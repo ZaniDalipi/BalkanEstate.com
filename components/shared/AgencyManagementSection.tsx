@@ -83,10 +83,9 @@ const AgencyManagementSection: React.FC<AgencyManagementSectionProps> = ({ curre
         // Filter for pending requests
         const pending = data.requests?.filter((req: any) => req.status === 'pending') || [];
         setPendingRequests(pending);
-        console.log('📋 Pending join requests:', pending.length);
       }
-    } catch (err) {
-      console.error('Failed to fetch pending requests:', err);
+    } catch {
+      // Silently handle - pending requests are non-critical
     }
   };
 
@@ -95,9 +94,7 @@ const AgencyManagementSection: React.FC<AgencyManagementSectionProps> = ({ curre
       setLoadingAgencies(true);
       const response = await getAgencies({ limit: 100 });
       setAgencies(response.agencies || []);
-      console.log('✅ Loaded', response.agencies?.length || 0, 'agencies');
-    } catch (err) {
-      console.error('❌ Failed to load agencies:', err);
+    } catch {
       setError('Failed to load agencies. Please try again.');
     } finally {
       setLoadingAgencies(false);
@@ -124,33 +121,23 @@ const AgencyManagementSection: React.FC<AgencyManagementSectionProps> = ({ curre
 
     try {
       setLoading(true);
-      console.log('🔍 Step 1: Verifying invitation code for agency:', selectedAgencyId);
-      console.log('📝 Agency name:', agencies.find(a => a._id === selectedAgencyId)?.name);
-      console.log('🔑 Code entered:', invitationCode.trim().toUpperCase());
 
       // Step 1: Verify the invitation code matches the selected agency
       const verification = await verifyInvitationCode(selectedAgencyId, invitationCode.trim());
-      console.log('📦 Verification result:', verification);
 
       if (!verification.valid) {
         const errorMsg = verification.message || 'Invalid invitation code for this agency';
-        console.error('❌ Verification failed:', errorMsg);
         setError(errorMsg);
         setLoading(false);
         return;
       }
 
-      console.log('✅ Step 1 complete: Invitation code verified successfully');
-
       // Step 2: Send join request
-      console.log('📤 Step 2: Sending join request to agency:', selectedAgencyId);
-      const joinResponse = await createJoinRequest(selectedAgencyId, `Join request with invitation code: ${invitationCode.trim().toUpperCase()}`);
-      console.log('✅ Step 2 complete: Join request response:', joinResponse);
+      await createJoinRequest(selectedAgencyId, `Join request with invitation code: ${invitationCode.trim().toUpperCase()}`);
 
       // Step 3: Show success and update UI
       const agencyName = agencies.find(a => a._id === selectedAgencyId)?.name || 'the agency';
       const selectedAgencyData = agencies.find(a => a._id === selectedAgencyId);
-      console.log('✅ All steps complete! Request sent to:', agencyName);
 
       // Immediately add to pending requests for instant UI feedback
       const newPendingRequest = {
@@ -180,7 +167,6 @@ const AgencyManagementSection: React.FC<AgencyManagementSectionProps> = ({ curre
       onAgencyChange();
 
     } catch (err: any) {
-      console.error('Error processing agency join request');
       setError(err.message || 'Failed to process join request. Please check the invitation code and try again.');
     } finally {
       setLoading(false);
@@ -204,28 +190,23 @@ const AgencyManagementSection: React.FC<AgencyManagementSectionProps> = ({ curre
       e.stopPropagation();
     }
     setError('');
-    console.log('🎫 Starting coupon redemption...');
 
     const trimmedCode = agentCouponCode.trim().toUpperCase();
     if (!trimmedCode) {
       setError('Please enter a coupon code');
       return;
     }
-    console.log('🔑 Coupon code:', trimmedCode);
 
     // Validate user is an agent
     if (!isUserAgent()) {
       setError('Only registered agents can redeem agency coupons. Please register as an agent first.');
       return;
     }
-    console.log('✓ User is agent, proceeding...');
 
     try {
       setLoading(true);
-      console.log('📤 Sending redemption request to:', `${API_URL}/agencies/coupons/redeem`);
 
       const token = localStorage.getItem('balkan_estate_token');
-      console.log('🔐 Auth token exists:', !!token);
 
       const response = await fetch(`${API_URL}/agencies/coupons/redeem`, {
         method: 'POST',
@@ -236,9 +217,7 @@ const AgencyManagementSection: React.FC<AgencyManagementSectionProps> = ({ curre
         body: JSON.stringify({ couponCode: trimmedCode }),
       });
 
-      console.log('📥 Response status:', response.status);
       const data = await response.json();
-      console.log('📦 Response data:', data);
 
       if (!response.ok) {
         // Handle specific error codes
@@ -266,8 +245,6 @@ const AgencyManagementSection: React.FC<AgencyManagementSectionProps> = ({ curre
 
       // Success! Update context and local state immediately
       if (data.subscription && data.agency) {
-        console.log('✅ Coupon redeemed successfully! Joining agency:', data.agency.name);
-
         // Update app context
         dispatch({
           type: 'UPDATE_USER',
@@ -309,8 +286,7 @@ const AgencyManagementSection: React.FC<AgencyManagementSectionProps> = ({ curre
         // Refresh user data from server
         onAgencyChange();
       }
-    } catch (err: any) {
-      console.error('Coupon redemption error:', err);
+    } catch {
       setError('Network error. Please check your connection and try again.');
     } finally {
       setLoading(false);
@@ -333,9 +309,7 @@ const AgencyManagementSection: React.FC<AgencyManagementSectionProps> = ({ curre
     try {
       setLoading(true);
 
-      const data = await leaveAgency();
-
-      console.log('✅ Successfully left agency');
+      await leaveAgency();
 
       // Update user context immediately
       dispatch({
@@ -352,7 +326,6 @@ const AgencyManagementSection: React.FC<AgencyManagementSectionProps> = ({ curre
       onAgencyChange();
 
     } catch (err: any) {
-      console.error('❌ Failed to leave agency:', err);
       setError(err.message || 'Failed to leave agency. Please try again.');
     } finally {
       setLoading(false);

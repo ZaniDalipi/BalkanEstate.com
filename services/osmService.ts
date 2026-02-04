@@ -20,8 +20,7 @@ export const searchLocation = async (query: string, countryCode?: string): Promi
     }
     const data: NominatimResult[] = await response.json();
     return data;
-  } catch (error) {
-    console.error('Failed to fetch locations from backend:', error);
+  } catch {
     return [];
   }
 };
@@ -39,8 +38,7 @@ export const reverseGeocode = async (lat: number, lng: number): Promise<Nominati
     }
     const data: NominatimResult = await response.json();
     return data;
-  } catch (error) {
-    console.error('Failed to reverse geocode location from backend:', error);
+  } catch {
     return null;
   }
 };

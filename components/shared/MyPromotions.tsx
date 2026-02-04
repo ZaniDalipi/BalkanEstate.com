@@ -143,7 +143,6 @@ const MyPromotions: React.FC = () => {
         });
       }
     } catch (error: any) {
-      console.error('Failed to update auto-extend:', error);
       // Check if it's an expired promotion error
       const errorMessage = error.message || '';
       if (errorMessage.toLowerCase().includes('expired')) {
@@ -174,7 +173,6 @@ const MyPromotions: React.FC = () => {
         setActionLoading(null);
       }
     } catch (error: any) {
-      console.error('Failed to complete auto-extend:', error);
       setToastMessage({
         type: 'info',
         message: 'Payments coming soon! Contact sales@balkanestateai.com to extend your promotion.',

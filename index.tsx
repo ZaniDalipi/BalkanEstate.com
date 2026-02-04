@@ -21,8 +21,7 @@ if (typeof window !== 'undefined' && !window.Ziggy) {
     routes: {},
   };
   // Provide a stub route() function that returns the current URL
-  window.route = (name: string, _params?: Record<string, unknown>) => {
-    console.warn(`[Ziggy Stub] route("${name}") called - Ziggy is not configured`);
+  window.route = (_name: string, _params?: Record<string, unknown>) => {
     return window.location.href;
   };
 }

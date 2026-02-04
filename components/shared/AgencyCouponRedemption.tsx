@@ -182,7 +182,6 @@ const AgencyCouponRedemption: React.FC<AgencyCouponRedemptionProps> = ({
         onSuccess(data);
       }
     } catch (err: any) {
-      console.error('Coupon redemption error:', err);
       setError('Network error. Please check your connection and try again.');
     } finally {
       setIsRedeeming(false);

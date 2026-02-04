@@ -118,7 +118,6 @@ export const SelectableCadastreLayer: React.FC<SelectableCadastreLayerProps> = (
       parcelsLayerRef.current = parcelsLayer;
 
     } catch (error) {
-      console.warn('Failed to load WFS parcels, falling back to WMS:', error);
       createWMSLayer();
     }
   }, [currentLayer, enabled, map, selectedParcel]);

@@ -125,7 +125,6 @@ const AgenciesListPage: React.FC = () => {
         setAgencies(sortedAgencies);
       }
     } catch (error) {
-      console.error('Failed to fetch agencies:', error);
       setError(t('agencies.unableToLoad'));
       setAgencies([]);
     } finally {

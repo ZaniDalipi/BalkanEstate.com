@@ -115,7 +115,6 @@ const MyMeasurements: React.FC<MyMeasurementsProps> = ({ userId }) => {
       setMaxAllowed(response.maxAllowed);
       setIsPro(response.isPro);
     } catch (err: any) {
-      console.error('Failed to fetch measurements:', err);
       setError(err.message || 'Failed to load measurements');
     } finally {
       setIsLoading(false);
@@ -154,7 +153,6 @@ const MyMeasurements: React.FC<MyMeasurementsProps> = ({ userId }) => {
       setEditingId(null);
       fetchMeasurements();
     } catch (err: any) {
-      console.error('Failed to update measurement:', err);
       setError(err.message || 'Failed to update measurement');
     }
   };

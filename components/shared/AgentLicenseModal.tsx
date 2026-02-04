@@ -62,13 +62,10 @@ const AgentLicenseModal: React.FC<AgentLicenseModalProps> = ({
 
   const fetchAgencies = async () => {
     try {
-      console.log('🏢 Fetching agencies for selection...');
       setLoadingAgencies(true);
       const response = await getAgencies({ limit: 100 }); // Get all agencies
-      console.log(`✅ Fetched ${response.agencies?.length || 0} agencies`);
       setAgencies(response.agencies || []);
     } catch (err) {
-      console.error('❌ Failed to fetch agencies:', err);
       setAgencies([]);
     } finally {
       setLoadingAgencies(false);
@@ -103,13 +100,6 @@ const AgentLicenseModal: React.FC<AgentLicenseModalProps> = ({
     setIsSubmitting(true);
 
     try {
-      console.log('📤 Submitting agent license with data:', {
-        licenseNumber: licenseNumber.trim(),
-        agencyInvitationCode: agencyInvitationCode.trim() || '(none)',
-        selectedAgency: selectedAgency || '(independent)',
-        isJoiningAgency
-      });
-
       await onSubmit({
         licenseNumber: licenseNumber.trim(),
         agencyInvitationCode: agencyInvitationCode.trim() || undefined,
@@ -118,7 +108,6 @@ const AgentLicenseModal: React.FC<AgentLicenseModalProps> = ({
         languages: languages.length > 0 ? languages : undefined,
       });
 
-      console.log('✅ Agent license verification successful');
 
       // Reset form and close
       if (!isJoiningAgency) {
@@ -130,7 +119,6 @@ const AgentLicenseModal: React.FC<AgentLicenseModalProps> = ({
       setError('');
       onClose();
     } catch (err) {
-      console.error('❌ Agent license verification failed:', err);
       const errorMessage = err instanceof Error ? err.message : 'Failed to verify license. Please check your information and try again.';
       setError(errorMessage);
       // Modal stays open - don't close, don't navigate, just show error

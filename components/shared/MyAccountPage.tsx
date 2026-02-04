@@ -145,7 +145,6 @@ const LoginHistorySection: React.FC = () => {
                 const history = await getLoginHistory();
                 setLoginHistory(history);
             } catch (error) {
-                console.error('Failed to fetch login history:', error);
             } finally {
                 setIsLoading(false);
             }
@@ -614,7 +613,6 @@ const ProfileSettings: React.FC<{ user: User }> = ({ user }) => {
                 }));
             }
         } catch (error) {
-            console.error('Error fetching agent data:', error);
         }
     };
 
@@ -668,9 +666,7 @@ const ProfileSettings: React.FC<{ user: User }> = ({ user }) => {
         setError('');
         try {
             const roleToSwitch = pendingRole || formData.role;
-            console.log('🔄 Switching to role:', roleToSwitch);
             const updatedUser = await switchRole(roleToSwitch, licenseData);
-            console.log('✅ Role switch successful');
 
             // Update context and form data
             dispatch({ type: 'UPDATE_USER', payload: updatedUser });
@@ -682,7 +678,6 @@ const ProfileSettings: React.FC<{ user: User }> = ({ user }) => {
             setIsSaved(true);
             setTimeout(() => setIsSaved(false), 2000);
         } catch (err) {
-            console.error('❌ Role switch failed:', err);
             const errorMessage = err instanceof Error ? err.message : 'Failed to switch role';
             setError(errorMessage);
             // Re-throw so modal can catch and display error
@@ -813,7 +808,6 @@ const ProfileSettings: React.FC<{ user: User }> = ({ user }) => {
                         lng: updatedAgent.lng !== undefined ? updatedAgent.lng : agentData.lng,
                     };
                 } catch (agentError) {
-                    console.error('Error updating agent profile:', agentError);
                     // Continue with user data even if agent update fails
                 }
             }
@@ -835,7 +829,6 @@ const ProfileSettings: React.FC<{ user: User }> = ({ user }) => {
             setIsSaved(true);
             setTimeout(() => setIsSaved(false), 2000);
         } catch (error) {
-            console.error('Error saving changes:', error);
             // Revert to previous state on error
             setFormData(user);
             setAgentData({
@@ -1062,7 +1055,6 @@ const ProfileSettings: React.FC<{ user: User }> = ({ user }) => {
                                  setFormData(data.user);
                               }
                            } catch (err) {
-                              console.error('Failed to refresh user data:', err);
                            }
                         }}
                      />

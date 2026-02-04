@@ -279,11 +279,9 @@ const MyListings: React.FC<{ sellerId: string }> = ({ sellerId }) => {
     const fetchMyListings = useCallback(async () => {
         setIsLoading(true);
         try {
-            console.log(`🔄 Fetching ALL listings for user`);
 
             // Fetch ALL listings without role filter
             const listings = await api.getMyListings();
-            console.log(`✅ Fetched ${listings.length} total listings`);
 
             setMyProperties(listings);
 
@@ -294,7 +292,6 @@ const MyListings: React.FC<{ sellerId: string }> = ({ sellerId }) => {
             });
             setRenewalStatuses(statuses);
         } catch (error) {
-            console.error('Failed to fetch listings:', error);
             setMyProperties([]);
         } finally {
             setIsLoading(false);
@@ -305,15 +302,12 @@ const MyListings: React.FC<{ sellerId: string }> = ({ sellerId }) => {
     // When any property is created/updated/deleted, refresh the list
     useRealtimeProperties({
         onPropertyCreated: () => {
-            console.log('🏠 MyListings: Property created, refreshing...');
             fetchMyListings();
         },
         onPropertyUpdated: () => {
-            console.log('🏠 MyListings: Property updated, refreshing...');
             fetchMyListings();
         },
         onPropertyDeleted: () => {
-            console.log('🏠 MyListings: Property deleted, refreshing...');
             fetchMyListings();
         },
     });
@@ -404,12 +398,10 @@ const MyListings: React.FC<{ sellerId: string }> = ({ sellerId }) => {
     const handleRenew = async (id: string) => {
         try {
             const result = await api.renewProperty(id);
-            console.log('🔄 Renew result:', result);
 
             if (result.success) {
                 // Update local state with new lastRenewed timestamp (as number for consistency)
                 const newLastRenewedTimestamp = new Date(result.lastRenewed!).getTime();
-                console.log('✅ Property renewed! New timestamp:', newLastRenewedTimestamp, 'Property ID:', id);
 
                 setMyProperties(prev => prev.map(p =>
                     p.id === id ? { ...p, lastRenewed: newLastRenewedTimestamp } : p
@@ -425,7 +417,6 @@ const MyListings: React.FC<{ sellerId: string }> = ({ sellerId }) => {
                 dispatch({ type: 'RENEW_PROPERTY', payload: id });
             }
         } catch (error: any) {
-            console.error('Failed to renew property:', error);
             // Check for cooldown error - details are in error.details from apiRequest
             const errorDetails = error.details || error;
             if (error.code === 'RENEWAL_COOLDOWN' || errorDetails.code === 'RENEWAL_COOLDOWN') {
@@ -458,7 +449,6 @@ const MyListings: React.FC<{ sellerId: string }> = ({ sellerId }) => {
                     p.id === propertyToMarkSold ? { ...p, status: 'sold' as PropertyStatus } : p
                 ));
             } catch (error) {
-                console.error('Failed to mark property as sold:', error);
             }
         }
         setShowSoldConfirm(false);
@@ -492,7 +482,6 @@ const MyListings: React.FC<{ sellerId: string }> = ({ sellerId }) => {
                 // Remove from local state
                 setMyProperties(prev => prev.filter(p => p.id !== propertyToDelete));
             } catch (error) {
-                console.error('Failed to delete property:', error);
             }
         }
         setShowDeleteConfirm(false);
@@ -540,7 +529,6 @@ const MyListings: React.FC<{ sellerId: string }> = ({ sellerId }) => {
             const listings = await api.getMyListings();
             setMyProperties(listings);
         } catch (error) {
-            console.error('Failed to refresh listings:', error);
         }
     };
 

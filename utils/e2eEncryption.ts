@@ -122,8 +122,7 @@ export async function generateKeyPair(userId: string): Promise<string> {
     // Export public key to share with server
     const publicKeyJwk = await crypto.subtle.exportKey('jwk', keyPair.publicKey);
     return JSON.stringify(publicKeyJwk);
-  } catch (error) {
-    console.error('Error generating key pair:', error);
+  } catch {
     throw new Error('Failed to generate encryption keys');
   }
 }
@@ -159,8 +158,7 @@ export async function importPublicKey(publicKeyJwkString: string): Promise<Crypt
       true,
       ['encrypt']
     );
-  } catch (error) {
-    console.error('Error importing public key:', error);
+  } catch {
     throw new Error('Failed to import public key');
   }
 }
@@ -209,8 +207,7 @@ export async function encryptMessage(
       encryptedKey: arrayBufferToBase64(encryptedKey),
       iv: arrayBufferToBase64(iv.buffer),
     };
-  } catch (error) {
-    console.error('Error encrypting message:', error);
+  } catch {
     throw new Error('Failed to encrypt message');
   }
 }
@@ -256,8 +253,7 @@ export async function decryptMessage(
 
     // Decode to string
     return new TextDecoder().decode(decryptedMessage);
-  } catch (error) {
-    console.error('Error decrypting message:', error);
+  } catch {
     return '[Unable to decrypt message]';
   }
 }
@@ -313,8 +309,7 @@ export async function encryptMessageForMultipleRecipients(
       iv: arrayBufferToBase64(iv.buffer),
       encryptedKeys,
     };
-  } catch (error) {
-    console.error('Error encrypting message for multiple recipients:', error);
+  } catch {
     throw new Error('Failed to encrypt message');
   }
 }

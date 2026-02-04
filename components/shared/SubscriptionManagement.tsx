@@ -259,7 +259,6 @@ const SubscriptionManagement: React.FC<SubscriptionManagementProps> = ({ userId 
         }
       }
     } catch (error) {
-      console.error('Error fetching products:', error);
     }
   }, []);
 
@@ -285,7 +284,6 @@ const SubscriptionManagement: React.FC<SubscriptionManagementProps> = ({ userId 
         }
       }
     } catch (error) {
-      console.error('Error fetching subscription:', error);
     } finally {
       setLoading(false);
     }
@@ -409,7 +407,6 @@ const SubscriptionManagement: React.FC<SubscriptionManagementProps> = ({ userId 
           agentCoupons,
         });
       } catch (error) {
-        console.error('Error fetching agency team data:', error);
       } finally {
         setLoadingAgencyData(false);
       }
@@ -425,7 +422,6 @@ const SubscriptionManagement: React.FC<SubscriptionManagementProps> = ({ userId 
       setCopiedCode(code);
       setTimeout(() => setCopiedCode(null), 2000);
     } catch (err) {
-      console.error('Failed to copy code:', err);
     }
   };
 
@@ -452,7 +448,6 @@ const SubscriptionManagement: React.FC<SubscriptionManagementProps> = ({ userId 
         setActionError(data.message || 'Failed to generate coupons');
       }
     } catch (error) {
-      console.error('Error generating coupons:', error);
       setActionError('Failed to generate coupons');
     } finally {
       setGeneratingCoupons(false);
@@ -647,7 +642,6 @@ const SubscriptionManagement: React.FC<SubscriptionManagementProps> = ({ userId 
   };
 
   const handlePaymentError = (error: string) => {
-    console.error('Payment error:', error);
     setActionError(error);
   };
 
@@ -666,7 +660,6 @@ const SubscriptionManagement: React.FC<SubscriptionManagementProps> = ({ userId 
       });
 
       if (syncResponse.ok) {
-        console.log('✅ Subscription counters synced successfully');
       }
 
       // Re-fetch current user to get updated subscription data
@@ -686,7 +679,6 @@ const SubscriptionManagement: React.FC<SubscriptionManagementProps> = ({ userId 
       setRefreshKey(prev => prev + 1);
       fetchSubscription();
     } catch (error) {
-      console.error('Error syncing subscription:', error);
     } finally {
       setLoading(false);
     }
@@ -703,7 +695,6 @@ const SubscriptionManagement: React.FC<SubscriptionManagementProps> = ({ userId 
         dispatch({ type: 'UPDATE_USER', payload: data.user });
       }
     } catch (error) {
-      console.error('Error refreshing user context:', error);
     }
   };
 
@@ -737,7 +728,6 @@ const SubscriptionManagement: React.FC<SubscriptionManagementProps> = ({ userId 
         setActionError(data.message || 'Failed to cancel subscription');
       }
     } catch (error) {
-      console.error('Error cancelling subscription:', error);
       setActionError('An error occurred while cancelling your subscription');
     } finally {
       setCancelling(false);
@@ -779,7 +769,6 @@ const SubscriptionManagement: React.FC<SubscriptionManagementProps> = ({ userId 
         setActionError(data.message || t('management.validation.restoreError'));
       }
     } catch (error) {
-      console.error('Error restoring subscription:', error);
       setActionError(t('management.validation.restoreError'));
     } finally {
       setRestoring(false);
@@ -834,7 +823,6 @@ const SubscriptionManagement: React.FC<SubscriptionManagementProps> = ({ userId 
         setActionError(data.message || t('management.validation.toggleAutoRenewalError'));
       }
     } catch (error) {
-      console.error('Error toggling auto-renewal:', error);
       setActionError(t('management.validation.toggleAutoRenewalError'));
     } finally {
       setTogglingAutoRenew(false);

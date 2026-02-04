@@ -323,7 +323,6 @@ const PaymentWindow: React.FC<PaymentWindowProps> = ({
         }
 
       } catch (error) {
-        console.error('Polling error:', error);
       }
 
       // Stop polling after max attempts
@@ -548,7 +547,6 @@ const PaymentWindow: React.FC<PaymentWindowProps> = ({
           }, 1000);
         } else {
           // Popup blocked - fall back to redirect
-          console.warn('Popup blocked, falling back to redirect');
           window.location.href = data.paymentUrl;
         }
       } else {
@@ -556,7 +554,6 @@ const PaymentWindow: React.FC<PaymentWindowProps> = ({
       }
 
     } catch (error) {
-      console.error('❌ Payment error:', error);
       const message = error instanceof Error ? error.message : t('payment:errors.paymentFailed', 'Failed to initialize payment');
       setErrorMessage(message);
       setShowError(true);

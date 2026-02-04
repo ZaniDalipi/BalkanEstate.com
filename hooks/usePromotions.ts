@@ -60,7 +60,6 @@ export const usePromotions = (): UsePromotionsReturn => {
       }
       setPromotions(promoMap);
     } catch (err: any) {
-      console.error('Failed to fetch promoted properties:', err);
       setError(err.message || 'Failed to fetch promotions');
     } finally {
       setIsLoading(false);
@@ -153,7 +152,6 @@ export const usePromotionActions = (): UsePromotionActionsReturn => {
         throw new Error('No payment URL returned. Please try again.');
       }
     } catch (error: any) {
-      console.error('Failed to add urgent badge:', error);
       alert(error.message || 'Failed to add urgent badge. Please try again.');
       setActionLoading(null);
     }
@@ -169,7 +167,6 @@ export const usePromotionActions = (): UsePromotionActionsReturn => {
       await updateAutoExtend(promotionId, { autoExtend });
       onSuccess?.();
     } catch (error: any) {
-      console.error('Failed to update auto-extend:', error);
       alert(error.message || 'Failed to update auto-extend');
     }
   }, []);
@@ -184,7 +181,6 @@ export const usePromotionActions = (): UsePromotionActionsReturn => {
         alert('No pending auto-extend checkout found');
       }
     } catch (error: any) {
-      console.error('Failed to complete auto-extend:', error);
       alert(error.message || 'Failed to get auto-extend checkout');
     } finally {
       setActionLoading(null);

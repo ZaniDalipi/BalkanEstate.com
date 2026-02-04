@@ -49,7 +49,6 @@ const DiscountGameModal: React.FC<DiscountGameModalProps> = ({ isOpen, onGameCom
                 localStorage.setItem('balkan_estate_ad_views', '0');
             }
         } catch (error) {
-            console.error('Failed to generate discount code:', error);
         }
 
         // A small delay to show the final score before transitioning

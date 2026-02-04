@@ -58,7 +58,6 @@ const FeaturedSubscriptionDialog: React.FC<FeaturedSubscriptionDialogProps> = ({
         setFeaturedProducts(featured);
       }
     } catch (err) {
-      console.error('Failed to fetch featured products:', err);
     } finally {
       setLoadingProducts(false);
     }

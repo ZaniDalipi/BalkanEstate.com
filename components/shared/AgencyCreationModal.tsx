@@ -77,7 +77,6 @@ const AgencyCreationModal: React.FC<AgencyCreationModalProps> = ({
           }
         }
       } catch (err) {
-        console.error('Failed to fetch enterprise plan:', err);
         // Keep default plan on error
       } finally {
         setLoadingPlan(false);
@@ -268,7 +267,6 @@ const AgencyCreationModal: React.FC<AgencyCreationModalProps> = ({
 
   // Handle payment success - create agency after successful payment
   const handlePaymentSuccess = async (paymentIntentId: string) => {
-    console.log('Enterprise payment successful:', paymentIntentId);
     setShowPaymentWindow(false);
 
     if (pendingAgencyData) {
@@ -306,7 +304,6 @@ const AgencyCreationModal: React.FC<AgencyCreationModalProps> = ({
           setError('Payment successful but failed to create agency. Please contact support.');
         }
       } catch (err: any) {
-        console.error('Failed to create agency after payment:', err);
         setError(err.message || 'Payment successful but failed to create agency. Please contact support.');
       } finally {
         setIsCreating(false);
@@ -317,7 +314,6 @@ const AgencyCreationModal: React.FC<AgencyCreationModalProps> = ({
 
   // Handle payment error
   const handlePaymentError = (errorMsg: string) => {
-    console.error('Enterprise payment error:', errorMsg);
     setError(`Payment failed: ${errorMsg}`);
     setShowPaymentWindow(false);
   };
@@ -392,7 +388,6 @@ const AgencyCreationModal: React.FC<AgencyCreationModalProps> = ({
           setError('Failed to create agency. Please try again.');
         }
       } catch (err: any) {
-        console.error('Failed to create agency:', err);
         setError(err.message || 'Failed to create agency. Please try again.');
       } finally {
         setIsCreating(false);

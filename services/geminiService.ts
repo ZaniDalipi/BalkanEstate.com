@@ -42,7 +42,7 @@ async function retryWithBackoff<T>(
       throw error;
     }
 
-    console.warn(`Gemini API call failed, retrying in ${delay}ms... (${MAX_RETRIES - retries + 1}/${MAX_RETRIES})`);
+    // Wait before retry with exponential backoff
     await new Promise(resolve => setTimeout(resolve, delay));
 
     // Exponential backoff: double the delay for next retry

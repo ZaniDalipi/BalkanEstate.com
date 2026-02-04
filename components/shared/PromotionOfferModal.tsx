@@ -91,7 +91,6 @@ const PromotionOfferModal: React.FC<PromotionOfferModalProps> = ({
                     throw new Error(data.message || 'Failed to activate promotion');
                 }
             } catch (error: any) {
-                console.error('Failed to activate promotion:', error);
                 setPaymentErrorMessage(`Payment was successful but failed to activate promotion: ${error.message}. Please contact support.`);
                 setShowPaymentError(true);
             }
@@ -99,7 +98,6 @@ const PromotionOfferModal: React.FC<PromotionOfferModalProps> = ({
     };
 
     const handlePaymentError = (error: string) => {
-        console.error('Payment error:', error);
         setShowPaymentWindow(false);
         setPaymentErrorMessage(error);
         setShowPaymentError(true);

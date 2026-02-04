@@ -62,8 +62,7 @@ export async function fetchProducts(role?: 'buyer' | 'seller' | 'agent'): Promis
     }
 
     return data.products;
-  } catch (error) {
-    console.error('Error fetching products:', error);
+  } catch {
     // Return empty array as fallback
     return [];
   }
@@ -90,8 +89,7 @@ export async function fetchProduct(productId: string): Promise<Product | null> {
     }
 
     return data.product;
-  } catch (error) {
-    console.error('Error fetching product:', error);
+  } catch {
     return null;
   }
 }

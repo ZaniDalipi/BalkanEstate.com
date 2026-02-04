@@ -235,7 +235,6 @@ const ProfileStatistics: React.FC<ProfileStatisticsProps> = ({ user }) => {
         }
       }
     } catch (error) {
-      console.error('Error fetching subscription:', error);
     }
   }, [getAuthToken]);
 
@@ -375,7 +374,6 @@ const ProfileStatistics: React.FC<ProfileStatisticsProps> = ({ user }) => {
           statsData = syncData.stats;
         }
       } catch (syncError) {
-        console.warn('Sync failed, falling back to stats fetch:', syncError);
       }
 
       if (!statsData) {
@@ -400,7 +398,6 @@ const ProfileStatistics: React.FC<ProfileStatisticsProps> = ({ user }) => {
       });
 
     } catch (error) {
-      console.error('Failed to fetch user stats:', error);
       setStats({
         activeListings: user.listingsCount || 0,
         totalListings: user.totalListingsCreated || 0,
@@ -439,7 +436,6 @@ const ProfileStatistics: React.FC<ProfileStatisticsProps> = ({ user }) => {
         throw new Error('Sync failed');
       }
     } catch (error) {
-      console.error('Failed to sync stats:', error);
       await fetchStats();
     } finally {
       setSyncing(false);
@@ -470,7 +466,6 @@ const ProfileStatistics: React.FC<ProfileStatisticsProps> = ({ user }) => {
         throw new Error(`Failed to fetch sales history: ${response.status}`);
       }
     } catch (error) {
-      console.error('Failed to fetch sales history:', error);
     } finally {
       setLoadingHistory(false);
     }

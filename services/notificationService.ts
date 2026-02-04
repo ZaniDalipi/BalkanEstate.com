@@ -5,7 +5,6 @@ class NotificationService {
 
   async requestPermission(): Promise<boolean> {
     if (!('Notification' in window)) {
-      console.log('This browser does not support notifications');
       return false;
     }
 
@@ -43,8 +42,8 @@ class NotificationService {
         window.focus();
         notification.close();
       };
-    } catch (error) {
-      console.error('Error showing notification:', error);
+    } catch {
+      // Notification failed silently
     }
   }
 

@@ -175,7 +175,6 @@ const AchievementsSection: React.FC<AchievementsSectionProps> = ({
 
       handleCloseModal();
     } catch (error) {
-      console.error('Error saving achievement:', error);
     } finally {
       setIsSubmitting(false);
     }
@@ -188,7 +187,6 @@ const AchievementsSection: React.FC<AchievementsSectionProps> = ({
     try {
       await onDelete(id);
     } catch (error) {
-      console.error('Error deleting achievement:', error);
     } finally {
       setDeletingId(null);
     }

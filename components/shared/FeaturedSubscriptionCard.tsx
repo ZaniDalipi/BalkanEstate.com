@@ -73,7 +73,6 @@ const FeaturedSubscriptionCard: React.FC<FeaturedSubscriptionCardProps> = React.
         }
       }
     } catch (err) {
-      console.error('Failed to fetch featured pricing:', err);
     }
   };
 
