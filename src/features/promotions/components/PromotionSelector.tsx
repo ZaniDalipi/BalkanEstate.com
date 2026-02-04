@@ -68,6 +68,8 @@ const PromotionSelector: React.FC<PromotionSelectorProps> = ({
   const [couponCode, setCouponCode] = useState(initialCoupon);
   const [couponValidation, setCouponValidation] = useState<api.CouponValidationResult | null>(null);
   const [validatingCoupon, setValidatingCoupon] = useState(false);
+  // State to show "online payment coming soon" message
+  const [showPaymentComingSoon, setShowPaymentComingSoon] = useState(false);
 
   // Check if promotion is expired (for focusUrgent mode)
   const isPromotionExpired = focusUrgent && currentEndDate && new Date(currentEndDate).getTime() < Date.now();
@@ -216,23 +218,37 @@ const PromotionSelector: React.FC<PromotionSelectorProps> = ({
     try {
       const { final: finalPrice } = calculateFinalPrice();
 
-      // PAYMENTS COMING SOON - If payment is required, show info message
-      if (finalPrice > 0) {
-        setSuccessMessage('Payments coming soon! Please contact sales@balkanestateai.com to promote your listing manually.');
-        setSubmitting(false);
-        return;
-      }
-
-      // Focus Urgent mode without tier upgrade - just add urgent badge (free with coupon)
+      // Focus Urgent mode without tier upgrade - handle urgent badge
       if (focusUrgent && !wantsTierUpgrade && hasUrgentBadge && propertyId) {
-        // This path is for free urgent badge (100% coupon)
-        const result = await api.addUrgentBadge(promotionId || '');
-        if (result.isFree) {
-          setSuccessMessage('Urgent badge added successfully!');
-          setTimeout(() => onSuccess?.(), 1500);
+        // If free (100% discount coupon), add the badge
+        if (finalPrice === 0 && couponValidation?.isValid) {
+          try {
+            const result = await api.addUrgentBadge(promotionId || '', couponCode || undefined);
+            if (result.isFree || result.success) {
+              setSuccessMessage('Urgent badge added successfully!');
+              setTimeout(() => onSuccess?.(), 1500);
+              return;
+            }
+          } catch (err: any) {
+            // If API fails, show friendly message
+            setError(null);
+            setSuccessMessage(null);
+          }
+        }
+        // Online payment coming soon - but coupon still works
+        if (finalPrice > 0) {
+          setError(null);
+          setSubmitting(false);
+          // Show friendly message with coupon option
           return;
         }
-        // If not free, show coming soon message (already handled above)
+      }
+
+      // ONLINE PAYMENTS COMING SOON - If payment is required, show info message
+      if (finalPrice > 0) {
+        setError(null);
+        setShowPaymentComingSoon(true);
+        setSubmitting(false);
         return;
       }
 
@@ -515,6 +531,46 @@ const PromotionSelector: React.FC<PromotionSelectorProps> = ({
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
           </svg>
           {error}
+        </div>
+      )}
+
+      {/* Online Payment Coming Soon Banner */}
+      {showPaymentComingSoon && (
+        <div className="bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 px-5 py-4 rounded-xl mb-6">
+          <div className="flex items-start gap-3">
+            <div className="flex-shrink-0 mt-0.5">
+              <svg className="w-6 h-6 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+            </div>
+            <div className="flex-1">
+              <p className="font-semibold text-blue-900 mb-1">Online Payment Coming Soon</p>
+              <p className="text-blue-700 text-sm mb-3">
+                We're working on adding online payments. In the meantime, you can use a coupon code to upgrade your listing for free!
+              </p>
+              <div className="flex flex-wrap gap-2">
+                <button
+                  onClick={() => {
+                    setShowPaymentComingSoon(false);
+                    // Focus on coupon input
+                    const couponInput = document.querySelector('input[placeholder="Enter code"]') as HTMLInputElement;
+                    if (couponInput) {
+                      couponInput.focus();
+                    }
+                  }}
+                  className="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-4 py-2 rounded-lg transition-colors text-sm"
+                >
+                  I Have a Coupon
+                </button>
+                <button
+                  onClick={onSkip}
+                  className="bg-white hover:bg-gray-50 text-gray-700 font-medium px-4 py-2 rounded-lg transition-colors text-sm border border-gray-200"
+                >
+                  Maybe Later
+                </button>
+              </div>
+            </div>
+          </div>
         </div>
       )}
 

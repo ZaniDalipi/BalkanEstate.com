@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useCallback, useEffect, useRef, lazy, Suspense } from 'react';
+import React, { useState, useMemo, useCallback, useEffect, useRef, lazy, Suspense, Component, ErrorInfo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { MapContainer, TileLayer, Rectangle, useMapEvents, useMap } from 'react-leaflet';
 import { Property } from '@/types';
@@ -14,6 +14,86 @@ const USE_GOOGLE_MAPS = !!GOOGLE_MAPS_API_KEY;
 // Log map provider choice for debugging
 if (typeof window !== 'undefined') {
   console.log(`[Map] Using ${USE_GOOGLE_MAPS ? 'Google Maps' : 'Leaflet'} ${!GOOGLE_MAPS_API_KEY ? '(no API key found)' : ''}`);
+}
+
+/**
+ * Error Boundary for Google Maps
+ * Catches errors and provides retry or fallback options
+ */
+interface MapErrorBoundaryProps {
+  children: React.ReactNode;
+  onFallbackToLeaflet: () => void;
+}
+
+interface MapErrorBoundaryState {
+  hasError: boolean;
+  error: Error | null;
+  retryCount: number;
+}
+
+class MapErrorBoundary extends Component<MapErrorBoundaryProps, MapErrorBoundaryState> {
+  constructor(props: MapErrorBoundaryProps) {
+    super(props);
+    this.state = { hasError: false, error: null, retryCount: 0 };
+  }
+
+  static getDerivedStateFromError(error: Error): Partial<MapErrorBoundaryState> {
+    return { hasError: true, error };
+  }
+
+  componentDidCatch(error: Error, errorInfo: ErrorInfo) {
+    console.error('[MapErrorBoundary] Map loading error:', error, errorInfo);
+  }
+
+  handleRetry = () => {
+    this.setState(prev => ({
+      hasError: false,
+      error: null,
+      retryCount: prev.retryCount + 1
+    }));
+  };
+
+  handleFallback = () => {
+    this.props.onFallbackToLeaflet();
+  };
+
+  render() {
+    if (this.state.hasError) {
+      return (
+        <div className="w-full h-full flex items-center justify-center bg-gray-100">
+          <div className="text-center p-6 max-w-md">
+            <div className="w-16 h-16 mx-auto mb-4 bg-red-100 rounded-full flex items-center justify-center">
+              <svg className="w-8 h-8 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+              </svg>
+            </div>
+            <h3 className="text-lg font-semibold text-gray-900 mb-2">Map Loading Error</h3>
+            <p className="text-gray-500 text-sm mb-4">
+              {this.state.error?.message || 'Unable to load the map. This might be a temporary issue.'}
+            </p>
+            <div className="flex flex-col sm:flex-row gap-3 justify-center">
+              {this.state.retryCount < 3 && (
+                <button
+                  onClick={this.handleRetry}
+                  className="px-4 py-2 bg-primary text-white rounded-lg font-medium hover:bg-primary-dark transition-colors"
+                >
+                  Try Again ({3 - this.state.retryCount} left)
+                </button>
+              )}
+              <button
+                onClick={this.handleFallback}
+                className="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg font-medium hover:bg-gray-300 transition-colors"
+              >
+                Use Alternative Map
+              </button>
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    return this.props.children;
+  }
 }
 
 // Zillow-style: Zoom-based marker limits for performance
@@ -342,6 +422,28 @@ const MapComponent: React.FC<MapComponentProps> = ({
 }) => {
   const { t } = useTranslation(['search']);
   const { dispatch } = useAppContext();
+
+  // State to force fallback to Leaflet if Google Maps fails
+  const [forceLeaflet, setForceLeaflet] = useState(false);
+  // State to track loading timeout
+  const [loadingTimedOut, setLoadingTimedOut] = useState(false);
+  const loadingTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // Cleanup loading timeout on unmount
+  useEffect(() => {
+    return () => {
+      if (loadingTimeoutRef.current) {
+        clearTimeout(loadingTimeoutRef.current);
+      }
+    };
+  }, []);
+
+  // Handle fallback to Leaflet
+  const handleFallbackToLeaflet = useCallback(() => {
+    console.log('[MapComponent] Falling back to Leaflet map');
+    setForceLeaflet(true);
+  }, []);
+
   // Default to 'street' - Google Maps street view as per Zillow-style implementation
   const [mapType, setMapType] = useState<TileLayerType>('street' as TileLayerType);
   const [isLegendOpen, setIsLegendOpen] = useState(false); // Legend closed by default, user can open it
@@ -515,38 +617,81 @@ const MapComponent: React.FC<MapComponentProps> = ({
     window.history.pushState({ propertyId }, '', `/property/${propertyId}`);
   };
 
-  // Use Google Maps if API key is available for better performance
-  if (USE_GOOGLE_MAPS) {
-    return (
-      <Suspense fallback={
+  // Set a timeout to detect if loading takes too long (15 seconds)
+  useEffect(() => {
+    if (USE_GOOGLE_MAPS && !forceLeaflet) {
+      loadingTimeoutRef.current = setTimeout(() => {
+        console.warn('[MapComponent] Google Maps loading timed out after 15s');
+        setLoadingTimedOut(true);
+      }, 15000);
+    }
+
+    return () => {
+      if (loadingTimeoutRef.current) {
+        clearTimeout(loadingTimeoutRef.current);
+      }
+    };
+  }, [forceLeaflet]);
+
+  // Use Google Maps if API key is available and not forced to Leaflet
+  if (USE_GOOGLE_MAPS && !forceLeaflet) {
+    // Show timeout message if loading took too long
+    if (loadingTimedOut) {
+      return (
         <div className="w-full h-full flex items-center justify-center bg-gray-100">
-          <div className="text-center">
-            <div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto" />
-            <p className="text-gray-500 mt-3">{t('search:map.loading', 'Loading map...')}</p>
+          <div className="text-center p-6 max-w-md">
+            <div className="w-12 h-12 mx-auto mb-4 text-amber-500">
+              <svg fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+            </div>
+            <h3 className="text-lg font-semibold text-gray-900 mb-2">{t('search:map.loadingTimeout', 'Map Taking Too Long')}</h3>
+            <p className="text-gray-500 text-sm mb-4">
+              {t('search:map.loadingTimeoutDesc', 'The map is taking longer than expected. This might be due to a slow connection.')}
+            </p>
+            <button
+              onClick={handleFallbackToLeaflet}
+              className="px-4 py-2 bg-primary text-white rounded-lg font-medium hover:bg-primary-dark transition-colors"
+            >
+              {t('search:map.useAlternative', 'Use Alternative Map')}
+            </button>
           </div>
         </div>
-      }>
-        <GoogleMapComponent
-          properties={properties}
-          onMapMove={onMapMove}
-          userLocation={userLocation}
-          onSaveSearch={onSaveSearch}
-          isSaving={isSaving}
-          isAuthenticated={isAuthenticated}
-          mapBounds={mapBounds}
-          drawnBounds={drawnBounds}
-          onDrawComplete={onDrawComplete}
-          isDrawing={isDrawing}
-          onDrawStart={onDrawStart}
-          flyToTarget={flyToTarget}
-          onFlyComplete={onFlyComplete}
-          onRecenter={onRecenter}
-          isMobile={isMobile}
-          searchMode={searchMode}
-          hoveredPropertyId={hoveredPropertyId}
-          hideControls={hideControls}
-        />
-      </Suspense>
+      );
+    }
+
+    return (
+      <MapErrorBoundary onFallbackToLeaflet={handleFallbackToLeaflet}>
+        <Suspense fallback={
+          <div className="w-full h-full flex items-center justify-center bg-gray-100">
+            <div className="text-center">
+              <div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto" />
+              <p className="text-gray-500 mt-3">{t('search:map.loading', 'Loading map...')}</p>
+            </div>
+          </div>
+        }>
+          <GoogleMapComponent
+            properties={properties}
+            onMapMove={onMapMove}
+            userLocation={userLocation}
+            onSaveSearch={onSaveSearch}
+            isSaving={isSaving}
+            isAuthenticated={isAuthenticated}
+            mapBounds={mapBounds}
+            drawnBounds={drawnBounds}
+            onDrawComplete={onDrawComplete}
+            isDrawing={isDrawing}
+            onDrawStart={onDrawStart}
+            flyToTarget={flyToTarget}
+            onFlyComplete={onFlyComplete}
+            onRecenter={onRecenter}
+            isMobile={isMobile}
+            searchMode={searchMode}
+            hoveredPropertyId={hoveredPropertyId}
+            hideControls={hideControls}
+          />
+        </Suspense>
+      </MapErrorBoundary>
     );
   }
 

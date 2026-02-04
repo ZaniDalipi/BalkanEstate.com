@@ -1649,8 +1649,10 @@ export const confirmExtensionPayment = async (sessionId: string): Promise<{
 
 /**
  * Add urgent badge to existing promotion
+ * @param promotionId - The promotion ID to add urgent badge to
+ * @param couponCode - Optional coupon code for free/discounted urgent badge
  */
-export const addUrgentBadge = async (promotionId: string): Promise<{
+export const addUrgentBadge = async (promotionId: string, couponCode?: string): Promise<{
   success: boolean;
   isFree?: boolean;
   url?: string;
@@ -1661,6 +1663,7 @@ export const addUrgentBadge = async (promotionId: string): Promise<{
 }> => {
   return await apiRequest(`/promotions/${promotionId}/add-urgent`, {
     method: 'POST',
+    body: couponCode ? { couponCode } : undefined,
     requiresAuth: true,
   });
 };
