@@ -472,20 +472,48 @@ const createVideoWithOverlays = (options: {
       let currentFilter = '[faded]';
       let filterIndex = 0;
 
-      // Modern gradient overlay at bottom for text readability (sleek look)
-      const gradientHeight = isVertical ? Math.floor(height * 0.45) : Math.floor(height * 0.4);
+      // Elegant gradient overlay at bottom - multiple layers for smooth fade effect
+      const gradientHeight = isVertical ? Math.floor(height * 0.5) : Math.floor(height * 0.45);
+      // Layer 1: Very subtle (furthest up)
       filters.push(
-        `${currentFilter}drawbox=x=0:y=ih-${gradientHeight}:w=iw:h=${gradientHeight}:` +
+        `${currentFilter}drawbox=x=0:y=ih-${gradientHeight}:w=iw:h=${Math.floor(gradientHeight * 0.3)}:` +
+        `color=black@0.15:t=fill[t${filterIndex}]`
+      );
+      currentFilter = `[t${filterIndex}]`;
+      filterIndex++;
+      // Layer 2: Light
+      filters.push(
+        `${currentFilter}drawbox=x=0:y=ih-${Math.floor(gradientHeight * 0.7)}:w=iw:h=${Math.floor(gradientHeight * 0.25)}:` +
+        `color=black@0.3:t=fill[t${filterIndex}]`
+      );
+      currentFilter = `[t${filterIndex}]`;
+      filterIndex++;
+      // Layer 3: Medium
+      filters.push(
+        `${currentFilter}drawbox=x=0:y=ih-${Math.floor(gradientHeight * 0.45)}:w=iw:h=${Math.floor(gradientHeight * 0.2)}:` +
+        `color=black@0.45:t=fill[t${filterIndex}]`
+      );
+      currentFilter = `[t${filterIndex}]`;
+      filterIndex++;
+      // Layer 4: Darkest at bottom
+      filters.push(
+        `${currentFilter}drawbox=x=0:y=ih-${Math.floor(gradientHeight * 0.25)}:w=iw:h=${Math.floor(gradientHeight * 0.25)}:` +
         `color=black@0.6:t=fill[t${filterIndex}]`
       );
       currentFilter = `[t${filterIndex}]`;
       filterIndex++;
 
-      // Subtle top gradient for watermark
-      const topGradientHeight = Math.floor(height * 0.15);
+      // Subtle top gradient for watermark - also layered for smoothness
+      const topGradientHeight = Math.floor(height * 0.12);
       filters.push(
         `${currentFilter}drawbox=x=0:y=0:w=iw:h=${topGradientHeight}:` +
-        `color=black@0.45:t=fill[t${filterIndex}]`
+        `color=black@0.35:t=fill[t${filterIndex}]`
+      );
+      currentFilter = `[t${filterIndex}]`;
+      filterIndex++;
+      filters.push(
+        `${currentFilter}drawbox=x=0:y=${topGradientHeight}:w=iw:h=${Math.floor(topGradientHeight * 0.5)}:` +
+        `color=black@0.15:t=fill[t${filterIndex}]`
       );
       currentFilter = `[t${filterIndex}]`;
       filterIndex++;
@@ -611,58 +639,31 @@ const createVideoWithOverlays = (options: {
         }
       }
 
-      // Professional watermark with BalkanEstate logo and URL
+      // Elegant watermark - clean text-only design
       if (includeWatermark) {
-        // Position in top-left corner with padding
-        const wmX = Math.floor(width * 0.035);
-        const wmY = Math.floor(height * 0.025);
-        const wmFontSize = Math.floor(watermarkFontSize * 1.4);
-        const urlFontSize = Math.floor(watermarkFontSize * 0.85);
+        // Position in top-left corner
+        const wmX = Math.floor(width * 0.04);
+        const wmY = Math.floor(height * 0.035);
+        const wmFontSize = Math.floor(watermarkFontSize * 1.3);
+        const urlFontSize = Math.floor(watermarkFontSize * 0.75);
 
-        // Semi-transparent dark background pill for watermark visibility
-        const wmPadding = Math.floor(wmFontSize * 0.6);
-        const wmBgWidth = Math.floor(wmFontSize * 9.5);
-        const wmBgHeight = Math.floor(wmFontSize * 2.8);
-
-        // Rounded background container
-        filters.push(
-          `${currentFilter}drawbox=x=${wmX - wmPadding}:y=${wmY - wmPadding / 2}:w=${wmBgWidth}:h=${wmBgHeight}:` +
-          `color=black@0.55:t=fill[t${filterIndex}]`
-        );
-        currentFilter = `[t${filterIndex}]`;
-        filterIndex++;
-
-        // Logo icon representation (building icon using Unicode block characters)
-        // This creates a simple building-like visual
-        const iconX = wmX;
-        const iconY = wmY + Math.floor(wmFontSize * 0.15);
-        filters.push(
-          `${currentFilter}drawtext=${fontParam}:text='▌▌▐':` +
-          `fontsize=${Math.floor(wmFontSize * 1.1)}:fontcolor=${BRAND_COLORS.primary}:` +
-          `x=${iconX}:y=${iconY}:` +
-          `shadowcolor=black@0.4:shadowx=1:shadowy=1[t${filterIndex}]`
-        );
-        currentFilter = `[t${filterIndex}]`;
-        filterIndex++;
-
-        // BALKANESTATE brand name in blue
-        const textX = wmX + Math.floor(wmFontSize * 1.8);
+        // BALKANESTATE brand name in white (clean elegant look)
         filters.push(
           `${currentFilter}drawtext=${fontParam}:text='BALKANESTATE':` +
-          `fontsize=${wmFontSize}:fontcolor=${BRAND_COLORS.primary}:` +
-          `x=${textX}:y=${wmY}:` +
-          `shadowcolor=black@0.5:shadowx=1:shadowy=1[t${filterIndex}]`
+          `fontsize=${wmFontSize}:fontcolor=white:` +
+          `x=${wmX}:y=${wmY}:` +
+          `shadowcolor=black@0.7:shadowx=2:shadowy=2[t${filterIndex}]`
         );
         currentFilter = `[t${filterIndex}]`;
         filterIndex++;
 
-        // Website URL below the logo
-        const urlY = wmY + Math.floor(wmFontSize * 1.15);
+        // Website URL below in subtle style
+        const urlY = wmY + Math.floor(wmFontSize * 1.05);
         filters.push(
           `${currentFilter}drawtext=${fontParam}:text='balkanestateai.com':` +
-          `fontsize=${urlFontSize}:fontcolor=white@0.85:` +
-          `x=${textX}:y=${urlY}:` +
-          `shadowcolor=black@0.4:shadowx=1:shadowy=1[t${filterIndex}]`
+          `fontsize=${urlFontSize}:fontcolor=white@0.65:` +
+          `x=${wmX}:y=${urlY}:` +
+          `shadowcolor=black@0.5:shadowx=1:shadowy=1[t${filterIndex}]`
         );
         currentFilter = `[t${filterIndex}]`;
         filterIndex++;

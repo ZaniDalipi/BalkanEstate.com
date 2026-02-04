@@ -317,7 +317,6 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
                 <video
                   src={property.generatedVideoUrl}
                   autoPlay
-                  muted
                   playsInline
                   loop={false}
                   className="w-full h-full object-contain"
