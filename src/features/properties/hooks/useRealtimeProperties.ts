@@ -61,7 +61,7 @@ export function useRealtimeProperties(options: UseRealtimePropertiesOptions = {}
 
     // Handle new property created - invalidate all property lists
     const unsubCreated = socketService.onPropertyCreated((data) => {
-      console.log('🏠 Real-time: Property created', data.propertyId || data.property?.id);
+      // Log removed
 
       // Invalidate all property list queries to show the new listing
       queryClient.invalidateQueries({
@@ -81,7 +81,7 @@ export function useRealtimeProperties(options: UseRealtimePropertiesOptions = {}
 
     // Handle property updated
     const unsubUpdated = socketService.onPropertyUpdated((data) => {
-      console.log('🏠 Real-time: Property updated', data.propertyId);
+      // Log removed
 
       // Update the specific property in cache if we have it
       if (data.propertyId && data.property) {
@@ -107,7 +107,7 @@ export function useRealtimeProperties(options: UseRealtimePropertiesOptions = {}
 
     // Handle property deleted
     const unsubDeleted = socketService.onPropertyDeleted((data) => {
-      console.log('🏠 Real-time: Property deleted', data.propertyId);
+      // Log removed
 
       // Remove from cache immediately
       if (data.propertyId) {
@@ -137,7 +137,7 @@ export function useRealtimeProperties(options: UseRealtimePropertiesOptions = {}
 
     // Handle status changes (sold, available, etc.)
     const unsubStatus = socketService.onPropertyStatusChanged((data) => {
-      console.log('🏠 Real-time: Property status changed', data.propertyId, data.status);
+      // Log removed
 
       // Update the property in cache
       if (data.propertyId && data.property) {
@@ -156,7 +156,7 @@ export function useRealtimeProperties(options: UseRealtimePropertiesOptions = {}
 
     // Handle bulk updates
     const unsubBulk = socketService.onPropertyBulkUpdate((data) => {
-      console.log('🏠 Real-time: Bulk property update', data.action, data.count);
+      // Log removed
 
       // Invalidate all property queries on bulk operations
       queryClient.invalidateQueries({

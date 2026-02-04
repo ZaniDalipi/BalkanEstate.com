@@ -101,7 +101,7 @@ const PromotionPlansManager: React.FC = () => {
       setSuccessMessage(isNew ? t('admin:promotionPlans.createSuccess', 'Plan created successfully!') : t('admin:promotionPlans.updateSuccess', 'Plan updated successfully!'));
       setTimeout(() => setSuccessMessage(null), 3000);
     } catch (err) {
-      console.error('Save error:', err);
+      // Error removed
     }
   };
 
@@ -112,7 +112,7 @@ const PromotionPlansManager: React.FC = () => {
       setSuccessMessage(t('admin:promotionPlans.deleteSuccess', 'Plan deleted successfully!'));
       setTimeout(() => setSuccessMessage(null), 3000);
     } catch (err) {
-      console.error('Delete error:', err);
+      // Error removed
     }
   };
 
@@ -124,7 +124,7 @@ const PromotionPlansManager: React.FC = () => {
       setSuccessMessage(`Plan ${newStatus ? 'activated' : 'deactivated'} successfully`);
       setTimeout(() => setSuccessMessage(null), 3000);
     } catch (err) {
-      console.error('Toggle status error:', err);
+      // Error removed
     } finally {
       setMutatingPlanId(null);
     }
@@ -136,7 +136,7 @@ const PromotionPlansManager: React.FC = () => {
       setSuccessMessage(response.message);
       setTimeout(() => setSuccessMessage(null), 3000);
     } catch (err) {
-      console.error('Seed error:', err);
+      // Error removed
     }
   };
 

@@ -120,7 +120,7 @@ export function useUpdateProduct() {
       updateProduct(productId, data),
 
     onError: (error) => {
-      console.error('Update product error:', error);
+      // Error removed
     },
 
     // Force immediate refetch after mutation completes (success or error)
@@ -147,7 +147,7 @@ export function useToggleProductStatus() {
     mutationFn: (productId: string) => toggleProductStatus(productId),
 
     onError: (error) => {
-      console.error('Toggle product status error:', error);
+      // Error removed
     },
 
     // Force immediate refetch after mutation completes (success or error)
@@ -174,7 +174,7 @@ export function useToggleProductVisibility() {
     mutationFn: (productId: string) => toggleProductVisibility(productId),
 
     onError: (error) => {
-      console.error('Toggle product visibility error:', error);
+      // Error removed
     },
 
     // Force immediate refetch after mutation completes (success or error)
@@ -409,7 +409,7 @@ export function useCreatePromotionPlan() {
       createPromotionPlan(data),
 
     onError: (error) => {
-      console.error('Create promotion plan error:', error);
+      // Error removed
     },
 
     onSettled: async () => {
@@ -433,7 +433,7 @@ export function useUpdatePromotionPlan() {
       updatePromotionPlan(planId, data),
 
     onError: (error) => {
-      console.error('Update promotion plan error:', error);
+      // Error removed
     },
 
     onSettled: async () => {

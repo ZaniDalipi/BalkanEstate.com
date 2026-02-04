@@ -11,10 +11,7 @@ import GoogleMapComponent from './GoogleMapComponent';
 const GOOGLE_MAPS_API_KEY = import.meta.env.VITE_GOOGLE_MAPS_KEY;
 const USE_GOOGLE_MAPS = !!GOOGLE_MAPS_API_KEY;
 
-// Log map provider choice for debugging
-if (typeof window !== 'undefined') {
-  console.log(`[Map] Using ${USE_GOOGLE_MAPS ? 'Google Maps' : 'Leaflet'} ${!GOOGLE_MAPS_API_KEY ? '(no API key found)' : ''}`);
-}
+// Map provider is determined by VITE_GOOGLE_MAPS_KEY environment variable
 
 /**
  * Error Boundary for Google Maps
@@ -41,8 +38,8 @@ class MapErrorBoundary extends Component<MapErrorBoundaryProps, MapErrorBoundary
     return { hasError: true, error };
   }
 
-  componentDidCatch(error: Error, errorInfo: ErrorInfo) {
-    console.error('[MapErrorBoundary] Map loading error:', error, errorInfo);
+  componentDidCatch(_error: Error, _errorInfo: ErrorInfo) {
+    // Error boundary caught map loading error
   }
 
   handleRetry = () => {
@@ -376,8 +373,8 @@ const FitBoundsHandler: React.FC<{ drawnBounds: L.LatLngBounds | null }> = ({ dr
       // Fit the map to the drawn bounds with padding
       map.fitBounds(drawnBounds, { padding: [50, 50], animate: true, duration: 0.5 });
       hasFittedRef.current = true;
-    } catch (e) {
-      console.error('[MapComponent] Error fitting to drawnBounds:', e);
+    } catch {
+      // Silently handle bounds fitting error
     }
   }, [map, drawnBounds]);
 
@@ -440,7 +437,6 @@ const MapComponent: React.FC<MapComponentProps> = ({
 
   // Handle fallback to Leaflet
   const handleFallbackToLeaflet = useCallback(() => {
-    console.log('[MapComponent] Falling back to Leaflet map');
     setForceLeaflet(true);
   }, []);
 
@@ -566,28 +562,6 @@ const MapComponent: React.FC<MapComponentProps> = ({
       (p) => p.lat != null && !isNaN(p.lat) && p.lng != null && !isNaN(p.lng)
     );
 
-    // Debug: Log properties with missing or invalid coordinates, especially promoted ones
-    const invalidProperties = properties.filter(
-      (p) => p.lat == null || isNaN(p.lat) || p.lng == null || isNaN(p.lng)
-    );
-    if (invalidProperties.length > 0) {
-      console.warn(`🗺️ [MapComponent] ${invalidProperties.length} properties filtered out due to invalid coordinates:`);
-      invalidProperties.forEach((p) => {
-        console.warn(`  - ${p.id}: "${p.title || p.address}" (lat: ${p.lat}, lng: ${p.lng})${p.isPromoted ? ' [PROMOTED]' : ''}`);
-      });
-    }
-
-    // Debug: Log properties outside Balkan bounds
-    const outsideBounds = valid.filter(
-      (p) => p.lat < 34 || p.lat > 49 || p.lng < 13 || p.lng > 31
-    );
-    if (outsideBounds.length > 0) {
-      console.warn(`🗺️ [MapComponent] ${outsideBounds.length} properties outside Balkan bounds (34-49 lat, 13-31 lng):`);
-      outsideBounds.forEach((p) => {
-        console.warn(`  - ${p.id}: "${p.title || p.address}" (lat: ${p.lat}, lng: ${p.lng})${p.isPromoted ? ' [PROMOTED]' : ''}`);
-      });
-    }
-
     return valid;
   }, [properties]);
 
@@ -629,7 +603,6 @@ const MapComponent: React.FC<MapComponentProps> = ({
       loadingTimeoutRef.current = setTimeout(() => {
         // Double-check if it loaded in the meantime
         if (!window.google?.maps) {
-          console.warn('[MapComponent] Google Maps loading timed out after 30s');
           setLoadingTimedOut(true);
         }
       }, 30000);

@@ -202,7 +202,7 @@ const PricingPlans: React.FC<PricingPlansProps> = ({ isOpen, onClose, onSubscrib
 };
 
   const handlePaymentSuccess = async (paymentIntentId: string) => {
-    console.log('Payment successful:', paymentIntentId);
+    // Log removed
     setShowPaymentWindow(false);
 
     // If Enterprise plan and there's pending agency data, create the agency
@@ -244,7 +244,7 @@ const PricingPlans: React.FC<PricingPlansProps> = ({ isOpen, onClose, onSubscrib
             dispatch({ type: 'SET_AUTH_STATE', payload: { isAuthenticated: true, user: userData.user } });
           }
         } catch (error) {
-          console.error('Failed to refresh user data:', error);
+          // Error removed
         }
 
         // Close modal and show success
@@ -264,7 +264,7 @@ const PricingPlans: React.FC<PricingPlansProps> = ({ isOpen, onClose, onSubscrib
         // Redirect to agencies view
         dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'agencies' });
       } catch (err) {
-        console.error('Failed to create agency:', err);
+        // Error removed
         dispatch({
           type: 'SHOW_ALERT',
           payload: {
@@ -293,7 +293,7 @@ const PricingPlans: React.FC<PricingPlansProps> = ({ isOpen, onClose, onSubscrib
   };
 
   const handlePaymentError = (error: string) => {
-    console.error('Payment error:', error);
+    // Error removed
     // Error is already shown in the PaymentWindow component
   };
 

@@ -135,7 +135,7 @@ const WhackAnIconAnimation: React.FC<WhackAnIconAnimationProps> = ({ mode = 'loa
             setScore(prev => {
                 const newScore = prev + 1;
                 scoreRef.current = newScore;
-                console.log('Score incremented:', newScore); // Debug log
+                // Log removed // Debug log
                 return newScore;
             });
         }

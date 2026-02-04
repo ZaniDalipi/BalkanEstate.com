@@ -214,7 +214,7 @@ const MeasurementTool: React.FC<MeasurementToolProps> = ({ enabled, onSave, onCl
             }
           })
           .catch((err) => {
-            console.error('Failed to fetch measurement from backend:', err);
+            // Failed to fetch measurement from backend
           });
       }
     }
@@ -380,7 +380,6 @@ const MeasurementTool: React.FC<MeasurementToolProps> = ({ enabled, onSave, onCl
         setAddress('');
         setNotes('');
       } catch (error: any) {
-        console.error('Failed to save measurement:', error);
         setSaveError(error.message || 'Failed to save measurement');
       } finally {
         setIsSaving(false);

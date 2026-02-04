@@ -127,7 +127,7 @@ const InquiryManager: React.FC = () => {
       setTotalInquiries(data.pagination?.totalItems || 0);
     } catch (err) {
       setError('Failed to load inquiries');
-      console.error(err);
+      // Error removed
     } finally {
       setIsLoading(false);
     }
@@ -147,7 +147,7 @@ const InquiryManager: React.FC = () => {
         setStats(data);
       }
     } catch (err) {
-      console.error('Failed to fetch stats:', err);
+      // Error removed
     }
   };
 

@@ -34,7 +34,7 @@ export function SimpleLoginExample() {
       close(); // Close modal on success
     } catch (err) {
       // Error is automatically captured in the hook
-      console.error('Login failed');
+      // Error is captured in hook
     }
   };
 
@@ -129,7 +129,7 @@ export function SignupExample() {
       await signup({ email, password, name });
       close();
     } catch (err) {
-      console.error('Signup failed');
+      // Error is captured in hook
     }
   };
 
@@ -183,7 +183,7 @@ export function PasswordResetExample() {
       await requestReset({ email });
       setSent(true);
     } catch (err) {
-      console.error('Reset failed');
+      // Error is captured in hook
     }
   };
 
@@ -229,7 +229,7 @@ export function PhoneAuthExample() {
       await sendCode({ phone });
       setStep('code');
     } catch (err) {
-      console.error('Failed to send code');
+      // Error is captured in hook
     }
   };
 
@@ -240,7 +240,7 @@ export function PhoneAuthExample() {
       await verifyCode({ phone, code });
       // Success - user is now logged in
     } catch (err) {
-      console.error('Invalid code');
+      // Error is captured in hook
     }
   };
 

@@ -70,7 +70,7 @@ const MessageInput: React.FC<MessageInputProps> = ({ onSendMessage, onTyping, di
                 setText('');
                 handleRemoveImage();
             } catch (error) {
-                console.error('Failed to send message:', error);
+                // Error removed
             } finally {
                 setIsSending(false);
             }

@@ -471,7 +471,7 @@ const SearchPage: React.FC<SearchPageProps> = ({ onToggleSidebar }) => {
 
         const handleGeoError = (error: GeolocationPositionError) => {
             if (error.code === error.POSITION_UNAVAILABLE) {
-                console.warn(`Geolocation warning: ${error.message} (code: ${error.code})`);
+                // Warning removed
                 return;
             }
             
@@ -893,7 +893,7 @@ const SearchPage: React.FC<SearchPageProps> = ({ onToggleSidebar }) => {
             await addSavedSearch(newSearch);
             showToast("Search saved successfully!", 'success');
         } catch (e) {
-            console.error("Failed to save search:", e);
+            // Error removed
             showToast("Could not save search. AI might be busy.", 'error');
         } finally {
             setIsSaving(false);
@@ -1033,7 +1033,7 @@ const SearchPage: React.FC<SearchPageProps> = ({ onToggleSidebar }) => {
                     setFlyToTarget({ center: [Number(results[0].lat), Number(results[0].lon)], zoom: 12 });
                 }
             } catch (error) {
-                console.error("[AI Search] Error searching location:", error);
+                // Error removed
             }
         } else if (countryKey !== 'any' && !aiQuery.location) {
             // Only country specified (from country field), no city - fly to country

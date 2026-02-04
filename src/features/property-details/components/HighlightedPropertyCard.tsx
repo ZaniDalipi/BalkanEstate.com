@@ -119,7 +119,7 @@ const HighlightedPropertyCard: React.FC<HighlightedPropertyCardProps> = ({ prope
       try {
         await toggleSavedHome(property);
       } catch (error) {
-        console.error('Failed to toggle saved home:', error);
+        // Error removed
         showToast?.('Failed to save property. Please try again.', 'error');
       }
     }

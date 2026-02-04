@@ -90,7 +90,7 @@ export function PWAInstallPrompt() {
         setDeferredPrompt(null);
       }
     } catch (error) {
-      console.error('Error showing install prompt:', error);
+      // Error removed
     }
   }, [deferredPrompt]);
 

@@ -249,7 +249,7 @@ const Buildings3DLayer: React.FC<Buildings3DLayerProps> = ({
           initBuildings();
         };
         script.onerror = () => {
-          console.warn('Failed to load OSM Buildings from CDN');
+          // Warning removed
         };
         document.head.appendChild(script);
       }
@@ -303,7 +303,7 @@ const Buildings3DLayer: React.FC<Buildings3DLayerProps> = ({
 
         osmBuildingsRef.current = osmb;
       } catch (e) {
-        console.warn('Failed to initialize OSM Buildings:', e);
+        // Warning removed
         // Try fallback data source
         if (dataSourceIndexRef.current < OSM_BUILDINGS_DATA_SOURCES.length - 1) {
           dataSourceIndexRef.current++;

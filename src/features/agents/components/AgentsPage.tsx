@@ -97,7 +97,7 @@ const AgentsPage: React.FC = () => {
       });
       setAgents(response.agents || []);
     } catch (error) {
-      console.error('Failed to fetch agents:', error);
+      // Error removed
       setAgents([]);
     } finally {
       setLoading(false);
@@ -131,7 +131,7 @@ const AgentsPage: React.FC = () => {
         const agent = await getAgent(selectedAgentId);
         setFetchedAgent(agent);
       } catch (error) {
-        console.error('Failed to fetch agent:', error);
+        // Error removed
         setFetchedAgent(null);
       } finally {
         setFetchingAgent(false);
@@ -146,7 +146,7 @@ const AgentsPage: React.FC = () => {
       const response = await getAgencies({ limit: 12 });
       setAgencies(response.agencies || []);
     } catch (error) {
-      console.error('Failed to fetch agencies:', error);
+      // Error removed
       setAgencies([]);
     }
   };
@@ -189,7 +189,7 @@ const AgentsPage: React.FC = () => {
         });
       }
     } catch (error) {
-      console.error('Error submitting contact form:', error);
+      // Error removed
       dispatch({
         type: 'SHOW_ALERT',
         payload: {
@@ -817,7 +817,7 @@ const AgentsPage: React.FC = () => {
                           window.history.pushState({}, '', getLocalizedPath(`/agencies/${urlSlug}`));
                         }
                       } catch (error) {
-                        console.error('Error fetching agency:', error);
+                        // Error removed
                       }
                     }}
                     className="bg-white border border-neutral-200 hover:border-primary hover:shadow-md transition-all"

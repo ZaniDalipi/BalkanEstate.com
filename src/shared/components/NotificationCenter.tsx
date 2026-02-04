@@ -46,7 +46,7 @@ const NotificationCenter: React.FC = () => {
         setUnreadCount(data.count || 0);
       }
     } catch (error) {
-      console.error('Failed to fetch unread count:', error);
+      // Silently handle error - unread count will remain unchanged
     }
   }, [isAuthenticated, API_URL]);
 
@@ -65,7 +65,7 @@ const NotificationCenter: React.FC = () => {
         setNotifications(data.notifications || []);
       }
     } catch (error) {
-      console.error('Failed to fetch notifications:', error);
+      // Silently handle error
     } finally {
       setLoading(false);
     }
@@ -85,7 +85,7 @@ const NotificationCenter: React.FC = () => {
       );
       setUnreadCount(prev => Math.max(0, prev - 1));
     } catch (error) {
-      console.error('Failed to mark as read:', error);
+      // Silently handle error
     }
   };
 
@@ -101,7 +101,7 @@ const NotificationCenter: React.FC = () => {
       setNotifications(prev => prev.map(n => ({ ...n, isRead: true })));
       setUnreadCount(0);
     } catch (error) {
-      console.error('Failed to mark all as read:', error);
+      // Silently handle error
     }
   };
 

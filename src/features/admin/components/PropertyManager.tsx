@@ -170,7 +170,7 @@ const PropertyManager: React.FC = () => {
       setTotalProperties(data.pagination?.totalItems || 0);
     } catch (err) {
       setError('Failed to load properties');
-      console.error(err);
+      // Error removed
     } finally {
       setIsLoading(false);
     }

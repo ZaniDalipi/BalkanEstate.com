@@ -80,7 +80,7 @@ export function useToggleSavedHome() {
       if (context?.previousHomes) {
         queryClient.setQueryData(savedKeys.homes(), context.previousHomes);
       }
-      console.error('Toggle saved home error:', err);
+      // Error removed
     },
     onSuccess: () => {
       // Invalidate to ensure server state is correct

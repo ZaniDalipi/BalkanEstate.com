@@ -21,7 +21,7 @@ const ValuationPage: React.FC = () => {
         window.scrollTo({ top: 0, behavior: 'smooth' });
       },
       onError: (error) => {
-        console.error('Valuation error:', error);
+        // Error removed
       },
     });
   };

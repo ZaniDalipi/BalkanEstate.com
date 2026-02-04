@@ -22,7 +22,7 @@ interface ResetPasswordParams {
  *
  * const handleForgotPassword = async () => {
  *   const result = await requestReset({ email: 'user@example.com' });
- *   console.log(result.message);
+ *   // Log removed
  * };
  * ```
  */

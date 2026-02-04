@@ -37,9 +37,7 @@ export function useLogout() {
       // Clear all cached queries (user data, saved homes, etc.)
       queryClient.clear();
     },
-    onError: (error: any) => {
-      console.error('Logout error:', error);
-
+    onError: () => {
       // Even on error, clear local cache
       queryClient.setQueryData(authKeys.currentUser(), null);
       queryClient.clear();

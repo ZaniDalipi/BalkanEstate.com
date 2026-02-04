@@ -51,7 +51,7 @@ const Onboarding: React.FC = () => {
         }
       } catch (error) {
         // Silently fail - agencies section will just not show
-        console.log('Could not fetch agencies for onboarding');
+        // Log removed
       }
     };
 

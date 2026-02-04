@@ -127,7 +127,7 @@ const SavedSearchesPage: React.FC = () => {
         );
       }
     } catch (err) {
-      console.error('Failed to toggle alerts:', err);
+      // Error removed
       await showError(
         t('common:error', 'Error'),
         t('alerts.toggleFailed', 'Failed to update alert settings')
@@ -166,7 +166,7 @@ const SavedSearchesPage: React.FC = () => {
       await api.deleteAllSavedSearches();
       dispatch({ type: 'CLEAR_ALL_SAVED_SEARCHES' });
     } catch (error) {
-      console.error('Failed to clear saved searches:', error);
+      // Error removed
       dispatch({
         type: 'SHOW_ALERT',
         payload: {

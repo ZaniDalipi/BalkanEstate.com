@@ -95,7 +95,7 @@ const AgencyManager: React.FC = () => {
       setTotalAgencies(data.pagination?.totalItems || 0);
     } catch (err) {
       setError('Failed to load agencies');
-      console.error('Failed to fetch agencies:', err);
+      // Error removed
     } finally {
       setIsLoading(false);
     }

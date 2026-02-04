@@ -32,9 +32,9 @@ interface SignupParams {
  *       password: '123',
  *       name: 'John Doe'
  *     });
- *     console.log('Signed up:', user);
+ *     // Log removed
  *   } catch (err) {
- *     console.error('Signup failed:', err);
+ *     // Error removed
  *   }
  * };
  * ```
@@ -52,8 +52,8 @@ export function useSignup() {
       // Invalidate all auth queries to ensure fresh data
       queryClient.invalidateQueries({ queryKey: authKeys.all });
     },
-    onError: (error: any) => {
-      console.error('Signup error:', error);
+    onError: () => {
+      // Error is available via mutation.error
     },
   });
 

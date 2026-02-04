@@ -51,7 +51,7 @@ const SavedPropertiesPage: React.FC = () => {
         const agents = await getSavedAgents();
         setSavedAgentsList(agents);
       } catch (error) {
-        console.error('Error fetching saved agents:', error);
+        // Error removed
       } finally {
         setIsLoadingAgents(false);
       }

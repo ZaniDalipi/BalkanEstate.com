@@ -492,7 +492,7 @@ const GoogleMapComponent: React.FC<GoogleMapComponentProps> = ({
         setMeasurementIsPro(result.isPro);
         setIsAtMeasurementLimit(result.isAtLimit);
       } catch (error) {
-        console.error('[Map] Failed to fetch measurement limits:', error);
+        // Error removed
       }
     };
 
@@ -958,7 +958,7 @@ const GoogleMapComponent: React.FC<GoogleMapComponentProps> = ({
       setShowSaveModal(false);
       setPendingMeasurement(null);
     } catch (error: any) {
-      console.error('Failed to save measurement:', error);
+      // Error removed
 
       // Handle specific error types
       if (error instanceof MeasurementLimitExceededError) {
@@ -1237,7 +1237,7 @@ const GoogleMapComponent: React.FC<GoogleMapComponentProps> = ({
       // Fit the map to show the drawn bounds with some padding
       map.fitBounds(bounds, { top: 50, right: 50, bottom: 50, left: 50 });
     } catch (e) {
-      console.error('[GoogleMapComponent] Error fitting to drawnBounds:', e);
+      // Error removed
     }
   }, [map, drawnBounds]);
 
@@ -1614,7 +1614,7 @@ const GoogleMapComponent: React.FC<GoogleMapComponentProps> = ({
         west: sw.lng,
       };
     } catch (e) {
-      console.error('[GoogleMapComponent] Error converting bounds:', e, leafletBounds);
+      // Error removed
       return null;
     }
   };

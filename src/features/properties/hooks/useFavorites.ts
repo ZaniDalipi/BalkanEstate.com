@@ -109,7 +109,7 @@ export function useToggleFavorite() {
       if (context?.previousFavorites) {
         queryClient.setQueryData(propertyKeys.favorites(), context.previousFavorites);
       }
-      console.error('Toggle favorite error:', err);
+      // Error removed
     },
     onSuccess: () => {
       // Invalidate and immediately refetch to ensure server state is correct

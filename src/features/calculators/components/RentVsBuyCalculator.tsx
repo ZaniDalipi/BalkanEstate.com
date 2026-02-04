@@ -320,7 +320,7 @@ const RentVsBuyCalculator: React.FC<RentVsBuyCalculatorProps> = ({ propertyPrice
         const calculatedResults = calculateCosts();
         setResults(calculatedResults);
       } catch (error) {
-        console.error('Calculation error:', error);
+        // Error removed
         setResults(null);
       } finally {
         setIsCalculating(false);

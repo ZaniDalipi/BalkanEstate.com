@@ -41,8 +41,7 @@ const refreshAccessToken = async (): Promise<string | null> => {
     }
 
     return null;
-  } catch (error) {
-    console.error('Token refresh error:', error);
+  } catch {
     return null;
   }
 };
@@ -88,14 +87,11 @@ export const apiRequest = async <T>(
 
     // Handle 401 Unauthorized - try to refresh token
     if (response.status === 401 && requiresAuth && retryCount === 0) {
-      console.log('Access token expired, attempting to refresh...');
       const newAccessToken = await refreshAccessToken();
 
       if (newAccessToken) {
-        console.log('Token refreshed successfully, retrying request...');
         return apiRequest<T>(endpoint, options, 1);
       } else {
-        console.log('Token refresh failed, session expired...');
         tokenService.clearTokens();
         // Emit custom event for session expiration
         window.dispatchEvent(new CustomEvent('session-expired'));
@@ -114,7 +110,6 @@ export const apiRequest = async <T>(
 
     return isJson ? await response.json() : ({} as T);
   } catch (error: any) {
-    console.error('API request error:', error);
     throw error;
   }
 };
@@ -140,14 +135,11 @@ export const uploadRequest = async <T>(
 
   // Handle 401 Unauthorized - try to refresh token
   if (response.status === 401 && retryCount === 0) {
-    console.log('Access token expired during upload, attempting to refresh...');
     const newAccessToken = await refreshAccessToken();
 
     if (newAccessToken) {
-      console.log('Token refreshed successfully, retrying upload...');
       return uploadRequest<T>(endpoint, formData, 1);
     } else {
-      console.log('Token refresh failed, session expired...');
       tokenService.clearTokens();
       // Emit custom event for session expiration
       window.dispatchEvent(new CustomEvent('session-expired'));

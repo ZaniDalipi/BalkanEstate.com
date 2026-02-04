@@ -231,7 +231,7 @@ const PricingManager: React.FC = () => {
       setTimeout(() => setSuccessMessage(null), 3000);
     } catch (err) {
       // Error is handled by mutation state
-      console.error('Save error:', err);
+      // Error removed
     }
   };
 
@@ -244,7 +244,7 @@ const PricingManager: React.FC = () => {
       setSuccessMessage(`Product ${newStatus ? 'activated' : 'deactivated'} successfully`);
       setTimeout(() => setSuccessMessage(null), 3000);
     } catch (err) {
-      console.error('Toggle status error:', err);
+      // Error removed
     } finally {
       setMutatingProductId(null);
     }
@@ -259,7 +259,7 @@ const PricingManager: React.FC = () => {
       setSuccessMessage(`Product is now ${newVisibility ? 'visible' : 'hidden'}`);
       setTimeout(() => setSuccessMessage(null), 3000);
     } catch (err) {
-      console.error('Toggle visibility error:', err);
+      // Error removed
     } finally {
       setMutatingProductId(null);
     }

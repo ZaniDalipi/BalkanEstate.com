@@ -76,7 +76,7 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({
           setStats(data);
         }
       } catch (err) {
-        console.error('Failed to fetch admin stats:', err);
+        // Error removed
       } finally {
         setIsLoadingStats(false);
       }

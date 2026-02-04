@@ -129,7 +129,7 @@ const MapLocationPicker: React.FC<MapLocationPickerProps> = ({ lat, lng, address
             onAddressChange(locationName);
           }
         } catch (error) {
-          console.error('Reverse geocoding error:', error);
+          // Error removed
         }
       }
     });
@@ -277,7 +277,7 @@ const MapLocationPicker: React.FC<MapLocationPickerProps> = ({ lat, lng, address
 
         setSearchResults(results.slice(0, 8)); // Show top 8 results
       } catch (error) {
-        console.error('Search error:', error);
+        // Error removed
         setSearchResults([]);
       } finally {
         setIsSearching(false);
@@ -385,7 +385,7 @@ const MapLocationPicker: React.FC<MapLocationPickerProps> = ({ lat, lng, address
               setSearchQuery(locationName);
             }
           } catch (error) {
-            console.error('Reverse geocoding error:', error);
+            // Error removed
           }
         }
 

@@ -21,9 +21,9 @@ import type { Property } from '@/types';
  * const handleCreate = async (propertyData) => {
  *   try {
  *     const newProperty = await createProperty(propertyData);
- *     console.log('Created:', newProperty);
+ *     // Log removed
  *   } catch (err) {
- *     console.error('Failed:', err);
+ *     // Error removed
  *   }
  * };
  * ```
@@ -54,7 +54,7 @@ export function useCreateProperty() {
       }
     },
     onError: (error: any) => {
-      console.error('Create property error:', error);
+      // Error removed
     },
   });
 

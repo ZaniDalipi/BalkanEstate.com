@@ -114,7 +114,7 @@ export const ImageEditorModal: React.FC<ImageEditorModalProps> = ({ imageUrl, pr
     };
     img.onerror = () => {
       // Fallback: try without cache buster if CORS still fails
-      console.warn('Image load failed with cache buster, trying original URL');
+      // Warning removed
       img.crossOrigin = "anonymous";
       img.src = imageUrl;
     };
@@ -250,7 +250,7 @@ export const ImageEditorModal: React.FC<ImageEditorModalProps> = ({ imageUrl, pr
           setSentConversationId(conversationId);
           setShowSuccessDialog(true);
         } catch (error) {
-          console.error('Failed to send to agent:', error);
+          // Error removed
           dispatch({
             type: 'SHOW_ALERT',
             payload: {
@@ -264,7 +264,7 @@ export const ImageEditorModal: React.FC<ImageEditorModalProps> = ({ imageUrl, pr
         }
       }, 'image/png');
     } catch (error) {
-      console.error('Failed to send to agent:', error);
+      // Error removed
       dispatch({
         type: 'SHOW_ALERT',
         payload: {

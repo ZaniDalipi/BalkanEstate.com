@@ -63,14 +63,14 @@ const ConversationView: React.FC<ConversationViewProps> = ({ conversation, onBac
                 const data = await getConversation(conversation.id);
                 setMessages(data.messages);
             } catch (err) {
-                console.error('Failed to load messages:', err);
+                // Error removed
             } finally {
                 setIsLoading(false);
             }
         };
 
         loadMessages();
-        getSecurityWarning().then(setSecurityWarning).catch(console.error);
+        getSecurityWarning().then(setSecurityWarning).catch(() => {});
         socketService.joinConversation(conversation.id);
 
         const unsubscribeMessage = socketService.onMessage(conversation.id, (message: Message) => {
@@ -133,9 +133,9 @@ const ConversationView: React.FC<ConversationViewProps> = ({ conversation, onBac
         try {
             const audio = new Audio('data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+DyvmwhBTGH0fPTgjMGHm7A7+OZSA0PVanl8LBhGgU7k9n0zoAwBSh+zPLaizsIGGS57OihUBELTKXh8bllHAU2jdXzzn0vBSl6yvHajjwIHGm97OilURELTKXh8bllHAU2jdXzzn0vBSl6yvHajjwIHGm97OilURELTKXh8bllHAU2jdXzzn0vBSl6yvHajjwIHGm97OilURELTKXh8bllHAU2jdXzzn0vBSl6yvHajjwIHGm97OilURELTKXh8bllHAU2jdXzzn0vBSl6yvHajjwIHGm97OilURELTKXh8bllHAU2jdXzzn0vBSl6yvHajjwIHGm97OilURELTKXh8bllHAU2jdXzzn0vBSl6yvHajjwIHGm97OilURELTKXh8bllHAU2jdXzzn0vBSl6yvHajjwIHGm97OilURELTKXh8bllHAU2jdXzzn0vBSl6yvHajjwIHGm97OilURELTKXh8bllHAU2jdXzzn0vBSl6yvHajjwIHGm97OilURE=');
             audio.volume = 0.3;
-            audio.play().catch(err => console.log('Could not play notification sound:', err));
-        } catch (err) {
-            console.log('Notification sound not available');
+            audio.play().catch(() => {});
+        } catch {
+            // Silently ignore audio errors
         }
     };
 
@@ -154,7 +154,7 @@ const ConversationView: React.FC<ConversationViewProps> = ({ conversation, onBac
             try {
                 imageUrl = await uploadMessageImage(conversation.id, imageFile);
             } catch (err) {
-                console.error('Failed to upload image:', err);
+                // Error removed
                 await error(t('inbox.errorTitle', 'Error'), t('inbox.failedToUploadImage'));
                 throw err;
             }
@@ -184,7 +184,7 @@ const ConversationView: React.FC<ConversationViewProps> = ({ conversation, onBac
                 setTimeout(() => setShowSecurityAlert(false), 5000);
             }
         } catch (err) {
-            console.error('Failed to send message:', err);
+            // Error removed
             await error(t('inbox.errorTitle', 'Error'), t('inbox.failedToSendMessage'));
             throw err;
         }
@@ -204,7 +204,7 @@ const ConversationView: React.FC<ConversationViewProps> = ({ conversation, onBac
                 await deleteConversation(conversation.id);
                 if (onBack) onBack();
             } catch (err) {
-                console.error('Failed to delete conversation:', err);
+                // Error removed
                 await error(t('inbox.errorTitle', 'Error'), t('inbox.failedToDeleteConversation'));
             }
         }

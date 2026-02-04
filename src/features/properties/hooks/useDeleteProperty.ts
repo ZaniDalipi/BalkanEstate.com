@@ -65,7 +65,7 @@ export function useDeleteProperty() {
       if (context?.previousMyListings) {
         queryClient.setQueryData(propertyKeys.myListings(), context.previousMyListings);
       }
-      console.error('Delete property error:', err);
+      // Error removed
     },
     onSuccess: (result, propertyId) => {
       // Remove from cache

@@ -277,7 +277,7 @@ const PricingPage: React.FC = () => {
   };
 
   const handlePaymentSuccess = async (paymentIntentId: string) => {
-    console.log('Payment successful:', paymentIntentId);
+    // Log removed
     setShowPaymentWindow(false);
     dispatch({
       type: 'SHOW_ALERT',
@@ -290,7 +290,7 @@ const PricingPage: React.FC = () => {
   };
 
   const handlePaymentError = (error: string) => {
-    console.error('Payment error:', error);
+    // Error removed
   };
 
   // Listing promotion handlers

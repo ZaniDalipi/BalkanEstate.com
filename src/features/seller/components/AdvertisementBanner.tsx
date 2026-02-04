@@ -71,7 +71,7 @@ const AdvertisementBanner: React.FC<AdvertisementBannerProps> = ({ position = 't
 
     // Trigger gamification after threshold reached (unless disabled for this banner)
     if (!disableGameTrigger && newCount === AD_VIEW_THRESHOLD) {
-      console.log('🎮 Ad view threshold reached! Triggering gamification...');
+      // Log removed
       triggerGamification();
     }
   };

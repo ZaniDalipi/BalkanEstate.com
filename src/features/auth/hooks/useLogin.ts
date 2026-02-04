@@ -26,9 +26,9 @@ interface LoginParams {
  * const handleLogin = async () => {
  *   try {
  *     const user = await login({ emailOrPhone: 'user@example.com', password: '123' });
- *     console.log('Logged in:', user);
+ *     // Log removed
  *   } catch (err) {
- *     console.error('Login failed:', err);
+ *     // Error removed
  *   }
  * };
  * ```
@@ -46,8 +46,8 @@ export function useLogin() {
       // Invalidate all auth queries to ensure fresh data
       queryClient.invalidateQueries({ queryKey: authKeys.all });
     },
-    onError: (error: any) => {
-      console.error('Login error:', error);
+    onError: () => {
+      // Error is available via mutation.error
     },
   });
 

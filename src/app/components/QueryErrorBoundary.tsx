@@ -32,7 +32,7 @@ export function QueryErrorBoundary({ children, fallback }: Props) {
         <ErrorBoundary
           onError={(error, errorInfo) => {
             // Log error
-            console.error('Query error:', error, errorInfo);
+            // Error removed
           }}
           fallback={
             fallback || (

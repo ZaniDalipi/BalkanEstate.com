@@ -77,7 +77,7 @@ export const getConversations = async (): Promise<Conversation[]> => {
 
     return validConversations.map(transformBackendConversation);
   } catch (error) {
-    console.error('Error fetching conversations:', error);
+    // Error removed
     return [];
   }
 };

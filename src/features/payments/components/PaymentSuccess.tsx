@@ -69,7 +69,7 @@ const PaymentSuccess: React.FC = () => {
   const scheduleDataRefresh = useCallback(() => {
     // First refresh after 3 seconds (quick check)
     setTimeout(() => {
-      console.log('📡 Payment success: Refreshing data (3s)...');
+      // Log removed
       fetchProperties?.();
       queryClient.invalidateQueries({ queryKey: propertyKeys.all });
       queryClient.invalidateQueries({ queryKey: ['promotions'] });
@@ -77,7 +77,7 @@ const PaymentSuccess: React.FC = () => {
 
     // Second refresh after 10 seconds (ensure webhook processed)
     setTimeout(() => {
-      console.log('📡 Payment success: Refreshing data (10s)...');
+      // Log removed
       fetchProperties?.();
       queryClient.invalidateQueries({
         queryKey: propertyKeys.all,
@@ -184,7 +184,7 @@ const PaymentSuccess: React.FC = () => {
             dispatch({ type: 'SET_CURRENT_USER', payload: response.user });
           }
         } catch (refreshError) {
-          console.error('Failed to refresh user data:', refreshError);
+          // Error removed
         }
 
         // Schedule data refresh to pick up any database changes from webhook
@@ -245,7 +245,7 @@ const PaymentSuccess: React.FC = () => {
         });
       }
     } catch (agencyError) {
-      console.error('Failed to create agency:', agencyError);
+      // Error removed
       // Don't block the payment success, just log the error
       // User can create agency manually from their account
       dispatch({
@@ -279,7 +279,7 @@ const PaymentSuccess: React.FC = () => {
       setCopiedCouponIndex(index);
       setTimeout(() => setCopiedCouponIndex(null), 2000);
     } catch (err) {
-      console.error('Failed to copy coupon code:', err);
+      // Error removed
     }
   };
 

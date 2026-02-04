@@ -105,7 +105,7 @@ const AgentRequestManager: React.FC = () => {
       setTotalPages(data.pagination?.pages || 1);
     } catch (err) {
       setError('Failed to load agent requests');
-      console.error(err);
+      // Error removed
     } finally {
       setIsLoading(false);
     }
@@ -125,7 +125,7 @@ const AgentRequestManager: React.FC = () => {
         setStats(data.stats);
       }
     } catch (err) {
-      console.error('Failed to fetch stats:', err);
+      // Error removed
     }
   };
 
@@ -150,7 +150,7 @@ const AgentRequestManager: React.FC = () => {
       setIsDetailModalOpen(false);
     } catch (err) {
       setError('Failed to update request');
-      console.error(err);
+      // Error removed
     }
   };
 

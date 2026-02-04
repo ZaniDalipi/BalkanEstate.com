@@ -68,7 +68,7 @@ export const MapEvents: React.FC<{
           }
         } catch (e) {
           // Map not ready yet, will be handled by load event
-          console.debug('Map initialization deferred:', e);
+          // Debug removed
         }
       }, 100);
       return () => clearTimeout(timer);
@@ -164,7 +164,7 @@ export const MapEvents: React.FC<{
           onMove(bounds, center);
         }
       } catch (e) {
-        console.debug('Map load event - bounds not ready:', e);
+        // Debug removed
       }
 
       // Force map to invalidate size and re-render layers after a short delay
@@ -177,7 +177,7 @@ export const MapEvents: React.FC<{
             map.invalidateSize();
           }
         } catch (e) {
-          console.debug('Map invalidateSize deferred:', e);
+          // Debug removed
         }
       }, 150);
     },
@@ -189,7 +189,7 @@ export const MapEvents: React.FC<{
           onMove(bounds, center);
         }
       } catch (e) {
-        console.debug('Map moveend - bounds not ready:', e);
+        // Debug removed
       }
     },
   });

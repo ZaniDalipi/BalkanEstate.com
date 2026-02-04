@@ -72,7 +72,7 @@ const AnalyticsDashboard: React.FC = () => {
       setError(null);
     } catch (err) {
       setError('Failed to load statistics');
-      console.error(err);
+      // Error removed
     } finally {
       setIsLoading(false);
     }

@@ -294,7 +294,7 @@ const Map3DBuildings: React.FC<Map3DBuildingsProps> = ({
 
     // Check if 3d-buildings layer exists
     if (!mapInstance.getLayer('3d-buildings')) {
-      console.warn('[Map3D] 3d-buildings layer not found!');
+      // Warning removed
     }
 
     // Helper function to calculate building centroid
@@ -398,7 +398,7 @@ const Map3DBuildings: React.FC<Map3DBuildingsProps> = ({
           const height = closestFeature.properties?.render_height ||
                         (closestFeature.properties?.['building:levels'] || 1) * 3.5;
         } else {
-          console.warn(`[Map3D] No building found meeting minimum height requirement of ${minRequiredHeight}m`);
+          // Warning removed
         }
       }
     }
@@ -415,7 +415,7 @@ const Map3DBuildings: React.FC<Map3DBuildingsProps> = ({
 
     // If we still don't have building coords, create a fallback based on the building's floor count
     if (!buildingCoords) {
-      console.warn('[Map3D] No building found! Creating fallback building');
+      // Warning removed
       const metersToDegrees = 1 / 111320;
       // For a tall building, use a larger footprint (proportional to floors)
       const buildingSize = Math.max(25, totalFlrs * 1.5); // At least 25m, scales with floors
@@ -792,7 +792,7 @@ const Map3DBuildings: React.FC<Map3DBuildingsProps> = ({
 
         // Verify the source exists before adding layer
         if (!mapInstance.getSource(buildingSource)) {
-          console.error('[Map3D] Building source not found:', buildingSource, 'Available:', sourceNames);
+          // Error removed
           return;
         }
 
@@ -829,7 +829,7 @@ const Map3DBuildings: React.FC<Map3DBuildingsProps> = ({
             labelLayerId
           );
         } catch (error) {
-          console.error('[Map3D] Failed to add 3D buildings layer:', error);
+          // Error removed
         }
       }
 

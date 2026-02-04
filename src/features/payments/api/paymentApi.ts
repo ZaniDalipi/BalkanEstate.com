@@ -118,7 +118,7 @@ export async function createPayment(request: CreatePaymentRequest): Promise<Crea
     );
     return response;
   } catch (error: any) {
-    console.error('Error creating payment:', error);
+    // Error removed
     return {
       success: false,
       provider: getProviderForCountry(request.countryCode),
@@ -140,7 +140,7 @@ export async function getPaymentProvider(countryCode: string): Promise<PaymentPr
     );
     return response;
   } catch (error: any) {
-    console.error('Error getting payment provider:', error);
+    // Error removed
     // Fallback to local config
     const info = getCountryPaymentInfo(countryCode);
     if (info) {
@@ -179,7 +179,7 @@ export async function getSupportedCountries(): Promise<SupportedCountriesRespons
     );
     return response;
   } catch (error: any) {
-    console.error('Error getting supported countries:', error);
+    // Error removed
     // Fallback to local config
     const countries = Object.values(COUNTRY_PAYMENT_MAP);
     return {
@@ -215,7 +215,7 @@ export async function verifyStripePayment(sessionId: string): Promise<VerifyPaym
     );
     return { ...response, provider: 'stripe' };
   } catch (error: any) {
-    console.error('Error verifying Stripe payment:', error);
+    // Error removed
     return {
       success: false,
       paymentStatus: 'error',
@@ -265,7 +265,7 @@ export async function verifyLemonSqueezyPayment(maxAttempts = 10): Promise<Verif
 
       return { ...response, provider: 'lemonsqueezy' };
     } catch (error: any) {
-      console.error(`[LemonSqueezy] Verify attempt ${attempt}/${maxAttempts} failed:`, error);
+      // Error removed
       if (attempt === maxAttempts) {
         // On timeout, assume payment went through (LemonSqueezy confirmed it)
         return {
@@ -323,7 +323,7 @@ export async function getSubscriptionStatus(): Promise<SubscriptionStatusRespons
     );
     return response;
   } catch (error: any) {
-    console.error('Error getting subscription status:', error);
+    // Error removed
     return null;
   }
 }
@@ -339,7 +339,7 @@ export async function cancelSubscription(): Promise<{ success: boolean; message?
     );
     return { success: true, message: response.message };
   } catch (error: any) {
-    console.error('Error canceling subscription:', error);
+    // Error removed
     return {
       success: false,
       message: error.message,
@@ -367,7 +367,7 @@ export async function applyFreeSubscription(params: {
       message: response.message,
     };
   } catch (error: any) {
-    console.error('Error applying free subscription:', error);
+    // Error removed
     return {
       success: false,
       message: error.message,

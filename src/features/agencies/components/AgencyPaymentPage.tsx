@@ -90,7 +90,7 @@ const AgencyPaymentPage: React.FC = () => {
           }
         }
       } catch (err) {
-        console.error('Failed to fetch enterprise plan:', err);
+        // Error removed
       } finally {
         setLoadingPlan(false);
       }
@@ -182,7 +182,7 @@ const AgencyPaymentPage: React.FC = () => {
         setError(data.message || t('payment.error', 'Failed to initiate payment'));
       }
     } catch (err) {
-      console.error('Payment error:', err);
+      // Error removed
       setError(t('payment.error', 'Failed to initiate payment. Please try again.'));
     } finally {
       setIsLoading(false);

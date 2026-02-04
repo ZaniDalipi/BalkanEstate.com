@@ -140,7 +140,7 @@ const AnalyticsPage: React.FC = () => {
         refetchProperties(),
       ]);
     } catch (error) {
-      console.error('Failed to refetch analytics data:', error);
+      // Error removed
     }
   };
 

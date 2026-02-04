@@ -43,7 +43,7 @@ export class MeasurementRepository implements IMeasurementRepository {
         isPro: response.isPro,
       };
     } catch (error: any) {
-      console.error('[MeasurementRepository] getMeasurements error:', error);
+      // Error: getMeasurements error:', error);
       throw error;
     }
   }
@@ -64,7 +64,7 @@ export class MeasurementRepository implements IMeasurementRepository {
       if (error.message?.includes('not found')) {
         throw new MeasurementNotFoundError(id);
       }
-      console.error('[MeasurementRepository] getMeasurementById error:', error);
+      // Error: getMeasurementById error:', error);
       throw error;
     }
   }
@@ -106,7 +106,7 @@ export class MeasurementRepository implements IMeasurementRepository {
           listResponse.isPro
         );
       }
-      console.error('[MeasurementRepository] saveMeasurement error:', error);
+      // Error: saveMeasurement error:', error);
       throw error;
     }
   }
@@ -131,7 +131,7 @@ export class MeasurementRepository implements IMeasurementRepository {
       if (error.message?.includes('not found')) {
         throw new MeasurementNotFoundError(id);
       }
-      console.error('[MeasurementRepository] updateMeasurement error:', error);
+      // Error: updateMeasurement error:', error);
       throw error;
     }
   }
@@ -152,7 +152,7 @@ export class MeasurementRepository implements IMeasurementRepository {
       if (error.message?.includes('not found')) {
         throw new MeasurementNotFoundError(id);
       }
-      console.error('[MeasurementRepository] deleteMeasurement error:', error);
+      // Error: deleteMeasurement error:', error);
       throw error;
     }
   }
@@ -171,7 +171,7 @@ export class MeasurementRepository implements IMeasurementRepository {
         isPro: response.isPro,
       };
     } catch (error) {
-      console.error('[MeasurementRepository] canSaveMeasurement error:', error);
+      // Error: canSaveMeasurement error:', error);
       // Default to allowing save if we can't check (will be validated server-side)
       return { canSave: true, count: 0, maxAllowed: 5, isPro: false };
     }

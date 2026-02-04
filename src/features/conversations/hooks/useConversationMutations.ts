@@ -87,7 +87,7 @@ export function useSendMessage() {
       if (context?.previousData) {
         queryClient.setQueryData(conversationKeys.detail(conversationId), context.previousData);
       }
-      console.error('Send message error:', err);
+      // Error removed
     },
     onSuccess: (result, { conversationId }) => {
       // Update with server response
@@ -180,7 +180,7 @@ export function useDeleteConversation() {
       if (context?.previousConversations) {
         queryClient.setQueryData(conversationKeys.lists(), context.previousConversations);
       }
-      console.error('Delete conversation error:', err);
+      // Error removed
     },
     onSuccess: (_, conversationId) => {
       // Remove from cache

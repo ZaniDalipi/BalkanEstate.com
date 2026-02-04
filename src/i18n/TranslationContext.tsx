@@ -48,7 +48,7 @@ const loadTranslations = async (lang: Language): Promise<Translations> => {
             translations[module] = data;
           }
         } catch (err) {
-          console.warn(`Failed to load ${module} translations for ${lang}`);
+          // Warning removed
         }
       })
     );
@@ -56,7 +56,7 @@ const loadTranslations = async (lang: Language): Promise<Translations> => {
     translationCache[lang] = translations;
     return translations;
   } catch (error) {
-    console.error(`Failed to load translations for ${lang}:`, error);
+    // Error removed
     return {};
   }
 };
@@ -138,7 +138,7 @@ export const TranslationProvider: React.FC<TranslationProviderProps> = ({ childr
       }
 
       // Last resort: return the key
-      console.warn(`Translation missing for key: ${key}`);
+      // Warning removed
       return key;
     },
     [translations, language]

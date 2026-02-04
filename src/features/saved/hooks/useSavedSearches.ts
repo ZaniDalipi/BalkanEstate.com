@@ -109,7 +109,7 @@ export function useDeleteSavedSearch() {
       if (context?.previousSearches) {
         queryClient.setQueryData(savedKeys.searches(), context.previousSearches);
       }
-      console.error('Delete saved search error:', err);
+      // Error removed
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: savedKeys.searches() });

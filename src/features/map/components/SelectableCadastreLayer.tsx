@@ -127,7 +127,7 @@ export const SelectableCadastreLayer: React.FC<SelectableCadastreLayerProps> = (
       parcelsLayerRef.current = parcelsLayer;
 
     } catch (error) {
-      console.warn('Failed to load WFS parcels, falling back to WMS:', error);
+      // Warning removed
       createWMSLayer();
     }
   }, [currentLayer, enabled, map, selectedParcel]);
@@ -255,7 +255,7 @@ export const SelectableCadastreLayer: React.FC<SelectableCadastreLayerProps> = (
           });
         }
       } catch (error) {
-        console.warn('GetFeatureInfo failed:', error);
+        // Warning removed
       }
     }
   };

@@ -56,7 +56,7 @@ export class ConversationRepository implements IConversationRepository {
   ): () => void {
     // TODO: Implement WebSocket subscription
     // This will be implemented when integrating with existing socketService
-    console.warn('WebSocket subscription not yet implemented');
+    // TODO: WebSocket subscription not yet implemented
     return () => {};
   }
 
@@ -66,7 +66,7 @@ export class ConversationRepository implements IConversationRepository {
   ): () => void {
     // TODO: Implement WebSocket subscription
     // This will be implemented when integrating with existing socketService
-    console.warn('WebSocket subscription not yet implemented');
+    // TODO: WebSocket subscription not yet implemented
     return () => {};
   }
 }

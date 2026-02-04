@@ -72,7 +72,7 @@ const SavedSearchAccordion: React.FC<SavedSearchAccordionProps> = ({ search, onO
         await success(t('accordion.alertsEnabled', 'Alerts enabled'), t('accordion.alertsEnabledDesc', 'You will receive {{frequency}} notifications', { frequency }));
       }
     } catch (err) {
-      console.error('Failed to update alert settings:', err);
+      // Error removed
       await error(t('accordion.errorTitle', 'Error'), t('accordion.alertUpdateFailed', 'Failed to update alert settings'));
     } finally {
       setIsUpdatingAlerts(false);
@@ -83,15 +83,8 @@ const SavedSearchAccordion: React.FC<SavedSearchAccordionProps> = ({ search, onO
   // Helper function to safely parse drawnBoundsJSON
   const parsedBounds = useMemo(() => {
     try {
-      console.log('[SavedSearchAccordion] Parsing drawnBoundsJSON:', {
-        searchId: search.id,
-        searchName: search.name,
-        drawnBoundsJSON: search.drawnBoundsJSON,
-        type: typeof search.drawnBoundsJSON,
-      });
-
       if (!search.drawnBoundsJSON) {
-        console.log('[SavedSearchAccordion] No drawnBoundsJSON - returning null');
+        // Log removed
         return null;
       }
 
@@ -107,7 +100,7 @@ const SavedSearchAccordion: React.FC<SavedSearchAccordionProps> = ({ search, onO
         // Decode HTML entities if present (backend may encode quotes as &quot;)
         if (trimmed.includes('&quot;') || trimmed.includes('&#')) {
           trimmed = decodeHtmlEntities(trimmed);
-          console.log('[SavedSearchAccordion] Decoded HTML entities:', trimmed);
+          // Log removed
         }
 
         parsed = JSON.parse(trimmed);
@@ -126,10 +119,10 @@ const SavedSearchAccordion: React.FC<SavedSearchAccordionProps> = ({ search, onO
         return null;
       }
 
-      console.log('[SavedSearchAccordion] Successfully parsed bounds:', parsed);
+      // Log removed
       return parsed;
     } catch (e) {
-      console.error('[SavedSearchAccordion] Failed to parse drawnBoundsJSON:', e);
+      // Error removed
       return null;
     }
   }, [search.drawnBoundsJSON]);
@@ -140,37 +133,27 @@ const SavedSearchAccordion: React.FC<SavedSearchAccordionProps> = ({ search, onO
     try {
       return L.latLngBounds(parsedBounds._southWest, parsedBounds._northEast);
     } catch (e) {
-      console.error('[SavedSearchAccordion] Failed to create Leaflet bounds:', e);
+      // Error removed
       return null;
     }
   }, [parsedBounds]);
 
   const matchingProperties = useMemo(() => {
-      console.log('[SavedSearchAccordion] Computing matchingProperties:', {
-          searchId: search.id,
-          hasParsedBounds: !!parsedBounds,
-          propertiesCount: properties.length,
-      });
-
       // If there's a valid drawn area, prioritize geographic filtering
       if (parsedBounds) {
           try {
               const drawnBounds = L.latLngBounds(parsedBounds._southWest, parsedBounds._northEast);
               // Only filter by bounds for drawn area searches
               const filtered = properties.filter(p => p.lat && p.lng && drawnBounds.contains([p.lat, p.lng]));
-              console.log('[SavedSearchAccordion] Filtered by bounds:', {
-                  originalCount: properties.length,
-                  filteredCount: filtered.length,
-              });
               return filtered;
           } catch (e) {
-              console.error("[SavedSearchAccordion] Failed to create bounds from parsed data:", e);
+              // Error removed
               return [];
           }
       }
 
       // Otherwise use filter-based search
-      console.log('[SavedSearchAccordion] No parsed bounds, using filter-based search');
+      // Log removed
       return filterProperties(properties, search.filters);
   }, [properties, search.filters, parsedBounds, search.id]);
 
@@ -222,7 +205,7 @@ const SavedSearchAccordion: React.FC<SavedSearchAccordionProps> = ({ search, onO
 
           setMapFlyTarget({ center: [center.lat, center.lng], zoom: finalZoom });
         } catch (e) {
-          console.error("Failed to create bounds for fly target", e);
+          // Error removed
         }
       }
     }
@@ -249,7 +232,7 @@ const SavedSearchAccordion: React.FC<SavedSearchAccordionProps> = ({ search, onO
       await api.deleteSavedSearch(search.id);
       dispatch({ type: 'REMOVE_SAVED_SEARCH', payload: search.id });
     } catch (err) {
-      console.error('Failed to delete saved search:', err);
+      // Error removed
       await error(t('accordion.errorTitle', 'Error'), t('accordion.deleteFailed'));
     } finally {
       setIsDeleting(false);
@@ -282,7 +265,7 @@ const SavedSearchAccordion: React.FC<SavedSearchAccordionProps> = ({ search, onO
       dispatch({ type: 'UPDATE_SAVED_SEARCH', payload: { ...search, name: newName } });
       setIsRenaming(false);
     } catch (err) {
-      console.error('Failed to rename saved search:', err);
+      // Error removed
       await error(t('accordion.errorTitle', 'Error'), t('accordion.renameFailed'));
     } finally {
       setIsUpdating(false);

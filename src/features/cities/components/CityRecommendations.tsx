@@ -47,7 +47,7 @@ const CityRecommendations: React.FC = () => {
       const data = await getFeaturedCities(36); // Load 36 cities (3-4 per country)
       setCities(data);
     } catch (error) {
-      console.error('Failed to load featured cities:', error);
+      // Error removed
     } finally {
       setLoading(false);
     }

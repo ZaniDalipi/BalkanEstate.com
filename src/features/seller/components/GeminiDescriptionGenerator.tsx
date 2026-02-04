@@ -378,12 +378,6 @@ const GeminiDescriptionGenerator: React.FC<{ propertyToEdit: Property | null }> 
     // Populate form if editing
     useEffect(() => {
         if (propertyToEdit) {
-            console.log('📝 [Edit Mode] Loading property for editing:', {
-                id: propertyToEdit.id,
-                hasImages: propertyToEdit.images !== undefined,
-                imagesCount: propertyToEdit.images?.length || 0,
-                sampleImage: propertyToEdit.images?.[0]?.url?.substring(0, 50) || propertyToEdit.images?.[0]
-            });
             setMode('manual');
             setStep('form');
 
@@ -444,7 +438,7 @@ const GeminiDescriptionGenerator: React.FC<{ propertyToEdit: Property | null }> 
                 return { file: null, previewUrl: imageUrl };
             }).filter(img => img.previewUrl); // Filter out any empty URLs
             setImages(existingImages);
-            console.log(`📸 Loaded ${existingImages.length} existing images for editing`);
+            // Log removed
             if (propertyToEdit.floorplanUrl) {
                 setFloorplanImage({ file: null, previewUrl: propertyToEdit.floorplanUrl });
             }
@@ -496,7 +490,7 @@ const GeminiDescriptionGenerator: React.FC<{ propertyToEdit: Property | null }> 
     }, [selectedCountry, selectedCity]);
 
     const handleMapLocationChange = (newLat: number, newLng: number) => {
-        console.log('📍 PIN DRAGGED TO EXACT COORDINATES:', { lat: newLat, lng: newLng });
+        // Log removed
         setListingData(prev => ({
             ...prev,
             lat: newLat,
@@ -556,18 +550,18 @@ const GeminiDescriptionGenerator: React.FC<{ propertyToEdit: Property | null }> 
             for (let i = 0; i < filesToProcess.length; i++) {
                 const file = filesToProcess[i];
                 try {
-                    console.log(`🗜️ Compressing image ${i + 1}/${filesToProcess.length}: ${file.name} (${(file.size / 1024 / 1024).toFixed(2)}MB)`);
+                    // Log removed
 
                     const compressedFile = await imageCompression(file, compressionOptions);
 
-                    console.log(`✅ Compressed: ${compressedFile.name} (${(compressedFile.size / 1024 / 1024).toFixed(2)}MB) - ${((1 - compressedFile.size / file.size) * 100).toFixed(0)}% reduction`);
+                    // Log removed
 
                     compressedImages.push({
                         file: compressedFile,
                         previewUrl: URL.createObjectURL(compressedFile)
                     });
                 } catch (compressionError) {
-                    console.error(`Failed to compress ${file.name}, using original:`, compressionError);
+                    // Error removed
                     // Fallback to original file if compression fails
                     compressedImages.push({
                         file,
@@ -591,9 +585,9 @@ const GeminiDescriptionGenerator: React.FC<{ propertyToEdit: Property | null }> 
                 return newImages;
             });
 
-            console.log(`🎉 Successfully processed ${compressedImages.length} images`);
+            // Log removed
         } catch (error) {
-            console.error('Image compression error:', error);
+            // Error removed
             showError(t('newListing:errors.imageProcessingFailed'), t('newListing:errors.failedToProcessImages'));
         } finally {
             setIsCompressing(false);
@@ -617,13 +611,13 @@ const GeminiDescriptionGenerator: React.FC<{ propertyToEdit: Property | null }> 
                     initialQuality: 0.8,
                 };
 
-                console.log(`🗜️ Compressing floorplan: ${file.name} (${(file.size / 1024 / 1024).toFixed(2)}MB)`);
+                // Log removed
                 const compressedFile = await imageCompression(file, compressionOptions);
-                console.log(`✅ Compressed floorplan: ${compressedFile.name} (${(compressedFile.size / 1024 / 1024).toFixed(2)}MB)`);
+                // Log removed
 
                 setFloorplanImage({ file: compressedFile, previewUrl: URL.createObjectURL(compressedFile) });
             } catch (error) {
-                console.error('Floorplan compression error:', error);
+                // Error removed
                 // Fallback to original
                 setFloorplanImage({ file, previewUrl: URL.createObjectURL(file) });
             } finally {
@@ -748,7 +742,7 @@ const GeminiDescriptionGenerator: React.FC<{ propertyToEdit: Property | null }> 
             // Scroll to top after generation completes
             window.scrollTo({ top: 0, behavior: 'smooth' });
         } catch (e) {
-            console.error('⚠️ AI description generation failed:', e);
+            // Error removed
             if (e instanceof Error) {
                 showWarning(t('newListing:errors.aiGenerationFailed'), `${e.message}. ${t('newListing:errors.continueManualEntry')}`);
             } else {
@@ -842,43 +836,33 @@ const GeminiDescriptionGenerator: React.FC<{ propertyToEdit: Property | null }> 
             // Step 1: Upload images to Cloudinary before creating the property
             let imageUrls: PropertyImage[] = [];
 
-            // Debug: Log current images state
-            console.log('🔍 [handleSubmit] Images state:', {
-                totalImages: images.length,
-                images: images.map((img, i) => ({
-                    index: i,
-                    hasFile: img.file !== null,
-                    previewUrl: img.previewUrl?.substring(0, 50) + '...'
-                }))
-            });
-
             // Get all image files that need to be uploaded (new images with file objects)
             const imagesToUpload = images
                 .map((img, index) => ({ img, index }))
                 .filter(({ img }) => img.file !== null);
 
-            console.log('📤 [handleSubmit] Images to upload:', imagesToUpload.length);
+            // Log removed
 
             // Check if we have new images to upload
             if (imagesToUpload.length > 0) {
                 try {
                     setIsUploading(true);
                     setUploadProgress(0);
-                    console.log(`📤 Uploading ${imagesToUpload.length} compressed images to Cloudinary...`);
+                    // Log removed
 
                     // Extract just the files (already compressed from handleImageChange)
                     const imageFiles = imagesToUpload.map(({ img }) => img.file!);
 
                     // Calculate total size for progress tracking
                     const totalSize = imageFiles.reduce((sum, file) => sum + file.size, 0);
-                    console.log(`📊 Total upload size: ${(totalSize / 1024 / 1024).toFixed(2)}MB`);
+                    // Log removed
 
                     // Upload to Cloudinary (without propertyId first, we'll get temp URLs)
                     const uploadedImages = await api.uploadPropertyImages(imageFiles);
 
                     setUploadProgress(100);
                     setIsUploading(false);
-                    console.log(`✅ Successfully uploaded ${uploadedImages.length} images to Cloudinary`);
+                    // Log removed
 
                     // Map the uploaded Cloudinary URLs back to our image array with proper tags
                     let uploadIndex = 0;
@@ -903,14 +887,14 @@ const GeminiDescriptionGenerator: React.FC<{ propertyToEdit: Property | null }> 
                         }
                     });
                 } catch (uploadError: any) {
-                    console.error('❌ Failed to upload images to Cloudinary:', uploadError);
+                    // Error removed
                     showError(t('newListing:errors.uploadFailed'), t('newListing:errors.uploadFailedMessage', { error: uploadError.message || t('common:errors.unknown') }));
                     setIsSubmitting(false);
                     return;
                 }
             } else if (images.length > 0) {
                 // All images are existing (editing mode), just use the preview URLs
-                console.log('📷 [handleSubmit] Using existing images (no new uploads)');
+                // Log removed
                 imageUrls = images.map((img, index) => {
                     const tagInfo = listingData.image_tags.find(t => t.index === index);
                     return {
@@ -918,13 +902,13 @@ const GeminiDescriptionGenerator: React.FC<{ propertyToEdit: Property | null }> 
                         tag: (tagInfo?.tag as PropertyImageTag) || 'other',
                     };
                 });
-                console.log('📷 [handleSubmit] Existing imageUrls:', imageUrls.length, imageUrls.map(i => i.url?.substring(0, 50)));
+                // Log removed
             } else {
-                console.warn('⚠️ [handleSubmit] No images found in state!');
+                // Warning removed
             }
 
             const { lat, lng } = listingData;
-            console.log('💾 SAVING PROPERTY WITH EXACT COORDINATES:', { lat, lng });
+            // Log removed
 
             // Use the address from Property Location (map search) - do not duplicate city/country
             const finalAddress = listingData.streetAddress.trim();
@@ -948,7 +932,7 @@ const GeminiDescriptionGenerator: React.FC<{ propertyToEdit: Property | null }> 
 
             if (addressChanged) {
                 try {
-                    console.log('📍 Calculating property distances using Gemini AI...');
+                    // Log removed
                     const calculatedDistances = await calculatePropertyDistances(
                         finalAddress,
                         selectedCity,
@@ -962,26 +946,26 @@ const GeminiDescriptionGenerator: React.FC<{ propertyToEdit: Property | null }> 
                         distanceToSchool: calculatedDistances.distanceToSchool < 999 ? calculatedDistances.distanceToSchool : undefined,
                         distanceToHospital: calculatedDistances.distanceToHospital < 999 ? calculatedDistances.distanceToHospital : undefined,
                     };
-                    console.log('✅ Distances calculated:', distances);
+                    // Log removed
                 } catch (error) {
-                    console.warn('⚠️ Failed to calculate distances with Gemini AI. Listing will be created without distance information.');
-                    console.error('Distance calculation error details:', error);
+                    // Warning removed
+                    // Error removed
                     // Continue without distances - they will be undefined
                     // This is intentional - we don't want to block listing creation if Gemini API fails
                 }
             } else {
                 // Address hasn't changed, reuse existing distances
-                console.log('📍 Address unchanged - reusing existing distances');
+                // Log removed
                 distances = {
                     distanceToCenter: propertyToEdit.distanceToCenter,
                     distanceToSea: propertyToEdit.distanceToSea,
                     distanceToSchool: propertyToEdit.distanceToSchool,
                     distanceToHospital: propertyToEdit.distanceToHospital,
                 };
-                console.log('♻️ Reusing distances:', distances);
+                // Log removed
             }
 
-            console.log('✅ FINAL COORDINATES BEING SAVED TO PROPERTY:', { lat, lng });
+            // Log removed
 
             const newProperty: Property = {
                 id: propertyToEdit ? propertyToEdit.id : `prop-${Date.now()}`,
@@ -1252,7 +1236,7 @@ const GeminiDescriptionGenerator: React.FC<{ propertyToEdit: Property | null }> 
             });
 
             if (!response.ok) {
-                console.error('Failed to apply promotion, but listing was created');
+                // Error removed
             }
 
             setPendingPropertyData(null);
@@ -1261,7 +1245,7 @@ const GeminiDescriptionGenerator: React.FC<{ propertyToEdit: Property | null }> 
                 dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'account' });
             }, 3000);
         } catch (err) {
-            console.error('Error creating listing with promotion:', err);
+            // Error removed
             showError(t('newListing:errors.failedToCreate'), t('newListing:errors.failedToCreateMessage'));
             setStep('form');
         } finally {
@@ -1287,7 +1271,7 @@ const GeminiDescriptionGenerator: React.FC<{ propertyToEdit: Property | null }> 
                 dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'account' });
             }, 3000);
         } catch (err) {
-            console.error('Error creating listing:', err);
+            // Error removed
             showError(t('newListing:errors.failedToCreate'), t('newListing:errors.failedToCreateMessage'));
             setStep('form');
         } finally {

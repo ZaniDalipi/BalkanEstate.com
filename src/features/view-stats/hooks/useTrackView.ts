@@ -29,7 +29,7 @@ export function useTrackView({ entityType, entityId, enabled = true }: UseTrackV
       hasTrackedRef.current = true;
       startTimeRef.current = Date.now();
     } catch (error) {
-      console.error('Error tracking view:', error);
+      // Error removed
     }
   }, [entityType, entityId, enabled]);
 
@@ -40,7 +40,7 @@ export function useTrackView({ entityType, entityId, enabled = true }: UseTrackV
       const duration = Math.round((Date.now() - startTimeRef.current) / 1000);
       await viewStatsApiClient.updateViewDuration(viewIdRef.current, duration);
     } catch (error) {
-      console.error('Error updating view duration:', error);
+      // Error removed
     }
   }, []);
 

@@ -139,7 +139,7 @@ export const trackEvent = (
 
   // Console log in development
   if (import.meta.env.DEV) {
-    console.log('📊 Analytics Event:', eventName, eventParams);
+    // Log removed
   }
 };
 

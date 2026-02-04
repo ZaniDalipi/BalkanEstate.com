@@ -79,7 +79,6 @@ export class HttpClient {
 
       return isJson ? await response.json() : ({} as T);
     } catch (error: any) {
-      console.error('HTTP request error:', error);
       throw error;
     }
   }
@@ -128,7 +127,6 @@ export class HttpClient {
 
       return await response.json();
     } catch (error: any) {
-      console.error('File upload error:', error);
       throw error;
     }
   }

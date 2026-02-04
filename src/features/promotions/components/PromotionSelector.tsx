@@ -92,7 +92,7 @@ const PromotionSelector: React.FC<PromotionSelectorProps> = ({
         }
       } catch (err: any) {
         setError('Failed to load promotion options');
-        console.error('Load promotion data error:', err);
+        // Error removed
       } finally {
         setLoading(false);
       }
@@ -323,7 +323,7 @@ const PromotionSelector: React.FC<PromotionSelectorProps> = ({
       }
     } catch (err: any) {
       setError(err.message || 'Failed to process request');
-      console.error('Purchase/extension error:', err);
+      // Error removed
     } finally {
       setSubmitting(false);
     }

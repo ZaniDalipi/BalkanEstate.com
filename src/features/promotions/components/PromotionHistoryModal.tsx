@@ -81,7 +81,7 @@ const PromotionHistoryModal: React.FC<PromotionHistoryModalProps> = ({
         totalInquiries: 0,
       });
     } catch (err: any) {
-      console.error('Failed to fetch promotion history:', err);
+      // Error removed
       setError(err.message || 'Failed to load promotion history');
     } finally {
       setIsLoading(false);

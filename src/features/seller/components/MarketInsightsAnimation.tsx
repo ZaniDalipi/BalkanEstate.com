@@ -56,7 +56,7 @@ const MarketInsightsAnimation: React.FC<MarketInsightsAnimationProps> = ({
                 setCityData(randomCity);
                 setLoading(false);
             } catch (error) {
-                console.error('Failed to fetch city data:', error);
+                // Error removed
                 setLoading(false);
             }
         };

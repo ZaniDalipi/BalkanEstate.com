@@ -47,7 +47,7 @@ export function useUpdateProperty() {
           context.previousProperty
         );
       }
-      console.error('Update property error:', err);
+      // Error removed
     },
     onSuccess: (updatedProperty) => {
       // Update cache with server response

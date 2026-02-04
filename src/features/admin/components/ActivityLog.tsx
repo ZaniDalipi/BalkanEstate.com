@@ -118,7 +118,7 @@ const ActivityLog: React.FC = () => {
       setActivities(data.activities || []);
       setTotalPages(data.pagination?.totalPages || 1);
     } catch (err) {
-      console.error('Failed to fetch activities:', err);
+      // Error removed
       setActivities([]);
     } finally {
       setIsLoading(false);
@@ -134,7 +134,7 @@ const ActivityLog: React.FC = () => {
       );
       setDashboardStats(data.summary || null);
     } catch (err) {
-      console.error('Failed to fetch dashboard stats:', err);
+      // Error removed
       setDashboardStats(null);
     } finally {
       setIsLoading(false);
@@ -150,7 +150,7 @@ const ActivityLog: React.FC = () => {
       );
       setHeatmapData(data || null);
     } catch (err) {
-      console.error('Failed to fetch heatmap data:', err);
+      // Error removed
       setHeatmapData(null);
     } finally {
       setIsLoading(false);
@@ -165,7 +165,7 @@ const ActivityLog: React.FC = () => {
       );
       setRecentSubscriptions(data.events || []);
     } catch (err) {
-      console.error('Failed to fetch recent subscriptions:', err);
+      // Error removed
       setRecentSubscriptions([]);
     }
   };

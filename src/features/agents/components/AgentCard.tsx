@@ -151,7 +151,7 @@ const AgentCard: React.FC<AgentCardProps> = ({ agent, index = 0 }) => {
         window.history.pushState({}, '', `/agencies/${urlSlug}`);
       }
     } catch (error) {
-      console.error('Error fetching agency:', error);
+      // Error removed
     }
   };
 

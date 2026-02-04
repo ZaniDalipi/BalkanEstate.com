@@ -213,7 +213,7 @@ const PropertyDetailsPage: React.FC<{ property: Property }> = ({ property }) => 
       try {
         await toggleSavedHome(property);
       } catch (err) {
-        console.error('Failed to toggle saved home:', err);
+        // Error removed
         await error(t('property:errors.errorTitle', 'Error'), t('property:errors.saveFailed', 'Failed to save property. Please try again.'));
       }
     }
@@ -298,7 +298,7 @@ const PropertyDetailsPage: React.FC<{ property: Property }> = ({ property }) => 
       }
     } catch (err) {
       // User cancelled share or error occurred
-      console.log('Share cancelled or failed');
+      // Log removed
     }
   };
 

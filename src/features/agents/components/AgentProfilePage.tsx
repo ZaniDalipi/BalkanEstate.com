@@ -303,7 +303,7 @@ const AgentProfilePage: React.FC<AgentProfilePageProps> = ({ agent }) => {
                 setFetchedProperties(properties);
             }
         } catch (error) {
-            console.error('Error fetching agent properties:', error);
+            // Error removed
             // Don't clear - we still have state.properties as fallback
         } finally {
             setLoadingProperties(false);
@@ -360,7 +360,7 @@ const AgentProfilePage: React.FC<AgentProfilePageProps> = ({ agent }) => {
                             }
                         }
                     } catch (error) {
-                        console.error('Error fetching agency data:', error);
+                        // Error removed
                     }
                 } else {
                     // Fetch agents from same city
@@ -374,7 +374,7 @@ const AgentProfilePage: React.FC<AgentProfilePageProps> = ({ agent }) => {
                     setSimilarAgents(cityAgents);
                 }
             } catch (error) {
-                console.error('Error fetching similar agents:', error);
+                // Error removed
             } finally {
                 setLoadingSimilarAgents(false);
             }
@@ -403,7 +403,7 @@ const AgentProfilePage: React.FC<AgentProfilePageProps> = ({ agent }) => {
         } catch (error) {
             // Revert on error
             setSavedAgent(savedAgent);
-            console.error('Error saving agent:', error);
+            // Error removed
         }
     };
 
@@ -415,7 +415,7 @@ const AgentProfilePage: React.FC<AgentProfilePageProps> = ({ agent }) => {
                 const response = await checkSavedAgent(agent.id);
                 setSavedAgent(response.isSaved);
             } catch (error) {
-                console.error('Error checking saved agent:', error);
+                // Error removed
             }
         };
         checkIfSaved();
@@ -430,7 +430,7 @@ const AgentProfilePage: React.FC<AgentProfilePageProps> = ({ agent }) => {
                 const achievements = await getUserAchievements(userId);
                 setAgentAchievements(achievements);
             } catch (error) {
-                console.error('Error fetching agent achievements:', error);
+                // Error removed
             }
         };
         fetchAchievements();
@@ -475,7 +475,7 @@ const AgentProfilePage: React.FC<AgentProfilePageProps> = ({ agent }) => {
             window.history.pushState({ page: 'inbox' }, '', '/inbox');
             dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'inbox' });
         } catch (error) {
-            console.error('Failed to start conversation:', error);
+            // Error removed
         }
     };
 
@@ -502,7 +502,7 @@ const AgentProfilePage: React.FC<AgentProfilePageProps> = ({ agent }) => {
             setShowAppraisalModal(false);
             setAppraisalForm({ address: '', propertyType: '', notes: '' });
         } catch (error) {
-            console.error('Error submitting appraisal request:', error);
+            // Error removed
         } finally {
             setIsSubmitting(false);
         }
@@ -530,7 +530,7 @@ const AgentProfilePage: React.FC<AgentProfilePageProps> = ({ agent }) => {
             setShowConsultationModal(false);
             setConsultationForm({ date: '', time: '', topic: '', notes: '' });
         } catch (error) {
-            console.error('Error submitting consultation request:', error);
+            // Error removed
         } finally {
             setIsSubmitting(false);
         }
@@ -547,7 +547,7 @@ const AgentProfilePage: React.FC<AgentProfilePageProps> = ({ agent }) => {
             window.history.pushState({ page: 'inbox' }, '', '/inbox');
             dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'inbox' });
         } catch (error) {
-            console.error('Error requesting market report:', error);
+            // Error removed
         }
     };
 
@@ -592,7 +592,7 @@ const AgentProfilePage: React.FC<AgentProfilePageProps> = ({ agent }) => {
                 window.history.pushState({}, '', `/agencies/${urlSlug}`);
             }
         } catch (error) {
-            console.error('Error navigating to agency:', error);
+            // Error removed
         }
     };
 
@@ -623,7 +623,7 @@ const AgentProfilePage: React.FC<AgentProfilePageProps> = ({ agent }) => {
             setAgentData({ ...agentData, ...updatedAgent });
             setIsEditModalOpen(false);
         } catch (error) {
-            console.error('Error saving profile:', error);
+            // Error removed
         } finally {
             setIsSavingProfile(false);
         }

@@ -14,7 +14,7 @@ export const useGoogleMapLoader = () => {
 
   // Log errors for debugging
   if (loadError) {
-    console.error('[useGoogleMapLoader] Google Maps failed to load:', loadError.message);
+    // Google Maps load error available via loadError
   }
 
   return { isLoaded, loadError };

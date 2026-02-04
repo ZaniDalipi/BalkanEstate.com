@@ -160,7 +160,7 @@ const SubscriptionModal: React.FC<SubscriptionModalProps> = ({ isOpen, onClose, 
   };
 
   const handlePaymentSuccess = async (paymentIntentId: string) => {
-    console.log('Payment successful:', paymentIntentId);
+    // Log removed
     // TODO: Update user subscription status via API
     setShowPaymentWindow(false);
     onClose();
@@ -169,7 +169,7 @@ const SubscriptionModal: React.FC<SubscriptionModalProps> = ({ isOpen, onClose, 
   };
 
   const handlePaymentError = (error: string) => {
-    console.error('Payment error:', error);
+    // Error removed
     // Error is already shown in the PaymentWindow component
   };
 

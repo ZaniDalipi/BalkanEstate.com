@@ -127,7 +127,7 @@ export const useMeasurement = ({
         setMeasurementIsPro(result.isPro);
         setIsAtMeasurementLimit(result.isAtLimit);
       } catch (error) {
-        console.error('[Map] Failed to fetch measurement limits:', error);
+        // Failed to fetch measurement limits
       }
     };
 
@@ -227,7 +227,7 @@ export const useMeasurement = ({
       setShowSaveModal(false);
       setPendingMeasurement(null);
     } catch (error: any) {
-      console.error('Failed to save measurement:', error);
+      // Failed to save measurement - error handled below
 
       if (error instanceof MeasurementLimitExceededError) {
         setMeasurementSaveError(

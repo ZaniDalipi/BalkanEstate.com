@@ -122,7 +122,7 @@ export const CadastreLayer: React.FC<CadastreLayerProps> = ({
       tileLayerRef.current = tileLayer;
 
     } catch (error) {
-      console.warn('Failed to create WMS layer:', error);
+      // Warning removed
     }
 
     // Cleanup function

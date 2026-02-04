@@ -54,7 +54,7 @@ const AiSearch: React.FC<AiSearchProps> = ({ properties, onApplyFilters, isMobil
                 setFinalQuery(result.searchQuery);
             }
         } catch (error) {
-            console.error("AI chat error:", error);
+            // Error removed
             const errorMessage: ChatMessage = { sender: 'ai', text: t('ai.connectionError') };
             onHistoryChange([...newHistory, errorMessage]);
         } finally {

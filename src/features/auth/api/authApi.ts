@@ -103,8 +103,8 @@ export const logout = async (): Promise<void> => {
       requiresAuth: true,
       body: { refreshToken },
     });
-  } catch (error) {
-    console.error('Logout error:', error);
+  } catch {
+    // Silently handle logout errors - tokens will be cleared regardless
   }
 
   tokenService.clearTokens();
@@ -116,8 +116,8 @@ export const logoutAllDevices = async (): Promise<void> => {
       method: 'POST',
       requiresAuth: true,
     });
-  } catch (error) {
-    console.error('Logout all devices error:', error);
+  } catch {
+    // Silently handle logout errors - tokens will be cleared regardless
   }
 
   tokenService.clearTokens();
@@ -190,8 +190,7 @@ export const getAvailableOAuthProviders = async (): Promise<{
       providers: { google: boolean; facebook: boolean; apple: boolean };
     }>('/auth/oauth/providers');
     return response.providers;
-  } catch (error) {
-    console.error('Error fetching OAuth providers:', error);
+  } catch {
     return { google: false, facebook: false, apple: false };
   }
 };
@@ -214,8 +213,7 @@ export const loginWithSocial = (provider: 'google' | 'facebook' | 'apple'): void
 
 // --- Phone Auth ---
 
-export const sendPhoneCode = async (phone: string): Promise<void> => {
-  console.log(`Sending code to ${phone}`);
+export const sendPhoneCode = async (_phone: string): Promise<void> => {
   // TODO: Implement phone verification on backend
 };
 

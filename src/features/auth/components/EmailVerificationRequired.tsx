@@ -52,8 +52,9 @@ const EmailVerificationRequired: React.FC<EmailVerificationRequiredProps> = ({ e
     try {
       await logout();
       window.location.href = '/';
-    } catch (err) {
-      console.error('Logout failed:', err);
+    } catch {
+      // Redirect even if logout fails
+      window.location.href = '/';
     }
   };
 

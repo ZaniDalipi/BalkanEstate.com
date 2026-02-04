@@ -162,7 +162,7 @@ const loadCacheFromStorage = (): void => {
       }
 
       if (loadedCount > 0) {
-        console.debug(`[POI] Loaded ${loadedCount} cached areas from storage`);
+        // Debug removed
       }
     }
   } catch (e) {
@@ -284,7 +284,7 @@ const LandmarksLayer: React.FC<LandmarksLayerProps> = ({
     // Check cache first (includes localStorage cache loaded on startup)
     const cached = landmarksCache.get(boundsKey);
     if (cached && Date.now() - cached.timestamp < STORAGE_CACHE_TTL) {
-      console.debug(`[POI] Cache hit: ${cached.landmarks.length} landmarks`);
+      // Debug removed
       setLandmarks(cached.landmarks);
       lastBoundsKeyRef.current = boundsKey;
       return;
@@ -293,11 +293,11 @@ const LandmarksLayer: React.FC<LandmarksLayerProps> = ({
     // Rate limiting: check if we can make a request
     const now = Date.now();
     if (requestInFlight) {
-      console.debug('[POI] Request already in flight, skipping');
+      // Debug removed
       return;
     }
     if (now - lastRequestTime < MIN_REQUEST_INTERVAL) {
-      console.debug(`[POI] Rate limited, wait ${Math.ceil((MIN_REQUEST_INTERVAL - (now - lastRequestTime)) / 1000)}s`);
+      // Debug removed
       return;
     }
 
@@ -305,10 +305,10 @@ const LandmarksLayer: React.FC<LandmarksLayerProps> = ({
     if (consecutiveFailures >= OVERPASS_ENDPOINTS.length) {
       // Reset after 5 minutes
       if (now - lastRequestTime > 5 * 60 * 1000) {
-        console.debug('[POI] Resetting failure counter after 5 min cooldown');
+        // Debug removed
         consecutiveFailures = 0;
       } else {
-        console.debug(`[POI] All endpoints failed (${consecutiveFailures}x), waiting for cooldown`);
+        // Debug removed
         return;
       }
     }
@@ -319,7 +319,7 @@ const LandmarksLayer: React.FC<LandmarksLayerProps> = ({
     try {
       const query = buildOverpassQuery(bounds);
       const endpoint = OVERPASS_ENDPOINTS[currentEndpointIndex];
-      console.debug(`[POI] Fetching from endpoint ${currentEndpointIndex + 1}/${OVERPASS_ENDPOINTS.length}`);
+      // Debug removed
 
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 12000); // 12s client timeout - fail fast, try next endpoint
@@ -369,7 +369,7 @@ const LandmarksLayer: React.FC<LandmarksLayerProps> = ({
       );
 
       const limitedLandmarks = uniqueLandmarks.slice(0, 40); // Limit to 40 landmarks
-      console.debug(`[POI] Found ${limitedLandmarks.length} landmarks`);
+      // Debug removed
 
       // Cache the result and cleanup old entries
       landmarksCache.set(boundsKey, {
@@ -385,7 +385,7 @@ const LandmarksLayer: React.FC<LandmarksLayerProps> = ({
       consecutiveFailures++;
       // Rotate to next endpoint on any failure
       currentEndpointIndex = (currentEndpointIndex + 1) % OVERPASS_ENDPOINTS.length;
-      console.debug(`[POI] Endpoint failed (${consecutiveFailures}/${OVERPASS_ENDPOINTS.length}), trying next...`);
+      // Debug removed
     } finally {
       requestInFlight = false;
     }
@@ -417,7 +417,7 @@ const LandmarksLayer: React.FC<LandmarksLayerProps> = ({
       return;
     }
 
-    console.debug(`[POI] Background pre-fetching for current area...`);
+    // Debug removed
     requestInFlight = true;
     lastRequestTime = now;
 
@@ -462,7 +462,7 @@ const LandmarksLayer: React.FC<LandmarksLayerProps> = ({
       );
 
       const limitedLandmarks = uniqueLandmarks.slice(0, 40);
-      console.debug(`[POI] Pre-fetched ${limitedLandmarks.length} landmarks (cached for later)`);
+      // Debug removed
 
       landmarksCache.set(boundsKey, {
         landmarks: limitedLandmarks,
@@ -491,7 +491,7 @@ const LandmarksLayer: React.FC<LandmarksLayerProps> = ({
       const currentZoom = map.getZoom();
       // Only fetch at zoom level 12+ to reduce API calls
       if (currentZoom < MIN_ZOOM_FOR_FETCH) {
-        console.debug(`[POI] Zoom ${currentZoom} < ${MIN_ZOOM_FOR_FETCH}, need to zoom in more`);
+        // Debug removed
         clearLandmarks();
         return;
       }

@@ -130,7 +130,7 @@ const ValuationForm: React.FC<ValuationFormProps> = ({ onSubmit, isLoading = fal
         const results = await searchLocation(query);
         setSearchResults(results.slice(0, 6));
       } catch (error) {
-        console.error('Search error:', error);
+        // Error removed
         setSearchResults([]);
       } finally {
         setIsSearching(false);
