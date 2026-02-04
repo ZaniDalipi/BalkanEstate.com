@@ -129,7 +129,7 @@ const CityRecommendations: React.FC = () => {
       },
       activeFilters: {
         country: 'any',
-        query: displayName, // Show city name in search field for context
+        query: '', // Empty for filtering - use geographic bounds instead
         minPrice: null,
         maxPrice: null,
         beds: null,
