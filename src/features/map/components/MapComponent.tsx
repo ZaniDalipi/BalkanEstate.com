@@ -617,13 +617,22 @@ const MapComponent: React.FC<MapComponentProps> = ({
     window.history.pushState({ propertyId }, '', `/property/${propertyId}`);
   };
 
-  // Set a timeout to detect if loading takes too long (15 seconds)
+  // Set a timeout to detect if loading takes too long (30 seconds)
   useEffect(() => {
     if (USE_GOOGLE_MAPS && !forceLeaflet) {
+      // Check if Google Maps is already loaded
+      if (window.google?.maps) {
+        setLoadingTimedOut(false);
+        return;
+      }
+
       loadingTimeoutRef.current = setTimeout(() => {
-        console.warn('[MapComponent] Google Maps loading timed out after 15s');
-        setLoadingTimedOut(true);
-      }, 15000);
+        // Double-check if it loaded in the meantime
+        if (!window.google?.maps) {
+          console.warn('[MapComponent] Google Maps loading timed out after 30s');
+          setLoadingTimedOut(true);
+        }
+      }, 30000);
     }
 
     return () => {
