@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { XMarkIcon, ChartBarIcon, ClockIcon, EyeIcon, ChatBubbleLeftRightIcon, HeartIcon } from '@/constants';
+import { XMarkIcon, ChartBarIcon, ClockIcon, EyeIcon, InquiriesIcon, HeartIcon } from '@/constants';
 import * as api from '@/services/apiService';
 import { formatPrice } from '@/utils/currency';
 
@@ -236,7 +236,7 @@ const PromotionHistoryModal: React.FC<PromotionHistoryModalProps> = ({
                               <span>{item.performance.views} views</span>
                             </div>
                             <div className="flex items-center gap-1 text-green-600">
-                              <ChatBubbleLeftRightIcon className="w-4 h-4" />
+                              <InquiriesIcon className="w-4 h-4" />
                               <span>{item.performance.inquiries} inquiries</span>
                             </div>
                             <div className="flex items-center gap-1 text-amber-600">
