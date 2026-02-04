@@ -255,8 +255,8 @@ export default defineConfig(({ mode }) => {
         },
       },
       define: {
-        'process.env.API_KEY': JSON.stringify(env.GEMINI_API_KEY),
-        'process.env.GEMINI_API_KEY': JSON.stringify(env.GEMINI_API_KEY),
+        // SECURITY: Never expose API keys in frontend bundle
+        // AI operations must go through backend API routes for security
         '__APP_ENV__': JSON.stringify(mode),
       },
       resolve: {

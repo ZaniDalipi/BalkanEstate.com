@@ -7,7 +7,7 @@ import { describe, it, expect, vi } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import RoleSelector from '../features/seller/components/RoleSelector';
-import { User, UserRole } from '../types';
+import { User, UserRole } from '@/types';
 
 // Mock console.log to avoid cluttering test output
 vi.spyOn(console, 'log').mockImplementation(() => {});

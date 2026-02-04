@@ -69,6 +69,12 @@ export const validateEnvironment = (): void => {
 
 /**
  * Configure Helmet security headers
+ *
+ * CSP Notes:
+ * - 'unsafe-inline' is required for Tailwind CSS and React's style injection
+ * - 'unsafe-eval' is required for some mapping libraries (MapLibre, Leaflet)
+ * - TODO: Implement nonce-based CSP for better security when feasible
+ * - Report-only mode can be used to test stricter policies
  */
 export const helmetConfig = helmet({
   // Content Security Policy
@@ -77,14 +83,20 @@ export const helmetConfig = helmet({
       defaultSrc: ["'self'"],
       scriptSrc: [
         "'self'",
-        "'unsafe-inline'", // Required for some inline scripts
-        "'unsafe-eval'", // Required for some libraries
+        // Note: 'unsafe-inline' needed for React hydration, Tailwind
+        // TODO: Migrate to nonce-based CSP for scripts
+        "'unsafe-inline'",
+        // Note: 'unsafe-eval' needed for MapLibre GL JS
+        // See: https://github.com/maplibre/maplibre-gl-js/issues/1035
+        "'unsafe-eval'",
         'https://unpkg.com',
         'https://www.googletagmanager.com',
         'https://connect.facebook.net',
+        'https://js.stripe.com', // Stripe payments
       ],
       styleSrc: [
         "'self'",
+        // Note: 'unsafe-inline' needed for Tailwind CSS and component styles
         "'unsafe-inline'",
         'https://fonts.googleapis.com',
         'https://unpkg.com',
@@ -101,14 +113,21 @@ export const helmetConfig = helmet({
         'https://res.cloudinary.com',
         'https://*.tile.openstreetmap.org',
         'https://unpkg.com',
+        'https://*.basemaps.cartocdn.com', // Map tiles
+        'https://api.mapbox.com', // MapLibre
       ],
       connectSrc: [
         "'self'",
         'https://api.balkanestate.com',
+        'https://www.balkanestate.com',
         'wss://api.balkanestate.com',
+        'https://api.balkanestateai.com',
+        'wss://api.balkanestateai.com',
         'https://nominatim.openstreetmap.org',
         'https://www.google-analytics.com',
         'https://connect.facebook.net',
+        'https://api.stripe.com', // Stripe
+        'https://*.sentry.io', // Error tracking
         // Development URLs
         ...(isDevelopment ? [
           'http://localhost:5001',
@@ -116,11 +135,21 @@ export const helmetConfig = helmet({
           'http://127.0.0.1:5001',
         ] : []),
       ],
-      frameSrc: ["'none'"],
+      frameSrc: [
+        "'self'",
+        'https://js.stripe.com', // Stripe 3D Secure
+        'https://hooks.stripe.com',
+      ],
       objectSrc: ["'none'"],
-      mediaSrc: ["'self'", 'https://res.cloudinary.com'],
+      mediaSrc: ["'self'", 'https://res.cloudinary.com', 'blob:'],
       workerSrc: ["'self'", 'blob:'],
+      childSrc: ["'self'", 'blob:'],
+      formAction: ["'self'"],
+      baseUri: ["'self'"],
+      upgradeInsecureRequests: isProduction ? [] : null,
     },
+    // Report violations to help identify issues without breaking functionality
+    reportOnly: false,
   } : false, // Disable CSP in development for easier debugging
 
   // Cross-Origin settings
@@ -288,6 +317,32 @@ export const paymentRateLimiter = rateLimit({
   standardHeaders: true,
   legacyHeaders: false,
   skip: () => isDevelopment, // Skip rate limiting entirely in development
+});
+
+/**
+ * Rate limiter for AI endpoints (neighborhood insights, valuations, etc.)
+ * Protects against AI quota abuse while allowing reasonable usage
+ * More permissive than payment but stricter than general
+ */
+export const aiRateLimiter = rateLimit({
+  windowMs: 60 * 60 * 1000, // 1 hour window
+  max: isProduction ? 20 : 100, // 20 requests per hour in production
+  message: {
+    error: 'AI rate limit exceeded',
+    message: 'You have made too many AI requests. Please try again later.',
+    retryAfter: 60,
+  },
+  standardHeaders: true,
+  legacyHeaders: false,
+  skip: () => isDevelopment, // Skip rate limiting in development
+  keyGenerator: (req: Request) => {
+    // Rate limit by user ID if authenticated, otherwise by IP
+    const userId = (req as any).user?.id;
+    if (userId) {
+      return `ai_user_${userId}`;
+    }
+    return req.ip || 'unknown';
+  },
 });
 
 /**
@@ -506,6 +561,7 @@ export default {
   generalRateLimiter,
   sensitiveRateLimiter,
   paymentRateLimiter,
+  aiRateLimiter,
   hppProtection,
   mongoSanitization,
   xssSanitizer,

@@ -19,6 +19,7 @@ import {
   generalRateLimiter,
   sensitiveRateLimiter,
   paymentRateLimiter,
+  aiRateLimiter,
   xssSanitizer,
   getSocketCorsConfig,
 } from './middleware/security';
@@ -253,7 +254,7 @@ app.use('/api/agency-join-requests', agencyJoinRequestRoutes);
 app.use('/api/agents', agentRoutes);
 app.use('/api/agent-requests', agentRequestRoutes);
 app.use('/api/geocoding', geocodingRoutes);
-app.use('/api/neighborhood-insights', neighborhoodInsightsRoutes);
+app.use('/api/neighborhood-insights', aiRateLimiter, neighborhoodInsightsRoutes); // AI-powered - rate limited
 app.use('/api/sales-history', salesHistoryRoutes);
 app.use('/api/discount-codes', discountCodeRoutes);
 app.use('/api/cities', cityMarketDataRoutes); // City market data and recommendations
@@ -262,7 +263,7 @@ app.use('/api/license', licenseRoutes); // Agent license verification
 app.use('/api/credentials', credentialRoutes); // Agent credentials management
 app.use('/api/view-stats', viewStatsRoutes); // View statistics tracking
 app.use('/api/notifications', notificationRoutes); // User notifications
-app.use('/api/valuations', propertyValuationRoutes); // AI property valuation
+app.use('/api/valuations', aiRateLimiter, propertyValuationRoutes); // AI-powered - rate limited
 app.use('/api/inquiries', inquiryRoutes); // Buyer-to-agent inquiries (rate limited)
 app.use('/api/measurements', measurementRoutes); // User land measurements
 app.use('/api/analytics', analyticsRoutes); // Analytics and activity tracking

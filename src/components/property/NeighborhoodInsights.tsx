@@ -7,6 +7,7 @@ import i18n from 'i18next';
 import { useAppContext } from '../../../context/AppContext';
 import { SparklesIcon } from '../../../constants';
 import { parseMarkdown } from '../../utils/markdown';
+import { createSanitizedMarkup } from '../../shared/utils/sanitize';
 
 // Map language codes to full language names for AI prompt
 const LANGUAGE_NAMES: Record<string, string> = {
@@ -178,7 +179,7 @@ export const NeighborhoodInsights: React.FC<NeighborhoodInsightsProps> = ({
         <>
           <div
             className="prose prose-sm max-w-none text-neutral-700 space-y-3 animate-fade-in"
-            dangerouslySetInnerHTML={{ __html: parseMarkdown(insights) }}
+            dangerouslySetInnerHTML={createSanitizedMarkup(parseMarkdown(insights))}
           />
           {usage && usage.remaining !== undefined && (
             <div className="mt-4 p-3 bg-blue-50 rounded-lg border border-blue-200">

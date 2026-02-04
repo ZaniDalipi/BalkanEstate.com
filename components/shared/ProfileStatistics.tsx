@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useCallback, useMemo } from 'react';
 import { User, UserRole } from '../../types';
-import { ChartBarIcon, HomeIcon, EyeIcon, HeartIcon, ChatBubbleBottomCenterTextIcon, CalendarIcon, MapPinIcon, BuildingOfficeIcon, BedIcon, BathIcon, SqftIcon } from '../../constants';
+import { ChartBarIcon, HomeIcon, EyeIcon, HeartIcon, EnvelopeIcon, CalendarIcon, MapPinIcon, BuildingOfficeIcon, BedIcon, BathIcon, SqftIcon } from '../../constants';
 import { formatPrice } from '../../utils/currency';
 
 interface ProfileStatisticsProps {
@@ -619,7 +619,7 @@ const ProfileStatistics: React.FC<ProfileStatisticsProps> = ({ user }) => {
           {/* Secondary Stats */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             <StatCard
-              icon={<ChatBubbleBottomCenterTextIcon className="w-6 h-6" />}
+              icon={<EnvelopeIcon className="w-6 h-6" />}
               label="Total Inquiries"
               value={formatNumber(stats.totalInquiries)}
               subtext="Buyer messages received"

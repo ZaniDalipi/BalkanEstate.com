@@ -235,135 +235,41 @@ const Map3DBuildings: React.FC<Map3DBuildingsProps> = ({
       return;
     }
 
-    if (false) {
-      // Dead code - keeping structure for non-apartment types
-      const markerEl = document.createElement('div');
-      const poleHeight = 0;
-      const indicatorPosition = 0;
+    // Standard marker for houses/villas/land
+    const markerEl = document.createElement('div');
+    markerEl.innerHTML = `
+      <div style="position: relative; width: 48px; height: 48px;">
+        <div style="
+          position: absolute;
+          inset: 0;
+          background: rgba(59, 130, 246, 0.3);
+          border-radius: 50%;
+          animation: pulse3d 2s ease-in-out infinite;
+        "></div>
+        <div style="
+          position: absolute;
+          inset: 8px;
+          background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+          border-radius: 50%;
+          border: 3px solid white;
+          box-shadow: 0 4px 16px rgba(0,0,0,0.4);
+        "></div>
+        <div style="
+          position: absolute;
+          top: 50%;
+          left: 50%;
+          transform: translate(-50%, -50%);
+          width: 10px;
+          height: 10px;
+          background: white;
+          border-radius: 50%;
+        "></div>
+      </div>
+    `;
 
-      markerEl.innerHTML = `
-        <div style="position: relative; width: 60px; display: flex; flex-direction: column; align-items: center;">
-          <!-- Vertical pole representing building -->
-          <div style="
-            position: relative;
-            width: 8px;
-            height: ${poleHeight}px;
-            background: linear-gradient(180deg, rgba(100,116,139,0.6), rgba(100,116,139,0.9));
-            border-radius: 2px;
-            box-shadow: 2px 4px 8px rgba(0,0,0,0.3);
-          ">
-            <!-- Floor indicator -->
-            <div style="
-              position: absolute;
-              left: 50%;
-              bottom: ${indicatorPosition}px;
-              transform: translateX(-50%);
-              width: 28px;
-              height: 14px;
-              background: linear-gradient(135deg, #3b82f6, #8b5cf6);
-              border-radius: 3px;
-              border: 2px solid white;
-              box-shadow: 0 2px 8px rgba(59,130,246,0.6);
-              display: flex;
-              align-items: center;
-              justify-content: center;
-              animation: floorPulse 2s ease-in-out infinite;
-            ">
-              <span style="color: white; font-size: 9px; font-weight: bold;">0</span>
-            </div>
-            <!-- Floor label -->
-            <div style="
-              position: absolute;
-              left: 16px;
-              bottom: ${indicatorPosition - 2}px;
-              white-space: nowrap;
-              background: rgba(15,23,42,0.9);
-              padding: 2px 6px;
-              border-radius: 4px;
-              font-size: 10px;
-              color: white;
-              font-weight: 500;
-              box-shadow: 0 2px 4px rgba(0,0,0,0.3);
-            ">
-              Floor 0
-            </div>
-          </div>
-          <!-- Base marker -->
-          <div style="
-            width: 20px;
-            height: 20px;
-            background: linear-gradient(135deg, #3b82f6, #8b5cf6);
-            border-radius: 50%;
-            border: 3px solid white;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.4);
-            margin-top: -2px;
-          ">
-            <div style="
-              position: absolute;
-              top: 50%;
-              left: 50%;
-              transform: translate(-50%, -50%);
-              width: 6px;
-              height: 6px;
-              background: white;
-              border-radius: 50%;
-            "></div>
-          </div>
-          <!-- Pulse ring -->
-          <div style="
-            position: absolute;
-            bottom: -6px;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 32px;
-            height: 32px;
-            border-radius: 50%;
-            background: rgba(59, 130, 246, 0.3);
-            animation: pulse3d 2s ease-in-out infinite;
-          "></div>
-        </div>
-      `;
-
-      new maplibregl.Marker({ element: markerEl, anchor: 'bottom' })
-        .setLngLat([longitude, latitude])
-        .addTo(mapInstance);
-    } else {
-      // Standard marker for houses/villas/land
-      const markerEl = document.createElement('div');
-      markerEl.innerHTML = `
-        <div style="position: relative; width: 48px; height: 48px;">
-          <div style="
-            position: absolute;
-            inset: 0;
-            background: rgba(59, 130, 246, 0.3);
-            border-radius: 50%;
-            animation: pulse3d 2s ease-in-out infinite;
-          "></div>
-          <div style="
-            position: absolute;
-            inset: 8px;
-            background: linear-gradient(135deg, #3b82f6, #8b5cf6);
-            border-radius: 50%;
-            border: 3px solid white;
-            box-shadow: 0 4px 16px rgba(0,0,0,0.4);
-          "></div>
-          <div style="
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            width: 10px;
-            height: 10px;
-            background: white;
-            border-radius: 50%;
-          "></div>
-        </div>
-      `;
-
-      new maplibregl.Marker({ element: markerEl, anchor: 'center' })
-        .setLngLat([longitude, latitude])
-        .addTo(mapInstance);
-    }
+    new maplibregl.Marker({ element: markerEl, anchor: 'center' })
+      .setLngLat([longitude, latitude])
+      .addTo(mapInstance);
   }, []);
 
   // Add custom 3D building cube with floor slices for apartments

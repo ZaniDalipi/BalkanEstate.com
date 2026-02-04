@@ -12,6 +12,7 @@ import MapComponent from '@/src/features/map/components/MapComponent';
 import { useConfirmation } from '@/src/shared/hooks/useConfirmation';
 import { useNotification } from '@/src/shared/hooks/useNotification';
 import { BellDotIcon } from 'lucide-react';
+import { decodeHtmlEntities } from '@/src/shared/utils/sanitize';
 
 interface SavedSearchAccordionProps {
   search: SavedSearch;
@@ -77,13 +78,6 @@ const SavedSearchAccordion: React.FC<SavedSearchAccordionProps> = ({ search, onO
       setIsUpdatingAlerts(false);
       setShowAlertSettings(false);
     }
-  };
-
-  // Helper function to decode HTML entities (backend encodes quotes as &quot;)
-  const decodeHtmlEntities = (str: string): string => {
-    const textarea = document.createElement('textarea');
-    textarea.innerHTML = str;
-    return textarea.value;
   };
 
   // Helper function to safely parse drawnBoundsJSON

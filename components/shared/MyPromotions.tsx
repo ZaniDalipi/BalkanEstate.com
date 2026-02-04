@@ -81,7 +81,11 @@ const MyPromotions: React.FC = () => {
   const handleViewProperty = (propertyId: string) => {
     dispatch({ type: 'SET_SELECTED_PROPERTY', payload: propertyId });
     dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'property-details' });
-    window.history.pushState({ propertyId }, '', `/property/${propertyId}`);
+    // Get current language from URL path
+    const currentLang = window.location.pathname.split('/')[1] || 'en';
+    const validLangs = ['en', 'sq', 'sr', 'de', 'mk', 'hr', 'bs', 'sl', 'bg', 'ro', 'el', 'tr', 'it', 'fr'];
+    const lang = validLangs.includes(currentLang) ? currentLang : 'en';
+    window.history.pushState({ propertyId }, '', `/${lang}/property/${propertyId}`);
   };
 
   const handleExtend = (property: Property) => {
