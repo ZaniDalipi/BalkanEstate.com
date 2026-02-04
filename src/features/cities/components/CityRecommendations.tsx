@@ -63,30 +63,34 @@ const CityRecommendations: React.FC = () => {
     // Get fallback coordinates from BALKAN_LOCATIONS
     const fallbackCoords = getCityCoordinates(city.city, city.country);
 
-    // Search OSM for the city to get the proper localized name and bounds
-    // This ensures we get names like "Tiranë, Bashkia Tiranë" instead of just "Tirana"
+    // Search OSM for the city to get proper coordinates and bounding box
     const searchQuery = `${city.city}, ${city.country}`;
     const results = await searchLocation(searchQuery);
 
     // Use the first result from OSM - it's typically the best match for the whole city
-    // Examples: Tirana → "Tiranë, Bashkia Tiranë", Belgrade → "Београд, Град Београд"
     const bestResult = results[0];
-
-    // Extract the localized city name from OSM result (first 2 parts of display_name)
-    // This gives us: "Tiranë, Bashkia Tiranë" or "Београд, Град Београд" etc.
-    const shortName = bestResult
-      ? bestResult.display_name.split(',').slice(0, 2).join(',').trim()
-      : city.city;
 
     // Get coordinates from OSM result or fallback
     const lat = bestResult ? Number(bestResult.lat) : fallbackCoords?.lat ?? 0;
     const lng = bestResult ? Number(bestResult.lon) : fallbackCoords?.lng ?? 0;
 
-    // Set filters with the proper localized city name from OSM
+    // Get the bounding box from OSM to define the city area
+    // This ensures we show ALL properties within the city boundaries
+    let drawnBoundsJSON: string | null = null;
+    if (bestResult?.boundingbox) {
+      const [south, north, west, east] = bestResult.boundingbox.map(Number);
+      drawnBoundsJSON = JSON.stringify({
+        _southWest: { lat: south, lng: west },
+        _northEast: { lat: north, lng: east }
+      });
+    }
+
+    // Set filters - use geographic bounds instead of text query
+    // This shows all properties within the city area regardless of address format
     updateSearchPageState({
       filters: {
         country: city.countryCode,
-        query: shortName, // Use OSM's localized name for better matching
+        query: '', // Don't use text query - rely on geographic bounds
         minPrice: null,
         maxPrice: null,
         beds: null,
@@ -122,7 +126,7 @@ const CityRecommendations: React.FC = () => {
       },
       activeFilters: {
         country: city.countryCode,
-        query: shortName, // Use OSM's localized name for better matching
+        query: '', // Don't use text query - rely on geographic bounds
         minPrice: null,
         maxPrice: null,
         beds: null,
@@ -156,11 +160,13 @@ const CityRecommendations: React.FC = () => {
         maxDistanceToHospital: null,
         amenities: [],
       },
-      // Set map focus to city coordinates with a wider zoom to cover the whole city
+      // Set city bounding box as the search area
+      drawnBoundsJSON: drawnBoundsJSON,
+      // Set map focus to city coordinates
       focusMapOnProperty: {
         lat,
         lng,
-        address: shortName,
+        address: `${city.city}, ${city.country}`,
         zoom: 12, // City-level zoom to show all listings
       },
       // Switch to map view on mobile
