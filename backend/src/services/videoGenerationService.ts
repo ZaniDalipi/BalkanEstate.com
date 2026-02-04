@@ -346,26 +346,51 @@ const createVideoWithOverlays = (options: {
     let filters: string[] = [];
 
     // Step 1: Create professional background based on style
+    // Using BalkanEstate brand colors: Blue (#5B8DEF), Dark Blue (#1e3a5f), Purple (#8B5CF6), Teal (#06b6d4)
     let bgFilter = '';
+    const blurRadius = Math.floor(Math.min(width, height) / 8); // Strong blur for smooth gradients
+
     switch (backgroundStyle) {
       case 'gradient':
-        // Animated gradient background (purple to blue - Canva style)
-        bgFilter = `color=c=#1a1a2e:s=${width}x${height}:d=${totalDuration}:r=${fps}[bg];` +
-          `[bg]drawbox=x=0:y=0:w=iw:h=ih/3:color=#533483@0.4:t=fill[bg1];` +
-          `[bg1]drawbox=x=0:y=ih*2/3:w=iw:h=ih/3:color=#0f3460@0.4:t=fill[bg2]`;
+        // Beautiful blurred multi-color gradient (Blue, Purple, Teal - BalkanEstate style)
+        bgFilter = `color=c=#0a0a12:s=${width}x${height}:d=${totalDuration}:r=${fps}[bgbase];` +
+          // Add blue glow (top-right)
+          `[bgbase]drawbox=x=iw*0.6:y=0:w=iw*0.5:h=ih*0.5:color=#5B8DEF@0.6:t=fill[bg1];` +
+          // Add purple glow (bottom-left)
+          `[bg1]drawbox=x=0:y=ih*0.5:w=iw*0.5:h=ih*0.5:color=#8B5CF6@0.5:t=fill[bg2];` +
+          // Add teal accent (center)
+          `[bg2]drawbox=x=iw*0.3:y=ih*0.3:w=iw*0.4:h=ih*0.4:color=#06b6d4@0.3:t=fill[bg3];` +
+          // Apply heavy blur for smooth blended effect
+          `[bg3]gblur=sigma=${blurRadius}[bg4];` +
+          // Add subtle vignette for depth
+          `[bg4]vignette=PI/3[bg2]`;
         break;
       case 'blur':
-        // Will use blurred version of current image - handled differently
-        bgFilter = `color=c=#0a0a0a:s=${width}x${height}:d=${totalDuration}:r=${fps}[bg2]`;
+        // Blurred gradient with softer colors
+        bgFilter = `color=c=#0f172a:s=${width}x${height}:d=${totalDuration}:r=${fps}[bgbase];` +
+          `[bgbase]drawbox=x=iw*0.5:y=0:w=iw*0.6:h=ih*0.6:color=#3b82f6@0.5:t=fill[bg1];` +
+          `[bg1]drawbox=x=0:y=ih*0.4:w=iw*0.6:h=ih*0.6:color=#6366f1@0.4:t=fill[bg2];` +
+          `[bg2]gblur=sigma=${blurRadius * 1.5}[bg3];` +
+          `[bg3]vignette=PI/4[bg2]`;
         break;
       case 'dark':
-        bgFilter = `color=c=#0a0a0a:s=${width}x${height}:d=${totalDuration}:r=${fps}[bg2]`;
+        // Elegant dark with subtle blue accent
+        bgFilter = `color=c=#030712:s=${width}x${height}:d=${totalDuration}:r=${fps}[bgbase];` +
+          `[bgbase]drawbox=x=iw*0.7:y=0:w=iw*0.4:h=ih*0.4:color=#1e3a5f@0.4:t=fill[bg1];` +
+          `[bg1]gblur=sigma=${blurRadius}[bg2]`;
         break;
       case 'elegant':
       default:
-        // Premium dark with subtle vignette effect
-        bgFilter = `color=c=#121212:s=${width}x${height}:d=${totalDuration}:r=${fps}[bg];` +
-          `[bg]vignette=PI/4[bg2]`;
+        // Premium dark with BalkanEstate blue gradient and blur
+        bgFilter = `color=c=#0a0a12:s=${width}x${height}:d=${totalDuration}:r=${fps}[bgbase];` +
+          // Blue glow from top-right corner
+          `[bgbase]drawbox=x=iw*0.5:y=0:w=iw*0.6:h=ih*0.5:color=#5B8DEF@0.5:t=fill[bg1];` +
+          // Subtle purple from bottom-left
+          `[bg1]drawbox=x=0:y=ih*0.6:w=iw*0.4:h=ih*0.4:color=#6366f1@0.3:t=fill[bg2];` +
+          // Apply blur for smooth gradient
+          `[bg2]gblur=sigma=${blurRadius}[bg3];` +
+          // Add vignette for professional depth
+          `[bg3]vignette=PI/4[bg2]`;
         break;
     }
 
@@ -547,26 +572,31 @@ const createVideoWithOverlays = (options: {
         }
       }
 
-      // Professional watermark with BalkanEstate branding
+      // Professional watermark with BalkanEstate branding (matching logo colors)
       if (includeWatermark) {
-        // Watermark background pill
-        const wmWidth = Math.floor(width * 0.35);
-        const wmHeight = Math.floor(watermarkFontSize * 2.5);
-        const wmX = Math.floor(width * 0.02);
-        const wmY = Math.floor(height * 0.02);
+        // Position in top-left corner with padding
+        const wmX = Math.floor(width * 0.03);
+        const wmY = Math.floor(height * 0.025);
+        const wmFontSize = Math.floor(watermarkFontSize * 1.3);
+
+        // Semi-transparent dark background for watermark visibility
+        const wmPadding = Math.floor(wmFontSize * 0.5);
+        const wmBgWidth = Math.floor(wmFontSize * 8);
+        const wmBgHeight = Math.floor(wmFontSize * 1.8);
 
         filters.push(
-          `${currentFilter}drawbox=x=${wmX}:y=${wmY}:w=${wmWidth}:h=${wmHeight}:` +
-          `color=black@0.5:t=fill[t${filterIndex}]`
+          `${currentFilter}drawbox=x=${wmX - wmPadding}:y=${wmY - wmPadding / 2}:w=${wmBgWidth}:h=${wmBgHeight}:` +
+          `color=black@0.4:t=fill[t${filterIndex}]`
         );
         currentFilter = `[t${filterIndex}]`;
         filterIndex++;
 
-        // BalkanEstate logo text with house icon
+        // BalkanEstate text in brand blue color (#5B8DEF)
         filters.push(
-          `${currentFilter}drawtext=${fontParam}:text='🏠 BalkanEstate.com':` +
-          `fontsize=${watermarkFontSize}:fontcolor=white@0.9:` +
-          `x=${wmX + 10}:y=${wmY + wmHeight / 2 - watermarkFontSize / 2}[t${filterIndex}]`
+          `${currentFilter}drawtext=${fontParam}:text='BALKANESTATE':` +
+          `fontsize=${wmFontSize}:fontcolor=#5B8DEF:` +
+          `x=${wmX}:y=${wmY}:` +
+          `shadowcolor=black@0.6:shadowx=1:shadowy=1[t${filterIndex}]`
         );
         currentFilter = `[t${filterIndex}]`;
         filterIndex++;
