@@ -42,8 +42,7 @@ export class MeasurementRepository implements IMeasurementRepository {
         maxAllowed: response.maxAllowed,
         isPro: response.isPro,
       };
-    } catch (error: any) {
-      // Error: getMeasurements error:', error);
+    } catch (error) {
       throw error;
     }
   }
@@ -60,11 +59,10 @@ export class MeasurementRepository implements IMeasurementRepository {
       }
 
       return MeasurementMapper.toDomain(response.measurement);
-    } catch (error: any) {
-      if (error.message?.includes('not found')) {
+    } catch (error) {
+      if (error instanceof Error && error.message?.includes('not found')) {
         throw new MeasurementNotFoundError(id);
       }
-      // Error: getMeasurementById error:', error);
       throw error;
     }
   }
@@ -95,10 +93,12 @@ export class MeasurementRepository implements IMeasurementRepository {
         count: response.count,
         maxAllowed: response.maxAllowed,
       };
-    } catch (error: any) {
+    } catch (error) {
       // Check if it's a limit error from the API
-      if (error.message?.toLowerCase().includes('limit') ||
-          error.message?.toLowerCase().includes('maximum')) {
+      if (error instanceof Error && (
+        error.message?.toLowerCase().includes('limit') ||
+        error.message?.toLowerCase().includes('maximum')
+      )) {
         const listResponse = await this.getMeasurements();
         throw new MeasurementLimitExceededError(
           listResponse.count,
@@ -106,7 +106,6 @@ export class MeasurementRepository implements IMeasurementRepository {
           listResponse.isPro
         );
       }
-      // Error: saveMeasurement error:', error);
       throw error;
     }
   }
@@ -127,11 +126,10 @@ export class MeasurementRepository implements IMeasurementRepository {
       }
 
       return MeasurementMapper.toDomain(response.measurement);
-    } catch (error: any) {
-      if (error.message?.includes('not found')) {
+    } catch (error) {
+      if (error instanceof Error && error.message?.includes('not found')) {
         throw new MeasurementNotFoundError(id);
       }
-      // Error: updateMeasurement error:', error);
       throw error;
     }
   }
@@ -148,11 +146,10 @@ export class MeasurementRepository implements IMeasurementRepository {
       }
 
       return { count: response.count };
-    } catch (error: any) {
-      if (error.message?.includes('not found')) {
+    } catch (error) {
+      if (error instanceof Error && error.message?.includes('not found')) {
         throw new MeasurementNotFoundError(id);
       }
-      // Error: deleteMeasurement error:', error);
       throw error;
     }
   }

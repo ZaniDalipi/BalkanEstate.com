@@ -4,6 +4,7 @@ import { ArrowLeftIcon } from '@/constants';
 import { useAppContext } from '@/context/AppContext';
 import Footer from '@/components/shared/Footer';
 import { PageTransition, Animated } from '@/src/components/ui/Animations';
+import { CONTACT_CONFIG } from '@/src/shared/config/contact';
 
 const RefundPolicyPage: React.FC = () => {
   const { t } = useTranslation(['legal', 'common']);
@@ -164,12 +165,12 @@ const RefundPolicyPage: React.FC = () => {
               <div className="space-y-2">
                 <p className="text-blue-900">
                   <strong>Email:</strong>{' '}
-                  <a href="mailto:refunds@balkanestateai.com" className="underline hover:no-underline">
-                    refunds@balkanestateai.com
+                  <a href={`mailto:${CONTACT_CONFIG.email.refunds}`} className="underline hover:no-underline">
+                    {CONTACT_CONFIG.email.refunds}
                   </a>
                 </p>
                 <p className="text-blue-900">
-                  <strong>Phone:</strong> +389 71 967 915
+                  <strong>Phone:</strong> {CONTACT_CONFIG.phone.primary}
                 </p>
                 <p className="text-blue-900 text-sm mt-2">
                   {t('legal:refund.contact.response', 'We typically respond within 24-48 hours during business days.')}
@@ -264,10 +265,10 @@ const RefundPolicyPage: React.FC = () => {
               {t('legal:refund.contactUs.text', 'If you have any questions about our refund policy or need assistance, please contact us:')}
             </p>
             <div className="bg-gray-50 rounded-lg p-4 space-y-2">
-              <p className="text-gray-700"><strong>BalkanEstate AI</strong></p>
-              <p className="text-gray-700">Refunds: <a href="mailto:refunds@balkanestateai.com" className="text-primary hover:underline">refunds@balkanestateai.com</a></p>
-              <p className="text-gray-700">Support: <a href="mailto:support@balkanestateai.com" className="text-primary hover:underline">support@balkanestateai.com</a></p>
-              <p className="text-gray-700">Phone: +389 71 967 915</p>
+              <p className="text-gray-700"><strong>{CONTACT_CONFIG.company.name}</strong></p>
+              <p className="text-gray-700">Refunds: <a href={`mailto:${CONTACT_CONFIG.email.refunds}`} className="text-primary hover:underline">{CONTACT_CONFIG.email.refunds}</a></p>
+              <p className="text-gray-700">Support: <a href={`mailto:${CONTACT_CONFIG.email.support}`} className="text-primary hover:underline">{CONTACT_CONFIG.email.support}</a></p>
+              <p className="text-gray-700">Phone: {CONTACT_CONFIG.phone.primary}</p>
             </div>
           </section>
             </div>

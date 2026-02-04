@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useAppContext } from '@/context/AppContext';
 import PaymentWindow from '@/components/shared/PaymentWindow';
+import { CONTACT_CONFIG } from '@/src/shared/config/contact';
 import { translateAndReplacePlaceholders } from '@/src/shared/utils/featurePlaceholders';
 import Footer from '@/components/shared/Footer';
 import {
@@ -94,9 +95,9 @@ const PricingPage: React.FC = () => {
   // Convert error to string for display
   const error = productsError ? t('pricing:error.loadFailed', 'Failed to load pricing plans') : null;
 
-  // Sales team contact info
-  const salesEmail = 'sales@balkanestateai.com';
-  const salesPhone = '+389 71 967 915';
+  // Sales team contact info - imported from shared config
+  const salesEmail = CONTACT_CONFIG.email.sales;
+  const salesPhone = CONTACT_CONFIG.phone.primary;
 
   // Default/fallback promotion pricing (used if API fails or returns no data)
   const defaultPromotionPricing: Record<string, Record<number, number>> = {

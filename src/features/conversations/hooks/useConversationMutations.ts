@@ -1,7 +1,13 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { conversationKeys } from '../api/conversationKeys';
-import * as api from '@/services/apiService';
-import { Conversation, Message } from '@/types';
+import {
+  createConversation,
+  sendMessage,
+  uploadMessageImage,
+  deleteConversation,
+  markConversationAsRead,
+} from '../api/conversationApi';
+import type { Conversation, Message } from '@/src/shared/types';
 
 /**
  * Hook to create new conversation
@@ -17,7 +23,7 @@ export function useCreateConversation() {
 
   const mutation = useMutation({
     mutationFn: async (propertyId: string): Promise<Conversation> => {
-      return await api.createConversation(propertyId);
+      return await createConversation(propertyId);
     },
     onSuccess: (newConversation) => {
       // Add to conversations list
@@ -62,7 +68,7 @@ export function useSendMessage() {
       conversationId: string;
       message: Message;
     }): Promise<{ message: Message; securityWarnings?: string[] }> => {
-      return await api.sendMessage(conversationId, message);
+      return await sendMessage(conversationId, message);
     },
     onMutate: async ({ conversationId, message }) => {
       // Cancel outgoing refetches
@@ -130,7 +136,7 @@ export function useUploadMessageImage() {
       conversationId: string;
       imageFile: File;
     }): Promise<string> => {
-      return await api.uploadMessageImage(conversationId, imageFile);
+      return await uploadMessageImage(conversationId, imageFile);
     },
   });
 
@@ -159,7 +165,7 @@ export function useDeleteConversation() {
 
   const mutation = useMutation({
     mutationFn: async (conversationId: string): Promise<void> => {
-      await api.deleteConversation(conversationId);
+      await deleteConversation(conversationId);
     },
     onMutate: async (conversationId) => {
       // Cancel outgoing refetches
@@ -211,7 +217,7 @@ export function useMarkConversationAsRead() {
 
   const mutation = useMutation({
     mutationFn: async (conversationId: string): Promise<void> => {
-      await api.markConversationAsRead(conversationId);
+      await markConversationAsRead(conversationId);
     },
     onSuccess: (_, conversationId) => {
       // Update unread count in conversation list

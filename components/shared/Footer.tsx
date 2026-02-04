@@ -22,6 +22,7 @@ import {
 } from '../../constants';
 import FooterCityscape from './FooterCityscape';
 import { useLocalizedNavigation } from '@/src/hooks/useLocalizedNavigation';
+import { CONTACT_CONFIG } from '@/src/shared/config/contact';
 
 interface FooterProps {
     className?: string;
@@ -124,7 +125,7 @@ const Footer: React.FC<FooterProps> = ({ className = '', contained = false }) =>
                             {[
                                 { icon: FacebookIcon, href: 'https://facebook.com/balkanestateai', label: 'Facebook', color: 'hover:bg-blue-600' },
                                 { icon: TwitterIcon, href: 'https://twitter.com/balkanestateai', label: 'Twitter', color: 'hover:bg-sky-500' },
-                                { icon: WhatsappIcon, href: 'https://wa.me/38971967915', label: 'WhatsApp', color: 'hover:bg-green-500' }
+                                { icon: WhatsappIcon, href: `https://wa.me/${CONTACT_CONFIG.social.whatsappNumber}`, label: 'WhatsApp', color: 'hover:bg-green-500' }
                             ].map(({ icon: Icon, href, label, color }) => (
                                 <a
                                     key={label}
@@ -191,20 +192,20 @@ const Footer: React.FC<FooterProps> = ({ className = '', contained = false }) =>
                         <ul className="space-y-2 sm:space-y-3 mb-4 sm:mb-6">
                             <li>
                                 <a
-                                    href="mailto:contact@balkanestateai.com"
+                                    href={`mailto:${CONTACT_CONFIG.email.contact}`}
                                     className="flex items-center gap-2 sm:gap-2.5 text-slate-400 hover:text-white transition-all duration-200 group"
                                 >
                                     <EnvelopeIcon className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-purple-500/70 group-hover:text-purple-500 transition-colors flex-shrink-0" />
-                                    <span className="text-xs sm:text-sm break-all sm:break-normal">contact@balkanestateai.com</span>
+                                    <span className="text-xs sm:text-sm break-all sm:break-normal">{CONTACT_CONFIG.email.contact}</span>
                                 </a>
                             </li>
                             <li>
                                 <a
-                                    href="tel:+38971967915"
+                                    href={`tel:${CONTACT_CONFIG.phone.primaryTel}`}
                                     className="flex items-center gap-2 sm:gap-2.5 text-slate-400 hover:text-white transition-all duration-200 group"
                                 >
                                     <PhoneIcon className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-purple-500/70 group-hover:text-purple-500 transition-colors flex-shrink-0" />
-                                    <span className="text-xs sm:text-sm">+389 71 967 915</span>
+                                    <span className="text-xs sm:text-sm">{CONTACT_CONFIG.phone.primary}</span>
                                 </a>
                             </li>
                         </ul>

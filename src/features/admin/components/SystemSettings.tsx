@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { CONTACT_CONFIG } from '@/src/shared/config/contact';
 import {
   Cog6ToothIcon,
   EnvelopeIcon,
@@ -28,8 +29,8 @@ const SystemSettings: React.FC = () => {
     // General
     siteName: 'BalkanEstate',
     siteDescription: 'Your trusted real estate platform in the Balkans',
-    contactEmail: 'contact@balkanestateai.com',
-    supportEmail: 'support@balkanestateai.com',
+    contactEmail: CONTACT_CONFIG.email.contact,
+    supportEmail: CONTACT_CONFIG.email.support,
     timezone: 'Europe/Belgrade',
     dateFormat: 'DD/MM/YYYY',
     currency: 'EUR',

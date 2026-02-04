@@ -2,6 +2,7 @@
 // Prevents entire app from crashing on component errors
 
 import React, { Component, ErrorInfo, ReactNode } from 'react';
+import { captureError, addBreadcrumb } from '@/src/lib/sentry';
 
 interface Props {
   children: ReactNode;
@@ -56,11 +57,6 @@ export class ErrorBoundary extends Component<Props, State> {
   }
 
   componentDidCatch(error: Error, errorInfo: ErrorInfo) {
-    // Log error to console in development
-    if (import.meta.env.DEV) {
-      // Error removed
-    }
-
     // Call optional error handler
     this.props.onError?.(error, errorInfo);
 
@@ -70,8 +66,17 @@ export class ErrorBoundary extends Component<Props, State> {
       errorInfo,
     });
 
-    // TODO: Log to error reporting service (Sentry, LogRocket, etc.)
-    // logErrorToService(error, errorInfo);
+    // Log to Sentry error reporting service
+    addBreadcrumb(
+      `Error caught by ${this.props.level || 'app'} level ErrorBoundary`,
+      'error-boundary',
+      { componentStack: errorInfo.componentStack }
+    );
+
+    captureError(error, {
+      level: this.props.level || 'app',
+      componentStack: errorInfo.componentStack,
+    });
   }
 
   handleReset = () => {

@@ -78,7 +78,7 @@ export class HttpClient {
       }
 
       return isJson ? await response.json() : ({} as T);
-    } catch (error: any) {
+    } catch (error) {
       throw error;
     }
   }
@@ -126,7 +126,7 @@ export class HttpClient {
       }
 
       return await response.json();
-    } catch (error: any) {
+    } catch (error) {
       throw error;
     }
   }

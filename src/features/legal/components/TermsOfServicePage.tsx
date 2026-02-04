@@ -4,6 +4,7 @@ import { ArrowLeftIcon } from '@/constants';
 import { useAppContext } from '@/context/AppContext';
 import Footer from '@/components/shared/Footer';
 import { PageTransition, Animated } from '@/src/components/ui/Animations';
+import { CONTACT_CONFIG } from '@/src/shared/config/contact';
 
 const TermsOfServicePage: React.FC = () => {
   const { t } = useTranslation(['legal', 'common']);
@@ -346,9 +347,9 @@ const TermsOfServicePage: React.FC = () => {
               {t('legal:terms.contact.text', 'If you have questions about these Terms of Service, please contact us:')}
             </p>
             <div className="bg-gray-50 rounded-lg p-4 space-y-2">
-              <p className="text-gray-700"><strong>BalkanEstate</strong></p>
-              <p className="text-gray-700">Email: legal@balkanestateai.com</p>
-              <p className="text-gray-700">Phone: +389 71 967 915</p>
+              <p className="text-gray-700"><strong>{CONTACT_CONFIG.company.name}</strong></p>
+              <p className="text-gray-700">Email: {CONTACT_CONFIG.email.legal}</p>
+              <p className="text-gray-700">Phone: {CONTACT_CONFIG.phone.primary}</p>
             </div>
           </section>
             </div>

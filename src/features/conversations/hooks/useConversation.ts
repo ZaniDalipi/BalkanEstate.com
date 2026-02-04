@@ -1,7 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { conversationKeys } from '../api/conversationKeys';
-import * as api from '@/services/apiService';
-import { Conversation, Message } from '@/types';
+import { getConversation, getConversationPublicKeys } from '../api/conversationApi';
+import type { Conversation, Message } from '@/src/shared/types';
 
 /**
  * Hook to get conversation details with messages
@@ -26,7 +26,7 @@ export function useConversation(conversationId: string | null | undefined) {
     queryKey: conversationKeys.detail(conversationId || ''),
     queryFn: async () => {
       if (!conversationId) throw new Error('Conversation ID required');
-      return await api.getConversation(conversationId);
+      return await getConversation(conversationId);
     },
     enabled: !!conversationId,
     staleTime: 10 * 1000, // 10 seconds - messages should be very fresh
@@ -66,7 +66,7 @@ export function useConversationPublicKeys(conversationId: string | null) {
     queryKey: conversationKeys.publicKeys(conversationId || ''),
     queryFn: async () => {
       if (!conversationId) throw new Error('Conversation ID required');
-      return await api.getConversationPublicKeys(conversationId);
+      return await getConversationPublicKeys(conversationId);
     },
     enabled: !!conversationId,
     staleTime: 5 * 60 * 1000, // 5 minutes - public keys don't change often

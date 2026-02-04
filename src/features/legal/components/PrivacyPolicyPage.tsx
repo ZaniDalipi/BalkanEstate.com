@@ -4,6 +4,7 @@ import { ArrowLeftIcon } from '@/constants';
 import { useAppContext } from '@/context/AppContext';
 import Footer from '@/components/shared/Footer';
 import { PageTransition, Animated } from '@/src/components/ui/Animations';
+import { CONTACT_CONFIG } from '@/src/shared/config/contact';
 
 const PrivacyPolicyPage: React.FC = () => {
   const { t } = useTranslation(['legal', 'common']);
@@ -281,9 +282,9 @@ const PrivacyPolicyPage: React.FC = () => {
               {t('legal:privacy.contact.text', 'If you have questions about this Privacy Policy or our data practices, please contact us:')}
             </p>
             <div className="bg-gray-50 rounded-lg p-4 space-y-2">
-              <p className="text-gray-700"><strong>BalkanEstate</strong></p>
-              <p className="text-gray-700">Email: privacy@balkanestateai.com</p>
-              <p className="text-gray-700">Phone: +389 71 967 915</p>
+              <p className="text-gray-700"><strong>{CONTACT_CONFIG.company.name}</strong></p>
+              <p className="text-gray-700">Email: {CONTACT_CONFIG.email.privacy}</p>
+              <p className="text-gray-700">Phone: {CONTACT_CONFIG.phone.primary}</p>
               <p className="text-gray-700">{t('legal:privacy.contact.address', 'Address: Skopje, North Macedonia')}</p>
             </div>
           </section>

@@ -1,7 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { agentKeys } from '../api/agentKeys';
-import { getAllAgents } from '@/services/apiService';
-import { Agent } from '@/types';
+import { getAllAgents } from '../api/agentApi';
+import type { Agent } from '@/src/shared/types';
 
 interface UseAgentsOptions {
   enabled?: boolean;

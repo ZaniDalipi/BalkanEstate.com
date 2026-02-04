@@ -76,11 +76,11 @@ const FloorPlanViewerModal: React.FC<FloorPlanViewerModalProps> = ({ imageUrl, o
         >
             <div className="absolute top-4 right-4 z-20 flex items-center gap-2">
                  <div className="flex items-center gap-1 bg-neutral-800/60 p-1.5 rounded-lg backdrop-blur-sm">
-                    <button onClick={() => zoom('out')} className="p-2 text-white/80 hover:text-white hover:bg-white/10 rounded-md"><MagnifyingGlassMinusIcon className="w-6 h-6"/></button>
-                    <button onClick={resetTransform} className="p-2 text-white/80 hover:text-white hover:bg-white/10 rounded-md"><ArrowPathIcon className="w-6 h-6"/></button>
-                    <button onClick={() => zoom('in')} className="p-2 text-white/80 hover:text-white hover:bg-white/10 rounded-md"><MagnifyingGlassPlusIcon className="w-6 h-6"/></button>
+                    <button onClick={() => zoom('out')} className="p-2 text-white/80 hover:text-white hover:bg-white/10 rounded-md" aria-label="Zoom out"><MagnifyingGlassMinusIcon className="w-6 h-6"/></button>
+                    <button onClick={resetTransform} className="p-2 text-white/80 hover:text-white hover:bg-white/10 rounded-md" aria-label="Reset zoom"><ArrowPathIcon className="w-6 h-6"/></button>
+                    <button onClick={() => zoom('in')} className="p-2 text-white/80 hover:text-white hover:bg-white/10 rounded-md" aria-label="Zoom in"><MagnifyingGlassPlusIcon className="w-6 h-6"/></button>
                  </div>
-                 <button onClick={onClose} className="p-2 bg-neutral-800/60 text-white/80 hover:text-white hover:bg-white/10 rounded-full backdrop-blur-sm"><XMarkIcon className="w-6 h-6"/></button>
+                 <button onClick={onClose} className="p-2 bg-neutral-800/60 text-white/80 hover:text-white hover:bg-white/10 rounded-full backdrop-blur-sm" aria-label="Close floor plan viewer"><XMarkIcon className="w-6 h-6"/></button>
             </div>
 
             <div 

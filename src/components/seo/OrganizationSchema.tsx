@@ -1,5 +1,6 @@
 import React from 'react';
 import { Helmet } from 'react-helmet-async';
+import { CONTACT_CONFIG } from '@/src/shared/config/contact';
 
 interface OrganizationSchemaProps {
   name?: string;
@@ -28,7 +29,7 @@ export const OrganizationSchema: React.FC<OrganizationSchemaProps> = ({
   url = 'https://balkanestateai.com',
   logo = 'https://balkanestateai.com/logo.png',
   description = 'BalkanEstateAI is the leading AI-powered real estate platform in the Balkans, connecting buyers with their dream properties across Serbia, Montenegro, Croatia, Bosnia, North Macedonia, and Albania.',
-  email = 'info@balkanestateai.com',
+  email = CONTACT_CONFIG.email.info,
   phone,
   address,
   socialProfiles = [],

@@ -1,7 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { conversationKeys } from '../api/conversationKeys';
-import * as api from '@/services/apiService';
-import { Conversation } from '@/types';
+import { getConversations } from '../api/conversationApi';
+import type { Conversation } from '@/src/shared/types';
 
 /**
  * Hook to get all conversations for current user
@@ -23,7 +23,7 @@ export function useConversations() {
     refetch,
   } = useQuery({
     queryKey: conversationKeys.lists(),
-    queryFn: async () => await api.getConversations(),
+    queryFn: async () => await getConversations(),
     staleTime: 30 * 1000, // 30 seconds - conversations should be fresh
     gcTime: 2 * 60 * 1000, // 2 minutes
     refetchInterval: 30 * 1000, // Poll every 30 seconds for new messages
