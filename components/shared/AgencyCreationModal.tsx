@@ -7,8 +7,7 @@ import { BALKAN_LOCATIONS } from '../../utils/balkanLocations';
 import { canCreateAgency } from '../../src/shared/utils/subscriptionHelpers';
 import { UserRole } from '../../types';
 import { createAgency } from '../../src/features/agencies/api/agencyApi';
-
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5001/api';
+import { API_URL } from '../../src/shared/api/config';
 
 // Default Enterprise plan configuration (fallback if API fails)
 const DEFAULT_ENTERPRISE_PLAN = {

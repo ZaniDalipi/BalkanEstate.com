@@ -5,8 +5,7 @@ import { useAppContext } from '../../context/AppContext';
 import { useConfirmation } from '../../src/shared/hooks/useConfirmation';
 import { useNotification } from '../../src/shared/hooks/useNotification';
 import { TicketIcon, CheckCircleIcon, ExclamationTriangleIcon } from '../../constants';
-
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5001/api';
+import { API_URL } from '../../src/shared/api/config';
 
 interface Agency {
   _id: string;

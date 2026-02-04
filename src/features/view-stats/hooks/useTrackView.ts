@@ -1,5 +1,6 @@
 import { useEffect, useRef, useCallback } from 'react';
 import { viewStatsApiClient, EntityType } from '@/src/data/api/ViewStatsApiClient';
+import { API_URL } from '@/src/shared/api/config';
 
 interface UseTrackViewOptions {
   entityType: EntityType;
@@ -55,7 +56,7 @@ export function useTrackView({ entityType, entityId, enabled = true }: UseTrackV
         // Use sendBeacon for reliable unload tracking
         const duration = Math.round((Date.now() - startTimeRef.current) / 1000);
         const data = JSON.stringify({ duration });
-        const url = `${import.meta.env.VITE_API_URL || 'http://localhost:5001/api'}/view-stats/${viewIdRef.current}/duration`;
+        const url = `${API_URL}/view-stats/${viewIdRef.current}/duration`;
 
         if (navigator.sendBeacon) {
           const blob = new Blob([data], { type: 'application/json' });

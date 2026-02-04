@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { useAppContext } from '@/context/AppContext';
 import AdminSidebar from './AdminSidebar';
 import AdminHeader from './AdminHeader';
+import { API_URL } from '@/src/shared/api/config';
 
 interface AdminStats {
   overview: {
@@ -64,7 +65,6 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({
 
     const fetchStats = async () => {
       try {
-        const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5001/api';
         const response = await fetch(`${API_URL}/admin/stats`, {
           headers: {
             'Authorization': `Bearer ${token}`,

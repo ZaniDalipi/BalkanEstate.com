@@ -17,6 +17,7 @@ import {
   ArrowPathIcon,
 } from '@/constants';
 import { useConfirmation } from '@/src/shared/hooks/useConfirmation';
+import { API_URL } from '@/src/shared/api/config';
 
 interface PropertyImage {
   url: string;
@@ -95,7 +96,6 @@ const getAllPropertyImages = (property: Property): string[] => {
 const PropertyManager: React.FC = () => {
   const { t } = useTranslation(['admin']);
   const { confirm } = useConfirmation();
-  const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5001/api';
   const [properties, setProperties] = useState<Property[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -155,7 +155,6 @@ const PropertyManager: React.FC = () => {
         ...(searchQuery && { search: searchQuery }),
       });
 
-      const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5001/api';
       const response = await fetch(`${API_URL}/admin/properties?${params}`, {
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -209,7 +208,6 @@ const PropertyManager: React.FC = () => {
 
     try {
       const token = localStorage.getItem('balkan_estate_token');
-      const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5001/api';
 
       const response = await fetch(`${API_URL}/admin/properties/${editingProperty._id}`, {
         method: 'PATCH',
@@ -236,7 +234,6 @@ const PropertyManager: React.FC = () => {
   const handleTogglePromoted = async (property: Property) => {
     try {
       const token = localStorage.getItem('balkan_estate_token');
-      const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5001/api';
 
       const response = await fetch(`${API_URL}/admin/properties/${property._id}`, {
         method: 'PATCH',
@@ -270,7 +267,6 @@ const PropertyManager: React.FC = () => {
 
     try {
       const token = localStorage.getItem('balkan_estate_token');
-      const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5001/api';
 
       const response = await fetch(`${API_URL}/admin/properties/${propertyId}`, {
         method: 'DELETE',

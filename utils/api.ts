@@ -1,5 +1,5 @@
-// API Base URL - can be configured via environment variable
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5001/api';
+// API Base URL - imported from shared config
+import { API_URL as API_BASE_URL } from '../src/shared/api/config';
 
 // Types
 export interface Product {

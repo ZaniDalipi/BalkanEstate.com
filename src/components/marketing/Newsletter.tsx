@@ -1,12 +1,11 @@
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { API_URL } from '@/src/shared/api/config';
 
 interface NewsletterProps {
   variant?: 'inline' | 'card' | 'footer';
   className?: string;
 }
-
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5001/api';
 
 export const Newsletter: React.FC<NewsletterProps> = ({ variant = 'card', className = '' }) => {
   const { t } = useTranslation(['newsletter']);

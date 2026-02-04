@@ -15,6 +15,7 @@ import { BALKAN_COUNTRIES } from '@/constants/countries';
 import { FloatingSphere, GlossyPill, AbstractBlob, RealEstateOrb, Decorative3DStyles } from '@/components/shared/Decorative3D';
 import AgentsHeroBanner from '@/components/shared/AgentsHeroBanner';
 import { HERO_IMAGES } from '@/config/cloudinaryConfig';
+import { API_URL } from '@/src/shared/api/config';
 
 type SortOption = 'rating' | 'experience' | 'sales' | 'recent' | 'name';
 type SearchTab = 'all' | 'name' | 'location' | 'specialization';
@@ -156,7 +157,6 @@ const AgentsPage: React.FC = () => {
     setIsSubmittingContact(true);
 
     try {
-      const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5001/api';
       const response = await fetch(`${API_URL}/agent-requests`, {
         method: 'POST',
         headers: {
@@ -807,7 +807,6 @@ const AgentsPage: React.FC = () => {
                     asLink={false}
                     onClick={async () => {
                       try {
-                        const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5001/api';
                         const response = await fetch(`${API_URL}/agencies/${agency._id}`);
                         if (response.ok) {
                           const data = await response.json();

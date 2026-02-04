@@ -5,6 +5,7 @@ import PaymentWindow from '@/components/shared/PaymentWindow';
 import { BuildingOfficeIcon, ChartBarIcon, CurrencyDollarIcon, BoltIcon } from '@/constants';
 import { useAppContext } from '@/context/AppContext';
 import { useSellerProducts, Product } from '@/src/shared/query';
+import { API_URL } from '@/src/shared/api/config';
 
 interface PricingPlansProps {
   isOpen: boolean;
@@ -213,7 +214,6 @@ const PricingPlans: React.FC<PricingPlansProps> = ({ isOpen, onClose, onSubscrib
           throw new Error('Please log in to create an agency');
         }
 
-        const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5001/api';
         const response = await fetch(`${API_URL}/agencies`, {
           method: 'POST',
           headers: {

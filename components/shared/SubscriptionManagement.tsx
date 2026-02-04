@@ -5,8 +5,7 @@ import { useAppContext } from '../../context/AppContext';
 import { User } from '../../types';
 import PaymentWindow from './PaymentWindow';
 import { replacePlaceholders, ProductValues } from '../../src/shared/utils/featurePlaceholders';
-
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5001/api';
+import { API_URL } from '../../src/shared/api/config';
 
 interface SubscriptionManagementProps {
   userId: string;

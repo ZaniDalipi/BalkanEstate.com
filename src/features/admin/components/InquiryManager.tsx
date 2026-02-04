@@ -13,6 +13,7 @@ import {
   ArchiveBoxIcon,
 } from '@/constants';
 import { useConfirmation } from '@/src/shared/hooks/useConfirmation';
+import { API_URL } from '@/src/shared/api/config';
 
 interface Inquiry {
   _id: string;
@@ -70,7 +71,6 @@ interface InquiryStats {
 const InquiryManager: React.FC = () => {
   const { t } = useTranslation(['admin']);
   const { confirm } = useConfirmation();
-  const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5001/api';
   const [inquiries, setInquiries] = useState<Inquiry[]>([]);
   const [stats, setStats] = useState<InquiryStats | null>(null);
   const [isLoading, setIsLoading] = useState(true);

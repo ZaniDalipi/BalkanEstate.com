@@ -2,6 +2,7 @@
 // Handles all view tracking and statistics-related API calls
 
 import { httpClient } from './httpClient';
+import { API_URL } from '@/src/shared/api/config';
 
 export type EntityType = 'property' | 'agent' | 'agency';
 export type Period = '7d' | '30d' | '90d' | 'all';
@@ -334,7 +335,7 @@ export class ViewStatsApiClient {
     if (format === 'csv') {
       // For CSV, we need to handle the blob response
       const response = await fetch(
-        `${import.meta.env.VITE_API_URL || 'http://localhost:5001/api'}/view-stats/report?period=${period}&format=csv`,
+        `${API_URL}/view-stats/report?period=${period}&format=csv`,
         {
           headers: {
             Authorization: `Bearer ${localStorage.getItem('balkan_estate_token')}`,

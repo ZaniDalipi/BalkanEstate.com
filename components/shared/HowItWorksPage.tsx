@@ -4,6 +4,7 @@ import { useAppContext } from '../../context/AppContext';
 import { buildLocalizedPath } from '../../src/utils/languageRouting';
 import { HowItWorksTab } from '../../types';
 import Footer from './Footer';
+import { API_URL } from '../../src/shared/api/config';
 
 interface SiteVideo {
   _id: string;
@@ -205,14 +206,13 @@ const HowItWorksPage: React.FC = () => {
   useEffect(() => {
     const fetchVideos = async () => {
       try {
-        const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5001/api';
         const response = await fetch(`${API_URL}/site-content/how-it-works`);
         if (response.ok) {
           const data = await response.json();
           setVideos(data);
         }
-      } catch (err) {
-        console.error('Failed to fetch how-it-works videos:', err);
+      } catch {
+        // Failed to fetch videos
       }
     };
     fetchVideos();

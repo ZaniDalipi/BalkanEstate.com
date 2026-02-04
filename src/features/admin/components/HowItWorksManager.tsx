@@ -14,6 +14,7 @@ import {
   ChevronUpIcon,
   ChevronDownIcon,
 } from '@/constants';
+import { API_URL } from '@/src/shared/api/config';
 
 interface Step {
   stepNumber: number;
@@ -128,8 +129,6 @@ const HowItWorksManager: React.FC = () => {
     difficulty: 'easy' as 'easy' | 'medium' | 'advanced',
     tags: [] as string[],
   });
-
-  const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5001/api';
 
   const fetchContent = async () => {
     try {

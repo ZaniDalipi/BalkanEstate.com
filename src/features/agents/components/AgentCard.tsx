@@ -18,6 +18,7 @@ import {
 import { useAppContext } from '@/context/AppContext';
 import { formatPrice } from '@/utils/currency';
 import { slugify } from '@/utils/slug';
+import { API_URL } from '@/src/shared/api/config';
 
 interface AgentCardProps {
   agent: Agent;
@@ -139,7 +140,6 @@ const AgentCard: React.FC<AgentCardProps> = ({ agent, index = 0 }) => {
     const agencyIdentifier = agent.agencyId || slugify(agent.agencyName);
 
     try {
-      const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5001/api';
       const response = await fetch(`${API_URL}/agencies/${agencyIdentifier}`);
 
       if (response.ok) {

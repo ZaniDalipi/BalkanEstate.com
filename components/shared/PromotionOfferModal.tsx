@@ -5,6 +5,7 @@ import { SparklesIcon, BoltIcon, ChartBarIcon } from '../../constants';
 import { useAppContext } from '../../context/AppContext';
 import { Property } from '../../types';
 import { useSellerProducts, Product } from '@/src/shared/query';
+import { API_URL } from '../../src/shared/api/config';
 
 interface PromotionOfferModalProps {
     isOpen: boolean;
@@ -65,15 +66,13 @@ const PromotionOfferModal: React.FC<PromotionOfferModalProps> = ({
         setShowPaymentWindow(true);
     };
 
-    const handlePaymentSuccess = async (paymentIntentId: string) => {
-        console.log('Promotion payment successful:', paymentIntentId);
+    const handlePaymentSuccess = async (_paymentIntentId: string) => {
         setShowPaymentWindow(false);
 
         // Promote the property via API
         if (property) {
             try {
                 const token = localStorage.getItem('balkan_estate_token');
-                const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5001/api';
 
                 const response = await fetch(`${API_URL}/promotions`, {
                     method: 'POST',

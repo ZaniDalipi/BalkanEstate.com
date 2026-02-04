@@ -18,8 +18,7 @@ import { SEO } from '../../src/components/seo';
 import { useConfirmation } from '../../src/shared/hooks/useConfirmation';
 import { useNotification } from '../../src/shared/hooks/useNotification';
 import { buildLocalizedPath } from '../../src/utils/languageRouting';
-
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5001/api';
+import { API_URL } from '../../src/shared/api/config';
 
 // Common languages spoken in the Balkan region
 const BALKAN_LANGUAGES = [

@@ -1,8 +1,7 @@
 import React from 'react';
 import Modal from './Modal';
 import WhackAnIconAnimation from '@/features/seller/components/WhackAnIconAnimation';
-
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5001/api';
+import { API_URL } from '../../src/shared/api/config';
 
 interface DiscountGameModalProps {
     isOpen: boolean;

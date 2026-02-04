@@ -1,8 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { getFeaturedSubscription } from '../../services/apiService';
 import { SparklesIcon, CheckCircleIcon, XCircleIcon, ClockIcon } from '../../constants';
-
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5001/api';
+import { API_URL } from '../../src/shared/api/config';
 
 // Add shimmer animation styles
 const shimmerStyles = `

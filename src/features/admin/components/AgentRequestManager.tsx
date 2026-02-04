@@ -12,6 +12,7 @@ import {
   ClockIcon,
   UserGroupIcon,
 } from '@/constants';
+import { API_URL } from '@/src/shared/api/config';
 
 interface AgentRequest {
   _id: string;
@@ -55,7 +56,6 @@ interface AgentRequestStats {
 
 const AgentRequestManager: React.FC = () => {
   const { t } = useTranslation(['admin']);
-  const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5001/api';
   const [requests, setRequests] = useState<AgentRequest[]>([]);
   const [stats, setStats] = useState<AgentRequestStats | null>(null);
   const [isLoading, setIsLoading] = useState(true);

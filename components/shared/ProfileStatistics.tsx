@@ -2,6 +2,7 @@ import React, { useEffect, useState, useCallback, useMemo } from 'react';
 import { User, UserRole } from '../../types';
 import { ChartBarIcon, HomeIcon, EyeIcon, HeartIcon, EnvelopeIcon, CalendarIcon, MapPinIcon, BuildingOfficeIcon, BedIcon, BathIcon, SqftIcon } from '../../constants';
 import { formatPrice } from '../../utils/currency';
+import { API_URL } from '../../src/shared/api/config';
 
 interface ProfileStatisticsProps {
   user: User & { subscriptionPlan?: string };
@@ -182,8 +183,6 @@ const SoldPropertyCard: React.FC<{ sale: SaleRecord }> = ({ sale }) => {
     </div>
   );
 };
-
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5001/api';
 
 const ProfileStatistics: React.FC<ProfileStatisticsProps> = ({ user }) => {
   const [stats, setStats] = useState<UserStats>({

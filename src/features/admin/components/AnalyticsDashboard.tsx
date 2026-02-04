@@ -15,6 +15,7 @@ import {
   ExclamationTriangleIcon,
   ShieldCheckIcon,
 } from '@/constants';
+import { API_URL } from '@/src/shared/api/config';
 
 interface AdminStats {
   overview: {
@@ -43,7 +44,6 @@ interface AdminStats {
 
 const AnalyticsDashboard: React.FC = () => {
   const { t } = useTranslation(['admin']);
-  const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5001/api';
   const [stats, setStats] = useState<AdminStats | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -58,7 +58,6 @@ const AnalyticsDashboard: React.FC = () => {
     try {
       setIsLoading(true);
       const token = localStorage.getItem('balkan_estate_token');
-      const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5001/api';
       const response = await fetch(`${API_URL}/admin/stats`, {
         headers: {
           'Authorization': `Bearer ${token}`,

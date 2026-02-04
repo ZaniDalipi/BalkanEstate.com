@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Bell, X, Check, CheckCheck, Home, TrendingDown, MessageSquare, AlertCircle } from 'lucide-react';
 import { useAppContext } from '@/context/AppContext';
+import { API_URL } from '@/src/shared/api/config';
 
 interface Notification {
   _id: string;
@@ -29,8 +30,6 @@ const NotificationCenter: React.FC = () => {
   const [unreadCount, setUnreadCount] = useState(0);
   const [loading, setLoading] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
-
-  const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5001/api';
 
   // Fetch unread count
   const fetchUnreadCount = useCallback(async () => {

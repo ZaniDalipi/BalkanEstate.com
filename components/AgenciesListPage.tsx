@@ -32,8 +32,7 @@ import Footer from './shared/Footer';
 import { SEO } from '../src/components/seo';
 import AgenciesHeroBanner from './shared/AgenciesHeroBanner';
 import { FloatingSphere, GlossyPill, AbstractBlob, RealEstateOrb, Decorative3DStyles } from './shared/Decorative3D';
-
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5001/api';
+import { API_URL } from '../src/shared/api/config';
 
 const AgenciesListPage: React.FC = () => {
   const { t } = useTranslation(['agents']);

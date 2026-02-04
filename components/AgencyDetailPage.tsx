@@ -26,6 +26,7 @@ import {
   updateAgencyAchievement,
   deleteAgencyAchievement
 } from '../src/features/achievements/api/achievementApi';
+import { API_URL } from '../src/shared/api/config';
 
 // Map icon SVG for section headers
 const MapIcon: React.FC<{ className?: string }> = ({ className }) => (
@@ -43,8 +44,6 @@ const MapInvalidator: React.FC = () => {
   }, [map]);
   return null;
 };
-
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5001/api';
 
 interface Agent {
   agentId: string;

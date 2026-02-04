@@ -18,6 +18,7 @@ import PromotionSelector from '@/src/features/promotions/components/PromotionSel
 import RoleSelector from './RoleSelector';
 import { PLAN_LISTING_LIMITS } from '@/shared/utils/subscriptionHelpers';
 import { SubscriptionPlan } from '@/shared/types/user.types';
+import { API_URL } from '@/src/shared/api/config';
 
 type Step = 'init' | 'loading' | 'form' | 'floorplan' | 'payment' | 'success';
 type Mode = 'ai' | 'manual';
@@ -1219,7 +1220,6 @@ const GeminiDescriptionGenerator: React.FC<{ propertyToEdit: Property | null }> 
 
             // Now apply promotion to the created property
             const token = localStorage.getItem('balkan_estate_token');
-            const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5001/api';
 
             const response = await fetch(`${API_URL}/promotions`, {
                 method: 'POST',

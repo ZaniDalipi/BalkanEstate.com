@@ -2,6 +2,7 @@ import React, { useState, useEffect, useMemo } from 'react';
 import Modal from './Modal';
 import { createFeaturedSubscription } from '../../services/apiService';
 import { SparklesIcon, CheckCircleIcon, XMarkIcon } from '../../constants';
+import { API_URL } from '../../src/shared/api/config';
 
 interface FeaturedProduct {
   productId: string;
@@ -19,8 +20,6 @@ interface FeaturedSubscriptionDialogProps {
   agencyId: string;
   onSuccess?: () => void;
 }
-
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5001/api';
 
 const FeaturedSubscriptionDialog: React.FC<FeaturedSubscriptionDialogProps> = ({
   isOpen,

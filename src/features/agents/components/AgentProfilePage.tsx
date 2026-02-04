@@ -54,6 +54,7 @@ import { formatPrice } from '@/utils/currency';
 import PropertyCard from '@/src/features/property-details/components/PropertyCard';
 import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
 import L from 'leaflet';
+import { API_URL } from '@/src/shared/api/config';
 
 // Component to fix map rendering issues in dynamic containers
 const MapInvalidator: React.FC = () => {
@@ -358,7 +359,6 @@ const AgentProfilePage: React.FC<AgentProfilePageProps> = ({ agent }) => {
 
                     // Fetch agency details
                     try {
-                        const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5001/api';
                         const agencyResponse = await fetch(`${API_URL}/agencies/${agent.agencyId}`);
                         if (agencyResponse.ok) {
                             const agencyDataResponse = await agencyResponse.json();
@@ -594,7 +594,6 @@ const AgentProfilePage: React.FC<AgentProfilePageProps> = ({ agent }) => {
         if (!agent.agencyId) return;
 
         try {
-            const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5001/api';
             const response = await fetch(`${API_URL}/agencies/${agent.agencyId}`);
             if (response.ok) {
                 const data = await response.json();

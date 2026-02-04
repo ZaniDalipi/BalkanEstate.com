@@ -8,6 +8,7 @@ import { useAppContext } from '../../../context/AppContext';
 import { MapPinIcon } from '../../../constants';
 import { parseMarkdown } from '../../utils/markdown';
 import { createSanitizedMarkup } from '../../shared/utils/sanitize';
+import { API_URL } from '../../shared/api/config';
 
 // Map language codes to full language names for AI prompt
 const LANGUAGE_NAMES: Record<string, string> = {
@@ -81,7 +82,6 @@ export const NeighborhoodInsights: React.FC<NeighborhoodInsightsProps> = ({
     setError(null);
 
     try {
-      const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5001/api';
       const token = localStorage.getItem('balkan_estate_token');
 
       // Get current language for AI response
