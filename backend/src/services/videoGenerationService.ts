@@ -510,111 +510,128 @@ const createVideoWithOverlays = (options: {
       currentFilter = `[t${filterIndex}]`;
       filterIndex++;
 
-      // Animation helper function - creates smooth fade-in effect
-      // alpha expression: starts at 0, fades in during animDuration after startTime
+      // Animation helper - elegant slide-up with fade
+      // Creates text that slides up from below while fading in
+      const slideOffset = Math.floor(height * 0.03); // How far text slides up
+
+      const slideUpY = (targetY: number, startTime: number) =>
+        `y='if(lt(t\\,${startTime})\\,${targetY + slideOffset}\\,if(lt(t\\,${startTime + animDuration})\\,${targetY + slideOffset}-(${slideOffset}*(t-${startTime})/${animDuration})\\,${targetY}))'`;
+
       const fadeInAlpha = (startTime: number) =>
         `alpha='if(lt(t\\,${startTime})\\,0\\,if(lt(t\\,${startTime + animDuration})\\,(t-${startTime})/${animDuration}\\,1))'`;
 
-      // 1. PRICE - Large and prominent, centered
+      // 1. PRICE - Large, elegant, with slide-up animation
       if (priceText) {
-        const priceY = height - bottomMargin - Math.floor(priceFontSize * 3);
+        const priceY = height - bottomMargin - Math.floor(priceFontSize * 3.2);
         filters.push(
           `${currentFilter}drawtext=${fontParam}:text='${escapeText(priceText)}':` +
           `fontsize=${priceFontSize}:fontcolor=white:` +
-          `x=(w-text_w)/2:y=${priceY}:` +
+          `x=(w-text_w)/2:${slideUpY(priceY, animStartTime)}:` +
           `${fadeInAlpha(animStartTime)}:` +
-          `shadowcolor=black@0.5:shadowx=2:shadowy=2[t${filterIndex}]`
+          `shadowcolor=black@0.4:shadowx=2:shadowy=3[t${filterIndex}]`
         );
         currentFilter = `[t${filterIndex}]`;
         filterIndex++;
         animStartTime += animDelay;
       }
 
-      // 2. LOCATION - Below price with subtle styling
+      // 2. LOCATION - Elegant smaller text below price
       if (locationText) {
-        const locationY = height - bottomMargin - Math.floor(priceFontSize * 1.6);
+        const locationY = height - bottomMargin - Math.floor(priceFontSize * 1.8);
         filters.push(
           `${currentFilter}drawtext=${fontParam}:text='${escapeText(locationText)}':` +
-          `fontsize=${locationFontSize}:fontcolor=white@0.9:` +
-          `x=(w-text_w)/2:y=${locationY}:` +
+          `fontsize=${locationFontSize}:fontcolor=white@0.95:` +
+          `x=(w-text_w)/2:${slideUpY(locationY, animStartTime)}:` +
           `${fadeInAlpha(animStartTime)}:` +
-          `shadowcolor=black@0.4:shadowx=1:shadowy=1[t${filterIndex}]`
+          `shadowcolor=black@0.3:shadowx=1:shadowy=2[t${filterIndex}]`
         );
         currentFilter = `[t${filterIndex}]`;
         filterIndex++;
         animStartTime += animDelay;
       }
 
-      // 3. FEATURES - Clean separator style (beds | baths | sqft)
+      // 3. FEATURES - Clean minimal style with slide-up
       if (featuresText) {
-        const featuresY = height - bottomMargin - Math.floor(priceFontSize * 0.4);
+        const featuresY = height - bottomMargin - Math.floor(priceFontSize * 0.5);
         filters.push(
           `${currentFilter}drawtext=${fontParam}:text='${escapeText(featuresText)}':` +
           `fontsize=${featureFontSize}:fontcolor=white@0.85:` +
-          `x=(w-text_w)/2:y=${featuresY}:` +
-          `${fadeInAlpha(animStartTime)}:` +
-          `shadowcolor=black@0.4:shadowx=1:shadowy=1[t${filterIndex}]`
-        );
-        currentFilter = `[t${filterIndex}]`;
-        filterIndex++;
-        animStartTime += animDelay;
-      }
-
-      // 4. TITLE - At the very bottom if provided
-      if (title) {
-        const titleY = height - bottomMargin + Math.floor(featureFontSize * 1.2);
-        filters.push(
-          `${currentFilter}drawtext=${fontParam}:text='${escapeText(title.substring(0, 35))}':` +
-          `fontsize=${Math.floor(titleFontSize * 0.75)}:fontcolor=white@0.75:` +
-          `x=(w-text_w)/2:y=${titleY}:` +
+          `x=(w-text_w)/2:${slideUpY(featuresY, animStartTime)}:` +
           `${fadeInAlpha(animStartTime)}:` +
           `shadowcolor=black@0.3:shadowx=1:shadowy=1[t${filterIndex}]`
         );
         currentFilter = `[t${filterIndex}]`;
         filterIndex++;
+        animStartTime += animDelay;
       }
 
-      // 5. CONTACT INFO - Appears in last 3 seconds with elegant card
-      const contactStartTime = Math.max(0, totalDuration - 3);
-      if (sellerName || sellerPhone) {
-        const cardWidth = Math.floor(width * 0.7);
-        const cardHeight = Math.floor(height * 0.18);
-        const cardX = Math.floor((width - cardWidth) / 2);
-        const cardY = Math.floor(height * 0.38);
+      // 4. TITLE - Small elegant subtitle
+      if (title) {
+        const titleY = height - bottomMargin + Math.floor(featureFontSize * 1.0);
+        filters.push(
+          `${currentFilter}drawtext=${fontParam}:text='${escapeText(title.substring(0, 35))}':` +
+          `fontsize=${Math.floor(titleFontSize * 0.7)}:fontcolor=white@0.7:` +
+          `x=(w-text_w)/2:${slideUpY(titleY, animStartTime)}:` +
+          `${fadeInAlpha(animStartTime)}:` +
+          `shadowcolor=black@0.25:shadowx=1:shadowy=1[t${filterIndex}]`
+        );
+        currentFilter = `[t${filterIndex}]`;
+        filterIndex++;
+      }
 
-        // Elegant dark card with rounded feel
+      // 5. CONTACT INFO - Modern floating card with fade-in animation
+      const contactStartTime = Math.max(0, totalDuration - 3.5);
+      const contactAnimDuration = 0.4;
+      if (sellerName || sellerPhone) {
+        const cardWidth = Math.floor(width * 0.65);
+        const cardHeight = Math.floor(height * 0.15);
+        const cardX = Math.floor((width - cardWidth) / 2);
+        const cardY = Math.floor(height * 0.4);
+
+        // Card fade-in alpha
+        const cardFadeAlpha = `enable='gte(t\\,${contactStartTime})'`;
+        const cardFadeAlphaText = (offset: number) =>
+          `alpha='if(lt(t\\,${contactStartTime + offset})\\,0\\,if(lt(t\\,${contactStartTime + offset + contactAnimDuration})\\,(t-${contactStartTime + offset})/${contactAnimDuration}\\,1))'`;
+
+        // Modern glass card background with subtle transparency
         filters.push(
           `${currentFilter}drawbox=x=${cardX}:y=${cardY}:w=${cardWidth}:h=${cardHeight}:` +
-          `color=black@0.85:t=fill:enable='gte(t\\,${contactStartTime})'[t${filterIndex}]`
+          `color=black@0.75:t=fill:${cardFadeAlpha}[t${filterIndex}]`
         );
         currentFilter = `[t${filterIndex}]`;
         filterIndex++;
 
-        // Subtle accent line at top
+        // Elegant blue accent line at top
         filters.push(
-          `${currentFilter}drawbox=x=${cardX}:y=${cardY}:w=${cardWidth}:h=3:` +
-          `color=${BRAND_COLORS.primary}:t=fill:enable='gte(t\\,${contactStartTime})'[t${filterIndex}]`
+          `${currentFilter}drawbox=x=${cardX}:y=${cardY}:w=${cardWidth}:h=4:` +
+          `color=${BRAND_COLORS.primary}:t=fill:${cardFadeAlpha}[t${filterIndex}]`
         );
         currentFilter = `[t${filterIndex}]`;
         filterIndex++;
 
+        // Name with slide-up effect
         if (sellerName) {
+          const nameY = cardY + Math.floor(cardHeight * 0.38);
           filters.push(
             `${currentFilter}drawtext=${fontParam}:text='${escapeText(sellerName)}':` +
-            `fontsize=${Math.floor(titleFontSize * 0.85)}:fontcolor=white:` +
-            `x=(w-text_w)/2:y=${cardY + Math.floor(cardHeight * 0.35)}:` +
-            `enable='gte(t\\,${contactStartTime})'[t${filterIndex}]`
+            `fontsize=${Math.floor(titleFontSize * 0.8)}:fontcolor=white:` +
+            `x=(w-text_w)/2:${slideUpY(nameY, contactStartTime + 0.1)}:` +
+            `${cardFadeAlphaText(0.1)}:` +
+            `shadowcolor=black@0.3:shadowx=1:shadowy=1[t${filterIndex}]`
           );
           currentFilter = `[t${filterIndex}]`;
           filterIndex++;
         }
 
+        // Phone with slide-up effect
         if (sellerPhone) {
+          const phoneY = cardY + Math.floor(cardHeight * 0.68);
           filters.push(
             `${currentFilter}drawtext=${fontParam}:text='${escapeText(sellerPhone)}':` +
-            `fontsize=${Math.floor(locationFontSize * 0.9)}:fontcolor=white@0.85:` +
-            `x=(w-text_w)/2:y=${cardY + Math.floor(cardHeight * 0.65)}:` +
-            `enable='gte(t\\,${contactStartTime})'[t${filterIndex}]`
+            `fontsize=${Math.floor(locationFontSize * 0.85)}:fontcolor=white@0.9:` +
+            `x=(w-text_w)/2:${slideUpY(phoneY, contactStartTime + 0.2)}:` +
+            `${cardFadeAlphaText(0.2)}:` +
+            `shadowcolor=black@0.3:shadowx=1:shadowy=1[t${filterIndex}]`
           );
           currentFilter = `[t${filterIndex}]`;
           filterIndex++;
