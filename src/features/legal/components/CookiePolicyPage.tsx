@@ -1,10 +1,15 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { ArrowLeftIcon } from '@/constants';
 import { useAppContext } from '@/context/AppContext';
-import Footer from '@/components/shared/Footer';
-import { PageTransition, Animated } from '@/src/components/ui/Animations';
 import { CONTACT_CONFIG } from '@/src/shared/config/contact';
+import LegalFooter from './LegalFooter';
+
+// Inline ArrowLeftIcon to avoid importing all icons
+const ArrowLeftIcon: React.FC<{ className?: string }> = ({ className }) => (
+  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className={className}>
+    <path strokeLinecap="round" strokeLinejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" />
+  </svg>
+);
 
 const CookiePolicyPage: React.FC = () => {
   const { t } = useTranslation(['legal', 'common']);
@@ -13,6 +18,11 @@ const CookiePolicyPage: React.FC = () => {
   const handleBack = () => {
     dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'search' });
     window.history.pushState({}, '', '/');
+  };
+
+  const handleNavigate = (view: string) => {
+    dispatch({ type: 'SET_ACTIVE_VIEW', payload: view });
+    window.history.pushState({}, '', `/${view}`);
   };
 
   const handleManageCookies = () => {
@@ -24,12 +34,11 @@ const CookiePolicyPage: React.FC = () => {
   const lastUpdated = 'January 9, 2026';
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <PageTransition>
+    <div className="min-h-screen bg-gray-50 flex flex-col">
+      <div className="flex-1">
         <div className="max-w-4xl mx-auto px-4 py-8 sm:py-12">
           {/* Header */}
-          <Animated variant="fadeInUp" delay={0}>
-            <div className="mb-8">
+          <div className="mb-8">
               <button
                 onClick={handleBack}
                 className="flex items-center gap-2 text-gray-600 hover:text-primary transition-colors mb-4"
@@ -44,11 +53,9 @@ const CookiePolicyPage: React.FC = () => {
                 {t('legal:cookies.lastUpdated', 'Last updated')}: {lastUpdated}
               </p>
             </div>
-          </Animated>
 
           {/* Content */}
-          <Animated variant="fadeInUp" delay={100}>
-            <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6 sm:p-8 space-y-8">
+          <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6 sm:p-8 space-y-8">
           {/* Introduction */}
           <section>
             <h2 className="text-xl font-semibold text-gray-900 mb-3">
@@ -304,11 +311,10 @@ const CookiePolicyPage: React.FC = () => {
             </div>
           </section>
             </div>
-          </Animated>
         </div>
-      </PageTransition>
+      </div>
 
-      <Footer />
+      <LegalFooter onNavigate={handleNavigate} />
     </div>
   );
 };

@@ -361,9 +361,18 @@ export default defineConfig(({ mode }) => {
               if (id.includes('/features/auth/')) {
                 return 'auth';
               }
-              // Legal pages (standalone, small)
-              if (id.includes('/features/legal/')) {
-                return 'legal';
+              // Legal pages - each page separate for better code splitting
+              if (id.includes('/features/legal/components/PrivacyPolicyPage')) {
+                return 'legal-privacy';
+              }
+              if (id.includes('/features/legal/components/TermsOfServicePage')) {
+                return 'legal-terms';
+              }
+              if (id.includes('/features/legal/components/CookiePolicyPage')) {
+                return 'legal-cookies';
+              }
+              if (id.includes('/features/legal/components/RefundPolicyPage')) {
+                return 'legal-refund';
               }
               // Onboarding (standalone)
               if (id.includes('/features/onboarding/')) {
