@@ -5,6 +5,7 @@ import {
   getValuationById,
   getCityValuationStats,
 } from '../services/propertyValuationService';
+import { apiLogger } from '../utils/logger';
 
 /**
  * @desc    Create a new property valuation
@@ -100,7 +101,7 @@ export const createValuationController = async (req: Request, res: Response): Pr
       data: valuation,
     });
   } catch (error: any) {
-    console.error('Error creating property valuation:', error);
+    apiLogger.error('Error creating property valuation:', error);
     res.status(500).json({
       success: false,
       message: 'Error creating property valuation',
@@ -133,7 +134,7 @@ export const getValuationController = async (req: Request, res: Response): Promi
       data: valuation,
     });
   } catch (error: any) {
-    console.error('Error fetching valuation:', error);
+    apiLogger.error('Error fetching valuation:', error);
     res.status(500).json({
       success: false,
       message: 'Error fetching valuation',
@@ -168,7 +169,7 @@ export const getValuationHistoryController = async (req: Request, res: Response)
       data: valuations,
     });
   } catch (error: any) {
-    console.error('Error fetching valuation history:', error);
+    apiLogger.error('Error fetching valuation history:', error);
     res.status(500).json({
       success: false,
       message: 'Error fetching valuation history',
@@ -201,7 +202,7 @@ export const getCityStatsController = async (req: Request, res: Response): Promi
       data: stats,
     });
   } catch (error: any) {
-    console.error('Error fetching city valuation stats:', error);
+    apiLogger.error('Error fetching city valuation stats:', error);
     res.status(500).json({
       success: false,
       message: 'Error fetching city statistics',

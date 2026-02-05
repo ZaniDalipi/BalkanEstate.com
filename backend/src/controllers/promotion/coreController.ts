@@ -15,6 +15,7 @@ import {
   enrichPromotion,
   clearPropertyPromotion,
 } from '../../services/promotion/promotionService';
+import { promotionLogger } from '../../utils/logger';
 
 /**
  * @desc    Get available promotion tiers and pricing
@@ -32,7 +33,7 @@ export const getPromotionTiers = async (
       urgentModifier: URGENT_MODIFIER,
     });
   } catch (error: any) {
-    console.error('Get promotion tiers error:', error);
+    promotionLogger.error('Get promotion tiers error:', error);
     res.status(500).json({ message: 'Error fetching promotion tiers', error: error.message });
   }
 };
@@ -91,7 +92,7 @@ export const getAgencyPromotionAllocation = async (
 
     res.json({ allocation, agency: { id: agency._id, name: agency.name } });
   } catch (error: any) {
-    console.error('Get agency allocation error:', error);
+    promotionLogger.error('Get agency allocation error:', error);
     res.status(500).json({ message: 'Error fetching agency allocation', error: error.message });
   }
 };
@@ -121,7 +122,7 @@ export const getMyPromotions = async (
 
     res.json({ promotions: enrichedPromotions });
   } catch (error: any) {
-    console.error('Get promotions error:', error);
+    promotionLogger.error('Get promotions error:', error);
     res.status(500).json({ message: 'Error fetching promotions', error: error.message });
   }
 };
@@ -166,7 +167,7 @@ export const cancelPromotion = async (
 
     res.json({ message: 'Promotion cancelled successfully' });
   } catch (error: any) {
-    console.error('Cancel promotion error:', error);
+    promotionLogger.error('Cancel promotion error:', error);
     res.status(500).json({ message: 'Error cancelling promotion', error: error.message });
   }
 };
@@ -222,7 +223,7 @@ export const getFeaturedProperties = async (
       total: enrichedPromotions.length,
     });
   } catch (error: any) {
-    console.error('Get featured properties error:', error);
+    promotionLogger.error('Get featured properties error:', error);
     res.status(500).json({ message: 'Error fetching featured properties', error: error.message });
   }
 };

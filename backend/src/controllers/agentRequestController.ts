@@ -4,6 +4,7 @@ import Agent from '../models/Agent';
 import Agency from '../models/Agency';
 import emailService from '../services/emailService';
 import { geocodeFreeformLocation, calculateDistanceKm } from '../services/geocodingService';
+import { apiLogger } from '../utils/logger';
 
 const SEARCH_RADIUS_KM = 25; // 20-25 km radius for finding nearby agents
 
@@ -37,7 +38,7 @@ export const createAgentRequest = async (req: Request, res: Response): Promise<v
     if (geocodeResult) {
       userLat = geocodeResult.lat;
       userLng = geocodeResult.lng;
-      console.log(`📍 User location geocoded: ${userLat}, ${userLng} (${geocodeResult.display_name})`);
+      apiLogger.info(`📍 User location geocoded: ${userLat}, ${userLng} (${geocodeResult.display_name})`);
     }
 
     // Find nearby agents within SEARCH_RADIUS_KM
@@ -95,12 +96,12 @@ export const createAgentRequest = async (req: Request, res: Response): Promise<v
       // Sort agencies by distance
       matchedAgencies.sort((a, b) => a.distance - b.distance);
 
-      console.log(`🔍 Found ${matchedAgents.length} agents and ${matchedAgencies.length} agencies within ${SEARCH_RADIUS_KM}km`);
+      apiLogger.info(`🔍 Found ${matchedAgents.length} agents and ${matchedAgencies.length} agencies within ${SEARCH_RADIUS_KM}km`);
     }
 
     // Fallback: If geo-search didn't find enough, use text-based search
     if (matchedAgents.length < 3) {
-      console.log('📝 Using text-based fallback search for agents...');
+      apiLogger.info('📝 Using text-based fallback search for agents...');
       const textMatchedAgents = await Agent.find({
         $or: [
           { serviceAreas: { $elemMatch: { $regex: locationLower, $options: 'i' } } },
@@ -162,7 +163,7 @@ export const createAgentRequest = async (req: Request, res: Response): Promise<v
           emailsSent.push(user.email);
           emailsSentCount++;
         } catch (err) {
-          console.error(`Failed to send email to agent ${user.email}:`, err);
+          apiLogger.error(`Failed to send email to agent ${user.email}:`, err);
         }
       }
     }
@@ -187,12 +188,12 @@ export const createAgentRequest = async (req: Request, res: Response): Promise<v
           emailsSent.push(agency.email);
           emailsSentCount++;
         } catch (err) {
-          console.error(`Failed to send email to agency ${agency.email}:`, err);
+          apiLogger.error(`Failed to send email to agency ${agency.email}:`, err);
         }
       }
     }
 
-    console.log(`📧 Sent ${emailsSent.length} notification emails`);
+    apiLogger.info(`📧 Sent ${emailsSent.length} notification emails`);
 
     // Save final state with email count
     agentRequest.emailsSent = emailsSentCount;
@@ -211,7 +212,7 @@ export const createAgentRequest = async (req: Request, res: Response): Promise<v
       },
     });
   } catch (error) {
-    console.error('Error creating agent request:', error);
+    apiLogger.error('Error creating agent request:', error);
     res.status(500).json({ message: 'Server error' });
   }
 };
@@ -328,7 +329,7 @@ export const getAllAgentRequests = async (req: Request, res: Response): Promise<
       },
     });
   } catch (error) {
-    console.error('Error fetching agent requests:', error);
+    apiLogger.error('Error fetching agent requests:', error);
     res.status(500).json({ message: 'Server error' });
   }
 };
@@ -351,7 +352,7 @@ export const getAgentRequests = async (req: Request, res: Response): Promise<voi
 
     res.json({ agentRequests });
   } catch (error) {
-    console.error('Error fetching agent requests:', error);
+    apiLogger.error('Error fetching agent requests:', error);
     res.status(500).json({ message: 'Server error' });
   }
 };
@@ -397,7 +398,7 @@ export const updateAgentRequestStatus = async (req: Request, res: Response): Pro
 
     res.json({ agentRequest });
   } catch (error) {
-    console.error('Error updating agent request:', error);
+    apiLogger.error('Error updating agent request:', error);
     res.status(500).json({ message: 'Server error' });
   }
 };
@@ -502,7 +503,7 @@ export const getAgentRequestStats = async (req: Request, res: Response): Promise
       recentRequests,
     });
   } catch (error) {
-    console.error('Error fetching agent request stats:', error);
+    apiLogger.error('Error fetching agent request stats:', error);
     res.status(500).json({ message: 'Server error' });
   }
 };

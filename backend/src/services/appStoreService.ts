@@ -1,5 +1,6 @@
 import axios from 'axios';
 import * as jwt from 'jsonwebtoken';
+import { paymentLogger } from '../utils/logger';
 
 
 /**
@@ -88,7 +89,7 @@ class AppStoreService {
 
       return decoded;
     } catch (error: any) {
-      console.error('App Store validation error:', error);
+      paymentLogger.error('App Store validation error:', error);
       throw new Error(`Failed to validate App Store transaction: ${error.message}`);
     }
   }
@@ -116,7 +117,7 @@ class AppStoreService {
 
       return transactions;
     } catch (error: any) {
-      console.error('App Store history error:', error);
+      paymentLogger.error('App Store history error:', error);
       throw new Error(`Failed to get transaction history: ${error.message}`);
     }
   }
@@ -139,7 +140,7 @@ class AppStoreService {
 
       return response.data;
     } catch (error: any) {
-      console.error('App Store subscription status error:', error);
+      paymentLogger.error('App Store subscription status error:', error);
       throw new Error(`Failed to get subscription status: ${error.message}`);
     }
   }
@@ -161,9 +162,9 @@ class AppStoreService {
         }
       );
 
-      console.log(`Requested refund for transaction: ${transactionId}`);
+      paymentLogger.info(`Requested refund for transaction: ${transactionId}`);
     } catch (error: any) {
-      console.error('App Store refund error:', error);
+      paymentLogger.error('App Store refund error:', error);
       throw new Error(`Failed to request refund: ${error.message}`);
     }
   }
@@ -193,7 +194,7 @@ class AppStoreService {
       // This is a simplified version - in production, validate the full chain
       return true;
     } catch (error) {
-      console.error('Signature verification failed:', error);
+      paymentLogger.error('Signature verification failed:', error);
       return false;
     }
   }
@@ -206,7 +207,7 @@ class AppStoreService {
       const decoded = jwt.decode(signedPayload);
       return decoded;
     } catch (error) {
-      console.error('Failed to decode notification:', error);
+      paymentLogger.error('Failed to decode notification:', error);
       throw new Error('Invalid notification payload');
     }
   }

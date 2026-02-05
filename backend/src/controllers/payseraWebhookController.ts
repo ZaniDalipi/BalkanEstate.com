@@ -10,6 +10,7 @@ import { payseraService } from '../services/payseraService';
 import { processSubscriptionPayment } from '../services/subscriptionPaymentService';
 import User from '../models/User';
 import Product from '../models/Product';
+import { paymentLogger } from '../utils/logger';
 
 /**
  * PaySera callback status codes
@@ -32,7 +33,7 @@ export const handlePayseraWebhook = async (req: Request, res: Response): Promise
 
     // Validate required parameters
     if (!data || !ss1 || typeof data !== 'string' || typeof ss1 !== 'string') {
-      console.error('❌ PaySera webhook: Missing data or signature');
+      paymentLogger.error('❌ PaySera webhook: Missing data or signature');
       res.status(400).send('Bad Request: Missing parameters');
       return;
     }
@@ -41,7 +42,7 @@ export const handlePayseraWebhook = async (req: Request, res: Response): Promise
     const callbackResult = payseraService.parseCallback(data, ss1);
 
     if (!callbackResult.valid || !callbackResult.data) {
-      console.error('❌ PaySera webhook: Invalid signature or data');
+      paymentLogger.error('❌ PaySera webhook: Invalid signature or data');
       res.status(400).send('Bad Request: Invalid signature');
       return;
     }
@@ -49,8 +50,8 @@ export const handlePayseraWebhook = async (req: Request, res: Response): Promise
     const callbackData = callbackResult.data;
     const metadata = callbackResult.metadata;
 
-    console.log(`📥 PaySera webhook received for order ${callbackData.orderid}`);
-    console.log(`   Status: ${callbackData.status}, Amount: ${callbackData.payamount} ${callbackData.paycurrency}`);
+    paymentLogger.info(`📥 PaySera webhook received for order ${callbackData.orderid}`);
+    paymentLogger.info(`   Status: ${callbackData.status}, Amount: ${callbackData.payamount} ${callbackData.paycurrency}`);
 
     // Handle based on status
     switch (callbackData.status) {
@@ -59,26 +60,26 @@ export const handlePayseraWebhook = async (req: Request, res: Response): Promise
         break;
 
       case PAYSERA_STATUS.ACCEPTED_NOT_EXECUTED:
-        console.log(`⏳ PaySera payment accepted but not yet executed: ${callbackData.orderid}`);
+        paymentLogger.info(`⏳ PaySera payment accepted but not yet executed: ${callbackData.orderid}`);
         // Payment is pending - we could create a pending subscription here
         break;
 
       case PAYSERA_STATUS.NOT_EXECUTED:
-        console.log(`❌ PaySera payment not executed: ${callbackData.orderid}`);
+        paymentLogger.info(`❌ PaySera payment not executed: ${callbackData.orderid}`);
         break;
 
       case PAYSERA_STATUS.ADDITIONAL_INFO_NEEDED:
-        console.log(`⚠️ PaySera payment needs additional info: ${callbackData.orderid}`);
+        paymentLogger.info(`⚠️ PaySera payment needs additional info: ${callbackData.orderid}`);
         break;
 
       default:
-        console.log(`❓ PaySera unknown status ${callbackData.status}: ${callbackData.orderid}`);
+        paymentLogger.info(`❓ PaySera unknown status ${callbackData.status}: ${callbackData.orderid}`);
     }
 
     // PaySera expects 'OK' response for successful processing
     res.status(200).send('OK');
   } catch (error: any) {
-    console.error('❌ PaySera webhook error:', error);
+    paymentLogger.error('❌ PaySera webhook error:', error);
     // Still respond with OK to prevent retries for errors we can't fix
     res.status(200).send('OK');
   }
@@ -97,16 +98,16 @@ async function handleSuccessfulPayment(
     const productId = metadata?.productId;
 
     if (!userId) {
-      console.error('❌ PaySera webhook: No userId found in callback');
+      paymentLogger.error('❌ PaySera webhook: No userId found in callback');
       return;
     }
 
-    console.log(`✅ Processing successful PaySera payment for user ${userId}`);
+    paymentLogger.info(`✅ Processing successful PaySera payment for user ${userId}`);
 
     // Find user
     const user = await User.findById(userId);
     if (!user) {
-      console.error(`❌ PaySera webhook: User not found: ${userId}`);
+      paymentLogger.error(`❌ PaySera webhook: User not found: ${userId}`);
       return;
     }
 
@@ -140,11 +141,11 @@ async function handleSuccessfulPayment(
       purchaseToken: callbackData.requestid,
     });
 
-    console.log(`✅ PaySera subscription activated for user ${user.email}`);
-    console.log(`   Subscription ID: ${result.subscription._id}`);
-    console.log(`   Expires: ${result.subscription.expirationDate}`);
+    paymentLogger.info(`✅ PaySera subscription activated for user ${user.email}`);
+    paymentLogger.info(`   Subscription ID: ${result.subscription._id}`);
+    paymentLogger.info(`   Expires: ${result.subscription.expirationDate}`);
   } catch (error: any) {
-    console.error('❌ Error processing PaySera payment:', error);
+    paymentLogger.error('❌ Error processing PaySera payment:', error);
     throw error;
   }
 }
@@ -197,7 +198,7 @@ export const verifyPayseraPayment = async (req: Request, res: Response): Promise
       });
     }
   } catch (error: any) {
-    console.error('Error verifying PaySera payment:', error);
+    paymentLogger.error('Error verifying PaySera payment:', error);
     res.status(500).json({ message: 'Error verifying payment', error: error.message });
   }
 };

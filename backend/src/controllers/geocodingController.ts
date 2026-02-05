@@ -1,4 +1,5 @@
 import { Request, Response } from 'express';
+import { geocodingLogger } from '../utils/logger';
 
 const NOMINATIM_BASE_URL = 'https://nominatim.openstreetmap.org/search?';
 const NOMINATIM_REVERSE_URL = 'https://nominatim.openstreetmap.org/reverse?';
@@ -24,7 +25,7 @@ export const searchLocation = async (req: Request, res: Response): Promise<void>
       countrycodes: BALKAN_COUNTRY_CODES,
     });
 
-    console.log('Geocoding search for:', query);
+    geocodingLogger.info('Geocoding search for:', query);
 
     const response = await fetch(`${NOMINATIM_BASE_URL}${params.toString()}`, {
       headers: {
@@ -39,7 +40,7 @@ export const searchLocation = async (req: Request, res: Response): Promise<void>
     const data = await response.json();
     res.json(data);
   } catch (error: any) {
-    console.error('Geocoding search error:', error);
+    geocodingLogger.error('Geocoding search error:', error);
     res.status(500).json({ message: 'Error searching location', error: error.message });
   }
 };
@@ -64,7 +65,7 @@ export const reverseGeocode = async (req: Request, res: Response): Promise<void>
       zoom: '18', // Higher zoom = more detailed address
     });
 
-    console.log('Reverse geocoding for:', lat, lon);
+    geocodingLogger.info('Reverse geocoding for:', lat, lon);
 
     const response = await fetch(`${NOMINATIM_REVERSE_URL}${params.toString()}`, {
       headers: {
@@ -79,7 +80,7 @@ export const reverseGeocode = async (req: Request, res: Response): Promise<void>
     const data = await response.json();
     res.json(data);
   } catch (error: any) {
-    console.error('Reverse geocoding error:', error);
+    geocodingLogger.error('Reverse geocoding error:', error);
     res.status(500).json({ message: 'Error reverse geocoding location', error: error.message });
   }
 };

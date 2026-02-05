@@ -1,5 +1,6 @@
 import * as cron from 'node-cron';
 import mongoose from 'mongoose';
+import { cronLogger } from '../utils/logger';
 import AgencyFeaturedSubscription from '../models/AgencyFeaturedSubscription';
 import Agency from '../models/Agency';
 import User from '../models/User';
@@ -20,7 +21,7 @@ const isMongoConnected = (): boolean => {
 // Wrapper to run cron jobs only when DB is connected
 const withDbConnection = async (jobName: string, job: () => Promise<void>): Promise<void> => {
   if (!isMongoConnected()) {
-    console.log(`⏭️ Skipping ${jobName} - MongoDB not connected`);
+    cronLogger.info(`⏭️ Skipping ${jobName} - MongoDB not connected`);
     return;
   }
   await job();
@@ -44,7 +45,7 @@ export const startCronJobs = () => {
   checkExpiringTask = cron.schedule('0 10 * * *', async () => {
     await withDbConnection('expiring subscriptions check', async () => {
       try {
-        console.log('🔍 Checking expiring subscriptions...');
+        cronLogger.info('🔍 Checking expiring subscriptions...');
         const tomorrow = new Date();
         tomorrow.setDate(tomorrow.getDate() + 1);
         tomorrow.setHours(23, 59, 59, 999);
@@ -81,10 +82,10 @@ export const startCronJobs = () => {
           }).save();
 
           await emailService.sendExpiryReminder(user.email, agency.name, sub.currentPeriodEnd, couponCode, 20);
-          console.log('✅ Sent reminder to', agency.name);
+          cronLogger.info('✅ Sent reminder to', agency.name);
         }
       } catch (error) {
-        console.error('Expiry cron error:', error);
+        cronLogger.error('Expiry cron error:', error);
       }
     });
   });
@@ -110,9 +111,9 @@ export const startCronJobs = () => {
             await agency.save();
           }
         }
-        console.log('✅ Updated', expired.length, 'expired subscriptions');
+        cronLogger.info('✅ Updated', expired.length, 'expired subscriptions');
       } catch (error) {
-        console.error('Expiry update cron error:', error);
+        cronLogger.error('Expiry update cron error:', error);
       }
     });
   });
@@ -121,11 +122,11 @@ export const startCronJobs = () => {
   userSubscriptionTask = cron.schedule('0 */6 * * *', async () => {
     await withDbConnection('user subscription expiry', async () => {
       try {
-        console.log('🔄 Checking and updating expired user subscriptions...');
+        cronLogger.info('🔄 Checking and updating expired user subscriptions...');
         const count = await updateExpiredSubscriptions();
-        console.log(`✅ Processed ${count} expired user subscriptions`);
+        cronLogger.info(`✅ Processed ${count} expired user subscriptions`);
       } catch (error) {
-        console.error('User subscription expiry cron error:', error);
+        cronLogger.error('User subscription expiry cron error:', error);
       }
     });
   });
@@ -134,7 +135,7 @@ export const startCronJobs = () => {
   // Sends reminders 7 days before expiration/renewal for both auto-renewing and non-auto-renewing
   subscriptionReminderTask = cron.schedule('0 9 * * *', async () => {
     try {
-      console.log('📧 Sending subscription renewal reminders...');
+      cronLogger.info('📧 Sending subscription renewal reminders...');
 
       // Calculate date ranges
       const today = new Date();
@@ -179,7 +180,7 @@ export const startCronJobs = () => {
           await sub.save();
           remindersSent++;
         } catch (emailError) {
-          console.error(`Failed to send auto-renewal reminder to ${user.email}:`, emailError);
+          cronLogger.error(`Failed to send auto-renewal reminder to ${user.email}:`, emailError);
         }
       }
 
@@ -207,24 +208,24 @@ export const startCronJobs = () => {
           await sub.save();
           remindersSent++;
         } catch (emailError) {
-          console.error(`Failed to send expiry reminder to ${user.email}:`, emailError);
+          cronLogger.error(`Failed to send expiry reminder to ${user.email}:`, emailError);
         }
       }
 
-      console.log(`✅ Sent ${remindersSent} subscription reminders (auto-renewal: ${autoRenewingSubscriptions.length}, expiring: ${expiringSubscriptions.length})`);
+      cronLogger.info(`✅ Sent ${remindersSent} subscription reminders (auto-renewal: ${autoRenewingSubscriptions.length}, expiring: ${expiringSubscriptions.length})`);
     } catch (error) {
-      console.error('Subscription reminder cron error:', error);
+      cronLogger.error('Subscription reminder cron error:', error);
     }
   });
 
   // Send weekly statistics to Pro members and agencies - runs every Monday at 9 AM UTC
   weeklyStatsTask = cron.schedule('0 9 * * 1', async () => {
     try {
-      console.log('📊 Starting weekly statistics email job...');
+      cronLogger.info('📊 Starting weekly statistics email job...');
       await runWeeklyStatsJobs();
-      console.log('✅ Weekly statistics emails sent');
+      cronLogger.info('✅ Weekly statistics emails sent');
     } catch (error) {
-      console.error('Weekly stats cron error:', error);
+      cronLogger.error('Weekly stats cron error:', error);
     }
   });
 
@@ -237,29 +238,29 @@ export const startCronJobs = () => {
     try {
       await processNewListingAlerts('instant');
     } catch (error) {
-      console.error('Instant alerts cron error:', error);
+      cronLogger.error('Instant alerts cron error:', error);
     }
   });
 
   // Daily digest alerts - runs daily at 8 AM UTC
   dailyAlertsTask = cron.schedule('0 8 * * *', async () => {
     try {
-      console.log('📬 Processing daily property alerts...');
+      cronLogger.info('📬 Processing daily property alerts...');
       await processNewListingAlerts('daily');
-      console.log('✅ Daily alerts sent');
+      cronLogger.info('✅ Daily alerts sent');
     } catch (error) {
-      console.error('Daily alerts cron error:', error);
+      cronLogger.error('Daily alerts cron error:', error);
     }
   });
 
   // Weekly digest alerts - runs every Sunday at 8 AM UTC
   weeklyAlertsTask = cron.schedule('0 8 * * 0', async () => {
     try {
-      console.log('📬 Processing weekly property alerts...');
+      cronLogger.info('📬 Processing weekly property alerts...');
       await processNewListingAlerts('weekly');
-      console.log('✅ Weekly alerts sent');
+      cronLogger.info('✅ Weekly alerts sent');
     } catch (error) {
-      console.error('Weekly alerts cron error:', error);
+      cronLogger.error('Weekly alerts cron error:', error);
     }
   });
 
@@ -268,7 +269,7 @@ export const startCronJobs = () => {
     try {
       await processPriceDropAlerts();
     } catch (error) {
-      console.error('Price drop alerts cron error:', error);
+      cronLogger.error('Price drop alerts cron error:', error);
     }
   });
 
@@ -280,22 +281,22 @@ export const startCronJobs = () => {
   // Sends personalized property recommendations during user's most active hours
   proBuyerHotHoursTask = cron.schedule('0 * * * *', async () => {
     try {
-      console.log('🔥 Processing pro buyer hot hour recommendations...');
+      cronLogger.info('🔥 Processing pro buyer hot hour recommendations...');
       const stats = await sendHotHourRecommendations();
-      console.log(`✅ Hot hour emails: ${stats.sent} sent, ${stats.skipped} skipped, ${stats.errors} errors`);
+      cronLogger.info(`✅ Hot hour emails: ${stats.sent} sent, ${stats.skipped} skipped, ${stats.errors} errors`);
     } catch (error) {
-      console.error('Pro buyer hot hours cron error:', error);
+      cronLogger.error('Pro buyer hot hours cron error:', error);
     }
   });
 
   // Cleanup old activity patterns - runs daily at midnight
   activityCleanupTask = cron.schedule('0 0 * * *', async () => {
     try {
-      console.log('🧹 Cleaning up old activity patterns...');
+      cronLogger.info('🧹 Cleaning up old activity patterns...');
       cleanupOldPatterns();
-      console.log('✅ Activity patterns cleanup complete');
+      cronLogger.info('✅ Activity patterns cleanup complete');
     } catch (error) {
-      console.error('Activity cleanup cron error:', error);
+      cronLogger.error('Activity cleanup cron error:', error);
     }
   });
 
@@ -307,21 +308,21 @@ export const startCronJobs = () => {
   // Refreshes promotion coupons for all Pro and Enterprise users and sends email notifications
   monthlyCouponTask = cron.schedule('0 9 1 * *', async () => {
     try {
-      console.log('🎟️ Starting monthly promotion coupon refresh...');
+      cronLogger.info('🎟️ Starting monthly promotion coupon refresh...');
       const result = await processMonthlyCouponRefresh();
-      console.log(`✅ Monthly coupon refresh completed:`);
-      console.log(`   - Pro users refreshed: ${result.usersRefreshed}`);
-      console.log(`   - Agencies refreshed: ${result.agenciesRefreshed}`);
-      console.log(`   - Emails sent: ${result.emailsSent}`);
+      cronLogger.info(`✅ Monthly coupon refresh completed:`);
+      cronLogger.info(`   - Pro users refreshed: ${result.usersRefreshed}`);
+      cronLogger.info(`   - Agencies refreshed: ${result.agenciesRefreshed}`);
+      cronLogger.info(`   - Emails sent: ${result.emailsSent}`);
       if (result.errors.length > 0) {
-        console.warn(`⚠️ ${result.errors.length} errors occurred during refresh`);
+        cronLogger.warn(`⚠️ ${result.errors.length} errors occurred during refresh`);
       }
     } catch (error) {
-      console.error('Monthly coupon cron error:', error);
+      cronLogger.error('Monthly coupon cron error:', error);
     }
   });
 
-  console.log('🕐 All cron jobs started (subscription checks, weekly stats, property alerts, pro buyer emails, monthly coupons)');
+  cronLogger.info('🕐 All cron jobs started (subscription checks, weekly stats, property alerts, pro buyer emails, monthly coupons)');
 };
 
 export const stopCronJobs = () => {
@@ -337,5 +338,5 @@ export const stopCronJobs = () => {
   if (proBuyerHotHoursTask) proBuyerHotHoursTask.stop();
   if (activityCleanupTask) activityCleanupTask.stop();
   if (monthlyCouponTask) monthlyCouponTask.stop();
-  console.log('🛑 All cron jobs stopped');
+  cronLogger.info('🛑 All cron jobs stopped');
 };

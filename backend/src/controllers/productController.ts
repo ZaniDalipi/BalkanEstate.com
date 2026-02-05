@@ -1,5 +1,6 @@
 import { Request, Response } from 'express';
 import Product from '../models/Product';
+import { apiLogger } from '../utils/logger';
 
 // ============================================================================
 // PUBLIC ENDPOINTS
@@ -36,7 +37,7 @@ export const getProducts = async (req: Request, res: Response): Promise<void> =>
       products,
     });
   } catch (error) {
-    console.error('Error fetching products:', error);
+    apiLogger.error('Error fetching products:', error);
     res.status(500).json({
       success: false,
       message: 'Failed to fetch products',
@@ -67,7 +68,7 @@ export const getProductById = async (req: Request, res: Response): Promise<void>
       product,
     });
   } catch (error) {
-    console.error('Error fetching product:', error);
+    apiLogger.error('Error fetching product:', error);
     res.status(500).json({
       success: false,
       message: 'Failed to fetch product',
@@ -93,7 +94,7 @@ export const getAllProductsAdmin = async (_req: Request, res: Response): Promise
       products,
     });
   } catch (error) {
-    console.error('Error fetching all products:', error);
+    apiLogger.error('Error fetching all products:', error);
     res.status(500).json({
       success: false,
       message: 'Failed to fetch products',
@@ -115,7 +116,7 @@ export const createProduct = async (req: Request, res: Response): Promise<void> 
       product,
     });
   } catch (error: any) {
-    console.error('Error creating product:', error);
+    apiLogger.error('Error creating product:', error);
 
     if (error.code === 11000) {
       res.status(400).json({
@@ -161,7 +162,7 @@ export const updateProduct = async (req: Request, res: Response): Promise<void> 
       product,
     });
   } catch (error: any) {
-    console.error('Error updating product:', error);
+    apiLogger.error('Error updating product:', error);
     res.status(500).json({
       success: false,
       message: 'Failed to update product',
@@ -193,7 +194,7 @@ export const deleteProduct = async (req: Request, res: Response): Promise<void> 
       message: 'Product deleted successfully',
     });
   } catch (error: any) {
-    console.error('Error deleting product:', error);
+    apiLogger.error('Error deleting product:', error);
     res.status(500).json({
       success: false,
       message: 'Failed to delete product',
@@ -229,7 +230,7 @@ export const toggleProductVisibility = async (req: Request, res: Response): Prom
       product,
     });
   } catch (error: any) {
-    console.error('Error toggling product visibility:', error);
+    apiLogger.error('Error toggling product visibility:', error);
     res.status(500).json({
       success: false,
       message: 'Failed to toggle product visibility',
@@ -265,7 +266,7 @@ export const toggleProductStatus = async (req: Request, res: Response): Promise<
       product,
     });
   } catch (error: any) {
-    console.error('Error toggling product status:', error);
+    apiLogger.error('Error toggling product status:', error);
     res.status(500).json({
       success: false,
       message: 'Failed to toggle product status',

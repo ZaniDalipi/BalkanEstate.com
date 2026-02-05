@@ -2,6 +2,7 @@ import { Request, Response } from 'express';
 import DiscountCode from '../models/DiscountCode';
 import User, { IUser } from '../models/User';
 import { generateSecureRandomString } from '../utils/secureRandom';
+import { apiLogger } from '../utils/logger';
 
 /**
  * Helper to check if user is admin
@@ -90,7 +91,7 @@ export const createDiscountCode = async (req: Request, res: Response): Promise<v
       },
     });
   } catch (error: any) {
-    console.error('Create discount code error:', error);
+    apiLogger.error('Create discount code error:', error);
     res.status(500).json({ message: 'Error creating discount code', error: error.message });
   }
 };
@@ -152,7 +153,7 @@ export const generateDiscountCodes = async (req: Request, res: Response): Promis
 
         generatedCodes.push(discountCode.code);
       } catch (error) {
-        console.error(`Failed to create code ${code}:`, error);
+        apiLogger.error(`Failed to create code ${code}:`, error);
         // Skip duplicates and continue
       }
     }
@@ -162,7 +163,7 @@ export const generateDiscountCodes = async (req: Request, res: Response): Promis
       codes: generatedCodes,
     });
   } catch (error: any) {
-    console.error('Generate discount codes error:', error);
+    apiLogger.error('Generate discount codes error:', error);
     res.status(500).json({ message: 'Error generating discount codes', error: error.message });
   }
 };
@@ -222,7 +223,7 @@ export const validateDiscountCode = async (req: Request, res: Response): Promise
       },
     });
   } catch (error: any) {
-    console.error('Validate discount code error:', error);
+    apiLogger.error('Validate discount code error:', error);
     res.status(500).json({ message: 'Error validating discount code', error: error.message });
   }
 };
@@ -279,7 +280,7 @@ export const redeemDiscountCode = async (req: Request, res: Response): Promise<v
       },
     });
   } catch (error: any) {
-    console.error('Redeem discount code error:', error);
+    apiLogger.error('Redeem discount code error:', error);
     res.status(500).json({ message: 'Error redeeming discount code', error: error.message });
   }
 };
@@ -339,7 +340,7 @@ export const getAllDiscountCodes = async (req: Request, res: Response): Promise<
       },
     });
   } catch (error: any) {
-    console.error('Get discount codes error:', error);
+    apiLogger.error('Get discount codes error:', error);
     res.status(500).json({ message: 'Error fetching discount codes', error: error.message });
   }
 };
@@ -381,7 +382,7 @@ export const deactivateDiscountCode = async (req: Request, res: Response): Promi
       },
     });
   } catch (error: any) {
-    console.error('Deactivate discount code error:', error);
+    apiLogger.error('Deactivate discount code error:', error);
     res.status(500).json({ message: 'Error deactivating discount code', error: error.message });
   }
 };
@@ -423,7 +424,7 @@ export const deleteDiscountCode = async (req: Request, res: Response): Promise<v
 
     res.json({ message: 'Discount code deleted successfully' });
   } catch (error: any) {
-    console.error('Delete discount code error:', error);
+    apiLogger.error('Delete discount code error:', error);
     res.status(500).json({ message: 'Error deleting discount code', error: error.message });
   }
 };

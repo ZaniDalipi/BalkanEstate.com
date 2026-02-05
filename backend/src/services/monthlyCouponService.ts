@@ -3,6 +3,7 @@ import Agency from '../models/Agency';
 import Product from '../models/Product';
 import Subscription from '../models/Subscription';
 import { sendMonthlyCouponEmail } from './emailService';
+import { promotionLogger } from '../utils/logger';
 
 /**
  * Monthly Coupon Service
@@ -213,7 +214,7 @@ export async function refreshAgencyCoupons(): Promise<{ refreshed: number; email
  * Main function to process all monthly coupon refreshes
  */
 export async function processMonthlyCouponRefresh(): Promise<CouponRefreshResult> {
-  console.log('[Coupon Service] Starting monthly coupon refresh...');
+  promotionLogger.info('[Coupon Service] Starting monthly coupon refresh...');
 
   const proResult = await refreshProUserCoupons();
   const agencyResult = await refreshAgencyCoupons();
@@ -225,13 +226,13 @@ export async function processMonthlyCouponRefresh(): Promise<CouponRefreshResult
     errors: [...proResult.errors, ...agencyResult.errors],
   };
 
-  console.log(`[Coupon Service] Monthly refresh completed:`);
-  console.log(`  - Pro users refreshed: ${result.usersRefreshed}`);
-  console.log(`  - Agencies refreshed: ${result.agenciesRefreshed}`);
-  console.log(`  - Emails sent: ${result.emailsSent}`);
+  promotionLogger.info(`[Coupon Service] Monthly refresh completed:`);
+  promotionLogger.info(`  - Pro users refreshed: ${result.usersRefreshed}`);
+  promotionLogger.info(`  - Agencies refreshed: ${result.agenciesRefreshed}`);
+  promotionLogger.info(`  - Emails sent: ${result.emailsSent}`);
   if (result.errors.length > 0) {
-    console.log(`  - Errors: ${result.errors.length}`);
-    result.errors.forEach(e => console.error(`    ${e}`));
+    promotionLogger.info(`  - Errors: ${result.errors.length}`);
+    result.errors.forEach(e => promotionLogger.error(`    ${e}`));
   }
 
   return result;

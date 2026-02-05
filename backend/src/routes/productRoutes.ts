@@ -1,6 +1,7 @@
 import express, { Request, Response } from 'express';
 import Product from '../models/Product';
 import { protect, restrictTo } from '../middleware/auth';
+import { apiLogger } from '../utils/logger';
 
 const router = express.Router();
 
@@ -83,7 +84,7 @@ router.get('/', async (req: Request, res: Response): Promise<void> => {
       })),
     });
   } catch (error: any) {
-    console.error('Error getting products:', error);
+    apiLogger.error('Error getting products:', error);
     res.status(500).json({ success: false, message: 'Error getting products', error: error.message });
   }
 });
@@ -107,7 +108,7 @@ router.get('/admin/all', protect, restrictTo('admin', 'super_admin'), async (_re
       products,
     });
   } catch (error: any) {
-    console.error('Error fetching all products:', error);
+    apiLogger.error('Error fetching all products:', error);
     res.status(500).json({
       success: false,
       message: 'Failed to fetch products',
@@ -131,7 +132,7 @@ router.post('/admin', protect, restrictTo('admin', 'super_admin'), async (req: R
       product,
     });
   } catch (error: any) {
-    console.error('Error creating product:', error);
+    apiLogger.error('Error creating product:', error);
 
     if (error.code === 11000) {
       res.status(400).json({
@@ -160,8 +161,8 @@ router.put('/admin/:id', protect, restrictTo('admin', 'super_admin'), async (req
     const updateData = req.body;
 
     // Log the update attempt for debugging
-    console.log(`📝 Product update request - ID: ${id}`);
-    console.log('📝 Update data:', JSON.stringify(updateData, null, 2));
+    apiLogger.info(`📝 Product update request - ID: ${id}`);
+    apiLogger.info('📝 Update data:', JSON.stringify(updateData, null, 2));
 
     // Remove _id from update data if present (immutable field)
     delete updateData._id;
@@ -173,7 +174,7 @@ router.put('/admin/:id', protect, restrictTo('admin', 'super_admin'), async (req
     );
 
     if (!product) {
-      console.error(`❌ Product not found: ${id}`);
+      apiLogger.error(`❌ Product not found: ${id}`);
       res.status(404).json({
         success: false,
         message: 'Product not found',
@@ -181,17 +182,17 @@ router.put('/admin/:id', protect, restrictTo('admin', 'super_admin'), async (req
       return;
     }
 
-    console.log(`✅ Product updated successfully: ${product.productId}`);
+    apiLogger.info(`✅ Product updated successfully: ${product.productId}`);
     res.status(200).json({
       success: true,
       message: 'Product updated successfully',
       product,
     });
   } catch (error: any) {
-    console.error('❌ Error updating product:', error);
-    console.error('Error details:', error.message);
+    apiLogger.error('❌ Error updating product:', error);
+    apiLogger.error('Error details:', error.message);
     if (error.errors) {
-      console.error('Validation errors:', JSON.stringify(error.errors, null, 2));
+      apiLogger.error('Validation errors:', JSON.stringify(error.errors, null, 2));
     }
     res.status(500).json({
       success: false,
@@ -226,7 +227,7 @@ router.delete('/admin/:id', protect, restrictTo('admin', 'super_admin'), async (
       message: 'Product deleted successfully',
     });
   } catch (error: any) {
-    console.error('Error deleting product:', error);
+    apiLogger.error('Error deleting product:', error);
     res.status(500).json({
       success: false,
       message: 'Failed to delete product',
@@ -263,7 +264,7 @@ router.patch('/admin/:id/visibility', protect, restrictTo('admin', 'super_admin'
       product,
     });
   } catch (error: any) {
-    console.error('Error toggling product visibility:', error);
+    apiLogger.error('Error toggling product visibility:', error);
     res.status(500).json({
       success: false,
       message: 'Failed to toggle product visibility',
@@ -300,7 +301,7 @@ router.patch('/admin/:id/status', protect, restrictTo('admin', 'super_admin'), a
       product,
     });
   } catch (error: any) {
-    console.error('Error toggling product status:', error);
+    apiLogger.error('Error toggling product status:', error);
     res.status(500).json({
       success: false,
       message: 'Failed to toggle product status',
@@ -373,7 +374,7 @@ router.get('/:id', async (req: Request, res: Response): Promise<void> => {
       },
     });
   } catch (error: any) {
-    console.error('Error getting product:', error);
+    apiLogger.error('Error getting product:', error);
     res.status(500).json({ success: false, message: 'Error getting product', error: error.message });
   }
 });

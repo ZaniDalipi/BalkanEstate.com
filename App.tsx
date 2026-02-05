@@ -6,6 +6,7 @@ import { ConfirmationProvider } from './src/shared/hooks/useConfirmation';
 import { NotificationProvider } from './src/shared/hooks/useNotification';
 import { QueryProvider } from './src/app/providers/QueryProvider';
 import { ErrorBoundary } from './src/app/components/ErrorBoundary';
+import { QueryErrorBoundary } from './src/app/components/QueryErrorBoundary';
 import { AnimationProvider } from './src/components/ui/Animations';
 // Lazy load SEO components (don't block initial render)
 const SEO = lazy(() => import('./src/components/seo').then(m => ({ default: m.SEO })));
@@ -459,9 +460,11 @@ const AppContent: React.FC<{ onToggleSidebar: () => void }> = ({ onToggleSidebar
   // Global handler for selected property view
   if (state.selectedProperty) {
     return (
-      <Suspense fallback={<PageLoader />}>
-        <PropertyDetailsPage property={state.selectedProperty} />
-      </Suspense>
+      <QueryErrorBoundary>
+        <Suspense fallback={<PageLoader />}>
+          <PropertyDetailsPage property={state.selectedProperty} />
+        </Suspense>
+      </QueryErrorBoundary>
     );
   }
 
@@ -478,9 +481,11 @@ const AppContent: React.FC<{ onToggleSidebar: () => void }> = ({ onToggleSidebar
       );
     }
     return (
-      <Suspense fallback={<PageLoader />}>
-        <AgencyDetailPage agency={selectedAgency} />
-      </Suspense>
+      <QueryErrorBoundary>
+        <Suspense fallback={<PageLoader />}>
+          <AgencyDetailPage agency={selectedAgency} />
+        </Suspense>
+      </QueryErrorBoundary>
     );
   }
 
@@ -500,13 +505,13 @@ const AppContent: React.FC<{ onToggleSidebar: () => void }> = ({ onToggleSidebar
       case 'create-listing':
         return <CreateListingPage />;
       case 'agents':
-        return <AgentsPage />;
+        return <QueryErrorBoundary><AgentsPage /></QueryErrorBoundary>;
       case 'agencies':
-        return <AgenciesListPage />;
+        return <QueryErrorBoundary><AgenciesListPage /></QueryErrorBoundary>;
       case 'admin':
         // Only load admin dashboard for admin/super_admin users
         if (state.currentUser?.role === UserRole.ADMIN || state.currentUser?.role === UserRole.SUPER_ADMIN) {
-          return <AdminDashboard />;
+          return <QueryErrorBoundary><AdminDashboard /></QueryErrorBoundary>;
         }
         // Redirect non-admins to home
         return <Onboarding />;
@@ -515,7 +520,7 @@ const AppContent: React.FC<{ onToggleSidebar: () => void }> = ({ onToggleSidebar
       case 'verify-email':
         return <VerifyEmailPage />;
       case 'analytics':
-        return <AnalyticsPage />;
+        return <QueryErrorBoundary><AnalyticsPage /></QueryErrorBoundary>;
       case 'how-it-works':
         return <HowItWorksPage />;
       case 'valuation':
@@ -540,15 +545,17 @@ const AppContent: React.FC<{ onToggleSidebar: () => void }> = ({ onToggleSidebar
         return <AgencyPaymentPage />;
       case 'search':
       default:
-        return <SearchPage onToggleSidebar={onToggleSidebar} />;
+        return <QueryErrorBoundary><SearchPage onToggleSidebar={onToggleSidebar} /></QueryErrorBoundary>;
     }
   };
 
   // All views now use Suspense since SearchPage is lazy loaded
   return (
-    <Suspense fallback={<PageLoader />}>
-      {renderView()}
-    </Suspense>
+    <ErrorBoundary level="route" key={state.activeView}>
+      <Suspense fallback={<PageLoader />}>
+        {renderView()}
+      </Suspense>
+    </ErrorBoundary>
   );
 };
 

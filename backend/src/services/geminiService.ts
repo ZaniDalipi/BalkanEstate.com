@@ -1,4 +1,5 @@
 import { GoogleGenAI } from '@google/genai';
+import { apiLogger } from '../utils/logger';
 
 const ai = new GoogleGenAI({ apiKey: process.env.GOOGLE_AI_API_KEY || '' });
 
@@ -34,8 +35,8 @@ async function retryWithBackoff<T>(
       throw error;
     }
 
-    console.warn(`Gemini API call failed, retrying in ${delay}ms... (${MAX_RETRIES - retries + 1}/${MAX_RETRIES})`);
-    console.warn(`Error: ${error?.message || String(error)}`);
+    apiLogger.warn(`Gemini API call failed, retrying in ${delay}ms... (${MAX_RETRIES - retries + 1}/${MAX_RETRIES})`);
+    apiLogger.warn(`Error: ${error?.message || String(error)}`);
     await new Promise(resolve => setTimeout(resolve, delay));
 
     // Exponential backoff: double the delay for next retry
@@ -88,7 +89,7 @@ Remember: Write the ENTIRE response in ${language}.
 
     return result.text.trim();
   } catch (e) {
-    console.error("Error fetching neighborhood insights:", e instanceof Error ? e.message : String(e));
+    apiLogger.error("Error fetching neighborhood insights:", e instanceof Error ? e.message : String(e));
     throw new Error("Could not retrieve neighborhood insights at this time. Please try again later.");
   }
 };

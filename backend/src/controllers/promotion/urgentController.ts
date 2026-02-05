@@ -14,6 +14,7 @@ import {
   isPromotionActive,
   getBaseUrl,
 } from '../../services/promotion/promotionService';
+import { promotionLogger } from '../../utils/logger';
 
 /**
  * @desc    Add urgent badge to existing promotion
@@ -99,7 +100,7 @@ export const addUrgentBadge = async (
     });
 
     if (!session.url) {
-      console.error('Stripe session created but URL is null:', session);
+      promotionLogger.error('Stripe session created but URL is null:', session);
       res.status(500).json({
         success: false,
         message: 'Failed to create payment session. Please try again.'
@@ -115,7 +116,7 @@ export const addUrgentBadge = async (
       price: urgentPrice,
     });
   } catch (error: any) {
-    console.error('Add urgent badge error:', error);
+    promotionLogger.error('Add urgent badge error:', error);
     res.status(500).json({
       success: false,
       message: error.message || 'Error adding urgent badge'
@@ -186,7 +187,7 @@ export const confirmUrgentBadgePayment = async (
       promotion,
     });
   } catch (error: any) {
-    console.error('Confirm urgent badge payment error:', error);
+    promotionLogger.error('Confirm urgent badge payment error:', error);
     res.status(500).json({ message: 'Error confirming urgent badge', error: error.message });
   }
 };

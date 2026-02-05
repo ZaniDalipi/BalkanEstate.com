@@ -4,6 +4,7 @@ import User from '../models/User';
 import Agent from '../models/Agent';
 import Property from '../models/Property';
 import Inquiry from '../models/Inquiry';
+import { apiLogger } from '../utils/logger';
 
 /**
  * @desc    Send inquiry to agent about a property
@@ -93,7 +94,7 @@ export const sendPropertyInquiry = async (
       inquiryType: 'property',
     });
 
-    console.log(`[inquiryController] Property inquiry sent and saved: ${buyerEmail} -> ${agentEmail} about ${property.title} (ID: ${inquiry._id})`);
+    apiLogger.info(`[inquiryController] Property inquiry sent and saved: ${buyerEmail} -> ${agentEmail} about ${property.title} (ID: ${inquiry._id})`);
 
     res.json({
       message: 'Your inquiry has been sent successfully',
@@ -101,7 +102,7 @@ export const sendPropertyInquiry = async (
       inquiryId: inquiry._id,
     });
   } catch (error: any) {
-    console.error('Send property inquiry error:', error);
+    apiLogger.error('Send property inquiry error:', error);
     res.status(500).json({
       message: 'Error sending inquiry',
       error: error.message,
@@ -172,7 +173,7 @@ export const sendAgentGeneralInquiry = async (
       inquiryType: 'general',
     });
 
-    console.log(`[inquiryController] General inquiry sent and saved: ${buyerEmail} -> ${agent.email} (ID: ${inquiry._id})`);
+    apiLogger.info(`[inquiryController] General inquiry sent and saved: ${buyerEmail} -> ${agent.email} (ID: ${inquiry._id})`);
 
     res.json({
       message: 'Your inquiry has been sent successfully',
@@ -180,7 +181,7 @@ export const sendAgentGeneralInquiry = async (
       inquiryId: inquiry._id,
     });
   } catch (error: any) {
-    console.error('Send agent inquiry error:', error);
+    apiLogger.error('Send agent inquiry error:', error);
     res.status(500).json({
       message: 'Error sending inquiry',
       error: error.message,
@@ -292,7 +293,7 @@ export const sendAreaSearchInquiry = async (
 
     await Promise.all(sendPromises);
 
-    console.log(`[inquiryController] Area search inquiry sent and saved to ${targetAgents.length} agents for location: ${location} (IDs: ${inquiryIds.join(', ')})`);
+    apiLogger.info(`[inquiryController] Area search inquiry sent and saved to ${targetAgents.length} agents for location: ${location} (IDs: ${inquiryIds.join(', ')})`);
 
     res.json({
       message: `Your inquiry has been sent to ${targetAgents.length} agent(s) in ${location}`,
@@ -300,7 +301,7 @@ export const sendAreaSearchInquiry = async (
       inquiryIds,
     });
   } catch (error: any) {
-    console.error('Send area search inquiry error:', error);
+    apiLogger.error('Send area search inquiry error:', error);
     res.status(500).json({
       message: 'Error sending inquiry',
       error: error.message,

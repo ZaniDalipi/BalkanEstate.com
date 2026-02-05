@@ -2,6 +2,7 @@ import { Request, Response } from 'express';
 import AgencyFeaturedSubscription from '../models/AgencyFeaturedSubscription';
 import Agency from '../models/Agency';
 import PromotionCoupon from '../models/PromotionCoupon';
+import { agencyLogger } from '../utils/logger';
 
 export const createFeaturedSubscription = async (req: Request, res: Response): Promise<void> => {
   try {
@@ -175,7 +176,7 @@ export const createFeaturedSubscription = async (req: Request, res: Response): P
       finalPrice: price,
     });
   } catch (error) {
-    console.error('Error creating featured subscription:', error);
+    agencyLogger.error('Error creating featured subscription:', error);
     res.status(500).json({ error: 'Failed to create subscription' });
   }
 };
@@ -236,7 +237,7 @@ export const getFeaturedSubscription = async (req: Request, res: Response): Prom
       }
     });
   } catch (error) {
-    console.error('Error fetching featured subscription:', error);
+    agencyLogger.error('Error fetching featured subscription:', error);
     res.status(500).json({ error: 'Failed to fetch subscription' });
   }
 };
@@ -300,7 +301,7 @@ export const cancelFeaturedSubscription = async (req: Request, res: Response): P
       subscription,
     });
   } catch (error) {
-    console.error('Error canceling featured subscription:', error);
+    agencyLogger.error('Error canceling featured subscription:', error);
     res.status(500).json({ error: 'Failed to cancel subscription' });
   }
 };
@@ -347,7 +348,7 @@ export const confirmPayment = async (req: Request, res: Response): Promise<void>
       subscription,
     });
   } catch (error) {
-    console.error('Error confirming payment:', error);
+    agencyLogger.error('Error confirming payment:', error);
     res.status(500).json({ error: 'Failed to confirm payment' });
   }
 };
@@ -425,7 +426,7 @@ export const applyCoupon = async (req: Request, res: Response): Promise<void> =>
       newPrice,
     });
   } catch (error) {
-    console.error('Error applying coupon:', error);
+    agencyLogger.error('Error applying coupon:', error);
     res.status(500).json({ error: 'Failed to apply coupon' });
   }
 };
@@ -495,7 +496,7 @@ export const checkExpiredSubscriptions = async (req: Request, res: Response) => 
       updatedCount,
     });
   } catch (error) {
-    console.error('Error checking expired subscriptions:', error);
+    agencyLogger.error('Error checking expired subscriptions:', error);
     res.status(500).json({ error: 'Failed to check expired subscriptions' });
   }
 };
@@ -529,7 +530,7 @@ export const getAllFeaturedSubscriptions = async (req: Request, res: Response) =
       totalPages: Math.ceil(total / Number(limit)),
     });
   } catch (error) {
-    console.error('Error fetching featured subscriptions:', error);
+    agencyLogger.error('Error fetching featured subscriptions:', error);
     res.status(500).json({ error: 'Failed to fetch subscriptions' });
   }
 };

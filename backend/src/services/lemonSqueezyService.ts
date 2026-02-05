@@ -10,6 +10,7 @@
  */
 
 import crypto from 'crypto';
+import { paymentLogger } from '../utils/logger';
 
 // LemonSqueezy API base URL
 const LEMONSQUEEZY_API_URL = 'https://api.lemonsqueezy.com/v1';
@@ -66,7 +67,7 @@ class LemonSqueezyService {
 
     // Only log initialization in development
     if (this.apiKey && process.env.NODE_ENV !== 'production') {
-      console.log('[LemonSqueezy] Service initialized', {
+      paymentLogger.info('[LemonSqueezy] Service initialized', {
         testMode: this.isTestMode,
       });
     }
@@ -191,7 +192,7 @@ class LemonSqueezyService {
         checkoutId: response.data?.id,
       };
     } catch (error: any) {
-      console.error('[LemonSqueezy] Failed to create checkout:', error);
+      paymentLogger.error('[LemonSqueezy] Failed to create checkout:', error);
       return {
         success: false,
         error: error.message || 'Failed to create checkout',
@@ -208,10 +209,10 @@ class LemonSqueezyService {
 
     if (!this.webhookSecret) {
       if (isProduction) {
-        console.error('[LemonSqueezy] SECURITY: Webhook secret not configured in production - rejecting request');
+        paymentLogger.error('[LemonSqueezy] SECURITY: Webhook secret not configured in production - rejecting request');
         return false;
       }
-      console.warn('[LemonSqueezy] Webhook secret not configured, skipping verification (dev mode only)');
+      paymentLogger.warn('[LemonSqueezy] Webhook secret not configured, skipping verification (dev mode only)');
       return true; // Skip verification only in development
     }
 
@@ -221,12 +222,12 @@ class LemonSqueezyService {
       const isValid = crypto.timingSafeEqual(Buffer.from(signature), Buffer.from(digest));
 
       if (!isValid) {
-        console.error('[LemonSqueezy] Webhook signature mismatch');
+        paymentLogger.error('[LemonSqueezy] Webhook signature mismatch');
       }
 
       return isValid;
     } catch (error) {
-      console.error('[LemonSqueezy] Signature verification failed:', error);
+      paymentLogger.error('[LemonSqueezy] Signature verification failed:', error);
       return false;
     }
   }
@@ -252,7 +253,7 @@ class LemonSqueezyService {
         data: body.data,
       };
     } catch (error) {
-      console.error('[LemonSqueezy] Failed to parse webhook event:', error);
+      paymentLogger.error('[LemonSqueezy] Failed to parse webhook event:', error);
       return null;
     }
   }
@@ -265,7 +266,7 @@ class LemonSqueezyService {
       const response = await this.apiRequest<any>(`/subscriptions/${subscriptionId}`);
       return response.data;
     } catch (error: any) {
-      console.error('[LemonSqueezy] Failed to get subscription:', error);
+      paymentLogger.error('[LemonSqueezy] Failed to get subscription:', error);
       throw error;
     }
   }
@@ -278,7 +279,7 @@ class LemonSqueezyService {
       await this.apiRequest<any>(`/subscriptions/${subscriptionId}`, 'DELETE');
       return true;
     } catch (error: any) {
-      console.error('[LemonSqueezy] Failed to cancel subscription:', error);
+      paymentLogger.error('[LemonSqueezy] Failed to cancel subscription:', error);
       return false;
     }
   }
@@ -299,7 +300,7 @@ class LemonSqueezyService {
       });
       return true;
     } catch (error: any) {
-      console.error('[LemonSqueezy] Failed to resume subscription:', error);
+      paymentLogger.error('[LemonSqueezy] Failed to resume subscription:', error);
       return false;
     }
   }
@@ -323,7 +324,7 @@ class LemonSqueezyService {
       });
       return true;
     } catch (error: any) {
-      console.error('[LemonSqueezy] Failed to update subscription:', error);
+      paymentLogger.error('[LemonSqueezy] Failed to update subscription:', error);
       return false;
     }
   }
@@ -336,7 +337,7 @@ class LemonSqueezyService {
       const response = await this.apiRequest<any>(`/customers/${customerId}`);
       return response.data?.attributes?.urls?.customer_portal || null;
     } catch (error: any) {
-      console.error('[LemonSqueezy] Failed to get customer portal URL:', error);
+      paymentLogger.error('[LemonSqueezy] Failed to get customer portal URL:', error);
       return null;
     }
   }
@@ -349,7 +350,7 @@ class LemonSqueezyService {
       const response = await this.apiRequest<any>(`/variants/${variantId}`);
       return response.data;
     } catch (error: any) {
-      console.error('[LemonSqueezy] Failed to get variant:', error);
+      paymentLogger.error('[LemonSqueezy] Failed to get variant:', error);
       throw error;
     }
   }
@@ -363,7 +364,7 @@ class LemonSqueezyService {
       const response = await this.apiRequest<any>(`/orders/${orderId}`);
       return response.data;
     } catch (error: any) {
-      console.error('[LemonSqueezy] Failed to get order:', error);
+      paymentLogger.error('[LemonSqueezy] Failed to get order:', error);
       throw error;
     }
   }
@@ -377,7 +378,7 @@ class LemonSqueezyService {
       const response = await this.apiRequest<any>(`/checkouts/${checkoutId}`);
       return response.data;
     } catch (error: any) {
-      console.error('[LemonSqueezy] Failed to get checkout:', error);
+      paymentLogger.error('[LemonSqueezy] Failed to get checkout:', error);
       throw error;
     }
   }
@@ -393,7 +394,7 @@ class LemonSqueezyService {
       );
       return response.data || [];
     } catch (error: any) {
-      console.error('[LemonSqueezy] Failed to list orders:', error);
+      paymentLogger.error('[LemonSqueezy] Failed to list orders:', error);
       return [];
     }
   }
@@ -452,7 +453,7 @@ class LemonSqueezyService {
         error: 'No matching payment found',
       };
     } catch (error: any) {
-      console.error('[LemonSqueezy] Payment verification failed:', error);
+      paymentLogger.error('[LemonSqueezy] Payment verification failed:', error);
       return {
         success: false,
         error: error.message || 'Verification failed',

@@ -6,6 +6,7 @@ import os from 'os';
 import https from 'https';
 import http from 'http';
 import cloudinary from '../config/cloudinary';
+import { videoLogger } from '../utils/logger';
 
 // Set FFmpeg path from installer
 ffmpeg.setFfmpegPath(ffmpegInstaller.path);
@@ -154,12 +155,12 @@ const downloadMusic = async (style: string, tempDir: string): Promise<string | n
   const musicPath = path.join(tempDir, 'music.mp3');
 
   try {
-    console.log('🎵 Downloading background music...');
+    videoLogger.info('🎵 Downloading background music...');
     await downloadFile(musicUrl, musicPath);
-    console.log('✅ Music downloaded');
+    videoLogger.info('✅ Music downloaded');
     return musicPath;
   } catch (error: any) {
-    console.warn('⚠️ Failed to download music:', error.message);
+    videoLogger.warn('⚠️ Failed to download music:', error.message);
     return null;
   }
 };
@@ -199,13 +200,13 @@ export const generatePropertyVideo = async (
   const resolution = getResolution(format, quality);
   const { width, height } = resolution;
 
-  console.log(`🎬 Starting video generation for property ${propertyId}`);
-  console.log(`📐 Format: ${format} (${width}x${height}) - Quality: ${quality}`);
-  console.log(`🖼️  Processing ${imageUrls.length} images`);
+  videoLogger.info(`🎬 Starting video generation for property ${propertyId}`);
+  videoLogger.info(`📐 Format: ${format} (${width}x${height}) - Quality: ${quality}`);
+  videoLogger.info(`🖼️  Processing ${imageUrls.length} images`);
 
   try {
     // Step 1: Download images
-    console.log('📥 Downloading images...');
+    videoLogger.info('📥 Downloading images...');
     const imagesToProcess = imageUrls.slice(0, 10);
     const imagePaths: string[] = [];
 
@@ -213,9 +214,9 @@ export const generatePropertyVideo = async (
       try {
         const imgPath = await downloadImage(imagesToProcess[i], i, tempDir);
         imagePaths.push(imgPath);
-        console.log(`  ✓ Image ${i + 1}/${imagesToProcess.length}`);
+        videoLogger.info(`  ✓ Image ${i + 1}/${imagesToProcess.length}`);
       } catch (error: any) {
-        console.warn(`  ✗ Failed image ${i + 1}: ${error.message}`);
+        videoLogger.warn(`  ✗ Failed image ${i + 1}: ${error.message}`);
       }
     }
 
@@ -250,17 +251,17 @@ export const generatePropertyVideo = async (
       includeWatermark: options.includeWatermark !== false,
     });
 
-    console.log('✅ Video created successfully');
+    videoLogger.info('✅ Video created successfully');
 
     // Step 4: Upload to Cloudinary
-    console.log('☁️  Uploading to Cloudinary...');
+    videoLogger.info('☁️  Uploading to Cloudinary...');
     const cloudinaryResult = await uploadVideoToCloudinary(outputPath, userId, propertyId);
 
     // Step 5: Cleanup
-    console.log('🧹 Cleaning up...');
+    videoLogger.info('🧹 Cleaning up...');
     fs.rmSync(tempDir, { recursive: true, force: true });
 
-    console.log(`🎉 Video complete: ${cloudinaryResult.url}`);
+    videoLogger.info(`🎉 Video complete: ${cloudinaryResult.url}`);
 
     return {
       url: cloudinaryResult.url,
@@ -272,7 +273,7 @@ export const generatePropertyVideo = async (
     };
   } catch (error: any) {
     try { fs.rmSync(tempDir, { recursive: true, force: true }); } catch {}
-    console.error('❌ Video generation failed:', error);
+    videoLogger.error('❌ Video generation failed:', error);
     throw new Error(`Failed to generate video: ${error.message}`);
   }
 };
@@ -348,14 +349,14 @@ const createVideoWithOverlays = (options: {
     for (const fp of fontPaths) {
       if (fs.existsSync(fp)) {
         fontFile = fp;
-        console.log(`📝 Using font: ${fp}`);
+        videoLogger.info(`📝 Using font: ${fp}`);
         break;
       }
     }
 
     const hasFont = fontFile !== '';
     if (!hasFont) {
-      console.warn('⚠️ No system font found, skipping text overlays');
+      videoLogger.warn('⚠️ No system font found, skipping text overlays');
     }
 
     // Build professional filter complex
@@ -700,8 +701,8 @@ const createVideoWithOverlays = (options: {
 
     const filterComplex = filters.join(';');
 
-    console.log('🎬 Starting FFmpeg processing with professional overlays...');
-    console.log(`📐 Background style: ${backgroundStyle}`);
+    videoLogger.info('🎬 Starting FFmpeg processing with professional overlays...');
+    videoLogger.info(`📐 Background style: ${backgroundStyle}`);
 
     const command = ffmpeg()
       .input(concatFilePath)
@@ -735,22 +736,22 @@ const createVideoWithOverlays = (options: {
 
     (command as any)
       .on('start', (cmd: string) => {
-        console.log('🎬 FFmpeg started');
-        console.log('Command preview:', cmd.substring(0, 500) + '...');
+        videoLogger.info('🎬 FFmpeg started');
+        videoLogger.info('Command preview:', cmd.substring(0, 500) + '...');
       })
       .on('progress', (progress: { percent?: number }) => {
         if (progress.percent) {
-          console.log(`📊 Progress: ${Math.round(progress.percent)}%`);
+          videoLogger.info(`📊 Progress: ${Math.round(progress.percent)}%`);
         }
       })
       .on('end', () => {
-        console.log('✅ FFmpeg complete');
+        videoLogger.info('✅ FFmpeg complete');
         try { fs.unlinkSync(concatFilePath); } catch {}
         resolve();
       })
       .on('error', (err: Error, _stdout: string, stderr: string) => {
-        console.error('❌ FFmpeg error:', err.message);
-        console.error('Stderr:', stderr);
+        videoLogger.error('❌ FFmpeg error:', err.message);
+        videoLogger.error('Stderr:', stderr);
         try { fs.unlinkSync(concatFilePath); } catch {}
         reject(err);
       })
@@ -787,7 +788,7 @@ const uploadVideoToCloudinary = async (
       eager_async: true,
     }, (error, result) => {
       if (error) {
-        console.error('Cloudinary error:', error);
+        videoLogger.error('Cloudinary error:', error);
         reject(error);
       } else if (result) {
         resolve({ url: result.secure_url, publicId: result.public_id });
@@ -804,9 +805,9 @@ const uploadVideoToCloudinary = async (
 export const deleteGeneratedVideo = async (publicId: string): Promise<void> => {
   try {
     await cloudinary.uploader.destroy(publicId, { resource_type: 'video' });
-    console.log(`🗑️ Deleted video: ${publicId}`);
+    videoLogger.info(`🗑️ Deleted video: ${publicId}`);
   } catch (error: any) {
-    console.error(`❌ Failed to delete video ${publicId}:`, error.message);
+    videoLogger.error(`❌ Failed to delete video ${publicId}:`, error.message);
   }
 };
 

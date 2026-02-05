@@ -1,6 +1,7 @@
 import { Request, Response } from 'express';
 import SavedSearch from '../models/SavedSearch';
 import { IUser } from '../models/User';
+import { apiLogger } from '../utils/logger';
 
 // @desc    Get user's saved searches
 // @route   GET /api/saved-searches
@@ -21,7 +22,7 @@ export const getSavedSearches = async (
 
     res.json({ savedSearches });
   } catch (error: any) {
-    console.error('Get saved searches error:', error);
+    apiLogger.error('Get saved searches error:', error);
     res.status(500).json({ message: 'Error fetching saved searches', error: error.message });
   }
 };
@@ -41,7 +42,7 @@ export const createSavedSearch = async (
 
     const { name, filters, drawnBoundsJSON } = req.body;
 
-    console.log('[savedSearchController] Creating saved search:', {
+    apiLogger.info('[savedSearchController] Creating saved search:', {
       name,
       drawnBoundsJSON,
       drawnBoundsType: typeof drawnBoundsJSON,
@@ -60,14 +61,14 @@ export const createSavedSearch = async (
       drawnBoundsJSON: drawnBoundsJSON || null,
     });
 
-    console.log('[savedSearchController] Created saved search:', {
+    apiLogger.info('[savedSearchController] Created saved search:', {
       id: savedSearch._id,
       drawnBoundsJSON: savedSearch.drawnBoundsJSON,
     });
 
     res.status(201).json({ savedSearch });
   } catch (error: any) {
-    console.error('Create saved search error:', error);
+    apiLogger.error('Create saved search error:', error);
     res.status(500).json({ message: 'Error creating saved search', error: error.message });
   }
 };
@@ -109,7 +110,7 @@ export const updateAccessTime = async (
 
     res.json({ savedSearch });
   } catch (error: any) {
-    console.error('Update access time error:', error);
+    apiLogger.error('Update access time error:', error);
     res.status(500).json({ message: 'Error updating access time', error: error.message });
   }
 };
@@ -157,7 +158,7 @@ export const updateSavedSearch = async (
       savedSearch,
     });
   } catch (error: any) {
-    console.error('Update saved search error:', error);
+    apiLogger.error('Update saved search error:', error);
     res.status(500).json({ message: 'Error updating saved search', error: error.message });
   }
 };
@@ -207,14 +208,14 @@ export const updateAlertSettings = async (
 
     await savedSearch.save();
 
-    console.log(`[savedSearchController] Updated alerts for search ${savedSearch._id}: enabled=${savedSearch.alertsEnabled}, frequency=${savedSearch.alertFrequency}`);
+    apiLogger.info(`[savedSearchController] Updated alerts for search ${savedSearch._id}: enabled=${savedSearch.alertsEnabled}, frequency=${savedSearch.alertFrequency}`);
 
     res.json({
       message: 'Alert settings updated successfully',
       savedSearch,
     });
   } catch (error: any) {
-    console.error('Update alert settings error:', error);
+    apiLogger.error('Update alert settings error:', error);
     res.status(500).json({ message: 'Error updating alert settings', error: error.message });
   }
 };
@@ -236,7 +237,7 @@ export const deleteAllSavedSearches = async (
 
     res.json({ message: `Deleted ${result.deletedCount} saved searches` });
   } catch (error: any) {
-    console.error('Delete all saved searches error:', error);
+    apiLogger.error('Delete all saved searches error:', error);
     res.status(500).json({ message: 'Error deleting saved searches', error: error.message });
   }
 };
@@ -271,7 +272,7 @@ export const deleteSavedSearch = async (
 
     res.json({ message: 'Saved search deleted successfully' });
   } catch (error: any) {
-    console.error('Delete saved search error:', error);
+    apiLogger.error('Delete saved search error:', error);
     res.status(500).json({ message: 'Error deleting saved search', error: error.message });
   }
 };

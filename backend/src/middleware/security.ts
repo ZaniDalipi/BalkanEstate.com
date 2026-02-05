@@ -8,6 +8,7 @@ import hpp from 'hpp';
 import rateLimit from 'express-rate-limit';
 import { Request, Response, NextFunction, Application } from 'express';
 import cors from 'cors';
+import { apiLogger } from '../utils/logger';
 
 // Environment detection
 const isProduction = process.env.NODE_ENV === 'production';
@@ -33,6 +34,20 @@ export const validateEnvironment = (): void => {
     'CLOUDINARY_CLOUD_NAME',
     'CLOUDINARY_API_KEY',
     'CLOUDINARY_API_SECRET',
+    'RESEND_API_KEY',
+    'GEMINI_API_KEY',
+    'FRONTEND_URL',
+    'BACKEND_URL',
+  ];
+
+  // Optional but recommended variables - warn if missing but don't throw
+  const optionalButRecommended = [
+    'STRIPE_SECRET_KEY',
+    'STRIPE_WEBHOOK_SECRET',
+    'LEMON_SQUEEZY_API_KEY',
+    'SENTRY_DSN',
+    'GOOGLE_CLIENT_ID',
+    'GOOGLE_CLIENT_SECRET',
   ];
 
   const varsToCheck = isProduction ? productionRequiredVars : requiredVars;
@@ -43,6 +58,17 @@ export const validateEnvironment = (): void => {
       missing.push(varName);
     }
   });
+
+  // Validate MONGODB_URI format
+  const mongoUri = process.env.MONGODB_URI;
+  if (mongoUri && !mongoUri.startsWith('mongodb://') && !mongoUri.startsWith('mongodb+srv://')) {
+    const formatMsg = 'MONGODB_URI must start with mongodb:// or mongodb+srv://';
+    if (isProduction) {
+      throw new Error(formatMsg);
+    } else {
+      apiLogger.warn(`[ENV WARNING] ${formatMsg}`);
+    }
+  }
 
   // Check for weak default secrets
   if (process.env.JWT_SECRET === 'secret' || process.env.JWT_SECRET === 'your-secret-key') {
@@ -57,11 +83,30 @@ export const validateEnvironment = (): void => {
     }
   }
 
+  // Check optional but recommended variables and warn if missing
+  const missingOptional: string[] = [];
+  optionalButRecommended.forEach((varName) => {
+    if (!process.env[varName]) {
+      missingOptional.push(varName);
+    }
+  });
+
+  if (missingOptional.length > 0) {
+    apiLogger.warn(
+      `[ENV WARNING] Optional but recommended environment variables are not set: ${missingOptional.join(', ')}. ` +
+      'Some features (payments, error tracking, OAuth) may not work correctly.'
+    );
+  }
+
   if (missing.length > 0) {
     const errorMsg = `Missing required environment variables: ${missing.join(', ')}`;
     if (isProduction) {
       throw new Error(errorMsg);
     } else {
+      apiLogger.warn(
+        `[ENV WARNING] ${errorMsg}. ` +
+        'The application may not function correctly. Set these variables in your .env file.'
+      );
     }
   }
 
@@ -242,7 +287,7 @@ export const getCorsConfig = () => {
           callback(new Error('Not allowed by CORS'));
         }
       } else {
-        console.warn(`CORS blocked origin: ${origin}`);
+        apiLogger.warn(`CORS blocked origin: ${origin}`);
         callback(new Error('Not allowed by CORS'));
       }
     },

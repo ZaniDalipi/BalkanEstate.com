@@ -5,22 +5,23 @@
 
 import Promotion from '../../models/Promotion';
 import Property from '../../models/Property';
+import { cronLogger } from '../../utils/logger';
 
 /**
  * Refresh Highlight tier promotions that are due for refresh
  */
 export const refreshHighlightPromotions = async (): Promise<void> => {
   try {
-    console.log('[RefreshWorker] Starting highlight promotion refresh...');
+    cronLogger.info('[RefreshWorker] Starting highlight promotion refresh...');
 
     const promotionsToRefresh = await (Promotion as any).getPromotionsNeedingRefresh();
 
     if (promotionsToRefresh.length === 0) {
-      console.log('[RefreshWorker] No promotions need refresh');
+      cronLogger.info('[RefreshWorker] No promotions need refresh');
       return;
     }
 
-    console.log(`[RefreshWorker] Found ${promotionsToRefresh.length} promotions to refresh`);
+    cronLogger.info(`[RefreshWorker] Found ${promotionsToRefresh.length} promotions to refresh`);
 
     let refreshedCount = 0;
 
@@ -47,21 +48,21 @@ export const refreshHighlightPromotions = async (): Promise<void> => {
         }
 
         refreshedCount++;
-        console.log(
+        cronLogger.info(
           `[RefreshWorker] Refreshed promotion ${promotion._id} for property ${promotion.propertyId}`
         );
       } catch (error) {
-        console.error(
+        cronLogger.error(
           `[RefreshWorker] Error refreshing promotion ${promotion._id}:`,
           error
         );
       }
     }
 
-    console.log(
+    cronLogger.info(
       `[RefreshWorker] Successfully refreshed ${refreshedCount}/${promotionsToRefresh.length} promotions`
     );
   } catch (error) {
-    console.error('[RefreshWorker] Error in refresh worker:', error);
+    cronLogger.error('[RefreshWorker] Error in refresh worker:', error);
   }
 };

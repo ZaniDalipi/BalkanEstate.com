@@ -3,6 +3,7 @@ import Favorite from '../models/Favorite';
 import Property from '../models/Property';
 import { IUser } from '../models/User';
 import { incrementSaveCount, decrementSaveCount } from '../utils/statsUpdater';
+import { apiLogger } from '../utils/logger';
 
 // @desc    Get user's favorites
 // @route   GET /api/favorites
@@ -33,7 +34,7 @@ export const getFavorites = async (
 
     res.json({ favorites: validFavorites });
   } catch (error: any) {
-    console.error('Get favorites error:', error);
+    apiLogger.error('Get favorites error:', error);
     res.status(500).json({ message: 'Error fetching favorites', error: error.message });
   }
 };
@@ -101,7 +102,7 @@ export const toggleFavorite = async (
       res.json({ message: 'Favorite added', isSaved: true });
     }
   } catch (error: any) {
-    console.error('Toggle favorite error:', error);
+    apiLogger.error('Toggle favorite error:', error);
     res.status(500).json({ message: 'Error toggling favorite', error: error.message });
   }
 };
@@ -126,7 +127,7 @@ export const checkFavorite = async (
 
     res.json({ isSaved: !!favorite });
   } catch (error: any) {
-    console.error('Check favorite error:', error);
+    apiLogger.error('Check favorite error:', error);
     res.status(500).json({ message: 'Error checking favorite', error: error.message });
   }
 };

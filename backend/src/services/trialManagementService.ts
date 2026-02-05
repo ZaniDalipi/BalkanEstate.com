@@ -1,6 +1,7 @@
 import User, { IUser } from '../models/User';
 import { sendEmail } from './emailService';
 import { TRIAL_LIMITS, FREE_TIER_LIMITS } from '../config/subscriptionConstants';
+import { subscriptionLogger } from '../utils/logger';
 
 /**
  * Trial Management Service
@@ -518,7 +519,7 @@ export const processTrialManagement = async (): Promise<{
       await sendTrialExpirationReminder(user);
       remindersSent++;
     } catch (error) {
-      console.error('Failed to send trial reminder:', error);
+      subscriptionLogger.error('Failed to send trial reminder:', error);
     }
   }
 
@@ -529,7 +530,7 @@ export const processTrialManagement = async (): Promise<{
       await expireTrialAndDowngrade(user);
       trialsExpired++;
     } catch (error) {
-      console.error('Failed to expire trial:', error);
+      subscriptionLogger.error('Failed to expire trial:', error);
     }
   }
 

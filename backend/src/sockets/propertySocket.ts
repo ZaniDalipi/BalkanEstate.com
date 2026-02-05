@@ -1,5 +1,6 @@
 import { Server } from 'socket.io';
 import mongoose from 'mongoose';
+import { socketLogger } from '../utils/logger';
 
 // Store the io instance for emitting from controllers
 let ioInstance: Server | null = null;
@@ -25,7 +26,7 @@ let changeStreamActive = false;
 export const setupPropertySocket = (io: Server) => {
   ioInstance = io;
 
-  console.log('🏠 Property socket initialized');
+  socketLogger.info('🏠 Property socket initialized');
 
   // Try to setup MongoDB Change Stream (optional - requires replica set)
   setupChangeStream();
@@ -47,7 +48,7 @@ const setupChangeStream = async () => {
       initializeChangeStream();
     }
   } catch (error) {
-    console.warn('⚠️ Change streams not available. Using controller-triggered events only.');
+    socketLogger.warn('⚠️ Change streams not available. Using controller-triggered events only.');
   }
 };
 
@@ -56,7 +57,7 @@ const initializeChangeStream = async () => {
     // Check if we're connected to a replica set
     const db = mongoose.connection.db;
     if (!db) {
-      console.warn('⚠️ Database not ready for change streams');
+      socketLogger.warn('⚠️ Database not ready for change streams');
       return;
     }
 
@@ -67,8 +68,8 @@ const initializeChangeStream = async () => {
 
       // Check if replication is available
       if (!serverStatus.repl) {
-        console.log('ℹ️ MongoDB running in standalone mode - Change Streams require replica set');
-        console.log('ℹ️ Real-time updates will use controller-triggered events instead');
+        socketLogger.info('ℹ️ MongoDB running in standalone mode - Change Streams require replica set');
+        socketLogger.info('ℹ️ Real-time updates will use controller-triggered events instead');
         return;
       }
     } catch {
@@ -93,7 +94,7 @@ const initializeChangeStream = async () => {
 
     // Use async iterator pattern (more reliable)
     changeStreamActive = true;
-    console.log('✅ Property MongoDB Change Stream active');
+    socketLogger.info('✅ Property MongoDB Change Stream active');
 
     // Handle changes using event emitter pattern
     changeStream.on('change', (change: any) => {
@@ -101,25 +102,25 @@ const initializeChangeStream = async () => {
     });
 
     changeStream.on('error', (error: any) => {
-      console.error('❌ Property change stream error:', error.message || error);
+      socketLogger.error('❌ Property change stream error:', error.message || error);
       changeStreamActive = false;
 
       // Don't retry if it's a "not replica set" error
       if (error.message?.includes('replica set') || error.code === 40573) {
-        console.log('ℹ️ Change Streams not supported - using controller events only');
+        socketLogger.info('ℹ️ Change Streams not supported - using controller events only');
         return;
       }
 
       // Attempt to restart the change stream after a delay for other errors
       setTimeout(() => {
-        console.log('🔄 Attempting to restart property change stream...');
+        socketLogger.info('🔄 Attempting to restart property change stream...');
         initializeChangeStream();
       }, 10000);
     });
 
     changeStream.on('close', () => {
       changeStreamActive = false;
-      console.log('ℹ️ Property change stream closed');
+      socketLogger.info('ℹ️ Property change stream closed');
     });
 
   } catch (error: any) {
@@ -130,10 +131,10 @@ const initializeChangeStream = async () => {
         errorMessage.includes('not supported') ||
         errorMessage.includes('$changeStream') ||
         error?.code === 40573) {
-      console.log('ℹ️ MongoDB Change Streams not available (requires replica set)');
-      console.log('ℹ️ Real-time updates will use controller-triggered events');
+      socketLogger.info('ℹ️ MongoDB Change Streams not available (requires replica set)');
+      socketLogger.info('ℹ️ Real-time updates will use controller-triggered events');
     } else {
-      console.warn('⚠️ Could not initialize change stream:', errorMessage);
+      socketLogger.warn('⚠️ Could not initialize change stream:', errorMessage);
     }
   }
 };
@@ -155,7 +156,7 @@ const handlePropertyChange = (change: any) => {
           property,
           timestamp: new Date().toISOString(),
         });
-        console.log(`📤 [ChangeStream] property:created for ${propertyId}`);
+        socketLogger.info(`📤 [ChangeStream] property:created for ${propertyId}`);
       }
       break;
 
@@ -168,7 +169,7 @@ const handlePropertyChange = (change: any) => {
           property,
           timestamp: new Date().toISOString(),
         });
-        console.log(`📤 [ChangeStream] property:updated for ${propertyId}`);
+        socketLogger.info(`📤 [ChangeStream] property:updated for ${propertyId}`);
       }
       break;
 
@@ -177,7 +178,7 @@ const handlePropertyChange = (change: any) => {
         propertyId,
         timestamp: new Date().toISOString(),
       });
-      console.log(`📤 [ChangeStream] property:deleted for ${propertyId}`);
+      socketLogger.info(`📤 [ChangeStream] property:deleted for ${propertyId}`);
       break;
   }
 };
@@ -213,7 +214,7 @@ export const emitPropertyCreated = (property: any) => {
     propertyId: transformed?.id,
     timestamp: new Date().toISOString(),
   });
-  console.log(`📤 [Controller] property:created for ${transformed?.id}`);
+  socketLogger.info(`📤 [Controller] property:created for ${transformed?.id}`);
 };
 
 /**
@@ -228,7 +229,7 @@ export const emitPropertyUpdated = (propertyId: string, property: any) => {
     property: transformProperty(property),
     timestamp: new Date().toISOString(),
   });
-  console.log(`📤 [Controller] property:updated for ${propertyId}`);
+  socketLogger.info(`📤 [Controller] property:updated for ${propertyId}`);
 };
 
 /**
@@ -242,7 +243,7 @@ export const emitPropertyDeleted = (propertyId: string) => {
     propertyId,
     timestamp: new Date().toISOString(),
   });
-  console.log(`📤 [Controller] property:deleted for ${propertyId}`);
+  socketLogger.info(`📤 [Controller] property:deleted for ${propertyId}`);
 };
 
 /**
@@ -257,7 +258,7 @@ export const emitPropertyStatusChanged = (propertyId: string, status: string, pr
     property: property ? transformProperty(property) : undefined,
     timestamp: new Date().toISOString(),
   });
-  console.log(`📤 [Controller] property:statusChanged for ${propertyId} -> ${status}`);
+  socketLogger.info(`📤 [Controller] property:statusChanged for ${propertyId} -> ${status}`);
 };
 
 /**
@@ -271,7 +272,7 @@ export const emitPropertiesBulkUpdate = (action: 'created' | 'updated' | 'delete
     count,
     timestamp: new Date().toISOString(),
   });
-  console.log(`📤 [Controller] property:bulkUpdate - ${action} ${count} properties`);
+  socketLogger.info(`📤 [Controller] property:bulkUpdate - ${action} ${count} properties`);
 };
 
 /**

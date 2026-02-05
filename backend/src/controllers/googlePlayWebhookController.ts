@@ -4,6 +4,7 @@ import Subscription from '../models/Subscription';
 import SubscriptionEvent from '../models/SubscriptionEvent';
 import PaymentRecord from '../models/PaymentRecord';
 import Product from '../models/Product';
+import { paymentLogger } from '../utils/logger';
 
 
 /**
@@ -27,14 +28,14 @@ export const handleGooglePlayNotification = async (
     const decodedData = Buffer.from(pubsubMessage.data, 'base64').toString('utf-8');
     const notification = JSON.parse(decodedData);
 
-    console.log('Google Play notification received:', notification);
+    paymentLogger.info('Google Play notification received:', notification);
 
     // Extract notification details
     const { subscriptionNotification, testNotification } = notification;
 
     // Handle test notifications
     if (testNotification) {
-      console.log('Google Play test notification received');
+      paymentLogger.info('Google Play test notification received');
       res.status(200).json({ message: 'Test notification received' });
       return;
     }
@@ -74,7 +75,7 @@ export const handleGooglePlayNotification = async (
     });
 
     if (!product) {
-      console.error(`Product not found for Google Play ID: ${subscriptionId}`);
+      paymentLogger.error(`Product not found for Google Play ID: ${subscriptionId}`);
       res.status(404).json({ message: 'Product not found' });
       return;
     }
@@ -118,7 +119,7 @@ export const handleGooglePlayNotification = async (
         break;
 
       default:
-        console.log(`Unhandled notification type: ${notificationType}`);
+        paymentLogger.info(`Unhandled notification type: ${notificationType}`);
     }
 
     // Log the event
@@ -137,7 +138,7 @@ export const handleGooglePlayNotification = async (
     // Acknowledge the notification
     res.status(200).json({ message: 'Notification processed successfully' });
   } catch (error: any) {
-    console.error('Error processing Google Play notification:', error);
+    paymentLogger.error('Error processing Google Play notification:', error);
     res.status(500).json({ message: 'Error processing notification', error: error.message });
   }
 };
@@ -193,9 +194,9 @@ async function handleSubscriptionPurchased(
       country: purchaseData.countryCode,
     });
 
-    console.log(`New Google Play subscription created: ${subscription._id}`);
+    paymentLogger.info(`New Google Play subscription created: ${subscription._id}`);
   } catch (error) {
-    console.error('Error handling subscription purchase:', error);
+    paymentLogger.error('Error handling subscription purchase:', error);
     throw error;
   }
 }
@@ -232,7 +233,7 @@ async function handleSubscriptionRenewed(
     productId: product.productId,
   });
 
-  console.log(`Subscription renewed: ${subscription._id}`);
+  paymentLogger.info(`Subscription renewed: ${subscription._id}`);
 }
 
 /**
@@ -252,7 +253,7 @@ async function handleSubscriptionCanceled(
   subscription.cancellationReason = purchaseData.cancelReason?.toString();
   await subscription.save();
 
-  console.log(`Subscription canceled: ${subscription._id}`);
+  paymentLogger.info(`Subscription canceled: ${subscription._id}`);
 }
 
 /**
@@ -264,7 +265,7 @@ async function handleSubscriptionExpired(subscription: any): Promise<void> {
   subscription.status = 'expired';
   await subscription.save();
 
-  console.log(`Subscription expired: ${subscription._id}`);
+  paymentLogger.info(`Subscription expired: ${subscription._id}`);
 }
 
 /**
@@ -280,7 +281,7 @@ async function handleSubscriptionGracePeriod(
   subscription.gracePeriodEndDate = new Date(parseInt(purchaseData.expiryTimeMillis));
   await subscription.save();
 
-  console.log(`Subscription in grace period: ${subscription._id}`);
+  paymentLogger.info(`Subscription in grace period: ${subscription._id}`);
 }
 
 /**
@@ -297,7 +298,7 @@ async function handleSubscriptionRecovered(
   subscription.expirationDate = new Date(parseInt(purchaseData.expiryTimeMillis));
   await subscription.save();
 
-  console.log(`Subscription recovered: ${subscription._id}`);
+  paymentLogger.info(`Subscription recovered: ${subscription._id}`);
 }
 
 /**
@@ -327,7 +328,7 @@ async function handleSubscriptionRevoked(
     productId: subscription.productId,
   });
 
-  console.log(`Subscription refunded: ${subscription._id}`);
+  paymentLogger.info(`Subscription refunded: ${subscription._id}`);
 }
 
 /**
@@ -340,7 +341,7 @@ async function handleSubscriptionPaused(subscription: any): Promise<void> {
   subscription.pausedAt = new Date();
   await subscription.save();
 
-  console.log(`Subscription paused: ${subscription._id}`);
+  paymentLogger.info(`Subscription paused: ${subscription._id}`);
 }
 
 /**
@@ -357,5 +358,5 @@ async function handleSubscriptionRestarted(
   subscription.expirationDate = new Date(parseInt(purchaseData.expiryTimeMillis));
   await subscription.save();
 
-  console.log(`Subscription restarted: ${subscription._id}`);
+  paymentLogger.info(`Subscription restarted: ${subscription._id}`);
 }

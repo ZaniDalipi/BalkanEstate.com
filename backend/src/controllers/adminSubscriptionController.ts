@@ -11,6 +11,7 @@ import Subscription from '../models/Subscription';
 import PaymentRecord from '../models/PaymentRecord';
 import SubscriptionEvent from '../models/SubscriptionEvent';
 import User from '../models/User';
+import { adminLogger } from '../utils/logger';
 
 /**
  * @desc    Get all subscriptions with pagination and filters
@@ -67,7 +68,7 @@ export const getAllSubscriptions = async (req: Request, res: Response): Promise<
       },
     });
   } catch (error: any) {
-    console.error('[Admin] Error getting subscriptions:', error);
+    adminLogger.error('[Admin] Error getting subscriptions:', error);
     res.status(500).json({ message: 'Error getting subscriptions', error: error.message });
   }
 };
@@ -108,7 +109,7 @@ export const getSubscriptionById = async (req: Request, res: Response): Promise<
       events,
     });
   } catch (error: any) {
-    console.error('[Admin] Error getting subscription:', error);
+    adminLogger.error('[Admin] Error getting subscription:', error);
     res.status(500).json({ message: 'Error getting subscription', error: error.message });
   }
 };
@@ -179,7 +180,7 @@ export const getAllPayments = async (req: Request, res: Response): Promise<void>
       },
     });
   } catch (error: any) {
-    console.error('[Admin] Error getting payments:', error);
+    adminLogger.error('[Admin] Error getting payments:', error);
     res.status(500).json({ message: 'Error getting payments', error: error.message });
   }
 };
@@ -208,7 +209,7 @@ export const getPaymentById = async (req: Request, res: Response): Promise<void>
       payment,
     });
   } catch (error: any) {
-    console.error('[Admin] Error getting payment:', error);
+    adminLogger.error('[Admin] Error getting payment:', error);
     res.status(500).json({ message: 'Error getting payment', error: error.message });
   }
 };
@@ -299,7 +300,7 @@ export const getPaymentStats = async (req: Request, res: Response): Promise<void
       },
     });
   } catch (error: any) {
-    console.error('[Admin] Error getting payment stats:', error);
+    adminLogger.error('[Admin] Error getting payment stats:', error);
     res.status(500).json({ message: 'Error getting payment stats', error: error.message });
   }
 };
@@ -370,7 +371,7 @@ export const activateUserSubscription = async (req: Request, res: Response): Pro
       },
     });
 
-    console.log(`[Admin] Subscription activated for user ${user.email} - Plan: ${planName}, Duration: ${durationDays} days`);
+    adminLogger.info(`[Admin] Subscription activated for user ${user.email} - Plan: ${planName}, Duration: ${durationDays} days`);
 
     res.json({
       success: true,
@@ -383,7 +384,7 @@ export const activateUserSubscription = async (req: Request, res: Response): Pro
       },
     });
   } catch (error: any) {
-    console.error('[Admin] Error activating subscription:', error);
+    adminLogger.error('[Admin] Error activating subscription:', error);
     res.status(500).json({ message: 'Error activating subscription', error: error.message });
   }
 };
@@ -446,14 +447,14 @@ export const cancelSubscription = async (req: Request, res: Response): Promise<v
       },
     });
 
-    console.log(`[Admin] Subscription ${id} canceled for user ${user?.email}`);
+    adminLogger.info(`[Admin] Subscription ${id} canceled for user ${user?.email}`);
 
     res.json({
       success: true,
       message: immediate ? 'Subscription canceled immediately' : 'Subscription will cancel at end of period',
     });
   } catch (error: any) {
-    console.error('[Admin] Error canceling subscription:', error);
+    adminLogger.error('[Admin] Error canceling subscription:', error);
     res.status(500).json({ message: 'Error canceling subscription', error: error.message });
   }
 };

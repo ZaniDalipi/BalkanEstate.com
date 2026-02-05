@@ -12,6 +12,7 @@
 import { refreshHighlightPromotions } from './refreshWorker';
 import { processAutoExtends } from './autoExtendWorker';
 import { deactivateExpiredPromotions } from './cleanupWorker';
+import { cronLogger } from '../../utils/logger';
 
 // Re-export individual workers
 export { refreshHighlightPromotions } from './refreshWorker';
@@ -22,13 +23,13 @@ export { deactivateExpiredPromotions } from './cleanupWorker';
  * Run all promotion maintenance tasks
  */
 export const runPromotionMaintenance = async (): Promise<void> => {
-  console.log('[PromotionWorker] Starting promotion maintenance...');
+  cronLogger.info('[PromotionWorker] Starting promotion maintenance...');
 
   await refreshHighlightPromotions();
   await processAutoExtends();
   await deactivateExpiredPromotions();
 
-  console.log('[PromotionWorker] Promotion maintenance completed');
+  cronLogger.info('[PromotionWorker] Promotion maintenance completed');
 };
 
 /**
@@ -36,7 +37,7 @@ export const runPromotionMaintenance = async (): Promise<void> => {
  * Runs every hour to check for promotions that need refresh or cleanup
  */
 export const startPromotionRefreshWorker = (): NodeJS.Timeout => {
-  console.log('[PromotionWorker] Starting promotion worker...');
+  cronLogger.info('[PromotionWorker] Starting promotion worker...');
 
   // Run immediately on start
   runPromotionMaintenance();

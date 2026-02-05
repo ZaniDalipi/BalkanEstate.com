@@ -3,14 +3,12 @@
 
 export { ImageEditorModal } from './ImageEditorModal';
 export { NeighborhoodInsights } from './NeighborhoodInsights';
-export { SharePopover } from './SharePopover';
 export { PropertyGallery } from './PropertyGallery';
 export { PropertyInfo } from './PropertyInfo';
 export { PropertyContact } from './PropertyContact';
 export { PropertyPhotos } from './PropertyPhotos';
 export { PropertyMapLink } from './PropertyMapLink';
 export { PropertyGuide } from './PropertyGuide';
-export { VideoPlayer } from './VideoPlayer';
 export { SocialVideoEmbed } from './SocialVideoEmbed';
 export {
   DetailItem,

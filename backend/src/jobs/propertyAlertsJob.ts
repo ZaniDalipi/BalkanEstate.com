@@ -10,6 +10,7 @@
 
 import Property, { IProperty } from '../models/Property';
 import SavedSearch, { IFilters } from '../models/SavedSearch';
+import { cronLogger } from '../utils/logger';
 import Favorite from '../models/Favorite';
 import PropertyAlert from '../models/PropertyAlert';
 import PriceHistory from '../models/PriceHistory';
@@ -143,7 +144,7 @@ function propertyInBounds(property: IProperty, drawnBoundsJSON: string | null): 
  * Runs every 15 minutes for instant alerts, or as scheduled for daily/weekly
  */
 export async function processNewListingAlerts(frequency: 'instant' | 'daily' | 'weekly' = 'instant'): Promise<void> {
-  console.log(`🔔 Processing ${frequency} new listing alerts...`);
+  cronLogger.info(`🔔 Processing ${frequency} new listing alerts...`);
 
   try {
     // Get all saved searches with alerts enabled for this frequency
@@ -153,7 +154,7 @@ export async function processNewListingAlerts(frequency: 'instant' | 'daily' | '
     }).populate('userId', 'email name subscription');
 
     if (savedSearches.length === 0) {
-      console.log('   No saved searches with alerts enabled');
+      cronLogger.info('   No saved searches with alerts enabled');
       return;
     }
 
@@ -169,7 +170,7 @@ export async function processNewListingAlerts(frequency: 'instant' | 'daily' | '
       return isEligibleTier && isActiveStatus;
     });
 
-    console.log(`   ${savedSearches.length} saved searches, ${eligibleSearches.length} with eligible subscriptions`);
+    cronLogger.info(`   ${savedSearches.length} saved searches, ${eligibleSearches.length} with eligible subscriptions`);
 
     // Determine time window based on frequency
     let since: Date;
@@ -192,16 +193,16 @@ export async function processNewListingAlerts(frequency: 'instant' | 'daily' | '
     });
 
     if (newProperties.length === 0) {
-      console.log('   No new properties found');
+      cronLogger.info('   No new properties found');
       return;
     }
 
     if (eligibleSearches.length === 0) {
-      console.log('   No users with eligible subscriptions');
+      cronLogger.info('   No users with eligible subscriptions');
       return;
     }
 
-    console.log(`   Found ${newProperties.length} new properties, checking ${eligibleSearches.length} eligible saved searches`);
+    cronLogger.info(`   Found ${newProperties.length} new properties, checking ${eligibleSearches.length} eligible saved searches`);
 
     // Process each saved search (only for users with active subscriptions)
     for (const search of eligibleSearches) {
@@ -299,13 +300,13 @@ export async function processNewListingAlerts(frequency: 'instant' | 'daily' | '
           );
         }
       } catch (emailError) {
-        console.error('   Failed to send property alert email:', emailError);
+        cronLogger.error('   Failed to send property alert email:', emailError);
       }
     }
 
-    console.log('✅ New listing alerts processed');
+    cronLogger.info('✅ New listing alerts processed');
   } catch (error) {
-    console.error('❌ Error processing new listing alerts:', error);
+    cronLogger.error('❌ Error processing new listing alerts:', error);
     throw error;
   }
 }
@@ -314,7 +315,7 @@ export async function processNewListingAlerts(frequency: 'instant' | 'daily' | '
  * Process price drop alerts for favorited properties
  */
 export async function processPriceDropAlerts(): Promise<void> {
-  console.log('🔔 Processing price drop alerts...');
+  cronLogger.info('🔔 Processing price drop alerts...');
 
   try {
     // Get all favorites with price alerts enabled
@@ -323,7 +324,7 @@ export async function processPriceDropAlerts(): Promise<void> {
     }).populate('userId', 'email name subscription').populate('propertyId');
 
     if (favorites.length === 0) {
-      console.log('   No favorites with price alerts enabled');
+      cronLogger.info('   No favorites with price alerts enabled');
       return;
     }
 
@@ -339,10 +340,10 @@ export async function processPriceDropAlerts(): Promise<void> {
       return isEligibleTier && isActiveStatus;
     });
 
-    console.log(`   ${favorites.length} favorites with alerts, ${eligibleFavorites.length} with eligible subscriptions`);
+    cronLogger.info(`   ${favorites.length} favorites with alerts, ${eligibleFavorites.length} with eligible subscriptions`);
 
     if (eligibleFavorites.length === 0) {
-      console.log('   No users with eligible subscriptions');
+      cronLogger.info('   No users with eligible subscriptions');
       return;
     }
 
@@ -370,7 +371,7 @@ export async function processPriceDropAlerts(): Promise<void> {
       // Check if we already sent an alert for this price
       if (favorite.lastAlertedPrice && favorite.lastAlertedPrice <= currentPrice) continue;
 
-      console.log(`   Price drop: ${property.address} - €${savedPrice} → €${currentPrice} (-${percentageDrop}%)`);
+      cronLogger.info(`   Price drop: ${property.address} - €${savedPrice} → €${currentPrice} (-${percentageDrop}%)`);
 
       // Create alert
       await PropertyAlert.create({
@@ -417,13 +418,13 @@ export async function processPriceDropAlerts(): Promise<void> {
 
         alertsSent++;
       } catch (emailError) {
-        console.error('   Failed to send price drop email:', emailError);
+        cronLogger.error('   Failed to send price drop email:', emailError);
       }
     }
 
-    console.log(`✅ Price drop alerts processed: ${alertsSent} alerts sent`);
+    cronLogger.info(`✅ Price drop alerts processed: ${alertsSent} alerts sent`);
   } catch (error) {
-    console.error('❌ Error processing price drop alerts:', error);
+    cronLogger.error('❌ Error processing price drop alerts:', error);
     throw error;
   }
 }
@@ -455,9 +456,9 @@ export async function recordPriceChange(
       changedAt: new Date(),
     });
 
-    console.log(`📊 Price history recorded: ${propertyId} - ${changeType} ${percentageChange ? `(${percentageChange}%)` : ''}`);
+    cronLogger.info(`📊 Price history recorded: ${propertyId} - ${changeType} ${percentageChange ? `(${percentageChange}%)` : ''}`);
   } catch (error) {
-    console.error('Error recording price history:', error);
+    cronLogger.error('Error recording price history:', error);
   }
 }
 
@@ -467,23 +468,23 @@ export async function recordPriceChange(
  * This provides truly instant notifications instead of waiting for the 15-minute cron
  */
 export async function processInstantAlertsForProperty(propertyId: string): Promise<void> {
-  console.log(`🔔 Processing instant alerts for property ${propertyId}...`);
+  cronLogger.info(`🔔 Processing instant alerts for property ${propertyId}...`);
 
   try {
     // Get the property
     const property = await Property.findById(propertyId);
     if (!property) {
-      console.log(`   ❌ Property ${propertyId} not found`);
+      cronLogger.info(`   ❌ Property ${propertyId} not found`);
       return;
     }
 
     // Only process active properties
     if (property.status !== 'active') {
-      console.log(`   ⏸️ Property ${propertyId} is not active (status: ${property.status})`);
+      cronLogger.info(`   ⏸️ Property ${propertyId} is not active (status: ${property.status})`);
       return;
     }
 
-    console.log(`   📍 Property: ${property.title || property.address}, ${property.city} (lat: ${property.lat}, lng: ${property.lng})`);
+    cronLogger.info(`   📍 Property: ${property.title || property.address}, ${property.city} (lat: ${property.lat}, lng: ${property.lng})`);
 
     // Get all saved searches with instant alerts enabled
     // Note: alertsEnabled defaults to true in schema, but older records may not have it
@@ -496,24 +497,24 @@ export async function processInstantAlertsForProperty(propertyId: string): Promi
       ],
     }).populate('userId', 'email name subscription');
 
-    console.log(`   📋 Found ${savedSearches.length} saved searches with instant alerts enabled`);
+    cronLogger.info(`   📋 Found ${savedSearches.length} saved searches with instant alerts enabled`);
 
     if (savedSearches.length === 0) {
-      console.log('   ℹ️ No saved searches with instant alerts enabled');
+      cronLogger.info('   ℹ️ No saved searches with instant alerts enabled');
       return;
     }
 
     // Log all saved searches for debugging
     savedSearches.forEach((search, i) => {
       const user = search.userId as any;
-      console.log(`   [${i + 1}] Search "${search.name}" by ${user?.email || 'unknown'} - subscription: ${user?.subscription?.tier || 'none'} (${user?.subscription?.status || 'none'})`);
+      cronLogger.info(`   [${i + 1}] Search "${search.name}" by ${user?.email || 'unknown'} - subscription: ${user?.subscription?.tier || 'none'} (${user?.subscription?.status || 'none'})`);
     });
 
     // Filter to only users with active subscriptions
     const eligibleSearches = savedSearches.filter(search => {
       const user = search.userId as any;
       if (!user || !user.subscription) {
-        console.log(`   ❌ Search "${search.name}" - no user or subscription`);
+        cronLogger.info(`   ❌ Search "${search.name}" - no user or subscription`);
         return false;
       }
 
@@ -522,18 +523,18 @@ export async function processInstantAlertsForProperty(propertyId: string): Promi
       const isActiveStatus = ALERT_ELIGIBLE_STATUSES.includes(status);
 
       if (!isEligibleTier || !isActiveStatus) {
-        console.log(`   ❌ Search "${search.name}" - user ${user.email} not eligible (tier: ${tier}, status: ${status})`);
+        cronLogger.info(`   ❌ Search "${search.name}" - user ${user.email} not eligible (tier: ${tier}, status: ${status})`);
         return false;
       }
 
-      console.log(`   ✓ Search "${search.name}" - user ${user.email} is eligible`);
+      cronLogger.info(`   ✓ Search "${search.name}" - user ${user.email} is eligible`);
       return true;
     });
 
-    console.log(`   👥 ${eligibleSearches.length} eligible saved searches (users with Pro subscription)`);
+    cronLogger.info(`   👥 ${eligibleSearches.length} eligible saved searches (users with Pro subscription)`);
 
     if (eligibleSearches.length === 0) {
-      console.log('   ℹ️ No users with eligible subscriptions');
+      cronLogger.info('   ℹ️ No users with eligible subscriptions');
       return;
     }
 
@@ -546,26 +547,26 @@ export async function processInstantAlertsForProperty(propertyId: string): Promi
 
       // Skip if already seen
       if (search.seenPropertyIds.includes(String(property._id))) {
-        console.log(`   ⏭️ Search "${search.name}" - property already seen`);
+        cronLogger.info(`   ⏭️ Search "${search.name}" - property already seen`);
         continue;
       }
 
       // Check if property matches filters
       const matchesFilters = propertyMatchesFilters(property, search.filters);
       if (!matchesFilters) {
-        console.log(`   ⏭️ Search "${search.name}" - property doesn't match filters`);
+        cronLogger.info(`   ⏭️ Search "${search.name}" - property doesn't match filters`);
         continue;
       }
 
       // Check if property is within bounds
       const inBounds = propertyInBounds(property, search.drawnBoundsJSON);
       if (!inBounds) {
-        console.log(`   ⏭️ Search "${search.name}" - property not in bounds (drawnBoundsJSON: ${search.drawnBoundsJSON ? 'exists' : 'null'})`);
+        cronLogger.info(`   ⏭️ Search "${search.name}" - property not in bounds (drawnBoundsJSON: ${search.drawnBoundsJSON ? 'exists' : 'null'})`);
         continue;
       }
 
       // Property matches this saved search!
-      console.log(`   ✅ Property matches saved search "${search.name}" for user ${user.email}`);
+      cronLogger.info(`   ✅ Property matches saved search "${search.name}" for user ${user.email}`);
 
       // Create alert record
       await PropertyAlert.create({
@@ -587,7 +588,7 @@ export async function processInstantAlertsForProperty(propertyId: string): Promi
 
       // Send email notification immediately
       try {
-        console.log(`   📧 Sending email to ${user.email}...`);
+        cronLogger.info(`   📧 Sending email to ${user.email}...`);
         await sendPropertyAlert({
           recipientEmail: user.email,
           recipientName: user.name || 'User',
@@ -612,15 +613,15 @@ export async function processInstantAlertsForProperty(propertyId: string): Promi
         );
 
         alertsSent++;
-        console.log(`   ✉️ Instant alert email sent to ${user.email}`);
+        cronLogger.info(`   ✉️ Instant alert email sent to ${user.email}`);
       } catch (emailError) {
-        console.error(`   ❌ Failed to send instant alert email to ${user.email}:`, emailError);
+        cronLogger.error(`   ❌ Failed to send instant alert email to ${user.email}:`, emailError);
       }
     }
 
-    console.log(`✅ Instant alerts processed for property ${propertyId}: ${alertsSent} alerts sent`);
+    cronLogger.info(`✅ Instant alerts processed for property ${propertyId}: ${alertsSent} alerts sent`);
   } catch (error) {
-    console.error(`❌ Error processing instant alerts for property ${propertyId}:`, error);
+    cronLogger.error(`❌ Error processing instant alerts for property ${propertyId}:`, error);
     // Don't throw - we don't want to break the property creation flow
   }
 }

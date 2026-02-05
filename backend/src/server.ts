@@ -8,6 +8,7 @@ import connectDB from './config/database';
 import { setupChatSocket } from './sockets/chatSocket';
 import { setupPropertySocket } from './sockets/propertySocket';
 import { setSocketInstance } from './utils/socketInstance';
+import { serverLogger } from './utils/logger';
 
 // Import and initialize Sentry for error monitoring (must be early)
 import { initSentry, setupSentry, attachSentryErrorHandler } from './lib/sentry';
@@ -42,8 +43,8 @@ dotenv.config({ path: envFile });
 // Fallback to .env if environment-specific file doesn't exist
 dotenv.config();
 
-console.log(`🚀 Server starting in ${process.env.NODE_ENV || 'development'} mode`);
-console.log(`📁 Loading environment from: ${envFile}`);
+serverLogger.info(`🚀 Server starting in ${process.env.NODE_ENV || 'development'} mode`);
+serverLogger.info(`📁 Loading environment from: ${envFile}`);
 
 // Initialize Sentry first (before anything else)
 initSentry();
@@ -135,9 +136,9 @@ if (process.env.GOOGLE_PLAY_CLIENT_EMAIL && process.env.GOOGLE_PLAY_PRIVATE_KEY)
       privateKey: process.env.GOOGLE_PLAY_PRIVATE_KEY.replace(/\\n/g, '\n'),
       packageName: process.env.GOOGLE_PLAY_PACKAGE_NAME || 'com.balkanestate.app',
     });
-    console.log('✅ Google Play Service initialized');
+    serverLogger.info('✅ Google Play Service initialized');
   } catch (error) {
-    console.warn('⚠️  Google Play Service not initialized:', error);
+    serverLogger.warn('⚠️  Google Play Service not initialized:', error);
   }
 }
 
@@ -150,37 +151,37 @@ if (process.env.APP_STORE_ISSUER_ID && process.env.APP_STORE_KEY_ID && process.e
       bundleId: process.env.APP_STORE_BUNDLE_ID || 'com.balkanestate.app',
       environment: (process.env.APP_STORE_ENVIRONMENT as 'sandbox' | 'production') || 'sandbox',
     });
-    console.log('✅ App Store Service initialized');
+    serverLogger.info('✅ App Store Service initialized');
   } catch (error) {
-    console.warn('⚠️  App Store Service not initialized:', error);
+    serverLogger.warn('⚠️  App Store Service not initialized:', error);
   }
 }
 
 // Start reconciliation worker (if enabled)
 if (process.env.ENABLE_RECONCILIATION === 'true') {
   scheduleReconciliation();
-  console.log('✅ Reconciliation worker started');
+  serverLogger.info('✅ Reconciliation worker started');
 }
 
 // Start subscription expiration worker (always enabled for security)
 scheduleExpirationWorker();
-console.log('✅ Subscription expiration worker started');
+serverLogger.info('✅ Subscription expiration worker started');
 
 // Start promotion refresh worker (for Highlight tier auto-refresh and expired promotion cleanup)
 startPromotionRefreshWorker();
-console.log('✅ Promotion refresh worker started');
+serverLogger.info('✅ Promotion refresh worker started');
 
 // Start trial management job (for agent trial reminders and expirations)
 startTrialManagementJob();
-console.log('✅ Trial management job started');
+serverLogger.info('✅ Trial management job started');
 
 // Start city market data update job (biweekly updates on 1st and 15th)
 startCityMarketDataUpdateJob();
-console.log('✅ City market data update job started (biweekly)');
+serverLogger.info('✅ City market data update job started (biweekly)');
 
 // Start monthly coupon refresh job (1st of each month)
 startMonthlyCouponJob();
-console.log('✅ Monthly coupon refresh job started (1st of each month)');
+serverLogger.info('✅ Monthly coupon refresh job started (1st of each month)');
 
 // ============================================================================
 // SECURITY MIDDLEWARE - Apply comprehensive security headers and CORS
@@ -282,7 +283,7 @@ attachSentryErrorHandler(app);
 
 // Error handler
 app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
-  console.error('❌ Error:', err);
+  serverLogger.error('❌ Error:', err);
 
   const statusCode = err.statusCode || 500;
   const message = err.message || 'Internal server error';
@@ -298,24 +299,24 @@ const PORT = process.env.PORT || 5001;
 
 httpServer.listen(PORT, () => {
   const isProd = process.env.NODE_ENV === 'production';
-  console.log('');
-  console.log('🚀 ============================================');
-  console.log(`🚀 Server running on port ${PORT}`);
-  console.log(`🚀 Environment: ${process.env.NODE_ENV || 'development'}`);
-  console.log('🚀 ============================================');
-  console.log('');
-  console.log('🔒 Security Features:');
-  console.log('   - Helmet security headers: Enabled');
-  console.log('   - CORS: ' + (isProd ? 'Production whitelist' : 'Development (permissive)'));
-  console.log('   - Rate limiting: Enabled (general + sensitive + payment)');
-  console.log('   - XSS protection: Enabled');
-  console.log('   - HPP protection: Enabled');
-  console.log('   - NoSQL injection protection: Enabled');
-  console.log('');
-  console.log('📍 Health check: http://localhost:' + PORT + '/health');
-  console.log('📍 API base URL: http://localhost:' + PORT + '/api');
-  console.log('📍 WebSocket URL: ws://localhost:' + PORT);
-  console.log('');
+  serverLogger.info('');
+  serverLogger.info('🚀 ============================================');
+  serverLogger.info(`🚀 Server running on port ${PORT}`);
+  serverLogger.info(`🚀 Environment: ${process.env.NODE_ENV || 'development'}`);
+  serverLogger.info('🚀 ============================================');
+  serverLogger.info('');
+  serverLogger.info('🔒 Security Features:');
+  serverLogger.info('   - Helmet security headers: Enabled');
+  serverLogger.info('   - CORS: ' + (isProd ? 'Production whitelist' : 'Development (permissive)'));
+  serverLogger.info('   - Rate limiting: Enabled (general + sensitive + payment)');
+  serverLogger.info('   - XSS protection: Enabled');
+  serverLogger.info('   - HPP protection: Enabled');
+  serverLogger.info('   - NoSQL injection protection: Enabled');
+  serverLogger.info('');
+  serverLogger.info('📍 Health check: http://localhost:' + PORT + '/health');
+  serverLogger.info('📍 API base URL: http://localhost:' + PORT + '/api');
+  serverLogger.info('📍 WebSocket URL: ws://localhost:' + PORT);
+  serverLogger.info('');
 
   // Start subscription cron jobs
   startCronJobs();

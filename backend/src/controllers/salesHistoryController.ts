@@ -1,6 +1,7 @@
 import { Request, Response } from 'express';
 import SalesHistory from '../models/SalesHistory';
 import { IUser } from '../models/User';
+import { apiLogger } from '../utils/logger';
 
 /**
  * Get sales history for the current user (agent/seller)
@@ -56,7 +57,7 @@ export const getMySalesHistory = async (req: Request, res: Response): Promise<vo
       },
     });
   } catch (error: any) {
-    console.error('Get sales history error:', error);
+    apiLogger.error('Get sales history error:', error);
     res.status(500).json({ message: 'Error fetching sales history', error: error.message });
   }
 };
@@ -96,7 +97,7 @@ export const getAgentSalesHistory = async (req: Request, res: Response): Promise
       },
     });
   } catch (error: any) {
-    console.error('Get agent sales history error:', error);
+    apiLogger.error('Get agent sales history error:', error);
     res.status(500).json({ message: 'Error fetching agent sales history', error: error.message });
   }
 };
@@ -130,7 +131,7 @@ export const getSaleById = async (req: Request, res: Response): Promise<void> =>
 
     res.json({ sale });
   } catch (error: any) {
-    console.error('Get sale by ID error:', error);
+    apiLogger.error('Get sale by ID error:', error);
     res.status(500).json({ message: 'Error fetching sale record', error: error.message });
   }
 };
@@ -173,7 +174,7 @@ export const updateSaleRecord = async (req: Request, res: Response): Promise<voi
 
     res.json({ sale });
   } catch (error: any) {
-    console.error('Update sale record error:', error);
+    apiLogger.error('Update sale record error:', error);
     res.status(500).json({ message: 'Error updating sale record', error: error.message });
   }
 };

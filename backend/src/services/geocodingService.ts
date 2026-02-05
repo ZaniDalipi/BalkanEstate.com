@@ -1,4 +1,5 @@
 import axios from 'axios';
+import { geocodingLogger } from '../utils/logger';
 
 interface GeocodeResult {
   lat: number;
@@ -23,7 +24,7 @@ export async function geocodeAddress(
   try {
     // Require at least city and country for meaningful geocoding
     if (!city || !country) {
-      console.log('⚠️ Geocoding skipped: city and country are required');
+      geocodingLogger.info('⚠️ Geocoding skipped: city and country are required');
       return null;
     }
 
@@ -44,9 +45,9 @@ export async function geocodeAddress(
 
     // If we only have city and country (no street address), still geocode but less precise
     if (!address) {
-      console.log(`ℹ️ Geocoding city-level: ${fullAddress}`);
+      geocodingLogger.info(`ℹ️ Geocoding city-level: ${fullAddress}`);
     } else {
-      console.log(`📍 Geocoding full address: ${fullAddress}`);
+      geocodingLogger.info(`📍 Geocoding full address: ${fullAddress}`);
     }
 
     // OpenStreetMap Nominatim API (free, no key required)
@@ -73,16 +74,16 @@ export async function geocodeAddress(
         display_name: result.display_name,
       };
 
-      console.log(`✅ Geocoded: ${geocodeResult.lat}, ${geocodeResult.lng}`);
-      console.log(`   Location: ${result.display_name}`);
+      geocodingLogger.info(`✅ Geocoded: ${geocodeResult.lat}, ${geocodeResult.lng}`);
+      geocodingLogger.info(`   Location: ${result.display_name}`);
 
       return geocodeResult;
     } else {
-      console.log(`⚠️ No geocoding results found for: ${fullAddress}`);
+      geocodingLogger.info(`⚠️ No geocoding results found for: ${fullAddress}`);
       return null;
     }
   } catch (error: any) {
-    console.error('❌ Geocoding error:', error.message);
+    geocodingLogger.error('❌ Geocoding error:', error.message);
     // Don't fail the entire request if geocoding fails
     return null;
   }
@@ -105,7 +106,7 @@ export async function geocodeAddressWithRateLimit(
 
   if (timeSinceLastRequest < GEOCODING_DELAY) {
     const waitTime = GEOCODING_DELAY - timeSinceLastRequest;
-    console.log(`⏳ Waiting ${waitTime}ms for rate limiting...`);
+    geocodingLogger.info(`⏳ Waiting ${waitTime}ms for rate limiting...`);
     await new Promise(resolve => setTimeout(resolve, waitTime));
   }
 
@@ -161,11 +162,11 @@ export async function geocodeProperty(propertyData: {
 export async function geocodeFreeformLocation(location: string): Promise<GeocodeResult | null> {
   try {
     if (!location || location.trim().length < 2) {
-      console.log('⚠️ Geocoding skipped: location string too short');
+      geocodingLogger.info('⚠️ Geocoding skipped: location string too short');
       return null;
     }
 
-    console.log(`📍 Geocoding freeform location: ${location}`);
+    geocodingLogger.info(`📍 Geocoding freeform location: ${location}`);
 
     const response = await axios.get('https://nominatim.openstreetmap.org/search', {
       params: {
@@ -189,14 +190,14 @@ export async function geocodeFreeformLocation(location: string): Promise<Geocode
         display_name: result.display_name,
       };
 
-      console.log(`✅ Geocoded freeform: ${geocodeResult.lat}, ${geocodeResult.lng}`);
+      geocodingLogger.info(`✅ Geocoded freeform: ${geocodeResult.lat}, ${geocodeResult.lng}`);
       return geocodeResult;
     } else {
-      console.log(`⚠️ No geocoding results found for: ${location}`);
+      geocodingLogger.info(`⚠️ No geocoding results found for: ${location}`);
       return null;
     }
   } catch (error: any) {
-    console.error('❌ Freeform geocoding error:', error.message);
+    geocodingLogger.error('❌ Freeform geocoding error:', error.message);
     return null;
   }
 }

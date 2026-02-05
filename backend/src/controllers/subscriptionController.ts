@@ -6,6 +6,7 @@ import Product from '../models/Product';
 import User from '../models/User';
 import { getGooglePlayService } from '../services/googlePlayService';
 import { getAppStoreService } from '../services/appStoreService';
+import { subscriptionLogger } from '../utils/logger';
 
 /**
  * @desc    Create a new subscription (web purchases)
@@ -144,7 +145,7 @@ export const createSubscription = async (req: Request, res: Response): Promise<v
       },
     });
   } catch (error: any) {
-    console.error('Error creating subscription:', error);
+    subscriptionLogger.error('Error creating subscription:', error);
     res.status(500).json({ message: 'Error creating subscription', error: error.message });
   }
 };
@@ -181,7 +182,7 @@ export const getUserSubscriptions = async (req: Request, res: Response): Promise
       })),
     });
   } catch (error: any) {
-    console.error('Error getting subscriptions:', error);
+    subscriptionLogger.error('Error getting subscriptions:', error);
     res.status(500).json({ message: 'Error getting subscriptions', error: error.message });
   }
 };
@@ -304,7 +305,7 @@ export const getCurrentSubscription = async (req: Request, res: Response): Promi
       },
     });
   } catch (error: any) {
-    console.error('Error getting current subscription:', error);
+    subscriptionLogger.error('Error getting current subscription:', error);
     res.status(500).json({ message: 'Error getting current subscription', error: error.message });
   }
 };
@@ -351,7 +352,7 @@ export const getSubscriptionById = async (req: Request, res: Response): Promise<
       },
     });
   } catch (error: any) {
-    console.error('Error getting subscription:', error);
+    subscriptionLogger.error('Error getting subscription:', error);
     res.status(500).json({ message: 'Error getting subscription', error: error.message });
   }
 };
@@ -418,7 +419,7 @@ export const cancelSubscription = async (req: Request, res: Response): Promise<v
       },
     });
   } catch (error: any) {
-    console.error('Error canceling subscription:', error);
+    subscriptionLogger.error('Error canceling subscription:', error);
     res.status(500).json({ message: 'Error canceling subscription', error: error.message });
   }
 };
@@ -474,7 +475,7 @@ export const restoreSubscription = async (req: Request, res: Response): Promise<
       },
     });
   } catch (error: any) {
-    console.error('Error restoring subscription:', error);
+    subscriptionLogger.error('Error restoring subscription:', error);
     res.status(500).json({ message: 'Error restoring subscription', error: error.message });
   }
 };
@@ -515,7 +516,7 @@ export const getSubscriptionEvents = async (req: Request, res: Response): Promis
       })),
     });
   } catch (error: any) {
-    console.error('Error getting subscription events:', error);
+    subscriptionLogger.error('Error getting subscription events:', error);
     res.status(500).json({ message: 'Error getting subscription events', error: error.message });
   }
 };
@@ -558,7 +559,7 @@ export const getSubscriptionPayments = async (req: Request, res: Response): Prom
       })),
     });
   } catch (error: any) {
-    console.error('Error getting subscription payments:', error);
+    subscriptionLogger.error('Error getting subscription payments:', error);
     res.status(500).json({
       message: 'Error getting subscription payments',
       error: error.message,
@@ -629,7 +630,7 @@ export const verifySubscription = async (req: Request, res: Response): Promise<v
       },
     });
   } catch (error: any) {
-    console.error('Error verifying subscription:', error);
+    subscriptionLogger.error('Error verifying subscription:', error);
     res.status(500).json({ message: 'Error verifying subscription', error: error.message });
   }
 };
@@ -695,11 +696,11 @@ export const activateTestProSubscription = async (req: Request, res: Response): 
 
     await user.save();
 
-    console.log(`✅ Test Pro subscription activated for user ${user.email}`);
-    console.log(`   Plan: ${plan}`);
-    console.log(`   Expires: ${expirationDate.toISOString()}`);
-    console.log(`   Listings: ${user.proSubscription?.activeListingsCount || 0}/15`);
-    console.log(`   Highlight Coupons: ${user.proSubscription?.promotionCoupons?.highlightCoupons || 0}`);
+    subscriptionLogger.info(`✅ Test Pro subscription activated for user ${user.email}`);
+    subscriptionLogger.info(`   Plan: ${plan}`);
+    subscriptionLogger.info(`   Expires: ${expirationDate.toISOString()}`);
+    subscriptionLogger.info(`   Listings: ${user.proSubscription?.activeListingsCount || 0}/15`);
+    subscriptionLogger.info(`   Highlight Coupons: ${user.proSubscription?.promotionCoupons?.highlightCoupons || 0}`);
 
     res.status(200).json({
       message: 'Test Pro subscription activated successfully',
@@ -713,7 +714,7 @@ export const activateTestProSubscription = async (req: Request, res: Response): 
       },
     });
   } catch (error: any) {
-    console.error('Error activating test Pro subscription:', error);
+    subscriptionLogger.error('Error activating test Pro subscription:', error);
     res.status(500).json({
       message: 'Error activating test Pro subscription',
       error: error.message,
@@ -749,7 +750,7 @@ export const syncProSubscription = async (req: Request, res: Response): Promise<
     }).sort({ expirationDate: -1 });
 
     if (activeSubscription) {
-      console.log(`🔄 Syncing Pro subscription for user ${user.email}`);
+      subscriptionLogger.info(`🔄 Syncing Pro subscription for user ${user.email}`);
 
       // Get product details for benefits
       const product = await Product.findOne({ productId: activeSubscription.productId });
@@ -779,7 +780,7 @@ export const syncProSubscription = async (req: Request, res: Response): Promise<
 
       await user.save();
 
-      console.log(`✅ Pro subscription synced! isActive: ${user.proSubscription?.isActive || false}`);
+      subscriptionLogger.info(`✅ Pro subscription synced! isActive: ${user.proSubscription?.isActive || false}`);
 
       res.status(200).json({
         message: 'Pro subscription synced successfully',
@@ -796,7 +797,7 @@ export const syncProSubscription = async (req: Request, res: Response): Promise<
       });
     }
   } catch (error: any) {
-    console.error('Error syncing Pro subscription:', error);
+    subscriptionLogger.error('Error syncing Pro subscription:', error);
     res.status(500).json({
       message: 'Error syncing Pro subscription',
       error: error.message,

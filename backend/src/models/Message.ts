@@ -1,5 +1,6 @@
 import mongoose, { Document, Schema } from 'mongoose';
 import { sanitizeMessage } from '../utils/messageFilter';
+import { dbLogger } from '../utils/logger';
 
 export interface IMessage extends Document {
   conversationId: mongoose.Types.ObjectId;
@@ -95,7 +96,7 @@ MessageSchema.pre('save', function(next) {
       message.hadSensitiveInfo = hadSensitiveInfo;
       message.securityWarnings = warnings;
     } catch (error) {
-      console.error('Error processing message:', error);
+      dbLogger.error('Error processing message:', error);
       return next(error as Error);
     }
   }

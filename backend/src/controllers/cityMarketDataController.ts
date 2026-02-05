@@ -1,6 +1,7 @@
 import { Request, Response } from 'express';
 import { getFeaturedCities, getCitiesByCountry, getCityMarketData } from '../services/cityMarketDataService';
 import { triggerMarketDataUpdate } from '../jobs/updateCityMarketData';
+import { apiLogger } from '../utils/logger';
 
 /**
  * @desc    Get featured city recommendations
@@ -18,7 +19,7 @@ export const getFeaturedCitiesController = async (req: Request, res: Response): 
       cities,
     });
   } catch (error: any) {
-    console.error('Error fetching featured cities:', error);
+    apiLogger.error('Error fetching featured cities:', error);
     res.status(500).json({
       success: false,
       message: 'Error fetching featured cities',
@@ -43,7 +44,7 @@ export const getCitiesByCountryController = async (req: Request, res: Response):
       cities,
     });
   } catch (error: any) {
-    console.error('Error fetching cities by country:', error);
+    apiLogger.error('Error fetching cities by country:', error);
     res.status(500).json({
       success: false,
       message: 'Error fetching cities',
@@ -75,7 +76,7 @@ export const getCityMarketDataController = async (req: Request, res: Response): 
       data: marketData,
     });
   } catch (error: any) {
-    console.error('Error fetching city market data:', error);
+    apiLogger.error('Error fetching city market data:', error);
     res.status(500).json({
       success: false,
       message: 'Error fetching market data',
@@ -102,7 +103,7 @@ export const triggerMarketDataUpdateController = async (req: Request, res: Respo
 
     // Trigger update in background
     triggerMarketDataUpdate().catch(error => {
-      console.error('Background market data update failed:', error);
+      apiLogger.error('Background market data update failed:', error);
     });
 
     res.json({
@@ -110,7 +111,7 @@ export const triggerMarketDataUpdateController = async (req: Request, res: Respo
       message: 'Market data update triggered successfully',
     });
   } catch (error: any) {
-    console.error('Error triggering market data update:', error);
+    apiLogger.error('Error triggering market data update:', error);
     res.status(500).json({
       success: false,
       message: 'Error triggering update',

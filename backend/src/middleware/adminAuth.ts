@@ -1,5 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 import { IUser } from '../models/User';
+import { apiLogger } from '../utils/logger';
 
 // Load allowed IPs from environment variable (comma-separated)
 // Example: ADMIN_ALLOWED_IPS=1.2.3.4,5.6.7.8
@@ -43,7 +44,7 @@ const ADMIN_ROLES = ['admin', 'super_admin'];
 export const checkVPNAccess = (req: Request, res: Response, next: NextFunction): void => {
   // Skip VPN check if disabled (development only!)
   if (isVPNCheckDisabled()) {
-    console.log('⚠️ VPN check disabled via DISABLE_ADMIN_VPN_CHECK');
+    apiLogger.info('⚠️ VPN check disabled via DISABLE_ADMIN_VPN_CHECK');
     next();
     return;
   }
@@ -70,7 +71,7 @@ export const checkVPNAccess = (req: Request, res: Response, next: NextFunction):
   const isDomainAllowed = allowedDomains.length > 0 && allowedDomains.includes(host);
 
   if (isDomainAllowed) {
-    console.log(`✅ Domain verified: ${host}`);
+    apiLogger.info(`✅ Domain verified: ${host}`);
     next();
     return;
   }
@@ -82,7 +83,7 @@ export const checkVPNAccess = (req: Request, res: Response, next: NextFunction):
   });
 
   if (!isIPWhitelisted) {
-    console.error('❌ Unauthorized access attempt');
+    apiLogger.error('❌ Unauthorized access attempt');
     res.status(403).json({
       message: 'Access denied. Admin panel requires VPN connection or authorized domain.',
       error: 'ACCESS_DENIED',
@@ -92,7 +93,7 @@ export const checkVPNAccess = (req: Request, res: Response, next: NextFunction):
     return;
   }
 
-  console.log(`✅ VPN IP verified: ${clientIP}`);
+  apiLogger.info(`✅ VPN IP verified: ${clientIP}`);
   next();
 };
 
@@ -114,7 +115,7 @@ export const checkAdminRole = (req: Request, res: Response, next: NextFunction):
   const isAdmin = ADMIN_ROLES.includes(user.role);
 
   if (!isAdmin) {
-    console.error('❌ Non-admin user attempted access');
+    apiLogger.error('❌ Non-admin user attempted access');
     res.status(403).json({
       message: 'Access denied. Admin privileges required.',
       error: 'INSUFFICIENT_PERMISSIONS',
@@ -138,7 +139,7 @@ export const requireAdminAccess = [checkVPNAccess, checkAdminRole];
 export const logAdminAction = (_action: string) => {
   return (_req: Request, _res: Response, next: NextFunction) => {
     // Admin action logged: ${_action}
-    // console.log(`   Body: ${JSON.stringify(req.body).substring(0, 200)}`);
+    // apiLogger.info(`   Body: ${JSON.stringify(req.body).substring(0, 200)}`);
 
     // TODO: Store in database for audit trail
     // await AdminAuditLog.create({

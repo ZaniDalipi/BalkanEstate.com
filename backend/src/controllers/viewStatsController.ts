@@ -7,6 +7,7 @@ import Agency from '../models/Agency';
 import { IUser } from '../models/User';
 import { incrementViewCount } from '../utils/statsUpdater';
 import { checkViewMilestone } from '../services/engagementService';
+import { apiLogger } from '../utils/logger';
 
 /**
  * Helper function to hash IP address for privacy
@@ -214,7 +215,7 @@ export const trackView = async (req: Request, res: Response): Promise<void> => {
         entityId,
         updatedEntity.views || 0,
         updatedEntity.isPromoted || false
-      ).catch((err) => console.error('Milestone check error:', err));
+      ).catch((err) => apiLogger.error('Milestone check error:', err));
     }
 
     res.status(201).json({
@@ -223,7 +224,7 @@ export const trackView = async (req: Request, res: Response): Promise<void> => {
       viewId: pageView._id,
     });
   } catch (error: any) {
-    console.error('Track view error:', error);
+    apiLogger.error('Track view error:', error);
     res.status(500).json({ message: 'Error tracking view', error: error.message });
   }
 };
@@ -244,7 +245,7 @@ export const updateViewDuration = async (req: Request, res: Response): Promise<v
     await PageView.findByIdAndUpdate(viewId, { duration });
     res.json({ success: true });
   } catch (error: any) {
-    console.error('Update view duration error:', error);
+    apiLogger.error('Update view duration error:', error);
     res.status(500).json({ message: 'Error updating duration', error: error.message });
   }
 };
@@ -472,7 +473,7 @@ export const getEntityStats = async (req: Request, res: Response): Promise<void>
       isLimited: false,
     });
   } catch (error: any) {
-    console.error('Get entity stats error:', error);
+    apiLogger.error('Get entity stats error:', error);
     res.status(500).json({ message: 'Error fetching statistics', error: error.message });
   }
 };
@@ -705,7 +706,7 @@ export const getMyPropertiesStats = async (req: Request, res: Response): Promise
       isLimited: false,
     });
   } catch (error: any) {
-    console.error('Get my properties stats error:', error);
+    apiLogger.error('Get my properties stats error:', error);
     res.status(500).json({ message: 'Error fetching statistics', error: error.message });
   }
 };
@@ -731,7 +732,7 @@ export const getMyAgentStats = async (req: Request, res: Response): Promise<void
     req.params.entityId = String(agent._id);
     return getEntityStats(req, res);
   } catch (error: any) {
-    console.error('Get my agent stats error:', error);
+    apiLogger.error('Get my agent stats error:', error);
     res.status(500).json({ message: 'Error fetching statistics', error: error.message });
   }
 };
@@ -760,7 +761,7 @@ export const getMyAgencyStats = async (req: Request, res: Response): Promise<voi
     req.params.entityId = String(agency._id);
     return getEntityStats(req, res);
   } catch (error: any) {
-    console.error('Get my agency stats error:', error);
+    apiLogger.error('Get my agency stats error:', error);
     res.status(500).json({ message: 'Error fetching statistics', error: error.message });
   }
 };
@@ -854,7 +855,7 @@ export const getComparisonStats = async (req: Request, res: Response): Promise<v
       });
     }
   } catch (error: any) {
-    console.error('Get comparison stats error:', error);
+    apiLogger.error('Get comparison stats error:', error);
     res.status(500).json({ message: 'Error fetching comparison', error: error.message });
   }
 };
@@ -1095,7 +1096,7 @@ export const generateReport = async (req: Request, res: Response): Promise<void>
       subscriptionInfo,
     });
   } catch (error: any) {
-    console.error('Generate report error:', error);
+    apiLogger.error('Generate report error:', error);
     res.status(500).json({ message: 'Error generating report', error: error.message });
   }
 };
@@ -1359,7 +1360,7 @@ export const getDashboardOverview = async (req: Request, res: Response): Promise
       isLimited: !subscriptionInfo.isPremium,
     });
   } catch (error: any) {
-    console.error('Get dashboard overview error:', error);
+    apiLogger.error('Get dashboard overview error:', error);
     res.status(500).json({ message: 'Error fetching dashboard', error: error.message });
   }
 };

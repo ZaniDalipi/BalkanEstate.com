@@ -10,6 +10,7 @@ import { processSubscriptionPayment } from '../services/subscriptionPaymentServi
 import { paymentProviderFactory } from '../services/paymentProviderFactory';
 import emailService from '../services/emailService';
 import { lemonSqueezyService } from '../services/lemonSqueezyService';
+import { paymentLogger } from '../utils/logger';
 
 // Stripe is used as fallback - LemonSqueezy is the primary payment provider
 // Keeping Stripe initialization for legacy webhook handling only
@@ -88,7 +89,7 @@ export const createCheckoutSession = async (req: Request, res: Response): Promis
       url: session.url, // This is the Stripe-hosted payment page URL
     });
   } catch (error: any) {
-    console.error('Error creating checkout session:', error);
+    paymentLogger.error('Error creating checkout session:', error);
     res.status(500).json({ message: 'Error creating checkout session', error: error.message });
   }
 };
@@ -135,7 +136,7 @@ export const createUnifiedPayment = async (req: Request, res: Response): Promise
 
     // Check if country is supported
     if (!paymentProviderFactory.isCountrySupported(userCountry)) {
-      console.warn(`⚠️ Country ${userCountry} not in our primary list, defaulting to Stripe`);
+      paymentLogger.warn(`⚠️ Country ${userCountry} not in our primary list, defaulting to Stripe`);
     }
 
     // Create payment using the factory
@@ -173,7 +174,7 @@ export const createUnifiedPayment = async (req: Request, res: Response): Promise
       providerInfo: paymentProviderFactory.getProviderInfo(result.provider),
     });
   } catch (error: any) {
-    console.error('Error creating unified payment:', error);
+    paymentLogger.error('Error creating unified payment:', error);
     res.status(500).json({ message: 'Error creating payment', error: error.message });
   }
 };
@@ -210,7 +211,7 @@ export const getPaymentProviders = async (req: Request, res: Response): Promise<
         : ['card', 'bank_transfer', 'wallet'],
     });
   } catch (error: any) {
-    console.error('Error getting payment providers:', error);
+    paymentLogger.error('Error getting payment providers:', error);
     res.status(500).json({ message: 'Error getting providers', error: error.message });
   }
 };
@@ -234,7 +235,7 @@ export const getSupportedCountries = async (_req: Request, res: Response): Promi
       lemonSqueezyCountries: paymentProviderFactory.getCountriesByProvider('lemonsqueezy'),
     });
   } catch (error: any) {
-    console.error('Error getting supported countries:', error);
+    paymentLogger.error('Error getting supported countries:', error);
     res.status(500).json({ message: 'Error getting countries', error: error.message });
   }
 };
@@ -317,7 +318,7 @@ export const processPayment = async (req: Request, res: Response): Promise<void>
       },
     });
   } catch (error: any) {
-    console.error('Error processing payment:', error);
+    paymentLogger.error('Error processing payment:', error);
     res.status(500).json({ message: 'Error processing payment', error: error.message });
   }
 };
@@ -353,7 +354,7 @@ export const getSubscriptionStatus = async (req: Request, res: Response): Promis
       canAccessPremium: user.canAccessPremiumFeatures(),
     });
   } catch (error: any) {
-    console.error('Error getting subscription status:', error);
+    paymentLogger.error('Error getting subscription status:', error);
     res.status(500).json({ message: 'Error getting subscription status', error: error.message });
   }
 };
@@ -395,7 +396,7 @@ export const cancelSubscription = async (req: Request, res: Response): Promise<v
       },
     });
   } catch (error: any) {
-    console.error('Error cancelling subscription:', error);
+    paymentLogger.error('Error cancelling subscription:', error);
     res.status(500).json({ message: 'Error cancelling subscription', error: error.message });
   }
 };
@@ -410,7 +411,7 @@ export const handleWebhook = async (req: Request, res: Response): Promise<void> 
   const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
 
   if (!webhookSecret) {
-    console.error('⚠️ Webhook secret not configured');
+    paymentLogger.error('⚠️ Webhook secret not configured');
     res.status(400).send('Webhook secret not configured');
     return;
   }
@@ -421,7 +422,7 @@ export const handleWebhook = async (req: Request, res: Response): Promise<void> 
     // Verify webhook signature
     event = stripe.webhooks.constructEvent(req.body, sig, webhookSecret);
   } catch (err: any) {
-    console.error('⚠️ Webhook signature verification failed:', err.message);
+    paymentLogger.error('⚠️ Webhook signature verification failed:', err.message);
     res.status(400).send(`Webhook Error: ${err.message}`);
     return;
   }
@@ -472,12 +473,12 @@ export const handleWebhook = async (req: Request, res: Response): Promise<void> 
       }
 
       default:
-        console.log(`Unhandled event type: ${event.type}`);
+        paymentLogger.info(`Unhandled event type: ${event.type}`);
     }
 
     res.json({ received: true });
   } catch (error: any) {
-    console.error('Error handling webhook:', error);
+    paymentLogger.error('Error handling webhook:', error);
     res.status(500).json({ error: 'Webhook handler failed' });
   }
 };
@@ -492,11 +493,11 @@ async function handleSuccessfulCheckout(session: Stripe.Checkout.Session) {
   const productId = session.metadata?.productId;
 
   if (!userId) {
-    console.error('No userId in session metadata');
+    paymentLogger.error('No userId in session metadata');
     return;
   }
 
-  console.log(`✅ Processing successful payment for user ${userId}`);
+  paymentLogger.info(`✅ Processing successful payment for user ${userId}`);
 
   try {
     // Find or create product
@@ -533,9 +534,9 @@ async function handleSuccessfulCheckout(session: Stripe.Checkout.Session) {
       }
     }
 
-    console.log(`✅ Subscription activated for user ${userId}`);
+    paymentLogger.info(`✅ Subscription activated for user ${userId}`);
   } catch (error) {
-    console.error('Error processing successful checkout:', error);
+    paymentLogger.error('Error processing successful checkout:', error);
     throw error;
   }
 }
@@ -547,15 +548,15 @@ async function handleSubscriptionUpdated(stripeSubscription: Stripe.Subscription
   try {
     const userId = stripeSubscription.metadata?.userId;
     if (!userId) {
-      console.error('No userId in subscription metadata');
+      paymentLogger.error('No userId in subscription metadata');
       return;
     }
 
-    console.log(`📝 Updating subscription for user ${userId}`);
+    paymentLogger.info(`📝 Updating subscription for user ${userId}`);
 
     const user = await User.findById(userId);
     if (!user || !user.activeSubscriptionId) {
-      console.error(`User or subscription not found for user ${userId}`);
+      paymentLogger.error(`User or subscription not found for user ${userId}`);
       return;
     }
 
@@ -574,10 +575,10 @@ async function handleSubscriptionUpdated(stripeSubscription: Stripe.Subscription
       user.subscriptionStatus = stripeSubscription.status === 'active' ? 'active' : 'canceled';
       await user.save();
 
-      console.log(`✅ Subscription updated for user ${userId}`);
+      paymentLogger.info(`✅ Subscription updated for user ${userId}`);
     }
   } catch (error) {
-    console.error('Error handling subscription update:', error);
+    paymentLogger.error('Error handling subscription update:', error);
   }
 }
 
@@ -588,15 +589,15 @@ async function handleSubscriptionDeleted(stripeSubscription: Stripe.Subscription
   try {
     const userId = stripeSubscription.metadata?.userId;
     if (!userId) {
-      console.error('No userId in subscription metadata');
+      paymentLogger.error('No userId in subscription metadata');
       return;
     }
 
-    console.log(`🗑️ Canceling subscription for user ${userId}`);
+    paymentLogger.info(`🗑️ Canceling subscription for user ${userId}`);
 
     const user = await User.findById(userId);
     if (!user) {
-      console.error(`User not found: ${userId}`);
+      paymentLogger.error(`User not found: ${userId}`);
       return;
     }
 
@@ -616,9 +617,9 @@ async function handleSubscriptionDeleted(stripeSubscription: Stripe.Subscription
     user.isSubscribed = false;
     await user.save();
 
-    console.log(`✅ Subscription canceled for user ${userId}`);
+    paymentLogger.info(`✅ Subscription canceled for user ${userId}`);
   } catch (error) {
-    console.error('Error handling subscription deletion:', error);
+    paymentLogger.error('Error handling subscription deletion:', error);
   }
 }
 
@@ -629,7 +630,7 @@ async function handleRecurringPaymentSucceeded(invoice: Stripe.Invoice) {
   try {
     const subscription = (invoice as any).subscription;
     if (!subscription || typeof subscription !== 'string') {
-      console.log('No subscription ID in invoice');
+      paymentLogger.info('No subscription ID in invoice');
       return;
     }
 
@@ -639,16 +640,16 @@ async function handleRecurringPaymentSucceeded(invoice: Stripe.Invoice) {
     const productId = stripeSubscription.metadata?.productId;
 
     if (!userId || !productId) {
-      console.error('Missing userId or productId in subscription metadata');
+      paymentLogger.error('Missing userId or productId in subscription metadata');
       return;
     }
 
-    console.log(`💰 Processing recurring payment for user ${userId}`);
+    paymentLogger.info(`💰 Processing recurring payment for user ${userId}`);
 
     // Find product
     const product = await Product.findOne({ productId });
     if (!product) {
-      console.error(`Product not found: ${productId}`);
+      paymentLogger.error(`Product not found: ${productId}`);
       return;
     }
 
@@ -661,9 +662,9 @@ async function handleRecurringPaymentSucceeded(invoice: Stripe.Invoice) {
       currency: (invoice.currency || 'eur').toUpperCase(),
     });
 
-    console.log(`✅ Recurring payment processed for user ${userId}`);
+    paymentLogger.info(`✅ Recurring payment processed for user ${userId}`);
   } catch (error) {
-    console.error('Error handling recurring payment:', error);
+    paymentLogger.error('Error handling recurring payment:', error);
   }
 }
 
@@ -681,11 +682,11 @@ async function handlePaymentFailed(invoice: Stripe.Invoice) {
     const userId = stripeSubscription.metadata?.userId;
 
     if (!userId) {
-      console.error('No userId in subscription metadata');
+      paymentLogger.error('No userId in subscription metadata');
       return;
     }
 
-    console.log(`❌ Payment failed for user ${userId}`);
+    paymentLogger.info(`❌ Payment failed for user ${userId}`);
 
     const user = await User.findById(userId);
     if (!user) {
@@ -709,9 +710,9 @@ async function handlePaymentFailed(invoice: Stripe.Invoice) {
       }
     }
 
-    console.log(`✅ User ${userId} moved to grace period`);
+    paymentLogger.info(`✅ User ${userId} moved to grace period`);
   } catch (error) {
-    console.error('Error handling payment failure:', error);
+    paymentLogger.error('Error handling payment failure:', error);
   }
 }
 
@@ -746,7 +747,7 @@ export const verifySession = async (req: Request, res: Response): Promise<void> 
       amountTotal: session.amount_total ? session.amount_total / 100 : 0,
     });
   } catch (error: any) {
-    console.error('Error verifying session:', error);
+    paymentLogger.error('Error verifying session:', error);
     res.status(500).json({ message: 'Error verifying session', error: error.message });
   }
 };
@@ -764,14 +765,14 @@ export const applyFreeSubscription = async (req: Request, res: Response): Promis
     // Free subscription request received
 
     if (!userId) {
-      console.error('❌ User not authenticated');
+      paymentLogger.error('❌ User not authenticated');
       res.status(401).json({ message: 'User not authenticated' });
       return;
     }
 
     const user = await User.findById(userId);
     if (!user) {
-      console.error('❌ User not found:', userId);
+      paymentLogger.error('❌ User not found:', userId);
       res.status(404).json({ message: 'User not found' });
       return;
     }
@@ -834,7 +835,7 @@ export const applyFreeSubscription = async (req: Request, res: Response): Promis
       return;
     }
 
-    console.log('💾 Creating free subscription in database...');
+    paymentLogger.info('💾 Creating free subscription in database...');
 
     // Process the subscription payment with 0 amount
     const result = await processSubscriptionPayment({
@@ -845,9 +846,9 @@ export const applyFreeSubscription = async (req: Request, res: Response): Promis
       currency: 'EUR',
     });
 
-    console.log('✅ Subscription created with ID:', result.subscription._id);
-    console.log('Subscription status:', result.subscription.status);
-    console.log('Expires at:', result.subscription.expirationDate);
+    paymentLogger.info('✅ Subscription created with ID:', result.subscription._id);
+    paymentLogger.info('Subscription status:', result.subscription.status);
+    paymentLogger.info('Expires at:', result.subscription.expirationDate);
 
     // Increment discount code usage
     discount.usedCount = (discount.usedCount || 0) + 1;
@@ -870,8 +871,8 @@ export const applyFreeSubscription = async (req: Request, res: Response): Promis
       },
     });
   } catch (error: any) {
-    console.error('❌ Error applying free subscription:', error);
-    console.error('Stack trace:', error.stack);
+    paymentLogger.error('❌ Error applying free subscription:', error);
+    paymentLogger.error('Stack trace:', error.stack);
     res.status(500).json({ message: 'Error applying free subscription', error: error.message });
   }
 };
@@ -881,7 +882,7 @@ export const applyFreeSubscription = async (req: Request, res: Response): Promis
  */
 async function handleChargeRefunded(charge: Stripe.Charge) {
   try {
-    console.log(`💰 Processing refund for charge: ${charge.id}`);
+    paymentLogger.info(`💰 Processing refund for charge: ${charge.id}`);
 
     // Get refund details
     const refundAmount = charge.amount_refunded / 100; // Convert from cents
@@ -895,7 +896,7 @@ async function handleChargeRefunded(charge: Stripe.Charge) {
     });
 
     if (!paymentRecord) {
-      console.warn(`⚠️ Payment record not found for charge: ${charge.id}`);
+      paymentLogger.warn(`⚠️ Payment record not found for charge: ${charge.id}`);
       return;
     }
 
@@ -909,7 +910,7 @@ async function handleChargeRefunded(charge: Stripe.Charge) {
     // Find user
     const user = await User.findById(paymentRecord.userId);
     if (!user) {
-      console.error(`User not found for refund: ${paymentRecord.userId}`);
+      paymentLogger.error(`User not found for refund: ${paymentRecord.userId}`);
       return;
     }
 
@@ -949,7 +950,7 @@ async function handleChargeRefunded(charge: Stripe.Charge) {
 
     // Refund processed successfully
   } catch (error) {
-    console.error('❌ Error handling refund:', error);
+    paymentLogger.error('❌ Error handling refund:', error);
   }
 }
 
@@ -958,11 +959,11 @@ async function handleChargeRefunded(charge: Stripe.Charge) {
  */
 async function handleDisputeCreated(dispute: Stripe.Dispute) {
   try {
-    console.log(`⚠️ Dispute/chargeback created: ${dispute.id}`);
+    paymentLogger.info(`⚠️ Dispute/chargeback created: ${dispute.id}`);
 
     const chargeId = typeof dispute.charge === 'string' ? dispute.charge : dispute.charge?.id;
     if (!chargeId) {
-      console.error('No charge ID in dispute');
+      paymentLogger.error('No charge ID in dispute');
       return;
     }
 
@@ -973,7 +974,7 @@ async function handleDisputeCreated(dispute: Stripe.Dispute) {
     });
 
     if (!paymentRecord) {
-      console.warn(`⚠️ Payment record not found for dispute: ${chargeId}`);
+      paymentLogger.warn(`⚠️ Payment record not found for dispute: ${chargeId}`);
       return;
     }
 
@@ -1006,7 +1007,7 @@ async function handleDisputeCreated(dispute: Stripe.Dispute) {
       });
     }
   } catch (error) {
-    console.error('❌ Error handling dispute:', error);
+    paymentLogger.error('❌ Error handling dispute:', error);
   }
 }
 
@@ -1121,7 +1122,7 @@ export const verifyLemonSqueezyPayment = async (req: Request, res: Response): Pr
         autoRenewing: paymentResult.subscription.autoRenewing !== false,
       });
     } catch (emailError) {
-      console.error('Failed to send invoice email:', emailError);
+      paymentLogger.error('Failed to send invoice email:', emailError);
       // Don't fail the payment verification if email fails
     }
 
@@ -1143,7 +1144,7 @@ export const verifyLemonSqueezyPayment = async (req: Request, res: Response): Pr
       },
     });
   } catch (error: any) {
-    console.error('Error verifying LemonSqueezy payment:', error);
+    paymentLogger.error('Error verifying LemonSqueezy payment:', error);
     res.status(500).json({
       success: false,
       message: 'Error verifying payment',

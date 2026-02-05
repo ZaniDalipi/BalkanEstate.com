@@ -309,7 +309,10 @@ const PricingPage: React.FC = () => {
 
   const handlePurchasePromotion = () => {
     if (!selectedListing || !selectedPromoTier) return;
-    // TODO: Integrate with payment system
+    // Payment integration pending: when payment system is enabled, this should
+    // open PaymentWindow with the promotion price from getPromotionPrice(selectedPromoTier, selectedDuration)
+    // and pass listingId, tier, and duration to the backend for activation after successful payment.
+    // See handlePlanSelection() for the pattern used with subscription payments.
     dispatch({
       type: 'SHOW_ALERT',
       payload: {
@@ -325,7 +328,10 @@ const PricingPage: React.FC = () => {
       dispatch({ type: 'TOGGLE_AUTH_MODAL', payload: { isOpen: true, view: 'login' } });
       return;
     }
-    // TODO: Integrate with payment system
+    // Payment integration pending: when payment system is enabled, this should open
+    // PaymentWindow with the agency feature price from getAgencyPrice(tier, selectedAgencyDuration)
+    // and pass agencyId and tier to the backend for activation after successful payment.
+    // The user's agencyId is available via state.currentUser?.agencyId.
     dispatch({
       type: 'SHOW_ALERT',
       payload: {

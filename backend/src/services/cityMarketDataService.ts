@@ -2,6 +2,7 @@ import { GoogleGenerativeAI } from '@google/generative-ai';
 import CityMarketData, { ICityMarketData } from '../models/CityMarketData';
 import Property from '../models/Property';
 import { FlattenMaps } from 'mongoose';
+import { apiLogger } from '../utils/logger';
 
 // Type for lean documents (plain objects without Mongoose methods)
 export type CityMarketDataLean = FlattenMaps<ICityMarketData> & { _id: string };
@@ -248,7 +249,7 @@ function generateFallbackCityData(cityInfo: { city: string; country: string; cou
  */
 async function fetchCityDataFromGemini(cities: Array<{ city: string; country: string; countryCode: string }>): Promise<CityDataFromGemini[]> {
   if (!process.env.GEMINI_API_KEY && !process.env.GOOGLE_AI_API_KEY) {
-    console.warn('⚠️ Gemini API key not configured. Using fallback data generation.');
+    apiLogger.warn('⚠️ Gemini API key not configured. Using fallback data generation.');
     return cities.map(generateFallbackCityData);
   }
 
@@ -301,12 +302,12 @@ Return only the JSON array, no other text.`;
     }
 
     const data: CityDataFromGemini[] = JSON.parse(jsonMatch[0]);
-    console.log(`✅ Fetched market data for ${data.length} cities from Gemini`);
+    apiLogger.info(`✅ Fetched market data for ${data.length} cities from Gemini`);
 
     return data;
   } catch (error) {
-    console.error('❌ Error fetching city data from Gemini:', error);
-    console.warn('⚠️ Falling back to generated placeholder data for these cities');
+    apiLogger.error('❌ Error fetching city data from Gemini:', error);
+    apiLogger.warn('⚠️ Falling back to generated placeholder data for these cities');
     return cities.map(generateFallbackCityData);
   }
 }
@@ -356,7 +357,7 @@ async function calculateMarketDataFromProperties(city: string, country: string):
       dataSource: 'calculated',
     };
   } catch (error) {
-    console.error(`Error calculating market data for ${city}:`, error);
+    apiLogger.error(`Error calculating market data for ${city}:`, error);
     return null;
   }
 }
@@ -387,7 +388,7 @@ async function getLiveListingCounts(city: string, country: string): Promise<{ li
 
     return { listingsCount, soldLastMonth };
   } catch (error) {
-    console.error(`Error getting live listing counts for ${city}:`, error);
+    apiLogger.error(`Error getting live listing counts for ${city}:`, error);
     return { listingsCount: 0, soldLastMonth: 0 };
   }
 }
@@ -397,7 +398,7 @@ async function getLiveListingCounts(city: string, country: string): Promise<{ li
  * This should be called twice per month (biweekly)
  */
 export async function updateAllCityMarketData(): Promise<void> {
-  console.log('🔄 Starting biweekly market data update for all featured cities...');
+  apiLogger.info('🔄 Starting biweekly market data update for all featured cities...');
 
   // Process cities in batches of 10 to avoid token limits
   const BATCH_SIZE = 10;
@@ -407,7 +408,7 @@ export async function updateAllCityMarketData(): Promise<void> {
   for (let i = 0; i < FEATURED_CITIES.length; i += BATCH_SIZE) {
     const batch = FEATURED_CITIES.slice(i, i + BATCH_SIZE);
 
-    console.log(`📊 Processing batch ${Math.floor(i / BATCH_SIZE) + 1}/${Math.ceil(FEATURED_CITIES.length / BATCH_SIZE)}...`);
+    apiLogger.info(`📊 Processing batch ${Math.floor(i / BATCH_SIZE) + 1}/${Math.ceil(FEATURED_CITIES.length / BATCH_SIZE)}...`);
 
     try {
       const geminiData = await fetchCityDataFromGemini(batch);
@@ -425,7 +426,7 @@ export async function updateAllCityMarketData(): Promise<void> {
           const calculatedData = await calculateMarketDataFromProperties(cityInfo.city, cityInfo.country);
 
           if (!geminiCityData && !calculatedData) {
-            console.warn(`⚠️ No data available for ${cityInfo.city}, ${cityInfo.country}`);
+            apiLogger.warn(`⚠️ No data available for ${cityInfo.city}, ${cityInfo.country}`);
             failedCount++;
             continue;
           }
@@ -455,9 +456,9 @@ export async function updateAllCityMarketData(): Promise<void> {
           );
 
           updatedCount++;
-          console.log(`✅ Updated market data for ${cityInfo.city}, ${cityInfo.country}`);
+          apiLogger.info(`✅ Updated market data for ${cityInfo.city}, ${cityInfo.country}`);
         } catch (error) {
-          console.error(`❌ Failed to update ${cityInfo.city}:`, error);
+          apiLogger.error(`❌ Failed to update ${cityInfo.city}:`, error);
           failedCount++;
         }
       }
@@ -467,12 +468,12 @@ export async function updateAllCityMarketData(): Promise<void> {
         await new Promise(resolve => setTimeout(resolve, 2000)); // 2 second delay
       }
     } catch (error) {
-      console.error(`❌ Batch processing failed:`, error);
+      apiLogger.error(`❌ Batch processing failed:`, error);
       failedCount += batch.length;
     }
   }
 
-  console.log(`✅ Market data update complete: ${updatedCount} updated, ${failedCount} failed`);
+  apiLogger.info(`✅ Market data update complete: ${updatedCount} updated, ${failedCount} failed`);
 }
 
 /**
@@ -499,7 +500,7 @@ export async function getFeaturedCities(limit: number = 12): Promise<CityMarketD
 
     return enrichedCities;
   } catch (error) {
-    console.error('Error fetching featured cities:', error);
+    apiLogger.error('Error fetching featured cities:', error);
     return [];
   }
 }
@@ -527,7 +528,7 @@ export async function getCitiesByCountry(country: string): Promise<CityMarketDat
 
     return enrichedCities;
   } catch (error) {
-    console.error(`Error fetching cities for ${country}:`, error);
+    apiLogger.error(`Error fetching cities for ${country}:`, error);
     return [];
   }
 }
@@ -551,7 +552,7 @@ export async function getCityMarketData(city: string, country: string): Promise<
       soldLastMonth: liveCounts.soldLastMonth,
     };
   } catch (error) {
-    console.error(`Error fetching market data for ${city}:`, error);
+    apiLogger.error(`Error fetching market data for ${city}:`, error);
     return null;
   }
 }

@@ -18,6 +18,7 @@ import {
   getBaseUrl,
   PromotionTierType,
 } from '../../services/promotion/promotionService';
+import { promotionLogger } from '../../utils/logger';
 
 /**
  * @desc    Extend an existing promotion
@@ -166,7 +167,7 @@ export const extendPromotion = async (
       },
     });
   } catch (error: any) {
-    console.error('Extend promotion error:', error);
+    promotionLogger.error('Extend promotion error:', error);
 
     // Check for specific error types
     if (error.message?.includes('STRIPE_SECRET_KEY')) {
@@ -263,7 +264,7 @@ export const confirmExtensionPayment = async (
       newEndDate: newEndDate.toISOString(),
     });
   } catch (error: any) {
-    console.error('Confirm extension payment error:', error);
+    promotionLogger.error('Confirm extension payment error:', error);
     res.status(500).json({ message: 'Error confirming extension', error: error.message });
   }
 };

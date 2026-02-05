@@ -1,6 +1,7 @@
 import cron from 'node-cron';
 import { processMonthlyCouponRefresh } from '../services/monthlyCouponService';
 import { sendMonthlyCouponEmail } from '../services/emailService';
+import { cronLogger } from '../utils/logger';
 
 /**
  * Monthly Coupon Refresh Cron Job
@@ -22,32 +23,32 @@ import { sendMonthlyCouponEmail } from '../services/emailService';
 export const startMonthlyCouponJob = (): void => {
   // Run on the 1st of every month at 9:00 AM UTC
   cron.schedule('0 9 1 * *', async () => {
-    console.log('[Cron Job] Starting monthly coupon refresh process...');
+    cronLogger.info('[Cron Job] Starting monthly coupon refresh process...');
 
     try {
       const result = await processMonthlyCouponRefresh();
 
-      console.log(`[Cron Job] Monthly coupon refresh completed:`);
-      console.log(`  - Pro users refreshed: ${result.usersRefreshed}`);
-      console.log(`  - Agencies refreshed: ${result.agenciesRefreshed}`);
-      console.log(`  - Emails sent: ${result.emailsSent}`);
+      cronLogger.info(`[Cron Job] Monthly coupon refresh completed:`);
+      cronLogger.info(`  - Pro users refreshed: ${result.usersRefreshed}`);
+      cronLogger.info(`  - Agencies refreshed: ${result.agenciesRefreshed}`);
+      cronLogger.info(`  - Emails sent: ${result.emailsSent}`);
 
       if (result.errors.length > 0) {
-        console.warn(`[Cron Job] ${result.errors.length} errors occurred during refresh`);
+        cronLogger.warn(`[Cron Job] ${result.errors.length} errors occurred during refresh`);
       }
     } catch (error) {
-      console.error('[Cron Job] Error processing monthly coupon refresh:', error);
+      cronLogger.error('[Cron Job] Error processing monthly coupon refresh:', error);
     }
   });
 
-  console.log('[Cron Job] Monthly coupon refresh job scheduled (1st of each month at 9:00 AM UTC)');
+  cronLogger.info('[Cron Job] Monthly coupon refresh job scheduled (1st of each month at 9:00 AM UTC)');
 };
 
 // Export for manual execution (useful for testing)
 export const runMonthlyCouponRefreshManually = async (): Promise<void> => {
-  console.log('[Manual] Running monthly coupon refresh...');
+  cronLogger.info('[Manual] Running monthly coupon refresh...');
   const result = await processMonthlyCouponRefresh();
-  console.log(`[Manual] Result:`, result);
+  cronLogger.info(`[Manual] Result:`, result);
 };
 
 /**
@@ -55,7 +56,7 @@ export const runMonthlyCouponRefreshManually = async (): Promise<void> => {
  * Used for testing the email template
  */
 export const sendTestMonthlyCouponEmail = async (email: string, userName: string): Promise<void> => {
-  console.log(`[Test] Sending test monthly coupon email to ${email}...`);
+  cronLogger.info(`[Test] Sending test monthly coupon email to ${email}...`);
 
   await sendMonthlyCouponEmail({
     email,
@@ -71,14 +72,14 @@ export const sendTestMonthlyCouponEmail = async (email: string, userName: string
     },
   });
 
-  console.log(`[Test] Test email sent to ${email}`);
+  cronLogger.info(`[Test] Test email sent to ${email}`);
 };
 
 /**
  * Send a test agency monthly coupon email
  */
 export const sendTestAgencyCouponEmail = async (email: string, userName: string, agencyName: string): Promise<void> => {
-  console.log(`[Test] Sending test agency coupon email to ${email}...`);
+  cronLogger.info(`[Test] Sending test agency coupon email to ${email}...`);
 
   await sendMonthlyCouponEmail({
     email,
@@ -96,5 +97,5 @@ export const sendTestAgencyCouponEmail = async (email: string, userName: string,
     agencyName,
   });
 
-  console.log(`[Test] Test agency email sent to ${email}`);
+  cronLogger.info(`[Test] Test agency email sent to ${email}`);
 };

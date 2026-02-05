@@ -11,6 +11,7 @@ import { uploadImage, deleteImage } from '../services/cloudinaryService';
 import { generateSecureAgentId } from '../utils/secureRandom';
 import { sendAgentJoinedAgencyEmail, sendAgencyNewMemberEmail } from '../services/emailService';
 import { ENTERPRISE_TIER_LIMITS } from '../config/subscriptionConstants';
+import { agencyLogger } from '../utils/logger';
 
 // Helper function to generate unique Agent ID using secure random
 function generateAgentId(): string {
@@ -75,13 +76,13 @@ export const createAgency = async (
 
     if (isDevelopment) {
       if (!isAgent) {
-        console.log('🔧 Development mode: Bypassing agent status check for agency creation');
+        agencyLogger.info('🔧 Development mode: Bypassing agent status check for agency creation');
       }
       if (!hasProSubscription) {
-        console.log('🔧 Development mode: Bypassing Pro subscription check for agency creation');
+        agencyLogger.info('🔧 Development mode: Bypassing Pro subscription check for agency creation');
       }
       if (user.subscriptionPlan !== 'enterprise') {
-        console.log('🔧 Development mode: Bypassing Enterprise subscription check for agency creation');
+        agencyLogger.info('🔧 Development mode: Bypassing Enterprise subscription check for agency creation');
       }
     }
 
@@ -114,7 +115,7 @@ export const createAgency = async (
       }),
     };
 
-    console.log(`📍 Creating agency with coordinates:`, coordinates.lat ? `${coordinates.lat}, ${coordinates.lng}` : 'No coordinates');
+    agencyLogger.info(`📍 Creating agency with coordinates:`, coordinates.lat ? `${coordinates.lat}, ${coordinates.lng}` : 'No coordinates');
 
     // Use constructor + save() pattern to allow pre-save hook to generate slug and invitationCode
     const agency = new Agency(agencyData);
@@ -187,12 +188,12 @@ export const createAgency = async (
       if (trialResult.success) {
         trialStarted = true;
         trialSubscription = trialResult.subscription;
-        console.log(`🎁 Automatically started 7-day free featured trial for agency ${agency.name}`);
+        agencyLogger.info(`🎁 Automatically started 7-day free featured trial for agency ${agency.name}`);
       } else {
-        console.log(`⚠️ Could not start free trial: ${trialResult.error}`);
+        agencyLogger.info(`⚠️ Could not start free trial: ${trialResult.error}`);
       }
     } catch (trialError) {
-      console.error('Error starting auto free trial:', trialError);
+      agencyLogger.error('Error starting auto free trial:', trialError);
       // Don't fail agency creation if trial fails
     }
 
@@ -235,7 +236,7 @@ export const createAgency = async (
 
         await agency.save();
         agentCouponsGenerated = true;
-        console.log(`🎟️ Generated 5 agent registration coupons for new agency ${agency.name}`);
+        agencyLogger.info(`🎟️ Generated 5 agent registration coupons for new agency ${agency.name}`);
 
         // Send emails with coupon codes and welcome message
         try {
@@ -271,10 +272,10 @@ export const createAgency = async (
           });
           // Sent Enterprise welcome email with coupon breakdown
         } catch (emailError) {
-          console.error('⚠️ Failed to send Enterprise emails:', emailError);
+          agencyLogger.error('⚠️ Failed to send Enterprise emails:', emailError);
         }
       } catch (couponError) {
-        console.error('⚠️ Error generating agent coupons:', couponError);
+        agencyLogger.error('⚠️ Error generating agent coupons:', couponError);
         // Don't fail agency creation if coupon generation fails
       }
     }
@@ -298,7 +299,7 @@ export const createAgency = async (
         : undefined,
     });
   } catch (error: any) {
-    console.error('Create agency error:', error);
+    agencyLogger.error('Create agency error:', error);
     res.status(500).json({ message: 'Error creating agency', error: error.message });
   }
 };
@@ -327,28 +328,28 @@ export const getAgencies = async (
         { specialties: { $elemMatch: { $regex: searchRegex } } },
         { type: searchRegex },
       ];
-      console.log(`🔍 Universal search for agencies: "${search}"`);
+      agencyLogger.info(`🔍 Universal search for agencies: "${search}"`);
     } else {
       // Legacy individual field filters (for backward compatibility)
       if (city) {
         filter.city = new RegExp(city as string, 'i');
-        console.log(`🔍 Filtering agencies by city: ${city}`);
+        agencyLogger.info(`🔍 Filtering agencies by city: ${city}`);
       }
 
       if (country) {
         filter.country = new RegExp(country as string, 'i');
-        console.log(`🔍 Filtering agencies by country: ${country}`);
+        agencyLogger.info(`🔍 Filtering agencies by country: ${country}`);
       }
 
       if (name) {
         filter.name = new RegExp(name as string, 'i');
-        console.log(`🔍 Filtering agencies by name: ${name}`);
+        agencyLogger.info(`🔍 Filtering agencies by name: ${name}`);
       }
     }
 
     if (featured === 'true') {
       filter.isFeatured = true;
-      console.log(`⭐ Filtering for featured agencies only`);
+      agencyLogger.info(`⭐ Filtering for featured agencies only`);
     }
 
     const pageNum = Number(page);
@@ -367,7 +368,7 @@ export const getAgencies = async (
 
     const skip = (pageNum - 1) * limitNum;
 
-    console.log(`📄 Fetching agencies: page ${pageNum}, limit ${limitNum}, skip ${skip}`);
+    agencyLogger.info(`📄 Fetching agencies: page ${pageNum}, limit ${limitNum}, skip ${skip}`);
 
     // Get agencies sorted by rotation order for featured ones
     const agencies = await Agency.find(filter)
@@ -403,7 +404,7 @@ export const getAgencies = async (
 
     const total = await Agency.countDocuments(filter);
 
-    console.log(`✅ Found ${agencies.length} agencies out of ${total} total`);
+    agencyLogger.info(`✅ Found ${agencies.length} agencies out of ${total} total`);
 
     res.json({
       agencies: agenciesWithCounts,
@@ -415,8 +416,8 @@ export const getAgencies = async (
       },
     });
   } catch (error: any) {
-    console.error('❌ Get agencies error:', error);
-    console.error('Stack trace:', error.stack);
+    agencyLogger.error('❌ Get agencies error:', error);
+    agencyLogger.error('Stack trace:', error.stack);
     res.status(500).json({
       message: 'Error fetching agencies',
       error: error.message,
@@ -439,13 +440,13 @@ export const getAgency = async (
     let identifier = idOrSlug;
     if (country && name) {
       identifier = `${country}/${name}`;
-      console.log(`🔍 Looking up agency by country/name: ${identifier}`);
+      agencyLogger.info(`🔍 Looking up agency by country/name: ${identifier}`);
     } else if (idOrSlug) {
-      console.log(`🔍 Looking up agency by idOrSlug: ${idOrSlug}`);
+      agencyLogger.info(`🔍 Looking up agency by idOrSlug: ${idOrSlug}`);
     }
 
     if (!identifier) {
-      console.error('❌ getAgency: No identifier provided');
+      agencyLogger.error('❌ getAgency: No identifier provided');
       res.status(400).json({ message: 'Agency ID or slug is required' });
       return;
     }
@@ -456,7 +457,7 @@ export const getAgency = async (
 
     if (mongoose.Types.ObjectId.isValid(identifier)) {
       lookupMethod = 'ID';
-      console.log(`🔑 Attempting lookup by ObjectId: ${identifier}`);
+      agencyLogger.info(`🔑 Attempting lookup by ObjectId: ${identifier}`);
       agency = await Agency.findById(identifier)
         .populate('ownerId', 'name email phone avatarUrl')
         .populate('agents', 'name email phone avatarUrl role agencyName licenseNumber agentId city country stats.activeListings stats.totalSalesValue stats.propertiesSold stats.rating')
@@ -466,7 +467,7 @@ export const getAgency = async (
     if (!agency) {
       lookupMethod = 'slug';
       const slugLower = identifier.toLowerCase();
-      console.log(`🏷️  Attempting lookup by slug: ${slugLower}`);
+      agencyLogger.info(`🏷️  Attempting lookup by slug: ${slugLower}`);
       agency = await Agency.findOne({ slug: slugLower })
         .populate('ownerId', 'name email phone avatarUrl')
         .populate('agents', 'name email phone avatarUrl role agencyName licenseNumber agentId city country stats.activeListings stats.totalSalesValue stats.propertiesSold stats.rating')
@@ -477,7 +478,7 @@ export const getAgency = async (
     if (!agency && identifier.includes('/')) {
       lookupMethod = 'slug (legacy format)';
       const legacySlug = identifier.toLowerCase().replace('/', ',');
-      console.log(`🏷️  Attempting lookup by legacy slug format: ${legacySlug}`);
+      agencyLogger.info(`🏷️  Attempting lookup by legacy slug format: ${legacySlug}`);
       agency = await Agency.findOne({ slug: legacySlug })
         .populate('ownerId', 'name email phone avatarUrl')
         .populate('agents', 'name email phone avatarUrl role agencyName licenseNumber agentId city country stats.activeListings stats.totalSalesValue stats.propertiesSold stats.rating')
@@ -485,7 +486,7 @@ export const getAgency = async (
     }
 
     if (!agency) {
-      console.error(`❌ Agency not found for identifier: ${identifier}`);
+      agencyLogger.error(`❌ Agency not found for identifier: ${identifier}`);
       res.status(404).json({
         message: 'Agency not found',
         searchedFor: identifier,
@@ -494,11 +495,11 @@ export const getAgency = async (
       return;
     }
 
-    console.log(`✅ Agency found via ${lookupMethod}: ${agency.name} (ID: ${agency._id})`);
+    agencyLogger.info(`✅ Agency found via ${lookupMethod}: ${agency.name} (ID: ${agency._id})`);
 
     // Validate that populated fields were successful
     if (!agency.ownerId) {
-      console.warn(`⚠️  Agency owner not found or failed to populate for agency: ${agency._id}`);
+      agencyLogger.warn(`⚠️  Agency owner not found or failed to populate for agency: ${agency._id}`);
     }
 
     // Auto-add owner/admin as member if they're viewing the agency and not already a member
@@ -512,7 +513,7 @@ export const getAgency = async (
       // Check if user is owner or admin but not in the agents array
       const isOwnerOrAdmin = userId === ownerId || agencyAdmins.includes(userId);
       if (isOwnerOrAdmin && !agencyAgents.includes(userId)) {
-        console.log(`👤 Auto-adding owner/admin ${currentUser.email} to agency members`);
+        agencyLogger.info(`👤 Auto-adding owner/admin ${currentUser.email} to agency members`);
 
         // Add user to agents array
         agency.agents.push(new mongoose.Types.ObjectId(userId));
@@ -557,7 +558,7 @@ export const getAgency = async (
           // Update user with agent ID
           user.agentId = agentProfile.agentId;
           await user.save();
-          console.log(`✅ User ${currentUser.email} profile updated with agency info`);
+          agencyLogger.info(`✅ User ${currentUser.email} profile updated with agency info`);
         }
 
         // Re-populate agents to include the newly added admin
@@ -569,7 +570,7 @@ export const getAgency = async (
     let properties: any[] = [];
     try {
       const sellerIds = [agency.ownerId, ...agency.agents].filter(Boolean);
-      console.log(`🏠 Fetching properties for ${sellerIds.length} sellers (owner + ${agency.agents.length} agents)`);
+      agencyLogger.info(`🏠 Fetching properties for ${sellerIds.length} sellers (owner + ${agency.agents.length} agents)`);
 
       const rawProperties = await Property.find({
         sellerId: { $in: sellerIds },
@@ -605,9 +606,9 @@ export const getAgency = async (
         };
       });
 
-      console.log(`✅ Found ${properties.length} properties for agency`);
+      agencyLogger.info(`✅ Found ${properties.length} properties for agency`);
     } catch (propertyError: any) {
-      console.error(`⚠️  Error fetching properties for agency ${agency._id}:`, propertyError.message);
+      agencyLogger.error(`⚠️  Error fetching properties for agency ${agency._id}:`, propertyError.message);
       // Continue anyway, return agency without properties
       properties = [];
     }
@@ -641,8 +642,8 @@ export const getAgency = async (
 
     res.json({ agency: agencyWithStats, properties });
   } catch (error: any) {
-    console.error('❌ Get agency error:', error);
-    console.error('Stack trace:', error.stack);
+    agencyLogger.error('❌ Get agency error:', error);
+    agencyLogger.error('Stack trace:', error.stack);
     res.status(500).json({
       message: 'Error fetching agency',
       error: error.message,
@@ -690,7 +691,7 @@ export const updateAgency = async (
 
     res.json({ agency });
   } catch (error: any) {
-    console.error('Update agency error:', error);
+    agencyLogger.error('Update agency error:', error);
     res.status(500).json({ message: 'Error updating agency', error: error.message });
   }
 };
@@ -754,7 +755,7 @@ export const addAgentToAgency = async (
 
     res.json({ agency });
   } catch (error: any) {
-    console.error('Add agent error:', error);
+    agencyLogger.error('Add agent error:', error);
     res.status(500).json({ message: 'Error adding agent to agency', error: error.message });
   }
 };
@@ -810,7 +811,7 @@ export const removeAgentFromAgency = async (
 
     res.json({ message: 'Agent removed from agency successfully' });
   } catch (error: any) {
-    console.error('Remove agent error:', error);
+    agencyLogger.error('Remove agent error:', error);
     res.status(500).json({ message: 'Error removing agent from agency', error: error.message });
   }
 };
@@ -871,7 +872,7 @@ export const getFeaturedAgencies = async (
 
     res.json({ agencies: rotatedAgencies });
   } catch (error: any) {
-    console.error('Get featured agencies error:', error);
+    agencyLogger.error('Get featured agencies error:', error);
     res.status(500).json({ message: 'Error fetching featured agencies', error: error.message });
   }
 };
@@ -896,7 +897,7 @@ export const uploadAgencyLogo = async (
 
     // Check if Cloudinary is configured
     if (!process.env.CLOUDINARY_CLOUD_NAME || !process.env.CLOUDINARY_API_KEY || !process.env.CLOUDINARY_API_SECRET) {
-      console.error('Cloudinary not configured');
+      agencyLogger.error('Cloudinary not configured');
       res.status(500).json({ message: 'Image upload service not configured' });
       return;
     }
@@ -919,14 +920,14 @@ export const uploadAgencyLogo = async (
       return;
     }
 
-    console.log('Uploading logo for agency:', agency._id);
+    agencyLogger.info('Uploading logo for agency:', agency._id);
 
     // Delete old logo if exists
     if (agency.logoPublicId) {
       try {
         await deleteImage(agency.logoPublicId);
       } catch (deleteError) {
-        console.log('Could not delete old logo:', deleteError);
+        agencyLogger.info('Could not delete old logo:', deleteError);
       }
     }
 
@@ -945,11 +946,11 @@ export const uploadAgencyLogo = async (
     agency.logoPublicId = uploadResult.publicId;
     await agency.save();
 
-    console.log('✅ Logo uploaded successfully:', uploadResult.url);
+    agencyLogger.info('✅ Logo uploaded successfully:', uploadResult.url);
 
     res.json({ logo: uploadResult.url, agency });
   } catch (error: any) {
-    console.error('Upload agency logo error:', error);
+    agencyLogger.error('Upload agency logo error:', error);
     res.status(500).json({ message: 'Error uploading logo', error: error.message });
   }
 };
@@ -974,7 +975,7 @@ export const uploadAgencyCover = async (
 
     // Check if Cloudinary is configured
     if (!process.env.CLOUDINARY_CLOUD_NAME || !process.env.CLOUDINARY_API_KEY || !process.env.CLOUDINARY_API_SECRET) {
-      console.error('Cloudinary not configured');
+      agencyLogger.error('Cloudinary not configured');
       res.status(500).json({ message: 'Image upload service not configured' });
       return;
     }
@@ -997,14 +998,14 @@ export const uploadAgencyCover = async (
       return;
     }
 
-    console.log('Uploading cover for agency:', agency._id);
+    agencyLogger.info('Uploading cover for agency:', agency._id);
 
     // Delete old cover if exists
     if (agency.coverImagePublicId) {
       try {
         await deleteImage(agency.coverImagePublicId);
       } catch (deleteError) {
-        console.log('Could not delete old cover:', deleteError);
+        agencyLogger.info('Could not delete old cover:', deleteError);
       }
     }
 
@@ -1023,11 +1024,11 @@ export const uploadAgencyCover = async (
     agency.coverImagePublicId = uploadResult.publicId;
     await agency.save();
 
-    console.log('✅ Cover uploaded successfully:', uploadResult.url);
+    agencyLogger.info('✅ Cover uploaded successfully:', uploadResult.url);
 
     res.json({ coverImage: uploadResult.url, agency });
   } catch (error: any) {
-    console.error('Upload agency cover error:', error);
+    agencyLogger.error('Upload agency cover error:', error);
     res.status(500).json({ message: 'Error uploading cover image', error: error.message });
   }
 };
@@ -1099,10 +1100,10 @@ export const joinAgencyByInvitationCode = async (
           );
           oldAgency.totalAgents = oldAgency.agents.length;
           await oldAgency.save();
-          console.log(`✅ Removed agent from old agency: ${oldAgency.name}`);
+          agencyLogger.info(`✅ Removed agent from old agency: ${oldAgency.name}`);
         }
       } catch (error) {
-        console.error('Error removing agent from old agency:', error);
+        agencyLogger.error('Error removing agent from old agency:', error);
         // Continue anyway - we still want to add them to the new agency
       }
     }
@@ -1162,7 +1163,7 @@ export const joinAgencyByInvitationCode = async (
       agent: updatedAgent,
     });
   } catch (error: any) {
-    console.error('Join agency by invitation code error:', error);
+    agencyLogger.error('Join agency by invitation code error:', error);
     res.status(500).json({ message: 'Error joining agency', error: error.message });
   }
 };
@@ -1196,14 +1197,14 @@ export const verifyInvitationCode = async (
                     agency.invitationCode.toUpperCase() === code.toUpperCase();
 
     if (isValid) {
-      console.log(`✅ Valid invitation code for agency: ${agency.name}`);
+      agencyLogger.info(`✅ Valid invitation code for agency: ${agency.name}`);
       res.json({ valid: true, message: 'Invitation code is valid' });
     } else {
-      console.log(`❌ Invalid invitation code for agency: ${agency.name}`);
+      agencyLogger.info(`❌ Invalid invitation code for agency: ${agency.name}`);
       res.json({ valid: false, message: 'Invalid invitation code' });
     }
   } catch (error: any) {
-    console.error('Verify invitation code error:', error);
+    agencyLogger.error('Verify invitation code error:', error);
     res.status(500).json({ valid: false, message: 'Error verifying invitation code', error: error.message });
   }
 };
@@ -1223,19 +1224,19 @@ export const findAgencyByInvitationCode = async (
       return;
     }
 
-    console.log(`🔍 Looking up agency with invitation code: ${code.toUpperCase()}`);
+    agencyLogger.info(`🔍 Looking up agency with invitation code: ${code.toUpperCase()}`);
 
     // Find agency by invitation code
     const agency = await Agency.findOne({ invitationCode: code.toUpperCase() })
       .populate('ownerId', 'name email');
 
     if (!agency) {
-      console.log(`❌ No agency found with invitation code: ${code.toUpperCase()}`);
+      agencyLogger.info(`❌ No agency found with invitation code: ${code.toUpperCase()}`);
       res.status(404).json({ message: 'Invalid invitation code. Please check and try again.' });
       return;
     }
 
-    console.log(`✅ Found agency: ${agency.name} (${agency._id})`);
+    agencyLogger.info(`✅ Found agency: ${agency.name} (${agency._id})`);
 
     res.json({
       success: true,
@@ -1252,7 +1253,7 @@ export const findAgencyByInvitationCode = async (
       }
     });
   } catch (error: any) {
-    console.error('Find agency by invitation code error:', error);
+    agencyLogger.error('Find agency by invitation code error:', error);
     res.status(500).json({ message: 'Error looking up agency', error: error.message });
   }
 };
@@ -1312,10 +1313,10 @@ export const addAgencyAdmin = async (
     agency.admins.push(userId as unknown as mongoose.Types.ObjectId);
     await agency.save();
 
-    console.log(`✅ Added admin to agency: ${agency.name}`);
+    agencyLogger.info(`✅ Added admin to agency: ${agency.name}`);
     res.json({ message: 'Admin added successfully', agency });
   } catch (error: any) {
-    console.error('Add agency admin error:', error);
+    agencyLogger.error('Add agency admin error:', error);
     res.status(500).json({ message: 'Error adding admin', error: error.message });
   }
 };
@@ -1360,10 +1361,10 @@ export const removeAgencyAdmin = async (
     agency.admins = agency.admins.filter(adminId => String(adminId) !== String(userId));
     await agency.save();
 
-    console.log(`✅ Removed admin from agency: ${agency.name}`);
+    agencyLogger.info(`✅ Removed admin from agency: ${agency.name}`);
     res.json({ message: 'Admin removed successfully', agency });
   } catch (error: any) {
-    console.error('Remove agency admin error:', error);
+    agencyLogger.error('Remove agency admin error:', error);
     res.status(500).json({ message: 'Error removing admin', error: error.message });
   }
 };
@@ -1424,7 +1425,7 @@ export const leaveAgency = async (
       agency.admins = agency.admins.filter(
         id => String(id) !== String(user._id)
       );
-      console.log(`✅ Removed user from admins of agency: ${agencyName}`);
+      agencyLogger.info(`✅ Removed user from admins of agency: ${agencyName}`);
     }
 
     await agency.save();
@@ -1440,10 +1441,10 @@ export const leaveAgency = async (
       agentRecord.agencyName = 'Independent Agent';
       agentRecord.agencyId = undefined;
       await agentRecord.save();
-      console.log(`✅ Updated agent profile to Independent Agent`);
+      agencyLogger.info(`✅ Updated agent profile to Independent Agent`);
     }
 
-    console.log(`✅ User ${user.email} left agency: ${agencyName}`);
+    agencyLogger.info(`✅ User ${user.email} left agency: ${agencyName}`);
 
     res.json({
       message: `Successfully left ${agencyName}`,
@@ -1457,7 +1458,7 @@ export const leaveAgency = async (
       }
     });
   } catch (error: any) {
-    console.error('Leave agency error:', error);
+    agencyLogger.error('Leave agency error:', error);
     res.status(500).json({ message: 'Error leaving agency', error: error.message });
   }
 };
@@ -1536,7 +1537,7 @@ export const generateAgentCoupons = async (
 
     await agency.save();
 
-    console.log(`✅ Generated ${couponsToGenerate} agent coupons for agency ${agency.name}`);
+    agencyLogger.info(`✅ Generated ${couponsToGenerate} agent coupons for agency ${agency.name}`);
 
     res.status(200).json({
       message: `Successfully generated ${couponsToGenerate} agent coupon codes`,
@@ -1544,7 +1545,7 @@ export const generateAgentCoupons = async (
       totalAvailable: agency.agentCoupons.filter(c => c.status === 'available').length,
     });
   } catch (error: any) {
-    console.error('Generate agent coupons error:', error);
+    agencyLogger.error('Generate agent coupons error:', error);
     res.status(500).json({
       message: 'Error generating coupons',
       error: error.message
@@ -1702,7 +1703,7 @@ export const redeemAgentCoupon = async (
       // Reset reminder flag so new reminder will be sent before new expiration
       existingSubscription.expiryReminderSent = false;
       await existingSubscription.save();
-      console.log(`✅ Updated Subscription document for ${user.email}`);
+      agencyLogger.info(`✅ Updated Subscription document for ${user.email}`);
     } else {
       // Create new subscription document
       await Subscription.create({
@@ -1718,7 +1719,7 @@ export const redeemAgentCoupon = async (
         currency: 'EUR',
         isAcknowledged: true,
       });
-      console.log(`✅ Created Subscription document for ${user.email}`);
+      agencyLogger.info(`✅ Created Subscription document for ${user.email}`);
     }
 
     // Mark coupon as used
@@ -1764,10 +1765,10 @@ export const redeemAgentCoupon = async (
       agentRecord.agencyId = agency._id as any;
       agentRecord.agencyName = agency.name;
       await agentRecord.save();
-      console.log(`✅ Updated Agent record for ${user.email} with agency: ${agency.name}`);
+      agencyLogger.info(`✅ Updated Agent record for ${user.email} with agency: ${agency.name}`);
     }
 
-    console.log(`✅ User ${user.email} redeemed agent coupon for agency ${agency.name}`);
+    agencyLogger.info(`✅ User ${user.email} redeemed agent coupon for agency ${agency.name}`);
 
     // Send email notifications (non-blocking)
     try {
@@ -1783,7 +1784,7 @@ export const redeemAgentCoupon = async (
         subscriptionTier: user.subscription.tier,
         listingsLimit: user.subscription.listingsLimit,
         expiresAt: user.subscription.expiresAt || new Date(Date.now() + 365 * 24 * 60 * 60 * 1000),
-      }).catch(err => console.error('Failed to send agent welcome email:', err));
+      }).catch(err => agencyLogger.error('Failed to send agent welcome email:', err));
 
       // Send email to the agency owner
       if (owner && owner.email) {
@@ -1796,13 +1797,13 @@ export const redeemAgentCoupon = async (
           newAgentEmail: user.email,
           couponCode: couponCode,
           totalAgents: agency.agents.length,
-        }).catch(err => console.error('Failed to send agency notification email:', err));
+        }).catch(err => agencyLogger.error('Failed to send agency notification email:', err));
       }
 
-      console.log(`📧 Email notifications sent for coupon redemption`);
+      agencyLogger.info(`📧 Email notifications sent for coupon redemption`);
     } catch (emailError) {
       // Don't fail the redemption if emails fail
-      console.error('Error sending email notifications:', emailError);
+      agencyLogger.error('Error sending email notifications:', emailError);
     }
 
     res.status(200).json({
@@ -1820,7 +1821,7 @@ export const redeemAgentCoupon = async (
       },
     });
   } catch (error: any) {
-    console.error('Redeem agent coupon error:', error);
+    agencyLogger.error('Redeem agent coupon error:', error);
     res.status(500).json({
       message: 'Error redeeming coupon',
       error: error.message
@@ -1914,7 +1915,7 @@ export const getAgencyCoupons = async (
       },
     });
   } catch (error: any) {
-    console.error('Get agency coupons error:', error);
+    agencyLogger.error('Get agency coupons error:', error);
     res.status(500).json({
       message: 'Error fetching coupons',
       error: error.message
@@ -1994,7 +1995,7 @@ export const usePromotionCoupon = async (
     agency.promotionCoupons.used += 1;
     await agency.save();
 
-    console.log(`✅ Agency ${agency.name} used promotion coupon for property ${propertyId} (${agency.promotionCoupons.available}/${agency.promotionCoupons.monthly} remaining)`);
+    agencyLogger.info(`✅ Agency ${agency.name} used promotion coupon for property ${propertyId} (${agency.promotionCoupons.available}/${agency.promotionCoupons.monthly} remaining)`);
 
     res.status(200).json({
       message: 'Promotion coupon applied successfully',
@@ -2006,7 +2007,7 @@ export const usePromotionCoupon = async (
       },
     });
   } catch (error: any) {
-    console.error('Use promotion coupon error:', error);
+    agencyLogger.error('Use promotion coupon error:', error);
     res.status(500).json({
       message: 'Error using promotion coupon',
       error: error.message
@@ -2081,7 +2082,7 @@ export const getAgencyAgents = async (
       agents: agentsData,
     });
   } catch (error: any) {
-    console.error('Get agency agents error:', error);
+    agencyLogger.error('Get agency agents error:', error);
     res.status(500).json({
       message: 'Error fetching agents',
       error: error.message
@@ -2098,7 +2099,7 @@ export const migrateAgentSubscriptions = async (
   res: Response
 ): Promise<void> => {
   try {
-    console.log('🔄 Starting agency agent subscription migration...');
+    agencyLogger.info('🔄 Starting agency agent subscription migration...');
 
     // Find all agencies with agents
     const agencies = await Agency.find({ agents: { $exists: true, $ne: [] } })
@@ -2225,7 +2226,7 @@ export const migrateAgentSubscriptions = async (
       }
     }
 
-    console.log(`✅ Migration complete: ${totalUpdated} users updated, ${totalCreated} subscriptions created`);
+    agencyLogger.info(`✅ Migration complete: ${totalUpdated} users updated, ${totalCreated} subscriptions created`);
 
     res.status(200).json({
       message: 'Migration completed successfully',
@@ -2237,7 +2238,7 @@ export const migrateAgentSubscriptions = async (
       details: results,
     });
   } catch (error: any) {
-    console.error('Migration error:', error);
+    agencyLogger.error('Migration error:', error);
     res.status(500).json({
       message: 'Migration failed',
       error: error.message

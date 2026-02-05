@@ -4,6 +4,7 @@
  */
 
 import { Request, Response, NextFunction } from 'express';
+import { apiLogger } from '../utils/logger';
 
 interface CacheEntry {
   data: any;
@@ -250,7 +251,7 @@ export const invalidateCache = (pathPattern: string): void => {
   });
 
   keysToDelete.forEach(key => cache.delete(key));
-  console.log(`🗑️ Cache invalidated for pattern: ${pathPattern} (${keysToDelete.length} entries)`);
+  apiLogger.info(`🗑️ Cache invalidated for pattern: ${pathPattern} (${keysToDelete.length} entries)`);
 };
 
 /**
@@ -259,7 +260,7 @@ export const invalidateCache = (pathPattern: string): void => {
 export const clearCache = (): void => {
   const size = cache.size;
   cache.clear();
-  console.log(`🗑️ Cache cleared (${size} entries)`);
+  apiLogger.info(`🗑️ Cache cleared (${size} entries)`);
 };
 
 /**

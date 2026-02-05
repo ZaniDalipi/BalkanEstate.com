@@ -2,6 +2,7 @@ import { Request, Response } from 'express';
 import User, { IUser } from '../models/User';
 import Agency from '../models/Agency';
 import crypto from 'crypto';
+import { apiLogger } from '../utils/logger';
 
 // Generate unique ID for achievements
 const generateAchievementId = () => {
@@ -27,7 +28,7 @@ export const getUserAchievements = async (req: Request, res: Response): Promise<
 
     res.json({ achievements: user.achievements || [] });
   } catch (error: any) {
-    console.error('Error fetching user achievements:', error);
+    apiLogger.error('Error fetching user achievements:', error);
     res.status(500).json({ message: 'Error fetching achievements', error: error.message });
   }
 };
@@ -94,7 +95,7 @@ export const addUserAchievement = async (req: Request, res: Response): Promise<v
       achievements: updatedUser.achievements,
     });
   } catch (error: any) {
-    console.error('Error adding user achievement:', error);
+    apiLogger.error('Error adding user achievement:', error);
     res.status(500).json({ message: 'Error adding achievement', error: error.message });
   }
 };
@@ -152,7 +153,7 @@ export const updateUserAchievement = async (req: Request, res: Response): Promis
       achievements: user.achievements,
     });
   } catch (error: any) {
-    console.error('Error updating user achievement:', error);
+    apiLogger.error('Error updating user achievement:', error);
     res.status(500).json({ message: 'Error updating achievement', error: error.message });
   }
 };
@@ -186,7 +187,7 @@ export const deleteUserAchievement = async (req: Request, res: Response): Promis
       achievements: updatedUser.achievements,
     });
   } catch (error: any) {
-    console.error('Error deleting user achievement:', error);
+    apiLogger.error('Error deleting user achievement:', error);
     res.status(500).json({ message: 'Error deleting achievement', error: error.message });
   }
 };
@@ -209,7 +210,7 @@ export const getAgencyAchievements = async (req: Request, res: Response): Promis
 
     res.json({ achievements: agency.achievements || [] });
   } catch (error: any) {
-    console.error('Error fetching agency achievements:', error);
+    apiLogger.error('Error fetching agency achievements:', error);
     res.status(500).json({ message: 'Error fetching achievements', error: error.message });
   }
 };
@@ -280,7 +281,7 @@ export const addAgencyAchievement = async (req: Request, res: Response): Promise
       achievements: agency.achievements,
     });
   } catch (error: any) {
-    console.error('Error adding agency achievement:', error);
+    apiLogger.error('Error adding agency achievement:', error);
     res.status(500).json({ message: 'Error adding achievement', error: error.message });
   }
 };
@@ -347,7 +348,7 @@ export const updateAgencyAchievement = async (req: Request, res: Response): Prom
       achievements: agency.achievements,
     });
   } catch (error: any) {
-    console.error('Error updating agency achievement:', error);
+    apiLogger.error('Error updating agency achievement:', error);
     res.status(500).json({ message: 'Error updating achievement', error: error.message });
   }
 };
@@ -389,7 +390,7 @@ export const deleteAgencyAchievement = async (req: Request, res: Response): Prom
       achievements: agency.achievements,
     });
   } catch (error: any) {
-    console.error('Error deleting agency achievement:', error);
+    apiLogger.error('Error deleting agency achievement:', error);
     res.status(500).json({ message: 'Error deleting achievement', error: error.message });
   }
 };
@@ -459,7 +460,7 @@ export const verifyAchievement = async (req: Request, res: Response): Promise<vo
       res.status(400).json({ message: 'Invalid type. Must be "user" or "agency"' });
     }
   } catch (error: any) {
-    console.error('Error verifying achievement:', error);
+    apiLogger.error('Error verifying achievement:', error);
     res.status(500).json({ message: 'Error verifying achievement', error: error.message });
   }
 };

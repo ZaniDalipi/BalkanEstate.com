@@ -54,20 +54,20 @@ export class ConversationRepository implements IConversationRepository {
     conversationId: string,
     onMessage: (message: Message) => void
   ): () => void {
-    // TODO: Implement WebSocket subscription
-    // This will be implemented when integrating with existing socketService
-    // TODO: WebSocket subscription not yet implemented
-    return () => {};
+    // WebSocket subscriptions are handled by the Socket.io connection in useChat hook.
+    // This repository method is not needed as real-time updates flow through Socket.io events
+    // (e.g., 'new_message', 'message_sent') managed at the hook/service layer.
+    return () => {}; // no-op cleanup
   }
 
   subscribeToUserConversations(
     userId: string,
     onUpdate: (conversation: Conversation) => void
   ): () => void {
-    // TODO: Implement WebSocket subscription
-    // This will be implemented when integrating with existing socketService
-    // TODO: WebSocket subscription not yet implemented
-    return () => {};
+    // WebSocket subscriptions for conversation list updates are handled by Socket.io
+    // in the chat hooks layer. Real-time conversation updates (new messages, read receipts)
+    // flow through Socket.io events, not through the repository pattern.
+    return () => {}; // no-op cleanup
   }
 }
 

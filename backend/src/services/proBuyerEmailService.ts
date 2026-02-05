@@ -17,6 +17,7 @@ import User from '../models/User';
 import Property from '../models/Property';
 import SavedSearch from '../models/SavedSearch';
 import { sendPropertyAlert, sendPriceDropAlert, sendNewListingsDigest } from './emailService';
+import { emailLogger } from '../utils/logger';
 
 // Track user activity patterns (in-memory, consider Redis for production)
 interface UserActivityPattern {
@@ -242,7 +243,7 @@ export const sendHotHourRecommendations = async (): Promise<{
       // Sent hot hour recommendation
       stats.sent++;
     } catch (error) {
-      console.error('[proBuyerEmailService] Error sending hot hour recommendation:', error);
+      emailLogger.error('[proBuyerEmailService] Error sending hot hour recommendation:', error);
       stats.errors++;
     }
   }
@@ -266,7 +267,7 @@ export const sendPriceDropAlerts = async (
 
   const property = await Property.findById(propertyId).lean();
   if (!property) {
-    console.error(`[proBuyerEmailService] Property ${propertyId} not found for price drop alert`);
+    emailLogger.error(`[proBuyerEmailService] Property ${propertyId} not found for price drop alert`);
     return;
   }
 
@@ -294,7 +295,7 @@ export const sendPriceDropAlerts = async (
 
       // Sent price drop alert
     } catch (error) {
-      console.error('[proBuyerEmailService] Error sending price drop alert:', error);
+      emailLogger.error('[proBuyerEmailService] Error sending price drop alert:', error);
     }
   }
 };
@@ -435,7 +436,7 @@ export const processSavedSearchAlerts = async (): Promise<{
       stats.alertsSent++;
       // Sent saved search alert
     } catch (error) {
-      console.error(`[proBuyerEmailService] Error processing saved search:`, error);
+      emailLogger.error(`[proBuyerEmailService] Error processing saved search:`, error);
       stats.errors++;
     }
   }

@@ -8,6 +8,7 @@ import {
   deleteGeneratedVideo,
   VideoGenerationOptions,
 } from '../services/videoGenerationService';
+import { videoLogger } from '../utils/logger';
 
 /**
  * @desc    Generate video for a property (synchronous - for smaller videos)
@@ -112,7 +113,7 @@ export const generateVideo = async (req: Request, res: Response): Promise<void> 
       embedInListing,
     };
 
-    console.log(`🎬 Starting video generation for property ${propertyId} by user ${userId} (quality: ${quality}, background: ${backgroundStyle})`);
+    videoLogger.info(`🎬 Starting video generation for property ${propertyId} by user ${userId} (quality: ${quality}, background: ${backgroundStyle})`);
 
     // Generate video
     const result = await generatePropertyVideo(options);
@@ -130,14 +131,14 @@ export const generateVideo = async (req: Request, res: Response): Promise<void> 
     property.videoUrl = result.url;
     await property.save();
 
-    console.log(`✅ Video generated successfully for property ${propertyId}`);
+    videoLogger.info(`✅ Video generated successfully for property ${propertyId}`);
 
     res.status(200).json({
       message: 'Video generated successfully',
       video: result,
     });
   } catch (error: any) {
-    console.error('❌ Video generation error:', error);
+    videoLogger.error('❌ Video generation error:', error);
     res.status(500).json({
       message: 'Failed to generate video',
       error: error.message,
@@ -233,7 +234,7 @@ export const startAsyncVideoGeneration = async (req: Request, res: Response): Pr
       statusUrl: `/api/videos/status/${jobId}`,
     });
   } catch (error: any) {
-    console.error('❌ Failed to start video generation:', error);
+    videoLogger.error('❌ Failed to start video generation:', error);
     res.status(500).json({
       message: 'Failed to start video generation',
       error: error.message,
@@ -259,7 +260,7 @@ export const getJobStatus = async (req: Request, res: Response): Promise<void> =
 
     res.status(200).json(job);
   } catch (error: any) {
-    console.error('❌ Failed to get job status:', error);
+    videoLogger.error('❌ Failed to get job status:', error);
     res.status(500).json({
       message: 'Failed to get job status',
       error: error.message,
@@ -322,7 +323,7 @@ export const deleteVideo = async (req: Request, res: Response): Promise<void> =>
 
     res.status(200).json({ message: 'Video deleted successfully' });
   } catch (error: any) {
-    console.error('❌ Failed to delete video:', error);
+    videoLogger.error('❌ Failed to delete video:', error);
     res.status(500).json({
       message: 'Failed to delete video',
       error: error.message,
@@ -415,7 +416,7 @@ export const getVideoPreview = async (req: Request, res: Response): Promise<void
       } : null,
     });
   } catch (error: any) {
-    console.error('❌ Failed to get video preview:', error);
+    videoLogger.error('❌ Failed to get video preview:', error);
     res.status(500).json({
       message: 'Failed to get video preview',
       error: error.message,

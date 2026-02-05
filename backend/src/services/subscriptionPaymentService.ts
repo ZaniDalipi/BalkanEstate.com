@@ -7,6 +7,7 @@ import Product from '../models/Product';
 import Agency from '../models/Agency';
 import { sendAgentRegistrationCouponsEmail, sendEnterpriseWelcomeEmail } from './emailService';
 import { generateSecureRandomString } from '../utils/secureRandom';
+import { paymentLogger } from '../utils/logger';
 
 const isProduction = process.env.NODE_ENV === 'production';
 
@@ -80,7 +81,7 @@ export async function processSubscriptionPayment(
     }
 
     // 4. Create or update subscription
-    if (!isProduction) console.log('🔍 Checking for existing subscription...');
+    if (!isProduction) paymentLogger.info('🔍 Checking for existing subscription...');
     let subscription = await Subscription.findOne({
       userId,
       productId,
@@ -88,7 +89,7 @@ export async function processSubscriptionPayment(
     }).session(session);
 
     if (subscription) {
-      if (!isProduction) console.log('🔄 Renewing existing subscription:', subscription._id);
+      if (!isProduction) paymentLogger.info('🔄 Renewing existing subscription:', subscription._id);
       // Renew existing subscription
       subscription.expirationDate = expirationDate;
       subscription.renewalDate = expirationDate;
@@ -96,9 +97,9 @@ export async function processSubscriptionPayment(
       subscription.autoRenewing = true;
       subscription.lastUpdated = new Date();
       await subscription.save({ session });
-      if (!isProduction) console.log('✅ Subscription renewed successfully');
+      if (!isProduction) paymentLogger.info('✅ Subscription renewed successfully');
     } else {
-      if (!isProduction) console.log('➕ Creating new subscription...');
+      if (!isProduction) paymentLogger.info('➕ Creating new subscription...');
 
       // Generate unique tokens for web subscriptions if not provided (using secure random)
       // This prevents duplicate key errors when multiple users create free subscriptions
@@ -141,11 +142,11 @@ export async function processSubscriptionPayment(
         { session }
       );
       subscription = newSubscription;
-      if (!isProduction) console.log('✅ New subscription created:', subscription._id);
+      if (!isProduction) paymentLogger.info('✅ New subscription created:', subscription._id);
     }
 
     // 5. Create payment record
-    if (!isProduction) console.log('💳 Creating payment record...');
+    if (!isProduction) paymentLogger.info('💳 Creating payment record...');
 
     // Use the subscription's tokens or generate a unique transaction ID (secure random)
     const paymentTransactionId = subscription.transactionId
@@ -172,10 +173,10 @@ export async function processSubscriptionPayment(
       ],
       { session }
     );
-    if (!isProduction) console.log('✅ Payment record created:', paymentRecord._id, 'for user:', user.email);
+    if (!isProduction) paymentLogger.info('✅ Payment record created:', paymentRecord._id, 'for user:', user.email);
 
     // 6. Update user with subscription info
-    if (!isProduction) console.log('👤 Updating user subscription info...');
+    if (!isProduction) paymentLogger.info('👤 Updating user subscription info...');
     user.isSubscribed = true;
     user.subscriptionPlan = productId; // Product ID (e.g., 'buyer_pro_monthly')
     user.subscriptionProductName = product.name; // Human-readable name
@@ -188,7 +189,7 @@ export async function processSubscriptionPayment(
     user.totalPaid = (user.totalPaid || 0) + amount;
     user.subscriptionStatus = 'active';
     await user.save({ session });
-    if (!isProduction) console.log('✅ User updated with subscription info');
+    if (!isProduction) paymentLogger.info('✅ User updated with subscription info');
 
     // 7. Create subscription event
     await SubscriptionEvent.create(
@@ -214,7 +215,7 @@ export async function processSubscriptionPayment(
     // Commit the transaction
     await session.commitTransaction();
 
-    if (!isProduction) console.log(`✅ Payment processed successfully for user ${userId}`);
+    if (!isProduction) paymentLogger.info(`✅ Payment processed successfully for user ${userId}`);
 
     // After successful subscription, handle Enterprise-specific logic
     // This runs outside the transaction since it's not critical
@@ -224,10 +225,10 @@ export async function processSubscriptionPayment(
     if (isEnterpriseProduct && isNewSubscription) {
       try {
         await generateEnterpriseAgentCoupons(String(userId), user.name || 'Agency Owner', user.email);
-        if (!isProduction) console.log(`🎟️ Generated agent coupons for Enterprise subscription`);
+        if (!isProduction) paymentLogger.info(`🎟️ Generated agent coupons for Enterprise subscription`);
       } catch (couponError) {
         // Don't fail the subscription if coupon generation fails
-        console.error('⚠️ Error generating Enterprise agent coupons:', couponError);
+        paymentLogger.error('⚠️ Error generating Enterprise agent coupons:', couponError);
       }
     }
 
@@ -241,7 +242,7 @@ export async function processSubscriptionPayment(
   } catch (error: any) {
     // Rollback all changes if anything fails
     await session.abortTransaction();
-    console.error('❌ Payment processing failed:', error);
+    paymentLogger.error('❌ Payment processing failed:', error);
 
     throw new Error(`Payment processing failed: ${error.message}`);
   } finally {
@@ -480,7 +481,7 @@ async function generateEnterpriseAgentCoupons(
 
   if (!agency) {
     // If no agency exists yet, the coupons will be generated when they create the agency
-    if (!isProduction) console.log('📋 No agency found yet - coupons will be generated when agency is created');
+    if (!isProduction) paymentLogger.info('📋 No agency found yet - coupons will be generated when agency is created');
     return;
   }
 
@@ -490,7 +491,7 @@ async function generateEnterpriseAgentCoupons(
   ).length;
 
   if (existingAvailableCoupons >= 5) {
-    if (!isProduction) console.log('✅ Agency already has 5 available coupons');
+    if (!isProduction) paymentLogger.info('✅ Agency already has 5 available coupons');
     return;
   }
 
@@ -523,7 +524,7 @@ async function generateEnterpriseAgentCoupons(
 
   await agency.save();
 
-  if (!isProduction) console.log(`✅ Generated ${couponsToGenerate} agent coupons for agency ${agency.name}`);
+  if (!isProduction) paymentLogger.info(`✅ Generated ${couponsToGenerate} agent coupons for agency ${agency.name}`);
 
   // Send emails with the coupon codes and welcome message
   try {
@@ -557,7 +558,7 @@ async function generateEnterpriseAgentCoupons(
     });
     // Sent Enterprise welcome email with coupon breakdown
   } catch (emailError) {
-    console.error('⚠️ Failed to send Enterprise emails:', emailError);
+    paymentLogger.error('⚠️ Failed to send Enterprise emails:', emailError);
     // Don't throw - coupons were still generated successfully
   }
 }

@@ -1,5 +1,6 @@
 import { Request, Response } from 'express';
 import PromotionPlan from '../models/PromotionPlan';
+import { promotionLogger } from '../utils/logger';
 
 // Get all promotion plans (public)
 export const getPromotionPlans = async (req: Request, res: Response) => {
@@ -15,7 +16,7 @@ export const getPromotionPlans = async (req: Request, res: Response) => {
 
     res.json({ plans });
   } catch (error) {
-    console.error('Error fetching promotion plans:', error);
+    promotionLogger.error('Error fetching promotion plans:', error);
     res.status(500).json({ error: 'Failed to fetch promotion plans' });
   }
 };
@@ -26,7 +27,7 @@ export const getAdminPromotionPlans = async (req: Request, res: Response) => {
     const plans = await PromotionPlan.find().sort({ category: 1, displayOrder: 1 });
     res.json({ plans });
   } catch (error) {
-    console.error('Error fetching admin promotion plans:', error);
+    promotionLogger.error('Error fetching admin promotion plans:', error);
     res.status(500).json({ error: 'Failed to fetch promotion plans' });
   }
 };
@@ -38,7 +39,7 @@ export const createPromotionPlan = async (req: Request, res: Response) => {
     await plan.save();
     res.status(201).json({ plan });
   } catch (error) {
-    console.error('Error creating promotion plan:', error);
+    promotionLogger.error('Error creating promotion plan:', error);
     res.status(500).json({ error: 'Failed to create promotion plan' });
   }
 };
@@ -60,7 +61,7 @@ export const updatePromotionPlan = async (req: Request, res: Response): Promise<
 
     res.json({ plan });
   } catch (error) {
-    console.error('Error updating promotion plan:', error);
+    promotionLogger.error('Error updating promotion plan:', error);
     res.status(500).json({ error: 'Failed to update promotion plan' });
   }
 };
@@ -78,7 +79,7 @@ export const deletePromotionPlan = async (req: Request, res: Response): Promise<
 
     res.json({ message: 'Promotion plan deleted successfully' });
   } catch (error) {
-    console.error('Error deleting promotion plan:', error);
+    promotionLogger.error('Error deleting promotion plan:', error);
     res.status(500).json({ error: 'Failed to delete promotion plan' });
   }
 };
@@ -99,7 +100,7 @@ export const togglePromotionPlanStatus = async (req: Request, res: Response): Pr
 
     res.json({ plan });
   } catch (error) {
-    console.error('Error toggling promotion plan status:', error);
+    promotionLogger.error('Error toggling promotion plan status:', error);
     res.status(500).json({ error: 'Failed to toggle plan status' });
   }
 };
@@ -237,7 +238,7 @@ export const seedPromotionPlans = async (req: Request, res: Response): Promise<v
     await PromotionPlan.insertMany(defaultPlans);
     res.json({ message: 'Promotion plans seeded successfully', count: defaultPlans.length });
   } catch (error) {
-    console.error('Error seeding promotion plans:', error);
+    promotionLogger.error('Error seeding promotion plans:', error);
     res.status(500).json({ error: 'Failed to seed promotion plans' });
   }
 };

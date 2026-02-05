@@ -8,6 +8,7 @@ import cloudinary from '../config/cloudinary';
 import { sendNewMessageNotification } from '../services/emailService';
 import { getSocketInstance } from '../utils/socketInstance';
 import { incrementInquiryCount } from '../utils/statsUpdater';
+import { apiLogger } from '../utils/logger';
 
 // @desc    Get user's conversations
 // @route   GET /api/conversations
@@ -47,7 +48,7 @@ export const getConversations = async (
 
     res.json({ conversations: conversationsWithMessages });
   } catch (error: any) {
-    console.error('Get conversations error:', error);
+    apiLogger.error('Get conversations error:', error);
     res.status(500).json({ message: 'Error fetching conversations', error: error.message });
   }
 };
@@ -118,7 +119,7 @@ export const getConversation = async (
 
     res.json({ conversation, messages });
   } catch (error: any) {
-    console.error('Get conversation error:', error);
+    apiLogger.error('Get conversation error:', error);
     res.status(500).json({ message: 'Error fetching conversation', error: error.message });
   }
 };
@@ -192,7 +193,7 @@ export const createConversation = async (
 
     res.status(201).json({ conversation });
   } catch (error: any) {
-    console.error('Create conversation error:', error);
+    apiLogger.error('Create conversation error:', error);
     res.status(500).json({ message: 'Error creating conversation', error: error.message });
   }
 };
@@ -296,7 +297,7 @@ export const sendMessage = async (
         });
       }
     } catch (emailError) {
-      console.error('Error sending email notification:', emailError);
+      apiLogger.error('Error sending email notification:', emailError);
       // Don't fail the request if email fails
     }
 
@@ -313,7 +314,7 @@ export const sendMessage = async (
 
       });
 
-      console.log(`📨 Emitted message to conversation room: ${conversationId}`);
+      apiLogger.info(`📨 Emitted message to conversation room: ${conversationId}`);
 
     }
 
@@ -325,7 +326,7 @@ export const sendMessage = async (
 
     res.status(201).json(response);
   } catch (error: any) {
-    console.error('Send message error:', error);
+    apiLogger.error('Send message error:', error);
     res.status(500).json({ message: 'Error sending message', error: error.message });
   }
 };
@@ -391,14 +392,14 @@ export const uploadMessageImage = async (
       },
     });
 
-    console.log(`📸 Message image uploaded: ${result.public_id}`);
+    apiLogger.info(`📸 Message image uploaded: ${result.public_id}`);
 
     res.json({
       imageUrl: result.secure_url,
       publicId: result.public_id, // Return public ID for message storage
     });
   } catch (error: any) {
-    console.error('Upload message image error:', error);
+    apiLogger.error('Upload message image error:', error);
     res.status(500).json({ message: 'Error uploading image', error: error.message });
   }
 };
@@ -453,7 +454,7 @@ export const getConversationPublicKeys = async (
       },
     });
   } catch (error: any) {
-    console.error('Get conversation public keys error:', error);
+    apiLogger.error('Get conversation public keys error:', error);
     res.status(500).json({ message: 'Error getting public keys', error: error.message });
   }
 };
@@ -514,7 +515,7 @@ export const markAsRead = async (
 
     res.json({ message: 'Marked as read' });
   } catch (error: any) {
-    console.error('Mark as read error:', error);
+    apiLogger.error('Mark as read error:', error);
     res.status(500).json({ message: 'Error marking as read', error: error.message });
   }
 };
@@ -557,14 +558,14 @@ export const deleteConversation = async (
 
     // Delete images from Cloudinary
     if (messagesWithImages.length > 0) {
-      console.log(`🗑️  Deleting ${messagesWithImages.length} images from Cloudinary...`);
+      apiLogger.info(`🗑️  Deleting ${messagesWithImages.length} images from Cloudinary...`);
 
       const deletePromises = messagesWithImages.map(async (message) => {
         try {
           await cloudinary.uploader.destroy(message.imagePublicId!);
           // Deleted image from Cloudinary
         } catch (error) {
-          console.error(`❌ Failed to delete image ${message.imagePublicId}:`, error);
+          apiLogger.error(`❌ Failed to delete image ${message.imagePublicId}:`, error);
           // Continue even if some images fail to delete
         }
       });
@@ -578,11 +579,11 @@ export const deleteConversation = async (
     // Delete the conversation
     await Conversation.findByIdAndDelete(req.params.id);
 
-    console.log(`🗑️  Deleted conversation ${req.params.id} and ${messagesWithImages.length} images`);
+    apiLogger.info(`🗑️  Deleted conversation ${req.params.id} and ${messagesWithImages.length} images`);
 
     res.json({ message: 'Conversation deleted' });
   } catch (error: any) {
-    console.error('Delete conversation error:', error);
+    apiLogger.error('Delete conversation error:', error);
     res.status(500).json({ message: 'Error deleting conversation', error: error.message });
   }
 };

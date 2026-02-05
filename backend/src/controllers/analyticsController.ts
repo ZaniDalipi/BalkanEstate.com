@@ -4,6 +4,7 @@ import SubscriptionEvent from '../models/SubscriptionEvent';
 import User from '../models/User';
 import Property from '../models/Property';
 import Inquiry from '../models/Inquiry';
+import { apiLogger } from '../utils/logger';
 
 // Simple user agent parser (no external dependency)
 const parseUserAgent = (ua: string) => {
@@ -80,7 +81,7 @@ export const trackEvent = async (req: Request, res: Response) => {
 
     res.status(201).json({ success: true, eventId: event._id });
   } catch (error) {
-    console.error('Error tracking event:', error);
+    apiLogger.error('Error tracking event:', error);
     res.status(500).json({ error: 'Failed to track event' });
   }
 };
@@ -147,7 +148,7 @@ export const getActivityLog = async (req: Request, res: Response) => {
       },
     });
   } catch (error) {
-    console.error('Error fetching activity log:', error);
+    apiLogger.error('Error fetching activity log:', error);
     res.status(500).json({ error: 'Failed to fetch activity log' });
   }
 };
@@ -280,7 +281,7 @@ export const getDashboardAnalytics = async (req: Request, res: Response) => {
       dateRange,
     });
   } catch (error) {
-    console.error('Error fetching dashboard analytics:', error);
+    apiLogger.error('Error fetching dashboard analytics:', error);
     res.status(500).json({ error: 'Failed to fetch analytics' });
   }
 };
@@ -465,7 +466,7 @@ export const getNavigationHeatmap = async (req: Request, res: Response) => {
       dateRange,
     });
   } catch (error) {
-    console.error('Error fetching navigation heatmap:', error);
+    apiLogger.error('Error fetching navigation heatmap:', error);
     res.status(500).json({ error: 'Failed to fetch heatmap data' });
   }
 };
@@ -487,7 +488,7 @@ export const getRecentSubscriptions = async (req: Request, res: Response) => {
 
     res.json({ events });
   } catch (error) {
-    console.error('Error fetching subscription events:', error);
+    apiLogger.error('Error fetching subscription events:', error);
     res.status(500).json({ error: 'Failed to fetch subscription events' });
   }
 };
@@ -520,7 +521,7 @@ export const trackServerEvent = async (
     await event.save();
     return event._id;
   } catch (error) {
-    console.error('Error tracking server event:', error);
+    apiLogger.error('Error tracking server event:', error);
     return null;
   }
 };

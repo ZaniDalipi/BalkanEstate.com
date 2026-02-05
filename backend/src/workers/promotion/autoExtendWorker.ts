@@ -7,6 +7,7 @@
 import Stripe from 'stripe';
 import Promotion from '../../models/Promotion';
 import User from '../../models/User';
+import { cronLogger } from '../../utils/logger';
 import {
   PROMOTION_TIERS,
   getPromotionPrice,
@@ -27,7 +28,7 @@ const stripe = isStripeConfigured
 const processPromotion = async (promotion: any, property: any): Promise<boolean> => {
   const user = await User.findById(promotion.userId);
   if (!user) {
-    console.log(`[AutoExtendWorker] User not found for promotion ${promotion._id}`);
+    cronLogger.info(`[AutoExtendWorker] User not found for promotion ${promotion._id}`);
     return false;
   }
 
@@ -52,13 +53,13 @@ const processPromotion = async (promotion: any, property: any): Promise<boolean>
     property.promotionEndDate = newEndDate;
     await property.save();
 
-    console.log(`[AutoExtendWorker] Auto-extended promotion ${promotion._id} for free`);
+    cronLogger.info(`[AutoExtendWorker] Auto-extended promotion ${promotion._id} for free`);
     return true;
   }
 
   // Skip paid extensions if Stripe is not configured
   if (!stripe) {
-    console.log(`[AutoExtendWorker] Stripe not configured, skipping paid auto-extend for promotion ${promotion._id}`);
+    cronLogger.info(`[AutoExtendWorker] Stripe not configured, skipping paid auto-extend for promotion ${promotion._id}`);
     promotion.autoExtendStatus = 'failed';
     promotion.notes = (promotion.notes || '') + ` | Skipped: Payment provider not configured`;
     await promotion.save();
@@ -105,7 +106,7 @@ const processPromotion = async (promotion: any, property: any): Promise<boolean>
   promotion.lastAutoExtendAttempt = new Date();
   await promotion.save();
 
-  console.log(
+  cronLogger.info(
     `[AutoExtendWorker] Created auto-extend checkout for promotion ${promotion._id}, session: ${session.id}`
   );
 
@@ -118,11 +119,11 @@ const processPromotion = async (promotion: any, property: any): Promise<boolean>
 export const processAutoExtends = async (): Promise<void> => {
   try {
     if (!isStripeConfigured) {
-      console.log('[AutoExtendWorker] Stripe not configured, skipping auto-extend processing');
+      cronLogger.info('[AutoExtendWorker] Stripe not configured, skipping auto-extend processing');
       return;
     }
 
-    console.log('[AutoExtendWorker] Processing auto-extend promotions...');
+    cronLogger.info('[AutoExtendWorker] Processing auto-extend promotions...');
 
     const now = new Date();
     const in24Hours = new Date(now.getTime() + 24 * 60 * 60 * 1000);
@@ -136,11 +137,11 @@ export const processAutoExtends = async (): Promise<void> => {
     }).populate('propertyId');
 
     if (promotionsToAutoExtend.length === 0) {
-      console.log('[AutoExtendWorker] No promotions need auto-extend');
+      cronLogger.info('[AutoExtendWorker] No promotions need auto-extend');
       return;
     }
 
-    console.log(`[AutoExtendWorker] Found ${promotionsToAutoExtend.length} promotions to auto-extend`);
+    cronLogger.info(`[AutoExtendWorker] Found ${promotionsToAutoExtend.length} promotions to auto-extend`);
 
     let processedCount = 0;
 
@@ -148,7 +149,7 @@ export const processAutoExtends = async (): Promise<void> => {
       try {
         const property = promotion.propertyId as any;
         if (!property) {
-          console.log(`[AutoExtendWorker] Property not found for promotion ${promotion._id}`);
+          cronLogger.info(`[AutoExtendWorker] Property not found for promotion ${promotion._id}`);
           continue;
         }
 
@@ -157,7 +158,7 @@ export const processAutoExtends = async (): Promise<void> => {
           processedCount++;
         }
       } catch (error) {
-        console.error(
+        cronLogger.error(
           `[AutoExtendWorker] Error processing auto-extend for promotion ${promotion._id}:`,
           error
         );
@@ -169,10 +170,10 @@ export const processAutoExtends = async (): Promise<void> => {
       }
     }
 
-    console.log(
+    cronLogger.info(
       `[AutoExtendWorker] Processed ${processedCount}/${promotionsToAutoExtend.length} auto-extend promotions`
     );
   } catch (error) {
-    console.error('[AutoExtendWorker] Error in auto-extend processing:', error);
+    cronLogger.error('[AutoExtendWorker] Error in auto-extend processing:', error);
   }
 };

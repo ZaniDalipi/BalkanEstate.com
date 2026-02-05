@@ -250,5 +250,15 @@ export const paymentLogger = createLogger('Payment');
 export const emailLogger = createLogger('Email');
 export const socketLogger = createLogger('Socket');
 export const cronLogger = createLogger('Cron');
+export const agencyLogger = createLogger('Agency');
+export const propertyLogger = createLogger('Property');
+export const adminLogger = createLogger('Admin');
+export const promotionLogger = createLogger('Promotion');
+export const subscriptionLogger = createLogger('Subscription');
+export const videoLogger = createLogger('Video');
+export const webhookLogger = createLogger('Webhook');
+export const geocodingLogger = createLogger('Geocoding');
+export const mediaLogger = createLogger('Media');
+export const serverLogger = createLogger('Server');
 
 export default logger;

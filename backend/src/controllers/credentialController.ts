@@ -2,6 +2,7 @@ import { Request, Response } from 'express';
 import Agent, { ICredential } from '../models/Agent';
 import { IUser } from '../models/User';
 import { uploadImage, deleteImages } from '../services/cloudinaryService';
+import { apiLogger } from '../utils/logger';
 
 // @desc    Get agent credentials
 // @route   GET /api/credentials
@@ -26,7 +27,7 @@ export const getCredentials = async (req: Request, res: Response): Promise<void>
       credentials: agent.credentials || [],
     });
   } catch (error: any) {
-    console.error('Get credentials error:', error);
+    apiLogger.error('Get credentials error:', error);
     res.status(500).json({ message: 'Error fetching credentials', error: error.message });
   }
 };
@@ -121,7 +122,7 @@ export const addCredential = async (req: Request, res: Response): Promise<void> 
       credential: addedCredential,
     });
   } catch (error: any) {
-    console.error('Add credential error:', error);
+    apiLogger.error('Add credential error:', error);
     res.status(500).json({ message: 'Error adding credential', error: error.message });
   }
 };
@@ -209,7 +210,7 @@ export const updateCredential = async (req: Request, res: Response): Promise<voi
       credential: agent.credentials[credentialIndex],
     });
   } catch (error: any) {
-    console.error('Update credential error:', error);
+    apiLogger.error('Update credential error:', error);
     res.status(500).json({ message: 'Error updating credential', error: error.message });
   }
 };
@@ -263,7 +264,7 @@ export const deleteCredential = async (req: Request, res: Response): Promise<voi
       message: 'Credential deleted successfully',
     });
   } catch (error: any) {
-    console.error('Delete credential error:', error);
+    apiLogger.error('Delete credential error:', error);
     res.status(500).json({ message: 'Error deleting credential', error: error.message });
   }
 };
@@ -292,7 +293,7 @@ export const getAgentPublicCredentials = async (req: Request, res: Response): Pr
       credentials: publicCredentials,
     });
   } catch (error: any) {
-    console.error('Get agent public credentials error:', error);
+    apiLogger.error('Get agent public credentials error:', error);
     res.status(500).json({ message: 'Error fetching credentials', error: error.message });
   }
 };

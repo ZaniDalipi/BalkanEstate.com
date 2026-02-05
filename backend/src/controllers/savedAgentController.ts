@@ -2,6 +2,7 @@ import { Request, Response } from 'express';
 import SavedAgent from '../models/SavedAgent';
 import Agent from '../models/Agent';
 import { IUser } from '../models/User';
+import { apiLogger } from '../utils/logger';
 
 // @desc    Get user's saved agents
 // @route   GET /api/saved-agents
@@ -32,7 +33,7 @@ export const getSavedAgents = async (
 
     res.json({ savedAgents: validSavedAgents });
   } catch (error: any) {
-    console.error('Get saved agents error:', error);
+    apiLogger.error('Get saved agents error:', error);
     res.status(500).json({ message: 'Error fetching saved agents', error: error.message });
   }
 };
@@ -84,7 +85,7 @@ export const toggleSavedAgent = async (
       res.json({ message: 'Agent saved', isSaved: true });
     }
   } catch (error: any) {
-    console.error('Toggle saved agent error:', error);
+    apiLogger.error('Toggle saved agent error:', error);
     res.status(500).json({ message: 'Error toggling saved agent', error: error.message });
   }
 };
@@ -109,7 +110,7 @@ export const checkSavedAgent = async (
 
     res.json({ isSaved: !!savedAgent });
   } catch (error: any) {
-    console.error('Check saved agent error:', error);
+    apiLogger.error('Check saved agent error:', error);
     res.status(500).json({ message: 'Error checking saved agent', error: error.message });
   }
 };

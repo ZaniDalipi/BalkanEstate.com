@@ -5,6 +5,7 @@ import {
   getExportByBatchId,
 } from '../services/bankExportService';
 import { SubscriptionStore } from '../models/Subscription';
+import { apiLogger } from '../utils/logger';
 
 /**
  * @desc    Create a new bank export
@@ -61,7 +62,7 @@ export const createExport = async (req: Request, res: Response): Promise<void> =
       fileContent: result.fileContent,
     });
   } catch (error: any) {
-    console.error('Error creating bank export:', error);
+    apiLogger.error('Error creating bank export:', error);
     res.status(500).json({ message: 'Error creating export', error: error.message });
   }
 };
@@ -105,7 +106,7 @@ export const getExports = async (req: Request, res: Response): Promise<void> => 
       })),
     });
   } catch (error: any) {
-    console.error('Error getting exports:', error);
+    apiLogger.error('Error getting exports:', error);
     res.status(500).json({ message: 'Error getting exports', error: error.message });
   }
 };
@@ -149,7 +150,7 @@ export const getExport = async (req: Request, res: Response): Promise<void> => {
       },
     });
   } catch (error: any) {
-    console.error('Error getting export:', error);
+    apiLogger.error('Error getting export:', error);
     res.status(404).json({ message: 'Export not found', error: error.message });
   }
 };
@@ -184,7 +185,7 @@ export const downloadExport = async (req: Request, res: Response): Promise<void>
       batchId: bankExport.batchId,
     });
   } catch (error: any) {
-    console.error('Error downloading export:', error);
+    apiLogger.error('Error downloading export:', error);
     res.status(404).json({ message: 'Export not found', error: error.message });
   }
 };

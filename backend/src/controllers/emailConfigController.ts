@@ -2,6 +2,7 @@ import { Request, Response } from 'express';
 import EmailConfig, { IEmailConfig } from '../models/EmailConfig';
 import { seedEmailConfigs } from '../seeds/emailConfigSeed';
 import emailService from '../services/emailService';
+import { apiLogger } from '../utils/logger';
 
 // Get all email configurations
 export const getAllEmailConfigs = async (req: Request, res: Response): Promise<void> => {
@@ -50,7 +51,7 @@ export const getAllEmailConfigs = async (req: Request, res: Response): Promise<v
       categoryStats,
     });
   } catch (error) {
-    console.error('Error fetching email configs:', error);
+    apiLogger.error('Error fetching email configs:', error);
     res.status(500).json({ message: 'Failed to fetch email configurations' });
   }
 };
@@ -69,7 +70,7 @@ export const getEmailConfigByKey = async (req: Request, res: Response): Promise<
 
     res.json({ config });
   } catch (error) {
-    console.error('Error fetching email config:', error);
+    apiLogger.error('Error fetching email config:', error);
     res.status(500).json({ message: 'Failed to fetch email configuration' });
   }
 };
@@ -108,7 +109,7 @@ export const updateEmailConfig = async (req: Request, res: Response): Promise<vo
       config,
     });
   } catch (error) {
-    console.error('Error updating email config:', error);
+    apiLogger.error('Error updating email config:', error);
     res.status(500).json({ message: 'Failed to update email configuration' });
   }
 };
@@ -139,7 +140,7 @@ export const toggleEmailStatus = async (req: Request, res: Response): Promise<vo
       config,
     });
   } catch (error) {
-    console.error('Error toggling email status:', error);
+    apiLogger.error('Error toggling email status:', error);
     res.status(500).json({ message: 'Failed to toggle email status' });
   }
 };
@@ -175,7 +176,7 @@ export const resetEmailConfig = async (req: Request, res: Response): Promise<voi
       config,
     });
   } catch (error) {
-    console.error('Error resetting email config:', error);
+    apiLogger.error('Error resetting email config:', error);
     res.status(500).json({ message: 'Failed to reset email configuration' });
   }
 };
@@ -189,7 +190,7 @@ export const resetAllEmailConfigs = async (_req: Request, res: Response): Promis
       message: 'All email configurations reset to defaults',
     });
   } catch (error) {
-    console.error('Error resetting all email configs:', error);
+    apiLogger.error('Error resetting all email configs:', error);
     res.status(500).json({ message: 'Failed to reset email configurations' });
   }
 };
@@ -240,7 +241,7 @@ export const sendTestEmail = async (req: Request, res: Response): Promise<void> 
       message: `Test email sent successfully to ${testEmail}`,
     });
   } catch (error) {
-    console.error('Error sending test email:', error);
+    apiLogger.error('Error sending test email:', error);
     res.status(500).json({ message: 'Failed to send test email', error: String(error) });
   }
 };
@@ -280,7 +281,7 @@ export const previewEmail = async (req: Request, res: Response): Promise<void> =
       preheaderText: replaceVariables(config.preheaderText || '', variables),
     });
   } catch (error) {
-    console.error('Error previewing email:', error);
+    apiLogger.error('Error previewing email:', error);
     res.status(500).json({ message: 'Failed to generate email preview' });
   }
 };
@@ -301,7 +302,7 @@ export const getEmailCategories = async (_req: Request, res: Response): Promise<
 
     res.json({ categories });
   } catch (error) {
-    console.error('Error fetching email categories:', error);
+    apiLogger.error('Error fetching email categories:', error);
     res.status(500).json({ message: 'Failed to fetch email categories' });
   }
 };
@@ -352,7 +353,7 @@ export const createEmailConfig = async (req: Request, res: Response): Promise<vo
       config,
     });
   } catch (error) {
-    console.error('Error creating email config:', error);
+    apiLogger.error('Error creating email config:', error);
     res.status(500).json({ message: 'Failed to create email configuration' });
   }
 };
@@ -384,7 +385,7 @@ export const deleteEmailConfig = async (req: Request, res: Response): Promise<vo
       message: 'Email configuration deleted successfully',
     });
   } catch (error) {
-    console.error('Error deleting email config:', error);
+    apiLogger.error('Error deleting email config:', error);
     res.status(500).json({ message: 'Failed to delete email configuration' });
   }
 };
@@ -434,7 +435,7 @@ export const duplicateEmailConfig = async (req: Request, res: Response): Promise
       config,
     });
   } catch (error) {
-    console.error('Error duplicating email config:', error);
+    apiLogger.error('Error duplicating email config:', error);
     res.status(500).json({ message: 'Failed to duplicate email configuration' });
   }
 };
@@ -723,7 +724,7 @@ export const previewMinimalisticTemplate = async (req: Request, res: Response): 
       html,
     });
   } catch (error) {
-    console.error('Error previewing minimalistic template:', error);
+    apiLogger.error('Error previewing minimalistic template:', error);
     res.status(500).json({ message: 'Failed to generate template preview' });
   }
 };

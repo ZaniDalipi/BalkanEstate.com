@@ -1,4 +1,5 @@
 import EmailConfig from '../models/EmailConfig';
+import { dbLogger } from '../utils/logger';
 
 // Default email configurations for all email types in the system
 export const defaultEmailConfigs = [
@@ -929,7 +930,7 @@ export const defaultEmailConfigs = [
 
 // Function to seed email configurations
 export async function seedEmailConfigs(): Promise<void> {
-  console.log('🌱 Seeding email configurations...');
+  dbLogger.info('🌱 Seeding email configurations...');
 
   for (const config of defaultEmailConfigs) {
     try {
@@ -942,13 +943,13 @@ export async function seedEmailConfigs(): Promise<void> {
         },
         { upsert: true, new: true }
       );
-      console.log(`  ✅ ${config.key}`);
+      dbLogger.info(`  ✅ ${config.key}`);
     } catch (error) {
-      console.error(`  ❌ Failed to seed ${config.key}:`, error);
+      dbLogger.error(`  ❌ Failed to seed ${config.key}:`, error);
     }
   }
 
-  console.log('✨ Email configuration seeding complete!');
+  dbLogger.info('✨ Email configuration seeding complete!');
 }
 
 // Run seeding if this file is executed directly

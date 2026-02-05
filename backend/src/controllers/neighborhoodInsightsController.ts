@@ -1,6 +1,7 @@
 import { Request, Response } from 'express';
 import { getNeighborhoodInsights as getNeighborhoodInsightsFromGemini } from '../services/geminiService';
 import User from '../models/User';
+import { apiLogger } from '../utils/logger';
 
 // Usage limits
 const FREE_USER_MONTHLY_LIMIT = 3; // Free users get 3 insights per month
@@ -109,13 +110,13 @@ export const getNeighborhoodInsights = async (req: Request, res: Response) => {
         },
       });
     } catch (error) {
-      console.error('Error getting neighborhood insights:', error);
+      apiLogger.error('Error getting neighborhood insights:', error);
       return res.status(500).json({
         message: 'Failed to generate neighborhood insights. Please try again later.',
       });
     }
   } catch (error) {
-    console.error('Error in getNeighborhoodInsights controller:', error);
+    apiLogger.error('Error in getNeighborhoodInsights controller:', error);
     return res.status(500).json({
       message: 'An error occurred while processing your request',
     });
@@ -171,7 +172,7 @@ export const getUsageStats = async (req: Request, res: Response) => {
       isSubscribed,
     });
   } catch (error) {
-    console.error('Error in getUsageStats controller:', error);
+    apiLogger.error('Error in getUsageStats controller:', error);
     return res.status(500).json({
       message: 'An error occurred while fetching usage statistics',
     });

@@ -2,6 +2,7 @@ import BankExport from '../models/BankExport';
 import PaymentRecord from '../models/PaymentRecord';
 import { SubscriptionStore } from '../models/Subscription';
 import { generateSecureRandomString } from '../utils/secureRandom';
+import { apiLogger } from '../utils/logger';
 
 /**
  * Bank Export Service
@@ -96,7 +97,7 @@ export async function createBankExport(options: ExportOptions): Promise<any> {
       processedBy,
     });
 
-    console.log(`Created bank export batch: ${batchId} with ${paymentRecords.length} records`);
+    apiLogger.info(`Created bank export batch: ${batchId} with ${paymentRecords.length} records`);
 
     // Generate the export file
     const fileContent = await generateExportFile(bankExport, format);
@@ -127,7 +128,7 @@ export async function createBankExport(options: ExportOptions): Promise<any> {
       }
     );
 
-    console.log(`Bank export completed: ${batchId}`);
+    apiLogger.info(`Bank export completed: ${batchId}`);
 
     return {
       batchId,
@@ -138,7 +139,7 @@ export async function createBankExport(options: ExportOptions): Promise<any> {
       fileContent, // Return content for download
     };
   } catch (error: any) {
-    console.error('Error creating bank export:', error);
+    apiLogger.error('Error creating bank export:', error);
     throw error;
   }
 }

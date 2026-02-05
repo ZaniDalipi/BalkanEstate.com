@@ -12,6 +12,7 @@ import { sendVerificationEmail } from '../services/emailVerificationService';
 import { generateTokenPair } from '../services/refreshTokenService';
 import { loginRateLimiterAccount, resetLoginRateLimit } from '../middleware/rateLimiter';
 import { activityLogger } from '../services/activityLogger';
+import { authLogger } from '../utils/logger';
 import { generateSecureAgentId } from '../utils/secureRandom';
 import { FREE_TIER_LIMITS, PRO_TIER_LIMITS, ENTERPRISE_TIER_LIMITS } from '../config/subscriptionConstants';
 
@@ -607,7 +608,7 @@ export const getMe = async (req: Request, res: Response): Promise<void> => {
         agentRecord.agencyId = memberAgency._id as any;
         agentRecord.agencyName = memberAgency.name;
         await agentRecord.save();
-        console.log(`🔄 Auto-synced Agent record for ${user.email}: ${memberAgency.name}`);
+        authLogger.info(`🔄 Auto-synced Agent record for ${user.email}: ${memberAgency.name}`);
       }
 
       // **AUTO-CREATE SUBSCRIPTION DOCUMENT**: Ensure agency agents have a Subscription document
@@ -634,7 +635,7 @@ export const getMe = async (req: Request, res: Response): Promise<void> => {
           currency: 'EUR',
           isAcknowledged: true,
         });
-        console.log(`✅ Auto-created Subscription document for agency agent ${user.email}`);
+        authLogger.info(`✅ Auto-created Subscription document for agency agent ${user.email}`);
       } else if (existingAgentSubscription &&
                  user.subscription?.tier === 'agency_agent' &&
                  existingAgentSubscription.productId !== 'agency_agent_yearly') {
@@ -652,11 +653,11 @@ export const getMe = async (req: Request, res: Response): Promise<void> => {
         // Reset reminder flag so new reminder will be sent before new expiration
         existingAgentSubscription.expiryReminderSent = false;
         await existingAgentSubscription.save();
-        console.log(`✅ Auto-updated Subscription document for agency agent ${user.email}`);
+        authLogger.info(`✅ Auto-updated Subscription document for agency agent ${user.email}`);
       }
 
       if (needsSync) {
-        console.log(`🔄 Auto-synced agency data for user ${user.email}: ${memberAgency.name}`);
+        authLogger.info(`🔄 Auto-synced agency data for user ${user.email}: ${memberAgency.name}`);
       }
     }
 

@@ -160,8 +160,11 @@ const SubscriptionModal: React.FC<SubscriptionModalProps> = ({ isOpen, onClose, 
   };
 
   const handlePaymentSuccess = async (paymentIntentId: string) => {
-    // Log removed
-    // TODO: Update user subscription status via API
+    // Subscription status update is handled server-side via Stripe/LemonSqueezy webhooks.
+    // When a payment succeeds, the payment provider sends a webhook to the backend
+    // (see backend payment webhook handlers) which updates the user's subscription
+    // status in the database. The frontend will pick up the updated status on next
+    // auth check or page refresh via checkAuth() -> GET /auth/me.
     setShowPaymentWindow(false);
     onClose();
     // Show success message

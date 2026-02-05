@@ -101,8 +101,13 @@ export class AuthRepository implements IAuthRepository {
   }
 
   async refreshToken(): Promise<string> {
-    // TODO: Implement token refresh endpoint
-    throw new Error('Token refresh not yet implemented');
+    // Token refresh is handled proactively by tokenService (src/shared/api/tokenService.ts)
+    // which calls POST /auth/refresh-token with the stored refresh token.
+    // The backend endpoint exists at /api/auth/refresh-token (see refreshTokenService.ts).
+    // This repository method is not used directly; tokenService manages refresh automatically.
+    throw new Error(
+      'Token refresh is managed by tokenService. Use tokenService.forceRefresh() instead.'
+    );
   }
 
   async requestPasswordReset(email: string): Promise<void> {

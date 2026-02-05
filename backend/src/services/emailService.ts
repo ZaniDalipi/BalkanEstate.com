@@ -2,6 +2,7 @@ import nodemailer from 'nodemailer';
 import { Resend } from 'resend';
 import User from '../models/User';
 import { getPromoTemplate, BRAND_COLORS } from '../templates/emailTemplates';
+import { emailLogger } from '../utils/logger';
 
 // =============================================================================
 // Security Utilities
@@ -158,12 +159,12 @@ class EmailService {
     if (process.env.RESEND_API_KEY) {
       this.resend = new Resend(process.env.RESEND_API_KEY);
       this.provider = 'resend';
-      console.log('✉️ Email service configured with Resend');
-      console.log('   Email addresses:');
-      console.log(`     noreply: ${this.fromEmails.noreply}`);
-      console.log(`     alerts: ${this.fromEmails.alerts}`);
-      console.log(`     support: ${this.fromEmails.support}`);
-      console.log(`     inquiries: ${this.fromEmails.inquiries}`);
+      emailLogger.info('✉️ Email service configured with Resend');
+      emailLogger.info('   Email addresses:');
+      emailLogger.info(`     noreply: ${this.fromEmails.noreply}`);
+      emailLogger.info(`     alerts: ${this.fromEmails.alerts}`);
+      emailLogger.info(`     support: ${this.fromEmails.support}`);
+      emailLogger.info(`     inquiries: ${this.fromEmails.inquiries}`);
     } else if (process.env.SMTP_USER && process.env.SMTP_PASS) {
       this.transporter = nodemailer.createTransport({
         host: process.env.SMTP_HOST || 'smtp.gmail.com',
@@ -175,10 +176,10 @@ class EmailService {
         },
       });
       this.provider = 'smtp';
-      console.log('✉️ Email service configured with SMTP');
+      emailLogger.info('✉️ Email service configured with SMTP');
     } else {
-      console.warn('⚠️ Email service not configured. Set RESEND_API_KEY or SMTP credentials.');
-      console.warn('   Get a free Resend API key at: https://resend.com');
+      emailLogger.warn('⚠️ Email service not configured. Set RESEND_API_KEY or SMTP credentials.');
+      emailLogger.warn('   Get a free Resend API key at: https://resend.com');
     }
   }
 
@@ -192,7 +193,7 @@ class EmailService {
   async sendEmail(config: EmailConfig): Promise<void> {
     // Validate email address
     if (!isValidEmail(config.to)) {
-      console.error(`❌ Invalid email address: ${config.to}`);
+      emailLogger.error(`❌ Invalid email address: ${config.to}`);
       throw new Error('Invalid email address format');
     }
 
@@ -201,10 +202,10 @@ class EmailService {
 
     // Skip email sending if not configured
     if (this.provider === 'none') {
-      console.log('📧 [DEV MODE] Email skipped (no email provider configured):');
-      console.log(`   From: ${fromAddress}`);
-      console.log(`   To: ${config.to}`);
-      console.log(`   Subject: ${config.subject}`);
+      emailLogger.info('📧 [DEV MODE] Email skipped (no email provider configured):');
+      emailLogger.info(`   From: ${fromAddress}`);
+      emailLogger.info(`   To: ${config.to}`);
+      emailLogger.info(`   Subject: ${config.subject}`);
       return;
     }
 
@@ -229,9 +230,9 @@ class EmailService {
           text: config.text || '',
         });
       }
-      console.log(`✅ Email sent (${config.category || 'noreply'}) to ${config.to}: ${config.subject}`);
+      emailLogger.info(`✅ Email sent (${config.category || 'noreply'}) to ${config.to}: ${config.subject}`);
     } catch (error) {
-      console.error('❌ Email sending failed:', error);
+      emailLogger.error('❌ Email sending failed:', error);
       throw error;
     }
   }
@@ -292,7 +293,7 @@ class EmailService {
 
       return { token: user.unsubscribeToken, canSend };
     } catch (error) {
-      console.error('Error fetching unsubscribe info:', error);
+      emailLogger.error('Error fetching unsubscribe info:', error);
       return { token: undefined, canSend: true }; // Default to sending on error
     }
   }
@@ -338,7 +339,7 @@ class EmailService {
     // Check if user has opted out of weekly stats emails
     const { token: unsubscribeToken, canSend } = await this.getUnsubscribeInfo(data.email, 'weeklyStats');
     if (!canSend) {
-      console.log(`📧 Skipping weekly stats email to ${data.email} - user unsubscribed`);
+      emailLogger.info(`📧 Skipping weekly stats email to ${data.email} - user unsubscribed`);
       return;
     }
 
@@ -482,7 +483,7 @@ class EmailService {
     // Check if user has opted out of weekly stats emails
     const { token: unsubscribeToken, canSend } = await this.getUnsubscribeInfo(data.email, 'weeklyStats');
     if (!canSend) {
-      console.log(`📧 Skipping agency weekly stats email to ${data.email} - user unsubscribed`);
+      emailLogger.info(`📧 Skipping agency weekly stats email to ${data.email} - user unsubscribed`);
       return;
     }
 
@@ -613,7 +614,7 @@ class EmailService {
     // Check if user has opted out of message notifications
     const { token: unsubscribeToken, canSend } = await this.getUnsubscribeInfo(params.recipientEmail, 'messages');
     if (!canSend) {
-      console.log(`📧 Skipping message notification to ${params.recipientEmail} - user unsubscribed`);
+      emailLogger.info(`📧 Skipping message notification to ${params.recipientEmail} - user unsubscribed`);
       return;
     }
 
@@ -803,7 +804,7 @@ class EmailService {
     // Check if user has opted out of property alerts
     const { token: unsubscribeToken, canSend } = await this.getUnsubscribeInfo(params.recipientEmail, 'propertyAlerts');
     if (!canSend) {
-      console.log(`📧 Skipping property alert to ${params.recipientEmail} - user unsubscribed`);
+      emailLogger.info(`📧 Skipping property alert to ${params.recipientEmail} - user unsubscribed`);
       return;
     }
 
@@ -928,7 +929,7 @@ class EmailService {
     // Check if user has opted out of property alerts
     const { token: unsubscribeToken, canSend } = await this.getUnsubscribeInfo(params.recipientEmail, 'propertyAlerts');
     if (!canSend) {
-      console.log(`📧 Skipping listings digest to ${params.recipientEmail} - user unsubscribed`);
+      emailLogger.info(`📧 Skipping listings digest to ${params.recipientEmail} - user unsubscribed`);
       return;
     }
 
@@ -1026,7 +1027,7 @@ class EmailService {
     // Check if user has opted out of price drop alerts
     const { token: unsubscribeToken, canSend } = await this.getUnsubscribeInfo(params.recipientEmail, 'priceDrops');
     if (!canSend) {
-      console.log(`📧 Skipping price drop alert to ${params.recipientEmail} - user unsubscribed`);
+      emailLogger.info(`📧 Skipping price drop alert to ${params.recipientEmail} - user unsubscribed`);
       return;
     }
 

@@ -1,4 +1,5 @@
 import mongoose, { Document, Schema } from 'mongoose';
+import { dbLogger } from '../utils/logger';
 
 export interface IConversation extends Document {
   propertyId: mongoose.Types.ObjectId;
@@ -74,7 +75,7 @@ ConversationSchema.pre('save', function(next) {
     conversation.expiresAt = expirationDate;
 
     if (conversation.isNew) {
-      console.log(`📅 New conversation will expire on ${expirationDate.toISOString()}`);
+      dbLogger.info(`📅 New conversation will expire on ${expirationDate.toISOString()}`);
     }
   }
 

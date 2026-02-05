@@ -4,6 +4,7 @@ import Subscription from '../models/Subscription';
 import SubscriptionEvent from '../models/SubscriptionEvent';
 import PaymentRecord from '../models/PaymentRecord';
 import Product from '../models/Product';
+import { paymentLogger } from '../utils/logger';
 
 /**
  * App Store Server Notifications v2 webhook handler
@@ -27,7 +28,7 @@ export const handleAppStoreNotification = async (
     // Verify the signature
     const isValid = appStoreService.verifyNotificationSignature(signedPayload);
     if (!isValid) {
-      console.error('Invalid App Store notification signature');
+      paymentLogger.error('Invalid App Store notification signature');
       res.status(401).json({ message: 'Invalid signature' });
       return;
     }
@@ -35,7 +36,7 @@ export const handleAppStoreNotification = async (
     // Decode the notification
     const notification = appStoreService.decodeNotification(signedPayload);
 
-    console.log('App Store notification received:', notification);
+    paymentLogger.info('App Store notification received:', notification);
 
     const { notificationType, subtype, data } = notification;
 
@@ -71,7 +72,7 @@ export const handleAppStoreNotification = async (
     });
 
     if (!product) {
-      console.error(`Product not found for App Store ID: ${productId}`);
+      paymentLogger.error(`Product not found for App Store ID: ${productId}`);
       res.status(404).json({ message: 'Product not found' });
       return;
     }
@@ -119,7 +120,7 @@ export const handleAppStoreNotification = async (
         break;
 
       default:
-        console.log(`Unhandled notification type: ${notificationType}`);
+        paymentLogger.info(`Unhandled notification type: ${notificationType}`);
     }
 
     // Log the event
@@ -138,7 +139,7 @@ export const handleAppStoreNotification = async (
     // Acknowledge the notification
     res.status(200).json({ message: 'Notification processed successfully' });
   } catch (error: any) {
-    console.error('Error processing App Store notification:', error);
+    paymentLogger.error('Error processing App Store notification:', error);
     res.status(500).json({ message: 'Error processing notification', error: error.message });
   }
 };
@@ -186,9 +187,9 @@ async function handleSubscriptionPurchased(
       productId: product.productId,
     });
 
-    console.log(`New App Store subscription created: ${subscription._id}`);
+    paymentLogger.info(`New App Store subscription created: ${subscription._id}`);
   } catch (error) {
-    console.error('Error handling subscription purchase:', error);
+    paymentLogger.error('Error handling subscription purchase:', error);
     throw error;
   }
 }
@@ -225,7 +226,7 @@ async function handleSubscriptionRenewed(
     productId: product.productId,
   });
 
-  console.log(`Subscription renewed: ${subscription._id}`);
+  paymentLogger.info(`Subscription renewed: ${subscription._id}`);
 }
 
 /**
@@ -247,7 +248,7 @@ async function handleRenewalStatusChanged(
   }
 
   await subscription.save();
-  console.log(`Renewal status changed for subscription: ${subscription._id}`);
+  paymentLogger.info(`Renewal status changed for subscription: ${subscription._id}`);
 }
 
 /**
@@ -267,7 +268,7 @@ async function handleRenewalFailed(subscription: any, subtype: string): Promise<
   }
 
   await subscription.save();
-  console.log(`Renewal failed for subscription: ${subscription._id}`);
+  paymentLogger.info(`Renewal failed for subscription: ${subscription._id}`);
 }
 
 /**
@@ -280,7 +281,7 @@ async function handleGracePeriodExpired(subscription: any): Promise<void> {
   subscription.gracePeriodEndDate = undefined;
   await subscription.save();
 
-  console.log(`Grace period expired for subscription: ${subscription._id}`);
+  paymentLogger.info(`Grace period expired for subscription: ${subscription._id}`);
 }
 
 /**
@@ -292,7 +293,7 @@ async function handleSubscriptionExpired(subscription: any, subtype: string): Pr
   subscription.status = 'expired';
   await subscription.save();
 
-  console.log(`Subscription expired: ${subscription._id} (${subtype})`);
+  paymentLogger.info(`Subscription expired: ${subscription._id} (${subtype})`);
 }
 
 /**
@@ -322,7 +323,7 @@ async function handleSubscriptionRefunded(
     productId: subscription.productId,
   });
 
-  console.log(`Subscription refunded: ${subscription._id}`);
+  paymentLogger.info(`Subscription refunded: ${subscription._id}`);
 }
 
 /**
@@ -335,7 +336,7 @@ async function handleSubscriptionRevoked(subscription: any): Promise<void> {
   subscription.refundedAt = new Date();
   await subscription.save();
 
-  console.log(`Subscription revoked: ${subscription._id}`);
+  paymentLogger.info(`Subscription revoked: ${subscription._id}`);
 }
 
 /**
@@ -349,7 +350,7 @@ async function handleRenewalExtended(subscription: any, transactionData: any): P
   subscription.renewalDate = expirationDate;
   await subscription.save();
 
-  console.log(`Renewal extended for subscription: ${subscription._id}`);
+  paymentLogger.info(`Renewal extended for subscription: ${subscription._id}`);
 }
 
 /**
@@ -361,5 +362,5 @@ async function handlePriceIncrease(subscription: any, transactionData: any): Pro
   subscription.price = transactionData.price;
   await subscription.save();
 
-  console.log(`Price increased for subscription: ${subscription._id}`);
+  paymentLogger.info(`Price increased for subscription: ${subscription._id}`);
 }

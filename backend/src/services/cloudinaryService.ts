@@ -1,6 +1,7 @@
 import { Readable } from 'stream';
 import sharp from 'sharp';
 import cloudinary from '../config/cloudinary';
+import { mediaLogger } from '../utils/logger';
 
 /**
  * Cloudinary Service - Efficient image upload and management
@@ -147,7 +148,7 @@ export const uploadImage = async (
     // This reduces processing time since frontend already compresses
     if (imageMetadata.width && imageMetadata.height &&
         (imageMetadata.width > maxWidth * 1.5 || imageMetadata.height > maxHeight * 1.5)) {
-      console.log(`⚡ Image needs resizing: ${imageMetadata.width}x${imageMetadata.height} -> max ${maxWidth}x${maxHeight}`);
+      mediaLogger.info(`⚡ Image needs resizing: ${imageMetadata.width}x${imageMetadata.height} -> max ${maxWidth}x${maxHeight}`);
       processedBuffer = await sharp(fileBuffer)
         .resize(maxWidth, maxHeight, {
           fit: 'inside',
@@ -160,7 +161,7 @@ export const uploadImage = async (
         .toBuffer();
     } else {
       // Image is already good size, just ensure JPEG format
-      console.log(`✨ Image already optimized: ${imageMetadata.width}x${imageMetadata.height}, skipping resize`);
+      mediaLogger.info(`✨ Image already optimized: ${imageMetadata.width}x${imageMetadata.height}, skipping resize`);
       processedBuffer = await sharp(fileBuffer)
         .jpeg({
           quality: 95, // Minimal quality loss
@@ -211,7 +212,7 @@ export const uploadImage = async (
       readableStream.pipe(uploadStream);
     });
 
-    console.log(`✅ Uploaded image to Cloudinary: ${result.public_id} (${Math.round(result.bytes / 1024)}KB)`);
+    mediaLogger.info(`✅ Uploaded image to Cloudinary: ${result.public_id} (${Math.round(result.bytes / 1024)}KB)`);
 
     return {
       url: result.secure_url,
@@ -222,7 +223,7 @@ export const uploadImage = async (
       bytes: result.bytes,
     };
   } catch (error: any) {
-    console.error('❌ Cloudinary upload error:', error);
+    mediaLogger.error('❌ Cloudinary upload error:', error);
     throw new Error(`Failed to upload image: ${error.message}`);
   }
 };
@@ -237,7 +238,7 @@ export const uploadPropertyImages = async (
 ): Promise<Array<{ url: string; publicId: string; tag: string }>> => {
   const uploadedImages: Array<{ url: string; publicId: string; tag: string }> = [];
 
-  console.log(`📤 Uploading ${files.length} images for user ${userId}${propertyId ? `, property ${propertyId}` : ''}`);
+  mediaLogger.info(`📤 Uploading ${files.length} images for user ${userId}${propertyId ? `, property ${propertyId}` : ''}`);
 
   for (const file of files) {
     try {
@@ -256,12 +257,12 @@ export const uploadPropertyImages = async (
         tag: 'other', // Can be customized based on file metadata or user input
       });
     } catch (error: any) {
-      console.error(`⚠️  Failed to upload image: ${error.message}`);
+      mediaLogger.error(`⚠️  Failed to upload image: ${error.message}`);
       // Continue with other images even if one fails
     }
   }
 
-  console.log(`✅ Successfully uploaded ${uploadedImages.length}/${files.length} images`);
+  mediaLogger.info(`✅ Successfully uploaded ${uploadedImages.length}/${files.length} images`);
 
   return uploadedImages;
 };
@@ -272,9 +273,9 @@ export const uploadPropertyImages = async (
 export const deleteImage = async (publicId: string): Promise<void> => {
   try {
     await cloudinary.uploader.destroy(publicId);
-    console.log(`🗑️  Deleted image from Cloudinary: ${publicId}`);
+    mediaLogger.info(`🗑️  Deleted image from Cloudinary: ${publicId}`);
   } catch (error: any) {
-    console.error(`❌ Failed to delete image ${publicId}:`, error.message);
+    mediaLogger.error(`❌ Failed to delete image ${publicId}:`, error.message);
     // Don't throw - we don't want to fail the whole operation if cleanup fails
   }
 };
@@ -287,14 +288,14 @@ export const deleteImages = async (publicIds: string[]): Promise<void> => {
     return;
   }
 
-  console.log(`🗑️  Deleting ${publicIds.length} images from Cloudinary...`);
+  mediaLogger.info(`🗑️  Deleting ${publicIds.length} images from Cloudinary...`);
 
   try {
     // Cloudinary allows batch deletion
     const result = await cloudinary.api.delete_resources(publicIds);
-    console.log(`✅ Deleted ${Object.keys(result.deleted).length} images from Cloudinary`);
+    mediaLogger.info(`✅ Deleted ${Object.keys(result.deleted).length} images from Cloudinary`);
   } catch (error: any) {
-    console.error(`❌ Batch delete error:`, error.message);
+    mediaLogger.error(`❌ Batch delete error:`, error.message);
     // Fallback to individual deletion
     await Promise.all(publicIds.map(id => deleteImage(id)));
   }
@@ -305,7 +306,7 @@ export const deleteImages = async (publicIds: string[]): Promise<void> => {
  */
 export const deleteFolder = async (folderPath: string): Promise<void> => {
   try {
-    console.log(`🗑️  Deleting folder: ${folderPath}`);
+    mediaLogger.info(`🗑️  Deleting folder: ${folderPath}`);
 
     // Get all resources in the folder
     const result = await cloudinary.api.resources({
@@ -319,9 +320,9 @@ export const deleteFolder = async (folderPath: string): Promise<void> => {
       await deleteImages(publicIds);
     }
 
-    console.log(`✅ Deleted folder: ${folderPath}`);
+    mediaLogger.info(`✅ Deleted folder: ${folderPath}`);
   } catch (error: any) {
-    console.error(`❌ Failed to delete folder ${folderPath}:`, error.message);
+    mediaLogger.error(`❌ Failed to delete folder ${folderPath}:`, error.message);
   }
 };
 
@@ -356,9 +357,9 @@ export const moveImagesToProperty = async (
       });
 
       newPublicIds.push(result.public_id);
-      console.log(`📁 Moved image: ${publicId} → ${result.public_id}`);
+      mediaLogger.info(`📁 Moved image: ${publicId} → ${result.public_id}`);
     } catch (error: any) {
-      console.error(`⚠️  Failed to move image ${publicId}:`, error.message);
+      mediaLogger.error(`⚠️  Failed to move image ${publicId}:`, error.message);
       // Keep old public_id if move fails
       newPublicIds.push(publicId);
     }

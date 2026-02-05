@@ -1,4 +1,5 @@
 import { GoogleGenAI } from '@google/genai';
+import { propertyLogger } from '../utils/logger';
 import PropertyValuation, {
   IPropertyValuation,
   IComparableProperty,
@@ -74,7 +75,7 @@ async function retryWithBackoff<T>(
       throw error;
     }
 
-    console.warn(`Gemini API call failed, retrying in ${delay}ms... (${MAX_RETRIES - retries + 1}/${MAX_RETRIES})`);
+    propertyLogger.warn(`Gemini API call failed, retrying in ${delay}ms... (${MAX_RETRIES - retries + 1}/${MAX_RETRIES})`);
     await new Promise(resolve => setTimeout(resolve, delay));
 
     return retryWithBackoff(fn, retries - 1, delay * 2);
@@ -362,7 +363,7 @@ Respond ONLY with valid JSON in this exact format:
       breakdown: adjustments,
     };
   } catch (error) {
-    console.error('AI valuation error, using calculated values:', error);
+    propertyLogger.error('AI valuation error, using calculated values:', error);
 
     // Fallback to calculated values
     const variance = totalValue * 0.1;

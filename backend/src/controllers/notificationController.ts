@@ -2,6 +2,7 @@ import { Request, Response } from 'express';
 import { IUser } from '../models/User';
 import engagementService from '../services/engagementService';
 import { NotificationType } from '../models/Notification';
+import { apiLogger } from '../utils/logger';
 
 /**
  * @desc    Get user's notifications
@@ -30,7 +31,7 @@ export const getNotifications = async (req: Request, res: Response): Promise<voi
       hasMore: offset + limit < result.total,
     });
   } catch (error: any) {
-    console.error('Get notifications error:', error);
+    apiLogger.error('Get notifications error:', error);
     res.status(500).json({ message: 'Error fetching notifications', error: error.message });
   }
 };
@@ -52,7 +53,7 @@ export const getUnreadCount = async (req: Request, res: Response): Promise<void>
 
     res.json({ count });
   } catch (error: any) {
-    console.error('Get unread count error:', error);
+    apiLogger.error('Get unread count error:', error);
     res.status(500).json({ message: 'Error fetching unread count', error: error.message });
   }
 };
@@ -80,7 +81,7 @@ export const markAsRead = async (req: Request, res: Response): Promise<void> => 
       res.status(404).json({ message: 'Notification not found' });
     }
   } catch (error: any) {
-    console.error('Mark as read error:', error);
+    apiLogger.error('Mark as read error:', error);
     res.status(500).json({ message: 'Error marking notification as read', error: error.message });
   }
 };
@@ -102,7 +103,7 @@ export const markAllAsRead = async (req: Request, res: Response): Promise<void> 
 
     res.json({ success: true, markedCount: count });
   } catch (error: any) {
-    console.error('Mark all as read error:', error);
+    apiLogger.error('Mark all as read error:', error);
     res.status(500).json({ message: 'Error marking notifications as read', error: error.message });
   }
 };
@@ -126,7 +127,7 @@ export const getUnreadNotifications = async (req: Request, res: Response): Promi
 
     res.json({ notifications });
   } catch (error: any) {
-    console.error('Get unread notifications error:', error);
+    apiLogger.error('Get unread notifications error:', error);
     res.status(500).json({ message: 'Error fetching unread notifications', error: error.message });
   }
 };

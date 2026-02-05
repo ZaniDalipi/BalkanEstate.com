@@ -5,6 +5,7 @@ import Agency from '../models/Agency';
 import User, { IUser } from '../models/User';
 import Agent from '../models/Agent';
 import { getSocketInstance } from '../utils/socketInstance';
+import { agencyLogger } from '../utils/logger';
 
 // Create a join request
 export const createJoinRequest = async (req: Request, res: Response): Promise<void> => {
@@ -78,7 +79,7 @@ export const createJoinRequest = async (req: Request, res: Response): Promise<vo
       joinRequest,
     });
   } catch (error) {
-    console.error('Error creating join request:', error);
+    agencyLogger.error('Error creating join request:', error);
     res.status(500).json({ message: 'Server error' });
   }
 };
@@ -114,7 +115,7 @@ export const getAgencyJoinRequests = async (req: Request, res: Response): Promis
 
     res.json({ joinRequests });
   } catch (error) {
-    console.error('Error fetching join requests:', error);
+    agencyLogger.error('Error fetching join requests:', error);
     res.status(500).json({ message: 'Server error' });
   }
 };
@@ -135,7 +136,7 @@ export const getAgentJoinRequests = async (req: Request, res: Response): Promise
 
     res.json({ joinRequests });
   } catch (error) {
-    console.error('Error fetching agent join requests:', error);
+    agencyLogger.error('Error fetching agent join requests:', error);
     res.status(500).json({ message: 'Server error' });
   }
 };
@@ -273,7 +274,7 @@ export const approveJoinRequest = async (req: Request, res: Response): Promise<v
       joinRequest,
     });
   } catch (error) {
-    console.error('Error approving join request:', error);
+    agencyLogger.error('Error approving join request:', error);
     res.status(500).json({ message: 'Server error' });
   }
 };
@@ -324,7 +325,7 @@ export const rejectJoinRequest = async (req: Request, res: Response): Promise<vo
       joinRequest,
     });
   } catch (error) {
-    console.error('Error rejecting join request:', error);
+    agencyLogger.error('Error rejecting join request:', error);
     res.status(500).json({ message: 'Server error' });
   }
 };
@@ -362,7 +363,7 @@ export const cancelJoinRequest = async (req: Request, res: Response): Promise<vo
 
     res.json({ message: 'Join request cancelled successfully' });
   } catch (error) {
-    console.error('Error cancelling join request:', error);
+    agencyLogger.error('Error cancelling join request:', error);
     res.status(500).json({ message: 'Server error' });
   }
 };
@@ -438,7 +439,7 @@ export const joinByInvitationCode = async (req: Request, res: Response): Promise
       },
     });
   } catch (error) {
-    console.error('Error joining by invitation code:', error);
+    agencyLogger.error('Error joining by invitation code:', error);
     res.status(500).json({ message: 'Server error' });
   }
 };

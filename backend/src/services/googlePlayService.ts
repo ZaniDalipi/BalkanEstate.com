@@ -1,5 +1,6 @@
 
 import { google } from 'googleapis';
+import { paymentLogger } from '../utils/logger';
 
 /**
  * Google Play Developer API Service
@@ -72,7 +73,7 @@ class GooglePlayService {
 
       return response.data as GooglePlayPurchase;
     } catch (error: any) {
-      console.error('Google Play validation error:', error);
+      paymentLogger.error('Google Play validation error:', error);
       throw new Error(`Failed to validate Google Play purchase: ${error.message}`);
     }
   }
@@ -88,9 +89,9 @@ class GooglePlayService {
         token: purchaseToken,
       });
 
-      console.log(`Acknowledged Google Play purchase: ${purchaseToken}`);
+      paymentLogger.info(`Acknowledged Google Play purchase: ${purchaseToken}`);
     } catch (error: any) {
-      console.error('Google Play acknowledge error:', error);
+      paymentLogger.error('Google Play acknowledge error:', error);
       throw new Error(`Failed to acknowledge purchase: ${error.message}`);
     }
   }
@@ -106,9 +107,9 @@ class GooglePlayService {
         token: purchaseToken,
       });
 
-      console.log(`Cancelled Google Play subscription: ${purchaseToken}`);
+      paymentLogger.info(`Cancelled Google Play subscription: ${purchaseToken}`);
     } catch (error: any) {
-      console.error('Google Play cancel error:', error);
+      paymentLogger.error('Google Play cancel error:', error);
       throw new Error(`Failed to cancel subscription: ${error.message}`);
     }
   }
@@ -124,9 +125,9 @@ class GooglePlayService {
         token: purchaseToken,
       });
 
-      console.log(`Refunded Google Play subscription: ${purchaseToken}`);
+      paymentLogger.info(`Refunded Google Play subscription: ${purchaseToken}`);
     } catch (error: any) {
-      console.error('Google Play refund error:', error);
+      paymentLogger.error('Google Play refund error:', error);
       throw new Error(`Failed to refund subscription: ${error.message}`);
     }
   }
@@ -142,7 +143,7 @@ class GooglePlayService {
       // For now, return true for mock testing
       return true;
     } catch (error) {
-      console.error('Signature verification failed:', error);
+      paymentLogger.error('Signature verification failed:', error);
       return false;
     }
   }

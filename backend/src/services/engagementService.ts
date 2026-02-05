@@ -10,6 +10,7 @@ import Notification, { NotificationType, NotificationPriority } from '../models/
 import Property from '../models/Property';
 import User from '../models/User';
 import emailService from './emailService';
+import { apiLogger } from '../utils/logger';
 
 // ============================================================================
 // Configuration & Thresholds
@@ -246,7 +247,7 @@ export async function checkViewMilestone(
     // Send email notification (if user has email notifications enabled)
     await sendMilestoneEmail(user, property, template, currentViews, milestone, isPromoted);
 
-    console.log(`🎉 Milestone notification sent: ${milestone} views for property ${propertyId}`);
+    apiLogger.info(`🎉 Milestone notification sent: ${milestone} views for property ${propertyId}`);
 
     return {
       notificationSent: true,
@@ -255,7 +256,7 @@ export async function checkViewMilestone(
       notification,
     };
   } catch (error) {
-    console.error('Error checking view milestone:', error);
+    apiLogger.error('Error checking view milestone:', error);
     return { notificationSent: false, isPromoted };
   }
 }
@@ -341,7 +342,7 @@ async function sendMilestoneEmail(
       { emailSent: true, emailSentAt: new Date() }
     );
   } catch (error) {
-    console.error('Error sending milestone email:', error);
+    apiLogger.error('Error sending milestone email:', error);
     // Don't throw - email failure shouldn't break the notification
   }
 }

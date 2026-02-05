@@ -1,6 +1,7 @@
 import PromotionCoupon from '../models/PromotionCoupon';
 import AgencyFeaturedSubscription from '../models/AgencyFeaturedSubscription';
 import Agency from '../models/Agency';
+import { subscriptionLogger } from './logger';
 
 /**
  * Create a 7-day free trial coupon for new agencies
@@ -45,7 +46,7 @@ export const createFreeTrialCoupon = async (
 
     return { success: true, couponCode: coupon.code };
   } catch (error) {
-    console.error('Error creating free trial coupon:', error);
+    subscriptionLogger.error('Error creating free trial coupon:', error);
     return { success: false, error: 'Failed to create trial coupon' };
   }
 };
@@ -105,7 +106,7 @@ export const startAutoFreeTrial = async (
 
     return { success: true, subscription };
   } catch (error) {
-    console.error('Error starting auto free trial:', error);
+    subscriptionLogger.error('Error starting auto free trial:', error);
     return { success: false, error: 'Failed to start trial' };
   }
 };
@@ -150,7 +151,7 @@ export const checkAndUpdateSubscription = async (
 
     return { needsRenewal: false, subscription };
   } catch (error) {
-    console.error('Error checking subscription:', error);
+    subscriptionLogger.error('Error checking subscription:', error);
     return { needsRenewal: false };
   }
 };

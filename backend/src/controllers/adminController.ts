@@ -6,6 +6,8 @@ import Property from '../models/Property';
 import DiscountCode from '../models/DiscountCode';
 import Inquiry from '../models/Inquiry';
 import { geocodeAddressWithRateLimit } from '../services/geocodingService';
+import { getWhitelistConfig } from '../middleware/adminAuth';
+import { adminLogger } from '../utils/logger';
 
 
 // @desc    Get admin dashboard statistics
@@ -75,7 +77,7 @@ export const getAdminStats = async (req: Request, res: Response): Promise<void> 
       }, {}),
     });
   } catch (error: any) {
-    console.error('Get admin stats error:', error);
+    adminLogger.error('Get admin stats error:', error);
     res.status(500).json({ message: 'Error fetching admin statistics', error: error.message });
   }
 };
@@ -120,7 +122,7 @@ export const getAllUsers = async (req: Request, res: Response): Promise<void> =>
       },
     });
   } catch (error: any) {
-    console.error('Get all users error:', error);
+    adminLogger.error('Get all users error:', error);
     res.status(500).json({ message: 'Error fetching users', error: error.message });
   }
 };
@@ -159,7 +161,7 @@ export const updateUserAdmin = async (req: Request, res: Response): Promise<void
       user,
     });
   } catch (error: any) {
-    console.error('Update user error:', error);
+    adminLogger.error('Update user error:', error);
 
     // Handle validation errors
     if (error.name === 'ValidationError') {
@@ -195,7 +197,7 @@ export const deleteUser = async (req: Request, res: Response): Promise<void> => 
 
     res.json({ message: 'User and associated data deleted successfully' });
   } catch (error: any) {
-    console.error('Delete user error:', error);
+    adminLogger.error('Delete user error:', error);
     res.status(500).json({ message: 'Error deleting user', error: error.message });
   }
 };
@@ -265,7 +267,7 @@ export const getAllAgenciesAdmin = async (req: Request, res: Response): Promise<
       },
     });
   } catch (error: any) {
-    console.error('Get agencies error:', error);
+    adminLogger.error('Get agencies error:', error);
     res.status(500).json({ message: 'Error fetching agencies', error: error.message });
   }
 };
@@ -367,7 +369,7 @@ export const getAgencyDetailAdmin = async (req: Request, res: Response): Promise
       couponStats,
     });
   } catch (error: any) {
-    console.error('Get agency detail error:', error);
+    adminLogger.error('Get agency detail error:', error);
     res.status(500).json({ message: 'Error fetching agency details', error: error.message });
   }
 };
@@ -403,7 +405,7 @@ export const updateAgency = async (req: Request, res: Response): Promise<void> =
       agency,
     });
   } catch (error: any) {
-    console.error('Update agency error:', error);
+    adminLogger.error('Update agency error:', error);
 
     // Handle validation errors
     if (error.name === 'ValidationError') {
@@ -440,7 +442,7 @@ export const deleteAgency = async (req: Request, res: Response): Promise<void> =
 
     res.json({ message: 'Agency deleted successfully and agents unassigned' });
   } catch (error: any) {
-    console.error('Delete agency error:', error);
+    adminLogger.error('Delete agency error:', error);
     res.status(500).json({ message: 'Error deleting agency', error: error.message });
   }
 };
@@ -483,7 +485,7 @@ export const getAllPropertiesAdmin = async (req: Request, res: Response): Promis
       },
     });
   } catch (error: any) {
-    console.error('Get properties error:', error);
+    adminLogger.error('Get properties error:', error);
     res.status(500).json({ message: 'Error fetching properties', error: error.message });
   }
 };
@@ -518,7 +520,7 @@ export const updateProperty = async (req: Request, res: Response): Promise<void>
       property,
     });
   } catch (error: any) {
-    console.error('Update property error:', error);
+    adminLogger.error('Update property error:', error);
 
     // Handle validation errors
     if (error.name === 'ValidationError') {
@@ -546,7 +548,7 @@ export const deleteProperty = async (req: Request, res: Response): Promise<void>
 
     res.json({ message: 'Property deleted successfully' });
   } catch (error: any) {
-    console.error('Delete property error:', error);
+    adminLogger.error('Delete property error:', error);
     res.status(500).json({ message: 'Error deleting property', error: error.message });
   }
 };
@@ -561,7 +563,7 @@ export const getSystemConfig = async (req: Request, res: Response): Promise<void
       nodeVersion: process.version,
       uptime: process.uptime(),
       memory: process.memoryUsage(),
-      vpnWhitelistCount: 5, // TODO: Get from actual whitelist
+      vpnWhitelistCount: getWhitelistConfig().ips.length,
       features: {
         discountCodes: true,
         gamification: true,
@@ -570,7 +572,7 @@ export const getSystemConfig = async (req: Request, res: Response): Promise<void
       },
     });
   } catch (error: any) {
-    console.error('Get system config error:', error);
+    adminLogger.error('Get system config error:', error);
     res.status(500).json({ message: 'Error fetching system config', error: error.message });
   }
 };
@@ -593,7 +595,7 @@ export const fixPropertyCoordinates = async (req: Request, res: Response): Promi
       status: 'active', // Only fix active properties
     });
 
-    console.log(`🔧 Found ${propertiesWithMissingCoords.length} properties with missing coordinates`);
+    adminLogger.info(`🔧 Found ${propertiesWithMissingCoords.length} properties with missing coordinates`);
 
     const results = {
       total: propertiesWithMissingCoords.length,
@@ -604,7 +606,7 @@ export const fixPropertyCoordinates = async (req: Request, res: Response): Promi
 
     for (const property of propertiesWithMissingCoords) {
       try {
-        console.log(`📍 Geocoding property: ${property.title || property.address} (${property.city}, ${property.country})`);
+        adminLogger.info(`📍 Geocoding property: ${property.title || property.address} (${property.city}, ${property.country})`);
 
         const geocodeResult = await geocodeAddressWithRateLimit(
           property.address,
@@ -625,7 +627,7 @@ export const fixPropertyCoordinates = async (req: Request, res: Response): Promi
             lat: geocodeResult.lat,
             lng: geocodeResult.lng,
           });
-          console.log(`✅ Fixed: ${property.title || property.address} -> ${geocodeResult.lat}, ${geocodeResult.lng}`);
+          adminLogger.info(`✅ Fixed: ${property.title || property.address} -> ${geocodeResult.lat}, ${geocodeResult.lng}`);
         } else {
           results.failed++;
           results.details.push({
@@ -633,7 +635,7 @@ export const fixPropertyCoordinates = async (req: Request, res: Response): Promi
             title: property.title || property.address,
             status: 'failed - no geocode result',
           });
-          console.log(`❌ Failed to geocode: ${property.title || property.address}`);
+          adminLogger.info(`❌ Failed to geocode: ${property.title || property.address}`);
         }
       } catch (error: any) {
         results.failed++;
@@ -642,18 +644,18 @@ export const fixPropertyCoordinates = async (req: Request, res: Response): Promi
           title: property.title || property.address,
           status: `failed - ${error.message}`,
         });
-        console.error(`❌ Error fixing property ${property._id}:`, error.message);
+        adminLogger.error(`❌ Error fixing property ${property._id}:`, error.message);
       }
     }
 
-    console.log(`🔧 Fix coordinates complete: ${results.fixed} fixed, ${results.failed} failed`);
+    adminLogger.info(`🔧 Fix coordinates complete: ${results.fixed} fixed, ${results.failed} failed`);
 
     res.json({
       message: `Fixed ${results.fixed} of ${results.total} properties`,
       results,
     });
   } catch (error: any) {
-    console.error('Fix coordinates error:', error);
+    adminLogger.error('Fix coordinates error:', error);
     res.status(500).json({ message: 'Error fixing property coordinates', error: error.message });
   }
 };
@@ -671,8 +673,8 @@ export const fixSinglePropertyCoordinates = async (req: Request, res: Response):
       return;
     }
 
-    console.log(`📍 Geocoding single property: ${property.title || property.address} (${property.city}, ${property.country})`);
-    console.log(`   Current coordinates: lat=${property.lat}, lng=${property.lng}`);
+    adminLogger.info(`📍 Geocoding single property: ${property.title || property.address} (${property.city}, ${property.country})`);
+    adminLogger.info(`   Current coordinates: lat=${property.lat}, lng=${property.lng}`);
 
     const geocodeResult = await geocodeAddressWithRateLimit(
       property.address,
@@ -685,7 +687,7 @@ export const fixSinglePropertyCoordinates = async (req: Request, res: Response):
       property.lng = geocodeResult.lng;
       await property.save();
 
-      console.log(`✅ Fixed: ${property.title || property.address} -> ${geocodeResult.lat}, ${geocodeResult.lng}`);
+      adminLogger.info(`✅ Fixed: ${property.title || property.address} -> ${geocodeResult.lat}, ${geocodeResult.lng}`);
 
       res.json({
         message: 'Property coordinates fixed successfully',
@@ -700,7 +702,7 @@ export const fixSinglePropertyCoordinates = async (req: Request, res: Response):
         },
       });
     } else {
-      console.log(`❌ Failed to geocode: ${property.title || property.address}`);
+      adminLogger.info(`❌ Failed to geocode: ${property.title || property.address}`);
       res.status(400).json({
         message: 'Failed to geocode property address. The address may not be recognized.',
         property: {
@@ -713,7 +715,7 @@ export const fixSinglePropertyCoordinates = async (req: Request, res: Response):
       });
     }
   } catch (error: any) {
-    console.error('Fix single property coordinates error:', error);
+    adminLogger.error('Fix single property coordinates error:', error);
     res.status(500).json({ message: 'Error fixing property coordinates', error: error.message });
   }
 };
@@ -739,7 +741,7 @@ export const getPropertiesMissingCoords = async (req: Request, res: Response): P
       properties,
     });
   } catch (error: any) {
-    console.error('Get properties missing coords error:', error);
+    adminLogger.error('Get properties missing coords error:', error);
     res.status(500).json({ message: 'Error fetching properties', error: error.message });
   }
 };
@@ -816,7 +818,7 @@ export const getAllInquiries = async (req: Request, res: Response): Promise<void
       },
     });
   } catch (error: any) {
-    console.error('Get all inquiries error:', error);
+    adminLogger.error('Get all inquiries error:', error);
     res.status(500).json({ message: 'Error fetching inquiries', error: error.message });
   }
 };
@@ -840,7 +842,7 @@ export const getInquiryById = async (req: Request, res: Response): Promise<void>
 
     res.json({ inquiry });
   } catch (error: any) {
-    console.error('Get inquiry by id error:', error);
+    adminLogger.error('Get inquiry by id error:', error);
     res.status(500).json({ message: 'Error fetching inquiry', error: error.message });
   }
 };
@@ -884,7 +886,7 @@ export const updateInquiry = async (req: Request, res: Response): Promise<void> 
       inquiry,
     });
   } catch (error: any) {
-    console.error('Update inquiry error:', error);
+    adminLogger.error('Update inquiry error:', error);
     res.status(500).json({ message: 'Error updating inquiry', error: error.message });
   }
 };
@@ -904,7 +906,7 @@ export const deleteInquiry = async (req: Request, res: Response): Promise<void> 
 
     res.json({ message: 'Inquiry deleted successfully' });
   } catch (error: any) {
-    console.error('Delete inquiry error:', error);
+    adminLogger.error('Delete inquiry error:', error);
     res.status(500).json({ message: 'Error deleting inquiry', error: error.message });
   }
 };
@@ -940,7 +942,7 @@ export const bulkUpdateInquiryStatus = async (req: Request, res: Response): Prom
       modifiedCount: result.modifiedCount,
     });
   } catch (error: any) {
-    console.error('Bulk update inquiry status error:', error);
+    adminLogger.error('Bulk update inquiry status error:', error);
     res.status(500).json({ message: 'Error updating inquiries', error: error.message });
   }
 };
@@ -1019,7 +1021,7 @@ export const getInquiryStats = async (req: Request, res: Response): Promise<void
       topAgents,
     });
   } catch (error: any) {
-    console.error('Get inquiry stats error:', error);
+    adminLogger.error('Get inquiry stats error:', error);
     res.status(500).json({ message: 'Error fetching inquiry stats', error: error.message });
   }
 };

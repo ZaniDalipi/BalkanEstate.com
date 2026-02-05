@@ -2,6 +2,7 @@ import { Request, Response } from 'express';
 import User, { IUser } from '../models/User';
 import Property from '../models/Property';
 import { syncUserStats, initializeUserStats } from '../utils/statsUpdater';
+import { apiLogger } from '../utils/logger';
 
 // Get all agents with their statistics
 export const getAllAgents = async (req: Request, res: Response): Promise<void> => {
@@ -54,7 +55,7 @@ export const getAllAgents = async (req: Request, res: Response): Promise<void> =
 
     res.json({ agents: agentsWithStats, count: agentsWithStats.length });
   } catch (error) {
-    console.error('Error fetching agents:', error);
+    apiLogger.error('Error fetching agents:', error);
     res.status(500).json({ message: 'Server error' });
   }
 };
@@ -98,7 +99,7 @@ export const getUserStats = async (req: Request, res: Response): Promise<void> =
 
     res.json({ stats });
   } catch (error) {
-    console.error('Error fetching user stats:', error);
+    apiLogger.error('Error fetching user stats:', error);
     res.status(500).json({ message: 'Server error' });
   }
 };
@@ -168,7 +169,7 @@ export const syncStats = async (req: Request, res: Response): Promise<void> => {
       stats
     });
   } catch (error) {
-    console.error('Error syncing user stats:', error);
+    apiLogger.error('Error syncing user stats:', error);
     res.status(500).json({ message: 'Server error' });
   }
 };
@@ -180,11 +181,11 @@ export const syncStats = async (req: Request, res: Response): Promise<void> => {
  */
 export const syncAllSubscriptionCounters = async (req: Request, res: Response): Promise<void> => {
   try {
-    console.log('\n📊 Starting subscription counter sync for all users...\n');
+    apiLogger.info('\n📊 Starting subscription counter sync for all users...\n');
 
     // Get all users
     const users = await User.find({});
-    console.log(`Found ${users.length} users to sync`);
+    apiLogger.info(`Found ${users.length} users to sync`);
 
     let syncedCount = 0;
     let errorCount = 0;
@@ -264,7 +265,7 @@ export const syncAllSubscriptionCounters = async (req: Request, res: Response): 
         syncedCount++;
         // User synced successfully
       } catch (error) {
-        console.error('❌ Error syncing user:', error);
+        apiLogger.error('❌ Error syncing user:', error);
         errorCount++;
         results.push({
           email: user.email,
@@ -274,7 +275,7 @@ export const syncAllSubscriptionCounters = async (req: Request, res: Response): 
       }
     }
 
-    console.log(`\n📊 Sync complete: ${syncedCount} synced, ${errorCount} errors\n`);
+    apiLogger.info(`\n📊 Sync complete: ${syncedCount} synced, ${errorCount} errors\n`);
 
     res.json({
       message: 'Subscription counters synced successfully',
@@ -284,7 +285,7 @@ export const syncAllSubscriptionCounters = async (req: Request, res: Response): 
       results
     });
   } catch (error) {
-    console.error('Error syncing all subscription counters:', error);
+    apiLogger.error('Error syncing all subscription counters:', error);
     res.status(500).json({ message: 'Server error', error: error instanceof Error ? error.message : 'Unknown error' });
   }
 };

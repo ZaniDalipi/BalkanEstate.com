@@ -1,6 +1,7 @@
 import { Request, Response } from 'express';
 import PromotionCoupon from '../models/PromotionCoupon';
 import User, { IUser } from '../models/User';
+import { apiLogger } from '../utils/logger';
 
 /**
  * @desc    Create a new promotion coupon (Admin only)
@@ -96,7 +97,7 @@ export const createCoupon = async (
       },
     });
   } catch (error: any) {
-    console.error('Create coupon error:', error);
+    apiLogger.error('Create coupon error:', error);
     res.status(500).json({ message: 'Error creating coupon', error: error.message });
   }
 };
@@ -173,7 +174,7 @@ export const validateCoupon = async (req: Request, res: Response): Promise<void>
       discountValue: coupon.discountValue,
     });
   } catch (error) {
-    console.error('Error validating coupon:', error);
+    apiLogger.error('Error validating coupon:', error);
     res.status(500).json({ error: 'Failed to validate coupon' });
   }
 };
@@ -236,7 +237,7 @@ export const getAllCoupons = async (
       total: coupons.length,
     });
   } catch (error: any) {
-    console.error('Get coupons error:', error);
+    apiLogger.error('Get coupons error:', error);
     res.status(500).json({ message: 'Error fetching coupons', error: error.message });
   }
 };
@@ -265,7 +266,7 @@ export const getPublicCoupons = async (
       })),
     });
   } catch (error: any) {
-    console.error('Get public coupons error:', error);
+    apiLogger.error('Get public coupons error:', error);
     res.status(500).json({ message: 'Error fetching public coupons', error: error.message });
   }
 };
@@ -327,7 +328,7 @@ export const getCouponDetails = async (
       },
     });
   } catch (error: any) {
-    console.error('Get coupon details error:', error);
+    apiLogger.error('Get coupon details error:', error);
     res.status(500).json({ message: 'Error fetching coupon details', error: error.message });
   }
 };
@@ -407,7 +408,7 @@ export const updateCoupon = async (
       },
     });
   } catch (error: any) {
-    console.error('Update coupon error:', error);
+    apiLogger.error('Update coupon error:', error);
     res.status(500).json({ message: 'Error updating coupon', error: error.message });
   }
 };
@@ -455,7 +456,7 @@ export const deleteCoupon = async (
       },
     });
   } catch (error: any) {
-    console.error('Delete coupon error:', error);
+    apiLogger.error('Delete coupon error:', error);
     res.status(500).json({ message: 'Error deleting coupon', error: error.message });
   }
 };

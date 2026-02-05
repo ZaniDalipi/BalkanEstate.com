@@ -11,6 +11,7 @@ import {
   PROMOTION_TIERS,
   PromotionTierType,
 } from '../../services/promotion/promotionService';
+import { promotionLogger } from '../../utils/logger';
 
 /**
  * @desc    Get promotion statistics
@@ -80,7 +81,7 @@ export const getPromotionStats = async (
 
     res.json({ stats });
   } catch (error: any) {
-    console.error('Get promotion stats error:', error);
+    promotionLogger.error('Get promotion stats error:', error);
     res.status(500).json({ message: 'Error fetching promotion stats', error: error.message });
   }
 };
@@ -163,7 +164,7 @@ export const getPromotionHistory = async (
       },
     });
   } catch (error: any) {
-    console.error('Get promotion history error:', error);
+    promotionLogger.error('Get promotion history error:', error);
     res.status(500).json({ message: 'Error fetching promotion history', error: error.message });
   }
 };

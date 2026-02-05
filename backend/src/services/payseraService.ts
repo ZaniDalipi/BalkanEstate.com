@@ -13,6 +13,7 @@
  */
 
 import crypto from 'crypto';
+import { paymentLogger } from '../utils/logger';
 
 // PaySera API endpoints
 const PAYSERA_API_URL = process.env.NODE_ENV === 'production'
@@ -171,7 +172,7 @@ class PayseraService {
       // Build payment URL
       const paymentUrl = `${PAYSERA_API_URL}?data=${encodedData}&sign=${signature}`;
 
-      console.log(`✅ PaySera payment URL created for order ${request.orderId}`);
+      paymentLogger.info(`✅ PaySera payment URL created for order ${request.orderId}`);
 
       return {
         success: true,
@@ -179,7 +180,7 @@ class PayseraService {
         orderId: request.orderId,
       };
     } catch (error: any) {
-      console.error('❌ PaySera payment creation failed:', error);
+      paymentLogger.error('❌ PaySera payment creation failed:', error);
       return {
         success: false,
         error: error.message,
@@ -194,7 +195,7 @@ class PayseraService {
     try {
       // Verify signature
       if (!this.verifySignature(data, ss1)) {
-        console.error('❌ PaySera callback signature verification failed');
+        paymentLogger.error('❌ PaySera callback signature verification failed');
         return { valid: false };
       }
 
@@ -226,11 +227,11 @@ class PayseraService {
         try {
           metadata = JSON.parse(Buffer.from(metaMatch[1], 'base64').toString('utf-8'));
         } catch {
-          console.warn('Failed to parse PaySera metadata');
+          paymentLogger.warn('Failed to parse PaySera metadata');
         }
       }
 
-      console.log(`✅ PaySera callback parsed for order ${callbackData.orderid}, status: ${callbackData.status}`);
+      paymentLogger.info(`✅ PaySera callback parsed for order ${callbackData.orderid}, status: ${callbackData.status}`);
 
       return {
         valid: true,
@@ -238,7 +239,7 @@ class PayseraService {
         metadata,
       };
     } catch (error: any) {
-      console.error('❌ PaySera callback parsing failed:', error);
+      paymentLogger.error('❌ PaySera callback parsing failed:', error);
       return { valid: false };
     }
   }

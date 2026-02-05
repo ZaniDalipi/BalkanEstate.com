@@ -1,6 +1,7 @@
 import { Request, Response } from 'express';
 import User, { IUser } from '../models/User';
 import { uploadImage, deleteImages } from '../services/cloudinaryService';
+import { apiLogger } from '../utils/logger';
 
 // @desc    Upload agent license document (optional)
 // @route   POST /api/license/upload
@@ -73,7 +74,7 @@ export const uploadLicense = async (
       },
     });
   } catch (error: any) {
-    console.error('Upload license error:', error);
+    apiLogger.error('Upload license error:', error);
     res.status(500).json({
       message: 'Error uploading license',
       error: error.message
@@ -122,7 +123,7 @@ export const getLicense = async (
       },
     });
   } catch (error: any) {
-    console.error('Get license error:', error);
+    apiLogger.error('Get license error:', error);
     res.status(500).json({
       message: 'Error fetching license',
       error: error.message
@@ -171,7 +172,7 @@ export const deleteLicense = async (
       message: 'License deleted successfully',
     });
   } catch (error: any) {
-    console.error('Delete license error:', error);
+    apiLogger.error('Delete license error:', error);
     res.status(500).json({
       message: 'Error deleting license',
       error: error.message

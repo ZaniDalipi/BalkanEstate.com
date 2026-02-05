@@ -5,13 +5,14 @@
 
 import Promotion from '../../models/Promotion';
 import Property from '../../models/Property';
+import { cronLogger } from '../../utils/logger';
 
 /**
  * Deactivate expired promotions and update property status
  */
 export const deactivateExpiredPromotions = async (): Promise<void> => {
   try {
-    console.log('[CleanupWorker] Starting expired promotion cleanup...');
+    cronLogger.info('[CleanupWorker] Starting expired promotion cleanup...');
 
     const now = new Date();
 
@@ -31,11 +32,11 @@ export const deactivateExpiredPromotions = async (): Promise<void> => {
     });
 
     if (expiredPromotions.length === 0) {
-      console.log('[CleanupWorker] No expired promotions found');
+      cronLogger.info('[CleanupWorker] No expired promotions found');
       return;
     }
 
-    console.log(`[CleanupWorker] Found ${expiredPromotions.length} expired promotions`);
+    cronLogger.info(`[CleanupWorker] Found ${expiredPromotions.length} expired promotions`);
 
     let deactivatedCount = 0;
 
@@ -55,21 +56,21 @@ export const deactivateExpiredPromotions = async (): Promise<void> => {
         }
 
         deactivatedCount++;
-        console.log(
+        cronLogger.info(
           `[CleanupWorker] Deactivated expired promotion ${promotion._id} for property ${promotion.propertyId}`
         );
       } catch (error) {
-        console.error(
+        cronLogger.error(
           `[CleanupWorker] Error deactivating promotion ${promotion._id}:`,
           error
         );
       }
     }
 
-    console.log(
+    cronLogger.info(
       `[CleanupWorker] Successfully deactivated ${deactivatedCount}/${expiredPromotions.length} promotions`
     );
   } catch (error) {
-    console.error('[CleanupWorker] Error in cleanup worker:', error);
+    cronLogger.error('[CleanupWorker] Error in cleanup worker:', error);
   }
 };

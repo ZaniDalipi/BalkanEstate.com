@@ -30,7 +30,7 @@ import Promotion from '../models/Promotion';
 import Property from '../models/Property';
 import emailService from '../services/emailService';
 import { activityLogger } from '../services/activityLogger';
-import logger from '../utils/logger';
+import logger, { paymentLogger } from '../utils/logger';
 
 const isProduction = process.env.NODE_ENV === 'production';
 
@@ -83,7 +83,7 @@ function validatePaymentAmount(
 
   if (!expectedRange) {
     // Unknown plan - log but allow (might be a new plan)
-    console.warn(`[LemonSqueezy] Unknown plan for price validation: ${planName}`);
+    paymentLogger.warn(`[LemonSqueezy] Unknown plan for price validation: ${planName}`);
     return { valid: true };
   }
 
@@ -145,10 +145,10 @@ export const handleLemonSqueezyWebhook = async (req: Request, res: Response): Pr
   // Only log detailed info in development
   if (!isProduction) {
     const timestamp = new Date().toISOString();
-    console.log(`[LemonSqueezy Webhook] ========================================`);
-    console.log(`[LemonSqueezy Webhook] Request ${requestId} received at ${timestamp}`);
-    console.log(`[LemonSqueezy Webhook] IP: ${req.ip}, User-Agent: ${req.headers['user-agent']?.substring(0, 50)}`);
-    console.log(`[LemonSqueezy Webhook] Has signature: ${!!req.headers['x-signature']}`);
+    paymentLogger.info(`[LemonSqueezy Webhook] ========================================`);
+    paymentLogger.info(`[LemonSqueezy Webhook] Request ${requestId} received at ${timestamp}`);
+    paymentLogger.info(`[LemonSqueezy Webhook] IP: ${req.ip}, User-Agent: ${req.headers['user-agent']?.substring(0, 50)}`);
+    paymentLogger.info(`[LemonSqueezy Webhook] Has signature: ${!!req.headers['x-signature']}`);
   }
 
   try {
@@ -157,7 +157,7 @@ export const handleLemonSqueezyWebhook = async (req: Request, res: Response): Pr
 
     // SECURITY: Signature verification is MANDATORY
     if (!signature) {
-      console.error(`[LemonSqueezy Webhook] ${requestId} - Missing signature header`);
+      paymentLogger.error(`[LemonSqueezy Webhook] ${requestId} - Missing signature header`);
       activityLogger.logSuspiciousActivity('webhook_missing_signature', {
         requestId,
         ip: req.ip,
@@ -168,7 +168,7 @@ export const handleLemonSqueezyWebhook = async (req: Request, res: Response): Pr
     }
 
     if (!lemonSqueezyService.verifyWebhookSignature(rawBody, signature)) {
-      console.error(`[LemonSqueezy Webhook] ${requestId} - Invalid signature`);
+      paymentLogger.error(`[LemonSqueezy Webhook] ${requestId} - Invalid signature`);
       activityLogger.logSuspiciousActivity('webhook_invalid_signature', {
         requestId,
         ip: req.ip,
@@ -182,7 +182,7 @@ export const handleLemonSqueezyWebhook = async (req: Request, res: Response): Pr
     const event = lemonSqueezyService.parseWebhookEvent(req.body);
 
     if (!event) {
-      console.error(`[LemonSqueezy Webhook] ${requestId} - Invalid event format`);
+      paymentLogger.error(`[LemonSqueezy Webhook] ${requestId} - Invalid event format`);
       res.status(400).json({ error: 'Invalid event format' });
       return;
     }
@@ -192,12 +192,12 @@ export const handleLemonSqueezyWebhook = async (req: Request, res: Response): Pr
 
     // IDEMPOTENCY: Check if we've already processed this event
     if (eventId && isEventProcessed(`${eventName}_${eventId}`)) {
-      console.log(`[LemonSqueezy Webhook] ${requestId} - Event ${eventName}_${eventId} already processed (idempotency)`);
+      paymentLogger.info(`[LemonSqueezy Webhook] ${requestId} - Event ${eventName}_${eventId} already processed (idempotency)`);
       res.status(200).json({ received: true, message: 'Event already processed' });
       return;
     }
 
-    console.log(`[LemonSqueezy Webhook] ${requestId} - Processing event: ${eventName}, ID: ${eventId}`);
+    paymentLogger.info(`[LemonSqueezy Webhook] ${requestId} - Processing event: ${eventName}, ID: ${eventId}`);
 
     // Handle different event types
     switch (eventName) {
@@ -243,13 +243,13 @@ export const handleLemonSqueezyWebhook = async (req: Request, res: Response): Pr
         break;
 
       default:
-        console.log(`[LemonSqueezy Webhook] Unhandled event: ${eventName}`);
+        paymentLogger.info(`[LemonSqueezy Webhook] Unhandled event: ${eventName}`);
     }
 
     // LemonSqueezy expects a 200 response
     if (!isProduction) {
-      console.log(`[LemonSqueezy Webhook] ${requestId} - Successfully processed event: ${eventName}`);
-      console.log(`[LemonSqueezy Webhook] ========================================`);
+      paymentLogger.info(`[LemonSqueezy Webhook] ${requestId} - Successfully processed event: ${eventName}`);
+      paymentLogger.info(`[LemonSqueezy Webhook] ========================================`);
     }
     res.status(200).json({ received: true });
   } catch (error: any) {
@@ -284,7 +284,7 @@ async function handleOrderCreated(event: any): Promise<void> {
 
     // Only log in development - no sensitive data in production
     if (!isProduction) {
-      console.log('[LemonSqueezy] Order created:', {
+      paymentLogger.info('[LemonSqueezy] Order created:', {
         orderId,
         status: attributes.status,
       });
@@ -292,7 +292,7 @@ async function handleOrderCreated(event: any): Promise<void> {
 
     // VALIDATION: User ID is required
     if (!userId) {
-      console.warn('[LemonSqueezy] No user_id in custom data - potential fraud');
+      paymentLogger.warn('[LemonSqueezy] No user_id in custom data - potential fraud');
       activityLogger.logSuspiciousActivity('payment_no_user_id', {
         orderId,
         customData,
@@ -302,7 +302,7 @@ async function handleOrderCreated(event: any): Promise<void> {
 
     // VALIDATION: Check for valid MongoDB ObjectId format
     if (!/^[a-f\d]{24}$/i.test(userId)) {
-      console.error('[LemonSqueezy] Invalid user_id format:', userId);
+      paymentLogger.error('[LemonSqueezy] Invalid user_id format:', userId);
       activityLogger.logSuspiciousActivity('payment_invalid_user_id', {
         orderId,
         userId,
@@ -317,7 +317,7 @@ async function handleOrderCreated(event: any): Promise<void> {
     });
 
     if (existingPayment) {
-      console.log('[LemonSqueezy] Order already processed (idempotency):', orderId);
+      paymentLogger.info('[LemonSqueezy] Order already processed (idempotency):', orderId);
       markEventProcessed(`order_created_${orderId}`);
       return;
     }
@@ -325,7 +325,7 @@ async function handleOrderCreated(event: any): Promise<void> {
     // Find user
     const user = await User.findById(userId);
     if (!user) {
-      console.error('[LemonSqueezy] User not found:', userId);
+      paymentLogger.error('[LemonSqueezy] User not found:', userId);
       activityLogger.logSuspiciousActivity('payment_user_not_found', {
         orderId,
         userId,
@@ -346,7 +346,7 @@ async function handleOrderCreated(event: any): Promise<void> {
     if (planName) {
       const amountValidation = validatePaymentAmount(planName, total, discountPercentage);
       if (!amountValidation.valid) {
-        console.error('[LemonSqueezy] Amount validation failed:', amountValidation.reason);
+        paymentLogger.error('[LemonSqueezy] Amount validation failed:', amountValidation.reason);
         activityLogger.logSuspiciousActivity('payment_amount_mismatch', {
           orderId,
           userId,
@@ -373,7 +373,7 @@ async function handleOrderCreated(event: any): Promise<void> {
 
       // Only log details in development
       if (!isProduction) {
-        console.log('[LemonSqueezy] Discount applied:', {
+        paymentLogger.info('[LemonSqueezy] Discount applied:', {
           orderId,
           discountPercentage: discountPercentage.toFixed(2) + '%',
         });
@@ -446,7 +446,7 @@ async function handleOrderCreated(event: any): Promise<void> {
           transactionId: orderId,
         });
       } catch (emailError) {
-        console.error('[LemonSqueezy] Failed to send email:', emailError);
+        paymentLogger.error('[LemonSqueezy] Failed to send email:', emailError);
       }
 
       // Log subscription creation
@@ -465,11 +465,11 @@ async function handleOrderCreated(event: any): Promise<void> {
 
       // Only log in development
       if (!isProduction) {
-        console.log('[LemonSqueezy] Order processed successfully:', { orderId });
+        paymentLogger.info('[LemonSqueezy] Order processed successfully:', { orderId });
       }
     }
   } catch (error: any) {
-    console.error('[LemonSqueezy] Error handling order_created:', error);
+    paymentLogger.error('[LemonSqueezy] Error handling order_created:', error);
     throw error;
   }
 }
@@ -495,7 +495,7 @@ async function handlePromotionOrder(
 
   // Only log in development
   if (!isProduction) {
-    console.log('[LemonSqueezy] Processing promotion order:', {
+    paymentLogger.info('[LemonSqueezy] Processing promotion order:', {
       orderId,
       promotionTier,
       duration,
@@ -505,7 +505,7 @@ async function handlePromotionOrder(
   // Check if property exists
   const property = await Property.findById(propertyId);
   if (!property) {
-    console.error('[LemonSqueezy] Property not found for promotion:', propertyId);
+    paymentLogger.error('[LemonSqueezy] Property not found for promotion:', propertyId);
     return;
   }
 
@@ -518,7 +518,7 @@ async function handlePromotionOrder(
   });
 
   if (existingPromotion) {
-    console.log('[LemonSqueezy] Property already has active promotion:', existingPromotion._id);
+    paymentLogger.info('[LemonSqueezy] Property already has active promotion:', existingPromotion._id);
     // Could extend the existing promotion instead
     return;
   }
@@ -589,7 +589,7 @@ async function handlePromotionOrder(
 
   // Only log in development
   if (!isProduction) {
-    console.log('[LemonSqueezy] Promotion created successfully:', {
+    paymentLogger.info('[LemonSqueezy] Promotion created successfully:', {
       promotionId: promotion._id,
       tier: promotionTier,
       duration,
@@ -608,7 +608,7 @@ async function handleSubscriptionCreated(event: any): Promise<void> {
 
     // Only log in development
     if (!isProduction) {
-      console.log('[LemonSqueezy] Subscription created:', {
+      paymentLogger.info('[LemonSqueezy] Subscription created:', {
         subscriptionId: event.data.id,
         status: attributes.status,
       });
@@ -632,7 +632,7 @@ async function handleSubscriptionCreated(event: any): Promise<void> {
       lemonSqueezySubscriptionId: event.data.id,
     });
   } catch (error: any) {
-    console.error('[LemonSqueezy] Error handling subscription_created:', error);
+    paymentLogger.error('[LemonSqueezy] Error handling subscription_created:', error);
   }
 }
 
@@ -646,13 +646,13 @@ async function handleSubscriptionPaymentSuccess(event: any): Promise<void> {
 
     // Only log in development
     if (!isProduction) {
-      console.log('[LemonSqueezy] Subscription payment success');
+      paymentLogger.info('[LemonSqueezy] Subscription payment success');
     }
 
     // Find user by LemonSqueezy subscription ID
     const user = await User.findOne({ lemonSqueezySubscriptionId: subscriptionId });
     if (!user) {
-      console.warn('[LemonSqueezy] User not found for subscription:', subscriptionId);
+      paymentLogger.warn('[LemonSqueezy] User not found for subscription:', subscriptionId);
       return;
     }
 
@@ -707,7 +707,7 @@ async function handleSubscriptionPaymentSuccess(event: any): Promise<void> {
       `${subscriptionId}_${Date.now()}`
     );
   } catch (error: any) {
-    console.error('[LemonSqueezy] Error handling subscription_payment_success:', error);
+    paymentLogger.error('[LemonSqueezy] Error handling subscription_payment_success:', error);
   }
 }
 
@@ -721,7 +721,7 @@ async function handleSubscriptionUpdated(event: any): Promise<void> {
 
     // Only log in development
     if (!isProduction) {
-      console.log('[LemonSqueezy] Subscription updated');
+      paymentLogger.info('[LemonSqueezy] Subscription updated');
     }
 
     // Find user by subscription ID
@@ -737,7 +737,7 @@ async function handleSubscriptionUpdated(event: any): Promise<void> {
       subscriptionExpiresAt: attributes.renews_at ? new Date(attributes.renews_at) : undefined,
     });
   } catch (error: any) {
-    console.error('[LemonSqueezy] Error handling subscription_updated:', error);
+    paymentLogger.error('[LemonSqueezy] Error handling subscription_updated:', error);
   }
 }
 
@@ -751,7 +751,7 @@ async function handleSubscriptionCancelled(event: any): Promise<void> {
 
     // Only log in development
     if (!isProduction) {
-      console.log('[LemonSqueezy] Subscription cancelled');
+      paymentLogger.info('[LemonSqueezy] Subscription cancelled');
     }
 
     // Find user
@@ -800,7 +800,7 @@ async function handleSubscriptionCancelled(event: any): Promise<void> {
           : user.subscriptionExpiresAt || new Date(),
       });
     } catch (emailError) {
-      console.error('[LemonSqueezy] Failed to send cancellation email:', emailError);
+      paymentLogger.error('[LemonSqueezy] Failed to send cancellation email:', emailError);
     }
 
     // Log cancellation
@@ -811,7 +811,7 @@ async function handleSubscriptionCancelled(event: any): Promise<void> {
       attributes.ends_at ? new Date(attributes.ends_at) : undefined
     );
   } catch (error: any) {
-    console.error('[LemonSqueezy] Error handling subscription_cancelled:', error);
+    paymentLogger.error('[LemonSqueezy] Error handling subscription_cancelled:', error);
   }
 }
 
@@ -824,7 +824,7 @@ async function handleSubscriptionExpired(event: any): Promise<void> {
 
     // Only log in development
     if (!isProduction) {
-      console.log('[LemonSqueezy] Subscription expired');
+      paymentLogger.info('[LemonSqueezy] Subscription expired');
     }
 
     const user = await User.findOne({ lemonSqueezySubscriptionId: subscriptionId });
@@ -844,7 +844,7 @@ async function handleSubscriptionExpired(event: any): Promise<void> {
       });
     }
   } catch (error: any) {
-    console.error('[LemonSqueezy] Error handling subscription_expired:', error);
+    paymentLogger.error('[LemonSqueezy] Error handling subscription_expired:', error);
   }
 }
 
@@ -857,7 +857,7 @@ async function handleSubscriptionPaused(event: any): Promise<void> {
 
     // Only log in development
     if (!isProduction) {
-      console.log('[LemonSqueezy] Subscription paused');
+      paymentLogger.info('[LemonSqueezy] Subscription paused');
     }
 
     const user = await User.findOne({ lemonSqueezySubscriptionId: subscriptionId });
@@ -867,7 +867,7 @@ async function handleSubscriptionPaused(event: any): Promise<void> {
       });
     }
   } catch (error: any) {
-    console.error('[LemonSqueezy] Error handling subscription_paused:', error);
+    paymentLogger.error('[LemonSqueezy] Error handling subscription_paused:', error);
   }
 }
 
@@ -880,7 +880,7 @@ async function handleSubscriptionResumed(event: any): Promise<void> {
 
     // Only log in development
     if (!isProduction) {
-      console.log('[LemonSqueezy] Subscription resumed');
+      paymentLogger.info('[LemonSqueezy] Subscription resumed');
     }
 
     const user = await User.findOne({ lemonSqueezySubscriptionId: subscriptionId });
@@ -890,7 +890,7 @@ async function handleSubscriptionResumed(event: any): Promise<void> {
       });
     }
   } catch (error: any) {
-    console.error('[LemonSqueezy] Error handling subscription_resumed:', error);
+    paymentLogger.error('[LemonSqueezy] Error handling subscription_resumed:', error);
   }
 }
 
@@ -903,7 +903,7 @@ async function handleSubscriptionPaymentFailed(event: any): Promise<void> {
 
     // Only log in development
     if (!isProduction) {
-      console.log('[LemonSqueezy] Subscription payment failed');
+      paymentLogger.info('[LemonSqueezy] Subscription payment failed');
     }
 
     const user = await User.findOne({ lemonSqueezySubscriptionId: subscriptionId });
@@ -921,7 +921,7 @@ async function handleSubscriptionPaymentFailed(event: any): Promise<void> {
       );
     }
   } catch (error: any) {
-    console.error('[LemonSqueezy] Error handling subscription_payment_failed:', error);
+    paymentLogger.error('[LemonSqueezy] Error handling subscription_payment_failed:', error);
   }
 }
 
@@ -935,7 +935,7 @@ async function handleOrderRefunded(event: any): Promise<void> {
 
     // Only log in development
     if (!isProduction) {
-      console.log('[LemonSqueezy] Order refunded');
+      paymentLogger.info('[LemonSqueezy] Order refunded');
     }
 
     // Find payment record
@@ -945,7 +945,7 @@ async function handleOrderRefunded(event: any): Promise<void> {
     });
 
     if (!paymentRecord) {
-      console.warn('[LemonSqueezy] Payment record not found for refund:', orderId);
+      paymentLogger.warn('[LemonSqueezy] Payment record not found for refund:', orderId);
       return;
     }
 
@@ -1003,7 +1003,7 @@ async function handleOrderRefunded(event: any): Promise<void> {
         reason: 'customer_request',
       });
     } catch (emailError) {
-      console.error('[LemonSqueezy] Failed to send refund email:', emailError);
+      paymentLogger.error('[LemonSqueezy] Failed to send refund email:', emailError);
     }
 
     // Log refund
@@ -1016,7 +1016,7 @@ async function handleOrderRefunded(event: any): Promise<void> {
       'customer_request'
     );
   } catch (error: any) {
-    console.error('[LemonSqueezy] Error handling order_refunded:', error);
+    paymentLogger.error('[LemonSqueezy] Error handling order_refunded:', error);
   }
 }
 
@@ -1148,7 +1148,7 @@ export const verifyLemonSqueezyPayment = async (req: Request, res: Response): Pr
           }
         }
       } catch (apiError) {
-        console.error('[LemonSqueezy] Error fetching subscription from API:', apiError);
+        paymentLogger.error('[LemonSqueezy] Error fetching subscription from API:', apiError);
       }
     }
 
@@ -1176,7 +1176,7 @@ export const verifyLemonSqueezyPayment = async (req: Request, res: Response): Pr
       message: 'Payment is being processed. Please wait a moment.',
     });
   } catch (error: any) {
-    console.error('[LemonSqueezy] Error verifying payment:', error);
+    paymentLogger.error('[LemonSqueezy] Error verifying payment:', error);
     res.status(500).json({
       success: false,
       message: 'Error verifying payment',

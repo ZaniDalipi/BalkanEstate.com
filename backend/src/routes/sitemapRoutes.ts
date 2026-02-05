@@ -1,6 +1,7 @@
 import express, { Request, Response } from 'express';
 import Property from '../models/Property';
 import Agency from '../models/Agency';
+import { apiLogger } from '../utils/logger';
 
 const router = express.Router();
 
@@ -91,7 +92,7 @@ router.get('/sitemap.xml', async (_req: Request, res: Response) => {
     res.set('Cache-Control', 'public, max-age=3600'); // Cache for 1 hour
     res.send(xml);
   } catch (error) {
-    console.error('Error generating sitemap:', error);
+    apiLogger.error('Error generating sitemap:', error);
     res.status(500).send('Error generating sitemap');
   }
 });

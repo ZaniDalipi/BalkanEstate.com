@@ -1,5 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 import User from '../models/User';
+import { apiLogger } from '../utils/logger';
 
 /**
  * Middleware to check if user has an active subscription
@@ -41,7 +42,7 @@ export const requireActiveSubscription = async (
 
     next();
   } catch (error: any) {
-    console.error('Subscription check error:', error);
+    apiLogger.error('Subscription check error:', error);
     res.status(500).json({ message: 'Error checking subscription status' });
   }
 };
@@ -86,7 +87,7 @@ export const requirePremiumAccess = async (
 
     next();
   } catch (error: any) {
-    console.error('Premium access check error:', error);
+    apiLogger.error('Premium access check error:', error);
     res.status(500).json({ message: 'Error checking premium access' });
   }
 };
@@ -124,7 +125,7 @@ export const addSubscriptionInfo = async (
     next();
   } catch (error: any) {
     // Don't fail the request, just log the error
-    console.error('Error adding subscription info:', error);
+    apiLogger.error('Error adding subscription info:', error);
     next();
   }
 };

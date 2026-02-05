@@ -6,6 +6,7 @@
 
 import User from '../models/User';
 import Agency from '../models/Agency';
+import { cronLogger } from '../utils/logger';
 import Property from '../models/Property';
 import PageView from '../models/PageView';
 import Conversation from '../models/Conversation';
@@ -82,7 +83,7 @@ const getInquiriesInPeriod = async (
  * Send weekly statistics to Pro member sellers
  */
 export const sendProMemberWeeklyStats = async (): Promise<void> => {
-  console.log('📊 Starting weekly statistics job for Pro members...');
+  cronLogger.info('📊 Starting weekly statistics job for Pro members...');
 
   const now = new Date();
   const oneWeekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
@@ -97,7 +98,7 @@ export const sendProMemberWeeklyStats = async (): Promise<void> => {
       email: { $exists: true, $ne: '' },
     });
 
-    console.log(`Found ${proMembers.length} Pro members to send weekly stats`);
+    cronLogger.info(`Found ${proMembers.length} Pro members to send weekly stats`);
 
     for (const user of proMembers) {
       try {
@@ -177,13 +178,13 @@ export const sendProMemberWeeklyStats = async (): Promise<void> => {
         await emailService.sendWeeklyStats(statsData);
         // Sent weekly stats to user
       } catch (userError) {
-        console.error('❌ Failed to send weekly stats to user:', userError);
+        cronLogger.error('❌ Failed to send weekly stats to user:', userError);
       }
     }
 
-    console.log('📊 Pro member weekly statistics job completed');
+    cronLogger.info('📊 Pro member weekly statistics job completed');
   } catch (error) {
-    console.error('❌ Weekly stats job error:', error);
+    cronLogger.error('❌ Weekly stats job error:', error);
   }
 };
 
@@ -191,7 +192,7 @@ export const sendProMemberWeeklyStats = async (): Promise<void> => {
  * Send weekly statistics to agency owners
  */
 export const sendAgencyWeeklyStats = async (): Promise<void> => {
-  console.log('🏢 Starting weekly statistics job for agencies...');
+  cronLogger.info('🏢 Starting weekly statistics job for agencies...');
 
   const now = new Date();
   const oneWeekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
@@ -203,13 +204,13 @@ export const sendAgencyWeeklyStats = async (): Promise<void> => {
       'subscription.status': { $in: ['active', 'trial'] },
     }).populate('ownerId', 'email name');
 
-    console.log(`Found ${agencies.length} agencies to send weekly stats`);
+    cronLogger.info(`Found ${agencies.length} agencies to send weekly stats`);
 
     for (const agency of agencies) {
       try {
         const owner = agency.ownerId as any;
         if (!owner?.email) {
-          console.warn(`Skipping agency ${agency.name} - no owner email`);
+          cronLogger.warn(`Skipping agency ${agency.name} - no owner email`);
           continue;
         }
 
@@ -307,15 +308,15 @@ export const sendAgencyWeeklyStats = async (): Promise<void> => {
         };
 
         await emailService.sendAgencyWeeklyStats(statsData);
-        console.log(`✅ Sent weekly stats to agency ${agency.name}`);
+        cronLogger.info(`✅ Sent weekly stats to agency ${agency.name}`);
       } catch (agencyError) {
-        console.error(`❌ Failed to send stats to agency ${agency.name}:`, agencyError);
+        cronLogger.error(`❌ Failed to send stats to agency ${agency.name}:`, agencyError);
       }
     }
 
-    console.log('🏢 Agency weekly statistics job completed');
+    cronLogger.info('🏢 Agency weekly statistics job completed');
   } catch (error) {
-    console.error('❌ Agency weekly stats job error:', error);
+    cronLogger.error('❌ Agency weekly stats job error:', error);
   }
 };
 
@@ -323,8 +324,8 @@ export const sendAgencyWeeklyStats = async (): Promise<void> => {
  * Run all weekly statistics jobs
  */
 export const runWeeklyStatsJobs = async (): Promise<void> => {
-  console.log('📧 Running all weekly statistics jobs...');
+  cronLogger.info('📧 Running all weekly statistics jobs...');
   await sendProMemberWeeklyStats();
   await sendAgencyWeeklyStats();
-  console.log('📧 All weekly statistics jobs completed');
+  cronLogger.info('📧 All weekly statistics jobs completed');
 };

@@ -212,24 +212,34 @@ export const loginWithSocial = (provider: 'google' | 'facebook' | 'apple'): void
 };
 
 // --- Phone Auth ---
+// Phone verification is a planned feature. The backend does not yet have
+// SMS sending or phone verification endpoints. When implemented, these
+// functions will call POST /auth/send-phone-code, POST /auth/verify-phone-code,
+// and POST /auth/complete-phone-signup respectively.
 
 export const sendPhoneCode = async (_phone: string): Promise<void> => {
-  // TODO: Implement phone verification on backend
+  throw new Error(
+    'Phone verification is not yet available. This feature is planned for a future release.'
+  );
 };
 
 export const verifyPhoneCode = async (
-  phone: string,
-  code: string
+  _phone: string,
+  _code: string
 ): Promise<{ user: User | null; isNew: boolean }> => {
-  throw new Error('Phone verification not yet implemented');
+  throw new Error(
+    'Phone verification is not yet available. This feature is planned for a future release.'
+  );
 };
 
 export const completePhoneSignup = async (
-  phone: string,
-  name: string,
-  email: string
+  _phone: string,
+  _name: string,
+  _email: string
 ): Promise<User> => {
-  throw new Error('Phone signup not yet implemented');
+  throw new Error(
+    'Phone signup is not yet available. This feature is planned for a future release.'
+  );
 };
 
 // --- Profile ---

@@ -1,6 +1,7 @@
 import Conversation from '../models/Conversation';
 import Message from '../models/Message';
 import cloudinary from '../config/cloudinary';
+import { apiLogger } from '../utils/logger';
 
 /**
  * Delete expired conversations (older than 30 days from last message)
@@ -13,7 +14,7 @@ export const cleanupExpiredConversations = async (): Promise<{
 }> => {
   const now = new Date();
 
-  console.log(`🧹 Starting conversation cleanup... (${now.toISOString()})`);
+  apiLogger.info(`🧹 Starting conversation cleanup... (${now.toISOString()})`);
 
   try {
     // Find all expired conversations
@@ -22,7 +23,7 @@ export const cleanupExpiredConversations = async (): Promise<{
     });
 
     if (expiredConversations.length === 0) {
-      console.log('✨ No expired conversations to clean up');
+      apiLogger.info('✨ No expired conversations to clean up');
       return {
         deletedConversations: 0,
         deletedMessages: 0,
@@ -30,7 +31,7 @@ export const cleanupExpiredConversations = async (): Promise<{
       };
     }
 
-    console.log(`📋 Found ${expiredConversations.length} expired conversations to delete`);
+    apiLogger.info(`📋 Found ${expiredConversations.length} expired conversations to delete`);
 
     let totalDeletedMessages = 0;
     let totalDeletedImages = 0;
@@ -39,7 +40,7 @@ export const cleanupExpiredConversations = async (): Promise<{
     for (const conversation of expiredConversations) {
       const conversationId = conversation._id;
 
-      console.log(
+      apiLogger.info(
         `🗑️  Processing conversation ${conversationId} (expired: ${conversation.expiresAt.toISOString()})`
       );
 
@@ -51,15 +52,15 @@ export const cleanupExpiredConversations = async (): Promise<{
 
       // Delete images from Cloudinary
       if (messagesWithImages.length > 0) {
-        console.log(`  📸 Deleting ${messagesWithImages.length} images from Cloudinary...`);
+        apiLogger.info(`  📸 Deleting ${messagesWithImages.length} images from Cloudinary...`);
 
         const imageDeletePromises = messagesWithImages.map(async (message) => {
           try {
             await cloudinary.uploader.destroy(message.imagePublicId!);
-            console.log(`    ✅ Deleted: ${message.imagePublicId}`);
+            apiLogger.info(`    ✅ Deleted: ${message.imagePublicId}`);
             return true;
           } catch (error) {
-            console.error(`    ❌ Failed to delete ${message.imagePublicId}:`, error);
+            apiLogger.error(`    ❌ Failed to delete ${message.imagePublicId}:`, error);
             return false;
           }
         });
@@ -68,7 +69,7 @@ export const cleanupExpiredConversations = async (): Promise<{
         const successfulDeletes = results.filter((r) => r).length;
         totalDeletedImages += successfulDeletes;
 
-        console.log(`  ✅ Deleted ${successfulDeletes}/${messagesWithImages.length} images`);
+        apiLogger.info(`  ✅ Deleted ${successfulDeletes}/${messagesWithImages.length} images`);
       }
 
       // Count and delete all messages for this conversation
@@ -76,21 +77,21 @@ export const cleanupExpiredConversations = async (): Promise<{
       await Message.deleteMany({ conversationId });
       totalDeletedMessages += messageCount;
 
-      console.log(`  ✅ Deleted ${messageCount} messages`);
+      apiLogger.info(`  ✅ Deleted ${messageCount} messages`);
 
       // Delete the conversation itself
       await Conversation.findByIdAndDelete(conversationId);
 
-      console.log(`  ✅ Deleted conversation ${conversationId}`);
+      apiLogger.info(`  ✅ Deleted conversation ${conversationId}`);
     }
 
     // Try to delete empty folders from Cloudinary (optional, may not always work)
     // Cloudinary doesn't have a direct API to delete empty folders, but we can try
-    console.log('🧹 Cleanup complete!');
-    console.log(`  📊 Summary:`);
-    console.log(`    - Conversations deleted: ${expiredConversations.length}`);
-    console.log(`    - Messages deleted: ${totalDeletedMessages}`);
-    console.log(`    - Images deleted: ${totalDeletedImages}`);
+    apiLogger.info('🧹 Cleanup complete!');
+    apiLogger.info(`  📊 Summary:`);
+    apiLogger.info(`    - Conversations deleted: ${expiredConversations.length}`);
+    apiLogger.info(`    - Messages deleted: ${totalDeletedMessages}`);
+    apiLogger.info(`    - Images deleted: ${totalDeletedImages}`);
 
     return {
       deletedConversations: expiredConversations.length,
@@ -98,7 +99,7 @@ export const cleanupExpiredConversations = async (): Promise<{
       deletedImages: totalDeletedImages,
     };
   } catch (error) {
-    console.error('❌ Error during conversation cleanup:', error);
+    apiLogger.error('❌ Error during conversation cleanup:', error);
     throw error;
   }
 };

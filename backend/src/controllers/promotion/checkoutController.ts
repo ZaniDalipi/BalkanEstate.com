@@ -24,6 +24,7 @@ import {
   calculateNextRefreshDate,
   getBaseUrl,
 } from '../../services/promotion/promotionService';
+import { promotionLogger } from '../../utils/logger';
 
 /**
  * @desc    Purchase/Create a property promotion (direct, for agency allocations)
@@ -223,7 +224,7 @@ export const purchasePromotion = async (
       },
     });
   } catch (error: any) {
-    console.error('Purchase promotion error:', error);
+    promotionLogger.error('Purchase promotion error:', error);
     res.status(500).json({ message: 'Error creating promotion', error: error.message });
   }
 };
@@ -381,7 +382,7 @@ export const createPromotionCheckout = async (
       },
     });
   } catch (error: any) {
-    console.error('Create promotion checkout error:', error);
+    promotionLogger.error('Create promotion checkout error:', error);
 
     // Check for Stripe configuration error
     if (error.message?.includes('STRIPE_SECRET_KEY')) {
@@ -496,7 +497,7 @@ export const confirmPromotionPayment = async (
       promotion,
     });
   } catch (error: any) {
-    console.error('Confirm promotion payment error:', error);
+    promotionLogger.error('Confirm promotion payment error:', error);
     res.status(500).json({ message: 'Error confirming payment', error: error.message });
   }
 };

@@ -6,6 +6,7 @@ import Conversation from '../models/Conversation';
 import Property from '../models/Property';
 import CityMarketData from '../models/CityMarketData';
 import { getSocketInstance } from '../utils/socketInstance';
+import { apiLogger } from '../utils/logger';
 
 
 
@@ -29,7 +30,7 @@ export const getAgents = async (req: Request, res: Response): Promise<void> => {
         { serviceAreas: { $elemMatch: { $regex: searchRegex } } },
         { languages: { $elemMatch: { $regex: searchRegex } } },
       ];
-      console.log(`🔍 Universal search for agents: "${search}"`);
+      apiLogger.info(`🔍 Universal search for agents: "${search}"`);
     }
 
     const pageNum = Number(page);
@@ -79,7 +80,7 @@ export const getAgents = async (req: Request, res: Response): Promise<void> => {
 
     const total = await Agent.countDocuments(filter);
 
-    console.log(`✅ Found ${agents.length} agents${search ? ` matching "${search}"` : ''}`);
+    apiLogger.info(`✅ Found ${agents.length} agents${search ? ` matching "${search}"` : ''}`);
 
     res.json({
       agents,
@@ -91,7 +92,7 @@ export const getAgents = async (req: Request, res: Response): Promise<void> => {
       },
     });
   } catch (error: any) {
-    console.error('Get agents error:', error);
+    apiLogger.error('Get agents error:', error);
     res.status(500).json({ message: 'Error fetching agents', error: error.message });
   }
 };
@@ -112,7 +113,7 @@ export const getAgent = async (req: Request, res: Response): Promise<void> => {
 
     res.json({ agent });
   } catch (error: any) {
-    console.error('Get agent error:', error);
+    apiLogger.error('Get agent error:', error);
     res.status(500).json({ message: 'Error fetching agent', error: error.message });
   }
 };
@@ -133,7 +134,7 @@ export const getAgentByUserId = async (req: Request, res: Response): Promise<voi
 
     res.json({ agent });
   } catch (error: any) {
-    console.error('Get agent by user ID error:', error);
+    apiLogger.error('Get agent by user ID error:', error);
     res.status(500).json({ message: 'Error fetching agent', error: error.message });
   }
 };
@@ -201,7 +202,7 @@ export const updateAgentProfile = async (req: Request, res: Response): Promise<v
       agent,
     });
   } catch (error: any) {
-    console.error('Update agent profile error:', error);
+    apiLogger.error('Update agent profile error:', error);
     res.status(500).json({ message: 'Error updating agent profile', error: error.message });
   }
 };
@@ -287,7 +288,7 @@ export const addReview = async (req: Request, res: Response): Promise<void> => {
       agent,
     });
   } catch (error: any) {
-    console.error('Add review error:', error);
+    apiLogger.error('Add review error:', error);
     res.status(500).json({ message: 'Error adding review', error: error.message });
   }
 };
@@ -336,7 +337,7 @@ export const addTestimonial = async (req: Request, res: Response): Promise<void>
       agent,
     });
   } catch (error: any) {
-    console.error('Add testimonial error:', error);
+    apiLogger.error('Add testimonial error:', error);
     res.status(500).json({ message: 'Error adding testimonial', error: error.message });
   }
 };
@@ -355,7 +356,7 @@ export const updateAgentStats = async (
     const agent = await Agent.findOne({ userId });
 
     if (!agent) {
-      console.warn(`Agent not found for user ${userId}`);
+      apiLogger.warn(`Agent not found for user ${userId}`);
       return;
     }
 
@@ -373,7 +374,7 @@ export const updateAgentStats = async (
 
     await agent.save();
   } catch (error: any) {
-    console.error('Update agent stats error:', error);
+    apiLogger.error('Update agent stats error:', error);
   }
 };
 
@@ -467,7 +468,7 @@ export const leaveAgency = async (req: Request, res: Response): Promise<void> =>
             agencyName: 'Independent Agent',
           },
         });
-        console.log(`✅ Socket event emitted to agent ${currentUser._id} for leaving agency`);
+        apiLogger.info(`✅ Socket event emitted to agent ${currentUser._id} for leaving agency`);
 
         // Notify all viewers of the agency page that a member has left
         io.emit(`agency-update-${String(agencyId)}`, {
@@ -476,7 +477,7 @@ export const leaveAgency = async (req: Request, res: Response): Promise<void> =>
           agentId: String(currentUser._id),
           agentName: user.name,
         });
-        console.log(`✅ Socket event emitted to agency ${agencyId} for member removal`);
+        apiLogger.info(`✅ Socket event emitted to agency ${agencyId} for member removal`);
       }
     }
 
@@ -489,7 +490,7 @@ export const leaveAgency = async (req: Request, res: Response): Promise<void> =>
       },
     });
   } catch (error: any) {
-    console.error('Leave agency error:', error);
+    apiLogger.error('Leave agency error:', error);
     res.status(500).json({ message: 'Error leaving agency', error: error.message });
   }
 };
@@ -608,7 +609,7 @@ export const getAgentMarketInsights = async (req: Request, res: Response): Promi
       insights,
     });
   } catch (error: any) {
-    console.error('Get agent market insights error:', error);
+    apiLogger.error('Get agent market insights error:', error);
     res.status(500).json({ message: 'Error fetching market insights', error: error.message });
   }
 };

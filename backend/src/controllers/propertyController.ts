@@ -20,6 +20,7 @@ import {
   emitPropertyUpdated,
   emitPropertyDeleted,
 } from '../sockets/propertySocket';
+import { propertyLogger } from '../utils/logger';
 
 /**
  * ═══════════════════════════════════════════════════════════════════════════
@@ -206,7 +207,7 @@ export const getProperties = async (
     // Log highlighting stats for monitoring
     const stats = getHighlightingStats(properties);
     if (stats.activePromotions > 0) {
-      console.log(`📊 Highlighting stats: ${stats.premium} premium, ${stats.highlight} highlight, ${stats.featured} featured (rotation hour: ${currentHour})`);
+      propertyLogger.info(`📊 Highlighting stats: ${stats.premium} premium, ${stats.highlight} highlight, ${stats.featured} featured (rotation hour: ${currentHour})`);
     }
 
     // Trim to requested limit after sorting
@@ -267,7 +268,7 @@ export const getProperties = async (
       },
     });
   } catch (error: any) {
-    console.error('Get properties error:', error);
+    propertyLogger.error('Get properties error:', error);
     res.status(500).json({ message: 'Error fetching properties', error: error.message });
   }
 };
@@ -309,7 +310,7 @@ export const getProperty = async (
 
     res.json({ property: enrichedProperty });
   } catch (error: any) {
-    console.error('Get property error:', error);
+    propertyLogger.error('Get property error:', error);
     res.status(500).json({ message: 'Error fetching property', error: error.message });
   }
 };
@@ -595,7 +596,7 @@ export const createProperty = async (
       // Trigger instant alerts for saved searches that match this property
       // Run asynchronously to not block the response
       processInstantAlertsForProperty(String(property._id)).catch(err => {
-        console.error('Error processing instant alerts:', err);
+        propertyLogger.error('Error processing instant alerts:', err);
       });
     }
 
@@ -626,7 +627,7 @@ export const createProperty = async (
       },
     });
   } catch (error: any) {
-    console.error('Create property error:', error);
+    propertyLogger.error('Create property error:', error);
     res.status(500).json({ message: 'Error creating property', error: error.message });
   }
 };
@@ -683,11 +684,11 @@ export const updateProperty = async (
     // Log if someone tried to change immutable fields
     const attemptedImmutableChanges = immutableFields.filter(field => req.body[field] !== undefined);
     if (attemptedImmutableChanges.length > 0) {
-      console.warn(`⚠️ Blocked attempt to change immutable fields: ${attemptedImmutableChanges.join(', ')}`);
+      propertyLogger.warn(`⚠️ Blocked attempt to change immutable fields: ${attemptedImmutableChanges.join(', ')}`);
     }
 
     // Debug: Log what images are being received
-    console.log('🔍 [updateProperty] Received images:', {
+    propertyLogger.info('🔍 [updateProperty] Received images:', {
       hasImages: updateData.images !== undefined,
       imagesCount: updateData.images?.length || 0,
       existingImagesCount: property.images?.length || 0,
@@ -714,7 +715,7 @@ export const updateProperty = async (
       if (updateData[field] !== undefined) {
         // Skip updating coordinates if they're 0 (invalid) - preserve existing valid coordinates
         if ((field === 'lat' || field === 'lng') && updateData[field] === 0) {
-          console.log(`⚠️ Skipping ${field} update - value is 0, preserving existing: ${(property as any)[field]}`);
+          propertyLogger.info(`⚠️ Skipping ${field} update - value is 0, preserving existing: ${(property as any)[field]}`);
           return;
         }
         (property as any)[field] = updateData[field];
@@ -723,8 +724,8 @@ export const updateProperty = async (
     });
 
     // Log coordinates status
-    console.log(`📍 Property coordinates after update: lat=${property.lat}, lng=${property.lng}`);
-    console.log(`📝 Updated property ${property._id} fields: ${updatedFields.join(', ') || 'none'}`);
+    propertyLogger.info(`📍 Property coordinates after update: lat=${property.lat}, lng=${property.lng}`);
+    propertyLogger.info(`📝 Updated property ${property._id} fields: ${updatedFields.join(', ') || 'none'}`);
 
     // Track price reduction for display (originalPrice and priceReducedAt)
     if (updateData.price !== undefined && updateData.price < previousPrice) {
@@ -733,12 +734,12 @@ export const updateProperty = async (
         property.originalPrice = previousPrice;
       }
       property.priceReducedAt = new Date();
-      console.log(`📉 Price reduced: €${previousPrice} → €${property.price} (original: €${property.originalPrice})`);
+      propertyLogger.info(`📉 Price reduced: €${previousPrice} → €${property.price} (original: €${property.originalPrice})`);
     } else if (updateData.price !== undefined && updateData.price > previousPrice) {
       // Price was increased - clear the reduction tracking
       property.originalPrice = undefined;
       property.priceReducedAt = undefined;
-      console.log(`📈 Price increased: €${previousPrice} → €${property.price} (cleared reduction)`);
+      propertyLogger.info(`📈 Price increased: €${previousPrice} → €${property.price} (cleared reduction)`);
     }
 
     await property.save();
@@ -746,15 +747,15 @@ export const updateProperty = async (
     // Record price change for alerts if price was updated
     if (updateData.price !== undefined && updateData.price !== previousPrice) {
       await recordPriceChange(String(property._id), property.price, previousPrice);
-      console.log(`💰 Price changed: €${previousPrice} → €${property.price}`);
+      propertyLogger.info(`💰 Price changed: €${previousPrice} → €${property.price}`);
     }
 
     // Trigger instant alerts if property status changed to 'active'
     // This handles the case when a property is published from 'pending' or 'draft'
     if (previousStatus !== 'active' && property.status === 'active') {
-      console.log(`📢 Property ${property._id} status changed to active - triggering instant alerts`);
+      propertyLogger.info(`📢 Property ${property._id} status changed to active - triggering instant alerts`);
       processInstantAlertsForProperty(String(property._id)).catch(err => {
-        console.error('Error processing instant alerts:', err);
+        propertyLogger.error('Error processing instant alerts:', err);
       });
     }
 
@@ -766,7 +767,7 @@ export const updateProperty = async (
 
     res.json({ property });
   } catch (error: any) {
-    console.error('Update property error:', error);
+    propertyLogger.error('Update property error:', error);
     res.status(500).json({ message: 'Error updating property', error: error.message });
   }
 };
@@ -831,9 +832,9 @@ export const deleteProperty = async (
         await deleteImages(publicIdsToDelete);
       }
 
-      console.log(`✅ Cleaned up all images for property ${propertyId}`);
+      propertyLogger.info(`✅ Cleaned up all images for property ${propertyId}`);
     } catch (cloudinaryError: any) {
-      console.error('⚠️  Error deleting images from Cloudinary:', cloudinaryError);
+      propertyLogger.error('⚠️  Error deleting images from Cloudinary:', cloudinaryError);
       // Continue with property deletion even if Cloudinary cleanup fails
     }
 
@@ -934,7 +935,7 @@ export const deleteProperty = async (
       updatedSubscription,
     });
   } catch (error: any) {
-    console.error('Delete property error:', error);
+    propertyLogger.error('Delete property error:', error);
     res.status(500).json({ message: 'Error deleting property', error: error.message });
   }
 };
@@ -963,19 +964,19 @@ export const getMyListings = async (
 
     if (roleFilter && (roleFilter === 'agent' || roleFilter === 'private_seller')) {
       query.createdAsRole = roleFilter;
-      console.log(`📋 Fetching listings for user ${userId} created as ${roleFilter}`);
+      propertyLogger.info(`📋 Fetching listings for user ${userId} created as ${roleFilter}`);
     } else {
-      console.log(`📋 Fetching all listings for user ${userId}`);
+      propertyLogger.info(`📋 Fetching all listings for user ${userId}`);
     }
 
     const properties = await Property.find(query)
       .populate('sellerId', 'name email phone avatarUrl role agencyName')
       .sort({ lastRenewed: -1, createdAt: -1 }); // Renewed listings appear first
 
-    console.log(`✅ Found ${properties.length} listings`);
+    propertyLogger.info(`✅ Found ${properties.length} listings`);
     res.json({ properties });
   } catch (error: any) {
-    console.error('Get my listings error:', error);
+    propertyLogger.error('Get my listings error:', error);
     res.status(500).json({ message: 'Error fetching listings', error: error.message });
   }
 };
@@ -1026,7 +1027,7 @@ export const uploadImages = async (
       message: `Successfully uploaded ${uploadedImages.length} images`,
     });
   } catch (error: any) {
-    console.error('❌ Upload images error:', error);
+    propertyLogger.error('❌ Upload images error:', error);
     res.status(500).json({ message: 'Error uploading images', error: error.message });
   }
 };
@@ -1116,12 +1117,12 @@ export const markAsSold = async (
         daysOnMarket,
       });
 
-      console.log(`📊 Sales history record created for property ${property._id}`);
+      propertyLogger.info(`📊 Sales history record created for property ${property._id}`);
     }
 
     res.json({ property });
   } catch (error: any) {
-    console.error('Mark as sold error:', error);
+    propertyLogger.error('Mark as sold error:', error);
     res.status(500).json({ message: 'Error marking property as sold', error: error.message });
   }
 };
@@ -1134,10 +1135,10 @@ export const renewProperty = async (
   res: Response
 ): Promise<void> => {
   try {
-    console.log('🔄 Renew property request:', req.params.id);
+    propertyLogger.info('🔄 Renew property request:', req.params.id);
 
     if (!req.user) {
-      console.log('❌ Renew failed: Not authorized');
+      propertyLogger.info('❌ Renew failed: Not authorized');
       res.status(401).json({ message: 'Not authorized' });
       return;
     }
@@ -1183,7 +1184,7 @@ export const renewProperty = async (
 
     property.lastRenewed = now;
     await property.save();
-    console.log('✅ Property renewed successfully:', property._id, 'lastRenewed:', now.toISOString());
+    propertyLogger.info('✅ Property renewed successfully:', property._id, 'lastRenewed:', now.toISOString());
 
     // Calculate when they can renew next
     const canRenewAt = new Date(now.getTime() + cooldownMs);
@@ -1196,7 +1197,7 @@ export const renewProperty = async (
       canRenewAt: canRenewAt.toISOString(),
     });
   } catch (error: any) {
-    console.error('Renew property error:', error);
+    propertyLogger.error('Renew property error:', error);
     res.status(500).json({ message: 'Error renewing property', error: error.message });
   }
 };

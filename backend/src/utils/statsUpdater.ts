@@ -1,6 +1,7 @@
 import User from '../models/User';
 import Property from '../models/Property';
 import Conversation from '../models/Conversation';
+import { apiLogger } from './logger';
 
 /**
  * Initialize stats object for a user if it doesn't exist
@@ -10,7 +11,7 @@ export const initializeUserStats = async (userId: string): Promise<void> => {
     const user = await User.findById(userId);
 
     if (!user) {
-      console.error(`User not found: ${userId}`);
+      apiLogger.error(`User not found: ${userId}`);
       return;
     }
 
@@ -42,10 +43,10 @@ export const initializeUserStats = async (userId: string): Promise<void> => {
         }
       );
 
-      console.log(`Stats initialized for user ${userId}`);
+      apiLogger.info(`Stats initialized for user ${userId}`);
     }
   } catch (error) {
-    console.error('Error initializing user stats:', error);
+    apiLogger.error('Error initializing user stats:', error);
   }
 };
 
@@ -62,7 +63,7 @@ export const incrementViewCount = async (sellerId: string, count: number = 1): P
       }
     );
   } catch (error) {
-    console.error('Error incrementing view count:', error);
+    apiLogger.error('Error incrementing view count:', error);
   }
 };
 
@@ -79,7 +80,7 @@ export const incrementSaveCount = async (sellerId: string, count: number = 1): P
       }
     );
   } catch (error) {
-    console.error('Error incrementing save count:', error);
+    apiLogger.error('Error incrementing save count:', error);
   }
 };
 
@@ -96,7 +97,7 @@ export const decrementSaveCount = async (sellerId: string, count: number = 1): P
       }
     );
   } catch (error) {
-    console.error('Error decrementing save count:', error);
+    apiLogger.error('Error decrementing save count:', error);
   }
 };
 
@@ -113,7 +114,7 @@ export const incrementInquiryCount = async (sellerId: string, count: number = 1)
       }
     );
   } catch (error) {
-    console.error('Error incrementing inquiry count:', error);
+    apiLogger.error('Error incrementing inquiry count:', error);
   }
 };
 
@@ -134,7 +135,7 @@ export const updateSoldStats = async (sellerId: string, propertyPrice: number): 
       }
     );
   } catch (error) {
-    console.error('Error updating sold stats:', error);
+    apiLogger.error('Error updating sold stats:', error);
   }
 };
 
@@ -151,7 +152,7 @@ export const incrementActiveListings = async (sellerId: string): Promise<void> =
       }
     );
   } catch (error) {
-    console.error('Error incrementing active listings:', error);
+    apiLogger.error('Error incrementing active listings:', error);
   }
 };
 
@@ -168,7 +169,7 @@ export const decrementActiveListings = async (sellerId: string): Promise<void> =
       }
     );
   } catch (error) {
-    console.error('Error decrementing active listings:', error);
+    apiLogger.error('Error decrementing active listings:', error);
   }
 };
 
@@ -193,9 +194,15 @@ export const syncUserStats = async (userId: string): Promise<void> => {
     // Get total inquiries from conversations
     const totalInquiries = await Conversation.countDocuments({ sellerId: userId });
 
-    // Calculate rating (placeholder - you can implement actual rating logic later)
-    // For now, we'll set it to 0 or calculate based on some criteria
-    const rating = 0; // TODO: Implement actual rating calculation based on reviews
+    // Calculate rating from Agent testimonials if the user is an agent.
+    // The Agent model stores testimonials with individual ratings and has a pre-save
+    // hook that computes the average (see Agent.calculateAverageRating).
+    // We read the already-computed rating from the Agent document if available.
+    let rating = 0;
+    const agentDoc = await (await import('../models/Agent')).default.findOne({ userId }).select('rating').lean();
+    if (agentDoc && typeof agentDoc.rating === 'number' && agentDoc.rating > 0) {
+      rating = agentDoc.rating;
+    }
 
     // Update user stats
     await User.findByIdAndUpdate(
@@ -216,9 +223,9 @@ export const syncUserStats = async (userId: string): Promise<void> => {
       }
     );
 
-    console.log(`Stats synced for user ${userId}: ${activeListings} active listings, ${propertiesSold} sold`);
+    apiLogger.info(`Stats synced for user ${userId}: ${activeListings} active listings, ${propertiesSold} sold`);
   } catch (error) {
-    console.error('Error syncing user stats:', error);
+    apiLogger.error('Error syncing user stats:', error);
     throw error;
   }
 };
@@ -232,15 +239,15 @@ export const syncAllSellerStats = async (): Promise<void> => {
       role: { $in: ['agent', 'private_seller'] }
     });
 
-    console.log(`Syncing stats for ${sellers.length} sellers...`);
+    apiLogger.info(`Syncing stats for ${sellers.length} sellers...`);
 
     for (const seller of sellers) {
       await syncUserStats(String(seller._id));
     }
 
-    console.log('All seller stats synced successfully');
+    apiLogger.info('All seller stats synced successfully');
   } catch (error) {
-    console.error('Error syncing all seller stats:', error);
+    apiLogger.error('Error syncing all seller stats:', error);
     throw error;
   }
 };

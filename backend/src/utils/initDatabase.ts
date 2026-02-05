@@ -3,12 +3,13 @@ import CityMarketData from '../models/CityMarketData';
 import EmailConfig from '../models/EmailConfig';
 import { updateAllCityMarketData } from '../services/cityMarketDataService';
 import { seedEmailConfigs } from '../seeds/emailConfigSeed';
+import { dbLogger } from './logger';
 
 export const initializeDatabase = async (): Promise<void> => {
   try {
     const db = mongoose.connection.db;
     if (!db) {
-      console.warn('⚠️  Database not connected yet, skipping index initialization');
+      dbLogger.warn('⚠️  Database not connected yet, skipping index initialization');
       return;
     }
 
@@ -21,66 +22,66 @@ export const initializeDatabase = async (): Promise<void> => {
     );
 
     if (oldIndex) {
-      console.log('🔧 Fixing User index for multiple local users...');
+      dbLogger.info('🔧 Fixing User index for multiple local users...');
 
       try {
         // Drop the old index
         await usersCollection.dropIndex('provider_1_providerId_1');
-        console.log('  ✅ Dropped old provider_providerId index');
+        dbLogger.info('  ✅ Dropped old provider_providerId index');
 
         // The new index will be created automatically by Mongoose
-        console.log('  ✅ New partial index will be created by Mongoose');
+        dbLogger.info('  ✅ New partial index will be created by Mongoose');
       } catch (error: any) {
         if (error.code === 27) {
-          console.log('  ℹ️  Index already dropped');
+          dbLogger.info('  ℹ️  Index already dropped');
         } else {
-          console.error('  ❌ Error dropping index:', error.message);
+          dbLogger.error('  ❌ Error dropping index:', error.message);
         }
       }
     } else {
-      console.log('✅ User indexes are up to date');
+      dbLogger.info('✅ User indexes are up to date');
     }
 
     // Initialize email configurations if empty
     try {
       const emailConfigCount = await EmailConfig.countDocuments();
       if (emailConfigCount === 0) {
-        console.log('🌱 No email configurations found. Seeding defaults...');
+        dbLogger.info('🌱 No email configurations found. Seeding defaults...');
         await seedEmailConfigs();
-        console.log('✅ Email configurations seeded successfully!');
+        dbLogger.info('✅ Email configurations seeded successfully!');
       } else {
-        console.log(`✅ Email configurations loaded (${emailConfigCount} templates)`);
+        dbLogger.info(`✅ Email configurations loaded (${emailConfigCount} templates)`);
       }
     } catch (error) {
-      console.error('❌ Error initializing email configurations:', error);
+      dbLogger.error('❌ Error initializing email configurations:', error);
     }
 
     // Initialize city market data if empty
     try {
       const cityCount = await CityMarketData.countDocuments();
       if (cityCount === 0) {
-        console.log('🌱 No city market data found. Initializing database with Balkan cities...');
-        console.log('   This may take 1-2 minutes depending on API rate limits.');
+        dbLogger.info('🌱 No city market data found. Initializing database with Balkan cities...');
+        dbLogger.info('   This may take 1-2 minutes depending on API rate limits.');
 
         // Run initial seed in background to avoid blocking server startup
         setTimeout(async () => {
           try {
             await updateAllCityMarketData();
-            console.log('✅ City market data initialized successfully!');
-            console.log('   Data will be refreshed automatically on 1st and 15th of each month.');
+            dbLogger.info('✅ City market data initialized successfully!');
+            dbLogger.info('   Data will be refreshed automatically on 1st and 15th of each month.');
           } catch (error) {
-            console.error('❌ Failed to initialize city data:', error);
-            console.warn('   City data will be populated during next scheduled update.');
+            dbLogger.error('❌ Failed to initialize city data:', error);
+            dbLogger.warn('   City data will be populated during next scheduled update.');
           }
         }, 5000); // 5 second delay to let server fully start first
       } else {
-        console.log(`✅ City market data loaded (${cityCount} cities)`);
+        dbLogger.info(`✅ City market data loaded (${cityCount} cities)`);
       }
     } catch (error) {
-      console.error('❌ Error checking city market data:', error);
+      dbLogger.error('❌ Error checking city market data:', error);
     }
   } catch (error) {
-    console.error('❌ Error initializing database:', error);
+    dbLogger.error('❌ Error initializing database:', error);
     // Don't throw - let the app continue even if index fix fails
   }
 };
