@@ -418,6 +418,8 @@ const GoogleMapComponent: React.FC<GoogleMapComponentProps> = ({
   const lastCadastreZoomRef = useRef<number | null>(null);
   const lastMapTypeRef = useRef<string | null>(null);
   const climateLayerRef = useRef<google.maps.ImageMapType | null>(null);
+  // Ref to track map instance synchronously (avoids race condition with async setState)
+  const mapInstanceRef = useRef<google.maps.Map | null>(null);
 
   // Drawing refs - for rectangle drawing on map
   const drawingStartRef = useRef<{ lat: number; lng: number } | null>(null);
@@ -729,6 +731,8 @@ const GoogleMapComponent: React.FC<GoogleMapComponentProps> = ({
 
   // Handle map load
   const onLoad = useCallback((mapInstance: google.maps.Map) => {
+    // Set ref synchronously first (avoids race condition with marker creation effect)
+    mapInstanceRef.current = mapInstance;
     setMap(mapInstance);
 
     // Initialize clusterer with SuperCluster algorithm for performance
@@ -789,6 +793,7 @@ const GoogleMapComponent: React.FC<GoogleMapComponentProps> = ({
     }
     markersRef.current.clear();
     markerDivsRef.current.clear();
+    mapInstanceRef.current = null;
     setMap(null);
   }, []);
 
@@ -1005,7 +1010,9 @@ const GoogleMapComponent: React.FC<GoogleMapComponentProps> = ({
 
   // Update markers when properties change - optimized with batching
   useEffect(() => {
-    if (!map || !clustererRef.current || !isLoaded) return;
+    // Use ref as fallback to avoid race condition where state hasn't updated yet
+    const mapToUse = map || mapInstanceRef.current;
+    if (!mapToUse || !clustererRef.current || !isLoaded) return;
 
     // Clear existing markers
     clustererRef.current.clearMarkers();
@@ -1083,7 +1090,7 @@ const GoogleMapComponent: React.FC<GoogleMapComponentProps> = ({
         markerDiv.onclick = (e) => {
           e.stopPropagation();
           setSelectedProperty(property);
-          map?.panTo({ lat: property.lat, lng: property.lng });
+          mapToUse?.panTo({ lat: property.lat, lng: property.lng });
         };
 
         const marker = new google.maps.marker.AdvancedMarkerElement({
@@ -1095,7 +1102,7 @@ const GoogleMapComponent: React.FC<GoogleMapComponentProps> = ({
         // Separate promoted markers from regular ones
         if (isActivelyPromoted) {
           // Add promoted markers directly to map (not clustered)
-          marker.map = map;
+          marker.map = mapToUse;
           promotedMarkers.push(marker);
         } else {
           regularMarkers.push(marker);
