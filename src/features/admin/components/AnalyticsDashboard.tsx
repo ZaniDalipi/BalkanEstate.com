@@ -167,14 +167,8 @@ const AnalyticsDashboard: React.FC = () => {
     },
   ];
 
-  // Mock recent activity - in production this would come from the API
-  const recentActivity = stats?.recentActivity || [
-    { type: 'user', message: 'New user registration', timestamp: '2 minutes ago', user: 'john.doe@email.com' },
-    { type: 'property', message: 'New property listed', timestamp: '15 minutes ago', user: 'Agent Smith' },
-    { type: 'inquiry', message: 'New property inquiry received', timestamp: '1 hour ago' },
-    { type: 'verification', message: 'Agent license verified', timestamp: '2 hours ago', user: 'Jane Agent' },
-    { type: 'discount', message: 'Discount code created', timestamp: '3 hours ago' },
-  ];
+  // Recent activity from API (no mock fallback in production)
+  const recentActivity = stats?.recentActivity || [];
 
   const getActivityIcon = (type: string) => {
     switch (type) {
@@ -283,27 +277,34 @@ const AnalyticsDashboard: React.FC = () => {
             </button>
           </div>
           <div className="space-y-3">
-            {recentActivity.map((activity, index) => (
-              <div
-                key={index}
-                className="flex items-center gap-4 p-3 hover:bg-gray-50 rounded-lg transition-colors"
-              >
-                <div className={`p-2 rounded-lg ${getActivityColor(activity.type)}`}>
-                  {getActivityIcon(activity.type)}
+            {recentActivity.length > 0 ? (
+              recentActivity.map((activity, index) => (
+                <div
+                  key={index}
+                  className="flex items-center gap-4 p-3 hover:bg-gray-50 rounded-lg transition-colors"
+                >
+                  <div className={`p-2 rounded-lg ${getActivityColor(activity.type)}`}>
+                    {getActivityIcon(activity.type)}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-medium text-gray-900 truncate">
+                      {activity.message}
+                    </p>
+                    {activity.user && (
+                      <p className="text-xs text-gray-500 truncate">{activity.user}</p>
+                    )}
+                  </div>
+                  <div className="text-xs text-gray-400 whitespace-nowrap">
+                    {activity.timestamp}
+                  </div>
                 </div>
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium text-gray-900 truncate">
-                    {activity.message}
-                  </p>
-                  {activity.user && (
-                    <p className="text-xs text-gray-500 truncate">{activity.user}</p>
-                  )}
-                </div>
-                <div className="text-xs text-gray-400 whitespace-nowrap">
-                  {activity.timestamp}
-                </div>
+              ))
+            ) : (
+              <div className="text-center py-8 text-gray-500">
+                <ClockIcon className="w-8 h-8 mx-auto mb-2 text-gray-300" />
+                <p className="text-sm">No recent activity</p>
               </div>
-            ))}
+            )}
           </div>
         </div>
       </div>
@@ -407,8 +408,12 @@ const AnalyticsDashboard: React.FC = () => {
             </div>
             <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
               <span className="text-gray-600">Environment</span>
-              <span className="px-2 py-1 bg-blue-100 text-blue-600 text-xs font-semibold rounded-full">
-                Development
+              <span className={`px-2 py-1 text-xs font-semibold rounded-full ${
+                import.meta.env.MODE === 'production'
+                  ? 'bg-green-100 text-green-600'
+                  : 'bg-blue-100 text-blue-600'
+              }`}>
+                {import.meta.env.MODE === 'production' ? 'Production' : 'Development'}
               </span>
             </div>
             <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">

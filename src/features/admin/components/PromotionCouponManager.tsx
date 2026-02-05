@@ -462,13 +462,16 @@ const PromotionCouponManager: React.FC = () => {
 
             {/* Quick Presets */}
             <div className="px-6 pt-4 flex gap-2">
-              <button
-                type="button"
-                onClick={() => applyPreset('test100')}
-                className="px-3 py-1.5 text-xs bg-gray-100 text-gray-700 rounded hover:bg-gray-200"
-              >
-                Test 100% Off
-              </button>
+              {/* Test preset only shown in development */}
+              {import.meta.env.MODE !== 'production' && (
+                <button
+                  type="button"
+                  onClick={() => applyPreset('test100')}
+                  className="px-3 py-1.5 text-xs bg-gray-100 text-gray-700 rounded hover:bg-gray-200"
+                >
+                  Test 100% Off
+                </button>
+              )}
               <button
                 type="button"
                 onClick={() => applyPreset('welcome')}

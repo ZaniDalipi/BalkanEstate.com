@@ -104,11 +104,15 @@ const SystemSettings: React.FC = () => {
     setSaveMessage(null);
 
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      setSaveMessage({ type: 'success', text: 'Settings saved successfully!' });
+      // Note: Settings persistence requires backend implementation
+      // Currently showing preview only
+      await new Promise(resolve => setTimeout(resolve, 500));
+      setSaveMessage({
+        type: 'success',
+        text: 'Settings preview applied. To persist changes, update environment variables on the server.'
+      });
     } catch (err) {
-      setSaveMessage({ type: 'error', text: 'Failed to save settings. Please try again.' });
+      setSaveMessage({ type: 'error', text: 'Failed to apply settings preview.' });
     } finally {
       setIsSaving(false);
     }
@@ -469,6 +473,13 @@ const SystemSettings: React.FC = () => {
       <div className="bg-white rounded-xl shadow-sm p-6">
         <h2 className="text-2xl font-bold text-gray-900 mb-2">System Settings</h2>
         <p className="text-gray-500">Configure your platform settings and preferences</p>
+        {/* Info banner about settings persistence */}
+        <div className="mt-4 p-3 bg-amber-50 border border-amber-200 rounded-lg">
+          <p className="text-sm text-amber-800">
+            <strong>Note:</strong> Settings are currently managed via environment variables.
+            Changes made here are for preview only and will reset on page reload.
+          </p>
+        </div>
       </div>
 
       {/* Settings Content */}
@@ -534,10 +545,10 @@ const SystemSettings: React.FC = () => {
                 {isSaving ? (
                   <>
                     <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
-                    Saving...
+                    Applying...
                   </>
                 ) : (
-                  'Save Changes'
+                  'Preview Changes'
                 )}
               </button>
             </div>
