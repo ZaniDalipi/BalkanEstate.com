@@ -38,6 +38,17 @@
 }
 
 /* ============================================================================
+   Browser Zoom Compensation
+   When users zoom the browser above 100%, scale the app down proportionally
+   so components remain usable and don't overflow. The --zoom-scale variable
+   is set dynamically by useZoomCompensation hook.
+   ============================================================================ */
+
+html[data-zoom] #root {
+  zoom: var(--zoom-scale, 1);
+}
+
+/* ============================================================================
    Animation Keyframes
    ============================================================================ */
 
