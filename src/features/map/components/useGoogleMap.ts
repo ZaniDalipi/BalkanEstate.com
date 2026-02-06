@@ -1172,10 +1172,11 @@ export function useGoogleMap(props: GoogleMapComponentProps) {
     if (selectedClimateRisk === 'none') return;
 
     // Climate risk tile layer configurations using real APIs
+    const owmKey = import.meta.env.VITE_OWM_API_KEY || '';
     const climateLayerConfigs: Record<string, { url: string; opacity: number; name: string }> = {
-      // OpenWeatherMap layers (free tier available)
+      // OpenWeatherMap precipitation radar (free tier)
       flood: {
-        url: 'https://tile.openweathermap.org/map/precipitation_new/{z}/{x}/{y}.png?appid=demo',
+        url: `https://tile.openweathermap.org/map/precipitation_new/{z}/{x}/{y}.png?appid=${owmKey}`,
         opacity: 0.6,
         name: 'Precipitation/Flood Risk'
       },
@@ -1185,21 +1186,21 @@ export function useGoogleMap(props: GoogleMapComponentProps) {
         opacity: 0.7,
         name: 'Active Fires (NASA FIRMS)'
       },
-      // Wind speed layer
+      // OpenWeatherMap wind speed (free tier)
       wind: {
-        url: 'https://tile.openweathermap.org/map/wind_new/{z}/{x}/{y}.png?appid=demo',
+        url: `https://tile.openweathermap.org/map/wind_new/{z}/{x}/{y}.png?appid=${owmKey}`,
         opacity: 0.5,
         name: 'Wind Speed'
       },
-      // Air quality - OpenWeatherMap
+      // AQICN air quality index (free, no key)
       air: {
         url: 'https://tiles.aqicn.org/tiles/usepa-aqi/{z}/{x}/{y}.png',
         opacity: 0.6,
         name: 'Air Quality Index (WAQI)'
       },
-      // Temperature/Heat
+      // OpenWeatherMap temperature (free tier)
       heat: {
-        url: 'https://tile.openweathermap.org/map/temp_new/{z}/{x}/{y}.png?appid=demo',
+        url: `https://tile.openweathermap.org/map/temp_new/{z}/{x}/{y}.png?appid=${owmKey}`,
         opacity: 0.5,
         name: 'Temperature/Heat'
       }
