@@ -282,7 +282,7 @@ const CookiePolicyPage: React.FC = () => {
               {t('legal:cookies.thirdParty.title', 'Third-Party Cookies')}
             </h2>
             <p className="text-gray-700 leading-relaxed">
-              {t('legal:cookies.thirdParty.text', 'Some cookies on our site are set by third-party services we use, such as Google Analytics for website analytics and Stripe for payment processing. These services have their own privacy policies governing how they use your data.')}
+              {t('legal:cookies.thirdParty.text', 'Some cookies on our site are set by third-party services we use, such as Google Analytics for website analytics and our payment processor for secure transactions. These services have their own privacy policies governing how they use your data.')}
             </p>
           </section>
 

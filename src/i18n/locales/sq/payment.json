@@ -52,7 +52,7 @@
     "secureCheckout": "Pagesë e Sigurt",
     "secureCheckoutDescription": "Përfundoni blerjen tuaj te partneri ynë i sigurt i pagesës",
     "secureExternalPayment": "Pagesë e Jashtme e Sigurt",
-    "secureExternalPaymentDescription": "Do të ridrejtoheni te partneri ynë i sigurt i pagesës (LemonSqueezy) për të përfunduar blerjen tuaj. Ne nuk ruajmë kurrë detajet e kartës suaj - ato menaxhohen tërësisht nga procesori ynë i certifikuar i pagesave.",
+    "secureExternalPaymentDescription": "Do të ridrejtoheni te partneri ynë i sigurt i pagesës për të përfunduar blerjen tuaj. Ne nuk ruajmë kurrë detajet e kartës suaj - ato menaxhohen tërësisht nga procesori ynë i certifikuar i pagesave.",
     "freeSubscriptionActivated": "Abonimi Falas i Aktivizuar",
     "freeSubscriptionDescription": "Kodi juaj i zbritjes ofron 100% ulje! Klikoni butonin më poshtë për të aktivizuar abonimin tuaj falas menjëherë. Nuk kërkohet pagesë.",
     "continueToPayment": "Vazhdoni në Pagesë",
@@ -82,6 +82,6 @@
     "privacy": "Politikën e Privatësisë",
     "refund": "Politikën e Rimbursimit",
     "and": "dhe",
-    "lemonsqueezy": "Pagesat përpunohen nga LemonSqueezy si Tregtari i Regjistruar."
+    "lemonsqueezy": "Pagesat përpunohen nga ofruesi ynë i pagesave si Tregtari i Regjistruar."
   }
 }

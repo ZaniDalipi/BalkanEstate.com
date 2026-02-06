@@ -8,7 +8,6 @@ import Promotion from '../../models/Promotion';
 import Property from '../../models/Property';
 import { IUser } from '../../models/User';
 import {
-  stripe,
   verifyPromotionOwnership,
   isPromotionActive,
   isValidDuration,
@@ -87,14 +86,16 @@ export const confirmAutoExtendPayment = async (
       return;
     }
 
-    const session = await stripe.checkout.sessions.retrieve(sessionId);
+    // TODO: Integrate with payment provider to verify session
+    // Payment verification not yet configured
+    res.status(503).json({
+      success: false,
+      message: 'Payment confirmation is not yet configured. Please contact support.',
+      code: 'PAYMENT_NOT_CONFIGURED',
+    });
+    return;
 
-    if (session.payment_status !== 'paid') {
-      res.status(400).json({ message: 'Payment not completed' });
-      return;
-    }
-
-    const { type, promotionId, duration } = session.metadata || {};
+    const { type, promotionId, duration } = {} as any;
 
     if (type !== 'auto-extend' || !promotionId || !duration) {
       res.status(400).json({ message: 'Invalid session metadata' });

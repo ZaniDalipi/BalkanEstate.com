@@ -118,7 +118,7 @@ export async function processSubscriptionPayment(
         productId,
         googlePlayProductId: product.googlePlayProductId,
         appStoreProductId: product.appStoreProductId,
-        stripeProductId: product.stripeProductId,
+        webProductId: product.webProductId,
         startDate,
         expirationDate,
         renewalDate: expirationDate,

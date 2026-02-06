@@ -175,7 +175,7 @@ export function useAddUrgentBadge() {
         // Invalidate and refetch immediately for free urgent badge
         queryClient.invalidateQueries({ queryKey: promotionKeys.all });
       }
-      // If paid, user will be redirected to Stripe
+      // If paid, user will be redirected to payment checkout
     },
   });
 }

@@ -21,7 +21,7 @@ This API powers the BalkanEstate real estate platform, providing endpoints for:
 - **Authentication** - User registration, login, and token management
 - **Properties** - Listing, searching, and managing real estate properties
 - **Agencies & Agents** - Agency management and agent operations
-- **Payments & Subscriptions** - Stripe-powered payment processing
+- **Payments & Subscriptions** - Payment processing and subscription management
 - **Messaging** - Real-time chat between users
 - **Analytics** - Market data and insights
 
@@ -294,7 +294,7 @@ API requests are rate-limited to prevent abuse:
               type: 'string',
               format: 'date-time',
             },
-            stripeSubscriptionId: {
+            externalSubscriptionId: {
               type: 'string',
             },
           },

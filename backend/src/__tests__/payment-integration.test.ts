@@ -16,9 +16,7 @@ import {
   TEST_USERS,
   TEST_PRODUCTS,
   TEST_PAYMENT_REQUESTS,
-  MOCK_PADDLE_RESPONSES,
   createMockUser,
-  createMockPaddleWebhook,
 } from './fixtures/payment-fixtures';
 
 let mongoServer: MongoMemoryServer;
@@ -84,17 +82,6 @@ describe('Public Payment Endpoints', () => {
       expect(res.body.countries).toHaveLength(11);
     });
 
-    it('includes stripeCountries and paddleCountries', async () => {
-      const res = await request(app)
-        .get('/api/payments/supported-countries')
-        .expect(200);
-
-      expect(res.body.stripeCountries).toBeDefined();
-      expect(res.body.paddleCountries).toBeDefined();
-      expect(res.body.stripeCountries).toHaveLength(5);
-      expect(res.body.paddleCountries).toHaveLength(6);
-    });
-
     it('includes provider info for each country', async () => {
       const res = await request(app)
         .get('/api/payments/supported-countries')
@@ -103,41 +90,32 @@ describe('Public Payment Endpoints', () => {
       res.body.countries.forEach((country: any) => {
         expect(country.providerInfo).toBeDefined();
         expect(country.providerInfo.name).toBeDefined();
-        expect(country.providerInfo.fees).toBeDefined();
       });
     });
   });
 
   describe('GET /api/payments/providers/:countryCode', () => {
 
-    it('returns Stripe for Greece (EU)', async () => {
+    it('returns web for Greece (EU)', async () => {
       const res = await request(app)
         .get('/api/payments/providers/GR')
         .expect(200);
 
       expect(res.body.success).toBe(true);
-      expect(res.body.provider).toBe('stripe');
+      expect(res.body.provider).toBe('web');
       expect(res.body.countryName).toBe('Greece');
       expect(res.body.isEU).toBe(true);
     });
 
-    it('returns Paddle for Serbia (non-EU)', async () => {
+    it('returns web for Serbia (non-EU)', async () => {
       const res = await request(app)
         .get('/api/payments/providers/RS')
         .expect(200);
 
       expect(res.body.success).toBe(true);
-      expect(res.body.provider).toBe('paddle');
+      expect(res.body.provider).toBe('web');
       expect(res.body.countryName).toBe('Serbia');
       expect(res.body.isEU).toBe(false);
-    });
-
-    it('returns Stripe as default for unknown country', async () => {
-      const res = await request(app)
-        .get('/api/payments/providers/XX')
-        .expect(200);
-
-      expect(res.body.provider).toBe('stripe');
     });
 
     it('handles lowercase country codes', async () => {
@@ -145,20 +123,7 @@ describe('Public Payment Endpoints', () => {
         .get('/api/payments/providers/rs')
         .expect(200);
 
-      expect(res.body.provider).toBe('paddle');
-    });
-  });
-
-  describe('GET /api/payments/paddle/config', () => {
-
-    it('returns Paddle configuration', async () => {
-      const res = await request(app)
-        .get('/api/payments/paddle/config')
-        .expect(200);
-
-      expect(res.body.success).toBe(true);
-      expect(res.body.environment).toBeDefined();
-      expect(['sandbox', 'production']).toContain(res.body.environment);
+      expect(res.body.provider).toBe('web');
     });
   });
 });
@@ -174,32 +139,8 @@ describe('Authenticated Payment Endpoints', () => {
     it('requires authentication', async () => {
       await request(app)
         .post('/api/payments/create-payment')
-        .send(TEST_PAYMENT_REQUESTS.stripePayment)
+        .send(TEST_PAYMENT_REQUESTS.webPaymentEU)
         .expect(401);
-    });
-
-    it('creates Stripe payment for EU country', async () => {
-      const { user, token } = await createAuthenticatedUser(TEST_USERS.greekUser);
-
-      const res = await request(app)
-        .post('/api/payments/create-payment')
-        .set('Authorization', `Bearer ${token}`)
-        .send(TEST_PAYMENT_REQUESTS.stripePayment);
-
-      // Will return error if Stripe not configured, but should route to Stripe
-      expect(res.body.provider).toBe('stripe');
-    });
-
-    it('creates Paddle payment for non-EU country', async () => {
-      const { user, token } = await createAuthenticatedUser(TEST_USERS.serbianUser);
-
-      const res = await request(app)
-        .post('/api/payments/create-payment')
-        .set('Authorization', `Bearer ${token}`)
-        .send(TEST_PAYMENT_REQUESTS.paddlePayment);
-
-      // Will fall back to Stripe if Paddle not configured
-      expect(['paddle', 'stripe']).toContain(res.body.provider);
     });
 
     it('validates required fields', async () => {
@@ -258,141 +199,12 @@ describe('Authenticated Payment Endpoints', () => {
 });
 
 // ============================================================
-// WEBHOOK TESTS
-// ============================================================
-
-describe('Webhook Endpoints', () => {
-
-  describe('POST /api/payments/paddle/webhook', () => {
-
-    it('accepts valid webhook format', async () => {
-      const res = await request(app)
-        .post('/api/payments/paddle/webhook')
-        .set('Content-Type', 'application/json')
-        .send(MOCK_PADDLE_RESPONSES.transactionCompleted)
-        .expect(200);
-
-      expect(res.body.received).toBe(true);
-    });
-
-    it('handles transaction.completed event', async () => {
-      const { user } = await createAuthenticatedUser(TEST_USERS.serbianUser);
-
-      const webhook = createMockPaddleWebhook(
-        'transaction.completed',
-        user._id.toString()
-      );
-
-      const res = await request(app)
-        .post('/api/payments/paddle/webhook')
-        .set('Content-Type', 'application/json')
-        .send(webhook)
-        .expect(200);
-
-      expect(res.body.received).toBe(true);
-    });
-
-    it('handles subscription.created event', async () => {
-      const res = await request(app)
-        .post('/api/payments/paddle/webhook')
-        .set('Content-Type', 'application/json')
-        .send(MOCK_PADDLE_RESPONSES.subscriptionCreated)
-        .expect(200);
-
-      expect(res.body.received).toBe(true);
-    });
-
-    it('handles subscription.canceled event', async () => {
-      const res = await request(app)
-        .post('/api/payments/paddle/webhook')
-        .set('Content-Type', 'application/json')
-        .send(MOCK_PADDLE_RESPONSES.subscriptionCanceled)
-        .expect(200);
-
-      expect(res.body.received).toBe(true);
-    });
-
-    it('handles malformed webhook gracefully', async () => {
-      const res = await request(app)
-        .post('/api/payments/paddle/webhook')
-        .set('Content-Type', 'application/json')
-        .send({ invalid: 'data' })
-        .expect(200); // Should still return 200 to prevent retries
-
-      expect(res.body.received).toBe(true);
-    });
-  });
-
-  describe('GET /api/payments/paddle/verify/:transactionId', () => {
-
-    it('requires authentication', async () => {
-      await request(app)
-        .get('/api/payments/paddle/verify/txn_123')
-        .expect(401);
-    });
-
-    it('returns pending for unprocessed transaction', async () => {
-      const { token } = await createAuthenticatedUser(TEST_USERS.serbianUser);
-
-      const res = await request(app)
-        .get('/api/payments/paddle/verify/txn_unknown')
-        .set('Authorization', `Bearer ${token}`)
-        .expect(200);
-
-      expect(res.body.success).toBe(false);
-      expect(res.body.paymentStatus).toBe('pending');
-    });
-  });
-});
-
-// ============================================================
-// SUBSCRIPTION FLOW TESTS
-// ============================================================
-
-describe('Full Subscription Flow', () => {
-
-  it('complete flow: create payment -> webhook -> verify', async () => {
-    // 1. Create authenticated user
-    const { user, token } = await createAuthenticatedUser(
-      createMockUser('RS', { email: 'flow.test@balkanestateai.com' })
-    );
-
-    // 2. Check initial status
-    let statusRes = await request(app)
-      .get('/api/payments/subscription-status')
-      .set('Authorization', `Bearer ${token}`)
-      .expect(200);
-
-    expect(statusRes.body.isSubscribed).toBe(false);
-
-    // 3. Simulate webhook (payment completed)
-    const webhook = createMockPaddleWebhook(
-      'transaction.completed',
-      user._id.toString(),
-      'txn_flow_test_123'
-    );
-
-    await request(app)
-      .post('/api/payments/paddle/webhook')
-      .set('Content-Type', 'application/json')
-      .send(webhook)
-      .expect(200);
-
-    // 4. Verify subscription was created
-    // Note: In real test, we'd check the database directly
-    const updatedUser = await User.findById(user._id);
-    // Subscription should be active after webhook processing
-  });
-});
-
-// ============================================================
 // ERROR HANDLING TESTS
 // ============================================================
 
 describe('Error Handling', () => {
 
   it('handles database connection errors gracefully', async () => {
-    // This tests the error handling paths
     const res = await request(app)
       .get('/api/payments/supported-countries')
       .expect(200);

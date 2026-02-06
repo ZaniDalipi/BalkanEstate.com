@@ -115,7 +115,7 @@ export const realEstateFAQs: FAQItem[] = [
   },
   {
     question: 'What payment methods are accepted for subscriptions?',
-    answer: 'We accept all major credit cards through Stripe, as well as payments via Google Play Store and Apple App Store for mobile users. All payments are secure and encrypted.',
+    answer: 'We accept all major credit cards through our secure payment provider, as well as payments via Google Play Store and Apple App Store for mobile users. All payments are secure and encrypted.',
   },
   {
     question: 'Can I promote my listing for more visibility?',

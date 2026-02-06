@@ -336,9 +336,9 @@ export const purchasePromotion = async (
     }
 
     // Create promotion with 'paid' status
-    // NOTE: When integrating Stripe payment, change this flow to:
+    // NOTE: When integrating payment provider, change this flow to:
     // 1. Create promotion with 'pending' status
-    // 2. Create Stripe checkout session
+    // 2. Create checkout session
     // 3. On webhook confirmation, update to 'paid'
     // For now, we mark as 'paid' immediately to enable the feature
     const promotion = await Promotion.create({
@@ -353,7 +353,7 @@ export const purchasePromotion = async (
       hasUrgentBadge,
       price: finalPrice,
       currency: 'EUR',
-      paymentStatus: 'paid', // Mark as paid immediately (integrate with Stripe later)
+      paymentStatus: 'paid', // Mark as paid immediately (integrate with payment provider later)
       isFromAgencyAllocation,
       agencyId,
       viewsGenerated: 0,
@@ -644,7 +644,7 @@ export const getPromotionStats = async (
 };
 
 /**
- * @desc    Create Stripe checkout session for promotion purchase
+ * @desc    Create checkout session for promotion purchase
  * @route   POST /api/promotions/checkout
  * @access  Private
  */
@@ -796,7 +796,7 @@ export const createPromotionCheckout = async (
       return;
     }
 
-    // Create LemonSqueezy checkout session via payment provider factory
+    // Create checkout session via payment provider factory
     const result = await paymentProviderFactory.createPromotionPayment({
       userId: String(user._id),
       userEmail: user.email ?? '',
@@ -843,7 +843,7 @@ export const createPromotionCheckout = async (
  * @route   POST /api/promotions/confirm-payment
  * @access  Private
  *
- * Note: With LemonSqueezy, promotions are created via webhook (handlePromotionOrder).
+ * Note: Promotions are created via webhook (handlePromotionOrder).
  * This endpoint is for verification/polling after payment redirect.
  */
 export const confirmPromotionPayment = async (
@@ -1016,7 +1016,7 @@ export const extendPromotion = async (
       return;
     }
 
-    // Create LemonSqueezy checkout for paid extension
+    // Create checkout for paid extension
     const result = await paymentProviderFactory.createPromotionPayment({
       userId: String(currentUser._id),
       userEmail: currentUser.email ?? '',
@@ -1059,11 +1059,11 @@ export const extendPromotion = async (
 };
 
 /**
- * @desc    Confirm extension payment (from LemonSqueezy redirect)
+ * @desc    Confirm extension payment (from payment redirect)
  * @route   POST /api/promotions/confirm-extension
  * @access  Private
  *
- * Note: With LemonSqueezy, extensions are processed via webhook.
+ * Note: Extensions are processed via webhook.
  * This endpoint is for verification/polling after payment redirect.
  */
 export const confirmExtensionPayment = async (
@@ -1151,7 +1151,7 @@ export const addUrgentBadge = async (
       return;
     }
 
-    // Create Stripe checkout for urgent badge payment
+    // Create checkout for urgent badge payment
     const urgentPrice = URGENT_MODIFIER.price;
 
     // If price is 0, add badge directly
@@ -1175,7 +1175,7 @@ export const addUrgentBadge = async (
       return;
     }
 
-    // Create LemonSqueezy checkout for urgent badge
+    // Create checkout for urgent badge
     // Get the property to include in the payment
     const property = await Property.findById(promotion.propertyId);
     if (!property) {
@@ -1227,7 +1227,7 @@ export const addUrgentBadge = async (
 /**
  * @desc    Confirm urgent badge payment
  * @route   POST /api/promotions/confirm-urgent
- * @access  Public (Stripe webhook or redirect)
+ * @access  Public (webhook or redirect)
  */
 export const confirmUrgentBadgePayment = async (
   req: Request,
@@ -1418,7 +1418,7 @@ export const updateAutoExtend = async (
  * @route   POST /api/promotions/confirm-auto-extend
  * @access  Private
  *
- * Note: With LemonSqueezy, auto-extend is processed via webhook.
+ * Note: Auto-extend is processed via webhook.
  * This endpoint is for verification/polling after payment redirect.
  */
 export const confirmAutoExtendPayment = async (

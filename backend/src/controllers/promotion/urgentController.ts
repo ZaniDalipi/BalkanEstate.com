@@ -8,7 +8,6 @@ import Promotion from '../../models/Promotion';
 import Property from '../../models/Property';
 import { IUser } from '../../models/User';
 import {
-  stripe,
   URGENT_MODIFIER,
   verifyPromotionOwnership,
   isPromotionActive,
@@ -72,47 +71,12 @@ export const addUrgentBadge = async (
       return;
     }
 
-    // Create Stripe checkout
-    const baseUrl = getBaseUrl();
-
-    const session = await stripe.checkout.sessions.create({
-      mode: 'payment',
-      line_items: [
-        {
-          price_data: {
-            currency: 'eur',
-            product_data: {
-              name: 'Urgent Badge',
-              description: `Add urgent badge to your ${promotion.promotionTier} promotion`,
-            },
-            unit_amount: Math.round(urgentPrice * 100),
-          },
-          quantity: 1,
-        },
-      ],
-      metadata: {
-        type: 'add_urgent_badge',
-        promotionId: String(promotion._id),
-        userId,
-      },
-      success_url: `${baseUrl}/settings?tab=promotions&urgent_added=true&session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${baseUrl}/settings?tab=promotions&urgent_cancelled=true`,
-    });
-
-    if (!session.url) {
-      promotionLogger.error('Stripe session created but URL is null:', session);
-      res.status(500).json({
-        success: false,
-        message: 'Failed to create payment session. Please try again.'
-      });
-      return;
-    }
-
-    res.status(200).json({
-      success: true,
-      isFree: false,
-      url: session.url,
-      sessionId: session.id,
+    // Payment provider not yet configured
+    // TODO: Integrate with new payment provider when selected
+    res.status(503).json({
+      success: false,
+      message: 'Payment processing is not yet configured. Please contact support.',
+      code: 'PAYMENT_NOT_CONFIGURED',
       price: urgentPrice,
     });
   } catch (error: any) {
@@ -141,14 +105,16 @@ export const confirmUrgentBadgePayment = async (
       return;
     }
 
-    const session = await stripe.checkout.sessions.retrieve(sessionId);
+    // TODO: Integrate with payment provider to verify session
+    // Payment verification not yet configured
+    res.status(503).json({
+      success: false,
+      message: 'Payment confirmation is not yet configured. Please contact support.',
+      code: 'PAYMENT_NOT_CONFIGURED',
+    });
+    return;
 
-    if (session.payment_status !== 'paid') {
-      res.status(400).json({ message: 'Payment not completed' });
-      return;
-    }
-
-    const { promotionId, type } = session.metadata || {};
+    const { promotionId, type } = {} as any;
 
     if (type !== 'add_urgent_badge' || !promotionId) {
       res.status(400).json({ message: 'Invalid session metadata' });

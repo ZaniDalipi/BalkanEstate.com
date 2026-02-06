@@ -237,7 +237,7 @@ app.use('/api/auth', sensitiveRateLimiter, authRoutes);
 // Payment routes with payment-specific rate limiting
 app.use('/api/payments', paymentRateLimiter, paymentRoutes);
 app.use('/api/subscriptions', paymentRateLimiter, subscriptionRoutes);
-app.use('/api/webhooks', webhookRoutes); // Webhooks from Stripe - no rate limit needed
+app.use('/api/webhooks', webhookRoutes); // Webhooks from payment provider - no rate limit needed
 
 // Standard API routes
 app.use('/api/properties', propertyRoutes);

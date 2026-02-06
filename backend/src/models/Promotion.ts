@@ -33,8 +33,8 @@ export interface IPromotion extends Document {
   autoExtend: boolean; // Whether to auto-extend when promotion ends
   autoExtendDuration?: number; // Duration in days for auto-extend
   autoExtendStatus: 'none' | 'pending' | 'completed' | 'failed'; // Status of auto-extend
-  autoExtendSessionId?: string; // Stripe session ID for pending auto-extend
-  autoExtendCheckoutUrl?: string; // Stripe checkout URL for user to complete payment
+  autoExtendSessionId?: string; // Payment session ID for pending auto-extend
+  autoExtendCheckoutUrl?: string; // Payment checkout URL for user to complete payment
   autoExtendAttempts: number; // Number of auto-extend attempts
   lastAutoExtendAttempt?: Date; // When last auto-extend was attempted
   // Additional metadata

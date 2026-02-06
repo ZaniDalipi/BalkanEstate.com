@@ -124,20 +124,16 @@ const TermsOfServicePage: React.FC = () => {
               <li>{t('legal:terms.payments.price', 'We may change subscription prices with 30 days notice')}</li>
             </ul>
             <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mt-4">
-              <h4 className="font-semibold text-gray-800 mb-2">{t('legal:terms.payments.provider.title', 'Merchant of Record')}</h4>
+              <h4 className="font-semibold text-gray-800 mb-2">{t('legal:terms.payments.provider.title', 'Payment Processing')}</h4>
               <p className="text-gray-700 text-sm mb-3">
-                {t('legal:terms.payments.provider.morStatement', 'Our order process is conducted by our online reseller LemonSqueezy. LemonSqueezy is the Merchant of Record for all our orders. LemonSqueezy provides all customer service inquiries and handles returns.')}
+                {t('legal:terms.payments.provider.morStatement', 'Our order process is conducted by our payment service provider. They serve as the Merchant of Record for all our orders and handle customer service inquiries related to payments and returns.')}
               </p>
               <p className="text-gray-600 text-sm mb-3">
-                {t('legal:terms.payments.provider.text', 'When you make a purchase, you are transacting with LemonSqueezy, who handles payment processing, invoicing, VAT/tax compliance, and refunds. Your payment will appear on your statement as a charge from LemonSqueezy.')}
+                {t('legal:terms.payments.provider.text', 'When you make a purchase, you are transacting with our payment service provider, who handles payment processing, invoicing, VAT/tax compliance, and refunds.')}
               </p>
               <p className="text-gray-600 text-sm mb-3">
-                {t('legal:terms.payments.provider.buyerTerms', 'By making a purchase, you also agree to LemonSqueezy\'s Terms of Service.')}
+                {t('legal:terms.payments.provider.buyerTerms', 'By making a purchase, you also agree to the payment provider\'s terms of service.')}
               </p>
-              <div className="flex flex-wrap gap-3 mt-3">
-                <a href="https://www.lemonsqueezy.com/terms" target="_blank" rel="noopener noreferrer" className="text-primary text-sm hover:underline">LemonSqueezy Terms →</a>
-                <a href="https://www.lemonsqueezy.com/privacy" target="_blank" rel="noopener noreferrer" className="text-primary text-sm hover:underline">LemonSqueezy Privacy Policy →</a>
-              </div>
             </div>
           </section>
 

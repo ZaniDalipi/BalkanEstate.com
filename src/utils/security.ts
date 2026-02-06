@@ -65,7 +65,6 @@ export const sanitizeUrl = (url: string): string => {
     const trustedDomains = [
       window.location.hostname,
       'balkanestateai.com',
-      'stripe.com',
       'accounts.google.com',
     ];
 

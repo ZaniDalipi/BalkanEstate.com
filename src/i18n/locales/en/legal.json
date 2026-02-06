@@ -14,7 +14,7 @@
         "name": "Name and contact information (email, phone number)",
         "account": "Account credentials (username, password)",
         "profile": "Profile information (photo, bio, preferences)",
-        "payment": "Payment information (processed securely via Stripe)",
+        "payment": "Payment information (processed securely via our payment processor)",
         "communication": "Communications and messages you send through our platform"
       },
       "auto": {
@@ -42,7 +42,7 @@
       "agents": "With Property Agents:",
       "agentsDesc": "When you inquire about a property, your contact information is shared with the listing agent.",
       "providers": "Service Providers:",
-      "providersDesc": "We work with third parties for payment processing (Stripe), email services, and analytics.",
+      "providersDesc": "We work with third parties for payment processing, email services, and analytics.",
       "legal": "Legal Requirements:",
       "legalDesc": "When required by law or to protect our rights.",
       "business": "Business Transfers:",
@@ -93,7 +93,7 @@
     "thirdParty": {
       "title": "Third-Party Services",
       "text": "We use the following third-party services that may process your data:",
-      "stripe": "Payment processing. Stripe processes your payment information securely. We do not store your full credit card details.",
+      "stripe": "Payment processing. Our payment processor processes your payment information securely. We do not store your full credit card details.",
       "analytics": "Website analytics to understand user behavior and improve our services. We use IP anonymization.",
       "cloudflare": "Security and performance services including DDoS protection and content delivery.",
       "aws": "Cloud hosting and storage services. Data is stored in EU data centers."
@@ -162,9 +162,9 @@
       "price": "We may change subscription prices with 30 days notice",
       "lemonsqueezy": {
         "title": "Merchant of Record",
-        "morStatement": "Our order process is conducted by our online reseller LemonSqueezy. LemonSqueezy is the Merchant of Record for all our orders. LemonSqueezy provides all customer service inquiries and handles returns.",
-        "text": "When you make a purchase, you are transacting with LemonSqueezy, who handles payment processing, invoicing, VAT/tax compliance, and refunds. Your payment will appear on your statement as a charge from LemonSqueezy.",
-        "buyerTerms": "By making a purchase, you also agree to LemonSqueezy's Terms of Service."
+        "morStatement": "Our order process is conducted by our online reseller and payment service provider. Our payment service provider is the Merchant of Record for all our orders and provides all customer service inquiries and handles returns.",
+        "text": "When you make a purchase, you are transacting with our payment service provider, who handles payment processing, invoicing, VAT/tax compliance, and refunds.",
+        "buyerTerms": "By making a purchase, you also agree to our payment service provider's Terms of Service."
       }
     },
     "prohibited": {
@@ -339,7 +339,7 @@
     },
     "thirdParty": {
       "title": "Third-Party Cookies",
-      "text": "Some cookies on our site are set by third-party services we use, such as Google Analytics for website analytics and Stripe for payment processing. These services have their own privacy policies governing how they use your data."
+      "text": "Some cookies on our site are set by third-party services we use, such as Google Analytics for website analytics and our payment processor for payment processing. These services have their own privacy policies governing how they use your data."
     },
     "updates": {
       "title": "Updates to This Policy",

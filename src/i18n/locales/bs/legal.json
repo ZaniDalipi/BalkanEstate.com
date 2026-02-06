@@ -14,7 +14,7 @@
         "name": "Ime i kontakt informacije (email, broj telefona)",
         "account": "Akreditivi računa (korisničko ime, lozinka)",
         "profile": "Informacije o profilu (fotografija, biografija, preferencije)",
-        "payment": "Informacije o plaćanju (sigurno obrađeno putem Stripe)",
+        "payment": "Informacije o plaćanju (sigurno obrađeno putem našeg procesora plaćanja)",
         "communication": "Komunikacije i poruke koje šaljete putem naše platforme"
       },
       "auto": {
@@ -42,7 +42,7 @@
       "agents": "Sa Agentima za Nekretnine:",
       "agentsDesc": "Kada se raspitujete o nekretnini, Vaše kontakt informacije se dijele sa agentom oglasa.",
       "providers": "Pružaoci Usluga:",
-      "providersDesc": "Radimo sa trećim stranama za obradu plaćanja (Stripe), email usluge i analitiku.",
+      "providersDesc": "Radimo sa trećim stranama za obradu plaćanja, email usluge i analitiku.",
       "legal": "Zakonski Zahtjevi:",
       "legalDesc": "Kada je zakonom propisano ili radi zaštite naših prava.",
       "business": "Poslovni Transferi:",
@@ -93,7 +93,7 @@
     "thirdParty": {
       "title": "Usluge Trećih Strana",
       "text": "Koristimo sljedeće usluge trećih strana koje mogu obrađivati Vaše podatke:",
-      "stripe": "Obrada plaćanja. Stripe obrađuje Vaše informacije o plaćanju sigurno. Ne pohranjujemo Vaše potpune podatke kreditne kartice.",
+      "stripe": "Obrada plaćanja. Naš procesor plaćanja obrađuje Vaše informacije o plaćanju sigurno. Ne pohranjujemo Vaše potpune podatke kreditne kartice.",
       "analytics": "Web analitika za razumijevanje ponašanja korisnika i poboljšanje naših usluga. Koristimo anonimizaciju IP adrese.",
       "cloudflare": "Sigurnosne i performansne usluge uključujući DDoS zaštitu i dostavu sadržaja.",
       "aws": "Cloud hosting i usluge pohrane. Podaci se pohranjuju u EU data centrima."
@@ -162,9 +162,9 @@
       "price": "Možemo promijeniti cijene pretplate uz obavještenje od 30 dana",
       "lemonsqueezy": {
         "title": "Trgovac evidencije",
-        "morStatement": "Naš proces naručivanja provodi naš online preprodavač LemonSqueezy. LemonSqueezy je Trgovac evidencije za sve naše narudžbe. LemonSqueezy pruža sve upite korisničke podrške i upravlja povratima.",
-        "text": "Kada izvršite kupovinu, obavljate transakciju s LemonSqueezy-om, koji upravlja obradom plaćanja, fakturiranjem, usklađenošću s PDV-om/porezima i povratima. Vaše plaćanje će se pojaviti na vašem izvodu kao naplata od LemonSqueezy-a.",
-        "buyerTerms": "Kupovinom također prihvaćate LemonSqueezy-ove Uvjete za kupce."
+        "morStatement": "Naš proces naručivanja provodi naš online preprodavač i pružalac usluga plaćanja. Naš pružalac usluga plaćanja je Trgovac evidencije za sve naše narudžbe i pruža sve upite korisničke podrške i upravlja povratima.",
+        "text": "Kada izvršite kupovinu, obavljate transakciju s našim pružaocem usluga plaćanja, koji upravlja obradom plaćanja, fakturiranjem, usklađenošću s PDV-om/porezima i povratima.",
+        "buyerTerms": "Kupovinom također prihvaćate Uvjete za kupce našeg pružaoca usluga plaćanja."
       }
     },
     "prohibited": {
@@ -339,7 +339,7 @@
     },
     "thirdParty": {
       "title": "Kolačići Trećih Strana",
-      "text": "Neki kolačići na našoj stranici postavljaju usluge trećih strana koje koristimo, poput Google Analytics za analitiku web stranice i Stripe za obradu plaćanja. Ove usluge imaju vlastite politike privatnosti koje regulišu kako koriste Vaše podatke."
+      "text": "Neki kolačići na našoj stranici postavljaju usluge trećih strana koje koristimo, poput Google Analytics za analitiku web stranice i našeg procesora plaćanja za obradu plaćanja. Ove usluge imaju vlastite politike privatnosti koje regulišu kako koriste Vaše podatke."
     },
     "updates": {
       "title": "Ažuriranja Ove Politike",

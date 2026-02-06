@@ -27,8 +27,8 @@ export interface IAgencyFeaturedSubscription extends Document {
   canceledAt?: Date;
 
   // Payment
-  stripeSubscriptionId?: string;
-  stripeCustomerId?: string;
+  externalSubscriptionId?: string;
+  externalCustomerId?: string;
   lastPaymentDate?: Date;
   nextPaymentDate?: Date;
 
@@ -116,12 +116,12 @@ const AgencyFeaturedSubscriptionSchema: Schema = new Schema(
     canceledAt: {
       type: Date,
     },
-    stripeSubscriptionId: {
+    externalSubscriptionId: {
       type: String,
       index: true,
       sparse: true,
     },
-    stripeCustomerId: {
+    externalCustomerId: {
       type: String,
       index: true,
       sparse: true,
@@ -175,7 +175,7 @@ const AgencyFeaturedSubscriptionSchema: Schema = new Schema(
 AgencyFeaturedSubscriptionSchema.index({ agencyId: 1, status: 1 });
 AgencyFeaturedSubscriptionSchema.index({ userId: 1, status: 1 });
 AgencyFeaturedSubscriptionSchema.index({ currentPeriodEnd: 1, status: 1 });
-AgencyFeaturedSubscriptionSchema.index({ stripeSubscriptionId: 1 }, { unique: true, sparse: true });
+AgencyFeaturedSubscriptionSchema.index({ externalSubscriptionId: 1 }, { unique: true, sparse: true });
 
 // Instance methods
 AgencyFeaturedSubscriptionSchema.methods.isActive = function(): boolean {

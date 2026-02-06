@@ -242,8 +242,8 @@ export interface Product {
   savedSearchesLimit: number;
   earlyAccessListings?: boolean;
   advancedMarketInsights?: boolean;
-  stripeProductId?: string;
-  stripePriceId?: string;
+  externalProductId?: string;
+  externalPriceId?: string;
   // Agency/Enterprise features
   maxActiveSubscriptions?: number;
   cardStyle?: {

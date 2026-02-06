@@ -9,7 +9,6 @@ import Property from '../../models/Property';
 import { IUser } from '../../models/User';
 import PromotionCoupon from '../../models/PromotionCoupon';
 import {
-  stripe,
   PROMOTION_TIERS,
   getPromotionPrice,
   isValidDuration,
@@ -122,43 +121,12 @@ export const extendPromotion = async (
       return;
     }
 
-    // Create Stripe checkout for paid extension
-    const baseUrl = getBaseUrl();
-    const tierInfo = PROMOTION_TIERS[promotionTier];
-
-    const session = await stripe.checkout.sessions.create({
-      line_items: [
-        {
-          price_data: {
-            currency: 'eur',
-            product_data: {
-              name: `Extend ${tierInfo.name} Promotion`,
-              description: `Add ${duration} days to promotion for "${property.title}"`,
-            },
-            unit_amount: Math.round(extensionPrice * 100),
-          },
-          quantity: 1,
-        },
-      ],
-      mode: 'payment',
-      success_url: `${baseUrl}/promotions/extend-success?session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${baseUrl}/promotions/cancel?property_id=${property._id}`,
-      client_reference_id: String(currentUser._id),
-      metadata: {
-        type: 'extension',
-        userId: String(currentUser._id),
-        promotionId: String(promotion._id),
-        propertyId: String(property._id),
-        duration: String(duration),
-        couponCode: appliedCouponCode ?? '',
-        couponDiscount: String(couponDiscount),
-      },
-    });
-
-    res.status(200).json({
-      success: true,
-      sessionId: session.id,
-      url: session.url,
+    // Payment provider not yet configured
+    // TODO: Integrate with new payment provider when selected (see PAYMENT_OPTIONS_2026.md)
+    res.status(503).json({
+      success: false,
+      message: 'Payment processing is not yet configured. Please contact support.',
+      code: 'PAYMENT_NOT_CONFIGURED',
       pricing: {
         originalPrice: extensionPrice + couponDiscount,
         discount: couponDiscount,
@@ -168,26 +136,6 @@ export const extendPromotion = async (
     });
   } catch (error: any) {
     promotionLogger.error('Extend promotion error:', error);
-
-    // Check for specific error types
-    if (error.message?.includes('STRIPE_SECRET_KEY')) {
-      res.status(503).json({
-        message: 'Payment service not configured',
-        code: 'PAYMENT_NOT_CONFIGURED',
-        error: 'Stripe is not configured. Please contact support.'
-      });
-      return;
-    }
-
-    if (error.type === 'StripeAuthenticationError') {
-      res.status(503).json({
-        message: 'Payment service authentication error',
-        code: 'PAYMENT_AUTH_ERROR',
-        error: 'Unable to process payment. Please try again later.'
-      });
-      return;
-    }
-
     res.status(500).json({ message: 'Error extending promotion', error: error.message });
   }
 };
@@ -209,59 +157,11 @@ export const confirmExtensionPayment = async (
       return;
     }
 
-    const session = await stripe.checkout.sessions.retrieve(sessionId);
-
-    if (session.payment_status !== 'paid') {
-      res.status(400).json({ message: 'Payment not completed' });
-      return;
-    }
-
-    const { promotionId, duration } = session.metadata || {};
-
-    if (!promotionId || !duration) {
-      res.status(400).json({ message: 'Invalid session metadata' });
-      return;
-    }
-
-    const promotion = await Promotion.findById(promotionId);
-    if (!promotion) {
-      res.status(404).json({ message: 'Promotion not found' });
-      return;
-    }
-
-    // Check if already processed
-    if (promotion.notes?.includes(sessionId)) {
-      res.status(200).json({
-        success: true,
-        message: 'Extension already processed',
-        promotion,
-      });
-      return;
-    }
-
-    const currentEndDate = new Date(promotion.endDate);
-    const baseDate = currentEndDate > new Date() ? currentEndDate : new Date();
-    const newEndDate = new Date(baseDate);
-    newEndDate.setDate(newEndDate.getDate() + parseInt(duration));
-
-    promotion.endDate = newEndDate;
-    promotion.duration = promotion.duration + parseInt(duration);
-    promotion.isActive = true;
-    promotion.notes = (promotion.notes || '') + ` | Extended: +${duration} days (${sessionId})`;
-    await promotion.save();
-
-    const property = await Property.findById(promotion.propertyId);
-    if (property) {
-      property.promotionEndDate = newEndDate;
-      property.isPromoted = true;
-      await property.save();
-    }
-
-    res.status(200).json({
-      success: true,
-      message: 'Promotion extended successfully',
-      promotion,
-      newEndDate: newEndDate.toISOString(),
+    // TODO: Integrate with new payment provider when selected (see PAYMENT_OPTIONS_2026.md)
+    res.status(503).json({
+      success: false,
+      message: 'Payment confirmation is not yet configured. Please contact support.',
+      code: 'PAYMENT_NOT_CONFIGURED',
     });
   } catch (error: any) {
     promotionLogger.error('Confirm extension payment error:', error);
