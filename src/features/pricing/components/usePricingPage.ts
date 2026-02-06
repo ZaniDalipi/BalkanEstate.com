@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useAppContext } from '@/context/AppContext';
 import { CONTACT_CONFIG } from '@/src/shared/config/contact';
+import { apiRequest } from '@/src/shared/api';
 import { UserRole } from '@/types';
 import { usePricingPageData, type Product } from '../hooks/usePricingData';
 
@@ -39,6 +40,14 @@ export function usePricingPage() {
     productId: string;
   } | null>(null);
   const [showContactOptions, setShowContactOptions] = useState(false);
+
+  // Coupon activation modal states
+  const [showCouponModal, setShowCouponModal] = useState(false);
+  const [couponCode, setCouponCode] = useState('');
+  const [couponLoading, setCouponLoading] = useState(false);
+  const [couponError, setCouponError] = useState<string | null>(null);
+  const [couponSuccess, setCouponSuccess] = useState(false);
+  const [selectedCouponPlan, setSelectedCouponPlan] = useState<Product | null>(null);
 
   // Listing promotion states
   const [selectedPromoTier, setSelectedPromoTier] = useState<'featured' | 'highlight' | 'premium' | null>(null);
@@ -148,32 +157,7 @@ export function usePricingPage() {
   };
 
   const handlePlanSelection = (product: Product) => {
-    // PAYMENTS COMING SOON - Show info message instead of processing payment
-    dispatch({
-      type: 'SHOW_ALERT',
-      payload: {
-        type: 'info',
-        title: t('pricing:comingSoon.title', 'Payments Coming Soon'),
-        message: t(
-          'pricing:comingSoon.message',
-          'We are setting up our payment system. Please contact sales@balkanestateai.com to process your subscription manually.'
-        ),
-      },
-    });
-    return;
-
-    // Original payment logic - temporarily disabled
-    /*
     if (!state.isAuthenticated || !state.currentUser) {
-      dispatch({
-        type: 'SET_PENDING_SUBSCRIPTION',
-        payload: {
-          planName: product.name,
-          planPrice: product.price,
-          planInterval: product.billingPeriod === 'yearly' ? 'year' : 'month',
-          modalType: activeTab,
-        },
-      });
       dispatch({
         type: 'TOGGLE_AUTH_MODAL',
         payload: { isOpen: true, view: 'login' },
@@ -181,68 +165,76 @@ export function usePricingPage() {
       return;
     }
 
-    // For Enterprise plan, perform all checks
-    const isEnterprisePlan = product.productId.includes('enterprise');
+    // Open coupon activation modal
+    setSelectedCouponPlan(product);
+    setCouponCode('');
+    setCouponError(null);
+    setCouponSuccess(false);
+    setShowCouponModal(true);
+  };
 
-    if (isEnterprisePlan) {
-      // Check 1: Must be an agent first
-      if (!isUserAgent()) {
+  const handleCouponActivation = async () => {
+    if (!couponCode.trim() || !selectedCouponPlan) return;
+
+    setCouponLoading(true);
+    setCouponError(null);
+
+    try {
+      const response = await apiRequest<{
+        message: string;
+        subscription: {
+          id: string;
+          productId: string;
+          status: string;
+          startDate: string;
+          expirationDate: string;
+        };
+        user: {
+          id: string;
+          email: string;
+          proSubscription: any;
+        };
+      }>('/subscriptions/activate-coupon', {
+        method: 'POST',
+        body: {
+          couponCode: couponCode.trim(),
+          productId: selectedCouponPlan.productId,
+        },
+        requiresAuth: true,
+      });
+
+      setCouponSuccess(true);
+
+      // Update local user state
+      if (response.user?.proSubscription) {
+        dispatch({
+          type: 'UPDATE_USER',
+          payload: {
+            isSubscribed: true,
+            subscriptionPlan: selectedCouponPlan.productId,
+            proSubscription: response.user.proSubscription,
+          },
+        });
+      }
+
+      // Show success and close after delay
+      setTimeout(() => {
+        setShowCouponModal(false);
+        setCouponSuccess(false);
         dispatch({
           type: 'SHOW_ALERT',
           payload: {
-            type: 'warning',
-            title: t('pricing:enterprise.agentRequired', 'Agent Status Required'),
-            message: t(
-              'pricing:enterprise.agentRequiredMessage',
-              'Only registered agents can create an agency. Please switch to Agent account type in your profile first.'
-            ),
+            type: 'success',
+            title: t('pricing:couponModal.successTitle', 'Subscription Activated!'),
+            message: t('pricing:couponModal.successMessage', 'Your subscription has been activated successfully. Enjoy your plan!'),
           },
         });
-        dispatch({ type: 'SET_ACCOUNT_TAB', payload: 'profile' });
-        dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'account' });
-        window.history.pushState({}, '', buildLocalizedPath('/account'));
-        return;
-      }
-
-      // Check 2: Cannot create agency if already have one
-      if (userHasAgency()) {
-        dispatch({
-          type: 'SHOW_ALERT',
-          payload: {
-            type: 'info',
-            title: t('pricing:enterprise.alreadyHaveAgency', 'You Already Have an Agency'),
-            message: t(
-              'pricing:enterprise.viewYourAgency',
-              'You already have an agency. Visit your account to manage it.'
-            ),
-          },
-        });
-        dispatch({ type: 'SET_ACCOUNT_TAB', payload: 'agency' });
-        dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'account' });
-        window.history.pushState({}, '', buildLocalizedPath('/account/agency'));
-        return;
-      }
-
-      // Check 3: If already has Enterprise subscription, skip payment
-      if (hasEnterpriseSubscription()) {
-        dispatch({ type: 'TOGGLE_ENTERPRISE_MODAL', payload: true });
-        return;
-      }
-
-      // No Enterprise subscription yet - open modal to fill agency details, then go to payment
-      dispatch({ type: 'TOGGLE_ENTERPRISE_MODAL', payload: true });
-      return;
+      }, 2000);
+    } catch (err: any) {
+      setCouponError(err.message || t('pricing:couponModal.errorGeneric', 'Failed to activate coupon. Please try again.'));
+    } finally {
+      setCouponLoading(false);
     }
-
-    // For non-Enterprise plans (Pro Monthly, Pro Yearly, Buyer), proceed to payment directly
-    setSelectedPlan({
-      name: product.name,
-      price: product.price,
-      interval: product.billingPeriod === 'yearly' ? 'year' : 'month',
-      productId: product.productId,
-    });
-    setShowPaymentWindow(true);
-    */
   };
 
   const handlePaymentSuccess = async (paymentIntentId: string) => {
@@ -389,10 +381,21 @@ export function usePricingPage() {
     getBadgeColor,
     getBillingLabel,
     getUserRole,
+    // Coupon modal state
+    showCouponModal,
+    setShowCouponModal,
+    couponCode,
+    setCouponCode,
+    couponLoading,
+    couponError,
+    setCouponError,
+    couponSuccess,
+    selectedCouponPlan,
     // Handlers
     handleBack,
     handleLegalNavigation,
     handlePlanSelection,
+    handleCouponActivation,
     handlePaymentSuccess,
     handlePaymentError,
     handlePromoteListing,
