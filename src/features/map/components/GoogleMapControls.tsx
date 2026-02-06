@@ -190,12 +190,28 @@ const GoogleMapControls: React.FC<GoogleMapControlsProps> = ({
           </div>
 
           {/* Layer toggles */}
-          <div className="flex items-center gap-1 xl:gap-1.5 bg-white/80 backdrop-blur-xl border border-white/50 p-1 xl:p-1.5 rounded-full shadow-xl shadow-black/10 max-w-[calc(100%-2rem)] overflow-x-auto scrollbar-hide">
-            {/* Climate Risks Dropdown */}
-            <div className="relative">
+          <div className="relative">
+            {/* Climate dropdown - rendered outside overflow container */}
+            {isClimateMenuOpen && (
+              <div className="absolute bottom-full left-0 mb-2 bg-white rounded-xl shadow-xl border border-gray-100 p-2 min-w-[160px] z-50">
+                {(['none', 'flood', 'fire', 'wind', 'air', 'heat'] as ClimateRiskType[]).map((risk) => (
+                  <button
+                    key={risk}
+                    onClick={() => { setSelectedClimateRisk(risk); setIsClimateMenuOpen(false); }}
+                    className={`w-full text-left px-3 py-2 rounded-lg text-xs font-medium transition-colors ${
+                      selectedClimateRisk === risk ? 'bg-blue-50 text-blue-600' : 'hover:bg-gray-50 text-gray-700'
+                    }`}
+                  >
+                    {risk === 'none' ? '✕ None' : risk === 'flood' ? '💧 Flood' : risk === 'fire' ? '🔥 Fire' : risk === 'wind' ? '💨 Wind' : risk === 'air' ? '🌬️ Air Quality' : '☀️ Heat'}
+                  </button>
+                ))}
+              </div>
+            )}
+            <div className="flex items-center gap-1 xl:gap-1.5 bg-white/80 backdrop-blur-xl border border-white/50 p-1 xl:p-1.5 rounded-full shadow-xl shadow-black/10 max-w-[calc(100%-2rem)] overflow-x-auto scrollbar-hide">
+              {/* Climate Risks Button */}
               <button
                 onClick={() => setIsClimateMenuOpen(!isClimateMenuOpen)}
-                className={`flex items-center gap-1 xl:gap-1.5 px-2 py-1 xl:px-3 xl:py-1.5 text-[10px] xl:text-xs font-semibold rounded-full transition-all ${
+                className={`flex items-center gap-1 xl:gap-1.5 px-2 py-1 xl:px-3 xl:py-1.5 text-[10px] xl:text-xs font-semibold rounded-full transition-all flex-shrink-0 ${
                   isClimateMenuOpen || selectedClimateRisk !== 'none'
                     ? 'bg-blue-500 text-white'
                     : 'bg-white text-gray-700 hover:bg-gray-50 shadow-sm'
@@ -210,22 +226,6 @@ const GoogleMapControls: React.FC<GoogleMapControlsProps> = ({
                   <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
                 </svg>
               </button>
-              {isClimateMenuOpen && (
-                <div className="absolute bottom-full left-0 mb-2 bg-white rounded-xl shadow-xl border border-gray-100 p-2 min-w-[160px]">
-                  {(['none', 'flood', 'fire', 'wind', 'air', 'heat'] as ClimateRiskType[]).map((risk) => (
-                    <button
-                      key={risk}
-                      onClick={() => { setSelectedClimateRisk(risk); setIsClimateMenuOpen(false); }}
-                      className={`w-full text-left px-3 py-2 rounded-lg text-xs font-medium transition-colors ${
-                        selectedClimateRisk === risk ? 'bg-blue-50 text-blue-600' : 'hover:bg-gray-50 text-gray-700'
-                      }`}
-                    >
-                      {risk === 'none' ? '✕ None' : risk === 'flood' ? '💧 Flood' : risk === 'fire' ? '🔥 Fire' : risk === 'wind' ? '💨 Wind' : risk === 'air' ? '🌬️ Air Quality' : '☀️ Heat'}
-                    </button>
-                  ))}
-                </div>
-              )}
-            </div>
 
             {/* Promoted/Premium Filter */}
             <button
@@ -311,6 +311,7 @@ const GoogleMapControls: React.FC<GoogleMapControlsProps> = ({
               <MapLegendIcon className="w-3.5 h-3.5 xl:w-4 xl:h-4" />
               <span className="hidden xl:inline">{t('search:map.legend', 'Legend')}</span>
             </button>
+            </div>
           </div>
 
           {/* Drawn bounds actions */}
