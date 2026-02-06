@@ -934,7 +934,7 @@ export const activateCouponSubscription = async (req: Request, res: Response): P
     });
 
     // Record coupon usage
-    await coupon.recordUsage(userId, subscription._id, discount);
+    await coupon.recordUsage(userId, subscription._id as any, discount);
 
     // Update user subscription status
     user.isSubscribed = true;
