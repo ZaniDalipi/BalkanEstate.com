@@ -142,18 +142,18 @@ const MapFilterControls: React.FC<MapFilterControlsProps> = ({
         <>
           <div className="absolute bottom-24 right-4 z-[1000] flex-col items-end gap-2 hidden md:flex">
             {/* Main control bar - compact with glass effect */}
-            <div className="bg-white/80 backdrop-blur-xl border border-white/50 p-1.5 rounded-full shadow-xl shadow-black/10 flex items-center gap-1.5 transition-all duration-300">
+            <div className="bg-white/80 backdrop-blur-xl border border-white/50 p-1 xl:p-1.5 rounded-full shadow-xl shadow-black/10 flex items-center gap-1 xl:gap-1.5 transition-all duration-300">
               <button
                 onClick={onRecenter}
-                className="p-1.5 rounded-full transition-colors hover:bg-black/10"
+                className="p-1 xl:p-1.5 rounded-full transition-colors hover:bg-black/10"
                 aria-label={t('search:map.centerOnLocation')}
               >
-                <CrosshairsIcon className="w-5 h-5 text-neutral-700" />
+                <CrosshairsIcon className="w-4 h-4 xl:w-5 xl:h-5 text-neutral-700" />
               </button>
               <div className="flex items-center bg-neutral-200/50 p-0.5 rounded-full" role="radiogroup" aria-label="Map style">
                 <button
                   onClick={() => setMapType('positron')}
-                  className={`px-2 py-1 rounded-full text-[11px] font-semibold transition-all ${
+                  className={`px-1.5 py-0.5 xl:px-2 xl:py-1 rounded-full text-[10px] xl:text-[11px] font-semibold transition-all ${
                     mapType === 'positron'
                       ? 'bg-white shadow text-primary'
                       : 'text-neutral-600 hover:bg-white/50'
@@ -165,7 +165,7 @@ const MapFilterControls: React.FC<MapFilterControlsProps> = ({
                 </button>
                 <button
                   onClick={() => setMapType('voyager')}
-                  className={`px-2 py-1 rounded-full text-[11px] font-semibold transition-all ${
+                  className={`px-1.5 py-0.5 xl:px-2 xl:py-1 rounded-full text-[10px] xl:text-[11px] font-semibold transition-all ${
                     mapType === 'voyager'
                       ? 'bg-white shadow text-primary'
                       : 'text-neutral-600 hover:bg-white/50'
@@ -177,7 +177,7 @@ const MapFilterControls: React.FC<MapFilterControlsProps> = ({
                 </button>
                 <button
                   onClick={() => setMapType('street')}
-                  className={`px-2 py-1 rounded-full text-[11px] font-semibold transition-all ${
+                  className={`px-1.5 py-0.5 xl:px-2 xl:py-1 rounded-full text-[10px] xl:text-[11px] font-semibold transition-all ${
                     mapType === 'street'
                       ? 'bg-white shadow text-primary'
                       : 'text-neutral-600 hover:bg-white/50'
@@ -189,7 +189,7 @@ const MapFilterControls: React.FC<MapFilterControlsProps> = ({
                 </button>
                 <button
                   onClick={() => setMapType('satellite')}
-                  className={`px-2 py-1 rounded-full text-[11px] font-semibold transition-all ${
+                  className={`px-1.5 py-0.5 xl:px-2 xl:py-1 rounded-full text-[10px] xl:text-[11px] font-semibold transition-all ${
                     mapType === 'satellite'
                       ? 'bg-white shadow text-primary'
                       : 'text-neutral-600 hover:bg-white/50'
@@ -202,7 +202,7 @@ const MapFilterControls: React.FC<MapFilterControlsProps> = ({
               </div>
               <button
                 onClick={onDrawStart}
-                className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-full shadow-md transition-colors ${
+                className={`flex items-center gap-1 xl:gap-1.5 px-2 py-1 xl:px-3 xl:py-1.5 text-[10px] xl:text-xs font-semibold rounded-full shadow-md transition-colors ${
                   isDrawing
                     ? 'bg-red-600 text-white hover:bg-red-700'
                     : 'bg-neutral-800 text-white hover:bg-neutral-900'
@@ -210,19 +210,19 @@ const MapFilterControls: React.FC<MapFilterControlsProps> = ({
                 aria-label={isDrawing ? t('search:map.cancel') : t('search:map.drawArea')}
                 aria-pressed={isDrawing}
               >
-                {isDrawing ? <XCircleIcon className="w-4 h-4" /> : <PencilIcon className="w-4 h-4" />}
-                <span className="hidden sm:inline">{isDrawing ? t('search:map.cancel') : t('search:map.drawArea')}</span>
-                <span className="sm:hidden">{isDrawing ? '✕' : '✎'}</span>
+                {isDrawing ? <XCircleIcon className="w-3.5 h-3.5 xl:w-4 xl:h-4" /> : <PencilIcon className="w-3.5 h-3.5 xl:w-4 xl:h-4" />}
+                <span className="hidden xl:inline">{isDrawing ? t('search:map.cancel') : t('search:map.drawArea')}</span>
+                <span className="xl:hidden">{isDrawing ? '✕' : '✎'}</span>
               </button>
             </div>
 
             {/* Layer toggles - compact row with glass effect */}
-            <div className="flex items-center gap-1.5 bg-white/80 backdrop-blur-xl border border-white/50 p-1.5 rounded-full shadow-xl shadow-black/10 max-w-[calc(100%-2rem)] overflow-x-auto scrollbar-hide">
+            <div className="flex items-center gap-1 xl:gap-1.5 bg-white/80 backdrop-blur-xl border border-white/50 p-1 xl:p-1.5 rounded-full shadow-xl shadow-black/10 max-w-[calc(100%-2rem)] overflow-x-auto scrollbar-hide">
               {/* Climate Risks Button - FIRST on desktop */}
               <div className="relative">
                 <button
                   onClick={() => setIsMapOptionsOpen(!isMapOptionsOpen)}
-                  className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-full transition-all ${
+                  className={`flex items-center gap-1 xl:gap-1.5 px-2 py-1 xl:px-3 xl:py-1.5 text-[10px] xl:text-xs font-semibold rounded-full transition-all ${
                     isMapOptionsOpen || selectedClimateRisk !== 'none'
                       ? 'bg-blue-500 text-white'
                       : 'bg-white text-gray-700 hover:bg-gray-50 shadow-sm'
@@ -231,9 +231,10 @@ const MapFilterControls: React.FC<MapFilterControlsProps> = ({
                   aria-haspopup="menu"
                   aria-expanded={isMapOptionsOpen}
                 >
-                  <span>{t('search:map.climateRisks.title', 'Climate Risks')}</span>
+                  <span className="text-xs xl:text-sm">🌡️</span>
+                  <span className="hidden xl:inline">{t('search:map.climateRisks.title', 'Climate Risks')}</span>
                   <svg
-                    className={`w-3.5 h-3.5 transition-transform ${isMapOptionsOpen ? 'rotate-180' : ''}`}
+                    className={`w-3 h-3 xl:w-3.5 xl:h-3.5 transition-transform ${isMapOptionsOpen ? 'rotate-180' : ''}`}
                     fill="none"
                     viewBox="0 0 24 24"
                     stroke="currentColor"
@@ -265,7 +266,7 @@ const MapFilterControls: React.FC<MapFilterControlsProps> = ({
               {/* 3D Buildings Toggle */}
               <button
                 onClick={() => setShow3DBuildings(!show3DBuildings)}
-                className={`flex items-center gap-1 px-2.5 py-1.5 text-xs font-semibold rounded-full transition-all ${
+                className={`flex items-center gap-1 px-1.5 py-1 xl:px-2.5 xl:py-1.5 text-[10px] xl:text-xs font-semibold rounded-full transition-all ${
                   show3DBuildings
                     ? 'bg-slate-700 text-white'
                     : 'text-neutral-600 hover:bg-neutral-200'
@@ -273,14 +274,14 @@ const MapFilterControls: React.FC<MapFilterControlsProps> = ({
                 aria-label={t('search:map.buildings3D', '3D Buildings')}
                 aria-pressed={show3DBuildings}
               >
-                <span className="text-sm">🏢</span>
-                <span className="hidden sm:inline">{t('search:map.buildings3D', '3D')}</span>
+                <span className="text-xs xl:text-sm">🏢</span>
+                <span className="hidden xl:inline">{t('search:map.buildings3D', '3D')}</span>
               </button>
 
               {/* Landmarks Toggle */}
               <button
                 onClick={() => setShowLandmarks(!showLandmarks)}
-                className={`flex items-center gap-1 px-2.5 py-1.5 text-xs font-semibold rounded-full transition-all ${
+                className={`flex items-center gap-1 px-1.5 py-1 xl:px-2.5 xl:py-1.5 text-[10px] xl:text-xs font-semibold rounded-full transition-all ${
                   showLandmarks
                     ? 'bg-primary text-white'
                     : 'text-neutral-600 hover:bg-neutral-200'
@@ -288,15 +289,15 @@ const MapFilterControls: React.FC<MapFilterControlsProps> = ({
                 aria-label={t('search:map.landmarks', 'Landmarks')}
                 aria-pressed={showLandmarks}
               >
-                <span className="text-sm">🏛️</span>
-                <span className="hidden sm:inline">{t('search:map.poi', 'POI')}</span>
+                <span className="text-xs xl:text-sm">🏛️</span>
+                <span className="hidden xl:inline">{t('search:map.poi', 'POI')}</span>
               </button>
 
               {/* Cadastre Toggle - only in satellite/hybrid views */}
               {(mapType === 'satellite' || mapType === 'hybrid') && (
                 <button
                   onClick={() => setShowCadastre(!showCadastre)}
-                  className={`flex items-center gap-1 px-2.5 py-1.5 text-xs font-semibold rounded-full transition-all ${
+                  className={`flex items-center gap-1 px-1.5 py-1 xl:px-2.5 xl:py-1.5 text-[10px] xl:text-xs font-semibold rounded-full transition-all ${
                     showCadastre
                       ? 'bg-primary text-white'
                       : 'text-neutral-600 hover:bg-neutral-200'
@@ -304,15 +305,15 @@ const MapFilterControls: React.FC<MapFilterControlsProps> = ({
                   aria-label={t('search:map.cadastralParcels')}
                   aria-pressed={showCadastre}
                 >
-                  <span className="text-sm">📐</span>
-                  <span className="hidden sm:inline">{t('search:map.parcels', 'Parcels')}</span>
+                  <span className="text-xs xl:text-sm">📐</span>
+                  <span className="hidden xl:inline">{t('search:map.parcels', 'Parcels')}</span>
                 </button>
               )}
 
               {/* Measurement Tool Toggle */}
               <button
                 onClick={() => setShowMeasurement(!showMeasurement)}
-                className={`flex items-center gap-1 px-2.5 py-1.5 text-xs font-semibold rounded-full transition-all ${
+                className={`flex items-center gap-1 px-1.5 py-1 xl:px-2.5 xl:py-1.5 text-[10px] xl:text-xs font-semibold rounded-full transition-all ${
                   showMeasurement
                     ? 'bg-emerald-600 text-white'
                     : 'text-neutral-600 hover:bg-neutral-200'
@@ -320,14 +321,14 @@ const MapFilterControls: React.FC<MapFilterControlsProps> = ({
                 aria-label={t('search:map.measure', 'Measure land')}
                 aria-pressed={showMeasurement}
               >
-                <span className="text-sm">📏</span>
-                <span className="hidden sm:inline">{t('search:map.measure', 'Measure')}</span>
+                <span className="text-xs xl:text-sm">📏</span>
+                <span className="hidden xl:inline">{t('search:map.measure', 'Measure')}</span>
               </button>
 
               {/* Legend Toggle */}
               <button
                 onClick={() => setIsLegendOpen(!isLegendOpen)}
-                className={`flex items-center gap-1 px-2.5 py-2.5 text-xs font-semibold rounded-full transition-all ${
+                className={`flex items-center gap-1 px-1.5 py-1 xl:px-2.5 xl:py-1.5 text-[10px] xl:text-xs font-semibold rounded-full transition-all ${
                   isLegendOpen
                     ? 'bg-amber-500 text-white'
                     : 'text-neutral-600 hover:bg-neutral-200'
@@ -335,8 +336,8 @@ const MapFilterControls: React.FC<MapFilterControlsProps> = ({
                 aria-label={t('search:map.legend', 'Legend')}
                 aria-pressed={isLegendOpen}
               >
-                <MapLegendIcon className="w-4 h-4" />
-                <span className="hidden sm:inline">{t('search:map.legend', 'Legend')}</span>
+                <MapLegendIcon className="w-3.5 h-3.5 xl:w-4 xl:h-4" />
+                <span className="hidden xl:inline">{t('search:map.legend', 'Legend')}</span>
               </button>
             </div>
 
