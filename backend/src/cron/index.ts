@@ -162,7 +162,7 @@ export const startCronJobs = () => {
         autoRenewing: true,
         expirationDate: { $gte: sevenDaysStart, $lte: sevenDaysEnd },
         renewalReminderSent: { $ne: true }, // Don't send duplicate reminders
-      }).populate('userId');
+      }).populate('userId', 'name email');
 
       for (const sub of autoRenewingSubscriptions) {
         const user = sub.userId as any;
@@ -190,7 +190,7 @@ export const startCronJobs = () => {
         autoRenewing: false,
         expirationDate: { $gte: today, $lte: threeDaysFromNow },
         expiryReminderSent: { $ne: true }, // Don't send duplicate reminders
-      }).populate('userId');
+      }).populate('userId', 'name email');
 
       for (const sub of expiringSubscriptions) {
         const user = sub.userId as any;

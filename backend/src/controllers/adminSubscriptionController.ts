@@ -196,7 +196,7 @@ export const getPaymentById = async (req: Request, res: Response): Promise<void>
 
     const payment = await PaymentRecord.findById(id)
       .populate('userId', 'email name phone role')
-      .populate('subscriptionId')
+      .populate('subscriptionId', 'plan status startDate endDate')
       .lean();
 
     if (!payment) {

@@ -411,7 +411,7 @@ const AgentProfileTabs: React.FC<AgentProfileTabsProps> = ({
                                                 <Popup>
                                                     <div className="min-w-[200px]">
                                                         {property.imageUrl && (
-                                                            <img src={property.imageUrl} alt={property.address} className="w-full h-32 object-cover rounded-lg mb-2" loading="lazy" />
+                                                            <img src={property.imageUrl} alt={property.address} className="w-full h-32 object-cover rounded-lg mb-2" loading="lazy" decoding="async" />
                                                         )}
                                                         <p className="font-bold text-sm mb-1">{property.address}</p>
                                                         <p className="text-xs text-gray-600 mb-2">{property.city}, {property.country}</p>
@@ -485,7 +485,7 @@ const AgentProfileTabs: React.FC<AgentProfileTabsProps> = ({
                                                 <div className="text-center min-w-[200px]">
                                                     {agent.avatarUrl && (
                                                         <div className="w-16 h-16 rounded-full mx-auto mb-3 overflow-hidden border-2 border-gray-300 flex-shrink-0">
-                                                            <img src={agent.avatarUrl} alt={agent.name} className="w-full h-full object-cover" referrerPolicy="no-referrer" loading="lazy" />
+                                                            <img src={agent.avatarUrl} alt={agent.name} className="w-full h-full object-cover" referrerPolicy="no-referrer" loading="lazy" decoding="async" />
                                                         </div>
                                                     )}
                                                     <p className="font-bold text-base mb-1">{agent.name}</p>
@@ -518,7 +518,7 @@ const AgentProfileTabs: React.FC<AgentProfileTabsProps> = ({
                                         <div className="w-full text-white text-center pointer-events-auto" onClick={(e) => e.stopPropagation()}>
                                             {agent.avatarUrl && (
                                                 <div className="w-20 h-20 rounded-full mx-auto mb-3 overflow-hidden border-4 border-indigo-300 flex-shrink-0">
-                                                    <img src={agent.avatarUrl} alt={agent.name} className="w-full h-full object-cover" referrerPolicy="no-referrer" loading="lazy" />
+                                                    <img src={agent.avatarUrl} alt={agent.name} className="w-full h-full object-cover" referrerPolicy="no-referrer" loading="lazy" decoding="async" />
                                                 </div>
                                             )}
                                             <p className="font-bold text-lg">{agent.name}</p>
@@ -735,6 +735,8 @@ const AgentProfileTabs: React.FC<AgentProfileTabsProps> = ({
                                                     <img
                                                         src={t.userId.avatarUrl}
                                                         alt={t.userId.name || t.clientName}
+                                                        loading="lazy"
+                                                        decoding="async"
                                                         className="w-12 h-12 rounded-full"
                                                     />
                                                 ) : (

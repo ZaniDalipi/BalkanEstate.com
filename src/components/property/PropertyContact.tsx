@@ -228,6 +228,8 @@ export const PropertyContact: React.FC<PropertyContactProps> = ({
               <img
                 src={property.seller.avatarUrl}
                 alt={property.seller.name}
+                loading="lazy"
+                decoding="async"
                 className="w-12 h-12 rounded-full object-cover ring-2 ring-neutral-100 group-hover:ring-blue-200 transition-all"
               />
             ) : (
@@ -255,6 +257,8 @@ export const PropertyContact: React.FC<PropertyContactProps> = ({
               <img
                 src={property.seller.avatarUrl}
                 alt={property.seller.name}
+                loading="lazy"
+                decoding="async"
                 className="w-12 h-12 rounded-full object-cover ring-2 ring-neutral-100"
               />
             ) : (

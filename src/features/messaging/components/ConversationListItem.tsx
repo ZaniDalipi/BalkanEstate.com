@@ -58,6 +58,8 @@ const ConversationListItem: React.FC<ConversationListItemProps> = ({ conversatio
                     <img
                         src={property.imageUrl}
                         alt={property.address}
+                        loading="lazy"
+                        decoding="async"
                         className="w-16 h-16 object-cover rounded-md"
                         onError={() => setImageError(true)}
                     />

@@ -44,6 +44,8 @@ export const PropertyViewModal: React.FC<PropertyViewModalProps> = ({
                   key={idx}
                   src={imgUrl}
                   alt={`${property.title} ${idx + 1}`}
+                  loading="lazy"
+                  decoding="async"
                   className="w-full h-32 object-cover rounded-xl"
                 />
               ))}

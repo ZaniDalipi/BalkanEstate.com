@@ -262,6 +262,8 @@ const Onboarding: React.FC = () => {
                       <img
                         src={agency.logo}
                         alt={agency.name}
+                        loading="lazy"
+                        decoding="async"
                         className="w-10 h-10 rounded-lg object-cover"
                       />
                     ) : (

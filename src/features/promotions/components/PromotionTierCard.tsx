@@ -192,4 +192,4 @@ const PromotionTierCard: React.FC<PromotionTierCardProps> = ({
   );
 };
 
-export default PromotionTierCard;
+export default React.memo(PromotionTierCard);

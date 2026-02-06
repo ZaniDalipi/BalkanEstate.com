@@ -134,7 +134,7 @@ export const processAutoExtends = async (): Promise<void> => {
       autoExtendStatus: { $in: ['none', 'failed'] },
       autoExtendAttempts: { $lt: 3 },
       endDate: { $gt: now, $lte: in24Hours },
-    }).populate('propertyId');
+    }).populate('propertyId', 'title images price city country address propertyType status sellerId');
 
     if (promotionsToAutoExtend.length === 0) {
       cronLogger.info('[AutoExtendWorker] No promotions need auto-extend');

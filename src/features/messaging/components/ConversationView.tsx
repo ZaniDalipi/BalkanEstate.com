@@ -28,6 +28,8 @@ const MessageImage: React.FC<{imageUrl: string; t: (key: string) => string}> = (
         <img
             src={imageUrl}
             alt="Annotated property"
+            loading="lazy"
+            decoding="async"
             className="max-w-full max-h-48 sm:max-h-64 h-auto rounded-lg cursor-pointer hover:opacity-90 transition-opacity"
             onError={() => setError(true)}
             onClick={() => window.open(imageUrl, '_blank')}
@@ -227,6 +229,8 @@ const ConversationView: React.FC<ConversationViewProps> = ({ conversation, onBac
                     <img
                         src={property.imageUrl}
                         alt={property.address}
+                        loading="lazy"
+                        decoding="async"
                         className="w-10 h-10 sm:w-12 sm:h-12 object-cover rounded-lg flex-shrink-0"
                         onError={() => setImageError(true)}
                     />
@@ -317,7 +321,7 @@ const ConversationView: React.FC<ConversationViewProps> = ({ conversation, onBac
                                     {!isCurrentUserMessage && otherPerson && (
                                         <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-full overflow-hidden flex-shrink-0 bg-neutral-100">
                                             {otherPerson.avatarUrl ? (
-                                                <img src={otherPerson.avatarUrl} alt={otherPerson.name} className="w-full h-full object-cover" referrerPolicy="no-referrer" />
+                                                <img src={otherPerson.avatarUrl} alt={otherPerson.name} loading="lazy" decoding="async" className="w-full h-full object-cover" referrerPolicy="no-referrer" />
                                             ) : (
                                                 <UserCircleIcon className="w-full h-full text-neutral-400" />
                                             )}
@@ -346,6 +350,8 @@ const ConversationView: React.FC<ConversationViewProps> = ({ conversation, onBac
                                         <img
                                             src={conversation.seller?.avatarUrl || property?.seller?.avatarUrl}
                                             alt="Seller"
+                                            loading="lazy"
+                                            decoding="async"
                                             className="w-full h-full object-cover"
                                         />
                                     ) : (

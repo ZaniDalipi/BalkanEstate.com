@@ -50,6 +50,8 @@ const AgencyManagerDetail: React.FC<AgencyManagerDetailProps> = ({
                   <img
                     src={viewingAgency.logo}
                     alt={viewingAgency.name}
+                    loading="lazy"
+                    decoding="async"
                     className="w-24 h-24 rounded-lg object-cover"
                   />
                 ) : (

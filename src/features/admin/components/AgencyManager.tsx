@@ -86,6 +86,8 @@ const AgencyManager: React.FC = () => {
                       <img
                         src={agency.logo}
                         alt={agency.name}
+                        loading="lazy"
+                        decoding="async"
                         className="w-12 h-12 rounded object-cover mr-3"
                       />
                     ) : (

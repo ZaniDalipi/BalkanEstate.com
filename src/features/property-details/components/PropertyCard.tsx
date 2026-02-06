@@ -216,6 +216,8 @@ const PropertyCard: React.FC<PropertyCardProps> = ({ property, showToast, showCo
               src={property.imageUrl}
               alt=""
               aria-hidden="true"
+              loading="lazy"
+              decoding="async"
               className="absolute inset-0 w-full h-full object-cover blur-xl scale-110 opacity-60"
             />
             {/* Main image - contained to show full image */}

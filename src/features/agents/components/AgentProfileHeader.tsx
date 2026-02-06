@@ -309,6 +309,8 @@ const AgentProfileHeader: React.FC<AgentProfileHeaderProps> = ({
                                                         <img
                                                             src={agencyData.logo}
                                                             alt={agencyData.name}
+                                                            loading="lazy"
+                                                            decoding="async"
                                                             className="w-8 h-8 sm:w-12 sm:h-12 object-cover rounded-md sm:rounded-lg"
                                                         />
                                                     ) : (

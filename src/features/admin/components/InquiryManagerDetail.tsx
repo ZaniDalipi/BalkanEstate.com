@@ -94,7 +94,7 @@ const InquiryManagerDetail: React.FC<InquiryDetailProps> = ({
             <h4 className="font-semibold text-gray-700 mb-3">Recipient (Agent/Seller)</h4>
             <div className="flex items-center gap-3">
               {inquiry.recipientId?.avatarUrl ? (
-                <img src={inquiry.recipientId.avatarUrl} alt="" className="w-12 h-12 rounded-full" referrerPolicy="no-referrer" />
+                <img src={inquiry.recipientId.avatarUrl} alt="" loading="lazy" decoding="async" className="w-12 h-12 rounded-full" referrerPolicy="no-referrer" />
               ) : (
                 <div className="w-12 h-12 rounded-full bg-blue-600 text-white flex items-center justify-center text-lg font-bold">
                   {inquiry.recipientName.charAt(0).toUpperCase()}
@@ -119,6 +119,8 @@ const InquiryManagerDetail: React.FC<InquiryDetailProps> = ({
                   <img
                     src={inquiry.propertyId.images[0]}
                     alt=""
+                    loading="lazy"
+                    decoding="async"
                     className="w-20 h-20 object-cover rounded-lg"
                   />
                 )}

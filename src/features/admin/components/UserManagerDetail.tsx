@@ -55,7 +55,7 @@ const UserManagerDetail: React.FC<UserManagerDetailProps> = ({
               {/* User Header */}
               <div className="flex items-center gap-4">
                 {viewingUser.avatarUrl ? (
-                  <img src={viewingUser.avatarUrl} alt={viewingUser.name} className="w-20 h-20 rounded-full" referrerPolicy="no-referrer" />
+                  <img src={viewingUser.avatarUrl} alt={viewingUser.name} loading="lazy" decoding="async" className="w-20 h-20 rounded-full" referrerPolicy="no-referrer" />
                 ) : (
                   <div className="w-20 h-20 rounded-full bg-blue-600 text-white flex items-center justify-center text-2xl font-bold">
                     {viewingUser.name.charAt(0).toUpperCase()}

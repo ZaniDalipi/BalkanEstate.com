@@ -27,7 +27,7 @@ export const getConversations = async (
     const conversations = await Conversation.find({
       $or: [{ buyerId: String((req.user as IUser)._id) }, { sellerId: String((req.user as IUser)._id) }],
     })
-      .populate('propertyId')
+      .populate('propertyId', 'title images price city country address propertyType sellerId')
       .populate('buyerId', 'name email phone avatarUrl')
       .populate('sellerId', 'name email phone avatarUrl role agencyName')
       .sort({ lastMessageAt: -1 });
@@ -67,7 +67,7 @@ export const getConversation = async (
     }
 
     const conversation = await Conversation.findById(req.params.id)
-      .populate('propertyId')
+      .populate('propertyId', 'title images price city country address propertyType sellerId')
       .populate('buyerId', 'name email phone avatarUrl')
       .populate('sellerId', 'name email phone avatarUrl role agencyName');
 
@@ -164,7 +164,7 @@ export const createConversation = async (
       buyerId: String((req.user as IUser)._id),
       sellerId: property.sellerId,
     })
-      .populate('propertyId')
+      .populate('propertyId', 'title images price city country address propertyType sellerId')
       .populate('buyerId', 'name email phone avatarUrl')
       .populate('sellerId', 'name email phone avatarUrl role agencyName');
 
@@ -183,7 +183,7 @@ export const createConversation = async (
       // Update seller's inquiry stats in real-time
       await incrementInquiryCount(String(property.sellerId));
 
-      await conversation.populate('propertyId');
+      await conversation.populate('propertyId', 'title images price city country address propertyType sellerId');
       await conversation.populate('buyerId', 'name email phone avatarUrl');
       await conversation.populate(
         'sellerId',
@@ -270,7 +270,7 @@ export const sendMessage = async (
     // Send email notification to recipient
     try {
       // Populate conversation with property and user details
-      await conversation.populate('propertyId');
+      await conversation.populate('propertyId', 'title images price city country address propertyType sellerId');
       await conversation.populate('buyerId', 'name email');
       await conversation.populate('sellerId', 'name email');
 

@@ -230,7 +230,7 @@ const InquiryManager: React.FC = () => {
                   <td className="px-4 py-4">
                     <div className="flex items-center">
                       {inquiry.recipientId?.avatarUrl ? (
-                        <img src={inquiry.recipientId.avatarUrl} alt="" className="w-8 h-8 rounded-full mr-2" referrerPolicy="no-referrer" />
+                        <img src={inquiry.recipientId.avatarUrl} alt="" loading="lazy" decoding="async" className="w-8 h-8 rounded-full mr-2" referrerPolicy="no-referrer" />
                       ) : (
                         <div className="w-8 h-8 rounded-full bg-blue-600 text-white flex items-center justify-center mr-2 text-sm">
                           {inquiry.recipientName.charAt(0).toUpperCase()}

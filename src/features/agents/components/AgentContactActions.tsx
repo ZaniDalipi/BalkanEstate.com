@@ -178,6 +178,8 @@ const AgentContactActions: React.FC<AgentContactActionsProps> = ({
                                     <img
                                         src={similarAgent.avatarUrl}
                                         alt={similarAgent.name}
+                                        loading="lazy"
+                                        decoding="async"
                                         className="w-12 h-12 rounded-full object-cover border-2 border-white shadow-sm"
                                     />
                                 ) : (

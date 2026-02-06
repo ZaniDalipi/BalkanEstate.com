@@ -54,6 +54,7 @@ const AgentAvatar: React.FC<{ agent: Agent }> = ({ agent }) => {
         onError={() => setError(true)}
         onLoad={() => setLoaded(true)}
         loading="lazy"
+        decoding="async"
         draggable={false}
       />
     </>
@@ -190,6 +191,8 @@ const AgentCard: React.FC<AgentCardProps> = ({ agent, index = 0 }) => {
                 <img
                   src={agent.agencyLogo}
                   alt={agent.agencyName}
+                  loading="lazy"
+                  decoding="async"
                   className="w-full h-full object-cover"
                 />
               </div>
@@ -428,4 +431,4 @@ const AgentCard: React.FC<AgentCardProps> = ({ agent, index = 0 }) => {
   );
 };
 
-export default AgentCard;
+export default React.memo(AgentCard);

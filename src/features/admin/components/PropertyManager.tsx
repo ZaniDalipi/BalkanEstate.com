@@ -230,6 +230,8 @@ const PropertyManager: React.FC = () => {
                         <img
                           src={getPropertyImage(property)!}
                           alt={property.title}
+                          loading="lazy"
+                          decoding="async"
                           className="w-14 h-14 rounded-lg object-cover flex-shrink-0"
                         />
                       ) : (
