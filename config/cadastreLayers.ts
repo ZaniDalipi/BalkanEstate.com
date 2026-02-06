@@ -155,6 +155,7 @@ export const CADASTRE_LAYERS: Record<string, CadastreLayerConfig> = {
     countryCode: 'HR',
     enabled: true,
     wmsUrl: 'https://api.uredjenazemlja.hr/services/inspire/cp_wms/wms',
+    wfsUrl: 'https://api.uredjenazemlja.hr/services/inspire/cp_wfs/wfs',
     layers: 'CP.CadastralParcel',
     format: 'image/png',
     version: '1.3.0',
@@ -166,7 +167,7 @@ export const CADASTRE_LAYERS: Record<string, CadastreLayerConfig> = {
       CRS: 'EPSG:3857',
       STYLES: ''
     },
-    notes: '✅ WORKING: INSPIRE WMS with labels. Portal: oss.uredjenazemlja.hr'
+    notes: '✅ WORKING: INSPIRE WMS/WFS with labels. Portal: oss.uredjenazemlja.hr'
   },
 
   RS: {

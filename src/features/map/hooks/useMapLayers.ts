@@ -71,7 +71,7 @@ export const useMapLayers = ({ map, isLoaded }: UseMapLayersProps) => {
     };
 
     const TILE_SIZE = 256;
-    const REQUEST_SIZE = 1024;
+    const REQUEST_SIZE = 256;
 
     const getCrs = () => cadastreConfig.additionalParams?.CRS || 'EPSG:4326';
 
@@ -185,7 +185,10 @@ export const useMapLayers = ({ map, isLoaded }: UseMapLayersProps) => {
       infoWindow.open(map);
 
       try {
-        const response = await fetch(`${cadastreConfig.wmsUrl}?${params.toString()}`);
+        // Use backend proxy to avoid CORS issues with government WMS servers
+        const wmsUrl = `${cadastreConfig.wmsUrl}?${params.toString()}`;
+        const proxyUrl = `/api/cadastre/feature-info?url=${encodeURIComponent(wmsUrl)}`;
+        const response = await fetch(proxyUrl);
         if (!response.ok) throw new Error(`HTTP ${response.status}`);
 
         const contentType = response.headers.get('content-type') || '';

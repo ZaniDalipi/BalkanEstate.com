@@ -1040,9 +1040,10 @@ export function useGoogleMap(props: GoogleMapComponentProps) {
       return { x, y };
     };
 
-    // Larger request size = bigger parcel numbers and labels on the tiles
+    // Lower REQUEST_SIZE relative to TILE_SIZE = bigger parcel numbers on screen
+    // Server renders 256px image which displays at 256px = native size labels
     const TILE_SIZE = 256;
-    const REQUEST_SIZE = 1024;
+    const REQUEST_SIZE = 256;
 
     const getCrs = () => cadastreConfig.additionalParams?.CRS || 'EPSG:4326';
 
@@ -1165,7 +1166,10 @@ export function useGoogleMap(props: GoogleMapComponentProps) {
       infoWindow.open(map);
 
       try {
-        const response = await fetch(`${cadastreConfig.wmsUrl}?${params.toString()}`);
+        // Use backend proxy to avoid CORS issues with government WMS servers
+        const wmsUrl = `${cadastreConfig.wmsUrl}?${params.toString()}`;
+        const proxyUrl = `/api/cadastre/feature-info?url=${encodeURIComponent(wmsUrl)}`;
+        const response = await fetch(proxyUrl);
         if (!response.ok) throw new Error(`HTTP ${response.status}`);
 
         const contentType = response.headers.get('content-type') || '';
@@ -1175,12 +1179,11 @@ export function useGoogleMap(props: GoogleMapComponentProps) {
           const data = await response.json();
           features = data.features || [];
         } else {
-          // Some WMS servers return GML/XML - try to parse text
           const text = await response.text();
-          if (text.includes('numberReturned="0"') || text.includes('<wfs:member>') === false && text.includes('gml:featureMember') === false) {
+          if (text.includes('numberReturned="0"')) {
             features = [];
           } else {
-            // Attempt basic extraction from GML
+            // Attempt basic extraction from GML/XML responses
             const idMatch = text.match(/(?:nationalCadastralReference|inspireId|gml:id|PARCEL_ID|fid)(?:>|=")([^<"]+)/);
             const areaMatch = text.match(/(?:areaValue|area|AREA|surface)>([^<]+)/);
             const labelMatch = text.match(/(?:label|LABEL|name|NAME)>([^<]+)/);
