@@ -21,6 +21,7 @@ import {
   emitPropertyDeleted,
 } from '../sockets/propertySocket';
 import { propertyLogger } from '../utils/logger';
+import { invalidateCache } from '../middleware/cache';
 
 /**
  * ═══════════════════════════════════════════════════════════════════════════
@@ -615,6 +616,9 @@ export const createProperty = async (
     // Emit real-time event for instant updates across all connected clients
     emitPropertyCreated(property.toObject());
 
+    // Invalidate properties cache so new listing appears immediately in search
+    invalidateCache('/api/properties');
+
     // Return updated subscription info so frontend can update UI immediately
     res.status(201).json({
       property,
@@ -764,6 +768,9 @@ export const updateProperty = async (
 
     // Emit real-time event for instant updates across all connected clients
     emitPropertyUpdated(String(property._id), property.toObject());
+
+    // Invalidate properties cache so changes appear immediately in search
+    invalidateCache('/api/properties');
 
     res.json({ property });
   } catch (error: any) {
@@ -919,6 +926,9 @@ export const deleteProperty = async (
 
     // Emit real-time event for instant updates across all connected clients
     emitPropertyDeleted(deletedPropertyId);
+
+    // Invalidate properties cache so deletion is reflected immediately in search
+    invalidateCache('/api/properties');
 
     // Get updated subscription info to return to frontend
     const updatedUser = await User.findById(String(currentUser._id));
@@ -1120,6 +1130,9 @@ export const markAsSold = async (
       propertyLogger.info(`📊 Sales history record created for property ${property._id}`);
     }
 
+    // Invalidate properties cache so sold status appears immediately in search
+    invalidateCache('/api/properties');
+
     res.json({ property });
   } catch (error: any) {
     propertyLogger.error('Mark as sold error:', error);
@@ -1185,6 +1198,9 @@ export const renewProperty = async (
     property.lastRenewed = now;
     await property.save();
     propertyLogger.info('✅ Property renewed successfully:', property._id, 'lastRenewed:', now.toISOString());
+
+    // Invalidate properties cache so renewed position is reflected immediately
+    invalidateCache('/api/properties');
 
     // Calculate when they can renew next
     const canRenewAt = new Date(now.getTime() + cooldownMs);
