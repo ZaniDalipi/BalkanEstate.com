@@ -1,7 +1,6 @@
 import { Request, Response } from 'express';
 import User from '../models/User';
 import Product from '../models/Product';
-import Subscription from '../models/Subscription';
 import DiscountCode from '../models/DiscountCode';
 import { processSubscriptionPayment } from '../services/subscriptionPaymentService';
 import { paymentProviderFactory } from '../services/paymentProviderFactory';
