@@ -7,9 +7,7 @@ import { Request, Response } from 'express';
 import Promotion from '../../models/Promotion';
 import User, { IUser } from '../../models/User';
 import Agency from '../../models/Agency';
-import PromotionCoupon from '../../models/PromotionCoupon';
 import {
-  PROMOTION_TIERS,
   URGENT_MODIFIER,
   getPromotionPrice,
   getAgencyAllocation,
@@ -21,7 +19,6 @@ import {
   applyCoupon,
   updatePropertyPromotion,
   calculateNextRefreshDate,
-  getBaseUrl,
 } from '../../services/promotion/promotionService';
 import { promotionLogger } from '../../utils/logger';
 
