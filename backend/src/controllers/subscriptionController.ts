@@ -4,7 +4,7 @@ import SubscriptionEvent from '../models/SubscriptionEvent';
 import PaymentRecord from '../models/PaymentRecord';
 import Product from '../models/Product';
 import User from '../models/User';
-import PromotionCoupon from '../models/PromotionCoupon';
+import DiscountCode from '../models/DiscountCode';
 import { getGooglePlayService } from '../services/googlePlayService';
 import { getAppStoreService } from '../services/appStoreService';
 import { subscriptionLogger } from '../utils/logger';
@@ -833,46 +833,31 @@ export const activateCouponSubscription = async (req: Request, res: Response): P
       return;
     }
 
-    // Find and validate coupon
-    const coupon = await PromotionCoupon.findOne({
+    // Find and validate discount code
+    const discountCode = await DiscountCode.findOne({
       code: couponCode.toUpperCase(),
-      status: 'active',
     });
 
-    if (!coupon) {
-      res.status(404).json({ message: 'Coupon not found or expired' });
+    if (!discountCode) {
+      res.status(404).json({ message: 'Invalid discount code' });
       return;
     }
 
-    if (!coupon.isValid()) {
-      res.status(400).json({ message: 'Coupon is no longer valid' });
+    // Validate the discount code (checks active, date range, usage limits, per-user, plan)
+    const validation = discountCode.isValid(String(userId), productId, product.price);
+    if (!validation.valid) {
+      res.status(400).json({ message: validation.reason });
       return;
-    }
-
-    const canUse = await coupon.canBeUsedBy(userId);
-    if (!canUse) {
-      res.status(400).json({ message: 'You have already used this coupon' });
-      return;
-    }
-
-    // Check applicable tiers if specified
-    if (coupon.applicableTiers && coupon.applicableTiers.length > 0) {
-      const productTier = productId.includes('enterprise') ? 'premium' :
-                          productId.includes('yearly') ? 'highlight' : 'featured';
-      if (!coupon.applicableTiers.includes(productTier as any)) {
-        res.status(400).json({ message: 'Coupon is not applicable to this plan' });
-        return;
-      }
     }
 
     // Calculate discount
-    const discount = coupon.calculateDiscount(product.price);
+    const discount = discountCode.calculateDiscount(product.price);
     const finalPrice = Math.max(0, product.price - discount);
 
-    // Only allow activation if the coupon covers 100% (free activation via coupon)
+    // Only allow activation if the discount code covers 100% (free activation)
     if (finalPrice > 0) {
       res.status(400).json({
-        message: 'This coupon does not fully cover the plan cost. Please contact sales@balkanestateai.com for a valid activation coupon.',
+        message: 'This discount code does not fully cover the plan cost. Please contact sales@balkanestateai.com for a valid activation code.',
         discount,
         finalPrice,
         originalPrice: product.price,
@@ -901,7 +886,7 @@ export const activateCouponSubscription = async (req: Request, res: Response): P
       userId,
       store: 'agency_coupon',
       productId: product.productId,
-      purchaseToken: `coupon_${coupon.code}_${userId}_${Date.now()}`,
+      purchaseToken: `discount_${discountCode.code}_${userId}_${Date.now()}`,
       startDate,
       expirationDate,
       renewalDate: expirationDate,
@@ -917,7 +902,7 @@ export const activateCouponSubscription = async (req: Request, res: Response): P
       userId,
       eventType: 'subscription_purchased',
       store: 'agency_coupon',
-      metadata: { productId, couponCode: coupon.code, originalPrice: product.price, discount },
+      metadata: { productId, discountCode: discountCode.code, originalPrice: product.price, discount },
     });
 
     // Create payment record
@@ -925,7 +910,7 @@ export const activateCouponSubscription = async (req: Request, res: Response): P
       userId,
       subscriptionId: subscription._id,
       store: 'agency_coupon',
-      storeTransactionId: `coupon_${coupon.code}_${Date.now()}`,
+      storeTransactionId: `discount_${discountCode.code}_${Date.now()}`,
       transactionType: 'charge',
       transactionDate: startDate,
       amount: 0,
@@ -934,8 +919,8 @@ export const activateCouponSubscription = async (req: Request, res: Response): P
       productId: product.productId,
     });
 
-    // Record coupon usage
-    await coupon.recordUsage(userId, subscription._id as any, discount);
+    // Mark discount code as used
+    await discountCode.markAsUsed(String(userId));
 
     // Update user subscription status
     user.isSubscribed = true;
@@ -968,9 +953,9 @@ export const activateCouponSubscription = async (req: Request, res: Response): P
 
     await user.save();
 
-    subscriptionLogger.info(`✅ Coupon subscription activated for user ${user.email}`);
+    subscriptionLogger.info(`✅ Discount code subscription activated for user ${user.email}`);
     subscriptionLogger.info(`   Product: ${product.productId}`);
-    subscriptionLogger.info(`   Coupon: ${coupon.code}`);
+    subscriptionLogger.info(`   Discount Code: ${discountCode.code}`);
     subscriptionLogger.info(`   Expires: ${expirationDate.toISOString()}`);
 
     res.status(201).json({

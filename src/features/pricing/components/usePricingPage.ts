@@ -231,7 +231,7 @@ export function usePricingPage() {
         });
       }, 2000);
     } catch (err: any) {
-      setCouponError(err.message || t('pricing:couponModal.errorGeneric', 'Failed to activate coupon. Please try again.'));
+      setCouponError(err.message || t('pricing:couponModal.errorGeneric', 'Failed to activate discount code. Please try again.'));
     } finally {
       setCouponLoading(false);
     }

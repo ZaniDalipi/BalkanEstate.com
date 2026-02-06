@@ -582,7 +582,7 @@ const PricingPage: React.FC = () => {
                       <div>
                         <p className="text-sm font-semibold text-amber-900">{t('pricing:couponModal.noOnlinePayment', 'Online payments are not available yet')}</p>
                         <p className="text-xs text-amber-700 mt-1">
-                          {t('pricing:couponModal.contactUs', 'Please contact our sales team to get a coupon code for activating your plan.')}
+                          {t('pricing:couponModal.contactUs', 'Please contact our sales team to get a discount code for activating your plan.')}
                         </p>
                       </div>
                     </div>
@@ -593,7 +593,7 @@ const PricingPage: React.FC = () => {
                     <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">{t('pricing:couponModal.contactSales', 'Contact Sales')}</p>
                     <div className="space-y-2">
                       <a
-                        href={`mailto:${salesEmail}?subject=Coupon%20Request%20-%20${encodeURIComponent(selectedCouponPlan.name)}`}
+                        href={`mailto:${salesEmail}?subject=Discount%20Code%20Request%20-%20${encodeURIComponent(selectedCouponPlan.name)}`}
                         className="flex items-center gap-3 text-sm text-gray-700 hover:text-primary transition-colors"
                       >
                         <div className="w-8 h-8 rounded-lg bg-blue-100 flex items-center justify-center">
@@ -620,7 +620,7 @@ const PricingPage: React.FC = () => {
                   {/* Coupon Input */}
                   <div>
                     <label className="block text-sm font-semibold text-gray-700 mb-2">
-                      {t('pricing:couponModal.couponLabel', 'Enter Coupon Code')}
+                      {t('pricing:couponModal.couponLabel', 'Enter Discount Code')}
                     </label>
                     <div className="flex gap-2">
                       <input
