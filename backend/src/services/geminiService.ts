@@ -291,6 +291,10 @@ export const generateDescriptionFromImages = async (
     })
   );
 
+  if (!result.text) {
+    throw new Error("No text returned from Gemini API");
+  }
+
   try {
     const jsonText = result.text.trim();
     const sanitizedJsonText = jsonText.replace(/^```json\n/, '').replace(/\n```$/, '');
@@ -368,6 +372,10 @@ If a location type doesn't apply (e.g., sea for landlocked cities), use 999 to i
       },
     })
   );
+
+  if (!result.text) {
+    throw new Error("No text returned from Gemini API");
+  }
 
   try {
     const jsonText = result.text.trim();
@@ -534,6 +542,10 @@ export const getAiChatResponse = async (
     })
   );
 
+  if (!result.text) {
+    throw new Error("No text returned from Gemini API");
+  }
+
   try {
     const jsonText = result.text.trim();
     const parsedResult = JSON.parse(jsonText);
@@ -607,6 +619,10 @@ export const generateSearchName = async (filters: Record<string, any>): Promise<
     })
   );
 
+  if (!result.text) {
+    throw new Error("No text returned from Gemini API");
+  }
+
   return result.text.trim();
 };
 
@@ -638,6 +654,10 @@ export const generateSearchNameFromCoords = async (
       contents: prompt,
     })
   );
+
+  if (!result.text) {
+    throw new Error("No text returned from Gemini API");
+  }
 
   return result.text.trim();
 };
