@@ -363,6 +363,15 @@ html[data-zoom] #root {
   transform: scale(0.98);
 }
 
+/* Hide scrollbar while keeping scroll functionality */
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
 /* Custom Media Query Variants for landscape modes */
 @custom-variant landscape (@media (orientation: landscape) and (max-height: 500px));
 @custom-variant tablet-landscape (@media (orientation: landscape) and (min-width: 768px) and (max-width: 1024px));

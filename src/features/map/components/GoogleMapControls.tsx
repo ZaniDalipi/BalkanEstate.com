@@ -190,7 +190,7 @@ const GoogleMapControls: React.FC<GoogleMapControlsProps> = ({
           </div>
 
           {/* Layer toggles */}
-          <div className="flex items-center gap-1.5 bg-white/80 backdrop-blur-xl border border-white/50 p-1.5 rounded-full shadow-xl shadow-black/10">
+          <div className="flex items-center gap-1.5 bg-white/80 backdrop-blur-xl border border-white/50 p-1.5 rounded-full shadow-xl shadow-black/10 max-w-[calc(100%-2rem)] overflow-x-auto scrollbar-hide">
             {/* Climate Risks Dropdown */}
             <div className="relative">
               <button

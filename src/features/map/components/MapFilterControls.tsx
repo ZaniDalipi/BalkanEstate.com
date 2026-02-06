@@ -217,7 +217,7 @@ const MapFilterControls: React.FC<MapFilterControlsProps> = ({
             </div>
 
             {/* Layer toggles - compact row with glass effect */}
-            <div className="flex items-center gap-1.5 bg-white/80 backdrop-blur-xl border border-white/50 p-1.5 rounded-full shadow-xl shadow-black/10">
+            <div className="flex items-center gap-1.5 bg-white/80 backdrop-blur-xl border border-white/50 p-1.5 rounded-full shadow-xl shadow-black/10 max-w-[calc(100%-2rem)] overflow-x-auto scrollbar-hide">
               {/* Climate Risks Button - FIRST on desktop */}
               <div className="relative">
                 <button

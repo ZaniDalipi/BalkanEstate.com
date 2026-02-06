@@ -90,20 +90,21 @@ const Header: React.FC<HeaderProps> = ({ onToggleSidebar, isFloating }) => {
 
     return (
       <header className={headerPositionClass}>
-        <nav className="flex items-center space-x-2 sm:space-x-3 bg-white/90 backdrop-blur-md p-1.5 rounded-full shadow-lg border border-neutral-200/50">
+        <nav className="flex items-center space-x-1.5 md:space-x-2 lg:space-x-3 bg-white/90 backdrop-blur-md p-1 md:p-1.5 rounded-full shadow-lg border border-neutral-200/50">
           <button
             onClick={handleSubscribeClick}
-            className="bg-primary text-white px-3 py-1.5 sm:px-4 sm:py-2 rounded-full text-sm font-semibold hover:bg-primary-dark transition-all shadow-sm hover:shadow-md whitespace-nowrap"
+            className="bg-primary text-white px-2.5 py-1.5 md:px-3 lg:px-4 lg:py-2 rounded-full text-xs md:text-sm font-semibold hover:bg-primary-dark transition-all shadow-sm hover:shadow-md whitespace-nowrap"
             aria-label={t('nav:subscribe')}
           >
               {t('nav:subscribe')}
           </button>
           <button
             onClick={handleNewListingClick}
-            className="bg-secondary text-white px-3 py-1.5 sm:px-4 sm:py-2 rounded-full text-sm font-semibold hover:bg-opacity-90 transition-all shadow-sm hover:shadow-md whitespace-nowrap"
+            className="bg-secondary text-white px-2.5 py-1.5 md:px-3 lg:px-4 lg:py-2 rounded-full text-xs md:text-sm font-semibold hover:bg-opacity-90 transition-all shadow-sm hover:shadow-md whitespace-nowrap"
             aria-label={t('nav:newListing')}
           >
-              + {t('nav:newListing')}
+              <span className="md:hidden lg:inline">+ {t('nav:newListing')}</span>
+              <span className="hidden md:inline lg:hidden">+ New</span>
           </button>
           <AuthButton floating />
           {isAuthenticated && (
@@ -129,20 +130,21 @@ const Header: React.FC<HeaderProps> = ({ onToggleSidebar, isFloating }) => {
              </div>
           </div>
 
-          <nav className="flex justify-end items-center space-x-2 sm:space-x-3">
+          <nav className="flex justify-end items-center space-x-1.5 md:space-x-2 lg:space-x-3">
             <button
               onClick={handleSubscribeClick}
-              className="bg-primary text-white px-3 py-1.5 sm:px-4 sm:py-2 rounded-full text-sm font-semibold hover:bg-primary-dark transition-all shadow-sm hover:shadow-md whitespace-nowrap"
+              className="bg-primary text-white px-2.5 py-1.5 md:px-3 lg:px-4 lg:py-2 rounded-full text-xs md:text-sm font-semibold hover:bg-primary-dark transition-all shadow-sm hover:shadow-md whitespace-nowrap"
               aria-label={t('nav:subscribe')}
             >
                 {t('nav:subscribe')}
             </button>
             <button
               onClick={handleNewListingClick}
-              className="bg-secondary text-white px-3 py-1.5 sm:px-4 sm:py-2 rounded-full text-sm font-semibold hover:bg-opacity-90 transition-all shadow-sm hover:shadow-md whitespace-nowrap"
+              className="bg-secondary text-white px-2.5 py-1.5 md:px-3 lg:px-4 lg:py-2 rounded-full text-xs md:text-sm font-semibold hover:bg-opacity-90 transition-all shadow-sm hover:shadow-md whitespace-nowrap"
               aria-label={t('nav:newListing')}
             >
-                + {t('nav:newListing')}
+                <span className="md:hidden lg:inline">+ {t('nav:newListing')}</span>
+                <span className="hidden md:inline lg:hidden">+ New</span>
             </button>
             <AuthButton />
             {isAuthenticated && (

@@ -31,12 +31,12 @@ const SearchHeader: React.FC<SearchHeaderProps> = ({
 }) => {
     return (
         <div
-            className="hidden md:flex p-3 border-b border-white/40 flex-shrink-0 items-center gap-3 relative z-[100] bg-white/70 backdrop-blur-xl"
+            className="hidden md:flex p-2 lg:p-3 border-b border-white/40 flex-shrink-0 items-center gap-2 lg:gap-3 relative z-[100] bg-white/70 backdrop-blur-xl"
             style={{
                 boxShadow: '0 4px 20px rgba(31, 38, 135, 0.08), inset 0 0 20px rgba(255, 255, 255, 0.3)',
             }}
         >
-            <h2 className="text-base font-semibold text-neutral-800 flex-shrink-0">{t('search:propertiesForSale')}</h2>
+            <h2 className="text-sm lg:text-base font-semibold text-neutral-800 flex-shrink-0 hidden lg:block">{t('search:propertiesForSale')}</h2>
             {/* Desktop Search Bar */}
             <SearchLocationBar
                 filters={filters}
@@ -54,7 +54,7 @@ const SearchHeader: React.FC<SearchHeaderProps> = ({
                 value={filters.country}
                 onChange={(e) => onFilterChange('country', e.target.value)}
                 aria-label={t('search:filters.allCountries', 'Filter by country')}
-                className="bg-white/60 backdrop-blur-sm border border-white/50 rounded-xl text-neutral-900 text-sm px-3 py-2 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all appearance-none cursor-pointer flex-shrink-0 shadow-sm"
+                className="hidden lg:block bg-white/60 backdrop-blur-sm border border-white/50 rounded-xl text-neutral-900 text-sm px-3 py-2 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all appearance-none cursor-pointer flex-shrink-0 shadow-sm"
                 style={{ backgroundImage: "url(\"data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e\")", backgroundPosition: 'right 0.5rem center', backgroundRepeat: 'no-repeat', backgroundSize: '1.5em 1.5em', paddingRight: '2.5rem' }}
             >
                 <option value="any">{t('search:filters.allCountries')}</option>

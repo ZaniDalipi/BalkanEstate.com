@@ -52,6 +52,7 @@ const SearchPage: React.FC<SearchPageProps> = ({ onToggleSidebar }) => {
         isFiltersOpen,
         // Local state
         isMobile,
+        isTablet,
         isQueryInputFocused,
         setIsQueryInputFocused,
         toast,
@@ -99,6 +100,10 @@ const SearchPage: React.FC<SearchPageProps> = ({ onToggleSidebar }) => {
         onFlyComplete,
         userLocation,
     } = useSearchPage();
+
+    // Zillow-style layout: split view only at lg+ (1024px), full-width with toggle on md tablets
+    const showSplitView = !isMobile && !isTablet;
+    const showViewToggle = isMobile || isTablet;
 
     const mapProps = {
         properties: baseFilteredProperties,
@@ -150,7 +155,7 @@ const SearchPage: React.FC<SearchPageProps> = ({ onToggleSidebar }) => {
     };
 
     return (
-        <div className={`relative flex h-full w-full flex-col md:flex-row ${isMobile && isFiltersOpen ? 'overflow-hidden' : ''}`}>
+        <div className={`relative flex h-full w-full flex-col lg:flex-row ${(isMobile || isTablet) && isFiltersOpen ? 'overflow-hidden' : ''}`}>
             {/* Dynamic SEO for Search Page */}
             <SEO
                 title={seoTitle}
@@ -171,9 +176,10 @@ const SearchPage: React.FC<SearchPageProps> = ({ onToggleSidebar }) => {
             />
 
             {/* Main Content Wrapper */}
-            <div className={`flex h-full w-full flex-col md:flex-row transition-all duration-300 relative ${isMobile && isFiltersOpen ? 'blur-sm pointer-events-none' : ''}`}>
+            <div className={`flex h-full w-full flex-col lg:flex-row transition-all duration-300 relative ${(isMobile || isTablet) && isFiltersOpen ? 'blur-sm pointer-events-none' : ''}`}>
                 {/* --- Left Panel: List & Filters --- */}
-                 <div className={`absolute inset-0 z-10 h-full w-full bg-white md:relative md:w-[55%] md:flex-shrink-0 md:border-r md:border-neutral-200 md:flex md:flex-col ${ isMobile && mobileView === 'list' ? 'translate-x-0' : '-translate-x-full md:translate-x-0' } transition-transform duration-300`}>
+                {/* On mobile/tablet: full-width overlay with slide animation. On lg+: side panel in split view */}
+                 <div className={`absolute inset-0 z-10 h-full w-full bg-white lg:relative lg:w-[40%] lg:flex-shrink-0 lg:border-r lg:border-neutral-200 lg:flex lg:flex-col ${ showViewToggle && mobileView === 'list' ? 'translate-x-0' : showViewToggle ? '-translate-x-full' : '' } lg:translate-x-0 transition-transform duration-300`}>
                     <SearchHeader
                         t={t}
                         filters={filters}
@@ -191,14 +197,15 @@ const SearchPage: React.FC<SearchPageProps> = ({ onToggleSidebar }) => {
 
 
                 {/* --- Right Panel: Map --- */}
-                <div className="h-full w-full md:w-[45%] md:flex-shrink-0 relative z-0 overflow-hidden">
+                {/* On mobile/tablet: full-width behind list panel. On lg+: side panel 60% */}
+                <div className="h-full w-full lg:w-[60%] lg:flex-shrink-0 relative z-0 overflow-hidden">
                     <div className="absolute inset-0 overflow-hidden">
                         <MapComponent {...mapProps} />
                     </div>
 
                     {/* Draw hint banner - shown when navigating from explore cities */}
                     {showDrawHint && !isDrawing && !drawnBounds && (
-                        <div className="absolute top-20 md:top-4 left-4 right-4 md:left-auto md:right-auto md:left-1/2 md:-translate-x-1/2 z-[1002] animate-fade-in">
+                        <div className="absolute top-20 lg:top-4 left-4 right-4 lg:left-auto lg:right-auto lg:left-1/2 lg:-translate-x-1/2 z-[1002] animate-fade-in">
                             <div
                                 className="bg-gradient-to-r from-primary to-blue-600 text-white px-4 py-3 rounded-xl shadow-lg flex items-center gap-3"
                                 style={{
@@ -224,61 +231,65 @@ const SearchPage: React.FC<SearchPageProps> = ({ onToggleSidebar }) => {
                     )}
                 </div>
 
-                {/* --- Mobile View Overlays --- */}
-                {isMobile && !isFiltersOpen && (
+                {/* --- Mobile/Tablet View Overlays --- */}
+                {showViewToggle && !isFiltersOpen && (
                     <>
-                        <div className="absolute top-0 left-0 right-0 z-[100] p-2 landscape:p-1.5 pointer-events-none safe-area-inset-top">
-                            <div ref={searchWrapperRef} className="pointer-events-auto w-full space-y-2">
-                                <div
-                                    className="w-full bg-white/60 backdrop-blur-xl rounded-full p-1 flex items-center gap-0.5 sm:gap-1 border border-white/40"
-                                    style={{
-                                        boxShadow: '0 8px 32px rgba(31, 38, 135, 0.15), inset 0 0 20px rgba(255, 255, 255, 0.3)',
-                                    }}
-                                >
-                                    <button
-                                        onClick={onToggleSidebar}
-                                        className="min-h-[44px] min-w-[44px] flex items-center justify-center flex-shrink-0 rounded-full hover:bg-neutral-100 active:bg-neutral-200 transition-colors touch-manipulation focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-primary/50"
-                                        aria-label="Open menu"
+                        {/* Mobile-only: floating search bar overlay (tablet uses SearchHeader instead) */}
+                        {isMobile && (
+                            <div className="absolute top-0 left-0 right-0 z-[100] p-2 landscape:p-1.5 pointer-events-none safe-area-inset-top">
+                                <div ref={searchWrapperRef} className="pointer-events-auto w-full space-y-2">
+                                    <div
+                                        className="w-full bg-white/60 backdrop-blur-xl rounded-full p-1 flex items-center gap-0.5 sm:gap-1 border border-white/40"
+                                        style={{
+                                            boxShadow: '0 8px 32px rgba(31, 38, 135, 0.15), inset 0 0 20px rgba(255, 255, 255, 0.3)',
+                                        }}
                                     >
-                                        <Bars3Icon className="w-6 h-6 text-neutral-800"/>
-                                    </button>
-                                    <SearchLocationBar
-                                        filters={filters}
-                                        suggestions={suggestions}
-                                        isQueryInputFocused={isQueryInputFocused}
-                                        isSearchingLocation={isSearchingLocation}
-                                        searchWrapperRef={searchWrapperRef}
-                                        onFilterChange={handleFilterChange}
-                                        onSearch={() => handleSearch()}
-                                        onQueryInputFocusChange={setIsQueryInputFocused}
-                                        onSuggestionClick={handleSuggestionClick}
-                                        variant="mobile"
-                                    />
-                                    <button
-                                        onClick={() => updateSearchPageState({ isFiltersOpen: true })}
-                                        className="min-h-[44px] min-w-[44px] flex items-center justify-center flex-shrink-0 rounded-full hover:bg-neutral-100 active:bg-neutral-200 transition-colors touch-manipulation focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-primary/50"
-                                        aria-label="Open filters"
-                                    >
-                                        <AdjustmentsHorizontalIcon className="w-6 h-6 text-neutral-800"/>
-                                    </button>
-                                    {isAuthenticated && currentUser && (
                                         <button
-                                            onClick={() => dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'account' })}
-                                            className="min-h-[44px] min-w-[44px] flex items-center justify-center flex-shrink-0 rounded-full hover:bg-neutral-100 active:bg-neutral-200 transition-colors touch-manipulation focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-primary/50 mr-0.5"
-                                            aria-label="My account"
+                                            onClick={onToggleSidebar}
+                                            className="min-h-[44px] min-w-[44px] flex items-center justify-center flex-shrink-0 rounded-full hover:bg-neutral-100 active:bg-neutral-200 transition-colors touch-manipulation focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-primary/50"
+                                            aria-label="Open menu"
                                         >
-                                            {currentUser.avatarUrl ? (
-                                                <img src={currentUser.avatarUrl} alt="" className="w-8 h-8 rounded-full object-cover" referrerPolicy="no-referrer" aria-hidden="true" />
-                                            ) : (
-                                                <UserCircleIcon className="w-8 h-8 text-neutral-400" aria-hidden="true"/>
-                                            )}
+                                            <Bars3Icon className="w-6 h-6 text-neutral-800"/>
                                         </button>
-                                    )}
+                                        <SearchLocationBar
+                                            filters={filters}
+                                            suggestions={suggestions}
+                                            isQueryInputFocused={isQueryInputFocused}
+                                            isSearchingLocation={isSearchingLocation}
+                                            searchWrapperRef={searchWrapperRef}
+                                            onFilterChange={handleFilterChange}
+                                            onSearch={() => handleSearch()}
+                                            onQueryInputFocusChange={setIsQueryInputFocused}
+                                            onSuggestionClick={handleSuggestionClick}
+                                            variant="mobile"
+                                        />
+                                        <button
+                                            onClick={() => updateSearchPageState({ isFiltersOpen: true })}
+                                            className="min-h-[44px] min-w-[44px] flex items-center justify-center flex-shrink-0 rounded-full hover:bg-neutral-100 active:bg-neutral-200 transition-colors touch-manipulation focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-primary/50"
+                                            aria-label="Open filters"
+                                        >
+                                            <AdjustmentsHorizontalIcon className="w-6 h-6 text-neutral-800"/>
+                                        </button>
+                                        {isAuthenticated && currentUser && (
+                                            <button
+                                                onClick={() => dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'account' })}
+                                                className="min-h-[44px] min-w-[44px] flex items-center justify-center flex-shrink-0 rounded-full hover:bg-neutral-100 active:bg-neutral-200 transition-colors touch-manipulation focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-primary/50 mr-0.5"
+                                                aria-label="My account"
+                                            >
+                                                {currentUser.avatarUrl ? (
+                                                    <img src={currentUser.avatarUrl} alt="" className="w-8 h-8 rounded-full object-cover" referrerPolicy="no-referrer" aria-hidden="true" />
+                                                ) : (
+                                                    <UserCircleIcon className="w-8 h-8 text-neutral-400" aria-hidden="true"/>
+                                                )}
+                                            </button>
+                                        )}
+                                    </div>
                                 </div>
                             </div>
-                        </div>
+                        )}
 
-                        <div className="absolute bottom-20 xs:bottom-24 sm:bottom-20 landscape:bottom-14 left-0 right-0 z-[100] p-3 sm:p-4 landscape:p-2 pointer-events-none flex justify-center" style={{ paddingBottom: 'max(env(safe-area-inset-bottom), 8px)' }}>
+                        {/* Floating List/Map toggle - shows on both mobile and tablet (Zillow-style) */}
+                        <div className="absolute bottom-20 xs:bottom-24 sm:bottom-20 md:bottom-6 landscape:bottom-14 left-0 right-0 z-[100] p-3 sm:p-4 landscape:p-2 pointer-events-none flex justify-center" style={{ paddingBottom: 'max(env(safe-area-inset-bottom), 8px)' }}>
                             {/* Map hint tooltip - positioned to point at Map button */}
                             {showMapHint && (
                                 <div className="absolute bottom-full right-1/2 translate-x-[70%] mb-2 pointer-events-auto animate-bounce">
@@ -307,7 +318,7 @@ const SearchPage: React.FC<SearchPageProps> = ({ onToggleSidebar }) => {
                 )}
             </div>
 
-            {isMobile && isFiltersOpen && (
+            {(isMobile || isTablet) && isFiltersOpen && (
                 <div className="fixed inset-0 z-30 flex flex-col">
                     <div className="absolute inset-0 bg-black/50" onClick={() => updateSearchPageState({ isFiltersOpen: false })}></div>
                     <div className="relative w-full h-full" onClick={(e) => { e.stopPropagation(); updateSearchPageState({ isFiltersOpen: false }); }}>
