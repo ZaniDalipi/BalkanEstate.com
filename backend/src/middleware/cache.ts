@@ -19,16 +19,17 @@ const cache = new Map<string, CacheEntry>();
 const cacheConfig: Record<string, number> = {
   // Public data that changes infrequently (15 minutes)
   '/api/cities': 15 * 60 * 1000,
-  '/api/agencies': 10 * 60 * 1000,
-  '/api/agents': 10 * 60 * 1000,
+  '/api/agencies': 5 * 60 * 1000,
+  '/api/agents': 5 * 60 * 1000,
 
-  // Property listings (5 minutes - balance freshness with performance)
-  '/api/properties': 5 * 60 * 1000,
+  // Property listings (2 minutes - fast refresh after changes)
+  '/api/properties': 2 * 60 * 1000,
 
-  // Static/semi-static data (30 minutes)
-  '/api/products': 30 * 60 * 1000,
-  '/api/promotions/tiers': 30 * 60 * 1000,
-  '/api/coupons/public': 10 * 60 * 1000,
+  // Products and promotions (30 seconds - invalidated on mutations for instant updates)
+  '/api/products': 30 * 1000,
+  '/api/promotions/tiers': 30 * 1000,
+  '/api/promotion-plans': 30 * 1000,
+  '/api/coupons/public': 5 * 60 * 1000,
 
   // Neighborhood and location data (20 minutes)
   '/api/neighborhood-insights': 20 * 60 * 1000,
@@ -38,8 +39,8 @@ const cacheConfig: Record<string, number> = {
   '/api/city-market-data': 60 * 60 * 1000,
   '/api/sales-history': 30 * 60 * 1000,
 
-  // Content pages (15 minutes)
-  '/api/site-content': 15 * 60 * 1000,
+  // Content pages (5 minutes)
+  '/api/site-content': 5 * 60 * 1000,
 };
 
 // Max cache size to prevent memory issues

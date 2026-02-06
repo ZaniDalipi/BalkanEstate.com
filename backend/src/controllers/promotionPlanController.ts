@@ -1,6 +1,7 @@
 import { Request, Response } from 'express';
 import PromotionPlan from '../models/PromotionPlan';
 import { promotionLogger } from '../utils/logger';
+import { invalidateCache } from '../middleware/cache';
 
 // Get all promotion plans (public)
 export const getPromotionPlans = async (req: Request, res: Response) => {
@@ -37,6 +38,11 @@ export const createPromotionPlan = async (req: Request, res: Response) => {
   try {
     const plan = new PromotionPlan(req.body);
     await plan.save();
+
+    // Invalidate promotion plans cache so changes appear immediately
+    invalidateCache('/api/promotion-plans');
+    invalidateCache('/api/promotions/tiers');
+
     res.status(201).json({ plan });
   } catch (error) {
     promotionLogger.error('Error creating promotion plan:', error);
@@ -59,6 +65,10 @@ export const updatePromotionPlan = async (req: Request, res: Response): Promise<
       return;
     }
 
+    // Invalidate promotion plans cache so changes appear immediately
+    invalidateCache('/api/promotion-plans');
+    invalidateCache('/api/promotions/tiers');
+
     res.json({ plan });
   } catch (error) {
     promotionLogger.error('Error updating promotion plan:', error);
@@ -76,6 +86,10 @@ export const deletePromotionPlan = async (req: Request, res: Response): Promise<
       res.status(404).json({ error: 'Promotion plan not found' });
       return;
     }
+
+    // Invalidate promotion plans cache so deletion is reflected immediately
+    invalidateCache('/api/promotion-plans');
+    invalidateCache('/api/promotions/tiers');
 
     res.json({ message: 'Promotion plan deleted successfully' });
   } catch (error) {
@@ -97,6 +111,10 @@ export const togglePromotionPlanStatus = async (req: Request, res: Response): Pr
 
     plan.isActive = !plan.isActive;
     await plan.save();
+
+    // Invalidate promotion plans cache so status change is reflected immediately
+    invalidateCache('/api/promotion-plans');
+    invalidateCache('/api/promotions/tiers');
 
     res.json({ plan });
   } catch (error) {
