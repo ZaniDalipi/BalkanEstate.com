@@ -4,6 +4,7 @@ import SubscriptionEvent from '../models/SubscriptionEvent';
 import PaymentRecord from '../models/PaymentRecord';
 import Product from '../models/Product';
 import User from '../models/User';
+import PromotionCoupon from '../models/PromotionCoupon';
 import { getGooglePlayService } from '../services/googlePlayService';
 import { getAppStoreService } from '../services/appStoreService';
 import { subscriptionLogger } from '../utils/logger';
@@ -802,5 +803,192 @@ export const syncProSubscription = async (req: Request, res: Response): Promise<
       message: 'Error syncing Pro subscription',
       error: error.message,
     });
+  }
+};
+
+/**
+ * @desc    Activate a subscription using a coupon code (no online payment)
+ * @route   POST /api/subscriptions/activate-coupon
+ * @access  Private
+ */
+export const activateCouponSubscription = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const userId = (req as any).user?._id;
+    const { couponCode, productId } = req.body;
+
+    if (!userId) {
+      res.status(401).json({ message: 'User not authenticated' });
+      return;
+    }
+
+    if (!couponCode || !productId) {
+      res.status(400).json({ message: 'Coupon code and product ID are required' });
+      return;
+    }
+
+    // Find the product
+    const product = await Product.findOne({ productId });
+    if (!product) {
+      res.status(404).json({ message: 'Product not found' });
+      return;
+    }
+
+    // Find and validate coupon
+    const coupon = await PromotionCoupon.findOne({
+      code: couponCode.toUpperCase(),
+      status: 'active',
+    });
+
+    if (!coupon) {
+      res.status(404).json({ message: 'Coupon not found or expired' });
+      return;
+    }
+
+    if (!coupon.isValid()) {
+      res.status(400).json({ message: 'Coupon is no longer valid' });
+      return;
+    }
+
+    const canUse = await coupon.canBeUsedBy(userId);
+    if (!canUse) {
+      res.status(400).json({ message: 'You have already used this coupon' });
+      return;
+    }
+
+    // Check applicable tiers if specified
+    if (coupon.applicableTiers && coupon.applicableTiers.length > 0) {
+      const productTier = productId.includes('enterprise') ? 'premium' :
+                          productId.includes('yearly') ? 'highlight' : 'featured';
+      if (!coupon.applicableTiers.includes(productTier as any)) {
+        res.status(400).json({ message: 'Coupon is not applicable to this plan' });
+        return;
+      }
+    }
+
+    // Calculate discount
+    const discount = coupon.calculateDiscount(product.price);
+    const finalPrice = Math.max(0, product.price - discount);
+
+    // Only allow activation if the coupon covers 100% (free activation via coupon)
+    if (finalPrice > 0) {
+      res.status(400).json({
+        message: 'This coupon does not fully cover the plan cost. Please contact sales@balkanestateai.com for a valid activation coupon.',
+        discount,
+        finalPrice,
+        originalPrice: product.price,
+      });
+      return;
+    }
+
+    const user = await User.findById(userId);
+    if (!user) {
+      res.status(404).json({ message: 'User not found' });
+      return;
+    }
+
+    // Calculate dates
+    const startDate = new Date();
+    const expirationDate = new Date();
+
+    if (product.billingPeriod === 'monthly') {
+      expirationDate.setMonth(expirationDate.getMonth() + 1);
+    } else if (product.billingPeriod === 'yearly') {
+      expirationDate.setFullYear(expirationDate.getFullYear() + 1);
+    }
+
+    // Create subscription
+    const subscription = await Subscription.create({
+      userId,
+      store: 'agency_coupon',
+      productId: product.productId,
+      startDate,
+      expirationDate,
+      renewalDate: expirationDate,
+      status: 'active',
+      autoRenewing: false,
+      price: 0,
+      currency: product.currency,
+    });
+
+    // Create subscription event
+    await SubscriptionEvent.create({
+      subscriptionId: subscription._id,
+      userId,
+      eventType: 'subscription_purchased',
+      store: 'agency_coupon',
+      metadata: { productId, couponCode: coupon.code, originalPrice: product.price, discount },
+    });
+
+    // Create payment record
+    await PaymentRecord.create({
+      userId,
+      subscriptionId: subscription._id,
+      store: 'agency_coupon',
+      storeTransactionId: `coupon_${coupon.code}_${Date.now()}`,
+      transactionType: 'charge',
+      transactionDate: startDate,
+      amount: 0,
+      currency: product.currency,
+      status: 'completed',
+      productId: product.productId,
+    });
+
+    // Record coupon usage
+    await coupon.recordUsage(userId, subscription._id, discount);
+
+    // Update user subscription status
+    user.isSubscribed = true;
+    user.subscriptionPlan = product.productId;
+    user.subscriptionExpiresAt = expirationDate;
+    user.subscriptionStartedAt = startDate;
+    user.subscriptionStatus = 'active';
+
+    // Determine plan type and set proSubscription
+    const isEnterprise = product.productId.includes('enterprise');
+    const isYearly = product.productId.includes('yearly');
+
+    user.proSubscription = {
+      isActive: true,
+      plan: isEnterprise ? 'pro_yearly' : (isYearly ? 'pro_yearly' : 'pro_monthly'),
+      expiresAt: expirationDate,
+      startedAt: startDate,
+      totalListingsLimit: product.listingsLimit || 20,
+      activeListingsCount: user.proSubscription?.activeListingsCount || 0,
+      privateSellerCount: user.proSubscription?.privateSellerCount || 0,
+      agentCount: user.proSubscription?.agentCount || 0,
+      promotionCoupons: {
+        monthly: product.promotionCoupons || 3,
+        available: product.promotionCoupons || 3,
+        used: 0,
+        highlightCoupons: product.highlightedCoupons || 2,
+        usedHighlightCoupons: 0,
+      },
+    };
+
+    await user.save();
+
+    subscriptionLogger.info(`✅ Coupon subscription activated for user ${user.email}`);
+    subscriptionLogger.info(`   Product: ${product.productId}`);
+    subscriptionLogger.info(`   Coupon: ${coupon.code}`);
+    subscriptionLogger.info(`   Expires: ${expirationDate.toISOString()}`);
+
+    res.status(201).json({
+      message: 'Subscription activated successfully',
+      subscription: {
+        id: subscription._id,
+        productId: subscription.productId,
+        status: subscription.status,
+        startDate: subscription.startDate,
+        expirationDate: subscription.expirationDate,
+      },
+      user: {
+        id: user._id,
+        email: user.email,
+        proSubscription: user.proSubscription,
+      },
+    });
+  } catch (error: any) {
+    subscriptionLogger.error('Error activating coupon subscription:', error);
+    res.status(500).json({ message: 'Error activating subscription', error: error.message });
   }
 };

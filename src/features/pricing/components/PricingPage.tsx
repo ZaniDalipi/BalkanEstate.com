@@ -4,6 +4,7 @@ import { useAppContext } from '@/context/AppContext';
 import PaymentWindow from '@/components/shared/PaymentWindow';
 import { CONTACT_CONFIG } from '@/src/shared/config/contact';
 import { translateAndReplacePlaceholders } from '@/src/shared/utils/featurePlaceholders';
+import { apiRequest } from '@/src/shared/api';
 import Footer from '@/components/shared/Footer';
 import {
   FloatingSphere,
@@ -71,6 +72,14 @@ const PricingPage: React.FC = () => {
     productId: string;
   } | null>(null);
   const [showContactOptions, setShowContactOptions] = useState(false);
+
+  // Coupon activation modal states
+  const [showCouponModal, setShowCouponModal] = useState(false);
+  const [couponCode, setCouponCode] = useState('');
+  const [couponLoading, setCouponLoading] = useState(false);
+  const [couponError, setCouponError] = useState<string | null>(null);
+  const [couponSuccess, setCouponSuccess] = useState(false);
+  const [selectedCouponPlan, setSelectedCouponPlan] = useState<Product | null>(null);
 
   // Listing promotion states
   const [selectedPromoTier, setSelectedPromoTier] = useState<'featured' | 'highlight' | 'premium' | null>(null);
@@ -180,32 +189,7 @@ const PricingPage: React.FC = () => {
   };
 
   const handlePlanSelection = (product: Product) => {
-    // PAYMENTS COMING SOON - Show info message instead of processing payment
-    dispatch({
-      type: 'SHOW_ALERT',
-      payload: {
-        type: 'info',
-        title: t('pricing:comingSoon.title', 'Payments Coming Soon'),
-        message: t(
-          'pricing:comingSoon.message',
-          'We are setting up our payment system. Please contact sales@balkanestateai.com to process your subscription manually.'
-        ),
-      },
-    });
-    return;
-
-    // Original payment logic - temporarily disabled
-    /*
     if (!state.isAuthenticated || !state.currentUser) {
-      dispatch({
-        type: 'SET_PENDING_SUBSCRIPTION',
-        payload: {
-          planName: product.name,
-          planPrice: product.price,
-          planInterval: product.billingPeriod === 'yearly' ? 'year' : 'month',
-          modalType: activeTab,
-        },
-      });
       dispatch({
         type: 'TOGGLE_AUTH_MODAL',
         payload: { isOpen: true, view: 'login' },
@@ -213,68 +197,76 @@ const PricingPage: React.FC = () => {
       return;
     }
 
-    // For Enterprise plan, perform all checks
-    const isEnterprisePlan = product.productId.includes('enterprise');
+    // Open coupon activation modal
+    setSelectedCouponPlan(product);
+    setCouponCode('');
+    setCouponError(null);
+    setCouponSuccess(false);
+    setShowCouponModal(true);
+  };
 
-    if (isEnterprisePlan) {
-      // Check 1: Must be an agent first
-      if (!isUserAgent()) {
+  const handleCouponActivation = async () => {
+    if (!couponCode.trim() || !selectedCouponPlan) return;
+
+    setCouponLoading(true);
+    setCouponError(null);
+
+    try {
+      const response = await apiRequest<{
+        message: string;
+        subscription: {
+          id: string;
+          productId: string;
+          status: string;
+          startDate: string;
+          expirationDate: string;
+        };
+        user: {
+          id: string;
+          email: string;
+          proSubscription: any;
+        };
+      }>('/subscriptions/activate-coupon', {
+        method: 'POST',
+        body: {
+          couponCode: couponCode.trim(),
+          productId: selectedCouponPlan.productId,
+        },
+        requiresAuth: true,
+      });
+
+      setCouponSuccess(true);
+
+      // Update local user state
+      if (response.user?.proSubscription) {
+        dispatch({
+          type: 'UPDATE_USER',
+          payload: {
+            isSubscribed: true,
+            subscriptionPlan: selectedCouponPlan.productId,
+            proSubscription: response.user.proSubscription,
+          },
+        });
+      }
+
+      // Show success and close after delay
+      setTimeout(() => {
+        setShowCouponModal(false);
+        setCouponSuccess(false);
         dispatch({
           type: 'SHOW_ALERT',
           payload: {
-            type: 'warning',
-            title: t('pricing:enterprise.agentRequired', 'Agent Status Required'),
-            message: t(
-              'pricing:enterprise.agentRequiredMessage',
-              'Only registered agents can create an agency. Please switch to Agent account type in your profile first.'
-            ),
+            type: 'success',
+            title: t('pricing:couponModal.successTitle', 'Subscription Activated!'),
+            message: t('pricing:couponModal.successMessage', 'Your subscription has been activated successfully. Enjoy your plan!'),
           },
         });
-        dispatch({ type: 'SET_ACCOUNT_TAB', payload: 'profile' });
-        dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'account' });
-        window.history.pushState({}, '', buildLocalizedPath('/account'));
-        return;
-      }
-
-      // Check 2: Cannot create agency if already have one
-      if (userHasAgency()) {
-        dispatch({
-          type: 'SHOW_ALERT',
-          payload: {
-            type: 'info',
-            title: t('pricing:enterprise.alreadyHaveAgency', 'You Already Have an Agency'),
-            message: t(
-              'pricing:enterprise.viewYourAgency',
-              'You already have an agency. Visit your account to manage it.'
-            ),
-          },
-        });
-        dispatch({ type: 'SET_ACCOUNT_TAB', payload: 'agency' });
-        dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'account' });
-        window.history.pushState({}, '', buildLocalizedPath('/account/agency'));
-        return;
-      }
-
-      // Check 3: If already has Enterprise subscription, skip payment
-      if (hasEnterpriseSubscription()) {
-        dispatch({ type: 'TOGGLE_ENTERPRISE_MODAL', payload: true });
-        return;
-      }
-
-      // No Enterprise subscription yet - open modal to fill agency details, then go to payment
-      dispatch({ type: 'TOGGLE_ENTERPRISE_MODAL', payload: true });
-      return;
+      }, 2000);
+    } catch (error: any) {
+      setCouponError(error.message || t('pricing:couponModal.errorGeneric', 'Failed to activate coupon. Please try again.'));
+    } finally {
+      setCouponLoading(false);
     }
-
-    // For non-Enterprise plans (Pro Monthly, Pro Yearly, Buyer), proceed to payment directly
-    setSelectedPlan({
-      name: product.name,
-      price: product.price,
-      interval: product.billingPeriod === 'yearly' ? 'year' : 'month',
-      productId: product.productId,
-    });
-    setShowPaymentWindow(true);
-    */
   };
 
   const handlePaymentSuccess = async (paymentIntentId: string) => {
@@ -1378,6 +1370,145 @@ const PricingPage: React.FC = () => {
           onError={handlePaymentError}
           productId={selectedPlan.productId}
         />
+      )}
+
+      {/* Coupon Activation Modal */}
+      {showCouponModal && selectedCouponPlan && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          {/* Backdrop */}
+          <div
+            className="absolute inset-0 bg-black/50 backdrop-blur-sm"
+            onClick={() => !couponLoading && setShowCouponModal(false)}
+          />
+
+          {/* Modal */}
+          <div className="relative bg-white rounded-3xl shadow-2xl w-full max-w-md overflow-hidden animate-in fade-in zoom-in duration-200">
+            {/* Header */}
+            <div className="bg-gradient-to-r from-primary to-indigo-600 px-6 py-5 text-white">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h3 className="text-lg font-bold">{t('pricing:couponModal.title', 'Activate Plan')}</h3>
+                  <p className="text-sm text-white/80 mt-0.5">{selectedCouponPlan.name} - €{selectedCouponPlan.price}{getBillingLabel(selectedCouponPlan.billingPeriod)}</p>
+                </div>
+                <button
+                  onClick={() => !couponLoading && setShowCouponModal(false)}
+                  className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center hover:bg-white/30 transition-colors"
+                >
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
+            </div>
+
+            {/* Body */}
+            <div className="px-6 py-6">
+              {couponSuccess ? (
+                /* Success State */
+                <div className="text-center py-4">
+                  <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <CheckIcon className="w-8 h-8 text-green-600" />
+                  </div>
+                  <h4 className="text-xl font-bold text-gray-900 mb-2">{t('pricing:couponModal.activated', 'Plan Activated!')}</h4>
+                  <p className="text-gray-600 text-sm">{t('pricing:couponModal.enjoyPlan', 'Your subscription is now active. Enjoy all the features!')}</p>
+                </div>
+              ) : (
+                <>
+                  {/* Info Banner */}
+                  <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 mb-6">
+                    <div className="flex items-start gap-3">
+                      <div className="w-8 h-8 bg-amber-400 rounded-lg flex items-center justify-center flex-shrink-0 mt-0.5">
+                        <ExclamationTriangleIcon className="w-4 h-4 text-white" />
+                      </div>
+                      <div>
+                        <p className="text-sm font-semibold text-amber-900">{t('pricing:couponModal.noOnlinePayment', 'Online payments are not available yet')}</p>
+                        <p className="text-xs text-amber-700 mt-1">
+                          {t('pricing:couponModal.contactUs', 'Please contact our sales team to get a coupon code for activating your plan.')}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Contact Info */}
+                  <div className="bg-gray-50 rounded-xl p-4 mb-6">
+                    <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">{t('pricing:couponModal.contactSales', 'Contact Sales')}</p>
+                    <div className="space-y-2">
+                      <a
+                        href={`mailto:${salesEmail}?subject=Coupon%20Request%20-%20${encodeURIComponent(selectedCouponPlan.name)}`}
+                        className="flex items-center gap-3 text-sm text-gray-700 hover:text-primary transition-colors"
+                      >
+                        <div className="w-8 h-8 rounded-lg bg-blue-100 flex items-center justify-center">
+                          <svg className="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                          </svg>
+                        </div>
+                        <span>{salesEmail}</span>
+                      </a>
+                      <a
+                        href={`tel:${salesPhone.replace(/\s/g, '')}`}
+                        className="flex items-center gap-3 text-sm text-gray-700 hover:text-primary transition-colors"
+                      >
+                        <div className="w-8 h-8 rounded-lg bg-green-100 flex items-center justify-center">
+                          <svg className="w-4 h-4 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
+                          </svg>
+                        </div>
+                        <span>{salesPhone}</span>
+                      </a>
+                    </div>
+                  </div>
+
+                  {/* Coupon Input */}
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-2">
+                      {t('pricing:couponModal.couponLabel', 'Enter Coupon Code')}
+                    </label>
+                    <div className="flex gap-2">
+                      <input
+                        type="text"
+                        value={couponCode}
+                        onChange={(e) => {
+                          setCouponCode(e.target.value.toUpperCase());
+                          setCouponError(null);
+                        }}
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter' && couponCode.trim()) {
+                            handleCouponActivation();
+                          }
+                        }}
+                        placeholder={t('pricing:couponModal.couponPlaceholder', 'e.g. BALKAN2025')}
+                        className="flex-1 px-4 py-3 border-2 border-gray-200 rounded-xl text-sm font-mono tracking-wider uppercase focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all"
+                        disabled={couponLoading}
+                        autoFocus
+                      />
+                      <button
+                        onClick={handleCouponActivation}
+                        disabled={!couponCode.trim() || couponLoading}
+                        className="px-5 py-3 bg-gradient-to-r from-primary to-indigo-600 text-white font-semibold rounded-xl hover:from-primary-dark hover:to-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center gap-2 min-w-[100px] justify-center"
+                      >
+                        {couponLoading ? (
+                          <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                        ) : (
+                          t('pricing:couponModal.activate', 'Activate')
+                        )}
+                      </button>
+                    </div>
+
+                    {/* Error Message */}
+                    {couponError && (
+                      <div className="mt-3 flex items-start gap-2 text-red-600 bg-red-50 rounded-lg p-3">
+                        <svg className="w-4 h-4 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        <p className="text-sm">{couponError}</p>
+                      </div>
+                    )}
+                  </div>
+                </>
+              )}
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );
