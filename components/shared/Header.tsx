@@ -63,9 +63,11 @@ const Header: React.FC<HeaderProps> = ({ onToggleSidebar, isFloating }) => {
           className={`flex items-center space-x-2 font-semibold transition-colors py-1.5 px-2.5 rounded-full whitespace-nowrap ${floating ? 'text-neutral-700 bg-white hover:bg-neutral-100' : 'text-neutral-600 hover:text-primary hover:bg-neutral-100'}`}
         >
             {currentUser.avatarUrl ? (
-              <img src={currentUser.avatarUrl} alt="User Avatar" className="w-7 h-7 rounded-full object-cover"/>
+              <div className="w-7 h-7 rounded-full overflow-hidden flex-shrink-0">
+                <img src={currentUser.avatarUrl} alt="User Avatar" className="w-full h-full rounded-full object-cover"/>
+              </div>
             ) : (
-              <UserCircleIcon className="w-7 h-7" />
+              <UserCircleIcon className="w-7 h-7 flex-shrink-0" />
             )}
             <span className="hidden sm:inline text-sm">{t('nav:myAccount')}</span>
         </button>
