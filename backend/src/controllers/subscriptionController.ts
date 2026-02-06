@@ -901,6 +901,7 @@ export const activateCouponSubscription = async (req: Request, res: Response): P
       userId,
       store: 'agency_coupon',
       productId: product.productId,
+      purchaseToken: `coupon_${coupon.code}_${userId}_${Date.now()}`,
       startDate,
       expirationDate,
       renewalDate: expirationDate,
