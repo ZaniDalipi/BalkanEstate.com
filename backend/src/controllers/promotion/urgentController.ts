@@ -11,7 +11,6 @@ import {
   URGENT_MODIFIER,
   verifyPromotionOwnership,
   isPromotionActive,
-  getBaseUrl,
 } from '../../services/promotion/promotionService';
 import { promotionLogger } from '../../utils/logger';
 
@@ -106,51 +105,10 @@ export const confirmUrgentBadgePayment = async (
     }
 
     // TODO: Integrate with payment provider to verify session
-    // Payment verification not yet configured
     res.status(503).json({
       success: false,
       message: 'Payment confirmation is not yet configured. Please contact support.',
       code: 'PAYMENT_NOT_CONFIGURED',
-    });
-    return;
-
-    const { promotionId, type } = {} as any;
-
-    if (type !== 'add_urgent_badge' || !promotionId) {
-      res.status(400).json({ message: 'Invalid session metadata' });
-      return;
-    }
-
-    const promotion = await Promotion.findById(promotionId);
-    if (!promotion) {
-      res.status(404).json({ message: 'Promotion not found' });
-      return;
-    }
-
-    // Check if already processed
-    if (promotion.hasUrgentBadge) {
-      res.status(200).json({
-        success: true,
-        message: 'Urgent badge already added',
-        promotion,
-      });
-      return;
-    }
-
-    promotion.hasUrgentBadge = true;
-    promotion.notes = (promotion.notes || '') + ` | Urgent badge added (${sessionId})`;
-    await promotion.save();
-
-    const property = await Property.findById(promotion.propertyId);
-    if (property) {
-      property.hasUrgentBadge = true;
-      await property.save();
-    }
-
-    res.status(200).json({
-      success: true,
-      message: 'Urgent badge added successfully',
-      promotion,
     });
   } catch (error: any) {
     promotionLogger.error('Confirm urgent badge payment error:', error);
