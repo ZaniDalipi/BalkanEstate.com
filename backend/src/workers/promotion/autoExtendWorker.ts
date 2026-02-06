@@ -8,7 +8,6 @@ import Promotion from '../../models/Promotion';
 import User from '../../models/User';
 import { cronLogger } from '../../utils/logger';
 import {
-  PROMOTION_TIERS,
   getPromotionPrice,
   PromotionTierType,
 } from '../../config/promotionTiers';
