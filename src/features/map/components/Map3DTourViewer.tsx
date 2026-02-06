@@ -38,10 +38,14 @@ const Map3DTourViewer: React.FC<Map3DTourViewerProps> = ({
             {t('property:virtualTour.exit', 'Exit Tour')}
           </button>
 
-          {/* Floor indicator badge */}
+          {/* Tour indicator badge */}
           <div className="absolute top-4 left-4 z-60 flex items-center gap-2 px-4 py-2 bg-green-500/90 backdrop-blur-sm text-white font-bold rounded-lg shadow-lg">
-            <span>{'\u{1F3E2}'}</span>
-            <span>{t('property:virtualTour.floor', 'Floor {{floor}}', { floor: floorNumber })}</span>
+            <span>{floorNumber ? '\u{1F3E2}' : '\u{1F6AA}'}</span>
+            <span>
+              {floorNumber
+                ? t('property:virtualTour.floor', 'Floor {{floor}}', { floor: floorNumber })
+                : t('property:virtualTour.title', '360° Virtual Tour')}
+            </span>
           </div>
 
           {/* 360 Tour iframe */}

@@ -21,6 +21,7 @@ export interface Map3DControlsProps {
 
   // Property info
   hasFloorInfo: boolean;
+  has360Tour: boolean;
   floorNumber?: number;
   totalFloors?: number;
   virtualTour360Url?: string;
@@ -49,6 +50,7 @@ const Map3DControls: React.FC<Map3DControlsProps> = ({
   isEnteringBuilding,
   enableShadowTimelapse,
   hasFloorInfo,
+  has360Tour,
   floorNumber,
   totalFloors,
   virtualTour360Url,
@@ -182,6 +184,33 @@ const Map3DControls: React.FC<Map3DControlsProps> = ({
           <span className="text-sm sm:text-lg">{'\u{1F3E2}'}</span>
           <span className="text-xs sm:text-sm font-medium">{floorNumber}/{totalFloors}</span>
         </button>
+      )}
+
+      {/* 360 Tour button for non-apartment types (villas, houses, land) */}
+      {!hasFloorInfo && has360Tour && !show360Tour && (
+        <div className="absolute left-2 sm:left-4 top-1/2 -translate-y-1/2 z-20">
+          <button
+            onClick={handleEnterBuilding}
+            disabled={isEnteringBuilding}
+            className="flex flex-col items-center gap-1.5 px-3 sm:px-4 py-3 sm:py-4 bg-slate-900/95 backdrop-blur-sm hover:bg-slate-800 rounded-xl shadow-2xl border border-slate-700/50 transition-all group"
+          >
+            {isEnteringBuilding ? (
+              <>
+                <span className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                <span className="text-[10px] sm:text-xs text-white font-medium">
+                  {t('property:virtualTour.entering', 'Entering...')}
+                </span>
+              </>
+            ) : (
+              <>
+                <div className="w-12 h-12 sm:w-14 sm:h-14 flex items-center justify-center bg-gradient-to-br from-green-500 to-emerald-600 rounded-full border-2 border-white shadow-lg group-hover:scale-110 transition-transform">
+                  <span className="text-2xl sm:text-3xl">{'\u{1F6AA}'}</span>
+                </div>
+                <span className="text-[10px] sm:text-xs text-white font-bold">360° Tour</span>
+              </>
+            )}
+          </button>
+        </div>
       )}
 
       {/* 2D/3D Toggle, Floor Labels Toggle, and Shadow Toggle - top right, OneGeo style */}

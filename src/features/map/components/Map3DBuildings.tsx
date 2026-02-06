@@ -52,6 +52,7 @@ const Map3DBuildings: React.FC<Map3DBuildingsProps> = (props) => {
     isEnteringBuilding,
     // Computed
     hasFloorInfo,
+    has360Tour,
     // Timelapse
     timelapse,
     // Handlers
@@ -123,6 +124,7 @@ const Map3DBuildings: React.FC<Map3DBuildingsProps> = (props) => {
         isEnteringBuilding={isEnteringBuilding}
         enableShadowTimelapse={enableShadowTimelapse}
         hasFloorInfo={hasFloorInfo}
+        has360Tour={has360Tour}
         floorNumber={floorNumber}
         totalFloors={totalFloors}
         virtualTour360Url={virtualTour360Url}

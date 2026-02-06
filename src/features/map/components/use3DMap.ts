@@ -41,6 +41,7 @@ export function use3DMap(props: Map3DBuildingsProps) {
   // Calculate floor visualization data
   const isApartment = propertyType === 'apartment';
   const hasFloorInfo = isApartment && floorNumber != null && totalFloors != null && totalFloors > 0;
+  const has360Tour = !!virtualTour360Url;
   const floorHeightMeters = 3; // Average floor height
   const buildingHeightMeters = hasFloorInfo ? totalFloors * floorHeightMeters : 0;
   const floorPositionPercent = hasFloorInfo ? ((floorNumber - 0.5) / totalFloors) * 100 : 0;
@@ -705,6 +706,57 @@ export function use3DMap(props: Map3DBuildingsProps) {
         }
       }
 
+      // Add 360 tour door marker for non-apartment types (villas, houses, land)
+      if (propertyType !== 'apartment' && virtualTour360Url) {
+        const doorEl = document.createElement('div');
+        doorEl.className = 'apartment-door-marker';
+        doorEl.innerHTML = `
+          <div style="
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 2px;
+            cursor: pointer;
+          ">
+            <div style="
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              width: 44px;
+              height: 44px;
+              background: linear-gradient(135deg, #22c55e, #16a34a);
+              border-radius: 50%;
+              border: 3px solid white;
+              box-shadow: 0 4px 12px rgba(0,0,0,0.4), 0 0 15px rgba(34,197,94,0.6);
+              font-size: 22px;
+              animation: doorPulse 2s ease-in-out infinite;
+            ">\u{1F6AA}</div>
+            <div style="
+              background: rgba(0,0,0,0.85);
+              color: white;
+              padding: 3px 10px;
+              border-radius: 8px;
+              font-size: 11px;
+              font-weight: bold;
+              white-space: nowrap;
+              border: 2px solid white;
+            ">360\u00B0 Tour</div>
+          </div>
+        `;
+
+        doorEl.addEventListener('click', handleEnterBuilding);
+
+        const doorMarker = new maplibregl.Marker({
+          element: doorEl,
+          anchor: 'bottom',
+          offset: [0, -10],
+        })
+          .setLngLat([lng, lat])
+          .addTo(mapInstance);
+
+        doorMarkerRef.current = doorMarker;
+      }
+
       // Add custom 3D building with floor slices for apartments
       // Wait for tiles to fully load before querying building geometry
       if (propertyType === 'apartment' && floorNumber != null && totalFloors != null && totalFloors > 0) {
@@ -1219,6 +1271,7 @@ export function use3DMap(props: Map3DBuildingsProps) {
     isEnteringBuilding,
     // Computed
     hasFloorInfo,
+    has360Tour,
     // Timelapse
     timelapse,
     // Handlers
