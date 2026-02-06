@@ -4,8 +4,6 @@
  */
 
 import { Request, Response } from 'express';
-import Promotion from '../../models/Promotion';
-import Property from '../../models/Property';
 import { IUser } from '../../models/User';
 import {
   verifyPromotionOwnership,
@@ -87,61 +85,10 @@ export const confirmAutoExtendPayment = async (
     }
 
     // TODO: Integrate with payment provider to verify session
-    // Payment verification not yet configured
     res.status(503).json({
       success: false,
       message: 'Payment confirmation is not yet configured. Please contact support.',
       code: 'PAYMENT_NOT_CONFIGURED',
-    });
-    return;
-
-    const { type, promotionId, duration } = {} as any;
-
-    if (type !== 'auto-extend' || !promotionId || !duration) {
-      res.status(400).json({ message: 'Invalid session metadata' });
-      return;
-    }
-
-    const promotion = await Promotion.findById(promotionId);
-    if (!promotion) {
-      res.status(404).json({ message: 'Promotion not found' });
-      return;
-    }
-
-    // Check if already processed
-    if (promotion.autoExtendStatus === 'completed' && promotion.autoExtendSessionId === sessionId) {
-      res.status(200).json({
-        success: true,
-        message: 'Auto-extend already processed',
-        promotion,
-      });
-      return;
-    }
-
-    const currentEndDate = new Date(promotion.endDate);
-    const baseDate = currentEndDate > new Date() ? currentEndDate : new Date();
-    const newEndDate = new Date(baseDate);
-    newEndDate.setDate(newEndDate.getDate() + parseInt(duration));
-
-    promotion.endDate = newEndDate;
-    promotion.duration = promotion.duration + parseInt(duration);
-    promotion.isActive = true;
-    promotion.autoExtendStatus = 'completed';
-    promotion.notes = (promotion.notes || '') + ` | Auto-extended: +${duration} days (${sessionId})`;
-    await promotion.save();
-
-    const property = await Property.findById(promotion.propertyId);
-    if (property) {
-      property.promotionEndDate = newEndDate;
-      property.isPromoted = true;
-      await property.save();
-    }
-
-    res.status(200).json({
-      success: true,
-      message: 'Promotion auto-extended successfully',
-      promotion,
-      newEndDate: newEndDate.toISOString(),
     });
   } catch (error: any) {
     promotionLogger.error('Confirm auto-extend payment error:', error);
