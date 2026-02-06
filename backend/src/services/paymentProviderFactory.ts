@@ -6,8 +6,6 @@
  * See PAYMENT_OPTIONS_2026.md for full analysis.
  */
 
-import Product from '../models/Product';
-
 // Payment provider types - will be updated when new provider is selected
 export type PaymentProvider = 'web';
 
