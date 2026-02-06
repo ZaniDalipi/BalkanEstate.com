@@ -4,7 +4,6 @@
  */
 
 import { Request, Response } from 'express';
-import Promotion from '../../models/Promotion';
 import Property from '../../models/Property';
 import { IUser } from '../../models/User';
 import {
