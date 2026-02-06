@@ -26,9 +26,42 @@ EUR cross-border transfers to/from MK are now treated like domestic SEPA transac
 
 ---
 
-## Remaining Viable Options
+## Provider Support by Country (All 11 Countries)
 
-### Tier 1: Merchant of Record (handle VAT/tax/chargebacks for you)
+### Merchant of Record (handle VAT/tax/chargebacks)
+
+| Provider | GR | HR | BG | RO | SI | RS | AL | BA | MK | ME | XK | Fees |
+|----------|----|----|----|----|----|----|----|----|----|----|-----|------|
+| **Paddle** | YES | YES | YES | YES | YES | ? | ? | ? | REJECTED | ? | ? | 5% + $0.50 |
+| **LemonSqueezy** | YES | YES | YES | YES | YES | NO | NO | NO | REJECTED | NO | NO | ~6.5% |
+| **2Checkout** | YES | YES | YES | YES | YES | YES | YES | YES | YES | YES | ? | 4.5% + $0.45 |
+| **Dodo Payments** | YES | YES | YES | YES | YES | YES | YES | YES | YES | YES | YES | 4% + $0.40 |
+| **FastSpring** | YES | YES | YES | YES | YES | ? | ? | ? | ? | ? | ? | ~5.9-8.9% |
+| **Gumroad** | YES | YES | YES | YES | YES | YES | YES | YES | YES | NO | NO | 10% |
+
+### PSP (you handle tax/compliance)
+
+| Provider | GR | HR | BG | RO | SI | RS | AL | BA | MK | ME | XK | Fees |
+|----------|----|----|----|----|----|----|----|----|----|----|-----|------|
+| **Stripe** | YES | YES | YES | YES | YES | NO | NO | NO | NO | NO | NO | 2.9% + $0.30 |
+| **PayPal Biz** | YES | YES | YES | YES | YES | LTD | LTD | LTD | LTD | LTD | NO | 2.9% + fixed |
+| **Adyen** | YES | YES | YES | YES | YES | NO | NO | NO | NO | NO | NO | Interchange++ |
+| **Mollie** | YES | YES | YES | YES | YES | NO | NO | NO | NO | NO | NO | 1.8% + €0.25 |
+| **Rapyd/PayU** | YES | YES | YES | YES | YES | YES | ? | YES | YES | YES | ? | Custom |
+| **Paysera** | YES | YES | YES | YES | YES | YES | YES | YES | ? | ? | YES | ~1-2.5% |
+| **Novalnet** | YES | YES | YES | YES | YES | YES | YES | ? | YES | YES | ? | Custom + €19/mo |
+| **Monri/Payten** | YES | YES | YES | YES | YES | YES | YES | YES | YES | YES | YES | Custom |
+
+### Key Takeaway
+
+**Registering in an EU Balkan country (GR, HR, BG, RO, SI) unlocks ALL providers.**
+Romania and Bulgaria are the cheapest for company registration.
+
+---
+
+## Remaining Viable Options (from North Macedonia)
+
+### Tier 1: Merchant of Record
 
 #### 1. 2Checkout (Verifone) - 2Subscribe Plan
 - **Website:** https://www.2checkout.com
@@ -37,9 +70,8 @@ EUR cross-border transfers to/from MK are now treated like domestic SEPA transac
 - **Subscriptions:** YES - full lifecycle, dunning, retention tools
 - **Payment methods:** 45+ methods, 100+ currencies, 200+ countries
 - **Tax handling:** Full global VAT/sales tax compliance
-- **Wise compatibility:** UNCERTAIN - manual Financial Department review of bank details
+- **Wise compatibility:** UNCERTAIN - manual Financial Department review
 - **Maturity:** Very High (20,000+ merchants)
-- **Contact:** https://www.2checkout.com/contact
 
 #### 2. Dodo Payments
 - **Website:** https://dodopayments.com
@@ -50,7 +82,6 @@ EUR cross-border transfers to/from MK are now treated like domestic SEPA transac
 - **Tax handling:** Full MoR compliance
 - **Wise compatibility:** Likely yes
 - **Maturity:** Low (founded 2023, $1.1M pre-seed)
-- **Contact:** support@dodopayments.com
 
 #### 3. FastSpring
 - **Website:** https://fastspring.com
@@ -61,7 +92,6 @@ EUR cross-border transfers to/from MK are now treated like domestic SEPA transac
 - **Tax handling:** Full MoR compliance
 - **Wise compatibility:** YES (well-documented USD ACH setup)
 - **Maturity:** High
-- **Contact:** https://fastspring.com/contact
 
 #### 4. Gumroad
 - **Website:** https://gumroad.com
@@ -72,86 +102,100 @@ EUR cross-border transfers to/from MK are now treated like domestic SEPA transac
 - **Maturity:** Medium
 - **Note:** Expensive. Last resort.
 
-### Tier 2: PSP with US LLC workaround
+### Tier 2: PSP (you handle tax/compliance)
 
-#### 5. Stripe via US LLC
-- **Setup cost:** ~$500-800 one-time (via Doola, Firstbase, or Stripe Atlas)
-- **Annual cost:** ~$200-500/yr (Delaware franchise tax, registered agent, annual report)
-- **Stripe fees:** 2.9% + $0.30 (+1% international cards, +1% currency conversion)
-- **Subscriptions:** YES - Stripe Billing is best-in-class
-- **Payment methods:** Everything (cards, SEPA, Apple/Google Pay, Klarna, etc.)
-- **Wise compatibility:** YES (officially supported, USD ACH)
-- **Maturity:** Highest
-- **Breakeven vs MoR:** Makes sense at ~€500+/mo revenue
-- **Setup time:** 2-4 weeks
-
-### Tier 3: Regional / Supplementary
-
-#### 6. Rapyd (now with PayU)
+#### 5. Rapyd (now with PayU)
 - **Website:** https://www.rapyd.net
 - **Fees:** Custom (Interchange++ model)
 - **MK support:** YES (explicitly listed)
 - **Payment methods:** 900+ methods across 190+ countries
 - **Subscriptions:** YES
-- **Best for:** When you scale and need enterprise pricing
-- **Contact:** https://www.rapyd.net/contact-us
 
-#### 7. Novalnet
+#### 6. Novalnet
 - **Website:** https://www.novalnet.com
 - **Fees:** Custom + €19/month
 - **MK support:** YES (dedicated MK page)
 - **Subscriptions:** YES
 - **Payment methods:** Cards, SEPA, PayPal, Apple/Google Pay
-- **Contact:** https://www.novalnet.com/contact
 
-#### 8. CaSys / cPay (Local MK processor)
-- **Website:** https://casys.com.mk / https://www.cpay.com.mk
-- **Fees:** ~2.4% per transaction
-- **MK support:** YES (domestic processor)
-- **Subscriptions:** YES (card-on-file recurring)
-- **Payment methods:** Visa, Mastercard via MK acquiring banks
-- **Limitation:** Domestic focus, not ideal for 11-country coverage
+#### 7. Monri / Payten (Regional leader)
+- **Website:** https://monri.com / https://www.payten.com
+- **Fees:** Custom
+- **Coverage:** All 11 Balkan countries (offices in HR, RS, BA, ME, MK, AL, XK)
+- **Subscriptions:** YES
+- **Payment methods:** Cards, local bank methods
+
+#### 8. Paysera
+- **Website:** https://www.paysera.com
+- **Fees:** ~1-2.5% + €0.29
+- **Coverage:** Strong in Balkans (recently expanded to AL, XK)
+- **Subscriptions:** Limited (needs custom implementation)
+
+### Tier 3: US LLC Workaround
+
+#### 9. Stripe via US LLC
+- **Setup cost:** ~$500-800 one-time (via Doola, Firstbase, or Stripe Atlas)
+- **Annual cost:** ~$200-500/yr
+- **Stripe fees:** 2.9% + $0.30
+- **Wise compatibility:** YES (officially supported, USD ACH)
+- **Breakeven vs MoR:** Makes sense at ~€500+/mo revenue
 
 ### Tier 4: Crypto (supplementary)
 
-#### 9. NOWPayments
+#### 10. NOWPayments
 - **Website:** https://nowpayments.io
 - **Fees:** 0.5-1%
 - **Subscriptions:** YES
 - **300+ cryptocurrencies**
-- **Fiat off-ramp:** Guardarian -> SEPA -> Wise EUR IBAN
 
-#### 10. BitPay
+#### 11. BitPay
 - **Website:** https://bitpay.com
 - **Fees:** 1-2%
 - **Subscriptions:** YES
-- **Direct EUR bank settlement** (if MK qualifies post-SEPA)
+- **Direct EUR bank settlement**
 
 ---
 
-## Comparison (MoR options only)
+## Fee Comparison (on €25/mo Pro Plan)
 
-| Provider | Fees | On €25/mo plan you keep | MK Support | Wise | Maturity |
-|----------|------|------------------------|------------|------|----------|
-| Dodo Payments | 4% + $0.40 | ~€23.60 | YES | Likely | Low |
-| 2Checkout | 4.5% + $0.45 | ~€23.43 | YES | Uncertain | Very High |
-| FastSpring | ~5.9% | ~€22.53 | YES | YES | High |
-| Gumroad | 10% | €22.50 | YES | Yes | Medium |
-
-## Comparison (PSP option)
-
-| Provider | Fees | On €25/mo plan you keep | Setup Cost | Wise |
-|----------|------|------------------------|------------|------|
-| Stripe (US LLC) | ~3.9% + $0.30 | ~€23.73 | $500-800 + $200-500/yr | YES |
+| Provider | Type | Fee per txn | You keep | Tax handling |
+|----------|------|-------------|----------|--------------|
+| Dodo Payments | MoR | ~€1.40 | ~€23.60 | Included |
+| 2Checkout | MoR | ~€1.57 | ~€23.43 | Included |
+| Stripe (US LLC) | PSP | ~€1.27 | ~€23.73 | You handle |
+| FastSpring | MoR | ~€1.48-2.23 | ~€22.77-23.52 | Included |
+| Gumroad | MoR | €2.50 | €22.50 | Included |
+| Rapyd | PSP | Custom | Custom | You handle |
+| Novalnet | PSP | Custom + €19/mo | Custom | You handle |
 
 ---
 
-## Recommendation
+## Outreach Emails
 
-1. **Apply to 2Checkout and Dodo Payments first** - cheapest MoR options that support MK
-2. **If both reject** - go FastSpring (higher fees but proven)
-3. **Long-term** - form US LLC for Stripe access when revenue justifies the overhead
-4. **Supplementary** - add NOWPayments for crypto (0.5% fee, differentiator in Balkans)
+### Sent to:
+1. 2Checkout (Verifone) - sales@2checkout.com / https://www.2checkout.com/contact
+2. Dodo Payments - support@dodopayments.com
+3. FastSpring - https://fastspring.com/contact
+4. Rapyd - https://www.rapyd.net/contact-us
+5. Novalnet - https://www.novalnet.com/contact
+6. Monri/Payten - https://monri.com/contact
+7. Paysera - https://www.paysera.com/contact
+
+---
+
+## Strategy
+
+### Option A: Stay in North Macedonia
+1. Apply to **2Checkout** and **Dodo Payments** first (cheapest MoR)
+2. If rejected, try **FastSpring** (higher fees but proven)
+3. Add **Monri/Payten** as regional PSP fallback
+4. Long-term: form US LLC for Stripe access
+
+### Option B: Register EU entity (recommended if possible)
+1. Register company in **Romania** or **Bulgaria** (cheapest EU options)
+2. Unlock **Stripe**, **Paddle**, **Adyen**, **Mollie** -- everything
+3. Use Stripe (2.9%) or Paddle (5% MoR) as primary
+4. Massive cost savings and no rejections
 
 ---
 
