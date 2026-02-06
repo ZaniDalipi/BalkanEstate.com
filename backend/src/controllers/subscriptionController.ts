@@ -62,7 +62,7 @@ export const createSubscription = async (req: Request, res: Response): Promise<v
       productId: product.productId,
       googlePlayProductId: product.googlePlayProductId,
       appStoreProductId: product.appStoreProductId,
-      webProductId: product.webProductId,
+      externalProductId: product.externalProductId,
       purchaseToken: store === 'google' ? purchaseToken : undefined,
       transactionId: store === 'apple' ? transactionId : undefined,
       startDate,
