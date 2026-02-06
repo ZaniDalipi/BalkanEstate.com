@@ -882,11 +882,13 @@ export const activateCouponSubscription = async (req: Request, res: Response): P
     }
 
     // Create subscription
+    const uniqueToken = `discount_${discountCode.code}_${userId}_${Date.now()}`;
     const subscription = await Subscription.create({
       userId,
       store: 'agency_coupon',
       productId: product.productId,
-      purchaseToken: `discount_${discountCode.code}_${userId}_${Date.now()}`,
+      purchaseToken: uniqueToken,
+      transactionId: uniqueToken,
       startDate,
       expirationDate,
       renewalDate: expirationDate,
