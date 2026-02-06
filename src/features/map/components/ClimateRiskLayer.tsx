@@ -15,8 +15,8 @@ interface ClimateRiskLayerProps {
   opacity?: number;
 }
 
-// OpenWeatherMap API key (free tier)
-const OWM_API_KEY = '439d4b804bc8187953eb36d2a8c26a02';
+// OpenWeatherMap API key from environment
+const OWM_API_KEY = import.meta.env.VITE_OWM_API_KEY || '';
 
 // Climate risk layer configurations
 const CLIMATE_RISK_LAYERS: Record<

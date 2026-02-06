@@ -32,19 +32,22 @@ export const getConversations = async (
       .populate('sellerId', 'name email phone avatarUrl role agencyName')
       .sort({ lastMessageAt: -1 });
 
-    // Get last message for each conversation
-    const conversationsWithMessages = await Promise.all(
-      conversations.map(async (conv) => {
-        const lastMessage = await Message.findOne({
-          conversationId: conv._id,
-        }).sort({ createdAt: -1 });
+    // Get last message for ALL conversations in a single aggregation query
+    const conversationIds = conversations.map(c => c._id);
+    const lastMessages = await Message.aggregate([
+      { $match: { conversationId: { $in: conversationIds } } },
+      { $sort: { createdAt: -1 } },
+      { $group: { _id: '$conversationId', lastMessage: { $first: '$$ROOT' } } },
+    ]);
 
-        return {
-          ...conv.toObject(),
-          lastMessage,
-        };
-      })
+    const lastMessageMap = new Map(
+      lastMessages.map(m => [String(m._id), m.lastMessage])
     );
+
+    const conversationsWithMessages = conversations.map(conv => ({
+      ...conv.toObject(),
+      lastMessage: lastMessageMap.get(String(conv._id)) || null,
+    }));
 
     res.json({ conversations: conversationsWithMessages });
   } catch (error: any) {
@@ -92,30 +95,24 @@ export const getConversation = async (
 
     // Messages remain encrypted, client will decrypt them
 
-    // Mark messages as read
+    // Mark messages as read + reset unread count atomically
     if (isBuyer) {
-      await Message.updateMany(
-        {
-          conversationId: conversation._id,
-          senderId: conversation.sellerId._id,
-          isRead: false,
-        },
-        { isRead: true }
-      );
-      conversation.buyerUnreadCount = 0;
+      await Promise.all([
+        Message.updateMany(
+          { conversationId: conversation._id, senderId: conversation.sellerId._id, isRead: false },
+          { isRead: true }
+        ),
+        Conversation.findByIdAndUpdate(conversation._id, { $set: { buyerUnreadCount: 0 } }),
+      ]);
     } else {
-      await Message.updateMany(
-        {
-          conversationId: conversation._id,
-          senderId: conversation.buyerId._id,
-          isRead: false,
-        },
-        { isRead: true }
-      );
-      conversation.sellerUnreadCount = 0;
+      await Promise.all([
+        Message.updateMany(
+          { conversationId: conversation._id, senderId: conversation.buyerId._id, isRead: false },
+          { isRead: true }
+        ),
+        Conversation.findByIdAndUpdate(conversation._id, { $set: { sellerUnreadCount: 0 } }),
+      ]);
     }
-
-    await conversation.save();
 
     res.json({ conversation, messages });
   } catch (error: any) {
@@ -256,14 +253,12 @@ export const sendMessage = async (
 
     const message = await Message.create(messageData);
 
-    // Update conversation
-    conversation.lastMessageAt = new Date();
-    if (isBuyer) {
-      conversation.sellerUnreadCount += 1;
-    } else {
-      conversation.buyerUnreadCount += 1;
-    }
-    await conversation.save();
+    // Update conversation atomically (avoids race condition on concurrent messages)
+    const unreadField = isBuyer ? 'sellerUnreadCount' : 'buyerUnreadCount';
+    await Conversation.findByIdAndUpdate(conversation._id, {
+      $set: { lastMessageAt: new Date() },
+      $inc: { [unreadField]: 1 },
+    });
 
     await message.populate('senderId', 'name avatarUrl');
 
@@ -488,30 +483,24 @@ export const markAsRead = async (
       return;
     }
 
-    // Mark messages as read
+    // Mark messages as read + reset unread count atomically
     if (isBuyer) {
-      await Message.updateMany(
-        {
-          conversationId: conversation._id,
-          senderId: conversation.sellerId,
-          isRead: false,
-        },
-        { isRead: true }
-      );
-      conversation.buyerUnreadCount = 0;
+      await Promise.all([
+        Message.updateMany(
+          { conversationId: conversation._id, senderId: conversation.sellerId, isRead: false },
+          { isRead: true }
+        ),
+        Conversation.findByIdAndUpdate(conversation._id, { $set: { buyerUnreadCount: 0 } }),
+      ]);
     } else {
-      await Message.updateMany(
-        {
-          conversationId: conversation._id,
-          senderId: conversation.buyerId,
-          isRead: false,
-        },
-        { isRead: true }
-      );
-      conversation.sellerUnreadCount = 0;
+      await Promise.all([
+        Message.updateMany(
+          { conversationId: conversation._id, senderId: conversation.buyerId, isRead: false },
+          { isRead: true }
+        ),
+        Conversation.findByIdAndUpdate(conversation._id, { $set: { sellerUnreadCount: 0 } }),
+      ]);
     }
-
-    await conversation.save();
 
     res.json({ message: 'Marked as read' });
   } catch (error: any) {

@@ -12,6 +12,7 @@ import {
 } from '../controllers/propertyController';
 import { protect } from '../middleware/auth';
 import { upload } from '../utils/upload';
+import { sensitiveRateLimiter } from '../middleware/security';
 
 const router = express.Router();
 
@@ -177,14 +178,14 @@ router.get('/:id', getProperty);
  *       401:
  *         $ref: '#/components/responses/Unauthorized'
  */
-router.post('/', protect, createProperty);
-router.put('/:id', protect, updateProperty);
-router.delete('/:id', protect, deleteProperty);
+router.post('/', protect, sensitiveRateLimiter, createProperty);
+router.put('/:id', protect, sensitiveRateLimiter, updateProperty);
+router.delete('/:id', protect, sensitiveRateLimiter, deleteProperty);
 router.get('/my/listings', protect, getMyListings);
 // Upload images - can be used with or without propertyId
-router.post('/upload-images', protect, upload.array('images', 30), uploadImages);
-router.post('/:propertyId/upload-images', protect, upload.array('images', 30), uploadImages);
-router.patch('/:id/mark-sold', protect, markAsSold);
-router.patch('/:id/renew', protect, renewProperty);
+router.post('/upload-images', protect, sensitiveRateLimiter, upload.array('images', 30), uploadImages);
+router.post('/:propertyId/upload-images', protect, sensitiveRateLimiter, upload.array('images', 30), uploadImages);
+router.patch('/:id/mark-sold', protect, sensitiveRateLimiter, markAsSold);
+router.patch('/:id/renew', protect, sensitiveRateLimiter, renewProperty);
 
 export default router;

@@ -137,6 +137,7 @@ const FilterControls: React.FC<Omit<PropertyListProps, 'properties' | 'showList'
                         <button
                             onClick={onResetFilters}
                             className="flex-grow py-2.5 px-4 border border-neutral-300 text-neutral-600 rounded-lg text-sm font-bold bg-white hover:bg-neutral-100 transition-colors"
+                            aria-label={t('search:filters.resetFilters')}
                         >
                             {t('search:filters.resetFilters')}
                         </button>
@@ -158,6 +159,9 @@ const FilterControls: React.FC<Omit<PropertyListProps, 'properties' | 'showList'
                         onKeyDown={(e) => e.key === 'Enter' && onSearchClick()}
                         onFocus={() => onQueryInputFocusChange?.(true)}
                         className={`${inputBaseClasses} pl-9`}
+                        aria-label={t('search:searchLocation')}
+                        aria-autocomplete="list"
+                        aria-expanded={suggestions.length > 0 && isQueryInputFocused}
                     />
                     {filters.query && !isSearchingLocation && (
                         <div className="absolute inset-y-0 right-0 flex items-center pr-2">
@@ -173,12 +177,14 @@ const FilterControls: React.FC<Omit<PropertyListProps, 'properties' | 'showList'
                     )}
                 </div>
                 {suggestions.length > 0 && isQueryInputFocused && (
-                    <ul className="absolute z-30 w-full mt-1 bg-white border border-neutral-200 rounded-lg shadow-lg max-h-48 overflow-y-auto">
+                    <ul className="absolute z-30 w-full mt-1 bg-white border border-neutral-200 rounded-lg shadow-lg max-h-48 overflow-y-auto" role="listbox" aria-label="Search suggestions">
                         {suggestions.map((suggestion) => (
                             <li
                                 key={suggestion.place_id}
                                 onMouseDown={() => onSuggestionClick?.(suggestion as any)}
                                 className="px-3 py-2 text-xs text-neutral-700 hover:bg-primary/5 cursor-pointer flex items-center gap-2 transition-colors"
+                                role="option"
+                                aria-selected={false}
                             >
                                 <MapPinIcon className="w-4 h-4 text-primary flex-shrink-0" />
                                 <span className="truncate">{suggestion.display_name}</span>
@@ -199,6 +205,7 @@ const FilterControls: React.FC<Omit<PropertyListProps, 'properties' | 'showList'
                             value={filters.minPrice ? filters.minPrice.toLocaleString('de-DE') : ''}
                             onChange={(e) => handleNumericInputChange('minPrice', e.target.value)}
                             className={`${inputBaseClasses} pl-7`}
+                            aria-label={t('search:filters.min') + ' ' + t('search:filters.priceRange')}
                         />
                     </div>
                     <span className="text-neutral-400">-</span>
@@ -210,6 +217,7 @@ const FilterControls: React.FC<Omit<PropertyListProps, 'properties' | 'showList'
                             value={filters.maxPrice ? filters.maxPrice.toLocaleString('de-DE') : ''}
                              onChange={(e) => handleNumericInputChange('maxPrice', e.target.value)}
                             className={`${inputBaseClasses} pl-7`}
+                            aria-label={t('search:filters.max') + ' ' + t('search:filters.priceRange')}
                         />
                     </div>
                 </div>
@@ -225,6 +233,7 @@ const FilterControls: React.FC<Omit<PropertyListProps, 'properties' | 'showList'
                              value={filters.minSqft ? filters.minSqft.toLocaleString('de-DE') : ''}
                              onChange={(e) => handleNumericInputChange('minSqft', e.target.value)}
                              className={`${inputBaseClasses} pr-8`}
+                             aria-label={t('search:filters.min') + ' ' + t('search:filters.areaRange')}
                         />
                         <span className="absolute right-3 top-1/2 -translate-y-1/2 text-neutral-500 text-sm">m²</span>
                     </div>
@@ -236,6 +245,7 @@ const FilterControls: React.FC<Omit<PropertyListProps, 'properties' | 'showList'
                             value={filters.maxSqft ? filters.maxSqft.toLocaleString('de-DE') : ''}
                             onChange={(e) => handleNumericInputChange('maxSqft', e.target.value)}
                             className={`${inputBaseClasses} pr-8`}
+                            aria-label={t('search:filters.max') + ' ' + t('search:filters.areaRange')}
                         />
                         <span className="absolute right-3 top-1/2 -translate-y-1/2 text-neutral-500 text-sm">m²</span>
                     </div>
@@ -787,6 +797,7 @@ const PropertyList: React.FC<PropertyListProps> = (props) => {
                                     name="sortBy"
                                     value={filters.sortBy}
                                     onChange={(e) => onSortChange(e.target.value)}
+                                    aria-label={t('search:filters.sortBy', 'Sort properties by')}
                                     className={`${inputBaseClasses} appearance-none pr-8 text-xs !py-1.5`}
                                 >
                                     <option value="newest">{t('search:sort.newest')}</option>

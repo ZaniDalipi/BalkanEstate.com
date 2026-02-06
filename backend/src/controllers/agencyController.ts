@@ -383,24 +383,28 @@ export const getAgencies = async (
     // Import Property model at the top if not already imported
     const Property = (await import('../models/Property')).default;
 
-    // Calculate totalProperties for each agency by counting properties from all agents
-    const agenciesWithCounts = await Promise.all(
-      agencies.map(async (agency: any) => {
-        const agentIds = agency.agents?.map((agent: any) => agent._id) || [];
-
-        // Count active properties for all agents in this agency
-        const propertyCount = await Property.countDocuments({
-          sellerId: { $in: agentIds },
-          status: { $in: ['active', 'pending'] }
-        });
-
-        return {
-          ...agency,
-          totalProperties: propertyCount,
-          totalAgents: agency.agents?.length || 0
-        };
-      })
+    // Calculate totalProperties for ALL agencies in a single aggregation query
+    const allAgentIds = agencies.flatMap((agency: any) =>
+      agency.agents?.map((agent: any) => agent._id) || []
     );
+
+    const propertyCounts = await Property.aggregate([
+      { $match: { sellerId: { $in: allAgentIds }, status: { $in: ['active', 'pending'] } } },
+      { $group: { _id: '$sellerId', count: { $sum: 1 } } },
+    ]);
+
+    // Build a map of agentId -> count for fast lookup
+    const countByAgent = new Map(
+      propertyCounts.map(pc => [String(pc._id), pc.count])
+    );
+
+    const agenciesWithCounts = agencies.map((agency: any) => {
+      const agentIds = agency.agents?.map((agent: any) => agent._id) || [];
+      const totalProperties = agentIds.reduce(
+        (sum: number, id: any) => sum + (countByAgent.get(String(id)) || 0), 0
+      );
+      return { ...agency, totalProperties, totalAgents: agency.agents?.length || 0 };
+    });
 
     const total = await Agency.countDocuments(filter);
 

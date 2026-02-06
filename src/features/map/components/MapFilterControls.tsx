@@ -146,11 +146,11 @@ const MapFilterControls: React.FC<MapFilterControlsProps> = ({
               <button
                 onClick={onRecenter}
                 className="p-1.5 rounded-full transition-colors hover:bg-black/10"
-                title={t('search:map.centerOnLocation')}
+                aria-label={t('search:map.centerOnLocation')}
               >
                 <CrosshairsIcon className="w-5 h-5 text-neutral-700" />
               </button>
-              <div className="flex items-center bg-neutral-200/50 p-0.5 rounded-full">
+              <div className="flex items-center bg-neutral-200/50 p-0.5 rounded-full" role="radiogroup" aria-label="Map style">
                 <button
                   onClick={() => setMapType('positron')}
                   className={`px-2 py-1 rounded-full text-[11px] font-semibold transition-all ${
@@ -158,7 +158,8 @@ const MapFilterControls: React.FC<MapFilterControlsProps> = ({
                       ? 'bg-white shadow text-primary'
                       : 'text-neutral-600 hover:bg-white/50'
                   }`}
-                  title="Clean, minimal - properties stand out"
+                  aria-label="Clean map style - minimal, properties stand out"
+                  aria-pressed={mapType === 'positron'}
                 >
                   {t('search:map.clean', 'Clean')}
                 </button>
@@ -169,7 +170,8 @@ const MapFilterControls: React.FC<MapFilterControlsProps> = ({
                       ? 'bg-white shadow text-primary'
                       : 'text-neutral-600 hover:bg-white/50'
                   }`}
-                  title="Shows neighborhoods, parks, amenities"
+                  aria-label="Color map style - shows neighborhoods, parks, amenities"
+                  aria-pressed={mapType === 'voyager'}
                 >
                   {t('search:map.color', 'Color')}
                 </button>
@@ -180,7 +182,8 @@ const MapFilterControls: React.FC<MapFilterControlsProps> = ({
                       ? 'bg-white shadow text-primary'
                       : 'text-neutral-600 hover:bg-white/50'
                   }`}
-                  title="Google Maps street view"
+                  aria-label="Street map style"
+                  aria-pressed={mapType === 'street'}
                 >
                   {t('search:map.street')}
                 </button>
@@ -191,7 +194,8 @@ const MapFilterControls: React.FC<MapFilterControlsProps> = ({
                       ? 'bg-white shadow text-primary'
                       : 'text-neutral-600 hover:bg-white/50'
                   }`}
-                  title="Aerial/satellite imagery"
+                  aria-label="Satellite aerial imagery"
+                  aria-pressed={mapType === 'satellite'}
                 >
                   {t('search:map.satellite')}
                 </button>
@@ -203,6 +207,8 @@ const MapFilterControls: React.FC<MapFilterControlsProps> = ({
                     ? 'bg-red-600 text-white hover:bg-red-700'
                     : 'bg-neutral-800 text-white hover:bg-neutral-900'
                 }`}
+                aria-label={isDrawing ? t('search:map.cancel') : t('search:map.drawArea')}
+                aria-pressed={isDrawing}
               >
                 {isDrawing ? <XCircleIcon className="w-4 h-4" /> : <PencilIcon className="w-4 h-4" />}
                 <span className="hidden sm:inline">{isDrawing ? t('search:map.cancel') : t('search:map.drawArea')}</span>
@@ -221,6 +227,9 @@ const MapFilterControls: React.FC<MapFilterControlsProps> = ({
                       ? 'bg-blue-500 text-white'
                       : 'bg-white text-gray-700 hover:bg-gray-50 shadow-sm'
                   }`}
+                  aria-label={t('search:map.climateRisks.title', 'Climate Risks')}
+                  aria-haspopup="menu"
+                  aria-expanded={isMapOptionsOpen}
                 >
                   <span>{t('search:map.climateRisks.title', 'Climate Risks')}</span>
                   <svg
@@ -261,7 +270,8 @@ const MapFilterControls: React.FC<MapFilterControlsProps> = ({
                     ? 'bg-slate-700 text-white'
                     : 'text-neutral-600 hover:bg-neutral-200'
                 }`}
-                title={t('search:map.buildings3D', '3D Buildings')}
+                aria-label={t('search:map.buildings3D', '3D Buildings')}
+                aria-pressed={show3DBuildings}
               >
                 <span className="text-sm">🏢</span>
                 <span className="hidden sm:inline">{t('search:map.buildings3D', '3D')}</span>
@@ -275,7 +285,8 @@ const MapFilterControls: React.FC<MapFilterControlsProps> = ({
                     ? 'bg-primary text-white'
                     : 'text-neutral-600 hover:bg-neutral-200'
                 }`}
-                title={t('search:map.landmarks', 'Landmarks')}
+                aria-label={t('search:map.landmarks', 'Landmarks')}
+                aria-pressed={showLandmarks}
               >
                 <span className="text-sm">🏛️</span>
                 <span className="hidden sm:inline">{t('search:map.poi', 'POI')}</span>
@@ -290,7 +301,8 @@ const MapFilterControls: React.FC<MapFilterControlsProps> = ({
                       ? 'bg-primary text-white'
                       : 'text-neutral-600 hover:bg-neutral-200'
                   }`}
-                  title={t('search:map.cadastralParcels')}
+                  aria-label={t('search:map.cadastralParcels')}
+                  aria-pressed={showCadastre}
                 >
                   <span className="text-sm">📐</span>
                   <span className="hidden sm:inline">{t('search:map.parcels', 'Parcels')}</span>
@@ -305,7 +317,8 @@ const MapFilterControls: React.FC<MapFilterControlsProps> = ({
                     ? 'bg-emerald-600 text-white'
                     : 'text-neutral-600 hover:bg-neutral-200'
                 }`}
-                title={t('search:map.measure', 'Measure land')}
+                aria-label={t('search:map.measure', 'Measure land')}
+                aria-pressed={showMeasurement}
               >
                 <span className="text-sm">📏</span>
                 <span className="hidden sm:inline">{t('search:map.measure', 'Measure')}</span>
@@ -319,7 +332,8 @@ const MapFilterControls: React.FC<MapFilterControlsProps> = ({
                     ? 'bg-amber-500 text-white'
                     : 'text-neutral-600 hover:bg-neutral-200'
                 }`}
-                title={t('search:map.legend', 'Legend')}
+                aria-label={t('search:map.legend', 'Legend')}
+                aria-pressed={isLegendOpen}
               >
                 <MapLegendIcon className="w-4 h-4" />
                 <span className="hidden sm:inline">{t('search:map.legend', 'Legend')}</span>
