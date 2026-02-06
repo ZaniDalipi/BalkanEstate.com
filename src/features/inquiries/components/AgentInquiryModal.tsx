@@ -146,6 +146,8 @@ const AgentInquiryModal: React.FC<AgentInquiryModalProps> = ({
                   <img
                     src={agent.avatarUrl}
                     alt={agent.name}
+                    loading="lazy"
+                    decoding="async"
                     className="w-16 h-16 rounded-full object-cover ring-2 ring-neutral-200"
                   />
                 ) : (

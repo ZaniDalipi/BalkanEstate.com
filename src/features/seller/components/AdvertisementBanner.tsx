@@ -172,6 +172,8 @@ const AdvertisementBanner: React.FC<AdvertisementBannerProps> = ({ position = 't
             <img
               src={currentAd.logo}
               alt={currentAd.name}
+              loading="lazy"
+              decoding="async"
               className="w-16 h-16 rounded-full border-2 border-white mb-3 object-cover"
             />
           ) : (
@@ -226,6 +228,8 @@ const AdvertisementBanner: React.FC<AdvertisementBannerProps> = ({ position = 't
             <img
               src={currentAd.logo}
               alt={currentAd.name}
+              loading="lazy"
+              decoding="async"
               className="w-12 h-12 rounded-full border-2 border-white object-cover"
             />
           </div>

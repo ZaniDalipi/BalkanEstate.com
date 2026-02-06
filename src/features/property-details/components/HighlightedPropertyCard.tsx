@@ -197,6 +197,7 @@ const HighlightedPropertyCard: React.FC<HighlightedPropertyCardProps> = ({ prope
                   src={imgUrl}
                   alt={`${property.title || propertyTypeLabel} - Image ${index + 1}`}
                   loading={index === 0 ? 'eager' : 'lazy'}
+                  decoding="async"
                   className={`w-full h-full object-cover transition-transform duration-700 ${
                     isHovered ? 'scale-105' : 'scale-100'
                   }`}

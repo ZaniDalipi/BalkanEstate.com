@@ -26,9 +26,9 @@ const ClimateRiskLegend: React.FC<ClimateRiskLegendProps> = ({ riskType }) => {
       labels: ['Low', 'Moderate', 'High', 'Severe'],
     },
     fire: {
-      label: t('search:map.climateRisks.fire', 'Fire Risk'),
-      colors: ['#fff3e0', '#ffb74d', '#f57c00', '#bf360c'],
-      labels: ['Low', 'Moderate', 'High', 'Severe'],
+      label: t('search:map.climateRisks.fire', 'Active Fires (NASA)'),
+      colors: ['#ffe082', '#ff9800', '#f44336', '#b71c1c'],
+      labels: ['Low', 'Med', 'High', 'Intense'],
     },
     wind: {
       label: t('search:map.climateRisks.wind', 'Wind Risk'),

@@ -321,7 +321,7 @@ export async function processPriceDropAlerts(): Promise<void> {
     // Get all favorites with price alerts enabled
     const favorites = await Favorite.find({
       priceAlertEnabled: true,
-    }).populate('userId', 'email name subscription').populate('propertyId');
+    }).populate('userId', 'email name subscription').populate('propertyId', 'title address city price beds baths sqft imageUrl');
 
     if (favorites.length === 0) {
       cronLogger.info('   No favorites with price alerts enabled');

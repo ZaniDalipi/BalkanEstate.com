@@ -8,6 +8,7 @@ import { QueryProvider } from './src/app/providers/QueryProvider';
 import { ErrorBoundary } from './src/app/components/ErrorBoundary';
 import { QueryErrorBoundary } from './src/app/components/QueryErrorBoundary';
 import { AnimationProvider } from './src/components/ui/Animations';
+import { useZoomCompensation } from './src/app/hooks/useZoomCompensation';
 // Lazy load SEO components (don't block initial render)
 const SEO = lazy(() => import('./src/components/seo').then(m => ({ default: m.SEO })));
 const OrganizationSchema = lazy(() => import('./src/components/seo').then(m => ({ default: m.OrganizationSchema })));
@@ -769,6 +770,9 @@ const AppWrapper: React.FC = () => {
 }
 
 const App: React.FC = () => {
+  // Compensate for browser zoom so UI remains usable at 125%+
+  useZoomCompensation();
+
   // Get analytics IDs from environment variables
   const googleAnalyticsId = import.meta.env.VITE_GA_ID;
   const facebookPixelId = import.meta.env.VITE_FB_PIXEL_ID;

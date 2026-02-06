@@ -64,6 +64,8 @@ const MapPropertyPopup: React.FC<MapPropertyPopupProps> = ({ property, onClose, 
           <img
             src={imageUrl}
             alt={property.title || property.address}
+            loading="lazy"
+            decoding="async"
             className="w-full h-full object-cover"
           />
         ) : (

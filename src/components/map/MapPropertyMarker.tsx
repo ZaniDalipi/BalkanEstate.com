@@ -559,6 +559,8 @@ const PropertyPopup: React.FC<{
                   <img
                     src={imgUrl}
                     alt={`${property.title || property.address} - ${index + 1}`}
+                    loading="lazy"
+                    decoding="async"
                     className="w-full h-full object-cover"
                     style={{ width: '100%', height: '100%', objectFit: 'cover' }}
                     onError={() => handleImageError(index)}
@@ -686,6 +688,8 @@ const PropertyPopup: React.FC<{
             <img
               src={images[0]}
               alt={property.address}
+              loading="lazy"
+              decoding="async"
               className="w-full h-full object-cover"
               style={{ width: '100%', height: '100%', objectFit: 'cover' }}
               onError={() => handleImageError(0)}
@@ -777,7 +781,7 @@ interface MarkersProps {
   isNightMode?: boolean;
 }
 
-export const Markers: React.FC<MarkersProps> = ({ properties, onPopupClick, hoveredPropertyId, isNightMode = false }) => {
+const MarkersComponent: React.FC<MarkersProps> = ({ properties, onPopupClick, hoveredPropertyId, isNightMode = false }) => {
   const map = useMap();
   const [zoom, setZoom] = useState(map.getZoom());
   const markerRefsMap = React.useRef<Map<string, L.Marker>>(new Map());
@@ -873,6 +877,8 @@ export const Markers: React.FC<MarkersProps> = ({ properties, onPopupClick, hove
     </>
   );
 };
+
+export const Markers = React.memo(MarkersComponent);
 
 /**
  * Promotion Tier Colors for map markers

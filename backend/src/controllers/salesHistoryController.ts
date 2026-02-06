@@ -115,7 +115,7 @@ export const getSaleById = async (req: Request, res: Response): Promise<void> =>
     }
 
     const { id } = req.params;
-    const sale = await SalesHistory.findById(id).populate('propertyId');
+    const sale = await SalesHistory.findById(id).populate('propertyId', 'title images price city country address propertyType status currency');
 
     if (!sale) {
       res.status(404).json({ message: 'Sale record not found' });

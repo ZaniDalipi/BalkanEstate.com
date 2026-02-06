@@ -63,9 +63,11 @@ const Header: React.FC<HeaderProps> = ({ onToggleSidebar, isFloating }) => {
           className={`flex items-center space-x-2 font-semibold transition-colors py-1.5 px-2.5 rounded-full whitespace-nowrap ${floating ? 'text-neutral-700 bg-white hover:bg-neutral-100' : 'text-neutral-600 hover:text-primary hover:bg-neutral-100'}`}
         >
             {currentUser.avatarUrl ? (
-              <img src={currentUser.avatarUrl} alt="User Avatar" className="w-7 h-7 rounded-full object-cover"/>
+              <div className="w-7 h-7 rounded-full overflow-hidden flex-shrink-0">
+                <img src={currentUser.avatarUrl} alt="User Avatar" className="w-full h-full rounded-full object-cover"/>
+              </div>
             ) : (
-              <UserCircleIcon className="w-7 h-7" />
+              <UserCircleIcon className="w-7 h-7 flex-shrink-0" />
             )}
             <span className="hidden sm:inline text-sm">{t('nav:myAccount')}</span>
         </button>
@@ -90,20 +92,21 @@ const Header: React.FC<HeaderProps> = ({ onToggleSidebar, isFloating }) => {
 
     return (
       <header className={headerPositionClass}>
-        <nav className="flex items-center space-x-2 sm:space-x-3 bg-white/90 backdrop-blur-md p-1.5 rounded-full shadow-lg border border-neutral-200/50">
+        <nav className="flex items-center space-x-1.5 md:space-x-2 xl:space-x-3 bg-white/90 backdrop-blur-md p-1 md:p-1.5 rounded-full shadow-lg border border-neutral-200/50">
           <button
             onClick={handleSubscribeClick}
-            className="bg-primary text-white px-3 py-1.5 sm:px-4 sm:py-2 rounded-full text-sm font-semibold hover:bg-primary-dark transition-all shadow-sm hover:shadow-md whitespace-nowrap"
+            className="bg-primary text-white px-2.5 py-1.5 md:px-3 xl:px-4 xl:py-2 rounded-full text-xs xl:text-sm font-semibold hover:bg-primary-dark transition-all shadow-sm hover:shadow-md whitespace-nowrap"
             aria-label={t('nav:subscribe')}
           >
               {t('nav:subscribe')}
           </button>
           <button
             onClick={handleNewListingClick}
-            className="bg-secondary text-white px-3 py-1.5 sm:px-4 sm:py-2 rounded-full text-sm font-semibold hover:bg-opacity-90 transition-all shadow-sm hover:shadow-md whitespace-nowrap"
+            className="bg-secondary text-white px-2.5 py-1.5 md:px-3 xl:px-4 xl:py-2 rounded-full text-xs xl:text-sm font-semibold hover:bg-opacity-90 transition-all shadow-sm hover:shadow-md whitespace-nowrap"
             aria-label={t('nav:newListing')}
           >
-              + {t('nav:newListing')}
+              <span className="md:hidden xl:inline">+ {t('nav:newListing')}</span>
+              <span className="hidden md:inline xl:hidden">+ New</span>
           </button>
           <AuthButton floating />
           {isAuthenticated && (
@@ -129,20 +132,21 @@ const Header: React.FC<HeaderProps> = ({ onToggleSidebar, isFloating }) => {
              </div>
           </div>
 
-          <nav className="flex justify-end items-center space-x-2 sm:space-x-3">
+          <nav className="flex justify-end items-center space-x-1.5 md:space-x-2 xl:space-x-3">
             <button
               onClick={handleSubscribeClick}
-              className="bg-primary text-white px-3 py-1.5 sm:px-4 sm:py-2 rounded-full text-sm font-semibold hover:bg-primary-dark transition-all shadow-sm hover:shadow-md whitespace-nowrap"
+              className="bg-primary text-white px-2.5 py-1.5 md:px-3 xl:px-4 xl:py-2 rounded-full text-xs xl:text-sm font-semibold hover:bg-primary-dark transition-all shadow-sm hover:shadow-md whitespace-nowrap"
               aria-label={t('nav:subscribe')}
             >
                 {t('nav:subscribe')}
             </button>
             <button
               onClick={handleNewListingClick}
-              className="bg-secondary text-white px-3 py-1.5 sm:px-4 sm:py-2 rounded-full text-sm font-semibold hover:bg-opacity-90 transition-all shadow-sm hover:shadow-md whitespace-nowrap"
+              className="bg-secondary text-white px-2.5 py-1.5 md:px-3 xl:px-4 xl:py-2 rounded-full text-xs xl:text-sm font-semibold hover:bg-opacity-90 transition-all shadow-sm hover:shadow-md whitespace-nowrap"
               aria-label={t('nav:newListing')}
             >
-                + {t('nav:newListing')}
+                <span className="md:hidden lg:inline">+ {t('nav:newListing')}</span>
+                <span className="hidden md:inline lg:hidden">+ New</span>
             </button>
             <AuthButton />
             {isAuthenticated && (

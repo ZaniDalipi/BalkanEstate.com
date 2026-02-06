@@ -24,6 +24,8 @@ const CompareImage: React.FC<{ prop: Property; onRemove: (id: string) => void; }
                  <img
                     src={prop.imageUrl}
                     alt={prop.address}
+                    loading="lazy"
+                    decoding="async"
                     className="w-10 h-10 object-cover rounded-full border-2 border-white shadow-md"
                     onError={() => setError(true)}
                 />

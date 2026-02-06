@@ -297,7 +297,7 @@ export const getCouponDetails = async (
     const coupon = await PromotionCoupon.findById(req.params.id)
       .populate('createdBy', 'name email')
       .populate('usageHistory.userId', 'name email')
-      .populate('usageHistory.promotionId');
+      .populate('usageHistory.promotionId', 'type tier status startDate endDate');
 
     if (!coupon) {
       res.status(404).json({ message: 'Coupon not found' });
