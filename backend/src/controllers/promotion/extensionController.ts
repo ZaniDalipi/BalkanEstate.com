@@ -9,12 +9,10 @@ import Property from '../../models/Property';
 import { IUser } from '../../models/User';
 import PromotionCoupon from '../../models/PromotionCoupon';
 import {
-  PROMOTION_TIERS,
   getPromotionPrice,
   isValidDuration,
   applyCoupon,
   updatePropertyPromotion,
-  getBaseUrl,
   PromotionTierType,
 } from '../../services/promotion/promotionService';
 import { promotionLogger } from '../../utils/logger';
