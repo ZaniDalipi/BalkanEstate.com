@@ -1,6 +1,7 @@
 import { Request, Response } from 'express';
 import Product from '../models/Product';
 import { apiLogger } from '../utils/logger';
+import { invalidateCache } from '../middleware/cache';
 
 // ============================================================================
 // PUBLIC ENDPOINTS
@@ -110,6 +111,9 @@ export const createProduct = async (req: Request, res: Response): Promise<void> 
   try {
     const product = await Product.create(req.body);
 
+    // Invalidate products cache so changes appear immediately
+    invalidateCache('/api/products');
+
     res.status(201).json({
       success: true,
       message: 'Product created successfully',
@@ -156,6 +160,9 @@ export const updateProduct = async (req: Request, res: Response): Promise<void> 
       return;
     }
 
+    // Invalidate products cache so changes appear immediately
+    invalidateCache('/api/products');
+
     res.status(200).json({
       success: true,
       message: 'Product updated successfully',
@@ -188,6 +195,9 @@ export const deleteProduct = async (req: Request, res: Response): Promise<void> 
       });
       return;
     }
+
+    // Invalidate products cache so deletion is reflected immediately
+    invalidateCache('/api/products');
 
     res.status(200).json({
       success: true,
@@ -224,6 +234,9 @@ export const toggleProductVisibility = async (req: Request, res: Response): Prom
     product.isVisible = !product.isVisible;
     await product.save();
 
+    // Invalidate products cache so visibility change is reflected immediately
+    invalidateCache('/api/products');
+
     res.status(200).json({
       success: true,
       message: `Product ${product.isVisible ? 'shown' : 'hidden'}`,
@@ -259,6 +272,9 @@ export const toggleProductStatus = async (req: Request, res: Response): Promise<
 
     product.isActive = !product.isActive;
     await product.save();
+
+    // Invalidate products cache so status change is reflected immediately
+    invalidateCache('/api/products');
 
     res.status(200).json({
       success: true,

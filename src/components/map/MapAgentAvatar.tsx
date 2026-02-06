@@ -171,6 +171,8 @@ const MapAgentAvatar: React.FC<MapAgentAvatarProps> = ({ onPropertySelect }) => 
               <img
                 src={currentMapFeatured.imageUrl}
                 alt={currentMapFeatured.title || currentMapFeatured.address}
+                loading="lazy"
+                decoding="async"
                 className="w-full h-16 sm:h-20 md:h-24 object-cover transition-transform duration-500 group-hover:scale-110"
               />
               <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
@@ -381,4 +383,4 @@ const MapAgentAvatar: React.FC<MapAgentAvatarProps> = ({ onPropertySelect }) => 
 };
 
 export const MapAgentAvatarInner = MapAgentAvatar;
-export default MapAgentAvatar;
+export default React.memo(MapAgentAvatar);

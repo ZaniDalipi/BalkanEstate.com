@@ -106,6 +106,7 @@ const SavedPropertiesPage: React.FC = () => {
               alt={agent.name}
               className="w-16 h-16 rounded-full object-cover border-2 border-gray-100"
               loading="lazy"
+              decoding="async"
             />
           ) : (
             <UserCircleIcon className="w-16 h-16 text-gray-300" />

@@ -202,6 +202,10 @@ const PropertyCard: React.FC<PropertyCardProps> = ({ property, showToast, showCo
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
       onClick={handleCardClick}
+      onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); handleCardClick(e as any); } }}
+      role="article"
+      tabIndex={0}
+      aria-label={`${property.title || propertyTypeLabel}, ${formatPrice(property.price, property.country)}, ${safeProperty.city}, ${safeProperty.country}`}
     >
       {/* Image Section */}
       <div className="relative overflow-hidden">
@@ -216,6 +220,8 @@ const PropertyCard: React.FC<PropertyCardProps> = ({ property, showToast, showCo
               src={property.imageUrl}
               alt=""
               aria-hidden="true"
+              loading="lazy"
+              decoding="async"
               className="absolute inset-0 w-full h-full object-cover blur-xl scale-110 opacity-60"
             />
             {/* Main image - contained to show full image */}
@@ -352,7 +358,7 @@ const PropertyCard: React.FC<PropertyCardProps> = ({ property, showToast, showCo
             <button
               onClick={(e) => handleLocationClick(e, 'city')}
               className="hover:text-primary hover:underline transition-colors cursor-pointer"
-              title={`View all properties in ${safeProperty.city}`}
+              aria-label={`View all properties in ${safeProperty.city}`}
             >
               {safeProperty.city}
             </button>
@@ -360,7 +366,7 @@ const PropertyCard: React.FC<PropertyCardProps> = ({ property, showToast, showCo
             <button
               onClick={(e) => handleLocationClick(e, 'country')}
               className="hover:text-primary hover:underline transition-colors cursor-pointer"
-              title={`View all properties in ${safeProperty.country}`}
+              aria-label={`View all properties in ${safeProperty.country}`}
             >
               {safeProperty.country}
             </button>
@@ -372,7 +378,7 @@ const PropertyCard: React.FC<PropertyCardProps> = ({ property, showToast, showCo
           {/* Beds */}
           <div
             className="group relative flex flex-col items-center py-2.5 px-1.5 rounded-xl bg-white/60 backdrop-blur-md border border-white/80 shadow-[0_2px_8px_rgba(0,0,0,0.04),inset_0_1px_0_rgba(255,255,255,0.8)] hover:shadow-[0_4px_12px_rgba(59,130,246,0.15),inset_0_1px_0_rgba(255,255,255,0.9)] hover:border-blue-200/60 transition-all duration-300"
-            title={`${safeProperty.beds} ${t('property:features.bedrooms')}`}
+            aria-label={`${safeProperty.beds} ${t('property:features.bedrooms')}`}
           >
             <div className="absolute inset-0 rounded-xl bg-gradient-to-br from-blue-50/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
             <svg className="w-4 h-4 text-blue-500 mb-1 relative z-10 drop-shadow-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
@@ -384,7 +390,7 @@ const PropertyCard: React.FC<PropertyCardProps> = ({ property, showToast, showCo
           {/* Baths */}
           <div
             className="group relative flex flex-col items-center py-2.5 px-1.5 rounded-xl bg-white/60 backdrop-blur-md border border-white/80 shadow-[0_2px_8px_rgba(0,0,0,0.04),inset_0_1px_0_rgba(255,255,255,0.8)] hover:shadow-[0_4px_12px_rgba(16,185,129,0.15),inset_0_1px_0_rgba(255,255,255,0.9)] hover:border-emerald-200/60 transition-all duration-300"
-            title={`${safeProperty.baths} ${t('property:features.bathrooms')}`}
+            aria-label={`${safeProperty.baths} ${t('property:features.bathrooms')}`}
           >
             <div className="absolute inset-0 rounded-xl bg-gradient-to-br from-emerald-50/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
             <svg className="w-4 h-4 text-emerald-500 mb-1 relative z-10 drop-shadow-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
@@ -396,7 +402,7 @@ const PropertyCard: React.FC<PropertyCardProps> = ({ property, showToast, showCo
           {/* Living Rooms */}
           <div
             className="group relative flex flex-col items-center py-2.5 px-1.5 rounded-xl bg-white/60 backdrop-blur-md border border-white/80 shadow-[0_2px_8px_rgba(0,0,0,0.04),inset_0_1px_0_rgba(255,255,255,0.8)] hover:shadow-[0_4px_12px_rgba(168,85,247,0.15),inset_0_1px_0_rgba(255,255,255,0.9)] hover:border-purple-200/60 transition-all duration-300"
-            title={`${safeProperty.livingRooms} ${t('property:features.livingRooms')}`}
+            aria-label={`${safeProperty.livingRooms} ${t('property:features.livingRooms')}`}
           >
             <div className="absolute inset-0 rounded-xl bg-gradient-to-br from-purple-50/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
             <svg className="w-4 h-4 text-purple-500 mb-1 relative z-10 drop-shadow-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
@@ -408,7 +414,7 @@ const PropertyCard: React.FC<PropertyCardProps> = ({ property, showToast, showCo
           {/* Sqft - Highlighted */}
           <div
             className="group relative flex flex-col items-center py-2.5 px-1.5 rounded-xl bg-gradient-to-br from-blue-50/80 to-indigo-50/80 backdrop-blur-md border border-blue-200/60 shadow-[0_2px_8px_rgba(59,130,246,0.1),inset_0_1px_0_rgba(255,255,255,0.9)] hover:shadow-[0_4px_12px_rgba(59,130,246,0.2),inset_0_1px_0_rgba(255,255,255,1)] hover:border-blue-300/70 transition-all duration-300"
-            title={`${safeProperty.sqft} ${t('common:sqm')}`}
+            aria-label={`${safeProperty.sqft} ${t('common:sqm')}`}
           >
             <div className="absolute inset-0 rounded-xl bg-gradient-to-br from-blue-100/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
             <svg className="w-4 h-4 text-blue-600 mb-1 relative z-10 drop-shadow-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">

@@ -429,7 +429,7 @@ export const getMyPromotions = async (
     const promotions = await Promotion.find({
       userId: String((req.user as IUser)._id),
     })
-      .populate('propertyId')
+      .populate('propertyId', 'title images price city country address propertyType status sellerId')
       .sort({ createdAt: -1 });
 
     // Add tier information to each promotion
@@ -584,7 +584,7 @@ export const getPromotionStats = async (
       return;
     }
 
-    const promotion = await Promotion.findById(req.params.id).populate('propertyId');
+    const promotion = await Promotion.findById(req.params.id).populate('propertyId', 'title images price city country address propertyType status sellerId views saves inquiries');
 
     if (!promotion) {
       res.status(404).json({ message: 'Promotion not found' });

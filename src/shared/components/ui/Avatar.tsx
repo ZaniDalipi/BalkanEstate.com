@@ -50,6 +50,8 @@ export const Avatar: React.FC<AvatarProps> = ({
       <img
         src={src}
         alt={alt}
+        loading="lazy"
+        decoding="async"
         className={`
           rounded-full object-cover
           ${sizeClasses[size]}

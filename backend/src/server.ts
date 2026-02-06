@@ -90,6 +90,7 @@ import siteContentRoutes from './routes/siteContentRoutes';
 import achievementRoutes from './routes/achievementRoutes';
 import promotionPlanRoutes from './routes/promotionPlanRoutes';
 import videoRoutes from './routes/videoRoutes';
+import aiRoutes from './routes/aiRoutes';
 
 // Import services
 import { initializeGooglePlayService } from './services/googlePlayService';
@@ -256,6 +257,7 @@ app.use('/api/agents', agentRoutes);
 app.use('/api/agent-requests', agentRequestRoutes);
 app.use('/api/geocoding', geocodingRoutes);
 app.use('/api/neighborhood-insights', aiRateLimiter, neighborhoodInsightsRoutes); // AI-powered - rate limited
+app.use('/api/ai', aiRateLimiter, aiRoutes); // AI-powered endpoints (description, distances, chat, search names)
 app.use('/api/sales-history', salesHistoryRoutes);
 app.use('/api/discount-codes', discountCodeRoutes);
 app.use('/api/cities', cityMarketDataRoutes); // City market data and recommendations

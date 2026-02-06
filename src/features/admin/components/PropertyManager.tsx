@@ -1,10 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   MagnifyingGlassIcon,
   PencilIcon,
   TrashIcon,
-  XMarkIcon,
   EyeIcon,
   HomeIcon,
   SparklesIcon,
@@ -16,324 +15,49 @@ import {
   FunnelIcon,
   ArrowPathIcon,
 } from '@/constants';
-import { useConfirmation } from '@/src/shared/hooks/useConfirmation';
-import { API_URL } from '@/src/shared/api/config';
-
-interface PropertyImage {
-  url: string;
-  publicId?: string;
-  tag?: string;
-}
-
-interface Property {
-  _id: string;
-  title: string;
-  price: number;
-  priceType: string;
-  status: 'active' | 'pending' | 'sold';
-  address: string;
-  city: string;
-  country: string;
-  propertyType: string;
-  beds?: number;
-  bedrooms?: number;
-  baths?: number;
-  bathrooms?: number;
-  sqft?: number;
-  area?: number;
-  livingRooms?: number;
-  yearBuilt?: number;
-  parking?: number;
-  description?: string;
-  isPromoted?: boolean;
-  views?: number;
-  imageUrl?: string;
-  images?: PropertyImage[];
-  sellerId: {
-    _id: string;
-    name: string;
-    email: string;
-    role: string;
-  };
-  createdAt: string;
-  updatedAt: string;
-}
-
-// Helper function to get the best available image URL
-const getPropertyImage = (property: Property): string | null => {
-  // First try the main imageUrl
-  if (property.imageUrl) {
-    return property.imageUrl;
-  }
-  // Then try the first image from the images array
-  if (property.images && property.images.length > 0 && property.images[0]?.url) {
-    return property.images[0].url;
-  }
-  return null;
-};
-
-// Helper to get all image URLs
-const getAllPropertyImages = (property: Property): string[] => {
-  const allImages: string[] = [];
-
-  // Add main image first
-  if (property.imageUrl) {
-    allImages.push(property.imageUrl);
-  }
-
-  // Add images from the array
-  if (property.images && property.images.length > 0) {
-    property.images.forEach(img => {
-      if (img?.url && !allImages.includes(img.url)) {
-        allImages.push(img.url);
-      }
-    });
-  }
-
-  return allImages;
-};
+import { usePropertyManager, getPropertyImage } from './usePropertyManager';
+import { PropertyViewModal, PropertyEditModal } from './PropertyManagerDetail';
 
 const PropertyManager: React.FC = () => {
   const { t } = useTranslation(['admin']);
-  const { confirm } = useConfirmation();
-  const [properties, setProperties] = useState<Property[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
-  // Filter states
-  const [searchQuery, setSearchQuery] = useState('');
-  const [filterStatus, setFilterStatus] = useState<string>('all');
-  const [filterType, setFilterType] = useState<string>('all');
-  const [filterPromoted, setFilterPromoted] = useState<string>('all');
-
-  // Edit modal
-  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
-  const [editingProperty, setEditingProperty] = useState<Property | null>(null);
-  const [editForm, setEditForm] = useState({
-    title: '',
-    price: 0,
-    status: 'active' as 'active' | 'pending' | 'sold',
-    address: '',
-    city: '',
-    country: '',
-    beds: 0,
-    baths: 0,
-    livingRooms: 0,
-    sqft: 0,
-    yearBuilt: new Date().getFullYear(),
-    parking: 0,
-    propertyType: 'house',
-    description: '',
-    isPromoted: false,
-  });
-
-  // View modal
-  const [isViewModalOpen, setIsViewModalOpen] = useState(false);
-  const [viewingProperty, setViewingProperty] = useState<Property | null>(null);
-
-  // Pagination
-  const [currentPage, setCurrentPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(1);
-  const [totalProperties, setTotalProperties] = useState(0);
-
-  useEffect(() => {
-    fetchProperties();
-  }, [currentPage, filterStatus, filterType, filterPromoted, searchQuery]);
-
-  const fetchProperties = async () => {
-    try {
-      setIsLoading(true);
-      const token = localStorage.getItem('balkan_estate_token');
-
-      const params = new URLSearchParams({
-        page: currentPage.toString(),
-        limit: '15',
-        ...(filterStatus !== 'all' && { status: filterStatus }),
-        ...(filterType !== 'all' && { propertyType: filterType }),
-        ...(filterPromoted !== 'all' && { isPromoted: filterPromoted }),
-        ...(searchQuery && { search: searchQuery }),
-      });
-
-      const response = await fetch(`${API_URL}/admin/properties?${params}`, {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-        },
-      });
-
-      if (!response.ok) throw new Error('Failed to fetch properties');
-
-      const data = await response.json();
-      setProperties(data.properties || []);
-      setTotalPages(data.pagination?.totalPages || 1);
-      setTotalProperties(data.pagination?.totalItems || 0);
-    } catch (err) {
-      setError('Failed to load properties');
-      // Error removed
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const handleViewProperty = (property: Property) => {
-    setViewingProperty(property);
-    setIsViewModalOpen(true);
-  };
-
-  const handleEditProperty = (property: Property) => {
-    setEditingProperty(property);
-    setEditForm({
-      title: property.title || '',
-      price: property.price || 0,
-      status: property.status,
-      address: property.address || '',
-      city: property.city || '',
-      country: property.country || '',
-      beds: property.beds || property.bedrooms || 0,
-      baths: property.baths || property.bathrooms || 0,
-      livingRooms: property.livingRooms || 0,
-      sqft: property.sqft || property.area || 0,
-      yearBuilt: property.yearBuilt || new Date().getFullYear(),
-      parking: property.parking || 0,
-      propertyType: property.propertyType || 'house',
-      description: property.description || '',
-      isPromoted: property.isPromoted || false,
-    });
-    setIsEditModalOpen(true);
-  };
-
-  const handleUpdateProperty = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!editingProperty) return;
-
-    try {
-      const token = localStorage.getItem('balkan_estate_token');
-
-      const response = await fetch(`${API_URL}/admin/properties/${editingProperty._id}`, {
-        method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,
-        },
-        body: JSON.stringify(editForm),
-      });
-
-      if (!response.ok) throw new Error('Failed to update property');
-
-      await fetchProperties();
-      setIsEditModalOpen(false);
-      setEditingProperty(null);
-      setSuccessMessage('Property updated successfully');
-      setTimeout(() => setSuccessMessage(null), 3000);
-    } catch (err) {
-      setError('Failed to update property');
-      setTimeout(() => setError(null), 5000);
-    }
-  };
-
-  const handleTogglePromoted = async (property: Property) => {
-    try {
-      const token = localStorage.getItem('balkan_estate_token');
-
-      const response = await fetch(`${API_URL}/admin/properties/${property._id}`, {
-        method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,
-        },
-        body: JSON.stringify({ isPromoted: !property.isPromoted }),
-      });
-
-      if (!response.ok) throw new Error('Failed to update property');
-
-      await fetchProperties();
-      setSuccessMessage(`Property ${property.isPromoted ? 'unpromoted' : 'promoted'} successfully`);
-      setTimeout(() => setSuccessMessage(null), 3000);
-    } catch (err) {
-      setError('Failed to update property');
-      setTimeout(() => setError(null), 5000);
-    }
-  };
-
-  const handleDeleteProperty = async (propertyId: string, title: string) => {
-    const confirmed = await confirm({
-      title: t('admin:properties.deleteTitle', 'Delete Property'),
-      message: t('admin:properties.deleteConfirm', { title, defaultValue: `Are you sure you want to delete "${title}"? This action cannot be undone.` }),
-      confirmLabel: t('admin:common.delete', 'Delete'),
-      cancelLabel: t('admin:common.cancel', 'Cancel'),
-      type: 'danger',
-    });
-    if (!confirmed) return;
-
-    try {
-      const token = localStorage.getItem('balkan_estate_token');
-
-      const response = await fetch(`${API_URL}/admin/properties/${propertyId}`, {
-        method: 'DELETE',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-        },
-      });
-
-      if (!response.ok) throw new Error('Failed to delete property');
-
-      await fetchProperties();
-      setSuccessMessage('Property deleted successfully');
-      setTimeout(() => setSuccessMessage(null), 3000);
-    } catch (err) {
-      setError('Failed to delete property');
-      setTimeout(() => setError(null), 5000);
-    }
-  };
-
-  const formatPrice = (price: number) => {
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: 'EUR',
-      maximumFractionDigits: 0,
-    }).format(price);
-  };
-
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
-    });
-  };
-
-  const getStatusBadgeColor = (status: string) => {
-    switch (status) {
-      case 'active':
-        return 'bg-green-100 text-green-800';
-      case 'pending':
-        return 'bg-yellow-100 text-yellow-800';
-      case 'sold':
-        return 'bg-gray-100 text-gray-800';
-      default:
-        return 'bg-gray-100 text-gray-800';
-    }
-  };
-
-  const getPropertyTypeLabel = (type: string) => {
-    const types: Record<string, string> = {
-      house: 'House',
-      apartment: 'Apartment',
-      villa: 'Villa',
-      land: 'Land',
-      commercial: 'Commercial',
-      other: 'Other',
-    };
-    return types[type] || type;
-  };
-
-  // Stats calculation
-  const stats = {
-    total: totalProperties,
-    active: properties.filter(p => p.status === 'active').length,
-    pending: properties.filter(p => p.status === 'pending').length,
-    promoted: properties.filter(p => p.isPromoted).length,
-  };
+  const {
+    properties,
+    isLoading,
+    error,
+    successMessage,
+    stats,
+    totalProperties,
+    totalPages,
+    currentPage,
+    setCurrentPage,
+    searchQuery,
+    setSearchQuery,
+    filterStatus,
+    setFilterStatus,
+    filterType,
+    setFilterType,
+    filterPromoted,
+    setFilterPromoted,
+    isViewModalOpen,
+    setIsViewModalOpen,
+    viewingProperty,
+    isEditModalOpen,
+    setIsEditModalOpen,
+    editingProperty,
+    editForm,
+    setEditForm,
+    fetchProperties,
+    handleViewProperty,
+    handleEditProperty,
+    handleUpdateProperty,
+    handleTogglePromoted,
+    handleDeleteProperty,
+    formatPrice,
+    formatDate,
+    getStatusBadgeColor,
+    getPropertyTypeLabel,
+  } = usePropertyManager();
 
   if (isLoading && properties.length === 0) {
     return (
@@ -428,7 +152,6 @@ const PropertyManager: React.FC = () => {
               className="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             />
           </div>
-
           <select
             value={filterStatus}
             onChange={(e) => setFilterStatus(e.target.value)}
@@ -439,7 +162,6 @@ const PropertyManager: React.FC = () => {
             <option value="pending">Pending</option>
             <option value="sold">Sold</option>
           </select>
-
           <select
             value={filterType}
             onChange={(e) => setFilterType(e.target.value)}
@@ -453,7 +175,6 @@ const PropertyManager: React.FC = () => {
             <option value="commercial">Commercial</option>
             <option value="other">Other</option>
           </select>
-
           <select
             value={filterPromoted}
             onChange={(e) => setFilterPromoted(e.target.value)}
@@ -509,6 +230,8 @@ const PropertyManager: React.FC = () => {
                         <img
                           src={getPropertyImage(property)!}
                           alt={property.title}
+                          loading="lazy"
+                          decoding="async"
                           className="w-14 h-14 rounded-lg object-cover flex-shrink-0"
                         />
                       ) : (
@@ -670,345 +393,25 @@ const PropertyManager: React.FC = () => {
 
       {/* View Modal */}
       {isViewModalOpen && viewingProperty && (
-        <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-2xl max-w-4xl w-full max-h-[90vh] overflow-hidden">
-            <div className="p-6 border-b border-gray-200 flex items-center justify-between sticky top-0 bg-white z-10">
-              <div>
-                <h3 className="text-xl font-bold text-gray-900">Property Details</h3>
-                <p className="text-sm text-gray-500">ID: {viewingProperty._id}</p>
-              </div>
-              <button
-                onClick={() => setIsViewModalOpen(false)}
-                className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
-              >
-                <XMarkIcon className="w-6 h-6 text-gray-500" />
-              </button>
-            </div>
-
-            <div className="p-6 space-y-6 overflow-y-auto max-h-[calc(90vh-80px)]">
-              {/* Images Gallery */}
-              {getAllPropertyImages(viewingProperty).length > 0 && (
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-                  {getAllPropertyImages(viewingProperty).slice(0, 8).map((imgUrl, idx) => (
-                    <img
-                      key={idx}
-                      src={imgUrl}
-                      alt={`${viewingProperty.title} ${idx + 1}`}
-                      className="w-full h-32 object-cover rounded-xl"
-                    />
-                  ))}
-                </div>
-              )}
-
-              {/* Main Info */}
-              <div className="bg-gray-50 rounded-xl p-4">
-                <div className="flex items-start justify-between gap-4">
-                  <div>
-                    <h4 className="text-lg font-semibold text-gray-900">{viewingProperty.title}</h4>
-                    <p className="text-gray-600 mt-1">{viewingProperty.address}</p>
-                    <p className="text-gray-500 text-sm">{viewingProperty.city}, {viewingProperty.country}</p>
-                  </div>
-                  <div className="text-right">
-                    <div className="text-2xl font-bold text-blue-600">{formatPrice(viewingProperty.price)}</div>
-                    <span className={`inline-block mt-2 px-3 py-1 text-xs font-medium rounded-full ${getStatusBadgeColor(viewingProperty.status)}`}>
-                      {viewingProperty.status}
-                    </span>
-                  </div>
-                </div>
-              </div>
-
-              {/* Specifications */}
-              <div>
-                <h5 className="text-sm font-semibold text-gray-700 mb-3 uppercase tracking-wider">Specifications</h5>
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                  <div className="bg-gray-50 rounded-lg p-3">
-                    <div className="text-gray-500 text-xs">Type</div>
-                    <div className="font-medium text-gray-900">{getPropertyTypeLabel(viewingProperty.propertyType)}</div>
-                  </div>
-                  {viewingProperty.bedrooms && (
-                    <div className="bg-gray-50 rounded-lg p-3">
-                      <div className="text-gray-500 text-xs">Bedrooms</div>
-                      <div className="font-medium text-gray-900">{viewingProperty.bedrooms}</div>
-                    </div>
-                  )}
-                  {viewingProperty.bathrooms && (
-                    <div className="bg-gray-50 rounded-lg p-3">
-                      <div className="text-gray-500 text-xs">Bathrooms</div>
-                      <div className="font-medium text-gray-900">{viewingProperty.bathrooms}</div>
-                    </div>
-                  )}
-                  {viewingProperty.area && (
-                    <div className="bg-gray-50 rounded-lg p-3">
-                      <div className="text-gray-500 text-xs">Area</div>
-                      <div className="font-medium text-gray-900">{viewingProperty.area} m²</div>
-                    </div>
-                  )}
-                  {viewingProperty.yearBuilt && (
-                    <div className="bg-gray-50 rounded-lg p-3">
-                      <div className="text-gray-500 text-xs">Year Built</div>
-                      <div className="font-medium text-gray-900">{viewingProperty.yearBuilt}</div>
-                    </div>
-                  )}
-                  {viewingProperty.parking !== undefined && (
-                    <div className="bg-gray-50 rounded-lg p-3">
-                      <div className="text-gray-500 text-xs">Parking</div>
-                      <div className="font-medium text-gray-900">{viewingProperty.parking} spots</div>
-                    </div>
-                  )}
-                  <div className="bg-gray-50 rounded-lg p-3">
-                    <div className="text-gray-500 text-xs">Promoted</div>
-                    <div className={`font-medium ${viewingProperty.isPromoted ? 'text-purple-600' : 'text-gray-900'}`}>
-                      {viewingProperty.isPromoted ? 'Yes' : 'No'}
-                    </div>
-                  </div>
-                  {viewingProperty.views !== undefined && (
-                    <div className="bg-gray-50 rounded-lg p-3">
-                      <div className="text-gray-500 text-xs">Views</div>
-                      <div className="font-medium text-gray-900">{viewingProperty.views}</div>
-                    </div>
-                  )}
-                </div>
-              </div>
-
-              {/* Description */}
-              {viewingProperty.description && (
-                <div>
-                  <h5 className="text-sm font-semibold text-gray-700 mb-2 uppercase tracking-wider">Description</h5>
-                  <p className="text-gray-600 text-sm leading-relaxed">{viewingProperty.description}</p>
-                </div>
-              )}
-
-              {/* Owner Info */}
-              <div>
-                <h5 className="text-sm font-semibold text-gray-700 mb-3 uppercase tracking-wider">Property Owner</h5>
-                <div className="bg-gray-50 rounded-xl p-4">
-                  <div className="flex items-center gap-4">
-                    <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
-                      <span className="text-blue-600 font-semibold">
-                        {viewingProperty.sellerId?.name?.charAt(0) || '?'}
-                      </span>
-                    </div>
-                    <div>
-                      <div className="font-medium text-gray-900">{viewingProperty.sellerId?.name || 'Unknown'}</div>
-                      <div className="text-sm text-gray-500">{viewingProperty.sellerId?.email || ''}</div>
-                      <div className="text-xs text-gray-400 capitalize mt-0.5">
-                        {viewingProperty.sellerId?.role || 'N/A'}
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {/* Timestamps */}
-              <div className="grid grid-cols-2 gap-4 text-sm border-t border-gray-200 pt-4">
-                <div>
-                  <span className="text-gray-500">Created:</span>
-                  <span className="ml-2 text-gray-900">{formatDate(viewingProperty.createdAt)}</span>
-                </div>
-                <div>
-                  <span className="text-gray-500">Last Updated:</span>
-                  <span className="ml-2 text-gray-900">{formatDate(viewingProperty.updatedAt)}</span>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
+        <PropertyViewModal
+          property={viewingProperty}
+          onClose={() => setIsViewModalOpen(false)}
+          formatPrice={formatPrice}
+          formatDate={formatDate}
+          getStatusBadgeColor={getStatusBadgeColor}
+          getPropertyTypeLabel={getPropertyTypeLabel}
+        />
       )}
 
       {/* Edit Modal */}
       {isEditModalOpen && editingProperty && (
-        <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-2xl max-w-3xl w-full max-h-[90vh] flex flex-col">
-            <div className="p-6 border-b border-gray-200 flex items-center justify-between flex-shrink-0">
-              <div>
-                <h3 className="text-xl font-bold text-gray-900">Edit Property</h3>
-                <p className="text-sm text-gray-500">{editingProperty.title}</p>
-              </div>
-              <button
-                onClick={() => setIsEditModalOpen(false)}
-                className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
-              >
-                <XMarkIcon className="w-6 h-6 text-gray-500" />
-              </button>
-            </div>
-
-            <form onSubmit={handleUpdateProperty} className="flex flex-col flex-1 overflow-hidden">
-              <div className="p-6 space-y-4 overflow-y-auto flex-1">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Title</label>
-                  <input
-                    type="text"
-                    value={editForm.title}
-                    onChange={(e) => setEditForm({ ...editForm, title: e.target.value })}
-                    className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    required
-                  />
-                </div>
-
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Price (EUR)</label>
-                    <input
-                      type="number"
-                      value={editForm.price}
-                      onChange={(e) => setEditForm({ ...editForm, price: Number(e.target.value) })}
-                      className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                      required
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Status</label>
-                    <select
-                      value={editForm.status}
-                      onChange={(e) => setEditForm({ ...editForm, status: e.target.value as any })}
-                      className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    >
-                      <option value="active">Active</option>
-                      <option value="pending">Pending</option>
-                      <option value="sold">Sold</option>
-                    </select>
-                  </div>
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Address</label>
-                  <input
-                    type="text"
-                    value={editForm.address}
-                    onChange={(e) => setEditForm({ ...editForm, address: e.target.value })}
-                    className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    required
-                  />
-                </div>
-
-                <div className="grid grid-cols-3 gap-4">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">City</label>
-                    <input
-                      type="text"
-                      value={editForm.city}
-                      onChange={(e) => setEditForm({ ...editForm, city: e.target.value })}
-                      className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                      required
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Country</label>
-                    <input
-                      type="text"
-                      value={editForm.country}
-                      onChange={(e) => setEditForm({ ...editForm, country: e.target.value })}
-                      className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                      required
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Property Type</label>
-                    <select
-                      value={editForm.propertyType}
-                      onChange={(e) => setEditForm({ ...editForm, propertyType: e.target.value })}
-                      className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    >
-                      <option value="house">House</option>
-                      <option value="apartment">Apartment</option>
-                      <option value="villa">Villa</option>
-                      <option value="land">Land</option>
-                      <option value="commercial">Commercial</option>
-                      <option value="other">Other</option>
-                    </select>
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-4 gap-4">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Bedrooms</label>
-                    <input
-                      type="number"
-                      min="0"
-                      value={editForm.beds}
-                      onChange={(e) => setEditForm({ ...editForm, beds: Number(e.target.value) })}
-                      className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Bathrooms</label>
-                    <input
-                      type="number"
-                      min="0"
-                      value={editForm.baths}
-                      onChange={(e) => setEditForm({ ...editForm, baths: Number(e.target.value) })}
-                      className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Area (m²)</label>
-                    <input
-                      type="number"
-                      min="0"
-                      value={editForm.sqft}
-                      onChange={(e) => setEditForm({ ...editForm, sqft: Number(e.target.value) })}
-                      className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Year Built</label>
-                    <input
-                      type="number"
-                      min="1800"
-                      max={new Date().getFullYear() + 5}
-                      value={editForm.yearBuilt}
-                      onChange={(e) => setEditForm({ ...editForm, yearBuilt: Number(e.target.value) })}
-                      className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    />
-                  </div>
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
-                  <textarea
-                    value={editForm.description}
-                    onChange={(e) => setEditForm({ ...editForm, description: e.target.value })}
-                    className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    rows={3}
-                    placeholder="Property description..."
-                  />
-                </div>
-
-                <div className="flex items-center gap-3 p-4 bg-purple-50 rounded-xl">
-                  <input
-                    type="checkbox"
-                    id="isPromoted"
-                    checked={editForm.isPromoted}
-                    onChange={(e) => setEditForm({ ...editForm, isPromoted: e.target.checked })}
-                    className="w-5 h-5 text-purple-600 border-gray-300 rounded focus:ring-purple-500"
-                  />
-                  <div>
-                    <label htmlFor="isPromoted" className="text-sm font-medium text-gray-900">
-                      Promote this property
-                    </label>
-                    <p className="text-xs text-gray-500">Promoted properties appear at the top of search results</p>
-                  </div>
-                </div>
-              </div>
-
-              <div className="p-6 border-t border-gray-200 flex gap-3 flex-shrink-0 bg-gray-50">
-                <button
-                  type="button"
-                  onClick={() => setIsEditModalOpen(false)}
-                  className="flex-1 px-6 py-3 border border-gray-300 text-gray-700 rounded-xl hover:bg-gray-100 font-medium transition-colors"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  className="flex-1 px-6 py-3 bg-blue-600 text-white rounded-xl hover:bg-blue-700 font-medium transition-colors"
-                >
-                  Save Changes
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
+        <PropertyEditModal
+          property={editingProperty}
+          editForm={editForm}
+          setEditForm={setEditForm}
+          onClose={() => setIsEditModalOpen(false)}
+          onSubmit={handleUpdateProperty}
+        />
       )}
     </div>
   );

@@ -1,212 +1,37 @@
-import React, { useState, useMemo } from 'react';
-import { PlusIcon, TrashIcon, XMarkIcon, ArrowPathIcon } from '@/constants';
-import { useConfirmation } from '@/src/shared/hooks/useConfirmation';
-import {
-  useDiscountCodes,
-  useCreateFullDiscountCode,
-  useDeleteDiscountCode,
-  useDeactivateDiscountCode,
-  useBulkGenerateDiscountCodes,
-} from '../hooks/useAdminData';
-
-interface DiscountCode {
-  _id: string;
-  code: string;
-  discountType: 'percentage' | 'fixed';
-  discountValue: number;
-  validFrom: string;
-  validUntil: string;
-  usageLimit: number;
-  usedCount: number;
-  usedBy: string[];
-  isActive: boolean;
-  applicablePlans?: string[];
-  minimumPurchaseAmount?: number;
-  description?: string;
-  source?: string;
-  createdAt: string;
-}
+import React from 'react';
+import { PlusIcon, ArrowPathIcon } from '@/constants';
+import { useDiscountCodeManager } from './useDiscountCodeManager';
+import { CreateCodeModal, BulkGenerateModal } from './DiscountCodeManagerForm';
 
 const DiscountCodeManager: React.FC = () => {
-  const { confirm } = useConfirmation();
-  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
-  const [isBulkModalOpen, setIsBulkModalOpen] = useState(false);
-  const [localError, setLocalError] = useState<string | null>(null);
-  const [successMessage, setSuccessMessage] = useState<string | null>(null);
-
-  // Filter states
-  const [filterStatus, setFilterStatus] = useState<'all' | 'active' | 'inactive'>('all');
-  const [filterSource, setFilterSource] = useState<string>('all');
-
-  // React Query hooks for reactive data management
-  const { data: codesData, isLoading, error: queryError, isRefetching, refetch } = useDiscountCodes();
-  const createCodeMutation = useCreateFullDiscountCode();
-  const deleteCodeMutation = useDeleteDiscountCode();
-  const deactivateCodeMutation = useDeactivateDiscountCode();
-  const bulkGenerateMutation = useBulkGenerateDiscountCodes();
-
-  const codes = codesData?.discountCodes || [];
-  const error = queryError ? 'Failed to load discount codes' : localError;
-
-  // Form state for creating codes
-  const [newCode, setNewCode] = useState({
-    code: '',
-    discountType: 'percentage' as 'percentage' | 'fixed',
-    discountValue: 10,
-    validUntil: '',
-    usageLimit: 1,
-    description: '',
-    applicablePlans: [] as string[],
-    minimumPurchaseAmount: 0,
-    source: 'admin' as string,
-  });
-
-  // Bulk generation form
-  const [bulkForm, setBulkForm] = useState({
-    count: 10,
-    prefix: 'PROMO',
-    discountType: 'percentage' as 'percentage' | 'fixed',
-    discountValue: 10,
-    validUntil: '',
-    usageLimit: 1,
-  });
-
-  // Helper for validated number input - prevents negative values where min >= 0
-  const handleNewCodeNumber = (field: keyof typeof newCode, value: string, min: number = 0) => {
-    const parsed = parseInt(value, 10);
-    if (value === '' || isNaN(parsed)) {
-      setNewCode({ ...newCode, [field]: min });
-      return;
-    }
-    setNewCode({ ...newCode, [field]: Math.max(parsed, min) });
-  };
-
-  const handleBulkFormNumber = (field: keyof typeof bulkForm, value: string, min: number = 0) => {
-    const parsed = parseInt(value, 10);
-    if (value === '' || isNaN(parsed)) {
-      setBulkForm({ ...bulkForm, [field]: min });
-      return;
-    }
-    setBulkForm({ ...bulkForm, [field]: Math.max(parsed, min) });
-  };
-
-  const handleCreateCode = async (e: React.FormEvent) => {
-    e.preventDefault();
-    createCodeMutation.mutate(
-      {
-        ...newCode,
-        code: newCode.code.toUpperCase(),
-        validFrom: new Date().toISOString(),
-      },
-      {
-        onSuccess: () => {
-          setIsCreateModalOpen(false);
-          setSuccessMessage('Discount code created successfully!');
-          setTimeout(() => setSuccessMessage(null), 3000);
-          // Reset form
-          setNewCode({
-            code: '',
-            discountType: 'percentage',
-            discountValue: 10,
-            validUntil: '',
-            usageLimit: 1,
-            description: '',
-            applicablePlans: [],
-            minimumPurchaseAmount: 0,
-            source: 'admin',
-          });
-        },
-        onError: (err: any) => {
-          setLocalError(err.message || 'Failed to create discount code');
-          setTimeout(() => setLocalError(null), 5000);
-        },
-      }
-    );
-  };
-
-  const handleBulkGenerate = async (e: React.FormEvent) => {
-    e.preventDefault();
-    bulkGenerateMutation.mutate(
-      {
-        ...bulkForm,
-        validFrom: new Date().toISOString(),
-      },
-      {
-        onSuccess: (data) => {
-          setIsBulkModalOpen(false);
-          setSuccessMessage(`Successfully generated ${data.codes?.length || bulkForm.count} discount codes!`);
-          setTimeout(() => setSuccessMessage(null), 3000);
-        },
-        onError: () => {
-          setLocalError('Failed to generate discount codes');
-          setTimeout(() => setLocalError(null), 5000);
-        },
-      }
-    );
-  };
-
-  const handleDeactivate = async (id: string) => {
-    const confirmed = await confirm({
-      title: 'Deactivate Discount Code',
-      message: 'Are you sure you want to deactivate this discount code?',
-      confirmLabel: 'Deactivate',
-      cancelLabel: 'Cancel',
-      type: 'warning',
-    });
-    if (!confirmed) return;
-
-    deactivateCodeMutation.mutate(id, {
-      onSuccess: () => {
-        setSuccessMessage('Discount code deactivated');
-        setTimeout(() => setSuccessMessage(null), 3000);
-      },
-      onError: (err: any) => {
-        const message = err?.message || 'Failed to deactivate discount code';
-        setLocalError(message);
-        setTimeout(() => setLocalError(null), 5000);
-      },
-    });
-  };
-
-  const handleDelete = async (id: string) => {
-    const confirmed = await confirm({
-      title: 'Delete Discount Code',
-      message: 'Are you sure you want to permanently delete this discount code?',
-      confirmLabel: 'Delete',
-      cancelLabel: 'Cancel',
-      type: 'danger',
-    });
-    if (!confirmed) return;
-
-    deleteCodeMutation.mutate(id, {
-      onSuccess: () => {
-        setSuccessMessage('Discount code deleted');
-        setTimeout(() => setSuccessMessage(null), 3000);
-      },
-      onError: (err: any) => {
-        const message = err?.message || 'Failed to delete discount code';
-        setLocalError(message);
-        setTimeout(() => setLocalError(null), 5000);
-      },
-    });
-  };
-
-  const filteredCodes = useMemo(() => codes.filter((code: DiscountCode) => {
-    if (filterStatus === 'active' && !code.isActive) return false;
-    if (filterStatus === 'inactive' && code.isActive) return false;
-    if (filterSource !== 'all' && code.source !== filterSource) return false;
-    return true;
-  }), [codes, filterStatus, filterSource]);
-
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
-    });
-  };
+  const {
+    isCreateModalOpen,
+    setIsCreateModalOpen,
+    isBulkModalOpen,
+    setIsBulkModalOpen,
+    error,
+    successMessage,
+    filterStatus,
+    setFilterStatus,
+    filterSource,
+    setFilterSource,
+    isLoading,
+    isRefetching,
+    refetch,
+    newCode,
+    setNewCode,
+    bulkForm,
+    setBulkForm,
+    filteredCodes,
+    handleNewCodeNumber,
+    handleBulkFormNumber,
+    handleCreateCode,
+    handleBulkGenerate,
+    handleDeactivate,
+    handleDelete,
+    openListingPromoCreate,
+    formatDate,
+  } = useDiscountCodeManager();
 
   if (isLoading) {
     return (
@@ -240,21 +65,7 @@ const DiscountCodeManager: React.FC = () => {
               <ArrowPathIcon className={`w-5 h-5 ${isRefetching ? 'animate-spin' : ''}`} />
             </button>
             <button
-              onClick={() => {
-                // Set preset values for listing promotion code
-                setNewCode({
-                  code: `PROMO${Date.now().toString().slice(-6)}`,
-                  discountType: 'percentage',
-                  discountValue: 20,
-                  validUntil: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().slice(0, 16),
-                  usageLimit: 100,
-                  description: 'Listing promotion discount',
-                  applicablePlans: ['listing_promotion_15days'],
-                  minimumPurchaseAmount: 0,
-                  source: 'promotion',
-                });
-                setIsCreateModalOpen(true);
-              }}
+              onClick={openListingPromoCreate}
               className="px-4 py-2 bg-amber-500 text-white rounded-lg hover:bg-amber-600 font-medium flex items-center gap-2"
             >
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -339,7 +150,7 @@ const DiscountCodeManager: React.FC = () => {
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">
                   <span className="font-semibold text-green-600">
-                    {code.discountType === 'percentage' ? `${code.discountValue}%` : `€${code.discountValue}`}
+                    {code.discountType === 'percentage' ? `${code.discountValue}%` : `\u20AC${code.discountValue}`}
                   </span>
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">
@@ -397,349 +208,24 @@ const DiscountCodeManager: React.FC = () => {
 
       {/* Create Modal */}
       {isCreateModalOpen && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto">
-            <div className="p-6 border-b border-gray-200 flex items-center justify-between sticky top-0 bg-white">
-              <h3 className="text-xl font-bold">Create Discount Code</h3>
-              <button onClick={() => setIsCreateModalOpen(false)}>
-                <XMarkIcon className="w-6 h-6 text-gray-500 hover:text-gray-700" />
-              </button>
-            </div>
-
-            <form onSubmit={handleCreateCode} className="p-6 space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Code <span className="text-red-500">*</span>
-                </label>
-                <input
-                  type="text"
-                  value={newCode.code}
-                  onChange={(e) => setNewCode({ ...newCode, code: e.target.value.toUpperCase() })}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg font-mono"
-                  placeholder="SUMMER2024"
-                  required
-                />
-              </div>
-
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Discount Type
-                  </label>
-                  <select
-                    value={newCode.discountType}
-                    onChange={(e) => setNewCode({ ...newCode, discountType: e.target.value as any })}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg"
-                  >
-                    <option value="percentage">Percentage (%)</option>
-                    <option value="fixed">Fixed Amount (€)</option>
-                  </select>
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Discount Value <span className="text-red-500">*</span>
-                  </label>
-                  <input
-                    type="number"
-                    value={newCode.discountValue}
-                    onChange={(e) => handleNewCodeNumber('discountValue', e.target.value, 1)}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg"
-                    min="1"
-                    required
-                  />
-                </div>
-              </div>
-
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Valid Until <span className="text-red-500">*</span>
-                  </label>
-                  <input
-                    type="datetime-local"
-                    value={newCode.validUntil}
-                    onChange={(e) => setNewCode({ ...newCode, validUntil: e.target.value })}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg"
-                    required
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Usage Limit
-                  </label>
-                  <input
-                    type="number"
-                    value={newCode.usageLimit}
-                    onChange={(e) => handleNewCodeNumber('usageLimit', e.target.value, 1)}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg"
-                    min="1"
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Minimum Purchase Amount (€)
-                </label>
-                <input
-                  type="number"
-                  value={newCode.minimumPurchaseAmount}
-                  onChange={(e) => handleNewCodeNumber('minimumPurchaseAmount', e.target.value, 0)}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg"
-                  min="0"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Code Type/Source
-                </label>
-                <select
-                  value={newCode.source}
-                  onChange={(e) => setNewCode({ ...newCode, source: e.target.value })}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg"
-                >
-                  <option value="admin">Admin (General)</option>
-                  <option value="promotion">Listing Promotion</option>
-                  <option value="seasonal">Seasonal Campaign</option>
-                  <option value="referral">Referral Program</option>
-                </select>
-                <p className="text-xs text-gray-500 mt-1">
-                  {newCode.source === 'promotion' && 'Use for discounts on listing promotions (15-day featured boost)'}
-                  {newCode.source === 'seasonal' && 'Use for holiday/seasonal marketing campaigns'}
-                  {newCode.source === 'referral' && 'Use for user referral rewards'}
-                  {newCode.source === 'admin' && 'General purpose discount codes'}
-                </p>
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Applicable Plans (optional)
-                </label>
-                <div className="space-y-2">
-                  <label className="flex items-center gap-2">
-                    <input
-                      type="checkbox"
-                      checked={newCode.applicablePlans.includes('listing_promotion_15days')}
-                      onChange={(e) => {
-                        if (e.target.checked) {
-                          setNewCode({ ...newCode, applicablePlans: [...newCode.applicablePlans, 'listing_promotion_15days'] });
-                        } else {
-                          setNewCode({ ...newCode, applicablePlans: newCode.applicablePlans.filter(p => p !== 'listing_promotion_15days') });
-                        }
-                      }}
-                      className="rounded border-gray-300"
-                    />
-                    <span className="text-sm text-gray-700">Listing Promotion (15 days)</span>
-                  </label>
-                  <label className="flex items-center gap-2">
-                    <input
-                      type="checkbox"
-                      checked={newCode.applicablePlans.includes('seller_pro_monthly')}
-                      onChange={(e) => {
-                        if (e.target.checked) {
-                          setNewCode({ ...newCode, applicablePlans: [...newCode.applicablePlans, 'seller_pro_monthly'] });
-                        } else {
-                          setNewCode({ ...newCode, applicablePlans: newCode.applicablePlans.filter(p => p !== 'seller_pro_monthly') });
-                        }
-                      }}
-                      className="rounded border-gray-300"
-                    />
-                    <span className="text-sm text-gray-700">Seller Pro (Monthly)</span>
-                  </label>
-                  <label className="flex items-center gap-2">
-                    <input
-                      type="checkbox"
-                      checked={newCode.applicablePlans.includes('seller_pro_yearly')}
-                      onChange={(e) => {
-                        if (e.target.checked) {
-                          setNewCode({ ...newCode, applicablePlans: [...newCode.applicablePlans, 'seller_pro_yearly'] });
-                        } else {
-                          setNewCode({ ...newCode, applicablePlans: newCode.applicablePlans.filter(p => p !== 'seller_pro_yearly') });
-                        }
-                      }}
-                      className="rounded border-gray-300"
-                    />
-                    <span className="text-sm text-gray-700">Seller Pro (Yearly)</span>
-                  </label>
-                  <label className="flex items-center gap-2">
-                    <input
-                      type="checkbox"
-                      checked={newCode.applicablePlans.includes('seller_enterprise_yearly')}
-                      onChange={(e) => {
-                        if (e.target.checked) {
-                          setNewCode({ ...newCode, applicablePlans: [...newCode.applicablePlans, 'seller_enterprise_yearly'] });
-                        } else {
-                          setNewCode({ ...newCode, applicablePlans: newCode.applicablePlans.filter(p => p !== 'seller_enterprise_yearly') });
-                        }
-                      }}
-                      className="rounded border-gray-300"
-                    />
-                    <span className="text-sm text-gray-700">Enterprise Plan</span>
-                  </label>
-                </div>
-                <p className="text-xs text-gray-500 mt-1">Leave all unchecked to apply to all plans</p>
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Description
-                </label>
-                <textarea
-                  value={newCode.description}
-                  onChange={(e) => setNewCode({ ...newCode, description: e.target.value })}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg"
-                  rows={3}
-                  placeholder="Internal note about this code..."
-                />
-              </div>
-
-              <div className="flex gap-3 pt-4">
-                <button
-                  type="button"
-                  onClick={() => setIsCreateModalOpen(false)}
-                  className="flex-1 px-6 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 font-medium"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  className="flex-1 px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium"
-                >
-                  Create Code
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
+        <CreateCodeModal
+          newCode={newCode}
+          setNewCode={setNewCode}
+          handleNewCodeNumber={handleNewCodeNumber}
+          onSubmit={handleCreateCode}
+          onClose={() => setIsCreateModalOpen(false)}
+        />
       )}
 
       {/* Bulk Generate Modal */}
       {isBulkModalOpen && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-lg max-w-lg w-full">
-            <div className="p-6 border-b border-gray-200 flex items-center justify-between">
-              <h3 className="text-xl font-bold">Bulk Generate Codes</h3>
-              <button onClick={() => setIsBulkModalOpen(false)}>
-                <XMarkIcon className="w-6 h-6 text-gray-500 hover:text-gray-700" />
-              </button>
-            </div>
-
-            <form onSubmit={handleBulkGenerate} className="p-6 space-y-4">
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Number of Codes
-                  </label>
-                  <input
-                    type="number"
-                    value={bulkForm.count}
-                    onChange={(e) => handleBulkFormNumber('count', e.target.value, 1)}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg"
-                    min="1"
-                    max="1000"
-                    required
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Code Prefix
-                  </label>
-                  <input
-                    type="text"
-                    value={bulkForm.prefix}
-                    onChange={(e) => setBulkForm({ ...bulkForm, prefix: e.target.value.toUpperCase() })}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg font-mono"
-                    required
-                  />
-                </div>
-              </div>
-
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Discount Type
-                  </label>
-                  <select
-                    value={bulkForm.discountType}
-                    onChange={(e) => setBulkForm({ ...bulkForm, discountType: e.target.value as any })}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg"
-                  >
-                    <option value="percentage">Percentage (%)</option>
-                    <option value="fixed">Fixed Amount (€)</option>
-                  </select>
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Discount Value
-                  </label>
-                  <input
-                    type="number"
-                    value={bulkForm.discountValue}
-                    onChange={(e) => handleBulkFormNumber('discountValue', e.target.value, 1)}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg"
-                    min="1"
-                    required
-                  />
-                </div>
-              </div>
-
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Valid Until
-                  </label>
-                  <input
-                    type="datetime-local"
-                    value={bulkForm.validUntil}
-                    onChange={(e) => setBulkForm({ ...bulkForm, validUntil: e.target.value })}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg"
-                    required
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Usage Limit (each)
-                  </label>
-                  <input
-                    type="number"
-                    value={bulkForm.usageLimit}
-                    onChange={(e) => handleBulkFormNumber('usageLimit', e.target.value, 1)}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg"
-                    min="1"
-                  />
-                </div>
-              </div>
-
-              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                <p className="text-sm text-blue-800">
-                  This will generate {bulkForm.count} codes with random suffixes like: {bulkForm.prefix}-XXXXX
-                </p>
-              </div>
-
-              <div className="flex gap-3 pt-4">
-                <button
-                  type="button"
-                  onClick={() => setIsBulkModalOpen(false)}
-                  className="flex-1 px-6 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 font-medium"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  className="flex-1 px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium"
-                >
-                  Generate Codes
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
+        <BulkGenerateModal
+          bulkForm={bulkForm}
+          setBulkForm={setBulkForm}
+          handleBulkFormNumber={handleBulkFormNumber}
+          onSubmit={handleBulkGenerate}
+          onClose={() => setIsBulkModalOpen(false)}
+        />
       )}
     </div>
   );

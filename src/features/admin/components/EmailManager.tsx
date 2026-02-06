@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React from 'react';
 import {
   MagnifyingGlassIcon,
   EnvelopeIcon,
@@ -9,20 +9,9 @@ import {
   CheckCircleIcon,
   XCircleIcon,
   ChevronDownIcon,
-  XMarkIcon,
 } from '@/constants';
-import { useNotification } from '@/src/shared/hooks/useNotification';
-import { useConfirmation } from '@/src/shared/hooks/useConfirmation';
-import {
-  useEmailConfigs,
-  useUpdateEmailConfig,
-  useToggleEmailStatus,
-  useResetEmailConfig,
-  useResetAllEmailConfigs,
-  useSendTestEmail,
-  usePreviewEmail,
-  EmailConfig,
-} from '../hooks/useEmailConfigData';
+import { useEmailManager } from './useEmailManager';
+import { EditEmailModal, PreviewEmailModal, TestEmailModal } from './EmailManagerForm';
 
 // Category colors for visual differentiation
 const categoryColors: Record<string, { bg: string; text: string; border: string }> = {
@@ -41,228 +30,50 @@ const fromCategoryLabels: Record<string, string> = {
 };
 
 const EmailManager: React.FC = () => {
-  const { showNotification } = useNotification();
-  const { confirm } = useConfirmation();
-
-  // State
-  const [searchQuery, setSearchQuery] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState<string>('all');
-  const [selectedStatus, setSelectedStatus] = useState<string>('all');
-  const [selectedEmail, setSelectedEmail] = useState<EmailConfig | null>(null);
-  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
-  const [isPreviewModalOpen, setIsPreviewModalOpen] = useState(false);
-  const [isTestModalOpen, setIsTestModalOpen] = useState(false);
-  const [previewHtml, setPreviewHtml] = useState<string>('');
-  const [previewSubject, setPreviewSubject] = useState<string>('');
-  const [testEmail, setTestEmail] = useState('');
-
-  // Edit form state
-  const [editForm, setEditForm] = useState<Partial<EmailConfig>>({});
-
-  // React Query hooks
   const {
-    data: emailData,
+    searchQuery,
+    setSearchQuery,
+    selectedCategory,
+    setSelectedCategory,
+    selectedStatus,
+    setSelectedStatus,
+    selectedEmail,
+    setSelectedEmail,
+    isEditModalOpen,
+    setIsEditModalOpen,
+    isPreviewModalOpen,
+    setIsPreviewModalOpen,
+    isTestModalOpen,
+    setIsTestModalOpen,
+    previewHtml,
+    setPreviewHtml,
+    previewSubject,
+    testEmail,
+    setTestEmail,
+    editForm,
+    setEditForm,
     isLoading,
     error,
     refetch,
     isRefetching,
-  } = useEmailConfigs({
-    category: selectedCategory !== 'all' ? selectedCategory : undefined,
-    isActive: selectedStatus !== 'all' ? selectedStatus : undefined,
-    search: searchQuery || undefined,
-  });
-
-  const updateMutation = useUpdateEmailConfig();
-  const toggleMutation = useToggleEmailStatus();
-  const resetMutation = useResetEmailConfig();
-  const resetAllMutation = useResetAllEmailConfigs();
-  const sendTestMutation = useSendTestEmail();
-  const previewMutation = usePreviewEmail();
-
-  const emails = emailData?.configs || [];
-  const categoryStats = emailData?.categoryStats || {};
-
-  // Filter emails locally for instant feedback
-  const filteredEmails = useMemo(() => {
-    return emails;
-  }, [emails]);
-
-  // Group emails by category
-  const groupedEmails = useMemo(() => {
-    const groups: Record<string, EmailConfig[]> = {};
-    filteredEmails.forEach((email) => {
-      if (!groups[email.category]) {
-        groups[email.category] = [];
-      }
-      groups[email.category].push(email);
-    });
-    return groups;
-  }, [filteredEmails]);
-
-  // Handlers
-  const handleOpenEdit = (email: EmailConfig) => {
-    setSelectedEmail(email);
-    setEditForm({
-      subject: email.subject,
-      preheaderText: email.preheaderText,
-      headerTitle: email.headerTitle,
-      headerSubtitle: email.headerSubtitle,
-      headerEmoji: email.headerEmoji,
-      headerGradient: email.headerGradient,
-      bodyTemplate: email.bodyTemplate,
-      ctaEnabled: email.ctaEnabled,
-      ctaText: email.ctaText,
-      ctaUrl: email.ctaUrl,
-      showUnsubscribe: email.showUnsubscribe,
-      footerReason: email.footerReason,
-    });
-    setIsEditModalOpen(true);
-  };
-
-  const handleSaveEdit = async () => {
-    if (!selectedEmail) return;
-
-    try {
-      await updateMutation.mutateAsync({
-        key: selectedEmail.key,
-        data: editForm,
-      });
-      showNotification({
-        type: 'success',
-        message: 'Email configuration updated successfully',
-      });
-      setIsEditModalOpen(false);
-      setSelectedEmail(null);
-    } catch (err: any) {
-      showNotification({
-        type: 'error',
-        message: err.message || 'Failed to update email configuration',
-      });
-    }
-  };
-
-  const handleToggleStatus = async (email: EmailConfig) => {
-    const action = email.isActive ? 'disable' : 'enable';
-    const confirmed = await confirm({
-      title: `${email.isActive ? 'Disable' : 'Enable'} Email`,
-      message: `Are you sure you want to ${action} "${email.name}"? ${
-        email.isActive
-          ? 'This will prevent the system from sending this type of email.'
-          : 'This will allow the system to send this type of email.'
-      }`,
-      confirmText: email.isActive ? 'Disable' : 'Enable',
-      variant: email.isActive ? 'danger' : 'primary',
-    });
-
-    if (!confirmed) return;
-
-    try {
-      await toggleMutation.mutateAsync(email.key);
-      showNotification({
-        type: 'success',
-        message: `Email ${action}d successfully`,
-      });
-    } catch (err: any) {
-      showNotification({
-        type: 'error',
-        message: err.message || `Failed to ${action} email`,
-      });
-    }
-  };
-
-  const handleReset = async (email: EmailConfig) => {
-    const confirmed = await confirm({
-      title: 'Reset to Default',
-      message: `Are you sure you want to reset "${email.name}" to its default configuration? This will overwrite any customizations you've made.`,
-      confirmText: 'Reset',
-      variant: 'danger',
-    });
-
-    if (!confirmed) return;
-
-    try {
-      await resetMutation.mutateAsync(email.key);
-      showNotification({
-        type: 'success',
-        message: 'Email reset to default successfully',
-      });
-    } catch (err: any) {
-      showNotification({
-        type: 'error',
-        message: err.message || 'Failed to reset email',
-      });
-    }
-  };
-
-  const handleResetAll = async () => {
-    const confirmed = await confirm({
-      title: 'Reset All Emails',
-      message:
-        'Are you sure you want to reset ALL email configurations to their defaults? This will overwrite any customizations you\'ve made to any emails.',
-      confirmText: 'Reset All',
-      variant: 'danger',
-    });
-
-    if (!confirmed) return;
-
-    try {
-      await resetAllMutation.mutateAsync();
-      showNotification({
-        type: 'success',
-        message: 'All emails reset to defaults successfully',
-      });
-    } catch (err: any) {
-      showNotification({
-        type: 'error',
-        message: err.message || 'Failed to reset emails',
-      });
-    }
-  };
-
-  const handlePreview = async (email: EmailConfig) => {
-    setSelectedEmail(email);
-    try {
-      const result = await previewMutation.mutateAsync({
-        key: email.key,
-      });
-      setPreviewHtml(result.html);
-      setPreviewSubject(result.subject);
-      setIsPreviewModalOpen(true);
-    } catch (err: any) {
-      showNotification({
-        type: 'error',
-        message: err.message || 'Failed to generate preview',
-      });
-    }
-  };
-
-  const handleOpenTestModal = (email: EmailConfig) => {
-    setSelectedEmail(email);
-    setTestEmail('');
-    setIsTestModalOpen(true);
-  };
-
-  const handleSendTest = async () => {
-    if (!selectedEmail || !testEmail) return;
-
-    try {
-      await sendTestMutation.mutateAsync({
-        key: selectedEmail.key,
-        testEmail,
-      });
-      showNotification({
-        type: 'success',
-        message: `Test email sent to ${testEmail}`,
-      });
-      setIsTestModalOpen(false);
-      setSelectedEmail(null);
-    } catch (err: any) {
-      showNotification({
-        type: 'error',
-        message: err.message || 'Failed to send test email',
-      });
-    }
-  };
+    updateMutation,
+    toggleMutation,
+    resetMutation,
+    resetAllMutation,
+    sendTestMutation,
+    previewMutation,
+    filteredEmails,
+    groupedEmails,
+    categoryStats,
+    handleOpenEdit,
+    handleSaveEdit,
+    handleToggleStatus,
+    handleReset,
+    handleResetAll,
+    handlePreview,
+    handleOpenTestModal,
+    handleSendTest,
+  } = useEmailManager();
 
   if (isLoading) {
     return (
@@ -482,324 +293,44 @@ const EmailManager: React.FC = () => {
 
       {/* Edit Modal */}
       {isEditModalOpen && selectedEmail && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-2xl shadow-xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
-            <div className="sticky top-0 bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between">
-              <div>
-                <h2 className="text-xl font-bold text-gray-900">Edit Email Template</h2>
-                <p className="text-sm text-gray-500">{selectedEmail.name}</p>
-              </div>
-              <button
-                onClick={() => {
-                  setIsEditModalOpen(false);
-                  setSelectedEmail(null);
-                }}
-                className="p-2 hover:bg-gray-100 rounded-lg"
-              >
-                <XMarkIcon className="w-5 h-5" />
-              </button>
-            </div>
-
-            <div className="p-6 space-y-6">
-              {/* Subject */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Subject Line
-                </label>
-                <input
-                  type="text"
-                  value={editForm.subject || ''}
-                  onChange={(e) => setEditForm({ ...editForm, subject: e.target.value })}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                />
-                <p className="text-xs text-gray-500 mt-1">
-                  Variables: {selectedEmail.variables.map((v) => `{{${v.name}}}`).join(', ')}
-                </p>
-              </div>
-
-              {/* Preheader */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Preheader Text
-                </label>
-                <input
-                  type="text"
-                  value={editForm.preheaderText || ''}
-                  onChange={(e) => setEditForm({ ...editForm, preheaderText: e.target.value })}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  placeholder="Preview text shown in email clients"
-                />
-              </div>
-
-              {/* Header */}
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Header Title
-                  </label>
-                  <input
-                    type="text"
-                    value={editForm.headerTitle || ''}
-                    onChange={(e) => setEditForm({ ...editForm, headerTitle: e.target.value })}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Header Emoji
-                  </label>
-                  <input
-                    type="text"
-                    value={editForm.headerEmoji || ''}
-                    onChange={(e) => setEditForm({ ...editForm, headerEmoji: e.target.value })}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Header Subtitle
-                  </label>
-                  <input
-                    type="text"
-                    value={editForm.headerSubtitle || ''}
-                    onChange={(e) => setEditForm({ ...editForm, headerSubtitle: e.target.value })}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  />
-                </div>
-              </div>
-
-              {/* Body Template */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Body Template (HTML)
-                </label>
-                <textarea
-                  value={editForm.bodyTemplate || ''}
-                  onChange={(e) => setEditForm({ ...editForm, bodyTemplate: e.target.value })}
-                  rows={12}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent font-mono text-sm"
-                />
-              </div>
-
-              {/* CTA Button */}
-              <div className="space-y-4">
-                <div className="flex items-center gap-2">
-                  <input
-                    type="checkbox"
-                    id="ctaEnabled"
-                    checked={editForm.ctaEnabled || false}
-                    onChange={(e) => setEditForm({ ...editForm, ctaEnabled: e.target.checked })}
-                    className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-                  />
-                  <label htmlFor="ctaEnabled" className="text-sm font-medium text-gray-700">
-                    Enable Call-to-Action Button
-                  </label>
-                </div>
-
-                {editForm.ctaEnabled && (
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pl-6">
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Button Text
-                      </label>
-                      <input
-                        type="text"
-                        value={editForm.ctaText || ''}
-                        onChange={(e) => setEditForm({ ...editForm, ctaText: e.target.value })}
-                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Button URL
-                      </label>
-                      <input
-                        type="text"
-                        value={editForm.ctaUrl || ''}
-                        onChange={(e) => setEditForm({ ...editForm, ctaUrl: e.target.value })}
-                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                      />
-                    </div>
-                  </div>
-                )}
-              </div>
-
-              {/* Footer */}
-              <div className="space-y-4">
-                <div className="flex items-center gap-2">
-                  <input
-                    type="checkbox"
-                    id="showUnsubscribe"
-                    checked={editForm.showUnsubscribe || false}
-                    onChange={(e) => setEditForm({ ...editForm, showUnsubscribe: e.target.checked })}
-                    className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-                  />
-                  <label htmlFor="showUnsubscribe" className="text-sm font-medium text-gray-700">
-                    Show Unsubscribe Link
-                  </label>
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Footer Reason Text
-                  </label>
-                  <input
-                    type="text"
-                    value={editForm.footerReason || ''}
-                    onChange={(e) => setEditForm({ ...editForm, footerReason: e.target.value })}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    placeholder="e.g., You received this because..."
-                  />
-                </div>
-              </div>
-
-              {/* Available Variables */}
-              <div className="bg-gray-50 rounded-lg p-4">
-                <h4 className="font-medium text-gray-700 mb-2">Available Variables</h4>
-                <div className="flex flex-wrap gap-2">
-                  {selectedEmail.variables.map((v) => (
-                    <span
-                      key={v.name}
-                      className="px-2 py-1 bg-white border border-gray-200 rounded text-xs font-mono"
-                      title={`${v.description} (e.g., ${v.example})`}
-                    >
-                      {`{{${v.name}}}`}
-                    </span>
-                  ))}
-                </div>
-              </div>
-            </div>
-
-            <div className="sticky bottom-0 bg-white border-t border-gray-200 px-6 py-4 flex justify-end gap-3">
-              <button
-                onClick={() => {
-                  setIsEditModalOpen(false);
-                  setSelectedEmail(null);
-                }}
-                className="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={handleSaveEdit}
-                disabled={updateMutation.isPending}
-                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 flex items-center gap-2"
-              >
-                {updateMutation.isPending ? (
-                  <>
-                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                    Saving...
-                  </>
-                ) : (
-                  'Save Changes'
-                )}
-              </button>
-            </div>
-          </div>
-        </div>
+        <EditEmailModal
+          selectedEmail={selectedEmail}
+          editForm={editForm}
+          setEditForm={setEditForm}
+          onSave={handleSaveEdit}
+          onClose={() => {
+            setIsEditModalOpen(false);
+            setSelectedEmail(null);
+          }}
+          isSaving={updateMutation.isPending}
+        />
       )}
 
       {/* Preview Modal */}
       {isPreviewModalOpen && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-2xl shadow-xl max-w-3xl w-full max-h-[90vh] overflow-hidden flex flex-col">
-            <div className="border-b border-gray-200 px-6 py-4 flex items-center justify-between">
-              <div>
-                <h2 className="text-xl font-bold text-gray-900">Email Preview</h2>
-                <p className="text-sm text-gray-500">Subject: {previewSubject}</p>
-              </div>
-              <button
-                onClick={() => {
-                  setIsPreviewModalOpen(false);
-                  setPreviewHtml('');
-                }}
-                className="p-2 hover:bg-gray-100 rounded-lg"
-              >
-                <XMarkIcon className="w-5 h-5" />
-              </button>
-            </div>
-
-            <div className="flex-1 overflow-y-auto p-4 bg-gray-100">
-              <div
-                className="bg-white mx-auto shadow-lg"
-                style={{ maxWidth: '600px' }}
-                dangerouslySetInnerHTML={{ __html: previewHtml }}
-              />
-            </div>
-          </div>
-        </div>
+        <PreviewEmailModal
+          previewSubject={previewSubject}
+          previewHtml={previewHtml}
+          onClose={() => {
+            setIsPreviewModalOpen(false);
+            setPreviewHtml('');
+          }}
+        />
       )}
 
       {/* Test Email Modal */}
       {isTestModalOpen && selectedEmail && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-2xl shadow-xl max-w-md w-full">
-            <div className="border-b border-gray-200 px-6 py-4 flex items-center justify-between">
-              <div>
-                <h2 className="text-xl font-bold text-gray-900">Send Test Email</h2>
-                <p className="text-sm text-gray-500">{selectedEmail.name}</p>
-              </div>
-              <button
-                onClick={() => {
-                  setIsTestModalOpen(false);
-                  setSelectedEmail(null);
-                }}
-                className="p-2 hover:bg-gray-100 rounded-lg"
-              >
-                <XMarkIcon className="w-5 h-5" />
-              </button>
-            </div>
-
-            <div className="p-6 space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Recipient Email
-                </label>
-                <input
-                  type="email"
-                  value={testEmail}
-                  onChange={(e) => setTestEmail(e.target.value)}
-                  placeholder="Enter email address"
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                />
-              </div>
-
-              <p className="text-sm text-gray-500">
-                A test email will be sent using example values for all variables.
-                The subject will be prefixed with "[TEST]".
-              </p>
-            </div>
-
-            <div className="border-t border-gray-200 px-6 py-4 flex justify-end gap-3">
-              <button
-                onClick={() => {
-                  setIsTestModalOpen(false);
-                  setSelectedEmail(null);
-                }}
-                className="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={handleSendTest}
-                disabled={sendTestMutation.isPending || !testEmail}
-                className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50 flex items-center gap-2"
-              >
-                {sendTestMutation.isPending ? (
-                  <>
-                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                    Sending...
-                  </>
-                ) : (
-                  <>
-                    <PaperAirplaneIcon className="w-4 h-4" />
-                    Send Test
-                  </>
-                )}
-              </button>
-            </div>
-          </div>
-        </div>
+        <TestEmailModal
+          selectedEmail={selectedEmail}
+          testEmail={testEmail}
+          setTestEmail={setTestEmail}
+          onSend={handleSendTest}
+          onClose={() => {
+            setIsTestModalOpen(false);
+            setSelectedEmail(null);
+          }}
+          isSending={sendTestMutation.isPending}
+        />
       )}
     </div>
   );

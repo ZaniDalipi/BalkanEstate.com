@@ -1,0 +1,380 @@
+import React from 'react';
+import { XMarkIcon } from '@/constants';
+import { type Property, type PropertyEditForm, getAllPropertyImages } from './usePropertyManager';
+
+interface PropertyViewModalProps {
+  property: Property;
+  onClose: () => void;
+  formatPrice: (price: number) => string;
+  formatDate: (dateString: string) => string;
+  getStatusBadgeColor: (status: string) => string;
+  getPropertyTypeLabel: (type: string) => string;
+}
+
+export const PropertyViewModal: React.FC<PropertyViewModalProps> = ({
+  property,
+  onClose,
+  formatPrice,
+  formatDate,
+  getStatusBadgeColor,
+  getPropertyTypeLabel,
+}) => {
+  return (
+    <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4">
+      <div className="bg-white rounded-2xl max-w-4xl w-full max-h-[90vh] overflow-hidden">
+        <div className="p-6 border-b border-gray-200 flex items-center justify-between sticky top-0 bg-white z-10">
+          <div>
+            <h3 className="text-xl font-bold text-gray-900">Property Details</h3>
+            <p className="text-sm text-gray-500">ID: {property._id}</p>
+          </div>
+          <button
+            onClick={onClose}
+            className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+          >
+            <XMarkIcon className="w-6 h-6 text-gray-500" />
+          </button>
+        </div>
+
+        <div className="p-6 space-y-6 overflow-y-auto max-h-[calc(90vh-80px)]">
+          {/* Images Gallery */}
+          {getAllPropertyImages(property).length > 0 && (
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+              {getAllPropertyImages(property).slice(0, 8).map((imgUrl, idx) => (
+                <img
+                  key={idx}
+                  src={imgUrl}
+                  alt={`${property.title} ${idx + 1}`}
+                  loading="lazy"
+                  decoding="async"
+                  className="w-full h-32 object-cover rounded-xl"
+                />
+              ))}
+            </div>
+          )}
+
+          {/* Main Info */}
+          <div className="bg-gray-50 rounded-xl p-4">
+            <div className="flex items-start justify-between gap-4">
+              <div>
+                <h4 className="text-lg font-semibold text-gray-900">{property.title}</h4>
+                <p className="text-gray-600 mt-1">{property.address}</p>
+                <p className="text-gray-500 text-sm">{property.city}, {property.country}</p>
+              </div>
+              <div className="text-right">
+                <div className="text-2xl font-bold text-blue-600">{formatPrice(property.price)}</div>
+                <span className={`inline-block mt-2 px-3 py-1 text-xs font-medium rounded-full ${getStatusBadgeColor(property.status)}`}>
+                  {property.status}
+                </span>
+              </div>
+            </div>
+          </div>
+
+          {/* Specifications */}
+          <div>
+            <h5 className="text-sm font-semibold text-gray-700 mb-3 uppercase tracking-wider">Specifications</h5>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              <div className="bg-gray-50 rounded-lg p-3">
+                <div className="text-gray-500 text-xs">Type</div>
+                <div className="font-medium text-gray-900">{getPropertyTypeLabel(property.propertyType)}</div>
+              </div>
+              {property.bedrooms && (
+                <div className="bg-gray-50 rounded-lg p-3">
+                  <div className="text-gray-500 text-xs">Bedrooms</div>
+                  <div className="font-medium text-gray-900">{property.bedrooms}</div>
+                </div>
+              )}
+              {property.bathrooms && (
+                <div className="bg-gray-50 rounded-lg p-3">
+                  <div className="text-gray-500 text-xs">Bathrooms</div>
+                  <div className="font-medium text-gray-900">{property.bathrooms}</div>
+                </div>
+              )}
+              {property.area && (
+                <div className="bg-gray-50 rounded-lg p-3">
+                  <div className="text-gray-500 text-xs">Area</div>
+                  <div className="font-medium text-gray-900">{property.area} m²</div>
+                </div>
+              )}
+              {property.yearBuilt && (
+                <div className="bg-gray-50 rounded-lg p-3">
+                  <div className="text-gray-500 text-xs">Year Built</div>
+                  <div className="font-medium text-gray-900">{property.yearBuilt}</div>
+                </div>
+              )}
+              {property.parking !== undefined && (
+                <div className="bg-gray-50 rounded-lg p-3">
+                  <div className="text-gray-500 text-xs">Parking</div>
+                  <div className="font-medium text-gray-900">{property.parking} spots</div>
+                </div>
+              )}
+              <div className="bg-gray-50 rounded-lg p-3">
+                <div className="text-gray-500 text-xs">Promoted</div>
+                <div className={`font-medium ${property.isPromoted ? 'text-purple-600' : 'text-gray-900'}`}>
+                  {property.isPromoted ? 'Yes' : 'No'}
+                </div>
+              </div>
+              {property.views !== undefined && (
+                <div className="bg-gray-50 rounded-lg p-3">
+                  <div className="text-gray-500 text-xs">Views</div>
+                  <div className="font-medium text-gray-900">{property.views}</div>
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Description */}
+          {property.description && (
+            <div>
+              <h5 className="text-sm font-semibold text-gray-700 mb-2 uppercase tracking-wider">Description</h5>
+              <p className="text-gray-600 text-sm leading-relaxed">{property.description}</p>
+            </div>
+          )}
+
+          {/* Owner Info */}
+          <div>
+            <h5 className="text-sm font-semibold text-gray-700 mb-3 uppercase tracking-wider">Property Owner</h5>
+            <div className="bg-gray-50 rounded-xl p-4">
+              <div className="flex items-center gap-4">
+                <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
+                  <span className="text-blue-600 font-semibold">
+                    {property.sellerId?.name?.charAt(0) || '?'}
+                  </span>
+                </div>
+                <div>
+                  <div className="font-medium text-gray-900">{property.sellerId?.name || 'Unknown'}</div>
+                  <div className="text-sm text-gray-500">{property.sellerId?.email || ''}</div>
+                  <div className="text-xs text-gray-400 capitalize mt-0.5">
+                    {property.sellerId?.role || 'N/A'}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Timestamps */}
+          <div className="grid grid-cols-2 gap-4 text-sm border-t border-gray-200 pt-4">
+            <div>
+              <span className="text-gray-500">Created:</span>
+              <span className="ml-2 text-gray-900">{formatDate(property.createdAt)}</span>
+            </div>
+            <div>
+              <span className="text-gray-500">Last Updated:</span>
+              <span className="ml-2 text-gray-900">{formatDate(property.updatedAt)}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+interface PropertyEditModalProps {
+  property: Property;
+  editForm: PropertyEditForm;
+  setEditForm: (form: PropertyEditForm) => void;
+  onClose: () => void;
+  onSubmit: (e: React.FormEvent) => void;
+}
+
+export const PropertyEditModal: React.FC<PropertyEditModalProps> = ({
+  property,
+  editForm,
+  setEditForm,
+  onClose,
+  onSubmit,
+}) => {
+  return (
+    <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4">
+      <div className="bg-white rounded-2xl max-w-3xl w-full max-h-[90vh] flex flex-col">
+        <div className="p-6 border-b border-gray-200 flex items-center justify-between flex-shrink-0">
+          <div>
+            <h3 className="text-xl font-bold text-gray-900">Edit Property</h3>
+            <p className="text-sm text-gray-500">{property.title}</p>
+          </div>
+          <button
+            onClick={onClose}
+            className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+          >
+            <XMarkIcon className="w-6 h-6 text-gray-500" />
+          </button>
+        </div>
+
+        <form onSubmit={onSubmit} className="flex flex-col flex-1 overflow-hidden">
+          <div className="p-6 space-y-4 overflow-y-auto flex-1">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Title</label>
+              <input
+                type="text"
+                value={editForm.title}
+                onChange={(e) => setEditForm({ ...editForm, title: e.target.value })}
+                className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                required
+              />
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Price (EUR)</label>
+                <input
+                  type="number"
+                  value={editForm.price}
+                  onChange={(e) => setEditForm({ ...editForm, price: Number(e.target.value) })}
+                  className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  required
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Status</label>
+                <select
+                  value={editForm.status}
+                  onChange={(e) => setEditForm({ ...editForm, status: e.target.value as any })}
+                  className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                >
+                  <option value="active">Active</option>
+                  <option value="pending">Pending</option>
+                  <option value="sold">Sold</option>
+                </select>
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Address</label>
+              <input
+                type="text"
+                value={editForm.address}
+                onChange={(e) => setEditForm({ ...editForm, address: e.target.value })}
+                className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                required
+              />
+            </div>
+
+            <div className="grid grid-cols-3 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">City</label>
+                <input
+                  type="text"
+                  value={editForm.city}
+                  onChange={(e) => setEditForm({ ...editForm, city: e.target.value })}
+                  className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  required
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Country</label>
+                <input
+                  type="text"
+                  value={editForm.country}
+                  onChange={(e) => setEditForm({ ...editForm, country: e.target.value })}
+                  className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  required
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Property Type</label>
+                <select
+                  value={editForm.propertyType}
+                  onChange={(e) => setEditForm({ ...editForm, propertyType: e.target.value })}
+                  className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                >
+                  <option value="house">House</option>
+                  <option value="apartment">Apartment</option>
+                  <option value="villa">Villa</option>
+                  <option value="land">Land</option>
+                  <option value="commercial">Commercial</option>
+                  <option value="other">Other</option>
+                </select>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-4 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Bedrooms</label>
+                <input
+                  type="number"
+                  min="0"
+                  value={editForm.beds}
+                  onChange={(e) => setEditForm({ ...editForm, beds: Number(e.target.value) })}
+                  className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Bathrooms</label>
+                <input
+                  type="number"
+                  min="0"
+                  value={editForm.baths}
+                  onChange={(e) => setEditForm({ ...editForm, baths: Number(e.target.value) })}
+                  className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Area (m²)</label>
+                <input
+                  type="number"
+                  min="0"
+                  value={editForm.sqft}
+                  onChange={(e) => setEditForm({ ...editForm, sqft: Number(e.target.value) })}
+                  className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Year Built</label>
+                <input
+                  type="number"
+                  min="1800"
+                  max={new Date().getFullYear() + 5}
+                  value={editForm.yearBuilt}
+                  onChange={(e) => setEditForm({ ...editForm, yearBuilt: Number(e.target.value) })}
+                  className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                />
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
+              <textarea
+                value={editForm.description}
+                onChange={(e) => setEditForm({ ...editForm, description: e.target.value })}
+                className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                rows={3}
+                placeholder="Property description..."
+              />
+            </div>
+
+            <div className="flex items-center gap-3 p-4 bg-purple-50 rounded-xl">
+              <input
+                type="checkbox"
+                id="isPromoted"
+                checked={editForm.isPromoted}
+                onChange={(e) => setEditForm({ ...editForm, isPromoted: e.target.checked })}
+                className="w-5 h-5 text-purple-600 border-gray-300 rounded focus:ring-purple-500"
+              />
+              <div>
+                <label htmlFor="isPromoted" className="text-sm font-medium text-gray-900">
+                  Promote this property
+                </label>
+                <p className="text-xs text-gray-500">Promoted properties appear at the top of search results</p>
+              </div>
+            </div>
+          </div>
+
+          <div className="p-6 border-t border-gray-200 flex gap-3 flex-shrink-0 bg-gray-50">
+            <button
+              type="button"
+              onClick={onClose}
+              className="flex-1 px-6 py-3 border border-gray-300 text-gray-700 rounded-xl hover:bg-gray-100 font-medium transition-colors"
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              className="flex-1 px-6 py-3 bg-blue-600 text-white rounded-xl hover:bg-blue-700 font-medium transition-colors"
+            >
+              Save Changes
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
+};

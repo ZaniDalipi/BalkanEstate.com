@@ -11,7 +11,7 @@ import { SEO } from '@/src/components/seo';
 import * as api from '@/services/apiService';
 import { useConfirmation } from '@/src/shared/hooks/useConfirmation';
 import { useNotification } from '@/src/shared/hooks/useNotification';
-import { FloatingSphere, GlossyPill, Decorative3DStyles } from '@/components/shared/Decorative3D';
+// Decorative3D imports removed - using liquid glass style instead
 import SavedSearchesHeroBanner from '@/components/shared/SavedSearchesHeroBanner';
 
 const initialFilters: Filters = {
@@ -201,25 +201,27 @@ const SavedSearchesPage: React.FC = () => {
   const renderContent = () => {
     if (!isAuthenticated) {
         return (
-            <div className="text-center py-16 px-4 bg-white rounded-2xl shadow-md border relative overflow-hidden">
-                {/* 3D Decorative background */}
-                <div className="absolute inset-0 pointer-events-none opacity-40">
-                  <div className="absolute top-4 right-8">
-                    <FloatingSphere size="md" color="blue" />
-                  </div>
-                  <div className="absolute bottom-8 left-8">
-                    <FloatingSphere size="sm" color="cyan" animate={false} />
-                  </div>
-                </div>
+            <div
+              className="text-center py-16 px-4 rounded-2xl border border-white/50 relative overflow-hidden"
+              style={{
+                background: 'rgba(255, 255, 255, 0.55)',
+                backdropFilter: 'blur(24px)',
+                WebkitBackdropFilter: 'blur(24px)',
+                boxShadow: '0 8px 32px rgba(0,0,0,0.08), inset 0 1px 2px rgba(255,255,255,0.8)',
+              }}
+            >
                 <div className="relative z-10">
-                  <div className="w-20 h-20 mx-auto mb-4 rounded-full bg-gradient-to-br from-blue-100 to-indigo-100 flex items-center justify-center">
-                    <MagnifyingGlassPlusIcon className="w-10 h-10 text-blue-400" />
+                  <div
+                    className="w-16 h-16 mx-auto mb-4 rounded-2xl flex items-center justify-center border border-white/60"
+                    style={{ background: 'rgba(255,255,255,0.6)', boxShadow: '0 2px 12px rgba(0,0,0,0.06)' }}
+                  >
+                    <MagnifyingGlassPlusIcon className="w-8 h-8 text-primary" />
                   </div>
                   <h3 className="text-xl font-semibold text-neutral-800">{t('loginRequired.title')}</h3>
                   <p className="text-neutral-500 mt-2">{t('loginRequired.description')}</p>
                   <button
                       onClick={() => dispatch({ type: 'TOGGLE_AUTH_MODAL', payload: { isOpen: true } })}
-                      className="mt-6 px-6 py-3 bg-primary text-white font-bold rounded-lg shadow-md hover:bg-primary-dark transition-colors"
+                      className="mt-6 px-6 py-3 bg-primary text-white font-medium rounded-xl shadow-md hover:bg-primary-dark transition-colors"
                   >
                       {t('loginRequired.button')}
                   </button>
@@ -244,28 +246,33 @@ const SavedSearchesPage: React.FC = () => {
         };
 
         return (
-             <div className="text-center py-16 px-4 bg-white rounded-2xl shadow-md border relative overflow-hidden">
-                {/* 3D Decorative background */}
-                <div className="absolute inset-0 pointer-events-none opacity-40">
-                  <div className="absolute top-4 left-8">
-                    <FloatingSphere size="md" color="cyan" />
-                  </div>
-                  <div className="absolute bottom-8 right-8">
-                    <FloatingSphere size="sm" color="blue" animate={false} />
-                  </div>
-                </div>
+             <div
+               className="text-center py-16 px-4 rounded-2xl border border-white/50 relative overflow-hidden"
+               style={{
+                 background: 'rgba(255, 255, 255, 0.55)',
+                 backdropFilter: 'blur(24px)',
+                 WebkitBackdropFilter: 'blur(24px)',
+                 boxShadow: '0 8px 32px rgba(0,0,0,0.08), inset 0 1px 2px rgba(255,255,255,0.8)',
+               }}
+             >
                 <div className="relative z-10">
-                  <div className="w-20 h-20 mx-auto mb-4 rounded-full bg-gradient-to-br from-cyan-100 to-blue-100 flex items-center justify-center">
-                    <MagnifyingGlassPlusIcon className="w-10 h-10 text-cyan-500" />
+                  <div
+                    className="w-16 h-16 mx-auto mb-4 rounded-2xl flex items-center justify-center border border-white/60"
+                    style={{ background: 'rgba(255,255,255,0.6)', boxShadow: '0 2px 12px rgba(0,0,0,0.06)' }}
+                  >
+                    <MagnifyingGlassPlusIcon className="w-8 h-8 text-primary" />
                   </div>
                   <h3 className="text-xl font-semibold text-neutral-800">{t('empty.title')}</h3>
                   <p className="text-neutral-500 mt-2">{t('empty.description')}</p>
 
-                  <div className="mt-6 bg-neutral-50 p-4 rounded-lg border max-w-md mx-auto flex items-center justify-between">
+                  <div
+                    className="mt-6 p-4 rounded-xl border border-white/50 max-w-md mx-auto flex items-center justify-between"
+                    style={{ background: 'rgba(255,255,255,0.5)', boxShadow: '0 2px 8px rgba(0,0,0,0.04)' }}
+                  >
                       <p className="font-semibold text-neutral-700">{t('example.label')}: {t('example.name')}</p>
                       <button
                           onClick={handleSaveExample}
-                          className="px-4 py-2 bg-secondary text-white font-bold rounded-lg shadow-sm hover:bg-opacity-90 transition-colors text-sm"
+                          className="px-4 py-2 bg-secondary text-white font-medium rounded-xl shadow-sm hover:bg-opacity-90 transition-colors text-sm"
                       >
                           + {t('example.save')}
                       </button>
@@ -273,7 +280,7 @@ const SavedSearchesPage: React.FC = () => {
 
                   <button
                       onClick={() => dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'search' })}
-                      className="mt-8 px-6 py-3 bg-primary text-white font-bold rounded-lg shadow-md hover:bg-primary-dark transition-colors"
+                      className="mt-8 px-6 py-3 bg-primary text-white font-medium rounded-xl shadow-md hover:bg-primary-dark transition-colors"
                   >
                       {t('empty.startSearch')}
                   </button>

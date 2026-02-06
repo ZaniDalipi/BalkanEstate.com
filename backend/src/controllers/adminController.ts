@@ -8,6 +8,7 @@ import Inquiry from '../models/Inquiry';
 import { geocodeAddressWithRateLimit } from '../services/geocodingService';
 import { getWhitelistConfig } from '../middleware/adminAuth';
 import { adminLogger } from '../utils/logger';
+import { invalidateCache } from '../middleware/cache';
 
 
 // @desc    Get admin dashboard statistics
@@ -156,6 +157,11 @@ export const updateUserAdmin = async (req: Request, res: Response): Promise<void
       return;
     }
 
+    // Invalidate related caches so changes reflect immediately across the app
+    invalidateCache('/api/agents');
+    invalidateCache('/api/agencies');
+    invalidateCache('/api/properties');
+
     res.json({
       message: 'User updated successfully',
       user,
@@ -194,6 +200,11 @@ export const deleteUser = async (req: Request, res: Response): Promise<void> => 
 
     await Property.deleteMany({ sellerId: id });
     await user.deleteOne();
+
+    // Invalidate related caches so deletion reflects immediately across the app
+    invalidateCache('/api/agents');
+    invalidateCache('/api/agencies');
+    invalidateCache('/api/properties');
 
     res.json({ message: 'User and associated data deleted successfully' });
   } catch (error: any) {

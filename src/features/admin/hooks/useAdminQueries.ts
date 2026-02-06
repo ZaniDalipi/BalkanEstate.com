@@ -99,10 +99,10 @@ export function useAdminUsers(filters?: { page?: number; limit?: number; role?: 
   return useQuery({
     queryKey: adminKeys.usersList(filters),
     queryFn: () => getUsers(filters),
-    staleTime: 30 * 1000, // 30 seconds
-    gcTime: 5 * 60 * 1000, // 5 minutes
+    staleTime: 5 * 1000, // 5 seconds - admin needs fresh data
+    gcTime: 60 * 1000, // 1 minute
     refetchOnWindowFocus: true,
-    refetchInterval: 60 * 1000, // Poll every 60 seconds
+    refetchInterval: 10 * 1000, // Poll every 10 seconds for near-instant updates
   });
 }
 
@@ -113,7 +113,13 @@ export function useUpdateUser() {
     mutationFn: ({ userId, data }: { userId: string; data: UserUpdateData }) =>
       updateUser(userId, data),
     onSuccess: () => {
+      // Invalidate admin user list
       queryClient.invalidateQueries({ queryKey: adminKeys.users() });
+      // Invalidate public-facing caches so changes reflect across the app
+      queryClient.invalidateQueries({ queryKey: ['auth'] });
+      queryClient.invalidateQueries({ queryKey: ['agents'] });
+      queryClient.invalidateQueries({ queryKey: ['properties'] });
+      queryClient.invalidateQueries({ queryKey: adminKeys.dashboardStats() });
     },
   });
 }
@@ -125,7 +131,13 @@ export function useUpdateUserRole() {
     mutationFn: ({ userId, role }: { userId: string; role: string }) =>
       updateUserRole(userId, role),
     onSuccess: () => {
+      // Invalidate admin user list
       queryClient.invalidateQueries({ queryKey: adminKeys.users() });
+      // Invalidate public-facing caches so role change reflects across the app
+      queryClient.invalidateQueries({ queryKey: ['auth'] });
+      queryClient.invalidateQueries({ queryKey: ['agents'] });
+      queryClient.invalidateQueries({ queryKey: ['properties'] });
+      queryClient.invalidateQueries({ queryKey: adminKeys.dashboardStats() });
     },
   });
 }
@@ -136,7 +148,12 @@ export function useDeleteUser() {
   return useMutation({
     mutationFn: (userId: string) => deleteUser(userId),
     onSuccess: () => {
+      // Invalidate admin user list
       queryClient.invalidateQueries({ queryKey: adminKeys.users() });
+      // Invalidate public-facing caches so deletion reflects across the app
+      queryClient.invalidateQueries({ queryKey: ['agents'] });
+      queryClient.invalidateQueries({ queryKey: ['properties'] });
+      queryClient.invalidateQueries({ queryKey: adminKeys.dashboardStats() });
     },
   });
 }
@@ -149,10 +166,10 @@ export function useAdminProperties(filters?: { page?: number; limit?: number; st
   return useQuery({
     queryKey: adminKeys.propertiesList(filters),
     queryFn: () => getAdminProperties(filters),
-    staleTime: 30 * 1000,
-    gcTime: 5 * 60 * 1000,
+    staleTime: 5 * 1000, // 5 seconds
+    gcTime: 60 * 1000, // 1 minute
     refetchOnWindowFocus: true,
-    refetchInterval: 60 * 1000,
+    refetchInterval: 10 * 1000, // Poll every 10 seconds
   });
 }
 
@@ -187,10 +204,10 @@ export function useAdminProducts() {
   return useQuery({
     queryKey: adminKeys.products(),
     queryFn: () => getProducts(),
-    staleTime: 30 * 1000,
-    gcTime: 5 * 60 * 1000,
+    staleTime: 5 * 1000, // 5 seconds
+    gcTime: 60 * 1000, // 1 minute
     refetchOnWindowFocus: true,
-    refetchInterval: 60 * 1000,
+    refetchInterval: 10 * 1000, // Poll every 10 seconds
   });
 }
 
@@ -240,10 +257,10 @@ export function useAdminPromotionPlans() {
   return useQuery({
     queryKey: adminKeys.promotionPlans(),
     queryFn: () => getPromotionPlans(),
-    staleTime: 30 * 1000,
-    gcTime: 5 * 60 * 1000,
+    staleTime: 5 * 1000, // 5 seconds
+    gcTime: 60 * 1000, // 1 minute
     refetchOnWindowFocus: true,
-    refetchInterval: 60 * 1000,
+    refetchInterval: 10 * 1000, // Poll every 10 seconds
   });
 }
 
@@ -304,10 +321,10 @@ export function useAdminDiscountCodes() {
   return useQuery({
     queryKey: adminKeys.discountCodes(),
     queryFn: () => getDiscountCodes(),
-    staleTime: 30 * 1000,
-    gcTime: 5 * 60 * 1000,
+    staleTime: 5 * 1000, // 5 seconds
+    gcTime: 60 * 1000, // 1 minute
     refetchOnWindowFocus: true,
-    refetchInterval: 60 * 1000,
+    refetchInterval: 10 * 1000, // Poll every 10 seconds
   });
 }
 
@@ -379,10 +396,10 @@ export function useDashboardStats() {
   return useQuery({
     queryKey: adminKeys.dashboardStats(),
     queryFn: () => apiRequest('/analytics/dashboard-stats', { requiresAuth: true }),
-    staleTime: 60 * 1000, // 1 minute
-    gcTime: 5 * 60 * 1000,
+    staleTime: 10 * 1000, // 10 seconds
+    gcTime: 60 * 1000, // 1 minute
     refetchOnWindowFocus: true,
-    refetchInterval: 60 * 1000,
+    refetchInterval: 15 * 1000, // Poll every 15 seconds
   });
 }
 
@@ -400,10 +417,10 @@ export function useRecentSubscriptions(limit: number = 10) {
   return useQuery({
     queryKey: adminKeys.recentSubscriptions(limit),
     queryFn: () => apiRequest(`/analytics/subscriptions/recent?limit=${limit}`, { requiresAuth: true }),
-    staleTime: 60 * 1000,
-    gcTime: 5 * 60 * 1000,
+    staleTime: 10 * 1000, // 10 seconds
+    gcTime: 60 * 1000, // 1 minute
     refetchOnWindowFocus: true,
-    refetchInterval: 60 * 1000,
+    refetchInterval: 15 * 1000, // Poll every 15 seconds
   });
 }
 
@@ -424,10 +441,10 @@ export function useAdminPayments(filters?: { page?: number; limit?: number; stat
       if (filters?.status) params.append('status', filters.status);
       return apiRequest(`/admin/payments?${params.toString()}`, { requiresAuth: true });
     },
-    staleTime: 60 * 1000,
-    gcTime: 5 * 60 * 1000,
+    staleTime: 10 * 1000, // 10 seconds
+    gcTime: 60 * 1000, // 1 minute
     refetchOnWindowFocus: true,
-    refetchInterval: 60 * 1000,
+    refetchInterval: 15 * 1000, // Poll every 15 seconds
   });
 }
 
@@ -438,10 +455,10 @@ export function usePaymentStats() {
   return useQuery({
     queryKey: adminKeys.paymentStats(),
     queryFn: () => apiRequest('/admin/payments/stats', { requiresAuth: true }),
-    staleTime: 60 * 1000,
-    gcTime: 5 * 60 * 1000,
+    staleTime: 10 * 1000, // 10 seconds
+    gcTime: 60 * 1000, // 1 minute
     refetchOnWindowFocus: true,
-    refetchInterval: 120 * 1000, // Poll every 2 minutes
+    refetchInterval: 30 * 1000, // Poll every 30 seconds
   });
 }
 
@@ -459,10 +476,10 @@ export function useAdminInquiries(filters?: { page?: number; limit?: number; sta
       if (filters?.status) params.append('status', filters.status);
       return apiRequest(`/admin/inquiries?${params.toString()}`, { requiresAuth: true });
     },
-    staleTime: 30 * 1000,
-    gcTime: 5 * 60 * 1000,
+    staleTime: 5 * 1000, // 5 seconds
+    gcTime: 60 * 1000, // 1 minute
     refetchOnWindowFocus: true,
-    refetchInterval: 60 * 1000,
+    refetchInterval: 10 * 1000, // Poll every 10 seconds
   });
 }
 
@@ -496,10 +513,10 @@ export function useAdminAgentRequests(filters?: { page?: number; limit?: number;
       if (filters?.status) params.append('status', filters.status);
       return apiRequest(`/agent-requests?${params.toString()}`, { requiresAuth: true });
     },
-    staleTime: 30 * 1000,
-    gcTime: 5 * 60 * 1000,
+    staleTime: 5 * 1000, // 5 seconds
+    gcTime: 60 * 1000, // 1 minute
     refetchOnWindowFocus: true,
-    refetchInterval: 60 * 1000,
+    refetchInterval: 10 * 1000, // Poll every 10 seconds
   });
 }
 
@@ -548,10 +565,10 @@ export function useAdminAgencies(filters?: { page?: number; limit?: number }) {
       if (filters?.limit) params.append('limit', String(filters.limit));
       return apiRequest(`/admin/agencies?${params.toString()}`, { requiresAuth: true });
     },
-    staleTime: 30 * 1000,
-    gcTime: 5 * 60 * 1000,
+    staleTime: 5 * 1000, // 5 seconds
+    gcTime: 60 * 1000, // 1 minute
     refetchOnWindowFocus: true,
-    refetchInterval: 60 * 1000,
+    refetchInterval: 10 * 1000, // Poll every 10 seconds
   });
 }
 

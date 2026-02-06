@@ -166,6 +166,8 @@ const PropertyInquiryModal: React.FC<PropertyInquiryModalProps> = ({
                 <img
                   src={property.imageUrl}
                   alt={property.title}
+                  loading="lazy"
+                  decoding="async"
                   className="w-20 h-20 rounded-lg object-cover"
                 />
                 <div className="flex-1 min-w-0">

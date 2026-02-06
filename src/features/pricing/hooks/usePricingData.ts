@@ -91,11 +91,11 @@ export function useProducts(role: string) {
   return useQuery({
     queryKey: ['products', role],
     queryFn: () => fetchProducts(role),
-    staleTime: 30 * 1000, // Consider data fresh for 30 seconds
-    gcTime: 5 * 60 * 1000, // Keep in cache for 5 minutes (formerly cacheTime)
+    staleTime: 5 * 1000, // Consider data fresh for 5 seconds
+    gcTime: 60 * 1000, // Keep in cache for 1 minute
     refetchOnWindowFocus: true, // Refetch when user returns to tab
     refetchOnReconnect: true, // Refetch when connection is restored
-    refetchInterval: 60 * 1000, // Poll every 60 seconds for real-time updates
+    refetchInterval: 10 * 1000, // Poll every 10 seconds for near-instant updates
     retry: 3,
   });
 }
@@ -107,11 +107,11 @@ export function usePromotionPlans() {
   return useQuery({
     queryKey: ['promotionPlans'],
     queryFn: fetchPromotionPlans,
-    staleTime: 30 * 1000,
-    gcTime: 5 * 60 * 1000,
+    staleTime: 5 * 1000, // Consider data fresh for 5 seconds
+    gcTime: 60 * 1000, // Keep in cache for 1 minute
     refetchOnWindowFocus: true,
     refetchOnReconnect: true,
-    refetchInterval: 60 * 1000, // Poll every 60 seconds
+    refetchInterval: 10 * 1000, // Poll every 10 seconds for near-instant updates
     retry: 3,
   });
 }
@@ -126,8 +126,8 @@ export function useUserListings(enabled: boolean) {
     queryKey: ['userListings'],
     queryFn: () => fetchUserListings(token!),
     enabled: enabled && !!token,
-    staleTime: 60 * 1000,
-    gcTime: 5 * 60 * 1000,
+    staleTime: 10 * 1000, // 10 seconds
+    gcTime: 60 * 1000, // 1 minute
     refetchOnWindowFocus: true,
   });
 }
@@ -178,7 +178,7 @@ export function usePricingPageData(activeTab: string, isAuthenticated: boolean) 
         queryClient.prefetchQuery({
           queryKey: ['products', role],
           queryFn: () => fetchProducts(role),
-          staleTime: 30 * 1000,
+          staleTime: 5 * 1000,
         });
       }
     });

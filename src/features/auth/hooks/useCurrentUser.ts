@@ -8,7 +8,8 @@ import { authKeys, checkAuth } from '../api';
  * Hook to get the current authenticated user
  *
  * Features:
- * - Automatic caching (5 min fresh, 10 min cache)
+ * - Automatic caching (30s fresh, 2 min cache)
+ * - Polls every 30 seconds for near-instant admin change detection
  * - Refetch on window focus
  * - Refetch on network reconnect
  * - No manual state management needed
@@ -32,9 +33,10 @@ export function useCurrentUser() {
       if (error?.response?.status === 401) return false;
       return failureCount < 3;
     },
-    // Keep user data fresh
-    staleTime: 5 * 60 * 1000, // 5 minutes
-    gcTime: 10 * 60 * 1000, // 10 minutes
+    // Keep user data fresh for fast admin change detection
+    staleTime: 30 * 1000, // 30 seconds
+    gcTime: 2 * 60 * 1000, // 2 minutes
+    refetchInterval: 30 * 1000, // Poll every 30 seconds to detect admin changes
   });
 
   return {

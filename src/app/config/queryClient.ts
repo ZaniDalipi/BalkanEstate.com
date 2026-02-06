@@ -7,8 +7,8 @@ import { QueryClient } from '@tanstack/react-query';
  * Creates a Query Client with production-ready defaults
  *
  * Configuration Strategy:
- * - Stale time: 5 minutes - Data considered fresh
- * - Cache time: 10 minutes - Keep unused data
+ * - Stale time: 30 seconds - Data considered fresh (fast refresh)
+ * - Cache time: 2 minutes - Keep unused data briefly
  * - Retry: Smart retry based on error type
  * - Refetch: On window focus and reconnect
  */
@@ -16,10 +16,10 @@ export const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
       // How long data is considered fresh (no refetch)
-      staleTime: 5 * 60 * 1000, // 5 minutes
+      staleTime: 30 * 1000, // 30 seconds - fast refresh for all data
 
       // How long unused data stays in cache
-      gcTime: 10 * 60 * 1000, // 10 minutes (formerly cacheTime)
+      gcTime: 2 * 60 * 1000, // 2 minutes (formerly cacheTime)
 
       // Retry logic
       retry: (failureCount, error: any) => {
