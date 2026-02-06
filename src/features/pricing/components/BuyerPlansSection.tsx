@@ -5,7 +5,7 @@ import { CheckIcon, SparklesIcon } from '@/constants';
 import { type Product } from '../hooks/usePricingData';
 
 interface BuyerPlansSectionProps {
-  t: (key: string, defaultValue?: string) => string;
+  t: (key: string, defaultValue?: string, options?: any) => string;
   buyerProduct: Product | undefined;
   onPlanSelection: (product: Product) => void;
 }

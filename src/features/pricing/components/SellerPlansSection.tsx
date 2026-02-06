@@ -11,7 +11,7 @@ import { type Product } from '../hooks/usePricingData';
 import { formatLimit } from './usePricingPage';
 
 interface SellerPlansSectionProps {
-  t: (key: string, defaultValue?: string) => string;
+  t: (key: string, defaultValue?: string, options?: any) => string;
   proYearlyProduct: Product | undefined;
   proMonthlyProduct: Product | undefined;
   enterpriseProduct: Product | undefined;
