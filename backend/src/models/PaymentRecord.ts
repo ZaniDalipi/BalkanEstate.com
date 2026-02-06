@@ -99,7 +99,7 @@ const PaymentRecordSchema: Schema = new Schema(
     // Store
     store: {
       type: String,
-      enum: ['google', 'apple', 'stripe', 'paddle', 'lemonsqueezy', 'web'],
+      enum: ['google', 'apple', 'web'],
       required: true,
       index: true,
     },

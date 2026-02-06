@@ -42,9 +42,6 @@ export const validateEnvironment = (): void => {
 
   // Optional but recommended variables - warn if missing but don't throw
   const optionalButRecommended = [
-    'STRIPE_SECRET_KEY',
-    'STRIPE_WEBHOOK_SECRET',
-    'LEMON_SQUEEZY_API_KEY',
     'SENTRY_DSN',
     'GOOGLE_CLIENT_ID',
     'GOOGLE_CLIENT_SECRET',
@@ -137,7 +134,6 @@ export const helmetConfig = helmet({
         'https://unpkg.com',
         'https://www.googletagmanager.com',
         'https://connect.facebook.net',
-        'https://js.stripe.com', // Stripe payments
       ],
       styleSrc: [
         "'self'",
@@ -171,7 +167,6 @@ export const helmetConfig = helmet({
         'https://nominatim.openstreetmap.org',
         'https://www.google-analytics.com',
         'https://connect.facebook.net',
-        'https://api.stripe.com', // Stripe
         'https://*.sentry.io', // Error tracking
         // Development URLs
         ...(isDevelopment ? [
@@ -182,8 +177,6 @@ export const helmetConfig = helmet({
       ],
       frameSrc: [
         "'self'",
-        'https://js.stripe.com', // Stripe 3D Secure
-        'https://hooks.stripe.com',
       ],
       objectSrc: ["'none'"],
       mediaSrc: ["'self'", 'https://res.cloudinary.com', 'blob:'],

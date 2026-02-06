@@ -17,7 +17,7 @@
 
 // ====== PAYMENT PROVIDERS ======
 
-export type PaymentProvider = 'stripe' | 'lemonsqueezy';
+export type PaymentProvider = 'web';
 
 export interface PaymentProviderInfo {
   id: PaymentProvider;
@@ -30,23 +30,14 @@ export interface PaymentProviderInfo {
 }
 
 export const PAYMENT_PROVIDERS: Record<PaymentProvider, PaymentProviderInfo> = {
-  lemonsqueezy: {
-    id: 'lemonsqueezy',
-    name: 'LemonSqueezy',
-    description: 'Secure payments with automatic VAT handling',
-    fees: '~5% + $0.50',
-    logo: 'lemonsqueezy',
+  web: {
+    id: 'web' as PaymentProvider,
+    name: 'Web Payment',
+    description: 'Secure online payments',
+    fees: 'TBD',
+    logo: 'payment',
     supportedCountries: ['GR', 'HR', 'BG', 'RO', 'SI', 'RS', 'AL', 'BA', 'MK', 'ME', 'XK'],
     supportedMethods: ['card', 'paypal', 'apple_pay', 'google_pay'],
-  },
-  stripe: {
-    id: 'stripe',
-    name: 'Stripe',
-    description: 'Secure card payments for EU countries',
-    fees: '~2.9% + €0.25',
-    logo: 'stripe',
-    supportedCountries: ['GR', 'HR', 'BG', 'RO', 'SI'],
-    supportedMethods: ['card', 'sepa_debit', 'apple_pay', 'google_pay', 'klarna', 'ideal', 'bancontact', 'giropay', 'eps'],
   },
 };
 
@@ -65,18 +56,18 @@ export interface CountryPaymentInfo {
 // All countries now use LemonSqueezy as primary provider
 export const COUNTRY_PAYMENT_MAP: Record<string, CountryPaymentInfo> = {
   // EU Countries
-  GR: { countryCode: 'GR', countryName: 'Greece', provider: 'lemonsqueezy', currency: 'EUR', isEU: true, isSEPA: true, flag: '🇬🇷' },
-  HR: { countryCode: 'HR', countryName: 'Croatia', provider: 'lemonsqueezy', currency: 'EUR', isEU: true, isSEPA: true, flag: '🇭🇷' },
-  BG: { countryCode: 'BG', countryName: 'Bulgaria', provider: 'lemonsqueezy', currency: 'EUR', isEU: true, isSEPA: true, flag: '🇧🇬' },
-  RO: { countryCode: 'RO', countryName: 'Romania', provider: 'lemonsqueezy', currency: 'EUR', isEU: true, isSEPA: true, flag: '🇷🇴' },
-  SI: { countryCode: 'SI', countryName: 'Slovenia', provider: 'lemonsqueezy', currency: 'EUR', isEU: true, isSEPA: true, flag: '🇸🇮' },
+  GR: { countryCode: 'GR', countryName: 'Greece', provider: 'web' as PaymentProvider, currency: 'EUR', isEU: true, isSEPA: true, flag: '🇬🇷' },
+  HR: { countryCode: 'HR', countryName: 'Croatia', provider: 'web' as PaymentProvider, currency: 'EUR', isEU: true, isSEPA: true, flag: '🇭🇷' },
+  BG: { countryCode: 'BG', countryName: 'Bulgaria', provider: 'web' as PaymentProvider, currency: 'EUR', isEU: true, isSEPA: true, flag: '🇧🇬' },
+  RO: { countryCode: 'RO', countryName: 'Romania', provider: 'web' as PaymentProvider, currency: 'EUR', isEU: true, isSEPA: true, flag: '🇷🇴' },
+  SI: { countryCode: 'SI', countryName: 'Slovenia', provider: 'web' as PaymentProvider, currency: 'EUR', isEU: true, isSEPA: true, flag: '🇸🇮' },
   // Non-EU Balkans
-  RS: { countryCode: 'RS', countryName: 'Serbia', provider: 'lemonsqueezy', currency: 'EUR', isEU: false, isSEPA: true, flag: '🇷🇸' },
-  AL: { countryCode: 'AL', countryName: 'Albania', provider: 'lemonsqueezy', currency: 'EUR', isEU: false, isSEPA: true, flag: '🇦🇱' },
-  BA: { countryCode: 'BA', countryName: 'Bosnia and Herzegovina', provider: 'lemonsqueezy', currency: 'EUR', isEU: false, isSEPA: false, flag: '🇧🇦' },
-  MK: { countryCode: 'MK', countryName: 'North Macedonia', provider: 'lemonsqueezy', currency: 'EUR', isEU: false, isSEPA: true, flag: '🇲🇰' },
-  ME: { countryCode: 'ME', countryName: 'Montenegro', provider: 'lemonsqueezy', currency: 'EUR', isEU: false, isSEPA: true, flag: '🇲🇪' },
-  XK: { countryCode: 'XK', countryName: 'Kosovo', provider: 'lemonsqueezy', currency: 'EUR', isEU: false, isSEPA: false, flag: '🇽🇰' },
+  RS: { countryCode: 'RS', countryName: 'Serbia', provider: 'web' as PaymentProvider, currency: 'EUR', isEU: false, isSEPA: true, flag: '🇷🇸' },
+  AL: { countryCode: 'AL', countryName: 'Albania', provider: 'web' as PaymentProvider, currency: 'EUR', isEU: false, isSEPA: true, flag: '🇦🇱' },
+  BA: { countryCode: 'BA', countryName: 'Bosnia and Herzegovina', provider: 'web' as PaymentProvider, currency: 'EUR', isEU: false, isSEPA: false, flag: '🇧🇦' },
+  MK: { countryCode: 'MK', countryName: 'North Macedonia', provider: 'web' as PaymentProvider, currency: 'EUR', isEU: false, isSEPA: true, flag: '🇲🇰' },
+  ME: { countryCode: 'ME', countryName: 'Montenegro', provider: 'web' as PaymentProvider, currency: 'EUR', isEU: false, isSEPA: true, flag: '🇲🇪' },
+  XK: { countryCode: 'XK', countryName: 'Kosovo', provider: 'web' as PaymentProvider, currency: 'EUR', isEU: false, isSEPA: false, flag: '🇽🇰' },
 };
 
 /**
@@ -84,7 +75,7 @@ export const COUNTRY_PAYMENT_MAP: Record<string, CountryPaymentInfo> = {
  */
 export function getProviderForCountry(countryCode: string): PaymentProvider {
   const info = COUNTRY_PAYMENT_MAP[countryCode.toUpperCase()];
-  return info?.provider || 'stripe'; // Default to Stripe
+  return info?.provider || 'web'; // Default to web
 }
 
 /**
@@ -366,26 +357,6 @@ export function getRecommendedPaymentMethod(
   return availableMethods[0] || null;
 }
 
-// ====== STRIPE CONFIGURATION ======
-
-export const STRIPE_CONFIG = {
-  // Use environment variable for publishable key
-  publishableKey: import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY || '',
-
-  // Stripe API version
-  apiVersion: '2023-10-16' as const,
-
-  // Supported locales for Stripe checkout
-  locale: 'en' as const,
-
-  // Enable these Stripe features
-  features: {
-    applePayEnabled: true,
-    googlePayEnabled: true,
-    linkEnabled: true, // Stripe Link for faster checkout
-  },
-};
-
 // ====== PAYMENT PLANS ======
 
 export interface PaymentPlan {
@@ -394,8 +365,8 @@ export interface PaymentPlan {
   price: number;
   currency: string;
   interval: 'month' | 'year' | 'one-time';
-  stripeProductId?: string;
-  stripePriceId?: string;
+  externalProductId?: string;
+  externalPriceId?: string;
 }
 
 export const PAYMENT_PLANS: Record<string, PaymentPlan> = {
@@ -405,8 +376,7 @@ export const PAYMENT_PLANS: Record<string, PaymentPlan> = {
     price: 3, // €3/month for Buyer Pro
     currency: 'EUR',
     interval: 'month',
-    // Add your Stripe Price ID here when created
-    stripePriceId: process.env.STRIPE_PRICE_BUYER_PRO_MONTHLY,
+    externalPriceId: undefined,
   },
   pro_monthly: {
     id: 'pro_monthly',
@@ -414,7 +384,7 @@ export const PAYMENT_PLANS: Record<string, PaymentPlan> = {
     price: 25, // €25/month - 20 listings/month
     currency: 'EUR',
     interval: 'month',
-    stripePriceId: process.env.STRIPE_PRICE_PRO_MONTHLY,
+    externalPriceId: undefined,
   },
   pro_yearly: {
     id: 'pro_yearly',
@@ -422,7 +392,7 @@ export const PAYMENT_PLANS: Record<string, PaymentPlan> = {
     price: 200, // €200/year - 250 listings/year
     currency: 'EUR',
     interval: 'year',
-    stripePriceId: process.env.STRIPE_PRICE_PRO_YEARLY,
+    externalPriceId: undefined,
   },
   enterprise: {
     id: 'enterprise',
@@ -430,6 +400,6 @@ export const PAYMENT_PLANS: Record<string, PaymentPlan> = {
     price: 1000, // €1000/year - 500 listings, 5 team members
     currency: 'EUR',
     interval: 'year',
-    stripePriceId: process.env.STRIPE_PRICE_ENTERPRISE,
+    externalPriceId: undefined,
   },
 };

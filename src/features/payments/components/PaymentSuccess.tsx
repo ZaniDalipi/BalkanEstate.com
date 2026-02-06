@@ -111,8 +111,7 @@ const PaymentSuccess: React.FC = () => {
     }
 
     // Verify payment based on available parameters
-    // LemonSqueezy only needs provider param - verification polls the API
-    if (sid || oid || providerParam === 'lemonsqueezy') {
+    if (sid || oid || providerParam) {
       verifyPayment(params);
     } else {
       setError(t('success.noSessionFound'));
@@ -175,7 +174,7 @@ const PaymentSuccess: React.FC = () => {
             price: result.amountTotal || 0,
             quantity: 1,
           }],
-          payment_provider: result.provider || 'lemonsqueezy',
+          payment_provider: result.provider || 'web',
         });
 
         try {
