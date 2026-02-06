@@ -18,6 +18,8 @@ export const useMapLayers = ({ map, isLoaded }: UseMapLayersProps) => {
   const cadastreLayerRef = useRef<google.maps.ImageMapType | null>(null);
   const climateLayerRef = useRef<google.maps.ImageMapType | null>(null);
   const lastCadastreZoomRef = useRef<number | null>(null);
+  const cadastreInfoWindowRef = useRef<google.maps.InfoWindow | null>(null);
+  const cadastreClickListenerRef = useRef<google.maps.MapsEventListener | null>(null);
 
   // Cadastre layer effect
   useEffect(() => {
@@ -35,7 +37,18 @@ export const useMapLayers = ({ map, isLoaded }: UseMapLayersProps) => {
       }
     };
 
+    const removeClickListener = () => {
+      if (cadastreClickListenerRef.current) {
+        google.maps.event.removeListener(cadastreClickListenerRef.current);
+        cadastreClickListenerRef.current = null;
+      }
+      if (cadastreInfoWindowRef.current) {
+        cadastreInfoWindowRef.current.close();
+      }
+    };
+
     removeCadastreLayer();
+    removeClickListener();
 
     if (!showCadastre) {
       lastCadastreZoomRef.current = null;
@@ -58,12 +71,24 @@ export const useMapLayers = ({ map, isLoaded }: UseMapLayersProps) => {
     };
 
     const TILE_SIZE = 256;
-    const REQUEST_SIZE = 512;
+    const REQUEST_SIZE = 1024;
+
+    const getCrs = () => cadastreConfig.additionalParams?.CRS || 'EPSG:4326';
+
+    const computeBbox = (sw: google.maps.LatLng, ne: google.maps.LatLng) => {
+      const crs = getCrs();
+      if (crs === 'EPSG:3857') {
+        const swMerc = latLngToMercator(sw.lat(), sw.lng());
+        const neMerc = latLngToMercator(ne.lat(), ne.lng());
+        return `${swMerc.x},${swMerc.y},${neMerc.x},${neMerc.y}`;
+      }
+      return `${sw.lat()},${sw.lng()},${ne.lat()},${ne.lng()}`;
+    };
 
     const createWmsLayer = () => {
       return new google.maps.ImageMapType({
         getTileUrl: (coord, zoom) => {
-          const minZoom = Math.max(cadastreConfig.minZoom || CADASTRE_MIN_ZOOM, 17);
+          const minZoom = cadastreConfig.minZoom || CADASTRE_MIN_ZOOM;
           if (zoom < minZoom) return '';
 
           const proj = map.getProjection();
@@ -81,19 +106,7 @@ export const useMapLayers = ({ map, isLoaded }: UseMapLayersProps) => {
 
           const sw = proj.fromPointToLatLng(new google.maps.Point(topLeft.x, bottomRight.y));
           const ne = proj.fromPointToLatLng(new google.maps.Point(bottomRight.x, topLeft.y));
-
           if (!sw || !ne) return '';
-
-          let bbox: string;
-          const crs = cadastreConfig.additionalParams?.CRS || 'EPSG:4326';
-
-          if (crs === 'EPSG:3857') {
-            const swMerc = latLngToMercator(sw.lat(), sw.lng());
-            const neMerc = latLngToMercator(ne.lat(), ne.lng());
-            bbox = `${swMerc.x},${swMerc.y},${neMerc.x},${neMerc.y}`;
-          } else {
-            bbox = `${sw.lat()},${sw.lng()},${ne.lat()},${ne.lng()}`;
-          }
 
           const params = new URLSearchParams({
             SERVICE: 'WMS',
@@ -105,14 +118,14 @@ export const useMapLayers = ({ map, isLoaded }: UseMapLayersProps) => {
             TRANSPARENT: 'true',
             WIDTH: String(REQUEST_SIZE),
             HEIGHT: String(REQUEST_SIZE),
-            CRS: crs,
-            BBOX: bbox,
+            CRS: getCrs(),
+            BBOX: computeBbox(sw, ne),
           });
 
           return `${cadastreConfig.wmsUrl}?${params.toString()}`;
         },
         tileSize: new google.maps.Size(TILE_SIZE, TILE_SIZE),
-        opacity: 0.55,
+        opacity: 0.7,
         name: 'Cadastre',
       });
     };
@@ -120,6 +133,126 @@ export const useMapLayers = ({ map, isLoaded }: UseMapLayersProps) => {
     const wmsLayer = createWmsLayer();
     map.overlayMapTypes.push(wmsLayer);
     cadastreLayerRef.current = wmsLayer;
+
+    // Click handler - WMS GetFeatureInfo
+    if (!cadastreInfoWindowRef.current) {
+      cadastreInfoWindowRef.current = new google.maps.InfoWindow();
+    }
+    const infoWindow = cadastreInfoWindowRef.current;
+
+    const handleCadastreClick = async (e: google.maps.MapMouseEvent) => {
+      if (!e.latLng) return;
+      const zoom = map.getZoom();
+      const minZoom = cadastreConfig.minZoom || CADASTRE_MIN_ZOOM;
+      if (!zoom || zoom < minZoom) return;
+
+      const mapDiv = map.getDiv();
+      const mapWidth = mapDiv.offsetWidth;
+      const mapHeight = mapDiv.offsetHeight;
+      const bounds = map.getBounds();
+      if (!bounds) return;
+
+      const sw = bounds.getSouthWest();
+      const ne = bounds.getNorthEast();
+      if (!sw || !ne) return;
+
+      const lngRange = ne.lng() - sw.lng();
+      const latRange = ne.lat() - sw.lat();
+      const i = Math.round(((e.latLng.lng() - sw.lng()) / lngRange) * mapWidth);
+      const j = Math.round(((ne.lat() - e.latLng.lat()) / latRange) * mapHeight);
+
+      const crs = getCrs();
+      const bbox = computeBbox(sw, ne);
+
+      const params = new URLSearchParams({
+        SERVICE: 'WMS',
+        VERSION: cadastreConfig.version || '1.3.0',
+        REQUEST: 'GetFeatureInfo',
+        LAYERS: cadastreConfig.layers,
+        QUERY_LAYERS: cadastreConfig.layers,
+        INFO_FORMAT: 'application/json',
+        FEATURE_COUNT: '1',
+        I: String(i),
+        J: String(j),
+        WIDTH: String(mapWidth),
+        HEIGHT: String(mapHeight),
+        CRS: crs,
+        BBOX: bbox,
+      });
+
+      infoWindow.setContent('<div style="padding:8px;font-family:system-ui,sans-serif;font-size:13px;color:#666;">Loading parcel info...</div>');
+      infoWindow.setPosition(e.latLng);
+      infoWindow.open(map);
+
+      try {
+        const response = await fetch(`${cadastreConfig.wmsUrl}?${params.toString()}`);
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+
+        const contentType = response.headers.get('content-type') || '';
+        let features: any[] = [];
+
+        if (contentType.includes('json')) {
+          const data = await response.json();
+          features = data.features || [];
+        } else {
+          const text = await response.text();
+          if (!text.includes('numberReturned="0"')) {
+            const idMatch = text.match(/(?:nationalCadastralReference|inspireId|gml:id|PARCEL_ID|fid)(?:>|=")([^<"]+)/);
+            const areaMatch = text.match(/(?:areaValue|area|AREA|surface)>([^<]+)/);
+            const labelMatch = text.match(/(?:label|LABEL|name|NAME)>([^<]+)/);
+            const municMatch = text.match(/(?:administrativeUnit|municipality|MUNICIPALITY|KO_NAME)>([^<]+)/);
+            if (idMatch || areaMatch) {
+              features = [{
+                properties: {
+                  ...(idMatch ? { id: idMatch[1] } : {}),
+                  ...(areaMatch ? { area: areaMatch[1] } : {}),
+                  ...(labelMatch ? { label: labelMatch[1] } : {}),
+                  ...(municMatch ? { municipality: municMatch[1] } : {}),
+                }
+              }];
+            }
+          }
+        }
+
+        if (features.length > 0) {
+          const props = features[0].properties || {};
+          const parcelId = props.nationalCadastralReference || props.inspireId || props.id || props.ID || props.gml_id || props.PARCEL_ID || props.parcel_id || props.fid || '';
+          const area = props.areaValue || props.area || props.AREA || props.Area || props.surface || props.SURFACE || '';
+          const label = props.label || props.LABEL || props.name || props.NAME || '';
+          const municipality = props.administrativeUnit || props.municipality || props.MUNICIPALITY || props.KO_NAME || props.cadastralZoning || '';
+
+          const areaStr = area ? `${Number(area).toLocaleString()} m²` : '';
+          const rows = [
+            parcelId && `<tr><td style="color:#888;padding:2px 8px 2px 0;white-space:nowrap;">Parcel ID</td><td style="font-weight:600;">${parcelId}</td></tr>`,
+            areaStr && `<tr><td style="color:#888;padding:2px 8px 2px 0;white-space:nowrap;">Area</td><td style="font-weight:600;">${areaStr}</td></tr>`,
+            label && `<tr><td style="color:#888;padding:2px 8px 2px 0;white-space:nowrap;">Label</td><td style="font-weight:600;">${label}</td></tr>`,
+            municipality && `<tr><td style="color:#888;padding:2px 8px 2px 0;white-space:nowrap;">Municipality</td><td style="font-weight:600;">${municipality}</td></tr>`,
+          ].filter(Boolean);
+
+          const shownKeys = new Set(['nationalCadastralReference', 'inspireId', 'id', 'ID', 'gml_id', 'PARCEL_ID', 'parcel_id', 'fid', 'areaValue', 'area', 'AREA', 'Area', 'surface', 'SURFACE', 'label', 'LABEL', 'name', 'NAME', 'administrativeUnit', 'municipality', 'MUNICIPALITY', 'KO_NAME', 'cadastralZoning', 'bbox', 'geometry']);
+          const extraRows = Object.entries(props)
+            .filter(([key]) => !shownKeys.has(key))
+            .slice(0, 6)
+            .map(([key, val]) => `<tr><td style="color:#888;padding:2px 8px 2px 0;white-space:nowrap;text-transform:capitalize;">${key.replace(/_/g, ' ')}</td><td style="font-weight:600;">${val}</td></tr>`);
+
+          const html = `
+            <div style="font-family:system-ui,-apple-system,sans-serif;font-size:13px;min-width:200px;">
+              <div style="font-weight:700;font-size:15px;margin-bottom:8px;padding-bottom:6px;border-bottom:2px solid #e5720e;color:#333;">
+                Cadastre Parcel
+              </div>
+              ${[...rows, ...extraRows].length > 0 ? `<table style="border-collapse:collapse;">${[...rows, ...extraRows].join('')}</table>` : '<div style="color:#888;">No details available for this location</div>'}
+              <div style="margin-top:8px;font-size:11px;color:#999;">${cadastreConfig.attribution}</div>
+            </div>`;
+          infoWindow.setContent(html);
+        } else {
+          infoWindow.setContent('<div style="padding:8px;font-family:system-ui,sans-serif;font-size:13px;color:#888;">No parcel found at this location</div>');
+        }
+      } catch {
+        infoWindow.setContent('<div style="padding:8px;font-family:system-ui,sans-serif;font-size:13px;color:#888;">Could not load parcel info</div>');
+      }
+    };
+
+    cadastreClickListenerRef.current = map.addListener('click', handleCadastreClick);
 
     const handleZoomChange = () => {
       const newZoom = map.getZoom();
@@ -152,6 +285,7 @@ export const useMapLayers = ({ map, isLoaded }: UseMapLayersProps) => {
     return () => {
       google.maps.event.removeListener(zoomListener);
       google.maps.event.removeListener(idleListener);
+      removeClickListener();
       removeCadastreLayer();
     };
   }, [map, isLoaded, showCadastre]);

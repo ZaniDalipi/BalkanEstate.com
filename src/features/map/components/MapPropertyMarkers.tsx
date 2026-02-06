@@ -1,6 +1,6 @@
 import React from 'react';
 import { Property } from '@/types';
-import { CadastreLayer } from './CadastreLayer';
+import { SelectableCadastreLayer } from './SelectableCadastreLayer';
 import HeatMapLayer from './HeatMapLayer';
 import Buildings3DLayer from './Buildings3DLayer';
 import LandmarksLayer from './LandmarksLayer';
@@ -61,7 +61,7 @@ const MapPropertyMarkers: React.FC<MapPropertyMarkersProps> = ({
         enabled={showLandmarks}
         isNightMode={false}
       />
-      <CadastreLayer enabled={showCadastre && (mapType === 'satellite' || mapType === 'hybrid')} opacity={0.7} />
+      <SelectableCadastreLayer enabled={showCadastre} opacity={0.7} />
       <HeatMapLayer properties={propertiesInView} enabled={showHeatMap} intensity="medium" />
       {/* Render markers - zoom-based limit applied in propertiesInView */}
       <Markers properties={propertiesInView} onPopupClick={onPopupClick} hoveredPropertyId={hoveredPropertyId} isNightMode={false} />
