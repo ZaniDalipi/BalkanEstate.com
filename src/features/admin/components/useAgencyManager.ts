@@ -1,0 +1,270 @@
+import { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
+import { Agency } from '@/types';
+import { useConfirmation } from '@/src/shared/hooks/useConfirmation';
+import { API_URL } from '@/src/shared/api/config';
+
+export interface AgencyEditForm {
+  name: string;
+  description: string;
+  website: string;
+  phone: string;
+  email: string;
+  address: string;
+  city: string;
+  country: string;
+  zipCode: string;
+  lat: number;
+  lng: number;
+  facebookUrl: string;
+  instagramUrl: string;
+  linkedinUrl: string;
+  twitterUrl: string;
+  yearsInBusiness: number;
+  specialties: string[];
+  certifications: string[];
+  isFeatured: boolean;
+  featuredStartDate: string;
+  featuredEndDate: string;
+  adRotationOrder: number;
+  businessHours: {
+    monday: string;
+    tuesday: string;
+    wednesday: string;
+    thursday: string;
+    friday: string;
+    saturday: string;
+    sunday: string;
+  };
+}
+
+const defaultEditForm: AgencyEditForm = {
+  name: '',
+  description: '',
+  website: '',
+  phone: '',
+  email: '',
+  address: '',
+  city: '',
+  country: '',
+  zipCode: '',
+  lat: 0,
+  lng: 0,
+  facebookUrl: '',
+  instagramUrl: '',
+  linkedinUrl: '',
+  twitterUrl: '',
+  yearsInBusiness: 0,
+  specialties: [],
+  certifications: [],
+  isFeatured: false,
+  featuredStartDate: '',
+  featuredEndDate: '',
+  adRotationOrder: 0,
+  businessHours: {
+    monday: '',
+    tuesday: '',
+    wednesday: '',
+    thursday: '',
+    friday: '',
+    saturday: '',
+    sunday: '',
+  },
+};
+
+export function useAgencyManager() {
+  const { t } = useTranslation(['admin']);
+  const { confirm } = useConfirmation();
+  const [agencies, setAgencies] = useState<Agency[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
+
+  // View modal
+  const [isViewModalOpen, setIsViewModalOpen] = useState(false);
+  const [viewingAgency, setViewingAgency] = useState<Agency | null>(null);
+
+  // Edit modal
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [editingAgency, setEditingAgency] = useState<Agency | null>(null);
+  const [editForm, setEditForm] = useState<AgencyEditForm>(defaultEditForm);
+
+  // Pagination
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [totalAgencies, setTotalAgencies] = useState(0);
+
+  useEffect(() => {
+    fetchAgencies();
+  }, [currentPage]);
+
+  const fetchAgencies = async () => {
+    try {
+      setIsLoading(true);
+      const token = localStorage.getItem('balkan_estate_token');
+
+      const params = new URLSearchParams({
+        page: currentPage.toString(),
+        limit: '20',
+      });
+
+      const response = await fetch(`${API_URL}/admin/agencies?${params}`, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        },
+      });
+
+      if (!response.ok) throw new Error('Failed to fetch agencies');
+
+      const data = await response.json();
+      setAgencies(data.agencies || []);
+      setTotalPages(data.pagination?.totalPages || 1);
+      setTotalAgencies(data.pagination?.totalItems || 0);
+    } catch (err) {
+      setError('Failed to load agencies');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleViewAgency = (agency: Agency) => {
+    setViewingAgency(agency);
+    setIsViewModalOpen(true);
+  };
+
+  const handleEditAgency = (agency: Agency) => {
+    setEditingAgency(agency);
+    setEditForm({
+      name: agency.name,
+      description: agency.description || '',
+      website: agency.website || '',
+      phone: agency.phone || '',
+      email: agency.email || '',
+      address: agency.address || '',
+      city: agency.city || '',
+      country: agency.country || '',
+      zipCode: agency.zipCode || '',
+      lat: agency.lat || 0,
+      lng: agency.lng || 0,
+      facebookUrl: agency.facebookUrl || '',
+      instagramUrl: agency.instagramUrl || '',
+      linkedinUrl: agency.linkedinUrl || '',
+      twitterUrl: agency.twitterUrl || '',
+      yearsInBusiness: agency.yearsInBusiness || 0,
+      specialties: agency.specialties || [],
+      certifications: agency.certifications || [],
+      isFeatured: agency.isFeatured || false,
+      featuredStartDate: agency.featuredStartDate ? agency.featuredStartDate.split('T')[0] : '',
+      featuredEndDate: agency.featuredEndDate ? agency.featuredEndDate.split('T')[0] : '',
+      adRotationOrder: agency.adRotationOrder || 0,
+      businessHours: {
+        monday: agency.businessHours?.monday || '',
+        tuesday: agency.businessHours?.tuesday || '',
+        wednesday: agency.businessHours?.wednesday || '',
+        thursday: agency.businessHours?.thursday || '',
+        friday: agency.businessHours?.friday || '',
+        saturday: agency.businessHours?.saturday || '',
+        sunday: agency.businessHours?.sunday || '',
+      },
+    });
+    setIsEditModalOpen(true);
+  };
+
+  const handleUpdateAgency = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editingAgency) return;
+
+    try {
+      const token = localStorage.getItem('balkan_estate_token');
+
+      const sanitizedForm = {
+        ...editForm,
+        specialties: editForm.specialties.filter(s => s),
+        certifications: editForm.certifications.filter(s => s),
+      };
+
+      const response = await fetch(`${API_URL}/admin/agencies/${editingAgency._id}`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+        body: JSON.stringify(sanitizedForm),
+      });
+
+      if (!response.ok) throw new Error('Failed to update agency');
+
+      await fetchAgencies();
+      setIsEditModalOpen(false);
+      setEditingAgency(null);
+      setSuccessMessage('Agency updated successfully');
+      setTimeout(() => setSuccessMessage(null), 3000);
+    } catch (err) {
+      setError('Failed to update agency');
+      setTimeout(() => setError(null), 5000);
+    }
+  };
+
+  const handleDeleteAgency = async (agencyId: string, name: string) => {
+    const confirmed = await confirm({
+      title: t('admin:agencies.deleteTitle', 'Delete Agency'),
+      message: t('admin:agencies.deleteConfirm', { name, defaultValue: `Are you sure you want to delete "${name}"? This will remove the agency and unassign all agents. This action cannot be undone.` }),
+      confirmLabel: t('admin:common.delete', 'Delete'),
+      cancelLabel: t('admin:common.cancel', 'Cancel'),
+      type: 'danger',
+    });
+    if (!confirmed) return;
+
+    try {
+      const token = localStorage.getItem('balkan_estate_token');
+
+      const response = await fetch(`${API_URL}/admin/agencies/${agencyId}`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        },
+      });
+
+      if (!response.ok) throw new Error('Failed to delete agency');
+
+      await fetchAgencies();
+      setSuccessMessage('Agency deleted successfully');
+      setTimeout(() => setSuccessMessage(null), 3000);
+    } catch (err) {
+      setError('Failed to delete agency');
+      setTimeout(() => setError(null), 5000);
+    }
+  };
+
+  const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+    });
+  };
+
+  return {
+    agencies,
+    isLoading,
+    error,
+    successMessage,
+    isViewModalOpen,
+    setIsViewModalOpen,
+    viewingAgency,
+    isEditModalOpen,
+    setIsEditModalOpen,
+    editingAgency,
+    editForm,
+    setEditForm,
+    currentPage,
+    setCurrentPage,
+    totalPages,
+    totalAgencies,
+    handleViewAgency,
+    handleEditAgency,
+    handleUpdateAgency,
+    handleDeleteAgency,
+    formatDate,
+  };
+}
