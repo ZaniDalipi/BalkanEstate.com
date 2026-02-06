@@ -12,6 +12,7 @@ import PaymentRecord from '../models/PaymentRecord';
 import SubscriptionEvent from '../models/SubscriptionEvent';
 import User from '../models/User';
 import { adminLogger } from '../utils/logger';
+import { invalidateCache } from '../middleware/cache';
 
 /**
  * @desc    Get all subscriptions with pagination and filters
@@ -373,6 +374,10 @@ export const activateUserSubscription = async (req: Request, res: Response): Pro
 
     adminLogger.info(`[Admin] Subscription activated for user ${user.email} - Plan: ${planName}, Duration: ${durationDays} days`);
 
+    // Invalidate caches so subscription change reflects immediately
+    invalidateCache('/api/agents');
+    invalidateCache('/api/properties');
+
     res.json({
       success: true,
       message: `Subscription activated for ${user.email}`,
@@ -448,6 +453,10 @@ export const cancelSubscription = async (req: Request, res: Response): Promise<v
     });
 
     adminLogger.info(`[Admin] Subscription ${id} canceled for user ${user?.email}`);
+
+    // Invalidate caches so cancellation reflects immediately
+    invalidateCache('/api/agents');
+    invalidateCache('/api/properties');
 
     res.json({
       success: true,
