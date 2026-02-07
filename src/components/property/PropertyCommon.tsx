@@ -21,13 +21,22 @@ interface DetailItemProps {
  * ```
  */
 export const DetailItem: React.FC<DetailItemProps> = ({ icon, label, children }) => (
-  <div className="flex items-center gap-3 py-3 px-3 rounded-xl hover:bg-neutral-50 transition-colors duration-200">
-    <div className="flex-shrink-0 w-9 h-9 rounded-lg bg-neutral-100 flex items-center justify-center text-neutral-500 [&>svg]:w-4.5 [&>svg]:h-4.5 [&>span]:text-base">
-      {icon}
-    </div>
-    <div className="flex-1 min-w-0">
-      <span className="text-xs text-neutral-500 block leading-tight">{label}</span>
-      <span className="text-sm font-semibold text-neutral-800 block leading-tight mt-0.5">{children}</span>
+  <div className="group relative overflow-hidden rounded-2xl bg-white/50 backdrop-blur-md border border-white/60 shadow-[0_2px_12px_rgba(0,0,0,0.04)] hover:shadow-[0_4px_20px_rgba(0,0,0,0.08)] hover:bg-white/70 transition-all duration-300">
+    {/* Glass top highlight */}
+    <div className="absolute top-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-white/90 to-transparent" />
+
+    <div className="relative p-3.5 flex items-center gap-3">
+      {/* Frosted glass icon */}
+      <div className="relative flex-shrink-0 w-10 h-10 rounded-xl bg-gradient-to-br from-white/80 to-white/40 backdrop-blur-sm border border-white/70 shadow-[inset_0_1px_0_rgba(255,255,255,0.8),0_1px_3px_rgba(0,0,0,0.06)] flex items-center justify-center text-primary/70 group-hover:text-primary transition-colors duration-300">
+        <div className="w-[18px] h-[18px] flex items-center justify-center [&>svg]:w-full [&>svg]:h-full [&>span]:text-sm">
+          {icon}
+        </div>
+      </div>
+
+      <div className="flex-1 min-w-0">
+        <span className="text-[11px] text-neutral-400 font-medium block leading-tight">{label}</span>
+        <span className="text-sm font-semibold text-neutral-800 block leading-tight mt-0.5">{children}</span>
+      </div>
     </div>
   </div>
 );
