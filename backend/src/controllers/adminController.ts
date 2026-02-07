@@ -1038,12 +1038,17 @@ export const getInquiryStats = async (req: Request, res: Response): Promise<void
   }
 };
 
-// @desc    Sync property schema — adds missing attributes with defaults to all properties
+// @desc    Sync property schema — adds missing attributes and indexes to all properties
 // @route   POST /api/admin/sync-property-schema
 // @access  Private/Admin
 export const syncPropertySchema = async (req: Request, res: Response): Promise<void> => {
   try {
+    // Sync missing document attributes
     const { commonUpdated, rentalUpdated } = await migratePropertySchema();
+
+    // Sync missing indexes
+    await Property.syncIndexes();
+    const indexes = await Property.collection.indexes();
 
     invalidateCache('/api/properties');
 
@@ -1052,6 +1057,7 @@ export const syncPropertySchema = async (req: Request, res: Response): Promise<v
       message: 'Property schema synced successfully',
       commonUpdated,
       rentalUpdated,
+      indexCount: indexes.length,
     });
   } catch (error: any) {
     adminLogger.error('Sync property schema error:', error);
