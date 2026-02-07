@@ -251,6 +251,8 @@
     "selectCountryCity": "Please select both country and city.",
     "selectValidCity": "Please select a valid city to set the location.",
     "apartmentFloorNumber": "For apartments, please enter a valid floor number (1 or greater).",
-    "houseTotalFloors": "For houses and villas, please enter the total number of floors (1 or greater)."
+    "houseTotalFloors": "For houses and villas, please enter the total number of floors (1 or greater).",
+    "apartmentElevator": "Za stanove, molimo navedite da li postoji lift (Da ili Ne).",
+    "floorExceedsTotal": "Broj sprata ne može biti veći od ukupnog broja spratova."
   }
 }

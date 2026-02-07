@@ -3,6 +3,7 @@
   "locationRequired": "Kërkohet Vendndodhja",
   "invalidFloorNumber": "Numër Kati i Pavlefshëm",
   "invalidFloorCount": "Numri i Kateve i Pavlefshëm",
+  "elevatorRequired": "Informacion për Ashensorin i Nevojshëm",
   "password": {
     "minLength": "Të paktën 8 karaktere",
     "uppercase": "Një shkronjë të madhe",

@@ -545,6 +545,11 @@ export const useListingForm = (propertyToEdit: Property | null) => {
                     setIsSubmitting(false);
                     return;
                 }
+                if (listingData.hasElevator === undefined) {
+                    showError(t('validation:elevatorRequired'), t('newListing:validation.apartmentElevator'));
+                    setIsSubmitting(false);
+                    return;
+                }
             }
             if ((listingData.propertyType === 'house' || listingData.propertyType === 'villa') && (!listingData.totalFloors || listingData.totalFloors < 1)) {
                 showError(t('validation:invalidFloorCount'), t('newListing:validation.houseTotalFloors'));

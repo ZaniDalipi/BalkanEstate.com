@@ -121,7 +121,7 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
   const [showAllMembers, setShowAllMembers] = useState(true);
   const [isLeavingAgency, setIsLeavingAgency] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
-  const [propertyView, setPropertyView] = useState<'active' | 'sold'>('active');
+  const [propertyView, setPropertyView] = useState<'active' | 'sold' | 'rented'>('active');
   const [propertyTypeView, setPropertyTypeView] = useState<'all' | 'sale' | 'rent'>('all');
   const [subscriptionKey, setSubscriptionKey] = useState(0);
   const [showGradientPicker, setShowGradientPicker] = useState(false);
@@ -272,10 +272,11 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
   }, [agents]);
 
   // Memoized filtered properties to avoid recalculating on every render
-  const { activeProperties, soldProperties } = useMemo(() => {
+  const { activeProperties, soldProperties, rentedProperties } = useMemo(() => {
     const active = agencyProperties.filter(p => p.status === 'active');
     const sold = agencyProperties.filter(p => p.status === 'sold');
-    return { activeProperties: active, soldProperties: sold };
+    const rented = agencyProperties.filter(p => p.status === 'rented');
+    return { activeProperties: active, soldProperties: sold, rentedProperties: rented };
   }, [agencyProperties]);
 
   // Properties with coordinates - memoized
@@ -1915,12 +1916,30 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
                   {soldProperties.length}
                 </span>
               </button>
+              {rentedProperties.length > 0 && (
+                <button
+                  onClick={() => setPropertyView('rented')}
+                  className={`relative flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-lg transition-all duration-300 ${
+                    propertyView === 'rented'
+                      ? 'bg-white text-slate-900 shadow-sm'
+                      : 'text-slate-500 hover:text-slate-700'
+                  }`}
+                >
+                  <span className={`w-2 h-2 rounded-full ${propertyView === 'rented' ? 'bg-orange-500' : 'bg-slate-300'}`}></span>
+                  Rented
+                  <span className={`ml-1 px-2 py-0.5 text-xs font-bold rounded-md ${
+                    propertyView === 'rented' ? 'bg-orange-100 text-orange-700' : 'bg-slate-200 text-slate-500'
+                  }`}>
+                    {rentedProperties.length}
+                  </span>
+                </button>
+              )}
             </div>
           </div>
 
           {/* Listing Type Filter (Sale / Rent) */}
           {(() => {
-            const currentProps = propertyView === 'active' ? activeProperties : soldProperties;
+            const currentProps = propertyView === 'active' ? activeProperties : propertyView === 'sold' ? soldProperties : rentedProperties;
             const saleCount = currentProps.filter(p => (p.listingType || 'sale') === 'sale').length;
             const rentCount = currentProps.filter(p => p.listingType === 'rent').length;
             if (saleCount > 0 && rentCount > 0) {
@@ -1958,7 +1977,7 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
 
           {/* Properties Grid */}
           {(() => {
-            const baseProps = propertyView === 'active' ? activeProperties : soldProperties;
+            const baseProps = propertyView === 'active' ? activeProperties : propertyView === 'sold' ? soldProperties : rentedProperties;
             const displayProps = propertyTypeView === 'all' ? baseProps : baseProps.filter(p => (p.listingType || 'sale') === propertyTypeView);
             if (loading) {
               return (

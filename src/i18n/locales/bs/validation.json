@@ -3,6 +3,7 @@
   "locationRequired": "Potrebna Lokacija",
   "invalidFloorNumber": "Nevažeći Broj Sprata",
   "invalidFloorCount": "Nevažeći Broj Spratova",
+  "elevatorRequired": "Potrebna Informacija o Liftu",
   "password": {
     "minLength": "Najmanje 8 karaktera",
     "uppercase": "Jedno veliko slovo",

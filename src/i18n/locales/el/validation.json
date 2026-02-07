@@ -3,6 +3,7 @@
   "locationRequired": "Απαιτείται Τοποθεσία",
   "invalidFloorNumber": "Μη Έγκυρος Αριθμός Ορόφου",
   "invalidFloorCount": "Μη Έγκυρος Αριθμός Ορόφων",
+  "elevatorRequired": "Απαιτούνται Πληροφορίες Ανελκυστήρα",
   "password": {
     "minLength": "At least 8 characters",
     "uppercase": "One uppercase letter",

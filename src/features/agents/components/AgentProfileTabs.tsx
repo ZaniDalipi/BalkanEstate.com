@@ -70,6 +70,7 @@ interface AgentProfileTabsProps {
     setActiveTab: (tab: 'overview' | 'listings' | 'reviews') => void;
     activeListings: any[];
     soldProperties: any[];
+    rentedProperties: any[];
     allAgentProperties: any[];
     loadingProperties: boolean;
     hasValidCoordinates: boolean;
@@ -96,6 +97,7 @@ const AgentProfileTabs: React.FC<AgentProfileTabsProps> = ({
     setActiveTab,
     activeListings,
     soldProperties,
+    rentedProperties,
     allAgentProperties,
     loadingProperties,
     hasValidCoordinates,
@@ -376,7 +378,7 @@ const AgentProfileTabs: React.FC<AgentProfileTabsProps> = ({
                                     <MapIcon className="w-5 h-5 sm:w-6 sm:h-6 text-blue-600" />
                                     {t('profilePage.propertiesMap.title')}
                                     <span className="text-sm font-normal text-gray-600 ml-2">
-                                        ({activeListings.length} {t('profilePage.propertiesMap.active')}, {soldProperties.length} {t('profilePage.propertiesMap.sold')})
+                                        ({activeListings.length} {t('profilePage.propertiesMap.active')}, {soldProperties.length} {t('profilePage.propertiesMap.sold')}{rentedProperties.length > 0 ? `, ${rentedProperties.length} ${t('profilePage.propertiesMap.rented', 'Rented')}` : ''})
                                     </span>
                                 </h3>
                                 <div className="rounded-xl overflow-hidden shadow-lg border border-gray-200">
@@ -401,6 +403,8 @@ const AgentProfileTabs: React.FC<AgentProfileTabsProps> = ({
                                                 icon={L.icon({
                                                     iconUrl: property.status === 'sold'
                                                         ? 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-red.png'
+                                                        : property.status === 'rented'
+                                                        ? 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-orange.png'
                                                         : 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-green.png',
                                                     shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
                                                     iconSize: [25, 41],
@@ -429,9 +433,9 @@ const AgentProfileTabs: React.FC<AgentProfileTabsProps> = ({
                                                                 const propertyId = property.id || (property as any)._id;
                                                                 onViewProperty(propertyId);
                                                             }}
-                                                            className={`w-full text-white px-3 py-2 rounded-lg font-semibold text-sm ${property.status === 'sold' ? 'bg-red-600 hover:bg-red-700' : 'bg-green-600 hover:bg-green-700'}`}
+                                                            className={`w-full text-white px-3 py-2 rounded-lg font-semibold text-sm ${property.status === 'sold' ? 'bg-red-600 hover:bg-red-700' : property.status === 'rented' ? 'bg-orange-600 hover:bg-orange-700' : 'bg-green-600 hover:bg-green-700'}`}
                                                         >
-                                                            {property.status === 'sold' ? t('profilePage.propertiesMap.viewSoldProperty') : t('profilePage.propertiesMap.viewDetails')}
+                                                            {property.status === 'sold' ? t('profilePage.propertiesMap.viewSoldProperty') : property.status === 'rented' ? t('profilePage.propertiesMap.viewRentedProperty', 'View Rented Property') : t('profilePage.propertiesMap.viewDetails')}
                                                         </button>
                                                     </div>
                                                 </Popup>
@@ -439,7 +443,7 @@ const AgentProfileTabs: React.FC<AgentProfileTabsProps> = ({
                                         ))}
                                     </MapContainer>
                                 </div>
-                                <div className="mt-3 flex items-center justify-center gap-6 text-sm">
+                                <div className="mt-3 flex items-center justify-center gap-6 text-sm flex-wrap">
                                     <div className="flex items-center gap-2">
                                         <div className="w-4 h-4 bg-green-500 rounded-full"></div>
                                         <span className="text-gray-600">{t('profilePage.propertiesMap.forSale')} ({activeListings.length})</span>
@@ -448,6 +452,12 @@ const AgentProfileTabs: React.FC<AgentProfileTabsProps> = ({
                                         <div className="w-4 h-4 bg-red-500 rounded-full"></div>
                                         <span className="text-gray-600">{t('profilePage.propertiesMap.soldLabel')} ({soldProperties.length})</span>
                                     </div>
+                                    {rentedProperties.length > 0 && (
+                                        <div className="flex items-center gap-2">
+                                            <div className="w-4 h-4 bg-orange-500 rounded-full"></div>
+                                            <span className="text-gray-600">{t('profilePage.propertiesMap.rented', 'Rented')} ({rentedProperties.length})</span>
+                                        </div>
+                                    )}
                                 </div>
                             </div>
                         )}
@@ -624,6 +634,7 @@ const AgentProfileTabs: React.FC<AgentProfileTabsProps> = ({
                                 </h2>
                                 <p className="text-gray-600">
                                     {t('profilePage.listingsTab.activeListingsCount', { active: activeListings.length, sold: soldProperties.length })}
+                                    {rentedProperties.length > 0 && ` · ${rentedProperties.length} ${t('profilePage.listingsTab.rentedLabel', 'Rented')}`}
                                 </p>
                             </div>
                             <button
@@ -676,6 +687,7 @@ const AgentProfileTabs: React.FC<AgentProfileTabsProps> = ({
                         {(() => {
                             const filteredActive = listingTypeFilter === 'all' ? activeListings : activeListings.filter(p => (p.listingType || 'sale') === listingTypeFilter);
                             const filteredSold = listingTypeFilter === 'all' ? soldProperties : soldProperties.filter(p => (p.listingType || 'sale') === listingTypeFilter);
+                            const filteredRented = listingTypeFilter === 'all' ? rentedProperties : rentedProperties.filter(p => (p.listingType || 'sale') === listingTypeFilter);
 
                             return (
                                 <>
@@ -712,6 +724,22 @@ const AgentProfileTabs: React.FC<AgentProfileTabsProps> = ({
                                                         <PropertyCard property={prop} />
                                                         <div className="absolute top-3 right-3 bg-red-600 text-white text-xs font-bold px-2.5 py-1 rounded-md shadow-lg z-10">
                                                             {t('profilePage.listingsTab.soldBadge')}
+                                                        </div>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    )}
+
+                                    {filteredRented.length > 0 && (
+                                        <div>
+                                            <h3 className="text-lg font-semibold text-gray-900 mb-4">{t('profilePage.listingsTab.rentedProperties', 'Rented Properties')} ({filteredRented.length})</h3>
+                                            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                                                {filteredRented.map(prop => (
+                                                    <div key={prop.id} className="relative">
+                                                        <PropertyCard property={prop} />
+                                                        <div className="absolute top-3 right-3 bg-orange-600 text-white text-xs font-bold px-2.5 py-1 rounded-md shadow-lg z-10">
+                                                            {t('profilePage.listingsTab.rentedBadge', 'RENTED')}
                                                         </div>
                                                     </div>
                                                 ))}

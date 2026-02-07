@@ -168,7 +168,9 @@
     "selectCountryCity": "Vă rugăm selectați țara și orașul.",
     "selectValidCity": "Vă rugăm selectați un oraș valid.",
     "apartmentFloorNumber": "Pentru apartamente, vă rugăm introduceți un număr de etaj valid (1 sau mai mare).",
-    "houseTotalFloors": "Pentru case și vile, vă rugăm introduceți numărul total de etaje (1 sau mai mare)."
+    "houseTotalFloors": "Pentru case și vile, vă rugăm introduceți numărul total de etaje (1 sau mai mare).",
+    "apartmentElevator": "Pentru apartamente, vă rugăm specificați dacă există lift (Da sau Nu).",
+    "floorExceedsTotal": "Numărul etajului nu poate depăși numărul total de etaje."
   },
   "success": {
     "title": "Anunț Publicat!",

@@ -251,6 +251,8 @@
     "selectCountryCity": "Please select both country and city.",
     "selectValidCity": "Please select a valid city to set the location.",
     "apartmentFloorNumber": "For apartments, please enter a valid floor number (1 or greater).",
-    "houseTotalFloors": "For houses and villas, please enter the total number of floors (1 or greater)."
+    "houseTotalFloors": "For houses and villas, please enter the total number of floors (1 or greater).",
+    "apartmentElevator": "For apartments, please specify whether there is a lift/elevator (Yes or No).",
+    "floorExceedsTotal": "Floor number cannot exceed the total number of floors."
   }
 }

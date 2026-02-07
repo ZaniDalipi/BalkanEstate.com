@@ -168,7 +168,9 @@
     "selectCountryCity": "Molimo odaberite državu i grad.",
     "selectValidCity": "Molimo odaberite važeći grad.",
     "apartmentFloorNumber": "Za stanove, molimo unesite važeći broj kata (1 ili više).",
-    "houseTotalFloors": "Za kuće i vile, molimo unesite ukupan broj katova (1 ili više)."
+    "houseTotalFloors": "Za kuće i vile, molimo unesite ukupan broj katova (1 ili više).",
+    "apartmentElevator": "Za stanove, molimo navedite ima li dizalo (Da ili Ne).",
+    "floorExceedsTotal": "Broj kata ne može premašiti ukupan broj katova."
   },
   "success": {
     "title": "Oglas Objavljen!",

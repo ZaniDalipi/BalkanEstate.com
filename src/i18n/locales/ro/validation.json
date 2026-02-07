@@ -3,6 +3,7 @@
   "locationRequired": "Locație Necesară",
   "invalidFloorNumber": "Număr de Etaj Invalid",
   "invalidFloorCount": "Număr de Etaje Invalid",
+  "elevatorRequired": "Informații despre Lift Necesare",
   "password": {
     "minLength": "At least 8 characters",
     "uppercase": "One uppercase letter",

@@ -3,6 +3,7 @@
   "locationRequired": "Lokacija je Obavezna",
   "invalidFloorNumber": "Nevažeći Broj Kata",
   "invalidFloorCount": "Nevažeći Broj Katova",
+  "elevatorRequired": "Potrebna Informacija o Dizalu",
   "password": {
     "minLength": "Najmanje 8 znakova",
     "uppercase": "Jedno veliko slovo",

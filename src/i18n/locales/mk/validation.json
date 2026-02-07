@@ -3,6 +3,7 @@
   "locationRequired": "Потребна е локација",
   "invalidFloorNumber": "Невалиден број на кат",
   "invalidFloorCount": "Невалиден број на катови",
+  "elevatorRequired": "Потребна Информација за Лифт",
   "password": {
     "minLength": "Најмалку 8 карактери",
     "uppercase": "Една голема буква",

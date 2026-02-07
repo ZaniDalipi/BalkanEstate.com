@@ -88,6 +88,7 @@ const AgentProfilePage: React.FC<AgentProfilePageProps> = ({ agent }) => {
                             setActiveTab={profile.setActiveTab}
                             activeListings={profile.activeListings}
                             soldProperties={profile.soldProperties}
+                            rentedProperties={profile.rentedProperties}
                             allAgentProperties={profile.allAgentProperties}
                             loadingProperties={profile.loadingProperties}
                             hasValidCoordinates={profile.hasValidCoordinates}

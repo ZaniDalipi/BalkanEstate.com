@@ -3,6 +3,7 @@
   "locationRequired": "Изисква се Местоположение",
   "invalidFloorNumber": "Невалиден Номер на Етаж",
   "invalidFloorCount": "Невалиден Брой Етажи",
+  "elevatorRequired": "Необходима Информация за Асансьор",
   "password": {
     "minLength": "Поне 8 символа",
     "uppercase": "Една главна буква",

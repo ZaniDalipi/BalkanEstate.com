@@ -740,6 +740,7 @@ export function useAgentProfile({ agent }: { agent: Agent }) {
         allAgentProperties,
         activeListings,
         soldProperties,
+        rentedProperties,
         stats,
         marketInsights,
         firstName,
