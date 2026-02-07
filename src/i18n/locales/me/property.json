@@ -157,7 +157,8 @@
     "photos": "Photos",
     "streetView": "Ulični Prikaz",
     "video": "Video",
-    "all": "Sve"
+    "all": "Sve",
+    "sendInquiry": "Pošalji upit e-mailom"
   },
   "video": {
     "loading": "Učitavanje videa...",
@@ -174,7 +175,8 @@
     "contactInfo": "Contact Information",
     "phone": "Phone",
     "email": "Email",
-    "website": "Website"
+    "website": "Website",
+    "viewProfile": "Pogledaj profil"
   },
   "navigation": {
     "back": "Back",

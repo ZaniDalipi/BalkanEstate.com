@@ -157,7 +157,8 @@
     "photos": "Foto",
     "streetView": "Pamje Rruge",
     "video": "Video",
-    "all": "Të Gjitha"
+    "all": "Të Gjitha",
+    "sendInquiry": "Dërgo Pyetje me Email"
   },
   "video": {
     "loading": "Duke ngarkuar videon...",
@@ -174,7 +175,8 @@
     "contactInfo": "Informacioni i Kontaktit",
     "phone": "Telefoni",
     "email": "Email",
-    "website": "Faqja Web"
+    "website": "Faqja Web",
+    "viewProfile": "Shiko Profilin"
   },
   "navigation": {
     "back": "Kthehu",

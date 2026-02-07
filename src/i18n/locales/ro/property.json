@@ -157,7 +157,8 @@
     "photos": "Fotografii",
     "streetView": "Vedere Stradală",
     "video": "Video",
-    "all": "Toate"
+    "all": "Toate",
+    "sendInquiry": "Trimite cerere prin email"
   },
   "video": {
     "loading": "Se încarcă videoul...",
@@ -174,7 +175,8 @@
     "contactInfo": "Informații de Contact",
     "phone": "Telefon",
     "email": "Email",
-    "website": "Website"
+    "website": "Website",
+    "viewProfile": "Vezi profil"
   },
   "navigation": {
     "back": "Înapoi",

@@ -15,6 +15,7 @@ import {
   FilterIcon,
   TrophyIcon,
   UsersIcon,
+  UserIcon,
   HomeIcon,
   CalendarIcon,
   SparklesIcon,
@@ -559,7 +560,7 @@ const AgenciesListPage: React.FC = () => {
                 <div className="flex items-center gap-4 sm:gap-6 mt-4 sm:mt-6 py-3 sm:py-4 px-4 sm:px-6 bg-white rounded-xl sm:rounded-2xl border border-gray-100 shadow-sm">
                   <div className="flex items-center gap-2 sm:gap-3">
                     <div className="w-9 h-9 sm:w-10 sm:h-10 bg-blue-500 rounded-lg sm:rounded-xl flex items-center justify-center">
-                      <TrophyIcon className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
+                      <HomeIcon className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
                     </div>
                     <div>
                       <div className="text-lg sm:text-xl font-bold text-gray-900 leading-none">
@@ -573,7 +574,7 @@ const AgenciesListPage: React.FC = () => {
 
                   <div className="flex items-center gap-2 sm:gap-3">
                     <div className="w-9 h-9 sm:w-10 sm:h-10 bg-green-500 rounded-lg sm:rounded-xl flex items-center justify-center">
-                      <UsersIcon className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
+                      <UserIcon className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
                     </div>
                     <div>
                       <div className="text-lg sm:text-xl font-bold text-gray-900 leading-none">

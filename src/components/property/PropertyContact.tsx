@@ -230,8 +230,12 @@ export const PropertyContact: React.FC<PropertyContactProps> = ({
         {property.seller?.type === 'agent' ? (
           <button
             onClick={() => {
+              dispatch({ type: 'SET_SELECTED_PROPERTY', payload: null });
+              dispatch({ type: 'SET_SELECTED_AGENCY', payload: null });
               dispatch({ type: 'SET_SELECTED_AGENT', payload: property.sellerId });
+              dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'agents' });
               window.history.pushState({}, '', `/agents/${property.sellerId}`);
+              window.dispatchEvent(new PopStateEvent('popstate'));
             }}
             className="flex items-center gap-4 mb-4 w-full p-2 -m-2 rounded-xl hover:bg-blue-50 transition-colors group cursor-pointer text-left"
           >

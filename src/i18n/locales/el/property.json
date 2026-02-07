@@ -157,7 +157,8 @@
     "photos": "Φωτογραφίες",
     "streetView": "Προβολή Δρόμου",
     "video": "Βίντεο",
-    "all": "Όλα"
+    "all": "Όλα",
+    "sendInquiry": "Αποστολή ερώτησης μέσω email"
   },
   "video": {
     "loading": "Φόρτωση βίντεο...",
@@ -174,7 +175,8 @@
     "contactInfo": "Στοιχεία Επικοινωνίας",
     "phone": "Τηλέφωνο",
     "email": "Email",
-    "website": "Ιστοσελίδα"
+    "website": "Ιστοσελίδα",
+    "viewProfile": "Προβολή προφίλ"
   },
   "navigation": {
     "back": "Πίσω",

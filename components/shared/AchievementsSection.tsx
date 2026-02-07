@@ -153,6 +153,7 @@ const AchievementsSection: React.FC<AchievementsSectionProps> = ({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    e.stopPropagation();
     if (!formData.title || !formData.issuingOrganization || !formData.dateReceived) return;
 
     setIsSubmitting(true);
@@ -201,35 +202,39 @@ const AchievementsSection: React.FC<AchievementsSectionProps> = ({
 
   return (
     <div className={`${className}`}>
-      {/* Section Header */}
-      <div className="flex items-center justify-between mb-6">
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 bg-gradient-to-br from-amber-500 to-yellow-600 rounded-xl flex items-center justify-center shadow-lg shadow-amber-500/30">
-            <TrophyIcon className="w-5 h-5 text-white" />
+      {/* Section Header - Liquid Glass */}
+      <div className="relative flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4 mb-6 p-4 sm:p-5 rounded-2xl bg-white/60 backdrop-blur-xl border border-white/40 shadow-[0_8px_32px_rgba(0,0,0,0.06)] overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-br from-amber-50/40 via-transparent to-yellow-50/30 pointer-events-none" />
+        <div className="absolute top-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-white/80 to-transparent" />
+
+        <div className="relative flex items-center gap-3">
+          <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-xl bg-gradient-to-br from-white/80 to-amber-50/60 backdrop-blur-sm border border-white/70 shadow-[inset_0_1px_0_rgba(255,255,255,0.8),0_2px_8px_rgba(217,119,6,0.15)] flex items-center justify-center">
+            <TrophyIcon className="w-5 h-5 sm:w-6 sm:h-6 text-amber-600/80" />
           </div>
           <div>
-            <h2 className="text-xl font-bold text-gray-900 dark:text-white">
+            <h2 className="text-base sm:text-lg font-bold text-neutral-900">
               {t('achievements.title', 'Achievements & Awards')}
             </h2>
-            <p className="text-sm text-gray-500 dark:text-gray-400">
+            <p className="text-xs sm:text-sm text-neutral-500">
               {t('achievements.subtitle', 'Professional recognitions and certifications')}
             </p>
           </div>
         </div>
         {isOwner && onAdd && (
           <button
+            type="button"
             onClick={handleOpenAddModal}
-            className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-amber-500 to-yellow-600 text-white rounded-xl hover:from-amber-600 hover:to-yellow-700 transition-all shadow-lg shadow-amber-500/30 hover:shadow-amber-500/50"
+            className="relative flex items-center gap-2 px-4 py-2 sm:py-2.5 bg-white/70 backdrop-blur-sm border border-amber-200/60 text-amber-700 rounded-xl hover:bg-amber-50/80 hover:border-amber-300/60 transition-all shadow-sm text-sm font-semibold"
           >
-            <PlusIcon className="w-5 h-5" />
-            <span className="hidden sm:inline">{t('achievements.add', 'Add Achievement')}</span>
+            <PlusIcon className="w-4 h-4 sm:w-5 sm:h-5" />
+            <span>{t('achievements.add', 'Add Achievement')}</span>
           </button>
         )}
       </div>
 
       {/* Achievements Grid */}
       {sortedAchievements.length > 0 ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
           {sortedAchievements.map((achievement) => {
             const IconComponent = getTypeIcon(achievement.type);
             const gradientColor = getTypeColor(achievement.type);
@@ -238,55 +243,57 @@ const AchievementsSection: React.FC<AchievementsSectionProps> = ({
             return (
               <div
                 key={achievement.id}
-                className={`relative bg-white dark:bg-gray-800 rounded-2xl p-5 border ${
+                className={`relative bg-white/70 backdrop-blur-xl rounded-2xl p-4 sm:p-5 border ${
                   expired
-                    ? 'border-red-200 dark:border-red-800/50 opacity-75'
-                    : 'border-gray-100 dark:border-gray-700'
-                } hover:shadow-lg transition-all group`}
+                    ? 'border-red-200/60 opacity-75'
+                    : 'border-white/50'
+                } shadow-[0_4px_20px_rgba(0,0,0,0.04)] hover:shadow-[0_8px_32px_rgba(0,0,0,0.08)] transition-all group overflow-hidden`}
               >
+                <div className="absolute inset-0 bg-gradient-to-br from-white/40 via-transparent to-transparent pointer-events-none" />
+
                 {/* Status Badge */}
-                <div className="absolute top-4 right-4 flex items-center gap-2">
+                <div className="absolute top-3 sm:top-4 right-3 sm:right-4 flex items-center gap-2 z-10">
                   {achievement.isVerified && (
-                    <div className="flex items-center gap-1 px-2 py-1 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 text-xs font-medium rounded-full">
+                    <div className="flex items-center gap-1 px-2 py-0.5 bg-green-50/80 backdrop-blur-sm text-green-700 text-[10px] sm:text-xs font-medium rounded-full border border-green-200/50">
                       <CheckCircleIcon className="w-3 h-3" />
                       {t('achievements.verified', 'Verified')}
                     </div>
                   )}
                   {expired && (
-                    <div className="px-2 py-1 bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400 text-xs font-medium rounded-full">
+                    <div className="px-2 py-0.5 bg-red-50/80 backdrop-blur-sm text-red-700 text-[10px] sm:text-xs font-medium rounded-full border border-red-200/50">
                       {t('achievements.expired', 'Expired')}
                     </div>
                   )}
                 </div>
 
                 {/* Icon */}
-                <div className={`w-12 h-12 bg-gradient-to-br ${gradientColor} rounded-xl flex items-center justify-center shadow-lg mb-4`}>
-                  <IconComponent className="w-6 h-6 text-white" />
+                <div className={`relative w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-br ${gradientColor} rounded-xl flex items-center justify-center shadow-lg mb-3 sm:mb-4`}>
+                  <IconComponent className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
                 </div>
 
                 {/* Content */}
-                <div className="space-y-2">
-                  <div className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                <div className="relative space-y-1.5 sm:space-y-2">
+                  <div className="text-[10px] sm:text-xs font-medium text-neutral-400 uppercase tracking-wider">
                     {t(`achievements.types.${achievement.type}`, achievement.type)}
                   </div>
-                  <h3 className="font-bold text-gray-900 dark:text-white text-lg line-clamp-2">
+                  <h3 className="font-bold text-neutral-900 text-sm sm:text-lg line-clamp-2 pr-16">
                     {achievement.title}
                   </h3>
                   {achievement.description && (
-                    <p className="text-sm text-gray-600 dark:text-gray-300 line-clamp-2">
+                    <p className="text-xs sm:text-sm text-neutral-600 line-clamp-2">
                       {achievement.description}
                     </p>
                   )}
 
                   {/* Organization */}
-                  <div className="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400">
-                    <BuildingOfficeIcon className="w-4 h-4" />
+                  <div className="flex items-center gap-2 text-xs sm:text-sm text-neutral-500">
+                    <BuildingOfficeIcon className="w-3.5 h-3.5 sm:w-4 sm:h-4 flex-shrink-0" />
                     <span className="truncate">{achievement.issuingOrganization}</span>
                   </div>
 
                   {/* Date */}
-                  <div className="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400">
-                    <CalendarIcon className="w-4 h-4" />
+                  <div className="flex items-center gap-2 text-xs sm:text-sm text-neutral-500">
+                    <CalendarIcon className="w-3.5 h-3.5 sm:w-4 sm:h-4 flex-shrink-0" />
                     <span>{formatDate(achievement.dateReceived)}</span>
                     {achievement.expiryDate && (
                       <span className={expired ? 'text-red-500' : ''}>
@@ -301,9 +308,9 @@ const AchievementsSection: React.FC<AchievementsSectionProps> = ({
                       href={achievement.documentUrl}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="inline-flex items-center gap-1.5 text-sm text-blue-600 dark:text-blue-400 hover:underline"
+                      className="inline-flex items-center gap-1.5 text-xs sm:text-sm text-blue-600 hover:underline"
                     >
-                      <DocumentTextIcon className="w-4 h-4" />
+                      <DocumentTextIcon className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                       {t('achievements.viewDocument', 'View Document')}
                     </a>
                   )}
@@ -311,27 +318,29 @@ const AchievementsSection: React.FC<AchievementsSectionProps> = ({
 
                 {/* Owner Actions */}
                 {isOwner && (onEdit || onDelete) && (
-                  <div className="absolute bottom-4 right-4 flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                  <div className="absolute bottom-3 sm:bottom-4 right-3 sm:right-4 flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity z-10">
                     {onEdit && (
                       <button
+                        type="button"
                         onClick={() => handleOpenEditModal(achievement)}
-                        className="p-2 bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
+                        className="p-1.5 sm:p-2 bg-white/80 backdrop-blur-sm text-neutral-600 rounded-lg hover:bg-neutral-100 transition-colors border border-neutral-200/50"
                         title={t('common:edit', 'Edit')}
                       >
-                        <PencilIcon className="w-4 h-4" />
+                        <PencilIcon className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                       </button>
                     )}
                     {onDelete && (
                       <button
+                        type="button"
                         onClick={() => handleDelete(achievement.id)}
                         disabled={deletingId === achievement.id}
-                        className="p-2 bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400 rounded-lg hover:bg-red-200 dark:hover:bg-red-900/50 transition-colors disabled:opacity-50"
+                        className="p-1.5 sm:p-2 bg-red-50/80 backdrop-blur-sm text-red-600 rounded-lg hover:bg-red-100 transition-colors disabled:opacity-50 border border-red-200/50"
                         title={t('common:delete', 'Delete')}
                       >
                         {deletingId === achievement.id ? (
-                          <div className="w-4 h-4 border-2 border-red-600 border-t-transparent rounded-full animate-spin" />
+                          <div className="w-3.5 h-3.5 sm:w-4 sm:h-4 border-2 border-red-600 border-t-transparent rounded-full animate-spin" />
                         ) : (
-                          <TrashIcon className="w-4 h-4" />
+                          <TrashIcon className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                         )}
                       </button>
                     )}
@@ -342,52 +351,62 @@ const AchievementsSection: React.FC<AchievementsSectionProps> = ({
           })}
         </div>
       ) : (
-        <div className="bg-gray-50 dark:bg-gray-800/50 rounded-2xl p-8 text-center border border-dashed border-gray-200 dark:border-gray-700">
-          <TrophyIcon className="w-12 h-12 text-gray-300 dark:text-gray-600 mx-auto mb-4" />
-          <p className="text-gray-500 dark:text-gray-400">
-            {isOwner
-              ? t('achievements.emptyOwner', 'Showcase your achievements and certifications to build trust with clients.')
-              : t('achievements.empty', 'No achievements to display yet.')}
-          </p>
-          {isOwner && onAdd && (
-            <button
-              onClick={handleOpenAddModal}
-              className="mt-4 inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-amber-500 to-yellow-600 text-white rounded-xl hover:from-amber-600 hover:to-yellow-700 transition-all"
-            >
-              <PlusIcon className="w-5 h-5" />
-              {t('achievements.addFirst', 'Add Your First Achievement')}
-            </button>
-          )}
+        /* Empty State - Liquid Glass */
+        <div className="relative rounded-2xl p-6 sm:p-10 text-center bg-white/50 backdrop-blur-xl border border-white/40 shadow-[0_4px_20px_rgba(0,0,0,0.04)] overflow-hidden">
+          <div className="absolute inset-0 bg-gradient-to-br from-amber-50/20 via-transparent to-yellow-50/20 pointer-events-none" />
+          <div className="absolute top-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-white/60 to-transparent" />
+
+          <div className="relative">
+            <div className="w-14 h-14 sm:w-16 sm:h-16 mx-auto mb-4 rounded-2xl bg-gradient-to-br from-white/80 to-amber-50/50 backdrop-blur-sm border border-white/60 shadow-[inset_0_1px_0_rgba(255,255,255,0.8),0_4px_12px_rgba(217,119,6,0.1)] flex items-center justify-center">
+              <TrophyIcon className="w-7 h-7 sm:w-8 sm:h-8 text-amber-500/60" />
+            </div>
+            <p className="text-sm sm:text-base text-neutral-500 max-w-sm mx-auto">
+              {isOwner
+                ? t('achievements.emptyOwner', 'Showcase your achievements and certifications to build trust with clients.')
+                : t('achievements.empty', 'No achievements to display yet.')}
+            </p>
+            {isOwner && onAdd && (
+              <button
+                type="button"
+                onClick={handleOpenAddModal}
+                className="mt-4 sm:mt-5 inline-flex items-center gap-2 px-5 py-2.5 bg-white/70 backdrop-blur-sm border border-amber-200/60 text-amber-700 rounded-xl hover:bg-amber-50/80 hover:border-amber-300/60 transition-all shadow-sm text-sm font-semibold"
+              >
+                <PlusIcon className="w-4 h-4 sm:w-5 sm:h-5" />
+                {t('achievements.addFirst', 'Add Your First Achievement')}
+              </button>
+            )}
+          </div>
         </div>
       )}
 
       {/* Add/Edit Modal */}
       {showAddModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+        <div className="fixed inset-0 z-[60] flex items-end sm:items-center justify-center p-0 sm:p-4">
           <div
-            className="absolute inset-0 bg-black/50 backdrop-blur-sm"
+            className="absolute inset-0 bg-black/40 backdrop-blur-sm"
             onClick={handleCloseModal}
           />
-          <div className="relative bg-white dark:bg-gray-800 rounded-2xl p-6 w-full max-w-lg max-h-[90vh] overflow-y-auto shadow-2xl">
+          <div className="relative bg-white rounded-t-2xl sm:rounded-2xl w-full sm:max-w-lg max-h-[85vh] sm:max-h-[90vh] overflow-y-auto shadow-2xl">
             {/* Modal Header */}
-            <div className="flex items-center justify-between mb-6">
-              <h3 className="text-xl font-bold text-gray-900 dark:text-white">
+            <div className="sticky top-0 bg-white/90 backdrop-blur-md z-10 flex items-center justify-between px-5 sm:px-6 py-4 border-b border-neutral-100">
+              <h3 className="text-lg sm:text-xl font-bold text-neutral-900">
                 {editingAchievement
                   ? t('achievements.editTitle', 'Edit Achievement')
                   : t('achievements.addTitle', 'Add Achievement')}
               </h3>
               <button
+                type="button"
                 onClick={handleCloseModal}
-                className="p-2 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+                className="p-2 text-neutral-400 hover:text-neutral-600 hover:bg-neutral-100 rounded-xl transition-colors"
               >
                 <XMarkIcon className="w-5 h-5" />
               </button>
             </div>
 
-            <form onSubmit={handleSubmit} className="space-y-5">
+            <form onSubmit={handleSubmit} className="p-5 sm:p-6 space-y-4 sm:space-y-5">
               {/* Type Selection */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                <label className="block text-sm font-medium text-neutral-700 mb-2">
                   {t('achievements.form.type', 'Type')} *
                 </label>
                 <div className="grid grid-cols-3 sm:grid-cols-5 gap-2">
@@ -396,14 +415,14 @@ const AchievementsSection: React.FC<AchievementsSectionProps> = ({
                       key={value}
                       type="button"
                       onClick={() => setFormData(prev => ({ ...prev, type: value }))}
-                      className={`flex flex-col items-center gap-1.5 p-3 rounded-xl border-2 transition-all ${
+                      className={`flex flex-col items-center gap-1.5 p-2.5 sm:p-3 rounded-xl border-2 transition-all ${
                         formData.type === value
-                          ? 'border-amber-500 bg-amber-50 dark:bg-amber-900/20'
-                          : 'border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600'
+                          ? 'border-amber-400 bg-amber-50/80'
+                          : 'border-neutral-200 hover:border-neutral-300'
                       }`}
                     >
-                      <Icon className={`w-5 h-5 ${formData.type === value ? 'text-amber-600' : 'text-gray-500'}`} />
-                      <span className={`text-xs font-medium ${formData.type === value ? 'text-amber-700 dark:text-amber-400' : 'text-gray-600 dark:text-gray-400'}`}>
+                      <Icon className={`w-4 h-4 sm:w-5 sm:h-5 ${formData.type === value ? 'text-amber-600' : 'text-neutral-400'}`} />
+                      <span className={`text-[10px] sm:text-xs font-medium ${formData.type === value ? 'text-amber-700' : 'text-neutral-500'}`}>
                         {t(`achievements.types.${value}`, label)}
                       </span>
                     </button>
@@ -413,7 +432,7 @@ const AchievementsSection: React.FC<AchievementsSectionProps> = ({
 
               {/* Title */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                <label className="block text-sm font-medium text-neutral-700 mb-2">
                   {t('achievements.form.title', 'Title')} *
                 </label>
                 <input
@@ -421,14 +440,14 @@ const AchievementsSection: React.FC<AchievementsSectionProps> = ({
                   value={formData.title}
                   onChange={(e) => setFormData(prev => ({ ...prev, title: e.target.value }))}
                   placeholder={t('achievements.form.titlePlaceholder', 'e.g., Top Producer Award 2024')}
-                  className="w-full px-4 py-3 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-transparent"
+                  className="w-full px-4 py-3 bg-neutral-50 border border-neutral-200 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-transparent text-sm sm:text-base"
                   required
                 />
               </div>
 
               {/* Issuing Organization */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                <label className="block text-sm font-medium text-neutral-700 mb-2">
                   {t('achievements.form.organization', 'Issuing Organization')} *
                 </label>
                 <input
@@ -436,14 +455,14 @@ const AchievementsSection: React.FC<AchievementsSectionProps> = ({
                   value={formData.issuingOrganization}
                   onChange={(e) => setFormData(prev => ({ ...prev, issuingOrganization: e.target.value }))}
                   placeholder={t('achievements.form.organizationPlaceholder', 'e.g., National Association of Realtors')}
-                  className="w-full px-4 py-3 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-transparent"
+                  className="w-full px-4 py-3 bg-neutral-50 border border-neutral-200 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-transparent text-sm sm:text-base"
                   required
                 />
               </div>
 
               {/* Description */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                <label className="block text-sm font-medium text-neutral-700 mb-2">
                   {t('achievements.form.description', 'Description')}
                 </label>
                 <textarea
@@ -451,40 +470,40 @@ const AchievementsSection: React.FC<AchievementsSectionProps> = ({
                   onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
                   placeholder={t('achievements.form.descriptionPlaceholder', 'Brief description of this achievement...')}
                   rows={3}
-                  className="w-full px-4 py-3 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-transparent resize-none"
+                  className="w-full px-4 py-3 bg-neutral-50 border border-neutral-200 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-transparent resize-none text-sm sm:text-base"
                 />
               </div>
 
               {/* Dates */}
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  <label className="block text-sm font-medium text-neutral-700 mb-2">
                     {t('achievements.form.dateReceived', 'Date Received')} *
                   </label>
                   <input
                     type="date"
                     value={formData.dateReceived}
                     onChange={(e) => setFormData(prev => ({ ...prev, dateReceived: e.target.value }))}
-                    className="w-full px-4 py-3 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-transparent"
+                    className="w-full px-4 py-3 bg-neutral-50 border border-neutral-200 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-transparent text-sm sm:text-base"
                     required
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  <label className="block text-sm font-medium text-neutral-700 mb-2">
                     {t('achievements.form.expiryDate', 'Expiry Date')}
                   </label>
                   <input
                     type="date"
                     value={formData.expiryDate}
                     onChange={(e) => setFormData(prev => ({ ...prev, expiryDate: e.target.value }))}
-                    className="w-full px-4 py-3 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-transparent"
+                    className="w-full px-4 py-3 bg-neutral-50 border border-neutral-200 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-transparent text-sm sm:text-base"
                   />
                 </div>
               </div>
 
               {/* Document URL */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                <label className="block text-sm font-medium text-neutral-700 mb-2">
                   {t('achievements.form.documentUrl', 'Document/Certificate URL')}
                 </label>
                 <input
@@ -492,26 +511,26 @@ const AchievementsSection: React.FC<AchievementsSectionProps> = ({
                   value={formData.documentUrl}
                   onChange={(e) => setFormData(prev => ({ ...prev, documentUrl: e.target.value }))}
                   placeholder="https://..."
-                  className="w-full px-4 py-3 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-transparent"
+                  className="w-full px-4 py-3 bg-neutral-50 border border-neutral-200 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-transparent text-sm sm:text-base"
                 />
-                <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                <p className="mt-1 text-[10px] sm:text-xs text-neutral-400">
                   {t('achievements.form.documentHint', 'Link to your certificate or supporting documentation')}
                 </p>
               </div>
 
               {/* Actions */}
-              <div className="flex items-center justify-end gap-3 pt-4 border-t border-gray-200 dark:border-gray-700">
+              <div className="flex items-center justify-end gap-3 pt-4 border-t border-neutral-100">
                 <button
                   type="button"
                   onClick={handleCloseModal}
-                  className="px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-xl transition-colors"
+                  className="px-4 py-2.5 text-neutral-600 hover:bg-neutral-100 rounded-xl transition-colors text-sm font-medium"
                 >
                   {t('common:cancel', 'Cancel')}
                 </button>
                 <button
                   type="submit"
                   disabled={isSubmitting || !formData.title || !formData.issuingOrganization || !formData.dateReceived}
-                  className="flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-amber-500 to-yellow-600 text-white rounded-xl hover:from-amber-600 hover:to-yellow-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-amber-500 to-yellow-600 text-white rounded-xl hover:from-amber-600 hover:to-yellow-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed text-sm font-semibold shadow-lg shadow-amber-500/20"
                 >
                   {isSubmitting ? (
                     <>
@@ -520,7 +539,7 @@ const AchievementsSection: React.FC<AchievementsSectionProps> = ({
                     </>
                   ) : (
                     <>
-                      <CheckCircleIcon className="w-5 h-5" />
+                      <CheckCircleIcon className="w-4 h-4 sm:w-5 sm:h-5" />
                       {editingAchievement
                         ? t('common:saveChanges', 'Save Changes')
                         : t('achievements.addButton', 'Add Achievement')}
