@@ -503,6 +503,7 @@ const MapLocationPicker: React.FC<MapLocationPickerProps> = ({ lat, lng, address
         {/* Map type toggle buttons */}
         <div className="absolute top-3 right-3 z-[999] bg-white rounded-lg shadow-md border border-neutral-200 flex p-1 gap-1">
           <button
+            type="button"
             onClick={() => handleMapTypeToggle('street')}
             className={`px-3 py-1.5 rounded text-xs font-semibold transition-all ${
               mapType === 'street'
@@ -513,6 +514,7 @@ const MapLocationPicker: React.FC<MapLocationPickerProps> = ({ lat, lng, address
             {t('search:map.street')}
           </button>
           <button
+            type="button"
             onClick={() => handleMapTypeToggle('satellite')}
             className={`px-3 py-1.5 rounded text-xs font-semibold transition-all ${
               mapType === 'satellite'

@@ -182,13 +182,13 @@ export const PropertyInfo: React.FC<PropertyInfoProps> = ({ property, onOpenFloo
         {/* Glass effects */}
         <div className="absolute inset-0 bg-gradient-to-br from-emerald-50/30 via-transparent to-transparent pointer-events-none" />
         <div className="absolute top-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-white/80 to-transparent" />
-        <div className="relative flex items-center gap-4 mb-6">
-          <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-emerald-500 to-emerald-600 flex items-center justify-center shadow-lg shadow-emerald-500/25">
-            <svg className="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <div className="relative flex items-center gap-3 mb-5">
+          <div className="w-10 h-10 rounded-xl bg-emerald-50 flex items-center justify-center">
+            <svg className="w-5 h-5 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
             </svg>
           </div>
-          <h3 className="text-xl sm:text-2xl font-bold text-neutral-900">{t('details.about')}</h3>
+          <h3 className="text-lg sm:text-xl font-bold text-neutral-900">{t('details.about')}</h3>
         </div>
         <div className="relative prose prose-neutral max-w-none text-neutral-600 leading-relaxed whitespace-pre-wrap">
           {property.description}
@@ -197,28 +197,22 @@ export const PropertyInfo: React.FC<PropertyInfoProps> = ({ property, onOpenFloo
 
       {/* Property Details */}
       <div className="relative bg-white/70 backdrop-blur-xl p-6 sm:p-8 rounded-2xl shadow-[0_8px_32px_rgba(0,0,0,0.08)] border border-white/60 overflow-hidden">
-        {/* Glass effects */}
-        <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-transparent pointer-events-none" />
+        <div className="absolute inset-0 bg-gradient-to-br from-neutral-50/30 via-transparent to-transparent pointer-events-none" />
         <div className="absolute top-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-white/80 to-transparent" />
 
-        {/* Modern section header */}
-        <div className="relative flex items-center gap-4 mb-8">
-          <div className="relative">
-            <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-primary to-primary-dark flex items-center justify-center shadow-lg shadow-primary/25">
-              <svg className="w-7 h-7 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
-              </svg>
-            </div>
-            {/* Decorative ring */}
-            <div className="absolute -inset-1 rounded-2xl bg-gradient-to-br from-primary/20 to-transparent -z-10 blur-sm" />
+        <div className="relative flex items-center gap-3 mb-5">
+          <div className="w-10 h-10 rounded-xl bg-neutral-100 flex items-center justify-center">
+            <svg className="w-5 h-5 text-neutral-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+            </svg>
           </div>
           <div>
-            <h3 className="text-xl sm:text-2xl font-bold text-neutral-900">{t('details.title')}</h3>
-            <p className="text-sm text-neutral-500 mt-0.5">{t('details.subtitle')}</p>
+            <h3 className="text-lg sm:text-xl font-bold text-neutral-900">{t('details.title')}</h3>
+            <p className="text-xs text-neutral-500">{t('details.subtitle')}</p>
           </div>
         </div>
 
-        <div className="relative grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
+        <div className="relative grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-1">
           <DetailItem icon={<CalendarIcon />} label={t('features.yearBuilt')}>
             {property.yearBuilt}
           </DetailItem>
@@ -273,16 +267,14 @@ export const PropertyInfo: React.FC<PropertyInfoProps> = ({ property, onOpenFloo
           )}
 
           {property.floorplanUrl && (
-            <div className="col-span-2 sm:col-span-3 lg:col-span-4">
+            <div className="col-span-2 sm:col-span-3 lg:col-span-4 mt-2">
               <button
                 onClick={onOpenFloorPlan}
-                className="w-full flex items-center justify-center gap-3 p-4 rounded-xl bg-gradient-to-r from-primary/5 to-primary/10 border border-primary/20 hover:border-primary/40 hover:shadow-md transition-all duration-200 group"
+                className="w-full flex items-center gap-3 py-3 px-4 rounded-xl bg-primary/5 border border-primary/15 hover:bg-primary/10 hover:border-primary/25 transition-all duration-200 group"
               >
-                <div className="w-10 h-10 rounded-lg bg-primary/20 flex items-center justify-center group-hover:scale-110 transition-transform">
-                  <CubeTransparentIcon className="w-5 h-5 text-primary" />
-                </div>
-                <span className="font-semibold text-primary">{t('details.viewFloorPlan')}</span>
-                <svg className="w-4 h-4 text-primary ml-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <CubeTransparentIcon className="w-5 h-5 text-primary" />
+                <span className="text-sm font-semibold text-primary">{t('details.viewFloorPlan')}</span>
+                <svg className="w-4 h-4 text-primary/60 ml-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                 </svg>
               </button>
@@ -348,13 +340,13 @@ export const PropertyInfo: React.FC<PropertyInfoProps> = ({ property, onOpenFloo
           <div className="absolute inset-0 bg-gradient-to-br from-violet-50/30 via-transparent to-transparent pointer-events-none" />
           <div className="absolute top-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-white/80 to-transparent" />
 
-          <div className="relative flex items-center gap-4 mb-8">
-            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center shadow-lg shadow-violet-500/25">
-              <svg className="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <div className="relative flex items-center gap-3 mb-5">
+            <div className="w-10 h-10 rounded-xl bg-violet-50 flex items-center justify-center">
+              <svg className="w-5 h-5 text-violet-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
               </svg>
             </div>
-            <h3 className="text-xl sm:text-2xl font-bold text-neutral-900">
+            <h3 className="text-lg sm:text-xl font-bold text-neutral-900">
               {t('details.amenitiesFeatures')}
             </h3>
           </div>

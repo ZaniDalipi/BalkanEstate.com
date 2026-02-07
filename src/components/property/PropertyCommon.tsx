@@ -21,29 +21,13 @@ interface DetailItemProps {
  * ```
  */
 export const DetailItem: React.FC<DetailItemProps> = ({ icon, label, children }) => (
-  <div className="group relative overflow-hidden rounded-2xl bg-gradient-to-br from-white/80 to-white/60 backdrop-blur-xl border border-white/50 shadow-[0_8px_32px_rgba(0,0,0,0.06),inset_0_1px_0_rgba(255,255,255,0.9)] hover:shadow-[0_12px_40px_rgba(0,0,0,0.1),inset_0_1px_0_rgba(255,255,255,1)] transition-all duration-500 hover:-translate-y-1">
-    {/* Liquid glass highlight effect */}
-    <div className="absolute inset-0 bg-gradient-to-br from-white/40 via-transparent to-transparent rounded-2xl" />
-    <div className="absolute top-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-white/80 to-transparent" />
-
-    {/* Subtle color tint on hover */}
-    <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-blue-500/3 to-purple-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500 rounded-2xl" />
-
-    <div className="relative p-4 flex items-center gap-4">
-      {/* Apple-style liquid glass icon container */}
-      <div className="relative flex-shrink-0 w-12 h-12 rounded-2xl bg-gradient-to-br from-primary/90 to-primary shadow-lg shadow-primary/25 flex items-center justify-center text-white group-hover:scale-105 group-hover:shadow-xl group-hover:shadow-primary/30 transition-all duration-500">
-        {/* Glass reflection */}
-        <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-white/30 via-transparent to-transparent" />
-        <div className="absolute top-0 left-1 right-1 h-[40%] rounded-t-xl bg-gradient-to-b from-white/25 to-transparent" />
-        <div className="relative w-5 h-5 flex items-center justify-center [&>svg]:w-full [&>svg]:h-full">
-          {icon}
-        </div>
-      </div>
-
-      <div className="flex-1 min-w-0">
-        <span className="text-[10px] font-semibold text-neutral-400 uppercase tracking-wider block mb-0.5">{label}</span>
-        <span className="text-sm sm:text-base font-bold text-neutral-800 block leading-tight">{children}</span>
-      </div>
+  <div className="flex items-center gap-3 py-3 px-3 rounded-xl hover:bg-neutral-50 transition-colors duration-200">
+    <div className="flex-shrink-0 w-9 h-9 rounded-lg bg-neutral-100 flex items-center justify-center text-neutral-500 [&>svg]:w-4.5 [&>svg]:h-4.5 [&>span]:text-base">
+      {icon}
+    </div>
+    <div className="flex-1 min-w-0">
+      <span className="text-xs text-neutral-500 block leading-tight">{label}</span>
+      <span className="text-sm font-semibold text-neutral-800 block leading-tight mt-0.5">{children}</span>
     </div>
   </div>
 );
