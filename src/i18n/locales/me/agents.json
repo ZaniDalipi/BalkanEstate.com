@@ -397,13 +397,13 @@
       "team": "Team"
     },
     "credentials": {
-      "title": "Credentials & Certifications",
-      "licensedAgent": "Licensed Real Estate Agent",
-      "authorizedToPractice": "Authorized to practice in {{city}}, {{country}}",
-      "professionalCertifications": "Professional Certifications",
-      "memberOfAssociation": "Member of National Association",
-      "awardsRecognition": "Awards & Recognition",
-      "noAwards": "No awards listed",
+      "title": "Kvalifikacije i Sertifikati",
+      "licensedAgent": "Licencirani Agent za Nekretnine",
+      "authorizedToPractice": "Ovlašćen za rad u {{city}}, {{country}}",
+      "professionalCertifications": "Profesionalni Sertifikati",
+      "memberOfAssociation": "Član Nacionalnog Udruženja",
+      "awardsRecognition": "Nagrade i Priznanja",
+      "noAwards": "Nema navedenih nagrada",
       "addCredential": "Add Credential",
       "editCredential": "Edit Credential",
       "deleteCredential": "Delete Credential",
@@ -524,7 +524,11 @@
       "searchAllProperties": "Search all properties",
       "activeListings": "Active Listings",
       "soldProperties": "Sold Properties",
-      "soldBadge": "SOLD"
+      "soldBadge": "SOLD",
+      "all": "Sve",
+      "forSale": "Na prodaju",
+      "forRent": "Za iznajmljivanje",
+      "noListings": "Nema dostupnih oglasa"
     },
     "reviewsTab": {
       "verifiedReviews": "verified reviews",

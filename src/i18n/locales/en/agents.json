@@ -524,7 +524,11 @@
       "searchAllProperties": "Search all properties",
       "activeListings": "Active Listings",
       "soldProperties": "Sold Properties",
-      "soldBadge": "SOLD"
+      "soldBadge": "SOLD",
+      "all": "All",
+      "forSale": "For Sale",
+      "forRent": "For Rent",
+      "noListings": "No listings available"
     },
     "reviewsTab": {
       "verifiedReviews": "verified reviews",

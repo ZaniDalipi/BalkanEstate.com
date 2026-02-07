@@ -524,7 +524,11 @@
       "searchAllProperties": "Pretraži sve nekretnine",
       "activeListings": "Aktivni oglasi",
       "soldProperties": "Prodane nekretnine",
-      "soldBadge": "PRODANO"
+      "soldBadge": "PRODANO",
+      "all": "Sve",
+      "forSale": "Na prodaju",
+      "forRent": "Za najam",
+      "noListings": "Nema dostupnih oglasa"
     },
     "reviewsTab": {
       "verifiedReviews": "verificiranih recenzija",

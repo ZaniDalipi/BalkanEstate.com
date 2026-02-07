@@ -16,7 +16,7 @@ import {
 } from '@/constants';
 import StarRating from '@/components/shared/StarRating';
 import AgentInquiryModal from '@/src/features/inquiries/components/AgentInquiryModal';
-import { AppraisalFormData, ConsultationFormData } from './useAgentProfile';
+import { AppraisalFormData, ConsultationFormData, MarketInsights } from './useAgentProfile';
 
 interface AgentContactActionsProps {
     agent: Agent;
@@ -42,6 +42,7 @@ interface AgentContactActionsProps {
     onRequestMarketReport: () => void;
     onSelectSimilarAgent: (agent: Agent) => void;
     onViewMoreAgents: () => void;
+    marketInsights?: MarketInsights;
 }
 
 const AgentContactActions: React.FC<AgentContactActionsProps> = ({
@@ -68,6 +69,7 @@ const AgentContactActions: React.FC<AgentContactActionsProps> = ({
     onRequestMarketReport,
     onSelectSimilarAgent,
     onViewMoreAgents,
+    marketInsights,
 }) => {
     const { t } = useTranslation(['agents']);
 
@@ -217,30 +219,30 @@ const AgentContactActions: React.FC<AgentContactActionsProps> = ({
 
             {/* Agent Credentials */}
             <div className="bg-white rounded-2xl shadow-md border border-gray-200 p-6 mt-6">
-                <h3 className="text-xl font-bold text-gray-900 mb-4">Credentials & Certifications</h3>
+                <h3 className="text-xl font-bold text-gray-900 mb-4">{t('profilePage.credentials.title')}</h3>
                 <div className="space-y-3">
                     <div className="flex items-center gap-3">
                         <ShieldCheckIcon className="w-5 h-5 text-green-500" />
                         <div>
-                            <p className="font-medium text-gray-900">Licensed Real Estate Agent</p>
-                            <p className="text-sm text-gray-600">{agent.licenseNumber || 'License: 12345678'}</p>
+                            <p className="font-medium text-gray-900">{t('profilePage.credentials.licensedAgent')}</p>
+                            <p className="text-sm text-gray-600">{agent.licenseNumber || t('profilePage.credentials.memberOfAssociation')}</p>
                         </div>
                     </div>
                     <div className="flex items-center gap-3">
                         <AcademicCapIcon className="w-5 h-5 text-blue-500" />
                         <div>
-                            <p className="font-medium text-gray-900">Professional Certifications</p>
+                            <p className="font-medium text-gray-900">{t('profilePage.credentials.professionalCertifications')}</p>
                             <p className="text-sm text-gray-600">
-                                {agent.certifications?.join(', ') || 'Member of National Association'}
+                                {agent.certifications?.join(', ') || t('profilePage.credentials.memberOfAssociation')}
                             </p>
                         </div>
                     </div>
                     <div className="flex items-center gap-3">
                         <TrophyIcon className="w-5 h-5 text-amber-500" />
                         <div>
-                            <p className="font-medium text-gray-900">Awards & Recognition</p>
+                            <p className="font-medium text-gray-900">{t('profilePage.credentials.awardsRecognition')}</p>
                             <p className="text-sm text-gray-600">
-                                {agent.awards?.join(', ') || 'No awards listed'}
+                                {agent.awards?.join(', ') || t('profilePage.credentials.noAwards')}
                             </p>
                         </div>
                     </div>
@@ -249,26 +251,33 @@ const AgentContactActions: React.FC<AgentContactActionsProps> = ({
 
             {/* Market Insights */}
             <div className="bg-gradient-to-br from-purple-50 to-pink-50 rounded-2xl border border-purple-200 p-6 mt-6">
-                <h3 className="text-xl font-bold text-gray-900 mb-4">Local Market Insights</h3>
+                <h3 className="text-xl font-bold text-gray-900 mb-4">{t('profilePage.marketInsights.title')}</h3>
                 <div className="space-y-3">
                     <div className="flex justify-between items-center p-3 bg-white/50 rounded-lg">
-                        <span className="font-medium text-gray-700">Avg. Days on Market</span>
-                        <span className="font-bold text-purple-600">24 days</span>
+                        <span className="font-medium text-gray-700">{t('profilePage.marketInsights.avgDaysOnMarket')}</span>
+                        <span className="font-bold text-purple-600">{marketInsights?.avgDaysOnMarket || 30} {t('profilePage.marketInsights.days')}</span>
                     </div>
                     <div className="flex justify-between items-center p-3 bg-white/50 rounded-lg">
-                        <span className="font-medium text-gray-700">Price Growth (YoY)</span>
-                        <span className="font-bold text-green-600">+5.2%</span>
+                        <span className="font-medium text-gray-700">{t('profilePage.marketInsights.priceGrowthYoY')}</span>
+                        <span className="font-bold text-green-600">+{marketInsights?.priceGrowth || 5.2}%</span>
                     </div>
                     <div className="flex justify-between items-center p-3 bg-white/50 rounded-lg">
-                        <span className="font-medium text-gray-700">Market Activity</span>
-                        <span className="font-bold text-blue-600">High</span>
+                        <span className="font-medium text-gray-700">{t('profilePage.marketInsights.marketActivity')}</span>
+                        <span className={`font-bold ${
+                            marketInsights?.activityLevel === 'Very High' ? 'text-red-600' :
+                            marketInsights?.activityLevel === 'High' ? 'text-purple-600' :
+                            marketInsights?.activityLevel === 'Moderate' ? 'text-blue-600' :
+                            'text-gray-600'
+                        }`}>
+                            {t(`profilePage.marketInsights.activity.${(marketInsights?.activityLevel || 'Moderate').toLowerCase().replace(' ', '')}`, marketInsights?.activityLevel || 'Moderate')}
+                        </span>
                     </div>
                 </div>
                 <button
                     onClick={onRequestMarketReport}
                     className="w-full mt-4 text-center text-purple-600 hover:text-purple-700 font-semibold text-sm py-2"
                 >
-                    Request Full Market Report →
+                    {t('profilePage.marketInsights.requestFullReport')} →
                 </button>
             </div>
 

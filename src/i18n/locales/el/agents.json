@@ -524,7 +524,11 @@
       "searchAllProperties": "Search all properties",
       "activeListings": "Active Listings",
       "soldProperties": "Sold Properties",
-      "soldBadge": "SOLD"
+      "soldBadge": "SOLD",
+      "all": "Όλα",
+      "forSale": "Προς Πώληση",
+      "forRent": "Προς Ενοικίαση",
+      "noListings": "Δεν βρέθηκαν καταχωρήσεις"
     },
     "reviewsTab": {
       "verifiedReviews": "verified reviews",

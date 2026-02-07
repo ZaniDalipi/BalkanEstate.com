@@ -449,7 +449,11 @@
       "searchAllProperties": "Търси всички имоти",
       "activeListings": "Активни обяви",
       "soldProperties": "Продадени имоти",
-      "soldBadge": "ПРОДАДЕН"
+      "soldBadge": "ПРОДАДЕН",
+      "all": "Всички",
+      "forSale": "За продажба",
+      "forRent": "Под наем",
+      "noListings": "Няма налични обяви"
     },
     "reviewsTab": {
       "verifiedReviews": "верифицирани отзиви",

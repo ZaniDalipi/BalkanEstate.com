@@ -59,86 +59,106 @@ const AgentProfileHeader: React.FC<AgentProfileHeaderProps> = ({
 
     return (
         <>
-            {/* Agency Agent Header - Banner style with cover image or gradient */}
+            {/* Agency Agent Header - Liquid Glass Banner */}
             {isAgencyAgent && (
                 <div className="sticky top-0 z-40">
-                    {/* Agency Banner Bar - Uses cover image or gradient */}
-                    <div className="relative h-16 sm:h-18 overflow-hidden">
-                        {/* Background: Cover Image or Gradient */}
+                    <div className="relative h-16 sm:h-[4.5rem] overflow-hidden">
+                        {/* Background Layer - Blurred cover image extending to edges */}
                         {hasCoverImage ? (
                             <>
+                                {/* Heavily blurred background fill for sides */}
                                 <img
                                     src={agent.agencyCoverImage}
                                     alt=""
-                                    className="absolute inset-0 w-full h-full object-cover"
+                                    className="absolute inset-0 w-full h-full object-cover scale-110 blur-md"
                                 />
-                                {/* Dark overlay for text readability */}
-                                <div className="absolute inset-0 bg-black/50" />
+                                {/* Glass overlay */}
+                                <div className="absolute inset-0 bg-slate-900/60 backdrop-blur-xl" />
+                                {/* Subtle gradient shimmer */}
+                                <div className="absolute inset-0 bg-gradient-to-r from-white/[0.03] via-white/[0.08] to-white/[0.03]" />
                             </>
                         ) : (
-                            <div className={`absolute inset-0 ${headerGradient}`} />
+                            <>
+                                <div className={`absolute inset-0 ${headerGradient}`} />
+                                <div className="absolute inset-0 backdrop-blur-sm bg-black/10" />
+                            </>
                         )}
 
+                        {/* Bottom border glow */}
+                        <div className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-white/20 to-transparent" />
+
                         {/* Navigation Content */}
-                        <div className="relative h-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                        <div className="relative h-full max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
                             <div className="flex items-center justify-between h-full">
                                 {/* Back Button */}
                                 <button
                                     onClick={onBack}
-                                    className="flex items-center gap-2 text-white/90 hover:text-white font-medium transition-colors group"
+                                    className="flex items-center gap-1.5 text-white/80 hover:text-white font-medium transition-all group bg-white/[0.06] hover:bg-white/[0.12] px-2.5 py-1.5 rounded-xl border border-white/[0.08]"
                                 >
-                                    <ArrowLeftIcon className="w-5 h-5 group-hover:-translate-x-1 transition-transform" />
-                                    <span className="hidden sm:inline">{t('profilePage.header.back')}</span>
+                                    <ArrowLeftIcon className="w-4 h-4 group-hover:-translate-x-0.5 transition-transform" />
+                                    <span className="hidden sm:inline text-sm">{t('profilePage.header.back')}</span>
                                 </button>
 
-                                {/* Agency Brand - Center */}
+                                {/* Agency Brand - Center with liquid glass container */}
                                 <button
                                     onClick={onAgencyClick}
-                                    className="flex items-center gap-3 hover:bg-white/10 px-3 sm:px-4 py-2 rounded-lg transition-colors cursor-pointer"
+                                    className="flex items-center gap-2.5 sm:gap-3 hover:bg-white/[0.08] px-2.5 sm:px-4 py-1.5 rounded-xl transition-all cursor-pointer border border-transparent hover:border-white/[0.1]"
                                 >
-                                    {agent.agencyLogo ? (
-                                        <div className="bg-white rounded-lg p-1 shadow-sm">
-                                            <img
-                                                src={agent.agencyLogo}
-                                                alt={agent.agencyName}
-                                                className="h-8 sm:h-9 w-auto max-w-[100px] sm:max-w-[140px] object-contain"
-                                            />
-                                        </div>
-                                    ) : (
-                                        <div className="bg-white/20 backdrop-blur-sm h-10 w-10 rounded-lg flex items-center justify-center">
-                                            <BuildingOfficeIcon className="w-6 h-6 text-white" />
-                                        </div>
-                                    )}
-                                    <div className="text-left">
-                                        <p className="text-sm sm:text-base font-bold text-white leading-tight drop-shadow-sm">{agent.agencyName}</p>
-                                        <p className="text-xs text-white/80 hidden sm:block">{t('profilePage.header.viewAgencyProfile')}</p>
+                                    {/* Logo in glass container */}
+                                    <div className="relative flex-shrink-0">
+                                        {agent.agencyLogo ? (
+                                            <div className="relative w-9 h-9 sm:w-10 sm:h-10 rounded-xl overflow-hidden border border-white/20 shadow-lg shadow-black/20">
+                                                {/* Blurred background of the same image */}
+                                                <img
+                                                    src={agent.agencyLogo}
+                                                    alt=""
+                                                    className="absolute inset-0 w-full h-full object-cover scale-150 blur-sm opacity-40"
+                                                />
+                                                {/* Glass layer */}
+                                                <div className="absolute inset-0 bg-white/70 backdrop-blur-sm" />
+                                                {/* Actual logo, properly contained */}
+                                                <img
+                                                    src={agent.agencyLogo}
+                                                    alt={agent.agencyName}
+                                                    className="relative w-full h-full object-contain p-1"
+                                                />
+                                            </div>
+                                        ) : (
+                                            <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-white/10 backdrop-blur-md border border-white/20 flex items-center justify-center shadow-lg shadow-black/10">
+                                                <BuildingOfficeIcon className="w-5 h-5 text-white/90" />
+                                            </div>
+                                        )}
+                                    </div>
+                                    <div className="text-left min-w-0">
+                                        <p className="text-sm sm:text-base font-semibold text-white leading-tight truncate max-w-[120px] sm:max-w-[200px]">{agent.agencyName}</p>
+                                        <p className="text-[10px] sm:text-xs text-white/60 hidden sm:block font-medium">{t('profilePage.header.viewAgencyProfile')}</p>
                                     </div>
                                 </button>
 
-                                {/* Actions */}
-                                <div className="flex items-center gap-1 sm:gap-2">
+                                {/* Actions - Glass buttons */}
+                                <div className="flex items-center gap-1 sm:gap-1.5">
                                     {isOwner && (
                                         <button
                                             onClick={onOpenEditModal}
-                                            className="flex items-center gap-2 px-2 sm:px-3 py-2 text-white/90 hover:text-white hover:bg-white/10 rounded-lg transition-colors"
+                                            className="flex items-center gap-1.5 px-2 sm:px-3 py-1.5 text-white/80 hover:text-white bg-white/[0.06] hover:bg-white/[0.12] rounded-xl transition-all border border-white/[0.08]"
                                         >
-                                            <PencilIcon className="w-5 h-5" />
-                                            <span className="hidden md:inline text-sm font-medium">{t('profilePage.header.editProfile')}</span>
+                                            <PencilIcon className="w-4 h-4" />
+                                            <span className="hidden md:inline text-xs font-medium">{t('profilePage.header.editProfile')}</span>
                                         </button>
                                     )}
                                     <button
                                         onClick={onSaveAgent}
-                                        className="flex items-center gap-2 px-2 sm:px-3 py-2 text-white/90 hover:text-white hover:bg-white/10 rounded-lg transition-colors"
+                                        className="flex items-center gap-1.5 px-2 sm:px-3 py-1.5 text-white/80 hover:text-white bg-white/[0.06] hover:bg-white/[0.12] rounded-xl transition-all border border-white/[0.08]"
                                     >
-                                        <HeartIcon className={`w-5 h-5 ${savedAgent ? 'fill-red-400 text-red-400' : ''}`} />
-                                        <span className="hidden md:inline text-sm font-medium">{savedAgent ? t('profilePage.header.saved') : t('profilePage.header.save')}</span>
+                                        <HeartIcon className={`w-4 h-4 ${savedAgent ? 'fill-red-400 text-red-400' : ''}`} />
+                                        <span className="hidden md:inline text-xs font-medium">{savedAgent ? t('profilePage.header.saved') : t('profilePage.header.save')}</span>
                                     </button>
                                     <button
                                         onClick={onShareAgent}
-                                        className="flex items-center gap-2 px-2 sm:px-3 py-2 text-white/90 hover:text-white hover:bg-white/10 rounded-lg transition-colors"
+                                        className="flex items-center gap-1.5 px-2 sm:px-3 py-1.5 text-white/80 hover:text-white bg-white/[0.06] hover:bg-white/[0.12] rounded-xl transition-all border border-white/[0.08]"
                                     >
-                                        <ShareIcon className="w-5 h-5" />
-                                        <span className="hidden md:inline text-sm font-medium">{t('profilePage.header.share')}</span>
+                                        <ShareIcon className="w-4 h-4" />
+                                        <span className="hidden md:inline text-xs font-medium">{t('profilePage.header.share')}</span>
                                     </button>
                                 </div>
                             </div>

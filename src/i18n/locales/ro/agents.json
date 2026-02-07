@@ -524,7 +524,11 @@
       "searchAllProperties": "Search all properties",
       "activeListings": "Active Listings",
       "soldProperties": "Sold Properties",
-      "soldBadge": "SOLD"
+      "soldBadge": "SOLD",
+      "all": "Toate",
+      "forSale": "De vânzare",
+      "forRent": "De închiriat",
+      "noListings": "Nu sunt anunțuri disponibile"
     },
     "reviewsTab": {
       "verifiedReviews": "verified reviews",

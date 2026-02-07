@@ -14,6 +14,7 @@ import {
   updateUserAchievement,
   deleteUserAchievement
 } from '@/src/features/achievements/api/achievementApi';
+import { Credential, getCredentials, getAgentPublicCredentials } from '@/src/features/credentials/api/credentialApi';
 import { useNotification } from '@/src/shared/hooks/useNotification';
 import { API_URL } from '@/src/shared/api/config';
 
@@ -102,6 +103,7 @@ export function useAgentProfile({ agent }: { agent: Agent }) {
     const [isSavingProfile, setIsSavingProfile] = useState(false);
     const [agentData, setAgentData] = useState(agent);
     const [agentAchievements, setAgentAchievements] = useState<Achievement[]>([]);
+    const [agentCredentials, setAgentCredentials] = useState<Credential[]>([]);
     const [fetchedProperties, setFetchedProperties] = useState<any[]>([]);
     const [loadingProperties, setLoadingProperties] = useState(true);
     const { success, error: showError } = useNotification();
@@ -383,6 +385,27 @@ export function useAgentProfile({ agent }: { agent: Agent }) {
         };
         fetchAchievements();
     }, [agent.id, agent.userId]);
+
+    // Fetch agent credentials
+    useEffect(() => {
+        const fetchCredentials = async () => {
+            try {
+                if (isOwner) {
+                    const creds = await getCredentials();
+                    setAgentCredentials(creds);
+                } else {
+                    const agentId = agent.userId || agent.id;
+                    if (agentId) {
+                        const creds = await getAgentPublicCredentials(String(agentId));
+                        setAgentCredentials(creds);
+                    }
+                }
+            } catch (error) {
+                // Silent fail
+            }
+        };
+        fetchCredentials();
+    }, [agent.id, agent.userId, isOwner]);
 
     // ─── Handlers ────────────────────────────────────────────────────────────
 
@@ -706,6 +729,7 @@ export function useAgentProfile({ agent }: { agent: Agent }) {
         isEditModalOpen, setIsEditModalOpen,
         isSavingProfile,
         agentAchievements,
+        agentCredentials, setAgentCredentials,
         loadingProperties,
         editForm, setEditForm,
 

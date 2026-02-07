@@ -524,7 +524,11 @@
       "searchAllProperties": "Пребарајте ги сите имоти",
       "activeListings": "Активни огласи",
       "soldProperties": "Продадени имоти",
-      "soldBadge": "ПРОДАДЕНО"
+      "soldBadge": "ПРОДАДЕНО",
+      "all": "Сите",
+      "forSale": "За продажба",
+      "forRent": "За изнајмување",
+      "noListings": "Нема достапни огласи"
     },
     "reviewsTab": {
       "verifiedReviews": "верифицирани рецензии",

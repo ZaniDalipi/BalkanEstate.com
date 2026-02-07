@@ -4,9 +4,12 @@ import {
     XMarkIcon,
     PlusIcon,
     TrophyIcon,
+    AcademicCapIcon,
 } from '@/constants';
 import AchievementsSection from '@/components/shared/AchievementsSection';
 import { Achievement } from '@/components/shared/AchievementsSection';
+import CredentialsSection from '@/src/features/credentials/components/CredentialsSection';
+import { Credential } from '@/src/features/credentials/api/credentialApi';
 import { EditFormData } from './useAgentProfile';
 
 interface AgentEditModalProps {
@@ -22,6 +25,8 @@ interface AgentEditModalProps {
     onAddAchievement: (achievement: Omit<Achievement, 'id' | 'createdAt' | 'isVerified'>) => Promise<void>;
     onEditAchievement: (id: string, achievement: Partial<Achievement>) => Promise<void>;
     onDeleteAchievement: (id: string) => Promise<void>;
+    agentCredentials: Credential[];
+    onCredentialsChange: (credentials: Credential[]) => void;
 }
 
 const AgentEditModal: React.FC<AgentEditModalProps> = ({
@@ -37,6 +42,8 @@ const AgentEditModal: React.FC<AgentEditModalProps> = ({
     onAddAchievement,
     onEditAchievement,
     onDeleteAchievement,
+    agentCredentials,
+    onCredentialsChange,
 }) => {
     const { t } = useTranslation(['agents']);
 
@@ -299,6 +306,16 @@ const AgentEditModal: React.FC<AgentEditModalProps> = ({
                                 />
                             </div>
                         </div>
+                    </div>
+
+                    {/* Professional Certifications Section */}
+                    <div className="border-t border-gray-200 pt-6">
+                        <CredentialsSection
+                            credentials={agentCredentials}
+                            isOwner={true}
+                            onCredentialsChange={onCredentialsChange}
+                            className=""
+                        />
                     </div>
 
                     {/* Awards & Achievements Section */}

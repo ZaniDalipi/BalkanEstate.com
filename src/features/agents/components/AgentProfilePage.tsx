@@ -133,6 +133,7 @@ const AgentProfilePage: React.FC<AgentProfilePageProps> = ({ agent }) => {
                             onRequestMarketReport={profile.handleRequestMarketReport}
                             onSelectSimilarAgent={profile.handleSelectSimilarAgent}
                             onViewMoreAgents={profile.handleViewMoreAgents}
+                            marketInsights={profile.marketInsights}
                         />
                     </div>
                 </div>
@@ -198,6 +199,8 @@ const AgentProfilePage: React.FC<AgentProfilePageProps> = ({ agent }) => {
                 onAddAchievement={profile.handleAddAchievement}
                 onEditAchievement={profile.handleEditAchievement}
                 onDeleteAchievement={profile.handleDeleteAchievement}
+                agentCredentials={profile.agentCredentials}
+                onCredentialsChange={profile.setAgentCredentials}
             />
         </div>
     );

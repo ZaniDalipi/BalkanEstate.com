@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Agent } from '@/types';
 import {
@@ -114,6 +114,7 @@ const AgentProfileTabs: React.FC<AgentProfileTabsProps> = ({
     onViewProperty,
 }) => {
     const { t } = useTranslation(['agents']);
+    const [listingTypeFilter, setListingTypeFilter] = useState<'all' | 'sale' | 'rent'>('all');
 
     return (
         <div className="bg-white rounded-lg sm:rounded-xl lg:rounded-2xl shadow-sm border border-gray-200 mb-4 sm:mb-6 lg:mb-8 overflow-hidden sticky top-0 md:top-16 z-30">
@@ -634,47 +635,92 @@ const AgentProfileTabs: React.FC<AgentProfileTabsProps> = ({
                             </button>
                         </div>
 
+                        {/* Listing Type Filter (Sale / Rent) */}
+                        {(() => {
+                            const saleCount = activeListings.filter(p => (p.listingType || 'sale') === 'sale').length;
+                            const rentCount = activeListings.filter(p => p.listingType === 'rent').length;
+                            if (saleCount > 0 && rentCount > 0) {
+                                return (
+                                    <div className="flex gap-2 mb-6">
+                                        <button
+                                            onClick={() => setListingTypeFilter('all')}
+                                            className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${
+                                                listingTypeFilter === 'all' ? 'bg-gray-800 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                                            }`}
+                                        >
+                                            {t('profilePage.listingsTab.all', 'All')} ({activeListings.length})
+                                        </button>
+                                        <button
+                                            onClick={() => setListingTypeFilter('sale')}
+                                            className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${
+                                                listingTypeFilter === 'sale' ? 'bg-emerald-600 text-white' : 'bg-emerald-50 text-emerald-700 hover:bg-emerald-100'
+                                            }`}
+                                        >
+                                            {t('profilePage.listingsTab.forSale', 'For Sale')} ({saleCount})
+                                        </button>
+                                        <button
+                                            onClick={() => setListingTypeFilter('rent')}
+                                            className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${
+                                                listingTypeFilter === 'rent' ? 'bg-blue-600 text-white' : 'bg-blue-50 text-blue-700 hover:bg-blue-100'
+                                            }`}
+                                        >
+                                            {t('profilePage.listingsTab.forRent', 'For Rent')} ({rentCount})
+                                        </button>
+                                    </div>
+                                );
+                            }
+                            return null;
+                        })()}
+
                         {/* Active Listings */}
-                        {loadingProperties ? (
-                            <div>
-                                <h3 className="text-lg font-semibold text-gray-900 mb-4">{t('profilePage.listingsTab.activeListings')}</h3>
-                                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                                    <PropertyCardSkeleton />
-                                    <PropertyCardSkeleton />
-                                    <PropertyCardSkeleton />
-                                </div>
-                            </div>
-                        ) : activeListings.length > 0 ? (
-                            <div>
-                                <h3 className="text-lg font-semibold text-gray-900 mb-4">{t('profilePage.listingsTab.activeListings')}</h3>
-                                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                                    {activeListings.map(prop => (
-                                        <PropertyCard key={prop.id} property={prop} />
-                                    ))}
-                                </div>
-                            </div>
-                        ) : soldProperties.length === 0 ? (
-                            <div className="text-center py-12 bg-gray-50 rounded-2xl">
-                                <p className="text-gray-500">{t('profilePage.listingsTab.noListings', 'No listings available')}</p>
-                            </div>
-                        ) : null}
+                        {(() => {
+                            const filteredActive = listingTypeFilter === 'all' ? activeListings : activeListings.filter(p => (p.listingType || 'sale') === listingTypeFilter);
+                            const filteredSold = listingTypeFilter === 'all' ? soldProperties : soldProperties.filter(p => (p.listingType || 'sale') === listingTypeFilter);
 
-
-                        {soldProperties.length > 0 && (
-                            <div>
-                                <h3 className="text-lg font-semibold text-gray-900 mb-4">{t('profilePage.listingsTab.soldProperties')} ({soldProperties.length})</h3>
-                                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                                    {soldProperties.map(prop => (
-                                        <div key={prop.id} className="relative">
-                                            <PropertyCard property={prop} />
-                                            <div className="absolute top-3 right-3 bg-red-600 text-white text-xs font-bold px-2.5 py-1 rounded-md shadow-lg z-10">
-                                                {t('profilePage.listingsTab.soldBadge')}
+                            return (
+                                <>
+                                    {loadingProperties ? (
+                                        <div>
+                                            <h3 className="text-lg font-semibold text-gray-900 mb-4">{t('profilePage.listingsTab.activeListings')}</h3>
+                                            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                                                <PropertyCardSkeleton />
+                                                <PropertyCardSkeleton />
+                                                <PropertyCardSkeleton />
                                             </div>
                                         </div>
-                                    ))}
-                                </div>
-                            </div>
-                        )}
+                                    ) : filteredActive.length > 0 ? (
+                                        <div>
+                                            <h3 className="text-lg font-semibold text-gray-900 mb-4">{t('profilePage.listingsTab.activeListings')}</h3>
+                                            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                                                {filteredActive.map(prop => (
+                                                    <PropertyCard key={prop.id} property={prop} />
+                                                ))}
+                                            </div>
+                                        </div>
+                                    ) : filteredSold.length === 0 ? (
+                                        <div className="text-center py-12 bg-gray-50 rounded-2xl">
+                                            <p className="text-gray-500">{t('profilePage.listingsTab.noListings', 'No listings available')}</p>
+                                        </div>
+                                    ) : null}
+
+                                    {filteredSold.length > 0 && (
+                                        <div>
+                                            <h3 className="text-lg font-semibold text-gray-900 mb-4">{t('profilePage.listingsTab.soldProperties')} ({filteredSold.length})</h3>
+                                            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                                                {filteredSold.map(prop => (
+                                                    <div key={prop.id} className="relative">
+                                                        <PropertyCard property={prop} />
+                                                        <div className="absolute top-3 right-3 bg-red-600 text-white text-xs font-bold px-2.5 py-1 rounded-md shadow-lg z-10">
+                                                            {t('profilePage.listingsTab.soldBadge')}
+                                                        </div>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    )}
+                                </>
+                            );
+                        })()}
                     </div>
                 )}
 
