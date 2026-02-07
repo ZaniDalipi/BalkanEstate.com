@@ -350,7 +350,9 @@ export function useMapComponent(props: MapComponentProps) {
 
   const handlePopupClick = (propertyId: string) => {
     dispatch({ type: 'SET_SELECTED_PROPERTY', payload: propertyId });
+    dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'property-details' });
     window.history.pushState({ propertyId }, '', `/property/${propertyId}`);
+    window.dispatchEvent(new PopStateEvent('popstate'));
   };
 
   // Set a timeout to detect if loading takes too long (30 seconds)

@@ -251,12 +251,14 @@ const PropertyDetailsPage: React.FC<{ property: Property }> = ({ property: cache
       return;
     }
 
-    dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'inbox' });
-
     setIsCreatingConversation(true);
     try {
       const conversation = await createConversation(property.id);
+      // Clear selected property so App.tsx stops rendering PropertyDetailsPage
+      dispatch({ type: 'SET_SELECTED_PROPERTY', payload: null });
+      dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'inbox' });
       dispatch({ type: 'SET_ACTIVE_CONVERSATION', payload: conversation.id });
+      window.history.pushState({}, '', '/inbox');
     } catch (err) {
       await error(t('property:errors.errorTitle', 'Error'), t('property:errors.conversationFailed', 'Failed to start conversation. Please try again.'));
     } finally {

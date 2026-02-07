@@ -77,6 +77,7 @@ import sqNewListing from './locales/sq/newListing.json';
 import sqAnalytics from './locales/sq/analytics.json';
 import sqValuation from './locales/sq/valuation.json';
 import sqHowItWorks from './locales/sq/howItWorks.json';
+import sqRental from './locales/sq/rental.json';
 
 // Import translations - Serbian
 import srCommon from './locales/sr/common.json';
@@ -106,6 +107,7 @@ import srNewListing from './locales/sr/newListing.json';
 import srAnalytics from './locales/sr/analytics.json';
 import srValuation from './locales/sr/valuation.json';
 import srHowItWorks from './locales/sr/howItWorks.json';
+import srRental from './locales/sr/rental.json';
 
 // Import translations - Bulgarian
 import bgCommon from './locales/bg/common.json';
@@ -135,6 +137,7 @@ import bgNewListing from './locales/bg/newListing.json';
 import bgAnalytics from './locales/bg/analytics.json';
 import bgValuation from './locales/bg/valuation.json';
 import bgHowItWorks from './locales/bg/howItWorks.json';
+import bgRental from './locales/bg/rental.json';
 
 // Import translations - Croatian
 import hrCommon from './locales/hr/common.json';
@@ -164,6 +167,7 @@ import hrNewListing from './locales/hr/newListing.json';
 import hrAnalytics from './locales/hr/analytics.json';
 import hrValuation from './locales/hr/valuation.json';
 import hrHowItWorks from './locales/hr/howItWorks.json';
+import hrRental from './locales/hr/rental.json';
 
 // Import translations - Bosnian
 import bsCommon from './locales/bs/common.json';
@@ -193,6 +197,7 @@ import bsNewListing from './locales/bs/newListing.json';
 import bsAnalytics from './locales/bs/analytics.json';
 import bsValuation from './locales/bs/valuation.json';
 import bsHowItWorks from './locales/bs/howItWorks.json';
+import bsRental from './locales/bs/rental.json';
 
 // Import translations - Montenegrin
 import meCommon from './locales/me/common.json';
@@ -222,6 +227,7 @@ import meNewListing from './locales/me/newListing.json';
 import meAnalytics from './locales/me/analytics.json';
 import meValuation from './locales/me/valuation.json';
 import meHowItWorks from './locales/me/howItWorks.json';
+import meRental from './locales/me/rental.json';
 
 // Import translations - Macedonian
 import mkCommon from './locales/mk/common.json';
@@ -251,6 +257,7 @@ import mkNewListing from './locales/mk/newListing.json';
 import mkAnalytics from './locales/mk/analytics.json';
 import mkValuation from './locales/mk/valuation.json';
 import mkHowItWorks from './locales/mk/howItWorks.json';
+import mkRental from './locales/mk/rental.json';
 
 // Import translations - Romanian
 import roCommon from './locales/ro/common.json';
@@ -280,6 +287,7 @@ import roNewListing from './locales/ro/newListing.json';
 import roAnalytics from './locales/ro/analytics.json';
 import roValuation from './locales/ro/valuation.json';
 import roHowItWorks from './locales/ro/howItWorks.json';
+import roRental from './locales/ro/rental.json';
 
 // Import translations - Greek
 import elCommon from './locales/el/common.json';
@@ -309,6 +317,7 @@ import elNewListing from './locales/el/newListing.json';
 import elAnalytics from './locales/el/analytics.json';
 import elValuation from './locales/el/valuation.json';
 import elHowItWorks from './locales/el/howItWorks.json';
+import elRental from './locales/el/rental.json';
 
 // Language configuration
 export const languages = [
@@ -386,6 +395,7 @@ const resources = {
     analytics: sqAnalytics,
     valuation: sqValuation,
     howItWorks: sqHowItWorks,
+    rental: sqRental,
   },
   sr: {
     common: srCommon,
@@ -415,6 +425,7 @@ const resources = {
     analytics: srAnalytics,
     valuation: srValuation,
     howItWorks: srHowItWorks,
+    rental: srRental,
   },
   bg: {
     common: bgCommon,
@@ -444,6 +455,7 @@ const resources = {
     analytics: bgAnalytics,
     valuation: bgValuation,
     howItWorks: bgHowItWorks,
+    rental: bgRental,
   },
   hr: {
     common: hrCommon,
@@ -473,6 +485,7 @@ const resources = {
     analytics: hrAnalytics,
     valuation: hrValuation,
     howItWorks: hrHowItWorks,
+    rental: hrRental,
   },
   bs: {
     common: bsCommon,
@@ -502,6 +515,7 @@ const resources = {
     analytics: bsAnalytics,
     valuation: bsValuation,
     howItWorks: bsHowItWorks,
+    rental: bsRental,
   },
   me: {
     common: meCommon,
@@ -531,6 +545,7 @@ const resources = {
     analytics: meAnalytics,
     valuation: meValuation,
     howItWorks: meHowItWorks,
+    rental: meRental,
   },
   mk: {
     common: mkCommon,
@@ -560,6 +575,7 @@ const resources = {
     analytics: mkAnalytics,
     valuation: mkValuation,
     howItWorks: mkHowItWorks,
+    rental: mkRental,
   },
   ro: {
     common: roCommon,
@@ -589,6 +605,7 @@ const resources = {
     analytics: roAnalytics,
     valuation: roValuation,
     howItWorks: roHowItWorks,
+    rental: roRental,
   },
   el: {
     common: elCommon,
@@ -618,6 +635,7 @@ const resources = {
     analytics: elAnalytics,
     valuation: elValuation,
     howItWorks: elHowItWorks,
+    rental: elRental,
   }
 
 };
@@ -630,7 +648,7 @@ i18n
     resources,
     fallbackLng: 'en',
     defaultNS: 'common',
-    ns: ['common', 'nav', 'property', 'auth', 'search', 'messages', 'footer', 'newsletter', 'calculators', 'pricing', 'validation', 'admin', 'account', 'seller', 'agents', 'modals', 'payment', 'saved', 'exploreCities', 'analytics', 'subscription', 'agencies', 'agencyDetails', 'agentProfile', 'newListing', 'valuation', 'howItWorks'],
+    ns: ['common', 'nav', 'property', 'auth', 'search', 'messages', 'footer', 'newsletter', 'calculators', 'pricing', 'validation', 'admin', 'account', 'seller', 'agents', 'modals', 'payment', 'saved', 'exploreCities', 'analytics', 'subscription', 'agencies', 'agencyDetails', 'agentProfile', 'newListing', 'valuation', 'howItWorks', 'rental'],
 
     interpolation: {
       escapeValue: false, // React already escapes

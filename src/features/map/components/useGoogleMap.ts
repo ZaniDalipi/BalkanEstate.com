@@ -971,7 +971,9 @@ export function useGoogleMap(props: GoogleMapComponentProps) {
   // Handle view details click
   const handleViewDetails = useCallback((propertyId: string) => {
     dispatch({ type: 'SET_SELECTED_PROPERTY', payload: propertyId });
+    dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'property-details' });
     window.history.pushState({ propertyId }, '', `/property/${propertyId}`);
+    window.dispatchEvent(new PopStateEvent('popstate'));
     setSelectedProperty(null);
   }, [dispatch]);
 
