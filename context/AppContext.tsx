@@ -195,6 +195,20 @@ const appReducer = (state: AppState, action: AppAction): AppState => {
                 p.id === action.payload ? { ...p, status: 'sold' } : p
             ),
         };
+    case 'MARK_PROPERTY_RENTED':
+        return {
+            ...state,
+            properties: state.properties.map(p =>
+                p.id === action.payload.id ? { ...p, status: 'rented', rentedAt: action.payload.rentedAt, rentedUntil: action.payload.rentedUntil } : p
+            ),
+        };
+    case 'MARK_PROPERTY_AVAILABLE':
+        return {
+            ...state,
+            properties: state.properties.map(p =>
+                p.id === action.payload ? { ...p, status: 'active', rentedAt: undefined, rentedUntil: undefined } : p
+            ),
+        };
     case 'DELETE_PROPERTY':
         // Remove the property from the list.
         return {

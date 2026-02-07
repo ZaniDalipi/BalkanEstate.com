@@ -157,6 +157,8 @@ export type AppAction =
   | { type: 'UPDATE_PROPERTY'; payload: Property }
   | { type: 'RENEW_PROPERTY'; payload: string }
   | { type: 'MARK_PROPERTY_SOLD'; payload: string }
+  | { type: 'MARK_PROPERTY_RENTED'; payload: { id: string; rentedAt?: number; rentedUntil?: number } }
+  | { type: 'MARK_PROPERTY_AVAILABLE'; payload: string }
   | { type: 'DELETE_PROPERTY'; payload: string }
   | { type: 'UPDATE_USER'; payload: Partial<User> }
   | { type: 'CREATE_CONVERSATION'; payload: Conversation }

@@ -314,6 +314,9 @@ const PropertyDetailsPage: React.FC<{ property: Property }> = ({ property: cache
   const handleMarkAsRented = useCallback(async () => {
     setShowRentedModal(false);
     setLocalStatus('rented');
+    const rentedAt = Date.now();
+    const until = rentedUntilDate ? new Date(rentedUntilDate).getTime() : undefined;
+    dispatch({ type: 'MARK_PROPERTY_RENTED', payload: { id: property.id, rentedAt, rentedUntil: until } });
     setRentedUntilDate('');
     try {
       await api.markPropertyAsRented(property.id, rentedUntilDate || undefined);
@@ -321,20 +324,23 @@ const PropertyDetailsPage: React.FC<{ property: Property }> = ({ property: cache
       window.dispatchEvent(new CustomEvent('property-status-changed'));
     } catch {
       setLocalStatus('active');
+      dispatch({ type: 'MARK_PROPERTY_AVAILABLE', payload: property.id });
     }
-  }, [property.id, rentedUntilDate, fetchProperties]);
+  }, [property.id, rentedUntilDate, fetchProperties, dispatch]);
 
   const handleMarkAsAvailable = useCallback(async () => {
     setShowAvailableConfirm(false);
     setLocalStatus('active');
+    dispatch({ type: 'MARK_PROPERTY_AVAILABLE', payload: property.id });
     try {
       await api.markPropertyAsAvailable(property.id);
       fetchProperties?.();
       window.dispatchEvent(new CustomEvent('property-status-changed'));
     } catch {
       setLocalStatus('rented');
+      dispatch({ type: 'MARK_PROPERTY_RENTED', payload: { id: property.id } });
     }
-  }, [property.id, fetchProperties]);
+  }, [property.id, fetchProperties, dispatch]);
 
   // Keep localStatus in sync with property
   useEffect(() => {

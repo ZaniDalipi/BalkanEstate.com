@@ -1,4 +1,4 @@
-import React, { useMemo, useState, useEffect, useCallback } from 'react';
+import React, { useMemo, useState, useEffect, useCallback, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Property, PropertyStatus, UserRole } from '../../types';
 import { formatPrice } from '../../utils/currency';
@@ -303,6 +303,7 @@ const MyListings: React.FC<{ sellerId: string }> = ({ sellerId }) => {
     const [myProperties, setMyProperties] = useState<Property[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [renewalStatuses, setRenewalStatuses] = useState<Record<string, { canRenew: boolean; hoursRemaining?: number; minutesRemaining?: number }>>({});
+    const skipNextRefetchRef = useRef(false);
 
     // Calculate renewal status based on lastRenewed
     const calculateRenewalStatus = (lastRenewed?: Date | number | string) => {
@@ -348,17 +349,26 @@ const MyListings: React.FC<{ sellerId: string }> = ({ sellerId }) => {
         }
     }, []);
 
+    // Delayed refetch for real-time updates - skips if an optimistic update just happened
+    const realtimeRefetch = useCallback(() => {
+        if (skipNextRefetchRef.current) {
+            skipNextRefetchRef.current = false;
+            return;
+        }
+        fetchMyListings();
+    }, [fetchMyListings]);
+
     // Enable real-time updates via WebSocket
     // When any property is created/updated/deleted, refresh the list
     useRealtimeProperties({
         onPropertyCreated: () => {
-            fetchMyListings();
+            realtimeRefetch();
         },
         onPropertyUpdated: () => {
-            fetchMyListings();
+            realtimeRefetch();
         },
         onPropertyDeleted: () => {
-            fetchMyListings();
+            realtimeRefetch();
         },
     });
 
@@ -443,7 +453,7 @@ const MyListings: React.FC<{ sellerId: string }> = ({ sellerId }) => {
 
         return [...filtered].sort((a, b) => {
             // First sort by status (active first)
-            const statusOrder = { active: 1, pending: 2, draft: 3, sold: 4 };
+            const statusOrder: Record<string, number> = { active: 1, pending: 2, rented: 3, draft: 4, sold: 5 };
             const statusDiff = statusOrder[a.status] - statusOrder[b.status];
             if (statusDiff !== 0) return statusDiff;
 
@@ -512,14 +522,17 @@ const MyListings: React.FC<{ sellerId: string }> = ({ sellerId }) => {
     const confirmMarkAsRented = async () => {
         if (propertyToMarkSold) {
             const id = propertyToMarkSold;
+            const rentedAt = Date.now();
             const until = rentedUntilDate ? new Date(rentedUntilDate).getTime() : undefined;
             // Close modal + update UI instantly
             setShowRentedModal(false);
             setPropertyToMarkSold(null);
             setRentedUntilDate('');
+            skipNextRefetchRef.current = true;
             setMyProperties(prev => prev.map(p =>
-                p.id === id ? { ...p, status: 'rented' as PropertyStatus, rentedAt: Date.now(), rentedUntil: until } : p
+                p.id === id ? { ...p, status: 'rented' as PropertyStatus, rentedAt, rentedUntil: until } : p
             ));
+            dispatch({ type: 'MARK_PROPERTY_RENTED', payload: { id, rentedAt, rentedUntil: until } });
             // Fire API in background
             try {
                 await api.markPropertyAsRented(id, rentedUntilDate || undefined);
@@ -529,6 +542,7 @@ const MyListings: React.FC<{ sellerId: string }> = ({ sellerId }) => {
                 setMyProperties(prev => prev.map(p =>
                     p.id === id ? { ...p, status: 'active' as PropertyStatus, rentedAt: undefined, rentedUntil: undefined } : p
                 ));
+                dispatch({ type: 'MARK_PROPERTY_AVAILABLE', payload: id });
             }
         }
     };
@@ -539,6 +553,7 @@ const MyListings: React.FC<{ sellerId: string }> = ({ sellerId }) => {
             // Close modal + update UI instantly
             setShowSoldConfirm(false);
             setPropertyToMarkSold(null);
+            skipNextRefetchRef.current = true;
             setMyProperties(prev => prev.map(p =>
                 p.id === id ? { ...p, status: 'sold' as PropertyStatus } : p
             ));
@@ -566,9 +581,11 @@ const MyListings: React.FC<{ sellerId: string }> = ({ sellerId }) => {
             // Close modal + update UI instantly
             setShowAvailableConfirm(false);
             setPropertyToMarkAvailable(null);
+            skipNextRefetchRef.current = true;
             setMyProperties(prev => prev.map(p =>
                 p.id === id ? { ...p, status: 'active' as PropertyStatus, rentedAt: undefined, rentedUntil: undefined } : p
             ));
+            dispatch({ type: 'MARK_PROPERTY_AVAILABLE', payload: id });
             // Fire API in background
             try {
                 await api.markPropertyAsAvailable(id);
@@ -578,6 +595,7 @@ const MyListings: React.FC<{ sellerId: string }> = ({ sellerId }) => {
                 setMyProperties(prev => prev.map(p =>
                     p.id === id ? { ...p, status: 'rented' as PropertyStatus } : p
                 ));
+                dispatch({ type: 'MARK_PROPERTY_RENTED', payload: { id } });
             }
         }
     };
