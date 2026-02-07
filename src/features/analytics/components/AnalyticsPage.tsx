@@ -8,6 +8,8 @@ import {
 } from '@/src/features/view-stats/hooks';
 import { Period } from '@/src/data/api/ViewStatsApiClient';
 import { AppView } from '@/types';
+import { getMyListings } from '@/src/features/properties/api/propertyApi';
+import RentalDashboardStats from '@/src/features/rental/components/RentalDashboardStats';
 import {
   ChartBarIcon,
   EyeIcon,
@@ -99,6 +101,13 @@ const AnalyticsPage: React.FC = () => {
   const { state, dispatch } = useAppContext();
   const { currentUser } = state;
   const [period, setPeriod] = useState<Period>('30d');
+  const [myProperties, setMyProperties] = useState<any[]>([]);
+
+  // Fetch user's listings for rental portfolio stats
+  useEffect(() => {
+    if (!currentUser) return;
+    getMyListings().then(setMyProperties).catch(() => {});
+  }, [currentUser]);
 
   // Navigation helpers
   const navigateToProperty = (propertyId: string) => {
@@ -425,6 +434,13 @@ const AnalyticsPage: React.FC = () => {
             delay={400}
           />
         </div>
+
+        {/* Rental Portfolio Stats */}
+        {myProperties.some(p => p.listingType === 'rent') && (
+          <div className="mb-6">
+            <RentalDashboardStats properties={myProperties} />
+          </div>
+        )}
 
         {/* Premium Banner */}
         {!isPremium && !isLoading && (

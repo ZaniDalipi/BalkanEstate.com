@@ -9,7 +9,6 @@ import ListingCardSkeleton from './ListingCardSkeleton';
 import * as api from '../../services/apiService';
 import PromotionModal from '../../src/features/promotions/components/PromotionModal';
 import { VideoGenerator } from '../../src/features/videos';
-import RentalDashboardStats from '../../src/features/rental/components/RentalDashboardStats';
 
 // Video Icon component
 const VideoIcon: React.FC<{ className?: string }> = ({ className }) => (
@@ -432,7 +431,7 @@ const MyListings: React.FC<{ sellerId: string }> = ({ sellerId }) => {
             const bTime = Math.max(bRenewed, bCreated);
             return bTime - aTime;
         });
-    }, [myProperties, statusFilter, roleFilter]);
+    }, [myProperties, statusFilter, roleFilter, listingTypeFilter]);
 
     const handleRenew = async (id: string) => {
         try {
@@ -692,11 +691,6 @@ const MyListings: React.FC<{ sellerId: string }> = ({ sellerId }) => {
                     </button>
                 </div>
             </div>
-
-            {/* Rental Portfolio Dashboard */}
-            {listingTypeCounts.rent > 0 && (
-                <RentalDashboardStats properties={myProperties} />
-            )}
 
             {/* Listing Type Filter (Sale / Rent) */}
             {showListingTypeFilter && (
