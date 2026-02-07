@@ -8,6 +8,7 @@ import {
   getMyListings,
   uploadImages,
   markAsSold,
+  markAsRented,
   renewProperty,
 } from '../controllers/propertyController';
 import { protect } from '../middleware/auth';
@@ -186,6 +187,7 @@ router.get('/my/listings', protect, getMyListings);
 router.post('/upload-images', protect, sensitiveRateLimiter, upload.array('images', 30), uploadImages);
 router.post('/:propertyId/upload-images', protect, sensitiveRateLimiter, upload.array('images', 30), uploadImages);
 router.patch('/:id/mark-sold', protect, sensitiveRateLimiter, markAsSold);
+router.patch('/:id/mark-rented', protect, sensitiveRateLimiter, markAsRented);
 router.patch('/:id/renew', protect, sensitiveRateLimiter, renewProperty);
 
 export default router;

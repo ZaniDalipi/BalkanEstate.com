@@ -21,8 +21,9 @@ export interface IProperty extends Document {
   createdAsRole: 'private_seller' | 'agent'; // Which role context was used to create this listing
   createdByAgencyName?: string; // If created as agent, store agency name
   createdByLicenseNumber?: string; // If created as agent, store license number
+  listingType: 'sale' | 'rent'; // Whether this property is for sale or rent
   title?: string; // Optional title/headline for the property listing
-  status: 'active' | 'pending' | 'sold' | 'draft';
+  status: 'active' | 'pending' | 'sold' | 'rented' | 'draft';
   soldAt?: Date;
   price: number;
   // Price discount fields
@@ -91,6 +92,17 @@ export interface IProperty extends Document {
   condition?: 'new' | 'excellent' | 'good' | 'fair' | 'needs-renovation';
   viewType?: 'sea' | 'mountain' | 'city' | 'park' | 'garden' | 'street';
   energyRating?: 'A+' | 'A' | 'B' | 'C' | 'D' | 'E' | 'F' | 'G';
+  // Rental-specific fields (only applicable when listingType === 'rent')
+  rentPeriod?: 'monthly' | 'weekly' | 'daily'; // How rent is charged
+  securityDeposit?: number; // Security deposit amount
+  minimumLeaseDuration?: number; // Minimum lease in months
+  maximumLeaseDuration?: number; // Maximum lease in months
+  availableFrom?: Date; // When the property is available for move-in
+  utilitiesIncluded?: boolean; // Whether utilities (water, electricity, etc.) are included in rent
+  internetIncluded?: boolean; // Whether internet is included
+  tenantRequirements?: string[]; // e.g. ['no_smoking', 'no_pets', 'references_required', 'employed']
+  maxOccupants?: number; // Maximum number of occupants allowed
+  rentedAt?: Date; // When the property was rented
   createdAt: Date;
   updatedAt: Date;
 }
@@ -129,6 +141,13 @@ const PropertySchema: Schema = new Schema(
       type: String,
       required: false,
     },
+    listingType: {
+      type: String,
+      enum: ['sale', 'rent'],
+      default: 'sale',
+      required: true,
+      index: true,
+    },
     title: {
       type: String,
       required: false,
@@ -137,7 +156,7 @@ const PropertySchema: Schema = new Schema(
     },
     status: {
       type: String,
-      enum: ['active', 'pending', 'sold', 'draft'],
+      enum: ['active', 'pending', 'sold', 'rented', 'draft'],
       default: 'active',
       index: true,
     },
@@ -412,6 +431,46 @@ const PropertySchema: Schema = new Schema(
       enum: ['A+', 'A', 'B', 'C', 'D', 'E', 'F', 'G'],
       index: true,
     },
+    // Rental-specific fields
+    rentPeriod: {
+      type: String,
+      enum: ['monthly', 'weekly', 'daily'],
+      default: 'monthly',
+    },
+    securityDeposit: {
+      type: Number,
+      min: 0,
+    },
+    minimumLeaseDuration: {
+      type: Number,
+      min: 1,
+    },
+    maximumLeaseDuration: {
+      type: Number,
+      min: 1,
+    },
+    availableFrom: {
+      type: Date,
+      index: true,
+    },
+    utilitiesIncluded: {
+      type: Boolean,
+    },
+    internetIncluded: {
+      type: Boolean,
+    },
+    tenantRequirements: {
+      type: [String],
+      default: [],
+    },
+    maxOccupants: {
+      type: Number,
+      min: 1,
+    },
+    rentedAt: {
+      type: Date,
+      index: true,
+    },
   },
   {
     timestamps: true,
@@ -432,5 +491,9 @@ PropertySchema.index({ promotionTier: 1, isPromoted: 1, promotionEndDate: 1 });
 PropertySchema.index({ hasUrgentBadge: 1, isPromoted: 1 });
 // Index for price-reduced properties
 PropertySchema.index({ priceReducedAt: 1, status: 1 });
+// Index for listing type filtering (sale vs rent)
+PropertySchema.index({ listingType: 1, status: 1 });
+// Compound index for rental searches
+PropertySchema.index({ listingType: 1, propertyType: 1, city: 1, status: 1 });
 
 export default mongoose.model<IProperty>('Property', PropertySchema);

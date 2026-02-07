@@ -2,7 +2,9 @@
 
 import { UserRole } from './user.types';
 
-export type PropertyStatus = 'active' | 'pending' | 'sold' | 'draft';
+export type PropertyStatus = 'active' | 'pending' | 'sold' | 'rented' | 'draft';
+export type ListingType = 'sale' | 'rent';
+export type RentPeriod = 'monthly' | 'weekly' | 'daily';
 export type PropertyImageTag = 'exterior' | 'living_room' | 'kitchen' | 'bedroom' | 'bathroom' | 'other';
 export type PropertyType = 'house' | 'apartment' | 'villa' | 'land' | 'other';
 export type FurnishingStatus = 'any' | 'furnished' | 'semi-furnished' | 'unfurnished';
@@ -39,8 +41,10 @@ export interface Property {
   id: string;
   title?: string;
   sellerId: string;
+  listingType: ListingType;
   status: PropertyStatus;
   soldAt?: number;
+  rentedAt?: number;
   price: number;
   // Price discount fields
   originalPrice?: number; // Original price before discount
@@ -107,6 +111,16 @@ export interface Property {
   promotionStartDate?: number;
   promotionEndDate?: number;
   hasUrgentBadge?: boolean;
+  // Rental-specific fields
+  rentPeriod?: RentPeriod;
+  securityDeposit?: number;
+  minimumLeaseDuration?: number;
+  maximumLeaseDuration?: number;
+  availableFrom?: number;
+  utilitiesIncluded?: boolean;
+  internetIncluded?: boolean;
+  tenantRequirements?: string[];
+  maxOccupants?: number;
 }
 
 export type SellerType = 'any' | 'agent' | 'private';
@@ -114,6 +128,7 @@ export type SellerType = 'any' | 'agent' | 'private';
 export interface Filters {
   query: string;
   country: string;
+  listingType: 'any' | ListingType;
   minPrice: number | null;
   maxPrice: number | null;
   beds: number | null;
@@ -154,6 +169,7 @@ export interface Filters {
 export const initialFilters: Filters = {
   query: '',
   country: 'any',
+  listingType: 'any',
   minPrice: null,
   maxPrice: null,
   beds: null,

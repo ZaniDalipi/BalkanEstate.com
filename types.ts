@@ -22,11 +22,13 @@ export enum UserRole {
     SUPER_ADMIN = 'super_admin',
 }
 
-export type PropertyStatus = 'active' | 'pending' | 'sold' | 'draft';
+export type PropertyStatus = 'active' | 'pending' | 'sold' | 'rented' | 'draft';
+export type ListingType = 'sale' | 'rent';
+export type RentPeriod = 'monthly' | 'weekly' | 'daily';
 
 export type PropertyImageTag = 'exterior' | 'living_room' | 'kitchen' | 'bedroom' | 'bathroom' | 'other';
 
-export type AppView = 'search' | 'explore-cities' | 'saved-searches' | 'saved-properties' | 'inbox' | 'account' | 'create-listing' | 'my-listings' | 'agents' | 'agencies' | 'agentProfile' | 'agencyDetail' | 'admin' | 'analytics' | 'reset-password' | 'verify-email' | 'valuation' | 'mortgage-calculator' | 'pricing' | 'how-it-works' | 'privacy' | 'terms' | 'cookies' | 'refund' | 'createAgency' | 'createAgencyPayment' | 'createAgencyConfirm';
+export type AppView = 'search' | 'explore-cities' | 'saved-searches' | 'saved-properties' | 'inbox' | 'account' | 'create-listing' | 'create-rental' | 'rentals' | 'my-listings' | 'agents' | 'agencies' | 'agentProfile' | 'agencyDetail' | 'admin' | 'analytics' | 'reset-password' | 'verify-email' | 'valuation' | 'mortgage-calculator' | 'pricing' | 'how-it-works' | 'privacy' | 'terms' | 'cookies' | 'refund' | 'createAgency' | 'createAgencyPayment' | 'createAgencyConfirm';
 
 export type HowItWorksTab = 'getting-started' | 'premium-features' | 'agencies' | 'agents' | 'buyers' | 'sellers';
 
@@ -264,8 +266,10 @@ export interface Property {
     id: string;
     title?: string;
     sellerId: string;
+    listingType: ListingType;
     status: PropertyStatus;
     soldAt?: number;
+    rentedAt?: number;
     price: number;
     originalPrice?: number; // Original price before any reduction
     priceReducedAt?: number; // Timestamp when price was reduced
@@ -324,6 +328,16 @@ export interface Property {
     promotionStartDate?: number;
     promotionEndDate?: number;
     hasUrgentBadge?: boolean;
+    // Rental-specific fields
+    rentPeriod?: RentPeriod;
+    securityDeposit?: number;
+    minimumLeaseDuration?: number;
+    maximumLeaseDuration?: number;
+    availableFrom?: number; // Unix timestamp
+    utilitiesIncluded?: boolean;
+    internetIncluded?: boolean;
+    tenantRequirements?: string[];
+    maxOccupants?: number;
 }
 
 export interface Message {
@@ -369,6 +383,7 @@ export interface Conversation {
 export interface Filters {
     query: string;
     country: string;
+    listingType: 'any' | ListingType;
     minPrice: number | null;
     maxPrice: number | null;
     beds: number | null;
@@ -409,6 +424,7 @@ export interface Filters {
 export const initialFilters: Filters = {
     query: '',
     country: 'any',
+    listingType: 'any',
     minPrice: null,
     maxPrice: null,
     beds: null,

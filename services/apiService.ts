@@ -575,6 +575,15 @@ export const markPropertyAsSold = async (propertyId: string): Promise<Property> 
   return transformBackendProperty(response.property);
 };
 
+export const markPropertyAsRented = async (propertyId: string): Promise<Property> => {
+  const response = await apiRequest<{ property: any }>(`/properties/${propertyId}/mark-rented`, {
+    method: 'PATCH',
+    requiresAuth: true,
+  });
+
+  return transformBackendProperty(response.property);
+};
+
 export const getMyListings = async (role?: 'agent' | 'private_seller'): Promise<Property[]> => {
   // Build URL with optional role filter
   const url = role
@@ -900,9 +909,11 @@ function transformBackendProperty(backendProp: any): Property {
   return {
     id: backendProp._id,
     sellerId: seller._id || seller,
+    listingType: backendProp.listingType || 'sale',
     status: backendProp.status,
     title: backendProp.title,
     soldAt: backendProp.soldAt ? new Date(backendProp.soldAt).getTime() : undefined,
+    rentedAt: backendProp.rentedAt ? new Date(backendProp.rentedAt).getTime() : undefined,
     price: backendProp.price,
     originalPrice: backendProp.originalPrice,
     priceReducedAt: backendProp.priceReducedAt ? new Date(backendProp.priceReducedAt).getTime() : undefined,
@@ -969,6 +980,16 @@ function transformBackendProperty(backendProp: any): Property {
     promotionStartDate: backendProp.promotionStartDate ? new Date(backendProp.promotionStartDate).getTime() : undefined,
     promotionEndDate: backendProp.promotionEndDate ? new Date(backendProp.promotionEndDate).getTime() : undefined,
     hasUrgentBadge: backendProp.hasUrgentBadge || false,
+    // Rental-specific fields
+    rentPeriod: backendProp.rentPeriod,
+    securityDeposit: backendProp.securityDeposit,
+    minimumLeaseDuration: backendProp.minimumLeaseDuration,
+    maximumLeaseDuration: backendProp.maximumLeaseDuration,
+    availableFrom: backendProp.availableFrom ? new Date(backendProp.availableFrom).getTime() : undefined,
+    utilitiesIncluded: backendProp.utilitiesIncluded,
+    internetIncluded: backendProp.internetIncluded,
+    tenantRequirements: backendProp.tenantRequirements || [],
+    maxOccupants: backendProp.maxOccupants,
   };
 }
 
@@ -998,6 +1019,8 @@ function transformToBackendProperty(frontendProp: Property): any {
     lat: frontendProp.lat,
     lng: frontendProp.lng,
     propertyType: frontendProp.propertyType,
+    // Listing type (sale or rent)
+    listingType: frontendProp.listingType || 'sale',
     // Dual-role system
     createdAsRole: frontendProp.createdAsRole,
   };
@@ -1063,6 +1086,35 @@ function transformToBackendProperty(frontendProp: Property): any {
   }
   if (frontendProp.distanceToHospital !== undefined) {
     result.distanceToHospital = frontendProp.distanceToHospital;
+  }
+
+  // Rental-specific fields - only include for rental listings
+  if (frontendProp.listingType === 'rent') {
+    if (frontendProp.rentPeriod) result.rentPeriod = frontendProp.rentPeriod;
+    if (frontendProp.securityDeposit !== undefined && frontendProp.securityDeposit > 0) {
+      result.securityDeposit = frontendProp.securityDeposit;
+    }
+    if (frontendProp.minimumLeaseDuration !== undefined) {
+      result.minimumLeaseDuration = frontendProp.minimumLeaseDuration;
+    }
+    if (frontendProp.maximumLeaseDuration !== undefined) {
+      result.maximumLeaseDuration = frontendProp.maximumLeaseDuration;
+    }
+    if (frontendProp.availableFrom) {
+      result.availableFrom = new Date(frontendProp.availableFrom).toISOString();
+    }
+    if (frontendProp.utilitiesIncluded !== undefined) {
+      result.utilitiesIncluded = frontendProp.utilitiesIncluded;
+    }
+    if (frontendProp.internetIncluded !== undefined) {
+      result.internetIncluded = frontendProp.internetIncluded;
+    }
+    if (frontendProp.tenantRequirements && frontendProp.tenantRequirements.length > 0) {
+      result.tenantRequirements = frontendProp.tenantRequirements;
+    }
+    if (frontendProp.maxOccupants !== undefined && frontendProp.maxOccupants > 0) {
+      result.maxOccupants = frontendProp.maxOccupants;
+    }
   }
 
   return result;

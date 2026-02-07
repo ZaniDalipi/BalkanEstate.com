@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { PropertyImageTag, FurnishingStatus, HeatingType, PropertyCondition, ViewType, EnergyRating } from '@/types';
+import { PropertyImageTag, FurnishingStatus, HeatingType, PropertyCondition, ViewType, EnergyRating, ListingType, RentPeriod } from '@/types';
 
 // --- Types ---
 
@@ -9,6 +9,7 @@ export type Mode = 'ai' | 'manual';
 
 export interface ListingData {
     title: string;
+    listingType: ListingType;
     streetAddress: string;
     price: number;
     bedrooms: number;
@@ -43,6 +44,16 @@ export interface ListingData {
     condition: PropertyCondition;
     viewType: ViewType;
     energyRating: EnergyRating;
+    // Rental-specific fields
+    rentPeriod: RentPeriod;
+    securityDeposit: number;
+    minimumLeaseDuration: number;
+    maximumLeaseDuration: number;
+    availableFrom: string; // ISO date string for form input
+    utilitiesIncluded: boolean;
+    internetIncluded: boolean;
+    tenantRequirements: string[];
+    maxOccupants: number;
 }
 
 export interface ImageData {
@@ -52,6 +63,7 @@ export interface ImageData {
 
 export const initialListingData: ListingData = {
     title: '',
+    listingType: 'sale',
     streetAddress: '',
     price: 0,
     bedrooms: 0,
@@ -85,6 +97,16 @@ export const initialListingData: ListingData = {
     condition: 'any',
     viewType: 'any',
     energyRating: 'any',
+    // Rental-specific fields
+    rentPeriod: 'monthly',
+    securityDeposit: 0,
+    minimumLeaseDuration: 1,
+    maximumLeaseDuration: 12,
+    availableFrom: '',
+    utilitiesIncluded: false,
+    internetIncluded: false,
+    tenantRequirements: [],
+    maxOccupants: 1,
 };
 
 // Languages corresponding to supported countries: Kosovo, Albania, North Macedonia, Serbia, Bosnia and Herzegovina, Croatia, Montenegro, Greece, Bulgaria, Romania

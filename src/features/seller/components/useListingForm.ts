@@ -87,6 +87,7 @@ export const useListingForm = (propertyToEdit: Property | null) => {
 
             setListingData({
                 title: propertyToEdit.title || '',
+                listingType: propertyToEdit.listingType || 'sale',
                 streetAddress: propertyToEdit.address,
                 price: propertyToEdit.price,
                 bedrooms: propertyToEdit.beds,
@@ -123,6 +124,16 @@ export const useListingForm = (propertyToEdit: Property | null) => {
                 condition: propertyToEdit.condition || 'any',
                 viewType: propertyToEdit.viewType || 'any',
                 energyRating: propertyToEdit.energyRating || 'any',
+                // Rental-specific fields
+                rentPeriod: propertyToEdit.rentPeriod || 'monthly',
+                securityDeposit: propertyToEdit.securityDeposit || 0,
+                minimumLeaseDuration: propertyToEdit.minimumLeaseDuration || 1,
+                maximumLeaseDuration: propertyToEdit.maximumLeaseDuration || 12,
+                availableFrom: propertyToEdit.availableFrom ? new Date(propertyToEdit.availableFrom).toISOString().split('T')[0] : '',
+                utilitiesIncluded: propertyToEdit.utilitiesIncluded || false,
+                internetIncluded: propertyToEdit.internetIncluded || false,
+                tenantRequirements: propertyToEdit.tenantRequirements || [],
+                maxOccupants: propertyToEdit.maxOccupants || 1,
             });
 
             // Set country and city from property
@@ -674,6 +685,7 @@ export const useListingForm = (propertyToEdit: Property | null) => {
             const newProperty: Property = {
                 id: propertyToEdit ? propertyToEdit.id : `prop-${Date.now()}`,
                 sellerId: currentUser.id,
+                listingType: listingData.listingType || 'sale',
                 status: propertyToEdit ? propertyToEdit.status : 'active',
                 title: listingData.title.trim() || undefined,
                 price: Number(listingData.price),
@@ -733,6 +745,18 @@ export const useListingForm = (propertyToEdit: Property | null) => {
                 distanceToSea: distances.distanceToSea,
                 distanceToSchool: distances.distanceToSchool,
                 distanceToHospital: distances.distanceToHospital,
+                // Rental-specific fields (only included when listingType is 'rent')
+                ...(listingData.listingType === 'rent' ? {
+                    rentPeriod: listingData.rentPeriod,
+                    securityDeposit: Number(listingData.securityDeposit) || undefined,
+                    minimumLeaseDuration: Number(listingData.minimumLeaseDuration) || undefined,
+                    maximumLeaseDuration: Number(listingData.maximumLeaseDuration) || undefined,
+                    availableFrom: listingData.availableFrom ? new Date(listingData.availableFrom).getTime() : undefined,
+                    utilitiesIncluded: listingData.utilitiesIncluded,
+                    internetIncluded: listingData.internetIncluded,
+                    tenantRequirements: listingData.tenantRequirements.length > 0 ? listingData.tenantRequirements : undefined,
+                    maxOccupants: Number(listingData.maxOccupants) || undefined,
+                } : {}),
             };
 
             // Check if user has reached their listing limit (from PLAN_LISTING_LIMITS as source of truth)

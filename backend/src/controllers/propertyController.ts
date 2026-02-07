@@ -129,6 +129,11 @@ export const getProperties = async (
       filter.country = new RegExp(country as string, 'i');
     }
 
+    // Filter by listing type (sale vs rent)
+    if (req.query.listingType && req.query.listingType !== 'any') {
+      filter.listingType = req.query.listingType;
+    }
+
     // Filter by role context (for dual-role system)
     if (req.query.createdAsRole) {
       filter.createdAsRole = req.query.createdAsRole;
@@ -670,6 +675,7 @@ export const updateProperty = async (
     // - createdByAgencyName, createdByLicenseNumber: Agent credentials
     const immutableFields = [
       'createdAsRole',
+      'listingType',
       'sellerId',
       'createdByName',
       'createdByEmail',
@@ -712,6 +718,10 @@ export const updateProperty = async (
       'hasBalcony', 'hasGarden', 'hasElevator', 'hasSecurity',
       'hasAirConditioning', 'hasPool', 'petsAllowed',
       'distanceToCenter', 'distanceToSea', 'distanceToSchool', 'distanceToHospital',
+      // Rental-specific fields
+      'rentPeriod', 'securityDeposit', 'minimumLeaseDuration', 'maximumLeaseDuration',
+      'availableFrom', 'utilitiesIncluded', 'internetIncluded',
+      'tenantRequirements', 'maxOccupants',
     ];
 
     let updatedFields: string[] = [];
@@ -1137,6 +1147,62 @@ export const markAsSold = async (
   } catch (error: any) {
     propertyLogger.error('Mark as sold error:', error);
     res.status(500).json({ message: 'Error marking property as sold', error: error.message });
+  }
+};
+
+// @desc    Mark rental property as rented
+// @route   PATCH /api/properties/:id/mark-rented
+// @access  Private
+export const markAsRented = async (
+  req: Request,
+  res: Response
+): Promise<void> => {
+  try {
+    if (!req.user) {
+      res.status(401).json({ message: 'Not authorized' });
+      return;
+    }
+
+    const property = await Property.findById(req.params.id);
+
+    if (!property) {
+      res.status(404).json({ message: 'Property not found' });
+      return;
+    }
+
+    // Check ownership
+    const currentUser = req.user as IUser;
+    if (property.sellerId.toString() !== String(currentUser._id).toString()) {
+      res.status(403).json({ message: 'Not authorized to update this property' });
+      return;
+    }
+
+    if (property.listingType !== 'rent') {
+      res.status(400).json({ message: 'Only rental properties can be marked as rented' });
+      return;
+    }
+
+    // Decrement listing count if property was active
+    if (property.status === 'active' || property.status === 'pending') {
+      const user = await User.findById(String(currentUser._id));
+      if (user && user.listingsCount > 0) {
+        user.listingsCount -= 1;
+        await user.save();
+      }
+    }
+
+    const rentedDate = new Date();
+    property.status = 'rented';
+    property.rentedAt = rentedDate;
+    await property.save();
+
+    // Invalidate properties cache
+    invalidateCache('/api/properties');
+
+    res.json({ property });
+  } catch (error: any) {
+    propertyLogger.error('Mark as rented error:', error);
+    res.status(500).json({ message: 'Error marking property as rented', error: error.message });
   }
 };
 

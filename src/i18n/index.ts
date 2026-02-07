@@ -47,6 +47,7 @@ import enAgentProfile from './locales/en/agentProfile.json';
 import enNewListing from './locales/en/newListing.json';
 import enValuation from './locales/en/valuation.json';
 import enHowItWorks from './locales/en/howItWorks.json';
+import enRental from './locales/en/rental.json';
 
 // Import translations - Albanian
 import sqCommon from './locales/sq/common.json';
@@ -355,6 +356,7 @@ const resources = {
     newListing: enNewListing,
     valuation: enValuation,
     howItWorks: enHowItWorks,
+    rental: enRental,
   },
   sq: {
     common: sqCommon,

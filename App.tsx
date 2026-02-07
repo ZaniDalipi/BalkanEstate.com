@@ -52,6 +52,8 @@ const SessionExpiredModal = lazy(() => import('./src/features/auth/components/Se
 // All these components use default exports
 const CityRecommendations = lazy(() => import('./src/features/cities/components/CityRecommendations'));
 const CreateListingPage = lazy(() => import('./src/features/seller/components/SellerDashboard'));
+const RentalSearchPage = lazy(() => import('./src/features/rental/components/RentalSearchPage'));
+const RentalListingForm = lazy(() => import('./src/features/rental/components/RentalListingForm'));
 const SavedSearchesPage = lazy(() => import('./src/features/saved/components/SavedSearchesPage'));
 const SavedPropertiesPage = lazy(() => import('./src/features/saved/components/SavedHomesPage'));
 const InboxPage = lazy(() => import('./src/features/messaging/components/InboxPage'));
@@ -246,6 +248,15 @@ const AppContent: React.FC<{ onToggleSidebar: () => void }> = ({ onToggleSidebar
         return;
       }
 
+      // Create rental listing route
+      if (path === '/create-rental') {
+        dispatch({ type: 'SET_PROPERTY_TO_EDIT', payload: null });
+        dispatch({ type: 'SET_SELECTED_PROPERTY', payload: null });
+        dispatch({ type: 'SET_SELECTED_AGENCY', payload: null });
+        dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'create-rental' });
+        return;
+      }
+
       // Account sub-routes: /account/:tab
       const accountMatch = path.match(/^\/account(?:\/(.+))?$/);
       if (accountMatch) {
@@ -309,6 +320,7 @@ const AppContent: React.FC<{ onToggleSidebar: () => void }> = ({ onToggleSidebar
         '/cookie-policy': 'cookies',
         '/refund': 'refund',
         '/refund-policy': 'refund',
+        '/rentals': 'rentals',
         '/create-agency': 'createAgency',
         '/create-agency/payment': 'createAgencyPayment',
         '/create-agency/confirm': 'createAgencyConfirm',
@@ -505,6 +517,10 @@ const AppContent: React.FC<{ onToggleSidebar: () => void }> = ({ onToggleSidebar
         return <MyAccountPage />;
       case 'create-listing':
         return <CreateListingPage />;
+      case 'rentals':
+        return <QueryErrorBoundary><RentalSearchPage /></QueryErrorBoundary>;
+      case 'create-rental':
+        return <RentalListingForm />;
       case 'agents':
         return <QueryErrorBoundary><AgentsPage /></QueryErrorBoundary>;
       case 'agencies':
@@ -574,7 +590,7 @@ const MainLayout: React.FC = () => {
   const isSearchPage = state.activeView === 'search';
   const isAgencyDetailView = !!state.selectedAgencyId;
   // Agency pages should allow scrolling to show all agents and details
-  const isFullHeightView = isSearchPage || state.activeView === 'inbox' || !!state.selectedProperty;
+  const isFullHeightView = isSearchPage || state.activeView === 'rentals' || state.activeView === 'inbox' || !!state.selectedProperty;
   const showHeader = !(isMobile && (isSearchPage || !!state.selectedProperty));
   // Note: Agency detail pages WILL show header on mobile to allow sidebar access
   

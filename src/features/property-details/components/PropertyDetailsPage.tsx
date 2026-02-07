@@ -11,6 +11,7 @@ import { ArrowLeftIcon, SparklesIcon } from '@/constants';
 import ImageViewerModal from './ImageViewerModal';
 import FloorPlanViewerModal from './FloorPlanViewerModal';
 import FeaturedAgencies from '@/components/FeaturedAgencies';
+import RentalTermsSection from '@/src/features/rental/components/RentalTermsSection';
 import { SEO, Breadcrumbs, generatePropertyBreadcrumbs } from '@/src/components/seo';
 import { SocialShare } from '@/src/components/marketing/SocialShare';
 import {
@@ -618,6 +619,13 @@ const PropertyDetailsPage: React.FC<{ property: Property }> = ({ property: cache
             <div className="hidden lg:block animate-slide-up" style={{ animationDelay: '100ms' }}>
               <PropertyInfo property={property} onOpenFloorPlan={() => setIsFloorPlanOpen(true)} />
             </div>
+
+            {/* Rental Terms (only for rental properties) */}
+            {property.listingType === 'rent' && (
+              <div className="animate-slide-up" style={{ animationDelay: '150ms' }}>
+                <RentalTermsSection property={property} />
+              </div>
+            )}
 
             {/* Map Link */}
             <div id="property-map-section" className="animate-slide-up" style={{ animationDelay: '300ms' }}>
