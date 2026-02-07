@@ -648,8 +648,9 @@ const AgentProfileTabs: React.FC<AgentProfileTabsProps> = ({
 
                         {/* Listing Type Filter (Sale / Rent) */}
                         {(() => {
-                            const saleCount = activeListings.filter(p => (p.listingType || 'sale') === 'sale').length;
-                            const rentCount = activeListings.filter(p => p.listingType === 'rent').length;
+                            const allProps = [...activeListings, ...soldProperties, ...rentedProperties];
+                            const saleCount = allProps.filter(p => (p.listingType || 'sale') === 'sale').length;
+                            const rentCount = allProps.filter(p => p.listingType === 'rent').length;
                             if (saleCount > 0 && rentCount > 0) {
                                 return (
                                     <div className="flex gap-2 mb-6">
@@ -659,7 +660,7 @@ const AgentProfileTabs: React.FC<AgentProfileTabsProps> = ({
                                                 listingTypeFilter === 'all' ? 'bg-gray-800 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
                                             }`}
                                         >
-                                            {t('profilePage.listingsTab.all', 'All')} ({activeListings.length})
+                                            {t('profilePage.listingsTab.all', 'All')} ({allProps.length})
                                         </button>
                                         <button
                                             onClick={() => setListingTypeFilter('sale')}
@@ -709,7 +710,7 @@ const AgentProfileTabs: React.FC<AgentProfileTabsProps> = ({
                                                 ))}
                                             </div>
                                         </div>
-                                    ) : filteredSold.length === 0 ? (
+                                    ) : filteredSold.length === 0 && filteredRented.length === 0 ? (
                                         <div className="text-center py-12 bg-gray-50 rounded-2xl">
                                             <p className="text-gray-500">{t('profilePage.listingsTab.noListings', 'No listings available')}</p>
                                         </div>

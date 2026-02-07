@@ -1939,10 +1939,13 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
 
           {/* Listing Type Filter (Sale / Rent) */}
           {(() => {
+            const allProps = [...activeProperties, ...soldProperties, ...rentedProperties];
             const currentProps = propertyView === 'active' ? activeProperties : propertyView === 'sold' ? soldProperties : rentedProperties;
+            const allSaleCount = allProps.filter(p => (p.listingType || 'sale') === 'sale').length;
+            const allRentCount = allProps.filter(p => p.listingType === 'rent').length;
             const saleCount = currentProps.filter(p => (p.listingType || 'sale') === 'sale').length;
             const rentCount = currentProps.filter(p => p.listingType === 'rent').length;
-            if (saleCount > 0 && rentCount > 0) {
+            if (allSaleCount > 0 && allRentCount > 0) {
               return (
                 <div className="flex gap-2 mb-6">
                   <button
