@@ -101,6 +101,15 @@ export function useRentalSearch() {
         fetchRentals();
     }, [fetchRentals]);
 
+    // Re-fetch when a property status changes (e.g., marked as available/rented)
+    useEffect(() => {
+        const handleStatusChange = () => {
+            fetchRentals();
+        };
+        window.addEventListener('property-status-changed', handleStatusChange);
+        return () => window.removeEventListener('property-status-changed', handleStatusChange);
+    }, [fetchRentals]);
+
     useEffect(() => {
         const handleResize = () => {
             setIsMobile(window.innerWidth < 768);

@@ -1,4 +1,8 @@
 {
+  "listings": {
+    "confirmSold": "Are you sure you want to mark this property as sold? This action cannot be undone.",
+    "confirmDelete": "Are you sure you want to delete this listing? This action cannot be undone."
+  },
   "roleSelector": {
     "title": "Post Listing As",
     "description": "Choose which role to use when creating this listing. Each role has separate listing limits and subscriptions.",

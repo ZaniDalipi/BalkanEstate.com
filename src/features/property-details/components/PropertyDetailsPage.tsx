@@ -47,7 +47,7 @@ import * as api from '@/services/apiService';
  * All major sections have been extracted into focused components <200 lines.
  */
 const PropertyDetailsPage: React.FC<{ property: Property }> = ({ property: cachedProperty }) => {
-  const { t } = useTranslation(['property']);
+  const { t } = useTranslation(['property', 'rental', 'common']);
   const { state, dispatch, createConversation, toggleSavedHome, fetchProperties } = useAppContext();
   const { error } = useNotification();
 
@@ -310,13 +310,13 @@ const PropertyDetailsPage: React.FC<{ property: Property }> = ({ property: cache
 
   // Rental status handlers
   const handleMarkAsRented = useCallback(async () => {
-    const until = rentedUntilDate ? new Date(rentedUntilDate).getTime() : undefined;
     setShowRentedModal(false);
     setLocalStatus('rented');
     setRentedUntilDate('');
     try {
       await api.markPropertyAsRented(property.id, rentedUntilDate || undefined);
       fetchProperties?.();
+      window.dispatchEvent(new CustomEvent('property-status-changed'));
     } catch {
       setLocalStatus('active');
     }
@@ -328,6 +328,7 @@ const PropertyDetailsPage: React.FC<{ property: Property }> = ({ property: cache
     try {
       await api.markPropertyAsAvailable(property.id);
       fetchProperties?.();
+      window.dispatchEvent(new CustomEvent('property-status-changed'));
     } catch {
       setLocalStatus('rented');
     }
@@ -449,14 +450,14 @@ const PropertyDetailsPage: React.FC<{ property: Property }> = ({ property: cache
       <Modal
         isOpen={showRentedModal}
         onClose={() => { setShowRentedModal(false); setRentedUntilDate(''); }}
-        title="Mark as Rented"
+        title={t('rental:status.markAsRented')}
       >
         <div className="space-y-4">
           <p className="text-neutral-600 text-center text-sm">
-            Set the rental end date so visitors can see when the property becomes available again.
+            {t('rental:status.markAsRentedDesc')}
           </p>
           <div>
-            <label className="block text-sm font-medium text-neutral-700 mb-1">Rented Until</label>
+            <label className="block text-sm font-medium text-neutral-700 mb-1">{t('rental:status.rentedUntilLabel')}</label>
             <input
               type="date"
               value={rentedUntilDate}
@@ -464,11 +465,11 @@ const PropertyDetailsPage: React.FC<{ property: Property }> = ({ property: cache
               min={new Date().toISOString().split('T')[0]}
               className="w-full px-3 py-2 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary text-sm"
             />
-            <p className="text-xs text-neutral-400 mt-1">Leave empty if the rental period is indefinite.</p>
+            <p className="text-xs text-neutral-400 mt-1">{t('rental:status.leaveEmptyHint')}</p>
           </div>
           <div className="flex justify-center gap-4 pt-2">
-            <button onClick={() => { setShowRentedModal(false); setRentedUntilDate(''); }} className="px-6 py-2 border border-neutral-300 text-neutral-700 font-semibold rounded-lg hover:bg-neutral-100">Cancel</button>
-            <button onClick={handleMarkAsRented} className="px-6 py-2 bg-orange-500 text-white font-semibold rounded-lg hover:bg-orange-600">Mark as Rented</button>
+            <button onClick={() => { setShowRentedModal(false); setRentedUntilDate(''); }} className="px-6 py-2 border border-neutral-300 text-neutral-700 font-semibold rounded-lg hover:bg-neutral-100">{t('common:cancel')}</button>
+            <button onClick={handleMarkAsRented} className="px-6 py-2 bg-orange-500 text-white font-semibold rounded-lg hover:bg-orange-600">{t('rental:status.markAsRented')}</button>
           </div>
         </div>
       </Modal>
@@ -477,14 +478,14 @@ const PropertyDetailsPage: React.FC<{ property: Property }> = ({ property: cache
       <Modal
         isOpen={showAvailableConfirm}
         onClose={() => setShowAvailableConfirm(false)}
-        title="Mark as Available"
+        title={t('rental:status.markAsAvailable')}
       >
         <p className="text-neutral-600 mb-6 text-center">
-          This will make the property active and visible to renters again.
+          {t('rental:status.markAsAvailableDesc')}
         </p>
         <div className="flex justify-center gap-4">
-          <button onClick={() => setShowAvailableConfirm(false)} className="px-6 py-2 border border-neutral-300 text-neutral-700 font-semibold rounded-lg hover:bg-neutral-100">Cancel</button>
-          <button onClick={handleMarkAsAvailable} className="px-6 py-2 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700">Mark as Available</button>
+          <button onClick={() => setShowAvailableConfirm(false)} className="px-6 py-2 border border-neutral-300 text-neutral-700 font-semibold rounded-lg hover:bg-neutral-100">{t('common:cancel')}</button>
+          <button onClick={handleMarkAsAvailable} className="px-6 py-2 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700">{t('rental:status.markAsAvailable')}</button>
         </div>
       </Modal>
 
@@ -618,7 +619,7 @@ const PropertyDetailsPage: React.FC<{ property: Property }> = ({ property: cache
                   <svg className="h-3.5 w-3.5 sm:h-4 sm:w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
                   </svg>
-                  <span className="hidden sm:inline">Mark as Available</span>
+                  <span className="hidden sm:inline">{t('rental:status.markAsAvailable')}</span>
                 </button>
               ) : (
                 <button
@@ -628,7 +629,7 @@ const PropertyDetailsPage: React.FC<{ property: Property }> = ({ property: cache
                   <svg className="h-3.5 w-3.5 sm:h-4 sm:w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                   </svg>
-                  <span className="hidden sm:inline">Mark as Rented</span>
+                  <span className="hidden sm:inline">{t('rental:status.markAsRented')}</span>
                 </button>
               )
             )}

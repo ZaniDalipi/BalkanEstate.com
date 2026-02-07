@@ -196,7 +196,10 @@
     "priceReduced": "Price Reduced",
     "urgent": "Urgent",
     "exclusive": "Exclusive",
-    "underOffer": "Under Offer"
+    "underOffer": "Under Offer",
+    "soldBanner": "This property has been sold",
+    "rentedBanner": "This property has been rented",
+    "rentedUntil": "Available from {{date}}"
   },
   "priceDiscount": {
     "originalPrice": "Original Price",

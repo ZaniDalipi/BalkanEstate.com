@@ -1,4 +1,5 @@
 import React, { useMemo, useState, useEffect, useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Property, PropertyStatus, UserRole } from '../../types';
 import { formatPrice } from '../../utils/currency';
 import { useAppContext } from '../../context/AppContext';
@@ -76,6 +77,7 @@ const ListingCard: React.FC<{
     onVideo: (id: string) => void,
     renewalStatus: { canRenew: boolean; hoursRemaining?: number; minutesRemaining?: number } | null,
 }> = ({ property, onRenew, onMarkAsSold, onMarkAsAvailable, onDelete, onPromote, onExtend, onVideo, renewalStatus }) => {
+    const { t } = useTranslation(['rental', 'common', 'seller']);
     const { dispatch } = useAppContext();
     const [imageError, setImageError] = useState(false);
 
@@ -221,7 +223,7 @@ const ListingCard: React.FC<{
                         className="w-full sm:w-auto flex items-center justify-center gap-1.5 px-3 py-2 text-xs font-medium text-blue-700 bg-blue-50 border border-blue-200 rounded-lg hover:bg-blue-100 transition-colors"
                     >
                         <ArrowPathIcon className="w-4 h-4" />
-                        Mark as Available
+                        {t('rental:status.markAsAvailable')}
                     </button>
                 ) : (
                     <button
@@ -230,7 +232,7 @@ const ListingCard: React.FC<{
                         className="w-full sm:w-auto flex items-center justify-center gap-1.5 px-3 py-2 text-xs font-medium text-green-700 bg-green-50 border border-green-200 rounded-lg hover:bg-green-100 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                         <CheckCircleIcon className="w-4 h-4" />
-                        {property.listingType === 'rent' ? 'Mark as Rented' : 'Mark as Sold'}
+                        {property.listingType === 'rent' ? t('rental:status.markAsRented') : t('rental:status.markAsSold')}
                     </button>
                 )}
              </div>
@@ -280,6 +282,7 @@ const ListingTypeBadge: React.FC<{ listingType?: string }> = ({ listingType }) =
 };
 
 const MyListings: React.FC<{ sellerId: string }> = ({ sellerId }) => {
+    const { t } = useTranslation(['rental', 'common', 'seller']);
     const { state, dispatch } = useAppContext();
     const [showSoldConfirm, setShowSoldConfirm] = useState(false);
     const [showRentedModal, setShowRentedModal] = useState(false);
@@ -520,6 +523,7 @@ const MyListings: React.FC<{ sellerId: string }> = ({ sellerId }) => {
             // Fire API in background
             try {
                 await api.markPropertyAsRented(id, rentedUntilDate || undefined);
+                window.dispatchEvent(new CustomEvent('property-status-changed'));
             } catch (error) {
                 // Revert on failure
                 setMyProperties(prev => prev.map(p =>
@@ -568,6 +572,7 @@ const MyListings: React.FC<{ sellerId: string }> = ({ sellerId }) => {
             // Fire API in background
             try {
                 await api.markPropertyAsAvailable(id);
+                window.dispatchEvent(new CustomEvent('property-status-changed'));
             } catch (error) {
                 // Revert on failure
                 setMyProperties(prev => prev.map(p =>
@@ -672,14 +677,14 @@ const MyListings: React.FC<{ sellerId: string }> = ({ sellerId }) => {
             <Modal
                 isOpen={showSoldConfirm}
                 onClose={() => setShowSoldConfirm(false)}
-                title="Mark as Sold"
+                title={t('rental:status.markAsSold')}
             >
                 <p className="text-neutral-600 mb-6 text-center">
-                    Are you sure you want to mark this property as sold? This action cannot be undone.
+                    {t('seller:listings.confirmSold', 'Are you sure you want to mark this property as sold? This action cannot be undone.')}
                 </p>
                 <div className="flex justify-center gap-4">
-                    <button onClick={() => setShowSoldConfirm(false)} className="px-6 py-2 border border-neutral-300 text-neutral-700 font-semibold rounded-lg hover:bg-neutral-100">Cancel</button>
-                    <button onClick={confirmMarkAsSold} className="px-6 py-2 bg-green-600 text-white font-semibold rounded-lg hover:bg-green-700">Confirm</button>
+                    <button onClick={() => setShowSoldConfirm(false)} className="px-6 py-2 border border-neutral-300 text-neutral-700 font-semibold rounded-lg hover:bg-neutral-100">{t('common:cancel')}</button>
+                    <button onClick={confirmMarkAsSold} className="px-6 py-2 bg-green-600 text-white font-semibold rounded-lg hover:bg-green-700">{t('common:confirm')}</button>
                 </div>
             </Modal>
 
@@ -687,14 +692,14 @@ const MyListings: React.FC<{ sellerId: string }> = ({ sellerId }) => {
             <Modal
                 isOpen={showRentedModal}
                 onClose={() => { setShowRentedModal(false); setPropertyToMarkSold(null); setRentedUntilDate(''); }}
-                title="Mark as Rented"
+                title={t('rental:status.markAsRented')}
             >
                 <div className="space-y-4">
                     <p className="text-neutral-600 text-center text-sm">
-                        Set the rental end date so tenants and visitors can see when the property becomes available again.
+                        {t('rental:status.markAsRentedDesc')}
                     </p>
                     <div>
-                        <label className="block text-sm font-medium text-neutral-700 mb-1">Rented Until</label>
+                        <label className="block text-sm font-medium text-neutral-700 mb-1">{t('rental:status.rentedUntilLabel')}</label>
                         <input
                             type="date"
                             value={rentedUntilDate}
@@ -702,11 +707,11 @@ const MyListings: React.FC<{ sellerId: string }> = ({ sellerId }) => {
                             min={new Date().toISOString().split('T')[0]}
                             className="w-full px-3 py-2 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary text-sm"
                         />
-                        <p className="text-xs text-neutral-400 mt-1">Leave empty if the rental period is indefinite.</p>
+                        <p className="text-xs text-neutral-400 mt-1">{t('rental:status.leaveEmptyHint')}</p>
                     </div>
                     <div className="flex justify-center gap-4 pt-2">
-                        <button onClick={() => { setShowRentedModal(false); setPropertyToMarkSold(null); setRentedUntilDate(''); }} className="px-6 py-2 border border-neutral-300 text-neutral-700 font-semibold rounded-lg hover:bg-neutral-100">Cancel</button>
-                        <button onClick={confirmMarkAsRented} className="px-6 py-2 bg-orange-500 text-white font-semibold rounded-lg hover:bg-orange-600">Mark as Rented</button>
+                        <button onClick={() => { setShowRentedModal(false); setPropertyToMarkSold(null); setRentedUntilDate(''); }} className="px-6 py-2 border border-neutral-300 text-neutral-700 font-semibold rounded-lg hover:bg-neutral-100">{t('common:cancel')}</button>
+                        <button onClick={confirmMarkAsRented} className="px-6 py-2 bg-orange-500 text-white font-semibold rounded-lg hover:bg-orange-600">{t('rental:status.markAsRented')}</button>
                     </div>
                 </div>
             </Modal>
@@ -715,14 +720,14 @@ const MyListings: React.FC<{ sellerId: string }> = ({ sellerId }) => {
             <Modal
                 isOpen={showAvailableConfirm}
                 onClose={() => { setShowAvailableConfirm(false); setPropertyToMarkAvailable(null); }}
-                title="Mark as Available"
+                title={t('rental:status.markAsAvailable')}
             >
                 <p className="text-neutral-600 mb-6 text-center">
-                    This will make the property active and visible to renters again. The listing will show as available from today.
+                    {t('rental:status.markAsAvailableDesc')}
                 </p>
                 <div className="flex justify-center gap-4">
-                    <button onClick={() => { setShowAvailableConfirm(false); setPropertyToMarkAvailable(null); }} className="px-6 py-2 border border-neutral-300 text-neutral-700 font-semibold rounded-lg hover:bg-neutral-100">Cancel</button>
-                    <button onClick={confirmMarkAsAvailable} className="px-6 py-2 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700">Mark as Available</button>
+                    <button onClick={() => { setShowAvailableConfirm(false); setPropertyToMarkAvailable(null); }} className="px-6 py-2 border border-neutral-300 text-neutral-700 font-semibold rounded-lg hover:bg-neutral-100">{t('common:cancel')}</button>
+                    <button onClick={confirmMarkAsAvailable} className="px-6 py-2 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700">{t('rental:status.markAsAvailable')}</button>
                 </div>
             </Modal>
 

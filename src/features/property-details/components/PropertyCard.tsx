@@ -54,7 +54,7 @@ const SellerAvatar: React.FC<{ avatarUrl?: string; name: string; type: string; s
 };
 
 const PropertyCard: React.FC<PropertyCardProps> = ({ property, showToast, showCompareButton }) => {
-  const { t } = useTranslation(['property', 'common']);
+  const { t } = useTranslation(['property', 'rental', 'common']);
   const { state, dispatch, toggleSavedHome, updateSearchPageState } = useAppContext();
   const [imageError, setImageError] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
@@ -273,7 +273,7 @@ const PropertyCard: React.FC<PropertyCardProps> = ({ property, showToast, showCo
               <div className="bg-orange-500 text-white text-[10px] font-bold px-2 py-1 rounded-md shadow-lg flex items-center gap-1">
                 <span className="w-1.5 h-1.5 bg-white rounded-full" />
                 {property?.rentedUntil ? (
-                  <>AVAILABLE {new Date(property.rentedUntil).toLocaleDateString('en-GB', { month: 'short', year: 'numeric' }).toUpperCase()}</>
+                  t('rental:status.availableBadge', { date: new Date(property.rentedUntil).toLocaleDateString('en-GB', { month: 'short', year: 'numeric' }).toUpperCase() })
                 ) : (
                   t('property:rented', 'RENTED').toUpperCase()
                 )}

@@ -459,7 +459,7 @@ const RentalRulesByCountry: React.FC<RentalRulesByCountryProps> = ({ country }) 
           <div>
             <h3 className="text-base sm:text-lg font-bold text-neutral-900 flex items-center gap-2">
               <span>{rentalInfo.flag}</span>
-              Rental Rules — {rentalInfo.country}
+              {t('rental:rules.title', { country: rentalInfo.country })}
             </h3>
           </div>
         </div>
@@ -502,7 +502,7 @@ const RentalRulesByCountry: React.FC<RentalRulesByCountryProps> = ({ country }) 
 
         {/* Disclaimer */}
         <p className="text-[10px] text-neutral-400 mt-4 italic">
-          This is a general guide only. Laws may change. Always consult a local lawyer for legal advice specific to your situation.
+          {t('rental:rules.disclaimer')}
         </p>
       </div>
     </div>

@@ -44,7 +44,7 @@ export const PropertyContact: React.FC<PropertyContactProps> = ({
   isCreatingConversation,
   onContactSeller,
 }) => {
-  const { t } = useTranslation(['property']);
+  const { t } = useTranslation(['property', 'rental']);
   const { state, dispatch } = useAppContext();
   const [showShareMenu, setShowShareMenu] = useState(false);
   const [showInquiryModal, setShowInquiryModal] = useState(false);
@@ -310,9 +310,9 @@ export const PropertyContact: React.FC<PropertyContactProps> = ({
           {property.status === 'rented' && property.rentedUntil && (
             <div className="w-full p-3 bg-orange-50 border border-orange-200 rounded-xl text-center mb-1">
               <p className="text-xs font-semibold text-orange-700">
-                Available from {new Date(property.rentedUntil).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })}
+                {t('rental:status.availableFromNotice', { date: new Date(property.rentedUntil).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' }) })}
               </p>
-              <p className="text-[10px] text-orange-600 mt-0.5">You can inquire now to reserve it</p>
+              <p className="text-[10px] text-orange-600 mt-0.5">{t('rental:status.inquireAvailability')}</p>
             </div>
           )}
 
@@ -329,7 +329,7 @@ export const PropertyContact: React.FC<PropertyContactProps> = ({
               : property.status === 'sold'
               ? t('property:actions.propertySold')
               : property.status === 'rented'
-              ? 'Inquire for Availability'
+              ? t('rental:status.inquireAvailability')
               : t('property:actions.messageSeller')}
           </button>
 

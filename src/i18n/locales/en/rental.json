@@ -148,6 +148,27 @@
     "requestSentDesc": "The landlord will confirm your viewing shortly.",
     "done": "Done"
   },
+  "status": {
+    "markAsRented": "Mark as Rented",
+    "markAsAvailable": "Mark as Available",
+    "markAsSold": "Mark as Sold",
+    "rentedUntilLabel": "Rented Until",
+    "markAsRentedDesc": "Set the rental end date so tenants and visitors can see when the property becomes available again.",
+    "markAsAvailableDesc": "This will make the property active and visible to renters again. The listing will show as available from today.",
+    "leaveEmptyHint": "Leave empty if the rental period is indefinite.",
+    "availableBadge": "AVAILABLE {{date}}",
+    "inquireAvailability": "Inquire for Availability",
+    "rentedNotice": "This property is currently rented",
+    "availableFromNotice": "Expected to be available from {{date}}"
+  },
+  "rules": {
+    "title": "Rental Rules — {{country}}",
+    "disclaimer": "This is a general guide only. Laws may change. Always consult a local lawyer for legal advice specific to your situation.",
+    "leaseAgreement": "Lease Agreement",
+    "securityDeposit": "Security Deposit",
+    "tenantRights": "Tenant Rights",
+    "landlordObligations": "Landlord Obligations"
+  },
   "dashboard": {
     "title": "Rental Portfolio",
     "monthlyIncome": "Monthly Income",
