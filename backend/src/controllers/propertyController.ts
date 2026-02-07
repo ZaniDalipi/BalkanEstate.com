@@ -1202,7 +1202,7 @@ export const markAsRented = async (
     property.rentedAt = rentedDate;
 
     // Accept optional rentedUntil date from request body
-    if (req.body.rentedUntil) {
+    if (req.body?.rentedUntil) {
       property.rentedUntil = new Date(req.body.rentedUntil);
     }
 
@@ -1256,21 +1256,31 @@ export const markAsAvailable = async (
       await user.save();
     }
 
-    property.status = 'active';
-    property.rentedAt = undefined;
-    property.rentedUntil = undefined;
-    // Set availableFrom to now or to a date from the request
-    if (req.body.availableFrom) {
-      property.availableFrom = new Date(req.body.availableFrom);
-    } else {
-      property.availableFrom = new Date();
-    }
-    await property.save();
+    // Set availableFrom
+    const newAvailableFrom = req.body?.availableFrom ? new Date(req.body.availableFrom) : new Date();
+
+    // Use updateOne with $set and $unset to properly clear fields
+    await Property.updateOne(
+      { _id: property._id },
+      {
+        $set: {
+          status: 'active',
+          availableFrom: newAvailableFrom,
+        },
+        $unset: {
+          rentedAt: 1,
+          rentedUntil: 1,
+        },
+      }
+    );
+
+    // Reload the property to return fresh data
+    const updatedProperty = await Property.findById(property._id);
 
     // Invalidate properties cache
     invalidateCache('/api/properties');
 
-    res.json({ property });
+    res.json({ property: updatedProperty });
   } catch (error: any) {
     propertyLogger.error('Mark as available error:', error);
     res.status(500).json({ message: 'Error marking property as available', error: error.message });
