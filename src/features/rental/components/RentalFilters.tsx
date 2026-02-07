@@ -77,9 +77,9 @@ const RentalFilters: React.FC<RentalFiltersProps> = ({ filters, onFilterChange, 
                     </div>
                 </div>
 
-                {/* Row 3: Furnishing + Sort + Checkboxes + Actions */}
-                <div className="flex items-end gap-2 flex-wrap">
-                    <div className="w-24">
+                {/* Row 3: Furnishing + Sort */}
+                <div className="grid grid-cols-2 gap-2">
+                    <div>
                         <label className={labelClasses}>{t('rental:filters.furnishing')}</label>
                         <select value={filters.furnishing} onChange={(e) => onFilterChange('furnishing', e.target.value)} className={selectClasses}>
                             <option value="any">{t('common:any')}</option>
@@ -88,7 +88,7 @@ const RentalFilters: React.FC<RentalFiltersProps> = ({ filters, onFilterChange, 
                             <option value="unfurnished">{t('rental:furnishing.unfurnished')}</option>
                         </select>
                     </div>
-                    <div className="w-28">
+                    <div>
                         <label className={labelClasses}>{t('rental:filters.sortBy')}</label>
                         <select value={filters.sortBy} onChange={(e) => onFilterChange('sortBy', e.target.value)} className={selectClasses}>
                             <option value="newest">{t('rental:filters.newest')}</option>
@@ -97,8 +97,11 @@ const RentalFilters: React.FC<RentalFiltersProps> = ({ filters, onFilterChange, 
                             <option value="sqft-high">{t('rental:filters.sqftHigh')}</option>
                         </select>
                     </div>
-                    {/* Compact boolean toggles */}
-                    <div className="flex items-center gap-2 flex-wrap">
+                </div>
+
+                {/* Row 4: Checkboxes + Actions */}
+                <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
                         {[
                             { key: 'petsAllowed' as keyof Filters, label: t('rental:filters.petsAllowed') },
                             { key: 'hasBalcony' as keyof Filters, label: t('rental:filters.hasBalcony') },
@@ -116,13 +119,14 @@ const RentalFilters: React.FC<RentalFiltersProps> = ({ filters, onFilterChange, 
                             </label>
                         ))}
                     </div>
-                    {/* Actions */}
-                    <button onClick={onSearch} className="bg-primary text-white text-xs font-semibold py-1.5 px-4 rounded-md hover:bg-primary-dark transition-colors whitespace-nowrap">
-                        {t('rental:filters.search')}
-                    </button>
-                    <button onClick={onReset} className="text-[10px] text-neutral-500 hover:text-neutral-700 py-1.5 transition-colors whitespace-nowrap">
-                        {t('rental:filters.reset')}
-                    </button>
+                    <div className="flex items-center gap-2">
+                        <button onClick={onReset} className="text-[10px] text-neutral-500 hover:text-neutral-700 py-1.5 transition-colors whitespace-nowrap">
+                            {t('rental:filters.reset')}
+                        </button>
+                        <button onClick={onSearch} className="bg-primary text-white text-xs font-semibold py-1.5 px-4 rounded-md hover:bg-primary-dark transition-colors whitespace-nowrap">
+                            {t('rental:filters.search')}
+                        </button>
+                    </div>
                 </div>
             </div>
         );
