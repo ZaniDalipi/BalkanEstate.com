@@ -23,7 +23,18 @@ const AgentListingsTab: React.FC<AgentListingsTabProps> = ({
 }) => {
   const { t } = useTranslation(['agents']);
   const [listingsFilter, setListingsFilter] = useState<'all' | 'active' | 'sold'>('all');
+  const [listingTypeFilter, setListingTypeFilter] = useState<'all' | 'sale' | 'rent'>('all');
   const [searchTerm, setSearchTerm] = useState('');
+
+  const allListings = React.useMemo(() => [...activeListings, ...soldProperties], [activeListings, soldProperties]);
+
+  const listingTypeCounts = React.useMemo(() => ({
+    all: allListings.length,
+    sale: allListings.filter(p => (p.listingType || 'sale') === 'sale').length,
+    rent: allListings.filter(p => p.listingType === 'rent').length,
+  }), [allListings]);
+
+  const showListingTypeFilter = listingTypeCounts.sale > 0 && listingTypeCounts.rent > 0;
 
   const filteredListings = React.useMemo(() => {
     let listings: Property[] = [];
@@ -34,6 +45,11 @@ const AgentListingsTab: React.FC<AgentListingsTabProps> = ({
       listings = activeListings;
     } else {
       listings = soldProperties;
+    }
+
+    // Apply listing type filter
+    if (listingTypeFilter !== 'all') {
+      listings = listings.filter(p => (p.listingType || 'sale') === listingTypeFilter);
     }
 
     if (searchTerm) {
@@ -47,7 +63,7 @@ const AgentListingsTab: React.FC<AgentListingsTabProps> = ({
     }
 
     return listings;
-  }, [activeListings, soldProperties, listingsFilter, searchTerm]);
+  }, [activeListings, soldProperties, listingsFilter, listingTypeFilter, searchTerm]);
 
   if (isLoading) {
     return (
@@ -61,7 +77,37 @@ const AgentListingsTab: React.FC<AgentListingsTabProps> = ({
 
   return (
     <div className="space-y-6">
-      {/* Filters */}
+      {/* Listing Type Filter (Sale / Rent) */}
+      {showListingTypeFilter && (
+        <div className="flex gap-2">
+          <button
+            onClick={() => setListingTypeFilter('all')}
+            className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+              listingTypeFilter === 'all' ? 'bg-gray-800 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+            }`}
+          >
+            All Types ({listingTypeCounts.all})
+          </button>
+          <button
+            onClick={() => setListingTypeFilter('sale')}
+            className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+              listingTypeFilter === 'sale' ? 'bg-emerald-600 text-white' : 'bg-emerald-50 text-emerald-700 hover:bg-emerald-100'
+            }`}
+          >
+            For Sale ({listingTypeCounts.sale})
+          </button>
+          <button
+            onClick={() => setListingTypeFilter('rent')}
+            className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+              listingTypeFilter === 'rent' ? 'bg-blue-600 text-white' : 'bg-blue-50 text-blue-700 hover:bg-blue-100'
+            }`}
+          >
+            For Rent ({listingTypeCounts.rent})
+          </button>
+        </div>
+      )}
+
+      {/* Status Filters */}
       <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
         {/* Tab Filters */}
         <div className="flex gap-2">

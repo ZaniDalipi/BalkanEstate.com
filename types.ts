@@ -424,7 +424,7 @@ export interface Filters {
 export const initialFilters: Filters = {
     query: '',
     country: 'any',
-    listingType: 'any',
+    listingType: 'sale',
     minPrice: null,
     maxPrice: null,
     beds: null,

@@ -1,14 +1,15 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import MapComponent from '@/src/features/map/components/MapComponent';
-import RentalPropertyCard from './RentalPropertyCard';
+import PropertyCard from '@/src/features/property-details/components/PropertyCard';
+import PropertyCardSkeleton from '@/src/features/property-details/components/PropertyCardSkeleton';
 import RentalFilters from './RentalFilters';
 import { useRentalSearch } from '../hooks/useRentalSearch';
-import { Squares2x2Icon, MapIcon, AdjustmentsHorizontalIcon, XMarkIcon } from '@/constants';
+import { Squares2x2Icon, MapIcon, AdjustmentsHorizontalIcon, XMarkIcon, MagnifyingGlassIcon } from '@/constants';
 import { LiquidGlassSwitch } from '@/src/components/ui/LiquidGlassSwitch';
 import { SEO } from '@/src/components/seo';
-import Footer from '@/components/shared/Footer';
 import { useLocalizedNavigation } from '@/src/hooks/useLocalizedNavigation';
+import { NominatimResult } from '@/types';
 
 const RentalSearchPage: React.FC = () => {
     const { t } = useTranslation(['rental', 'search', 'common']);
@@ -43,6 +44,13 @@ const RentalSearchPage: React.FC = () => {
         handleMapMove,
         handleRecenterOnUser,
         onFlyComplete,
+        // City search
+        suggestions,
+        searchWrapperRef,
+        isSearchingLocation,
+        isQueryInputFocused,
+        setIsQueryInputFocused,
+        handleSuggestionClick,
     } = useRentalSearch();
 
     const [isFiltersOpen, setIsFiltersOpen] = React.useState(false);
@@ -87,30 +95,79 @@ const RentalSearchPage: React.FC = () => {
             <div className="absolute inset-0 z-0 bg-neutral-50" />
 
             <div className={`flex h-full w-full flex-col lg:flex-row transition-all duration-300 relative ${isFiltersOpen && (isMobile || isTablet) ? 'blur-sm pointer-events-none' : ''}`}>
-                {/* Left Panel: Filters + Property List */}
+                {/* Left Panel: Search + Filters + Property List */}
                 <div className={`absolute inset-0 z-10 h-full w-full bg-white lg:relative lg:w-[45%] xl:w-[55%] lg:flex-shrink-0 lg:border-r lg:border-neutral-200 lg:flex lg:flex-col ${showViewToggle && mobileView === 'list' ? 'translate-x-0' : showViewToggle ? '-translate-x-full' : ''} lg:translate-x-0 transition-transform duration-300`}>
-                    {/* Header */}
-                    <div className="sticky top-0 z-20 bg-white border-b border-neutral-200 px-4 py-3 flex items-center justify-between gap-3">
-                        <div>
-                            <h1 className="text-lg font-bold text-neutral-800">{t('rental:title')}</h1>
-                            <p className="text-xs text-neutral-500">
-                                {listProperties.length} {t('rental:propertiesFound')}
-                            </p>
+                    {/* Header with city search */}
+                    <div className="sticky top-0 z-20 bg-white border-b border-neutral-200">
+                        <div className="px-4 py-3 flex items-center justify-between gap-3">
+                            <div>
+                                <h1 className="text-lg font-bold text-neutral-800">{t('rental:title')}</h1>
+                                <p className="text-xs text-neutral-500">
+                                    {listProperties.length} {t('rental:propertiesFound')}
+                                </p>
+                            </div>
+                            <div className="flex items-center gap-2">
+                                <button
+                                    onClick={handleCreateRental}
+                                    className="text-xs bg-secondary text-white font-semibold px-3 py-1.5 rounded-lg hover:bg-opacity-90 transition-colors"
+                                >
+                                    + {t('rental:createListing')}
+                                </button>
+                                <button
+                                    onClick={() => setIsFiltersOpen(!isFiltersOpen)}
+                                    className="lg:hidden p-2 rounded-lg hover:bg-neutral-100 transition-colors"
+                                    aria-label="Toggle filters"
+                                >
+                                    <AdjustmentsHorizontalIcon className="w-5 h-5 text-neutral-600" />
+                                </button>
+                            </div>
                         </div>
-                        <div className="flex items-center gap-2">
-                            <button
-                                onClick={handleCreateRental}
-                                className="text-xs bg-secondary text-white font-semibold px-3 py-1.5 rounded-lg hover:bg-opacity-90 transition-colors"
-                            >
-                                + {t('rental:createListing')}
-                            </button>
-                            <button
-                                onClick={() => setIsFiltersOpen(!isFiltersOpen)}
-                                className="lg:hidden p-2 rounded-lg hover:bg-neutral-100 transition-colors"
-                                aria-label="Toggle filters"
-                            >
-                                <AdjustmentsHorizontalIcon className="w-5 h-5 text-neutral-600" />
-                            </button>
+
+                        {/* City Search Bar */}
+                        <div className="px-4 pb-3">
+                            <div ref={searchWrapperRef} className="relative">
+                                <div className="relative">
+                                    <MagnifyingGlassIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-neutral-400" />
+                                    <input
+                                        type="text"
+                                        value={filters.query}
+                                        onChange={(e) => handleFilterChange('query', e.target.value)}
+                                        onFocus={() => setIsQueryInputFocused(true)}
+                                        onKeyDown={(e) => { if (e.key === 'Enter') handleSearch(); }}
+                                        placeholder={t('rental:filters.searchCity', 'Search by city or location...')}
+                                        className="w-full pl-9 pr-9 py-2 text-sm border border-neutral-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition-colors"
+                                    />
+                                    {filters.query && (
+                                        <button
+                                            onClick={() => handleFilterChange('query', '')}
+                                            className="absolute right-3 top-1/2 -translate-y-1/2 text-neutral-400 hover:text-neutral-600"
+                                        >
+                                            <XMarkIcon className="w-4 h-4" />
+                                        </button>
+                                    )}
+                                </div>
+
+                                {/* Location Suggestions Dropdown */}
+                                {isQueryInputFocused && suggestions.length > 0 && (
+                                    <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-neutral-200 rounded-lg shadow-lg z-50 max-h-60 overflow-y-auto">
+                                        {suggestions.map((suggestion: NominatimResult, index: number) => (
+                                            <button
+                                                key={index}
+                                                onClick={() => handleSuggestionClick(suggestion)}
+                                                className="w-full text-left px-3 py-2.5 text-sm hover:bg-neutral-50 transition-colors flex items-center gap-2 border-b border-neutral-100 last:border-b-0"
+                                            >
+                                                <MapIcon className="w-4 h-4 text-neutral-400 flex-shrink-0" />
+                                                <span className="truncate text-neutral-700">{suggestion.display_name}</span>
+                                            </button>
+                                        ))}
+                                    </div>
+                                )}
+                                {isSearchingLocation && (
+                                    <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-neutral-200 rounded-lg shadow-lg z-50 p-3 text-center">
+                                        <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-primary mx-auto" />
+                                    </div>
+                                )}
+                            </div>
                         </div>
                     </div>
 
@@ -125,12 +182,13 @@ const RentalSearchPage: React.FC = () => {
                         />
                     </div>
 
-                    {/* Property List */}
+                    {/* Property List - Using same PropertyCard as the Buy page */}
                     <div className="flex-1 overflow-y-auto p-3" data-scroll-container>
                         {isLoading ? (
-                            <div className="flex flex-col items-center justify-center py-12">
-                                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mb-3" />
-                                <p className="text-sm text-neutral-500">{t('rental:loading')}</p>
+                            <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-3">
+                                {[...Array(6)].map((_, i) => (
+                                    <PropertyCardSkeleton key={i} />
+                                ))}
                             </div>
                         ) : error ? (
                             <div className="text-center py-12">
@@ -154,10 +212,9 @@ const RentalSearchPage: React.FC = () => {
                         ) : (
                             <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-3">
                                 {listProperties.map(property => (
-                                    <RentalPropertyCard
+                                    <PropertyCard
                                         key={property.id}
                                         property={property}
-                                        onHover={setHoveredPropertyId}
                                     />
                                 ))}
                             </div>

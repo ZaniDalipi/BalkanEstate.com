@@ -39,6 +39,11 @@ export const filterProperties = (properties: Property[], filters: Filters): Prop
             }
         }
 
+        // Listing type filter (sale vs rent)
+        const listingTypeMatch = filters.listingType && filters.listingType !== 'any'
+            ? (p.listingType || 'sale') === filters.listingType
+            : true;
+
         // Basic filters
         const minPriceMatch = filters.minPrice ? p.price >= filters.minPrice : true;
         const maxPriceMatch = filters.maxPrice ? p.price <= filters.maxPrice : true;
@@ -107,6 +112,7 @@ export const filterProperties = (properties: Property[], filters: Filters): Prop
 
         return queryMatch &&
                countryMatch &&
+               listingTypeMatch &&
                minPriceMatch &&
                maxPriceMatch &&
                bedsMatch &&

@@ -26,12 +26,16 @@ export interface Map3DControlsProps {
   totalFloors?: number;
   virtualTour360Url?: string;
 
+  // POI
+  showPOI?: boolean;
+
   // Handlers
   toggle3DMode: () => void;
   setShowShadows: (value: boolean) => void;
   setShowFloorLabels: (value: boolean) => void;
   setShowTimelapse: (value: boolean) => void;
   setShowFloorIndicator: (value: boolean) => void;
+  setShowPOI?: (value: boolean) => void;
   flyToProperty: () => void;
   handleEnterBuilding: () => void;
   onNavigateToMap?: () => void;
@@ -54,11 +58,13 @@ const Map3DControls: React.FC<Map3DControlsProps> = ({
   floorNumber,
   totalFloors,
   virtualTour360Url,
+  showPOI,
   toggle3DMode,
   setShowShadows,
   setShowFloorLabels,
   setShowTimelapse,
   setShowFloorIndicator,
+  setShowPOI,
   flyToProperty,
   handleEnterBuilding,
   onNavigateToMap,
@@ -254,6 +260,22 @@ const Map3DControls: React.FC<Map3DControlsProps> = ({
               {showFloorLabels ? t('property:map3d.hideFloors', 'Hide') : t('property:map3d.showFloors', 'Floors')}
             </span>
           </button>
+          {setShowPOI && (
+            <button
+              onClick={() => setShowPOI(!showPOI)}
+              className={`px-2.5 sm:px-3 py-1.5 sm:py-2 rounded-lg font-bold text-xs sm:text-sm shadow-lg transition-all flex items-center gap-1 ${
+                showPOI
+                  ? 'bg-green-600 text-white border border-green-500'
+                  : 'bg-slate-900/90 text-white border border-slate-600'
+              }`}
+              title={t('property:map3d.nearbyPlaces', 'Nearby Places')}
+            >
+              <span className="text-sm">{'\u{1F4CD}'}</span>
+              <span className="hidden sm:inline text-xs">
+                {t('property:map3d.nearbyPOI', 'Nearby')}
+              </span>
+            </button>
+          )}
         </div>
       )}
 

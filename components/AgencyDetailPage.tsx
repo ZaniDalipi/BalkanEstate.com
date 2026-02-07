@@ -121,6 +121,7 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
   const [isLeavingAgency, setIsLeavingAgency] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [propertyView, setPropertyView] = useState<'active' | 'sold'>('active');
+  const [propertyTypeView, setPropertyTypeView] = useState<'all' | 'sale' | 'rent'>('all');
   const [subscriptionKey, setSubscriptionKey] = useState(0);
   const [showGradientPicker, setShowGradientPicker] = useState(false);
   const [editForm, setEditForm] = useState({
@@ -1847,30 +1848,78 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
             </div>
           </div>
 
+          {/* Listing Type Filter (Sale / Rent) */}
+          {(() => {
+            const currentProps = propertyView === 'active' ? activeProperties : soldProperties;
+            const saleCount = currentProps.filter(p => (p.listingType || 'sale') === 'sale').length;
+            const rentCount = currentProps.filter(p => p.listingType === 'rent').length;
+            if (saleCount > 0 && rentCount > 0) {
+              return (
+                <div className="flex gap-2 mb-6">
+                  <button
+                    onClick={() => setPropertyTypeView('all')}
+                    className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${
+                      propertyTypeView === 'all' ? 'bg-slate-800 text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                    }`}
+                  >
+                    All ({currentProps.length})
+                  </button>
+                  <button
+                    onClick={() => setPropertyTypeView('sale')}
+                    className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${
+                      propertyTypeView === 'sale' ? 'bg-emerald-600 text-white' : 'bg-emerald-50 text-emerald-700 hover:bg-emerald-100'
+                    }`}
+                  >
+                    For Sale ({saleCount})
+                  </button>
+                  <button
+                    onClick={() => setPropertyTypeView('rent')}
+                    className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${
+                      propertyTypeView === 'rent' ? 'bg-blue-600 text-white' : 'bg-blue-50 text-blue-700 hover:bg-blue-100'
+                    }`}
+                  >
+                    For Rent ({rentCount})
+                  </button>
+                </div>
+              );
+            }
+            return null;
+          })()}
+
           {/* Properties Grid */}
-          {loading ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-              {[1, 2, 3].map(i => <PropertyCardSkeleton key={i} />)}
-            </div>
-          ) : (propertyView === 'active' ? activeProperties : soldProperties).length > 0 ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-              {(propertyView === 'active' ? activeProperties : soldProperties).map(property => (
-                <PropertyCard key={property.id || property._id} property={property} />
-              ))}
-            </div>
-          ) : (
-            <div className="py-16 text-center">
-              <div className="w-16 h-16 bg-slate-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
-                <HomeIcon className="w-8 h-8 text-slate-300" />
+          {(() => {
+            const baseProps = propertyView === 'active' ? activeProperties : soldProperties;
+            const displayProps = propertyTypeView === 'all' ? baseProps : baseProps.filter(p => (p.listingType || 'sale') === propertyTypeView);
+            if (loading) {
+              return (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+                  {[1, 2, 3].map(i => <PropertyCardSkeleton key={i} />)}
+                </div>
+              );
+            }
+            if (displayProps.length > 0) {
+              return (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+                  {displayProps.map(property => (
+                    <PropertyCard key={property.id || property._id} property={property} />
+                  ))}
+                </div>
+              );
+            }
+            return (
+              <div className="py-16 text-center">
+                <div className="w-16 h-16 bg-slate-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                  <HomeIcon className="w-8 h-8 text-slate-300" />
+                </div>
+                <p className="text-slate-500 font-medium">
+                  {propertyView === 'active' ? 'No active listings at the moment' : 'No sold properties yet'}
+                </p>
+                <p className="text-sm text-slate-400 mt-1">
+                  {propertyView === 'active' ? 'New listings will appear here' : 'Sold properties will be shown here'}
+                </p>
               </div>
-              <p className="text-slate-500 font-medium">
-                {propertyView === 'active' ? 'No active listings at the moment' : 'No sold properties yet'}
-              </p>
-              <p className="text-sm text-slate-400 mt-1">
-                {propertyView === 'active' ? 'New listings will appear here' : 'Sold properties will be shown here'}
-              </p>
-            </div>
-          )}
+            );
+          })()}
         </div>
       </div>
 

@@ -49,11 +49,12 @@ const RoleBadge: React.FC<{ role?: UserRole | string }> = ({ role }) => {
 };
 
 const StatusBadge: React.FC<{ status: PropertyStatus }> = ({ status }) => {
-    const statusStyles: Record<PropertyStatus, { bg: string, text: string, icon?: React.ReactNode }> = {
+    const statusStyles: Record<string, { bg: string, text: string, icon?: React.ReactNode }> = {
         active: { bg: 'bg-green-100', text: 'text-green-800', icon: <CheckCircleIcon className="w-4 h-4"/> },
         draft: { bg: 'bg-yellow-100', text: 'text-yellow-800', icon: <PencilIcon className="w-4 h-4" /> },
         pending: { bg: 'bg-blue-100', text: 'text-blue-800', icon: <ClockIcon className="w-4 h-4" /> },
         sold: { bg: 'bg-neutral-200', text: 'text-neutral-700', icon: <CheckCircleIcon className="w-4 h-4" /> },
+        rented: { bg: 'bg-orange-100', text: 'text-orange-800', icon: <CheckCircleIcon className="w-4 h-4" /> },
     };
     const style = statusStyles[status] || statusStyles.draft;
     return (
@@ -124,6 +125,7 @@ const ListingCard: React.FC<{
                 <div onClick={handleCardClick} className="cursor-pointer">
                     <div className="flex flex-wrap items-center gap-2 mb-1">
                         <StatusBadge status={property.status} />
+                        <ListingTypeBadge listingType={property.listingType} />
                         <RoleBadge role={property.createdAsRole} />
                         {!hasValidCoordinates && (
                             <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs font-medium bg-red-100 text-red-700" title="This property won't appear on the map. Edit to set location.">
@@ -210,7 +212,7 @@ const ListingCard: React.FC<{
                     className="w-full sm:w-auto flex items-center justify-center gap-1.5 px-3 py-2 text-xs font-medium text-green-700 bg-green-50 border border-green-200 rounded-lg hover:bg-green-100 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                     <CheckCircleIcon className="w-4 h-4" />
-                    Mark as Sold
+                    {property.listingType === 'rent' ? 'Mark as Rented' : 'Mark as Sold'}
                 </button>
              </div>
         </div>
@@ -237,6 +239,27 @@ const FilterPill: React.FC<{
 );
 
 
+const ListingTypeBadge: React.FC<{ listingType?: string }> = ({ listingType }) => {
+    const isRent = listingType === 'rent';
+    return (
+        <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs font-medium ${
+            isRent ? 'bg-blue-100 text-blue-700' : 'bg-emerald-100 text-emerald-700'
+        }`}>
+            {isRent ? (
+                <>
+                    <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z" /></svg>
+                    For Rent
+                </>
+            ) : (
+                <>
+                    <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                    For Sale
+                </>
+            )}
+        </span>
+    );
+};
+
 const MyListings: React.FC<{ sellerId: string }> = ({ sellerId }) => {
     const { state, dispatch } = useAppContext();
     const [showSoldConfirm, setShowSoldConfirm] = useState(false);
@@ -245,6 +268,7 @@ const MyListings: React.FC<{ sellerId: string }> = ({ sellerId }) => {
     const [propertyToDelete, setPropertyToDelete] = useState<string | null>(null);
     const [statusFilter, setStatusFilter] = useState<PropertyStatus | 'all'>('all');
     const [roleFilter, setRoleFilter] = useState<'all' | 'private_seller' | 'agent'>('all');
+    const [listingTypeFilter, setListingTypeFilter] = useState<'all' | 'sale' | 'rent'>('all');
     const [showPromotionModal, setShowPromotionModal] = useState(false);
     const [propertyToPromote, setPropertyToPromote] = useState<Property | null>(null);
     const [isExtensionMode, setIsExtensionMode] = useState(false);
@@ -347,8 +371,22 @@ const MyListings: React.FC<{ sellerId: string }> = ({ sellerId }) => {
         };
     }, [myProperties]);
 
+    // Calculate listing type counts
+    const listingTypeCounts = useMemo(() => ({
+        all: myProperties.length,
+        sale: myProperties.filter(p => (p.listingType || 'sale') === 'sale').length,
+        rent: myProperties.filter(p => p.listingType === 'rent').length,
+    }), [myProperties]);
+
+    const showListingTypeFilter = listingTypeCounts.sale > 0 && listingTypeCounts.rent > 0;
+
     const filteredAndSortedProperties = useMemo(() => {
         let filtered = myProperties;
+
+        // Apply listing type filter
+        if (listingTypeFilter !== 'all') {
+            filtered = filtered.filter(p => (p.listingType || 'sale') === listingTypeFilter);
+        }
 
         // Apply role filter
         if (roleFilter !== 'all') {
@@ -440,14 +478,21 @@ const MyListings: React.FC<{ sellerId: string }> = ({ sellerId }) => {
 
     const confirmMarkAsSold = async () => {
         if (propertyToMarkSold) {
+            const prop = myProperties.find(p => p.id === propertyToMarkSold);
+            const isRentalProp = prop?.listingType === 'rent';
             try {
-                await api.markPropertyAsSold(propertyToMarkSold);
-                dispatch({ type: 'MARK_PROPERTY_SOLD', payload: propertyToMarkSold });
-
-                // Update local state
-                setMyProperties(prev => prev.map(p =>
-                    p.id === propertyToMarkSold ? { ...p, status: 'sold' as PropertyStatus } : p
-                ));
+                if (isRentalProp) {
+                    await api.markPropertyAsRented(propertyToMarkSold);
+                    setMyProperties(prev => prev.map(p =>
+                        p.id === propertyToMarkSold ? { ...p, status: 'rented' as PropertyStatus } : p
+                    ));
+                } else {
+                    await api.markPropertyAsSold(propertyToMarkSold);
+                    dispatch({ type: 'MARK_PROPERTY_SOLD', payload: propertyToMarkSold });
+                    setMyProperties(prev => prev.map(p =>
+                        p.id === propertyToMarkSold ? { ...p, status: 'sold' as PropertyStatus } : p
+                    ));
+                }
             } catch (error) {
             }
         }
@@ -537,6 +582,7 @@ const MyListings: React.FC<{ sellerId: string }> = ({ sellerId }) => {
         { label: 'Active', value: 'active' },
         { label: 'Pending', value: 'pending' },
         { label: 'Sold', value: 'sold' },
+        { label: 'Rented', value: 'rented' as PropertyStatus },
         { label: 'Draft', value: 'draft' },
     ];
 
@@ -550,11 +596,21 @@ const MyListings: React.FC<{ sellerId: string }> = ({ sellerId }) => {
                 onClose={() => setShowSoldConfirm(false)}
                 title="Confirm Action"
             >
-                <p className="text-neutral-600 mb-6 text-center">Are you sure you want to mark this property as sold? This action cannot be undone.</p>
-                <div className="flex justify-center gap-4">
-                    <button onClick={() => setShowSoldConfirm(false)} className="px-6 py-2 border border-neutral-300 text-neutral-700 font-semibold rounded-lg hover:bg-neutral-100">Cancel</button>
-                    <button onClick={confirmMarkAsSold} className="px-6 py-2 bg-green-600 text-white font-semibold rounded-lg hover:bg-green-700">Confirm</button>
-                </div>
+                {(() => {
+                    const prop = myProperties.find(p => p.id === propertyToMarkSold);
+                    const isRentalProp = prop?.listingType === 'rent';
+                    return (
+                        <>
+                            <p className="text-neutral-600 mb-6 text-center">
+                                Are you sure you want to mark this property as {isRentalProp ? 'rented' : 'sold'}? This action cannot be undone.
+                            </p>
+                            <div className="flex justify-center gap-4">
+                                <button onClick={() => setShowSoldConfirm(false)} className="px-6 py-2 border border-neutral-300 text-neutral-700 font-semibold rounded-lg hover:bg-neutral-100">Cancel</button>
+                                <button onClick={confirmMarkAsSold} className="px-6 py-2 bg-green-600 text-white font-semibold rounded-lg hover:bg-green-700">Confirm</button>
+                            </div>
+                        </>
+                    );
+                })()}
             </Modal>
 
             <Modal
@@ -610,18 +666,61 @@ const MyListings: React.FC<{ sellerId: string }> = ({ sellerId }) => {
 
             <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
                 <h3 className="text-xl sm:text-2xl font-bold text-neutral-800">My Listings ({myProperties.length})</h3>
-                <button
-                  onClick={() => {
-                      dispatch({ type: 'SET_PROPERTY_TO_EDIT', payload: null });
-                      window.history.pushState({}, '', '/create-listing');
-                      window.dispatchEvent(new PopStateEvent('popstate'));
-                  }}
-                  className="w-full sm:w-auto px-5 py-2.5 bg-primary text-white font-semibold rounded-lg shadow-sm hover:bg-primary-dark transition-colors flex items-center justify-center gap-2"
-                >
-                  <PencilIcon className="w-5 h-5"/>
-                  <span>Add New Listing</span>
-                </button>
+                <div className="flex flex-wrap gap-2">
+                    <button
+                      onClick={() => {
+                          dispatch({ type: 'SET_PROPERTY_TO_EDIT', payload: null });
+                          window.history.pushState({}, '', '/create-listing');
+                          window.dispatchEvent(new PopStateEvent('popstate'));
+                      }}
+                      className="flex-1 sm:flex-initial px-4 py-2.5 bg-primary text-white font-semibold rounded-lg shadow-sm hover:bg-primary-dark transition-colors flex items-center justify-center gap-2 text-sm"
+                    >
+                      <PencilIcon className="w-4 h-4"/>
+                      <span>New Sale Listing</span>
+                    </button>
+                    <button
+                      onClick={() => {
+                          dispatch({ type: 'SET_PROPERTY_TO_EDIT', payload: null });
+                          window.history.pushState({}, '', '/create-rental');
+                          window.dispatchEvent(new PopStateEvent('popstate'));
+                      }}
+                      className="flex-1 sm:flex-initial px-4 py-2.5 bg-blue-600 text-white font-semibold rounded-lg shadow-sm hover:bg-blue-700 transition-colors flex items-center justify-center gap-2 text-sm"
+                    >
+                      <PencilIcon className="w-4 h-4"/>
+                      <span>New Rental Listing</span>
+                    </button>
+                </div>
             </div>
+
+            {/* Listing Type Filter (Sale / Rent) */}
+            {showListingTypeFilter && (
+                <div className="flex items-center space-x-1 bg-gradient-to-r from-emerald-50 to-blue-50 p-1.5 rounded-full border border-neutral-200 self-start max-w-full sm:max-w-md">
+                    <button
+                        onClick={() => setListingTypeFilter('all')}
+                        className={`px-4 py-1.5 rounded-full text-sm font-semibold transition-all flex-grow text-center ${
+                            listingTypeFilter === 'all' ? 'bg-white text-neutral-800 shadow' : 'text-neutral-600 hover:bg-white/50'
+                        }`}
+                    >
+                        All ({listingTypeCounts.all})
+                    </button>
+                    <button
+                        onClick={() => setListingTypeFilter('sale')}
+                        className={`px-4 py-1.5 rounded-full text-sm font-semibold transition-all flex-grow text-center ${
+                            listingTypeFilter === 'sale' ? 'bg-emerald-600 text-white shadow' : 'text-emerald-700 hover:bg-emerald-100'
+                        }`}
+                    >
+                        For Sale ({listingTypeCounts.sale})
+                    </button>
+                    <button
+                        onClick={() => setListingTypeFilter('rent')}
+                        className={`px-4 py-1.5 rounded-full text-sm font-semibold transition-all flex-grow text-center ${
+                            listingTypeFilter === 'rent' ? 'bg-blue-600 text-white shadow' : 'text-blue-700 hover:bg-blue-100'
+                        }`}
+                    >
+                        For Rent ({listingTypeCounts.rent})
+                    </button>
+                </div>
+            )}
 
             {/* Role Filter - Only show if user has listings in both roles */}
             {showRoleFilter && (

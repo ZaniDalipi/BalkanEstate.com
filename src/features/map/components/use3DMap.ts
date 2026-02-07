@@ -49,6 +49,160 @@ export function use3DMap(props: Map3DBuildingsProps) {
   // Shadow timelapse hook
   const timelapse = useShadowTimelapse(lat);
 
+  // POI markers reference for cleanup
+  const poiMarkersRef = useRef<maplibregl.Marker[]>([]);
+  const [showPOI, setShowPOI] = useState(true);
+
+  // POI category styling
+  const POI_CATEGORIES: Record<string, { icon: string; color: string; label: string }> = {
+    university: { icon: '🎓', color: '#7c3aed', label: 'University' },
+    school: { icon: '🏫', color: '#2563eb', label: 'School' },
+    hospital: { icon: '🏥', color: '#dc2626', label: 'Hospital' },
+    clinic: { icon: '⚕️', color: '#ef4444', label: 'Clinic' },
+    pharmacy: { icon: '💊', color: '#10b981', label: 'Pharmacy' },
+    supermarket: { icon: '🛒', color: '#f59e0b', label: 'Supermarket' },
+    mall: { icon: '🏬', color: '#ec4899', label: 'Shopping Mall' },
+    marketplace: { icon: '🏪', color: '#f97316', label: 'Market' },
+    restaurant: { icon: '🍽️', color: '#ea580c', label: 'Restaurant' },
+    cafe: { icon: '☕', color: '#92400e', label: 'Café' },
+    bank: { icon: '🏦', color: '#1d4ed8', label: 'Bank' },
+    atm: { icon: '💳', color: '#3b82f6', label: 'ATM' },
+    bus_station: { icon: '🚌', color: '#059669', label: 'Bus Station' },
+    train_station: { icon: '🚂', color: '#0891b2', label: 'Train Station' },
+    parking: { icon: '🅿️', color: '#6366f1', label: 'Parking' },
+    park: { icon: '🌳', color: '#16a34a', label: 'Park' },
+    gym: { icon: '🏋️', color: '#9333ea', label: 'Gym' },
+    place_of_worship: { icon: '⛪', color: '#78716c', label: 'Place of Worship' },
+    kindergarten: { icon: '💒', color: '#f472b6', label: 'Kindergarten' },
+    police: { icon: '👮', color: '#1e3a5f', label: 'Police' },
+  };
+
+  // Fetch nearby POIs from Overpass API
+  const fetchAndDisplayPOI = useCallback(async (mapInstance: maplibregl.Map, latitude: number, longitude: number) => {
+    const radius = 800; // 800m radius
+    const query = `
+      [out:json][timeout:10];
+      (
+        node["amenity"~"university|school|hospital|clinic|pharmacy|restaurant|cafe|bank|place_of_worship|kindergarten|police"](around:${radius},${latitude},${longitude});
+        node["shop"~"supermarket|mall|marketplace"](around:${radius},${latitude},${longitude});
+        node["leisure"~"park|fitness_centre"](around:${radius},${latitude},${longitude});
+        node["public_transport"~"station|stop_position"](around:${radius},${latitude},${longitude});
+        node["railway"="station"](around:${radius},${latitude},${longitude});
+        node["amenity"="bus_station"](around:${radius},${latitude},${longitude});
+        node["amenity"="parking"](around:${radius},${latitude},${longitude});
+        way["amenity"~"university|school|hospital"](around:${radius},${latitude},${longitude});
+        way["shop"~"supermarket|mall"](around:${radius},${latitude},${longitude});
+        way["leisure"="park"](around:${radius},${latitude},${longitude});
+      );
+      out center 50;
+    `;
+
+    try {
+      const response = await fetch('https://overpass-api.de/api/interpreter', {
+        method: 'POST',
+        body: `data=${encodeURIComponent(query)}`,
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      });
+      if (!response.ok) return;
+      const data = await response.json();
+
+      // Clear existing POI markers
+      poiMarkersRef.current.forEach(m => m.remove());
+      poiMarkersRef.current = [];
+
+      const elements = data.elements || [];
+      const seen = new Set<string>(); // Avoid duplicates
+
+      for (const el of elements) {
+        const elLat = el.lat || el.center?.lat;
+        const elLng = el.lon || el.center?.lon;
+        if (!elLat || !elLng) continue;
+
+        const name = el.tags?.name;
+        if (!name) continue; // Skip unnamed POIs
+
+        // Deduplicate by name+approximate location
+        const key = `${name}-${Math.round(elLat * 1000)}-${Math.round(elLng * 1000)}`;
+        if (seen.has(key)) continue;
+        seen.add(key);
+
+        // Determine category
+        let category = '';
+        const amenity = el.tags?.amenity;
+        const shop = el.tags?.shop;
+        const leisure = el.tags?.leisure;
+        const transport = el.tags?.public_transport;
+        const railway = el.tags?.railway;
+
+        if (amenity === 'university') category = 'university';
+        else if (amenity === 'school') category = 'school';
+        else if (amenity === 'hospital') category = 'hospital';
+        else if (amenity === 'clinic' || amenity === 'doctors') category = 'clinic';
+        else if (amenity === 'pharmacy') category = 'pharmacy';
+        else if (amenity === 'restaurant') category = 'restaurant';
+        else if (amenity === 'cafe') category = 'cafe';
+        else if (amenity === 'bank') category = 'bank';
+        else if (amenity === 'bus_station') category = 'bus_station';
+        else if (amenity === 'parking') category = 'parking';
+        else if (amenity === 'place_of_worship') category = 'place_of_worship';
+        else if (amenity === 'kindergarten') category = 'kindergarten';
+        else if (amenity === 'police') category = 'police';
+        else if (shop === 'supermarket') category = 'supermarket';
+        else if (shop === 'mall') category = 'mall';
+        else if (shop === 'marketplace') category = 'marketplace';
+        else if (leisure === 'park') category = 'park';
+        else if (leisure === 'fitness_centre') category = 'gym';
+        else if (transport === 'station' || railway === 'station') category = 'train_station';
+        else if (transport === 'stop_position') category = 'bus_station';
+
+        if (!category || !POI_CATEGORIES[category]) continue;
+
+        const cat = POI_CATEGORIES[category];
+
+        // Calculate distance
+        const dLat = (elLat - latitude) * 111320;
+        const dLng = (elLng - longitude) * 111320 * Math.cos(latitude * Math.PI / 180);
+        const dist = Math.round(Math.sqrt(dLat * dLat + dLng * dLng));
+
+        const markerEl = document.createElement('div');
+        markerEl.style.cssText = 'cursor: pointer; transition: transform 0.2s;';
+        markerEl.innerHTML = `
+          <div style="
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            background: white;
+            padding: 3px 8px 3px 4px;
+            border-radius: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+            border: 2px solid ${cat.color}30;
+            font-size: 11px;
+            white-space: nowrap;
+            max-width: 180px;
+          ">
+            <span style="font-size: 14px;">${cat.icon}</span>
+            <div style="overflow: hidden;">
+              <div style="font-weight: 600; color: #1e293b; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 120px; font-size: 10px;">
+                ${name}
+              </div>
+              <div style="font-size: 9px; color: #94a3b8;">${dist}m</div>
+            </div>
+          </div>
+        `;
+        markerEl.addEventListener('mouseenter', () => { markerEl.style.transform = 'scale(1.15)'; markerEl.style.zIndex = '100'; });
+        markerEl.addEventListener('mouseleave', () => { markerEl.style.transform = 'scale(1)'; markerEl.style.zIndex = '1'; });
+
+        const marker = new maplibregl.Marker({ element: markerEl, anchor: 'center' })
+          .setLngLat([elLng, elLat])
+          .addTo(mapInstance);
+
+        poiMarkersRef.current.push(marker);
+      }
+    } catch {
+      // Overpass API error - silently fail
+    }
+  }, []);
+
   // Add property marker with optional floor indicator
   // For apartments with floor info, we skip this marker and use the 3D building visualization instead
   const addPropertyMarker = useCallback((
@@ -706,6 +860,9 @@ export function use3DMap(props: Map3DBuildingsProps) {
         }
       }
 
+      // Fetch and display nearby POIs (universities, shops, etc.)
+      fetchAndDisplayPOI(mapInstance, lat, lng);
+
       // Add 360 tour door marker for non-apartment types (villas, houses, land)
       if (propertyType !== 'apartment' && virtualTour360Url) {
         const doorEl = document.createElement('div');
@@ -817,10 +974,13 @@ export function use3DMap(props: Map3DBuildingsProps) {
       // Clean up floor labels
       floorLabelsRef.current.forEach(marker => marker.remove());
       floorLabelsRef.current = [];
+      // Clean up POI markers
+      poiMarkersRef.current.forEach(marker => marker.remove());
+      poiMarkersRef.current = [];
       mapInstance.remove();
       map.current = null;
     };
-  }, [lat, lng, zoom, pitch, bearing, addPropertyMarker, addCustomBuilding3D, floorNumber, totalFloors, propertyType, virtualTour360Url, handleEnterBuilding]);
+  }, [lat, lng, zoom, pitch, bearing, addPropertyMarker, addCustomBuilding3D, fetchAndDisplayPOI, floorNumber, totalFloors, propertyType, virtualTour360Url, handleEnterBuilding]);
 
   // Update building colors based on time
   useEffect(() => {
@@ -1253,6 +1413,14 @@ export function use3DMap(props: Map3DBuildingsProps) {
     };
   }, [mapLoaded, timelapse.timePeriod, showShadows, updateBuildingShadows]);
 
+  // Toggle POI visibility
+  useEffect(() => {
+    poiMarkersRef.current.forEach(m => {
+      const el = m.getElement();
+      if (el) el.style.display = showPOI ? 'block' : 'none';
+    });
+  }, [showPOI]);
+
   return {
     // Refs
     mapContainer,
@@ -1269,6 +1437,8 @@ export function use3DMap(props: Map3DBuildingsProps) {
     setShowShadows,
     show360Tour,
     isEnteringBuilding,
+    showPOI,
+    setShowPOI,
     // Computed
     hasFloorInfo,
     has360Tour,

@@ -78,6 +78,8 @@ const PropertyCard: React.FC<PropertyCardProps> = ({ property, showToast, showCo
   const isInComparison = state.comparisonList.includes(property?.id || '');
   const isNew = property?.createdAt && (Date.now() - property.createdAt < 3 * 24 * 60 * 60 * 1000);
   const isSold = property?.status === 'sold';
+  const isRented = property?.status === 'rented';
+  const isRental = (property?.listingType || 'sale') === 'rent';
 
   // Check if property has an active promotion
   const isActivelyPromoted = property?.isPromoted &&
@@ -184,7 +186,7 @@ const PropertyCard: React.FC<PropertyCardProps> = ({ property, showToast, showCo
   // Determine card styles based on promotion tier
   // Premium = Gold (1st), Highlight = Light Blue (2nd), Featured = Dark Purple (3rd)
   const getCardStyles = () => {
-    if (isSold) return 'border-neutral-300 opacity-80';
+    if (isSold || isRented) return 'border-neutral-300 opacity-80';
     if (isActivelyPromoted) {
       if (promotionTier === 'premium') return 'ring-2 ring-amber-400 border-amber-200 shadow-amber-100';
       if (promotionTier === 'highlight') return 'ring-2 ring-sky-400 border-sky-200 shadow-sky-100';
@@ -197,7 +199,7 @@ const PropertyCard: React.FC<PropertyCardProps> = ({ property, showToast, showCo
   return (
     <div
       className={`group bg-white rounded-2xl overflow-hidden shadow-lg border-2 transition-all duration-500 text-left w-full flex flex-col cursor-pointer isolate ${getCardStyles()} ${
-        isHovered && !isSold ? 'shadow-2xl -translate-y-2 scale-[1.02]' : 'hover:shadow-xl'
+        isHovered && !isSold && !isRented ? 'shadow-2xl -translate-y-2 scale-[1.02]' : 'hover:shadow-xl'
       }`}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
@@ -205,7 +207,7 @@ const PropertyCard: React.FC<PropertyCardProps> = ({ property, showToast, showCo
       onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); handleCardClick(e as any); } }}
       role="article"
       tabIndex={0}
-      aria-label={`${property.title || propertyTypeLabel}, ${formatPrice(property.price, property.country)}, ${safeProperty.city}, ${safeProperty.country}`}
+      aria-label={`${property.title || propertyTypeLabel}, ${formatPrice(property.price, property.country)}${isRental ? '/mo' : ''}, ${safeProperty.city}, ${safeProperty.country}`}
     >
       {/* Image Section */}
       <div className="relative overflow-hidden">
@@ -227,12 +229,12 @@ const PropertyCard: React.FC<PropertyCardProps> = ({ property, showToast, showCo
             {/* Main image - contained to show full image */}
             <img
               src={property.imageUrl}
-              alt={`${property.title || propertyTypeLabel} - ${property.beds} bed, ${property.baths} bath ${propertyTypeLabel} for sale in ${property.city}, ${property.country}`}
+              alt={`${property.title || propertyTypeLabel} - ${property.beds} bed, ${property.baths} bath ${propertyTypeLabel} for ${isRental ? 'rent' : 'sale'} in ${property.city}, ${property.country}`}
               loading="lazy"
               decoding="async"
               className={`relative w-full h-full object-contain transition-transform duration-700 ${
-                isHovered && !isSold ? 'scale-110' : 'scale-100'
-              } ${isSold ? 'grayscale' : ''}`}
+                isHovered && !isSold && !isRented ? 'scale-110' : 'scale-100'
+              } ${isSold || isRented ? 'grayscale' : ''}`}
               onError={() => setImageError(true)}
             />
             {/* Gradient overlay */}
@@ -243,6 +245,19 @@ const PropertyCard: React.FC<PropertyCardProps> = ({ property, showToast, showCo
         {/* Top badges row */}
         <div className="absolute top-3 left-3 right-3 flex justify-between items-start z-10">
           <div className="flex flex-col gap-1.5">
+            {/* Listing Type Badge */}
+            {isRental ? (
+              <div className="bg-blue-600 text-white text-[10px] font-bold px-2 py-1 rounded-md shadow-lg flex items-center gap-1">
+                <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z" /></svg>
+                {t('property:forRent', 'FOR RENT').toUpperCase()}
+              </div>
+            ) : (
+              <div className="bg-emerald-600 text-white text-[10px] font-bold px-2 py-1 rounded-md shadow-lg flex items-center gap-1">
+                <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                {t('property:forSale', 'FOR SALE').toUpperCase()}
+              </div>
+            )}
+
             {/* Sold Badge */}
             {isSold && (
               <div className="bg-red-600 text-white text-[10px] font-bold px-2 py-1 rounded-md shadow-lg flex items-center gap-1">
@@ -251,8 +266,16 @@ const PropertyCard: React.FC<PropertyCardProps> = ({ property, showToast, showCo
               </div>
             )}
 
+            {/* Rented Badge */}
+            {isRented && (
+              <div className="bg-red-600 text-white text-[10px] font-bold px-2 py-1 rounded-md shadow-lg flex items-center gap-1">
+                <span className="w-1.5 h-1.5 bg-white rounded-full animate-pulse" />
+                {t('property:rented', 'RENTED').toUpperCase()}
+              </div>
+            )}
+
             {/* New Badge */}
-            {!isSold && isNew && !isActivelyPromoted && (
+            {!isSold && !isRented && isNew && !isActivelyPromoted && (
               <div className="bg-gradient-to-r from-emerald-500 to-green-600 text-white text-[10px] font-bold px-2 py-1 rounded-md shadow-lg flex items-center gap-1">
                 <span className="relative flex h-1.5 w-1.5">
                   <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-white opacity-75"></span>
@@ -342,6 +365,7 @@ const PropertyCard: React.FC<PropertyCardProps> = ({ property, showToast, showCo
           {/* Price Badge */}
           <span className="bg-gradient-to-r from-primary to-primary-dark text-white text-xs sm:text-sm font-bold px-2.5 py-1 rounded-md shadow-md">
             {formatPrice(property.price, property.country)}
+            {isRental && <span className="text-[10px] font-normal opacity-80">/{property.rentPeriod === 'weekly' ? t('common:wk', 'wk') : property.rentPeriod === 'daily' ? t('common:day', 'day') : t('common:mo', 'mo')}</span>}
           </span>
         </div>
         {/* Title */}

@@ -48,7 +48,8 @@
     "priceHigh": "Rent: High to Low",
     "sqftHigh": "Largest First",
     "search": "Search Rentals",
-    "reset": "Reset"
+    "reset": "Reset",
+    "searchCity": "Search by city or location..."
   },
   "form": {
     "title": "List Your Property for Rent",
