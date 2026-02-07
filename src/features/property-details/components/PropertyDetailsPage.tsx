@@ -29,6 +29,8 @@ import { useTrackView } from '@/src/features/view-stats/hooks';
 import PromotionModal from '@/src/features/promotions/components/PromotionModal';
 import { useNotification } from '@/src/shared/hooks/useNotification';
 import Footer from '@/components/shared/Footer';
+import Modal from '@/components/shared/Modal';
+import * as api from '@/services/apiService';
 
 /**
  * PropertyDetailsPage Component
@@ -106,6 +108,12 @@ const PropertyDetailsPage: React.FC<{ property: Property }> = ({ property: cache
 
   // State for promotion modal
   const [isPromotionModalOpen, setIsPromotionModalOpen] = useState(false);
+
+  // State for rental status management
+  const [showRentedModal, setShowRentedModal] = useState(false);
+  const [showAvailableConfirm, setShowAvailableConfirm] = useState(false);
+  const [rentedUntilDate, setRentedUntilDate] = useState('');
+  const [localStatus, setLocalStatus] = useState(property.status);
 
   // State for mobile breadcrumb collapse on scroll
   const [isBreadcrumbCollapsed, setIsBreadcrumbCollapsed] = useState(false);
@@ -300,6 +308,36 @@ const PropertyDetailsPage: React.FC<{ property: Property }> = ({ property: cache
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }, []);
 
+  // Rental status handlers
+  const handleMarkAsRented = useCallback(async () => {
+    const until = rentedUntilDate ? new Date(rentedUntilDate).getTime() : undefined;
+    setShowRentedModal(false);
+    setLocalStatus('rented');
+    setRentedUntilDate('');
+    try {
+      await api.markPropertyAsRented(property.id, rentedUntilDate || undefined);
+      fetchProperties?.();
+    } catch {
+      setLocalStatus('active');
+    }
+  }, [property.id, rentedUntilDate, fetchProperties]);
+
+  const handleMarkAsAvailable = useCallback(async () => {
+    setShowAvailableConfirm(false);
+    setLocalStatus('active');
+    try {
+      await api.markPropertyAsAvailable(property.id);
+      fetchProperties?.();
+    } catch {
+      setLocalStatus('rented');
+    }
+  }, [property.id, fetchProperties]);
+
+  // Keep localStatus in sync with property
+  useEffect(() => {
+    setLocalStatus(property.status);
+  }, [property.status]);
+
   const handleShare = async () => {
     const url = `${window.location.origin}/property/${property.id}`;
     try {
@@ -407,6 +445,49 @@ const PropertyDetailsPage: React.FC<{ property: Property }> = ({ property: cache
         />
       )}
 
+      {/* Mark as Rented Modal */}
+      <Modal
+        isOpen={showRentedModal}
+        onClose={() => { setShowRentedModal(false); setRentedUntilDate(''); }}
+        title="Mark as Rented"
+      >
+        <div className="space-y-4">
+          <p className="text-neutral-600 text-center text-sm">
+            Set the rental end date so visitors can see when the property becomes available again.
+          </p>
+          <div>
+            <label className="block text-sm font-medium text-neutral-700 mb-1">Rented Until</label>
+            <input
+              type="date"
+              value={rentedUntilDate}
+              onChange={(e) => setRentedUntilDate(e.target.value)}
+              min={new Date().toISOString().split('T')[0]}
+              className="w-full px-3 py-2 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary text-sm"
+            />
+            <p className="text-xs text-neutral-400 mt-1">Leave empty if the rental period is indefinite.</p>
+          </div>
+          <div className="flex justify-center gap-4 pt-2">
+            <button onClick={() => { setShowRentedModal(false); setRentedUntilDate(''); }} className="px-6 py-2 border border-neutral-300 text-neutral-700 font-semibold rounded-lg hover:bg-neutral-100">Cancel</button>
+            <button onClick={handleMarkAsRented} className="px-6 py-2 bg-orange-500 text-white font-semibold rounded-lg hover:bg-orange-600">Mark as Rented</button>
+          </div>
+        </div>
+      </Modal>
+
+      {/* Mark as Available Confirm Modal */}
+      <Modal
+        isOpen={showAvailableConfirm}
+        onClose={() => setShowAvailableConfirm(false)}
+        title="Mark as Available"
+      >
+        <p className="text-neutral-600 mb-6 text-center">
+          This will make the property active and visible to renters again.
+        </p>
+        <div className="flex justify-center gap-4">
+          <button onClick={() => setShowAvailableConfirm(false)} className="px-6 py-2 border border-neutral-300 text-neutral-700 font-semibold rounded-lg hover:bg-neutral-100">Cancel</button>
+          <button onClick={handleMarkAsAvailable} className="px-6 py-2 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700">Mark as Available</button>
+        </div>
+      </Modal>
+
       {/* Copied Toast */}
       {showCopiedToast && (
         <div className="fixed top-20 left-1/2 -translate-x-1/2 z-50 bg-neutral-800 text-white px-4 py-2 rounded-lg shadow-lg text-sm font-medium animate-fade-in">
@@ -429,7 +510,7 @@ const PropertyDetailsPage: React.FC<{ property: Property }> = ({ property: cache
       )}
 
       {/* Rented Banner */}
-      {property.status === 'rented' && (
+      {localStatus === 'rented' && (
         <div className="bg-gradient-to-r from-orange-500 to-amber-600 text-white py-3 px-4">
           <div className="max-w-7xl mx-auto flex items-center justify-center gap-3">
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -525,6 +606,31 @@ const PropertyDetailsPage: React.FC<{ property: Property }> = ({ property: cache
                     : t('property:actions.promote', 'Promote')}
                 </span>
               </button>
+            )}
+
+            {/* Rental Status Toggle - Only for rental property owners */}
+            {isOwner && property.listingType === 'rent' && localStatus !== 'sold' && (
+              localStatus === 'rented' ? (
+                <button
+                  onClick={() => setShowAvailableConfirm(true)}
+                  className="flex items-center gap-1 px-2 sm:px-3 py-1.5 sm:py-2 text-xs sm:text-sm font-semibold rounded-full shadow-md hover:shadow-lg transition-all bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600 text-white"
+                >
+                  <svg className="h-3.5 w-3.5 sm:h-4 sm:w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                  </svg>
+                  <span className="hidden sm:inline">Mark as Available</span>
+                </button>
+              ) : (
+                <button
+                  onClick={() => setShowRentedModal(true)}
+                  className="flex items-center gap-1 px-2 sm:px-3 py-1.5 sm:py-2 text-xs sm:text-sm font-semibold rounded-full shadow-md hover:shadow-lg transition-all bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white"
+                >
+                  <svg className="h-3.5 w-3.5 sm:h-4 sm:w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                  <span className="hidden sm:inline">Mark as Rented</span>
+                </button>
+              )
             )}
 
             {/* Share Button */}

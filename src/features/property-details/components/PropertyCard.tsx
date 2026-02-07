@@ -110,7 +110,9 @@ const PropertyCard: React.FC<PropertyCardProps> = ({ property, showToast, showCo
   const handleCardClick = useCallback((e: React.MouseEvent) => {
     e.stopPropagation();
     dispatch({ type: 'SET_SELECTED_PROPERTY', payload: property.id });
+    dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'property-details' });
     window.history.pushState({ propertyId: property.id }, '', `/property/${property.id}`);
+    window.dispatchEvent(new PopStateEvent('popstate'));
   }, [dispatch, property.id]);
 
   const handleFavoriteClick = useCallback(async (e: React.MouseEvent) => {
