@@ -185,7 +185,7 @@ const RentalSearchPage: React.FC = () => {
                     {/* Property List - Using same PropertyCard as the Buy page */}
                     <div className="flex-1 overflow-y-auto p-3" data-scroll-container>
                         {isLoading ? (
-                            <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-3">
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                                 {[...Array(6)].map((_, i) => (
                                     <PropertyCardSkeleton key={i} />
                                 ))}
@@ -210,12 +210,17 @@ const RentalSearchPage: React.FC = () => {
                                 </button>
                             </div>
                         ) : (
-                            <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-3">
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                                 {listProperties.map(property => (
-                                    <PropertyCard
+                                    <div
                                         key={property.id}
-                                        property={property}
-                                    />
+                                        onMouseEnter={() => setHoveredPropertyId(property.id)}
+                                        onMouseLeave={() => setHoveredPropertyId(null)}
+                                    >
+                                        <PropertyCard
+                                            property={property}
+                                        />
+                                    </div>
                                 ))}
                             </div>
                         )}

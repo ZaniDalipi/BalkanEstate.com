@@ -16,23 +16,127 @@ const RentalFilters: React.FC<RentalFiltersProps> = ({ filters, onFilterChange, 
     const { t } = useTranslation(['rental', 'seller', 'common']);
     const currencySymbol = getCurrencySymbol(filters.country !== 'any' ? filters.country : '');
 
-    const selectClasses = 'block w-full text-sm bg-white border border-neutral-200 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition-colors';
-    const inputClasses = 'block w-full text-sm bg-white border border-neutral-200 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition-colors';
+    const selectClasses = 'block w-full text-xs bg-white border border-neutral-200 rounded-md px-2 py-1.5 focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary transition-colors';
+    const inputClasses = 'block w-full text-xs bg-white border border-neutral-200 rounded-md px-2 py-1.5 focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary transition-colors';
+    const labelClasses = 'block text-[10px] font-medium text-neutral-500 mb-0.5 uppercase tracking-wide';
 
+    if (compact) {
+        // Compact horizontal layout for desktop sidebar
+        return (
+            <div className="px-3 py-2 space-y-2">
+                {/* Row 1: Country + Property Type */}
+                <div className="grid grid-cols-2 gap-2">
+                    <div>
+                        <label className={labelClasses}>{t('rental:filters.country')}</label>
+                        <select value={filters.country} onChange={(e) => onFilterChange('country', e.target.value)} className={selectClasses}>
+                            <option value="any">{t('rental:filters.allCountries')}</option>
+                            {BALKAN_LOCATIONS.map(c => <option key={c.code} value={c.name}>{c.name}</option>)}
+                        </select>
+                    </div>
+                    <div>
+                        <label className={labelClasses}>{t('rental:filters.propertyType')}</label>
+                        <select value={filters.propertyType} onChange={(e) => onFilterChange('propertyType', e.target.value)} className={selectClasses}>
+                            <option value="any">{t('rental:filters.allTypes')}</option>
+                            <option value="apartment">{t('seller:propertyTypes.apartment')}</option>
+                            <option value="house">{t('seller:propertyTypes.house')}</option>
+                            <option value="villa">{t('seller:propertyTypes.villa')}</option>
+                            <option value="other">{t('seller:propertyTypes.other')}</option>
+                        </select>
+                    </div>
+                </div>
+
+                {/* Row 2: Price + Beds + Baths */}
+                <div className="grid grid-cols-4 gap-1.5">
+                    <div>
+                        <label className={labelClasses}>{t('rental:filters.minRent')}</label>
+                        <div className="relative">
+                            <span className="absolute left-1.5 top-1/2 -translate-y-1/2 text-[10px] text-neutral-400">{currencySymbol}</span>
+                            <input type="number" placeholder="0" value={filters.minPrice ?? ''} onChange={(e) => onFilterChange('minPrice', e.target.value ? Number(e.target.value) : null)} className={`${inputClasses} pl-5`} />
+                        </div>
+                    </div>
+                    <div>
+                        <label className={labelClasses}>{t('rental:filters.maxRent')}</label>
+                        <div className="relative">
+                            <span className="absolute left-1.5 top-1/2 -translate-y-1/2 text-[10px] text-neutral-400">{currencySymbol}</span>
+                            <input type="number" placeholder={t('rental:filters.noLimit')} value={filters.maxPrice ?? ''} onChange={(e) => onFilterChange('maxPrice', e.target.value ? Number(e.target.value) : null)} className={`${inputClasses} pl-5`} />
+                        </div>
+                    </div>
+                    <div>
+                        <label className={labelClasses}>{t('rental:filters.minBeds')}</label>
+                        <select value={filters.beds ?? ''} onChange={(e) => onFilterChange('beds', e.target.value ? Number(e.target.value) : null)} className={selectClasses}>
+                            <option value="">{t('common:any')}</option>
+                            {[1, 2, 3, 4, 5].map(n => <option key={n} value={n}>{n}+</option>)}
+                        </select>
+                    </div>
+                    <div>
+                        <label className={labelClasses}>{t('rental:filters.minBaths')}</label>
+                        <select value={filters.baths ?? ''} onChange={(e) => onFilterChange('baths', e.target.value ? Number(e.target.value) : null)} className={selectClasses}>
+                            <option value="">{t('common:any')}</option>
+                            {[1, 2, 3, 4].map(n => <option key={n} value={n}>{n}+</option>)}
+                        </select>
+                    </div>
+                </div>
+
+                {/* Row 3: Furnishing + Sort + Checkboxes + Actions */}
+                <div className="flex items-end gap-2 flex-wrap">
+                    <div className="w-24">
+                        <label className={labelClasses}>{t('rental:filters.furnishing')}</label>
+                        <select value={filters.furnishing} onChange={(e) => onFilterChange('furnishing', e.target.value)} className={selectClasses}>
+                            <option value="any">{t('common:any')}</option>
+                            <option value="furnished">{t('rental:furnishing.furnished')}</option>
+                            <option value="semi-furnished">{t('rental:furnishing.semi-furnished')}</option>
+                            <option value="unfurnished">{t('rental:furnishing.unfurnished')}</option>
+                        </select>
+                    </div>
+                    <div className="w-28">
+                        <label className={labelClasses}>{t('rental:filters.sortBy')}</label>
+                        <select value={filters.sortBy} onChange={(e) => onFilterChange('sortBy', e.target.value)} className={selectClasses}>
+                            <option value="newest">{t('rental:filters.newest')}</option>
+                            <option value="price-low">{t('rental:filters.priceLow')}</option>
+                            <option value="price-high">{t('rental:filters.priceHigh')}</option>
+                            <option value="sqft-high">{t('rental:filters.sqftHigh')}</option>
+                        </select>
+                    </div>
+                    {/* Compact boolean toggles */}
+                    <div className="flex items-center gap-2 flex-wrap">
+                        {[
+                            { key: 'petsAllowed' as keyof Filters, label: t('rental:filters.petsAllowed') },
+                            { key: 'hasBalcony' as keyof Filters, label: t('rental:filters.hasBalcony') },
+                            { key: 'hasAirConditioning' as keyof Filters, label: 'AC' },
+                            { key: 'hasElevator' as keyof Filters, label: t('rental:filters.hasElevator') },
+                        ].map(({ key, label }) => (
+                            <label key={key} className="flex items-center gap-1 text-[10px] text-neutral-600 cursor-pointer whitespace-nowrap">
+                                <input
+                                    type="checkbox"
+                                    checked={(filters as any)[key] === true}
+                                    onChange={(e) => onFilterChange(key, e.target.checked ? true : null)}
+                                    className="rounded text-primary focus:ring-primary w-3 h-3"
+                                />
+                                {label}
+                            </label>
+                        ))}
+                    </div>
+                    {/* Actions */}
+                    <button onClick={onSearch} className="bg-primary text-white text-xs font-semibold py-1.5 px-4 rounded-md hover:bg-primary-dark transition-colors whitespace-nowrap">
+                        {t('rental:filters.search')}
+                    </button>
+                    <button onClick={onReset} className="text-[10px] text-neutral-500 hover:text-neutral-700 py-1.5 transition-colors whitespace-nowrap">
+                        {t('rental:filters.reset')}
+                    </button>
+                </div>
+            </div>
+        );
+    }
+
+    // Full layout for mobile modal
     return (
-        <div className={`space-y-3 ${compact ? 'p-3' : 'p-4'}`}>
+        <div className="space-y-3 p-4">
             {/* Country */}
             <div>
                 <label className="block text-xs font-medium text-neutral-600 mb-1">{t('rental:filters.country')}</label>
-                <select
-                    value={filters.country}
-                    onChange={(e) => onFilterChange('country', e.target.value)}
-                    className={selectClasses}
-                >
+                <select value={filters.country} onChange={(e) => onFilterChange('country', e.target.value)} className={selectClasses}>
                     <option value="any">{t('rental:filters.allCountries')}</option>
-                    {BALKAN_LOCATIONS.map(country => (
-                        <option key={country.code} value={country.name}>{country.name}</option>
-                    ))}
+                    {BALKAN_LOCATIONS.map(country => <option key={country.code} value={country.name}>{country.name}</option>)}
                 </select>
             </div>
 
@@ -42,26 +146,14 @@ const RentalFilters: React.FC<RentalFiltersProps> = ({ filters, onFilterChange, 
                     <label className="block text-xs font-medium text-neutral-600 mb-1">{t('rental:filters.minRent')}</label>
                     <div className="relative">
                         <span className="absolute left-2.5 top-1/2 -translate-y-1/2 text-xs text-neutral-400">{currencySymbol}</span>
-                        <input
-                            type="number"
-                            placeholder="0"
-                            value={filters.minPrice ?? ''}
-                            onChange={(e) => onFilterChange('minPrice', e.target.value ? Number(e.target.value) : null)}
-                            className={`${inputClasses} pl-6`}
-                        />
+                        <input type="number" placeholder="0" value={filters.minPrice ?? ''} onChange={(e) => onFilterChange('minPrice', e.target.value ? Number(e.target.value) : null)} className={`${inputClasses} pl-6`} />
                     </div>
                 </div>
                 <div>
                     <label className="block text-xs font-medium text-neutral-600 mb-1">{t('rental:filters.maxRent')}</label>
                     <div className="relative">
                         <span className="absolute left-2.5 top-1/2 -translate-y-1/2 text-xs text-neutral-400">{currencySymbol}</span>
-                        <input
-                            type="number"
-                            placeholder={t('rental:filters.noLimit')}
-                            value={filters.maxPrice ?? ''}
-                            onChange={(e) => onFilterChange('maxPrice', e.target.value ? Number(e.target.value) : null)}
-                            className={`${inputClasses} pl-6`}
-                        />
+                        <input type="number" placeholder={t('rental:filters.noLimit')} value={filters.maxPrice ?? ''} onChange={(e) => onFilterChange('maxPrice', e.target.value ? Number(e.target.value) : null)} className={`${inputClasses} pl-6`} />
                     </div>
                 </div>
             </div>
@@ -69,11 +161,7 @@ const RentalFilters: React.FC<RentalFiltersProps> = ({ filters, onFilterChange, 
             {/* Property Type */}
             <div>
                 <label className="block text-xs font-medium text-neutral-600 mb-1">{t('rental:filters.propertyType')}</label>
-                <select
-                    value={filters.propertyType}
-                    onChange={(e) => onFilterChange('propertyType', e.target.value)}
-                    className={selectClasses}
-                >
+                <select value={filters.propertyType} onChange={(e) => onFilterChange('propertyType', e.target.value)} className={selectClasses}>
                     <option value="any">{t('rental:filters.allTypes')}</option>
                     <option value="apartment">{t('seller:propertyTypes.apartment')}</option>
                     <option value="house">{t('seller:propertyTypes.house')}</option>
@@ -86,28 +174,16 @@ const RentalFilters: React.FC<RentalFiltersProps> = ({ filters, onFilterChange, 
             <div className="grid grid-cols-2 gap-2">
                 <div>
                     <label className="block text-xs font-medium text-neutral-600 mb-1">{t('rental:filters.minBeds')}</label>
-                    <select
-                        value={filters.beds ?? ''}
-                        onChange={(e) => onFilterChange('beds', e.target.value ? Number(e.target.value) : null)}
-                        className={selectClasses}
-                    >
+                    <select value={filters.beds ?? ''} onChange={(e) => onFilterChange('beds', e.target.value ? Number(e.target.value) : null)} className={selectClasses}>
                         <option value="">{t('common:any')}</option>
-                        {[1, 2, 3, 4, 5].map(n => (
-                            <option key={n} value={n}>{n}+</option>
-                        ))}
+                        {[1, 2, 3, 4, 5].map(n => <option key={n} value={n}>{n}+</option>)}
                     </select>
                 </div>
                 <div>
                     <label className="block text-xs font-medium text-neutral-600 mb-1">{t('rental:filters.minBaths')}</label>
-                    <select
-                        value={filters.baths ?? ''}
-                        onChange={(e) => onFilterChange('baths', e.target.value ? Number(e.target.value) : null)}
-                        className={selectClasses}
-                    >
+                    <select value={filters.baths ?? ''} onChange={(e) => onFilterChange('baths', e.target.value ? Number(e.target.value) : null)} className={selectClasses}>
                         <option value="">{t('common:any')}</option>
-                        {[1, 2, 3, 4].map(n => (
-                            <option key={n} value={n}>{n}+</option>
-                        ))}
+                        {[1, 2, 3, 4].map(n => <option key={n} value={n}>{n}+</option>)}
                     </select>
                 </div>
             </div>
@@ -115,11 +191,7 @@ const RentalFilters: React.FC<RentalFiltersProps> = ({ filters, onFilterChange, 
             {/* Furnishing */}
             <div>
                 <label className="block text-xs font-medium text-neutral-600 mb-1">{t('rental:filters.furnishing')}</label>
-                <select
-                    value={filters.furnishing}
-                    onChange={(e) => onFilterChange('furnishing', e.target.value)}
-                    className={selectClasses}
-                >
+                <select value={filters.furnishing} onChange={(e) => onFilterChange('furnishing', e.target.value)} className={selectClasses}>
                     <option value="any">{t('common:any')}</option>
                     <option value="furnished">{t('rental:furnishing.furnished')}</option>
                     <option value="semi-furnished">{t('rental:furnishing.semi-furnished')}</option>
@@ -130,39 +202,19 @@ const RentalFilters: React.FC<RentalFiltersProps> = ({ filters, onFilterChange, 
             {/* Boolean Filters */}
             <div className="flex flex-wrap gap-2">
                 <label className="flex items-center gap-1.5 text-xs text-neutral-600 cursor-pointer">
-                    <input
-                        type="checkbox"
-                        checked={filters.petsAllowed === true}
-                        onChange={(e) => onFilterChange('petsAllowed', e.target.checked ? true : null)}
-                        className="rounded text-primary focus:ring-primary"
-                    />
+                    <input type="checkbox" checked={filters.petsAllowed === true} onChange={(e) => onFilterChange('petsAllowed', e.target.checked ? true : null)} className="rounded text-primary focus:ring-primary" />
                     {t('rental:filters.petsAllowed')}
                 </label>
                 <label className="flex items-center gap-1.5 text-xs text-neutral-600 cursor-pointer">
-                    <input
-                        type="checkbox"
-                        checked={filters.hasBalcony === true}
-                        onChange={(e) => onFilterChange('hasBalcony', e.target.checked ? true : null)}
-                        className="rounded text-primary focus:ring-primary"
-                    />
+                    <input type="checkbox" checked={filters.hasBalcony === true} onChange={(e) => onFilterChange('hasBalcony', e.target.checked ? true : null)} className="rounded text-primary focus:ring-primary" />
                     {t('rental:filters.hasBalcony')}
                 </label>
                 <label className="flex items-center gap-1.5 text-xs text-neutral-600 cursor-pointer">
-                    <input
-                        type="checkbox"
-                        checked={filters.hasAirConditioning === true}
-                        onChange={(e) => onFilterChange('hasAirConditioning', e.target.checked ? true : null)}
-                        className="rounded text-primary focus:ring-primary"
-                    />
+                    <input type="checkbox" checked={filters.hasAirConditioning === true} onChange={(e) => onFilterChange('hasAirConditioning', e.target.checked ? true : null)} className="rounded text-primary focus:ring-primary" />
                     {t('rental:filters.airConditioning')}
                 </label>
                 <label className="flex items-center gap-1.5 text-xs text-neutral-600 cursor-pointer">
-                    <input
-                        type="checkbox"
-                        checked={filters.hasElevator === true}
-                        onChange={(e) => onFilterChange('hasElevator', e.target.checked ? true : null)}
-                        className="rounded text-primary focus:ring-primary"
-                    />
+                    <input type="checkbox" checked={filters.hasElevator === true} onChange={(e) => onFilterChange('hasElevator', e.target.checked ? true : null)} className="rounded text-primary focus:ring-primary" />
                     {t('rental:filters.hasElevator')}
                 </label>
             </div>
@@ -170,11 +222,7 @@ const RentalFilters: React.FC<RentalFiltersProps> = ({ filters, onFilterChange, 
             {/* Sort */}
             <div>
                 <label className="block text-xs font-medium text-neutral-600 mb-1">{t('rental:filters.sortBy')}</label>
-                <select
-                    value={filters.sortBy}
-                    onChange={(e) => onFilterChange('sortBy', e.target.value)}
-                    className={selectClasses}
-                >
+                <select value={filters.sortBy} onChange={(e) => onFilterChange('sortBy', e.target.value)} className={selectClasses}>
                     <option value="newest">{t('rental:filters.newest')}</option>
                     <option value="price-low">{t('rental:filters.priceLow')}</option>
                     <option value="price-high">{t('rental:filters.priceHigh')}</option>
@@ -184,16 +232,10 @@ const RentalFilters: React.FC<RentalFiltersProps> = ({ filters, onFilterChange, 
 
             {/* Actions */}
             <div className="flex gap-2 pt-1">
-                <button
-                    onClick={onSearch}
-                    className="flex-1 bg-primary text-white text-sm font-semibold py-2 px-4 rounded-lg hover:bg-primary-dark transition-colors"
-                >
+                <button onClick={onSearch} className="flex-1 bg-primary text-white text-sm font-semibold py-2 px-4 rounded-lg hover:bg-primary-dark transition-colors">
                     {t('rental:filters.search')}
                 </button>
-                <button
-                    onClick={onReset}
-                    className="text-sm text-neutral-500 hover:text-neutral-700 py-2 px-3 transition-colors"
-                >
+                <button onClick={onReset} className="text-sm text-neutral-500 hover:text-neutral-700 py-2 px-3 transition-colors">
                     {t('rental:filters.reset')}
                 </button>
             </div>

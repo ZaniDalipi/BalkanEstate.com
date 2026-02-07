@@ -219,9 +219,9 @@ const Map3DControls: React.FC<Map3DControlsProps> = ({
         </div>
       )}
 
-      {/* 2D/3D Toggle, Floor Labels Toggle, and Shadow Toggle - top right, OneGeo style */}
+      {/* 2D/3D Toggle, Floor Labels Toggle, Shadow Toggle, Nearby, and Timelapse - top right */}
       {!show360Tour && (
-        <div className="absolute top-3 sm:top-4 right-2 sm:right-4 z-10 flex flex-col gap-2">
+        <div className="absolute top-3 sm:top-4 right-2 sm:right-4 z-10 flex flex-col gap-2 max-h-[calc(100%-80px)] overflow-y-auto">
           <button
             onClick={toggle3DMode}
             className={`px-2.5 sm:px-3 py-1.5 sm:py-2 rounded-lg font-bold text-xs sm:text-sm shadow-lg transition-all ${
@@ -276,117 +276,117 @@ const Map3DControls: React.FC<Map3DControlsProps> = ({
               </span>
             </button>
           )}
-        </div>
-      )}
 
-      {/* Shadow Timelapse Panel - Right side, positioned below the control buttons */}
-      {enableShadowTimelapse && !show360Tour && (
-        <div className="absolute top-36 sm:top-40 right-2 sm:right-4 z-10 w-44 sm:w-52">
-          {!showTimelapse ? (
-            <button
-              onClick={() => setShowTimelapse(true)}
-              className="w-full flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2 sm:py-3 bg-slate-900/90 text-white font-medium rounded-lg shadow-lg hover:bg-slate-800 transition-all border border-slate-700/50"
-            >
-              <span className="text-sm sm:text-base">{'\u2600\uFE0F'}</span>
-              <span className="text-xs sm:text-sm">{t('property:shadowTimelapse.title', 'Sun & Shadows')}</span>
-            </button>
-          ) : (
-            <div className="bg-slate-900/95 backdrop-blur-sm rounded-xl shadow-xl overflow-hidden border border-slate-700/50">
-              {/* Header with time */}
-              <div
-                className="p-3 transition-all duration-500"
-                style={{
-                  background: `linear-gradient(135deg, ${TIME_LIGHTING[timelapse.timePeriod].skyColor}cc, ${TIME_LIGHTING[timelapse.timePeriod].fogColor}99)`
-                }}
-              >
-                <div className="flex items-center justify-between text-white">
-                  <div>
-                    <div className="text-2xl font-bold">{timelapse.formattedTime}</div>
-                    <div className="text-sm opacity-90">
-                      {PERIOD_ICONS[timelapse.timePeriod]} {t(`property:shadowTimelapse.periods.${timelapse.timePeriod}`, timelapse.timePeriod)}
+          {/* Shadow Timelapse - inline below control buttons to avoid overlap */}
+          {enableShadowTimelapse && (
+            <div className="w-44 sm:w-52">
+              {!showTimelapse ? (
+                <button
+                  onClick={() => setShowTimelapse(true)}
+                  className="w-full flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2 sm:py-3 bg-slate-900/90 text-white font-medium rounded-lg shadow-lg hover:bg-slate-800 transition-all border border-slate-700/50"
+                >
+                  <span className="text-sm sm:text-base">{'\u2600\uFE0F'}</span>
+                  <span className="text-xs sm:text-sm">{t('property:shadowTimelapse.title', 'Sun & Shadows')}</span>
+                </button>
+              ) : (
+                <div className="bg-slate-900/95 backdrop-blur-sm rounded-xl shadow-xl overflow-hidden border border-slate-700/50">
+                  {/* Header with time */}
+                  <div
+                    className="p-3 transition-all duration-500"
+                    style={{
+                      background: `linear-gradient(135deg, ${TIME_LIGHTING[timelapse.timePeriod].skyColor}cc, ${TIME_LIGHTING[timelapse.timePeriod].fogColor}99)`
+                    }}
+                  >
+                    <div className="flex items-center justify-between text-white">
+                      <div>
+                        <div className="text-2xl font-bold">{timelapse.formattedTime}</div>
+                        <div className="text-sm opacity-90">
+                          {PERIOD_ICONS[timelapse.timePeriod]} {t(`property:shadowTimelapse.periods.${timelapse.timePeriod}`, timelapse.timePeriod)}
+                        </div>
+                      </div>
+                      <button
+                        onClick={() => setShowTimelapse(false)}
+                        className="w-7 h-7 rounded-full flex items-center justify-center bg-black/20 hover:bg-black/40 transition-all"
+                      >
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                      </button>
                     </div>
                   </div>
-                  <button
-                    onClick={() => setShowTimelapse(false)}
-                    className="w-7 h-7 rounded-full flex items-center justify-center bg-black/20 hover:bg-black/40 transition-all"
-                  >
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                    </svg>
-                  </button>
-                </div>
-              </div>
 
-              {/* Controls */}
-              <div className="p-3 space-y-3">
-                {/* Play/Pause and quick jumps */}
-                <div className="flex items-center justify-center gap-2">
-                  <button
-                    onClick={timelapse.goToSunrise}
-                    className="p-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-lg transition-all"
-                    title="Sunrise"
-                  >
-                    {'\u{1F305}'}
-                  </button>
-                  <button
-                    onClick={timelapse.toggle}
-                    className="w-14 h-14 rounded-full flex items-center justify-center bg-blue-600 hover:bg-blue-500 text-white shadow-lg transition-all"
-                  >
-                    {timelapse.isPlaying ? (
-                      <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
-                        <path d="M6 4h4v16H6V4zm8 0h4v16h-4V4z" />
-                      </svg>
-                    ) : (
-                      <svg className="w-6 h-6 ml-1" fill="currentColor" viewBox="0 0 24 24">
-                        <path d="M8 5v14l11-7z" />
-                      </svg>
-                    )}
-                  </button>
-                  <button
-                    onClick={timelapse.goToSunset}
-                    className="p-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-lg transition-all"
-                    title="Sunset"
-                  >
-                    {'\u{1F307}'}
-                  </button>
-                </div>
+                  {/* Controls */}
+                  <div className="p-3 space-y-3">
+                    {/* Play/Pause and quick jumps */}
+                    <div className="flex items-center justify-center gap-2">
+                      <button
+                        onClick={timelapse.goToSunrise}
+                        className="p-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-lg transition-all"
+                        title="Sunrise"
+                      >
+                        {'\u{1F305}'}
+                      </button>
+                      <button
+                        onClick={timelapse.toggle}
+                        className="w-14 h-14 rounded-full flex items-center justify-center bg-blue-600 hover:bg-blue-500 text-white shadow-lg transition-all"
+                      >
+                        {timelapse.isPlaying ? (
+                          <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M6 4h4v16H6V4zm8 0h4v16h-4V4z" />
+                          </svg>
+                        ) : (
+                          <svg className="w-6 h-6 ml-1" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M8 5v14l11-7z" />
+                          </svg>
+                        )}
+                      </button>
+                      <button
+                        onClick={timelapse.goToSunset}
+                        className="p-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-lg transition-all"
+                        title="Sunset"
+                      >
+                        {'\u{1F307}'}
+                      </button>
+                    </div>
 
-                {/* Progress bar */}
-                <div
-                  className="relative h-2 bg-slate-700 rounded-full cursor-pointer overflow-hidden"
-                  onClick={(e) => {
-                    const rect = e.currentTarget.getBoundingClientRect();
-                    const percent = ((e.clientX - rect.left) / rect.width) * 100;
-                    timelapse.seekToProgress(Math.max(0, Math.min(100, percent)));
-                  }}
-                >
-                  <div
-                    className="absolute inset-y-0 left-0 rounded-full bg-blue-500 transition-all duration-100"
-                    style={{ width: `${timelapse.progress}%` }}
-                  />
-                  <div
-                    className="absolute top-1/2 -translate-y-1/2 w-3 h-3 bg-white rounded-full shadow-md"
-                    style={{ left: `calc(${timelapse.progress}% - 6px)` }}
-                  />
-                </div>
-
-                {/* Speed controls */}
-                <div className="flex items-center justify-center gap-1">
-                  {(['slow', 'normal', 'fast', 'ultra'] as const).map((s) => (
-                    <button
-                      key={s}
-                      onClick={() => timelapse.setSpeed(s)}
-                      className={`px-2 py-1 text-xs font-medium rounded transition-all ${
-                        timelapse.speed === s
-                          ? 'bg-blue-600 text-white'
-                          : 'bg-slate-800 text-slate-300 hover:bg-slate-700'
-                      }`}
+                    {/* Progress bar */}
+                    <div
+                      className="relative h-2 bg-slate-700 rounded-full cursor-pointer overflow-hidden"
+                      onClick={(e) => {
+                        const rect = e.currentTarget.getBoundingClientRect();
+                        const percent = ((e.clientX - rect.left) / rect.width) * 100;
+                        timelapse.seekToProgress(Math.max(0, Math.min(100, percent)));
+                      }}
                     >
-                      {s === 'slow' ? '0.5x' : s === 'normal' ? '1x' : s === 'fast' ? '2x' : '4x'}
-                    </button>
-                  ))}
+                      <div
+                        className="absolute inset-y-0 left-0 rounded-full bg-blue-500 transition-all duration-100"
+                        style={{ width: `${timelapse.progress}%` }}
+                      />
+                      <div
+                        className="absolute top-1/2 -translate-y-1/2 w-3 h-3 bg-white rounded-full shadow-md"
+                        style={{ left: `calc(${timelapse.progress}% - 6px)` }}
+                      />
+                    </div>
+
+                    {/* Speed controls */}
+                    <div className="flex items-center justify-center gap-1">
+                      {(['slow', 'normal', 'fast', 'ultra'] as const).map((s) => (
+                        <button
+                          key={s}
+                          onClick={() => timelapse.setSpeed(s)}
+                          className={`px-2 py-1 text-xs font-medium rounded transition-all ${
+                            timelapse.speed === s
+                              ? 'bg-blue-600 text-white'
+                              : 'bg-slate-800 text-slate-300 hover:bg-slate-700'
+                          }`}
+                        >
+                          {s === 'slow' ? '0.5x' : s === 'normal' ? '1x' : s === 'fast' ? '2x' : '4x'}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
                 </div>
-              </div>
+              )}
             </div>
           )}
         </div>

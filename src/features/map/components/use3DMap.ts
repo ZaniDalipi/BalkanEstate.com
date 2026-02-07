@@ -165,9 +165,9 @@ export function use3DMap(props: Map3DBuildingsProps) {
         const dist = Math.round(Math.sqrt(dLat * dLat + dLng * dLng));
 
         const markerEl = document.createElement('div');
-        markerEl.style.cssText = 'cursor: pointer; transition: transform 0.2s;';
+        markerEl.style.cssText = 'cursor: pointer;';
         markerEl.innerHTML = `
-          <div style="
+          <div class="poi-inner" style="
             display: flex;
             align-items: center;
             gap: 4px;
@@ -179,6 +179,7 @@ export function use3DMap(props: Map3DBuildingsProps) {
             font-size: 11px;
             white-space: nowrap;
             max-width: 180px;
+            transition: transform 0.2s, box-shadow 0.2s;
           ">
             <span style="font-size: 14px;">${cat.icon}</span>
             <div style="overflow: hidden;">
@@ -189,8 +190,9 @@ export function use3DMap(props: Map3DBuildingsProps) {
             </div>
           </div>
         `;
-        markerEl.addEventListener('mouseenter', () => { markerEl.style.transform = 'scale(1.15)'; markerEl.style.zIndex = '100'; });
-        markerEl.addEventListener('mouseleave', () => { markerEl.style.transform = 'scale(1)'; markerEl.style.zIndex = '1'; });
+        const innerEl = markerEl.querySelector('.poi-inner') as HTMLElement;
+        markerEl.addEventListener('mouseenter', () => { if (innerEl) { innerEl.style.transform = 'scale(1.15)'; innerEl.style.boxShadow = '0 4px 12px rgba(0,0,0,0.25)'; } markerEl.style.zIndex = '100'; });
+        markerEl.addEventListener('mouseleave', () => { if (innerEl) { innerEl.style.transform = 'scale(1)'; innerEl.style.boxShadow = '0 2px 8px rgba(0,0,0,0.15)'; } markerEl.style.zIndex = '1'; });
 
         const marker = new maplibregl.Marker({ element: markerEl, anchor: 'center' })
           .setLngLat([elLng, elLat])
@@ -203,25 +205,12 @@ export function use3DMap(props: Map3DBuildingsProps) {
     }
   }, []);
 
-  // Add property marker with optional floor indicator
-  // For apartments with floor info, we skip this marker and use the 3D building visualization instead
+  // Add property marker - always shows a blue dot at the property location
   const addPropertyMarker = useCallback((
     mapInstance: maplibregl.Map,
     latitude: number,
     longitude: number,
-    floorNum?: number,
-    totalFlrs?: number,
-    propType?: string
   ) => {
-    // Skip marker for apartments - we use 3D building visualization instead
-    const isApartmentWithFloors = propType === 'apartment' && floorNum != null && totalFlrs != null && totalFlrs > 0;
-
-    if (isApartmentWithFloors) {
-      // Don't add the blue pole marker for apartments - 3D building handles this
-      return;
-    }
-
-    // Standard marker for houses/villas/land
     const markerEl = document.createElement('div');
     markerEl.innerHTML = `
       <div style="position: relative; width: 48px; height: 48px;">
@@ -819,8 +808,8 @@ export function use3DMap(props: Map3DBuildingsProps) {
         }
       }
 
-      // Add property marker with floor info
-      addPropertyMarker(mapInstance, lat, lng, floorNumber, totalFloors, propertyType);
+      // Always add the blue dot property marker
+      addPropertyMarker(mapInstance, lat, lng);
 
       // Show POIs (Points of Interest) for neighborhood context
       // Only hide very minor labels that would clutter the 3D view
