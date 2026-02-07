@@ -306,6 +306,16 @@ export const PropertyContact: React.FC<PropertyContactProps> = ({
               {t('property:actions.callSeller')}
             </a>
           )}
+          {/* Rented availability notice */}
+          {property.status === 'rented' && property.rentedUntil && (
+            <div className="w-full p-3 bg-orange-50 border border-orange-200 rounded-xl text-center mb-1">
+              <p className="text-xs font-semibold text-orange-700">
+                Available from {new Date(property.rentedUntil).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })}
+              </p>
+              <p className="text-[10px] text-orange-600 mt-0.5">You can inquire now to reserve it</p>
+            </div>
+          )}
+
           <button
             onClick={onContactSeller}
             disabled={isCreatingConversation || property.status === 'sold'}
@@ -318,6 +328,8 @@ export const PropertyContact: React.FC<PropertyContactProps> = ({
               ? t('property:actions.startingChat')
               : property.status === 'sold'
               ? t('property:actions.propertySold')
+              : property.status === 'rented'
+              ? 'Inquire for Availability'
               : t('property:actions.messageSeller')}
           </button>
 

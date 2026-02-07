@@ -86,17 +86,23 @@ export const getProperties = async (
     // Build filter object
     const filter: any = {};
 
-    // Default to active properties + recently sold (within 24 hours)
-    // Recently sold properties will be shown at the top with a "SOLD" label
+    // Default to active properties + recently sold (within 24 hours) + rented (for rental listings)
     if (!status || status === 'active') {
       const twentyFourHoursAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
-      filter.$or = [
+      const orConditions: any[] = [
         { status: 'active' },
         {
           status: 'sold',
           soldAt: { $gte: twentyFourHoursAgo }
         }
       ];
+
+      // Include rented properties so they appear on the rental search page
+      if (req.query.listingType === 'rent') {
+        orConditions.push({ status: 'rented' });
+      }
+
+      filter.$or = orConditions;
     } else {
       filter.status = status;
     }

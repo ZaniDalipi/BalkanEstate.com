@@ -75,6 +75,9 @@ export function useRentalSearch() {
                 id: p._id || p.id,
                 sellerId: p.sellerId?._id || p.sellerId,
                 listingType: p.listingType || 'rent',
+                rentedAt: p.rentedAt ? new Date(p.rentedAt).getTime() : undefined,
+                rentedUntil: p.rentedUntil ? new Date(p.rentedUntil).getTime() : undefined,
+                availableFrom: p.availableFrom ? new Date(p.availableFrom).getTime() : undefined,
                 seller: p.sellerId ? {
                     type: p.sellerId.role === 'agent' ? 'agent' : 'private',
                     name: p.sellerId.name || '',

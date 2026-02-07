@@ -268,9 +268,13 @@ const PropertyCard: React.FC<PropertyCardProps> = ({ property, showToast, showCo
 
             {/* Rented Badge */}
             {isRented && (
-              <div className="bg-red-600 text-white text-[10px] font-bold px-2 py-1 rounded-md shadow-lg flex items-center gap-1">
-                <span className="w-1.5 h-1.5 bg-white rounded-full animate-pulse" />
-                {t('property:rented', 'RENTED').toUpperCase()}
+              <div className="bg-orange-500 text-white text-[10px] font-bold px-2 py-1 rounded-md shadow-lg flex items-center gap-1">
+                <span className="w-1.5 h-1.5 bg-white rounded-full" />
+                {property?.rentedUntil ? (
+                  <>AVAILABLE {new Date(property.rentedUntil).toLocaleDateString('en-GB', { month: 'short', year: 'numeric' }).toUpperCase()}</>
+                ) : (
+                  t('property:rented', 'RENTED').toUpperCase()
+                )}
               </div>
             )}
 
