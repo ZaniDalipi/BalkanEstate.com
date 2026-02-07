@@ -27,7 +27,7 @@ export const getConversations = async (
     const conversations = await Conversation.find({
       $or: [{ buyerId: String((req.user as IUser)._id) }, { sellerId: String((req.user as IUser)._id) }],
     })
-      .populate('propertyId', 'title images price city country address propertyType sellerId')
+      .populate('propertyId', 'title imageUrl images price city country address propertyType sellerId')
       .populate('buyerId', 'name email phone avatarUrl')
       .populate('sellerId', 'name email phone avatarUrl role agencyName')
       .sort({ lastMessageAt: -1 });
@@ -70,7 +70,7 @@ export const getConversation = async (
     }
 
     const conversation = await Conversation.findById(req.params.id)
-      .populate('propertyId', 'title images price city country address propertyType sellerId')
+      .populate('propertyId', 'title imageUrl images price city country address propertyType sellerId')
       .populate('buyerId', 'name email phone avatarUrl')
       .populate('sellerId', 'name email phone avatarUrl role agencyName');
 
@@ -161,7 +161,7 @@ export const createConversation = async (
       buyerId: String((req.user as IUser)._id),
       sellerId: property.sellerId,
     })
-      .populate('propertyId', 'title images price city country address propertyType sellerId')
+      .populate('propertyId', 'title imageUrl images price city country address propertyType sellerId')
       .populate('buyerId', 'name email phone avatarUrl')
       .populate('sellerId', 'name email phone avatarUrl role agencyName');
 

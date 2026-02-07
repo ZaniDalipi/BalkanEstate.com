@@ -227,7 +227,7 @@ const ConversationView: React.FC<ConversationViewProps> = ({ conversation, onBac
                     </div>
                 ) : (
                     <img
-                        src={property.imageUrl}
+                        src={property.imageUrl || property.images?.[0]?.url}
                         alt={property.address}
                         loading="lazy"
                         decoding="async"
@@ -243,7 +243,9 @@ const ConversationView: React.FC<ConversationViewProps> = ({ conversation, onBac
                     <button
                         onClick={() => {
                             dispatch({ type: 'SET_SELECTED_PROPERTY', payload: property.id });
+                            dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'property-details' });
                             window.history.pushState({ propertyId: property.id }, '', `/property/${property.id}`);
+                            window.dispatchEvent(new PopStateEvent('popstate'));
                         }}
                         className="hidden sm:block px-3 py-1.5 text-xs sm:text-sm font-semibold bg-primary-light text-primary-dark rounded-full hover:bg-primary/20 transition-colors"
                     >

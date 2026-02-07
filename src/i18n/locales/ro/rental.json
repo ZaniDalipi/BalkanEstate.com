@@ -167,7 +167,79 @@
     "leaseAgreement": "Contract de Închiriere",
     "securityDeposit": "Garanție",
     "tenantRights": "Drepturile Chiriașului",
-    "landlordObligations": "Obligațiile Proprietarului"
+    "landlordObligations": "Obligațiile Proprietarului",
+    "countries": {
+      "albania": {
+        "summary": "Legislația albaneză privind închirierea este reglementată de Codul Civil (Articolele 801-849). Contractele pe o durată mai mare de 1 an trebuie înregistrate.",
+        "lease": ["Se recomandă contract scris; contractele verbale sunt valabile, dar greu de aplicat", "Contractele pe o durată mai mare de 1 an trebuie notarizate și înregistrate la IPRO", "Contractul trebuie să specifice suma chiriei, condițiile de plată, durata și garanția"],
+        "deposit": ["De obicei 1-2 luni de chirie", "Trebuie returnat în termen de 30 de zile de la încetarea contractului, dacă nu există daune", "Proprietarul trebuie să furnizeze o listă detaliată a deducerilor dacă reține garanția"],
+        "tenant": ["Proprietarul trebuie să mențină proprietatea în condiții locuibile", "Chiriașul nu poate fi evacuat fără hotărâre judecătorească", "Preaviz minim de 3 luni pentru rezilierea contractului", "Majorările de chirie necesită acord reciproc sau clauză contractuală"],
+        "landlord": ["Plata impozitului pe proprietate și a taxelor de întreținere a clădirii", "Declararea veniturilor din chirie la autoritățile fiscale (impozit pe venit de 15%)", "Asigurarea că proprietatea respectă standardele de siguranță și locuibilitate"]
+      },
+      "bosnia-herzegovina": {
+        "summary": "Legislația privind închirierea variază în funcție de entitate (Federația BiH și Republika Srpska). Se recomandă insistent contracte scrise.",
+        "lease": ["Contract scris necesar pentru protecție juridică", "Trebuie înregistrat la autoritatea fiscală locală", "Termeni standard de închiriere: 1 an cu opțiune de reînnoire"],
+        "deposit": ["De obicei 1-2 luni de chirie", "Condițiile de returnare trebuie specificate în contract"],
+        "tenant": ["Dreptul la o proprietate locuibilă cu utilități de bază", "Evacuarea necesită proces judiciar; preaviz minim de 30 de zile", "Chiriașul poate rezilia contractul cu preavizul specificat în contract"],
+        "landlord": ["Înregistrarea contractului de închiriere la autoritățile fiscale", "Plata impozitului pe venit din chirii (cotă unică de 10%)", "Menținerea integrității structurale a proprietății"]
+      },
+      "bulgaria": {
+        "summary": "Legislația bulgară privind închirierea se bazează pe Legea Obligațiilor și Contractelor. Contractele pe o durată mai mare de 1 an trebuie să fie în scris.",
+        "lease": ["Contract scris obligatoriu pentru închirierile pe o durată mai mare de 1 an", "Contractul trebuie notarizat pentru a fi executoriu în instanță", "Durata maximă a contractului: 10 ani (poate fi reînnoit)"],
+        "deposit": ["De obicei 1-2 luni de chirie", "Trebuie returnat la sfârșitul contractului, minus deducerile legitime"],
+        "tenant": ["Dreptul la folosința liniștită a proprietății", "Proprietarul trebuie să acorde un preaviz de 1 lună înainte de reziliere", "Chiriașul poate rezilia cu preaviz scris de 1 lună", "Majorarea chiriei este limitată la o dată pe an"],
+        "landlord": ["Plata impozitului forfetar de 10% pe veniturile din chirii", "Menținerea proprietății în starea convenită", "Înregistrarea contractului la Agenția Națională de Venituri"]
+      },
+      "croatia": {
+        "summary": "Legislația croată privind închirierea este reglementată de Legea Închirierii Locuințelor. Contractele trebuie să fie în formă scrisă.",
+        "lease": ["Contractul scris este obligatoriu", "Trebuie înregistrat la biroul fiscal local în termen de 30 de zile", "Contractul trebuie să includă: părțile, descrierea proprietății, chiria, durata, condițiile de reziliere"],
+        "deposit": ["Practică obișnuită: 1-2 luni de chirie", "Nu este impus prin lege, dar este standard în practică", "Condițiile de returnare trebuie menționate în contract"],
+        "tenant": ["Chiriașul este protejat împotriva evacuării arbitrare", "Preaviz minim de 90 de zile pentru reziliere de către proprietar", "Chiriașul poate solicita reparațiile necesare", "Subînchirierea numai cu acordul scris al proprietarului"],
+        "landlord": ["Plata impozitului de 12% pe veniturile din chirii", "Menținerea proprietății la standarde locuibile", "Furnizarea de chitanțe pentru plata chiriei, la cerere"]
+      },
+      "greece": {
+        "summary": "Legislația greacă privind închirierea oferă protecții puternice pentru chiriași. Contractele rezidențiale au o durată minimă de 3 ani prin lege.",
+        "lease": ["Contractele scrise sau verbale sunt valabile; se recomandă insistent forma scrisă", "Durata minimă a contractului rezidențial: 3 ani (prin lege)", "Proprietarul nu poate rezilia contractul înainte de 3 ani fără motiv", "Contractul trebuie depus la Autoritatea Independentă pentru Venituri Publice"],
+        "deposit": ["De obicei 2 luni de chirie", "Trebuie returnat în termen de 2 luni de la încetarea contractului", "Proprietarul trebuie să depună garanția într-un cont purtător de dobândă"],
+        "tenant": ["Protecție puternică conform Codului Civil Grec (Articolele 574-618)", "Chiriașul nu poate fi evacuat în perioada minimă de 3 ani", "Majorările de chirie sunt limitate la 75% din creșterea anuală a IPC", "Dreptul de a reînnoi contractul în condiții similare"],
+        "landlord": ["Declararea veniturilor din chirii (impozitate progresiv între 15-45%)", "Emiterea declarației anuale a veniturilor din chirii", "Menținerea proprietății în starea convenită la semnarea contractului"]
+      },
+      "kosovo": {
+        "summary": "Legislația din Kosovo privind închirierea se bazează pe Legea Raporturilor Obligaționale. Se recomandă contracte scrise.",
+        "lease": ["Se recomandă contract scris pentru forță juridică", "Trebuie să includă suma chiriei, durata și condițiile", "Înregistrarea nu este obligatorie, dar este recomandată în scopuri fiscale"],
+        "deposit": ["De obicei 1 lună de chirie", "Condițiile sunt negociate între părți"],
+        "tenant": ["Dreptul la o locuință locuibilă", "Evacuarea necesită preaviz rezonabil (de obicei 30 de zile)", "Chiriașul poate solicita reparații esențiale"],
+        "landlord": ["Declararea veniturilor din chirii la Administrația Fiscală din Kosovo", "Plata impozitului pe venit din chirii (9% pentru persoane fizice)", "Menținerea siguranței și locuibilității proprietății"]
+      },
+      "montenegro": {
+        "summary": "Legislația muntenegreană privind închirierea urmează Legea Locuinței. Contractele de închiriere scrise trebuie înregistrate.",
+        "lease": ["Contract scris obligatoriu", "Trebuie înregistrat la municipalitatea locală", "Trebuie să specifice toți termenii, inclusiv responsabilitatea pentru utilități"],
+        "deposit": ["De obicei 1-2 luni de chirie", "Trebuie definit clar în contract"],
+        "tenant": ["Dreptul la folosință liniștită", "Nu poate fi evacuat fără preaviz corespunzător și proces legal", "Are dreptul la condiții de locuit locuibile"],
+        "landlord": ["Înregistrarea contractului la autoritățile municipale", "Plata impozitului de 9% pe veniturile din chirii", "Menținerea integrității structurale a proprietății"]
+      },
+      "north-macedonia": {
+        "summary": "Legislația din Macedonia de Nord privind închirierea se bazează pe Legea Obligațiilor. Contractele scrise oferă cea mai bună protecție juridică.",
+        "lease": ["Se recomandă insistent contract scris", "Notarizarea adaugă forță executorie", "Trebuie să includă chiria, graficul de plată, durata și clauzele de reziliere"],
+        "deposit": ["De obicei 1 lună de chirie", "Condițiile de returnare specificate în contract"],
+        "tenant": ["Dreptul la o proprietate locuibilă", "Preaviz minim de 30 de zile pentru evacuare", "Poate solicita reparații pentru serviciile esențiale"],
+        "landlord": ["Declararea veniturilor din chirii la Oficiul de Venituri Publice", "Plata impozitului pe venit de 10% din chirii", "Menținerea proprietății la standardele convenite"]
+      },
+      "romania": {
+        "summary": "Legislația română privind închirierea este reglementată de Codul Civil (2011). Contractele trebuie înregistrate la ANAF pentru conformitate fiscală.",
+        "lease": ["Se recomandă insistent contract scris", "Trebuie înregistrat la ANAF (autoritatea fiscală) în termen de 30 de zile", "Contractele înregistrate sunt titluri executorii", "Durata obișnuită: 1-5 ani"],
+        "deposit": ["De obicei 1-3 luni de chirie", "Trebuie returnat în termen de 30 de zile de la încetarea contractului", "Deducerile trebuie documentate cu dovezi"],
+        "tenant": ["Dreptul la o proprietate locuibilă în stare bună", "Nu poate fi evacuat fără hotărâre judecătorească", "Preaviz minim de 60 de zile pentru nereînnoirea contractului de către proprietar", "Condițiile de majorare a chiriei trebuie stipulate în contract"],
+        "landlord": ["Plata impozitului pe venit de 10% din chirii", "Înregistrarea contractului la ANAF", "Emiterea de chitanțe pentru toate plățile de chirie", "Menținerea proprietății și plata reparațiilor majore"]
+      },
+      "serbia": {
+        "summary": "Legislația sârbă privind închirierea se bazează pe Legea Locuinței și Întreținerii Clădirilor. Contractele scrise sunt obligatorii.",
+        "lease": ["Contractul scris este obligatoriu prin lege", "Trebuie autentificat de un notar pentru forță executorie deplină", "Chiriașul trebuie înregistrat la adresa proprietății", "Contractul trebuie raportat la Administrația Fiscală"],
+        "deposit": ["De obicei 1-2 luni de chirie", "De obicei păstrat de proprietar, nu în custodie", "Condițiile de returnare trebuie specificate în contract"],
+        "tenant": ["Dreptul la folosința pașnică a proprietății", "Evacuarea doar prin proces judiciar legal", "Preaviz minim de 90 de zile pentru nereînnoirea contractului de către proprietar", "Chiriașul poate deduce costurile de reparații din chirie dacă proprietarul nu acționează"],
+        "landlord": ["Plata impozitului pe venit de 20% din chirii", "Înregistrarea chiriașului la adresa proprietății", "Depunerea declarațiilor fiscale anuale inclusiv veniturile din chirii", "Menținerea zonelor comune și a elementelor structurale"]
+      }
+    }
   },
   "dashboard": {
     "title": "Portofoliu de Închirieri",

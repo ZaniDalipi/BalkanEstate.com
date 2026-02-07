@@ -56,7 +56,7 @@ const ConversationListItem: React.FC<ConversationListItemProps> = ({ conversatio
                     </div>
                 ) : (
                     <img
-                        src={property.imageUrl}
+                        src={property.imageUrl || property.images?.[0]?.url}
                         alt={property.address}
                         loading="lazy"
                         decoding="async"
