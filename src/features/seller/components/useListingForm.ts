@@ -21,7 +21,13 @@ export const useListingForm = (propertyToEdit: Property | null) => {
     const [step, setStep] = useState<Step>('init');
     const [images, setImages] = useState<ImageData[]>([]);
     const [floorplanImage, setFloorplanImage] = useState<ImageData>({ file: null, previewUrl: '' });
-    const [listingData, setListingData] = useState<ListingData>(initialListingData);
+
+    // Determine initial listingType based on current view
+    const initialType = state.activeView === 'create-rental' ? 'rent' : 'sale';
+    const [listingData, setListingData] = useState<ListingData>({
+        ...initialListingData,
+        listingType: propertyToEdit?.listingType || initialType as any,
+    });
     const [language, setLanguage] = useState('English');
     const [aiPropertyType, setAiPropertyType] = useState<'house' | 'apartment' | 'villa' | 'land' | 'other'>('house');
     const [isSubmitting, setIsSubmitting] = useState(false);

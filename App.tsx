@@ -53,7 +53,6 @@ const SessionExpiredModal = lazy(() => import('./src/features/auth/components/Se
 const CityRecommendations = lazy(() => import('./src/features/cities/components/CityRecommendations'));
 const CreateListingPage = lazy(() => import('./src/features/seller/components/SellerDashboard'));
 const RentalSearchPage = lazy(() => import('./src/features/rental/components/RentalSearchPage'));
-const RentalListingForm = lazy(() => import('./src/features/rental/components/RentalListingForm'));
 const SavedSearchesPage = lazy(() => import('./src/features/saved/components/SavedSearchesPage'));
 const SavedPropertiesPage = lazy(() => import('./src/features/saved/components/SavedHomesPage'));
 const InboxPage = lazy(() => import('./src/features/messaging/components/InboxPage'));
@@ -520,7 +519,7 @@ const AppContent: React.FC<{ onToggleSidebar: () => void }> = ({ onToggleSidebar
       case 'rentals':
         return <QueryErrorBoundary><RentalSearchPage /></QueryErrorBoundary>;
       case 'create-rental':
-        return <RentalListingForm />;
+        return <CreateListingPage />;
       case 'agents':
         return <QueryErrorBoundary><AgentsPage /></QueryErrorBoundary>;
       case 'agencies':

@@ -11,14 +11,16 @@ import { useListingForm } from './useListingForm';
 import ListingFormFields from './ListingFormFields';
 import ListingPropertyFeatures from './ListingPropertyFeatures';
 import ListingImageUpload from './ListingImageUpload';
+import NumberInputWithSteppers from '@/components/shared/NumberInputWithSteppers';
+import { getCurrencySymbol } from '@/utils/currency';
 import {
-    LANGUAGES, CheckCircleIcon, UploadIcon,
+    LANGUAGES, CheckCircleIcon, UploadIcon, TagListInput,
     floatingInputClasses, floatingLabelClasses, floatingSelectLabelClasses, inputBaseClasses,
 } from './ListingFormHelpers';
 
 // --- Main Component ---
 const GeminiDescriptionGenerator: React.FC<{ propertyToEdit: Property | null }> = ({ propertyToEdit }) => {
-    const { t } = useTranslation(['newListing', 'seller', 'common', 'validation']);
+    const { t } = useTranslation(['newListing', 'seller', 'rental', 'common', 'validation']);
 
     const {
         mode, setMode,
@@ -86,9 +88,57 @@ const GeminiDescriptionGenerator: React.FC<{ propertyToEdit: Property | null }> 
         );
     }
 
+    const isRental = listingData.listingType === 'rent';
+    const currencySymbol = getCurrencySymbol(selectedCountry);
+
     return (
         <>
         <form onSubmit={handleSubmit}>
+            {/* Listing Type Toggle: Sale / Rent */}
+            <div className="flex justify-center mb-6">
+                <div className="bg-neutral-100 p-1 rounded-full flex items-center space-x-1 border border-neutral-200 shadow-sm">
+                    <button
+                        type="button"
+                        onClick={() => setListingData(prev => ({ ...prev, listingType: 'sale' }))}
+                        className={`px-6 py-2.5 rounded-full text-sm font-semibold transition-all duration-300 flex items-center gap-2 ${
+                            !isRental ? 'bg-white text-primary shadow' : 'text-neutral-600 hover:bg-neutral-200'
+                        }`}
+                    >
+                        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        {t('seller:createListing.listingType.sale', 'For Sale')}
+                    </button>
+                    <button
+                        type="button"
+                        onClick={() => setListingData(prev => ({ ...prev, listingType: 'rent' }))}
+                        className={`px-6 py-2.5 rounded-full text-sm font-semibold transition-all duration-300 flex items-center gap-2 ${
+                            isRental ? 'bg-white text-blue-600 shadow' : 'text-neutral-600 hover:bg-neutral-200'
+                        }`}
+                    >
+                        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z" />
+                        </svg>
+                        {t('seller:createListing.listingType.rent', 'For Rent')}
+                    </button>
+                </div>
+            </div>
+
+            {/* Rental indicator */}
+            {isRental && (
+                <div className="flex items-center gap-3 p-3 bg-blue-50 rounded-lg border border-blue-200 mb-6">
+                    <div className="bg-blue-100 p-2 rounded-full">
+                        <svg className="w-4 h-4 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z" />
+                        </svg>
+                    </div>
+                    <div>
+                        <span className="text-sm font-semibold text-blue-800">{t('rental:form.rentalListing')}</span>
+                        <p className="text-xs text-blue-600">{t('rental:form.rentalListingHint')}</p>
+                    </div>
+                </div>
+            )}
+
             {/* Photo Tips */}
             <div className="bg-primary-light text-primary-dark/90 text-sm p-4 rounded-lg mb-6 border border-primary/20">
                 <p><strong>{t('seller:createListing.photoTips.title')}:</strong> {t('seller:createListing.photoTips.description')}</p>
@@ -253,6 +303,125 @@ const GeminiDescriptionGenerator: React.FC<{ propertyToEdit: Property | null }> 
                         setListingData={setListingData}
                         handleInputChange={handleInputChange}
                     />
+
+                    {/* ===== Rental-Specific Fields (only shown when listingType is 'rent') ===== */}
+                    {isRental && (
+                        <fieldset className="space-y-6 p-4 sm:p-6 bg-blue-50/50 rounded-xl border border-blue-200">
+                            <div className="flex items-center gap-2 mb-2">
+                                <svg className="w-5 h-5 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                                    <path strokeLinecap="round" strokeLinejoin="round" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z" />
+                                </svg>
+                                <h3 className="text-base font-bold text-neutral-800">{t('rental:form.rentalDetails')}</h3>
+                            </div>
+
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                {/* Rent Period */}
+                                <div className="relative">
+                                    <select
+                                        name="rentPeriod"
+                                        value={listingData.rentPeriod}
+                                        onChange={(e) => setListingData(prev => ({ ...prev, rentPeriod: e.target.value as any }))}
+                                        className={`${floatingInputClasses} border-blue-200 focus:border-blue-500 focus:ring-blue-500`}
+                                    >
+                                        <option value="monthly">{t('rental:form.rentPeriods.monthly')}</option>
+                                        <option value="weekly">{t('rental:form.rentPeriods.weekly')}</option>
+                                        <option value="daily">{t('rental:form.rentPeriods.daily')}</option>
+                                    </select>
+                                    <label className={`${floatingSelectLabelClasses} text-blue-700`}>{t('rental:form.rentPeriod')}</label>
+                                </div>
+
+                                {/* Security Deposit */}
+                                <div className="relative cursor-text" onClick={() => document.getElementById('securityDeposit')?.focus()}>
+                                    <input
+                                        type="number"
+                                        id="securityDeposit"
+                                        value={listingData.securityDeposit > 0 ? listingData.securityDeposit : ''}
+                                        onChange={(e) => setListingData(prev => ({ ...prev, securityDeposit: Number(e.target.value) || 0 }))}
+                                        className={`${floatingInputClasses} border-blue-200 pl-8 focus:border-blue-500 focus:ring-blue-500`}
+                                        placeholder=" "
+                                        min={0}
+                                    />
+                                    <label htmlFor="securityDeposit" className={`${floatingLabelClasses} text-blue-700`}>{t('rental:form.securityDeposit')}</label>
+                                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-neutral-500 text-sm">{currencySymbol}</span>
+                                </div>
+
+                                {/* Min Lease */}
+                                <NumberInputWithSteppers
+                                    label={t('rental:form.minLeaseDuration')}
+                                    value={listingData.minimumLeaseDuration}
+                                    min={1}
+                                    max={60}
+                                    onChange={(val) => setListingData(prev => ({ ...prev, minimumLeaseDuration: val }))}
+                                />
+
+                                {/* Max Lease */}
+                                <NumberInputWithSteppers
+                                    label={t('rental:form.maxLeaseDuration')}
+                                    value={listingData.maximumLeaseDuration}
+                                    min={1}
+                                    max={120}
+                                    onChange={(val) => setListingData(prev => ({ ...prev, maximumLeaseDuration: val }))}
+                                />
+
+                                {/* Available From */}
+                                <div className="relative cursor-text" onClick={() => document.getElementById('availableFrom')?.focus()}>
+                                    <input
+                                        type="date"
+                                        id="availableFrom"
+                                        value={listingData.availableFrom}
+                                        onChange={(e) => setListingData(prev => ({ ...prev, availableFrom: e.target.value }))}
+                                        className={`${floatingInputClasses} border-blue-200 focus:border-blue-500 focus:ring-blue-500`}
+                                        min={new Date().toISOString().split('T')[0]}
+                                    />
+                                    <label htmlFor="availableFrom" className={`${floatingSelectLabelClasses} text-blue-700`}>{t('rental:form.availableFrom')}</label>
+                                </div>
+
+                                {/* Max Occupants */}
+                                <NumberInputWithSteppers
+                                    label={t('rental:form.maxOccupants')}
+                                    value={listingData.maxOccupants}
+                                    min={1}
+                                    max={20}
+                                    onChange={(val) => setListingData(prev => ({ ...prev, maxOccupants: val }))}
+                                />
+                            </div>
+
+                            {/* Inclusions */}
+                            <div className="space-y-3">
+                                <h4 className="text-sm font-semibold text-neutral-700">{t('rental:form.inclusions')}</h4>
+                                <div className="flex flex-wrap gap-4">
+                                    <label className="flex items-center gap-2 cursor-pointer">
+                                        <input
+                                            type="checkbox"
+                                            checked={listingData.utilitiesIncluded}
+                                            onChange={(e) => setListingData(prev => ({ ...prev, utilitiesIncluded: e.target.checked }))}
+                                            className="rounded text-blue-600 focus:ring-blue-500 w-4 h-4"
+                                        />
+                                        <span className="text-sm text-neutral-700">{t('rental:form.utilitiesIncluded')}</span>
+                                    </label>
+                                    <label className="flex items-center gap-2 cursor-pointer">
+                                        <input
+                                            type="checkbox"
+                                            checked={listingData.internetIncluded}
+                                            onChange={(e) => setListingData(prev => ({ ...prev, internetIncluded: e.target.checked }))}
+                                            className="rounded text-blue-600 focus:ring-blue-500 w-4 h-4"
+                                        />
+                                        <span className="text-sm text-neutral-700">{t('rental:form.internetIncluded')}</span>
+                                    </label>
+                                </div>
+                            </div>
+
+                            {/* Tenant Requirements */}
+                            <div>
+                                <TagListInput
+                                    tags={listingData.tenantRequirements}
+                                    setTags={(tags) => setListingData(prev => ({ ...prev, tenantRequirements: tags }))}
+                                    label={t('rental:form.tenantRequirements')}
+                                />
+                                <p className="mt-1 text-xs text-neutral-500">{t('rental:form.tenantRequirementsHint')}</p>
+                            </div>
+                        </fieldset>
+                    )}
 
                     {/* Description */}
                     <fieldset><label htmlFor="description" className="block text-sm font-medium text-neutral-700 mb-1">{t('seller:createListing.fields.description')}</label><textarea id="description" name="description" value={listingData.description} onChange={handleInputChange} className={`${inputBaseClasses} h-48`} required /></fieldset>
