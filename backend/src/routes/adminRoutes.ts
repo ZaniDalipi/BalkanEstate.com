@@ -23,6 +23,7 @@ import {
   deleteInquiry,
   bulkUpdateInquiryStatus,
   getInquiryStats,
+  syncPropertySchema,
 } from '../controllers/adminController';
 import {
   getAllDiscountCodes,
@@ -108,6 +109,7 @@ router.delete('/properties/:id', logAdminAction('DELETE_PROPERTY'), deleteProper
 router.get('/properties-missing-coords', logAdminAction('VIEW_MISSING_COORDS'), getPropertiesMissingCoords);
 router.post('/fix-coordinates', logAdminAction('FIX_COORDINATES'), fixPropertyCoordinates);
 router.post('/fix-coordinates/:propertyId', logAdminAction('FIX_SINGLE_COORDINATES'), fixSinglePropertyCoordinates);
+router.post('/sync-property-schema', logAdminAction('SYNC_PROPERTY_SCHEMA'), syncPropertySchema);
 
 // ===== Discount Code Management =====
 router.get('/discount-codes', logAdminAction('VIEW_DISCOUNT_CODES'), getAllDiscountCodes);

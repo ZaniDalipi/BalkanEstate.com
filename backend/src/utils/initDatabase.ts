@@ -3,6 +3,7 @@ import CityMarketData from '../models/CityMarketData';
 import EmailConfig from '../models/EmailConfig';
 import { updateAllCityMarketData } from '../services/cityMarketDataService';
 import { seedEmailConfigs } from '../seeds/emailConfigSeed';
+import { ensurePropertySchemaSync } from './migratePropertySchema';
 import { dbLogger } from './logger';
 
 export const initializeDatabase = async (): Promise<void> => {
@@ -41,6 +42,9 @@ export const initializeDatabase = async (): Promise<void> => {
     } else {
       dbLogger.info('✅ User indexes are up to date');
     }
+
+    // Ensure all property documents have the same attributes across environments
+    await ensurePropertySchemaSync();
 
     // Initialize email configurations if empty
     try {

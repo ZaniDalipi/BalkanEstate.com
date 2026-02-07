@@ -9,6 +9,7 @@ import { geocodeAddressWithRateLimit } from '../services/geocodingService';
 import { getWhitelistConfig } from '../middleware/adminAuth';
 import { adminLogger } from '../utils/logger';
 import { invalidateCache } from '../middleware/cache';
+import { migratePropertySchema } from '../utils/migratePropertySchema';
 
 
 // @desc    Get admin dashboard statistics
@@ -1034,5 +1035,26 @@ export const getInquiryStats = async (req: Request, res: Response): Promise<void
   } catch (error: any) {
     adminLogger.error('Get inquiry stats error:', error);
     res.status(500).json({ message: 'Error fetching inquiry stats', error: error.message });
+  }
+};
+
+// @desc    Sync property schema — adds missing attributes with defaults to all properties
+// @route   POST /api/admin/sync-property-schema
+// @access  Private/Admin
+export const syncPropertySchema = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { commonUpdated, rentalUpdated } = await migratePropertySchema();
+
+    invalidateCache('/api/properties');
+
+    res.json({
+      success: true,
+      message: 'Property schema synced successfully',
+      commonUpdated,
+      rentalUpdated,
+    });
+  } catch (error: any) {
+    adminLogger.error('Sync property schema error:', error);
+    res.status(500).json({ message: 'Error syncing property schema', error: error.message });
   }
 };

@@ -33,6 +33,8 @@
     "remove:agents": "ts-node src/scripts/removeAllAgents.ts",
     "migrate:agency-owners": "ts-node src/scripts/addOwnersToAgencyMembers.ts",
     "migrate:property-roles": "ts-node src/scripts/migratePropertyRoles.ts",
+    "migrate:property-schema": "ts-node src/scripts/syncPropertySchema.ts",
+    "migrate:property-schema:production": "NODE_ENV=production ts-node src/scripts/syncPropertySchema.ts",
     "migrate:subscriptions": "ts-node src/scripts/migrateToNewSubscriptionSystem.ts",
     "rollback:subscriptions": "ts-node src/scripts/migrateToNewSubscriptionSystem.ts rollback",
     "init:stats": "ts-node src/scripts/initializeAllUserStats.ts",
