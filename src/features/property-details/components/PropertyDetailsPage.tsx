@@ -317,6 +317,7 @@ const PropertyDetailsPage: React.FC<{ property: Property }> = ({ property: cache
     const rentedAt = Date.now();
     const until = rentedUntilDate ? new Date(rentedUntilDate).getTime() : undefined;
     dispatch({ type: 'MARK_PROPERTY_RENTED', payload: { id: property.id, rentedAt, rentedUntil: until } });
+    window.dispatchEvent(new CustomEvent('property-status-update', { detail: { id: property.id, status: 'rented', rentedAt, rentedUntil: until } }));
     setRentedUntilDate('');
     try {
       await api.markPropertyAsRented(property.id, rentedUntilDate || undefined);
@@ -332,6 +333,7 @@ const PropertyDetailsPage: React.FC<{ property: Property }> = ({ property: cache
     setShowAvailableConfirm(false);
     setLocalStatus('active');
     dispatch({ type: 'MARK_PROPERTY_AVAILABLE', payload: property.id });
+    window.dispatchEvent(new CustomEvent('property-status-update', { detail: { id: property.id, status: 'active', rentedAt: undefined, rentedUntil: undefined } }));
     try {
       await api.markPropertyAsAvailable(property.id);
       fetchProperties?.();

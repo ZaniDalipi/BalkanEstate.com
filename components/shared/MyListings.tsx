@@ -533,6 +533,7 @@ const MyListings: React.FC<{ sellerId: string }> = ({ sellerId }) => {
                 p.id === id ? { ...p, status: 'rented' as PropertyStatus, rentedAt, rentedUntil: until } : p
             ));
             dispatch({ type: 'MARK_PROPERTY_RENTED', payload: { id, rentedAt, rentedUntil: until } });
+            window.dispatchEvent(new CustomEvent('property-status-update', { detail: { id, status: 'rented', rentedAt, rentedUntil: until } }));
             // Fire API in background
             try {
                 await api.markPropertyAsRented(id, rentedUntilDate || undefined);
@@ -586,6 +587,7 @@ const MyListings: React.FC<{ sellerId: string }> = ({ sellerId }) => {
                 p.id === id ? { ...p, status: 'active' as PropertyStatus, rentedAt: undefined, rentedUntil: undefined } : p
             ));
             dispatch({ type: 'MARK_PROPERTY_AVAILABLE', payload: id });
+            window.dispatchEvent(new CustomEvent('property-status-update', { detail: { id, status: 'active', rentedAt: undefined, rentedUntil: undefined } }));
             // Fire API in background
             try {
                 await api.markPropertyAsAvailable(id);
