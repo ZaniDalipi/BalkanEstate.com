@@ -107,5 +107,56 @@
     "contactLandlord": "Contact Landlord",
     "scheduleViewing": "Schedule a Viewing",
     "rentThisProperty": "Rent This Property"
+  },
+  "affordability": {
+    "title": "Rent Affordability",
+    "monthlyIncome": "Your Monthly Income",
+    "monthlyRent": "Monthly Rent",
+    "ofIncome": "of income",
+    "affordable": "Within recommended 30% budget",
+    "stretched": "Above 30% — budget may be tight",
+    "tooExpensive": "Above 50% — not recommended",
+    "recommended": "Recommended income for this rent:"
+  },
+  "moveIn": {
+    "title": "Move-in Cost",
+    "firstMonthRent": "First month rent",
+    "securityDeposit": "Security deposit",
+    "estimatedUtilities": "Est. utilities (1st month)",
+    "estimatedInternet": "Est. internet (1st month)",
+    "totalUpfront": "Total upfront",
+    "monthlyOngoing": "Monthly ongoing cost",
+    "disclaimer": "* Utility and internet costs are estimates based on averages. Actual costs may vary."
+  },
+  "viewing": {
+    "title": "Schedule a Viewing",
+    "selectDate": "Select a date",
+    "selectTime": "Select a time",
+    "enterDetails": "Enter your contact details so the landlord can confirm.",
+    "name": "Full Name",
+    "email": "Email",
+    "phone": "Phone",
+    "optional": "optional",
+    "message": "Message",
+    "messagePlaceholder": "Any questions or preferences...",
+    "confirmDetails": "Confirm your viewing",
+    "back": "Back",
+    "continue": "Continue",
+    "review": "Review",
+    "confirmRequest": "Confirm Request",
+    "requestSent": "Viewing Request Sent!",
+    "requestSentDesc": "The landlord will confirm your viewing shortly.",
+    "done": "Done"
+  },
+  "dashboard": {
+    "title": "Rental Portfolio",
+    "monthlyIncome": "Monthly Income",
+    "rented": "rented",
+    "activeListings": "Available",
+    "avgRent": "avg",
+    "occupancy": "Occupancy",
+    "engagement": "Engagement",
+    "views": "views",
+    "inquiries": "inquiries"
   }
 }

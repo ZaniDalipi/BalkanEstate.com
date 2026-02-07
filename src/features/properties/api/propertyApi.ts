@@ -56,6 +56,17 @@ export function transformBackendProperty(backendProp: any): Property {
     saves: backendProp.saves || 0,
     inquiries: backendProp.inquiries || 0,
     createdAsRole: backendProp.createdAsRole,
+    listingType: backendProp.listingType || 'sale',
+    rentPeriod: backendProp.rentPeriod,
+    securityDeposit: backendProp.securityDeposit,
+    minimumLeaseDuration: backendProp.minimumLeaseDuration,
+    maximumLeaseDuration: backendProp.maximumLeaseDuration,
+    availableFrom: backendProp.availableFrom ? new Date(backendProp.availableFrom).getTime() : undefined,
+    utilitiesIncluded: backendProp.utilitiesIncluded,
+    internetIncluded: backendProp.internetIncluded,
+    tenantRequirements: backendProp.tenantRequirements,
+    maxOccupants: backendProp.maxOccupants,
+    rentedAt: backendProp.rentedAt ? new Date(backendProp.rentedAt).getTime() : undefined,
     furnishing: backendProp.furnishing,
     heatingType: backendProp.heatingType,
     condition: backendProp.condition,
@@ -108,7 +119,23 @@ export function transformToBackendProperty(frontendProp: Property): any {
     lng: frontendProp.lng,
     propertyType: frontendProp.propertyType,
     createdAsRole: frontendProp.createdAsRole,
+    listingType: frontendProp.listingType || 'sale',
   };
+
+  // Rental-specific fields
+  if (frontendProp.listingType === 'rent') {
+    result.rentPeriod = frontendProp.rentPeriod || 'monthly';
+    if (frontendProp.securityDeposit != null) result.securityDeposit = frontendProp.securityDeposit;
+    if (frontendProp.minimumLeaseDuration != null) result.minimumLeaseDuration = frontendProp.minimumLeaseDuration;
+    if (frontendProp.maximumLeaseDuration != null) result.maximumLeaseDuration = frontendProp.maximumLeaseDuration;
+    if (frontendProp.availableFrom != null) result.availableFrom = frontendProp.availableFrom;
+    if (frontendProp.utilitiesIncluded !== undefined) result.utilitiesIncluded = frontendProp.utilitiesIncluded;
+    if (frontendProp.internetIncluded !== undefined) result.internetIncluded = frontendProp.internetIncluded;
+    if (frontendProp.tenantRequirements && frontendProp.tenantRequirements.length > 0) {
+      result.tenantRequirements = frontendProp.tenantRequirements;
+    }
+    if (frontendProp.maxOccupants != null) result.maxOccupants = frontendProp.maxOccupants;
+  }
 
   if (frontendProp.tourUrl) result.tourUrl = frontendProp.tourUrl;
   if (frontendProp.virtualTour360Url) {

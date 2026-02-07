@@ -9,6 +9,9 @@ import { useAppContext } from '../../../context/AppContext';
 import MortgageCalculator from '@/src/features/calculators/components/MortgageCalculator';
 import RentVsBuyCalculator from '@/src/features/calculators/components/RentVsBuyCalculator';
 import PropertyInquiryModal from '@/src/features/inquiries/components/PropertyInquiryModal';
+import RentAffordabilityCalculator from '@/src/features/rental/components/RentAffordabilityCalculator';
+import MoveInCostBreakdown from '@/src/features/rental/components/MoveInCostBreakdown';
+import ScheduleViewingModal from '@/src/features/rental/components/ScheduleViewingModal';
 
 interface PropertyContactProps {
   property: Property;
@@ -45,6 +48,9 @@ export const PropertyContact: React.FC<PropertyContactProps> = ({
   const { state, dispatch } = useAppContext();
   const [showShareMenu, setShowShareMenu] = useState(false);
   const [showInquiryModal, setShowInquiryModal] = useState(false);
+  const [showViewingModal, setShowViewingModal] = useState(false);
+
+  const isRental = property.listingType === 'rent';
 
   const isInComparison = state.comparisonList.includes(property.id);
   const currentUser = state.currentUser || state.user;
@@ -73,6 +79,11 @@ export const PropertyContact: React.FC<PropertyContactProps> = ({
   };
 
   const handleScheduleVisit = () => {
+    if (isRental) {
+      // For rentals, open the dedicated viewing scheduler
+      setShowViewingModal(true);
+      return;
+    }
     if (!state.isAuthenticated) {
       dispatch({ type: 'TOGGLE_AUTH_MODAL', payload: { isOpen: true } });
       return;
@@ -335,11 +346,37 @@ export const PropertyContact: React.FC<PropertyContactProps> = ({
         defaultPhone={currentUser?.phone || ''}
       />
 
-      {/* Mortgage Calculator */}
-      <MortgageCalculator propertyPrice={property.price} country={property.country} />
+      {/* Schedule Viewing Modal (Rental) */}
+      {isRental && (
+        <ScheduleViewingModal
+          property={property}
+          isOpen={showViewingModal}
+          onClose={() => setShowViewingModal(false)}
+          onSubmit={(data) => {
+            // In a real app, this would send to the backend
+            console.log('Viewing request:', data);
+          }}
+        />
+      )}
 
-      {/* Rent vs Buy Calculator */}
-      <RentVsBuyCalculator propertyPrice={property.price} country={property.country} />
+      {/* Rental-specific widgets OR sale-specific widgets */}
+      {isRental ? (
+        <>
+          {/* Rent Affordability Calculator */}
+          <RentAffordabilityCalculator property={property} />
+
+          {/* Move-in Cost Breakdown */}
+          <MoveInCostBreakdown property={property} />
+        </>
+      ) : (
+        <>
+          {/* Mortgage Calculator */}
+          <MortgageCalculator propertyPrice={property.price} country={property.country} />
+
+          {/* Rent vs Buy Calculator */}
+          <RentVsBuyCalculator propertyPrice={property.price} country={property.country} />
+        </>
+      )}
 
       {/* Animation styles */}
       <style>{`
