@@ -508,32 +508,47 @@ const MyListings: React.FC<{ sellerId: string }> = ({ sellerId }) => {
 
     const confirmMarkAsRented = async () => {
         if (propertyToMarkSold) {
+            const id = propertyToMarkSold;
+            const until = rentedUntilDate ? new Date(rentedUntilDate).getTime() : undefined;
+            // Close modal + update UI instantly
+            setShowRentedModal(false);
+            setPropertyToMarkSold(null);
+            setRentedUntilDate('');
+            setMyProperties(prev => prev.map(p =>
+                p.id === id ? { ...p, status: 'rented' as PropertyStatus, rentedAt: Date.now(), rentedUntil: until } : p
+            ));
+            // Fire API in background
             try {
-                const result = await api.markPropertyAsRented(propertyToMarkSold, rentedUntilDate || undefined);
-                setMyProperties(prev => prev.map(p =>
-                    p.id === propertyToMarkSold ? { ...p, status: 'rented' as PropertyStatus, rentedUntil: rentedUntilDate ? new Date(rentedUntilDate).getTime() : undefined } : p
-                ));
+                await api.markPropertyAsRented(id, rentedUntilDate || undefined);
             } catch (error) {
+                // Revert on failure
+                setMyProperties(prev => prev.map(p =>
+                    p.id === id ? { ...p, status: 'active' as PropertyStatus, rentedAt: undefined, rentedUntil: undefined } : p
+                ));
             }
         }
-        setShowRentedModal(false);
-        setPropertyToMarkSold(null);
-        setRentedUntilDate('');
     };
 
     const confirmMarkAsSold = async () => {
         if (propertyToMarkSold) {
+            const id = propertyToMarkSold;
+            // Close modal + update UI instantly
+            setShowSoldConfirm(false);
+            setPropertyToMarkSold(null);
+            setMyProperties(prev => prev.map(p =>
+                p.id === id ? { ...p, status: 'sold' as PropertyStatus } : p
+            ));
+            dispatch({ type: 'MARK_PROPERTY_SOLD', payload: id });
+            // Fire API in background
             try {
-                await api.markPropertyAsSold(propertyToMarkSold);
-                dispatch({ type: 'MARK_PROPERTY_SOLD', payload: propertyToMarkSold });
-                setMyProperties(prev => prev.map(p =>
-                    p.id === propertyToMarkSold ? { ...p, status: 'sold' as PropertyStatus } : p
-                ));
+                await api.markPropertyAsSold(id);
             } catch (error) {
+                // Revert on failure
+                setMyProperties(prev => prev.map(p =>
+                    p.id === id ? { ...p, status: 'active' as PropertyStatus } : p
+                ));
             }
         }
-        setShowSoldConfirm(false);
-        setPropertyToMarkSold(null);
     };
 
     const handleMarkAsAvailableClick = (id: string) => {
@@ -543,16 +558,23 @@ const MyListings: React.FC<{ sellerId: string }> = ({ sellerId }) => {
 
     const confirmMarkAsAvailable = async () => {
         if (propertyToMarkAvailable) {
+            const id = propertyToMarkAvailable;
+            // Close modal + update UI instantly
+            setShowAvailableConfirm(false);
+            setPropertyToMarkAvailable(null);
+            setMyProperties(prev => prev.map(p =>
+                p.id === id ? { ...p, status: 'active' as PropertyStatus, rentedAt: undefined, rentedUntil: undefined } : p
+            ));
+            // Fire API in background
             try {
-                await api.markPropertyAsAvailable(propertyToMarkAvailable);
-                setMyProperties(prev => prev.map(p =>
-                    p.id === propertyToMarkAvailable ? { ...p, status: 'active' as PropertyStatus, rentedAt: undefined, rentedUntil: undefined } : p
-                ));
+                await api.markPropertyAsAvailable(id);
             } catch (error) {
+                // Revert on failure
+                setMyProperties(prev => prev.map(p =>
+                    p.id === id ? { ...p, status: 'rented' as PropertyStatus } : p
+                ));
             }
         }
-        setShowAvailableConfirm(false);
-        setPropertyToMarkAvailable(null);
     };
 
     const handleDeleteClick = (id: string) => {
