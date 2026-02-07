@@ -122,12 +122,6 @@ test_endpoint \
     "/api/payments/supported-countries" \
     "success"
 
-test_endpoint \
-    "GET /api/payments/paddle/config" \
-    "GET" \
-    "/api/payments/paddle/config" \
-    "success"
-
 echo ""
 
 # ----------------------------------------------------------
@@ -135,24 +129,13 @@ echo ""
 # ----------------------------------------------------------
 log_info "Testing country routing..."
 
-# EU Countries -> Stripe
-for country in GR HR BG RO SI; do
+# All countries should route to web
+for country in GR HR BG RO SI RS AL BA MK ME XK; do
     test_endpoint \
-        "Country $country -> Stripe" \
+        "Country $country -> web" \
         "GET" \
         "/api/payments/providers/$country" \
-        "stripe"
-done
-
-echo ""
-
-# Non-EU Countries -> Paddle
-for country in RS AL BA MK ME XK; do
-    test_endpoint \
-        "Country $country -> Paddle" \
-        "GET" \
-        "/api/payments/providers/$country" \
-        "paddle"
+        "web"
 done
 
 echo ""
@@ -163,16 +146,16 @@ echo ""
 log_info "Testing edge cases..."
 
 test_endpoint \
-    "Unknown country (XX) -> Stripe default" \
+    "Unknown country (XX) -> web default" \
     "GET" \
     "/api/payments/providers/XX" \
-    "stripe"
+    "web"
 
 test_endpoint \
-    "Lowercase country (rs) -> Paddle" \
+    "Lowercase country (rs) -> web" \
     "GET" \
     "/api/payments/providers/rs" \
-    "paddle"
+    "web"
 
 echo ""
 
@@ -181,7 +164,6 @@ echo ""
 # ----------------------------------------------------------
 log_info "Testing authentication requirements..."
 
-# These should return 401
 response=$(curl -s -o /dev/null -w "%{http_code}" \
     "$STAGING_URL/api/payments/create-payment" \
     -X POST \
@@ -211,7 +193,6 @@ echo ""
 if [ -n "$AUTH_TOKEN" ]; then
     log_info "Testing authenticated endpoints..."
 
-    # Get subscription status
     test_endpoint \
         "GET /api/payments/subscription-status (authenticated)" \
         "GET" \
@@ -219,49 +200,10 @@ if [ -n "$AUTH_TOKEN" ]; then
         "isSubscribed" \
         "" \
         "$AUTH_TOKEN"
-
-    # Create payment for EU country
-    test_endpoint \
-        "POST /api/payments/create-payment (Greece/Stripe)" \
-        "POST" \
-        "/api/payments/create-payment" \
-        "provider" \
-        '{"planName":"Pro Monthly","planInterval":"month","amount":25,"countryCode":"GR","productId":"pro_monthly"}' \
-        "$AUTH_TOKEN"
-
-    # Create payment for non-EU country
-    test_endpoint \
-        "POST /api/payments/create-payment (Serbia/Paddle)" \
-        "POST" \
-        "/api/payments/create-payment" \
-        "provider" \
-        '{"planName":"Pro Monthly","planInterval":"month","amount":25,"countryCode":"RS","productId":"pro_monthly"}' \
-        "$AUTH_TOKEN"
-
 else
     log_skip "Authenticated tests (no token provided)"
     log_info "To run authenticated tests, provide a token:"
     log_info "  ./scripts/test-staging-payments.sh $STAGING_URL YOUR_AUTH_TOKEN"
-fi
-
-echo ""
-
-# ----------------------------------------------------------
-# 7. Webhook Endpoints
-# ----------------------------------------------------------
-log_info "Testing webhook endpoints..."
-
-# Paddle webhook should accept POST
-response=$(curl -s -w "\n%{http_code}" \
-    -X POST "$STAGING_URL/api/payments/paddle/webhook" \
-    -H "Content-Type: application/json" \
-    -d '{"event_type":"test","event_id":"evt_test"}')
-
-http_code=$(echo "$response" | tail -n1)
-if [ "$http_code" = "200" ]; then
-    log_success "POST /api/payments/paddle/webhook accepts webhooks (200)"
-else
-    log_fail "POST /api/payments/paddle/webhook failed (HTTP $http_code)"
 fi
 
 echo ""

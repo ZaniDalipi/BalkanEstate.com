@@ -78,8 +78,8 @@ export interface IAgency extends Document {
     expiresAt: Date;
     amount: number; // €1000
     currency: string; // EUR
-    stripeCustomerId?: string;
-    stripeSubscriptionId?: string;
+    externalCustomerId?: string;
+    externalSubscriptionId?: string;
     autoRenew: boolean;
     trialEndsAt?: Date;
   };
@@ -427,8 +427,8 @@ const AgencySchema: Schema = new Schema(
         type: String,
         default: 'EUR',
       },
-      stripeCustomerId: String,
-      stripeSubscriptionId: String,
+      externalCustomerId: String,
+      externalSubscriptionId: String,
       autoRenew: {
         type: Boolean,
         default: true,

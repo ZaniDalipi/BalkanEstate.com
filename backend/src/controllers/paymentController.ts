@@ -1,98 +1,10 @@
 import { Request, Response } from 'express';
-import Stripe from 'stripe';
 import User from '../models/User';
 import Product from '../models/Product';
-import Subscription from '../models/Subscription';
 import DiscountCode from '../models/DiscountCode';
-import PaymentRecord from '../models/PaymentRecord';
-import SubscriptionEvent from '../models/SubscriptionEvent';
 import { processSubscriptionPayment } from '../services/subscriptionPaymentService';
 import { paymentProviderFactory } from '../services/paymentProviderFactory';
-import emailService from '../services/emailService';
-import { lemonSqueezyService } from '../services/lemonSqueezyService';
 import { paymentLogger } from '../utils/logger';
-
-// Stripe is used as fallback - LemonSqueezy is the primary payment provider
-// Keeping Stripe initialization for legacy webhook handling only
-const STRIPE_SECRET_KEY = process.env.STRIPE_SECRET_KEY;
-const stripe = new Stripe(STRIPE_SECRET_KEY || 'sk_not_configured', {
-  apiVersion: '2025-10-29.clover',
-});
-
-/**
- * @desc    Create a Stripe Checkout Session for external payment
- * @route   POST /api/payment/create-checkout-session
- * @access  Private
- */
-export const createCheckoutSession = async (req: Request, res: Response): Promise<void> => {
-  try {
-    const { planName, planInterval, amount, productId } = req.body;
-    const userId = (req as any).user?._id;
-
-    if (!userId) {
-      res.status(401).json({ message: 'User not authenticated' });
-      return;
-    }
-
-    const user = await User.findById(userId);
-    if (!user) {
-      res.status(404).json({ message: 'User not found' });
-      return;
-    }
-
-    // Validate amount
-    if (!amount || amount <= 0) {
-      res.status(400).json({ message: 'Invalid amount' });
-      return;
-    }
-
-    // Get the base URL from environment or request
-    const baseUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
-
-    // Create Stripe Checkout Session
-    const session = await stripe.checkout.sessions.create({
-      payment_method_types: ['card'],
-      line_items: [
-        {
-          price_data: {
-            currency: 'eur',
-            product_data: {
-              name: planName,
-              description: `${planName} - ${planInterval} subscription`,
-            },
-            unit_amount: Math.round(amount * 100), // Convert to cents
-            recurring: planInterval === 'month' || planInterval === 'year'
-              ? { interval: planInterval === 'year' ? 'year' : 'month' }
-              : undefined,
-          },
-          quantity: 1,
-        },
-      ],
-      mode: planInterval === 'month' || planInterval === 'year' ? 'subscription' : 'payment',
-      success_url: `${baseUrl}/payment/success?session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${baseUrl}/payment/cancel`,
-      client_reference_id: userId.toString(),
-      metadata: {
-        userId: userId.toString(),
-        planName,
-        planInterval,
-        productId: productId || 'default',
-        userEmail: user.email,
-      },
-    });
-
-    // Session created successfully
-
-    res.status(200).json({
-      success: true,
-      sessionId: session.id,
-      url: session.url, // This is the Stripe-hosted payment page URL
-    });
-  } catch (error: any) {
-    paymentLogger.error('Error creating checkout session:', error);
-    res.status(500).json({ message: 'Error creating checkout session', error: error.message });
-  }
-};
 
 /**
  * @desc    Create a unified payment session (routes to appropriate provider based on country)
@@ -100,9 +12,7 @@ export const createCheckoutSession = async (req: Request, res: Response): Promis
  * @access  Private
  *
  * This is the recommended endpoint for creating payments. It automatically
- * selects the best payment provider based on the user's country:
- * - Stripe for EU countries (Greece, Croatia, Bulgaria, Romania, Slovenia)
- * - PaySera for non-EU Balkans (Serbia, Albania, Bosnia, N. Macedonia, Montenegro, Kosovo)
+ * selects the best payment provider based on the user's country.
  */
 export const createUnifiedPayment = async (req: Request, res: Response): Promise<void> => {
   try {
@@ -136,7 +46,7 @@ export const createUnifiedPayment = async (req: Request, res: Response): Promise
 
     // Check if country is supported
     if (!paymentProviderFactory.isCountrySupported(userCountry)) {
-      paymentLogger.warn(`⚠️ Country ${userCountry} not in our primary list, defaulting to Stripe`);
+      paymentLogger.warn(`Country ${userCountry} not in our supported list`);
     }
 
     // Create payment using the factory
@@ -161,8 +71,6 @@ export const createUnifiedPayment = async (req: Request, res: Response): Promise
       });
       return;
     }
-
-    // Payment session created successfully
 
     res.status(200).json({
       success: true,
@@ -206,9 +114,7 @@ export const getPaymentProviders = async (req: Request, res: Response): Promise<
       isEU: mapping?.isEU || false,
       isSEPA: mapping?.isSEPA || false,
       currency: mapping?.currency || 'EUR',
-      supportedMethods: provider === 'stripe'
-        ? ['card', 'sepa_debit', 'apple_pay', 'google_pay']
-        : ['card', 'bank_transfer', 'wallet'],
+      supportedMethods: ['card', 'bank_transfer', 'wallet'],
     });
   } catch (error: any) {
     paymentLogger.error('Error getting payment providers:', error);
@@ -231,8 +137,6 @@ export const getSupportedCountries = async (_req: Request, res: Response): Promi
         ...c,
         providerInfo: paymentProviderFactory.getProviderInfo(c.provider),
       })),
-      stripeCountries: paymentProviderFactory.getCountriesByProvider('stripe'),
-      lemonSqueezyCountries: paymentProviderFactory.getCountriesByProvider('lemonsqueezy'),
     });
   } catch (error: any) {
     paymentLogger.error('Error getting supported countries:', error);
@@ -277,7 +181,6 @@ export const processPayment = async (req: Request, res: Response): Promise<void>
     let product = await Product.findOne({ productId });
 
     if (!product) {
-      // Create a default product for testing
       product = await Product.create({
         productId,
         name: planName,
@@ -297,8 +200,6 @@ export const processPayment = async (req: Request, res: Response): Promise<void>
       amount: product.price,
       currency: product.currency,
     });
-
-    // Payment processed successfully
 
     res.status(200).json({
       success: true,
@@ -385,8 +286,6 @@ export const cancelSubscription = async (req: Request, res: Response): Promise<v
     // Keep expiration date for reference
     await user.save();
 
-    // Subscription cancelled successfully
-
     res.status(200).json({
       message: 'Subscription cancelled successfully',
       user: {
@@ -402,357 +301,6 @@ export const cancelSubscription = async (req: Request, res: Response): Promise<v
 };
 
 /**
- * @desc    Handle Stripe webhook events
- * @route   POST /api/payment/webhook
- * @access  Public (but verified with Stripe signature)
- */
-export const handleWebhook = async (req: Request, res: Response): Promise<void> => {
-  const sig = req.headers['stripe-signature'] as string;
-  const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
-
-  if (!webhookSecret) {
-    paymentLogger.error('⚠️ Webhook secret not configured');
-    res.status(400).send('Webhook secret not configured');
-    return;
-  }
-
-  let event: Stripe.Event;
-
-  try {
-    // Verify webhook signature
-    event = stripe.webhooks.constructEvent(req.body, sig, webhookSecret);
-  } catch (err: any) {
-    paymentLogger.error('⚠️ Webhook signature verification failed:', err.message);
-    res.status(400).send(`Webhook Error: ${err.message}`);
-    return;
-  }
-
-  // Handle the event
-  try {
-    switch (event.type) {
-      case 'checkout.session.completed': {
-        const session = event.data.object as Stripe.Checkout.Session;
-        await handleSuccessfulCheckout(session);
-        break;
-      }
-
-      case 'customer.subscription.updated': {
-        const subscription = event.data.object as Stripe.Subscription;
-        await handleSubscriptionUpdated(subscription);
-        break;
-      }
-
-      case 'customer.subscription.deleted': {
-        const subscription = event.data.object as Stripe.Subscription;
-        await handleSubscriptionDeleted(subscription);
-        break;
-      }
-
-      case 'invoice.payment_succeeded': {
-        const invoice = event.data.object as Stripe.Invoice;
-        await handleRecurringPaymentSucceeded(invoice);
-        break;
-      }
-
-      case 'invoice.payment_failed': {
-        const invoice = event.data.object as Stripe.Invoice;
-        await handlePaymentFailed(invoice);
-        break;
-      }
-
-      case 'charge.refunded': {
-        const charge = event.data.object as Stripe.Charge;
-        await handleChargeRefunded(charge);
-        break;
-      }
-
-      case 'charge.dispute.created': {
-        const dispute = event.data.object as Stripe.Dispute;
-        await handleDisputeCreated(dispute);
-        break;
-      }
-
-      default:
-        paymentLogger.info(`Unhandled event type: ${event.type}`);
-    }
-
-    res.json({ received: true });
-  } catch (error: any) {
-    paymentLogger.error('Error handling webhook:', error);
-    res.status(500).json({ error: 'Webhook handler failed' });
-  }
-};
-
-/**
- * Helper function to process successful checkout
- */
-async function handleSuccessfulCheckout(session: Stripe.Checkout.Session) {
-  const userId = session.metadata?.userId;
-  const planName = session.metadata?.planName;
-  const planInterval = session.metadata?.planInterval;
-  const productId = session.metadata?.productId;
-
-  if (!userId) {
-    paymentLogger.error('No userId in session metadata');
-    return;
-  }
-
-  paymentLogger.info(`✅ Processing successful payment for user ${userId}`);
-
-  try {
-    // Find or create product
-    let product = await Product.findOne({ productId });
-
-    if (!product) {
-      // Create a default product
-      product = await Product.create({
-        productId: productId || 'default',
-        name: planName || 'Subscription',
-        description: `${planName} subscription`,
-        price: (session.amount_total || 0) / 100, // Convert from cents
-        currency: (session.currency || 'eur').toUpperCase(),
-        billingPeriod: planInterval === 'year' ? 'yearly' : 'monthly',
-        isActive: true,
-      });
-    }
-
-    // Process the subscription payment and get the result
-    const result = await processSubscriptionPayment({
-      userId,
-      productId: productId || 'default',
-      store: 'stripe',
-      amount: product.price,
-      currency: product.currency,
-    });
-
-    // Store Stripe subscription ID if this is a subscription (not one-time payment)
-    if (session.subscription && result.subscription) {
-      const subscription = await Subscription.findById(result.subscription._id);
-      if (subscription) {
-        subscription.stripeSubscriptionId = session.subscription as string;
-        await subscription.save();
-      }
-    }
-
-    paymentLogger.info(`✅ Subscription activated for user ${userId}`);
-  } catch (error) {
-    paymentLogger.error('Error processing successful checkout:', error);
-    throw error;
-  }
-}
-
-/**
- * Handle subscription updated event from Stripe
- */
-async function handleSubscriptionUpdated(stripeSubscription: Stripe.Subscription) {
-  try {
-    const userId = stripeSubscription.metadata?.userId;
-    if (!userId) {
-      paymentLogger.error('No userId in subscription metadata');
-      return;
-    }
-
-    paymentLogger.info(`📝 Updating subscription for user ${userId}`);
-
-    const user = await User.findById(userId);
-    if (!user || !user.activeSubscriptionId) {
-      paymentLogger.error(`User or subscription not found for user ${userId}`);
-      return;
-    }
-
-    // Update subscription expiration date if changed
-    const subscription = await Subscription.findById(user.activeSubscriptionId);
-    if (subscription && (stripeSubscription as any).current_period_end) {
-      const newExpirationDate = new Date((stripeSubscription as any).current_period_end * 1000);
-      subscription.expirationDate = newExpirationDate;
-      subscription.renewalDate = newExpirationDate;
-      subscription.status = stripeSubscription.status === 'active' ? 'active' : 'canceled';
-      subscription.autoRenewing = !(stripeSubscription as any).cancel_at_period_end;
-      await subscription.save();
-
-      // Update user
-      user.subscriptionExpiresAt = newExpirationDate;
-      user.subscriptionStatus = stripeSubscription.status === 'active' ? 'active' : 'canceled';
-      await user.save();
-
-      paymentLogger.info(`✅ Subscription updated for user ${userId}`);
-    }
-  } catch (error) {
-    paymentLogger.error('Error handling subscription update:', error);
-  }
-}
-
-/**
- * Handle subscription deleted event from Stripe
- */
-async function handleSubscriptionDeleted(stripeSubscription: Stripe.Subscription) {
-  try {
-    const userId = stripeSubscription.metadata?.userId;
-    if (!userId) {
-      paymentLogger.error('No userId in subscription metadata');
-      return;
-    }
-
-    paymentLogger.info(`🗑️ Canceling subscription for user ${userId}`);
-
-    const user = await User.findById(userId);
-    if (!user) {
-      paymentLogger.error(`User not found: ${userId}`);
-      return;
-    }
-
-    // Mark subscription as canceled
-    if (user.activeSubscriptionId) {
-      const subscription = await Subscription.findById(user.activeSubscriptionId);
-      if (subscription) {
-        subscription.status = 'canceled';
-        subscription.autoRenewing = false;
-        subscription.canceledAt = new Date();
-        await subscription.save();
-      }
-    }
-
-    // Update user
-    user.subscriptionStatus = 'canceled';
-    user.isSubscribed = false;
-    await user.save();
-
-    paymentLogger.info(`✅ Subscription canceled for user ${userId}`);
-  } catch (error) {
-    paymentLogger.error('Error handling subscription deletion:', error);
-  }
-}
-
-/**
- * Handle recurring payment succeeded (monthly/yearly renewals)
- */
-async function handleRecurringPaymentSucceeded(invoice: Stripe.Invoice) {
-  try {
-    const subscription = (invoice as any).subscription;
-    if (!subscription || typeof subscription !== 'string') {
-      paymentLogger.info('No subscription ID in invoice');
-      return;
-    }
-
-    // Get the full subscription object
-    const stripeSubscription = await stripe.subscriptions.retrieve(subscription);
-    const userId = stripeSubscription.metadata?.userId;
-    const productId = stripeSubscription.metadata?.productId;
-
-    if (!userId || !productId) {
-      paymentLogger.error('Missing userId or productId in subscription metadata');
-      return;
-    }
-
-    paymentLogger.info(`💰 Processing recurring payment for user ${userId}`);
-
-    // Find product
-    const product = await Product.findOne({ productId });
-    if (!product) {
-      paymentLogger.error(`Product not found: ${productId}`);
-      return;
-    }
-
-    // Process the renewal payment
-    await processSubscriptionPayment({
-      userId,
-      productId,
-      store: 'stripe',
-      amount: (invoice.amount_paid || 0) / 100, // Convert from cents
-      currency: (invoice.currency || 'eur').toUpperCase(),
-    });
-
-    paymentLogger.info(`✅ Recurring payment processed for user ${userId}`);
-  } catch (error) {
-    paymentLogger.error('Error handling recurring payment:', error);
-  }
-}
-
-/**
- * Handle payment failed event
- */
-async function handlePaymentFailed(invoice: Stripe.Invoice) {
-  try {
-    const subscription = (invoice as any).subscription;
-    if (!subscription || typeof subscription !== 'string') {
-      return;
-    }
-
-    const stripeSubscription = await stripe.subscriptions.retrieve(subscription);
-    const userId = stripeSubscription.metadata?.userId;
-
-    if (!userId) {
-      paymentLogger.error('No userId in subscription metadata');
-      return;
-    }
-
-    paymentLogger.info(`❌ Payment failed for user ${userId}`);
-
-    const user = await User.findById(userId);
-    if (!user) {
-      return;
-    }
-
-    // Update user subscription status to grace period
-    user.subscriptionStatus = 'grace';
-    await user.save();
-
-    // Update subscription to grace status
-    if (user.activeSubscriptionId) {
-      const subscription = await Subscription.findById(user.activeSubscriptionId);
-      if (subscription) {
-        subscription.status = 'grace';
-        // Set grace period for 7 days
-        const graceEnd = new Date();
-        graceEnd.setDate(graceEnd.getDate() + 7);
-        subscription.graceExpirationDate = graceEnd;
-        await subscription.save();
-      }
-    }
-
-    paymentLogger.info(`✅ User ${userId} moved to grace period`);
-  } catch (error) {
-    paymentLogger.error('Error handling payment failure:', error);
-  }
-}
-
-/**
- * @desc    Verify payment session and return status
- * @route   GET /api/payment/verify-session/:sessionId
- * @access  Private
- */
-export const verifySession = async (req: Request, res: Response): Promise<void> => {
-  try {
-    const { sessionId } = req.params;
-    const userId = (req as any).user?._id;
-
-    if (!userId) {
-      res.status(401).json({ message: 'User not authenticated' });
-      return;
-    }
-
-    // Retrieve the session from Stripe
-    const session = await stripe.checkout.sessions.retrieve(sessionId);
-
-    // Verify this session belongs to the current user
-    if (session.client_reference_id !== userId.toString()) {
-      res.status(403).json({ message: 'Session does not belong to current user' });
-      return;
-    }
-
-    res.status(200).json({
-      success: true,
-      paymentStatus: session.payment_status,
-      customerEmail: session.customer_email,
-      amountTotal: session.amount_total ? session.amount_total / 100 : 0,
-    });
-  } catch (error: any) {
-    paymentLogger.error('Error verifying session:', error);
-    res.status(500).json({ message: 'Error verifying session', error: error.message });
-  }
-};
-
-/**
  * @desc    Apply free subscription with 100% off coupon
  * @route   POST /api/payment/apply-free-subscription
  * @access  Private
@@ -762,22 +310,18 @@ export const applyFreeSubscription = async (req: Request, res: Response): Promis
     const { planName, planInterval, productId, discountCode } = req.body;
     const userId = (req as any).user?._id;
 
-    // Free subscription request received
-
     if (!userId) {
-      paymentLogger.error('❌ User not authenticated');
+      paymentLogger.error('User not authenticated');
       res.status(401).json({ message: 'User not authenticated' });
       return;
     }
 
     const user = await User.findById(userId);
     if (!user) {
-      paymentLogger.error('❌ User not found:', userId);
+      paymentLogger.error('User not found:', userId);
       res.status(404).json({ message: 'User not found' });
       return;
     }
-
-    // User found
 
     // Verify discount code is valid and provides 100% off
     if (!discountCode) {
@@ -807,16 +351,15 @@ export const applyFreeSubscription = async (req: Request, res: Response): Promis
       return;
     }
 
-    // Find or create product (need to check price for fixed discounts)
+    // Find or create product
     let product = await Product.findOne({ productId });
 
     if (!product) {
-      // Create a default product
       product = await Product.create({
         productId: productId || 'default',
         name: planName || 'Subscription',
         description: `${planName} subscription`,
-        price: 0, // Free with 100% off
+        price: 0,
         currency: 'EUR',
         billingPeriod: planInterval === 'year' ? 'yearly' : 'monthly',
         isActive: true,
@@ -835,8 +378,6 @@ export const applyFreeSubscription = async (req: Request, res: Response): Promis
       return;
     }
 
-    paymentLogger.info('💾 Creating free subscription in database...');
-
     // Process the subscription payment with 0 amount
     const result = await processSubscriptionPayment({
       userId,
@@ -846,15 +387,9 @@ export const applyFreeSubscription = async (req: Request, res: Response): Promis
       currency: 'EUR',
     });
 
-    paymentLogger.info('✅ Subscription created with ID:', result.subscription._id);
-    paymentLogger.info('Subscription status:', result.subscription.status);
-    paymentLogger.info('Expires at:', result.subscription.expirationDate);
-
     // Increment discount code usage
     discount.usedCount = (discount.usedCount || 0) + 1;
     await discount.save();
-
-    // Free subscription activated successfully
 
     res.status(200).json({
       success: true,
@@ -871,284 +406,7 @@ export const applyFreeSubscription = async (req: Request, res: Response): Promis
       },
     });
   } catch (error: any) {
-    paymentLogger.error('❌ Error applying free subscription:', error);
-    paymentLogger.error('Stack trace:', error.stack);
+    paymentLogger.error('Error applying free subscription:', error);
     res.status(500).json({ message: 'Error applying free subscription', error: error.message });
-  }
-};
-
-/**
- * Handle refund from Stripe charge.refunded webhook
- */
-async function handleChargeRefunded(charge: Stripe.Charge) {
-  try {
-    paymentLogger.info(`💰 Processing refund for charge: ${charge.id}`);
-
-    // Get refund details
-    const refundAmount = charge.amount_refunded / 100; // Convert from cents
-    const currency = charge.currency.toUpperCase();
-    const isFullRefund = charge.refunded;
-
-    // Try to find the payment record by transaction ID
-    const paymentRecord = await PaymentRecord.findOne({
-      storeTransactionId: charge.payment_intent || charge.id,
-      store: 'stripe',
-    });
-
-    if (!paymentRecord) {
-      paymentLogger.warn(`⚠️ Payment record not found for charge: ${charge.id}`);
-      return;
-    }
-
-    // Update payment record with refund info
-    paymentRecord.status = isFullRefund ? 'refunded' : 'partially_refunded';
-    paymentRecord.refundAmount = refundAmount;
-    paymentRecord.refundDate = new Date();
-    paymentRecord.refundReason = 'customer_request';
-    await paymentRecord.save();
-
-    // Find user
-    const user = await User.findById(paymentRecord.userId);
-    if (!user) {
-      paymentLogger.error(`User not found for refund: ${paymentRecord.userId}`);
-      return;
-    }
-
-    // If full refund, cancel the subscription
-    if (isFullRefund && paymentRecord.subscriptionId) {
-      const subscription = await Subscription.findById(paymentRecord.subscriptionId);
-      if (subscription) {
-        subscription.status = 'refunded';
-        subscription.canceledAt = new Date();
-        subscription.refundedAt = new Date();
-        await subscription.save();
-
-        // Update user - use 'canceled' since 'refunded' is not a valid user status
-        user.isSubscribed = false;
-        user.subscriptionStatus = 'canceled';
-        await user.save();
-
-        // Create subscription event
-        await SubscriptionEvent.create({
-          subscriptionId: subscription._id,
-          userId: user._id,
-          eventType: 'subscription_refunded',
-          store: 'stripe',
-          hasFinancialImpact: true,
-          amount: refundAmount,
-          currency,
-        });
-      }
-    }
-
-    // Send refund notification email
-    await emailService.sendRefundNotification(user.email, user.name || 'Customer', {
-      amount: refundAmount,
-      currency: currency === 'EUR' ? '€' : currency,
-      transactionId: charge.id,
-    });
-
-    // Refund processed successfully
-  } catch (error) {
-    paymentLogger.error('❌ Error handling refund:', error);
-  }
-}
-
-/**
- * Handle dispute/chargeback from Stripe
- */
-async function handleDisputeCreated(dispute: Stripe.Dispute) {
-  try {
-    paymentLogger.info(`⚠️ Dispute/chargeback created: ${dispute.id}`);
-
-    const chargeId = typeof dispute.charge === 'string' ? dispute.charge : dispute.charge?.id;
-    if (!chargeId) {
-      paymentLogger.error('No charge ID in dispute');
-      return;
-    }
-
-    // Find the payment record
-    const paymentRecord = await PaymentRecord.findOne({
-      storeTransactionId: chargeId,
-      store: 'stripe',
-    });
-
-    if (!paymentRecord) {
-      paymentLogger.warn(`⚠️ Payment record not found for dispute: ${chargeId}`);
-      return;
-    }
-
-    // Update payment record
-    paymentRecord.status = 'disputed';
-    await paymentRecord.save();
-
-    // Find user
-    const user = await User.findById(paymentRecord.userId);
-    if (!user) {
-      return;
-    }
-
-    // Dispute logged
-
-    // Create subscription event for tracking
-    if (paymentRecord.subscriptionId) {
-      await SubscriptionEvent.create({
-        subscriptionId: paymentRecord.subscriptionId,
-        userId: user._id,
-        eventType: 'chargeback_initiated',
-        store: 'stripe',
-        hasFinancialImpact: true,
-        amount: dispute.amount / 100,
-        currency: dispute.currency.toUpperCase(),
-        metadata: {
-          disputeId: dispute.id,
-          reason: dispute.reason,
-        },
-      });
-    }
-  } catch (error) {
-    paymentLogger.error('❌ Error handling dispute:', error);
-  }
-}
-
-/**
- * @desc    Verify LemonSqueezy payment status (polling endpoint)
- * @route   POST /api/payments/verify-lemonsqueezy
- * @access  Private
- */
-export const verifyLemonSqueezyPayment = async (req: Request, res: Response): Promise<void> => {
-  try {
-    const { productId } = req.body;
-    const userId = (req as any).user?._id;
-
-    if (!userId) {
-      res.status(401).json({ success: false, message: 'User not authenticated' });
-      return;
-    }
-
-    const user = await User.findById(userId);
-    if (!user) {
-      res.status(404).json({ success: false, message: 'User not found' });
-      return;
-    }
-
-    // Verify payment using LemonSqueezy service
-    const result = await lemonSqueezyService.verifyPayment(
-      userId.toString(),
-      user.email,
-      productId
-    );
-
-    if (!result.success) {
-      res.status(200).json({
-        success: false,
-        status: 'pending',
-        message: 'Payment not yet confirmed',
-      });
-      return;
-    }
-
-    // Payment verified - check if subscription already processed
-    const existingSubscription = await Subscription.findOne({
-      userId,
-      lemonSqueezyOrderId: result.order.id,
-    });
-
-    if (existingSubscription) {
-      // Already processed (likely by webhook)
-      res.status(200).json({
-        success: true,
-        status: 'completed',
-        message: 'Payment already processed',
-        subscription: {
-          id: existingSubscription._id,
-          plan: existingSubscription.productId,
-          expiresAt: existingSubscription.expirationDate,
-          status: existingSubscription.status,
-        },
-      });
-      return;
-    }
-
-    // Payment verified but not yet processed - process it now
-    const orderAttrs = result.order.attributes;
-    const customData = orderAttrs.first_order_item?.custom_data || {};
-
-    // Find product
-    const finalProductId = customData.product_id || productId || 'default';
-    let product = await Product.findOne({ productId: finalProductId });
-
-    if (!product) {
-      // Create default product
-      product = await Product.create({
-        productId: finalProductId,
-        name: customData.plan_name || 'Subscription',
-        description: 'Subscription',
-        price: orderAttrs.total / 100,
-        currency: orderAttrs.currency?.toUpperCase() || 'EUR',
-        billingPeriod: customData.plan_interval === 'year' ? 'yearly' : 'monthly',
-        isActive: true,
-      });
-    }
-
-    // Process subscription payment
-    const paymentResult = await processSubscriptionPayment({
-      userId,
-      productId: finalProductId,
-      store: 'lemonsqueezy',
-      amount: orderAttrs.total / 100,
-      currency: orderAttrs.currency?.toUpperCase() || 'EUR',
-    });
-
-    // Store LemonSqueezy order ID
-    if (paymentResult.subscription) {
-      paymentResult.subscription.lemonSqueezyOrderId = result.order.id;
-      if (result.subscription) {
-        paymentResult.subscription.lemonSqueezySubscriptionId = result.subscription.id;
-      }
-      await paymentResult.subscription.save();
-    }
-
-    // Send invoice email
-    try {
-      await emailService.sendSubscriptionInvoice(user.email, user.name || 'Customer', {
-        planName: product.name,
-        amount: orderAttrs.total / 100,
-        currency: orderAttrs.currency?.toUpperCase() || 'EUR',
-        billingPeriod: product.billingPeriod || 'monthly',
-        orderId: result.order.id,
-        subscriptionStartDate: new Date(),
-        nextBillingDate: paymentResult.subscription.expirationDate,
-        autoRenewing: paymentResult.subscription.autoRenewing !== false,
-      });
-    } catch (emailError) {
-      paymentLogger.error('Failed to send invoice email:', emailError);
-      // Don't fail the payment verification if email fails
-    }
-
-    res.status(200).json({
-      success: true,
-      status: 'completed',
-      message: 'Payment verified and subscription activated',
-      subscription: {
-        id: paymentResult.subscription._id,
-        plan: finalProductId,
-        productName: product.name,
-        expiresAt: paymentResult.subscription.expirationDate,
-        status: paymentResult.subscription.status,
-      },
-      payment: {
-        id: paymentResult.paymentRecord._id,
-        amount: paymentResult.paymentRecord.amount,
-        currency: paymentResult.paymentRecord.currency,
-      },
-    });
-  } catch (error: any) {
-    paymentLogger.error('Error verifying LemonSqueezy payment:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Error verifying payment',
-      error: error.message,
-    });
   }
 };

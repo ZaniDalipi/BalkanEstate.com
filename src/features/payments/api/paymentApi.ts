@@ -1,12 +1,9 @@
 /**
  * Payment API Service
  *
- * Handles all payment-related API calls with support for multiple providers:
- * - LemonSqueezy for all Balkan countries (Merchant of Record)
- * - Stripe as fallback for EU countries
- *
+ * Handles all payment-related API calls.
+ * Payment provider TBD - see PAYMENT_OPTIONS_2026.md.
  * The API automatically routes to the appropriate provider based on country.
- * LemonSqueezy is a Merchant of Record (MoR) handling VAT/tax compliance.
  */
 
 import { apiRequest } from '@/shared/api/httpClient';
@@ -74,8 +71,6 @@ export interface SupportedCountriesResponse {
       fees: string;
     };
   }>;
-  stripeCountries: Array<{ countryCode: string; countryName: string }>;
-  lemonSqueezyCountries: Array<{ countryCode: string; countryName: string }>;
 }
 
 export interface VerifyPaymentResponse {
@@ -118,7 +113,6 @@ export async function createPayment(request: CreatePaymentRequest): Promise<Crea
     );
     return response;
   } catch (error: any) {
-    // Error removed
     return {
       success: false,
       provider: getProviderForCountry(request.countryCode),
@@ -140,8 +134,6 @@ export async function getPaymentProvider(countryCode: string): Promise<PaymentPr
     );
     return response;
   } catch (error: any) {
-    // Error removed
-    // Fallback to local config
     const info = getCountryPaymentInfo(countryCode);
     if (info) {
       return {
@@ -150,18 +142,14 @@ export async function getPaymentProvider(countryCode: string): Promise<PaymentPr
         countryName: info.countryName,
         provider: info.provider,
         providerInfo: {
-          name: info.provider === 'stripe' ? 'Stripe' : 'LemonSqueezy',
-          description: info.provider === 'stripe'
-            ? 'Secure card payments'
-            : 'Secure payments with automatic VAT handling',
-          fees: info.provider === 'stripe' ? '~2.9%' : '~5%',
+          name: 'Web Payment',
+          description: 'Secure online payments',
+          fees: 'TBD',
         },
         isEU: info.isEU,
         isSEPA: info.isSEPA,
         currency: info.currency,
-        supportedMethods: info.provider === 'stripe'
-          ? ['card', 'sepa_debit', 'apple_pay', 'google_pay']
-          : ['card', 'paypal', 'apple_pay', 'google_pay'],
+        supportedMethods: ['card', 'paypal', 'apple_pay', 'google_pay'],
       };
     }
     return null;
@@ -179,130 +167,46 @@ export async function getSupportedCountries(): Promise<SupportedCountriesRespons
     );
     return response;
   } catch (error: any) {
-    // Error removed
-    // Fallback to local config
     const countries = Object.values(COUNTRY_PAYMENT_MAP);
     return {
       success: true,
       countries: countries.map(c => ({
         ...c,
         providerInfo: {
-          name: c.provider === 'stripe' ? 'Stripe' : 'LemonSqueezy',
-          description: c.provider === 'stripe'
-            ? 'Secure card payments'
-            : 'Secure payments with automatic VAT handling',
-          fees: c.provider === 'stripe' ? '~2.9%' : '~5%',
+          name: 'Web Payment',
+          description: 'Secure online payments',
+          fees: 'TBD',
         },
       })),
-      stripeCountries: countries
-        .filter(c => c.provider === 'stripe')
-        .map(c => ({ countryCode: c.countryCode, countryName: c.countryName })),
-      lemonSqueezyCountries: countries
-        .filter(c => c.provider === 'lemonsqueezy')
-        .map(c => ({ countryCode: c.countryCode, countryName: c.countryName })),
     };
   }
-}
-
-/**
- * Verify a Stripe payment session
- */
-export async function verifyStripePayment(sessionId: string): Promise<VerifyPaymentResponse> {
-  try {
-    const response = await apiRequest<VerifyPaymentResponse>(
-      `/payments/verify-session/${sessionId}`,
-      { method: 'GET', requiresAuth: true }
-    );
-    return { ...response, provider: 'stripe' };
-  } catch (error: any) {
-    // Error removed
-    return {
-      success: false,
-      paymentStatus: 'error',
-      provider: 'stripe',
-      message: error.message,
-    };
-  }
-}
-
-/**
- * Verify a LemonSqueezy payment with polling
- * Polls up to 10 times with 3-second intervals (30 seconds total)
- * If still processing after timeout, returns a success with pending status
- * so user can see their account and check later
- */
-export async function verifyLemonSqueezyPayment(maxAttempts = 10): Promise<VerifyPaymentResponse> {
-  const pollInterval = 3000; // 3 seconds between attempts
-
-  for (let attempt = 1; attempt <= maxAttempts; attempt++) {
-    try {
-      const response = await apiRequest<VerifyPaymentResponse>(
-        '/payments/lemonsqueezy/verify',
-        { method: 'GET', requiresAuth: true }
-      );
-
-      // If payment is confirmed, return success
-      if (response.paymentStatus === 'paid') {
-        return { ...response, provider: 'lemonsqueezy' };
-      }
-
-      // If still processing and not last attempt, wait and retry
-      if (response.paymentStatus === 'processing' && attempt < maxAttempts) {
-        await new Promise(resolve => setTimeout(resolve, pollInterval));
-        continue;
-      }
-
-      // On last attempt, if still processing, return success with pending status
-      // Payment likely went through but webhook is delayed
-      if (response.paymentStatus === 'processing' && attempt === maxAttempts) {
-        return {
-          success: true,
-          paymentStatus: 'pending_confirmation',
-          provider: 'lemonsqueezy',
-          message: 'Payment received! Your subscription will be activated shortly. Please check your email for confirmation.',
-        };
-      }
-
-      return { ...response, provider: 'lemonsqueezy' };
-    } catch (error: any) {
-      // Error removed
-      if (attempt === maxAttempts) {
-        // On timeout, assume payment went through (LemonSqueezy confirmed it)
-        return {
-          success: true,
-          paymentStatus: 'pending_confirmation',
-          provider: 'lemonsqueezy',
-          message: 'Payment received! Your subscription will be activated within a few minutes. Check your email for confirmation.',
-        };
-      }
-      await new Promise(resolve => setTimeout(resolve, pollInterval));
-    }
-  }
-
-  // Fallback - return pending instead of error
-  return {
-    success: true,
-    paymentStatus: 'pending_confirmation',
-    provider: 'lemonsqueezy',
-    message: 'Payment received! Your subscription is being processed and will be activated shortly.',
-  };
 }
 
 /**
  * Verify a payment (auto-detects provider from URL params)
  */
 export async function verifyPayment(params: URLSearchParams): Promise<VerifyPaymentResponse> {
-  const provider = params.get('provider') as PaymentProvider | null;
   const sessionId = params.get('session_id');
   const orderId = params.get('order_id');
 
-  // LemonSqueezy payments - use dedicated verification with polling
-  if (provider === 'lemonsqueezy') {
-    return verifyLemonSqueezyPayment();
-  }
-
-  if (sessionId) {
-    return verifyStripePayment(sessionId);
+  if (sessionId || orderId) {
+    try {
+      const endpoint = sessionId
+        ? `/payments/verify-session/${sessionId}`
+        : `/payments/verify-order/${orderId}`;
+      const response = await apiRequest<VerifyPaymentResponse>(
+        endpoint,
+        { method: 'GET', requiresAuth: true }
+      );
+      return { ...response, provider: 'web' as PaymentProvider };
+    } catch (error: any) {
+      return {
+        success: true,
+        paymentStatus: 'pending_confirmation',
+        provider: 'web' as PaymentProvider,
+        message: 'Payment received! Your subscription will be activated shortly.',
+      };
+    }
   }
 
   return {
@@ -323,7 +227,6 @@ export async function getSubscriptionStatus(): Promise<SubscriptionStatusRespons
     );
     return response;
   } catch (error: any) {
-    // Error removed
     return null;
   }
 }
@@ -339,7 +242,6 @@ export async function cancelSubscription(): Promise<{ success: boolean; message?
     );
     return { success: true, message: response.message };
   } catch (error: any) {
-    // Error removed
     return {
       success: false,
       message: error.message,
@@ -367,7 +269,6 @@ export async function applyFreeSubscription(params: {
       message: response.message,
     };
   } catch (error: any) {
-    // Error removed
     return {
       success: false,
       message: error.message,
@@ -377,7 +278,6 @@ export async function applyFreeSubscription(params: {
 
 /**
  * Redirect to payment page
- * Handles the redirect to either Stripe or PaySera checkout
  */
 export function redirectToPayment(paymentUrl: string): void {
   if (paymentUrl) {
@@ -410,8 +310,6 @@ export default {
   createPayment,
   getPaymentProvider,
   getSupportedCountries,
-  verifyStripePayment,
-  verifyLemonSqueezyPayment,
   verifyPayment,
   getSubscriptionStatus,
   cancelSubscription,

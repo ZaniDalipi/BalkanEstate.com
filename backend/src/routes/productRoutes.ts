@@ -40,8 +40,8 @@ router.get('/', async (req: Request, res: Response): Promise<void> => {
       filteredProducts = products.filter((p) => p.googlePlayProductId);
     } else if (store === 'apple') {
       filteredProducts = products.filter((p) => p.appStoreProductId);
-    } else if (store === 'stripe' || store === 'web') {
-      filteredProducts = products.filter((p) => p.stripeProductId || p.type === 'subscription');
+    } else if (store === 'web') {
+      filteredProducts = products.filter((p) => p.externalProductId || p.type === 'subscription');
     }
 
     res.status(200).json({
@@ -79,7 +79,7 @@ router.get('/', async (req: Request, res: Response): Promise<void> => {
         store: {
           google: product.googlePlayProductId,
           apple: product.appStoreProductId,
-          stripe: product.stripeProductId,
+          web: product.externalProductId,
         },
       })),
     });
@@ -369,7 +369,7 @@ router.get('/:id', async (req: Request, res: Response): Promise<void> => {
         store: {
           google: product.googlePlayProductId,
           apple: product.appStoreProductId,
-          stripe: product.stripeProductId,
+          web: product.externalProductId,
         },
       },
     });

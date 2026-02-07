@@ -313,7 +313,7 @@ export const cancelFeaturedSubscription = async (req: Request, res: Response): P
 export const confirmPayment = async (req: Request, res: Response): Promise<void> => {
   try {
     const { agencyId } = req.params;
-    const { stripeSubscriptionId, stripeCustomerId } = req.body;
+    const { externalSubscriptionId, externalCustomerId } = req.body;
 
     const subscription = await AgencyFeaturedSubscription.findOne({
       agencyId,
@@ -327,8 +327,8 @@ export const confirmPayment = async (req: Request, res: Response): Promise<void>
 
     // Update subscription
     subscription.status = 'active';
-    subscription.stripeSubscriptionId = stripeSubscriptionId;
-    subscription.stripeCustomerId = stripeCustomerId;
+    subscription.externalSubscriptionId = externalSubscriptionId;
+    subscription.externalCustomerId = externalCustomerId;
     subscription.lastPaymentDate = new Date();
     subscription.nextPaymentDate = subscription.currentPeriodEnd;
 

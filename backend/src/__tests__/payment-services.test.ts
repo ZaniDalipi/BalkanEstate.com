@@ -1,13 +1,12 @@
 /**
  * Payment Services Unit Tests
  *
- * Tests for payment provider factory and Paddle service
- * All countries use Paddle as the primary payment provider
+ * Tests for payment provider factory
+ * All countries use 'web' as payment provider (pending new provider integration)
  * Run: npm test -- --testPathPattern=payment-services
  */
 
-import { paymentProviderFactory, COUNTRY_PROVIDER_MAP, PaymentProvider } from '../services/paymentProviderFactory';
-import { paddleService } from '../services/paddleService';
+import { paymentProviderFactory, COUNTRY_PROVIDER_MAP } from '../services/paymentProviderFactory';
 
 // ============================================================
 // PAYMENT PROVIDER FACTORY TESTS
@@ -17,27 +16,26 @@ describe('PaymentProviderFactory', () => {
 
   describe('getProviderForCountry', () => {
 
-    // All Balkan countries use Paddle
     const allCountries = ['GR', 'HR', 'BG', 'RO', 'SI', 'RS', 'AL', 'BA', 'MK', 'ME', 'XK'];
 
-    test.each(allCountries)('returns paddle for country %s', (countryCode) => {
+    test.each(allCountries)('returns web for country %s', (countryCode) => {
       const provider = paymentProviderFactory.getProviderForCountry(countryCode);
-      expect(provider).toBe('paddle');
+      expect(provider).toBe('web');
     });
 
-    test('returns paddle for unknown country (default)', () => {
+    test('returns web for unknown country (default)', () => {
       const provider = paymentProviderFactory.getProviderForCountry('XX');
-      expect(provider).toBe('paddle');
+      expect(provider).toBe('web');
     });
 
     test('handles lowercase country codes', () => {
-      expect(paymentProviderFactory.getProviderForCountry('rs')).toBe('paddle');
-      expect(paymentProviderFactory.getProviderForCountry('gr')).toBe('paddle');
+      expect(paymentProviderFactory.getProviderForCountry('rs')).toBe('web');
+      expect(paymentProviderFactory.getProviderForCountry('gr')).toBe('web');
     });
 
     test('handles empty string', () => {
       const provider = paymentProviderFactory.getProviderForCountry('');
-      expect(provider).toBe('paddle');
+      expect(provider).toBe('web');
     });
   });
 
@@ -47,7 +45,7 @@ describe('PaymentProviderFactory', () => {
       const info = paymentProviderFactory.getCountryInfo('RS');
       expect(info).toBeDefined();
       expect(info?.countryName).toBe('Serbia');
-      expect(info?.provider).toBe('paddle');
+      expect(info?.provider).toBe('web');
       expect(info?.currency).toBe('EUR');
       expect(info?.isEU).toBe(false);
     });
@@ -56,7 +54,7 @@ describe('PaymentProviderFactory', () => {
       const info = paymentProviderFactory.getCountryInfo('GR');
       expect(info).toBeDefined();
       expect(info?.countryName).toBe('Greece');
-      expect(info?.provider).toBe('paddle');
+      expect(info?.provider).toBe('web');
       expect(info?.isEU).toBe(true);
     });
 
@@ -83,37 +81,6 @@ describe('PaymentProviderFactory', () => {
       const countries = paymentProviderFactory.getSupportedCountries();
       const nonEuCountries = countries.filter(c => !c.isEU);
       expect(nonEuCountries.length).toBe(6);
-    });
-  });
-
-  describe('getCountriesByProvider', () => {
-
-    test('returns 0 countries for Stripe (not used)', () => {
-      const stripeCountries = paymentProviderFactory.getCountriesByProvider('stripe');
-      expect(stripeCountries.length).toBe(0);
-    });
-
-    test('returns all 11 countries for Paddle', () => {
-      const paddleCountries = paymentProviderFactory.getCountriesByProvider('paddle');
-      expect(paddleCountries.length).toBe(11);
-      paddleCountries.forEach(c => {
-        expect(c.provider).toBe('paddle');
-      });
-    });
-  });
-
-  describe('getProviderInfo', () => {
-
-    test('returns correct info for Stripe', () => {
-      const info = paymentProviderFactory.getProviderInfo('stripe');
-      expect(info.name).toBe('Stripe');
-      expect(info.fees).toContain('2.9%');
-    });
-
-    test('returns correct info for Paddle', () => {
-      const info = paymentProviderFactory.getProviderInfo('paddle');
-      expect(info.name).toBe('Paddle');
-      expect(info.fees).toContain('5%');
     });
   });
 });
@@ -147,77 +114,5 @@ describe('COUNTRY_PROVIDER_MAP', () => {
       .forEach(country => {
         expect(country.isSEPA).toBe(true);
       });
-  });
-});
-
-// ============================================================
-// PADDLE SERVICE TESTS
-// ============================================================
-
-describe('PaddleService', () => {
-
-  describe('isConfigured', () => {
-
-    test('returns false when not configured', () => {
-      // Without env vars, should return false
-      const originalApiKey = process.env.PADDLE_API_KEY;
-      delete process.env.PADDLE_API_KEY;
-
-      // Note: This tests the current state - in real env it would check actual config
-      expect(typeof paddleService.isConfigured()).toBe('boolean');
-
-      process.env.PADDLE_API_KEY = originalApiKey;
-    });
-  });
-
-  describe('getEnvironment', () => {
-
-    test('returns sandbox or production', () => {
-      const env = paddleService.getEnvironment();
-      expect(['sandbox', 'production']).toContain(env);
-    });
-  });
-
-  describe('verifyWebhookSignature', () => {
-
-    test('returns false for invalid signature', () => {
-      const isValid = paddleService.verifyWebhookSignature(
-        '{"test": "data"}',
-        'invalid_signature'
-      );
-      expect(isValid).toBe(false);
-    });
-
-    test('handles empty payload', () => {
-      const isValid = paddleService.verifyWebhookSignature('', '');
-      expect(isValid).toBe(false);
-    });
-  });
-
-  describe('parseWebhookEvent', () => {
-
-    test('parses valid webhook event', () => {
-      const mockEvent = {
-        event_type: 'transaction.completed',
-        event_id: 'evt_123',
-        occurred_at: '2024-01-15T10:00:00Z',
-        data: { id: 'txn_123' }
-      };
-
-      const parsed = paddleService.parseWebhookEvent(mockEvent);
-      expect(parsed).toBeDefined();
-      expect(parsed?.event_type).toBe('transaction.completed');
-      expect(parsed?.event_id).toBe('evt_123');
-    });
-
-    test('returns null for invalid event', () => {
-      const parsed = paddleService.parseWebhookEvent({});
-      expect(parsed).toBeNull();
-    });
-
-    test('returns null for null input', () => {
-      const parsed = paddleService.parseWebhookEvent(null);
-      expect(parsed).toBeNull();
-    });
   });
 });

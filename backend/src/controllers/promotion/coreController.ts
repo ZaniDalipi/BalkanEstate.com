@@ -115,7 +115,7 @@ export const getMyPromotions = async (
     const promotions = await Promotion.find({
       userId: String((req.user as IUser)._id),
     })
-      .populate('propertyId', 'title images price city country address propertyType status sellerId')
+      .populate('propertyId', 'title images imageUrl price city country address propertyType status sellerId isPromoted promotionTier promotionStartDate promotionEndDate hasUrgentBadge')
       .sort({ createdAt: -1 });
 
     const enrichedPromotions = promotions.map(enrichPromotion);

@@ -52,10 +52,8 @@ export interface IUser extends Document {
   isSubscribed: boolean;
   subscriptionPlan?: string; // Product ID (e.g., 'buyer_pro_monthly')
   subscriptionProductName?: string; // Human-readable name (e.g., 'Buyer Pro Monthly')
-  subscriptionSource?: 'google' | 'apple' | 'stripe' | 'lemonsqueezy' | 'web'; // Where subscription came from
+  subscriptionSource?: 'google' | 'apple' | 'web'; // Where subscription came from
   subscriptionExternalId?: string; // External subscription ID from payment provider
-  lemonSqueezyCustomerId?: string; // LemonSqueezy customer ID
-  lemonSqueezySubscriptionId?: string; // LemonSqueezy subscription ID
   subscriptionExpiresAt?: Date;
   subscriptionStartedAt?: Date;
   activeSubscriptionId?: mongoose.Types.ObjectId; // Link to active Subscription document
@@ -116,8 +114,8 @@ export interface IUser extends Document {
     status: 'active' | 'canceled' | 'expired' | 'trial' | 'grace' | 'pending_cancellation';
     startDate?: Date;
     expiresAt?: Date;
-    stripeCustomerId?: string;
-    stripeSubscriptionId?: string;
+    externalCustomerId?: string;
+    externalSubscriptionId?: string;
 
     // Listing limits (for sellers: free/pro/agency)
     listingsLimit: number; // 3 for free, 20 for pro/agency agents
@@ -142,7 +140,7 @@ export interface IUser extends Document {
     lastPayment?: {
       amount: number;
       date: Date;
-      method: 'stripe' | 'agency_coupon';
+      method: 'web' | 'agency_coupon';
     };
   };
 
@@ -412,19 +410,11 @@ const UserSchema: Schema = new Schema(
     },
     subscriptionSource: {
       type: String,
-      enum: ['google', 'apple', 'stripe', 'lemonsqueezy', 'web'],
+      enum: ['google', 'apple', 'web'],
       index: true, // Index for querying by subscription source
     },
     subscriptionExternalId: {
       type: String, // External subscription ID from payment provider
-      index: true,
-    },
-    lemonSqueezyCustomerId: {
-      type: String, // LemonSqueezy customer ID
-      index: true,
-    },
-    lemonSqueezySubscriptionId: {
-      type: String, // LemonSqueezy subscription ID
       index: true,
     },
     subscriptionExpiresAt: {
@@ -579,8 +569,8 @@ const UserSchema: Schema = new Schema(
       },
       startDate: Date,
       expiresAt: Date,
-      stripeCustomerId: String,
-      stripeSubscriptionId: String,
+      externalCustomerId: String,
+      externalSubscriptionId: String,
 
       // Listing limits
       listingsLimit: {
@@ -640,7 +630,7 @@ const UserSchema: Schema = new Schema(
         date: Date,
         method: {
           type: String,
-          enum: ['stripe', 'agency_coupon'],
+          enum: ['web', 'agency_coupon'],
         },
       },
     },

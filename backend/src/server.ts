@@ -91,6 +91,7 @@ import achievementRoutes from './routes/achievementRoutes';
 import promotionPlanRoutes from './routes/promotionPlanRoutes';
 import videoRoutes from './routes/videoRoutes';
 import aiRoutes from './routes/aiRoutes';
+import cadastreRoutes from './routes/cadastreRoutes';
 
 // Import services
 import { initializeGooglePlayService } from './services/googlePlayService';
@@ -238,7 +239,7 @@ app.use('/api/auth', sensitiveRateLimiter, authRoutes);
 // Payment routes with payment-specific rate limiting
 app.use('/api/payments', paymentRateLimiter, paymentRoutes);
 app.use('/api/subscriptions', paymentRateLimiter, subscriptionRoutes);
-app.use('/api/webhooks', webhookRoutes); // Webhooks from Stripe - no rate limit needed
+app.use('/api/webhooks', webhookRoutes); // Webhooks from payment provider - no rate limit needed
 
 // Standard API routes
 app.use('/api/properties', propertyRoutes);
@@ -274,6 +275,7 @@ app.use('/api/site-content', siteContentRoutes); // Public site content (how it 
 app.use('/api/achievements', achievementRoutes); // User and agency achievements
 app.use('/api/promotion-plans', promotionPlanRoutes); // Listing promotion and agency feature plans
 app.use('/api/videos', videoRoutes); // Property video generation (FFmpeg-based)
+app.use('/api/cadastre', cadastreRoutes); // Cadastre WMS proxy (GetFeatureInfo)
 
 // 404 handler
 app.use((_req: Request, res: Response) => {

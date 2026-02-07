@@ -14,7 +14,7 @@
         "name": "Emri dhe informacioni i kontaktit (email, numri i telefonit)",
         "account": "Kredencialet e llogarisë (emri i përdoruesit, fjalëkalimi)",
         "profile": "Informacioni i profilit (foto, bio, preferencat)",
-        "payment": "Informacioni i pagesës (përpunuar në mënyrë të sigurt përmes Stripe)",
+        "payment": "Informacioni i pagesës (përpunuar në mënyrë të sigurt përmes procesorit tonë të pagesave)",
         "communication": "Komunikimet dhe mesazhet që dërgoni përmes platformës sonë"
       },
       "auto": {
@@ -42,7 +42,7 @@
       "agents": "Me Agjentët e Pronave:",
       "agentsDesc": "Kur pyesni për një pronë, informacioni juaj i kontaktit ndahet me agjentin e listimit.",
       "providers": "Ofruesit e Shërbimeve:",
-      "providersDesc": "Punojmë me palë të treta për përpunimin e pagesave (Stripe), shërbimet e emailit dhe analitikën.",
+      "providersDesc": "Punojmë me palë të treta për përpunimin e pagesave, shërbimet e emailit dhe analitikën.",
       "legal": "Kërkesat Ligjore:",
       "legalDesc": "Kur kërkohet me ligj ose për të mbrojtur të drejtat tona.",
       "business": "Transfertat e Biznesit:",
@@ -93,7 +93,7 @@
     "thirdParty": {
       "title": "Shërbimet e Palëve të Treta",
       "text": "Përdorim shërbimet e mëposhtme të palëve të treta që mund të përpunojnë të dhënat tuaja:",
-      "stripe": "Përpunimi i pagesave. Stripe përpunon informacionin tuaj të pagesës në mënyrë të sigurt. Ne nuk ruajmë detajet e plota të kartës suaj të kreditit.",
+      "stripe": "Përpunimi i pagesave. Procesori ynë i pagesave përpunon informacionin tuaj të pagesës në mënyrë të sigurt. Ne nuk ruajmë detajet e plota të kartës suaj të kreditit.",
       "analytics": "Analitika e faqes për të kuptuar sjelljen e përdoruesve dhe përmirësuar shërbimet tona. Përdorim anonimizimin e IP.",
       "cloudflare": "Shërbime sigurie dhe performancë duke përfshirë mbrojtjen DDoS dhe shpërndarjen e përmbajtjes.",
       "aws": "Shërbime pritjeje dhe ruajtjeje në cloud. Të dhënat ruhen në qendrat e të dhënave të BE."
@@ -162,9 +162,9 @@
       "price": "Mund të ndryshojmë çmimet e abonimit me 30 ditë njoftim",
       "lemonsqueezy": {
         "title": "Tregtari i Regjistruar",
-        "morStatement": "Procesi ynë i porosisë kryhet nga rishitësi ynë online LemonSqueezy. LemonSqueezy është Tregtari i Regjistruar për të gjitha porositë tona. LemonSqueezy ofron të gjitha pyetjet e shërbimit ndaj klientit dhe menaxhon kthimet.",
-        "text": "Kur bëni një blerje, po kryeni transaksion me LemonSqueezy, i cili menaxhon përpunimin e pagesave, faturimin, përputhshmërinë me TVSH/taksat dhe rimbursimet. Pagesa juaj do të shfaqet në deklaratën tuaj si një tarifë nga LemonSqueezy.",
-        "buyerTerms": "Duke bërë një blerje, pranoni gjithashtu Kushtet e Blerësit të LemonSqueezy."
+        "morStatement": "Procesi ynë i porosisë kryhet nga rishitësi ynë online dhe ofruesi i shërbimeve të pagesave. Ofruesi ynë i shërbimeve të pagesave është Tregtari i Regjistruar për të gjitha porositë tona dhe ofron të gjitha pyetjet e shërbimit ndaj klientit dhe menaxhon kthimet.",
+        "text": "Kur bëni një blerje, po kryeni transaksion me ofruesin tonë të shërbimeve të pagesave, i cili menaxhon përpunimin e pagesave, faturimin, përputhshmërinë me TVSH/taksat dhe rimbursimet.",
+        "buyerTerms": "Duke bërë një blerje, pranoni gjithashtu Kushtet e Blerësit të ofruesit tonë të shërbimeve të pagesave."
       }
     },
     "prohibited": {
@@ -339,7 +339,7 @@
     },
     "thirdParty": {
       "title": "Cookies të Palëve të Treta",
-      "text": "Disa cookies në faqen tonë vendosen nga shërbime të palëve të treta që përdorim, si Google Analytics për analitikë të faqes dhe Stripe për përpunim të pagesave. Këto shërbime kanë politikat e tyre të privatësisë që qeversin si i përdorin të dhënat tuaja."
+      "text": "Disa cookies në faqen tonë vendosen nga shërbime të palëve të treta që përdorim, si Google Analytics për analitikë të faqes dhe procesori ynë i pagesave për përpunim të pagesave. Këto shërbime kanë politikat e tyre të privatësisë që qeversin si i përdorin të dhënat tuaja."
     },
     "updates": {
       "title": "Përditësimet e Kësaj Politike",

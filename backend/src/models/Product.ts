@@ -21,10 +21,8 @@ export interface IProduct extends Document {
   // Store IDs
   googlePlayProductId?: string;
   appStoreProductId?: string;
-  stripeProductId?: string;
-  stripePriceId?: string;
-  lemonSqueezyProductId?: string;
-  lemonSqueezyVariantId?: string;
+  externalProductId?: string;
+  externalPriceId?: string;
 
   // Trial
   trialPeriodDays?: number;
@@ -137,16 +135,10 @@ const ProductSchema: Schema = new Schema(
     appStoreProductId: {
       type: String,
     },
-    stripeProductId: {
+    externalProductId: {
       type: String,
     },
-    stripePriceId: {
-      type: String,
-    },
-    lemonSqueezyProductId: {
-      type: String,
-    },
-    lemonSqueezyVariantId: {
+    externalPriceId: {
       type: String,
     },
 

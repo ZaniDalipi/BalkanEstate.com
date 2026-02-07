@@ -8,7 +8,7 @@ import {
 } from '@/constants';
 
 interface AgencyFeatureSectionProps {
-  t: (key: string, defaultValue?: string) => string;
+  t: any;
   currentUserAgencyId: string | undefined;
   getAgencyPrice: (tier: string, duration: number) => number;
   onAgencyFeature: (tier: 'spotlight' | 'homepage' | 'premium') => void;

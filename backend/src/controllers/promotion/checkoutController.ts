@@ -1,16 +1,13 @@
 /**
  * Promotion Checkout Controller
- * Handles Stripe checkout and payment confirmation for new promotions
+ * Handles checkout and payment confirmation for new promotions
  */
 
 import { Request, Response } from 'express';
 import Promotion from '../../models/Promotion';
 import User, { IUser } from '../../models/User';
 import Agency from '../../models/Agency';
-import PromotionCoupon from '../../models/PromotionCoupon';
 import {
-  stripe,
-  PROMOTION_TIERS,
   URGENT_MODIFIER,
   getPromotionPrice,
   getAgencyAllocation,
@@ -22,7 +19,6 @@ import {
   applyCoupon,
   updatePropertyPromotion,
   calculateNextRefreshDate,
-  getBaseUrl,
 } from '../../services/promotion/promotionService';
 import { promotionLogger } from '../../utils/logger';
 
@@ -230,7 +226,7 @@ export const purchasePromotion = async (
 };
 
 /**
- * @desc    Create Stripe checkout session for promotion purchase
+ * @desc    Create checkout session for promotion purchase
  * @route   POST /api/promotions/checkout
  * @access  Private
  */
@@ -334,46 +330,12 @@ export const createPromotionCheckout = async (
       return;
     }
 
-    // Create Stripe checkout session
-    const baseUrl = getBaseUrl();
-    const tierInfo = PROMOTION_TIERS[promotionTier];
-
-    const session = await stripe.checkout.sessions.create({
-      line_items: [
-        {
-          price_data: {
-            currency: 'eur',
-            product_data: {
-              name: `${tierInfo.name} Promotion`,
-              description: `${duration}-day promotion for "${property.title}"${hasUrgentBadge ? ' + Urgent Badge' : ''}`,
-            },
-            unit_amount: Math.round(finalPrice * 100),
-          },
-          quantity: 1,
-        },
-      ],
-      mode: 'payment',
-      success_url: `${baseUrl}/promotions/success?session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${baseUrl}/promotions/cancel?property_id=${propertyId}`,
-      client_reference_id: String(user._id),
-      metadata: {
-        userId: String(user._id),
-        propertyId: String(propertyId),
-        promotionTier: String(promotionTier),
-        duration: String(duration),
-        hasUrgentBadge: String(hasUrgentBadge),
-        couponCode: appliedCouponCode ?? '',
-        couponDiscount: String(couponDiscount),
-        originalPrice: String(finalPrice + couponDiscount),
-        userEmail: user.email ?? '',
-        propertyTitle: property.title ?? '',
-      },
-    });
-
-    res.status(200).json({
-      success: true,
-      sessionId: session.id,
-      url: session.url,
+    // Payment provider not yet configured
+    // TODO: Integrate with new payment provider when selected (see PAYMENT_OPTIONS_2026.md)
+    res.status(503).json({
+      success: false,
+      message: 'Payment processing is not yet configured. Please contact support.',
+      code: 'PAYMENT_NOT_CONFIGURED',
       pricing: {
         originalPrice: finalPrice + couponDiscount,
         discount: couponDiscount,
@@ -383,16 +345,6 @@ export const createPromotionCheckout = async (
     });
   } catch (error: any) {
     promotionLogger.error('Create promotion checkout error:', error);
-
-    // Check for Stripe configuration error
-    if (error.message?.includes('STRIPE_SECRET_KEY')) {
-      res.status(503).json({
-        message: 'Payment service not configured. Please contact support.',
-        code: 'STRIPE_NOT_CONFIGURED'
-      });
-      return;
-    }
-
     res.status(500).json({ message: 'Error creating checkout session', error: error.message });
   }
 };
@@ -414,87 +366,11 @@ export const confirmPromotionPayment = async (
       return;
     }
 
-    const session = await stripe.checkout.sessions.retrieve(sessionId);
-
-    if (session.payment_status !== 'paid') {
-      res.status(400).json({ message: 'Payment not completed' });
-      return;
-    }
-
-    // Check if already processed
-    const existingPromotion = await Promotion.findOne({ transactionId: sessionId });
-    if (existingPromotion) {
-      res.status(200).json({
-        success: true,
-        message: 'Promotion already activated',
-        promotion: existingPromotion,
-      });
-      return;
-    }
-
-    const { userId, propertyId, promotionTier, duration, hasUrgentBadge, couponCode, couponDiscount } = session.metadata || {};
-
-    if (!userId || !propertyId || !promotionTier || !duration) {
-      res.status(400).json({ message: 'Invalid session metadata' });
-      return;
-    }
-
-    const startDate = new Date();
-    const endDate = new Date();
-    endDate.setDate(endDate.getDate() + parseInt(duration));
-
-    const nextRefreshAt = promotionTier === 'highlight' ? calculateNextRefreshDate(startDate, endDate) : null;
-
-    const promotion = await Promotion.create({
-      userId,
-      propertyId,
-      startDate,
-      endDate,
-      isActive: true,
-      promotionType: promotionTier === 'highlight' ? 'highlighted' : promotionTier,
-      promotionTier,
-      duration: parseInt(duration),
-      hasUrgentBadge: hasUrgentBadge === 'true',
-      price: (session.amount_total || 0) / 100,
-      currency: 'EUR',
-      paymentStatus: 'paid',
-      transactionId: sessionId,
-      viewsGenerated: 0,
-      inquiriesGenerated: 0,
-      savesGenerated: 0,
-      lastRefreshedAt: startDate,
-      nextRefreshAt,
-      refreshCount: 0,
-      purchasedVia: 'web',
-      notes: couponCode ? `Coupon: ${couponCode} (-€${couponDiscount})` : undefined,
-    });
-
-    await updatePropertyPromotion(propertyId, {
-      isPromoted: true,
-      promotionTier,
-      promotionStartDate: startDate,
-      promotionEndDate: endDate,
-      hasUrgentBadge: hasUrgentBadge === 'true',
-    });
-
-    // Record coupon usage
-    if (couponCode && parseFloat(couponDiscount || '0') > 0) {
-      const coupon = await (PromotionCoupon as any).findValidCoupon(couponCode);
-      if (coupon) {
-        await coupon.recordUsage(userId, promotion._id, parseFloat(couponDiscount));
-      }
-    }
-
-    const user = await User.findById(userId);
-    if (user) {
-      user.promotedAdsCount = (user.promotedAdsCount || 0) + 1;
-      await user.save();
-    }
-
-    res.status(200).json({
-      success: true,
-      message: 'Promotion activated successfully',
-      promotion,
+    // TODO: Integrate with new payment provider when selected (see PAYMENT_OPTIONS_2026.md)
+    res.status(503).json({
+      success: false,
+      message: 'Payment confirmation is not yet configured. Please contact support.',
+      code: 'PAYMENT_NOT_CONFIGURED',
     });
   } catch (error: any) {
     promotionLogger.error('Confirm promotion payment error:', error);

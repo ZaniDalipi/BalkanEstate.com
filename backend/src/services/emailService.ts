@@ -1419,7 +1419,7 @@ class EmailService {
                 Questions? Contact us at <a href="mailto:support@balkanestate.com" style="color: #2563eb;">support@balkanestate.com</a>
               </p>
               <p style="color: #9ca3af; font-size: 11px; margin-top: 12px;">
-                BalkanEstate • Powered by LemonSqueezy as Merchant of Record
+                BalkanEstate • Secure Payment Processing
               </p>
             </div>
           </div>

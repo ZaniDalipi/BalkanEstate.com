@@ -14,7 +14,7 @@
         "name": "Nume și informații de contact (email, număr de telefon)",
         "account": "Acreditări de cont (nume de utilizator, parolă)",
         "profile": "Informații de profil (fotografie, biografie, preferințe)",
-        "payment": "Informații de plată (procesate în siguranță prin Stripe)",
+        "payment": "Informații de plată (procesate în siguranță prin procesatorul nostru de plăți)",
         "communication": "Comunicări și mesaje pe care le trimiteți prin platforma noastră"
       },
       "auto": {
@@ -42,7 +42,7 @@
       "agents": "Cu agenții imobiliari:",
       "agentsDesc": "Când întrebați despre o proprietate, informațiile dumneavoastră de contact sunt partajate cu agentul anunțului.",
       "providers": "Furnizori de servicii:",
-      "providersDesc": "Lucrăm cu terțe părți pentru procesarea plăților (Stripe), servicii de email și analiză.",
+      "providersDesc": "Lucrăm cu terțe părți pentru procesarea plăților, servicii de email și analiză.",
       "legal": "Cerințe legale:",
       "legalDesc": "Când este cerut de lege sau pentru a ne proteja drepturile.",
       "business": "Transferuri de afaceri:",
@@ -93,7 +93,7 @@
     "thirdParty": {
       "title": "Servicii ale terților",
       "text": "Utilizăm următoarele servicii ale terților:",
-      "stripe": "Procesare plăți prin Stripe.",
+      "stripe": "Procesare plăți prin procesatorul nostru de plăți.",
       "analytics": "Analiză web pentru înțelegerea comportamentului utilizatorilor.",
       "cloudflare": "Servicii de securitate și performanță.",
       "aws": "Găzduire cloud și servicii de stocare."
@@ -162,9 +162,9 @@
       "price": "Putem modifica prețurile abonamentelor cu preaviz de 30 de zile",
       "lemonsqueezy": {
         "title": "Comerciant înregistrat",
-        "morStatement": "Procesul nostru de comandă este gestionat de revânzătorul nostru online LemonSqueezy. LemonSqueezy este Comerciantul înregistrat pentru toate comenzile noastre. LemonSqueezy gestionează toate întrebările de asistență pentru clienți și retururile.",
-        "text": "Când faceți o achiziție, efectuați o tranzacție cu LemonSqueezy, care gestionează procesarea plăților, facturarea, conformitatea TVA/impozite și rambursările. Plata dumneavoastră va apărea pe extrasul dvs. ca o taxă de la LemonSqueezy.",
-        "buyerTerms": "Prin efectuarea unei achiziții, acceptați și Termenii pentru cumpărători LemonSqueezy."
+        "morStatement": "Procesul nostru de comandă este gestionat de revânzătorul nostru online și furnizorul de servicii de plată. Furnizorul nostru de servicii de plată este Comerciantul înregistrat pentru toate comenzile noastre și gestionează toate întrebările de asistență pentru clienți și retururile.",
+        "text": "Când faceți o achiziție, efectuați o tranzacție cu furnizorul nostru de servicii de plată, care gestionează procesarea plăților, facturarea, conformitatea TVA/impozite și rambursările.",
+        "buyerTerms": "Prin efectuarea unei achiziții, acceptați și Termenii pentru cumpărători ai furnizorului nostru de servicii de plată."
       }
     },
     "prohibited": {

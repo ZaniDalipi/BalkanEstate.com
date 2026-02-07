@@ -10,7 +10,6 @@
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Property } from '@/types';
-import { getMyListings } from '@/src/features/properties/api';
 import {
   getMyPromotions,
   addUrgentBadge,
@@ -71,31 +70,76 @@ export const promotionKeys = {
 // API Functions
 // =============================================================================
 
+/**
+ * Build property objects directly from promotions data.
+ * The GET /promotions endpoint already populates property info,
+ * so we don't need to fetch all listings separately.
+ */
+function promotionToProperty(promo: any): Property {
+  const prop = promo.propertyId || {};
+  const propId = typeof prop === 'object' ? (prop._id || '') : prop;
+  const seller = prop.sellerId || {};
+
+  return {
+    id: propId,
+    sellerId: typeof seller === 'object' ? (seller._id || '') : (seller || ''),
+    status: prop.status || 'active',
+    title: prop.title || '',
+    price: prop.price || 0,
+    address: prop.address || '',
+    city: prop.city || '',
+    country: prop.country || '',
+    propertyType: prop.propertyType || 'apartment',
+    imageUrl: prop.imageUrl || (prop.images?.[0]?.url) || '',
+    images: prop.images || [],
+    lat: prop.lat || 0,
+    lng: prop.lng || 0,
+    beds: prop.beds,
+    baths: prop.baths,
+    sqft: prop.sqft,
+    seller: {
+      type: seller.role === 'agent' ? 'agent' : 'private',
+      name: seller.name || '',
+      phone: seller.phone || '',
+      avatarUrl: seller.avatarUrl,
+      agencyName: seller.agencyName,
+    },
+    createdAt: prop.createdAt ? new Date(prop.createdAt).getTime() : Date.now(),
+    lastRenewed: prop.lastRenewed ? new Date(prop.lastRenewed).getTime() : Date.now(),
+    views: prop.views || 0,
+    saves: prop.saves || 0,
+    inquiries: prop.inquiries || 0,
+    isPromoted: promo.isActive !== false,
+    promotionTier: promo.promotionTier,
+    promotionStartDate: promo.startDate ? new Date(promo.startDate).getTime() : undefined,
+    promotionEndDate: promo.endDate ? new Date(promo.endDate).getTime() : undefined,
+    hasUrgentBadge: promo.hasUrgentBadge || false,
+  } as Property;
+}
+
 async function fetchPromotionsData(): Promise<PromotionsResponse> {
-  const [listings, promotionsData] = await Promise.all([
-    getMyListings(),
-    getMyPromotions(),
-  ]);
+  const promotionsData = await getMyPromotions();
 
-  const promoted = listings.filter((p: Property) => p.isPromoted);
-
+  const promotions = promotionsData?.promotions || [];
   const promoMap: Record<string, PromotionData> = {};
-  if (promotionsData?.promotions) {
-    promotionsData.promotions.forEach((promo: PromotionData) => {
-      const propId = typeof promo.propertyId === 'object' ? promo.propertyId._id : promo.propertyId;
-      if (propId) {
-        promoMap[propId] = promo;
-      }
-    });
-  }
+  const promoted: Property[] = [];
+
+  promotions.forEach((promo: any) => {
+    const prop = promo.propertyId;
+    const propId = typeof prop === 'object' ? (prop._id || '') : (prop || '');
+    if (!propId) return;
+
+    promoMap[propId] = promo;
+    promoted.push(promotionToProperty(promo));
+  });
 
   // Calculate stats
   const now = Date.now();
-  const activeProps = promoted.filter((p: Property) => p.promotionEndDate && p.promotionEndDate > now);
-  const expiredProps = promoted.filter((p: Property) => !p.promotionEndDate || p.promotionEndDate <= now);
+  const activeProps = promoted.filter(p => p.promotionEndDate && p.promotionEndDate > now);
+  const expiredProps = promoted.filter(p => !p.promotionEndDate || p.promotionEndDate <= now);
 
   const tierCounts: Record<string, number> = {};
-  activeProps.forEach((p: Property) => {
+  activeProps.forEach(p => {
     const tier = p.promotionTier || 'standard';
     tierCounts[tier] = (tierCounts[tier] || 0) + 1;
   });
@@ -123,9 +167,9 @@ export function usePromotionsQuery() {
   return useQuery({
     queryKey: promotionKeys.lists(),
     queryFn: fetchPromotionsData,
-    staleTime: 5 * 1000, // Consider stale after 5 seconds
+    staleTime: 15 * 1000, // Consider stale after 15 seconds
     gcTime: 10 * 60 * 1000, // Keep in cache for 10 minutes
-    refetchInterval: 10 * 1000, // Auto-refresh every 10 seconds
+    refetchInterval: 30 * 1000, // Auto-refresh every 30 seconds
     refetchOnWindowFocus: true,
     refetchOnMount: true,
     refetchOnReconnect: true,
@@ -175,7 +219,7 @@ export function useAddUrgentBadge() {
         // Invalidate and refetch immediately for free urgent badge
         queryClient.invalidateQueries({ queryKey: promotionKeys.all });
       }
-      // If paid, user will be redirected to Stripe
+      // If paid, user will be redirected to payment checkout
     },
   });
 }

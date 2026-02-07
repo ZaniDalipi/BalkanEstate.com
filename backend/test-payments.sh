@@ -2,7 +2,7 @@
 
 # ============================================================
 # Payment System Test Script
-# Tests Stripe + Paddle payment routing and endpoints
+# Tests payment routing and endpoints
 # ============================================================
 
 API_URL="${API_URL:-http://localhost:5001}"
@@ -28,10 +28,10 @@ run_test() {
     local response="$3"
 
     if echo "$response" | grep -q "$expected"; then
-        echo -e "   ${GREEN}✅ PASS${NC}"
+        echo -e "   ${GREEN}PASS${NC}"
         ((PASSED++))
     else
-        echo -e "   ${RED}❌ FAIL${NC} - Expected '$expected'"
+        echo -e "   ${RED}FAIL${NC} - Expected '$expected'"
         echo "   Response: $response"
         ((FAILED++))
     fi
@@ -46,141 +46,65 @@ run_test "Supported countries" "success" "$COUNTRIES"
 echo ""
 
 # ============================================================
-# Test 2-7: Non-EU Countries (Paddle)
+# Test 2-12: All Countries (should route to web)
 # ============================================================
-echo "--- NON-EU COUNTRIES (should route to Paddle) ---"
+echo "--- ALL COUNTRIES (should route to web) ---"
 echo ""
 
-echo "2. Testing Serbia (RS)"
-SERBIA=$(curl -s "$API_URL/api/payments/providers/RS")
-run_test "Serbia -> Paddle" "paddle" "$SERBIA"
-echo ""
-
-echo "3. Testing Albania (AL)"
-ALBANIA=$(curl -s "$API_URL/api/payments/providers/AL")
-run_test "Albania -> Paddle" "paddle" "$ALBANIA"
-echo ""
-
-echo "4. Testing Bosnia (BA)"
-BOSNIA=$(curl -s "$API_URL/api/payments/providers/BA")
-run_test "Bosnia -> Paddle" "paddle" "$BOSNIA"
-echo ""
-
-echo "5. Testing North Macedonia (MK)"
-MACEDONIA=$(curl -s "$API_URL/api/payments/providers/MK")
-run_test "N. Macedonia -> Paddle" "paddle" "$MACEDONIA"
-echo ""
-
-echo "6. Testing Montenegro (ME)"
-MONTENEGRO=$(curl -s "$API_URL/api/payments/providers/ME")
-run_test "Montenegro -> Paddle" "paddle" "$MONTENEGRO"
-echo ""
-
-echo "7. Testing Kosovo (XK)"
-KOSOVO=$(curl -s "$API_URL/api/payments/providers/XK")
-run_test "Kosovo -> Paddle" "paddle" "$KOSOVO"
-echo ""
+COUNTER=2
+for COUNTRY in RS AL BA MK ME XK GR HR BG RO SI; do
+    echo "$COUNTER. Testing $COUNTRY"
+    RESULT=$(curl -s "$API_URL/api/payments/providers/$COUNTRY")
+    run_test "$COUNTRY -> web" "web" "$RESULT"
+    echo ""
+    ((COUNTER++))
+done
 
 # ============================================================
-# Test 8-12: EU Countries (Stripe)
-# ============================================================
-echo "--- EU COUNTRIES (should route to Stripe) ---"
-echo ""
-
-echo "8. Testing Greece (GR)"
-GREECE=$(curl -s "$API_URL/api/payments/providers/GR")
-run_test "Greece -> Stripe" "stripe" "$GREECE"
-echo ""
-
-echo "9. Testing Croatia (HR)"
-CROATIA=$(curl -s "$API_URL/api/payments/providers/HR")
-run_test "Croatia -> Stripe" "stripe" "$CROATIA"
-echo ""
-
-echo "10. Testing Bulgaria (BG)"
-BULGARIA=$(curl -s "$API_URL/api/payments/providers/BG")
-run_test "Bulgaria -> Stripe" "stripe" "$BULGARIA"
-echo ""
-
-echo "11. Testing Romania (RO)"
-ROMANIA=$(curl -s "$API_URL/api/payments/providers/RO")
-run_test "Romania -> Stripe" "stripe" "$ROMANIA"
-echo ""
-
-echo "12. Testing Slovenia (SI)"
-SLOVENIA=$(curl -s "$API_URL/api/payments/providers/SI")
-run_test "Slovenia -> Stripe" "stripe" "$SLOVENIA"
-echo ""
-
-# ============================================================
-# Test 13-14: Edge Cases
+# Edge Cases
 # ============================================================
 echo "--- EDGE CASES ---"
 echo ""
 
-echo "13. Testing Unknown Country (XX) - should default to Stripe"
+echo "$COUNTER. Testing Unknown Country (XX)"
 UNKNOWN=$(curl -s "$API_URL/api/payments/providers/XX")
-run_test "Unknown -> Stripe" "stripe" "$UNKNOWN"
+run_test "Unknown -> web" "web" "$UNKNOWN"
 echo ""
+((COUNTER++))
 
-echo "14. Testing Lowercase Country Code (rs)"
+echo "$COUNTER. Testing Lowercase Country Code (rs)"
 LOWERCASE=$(curl -s "$API_URL/api/payments/providers/rs")
-run_test "Lowercase rs -> Paddle" "paddle" "$LOWERCASE"
+run_test "Lowercase rs -> web" "web" "$LOWERCASE"
 echo ""
+((COUNTER++))
 
 # ============================================================
-# Test 15: Paddle Config Endpoint
-# ============================================================
-echo "15. Testing GET /api/payments/paddle/config"
-PADDLE_CONFIG=$(curl -s "$API_URL/api/payments/paddle/config")
-run_test "Paddle config" "success" "$PADDLE_CONFIG"
-echo ""
-
-# ============================================================
-# Test 16-17: Authentication Tests
+# Authentication Tests
 # ============================================================
 echo "--- AUTHENTICATION TESTS ---"
 echo ""
 
-echo "16. Testing create-payment without auth (should fail)"
+echo "$COUNTER. Testing create-payment without auth (should fail)"
 CREATE_NO_AUTH=$(curl -s -X POST "$API_URL/api/payments/create-payment" \
   -H "Content-Type: application/json" \
   -d '{"planName":"Pro","planInterval":"month","amount":25,"countryCode":"RS"}')
 if echo "$CREATE_NO_AUTH" | grep -qE "(401|unauthorized|Unauthorized|token)"; then
-    echo -e "   ${GREEN}✅ PASS${NC} - Correctly requires auth"
+    echo -e "   ${GREEN}PASS${NC} - Correctly requires auth"
     ((PASSED++))
 else
-    echo -e "   ${RED}❌ FAIL${NC} - Should require authentication"
+    echo -e "   ${RED}FAIL${NC} - Should require authentication"
     ((FAILED++))
 fi
 echo ""
+((COUNTER++))
 
-echo "17. Testing subscription-status without auth (should fail)"
+echo "$COUNTER. Testing subscription-status without auth (should fail)"
 STATUS_NO_AUTH=$(curl -s "$API_URL/api/payments/subscription-status")
 if echo "$STATUS_NO_AUTH" | grep -qE "(401|unauthorized|Unauthorized|token)"; then
-    echo -e "   ${GREEN}✅ PASS${NC} - Correctly requires auth"
+    echo -e "   ${GREEN}PASS${NC} - Correctly requires auth"
     ((PASSED++))
 else
-    echo -e "   ${RED}❌ FAIL${NC} - Should require authentication"
-    ((FAILED++))
-fi
-echo ""
-
-# ============================================================
-# Test 18: Webhook Endpoint
-# ============================================================
-echo "--- WEBHOOK ENDPOINTS ---"
-echo ""
-
-echo "18. Testing Paddle webhook endpoint exists"
-PADDLE_WEBHOOK=$(curl -s -X POST "$API_URL/api/payments/paddle/webhook" \
-  -H "Content-Type: application/json" \
-  -d '{"event_type":"test"}')
-if [ $? -eq 0 ]; then
-    echo -e "   ${GREEN}✅ PASS${NC} - Endpoint exists"
-    ((PASSED++))
-else
-    echo -e "   ${RED}❌ FAIL${NC} - Endpoint not found"
+    echo -e "   ${RED}FAIL${NC} - Should require authentication"
     ((FAILED++))
 fi
 echo ""
@@ -204,22 +128,4 @@ else
 fi
 
 echo ""
-echo "========================================"
-echo "  Test Cards"
-echo "========================================"
-echo ""
-echo "Stripe Test Cards:"
-echo "  4242424242424242  - Success"
-echo "  4000000000003220  - 3D Secure required"
-echo "  4000000000009995  - Declined"
-echo ""
-echo "Paddle Sandbox Cards:"
-echo "  4242424242424242  - Success"
-echo "  4000000000000002  - Declined"
-echo ""
-echo "For all cards: Expiry=12/34, CVC=123"
-echo ""
-echo "See PAYMENT_TESTING.md for full testing guide."
-echo ""
-
 exit $FAILED

@@ -40,7 +40,7 @@ export const createSubscription = async (req: Request, res: Response): Promise<v
     } else if (store === 'apple' && transactionId) {
       const appStoreService = getAppStoreService();
       await appStoreService.validateTransaction(transactionId);
-    } else if (store !== 'web' && store !== 'stripe') {
+    } else if (store !== 'web') {
       res.status(400).json({ message: 'Invalid store or missing purchase information' });
       return;
     }
@@ -62,7 +62,7 @@ export const createSubscription = async (req: Request, res: Response): Promise<v
       productId: product.productId,
       googlePlayProductId: product.googlePlayProductId,
       appStoreProductId: product.appStoreProductId,
-      stripeProductId: product.stripeProductId,
+      externalProductId: product.externalProductId,
       purchaseToken: store === 'google' ? purchaseToken : undefined,
       transactionId: store === 'apple' ? transactionId : undefined,
       startDate,

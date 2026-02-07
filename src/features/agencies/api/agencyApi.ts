@@ -201,7 +201,7 @@ export const cancelFeaturedSubscription = async (
 
 export const confirmFeaturedPayment = async (
   agencyId: string,
-  data: { stripeSubscriptionId: string; stripeCustomerId: string }
+  data: { paymentSubscriptionId: string; externalCustomerId: string }
 ): Promise<any> => {
   return apiRequest(`/agencies/${agencyId}/featured-subscription/confirm-payment`, {
     method: 'POST',

@@ -1,6 +1,6 @@
 import mongoose, { Document, Schema } from 'mongoose';
 
-export type SubscriptionStore = 'google' | 'apple' | 'stripe' | 'paddle' | 'web' | 'agency_coupon';
+export type SubscriptionStore = 'google' | 'apple' | 'web' | 'agency_coupon';
 export type SubscriptionStatus =
   | 'active'
   | 'expired'
@@ -19,12 +19,9 @@ export interface ISubscription extends Document {
   // Store-specific product IDs
   googlePlayProductId?: string;
   appStoreProductId?: string;
-  stripeProductId?: string;
-
   // Store-specific identifiers
   purchaseToken?: string; // Google Play
   transactionId?: string; // Apple
-  stripeSubscriptionId?: string; // Stripe
   receiptData?: string; // Apple receipt
 
   // Dates
@@ -66,10 +63,6 @@ export interface ISubscription extends Document {
   renewalReminderSent?: boolean; // For auto-renewing subscriptions (7-day reminder)
   expiryReminderSent?: boolean; // For non-auto-renewing subscriptions (3-day reminder)
 
-  // LemonSqueezy integration
-  lemonSqueezyOrderId?: string;
-  lemonSqueezySubscriptionId?: string;
-
   // Audit
   lastUpdated: Date;
   lastValidated?: Date;
@@ -93,7 +86,7 @@ const SubscriptionSchema: Schema = new Schema(
     },
     store: {
       type: String,
-      enum: ['google', 'apple', 'stripe', 'paddle', 'web', 'agency_coupon'],
+      enum: ['google', 'apple', 'web', 'agency_coupon'],
       required: true,
       index: true,
     },
@@ -110,10 +103,6 @@ const SubscriptionSchema: Schema = new Schema(
     appStoreProductId: {
       type: String,
     },
-    stripeProductId: {
-      type: String,
-    },
-
     // Store-specific identifiers
     purchaseToken: {
       type: String,
@@ -121,11 +110,6 @@ const SubscriptionSchema: Schema = new Schema(
       sparse: true,
     },
     transactionId: {
-      type: String,
-      index: true,
-      sparse: true,
-    },
-    stripeSubscriptionId: {
       type: String,
       index: true,
       sparse: true,
@@ -234,18 +218,6 @@ const SubscriptionSchema: Schema = new Schema(
     expiryReminderSent: {
       type: Boolean,
       default: false,
-    },
-
-    // LemonSqueezy integration
-    lemonSqueezyOrderId: {
-      type: String,
-      index: true,
-      sparse: true,
-    },
-    lemonSqueezySubscriptionId: {
-      type: String,
-      index: true,
-      sparse: true,
     },
 
     // Audit

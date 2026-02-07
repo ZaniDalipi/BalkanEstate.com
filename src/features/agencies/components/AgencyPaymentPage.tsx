@@ -153,7 +153,7 @@ const AgencyPaymentPage: React.FC = () => {
     try {
       const token = localStorage.getItem('balkan_estate_token');
 
-      // Create Stripe checkout session
+      // Create payment checkout session
       const response = await fetch(`${API_URL}/payments/create-checkout-session`, {
         method: 'POST',
         headers: {
@@ -175,7 +175,7 @@ const AgencyPaymentPage: React.FC = () => {
       const data = await response.json();
 
       if (response.ok && data.url) {
-        // Redirect to Stripe checkout
+        // Redirect to payment checkout
         window.location.href = data.url;
       } else {
         setError(data.message || t('payment.error', 'Failed to initiate payment'));

@@ -127,7 +127,7 @@ export interface User {
   subscriptionExpiresAt?: string | Date;
   subscriptionStartedAt?: string | Date;
   subscriptionRenewalDate?: string | Date;
-  subscriptionSource?: 'google' | 'apple' | 'stripe' | 'web';
+  subscriptionSource?: 'google' | 'apple' | 'web';
   subscriptionPrice?: number;
   subscriptionAutoRenewing?: boolean;
   subscriptionCurrency?: string;

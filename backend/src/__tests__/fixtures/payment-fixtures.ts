@@ -11,7 +11,7 @@ import mongoose from 'mongoose';
 // ============================================================
 
 export const TEST_USERS = {
-  // User from Serbia (Paddle)
+  // User from Serbia
   serbianUser: {
     _id: new mongoose.Types.ObjectId(),
     email: 'test.serbia@balkanestateai.com',
@@ -21,7 +21,7 @@ export const TEST_USERS = {
     role: 'buyer',
   },
 
-  // User from Greece (Stripe)
+  // User from Greece
   greekUser: {
     _id: new mongoose.Types.ObjectId(),
     email: 'test.greece@balkanestateai.com',
@@ -31,7 +31,7 @@ export const TEST_USERS = {
     role: 'buyer',
   },
 
-  // User from Albania (Paddle)
+  // User from Albania
   albanianUser: {
     _id: new mongoose.Types.ObjectId(),
     email: 'test.albania@balkanestateai.com',
@@ -51,7 +51,7 @@ export const TEST_USERS = {
     subscriptionPlan: 'pro_monthly',
     subscriptionStatus: 'active',
     subscriptionExpiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), // 30 days
-    subscriptionSource: 'stripe',
+    subscriptionSource: 'web',
   },
 };
 
@@ -116,8 +116,8 @@ export const TEST_PRODUCTS = {
 // ============================================================
 
 export const TEST_PAYMENT_REQUESTS = {
-  // Stripe payment (EU country)
-  stripePayment: {
+  // Web payment (EU country)
+  webPaymentEU: {
     planName: 'Pro Monthly',
     planInterval: 'month',
     amount: 25,
@@ -126,8 +126,8 @@ export const TEST_PAYMENT_REQUESTS = {
     language: 'en',
   },
 
-  // Paddle payment (non-EU country)
-  paddlePayment: {
+  // Web payment (non-EU country)
+  webPaymentNonEU: {
     planName: 'Pro Monthly',
     planInterval: 'month',
     amount: 25,
@@ -158,14 +158,13 @@ export const TEST_PAYMENT_REQUESTS = {
 };
 
 // ============================================================
-// MOCK STRIPE RESPONSES
+// MOCK PAYMENT RESPONSES
 // ============================================================
 
-export const MOCK_STRIPE_RESPONSES = {
+export const MOCK_PAYMENT_RESPONSES = {
   checkoutSession: {
-    id: 'cs_test_a1b2c3d4e5f6g7h8i9j0',
-    object: 'checkout.session',
-    url: 'https://checkout.stripe.com/pay/cs_test_a1b2c3d4e5f6g7h8i9j0',
+    id: 'session_test_a1b2c3d4e5f6g7h8i9j0',
+    url: 'https://checkout.example.com/session_test_a1b2c3d4e5f6g7h8i9j0',
     payment_status: 'unpaid',
     status: 'open',
     customer_email: 'test@balkanestateai.com',
@@ -178,8 +177,7 @@ export const MOCK_STRIPE_RESPONSES = {
   },
 
   completedSession: {
-    id: 'cs_test_completed',
-    object: 'checkout.session',
+    id: 'session_test_completed',
     payment_status: 'paid',
     status: 'complete',
     customer: 'cus_test_123',
@@ -187,177 +185,26 @@ export const MOCK_STRIPE_RESPONSES = {
     amount_total: 2500, // 25.00 EUR in cents
     currency: 'eur',
   },
-
-  webhookEvent: {
-    id: 'evt_test_123',
-    type: 'checkout.session.completed',
-    data: {
-      object: {
-        id: 'cs_test_completed',
-        payment_status: 'paid',
-        status: 'complete',
-        customer: 'cus_test_123',
-        subscription: 'sub_test_123',
-        metadata: {
-          userId: 'user_123',
-          productId: 'pro_monthly',
-        },
-      },
-    },
-  },
-
-  subscription: {
-    id: 'sub_test_123',
-    object: 'subscription',
-    status: 'active',
-    current_period_start: Math.floor(Date.now() / 1000),
-    current_period_end: Math.floor(Date.now() / 1000) + 30 * 24 * 60 * 60,
-    customer: 'cus_test_123',
-    items: {
-      data: [
-        {
-          price: {
-            id: 'price_test_123',
-            unit_amount: 2500,
-            currency: 'eur',
-          },
-        },
-      ],
-    },
-  },
 };
 
 // ============================================================
-// MOCK PADDLE RESPONSES
-// ============================================================
-
-export const MOCK_PADDLE_RESPONSES = {
-  checkoutResponse: {
-    success: true,
-    transactionId: 'txn_01abc123def456',
-    checkoutUrl: 'https://checkout.paddle.com/txn_01abc123def456',
-  },
-
-  transactionCompleted: {
-    event_type: 'transaction.completed',
-    event_id: 'evt_01abc123',
-    occurred_at: new Date().toISOString(),
-    data: {
-      id: 'txn_01abc123def456',
-      status: 'completed',
-      customer_id: 'ctm_01xyz789',
-      currency_code: 'EUR',
-      details: {
-        totals: {
-          total: '2500', // 25.00 EUR in cents
-          subtotal: '2100',
-          tax: '400',
-        },
-      },
-      custom_data: {
-        user_id: 'user_123',
-        product_id: 'pro_monthly',
-        plan_name: 'Pro Monthly',
-        plan_interval: 'month',
-      },
-    },
-  },
-
-  subscriptionCreated: {
-    event_type: 'subscription.created',
-    event_id: 'evt_02abc456',
-    occurred_at: new Date().toISOString(),
-    data: {
-      id: 'sub_01abc123',
-      status: 'active',
-      customer_id: 'ctm_01xyz789',
-      current_billing_period: {
-        starts_at: new Date().toISOString(),
-        ends_at: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
-      },
-      custom_data: {
-        user_id: 'user_123',
-      },
-    },
-  },
-
-  subscriptionCanceled: {
-    event_type: 'subscription.canceled',
-    event_id: 'evt_03abc789',
-    occurred_at: new Date().toISOString(),
-    data: {
-      id: 'sub_01abc123',
-      status: 'canceled',
-      customer_id: 'ctm_01xyz789',
-      current_billing_period: {
-        ends_at: new Date(Date.now() + 15 * 24 * 60 * 60 * 1000).toISOString(),
-      },
-    },
-  },
-
-  subscription: {
-    id: 'sub_01abc123',
-    status: 'active',
-    customer_id: 'ctm_01xyz789',
-    current_billing_period: {
-      starts_at: new Date().toISOString(),
-      ends_at: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
-    },
-    next_billed_at: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
-  },
-};
-
-// ============================================================
-// TEST CARDS
+// TEST CARDS (generic test card numbers)
 // ============================================================
 
 export const TEST_CARDS = {
-  stripe: {
-    success: {
-      number: '4242424242424242',
-      exp_month: 12,
-      exp_year: 2034,
-      cvc: '123',
-      description: 'Always succeeds',
-    },
-    decline: {
-      number: '4000000000000002',
-      exp_month: 12,
-      exp_year: 2034,
-      cvc: '123',
-      description: 'Always declines',
-    },
-    requiresAuth: {
-      number: '4000002500003155',
-      exp_month: 12,
-      exp_year: 2034,
-      cvc: '123',
-      description: 'Requires 3D Secure authentication',
-    },
-    insufficientFunds: {
-      number: '4000000000009995',
-      exp_month: 12,
-      exp_year: 2034,
-      cvc: '123',
-      description: 'Declined - insufficient funds',
-    },
+  success: {
+    number: '4242424242424242',
+    exp_month: 12,
+    exp_year: 2034,
+    cvc: '123',
+    description: 'Always succeeds',
   },
-
-  paddle: {
-    success: {
-      number: '4242424242424242',
-      exp_month: 12,
-      exp_year: 2034,
-      cvc: '123',
-      description: 'Always succeeds in sandbox',
-    },
-    decline: {
-      number: '4000000000000002',
-      exp_month: 12,
-      exp_year: 2034,
-      cvc: '123',
-      description: 'Always declines in sandbox',
-    },
+  decline: {
+    number: '4000000000000002',
+    exp_month: 12,
+    exp_year: 2034,
+    cvc: '123',
+    description: 'Always declines',
   },
 };
 
@@ -395,35 +242,5 @@ export function createMockPaymentRequest(
     countryCode,
     productId: planName.toLowerCase().replace(' ', '_'),
     language: 'en',
-  };
-}
-
-/**
- * Generate mock Paddle webhook event
- */
-export function createMockPaddleWebhook(
-  eventType: string,
-  userId: string,
-  transactionId: string = `txn_${Date.now()}`
-) {
-  return {
-    event_type: eventType,
-    event_id: `evt_${Date.now()}`,
-    occurred_at: new Date().toISOString(),
-    data: {
-      id: transactionId,
-      status: 'completed',
-      customer_id: `ctm_${Date.now()}`,
-      currency_code: 'EUR',
-      details: {
-        totals: { total: '2500' },
-      },
-      custom_data: {
-        user_id: userId,
-        product_id: 'pro_monthly',
-        plan_name: 'Pro Monthly',
-        plan_interval: 'month',
-      },
-    },
   };
 }

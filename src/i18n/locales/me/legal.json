@@ -14,7 +14,7 @@
         "name": "Name and contact information (email, phone number)",
         "account": "Account credentials (username, password)",
         "profile": "Profile information (photo, bio, preferences)",
-        "payment": "Payment information (processed securely via Stripe)",
+        "payment": "Payment information (processed securely via our payment processor)",
         "communication": "Communications and messages you send through our platform"
       },
       "auto": {
@@ -42,7 +42,7 @@
       "agents": "With Property Agents:",
       "agentsDesc": "When you inquire about a property, your contact information is shared with the listing agent.",
       "providers": "Service Providers:",
-      "providersDesc": "We work with third parties for payment processing (Stripe), email services, and analytics.",
+      "providersDesc": "We work with third parties for payment processing, email services, and analytics.",
       "legal": "Legal Requirements:",
       "legalDesc": "When required by law or to protect our rights.",
       "business": "Business Transfers:",
@@ -93,7 +93,7 @@
     "thirdParty": {
       "title": "Third-Party Services",
       "text": "We use the following third-party services that may process your data:",
-      "stripe": "Payment processing. Stripe processes your payment information securely. We do not store your full credit card details.",
+      "stripe": "Payment processing. Our payment processor processes your payment information securely. We do not store your full credit card details.",
       "analytics": "Website analytics to understand user behavior and improve our services. We use IP anonymization.",
       "cloudflare": "Security and performance services including DDoS protection and content delivery.",
       "aws": "Cloud hosting and storage services. Data is stored in EU data centers."
@@ -162,9 +162,9 @@
       "price": "Možemo promijeniti cijene pretplate uz obavještenje od 30 dana",
       "lemonsqueezy": {
         "title": "Trgovac evidencije",
-        "morStatement": "Naš proces naručivanja vodi naš online preprodavač LemonSqueezy. LemonSqueezy je Trgovac evidencije za sve naše narudžbe. LemonSqueezy pruža sve upite korisničke podrške i upravlja povratima.",
-        "text": "Kada izvršite kupovinu, obavljate transakciju sa LemonSqueezy-om, koji upravlja obradom plaćanja, fakturisanjem, usklađenošću sa PDV-om/porezima i povratima. Vaše plaćanje će se pojaviti na vašem izvodu kao naplata od LemonSqueezy-a.",
-        "buyerTerms": "Kupovinom takođe prihvatate LemonSqueezy-ove Uslove za kupce."
+        "morStatement": "Naš proces naručivanja vodi naš online preprodavač i pružalac usluga plaćanja. Naš pružalac usluga plaćanja je Trgovac evidencije za sve naše narudžbe i pruža sve upite korisničke podrške i upravlja povratima.",
+        "text": "Kada izvršite kupovinu, obavljate transakciju sa našim pružaocem usluga plaćanja, koji upravlja obradom plaćanja, fakturisanjem, usklađenošću sa PDV-om/porezima i povratima.",
+        "buyerTerms": "Kupovinom takođe prihvatate Uslove za kupce našeg pružaoca usluga plaćanja."
       }
     },
     "prohibited": {
@@ -339,7 +339,7 @@
     },
     "thirdParty": {
       "title": "Third-Party Cookies",
-      "text": "Some cookies on our site are set by third-party services we use, such as Google Analytics for website analytics and Stripe for payment processing. These services have their own privacy policies governing how they use your data."
+      "text": "Some cookies on our site are set by third-party services we use, such as Google Analytics for website analytics and our payment processor for payment processing. These services have their own privacy policies governing how they use your data."
     },
     "updates": {
       "title": "Updates to This Policy",

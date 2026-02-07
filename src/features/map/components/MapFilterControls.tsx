@@ -292,22 +292,20 @@ const MapFilterControls: React.FC<MapFilterControlsProps> = ({
                 <span className="hidden xl:inline">{t('search:map.poi', 'POI')}</span>
               </button>
 
-              {/* Cadastre Toggle - only in satellite/hybrid views */}
-              {(mapType === 'satellite' || mapType === 'hybrid') && (
-                <button
-                  onClick={() => setShowCadastre(!showCadastre)}
-                  className={`flex items-center gap-1 px-1.5 py-1 xl:px-2.5 xl:py-1.5 text-[10px] xl:text-xs font-semibold rounded-full transition-all ${
-                    showCadastre
-                      ? 'bg-primary text-white'
-                      : 'text-neutral-600 hover:bg-neutral-200'
-                  }`}
-                  aria-label={t('search:map.cadastralParcels')}
-                  aria-pressed={showCadastre}
-                >
-                  <span className="text-xs xl:text-sm">📐</span>
-                  <span className="hidden xl:inline">{t('search:map.parcels', 'Parcels')}</span>
-                </button>
-              )}
+              {/* Cadastre Toggle */}
+              <button
+                onClick={() => setShowCadastre(!showCadastre)}
+                className={`flex items-center gap-1 px-1.5 py-1 xl:px-2.5 xl:py-1.5 text-[10px] xl:text-xs font-semibold rounded-full transition-all ${
+                  showCadastre
+                    ? 'bg-orange-500 text-white'
+                    : 'text-neutral-600 hover:bg-neutral-200'
+                }`}
+                aria-label={t('search:map.cadastralParcels')}
+                aria-pressed={showCadastre}
+              >
+                <span className="text-xs xl:text-sm">📐</span>
+                <span className="hidden xl:inline">{t('search:map.parcels', 'Parcels')}</span>
+              </button>
 
               {/* Measurement Tool Toggle */}
               <button
@@ -469,20 +467,18 @@ const MapFilterControls: React.FC<MapFilterControlsProps> = ({
                     <span className="text-[15px] font-semibold">{t('search:map.buildings3D', '3D Buildings')}</span>
                   </button>
 
-                  {/* Cadastre Toggle - only in satellite/hybrid views */}
-                  {(mapType === 'satellite' || mapType === 'hybrid') && (
-                    <button
-                      onClick={() => setShowCadastre(!showCadastre)}
-                      className={`flex items-center gap-3.5 px-4 py-3.5 rounded-2xl transition-all active:scale-[0.98] ${
-                        showCadastre
-                          ? 'bg-gradient-to-r from-purple-500 to-violet-500 text-white shadow-lg'
-                          : 'text-neutral-700 hover:bg-neutral-100/80'
-                      }`}
-                    >
-                      <span className="text-xl flex-shrink-0">📐</span>
-                      <span className="text-[15px] font-semibold">{t('search:map.landParcels', 'Land Parcels')}</span>
-                    </button>
-                  )}
+                  {/* Cadastre Toggle */}
+                  <button
+                    onClick={() => setShowCadastre(!showCadastre)}
+                    className={`flex items-center gap-3.5 px-4 py-3.5 rounded-2xl transition-all active:scale-[0.98] ${
+                      showCadastre
+                        ? 'bg-gradient-to-r from-orange-500 to-amber-500 text-white shadow-lg'
+                        : 'text-neutral-700 hover:bg-neutral-100/80'
+                    }`}
+                  >
+                    <span className="text-xl flex-shrink-0">📐</span>
+                    <span className="text-[15px] font-semibold">{t('search:map.landParcels', 'Land Parcels')}</span>
+                  </button>
                 </div>
               </div>
             )}

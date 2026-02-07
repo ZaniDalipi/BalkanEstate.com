@@ -47,7 +47,7 @@ export async function runReconciliation(maxRetries = 3): Promise<ReconciliationR
       for (let attempt = 1; attempt <= maxRetries; attempt++) {
         try {
           // Skip web subscriptions (they don't need store validation)
-          if (subscription.store === 'web' || subscription.store === 'stripe') {
+          if (subscription.store === 'web') {
             // Just check expiration date
             if (subscription.expirationDate < new Date()) {
               subscription.status = 'expired';

@@ -1,26 +1,16 @@
 /**
  * Auto-Extend Worker
  * Processes auto-extend for promotions expiring within 24 hours
- * Creates Stripe checkout sessions for users to complete payment
+ * TODO: Integrate with new payment provider when selected (see PAYMENT_OPTIONS_2026.md)
  */
 
-import Stripe from 'stripe';
 import Promotion from '../../models/Promotion';
 import User from '../../models/User';
 import { cronLogger } from '../../utils/logger';
 import {
-  PROMOTION_TIERS,
   getPromotionPrice,
   PromotionTierType,
 } from '../../config/promotionTiers';
-
-// Check if Stripe is properly configured
-const stripeKey = process.env.STRIPE_SECRET_KEY || '';
-const isStripeConfigured = stripeKey && stripeKey.startsWith('sk_') && !stripeKey.includes('placeholder');
-
-const stripe = isStripeConfigured
-  ? new Stripe(stripeKey, { apiVersion: '2025-10-29.clover' })
-  : null;
 
 /**
  * Process a single promotion for auto-extend
@@ -57,60 +47,12 @@ const processPromotion = async (promotion: any, property: any): Promise<boolean>
     return true;
   }
 
-  // Skip paid extensions if Stripe is not configured
-  if (!stripe) {
-    cronLogger.info(`[AutoExtendWorker] Stripe not configured, skipping paid auto-extend for promotion ${promotion._id}`);
-    promotion.autoExtendStatus = 'failed';
-    promotion.notes = (promotion.notes || '') + ` | Skipped: Payment provider not configured`;
-    await promotion.save();
-    return false;
-  }
-
-  // Create Stripe checkout session for paid extension
-  const baseUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
-  const tierInfo = PROMOTION_TIERS[promotionTier];
-
-  const session = await stripe.checkout.sessions.create({
-    line_items: [
-      {
-        price_data: {
-          currency: 'eur',
-          product_data: {
-            name: `Auto-Extend ${tierInfo.name} Promotion`,
-            description: `Automatically extend ${duration} days for "${property.title}"`,
-          },
-          unit_amount: Math.round(extensionPrice * 100),
-        },
-        quantity: 1,
-      },
-    ],
-    mode: 'payment',
-    success_url: `${baseUrl}/promotions/auto-extend-success?session_id={CHECKOUT_SESSION_ID}`,
-    cancel_url: `${baseUrl}/my-properties?auto_extend_cancelled=true`,
-    client_reference_id: String(user._id),
-    expires_at: Math.floor(Date.now() / 1000) + 24 * 60 * 60,
-    metadata: {
-      type: 'auto-extend',
-      userId: String(user._id),
-      promotionId: String(promotion._id),
-      propertyId: String(property._id),
-      duration: String(duration),
-      promotionTier: promotionTier,
-    },
-  });
-
-  promotion.autoExtendStatus = 'pending';
-  promotion.autoExtendSessionId = session.id;
-  promotion.autoExtendCheckoutUrl = session.url || '';
-  promotion.autoExtendAttempts = (promotion.autoExtendAttempts || 0) + 1;
-  promotion.lastAutoExtendAttempt = new Date();
+  // Skip paid extensions - payment provider not yet configured
+  cronLogger.info(`[AutoExtendWorker] Payment provider not configured, skipping paid auto-extend for promotion ${promotion._id}`);
+  promotion.autoExtendStatus = 'failed';
+  promotion.notes = (promotion.notes || '') + ` | Skipped: Payment provider not configured`;
   await promotion.save();
-
-  cronLogger.info(
-    `[AutoExtendWorker] Created auto-extend checkout for promotion ${promotion._id}, session: ${session.id}`
-  );
-
-  return true;
+  return false;
 };
 
 /**
@@ -118,11 +60,6 @@ const processPromotion = async (promotion: any, property: any): Promise<boolean>
  */
 export const processAutoExtends = async (): Promise<void> => {
   try {
-    if (!isStripeConfigured) {
-      cronLogger.info('[AutoExtendWorker] Stripe not configured, skipping auto-extend processing');
-      return;
-    }
-
     cronLogger.info('[AutoExtendWorker] Processing auto-extend promotions...');
 
     const now = new Date();

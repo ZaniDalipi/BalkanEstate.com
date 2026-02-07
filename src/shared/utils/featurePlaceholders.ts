@@ -211,7 +211,7 @@ const featurePatterns: Array<{ pattern: RegExp; key: string; extractValues?: (ma
  * @param t - The i18next translation function
  * @returns Translated feature string, or original if no translation found
  */
-export function translateFeature(feature: string, t: (key: string, options?: Record<string, unknown>) => string): string {
+export function translateFeature(feature: string, t: any): string {
   // Try to match against known patterns
   for (const { pattern, key, extractValues } of featurePatterns) {
     const match = feature.match(pattern);
@@ -239,7 +239,7 @@ export function translateFeature(feature: string, t: (key: string, options?: Rec
 export function translateAndReplacePlaceholders(
   feature: string,
   product: ProductValues,
-  t: (key: string, options?: Record<string, unknown>) => string
+  t: any
 ): string {
   // First replace placeholders with actual values
   const withValues = replacePlaceholders(feature, product);

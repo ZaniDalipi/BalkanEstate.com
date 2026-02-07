@@ -192,7 +192,7 @@ const RefundPolicyPage: React.FC = () => {
               {t('legal:refund.processing.title', 'Refund Processing')}
             </h2>
             <p className="text-gray-700 leading-relaxed mb-4">
-              {t('legal:refund.processing.text', 'Refunds are processed by LemonSqueezy, our Merchant of Record. Here is what to expect:')}
+              {t('legal:refund.processing.text', 'Refunds are processed by our payment provider. Here is what to expect:')}
             </p>
             <div className="bg-gray-50 rounded-lg p-4 space-y-3">
               <div className="flex justify-between items-center">
@@ -213,13 +213,13 @@ const RefundPolicyPage: React.FC = () => {
             </p>
           </section>
 
-          {/* LemonSqueezy as MoR */}
+          {/* Payment Provider */}
           <section>
             <h2 className="text-xl font-semibold text-gray-900 mb-3">
               {t('legal:refund.provider.title', 'Payment Processing')}
             </h2>
             <p className="text-gray-700 leading-relaxed">
-              {t('legal:refund.provider.text', 'All payments and refunds are processed by LemonSqueezy, our Merchant of Record. LemonSqueezy handles payment processing, tax compliance, and refund disbursements on our behalf. When you receive a refund, it will appear on your statement from LemonSqueezy. For any payment-related inquiries, you may also contact LemonSqueezy directly, though we recommend contacting us first for the fastest resolution.')}
+              {t('legal:refund.provider.text', 'All payments and refunds are processed by our payment provider. Our payment provider handles payment processing, tax compliance, and refund disbursements on our behalf. When you receive a refund, it will appear on your statement from our payment provider. For any payment-related inquiries, we recommend contacting us first for the fastest resolution.')}
             </p>
           </section>
 

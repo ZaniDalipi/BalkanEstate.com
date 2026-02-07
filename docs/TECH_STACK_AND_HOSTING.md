@@ -23,8 +23,7 @@
 | Mongoose | 8.19 | MongoDB ODM |
 | Socket.io | 4.8 | Real-time messaging |
 | Passport.js | 0.7 | Authentication (Google, Facebook, Apple) |
-| Stripe | 19.x | Payments (EU countries) |
-| Paddle | - | Payments (non-EU Balkans) |
+| (Pending) | - | Payment provider (see PAYMENT_OPTIONS_2026.md) |
 | Resend | 6.6 | Email notifications |
 | Nodemailer | 7.0 | SMTP email fallback |
 | Cloudinary | - | Image uploads & optimization |
@@ -149,8 +148,7 @@ EMAIL_FROM=noreply@balkanestateai.com
 - [ ] Set up hosting (Vercel + Railway recommended)
 - [ ] Configure MongoDB Atlas (or Railway database)
 - [ ] Set up Resend with verified domain
-- [ ] Configure Stripe for EU payments
-- [ ] Configure Paddle for non-EU Balkan payments
+- [ ] Configure payment provider (see PAYMENT_OPTIONS_2026.md)
 - [ ] Set up Cloudinary for images
 - [ ] Configure OAuth providers (Google, Facebook, Apple)
 - [ ] Set environment variables on hosting platform
@@ -174,10 +172,9 @@ JWT_REFRESH_SECRET=your-refresh-secret
 FRONTEND_URL=https://balkanestateai.com
 BACKEND_URL=https://api.balkanestateai.com
 
-# Payments
-STRIPE_SECRET_KEY=sk_live_...
-STRIPE_WEBHOOK_SECRET=whsec_...
-PADDLE_API_KEY=...
+# Payments (configure when provider is selected)
+# PAYMENT_PROVIDER_API_KEY=...
+# PAYMENT_PROVIDER_WEBHOOK_SECRET=...
 
 # Email
 RESEND_API_KEY=re_...
@@ -229,8 +226,7 @@ npx ts-node scripts/test-email.ts your@email.com
 - **Railway Docs:** https://docs.railway.app
 - **MongoDB Atlas:** https://www.mongodb.com/atlas
 - **Resend Docs:** https://resend.com/docs
-- **Stripe Docs:** https://stripe.com/docs
-- **Paddle Docs:** https://developer.paddle.com
+- **Payment Options:** See PAYMENT_OPTIONS_2026.md
 
 ---
 

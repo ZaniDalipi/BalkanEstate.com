@@ -1,22 +1,13 @@
 import express from 'express';
 import {
-  createCheckoutSession,
   createUnifiedPayment,
   getPaymentProviders,
   getSupportedCountries,
   processPayment,
   getSubscriptionStatus,
   cancelSubscription,
-  handleWebhook,
-  verifySession,
   applyFreeSubscription,
 } from '../controllers/paymentController';
-import {
-  handleLemonSqueezyWebhook,
-  getLemonSqueezyConfig,
-  getCustomerPortal,
-  verifyLemonSqueezyPayment,
-} from '../controllers/lemonSqueezyWebhookController';
 import { protect } from '../middleware/auth';
 
 const router = express.Router();
@@ -43,37 +34,6 @@ router.get('/providers/:countryCode', getPaymentProviders);
  * GET /api/payments/supported-countries
  */
 router.get('/supported-countries', getSupportedCountries);
-
-// ============================================================
-// STRIPE ENDPOINTS
-// ============================================================
-
-// Stripe Checkout Session (protected) - redirects to external Stripe payment page
-// Legacy endpoint - prefer /create-payment for new integrations
-router.post('/create-checkout-session', protect, createCheckoutSession);
-
-// Stripe Webhook (public but verified with signature)
-router.post('/webhook', express.raw({ type: 'application/json' }), handleWebhook);
-
-// Verify Stripe payment session after redirect (protected)
-router.get('/verify-session/:sessionId', protect, verifySession);
-
-// ============================================================
-// LEMONSQUEEZY ENDPOINTS
-// ============================================================
-
-// LemonSqueezy Webhook (public but verified with signature)
-// LemonSqueezy sends POST request with JSON body
-router.post('/lemonsqueezy/webhook', handleLemonSqueezyWebhook);
-
-// Get LemonSqueezy configuration for frontend
-router.get('/lemonsqueezy/config', getLemonSqueezyConfig);
-
-// Get customer portal URL (protected)
-router.get('/lemonsqueezy/portal', protect, getCustomerPortal);
-
-// Verify LemonSqueezy payment and activate subscription (protected)
-router.get('/lemonsqueezy/verify', protect, verifyLemonSqueezyPayment);
 
 // ============================================================
 // SUBSCRIPTION MANAGEMENT

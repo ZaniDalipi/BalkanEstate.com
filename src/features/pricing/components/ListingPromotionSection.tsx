@@ -4,7 +4,7 @@ import { CheckIcon, SparklesIcon } from '@/constants';
 import { type UserListing, buildLocalizedPath } from './usePricingPage';
 
 interface ListingPromotionSectionProps {
-  t: (key: string, defaultValue?: string) => string;
+  t: any;
   dispatch: (action: any) => void;
   isAuthenticated: boolean;
   selectedPromoTier: 'featured' | 'highlight' | 'premium' | null;

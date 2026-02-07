@@ -20,7 +20,7 @@ const isProduction = process.env.NODE_ENV === 'production';
 interface ProcessPaymentParams {
   userId: mongoose.Types.ObjectId | string;
   productId: string;
-  store: 'google' | 'apple' | 'stripe' | 'lemonsqueezy' | 'web';
+  store: 'google' | 'apple' | 'web';
   amount: number;
   currency: string;
   purchaseToken?: string;
@@ -118,7 +118,7 @@ export async function processSubscriptionPayment(
         productId,
         googlePlayProductId: product.googlePlayProductId,
         appStoreProductId: product.appStoreProductId,
-        stripeProductId: product.stripeProductId,
+        externalProductId: product.externalProductId,
         startDate,
         expirationDate,
         renewalDate: expirationDate,
