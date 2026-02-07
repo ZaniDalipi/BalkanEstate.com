@@ -47,7 +47,7 @@ import * as api from '@/services/apiService';
  * All major sections have been extracted into focused components <200 lines.
  */
 const PropertyDetailsPage: React.FC<{ property: Property }> = ({ property: cachedProperty }) => {
-  const { t } = useTranslation(['property', 'rental', 'common']);
+  const { t, i18n } = useTranslation(['property', 'rental', 'common']);
   const { state, dispatch, createConversation, toggleSavedHome, fetchProperties } = useAppContext();
   const { error } = useNotification();
 
@@ -530,7 +530,7 @@ const PropertyDetailsPage: React.FC<{ property: Property }> = ({ property: cache
                 <>
                   {t('property:status.rentedBanner', 'This property has been rented')}
                   {' — '}
-                  {t('property:status.rentedUntil', { date: new Date(property.rentedUntil).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' }), defaultValue: `Available from {{date}}` })}
+                  {t('property:status.rentedUntil', { date: new Date(property.rentedUntil).toLocaleDateString(i18n.language === 'me' ? 'sr-Latn-ME' : i18n.language === 'sq' ? 'sq-AL' : i18n.language, { day: 'numeric', month: 'long', year: 'numeric' }), defaultValue: `Available from {{date}}` })}
                 </>
               ) : (
                 t('property:status.rentedBanner', 'This property has been rented')

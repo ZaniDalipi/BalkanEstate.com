@@ -158,7 +158,9 @@
     "streetView": "Vedere Stradală",
     "video": "Video",
     "all": "Toate",
-    "sendInquiry": "Trimite cerere prin email"
+    "sendInquiry": "Trimite cerere prin email",
+    "promote": "Promovează",
+    "extendPromotion": "Prelungește"
   },
   "video": {
     "loading": "Se încarcă videoul...",
@@ -197,7 +199,9 @@
     "priceReduced": "Preț Redus",
     "urgent": "Urgent",
     "exclusive": "Exclusiv",
-    "underOffer": "În Negociere"
+    "underOffer": "În Negociere",
+    "rentedBanner": "Această proprietate a fost închiriată",
+    "rentedUntil": "Disponibilă din {{date}}"
   },
   "priceDiscount": {
     "originalPrice": "Preț Original",

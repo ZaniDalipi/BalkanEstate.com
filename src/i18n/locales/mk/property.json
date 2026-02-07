@@ -158,7 +158,9 @@
     "streetView": "Улична преглед",
     "video": "Видео",
     "all": "Сите",
-    "sendInquiry": "Испрати барање по е-пошта"
+    "sendInquiry": "Испрати барање по е-пошта",
+    "promote": "Промовирај",
+    "extendPromotion": "Продолжи"
   },
   "video": {
     "loading": "Се вчитува видео...",
@@ -197,7 +199,9 @@
     "priceReduced": "Намалена цена",
     "urgent": "Итно",
     "exclusive": "Ексклузивно",
-    "underOffer": "Под понуда"
+    "underOffer": "Под понуда",
+    "rentedBanner": "Овој имот е издаден",
+    "rentedUntil": "Достапен од {{date}}"
   },
   "priceDiscount": {
     "originalPrice": "Оригинална цена",

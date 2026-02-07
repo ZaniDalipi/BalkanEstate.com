@@ -158,7 +158,9 @@
     "streetView": "Προβολή Δρόμου",
     "video": "Βίντεο",
     "all": "Όλα",
-    "sendInquiry": "Αποστολή ερώτησης μέσω email"
+    "sendInquiry": "Αποστολή ερώτησης μέσω email",
+    "promote": "Προώθηση",
+    "extendPromotion": "Παράταση"
   },
   "video": {
     "loading": "Φόρτωση βίντεο...",
@@ -197,7 +199,9 @@
     "priceReduced": "Μειωμένη Τιμή",
     "urgent": "Επείγον",
     "exclusive": "Αποκλειστικό",
-    "underOffer": "Υπό Διαπραγμάτευση"
+    "underOffer": "Υπό Διαπραγμάτευση",
+    "rentedBanner": "Αυτό το ακίνητο έχει ενοικιαστεί",
+    "rentedUntil": "Διαθέσιμο από {{date}}"
   },
   "priceDiscount": {
     "originalPrice": "Αρχική Τιμή",

@@ -158,7 +158,9 @@
     "streetView": "Pamje Rruge",
     "video": "Video",
     "all": "Të Gjitha",
-    "sendInquiry": "Dërgo Pyetje me Email"
+    "sendInquiry": "Dërgo Pyetje me Email",
+    "promote": "Promovo",
+    "extendPromotion": "Zgjat"
   },
   "video": {
     "loading": "Duke ngarkuar videon...",
@@ -197,7 +199,9 @@
     "priceReduced": "Çmim i Ulur",
     "urgent": "Urgjente",
     "exclusive": "Ekskluzive",
-    "underOffer": "Në Negociata"
+    "underOffer": "Në Negociata",
+    "rentedBanner": "Kjo pronë është dhënë me qira",
+    "rentedUntil": "E disponueshme nga {{date}}"
   },
   "priceDiscount": {
     "originalPrice": "Çmimi Origjinal",

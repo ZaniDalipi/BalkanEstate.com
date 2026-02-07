@@ -158,7 +158,9 @@
     "streetView": "Улични Приказ",
     "video": "Видео",
     "all": "Све",
-    "sendInquiry": "Пошаљи упит путем е-поште"
+    "sendInquiry": "Пошаљи упит путем е-поште",
+    "promote": "Промовиши",
+    "extendPromotion": "Продужи"
   },
   "video": {
     "loading": "Учитавање видеа...",
@@ -197,7 +199,9 @@
     "priceReduced": "Снижена Цена",
     "urgent": "Хитно",
     "exclusive": "Ексклузивно",
-    "underOffer": "У Преговорима"
+    "underOffer": "У Преговорима",
+    "rentedBanner": "Ovaj objekat je iznajmljen",
+    "rentedUntil": "Dostupan od {{date}}"
   },
   "priceDiscount": {
     "originalPrice": "Оригинална Цена",

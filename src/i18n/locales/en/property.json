@@ -144,7 +144,9 @@
     "streetView": "Street View",
     "video": "Video",
     "all": "All",
-    "sendInquiry": "Send Email Inquiry"
+    "sendInquiry": "Send Email Inquiry",
+    "promote": "Promote",
+    "extendPromotion": "Extend"
   },
   "video": {
     "loading": "Loading video...",

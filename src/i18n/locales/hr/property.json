@@ -158,7 +158,9 @@
     "streetView": "Pogled Ulice",
     "video": "Video",
     "all": "Sve",
-    "sendInquiry": "Pošalji upit e-poštom"
+    "sendInquiry": "Pošalji upit e-poštom",
+    "promote": "Promoviraj",
+    "extendPromotion": "Produži"
   },
   "video": {
     "loading": "Učitavanje videa...",
@@ -197,7 +199,9 @@
     "priceReduced": "Snižena Cijena",
     "urgent": "Hitno",
     "exclusive": "Ekskluzivno",
-    "underOffer": "U Ponudi"
+    "underOffer": "U Ponudi",
+    "rentedBanner": "Ova nekretnina je iznajmljena",
+    "rentedUntil": "Dostupno od {{date}}"
   },
   "priceDiscount": {
     "originalPrice": "Originalna Cijena",

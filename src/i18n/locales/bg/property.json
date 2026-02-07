@@ -158,7 +158,9 @@
     "streetView": "Уличен изглед",
     "video": "Видео",
     "all": "Всички",
-    "sendInquiry": "Изпрати запитване по имейл"
+    "sendInquiry": "Изпрати запитване по имейл",
+    "promote": "Промотирай",
+    "extendPromotion": "Удължи"
   },
   "video": {
     "loading": "Зареждане на видео...",
@@ -197,7 +199,9 @@
     "priceReduced": "Намалена цена",
     "urgent": "Спешно",
     "exclusive": "Ексклузивно",
-    "underOffer": "Предлага се"
+    "underOffer": "Предлага се",
+    "rentedBanner": "Този имот е отдаден под наем",
+    "rentedUntil": "Наличен от {{date}}"
   },
   "priceDiscount": {
     "originalPrice": "Оригинална цена",
