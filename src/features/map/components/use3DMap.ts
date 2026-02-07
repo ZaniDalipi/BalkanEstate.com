@@ -694,6 +694,7 @@ export function use3DMap(props: Map3DBuildingsProps) {
         zoom: zoom,
         pitch: pitch,
         bearing: bearing,
+        padding: { top: 0, bottom: 120, left: 0, right: 0 },
         duration: 1500,
         essential: true,
       });
@@ -721,6 +722,19 @@ export function use3DMap(props: Map3DBuildingsProps) {
     } as maplibregl.MapOptions);
 
     map.current = mapInstance;
+
+    // After map loads, immediately fly to property with padding to compensate for pitch perspective
+    // With high pitch, the geographic center appears in the lower part of the viewport
+    mapInstance.once('load', () => {
+      mapInstance.flyTo({
+        center: [lng, lat],
+        zoom: zoom,
+        pitch: pitch,
+        bearing: bearing,
+        padding: { top: 0, bottom: 120, left: 0, right: 0 },
+        duration: 0, // Instant — no animation on initial load
+      });
+    });
 
     mapInstance.on('load', () => {
       setMapLoaded(true);
@@ -915,6 +929,7 @@ export function use3DMap(props: Map3DBuildingsProps) {
           mapInstance.flyTo({
             center: [lng, lat],
             zoom: Math.max(mapInstance.getZoom(), 17),
+            padding: { top: 0, bottom: 120, left: 0, right: 0 },
             duration: 1500,
           });
 
@@ -1008,7 +1023,7 @@ export function use3DMap(props: Map3DBuildingsProps) {
     setIs3DMode(!is3DMode);
   }, [is3DMode]);
 
-  // Fly to property
+  // Fly to property — centers the marker on screen with pitch-compensating padding
   const flyToProperty = useCallback(() => {
     if (!map.current) return;
     map.current.flyTo({
@@ -1016,6 +1031,7 @@ export function use3DMap(props: Map3DBuildingsProps) {
       zoom: 17,
       pitch: 65,
       bearing: Math.random() * 40 - 20,
+      padding: { top: 0, bottom: 120, left: 0, right: 0 },
       duration: 2500,
       essential: true,
     });
