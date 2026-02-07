@@ -2184,24 +2184,16 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
                   </div>
                 </div>
 
-                {/* Map Location Picker */}
-                <div>
-                  <label className="block text-xs font-medium text-slate-600 mb-1.5">
-                    Pin Location on Map
-                  </label>
-                  <div className="rounded-xl overflow-hidden border border-slate-200">
-                    <MapLocationPicker
-                      lat={editForm.lat || 42.0}
-                      lng={editForm.lng || 21.0}
-                      address={editForm.address}
-                      country={editForm.country}
-                      city={editForm.city}
-                      onLocationChange={(lat, lng) => setEditForm({ ...editForm, lat, lng })}
-                      onAddressChange={(address) => setEditForm({ ...editForm, address })}
-                    />
-                  </div>
-                  <p className="text-xs text-slate-400 mt-1.5">Search or click on the map to set your agency location</p>
-                </div>
+                {/* Map Location Picker - Same as listing creation */}
+                <MapLocationPicker
+                  lat={editForm.lat || 42.0}
+                  lng={editForm.lng || 21.0}
+                  address={editForm.address}
+                  country={editForm.country}
+                  city={editForm.city}
+                  onLocationChange={(lat, lng) => setEditForm({ ...editForm, lat, lng })}
+                  onAddressChange={(address) => setEditForm({ ...editForm, address })}
+                />
               </div>
 
               {/* Social Media */}
