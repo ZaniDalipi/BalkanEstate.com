@@ -166,6 +166,7 @@ export function useAgentProfile({ agent }: { agent: Agent }) {
 
     const activeListings = allAgentProperties.filter(p => p.status === 'active');
     const soldProperties = allAgentProperties.filter(p => p.status === 'sold');
+    const rentedProperties = allAgentProperties.filter(p => p.status === 'rented');
 
     const stats: AgentStats = useMemo(() => ({
         totalSales: agent.propertiesSold || 0,
