@@ -67,6 +67,7 @@ export function transformBackendProperty(backendProp: any): Property {
     tenantRequirements: backendProp.tenantRequirements,
     maxOccupants: backendProp.maxOccupants,
     rentedAt: backendProp.rentedAt ? new Date(backendProp.rentedAt).getTime() : undefined,
+    rentedUntil: backendProp.rentedUntil ? new Date(backendProp.rentedUntil).getTime() : undefined,
     furnishing: backendProp.furnishing,
     heatingType: backendProp.heatingType,
     condition: backendProp.condition,

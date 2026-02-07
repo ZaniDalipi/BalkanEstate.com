@@ -575,8 +575,18 @@ export const markPropertyAsSold = async (propertyId: string): Promise<Property> 
   return transformBackendProperty(response.property);
 };
 
-export const markPropertyAsRented = async (propertyId: string): Promise<Property> => {
+export const markPropertyAsRented = async (propertyId: string, rentedUntil?: string): Promise<Property> => {
   const response = await apiRequest<{ property: any }>(`/properties/${propertyId}/mark-rented`, {
+    method: 'PATCH',
+    requiresAuth: true,
+    body: rentedUntil ? { rentedUntil } : undefined,
+  });
+
+  return transformBackendProperty(response.property);
+};
+
+export const markPropertyAsAvailable = async (propertyId: string): Promise<Property> => {
+  const response = await apiRequest<{ property: any }>(`/properties/${propertyId}/mark-available`, {
     method: 'PATCH',
     requiresAuth: true,
   });
@@ -914,6 +924,7 @@ function transformBackendProperty(backendProp: any): Property {
     title: backendProp.title,
     soldAt: backendProp.soldAt ? new Date(backendProp.soldAt).getTime() : undefined,
     rentedAt: backendProp.rentedAt ? new Date(backendProp.rentedAt).getTime() : undefined,
+    rentedUntil: backendProp.rentedUntil ? new Date(backendProp.rentedUntil).getTime() : undefined,
     price: backendProp.price,
     originalPrice: backendProp.originalPrice,
     priceReducedAt: backendProp.priceReducedAt ? new Date(backendProp.priceReducedAt).getTime() : undefined,

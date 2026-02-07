@@ -121,6 +121,8 @@ export interface Property {
   internetIncluded?: boolean;
   tenantRequirements?: string[];
   maxOccupants?: number;
+  rentedAt?: number;
+  rentedUntil?: number;
 }
 
 export type SellerType = 'any' | 'agent' | 'private';

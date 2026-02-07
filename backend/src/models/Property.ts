@@ -103,6 +103,7 @@ export interface IProperty extends Document {
   tenantRequirements?: string[]; // e.g. ['no_smoking', 'no_pets', 'references_required', 'employed']
   maxOccupants?: number; // Maximum number of occupants allowed
   rentedAt?: Date; // When the property was rented
+  rentedUntil?: Date; // When the rental period ends
   createdAt: Date;
   updatedAt: Date;
 }
@@ -470,6 +471,9 @@ const PropertySchema: Schema = new Schema(
     rentedAt: {
       type: Date,
       index: true,
+    },
+    rentedUntil: {
+      type: Date,
     },
   },
   {

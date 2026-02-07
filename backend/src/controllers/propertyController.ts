@@ -1194,6 +1194,12 @@ export const markAsRented = async (
     const rentedDate = new Date();
     property.status = 'rented';
     property.rentedAt = rentedDate;
+
+    // Accept optional rentedUntil date from request body
+    if (req.body.rentedUntil) {
+      property.rentedUntil = new Date(req.body.rentedUntil);
+    }
+
     await property.save();
 
     // Invalidate properties cache
@@ -1203,6 +1209,65 @@ export const markAsRented = async (
   } catch (error: any) {
     propertyLogger.error('Mark as rented error:', error);
     res.status(500).json({ message: 'Error marking property as rented', error: error.message });
+  }
+};
+
+// @desc    Mark rented property as available again
+// @route   PATCH /api/properties/:id/mark-available
+// @access  Private
+export const markAsAvailable = async (
+  req: Request,
+  res: Response
+): Promise<void> => {
+  try {
+    if (!req.user) {
+      res.status(401).json({ message: 'Not authorized' });
+      return;
+    }
+
+    const property = await Property.findById(req.params.id);
+
+    if (!property) {
+      res.status(404).json({ message: 'Property not found' });
+      return;
+    }
+
+    const currentUser = req.user as IUser;
+    if (property.sellerId.toString() !== String(currentUser._id).toString()) {
+      res.status(403).json({ message: 'Not authorized to update this property' });
+      return;
+    }
+
+    if (property.status !== 'rented') {
+      res.status(400).json({ message: 'Only rented properties can be marked as available' });
+      return;
+    }
+
+    // Increment listing count back
+    const user = await User.findById(String(currentUser._id));
+    if (user) {
+      user.listingsCount += 1;
+      await user.save();
+    }
+
+    property.status = 'active';
+    property.rentedAt = undefined;
+    property.rentedUntil = undefined;
+    // Set availableFrom to now or to a date from the request
+    if (req.body.availableFrom) {
+      property.availableFrom = new Date(req.body.availableFrom);
+    } else {
+      property.availableFrom = new Date();
+    }
+    await property.save();
+
+    // Invalidate properties cache
+    invalidateCache('/api/properties');
+
+    res.json({ property });
+  } catch (error: any) {
+    propertyLogger.error('Mark as available error:', error);
+    res.status(500).json({ message: 'Error marking property as available', error: error.message });
   }
 };
 

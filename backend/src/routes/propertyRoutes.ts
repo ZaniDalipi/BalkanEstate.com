@@ -9,6 +9,7 @@ import {
   uploadImages,
   markAsSold,
   markAsRented,
+  markAsAvailable,
   renewProperty,
 } from '../controllers/propertyController';
 import { protect } from '../middleware/auth';
@@ -188,6 +189,7 @@ router.post('/upload-images', protect, sensitiveRateLimiter, upload.array('image
 router.post('/:propertyId/upload-images', protect, sensitiveRateLimiter, upload.array('images', 30), uploadImages);
 router.patch('/:id/mark-sold', protect, sensitiveRateLimiter, markAsSold);
 router.patch('/:id/mark-rented', protect, sensitiveRateLimiter, markAsRented);
+router.patch('/:id/mark-available', protect, sensitiveRateLimiter, markAsAvailable);
 router.patch('/:id/renew', protect, sensitiveRateLimiter, renewProperty);
 
 export default router;

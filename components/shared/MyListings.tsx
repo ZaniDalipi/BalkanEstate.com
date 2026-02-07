@@ -69,12 +69,13 @@ const ListingCard: React.FC<{
     property: Property,
     onRenew: (id: string) => void,
     onMarkAsSold: (id: string) => void,
+    onMarkAsAvailable: (id: string) => void,
     onDelete: (id: string) => void,
     onPromote: (id: string) => void,
     onExtend: (id: string) => void,
     onVideo: (id: string) => void,
     renewalStatus: { canRenew: boolean; hoursRemaining?: number; minutesRemaining?: number } | null,
-}> = ({ property, onRenew, onMarkAsSold, onDelete, onPromote, onExtend, onVideo, renewalStatus }) => {
+}> = ({ property, onRenew, onMarkAsSold, onMarkAsAvailable, onDelete, onPromote, onExtend, onVideo, renewalStatus }) => {
     const { dispatch } = useAppContext();
     const [imageError, setImageError] = useState(false);
 
@@ -166,6 +167,14 @@ const ListingCard: React.FC<{
                         </span>
                     </div>
                 )}
+                {property.status === 'rented' && property.rentedUntil && (
+                    <div className="flex items-center gap-1.5 text-orange-600" title="Rented until">
+                        <CalendarIcon className="w-4 h-4"/>
+                        <span className="text-xs font-medium">
+                            Rented until {new Date(property.rentedUntil).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}
+                        </span>
+                    </div>
+                )}
             </div>
 
              <div className="flex flex-col sm:flex-row items-center gap-2 mt-4">
@@ -206,14 +215,24 @@ const ListingCard: React.FC<{
                     <ArrowPathIcon className="w-4 h-4" />
                     {!canRenew && renewalStatus ? `${renewalStatus.hoursRemaining}h ${renewalStatus.minutesRemaining}m` : 'Renew'}
                 </button>
-                <button
-                    onClick={(e) => { e.stopPropagation(); onMarkAsSold(property.id); }}
-                    disabled={!isActionable}
-                    className="w-full sm:w-auto flex items-center justify-center gap-1.5 px-3 py-2 text-xs font-medium text-green-700 bg-green-50 border border-green-200 rounded-lg hover:bg-green-100 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                    <CheckCircleIcon className="w-4 h-4" />
-                    {property.listingType === 'rent' ? 'Mark as Rented' : 'Mark as Sold'}
-                </button>
+                {property.status === 'rented' ? (
+                    <button
+                        onClick={(e) => { e.stopPropagation(); onMarkAsAvailable(property.id); }}
+                        className="w-full sm:w-auto flex items-center justify-center gap-1.5 px-3 py-2 text-xs font-medium text-blue-700 bg-blue-50 border border-blue-200 rounded-lg hover:bg-blue-100 transition-colors"
+                    >
+                        <ArrowPathIcon className="w-4 h-4" />
+                        Mark as Available
+                    </button>
+                ) : (
+                    <button
+                        onClick={(e) => { e.stopPropagation(); onMarkAsSold(property.id); }}
+                        disabled={!isActionable}
+                        className="w-full sm:w-auto flex items-center justify-center gap-1.5 px-3 py-2 text-xs font-medium text-green-700 bg-green-50 border border-green-200 rounded-lg hover:bg-green-100 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                        <CheckCircleIcon className="w-4 h-4" />
+                        {property.listingType === 'rent' ? 'Mark as Rented' : 'Mark as Sold'}
+                    </button>
+                )}
              </div>
         </div>
     </div>
@@ -263,8 +282,12 @@ const ListingTypeBadge: React.FC<{ listingType?: string }> = ({ listingType }) =
 const MyListings: React.FC<{ sellerId: string }> = ({ sellerId }) => {
     const { state, dispatch } = useAppContext();
     const [showSoldConfirm, setShowSoldConfirm] = useState(false);
+    const [showRentedModal, setShowRentedModal] = useState(false);
     const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
     const [propertyToMarkSold, setPropertyToMarkSold] = useState<string | null>(null);
+    const [rentedUntilDate, setRentedUntilDate] = useState('');
+    const [showAvailableConfirm, setShowAvailableConfirm] = useState(false);
+    const [propertyToMarkAvailable, setPropertyToMarkAvailable] = useState<string | null>(null);
     const [propertyToDelete, setPropertyToDelete] = useState<string | null>(null);
     const [statusFilter, setStatusFilter] = useState<PropertyStatus | 'all'>('all');
     const [roleFilter, setRoleFilter] = useState<'all' | 'private_seller' | 'agent'>('all');
@@ -472,32 +495,64 @@ const MyListings: React.FC<{ sellerId: string }> = ({ sellerId }) => {
     };
 
     const handleMarkAsSoldClick = (id: string) => {
-        setPropertyToMarkSold(id);
-        setShowSoldConfirm(true);
+        const prop = myProperties.find(p => p.id === id);
+        if (prop?.listingType === 'rent') {
+            setPropertyToMarkSold(id);
+            setRentedUntilDate('');
+            setShowRentedModal(true);
+        } else {
+            setPropertyToMarkSold(id);
+            setShowSoldConfirm(true);
+        }
+    };
+
+    const confirmMarkAsRented = async () => {
+        if (propertyToMarkSold) {
+            try {
+                const result = await api.markPropertyAsRented(propertyToMarkSold, rentedUntilDate || undefined);
+                setMyProperties(prev => prev.map(p =>
+                    p.id === propertyToMarkSold ? { ...p, status: 'rented' as PropertyStatus, rentedUntil: rentedUntilDate ? new Date(rentedUntilDate).getTime() : undefined } : p
+                ));
+            } catch (error) {
+            }
+        }
+        setShowRentedModal(false);
+        setPropertyToMarkSold(null);
+        setRentedUntilDate('');
     };
 
     const confirmMarkAsSold = async () => {
         if (propertyToMarkSold) {
-            const prop = myProperties.find(p => p.id === propertyToMarkSold);
-            const isRentalProp = prop?.listingType === 'rent';
             try {
-                if (isRentalProp) {
-                    await api.markPropertyAsRented(propertyToMarkSold);
-                    setMyProperties(prev => prev.map(p =>
-                        p.id === propertyToMarkSold ? { ...p, status: 'rented' as PropertyStatus } : p
-                    ));
-                } else {
-                    await api.markPropertyAsSold(propertyToMarkSold);
-                    dispatch({ type: 'MARK_PROPERTY_SOLD', payload: propertyToMarkSold });
-                    setMyProperties(prev => prev.map(p =>
-                        p.id === propertyToMarkSold ? { ...p, status: 'sold' as PropertyStatus } : p
-                    ));
-                }
+                await api.markPropertyAsSold(propertyToMarkSold);
+                dispatch({ type: 'MARK_PROPERTY_SOLD', payload: propertyToMarkSold });
+                setMyProperties(prev => prev.map(p =>
+                    p.id === propertyToMarkSold ? { ...p, status: 'sold' as PropertyStatus } : p
+                ));
             } catch (error) {
             }
         }
         setShowSoldConfirm(false);
         setPropertyToMarkSold(null);
+    };
+
+    const handleMarkAsAvailableClick = (id: string) => {
+        setPropertyToMarkAvailable(id);
+        setShowAvailableConfirm(true);
+    };
+
+    const confirmMarkAsAvailable = async () => {
+        if (propertyToMarkAvailable) {
+            try {
+                await api.markPropertyAsAvailable(propertyToMarkAvailable);
+                setMyProperties(prev => prev.map(p =>
+                    p.id === propertyToMarkAvailable ? { ...p, status: 'active' as PropertyStatus, rentedAt: undefined, rentedUntil: undefined } : p
+                ));
+            } catch (error) {
+            }
+        }
+        setShowAvailableConfirm(false);
+        setPropertyToMarkAvailable(null);
     };
 
     const handleDeleteClick = (id: string) => {
@@ -591,26 +646,62 @@ const MyListings: React.FC<{ sellerId: string }> = ({ sellerId }) => {
 
     return (
         <div className="space-y-6">
+            {/* Mark as Sold confirm */}
             <Modal
                 isOpen={showSoldConfirm}
                 onClose={() => setShowSoldConfirm(false)}
-                title="Confirm Action"
+                title="Mark as Sold"
             >
-                {(() => {
-                    const prop = myProperties.find(p => p.id === propertyToMarkSold);
-                    const isRentalProp = prop?.listingType === 'rent';
-                    return (
-                        <>
-                            <p className="text-neutral-600 mb-6 text-center">
-                                Are you sure you want to mark this property as {isRentalProp ? 'rented' : 'sold'}? This action cannot be undone.
-                            </p>
-                            <div className="flex justify-center gap-4">
-                                <button onClick={() => setShowSoldConfirm(false)} className="px-6 py-2 border border-neutral-300 text-neutral-700 font-semibold rounded-lg hover:bg-neutral-100">Cancel</button>
-                                <button onClick={confirmMarkAsSold} className="px-6 py-2 bg-green-600 text-white font-semibold rounded-lg hover:bg-green-700">Confirm</button>
-                            </div>
-                        </>
-                    );
-                })()}
+                <p className="text-neutral-600 mb-6 text-center">
+                    Are you sure you want to mark this property as sold? This action cannot be undone.
+                </p>
+                <div className="flex justify-center gap-4">
+                    <button onClick={() => setShowSoldConfirm(false)} className="px-6 py-2 border border-neutral-300 text-neutral-700 font-semibold rounded-lg hover:bg-neutral-100">Cancel</button>
+                    <button onClick={confirmMarkAsSold} className="px-6 py-2 bg-green-600 text-white font-semibold rounded-lg hover:bg-green-700">Confirm</button>
+                </div>
+            </Modal>
+
+            {/* Mark as Rented with date picker */}
+            <Modal
+                isOpen={showRentedModal}
+                onClose={() => { setShowRentedModal(false); setPropertyToMarkSold(null); setRentedUntilDate(''); }}
+                title="Mark as Rented"
+            >
+                <div className="space-y-4">
+                    <p className="text-neutral-600 text-center text-sm">
+                        Set the rental end date so tenants and visitors can see when the property becomes available again.
+                    </p>
+                    <div>
+                        <label className="block text-sm font-medium text-neutral-700 mb-1">Rented Until</label>
+                        <input
+                            type="date"
+                            value={rentedUntilDate}
+                            onChange={(e) => setRentedUntilDate(e.target.value)}
+                            min={new Date().toISOString().split('T')[0]}
+                            className="w-full px-3 py-2 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary text-sm"
+                        />
+                        <p className="text-xs text-neutral-400 mt-1">Leave empty if the rental period is indefinite.</p>
+                    </div>
+                    <div className="flex justify-center gap-4 pt-2">
+                        <button onClick={() => { setShowRentedModal(false); setPropertyToMarkSold(null); setRentedUntilDate(''); }} className="px-6 py-2 border border-neutral-300 text-neutral-700 font-semibold rounded-lg hover:bg-neutral-100">Cancel</button>
+                        <button onClick={confirmMarkAsRented} className="px-6 py-2 bg-orange-500 text-white font-semibold rounded-lg hover:bg-orange-600">Mark as Rented</button>
+                    </div>
+                </div>
+            </Modal>
+
+            {/* Mark as Available confirm */}
+            <Modal
+                isOpen={showAvailableConfirm}
+                onClose={() => { setShowAvailableConfirm(false); setPropertyToMarkAvailable(null); }}
+                title="Mark as Available"
+            >
+                <p className="text-neutral-600 mb-6 text-center">
+                    This will make the property active and visible to renters again. The listing will show as available from today.
+                </p>
+                <div className="flex justify-center gap-4">
+                    <button onClick={() => { setShowAvailableConfirm(false); setPropertyToMarkAvailable(null); }} className="px-6 py-2 border border-neutral-300 text-neutral-700 font-semibold rounded-lg hover:bg-neutral-100">Cancel</button>
+                    <button onClick={confirmMarkAsAvailable} className="px-6 py-2 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700">Mark as Available</button>
+                </div>
             </Modal>
 
             <Modal
@@ -793,6 +884,7 @@ const MyListings: React.FC<{ sellerId: string }> = ({ sellerId }) => {
                             property={prop}
                             onRenew={handleRenew}
                             onMarkAsSold={handleMarkAsSoldClick}
+                            onMarkAsAvailable={handleMarkAsAvailableClick}
                             onDelete={handleDeleteClick}
                             onPromote={handlePromote}
                             onExtend={handleExtend}

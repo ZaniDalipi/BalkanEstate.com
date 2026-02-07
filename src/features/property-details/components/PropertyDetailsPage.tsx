@@ -12,6 +12,7 @@ import ImageViewerModal from './ImageViewerModal';
 import FloorPlanViewerModal from './FloorPlanViewerModal';
 import FeaturedAgencies from '@/components/FeaturedAgencies';
 import RentalTermsSection from '@/src/features/rental/components/RentalTermsSection';
+import RentalRulesByCountry from '@/src/features/rental/components/RentalRulesByCountry';
 import { SEO, Breadcrumbs, generatePropertyBreadcrumbs } from '@/src/components/seo';
 import { SocialShare } from '@/src/components/marketing/SocialShare';
 import {
@@ -435,7 +436,15 @@ const PropertyDetailsPage: React.FC<{ property: Property }> = ({ property: cache
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 14v3m4-3v3m4-3v3M3 21h18M3 10h18M3 7l9-4 9 4M4 10h16v11H4V10z" />
             </svg>
             <span className="font-semibold text-sm md:text-base">
-              {t('property:status.rentedBanner', 'This property has been rented')}
+              {property.rentedUntil ? (
+                <>
+                  {t('property:status.rentedBanner', 'This property has been rented')}
+                  {' — '}
+                  {t('property:status.rentedUntil', { date: new Date(property.rentedUntil).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' }), defaultValue: `Available from {{date}}` })}
+                </>
+              ) : (
+                t('property:status.rentedBanner', 'This property has been rented')
+              )}
             </span>
           </div>
         </div>
@@ -636,8 +645,9 @@ const PropertyDetailsPage: React.FC<{ property: Property }> = ({ property: cache
 
             {/* Rental Terms (only for rental properties) */}
             {property.listingType === 'rent' && (
-              <div className="animate-slide-up" style={{ animationDelay: '150ms' }}>
+              <div className="animate-slide-up space-y-6" style={{ animationDelay: '150ms' }}>
                 <RentalTermsSection property={property} />
+                <RentalRulesByCountry country={property.country} />
               </div>
             )}
 
