@@ -1006,8 +1006,6 @@ function transformBackendProperty(backendProp: any): Property {
 
 // Transform frontend Property to backend format
 function transformToBackendProperty(frontendProp: Property): any {
-  // Build the property object, only including fields with meaningful values
-  // This ensures we don't accidentally overwrite existing data with empty/undefined values
   const result: any = {
     status: frontendProp.status,
     title: frontendProp.title,
@@ -1030,28 +1028,30 @@ function transformToBackendProperty(frontendProp: Property): any {
     lat: frontendProp.lat,
     lng: frontendProp.lng,
     propertyType: frontendProp.propertyType,
-    // Listing type (sale or rent)
     listingType: frontendProp.listingType || 'sale',
-    // Dual-role system
     createdAsRole: frontendProp.createdAsRole,
+    // Always include boolean amenities (default to false if undefined)
+    hasBalcony: frontendProp.hasBalcony ?? false,
+    hasGarden: frontendProp.hasGarden ?? false,
+    hasElevator: frontendProp.hasElevator ?? false,
+    hasSecurity: frontendProp.hasSecurity ?? false,
+    hasAirConditioning: frontendProp.hasAirConditioning ?? false,
+    hasPool: frontendProp.hasPool ?? false,
+    petsAllowed: frontendProp.petsAllowed ?? false,
+    // Always include virtual tour flag
+    hasVirtualTour360: frontendProp.hasVirtualTour360 ?? false,
   };
 
-  // Only include URL fields if they have actual values (preserve existing data)
-  if (frontendProp.tourUrl) {
-    result.tourUrl = frontendProp.tourUrl;
-  }
+  // URL fields
+  if (frontendProp.tourUrl) result.tourUrl = frontendProp.tourUrl;
   if (frontendProp.virtualTour360Url) {
     result.virtualTour360Url = frontendProp.virtualTour360Url;
     result.hasVirtualTour360 = true;
-  } else if (frontendProp.hasVirtualTour360 !== undefined) {
-    // Only explicitly set to false if hasVirtualTour360 was explicitly set
-    result.hasVirtualTour360 = frontendProp.hasVirtualTour360;
   }
-  if (frontendProp.floorplanUrl) {
-    result.floorplanUrl = frontendProp.floorplanUrl;
-  }
+  if (frontendProp.videoUrl) result.videoUrl = frontendProp.videoUrl;
+  if (frontendProp.floorplanUrl) result.floorplanUrl = frontendProp.floorplanUrl;
 
-  // Only include floor info if explicitly set
+  // Floor info
   if (frontendProp.floorNumber !== undefined && frontendProp.floorNumber > 0) {
     result.floorNumber = frontendProp.floorNumber;
   }
@@ -1059,7 +1059,7 @@ function transformToBackendProperty(frontendProp: Property): any {
     result.totalFloors = frontendProp.totalFloors;
   }
 
-  // Advanced property features - only include if explicitly set (not 'any' or undefined)
+  // Advanced property features - always include if set to a real value (not 'any')
   if (frontendProp.furnishing && frontendProp.furnishing !== 'any') {
     result.furnishing = frontendProp.furnishing;
   }
@@ -1076,16 +1076,7 @@ function transformToBackendProperty(frontendProp: Property): any {
     result.energyRating = frontendProp.energyRating;
   }
 
-  // Boolean amenities - only include if explicitly set (not undefined)
-  if (frontendProp.hasBalcony !== undefined) result.hasBalcony = frontendProp.hasBalcony;
-  if (frontendProp.hasGarden !== undefined) result.hasGarden = frontendProp.hasGarden;
-  if (frontendProp.hasElevator !== undefined) result.hasElevator = frontendProp.hasElevator;
-  if (frontendProp.hasSecurity !== undefined) result.hasSecurity = frontendProp.hasSecurity;
-  if (frontendProp.hasAirConditioning !== undefined) result.hasAirConditioning = frontendProp.hasAirConditioning;
-  if (frontendProp.hasPool !== undefined) result.hasPool = frontendProp.hasPool;
-  if (frontendProp.petsAllowed !== undefined) result.petsAllowed = frontendProp.petsAllowed;
-
-  // Distance fields - only include if explicitly set
+  // Distance fields
   if (frontendProp.distanceToCenter !== undefined) {
     result.distanceToCenter = frontendProp.distanceToCenter;
   }
@@ -1099,32 +1090,18 @@ function transformToBackendProperty(frontendProp: Property): any {
     result.distanceToHospital = frontendProp.distanceToHospital;
   }
 
-  // Rental-specific fields - only include for rental listings
+  // Rental-specific fields - always include all fields for rent listings
   if (frontendProp.listingType === 'rent') {
-    if (frontendProp.rentPeriod) result.rentPeriod = frontendProp.rentPeriod;
-    if (frontendProp.securityDeposit !== undefined && frontendProp.securityDeposit > 0) {
-      result.securityDeposit = frontendProp.securityDeposit;
-    }
-    if (frontendProp.minimumLeaseDuration !== undefined) {
-      result.minimumLeaseDuration = frontendProp.minimumLeaseDuration;
-    }
-    if (frontendProp.maximumLeaseDuration !== undefined) {
-      result.maximumLeaseDuration = frontendProp.maximumLeaseDuration;
-    }
+    result.rentPeriod = frontendProp.rentPeriod || 'monthly';
+    result.securityDeposit = frontendProp.securityDeposit ?? 0;
+    result.minimumLeaseDuration = frontendProp.minimumLeaseDuration ?? 1;
+    result.maximumLeaseDuration = frontendProp.maximumLeaseDuration ?? 12;
+    result.utilitiesIncluded = frontendProp.utilitiesIncluded ?? false;
+    result.internetIncluded = frontendProp.internetIncluded ?? false;
+    result.tenantRequirements = frontendProp.tenantRequirements || [];
+    result.maxOccupants = frontendProp.maxOccupants ?? 1;
     if (frontendProp.availableFrom) {
       result.availableFrom = new Date(frontendProp.availableFrom).toISOString();
-    }
-    if (frontendProp.utilitiesIncluded !== undefined) {
-      result.utilitiesIncluded = frontendProp.utilitiesIncluded;
-    }
-    if (frontendProp.internetIncluded !== undefined) {
-      result.internetIncluded = frontendProp.internetIncluded;
-    }
-    if (frontendProp.tenantRequirements && frontendProp.tenantRequirements.length > 0) {
-      result.tenantRequirements = frontendProp.tenantRequirements;
-    }
-    if (frontendProp.maxOccupants !== undefined && frontendProp.maxOccupants > 0) {
-      result.maxOccupants = frontendProp.maxOccupants;
     }
   }
 

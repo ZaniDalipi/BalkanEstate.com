@@ -121,38 +121,51 @@ export function transformToBackendProperty(frontendProp: Property): any {
     propertyType: frontendProp.propertyType,
     createdAsRole: frontendProp.createdAsRole,
     listingType: frontendProp.listingType || 'sale',
+    // Always include boolean amenities (default to false if undefined)
+    hasBalcony: frontendProp.hasBalcony ?? false,
+    hasGarden: frontendProp.hasGarden ?? false,
+    hasElevator: frontendProp.hasElevator ?? false,
+    hasSecurity: frontendProp.hasSecurity ?? false,
+    hasAirConditioning: frontendProp.hasAirConditioning ?? false,
+    hasPool: frontendProp.hasPool ?? false,
+    petsAllowed: frontendProp.petsAllowed ?? false,
+    // Always include virtual tour flag
+    hasVirtualTour360: frontendProp.hasVirtualTour360 ?? false,
   };
 
-  // Rental-specific fields
+  // Rental-specific fields - always include all fields for rent listings
   if (frontendProp.listingType === 'rent') {
     result.rentPeriod = frontendProp.rentPeriod || 'monthly';
-    if (frontendProp.securityDeposit != null) result.securityDeposit = frontendProp.securityDeposit;
-    if (frontendProp.minimumLeaseDuration != null) result.minimumLeaseDuration = frontendProp.minimumLeaseDuration;
-    if (frontendProp.maximumLeaseDuration != null) result.maximumLeaseDuration = frontendProp.maximumLeaseDuration;
-    if (frontendProp.availableFrom != null) result.availableFrom = frontendProp.availableFrom;
-    if (frontendProp.utilitiesIncluded !== undefined) result.utilitiesIncluded = frontendProp.utilitiesIncluded;
-    if (frontendProp.internetIncluded !== undefined) result.internetIncluded = frontendProp.internetIncluded;
-    if (frontendProp.tenantRequirements && frontendProp.tenantRequirements.length > 0) {
-      result.tenantRequirements = frontendProp.tenantRequirements;
+    result.securityDeposit = frontendProp.securityDeposit ?? 0;
+    result.minimumLeaseDuration = frontendProp.minimumLeaseDuration ?? 1;
+    result.maximumLeaseDuration = frontendProp.maximumLeaseDuration ?? 12;
+    result.utilitiesIncluded = frontendProp.utilitiesIncluded ?? false;
+    result.internetIncluded = frontendProp.internetIncluded ?? false;
+    result.tenantRequirements = frontendProp.tenantRequirements || [];
+    result.maxOccupants = frontendProp.maxOccupants ?? 1;
+    if (frontendProp.availableFrom) {
+      result.availableFrom = new Date(frontendProp.availableFrom).toISOString();
     }
-    if (frontendProp.maxOccupants != null) result.maxOccupants = frontendProp.maxOccupants;
   }
 
+  // URL fields
   if (frontendProp.tourUrl) result.tourUrl = frontendProp.tourUrl;
   if (frontendProp.virtualTour360Url) {
     result.virtualTour360Url = frontendProp.virtualTour360Url;
     result.hasVirtualTour360 = true;
-  } else if (frontendProp.hasVirtualTour360 !== undefined) {
-    result.hasVirtualTour360 = frontendProp.hasVirtualTour360;
   }
   if (frontendProp.videoUrl) result.videoUrl = frontendProp.videoUrl;
   if (frontendProp.floorplanUrl) result.floorplanUrl = frontendProp.floorplanUrl;
+
+  // Floor info
   if (frontendProp.floorNumber !== undefined && frontendProp.floorNumber > 0) {
     result.floorNumber = frontendProp.floorNumber;
   }
   if (frontendProp.totalFloors !== undefined && frontendProp.totalFloors > 0) {
     result.totalFloors = frontendProp.totalFloors;
   }
+
+  // Advanced property features
   if (frontendProp.furnishing && frontendProp.furnishing !== 'any') {
     result.furnishing = frontendProp.furnishing;
   }
@@ -168,14 +181,8 @@ export function transformToBackendProperty(frontendProp: Property): any {
   if (frontendProp.energyRating && frontendProp.energyRating !== 'any') {
     result.energyRating = frontendProp.energyRating;
   }
-  if (frontendProp.hasBalcony !== undefined) result.hasBalcony = frontendProp.hasBalcony;
-  if (frontendProp.hasGarden !== undefined) result.hasGarden = frontendProp.hasGarden;
-  if (frontendProp.hasElevator !== undefined) result.hasElevator = frontendProp.hasElevator;
-  if (frontendProp.hasSecurity !== undefined) result.hasSecurity = frontendProp.hasSecurity;
-  if (frontendProp.hasAirConditioning !== undefined)
-    result.hasAirConditioning = frontendProp.hasAirConditioning;
-  if (frontendProp.hasPool !== undefined) result.hasPool = frontendProp.hasPool;
-  if (frontendProp.petsAllowed !== undefined) result.petsAllowed = frontendProp.petsAllowed;
+
+  // Distance fields
   if (frontendProp.distanceToCenter !== undefined)
     result.distanceToCenter = frontendProp.distanceToCenter;
   if (frontendProp.distanceToSea !== undefined) result.distanceToSea = frontendProp.distanceToSea;

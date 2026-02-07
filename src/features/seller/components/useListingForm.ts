@@ -737,14 +737,14 @@ export const useListingForm = (propertyToEdit: Property | null) => {
                 inquiries: propertyToEdit?.inquiries || 0,
                 // Dual-role system: Pass the selected role to backend
                 createdAsRole: selectedRole,
-                // Mandatory amenities
-                hasBalcony: listingData.hasBalcony,
-                hasGarden: listingData.hasGarden,
-                hasElevator: listingData.hasElevator,
-                hasSecurity: listingData.hasSecurity,
-                hasAirConditioning: listingData.hasAirConditioning,
-                hasPool: listingData.hasPool,
-                petsAllowed: listingData.petsAllowed,
+                // Amenities - always send values (default to false if not set)
+                hasBalcony: listingData.hasBalcony ?? false,
+                hasGarden: listingData.hasGarden ?? false,
+                hasElevator: listingData.hasElevator ?? false,
+                hasSecurity: listingData.hasSecurity ?? false,
+                hasAirConditioning: listingData.hasAirConditioning ?? false,
+                hasPool: listingData.hasPool ?? false,
+                petsAllowed: listingData.petsAllowed ?? false,
                 // Advanced property features
                 furnishing: listingData.furnishing !== 'any' ? listingData.furnishing : undefined,
                 heatingType: listingData.heatingType !== 'any' ? listingData.heatingType : undefined,
@@ -756,17 +756,17 @@ export const useListingForm = (propertyToEdit: Property | null) => {
                 distanceToSea: distances.distanceToSea,
                 distanceToSchool: distances.distanceToSchool,
                 distanceToHospital: distances.distanceToHospital,
-                // Rental-specific fields (only included when listingType is 'rent')
+                // Rental-specific fields (always included when listingType is 'rent')
                 ...(listingData.listingType === 'rent' ? {
-                    rentPeriod: listingData.rentPeriod,
-                    securityDeposit: Number(listingData.securityDeposit) || undefined,
-                    minimumLeaseDuration: Number(listingData.minimumLeaseDuration) || undefined,
-                    maximumLeaseDuration: Number(listingData.maximumLeaseDuration) || undefined,
+                    rentPeriod: listingData.rentPeriod || 'monthly',
+                    securityDeposit: Number(listingData.securityDeposit) ?? 0,
+                    minimumLeaseDuration: Number(listingData.minimumLeaseDuration) ?? 1,
+                    maximumLeaseDuration: Number(listingData.maximumLeaseDuration) ?? 12,
                     availableFrom: listingData.availableFrom ? new Date(listingData.availableFrom).getTime() : undefined,
-                    utilitiesIncluded: listingData.utilitiesIncluded,
-                    internetIncluded: listingData.internetIncluded,
-                    tenantRequirements: listingData.tenantRequirements.length > 0 ? listingData.tenantRequirements : undefined,
-                    maxOccupants: Number(listingData.maxOccupants) || undefined,
+                    utilitiesIncluded: listingData.utilitiesIncluded ?? false,
+                    internetIncluded: listingData.internetIncluded ?? false,
+                    tenantRequirements: listingData.tenantRequirements || [],
+                    maxOccupants: Number(listingData.maxOccupants) ?? 1,
                 } : {}),
             };
 
