@@ -3082,6 +3082,10 @@ Questions? Contact us at support@balkanestateai.com
             <td style="padding: 8px 0; color: #111827; font-size: 14px; font-weight: 600;">${safeTitle}</td>
           </tr>
           <tr>
+            <td style="padding: 8px 0; color: #6b7280; font-size: 14px;">Address:</td>
+            <td style="padding: 8px 0; color: #111827; font-size: 14px;">${safeAddress}</td>
+          </tr>
+          <tr>
             <td style="padding: 8px 0; color: #6b7280; font-size: 14px;">Date:</td>
             <td style="padding: 8px 0; color: #111827; font-size: 14px; font-weight: 600;">${safeDate} at ${safeTime}</td>
           </tr>
