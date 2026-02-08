@@ -279,7 +279,7 @@ const Map3DControls: React.FC<Map3DControlsProps> = ({
 
           {/* Shadow Timelapse - inline below control buttons to avoid overlap */}
           {enableShadowTimelapse && (
-            <div className="w-8 sm:w-52">
+            <div className={showTimelapse ? 'w-36 sm:w-52 max-w-[calc(100vw-4rem)]' : 'w-8 sm:w-auto'}>
               {!showTimelapse ? (
                 <button
                   onClick={() => setShowTimelapse(true)}
