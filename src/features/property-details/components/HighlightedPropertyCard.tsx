@@ -283,73 +283,73 @@ const HighlightedPropertyCard: React.FC<HighlightedPropertyCardProps> = ({ prope
         </button>
       </div>
 
-      {/* Content Section - compact */}
-      <div className="flex-1 p-3 md:p-3.5 flex flex-col min-w-0">
+      {/* Content Section */}
+      <div className="flex-1 p-3.5 md:p-4 flex flex-col min-w-0">
         {/* Price & Type Row */}
-        <div className="flex items-center justify-between gap-2 mb-1.5">
-          <span className="bg-gradient-to-r from-primary to-primary-dark text-white text-sm font-bold px-2.5 py-0.5 rounded-lg shadow-sm">
+        <div className="flex items-center justify-between gap-2 mb-2">
+          <span className="bg-gradient-to-r from-primary to-primary-dark text-white text-sm md:text-base font-bold px-3 py-1 rounded-lg shadow-md">
             {formatPrice(property.price, property.country)}
-            {isRental && <span className="text-[10px] font-normal opacity-80">/{property.rentPeriod === 'weekly' ? t('common:wk', 'wk') : property.rentPeriod === 'daily' ? t('common:day', 'day') : t('common:mo', 'mo')}</span>}
+            {isRental && <span className="text-xs font-normal opacity-80">/{property.rentPeriod === 'weekly' ? t('common:wk', 'wk') : property.rentPeriod === 'daily' ? t('common:day', 'day') : t('common:mo', 'mo')}</span>}
           </span>
-          <span className="bg-neutral-100 text-neutral-600 text-[10px] font-semibold px-2 py-0.5 rounded">
+          <span className="bg-neutral-100 text-neutral-700 text-xs font-semibold px-2.5 py-1 rounded-md">
             {propertyTypeLabel}
           </span>
         </div>
 
         {/* Title */}
         {property.title && (
-          <h3 className="text-sm font-bold text-neutral-900 mb-0.5 line-clamp-1 group-hover:text-primary transition-colors">
+          <h3 className="text-sm md:text-base font-bold text-neutral-900 mb-1 line-clamp-1 group-hover:text-primary transition-colors">
             {property.title}
           </h3>
         )}
 
         {/* Location */}
-        <div className="flex items-center gap-1 mb-2 text-neutral-500">
-          <MapPinIcon className="w-3 h-3 text-primary flex-shrink-0" />
-          <span className="text-[11px] truncate">{property.address}</span>
+        <div className="flex items-center gap-1.5 mb-2.5 text-neutral-600">
+          <MapPinIcon className="w-3.5 h-3.5 text-primary flex-shrink-0" />
+          <span className="text-xs truncate">{property.address}</span>
         </div>
 
         {/* Property Stats - compact inline row */}
-        <div className="flex items-center gap-3 mb-2 text-neutral-600">
+        <div className="flex items-center gap-4 mb-2.5 text-neutral-600">
           <div className="flex items-center gap-1">
-            <BedIcon className="w-3.5 h-3.5 text-primary" />
-            <span className="text-xs font-semibold">{property.beds}</span>
+            <BedIcon className="w-4 h-4 text-primary" />
+            <span className="text-sm font-semibold">{property.beds}</span>
           </div>
           <div className="flex items-center gap-1">
-            <BathIcon className="w-3.5 h-3.5 text-primary" />
-            <span className="text-xs font-semibold">{property.baths}</span>
+            <BathIcon className="w-4 h-4 text-primary" />
+            <span className="text-sm font-semibold">{property.baths}</span>
           </div>
           <div className="flex items-center gap-1">
-            <LivingRoomIcon className="w-3.5 h-3.5 text-primary" />
-            <span className="text-xs font-semibold">{property.livingRooms}</span>
+            <LivingRoomIcon className="w-4 h-4 text-primary" />
+            <span className="text-sm font-semibold">{property.livingRooms}</span>
           </div>
           <div className="flex items-center gap-1">
-            <SqftIcon className="w-3.5 h-3.5 text-primary" />
-            <span className="text-xs font-bold text-primary">{property.sqft} {t('common:sqm')}</span>
+            <SqftIcon className="w-4 h-4 text-primary" />
+            <span className="text-sm font-bold text-primary">{property.sqft} {t('common:sqm')}</span>
           </div>
         </div>
 
         {/* Description excerpt */}
         {property.description && (
-          <p className="text-[11px] text-neutral-400 line-clamp-2 mb-2 flex-grow leading-relaxed">
+          <p className="text-xs text-neutral-500 line-clamp-2 mb-2.5 flex-grow">
             {property.description}
           </p>
         )}
 
         {/* Seller Info & View Details */}
-        <div className="pt-2 border-t border-neutral-100 flex items-center justify-between mt-auto">
-          <div className="flex items-center gap-1.5 min-w-0">
+        <div className="pt-2.5 border-t border-neutral-100 flex items-center justify-between mt-auto">
+          <div className="flex items-center gap-2 min-w-0">
             <SellerAvatar
               avatarUrl={property.seller.avatarUrl}
               name={property.seller.name}
               type={property.seller.type}
             />
             <div className="min-w-0">
-              <p className="text-[11px] font-semibold text-neutral-700 truncate">{property.seller.name}</p>
-              <span className={`inline-flex items-center text-[9px] font-semibold px-1 py-0 rounded ${
+              <p className="text-xs font-semibold text-neutral-800 truncate">{property.seller.name}</p>
+              <span className={`inline-flex items-center gap-0.5 text-[10px] font-semibold px-1.5 py-0.5 rounded-full ${
                 property.seller.type === 'agent'
-                  ? 'bg-blue-50 text-blue-600'
-                  : 'bg-neutral-50 text-neutral-500'
+                  ? 'bg-blue-100 text-blue-700'
+                  : 'bg-neutral-100 text-neutral-600'
               }`}>
                 {property.seller.type === 'agent' ? t('property:seller.agent') : t('property:seller.private')}
               </span>
@@ -359,7 +359,7 @@ const HighlightedPropertyCard: React.FC<HighlightedPropertyCardProps> = ({ prope
           {/* View Details Button */}
           <button
             onClick={handleCardClick}
-            className="bg-primary hover:bg-primary-dark text-white text-[11px] font-semibold px-3 py-1.5 rounded-lg transition-colors shadow-sm flex-shrink-0"
+            className="bg-primary hover:bg-primary-dark text-white text-xs font-semibold px-3.5 py-1.5 rounded-lg transition-colors shadow-md flex-shrink-0"
           >
             {t('property:actions.viewDetails')}
           </button>
