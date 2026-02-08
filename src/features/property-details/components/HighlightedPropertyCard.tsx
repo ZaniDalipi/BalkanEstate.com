@@ -179,7 +179,7 @@ const HighlightedPropertyCard: React.FC<HighlightedPropertyCardProps> = ({ prope
       onClick={handleCardClick}
     >
       {/* Image Carousel Section */}
-      <div className="relative w-full md:w-2/5 h-56 md:h-auto md:min-h-[280px] overflow-hidden">
+      <div className="relative w-full md:w-2/5 h-56 md:h-auto md:min-h-[280px] overflow-hidden bg-black">
         {/* Images */}
         <div className="relative w-full h-full">
           {displayImages.map((imgUrl, index) => (
@@ -194,16 +194,28 @@ const HighlightedPropertyCard: React.FC<HighlightedPropertyCardProps> = ({ prope
                   <BuildingOfficeIcon className="w-16 h-16 text-neutral-400" />
                 </div>
               ) : (
-                <img
-                  src={imgUrl}
-                  alt={`${property.title || propertyTypeLabel} - Image ${index + 1}`}
-                  loading={index === 0 ? 'eager' : 'lazy'}
-                  decoding="async"
-                  className={`w-full h-full object-cover transition-transform duration-700 ${
-                    isHovered ? 'scale-105' : 'scale-100'
-                  }`}
-                  onError={() => handleImageError(index)}
-                />
+                <>
+                  {/* Blurred background image to fill empty space */}
+                  <img
+                    src={imgUrl}
+                    alt=""
+                    aria-hidden="true"
+                    loading="lazy"
+                    decoding="async"
+                    className="absolute inset-0 w-full h-full object-cover blur-xl scale-110 opacity-60"
+                  />
+                  {/* Main image - contained to show full image without cropping */}
+                  <img
+                    src={imgUrl}
+                    alt={`${property.title || propertyTypeLabel} - Image ${index + 1}`}
+                    loading={index === 0 ? 'eager' : 'lazy'}
+                    decoding="async"
+                    className={`relative w-full h-full object-contain transition-transform duration-700 ${
+                      isHovered ? 'scale-105' : 'scale-100'
+                    }`}
+                    onError={() => handleImageError(index)}
+                  />
+                </>
               )}
             </div>
           ))}
