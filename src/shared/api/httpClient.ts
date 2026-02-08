@@ -122,7 +122,15 @@ export const uploadRequest = async <T>(
 ): Promise<T> => {
   let token = tokenService.getAccessToken();
   if (!token) {
-    throw new Error('Not authorized. Please login again.');
+    // Try to refresh the token before giving up
+    const newToken = await refreshAccessToken();
+    if (newToken) {
+      token = newToken;
+    } else {
+      tokenService.clearTokens();
+      window.dispatchEvent(new CustomEvent('session-expired'));
+      throw new Error('Not authorized. Please login again.');
+    }
   }
 
   const response = await fetch(`${API_URL}${endpoint}`, {
