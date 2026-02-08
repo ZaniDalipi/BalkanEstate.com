@@ -172,15 +172,15 @@ const HighlightedPropertyCard: React.FC<HighlightedPropertyCardProps> = ({ prope
 
   return (
     <div
-      className={`group bg-white rounded-xl overflow-hidden shadow-xl ${tierStyles.border} ${tierStyles.glow} transition-all duration-500 cursor-pointer flex flex-col md:grid md:grid-cols-[40%_1fr] w-full ${
+      className={`group bg-white rounded-xl overflow-hidden shadow-xl ${tierStyles.border} ${tierStyles.glow} transition-all duration-500 cursor-pointer flex flex-col md:flex-row md:relative w-full ${
         isHovered ? 'shadow-2xl scale-[1.01]' : ''
       }`}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
       onClick={handleCardClick}
     >
-      {/* Image Section - fills height of card in row layout */}
-      <div className="relative h-48 md:h-full overflow-hidden bg-neutral-100">
+      {/* Image Section - absolute on desktop to guarantee full height fill */}
+      <div className="relative h-48 md:absolute md:inset-y-0 md:left-0 md:w-[40%] overflow-hidden bg-neutral-100">
         <div className="absolute inset-0">
           {displayImages.map((imgUrl, index) => (
             <div
@@ -284,8 +284,8 @@ const HighlightedPropertyCard: React.FC<HighlightedPropertyCardProps> = ({ prope
         </button>
       </div>
 
-      {/* Content Section */}
-      <div className="flex-1 p-3.5 md:p-4 flex flex-col min-w-0">
+      {/* Content Section - offset by image width on desktop */}
+      <div className="flex-1 p-3.5 md:p-4 md:ml-[40%] flex flex-col min-w-0">
         {/* Price & Type Row */}
         <div className="flex items-center justify-between gap-2 mb-2">
           <span className="bg-gradient-to-r from-primary to-primary-dark text-white text-sm md:text-base font-bold px-3 py-1 rounded-lg shadow-md">
