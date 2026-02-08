@@ -78,6 +78,8 @@ export function useRentalSearch() {
                 rentedAt: p.rentedAt ? new Date(p.rentedAt).getTime() : undefined,
                 rentedUntil: p.rentedUntil ? new Date(p.rentedUntil).getTime() : undefined,
                 availableFrom: p.availableFrom ? new Date(p.availableFrom).getTime() : undefined,
+                promotionStartDate: p.promotionStartDate ? new Date(p.promotionStartDate).getTime() : undefined,
+                promotionEndDate: p.promotionEndDate ? new Date(p.promotionEndDate).getTime() : undefined,
                 seller: p.sellerId ? {
                     type: p.sellerId.role === 'agent' ? 'agent' : 'private',
                     name: p.sellerId.name || '',
