@@ -184,7 +184,7 @@ const RentalSearchPage: React.FC = () => {
                     </div>
 
                     {/* Property List - Using same PropertyCard as the Buy page */}
-                    <div className="flex-1 overflow-y-auto p-3" data-scroll-container>
+                    <div className="flex-1 overflow-y-auto p-3 pb-28 lg:pb-3" data-scroll-container>
                         {isLoading ? (
                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                                 {[...Array(6)].map((_, i) => (
@@ -244,8 +244,8 @@ const RentalSearchPage: React.FC = () => {
                         <div className="pointer-events-auto mx-auto w-fit" role="tablist" aria-label="View toggle">
                             <LiquidGlassSwitch
                                 options={[
-                                    { value: 'list', label: t('search:list'), icon: <Squares2x2Icon className="w-full h-full" /> },
-                                    { value: 'map', label: t('search:map.title'), icon: <MapIcon className="w-full h-full" /> },
+                                    { value: 'list', label: t('search:map.list'), icon: <Squares2x2Icon className="w-full h-full" /> },
+                                    { value: 'map', label: t('search:map.showMap'), icon: <MapIcon className="w-full h-full" /> },
                                 ]}
                                 value={mobileView}
                                 onChange={(val) => setMobileView(val as 'list' | 'map')}
