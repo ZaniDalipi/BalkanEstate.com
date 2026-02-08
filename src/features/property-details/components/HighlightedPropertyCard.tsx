@@ -180,8 +180,7 @@ const HighlightedPropertyCard: React.FC<HighlightedPropertyCardProps> = ({ prope
       onClick={handleCardClick}
     >
       {/* Image Carousel Section */}
-      <div className="relative w-full md:w-[38%] overflow-hidden bg-neutral-900">
-        {/* Images - fixed height on mobile, stretch on desktop */}
+      <div className="relative w-full md:w-[38%] overflow-hidden">
         <div className="relative w-full h-48 md:h-full md:min-h-[220px]">
           {displayImages.map((imgUrl, index) => (
             <div
@@ -195,34 +194,22 @@ const HighlightedPropertyCard: React.FC<HighlightedPropertyCardProps> = ({ prope
                   <BuildingOfficeIcon className="w-12 h-12 text-neutral-400" />
                 </div>
               ) : (
-                <>
-                  {/* Blurred background layer - dark to avoid gray wash */}
-                  <img
-                    src={imgUrl}
-                    alt=""
-                    aria-hidden="true"
-                    className="absolute inset-0 w-full h-full object-cover blur-3xl scale-150 brightness-50 saturate-150"
-                  />
-                  {/* Dark overlay to prevent washed-out look */}
-                  <div className="absolute inset-0 bg-black/20" />
-                  {/* Main image - centered vertically */}
-                  <img
-                    src={imgUrl}
-                    alt={`${property.title || propertyTypeLabel} - Image ${index + 1}`}
-                    loading={index === 0 ? 'eager' : 'lazy'}
-                    decoding="async"
-                    className={`relative w-full h-full object-contain z-[1] transition-transform duration-700 ${
-                      isHovered ? 'scale-105' : 'scale-100'
-                    }`}
-                    onError={() => handleImageError(index)}
-                  />
-                </>
+                <img
+                  src={imgUrl}
+                  alt={`${property.title || propertyTypeLabel} - Image ${index + 1}`}
+                  loading={index === 0 ? 'eager' : 'lazy'}
+                  decoding="async"
+                  className={`w-full h-full object-cover transition-transform duration-700 ${
+                    isHovered ? 'scale-105' : 'scale-100'
+                  }`}
+                  onError={() => handleImageError(index)}
+                />
               )}
             </div>
           ))}
 
           {/* Gradient overlay */}
-          <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent z-[2]" />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent" />
         </div>
 
         {/* Navigation Arrows */}
