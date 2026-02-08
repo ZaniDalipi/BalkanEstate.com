@@ -329,7 +329,7 @@ export const useMapLayers = ({ map, isLoaded }: UseMapLayersProps) => {
       case 'fire':
         isWms = true;
         layerOpacity = 0.7;
-        layerName = 'Active Fires 24h (EFFIS Copernicus)';
+        layerName = 'Fire Danger (EFFIS Copernicus)';
         break;
       case 'wind':
         if (owmKey) tileUrl = `https://tile.openweathermap.org/map/wind_new/{z}/{x}/{y}.png?appid=${owmKey}`;
@@ -374,7 +374,12 @@ export const useMapLayers = ({ map, isLoaded }: UseMapLayersProps) => {
           const neMerc = latLngToWebMercator(ne.lat(), ne.lng());
           const bbox = `${swMerc.x},${swMerc.y},${neMerc.x},${neMerc.y}`;
 
-          return `https://maps.effis.emergency.copernicus.eu/effis?SERVICE=WMS&VERSION=1.3.0&REQUEST=GetMap&LAYERS=viirs.crt.firms&STYLES=&FORMAT=image/png&TRANSPARENT=true&CRS=EPSG:3857&BBOX=${bbox}&WIDTH=256&HEIGHT=256`;
+          const firmsKey = import.meta.env.VITE_FIRMS_MAP_KEY || '';
+          if (firmsKey) {
+            return `https://firms.modaps.eosdis.nasa.gov/mapserver/wms/fires/${firmsKey}/?SERVICE=WMS&VERSION=1.1.1&REQUEST=GetMap&LAYERS=fires_viirs_24&STYLES=&FORMAT=image/png&TRANSPARENT=true&SRS=EPSG:3857&BBOX=${bbox}&WIDTH=256&HEIGHT=256`;
+          }
+          const today = new Date().toISOString().split('T')[0];
+          return `https://maps.effis.emergency.copernicus.eu/effis?SERVICE=WMS&VERSION=1.1.1&REQUEST=GetMap&LAYERS=ecmwf007.fwi&STYLES=&FORMAT=image/png&TRANSPARENT=true&SRS=EPSG:3857&BBOX=${bbox}&WIDTH=256&HEIGHT=256&TIME=${today}`;
         },
         tileSize: new google.maps.Size(256, 256),
         opacity: layerOpacity,

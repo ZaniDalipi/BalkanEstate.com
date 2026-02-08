@@ -36,10 +36,10 @@ const ClimateRiskLegend: React.FC<ClimateRiskLegendProps> = ({ riskType }) => {
       source: 'RainViewer',
     },
     fire: {
-      label: t('search:map.climateRisks.fire', 'Active Fires (24h)'),
-      colors: ['#ffe082', '#ff9800', '#f44336', '#b71c1c'],
-      labels: ['Low', 'Med', 'High', 'Intense'],
-      source: 'EFFIS Copernicus',
+      label: t('search:map.climateRisks.fire', 'Fire Danger Index'),
+      colors: ['#008000', '#ffff00', '#ff8c00', '#ff0000', '#800000'],
+      labels: ['Low', 'Mod', 'High', 'V.High', 'Extreme'],
+      source: import.meta.env.VITE_FIRMS_MAP_KEY ? 'NASA FIRMS' : 'EFFIS Copernicus FWI',
     },
     wind: {
       label: t('search:map.climateRisks.wind', 'Wind Speed'),

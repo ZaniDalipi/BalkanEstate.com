@@ -53,13 +53,14 @@ const LEGEND_CONFIGS: Record<Exclude<ClimateRiskType, 'none'>, LayerLegendConfig
     ],
   },
   fire: {
-    legendTitle: 'Active Fires (24h)',
-    source: 'EFFIS Copernicus',
+    legendTitle: 'Fire Danger Index',
+    source: import.meta.env.VITE_FIRMS_MAP_KEY ? 'NASA FIRMS' : 'EFFIS Copernicus FWI',
     legendColors: [
-      { color: '#ffe082', label: 'Low FRP' },
-      { color: '#ff9800', label: 'Medium' },
-      { color: '#f44336', label: 'High' },
-      { color: '#b71c1c', label: 'Intense' },
+      { color: '#008000', label: 'Low' },
+      { color: '#ffff00', label: 'Moderate' },
+      { color: '#ff8c00', label: 'High' },
+      { color: '#ff0000', label: 'Very High' },
+      { color: '#800000', label: 'Extreme' },
     ],
   },
   wind: {
@@ -166,21 +167,46 @@ function useMapBounds(): MapBounds | null {
 // ---------------------------------------------------------------------------
 
 /**
- * WMS layer rendered via native Leaflet (for EFFIS Copernicus fire data)
+ * WMS layer for EFFIS Copernicus Fire Weather Index.
+ * Uses ecmwf007.fwi (today's fire danger forecast) - always has data globally.
+ * If VITE_FIRMS_MAP_KEY is set, shows active fire hotspots from NASA FIRMS instead.
  */
 const WMSFireLayer: React.FC<{ opacity: number }> = ({ opacity }) => {
   const map = useMap();
   const layerRef = useRef<L.TileLayer.WMS | null>(null);
 
   useEffect(() => {
-    const wmsLayer = L.tileLayer.wms(EFFIS_WMS_URL, {
-      layers: 'viirs.crt.firms',
-      format: 'image/png',
-      transparent: true,
-      opacity,
-      attribution: '&copy; <a href="https://effis.jrc.ec.europa.eu/">EFFIS Copernicus</a>',
-      version: '1.3.0',
-    });
+    const firmsKey = import.meta.env.VITE_FIRMS_MAP_KEY || '';
+    const today = new Date().toISOString().split('T')[0];
+
+    let wmsLayer: L.TileLayer.WMS;
+
+    if (firmsKey) {
+      // NASA FIRMS active fire hotspots (requires free MAP_KEY)
+      wmsLayer = L.tileLayer.wms(
+        `https://firms.modaps.eosdis.nasa.gov/mapserver/wms/fires/${firmsKey}/`,
+        {
+          layers: 'fires_viirs_24',
+          format: 'image/png',
+          transparent: true,
+          opacity,
+          attribution: '&copy; <a href="https://firms.modaps.eosdis.nasa.gov/">NASA FIRMS</a>',
+          version: '1.1.1',
+        }
+      );
+    } else {
+      // EFFIS Fire Weather Index (free, no key, always has data)
+      wmsLayer = L.tileLayer.wms(EFFIS_WMS_URL, {
+        layers: 'ecmwf007.fwi',
+        format: 'image/png',
+        transparent: true,
+        opacity,
+        attribution: '&copy; <a href="https://effis.jrc.ec.europa.eu/">EFFIS Copernicus</a>',
+        version: '1.1.1',
+        time: today,
+      } as any);
+    }
+
     wmsLayer.addTo(map);
     layerRef.current = wmsLayer;
 
