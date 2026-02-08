@@ -22,8 +22,8 @@ const cacheConfig: Record<string, number> = {
   '/api/agencies': 5 * 60 * 1000,
   '/api/agents': 5 * 60 * 1000,
 
-  // Property listings (2 minutes - fast refresh after changes)
-  '/api/properties': 2 * 60 * 1000,
+  // Property listings (10 seconds - mutations invalidate cache immediately)
+  '/api/properties': 10 * 1000,
 
   // Products and promotions (30 seconds - invalidated on mutations for instant updates)
   '/api/products': 30 * 1000,
@@ -192,14 +192,13 @@ export const apiCache = (req: Request, res: Response, next: NextFunction): void 
         return;
       }
 
-      // Return cached response with stale-while-revalidate
+      // Return cached response
       const maxAge = Math.floor((ttl - age) / 1000);
-      const staleWhileRevalidate = Math.floor(ttl / 1000); // Allow serving stale for same duration
 
       res.setHeader('X-Cache', 'HIT');
       res.setHeader('X-Cache-Age', Math.floor(age / 1000).toString());
       res.setHeader('ETag', cached.etag);
-      res.setHeader('Cache-Control', `public, max-age=${maxAge}, stale-while-revalidate=${staleWhileRevalidate}`);
+      res.setHeader('Cache-Control', `private, max-age=${maxAge}, must-revalidate`);
       res.setHeader('Vary', 'Authorization'); // Cache varies by auth status
       res.json(cached.data);
       return;
@@ -225,11 +224,10 @@ export const apiCache = (req: Request, res: Response, next: NextFunction): void 
       });
 
       const maxAge = Math.floor(ttl / 1000);
-      const staleWhileRevalidate = maxAge; // Allow serving stale for same duration
 
       res.setHeader('X-Cache', 'MISS');
       res.setHeader('ETag', etag);
-      res.setHeader('Cache-Control', `public, max-age=${maxAge}, stale-while-revalidate=${staleWhileRevalidate}`);
+      res.setHeader('Cache-Control', `private, max-age=${maxAge}, must-revalidate`);
       res.setHeader('Vary', 'Authorization'); // Cache varies by auth status
     }
 

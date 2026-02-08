@@ -609,9 +609,17 @@ const MyListings: React.FC<{ sellerId: string }> = ({ sellerId }) => {
 
     const confirmDelete = async () => {
         if (propertyToDelete) {
+            const deletingId = propertyToDelete;
+
+            // Optimistic: remove from UI immediately
+            dispatch({ type: 'DELETE_PROPERTY', payload: deletingId });
+            setMyProperties(prev => prev.filter(p => p.id !== deletingId));
+            setShowDeleteConfirm(false);
+            setPropertyToDelete(null);
+
+            // Then delete from backend in background
             try {
-                const result = await api.deleteProperty(propertyToDelete);
-                dispatch({ type: 'DELETE_PROPERTY', payload: propertyToDelete });
+                const result = await api.deleteProperty(deletingId);
 
                 // Update user's subscription counts if returned from backend
                 if (result.updatedSubscription) {
@@ -625,11 +633,11 @@ const MyListings: React.FC<{ sellerId: string }> = ({ sellerId }) => {
                         }
                     });
                 }
-
-                // Remove from local state
-                setMyProperties(prev => prev.filter(p => p.id !== propertyToDelete));
             } catch (error) {
+                // If backend fails, re-fetch to restore accurate state
+                fetchProperties();
             }
+            return;
         }
         setShowDeleteConfirm(false);
         setPropertyToDelete(null);
