@@ -172,7 +172,7 @@ const HighlightedPropertyCard: React.FC<HighlightedPropertyCardProps> = ({ prope
 
   return (
     <div
-      className={`group bg-white rounded-xl overflow-hidden shadow-xl ${tierStyles.border} ${tierStyles.glow} transition-all duration-500 cursor-pointer flex flex-col md:flex-row w-full ${
+      className={`group bg-white rounded-xl overflow-hidden shadow-xl ${tierStyles.border} ${tierStyles.glow} transition-all duration-500 cursor-pointer flex flex-col md:grid md:grid-cols-[40%_1fr] w-full ${
         isHovered ? 'shadow-2xl scale-[1.01]' : ''
       }`}
       onMouseEnter={() => setIsHovered(true)}
@@ -180,7 +180,7 @@ const HighlightedPropertyCard: React.FC<HighlightedPropertyCardProps> = ({ prope
       onClick={handleCardClick}
     >
       {/* Image Section - fills height of card in row layout */}
-      <div className="relative w-full md:w-[40%] min-h-48 overflow-hidden">
+      <div className="relative min-h-48 overflow-hidden">
         <div className="absolute inset-0">
           {displayImages.map((imgUrl, index) => (
             <div
