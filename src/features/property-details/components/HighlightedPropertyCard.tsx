@@ -68,6 +68,7 @@ const HighlightedPropertyCard: React.FC<HighlightedPropertyCardProps> = ({ prope
 
   const isFavorited = state.savedHomes.some(p => p.id === property.id);
   const promotionTier = property.promotionTier || 'featured';
+  const isRental = (property.listingType || 'sale') === 'rent';
 
   // Get up to 3 images from the property
   const images = property.images?.slice(0, 3) || [];
@@ -288,6 +289,7 @@ const HighlightedPropertyCard: React.FC<HighlightedPropertyCardProps> = ({ prope
         <div className="flex items-center justify-between mb-3">
           <span className="bg-gradient-to-r from-primary to-primary-dark text-white text-lg md:text-xl font-bold px-4 py-1.5 rounded-lg shadow-md">
             {formatPrice(property.price, property.country)}
+            {isRental && <span className="text-sm font-normal opacity-80">/{property.rentPeriod === 'weekly' ? t('common:wk', 'wk') : property.rentPeriod === 'daily' ? t('common:day', 'day') : t('common:mo', 'mo')}</span>}
           </span>
           <span className="bg-neutral-100 text-neutral-700 text-sm font-semibold px-3 py-1 rounded-lg">
             {propertyTypeLabel}

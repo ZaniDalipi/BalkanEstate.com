@@ -214,20 +214,32 @@ const PROPERTY_TYPE_COLORS: Record<
 
 /**
  * Format price for marker display (short format)
+ * Adds rental period suffix for rental properties
  */
-const formatMarkerPrice = (price: number): string => {
+const formatMarkerPrice = (property: Property): string => {
+  const price = property.price;
+  let formatted: string;
   if (price >= 1000000) {
     const millions = price / 1000000;
     // Use integer if it's a whole number, otherwise 1 decimal
     if (millions >= 10) {
-      return `€${Math.round(millions)}M`;
+      formatted = `€${Math.round(millions)}M`;
+    } else {
+      formatted = `€${millions.toFixed(1).replace('.0', '')}M`;
     }
-    return `€${millions.toFixed(1).replace('.0', '')}M`;
+  } else if (price >= 1000) {
+    formatted = `€${Math.round(price / 1000)}K`;
+  } else {
+    formatted = `€${price}`;
   }
-  if (price >= 1000) {
-    return `€${Math.round(price / 1000)}K`;
+
+  // Add rental period suffix
+  if ((property.listingType || 'sale') === 'rent') {
+    const suffix = property.rentPeriod === 'weekly' ? '/wk' : property.rentPeriod === 'daily' ? '/d' : '/mo';
+    formatted += suffix;
   }
-  return `€${price}`;
+
+  return formatted;
 };
 
 /**
@@ -272,7 +284,7 @@ const getPromotedMarkerInnerClass = (property: Property): string => {
  * Scales based on zoom level to avoid clutter when zoomed out
  */
 const createSimpleMarkerIcon = (property: Property, isHovered: boolean = false, isNightMode: boolean = false, zoom: number = 12) => {
-  const price = formatMarkerPrice(property.price);
+  const price = formatMarkerPrice(property);
   const color = PROPERTY_TYPE_COLORS[property.propertyType] || PROPERTY_TYPE_COLORS.other;
   const zoomScale = getMarkerScaleForZoom(zoom);
 
@@ -372,7 +384,7 @@ const lightenColor = (hex: string, percent: number): string => {
  * Supports night mode with neon glow effects
  */
 const createDetailedMarkerIcon = (property: Property, isHovered: boolean = false, isNightMode: boolean = false, zoom: number = 12) => {
-  const price = formatMarkerPrice(property.price);
+  const price = formatMarkerPrice(property);
   const color = PROPERTY_TYPE_COLORS[property.propertyType] || PROPERTY_TYPE_COLORS.other;
   const zoomScale = getMarkerScaleForZoom(zoom);
 
@@ -486,9 +498,10 @@ const PropertyPopup: React.FC<{
   property: Property;
   onPopupClick: (id: string) => void;
 }> = ({ property, onPopupClick }) => {
-  const { t } = useTranslation(['property']);
+  const { t } = useTranslation(['property', 'common']);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [imageErrors, setImageErrors] = useState<Set<number>>(new Set());
+  const isRental = (property.listingType || 'sale') === 'rent';
 
   // Check if property is actively promoted
   const isActivelyPromoted = property.isPromoted &&
@@ -626,6 +639,7 @@ const PropertyPopup: React.FC<{
                 : 'bg-gradient-to-r from-primary to-primary-dark'
             }`}>
               {formatPrice(priceInfo.currentPrice, property.country)}
+              {isRental && <span className="text-[9px] font-normal opacity-80">/{property.rentPeriod === 'weekly' ? t('common:wk', 'wk') : property.rentPeriod === 'daily' ? t('common:day', 'day') : t('common:mo', 'mo')}</span>}
             </span>
             <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded bg-neutral-100 text-neutral-600 capitalize">
               {property.propertyType}
@@ -708,6 +722,7 @@ const PropertyPopup: React.FC<{
         <div className="absolute bottom-1.5 left-1.5 z-10">
           <p className="font-bold text-white text-sm drop-shadow-lg">
             {formatPrice(priceInfo.currentPrice, property.country)}
+            {isRental && <span className="text-[10px] font-normal opacity-80">/{property.rentPeriod === 'weekly' ? t('common:wk', 'wk') : property.rentPeriod === 'daily' ? t('common:day', 'day') : t('common:mo', 'mo')}</span>}
           </p>
         </div>
       </div>
