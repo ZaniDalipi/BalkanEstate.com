@@ -384,7 +384,7 @@ export function useGoogleMap(props: GoogleMapComponentProps) {
   const getMapTypeId = useCallback((): google.maps.MapTypeId => {
     switch (mapStyle) {
       case 'satellite':
-        return google.maps.MapTypeId.SATELLITE;
+        return google.maps.MapTypeId.HYBRID;
       case 'hybrid':
         return google.maps.MapTypeId.HYBRID;
       default:
@@ -567,23 +567,21 @@ export function useGoogleMap(props: GoogleMapComponentProps) {
   useEffect(() => {
     if (!map || !isLoaded) return;
     const newMapType = getMapTypeId();
-    // Only update if map type actually changed to avoid repeated warnings
-    if (lastMapTypeRef.current !== newMapType) {
-      lastMapTypeRef.current = newMapType;
-      map.setMapTypeId(newMapType);
-    }
+    map.setMapTypeId(newMapType);
+    lastMapTypeRef.current = newMapType;
   }, [map, mapStyle, isLoaded, getMapTypeId]);
 
-  // Apply map styles when mapStyle changes (clean/color/street)
+  // Apply map styles + street view control when mapStyle changes
   useEffect(() => {
     if (!map || !isLoaded) return;
-    // Only apply styles for roadmap-based views (clean, color, street)
-    // Satellite and hybrid don't support custom styles
-    if (mapStyle === 'satellite' || mapStyle === 'hybrid') {
-      map.setOptions({ styles: [] });
-    } else {
-      map.setOptions({ styles: getMapStyles() });
-    }
+    const isSatellite = mapStyle === 'satellite' || mapStyle === 'hybrid';
+    const isStreet = mapStyle === 'street';
+
+    map.setOptions({
+      styles: isSatellite ? [] : getMapStyles(),
+      // Enable StreetView pegman in Street mode so users can see neighborhoods
+      streetViewControl: isStreet,
+    });
   }, [map, mapStyle, isLoaded, getMapStyles, showLandmarks]);
 
   // Handle 3D buildings toggle - tilt the map for 3D view

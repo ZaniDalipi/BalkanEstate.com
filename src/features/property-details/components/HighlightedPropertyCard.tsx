@@ -179,8 +179,8 @@ const HighlightedPropertyCard: React.FC<HighlightedPropertyCardProps> = ({ prope
       onMouseLeave={() => setIsHovered(false)}
       onClick={handleCardClick}
     >
-      {/* Image Section - fixed aspect ratio */}
-      <div className="relative w-full md:w-[40%] h-44 md:h-auto overflow-hidden">
+      {/* Image Section - fills height of card in row layout */}
+      <div className="relative w-full md:w-[40%] aspect-[4/3] md:aspect-auto overflow-hidden">
         <div className="absolute inset-0">
           {displayImages.map((imgUrl, index) => (
             <div
