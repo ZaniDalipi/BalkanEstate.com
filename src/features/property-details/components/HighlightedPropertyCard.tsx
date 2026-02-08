@@ -195,16 +195,26 @@ const HighlightedPropertyCard: React.FC<HighlightedPropertyCardProps> = ({ prope
                   <BuildingOfficeIcon className="w-12 h-12 text-neutral-400" />
                 </div>
               ) : (
-                <img
-                  src={imgUrl}
-                  alt={`${property.title || propertyTypeLabel} - Image ${index + 1}`}
-                  loading={index === 0 ? 'eager' : 'lazy'}
-                  decoding="async"
-                  className={`w-full h-full object-cover transition-transform duration-700 ${
-                    isHovered ? 'scale-105' : 'scale-100'
-                  }`}
-                  onError={() => handleImageError(index)}
-                />
+                <>
+                  {/* Blurred background layer */}
+                  <img
+                    src={imgUrl}
+                    alt=""
+                    aria-hidden="true"
+                    className="absolute inset-0 w-full h-full object-cover blur-2xl scale-125 brightness-75"
+                  />
+                  {/* Main image - centered vertically */}
+                  <img
+                    src={imgUrl}
+                    alt={`${property.title || propertyTypeLabel} - Image ${index + 1}`}
+                    loading={index === 0 ? 'eager' : 'lazy'}
+                    decoding="async"
+                    className={`relative w-full h-full object-contain transition-transform duration-700 ${
+                      isHovered ? 'scale-105' : 'scale-100'
+                    }`}
+                    onError={() => handleImageError(index)}
+                  />
+                </>
               )}
             </div>
           ))}
