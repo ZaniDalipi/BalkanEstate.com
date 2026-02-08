@@ -12,6 +12,7 @@ import ImageViewerModal from './ImageViewerModal';
 import FloorPlanViewerModal from './FloorPlanViewerModal';
 import FeaturedAgencies from '@/components/FeaturedAgencies';
 import RentalTermsSection from '@/src/features/rental/components/RentalTermsSection';
+import RentalHistorySection from '@/src/features/rental/components/RentalHistorySection';
 import RentalRulesByCountry from '@/src/features/rental/components/RentalRulesByCountry';
 import { SEO, Breadcrumbs, generatePropertyBreadcrumbs } from '@/src/components/seo';
 import { SocialShare } from '@/src/components/marketing/SocialShare';
@@ -767,6 +768,7 @@ const PropertyDetailsPage: React.FC<{ property: Property }> = ({ property: cache
             {property.listingType === 'rent' && (
               <div className="animate-slide-up space-y-6" style={{ animationDelay: '150ms' }}>
                 <RentalTermsSection property={property} />
+                <RentalHistorySection property={property} isOwner={isOwner} />
                 <RentalRulesByCountry country={property.country} />
               </div>
             )}

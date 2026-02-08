@@ -241,6 +241,28 @@
       }
     }
   },
+  "history": {
+    "title": "Povijest najma",
+    "addEntry": "Dodaj unos",
+    "addPastRental": "Dodaj prethodno razdoblje najma",
+    "startDate": "Datum početka",
+    "endDate": "Datum završetka",
+    "monthlyRent": "Mjesečna najamnina",
+    "tenantName": "Ime najmoprimca",
+    "notes": "Bilješke",
+    "optional": "Neobavezno",
+    "save": "Spremi",
+    "noHistory": "Nema povijesti najma",
+    "noHistoryHint": "Povijest se automatski bilježi kada označite nekretninu kao dostupnu. Možete i ručno dodati unose.",
+    "totalIncome": "Ukupan prihod",
+    "totalPeriods": "Razdoblja najma",
+    "avgMonthlyRent": "Prosječna mjesečna najamnina",
+    "current": "Trenutno",
+    "ongoing": "U tijeku",
+    "days": "{{count}} dana",
+    "months": "{{count}} mjeseci",
+    "mo": "mj"
+  },
   "dashboard": {
     "title": "Portfelj najma",
     "monthlyIncome": "Mjesecni prihod",

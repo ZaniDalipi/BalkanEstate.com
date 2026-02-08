@@ -14,6 +14,15 @@ export interface IPriceInterval {
   label?: string; // Optional label like "Summer Sale", "Holiday Special"
 }
 
+// Rental history entry for tracking past rental periods
+export interface IRentalHistoryEntry {
+  startDate: Date;
+  endDate: Date;
+  monthlyRent: number; // Normalized to monthly equivalent
+  tenantName?: string;
+  notes?: string;
+}
+
 export interface IProperty extends Document {
   sellerId: mongoose.Types.ObjectId;
   createdByName: string; // Name of the user who created this listing
@@ -104,6 +113,7 @@ export interface IProperty extends Document {
   maxOccupants?: number; // Maximum number of occupants allowed
   rentedAt?: Date; // When the property was rented
   rentedUntil?: Date; // When the rental period ends
+  rentalHistory?: IRentalHistoryEntry[]; // Past rental periods for income tracking
   createdAt: Date;
   updatedAt: Date;
 }
@@ -475,6 +485,15 @@ const PropertySchema: Schema = new Schema(
     rentedUntil: {
       type: Date,
     },
+    rentalHistory: [
+      {
+        startDate: { type: Date, required: true },
+        endDate: { type: Date, required: true },
+        monthlyRent: { type: Number, required: true, min: 0 },
+        tenantName: { type: String },
+        notes: { type: String },
+      },
+    ],
   },
   {
     timestamps: true,

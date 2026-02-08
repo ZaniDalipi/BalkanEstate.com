@@ -595,6 +595,26 @@ export const markPropertyAsAvailable = async (propertyId: string): Promise<Prope
   return transformBackendProperty(response.property);
 };
 
+export const addRentalHistoryEntry = async (
+  propertyId: string,
+  entry: { startDate: string; endDate: string; monthlyRent: number; tenantName?: string; notes?: string }
+): Promise<Property> => {
+  const response = await apiRequest<{ property: any }>(`/properties/${propertyId}/rental-history`, {
+    method: 'POST',
+    requiresAuth: true,
+    body: entry,
+  });
+  return transformBackendProperty(response.property);
+};
+
+export const deleteRentalHistoryEntry = async (propertyId: string, entryId: string): Promise<Property> => {
+  const response = await apiRequest<{ property: any }>(`/properties/${propertyId}/rental-history/${entryId}`, {
+    method: 'DELETE',
+    requiresAuth: true,
+  });
+  return transformBackendProperty(response.property);
+};
+
 export const getMyListings = async (role?: 'agent' | 'private_seller'): Promise<Property[]> => {
   // Build URL with optional role filter
   const url = role

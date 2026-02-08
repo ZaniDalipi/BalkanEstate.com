@@ -241,6 +241,28 @@
       }
     }
   },
+  "history": {
+    "title": "Historiku i Qirasë",
+    "addEntry": "Shto Hyrje",
+    "addPastRental": "Shto Periudhë të Kaluar Qiraje",
+    "startDate": "Data e Fillimit",
+    "endDate": "Data e Përfundimit",
+    "monthlyRent": "Qiraja Mujore",
+    "tenantName": "Emri i Qiramarrësit",
+    "notes": "Shënime",
+    "optional": "Opsionale",
+    "save": "Ruaj",
+    "noHistory": "Nuk ka histori qiraje",
+    "noHistoryHint": "Historiku regjistrohet automatikisht kur e shënoni pronën si të disponueshme. Mund të shtoni hyrje manualisht.",
+    "totalIncome": "Të Ardhurat Totale",
+    "totalPeriods": "Periudhat e Qirasë",
+    "avgMonthlyRent": "Qiraja Mesatare",
+    "current": "Aktuale",
+    "ongoing": "Në vazhdim",
+    "days": "{{count}} ditë",
+    "months": "{{count}} muaj",
+    "mo": "muaj"
+  },
   "dashboard": {
     "title": "Portofoli i Qirase",
     "monthlyIncome": "Te ardhurat Mujore",

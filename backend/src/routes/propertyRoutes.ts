@@ -11,6 +11,8 @@ import {
   markAsRented,
   markAsAvailable,
   renewProperty,
+  addRentalHistoryEntry,
+  deleteRentalHistoryEntry,
 } from '../controllers/propertyController';
 import { protect } from '../middleware/auth';
 import { upload } from '../utils/upload';
@@ -191,5 +193,7 @@ router.patch('/:id/mark-sold', protect, sensitiveRateLimiter, markAsSold);
 router.patch('/:id/mark-rented', protect, sensitiveRateLimiter, markAsRented);
 router.patch('/:id/mark-available', protect, sensitiveRateLimiter, markAsAvailable);
 router.patch('/:id/renew', protect, sensitiveRateLimiter, renewProperty);
+router.post('/:id/rental-history', protect, sensitiveRateLimiter, addRentalHistoryEntry);
+router.delete('/:id/rental-history/:entryId', protect, sensitiveRateLimiter, deleteRentalHistoryEntry);
 
 export default router;

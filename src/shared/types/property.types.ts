@@ -37,6 +37,15 @@ export interface PriceInterval {
   label?: string; // Optional label like "Summer Sale", "Holiday Special"
 }
 
+export interface RentalHistoryEntry {
+  _id: string;
+  startDate: number; // Unix timestamp
+  endDate: number; // Unix timestamp
+  monthlyRent: number;
+  tenantName?: string;
+  notes?: string;
+}
+
 export interface Property {
   id: string;
   title?: string;
@@ -123,6 +132,7 @@ export interface Property {
   maxOccupants?: number;
   rentedAt?: number;
   rentedUntil?: number;
+  rentalHistory?: RentalHistoryEntry[];
 }
 
 export type SellerType = 'any' | 'agent' | 'private';

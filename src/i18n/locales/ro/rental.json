@@ -241,6 +241,28 @@
       }
     }
   },
+  "history": {
+    "title": "Istoric Închirieri",
+    "addEntry": "Adaugă înregistrare",
+    "addPastRental": "Adaugă perioadă anterioară de închiriere",
+    "startDate": "Data de început",
+    "endDate": "Data de sfârșit",
+    "monthlyRent": "Chirie lunară",
+    "tenantName": "Numele chiriașului",
+    "notes": "Note",
+    "optional": "Opțional",
+    "save": "Salvează",
+    "noHistory": "Nu există istoric de închirieri",
+    "noHistoryHint": "Istoricul se înregistrează automat când marcați proprietatea ca disponibilă. Puteți adăuga și înregistrări manual.",
+    "totalIncome": "Venit total",
+    "totalPeriods": "Perioade de închiriere",
+    "avgMonthlyRent": "Chirie medie lunară",
+    "current": "Curentă",
+    "ongoing": "În desfășurare",
+    "days": "{{count}} zile",
+    "months": "{{count}} luni",
+    "mo": "lună"
+  },
   "dashboard": {
     "title": "Portofoliu de Închirieri",
     "monthlyIncome": "Venit Lunar",

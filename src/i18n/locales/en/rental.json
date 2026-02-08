@@ -241,6 +241,28 @@
       }
     }
   },
+  "history": {
+    "title": "Rental History",
+    "addEntry": "Add Entry",
+    "addPastRental": "Add Past Rental Period",
+    "startDate": "Start Date",
+    "endDate": "End Date",
+    "monthlyRent": "Monthly Rent",
+    "tenantName": "Tenant Name",
+    "notes": "Notes",
+    "optional": "Optional",
+    "save": "Save",
+    "noHistory": "No rental history yet",
+    "noHistoryHint": "History is recorded automatically when you mark a property as available. You can also add past entries manually.",
+    "totalIncome": "Total Income",
+    "totalPeriods": "Rental Periods",
+    "avgMonthlyRent": "Avg. Monthly Rent",
+    "current": "Current",
+    "ongoing": "Ongoing",
+    "days": "{{count}} days",
+    "months": "{{count}} months",
+    "mo": "mo"
+  },
   "dashboard": {
     "title": "Rental Portfolio",
     "monthlyIncome": "Monthly Income",

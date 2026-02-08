@@ -1256,6 +1256,28 @@ export const markAsAvailable = async (
       await user.save();
     }
 
+    // Save current rental period to history before clearing
+    if (property.rentedAt) {
+      const endDate = new Date();
+      // Calculate monthly rent equivalent for history
+      let monthlyRent = property.price;
+      if (property.rentPeriod === 'weekly') monthlyRent = property.price * 4.33;
+      else if (property.rentPeriod === 'daily') monthlyRent = property.price * 30;
+
+      await Property.updateOne(
+        { _id: property._id },
+        {
+          $push: {
+            rentalHistory: {
+              startDate: property.rentedAt,
+              endDate,
+              monthlyRent,
+            },
+          },
+        }
+      );
+    }
+
     // Set availableFrom
     const newAvailableFrom = req.body?.availableFrom ? new Date(req.body.availableFrom) : new Date();
 
@@ -1284,6 +1306,100 @@ export const markAsAvailable = async (
   } catch (error: any) {
     propertyLogger.error('Mark as available error:', error);
     res.status(500).json({ message: 'Error marking property as available', error: error.message });
+  }
+};
+
+// @desc    Add a rental history entry manually
+// @route   POST /api/properties/:id/rental-history
+// @access  Private (owner only)
+export const addRentalHistoryEntry = async (
+  req: Request,
+  res: Response
+): Promise<void> => {
+  try {
+    if (!req.user) {
+      res.status(401).json({ message: 'Not authorized' });
+      return;
+    }
+
+    const property = await Property.findById(req.params.id);
+    if (!property) {
+      res.status(404).json({ message: 'Property not found' });
+      return;
+    }
+
+    const currentUser = req.user as IUser;
+    if (property.sellerId.toString() !== String(currentUser._id).toString()) {
+      res.status(403).json({ message: 'Not authorized to update this property' });
+      return;
+    }
+
+    const { startDate, endDate, monthlyRent, tenantName, notes } = req.body;
+    if (!startDate || !endDate || monthlyRent === undefined) {
+      res.status(400).json({ message: 'startDate, endDate, and monthlyRent are required' });
+      return;
+    }
+
+    const entry = {
+      startDate: new Date(startDate),
+      endDate: new Date(endDate),
+      monthlyRent: Number(monthlyRent),
+      tenantName: tenantName || undefined,
+      notes: notes || undefined,
+    };
+
+    await Property.updateOne(
+      { _id: property._id },
+      { $push: { rentalHistory: entry } }
+    );
+
+    const updatedProperty = await Property.findById(property._id);
+    invalidateCache('/api/properties');
+
+    res.json({ property: updatedProperty });
+  } catch (error: any) {
+    propertyLogger.error('Add rental history error:', error);
+    res.status(500).json({ message: 'Error adding rental history entry', error: error.message });
+  }
+};
+
+// @desc    Delete a rental history entry
+// @route   DELETE /api/properties/:id/rental-history/:entryId
+// @access  Private (owner only)
+export const deleteRentalHistoryEntry = async (
+  req: Request,
+  res: Response
+): Promise<void> => {
+  try {
+    if (!req.user) {
+      res.status(401).json({ message: 'Not authorized' });
+      return;
+    }
+
+    const property = await Property.findById(req.params.id);
+    if (!property) {
+      res.status(404).json({ message: 'Property not found' });
+      return;
+    }
+
+    const currentUser = req.user as IUser;
+    if (property.sellerId.toString() !== String(currentUser._id).toString()) {
+      res.status(403).json({ message: 'Not authorized to update this property' });
+      return;
+    }
+
+    await Property.updateOne(
+      { _id: property._id },
+      { $pull: { rentalHistory: { _id: req.params.entryId } } }
+    );
+
+    const updatedProperty = await Property.findById(property._id);
+    invalidateCache('/api/properties');
+
+    res.json({ property: updatedProperty });
+  } catch (error: any) {
+    propertyLogger.error('Delete rental history error:', error);
+    res.status(500).json({ message: 'Error deleting rental history entry', error: error.message });
   }
 };
 
