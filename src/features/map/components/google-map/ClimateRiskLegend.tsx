@@ -20,7 +20,6 @@ interface RiskConfig {
   colors: string[];
   labels: string[];
   source: string;
-  needsApiKey?: boolean;
 }
 
 const ClimateRiskLegend: React.FC<ClimateRiskLegendProps> = ({ riskType }) => {
@@ -40,14 +39,13 @@ const ClimateRiskLegend: React.FC<ClimateRiskLegendProps> = ({ riskType }) => {
       label: t('search:map.climateRisks.fire', 'Active Fires (24h)'),
       colors: ['#ffe082', '#ff9800', '#f44336', '#b71c1c'],
       labels: ['Low', 'Med', 'High', 'Intense'],
-      source: 'NASA FIRMS',
+      source: 'EFFIS Copernicus',
     },
     wind: {
       label: t('search:map.climateRisks.wind', 'Wind Speed'),
       colors: ['#e8f4f8', '#a6d9e8', '#5ab4cf', '#1a8ab7'],
       labels: ['Calm', 'Light', 'Mod', 'Strong'],
-      source: 'OpenWeatherMap',
-      needsApiKey: !OWM_API_KEY,
+      source: OWM_API_KEY ? 'OpenWeatherMap' : 'Open-Meteo',
     },
     air: {
       label: t('search:map.climateRisks.air', 'Air Quality (EPA AQI)'),
@@ -59,8 +57,7 @@ const ClimateRiskLegend: React.FC<ClimateRiskLegendProps> = ({ riskType }) => {
       label: t('search:map.climateRisks.heat', 'Temperature'),
       colors: ['#313695', '#74add1', '#fee090', '#f46d43', '#a50026'],
       labels: ['Cold', 'Cool', 'Warm', 'Hot', 'Extreme'],
-      source: 'OpenWeatherMap',
-      needsApiKey: !OWM_API_KEY,
+      source: OWM_API_KEY ? 'OpenWeatherMap' : 'Open-Meteo',
     },
   };
 
@@ -80,9 +77,6 @@ const ClimateRiskLegend: React.FC<ClimateRiskLegendProps> = ({ riskType }) => {
           </div>
         ))}
       </div>
-      {config.needsApiKey && (
-        <p className="text-[9px] text-amber-600 mt-1.5">Set VITE_OWM_API_KEY in .env</p>
-      )}
       <p className="text-[8px] text-gray-400 mt-1">{config.source}</p>
     </div>
   );

@@ -33,6 +33,7 @@ import {
   type LocalMeasurement,
 } from '../hooks';
 import { useRainViewer } from '../hooks/useRainViewer';
+import { useOpenMeteoGrid, type MapBounds } from '../hooks/useOpenMeteoGrid';
 import {
   MapStyleType,
   ClimateRiskType,
@@ -165,6 +166,20 @@ export function useGoogleMap(props: GoogleMapComponentProps) {
 
   // RainViewer precipitation radar (free, no API key) - for flood layer
   const { tileUrl: rainViewerTileUrl } = useRainViewer(selectedClimateRisk === 'flood');
+
+  // Google Maps bounds tracking for Open-Meteo weather grid
+  const [gmapBounds, setGmapBounds] = useState<MapBounds | null>(null);
+  const openMeteoOverlayRef = useRef<google.maps.OverlayView | null>(null);
+
+  // Open-Meteo: free weather data fallback when no OWM API key
+  const owmKeyAvailable = !!(import.meta.env.VITE_OWM_API_KEY);
+  const needsOpenMeteoWind = selectedClimateRisk === 'wind' && !owmKeyAvailable;
+  const needsOpenMeteoHeat = selectedClimateRisk === 'heat' && !owmKeyAvailable;
+  const openMeteoDataType = needsOpenMeteoWind ? 'wind' as const : needsOpenMeteoHeat ? 'temperature' as const : null;
+  const { data: openMeteoData } = useOpenMeteoGrid(
+    openMeteoDataType ? gmapBounds : null,
+    openMeteoDataType,
+  );
 
   // Filter valid properties (optionally only promoted)
   const validProperties = useMemo(() => {
@@ -1291,10 +1306,10 @@ export function useGoogleMap(props: GoogleMapComponentProps) {
   // Climate risk layer overlay effect
   // Data sources:
   //   - Flood: RainViewer precipitation radar (free, no API key)
-  //   - Fire:  NASA FIRMS VIIRS via WMS (free, public MAP_KEY)
-  //   - Wind:  OpenWeatherMap wind (VITE_OWM_API_KEY required)
+  //   - Fire:  EFFIS Copernicus VIIRS fires via WMS (free, no API key)
+  //   - Wind:  OWM tiles if key set, else Open-Meteo canvas overlay (free)
   //   - Air:   AQICN EPA AQI tiles (free, no API key)
-  //   - Heat:  OpenWeatherMap temperature (VITE_OWM_API_KEY required)
+  //   - Heat:  OWM tiles if key set, else Open-Meteo canvas overlay (free)
   useEffect(() => {
     if (!map || !isLoaded) return;
 
@@ -1328,14 +1343,14 @@ export function useGoogleMap(props: GoogleMapComponentProps) {
       case 'fire':
         isWms = true;
         layerOpacity = 0.7;
-        layerName = 'Active Fires 24h (NASA FIRMS)';
+        layerName = 'Active Fires 24h (EFFIS Copernicus)';
         break;
       case 'wind':
         if (owmKey) {
           tileUrl = `https://tile.openweathermap.org/map/wind_new/{z}/{x}/{y}.png?appid=${owmKey}`;
         }
         layerOpacity = 0.5;
-        layerName = 'Wind Speed (OWM)';
+        layerName = 'Wind Speed';
         break;
       case 'air':
         tileUrl = 'https://tiles.aqicn.org/tiles/usepa-aqi/{z}/{x}/{y}.png';
@@ -1347,7 +1362,7 @@ export function useGoogleMap(props: GoogleMapComponentProps) {
           tileUrl = `https://tile.openweathermap.org/map/temp_new/{z}/{x}/{y}.png?appid=${owmKey}`;
         }
         layerOpacity = 0.5;
-        layerName = 'Temperature (OWM)';
+        layerName = 'Temperature';
         break;
     }
 
@@ -1357,7 +1372,7 @@ export function useGoogleMap(props: GoogleMapComponentProps) {
     let climateLayer: google.maps.ImageMapType;
 
     if (isWms) {
-      // NASA FIRMS WMS - compute bounding box per tile
+      // EFFIS Copernicus WMS - compute bounding box per tile
       climateLayer = new google.maps.ImageMapType({
         getTileUrl: (coord, zoom) => {
           const proj = map.getProjection();
@@ -1379,7 +1394,7 @@ export function useGoogleMap(props: GoogleMapComponentProps) {
           const neMerc = latLngToWebMercator(ne.lat(), ne.lng());
           const bbox = `${swMerc.x},${swMerc.y},${neMerc.x},${neMerc.y}`;
 
-          return `https://firms.modaps.eosdis.nasa.gov/mapserver/wms/fires/51e65c3412f9d1b15eddb27ab9c3b28c/?SERVICE=WMS&VERSION=1.1.1&REQUEST=GetMap&LAYERS=fires_viirs_24&STYLES=&FORMAT=image/png&TRANSPARENT=true&SRS=EPSG:3857&BBOX=${bbox}&WIDTH=256&HEIGHT=256`;
+          return `https://maps.effis.emergency.copernicus.eu/effis?SERVICE=WMS&VERSION=1.3.0&REQUEST=GetMap&LAYERS=viirs.crt.firms&STYLES=&FORMAT=image/png&TRANSPARENT=true&CRS=EPSG:3857&BBOX=${bbox}&WIDTH=256&HEIGHT=256`;
         },
         tileSize: new google.maps.Size(256, 256),
         opacity: layerOpacity,
@@ -1415,6 +1430,198 @@ export function useGoogleMap(props: GoogleMapComponentProps) {
       }
     };
   }, [map, isLoaded, selectedClimateRisk, rainViewerTileUrl]);
+
+  // Track Google Maps bounds for Open-Meteo grid data fetching
+  useEffect(() => {
+    if (!map || !isLoaded) return;
+    const update = () => {
+      const b = map.getBounds();
+      if (!b) return;
+      setGmapBounds({
+        north: b.getNorthEast().lat(),
+        south: b.getSouthWest().lat(),
+        east: b.getNorthEast().lng(),
+        west: b.getSouthWest().lng(),
+      });
+    };
+    update();
+    const listener = map.addListener('idle', update);
+    return () => { google.maps.event.removeListener(listener); };
+  }, [map, isLoaded]);
+
+  // Open-Meteo canvas overlay for wind/heat on Google Maps (fallback when no OWM key)
+  useEffect(() => {
+    if (!map || !isLoaded) return;
+
+    // Remove previous overlay
+    if (openMeteoOverlayRef.current) {
+      openMeteoOverlayRef.current.setMap(null);
+      openMeteoOverlayRef.current = null;
+    }
+
+    if (!openMeteoData.length || !openMeteoDataType) return;
+
+    // Create a custom OverlayView that draws on a canvas
+    class OpenMeteoOverlay extends google.maps.OverlayView {
+      private div: HTMLDivElement | null = null;
+      private canvas: HTMLCanvasElement | null = null;
+
+      onAdd() {
+        this.div = document.createElement('div');
+        this.div.style.position = 'absolute';
+        this.div.style.pointerEvents = 'none';
+        this.canvas = document.createElement('canvas');
+        this.div.appendChild(this.canvas);
+        this.getPanes()?.overlayLayer.appendChild(this.div);
+      }
+
+      draw() {
+        if (!this.canvas || !this.div) return;
+        const projection = this.getProjection();
+        if (!projection) return;
+
+        const bounds = map.getBounds();
+        if (!bounds) return;
+
+        const sw = projection.fromLatLngToDivPixel(bounds.getSouthWest());
+        const ne = projection.fromLatLngToDivPixel(bounds.getNorthEast());
+        if (!sw || !ne) return;
+
+        const width = ne.x - sw.x;
+        const height = sw.y - ne.y;
+
+        this.div.style.left = sw.x + 'px';
+        this.div.style.top = ne.y + 'px';
+        this.div.style.width = width + 'px';
+        this.div.style.height = height + 'px';
+
+        this.canvas.width = width;
+        this.canvas.height = height;
+
+        const ctx = this.canvas.getContext('2d');
+        if (!ctx) return;
+        ctx.clearRect(0, 0, width, height);
+
+        if (openMeteoDataType === 'temperature') {
+          this.drawTemperature(ctx, projection, sw, ne, width, height);
+        } else {
+          this.drawWind(ctx, projection, sw, ne, width, height);
+        }
+      }
+
+      private drawTemperature(
+        ctx: CanvasRenderingContext2D,
+        projection: google.maps.MapCanvasProjection,
+        sw: google.maps.Point,
+        _ne: google.maps.Point,
+        _w: number,
+        _h: number,
+      ) {
+        openMeteoData.forEach(point => {
+          if (point.temperature == null) return;
+          const pos = projection.fromLatLngToDivPixel(
+            new google.maps.LatLng(point.lat, point.lng)
+          );
+          if (!pos) return;
+
+          const x = pos.x - sw.x;
+          const y = pos.y - sw.y + (_h - (sw.y - _ne.y)); // correct for offset
+          const px = pos.x - sw.x;
+          const py = pos.y - _ne.y; // relative to top-left
+
+          // Temperature to color: -20°C → blue, 0 → cyan, 15 → yellow, 30 → red, 45 → dark red
+          const t = point.temperature;
+          let r: number, g: number, b: number;
+          if (t <= -10) { r = 49; g = 54; b = 149; }       // deep blue
+          else if (t <= 0) { r = 69; g = 117; b = 180; }    // blue
+          else if (t <= 10) { r = 116; g = 173; b = 209; }  // light blue
+          else if (t <= 18) { r = 254; g = 224; b = 144; }  // yellow
+          else if (t <= 28) { r = 244; g = 109; b = 67; }   // orange
+          else if (t <= 36) { r = 215; g = 48; b = 39; }    // red
+          else { r = 165; g = 0; b = 38; }                  // dark red
+
+          const radius = 50;
+          const gradient = ctx.createRadialGradient(px, py, 0, px, py, radius);
+          gradient.addColorStop(0, `rgba(${r},${g},${b},0.55)`);
+          gradient.addColorStop(1, `rgba(${r},${g},${b},0)`);
+          ctx.fillStyle = gradient;
+          ctx.fillRect(px - radius, py - radius, radius * 2, radius * 2);
+        });
+      }
+
+      private drawWind(
+        ctx: CanvasRenderingContext2D,
+        projection: google.maps.MapCanvasProjection,
+        sw: google.maps.Point,
+        _ne: google.maps.Point,
+        _w: number,
+        _h: number,
+      ) {
+        openMeteoData.forEach(point => {
+          if (point.windSpeed == null || point.windDirection == null) return;
+          const pos = projection.fromLatLngToDivPixel(
+            new google.maps.LatLng(point.lat, point.lng)
+          );
+          if (!pos) return;
+
+          const px = pos.x - sw.x;
+          const py = pos.y - _ne.y;
+          const speed = point.windSpeed;
+          const dir = (point.windDirection * Math.PI) / 180; // to radians
+
+          // Color by speed
+          let color: string;
+          if (speed < 5) color = '#b3e0ff';
+          else if (speed < 15) color = '#66c2ff';
+          else if (speed < 30) color = '#3399ff';
+          else if (speed < 50) color = '#0066cc';
+          else color = '#003366';
+
+          // Arrow size scales with speed
+          const arrowLen = Math.min(22, Math.max(10, 8 + speed * 0.3));
+
+          ctx.save();
+          ctx.translate(px, py);
+          ctx.rotate(dir);
+
+          // Draw arrow
+          ctx.beginPath();
+          ctx.moveTo(0, -arrowLen);
+          ctx.lineTo(-arrowLen * 0.35, arrowLen * 0.4);
+          ctx.lineTo(0, arrowLen * 0.15);
+          ctx.lineTo(arrowLen * 0.35, arrowLen * 0.4);
+          ctx.closePath();
+          ctx.fillStyle = color;
+          ctx.globalAlpha = 0.8;
+          ctx.fill();
+          ctx.strokeStyle = 'rgba(255,255,255,0.6)';
+          ctx.lineWidth = 0.8;
+          ctx.stroke();
+
+          ctx.restore();
+        });
+      }
+
+      onRemove() {
+        if (this.div) {
+          this.div.parentNode?.removeChild(this.div);
+          this.div = null;
+          this.canvas = null;
+        }
+      }
+    }
+
+    const overlay = new OpenMeteoOverlay();
+    overlay.setMap(map);
+    openMeteoOverlayRef.current = overlay;
+
+    return () => {
+      if (openMeteoOverlayRef.current) {
+        openMeteoOverlayRef.current.setMap(null);
+        openMeteoOverlayRef.current = null;
+      }
+    };
+  }, [map, isLoaded, openMeteoData, openMeteoDataType]);
 
   // Memoize map options - MUST be before any early returns to maintain hooks order
   // Check if google is defined before accessing google.maps

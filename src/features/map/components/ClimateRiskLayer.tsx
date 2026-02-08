@@ -3,16 +3,18 @@
  *
  * Displays climate risk overlays on the Leaflet map using free, working data sources:
  *   - Flood: RainViewer precipitation radar (free, no API key)
- *   - Fire:  NASA FIRMS VIIRS active fire detections via WMS (free, public MAP_KEY)
- *   - Wind:  OpenWeatherMap wind speed (free tier, VITE_OWM_API_KEY required)
+ *   - Fire:  EFFIS Copernicus VIIRS active fire detections via WMS (free, no API key)
+ *   - Wind:  OWM tiles if key set, otherwise Open-Meteo grid (free, no API key)
  *   - Air:   AQICN EPA air quality index tiles (free, no API key)
- *   - Heat:  OpenWeatherMap temperature (free tier, VITE_OWM_API_KEY required)
+ *   - Heat:  OWM tiles if key set, otherwise Open-Meteo grid via leaflet.heat (free)
  */
 
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState, useMemo } from 'react';
 import { TileLayer, useMap } from 'react-leaflet';
 import L from 'leaflet';
+import 'leaflet.heat';
 import { useRainViewer } from '../hooks/useRainViewer';
+import { useOpenMeteoGrid, type MapBounds } from '../hooks/useOpenMeteoGrid';
 
 export type ClimateRiskType = 'none' | 'flood' | 'fire' | 'wind' | 'air' | 'heat';
 
@@ -24,9 +26,8 @@ interface ClimateRiskLayerProps {
 // OpenWeatherMap API key from environment
 const OWM_API_KEY = import.meta.env.VITE_OWM_API_KEY || '';
 
-// NASA FIRMS WMS endpoint (public MAP_KEY for tile access)
-const FIRMS_WMS_URL =
-  'https://firms.modaps.eosdis.nasa.gov/mapserver/wms/fires/51e65c3412f9d1b15eddb27ab9c3b28c/';
+// EFFIS Copernicus WMS endpoint (free, no API key needed, global fire data)
+const EFFIS_WMS_URL = 'https://maps.effis.emergency.copernicus.eu/effis';
 
 interface LegendItem {
   color: string;
@@ -37,7 +38,6 @@ interface LayerLegendConfig {
   legendTitle: string;
   legendColors: LegendItem[];
   source: string;
-  needsApiKey?: boolean;
 }
 
 // Legend configurations for each layer type
@@ -54,7 +54,7 @@ const LEGEND_CONFIGS: Record<Exclude<ClimateRiskType, 'none'>, LayerLegendConfig
   },
   fire: {
     legendTitle: 'Active Fires (24h)',
-    source: 'NASA FIRMS',
+    source: 'EFFIS Copernicus',
     legendColors: [
       { color: '#ffe082', label: 'Low FRP' },
       { color: '#ff9800', label: 'Medium' },
@@ -64,8 +64,7 @@ const LEGEND_CONFIGS: Record<Exclude<ClimateRiskType, 'none'>, LayerLegendConfig
   },
   wind: {
     legendTitle: 'Wind Speed',
-    source: 'OpenWeatherMap',
-    needsApiKey: !OWM_API_KEY,
+    source: OWM_API_KEY ? 'OpenWeatherMap' : 'Open-Meteo',
     legendColors: [
       { color: '#e8f4f8', label: 'Calm' },
       { color: '#a6d9e8', label: 'Light' },
@@ -86,8 +85,7 @@ const LEGEND_CONFIGS: Record<Exclude<ClimateRiskType, 'none'>, LayerLegendConfig
   },
   heat: {
     legendTitle: 'Temperature',
-    source: 'OpenWeatherMap',
-    needsApiKey: !OWM_API_KEY,
+    source: OWM_API_KEY ? 'OpenWeatherMap' : 'Open-Meteo',
     legendColors: [
       { color: '#313695', label: 'Cold' },
       { color: '#74add1', label: 'Cool' },
@@ -133,29 +131,55 @@ export const ClimateRiskLegend: React.FC<{
           ))}
         </div>
       </div>
-      {config.needsApiKey && (
-        <span className="text-[7px] text-amber-600 mt-0.5">Set VITE_OWM_API_KEY in .env</span>
-      )}
       <span className="text-[6px] text-gray-400">{config.source}</span>
     </div>
   );
 };
 
+// ---------------------------------------------------------------------------
+// Helper: extract current Leaflet map bounds as MapBounds
+// ---------------------------------------------------------------------------
+function useMapBounds(): MapBounds | null {
+  const map = useMap();
+  const [bounds, setBounds] = useState<MapBounds | null>(null);
+
+  useEffect(() => {
+    const update = () => {
+      const b = map.getBounds();
+      setBounds({
+        north: b.getNorth(),
+        south: b.getSouth(),
+        east: b.getEast(),
+        west: b.getWest(),
+      });
+    };
+    update();
+    map.on('moveend', update);
+    return () => { map.off('moveend', update); };
+  }, [map]);
+
+  return bounds;
+}
+
+// ---------------------------------------------------------------------------
+// Layer sub-components
+// ---------------------------------------------------------------------------
+
 /**
- * WMS layer rendered via native Leaflet (for NASA FIRMS fire data)
+ * WMS layer rendered via native Leaflet (for EFFIS Copernicus fire data)
  */
 const WMSFireLayer: React.FC<{ opacity: number }> = ({ opacity }) => {
   const map = useMap();
   const layerRef = useRef<L.TileLayer.WMS | null>(null);
 
   useEffect(() => {
-    const wmsLayer = L.tileLayer.wms(FIRMS_WMS_URL, {
-      layers: 'fires_viirs_24',
+    const wmsLayer = L.tileLayer.wms(EFFIS_WMS_URL, {
+      layers: 'viirs.crt.firms',
       format: 'image/png',
       transparent: true,
       opacity,
-      attribution: '&copy; <a href="https://firms.modaps.eosdis.nasa.gov/">NASA FIRMS</a>',
-      version: '1.1.1',
+      attribution: '&copy; <a href="https://effis.jrc.ec.europa.eu/">EFFIS Copernicus</a>',
+      version: '1.3.0',
     });
     wmsLayer.addTo(map);
     layerRef.current = wmsLayer;
@@ -173,14 +197,11 @@ const WMSFireLayer: React.FC<{ opacity: number }> = ({ opacity }) => {
 
 /**
  * RainViewer precipitation layer for Leaflet
- * Fetches latest radar frame path and renders as XYZ tile layer.
  */
 const RainViewerFloodLayer: React.FC<{ opacity: number }> = ({ opacity }) => {
   const { tileUrl, isLoading, error } = useRainViewer(true);
 
-  if (isLoading || error || !tileUrl) {
-    return null;
-  }
+  if (isLoading || error || !tileUrl) return null;
 
   return (
     <TileLayer
@@ -196,7 +217,7 @@ const RainViewerFloodLayer: React.FC<{ opacity: number }> = ({ opacity }) => {
 };
 
 /**
- * OWM tile layer (for wind and heat) - only renders when API key is available
+ * OWM tile layer (for wind and heat) - only when API key present
  */
 const OWMTileLayer: React.FC<{
   layer: 'wind_new' | 'temp_new';
@@ -220,23 +241,165 @@ const OWMTileLayer: React.FC<{
 /**
  * AQICN air quality tile layer (free, no key)
  */
-const AQICNTileLayer: React.FC<{ opacity: number }> = ({ opacity }) => {
-  return (
-    <TileLayer
-      url="https://tiles.aqicn.org/tiles/usepa-aqi/{z}/{x}/{y}.png"
-      attribution='&copy; <a href="https://aqicn.org/">AQICN</a>'
-      opacity={opacity}
-      maxZoom={19}
-      minZoom={1}
-    />
-  );
+const AQICNTileLayer: React.FC<{ opacity: number }> = ({ opacity }) => (
+  <TileLayer
+    url="https://tiles.aqicn.org/tiles/usepa-aqi/{z}/{x}/{y}.png"
+    attribution='&copy; <a href="https://aqicn.org/">AQICN</a>'
+    opacity={opacity}
+    maxZoom={19}
+    minZoom={1}
+  />
+);
+
+// ---------------------------------------------------------------------------
+// Open-Meteo powered fallback layers (no API key needed)
+// ---------------------------------------------------------------------------
+
+/**
+ * Temperature overlay using Open-Meteo + leaflet.heat
+ * Creates a smooth gradient from grid point temperatures.
+ */
+const OpenMeteoHeatLayer: React.FC<{ opacity: number }> = ({ opacity }) => {
+  const map = useMap();
+  const bounds = useMapBounds();
+  const { data } = useOpenMeteoGrid(bounds, 'temperature');
+  const layerRef = useRef<L.HeatLayer | null>(null);
+
+  useEffect(() => {
+    // Clean up previous
+    if (layerRef.current) {
+      map.removeLayer(layerRef.current);
+      layerRef.current = null;
+    }
+
+    if (!data.length) return;
+
+    // Map temperature to 0-1 intensity (-20°C → 0, 45°C → 1)
+    const heatData = data
+      .filter(p => p.temperature != null)
+      .map(p => [
+        p.lat,
+        p.lng,
+        Math.max(0, Math.min(1, (p.temperature! + 20) / 65)),
+      ] as [number, number, number]);
+
+    const heat = L.heatLayer(heatData, {
+      radius: 55,
+      blur: 45,
+      maxZoom: 18,
+      max: 1,
+      minOpacity: opacity * 0.6,
+      gradient: {
+        0.0: '#313695',   // ≤-20 °C  deep blue
+        0.15: '#4575b4',  // ~-10 °C
+        0.3: '#74add1',   //   0 °C   light blue
+        0.4: '#abd9e9',   //   6 °C
+        0.5: '#fee090',   //  12 °C   yellow
+        0.6: '#fdae61',   //  19 °C   orange
+        0.75: '#f46d43',  //  29 °C   red-orange
+        0.85: '#d73027',  //  35 °C   red
+        1.0: '#a50026',   //  45 °C   dark red
+      },
+    });
+
+    heat.addTo(map);
+    layerRef.current = heat;
+
+    return () => {
+      if (layerRef.current) {
+        map.removeLayer(layerRef.current);
+        layerRef.current = null;
+      }
+    };
+  }, [map, data, opacity]);
+
+  return null;
 };
 
 /**
- * Main ClimateRiskLayer Component
- *
- * Renders the appropriate tile layer overlay based on the selected risk type.
+ * Wind overlay using Open-Meteo data.
+ * Renders wind arrows at grid points colored by speed.
  */
+const OpenMeteoWindLayer: React.FC<{ opacity: number }> = ({ opacity }) => {
+  const map = useMap();
+  const bounds = useMapBounds();
+  const { data } = useOpenMeteoGrid(bounds, 'wind');
+  const markersRef = useRef<L.LayerGroup | null>(null);
+
+  useEffect(() => {
+    if (markersRef.current) {
+      map.removeLayer(markersRef.current);
+      markersRef.current = null;
+    }
+
+    if (!data.length) return;
+
+    const group = L.layerGroup();
+
+    data.forEach(point => {
+      if (point.windSpeed == null || point.windDirection == null) return;
+
+      const speed = point.windSpeed; // km/h
+      const dir = point.windDirection; // degrees
+
+      // Color by wind speed: calm → light blue, strong → dark blue
+      let color: string;
+      if (speed < 5) color = '#b3e0ff';
+      else if (speed < 15) color = '#66c2ff';
+      else if (speed < 30) color = '#3399ff';
+      else if (speed < 50) color = '#0066cc';
+      else color = '#003366';
+
+      // Arrow size scales with speed (min 14, max 28)
+      const arrowSize = Math.min(28, Math.max(14, 12 + speed * 0.35));
+
+      const icon = L.divIcon({
+        className: '',
+        iconSize: [arrowSize, arrowSize],
+        iconAnchor: [arrowSize / 2, arrowSize / 2],
+        html: `<svg width="${arrowSize}" height="${arrowSize}" viewBox="0 0 24 24"
+                    style="transform:rotate(${dir}deg);opacity:${opacity}"
+                    xmlns="http://www.w3.org/2000/svg">
+                 <path d="M12 2 L8 14 L12 11 L16 14 Z"
+                       fill="${color}" stroke="rgba(255,255,255,0.6)" stroke-width="1"/>
+               </svg>`,
+      });
+
+      L.marker([point.lat, point.lng], { icon, interactive: false }).addTo(group);
+    });
+
+    group.addTo(map);
+    markersRef.current = group;
+
+    return () => {
+      if (markersRef.current) {
+        map.removeLayer(markersRef.current);
+        markersRef.current = null;
+      }
+    };
+  }, [map, data, opacity]);
+
+  return null;
+};
+
+// ---------------------------------------------------------------------------
+// Wind / Heat wrapper: OWM tiles if key exists, else Open-Meteo fallback
+// ---------------------------------------------------------------------------
+
+const WindLayer: React.FC<{ opacity: number }> = ({ opacity }) => {
+  if (OWM_API_KEY) return <OWMTileLayer layer="wind_new" opacity={opacity} />;
+  return <OpenMeteoWindLayer opacity={opacity} />;
+};
+
+const HeatLayer: React.FC<{ opacity: number }> = ({ opacity }) => {
+  if (OWM_API_KEY) return <OWMTileLayer layer="temp_new" opacity={opacity} />;
+  return <OpenMeteoHeatLayer opacity={opacity} />;
+};
+
+// ---------------------------------------------------------------------------
+// Main Component
+// ---------------------------------------------------------------------------
+
 const ClimateRiskLayer: React.FC<ClimateRiskLayerProps> = ({ riskType, opacity = 0.6 }) => {
   if (riskType === 'none') return null;
 
@@ -246,11 +409,11 @@ const ClimateRiskLayer: React.FC<ClimateRiskLayerProps> = ({ riskType, opacity =
     case 'fire':
       return <WMSFireLayer opacity={opacity} />;
     case 'wind':
-      return <OWMTileLayer layer="wind_new" opacity={opacity} />;
+      return <WindLayer opacity={opacity} />;
     case 'air':
       return <AQICNTileLayer opacity={opacity} />;
     case 'heat':
-      return <OWMTileLayer layer="temp_new" opacity={opacity} />;
+      return <HeatLayer opacity={opacity} />;
     default:
       return null;
   }
