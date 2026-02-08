@@ -101,7 +101,7 @@ export function useRentalSearch() {
         fetchRentals();
     }, [fetchRentals]);
 
-    // Re-fetch when a property status changes (e.g., marked as available/rented)
+    // Re-fetch when a property status changes (e.g., marked as available/rented/deleted)
     // Also handle optimistic updates from detailed events for instant UI response
     useEffect(() => {
         const handleStatusChange = () => {
@@ -114,11 +114,19 @@ export function useRentalSearch() {
                 p.id === detail.id ? { ...p, status: detail.status, rentedAt: detail.rentedAt, rentedUntil: detail.rentedUntil } : p
             ));
         };
+        const handlePropertyDeleted = (e: Event) => {
+            const detail = (e as CustomEvent).detail;
+            if (detail?.id) {
+                setRentalProperties(prev => prev.filter(p => p.id !== detail.id));
+            }
+        };
         window.addEventListener('property-status-changed', handleStatusChange);
         window.addEventListener('property-status-update', handleOptimisticUpdate);
+        window.addEventListener('property-deleted', handlePropertyDeleted);
         return () => {
             window.removeEventListener('property-status-changed', handleStatusChange);
             window.removeEventListener('property-status-update', handleOptimisticUpdate);
+            window.removeEventListener('property-deleted', handlePropertyDeleted);
         };
     }, [fetchRentals]);
 

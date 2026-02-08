@@ -622,7 +622,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   }, [state.currentUser]);
 
   const updateListing = useCallback(async (property: Property) => {
+      // Optimistic: update UI immediately with what the user submitted
+      dispatch({ type: 'UPDATE_PROPERTY', payload: property });
       const updatedProperty = await apiUpdateListing(property);
+      // Sync with server response (may have server-computed fields)
       dispatch({ type: 'UPDATE_PROPERTY', payload: updatedProperty });
       return updatedProperty;
   }, []);

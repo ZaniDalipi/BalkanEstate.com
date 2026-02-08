@@ -470,31 +470,35 @@ const MyListings: React.FC<{ sellerId: string }> = ({ sellerId }) => {
     }, [myProperties, statusFilter, roleFilter, listingTypeFilter]);
 
     const handleRenew = async (id: string) => {
+        // Optimistic: update UI immediately
+        const newLastRenewedTimestamp = Date.now();
+        setMyProperties(prev => prev.map(p =>
+            p.id === id ? { ...p, lastRenewed: newLastRenewedTimestamp } : p
+        ));
+        setRenewalStatuses(prev => ({
+            ...prev,
+            [id]: calculateRenewalStatus(new Date(newLastRenewedTimestamp)),
+        }));
+        dispatch({ type: 'RENEW_PROPERTY', payload: id });
+
         try {
             const result = await api.renewProperty(id);
 
-            if (result.success) {
-                // Update local state with new lastRenewed timestamp (as number for consistency)
-                const newLastRenewedTimestamp = new Date(result.lastRenewed!).getTime();
-
+            if (result.success && result.lastRenewed) {
+                // Sync with exact server timestamp
+                const serverTimestamp = new Date(result.lastRenewed).getTime();
                 setMyProperties(prev => prev.map(p =>
-                    p.id === id ? { ...p, lastRenewed: newLastRenewedTimestamp } : p
+                    p.id === id ? { ...p, lastRenewed: serverTimestamp } : p
                 ));
-
-                // Update renewal status
                 setRenewalStatuses(prev => ({
                     ...prev,
-                    [id]: calculateRenewalStatus(new Date(newLastRenewedTimestamp)),
+                    [id]: calculateRenewalStatus(new Date(serverTimestamp)),
                 }));
-
-                // Dispatch to update global state - property will appear at top when sorted by newest
-                dispatch({ type: 'RENEW_PROPERTY', payload: id });
             }
         } catch (error: any) {
-            // Check for cooldown error - details are in error.details from apiRequest
+            // Revert optimistic update on failure
             const errorDetails = error.details || error;
             if (error.code === 'RENEWAL_COOLDOWN' || errorDetails.code === 'RENEWAL_COOLDOWN') {
-                // Update the status with the server response
                 setRenewalStatuses(prev => ({
                     ...prev,
                     [id]: {
@@ -504,6 +508,8 @@ const MyListings: React.FC<{ sellerId: string }> = ({ sellerId }) => {
                     },
                 }));
             }
+            // Re-fetch to restore accurate state
+            fetchProperties();
         }
     };
 
@@ -616,6 +622,9 @@ const MyListings: React.FC<{ sellerId: string }> = ({ sellerId }) => {
             setMyProperties(prev => prev.filter(p => p.id !== deletingId));
             setShowDeleteConfirm(false);
             setPropertyToDelete(null);
+            // Notify other pages (rental search, search page) to update instantly
+            window.dispatchEvent(new CustomEvent('property-deleted', { detail: { id: deletingId } }));
+            window.dispatchEvent(new CustomEvent('property-status-changed'));
 
             // Then delete from backend in background
             try {
