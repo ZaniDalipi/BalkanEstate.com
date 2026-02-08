@@ -214,9 +214,9 @@ export function useSearchPage() {
     }, [drawnBoundsJSON]);
 
 
-    // Load properties immediately on mount, not conditionally
+    // Load sale properties immediately on mount (exclude rentals from buy page)
     useEffect(() => {
-        fetchProperties();
+        fetchProperties({ ...initialFilters, listingType: 'sale' });
     }, []);
 
     // Track previous country to detect changes
