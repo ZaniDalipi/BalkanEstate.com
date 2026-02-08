@@ -759,14 +759,14 @@ export const useListingForm = (propertyToEdit: Property | null) => {
                 // Rental-specific fields (always included when listingType is 'rent')
                 ...(listingData.listingType === 'rent' ? {
                     rentPeriod: listingData.rentPeriod || 'monthly',
-                    securityDeposit: Number(listingData.securityDeposit) ?? 0,
-                    minimumLeaseDuration: Number(listingData.minimumLeaseDuration) ?? 1,
-                    maximumLeaseDuration: Number(listingData.maximumLeaseDuration) ?? 12,
+                    securityDeposit: Number(listingData.securityDeposit) || 0,
+                    minimumLeaseDuration: Number(listingData.minimumLeaseDuration) || 1,
+                    maximumLeaseDuration: Number(listingData.maximumLeaseDuration) || 12,
                     availableFrom: listingData.availableFrom ? new Date(listingData.availableFrom).getTime() : undefined,
                     utilitiesIncluded: listingData.utilitiesIncluded ?? false,
                     internetIncluded: listingData.internetIncluded ?? false,
                     tenantRequirements: listingData.tenantRequirements || [],
-                    maxOccupants: Number(listingData.maxOccupants) ?? 1,
+                    maxOccupants: Number(listingData.maxOccupants) || 1,
                 } : {}),
             };
 
