@@ -1174,7 +1174,11 @@ export function use3DMap(props: Map3DBuildingsProps) {
 
     const mapInstance = map.current;
     const dayOfYear = getCurrentDayOfYear();
-    const sunPos = calculateSunPosition(timelapse.currentTime, lat, dayOfYear);
+    // Use timelapse time when active, otherwise use current real time
+    const now = new Date();
+    const realHour = now.getHours() + now.getMinutes() / 60;
+    const shadowHour = showTimelapse ? timelapse.currentTime : realHour;
+    const sunPos = calculateSunPosition(shadowHour, lat, dayOfYear);
     const lighting = TIME_LIGHTING[timelapse.timePeriod];
 
     // Only show shadows if sun is above horizon and shadows are enabled
@@ -1389,7 +1393,7 @@ export function use3DMap(props: Map3DBuildingsProps) {
         'line-opacity': 0.4
       }
     });
-  }, [mapLoaded, timelapse.timePeriod, timelapse.currentTime, showShadows, lat]);
+  }, [mapLoaded, timelapse.timePeriod, timelapse.currentTime, showShadows, showTimelapse, lat]);
 
   // Update shadows when timelapse changes or showShadows toggles
   // Use debounced updates to prevent performance issues
@@ -1420,7 +1424,7 @@ export function use3DMap(props: Map3DBuildingsProps) {
         map.current.off('moveend', debouncedUpdate);
       }
     };
-  }, [mapLoaded, timelapse.timePeriod, timelapse.currentTime, showShadows, updateBuildingShadows]);
+  }, [mapLoaded, timelapse.timePeriod, timelapse.currentTime, showShadows, showTimelapse, updateBuildingShadows]);
 
   // Toggle POI visibility
   useEffect(() => {
