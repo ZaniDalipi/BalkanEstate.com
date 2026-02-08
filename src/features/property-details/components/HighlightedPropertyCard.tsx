@@ -179,7 +179,7 @@ const HighlightedPropertyCard: React.FC<HighlightedPropertyCardProps> = ({ prope
       onClick={handleCardClick}
     >
       {/* Image Carousel Section */}
-      <div className="relative w-full md:w-2/5 h-56 md:h-auto md:min-h-[280px] overflow-hidden bg-black">
+      <div className="relative w-full md:w-2/5 h-56 md:h-auto md:min-h-[280px] overflow-hidden">
         {/* Images */}
         <div className="relative w-full h-full">
           {displayImages.map((imgUrl, index) => (
@@ -195,16 +195,16 @@ const HighlightedPropertyCard: React.FC<HighlightedPropertyCardProps> = ({ prope
                 </div>
               ) : (
                 <>
-                  {/* Blurred background image to fill empty space */}
+                  {/* Blurred background - same image fills empty space */}
                   <img
                     src={imgUrl}
                     alt=""
                     aria-hidden="true"
                     loading="lazy"
                     decoding="async"
-                    className="absolute inset-0 w-full h-full object-cover blur-xl scale-110 opacity-60"
+                    className="absolute inset-0 w-full h-full object-cover blur-2xl scale-125"
                   />
-                  {/* Main image - contained to show full image without cropping */}
+                  {/* Main image - centered, contained to show full image */}
                   <img
                     src={imgUrl}
                     alt={`${property.title || propertyTypeLabel} - Image ${index + 1}`}

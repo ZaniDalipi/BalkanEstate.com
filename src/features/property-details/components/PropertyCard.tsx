@@ -218,15 +218,15 @@ const PropertyCard: React.FC<PropertyCardProps> = ({ property, showToast, showCo
             <BuildingOfficeIcon className="w-12 h-12 text-neutral-400" />
           </div>
         ) : (
-          <div className="relative w-full h-40 sm:h-44 md:h-48 overflow-hidden bg-black">
-            {/* Blurred background image */}
+          <div className="relative w-full h-40 sm:h-44 md:h-48 overflow-hidden">
+            {/* Blurred background - same image fills empty space */}
             <img
               src={property.imageUrl}
               alt=""
               aria-hidden="true"
               loading="lazy"
               decoding="async"
-              className="absolute inset-0 w-full h-full object-cover blur-xl scale-110 opacity-60"
+              className="absolute inset-0 w-full h-full object-cover blur-2xl scale-125"
             />
             {/* Main image - contained to show full image */}
             <img
