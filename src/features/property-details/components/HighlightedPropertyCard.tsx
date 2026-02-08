@@ -180,7 +180,7 @@ const HighlightedPropertyCard: React.FC<HighlightedPropertyCardProps> = ({ prope
       onClick={handleCardClick}
     >
       {/* Image Section - fills height of card in row layout */}
-      <div className="relative min-h-48 overflow-hidden">
+      <div className="relative h-48 md:h-full overflow-hidden bg-neutral-100">
         <div className="absolute inset-0">
           {displayImages.map((imgUrl, index) => (
             <div
@@ -199,6 +199,7 @@ const HighlightedPropertyCard: React.FC<HighlightedPropertyCardProps> = ({ prope
                   alt={`${property.title || propertyTypeLabel} - Image ${index + 1}`}
                   loading={index === 0 ? 'eager' : 'lazy'}
                   decoding="async"
+                  sizes="(max-width: 768px) 100vw, 40vw"
                   className={`w-full h-full object-cover transition-transform duration-700 ${
                     isHovered ? 'scale-105' : 'scale-100'
                   }`}

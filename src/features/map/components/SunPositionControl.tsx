@@ -33,27 +33,43 @@ const SEASONS: { id: Season; icon: string; label: string }[] = [
   { id: 'winter', icon: '❄️', label: 'Winter' },
 ];
 
-// Calculate sun azimuth (compass direction) based on time and approximate latitude
-// This is a simplified calculation - for Balkans region (roughly 42°N latitude)
-const calculateSunAzimuth = (hour: number, latitude: number = 42): number => {
-  // Simplified sun position calculation
-  // At solar noon (12:00), sun is due south (180°) in Northern Hemisphere
-  // Morning: sun rises in east (~90°), moves through south, sets in west (~270°)
+// Calculate sun azimuth and altitude based on time, latitude, and day of year
+// Uses standard astronomical solar position formulas
+const calculateSunAzimuth = (hour: number, latitude: number = 42, dayOfYear?: number): number => {
+  const DEG_TO_RAD = Math.PI / 180;
+  const RAD_TO_DEG = 180 / Math.PI;
 
-  // Hours from solar noon (assuming 12:00 is solar noon)
-  const hoursFromNoon = hour - 12;
+  const doy = dayOfYear ?? (() => {
+    const now = new Date();
+    const start = new Date(now.getFullYear(), 0, 0);
+    return Math.floor((now.getTime() - start.getTime()) / 86400000);
+  })();
 
-  // Sun moves approximately 15° per hour (360° / 24 hours)
-  // But the path is an arc, so we use a sine curve for more realistic movement
-  const sunHourAngle = hoursFromNoon * 15;
+  // Solar declination
+  const declination = 23.45 * Math.sin((2 * Math.PI / 365) * (doy - 81));
+  const hourAngle = (hour - 12) * 15;
 
-  // Base azimuth is 180° (due south) at noon
-  // Add the hour angle to get current azimuth
-  let azimuth = 180 + sunHourAngle;
+  const latRad = latitude * DEG_TO_RAD;
+  const decRad = declination * DEG_TO_RAD;
+  const haRad = hourAngle * DEG_TO_RAD;
 
-  // Normalize to 0-360 range
-  while (azimuth < 0) azimuth += 360;
-  while (azimuth >= 360) azimuth -= 360;
+  // Solar altitude
+  const sinAlt = Math.sin(latRad) * Math.sin(decRad) +
+                 Math.cos(latRad) * Math.cos(decRad) * Math.cos(haRad);
+  const altitude = Math.asin(Math.max(-1, Math.min(1, sinAlt)));
+
+  // Solar azimuth
+  const cosAltitude = Math.cos(altitude);
+  if (cosAltitude === 0) return 180;
+
+  const cosAz = (Math.sin(decRad) - Math.sin(latRad) * sinAlt) /
+                (Math.cos(latRad) * cosAltitude);
+  let azimuth = Math.acos(Math.max(-1, Math.min(1, cosAz))) * RAD_TO_DEG;
+
+  // Afternoon: sun is west (azimuth > 180)
+  if (hourAngle > 0) {
+    azimuth = 360 - azimuth;
+  }
 
   return azimuth;
 };
@@ -226,8 +242,9 @@ const SunPositionControl: React.FC<SunPositionControlProps> = ({
     }
   }, [selectedSeason, onSeasonChange]);
 
-  // Calculate sun position
-  const sunAzimuth = useMemo(() => calculateSunAzimuth(hour, latitude), [hour, latitude]);
+  // Calculate sun position with season-aware day of year
+  const dayOfYear = useMemo(() => getSeasonDayOfYear(selectedSeason), [selectedSeason]);
+  const sunAzimuth = useMemo(() => calculateSunAzimuth(hour, latitude, dayOfYear), [hour, latitude, dayOfYear]);
   const cardinalDirection = useMemo(() => getCardinalDirection(sunAzimuth), [sunAzimuth]);
   const cardinalDirectionFull = useMemo(() => getCardinalDirectionFull(sunAzimuth), [sunAzimuth]);
   const timePeriod = useMemo(() => getTimePeriod(hour), [hour]);

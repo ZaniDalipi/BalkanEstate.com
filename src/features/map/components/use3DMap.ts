@@ -6,7 +6,7 @@ import { useRef, useEffect, useState, useCallback } from 'react';
 import * as maplibregl from 'maplibre-gl';
 import { useShadowTimelapse } from '../hooks/useShadowTimelapse';
 import type { Map3DBuildingsProps } from './Map3DConstants';
-import { TIME_LIGHTING, calculateBuildingShadow } from './Map3DConstants';
+import { TIME_LIGHTING, calculateBuildingShadow, calculateSunPosition, getCurrentDayOfYear } from './Map3DConstants';
 
 export function use3DMap(props: Map3DBuildingsProps) {
   const {
@@ -1173,10 +1173,12 @@ export function use3DMap(props: Map3DBuildingsProps) {
     if (!map.current || !mapLoaded) return;
 
     const mapInstance = map.current;
+    const dayOfYear = getCurrentDayOfYear();
+    const sunPos = calculateSunPosition(timelapse.currentTime, lat, dayOfYear);
     const lighting = TIME_LIGHTING[timelapse.timePeriod];
 
     // Only show shadows if sun is above horizon and shadows are enabled
-    if (!showShadows || lighting.sunAltitude <= 0) {
+    if (!showShadows || sunPos.altitude <= 0) {
       // Remove shadow layers if they exist
       ['building-shadows', 'building-shadows-soft', 'building-shadows-ambient'].forEach(layerId => {
         if (mapInstance.getLayer(layerId)) {
@@ -1225,20 +1227,22 @@ export function use3DMap(props: Map3DBuildingsProps) {
       if (processedBuildings.has(key)) return;
       processedBuildings.add(key);
 
-      // Calculate main shadow polygon
+      // Calculate main shadow polygon using dynamic sun position
       const shadowCoords = calculateBuildingShadow(
         coords,
         height,
-        lighting.sunAzimuth,
-        lighting.sunAltitude
+        sunPos.azimuth,
+        sunPos.altitude,
+        lat
       );
 
-      // Calculate soft/extended shadow (1.3x longer for soft edge)
+      // Calculate soft/extended shadow (1.4x longer for soft edge)
       const softShadowCoords = calculateBuildingShadow(
         coords,
         height * 1.4,
-        lighting.sunAzimuth,
-        lighting.sunAltitude
+        sunPos.azimuth,
+        sunPos.altitude,
+        lat
       );
 
       if (shadowCoords.length > 0) {
@@ -1385,7 +1389,7 @@ export function use3DMap(props: Map3DBuildingsProps) {
         'line-opacity': 0.4
       }
     });
-  }, [mapLoaded, timelapse.timePeriod, showShadows]);
+  }, [mapLoaded, timelapse.timePeriod, timelapse.currentTime, showShadows, lat]);
 
   // Update shadows when timelapse changes or showShadows toggles
   // Use debounced updates to prevent performance issues
@@ -1416,7 +1420,7 @@ export function use3DMap(props: Map3DBuildingsProps) {
         map.current.off('moveend', debouncedUpdate);
       }
     };
-  }, [mapLoaded, timelapse.timePeriod, showShadows, updateBuildingShadows]);
+  }, [mapLoaded, timelapse.timePeriod, timelapse.currentTime, showShadows, updateBuildingShadows]);
 
   // Toggle POI visibility
   useEffect(() => {

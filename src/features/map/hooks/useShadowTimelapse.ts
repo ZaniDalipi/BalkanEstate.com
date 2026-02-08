@@ -70,9 +70,18 @@ export interface SunInfo {
 }
 
 /**
+ * Get current day of year (1-365)
+ */
+function getCurrentDayOfYear(): number {
+  const now = new Date();
+  const start = new Date(now.getFullYear(), 0, 0);
+  return Math.floor((now.getTime() - start.getTime()) / 86400000);
+}
+
+/**
  * Calculate sunrise and sunset hours based on latitude and day of year
  */
-export function calculateSunriseSunset(latitude: number, dayOfYear: number = 172): SunInfo {
+export function calculateSunriseSunset(latitude: number, dayOfYear: number = getCurrentDayOfYear()): SunInfo {
   const DEG_TO_RAD = Math.PI / 180;
   const RAD_TO_DEG = 180 / Math.PI;
 

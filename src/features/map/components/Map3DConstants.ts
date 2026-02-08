@@ -126,18 +126,79 @@ export const PERIOD_ICONS: Record<TimePeriod, string> = {
 };
 
 /**
+ * Calculate sun position (azimuth and altitude) for a given time, latitude, and day
+ * Uses standard astronomical formulas for solar position
+ *
+ * @param hour - Decimal hour (e.g., 14.5 = 2:30 PM)
+ * @param latitude - Location latitude in degrees
+ * @param dayOfYear - Day of year (1-365)
+ * @returns { azimuth, altitude } in degrees. Azimuth: 0=North, 90=East, 180=South, 270=West
+ */
+export const calculateSunPosition = (
+  hour: number,
+  latitude: number,
+  dayOfYear: number
+): { azimuth: number; altitude: number } => {
+  const DEG_TO_RAD = Math.PI / 180;
+  const RAD_TO_DEG = 180 / Math.PI;
+
+  // Solar declination (angle of sun relative to equator)
+  const declination = 23.45 * Math.sin((2 * Math.PI / 365) * (dayOfYear - 81));
+
+  // Hour angle: 15 degrees per hour from solar noon, negative in morning
+  const hourAngle = (hour - 12) * 15;
+
+  const latRad = latitude * DEG_TO_RAD;
+  const decRad = declination * DEG_TO_RAD;
+  const haRad = hourAngle * DEG_TO_RAD;
+
+  // Solar altitude (elevation above horizon)
+  const sinAlt = Math.sin(latRad) * Math.sin(decRad) +
+                 Math.cos(latRad) * Math.cos(decRad) * Math.cos(haRad);
+  const altitude = Math.asin(Math.max(-1, Math.min(1, sinAlt))) * RAD_TO_DEG;
+
+  // Solar azimuth
+  const cosAltRad = Math.cos(altitude * DEG_TO_RAD);
+  if (cosAltRad === 0) {
+    return { azimuth: 180, altitude };
+  }
+
+  const cosAz = (Math.sin(decRad) - Math.sin(latRad) * sinAlt) /
+                (Math.cos(latRad) * cosAltRad);
+  let azimuth = Math.acos(Math.max(-1, Math.min(1, cosAz))) * RAD_TO_DEG;
+
+  // Afternoon: sun is in the west (azimuth > 180)
+  if (hourAngle > 0) {
+    azimuth = 360 - azimuth;
+  }
+
+  return { azimuth, altitude };
+};
+
+/**
+ * Get current day of year
+ */
+export const getCurrentDayOfYear = (): number => {
+  const now = new Date();
+  const start = new Date(now.getFullYear(), 0, 0);
+  return Math.floor((now.getTime() - start.getTime()) / 86400000);
+};
+
+/**
  * Calculate shadow polygon for a building based on sun position
  * @param buildingCoords - The building footprint coordinates [lng, lat][]
  * @param height - Building height in meters
  * @param sunAzimuth - Sun azimuth angle in degrees (0 = North, clockwise)
  * @param sunAltitude - Sun altitude angle in degrees above horizon
+ * @param latitude - Location latitude for accurate longitude scaling
  * @returns Shadow polygon coordinates
  */
 export const calculateBuildingShadow = (
   buildingCoords: number[][],
   height: number,
   sunAzimuth: number,
-  sunAltitude: number
+  sunAltitude: number,
+  latitude: number = 42
 ): number[][] => {
   // If sun is below horizon, no shadow
   if (sunAltitude <= 0) return [];
@@ -147,13 +208,13 @@ export const calculateBuildingShadow = (
   const altitudeRad = (sunAltitude * Math.PI) / 180;
 
   // Calculate shadow length factor based on sun altitude
-  // Higher sun = shorter shadows
   const shadowLength = height / Math.tan(altitudeRad);
 
-  // Convert shadow length to approximate degrees (at equator ~111km per degree)
-  const metersPerDegree = 111320;
-  const shadowOffsetLat = (shadowLength * Math.cos(azimuthRad)) / metersPerDegree;
-  const shadowOffsetLng = (shadowLength * Math.sin(azimuthRad)) / metersPerDegree;
+  // Convert shadow length to degrees with latitude correction
+  const metersPerDegreeLat = 111320;
+  const metersPerDegreeLng = 111320 * Math.cos(latitude * Math.PI / 180);
+  const shadowOffsetLat = (shadowLength * Math.cos(azimuthRad)) / metersPerDegreeLat;
+  const shadowOffsetLng = (shadowLength * Math.sin(azimuthRad)) / metersPerDegreeLng;
 
   // Create shadow polygon by extending building footprint in shadow direction
   const shadowPolygon: number[][] = [];
