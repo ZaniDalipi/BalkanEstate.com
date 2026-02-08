@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import MapComponent from '@/src/features/map/components/MapComponent';
 import PropertyCard from '@/src/features/property-details/components/PropertyCard';
 import PropertyCardSkeleton from '@/src/features/property-details/components/PropertyCardSkeleton';
+import HighlightedPropertiesSection from '@/src/features/property-details/components/HighlightedPropertiesSection';
 import RentalFilters from './RentalFilters';
 import { useRentalSearch } from '../hooks/useRentalSearch';
 import { Squares2x2Icon, MapIcon, AdjustmentsHorizontalIcon, XMarkIcon, MagnifyingGlassIcon } from '@/constants';
@@ -210,19 +211,22 @@ const RentalSearchPage: React.FC = () => {
                                 </button>
                             </div>
                         ) : (
-                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                                {listProperties.map(property => (
-                                    <div
-                                        key={property.id}
-                                        onMouseEnter={() => setHoveredPropertyId(property.id)}
-                                        onMouseLeave={() => setHoveredPropertyId(null)}
-                                    >
-                                        <PropertyCard
-                                            property={property}
-                                        />
-                                    </div>
-                                ))}
-                            </div>
+                            <>
+                                <HighlightedPropertiesSection properties={listProperties} />
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                    {listProperties.map(property => (
+                                        <div
+                                            key={property.id}
+                                            onMouseEnter={() => setHoveredPropertyId(property.id)}
+                                            onMouseLeave={() => setHoveredPropertyId(null)}
+                                        >
+                                            <PropertyCard
+                                                property={property}
+                                            />
+                                        </div>
+                                    ))}
+                                </div>
+                            </>
                         )}
                     </div>
                 </div>
