@@ -91,15 +91,15 @@ const PropertyCard: React.FC<PropertyCardProps> = ({ property, showToast, showCo
   if (!hasRequiredFields) {
     return (
       <div className="bg-white rounded-2xl overflow-hidden shadow-lg border-2 border-neutral-200 w-full flex flex-col">
-        <div className="w-full h-40 sm:h-44 md:h-48 bg-gradient-to-br from-neutral-100 via-neutral-200 to-neutral-300 flex items-center justify-center">
-          <BuildingOfficeIcon className="w-12 h-12 text-neutral-400" />
+        <div className="w-full h-36 sm:h-40 md:h-44 bg-gradient-to-br from-neutral-100 via-neutral-200 to-neutral-300 flex items-center justify-center">
+          <BuildingOfficeIcon className="w-10 h-10 text-neutral-400" />
         </div>
-        <div className="p-3 sm:p-4">
-          <div className="h-4 bg-neutral-200 rounded w-3/4 mb-2 animate-pulse" />
-          <div className="h-3 bg-neutral-200 rounded w-1/2 mb-3 animate-pulse" />
+        <div className="p-2.5 sm:p-3.5">
+          <div className="h-3.5 bg-neutral-200 rounded w-3/4 mb-1.5 animate-pulse" />
+          <div className="h-2.5 bg-neutral-200 rounded w-1/2 mb-2.5 animate-pulse" />
           <div className="grid grid-cols-2 xs:grid-cols-4 gap-1.5">
             {[1, 2, 3, 4].map(i => (
-              <div key={i} className="h-10 bg-neutral-100 rounded-lg animate-pulse" />
+              <div key={i} className="h-9 bg-neutral-100 rounded-lg animate-pulse" />
             ))}
           </div>
         </div>
@@ -214,11 +214,11 @@ const PropertyCard: React.FC<PropertyCardProps> = ({ property, showToast, showCo
       {/* Image Section */}
       <div className="relative overflow-hidden">
         {imageError ? (
-          <div className="w-full h-40 sm:h-44 md:h-48 bg-gradient-to-br from-neutral-100 via-neutral-200 to-neutral-300 flex items-center justify-center">
-            <BuildingOfficeIcon className="w-12 h-12 text-neutral-400" />
+          <div className="w-full h-36 sm:h-40 md:h-44 bg-gradient-to-br from-neutral-100 via-neutral-200 to-neutral-300 flex items-center justify-center">
+            <BuildingOfficeIcon className="w-10 h-10 text-neutral-400" />
           </div>
         ) : (
-          <div className="relative w-full h-40 sm:h-44 md:h-48 overflow-hidden">
+          <div className="relative w-full h-36 sm:h-40 md:h-44 overflow-hidden">
             {/* Blurred background - same image fills empty space */}
             <img
               src={property.imageUrl}
@@ -356,7 +356,7 @@ const PropertyCard: React.FC<PropertyCardProps> = ({ property, showToast, showCo
       </div>
 
       {/* Content Section */}
-      <div className="relative p-3 sm:p-4 flex flex-col flex-grow">
+      <div className="relative p-2.5 sm:p-3.5 flex flex-col flex-grow">
         {/* Glass background layer - sits behind all content */}
         <div className="absolute inset-0 bg-white/80 backdrop-blur-sm z-0" />
 
@@ -404,10 +404,10 @@ const PropertyCard: React.FC<PropertyCardProps> = ({ property, showToast, showCo
         </div>
 
         {/* Property Stats - Liquid Glass Design */}
-        <div className="grid grid-cols-4 gap-2 mb-3">
+        <div className="grid grid-cols-4 gap-1.5 mb-2.5">
           {/* Beds */}
           <div
-            className="group relative flex flex-col items-center py-2.5 px-1.5 rounded-xl bg-white/60 backdrop-blur-md border border-white/80 shadow-[0_2px_8px_rgba(0,0,0,0.04),inset_0_1px_0_rgba(255,255,255,0.8)] hover:shadow-[0_4px_12px_rgba(59,130,246,0.15),inset_0_1px_0_rgba(255,255,255,0.9)] hover:border-blue-200/60 transition-all duration-300"
+            className="group relative flex flex-col items-center py-2 px-1 rounded-xl bg-white/60 backdrop-blur-md border border-white/80 shadow-[0_2px_8px_rgba(0,0,0,0.04),inset_0_1px_0_rgba(255,255,255,0.8)] hover:shadow-[0_4px_12px_rgba(59,130,246,0.15),inset_0_1px_0_rgba(255,255,255,0.9)] hover:border-blue-200/60 transition-all duration-300"
             aria-label={`${safeProperty.beds} ${t('property:features.bedrooms')}`}
           >
             <div className="absolute inset-0 rounded-xl bg-gradient-to-br from-blue-50/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
@@ -419,7 +419,7 @@ const PropertyCard: React.FC<PropertyCardProps> = ({ property, showToast, showCo
 
           {/* Baths */}
           <div
-            className="group relative flex flex-col items-center py-2.5 px-1.5 rounded-xl bg-white/60 backdrop-blur-md border border-white/80 shadow-[0_2px_8px_rgba(0,0,0,0.04),inset_0_1px_0_rgba(255,255,255,0.8)] hover:shadow-[0_4px_12px_rgba(16,185,129,0.15),inset_0_1px_0_rgba(255,255,255,0.9)] hover:border-emerald-200/60 transition-all duration-300"
+            className="group relative flex flex-col items-center py-2 px-1 rounded-xl bg-white/60 backdrop-blur-md border border-white/80 shadow-[0_2px_8px_rgba(0,0,0,0.04),inset_0_1px_0_rgba(255,255,255,0.8)] hover:shadow-[0_4px_12px_rgba(16,185,129,0.15),inset_0_1px_0_rgba(255,255,255,0.9)] hover:border-emerald-200/60 transition-all duration-300"
             aria-label={`${safeProperty.baths} ${t('property:features.bathrooms')}`}
           >
             <div className="absolute inset-0 rounded-xl bg-gradient-to-br from-emerald-50/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
@@ -431,7 +431,7 @@ const PropertyCard: React.FC<PropertyCardProps> = ({ property, showToast, showCo
 
           {/* Living Rooms */}
           <div
-            className="group relative flex flex-col items-center py-2.5 px-1.5 rounded-xl bg-white/60 backdrop-blur-md border border-white/80 shadow-[0_2px_8px_rgba(0,0,0,0.04),inset_0_1px_0_rgba(255,255,255,0.8)] hover:shadow-[0_4px_12px_rgba(168,85,247,0.15),inset_0_1px_0_rgba(255,255,255,0.9)] hover:border-purple-200/60 transition-all duration-300"
+            className="group relative flex flex-col items-center py-2 px-1 rounded-xl bg-white/60 backdrop-blur-md border border-white/80 shadow-[0_2px_8px_rgba(0,0,0,0.04),inset_0_1px_0_rgba(255,255,255,0.8)] hover:shadow-[0_4px_12px_rgba(168,85,247,0.15),inset_0_1px_0_rgba(255,255,255,0.9)] hover:border-purple-200/60 transition-all duration-300"
             aria-label={`${safeProperty.livingRooms} ${t('property:features.livingRooms')}`}
           >
             <div className="absolute inset-0 rounded-xl bg-gradient-to-br from-purple-50/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
@@ -443,7 +443,7 @@ const PropertyCard: React.FC<PropertyCardProps> = ({ property, showToast, showCo
 
           {/* Sqft - Highlighted */}
           <div
-            className="group relative flex flex-col items-center py-2.5 px-1.5 rounded-xl bg-gradient-to-br from-blue-50/80 to-indigo-50/80 backdrop-blur-md border border-blue-200/60 shadow-[0_2px_8px_rgba(59,130,246,0.1),inset_0_1px_0_rgba(255,255,255,0.9)] hover:shadow-[0_4px_12px_rgba(59,130,246,0.2),inset_0_1px_0_rgba(255,255,255,1)] hover:border-blue-300/70 transition-all duration-300"
+            className="group relative flex flex-col items-center py-2 px-1 rounded-xl bg-gradient-to-br from-blue-50/80 to-indigo-50/80 backdrop-blur-md border border-blue-200/60 shadow-[0_2px_8px_rgba(59,130,246,0.1),inset_0_1px_0_rgba(255,255,255,0.9)] hover:shadow-[0_4px_12px_rgba(59,130,246,0.2),inset_0_1px_0_rgba(255,255,255,1)] hover:border-blue-300/70 transition-all duration-300"
             aria-label={`${safeProperty.sqft} ${t('common:sqm')}`}
           >
             <div className="absolute inset-0 rounded-xl bg-gradient-to-br from-blue-100/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />

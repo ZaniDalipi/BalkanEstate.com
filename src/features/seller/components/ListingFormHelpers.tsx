@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { PropertyImageTag, FurnishingStatus, HeatingType, PropertyCondition, ViewType, EnergyRating, ListingType, RentPeriod } from '@/types';
+import { PropertyImageTag, FurnishingStatus, HeatingType, PropertyCondition, ViewType, EnergyRating, ListingType, RentPeriod, VisitAvailability } from '@/types';
 
 // --- Types ---
 
@@ -54,6 +54,8 @@ export interface ListingData {
     internetIncluded: boolean;
     tenantRequirements: string[];
     maxOccupants: number;
+    // Visit availability
+    visitAvailability: VisitAvailability;
 }
 
 export interface ImageData {
@@ -107,6 +109,15 @@ export const initialListingData: ListingData = {
     internetIncluded: false,
     tenantRequirements: [],
     maxOccupants: 1,
+    // Visit availability
+    visitAvailability: {
+        enabled: false,
+        days: [1, 2, 3, 4, 5], // Mon-Fri
+        startTime: '09:00',
+        endTime: '18:00',
+        slotDurationMinutes: 30,
+        notes: '',
+    },
 };
 
 // Languages corresponding to supported countries: Kosovo, Albania, North Macedonia, Serbia, Bosnia and Herzegovina, Croatia, Montenegro, Greece, Bulgaria, Romania

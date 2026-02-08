@@ -423,6 +423,131 @@ const GeminiDescriptionGenerator: React.FC<{ propertyToEdit: Property | null }> 
                         </fieldset>
                     )}
 
+                    {/* ===== Visit Availability (for all listing types) ===== */}
+                    <fieldset className="space-y-4 p-4 sm:p-6 bg-amber-50/50 rounded-xl border border-amber-200">
+                        <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-2">
+                                <svg className="w-5 h-5 text-amber-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                                    <path strokeLinecap="round" strokeLinejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                </svg>
+                                <h3 className="text-base font-bold text-neutral-800">{t('seller:createListing.visitAvailability.title', 'Visit Availability')}</h3>
+                            </div>
+                            <label className="flex items-center gap-2 cursor-pointer">
+                                <input
+                                    type="checkbox"
+                                    checked={listingData.visitAvailability.enabled}
+                                    onChange={(e) => setListingData(prev => ({
+                                        ...prev,
+                                        visitAvailability: { ...prev.visitAvailability, enabled: e.target.checked }
+                                    }))}
+                                    className="rounded text-amber-600 focus:ring-amber-500 w-4 h-4"
+                                />
+                                <span className="text-sm font-medium text-neutral-700">{t('seller:createListing.visitAvailability.enable', 'Enable scheduling')}</span>
+                            </label>
+                        </div>
+                        <p className="text-xs text-neutral-500">{t('seller:createListing.visitAvailability.description', 'Allow visitors to schedule viewings online. Define your available days and hours.')}</p>
+
+                        {listingData.visitAvailability.enabled && (
+                            <div className="space-y-4">
+                                {/* Available Days */}
+                                <div>
+                                    <label className="block text-sm font-semibold text-neutral-700 mb-2">{t('seller:createListing.visitAvailability.availableDays', 'Available Days')}</label>
+                                    <div className="flex flex-wrap gap-2">
+                                        {[
+                                            { day: 1, label: t('common:days.mon', 'Mon') },
+                                            { day: 2, label: t('common:days.tue', 'Tue') },
+                                            { day: 3, label: t('common:days.wed', 'Wed') },
+                                            { day: 4, label: t('common:days.thu', 'Thu') },
+                                            { day: 5, label: t('common:days.fri', 'Fri') },
+                                            { day: 6, label: t('common:days.sat', 'Sat') },
+                                            { day: 0, label: t('common:days.sun', 'Sun') },
+                                        ].map(({ day, label }) => (
+                                            <button
+                                                key={day}
+                                                type="button"
+                                                onClick={() => {
+                                                    const days = listingData.visitAvailability.days.includes(day)
+                                                        ? listingData.visitAvailability.days.filter(d => d !== day)
+                                                        : [...listingData.visitAvailability.days, day];
+                                                    setListingData(prev => ({
+                                                        ...prev,
+                                                        visitAvailability: { ...prev.visitAvailability, days }
+                                                    }));
+                                                }}
+                                                className={`px-3 py-1.5 rounded-lg text-xs font-medium border transition-all ${
+                                                    listingData.visitAvailability.days.includes(day)
+                                                        ? 'bg-amber-500 text-white border-amber-500'
+                                                        : 'bg-white text-neutral-600 border-neutral-200 hover:border-amber-300'
+                                                }`}
+                                            >
+                                                {label}
+                                            </button>
+                                        ))}
+                                    </div>
+                                </div>
+
+                                {/* Time Range */}
+                                <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
+                                    <div>
+                                        <label className="block text-xs font-medium text-neutral-600 mb-1">{t('seller:createListing.visitAvailability.startTime', 'Start Time')}</label>
+                                        <input
+                                            type="time"
+                                            value={listingData.visitAvailability.startTime}
+                                            onChange={(e) => setListingData(prev => ({
+                                                ...prev,
+                                                visitAvailability: { ...prev.visitAvailability, startTime: e.target.value }
+                                            }))}
+                                            className="w-full px-3 py-2 text-sm border border-amber-200 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500"
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="block text-xs font-medium text-neutral-600 mb-1">{t('seller:createListing.visitAvailability.endTime', 'End Time')}</label>
+                                        <input
+                                            type="time"
+                                            value={listingData.visitAvailability.endTime}
+                                            onChange={(e) => setListingData(prev => ({
+                                                ...prev,
+                                                visitAvailability: { ...prev.visitAvailability, endTime: e.target.value }
+                                            }))}
+                                            className="w-full px-3 py-2 text-sm border border-amber-200 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500"
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="block text-xs font-medium text-neutral-600 mb-1">{t('seller:createListing.visitAvailability.slotDuration', 'Slot Duration')}</label>
+                                        <select
+                                            value={listingData.visitAvailability.slotDurationMinutes}
+                                            onChange={(e) => setListingData(prev => ({
+                                                ...prev,
+                                                visitAvailability: { ...prev.visitAvailability, slotDurationMinutes: Number(e.target.value) }
+                                            }))}
+                                            className="w-full px-3 py-2 text-sm border border-amber-200 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500"
+                                        >
+                                            <option value={15}>15 min</option>
+                                            <option value={30}>30 min</option>
+                                            <option value={45}>45 min</option>
+                                            <option value={60}>60 min</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                {/* Notes */}
+                                <div>
+                                    <label className="block text-xs font-medium text-neutral-600 mb-1">{t('seller:createListing.visitAvailability.notes', 'Notes for visitors')}</label>
+                                    <input
+                                        type="text"
+                                        value={listingData.visitAvailability.notes || ''}
+                                        onChange={(e) => setListingData(prev => ({
+                                            ...prev,
+                                            visitAvailability: { ...prev.visitAvailability, notes: e.target.value }
+                                        }))}
+                                        className="w-full px-3 py-2 text-sm border border-amber-200 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500"
+                                        placeholder={t('seller:createListing.visitAvailability.notesPlaceholder', 'e.g., Ring bell at gate, parking available...')}
+                                    />
+                                </div>
+                            </div>
+                        )}
+                    </fieldset>
+
                     {/* Description */}
                     <fieldset><label htmlFor="description" className="block text-sm font-medium text-neutral-700 mb-1">{t('seller:createListing.fields.description')}</label><textarea id="description" name="description" value={listingData.description} onChange={handleInputChange} className={`${inputBaseClasses} h-48`} required /></fieldset>
 

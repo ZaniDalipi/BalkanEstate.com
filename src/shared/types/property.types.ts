@@ -133,6 +133,17 @@ export interface Property {
   rentedAt?: number;
   rentedUntil?: number;
   rentalHistory?: RentalHistoryEntry[];
+  // Visit/viewing availability
+  visitAvailability?: VisitAvailability;
+}
+
+export interface VisitAvailability {
+  enabled: boolean;
+  days: number[]; // 0=Sunday, 1=Monday, ..., 6=Saturday
+  startTime: string; // e.g. "09:00"
+  endTime: string; // e.g. "18:00"
+  slotDurationMinutes: number; // e.g. 30
+  notes?: string;
 }
 
 export type SellerType = 'any' | 'agent' | 'private';

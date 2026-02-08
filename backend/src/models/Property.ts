@@ -23,6 +23,16 @@ export interface IRentalHistoryEntry {
   notes?: string;
 }
 
+// Visit availability - seller-defined time windows for property viewings
+export interface IVisitAvailability {
+  enabled: boolean;
+  days: number[]; // 0=Sunday, 1=Monday, ..., 6=Saturday
+  startTime: string; // e.g. "09:00"
+  endTime: string; // e.g. "18:00"
+  slotDurationMinutes: number; // e.g. 30
+  notes?: string; // e.g. "Ring bell at gate"
+}
+
 export interface IProperty extends Document {
   sellerId: mongoose.Types.ObjectId;
   createdByName: string; // Name of the user who created this listing
@@ -114,6 +124,8 @@ export interface IProperty extends Document {
   rentedAt?: Date; // When the property was rented
   rentedUntil?: Date; // When the rental period ends
   rentalHistory?: IRentalHistoryEntry[]; // Past rental periods for income tracking
+  // Visit/viewing availability
+  visitAvailability?: IVisitAvailability;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -494,6 +506,15 @@ const PropertySchema: Schema = new Schema(
         notes: { type: String },
       },
     ],
+    // Visit/viewing availability
+    visitAvailability: {
+      enabled: { type: Boolean, default: false },
+      days: { type: [Number], default: [1, 2, 3, 4, 5] }, // Mon-Fri
+      startTime: { type: String, default: '09:00' },
+      endTime: { type: String, default: '18:00' },
+      slotDurationMinutes: { type: Number, default: 30 },
+      notes: { type: String },
+    },
   },
   {
     timestamps: true,

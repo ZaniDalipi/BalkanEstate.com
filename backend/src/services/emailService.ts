@@ -2913,6 +2913,229 @@ Questions? Contact us at support@balkanestateai.com
       category: 'alerts',
     });
   }
+
+  /**
+   * Send viewing confirmation email to visitor
+   */
+  async sendViewingConfirmation(params: {
+    visitorEmail: string;
+    visitorName: string;
+    propertyTitle: string;
+    propertyAddress: string;
+    date: string;
+    timeSlot: string;
+    sellerName: string;
+    propertyId: string;
+  }): Promise<void> {
+    const safeName = escapeHtml(params.visitorName);
+    const safeTitle = escapeHtml(params.propertyTitle);
+    const safeAddress = escapeHtml(params.propertyAddress);
+    const safeDate = escapeHtml(params.date);
+    const safeTime = escapeHtml(params.timeSlot);
+    const safeSellerName = escapeHtml(params.sellerName);
+    const frontendUrl = process.env.FRONTEND_URL || 'https://balkanestate.com';
+    const currentYear = new Date().getFullYear();
+
+    const html = `
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body style="margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f3f4f6; -webkit-font-smoothing: antialiased;">
+  <div style="display: none; max-height: 0; overflow: hidden;">
+    Your viewing has been scheduled for ${safeDate} at ${safeTime}
+  </div>
+  <div style="max-width: 600px; margin: 0 auto; background-color: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);">
+    <div style="background: linear-gradient(135deg, #0252CD 0%, #0369a1 100%); padding: 40px 24px; text-align: center;">
+      <div style="margin-bottom: 16px;">
+        <span style="display: inline-block; width: 60px; height: 60px; background: rgba(255,255,255,0.1); border-radius: 50%; line-height: 60px; font-size: 28px;">📅</span>
+      </div>
+      <h1 style="color: #ffffff; margin: 0; font-size: 24px; font-weight: 700;">Viewing Confirmed!</h1>
+      <p style="color: #bfdbfe; margin: 8px 0 0 0; font-size: 14px;">Your property viewing has been scheduled</p>
+    </div>
+    <div style="padding: 32px 24px;">
+      <p style="color: #374151; font-size: 16px; margin: 0 0 16px 0;">
+        Hello ${safeName},
+      </p>
+      <p style="color: #4b5563; font-size: 15px; line-height: 1.6; margin: 0 0 24px 0;">
+        Your viewing request has been submitted. The property owner will review and confirm your appointment.
+      </p>
+      <div style="background: #f0f9ff; border: 1px solid #bae6fd; border-radius: 12px; padding: 24px; margin: 0 0 24px 0;">
+        <h2 style="color: #0369a1; font-size: 16px; margin: 0 0 16px 0;">Viewing Details</h2>
+        <table style="width: 100%; border-collapse: collapse;">
+          <tr>
+            <td style="padding: 8px 0; color: #6b7280; font-size: 14px; width: 120px;">Property:</td>
+            <td style="padding: 8px 0; color: #111827; font-size: 14px; font-weight: 600;">${safeTitle}</td>
+          </tr>
+          <tr>
+            <td style="padding: 8px 0; color: #6b7280; font-size: 14px;">Address:</td>
+            <td style="padding: 8px 0; color: #111827; font-size: 14px;">${safeAddress}</td>
+          </tr>
+          <tr>
+            <td style="padding: 8px 0; color: #6b7280; font-size: 14px;">Date:</td>
+            <td style="padding: 8px 0; color: #111827; font-size: 14px; font-weight: 600;">${safeDate}</td>
+          </tr>
+          <tr>
+            <td style="padding: 8px 0; color: #6b7280; font-size: 14px;">Time:</td>
+            <td style="padding: 8px 0; color: #111827; font-size: 14px; font-weight: 600;">${safeTime}</td>
+          </tr>
+          <tr>
+            <td style="padding: 8px 0; color: #6b7280; font-size: 14px;">Contact:</td>
+            <td style="padding: 8px 0; color: #111827; font-size: 14px;">${safeSellerName}</td>
+          </tr>
+        </table>
+      </div>
+      <div style="text-align: center; margin: 24px 0;">
+        <a href="${frontendUrl}/property/${params.propertyId}"
+           style="display: inline-block; background: linear-gradient(135deg, #0252CD 0%, #0369a1 100%); color: #ffffff; text-decoration: none; padding: 14px 32px; border-radius: 10px; font-weight: 600; font-size: 15px; box-shadow: 0 4px 14px rgba(2, 82, 205, 0.3);">
+          View Property
+        </a>
+      </div>
+      <div style="background: #fef3c7; border-radius: 8px; padding: 16px; margin: 24px 0;">
+        <p style="color: #92400e; font-size: 13px; margin: 0; line-height: 1.5;">
+          <strong>Note:</strong> The property owner will confirm your viewing. You'll receive another email once confirmed. Please arrive on time and bring a valid ID.
+        </p>
+      </div>
+    </div>
+    <div style="background: #f9fafb; padding: 24px; text-align: center; border-top: 1px solid #e5e7eb;">
+      <p style="color: #6b7280; font-size: 12px; margin: 0 0 8px 0;">
+        Need help? Contact us at <a href="mailto:support@balkanestateai.com" style="color: #0252CD; text-decoration: none;">support@balkanestateai.com</a>
+      </p>
+      <p style="color: #9ca3af; font-size: 11px; margin: 0;">
+        &copy; ${currentYear} BalkanEstate<sup>AI</sup>
+      </p>
+    </div>
+  </div>
+</body>
+</html>`;
+
+    await this.sendEmail({
+      to: params.visitorEmail,
+      subject: `📅 Viewing Scheduled: ${params.propertyTitle} on ${params.date}`,
+      html,
+      text: `Hello ${params.visitorName},\n\nYour viewing has been scheduled!\n\nProperty: ${params.propertyTitle}\nAddress: ${params.propertyAddress}\nDate: ${params.date}\nTime: ${params.timeSlot}\nContact: ${params.sellerName}\n\nThe property owner will confirm your viewing.\n\nView property: ${frontendUrl}/property/${params.propertyId}\n\n© ${currentYear} BalkanEstateᴬᴵ`,
+      category: 'inquiries',
+    });
+  }
+
+  /**
+   * Send viewing notification email to seller/agent
+   */
+  async sendViewingNotification(params: {
+    sellerEmail: string;
+    sellerName: string;
+    visitorName: string;
+    visitorEmail: string;
+    visitorPhone?: string;
+    visitorMessage?: string;
+    propertyTitle: string;
+    propertyAddress: string;
+    date: string;
+    timeSlot: string;
+    propertyId: string;
+  }): Promise<void> {
+    const safeSellerName = escapeHtml(params.sellerName);
+    const safeVisitorName = escapeHtml(params.visitorName);
+    const safeVisitorEmail = escapeHtml(params.visitorEmail);
+    const safeVisitorPhone = escapeHtml(params.visitorPhone);
+    const safeVisitorMessage = escapeHtml(params.visitorMessage);
+    const safeTitle = escapeHtml(params.propertyTitle);
+    const safeAddress = escapeHtml(params.propertyAddress);
+    const safeDate = escapeHtml(params.date);
+    const safeTime = escapeHtml(params.timeSlot);
+    const frontendUrl = process.env.FRONTEND_URL || 'https://balkanestate.com';
+    const currentYear = new Date().getFullYear();
+
+    const html = `
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body style="margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f3f4f6; -webkit-font-smoothing: antialiased;">
+  <div style="display: none; max-height: 0; overflow: hidden;">
+    New viewing request from ${safeVisitorName} for ${safeDate} at ${safeTime}
+  </div>
+  <div style="max-width: 600px; margin: 0 auto; background-color: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);">
+    <div style="background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); padding: 40px 24px; text-align: center;">
+      <div style="margin-bottom: 16px;">
+        <span style="display: inline-block; width: 60px; height: 60px; background: rgba(255,255,255,0.15); border-radius: 50%; line-height: 60px; font-size: 28px;">🏠</span>
+      </div>
+      <h1 style="color: #ffffff; margin: 0; font-size: 24px; font-weight: 700;">New Viewing Request!</h1>
+      <p style="color: #fef3c7; margin: 8px 0 0 0; font-size: 14px;">${safeTitle}</p>
+    </div>
+    <div style="padding: 32px 24px;">
+      <p style="color: #374151; font-size: 16px; margin: 0 0 16px 0;">
+        Hello ${safeSellerName},
+      </p>
+      <p style="color: #4b5563; font-size: 15px; line-height: 1.6; margin: 0 0 24px 0;">
+        Someone wants to view your property. Here are the details:
+      </p>
+      <div style="background: #fffbeb; border: 1px solid #fde68a; border-radius: 12px; padding: 24px; margin: 0 0 24px 0;">
+        <h2 style="color: #92400e; font-size: 16px; margin: 0 0 16px 0;">Viewing Details</h2>
+        <table style="width: 100%; border-collapse: collapse;">
+          <tr>
+            <td style="padding: 8px 0; color: #6b7280; font-size: 14px; width: 120px;">Property:</td>
+            <td style="padding: 8px 0; color: #111827; font-size: 14px; font-weight: 600;">${safeTitle}</td>
+          </tr>
+          <tr>
+            <td style="padding: 8px 0; color: #6b7280; font-size: 14px;">Date:</td>
+            <td style="padding: 8px 0; color: #111827; font-size: 14px; font-weight: 600;">${safeDate} at ${safeTime}</td>
+          </tr>
+        </table>
+      </div>
+      <div style="background: #f3f4f6; border-radius: 12px; padding: 24px; margin: 0 0 24px 0;">
+        <h2 style="color: #374151; font-size: 16px; margin: 0 0 16px 0;">Visitor Info</h2>
+        <table style="width: 100%; border-collapse: collapse;">
+          <tr>
+            <td style="padding: 8px 0; color: #6b7280; font-size: 14px; width: 120px;">Name:</td>
+            <td style="padding: 8px 0; color: #111827; font-size: 14px; font-weight: 600;">${safeVisitorName}</td>
+          </tr>
+          <tr>
+            <td style="padding: 8px 0; color: #6b7280; font-size: 14px;">Email:</td>
+            <td style="padding: 8px 0; color: #111827; font-size: 14px;">
+              <a href="mailto:${safeVisitorEmail}" style="color: #0252CD; text-decoration: none;">${safeVisitorEmail}</a>
+            </td>
+          </tr>
+          ${safeVisitorPhone ? `<tr>
+            <td style="padding: 8px 0; color: #6b7280; font-size: 14px;">Phone:</td>
+            <td style="padding: 8px 0; color: #111827; font-size: 14px;">
+              <a href="tel:${safeVisitorPhone}" style="color: #0252CD; text-decoration: none;">${safeVisitorPhone}</a>
+            </td>
+          </tr>` : ''}
+          ${safeVisitorMessage ? `<tr>
+            <td style="padding: 8px 0; color: #6b7280; font-size: 14px; vertical-align: top;">Message:</td>
+            <td style="padding: 8px 0; color: #111827; font-size: 14px; font-style: italic;">"${safeVisitorMessage}"</td>
+          </tr>` : ''}
+        </table>
+      </div>
+      <div style="text-align: center; margin: 24px 0;">
+        <a href="${frontendUrl}/property/${params.propertyId}"
+           style="display: inline-block; background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); color: #ffffff; text-decoration: none; padding: 14px 32px; border-radius: 10px; font-weight: 600; font-size: 15px; box-shadow: 0 4px 14px rgba(245, 158, 11, 0.3);">
+          View Property Listing
+        </a>
+      </div>
+    </div>
+    <div style="background: #f9fafb; padding: 24px; text-align: center; border-top: 1px solid #e5e7eb;">
+      <p style="color: #9ca3af; font-size: 11px; margin: 0;">
+        &copy; ${currentYear} BalkanEstate<sup>AI</sup>
+      </p>
+    </div>
+  </div>
+</body>
+</html>`;
+
+    await this.sendEmail({
+      to: params.sellerEmail,
+      subject: `🏠 New Viewing Request from ${params.visitorName} - ${params.date} at ${params.timeSlot}`,
+      html,
+      text: `Hello ${params.sellerName},\n\nNew viewing request!\n\nProperty: ${params.propertyTitle}\nDate: ${params.date} at ${params.timeSlot}\n\nVisitor: ${params.visitorName}\nEmail: ${params.visitorEmail}${params.visitorPhone ? `\nPhone: ${params.visitorPhone}` : ''}${params.visitorMessage ? `\nMessage: "${params.visitorMessage}"` : ''}\n\nView listing: ${frontendUrl}/property/${params.propertyId}\n\n© ${currentYear} BalkanEstateᴬᴵ`,
+      category: 'inquiries',
+    });
+  }
 }
 
 const emailServiceInstance = new EmailService();
@@ -2936,3 +3159,5 @@ export const sendAgentRegistrationCouponsEmail = emailServiceInstance.sendAgentR
 export const sendEnterpriseWelcomeEmail = emailServiceInstance.sendEnterpriseWelcomeEmail.bind(emailServiceInstance);
 export const sendAgentJoinedAgencyEmail = emailServiceInstance.sendAgentJoinedAgencyEmail.bind(emailServiceInstance);
 export const sendAgencyNewMemberEmail = emailServiceInstance.sendAgencyNewMemberEmail.bind(emailServiceInstance);
+export const sendViewingConfirmation = emailServiceInstance.sendViewingConfirmation.bind(emailServiceInstance);
+export const sendViewingNotification = emailServiceInstance.sendViewingNotification.bind(emailServiceInstance);

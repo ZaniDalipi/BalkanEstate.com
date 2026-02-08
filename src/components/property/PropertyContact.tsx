@@ -79,17 +79,8 @@ export const PropertyContact: React.FC<PropertyContactProps> = ({
   };
 
   const handleScheduleVisit = () => {
-    if (isRental) {
-      // For rentals, open the dedicated viewing scheduler
-      setShowViewingModal(true);
-      return;
-    }
-    if (!state.isAuthenticated) {
-      dispatch({ type: 'TOGGLE_AUTH_MODAL', payload: { isOpen: true } });
-      return;
-    }
-    // Start conversation with a visit request message
-    onContactSeller();
+    // Open viewing scheduler for all property types (rent & buy)
+    setShowViewingModal(true);
   };
 
   const handleShare = async () => {
@@ -362,18 +353,12 @@ export const PropertyContact: React.FC<PropertyContactProps> = ({
         defaultPhone={currentUser?.phone || ''}
       />
 
-      {/* Schedule Viewing Modal (Rental) */}
-      {isRental && (
-        <ScheduleViewingModal
-          property={property}
-          isOpen={showViewingModal}
-          onClose={() => setShowViewingModal(false)}
-          onSubmit={(data) => {
-            // In a real app, this would send to the backend
-            console.log('Viewing request:', data);
-          }}
-        />
-      )}
+      {/* Schedule Viewing Modal (All property types) */}
+      <ScheduleViewingModal
+        property={property}
+        isOpen={showViewingModal}
+        onClose={() => setShowViewingModal(false)}
+      />
 
       {/* Rental-specific widgets OR sale-specific widgets */}
       {isRental ? (

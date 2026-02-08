@@ -107,9 +107,12 @@ const HighlightedPropertyCard: React.FC<HighlightedPropertyCardProps> = ({ prope
     setCurrentImageIndex(index);
   }, []);
 
-  const handleCardClick = useCallback(() => {
+  const handleCardClick = useCallback((e?: React.MouseEvent) => {
+    e?.stopPropagation();
     dispatch({ type: 'SET_SELECTED_PROPERTY', payload: property.id });
+    dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'property-details' });
     window.history.pushState({ propertyId: property.id }, '', `/property/${property.id}`);
+    window.dispatchEvent(new PopStateEvent('popstate'));
   }, [dispatch, property.id]);
 
   const handleFavoriteClick = useCallback(async (e: React.MouseEvent) => {
@@ -179,7 +182,7 @@ const HighlightedPropertyCard: React.FC<HighlightedPropertyCardProps> = ({ prope
       onClick={handleCardClick}
     >
       {/* Image Carousel Section */}
-      <div className="relative w-full md:w-2/5 h-56 md:h-auto md:min-h-[280px] overflow-hidden">
+      <div className="relative w-full md:w-2/5 h-48 md:h-auto md:min-h-[250px] overflow-hidden">
         {/* Images */}
         <div className="relative w-full h-full">
           {displayImages.map((imgUrl, index) => (
@@ -296,10 +299,10 @@ const HighlightedPropertyCard: React.FC<HighlightedPropertyCardProps> = ({ prope
       </div>
 
       {/* Content Section */}
-      <div className="flex-1 p-5 md:p-6 flex flex-col">
+      <div className="flex-1 p-4 md:p-5 flex flex-col">
         {/* Price */}
         <div className="flex items-center justify-between mb-3">
-          <span className="bg-gradient-to-r from-primary to-primary-dark text-white text-lg md:text-xl font-bold px-4 py-1.5 rounded-lg shadow-md">
+          <span className="bg-gradient-to-r from-primary to-primary-dark text-white text-base md:text-lg font-bold px-3.5 py-1.5 rounded-lg shadow-md">
             {formatPrice(property.price, property.country)}
             {isRental && <span className="text-sm font-normal opacity-80">/{property.rentPeriod === 'weekly' ? t('common:wk', 'wk') : property.rentPeriod === 'daily' ? t('common:day', 'day') : t('common:mo', 'mo')}</span>}
           </span>
@@ -310,19 +313,19 @@ const HighlightedPropertyCard: React.FC<HighlightedPropertyCardProps> = ({ prope
 
         {/* Title */}
         {property.title && (
-          <h3 className="text-lg md:text-xl font-bold text-neutral-900 mb-2 line-clamp-2 group-hover:text-primary transition-colors">
+          <h3 className="text-base md:text-lg font-bold text-neutral-900 mb-1.5 line-clamp-2 group-hover:text-primary transition-colors">
             {property.title}
           </h3>
         )}
 
         {/* Location */}
-        <div className="flex items-center gap-2 mb-4 text-neutral-600">
-          <MapPinIcon className="w-4 h-4 text-primary flex-shrink-0" />
+        <div className="flex items-center gap-2 mb-3 text-neutral-600">
+          <MapPinIcon className="w-3.5 h-3.5 text-primary flex-shrink-0" />
           <span className="text-sm">{property.address}</span>
         </div>
 
         {/* Property Stats */}
-        <div className="grid grid-cols-4 gap-3 mb-4">
+        <div className="grid grid-cols-4 gap-2.5 mb-3">
           <div className="flex flex-col items-center bg-neutral-50 py-2 px-2 rounded-xl border border-neutral-100">
             <BedIcon className="w-5 h-5 text-primary mb-1" />
             <span className="font-bold text-sm text-neutral-800">{property.beds}</span>
@@ -347,7 +350,7 @@ const HighlightedPropertyCard: React.FC<HighlightedPropertyCardProps> = ({ prope
 
         {/* Description excerpt */}
         {property.description && (
-          <p className="text-sm text-neutral-600 line-clamp-2 mb-4 flex-grow">
+          <p className="text-sm text-neutral-600 line-clamp-2 mb-3 flex-grow">
             {property.description}
           </p>
         )}

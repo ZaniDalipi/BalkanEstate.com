@@ -140,6 +140,15 @@ export const useListingForm = (propertyToEdit: Property | null) => {
                 internetIncluded: propertyToEdit.internetIncluded || false,
                 tenantRequirements: propertyToEdit.tenantRequirements || [],
                 maxOccupants: propertyToEdit.maxOccupants || 1,
+                // Visit availability
+                visitAvailability: propertyToEdit.visitAvailability || {
+                    enabled: false,
+                    days: [1, 2, 3, 4, 5],
+                    startTime: '09:00',
+                    endTime: '18:00',
+                    slotDurationMinutes: 30,
+                    notes: '',
+                },
             });
 
             // Set country and city from property
@@ -767,6 +776,10 @@ export const useListingForm = (propertyToEdit: Property | null) => {
                     internetIncluded: listingData.internetIncluded ?? false,
                     tenantRequirements: listingData.tenantRequirements || [],
                     maxOccupants: Number(listingData.maxOccupants) || 1,
+                } : {}),
+                // Visit availability (for all listing types)
+                ...(listingData.visitAvailability.enabled ? {
+                    visitAvailability: listingData.visitAvailability,
                 } : {}),
             };
 
