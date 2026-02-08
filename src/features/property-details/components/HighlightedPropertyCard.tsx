@@ -180,7 +180,7 @@ const HighlightedPropertyCard: React.FC<HighlightedPropertyCardProps> = ({ prope
       onClick={handleCardClick}
     >
       {/* Image Section - absolute on desktop to guarantee full height fill */}
-      <div className="relative h-48 md:h-auto md:absolute md:inset-y-0 md:left-0 md:w-[40%] overflow-hidden bg-neutral-100">
+      <div className="relative h-48 md:h-full md:absolute md:inset-y-0 md:left-0 md:w-[40%] overflow-hidden bg-neutral-100">
         <div className="absolute inset-0">
           {displayImages.map((imgUrl, index) => (
             <div
