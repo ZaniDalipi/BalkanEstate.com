@@ -200,6 +200,7 @@
     "urgent": "Hitno",
     "exclusive": "Ekskluzivno",
     "underOffer": "U Ponudi",
+    "soldBanner": "Ova nekretnina je prodana",
     "rentedBanner": "Ova nekretnina je iznajmljena",
     "rentedUntil": "Dostupno od {{date}}"
   },

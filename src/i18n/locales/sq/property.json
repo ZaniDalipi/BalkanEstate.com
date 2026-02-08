@@ -200,6 +200,7 @@
     "urgent": "Urgjente",
     "exclusive": "Ekskluzive",
     "underOffer": "Në Negociata",
+    "soldBanner": "Kjo pronë është shitur",
     "rentedBanner": "Kjo pronë është dhënë me qira",
     "rentedUntil": "E disponueshme nga {{date}}"
   },

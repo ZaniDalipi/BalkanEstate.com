@@ -200,6 +200,7 @@
     "urgent": "Urgent",
     "exclusive": "Exclusiv",
     "underOffer": "În Negociere",
+    "soldBanner": "Această proprietate a fost vândută",
     "rentedBanner": "Această proprietate a fost închiriată",
     "rentedUntil": "Disponibilă din {{date}}"
   },

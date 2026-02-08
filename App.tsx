@@ -319,6 +319,7 @@ const AppContent: React.FC<{ onToggleSidebar: () => void }> = ({ onToggleSidebar
         '/cookie-policy': 'cookies',
         '/refund': 'refund',
         '/refund-policy': 'refund',
+        '/rent': 'rentals',
         '/rentals': 'rentals',
         '/create-agency': 'createAgency',
         '/create-agency/payment': 'createAgencyPayment',

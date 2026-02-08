@@ -25,6 +25,7 @@ import {
   NeighborhoodInsights,
   SocialVideoEmbed,
 } from '@/src/components/property';
+import { useLocalizedNavigation } from '@/src/hooks/useLocalizedNavigation';
 import { useTrackView } from '@/src/features/view-stats/hooks';
 import PromotionModal from '@/src/features/promotions/components/PromotionModal';
 import { useNotification } from '@/src/shared/hooks/useNotification';
@@ -50,6 +51,7 @@ const PropertyDetailsPage: React.FC<{ property: Property }> = ({ property: cache
   const { t, i18n } = useTranslation(['property', 'rental', 'common']);
   const { state, dispatch, createConversation, toggleSavedHome, fetchProperties } = useAppContext();
   const { error } = useNotification();
+  const { navigate } = useLocalizedNavigation();
 
   // Fetch fresh property data to ensure we have latest fields (e.g., generated video)
   // This fixes the issue where video doesn't show when opening from search (stale cache)
@@ -83,10 +85,10 @@ const PropertyDetailsPage: React.FC<{ property: Property }> = ({ property: cache
       }
     },
     onPropertyDeleted: (data) => {
-      // If the property being viewed was deleted, go back to search
+      // If the property being viewed was deleted, go back to the appropriate listing page
       if (data.propertyId === property.id) {
-        dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'search' });
-        window.history.pushState({}, '', '/');
+        const isRental = property.listingType === 'rent';
+        navigate(isRental ? '/rentals' : '/search');
       }
     },
   });
@@ -229,7 +231,8 @@ const PropertyDetailsPage: React.FC<{ property: Property }> = ({ property: cache
   // Handlers
   const handleBack = () => {
     dispatch({ type: 'SET_SELECTED_PROPERTY', payload: null });
-    window.history.pushState({}, '', '/search');
+    const isRental = property.listingType === 'rent';
+    navigate(isRental ? '/rentals' : '/search');
   };
 
   const handleFavoriteClick = async () => {
