@@ -200,6 +200,18 @@ class PaymentProviderFactory {
   }
 
   /**
+   * Create a promotion payment session
+   * TODO: Integrate with payment provider for promotion purchases
+   */
+  public async createPromotionPayment(params: Record<string, any>): Promise<PaymentResult> {
+    return {
+      success: false,
+      provider: 'web',
+      error: 'Payment provider not yet configured for promotions. See PAYMENT_OPTIONS_2026.md for integration options.',
+    };
+  }
+
+  /**
    * Get provider info for display purposes
    */
   public getProviderInfo(provider: PaymentProvider): { name: string; description: string; fees: string } {
