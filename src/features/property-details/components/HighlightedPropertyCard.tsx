@@ -180,7 +180,7 @@ const HighlightedPropertyCard: React.FC<HighlightedPropertyCardProps> = ({ prope
       onClick={handleCardClick}
     >
       {/* Image Section - fills height of card in row layout */}
-      <div className="relative w-full md:w-[40%] aspect-[4/3] md:aspect-auto overflow-hidden">
+      <div className="relative w-full md:w-[40%] min-h-48 overflow-hidden">
         <div className="absolute inset-0">
           {displayImages.map((imgUrl, index) => (
             <div
