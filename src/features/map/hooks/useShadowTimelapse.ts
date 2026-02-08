@@ -210,7 +210,8 @@ export function useShadowTimelapse(
   const effectiveStart = config.startHour ?? Math.floor(sunInfo.sunrise - 1);
   const effectiveEnd = config.endHour ?? Math.ceil(sunInfo.sunset + 1);
 
-  const [currentTime, setCurrentTime] = useState(effectiveStart);
+  // Start at noon so shadows are immediately visible
+  const [currentTime, setCurrentTime] = useState(12);
   const [isPlaying, setIsPlaying] = useState(false);
   const [speed, setSpeed] = useState<TimelapseSpeed>('normal');
 

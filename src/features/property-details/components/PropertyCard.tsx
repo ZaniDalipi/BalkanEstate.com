@@ -1,4 +1,4 @@
-import React, { useState, useCallback, memo } from 'react';
+import React, { useState, useCallback, memo, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Property } from '@/types';
 import { MapPinIcon, BedIcon, BathIcon, SqftIcon, UserCircleIcon, ScaleIcon, LivingRoomIcon, BuildingOfficeIcon, StarIconSolid, FireIcon } from '@/constants';
@@ -10,6 +10,21 @@ interface PropertyCardProps {
   property: Property;
   showToast?: (message: string, type: 'success' | 'error') => void;
   showCompareButton?: boolean;
+}
+
+// Props for the pure inner component
+interface PropertyCardInnerProps {
+  property: Property;
+  isFavorited: boolean;
+  isInComparison: boolean;
+  isAuthenticated: boolean;
+  comparisonCount: number;
+  showToast?: (message: string, type: 'success' | 'error') => void;
+  showCompareButton?: boolean;
+  onCardClick: (e: React.MouseEvent) => void;
+  onFavoriteClick: (e: React.MouseEvent) => void;
+  onCompareClick: (e: React.MouseEvent) => void;
+  onLocationClick: (e: React.MouseEvent, type: 'city' | 'country') => void;
 }
 
 // Seller Avatar component with error handling
@@ -53,14 +68,25 @@ const SellerAvatar: React.FC<{ avatarUrl?: string; name: string; type: string; s
   );
 };
 
-const PropertyCard: React.FC<PropertyCardProps> = ({ property, showToast, showCompareButton }) => {
+/**
+ * Pure inner component - handles ALL rendering, NO context subscription.
+ * Wrapped in memo() so it only re-renders when its specific props change.
+ * This prevents the "everything refreshes" issue when toggling favorites.
+ */
+const PropertyCardInner = memo<PropertyCardInnerProps>(({
+  property,
+  isFavorited,
+  isInComparison,
+  showToast,
+  showCompareButton,
+  onCardClick,
+  onFavoriteClick,
+  onCompareClick,
+  onLocationClick,
+}) => {
   const { t, i18n } = useTranslation(['property', 'rental', 'common']);
-  const { state, dispatch, toggleSavedHome, updateSearchPageState } = useAppContext();
   const [imageError, setImageError] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
-
-  // Defensive checks for required fields
-  const hasRequiredFields = property && property.id && property.price !== undefined;
 
   // Safe access with fallbacks
   const safeProperty = {
@@ -74,8 +100,6 @@ const PropertyCard: React.FC<PropertyCardProps> = ({ property, showToast, showCo
     seller: property?.seller || { type: 'private' as const, name: 'Unknown', phone: '' },
   };
 
-  const isFavorited = state.savedHomes.some(p => p.id === property?.id);
-  const isInComparison = state.comparisonList.includes(property?.id || '');
   const isNew = property?.createdAt && (Date.now() - property.createdAt < 3 * 24 * 60 * 60 * 1000);
   const isSold = property?.status === 'sold';
   const isRented = property?.status === 'rented';
@@ -87,106 +111,10 @@ const PropertyCard: React.FC<PropertyCardProps> = ({ property, showToast, showCo
     property.promotionEndDate > Date.now();
   const promotionTier = isActivelyPromoted ? property?.promotionTier : null;
 
-  // Early return for invalid/incomplete properties
-  if (!hasRequiredFields) {
-    return (
-      <div className="bg-white rounded-2xl overflow-hidden shadow-lg border-2 border-neutral-200 w-full flex flex-col">
-        <div className="w-full h-36 sm:h-40 md:h-44 bg-gradient-to-br from-neutral-100 via-neutral-200 to-neutral-300 flex items-center justify-center">
-          <BuildingOfficeIcon className="w-10 h-10 text-neutral-400" />
-        </div>
-        <div className="p-2.5 sm:p-3.5">
-          <div className="h-3.5 bg-neutral-200 rounded w-3/4 mb-1.5 animate-pulse" />
-          <div className="h-2.5 bg-neutral-200 rounded w-1/2 mb-2.5 animate-pulse" />
-          <div className="grid grid-cols-2 xs:grid-cols-4 gap-1.5">
-            {[1, 2, 3, 4].map(i => (
-              <div key={i} className="h-9 bg-neutral-100 rounded-lg animate-pulse" />
-            ))}
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  const handleCardClick = useCallback((e: React.MouseEvent) => {
-    e.stopPropagation();
-    dispatch({ type: 'SET_SELECTED_PROPERTY', payload: property.id });
-    dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'property-details' });
-    window.history.pushState({ propertyId: property.id }, '', `/property/${property.id}`);
-    window.dispatchEvent(new PopStateEvent('popstate'));
-  }, [dispatch, property.id]);
-
-  const handleFavoriteClick = useCallback(async (e: React.MouseEvent) => {
-      e.stopPropagation();
-      if (!state.isAuthenticated && !state.user) {
-          dispatch({ type: 'TOGGLE_AUTH_MODAL', payload: { isOpen: true } });
-      } else {
-          try {
-              await toggleSavedHome(property);
-          } catch (error) {
-              // Error removed
-              showToast?.('Failed to save property. Please try again.', 'error');
-          }
-      }
-  }, [state.isAuthenticated, state.user, dispatch, property, toggleSavedHome, showToast]);
-
-  const handleCompareClick = useCallback((e: React.MouseEvent) => {
-      e.stopPropagation();
-      if (isInComparison) {
-          dispatch({ type: 'REMOVE_FROM_COMPARISON', payload: property.id });
-      } else {
-          if (state.comparisonList.length < 5) {
-              dispatch({ type: 'ADD_TO_COMPARISON', payload: property.id });
-          } else {
-              showToast?.("You can compare a maximum of 5 properties.", 'error');
-          }
-      }
-  }, [isInComparison, dispatch, property.id, state.comparisonList.length, showToast]);
-
-  // Handle location click to navigate to search with city/country filter
-  const handleLocationClick = useCallback((e: React.MouseEvent, type: 'city' | 'country') => {
-    e.stopPropagation();
-
-    // Find the country key from BALKAN_COUNTRIES
-    const countryKey = Object.keys(BALKAN_COUNTRIES).find(
-      key => BALKAN_COUNTRIES[key].name.toLowerCase() === property.country.toLowerCase()
-    ) || '';
-
-    if (type === 'city') {
-      // Navigate to search with city filter
-      const newFilters = {
-        ...state.searchPageState.filters,
-        query: property.city,
-        country: countryKey,
-      };
-      updateSearchPageState({
-        filters: newFilters,
-        activeFilters: newFilters,
-      });
-      dispatch({ type: 'SET_SELECTED_PROPERTY', payload: null });
-      dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'search' });
-      window.history.pushState({}, '', `/search?city=${encodeURIComponent(property.city)}&country=${encodeURIComponent(countryKey)}`);
-    } else {
-      // Navigate to search with country filter only
-      const newFilters = {
-        ...state.searchPageState.filters,
-        query: '',
-        country: countryKey,
-      };
-      updateSearchPageState({
-        filters: newFilters,
-        activeFilters: newFilters,
-      });
-      dispatch({ type: 'SET_SELECTED_PROPERTY', payload: null });
-      dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'search' });
-      window.history.pushState({}, '', `/search?country=${encodeURIComponent(countryKey)}`);
-    }
-  }, [property.city, property.country, state.searchPageState.filters, updateSearchPageState, dispatch]);
-
   // Property type labels
   const propertyTypeLabel = t(`property:types.${property.propertyType}`, { defaultValue: t('property:property') });
 
   // Determine card styles based on promotion tier
-  // Premium = Gold (1st), Highlight = Light Blue (2nd), Featured = Dark Purple (3rd)
   const getCardStyles = () => {
     if (isSold || isRented) return 'border-neutral-300 opacity-80';
     if (isActivelyPromoted) {
@@ -205,8 +133,8 @@ const PropertyCard: React.FC<PropertyCardProps> = ({ property, showToast, showCo
       }`}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
-      onClick={handleCardClick}
-      onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); handleCardClick(e as any); } }}
+      onClick={onCardClick}
+      onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onCardClick(e as any); } }}
       role="article"
       tabIndex={0}
       aria-label={`${property.title || propertyTypeLabel}, ${formatPrice(property.price, property.country)}${isRental ? '/mo' : ''}, ${safeProperty.city}, ${safeProperty.country}`}
@@ -338,7 +266,7 @@ const PropertyCard: React.FC<PropertyCardProps> = ({ property, showToast, showCo
 
           {/* Favorite Button */}
           <button
-            onClick={handleFavoriteClick}
+            onClick={onFavoriteClick}
             className={`min-h-[44px] min-w-[44px] flex items-center justify-center rounded-full shadow-lg transition-all duration-300 touch-manipulation focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-red-500/50 ${
               isFavorited
                 ? 'bg-red-500 text-white scale-110'
@@ -386,7 +314,7 @@ const PropertyCard: React.FC<PropertyCardProps> = ({ property, showToast, showCo
           <MapPinIcon className="w-3.5 h-3.5 text-primary flex-shrink-0" />
           <div className="text-xs sm:text-sm text-neutral-600 truncate flex items-center gap-1">
             <button
-              onClick={(e) => handleLocationClick(e, 'city')}
+              onClick={(e) => onLocationClick(e, 'city')}
               className="hover:text-primary hover:underline transition-colors cursor-pointer"
               aria-label={`View all properties in ${safeProperty.city}`}
             >
@@ -394,7 +322,7 @@ const PropertyCard: React.FC<PropertyCardProps> = ({ property, showToast, showCo
             </button>
             <span>,</span>
             <button
-              onClick={(e) => handleLocationClick(e, 'country')}
+              onClick={(e) => onLocationClick(e, 'country')}
               className="hover:text-primary hover:underline transition-colors cursor-pointer"
               aria-label={`View all properties in ${safeProperty.country}`}
             >
@@ -507,7 +435,7 @@ const PropertyCard: React.FC<PropertyCardProps> = ({ property, showToast, showCo
           {/* Compare Button (if enabled) */}
           {showCompareButton && (
             <button
-              onClick={handleCompareClick}
+              onClick={onCompareClick}
               className={`mt-2.5 flex items-center justify-center gap-1.5 min-h-[44px] px-3 py-2 rounded-lg text-xs font-bold transition-all duration-300 w-full touch-manipulation focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-primary/50 ${
                 isInComparison
                   ? 'bg-primary text-white shadow-md'
@@ -523,6 +451,145 @@ const PropertyCard: React.FC<PropertyCardProps> = ({ property, showToast, showCo
         </div>{/* Close content wrapper */}
       </div>
     </div>
+  );
+});
+
+PropertyCardInner.displayName = 'PropertyCardInner';
+
+/**
+ * Outer connected component - thin wrapper that subscribes to AppContext,
+ * extracts primitive/stable values, and passes them to the memoized inner component.
+ * When context changes (e.g., savedHomes toggle), this wrapper re-renders but
+ * PropertyCardInner only re-renders if its specific props actually changed.
+ */
+const PropertyCard: React.FC<PropertyCardProps> = ({ property, showToast, showCompareButton }) => {
+  const { state, dispatch, toggleSavedHome, updateSearchPageState } = useAppContext();
+
+  // Defensive check for required fields
+  const hasRequiredFields = property && property.id && property.price !== undefined;
+
+  // Extract primitive values from context - these are compared by memo()
+  const isFavorited = state.savedHomes.some(p => p.id === property?.id);
+  const isInComparison = state.comparisonList.includes(property?.id || '');
+  const isAuthenticated = state.isAuthenticated;
+  const comparisonCount = state.comparisonList.length;
+
+  // Use refs for values that change often but are only needed in handlers
+  // This keeps handler callbacks stable (no dependency on changing state)
+  const stateRef = useRef(state);
+  stateRef.current = state;
+
+  const toggleSavedHomeRef = useRef(toggleSavedHome);
+  toggleSavedHomeRef.current = toggleSavedHome;
+
+  const updateSearchPageStateRef = useRef(updateSearchPageState);
+  updateSearchPageStateRef.current = updateSearchPageState;
+
+  // Stable handlers using refs - won't cause PropertyCardInner re-renders
+  const handleCardClick = useCallback((e: React.MouseEvent) => {
+    e.stopPropagation();
+    dispatch({ type: 'SET_SELECTED_PROPERTY', payload: property.id });
+    dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'property-details' });
+    window.history.pushState({ propertyId: property.id }, '', `/property/${property.id}`);
+    window.dispatchEvent(new PopStateEvent('popstate'));
+  }, [dispatch, property.id]);
+
+  const handleFavoriteClick = useCallback(async (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (!stateRef.current.isAuthenticated && !stateRef.current.user) {
+      dispatch({ type: 'TOGGLE_AUTH_MODAL', payload: { isOpen: true } });
+    } else {
+      try {
+        await toggleSavedHomeRef.current(property);
+      } catch (error) {
+        showToast?.('Failed to save property. Please try again.', 'error');
+      }
+    }
+  }, [dispatch, property, showToast]);
+
+  const handleCompareClick = useCallback((e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (stateRef.current.comparisonList.includes(property.id)) {
+      dispatch({ type: 'REMOVE_FROM_COMPARISON', payload: property.id });
+    } else {
+      if (stateRef.current.comparisonList.length < 5) {
+        dispatch({ type: 'ADD_TO_COMPARISON', payload: property.id });
+      } else {
+        showToast?.("You can compare a maximum of 5 properties.", 'error');
+      }
+    }
+  }, [dispatch, property.id, showToast]);
+
+  const handleLocationClick = useCallback((e: React.MouseEvent, type: 'city' | 'country') => {
+    e.stopPropagation();
+
+    const countryKey = Object.keys(BALKAN_COUNTRIES).find(
+      key => BALKAN_COUNTRIES[key].name.toLowerCase() === property.country.toLowerCase()
+    ) || '';
+
+    if (type === 'city') {
+      const newFilters = {
+        ...stateRef.current.searchPageState.filters,
+        query: property.city,
+        country: countryKey,
+      };
+      updateSearchPageStateRef.current({
+        filters: newFilters,
+        activeFilters: newFilters,
+      });
+      dispatch({ type: 'SET_SELECTED_PROPERTY', payload: null });
+      dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'search' });
+      window.history.pushState({}, '', `/search?city=${encodeURIComponent(property.city)}&country=${encodeURIComponent(countryKey)}`);
+    } else {
+      const newFilters = {
+        ...stateRef.current.searchPageState.filters,
+        query: '',
+        country: countryKey,
+      };
+      updateSearchPageStateRef.current({
+        filters: newFilters,
+        activeFilters: newFilters,
+      });
+      dispatch({ type: 'SET_SELECTED_PROPERTY', payload: null });
+      dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'search' });
+      window.history.pushState({}, '', `/search?country=${encodeURIComponent(countryKey)}`);
+    }
+  }, [property.city, property.country, dispatch]);
+
+  // Early return for invalid/incomplete properties
+  if (!hasRequiredFields) {
+    return (
+      <div className="bg-white rounded-2xl overflow-hidden shadow-lg border-2 border-neutral-200 w-full flex flex-col">
+        <div className="w-full h-36 sm:h-40 md:h-44 bg-gradient-to-br from-neutral-100 via-neutral-200 to-neutral-300 flex items-center justify-center">
+          <BuildingOfficeIcon className="w-10 h-10 text-neutral-400" />
+        </div>
+        <div className="p-2.5 sm:p-3.5">
+          <div className="h-3.5 bg-neutral-200 rounded w-3/4 mb-1.5 animate-pulse" />
+          <div className="h-2.5 bg-neutral-200 rounded w-1/2 mb-2.5 animate-pulse" />
+          <div className="grid grid-cols-2 xs:grid-cols-4 gap-1.5">
+            {[1, 2, 3, 4].map(i => (
+              <div key={i} className="h-9 bg-neutral-100 rounded-lg animate-pulse" />
+            ))}
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <PropertyCardInner
+      property={property}
+      isFavorited={isFavorited}
+      isInComparison={isInComparison}
+      isAuthenticated={isAuthenticated}
+      comparisonCount={comparisonCount}
+      showToast={showToast}
+      showCompareButton={showCompareButton}
+      onCardClick={handleCardClick}
+      onFavoriteClick={handleFavoriteClick}
+      onCompareClick={handleCompareClick}
+      onLocationClick={handleLocationClick}
+    />
   );
 };
 

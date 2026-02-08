@@ -575,8 +575,14 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   const toggleSavedHome = useCallback(async (property: Property) => {
     const isSaved = state.savedHomes.some(p => p.id === property.id);
-    await apiToggleSavedHome(property.id, isSaved);
+    // Optimistic update: update UI immediately before API call
     dispatch({ type: 'TOGGLE_SAVED_HOME', payload: property });
+    try {
+      await apiToggleSavedHome(property.id, isSaved);
+    } catch {
+      // Revert on API failure
+      dispatch({ type: 'TOGGLE_SAVED_HOME', payload: property });
+    }
   }, [state.savedHomes]);
 
   const addSavedSearch = useCallback(async (search: SavedSearch) => {

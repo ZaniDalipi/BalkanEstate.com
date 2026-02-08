@@ -1,4 +1,4 @@
-import React, { useCallback, useState, useRef, useEffect, useMemo } from 'react';
+import React, { useCallback, useState, useRef, useEffect, useMemo, memo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Property, ChatMessage, AiSearchQuery, Filters, SellerType, FurnishingStatus, HeatingType, PropertyCondition, ViewType, EnergyRating } from '@/types';
 import PropertyCard from '@/src/features/property-details/components/PropertyCard';
@@ -638,13 +638,13 @@ const FilterControls: React.FC<Omit<PropertyListProps, 'properties' | 'showList'
 
 const ITEMS_PER_PAGE = 20;
 
-// Animated wrapper for property cards
-const AnimatedPropertyCard: React.FC<{
+// Animated wrapper for property cards - memoized to prevent re-renders on parent state changes
+const AnimatedPropertyCard = memo<{
   property: Property;
   index: number;
   onHover?: (id: string | null) => void;
   isNew?: boolean;
-}> = ({ property, index, onHover, isNew = false }) => {
+}>(({ property, index, onHover, isNew = false }) => {
   const animationDelay = `${Math.min(index * 50, 300)}ms`;
 
   return (
@@ -657,7 +657,7 @@ const AnimatedPropertyCard: React.FC<{
       <PropertyCard property={property} />
     </div>
   );
-};
+});
 
 // CSS for property card animations
 const PropertyListStyles = () => (

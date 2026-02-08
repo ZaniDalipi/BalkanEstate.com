@@ -205,7 +205,63 @@ export function use3DMap(props: Map3DBuildingsProps) {
     }
   }, []);
 
+  // Determine the facing direction of a building from its footprint
+  // Returns the compass bearing (0-360) of the longest edge (building front)
+  const getBuildingFacing = useCallback((mapInstance: maplibregl.Map, latitude: number, longitude: number): number | null => {
+    if (!mapInstance.getLayer('3d-buildings')) return null;
+
+    const point = mapInstance.project([longitude, latitude]);
+    const buffer = 30;
+    const features = mapInstance.queryRenderedFeatures(
+      [
+        [point.x - buffer, point.y - buffer],
+        [point.x + buffer, point.y + buffer]
+      ],
+      { layers: ['3d-buildings'] }
+    );
+
+    if (features.length === 0) return null;
+
+    let coords: number[][] = [];
+    const geom = features[0].geometry;
+    if (geom.type === 'Polygon') {
+      coords = (geom as GeoJSON.Polygon).coordinates[0];
+    } else if (geom.type === 'MultiPolygon') {
+      coords = (geom as GeoJSON.MultiPolygon).coordinates[0][0];
+    }
+    if (coords.length < 3) return null;
+
+    // Find the longest edge - that's typically the building's front face
+    let maxLen = 0;
+    let facingBearing = 0;
+    for (let i = 0; i < coords.length - 1; i++) {
+      const dx = coords[i + 1][0] - coords[i][0];
+      const dy = coords[i + 1][1] - coords[i][1];
+      const len = Math.sqrt(dx * dx + dy * dy);
+      if (len > maxLen) {
+        maxLen = len;
+        // Bearing perpendicular to the edge = the direction the wall faces outward
+        const edgeBearing = Math.atan2(dx, dy) * (180 / Math.PI);
+        // Perpendicular (outward-facing normal)
+        facingBearing = (edgeBearing + 90 + 360) % 360;
+      }
+    }
+    return facingBearing;
+  }, []);
+
+  // Get cardinal direction label from bearing
+  const getCardinalLabel = (bearing: number): string => {
+    const dirs = ['North', 'NE', 'East', 'SE', 'South', 'SW', 'West', 'NW'];
+    return dirs[Math.round(bearing / 45) % 8];
+  };
+
+  const getCardinalShort = (bearing: number): string => {
+    const dirs = ['N', 'NE', 'E', 'SE', 'S', 'SW', 'W', 'NW'];
+    return dirs[Math.round(bearing / 45) % 8];
+  };
+
   // Add property marker - always shows a blue dot at the property location
+  // Also adds a facing direction compass indicator
   const addPropertyMarker = useCallback((
     mapInstance: maplibregl.Map,
     latitude: number,
@@ -245,7 +301,62 @@ export function use3DMap(props: Map3DBuildingsProps) {
     new maplibregl.Marker({ element: markerEl, anchor: 'center' })
       .setLngLat([longitude, latitude])
       .addTo(mapInstance);
-  }, []);
+
+    // Add facing direction indicator after a short delay (buildings need to render first)
+    setTimeout(() => {
+      const facing = getBuildingFacing(mapInstance, latitude, longitude);
+      if (facing === null) return;
+
+      const cardinal = getCardinalShort(facing);
+      const cardinalFull = getCardinalLabel(facing);
+      const arrowRotation = facing; // CSS rotation matches compass bearing
+
+      const facingEl = document.createElement('div');
+      facingEl.innerHTML = `
+        <div style="
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          gap: 2px;
+          pointer-events: none;
+        ">
+          <div style="
+            background: rgba(15, 23, 42, 0.92);
+            backdrop-filter: blur(8px);
+            color: white;
+            padding: 4px 10px;
+            border-radius: 10px;
+            border: 2px solid rgba(59, 130, 246, 0.6);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+            font-family: system-ui, sans-serif;
+            text-align: center;
+            white-space: nowrap;
+          ">
+            <div style="font-size: 10px; color: #94a3b8; font-weight: 500;">Facing</div>
+            <div style="display: flex; align-items: center; gap: 4px; justify-content: center;">
+              <div style="
+                width: 20px; height: 20px;
+                display: flex; align-items: center; justify-content: center;
+                transform: rotate(${arrowRotation}deg);
+              ">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#60a5fa" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M12 19V5M5 12l7-7 7 7"/>
+                </svg>
+              </div>
+              <span style="font-size: 14px; font-weight: 700; color: #60a5fa;">${cardinal}</span>
+            </div>
+            <div style="font-size: 9px; color: #64748b;">${cardinalFull}-facing</div>
+          </div>
+        </div>
+      `;
+
+      // Position the facing indicator slightly below the property
+      const offset = 0.00015; // ~15m south
+      new maplibregl.Marker({ element: facingEl, anchor: 'top' })
+        .setLngLat([longitude, latitude - offset])
+        .addTo(mapInstance);
+    }, 1500);
+  }, [getBuildingFacing]);
 
   // Add custom 3D building cube with floor slices for apartments
   // Uses the actual building geometry from the map data
