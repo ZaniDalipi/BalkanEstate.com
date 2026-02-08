@@ -3,6 +3,8 @@
  */
 import { useEffect, useRef, useCallback, useState } from 'react';
 import { getCadastreLayerForLocation, CADASTRE_MIN_ZOOM } from '@/config/cadastreLayers';
+import { useRainViewer } from './useRainViewer';
+import { latLngToWebMercator } from '../components/googleMapConstants';
 
 type ClimateRiskType = 'none' | 'flood' | 'fire' | 'wind' | 'air' | 'heat';
 
@@ -14,6 +16,9 @@ interface UseMapLayersProps {
 export const useMapLayers = ({ map, isLoaded }: UseMapLayersProps) => {
   const [showCadastre, setShowCadastre] = useState(false);
   const [selectedClimateRisk, setSelectedClimateRisk] = useState<ClimateRiskType>('none');
+
+  // RainViewer precipitation radar (free, no API key) - for flood layer
+  const { tileUrl: rainViewerTileUrl } = useRainViewer(selectedClimateRisk === 'flood');
 
   const cadastreLayerRef = useRef<google.maps.ImageMapType | null>(null);
   const climateLayerRef = useRef<google.maps.ImageMapType | null>(null);
@@ -294,6 +299,7 @@ export const useMapLayers = ({ map, isLoaded }: UseMapLayersProps) => {
   }, [map, isLoaded, showCadastre]);
 
   // Climate risk layer effect
+  // Sources: RainViewer (flood), NASA FIRMS (fire), OWM (wind/heat), AQICN (air)
   useEffect(() => {
     if (!map || !isLoaded) return;
 
@@ -308,10 +314,101 @@ export const useMapLayers = ({ map, isLoaded }: UseMapLayersProps) => {
 
     if (selectedClimateRisk === 'none') return;
 
-    // Climate risk layer configuration would go here
-    // This is a placeholder for actual climate data integration
+    const owmKey = import.meta.env.VITE_OWM_API_KEY || '';
+    let tileUrl: string | null = null;
+    let layerOpacity = 0.6;
+    let layerName = '';
+    let isWms = false;
 
-  }, [map, isLoaded, selectedClimateRisk]);
+    switch (selectedClimateRisk) {
+      case 'flood':
+        tileUrl = rainViewerTileUrl;
+        layerOpacity = 0.7;
+        layerName = 'Precipitation Radar (RainViewer)';
+        break;
+      case 'fire':
+        isWms = true;
+        layerOpacity = 0.7;
+        layerName = 'Active Fires 24h (NASA FIRMS)';
+        break;
+      case 'wind':
+        if (owmKey) tileUrl = `https://tile.openweathermap.org/map/wind_new/{z}/{x}/{y}.png?appid=${owmKey}`;
+        layerOpacity = 0.5;
+        layerName = 'Wind Speed (OWM)';
+        break;
+      case 'air':
+        tileUrl = 'https://tiles.aqicn.org/tiles/usepa-aqi/{z}/{x}/{y}.png';
+        layerOpacity = 0.6;
+        layerName = 'Air Quality (AQICN)';
+        break;
+      case 'heat':
+        if (owmKey) tileUrl = `https://tile.openweathermap.org/map/temp_new/{z}/{x}/{y}.png?appid=${owmKey}`;
+        layerOpacity = 0.5;
+        layerName = 'Temperature (OWM)';
+        break;
+    }
+
+    if (!tileUrl && !isWms) return;
+
+    let climateLayer: google.maps.ImageMapType;
+
+    if (isWms) {
+      climateLayer = new google.maps.ImageMapType({
+        getTileUrl: (coord, zoom) => {
+          const proj = map.getProjection();
+          if (!proj) return '';
+
+          const tileSize = 256;
+          const scale = Math.pow(2, zoom);
+          const sw = proj.fromPointToLatLng(new google.maps.Point(
+            (coord.x * tileSize) / scale,
+            ((coord.y + 1) * tileSize) / scale
+          ));
+          const ne = proj.fromPointToLatLng(new google.maps.Point(
+            ((coord.x + 1) * tileSize) / scale,
+            (coord.y * tileSize) / scale
+          ));
+          if (!sw || !ne) return '';
+
+          const swMerc = latLngToWebMercator(sw.lat(), sw.lng());
+          const neMerc = latLngToWebMercator(ne.lat(), ne.lng());
+          const bbox = `${swMerc.x},${swMerc.y},${neMerc.x},${neMerc.y}`;
+
+          return `https://firms.modaps.eosdis.nasa.gov/mapserver/wms/fires/51e65c3412f9d1b15eddb27ab9c3b28c/?SERVICE=WMS&VERSION=1.1.1&REQUEST=GetMap&LAYERS=fires_viirs_24&STYLES=&FORMAT=image/png&TRANSPARENT=true&SRS=EPSG:3857&BBOX=${bbox}&WIDTH=256&HEIGHT=256`;
+        },
+        tileSize: new google.maps.Size(256, 256),
+        opacity: layerOpacity,
+        name: layerName,
+      });
+    } else {
+      const url = tileUrl!;
+      climateLayer = new google.maps.ImageMapType({
+        getTileUrl: (coord, zoom) => {
+          return url
+            .replace('{z}', zoom.toString())
+            .replace('{x}', coord.x.toString())
+            .replace('{y}', coord.y.toString());
+        },
+        tileSize: new google.maps.Size(256, 256),
+        opacity: layerOpacity,
+        name: layerName,
+      });
+    }
+
+    map.overlayMapTypes.push(climateLayer);
+    climateLayerRef.current = climateLayer;
+
+    return () => {
+      if (climateLayerRef.current) {
+        map.overlayMapTypes.forEach((overlay, index) => {
+          if (overlay === climateLayerRef.current) {
+            map.overlayMapTypes.removeAt(index);
+          }
+        });
+        climateLayerRef.current = null;
+      }
+    };
+  }, [map, isLoaded, selectedClimateRisk, rainViewerTileUrl]);
 
   const toggleCadastre = useCallback(() => {
     setShowCadastre(prev => !prev);

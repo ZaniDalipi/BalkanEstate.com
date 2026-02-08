@@ -7,6 +7,8 @@ import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { PROPERTY_TYPE_COLORS, type ClimateRiskType } from './googleMapConstants';
 
+const OWM_API_KEY = import.meta.env.VITE_OWM_API_KEY || '';
+
 /**
  * Legend Component - Property type color legend
  */
@@ -35,6 +37,14 @@ export const Legend: React.FC = () => {
   );
 };
 
+interface RiskConfig {
+  label: string;
+  colors: string[];
+  labels: string[];
+  source: string;
+  needsApiKey?: boolean;
+}
+
 /**
  * Climate Risk Legend Component
  */
@@ -43,13 +53,40 @@ export const ClimateRiskLegend: React.FC<{ riskType: ClimateRiskType }> = ({ ris
 
   if (riskType === 'none') return null;
 
-  const riskConfig: Record<ClimateRiskType, { label: string; colors: string[]; labels: string[] }> = {
-    none: { label: '', colors: [], labels: [] },
-    flood: { label: t('search:map.climateRisks.flood', 'Flood Risk'), colors: ['#e3f2fd', '#64b5f6', '#1976d2', '#0d47a1'], labels: ['Low', 'Moderate', 'High', 'Severe'] },
-    fire: { label: t('search:map.climateRisks.fire', 'Fire Risk'), colors: ['#fff3e0', '#ffb74d', '#f57c00', '#bf360c'], labels: ['Low', 'Moderate', 'High', 'Severe'] },
-    wind: { label: t('search:map.climateRisks.wind', 'Wind Risk'), colors: ['#e8f5e9', '#81c784', '#388e3c', '#1b5e20'], labels: ['Calm', 'Breezy', 'Windy', 'Strong'] },
-    air: { label: t('search:map.climateRisks.air', 'Air Quality'), colors: ['#e8f5e9', '#fff59d', '#ff8a65', '#b71c1c'], labels: ['Good', 'Moderate', 'Poor', 'Hazardous'] },
-    heat: { label: t('search:map.climateRisks.heat', 'Heat Risk'), colors: ['#e3f2fd', '#fff59d', '#ff8a65', '#d32f2f'], labels: ['Cool', 'Warm', 'Hot', 'Extreme'] },
+  const riskConfig: Record<ClimateRiskType, RiskConfig> = {
+    none: { label: '', colors: [], labels: [], source: '' },
+    flood: {
+      label: t('search:map.climateRisks.flood', 'Precipitation Radar'),
+      colors: ['#88bbee', '#00ff00', '#ffff00', '#ff0000'],
+      labels: ['Light', 'Moderate', 'Heavy', 'Intense'],
+      source: 'RainViewer',
+    },
+    fire: {
+      label: t('search:map.climateRisks.fire', 'Active Fires (24h)'),
+      colors: ['#ffe082', '#ff9800', '#f44336', '#b71c1c'],
+      labels: ['Low', 'Med', 'High', 'Intense'],
+      source: 'NASA FIRMS',
+    },
+    wind: {
+      label: t('search:map.climateRisks.wind', 'Wind Speed'),
+      colors: ['#e8f4f8', '#a6d9e8', '#5ab4cf', '#1a8ab7'],
+      labels: ['Calm', 'Light', 'Mod', 'Strong'],
+      source: 'OpenWeatherMap',
+      needsApiKey: !OWM_API_KEY,
+    },
+    air: {
+      label: t('search:map.climateRisks.air', 'Air Quality (EPA AQI)'),
+      colors: ['#00e400', '#ffff00', '#ff7e00', '#ff0000', '#7e0023'],
+      labels: ['Good', 'OK', 'Poor', 'Bad', 'Hazard'],
+      source: 'AQICN',
+    },
+    heat: {
+      label: t('search:map.climateRisks.heat', 'Temperature'),
+      colors: ['#313695', '#74add1', '#fee090', '#f46d43', '#a50026'],
+      labels: ['Cold', 'Cool', 'Warm', 'Hot', 'Extreme'],
+      source: 'OpenWeatherMap',
+      needsApiKey: !OWM_API_KEY,
+    },
   };
 
   const config = riskConfig[riskType];
@@ -68,6 +105,10 @@ export const ClimateRiskLegend: React.FC<{ riskType: ClimateRiskType }> = ({ ris
           </div>
         ))}
       </div>
+      {config.needsApiKey && (
+        <p className="text-[9px] text-amber-600 mt-1.5">Set VITE_OWM_API_KEY in .env</p>
+      )}
+      <p className="text-[8px] text-gray-400 mt-1">{config.source}</p>
     </div>
   );
 };
