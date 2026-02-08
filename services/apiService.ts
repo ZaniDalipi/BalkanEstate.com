@@ -512,6 +512,7 @@ export const getProperties = async (filters?: Filters, options?: { limit?: numbe
     if (filters.sortBy) params.append('sortBy', filters.sortBy);
     if (filters.sellerType && filters.sellerType !== 'any') params.append('sellerType', filters.sellerType);
     if (filters.propertyType && filters.propertyType !== 'any') params.append('propertyType', filters.propertyType);
+    if (filters.listingType && filters.listingType !== 'any') params.append('listingType', filters.listingType);
   }
 
   const queryString = params.toString();

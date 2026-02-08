@@ -216,6 +216,8 @@ export const getProperties = async (filters?: Filters, options?: { limit?: numbe
       params.append('sellerType', filters.sellerType);
     if (filters.propertyType && filters.propertyType !== 'any')
       params.append('propertyType', filters.propertyType);
+    if (filters.listingType && filters.listingType !== 'any')
+      params.append('listingType', filters.listingType);
   }
 
   const queryString = params.toString();
