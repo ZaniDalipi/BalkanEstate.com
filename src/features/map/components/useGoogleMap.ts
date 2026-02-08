@@ -381,12 +381,18 @@ export function useGoogleMap(props: GoogleMapComponentProps) {
   }, [map]); // Only depend on map - use refs for other values
 
   // Get map type ID based on style
+  // Note: mapId prevents client-side styles, so we use different map types for visual distinction
   const getMapTypeId = useCallback((): google.maps.MapTypeId => {
     switch (mapStyle) {
+      case 'clean':
+        return google.maps.MapTypeId.ROADMAP;
+      case 'color':
+        return google.maps.MapTypeId.TERRAIN;
       case 'satellite':
-        return google.maps.MapTypeId.HYBRID;
       case 'hybrid':
         return google.maps.MapTypeId.HYBRID;
+      case 'street':
+        return google.maps.MapTypeId.ROADMAP;
       default:
         return google.maps.MapTypeId.ROADMAP;
     }
