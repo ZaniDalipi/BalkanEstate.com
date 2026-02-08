@@ -1,4 +1,4 @@
-import React, { useState, useCallback, memo, useEffect } from 'react';
+import React, { useState, useCallback, memo, useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Property } from '@/types';
 import { MapPinIcon, BedIcon, BathIcon, SqftIcon, UserCircleIcon, LivingRoomIcon, BuildingOfficeIcon, StarIconSolid, FireIcon } from '@/constants';
@@ -21,6 +21,15 @@ const ChevronRightIcon: React.FC<{ className?: string }> = ({ className }) => (
 interface HighlightedPropertyCardProps {
   property: Property;
   showToast?: (message: string, type: 'success' | 'error') => void;
+}
+
+// Props for the pure inner component
+interface HighlightedCardInnerProps {
+  property: Property;
+  isFavorited: boolean;
+  showToast?: (message: string, type: 'success' | 'error') => void;
+  onCardClick: (e?: React.MouseEvent) => void;
+  onFavoriteClick: (e: React.MouseEvent) => void;
 }
 
 // Seller Avatar component with error handling
@@ -58,15 +67,23 @@ const SellerAvatar: React.FC<{ avatarUrl?: string; name: string; type: string }>
   );
 };
 
-const HighlightedPropertyCard: React.FC<HighlightedPropertyCardProps> = ({ property, showToast }) => {
+/**
+ * Pure inner component - handles ALL rendering, NO context subscription.
+ * Wrapped in memo() so it only re-renders when its specific props change.
+ */
+const HighlightedCardInner = memo<HighlightedCardInnerProps>(({
+  property,
+  isFavorited,
+  showToast,
+  onCardClick,
+  onFavoriteClick,
+}) => {
   const { t } = useTranslation(['property', 'common']);
-  const { state, dispatch, toggleSavedHome } = useAppContext();
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [imageErrors, setImageErrors] = useState<Set<number>>(new Set());
   const [isHovered, setIsHovered] = useState(false);
   const [isAutoPlaying, setIsAutoPlaying] = useState(true);
 
-  const isFavorited = state.savedHomes.some(p => p.id === property.id);
   const promotionTier = property.promotionTier || 'featured';
   const isRental = (property.listingType || 'sale') === 'rent';
 
@@ -106,27 +123,6 @@ const HighlightedPropertyCard: React.FC<HighlightedPropertyCardProps> = ({ prope
     setIsAutoPlaying(false);
     setCurrentImageIndex(index);
   }, []);
-
-  const handleCardClick = useCallback((e?: React.MouseEvent) => {
-    e?.stopPropagation();
-    dispatch({ type: 'SET_SELECTED_PROPERTY', payload: property.id });
-    dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'property-details' });
-    window.history.pushState({ propertyId: property.id }, '', `/property/${property.id}`);
-    window.dispatchEvent(new PopStateEvent('popstate'));
-  }, [dispatch, property.id]);
-
-  const handleFavoriteClick = useCallback(async (e: React.MouseEvent) => {
-    e.stopPropagation();
-    if (!state.isAuthenticated && !state.user) {
-      dispatch({ type: 'TOGGLE_AUTH_MODAL', payload: { isOpen: true } });
-    } else {
-      try {
-        await toggleSavedHome(property);
-      } catch (error) {
-        showToast?.('Failed to save property. Please try again.', 'error');
-      }
-    }
-  }, [state.isAuthenticated, state.user, dispatch, property, toggleSavedHome, showToast]);
 
   const handleImageError = useCallback((index: number) => {
     setImageErrors(prev => new Set(prev).add(index));
@@ -177,7 +173,7 @@ const HighlightedPropertyCard: React.FC<HighlightedPropertyCardProps> = ({ prope
       }`}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
-      onClick={handleCardClick}
+      onClick={onCardClick}
     >
       {/* Image Section - absolute on desktop to guarantee full height fill */}
       <div className="relative h-48 md:h-full md:absolute md:inset-y-0 md:left-0 md:w-[40%] overflow-hidden bg-neutral-100">
@@ -271,7 +267,7 @@ const HighlightedPropertyCard: React.FC<HighlightedPropertyCardProps> = ({ prope
 
         {/* Favorite Button */}
         <button
-          onClick={handleFavoriteClick}
+          onClick={onFavoriteClick}
           className={`absolute top-2 right-2 p-1.5 rounded-full shadow-lg transition-all duration-300 z-10 ${
             isFavorited
               ? 'bg-red-500 text-white scale-110'
@@ -359,7 +355,7 @@ const HighlightedPropertyCard: React.FC<HighlightedPropertyCardProps> = ({ prope
 
           {/* View Details Button */}
           <button
-            onClick={handleCardClick}
+            onClick={onCardClick}
             className="bg-primary hover:bg-primary-dark text-white text-xs font-semibold px-3.5 py-1.5 rounded-lg transition-colors shadow-md flex-shrink-0"
           >
             {t('property:actions.viewDetails')}
@@ -367,6 +363,56 @@ const HighlightedPropertyCard: React.FC<HighlightedPropertyCardProps> = ({ prope
         </div>
       </div>
     </div>
+  );
+});
+
+HighlightedCardInner.displayName = 'HighlightedCardInner';
+
+/**
+ * Outer connected component - thin wrapper that subscribes to AppContext,
+ * extracts primitive values, and passes them to the memoized inner component.
+ */
+const HighlightedPropertyCard: React.FC<HighlightedPropertyCardProps> = ({ property, showToast }) => {
+  const { state, dispatch, toggleSavedHome } = useAppContext();
+
+  const isFavorited = state.savedHomes.some(p => p.id === property.id);
+
+  // Use refs for values that change often but are only needed in handlers
+  const stateRef = useRef(state);
+  stateRef.current = state;
+
+  const toggleSavedHomeRef = useRef(toggleSavedHome);
+  toggleSavedHomeRef.current = toggleSavedHome;
+
+  const handleCardClick = useCallback((e?: React.MouseEvent) => {
+    e?.stopPropagation();
+    dispatch({ type: 'SET_SELECTED_PROPERTY', payload: property.id });
+    dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'property-details' });
+    window.history.pushState({ propertyId: property.id }, '', `/property/${property.id}`);
+    window.dispatchEvent(new PopStateEvent('popstate'));
+  }, [dispatch, property.id]);
+
+  const handleFavoriteClick = useCallback(async (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (!stateRef.current.isAuthenticated && !stateRef.current.user) {
+      dispatch({ type: 'TOGGLE_AUTH_MODAL', payload: { isOpen: true } });
+    } else {
+      try {
+        await toggleSavedHomeRef.current(property);
+      } catch (error) {
+        showToast?.('Failed to save property. Please try again.', 'error');
+      }
+    }
+  }, [dispatch, property, showToast]);
+
+  return (
+    <HighlightedCardInner
+      property={property}
+      isFavorited={isFavorited}
+      showToast={showToast}
+      onCardClick={handleCardClick}
+      onFavoriteClick={handleFavoriteClick}
+    />
   );
 };
 
