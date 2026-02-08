@@ -221,10 +221,10 @@ const Map3DControls: React.FC<Map3DControlsProps> = ({
 
       {/* 2D/3D Toggle, Floor Labels Toggle, Shadow Toggle, Nearby, and Timelapse - top right */}
       {!show360Tour && (
-        <div className="absolute top-3 sm:top-4 right-2 sm:right-4 z-10 flex flex-col gap-2 max-h-[calc(100%-80px)] overflow-y-auto">
+        <div className="absolute top-2 sm:top-4 right-1.5 sm:right-4 z-10 flex flex-col items-end gap-1 sm:gap-2 max-h-[calc(100%-80px)] overflow-y-auto">
           <button
             onClick={toggle3DMode}
-            className={`px-2.5 sm:px-3 py-1.5 sm:py-2 rounded-lg font-bold text-xs sm:text-sm shadow-lg transition-all ${
+            className={`w-8 h-8 sm:w-auto sm:h-auto sm:px-3 sm:py-2 rounded-lg font-bold text-[10px] sm:text-sm shadow-lg transition-all flex items-center justify-center ${
               is3DMode
                 ? 'bg-slate-900/90 text-white border border-slate-600'
                 : 'bg-white/90 text-slate-800'
@@ -234,28 +234,28 @@ const Map3DControls: React.FC<Map3DControlsProps> = ({
           </button>
           <button
             onClick={() => setShowShadows(!showShadows)}
-            className={`px-2.5 sm:px-3 py-1.5 sm:py-2 rounded-lg font-bold text-xs sm:text-sm shadow-lg transition-all flex items-center gap-1 ${
+            className={`w-8 h-8 sm:w-auto sm:h-auto sm:px-3 sm:py-2 rounded-lg font-bold text-[10px] sm:text-sm shadow-lg transition-all flex items-center justify-center gap-1 ${
               showShadows
                 ? 'bg-amber-500 text-white border border-amber-400'
                 : 'bg-slate-900/90 text-white border border-slate-600'
             }`}
             title={t('property:map3d.shadows', 'Show Building Shadows')}
           >
-            <span className="text-sm">{'\u2600\uFE0F'}</span>
+            <span className="text-xs sm:text-sm">{'\u2600\uFE0F'}</span>
             <span className="hidden sm:inline text-xs">
               {showShadows ? t('property:map3d.shadowsOn', 'Shadows') : t('property:map3d.shadowsOff', 'Shadows')}
             </span>
           </button>
           <button
             onClick={() => setShowFloorLabels(!showFloorLabels)}
-            className={`px-2.5 sm:px-3 py-1.5 sm:py-2 rounded-lg font-bold text-xs sm:text-sm shadow-lg transition-all flex items-center gap-1 ${
+            className={`w-8 h-8 sm:w-auto sm:h-auto sm:px-3 sm:py-2 rounded-lg font-bold text-[10px] sm:text-sm shadow-lg transition-all flex items-center justify-center gap-1 ${
               showFloorLabels
                 ? 'bg-blue-600 text-white border border-blue-500'
                 : 'bg-slate-900/90 text-white border border-slate-600'
             }`}
             title={t('property:map3d.floorLabels', 'Show Floor Levels')}
           >
-            <span className="text-sm">{'\u{1F3E2}'}</span>
+            <span className="text-xs sm:text-sm">{'\u{1F3E2}'}</span>
             <span className="hidden sm:inline text-xs">
               {showFloorLabels ? t('property:map3d.hideFloors', 'Hide') : t('property:map3d.showFloors', 'Floors')}
             </span>
@@ -263,14 +263,14 @@ const Map3DControls: React.FC<Map3DControlsProps> = ({
           {setShowPOI && (
             <button
               onClick={() => setShowPOI(!showPOI)}
-              className={`px-2.5 sm:px-3 py-1.5 sm:py-2 rounded-lg font-bold text-xs sm:text-sm shadow-lg transition-all flex items-center gap-1 ${
+              className={`w-8 h-8 sm:w-auto sm:h-auto sm:px-3 sm:py-2 rounded-lg font-bold text-[10px] sm:text-sm shadow-lg transition-all flex items-center justify-center gap-1 ${
                 showPOI
                   ? 'bg-green-600 text-white border border-green-500'
                   : 'bg-slate-900/90 text-white border border-slate-600'
               }`}
               title={t('property:map3d.nearbyPlaces', 'Nearby Places')}
             >
-              <span className="text-sm">{'\u{1F4CD}'}</span>
+              <span className="text-xs sm:text-sm">{'\u{1F4CD}'}</span>
               <span className="hidden sm:inline text-xs">
                 {t('property:map3d.nearbyPOI', 'Nearby')}
               </span>
@@ -279,36 +279,36 @@ const Map3DControls: React.FC<Map3DControlsProps> = ({
 
           {/* Shadow Timelapse - inline below control buttons to avoid overlap */}
           {enableShadowTimelapse && (
-            <div className="w-44 sm:w-52">
+            <div className="w-8 sm:w-52">
               {!showTimelapse ? (
                 <button
                   onClick={() => setShowTimelapse(true)}
-                  className="w-full flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2 sm:py-3 bg-slate-900/90 text-white font-medium rounded-lg shadow-lg hover:bg-slate-800 transition-all border border-slate-700/50"
+                  className="w-full flex items-center justify-center sm:justify-start gap-1.5 sm:gap-2 sm:px-4 py-2 sm:py-3 bg-slate-900/90 text-white font-medium rounded-lg shadow-lg hover:bg-slate-800 transition-all border border-slate-700/50"
                 >
-                  <span className="text-sm sm:text-base">{'\u2600\uFE0F'}</span>
-                  <span className="text-xs sm:text-sm">{t('property:shadowTimelapse.title', 'Sun & Shadows')}</span>
+                  <span className="text-xs sm:text-base">{'\u2600\uFE0F'}</span>
+                  <span className="hidden sm:inline text-sm">{t('property:shadowTimelapse.title', 'Sun & Shadows')}</span>
                 </button>
               ) : (
-                <div className="bg-slate-900/95 backdrop-blur-sm rounded-xl shadow-xl overflow-hidden border border-slate-700/50">
+                <div className="w-44 sm:w-52 bg-slate-900/95 backdrop-blur-sm rounded-xl shadow-xl overflow-hidden border border-slate-700/50">
                   {/* Header with time */}
                   <div
-                    className="p-3 transition-all duration-500"
+                    className="p-2 sm:p-3 transition-all duration-500"
                     style={{
                       background: `linear-gradient(135deg, ${TIME_LIGHTING[timelapse.timePeriod].skyColor}cc, ${TIME_LIGHTING[timelapse.timePeriod].fogColor}99)`
                     }}
                   >
                     <div className="flex items-center justify-between text-white">
                       <div>
-                        <div className="text-2xl font-bold">{timelapse.formattedTime}</div>
-                        <div className="text-sm opacity-90">
+                        <div className="text-lg sm:text-2xl font-bold">{timelapse.formattedTime}</div>
+                        <div className="text-[10px] sm:text-sm opacity-90">
                           {PERIOD_ICONS[timelapse.timePeriod]} {t(`property:shadowTimelapse.periods.${timelapse.timePeriod}`, timelapse.timePeriod)}
                         </div>
                       </div>
                       <button
                         onClick={() => setShowTimelapse(false)}
-                        className="w-7 h-7 rounded-full flex items-center justify-center bg-black/20 hover:bg-black/40 transition-all"
+                        className="w-6 h-6 sm:w-7 sm:h-7 rounded-full flex items-center justify-center bg-black/20 hover:bg-black/40 transition-all"
                       >
-                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg className="w-3 h-3 sm:w-4 sm:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                         </svg>
                       </button>
@@ -316,33 +316,33 @@ const Map3DControls: React.FC<Map3DControlsProps> = ({
                   </div>
 
                   {/* Controls */}
-                  <div className="p-3 space-y-3">
+                  <div className="p-2 sm:p-3 space-y-2 sm:space-y-3">
                     {/* Play/Pause and quick jumps */}
-                    <div className="flex items-center justify-center gap-2">
+                    <div className="flex items-center justify-center gap-1.5 sm:gap-2">
                       <button
                         onClick={timelapse.goToSunrise}
-                        className="p-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-lg transition-all"
+                        className="p-1.5 sm:p-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-sm sm:text-lg transition-all"
                         title="Sunrise"
                       >
                         {'\u{1F305}'}
                       </button>
                       <button
                         onClick={timelapse.toggle}
-                        className="w-14 h-14 rounded-full flex items-center justify-center bg-blue-600 hover:bg-blue-500 text-white shadow-lg transition-all"
+                        className="w-10 h-10 sm:w-14 sm:h-14 rounded-full flex items-center justify-center bg-blue-600 hover:bg-blue-500 text-white shadow-lg transition-all"
                       >
                         {timelapse.isPlaying ? (
-                          <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+                          <svg className="w-4 h-4 sm:w-6 sm:h-6" fill="currentColor" viewBox="0 0 24 24">
                             <path d="M6 4h4v16H6V4zm8 0h4v16h-4V4z" />
                           </svg>
                         ) : (
-                          <svg className="w-6 h-6 ml-1" fill="currentColor" viewBox="0 0 24 24">
+                          <svg className="w-4 h-4 sm:w-6 sm:h-6 ml-0.5" fill="currentColor" viewBox="0 0 24 24">
                             <path d="M8 5v14l11-7z" />
                           </svg>
                         )}
                       </button>
                       <button
                         onClick={timelapse.goToSunset}
-                        className="p-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-lg transition-all"
+                        className="p-1.5 sm:p-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-sm sm:text-lg transition-all"
                         title="Sunset"
                       >
                         {'\u{1F307}'}
@@ -351,7 +351,7 @@ const Map3DControls: React.FC<Map3DControlsProps> = ({
 
                     {/* Progress bar */}
                     <div
-                      className="relative h-2 bg-slate-700 rounded-full cursor-pointer overflow-hidden"
+                      className="relative h-1.5 sm:h-2 bg-slate-700 rounded-full cursor-pointer overflow-hidden"
                       onClick={(e) => {
                         const rect = e.currentTarget.getBoundingClientRect();
                         const percent = ((e.clientX - rect.left) / rect.width) * 100;
@@ -369,12 +369,12 @@ const Map3DControls: React.FC<Map3DControlsProps> = ({
                     </div>
 
                     {/* Speed controls */}
-                    <div className="flex items-center justify-center gap-1">
+                    <div className="flex items-center justify-center gap-0.5 sm:gap-1">
                       {(['slow', 'normal', 'fast', 'ultra'] as const).map((s) => (
                         <button
                           key={s}
                           onClick={() => timelapse.setSpeed(s)}
-                          className={`px-2 py-1 text-xs font-medium rounded transition-all ${
+                          className={`px-1.5 sm:px-2 py-0.5 sm:py-1 text-[10px] sm:text-xs font-medium rounded transition-all ${
                             timelapse.speed === s
                               ? 'bg-blue-600 text-white'
                               : 'bg-slate-800 text-slate-300 hover:bg-slate-700'
