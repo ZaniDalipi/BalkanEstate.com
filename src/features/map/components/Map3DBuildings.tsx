@@ -53,6 +53,7 @@ const Map3DBuildings: React.FC<Map3DBuildingsProps> = (props) => {
     // Computed
     hasFloorInfo,
     has360Tour,
+    currentBearing,
     // Timelapse
     timelapse,
     showPOI,
@@ -111,6 +112,39 @@ const Map3DBuildings: React.FC<Map3DBuildingsProps> = (props) => {
           <div className="bg-slate-900/90 backdrop-blur-sm px-2.5 sm:px-4 py-2 sm:py-3 rounded-lg shadow-lg max-w-[160px] sm:max-w-[240px] border border-slate-700/50">
             {title && <p className="font-semibold text-white text-xs sm:text-sm truncate">{title}</p>}
             {address && <p className="text-[10px] sm:text-sm text-slate-300 truncate">{address}</p>}
+          </div>
+        </div>
+      )}
+
+      {/* Compass overlay - rotates with map bearing */}
+      {mapLoaded && !show360Tour && (
+        <div className="absolute top-2 sm:top-3 right-2 sm:right-4 z-20">
+          <div
+            className="w-14 h-14 sm:w-16 sm:h-16 rounded-full bg-slate-900/85 backdrop-blur-sm border border-slate-600/50 shadow-lg flex items-center justify-center transition-transform"
+            style={{ transform: `rotate(${-currentBearing}deg)` }}
+          >
+            {/* North indicator - red */}
+            <div className="absolute top-1 sm:top-1.5 left-1/2 -translate-x-1/2 flex flex-col items-center">
+              <span className="text-[9px] sm:text-[10px] font-bold text-red-400 leading-none">N</span>
+              <div className="w-0.5 h-2 sm:h-2.5 bg-red-400 rounded-full mt-px" />
+            </div>
+            {/* South indicator */}
+            <div className="absolute bottom-1 sm:bottom-1.5 left-1/2 -translate-x-1/2 flex flex-col items-center">
+              <div className="w-0.5 h-2 sm:h-2.5 bg-slate-400 rounded-full mb-px" />
+              <span className="text-[9px] sm:text-[10px] font-medium text-slate-400 leading-none">S</span>
+            </div>
+            {/* East indicator */}
+            <div className="absolute right-1 sm:right-1.5 top-1/2 -translate-y-1/2 flex items-center">
+              <div className="w-2 sm:w-2.5 h-0.5 bg-slate-400 rounded-full mr-px" />
+              <span className="text-[9px] sm:text-[10px] font-medium text-slate-400 leading-none">E</span>
+            </div>
+            {/* West indicator */}
+            <div className="absolute left-1 sm:left-1.5 top-1/2 -translate-y-1/2 flex items-center">
+              <span className="text-[9px] sm:text-[10px] font-medium text-slate-400 leading-none">W</span>
+              <div className="w-2 sm:w-2.5 h-0.5 bg-slate-400 rounded-full ml-px" />
+            </div>
+            {/* Center dot */}
+            <div className="w-1.5 h-1.5 rounded-full bg-white/60" />
           </div>
         </div>
       )}

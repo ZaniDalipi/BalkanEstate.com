@@ -14,7 +14,7 @@ export function use3DMap(props: Map3DBuildingsProps) {
     lng,
     zoom = 16,
     pitch = 60,
-    bearing = -17,
+    bearing: bearingProp = -17,
     enableShadowTimelapse = true,
     floorNumber,
     totalFloors,
@@ -22,6 +22,16 @@ export function use3DMap(props: Map3DBuildingsProps) {
     virtualTour360Url,
     orientation,
   } = props;
+
+  // Calculate effective bearing from orientation
+  // Camera should face TOWARD the building's oriented face (opposite direction)
+  const orientationBearingMap: Record<string, number> = {
+    north: 0, northEast: 45, east: 90, southEast: 135,
+    south: 180, southWest: 225, west: 270, northWest: 315,
+  };
+  const bearing = (orientation && orientation !== 'any' && orientationBearingMap[orientation] !== undefined)
+    ? (orientationBearingMap[orientation] + 180) % 360
+    : bearingProp;
 
   // Refs
   const mapContainer = useRef<HTMLDivElement>(null);
@@ -31,6 +41,7 @@ export function use3DMap(props: Map3DBuildingsProps) {
 
   // State
   const [mapLoaded, setMapLoaded] = useState(false);
+  const [currentBearing, setCurrentBearing] = useState(bearing);
   const [showTimelapse, setShowTimelapse] = useState(false);
   const [is3DMode, setIs3DMode] = useState(true);
   const [showFloorIndicator, setShowFloorIndicator] = useState(true);
@@ -848,6 +859,11 @@ export function use3DMap(props: Map3DBuildingsProps) {
 
     map.current = mapInstance;
 
+    // Track bearing changes for compass overlay
+    mapInstance.on('rotate', () => {
+      setCurrentBearing(mapInstance.getBearing());
+    });
+
     // After map loads, immediately fly to property with padding to compensate for pitch perspective
     // With high pitch, the geographic center appears in the lower part of the viewport
     mapInstance.once('load', () => {
@@ -1580,6 +1596,7 @@ export function use3DMap(props: Map3DBuildingsProps) {
     // Computed
     hasFloorInfo,
     has360Tour,
+    currentBearing,
     // Timelapse
     timelapse,
     // Handlers

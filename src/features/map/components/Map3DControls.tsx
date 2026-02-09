@@ -221,7 +221,7 @@ const Map3DControls: React.FC<Map3DControlsProps> = ({
 
       {/* 2D/3D Toggle, Floor Labels Toggle, Shadow Toggle, Nearby, and Timelapse - top right */}
       {!show360Tour && (
-        <div className="absolute top-2 sm:top-4 right-1.5 sm:right-4 z-10 flex flex-col items-end gap-1 sm:gap-2 max-h-[calc(100%-80px)] max-w-[calc(100%-1rem)] sm:max-w-none overflow-y-auto">
+        <div className="absolute top-[4.25rem] sm:top-[5.25rem] right-1.5 sm:right-4 z-10 flex flex-col items-end gap-1 sm:gap-2 max-h-[calc(100%-120px)] max-w-[calc(100%-1rem)] sm:max-w-none overflow-y-auto">
           <button
             onClick={toggle3DMode}
             className={`w-8 h-8 sm:w-auto sm:h-auto sm:px-3 sm:py-2 rounded-lg font-bold text-[10px] sm:text-sm shadow-lg transition-all flex items-center justify-center ${
