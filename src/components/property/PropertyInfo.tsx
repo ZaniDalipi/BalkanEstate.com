@@ -112,6 +112,12 @@ export const PropertyInfo: React.FC<PropertyInfoProps> = ({ property, onOpenFloo
             </div>
           )}
 
+          {property.title && (
+            <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-neutral-900 mb-2">
+              {property.title}
+            </h1>
+          )}
+
           <p className="text-2xl sm:text-3xl lg:text-4xl font-bold text-neutral-900">
             {formatPrice(property.price, property.country)}
           </p>
@@ -395,7 +401,7 @@ export const PropertyInfo: React.FC<PropertyInfoProps> = ({ property, onOpenFloo
                           property.hasBalcony ? 'text-green-700' : 'text-red-700'
                         }`}
                       >
-                        {property.hasBalcony ? t('available') : t('pending')}
+                        {property.hasBalcony ? t('available') : t('details.no')}
                       </span>
                     </div>
                   </div>
@@ -416,7 +422,7 @@ export const PropertyInfo: React.FC<PropertyInfoProps> = ({ property, onOpenFloo
                           property.hasGarden ? 'text-green-700' : 'text-red-700'
                         }`}
                       >
-                        {property.hasGarden ? t('available') : t('pending')}
+                        {property.hasGarden ? t('available') : t('details.no')}
                       </span>
                     </div>
                   </div>
@@ -437,7 +443,7 @@ export const PropertyInfo: React.FC<PropertyInfoProps> = ({ property, onOpenFloo
                           property.hasElevator ? 'text-green-700' : 'text-red-700'
                         }`}
                       >
-                        {property.hasElevator ? t('available') : t('pending')}
+                        {property.hasElevator ? t('available') : t('details.no')}
                       </span>
                     </div>
                   </div>
@@ -458,7 +464,7 @@ export const PropertyInfo: React.FC<PropertyInfoProps> = ({ property, onOpenFloo
                           property.hasSecurity ? 'text-green-700' : 'text-red-700'
                         }`}
                       >
-                        {property.hasSecurity ? t('available') : t('pending')}
+                        {property.hasSecurity ? t('available') : t('details.no')}
                       </span>
                     </div>
                   </div>
@@ -479,7 +485,7 @@ export const PropertyInfo: React.FC<PropertyInfoProps> = ({ property, onOpenFloo
                           property.hasAirConditioning ? 'text-green-700' : 'text-red-700'
                         }`}
                       >
-                        {property.hasAirConditioning ? t('available') : t('pending')}
+                        {property.hasAirConditioning ? t('available') : t('details.no')}
                       </span>
                     </div>
                   </div>
@@ -498,7 +504,7 @@ export const PropertyInfo: React.FC<PropertyInfoProps> = ({ property, onOpenFloo
                           property.hasPool ? 'text-green-700' : 'text-red-700'
                         }`}
                       >
-                        {property.hasPool ? t('available') : t('pending')}
+                        {property.hasPool ? t('available') : t('details.no')}
                       </span>
                     </div>
                   </div>

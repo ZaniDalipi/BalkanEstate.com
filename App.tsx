@@ -1,4 +1,5 @@
-import React, { useState, useEffect, lazy, Suspense } from 'react';
+import React, { useState, useEffect, useMemo, lazy, Suspense } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { HelmetProvider } from 'react-helmet-async';
 import { AppProvider, useAppContext } from './context/AppContext';
 import { AlertProvider } from './context/AlertContext';
@@ -147,7 +148,6 @@ const AppContent: React.FC<{ onToggleSidebar: () => void }> = ({ onToggleSidebar
       if (propertyMatch) {
         const propertyId = decodeURIComponent(propertyMatch[1]);
         dispatch({ type: 'SET_SELECTED_AGENCY', payload: null });
-        dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'search' });
 
         // Fetch property from API to ensure we have full data
         fetch(`${API_CONFIG.BASE_URL}/properties/${propertyId}`)
@@ -566,13 +566,31 @@ const AppContent: React.FC<{ onToggleSidebar: () => void }> = ({ onToggleSidebar
     }
   };
 
+  // Compute a stable key for the current view to trigger transitions
+  const viewKey = state.selectedProperty
+    ? `property-${state.selectedProperty.id || 'detail'}`
+    : state.selectedAgencyId
+      ? `agency-${state.selectedAgencyId}`
+      : state.activeView;
+
   // All views now use Suspense since SearchPage is lazy loaded
   return (
-    <ErrorBoundary level="route" key={state.activeView}>
-      <Suspense fallback={<PageLoader />}>
-        {renderView()}
-      </Suspense>
-    </ErrorBoundary>
+    <AnimatePresence mode="wait">
+      <motion.div
+        key={viewKey}
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        transition={{ duration: 0.2, ease: 'easeInOut' }}
+        className="h-full"
+      >
+        <ErrorBoundary level="route" key={state.activeView}>
+          <Suspense fallback={<PageLoader />}>
+            {renderView()}
+          </Suspense>
+        </ErrorBoundary>
+      </motion.div>
+    </AnimatePresence>
   );
 };
 

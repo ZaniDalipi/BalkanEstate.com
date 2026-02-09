@@ -1,7 +1,7 @@
 // SocialVideoEmbed Component
 // Embeds TikTok and Instagram videos using official embed methods
 
-import React, { useMemo, useEffect, useRef } from 'react';
+import React, { useMemo, useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 interface SocialVideoEmbedProps {
@@ -52,15 +52,19 @@ export const SocialVideoEmbed: React.FC<SocialVideoEmbedProps> = ({ videoUrl }) 
   const instagramId = useMemo(() => extractInstagramId(videoUrl), [videoUrl]);
   const isReel = useMemo(() => isInstagramReel(videoUrl), [videoUrl]);
 
-  // Load TikTok embed script
+  const [embedFailed, setEmbedFailed] = useState(false);
+
+  // Load TikTok embed script with retry
   useEffect(() => {
-    if (platform === 'tiktok' && tiktokInfo.id) {
-      // Load TikTok embed script
+    if (platform !== 'tiktok' || !tiktokInfo.id) return;
+
+    const loadAndRender = () => {
       const existingScript = document.querySelector('script[src*="tiktok.com/embed.js"]');
       if (!existingScript) {
         const script = document.createElement('script');
         script.src = 'https://www.tiktok.com/embed.js';
         script.async = true;
+        script.onerror = () => setEmbedFailed(true);
         document.body.appendChild(script);
       } else {
         // Re-process embeds if script already loaded
@@ -70,41 +74,70 @@ export const SocialVideoEmbed: React.FC<SocialVideoEmbedProps> = ({ videoUrl }) 
           }
         }, 100);
       }
-    }
+    };
+
+    loadAndRender();
+
+    // Retry rendering after delays in case script loaded slowly
+    const retries = [1000, 3000, 5000];
+    const timers = retries.map(delay =>
+      setTimeout(() => {
+        if ((window as any).tiktokEmbed?.lib?.render) {
+          (window as any).tiktokEmbed.lib.render();
+        }
+      }, delay)
+    );
+
+    // If still not rendered after 8s, show fallback
+    const fallbackTimer = setTimeout(() => {
+      if (tiktokContainerRef.current) {
+        const iframe = tiktokContainerRef.current.querySelector('iframe');
+        if (!iframe) setEmbedFailed(true);
+      }
+    }, 8000);
+
+    return () => {
+      timers.forEach(clearTimeout);
+      clearTimeout(fallbackTimer);
+    };
   }, [platform, tiktokInfo.id]);
 
-  // Load Instagram embed script
+  // Load Instagram embed script with retry
   useEffect(() => {
-    if (platform === 'instagram' && instagramId) {
-      // Load Instagram embed script
-      const existingScript = document.querySelector('script[src*="instagram.com/embed.js"]');
-      if (!existingScript) {
-        const script = document.createElement('script');
-        script.src = 'https://www.instagram.com/embed.js';
-        script.async = true;
-        document.body.appendChild(script);
-      }
-      // Process embeds after a short delay
-      const timer = setTimeout(() => {
-        if ((window as any).instgrm?.Embeds?.process) {
-          (window as any).instgrm.Embeds.process();
-        }
-      }, 500);
-      return () => clearTimeout(timer);
-    }
-  }, [platform, instagramId]);
+    if (platform !== 'instagram' || !instagramId) return;
 
-  // Re-process Instagram embeds when component updates
-  useEffect(() => {
-    if (platform === 'instagram' && containerRef.current) {
-      const timer = setTimeout(() => {
+    const existingScript = document.querySelector('script[src*="instagram.com/embed.js"]');
+    if (!existingScript) {
+      const script = document.createElement('script');
+      script.src = 'https://www.instagram.com/embed.js';
+      script.async = true;
+      script.onerror = () => setEmbedFailed(true);
+      document.body.appendChild(script);
+    }
+
+    // Process embeds after delays with retries
+    const retries = [500, 1500, 3000, 5000];
+    const timers = retries.map(delay =>
+      setTimeout(() => {
         if ((window as any).instgrm?.Embeds?.process) {
           (window as any).instgrm.Embeds.process();
         }
-      }, 1000);
-      return () => clearTimeout(timer);
-    }
-  }, [platform]);
+      }, delay)
+    );
+
+    // If still not rendered after 8s, show fallback
+    const fallbackTimer = setTimeout(() => {
+      if (containerRef.current) {
+        const iframe = containerRef.current.querySelector('iframe');
+        if (!iframe) setEmbedFailed(true);
+      }
+    }, 8000);
+
+    return () => {
+      timers.forEach(clearTimeout);
+      clearTimeout(fallbackTimer);
+    };
+  }, [platform, instagramId]);
 
   // Don't render if no valid platform or ID
   if (!platform) return null;
@@ -150,8 +183,33 @@ export const SocialVideoEmbed: React.FC<SocialVideoEmbedProps> = ({ videoUrl }) 
 
       {/* Video Embed Container */}
       <div ref={containerRef} className="flex justify-center bg-neutral-50 p-4">
+        {/* Fallback link when embed fails to load */}
+        {embedFailed && (
+          <div className="text-center p-8">
+            <div className={`w-16 h-16 mx-auto rounded-full flex items-center justify-center mb-4 ${platform === 'tiktok' ? 'bg-black' : 'bg-gradient-to-br from-purple-600 via-pink-500 to-orange-400'}`}>
+              <svg className="w-8 h-8 text-white" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M8 5v14l11-7z"/>
+              </svg>
+            </div>
+            <p className="text-neutral-600 text-sm mb-3">
+              {t('property:socialVideo.embedFailed', 'Video embed could not be loaded')}
+            </p>
+            <a
+              href={videoUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className={`inline-flex items-center gap-2 px-5 py-2.5 rounded-full text-white font-medium text-sm transition-opacity hover:opacity-90 ${platform === 'tiktok' ? 'bg-black' : 'bg-gradient-to-r from-purple-600 via-pink-500 to-orange-400'}`}
+            >
+              {t('property:socialVideo.openIn', { platform: platform === 'tiktok' ? 'TikTok' : 'Instagram' }, `Open in ${platform === 'tiktok' ? 'TikTok' : 'Instagram'}`)}
+              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+              </svg>
+            </a>
+          </div>
+        )}
+
         {/* TikTok Embed - Using official blockquote method */}
-        {platform === 'tiktok' && (
+        {platform === 'tiktok' && !embedFailed && (
           <div ref={tiktokContainerRef} className="w-full flex justify-center">
             <blockquote
               className="tiktok-embed"
@@ -184,7 +242,7 @@ export const SocialVideoEmbed: React.FC<SocialVideoEmbedProps> = ({ videoUrl }) 
         )}
 
         {/* Instagram Embed - Using official blockquote */}
-        {platform === 'instagram' && (
+        {platform === 'instagram' && !embedFailed && (
           <blockquote
             className="instagram-media"
             data-instgrm-captioned

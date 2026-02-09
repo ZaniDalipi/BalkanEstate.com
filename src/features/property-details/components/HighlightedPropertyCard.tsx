@@ -393,11 +393,9 @@ const HighlightedPropertyCard: React.FC<HighlightedPropertyCardProps> = ({ prope
 
   const handleCardClick = useCallback((e?: React.MouseEvent) => {
     e?.stopPropagation();
-    dispatch({ type: 'SET_SELECTED_PROPERTY', payload: property.id });
-    dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'property-details' });
+    dispatch({ type: 'SET_SELECTED_PROPERTY_OBJECT', payload: property });
     window.history.pushState({ propertyId: property.id }, '', `/property/${property.id}`);
-    window.dispatchEvent(new PopStateEvent('popstate'));
-  }, [dispatch, property.id]);
+  }, [dispatch, property]);
 
   const handleFavoriteClick = useCallback(async (e: React.MouseEvent) => {
     e.stopPropagation();
