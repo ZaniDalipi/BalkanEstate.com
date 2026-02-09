@@ -51,8 +51,8 @@ export function use3DMap(props: Map3DBuildingsProps) {
   const [isEnteringBuilding, setIsEnteringBuilding] = useState(false);
 
   // Calculate floor visualization data
-  const isApartment = propertyType === 'apartment';
-  const hasFloorInfo = isApartment && floorNumber != null && totalFloors != null && totalFloors > 0;
+  // Show floor levels for any property with more than 3 floors (not just apartments)
+  const hasFloorInfo = floorNumber != null && totalFloors != null && totalFloors > 0;
   const has360Tour = !!virtualTour360Url;
   const floorHeightMeters = 3; // Average floor height
   const buildingHeightMeters = hasFloorInfo ? totalFloors * floorHeightMeters : 0;
@@ -646,7 +646,7 @@ export function use3DMap(props: Map3DBuildingsProps) {
     for (let floor = 1; floor <= totalFlrs; floor++) {
       const floorBase = (floor - 1) * adjustedFloorHeight;
       const floorTop = floor * adjustedFloorHeight;
-      const isApartmentFloor = floor === floorNum;
+      const isHighlightedFloor = floor === floorNum;
       const layerId = `building-floor-${floor}`;
 
       mapInstance.addLayer({
@@ -654,12 +654,12 @@ export function use3DMap(props: Map3DBuildingsProps) {
         type: 'fill-extrusion',
         source: 'custom-building',
         paint: {
-          'fill-extrusion-color': isApartmentFloor
-            ? '#22c55e' // Bright green for apartment floor
+          'fill-extrusion-color': isHighlightedFloor
+            ? '#22c55e' // Bright green for the property's floor
             : floor % 2 === 0 ? '#4b5563' : '#6b7280', // Alternating grey for other floors
           'fill-extrusion-height': floorTop - 0.15, // Gap between floors for visual separation
           'fill-extrusion-base': floorBase + 0.05,
-          'fill-extrusion-opacity': isApartmentFloor ? 1 : 0.92,
+          'fill-extrusion-opacity': isHighlightedFloor ? 1 : 0.92,
         },
       });
     }
@@ -1007,8 +1007,10 @@ export function use3DMap(props: Map3DBuildingsProps) {
       // Fetch and display nearby POIs (universities, shops, etc.)
       fetchAndDisplayPOI(mapInstance, lat, lng);
 
-      // Add 360 tour door marker for non-apartment types (villas, houses, land)
-      if (propertyType !== 'apartment' && virtualTour360Url) {
+      // Add 360 tour door marker for properties without floor visualization
+      // (properties with >3 floors get the door marker via addCustomBuilding3D instead)
+      const willHaveFloorViz = floorNumber != null && totalFloors != null && totalFloors > 3;
+      if (!willHaveFloorViz && virtualTour360Url) {
         const doorEl = document.createElement('div');
         doorEl.className = 'apartment-door-marker';
         doorEl.innerHTML = `
@@ -1058,9 +1060,9 @@ export function use3DMap(props: Map3DBuildingsProps) {
         doorMarkerRef.current = doorMarker;
       }
 
-      // Add custom 3D building with floor slices for apartments
+      // Add custom 3D building with floor slices for properties with more than 3 floors
       // Wait for tiles to fully load before querying building geometry
-      if (propertyType === 'apartment' && floorNumber != null && totalFloors != null && totalFloors > 0) {
+      if (floorNumber != null && totalFloors != null && totalFloors > 3) {
         // Retry mechanism to ensure building tiles are loaded
         let retryCount = 0;
         const maxRetries = 5;

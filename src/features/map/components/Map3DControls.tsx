@@ -74,7 +74,7 @@ const Map3DControls: React.FC<Map3DControlsProps> = ({
 
   return (
     <>
-      {/* Floor Level Indicator - for apartments */}
+      {/* Floor Level Indicator - for properties with floor info */}
       {hasFloorInfo && showFloorIndicator && is3DMode && !show360Tour && (
         <div className="absolute left-2 sm:left-4 top-1/2 -translate-y-1/2 z-20">
           <div className="bg-slate-900/95 backdrop-blur-sm rounded-xl shadow-2xl border border-slate-700/50 overflow-hidden w-16 sm:w-20">
