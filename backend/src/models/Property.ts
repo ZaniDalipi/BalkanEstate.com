@@ -111,6 +111,8 @@ export interface IProperty extends Document {
   condition?: 'new' | 'excellent' | 'good' | 'fair' | 'needs-renovation';
   viewType?: 'sea' | 'mountain' | 'city' | 'park' | 'garden' | 'street';
   energyRating?: 'A+' | 'A' | 'B' | 'C' | 'D' | 'E' | 'F' | 'G';
+  // Building orientation (compass direction the property faces)
+  orientation?: 'north' | 'south' | 'east' | 'west' | 'northEast' | 'northWest' | 'southEast' | 'southWest';
   // Rental-specific fields (only applicable when listingType === 'rent')
   rentPeriod?: 'monthly' | 'weekly' | 'daily'; // How rent is charged
   securityDeposit?: number; // Security deposit amount
@@ -453,6 +455,11 @@ const PropertySchema: Schema = new Schema(
       type: String,
       enum: ['A+', 'A', 'B', 'C', 'D', 'E', 'F', 'G'],
       index: true,
+    },
+    // Building orientation (compass direction the property faces)
+    orientation: {
+      type: String,
+      enum: ['north', 'south', 'east', 'west', 'northEast', 'northWest', 'southEast', 'southWest'],
     },
     // Rental-specific fields
     rentPeriod: {

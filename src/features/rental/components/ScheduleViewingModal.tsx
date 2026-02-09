@@ -34,6 +34,22 @@ const STEPS: Step[] = ['datetime', 'details', 'confirm'];
 // Validation helpers
 const isValidEmail = (email: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 
+/** Generate time slots from start/end time and duration (mirrors backend logic) */
+function generateTimeSlotsFromConfig(startTime: string, endTime: string, durationMinutes: number): string[] {
+    const slots: string[] = [];
+    const [startH, startM] = startTime.split(':').map(Number);
+    const [endH, endM] = endTime.split(':').map(Number);
+    if (isNaN(startH) || isNaN(startM) || isNaN(endH) || isNaN(endM)) return slots;
+    const startMinutes = startH * 60 + startM;
+    const endMinutes = endH * 60 + endM;
+    for (let m = startMinutes; m + durationMinutes <= endMinutes; m += durationMinutes) {
+        const h = Math.floor(m / 60);
+        const min = m % 60;
+        slots.push(`${String(h).padStart(2, '0')}:${String(min).padStart(2, '0')}`);
+    }
+    return slots;
+}
+
 function generateICSFile(property: Property, date: string, timeSlot: string, durationMinutes: number): string {
     const [hours, minutes] = timeSlot.split(':').map(Number);
     const startDate = new Date(date);
@@ -75,33 +91,64 @@ const ScheduleViewingModal: React.FC<ScheduleViewingModalProps> = ({ property, i
     const [error, setError] = useState('');
     const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
 
-    // Availability from backend
+    // Availability from backend (with property.visitAvailability as fallback)
     const [availability, setAvailability] = useState<AvailabilityData | null>(null);
     const [loadingAvailability, setLoadingAvailability] = useState(true);
 
-    // Fetch availability when modal opens
+    /** Build availability from the property's own visitAvailability config (no booking info) */
+    const buildLocalAvailability = useCallback((): AvailabilityData => {
+        const va = property.visitAvailability;
+        if (va?.enabled) {
+            return {
+                enabled: true,
+                days: va.days ?? [1, 2, 3, 4, 5],
+                timeSlots: generateTimeSlotsFromConfig(
+                    va.startTime ?? '09:00',
+                    va.endTime ?? '18:00',
+                    va.slotDurationMinutes ?? 30,
+                ),
+                slotDurationMinutes: va.slotDurationMinutes ?? 30,
+                notes: va.notes ?? '',
+                bookedSlots: [], // Unknown without API
+            };
+        }
+        // No scheduling configured — return defaults
+        return {
+            enabled: false,
+            days: [1, 2, 3, 4, 5],
+            timeSlots: generateTimeSlotsFromConfig('09:00', '18:00', 30),
+            slotDurationMinutes: 30,
+            notes: '',
+            bookedSlots: [],
+        };
+    }, [property.visitAvailability]);
+
+    // Fetch availability + booked slots from API when modal opens
     useEffect(() => {
         if (!isOpen) return;
         setLoadingAvailability(true);
-        fetch(`${API_CONFIG.BASE_URL}/viewings/availability/${property.id}`)
-            .then(res => res.json())
+        const controller = new AbortController();
+
+        fetch(`${API_CONFIG.BASE_URL}/viewings/availability/${property.id}`, {
+            signal: controller.signal,
+        })
+            .then(res => {
+                if (!res.ok) throw new Error(`HTTP ${res.status}`);
+                return res.json();
+            })
             .then(data => {
                 setAvailability(data);
                 setLoadingAvailability(false);
             })
-            .catch(() => {
-                // Fallback defaults
-                setAvailability({
-                    enabled: false,
-                    days: [1, 2, 3, 4, 5],
-                    timeSlots: ['09:00', '09:30', '10:00', '10:30', '11:00', '11:30', '12:00', '13:00', '13:30', '14:00', '14:30', '15:00', '15:30', '16:00', '16:30', '17:00', '17:30', '18:00'],
-                    slotDurationMinutes: 30,
-                    notes: '',
-                    bookedSlots: [],
-                });
+            .catch((err) => {
+                if (err.name === 'AbortError') return;
+                // API unavailable — use property's own visitAvailability config
+                setAvailability(buildLocalAvailability());
                 setLoadingAvailability(false);
             });
-    }, [isOpen, property.id]);
+
+        return () => controller.abort();
+    }, [isOpen, property.id, buildLocalAvailability]);
 
     // Reset state when closing
     useEffect(() => {
@@ -170,6 +217,25 @@ const ScheduleViewingModal: React.FC<ScheduleViewingModalProps> = ({ property, i
 
     const handleSubmit = async () => {
         setError('');
+
+        // Client-side validation before submitting
+        if (!selectedDate || !selectedTime) {
+            setError(t('rental:viewing.errors.selectDateAndTime', 'Please select a date and time.'));
+            return;
+        }
+        if (!name.trim() || !email.trim() || !isValidEmail(email.trim())) {
+            setError(t('rental:viewing.errors.invalidDetails', 'Please provide valid contact details.'));
+            return;
+        }
+
+        // Validate the selected slot isn't already booked (client-side guard)
+        const bookedKey = `${selectedDate}_${selectedTime}`;
+        if (availability?.bookedSlots?.includes(bookedKey)) {
+            setError(t('rental:viewing.errors.slotAlreadyBooked', 'This time slot was just booked. Please select another.'));
+            setSelectedTime('');
+            return;
+        }
+
         setIsSubmitting(true);
 
         try {
@@ -190,12 +256,23 @@ const ScheduleViewingModal: React.FC<ScheduleViewingModalProps> = ({ property, i
             const data = await response.json();
 
             if (!response.ok) {
+                // Handle specific backend errors
+                if (response.status === 409) {
+                    // Slot was booked by someone else — refresh booked slots
+                    setAvailability(prev => prev ? {
+                        ...prev,
+                        bookedSlots: [...prev.bookedSlots, bookedKey],
+                    } : prev);
+                    setSelectedTime('');
+                    setStep('datetime');
+                }
                 throw new Error(data.message || 'Failed to schedule viewing');
             }
 
             setIsSubmitted(true);
-        } catch (err: any) {
-            setError(err.message || t('rental:viewing.errors.submitFailed', 'Failed to schedule viewing. Please try again.'));
+        } catch (err: unknown) {
+            const message = err instanceof Error ? err.message : String(err);
+            setError(message || t('rental:viewing.errors.submitFailed', 'Failed to schedule viewing. Please try again.'));
         } finally {
             setIsSubmitting(false);
         }
@@ -294,6 +371,27 @@ const ScheduleViewingModal: React.FC<ScheduleViewingModalProps> = ({ property, i
                             <div className="w-8 h-8 border-2 border-blue-600 border-t-transparent rounded-full animate-spin" />
                             <p className="text-sm text-neutral-500">{t('rental:viewing.loadingAvailability', 'Loading availability...')}</p>
                         </div>
+                    ) : !availability?.enabled ? (
+                        /* Scheduling not configured */
+                        <div className="text-center py-8">
+                            <div className="w-14 h-14 mx-auto mb-3 bg-amber-50 rounded-full flex items-center justify-center">
+                                <svg className="w-7 h-7 text-amber-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                                    <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z" />
+                                </svg>
+                            </div>
+                            <h3 className="text-base font-semibold text-neutral-800 mb-1">
+                                {t('rental:viewing.notConfigured', 'Online Scheduling Not Available')}
+                            </h3>
+                            <p className="text-sm text-neutral-500 max-w-xs mx-auto">
+                                {t('rental:viewing.notConfiguredDesc', 'The property owner hasn\'t set up online visit scheduling. Please contact them directly to arrange a viewing.')}
+                            </p>
+                            <button
+                                onClick={onClose}
+                                className="mt-5 px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg transition-all"
+                            >
+                                {t('rental:viewing.understood', 'Got it')}
+                            </button>
+                        </div>
                     ) : isSubmitted ? (
                         /* Success State */
                         <div className="text-center py-6">
@@ -340,6 +438,22 @@ const ScheduleViewingModal: React.FC<ScheduleViewingModalProps> = ({ property, i
                     ) : step === 'datetime' ? (
                         /* Step 1: Date & Time Selection */
                         <div className="space-y-5">
+                            {/* Availability schedule summary */}
+                            {availability?.enabled && (
+                                <div className="flex items-start gap-2.5 p-3 bg-blue-50 border border-blue-100 rounded-lg">
+                                    <svg className="w-4 h-4 text-blue-500 mt-0.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                                        <path strokeLinecap="round" strokeLinejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                    </svg>
+                                    <div className="text-xs text-blue-800">
+                                        <span className="font-medium">{t('rental:viewing.availableHours', 'Available hours')}:</span>{' '}
+                                        {availability.timeSlots[0]} – {availability.timeSlots[availability.timeSlots.length - 1]}
+                                        {availability.slotDurationMinutes && (
+                                            <span className="text-blue-600"> ({availability.slotDurationMinutes} {t('rental:viewing.minSlots', 'min slots')})</span>
+                                        )}
+                                    </div>
+                                </div>
+                            )}
+
                             {/* Seller notes */}
                             {availability?.notes && (
                                 <div className="flex items-start gap-2 p-3 bg-amber-50 border border-amber-200 rounded-lg">

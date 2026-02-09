@@ -721,6 +721,7 @@ export const updateProperty = async (
       'imageUrl', 'images', 'lat', 'lng',
       'propertyType', 'floorNumber', 'totalFloors', 'floorplanUrl',
       'furnishing', 'heatingType', 'condition', 'viewType', 'energyRating',
+      'orientation',
       'hasBalcony', 'hasGarden', 'hasElevator', 'hasSecurity',
       'hasAirConditioning', 'hasPool', 'petsAllowed',
       'distanceToCenter', 'distanceToSea', 'distanceToSchool', 'distanceToHospital',
@@ -728,6 +729,8 @@ export const updateProperty = async (
       'rentPeriod', 'securityDeposit', 'minimumLeaseDuration', 'maximumLeaseDuration',
       'availableFrom', 'utilitiesIncluded', 'internetIncluded',
       'tenantRequirements', 'maxOccupants',
+      // Visit availability
+      'visitAvailability',
     ];
 
     let updatedFields: string[] = [];

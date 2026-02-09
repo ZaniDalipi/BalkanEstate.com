@@ -51,9 +51,9 @@ export const getViewingAvailability = async (req: Request, res: Response): Promi
       return;
     }
 
-    // Get existing bookings for this property (next 14 days)
+    // Get existing bookings for this property (next 21 days to match frontend range)
     const now = new Date();
-    const twoWeeksLater = new Date(now.getTime() + 14 * 24 * 60 * 60 * 1000);
+    const twoWeeksLater = new Date(now.getTime() + 21 * 24 * 60 * 60 * 1000);
     const existingViewings = await Viewing.find({
       propertyId,
       date: { $gte: now, $lte: twoWeeksLater },
