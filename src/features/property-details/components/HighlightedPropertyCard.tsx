@@ -83,12 +83,13 @@ const HighlightedCardInner = memo<HighlightedCardInnerProps>(({
   const [imageErrors, setImageErrors] = useState<Set<number>>(new Set());
   const [isHovered, setIsHovered] = useState(false);
   const [isAutoPlaying, setIsAutoPlaying] = useState(true);
+  const touchStartX = useRef<number | null>(null);
 
   const promotionTier = property.promotionTier || 'featured';
   const isRental = (property.listingType || 'sale') === 'rent';
 
-  // Get up to 3 images from the property
-  const images = property.images?.slice(0, 3) || [];
+  // Get up to 5 images from the property
+  const images = property.images?.slice(0, 5) || [];
   const displayImages = images.length > 0
     ? images.map(img => typeof img === 'string' ? img : img.url)
     : [property.imageUrl];
@@ -127,6 +128,25 @@ const HighlightedCardInner = memo<HighlightedCardInnerProps>(({
   const handleImageError = useCallback((index: number) => {
     setImageErrors(prev => new Set(prev).add(index));
   }, []);
+
+  // Touch swipe for mobile carousel
+  const handleTouchStart = useCallback((e: React.TouchEvent) => {
+    touchStartX.current = e.touches[0].clientX;
+  }, []);
+
+  const handleTouchEnd = useCallback((e: React.TouchEvent) => {
+    if (touchStartX.current === null) return;
+    const diff = touchStartX.current - e.changedTouches[0].clientX;
+    if (Math.abs(diff) > 50) {
+      setIsAutoPlaying(false);
+      if (diff > 0) {
+        setCurrentImageIndex(prev => (prev + 1) % displayImages.length);
+      } else {
+        setCurrentImageIndex(prev => (prev - 1 + displayImages.length) % displayImages.length);
+      }
+    }
+    touchStartX.current = null;
+  }, [displayImages.length]);
 
   const propertyTypeLabel = t(`property:types.${property.propertyType}`, { defaultValue: t('property:property') });
 
@@ -168,83 +188,78 @@ const HighlightedCardInner = memo<HighlightedCardInnerProps>(({
 
   return (
     <div
-      className={`group bg-white rounded-xl overflow-hidden shadow-xl ${tierStyles.border} ${tierStyles.glow} transition-all duration-500 cursor-pointer flex flex-col md:flex-row md:relative w-full ${
+      className={`group bg-white rounded-xl overflow-hidden shadow-xl ${tierStyles.border} ${tierStyles.glow} transition-all duration-500 cursor-pointer flex flex-col md:flex-row w-full ${
         isHovered ? 'shadow-2xl scale-[1.01]' : ''
       }`}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
       onClick={onCardClick}
     >
-      {/* Image Section - absolute on desktop to guarantee full height fill */}
-      <div className="relative h-48 md:h-full md:absolute md:inset-y-0 md:left-0 md:w-[40%] overflow-hidden">
-        {/* Blurred background layer - fills any empty space for panoramic/wide images */}
-        <img
-          src={displayImages[currentImageIndex]}
-          alt=""
-          aria-hidden="true"
-          className="absolute inset-0 w-full h-full object-cover blur-2xl scale-125"
-        />
-        <div className="absolute inset-0">
-          {displayImages.map((imgUrl, index) => (
-            <div
-              key={index}
-              className={`absolute inset-0 transition-opacity duration-500 ${
-                index === currentImageIndex ? 'opacity-100' : 'opacity-0'
-              }`}
-            >
-              {imageErrors.has(index) ? (
-                <div className="w-full h-full bg-gradient-to-br from-neutral-100 via-neutral-200 to-neutral-300 flex items-center justify-center">
-                  <BuildingOfficeIcon className="w-12 h-12 text-neutral-400" />
-                </div>
-              ) : (
-                <img
-                  src={imgUrl}
-                  alt={`${property.title || propertyTypeLabel} - Image ${index + 1}`}
-                  loading={index === 0 ? 'eager' : 'lazy'}
-                  decoding="async"
-                  sizes="(max-width: 768px) 100vw, 40vw"
-                  className={`w-full h-full object-contain transition-transform duration-700 ${
-                    isHovered ? 'scale-105' : 'scale-100'
-                  }`}
-                  onError={() => handleImageError(index)}
-                />
-              )}
-            </div>
-          ))}
-        </div>
+      {/* Image Section */}
+      <div
+        className="relative w-full md:w-[42%] flex-shrink-0 aspect-[4/3] md:aspect-auto overflow-hidden bg-neutral-900"
+        onTouchStart={handleTouchStart}
+        onTouchEnd={handleTouchEnd}
+      >
+        {displayImages.map((imgUrl, index) => (
+          <div
+            key={index}
+            className={`absolute inset-0 transition-opacity duration-500 ${
+              index === currentImageIndex ? 'opacity-100' : 'opacity-0 pointer-events-none'
+            }`}
+          >
+            {imageErrors.has(index) ? (
+              <div className="w-full h-full bg-gradient-to-br from-neutral-100 via-neutral-200 to-neutral-300 flex items-center justify-center">
+                <BuildingOfficeIcon className="w-12 h-12 text-neutral-400" />
+              </div>
+            ) : (
+              <img
+                src={imgUrl}
+                alt={`${property.title || propertyTypeLabel} - Image ${index + 1}`}
+                loading={index === 0 ? 'eager' : 'lazy'}
+                decoding="async"
+                sizes="(max-width: 768px) 100vw, 42vw"
+                className={`w-full h-full object-cover transition-transform duration-700 ${
+                  isHovered ? 'scale-105' : 'scale-100'
+                }`}
+                onError={() => handleImageError(index)}
+              />
+            )}
+          </div>
+        ))}
 
         {/* Gradient overlay */}
-        <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent z-[1]" />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-transparent z-[1]" />
 
-        {/* Navigation Arrows */}
+        {/* Navigation Arrows - desktop only */}
         {displayImages.length > 1 && (
           <>
             <button
               onClick={handlePrevImage}
-              className="absolute left-1.5 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white p-1 rounded-full shadow-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-10"
+              className="absolute left-2 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white p-1.5 rounded-full shadow-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-10"
             >
-              <ChevronLeftIcon className="w-3.5 h-3.5 text-neutral-700" />
+              <ChevronLeftIcon className="w-4 h-4 text-neutral-700" />
             </button>
             <button
               onClick={handleNextImage}
-              className="absolute right-1.5 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white p-1 rounded-full shadow-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-10"
+              className="absolute right-2 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white p-1.5 rounded-full shadow-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-10"
             >
-              <ChevronRightIcon className="w-3.5 h-3.5 text-neutral-700" />
+              <ChevronRightIcon className="w-4 h-4 text-neutral-700" />
             </button>
           </>
         )}
 
         {/* Image Dots */}
         {displayImages.length > 1 && (
-          <div className="absolute bottom-2 left-1/2 -translate-x-1/2 flex gap-1 z-10">
+          <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-1.5 z-10">
             {displayImages.map((_, index) => (
               <button
                 key={index}
                 onClick={(e) => handleDotClick(e, index)}
-                className={`w-1.5 h-1.5 rounded-full transition-all duration-300 ${
+                className={`h-2 rounded-full transition-all duration-300 shadow-sm ${
                   index === currentImageIndex
-                    ? 'bg-white w-4'
-                    : 'bg-white/50 hover:bg-white/80'
+                    ? 'bg-white w-5'
+                    : 'bg-white/60 hover:bg-white/90 w-2'
                 }`}
               />
             ))}
@@ -252,43 +267,43 @@ const HighlightedCardInner = memo<HighlightedCardInnerProps>(({
         )}
 
         {/* Image Counter */}
-        <div className="absolute bottom-2 right-2 bg-black/60 text-white text-[9px] px-1.5 py-0.5 rounded-full z-10">
+        <div className="absolute bottom-3 right-2.5 bg-black/60 backdrop-blur-sm text-white text-[10px] font-medium px-2 py-0.5 rounded-full z-10">
           {currentImageIndex + 1}/{displayImages.length}
         </div>
 
         {/* Promotion Badge */}
-        <div className={`absolute top-2 left-2 ${tierStyles.badge} text-white text-[9px] font-bold px-2 py-0.5 rounded-md shadow-lg flex items-center gap-1 z-10`}>
-          <StarIconSolid className="w-2.5 h-2.5" />
+        <div className={`absolute top-2.5 left-2.5 ${tierStyles.badge} text-white text-[10px] font-bold px-2.5 py-1 rounded-lg shadow-lg flex items-center gap-1 z-10`}>
+          <StarIconSolid className="w-3 h-3" />
           {tierStyles.label}
         </div>
 
         {/* Urgent Badge */}
         {property.hasUrgentBadge && (
           <div
-            className="absolute top-2 right-10 bg-gradient-to-r from-red-600 to-rose-600 text-white text-[9px] font-bold px-1.5 py-0.5 rounded-md animate-pulse flex items-center gap-0.5 z-10"
+            className="absolute top-2.5 right-12 bg-gradient-to-r from-red-600 to-rose-600 text-white text-[10px] font-bold px-2 py-1 rounded-lg animate-pulse flex items-center gap-1 z-10"
             style={{ boxShadow: '0 0 12px 2px rgba(239, 68, 68, 0.6), 0 0 20px 4px rgba(239, 68, 68, 0.3)' }}
           >
-            <FireIcon className="w-2.5 h-2.5" /> {t('property:status.urgent').toUpperCase()}
+            <FireIcon className="w-3 h-3" /> {t('property:status.urgent').toUpperCase()}
           </div>
         )}
 
         {/* Favorite Button */}
         <button
           onClick={onFavoriteClick}
-          className={`absolute top-2 right-2 p-1.5 rounded-full shadow-lg transition-all duration-300 z-10 ${
+          className={`absolute top-2.5 right-2.5 p-2 rounded-full shadow-lg transition-all duration-300 z-10 ${
             isFavorited
               ? 'bg-red-500 text-white scale-110'
               : 'bg-white/95 text-neutral-600 hover:bg-red-500 hover:text-white hover:scale-110'
           }`}
         >
-          <svg xmlns="http://www.w3.org/2000/svg" className={`h-3.5 w-3.5 ${isFavorited ? 'fill-current' : ''}`} fill={isFavorited ? 'currentColor' : 'none'} viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+          <svg xmlns="http://www.w3.org/2000/svg" className={`h-4 w-4 ${isFavorited ? 'fill-current' : ''}`} fill={isFavorited ? 'currentColor' : 'none'} viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
             <path strokeLinecap="round" strokeLinejoin="round" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
           </svg>
         </button>
       </div>
 
-      {/* Content Section - offset by image width on desktop */}
-      <div className="flex-1 p-3.5 md:p-4 md:ml-[40%] flex flex-col min-w-0">
+      {/* Content Section */}
+      <div className="flex-1 p-4 md:p-5 flex flex-col min-w-0">
         {/* Price & Type Row */}
         <div className="flex items-center justify-between gap-2 mb-2">
           <span className="bg-gradient-to-r from-primary to-primary-dark text-white text-sm md:text-base font-bold px-3 py-1 rounded-lg shadow-md">
@@ -313,7 +328,7 @@ const HighlightedCardInner = memo<HighlightedCardInnerProps>(({
           <span className="text-xs truncate">{property.address}</span>
         </div>
 
-        {/* Property Stats - compact inline row */}
+        {/* Property Stats */}
         <div className="flex items-center gap-4 mb-2.5 text-neutral-600">
           <div className="flex items-center gap-1">
             <BedIcon className="w-4 h-4 text-primary" />
