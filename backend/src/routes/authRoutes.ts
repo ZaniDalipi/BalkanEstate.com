@@ -35,6 +35,7 @@ import {
   refreshTokenRateLimiterIP,
 } from '../middleware/rateLimiter';
 import { decryptPayload } from '../middleware/decryptPayload';
+import { encryptResponse } from '../middleware/encryptResponse';
 import { getPublicKeyBase64 } from '../utils/payloadEncryption';
 
 // Configure multer for avatar uploads
@@ -108,7 +109,7 @@ router.get('/encryption-key', (_req, res) => {
  *       429:
  *         $ref: '#/components/responses/RateLimited'
  */
-router.post('/signup', signupRateLimiterIP, decryptPayload, signup);
+router.post('/signup', signupRateLimiterIP, encryptResponse, decryptPayload, signup);
 
 /**
  * @swagger
@@ -150,7 +151,7 @@ router.post('/signup', signupRateLimiterIP, decryptPayload, signup);
  *       429:
  *         $ref: '#/components/responses/RateLimited'
  */
-router.post('/login', loginRateLimiterIP, decryptPayload, login);
+router.post('/login', loginRateLimiterIP, encryptResponse, decryptPayload, login);
 
 /**
  * @swagger
@@ -202,8 +203,8 @@ router.post('/logout-all', protect, logoutAllDevices);
  *       401:
  *         $ref: '#/components/responses/Unauthorized'
  */
-router.get('/me', protect, getMe);
-router.put('/profile', protect, updateProfile);
+router.get('/me', protect, encryptResponse, getMe);
+router.put('/profile', protect, encryptResponse, updateProfile);
 router.post('/set-public-key', protect, setPublicKey);
 router.post('/switch-role', protect, switchRole);
 router.get('/my-stats', protect, getUserStats);
@@ -213,7 +214,7 @@ router.get('/agents', getAllAgents);
 router.post('/upload-avatar', protect, upload.single('avatar'), uploadAvatar);
 
 // Token management
-router.post('/refresh-token', refreshTokenRateLimiterIP, refreshToken);
+router.post('/refresh-token', refreshTokenRateLimiterIP, encryptResponse, refreshToken);
 router.get('/sessions', protect, getActiveSessions);
 router.get('/login-history', protect, getLoginHistory);
 
@@ -222,9 +223,9 @@ router.post('/verify-email', verifyEmail);
 router.post('/resend-verification', resendVerificationEmail);
 
 // Password reset routes with rate limiting
-router.post('/forgot-password', passwordResetRateLimiterIP, decryptPayload, requestPasswordReset);
-router.post('/reset-password', decryptPayload, resetPassword);
-router.post('/change-password', protect, decryptPayload, changePassword);
+router.post('/forgot-password', passwordResetRateLimiterIP, encryptResponse, decryptPayload, requestPasswordReset);
+router.post('/reset-password', encryptResponse, decryptPayload, resetPassword);
+router.post('/change-password', protect, encryptResponse, decryptPayload, changePassword);
 
 // Role management routes
 router.post('/set-active-role', protect, setActiveRole);

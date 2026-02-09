@@ -79,6 +79,25 @@ export const decryptPayloadValue = (encryptedBase64: string): string => {
 };
 
 /**
+ * Decrypt a value to raw Buffer (for AES key decryption)
+ */
+export const decryptPayloadRaw = (encryptedBase64: string): Buffer => {
+  if (!privateKey) {
+    initializeKeyPair();
+  }
+
+  const encryptedBuffer = Buffer.from(encryptedBase64, 'base64');
+  return crypto.privateDecrypt(
+    {
+      key: privateKey,
+      padding: PADDING,
+      oaepHash: OAEP_HASH,
+    },
+    encryptedBuffer,
+  );
+};
+
+/**
  * Check if a string value looks like an encrypted payload
  * Encrypted values are base64 strings of RSA ciphertext (256+ bytes for 2048-bit key)
  */
