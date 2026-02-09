@@ -294,6 +294,7 @@ export const getCorsConfig = () => {
       'Accept',
       'Origin',
       'X-CSRF-Token',
+      'X-Response-Key',
     ],
     exposedHeaders: ['X-Total-Count', 'X-Page', 'X-Per-Page'],
     maxAge: 86400, // 24 hours
