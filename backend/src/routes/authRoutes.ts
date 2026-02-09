@@ -32,6 +32,7 @@ import {
   loginRateLimiterIP,
   signupRateLimiterIP,
   passwordResetRateLimiterIP,
+  refreshTokenRateLimiterIP,
 } from '../middleware/rateLimiter';
 
 // Configure multer for avatar uploads
@@ -205,7 +206,7 @@ router.get('/agents', getAllAgents);
 router.post('/upload-avatar', protect, upload.single('avatar'), uploadAvatar);
 
 // Token management
-router.post('/refresh-token', refreshToken);
+router.post('/refresh-token', refreshTokenRateLimiterIP, refreshToken);
 router.get('/sessions', protect, getActiveSessions);
 router.get('/login-history', protect, getLoginHistory);
 

@@ -264,7 +264,8 @@ export const getCorsConfig = () => {
 
   return cors({
     origin: (origin, callback) => {
-      // Allow requests with no origin (mobile apps, Postman, etc.)
+      // In production, only allow requests with no origin for non-browser clients
+      // (mobile apps, webhooks). These are further protected by auth middleware.
       if (!origin) {
         callback(null, true);
         return;
@@ -302,11 +303,11 @@ export const getCorsConfig = () => {
 /**
  * General API rate limiter
  * More permissive than auth rate limiting
- * In development mode, skip rate limiting entirely
+ * Active in all environments (relaxed limits in development)
  */
 export const generalRateLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
-  max: isProduction ? 200 : 0, // 0 = unlimited in development
+  max: isProduction ? 200 : 500, // Relaxed but not unlimited in development
   message: {
     error: 'Too many requests',
     message: 'You have exceeded the rate limit. Please try again later.',
@@ -315,22 +316,19 @@ export const generalRateLimiter = rateLimit({
   standardHeaders: true,
   legacyHeaders: false,
   skip: (req: Request) => {
-    // Skip rate limiting entirely in development
-    if (isDevelopment) return true;
-    // Skip rate limiting for health checks
+    // Skip rate limiting for health checks only
     return req.path === '/health';
   },
-  // Use default keyGenerator which handles IPv6 properly
-  // If behind a proxy, ensure 'trust proxy' is set in Express
   validate: { xForwardedForHeader: false },
 });
 
 /**
- * Stricter rate limiter for sensitive endpoints
+ * Stricter rate limiter for sensitive endpoints (auth, admin)
+ * Always enforced regardless of environment
  */
 export const sensitiveRateLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
-  max: isProduction ? 30 : 100, // Stricter limit
+  max: isProduction ? 30 : 60, // Stricter even in development
   message: {
     error: 'Too many requests',
     message: 'Too many requests to this endpoint. Please try again later.',
@@ -543,9 +541,37 @@ export const securityLogger = (req: Request, _res: Response, next: NextFunction)
 };
 
 /**
+ * HTTPS enforcement middleware
+ * In production, redirects HTTP requests to HTTPS and blocks non-secure API calls.
+ * Checks X-Forwarded-Proto header (set by load balancers/reverse proxies).
+ */
+export const enforceHttps = (req: Request, res: Response, next: NextFunction): void => {
+  if (!isProduction) {
+    next();
+    return;
+  }
+
+  const proto = req.headers['x-forwarded-proto'] || req.protocol;
+  if (proto !== 'https') {
+    // For API requests, reject with 403 instead of redirecting
+    if (req.path.startsWith('/api')) {
+      res.status(403).json({ message: 'HTTPS is required' });
+      return;
+    }
+    // For other requests, redirect to HTTPS
+    res.redirect(301, `https://${req.hostname}${req.originalUrl}`);
+    return;
+  }
+  next();
+};
+
+/**
  * Apply all security middleware to Express app
  */
 export const applySecurityMiddleware = (app: Application): void => {
+
+  // 0. Enforce HTTPS in production (must be first)
+  app.use(enforceHttps);
 
   // 1. Request ID (first, for tracking)
   app.use(requestId);
@@ -597,6 +623,7 @@ export const getSocketCorsConfig = () => {
 export default {
   validateEnvironment,
   applySecurityMiddleware,
+  enforceHttps,
   helmetConfig,
   getCorsConfig,
   generalRateLimiter,

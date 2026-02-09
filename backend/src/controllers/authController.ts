@@ -16,6 +16,43 @@ import { authLogger } from '../utils/logger';
 import { generateSecureAgentId } from '../utils/secureRandom';
 import { FREE_TIER_LIMITS, PRO_TIER_LIMITS, ENTERPRISE_TIER_LIMITS } from '../config/subscriptionConstants';
 
+/**
+ * Build a sanitized user response object for public-facing auth endpoints (login/signup).
+ * Only includes fields the frontend needs; strips internal/sensitive details.
+ */
+const buildSafeUserResponse = (user: IUser) => ({
+  id: String(user._id),
+  email: user.email,
+  name: user.name,
+  phone: user.phone,
+  role: user.role,
+  avatarUrl: user.avatarUrl,
+  city: user.city,
+  country: user.country,
+  isSubscribed: user.isSubscribed,
+  isEmailVerified: user.isEmailVerified,
+  activeListingsLimit: user.getActiveListingsLimit(),
+  // Only include agent/agency fields if user is an agent
+  ...(user.role === 'agent' ? {
+    agencyId: user.agencyId ? String(user.agencyId) : undefined,
+    agencyName: user.agencyName,
+    agentId: user.agentId,
+    licenseNumber: user.licenseNumber,
+    trialActive: user.isTrialActive(),
+    trialEndDate: user.trialEndDate,
+    trialExpiring: user.isTrialExpiring(),
+  } : {}),
+  // Only return minimal subscription info, not the full internal object
+  subscription: user.subscription ? {
+    tier: user.subscription.tier,
+    status: user.subscription.status,
+    listingsLimit: user.subscription.listingsLimit,
+    activeListingsCount: user.subscription.activeListingsCount,
+    promotionCoupons: user.subscription.promotionCoupons,
+    savedSearchesLimit: user.subscription.savedSearchesLimit,
+  } : undefined,
+});
+
 // @desc    Register new user
 // @route   POST /api/auth/signup
 // @access  Public
@@ -292,27 +329,10 @@ export const signup = async (req: Request, res: Response): Promise<void> => {
       accessToken: tokens.accessToken,
       refreshToken: tokens.refreshToken,
       user: {
-        id: String(user._id),
-        email: user.email,
-        name: user.name,
-        phone: user.phone,
-        role: user.role,
-        provider: user.provider,
-        avatarUrl: user.avatarUrl,
-        city: user.city,
-        country: user.country,
-        agencyId: user.agencyId ? String(user.agencyId) : undefined,
-        agencyName: user.agencyName,
-        agency: user.agency,
-        agentId: user.agentId,
-        licenseNumber: user.licenseNumber,
-        isSubscribed: user.isSubscribed,
-        isEmailVerified: user.isEmailVerified,
-        subscription: user.subscription,
+        ...buildSafeUserResponse(user),
         availableRoles: user.availableRoles,
         activeRole: user.activeRole,
         requiresSubscription: role === 'agent' && !user.isSubscribed,
-        activeListingsLimit: user.getActiveListingsLimit(),
       },
     });
   } catch (error: any) {
@@ -342,7 +362,7 @@ export const signup = async (req: Request, res: Response): Promise<void> => {
     }
 
     res.status(500).json({
-      message: 'Error creating user. Please try again.',
+      message: 'An error occurred during signup. Please try again.',
       code: 'SIGNUP_ERROR'
     });
   }
@@ -410,9 +430,10 @@ export const login = async (req: Request, res: Response): Promise<void> => {
     }
 
     // Check if user has a password (local auth)
+    // Use generic message to avoid revealing that the account exists or uses social login
     if (!user.password) {
       res.status(401).json({
-        message: 'This account uses social login. Please login with your social provider.'
+        message: invalidCredentialsMsg,
       });
       return;
     }
@@ -487,32 +508,10 @@ export const login = async (req: Request, res: Response): Promise<void> => {
     res.json({
       accessToken: tokens.accessToken,
       refreshToken: tokens.refreshToken,
-      user: {
-        id: String(user._id),
-        email: user.email,
-        name: user.name,
-        phone: user.phone,
-        role: user.role,
-        provider: user.provider,
-        avatarUrl: user.avatarUrl,
-        city: user.city,
-        country: user.country,
-        agencyId: user.agencyId ? String(user.agencyId) : undefined,
-        agencyName: user.agencyName,
-        agency: user.agency,
-        agentId: user.agentId,
-        licenseNumber: user.licenseNumber,
-        isSubscribed: user.isSubscribed,
-        isEmailVerified: user.isEmailVerified,
-        subscription: user.subscription,
-        trialActive: user.role === 'agent' ? user.isTrialActive() : false,
-        trialEndDate: user.role === 'agent' ? user.trialEndDate : undefined,
-        trialExpiring: user.role === 'agent' ? user.isTrialExpiring() : false,
-        activeListingsLimit: user.getActiveListingsLimit(),
-      },
+      user: buildSafeUserResponse(user),
     });
   } catch (error: any) {
-    res.status(500).json({ message: 'Error logging in', error: error.message });
+    res.status(500).json({ message: 'An error occurred during login' });
   }
 };
 
@@ -833,7 +832,6 @@ export const getMe = async (req: Request, res: Response): Promise<void> => {
         name: user.name,
         phone: user.phone,
         role: user.role,
-        provider: user.provider,
         isEmailVerified: user.isEmailVerified,
         availableRoles: user.availableRoles,
         activeRole: user.activeRole,
@@ -855,7 +853,7 @@ export const getMe = async (req: Request, res: Response): Promise<void> => {
       },
     });
   } catch (error: any) {
-    res.status(500).json({ message: 'Error fetching user', error: error.message });
+    res.status(500).json({ message: 'Error fetching user' });
   }
 };
 
@@ -917,7 +915,7 @@ export const updateProfile = async (
       },
     });
   } catch (error: any) {
-    res.status(500).json({ message: 'Error updating profile', error: error.message });
+    res.status(500).json({ message: 'Error updating profile' });
   }
 };
 
@@ -970,7 +968,7 @@ export const setPublicKey = async (req: Request, res: Response): Promise<void> =
       publicKey: user.publicKey,
     });
   } catch (error: any) {
-    res.status(500).json({ message: 'Error setting public key', error: error.message });
+    res.status(500).json({ message: 'Error setting public key' });
   }
 };
 
@@ -1252,7 +1250,7 @@ export const switchRole = async (req: Request, res: Response): Promise<void> => 
       },
     });
   } catch (error: any) {
-    res.status(500).json({ message: 'Error switching role', error: error.message });
+    res.status(500).json({ message: 'Error switching role' });
   }
 };
 
@@ -1321,7 +1319,7 @@ export const requestPasswordReset = async (
       message: successMessage,
     });
   } catch (error: any) {
-    res.status(500).json({ message: 'Error processing request', error: error.message });
+    res.status(500).json({ message: 'Error processing request' });
   }
 };
 
@@ -1410,7 +1408,7 @@ export const resetPassword = async (
       },
     });
   } catch (error: any) {
-    res.status(500).json({ message: 'Error resetting password', error: error.message });
+    res.status(500).json({ message: 'Error resetting password' });
   }
 };
 
@@ -1502,7 +1500,7 @@ export const uploadAvatar = async (
       }
     });
   } catch (error: any) {
-    res.status(500).json({ message: 'Error uploading avatar', error: error.message });
+    res.status(500).json({ message: 'Error uploading avatar' });
   }
 };
 
@@ -1536,7 +1534,7 @@ export const refreshToken = async (req: Request, res: Response): Promise<void> =
       refreshToken: result.refreshToken,
     });
   } catch (error: any) {
-    res.status(500).json({ message: 'Error refreshing token', error: error.message });
+    res.status(500).json({ message: 'Error refreshing token' });
   }
 };
 
@@ -1580,7 +1578,7 @@ export const verifyEmail = async (req: Request, res: Response): Promise<void> =>
       } : undefined,
     });
   } catch (error: any) {
-    res.status(500).json({ success: false, message: 'Error verifying email', error: error.message });
+    res.status(500).json({ success: false, message: 'Error verifying email' });
   }
 };
 
@@ -1602,7 +1600,7 @@ export const resendVerificationEmail = async (req: Request, res: Response): Prom
     // Always return success to prevent account enumeration
     res.json({ message: result.message });
   } catch (error: any) {
-    res.status(500).json({ message: 'Error resending verification email', error: error.message });
+    res.status(500).json({ message: 'Error resending verification email' });
   }
 };
 
@@ -1628,7 +1626,7 @@ export const enhancedLogout = async (req: Request, res: Response): Promise<void>
 
     res.json({ message: 'Logged out successfully' });
   } catch (error: any) {
-    res.status(500).json({ message: 'Error logging out', error: error.message });
+    res.status(500).json({ message: 'Error logging out' });
   }
 };
 
@@ -1649,7 +1647,7 @@ export const logoutAllDevices = async (req: Request, res: Response): Promise<voi
 
     res.json({ message: 'Logged out from all devices successfully' });
   } catch (error: any) {
-    res.status(500).json({ message: 'Error logging out', error: error.message });
+    res.status(500).json({ message: 'Error logging out' });
   }
 };
 
@@ -1670,7 +1668,7 @@ export const getActiveSessions = async (req: Request, res: Response): Promise<vo
 
     res.json({ sessions });
   } catch (error: any) {
-    res.status(500).json({ message: 'Error fetching sessions', error: error.message });
+    res.status(500).json({ message: 'Error fetching sessions' });
   }
 };
 
@@ -1702,7 +1700,7 @@ export const getLoginHistory = async (req: Request, res: Response): Promise<void
       total: sortedHistory.length,
     });
   } catch (error: any) {
-    res.status(500).json({ message: 'Error fetching login history', error: error.message });
+    res.status(500).json({ message: 'Error fetching login history' });
   }
 };
 
@@ -1837,7 +1835,7 @@ export const changePassword = async (req: Request, res: Response): Promise<void>
       message: 'Password changed successfully. You have been logged out of all devices for security.',
     });
   } catch (error: any) {
-    res.status(500).json({ message: 'Error changing password', error: error.message });
+    res.status(500).json({ message: 'Error changing password' });
   }
 };
 
@@ -1903,7 +1901,7 @@ export const setActiveRole = async (req: Request, res: Response): Promise<void> 
       },
     });
   } catch (error: any) {
-    res.status(500).json({ message: 'Error setting active role', error: error.message });
+    res.status(500).json({ message: 'Error setting active role' });
   }
 };
 
@@ -1988,7 +1986,7 @@ export const addRole = async (req: Request, res: Response): Promise<void> => {
       },
     });
   } catch (error: any) {
-    res.status(500).json({ message: 'Error adding role', error: error.message });
+    res.status(500).json({ message: 'Error adding role' });
   }
 };
 
@@ -2021,7 +2019,7 @@ export const getEmailPreferences = async (req: Request, res: Response): Promise<
 
     res.json({ emailPreferences: preferences });
   } catch (error: any) {
-    res.status(500).json({ message: 'Error getting email preferences', error: error.message });
+    res.status(500).json({ message: 'Error getting email preferences' });
   }
 };
 
@@ -2070,7 +2068,7 @@ export const updateEmailPreferences = async (req: Request, res: Response): Promi
       emailPreferences: user.emailPreferences,
     });
   } catch (error: any) {
-    res.status(500).json({ message: 'Error updating email preferences', error: error.message });
+    res.status(500).json({ message: 'Error updating email preferences' });
   }
 };
 
