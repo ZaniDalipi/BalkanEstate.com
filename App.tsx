@@ -42,7 +42,6 @@ const Sidebar = lazy(() => import('./components/shared/Sidebar'));
 const Header = lazy(() => import('./components/shared/Header'));
 
 // Lazy load all pages and conditional components to reduce initial bundle
-const Onboarding = lazy(() => import('./src/features/onboarding/components/Onboarding'));
 const SearchPage = lazy(() => import('./src/features/search/components').then(m => ({ default: m.SearchPage })));
 const AuthPage = lazy(() => import('./src/features/auth/components/AuthModal'));
 const EmailVerificationRequired = lazy(() => import('./src/features/auth/components/EmailVerificationRequired'));
@@ -530,8 +529,8 @@ const AppContent: React.FC<{ onToggleSidebar: () => void }> = ({ onToggleSidebar
         if (state.currentUser?.role === UserRole.ADMIN || state.currentUser?.role === UserRole.SUPER_ADMIN) {
           return <QueryErrorBoundary><AdminDashboard /></QueryErrorBoundary>;
         }
-        // Redirect non-admins to home
-        return <Onboarding />;
+        // Redirect non-admins to search
+        return <SearchPage />;
       case 'reset-password':
         return <ResetPasswordPage />;
       case 'verify-email':
@@ -776,19 +775,6 @@ const AppWrapper: React.FC = () => {
                 <EmailVerificationRequired email={state.currentUser.email} />
             </Suspense>
         );
-    }
-
-    if (!state.onboardingComplete && !isAuthFlowPage) {
-        return (
-            <>
-                <Suspense fallback={<FullScreenLoader />}>
-                    <Onboarding />
-                </Suspense>
-                <Suspense fallback={null}>
-                    {state.isAuthModalOpen && <AuthPage />}
-                </Suspense>
-            </>
-        )
     }
 
     return (

@@ -41,7 +41,7 @@ const initialSearchPageState: SearchPageState = {
 
 const initialState: AppState = {
   user: null,
-  onboardingComplete: false,
+  onboardingComplete: true,
   isAuthenticating: true,
   activeView: 'search',
   isPricingModalOpen: false,
