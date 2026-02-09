@@ -114,8 +114,29 @@ const MapLocationPicker: React.FC<MapLocationPickerProps> = ({ lat, lng, address
 
     marker.on('dragend', async (e) => {
       const position = e.target.getLatLng();
-      onLocationChange(position.lat, position.lng);
       setIsDragging(false);
+
+      // If city is selected, validate that the dragged location is within the city area
+      if (city && cityLat && cityLng) {
+        const distance = calculateDistance(cityLat, cityLng, position.lat, position.lng);
+        if (distance > 30) {
+          // Snap marker back to previous position
+          marker.setLatLng([lat, lng]);
+          marker.setPopupContent(`<b>${t('search:map.locationTooFarTitle', 'Location Too Far')}</b><br>${t('search:map.locationTooFar', { distance: distance.toFixed(1), city })}`);
+          marker.openPopup();
+          dispatch({
+            type: 'SHOW_ALERT',
+            payload: {
+              type: 'warning',
+              title: t('search:map.locationTooFarTitle', 'Location Too Far'),
+              message: t('search:map.locationTooFar', { distance: distance.toFixed(1), city }),
+            },
+          });
+          return;
+        }
+      }
+
+      onLocationChange(position.lat, position.lng);
       marker.setPopupContent(`<b>${t('search:map.locationSet')}</b><br>Lat: ${position.lat.toFixed(6)}, Lng: ${position.lng.toFixed(6)}`);
       marker.openPopup();
 
@@ -363,6 +384,23 @@ const MapLocationPicker: React.FC<MapLocationPickerProps> = ({ lat, lng, address
     navigator.geolocation.getCurrentPosition(
       async (position) => {
         const { latitude, longitude } = position.coords;
+
+        // If city is selected, validate that the current location is within the city area
+        if (city && cityLat && cityLng) {
+          const distance = calculateDistance(cityLat, cityLng, latitude, longitude);
+          if (distance > 30) {
+            setIsGettingLocation(false);
+            dispatch({
+              type: 'SHOW_ALERT',
+              payload: {
+                type: 'warning',
+                title: t('search:map.locationTooFarTitle', 'Location Too Far'),
+                message: t('search:map.locationTooFar', { distance: distance.toFixed(1), city }),
+              },
+            });
+            return;
+          }
+        }
 
         // Update location
         onLocationChange(latitude, longitude);

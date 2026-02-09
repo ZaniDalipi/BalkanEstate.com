@@ -374,14 +374,15 @@ const RentVsBuyCalculator: React.FC<RentVsBuyCalculatorProps> = ({ propertyPrice
           </div>
 
           {/* Magical Slider Container */}
-          <div className="relative py-3">
+          <div className="relative py-3" style={{ touchAction: 'none' }}>
             {/* Glow effect behind track */}
             <div
-              className="absolute top-1/2 -translate-y-1/2 h-4 rounded-full blur-md transition-all duration-300"
+              className="absolute top-1/2 -translate-y-1/2 h-4 rounded-full blur-md"
               style={{
                 left: 0,
                 width: `${((planningToStay - 1) / 29) * 100}%`,
-                background: 'linear-gradient(90deg, rgba(59,130,246,0.4), rgba(139,92,246,0.4), rgba(236,72,153,0.3))'
+                background: 'linear-gradient(90deg, rgba(59,130,246,0.4), rgba(139,92,246,0.4), rgba(236,72,153,0.3))',
+                willChange: 'width'
               }}
             />
 
@@ -389,12 +390,13 @@ const RentVsBuyCalculator: React.FC<RentVsBuyCalculatorProps> = ({ propertyPrice
             <div className="relative h-3 rounded-full bg-gradient-to-r from-neutral-200/80 via-neutral-100 to-neutral-200/80 shadow-inner overflow-hidden">
               {/* Animated gradient fill */}
               <div
-                className="absolute inset-y-0 left-0 rounded-full transition-all duration-200 ease-out"
+                className="absolute inset-y-0 left-0 rounded-full"
                 style={{
                   width: `${((planningToStay - 1) / 29) * 100}%`,
                   background: 'linear-gradient(90deg, #3b82f6, #8b5cf6, #ec4899, #f59e0b)',
                   backgroundSize: '200% 100%',
-                  animation: 'shimmer 3s linear infinite'
+                  animation: 'shimmer 3s linear infinite',
+                  willChange: 'width'
                 }}
               />
 
@@ -417,8 +419,8 @@ const RentVsBuyCalculator: React.FC<RentVsBuyCalculatorProps> = ({ propertyPrice
 
             {/* Custom thumb */}
             <div
-              className="absolute top-1/2 -translate-y-1/2 -translate-x-1/2 pointer-events-none transition-all duration-200"
-              style={{ left: `${((planningToStay - 1) / 29) * 100}%` }}
+              className="absolute top-1/2 -translate-y-1/2 -translate-x-1/2 pointer-events-none"
+              style={{ left: `${((planningToStay - 1) / 29) * 100}%`, willChange: 'left' }}
             >
               {/* Outer glow ring */}
               <div className="absolute inset-0 -m-2 rounded-full bg-primary/20 animate-pulse" />

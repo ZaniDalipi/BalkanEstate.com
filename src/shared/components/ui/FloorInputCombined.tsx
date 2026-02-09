@@ -76,6 +76,22 @@ const FloorInputCombined: React.FC<FloorInputCombinedProps> = ({
             </label>
             <div className="flex items-center gap-2 bg-white rounded-lg border border-neutral-300 p-2">
                 <div className="flex flex-col items-center">
+                    <span className="text-xs text-neutral-500 mb-1">Total</span>
+                    <input
+                        type="number"
+                        id={`${id}-total`}
+                        value={totalFloors || ''}
+                        onChange={handleTotalFloorsChange}
+                        onBlur={(e) => handleBlur(e, false)}
+                        onKeyDown={handleKeyDown}
+                        className={inputClasses}
+                        min={1}
+                        placeholder="14"
+                        aria-label="Total floors in building"
+                    />
+                </div>
+                <span className="text-2xl font-bold text-neutral-400 self-end mb-3">/</span>
+                <div className="flex flex-col items-center">
                     <span className="text-xs text-neutral-500 mb-1">Floor</span>
                     <input
                         type="number"
@@ -91,22 +107,6 @@ const FloorInputCombined: React.FC<FloorInputCombinedProps> = ({
                         aria-label="Floor number"
                     />
                 </div>
-                <span className="text-2xl font-bold text-neutral-400 self-end mb-3">/</span>
-                <div className="flex flex-col items-center">
-                    <span className="text-xs text-neutral-500 mb-1">Total</span>
-                    <input
-                        type="number"
-                        id={`${id}-total`}
-                        value={totalFloors || ''}
-                        onChange={handleTotalFloorsChange}
-                        onBlur={(e) => handleBlur(e, false)}
-                        onKeyDown={handleKeyDown}
-                        className={inputClasses}
-                        min={1}
-                        placeholder="14"
-                        aria-label="Total floors in building"
-                    />
-                </div>
                 <div className="ml-2 flex items-center text-neutral-500 self-end mb-4">
                     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
@@ -114,7 +114,7 @@ const FloorInputCombined: React.FC<FloorInputCombinedProps> = ({
                 </div>
             </div>
             <p className="text-xs text-neutral-500 mt-1">
-                e.g., Floor 8 of 14-story building
+                e.g., 14-story building, Floor 8
             </p>
         </div>
     );
