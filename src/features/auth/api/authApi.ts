@@ -4,6 +4,7 @@
 import { apiRequest } from '@/src/shared/api';
 import { tokenService } from '@/src/shared/api/tokenService';
 import { API_URL } from '@/src/shared/api/config';
+import { encryptSensitiveFields } from '@/src/shared/api/payloadEncryption';
 import type { User, UserRole, LoginHistoryEntry } from '@/src/shared/types';
 
 // --- Authentication API ---
@@ -23,9 +24,12 @@ export const checkAuth = async (): Promise<User | null> => {
 
 export const login = async (emailOrPhone: string, password: string): Promise<User> => {
   const isEmail = emailOrPhone.includes('@');
-  const body = isEmail
+  const rawBody = isEmail
     ? { email: emailOrPhone, password }
     : { phone: emailOrPhone, password };
+
+  // Encrypt sensitive fields before sending
+  const body = await encryptSensitiveFields(rawBody, ['email', 'phone', 'password']);
 
   const response = await apiRequest<{
     user: User;
@@ -63,6 +67,19 @@ export const signup = async (
   password: string,
   options?: SignupOptions
 ): Promise<User> => {
+  const rawBody = {
+    email,
+    password,
+    name: options?.name || email.split('@')[0],
+    phone: options?.phone || '',
+    role: options?.role || 'buyer',
+    licenseNumber: options?.licenseNumber,
+    agencyInvitationCode: options?.agencyInvitationCode,
+  };
+
+  // Encrypt sensitive fields before sending
+  const body = await encryptSensitiveFields(rawBody, ['email', 'password', 'phone']);
+
   const response = await apiRequest<{
     user: User;
     accessToken?: string;
@@ -70,15 +87,7 @@ export const signup = async (
     token?: string;
   }>('/auth/signup', {
     method: 'POST',
-    body: {
-      email,
-      password,
-      name: options?.name || email.split('@')[0],
-      phone: options?.phone || '',
-      role: options?.role || 'buyer',
-      licenseNumber: options?.licenseNumber,
-      agencyInvitationCode: options?.agencyInvitationCode,
-    },
+    body,
   });
 
   const accessToken = response.accessToken || response.token;
@@ -134,13 +143,15 @@ export const getLoginHistory = async (): Promise<LoginHistoryEntry[]> => {
 export const requestPasswordReset = async (
   email: string
 ): Promise<{ message: string; resetToken?: string }> => {
+  const body = await encryptSensitiveFields({ email }, ['email']);
   return apiRequest<{ message: string; resetToken?: string }>('/auth/forgot-password', {
     method: 'POST',
-    body: { email },
+    body,
   });
 };
 
 export const resetPassword = async (token: string, newPassword: string): Promise<User> => {
+  const body = await encryptSensitiveFields({ token, newPassword }, ['newPassword']);
   const response = await apiRequest<{
     user: User;
     accessToken?: string;
@@ -148,7 +159,7 @@ export const resetPassword = async (token: string, newPassword: string): Promise
     token?: string;
   }>('/auth/reset-password', {
     method: 'POST',
-    body: { token, newPassword },
+    body,
   });
 
   const accessToken = response.accessToken || response.token;
@@ -168,10 +179,11 @@ export const changePassword = async (
   currentPassword: string,
   newPassword: string
 ): Promise<{ message: string }> => {
+  const body = await encryptSensitiveFields({ currentPassword, newPassword }, ['currentPassword', 'newPassword']);
   const response = await apiRequest<{ message: string }>('/auth/change-password', {
     method: 'POST',
     requiresAuth: true,
-    body: { currentPassword, newPassword },
+    body,
   });
 
   tokenService.clearTokens();

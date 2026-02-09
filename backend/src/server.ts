@@ -52,6 +52,10 @@ initSentry();
 // Validate environment variables (warns in dev, throws in production)
 validateEnvironment();
 
+// Initialize RSA key pair for client-side payload encryption
+import { initializeKeyPair } from './utils/payloadEncryption';
+initializeKeyPair();
+
 // Import routes
 import authRoutes from './routes/authRoutes';
 import propertyRoutes from './routes/propertyRoutes';

@@ -34,6 +34,8 @@ import {
   passwordResetRateLimiterIP,
   refreshTokenRateLimiterIP,
 } from '../middleware/rateLimiter';
+import { decryptPayload } from '../middleware/decryptPayload';
+import { getPublicKeyBase64 } from '../utils/payloadEncryption';
 
 // Configure multer for avatar uploads
 const upload = multer({
@@ -53,6 +55,11 @@ const upload = multer({
 
 
 const router = express.Router();
+
+// Public key endpoint for client-side encryption
+router.get('/encryption-key', (_req, res) => {
+  res.json({ publicKey: getPublicKeyBase64() });
+});
 
 /**
  * @swagger
@@ -101,7 +108,7 @@ const router = express.Router();
  *       429:
  *         $ref: '#/components/responses/RateLimited'
  */
-router.post('/signup', signupRateLimiterIP, signup);
+router.post('/signup', signupRateLimiterIP, decryptPayload, signup);
 
 /**
  * @swagger
@@ -143,7 +150,7 @@ router.post('/signup', signupRateLimiterIP, signup);
  *       429:
  *         $ref: '#/components/responses/RateLimited'
  */
-router.post('/login', loginRateLimiterIP, login);
+router.post('/login', loginRateLimiterIP, decryptPayload, login);
 
 /**
  * @swagger
@@ -215,9 +222,9 @@ router.post('/verify-email', verifyEmail);
 router.post('/resend-verification', resendVerificationEmail);
 
 // Password reset routes with rate limiting
-router.post('/forgot-password', passwordResetRateLimiterIP, requestPasswordReset);
-router.post('/reset-password', resetPassword);
-router.post('/change-password', protect, changePassword);
+router.post('/forgot-password', passwordResetRateLimiterIP, decryptPayload, requestPasswordReset);
+router.post('/reset-password', decryptPayload, resetPassword);
+router.post('/change-password', protect, decryptPayload, changePassword);
 
 // Role management routes
 router.post('/set-active-role', protect, setActiveRole);
