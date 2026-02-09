@@ -473,7 +473,7 @@ export const setupSwagger = (app: Application): void => {
     })
   );
 
-  console.log('📚 Swagger API docs available at /api-docs');
+  // Swagger setup logged via serverLogger in server.ts
 };
 
 export default { swaggerSpec, setupSwagger };

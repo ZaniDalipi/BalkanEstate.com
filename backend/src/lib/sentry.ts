@@ -5,6 +5,7 @@
 
 import * as Sentry from '@sentry/node';
 import { Application, Request, Response, NextFunction } from 'express';
+import { serverLogger } from '../utils/logger';
 
 // Environment detection
 const isProduction = process.env.NODE_ENV === 'production';
@@ -19,7 +20,7 @@ const SENTRY_DSN = process.env.SENTRY_DSN;
 export const initSentry = (): void => {
   if (!SENTRY_DSN) {
     if (isDevelopment) {
-      console.log('ℹ️ Sentry DSN not configured - error tracking disabled');
+      serverLogger.info('Sentry DSN not configured - error tracking disabled');
     }
     return;
   }
@@ -60,7 +61,7 @@ export const initSentry = (): void => {
     },
   });
 
-  console.log('✅ Sentry initialized for backend error tracking');
+  serverLogger.info('Sentry initialized for backend error tracking');
 };
 
 /**
@@ -81,7 +82,7 @@ export const setupSentry = (app: Application): void => {
     next();
   });
 
-  console.log('✅ Sentry middleware attached to Express');
+  serverLogger.info('Sentry middleware attached to Express');
 };
 
 /**
