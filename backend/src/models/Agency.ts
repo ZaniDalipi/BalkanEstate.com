@@ -1,5 +1,6 @@
 import mongoose, { Document, Schema } from 'mongoose';
 import { generateSecureRandomString, generateSecureAgencyCouponCode } from '../utils/secureRandom';
+import { encryptionPlugin } from '../utils/fieldEncryption';
 
 export interface IAgencyCoupon {
   code: string;
@@ -686,5 +687,10 @@ AgencySchema.methods.canGenerateMoreCoupons = function (): boolean {
   ).length;
   return availableCoupons < 5; // Max 5 coupons at a time
 };
+
+// Field-level encryption for PII fields
+AgencySchema.plugin(encryptionPlugin, {
+  fields: ['phone', 'address'],
+});
 
 export default mongoose.model<IAgency>('Agency', AgencySchema);

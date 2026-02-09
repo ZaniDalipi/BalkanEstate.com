@@ -109,7 +109,10 @@ export function isEncrypted(value: string): boolean {
 export function hashForSearch(value: string): string {
   if (!value) return value;
 
-  const salt = process.env.SEARCH_HASH_SALT || process.env.ENCRYPTION_KEY || 'default-salt';
+  const salt = process.env.SEARCH_HASH_SALT || process.env.ENCRYPTION_KEY;
+  if (!salt) {
+    throw new Error('CRITICAL: SEARCH_HASH_SALT or ENCRYPTION_KEY must be set for secure hashing.');
+  }
   return crypto
     .createHmac('sha256', salt)
     .update(value.toLowerCase().trim())

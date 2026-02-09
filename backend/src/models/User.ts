@@ -1,6 +1,7 @@
 import mongoose, { Document, Schema } from 'mongoose';
 import bcrypt from 'bcryptjs';
 import crypto from 'crypto';
+import { encryptionPlugin } from '../utils/fieldEncryption';
 
 export interface IUser extends Document {
   _id: string;
@@ -896,9 +897,11 @@ UserSchema.pre('save', function (next) {
     this.set('primaryRole', currentRole);
   }
 
-  // Generate unsubscribe token for new users
+  // Generate unsubscribe token for new users (stored as hash for security)
   if (!this.get('unsubscribeToken')) {
-    this.set('unsubscribeToken', crypto.randomBytes(32).toString('hex'));
+    const rawToken = crypto.randomBytes(32).toString('hex');
+    const hashedToken = crypto.createHash('sha256').update(rawToken).digest('hex');
+    this.set('unsubscribeToken', hashedToken);
   }
 
   next();
@@ -1067,5 +1070,11 @@ UserSchema.index({ trialEndDate: 1, trialExpired: 1 });
 
 // Index for account lockout
 UserSchema.index({ lockUntil: 1 });
+
+// Field-level encryption for PII fields
+// Encrypts on save, decrypts on find. Gracefully handles legacy unencrypted data.
+UserSchema.plugin(encryptionPlugin, {
+  fields: ['phone', 'address'],
+});
 
 export default mongoose.model<IUser>('User', UserSchema);
