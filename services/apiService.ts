@@ -19,6 +19,7 @@
  */
 
 import { Property, Seller, User, UserRole, SavedSearch, Message, Conversation, Filters } from '../types';
+import { encryptSensitiveFields } from '@/src/shared/api/payloadEncryption';
 
 // Get API URL from environment variables
 // Production detection: if running on balkanestateai.com, use production API
@@ -209,9 +210,12 @@ export const checkAuth = async (): Promise<User | null> => {
 export const login = async (emailOrPhone: string, password: string): Promise<User> => {
   // Determine if it's an email or phone number
   const isEmail = emailOrPhone.includes('@');
-  const body = isEmail
+  const rawBody = isEmail
     ? { email: emailOrPhone, password }
     : { phone: emailOrPhone, password };
+
+  // Encrypt sensitive fields before sending
+  const body = await encryptSensitiveFields(rawBody, ['email', 'phone', 'password']);
 
   const response = await apiRequest<{ user: User; accessToken?: string; refreshToken?: string; token?: string }>('/auth/login', {
     method: 'POST',
@@ -243,17 +247,22 @@ export const signup = async (
     agencyInvitationCode?: string;
   }
 ): Promise<User> => {
+  const rawBody = {
+    email,
+    password,
+    name: options?.name || email.split('@')[0],
+    phone: options?.phone || '',
+    role: options?.role || 'buyer',
+    licenseNumber: options?.licenseNumber,
+    agencyInvitationCode: options?.agencyInvitationCode,
+  };
+
+  // Encrypt sensitive fields before sending
+  const body = await encryptSensitiveFields(rawBody, ['email', 'password', 'phone']);
+
   const response = await apiRequest<{ user: User; accessToken?: string; refreshToken?: string; token?: string }>('/auth/signup', {
     method: 'POST',
-    body: {
-      email,
-      password,
-      name: options?.name || email.split('@')[0],
-      phone: options?.phone || '',
-      role: options?.role || 'buyer',
-      licenseNumber: options?.licenseNumber,
-      agencyInvitationCode: options?.agencyInvitationCode,
-    },
+    body,
   });
 
   // Handle both new (accessToken/refreshToken) and old (token) formats
@@ -318,18 +327,20 @@ export const getLoginHistory = async (): Promise<LoginHistoryEntry[]> => {
 };
 
 export const requestPasswordReset = async (email: string): Promise<{ message: string; resetToken?: string }> => {
+  const body = await encryptSensitiveFields({ email }, ['email']);
   const response = await apiRequest<{ message: string; resetToken?: string }>('/auth/forgot-password', {
     method: 'POST',
-    body: { email },
+    body,
   });
 
   return response;
 };
 
 export const resetPassword = async (token: string, newPassword: string): Promise<User> => {
+  const body = await encryptSensitiveFields({ token, newPassword }, ['newPassword']);
   const response = await apiRequest<{ user: User; accessToken?: string; refreshToken?: string; token?: string }>('/auth/reset-password', {
     method: 'POST',
-    body: { token, newPassword },
+    body,
   });
 
   // Handle both new (accessToken/refreshToken) and old (token) formats
@@ -347,10 +358,11 @@ export const resetPassword = async (token: string, newPassword: string): Promise
 };
 
 export const changePassword = async (currentPassword: string, newPassword: string): Promise<{ message: string }> => {
+  const body = await encryptSensitiveFields({ currentPassword, newPassword }, ['currentPassword', 'newPassword']);
   const response = await apiRequest<{ message: string }>('/auth/change-password', {
     method: 'POST',
     requiresAuth: true,
-    body: { currentPassword, newPassword },
+    body,
   });
 
   // Password change logs out all devices, so remove local tokens
