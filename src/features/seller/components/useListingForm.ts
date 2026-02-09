@@ -130,6 +130,7 @@ export const useListingForm = (propertyToEdit: Property | null) => {
                 condition: propertyToEdit.condition || 'any',
                 viewType: propertyToEdit.viewType || 'any',
                 energyRating: propertyToEdit.energyRating || 'any',
+                orientation: propertyToEdit.orientation || 'any',
                 // Rental-specific fields
                 rentPeriod: propertyToEdit.rentPeriod || 'monthly',
                 securityDeposit: propertyToEdit.securityDeposit || 0,
@@ -760,6 +761,7 @@ export const useListingForm = (propertyToEdit: Property | null) => {
                 condition: listingData.condition !== 'any' ? listingData.condition : undefined,
                 viewType: listingData.viewType !== 'any' ? listingData.viewType : undefined,
                 energyRating: listingData.energyRating !== 'any' ? listingData.energyRating : undefined,
+                orientation: listingData.orientation !== 'any' ? listingData.orientation : undefined,
                 // Calculated distances
                 distanceToCenter: distances.distanceToCenter,
                 distanceToSea: distances.distanceToSea,

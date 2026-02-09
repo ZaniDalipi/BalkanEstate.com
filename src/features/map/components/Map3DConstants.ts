@@ -23,6 +23,8 @@ export interface Map3DBuildingsProps {
   propertyType?: 'house' | 'apartment' | 'villa' | 'land' | 'other';
   // 360 Virtual Tour
   virtualTour360Url?: string;
+  // Building facing direction (user-defined)
+  orientation?: string;
 }
 
 /**

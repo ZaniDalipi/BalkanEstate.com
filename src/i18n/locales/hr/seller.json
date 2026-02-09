@@ -187,6 +187,18 @@
         "e": "E",
         "f": "F",
         "g": "G (Least Efficient)"
+      },
+      "orientation": {
+        "label": "Orijentacija",
+        "notSpecified": "Nije navedeno",
+        "north": "Sjever",
+        "northEast": "Sjeveroistok",
+        "east": "Istok",
+        "southEast": "Jugoistok",
+        "south": "Jug",
+        "southWest": "Jugozapad",
+        "west": "Zapad",
+        "northWest": "Sjeverozapad"
       }
     },
     "landDetails": {

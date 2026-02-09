@@ -272,6 +272,12 @@ export const PropertyInfo: React.FC<PropertyInfoProps> = ({ property, onOpenFloo
             </DetailItem>
           )}
 
+          {property.orientation && property.orientation !== 'any' && (
+            <DetailItem icon={<span className="text-2xl">🧭</span>} label={t('details.orientation')}>
+              <span className="capitalize">{t(`details.orientations.${property.orientation}`)}</span>
+            </DetailItem>
+          )}
+
           {property.floorplanUrl && (
             <div className="col-span-2 sm:col-span-3 lg:col-span-4 mt-2">
               <button

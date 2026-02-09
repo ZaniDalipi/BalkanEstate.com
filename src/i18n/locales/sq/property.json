@@ -90,6 +90,16 @@
     "view": "Pamja",
     "viewType": "Pamje {{type}}",
     "orientation": "Orientimi",
+    "orientations": {
+      "north": "Veri",
+      "northEast": "Veri-Lindje",
+      "east": "Lindje",
+      "southEast": "Jug-Lindje",
+      "south": "Jug",
+      "southWest": "Jug-Perëndim",
+      "west": "Perëndim",
+      "northWest": "Veri-Perëndim"
+    },
     "materials": "Materialet e Ndërtimit",
     "furnishing": "Mobilimi",
     "specialFeatures": "Karakteristika të Veçanta",

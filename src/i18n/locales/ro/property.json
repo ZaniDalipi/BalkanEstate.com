@@ -90,6 +90,16 @@
     "view": "Vedere",
     "viewType": "Vedere {{type}}",
     "orientation": "Orientare",
+    "orientations": {
+      "north": "Nord",
+      "northEast": "Nord-Est",
+      "east": "Est",
+      "southEast": "Sud-Est",
+      "south": "Sud",
+      "southWest": "Sud-Vest",
+      "west": "Vest",
+      "northWest": "Nord-Vest"
+    },
     "materials": "Materiale de Construcție",
     "furnishing": "Mobilare",
     "specialFeatures": "Caracteristici Speciale",

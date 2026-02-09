@@ -186,6 +186,18 @@
         "e": "E",
         "f": "F",
         "g": "G (Най-неефективен)"
+      },
+      "orientation": {
+        "label": "Ориентация",
+        "notSpecified": "Не е посочено",
+        "north": "Север",
+        "northEast": "Североизток",
+        "east": "Изток",
+        "southEast": "Югоизток",
+        "south": "Юг",
+        "southWest": "Югозапад",
+        "west": "Запад",
+        "northWest": "Северозапад"
       }
     },
     "landDetails": {

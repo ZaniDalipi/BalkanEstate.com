@@ -201,6 +201,31 @@ const ListingPropertyFeatures: React.FC<ListingPropertyFeaturesProps> = ({
                                 <svg className="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/></svg>
                             </div>
                         </div>
+
+                        {/* Orientation / Facing Direction */}
+                        <div className="relative">
+                            <select
+                                id="orientation"
+                                name="orientation"
+                                value={listingData.orientation}
+                                onChange={handleInputChange}
+                                className={`${floatingInputClasses} border-neutral-300`}
+                            >
+                                <option value="any">{t('seller:createListing.advancedDetails.orientation.notSpecified')}</option>
+                                <option value="north">{t('seller:createListing.advancedDetails.orientation.north')}</option>
+                                <option value="northEast">{t('seller:createListing.advancedDetails.orientation.northEast')}</option>
+                                <option value="east">{t('seller:createListing.advancedDetails.orientation.east')}</option>
+                                <option value="southEast">{t('seller:createListing.advancedDetails.orientation.southEast')}</option>
+                                <option value="south">{t('seller:createListing.advancedDetails.orientation.south')}</option>
+                                <option value="southWest">{t('seller:createListing.advancedDetails.orientation.southWest')}</option>
+                                <option value="west">{t('seller:createListing.advancedDetails.orientation.west')}</option>
+                                <option value="northWest">{t('seller:createListing.advancedDetails.orientation.northWest')}</option>
+                            </select>
+                            <label htmlFor="orientation" className={floatingSelectLabelClasses}>{t('seller:createListing.advancedDetails.orientation.label')}</label>
+                            <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-neutral-500">
+                                <svg className="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/></svg>
+                            </div>
+                        </div>
                     </div>
                     <p className="text-xs text-neutral-500 mt-2">{t('seller:createListing.advancedDetails.hint')}</p>
                 </fieldset>

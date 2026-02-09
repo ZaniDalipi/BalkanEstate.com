@@ -90,6 +90,16 @@
     "view": "Θέα",
     "viewType": "Θέα {{type}}",
     "orientation": "Προσανατολισμός",
+    "orientations": {
+      "north": "Βόρεια",
+      "northEast": "Βορειοανατολικά",
+      "east": "Ανατολικά",
+      "southEast": "Νοτιοανατολικά",
+      "south": "Νότια",
+      "southWest": "Νοτιοδυτικά",
+      "west": "Δυτικά",
+      "northWest": "Βορειοδυτικά"
+    },
     "materials": "Υλικά Κατασκευής",
     "furnishing": "Επίπλωση",
     "specialFeatures": "Ειδικά Χαρακτηριστικά",

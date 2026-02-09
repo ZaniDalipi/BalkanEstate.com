@@ -187,6 +187,18 @@
         "e": "E",
         "f": "F",
         "g": "G (Најмање Ефикасно)"
+      },
+      "orientation": {
+        "label": "Оријентација",
+        "notSpecified": "Није наведено",
+        "north": "Север",
+        "northEast": "Североисток",
+        "east": "Исток",
+        "southEast": "Југоисток",
+        "south": "Југ",
+        "southWest": "Југозапад",
+        "west": "Запад",
+        "northWest": "Северозапад"
       }
     },
     "landDetails": {

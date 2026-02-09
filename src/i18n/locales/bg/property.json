@@ -89,6 +89,16 @@
     "energyRating": "Енергиен клас",
     "view": "Гледка",
     "orientation": "Ориентация",
+    "orientations": {
+      "north": "Север",
+      "northEast": "Североизток",
+      "east": "Изток",
+      "southEast": "Югоизток",
+      "south": "Юг",
+      "southWest": "Югозапад",
+      "west": "Запад",
+      "northWest": "Северозапад"
+    },
     "materials": "Строителни материали",
     "viewType": "Гледка: {{type}}",
     "furnishing": "Обзавеждане",

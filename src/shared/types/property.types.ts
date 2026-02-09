@@ -12,6 +12,7 @@ export type HeatingType = 'any' | 'central' | 'electric' | 'gas' | 'oil' | 'heat
 export type PropertyCondition = 'any' | 'new' | 'excellent' | 'good' | 'fair' | 'needs-renovation';
 export type ViewType = 'any' | 'sea' | 'mountain' | 'city' | 'park' | 'garden' | 'street';
 export type EnergyRating = 'any' | 'A+' | 'A' | 'B' | 'C' | 'D' | 'E' | 'F' | 'G';
+export type Orientation = 'any' | 'north' | 'south' | 'east' | 'west' | 'northEast' | 'northWest' | 'southEast' | 'southWest';
 export type PromotionTier = 'standard' | 'featured' | 'highlight' | 'premium';
 
 export interface PropertyImage {
@@ -103,6 +104,7 @@ export interface Property {
   condition?: PropertyCondition;
   viewType?: ViewType;
   energyRating?: EnergyRating;
+  orientation?: Orientation;
   hasBalcony?: boolean;
   hasGarden?: boolean;
   hasElevator?: boolean;

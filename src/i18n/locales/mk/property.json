@@ -90,6 +90,16 @@
     "view": "Поглед",
     "viewType": "Поглед на {{type}}",
     "orientation": "Ориентација",
+    "orientations": {
+      "north": "Север",
+      "northEast": "Североисток",
+      "east": "Исток",
+      "southEast": "Југоисток",
+      "south": "Југ",
+      "southWest": "Југозапад",
+      "west": "Запад",
+      "northWest": "Северозапад"
+    },
     "materials": "Градежни материјали",
     "furnishing": "Намештеност",
     "specialFeatures": "Специјални карактеристики",

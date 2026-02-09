@@ -90,6 +90,16 @@
     "view": "Pogled",
     "viewType": "Pogled na {{type}}",
     "orientation": "Orijentacija",
+    "orientations": {
+      "north": "Sjever",
+      "northEast": "Sjeveroistok",
+      "east": "Istok",
+      "southEast": "Jugoistok",
+      "south": "Jug",
+      "southWest": "Jugozapad",
+      "west": "Zapad",
+      "northWest": "Sjeverozapad"
+    },
     "materials": "Građevinski Materijali",
     "furnishing": "Namještenost",
     "specialFeatures": "Posebne Značajke",

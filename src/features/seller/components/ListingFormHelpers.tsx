@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { PropertyImageTag, FurnishingStatus, HeatingType, PropertyCondition, ViewType, EnergyRating, ListingType, RentPeriod, VisitAvailability } from '@/types';
+import { PropertyImageTag, FurnishingStatus, HeatingType, PropertyCondition, ViewType, EnergyRating, Orientation, ListingType, RentPeriod, VisitAvailability } from '@/types';
 
 // --- Types ---
 
@@ -44,6 +44,7 @@ export interface ListingData {
     condition: PropertyCondition;
     viewType: ViewType;
     energyRating: EnergyRating;
+    orientation: Orientation;
     // Rental-specific fields
     rentPeriod: RentPeriod;
     securityDeposit: number;
@@ -99,6 +100,7 @@ export const initialListingData: ListingData = {
     condition: 'any',
     viewType: 'any',
     energyRating: 'any',
+    orientation: 'any',
     // Rental-specific fields
     rentPeriod: 'monthly',
     securityDeposit: 0,

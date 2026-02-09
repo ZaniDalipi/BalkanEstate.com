@@ -187,6 +187,18 @@
         "e": "E",
         "f": "F",
         "g": "G (Më Pak Efikasi)"
+      },
+      "orientation": {
+        "label": "Orientimi",
+        "notSpecified": "I papërcaktuar",
+        "north": "Veri",
+        "northEast": "Veri-Lindje",
+        "east": "Lindje",
+        "southEast": "Jug-Lindje",
+        "south": "Jug",
+        "southWest": "Jug-Perëndim",
+        "west": "Perëndim",
+        "northWest": "Veri-Perëndim"
       }
     },
     "landDetails": {

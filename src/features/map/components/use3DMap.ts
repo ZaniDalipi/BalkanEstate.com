@@ -20,6 +20,7 @@ export function use3DMap(props: Map3DBuildingsProps) {
     totalFloors,
     propertyType,
     virtualTour360Url,
+    orientation,
   } = props;
 
   // Refs
@@ -260,12 +261,22 @@ export function use3DMap(props: Map3DBuildingsProps) {
     return dirs[Math.round(bearing / 45) % 8];
   };
 
+  // Convert orientation key to compass bearing (degrees)
+  const orientationToBearing = (orient: string): number => {
+    const map: Record<string, number> = {
+      north: 0, northEast: 45, east: 90, southEast: 135,
+      south: 180, southWest: 225, west: 270, northWest: 315,
+    };
+    return map[orient] ?? 0;
+  };
+
   // Add property marker - always shows a blue dot at the property location
   // Also adds a facing direction compass indicator
   const addPropertyMarker = useCallback((
     mapInstance: maplibregl.Map,
     latitude: number,
     longitude: number,
+    userOrientation?: string,
   ) => {
     const markerEl = document.createElement('div');
     markerEl.innerHTML = `
@@ -302,9 +313,12 @@ export function use3DMap(props: Map3DBuildingsProps) {
       .setLngLat([longitude, latitude])
       .addTo(mapInstance);
 
-    // Add facing direction indicator after a short delay (buildings need to render first)
+    // Add facing direction indicator
+    // Use user-defined orientation if available, otherwise auto-detect from building geometry
     setTimeout(() => {
-      const facing = getBuildingFacing(mapInstance, latitude, longitude);
+      const facing = userOrientation && userOrientation !== 'any'
+        ? orientationToBearing(userOrientation)
+        : getBuildingFacing(mapInstance, latitude, longitude);
       if (facing === null) return;
 
       const cardinal = getCardinalShort(facing);
@@ -934,7 +948,7 @@ export function use3DMap(props: Map3DBuildingsProps) {
       }
 
       // Always add the blue dot property marker
-      addPropertyMarker(mapInstance, lat, lng);
+      addPropertyMarker(mapInstance, lat, lng, orientation);
 
       // Show POIs (Points of Interest) for neighborhood context
       // Only hide very minor labels that would clutter the 3D view
@@ -1095,7 +1109,7 @@ export function use3DMap(props: Map3DBuildingsProps) {
       mapInstance.remove();
       map.current = null;
     };
-  }, [lat, lng, zoom, pitch, bearing, addPropertyMarker, addCustomBuilding3D, fetchAndDisplayPOI, floorNumber, totalFloors, propertyType, virtualTour360Url, handleEnterBuilding]);
+  }, [lat, lng, zoom, pitch, bearing, addPropertyMarker, addCustomBuilding3D, fetchAndDisplayPOI, floorNumber, totalFloors, propertyType, virtualTour360Url, handleEnterBuilding, orientation]);
 
   // Update building colors based on time
   useEffect(() => {

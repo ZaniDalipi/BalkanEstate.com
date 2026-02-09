@@ -187,6 +187,18 @@
         "e": "E",
         "f": "F",
         "g": "G (Cel Mai Puțin Eficient)"
+      },
+      "orientation": {
+        "label": "Orientare",
+        "notSpecified": "Nespecificat",
+        "north": "Nord",
+        "northEast": "Nord-Est",
+        "east": "Est",
+        "southEast": "Sud-Est",
+        "south": "Sud",
+        "southWest": "Sud-Vest",
+        "west": "Vest",
+        "northWest": "Nord-Vest"
       }
     },
     "landDetails": {

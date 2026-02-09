@@ -90,6 +90,16 @@
     "view": "View",
     "viewType": "{{type}} View",
     "orientation": "Orientation",
+    "orientations": {
+      "north": "Sjever",
+      "northEast": "Sjeveroistok",
+      "east": "Istok",
+      "southEast": "Jugoistok",
+      "south": "Jug",
+      "southWest": "Jugozapad",
+      "west": "Zapad",
+      "northWest": "Sjeverozapad"
+    },
     "materials": "Building Materials",
     "furnishing": "Furnishing",
     "specialFeatures": "Special Features",
