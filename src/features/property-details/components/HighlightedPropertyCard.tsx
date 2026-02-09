@@ -176,7 +176,14 @@ const HighlightedCardInner = memo<HighlightedCardInnerProps>(({
       onClick={onCardClick}
     >
       {/* Image Section - absolute on desktop to guarantee full height fill */}
-      <div className="relative h-48 md:h-full md:absolute md:inset-y-0 md:left-0 md:w-[40%] overflow-hidden bg-neutral-100">
+      <div className="relative h-48 md:h-full md:absolute md:inset-y-0 md:left-0 md:w-[40%] overflow-hidden">
+        {/* Blurred background layer - fills any empty space for panoramic/wide images */}
+        <img
+          src={displayImages[currentImageIndex]}
+          alt=""
+          aria-hidden="true"
+          className="absolute inset-0 w-full h-full object-cover blur-2xl scale-125"
+        />
         <div className="absolute inset-0">
           {displayImages.map((imgUrl, index) => (
             <div
@@ -196,7 +203,7 @@ const HighlightedCardInner = memo<HighlightedCardInnerProps>(({
                   loading={index === 0 ? 'eager' : 'lazy'}
                   decoding="async"
                   sizes="(max-width: 768px) 100vw, 40vw"
-                  className={`w-full h-full object-cover transition-transform duration-700 ${
+                  className={`w-full h-full object-contain transition-transform duration-700 ${
                     isHovered ? 'scale-105' : 'scale-100'
                   }`}
                   onError={() => handleImageError(index)}
