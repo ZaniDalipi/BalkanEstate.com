@@ -19,7 +19,17 @@ import { API_URL } from './config';
 
 let cachedPublicKey: CryptoKey | null = null;
 let cachedKeyTimestamp = 0;
+let keyFetchPromise: Promise<CryptoKey> | null = null;
 const KEY_CACHE_TTL = 30 * 60 * 1000; // Refresh key every 30 minutes
+
+/**
+ * Invalidate cached key (call on decryption failure / server key rotation)
+ */
+export const invalidatePublicKey = (): void => {
+  cachedPublicKey = null;
+  cachedKeyTimestamp = 0;
+  keyFetchPromise = null;
+};
 
 /**
  * Fetch and import the server's RSA public key
@@ -32,31 +42,51 @@ const getServerPublicKey = async (): Promise<CryptoKey> => {
     return cachedPublicKey;
   }
 
-  const response = await fetch(`${API_URL}/auth/encryption-key`);
-  if (!response.ok) {
-    throw new Error('Failed to fetch encryption key');
+  // Deduplicate concurrent fetches (multiple requests on page load)
+  if (keyFetchPromise) {
+    return keyFetchPromise;
   }
 
-  const { publicKey } = await response.json();
+  keyFetchPromise = (async () => {
+    const response = await fetch(`${API_URL}/auth/encryption-key`);
+    if (!response.ok) {
+      throw new Error('Failed to fetch encryption key');
+    }
 
-  // Convert base64 DER to ArrayBuffer
-  const binaryString = atob(publicKey);
-  const bytes = new Uint8Array(binaryString.length);
-  for (let i = 0; i < binaryString.length; i++) {
-    bytes[i] = binaryString.charCodeAt(i);
+    const data = await response.json();
+    // Handle case where the key endpoint response is itself encrypted
+    const publicKey = data.publicKey || data;
+
+    if (!publicKey || typeof publicKey !== 'string') {
+      throw new Error('Invalid encryption key response');
+    }
+
+    // Convert base64 DER to ArrayBuffer
+    const binaryString = atob(publicKey);
+    const bytes = new Uint8Array(binaryString.length);
+    for (let i = 0; i < binaryString.length; i++) {
+      bytes[i] = binaryString.charCodeAt(i);
+    }
+
+    // Import as RSA-OAEP public key
+    cachedPublicKey = await crypto.subtle.importKey(
+      'spki',
+      bytes.buffer,
+      { name: 'RSA-OAEP', hash: 'SHA-256' },
+      false,
+      ['encrypt'],
+    );
+    cachedKeyTimestamp = Date.now();
+
+    return cachedPublicKey;
+  })();
+
+  try {
+    const key = await keyFetchPromise;
+    return key;
+  } finally {
+    keyFetchPromise = null;
   }
-
-  // Import as RSA-OAEP public key
-  cachedPublicKey = await crypto.subtle.importKey(
-    'spki',
-    bytes.buffer,
-    { name: 'RSA-OAEP', hash: 'SHA-256' },
-    false,
-    ['encrypt'],
-  );
-  cachedKeyTimestamp = now;
-
-  return cachedPublicKey;
 };
 
 /**

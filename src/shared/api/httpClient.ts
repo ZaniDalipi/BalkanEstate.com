@@ -3,7 +3,7 @@
 
 import { API_URL } from './config';
 import { tokenService } from './tokenService';
-import { generateResponseKey, decryptResponse } from './payloadEncryption';
+import { generateResponseKey, decryptResponse, invalidatePublicKey } from './payloadEncryption';
 
 export interface RequestOptions {
   method?: string;
@@ -106,9 +106,10 @@ export const apiRequest = async <T>(
 
     if (!response.ok) {
       const rawError = isJson ? await response.json() : { message: response.statusText };
-      const error = (keyInfo && rawError?.__encrypted)
-        ? await decryptResponse(rawError, keyInfo.rawKey)
-        : rawError;
+      let error = rawError;
+      if (keyInfo && rawError?.__encrypted) {
+        try { error = await decryptResponse(rawError, keyInfo.rawKey); } catch { invalidatePublicKey(); }
+      }
       const err: any = new Error(error.message || 'An error occurred');
       err.code = error.code || null;
       err.statusCode = response.status;
@@ -119,7 +120,12 @@ export const apiRequest = async <T>(
     const rawData = isJson ? await response.json() : ({} as any);
 
     if (keyInfo && rawData?.__encrypted) {
-      return await decryptResponse(rawData, keyInfo.rawKey) as T;
+      try {
+        return await decryptResponse(rawData, keyInfo.rawKey) as T;
+      } catch {
+        invalidatePublicKey();
+        return apiRequest<T>(endpoint, options, retryCount);
+      }
     }
 
     return rawData as T;
