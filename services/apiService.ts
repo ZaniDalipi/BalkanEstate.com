@@ -23,7 +23,6 @@ import {
   encryptSensitiveFields,
   generateResponseKey,
   decryptResponse,
-  type ResponseKeyInfo,
 } from '@/src/shared/api/payloadEncryption';
 
 // Get API URL from environment variables
@@ -116,11 +115,15 @@ const refreshAccessToken = async (): Promise<string | null> => {
 const apiRequest = async <T>(endpoint: string, options: RequestOptions = {}, retryCount = 0): Promise<T> => {
   const { method = 'GET', body, headers = {}, requiresAuth = false } = options;
 
+  // Generate AES key for response encryption on every request
+  const keyInfo = await generateResponseKey();
+
   const config: RequestInit = {
     method,
     headers: {
       'Content-Type': 'application/json',
       ...headers,
+      ...(keyInfo ? { 'X-Response-Key': keyInfo.encryptedKeyBase64 } : {}),
     },
   };
 
@@ -162,15 +165,26 @@ const apiRequest = async <T>(endpoint: string, options: RequestOptions = {}, ret
     }
 
     if (!response.ok) {
-      const error = isJson ? await response.json() : { message: response.statusText };
+      const rawError = isJson ? await response.json() : { message: response.statusText };
+      // Decrypt error response if encrypted
+      const error = (keyInfo && rawError?.__encrypted)
+        ? await decryptResponse(rawError, keyInfo.rawKey)
+        : rawError;
       const err: any = new Error(error.message || 'An error occurred');
-      err.code = error.code || null; // Preserve backend error code
+      err.code = error.code || null;
       err.statusCode = response.status;
-      err.details = error; // Preserve full error object
+      err.details = error;
       throw err;
     }
 
-    return isJson ? await response.json() : ({} as T);
+    const rawData = isJson ? await response.json() : ({} as any);
+
+    // Decrypt response if server encrypted it
+    if (keyInfo && rawData?.__encrypted) {
+      return await decryptResponse(rawData, keyInfo.rawKey) as T;
+    }
+
+    return rawData as T;
   } catch (error: any) {
     throw error;
   }
@@ -199,9 +213,8 @@ export const allProperties: Property[] = [];
 // --- AUTHENTICATION API ---
 
 /**
- * Make an API request with both request encryption (sensitive fields) and
- * response encryption (AES-256-GCM). The network tab only shows ciphertext
- * in both directions.
+ * Make an auth API request with request-body field encryption.
+ * Response encryption is handled automatically by apiRequest.
  */
 const secureAuthRequest = async <T>(
   endpoint: string,
@@ -209,29 +222,11 @@ const secureAuthRequest = async <T>(
 ): Promise<T> => {
   const { sensitiveFields, ...requestOptions } = options;
 
-  // 1. Encrypt request body fields
   if (requestOptions.body && sensitiveFields?.length) {
     requestOptions.body = await encryptSensitiveFields(requestOptions.body, sensitiveFields);
   }
 
-  // 2. Generate AES key for response encryption
-  const keyInfo: ResponseKeyInfo | null = await generateResponseKey();
-  if (keyInfo) {
-    requestOptions.headers = {
-      ...requestOptions.headers,
-      'X-Response-Key': keyInfo.encryptedKeyBase64,
-    };
-  }
-
-  // 3. Make the request
-  const response = await apiRequest<any>(endpoint, requestOptions);
-
-  // 4. Decrypt response if server encrypted it
-  if (keyInfo && response?.__encrypted) {
-    return await decryptResponse(response, keyInfo.rawKey) as T;
-  }
-
-  return response as T;
+  return apiRequest<T>(endpoint, requestOptions);
 };
 
 export const checkAuth = async (): Promise<User | null> => {

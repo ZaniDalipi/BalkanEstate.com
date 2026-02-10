@@ -207,6 +207,10 @@ if (process.env.NODE_ENV === 'development') {
 // Compression
 app.use(compression());
 
+// Response encryption (activates only when client sends X-Response-Key header)
+import { encryptResponse } from './middleware/encryptResponse';
+app.use(encryptResponse);
+
 // Setup Swagger API documentation (only in development or if explicitly enabled)
 if (process.env.NODE_ENV !== 'production' || process.env.ENABLE_SWAGGER === 'true') {
   setupSwagger(app);
