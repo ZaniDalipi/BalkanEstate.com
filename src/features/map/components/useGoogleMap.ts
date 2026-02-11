@@ -164,9 +164,6 @@ export function useGoogleMap(props: GoogleMapComponentProps) {
   // Load Google Maps API using centralized hook (enables preloading benefits)
   const { isLoaded, loadError } = useGoogleMapLoader();
 
-  // Retry counter for rare race condition where google.maps.marker isn't ready yet
-  const [markerRetry, setMarkerRetry] = useState(0);
-
   // RainViewer precipitation radar (free, no API key) - for flood layer
   const { tileUrl: rainViewerTileUrl } = useRainViewer(selectedClimateRisk === 'flood');
 
@@ -786,12 +783,6 @@ export function useGoogleMap(props: GoogleMapComponentProps) {
     const mapToUse = map || mapInstanceRef.current;
     if (!mapToUse || !clustererRef.current || !isLoaded) return;
 
-    // Rare race condition: marker library may not be ready yet even though isLoaded is true
-    if (!google?.maps?.marker?.AdvancedMarkerElement) {
-      const retryTimeout = setTimeout(() => setMarkerRetry(r => r + 1), 100);
-      return () => clearTimeout(retryTimeout);
-    }
-
     // Abort flag — if effect re-runs (new properties/map change), cancel in-flight batches
     let aborted = false;
 
@@ -916,7 +907,7 @@ export function useGoogleMap(props: GoogleMapComponentProps) {
         marker.map = null;
       });
     };
-  }, [validProperties, map, isLoaded, markerRetry]);
+  }, [validProperties, map, isLoaded]);
 
   // Handle hover state changes from property list - use CSS classes for better performance
   useEffect(() => {
