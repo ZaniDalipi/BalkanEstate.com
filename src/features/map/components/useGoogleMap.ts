@@ -131,6 +131,9 @@ export function useGoogleMap(props: GoogleMapComponentProps) {
   // Promoted listings filter
   const [showOnlyPromoted, setShowOnlyPromoted] = useState(false);
 
+  // Tracks when the marker library + clusterer are ready (avoids race condition)
+  const [markersReady, setMarkersReady] = useState(false);
+
   // Refs - ALL useRef hooks must be at the top to maintain consistent hook order
   const clustererRef = useRef<MarkerClusterer | null>(null);
   const markersRef = useRef<Map<string, google.maps.marker.AdvancedMarkerElement>>(new Map());
@@ -163,18 +166,6 @@ export function useGoogleMap(props: GoogleMapComponentProps) {
 
   // Load Google Maps API using centralized hook (enables preloading benefits)
   const { isLoaded, loadError } = useGoogleMapLoader();
-
-  // Explicitly load the marker library to avoid race condition where
-  // isLoaded is true but google.maps.marker.AdvancedMarkerElement is undefined
-  const advancedMarkerRef = useRef<typeof google.maps.marker.AdvancedMarkerElement | null>(null);
-  const [markerLibLoaded, setMarkerLibLoaded] = useState(false);
-  useEffect(() => {
-    if (!isLoaded || advancedMarkerRef.current) return;
-    google.maps.importLibrary('marker').then((lib: google.maps.MarkerLibrary) => {
-      advancedMarkerRef.current = lib.AdvancedMarkerElement;
-      setMarkerLibLoaded(true);
-    });
-  }, [isLoaded]);
 
   // RainViewer precipitation radar (free, no API key) - for flood layer
   const { tileUrl: rainViewerTileUrl } = useRainViewer(selectedClimateRisk === 'flood');
@@ -518,55 +509,64 @@ export function useGoogleMap(props: GoogleMapComponentProps) {
     // Also retry after a short delay in case bounds aren't ready yet
     setTimeout(deliverInitialBounds, 200);
 
-    // Initialize clusterer with SuperCluster algorithm for performance
-    const clusterer = new MarkerClusterer({
-      map: mapInstance,
-      algorithm: new SuperClusterAlgorithm({
-        radius: 100,
-        maxZoom: 15,
-      }),
-      renderer: {
-        render: ({ count, position }) => {
-          const div = document.createElement('div');
-          div.className = 'cluster-marker';
-          // Smaller cluster sizes for cleaner look
-          const size = count < 10 ? 28 : count < 50 ? 32 : count < 100 ? 36 : 40;
-          div.style.cssText = `
-            width: ${size}px;
-            height: ${size}px;
-            background: linear-gradient(135deg, #0252CD 0%, #0066FF 100%);
-            border: 2px solid white;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-weight: bold;
-            font-size: ${count < 100 ? 11 : 10}px;
-            font-family: Inter, system-ui, sans-serif;
-            cursor: pointer;
-            box-shadow: 0 2px 8px rgba(2, 82, 205, 0.4), 0 1px 3px rgba(0,0,0,0.2);
-            transition: transform 0.2s ease-out, box-shadow 0.2s ease-out;
-          `;
-          div.textContent = String(count);
-          div.addEventListener('mouseenter', () => {
-            div.style.transform = 'scale(1.15)';
-            div.style.boxShadow = '0 4px 12px rgba(2, 82, 205, 0.5), 0 2px 4px rgba(0,0,0,0.3)';
-          });
-          div.addEventListener('mouseleave', () => {
-            div.style.transform = 'scale(1)';
-            div.style.boxShadow = '0 2px 8px rgba(2, 82, 205, 0.4), 0 1px 3px rgba(0,0,0,0.2)';
-          });
+    // Wait for marker library then initialize clusterer.
+    // google.maps.marker may not be ready even though isLoaded is true.
+    const initClusterer = () => {
+      if (!google.maps.marker?.AdvancedMarkerElement) {
+        setTimeout(initClusterer, 50);
+        return;
+      }
 
-          return new advancedMarkerRef.current!({
-            position,
-            content: div,
-          });
+      const clusterer = new MarkerClusterer({
+        map: mapInstance,
+        algorithm: new SuperClusterAlgorithm({
+          radius: 100,
+          maxZoom: 15,
+        }),
+        renderer: {
+          render: ({ count, position }) => {
+            const div = document.createElement('div');
+            div.className = 'cluster-marker';
+            const size = count < 10 ? 28 : count < 50 ? 32 : count < 100 ? 36 : 40;
+            div.style.cssText = `
+              width: ${size}px;
+              height: ${size}px;
+              background: linear-gradient(135deg, #0252CD 0%, #0066FF 100%);
+              border: 2px solid white;
+              border-radius: 50%;
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              color: white;
+              font-weight: bold;
+              font-size: ${count < 100 ? 11 : 10}px;
+              font-family: Inter, system-ui, sans-serif;
+              cursor: pointer;
+              box-shadow: 0 2px 8px rgba(2, 82, 205, 0.4), 0 1px 3px rgba(0,0,0,0.2);
+              transition: transform 0.2s ease-out, box-shadow 0.2s ease-out;
+            `;
+            div.textContent = String(count);
+            div.addEventListener('mouseenter', () => {
+              div.style.transform = 'scale(1.15)';
+              div.style.boxShadow = '0 4px 12px rgba(2, 82, 205, 0.5), 0 2px 4px rgba(0,0,0,0.3)';
+            });
+            div.addEventListener('mouseleave', () => {
+              div.style.transform = 'scale(1)';
+              div.style.boxShadow = '0 2px 8px rgba(2, 82, 205, 0.4), 0 1px 3px rgba(0,0,0,0.2)';
+            });
+
+            return new google.maps.marker.AdvancedMarkerElement({
+              position,
+              content: div,
+            });
+          },
         },
-      },
-    });
+      });
 
-    clustererRef.current = clusterer;
+      clustererRef.current = clusterer;
+      setMarkersReady(true);
+    };
+    initClusterer();
   }, []);
 
   // Handle map unmount
@@ -793,7 +793,7 @@ export function useGoogleMap(props: GoogleMapComponentProps) {
   useEffect(() => {
     // Use ref as fallback to avoid race condition where state hasn't updated yet
     const mapToUse = map || mapInstanceRef.current;
-    if (!mapToUse || !clustererRef.current || !isLoaded || !advancedMarkerRef.current) return;
+    if (!mapToUse || !clustererRef.current || !isLoaded || !markersReady) return;
 
     // Abort flag — if effect re-runs (new properties/map change), cancel in-flight batches
     let aborted = false;
@@ -878,7 +878,7 @@ export function useGoogleMap(props: GoogleMapComponentProps) {
           mapToUse?.panTo({ lat: property.lat, lng: property.lng });
         };
 
-        const marker = new advancedMarkerRef.current!({
+        const marker = new google.maps.marker.AdvancedMarkerElement({
           position: { lat: property.lat, lng: property.lng },
           content: markerDiv,
           zIndex: isActivelyPromoted ? 100 : 1,
@@ -919,7 +919,7 @@ export function useGoogleMap(props: GoogleMapComponentProps) {
         marker.map = null;
       });
     };
-  }, [validProperties, map, isLoaded, markerLibLoaded]);
+  }, [validProperties, map, isLoaded, markersReady]);
 
   // Handle hover state changes from property list - use CSS classes for better performance
   useEffect(() => {
@@ -1505,7 +1505,7 @@ export function useGoogleMap(props: GoogleMapComponentProps) {
   const openMeteoMarkersRef = useRef<(google.maps.Circle | google.maps.marker.AdvancedMarkerElement)[]>([]);
 
   useEffect(() => {
-    if (!map || !isLoaded || !advancedMarkerRef.current) return;
+    if (!map || !isLoaded || !markersReady) return;
 
     // Remove previous markers/circles
     openMeteoMarkersRef.current.forEach(m => {
@@ -1569,7 +1569,7 @@ export function useGoogleMap(props: GoogleMapComponentProps) {
         </svg>`;
         el.style.pointerEvents = 'none';
 
-        const marker = new advancedMarkerRef.current!({
+        const marker = new google.maps.marker.AdvancedMarkerElement({
           position: { lat: point.lat, lng: point.lng },
           map,
           content: el,
@@ -1585,7 +1585,7 @@ export function useGoogleMap(props: GoogleMapComponentProps) {
       });
       openMeteoMarkersRef.current = [];
     };
-  }, [map, isLoaded, markerLibLoaded, openMeteoData, openMeteoDataType]);
+  }, [map, isLoaded, markersReady, openMeteoData, openMeteoDataType]);
 
   // Memoize map options - MUST be before any early returns to maintain hooks order
   // Check if google is defined before accessing google.maps
