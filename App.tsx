@@ -1,4 +1,4 @@
-import React, { useState, useEffect, lazy, Suspense } from 'react';
+import React, { useState, useEffect, useCallback, lazy, Suspense } from 'react';
 // Page transitions use lightweight CSS instead of framer-motion to reduce initial bundle
 import { HelmetProvider } from 'react-helmet-async';
 import { AppProvider, useAppContext } from './context/AppContext';
@@ -87,6 +87,9 @@ const AgencyPaymentPage = lazy(() => import('./src/features/agencies/components/
 
 // Cookie Consent Banner (lazy loaded - shown after initial render)
 const CookieConsent = lazy(() => import('./src/shared/components/CookieConsent'));
+
+// Splash screen (lazy loaded - shown on initial app load to hide loading)
+const SplashScreen = lazy(() => import('./src/components/ui/SplashScreen'));
 
 // PWA Install Prompt (lazy loaded)
 const PWAInstallPrompt = lazy(() => import('./src/shared/components/PWAInstallPrompt'));
@@ -693,8 +696,21 @@ const FullScreenLoader: React.FC = () => (
 );
 
 
+const SPLASH_SHOWN_KEY = 'balkanestate_splash_shown';
+
 const AppWrapper: React.FC = () => {
     const { state, dispatch, checkAuthStatus, handleOAuthCallback } = useAppContext();
+
+    // Show splash screen on first visit per session to hide loading of map/resources
+    const [showSplash, setShowSplash] = useState(() => {
+        // Only show once per browser session
+        return !sessionStorage.getItem(SPLASH_SHOWN_KEY);
+    });
+
+    const handleSplashComplete = useCallback(() => {
+        sessionStorage.setItem(SPLASH_SHOWN_KEY, '1');
+        setShowSplash(false);
+    }, []);
 
     useEffect(() => {
         // Check for OAuth callback parameters in URL
@@ -740,6 +756,20 @@ const AppWrapper: React.FC = () => {
         checkAuthStatus();
     }, [checkAuthStatus, handleOAuthCallback, dispatch]);
 
+    // While splash is active, render app content behind it so resources start loading
+    if (showSplash) {
+        return (
+            <>
+                {/* Render main layout behind the splash so map/resources start loading */}
+                <div className="opacity-0 pointer-events-none" aria-hidden="true">
+                    {!state.isAuthenticating && <MainLayout />}
+                </div>
+                <Suspense fallback={<FullScreenLoader />}>
+                    <SplashScreen onComplete={handleSplashComplete} />
+                </Suspense>
+            </>
+        );
+    }
 
     if (state.isAuthenticating) {
         return <FullScreenLoader />;
