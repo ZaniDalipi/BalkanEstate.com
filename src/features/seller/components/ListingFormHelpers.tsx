@@ -4,7 +4,7 @@ import { PropertyImageTag, FurnishingStatus, HeatingType, PropertyCondition, Vie
 
 // --- Types ---
 
-export type Step = 'init' | 'loading' | 'form' | 'floorplan' | 'payment' | 'success';
+export type Step = 'init' | 'loading' | 'form' | 'preview' | 'floorplan' | 'payment' | 'success';
 export type Mode = 'ai' | 'manual';
 
 export interface ListingData {

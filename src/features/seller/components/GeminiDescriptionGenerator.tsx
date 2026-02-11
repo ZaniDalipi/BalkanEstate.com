@@ -11,6 +11,7 @@ import { useListingForm } from './useListingForm';
 import ListingFormFields from './ListingFormFields';
 import ListingPropertyFeatures from './ListingPropertyFeatures';
 import ListingImageUpload from './ListingImageUpload';
+import ListingPreview from './ListingPreview';
 import NumberInputWithSteppers from '@/components/shared/NumberInputWithSteppers';
 import { getCurrencySymbol } from '@/utils/currency';
 import {
@@ -38,6 +39,7 @@ const GeminiDescriptionGenerator: React.FC<{ propertyToEdit: Property | null }> 
         isCompressing,
         isUploading,
         selectedCountry, selectedCity, availableCities,
+        previewProperty,
         getZoomLevel, cityData,
         handleCountryChange, handleCityChange,
         handleMapLocationChange, handleMapAddressChange,
@@ -46,6 +48,7 @@ const GeminiDescriptionGenerator: React.FC<{ propertyToEdit: Property | null }> 
         handleDragStart, handleDragEnter, handleDragEnd, handleDrop,
         handleGenerate,
         handleInputChange, handlePriceChange, handleImageTagChange,
+        handleGoToPreview, handleBackToForm,
         handleSubmit,
         handlePromotionPaymentSuccess, handlePostWithoutPromotion,
         formContainerRef,
@@ -53,6 +56,19 @@ const GeminiDescriptionGenerator: React.FC<{ propertyToEdit: Property | null }> 
     } = useListingForm(propertyToEdit);
 
     // --- Step-based rendering ---
+
+    if (step === 'preview' && previewProperty) {
+        return (
+            <ListingPreview
+                property={previewProperty}
+                isSubmitting={isSubmitting}
+                wantToPromote={wantToPromote}
+                isEditing={!!propertyToEdit}
+                onBack={handleBackToForm}
+                onPublish={handleSubmit}
+            />
+        );
+    }
 
     if (step === 'payment' && pendingPropertyData) {
         return (
@@ -707,8 +723,20 @@ const GeminiDescriptionGenerator: React.FC<{ propertyToEdit: Property | null }> 
                         </div>
                     )}
 
-                    {/* Submit Button */}
-                    <div className="flex justify-end pt-4">
+                    {/* Preview & Submit Buttons */}
+                    <div className="flex flex-col sm:flex-row justify-end gap-3 pt-4">
+                        <button
+                            type="button"
+                            onClick={handleGoToPreview}
+                            disabled={isCompressing || isUploading}
+                            className="px-8 py-3 bg-amber-500 text-white font-bold rounded-lg shadow-md hover:bg-amber-600 transition-colors w-full sm:w-auto disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                        >
+                            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                            </svg>
+                            {t('seller:createListing.buttons.previewListing', 'Preview Listing')}
+                        </button>
                         <button
                             type="submit"
                             disabled={isSubmitting || isCompressing || isUploading}

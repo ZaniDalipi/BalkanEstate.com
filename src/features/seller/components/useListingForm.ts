@@ -12,6 +12,98 @@ import { SubscriptionPlan } from '@/shared/types/user.types';
 import { API_URL } from '@/src/shared/api/config';
 import { ListingData, ImageData, Step, Mode, initialListingData, ALL_VALID_TAGS } from './ListingFormHelpers';
 
+/** Builds a preview Property object from form state (no API calls, no uploads). */
+export function buildPreviewProperty(
+    listingData: ListingData,
+    images: ImageData[],
+    floorplanImage: ImageData,
+    selectedCountry: string,
+    selectedCity: string,
+    selectedRole: UserRole,
+    currentUser: { id: string; name: string; phone?: string; avatarUrl?: string } | null,
+    propertyToEdit: Property | null,
+): Property {
+    const imageUrls = images.map((img, index) => {
+        const tagInfo = listingData.image_tags.find(t => t.index === index);
+        return {
+            url: img.previewUrl,
+            tag: (tagInfo?.tag as PropertyImageTag) || 'other',
+        };
+    });
+
+    return {
+        id: propertyToEdit?.id || `preview-${Date.now()}`,
+        sellerId: currentUser?.id || '',
+        listingType: listingData.listingType || 'sale',
+        status: propertyToEdit?.status || 'active',
+        title: listingData.title.trim() || undefined,
+        price: Number(listingData.price),
+        address: listingData.streetAddress.trim(),
+        city: selectedCity,
+        country: selectedCountry,
+        beds: Number(listingData.bedrooms),
+        baths: Number(listingData.bathrooms),
+        livingRooms: Number(listingData.livingRooms),
+        sqft: Number(listingData.sq_meters),
+        yearBuilt: Number(listingData.year_built),
+        parking: Number(listingData.parking_spots),
+        description: listingData.description,
+        specialFeatures: listingData.specialFeatures,
+        materials: listingData.materials,
+        amenities: listingData.amenities,
+        tourUrl: listingData.tourUrl,
+        virtualTour360Url: listingData.virtualTour360Url || undefined,
+        hasVirtualTour360: !!listingData.virtualTour360Url,
+        imageUrl: images.length > 0 ? images[0].previewUrl : 'https://images.unsplash.com/photo-1568605114967-8130f3a36994?w=500',
+        images: imageUrls,
+        lat: listingData.lat,
+        lng: listingData.lng,
+        seller: {
+            type: selectedRole === UserRole.AGENT ? 'agent' : 'private',
+            name: currentUser?.name || '',
+            phone: currentUser?.phone,
+            avatarUrl: currentUser?.avatarUrl,
+        },
+        propertyType: listingData.propertyType,
+        floorNumber: Number(listingData.floorNumber) || undefined,
+        totalFloors: Number(listingData.totalFloors) || undefined,
+        floorplanUrl: floorplanImage.previewUrl || undefined,
+        createdAt: propertyToEdit?.createdAt || Date.now(),
+        lastRenewed: Date.now(),
+        views: propertyToEdit?.views || 0,
+        saves: propertyToEdit?.saves || 0,
+        inquiries: propertyToEdit?.inquiries || 0,
+        createdAsRole: selectedRole,
+        hasBalcony: listingData.hasBalcony ?? false,
+        hasGarden: listingData.hasGarden ?? false,
+        hasElevator: listingData.hasElevator ?? false,
+        hasSecurity: listingData.hasSecurity ?? false,
+        hasAirConditioning: listingData.hasAirConditioning ?? false,
+        hasPool: listingData.hasPool ?? false,
+        petsAllowed: listingData.petsAllowed ?? false,
+        furnishing: listingData.furnishing !== 'any' ? listingData.furnishing : undefined,
+        heatingType: listingData.heatingType !== 'any' ? listingData.heatingType : undefined,
+        condition: listingData.condition !== 'any' ? listingData.condition : undefined,
+        viewType: listingData.viewType !== 'any' ? listingData.viewType : undefined,
+        energyRating: listingData.energyRating !== 'any' ? listingData.energyRating : undefined,
+        orientation: listingData.orientation !== 'any' ? listingData.orientation : undefined,
+        ...(listingData.listingType === 'rent' ? {
+            rentPeriod: listingData.rentPeriod || 'monthly',
+            securityDeposit: Number(listingData.securityDeposit) || 0,
+            minimumLeaseDuration: Number(listingData.minimumLeaseDuration) || 1,
+            maximumLeaseDuration: Number(listingData.maximumLeaseDuration) || 12,
+            availableFrom: listingData.availableFrom ? new Date(listingData.availableFrom).getTime() : undefined,
+            utilitiesIncluded: listingData.utilitiesIncluded ?? false,
+            internetIncluded: listingData.internetIncluded ?? false,
+            tenantRequirements: listingData.tenantRequirements || [],
+            maxOccupants: Number(listingData.maxOccupants) || 1,
+        } : {}),
+        ...(listingData.visitAvailability.enabled ? {
+            visitAvailability: listingData.visitAvailability,
+        } : {}),
+    } as Property;
+}
+
 export const useListingForm = (propertyToEdit: Property | null) => {
     const { t } = useTranslation(['newListing', 'seller', 'common', 'validation']);
     const { state, dispatch, updateUser, createListing, updateListing } = useAppContext();
@@ -514,6 +606,26 @@ export const useListingForm = (propertyToEdit: Property | null) => {
         }
         setListingData(prev => ({ ...prev, image_tags: newImageTags }));
     };
+
+    // --- Preview Handlers ---
+    const [previewProperty, setPreviewProperty] = useState<Property | null>(null);
+
+    const handleGoToPreview = useCallback(() => {
+        // Build a temporary Property object from the form data for preview display
+        const preview = buildPreviewProperty(
+            listingData, images, floorplanImage,
+            selectedCountry, selectedCity, selectedRole,
+            currentUser, propertyToEdit,
+        );
+        setPreviewProperty(preview);
+        setStep('preview');
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }, [listingData, images, floorplanImage, selectedCountry, selectedCity, selectedRole, currentUser, propertyToEdit]);
+
+    const handleBackToForm = useCallback(() => {
+        setStep('form');
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }, []);
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -1049,6 +1161,7 @@ export const useListingForm = (propertyToEdit: Property | null) => {
         isCompressing,
         isUploading,
         selectedCountry, selectedCity, availableCities,
+        previewProperty,
         // Computed
         getZoomLevel, cityData,
         // Handlers
@@ -1059,6 +1172,7 @@ export const useListingForm = (propertyToEdit: Property | null) => {
         handleDragStart, handleDragEnter, handleDragEnd, handleDrop,
         handleGenerate,
         handleInputChange, handlePriceChange, handleImageTagChange,
+        handleGoToPreview, handleBackToForm,
         handleSubmit,
         handlePromotionPaymentSuccess, handlePostWithoutPromotion,
         // Refs
