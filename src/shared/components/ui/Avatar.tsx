@@ -57,12 +57,15 @@ export const Avatar: React.FC<AvatarProps> = ({
   if (src && !imageError) {
     // Request 2x the display size for retina screens
     const optimizedSrc = optimizeCloudinaryUrl(src, { width: pixelWidths[size] * 2, quality: 'auto', crop: 'fill' });
+    const displaySize = pixelWidths[size];
     return (
       <img
         src={optimizedSrc}
         alt={alt}
         loading="lazy"
         decoding="async"
+        width={displaySize}
+        height={displaySize}
         className={`
           rounded-full object-cover
           ${sizeClasses[size]}

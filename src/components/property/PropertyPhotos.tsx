@@ -165,6 +165,8 @@ export const PropertyPhotos: React.FC<PropertyPhotosProps> = ({
                 alt={`${property.address} - ${img.tag} ${index + 1}`}
                 loading="lazy"
                 decoding="async"
+                width={200}
+                height={200}
                 className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
               />
 

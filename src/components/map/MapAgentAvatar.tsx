@@ -174,6 +174,8 @@ const MapAgentAvatar: React.FC<MapAgentAvatarProps> = ({ onPropertySelect }) => 
                 alt={currentMapFeatured.title || currentMapFeatured.address}
                 loading="lazy"
                 decoding="async"
+                width={384}
+                height={256}
                 className="w-full h-16 sm:h-20 md:h-24 object-cover transition-transform duration-500 group-hover:scale-110"
               />
               <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />

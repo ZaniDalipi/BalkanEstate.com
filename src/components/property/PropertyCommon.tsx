@@ -71,7 +71,7 @@ export const Thumbnail: React.FC<ThumbnailProps> = ({ src, alt, isActive, onClic
         : 'border-transparent opacity-60 hover:opacity-100 hover:scale-[1.01]'
     }`}
   >
-    <img src={optimizeCloudinaryUrl(src, { width: 200, quality: 'auto', crop: 'fill' })} alt={alt} loading="lazy" decoding="async" className="w-full h-full object-cover" />
+    <img src={optimizeCloudinaryUrl(src, { width: 200, quality: 'auto', crop: 'fill' })} alt={alt} loading="lazy" decoding="async" width={200} height={200} className="w-full h-full object-cover" />
     {isActive && (
       <div className="absolute inset-0 bg-primary/10 pointer-events-none" />
     )}

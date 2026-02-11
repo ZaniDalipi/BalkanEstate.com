@@ -61,6 +61,8 @@ const SellerAvatar: React.FC<{ avatarUrl?: string; name: string; type: string; s
         alt={`${name} - Real Estate ${type === 'agent' ? 'Agent' : 'Seller'}`}
         loading="lazy"
         decoding="async"
+        width={64}
+        height={64}
         className={`w-full h-full object-cover transition-opacity duration-300 ${loaded ? 'opacity-100' : 'opacity-0'}`}
         onError={() => setError(true)}
         onLoad={() => setLoaded(true)}
@@ -155,6 +157,8 @@ const PropertyCardInner = memo<PropertyCardInnerProps>(({
               aria-hidden="true"
               loading="lazy"
               decoding="async"
+              width={100}
+              height={67}
               className="absolute inset-0 w-full h-full object-cover blur-2xl scale-125"
             />
             {/* Main image - contained to show full image */}
@@ -165,6 +169,8 @@ const PropertyCardInner = memo<PropertyCardInnerProps>(({
               alt={`${property.title || propertyTypeLabel} - ${property.beds} bed, ${property.baths} bath ${propertyTypeLabel} for ${isRental ? 'rent' : 'sale'} in ${property.city}, ${property.country}`}
               loading="lazy"
               decoding="async"
+              width={640}
+              height={427}
               className={`relative w-full h-full object-contain transition-transform duration-700 ${
                 isHovered && !isSold && !isRented ? 'scale-110' : 'scale-100'
               } ${isSold || isRented ? 'grayscale' : ''}`}
@@ -422,6 +428,8 @@ const PropertyCardInner = memo<PropertyCardInnerProps>(({
                     alt={`${safeProperty.seller.agencyName} - Real Estate Agency`}
                     loading="lazy"
                     decoding="async"
+                    width={24}
+                    height={24}
                     className="w-6 h-6 rounded object-contain bg-white"
                   />
                 ) : (

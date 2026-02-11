@@ -60,6 +60,8 @@ const SellerAvatar: React.FC<{ avatarUrl?: string; name: string; type: string }>
         alt={`${name} - Real Estate ${type === 'agent' ? 'Agent' : 'Seller'}`}
         loading="lazy"
         decoding="async"
+        width={28}
+        height={28}
         className={`w-full h-full object-cover transition-opacity duration-300 ${loaded ? 'opacity-100' : 'opacity-0'}`}
         onError={() => setError(true)}
         onLoad={() => setLoaded(true)}
@@ -221,6 +223,8 @@ const HighlightedCardInner = memo<HighlightedCardInnerProps>(({
                 loading={index === 0 ? 'eager' : 'lazy'}
                 decoding="async"
                 sizes="(max-width: 768px) 100vw, 42vw"
+                width={800}
+                height={533}
                 className={`w-full h-full object-cover transition-transform duration-700 ${
                   isHovered ? 'scale-105' : 'scale-100'
                 }`}

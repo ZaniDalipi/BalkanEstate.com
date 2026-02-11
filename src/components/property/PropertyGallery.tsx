@@ -308,6 +308,8 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
                 srcSet={cloudinarySrcSet(currentImageUrl, [480, 768, 1200, 1920])}
                 sizes="(max-width: 640px) 100vw, (max-width: 1024px) 80vw, 1200px"
                 alt={property.address}
+                width={1200}
+                height={800}
                 className="max-w-full max-h-full object-contain animate-image-fade"
                 onError={() => setMainImageError(true)}
               />

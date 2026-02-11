@@ -52,6 +52,8 @@ const AgentAvatar: React.FC<{ agent: Agent }> = ({ agent }) => {
           loaded ? 'opacity-100' : 'opacity-0'
         }`}
         style={{ aspectRatio: '1/1' }}
+        width={192}
+        height={192}
         onError={() => setError(true)}
         onLoad={() => setLoaded(true)}
         loading="lazy"
@@ -194,6 +196,8 @@ const AgentCard: React.FC<AgentCardProps> = ({ agent, index = 0 }) => {
                   alt={agent.agencyName}
                   loading="lazy"
                   decoding="async"
+                  width={20}
+                  height={20}
                   className="w-full h-full object-cover"
                 />
               </div>
