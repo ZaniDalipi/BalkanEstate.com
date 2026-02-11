@@ -484,54 +484,58 @@ export function useGoogleMap(props: GoogleMapComponentProps) {
     setMap(mapInstance);
 
     // Initialize clusterer with SuperCluster algorithm for performance
-    const clusterer = new MarkerClusterer({
-      map: mapInstance,
-      algorithm: new SuperClusterAlgorithm({
-        radius: 100,
-        maxZoom: 15,
-      }),
-      renderer: {
-        render: ({ count, position }) => {
-          const div = document.createElement('div');
-          div.className = 'cluster-marker';
-          // Smaller cluster sizes for cleaner look
-          const size = count < 10 ? 28 : count < 50 ? 32 : count < 100 ? 36 : 40;
-          div.style.cssText = `
-            width: ${size}px;
-            height: ${size}px;
-            background: linear-gradient(135deg, #0252CD 0%, #0066FF 100%);
-            border: 2px solid white;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-weight: bold;
-            font-size: ${count < 100 ? 11 : 10}px;
-            font-family: Inter, system-ui, sans-serif;
-            cursor: pointer;
-            box-shadow: 0 2px 8px rgba(2, 82, 205, 0.4), 0 1px 3px rgba(0,0,0,0.2);
-            transition: transform 0.2s ease-out, box-shadow 0.2s ease-out;
-          `;
-          div.textContent = String(count);
-          div.addEventListener('mouseenter', () => {
-            div.style.transform = 'scale(1.15)';
-            div.style.boxShadow = '0 4px 12px rgba(2, 82, 205, 0.5), 0 2px 4px rgba(0,0,0,0.3)';
-          });
-          div.addEventListener('mouseleave', () => {
-            div.style.transform = 'scale(1)';
-            div.style.boxShadow = '0 2px 8px rgba(2, 82, 205, 0.4), 0 1px 3px rgba(0,0,0,0.2)';
-          });
+    try {
+      const clusterer = new MarkerClusterer({
+        map: mapInstance,
+        algorithm: new SuperClusterAlgorithm({
+          radius: 100,
+          maxZoom: 15,
+        }),
+        renderer: {
+          render: ({ count, position }) => {
+            const div = document.createElement('div');
+            div.className = 'cluster-marker';
+            // Smaller cluster sizes for cleaner look
+            const size = count < 10 ? 28 : count < 50 ? 32 : count < 100 ? 36 : 40;
+            div.style.cssText = `
+              width: ${size}px;
+              height: ${size}px;
+              background: linear-gradient(135deg, #0252CD 0%, #0066FF 100%);
+              border: 2px solid white;
+              border-radius: 50%;
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              color: white;
+              font-weight: bold;
+              font-size: ${count < 100 ? 11 : 10}px;
+              font-family: Inter, system-ui, sans-serif;
+              cursor: pointer;
+              box-shadow: 0 2px 8px rgba(2, 82, 205, 0.4), 0 1px 3px rgba(0,0,0,0.2);
+              transition: transform 0.2s ease-out, box-shadow 0.2s ease-out;
+            `;
+            div.textContent = String(count);
+            div.addEventListener('mouseenter', () => {
+              div.style.transform = 'scale(1.15)';
+              div.style.boxShadow = '0 4px 12px rgba(2, 82, 205, 0.5), 0 2px 4px rgba(0,0,0,0.3)';
+            });
+            div.addEventListener('mouseleave', () => {
+              div.style.transform = 'scale(1)';
+              div.style.boxShadow = '0 2px 8px rgba(2, 82, 205, 0.4), 0 1px 3px rgba(0,0,0,0.2)';
+            });
 
-          return new google.maps.marker.AdvancedMarkerElement({
-            position,
-            content: div,
-          });
+            return new google.maps.marker.AdvancedMarkerElement({
+              position,
+              content: div,
+            });
+          },
         },
-      },
-    });
+      });
 
-    clustererRef.current = clusterer;
+      clustererRef.current = clusterer;
+    } catch (clustererError) {
+      console.warn('Failed to initialize MarkerClusterer. Markers may not display:', clustererError);
+    }
   }, []);
 
   // Handle map unmount
@@ -757,6 +761,12 @@ export function useGoogleMap(props: GoogleMapComponentProps) {
     const mapToUse = map || mapInstanceRef.current;
     if (!mapToUse || !clustererRef.current || !isLoaded) return;
 
+    // Guard: AdvancedMarkerElement may not be available if mapId is invalid
+    if (!google.maps.marker?.AdvancedMarkerElement) {
+      console.warn('AdvancedMarkerElement not available. Check that VITE_GOOGLE_MAPS_MAP_ID is a valid Map ID from Google Cloud Console.');
+      return;
+    }
+
     // Clear existing markers
     clustererRef.current.clearMarkers();
     markersRef.current.clear();
@@ -836,23 +846,27 @@ export function useGoogleMap(props: GoogleMapComponentProps) {
           mapToUse?.panTo({ lat: property.lat, lng: property.lng });
         };
 
-        const marker = new google.maps.marker.AdvancedMarkerElement({
-          position: { lat: property.lat, lng: property.lng },
-          content: markerDiv,
-          zIndex: isActivelyPromoted ? 100 : 1,
-        });
+        try {
+          const marker = new google.maps.marker.AdvancedMarkerElement({
+            position: { lat: property.lat, lng: property.lng },
+            content: markerDiv,
+            zIndex: isActivelyPromoted ? 100 : 1,
+          });
 
-        // Separate promoted markers from regular ones
-        if (isActivelyPromoted) {
-          // Add promoted markers directly to map (not clustered)
-          marker.map = mapToUse;
-          promotedMarkers.push(marker);
-        } else {
-          regularMarkers.push(marker);
+          // Separate promoted markers from regular ones
+          if (isActivelyPromoted) {
+            // Add promoted markers directly to map (not clustered)
+            marker.map = mapToUse;
+            promotedMarkers.push(marker);
+          } else {
+            regularMarkers.push(marker);
+          }
+
+          markersRef.current.set(property.id, marker);
+          markerDivsRef.current.set(property.id, markerDiv);
+        } catch (markerError) {
+          console.warn('Failed to create marker for property', property.id, markerError);
         }
-
-        markersRef.current.set(property.id, marker);
-        markerDivsRef.current.set(property.id, markerDiv);
       }
 
       currentIndex = endIndex;
