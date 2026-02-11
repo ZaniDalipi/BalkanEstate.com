@@ -480,8 +480,60 @@ export function useGoogleMap(props: GoogleMapComponentProps) {
     };
   }, []);
 
+  // Create clusterer once marker library is available
+  const createClusterer = useCallback((mapInstance: google.maps.Map) => {
+    const clusterer = new MarkerClusterer({
+      map: mapInstance,
+      algorithm: new SuperClusterAlgorithm({
+        radius: 100,
+        maxZoom: 15,
+      }),
+      renderer: {
+        render: ({ count, position }) => {
+          const div = document.createElement('div');
+          div.className = 'cluster-marker';
+          const size = count < 10 ? 28 : count < 50 ? 32 : count < 100 ? 36 : 40;
+          div.style.cssText = `
+            width: ${size}px;
+            height: ${size}px;
+            background: linear-gradient(135deg, #0252CD 0%, #0066FF 100%);
+            border: 2px solid white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-size: ${count < 100 ? 11 : 10}px;
+            font-family: Inter, system-ui, sans-serif;
+            cursor: pointer;
+            box-shadow: 0 2px 8px rgba(2, 82, 205, 0.4), 0 1px 3px rgba(0,0,0,0.2);
+            transition: transform 0.2s ease-out, box-shadow 0.2s ease-out;
+          `;
+          div.textContent = String(count);
+          div.addEventListener('mouseenter', () => {
+            div.style.transform = 'scale(1.15)';
+            div.style.boxShadow = '0 4px 12px rgba(2, 82, 205, 0.5), 0 2px 4px rgba(0,0,0,0.3)';
+          });
+          div.addEventListener('mouseleave', () => {
+            div.style.transform = 'scale(1)';
+            div.style.boxShadow = '0 2px 8px rgba(2, 82, 205, 0.4), 0 1px 3px rgba(0,0,0,0.2)';
+          });
+
+          return new google.maps.marker.AdvancedMarkerElement({
+            position,
+            content: div,
+          });
+        },
+      },
+    });
+
+    clustererRef.current = clusterer;
+    setMarkersReady(true);
+  }, []);
+
   // Handle map load
-  const onLoad = useCallback((mapInstance: google.maps.Map) => {
+  const onLoad = useCallback(async (mapInstance: google.maps.Map) => {
     // Set ref synchronously first (avoids race condition with marker creation effect)
     mapInstanceRef.current = mapInstance;
     setMap(mapInstance);
@@ -509,65 +561,35 @@ export function useGoogleMap(props: GoogleMapComponentProps) {
     // Also retry after a short delay in case bounds aren't ready yet
     setTimeout(deliverInitialBounds, 200);
 
-    // Wait for marker library then initialize clusterer.
-    // google.maps.marker may not be ready even though isLoaded is true.
-    const initClusterer = () => {
-      if (!google.maps.marker?.AdvancedMarkerElement) {
-        setTimeout(initClusterer, 50);
-        return;
+    // Ensure the marker library is fully loaded before creating clusterer.
+    // importLibrary is the official Google Maps API way to guarantee library availability.
+    try {
+      if (typeof google.maps.importLibrary === 'function') {
+        await google.maps.importLibrary('marker');
       }
+    } catch {
+      // importLibrary failed — fall through to polling below
+    }
 
-      const clusterer = new MarkerClusterer({
-        map: mapInstance,
-        algorithm: new SuperClusterAlgorithm({
-          radius: 100,
-          maxZoom: 15,
-        }),
-        renderer: {
-          render: ({ count, position }) => {
-            const div = document.createElement('div');
-            div.className = 'cluster-marker';
-            const size = count < 10 ? 28 : count < 50 ? 32 : count < 100 ? 36 : 40;
-            div.style.cssText = `
-              width: ${size}px;
-              height: ${size}px;
-              background: linear-gradient(135deg, #0252CD 0%, #0066FF 100%);
-              border: 2px solid white;
-              border-radius: 50%;
-              display: flex;
-              align-items: center;
-              justify-content: center;
-              color: white;
-              font-weight: bold;
-              font-size: ${count < 100 ? 11 : 10}px;
-              font-family: Inter, system-ui, sans-serif;
-              cursor: pointer;
-              box-shadow: 0 2px 8px rgba(2, 82, 205, 0.4), 0 1px 3px rgba(0,0,0,0.2);
-              transition: transform 0.2s ease-out, box-shadow 0.2s ease-out;
-            `;
-            div.textContent = String(count);
-            div.addEventListener('mouseenter', () => {
-              div.style.transform = 'scale(1.15)';
-              div.style.boxShadow = '0 4px 12px rgba(2, 82, 205, 0.5), 0 2px 4px rgba(0,0,0,0.3)';
-            });
-            div.addEventListener('mouseleave', () => {
-              div.style.transform = 'scale(1)';
-              div.style.boxShadow = '0 2px 8px rgba(2, 82, 205, 0.4), 0 1px 3px rgba(0,0,0,0.2)';
-            });
+    // If AdvancedMarkerElement is available, create clusterer immediately
+    if (google.maps.marker?.AdvancedMarkerElement) {
+      createClusterer(mapInstance);
+      return;
+    }
 
-            return new google.maps.marker.AdvancedMarkerElement({
-              position,
-              content: div,
-            });
-          },
-        },
-      });
-
-      clustererRef.current = clusterer;
-      setMarkersReady(true);
+    // Final fallback: poll with timeout (marker library might still be loading)
+    let retries = 0;
+    const poll = () => {
+      if (!mapInstanceRef.current) return; // Map was unmounted
+      if (google.maps.marker?.AdvancedMarkerElement) {
+        createClusterer(mapInstance);
+      } else if (retries < 200) {
+        retries++;
+        setTimeout(poll, 50);
+      }
     };
-    initClusterer();
-  }, []);
+    poll();
+  }, [createClusterer]);
 
   // Handle map unmount
   const onUnmount = useCallback(() => {
@@ -1592,7 +1614,7 @@ export function useGoogleMap(props: GoogleMapComponentProps) {
   const mapOptions = useMemo<google.maps.MapOptions | undefined>(() => {
     if (!isLoaded || typeof google === 'undefined') return undefined;
 
-    return {
+    const opts: google.maps.MapOptions = {
       restriction: {
         latLngBounds: BALKAN_BOUNDS,
         strictBounds: false,
@@ -1612,8 +1634,12 @@ export function useGoogleMap(props: GoogleMapComponentProps) {
       maxZoom: 21,
       tilt: 0,
       heading: 0,
-      mapId: GOOGLE_MAPS_MAP_ID,
     };
+    // Only set mapId if a valid one is configured (invalid mapId breaks AdvancedMarkerElement)
+    if (GOOGLE_MAPS_MAP_ID) {
+      opts.mapId = GOOGLE_MAPS_MAP_ID;
+    }
+    return opts;
   }, [isLoaded]);
 
   // Convert Leaflet bounds to Google bounds for drawn rectangle

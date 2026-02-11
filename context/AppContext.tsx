@@ -663,15 +663,13 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     tokenService.onSessionExpired(() => {
       // Disconnect from WebSocket
       socketService.disconnect();
-      // Clear auth state
-      dispatch({ type: 'SET_AUTH_STATE', payload: { isAuthenticated: false, user: null } });
-      // Show notification to user
+      // Show SessionExpiredModal (also clears auth state via reducer)
+      dispatch({ type: 'SESSION_EXPIRED' });
+      // Show browser notification
       notificationService.showNotification(
         'Session Expired',
         { body: 'Your session has expired. Please log in again.', tag: 'session-expired' }
       );
-      // Open auth modal
-      dispatch({ type: 'TOGGLE_AUTH_MODAL', payload: { isOpen: true, view: 'login' } });
     });
   }, []);
 

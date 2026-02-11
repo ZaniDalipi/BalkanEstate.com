@@ -20,4 +20,5 @@ export const useGoogleMapLoader = () => {
   return { isLoaded, loadError };
 };
 
-export const GOOGLE_MAPS_MAP_ID = import.meta.env.VITE_GOOGLE_MAPS_MAP_ID || 'balkan-estate-map';
+// Only pass mapId if actually configured - an invalid mapId prevents AdvancedMarkerElement from working
+export const GOOGLE_MAPS_MAP_ID = import.meta.env.VITE_GOOGLE_MAPS_MAP_ID || undefined;

@@ -1,4 +1,4 @@
-import React, { useCallback, useState, useRef, useEffect, useMemo, memo } from 'react';
+import React, { useState, useRef, useEffect, memo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Property, ChatMessage, AiSearchQuery, Filters, SellerType, FurnishingStatus, HeatingType, PropertyCondition, ViewType, EnergyRating } from '@/types';
 import PropertyCard from '@/src/features/property-details/components/PropertyCard';
@@ -642,29 +642,15 @@ const FilterControls: React.FC<Omit<PropertyListProps, 'properties' | 'showList'
 
 const ITEMS_PER_PAGE = 20;
 
-// Animated wrapper for property cards - memoized to prevent re-renders on parent state changes
+// Wrapper for property cards - memoized to prevent re-renders on parent state changes
 const AnimatedPropertyCard = memo<{
   property: Property;
   index: number;
   onHover?: (id: string | null) => void;
   isNew?: boolean;
-}>(({ property, index, onHover, isNew = false }) => {
-  // Track if the card has already animated to prevent replay on re-mount
-  const hasAnimatedRef = useRef(false);
-  const animationDelay = useMemo(() => `${Math.min(index * 50, 300)}ms`, [index]);
-
-  const handleAnimationEnd = useCallback(() => {
-    hasAnimatedRef.current = true;
-  }, []);
-
+}>(({ property, index, onHover }) => {
   return (
     <div
-      className={hasAnimatedRef.current
-        ? 'property-card-visible'
-        : `property-card-animated ${isNew ? 'property-card-new' : ''}`
-      }
-      style={hasAnimatedRef.current ? undefined : { animationDelay }}
-      onAnimationEnd={handleAnimationEnd}
       onMouseEnter={() => onHover?.(property.id)}
       onMouseLeave={() => onHover?.(null)}
     >
@@ -673,47 +659,9 @@ const AnimatedPropertyCard = memo<{
   );
 });
 
-// CSS for property card animations
+// CSS for property card transitions
 const PropertyListStyles = () => (
   <style>{`
-    .property-card-animated {
-      opacity: 0;
-      transform: translateY(15px);
-      animation: property-fade-in 0.4s ease-out forwards;
-    }
-
-    .property-card-new {
-      animation: property-slide-in 0.5s ease-out forwards;
-    }
-
-    /* Cards that have already animated - no animation, just visible */
-    .property-card-visible {
-      opacity: 1;
-      transform: none;
-    }
-
-    @keyframes property-fade-in {
-      0% {
-        opacity: 0;
-        transform: translateY(15px);
-      }
-      100% {
-        opacity: 1;
-        transform: translateY(0);
-      }
-    }
-
-    @keyframes property-slide-in {
-      0% {
-        opacity: 0;
-        transform: translateY(20px) scale(0.98);
-      }
-      100% {
-        opacity: 1;
-        transform: translateY(0) scale(1);
-      }
-    }
-
     .property-grid-transition {
       transition: opacity 0.2s ease-out;
     }
