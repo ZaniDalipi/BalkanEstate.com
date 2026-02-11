@@ -191,8 +191,8 @@ const HighlightedCardInner = memo<HighlightedCardInnerProps>(({
 
   return (
     <div
-      className={`group bg-white rounded-xl overflow-hidden shadow-xl ${tierStyles.border} ${tierStyles.glow} transition-all duration-500 cursor-pointer flex flex-col md:flex-row w-full ${
-        isHovered ? 'shadow-2xl scale-[1.01]' : ''
+      className={`group bg-white rounded-2xl overflow-hidden shadow-md ${tierStyles.border} ${tierStyles.glow} transition-all duration-300 cursor-pointer flex flex-col md:flex-row w-full ${
+        isHovered ? 'shadow-xl scale-[1.005]' : ''
       }`}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
@@ -255,54 +255,53 @@ const HighlightedCardInner = memo<HighlightedCardInnerProps>(({
           </>
         )}
 
-        {/* Image Dots */}
+        {/* iOS-style Page Dots */}
         {displayImages.length > 1 && (
-          <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-1.5 z-10">
+          <div className="absolute bottom-2.5 left-1/2 -translate-x-1/2 flex items-center gap-[5px] z-10">
             {displayImages.map((_, index) => (
               <button
                 key={index}
                 onClick={(e) => handleDotClick(e, index)}
-                className={`h-2 rounded-full transition-all duration-300 shadow-sm ${
+                className={`rounded-full transition-all duration-300 ${
                   index === currentImageIndex
-                    ? 'bg-white w-5'
-                    : 'bg-white/60 hover:bg-white/90 w-2'
+                    ? 'bg-white w-[7px] h-[7px]'
+                    : 'bg-white/45 w-[6px] h-[6px] active:bg-white/70'
                 }`}
               />
             ))}
           </div>
         )}
 
-        {/* Image Counter */}
-        <div className="absolute bottom-3 right-2.5 bg-black/60 backdrop-blur-sm text-white text-[10px] font-medium px-2 py-0.5 rounded-full z-10">
-          {currentImageIndex + 1}/{displayImages.length}
-        </div>
-
-        {/* Promotion Badge */}
-        <div className={`absolute top-2.5 left-2.5 ${tierStyles.badge} text-white text-[10px] font-bold px-2.5 py-1 rounded-lg shadow-lg flex items-center gap-1 z-10`}>
-          <StarIconSolid className="w-3 h-3" />
-          {tierStyles.label}
-        </div>
-
-        {/* Urgent Badge */}
-        {property.hasUrgentBadge && (
-          <div
-            className="absolute top-2.5 right-12 bg-gradient-to-r from-red-600 to-rose-600 text-white text-[10px] font-bold px-2 py-1 rounded-lg animate-pulse flex items-center gap-1 z-10"
-            style={{ boxShadow: '0 0 12px 2px rgba(239, 68, 68, 0.6), 0 0 20px 4px rgba(239, 68, 68, 0.3)' }}
-          >
-            <FireIcon className="w-3 h-3" /> {t('property:status.urgent').toUpperCase()}
+        {/* iOS-style Image Counter Pill */}
+        {displayImages.length > 1 && (
+          <div className="absolute bottom-2.5 right-2.5 bg-black/40 backdrop-blur-md text-white/90 text-[10px] font-medium px-1.5 py-[2px] rounded-full z-10 tabular-nums">
+            {currentImageIndex + 1}/{displayImages.length}
           </div>
         )}
 
-        {/* Favorite Button */}
+        {/* Promotion Badge - compact iOS pill */}
+        <div className={`absolute top-2.5 left-2.5 ${tierStyles.badge} text-white text-[10px] font-semibold px-2 py-[3px] rounded-full flex items-center gap-1 z-10`}>
+          <StarIconSolid className="w-2.5 h-2.5" />
+          {tierStyles.label}
+        </div>
+
+        {/* Urgent Badge - iOS compact */}
+        {property.hasUrgentBadge && (
+          <div className="absolute top-2.5 right-11 bg-red-500/90 backdrop-blur-sm text-white text-[10px] font-semibold px-2 py-[3px] rounded-full animate-pulse flex items-center gap-1 z-10">
+            <FireIcon className="w-2.5 h-2.5" /> {t('property:status.urgent').toUpperCase()}
+          </div>
+        )}
+
+        {/* iOS-style Favorite Button - frosted glass */}
         <button
           onClick={onFavoriteClick}
-          className={`absolute top-2.5 right-2.5 p-2 rounded-full shadow-lg transition-all duration-300 z-10 ${
+          className={`absolute top-2.5 right-2.5 w-8 h-8 flex items-center justify-center rounded-full transition-all duration-200 z-10 active:scale-90 ${
             isFavorited
-              ? 'bg-red-500 text-white scale-110'
-              : 'bg-white/95 text-neutral-600 hover:bg-red-500 hover:text-white hover:scale-110'
+              ? 'bg-red-500 text-white'
+              : 'bg-black/20 backdrop-blur-md text-white border border-white/20'
           }`}
         >
-          <svg xmlns="http://www.w3.org/2000/svg" className={`h-4 w-4 ${isFavorited ? 'fill-current' : ''}`} fill={isFavorited ? 'currentColor' : 'none'} viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+          <svg xmlns="http://www.w3.org/2000/svg" className={`h-[18px] w-[18px] ${isFavorited ? 'fill-current' : ''}`} fill={isFavorited ? 'currentColor' : 'none'} viewBox="0 0 24 24" stroke="currentColor" strokeWidth={isFavorited ? 0 : 1.5}>
             <path strokeLinecap="round" strokeLinejoin="round" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
           </svg>
         </button>
@@ -310,13 +309,13 @@ const HighlightedCardInner = memo<HighlightedCardInnerProps>(({
 
       {/* Content Section */}
       <div className="flex-1 p-4 md:p-5 flex flex-col min-w-0">
-        {/* Price & Type Row */}
+        {/* Price & Type Row - iOS style */}
         <div className="flex items-center justify-between gap-2 mb-2">
-          <span className="bg-gradient-to-r from-primary to-primary-dark text-white text-sm md:text-base font-bold px-3 py-1 rounded-lg shadow-md">
+          <span className="text-primary text-base md:text-lg font-bold tracking-tight">
             {formatPrice(property.price, property.country)}
-            {isRental && <span className="text-xs font-normal opacity-80">/{property.rentPeriod === 'weekly' ? t('common:wk', 'wk') : property.rentPeriod === 'daily' ? t('common:day', 'day') : t('common:mo', 'mo')}</span>}
+            {isRental && <span className="text-xs font-normal text-neutral-400">/{property.rentPeriod === 'weekly' ? t('common:wk', 'wk') : property.rentPeriod === 'daily' ? t('common:day', 'day') : t('common:mo', 'mo')}</span>}
           </span>
-          <span className="bg-neutral-100 text-neutral-700 text-xs font-semibold px-2.5 py-1 rounded-md">
+          <span className="bg-neutral-100 text-neutral-600 text-[11px] font-medium px-2.5 py-[3px] rounded-full">
             {propertyTypeLabel}
           </span>
         </div>
@@ -371,20 +370,20 @@ const HighlightedCardInner = memo<HighlightedCardInnerProps>(({
             />
             <div className="min-w-0">
               <p className="text-xs font-semibold text-neutral-800 truncate">{property.seller.name}</p>
-              <span className={`inline-flex items-center gap-0.5 text-[10px] font-semibold px-1.5 py-0.5 rounded-full ${
+              <span className={`inline-flex items-center text-[10px] font-medium px-1.5 py-[1px] rounded-full ${
                 property.seller.type === 'agent'
-                  ? 'bg-blue-100 text-blue-700'
-                  : 'bg-neutral-100 text-neutral-600'
+                  ? 'bg-blue-50 text-blue-600'
+                  : 'bg-neutral-50 text-neutral-500'
               }`}>
                 {property.seller.type === 'agent' ? t('property:seller.agent') : t('property:seller.private')}
               </span>
             </div>
           </div>
 
-          {/* View Details Button */}
+          {/* iOS-style View Details Button */}
           <button
             onClick={onCardClick}
-            className="bg-primary hover:bg-primary-dark text-white text-xs font-semibold px-3.5 py-1.5 rounded-lg transition-colors shadow-md flex-shrink-0"
+            className="bg-primary hover:bg-primary-dark text-white text-[13px] font-medium px-4 py-[7px] rounded-full transition-all active:scale-[0.97] flex-shrink-0"
           >
             {t('property:actions.viewDetails')}
           </button>

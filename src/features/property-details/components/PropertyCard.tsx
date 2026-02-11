@@ -131,8 +131,8 @@ const PropertyCardInner = memo<PropertyCardInnerProps>(({
 
   return (
     <div
-      className={`group bg-white rounded-2xl overflow-hidden shadow-lg border-2 transition-all duration-500 text-left w-full flex flex-col cursor-pointer isolate ${getCardStyles()} ${
-        isHovered && !isSold && !isRented ? 'shadow-2xl -translate-y-2 scale-[1.02]' : 'hover:shadow-xl'
+      className={`group bg-white rounded-2xl overflow-hidden shadow-sm border transition-all duration-300 text-left w-full flex flex-col cursor-pointer isolate ${getCardStyles()} ${
+        isHovered && !isSold && !isRented ? 'shadow-lg -translate-y-1 scale-[1.01]' : 'hover:shadow-md'
       }`}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
@@ -184,30 +184,28 @@ const PropertyCardInner = memo<PropertyCardInnerProps>(({
         {/* Top badges row */}
         <div className="absolute top-3 left-3 right-3 flex justify-between items-start z-10">
           <div className="flex flex-col gap-1.5">
-            {/* Listing Type Badge */}
+            {/* iOS-style Listing Type Badge */}
             {isRental ? (
-              <div className="bg-blue-600 text-white text-[10px] font-bold px-2 py-1 rounded-md shadow-lg flex items-center gap-1">
-                <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z" /></svg>
+              <div className="bg-blue-500/85 backdrop-blur-sm text-white text-[10px] font-semibold px-2 py-[3px] rounded-full flex items-center gap-1">
                 {t('property:forRent', 'FOR RENT').toUpperCase()}
               </div>
             ) : (
-              <div className="bg-emerald-600 text-white text-[10px] font-bold px-2 py-1 rounded-md shadow-lg flex items-center gap-1">
-                <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+              <div className="bg-emerald-500/85 backdrop-blur-sm text-white text-[10px] font-semibold px-2 py-[3px] rounded-full flex items-center gap-1">
                 {t('property:forSale', 'FOR SALE').toUpperCase()}
               </div>
             )}
 
-            {/* Sold Badge */}
+            {/* iOS-style Sold Badge */}
             {isSold && (
-              <div className="bg-red-600 text-white text-[10px] font-bold px-2 py-1 rounded-md shadow-lg flex items-center gap-1">
+              <div className="bg-red-500/85 backdrop-blur-sm text-white text-[10px] font-semibold px-2 py-[3px] rounded-full flex items-center gap-1">
                 <span className="w-1.5 h-1.5 bg-white rounded-full animate-pulse" />
                 {t('property:sold').toUpperCase()}
               </div>
             )}
 
-            {/* Rented Badge */}
+            {/* iOS-style Rented Badge */}
             {isRented && (
-              <div className="bg-orange-500 text-white text-[10px] font-bold px-2 py-1 rounded-md shadow-lg flex items-center gap-1">
+              <div className="bg-orange-500/85 backdrop-blur-sm text-white text-[10px] font-semibold px-2 py-[3px] rounded-full flex items-center gap-1">
                 <span className="w-1.5 h-1.5 bg-white rounded-full" />
                 {property?.rentedUntil ? (
                   t('rental:status.availableBadge', { date: new Date(property.rentedUntil).toLocaleDateString(i18n.language === 'me' ? 'sr-Latn-ME' : i18n.language === 'sq' ? 'sq-AL' : i18n.language, { month: 'short', year: 'numeric' }).toUpperCase() })
@@ -217,9 +215,9 @@ const PropertyCardInner = memo<PropertyCardInnerProps>(({
               </div>
             )}
 
-            {/* New Badge */}
+            {/* iOS-style New Badge */}
             {!isSold && !isRented && isNew && !isActivelyPromoted && (
-              <div className="bg-gradient-to-r from-emerald-500 to-green-600 text-white text-[10px] font-bold px-2 py-1 rounded-md shadow-lg flex items-center gap-1">
+              <div className="bg-emerald-500/85 backdrop-blur-sm text-white text-[10px] font-semibold px-2 py-[3px] rounded-full flex items-center gap-1">
                 <span className="relative flex h-1.5 w-1.5">
                   <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-white opacity-75"></span>
                   <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-white"></span>
@@ -228,18 +226,18 @@ const PropertyCardInner = memo<PropertyCardInnerProps>(({
               </div>
             )}
 
-            {/* Promotion Badges - Premium = Gold, Highlight = Light Blue, Featured = Pink */}
+            {/* iOS-style Promotion Badges */}
             {!isSold && isActivelyPromoted && promotionTier && (
-              <div className={`text-white text-[10px] font-bold px-2 py-1 rounded-md shadow-lg flex items-center gap-1 ${
+              <div className={`text-white text-[10px] font-semibold px-2 py-[3px] rounded-full flex items-center gap-1 ${
                 promotionTier === 'premium'
-                  ? 'bg-gradient-to-r from-amber-500 via-yellow-400 to-orange-400 animate-pulse'
+                  ? 'bg-gradient-to-r from-amber-500 to-orange-400 animate-pulse'
                   : promotionTier === 'highlight'
-                  ? 'bg-gradient-to-r from-sky-500 via-sky-400 to-cyan-400'
+                  ? 'bg-gradient-to-r from-sky-500 to-cyan-400'
                   : promotionTier === 'featured'
-                  ? 'bg-gradient-to-r from-violet-600 via-purple-500 to-violet-400'
-                  : 'bg-gradient-to-r from-gray-600 to-gray-700'
+                  ? 'bg-gradient-to-r from-violet-500 to-purple-400'
+                  : 'bg-neutral-500/85'
               }`}>
-                <StarIconSolid className="w-3 h-3" />
+                <StarIconSolid className="w-2.5 h-2.5" />
                 {promotionTier === 'premium' && t('property:map.tiers.premium', 'PREMIUM').toUpperCase()}
                 {promotionTier === 'highlight' && t('property:map.tiers.highlight', 'HIGHLIGHT').toUpperCase()}
                 {promotionTier === 'featured' && t('property:map.tiers.featured', 'FEATURED').toUpperCase()}
@@ -247,44 +245,33 @@ const PropertyCardInner = memo<PropertyCardInnerProps>(({
               </div>
             )}
 
-            {/* Urgent Badge */}
+            {/* iOS-style Urgent Badge */}
             {!isSold && isActivelyPromoted && property.hasUrgentBadge && (
-              <div
-                className="bg-gradient-to-r from-red-600 to-rose-600 text-white text-[10px] font-bold px-2 py-1 rounded-md animate-pulse flex items-center gap-1"
-                style={{ boxShadow: '0 0 12px 2px rgba(239, 68, 68, 0.6), 0 0 20px 4px rgba(239, 68, 68, 0.3)' }}
-              >
-                <FireIcon className="w-3 h-3" /> {t('property:status.urgent').toUpperCase()}
+              <div className="bg-red-500/90 backdrop-blur-sm text-white text-[10px] font-semibold px-2 py-[3px] rounded-full animate-pulse flex items-center gap-1">
+                <FireIcon className="w-2.5 h-2.5" /> {t('property:status.urgent').toUpperCase()}
               </div>
             )}
 
-            {/* 360° Tour Badge */}
+            {/* iOS-style 360° Tour Badge */}
             {property.virtualTour360Url && (
-              <div
-                className="bg-gradient-to-r from-purple-500 to-pink-500 text-white text-[10px] font-bold px-2 py-1 rounded-md shadow-lg flex items-center gap-1"
-                title="360° Virtual Tour Available"
-              >
-                <svg className="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-                  <circle cx="12" cy="12" r="10" />
-                  <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" />
-                  <path d="M2 12h20" />
-                </svg>
+              <div className="bg-purple-500/85 backdrop-blur-sm text-white text-[10px] font-semibold px-2 py-[3px] rounded-full flex items-center gap-1">
                 <span>360°</span>
               </div>
             )}
           </div>
 
-          {/* Favorite Button */}
+          {/* iOS-style Favorite Button - frosted glass */}
           <button
             onClick={onFavoriteClick}
-            className={`min-h-[44px] min-w-[44px] flex items-center justify-center rounded-full shadow-lg transition-all duration-300 touch-manipulation focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-red-500/50 ${
+            className={`w-8 h-8 flex items-center justify-center rounded-full transition-all duration-200 touch-manipulation focus:outline-none active:scale-90 ${
               isFavorited
-                ? 'bg-red-500 text-white scale-110'
-                : 'bg-white/95 backdrop-blur-sm text-neutral-600 hover:bg-red-500 hover:text-white hover:scale-110 active:scale-105'
+                ? 'bg-red-500 text-white'
+                : 'bg-black/20 backdrop-blur-md text-white border border-white/20'
             }`}
             aria-label={isFavorited ? t('property:actions.removeFromFavorites', 'Remove from favorites') : t('property:actions.addToFavorites', 'Add to favorites')}
             aria-pressed={isFavorited}
           >
-            <svg xmlns="http://www.w3.org/2000/svg" className={`h-5 w-5 transition-transform duration-300 ${isFavorited ? 'fill-current scale-110' : ''}`} fill={isFavorited ? 'currentColor' : 'none'} viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden="true">
+            <svg xmlns="http://www.w3.org/2000/svg" className={`h-[18px] w-[18px] ${isFavorited ? 'fill-current' : ''}`} fill={isFavorited ? 'currentColor' : 'none'} viewBox="0 0 24 24" stroke="currentColor" strokeWidth={isFavorited ? 0 : 1.5} aria-hidden="true">
               <path strokeLinecap="round" strokeLinejoin="round" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
             </svg>
           </button>
@@ -299,16 +286,16 @@ const PropertyCardInner = memo<PropertyCardInnerProps>(({
 
         {/* Content wrapper - on top of glass */}
         <div className="relative z-10 flex flex-col flex-grow">
-        {/* Property Type & Price Row */}
+        {/* Property Type & Price Row - iOS style */}
         <div className="flex items-center justify-between gap-2 mb-2">
           {/* Property Type Badge */}
-          <span className="bg-neutral-100 text-neutral-800 text-[10px] font-semibold px-2 py-1 rounded-md border border-neutral-200">
+          <span className="bg-neutral-100 text-neutral-600 text-[11px] font-medium px-2 py-[3px] rounded-full">
             {propertyTypeLabel}
           </span>
           {/* Price Badge */}
-          <span className="bg-gradient-to-r from-primary to-primary-dark text-white text-xs sm:text-sm font-bold px-2.5 py-1 rounded-md shadow-md">
+          <span className="text-primary text-sm sm:text-base font-bold tracking-tight">
             {formatPrice(property.price, property.country)}
-            {isRental && <span className="text-[10px] font-normal opacity-80">/{property.rentPeriod === 'weekly' ? t('common:wk', 'wk') : property.rentPeriod === 'daily' ? t('common:day', 'day') : t('common:mo', 'mo')}</span>}
+            {isRental && <span className="text-[11px] font-normal text-neutral-400">/{property.rentPeriod === 'weekly' ? t('common:wk', 'wk') : property.rentPeriod === 'daily' ? t('common:day', 'day') : t('common:mo', 'mo')}</span>}
           </span>
         </div>
         {/* Title */}
@@ -410,10 +397,10 @@ const PropertyCardInner = memo<PropertyCardInnerProps>(({
             {/* Seller Info */}
             <div className="min-w-0 flex-1">
               <p className="text-xs font-semibold text-neutral-800 truncate">{safeProperty.seller.name}</p>
-              <span className={`inline-flex items-center gap-0.5 text-[10px] font-semibold px-1.5 py-0.5 rounded-full ${
+              <span className={`inline-flex items-center text-[10px] font-medium px-1.5 py-[1px] rounded-full ${
                 safeProperty.seller.type === 'agent'
-                  ? 'bg-blue-500 text-white'
-                  : 'bg-neutral-200 text-neutral-600'
+                  ? 'bg-blue-50 text-blue-600'
+                  : 'bg-neutral-50 text-neutral-500'
               }`}>
                 {safeProperty.seller.type === 'agent' ? t('property:seller.agent') : t('property:seller.private')}
               </span>
@@ -443,14 +430,14 @@ const PropertyCardInner = memo<PropertyCardInnerProps>(({
             )}
           </div>
 
-          {/* Compare Button (if enabled) */}
+          {/* iOS-style Compare Button */}
           {showCompareButton && (
             <button
               onClick={onCompareClick}
-              className={`mt-2.5 flex items-center justify-center gap-1.5 min-h-[44px] px-3 py-2 rounded-lg text-xs font-bold transition-all duration-300 w-full touch-manipulation focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-primary/50 ${
+              className={`mt-2.5 flex items-center justify-center gap-1.5 h-10 px-4 rounded-full text-[13px] font-medium transition-all duration-200 w-full touch-manipulation focus:outline-none active:scale-[0.98] ${
                 isInComparison
-                  ? 'bg-primary text-white shadow-md'
-                  : 'bg-neutral-100 text-neutral-700 hover:bg-primary hover:text-white active:bg-primary-dark'
+                  ? 'bg-primary text-white'
+                  : 'bg-neutral-100 text-neutral-700 hover:bg-neutral-200'
               }`}
               aria-pressed={isInComparison}
             >
