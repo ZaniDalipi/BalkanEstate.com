@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { PropertyImageTag, FurnishingStatus, HeatingType, PropertyCondition, ViewType, EnergyRating, Orientation, ListingType, RentPeriod, VisitAvailability } from '@/types';
+import { Button } from '@/components/ui/liquid-glass-button';
 
 // --- Types ---
 
@@ -290,44 +291,37 @@ export const TriStateCheckbox: React.FC<{
         }
     };
 
-    const getButtonStyle = (state: 'no' | 'any' | 'yes') => {
-        let isActive = false;
-        if (state === 'no') isActive = value === false;
-        if (state === 'any') isActive = value === undefined;
-        if (state === 'yes') isActive = value === true;
-
-        return `px-3 py-1.5 text-xs font-medium rounded-lg transition-all duration-200 ${
-            isActive
-                ? 'glass-btn-primary !border-blue-400/40'
-                : 'glass-btn text-gray-500'
-        }`;
-    };
-
     return (
         <div className="flex flex-col gap-2">
             <label className="block text-sm font-medium text-gray-500">{label}</label>
             <div className="flex gap-2">
-                <button
+                <Button
                     type="button"
+                    variant={value === false ? 'cool' : 'glass'}
+                    size="sm"
                     onClick={() => onChange(false)}
-                    className={getButtonStyle('no')}
+                    className="text-xs font-medium rounded-lg"
                 >
                     No
-                </button>
-                <button
+                </Button>
+                <Button
                     type="button"
+                    variant={value === undefined ? 'cool' : 'glass'}
+                    size="sm"
                     onClick={() => onChange(undefined)}
-                    className={getButtonStyle('any')}
+                    className="text-xs font-medium rounded-lg"
                 >
                     Any
-                </button>
-                <button
+                </Button>
+                <Button
                     type="button"
+                    variant={value === true ? 'cool' : 'glass'}
+                    size="sm"
                     onClick={() => onChange(true)}
-                    className={getButtonStyle('yes')}
+                    className="text-xs font-medium rounded-lg"
                 >
                     Yes
-                </button>
+                </Button>
             </div>
         </div>
     );
