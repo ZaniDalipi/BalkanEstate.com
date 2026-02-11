@@ -200,7 +200,7 @@ const HighlightedCardInner = memo<HighlightedCardInnerProps>(({
     >
       {/* Image Section */}
       <div
-        className="relative w-full md:w-[42%] flex-shrink-0 aspect-[4/3] md:aspect-auto overflow-hidden bg-neutral-900"
+        className="relative w-full md:w-[42%] flex-shrink-0 aspect-[4/3] md:aspect-auto overflow-hidden bg-neutral-200"
         onTouchStart={handleTouchStart}
         onTouchEnd={handleTouchEnd}
       >
