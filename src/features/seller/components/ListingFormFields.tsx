@@ -43,6 +43,7 @@ const ListingFormFields: React.FC<ListingFormFieldsProps> = ({
     return (
         <>
             <fieldset className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <legend className="sr-only">{t('seller:createListing.location.sectionTitle', 'Location and pricing details')}</legend>
                 {/* Country Dropdown */}
                 <div className="relative">
                     <select
@@ -142,6 +143,7 @@ const ListingFormFields: React.FC<ListingFormFieldsProps> = ({
 
             {/* Property Type Selection */}
             <fieldset className="grid grid-cols-1 md:grid-cols-2 gap-6 items-end">
+                <legend className="sr-only">{t('seller:createListing.fields.propertyTypeSection', 'Property type and structure')}</legend>
                 <div className="relative">
                     <select name="propertyType" id="propertyType" value={listingData.propertyType} onChange={handleInputChange} className={`${floatingInputClasses} border-neutral-300`}>
                         <option value="house">{t('seller:propertyTypes.house')}</option>
@@ -193,6 +195,7 @@ const ListingFormFields: React.FC<ListingFormFieldsProps> = ({
 
             {/* Property Details - hide some fields for land */}
             <fieldset className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                <legend className="sr-only">{t('seller:createListing.fields.propertyDetailsSection', 'Property details')}</legend>
                 {listingData.propertyType !== 'land' && (
                     <>
                         <NumberInputWithSteppers label={t('seller:createListing.fields.bedrooms')} value={listingData.bedrooms} onChange={(val) => setListingData(p => ({ ...p, bedrooms: val }))} />

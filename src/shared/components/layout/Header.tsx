@@ -100,6 +100,13 @@ const Header: React.FC<HeaderProps> = ({ onToggleSidebar, isFloating }) => {
   if (isFloating) {
     return (
       <header className="absolute top-0 right-0 z-[1001] p-2 sm:p-3 landscape:p-2" role="banner">
+        {/* Skip to content link for keyboard users */}
+        <a
+          href="#main-content"
+          className="sr-only focus:not-sr-only focus:absolute focus:top-2 focus:left-2 focus:z-[2000] focus:bg-primary focus:text-white focus:px-4 focus:py-2 focus:rounded-lg focus:text-sm focus:font-semibold focus:shadow-lg"
+        >
+          {t('nav:skipToContent', 'Skip to main content')}
+        </a>
         <nav
           className="flex items-center gap-1.5 sm:gap-2 lg:gap-3 bg-white/70 backdrop-blur-xl p-1.5 rounded-full shadow-xl shadow-black/10 border border-white/30"
           role="navigation"
@@ -130,6 +137,13 @@ const Header: React.FC<HeaderProps> = ({ onToggleSidebar, isFloating }) => {
 
   return (
     <header className="bg-white shadow-sm sticky top-0 z-20 flex-shrink-0" role="banner">
+      {/* Skip to content link for keyboard users */}
+      <a
+        href="#main-content"
+        className="sr-only focus:not-sr-only focus:absolute focus:top-2 focus:left-2 focus:z-[2000] focus:bg-primary focus:text-white focus:px-4 focus:py-2 focus:rounded-lg focus:text-sm focus:font-semibold focus:shadow-lg"
+      >
+        {t('nav:skipToContent', 'Skip to main content')}
+      </a>
       <div className="max-w-screen-xl mx-auto px-3 sm:px-4 md:px-6 lg:px-8">
         <div className="flex justify-between items-center py-1.5 sm:py-2 landscape:py-1">
           <div className="flex items-center">

@@ -109,24 +109,28 @@ const GeminiDescriptionGenerator: React.FC<{ propertyToEdit: Property | null }> 
 
     return (
         <>
-        <form onSubmit={handleSubmit} onKeyDown={(e) => { if (e.key === 'Enter' && (e.target as HTMLElement).tagName !== 'TEXTAREA') e.preventDefault(); }}>
+        <form onSubmit={handleSubmit} onKeyDown={(e) => { if (e.key === 'Enter' && (e.target as HTMLElement).tagName !== 'TEXTAREA') e.preventDefault(); }} aria-label={t('seller:createListing.formLabel', 'Create new listing')}>
             {/* Listing Type Toggle: Sale / Rent */}
             <div className="flex justify-center mb-6">
-                <div className="bg-neutral-100 p-1 rounded-full flex items-center space-x-1 border border-neutral-200 shadow-sm">
+                <div className="bg-neutral-100 p-1 rounded-full flex items-center space-x-1 border border-neutral-200 shadow-sm" role="radiogroup" aria-label={t('seller:createListing.listingType.label', 'Listing type')}>
                     <button
                         type="button"
+                        role="radio"
+                        aria-checked={!isRental}
                         onClick={() => setListingData(prev => ({ ...prev, listingType: 'sale' }))}
                         className={`px-6 py-2.5 rounded-full text-sm font-semibold transition-all duration-300 flex items-center gap-2 ${
                             !isRental ? 'bg-white text-primary shadow' : 'text-neutral-600 hover:bg-neutral-200'
                         }`}
                     >
-                        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden="true">
                             <path strokeLinecap="round" strokeLinejoin="round" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                         </svg>
                         {t('seller:createListing.listingType.sale', 'For Sale')}
                     </button>
                     <button
                         type="button"
+                        role="radio"
+                        aria-checked={isRental}
                         onClick={() => setListingData(prev => ({ ...prev, listingType: 'rent' }))}
                         className={`px-6 py-2.5 rounded-full text-sm font-semibold transition-all duration-300 flex items-center gap-2 ${
                             isRental ? 'bg-white text-blue-600 shadow' : 'text-neutral-600 hover:bg-neutral-200'
@@ -162,9 +166,9 @@ const GeminiDescriptionGenerator: React.FC<{ propertyToEdit: Property | null }> 
 
             {/* Mode Toggle */}
             <div className="flex justify-center mb-6">
-                 <div className="bg-neutral-100 p-1 rounded-full flex items-center space-x-1 border border-neutral-200 shadow-sm max-w-sm">
-                    <button type="button" onClick={() => setMode('ai')} className={`w-1/2 px-4 py-2 rounded-full text-sm font-semibold transition-all duration-300 flex items-center justify-center gap-2 whitespace-nowrap ${mode === 'ai' ? 'bg-white text-primary shadow' : 'text-neutral-600 hover:bg-neutral-200'}`}><SparklesIcon className="w-4 h-4" /> {t('seller:createListing.mode.aiCreator')}</button>
-                    <button type="button" onClick={() => setMode('manual')} className={`w-1/2 px-4 py-2 rounded-full text-sm font-semibold transition-all duration-300 flex items-center justify-center gap-2 whitespace-nowrap ${mode === 'manual' ? 'bg-white text-primary shadow' : 'text-neutral-600 hover:bg-neutral-200'}`}>{t('seller:createListing.mode.manualEntry')}</button>
+                 <div className="bg-neutral-100 p-1 rounded-full flex items-center space-x-1 border border-neutral-200 shadow-sm max-w-sm" role="radiogroup" aria-label={t('seller:createListing.mode.label', 'Creation mode')}>
+                    <button type="button" role="radio" aria-checked={mode === 'ai'} onClick={() => setMode('ai')} className={`w-1/2 px-4 py-2 rounded-full text-sm font-semibold transition-all duration-300 flex items-center justify-center gap-2 whitespace-nowrap ${mode === 'ai' ? 'bg-white text-primary shadow' : 'text-neutral-600 hover:bg-neutral-200'}`}><SparklesIcon className="w-4 h-4" aria-hidden="true" /> {t('seller:createListing.mode.aiCreator')}</button>
+                    <button type="button" role="radio" aria-checked={mode === 'manual'} onClick={() => setMode('manual')} className={`w-1/2 px-4 py-2 rounded-full text-sm font-semibold transition-all duration-300 flex items-center justify-center gap-2 whitespace-nowrap ${mode === 'manual' ? 'bg-white text-primary shadow' : 'text-neutral-600 hover:bg-neutral-200'}`}>{t('seller:createListing.mode.manualEntry')}</button>
                 </div>
             </div>
 
@@ -288,7 +292,30 @@ const GeminiDescriptionGenerator: React.FC<{ propertyToEdit: Property | null }> 
                             <input id="image-upload" type="file" multiple accept="image/*" className="hidden" onChange={handleImageChange} />
                         </label>
                         {images.length > 0 && (
-                            <div className="mt-4"><p className="font-semibold text-sm mb-2">{t('seller:createListing.upload.imagesSelected', { count: images.length })}</p><div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-2">{images.map((img, index) => (<div key={index} className="relative group"><img src={img.previewUrl} alt={`preview ${index}`} className="w-full h-24 object-cover rounded-md" /><button type="button" onClick={() => removeImage(index)} className="absolute -top-1 -right-1 bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs opacity-0 group-hover:opacity-100 transition-opacity">&times;</button></div>))}</div></div>
+                            <div className="mt-4">
+                                <p className="font-semibold text-sm mb-2">{t('seller:createListing.upload.imagesSelected', { count: images.length })}</p>
+                                <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-2">
+                                    {images.map((img, index) => (
+                                        <div key={index} className="relative group">
+                                            <img
+                                                src={img.previewUrl}
+                                                alt={t('seller:createListing.imageManagement.imagePreview', 'Property image {{number}}', { number: index + 1 })}
+                                                className="w-full h-24 object-cover rounded-md"
+                                                loading="lazy"
+                                                decoding="async"
+                                            />
+                                            <button
+                                                type="button"
+                                                onClick={() => removeImage(index)}
+                                                className="absolute -top-1 -right-1 bg-red-500 text-white rounded-full w-6 h-6 min-h-[24px] min-w-[24px] flex items-center justify-center text-xs opacity-0 group-hover:opacity-100 focus:opacity-100 transition-opacity focus:outline-none focus-visible:ring-2 focus-visible:ring-red-500"
+                                                aria-label={t('seller:createListing.imageManagement.removeImage', 'Remove image {{number}}', { number: index + 1 })}
+                                            >
+                                                &times;
+                                            </button>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
                         )}
                          <button type="button" onClick={handleGenerate} className="w-full mt-6 py-3 text-lg font-bold text-white bg-primary rounded-lg shadow-md hover:bg-primary-dark transition-colors flex items-center justify-center gap-2" disabled={images.length === 0}><SparklesIcon className="w-6 h-6"/>{t('seller:createListing.generate')}</button>
                     </div>
@@ -565,7 +592,21 @@ const GeminiDescriptionGenerator: React.FC<{ propertyToEdit: Property | null }> 
                     </fieldset>
 
                     {/* Description */}
-                    <fieldset><label htmlFor="description" className="block text-sm font-medium text-neutral-700 mb-1">{t('seller:createListing.fields.description')}</label><textarea id="description" name="description" value={listingData.description} onChange={handleInputChange} className={`${inputBaseClasses} h-48`} required /></fieldset>
+                    <fieldset>
+                        <label htmlFor="description" className="block text-sm font-medium text-neutral-700 mb-1">{t('seller:createListing.fields.description')}</label>
+                        <textarea
+                            id="description"
+                            name="description"
+                            value={listingData.description}
+                            onChange={handleInputChange}
+                            className={`${inputBaseClasses} h-48`}
+                            required
+                            aria-describedby="description-hint"
+                        />
+                        <p id="description-hint" className="mt-1 text-xs text-neutral-500">
+                            {listingData.description.length > 0 && `${listingData.description.length} `}{t('seller:createListing.fields.descriptionHint', 'characters')}
+                        </p>
+                    </fieldset>
 
                     <ListingImageUpload
                         images={images}
@@ -724,14 +765,14 @@ const GeminiDescriptionGenerator: React.FC<{ propertyToEdit: Property | null }> 
                     )}
 
                     {/* Preview & Submit Buttons */}
-                    <div className="flex flex-col sm:flex-row justify-end gap-3 pt-4">
+                    <div className="flex flex-col sm:flex-row justify-end gap-3 pt-4" role="group" aria-label={t('seller:createListing.buttons.actionsGroup', 'Listing actions')}>
                         <button
                             type="button"
                             onClick={handleGoToPreview}
                             disabled={isCompressing || isUploading}
-                            className="px-8 py-3 bg-amber-500 text-white font-bold rounded-lg shadow-md hover:bg-amber-600 transition-colors w-full sm:w-auto disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                            className="px-8 py-3 bg-amber-500 text-white font-bold rounded-lg shadow-md hover:bg-amber-600 transition-colors w-full sm:w-auto disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 min-h-[48px] focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-600/50"
                         >
-                            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden="true">
                                 <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                                 <path strokeLinecap="round" strokeLinejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
                             </svg>
@@ -740,7 +781,7 @@ const GeminiDescriptionGenerator: React.FC<{ propertyToEdit: Property | null }> 
                         <button
                             type="submit"
                             disabled={isSubmitting || isCompressing || isUploading}
-                            className="px-8 py-3 bg-primary text-white font-bold rounded-lg shadow-md hover:bg-primary-dark transition-colors w-full sm:w-auto disabled:opacity-50 disabled:cursor-not-allowed"
+                            className="px-8 py-3 bg-primary text-white font-bold rounded-lg shadow-md hover:bg-primary-dark transition-colors w-full sm:w-auto disabled:opacity-50 disabled:cursor-not-allowed min-h-[48px] focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/50"
                         >
                             {isSubmitting ? t('seller:createListing.buttons.saving') : (
                                 propertyToEdit ? t('seller:createListing.buttons.updateListing') : (
