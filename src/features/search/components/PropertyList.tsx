@@ -649,12 +649,22 @@ const AnimatedPropertyCard = memo<{
   onHover?: (id: string | null) => void;
   isNew?: boolean;
 }>(({ property, index, onHover, isNew = false }) => {
-  const animationDelay = `${Math.min(index * 50, 300)}ms`;
+  // Track if the card has already animated to prevent replay on re-mount
+  const hasAnimatedRef = useRef(false);
+  const animationDelay = useMemo(() => `${Math.min(index * 50, 300)}ms`, [index]);
+
+  const handleAnimationEnd = useCallback(() => {
+    hasAnimatedRef.current = true;
+  }, []);
 
   return (
     <div
-      className={`property-card-animated ${isNew ? 'property-card-new' : ''}`}
-      style={{ animationDelay }}
+      className={hasAnimatedRef.current
+        ? 'property-card-visible'
+        : `property-card-animated ${isNew ? 'property-card-new' : ''}`
+      }
+      style={hasAnimatedRef.current ? undefined : { animationDelay }}
+      onAnimationEnd={handleAnimationEnd}
       onMouseEnter={() => onHover?.(property.id)}
       onMouseLeave={() => onHover?.(null)}
     >
@@ -674,6 +684,12 @@ const PropertyListStyles = () => (
 
     .property-card-new {
       animation: property-slide-in 0.5s ease-out forwards;
+    }
+
+    /* Cards that have already animated - no animation, just visible */
+    .property-card-visible {
+      opacity: 1;
+      transform: none;
     }
 
     @keyframes property-fade-in {

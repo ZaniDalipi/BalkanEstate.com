@@ -31,12 +31,18 @@ const NotificationCenter: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
-  // Fetch unread count
+  // Use ref for isAuthenticated to keep callbacks stable across renders
+  const isAuthenticatedRef = useRef(isAuthenticated);
+  isAuthenticatedRef.current = isAuthenticated;
+
+  // Fetch unread count - stable callback that doesn't change across renders
   const fetchUnreadCount = useCallback(async () => {
-    if (!isAuthenticated) return;
+    if (!isAuthenticatedRef.current) return;
+    if (document.hidden) return; // Skip when tab is not visible
 
     try {
       const token = localStorage.getItem('balkan_estate_token');
+      if (!token) return; // Skip if no token - prevents 401 requests
       const res = await fetch(`${API_URL}/notifications/unread-count`, {
         headers: { Authorization: `Bearer ${token}` },
       });
@@ -47,15 +53,16 @@ const NotificationCenter: React.FC = () => {
     } catch (error) {
       // Silently handle error - unread count will remain unchanged
     }
-  }, [isAuthenticated, API_URL]);
+  }, []); // Stable: uses ref for isAuthenticated, API_URL is module constant
 
-  // Fetch notifications
+  // Fetch notifications - stable callback
   const fetchNotifications = useCallback(async () => {
-    if (!isAuthenticated) return;
+    if (!isAuthenticatedRef.current) return;
 
     setLoading(true);
     try {
       const token = localStorage.getItem('balkan_estate_token');
+      if (!token) return;
       const res = await fetch(`${API_URL}/notifications?limit=20`, {
         headers: { Authorization: `Bearer ${token}` },
       });
@@ -68,7 +75,7 @@ const NotificationCenter: React.FC = () => {
     } finally {
       setLoading(false);
     }
-  }, [isAuthenticated, API_URL]);
+  }, []); // Stable: uses ref for isAuthenticated
 
   // Mark single notification as read
   const markAsRead = async (notificationId: string) => {
@@ -104,11 +111,24 @@ const NotificationCenter: React.FC = () => {
     }
   };
 
-  // Fetch on mount and periodically
+  // Fetch on mount and poll every 5 minutes (reduced from 1 minute)
+  // Also pause polling when tab is hidden and resume when visible
   useEffect(() => {
     fetchUnreadCount();
-    const interval = setInterval(fetchUnreadCount, 60000); // Check every minute
-    return () => clearInterval(interval);
+    const interval = setInterval(fetchUnreadCount, 300000); // 5 minutes
+
+    // Fetch when tab becomes visible again
+    const handleVisibilityChange = () => {
+      if (!document.hidden) {
+        fetchUnreadCount();
+      }
+    };
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+
+    return () => {
+      clearInterval(interval);
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+    };
   }, [fetchUnreadCount]);
 
   // Fetch notifications when dropdown opens

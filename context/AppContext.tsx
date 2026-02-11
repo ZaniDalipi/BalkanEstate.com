@@ -1,4 +1,4 @@
-import React, { createContext, useReducer, useContext, Dispatch, useCallback, useEffect, useRef } from 'react';
+import React, { createContext, useReducer, useContext, Dispatch, useCallback, useEffect, useRef, useMemo } from 'react';
 import { User, Property, SavedSearch, Conversation, AppState, AppAction, Filters, Message, AuthModalView, initialFilters, SearchPageState } from '../types';
 import {
   checkAuth as apiCheckAuth,
@@ -716,7 +716,11 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     };
   }, [state.currentUser]);
 
-  const value = { state, dispatch, checkAuthStatus, login, signup, logout, logoutAllDevices, requestPasswordReset, resetPassword, loginWithSocial, handleOAuthCallback, fetchProperties, toggleSavedHome, addSavedSearch, createConversation, deleteConversation, sendMessage, createListing, updateListing, updateUser, updateSearchPageState, updateSavedSearchAccessTime };
+  // Memoize context value to prevent unnecessary re-renders.
+  // All callbacks are already useCallback-stable, so the value only changes when state changes.
+  const value = useMemo(() => ({
+    state, dispatch, checkAuthStatus, login, signup, logout, logoutAllDevices, requestPasswordReset, resetPassword, loginWithSocial, handleOAuthCallback, fetchProperties, toggleSavedHome, addSavedSearch, createConversation, deleteConversation, sendMessage, createListing, updateListing, updateUser, updateSearchPageState, updateSavedSearchAccessTime
+  }), [state, dispatch, checkAuthStatus, login, signup, logout, logoutAllDevices, requestPasswordReset, resetPassword, loginWithSocial, handleOAuthCallback, fetchProperties, toggleSavedHome, addSavedSearch, createConversation, deleteConversation, sendMessage, createListing, updateListing, updateUser, updateSearchPageState, updateSavedSearchAccessTime]);
 
   return (
     <AppContext.Provider value={value}>
