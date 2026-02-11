@@ -51,10 +51,15 @@ export const MapEvents: React.FC<{
   const hasInitialized = useRef(false);
 
   // Ensure bounds are set on initial mount - don't rely solely on 'load' event
+  // Retries with increasing delays because the container may not have its
+  // final dimensions computed immediately (layout race condition)
   useEffect(() => {
     if (!hasInitialized.current && map) {
-      // Set initial bounds after map is fully ready
-      const timer = setTimeout(() => {
+      const delays = [50, 150, 400, 800];
+      const timers: ReturnType<typeof setTimeout>[] = [];
+
+      const tryInit = () => {
+        if (hasInitialized.current) return;
         try {
           const container = map.getContainer();
           if (container && container.offsetWidth > 0 && container.offsetHeight > 0) {
@@ -67,11 +72,15 @@ export const MapEvents: React.FC<{
             }
           }
         } catch (e) {
-          // Map not ready yet, will be handled by load event
-          // Debug removed
+          // Map not ready yet, next retry will handle it
         }
-      }, 100);
-      return () => clearTimeout(timer);
+      };
+
+      delays.forEach(delay => {
+        timers.push(setTimeout(tryInit, delay));
+      });
+
+      return () => timers.forEach(t => clearTimeout(t));
     }
   }, [map, onMove]);
 

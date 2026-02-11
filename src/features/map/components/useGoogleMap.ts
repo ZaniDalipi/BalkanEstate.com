@@ -483,6 +483,29 @@ export function useGoogleMap(props: GoogleMapComponentProps) {
     mapInstanceRef.current = mapInstance;
     setMap(mapInstance);
 
+    // Deliver initial bounds immediately so properties load on first render.
+    // onIdle may fire before React processes setMap(), causing it to exit early.
+    // This ensures the parent always gets bounds when the map first loads.
+    const deliverInitialBounds = () => {
+      const bounds = mapInstance.getBounds();
+      const center = mapInstance.getCenter();
+      if (bounds && center) {
+        const ne = bounds.getNorthEast();
+        const sw = bounds.getSouthWest();
+        const leafletBounds = L.latLngBounds(
+          [sw.lat(), sw.lng()],
+          [ne.lat(), ne.lng()]
+        );
+        const leafletCenter = L.latLng(center.lat(), center.lng());
+        onMapMove(leafletBounds, leafletCenter);
+      }
+    };
+
+    // Try immediately (bounds may be available)
+    deliverInitialBounds();
+    // Also retry after a short delay in case bounds aren't ready yet
+    setTimeout(deliverInitialBounds, 200);
+
     // Initialize clusterer with SuperCluster algorithm for performance
     const clusterer = new MarkerClusterer({
       map: mapInstance,
@@ -546,12 +569,15 @@ export function useGoogleMap(props: GoogleMapComponentProps) {
   }, []);
 
   // Handle map idle (after pan/zoom)
+  // Uses ref as fallback to avoid race condition where onIdle fires before
+  // React has processed the setMap() state update from onLoad
   const onIdle = useCallback(() => {
-    if (!map) return;
+    const mapToUse = map || mapInstanceRef.current;
+    if (!mapToUse) return;
 
-    const bounds = map.getBounds();
-    const mapCenter = map.getCenter();
-    const currentZoom = map.getZoom();
+    const bounds = mapToUse.getBounds();
+    const mapCenter = mapToUse.getCenter();
+    const currentZoom = mapToUse.getZoom();
 
     if (bounds && mapCenter && currentZoom !== undefined) {
       setZoom(currentZoom);
@@ -757,6 +783,9 @@ export function useGoogleMap(props: GoogleMapComponentProps) {
     const mapToUse = map || mapInstanceRef.current;
     if (!mapToUse || !clustererRef.current || !isLoaded) return;
 
+    // Abort flag — if effect re-runs (new properties/map change), cancel in-flight batches
+    let aborted = false;
+
     // Clear existing markers
     clustererRef.current.clearMarkers();
     markersRef.current.clear();
@@ -774,6 +803,7 @@ export function useGoogleMap(props: GoogleMapComponentProps) {
     let currentIndex = 0;
 
     const createMarkerBatch = () => {
+      if (aborted) return; // Stop if effect was cleaned up
       const endIndex = Math.min(currentIndex + BATCH_SIZE, validProperties.length);
 
       for (let i = currentIndex; i < endIndex; i++) {
@@ -859,7 +889,7 @@ export function useGoogleMap(props: GoogleMapComponentProps) {
 
       if (currentIndex < validProperties.length) {
         requestAnimationFrame(createMarkerBatch);
-      } else {
+      } else if (!aborted) {
         // Add only regular markers to clusterer (promoted stay individual)
         clustererRef.current?.addMarkers(regularMarkers);
         promotedMarkersRef.current = promotedMarkers;
@@ -870,8 +900,9 @@ export function useGoogleMap(props: GoogleMapComponentProps) {
       createMarkerBatch();
     }
 
-    // Cleanup function
+    // Cleanup function — abort in-flight batches and remove promoted markers
     return () => {
+      aborted = true;
       promotedMarkersRef.current.forEach(marker => {
         marker.map = null;
       });

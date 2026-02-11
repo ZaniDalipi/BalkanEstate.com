@@ -1,47 +1,36 @@
 /**
- * GoogleMapsPreloader - Preloads Google Maps API as early as possible
+ * GoogleMapsPreloader - Pre-warms connections to Google Maps servers
  *
- * This component should be rendered near the root of the app to start
- * loading the Google Maps API before the user navigates to the map.
+ * Instead of injecting a <script> tag (which conflicts with useJsApiLoader
+ * from @react-google-maps/api), this preloader just adds <link rel="preconnect">
+ * hints so DNS/TCP/TLS are already done when useJsApiLoader loads the script.
+ * This avoids dual-loading conflicts that could cause the map to not render.
  */
 import { useEffect } from 'react';
 
-const GOOGLE_MAPS_API_KEY = import.meta.env.VITE_GOOGLE_MAPS_KEY || '';
-
-// Global flag to prevent multiple loads
-let isPreloading = false;
-let isLoaded = false;
+let preconnected = false;
 
 export const preloadGoogleMaps = () => {
-  if (isPreloading || isLoaded || typeof window === 'undefined') return;
-  if (window.google?.maps) {
-    isLoaded = true;
-    return;
-  }
+  if (preconnected || typeof window === 'undefined') return;
+  if (window.google?.maps) return; // Already loaded
 
-  isPreloading = true;
+  preconnected = true;
 
-  // Create script element
-  const script = document.createElement('script');
-  script.src = `https://maps.googleapis.com/maps/api/js?key=${GOOGLE_MAPS_API_KEY}&libraries=places,geometry,marker&loading=async`;
-  script.async = true;
-  script.defer = true;
-  script.id = 'google-maps-preload';
+  // Pre-warm connections to Google Maps servers so the actual script loads faster
+  const origins = [
+    'https://maps.googleapis.com',
+    'https://maps.gstatic.com',
+  ];
 
-  script.onload = () => {
-    isLoaded = true;
-    isPreloading = false;
-  };
-
-  script.onerror = () => {
-    isPreloading = false;
-    // Don't set isLoaded = true - allow retry
-  };
-
-  // Only add if not already present
-  if (!document.getElementById('google-maps-preload') && !document.querySelector('script[src*="maps.googleapis.com"]')) {
-    document.head.appendChild(script);
-  }
+  origins.forEach(origin => {
+    if (!document.querySelector(`link[rel="preconnect"][href="${origin}"]`)) {
+      const link = document.createElement('link');
+      link.rel = 'preconnect';
+      link.href = origin;
+      link.crossOrigin = 'anonymous';
+      document.head.appendChild(link);
+    }
+  });
 };
 
 /**
@@ -53,15 +42,14 @@ export const useGoogleMapsReady = () => {
 
 /**
  * Component that preloads Google Maps when mounted
- * Loads immediately without delay for fastest possible map display
+ * Adds preconnect hints for faster loading
  */
 const GoogleMapsPreloader: React.FC = () => {
   useEffect(() => {
-    // Start preloading immediately - no delay
     preloadGoogleMaps();
   }, []);
 
-  return null; // This component doesn't render anything
+  return null;
 };
 
 export default GoogleMapsPreloader;
