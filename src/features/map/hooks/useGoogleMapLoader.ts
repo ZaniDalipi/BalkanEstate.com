@@ -20,4 +20,4 @@ export const useGoogleMapLoader = () => {
   return { isLoaded, loadError };
 };
 
-export const GOOGLE_MAPS_MAP_ID = import.meta.env.VITE_GOOGLE_MAPS_MAP_ID || 'balkan-estate-map';
+export const GOOGLE_MAPS_MAP_ID = import.meta.env.VITE_GOOGLE_MAPS_MAP_ID || undefined;

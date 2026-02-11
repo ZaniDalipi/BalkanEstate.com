@@ -1579,7 +1579,7 @@ export function useGoogleMap(props: GoogleMapComponentProps) {
       maxZoom: 21,
       tilt: 0,
       heading: 0,
-      mapId: GOOGLE_MAPS_MAP_ID,
+      ...(GOOGLE_MAPS_MAP_ID ? { mapId: GOOGLE_MAPS_MAP_ID } : {}),
     };
   }, [isLoaded]);
 
