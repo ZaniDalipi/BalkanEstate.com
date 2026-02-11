@@ -761,11 +761,7 @@ export function useGoogleMap(props: GoogleMapComponentProps) {
     const mapToUse = map || mapInstanceRef.current;
     if (!mapToUse || !clustererRef.current || !isLoaded) return;
 
-    // Guard: AdvancedMarkerElement may not be available if mapId is invalid
-    if (!google.maps.marker?.AdvancedMarkerElement) {
-      console.warn('AdvancedMarkerElement not available. Check that VITE_GOOGLE_MAPS_MAP_ID is a valid Map ID from Google Cloud Console.');
-      return;
-    }
+
 
     // Clear existing markers
     clustererRef.current.clearMarkers();
