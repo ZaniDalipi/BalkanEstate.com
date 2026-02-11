@@ -278,11 +278,14 @@ export const getCorsConfig = () => {
         if (origin.includes('localhost') || origin.includes('127.0.0.1')) {
           callback(null, true);
         } else {
-          callback(new Error('Not allowed by CORS'));
+          // Use callback(null, false) instead of callback(new Error(...)) to avoid
+          // triggering Express error handler which strips CORS headers from the response
+          apiLogger.warn(`CORS blocked origin: ${origin}`);
+          callback(null, false);
         }
       } else {
         apiLogger.warn(`CORS blocked origin: ${origin}`);
-        callback(new Error('Not allowed by CORS'));
+        callback(null, false);
       }
     },
     credentials: true,
@@ -552,6 +555,13 @@ export const enforceHttps = (req: Request, res: Response, next: NextFunction): v
     return;
   }
 
+  // Allow OPTIONS preflight requests through without HTTPS check
+  // so CORS headers (set by earlier middleware) are preserved in the response
+  if (req.method === 'OPTIONS') {
+    next();
+    return;
+  }
+
   const proto = req.headers['x-forwarded-proto'] || req.protocol;
   if (proto !== 'https') {
     // For API requests, reject with 403 instead of redirecting
@@ -571,17 +581,18 @@ export const enforceHttps = (req: Request, res: Response, next: NextFunction): v
  */
 export const applySecurityMiddleware = (app: Application): void => {
 
-  // 0. Enforce HTTPS in production (must be first)
+  // 0. CORS (must be first to handle preflight OPTIONS requests before
+  //    any other middleware can short-circuit the response without CORS headers)
+  app.use(getCorsConfig());
+
+  // 1. Enforce HTTPS in production
   app.use(enforceHttps);
 
-  // 1. Request ID (first, for tracking)
+  // 2. Request ID (for tracking)
   app.use(requestId);
 
-  // 2. Helmet security headers
+  // 3. Helmet security headers
   app.use(helmetConfig);
-
-  // 3. CORS
-  app.use(getCorsConfig());
 
   // 4. HPP protection
   app.use(hppProtection);
