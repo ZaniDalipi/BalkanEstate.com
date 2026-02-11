@@ -308,7 +308,7 @@ export const getCorsConfig = () => {
  */
 export const generalRateLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
-  max: isProduction ? 500 : 1000, // Generous for browsing-heavy real estate app
+  max: isProduction ? 1000 : 5000, // Generous for browsing-heavy real estate app
   message: {
     error: 'rate_limit',
     message: 'You\'re browsing a bit fast. Please wait a moment and try again.',
@@ -317,8 +317,8 @@ export const generalRateLimiter = rateLimit({
   standardHeaders: true,
   legacyHeaders: false,
   skip: (req: Request) => {
-    // Skip rate limiting for health checks only
-    return req.path === '/health';
+    // Skip rate limiting for health checks and encryption key fetches
+    return req.path === '/health' || req.path === '/auth/encryption-key';
   },
   validate: { xForwardedForHeader: false },
 });
@@ -329,7 +329,7 @@ export const generalRateLimiter = rateLimit({
  */
 export const sensitiveRateLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
-  max: isProduction ? 60 : 120, // Allows normal auth workflows without hitting limits
+  max: isProduction ? 200 : 2000, // Per-route auth limiters handle brute-force protection
   message: {
     error: 'rate_limit',
     message: 'Please slow down and try again in a moment.',
@@ -337,6 +337,10 @@ export const sensitiveRateLimiter = rateLimit({
   },
   standardHeaders: true,
   legacyHeaders: false,
+  skip: (req: Request) => {
+    // Skip for encryption-key - it's a public key fetched before every encrypted request
+    return req.path === '/encryption-key' || req.path === '/oauth/providers';
+  },
 });
 
 /**

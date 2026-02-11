@@ -28,42 +28,43 @@ const accountLimitStore = new Map<string, RateLimitEntry>();
 const isProduction = process.env.NODE_ENV === 'production';
 
 // Configuration - auth rate limits apply in ALL environments
+// Limits are generous for normal usage; only block obvious spam (100+ attempts)
 const RATE_LIMIT_CONFIG = {
   // Login endpoint: per-IP limits
   LOGIN_IP: {
-    maxAttempts: isProduction ? 15 : 30,
+    maxAttempts: isProduction ? 100 : 500,
     windowMs: 15 * 60 * 1000, // 15 minutes
-    blockDurationMs: isProduction ? 15 * 60 * 1000 : 5 * 60 * 1000, // 15min prod, 5min dev
+    blockDurationMs: isProduction ? 15 * 60 * 1000 : 2 * 60 * 1000, // 15min prod, 2min dev
   },
   // Login endpoint: per-account limits
   LOGIN_ACCOUNT: {
-    maxAttempts: isProduction ? 8 : 15,
+    maxAttempts: isProduction ? 50 : 200,
     windowMs: 15 * 60 * 1000,
-    blockDurationMs: isProduction ? 30 * 60 * 1000 : 10 * 60 * 1000, // 30min prod, 10min dev
+    blockDurationMs: isProduction ? 15 * 60 * 1000 : 2 * 60 * 1000, // 15min prod, 2min dev
   },
   // Signup endpoint: per-IP limits
   SIGNUP_IP: {
-    maxAttempts: isProduction ? 8 : 20,
+    maxAttempts: isProduction ? 50 : 200,
     windowMs: 60 * 60 * 1000, // 1 hour
-    blockDurationMs: isProduction ? 60 * 60 * 1000 : 10 * 60 * 1000,
+    blockDurationMs: isProduction ? 30 * 60 * 1000 : 2 * 60 * 1000,
   },
   // Password reset: per-IP limits
   PASSWORD_RESET_IP: {
-    maxAttempts: isProduction ? 8 : 15,
+    maxAttempts: isProduction ? 50 : 200,
     windowMs: 60 * 60 * 1000,
-    blockDurationMs: isProduction ? 60 * 60 * 1000 : 10 * 60 * 1000,
+    blockDurationMs: isProduction ? 30 * 60 * 1000 : 2 * 60 * 1000,
   },
   // Password reset: per-account limits
   PASSWORD_RESET_ACCOUNT: {
-    maxAttempts: isProduction ? 8 : 15,
+    maxAttempts: isProduction ? 50 : 200,
     windowMs: 60 * 60 * 1000,
-    blockDurationMs: isProduction ? 2 * 60 * 60 * 1000 : 15 * 60 * 1000,
+    blockDurationMs: isProduction ? 60 * 60 * 1000 : 5 * 60 * 1000,
   },
   // Refresh token endpoint: per-IP limits (generous to prevent accidental logouts)
   REFRESH_TOKEN_IP: {
-    maxAttempts: isProduction ? 100 : 200,
+    maxAttempts: isProduction ? 200 : 1000,
     windowMs: 15 * 60 * 1000,
-    blockDurationMs: isProduction ? 5 * 60 * 1000 : 2 * 60 * 1000,
+    blockDurationMs: isProduction ? 5 * 60 * 1000 : 1 * 60 * 1000,
   },
 };
 
