@@ -599,6 +599,87 @@ export const PropertyInfo: React.FC<PropertyInfoProps> = ({ property, onOpenFloo
           )}
         </div>
       )}
+
+      {/* Visit Availability Section */}
+      {property.visitAvailability && property.visitAvailability.enabled && (
+        <div className="relative bg-white/70 backdrop-blur-xl p-6 sm:p-8 rounded-2xl shadow-[0_8px_32px_rgba(0,0,0,0.08)] border border-white/60 overflow-hidden">
+          {/* Glass effects */}
+          <div className="absolute inset-0 bg-gradient-to-br from-blue-50/30 via-transparent to-transparent pointer-events-none" />
+          <div className="absolute top-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-white/80 to-transparent" />
+
+          <div className="relative flex items-center gap-3 mb-5">
+            <div className="relative w-10 h-10 rounded-xl bg-gradient-to-br from-white/80 to-blue-50/60 backdrop-blur-sm border border-white/70 shadow-[inset_0_1px_0_rgba(255,255,255,0.8),0_1px_3px_rgba(0,0,0,0.06)] flex items-center justify-center">
+              <svg className="w-5 h-5 text-blue-500/80" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+            </div>
+            <div>
+              <h3 className="text-lg sm:text-xl font-bold text-neutral-900">{t('details.visitAvailability.title')}</h3>
+              <p className="text-xs text-neutral-400">{t('details.visitAvailability.subtitle')}</p>
+            </div>
+          </div>
+
+          <div className="relative space-y-4">
+            {/* Available Days */}
+            <div>
+              <span className="text-sm font-semibold text-neutral-700">{t('details.visitAvailability.availableDays')}</span>
+              <div className="flex flex-wrap gap-2 mt-2">
+                {[0, 1, 2, 3, 4, 5, 6].map((day) => {
+                  const dayNames = [
+                    t('details.visitAvailability.days.sun'),
+                    t('details.visitAvailability.days.mon'),
+                    t('details.visitAvailability.days.tue'),
+                    t('details.visitAvailability.days.wed'),
+                    t('details.visitAvailability.days.thu'),
+                    t('details.visitAvailability.days.fri'),
+                    t('details.visitAvailability.days.sat'),
+                  ];
+                  const isAvailable = property.visitAvailability!.days.includes(day);
+                  return (
+                    <span
+                      key={day}
+                      className={`px-3 py-1.5 text-xs font-medium rounded-full ${
+                        isAvailable
+                          ? 'bg-blue-100 text-blue-700 border border-blue-200'
+                          : 'bg-neutral-100 text-neutral-400 border border-neutral-200 line-through'
+                      }`}
+                    >
+                      {dayNames[day]}
+                    </span>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* Time Range */}
+            <div className="flex items-center gap-3">
+              <div className="flex items-center gap-2 p-3 rounded-lg bg-blue-50 border border-blue-200">
+                <svg className="w-4 h-4 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <span className="text-sm font-semibold text-blue-700">
+                  {property.visitAvailability.startTime} - {property.visitAvailability.endTime}
+                </span>
+              </div>
+              <span className="text-xs text-neutral-500">
+                {t('details.visitAvailability.slotDuration', { minutes: property.visitAvailability.slotDurationMinutes })}
+              </span>
+            </div>
+
+            {/* Notes */}
+            {property.visitAvailability.notes && (
+              <div className="p-3 rounded-lg bg-amber-50 border border-amber-200">
+                <div className="flex items-start gap-2">
+                  <svg className="w-4 h-4 text-amber-600 mt-0.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                  <span className="text-sm text-amber-800">{property.visitAvailability.notes}</span>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 };

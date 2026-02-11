@@ -105,7 +105,22 @@
     "spots": "spots",
     "livingRoom": "living room",
     "livingRoomPlural": "living rooms",
-    "petsAllowed": "Pets Allowed"
+    "petsAllowed": "Pets Allowed",
+    "visitAvailability": {
+      "title": "Visit Availability",
+      "subtitle": "Schedule a viewing during available hours",
+      "availableDays": "Available Days",
+      "days": {
+        "sun": "Sun",
+        "mon": "Mon",
+        "tue": "Tue",
+        "wed": "Wed",
+        "thu": "Thu",
+        "fri": "Fri",
+        "sat": "Sat"
+      },
+      "slotDuration": "{{minutes}} min slots"
+    }
   },
   "distances": {
     "title": "Distances",

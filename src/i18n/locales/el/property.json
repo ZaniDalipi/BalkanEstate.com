@@ -119,7 +119,22 @@
     "spots": "θέσεις",
     "livingRoom": "σαλόνι",
     "livingRoomPlural": "σαλόνια",
-    "petsAllowed": "Επιτρέπονται Κατοικίδια"
+    "petsAllowed": "Επιτρέπονται Κατοικίδια",
+    "visitAvailability": {
+      "title": "Διαθεσιμότητα Επίσκεψης",
+      "subtitle": "Προγραμματίστε μια επίσκεψη στις διαθέσιμες ώρες",
+      "availableDays": "Διαθέσιμες Ημέρες",
+      "days": {
+        "sun": "Κυρ",
+        "mon": "Δευ",
+        "tue": "Τρί",
+        "wed": "Τετ",
+        "thu": "Πέμ",
+        "fri": "Παρ",
+        "sat": "Σάβ"
+      },
+      "slotDuration": "{{minutes}} λεπτά slots"
+    }
   },
   "distances": {
     "title": "Αποστάσεις",

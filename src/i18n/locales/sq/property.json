@@ -119,7 +119,22 @@
     "spots": "vende",
     "livingRoom": "dhomë ndenjeje",
     "livingRoomPlural": "dhoma ndenjeje",
-    "petsAllowed": "Lejohen Kafshët"
+    "petsAllowed": "Lejohen Kafshët",
+    "visitAvailability": {
+      "title": "Disponueshmëria e Vizitës",
+      "subtitle": "Planifikoni një vizitë gjatë orëve të disponueshme",
+      "availableDays": "Ditët e Disponueshme",
+      "days": {
+        "sun": "Die",
+        "mon": "Hën",
+        "tue": "Mar",
+        "wed": "Mër",
+        "thu": "Enj",
+        "fri": "Pre",
+        "sat": "Sht"
+      },
+      "slotDuration": "{{minutes}} min slot"
+    }
   },
   "distances": {
     "title": "Distancat",

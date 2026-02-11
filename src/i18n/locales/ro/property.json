@@ -119,7 +119,22 @@
     "spots": "locuri",
     "livingRoom": "cameră de zi",
     "livingRoomPlural": "camere de zi",
-    "petsAllowed": "Animale Permise"
+    "petsAllowed": "Animale Permise",
+    "visitAvailability": {
+      "title": "Disponibilitate Vizite",
+      "subtitle": "Programați o vizită în orele disponibile",
+      "availableDays": "Zile Disponibile",
+      "days": {
+        "sun": "Dum",
+        "mon": "Lun",
+        "tue": "Mar",
+        "wed": "Mie",
+        "thu": "Joi",
+        "fri": "Vin",
+        "sat": "Sâm"
+      },
+      "slotDuration": "{{minutes}} min sloturi"
+    }
   },
   "distances": {
     "title": "Distanțe",

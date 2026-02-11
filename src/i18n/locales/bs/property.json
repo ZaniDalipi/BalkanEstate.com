@@ -119,7 +119,22 @@
     "spots": "mjesta",
     "livingRoom": "dnevna soba",
     "livingRoomPlural": "dnevne sobe",
-    "petsAllowed": "Kućni ljubimci dozvoljeni"
+    "petsAllowed": "Kućni ljubimci dozvoljeni",
+    "visitAvailability": {
+      "title": "Dostupnost za Posjete",
+      "subtitle": "Zakažite obilazak u dostupnim terminima",
+      "availableDays": "Dostupni Dani",
+      "days": {
+        "sun": "Ned",
+        "mon": "Pon",
+        "tue": "Uto",
+        "wed": "Sri",
+        "thu": "Čet",
+        "fri": "Pet",
+        "sat": "Sub"
+      },
+      "slotDuration": "{{minutes}} min termini"
+    }
   },
   "distances": {
     "title": "Udaljenosti",
