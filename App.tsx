@@ -696,19 +696,13 @@ const FullScreenLoader: React.FC = () => (
 );
 
 
-const SPLASH_SHOWN_KEY = 'balkanestate_splash_shown';
-
 const AppWrapper: React.FC = () => {
     const { state, dispatch, checkAuthStatus, handleOAuthCallback } = useAppContext();
 
-    // Show splash screen on first visit per session to hide loading of map/resources
-    const [showSplash, setShowSplash] = useState(() => {
-        // Only show once per browser session
-        return !sessionStorage.getItem(SPLASH_SHOWN_KEY);
-    });
+    // Show splash screen every time the app opens to hide loading of map/resources
+    const [showSplash, setShowSplash] = useState(true);
 
     const handleSplashComplete = useCallback(() => {
-        sessionStorage.setItem(SPLASH_SHOWN_KEY, '1');
         setShowSplash(false);
     }, []);
 

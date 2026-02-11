@@ -81,25 +81,21 @@ const SplashScreen: React.FC<SplashScreenProps> = ({
           initial={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           transition={{ duration: 0.6, ease: 'easeInOut' }}
-          className="fixed inset-0 z-[99999] flex flex-col items-center justify-center overflow-hidden"
-          style={{
-            background:
-              'linear-gradient(145deg, #0a0f1e 0%, #0d1528 35%, #101b32 65%, #0a0f1e 100%)',
-          }}
+          className="fixed inset-0 z-[99999] flex flex-col items-center justify-center overflow-hidden bg-white"
         >
-          {/* Ambient glow effects */}
+          {/* Soft ambient glow effects */}
           <div
-            className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] sm:w-[700px] sm:h-[700px] rounded-full opacity-20 blur-3xl pointer-events-none"
+            className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] sm:w-[700px] sm:h-[700px] rounded-full opacity-30 blur-3xl pointer-events-none"
             style={{
               background:
-                'radial-gradient(circle, rgba(2,82,205,0.3) 0%, transparent 70%)',
+                'radial-gradient(circle, rgba(2,82,205,0.1) 0%, transparent 70%)',
             }}
           />
           <div
-            className="absolute bottom-1/4 right-1/4 w-[300px] h-[300px] sm:w-[400px] sm:h-[400px] rounded-full opacity-15 blur-3xl pointer-events-none"
+            className="absolute bottom-1/4 right-1/4 w-[300px] h-[300px] sm:w-[400px] sm:h-[400px] rounded-full opacity-20 blur-3xl pointer-events-none"
             style={{
               background:
-                'radial-gradient(circle, rgba(99,102,241,0.2) 0%, transparent 70%)',
+                'radial-gradient(circle, rgba(99,102,241,0.08) 0%, transparent 70%)',
             }}
           />
 
@@ -117,7 +113,7 @@ const SplashScreen: React.FC<SplashScreenProps> = ({
                   className="flex flex-col items-center"
                 >
                   <AppleHelloEnglishEffect
-                    className="h-14 sm:h-20 md:h-24 text-white w-auto"
+                    className="h-14 sm:h-20 md:h-24 text-neutral-800 w-auto"
                     speed={1.1}
                     onAnimationComplete={handleHelloComplete}
                   />
@@ -143,12 +139,12 @@ const SplashScreen: React.FC<SplashScreenProps> = ({
                       ease: [0.16, 1, 0.3, 1],
                       delay: 0.1,
                     }}
-                    className="p-4 sm:p-5 rounded-3xl border border-white/10"
+                    className="p-4 sm:p-5 rounded-3xl border border-neutral-100"
                     style={{
                       background:
-                        'linear-gradient(135deg, rgba(255,255,255,0.08) 0%, rgba(255,255,255,0.02) 100%)',
+                        'linear-gradient(135deg, rgba(249,250,251,0.8) 0%, rgba(255,255,255,0.9) 100%)',
                       boxShadow:
-                        '0 8px 32px rgba(0,0,0,0.3), inset 0 1px 1px rgba(255,255,255,0.1)',
+                        '0 8px 32px rgba(0,0,0,0.06), inset 0 1px 1px rgba(255,255,255,0.8)',
                     }}
                   >
                     <SplashLogo className="w-12 h-12 sm:w-16 sm:h-16 md:w-20 md:h-20" />
@@ -161,9 +157,9 @@ const SplashScreen: React.FC<SplashScreenProps> = ({
                     transition={{ duration: 0.5, delay: 0.2, ease: 'easeOut' }}
                     className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight text-center"
                   >
-                    <span className="text-white">Balkan</span>
-                    <span className="text-blue-400">Estate</span>
-                    <span className="text-white/30 font-medium">.AI</span>
+                    <span className="text-neutral-900">Balkan</span>
+                    <span className="text-primary">Estate</span>
+                    <span className="text-neutral-400 font-medium">.AI</span>
                   </motion.h1>
 
                   {/* Tagline */}
@@ -171,7 +167,7 @@ const SplashScreen: React.FC<SplashScreenProps> = ({
                     initial={{ opacity: 0, y: 8 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.5, delay: 0.35, ease: 'easeOut' }}
-                    className="text-sm sm:text-base md:text-lg text-white/40 font-light text-center max-w-xs sm:max-w-sm"
+                    className="text-sm sm:text-base md:text-lg text-neutral-400 font-light text-center max-w-xs sm:max-w-sm"
                   >
                     AI-powered property search across the Balkans
                   </motion.p>
@@ -187,7 +183,7 @@ const SplashScreen: React.FC<SplashScreenProps> = ({
                       {[0, 1, 2].map((i) => (
                         <motion.div
                           key={i}
-                          className="w-1.5 h-1.5 rounded-full bg-white/30"
+                          className="w-1.5 h-1.5 rounded-full bg-neutral-300"
                           animate={{ opacity: [0.3, 1, 0.3] }}
                           transition={{
                             duration: 1.2,
@@ -209,7 +205,7 @@ const SplashScreen: React.FC<SplashScreenProps> = ({
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 0.8, delay: 0.5 }}
-            className="absolute bottom-6 sm:bottom-8 text-[10px] sm:text-xs text-white/20 tracking-widest uppercase"
+            className="absolute bottom-6 sm:bottom-8 text-[10px] sm:text-xs text-neutral-300 tracking-widest uppercase"
           >
             11 countries &bull; 50+ cities
           </motion.p>
