@@ -24,6 +24,7 @@ import {
   generateResponseKey,
   decryptResponse,
   invalidatePublicKey,
+  type ResponseKeyInfo,
 } from '@/src/shared/api/payloadEncryption';
 
 // Get API URL from environment variables
@@ -76,6 +77,7 @@ interface RequestOptions {
   body?: any;
   headers?: Record<string, string>;
   requiresAuth?: boolean;
+  encryptResponse?: boolean;
 }
 
 // Helper function to refresh the access token
@@ -114,10 +116,13 @@ const refreshAccessToken = async (): Promise<string | null> => {
 };
 
 const apiRequest = async <T>(endpoint: string, options: RequestOptions = {}, retryCount = 0): Promise<T> => {
-  const { method = 'GET', body, headers = {}, requiresAuth = false } = options;
+  const { method = 'GET', body, headers = {}, requiresAuth = false, encryptResponse: shouldEncrypt = false } = options;
 
-  // Generate AES key for response encryption on every request
-  const keyInfo = await generateResponseKey();
+  // Only generate response encryption key for sensitive endpoints
+  let keyInfo: ResponseKeyInfo | null = null;
+  if (shouldEncrypt) {
+    keyInfo = await generateResponseKey();
+  }
 
   const config: RequestInit = {
     method,
@@ -169,7 +174,7 @@ const apiRequest = async <T>(endpoint: string, options: RequestOptions = {}, ret
       const rawError = isJson ? await response.json() : { message: response.statusText };
       let error = rawError;
       if (keyInfo && rawError?.__encrypted) {
-        try { error = await decryptResponse(rawError, keyInfo.rawKey); } catch { invalidatePublicKey(); }
+        try { error = await decryptResponse(rawError, keyInfo.rawKey); } catch { /* use raw */ }
       }
       const err: any = new Error(error.message || 'An error occurred');
       err.code = error.code || null;
@@ -184,9 +189,11 @@ const apiRequest = async <T>(endpoint: string, options: RequestOptions = {}, ret
       try {
         return await decryptResponse(rawData, keyInfo.rawKey) as T;
       } catch {
-        // Decryption failed (e.g. server key rotated) - clear cache and retry without encryption
         invalidatePublicKey();
-        return apiRequest<T>(endpoint, options, retryCount);
+        if (retryCount === 0) {
+          return apiRequest<T>(endpoint, options, 1);
+        }
+        return rawData as T;
       }
     }
 
@@ -219,8 +226,8 @@ export const allProperties: Property[] = [];
 // --- AUTHENTICATION API ---
 
 /**
- * Make an auth API request with request-body field encryption.
- * Response encryption is handled automatically by apiRequest.
+ * Make an auth API request with request-body field encryption
+ * and response encryption for sensitive user data.
  */
 const secureAuthRequest = async <T>(
   endpoint: string,
@@ -231,6 +238,9 @@ const secureAuthRequest = async <T>(
   if (requestOptions.body && sensitiveFields?.length) {
     requestOptions.body = await encryptSensitiveFields(requestOptions.body, sensitiveFields);
   }
+
+  // Always encrypt responses for auth endpoints (contain user data, tokens, etc.)
+  requestOptions.encryptResponse = true;
 
   return apiRequest<T>(endpoint, requestOptions);
 };
@@ -356,7 +366,8 @@ export interface LoginHistoryEntry {
 
 export const getLoginHistory = async (): Promise<LoginHistoryEntry[]> => {
   const response = await apiRequest<{ loginHistory: LoginHistoryEntry[]; total: number }>('/auth/login-history', {
-    requiresAuth: true
+    requiresAuth: true,
+    encryptResponse: true,
   });
   return response.loginHistory;
 };
@@ -436,6 +447,7 @@ export const verifyEmail = async (token: string): Promise<{ success: boolean; me
   const response = await apiRequest<{ success: boolean; message: string; user?: User; accessToken?: string; refreshToken?: string }>('/auth/verify-email', {
     method: 'POST',
     body: { token },
+    encryptResponse: true,
   });
 
   // If verification returns tokens, set them
@@ -509,6 +521,7 @@ export const updateUser = async (userData: Partial<User>): Promise<User> => {
     method: 'PUT',
     body: userData,
     requiresAuth: true,
+    encryptResponse: true,
   });
 
   return response.user;
@@ -519,6 +532,7 @@ export const updateAgentProfile = async (agentData: any): Promise<any> => {
     method: 'PUT',
     body: agentData,
     requiresAuth: true,
+    encryptResponse: true,
   });
 
   return response.agent;
@@ -532,6 +546,7 @@ export const switchRole = async (
     method: 'POST',
     body: { role, ...licenseData },
     requiresAuth: true,
+    encryptResponse: true,
   });
 
   return response.user;

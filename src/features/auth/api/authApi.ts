@@ -14,7 +14,7 @@ export const checkAuth = async (): Promise<User | null> => {
     const token = tokenService.getAccessToken();
     if (!token) return null;
 
-    const response = await apiRequest<{ user: User }>('/auth/me', { requiresAuth: true });
+    const response = await apiRequest<{ user: User }>('/auth/me', { requiresAuth: true, encryptResponse: true });
     return response.user;
   } catch (error) {
     tokenService.clearTokens();
@@ -39,6 +39,7 @@ export const login = async (emailOrPhone: string, password: string): Promise<Use
   }>('/auth/login', {
     method: 'POST',
     body,
+    encryptResponse: true,
   });
 
   const accessToken = response.accessToken || response.token;
@@ -88,6 +89,7 @@ export const signup = async (
   }>('/auth/signup', {
     method: 'POST',
     body,
+    encryptResponse: true,
   });
 
   const accessToken = response.accessToken || response.token;
@@ -135,7 +137,7 @@ export const logoutAllDevices = async (): Promise<void> => {
 export const getLoginHistory = async (): Promise<LoginHistoryEntry[]> => {
   const response = await apiRequest<{ loginHistory: LoginHistoryEntry[]; total: number }>(
     '/auth/login-history',
-    { requiresAuth: true }
+    { requiresAuth: true, encryptResponse: true }
   );
   return response.loginHistory;
 };
@@ -147,6 +149,7 @@ export const requestPasswordReset = async (
   return apiRequest<{ message: string; resetToken?: string }>('/auth/forgot-password', {
     method: 'POST',
     body,
+    encryptResponse: true,
   });
 };
 
@@ -160,6 +163,7 @@ export const resetPassword = async (token: string, newPassword: string): Promise
   }>('/auth/reset-password', {
     method: 'POST',
     body,
+    encryptResponse: true,
   });
 
   const accessToken = response.accessToken || response.token;
@@ -184,6 +188,7 @@ export const changePassword = async (
     method: 'POST',
     requiresAuth: true,
     body,
+    encryptResponse: true,
   });
 
   tokenService.clearTokens();
@@ -261,6 +266,7 @@ export const updateUser = async (userData: Partial<User>): Promise<User> => {
     method: 'PUT',
     body: userData,
     requiresAuth: true,
+    encryptResponse: true,
   });
   return response.user;
 };
@@ -290,6 +296,7 @@ export const switchRole = async (
     method: 'POST',
     body: { role, ...licenseData },
     requiresAuth: true,
+    encryptResponse: true,
   });
   return response.user;
 };

@@ -145,12 +145,12 @@ const PropertyCardInner = memo<PropertyCardInnerProps>(({
       {/* Image Section */}
       <div className="relative overflow-hidden">
         {imageError ? (
-          <div className="w-full h-36 sm:h-40 md:h-44 bg-gradient-to-br from-neutral-100 via-neutral-200 to-neutral-300 flex items-center justify-center">
+          <div className="w-full h-44 sm:h-48 md:h-52 bg-gradient-to-br from-neutral-100 via-neutral-200 to-neutral-300 flex items-center justify-center">
             <BuildingOfficeIcon className="w-10 h-10 text-neutral-400" />
           </div>
         ) : (
-          <div className="relative w-full h-36 sm:h-40 md:h-44 overflow-hidden">
-            {/* Blurred background - same image fills empty space */}
+          <div className="relative w-full h-44 sm:h-48 md:h-52 overflow-hidden bg-neutral-200">
+            {/* Blurred background - fills any gaps from object-cover edge cases */}
             <img
               src={optimizeCloudinaryUrl(property.imageUrl, { width: 100, quality: 'auto:low', crop: 'fill' })}
               alt=""
@@ -159,9 +159,9 @@ const PropertyCardInner = memo<PropertyCardInnerProps>(({
               decoding="async"
               width={100}
               height={67}
-              className="absolute inset-0 w-full h-full object-cover blur-2xl scale-125"
+              className="absolute inset-0 w-full h-full object-cover blur-2xl scale-150 opacity-80"
             />
-            {/* Main image - contained to show full image */}
+            {/* Main image - covers container fully */}
             <img
               src={optimizeCloudinaryUrl(property.imageUrl, { width: 640, quality: 'auto' })}
               srcSet={cloudinarySrcSet(property.imageUrl, [320, 480, 640])}
@@ -171,13 +171,13 @@ const PropertyCardInner = memo<PropertyCardInnerProps>(({
               decoding="async"
               width={640}
               height={427}
-              className={`relative w-full h-full object-contain transition-transform duration-700 ${
+              className={`relative w-full h-full object-cover transition-transform duration-700 ${
                 isHovered && !isSold && !isRented ? 'scale-110' : 'scale-100'
               } ${isSold || isRented ? 'grayscale' : ''}`}
               onError={() => setImageError(true)}
             />
             {/* Gradient overlay */}
-            <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/10 to-transparent" />
           </div>
         )}
 

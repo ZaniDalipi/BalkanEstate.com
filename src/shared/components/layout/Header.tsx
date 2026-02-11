@@ -122,11 +122,10 @@ const Header: React.FC<HeaderProps> = ({ onToggleSidebar, isFloating }) => {
           </button>
           <button
             onClick={handleNewListingClick}
-            className="min-h-[40px] sm:min-h-[44px] bg-gradient-to-r from-secondary to-orange-400 text-white px-3 py-2 sm:px-4 rounded-full text-sm font-semibold hover:shadow-lg hover:shadow-secondary/30 transition-all shadow-md whitespace-nowrap touch-manipulation select-none focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-secondary/50 active:scale-[0.98]"
+            className="hidden sm:flex min-h-[40px] sm:min-h-[44px] bg-gradient-to-r from-secondary to-orange-400 text-white px-3 py-2 sm:px-4 rounded-full text-sm font-semibold hover:shadow-lg hover:shadow-secondary/30 transition-all shadow-md whitespace-nowrap touch-manipulation select-none focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-secondary/50 active:scale-[0.98] items-center"
             aria-label={t('nav:newListing')}
           >
-            <span className="hidden sm:inline">+ {t('nav:newListing')}</span>
-            <span className="sm:hidden">+</span>
+            + {t('nav:newListing')}
           </button>
           <NotificationCenter />
           <AuthButton floating />
