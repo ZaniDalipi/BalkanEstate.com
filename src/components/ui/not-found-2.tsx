@@ -1,11 +1,10 @@
-import { Button } from "@/components/ui/button";
 import {
 	Empty,
 	EmptyContent,
 	EmptyDescription,
 	EmptyHeader,
 	EmptyTitle,
-} from "@/components/ui/empty";
+} from "./empty";
 import { HomeIcon, CompassIcon } from "lucide-react";
 import { buildLocalizedPath } from '../../utils/languageRouting';
 
