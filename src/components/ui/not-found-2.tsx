@@ -6,6 +6,7 @@ import {
 	EmptyTitle,
 } from "./empty";
 import { HomeIcon, CompassIcon } from "lucide-react";
+import { Button } from "@/components/ui/liquid-glass-button";
 import { buildLocalizedPath } from '../../utils/languageRouting';
 
 function navigate(path: string) {
@@ -34,20 +35,22 @@ export function NotFound() {
 					</EmptyHeader>
 					<EmptyContent>
 						<div className="flex gap-3">
-							<button
+							<Button
+								variant="cool"
 								onClick={() => navigate('/search')}
-								className="glass-btn-primary inline-flex items-center gap-2 px-5 py-2.5 text-sm font-medium"
+								className="rounded-xl"
 							>
 								<HomeIcon className="size-4" />
 								Go Home
-							</button>
-							<button
+							</Button>
+							<Button
+								variant="glass"
 								onClick={() => navigate('/rentals')}
-								className="glass-btn inline-flex items-center gap-2 px-5 py-2.5 text-sm font-medium"
+								className="rounded-xl"
 							>
 								<CompassIcon className="size-4" />
 								Explore
-							</button>
+							</Button>
 						</div>
 					</EmptyContent>
 				</Empty>

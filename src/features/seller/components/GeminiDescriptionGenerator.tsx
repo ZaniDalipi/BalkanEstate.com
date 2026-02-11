@@ -14,6 +14,7 @@ import ListingImageUpload from './ListingImageUpload';
 import ListingPreview from './ListingPreview';
 import NumberInputWithSteppers from '@/components/shared/NumberInputWithSteppers';
 import { LiquidGlassControl } from '@/components/ui/liquid-glass-control';
+import { Button } from '@/components/ui/liquid-glass-button';
 import { getCurrencySymbol } from '@/utils/currency';
 import {
     LANGUAGES, CheckCircleIcon, UploadIcon, TagListInput,
@@ -310,7 +311,7 @@ const GeminiDescriptionGenerator: React.FC<{ propertyToEdit: Property | null }> 
                         {images.length > 0 && (
                             <div className="mt-4"><p className="font-semibold text-sm mb-2 text-gray-600">{t('seller:createListing.upload.imagesSelected', { count: images.length })}</p><div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-2">{images.map((img, index) => (<div key={index} className="relative group"><img src={img.previewUrl} alt={`preview ${index}`} className="w-full h-24 object-cover rounded-lg border border-gray-200" /><button type="button" onClick={() => removeImage(index)} className="absolute -top-1 -right-1 bg-red-500/80 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs opacity-0 group-hover:opacity-100 transition-opacity backdrop-blur-sm">&times;</button></div>))}</div></div>
                         )}
-                         <button type="button" onClick={handleGenerate} className="w-full mt-6 py-3 text-lg font-bold glass-btn-primary flex items-center justify-center gap-2" disabled={images.length === 0}><SparklesIcon className="w-6 h-6"/>{t('seller:createListing.generate')}</button>
+                         <Button type="button" variant="cool" size="xl" onClick={handleGenerate} className="w-full mt-6 text-lg font-bold rounded-xl" disabled={images.length === 0}><SparklesIcon className="w-6 h-6"/>{t('seller:createListing.generate')}</Button>
                     </div>
                 </div>
             )}
@@ -505,9 +506,11 @@ const GeminiDescriptionGenerator: React.FC<{ propertyToEdit: Property | null }> 
                                             { day: 6, label: t('common:days.sat', 'Sat') },
                                             { day: 0, label: t('common:days.sun', 'Sun') },
                                         ].map(({ day, label }) => (
-                                            <button
+                                            <Button
                                                 key={day}
                                                 type="button"
+                                                variant={listingData.visitAvailability.days.includes(day) ? 'accent' : 'glass'}
+                                                size="sm"
                                                 onClick={() => {
                                                     const days = listingData.visitAvailability.days.includes(day)
                                                         ? listingData.visitAvailability.days.filter(d => d !== day)
@@ -517,14 +520,10 @@ const GeminiDescriptionGenerator: React.FC<{ propertyToEdit: Property | null }> 
                                                         visitAvailability: { ...prev.visitAvailability, days }
                                                     }));
                                                 }}
-                                                className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
-                                                    listingData.visitAvailability.days.includes(day)
-                                                        ? 'glass-btn-accent'
-                                                        : 'glass-btn text-gray-400'
-                                                }`}
+                                                className={`rounded-lg ${!listingData.visitAvailability.days.includes(day) ? 'text-gray-400' : ''}`}
                                             >
                                                 {label}
-                                            </button>
+                                            </Button>
                                         ))}
                                     </div>
                                 </div>
@@ -752,29 +751,33 @@ const GeminiDescriptionGenerator: React.FC<{ propertyToEdit: Property | null }> 
 
                     {/* Preview & Submit Buttons */}
                     <div className="flex flex-col sm:flex-row justify-end gap-3 pt-4">
-                        <button
+                        <Button
                             type="button"
+                            variant="accent"
+                            size="lg"
                             onClick={handleGoToPreview}
                             disabled={isCompressing || isUploading}
-                            className="glass-btn-accent px-8 py-3 font-bold w-full sm:w-auto disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                            className="font-bold w-full sm:w-auto rounded-xl"
                         >
                             <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                                 <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                                 <path strokeLinecap="round" strokeLinejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
                             </svg>
                             {t('seller:createListing.buttons.previewListing', 'Preview Listing')}
-                        </button>
-                        <button
+                        </Button>
+                        <Button
                             type="submit"
+                            variant="cool"
+                            size="lg"
                             disabled={isSubmitting || isCompressing || isUploading}
-                            className="glass-btn-primary px-8 py-3 font-bold w-full sm:w-auto disabled:opacity-50 disabled:cursor-not-allowed"
+                            className="font-bold w-full sm:w-auto rounded-xl"
                         >
                             {isSubmitting ? t('seller:createListing.buttons.saving') : (
                                 propertyToEdit ? t('seller:createListing.buttons.updateListing') : (
                                     wantToPromote ? t('seller:createListing.buttons.continueToPayment') : t('seller:createListing.buttons.publishListing')
                                 )
                             )}
-                        </button>
+                        </Button>
                     </div>
                  </div>
             )}

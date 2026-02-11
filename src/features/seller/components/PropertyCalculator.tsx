@@ -4,6 +4,7 @@ import { formatPrice } from '@/utils/currency';
 import { NominatimResult } from '@/types';
 import { searchLocation } from '@/services/osmService';
 import { MapPinIcon, SpinnerIcon } from '@/constants';
+import { Button } from '@/components/ui/liquid-glass-button';
 import { getCityMarketData } from '@/src/features/cities/api/cityApi';
 import { API_URL } from '@/src/shared/api/config';
 
@@ -184,9 +185,9 @@ const PropertyCalculator: React.FC = () => {
              <input type="number" name="sqft" id="sqft" min="0" defaultValue="100" className={calcFloatingInputClasses} placeholder=" " required />
              <label htmlFor="sqft" className={calcFloatingLabelClasses}>{t('property.fields.area')}</label>
           </div>
-           <button type="submit" disabled={loading} className="w-full glass-btn-accent py-2.5 px-4 text-sm font-bold disabled:opacity-50">
+           <Button type="submit" variant="accent" size="lg" disabled={loading} className="w-full font-bold rounded-xl">
             {loading ? t('property.calculating') : t('common.calculate')}
-          </button>
+          </Button>
         </div>
       </form>
 

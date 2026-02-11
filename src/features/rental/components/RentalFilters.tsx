@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { Filters } from '@/types';
 import { BALKAN_LOCATIONS } from '@/utils/balkanLocations';
 import { getCurrencySymbol } from '@/utils/currency';
+import { Button } from '@/components/ui/liquid-glass-button';
 
 interface RentalFiltersProps {
     filters: Filters;
@@ -123,9 +124,9 @@ const RentalFilters: React.FC<RentalFiltersProps> = ({ filters, onFilterChange, 
                         <button onClick={onReset} className="text-[11px] text-gray-400 hover:text-gray-600 py-1.5 transition-colors whitespace-nowrap">
                             {t('rental:filters.reset')}
                         </button>
-                        <button onClick={onSearch} className="glass-btn-primary text-xs font-semibold py-1.5 px-4 whitespace-nowrap">
+                        <Button variant="cool" size="sm" onClick={onSearch} className="text-xs font-semibold whitespace-nowrap rounded-xl">
                             {t('rental:filters.search')}
-                        </button>
+                        </Button>
                     </div>
                 </div>
             </div>
@@ -236,9 +237,9 @@ const RentalFilters: React.FC<RentalFiltersProps> = ({ filters, onFilterChange, 
 
             {/* Actions */}
             <div className="flex gap-2 pt-1">
-                <button onClick={onSearch} className="flex-1 glass-btn-primary text-sm font-semibold py-2 px-4">
+                <Button variant="cool" onClick={onSearch} className="flex-1 text-sm font-semibold rounded-xl">
                     {t('rental:filters.search')}
-                </button>
+                </Button>
                 <button onClick={onReset} className="text-sm text-gray-400 hover:text-gray-600 py-2 px-3 transition-colors">
                     {t('rental:filters.reset')}
                 </button>

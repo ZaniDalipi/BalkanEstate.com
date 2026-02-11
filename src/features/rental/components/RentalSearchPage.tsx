@@ -8,6 +8,7 @@ import RentalFilters from './RentalFilters';
 import { useRentalSearch } from '../hooks/useRentalSearch';
 import { Squares2x2Icon, MapIcon, AdjustmentsHorizontalIcon, XMarkIcon, MagnifyingGlassIcon } from '@/constants';
 import { LiquidGlassSwitch } from '@/src/components/ui/LiquidGlassSwitch';
+import { Button } from '@/components/ui/liquid-glass-button';
 import { SEO } from '@/src/components/seo';
 import { useLocalizedNavigation } from '@/src/hooks/useLocalizedNavigation';
 import { NominatimResult } from '@/types';
@@ -109,20 +110,24 @@ const RentalSearchPage: React.FC = () => {
                                 </p>
                             </div>
                             <div className="flex items-center gap-2">
-                                <button
+                                <Button
+                                    variant="accent"
+                                    size="sm"
                                     onClick={handleCreateRental}
-                                    className="glass-btn-accent text-xs font-semibold px-3 py-1.5"
+                                    className="font-semibold rounded-xl"
                                 >
                                     + {t('rental:createListing')}
-                                </button>
-                                <button
+                                </Button>
+                                <Button
+                                    variant="glass"
+                                    size="icon"
                                     onClick={() => setIsFiltersOpen(!isFiltersOpen)}
-                                    className="lg:hidden glass-btn p-2"
+                                    className="lg:hidden rounded-xl"
                                     aria-label="Toggle filters"
                                     aria-expanded={isFiltersOpen}
                                 >
                                     <AdjustmentsHorizontalIcon className="w-5 h-5 text-gray-500" />
-                                </button>
+                                </Button>
                             </div>
                         </div>
 
@@ -268,9 +273,9 @@ const RentalSearchPage: React.FC = () => {
                         <div className="relative w-full sm:max-w-md sm:rounded-xl rounded-t-xl max-h-[85vh] overflow-y-auto glass-scrollbar glass-panel" onClick={e => e.stopPropagation()}>
                             <div className="sticky top-0 z-10 px-4 py-3 flex items-center justify-between" style={{ background: 'rgba(255,255,255,0.9)', backdropFilter: 'blur(20px)', WebkitBackdropFilter: 'blur(20px)', borderBottom: '1px solid rgba(0,0,0,0.06)' }}>
                                 <h2 className="text-lg font-bold text-gray-900">{t('rental:filters.title')}</h2>
-                                <button onClick={() => setIsFiltersOpen(false)} className="glass-btn p-1" aria-label="Close filters">
+                                <Button variant="glass" size="icon" onClick={() => setIsFiltersOpen(false)} className="rounded-xl" aria-label="Close filters">
                                     <XMarkIcon className="w-5 h-5 text-gray-500" />
-                                </button>
+                                </Button>
                             </div>
                             <RentalFilters
                                 filters={filters}

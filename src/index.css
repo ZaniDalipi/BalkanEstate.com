@@ -13,6 +13,20 @@
   /* Secondary Colors */
   --color-secondary: #FFA500;
 
+  /* Foreground Colors (required by shadcn Button) */
+  --color-primary-foreground: #ffffff;
+  --color-secondary-foreground: #1A202C;
+  --color-destructive: #EF4444;
+  --color-destructive-foreground: #ffffff;
+  --color-accent: #F1F3F5;
+  --color-accent-foreground: #1A202C;
+  --color-muted: #F1F3F5;
+  --color-muted-foreground: #718096;
+  --color-background: #ffffff;
+  --color-foreground: #1A202C;
+  --color-input: rgba(0, 0, 0, 0.1);
+  --color-ring: rgba(0, 122, 255, 0.5);
+
   /* Neutral Colors */
   --color-neutral-50: #F8F9FA;
   --color-neutral-100: #F1F3F5;

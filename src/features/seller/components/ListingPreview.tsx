@@ -10,6 +10,7 @@ import {
 import RentalTermsSection from '@/src/features/rental/components/RentalTermsSection';
 import ImageViewerModal from '@/src/features/property-details/components/ImageViewerModal';
 import FloorPlanViewerModal from '@/src/features/property-details/components/FloorPlanViewerModal';
+import { Button } from '@/components/ui/liquid-glass-button';
 
 interface ListingPreviewProps {
     property: Property;
@@ -100,18 +101,20 @@ const ListingPreview: React.FC<ListingPreviewProps> = ({
                         </span>
                     </div>
                     <div className="flex items-center gap-2 flex-shrink-0">
-                        <button
-                            type="button"
+                        <Button
+                            variant="glass"
+                            size="sm"
                             onClick={onBack}
-                            className="glass-btn px-3 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm font-semibold"
+                            className="font-semibold rounded-xl"
                         >
                             {t('seller:createListing.preview.editListing', 'Edit Listing')}
-                        </button>
-                        <button
-                            type="button"
+                        </Button>
+                        <Button
+                            variant="cool"
+                            size="sm"
                             onClick={handlePublishClick}
                             disabled={isSubmitting}
-                            className="glass-btn-primary px-3 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm font-bold disabled:opacity-50 disabled:cursor-not-allowed"
+                            className="font-bold rounded-xl"
                         >
                             {isSubmitting
                                 ? t('seller:createListing.buttons.saving', 'Saving...')
@@ -121,7 +124,7 @@ const ListingPreview: React.FC<ListingPreviewProps> = ({
                                         ? t('seller:createListing.buttons.continueToPayment', 'Continue to Payment')
                                         : t('seller:createListing.buttons.publishListing', 'Publish Listing')
                             }
-                        </button>
+                        </Button>
                     </div>
                 </div>
             </div>
@@ -184,18 +187,18 @@ const ListingPreview: React.FC<ListingPreviewProps> = ({
                             {t('seller:createListing.preview.satisfied', 'Satisfied with your listing?')}
                         </p>
                         <div className="flex items-center gap-3 w-full sm:w-auto">
-                            <button
-                                type="button"
+                            <Button
+                                variant="glass"
                                 onClick={onBack}
-                                className="flex-1 sm:flex-none glass-btn px-5 py-2.5 text-sm font-semibold"
+                                className="flex-1 sm:flex-none font-semibold rounded-xl"
                             >
                                 {t('seller:createListing.preview.goBackEdit', 'Go Back & Edit')}
-                            </button>
-                            <button
-                                type="button"
+                            </Button>
+                            <Button
+                                variant="cool"
                                 onClick={handlePublishClick}
                                 disabled={isSubmitting}
-                                className="flex-1 sm:flex-none glass-btn-primary px-5 py-2.5 text-sm font-bold disabled:opacity-50 disabled:cursor-not-allowed"
+                                className="flex-1 sm:flex-none font-bold rounded-xl"
                             >
                                 {isSubmitting
                                     ? t('seller:createListing.buttons.saving', 'Saving...')
@@ -205,7 +208,7 @@ const ListingPreview: React.FC<ListingPreviewProps> = ({
                                             ? t('seller:createListing.buttons.continueToPayment', 'Continue to Payment')
                                             : t('seller:createListing.buttons.publishListing', 'Publish Listing')
                                 }
-                            </button>
+                            </Button>
                         </div>
                     </div>
                 </div>
