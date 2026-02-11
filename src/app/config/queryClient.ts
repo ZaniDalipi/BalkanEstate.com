@@ -28,7 +28,13 @@ export const queryClient = new QueryClient({
         if (error?.response?.status === 401) return false;
         if (error?.response?.status === 403) return false;
 
-        // Retry up to 3 times for server errors
+        // Don't retry on network errors (backend down / connection refused)
+        // These have no response object - retrying just spams a dead server
+        if (error?.message === 'Failed to fetch' || error?.name === 'TypeError') return false;
+        if (error?.code === 'ERR_CONNECTION_REFUSED') return false;
+        if (!error?.statusCode && !error?.response?.status) return false;
+
+        // Retry up to 3 times for server errors (5xx)
         return failureCount < 3;
       },
 
