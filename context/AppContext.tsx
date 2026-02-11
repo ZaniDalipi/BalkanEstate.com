@@ -1,4 +1,4 @@
-import React, { createContext, useReducer, useContext, Dispatch, useCallback, useEffect } from 'react';
+import React, { createContext, useReducer, useContext, Dispatch, useCallback, useEffect, useRef } from 'react';
 import { User, Property, SavedSearch, Conversation, AppState, AppAction, Filters, Message, AuthModalView, initialFilters, SearchPageState } from '../types';
 import {
   checkAuth as apiCheckAuth,
@@ -573,8 +573,15 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       }
   }, []);
 
+  // Use a ref to read savedHomes without making toggleSavedHome depend on it.
+  // This keeps toggleSavedHome stable across renders, preventing the entire context
+  // value from being recreated when savedHomes changes (which would cause all
+  // context subscribers to re-render).
+  const savedHomesRef = useRef(state.savedHomes);
+  savedHomesRef.current = state.savedHomes;
+
   const toggleSavedHome = useCallback(async (property: Property) => {
-    const isSaved = state.savedHomes.some(p => p.id === property.id);
+    const isSaved = savedHomesRef.current.some(p => p.id === property.id);
     // Optimistic update: update UI immediately before API call
     dispatch({ type: 'TOGGLE_SAVED_HOME', payload: property });
     try {
@@ -583,7 +590,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       // Revert on API failure
       dispatch({ type: 'TOGGLE_SAVED_HOME', payload: property });
     }
-  }, [state.savedHomes]);
+  }, []);
 
   const addSavedSearch = useCallback(async (search: SavedSearch) => {
     const newSearch = await apiAddSavedSearch(search);

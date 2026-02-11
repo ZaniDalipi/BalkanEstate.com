@@ -42,6 +42,7 @@ const SearchPage: React.FC<SearchPageProps> = ({ onToggleSidebar }) => {
         updateSearchPageState,
         properties,
         isAuthenticated,
+        isLoadingProperties,
         currentUser,
         // Search page state (from context)
         filters,
@@ -101,6 +102,11 @@ const SearchPage: React.FC<SearchPageProps> = ({ onToggleSidebar }) => {
         userLocation,
     } = useSearchPage();
 
+    // Stable callback for opening auth modal - avoids passing dispatch to PropertyList
+    const handleOpenAuthModal = React.useCallback(() => {
+        dispatch({ type: 'TOGGLE_AUTH_MODAL', payload: { isOpen: true, view: 'login' } });
+    }, [dispatch]);
+
     // Zillow-style layout: split view only at lg+ (1024px), full-width with toggle on md tablets
     const showSplitView = !isMobile && !isTablet;
     const showViewToggle = isMobile || isTablet;
@@ -152,6 +158,10 @@ const SearchPage: React.FC<SearchPageProps> = ({ onToggleSidebar }) => {
         isQueryInputFocused: isQueryInputFocused,
         onQueryInputFocusChange: setIsQueryInputFocused,
         fallbackLocation: fallbackLocation,
+        // Passed directly to avoid PropertyList subscribing to AppContext
+        isLoadingProperties: isLoadingProperties,
+        isAuthenticated: isAuthenticated,
+        onOpenAuthModal: handleOpenAuthModal,
     };
 
     return (

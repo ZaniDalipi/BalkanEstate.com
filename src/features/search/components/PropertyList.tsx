@@ -6,7 +6,6 @@ import HighlightedPropertiesSection from '@/src/features/property-details/compon
 import { SearchIcon, XMarkIcon, BellIcon, BuildingLibraryIcon, ChevronUpIcon, ChevronDownIcon, PencilIcon, XCircleIcon, MapPinIcon, SpinnerIcon } from '@/constants';
 import AiSearch from './AiSearch';
 import PropertyCardSkeleton from '@/src/features/property-details/components/PropertyCardSkeleton';
-import { useAppContext } from '@/context/AppContext';
 import Footer from '@/components/shared/Footer';
 
 interface PropertyListProps {
@@ -35,6 +34,11 @@ interface PropertyListProps {
   onSuggestionClick?: (suggestion: { place_id: number; display_name: string; lat: string; lon: string; boundingbox: string[] }) => void;
   isQueryInputFocused?: boolean;
   onQueryInputFocusChange?: (focused: boolean) => void;
+  // Passed from parent to avoid subscribing to full AppContext
+  // (prevents re-render cascade when savedHomes changes)
+  isLoadingProperties?: boolean;
+  isAuthenticated?: boolean;
+  onOpenAuthModal?: () => void;
 }
 
 const FilterButton: React.FC<{
@@ -705,12 +709,12 @@ const PropertyListStyles = () => (
   `}</style>
 );
 
-const PropertyList: React.FC<PropertyListProps> = (props) => {
+const PropertyList = memo<PropertyListProps>((props) => {
     const { t } = useTranslation(['search', 'common']);
-    const { state, dispatch } = useAppContext();
-    const { isLoadingProperties, isAuthenticated } = state;
 
-    const { properties, filters, onSortChange, isMobile, showFilters, showList, searchMode, onSearchModeChange, onApplyAiFilters, aiChatHistory, onAiChatHistoryChange, onPropertyHover, onResetFilters } = props;
+    // Use props instead of useAppContext() to avoid re-rendering the
+    // entire property list when unrelated context state changes (e.g. savedHomes).
+    const { properties, filters, onSortChange, isMobile, showFilters, showList, searchMode, onSearchModeChange, onApplyAiFilters, aiChatHistory, onAiChatHistoryChange, onPropertyHover, onResetFilters, isLoadingProperties = false, isAuthenticated = false, onOpenAuthModal } = props;
 
     const [visibleCount, setVisibleCount] = useState(ITEMS_PER_PAGE);
     const loadMoreRef = useRef(null);
@@ -761,7 +765,7 @@ const PropertyList: React.FC<PropertyListProps> = (props) => {
                             {isAuthenticated ? (
                                 <button onClick={() => onSearchModeChange('ai')} className={`w-1/2 px-4 py-2 rounded-full text-sm font-semibold transition-all duration-300 flex items-center justify-center gap-2 ${searchMode === 'ai' ? 'bg-white text-primary shadow' : 'text-neutral-600 hover:bg-neutral-200'}`}> {t('search:ai.title')}</button>
                             ) : (
-                                <button onClick={() => dispatch({ type: 'TOGGLE_AUTH_MODAL', payload: { isOpen: true, view: 'login' } })} className="w-1/2 px-4 py-2 rounded-full text-sm font-semibold transition-all duration-300 flex items-center justify-center gap-2 text-neutral-600 hover:bg-neutral-200" title="Sign in to access AI search">
+                                <button onClick={() => onOpenAuthModal?.()} className="w-1/2 px-4 py-2 rounded-full text-sm font-semibold transition-all duration-300 flex items-center justify-center gap-2 text-neutral-600 hover:bg-neutral-200" title="Sign in to access AI search">
                                      {t('search:ai.title')}
                                 </button>
                             )}
@@ -892,7 +896,7 @@ const PropertyList: React.FC<PropertyListProps> = (props) => {
                         {isAuthenticated ? (
                             <button onClick={() => onSearchModeChange('ai')} className={`w-1/2 px-4 py-2 rounded-full text-sm font-semibold transition-all duration-300 flex items-center justify-center gap-2 ${searchMode === 'ai' ? 'bg-white text-primary shadow' : 'text-neutral-600 hover:bg-neutral-200'}`}> {t('search:ai.title')}</button>
                         ) : (
-                            <button onClick={() => dispatch({ type: 'TOGGLE_AUTH_MODAL', payload: { isOpen: true, view: 'login' } })} className="w-1/2 px-4 py-2 rounded-full text-sm font-semibold transition-all duration-300 flex items-center justify-center gap-2 text-neutral-600 hover:bg-neutral-200" title="Sign in to access AI search"> {t('search:ai.title')}</button>
+                            <button onClick={() => onOpenAuthModal?.()} className="w-1/2 px-4 py-2 rounded-full text-sm font-semibold transition-all duration-300 flex items-center justify-center gap-2 text-neutral-600 hover:bg-neutral-200" title="Sign in to access AI search"> {t('search:ai.title')}</button>
                         )}
                     </div>
                 </div>
@@ -1016,6 +1020,8 @@ const PropertyList: React.FC<PropertyListProps> = (props) => {
             )}
         </div>
     );
-};
+});
+
+PropertyList.displayName = 'PropertyList';
 
 export default PropertyList;

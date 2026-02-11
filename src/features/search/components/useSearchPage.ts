@@ -22,7 +22,7 @@ export const serializeBounds = (bounds: L.LatLngBounds): string => {
 export function useSearchPage() {
     const { t } = useTranslation(['search', 'common']);
     const { state, dispatch, fetchProperties, updateSearchPageState, addSavedSearch } = useAppContext();
-    const { properties, isAuthenticated, currentUser, searchPageState } = state;
+    const { properties, isAuthenticated, isLoadingProperties, currentUser, searchPageState } = state;
     const { filters, activeFilters, mapBoundsJSON, drawnBoundsJSON, mobileView, searchMode, aiChatHistory, isAiChatModalOpen, isFiltersOpen, focusMapOnProperty } = searchPageState;
 
     // Local, non-persistent state
@@ -984,6 +984,7 @@ export function useSearchPage() {
         updateSearchPageState,
         properties,
         isAuthenticated,
+        isLoadingProperties,
         currentUser,
         // Search page state (from context)
         filters,
