@@ -84,9 +84,9 @@ const GeminiDescriptionGenerator: React.FC<{ propertyToEdit: Property | null }> 
 
     if (step === 'success') {
         return (
-            <div className="text-center py-12 flex flex-col items-center">
-                <div className="p-4 rounded-full bg-emerald-500/15 border border-emerald-400/20 mb-4">
-                    <CheckCircleIcon className="w-16 h-16 text-emerald-400" />
+            <div className="text-center py-12 flex flex-col items-center" aria-live="polite">
+                <div className="p-4 rounded-full bg-emerald-50 border border-emerald-200 mb-4">
+                    <CheckCircleIcon className="w-16 h-16 text-emerald-600" />
                 </div>
                 <h3 className="text-2xl font-bold text-gray-900">Listing {propertyToEdit ? 'Updated' : 'Published'} Successfully!</h3>
                 <p className="text-gray-400 mt-2">Redirecting you to your dashboard...</p>
@@ -144,8 +144,8 @@ const GeminiDescriptionGenerator: React.FC<{ propertyToEdit: Property | null }> 
 
             {/* Rental indicator */}
             {isRental && (
-                <div className="flex items-center gap-3 p-3 glass-fieldset border-blue-400/20 mb-6">
-                    <div className="p-2 rounded-full bg-blue-500/15">
+                <div className="flex items-center gap-3 p-3 glass-fieldset border-blue-200 mb-6">
+                    <div className="p-2 rounded-full bg-blue-50">
                         <svg className="w-4 h-4 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                             <path strokeLinecap="round" strokeLinejoin="round" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z" />
                         </svg>
@@ -158,7 +158,7 @@ const GeminiDescriptionGenerator: React.FC<{ propertyToEdit: Property | null }> 
             )}
 
             {/* Photo Tips */}
-            <div className="glass-fieldset border-blue-400/15 text-blue-600 text-sm p-4 mb-6">
+            <div className="glass-fieldset border-blue-200 text-blue-600 text-sm p-4 mb-6">
                 <p><strong className="text-blue-600">{t('seller:createListing.photoTips.title')}:</strong> {t('seller:createListing.photoTips.description')}</p>
             </div>
 
@@ -174,11 +174,11 @@ const GeminiDescriptionGenerator: React.FC<{ propertyToEdit: Property | null }> 
             {!propertyToEdit && (
                 isAuthenticating || isLoadingUserData ? (
                     <div className="glass-fieldset p-6 mb-6 animate-pulse">
-                        <div className="h-6 bg-white/10 rounded w-1/3 mb-4"></div>
-                        <div className="h-4 bg-white/5 rounded w-2/3 mb-4"></div>
+                        <div className="h-6 bg-gray-200 rounded w-1/3 mb-4"></div>
+                        <div className="h-4 bg-gray-100/60 rounded w-2/3 mb-4"></div>
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                            <div className="h-32 bg-white/5 rounded-lg"></div>
-                            <div className="h-32 bg-white/5 rounded-lg"></div>
+                            <div className="h-32 bg-gray-100/60 rounded-lg"></div>
+                            <div className="h-32 bg-gray-100/60 rounded-lg"></div>
                         </div>
                     </div>
                 ) : currentUser ? (
@@ -285,12 +285,12 @@ const GeminiDescriptionGenerator: React.FC<{ propertyToEdit: Property | null }> 
                             )}
                         </div>
 
-                        <label htmlFor="image-upload" className="flex flex-col items-center justify-center w-full h-48 border-2 border-white/10 border-dashed rounded-xl cursor-pointer glass-fieldset hover:bg-gray-50 transition-colors">
+                        <label htmlFor="image-upload" className="flex flex-col items-center justify-center w-full h-48 border-2 border-gray-200 border-dashed rounded-xl cursor-pointer glass-fieldset hover:bg-gray-50 transition-colors">
                             <div className="flex flex-col items-center justify-center pt-5 pb-6"><UploadIcon className="w-10 h-10 mb-3 text-gray-300" /><p className="mb-2 text-sm text-gray-400"><span className="font-semibold text-gray-600">{t('seller:createListing.upload.clickToUpload')}</span></p><p className="text-xs text-gray-300">{t('seller:createListing.upload.fileTypes')}</p></div>
                             <input id="image-upload" type="file" multiple accept="image/*" className="hidden" onChange={handleImageChange} />
                         </label>
                         {images.length > 0 && (
-                            <div className="mt-4"><p className="font-semibold text-sm mb-2 text-gray-600">{t('seller:createListing.upload.imagesSelected', { count: images.length })}</p><div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-2">{images.map((img, index) => (<div key={index} className="relative group"><img src={img.previewUrl} alt={`preview ${index}`} className="w-full h-24 object-cover rounded-lg border border-white/10" /><button type="button" onClick={() => removeImage(index)} className="absolute -top-1 -right-1 bg-red-500/80 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs opacity-0 group-hover:opacity-100 transition-opacity backdrop-blur-sm">&times;</button></div>))}</div></div>
+                            <div className="mt-4"><p className="font-semibold text-sm mb-2 text-gray-600">{t('seller:createListing.upload.imagesSelected', { count: images.length })}</p><div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-2">{images.map((img, index) => (<div key={index} className="relative group"><img src={img.previewUrl} alt={`preview ${index}`} className="w-full h-24 object-cover rounded-lg border border-gray-200" /><button type="button" onClick={() => removeImage(index)} className="absolute -top-1 -right-1 bg-red-500/80 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs opacity-0 group-hover:opacity-100 transition-opacity backdrop-blur-sm">&times;</button></div>))}</div></div>
                         )}
                          <button type="button" onClick={handleGenerate} className="w-full mt-6 py-3 text-lg font-bold glass-btn-primary flex items-center justify-center gap-2" disabled={images.length === 0}><SparklesIcon className="w-6 h-6"/>{t('seller:createListing.generate')}</button>
                     </div>
@@ -324,7 +324,7 @@ const GeminiDescriptionGenerator: React.FC<{ propertyToEdit: Property | null }> 
 
                     {/* ===== Rental-Specific Fields (only shown when listingType is 'rent') ===== */}
                     {isRental && (
-                        <fieldset className="space-y-6 glass-fieldset border-blue-400/15">
+                        <fieldset className="space-y-6 glass-fieldset border-blue-200">
                             <div className="flex items-center gap-2 mb-2">
                                 <svg className="w-5 h-5 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                                     <path strokeLinecap="round" strokeLinejoin="round" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z" />
@@ -413,7 +413,7 @@ const GeminiDescriptionGenerator: React.FC<{ propertyToEdit: Property | null }> 
                                             type="checkbox"
                                             checked={listingData.utilitiesIncluded}
                                             onChange={(e) => setListingData(prev => ({ ...prev, utilitiesIncluded: e.target.checked }))}
-                                            className="rounded text-blue-500 focus:ring-blue-500/30 w-4 h-4 bg-white/5 border-white/20"
+                                            className="rounded text-blue-500 focus:ring-blue-500/30 w-4 h-4 bg-gray-100/60 border-gray-300"
                                         />
                                         <span className="text-sm text-gray-600">{t('rental:form.utilitiesIncluded')}</span>
                                     </label>
@@ -422,7 +422,7 @@ const GeminiDescriptionGenerator: React.FC<{ propertyToEdit: Property | null }> 
                                             type="checkbox"
                                             checked={listingData.internetIncluded}
                                             onChange={(e) => setListingData(prev => ({ ...prev, internetIncluded: e.target.checked }))}
-                                            className="rounded text-blue-500 focus:ring-blue-500/30 w-4 h-4 bg-white/5 border-white/20"
+                                            className="rounded text-blue-500 focus:ring-blue-500/30 w-4 h-4 bg-gray-100/60 border-gray-300"
                                         />
                                         <span className="text-sm text-gray-600">{t('rental:form.internetIncluded')}</span>
                                     </label>
@@ -442,7 +442,7 @@ const GeminiDescriptionGenerator: React.FC<{ propertyToEdit: Property | null }> 
                     )}
 
                     {/* ===== Visit Availability (for all listing types) ===== */}
-                    <fieldset className="space-y-4 glass-fieldset border-amber-400/15">
+                    <fieldset className="space-y-4 glass-fieldset border-amber-200">
                         <div className="flex items-center justify-between">
                             <div className="flex items-center gap-2">
                                 <svg className="w-5 h-5 text-amber-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -458,7 +458,7 @@ const GeminiDescriptionGenerator: React.FC<{ propertyToEdit: Property | null }> 
                                         ...prev,
                                         visitAvailability: { ...prev.visitAvailability, enabled: e.target.checked }
                                     }))}
-                                    className="rounded text-amber-500 focus:ring-amber-500/30 w-4 h-4 bg-white/5 border-white/20"
+                                    className="rounded text-amber-500 focus:ring-amber-500/30 w-4 h-4 bg-gray-100/60 border-gray-300"
                                 />
                                 <span className="text-sm font-medium text-gray-500">{t('seller:createListing.visitAvailability.enable', 'Enable scheduling')}</span>
                             </label>
@@ -589,7 +589,7 @@ const GeminiDescriptionGenerator: React.FC<{ propertyToEdit: Property | null }> 
                     />
 
                     {/* 360 Virtual Tour URL */}
-                    <fieldset className="space-y-4 glass-fieldset border-purple-400/15">
+                    <fieldset className="space-y-4 glass-fieldset border-purple-200">
                         <div className="flex items-center gap-2 mb-2">
                             <svg className="w-6 h-6 text-purple-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                                 <circle cx="12" cy="12" r="10" />
@@ -621,9 +621,9 @@ const GeminiDescriptionGenerator: React.FC<{ propertyToEdit: Property | null }> 
                     </fieldset>
 
                     {/* Property Video URL */}
-                    <fieldset className="space-y-4 glass-fieldset border-red-400/15">
+                    <fieldset className="space-y-4 glass-fieldset border-red-200">
                         <div className="flex items-center gap-2 mb-2">
-                            <svg className="w-6 h-6 text-red-400" fill="currentColor" viewBox="0 0 24 24">
+                            <svg className="w-6 h-6 text-red-600" fill="currentColor" viewBox="0 0 24 24">
                                 <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z" />
                             </svg>
                             <h3 className="text-base font-semibold text-red-600">{t('seller:createListing.video.title', 'Property Video')}</h3>
@@ -641,7 +641,7 @@ const GeminiDescriptionGenerator: React.FC<{ propertyToEdit: Property | null }> 
                                 placeholder={t('seller:createListing.video.placeholder', 'https://youtube.com/watch?v=... or https://tiktok.com/...')}
                                 className={`${floatingInputClasses}`}
                             />
-                            <label htmlFor="tourUrl" className={`${floatingLabelClasses} text-red-500 peer-focus:text-red-400`}>
+                            <label htmlFor="tourUrl" className={`${floatingLabelClasses} text-red-500 peer-focus:text-red-600`}>
                                 {t('seller:createListing.video.label', 'Video URL')}
                             </label>
                         </div>
@@ -667,14 +667,14 @@ const GeminiDescriptionGenerator: React.FC<{ propertyToEdit: Property | null }> 
                                 Vimeo
                             </span>
                         </div>
-                        <p className="text-xs text-red-400">
+                        <p className="text-xs text-red-600">
                             {t('seller:createListing.video.hint', 'Paste a link from YouTube, TikTok, Instagram, Facebook, or Vimeo. The video will auto-play when visitors view your listing!')}
                         </p>
                     </fieldset>
 
                     {/* Promotion Option */}
                     {!propertyToEdit && (
-                        <div className="glass-fieldset border-white/10">
+                        <div className="glass-fieldset border-gray-200">
                             <div className="flex items-start gap-3 mb-4">
                                 <div className="flex-shrink-0">
                                     <span className="text-2xl">🚀</span>
@@ -695,7 +695,7 @@ const GeminiDescriptionGenerator: React.FC<{ propertyToEdit: Property | null }> 
                                     id="wantToPromote"
                                     checked={wantToPromote}
                                     onChange={(e) => setWantToPromote(e.target.checked)}
-                                    className="mt-0.5 w-5 h-5 rounded text-blue-500 focus:ring-blue-500/30 bg-white/5 border-white/20"
+                                    className="mt-0.5 w-5 h-5 rounded text-blue-500 focus:ring-blue-500/30 bg-gray-100/60 border-gray-300"
                                 />
                                 <div className="flex-1">
                                     <span className="text-sm font-semibold text-gray-700">
@@ -708,14 +708,14 @@ const GeminiDescriptionGenerator: React.FC<{ propertyToEdit: Property | null }> 
                             </label>
 
                             {wantToPromote && (
-                                <div className="mt-4 p-4 glass-fieldset border-emerald-400/20">
+                                <div className="mt-4 p-4 glass-fieldset border-emerald-200">
                                     <div className="flex items-start gap-2">
-                                        <span className="text-lg text-emerald-400">✓</span>
+                                        <span className="text-lg text-emerald-600">✓</span>
                                         <div className="flex-1">
-                                            <p className="text-sm font-medium text-emerald-300 mb-1">
+                                            <p className="text-sm font-medium text-emerald-600 mb-1">
                                                 {t('seller:createListing.promotion.selected')}
                                             </p>
-                                            <p className="text-xs text-emerald-300/50">
+                                            <p className="text-xs text-emerald-500/70">
                                                 {t('seller:createListing.promotion.selectedHint')}
                                             </p>
                                         </div>

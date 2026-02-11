@@ -98,7 +98,7 @@ const RentalSearchPage: React.FC = () => {
 
             <div className={`flex h-full w-full flex-col lg:flex-row transition-all duration-300 relative ${isFiltersOpen && (isMobile || isTablet) ? 'blur-sm pointer-events-none' : ''}`}>
                 {/* Left Panel: Search + Filters + Property List */}
-                <div className={`absolute inset-0 z-10 h-full w-full flex flex-col lg:relative lg:w-[45%] xl:w-[55%] lg:flex-shrink-0 lg:border-r lg:border-white/5 ${showViewToggle && mobileView === 'list' ? 'translate-x-0' : showViewToggle ? '-translate-x-full' : ''} lg:translate-x-0 transition-transform duration-300`} style={{ background: 'linear-gradient(180deg, rgba(248,249,252,0.98) 0%, rgba(238,241,248,0.95) 100%)' }}>
+                <div className={`absolute inset-0 z-10 h-full w-full flex flex-col lg:relative lg:w-[45%] xl:w-[55%] lg:flex-shrink-0 lg:border-r lg:border-gray-200 ${showViewToggle && mobileView === 'list' ? 'translate-x-0' : showViewToggle ? '-translate-x-full' : ''} lg:translate-x-0 transition-transform duration-300`} style={{ background: 'linear-gradient(180deg, rgba(248,249,252,0.98) 0%, rgba(238,241,248,0.95) 100%)' }}>
                     {/* Header with city search */}
                     <div className="sticky top-0 z-20" style={{ background: 'rgba(255,255,255,0.85)', backdropFilter: 'blur(20px)', WebkitBackdropFilter: 'blur(20px)', borderBottom: '1px solid rgba(0,0,0,0.06)' }}>
                         <div className="px-4 py-3 flex items-center justify-between gap-3">
@@ -119,6 +119,7 @@ const RentalSearchPage: React.FC = () => {
                                     onClick={() => setIsFiltersOpen(!isFiltersOpen)}
                                     className="lg:hidden glass-btn p-2"
                                     aria-label="Toggle filters"
+                                    aria-expanded={isFiltersOpen}
                                 >
                                     <AdjustmentsHorizontalIcon className="w-5 h-5 text-gray-500" />
                                 </button>
@@ -129,7 +130,7 @@ const RentalSearchPage: React.FC = () => {
                         <div className="px-4 pb-3">
                             <div ref={searchWrapperRef} className="relative">
                                 <div className="relative">
-                                    <MagnifyingGlassIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/30" />
+                                    <MagnifyingGlassIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-300" />
                                     <input
                                         type="text"
                                         value={filters.query}
@@ -138,11 +139,13 @@ const RentalSearchPage: React.FC = () => {
                                         onKeyDown={(e) => { if (e.key === 'Enter') handleSearch(); }}
                                         placeholder={t('rental:filters.searchCity', 'Search by city or location...')}
                                         className="glass-input w-full pl-9 pr-9 py-2 text-sm"
+                                        aria-label={t('rental:filters.searchCity', 'Search by city or location...')}
                                     />
                                     {filters.query && (
                                         <button
                                             onClick={() => handleFilterChange('query', '')}
-                                            className="absolute right-3 top-1/2 -translate-y-1/2 text-white/30 hover:text-gray-500 transition-colors"
+                                            className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-300 hover:text-gray-600 transition-colors"
+                                            aria-label="Clear search"
                                         >
                                             <XMarkIcon className="w-4 h-4" />
                                         </button>
@@ -156,9 +159,9 @@ const RentalSearchPage: React.FC = () => {
                                             <button
                                                 key={index}
                                                 onClick={() => handleSuggestionClick(suggestion)}
-                                                className="w-full text-left px-3 py-2.5 text-sm hover:bg-white/10 transition-colors flex items-center gap-2 border-b border-white/5 last:border-b-0"
+                                                className="w-full text-left px-3 py-2.5 text-sm hover:bg-gray-100 transition-colors flex items-center gap-2 border-b border-gray-200 last:border-b-0"
                                             >
-                                                <MapIcon className="w-4 h-4 text-white/30 flex-shrink-0" />
+                                                <MapIcon className="w-4 h-4 text-gray-300 flex-shrink-0" />
                                                 <span className="truncate text-gray-600">{suggestion.display_name}</span>
                                             </button>
                                         ))}
@@ -185,7 +188,7 @@ const RentalSearchPage: React.FC = () => {
                     </div>
 
                     {/* Property List */}
-                    <div className="flex-1 overflow-y-auto p-3 pb-28 lg:pb-3 glass-scrollbar" data-scroll-container>
+                    <div className="flex-1 overflow-y-auto p-3 pb-28 lg:pb-3 glass-scrollbar" data-scroll-container aria-live="polite">
                         {isLoading ? (
                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                                 {[...Array(6)].map((_, i) => (
@@ -260,12 +263,12 @@ const RentalSearchPage: React.FC = () => {
             {/* Mobile Filters Modal */}
             {(isMobile || isTablet) && isFiltersOpen && (
                 <div className="fixed inset-0 z-30 flex flex-col">
-                    <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" onClick={() => setIsFiltersOpen(false)} />
+                    <div className="absolute inset-0 bg-black/30 backdrop-blur-sm" onClick={() => setIsFiltersOpen(false)} />
                     <div className="relative w-full h-full flex items-end sm:items-center justify-center p-0 sm:p-4">
                         <div className="relative w-full sm:max-w-md sm:rounded-xl rounded-t-xl max-h-[85vh] overflow-y-auto glass-scrollbar glass-panel" onClick={e => e.stopPropagation()}>
                             <div className="sticky top-0 z-10 px-4 py-3 flex items-center justify-between" style={{ background: 'rgba(255,255,255,0.9)', backdropFilter: 'blur(20px)', WebkitBackdropFilter: 'blur(20px)', borderBottom: '1px solid rgba(0,0,0,0.06)' }}>
                                 <h2 className="text-lg font-bold text-gray-900">{t('rental:filters.title')}</h2>
-                                <button onClick={() => setIsFiltersOpen(false)} className="glass-btn p-1">
+                                <button onClick={() => setIsFiltersOpen(false)} className="glass-btn p-1" aria-label="Close filters">
                                     <XMarkIcon className="w-5 h-5 text-gray-500" />
                                 </button>
                             </div>

@@ -185,7 +185,7 @@ const RoleSelector: React.FC<RoleSelectorProps> = ({ currentUser, selectedRole, 
             case 'buyer':
                 return <span className="text-xs font-semibold px-2 py-0.5 bg-gradient-to-r from-green-500 to-emerald-500 text-white rounded">{t('seller:roleSelector.badges.buyer')}</span>;
             case 'free':
-                return <span className="text-xs font-semibold px-2 py-0.5 bg-white/10 text-neutral-700 rounded">{t('seller:roleSelector.badges.free')}</span>;
+                return <span className="text-xs font-semibold px-2 py-0.5 bg-gray-200 text-neutral-700 rounded">{t('seller:roleSelector.badges.free')}</span>;
             case 'none':
                 return <span className="text-xs font-semibold px-2 py-0.5 bg-red-100 text-red-600 rounded">{t('seller:roleSelector.badges.proRequired')}</span>;
             default:
@@ -302,8 +302,8 @@ const RoleCard: React.FC<RoleCardProps> = ({
             className={`
                 relative p-4 rounded-xl text-left transition-all duration-300
                 ${isSelected
-                    ? 'glass-panel border-blue-300 shadow-lg shadow-blue-500/10'
-                    : 'glass-panel-light hover:bg-white/10'
+                    ? 'glass-panel border-blue-300 shadow-lg shadow-blue-200/30'
+                    : 'glass-panel-light hover:bg-gray-100'
                 }
                 ${isLimitReached ? 'opacity-60 cursor-not-allowed' : 'cursor-pointer'}
             `}
@@ -372,7 +372,7 @@ const RoleCard: React.FC<RoleCardProps> = ({
                                 )}
 
                                 {/* Progress bar */}
-                                <div className="w-full bg-white/10 rounded-full h-1.5">
+                                <div className="w-full bg-gray-200 rounded-full h-1.5">
                                     <div
                                         className={`h-1.5 rounded-full transition-all duration-300 ${
                                             isLimitReached
@@ -407,28 +407,28 @@ const RoleCard: React.FC<RoleCardProps> = ({
                                         </p>
                                         <div className="grid grid-cols-2 gap-2">
                                             {subscription.featuredCoupons !== undefined && (
-                                                <div className="bg-white/5 p-1.5 rounded">
+                                                <div className="bg-gray-50 p-1.5 rounded">
                                                     <p className="text-purple-600 font-medium">
                                                         ⭐ Featured: {subscription.featuredCoupons}
                                                     </p>
-                                                    <p className="text-purple-500 text-[10px]">
+                                                    <p className="text-purple-500 text-[11px]">
                                                         {subscription.featuredDuration} days each
                                                     </p>
                                                 </div>
                                             )}
                                             {subscription.highlightedCoupons !== undefined && (
-                                                <div className="bg-white/5 p-1.5 rounded">
+                                                <div className="bg-gray-50 p-1.5 rounded">
                                                     <p className="text-amber-500 font-medium">
                                                         🔥 Highlighted: {subscription.highlightedCoupons}
                                                     </p>
-                                                    <p className="text-amber-500 text-[10px]">
+                                                    <p className="text-amber-500 text-[11px]">
                                                         {subscription.highlightedDuration} days each
                                                     </p>
                                                 </div>
                                             )}
                                         </div>
                                         {subscription.usedCoupons ? (
-                                            <p className="text-purple-500 text-[10px]">
+                                            <p className="text-purple-500 text-[11px]">
                                                 Used this month: {subscription.usedCoupons}
                                             </p>
                                         ) : null}
