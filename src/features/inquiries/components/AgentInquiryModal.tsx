@@ -93,10 +93,14 @@ const AgentInquiryModal: React.FC<AgentInquiryModalProps> = ({
     <div
       className="fixed inset-0 z-[5000] flex items-end sm:items-center justify-center bg-black/50 p-0 sm:p-4"
       onClick={onClose}
+      role="presentation"
     >
       <div
         className="bg-white w-full sm:max-w-lg sm:rounded-2xl rounded-t-2xl shadow-xl overflow-hidden max-h-[90vh] overflow-y-auto"
         onClick={e => e.stopPropagation()}
+        role="dialog"
+        aria-modal="true"
+        aria-label="Contact agent"
       >
         {/* Header */}
         <div className="bg-gradient-to-r from-blue-600 to-blue-700 p-4 flex items-center justify-between sticky top-0 z-10">

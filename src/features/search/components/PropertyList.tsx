@@ -926,6 +926,7 @@ const PropertyList: React.FC<PropertyListProps> = (props) => {
                                         name="sortBy"
                                         value={filters.sortBy}
                                         onChange={(e) => onSortChange(e.target.value)}
+                                        aria-label={t('search:filters.sortBy', 'Sort properties by')}
                                         className={`${inputBaseClasses} appearance-none pr-8 text-xs !py-1.5`}
                                     >
                                         <option value="newest">{t('search:sort.newest')}</option>

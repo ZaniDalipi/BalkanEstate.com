@@ -195,6 +195,7 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({
         {/* Mobile close button */}
         <button
           onClick={onMobileClose}
+          aria-label="Close sidebar"
           className="lg:hidden p-2 text-gray-400 hover:text-white hover:bg-gray-800 rounded-lg"
         >
           <XMarkIcon className="w-5 h-5" />
@@ -266,6 +267,7 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({
       <div className="hidden lg:block border-t border-gray-800 p-3">
         <button
           onClick={() => onCollapsedChange(!collapsed)}
+          aria-label={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
           className="w-full flex items-center justify-center gap-2 px-3 py-2 text-gray-400 hover:text-white hover:bg-gray-800 rounded-lg transition-colors"
         >
           {collapsed ? (

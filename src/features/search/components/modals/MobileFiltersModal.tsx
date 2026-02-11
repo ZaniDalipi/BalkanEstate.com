@@ -33,14 +33,14 @@ const MobileFiltersModal: React.FC<MobileFiltersModalProps> = ({
     if (!isOpen) return null;
 
     return (
-        <div className="fixed inset-0 z-30 flex flex-col">
+        <div className="fixed inset-0 z-30 flex flex-col" role="presentation">
             <div className="absolute inset-0 bg-black/50" onClick={onClose}></div>
             <div className="relative w-full h-full" onClick={onClose}>
-                <div className="absolute inset-0 bg-white" onClick={e => e.stopPropagation()}>
+                <div className="absolute inset-0 bg-white" onClick={e => e.stopPropagation()} role="dialog" aria-modal="true" aria-label={t('filters.title')}>
                     <div className="bg-white h-full w-full flex flex-col">
                         <div className="flex-shrink-0 p-4 border-b border-neutral-200 flex justify-between items-center">
                             <h2 className="text-lg font-bold text-neutral-800">{t('filters.title')}</h2>
-                            <button onClick={onClose} className="p-2 text-neutral-500 hover:text-neutral-800">
+                            <button onClick={onClose} aria-label="Close filters" className="p-2 text-neutral-500 hover:text-neutral-800">
                                 <XMarkIcon className="w-6 h-6" />
                             </button>
                         </div>

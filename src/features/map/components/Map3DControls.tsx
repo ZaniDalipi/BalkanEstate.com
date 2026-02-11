@@ -224,6 +224,7 @@ const Map3DControls: React.FC<Map3DControlsProps> = ({
         <div className="absolute top-[4.25rem] sm:top-[5.25rem] right-1.5 sm:right-4 z-10 flex flex-col items-end gap-1 sm:gap-2 max-h-[calc(100%-120px)] max-w-[calc(100%-1rem)] sm:max-w-none overflow-y-auto">
           <button
             onClick={toggle3DMode}
+            aria-label={is3DMode ? 'Switch to 2D view' : 'Switch to 3D view'}
             className={`w-8 h-8 sm:w-auto sm:h-auto sm:px-3 sm:py-2 rounded-lg font-bold text-[10px] sm:text-sm shadow-lg transition-all flex items-center justify-center ${
               is3DMode
                 ? 'bg-slate-900/90 text-white border border-slate-600'
@@ -239,6 +240,7 @@ const Map3DControls: React.FC<Map3DControlsProps> = ({
                 ? 'bg-amber-500 text-white border border-amber-400'
                 : 'bg-slate-900/90 text-white border border-slate-600'
             }`}
+            aria-label={showShadows ? 'Hide building shadows' : 'Show building shadows'}
             title={t('property:map3d.shadows', 'Show Building Shadows')}
           >
             <span className="text-xs sm:text-sm">{'\u2600\uFE0F'}</span>
@@ -253,6 +255,7 @@ const Map3DControls: React.FC<Map3DControlsProps> = ({
                 ? 'bg-blue-600 text-white border border-blue-500'
                 : 'bg-slate-900/90 text-white border border-slate-600'
             }`}
+            aria-label={showFloorLabels ? 'Hide floor levels' : 'Show floor levels'}
             title={t('property:map3d.floorLabels', 'Show Floor Levels')}
           >
             <span className="text-xs sm:text-sm">{'\u{1F3E2}'}</span>
@@ -268,6 +271,7 @@ const Map3DControls: React.FC<Map3DControlsProps> = ({
                   ? 'bg-green-600 text-white border border-green-500'
                   : 'bg-slate-900/90 text-white border border-slate-600'
               }`}
+              aria-label={showPOI ? 'Hide nearby places' : 'Show nearby places'}
               title={t('property:map3d.nearbyPlaces', 'Nearby Places')}
             >
               <span className="text-xs sm:text-sm">{'\u{1F4CD}'}</span>
@@ -306,6 +310,7 @@ const Map3DControls: React.FC<Map3DControlsProps> = ({
                       </div>
                       <button
                         onClick={() => setShowTimelapse(false)}
+                        aria-label="Close timelapse panel"
                         className="w-6 h-6 sm:w-7 sm:h-7 rounded-full flex items-center justify-center bg-black/20 hover:bg-black/40 transition-all"
                       >
                         <svg className="w-3 h-3 sm:w-4 sm:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -321,6 +326,7 @@ const Map3DControls: React.FC<Map3DControlsProps> = ({
                     <div className="flex items-center justify-center gap-1.5 sm:gap-2">
                       <button
                         onClick={timelapse.goToSunrise}
+                        aria-label="Jump to sunrise"
                         className="p-1.5 sm:p-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-sm sm:text-lg transition-all"
                         title="Sunrise"
                       >
@@ -328,6 +334,7 @@ const Map3DControls: React.FC<Map3DControlsProps> = ({
                       </button>
                       <button
                         onClick={timelapse.toggle}
+                        aria-label={timelapse.isPlaying ? 'Pause timelapse' : 'Play timelapse'}
                         className="w-10 h-10 sm:w-14 sm:h-14 rounded-full flex items-center justify-center bg-blue-600 hover:bg-blue-500 text-white shadow-lg transition-all"
                       >
                         {timelapse.isPlaying ? (
@@ -342,6 +349,7 @@ const Map3DControls: React.FC<Map3DControlsProps> = ({
                       </button>
                       <button
                         onClick={timelapse.goToSunset}
+                        aria-label="Jump to sunset"
                         className="p-1.5 sm:p-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-sm sm:text-lg transition-all"
                         title="Sunset"
                       >

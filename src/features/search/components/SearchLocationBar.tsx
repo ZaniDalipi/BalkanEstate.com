@@ -83,11 +83,13 @@ const SearchLocationBar: React.FC<SearchLocationBarProps> = ({
                     onChange={(e) => onFilterChange('query', e.target.value)}
                     onKeyDown={(e) => e.key === 'Enter' && onSearch()}
                     onFocus={() => onQueryInputFocusChange(true)}
+                    aria-label="Search by city, address, or keyword"
                     className="block w-full bg-white/60 backdrop-blur-sm border border-white/50 rounded-xl text-neutral-900 text-sm px-3 py-2 pl-9 pr-8 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all placeholder:text-neutral-400 shadow-sm"
                 />
                 {filters.query && !isSearchingLocation && (
                     <button
                         onClick={() => onFilterChange('query', '')}
+                        aria-label="Clear search"
                         className="absolute inset-y-0 right-0 flex items-center pr-2 text-neutral-400 hover:text-neutral-800"
                     >
                         <XMarkIcon className="h-4 w-4" />

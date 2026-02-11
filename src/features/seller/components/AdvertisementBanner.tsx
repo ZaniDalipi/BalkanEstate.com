@@ -139,6 +139,7 @@ const AdvertisementBanner: React.FC<AdvertisementBannerProps> = ({ position = 't
       <div className="bg-red-500 text-white shadow-lg p-4 text-center relative">
         <button
           onClick={() => setIsDismissed(true)}
+          aria-label="Dismiss advertisement error"
           className="absolute top-2 right-2 text-white/80 hover:text-white"
         >
           <XMarkIcon className="w-5 h-5" />
@@ -277,6 +278,7 @@ const AdvertisementBanner: React.FC<AdvertisementBannerProps> = ({ position = 't
               <button
                 key={index}
                 onClick={() => setCurrentIndex(index)}
+                aria-label={`Go to advertisement ${index + 1}`}
                 className={`h-2 rounded-full transition-all ${
                   index === currentIndex ? 'w-6 bg-white' : 'w-2 bg-white/50 hover:bg-white/70'
                 }`}

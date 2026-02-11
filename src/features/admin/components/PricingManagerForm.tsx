@@ -48,8 +48,8 @@ const PricingManagerForm: React.FC<PricingManagerFormProps> = ({
   const { t } = useTranslation(['admin', 'common']);
 
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-3xl max-h-[90vh] overflow-hidden flex flex-col">
+    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4" role="presentation">
+      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-3xl max-h-[90vh] overflow-hidden flex flex-col" role="dialog" aria-modal="true" aria-label="Edit product">
         <div className="flex items-center justify-between p-6 border-b bg-gradient-to-r from-blue-600 to-indigo-600 text-white">
           <h3 className="text-xl font-bold flex items-center gap-2">
             <PencilIcon className="w-5 h-5" />
@@ -58,6 +58,7 @@ const PricingManagerForm: React.FC<PricingManagerFormProps> = ({
           <button
             onClick={onClose}
             className="p-2 hover:bg-white/10 rounded-lg transition-colors"
+            aria-label="Close"
           >
             <XMarkIcon className="w-5 h-5" />
           </button>
@@ -67,8 +68,9 @@ const PricingManagerForm: React.FC<PricingManagerFormProps> = ({
           {/* Basic Info */}
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">{t('admin:pricing.form.productName', 'Product Name')}</label>
+              <label htmlFor="product-name" className="block text-sm font-medium text-gray-700 mb-1">{t('admin:pricing.form.productName', 'Product Name')}</label>
               <input
+                id="product-name"
                 type="text"
                 value={editingProduct.name}
                 onChange={(e) => setEditingProduct({ ...editingProduct, name: e.target.value })}
@@ -76,8 +78,9 @@ const PricingManagerForm: React.FC<PricingManagerFormProps> = ({
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">{t('admin:pricing.form.productId', 'Product ID')}</label>
+              <label htmlFor="product-id" className="block text-sm font-medium text-gray-700 mb-1">{t('admin:pricing.form.productId', 'Product ID')}</label>
               <input
+                id="product-id"
                 type="text"
                 value={editingProduct.productId}
                 disabled
@@ -88,8 +91,9 @@ const PricingManagerForm: React.FC<PricingManagerFormProps> = ({
 
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">{t('admin:pricing.form.targetRole', 'Target Role')}</label>
+              <label htmlFor="product-target-role" className="block text-sm font-medium text-gray-700 mb-1">{t('admin:pricing.form.targetRole', 'Target Role')}</label>
               <select
+                id="product-target-role"
                 value={editingProduct.targetRole}
                 onChange={(e) => setEditingProduct({ ...editingProduct, targetRole: e.target.value })}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
@@ -101,8 +105,9 @@ const PricingManagerForm: React.FC<PricingManagerFormProps> = ({
               </select>
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">{t('admin:pricing.form.tier', 'Tier')}</label>
+              <label htmlFor="product-tier" className="block text-sm font-medium text-gray-700 mb-1">{t('admin:pricing.form.tier', 'Tier')}</label>
               <select
+                id="product-tier"
                 value={editingProduct.tier || ''}
                 onChange={(e) => setEditingProduct({ ...editingProduct, tier: e.target.value })}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
@@ -117,8 +122,9 @@ const PricingManagerForm: React.FC<PricingManagerFormProps> = ({
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">{t('admin:pricing.form.description', 'Description')}</label>
+            <label htmlFor="product-description" className="block text-sm font-medium text-gray-700 mb-1">{t('admin:pricing.form.description', 'Description')}</label>
             <textarea
+              id="product-description"
               value={editingProduct.description || ''}
               onChange={(e) => setEditingProduct({ ...editingProduct, description: e.target.value })}
               rows={2}
@@ -131,8 +137,9 @@ const PricingManagerForm: React.FC<PricingManagerFormProps> = ({
             <h4 className="font-semibold text-blue-900 mb-3">{t('admin:pricing.form.pricingSection', 'Pricing')}</h4>
             <div className="grid grid-cols-4 gap-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">{t('admin:pricing.form.priceEuro', 'Price (€)')}</label>
+                <label htmlFor="product-price" className="block text-sm font-medium text-gray-700 mb-1">{t('admin:pricing.form.priceEuro', 'Price (€)')}</label>
                 <input
+                  id="product-price"
                   type="number"
                   value={editingProduct.price}
                   onChange={(e) => handleNumberChange('price', e.target.value, 0, true)}

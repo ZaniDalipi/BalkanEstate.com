@@ -128,7 +128,7 @@ const CookieConsent: React.FC = () => {
                         href={`/${lang}/cookies`}
                         className="text-primary hover:underline font-medium"
                       >
-                        {t('common:cookies.learnMore', 'Learn more')}
+                        {t('common:cookies.learnMore', 'Learn more about our cookie policy')}
                       </a>
                     </p>
                   </div>

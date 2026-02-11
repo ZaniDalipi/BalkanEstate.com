@@ -42,11 +42,11 @@ const UserManagerDetail: React.FC<UserManagerDetailProps> = ({
     <>
       {/* Detail Modal */}
       {isDetailModalOpen && viewingUser && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-lg max-w-2xl w-full max-h-[90vh] flex flex-col">
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4" role="presentation">
+          <div className="bg-white rounded-lg max-w-2xl w-full max-h-[90vh] flex flex-col" role="dialog" aria-modal="true" aria-label="User details">
             <div className="p-6 border-b border-gray-200 flex items-center justify-between flex-shrink-0">
               <h3 className="text-xl font-bold">User Details</h3>
-              <button onClick={() => setIsDetailModalOpen(false)}>
+              <button onClick={() => setIsDetailModalOpen(false)} aria-label="Close">
                 <XMarkIcon className="w-6 h-6 text-gray-500 hover:text-gray-700" />
               </button>
             </div>
@@ -206,11 +206,11 @@ const UserManagerDetail: React.FC<UserManagerDetailProps> = ({
 
       {/* Edit Modal */}
       {isEditModalOpen && editingUser && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-lg max-w-2xl w-full max-h-[90vh] flex flex-col">
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4" role="presentation">
+          <div className="bg-white rounded-lg max-w-2xl w-full max-h-[90vh] flex flex-col" role="dialog" aria-modal="true" aria-label="Edit user">
             <div className="p-6 border-b border-gray-200 flex items-center justify-between flex-shrink-0">
               <h3 className="text-xl font-bold">Edit User</h3>
-              <button onClick={() => setIsEditModalOpen(false)}>
+              <button onClick={() => setIsEditModalOpen(false)} aria-label="Close">
                 <XMarkIcon className="w-6 h-6 text-gray-500 hover:text-gray-700" />
               </button>
             </div>
@@ -218,10 +218,11 @@ const UserManagerDetail: React.FC<UserManagerDetailProps> = ({
             <form onSubmit={handleUpdateUser} className="flex flex-col flex-1 overflow-hidden">
               <div className="p-6 space-y-4 overflow-y-auto flex-1">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label htmlFor="edit-user-name" className="block text-sm font-medium text-gray-700 mb-1">
                   Name
                 </label>
                 <input
+                  id="edit-user-name"
                   type="text"
                   value={editForm.name}
                   onChange={(e) => setEditForm({ ...editForm, name: e.target.value })}
@@ -231,10 +232,11 @@ const UserManagerDetail: React.FC<UserManagerDetailProps> = ({
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label htmlFor="edit-user-email" className="block text-sm font-medium text-gray-700 mb-1">
                   Email
                 </label>
                 <input
+                  id="edit-user-email"
                   type="email"
                   value={editForm.email}
                   onChange={(e) => setEditForm({ ...editForm, email: e.target.value })}
@@ -244,10 +246,11 @@ const UserManagerDetail: React.FC<UserManagerDetailProps> = ({
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label htmlFor="edit-user-phone" className="block text-sm font-medium text-gray-700 mb-1">
                   Phone
                 </label>
                 <input
+                  id="edit-user-phone"
                   type="tel"
                   value={editForm.phone}
                   onChange={(e) => setEditForm({ ...editForm, phone: e.target.value })}
@@ -257,10 +260,11 @@ const UserManagerDetail: React.FC<UserManagerDetailProps> = ({
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label htmlFor="edit-user-city" className="block text-sm font-medium text-gray-700 mb-1">
                     City
                   </label>
                   <input
+                    id="edit-user-city"
                     type="text"
                     value={editForm.city}
                     onChange={(e) => setEditForm({ ...editForm, city: e.target.value })}
@@ -268,10 +272,11 @@ const UserManagerDetail: React.FC<UserManagerDetailProps> = ({
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label htmlFor="edit-user-country" className="block text-sm font-medium text-gray-700 mb-1">
                     Country
                   </label>
                   <input
+                    id="edit-user-country"
                     type="text"
                     value={editForm.country}
                     onChange={(e) => setEditForm({ ...editForm, country: e.target.value })}
@@ -281,10 +286,11 @@ const UserManagerDetail: React.FC<UserManagerDetailProps> = ({
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label htmlFor="edit-user-role" className="block text-sm font-medium text-gray-700 mb-1">
                   Role
                 </label>
                 <select
+                  id="edit-user-role"
                   value={editForm.role}
                   onChange={(e) => setEditForm({ ...editForm, role: e.target.value })}
                   className="w-full px-4 py-2 border border-gray-300 rounded-lg"
@@ -299,10 +305,11 @@ const UserManagerDetail: React.FC<UserManagerDetailProps> = ({
               {(editForm.role === 'agent' || editingUser.role === 'agent') && (
                 <>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                    <label htmlFor="edit-user-license" className="block text-sm font-medium text-gray-700 mb-1">
                       License Number
                     </label>
                     <input
+                      id="edit-user-license"
                       type="text"
                       value={editForm.licenseNumber}
                       onChange={(e) => setEditForm({ ...editForm, licenseNumber: e.target.value })}

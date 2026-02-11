@@ -31,7 +31,7 @@ const Toast: React.FC<ToastProps> = ({ show, message, type, onClose }) => {
         <div className={`flex items-center gap-3 text-white py-3 px-5 rounded-2xl shadow-2xl backdrop-blur-xl border border-white/20 ${bgColor}`}>
           {icon}
           <p className="font-semibold text-base">{message}</p>
-          <button onClick={onClose} className="ml-4 font-bold text-xl leading-none opacity-70 hover:opacity-100 transition-opacity">&times;</button>
+          <button onClick={onClose} aria-label="Close notification" className="ml-4 font-bold text-xl leading-none opacity-70 hover:opacity-100 transition-opacity">&times;</button>
         </div>
       )}
     </div>

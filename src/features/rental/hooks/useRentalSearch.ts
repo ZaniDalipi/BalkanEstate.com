@@ -141,14 +141,18 @@ export function useRentalSearch() {
         return () => window.removeEventListener('resize', handleResize);
     }, []);
 
-    // Geolocation
+    // Geolocation - only use if permission already granted (avoid prompting on page load)
     useEffect(() => {
-        if ('geolocation' in navigator) {
-            navigator.geolocation.getCurrentPosition(
-                (pos) => setUserLocation([pos.coords.latitude, pos.coords.longitude]),
-                () => { /* geolocation denied - ignore */ },
-                { enableHighAccuracy: false, timeout: 5000, maximumAge: 600000 }
-            );
+        if ('geolocation' in navigator && navigator.permissions) {
+            navigator.permissions.query({ name: 'geolocation' }).then((result) => {
+                if (result.state === 'granted') {
+                    navigator.geolocation.getCurrentPosition(
+                        (pos) => setUserLocation([pos.coords.latitude, pos.coords.longitude]),
+                        () => { /* geolocation denied - ignore */ },
+                        { enableHighAccuracy: false, timeout: 5000, maximumAge: 600000 }
+                    );
+                }
+            });
         }
     }, []);
 

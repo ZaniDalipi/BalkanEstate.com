@@ -289,12 +289,13 @@ export const ImageEditorModal: React.FC<ImageEditorModalProps> = ({ imageUrl, pr
   const colorPresets = ['#FF0000', '#00FF00', '#0000FF', '#FFFF00', '#FF00FF', '#FFFFFF'];
 
   return (
-    <div className="fixed inset-0 z-[1100] bg-black flex flex-col">
+    <div className="fixed inset-0 z-[1100] bg-black flex flex-col" role="dialog" aria-modal="true" aria-label="Image editor">
       {/* Compact Mobile Toolbar */}
       <div className="bg-gray-900 px-2 py-2 sm:px-4 sm:py-3 flex items-center justify-between gap-2 sm:gap-4 flex-shrink-0">
         {/* Close button */}
         <button
           onClick={onClose}
+          aria-label="Close image editor"
           className="p-2 text-white hover:bg-gray-800 rounded-lg transition-colors"
         >
           <XMarkIcon className="w-5 h-5 sm:w-6 sm:h-6" />
@@ -308,6 +309,7 @@ export const ImageEditorModal: React.FC<ImageEditorModalProps> = ({ imageUrl, pr
               <button
                 key={c}
                 onClick={() => setColor(c)}
+                aria-label={`Select color ${c}`}
                 className={`w-6 h-6 rounded-full border-2 ${color === c ? 'border-white' : 'border-transparent'}`}
                 style={{ backgroundColor: c }}
               />
@@ -336,6 +338,7 @@ export const ImageEditorModal: React.FC<ImageEditorModalProps> = ({ imageUrl, pr
           <button
             onClick={handleUndo}
             disabled={paths.length === 0}
+            aria-label="Undo last stroke"
             className="p-2 bg-gray-700 text-white rounded-lg hover:bg-gray-600 disabled:opacity-40 transition-colors"
           >
             <ArrowUturnLeftIcon className="w-4 h-4 sm:w-5 sm:h-5" />
@@ -346,6 +349,7 @@ export const ImageEditorModal: React.FC<ImageEditorModalProps> = ({ imageUrl, pr
         <div className="flex gap-1 sm:gap-2">
           <button
             onClick={handleDownload}
+            aria-label="Download annotated image"
             className="p-2 sm:px-3 sm:py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-1"
           >
             <ArrowDownTrayIcon className="w-4 h-4 sm:w-5 sm:h-5" />
@@ -355,6 +359,7 @@ export const ImageEditorModal: React.FC<ImageEditorModalProps> = ({ imageUrl, pr
           <button
             onClick={handleSendToAgent}
             disabled={isSending}
+            aria-label="Send annotated image to agent"
             className={`p-2 sm:px-3 sm:py-2 text-white rounded-lg flex items-center gap-1 transition-colors ${
               isSending ? 'bg-green-400 cursor-not-allowed' : 'bg-green-600 hover:bg-green-700'
             }`}

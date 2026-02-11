@@ -242,12 +242,14 @@ const HighlightedCardInner = memo<HighlightedCardInnerProps>(({
           <>
             <button
               onClick={handlePrevImage}
+              aria-label="Previous image"
               className="absolute left-2 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white p-1.5 rounded-full shadow-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-10"
             >
               <ChevronLeftIcon className="w-4 h-4 text-neutral-700" />
             </button>
             <button
               onClick={handleNextImage}
+              aria-label="Next image"
               className="absolute right-2 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white p-1.5 rounded-full shadow-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-10"
             >
               <ChevronRightIcon className="w-4 h-4 text-neutral-700" />
@@ -262,6 +264,7 @@ const HighlightedCardInner = memo<HighlightedCardInnerProps>(({
               <button
                 key={index}
                 onClick={(e) => handleDotClick(e, index)}
+                aria-label={`Go to image ${index + 1}`}
                 className={`h-2 rounded-full transition-all duration-300 shadow-sm ${
                   index === currentImageIndex
                     ? 'bg-white w-5'

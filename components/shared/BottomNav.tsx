@@ -49,7 +49,7 @@ const BottomNav: React.FC = () => {
     ];
 
     return (
-        <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-neutral-200 z-50 safe-area-inset-bottom">
+        <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-neutral-200 z-50 safe-area-inset-bottom" aria-label={t('nav:bottomNavigation', 'Bottom navigation')}>
             <div className="flex items-center justify-around px-1.5 py-1.5">
                 {navItems.map(item => {
                     const Icon = item.icon;
@@ -62,9 +62,11 @@ const BottomNav: React.FC = () => {
                                 key={item.view}
                                 onClick={handleNewListingClick}
                                 className="flex flex-col items-center justify-center flex-1 py-1.5 relative"
+                                aria-label={item.label}
+                                aria-current={isActive ? 'page' : undefined}
                             >
                                 <div className="w-10 h-10 bg-secondary rounded-full flex items-center justify-center shadow-lg -mt-5">
-                                    <Icon className="w-5 h-5 text-white" />
+                                    <Icon className="w-5 h-5 text-white" aria-hidden="true" />
                                 </div>
                                 <span className="text-xs font-medium text-neutral-600 mt-1">{item.label}</span>
                             </button>
@@ -76,9 +78,11 @@ const BottomNav: React.FC = () => {
                             key={item.view}
                             onClick={() => handleNavClick(item.view)}
                             className="flex flex-col items-center justify-center flex-1 py-1.5 relative"
+                            aria-label={item.badge && item.badge > 0 ? `${item.label} (${item.badge} unread)` : item.label}
+                            aria-current={isActive ? 'page' : undefined}
                         >
                             <div className="relative">
-                                <Icon className={`w-5 h-5 ${isActive ? 'text-primary' : 'text-neutral-600'}`} />
+                                <Icon className={`w-5 h-5 ${isActive ? 'text-primary' : 'text-neutral-600'}`} aria-hidden="true" />
                                 {item.badge && item.badge > 0 && (
                                     <span className="absolute -top-1 -right-1 bg-red-600 text-white text-xs font-bold rounded-full min-w-[16px] h-[16px] flex items-center justify-center px-1">
                                         {item.badge > 99 ? '99+' : item.badge}

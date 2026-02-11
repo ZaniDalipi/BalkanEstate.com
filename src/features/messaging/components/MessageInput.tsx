@@ -88,6 +88,7 @@ const MessageInput: React.FC<MessageInputProps> = ({ onSendMessage, onTyping, di
                     />
                     <button
                         onClick={handleRemoveImage}
+                        aria-label="Remove attached image"
                         className="absolute -top-1.5 -right-1.5 sm:-top-2 sm:-right-2 bg-red-500 text-white rounded-full p-0.5 sm:p-1 hover:bg-red-600"
                         type="button"
                     >
@@ -107,6 +108,7 @@ const MessageInput: React.FC<MessageInputProps> = ({ onSendMessage, onTyping, di
                     type="button"
                     onClick={() => fileInputRef.current?.click()}
                     disabled={disabled || isSending}
+                    aria-label="Attach photo"
                     className="bg-neutral-200 text-neutral-700 rounded-full p-2.5 sm:p-3.5 hover:bg-neutral-300 disabled:bg-neutral-100 disabled:cursor-not-allowed transition-colors flex-shrink-0 w-10 h-10 sm:w-12 sm:h-12 flex items-center justify-center"
                 >
                     <PhotoIcon className="h-4 w-4 sm:h-5 sm:w-5 flex-shrink-0" />
@@ -129,6 +131,7 @@ const MessageInput: React.FC<MessageInputProps> = ({ onSendMessage, onTyping, di
                 <button
                     type="submit"
                     disabled={disabled || isSending || (!text.trim() && !imageFile)}
+                    aria-label="Send message"
                     className="bg-primary text-white rounded-full p-2.5 sm:p-3.5 hover:bg-primary-dark disabled:bg-primary/50 disabled:cursor-not-allowed transition-colors flex-shrink-0 w-10 h-10 sm:w-12 sm:h-12 flex items-center justify-center"
                 >
                     {isSending ? (

@@ -135,6 +135,7 @@ const ShadowTimelapsePanel: React.FC<{
             <div className="flex items-center gap-2">
               <button
                 onClick={toggle}
+                aria-label={isPlaying ? 'Pause cinematic view' : 'Play cinematic view'}
                 className="w-12 h-12 rounded-full flex items-center justify-center bg-white/20 backdrop-blur-sm border-2 border-white/40 text-white transition-all hover:bg-white/30 active:scale-95"
               >
                 {isPlaying ? (
@@ -149,6 +150,7 @@ const ShadowTimelapsePanel: React.FC<{
               </button>
               <button
                 onClick={onClose}
+                aria-label="Close cinematic view"
                 className="w-8 h-8 rounded-full flex items-center justify-center bg-white/20 text-white hover:bg-white/30 transition-all"
               >
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">

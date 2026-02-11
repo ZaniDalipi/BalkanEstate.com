@@ -590,7 +590,7 @@ const SunPositionControl: React.FC<SunPositionControlProps> = ({
                     : 'bg-neutral-100 text-neutral-600 hover:bg-neutral-200'
                 }
               `}
-              title={`${t('search:map.sunrise', 'Sunrise')} - ${formatDecimalHour(sunriseSunset.sunrise)}`}
+              aria-label={`${t('search:map.sunrise', 'Sunrise')} - ${formatDecimalHour(sunriseSunset.sunrise)}`}
             >
               <SunriseIcon className="w-3 h-3" />
             </button>
@@ -607,7 +607,7 @@ const SunPositionControl: React.FC<SunPositionControlProps> = ({
                     : 'bg-neutral-100 text-neutral-600 hover:bg-neutral-200'
                 }
               `}
-              title={t('search:map.noon', 'Noon')}
+              aria-label={t('search:map.noon', 'Noon')}
             >
               <NoonIcon className="w-3 h-3" />
             </button>
@@ -624,7 +624,7 @@ const SunPositionControl: React.FC<SunPositionControlProps> = ({
                     : 'bg-neutral-100 text-neutral-600 hover:bg-neutral-200'
                 }
               `}
-              title={`${t('search:map.sunset', 'Sunset')} - ${formatDecimalHour(sunriseSunset.sunset)}`}
+              aria-label={`${t('search:map.sunset', 'Sunset')} - ${formatDecimalHour(sunriseSunset.sunset)}`}
             >
               <SunsetIcon className="w-3 h-3" />
             </button>
@@ -642,7 +642,7 @@ const SunPositionControl: React.FC<SunPositionControlProps> = ({
                     : 'bg-neutral-100 text-neutral-700 hover:bg-neutral-200'
                 }
               `}
-              title={isPlaying ? t('search:map.pauseAnimation', 'Pause') : t('search:map.playAnimation', 'Play')}
+              aria-label={isPlaying ? t('search:map.pauseAnimation', 'Pause') : t('search:map.playAnimation', 'Play')}
             >
               {isPlaying ? <PauseIcon className="w-3 h-3" /> : <PlayIcon className="w-3 h-3" />}
             </button>
@@ -670,7 +670,7 @@ const SunPositionControl: React.FC<SunPositionControlProps> = ({
                         : 'bg-neutral-100 text-neutral-600 hover:bg-neutral-200'
                     }
                   `}
-                  title={season.label}
+                  aria-label={season.label}
                 >
                   {season.icon}
                 </button>

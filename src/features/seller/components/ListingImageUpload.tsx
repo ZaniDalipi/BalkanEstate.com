@@ -75,7 +75,7 @@ const ListingImageUpload: React.FC<ListingImageUploadProps> = ({
                                         onDragOver={(e) => e.preventDefault()}
                                     >
                                         <img src={img.previewUrl} alt={`preview ${index}`} className="w-full h-24 object-cover rounded-md mb-2 border" />
-                                        <button type="button" onClick={() => removeImage(index)} className="absolute top-1 right-1 bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs opacity-0 group-hover:opacity-100 transition-opacity z-10">&times;</button>
+                                        <button type="button" onClick={() => removeImage(index)} aria-label={`Remove image ${index + 1}`} className="absolute top-1 right-1 bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs opacity-0 group-hover:opacity-100 transition-opacity z-10">&times;</button>
                                         <ImageTagSelector
                                             value={listingData.image_tags.find(t => t.index === index)?.tag || 'other'}
                                             options={ALL_VALID_TAGS}
@@ -97,7 +97,7 @@ const ListingImageUpload: React.FC<ListingImageUploadProps> = ({
                     <input id="floorplan-upload" type="file" accept="image/*" className="hidden" onChange={handleFloorplanImageChange} />
                 </label>
                 {floorplanImage.previewUrl && (
-                    <div className="mt-2 relative inline-block"><img src={floorplanImage.previewUrl} alt="floorplan" className="w-32 h-32 object-cover rounded-md" /><button type="button" onClick={() => setFloorplanImage({file: null, previewUrl: ''})} className="absolute -top-1 -right-1 bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs">&times;</button></div>
+                    <div className="mt-2 relative inline-block"><img src={floorplanImage.previewUrl} alt="floorplan" className="w-32 h-32 object-cover rounded-md" /><button type="button" onClick={() => setFloorplanImage({file: null, previewUrl: ''})} aria-label="Remove floorplan image" className="absolute -top-1 -right-1 bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs">&times;</button></div>
                 )}
             </div>
 

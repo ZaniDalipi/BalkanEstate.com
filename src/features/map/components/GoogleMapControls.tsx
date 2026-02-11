@@ -478,6 +478,7 @@ const GoogleMapControls: React.FC<GoogleMapControlsProps> = ({
             )}
             <button
               onClick={() => setIsLayerMenuOpen(!isLayerMenuOpen)}
+              aria-label="Map layer settings"
               className={`w-12 h-12 rounded-full shadow-lg flex items-center justify-center transition-all border border-white/40 ${
                 isLayerMenuOpen ? 'bg-primary text-white' : 'bg-white/90 text-gray-700'
               }`}
@@ -507,12 +508,14 @@ const GoogleMapControls: React.FC<GoogleMapControlsProps> = ({
                 </button>
                 <button
                   onClick={handleRecenter}
+                  aria-label="Recenter map"
                   className="p-2 rounded-xl hover:bg-white/50 text-neutral-600"
                 >
                   <CrosshairsIcon className="w-5 h-5" />
                 </button>
                 <button
                   onClick={onDrawStart}
+                  aria-label={isDrawing ? 'Cancel drawing' : 'Draw on map'}
                   className={`flex items-center gap-1.5 px-3 py-2 rounded-xl transition-all ${
                     isDrawing ? 'bg-red-500 text-white' : 'bg-neutral-800 text-white'
                   }`}

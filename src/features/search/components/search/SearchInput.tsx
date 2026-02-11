@@ -59,6 +59,7 @@ const SearchInput: React.FC<SearchInputProps> = ({
                 onChange={(e) => onChange(e.target.value)}
                 onKeyDown={(e) => e.key === 'Enter' && onSearch()}
                 onFocus={() => onFocusChange(true)}
+                aria-label="Search by city, address, or keyword"
                 className={isMobile
                     ? "block w-full text-base bg-transparent border-none text-neutral-900 px-9 py-1 focus:outline-none focus:ring-0"
                     : "block w-full bg-white border border-neutral-300 rounded-xl text-neutral-900 text-sm px-3 py-2 pl-9 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all placeholder:text-neutral-400"
@@ -66,7 +67,7 @@ const SearchInput: React.FC<SearchInputProps> = ({
             />
             {value && !isSearching && (
                 <div className="absolute inset-y-0 right-0 flex items-center pr-2">
-                    <button onClick={onClear} className="text-neutral-400 hover:text-neutral-800">
+                    <button onClick={onClear} aria-label="Clear search" className="text-neutral-400 hover:text-neutral-800">
                         <XMarkIcon className="h-5 w-5" />
                     </button>
                 </div>

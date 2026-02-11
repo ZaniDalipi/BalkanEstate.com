@@ -17,7 +17,7 @@
     </script>
 
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3e%3cpath fill='%230252CD' d='M2 21V16L5 14.5V21H2Z M3 15V11L6 9.5V15H3Z M11 21V16L14 14V21H11Z M12 15V10L15 8V15H12Z M13 9V5L16 3V9H13Z'/%3e%3cpath fill='%234A8FE7' d='M5 14.5L8 16V21H5V14.5Z M6 9.5L9 11V15H6V9.5Z M14 14L18 16V21H14V14Z M15 8L19 10V15H15V8Z M16 3L20 5V9H16V3Z'/%3e%3cpath fill='%236BA3F5' d='M2 16L5 14.5L8 16L5 17.5Z M3 11L6 9.5L9 11L6 12.5Z M11 16L14 14L18 16L14 18Z M12 10L15 8L19 10L15 12Z M13 5L16 3L20 5L16 7Z'/%3e%3c/svg%3e" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
 
     <!-- Primary Meta Tags -->
     <title>BalkanEstateAI - Find Your Dream Property in the Balkans</title>
@@ -95,7 +95,7 @@
     <link rel="alternate" hreflang="hr" href="https://balkanestateai.com/hr" />
     <link rel="alternate" hreflang="bs" href="https://balkanestateai.com/bs" />
     <link rel="alternate" hreflang="mk" href="https://balkanestateai.com/mk" />
-    <link rel="alternate" hreflang="me" href="https://balkanestateai.com/me" />
+    <link rel="alternate" hreflang="sr-ME" href="https://balkanestateai.com/me" />
     <link rel="alternate" hreflang="ro" href="https://balkanestateai.com/ro" />
     <link rel="alternate" hreflang="el" href="https://balkanestateai.com/el" />
     <link rel="alternate" hreflang="x-default" href="https://balkanestateai.com" />
@@ -104,16 +104,13 @@
     <link rel="dns-prefetch" href="https://res.cloudinary.com">
     <link rel="dns-prefetch" href="https://unpkg.com">
 
-    <!-- Preconnect to critical domains (high priority) -->
+    <!-- Preconnect to critical domains (high priority, max 4) -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link rel="preconnect" href="https://images.unsplash.com">
+    <link rel="preconnect" href="https://res.cloudinary.com">
+    <link rel="preconnect" href="https://api.balkanestateai.com">
 
-    <!-- Google Maps preconnect for faster map loading -->
-    <link rel="preconnect" href="https://maps.googleapis.com">
-    <link rel="preconnect" href="https://maps.gstatic.com" crossorigin>
-    <link rel="preconnect" href="https://khms0.google.com" crossorigin>
-    <link rel="preconnect" href="https://khms1.google.com" crossorigin>
+    <!-- DNS prefetch for deferred resources (Google Maps loads lazily) -->
     <link rel="dns-prefetch" href="https://maps.googleapis.com">
     <link rel="dns-prefetch" href="https://maps.gstatic.com">
 
@@ -344,10 +341,10 @@
         transform: scale(0.95) !important;
       }
 
-      /* Magical slider shimmer animation */
+      /* Magical slider shimmer animation - uses transform for GPU compositing */
       @keyframes shimmer {
-        0% { background-position: 200% 0; }
-        100% { background-position: -200% 0; }
+        0% { transform: translateX(-100%); }
+        100% { transform: translateX(100%); }
       }
 
       /* Floating animation for decorative elements */

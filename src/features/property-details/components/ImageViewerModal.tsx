@@ -82,8 +82,8 @@ const ImageViewerModal: React.FC<ImageViewerModalProps> = ({ images, startIndex,
     };
 
     return (
-        <div className="fixed inset-0 bg-black/90 z-[6000] flex flex-col items-center justify-center p-4" onClick={handleBackdropClick}>
-            <button onClick={onClose} className="absolute top-4 right-4 text-white/70 hover:text-white z-20">
+        <div className="fixed inset-0 bg-black/90 z-[6000] flex flex-col items-center justify-center p-4" onClick={handleBackdropClick} role="dialog" aria-modal="true" aria-label="Image viewer">
+            <button onClick={onClose} aria-label="Close image viewer" className="absolute top-4 right-4 text-white/70 hover:text-white z-20">
                 <XMarkIcon className="w-8 h-8" />
             </button>
             
@@ -93,7 +93,7 @@ const ImageViewerModal: React.FC<ImageViewerModalProps> = ({ images, startIndex,
                 onTouchMove={onTouchMove}
                 onTouchEnd={onTouchEnd}
             >
-                <button onClick={handlePrev} className="absolute left-2 sm:left-4 top-1/2 -translate-y-1/2 bg-white/20 backdrop-blur-sm p-2 sm:p-3 rounded-full hover:bg-white/40 transition-colors z-10">
+                <button onClick={handlePrev} aria-label="Previous image" className="absolute left-2 sm:left-4 top-1/2 -translate-y-1/2 bg-white/20 backdrop-blur-sm p-2 sm:p-3 rounded-full hover:bg-white/40 transition-colors z-10">
                     <ChevronLeftIcon className="w-6 h-6 sm:w-8 sm:h-8 text-white"/>
                 </button>
 
@@ -118,7 +118,7 @@ const ImageViewerModal: React.FC<ImageViewerModalProps> = ({ images, startIndex,
                     )}
                 </div>
 
-                <button onClick={handleNext} className="absolute right-2 sm:right-4 top-1/2 -translate-y-1/2 bg-white/20 backdrop-blur-sm p-2 sm:p-3 rounded-full hover:bg-white/40 transition-colors z-10">
+                <button onClick={handleNext} aria-label="Next image" className="absolute right-2 sm:right-4 top-1/2 -translate-y-1/2 bg-white/20 backdrop-blur-sm p-2 sm:p-3 rounded-full hover:bg-white/40 transition-colors z-10">
                     <ChevronRightIcon className="w-6 h-6 sm:w-8 sm:h-8 text-white"/>
                 </button>
             </div>

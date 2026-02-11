@@ -50,12 +50,13 @@ const AgentEditModal: React.FC<AgentEditModalProps> = ({
     if (!isOpen) return null;
 
     return (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-            <div className="bg-white rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto shadow-2xl">
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4" role="presentation">
+            <div className="bg-white rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto shadow-2xl" role="dialog" aria-modal="true" aria-label="Edit agent profile">
                 <div className="sticky top-0 bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between">
                     <h2 className="text-xl font-bold text-gray-900">{t('profilePage.editModal.title')}</h2>
                     <button
                         onClick={onClose}
+                        aria-label="Close edit modal"
                         className="p-2 hover:bg-gray-100 rounded-full transition-colors"
                     >
                         <XMarkIcon className="w-6 h-6 text-gray-500" />

@@ -91,13 +91,13 @@ const PromotionHistoryModal: React.FC<PromotionHistoryModalProps> = ({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 overflow-y-auto">
+    <div className="fixed inset-0 z-50 overflow-y-auto" role="presentation">
       <div className="flex min-h-screen items-center justify-center p-4">
         {/* Backdrop */}
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm" onClick={onClose} />
 
         {/* Modal */}
-        <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-hidden">
+        <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-hidden" role="dialog" aria-modal="true" aria-label="Promotion history">
           {/* Header */}
           <div className="bg-gradient-to-r from-primary to-primary-dark p-6 text-white">
             <div className="flex items-center justify-between">

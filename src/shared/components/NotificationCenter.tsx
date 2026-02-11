@@ -201,6 +201,7 @@ const NotificationCenter: React.FC = () => {
               )}
               <button
                 onClick={() => setIsOpen(false)}
+                aria-label="Close notifications"
                 className="p-1 hover:bg-white/50 rounded-lg transition-colors"
               >
                 <X className="w-4 h-4 text-gray-500" />

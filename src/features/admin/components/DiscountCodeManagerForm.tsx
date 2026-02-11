@@ -22,21 +22,22 @@ export const CreateCodeModal: React.FC<CreateCodeModalProps> = ({
   onClose,
 }) => {
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4" role="presentation">
+      <div className="bg-white rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto" role="dialog" aria-modal="true" aria-label="Create discount code">
         <div className="p-6 border-b border-gray-200 flex items-center justify-between sticky top-0 bg-white">
           <h3 className="text-xl font-bold">Create Discount Code</h3>
-          <button onClick={onClose}>
+          <button onClick={onClose} aria-label="Close">
             <XMarkIcon className="w-6 h-6 text-gray-500 hover:text-gray-700" />
           </button>
         </div>
 
         <form onSubmit={onSubmit} className="p-6 space-y-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label htmlFor="discount-code" className="block text-sm font-medium text-gray-700 mb-1">
               Code <span className="text-red-500">*</span>
             </label>
             <input
+              id="discount-code"
               type="text"
               value={newCode.code}
               onChange={(e) => setNewCode({ ...newCode, code: e.target.value.toUpperCase() })}
@@ -48,10 +49,11 @@ export const CreateCodeModal: React.FC<CreateCodeModalProps> = ({
 
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label htmlFor="discount-type" className="block text-sm font-medium text-gray-700 mb-1">
                 Discount Type
               </label>
               <select
+                id="discount-type"
                 value={newCode.discountType}
                 onChange={(e) => setNewCode({ ...newCode, discountType: e.target.value as any })}
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg"
@@ -62,10 +64,11 @@ export const CreateCodeModal: React.FC<CreateCodeModalProps> = ({
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label htmlFor="discount-value" className="block text-sm font-medium text-gray-700 mb-1">
                 Discount Value <span className="text-red-500">*</span>
               </label>
               <input
+                id="discount-value"
                 type="number"
                 value={newCode.discountValue}
                 onChange={(e) => handleNewCodeNumber('discountValue', e.target.value, 1)}
@@ -78,10 +81,11 @@ export const CreateCodeModal: React.FC<CreateCodeModalProps> = ({
 
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label htmlFor="discount-valid-until" className="block text-sm font-medium text-gray-700 mb-1">
                 Valid Until <span className="text-red-500">*</span>
               </label>
               <input
+                id="discount-valid-until"
                 type="datetime-local"
                 value={newCode.validUntil}
                 onChange={(e) => setNewCode({ ...newCode, validUntil: e.target.value })}
@@ -91,10 +95,11 @@ export const CreateCodeModal: React.FC<CreateCodeModalProps> = ({
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label htmlFor="discount-usage-limit" className="block text-sm font-medium text-gray-700 mb-1">
                 Usage Limit
               </label>
               <input
+                id="discount-usage-limit"
                 type="number"
                 value={newCode.usageLimit}
                 onChange={(e) => handleNewCodeNumber('usageLimit', e.target.value, 1)}
@@ -105,10 +110,11 @@ export const CreateCodeModal: React.FC<CreateCodeModalProps> = ({
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label htmlFor="discount-min-purchase" className="block text-sm font-medium text-gray-700 mb-1">
               Minimum Purchase Amount (&euro;)
             </label>
             <input
+              id="discount-min-purchase"
               type="number"
               value={newCode.minimumPurchaseAmount}
               onChange={(e) => handleNewCodeNumber('minimumPurchaseAmount', e.target.value, 0)}
@@ -118,10 +124,11 @@ export const CreateCodeModal: React.FC<CreateCodeModalProps> = ({
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label htmlFor="discount-source" className="block text-sm font-medium text-gray-700 mb-1">
               Code Type/Source
             </label>
             <select
+              id="discount-source"
               value={newCode.source}
               onChange={(e) => setNewCode({ ...newCode, source: e.target.value })}
               className="w-full px-4 py-2 border border-gray-300 rounded-lg"
@@ -171,10 +178,11 @@ export const CreateCodeModal: React.FC<CreateCodeModalProps> = ({
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label htmlFor="discount-description" className="block text-sm font-medium text-gray-700 mb-1">
               Description
             </label>
             <textarea
+              id="discount-description"
               value={newCode.description}
               onChange={(e) => setNewCode({ ...newCode, description: e.target.value })}
               className="w-full px-4 py-2 border border-gray-300 rounded-lg"
@@ -224,11 +232,11 @@ export const BulkGenerateModal: React.FC<BulkGenerateModalProps> = ({
   onClose,
 }) => {
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-lg max-w-lg w-full">
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4" role="presentation">
+      <div className="bg-white rounded-lg max-w-lg w-full" role="dialog" aria-modal="true" aria-label="Bulk generate codes">
         <div className="p-6 border-b border-gray-200 flex items-center justify-between">
           <h3 className="text-xl font-bold">Bulk Generate Codes</h3>
-          <button onClick={onClose}>
+          <button onClick={onClose} aria-label="Close">
             <XMarkIcon className="w-6 h-6 text-gray-500 hover:text-gray-700" />
           </button>
         </div>
@@ -236,10 +244,11 @@ export const BulkGenerateModal: React.FC<BulkGenerateModalProps> = ({
         <form onSubmit={onSubmit} className="p-6 space-y-4">
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label htmlFor="bulk-count" className="block text-sm font-medium text-gray-700 mb-1">
                 Number of Codes
               </label>
               <input
+                id="bulk-count"
                 type="number"
                 value={bulkForm.count}
                 onChange={(e) => handleBulkFormNumber('count', e.target.value, 1)}
@@ -251,10 +260,11 @@ export const BulkGenerateModal: React.FC<BulkGenerateModalProps> = ({
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label htmlFor="bulk-prefix" className="block text-sm font-medium text-gray-700 mb-1">
                 Code Prefix
               </label>
               <input
+                id="bulk-prefix"
                 type="text"
                 value={bulkForm.prefix}
                 onChange={(e) => setBulkForm({ ...bulkForm, prefix: e.target.value.toUpperCase() })}
@@ -266,10 +276,11 @@ export const BulkGenerateModal: React.FC<BulkGenerateModalProps> = ({
 
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label htmlFor="bulk-discount-type" className="block text-sm font-medium text-gray-700 mb-1">
                 Discount Type
               </label>
               <select
+                id="bulk-discount-type"
                 value={bulkForm.discountType}
                 onChange={(e) => setBulkForm({ ...bulkForm, discountType: e.target.value as any })}
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg"
@@ -280,10 +291,11 @@ export const BulkGenerateModal: React.FC<BulkGenerateModalProps> = ({
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label htmlFor="bulk-discount-value" className="block text-sm font-medium text-gray-700 mb-1">
                 Discount Value
               </label>
               <input
+                id="bulk-discount-value"
                 type="number"
                 value={bulkForm.discountValue}
                 onChange={(e) => handleBulkFormNumber('discountValue', e.target.value, 1)}
@@ -296,10 +308,11 @@ export const BulkGenerateModal: React.FC<BulkGenerateModalProps> = ({
 
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label htmlFor="bulk-valid-until" className="block text-sm font-medium text-gray-700 mb-1">
                 Valid Until
               </label>
               <input
+                id="bulk-valid-until"
                 type="datetime-local"
                 value={bulkForm.validUntil}
                 onChange={(e) => setBulkForm({ ...bulkForm, validUntil: e.target.value })}
@@ -309,10 +322,11 @@ export const BulkGenerateModal: React.FC<BulkGenerateModalProps> = ({
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label htmlFor="bulk-usage-limit" className="block text-sm font-medium text-gray-700 mb-1">
                 Usage Limit (each)
               </label>
               <input
+                id="bulk-usage-limit"
                 type="number"
                 value={bulkForm.usageLimit}
                 onChange={(e) => handleBulkFormNumber('usageLimit', e.target.value, 1)}

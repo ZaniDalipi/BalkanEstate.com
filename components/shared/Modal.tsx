@@ -62,10 +62,13 @@ const Modal: React.FC<ModalProps> = ({ isOpen, onClose, title, children, size = 
     : 'fixed inset-0 bg-black/30 backdrop-blur-md z-[5000] flex justify-center items-center p-2 sm:p-3 md:p-4 overflow-x-hidden overflow-y-auto';
 
   return (
-    <div className={backdropClasses} onClick={handleBackdropClick}>
+    <div className={backdropClasses} onClick={handleBackdropClick} role="presentation">
       <div
         className={`bg-white shadow-xl p-4 sm:p-4 md:p-6 w-full ${sizeClass} relative overflow-y-auto ${mobileFullScreenClasses}`}
         onClick={handleContentClick}
+        role="dialog"
+        aria-modal="true"
+        aria-label={title || 'Dialog'}
       >
         <button onClick={onClose} className="absolute top-3 right-3 sm:top-4 sm:right-4 text-neutral-500 hover:text-neutral-800 z-10 p-1" aria-label="Close modal">
           <XMarkIcon className="w-5 h-5 sm:w-6 sm:h-6" />

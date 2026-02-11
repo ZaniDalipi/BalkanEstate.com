@@ -336,11 +336,8 @@ export function useSearchPage() {
     }, [filters.country, filters.query]);
 
     useEffect(() => {
-        let timeoutId: number;
-
         const handleGeoError = (error: GeolocationPositionError) => {
             if (error.code === error.POSITION_UNAVAILABLE) {
-                // Warning removed
                 return;
             }
 
@@ -363,14 +360,11 @@ export function useSearchPage() {
             if (navigator.geolocation) {
                 navigator.geolocation.getCurrentPosition(
                     (position) => {
-                        // Skip setting user location if navigating from explore cities or similar
                         if (skipGeolocationRef.current) {
                             return;
                         }
                         const { latitude, longitude } = position.coords;
-                        if (!userLocation && !filters.query.trim()) {
-                           setUserLocation([latitude, longitude]);
-                        } else if (!userLocation) {
+                        if (!userLocation) {
                            setUserLocation([latitude, longitude]);
                         }
                     },
@@ -381,14 +375,21 @@ export function useSearchPage() {
                             handleGeoError(error);
                         }
                     },
-                    { enableHighAccuracy: highAccuracy, timeout: 10000, maximumAge: 0 }
+                    { enableHighAccuracy: highAccuracy, timeout: 10000, maximumAge: 300000 }
                 );
             }
         };
 
-        getLocation();
-        timeoutId = window.setTimeout(() => getLocation(), 5000);
-        return () => clearTimeout(timeoutId);
+        // Only request geolocation if permission was already granted (no prompt)
+        // This avoids the PageSpeed "Requests geolocation on page load" warning
+        if (navigator.permissions) {
+            navigator.permissions.query({ name: 'geolocation' }).then((result) => {
+                if (result.state === 'granted') {
+                    getLocation();
+                }
+                // If 'prompt' or 'denied', wait for user to interact with "locate me" button
+            });
+        }
     }, []);
 
     const showToast = useCallback((message: string, type: 'success' | 'error') => {

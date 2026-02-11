@@ -721,6 +721,7 @@ const AuthPage: React.FC = () => {
             <div
                 className="fixed inset-0 z-[5000] flex justify-center items-start md:items-center p-0 md:p-4 overflow-y-auto"
                 onClick={handleClose}
+                role="presentation"
             >
                 {/* Glassmorphism backdrop */}
                 <div className="absolute inset-0 bg-gradient-to-br from-primary/20 via-neutral-900/60 to-primary/30 backdrop-blur-md" />
@@ -740,6 +741,9 @@ const AuthPage: React.FC = () => {
                                flex flex-col md:my-4 overflow-y-auto
                                animate-in fade-in-0 zoom-in-95 duration-300"
                     onClick={(e) => e.stopPropagation()}
+                    role="dialog"
+                    aria-modal="true"
+                    aria-label="Authentication"
                 >
                     {/* Subtle inner glow */}
                     <div className="absolute inset-0 rounded-3xl bg-gradient-to-br from-white/50 via-transparent to-white/30 pointer-events-none" />

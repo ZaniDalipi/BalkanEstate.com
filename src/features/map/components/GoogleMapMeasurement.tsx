@@ -99,6 +99,7 @@ const GoogleMapMeasurement: React.FC<GoogleMapMeasurementProps> = ({
             </h3>
             <button
               onClick={() => setShowMeasurement(false)}
+              aria-label="Close measurement tool"
               className="p-1 rounded-full hover:bg-gray-100 text-gray-500"
             >
               <XCircleIcon className="w-5 h-5" />
@@ -220,6 +221,7 @@ const GoogleMapMeasurement: React.FC<GoogleMapMeasurementProps> = ({
                 </div>
                 <button
                   onClick={() => { setShowSaveModal(false); setPendingMeasurement(null); }}
+                  aria-label="Close save measurement dialog"
                   className="p-1 rounded-full hover:bg-white/20 transition-colors"
                 >
                   <XCircleIcon className="w-5 h-5" />

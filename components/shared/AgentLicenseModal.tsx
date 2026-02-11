@@ -150,8 +150,8 @@ const AgentLicenseModal: React.FC<AgentLicenseModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-lg shadow-xl max-w-md w-full">
+    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4" role="presentation">
+      <div className="bg-white rounded-lg shadow-xl max-w-md w-full" role="dialog" aria-modal="true" aria-label="Agent license verification">
         {/* Header */}
         <div className="flex items-center justify-between p-6 border-b">
           <h2 className="text-xl font-semibold text-gray-900">

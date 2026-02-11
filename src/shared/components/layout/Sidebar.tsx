@@ -132,7 +132,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
                             Balkan <span className="text-primary">Estate</span>
                         </h1>
                     </button>
-                    <button onClick={onClose} className="md:hidden absolute right-3 top-4 text-neutral-700 hover:text-neutral-800">
+                    <button onClick={onClose} aria-label="Close sidebar" className="md:hidden absolute right-3 top-4 text-neutral-700 hover:text-neutral-800">
                         <XMarkIcon className="w-5 h-5"/>
                     </button>
                 </div>

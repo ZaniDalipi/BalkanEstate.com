@@ -325,7 +325,7 @@ const SavedSearchAccordion: React.FC<SavedSearchAccordionProps> = ({ search, onO
                 onClick={handleSaveRename}
                 disabled={isUpdating}
                 className="p-2 text-green-600 hover:bg-green-50 rounded-full transition-colors disabled:opacity-50"
-                title={t('accordion.save')}
+                aria-label={t('accordion.save')}
               >
                 <CheckCircleIcon className="w-5 h-5" />
               </button>
@@ -333,7 +333,7 @@ const SavedSearchAccordion: React.FC<SavedSearchAccordionProps> = ({ search, onO
                 onClick={handleCancelRename}
                 disabled={isUpdating}
                 className="p-2 text-neutral-500 hover:bg-neutral-100 rounded-full transition-colors disabled:opacity-50"
-                title={t('accordion.cancel')}
+                aria-label={t('accordion.cancel')}
               >
                 <XMarkIcon className="w-5 h-5" />
               </button>
@@ -360,7 +360,7 @@ const SavedSearchAccordion: React.FC<SavedSearchAccordionProps> = ({ search, onO
                       ? 'text-green-600 bg-green-50 hover:bg-green-100'
                       : 'text-neutral-400 hover:bg-neutral-100 hover:text-neutral-600'
                   }`}
-                  title={hasBuyerSubscription ? t('accordion.alertSettings', 'Alert settings') : t('accordion.upgradeForAlerts', 'Upgrade to enable alerts')}
+                  aria-label={hasBuyerSubscription ? t('accordion.alertSettings', 'Alert settings') : t('accordion.upgradeForAlerts', 'Upgrade to enable alerts')}
                 >
                   {alertsEnabled ? <BellIcon className="w-5 h-5" /> : <BellDotIcon className="w-5 h-5" />}
                 </button>
@@ -375,6 +375,7 @@ const SavedSearchAccordion: React.FC<SavedSearchAccordionProps> = ({ search, onO
                       <button
                         onClick={() => handleUpdateAlerts(!alertsEnabled, alertFrequency)}
                         disabled={isUpdatingAlerts}
+                        aria-label={alertsEnabled ? t('accordion.disableAlerts', 'Disable email alerts') : t('accordion.enableAlerts', 'Enable email alerts')}
                         className={`relative w-10 h-5 rounded-full transition-colors ${
                           alertsEnabled ? 'bg-green-500' : 'bg-neutral-300'
                         } ${isUpdatingAlerts ? 'opacity-50' : ''}`}
@@ -413,7 +414,7 @@ const SavedSearchAccordion: React.FC<SavedSearchAccordionProps> = ({ search, onO
               <button
                 onClick={handleStartRename}
                 className="p-2 text-neutral-600 hover:bg-neutral-100 rounded-full transition-colors"
-                title={t('accordion.rename')}
+                aria-label={t('accordion.rename')}
               >
                 <PencilIcon className="w-5 h-5" />
               </button>
@@ -421,7 +422,7 @@ const SavedSearchAccordion: React.FC<SavedSearchAccordionProps> = ({ search, onO
                 onClick={handleDelete}
                 disabled={isDeleting}
                 className="p-2 text-red-500 hover:bg-red-50 rounded-full transition-colors disabled:opacity-50"
-                title={t('accordion.delete')}
+                aria-label={t('accordion.delete')}
               >
                 <TrashIcon className="w-5 h-5" />
               </button>

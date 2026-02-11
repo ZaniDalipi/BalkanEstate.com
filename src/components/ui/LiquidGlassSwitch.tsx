@@ -164,6 +164,8 @@ export const LiquidGlassSwitch: React.FC<LiquidGlassSwitchProps> = ({
             return (
               <button
                 key={option.value}
+                role="tab"
+                aria-selected={isActive}
                 onClick={() => onChange(option.value)}
                 className={`
                   relative z-20 flex items-center justify-center font-semibold

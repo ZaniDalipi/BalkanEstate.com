@@ -70,9 +70,12 @@ const FloorPlanViewerModal: React.FC<FloorPlanViewerModalProps> = ({ imageUrl, o
     }, [onClose]);
 
     return (
-        <div 
-            className="fixed inset-0 bg-black/80 z-[6000] flex flex-col items-center justify-center p-4" 
+        <div
+            className="fixed inset-0 bg-black/80 z-[6000] flex flex-col items-center justify-center p-4"
             onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}
+            role="dialog"
+            aria-modal="true"
+            aria-label="Floor plan viewer"
         >
             <div className="absolute top-4 right-4 z-20 flex items-center gap-2">
                  <div className="flex items-center gap-1 bg-neutral-800/60 p-1.5 rounded-lg backdrop-blur-sm">

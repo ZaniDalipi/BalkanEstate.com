@@ -350,6 +350,7 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
                     }
                   }}
                   className="absolute top-3 right-3 z-20 flex items-center justify-center w-10 h-10 bg-black/60 backdrop-blur-sm text-white rounded-full hover:bg-black/80 transition-colors"
+                  aria-label={isMuted ? 'Unmute video' : 'Mute video'}
                   title={isMuted ? 'Unmute' : 'Mute'}
                 >
                   {isMuted ? (
@@ -433,6 +434,7 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
             <button
               onClick={() => setIsFullscreen(!isFullscreen)}
               className="absolute top-4 right-4 bg-white/90 backdrop-blur-sm p-3 rounded-full shadow-lg hover:bg-white transition-colors z-10 md:hidden"
+              aria-label={isFullscreen ? 'Exit fullscreen' : 'Enter fullscreen'}
               title={isFullscreen ? 'Exit fullscreen' : 'Fullscreen'}
             >
               {isFullscreen ? (
@@ -477,6 +479,7 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
                   e.stopPropagation();
                   onOpenEditor(currentImageUrl);
                 }}
+                aria-label="Annotate image"
                 className="flex items-center justify-center bg-white/90 backdrop-blur-sm text-neutral-800 rounded-full hover:scale-105 transition-transform shadow-md w-10 h-10 sm:w-auto sm:h-auto sm:gap-2 sm:px-4 sm:py-2"
               >
                 <PencilIcon className="w-5 h-5 sm:w-5 sm:h-5" />
@@ -493,6 +496,7 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
                     e.stopPropagation();
                     handlePrevImage();
                   }}
+                  aria-label="Previous image"
                   className="absolute left-2 sm:left-3 top-1/2 -translate-y-1/2 bg-white/80 backdrop-blur-sm rounded-full hover:bg-white transition-colors shadow-md z-10 w-10 h-10 sm:w-10 sm:h-10 flex items-center justify-center"
                 >
                   <ChevronLeftIcon className="w-5 h-5 sm:w-5 sm:h-5 text-neutral-800" />
@@ -502,6 +506,7 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
                     e.stopPropagation();
                     handleNextImage();
                   }}
+                  aria-label="Next image"
                   className="absolute right-2 sm:right-3 top-1/2 -translate-y-1/2 bg-white/80 backdrop-blur-sm rounded-full hover:bg-white transition-colors shadow-md z-10 w-10 h-10 sm:w-10 sm:h-10 flex items-center justify-center"
                 >
                   <ChevronRightIcon className="w-5 h-5 sm:w-5 sm:h-5 text-neutral-800" />
