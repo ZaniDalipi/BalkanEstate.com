@@ -546,6 +546,9 @@ export function useGoogleMap(props: GoogleMapComponentProps) {
             div.style.boxShadow = '0 2px 8px rgba(2, 82, 205, 0.4), 0 1px 3px rgba(0,0,0,0.2)';
           });
 
+          if (!google?.maps?.marker?.AdvancedMarkerElement) {
+            return null as unknown as google.maps.marker.AdvancedMarkerElement;
+          }
           return new google.maps.marker.AdvancedMarkerElement({
             position,
             content: div,
@@ -781,7 +784,7 @@ export function useGoogleMap(props: GoogleMapComponentProps) {
   useEffect(() => {
     // Use ref as fallback to avoid race condition where state hasn't updated yet
     const mapToUse = map || mapInstanceRef.current;
-    if (!mapToUse || !clustererRef.current || !isLoaded) return;
+    if (!mapToUse || !clustererRef.current || !isLoaded || !google?.maps?.marker?.AdvancedMarkerElement) return;
 
     // Abort flag — if effect re-runs (new properties/map change), cancel in-flight batches
     let aborted = false;
@@ -1557,6 +1560,7 @@ export function useGoogleMap(props: GoogleMapComponentProps) {
         </svg>`;
         el.style.pointerEvents = 'none';
 
+        if (!google?.maps?.marker?.AdvancedMarkerElement) return;
         const marker = new google.maps.marker.AdvancedMarkerElement({
           position: { lat: point.lat, lng: point.lng },
           map,
