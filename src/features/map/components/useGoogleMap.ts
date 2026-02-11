@@ -164,6 +164,18 @@ export function useGoogleMap(props: GoogleMapComponentProps) {
   // Load Google Maps API using centralized hook (enables preloading benefits)
   const { isLoaded, loadError } = useGoogleMapLoader();
 
+  // Explicitly load the marker library to avoid race condition where
+  // isLoaded is true but google.maps.marker.AdvancedMarkerElement is undefined
+  const advancedMarkerRef = useRef<typeof google.maps.marker.AdvancedMarkerElement | null>(null);
+  const [markerLibLoaded, setMarkerLibLoaded] = useState(false);
+  useEffect(() => {
+    if (!isLoaded || advancedMarkerRef.current) return;
+    google.maps.importLibrary('marker').then((lib: google.maps.MarkerLibrary) => {
+      advancedMarkerRef.current = lib.AdvancedMarkerElement;
+      setMarkerLibLoaded(true);
+    });
+  }, [isLoaded]);
+
   // RainViewer precipitation radar (free, no API key) - for flood layer
   const { tileUrl: rainViewerTileUrl } = useRainViewer(selectedClimateRisk === 'flood');
 
@@ -546,7 +558,7 @@ export function useGoogleMap(props: GoogleMapComponentProps) {
             div.style.boxShadow = '0 2px 8px rgba(2, 82, 205, 0.4), 0 1px 3px rgba(0,0,0,0.2)';
           });
 
-          return new google.maps.marker.AdvancedMarkerElement({
+          return new advancedMarkerRef.current!({
             position,
             content: div,
           });
@@ -781,7 +793,7 @@ export function useGoogleMap(props: GoogleMapComponentProps) {
   useEffect(() => {
     // Use ref as fallback to avoid race condition where state hasn't updated yet
     const mapToUse = map || mapInstanceRef.current;
-    if (!mapToUse || !clustererRef.current || !isLoaded) return;
+    if (!mapToUse || !clustererRef.current || !isLoaded || !advancedMarkerRef.current) return;
 
     // Abort flag — if effect re-runs (new properties/map change), cancel in-flight batches
     let aborted = false;
@@ -866,7 +878,7 @@ export function useGoogleMap(props: GoogleMapComponentProps) {
           mapToUse?.panTo({ lat: property.lat, lng: property.lng });
         };
 
-        const marker = new google.maps.marker.AdvancedMarkerElement({
+        const marker = new advancedMarkerRef.current!({
           position: { lat: property.lat, lng: property.lng },
           content: markerDiv,
           zIndex: isActivelyPromoted ? 100 : 1,
@@ -907,7 +919,7 @@ export function useGoogleMap(props: GoogleMapComponentProps) {
         marker.map = null;
       });
     };
-  }, [validProperties, map, isLoaded]);
+  }, [validProperties, map, isLoaded, markerLibLoaded]);
 
   // Handle hover state changes from property list - use CSS classes for better performance
   useEffect(() => {
@@ -1493,7 +1505,7 @@ export function useGoogleMap(props: GoogleMapComponentProps) {
   const openMeteoMarkersRef = useRef<(google.maps.Circle | google.maps.marker.AdvancedMarkerElement)[]>([]);
 
   useEffect(() => {
-    if (!map || !isLoaded) return;
+    if (!map || !isLoaded || !advancedMarkerRef.current) return;
 
     // Remove previous markers/circles
     openMeteoMarkersRef.current.forEach(m => {
@@ -1557,7 +1569,7 @@ export function useGoogleMap(props: GoogleMapComponentProps) {
         </svg>`;
         el.style.pointerEvents = 'none';
 
-        const marker = new google.maps.marker.AdvancedMarkerElement({
+        const marker = new advancedMarkerRef.current!({
           position: { lat: point.lat, lng: point.lng },
           map,
           content: el,
@@ -1573,7 +1585,7 @@ export function useGoogleMap(props: GoogleMapComponentProps) {
       });
       openMeteoMarkersRef.current = [];
     };
-  }, [map, isLoaded, openMeteoData, openMeteoDataType]);
+  }, [map, isLoaded, markerLibLoaded, openMeteoData, openMeteoDataType]);
 
   // Memoize map options - MUST be before any early returns to maintain hooks order
   // Check if google is defined before accessing google.maps
