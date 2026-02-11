@@ -5,7 +5,7 @@ import { getCurrencySymbol } from '@/utils/currency';
 import MapLocationPicker from './MapLocationPicker';
 import NumberInputWithSteppers from '@/components/shared/NumberInputWithSteppers';
 import FloorInputCombined from '@/src/shared/components/ui/FloorInputCombined';
-import { ListingData, ImageData, floatingInputClasses, floatingLabelClasses, floatingSelectLabelClasses, inputBaseClasses } from './ListingFormHelpers';
+import { ListingData, ImageData, inputBaseClasses, labelClasses, selectClasses } from './ListingFormHelpers';
 
 interface ListingFormFieldsProps {
     listingData: ListingData;
@@ -40,55 +40,59 @@ const ListingFormFields: React.FC<ListingFormFieldsProps> = ({
 }) => {
     const { t } = useTranslation(['newListing', 'seller', 'common', 'validation']);
 
+    const chevronIcon = (
+        <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-gray-400">
+            <svg className="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
+                <path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/>
+            </svg>
+        </div>
+    );
+
     return (
         <>
-            <fieldset className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <fieldset className="grid grid-cols-1 md:grid-cols-2 gap-5">
                 {/* Country Dropdown */}
-                <div className="relative">
-                    <select
-                        id="country"
-                        value={selectedCountry}
-                        onChange={handleCountryChange}
-                        className={`${floatingInputClasses}`}
-                        required
-                    >
-                        <option value="">{t('seller:createListing.location.selectCountry')}</option>
-                        {BALKAN_LOCATIONS.map(country => (
-                            <option key={country.code} value={country.name}>
-                                {country.name}
-                            </option>
-                        ))}
-                    </select>
-                    <label htmlFor="country" className={floatingSelectLabelClasses}>{t('seller:createListing.location.country')}</label>
-                    <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-gray-400">
-                        <svg className="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
-                            <path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/>
-                        </svg>
+                <div>
+                    <label htmlFor="country" className={labelClasses}>{t('seller:createListing.location.country')}</label>
+                    <div className="relative">
+                        <select
+                            id="country"
+                            value={selectedCountry}
+                            onChange={handleCountryChange}
+                            className={selectClasses}
+                            required
+                        >
+                            <option value="">{t('seller:createListing.location.selectCountry')}</option>
+                            {BALKAN_LOCATIONS.map(country => (
+                                <option key={country.code} value={country.name}>
+                                    {country.name}
+                                </option>
+                            ))}
+                        </select>
+                        {chevronIcon}
                     </div>
                 </div>
 
                 {/* City Dropdown */}
-                <div className="relative">
-                    <select
-                        id="city"
-                        value={selectedCity}
-                        onChange={handleCityChange}
-                        className={`${floatingInputClasses}`}
-                        required
-                        disabled={!selectedCountry}
-                    >
-                        <option value="">{t('seller:createListing.location.selectCity')}</option>
-                        {availableCities.map(city => (
-                            <option key={city.name} value={city.name}>
-                                {city.name}
-                            </option>
-                        ))}
-                    </select>
-                    <label htmlFor="city" className={floatingSelectLabelClasses}>{t('seller:createListing.location.city')}</label>
-                    <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-gray-400">
-                        <svg className="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
-                            <path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/>
-                        </svg>
+                <div>
+                    <label htmlFor="city" className={labelClasses}>{t('seller:createListing.location.city')}</label>
+                    <div className="relative">
+                        <select
+                            id="city"
+                            value={selectedCity}
+                            onChange={handleCityChange}
+                            className={selectClasses}
+                            required
+                            disabled={!selectedCountry}
+                        >
+                            <option value="">{t('seller:createListing.location.selectCity')}</option>
+                            {availableCities.map(city => (
+                                <option key={city.name} value={city.name}>
+                                    {city.name}
+                                </option>
+                            ))}
+                        </select>
+                        {chevronIcon}
                     </div>
                 </div>
 
@@ -110,9 +114,10 @@ const ListingFormFields: React.FC<ListingFormFieldsProps> = ({
                     </div>
                 )}
 
-                <div className="relative md:col-span-2 cursor-text" onClick={() => document.getElementById('title')?.focus()}>
-                    <input type="text" id="title" name="title" value={listingData.title} onChange={handleInputChange} className={`${floatingInputClasses}`} placeholder=" " required maxLength={50} aria-describedby="titleHint" />
-                    <label htmlFor="title" className={floatingLabelClasses}>{t('seller:createListing.fields.listingTitle')}</label>
+                {/* Listing Title */}
+                <div className="md:col-span-2">
+                    <label htmlFor="title" className={labelClasses}>{t('seller:createListing.fields.listingTitle')}</label>
+                    <input type="text" id="title" name="title" value={listingData.title} onChange={handleInputChange} className={inputBaseClasses} placeholder={t('seller:createListing.fields.titleHint')} required maxLength={50} aria-describedby="titleHint" />
                     <div className="flex justify-between items-center mt-1">
                         <p id="titleHint" className="text-xs text-gray-400">
                             {t('seller:createListing.fields.titleHint')}
@@ -123,9 +128,10 @@ const ListingFormFields: React.FC<ListingFormFieldsProps> = ({
                     </div>
                 </div>
 
-                <div className="relative md:col-span-2 cursor-text" onClick={() => document.getElementById('streetAddress')?.focus()}>
-                    <input type="text" id="streetAddress" name="streetAddress" value={listingData.streetAddress} onChange={handleInputChange} className={`${floatingInputClasses}`} placeholder=" " aria-describedby="addressHint" />
-                    <label htmlFor="streetAddress" className={floatingLabelClasses}>{t('seller:createListing.location.address')}</label>
+                {/* Address */}
+                <div className="md:col-span-2">
+                    <label htmlFor="streetAddress" className={labelClasses}>{t('seller:createListing.location.address')}</label>
+                    <input type="text" id="streetAddress" name="streetAddress" value={listingData.streetAddress} onChange={handleInputChange} className={inputBaseClasses} placeholder={t('seller:createListing.location.addressHint')} aria-describedby="addressHint" />
                     <p id="addressHint" className="mt-1 text-xs text-gray-400">
                         {t('seller:createListing.location.addressHint')}
                         <br />
@@ -133,24 +139,30 @@ const ListingFormFields: React.FC<ListingFormFieldsProps> = ({
                     </p>
                 </div>
 
-                <div className="relative md:col-span-2 cursor-text" onClick={() => document.getElementById('price')?.focus()}>
-                    <input type="text" id="price" inputMode="numeric" name="price" value={listingData.price > 0 ? new Intl.NumberFormat('de-DE').format(listingData.price) : ''} onChange={handlePriceChange} className={`${floatingInputClasses} border-neutral-300 pl-8`} placeholder=" " required />
-                    <label htmlFor="price" className={floatingLabelClasses}>{t('seller:createListing.fields.price')}</label>
-                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">{getCurrencySymbol(selectedCountry)}</span>
+                {/* Price */}
+                <div className="md:col-span-2">
+                    <label htmlFor="price" className={labelClasses}>{t('seller:createListing.fields.price')}</label>
+                    <div className="relative">
+                        <input type="text" id="price" inputMode="numeric" name="price" value={listingData.price > 0 ? new Intl.NumberFormat('de-DE').format(listingData.price) : ''} onChange={handlePriceChange} className={`${inputBaseClasses} pl-10`} placeholder="0" required />
+                        <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 font-medium">{getCurrencySymbol(selectedCountry)}</span>
+                    </div>
                 </div>
             </fieldset>
 
             {/* Property Type Selection */}
-            <fieldset className="grid grid-cols-1 md:grid-cols-2 gap-6 items-end">
-                <div className="relative">
-                    <select name="propertyType" id="propertyType" value={listingData.propertyType} onChange={handleInputChange} className={`${floatingInputClasses}`}>
-                        <option value="house">{t('seller:propertyTypes.house')}</option>
-                        <option value="apartment">{t('seller:propertyTypes.apartment')}</option>
-                        <option value="villa">{t('seller:propertyTypes.villa')}</option>
-                        <option value="land">{t('seller:propertyTypes.land')}</option>
-                        <option value="other">{t('seller:propertyTypes.other')}</option>
-                    </select>
-                    <label htmlFor="propertyType" className={floatingSelectLabelClasses}>{t('seller:form.propertyType')}</label>
+            <fieldset className="grid grid-cols-1 md:grid-cols-2 gap-5 items-end">
+                <div>
+                    <label htmlFor="propertyType" className={labelClasses}>{t('seller:form.propertyType')}</label>
+                    <div className="relative">
+                        <select name="propertyType" id="propertyType" value={listingData.propertyType} onChange={handleInputChange} className={selectClasses}>
+                            <option value="house">{t('seller:propertyTypes.house')}</option>
+                            <option value="apartment">{t('seller:propertyTypes.apartment')}</option>
+                            <option value="villa">{t('seller:propertyTypes.villa')}</option>
+                            <option value="land">{t('seller:propertyTypes.land')}</option>
+                            <option value="other">{t('seller:propertyTypes.other')}</option>
+                        </select>
+                        {chevronIcon}
+                    </div>
                 </div>
                 {listingData.propertyType === 'apartment' && (
                     <>
@@ -161,27 +173,27 @@ const ListingFormFields: React.FC<ListingFormFieldsProps> = ({
                             onFloorNumberChange={(val) => setListingData(p => ({ ...p, floorNumber: val }))}
                             onTotalFloorsChange={(val) => setListingData(p => ({ ...p, totalFloors: val }))}
                         />
-                        <div className="relative">
-                            <select
-                                id="orientation"
-                                name="orientation"
-                                value={listingData.orientation}
-                                onChange={handleInputChange}
-                                className={`${floatingInputClasses}`}
-                            >
-                                <option value="any">{t('seller:createListing.advancedDetails.orientation.notSpecified')}</option>
-                                <option value="north">{t('seller:createListing.advancedDetails.orientation.north')}</option>
-                                <option value="northEast">{t('seller:createListing.advancedDetails.orientation.northEast')}</option>
-                                <option value="east">{t('seller:createListing.advancedDetails.orientation.east')}</option>
-                                <option value="southEast">{t('seller:createListing.advancedDetails.orientation.southEast')}</option>
-                                <option value="south">{t('seller:createListing.advancedDetails.orientation.south')}</option>
-                                <option value="southWest">{t('seller:createListing.advancedDetails.orientation.southWest')}</option>
-                                <option value="west">{t('seller:createListing.advancedDetails.orientation.west')}</option>
-                                <option value="northWest">{t('seller:createListing.advancedDetails.orientation.northWest')}</option>
-                            </select>
-                            <label htmlFor="orientation" className={floatingSelectLabelClasses}>{t('seller:createListing.advancedDetails.orientation.label')}</label>
-                            <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-gray-400">
-                                <svg className="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/></svg>
+                        <div>
+                            <label htmlFor="orientation" className={labelClasses}>{t('seller:createListing.advancedDetails.orientation.label')}</label>
+                            <div className="relative">
+                                <select
+                                    id="orientation"
+                                    name="orientation"
+                                    value={listingData.orientation}
+                                    onChange={handleInputChange}
+                                    className={selectClasses}
+                                >
+                                    <option value="any">{t('seller:createListing.advancedDetails.orientation.notSpecified')}</option>
+                                    <option value="north">{t('seller:createListing.advancedDetails.orientation.north')}</option>
+                                    <option value="northEast">{t('seller:createListing.advancedDetails.orientation.northEast')}</option>
+                                    <option value="east">{t('seller:createListing.advancedDetails.orientation.east')}</option>
+                                    <option value="southEast">{t('seller:createListing.advancedDetails.orientation.southEast')}</option>
+                                    <option value="south">{t('seller:createListing.advancedDetails.orientation.south')}</option>
+                                    <option value="southWest">{t('seller:createListing.advancedDetails.orientation.southWest')}</option>
+                                    <option value="west">{t('seller:createListing.advancedDetails.orientation.west')}</option>
+                                    <option value="northWest">{t('seller:createListing.advancedDetails.orientation.northWest')}</option>
+                                </select>
+                                {chevronIcon}
                             </div>
                         </div>
                     </>
@@ -192,7 +204,7 @@ const ListingFormFields: React.FC<ListingFormFieldsProps> = ({
             </fieldset>
 
             {/* Property Details - hide some fields for land */}
-            <fieldset className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            <fieldset className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
                 {listingData.propertyType !== 'land' && (
                     <>
                         <NumberInputWithSteppers label={t('seller:createListing.fields.bedrooms')} value={listingData.bedrooms} onChange={(val) => setListingData(p => ({ ...p, bedrooms: val }))} />

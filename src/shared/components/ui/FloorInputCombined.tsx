@@ -24,7 +24,6 @@ const FloorInputCombined: React.FC<FloorInputCombinedProps> = ({
     const handleFloorChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const val = parseInt(e.target.value, 10);
         if (!isNaN(val) && val >= 0) {
-            // Floor number can't exceed total floors
             const maxFloor = totalFloors > 0 ? totalFloors : 999;
             onFloorNumberChange(Math.min(val, maxFloor));
         } else if (e.target.value === '') {
@@ -36,7 +35,6 @@ const FloorInputCombined: React.FC<FloorInputCombinedProps> = ({
         const val = parseInt(e.target.value, 10);
         if (!isNaN(val) && val >= 1) {
             onTotalFloorsChange(val);
-            // If floor number exceeds new total, adjust it
             if (floorNumber > val) {
                 onFloorNumberChange(val);
             }
@@ -67,16 +65,16 @@ const FloorInputCombined: React.FC<FloorInputCombinedProps> = ({
         }
     };
 
-    const inputClasses = "w-16 h-[58px] px-2 text-center text-lg font-semibold text-neutral-900 bg-white rounded-lg border border-neutral-300 focus:border-primary focus:ring-1 focus:ring-primary transition-all [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none";
+    const inputClasses = "w-14 h-10 text-center text-lg font-semibold text-gray-900 bg-transparent outline-none border-none [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none";
 
     return (
-        <div className="relative">
-            <label htmlFor={id} className="block text-sm font-medium text-neutral-700 mb-1">
+        <div>
+            <label htmlFor={id} className="block text-sm font-medium text-gray-500 mb-1.5">
                 {label}
             </label>
-            <div className="flex items-center gap-2 bg-white rounded-lg border border-neutral-300 p-2">
+            <div className="glass-input flex items-center justify-center gap-2 h-[52px] !px-4">
                 <div className="flex flex-col items-center">
-                    <span className="text-xs text-neutral-500 mb-1">Total</span>
+                    <span className="text-[10px] uppercase tracking-wider text-gray-400">Total</span>
                     <input
                         type="number"
                         id={`${id}-total`}
@@ -90,9 +88,9 @@ const FloorInputCombined: React.FC<FloorInputCombinedProps> = ({
                         aria-label="Total floors in building"
                     />
                 </div>
-                <span className="text-2xl font-bold text-neutral-400 self-end mb-3">/</span>
+                <span className="text-xl font-light text-gray-300 mt-3">/</span>
                 <div className="flex flex-col items-center">
-                    <span className="text-xs text-neutral-500 mb-1">Floor</span>
+                    <span className="text-[10px] uppercase tracking-wider text-gray-400">Floor</span>
                     <input
                         type="number"
                         id={`${id}-floor`}
@@ -107,13 +105,13 @@ const FloorInputCombined: React.FC<FloorInputCombinedProps> = ({
                         aria-label="Floor number"
                     />
                 </div>
-                <div className="ml-2 flex items-center text-neutral-500 self-end mb-4">
-                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <div className="ml-1 text-gray-400 mt-3">
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
                     </svg>
                 </div>
             </div>
-            <p className="text-xs text-neutral-500 mt-1">
+            <p className="text-xs text-gray-400 mt-1">
                 e.g., 14-story building, Floor 8
             </p>
         </div>

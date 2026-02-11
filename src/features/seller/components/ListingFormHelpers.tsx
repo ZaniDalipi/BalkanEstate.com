@@ -140,9 +140,13 @@ export const ALL_VALID_TAGS: PropertyImageTag[] = ['exterior', 'living_room', 'k
 // --- CSS Class Constants (Liquid Glass Design) ---
 
 export const inputBaseClasses = "glass-input block w-full text-base px-4 py-2.5 transition-all";
+export const labelClasses = "block text-sm font-medium text-gray-500 mb-1.5";
+export const selectClasses = "glass-input block w-full text-base px-4 py-2.5 pr-10 appearance-none transition-all cursor-pointer";
+
+// Legacy floating label classes (kept for backward compatibility)
 export const floatingInputClasses = "glass-input block px-2.5 pb-2.5 pt-4 w-full text-base appearance-none peer";
-export const floatingLabelClasses = "absolute text-base text-gray-400 duration-300 transform -translate-y-4 scale-75 top-2 z-10 origin-[0] px-2 peer-focus:px-2 peer-focus:text-blue-600 peer-placeholder-shown:scale-100 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:top-1/2 peer-focus:top-2 peer-focus:scale-75 peer-focus:-translate-y-4 start-1 peer-focus:text-blue-600";
-export const floatingSelectLabelClasses = "absolute text-base text-gray-400 duration-300 transform -translate-y-4 scale-75 top-2 z-10 origin-[0] px-2 start-1";
+export const floatingLabelClasses = "absolute text-base text-gray-400 duration-300 transform -translate-y-4 scale-75 top-2 z-10 origin-[0] bg-white px-2 peer-focus:px-2 peer-focus:text-blue-600 peer-placeholder-shown:scale-100 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:top-1/2 peer-placeholder-shown:bg-transparent peer-focus:top-2 peer-focus:scale-75 peer-focus:-translate-y-4 peer-focus:bg-white start-1 peer-focus:text-blue-600";
+export const floatingSelectLabelClasses = "absolute text-base text-gray-400 duration-300 transform -translate-y-4 scale-75 top-2 z-10 origin-[0] bg-white px-2 start-1";
 
 // --- Helper Icons ---
 

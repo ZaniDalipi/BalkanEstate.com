@@ -25,10 +25,9 @@ const NumberInputWithSteppers: React.FC<NumberInputWithSteppersProps> = ({ label
             onChange(newValue);
         }
     };
-    
+
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const inputValue = e.target.value;
-        // Allow empty input to be treated as min value (usually 0)
         if (inputValue === '') {
             onChange(min ?? 0);
             return;
@@ -42,7 +41,6 @@ const NumberInputWithSteppers: React.FC<NumberInputWithSteppersProps> = ({ label
         }
     };
 
-    // Prevent Enter key from submitting the form
     const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
         if (e.key === 'Enter') {
             e.preventDefault();
@@ -50,18 +48,23 @@ const NumberInputWithSteppers: React.FC<NumberInputWithSteppersProps> = ({ label
         }
     };
 
+    const canDecrement = min === undefined || value > min;
+    const canIncrement = max === undefined || value < max;
+
     return (
-        <div className="relative">
-            <label htmlFor={id} className="block text-sm font-medium text-neutral-700 mb-1">{label}</label>
-            <div className="flex items-center justify-between w-full h-[58px] bg-white rounded-lg border border-neutral-300 focus-within:border-primary focus-within:ring-1 focus-within:ring-primary transition-all">
+        <div>
+            <label htmlFor={id} className="block text-sm font-medium text-gray-500 mb-1.5">{label}</label>
+            <div className="glass-input flex items-center h-[52px] overflow-hidden !p-0">
                 <button
                     type="button"
                     onClick={handleDecrement}
-                    disabled={value <= min}
-                    className="px-4 sm:px-6 py-2 text-2xl sm:text-3xl font-light text-neutral-600 hover:bg-neutral-100 disabled:text-neutral-300 disabled:cursor-not-allowed h-full rounded-l-lg focus:outline-none transition-colors"
+                    disabled={!canDecrement}
+                    className="w-12 h-full flex items-center justify-center text-gray-400 hover:text-gray-600 hover:bg-black/[0.03] active:bg-black/[0.06] transition-colors disabled:opacity-25 disabled:pointer-events-none shrink-0"
                     aria-label={`Decrease ${label}`}
                 >
-                    -
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" d="M5 12h14" />
+                    </svg>
                 </button>
                 <input
                     type="number"
@@ -69,19 +72,21 @@ const NumberInputWithSteppers: React.FC<NumberInputWithSteppersProps> = ({ label
                     value={value === undefined || value === null ? '' : value}
                     onChange={handleChange}
                     onKeyDown={handleKeyDown}
-                    className="w-full text-center text-lg font-semibold text-neutral-900 border-none focus:ring-0 bg-transparent [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                    className="flex-1 h-full text-center text-lg font-semibold text-gray-900 bg-transparent outline-none border-none [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                     min={min}
                     max={max}
                     aria-label={label}
                 />
-                <button 
-                    type="button" 
+                <button
+                    type="button"
                     onClick={handleIncrement}
-                    disabled={max !== undefined && value >= max}
-                    className="px-4 sm:px-6 py-2 text-2xl sm:text-3xl font-light text-neutral-600 hover:bg-neutral-100 disabled:text-neutral-300 disabled:cursor-not-allowed h-full rounded-r-lg focus:outline-none transition-colors"
+                    disabled={!canIncrement}
+                    className="w-12 h-full flex items-center justify-center text-gray-400 hover:text-gray-600 hover:bg-black/[0.03] active:bg-black/[0.06] transition-colors disabled:opacity-25 disabled:pointer-events-none shrink-0"
                     aria-label={`Increase ${label}`}
                 >
-                    +
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" d="M12 5v14M5 12h14" />
+                    </svg>
                 </button>
             </div>
         </div>

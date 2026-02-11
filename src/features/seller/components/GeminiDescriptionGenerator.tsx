@@ -16,7 +16,7 @@ import NumberInputWithSteppers from '@/components/shared/NumberInputWithSteppers
 import { getCurrencySymbol } from '@/utils/currency';
 import {
     LANGUAGES, CheckCircleIcon, UploadIcon, TagListInput,
-    floatingInputClasses, floatingLabelClasses, floatingSelectLabelClasses, inputBaseClasses,
+    inputBaseClasses, labelClasses, selectClasses,
 } from './ListingFormHelpers';
 
 // --- Main Component ---
@@ -195,70 +195,78 @@ const GeminiDescriptionGenerator: React.FC<{ propertyToEdit: Property | null }> 
                 <div className="animate-fade-in">
                     <div>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-4">
-                            <div className="relative">
-                                <select id="language" value={language} onChange={(e) => setLanguage(e.target.value)} className={`${floatingInputClasses}`}>
-                                    {LANGUAGES.map(lang => <option key={lang} value={lang}>{lang}</option>)}
-                                </select>
-                                <label htmlFor="language" className={floatingSelectLabelClasses}>{t('seller:createListing.language.label')}</label>
-                                <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-gray-400"><svg className="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/></svg></div>
+                            <div>
+                                <label htmlFor="language" className={labelClasses}>{t('seller:createListing.language.label')}</label>
+                                <div className="relative">
+                                    <select id="language" value={language} onChange={(e) => setLanguage(e.target.value)} className={selectClasses}>
+                                        {LANGUAGES.map(lang => <option key={lang} value={lang}>{lang}</option>)}
+                                    </select>
+                                    <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-gray-400"><svg className="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/></svg></div>
+                                </div>
                             </div>
-                            <div className="relative">
-                                <select id="aiPropertyType" value={aiPropertyType} onChange={(e) => setAiPropertyType(e.target.value as any)} className={`${floatingInputClasses}`}>
-                                    <option value="house">{t('seller:propertyTypes.house')}</option>
-                                    <option value="apartment">{t('seller:propertyTypes.apartment')}</option>
-                                    <option value="villa">{t('seller:propertyTypes.villa')}</option>
-                                    <option value="land">{t('seller:propertyTypes.land')}</option>
-                                    <option value="other">{t('seller:propertyTypes.other')}</option>
-                                </select>
-                                <label htmlFor="aiPropertyType" className={floatingSelectLabelClasses}>{t('seller:form.propertyType')}</label>
-                                <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-gray-400"><svg className="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/></svg></div>
+                            <div>
+                                <label htmlFor="aiPropertyType" className={labelClasses}>{t('seller:form.propertyType')}</label>
+                                <div className="relative">
+                                    <select id="aiPropertyType" value={aiPropertyType} onChange={(e) => setAiPropertyType(e.target.value as any)} className={selectClasses}>
+                                        <option value="house">{t('seller:propertyTypes.house')}</option>
+                                        <option value="apartment">{t('seller:propertyTypes.apartment')}</option>
+                                        <option value="villa">{t('seller:propertyTypes.villa')}</option>
+                                        <option value="land">{t('seller:propertyTypes.land')}</option>
+                                        <option value="other">{t('seller:propertyTypes.other')}</option>
+                                    </select>
+                                    <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-gray-400"><svg className="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/></svg></div>
+                                </div>
                             </div>
                         </div>
 
                         {/* Location Section for AI context */}
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-4">
-                            <div className="relative">
-                                <select
-                                    id="ai-country"
-                                    value={selectedCountry}
-                                    onChange={handleCountryChange}
-                                    className={`${floatingInputClasses}`}
-                                >
-                                    <option value="">{t('seller:createListing.location.selectCountry')}</option>
-                                    {BALKAN_LOCATIONS.map(country => (
-                                        <option key={country.code} value={country.name}>
-                                            {country.name}
-                                        </option>
-                                    ))}
-                                </select>
-                                <label htmlFor="ai-country" className={floatingSelectLabelClasses}>{t('seller:createListing.location.country')}</label>
-                                <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-gray-400">
-                                    <svg className="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
-                                        <path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/>
-                                    </svg>
+                            <div>
+                                <label htmlFor="ai-country" className={labelClasses}>{t('seller:createListing.location.country')}</label>
+                                <div className="relative">
+                                    <select
+                                        id="ai-country"
+                                        value={selectedCountry}
+                                        onChange={handleCountryChange}
+                                        className={selectClasses}
+                                    >
+                                        <option value="">{t('seller:createListing.location.selectCountry')}</option>
+                                        {BALKAN_LOCATIONS.map(country => (
+                                            <option key={country.code} value={country.name}>
+                                                {country.name}
+                                            </option>
+                                        ))}
+                                    </select>
+                                    <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-gray-400">
+                                        <svg className="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
+                                            <path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/>
+                                        </svg>
+                                    </div>
                                 </div>
                             </div>
 
-                            <div className="relative">
-                                <select
-                                    id="ai-city"
-                                    value={selectedCity}
-                                    onChange={handleCityChange}
-                                    className={`${floatingInputClasses}`}
-                                    disabled={!selectedCountry}
-                                >
-                                    <option value="">{t('seller:createListing.location.selectCity')}</option>
-                                    {availableCities.map(city => (
-                                        <option key={city.name} value={city.name}>
-                                            {city.name}
-                                        </option>
-                                    ))}
-                                </select>
-                                <label htmlFor="ai-city" className={floatingSelectLabelClasses}>{t('seller:createListing.location.city')}</label>
-                                <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-gray-400">
-                                    <svg className="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
-                                        <path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/>
-                                    </svg>
+                            <div>
+                                <label htmlFor="ai-city" className={labelClasses}>{t('seller:createListing.location.city')}</label>
+                                <div className="relative">
+                                    <select
+                                        id="ai-city"
+                                        value={selectedCity}
+                                        onChange={handleCityChange}
+                                        className={selectClasses}
+                                        disabled={!selectedCountry}
+                                    >
+                                        <option value="">{t('seller:createListing.location.selectCity')}</option>
+                                        {availableCities.map(city => (
+                                            <option key={city.name} value={city.name}>
+                                                {city.name}
+                                            </option>
+                                        ))}
+                                    </select>
+                                    <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-gray-400">
+                                        <svg className="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
+                                            <path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/>
+                                        </svg>
+                                    </div>
                                 </div>
                             </div>
 
@@ -334,33 +342,40 @@ const GeminiDescriptionGenerator: React.FC<{ propertyToEdit: Property | null }> 
 
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                 {/* Rent Period */}
-                                <div className="relative">
-                                    <select
-                                        name="rentPeriod"
-                                        value={listingData.rentPeriod}
-                                        onChange={(e) => setListingData(prev => ({ ...prev, rentPeriod: e.target.value as any }))}
-                                        className={`${floatingInputClasses}`}
-                                    >
-                                        <option value="monthly">{t('rental:form.rentPeriods.monthly')}</option>
-                                        <option value="weekly">{t('rental:form.rentPeriods.weekly')}</option>
-                                        <option value="daily">{t('rental:form.rentPeriods.daily')}</option>
-                                    </select>
-                                    <label className={`${floatingSelectLabelClasses} text-blue-500`}>{t('rental:form.rentPeriod')}</label>
+                                <div>
+                                    <label className={`${labelClasses} !text-blue-500`}>{t('rental:form.rentPeriod')}</label>
+                                    <div className="relative">
+                                        <select
+                                            name="rentPeriod"
+                                            value={listingData.rentPeriod}
+                                            onChange={(e) => setListingData(prev => ({ ...prev, rentPeriod: e.target.value as any }))}
+                                            className={selectClasses}
+                                        >
+                                            <option value="monthly">{t('rental:form.rentPeriods.monthly')}</option>
+                                            <option value="weekly">{t('rental:form.rentPeriods.weekly')}</option>
+                                            <option value="daily">{t('rental:form.rentPeriods.daily')}</option>
+                                        </select>
+                                        <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-gray-400">
+                                            <svg className="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/></svg>
+                                        </div>
+                                    </div>
                                 </div>
 
                                 {/* Security Deposit */}
-                                <div className="relative cursor-text" onClick={() => document.getElementById('securityDeposit')?.focus()}>
-                                    <input
-                                        type="number"
-                                        id="securityDeposit"
-                                        value={listingData.securityDeposit > 0 ? listingData.securityDeposit : ''}
-                                        onChange={(e) => setListingData(prev => ({ ...prev, securityDeposit: Number(e.target.value) || 0 }))}
-                                        className={`${floatingInputClasses} pl-8`}
-                                        placeholder=" "
-                                        min={0}
-                                    />
-                                    <label htmlFor="securityDeposit" className={`${floatingLabelClasses} text-blue-500`}>{t('rental:form.securityDeposit')}</label>
-                                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm">{currencySymbol}</span>
+                                <div>
+                                    <label htmlFor="securityDeposit" className={`${labelClasses} !text-blue-500`}>{t('rental:form.securityDeposit')}</label>
+                                    <div className="relative">
+                                        <input
+                                            type="number"
+                                            id="securityDeposit"
+                                            value={listingData.securityDeposit > 0 ? listingData.securityDeposit : ''}
+                                            onChange={(e) => setListingData(prev => ({ ...prev, securityDeposit: Number(e.target.value) || 0 }))}
+                                            className={`${inputBaseClasses} pl-10`}
+                                            placeholder="0"
+                                            min={0}
+                                        />
+                                        <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 font-medium">{currencySymbol}</span>
+                                    </div>
                                 </div>
 
                                 {/* Min Lease */}
@@ -382,16 +397,16 @@ const GeminiDescriptionGenerator: React.FC<{ propertyToEdit: Property | null }> 
                                 />
 
                                 {/* Available From */}
-                                <div className="relative cursor-text" onClick={() => document.getElementById('availableFrom')?.focus()}>
+                                <div>
+                                    <label htmlFor="availableFrom" className={`${labelClasses} !text-blue-500`}>{t('rental:form.availableFrom')}</label>
                                     <input
                                         type="date"
                                         id="availableFrom"
                                         value={listingData.availableFrom}
                                         onChange={(e) => setListingData(prev => ({ ...prev, availableFrom: e.target.value }))}
-                                        className={`${floatingInputClasses}`}
+                                        className={inputBaseClasses}
                                         min={new Date().toISOString().split('T')[0]}
                                     />
-                                    <label htmlFor="availableFrom" className={`${floatingSelectLabelClasses} text-blue-500`}>{t('rental:form.availableFrom')}</label>
                                 </div>
 
                                 {/* Max Occupants */}
@@ -601,7 +616,10 @@ const GeminiDescriptionGenerator: React.FC<{ propertyToEdit: Property | null }> 
                         <p className="text-sm text-purple-500/70 mb-3">
                             {t('seller:createListing.virtualTour.description')}
                         </p>
-                        <div className="relative">
+                        <div>
+                            <label htmlFor="virtualTour360Url" className={`${labelClasses} !text-purple-500`}>
+                                {t('seller:createListing.virtualTour.label')}
+                            </label>
                             <input
                                 type="url"
                                 id="virtualTour360Url"
@@ -609,11 +627,8 @@ const GeminiDescriptionGenerator: React.FC<{ propertyToEdit: Property | null }> 
                                 value={listingData.virtualTour360Url}
                                 onChange={handleInputChange}
                                 placeholder={t('seller:createListing.virtualTour.placeholder')}
-                                className={`${floatingInputClasses}`}
+                                className={inputBaseClasses}
                             />
-                            <label htmlFor="virtualTour360Url" className={`${floatingLabelClasses} text-purple-500 peer-focus:text-purple-600`}>
-                                {t('seller:createListing.virtualTour.label')}
-                            </label>
                         </div>
                         <p className="text-xs text-purple-600">
                             {t('seller:createListing.virtualTour.hint')}
@@ -631,7 +646,10 @@ const GeminiDescriptionGenerator: React.FC<{ propertyToEdit: Property | null }> 
                         <p className="text-sm text-red-500/70 mb-3">
                             {t('seller:createListing.video.description', 'Add a video to showcase your property! Videos auto-play when visitors view your listing.')}
                         </p>
-                        <div className="relative">
+                        <div>
+                            <label htmlFor="tourUrl" className={`${labelClasses} !text-red-500`}>
+                                {t('seller:createListing.video.label', 'Video URL')}
+                            </label>
                             <input
                                 type="url"
                                 id="tourUrl"
@@ -639,11 +657,8 @@ const GeminiDescriptionGenerator: React.FC<{ propertyToEdit: Property | null }> 
                                 value={listingData.tourUrl}
                                 onChange={handleInputChange}
                                 placeholder={t('seller:createListing.video.placeholder', 'https://youtube.com/watch?v=... or https://tiktok.com/...')}
-                                className={`${floatingInputClasses}`}
+                                className={inputBaseClasses}
                             />
-                            <label htmlFor="tourUrl" className={`${floatingLabelClasses} text-red-500 peer-focus:text-red-600`}>
-                                {t('seller:createListing.video.label', 'Video URL')}
-                            </label>
                         </div>
                         <div className="flex flex-wrap gap-2 text-xs text-gray-400">
                             <span className="flex items-center gap-1 glass-badge px-2 py-1 text-red-500">
