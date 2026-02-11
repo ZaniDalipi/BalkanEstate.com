@@ -4,10 +4,6 @@ import L from 'leaflet';
 
 // Import GoogleMapComponent directly for immediate display (not lazy loaded)
 import GoogleMapComponent from './GoogleMapComponent';
-import { preloadGoogleMaps } from './GoogleMapsPreloader';
-
-// Preload Google Maps API when map module is loaded (deferred from app startup)
-preloadGoogleMaps();
 
 import {
   FlyToController,
