@@ -53,15 +53,9 @@ const GoogleMapComponent: React.FC<GoogleMapComponentProps> = (props) => {
   const hook = useGoogleMap(props);
 
   // Loading states - early returns MUST come after all hooks
+  // Throw on loadError so MapErrorBoundary catches it and offers Leaflet fallback
   if (hook.loadError) {
-    return (
-      <div className="w-full h-full flex items-center justify-center bg-gray-100">
-        <div className="text-center p-4">
-          <p className="text-red-500 font-semibold">Error loading Google Maps</p>
-          <p className="text-gray-500 text-sm mt-2">Please check your API key configuration</p>
-        </div>
-      </div>
-    );
+    throw hook.loadError;
   }
 
   if (!hook.isLoaded) {

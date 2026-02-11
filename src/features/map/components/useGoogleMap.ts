@@ -162,7 +162,28 @@ export function useGoogleMap(props: GoogleMapComponentProps) {
   }, [drawingRect]);
 
   // Load Google Maps API using centralized hook (enables preloading benefits)
-  const { isLoaded, loadError } = useGoogleMapLoader();
+  const { isLoaded, loadError: loaderError } = useGoogleMapLoader();
+
+  // Detect Google Maps internal crashes (unhandled promise rejections from map.js/main.js)
+  const [gmapsInternalError, setGmapsInternalError] = useState(false);
+  useEffect(() => {
+    const handler = (e: PromiseRejectionEvent) => {
+      const msg = String(e.reason);
+      // Google Maps internal errors have patterns like "Cannot read properties of undefined"
+      // from minified map.js / main.js loaded via maps.googleapis.com
+      if (msg.includes('Cannot read properties of undefined') && e.reason instanceof TypeError) {
+        const stack = e.reason.stack || '';
+        if (stack.includes('map.js') || stack.includes('main.js') || stack.includes('common.js')) {
+          setGmapsInternalError(true);
+          e.preventDefault(); // Suppress console noise
+        }
+      }
+    };
+    window.addEventListener('unhandledrejection', handler);
+    return () => window.removeEventListener('unhandledrejection', handler);
+  }, []);
+
+  const loadError = loaderError || (gmapsInternalError ? new Error('Google Maps failed to initialize') : null);
 
   // RainViewer precipitation radar (free, no API key) - for flood layer
   const { tileUrl: rainViewerTileUrl } = useRainViewer(selectedClimateRisk === 'flood');
