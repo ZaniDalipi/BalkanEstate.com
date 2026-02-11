@@ -25,6 +25,7 @@ export interface Map3DControlsProps {
   floorNumber?: number;
   totalFloors?: number;
   virtualTour360Url?: string;
+  propertyType?: string;
 
   // POI
   showPOI?: boolean;
@@ -58,6 +59,7 @@ const Map3DControls: React.FC<Map3DControlsProps> = ({
   floorNumber,
   totalFloors,
   virtualTour360Url,
+  propertyType,
   showPOI,
   toggle3DMode,
   setShowShadows,
@@ -90,34 +92,39 @@ const Map3DControls: React.FC<Map3DControlsProps> = ({
               {/* Building outline */}
               <div className="relative mx-auto w-8 sm:w-10 rounded-t-sm overflow-hidden border-2 border-slate-600 bg-slate-800/80" style={{ height: '100px' }}>
                 {/* Floor segments */}
-                {Array.from({ length: totalFloors! }).map((_, i) => {
-                  const floor = totalFloors! - i;
-                  const isCurrentFloor = floor === floorNumber;
-                  return (
-                    <div
-                      key={floor}
-                      className={`absolute left-0 right-0 border-b border-slate-600/50 transition-all duration-500 ${
-                        isCurrentFloor ? 'z-10' : ''
-                      }`}
-                      style={{
-                        height: `${100 / totalFloors!}%`,
-                        top: `${(i / totalFloors!) * 100}%`,
-                        background: isCurrentFloor
-                          ? 'linear-gradient(90deg, rgba(59, 130, 246, 0.9), rgba(139, 92, 246, 0.9))'
-                          : 'transparent',
-                      }}
-                    >
-                      {isCurrentFloor && (
-                        <div className="absolute inset-0 animate-pulse bg-gradient-to-r from-blue-400/30 to-purple-400/30" />
-                      )}
-                    </div>
-                  );
-                })}
+                {(() => {
+                  const isWholeBuilding = propertyType === 'house' || propertyType === 'villa';
+                  return Array.from({ length: totalFloors! }).map((_, i) => {
+                    const floor = totalFloors! - i;
+                    const isHighlighted = isWholeBuilding || floor === floorNumber;
+                    return (
+                      <div
+                        key={floor}
+                        className={`absolute left-0 right-0 border-b border-slate-600/50 transition-all duration-500 ${
+                          isHighlighted ? 'z-10' : ''
+                        }`}
+                        style={{
+                          height: `${100 / totalFloors!}%`,
+                          top: `${(i / totalFloors!) * 100}%`,
+                          background: isHighlighted
+                            ? isWholeBuilding
+                              ? 'linear-gradient(90deg, rgba(34, 197, 94, 0.9), rgba(22, 163, 74, 0.9))'
+                              : 'linear-gradient(90deg, rgba(59, 130, 246, 0.9), rgba(139, 92, 246, 0.9))'
+                            : 'transparent',
+                        }}
+                      >
+                        {isHighlighted && !isWholeBuilding && (
+                          <div className="absolute inset-0 animate-pulse bg-gradient-to-r from-blue-400/30 to-purple-400/30" />
+                        )}
+                      </div>
+                    );
+                  });
+                })()}
 
                 {/* Floor number labels on the side */}
                 {totalFloors! <= 10 && Array.from({ length: totalFloors! }).map((_, i) => {
                   const floor = totalFloors! - i;
-                  const isCurrentFloor = floor === floorNumber;
+                  const isCurrentFloor = (propertyType === 'house' || propertyType === 'villa') || floor === floorNumber;
                   return (
                     <div
                       key={`label-${floor}`}

@@ -383,8 +383,10 @@ export function use3DMap(props: Map3DBuildingsProps) {
     }, 1500);
   }, [getBuildingFacing]);
 
-  // Add custom 3D building cube with floor slices for apartments
+  // Add custom 3D building cube with floor slices
   // Uses the actual building geometry from the map data
+  // For apartments: highlights the specific floor in green
+  // For houses/villas: highlights ALL floors in green (entire building)
   const addCustomBuilding3D = useCallback((
     mapInstance: maplibregl.Map,
     latitude: number,
@@ -392,7 +394,8 @@ export function use3DMap(props: Map3DBuildingsProps) {
     floorNum: number,
     totalFlrs: number,
     tourUrl?: string,
-    onEnterTour?: () => void
+    onEnterTour?: () => void,
+    propType?: string
   ) => {
     const floorHeightM = 3; // 3m per floor
     const totalHeightM = totalFlrs * floorHeightM;
@@ -642,11 +645,14 @@ export function use3DMap(props: Map3DBuildingsProps) {
     }
 
     // Add floor slice layers - each floor is a separate layer for the striped effect
-    // Add them on top of the 3d-buildings layer
+    // For houses/villas: ALL floors are green (entire building highlighted)
+    // For apartments: only the specific floor is green
+    const isWholeBuilding = propType === 'house' || propType === 'villa';
+
     for (let floor = 1; floor <= totalFlrs; floor++) {
       const floorBase = (floor - 1) * adjustedFloorHeight;
       const floorTop = floor * adjustedFloorHeight;
-      const isHighlightedFloor = floor === floorNum;
+      const isHighlightedFloor = isWholeBuilding || floor === floorNum;
       const layerId = `building-floor-${floor}`;
 
       mapInstance.addLayer({
@@ -655,7 +661,7 @@ export function use3DMap(props: Map3DBuildingsProps) {
         source: 'custom-building',
         paint: {
           'fill-extrusion-color': isHighlightedFloor
-            ? '#22c55e' // Bright green for the property's floor
+            ? '#22c55e' // Bright green for highlighted floor(s)
             : floor % 2 === 0 ? '#4b5563' : '#6b7280', // Alternating grey for other floors
           'fill-extrusion-height': floorTop - 0.15, // Gap between floors for visual separation
           'fill-extrusion-base': floorBase + 0.05,
@@ -1008,8 +1014,9 @@ export function use3DMap(props: Map3DBuildingsProps) {
       fetchAndDisplayPOI(mapInstance, lat, lng);
 
       // Add 360 tour door marker for properties without floor visualization
-      // (properties with >3 floors get the door marker via addCustomBuilding3D instead)
-      const willHaveFloorViz = floorNumber != null && totalFloors != null && totalFloors > 3;
+      // Houses/villas get floor viz with any floor count; apartments need >3 floors
+      const isHouseOrVilla = propertyType === 'house' || propertyType === 'villa';
+      const willHaveFloorViz = floorNumber != null && totalFloors != null && (isHouseOrVilla ? totalFloors > 0 : totalFloors > 3);
       if (!willHaveFloorViz && virtualTour360Url) {
         const doorEl = document.createElement('div');
         doorEl.className = 'apartment-door-marker';
@@ -1060,9 +1067,10 @@ export function use3DMap(props: Map3DBuildingsProps) {
         doorMarkerRef.current = doorMarker;
       }
 
-      // Add custom 3D building with floor slices for properties with more than 3 floors
-      // Wait for tiles to fully load before querying building geometry
-      if (floorNumber != null && totalFloors != null && totalFloors > 3) {
+      // Add custom 3D building with floor slices
+      // Houses/villas: show with any floor count (entire building green)
+      // Apartments: show only for buildings with >3 floors (specific floor green)
+      if (floorNumber != null && totalFloors != null && (isHouseOrVilla ? totalFloors > 0 : totalFloors > 3)) {
         // Retry mechanism to ensure building tiles are loaded
         let retryCount = 0;
         const maxRetries = 5;
@@ -1085,7 +1093,8 @@ export function use3DMap(props: Map3DBuildingsProps) {
               floorNumber,
               totalFloors,
               virtualTour360Url,
-              virtualTour360Url ? handleEnterBuilding : undefined
+              virtualTour360Url ? handleEnterBuilding : undefined,
+              propertyType
             );
 
             // Check if source was added successfully - if not, retry

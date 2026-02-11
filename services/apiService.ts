@@ -1082,6 +1082,8 @@ function transformBackendProperty(backendProp: any): Property {
     internetIncluded: backendProp.internetIncluded,
     tenantRequirements: backendProp.tenantRequirements || [],
     maxOccupants: backendProp.maxOccupants,
+    orientation: backendProp.orientation,
+    visitAvailability: backendProp.visitAvailability,
   };
 }
 
@@ -1155,6 +1157,12 @@ function transformToBackendProperty(frontendProp: Property): any {
   }
   if (frontendProp.energyRating && frontendProp.energyRating !== 'any') {
     result.energyRating = frontendProp.energyRating;
+  }
+  if (frontendProp.orientation && frontendProp.orientation !== 'any') {
+    result.orientation = frontendProp.orientation;
+  }
+  if (frontendProp.visitAvailability) {
+    result.visitAvailability = frontendProp.visitAvailability;
   }
 
   // Distance fields

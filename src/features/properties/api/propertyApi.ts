@@ -93,6 +93,8 @@ export function transformBackendProperty(backendProp: any): Property {
       ? new Date(backendProp.promotionEndDate).getTime()
       : undefined,
     hasUrgentBadge: backendProp.hasUrgentBadge || false,
+    orientation: backendProp.orientation,
+    visitAvailability: backendProp.visitAvailability,
   };
 }
 
@@ -180,6 +182,12 @@ export function transformToBackendProperty(frontendProp: Property): any {
   }
   if (frontendProp.energyRating && frontendProp.energyRating !== 'any') {
     result.energyRating = frontendProp.energyRating;
+  }
+  if (frontendProp.orientation && frontendProp.orientation !== 'any') {
+    result.orientation = frontendProp.orientation;
+  }
+  if (frontendProp.visitAvailability) {
+    result.visitAvailability = frontendProp.visitAvailability;
   }
 
   // Distance fields

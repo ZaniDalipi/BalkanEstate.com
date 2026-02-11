@@ -164,6 +164,7 @@ const Map3DBuildings: React.FC<Map3DBuildingsProps> = (props) => {
         floorNumber={floorNumber}
         totalFloors={totalFloors}
         virtualTour360Url={virtualTour360Url}
+        propertyType={props.propertyType}
         showPOI={showPOI}
         toggle3DMode={toggle3DMode}
         setShowShadows={setShowShadows}
