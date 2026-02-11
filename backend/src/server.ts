@@ -17,6 +17,7 @@ import { initSentry, setupSentry, attachSentryErrorHandler } from './lib/sentry'
 import {
   validateEnvironment,
   applySecurityMiddleware,
+  getCorsConfig,
   generalRateLimiter,
   sensitiveRateLimiter,
   paymentRateLimiter,
@@ -112,7 +113,14 @@ import { startMonthlyCouponJob } from './jobs/monthlyCouponJob';
 // Create Express app
 const app: Application = express();
 
-// Setup Sentry request handlers (must be first middleware)
+// Trust reverse proxy (required in production behind nginx/load balancer)
+app.set('trust proxy', 1);
+
+// CORS must be the absolute first middleware so preflight OPTIONS requests
+// always get proper headers before any other middleware can interfere
+app.use(getCorsConfig());
+
+// Setup Sentry request handlers
 setupSentry(app);
 
 // Create HTTP server

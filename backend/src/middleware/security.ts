@@ -581,9 +581,8 @@ export const enforceHttps = (req: Request, res: Response, next: NextFunction): v
  */
 export const applySecurityMiddleware = (app: Application): void => {
 
-  // 0. CORS (must be first to handle preflight OPTIONS requests before
-  //    any other middleware can short-circuit the response without CORS headers)
-  app.use(getCorsConfig());
+  // Note: CORS is applied earlier in server.ts (before all other middleware)
+  // to ensure preflight OPTIONS requests always get proper headers.
 
   // 1. Enforce HTTPS in production
   app.use(enforceHttps);
