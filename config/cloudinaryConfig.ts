@@ -169,16 +169,31 @@ export const optimizeCloudinaryUrl = (
     gravity?: 'auto' | 'center';
   } = {}
 ): string => {
-  if (!url) return '';
+  if (!url || typeof url !== 'string') return '';
+
+  // Security: Only allow http/https URLs, reject data:, javascript:, etc.
+  if (!/^https?:\/\//i.test(url)) return '';
+
+  // Security: Reject URLs with embedded newlines or control characters
+  if (/[\r\n\x00-\x1f]/.test(url)) return '';
+
+  // Clamp dimensions to reasonable values to prevent abuse
+  const clampDimension = (val: number | undefined, max: number): number | undefined => {
+    if (val === undefined) return undefined;
+    return Math.max(1, Math.min(Math.round(val), max));
+  };
 
   const {
-    width,
-    height,
+    width: rawWidth,
+    height: rawHeight,
     quality = 'auto',
     format = 'auto',
     crop,
     gravity,
   } = options;
+
+  const width = clampDimension(rawWidth, 4096);
+  const height = clampDimension(rawHeight, 4096);
 
   // Handle Cloudinary upload URLs
   const uploadMatch = url.match(/^(https?:\/\/res\.cloudinary\.com\/[^/]+\/image\/upload\/)(v\d+\/.+)$/);
@@ -198,7 +213,7 @@ export const optimizeCloudinaryUrl = (
 
   // Handle Google user content URLs (avatars) - resize via URL param
   if (url.includes('lh3.googleusercontent.com') || url.includes('googleusercontent.com')) {
-    const size = width || 96;
+    const size = clampDimension(rawWidth, 512) || 96;
     // Remove any existing size suffix and add our own
     const cleaned = url.replace(/=s\d+-c$/, '').replace(/=s\d+$/, '');
     return `${cleaned}=s${size}`;
@@ -220,7 +235,10 @@ export const cloudinarySrcSet = (
     crop?: 'fill' | 'scale' | 'fit' | 'limit';
   } = {}
 ): string => {
-  if (!url) return '';
+  if (!url || typeof url !== 'string') return '';
+
+  // Security: Only allow http/https URLs
+  if (!/^https?:\/\//i.test(url)) return '';
 
   // Only generate srcSet for Cloudinary upload URLs
   const uploadMatch = url.match(/^(https?:\/\/res\.cloudinary\.com\/[^/]+\/image\/upload\/)(v\d+\/.+)$/);
@@ -267,6 +285,11 @@ export const getOptimizedExternalImage = (
     gravity?: 'auto' | 'center' | 'face' | 'faces';
   } = {}
 ): string => {
+  // Security: Validate URL
+  if (!externalUrl || typeof externalUrl !== 'string' || !/^https?:\/\//i.test(externalUrl)) {
+    return '';
+  }
+
   const {
     width,
     height,

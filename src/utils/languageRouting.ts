@@ -4,7 +4,7 @@
  */
 
 import i18n from '@/src/i18n';
-import { languages, LanguageCode, isLanguageSupported } from '@/src/i18n';
+import { languages, LanguageCode, isLanguageSupported, loadLanguageResources } from '@/src/i18n';
 
 // Supported language codes for URL matching
 export const SUPPORTED_LANG_CODES = languages.map(l => l.code);
@@ -80,13 +80,15 @@ export function changeLanguageWithUrl(newLang: LanguageCode): void {
   // Preserve query parameters
   const queryString = window.location.search;
 
-  // Change i18n language
-  i18n.changeLanguage(newLang);
-  localStorage.setItem('balkanestate_language', newLang);
-
-  // Update URL with new language, preserving query parameters
+  // Update URL immediately for responsive feel
   const newPath = buildLocalizedPath(path, newLang) + queryString;
   window.history.replaceState({}, '', newPath);
+  localStorage.setItem('balkanestate_language', newLang);
+
+  // Load language bundle then switch (falls back to English until loaded)
+  loadLanguageResources(newLang).then(() => {
+    i18n.changeLanguage(newLang);
+  });
 }
 
 /**
@@ -101,8 +103,11 @@ export function initializeLanguageFromUrl(): { lang: LanguageCode; path: string 
 
   if (lang && isLanguageSupported(lang)) {
     // URL has valid language prefix - use it
-    i18n.changeLanguage(lang);
     localStorage.setItem('balkanestate_language', lang);
+    // Load bundle async then switch (English shown briefly if non-en)
+    loadLanguageResources(lang).then(() => {
+      i18n.changeLanguage(lang);
+    });
     return { lang, path };
   }
 
@@ -117,8 +122,11 @@ export function initializeLanguageFromUrl(): { lang: LanguageCode; path: string 
   const newPath = buildLocalizedPath(path, detectedLang) + queryString;
   window.history.replaceState({}, '', newPath);
 
-  i18n.changeLanguage(detectedLang);
   localStorage.setItem('balkanestate_language', detectedLang);
+  // Load bundle async then switch
+  loadLanguageResources(detectedLang).then(() => {
+    i18n.changeLanguage(detectedLang);
+  });
 
   return { lang: detectedLang, path };
 }

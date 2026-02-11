@@ -378,6 +378,13 @@ export default defineConfig(({ mode }) => {
               if (id.includes('/features/onboarding/')) {
                 return 'onboarding';
               }
+              // i18n language bundles - each language in its own chunk (loaded on demand)
+              if (id.includes('/i18n/locales/') && id.includes('/bundle')) {
+                const langMatch = id.match(/\/locales\/([a-z]{2})\/bundle/);
+                if (langMatch && langMatch[1] !== 'en') {
+                  return `i18n-${langMatch[1]}`;
+                }
+              }
 
               // NOTE: Let Rollup handle these automatically to avoid circular deps:
               // - admin (circular with payments)

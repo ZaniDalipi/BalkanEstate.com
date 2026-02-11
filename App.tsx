@@ -1,5 +1,5 @@
-import React, { useState, useEffect, useMemo, lazy, Suspense } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import React, { useState, useEffect, lazy, Suspense } from 'react';
+// Page transitions use lightweight CSS instead of framer-motion to reduce initial bundle
 import { HelmetProvider } from 'react-helmet-async';
 import { AppProvider, useAppContext } from './context/AppContext';
 import { AlertProvider } from './context/AlertContext';
@@ -83,11 +83,7 @@ const RefundPolicyPage = lazy(() => import('./src/features/legal/components/Refu
 const CreateAgencyPage = lazy(() => import('./src/features/agencies/components/CreateAgencyPage'));
 const AgencyPaymentPage = lazy(() => import('./src/features/agencies/components/AgencyPaymentPage'));
 
-// Google Maps Preloader - import directly (not lazy) for immediate loading
-import GoogleMapsPreloader, { preloadGoogleMaps } from './src/features/map/components/GoogleMapsPreloader';
-
-// Start preloading Google Maps API immediately at module load
-preloadGoogleMaps();
+// Google Maps API is deferred - only loads when map pages are visited (see MapComponent.tsx)
 
 // Cookie Consent Banner (lazy loaded - shown after initial render)
 const CookieConsent = lazy(() => import('./src/shared/components/CookieConsent'));
@@ -573,23 +569,15 @@ const AppContent: React.FC<{ onToggleSidebar: () => void }> = ({ onToggleSidebar
       : state.activeView;
 
   // All views now use Suspense since SearchPage is lazy loaded
+  // CSS fade transition (replaces framer-motion AnimatePresence for lighter bundle)
   return (
-    <AnimatePresence mode="wait">
-      <motion.div
-        key={viewKey}
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        exit={{ opacity: 0 }}
-        transition={{ duration: 0.2, ease: 'easeInOut' }}
-        className="h-full"
-      >
-        <ErrorBoundary level="route" key={state.activeView}>
-          <Suspense fallback={<PageLoader />}>
-            {renderView()}
-          </Suspense>
-        </ErrorBoundary>
-      </motion.div>
-    </AnimatePresence>
+    <div key={viewKey} className="h-full animate-fade-in">
+      <ErrorBoundary level="route" key={state.activeView}>
+        <Suspense fallback={<PageLoader />}>
+          {renderView()}
+        </Suspense>
+      </ErrorBoundary>
+    </div>
   );
 };
 
@@ -806,9 +794,6 @@ const App: React.FC = () => {
               <NotificationProvider>
                 <ConfirmationProvider>
                   <AnimationProvider>
-                    {/* Preload Google Maps API early for faster map rendering (not lazy) */}
-                    <GoogleMapsPreloader />
-
                     {/* Lazy loaded SEO & Analytics components (don't block initial render) */}
                     <Suspense fallback={null}>
                       <SEO />
