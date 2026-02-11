@@ -142,6 +142,99 @@ export const SUPPORTED_CITIES = [
 ] as const;
 
 // ============================================================================
+// Property Image Optimization (Cloudinary Upload Transforms)
+// ============================================================================
+
+/**
+ * Optimizes a Cloudinary-uploaded image URL by injecting transformation parameters.
+ *
+ * Cloudinary upload URLs follow this format:
+ *   https://res.cloudinary.com/{cloud}/image/upload/v{version}/{path}.jpg
+ *
+ * We inject transforms between `/upload/` and the version/path:
+ *   https://res.cloudinary.com/{cloud}/image/upload/f_auto,q_auto,w_800/v{version}/{path}.jpg
+ *
+ * For non-Cloudinary URLs, returns the original URL unchanged.
+ *
+ * For Google user content URLs (avatars), appends size parameter.
+ */
+export const optimizeCloudinaryUrl = (
+  url: string | undefined,
+  options: {
+    width?: number;
+    height?: number;
+    quality?: 'auto' | 'auto:low' | 'auto:eco' | 'auto:good' | 'auto:best';
+    format?: 'auto' | 'webp' | 'avif';
+    crop?: 'fill' | 'scale' | 'fit' | 'limit' | 'thumb';
+    gravity?: 'auto' | 'center';
+  } = {}
+): string => {
+  if (!url) return '';
+
+  const {
+    width,
+    height,
+    quality = 'auto',
+    format = 'auto',
+    crop,
+    gravity,
+  } = options;
+
+  // Handle Cloudinary upload URLs
+  const uploadMatch = url.match(/^(https?:\/\/res\.cloudinary\.com\/[^/]+\/image\/upload\/)(v\d+\/.+)$/);
+  if (uploadMatch) {
+    const transforms: string[] = [`f_${format}`, `q_${quality}`];
+    if (width) transforms.push(`w_${width}`);
+    if (height) transforms.push(`h_${height}`);
+    if (crop) transforms.push(`c_${crop}`);
+    if (gravity) transforms.push(`g_${gravity}`);
+    return `${uploadMatch[1]}${transforms.join(',')}/${uploadMatch[2]}`;
+  }
+
+  // Handle Cloudinary URLs that already have transforms (don't double-transform)
+  if (url.includes('res.cloudinary.com') && url.includes('/image/upload/')) {
+    return url;
+  }
+
+  // Handle Google user content URLs (avatars) - resize via URL param
+  if (url.includes('lh3.googleusercontent.com') || url.includes('googleusercontent.com')) {
+    const size = width || 96;
+    // Remove any existing size suffix and add our own
+    const cleaned = url.replace(/=s\d+-c$/, '').replace(/=s\d+$/, '');
+    return `${cleaned}=s${size}`;
+  }
+
+  return url;
+};
+
+/**
+ * Generates a srcSet string for responsive Cloudinary images.
+ * Returns an empty string for non-Cloudinary URLs.
+ */
+export const cloudinarySrcSet = (
+  url: string | undefined,
+  widths: number[] = [400, 640, 800, 1200, 1920],
+  options: {
+    quality?: 'auto' | 'auto:low' | 'auto:eco' | 'auto:good' | 'auto:best';
+    format?: 'auto' | 'webp';
+    crop?: 'fill' | 'scale' | 'fit' | 'limit';
+  } = {}
+): string => {
+  if (!url) return '';
+
+  // Only generate srcSet for Cloudinary upload URLs
+  const uploadMatch = url.match(/^(https?:\/\/res\.cloudinary\.com\/[^/]+\/image\/upload\/)(v\d+\/.+)$/);
+  if (!uploadMatch) return '';
+
+  return widths
+    .map((w) => {
+      const optimized = optimizeCloudinaryUrl(url, { ...options, width: w });
+      return `${optimized} ${w}w`;
+    })
+    .join(', ');
+};
+
+// ============================================================================
 // External Image Optimization (Cloudinary Fetch)
 // ============================================================================
 

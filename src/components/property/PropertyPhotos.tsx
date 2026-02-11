@@ -4,6 +4,7 @@
 import React, { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import type { Property, PropertyImageTag } from '../../../types';
+import { optimizeCloudinaryUrl } from '../../../config/cloudinaryConfig';
 
 // Category emoji map
 const categoryEmojis: Record<string, string> = {
@@ -160,7 +161,7 @@ export const PropertyPhotos: React.FC<PropertyPhotosProps> = ({
               }`}
             >
               <img
-                src={img.url}
+                src={optimizeCloudinaryUrl(img.url, { width: 200, quality: 'auto', crop: 'fill' })}
                 alt={`${property.address} - ${img.tag} ${index + 1}`}
                 loading="lazy"
                 decoding="async"

@@ -11,6 +11,7 @@ import {
   BuildingOfficeIcon,
 } from '../../../constants';
 import { LiquidGlassSwitch } from '../ui/LiquidGlassSwitch';
+import { optimizeCloudinaryUrl, cloudinarySrcSet } from '../../../config/cloudinaryConfig';
 
 interface PropertyGalleryProps {
   property: Property;
@@ -303,7 +304,9 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
             ) : (
               <img
                 key={currentImageUrl}
-                src={currentImageUrl}
+                src={optimizeCloudinaryUrl(currentImageUrl, { width: 1200, quality: 'auto' })}
+                srcSet={cloudinarySrcSet(currentImageUrl, [480, 768, 1200, 1920])}
+                sizes="(max-width: 640px) 100vw, (max-width: 1024px) 80vw, 1200px"
                 alt={property.address}
                 className="max-w-full max-h-full object-contain animate-image-fade"
                 onError={() => setMainImageError(true)}

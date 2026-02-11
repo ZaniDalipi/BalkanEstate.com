@@ -7,6 +7,7 @@ import React, { useState, useEffect } from 'react';
 import { Property } from '@/types';
 import { formatPrice } from '@/utils/currency';
 import { ClockIcon, BuildingOfficeIcon, MapPinIcon, ChartBarIcon, StarIconSolid, FireIcon } from '@/constants';
+import { optimizeCloudinaryUrl } from '@/config/cloudinaryConfig';
 
 // Tier configuration
 export const TIER_CONFIG: Record<string, { color: string; bg: string; label: string }> = {
@@ -200,7 +201,7 @@ const PromotedPropertyCard: React.FC<PromotedPropertyCardProps> = ({
         <div className="flex gap-4">
           <div className="w-24 h-24 flex-shrink-0 rounded-lg overflow-hidden bg-neutral-100">
             {property.imageUrl ? (
-              <img src={property.imageUrl} alt={property.title || 'Property'} className="w-full h-full object-cover" loading="lazy" decoding="async" />
+              <img src={optimizeCloudinaryUrl(property.imageUrl, { width: 192, quality: 'auto', crop: 'fill' })} alt={property.title || 'Property'} className="w-full h-full object-cover" loading="lazy" decoding="async" />
             ) : (
               <div className="w-full h-full flex items-center justify-center">
                 <BuildingOfficeIcon className="w-10 h-10 text-neutral-300" />

@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { ChevronLeftIcon, ChevronRightIcon, XMarkIcon, BuildingOfficeIcon } from '@/constants';
+import { optimizeCloudinaryUrl, cloudinarySrcSet } from '@/config/cloudinaryConfig';
 
 interface ImageViewerModalProps {
     images: { url: string; tag: string }[];
@@ -105,7 +106,9 @@ const ImageViewerModal: React.FC<ImageViewerModalProps> = ({ images, startIndex,
                     ) : (
                         <img
                             key={images[currentIndex].url}
-                            src={images[currentIndex].url}
+                            src={optimizeCloudinaryUrl(images[currentIndex].url, { width: 1920, quality: 'auto' })}
+                            srcSet={cloudinarySrcSet(images[currentIndex].url, [640, 1024, 1440, 1920])}
+                            sizes="100vw"
                             alt={`Property view ${currentIndex + 1}`}
                             className="max-w-full max-h-full object-contain animate-fade-in"
                             onError={() => setImageError(true)}

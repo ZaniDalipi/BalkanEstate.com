@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Agent } from '@/types';
+import { optimizeCloudinaryUrl } from '@/config/cloudinaryConfig';
 import StarRating from '@/components/shared/StarRating';
 import {
   UserCircleIcon,
@@ -45,7 +46,7 @@ const AgentAvatar: React.FC<{ agent: Agent }> = ({ agent }) => {
         <div className="absolute inset-0 bg-gradient-to-br from-blue-50 to-blue-100 animate-pulse" />
       )}
       <img
-        src={agent.avatarUrl}
+        src={optimizeCloudinaryUrl(agent.avatarUrl, { width: 192, quality: 'auto', crop: 'fill' })}
         alt={agent.name}
         className={`absolute inset-0 w-full h-full object-cover object-center transition-opacity duration-300 ${
           loaded ? 'opacity-100' : 'opacity-0'
@@ -189,7 +190,7 @@ const AgentCard: React.FC<AgentCardProps> = ({ agent, index = 0 }) => {
             {agent.agencyLogo ? (
               <div className="w-5 h-5 rounded overflow-hidden flex-shrink-0 bg-white/10">
                 <img
-                  src={agent.agencyLogo}
+                  src={optimizeCloudinaryUrl(agent.agencyLogo, { width: 40, quality: 'auto', crop: 'fill' })}
                   alt={agent.agencyName}
                   loading="lazy"
                   decoding="async"

@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { Property } from '@/types';
 import { useAppContext } from '@/context/AppContext';
 import { getCurrencySymbol } from '@/utils/currency';
+import { optimizeCloudinaryUrl, cloudinarySrcSet } from '@/config/cloudinaryConfig';
 
 interface RentalPropertyCardProps {
     property: Property;
@@ -33,7 +34,9 @@ const RentalPropertyCard: React.FC<RentalPropertyCardProps> = ({ property, onHov
             {/* Image */}
             <div className="relative aspect-[16/10] overflow-hidden">
                 <img
-                    src={property.imageUrl}
+                    src={optimizeCloudinaryUrl(property.imageUrl, { width: 640, quality: 'auto' })}
+                    srcSet={cloudinarySrcSet(property.imageUrl, [320, 480, 640])}
+                    sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
                     alt={property.title || property.address}
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                     loading="lazy"
@@ -118,7 +121,7 @@ const RentalPropertyCard: React.FC<RentalPropertyCardProps> = ({ property, onHov
                 {/* Seller Info */}
                 <div className="flex items-center gap-2 mt-3 pt-2 border-t border-neutral-100">
                     {property.seller?.avatarUrl ? (
-                        <img src={property.seller.avatarUrl} alt="" className="w-6 h-6 rounded-full object-cover" />
+                        <img src={optimizeCloudinaryUrl(property.seller.avatarUrl, { width: 48, quality: 'auto', crop: 'fill' })} alt="" loading="lazy" decoding="async" className="w-6 h-6 rounded-full object-cover" />
                     ) : (
                         <div className="w-6 h-6 rounded-full bg-neutral-200 flex items-center justify-center text-xs text-neutral-500">
                             {property.seller?.name?.charAt(0) || '?'}

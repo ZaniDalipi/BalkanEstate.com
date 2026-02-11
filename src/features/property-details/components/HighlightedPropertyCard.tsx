@@ -4,6 +4,7 @@ import { Property } from '@/types';
 import { MapPinIcon, BedIcon, BathIcon, SqftIcon, UserCircleIcon, LivingRoomIcon, BuildingOfficeIcon, StarIconSolid, FireIcon } from '@/constants';
 import { useAppContext } from '@/context/AppContext';
 import { formatPrice } from '@/utils/currency';
+import { optimizeCloudinaryUrl, cloudinarySrcSet } from '@/config/cloudinaryConfig';
 
 // Chevron Icons
 const ChevronLeftIcon: React.FC<{ className?: string }> = ({ className }) => (
@@ -55,7 +56,7 @@ const SellerAvatar: React.FC<{ avatarUrl?: string; name: string; type: string }>
         <div className="absolute inset-0 bg-gradient-to-br from-primary/10 to-primary/20 animate-pulse" />
       )}
       <img
-        src={avatarUrl}
+        src={optimizeCloudinaryUrl(avatarUrl, { width: 56, quality: 'auto', crop: 'fill' })}
         alt={`${name} - Real Estate ${type === 'agent' ? 'Agent' : 'Seller'}`}
         loading="lazy"
         decoding="async"
@@ -214,7 +215,8 @@ const HighlightedCardInner = memo<HighlightedCardInnerProps>(({
               </div>
             ) : (
               <img
-                src={imgUrl}
+                src={optimizeCloudinaryUrl(imgUrl, { width: 800, quality: 'auto' })}
+                srcSet={cloudinarySrcSet(imgUrl, [400, 640, 800, 1200])}
                 alt={`${property.title || propertyTypeLabel} - Image ${index + 1}`}
                 loading={index === 0 ? 'eager' : 'lazy'}
                 decoding="async"

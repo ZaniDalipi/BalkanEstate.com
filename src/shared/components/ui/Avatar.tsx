@@ -1,5 +1,6 @@
 import React from 'react';
 import { User } from 'lucide-react';
+import { optimizeCloudinaryUrl } from '../../../../config/cloudinaryConfig';
 
 export type AvatarSize = 'xs' | 'sm' | 'md' | 'lg' | 'xl';
 
@@ -27,6 +28,14 @@ const iconSizes: Record<AvatarSize, number> = {
   xl: 32,
 };
 
+const pixelWidths: Record<AvatarSize, number> = {
+  xs: 24,
+  sm: 32,
+  md: 40,
+  lg: 48,
+  xl: 64,
+};
+
 function getInitials(name: string): string {
   return name
     .split(' ')
@@ -46,9 +55,11 @@ export const Avatar: React.FC<AvatarProps> = ({
   const [imageError, setImageError] = React.useState(false);
 
   if (src && !imageError) {
+    // Request 2x the display size for retina screens
+    const optimizedSrc = optimizeCloudinaryUrl(src, { width: pixelWidths[size] * 2, quality: 'auto', crop: 'fill' });
     return (
       <img
-        src={src}
+        src={optimizedSrc}
         alt={alt}
         loading="lazy"
         decoding="async"

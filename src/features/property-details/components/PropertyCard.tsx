@@ -5,6 +5,7 @@ import { MapPinIcon, BedIcon, BathIcon, SqftIcon, UserCircleIcon, ScaleIcon, Liv
 import { useAppContext } from '@/context/AppContext';
 import { formatPrice } from '@/utils/currency';
 import { BALKAN_COUNTRIES } from '@/constants/countries';
+import { optimizeCloudinaryUrl, cloudinarySrcSet } from '@/config/cloudinaryConfig';
 
 interface PropertyCardProps {
   property: Property;
@@ -56,7 +57,7 @@ const SellerAvatar: React.FC<{ avatarUrl?: string; name: string; type: string; s
         <div className="absolute inset-0 bg-gradient-to-br from-primary/10 to-primary/20 animate-pulse" />
       )}
       <img
-        src={avatarUrl}
+        src={optimizeCloudinaryUrl(avatarUrl, { width: 64, quality: 'auto', crop: 'fill' })}
         alt={`${name} - Real Estate ${type === 'agent' ? 'Agent' : 'Seller'}`}
         loading="lazy"
         decoding="async"
@@ -149,7 +150,7 @@ const PropertyCardInner = memo<PropertyCardInnerProps>(({
           <div className="relative w-full h-36 sm:h-40 md:h-44 overflow-hidden">
             {/* Blurred background - same image fills empty space */}
             <img
-              src={property.imageUrl}
+              src={optimizeCloudinaryUrl(property.imageUrl, { width: 100, quality: 'auto:low', crop: 'fill' })}
               alt=""
               aria-hidden="true"
               loading="lazy"
@@ -158,7 +159,9 @@ const PropertyCardInner = memo<PropertyCardInnerProps>(({
             />
             {/* Main image - contained to show full image */}
             <img
-              src={property.imageUrl}
+              src={optimizeCloudinaryUrl(property.imageUrl, { width: 640, quality: 'auto' })}
+              srcSet={cloudinarySrcSet(property.imageUrl, [320, 480, 640])}
+              sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
               alt={`${property.title || propertyTypeLabel} - ${property.beds} bed, ${property.baths} bath ${propertyTypeLabel} for ${isRental ? 'rent' : 'sale'} in ${property.city}, ${property.country}`}
               loading="lazy"
               decoding="async"
@@ -415,7 +418,7 @@ const PropertyCardInner = memo<PropertyCardInnerProps>(({
               <div className="flex items-center gap-1.5 flex-shrink-0 bg-neutral-50 px-2 py-1.5 rounded-lg border border-neutral-200">
                 {safeProperty.seller.agencyLogo ? (
                   <img
-                    src={safeProperty.seller.agencyLogo}
+                    src={optimizeCloudinaryUrl(safeProperty.seller.agencyLogo, { width: 48, quality: 'auto', crop: 'fill' })}
                     alt={`${safeProperty.seller.agencyName} - Real Estate Agency`}
                     loading="lazy"
                     decoding="async"

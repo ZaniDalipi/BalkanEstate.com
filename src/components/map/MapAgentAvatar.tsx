@@ -14,6 +14,7 @@ import { useTranslation } from 'react-i18next';
 import { useMap } from 'react-leaflet';
 import { useHighlightedProperties, PROMOTION_TIER_COLORS } from '../../context/HighlightedPropertiesContext';
 import { formatPrice } from '../../../utils/currency';
+import { optimizeCloudinaryUrl } from '../../../config/cloudinaryConfig';
 
 interface MapAgentAvatarProps {
   onPropertySelect: (propertyId: string) => void;
@@ -169,7 +170,7 @@ const MapAgentAvatar: React.FC<MapAgentAvatarProps> = ({ onPropertySelect }) => 
             {/* Image - smaller on mobile */}
             <div className="relative rounded-lg overflow-hidden mb-1.5 sm:mb-2 group cursor-pointer" onClick={handleViewProperty}>
               <img
-                src={currentMapFeatured.imageUrl}
+                src={optimizeCloudinaryUrl(currentMapFeatured.imageUrl, { width: 384, quality: 'auto', crop: 'fill' })}
                 alt={currentMapFeatured.title || currentMapFeatured.address}
                 loading="lazy"
                 decoding="async"
