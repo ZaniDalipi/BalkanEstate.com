@@ -20,7 +20,7 @@ import { API_URL } from './config';
 let cachedPublicKey: CryptoKey | null = null;
 let cachedKeyTimestamp = 0;
 let keyFetchPromise: Promise<CryptoKey> | null = null;
-const KEY_CACHE_TTL = 30 * 60 * 1000; // Refresh key every 30 minutes
+const KEY_CACHE_TTL = 60 * 60 * 1000; // Refresh key every 60 minutes (server key is static)
 
 /**
  * Invalidate cached key (call on decryption failure / server key rotation)
@@ -42,7 +42,7 @@ const getServerPublicKey = async (): Promise<CryptoKey> => {
     return cachedPublicKey;
   }
 
-  // Deduplicate concurrent fetches (multiple requests on page load)
+  // Deduplicate concurrent fetches - reuse in-flight promise
   if (keyFetchPromise) {
     return keyFetchPromise;
   }
@@ -50,6 +50,8 @@ const getServerPublicKey = async (): Promise<CryptoKey> => {
   keyFetchPromise = (async () => {
     const response = await fetch(`${API_URL}/auth/encryption-key`);
     if (!response.ok) {
+      // Clear promise so next call retries
+      keyFetchPromise = null;
       throw new Error('Failed to fetch encryption key');
     }
 
@@ -58,6 +60,7 @@ const getServerPublicKey = async (): Promise<CryptoKey> => {
     const publicKey = data.publicKey || data;
 
     if (!publicKey || typeof publicKey !== 'string') {
+      keyFetchPromise = null;
       throw new Error('Invalid encryption key response');
     }
 
@@ -81,12 +84,7 @@ const getServerPublicKey = async (): Promise<CryptoKey> => {
     return cachedPublicKey;
   })();
 
-  try {
-    const key = await keyFetchPromise;
-    return key;
-  } finally {
-    keyFetchPromise = null;
-  }
+  return keyFetchPromise;
 };
 
 /**
