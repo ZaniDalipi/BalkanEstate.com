@@ -90,6 +90,14 @@ export const apiRequest = async <T>(
     const contentType = response.headers.get('content-type');
     const isJson = contentType && contentType.includes('application/json');
 
+    // Handle 429 Too Many Requests - retry once after backoff
+    if (response.status === 429 && retryCount < 2) {
+      const retryAfter = parseInt(response.headers.get('Retry-After') || '3', 10);
+      const waitMs = Math.min(retryAfter * 1000, 10000); // Max 10s wait
+      await new Promise(resolve => setTimeout(resolve, waitMs));
+      return apiRequest<T>(endpoint, options, retryCount + 1);
+    }
+
     // Handle 401 Unauthorized - try to refresh token
     if (response.status === 401 && requiresAuth && retryCount === 0) {
       const newAccessToken = await refreshAccessToken();
@@ -100,7 +108,7 @@ export const apiRequest = async <T>(
         tokenService.clearTokens();
         // Emit custom event for session expiration
         window.dispatchEvent(new CustomEvent('session-expired'));
-        throw new Error('Session expired. Please login again.');
+        throw new Error('Your session has ended. Please sign in again.');
       }
     }
 

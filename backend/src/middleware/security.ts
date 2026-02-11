@@ -308,10 +308,10 @@ export const getCorsConfig = () => {
  */
 export const generalRateLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
-  max: isProduction ? 200 : 500, // Relaxed but not unlimited in development
+  max: isProduction ? 500 : 1000, // Generous for browsing-heavy real estate app
   message: {
-    error: 'Too many requests',
-    message: 'You have exceeded the rate limit. Please try again later.',
+    error: 'rate_limit',
+    message: 'You\'re browsing a bit fast. Please wait a moment and try again.',
     retryAfter: 15,
   },
   standardHeaders: true,
@@ -324,15 +324,15 @@ export const generalRateLimiter = rateLimit({
 });
 
 /**
- * Stricter rate limiter for sensitive endpoints (auth, admin)
+ * Rate limiter for sensitive endpoints (auth, admin)
  * Always enforced regardless of environment
  */
 export const sensitiveRateLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
-  max: isProduction ? 30 : 60, // Stricter even in development
+  max: isProduction ? 60 : 120, // Allows normal auth workflows without hitting limits
   message: {
-    error: 'Too many requests',
-    message: 'Too many requests to this endpoint. Please try again later.',
+    error: 'rate_limit',
+    message: 'Please slow down and try again in a moment.',
     retryAfter: 15,
   },
   standardHeaders: true,
@@ -340,15 +340,15 @@ export const sensitiveRateLimiter = rateLimit({
 });
 
 /**
- * Very strict rate limiter for payment endpoints
+ * Strict rate limiter for payment endpoints
  * In development mode, skip rate limiting entirely to avoid blocking during testing
  */
 export const paymentRateLimiter = rateLimit({
   windowMs: 60 * 60 * 1000, // 1 hour
-  max: isProduction ? 10 : 0, // 0 = unlimited in development
+  max: isProduction ? 15 : 0, // 0 = unlimited in development
   message: {
-    error: 'Too many payment attempts',
-    message: 'Too many payment attempts. Please try again later.',
+    error: 'rate_limit',
+    message: 'Too many payment attempts. Please wait a while before trying again.',
     retryAfter: 60,
   },
   standardHeaders: true,
@@ -363,10 +363,10 @@ export const paymentRateLimiter = rateLimit({
  */
 export const aiRateLimiter = rateLimit({
   windowMs: 60 * 60 * 1000, // 1 hour window
-  max: isProduction ? 20 : 100, // 20 requests per hour in production
+  max: isProduction ? 40 : 100, // 40 requests per hour in production
   message: {
-    error: 'AI rate limit exceeded',
-    message: 'You have made too many AI requests. Please try again later.',
+    error: 'ai_rate_limit',
+    message: 'You\'ve used this feature quite a bit. Please try again in a little while.',
     retryAfter: 60,
   },
   standardHeaders: true,

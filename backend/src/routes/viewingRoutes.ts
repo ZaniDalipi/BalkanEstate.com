@@ -4,11 +4,11 @@ import { getViewingAvailability, scheduleViewing } from '../controllers/viewingC
 
 const router = express.Router();
 
-// Rate limit viewing requests (10 per hour per IP)
+// Rate limit viewing requests (20 per hour per IP)
 const viewingRateLimiter = rateLimit({
   windowMs: 60 * 60 * 1000, // 1 hour
-  max: 10,
-  message: { message: 'Too many viewing requests. Please try again later.' },
+  max: 20,
+  message: { message: 'You\'ve scheduled several viewings. Please wait a bit before requesting more.' },
   standardHeaders: true,
   legacyHeaders: false,
 });

@@ -29,41 +29,41 @@ const isProduction = process.env.NODE_ENV === 'production';
 
 // Configuration - auth rate limits apply in ALL environments
 const RATE_LIMIT_CONFIG = {
-  // Login endpoint: strict per-IP limits
+  // Login endpoint: per-IP limits
   LOGIN_IP: {
-    maxAttempts: isProduction ? 10 : 20,
+    maxAttempts: isProduction ? 15 : 30,
     windowMs: 15 * 60 * 1000, // 15 minutes
-    blockDurationMs: isProduction ? 30 * 60 * 1000 : 5 * 60 * 1000, // 30min prod, 5min dev
+    blockDurationMs: isProduction ? 15 * 60 * 1000 : 5 * 60 * 1000, // 15min prod, 5min dev
   },
   // Login endpoint: per-account limits
   LOGIN_ACCOUNT: {
-    maxAttempts: isProduction ? 5 : 10,
+    maxAttempts: isProduction ? 8 : 15,
     windowMs: 15 * 60 * 1000,
-    blockDurationMs: isProduction ? 60 * 60 * 1000 : 10 * 60 * 1000, // 1hr prod, 10min dev
+    blockDurationMs: isProduction ? 30 * 60 * 1000 : 10 * 60 * 1000, // 30min prod, 10min dev
   },
   // Signup endpoint: per-IP limits
   SIGNUP_IP: {
-    maxAttempts: isProduction ? 5 : 15,
+    maxAttempts: isProduction ? 8 : 20,
     windowMs: 60 * 60 * 1000, // 1 hour
-    blockDurationMs: isProduction ? 2 * 60 * 60 * 1000 : 10 * 60 * 1000,
+    blockDurationMs: isProduction ? 60 * 60 * 1000 : 10 * 60 * 1000,
   },
   // Password reset: per-IP limits
   PASSWORD_RESET_IP: {
-    maxAttempts: isProduction ? 5 : 10,
+    maxAttempts: isProduction ? 8 : 15,
     windowMs: 60 * 60 * 1000,
-    blockDurationMs: isProduction ? 2 * 60 * 60 * 1000 : 10 * 60 * 1000,
+    blockDurationMs: isProduction ? 60 * 60 * 1000 : 10 * 60 * 1000,
   },
   // Password reset: per-account limits
   PASSWORD_RESET_ACCOUNT: {
-    maxAttempts: isProduction ? 5 : 10,
+    maxAttempts: isProduction ? 8 : 15,
     windowMs: 60 * 60 * 1000,
-    blockDurationMs: isProduction ? 3 * 60 * 60 * 1000 : 15 * 60 * 1000,
+    blockDurationMs: isProduction ? 2 * 60 * 60 * 1000 : 15 * 60 * 1000,
   },
-  // Refresh token endpoint: per-IP limits
+  // Refresh token endpoint: per-IP limits (generous to prevent accidental logouts)
   REFRESH_TOKEN_IP: {
-    maxAttempts: isProduction ? 30 : 60,
+    maxAttempts: isProduction ? 100 : 200,
     windowMs: 15 * 60 * 1000,
-    blockDurationMs: isProduction ? 15 * 60 * 1000 : 5 * 60 * 1000,
+    blockDurationMs: isProduction ? 5 * 60 * 1000 : 2 * 60 * 1000,
   },
 };
 
@@ -137,7 +137,7 @@ export const loginRateLimiterIP = (
 
   if (!result.allowed) {
     res.status(429).json({
-      message: `Too many login attempts. Please try again later in ${result.retryAfter} seconds.`,
+      message: `Too many login attempts. Please wait ${Math.ceil((result.retryAfter || 60) / 60)} minutes and try again.`,
       retryAfter: result.retryAfter,
     });
     return;
@@ -171,7 +171,7 @@ export const signupRateLimiterIP = (
 
   if (!result.allowed) {
     res.status(429).json({
-      message: 'Too many signup attempts. Please try again later.',
+      message: 'Too many signup attempts. Please wait a few minutes and try again.',
       retryAfter: result.retryAfter,
     });
     return;
@@ -197,7 +197,7 @@ export const passwordResetRateLimiterIP = (
 
   if (!result.allowed) {
     res.status(429).json({
-      message: 'Too many password reset attempts. Please try again later.',
+      message: 'Too many password reset attempts. Please wait a few minutes and try again.',
       retryAfter: result.retryAfter,
     });
     return;
@@ -233,7 +233,7 @@ export const refreshTokenRateLimiterIP = (
 
   if (!result.allowed) {
     res.status(429).json({
-      message: 'Too many requests. Please try again later.',
+      message: 'Please slow down and try again in a moment.',
       retryAfter: result.retryAfter,
     });
     return;

@@ -15,7 +15,7 @@ import { API_URL } from './config';
 const ACCESS_TOKEN_KEY = 'balkan_estate_token';
 const REFRESH_TOKEN_KEY = 'balkan_estate_refresh_token';
 const SESSION_KEY = 'balkan_estate_session';
-const REFRESH_BUFFER_MS = 5 * 60 * 1000; // Refresh 5 minutes before expiry
+const REFRESH_BUFFER_MS = 10 * 60 * 1000; // Refresh 10 minutes before expiry for extra safety margin
 const STORAGE_VERSION = 'v3'; // Used to invalidate old storage format
 
 let refreshTimer: ReturnType<typeof setTimeout> | null = null;
@@ -220,16 +220,16 @@ const getTimeUntilExpiry = (token: string): number => {
   return Math.max(0, expiresAt - Date.now());
 };
 
-// Proactive token refresh
-const refreshTokenProactively = async (): Promise<boolean> => {
-  if (isRefreshing) return false;
+// Proactive token refresh with retry
+const refreshTokenProactively = async (retryAttempt = 0): Promise<boolean> => {
+  if (isRefreshing && retryAttempt === 0) return false;
 
   const refreshToken = secureStorage.getItem(REFRESH_TOKEN_KEY);
   if (!refreshToken) {
     return false;
   }
 
-  isRefreshing = true;
+  if (retryAttempt === 0) isRefreshing = true;
 
   try {
     const response = await fetch(`${API_URL}/auth/refresh-token`, {
@@ -238,9 +238,22 @@ const refreshTokenProactively = async (): Promise<boolean> => {
       body: JSON.stringify({ refreshToken }),
     });
 
+    // On rate limit (429) or server error (5xx), retry up to 2 times with backoff
+    if ((response.status === 429 || response.status >= 500) && retryAttempt < 2) {
+      const backoffMs = (retryAttempt + 1) * 3000; // 3s, 6s
+      await new Promise(resolve => setTimeout(resolve, backoffMs));
+      return refreshTokenProactively(retryAttempt + 1);
+    }
+
     if (!response.ok) {
-      tokenService.clearTokens();
-      onSessionExpired?.();
+      // Only expire session on definitive auth failures (401/403), not transient errors
+      if (response.status === 401 || response.status === 403) {
+        tokenService.clearTokens();
+        onSessionExpired?.();
+      } else {
+        // Transient error - schedule a retry in 30 seconds instead of logging out
+        setTimeout(() => refreshTokenProactively(), 30000);
+      }
       return false;
     }
 
@@ -256,9 +269,16 @@ const refreshTokenProactively = async (): Promise<boolean> => {
 
     return false;
   } catch (error) {
+    // Network error - retry once after a delay instead of giving up
+    if (retryAttempt < 1) {
+      await new Promise(resolve => setTimeout(resolve, 5000));
+      return refreshTokenProactively(retryAttempt + 1);
+    }
+    // Still don't log out on network errors - schedule retry
+    setTimeout(() => refreshTokenProactively(), 30000);
     return false;
   } finally {
-    isRefreshing = false;
+    if (retryAttempt === 0) isRefreshing = false;
   }
 };
 

@@ -8,11 +8,11 @@ import {
 
 const router = express.Router();
 
-// Rate limit inquiries to prevent spam (10 inquiries per hour per IP)
+// Rate limit inquiries to prevent spam (20 inquiries per hour per IP)
 const inquiryRateLimiter = rateLimit({
   windowMs: 60 * 60 * 1000, // 1 hour
-  max: 10,
-  message: { message: 'Too many inquiries sent. Please try again later.' },
+  max: 20,
+  message: { message: 'You\'ve sent quite a few inquiries. Please wait a bit before sending more.' },
   standardHeaders: true,
   legacyHeaders: false,
 });

@@ -54,10 +54,10 @@ const SessionExpiredModal: React.FC = () => {
 
         {/* Content */}
         <h2 className="text-2xl font-bold text-center text-neutral-900 mb-2">
-          {t('auth:sessionExpired.title', 'Session Expired')}
+          {t('auth:sessionExpired.title', 'You\'ve been signed out')}
         </h2>
         <p className="text-neutral-600 text-center mb-8">
-          {t('auth:sessionExpired.message', 'Your session has expired for security reasons. Please log in again to continue.')}
+          {t('auth:sessionExpired.message', 'Your session ended after being inactive. Sign in to pick up where you left off.')}
         </p>
 
         {/* Actions */}

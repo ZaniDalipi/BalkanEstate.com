@@ -19,10 +19,10 @@ const getJwtRefreshSecret = (): string => {
   return secret;
 };
 
-// Access token: Medium-lived (1 hour) - extended for better UX while maintaining security
+// Access token: Medium-lived (4 hours) - balanced for UX (fewer refreshes/logouts) and security
 export const generateAccessToken = (userId: string): string => {
   const secret: string = getJwtSecret();
-  const expiresIn = process.env.ACCESS_TOKEN_EXPIRES_IN || '1h';
+  const expiresIn = process.env.ACCESS_TOKEN_EXPIRES_IN || '4h';
   return jwt.sign({ id: userId, type: 'access' }, secret, { expiresIn } as any);
 };
 
