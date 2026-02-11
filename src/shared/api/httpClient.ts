@@ -3,7 +3,6 @@
 
 import { API_URL } from './config';
 import { tokenService } from './tokenService';
-import { generateResponseKey, decryptResponse, invalidatePublicKey } from './payloadEncryption';
 
 export interface RequestOptions {
   method?: string;
@@ -55,15 +54,11 @@ export const apiRequest = async <T>(
 ): Promise<T> => {
   const { method = 'GET', body, headers = {}, requiresAuth = false } = options;
 
-  // Generate AES key for response encryption on every request
-  const keyInfo = await generateResponseKey();
-
   const config: RequestInit = {
     method,
     headers: {
       'Content-Type': 'application/json',
       ...headers,
-      ...(keyInfo ? { 'X-Response-Key': keyInfo.encryptedKeyBase64 } : {}),
     },
   };
 
@@ -105,11 +100,7 @@ export const apiRequest = async <T>(
     }
 
     if (!response.ok) {
-      const rawError = isJson ? await response.json() : { message: response.statusText };
-      let error = rawError;
-      if (keyInfo && rawError?.__encrypted) {
-        try { error = await decryptResponse(rawError, keyInfo.rawKey); } catch { invalidatePublicKey(); }
-      }
+      const error = isJson ? await response.json() : { message: response.statusText };
       const err: any = new Error(error.message || 'An error occurred');
       err.code = error.code || null;
       err.statusCode = response.status;
@@ -117,18 +108,7 @@ export const apiRequest = async <T>(
       throw err;
     }
 
-    const rawData = isJson ? await response.json() : ({} as any);
-
-    if (keyInfo && rawData?.__encrypted) {
-      try {
-        return await decryptResponse(rawData, keyInfo.rawKey) as T;
-      } catch {
-        invalidatePublicKey();
-        return apiRequest<T>(endpoint, options, retryCount);
-      }
-    }
-
-    return rawData as T;
+    return isJson ? await response.json() as T : ({} as T);
   } catch (error: any) {
     throw error;
   }

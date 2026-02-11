@@ -21,9 +21,6 @@
 import { Property, Seller, User, UserRole, SavedSearch, Message, Conversation, Filters } from '../types';
 import {
   encryptSensitiveFields,
-  generateResponseKey,
-  decryptResponse,
-  invalidatePublicKey,
 } from '@/src/shared/api/payloadEncryption';
 
 // Get API URL from environment variables
@@ -116,15 +113,11 @@ const refreshAccessToken = async (): Promise<string | null> => {
 const apiRequest = async <T>(endpoint: string, options: RequestOptions = {}, retryCount = 0): Promise<T> => {
   const { method = 'GET', body, headers = {}, requiresAuth = false } = options;
 
-  // Generate AES key for response encryption on every request
-  const keyInfo = await generateResponseKey();
-
   const config: RequestInit = {
     method,
     headers: {
       'Content-Type': 'application/json',
       ...headers,
-      ...(keyInfo ? { 'X-Response-Key': keyInfo.encryptedKeyBase64 } : {}),
     },
   };
 
@@ -166,11 +159,7 @@ const apiRequest = async <T>(endpoint: string, options: RequestOptions = {}, ret
     }
 
     if (!response.ok) {
-      const rawError = isJson ? await response.json() : { message: response.statusText };
-      let error = rawError;
-      if (keyInfo && rawError?.__encrypted) {
-        try { error = await decryptResponse(rawError, keyInfo.rawKey); } catch { invalidatePublicKey(); }
-      }
+      const error = isJson ? await response.json() : { message: response.statusText };
       const err: any = new Error(error.message || 'An error occurred');
       err.code = error.code || null;
       err.statusCode = response.status;
@@ -178,19 +167,7 @@ const apiRequest = async <T>(endpoint: string, options: RequestOptions = {}, ret
       throw err;
     }
 
-    const rawData = isJson ? await response.json() : ({} as any);
-
-    if (keyInfo && rawData?.__encrypted) {
-      try {
-        return await decryptResponse(rawData, keyInfo.rawKey) as T;
-      } catch {
-        // Decryption failed (e.g. server key rotated) - clear cache and retry without encryption
-        invalidatePublicKey();
-        return apiRequest<T>(endpoint, options, retryCount);
-      }
-    }
-
-    return rawData as T;
+    return isJson ? await response.json() as T : ({} as T);
   } catch (error: any) {
     throw error;
   }
