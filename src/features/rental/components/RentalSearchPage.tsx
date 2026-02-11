@@ -93,33 +93,34 @@ const RentalSearchPage: React.FC = () => {
                 type="website"
             />
 
-            <div className="absolute inset-0 z-0 bg-neutral-50" />
+            {/* Dark gradient background for the left panel */}
+            <div className="absolute inset-0 z-0" style={{ background: 'linear-gradient(135deg, #0c1220 0%, #1a1040 50%, #0d1f3c 100%)' }} />
 
             <div className={`flex h-full w-full flex-col lg:flex-row transition-all duration-300 relative ${isFiltersOpen && (isMobile || isTablet) ? 'blur-sm pointer-events-none' : ''}`}>
                 {/* Left Panel: Search + Filters + Property List */}
-                <div className={`absolute inset-0 z-10 h-full w-full bg-white flex flex-col lg:relative lg:w-[45%] xl:w-[55%] lg:flex-shrink-0 lg:border-r lg:border-neutral-200 ${showViewToggle && mobileView === 'list' ? 'translate-x-0' : showViewToggle ? '-translate-x-full' : ''} lg:translate-x-0 transition-transform duration-300`}>
+                <div className={`absolute inset-0 z-10 h-full w-full flex flex-col lg:relative lg:w-[45%] xl:w-[55%] lg:flex-shrink-0 lg:border-r lg:border-white/5 ${showViewToggle && mobileView === 'list' ? 'translate-x-0' : showViewToggle ? '-translate-x-full' : ''} lg:translate-x-0 transition-transform duration-300`} style={{ background: 'linear-gradient(180deg, rgba(12,18,32,0.98) 0%, rgba(26,16,64,0.95) 100%)' }}>
                     {/* Header with city search */}
-                    <div className="sticky top-0 z-20 bg-white border-b border-neutral-200">
+                    <div className="sticky top-0 z-20" style={{ background: 'rgba(12,18,32,0.9)', backdropFilter: 'blur(20px)', WebkitBackdropFilter: 'blur(20px)', borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
                         <div className="px-4 py-3 flex items-center justify-between gap-3">
                             <div>
-                                <h1 className="text-lg font-bold text-neutral-800">{t('rental:title')}</h1>
-                                <p className="text-xs text-neutral-500">
+                                <h1 className="text-lg font-bold text-white/90 text-glow">{t('rental:title')}</h1>
+                                <p className="text-xs text-white/40">
                                     {listProperties.length} {t('rental:propertiesFound')}
                                 </p>
                             </div>
                             <div className="flex items-center gap-2">
                                 <button
                                     onClick={handleCreateRental}
-                                    className="text-xs bg-secondary text-white font-semibold px-3 py-1.5 rounded-lg hover:bg-opacity-90 transition-colors"
+                                    className="glass-btn-accent text-xs font-semibold px-3 py-1.5"
                                 >
                                     + {t('rental:createListing')}
                                 </button>
                                 <button
                                     onClick={() => setIsFiltersOpen(!isFiltersOpen)}
-                                    className="lg:hidden p-2 rounded-lg hover:bg-neutral-100 transition-colors"
+                                    className="lg:hidden glass-btn p-2"
                                     aria-label="Toggle filters"
                                 >
-                                    <AdjustmentsHorizontalIcon className="w-5 h-5 text-neutral-600" />
+                                    <AdjustmentsHorizontalIcon className="w-5 h-5 text-white/60" />
                                 </button>
                             </div>
                         </div>
@@ -128,7 +129,7 @@ const RentalSearchPage: React.FC = () => {
                         <div className="px-4 pb-3">
                             <div ref={searchWrapperRef} className="relative">
                                 <div className="relative">
-                                    <MagnifyingGlassIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-neutral-400" />
+                                    <MagnifyingGlassIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/30" />
                                     <input
                                         type="text"
                                         value={filters.query}
@@ -136,12 +137,12 @@ const RentalSearchPage: React.FC = () => {
                                         onFocus={() => setIsQueryInputFocused(true)}
                                         onKeyDown={(e) => { if (e.key === 'Enter') handleSearch(); }}
                                         placeholder={t('rental:filters.searchCity', 'Search by city or location...')}
-                                        className="w-full pl-9 pr-9 py-2 text-sm border border-neutral-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition-colors"
+                                        className="glass-input w-full pl-9 pr-9 py-2 text-sm"
                                     />
                                     {filters.query && (
                                         <button
                                             onClick={() => handleFilterChange('query', '')}
-                                            className="absolute right-3 top-1/2 -translate-y-1/2 text-neutral-400 hover:text-neutral-600"
+                                            className="absolute right-3 top-1/2 -translate-y-1/2 text-white/30 hover:text-white/60 transition-colors"
                                         >
                                             <XMarkIcon className="w-4 h-4" />
                                         </button>
@@ -150,22 +151,22 @@ const RentalSearchPage: React.FC = () => {
 
                                 {/* Location Suggestions Dropdown */}
                                 {isQueryInputFocused && suggestions.length > 0 && (
-                                    <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-neutral-200 rounded-lg shadow-lg z-50 max-h-60 overflow-y-auto">
+                                    <div className="absolute top-full left-0 right-0 mt-1 glass-panel-light z-50 max-h-60 overflow-y-auto glass-scrollbar">
                                         {suggestions.map((suggestion: NominatimResult, index: number) => (
                                             <button
                                                 key={index}
                                                 onClick={() => handleSuggestionClick(suggestion)}
-                                                className="w-full text-left px-3 py-2.5 text-sm hover:bg-neutral-50 transition-colors flex items-center gap-2 border-b border-neutral-100 last:border-b-0"
+                                                className="w-full text-left px-3 py-2.5 text-sm hover:bg-white/10 transition-colors flex items-center gap-2 border-b border-white/5 last:border-b-0"
                                             >
-                                                <MapIcon className="w-4 h-4 text-neutral-400 flex-shrink-0" />
-                                                <span className="truncate text-neutral-700">{suggestion.display_name}</span>
+                                                <MapIcon className="w-4 h-4 text-white/30 flex-shrink-0" />
+                                                <span className="truncate text-white/70">{suggestion.display_name}</span>
                                             </button>
                                         ))}
                                     </div>
                                 )}
                                 {isSearchingLocation && (
-                                    <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-neutral-200 rounded-lg shadow-lg z-50 p-3 text-center">
-                                        <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-primary mx-auto" />
+                                    <div className="absolute top-full left-0 right-0 mt-1 glass-panel-light z-50 p-3 text-center">
+                                        <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-blue-400 mx-auto" />
                                     </div>
                                 )}
                             </div>
@@ -173,7 +174,7 @@ const RentalSearchPage: React.FC = () => {
                     </div>
 
                     {/* Desktop Filters */}
-                    <div className="hidden lg:block border-b border-neutral-200">
+                    <div className="hidden lg:block" style={{ borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
                         <RentalFilters
                             filters={filters}
                             onFilterChange={handleFilterChange}
@@ -183,8 +184,8 @@ const RentalSearchPage: React.FC = () => {
                         />
                     </div>
 
-                    {/* Property List - Using same PropertyCard as the Buy page */}
-                    <div className="flex-1 overflow-y-auto p-3 pb-28 lg:pb-3" data-scroll-container>
+                    {/* Property List */}
+                    <div className="flex-1 overflow-y-auto p-3 pb-28 lg:pb-3 glass-scrollbar" data-scroll-container>
                         {isLoading ? (
                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                                 {[...Array(6)].map((_, i) => (
@@ -193,19 +194,19 @@ const RentalSearchPage: React.FC = () => {
                             </div>
                         ) : error ? (
                             <div className="text-center py-12">
-                                <p className="text-sm text-red-500 mb-2">{error}</p>
-                                <button onClick={handleSearch} className="text-sm text-primary hover:underline">
+                                <p className="text-sm text-red-400 mb-2">{error}</p>
+                                <button onClick={handleSearch} className="text-sm text-blue-400 hover:underline">
                                     {t('common:tryAgain')}
                                 </button>
                             </div>
                         ) : listProperties.length === 0 ? (
                             <div className="text-center py-12">
-                                <div className="text-4xl mb-3">🏠</div>
-                                <h3 className="text-lg font-semibold text-neutral-700 mb-1">{t('rental:noProperties')}</h3>
-                                <p className="text-sm text-neutral-500 mb-4">{t('rental:noPropertiesHint')}</p>
+                                <div className="text-4xl mb-3 opacity-60">🏠</div>
+                                <h3 className="text-lg font-semibold text-white/70 mb-1">{t('rental:noProperties')}</h3>
+                                <p className="text-sm text-white/40 mb-4">{t('rental:noPropertiesHint')}</p>
                                 <button
                                     onClick={handleResetFilters}
-                                    className="text-sm text-primary font-medium hover:underline"
+                                    className="text-sm text-blue-400 font-medium hover:underline"
                                 >
                                     {t('rental:filters.reset')}
                                 </button>
@@ -259,13 +260,13 @@ const RentalSearchPage: React.FC = () => {
             {/* Mobile Filters Modal */}
             {(isMobile || isTablet) && isFiltersOpen && (
                 <div className="fixed inset-0 z-30 flex flex-col">
-                    <div className="absolute inset-0 bg-black/50" onClick={() => setIsFiltersOpen(false)} />
+                    <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" onClick={() => setIsFiltersOpen(false)} />
                     <div className="relative w-full h-full flex items-end sm:items-center justify-center p-0 sm:p-4">
-                        <div className="relative bg-white w-full sm:max-w-md sm:rounded-xl rounded-t-xl max-h-[85vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
-                            <div className="sticky top-0 bg-white border-b border-neutral-200 px-4 py-3 flex items-center justify-between z-10">
-                                <h2 className="text-lg font-bold text-neutral-800">{t('rental:filters.title')}</h2>
-                                <button onClick={() => setIsFiltersOpen(false)} className="p-1 rounded-lg hover:bg-neutral-100">
-                                    <XMarkIcon className="w-5 h-5 text-neutral-600" />
+                        <div className="relative w-full sm:max-w-md sm:rounded-xl rounded-t-xl max-h-[85vh] overflow-y-auto glass-scrollbar glass-panel" onClick={e => e.stopPropagation()}>
+                            <div className="sticky top-0 z-10 px-4 py-3 flex items-center justify-between" style={{ background: 'rgba(12,18,32,0.9)', backdropFilter: 'blur(20px)', borderBottom: '1px solid rgba(255,255,255,0.08)' }}>
+                                <h2 className="text-lg font-bold text-white/90">{t('rental:filters.title')}</h2>
+                                <button onClick={() => setIsFiltersOpen(false)} className="glass-btn p-1">
+                                    <XMarkIcon className="w-5 h-5 text-white/60" />
                                 </button>
                             </div>
                             <RentalFilters

@@ -26,7 +26,7 @@ const RentalPropertyCard: React.FC<RentalPropertyCardProps> = ({ property, onHov
 
     return (
         <article
-            className={`group bg-white rounded-xl border border-neutral-200 overflow-hidden shadow-sm hover:shadow-md transition-all duration-200 cursor-pointer ${isRented ? 'opacity-75' : ''}`}
+            className={`group glass-panel overflow-hidden hover:bg-white/10 transition-all duration-300 cursor-pointer ${isRented ? 'opacity-75' : ''}`}
             onClick={handleClick}
             onMouseEnter={() => onHover?.(property.id)}
             onMouseLeave={() => onHover?.(null)}
@@ -46,17 +46,17 @@ const RentalPropertyCard: React.FC<RentalPropertyCardProps> = ({ property, onHov
                 />
                 {/* Status Badge */}
                 {isRented && (
-                    <div className="absolute top-2 left-2 bg-red-600 text-white text-xs font-bold px-2.5 py-1 rounded-full">
+                    <div className="absolute top-2 left-2 bg-red-500/80 backdrop-blur-sm text-white text-xs font-bold px-2.5 py-1 rounded-full">
                         {t('rental:rented')}
                     </div>
                 )}
                 {/* Listing Type Badge */}
-                <div className="absolute top-2 right-2 bg-blue-600 text-white text-xs font-bold px-2.5 py-1 rounded-full">
+                <div className="absolute top-2 right-2 glass-badge text-xs font-bold px-2.5 py-1 text-blue-300">
                     {t('rental:forRent')}
                 </div>
                 {/* Available From */}
                 {property.availableFrom && !isRented && (
-                    <div className="absolute bottom-2 left-2 bg-black/60 backdrop-blur-sm text-white text-xs px-2 py-1 rounded-lg">
+                    <div className="absolute bottom-2 left-2 glass-badge text-xs px-2 py-1 text-white/80">
                         {t('rental:availableFrom')}: {new Date(property.availableFrom).toLocaleDateString()}
                     </div>
                 )}
@@ -66,26 +66,26 @@ const RentalPropertyCard: React.FC<RentalPropertyCardProps> = ({ property, onHov
             <div className="p-3 sm:p-4">
                 {/* Price */}
                 <div className="flex items-baseline gap-1 mb-1">
-                    <span className="text-lg sm:text-xl font-bold text-neutral-900">
+                    <span className="text-lg sm:text-xl font-bold text-white/90">
                         {currencySymbol}{formattedPrice}
                     </span>
-                    <span className="text-sm text-neutral-500">{rentPeriodLabel}</span>
+                    <span className="text-sm text-white/40">{rentPeriodLabel}</span>
                 </div>
 
                 {/* Title / Address */}
                 {property.title && (
-                    <h3 className="text-sm font-semibold text-neutral-800 truncate mb-0.5">{property.title}</h3>
+                    <h3 className="text-sm font-semibold text-white/80 truncate mb-0.5">{property.title}</h3>
                 )}
-                <p className="text-sm text-neutral-500 truncate">{property.address}, {property.city}</p>
+                <p className="text-sm text-white/40 truncate">{property.address}, {property.city}</p>
 
                 {/* Key Details */}
-                <div className="flex items-center gap-3 mt-2 text-sm text-neutral-600">
+                <div className="flex items-center gap-3 mt-2 text-sm text-white/50">
                     {property.propertyType !== 'land' && (
                         <>
                             <span>{property.beds} {t('common:beds')}</span>
-                            <span className="text-neutral-300">|</span>
+                            <span className="text-white/20">|</span>
                             <span>{property.baths} {t('common:baths')}</span>
-                            <span className="text-neutral-300">|</span>
+                            <span className="text-white/20">|</span>
                         </>
                     )}
                     <span>{property.sqft} m²</span>
@@ -94,42 +94,42 @@ const RentalPropertyCard: React.FC<RentalPropertyCardProps> = ({ property, onHov
                 {/* Rental-Specific Details */}
                 <div className="flex flex-wrap items-center gap-2 mt-2">
                     {property.securityDeposit != null && property.securityDeposit > 0 && (
-                        <span className="inline-flex items-center text-xs bg-amber-50 text-amber-700 px-2 py-0.5 rounded-full border border-amber-200">
+                        <span className="glass-badge text-xs px-2 py-0.5 text-amber-300/80">
                             {t('rental:deposit')}: {currencySymbol}{new Intl.NumberFormat('de-DE').format(property.securityDeposit)}
                         </span>
                     )}
                     {property.minimumLeaseDuration && (
-                        <span className="inline-flex items-center text-xs bg-blue-50 text-blue-700 px-2 py-0.5 rounded-full border border-blue-200">
+                        <span className="glass-badge text-xs px-2 py-0.5 text-blue-300/80">
                             {t('rental:minLease')}: {property.minimumLeaseDuration} {t('rental:months')}
                         </span>
                     )}
                     {property.utilitiesIncluded && (
-                        <span className="inline-flex items-center text-xs bg-green-50 text-green-700 px-2 py-0.5 rounded-full border border-green-200">
+                        <span className="glass-badge text-xs px-2 py-0.5 text-emerald-300/80">
                             {t('rental:utilitiesIncluded')}
                         </span>
                     )}
                     {property.furnishing && property.furnishing !== 'any' && (
-                        <span className="inline-flex items-center text-xs bg-purple-50 text-purple-700 px-2 py-0.5 rounded-full border border-purple-200">
+                        <span className="glass-badge text-xs px-2 py-0.5 text-purple-300/80">
                             {t(`rental:furnishing.${property.furnishing}`)}
                         </span>
                     )}
                     {property.petsAllowed && (
-                        <span className="inline-flex items-center text-xs bg-orange-50 text-orange-700 px-2 py-0.5 rounded-full border border-orange-200">
+                        <span className="glass-badge text-xs px-2 py-0.5 text-orange-300/80">
                             {t('rental:petsAllowed')}
                         </span>
                     )}
                 </div>
 
                 {/* Seller Info */}
-                <div className="flex items-center gap-2 mt-3 pt-2 border-t border-neutral-100">
+                <div className="flex items-center gap-2 mt-3 pt-2 border-t border-white/5">
                     {property.seller?.avatarUrl ? (
-                        <img src={optimizeCloudinaryUrl(property.seller.avatarUrl, { width: 48, quality: 'auto', crop: 'fill' })} alt="" loading="lazy" decoding="async" width={24} height={24} className="w-6 h-6 rounded-full object-cover" />
+                        <img src={optimizeCloudinaryUrl(property.seller.avatarUrl, { width: 48, quality: 'auto', crop: 'fill' })} alt="" loading="lazy" decoding="async" width={24} height={24} className="w-6 h-6 rounded-full object-cover ring-1 ring-white/10" />
                     ) : (
-                        <div className="w-6 h-6 rounded-full bg-neutral-200 flex items-center justify-center text-xs text-neutral-500">
+                        <div className="w-6 h-6 rounded-full bg-white/10 flex items-center justify-center text-xs text-white/50">
                             {property.seller?.name?.charAt(0) || '?'}
                         </div>
                     )}
-                    <span className="text-xs text-neutral-500 truncate">
+                    <span className="text-xs text-white/40 truncate">
                         {property.seller?.name}
                         {property.seller?.agencyName && ` - ${property.seller.agencyName}`}
                     </span>

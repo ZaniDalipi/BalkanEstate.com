@@ -137,12 +137,12 @@ export const LANGUAGES = [
 ];
 export const ALL_VALID_TAGS: PropertyImageTag[] = ['exterior', 'living_room', 'kitchen', 'bedroom', 'bathroom', 'other'];
 
-// --- CSS Class Constants ---
+// --- CSS Class Constants (Liquid Glass Design) ---
 
-export const inputBaseClasses = "block w-full text-base bg-neutral-50 border border-neutral-300 rounded-lg text-neutral-900 shadow-sm px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition-colors focus:bg-white";
-export const floatingInputClasses = "block px-2.5 pb-2.5 pt-4 w-full text-base text-neutral-900 bg-white rounded-lg border appearance-none focus:outline-none focus:ring-0 peer";
-export const floatingLabelClasses = "absolute text-base text-neutral-700 duration-300 transform -translate-y-4 scale-75 top-2 z-10 origin-[0] bg-white px-2 peer-focus:px-2 peer-focus:text-primary peer-placeholder-shown:scale-100 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:top-1/2 peer-focus:top-2 peer-focus:scale-75 peer-focus:-translate-y-4 start-1 peer-focus:text-primary";
-export const floatingSelectLabelClasses = "absolute text-base text-neutral-700 duration-300 transform -translate-y-4 scale-75 top-2 z-10 origin-[0] bg-white px-2 start-1";
+export const inputBaseClasses = "glass-input block w-full text-base px-4 py-2.5 transition-all";
+export const floatingInputClasses = "glass-input block px-2.5 pb-2.5 pt-4 w-full text-base appearance-none peer";
+export const floatingLabelClasses = "absolute text-base text-white/50 duration-300 transform -translate-y-4 scale-75 top-2 z-10 origin-[0] px-2 peer-focus:px-2 peer-focus:text-blue-400 peer-placeholder-shown:scale-100 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:top-1/2 peer-focus:top-2 peer-focus:scale-75 peer-focus:-translate-y-4 start-1 peer-focus:text-blue-400";
+export const floatingSelectLabelClasses = "absolute text-base text-white/50 duration-300 transform -translate-y-4 scale-75 top-2 z-10 origin-[0] px-2 start-1";
 
 // --- Helper Icons ---
 
@@ -196,18 +196,18 @@ export const ImageTagSelector: React.FC<{
             <button
                 type="button"
                 onClick={() => setIsOpen(!isOpen)}
-                className="w-full bg-white border border-neutral-300 rounded-lg px-3 py-2 text-sm font-semibold text-neutral-700 flex justify-between items-center capitalize"
+                className="w-full glass-input px-3 py-2 text-sm font-semibold flex justify-between items-center capitalize"
             >
                 {selectedLabel}
-                <svg className={`w-4 h-4 ml-2 transition-transform ${isOpen ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"></path></svg>
+                <svg className={`w-4 h-4 ml-2 transition-transform text-white/50 ${isOpen ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"></path></svg>
             </button>
             {isOpen && (
-                <ul className="absolute z-10 w-full mt-1 bg-white border border-neutral-200 rounded-lg shadow-lg max-h-40 overflow-y-auto">
+                <ul className="absolute z-10 w-full mt-1 glass-panel-light max-h-40 overflow-y-auto">
                     {options.map(tag => (
                         <li
                             key={tag}
                             onClick={() => handleSelect(tag)}
-                            className="px-3 py-2 text-sm text-neutral-700 hover:bg-neutral-100 cursor-pointer capitalize"
+                            className="px-3 py-2 text-sm text-white/80 hover:bg-white/10 cursor-pointer capitalize transition-colors"
                         >
                             {tag.replace(/_/g, ' ')}
                         </li>
@@ -245,15 +245,15 @@ export const TagListInput: React.FC<{
 
     return (
         <div>
-             <label htmlFor={inputId} className="block text-sm font-medium text-neutral-700 mb-1">{label}</label>
+             <label htmlFor={inputId} className="block text-sm font-medium text-white/60 mb-1">{label}</label>
             <div
                 className={`${inputBaseClasses} flex flex-wrap items-center gap-2 h-auto py-1 cursor-text`}
                 onClick={() => document.getElementById(inputId)?.focus()}
             >
                 {tags.map(tag => (
-                    <div key={tag} className="flex items-center gap-1 bg-primary-light text-primary-dark text-sm font-semibold px-2 py-1 rounded">
+                    <div key={tag} className="flex items-center gap-1 glass-badge text-sm font-semibold px-2.5 py-1 text-blue-300">
                         <span>{tag}</span>
-                        <button type="button" onClick={(e) => { e.stopPropagation(); removeTag(tag); }} className="text-primary-dark/70 hover:text-primary-dark">&times;</button>
+                        <button type="button" onClick={(e) => { e.stopPropagation(); removeTag(tag); }} className="text-white/40 hover:text-white/70 transition-colors">&times;</button>
                     </div>
                 ))}
                 <input
@@ -263,7 +263,7 @@ export const TagListInput: React.FC<{
                     onChange={(e) => setInputValue(e.target.value)}
                     onKeyDown={handleKeyDown}
                     placeholder={tags.length === 0 ? t('seller:createListing.fields.addTags') : ""}
-                    className="flex-grow bg-transparent outline-none text-base h-8 placeholder:text-neutral-700"
+                    className="flex-grow bg-transparent outline-none text-base h-8 text-white/90 placeholder:text-white/30"
                 />
             </div>
         </div>
@@ -292,16 +292,16 @@ export const TriStateCheckbox: React.FC<{
         if (state === 'any') isActive = value === undefined;
         if (state === 'yes') isActive = value === true;
 
-        return `px-3 py-1.5 text-xs font-medium rounded transition-colors ${
+        return `px-3 py-1.5 text-xs font-medium rounded-lg transition-all duration-200 ${
             isActive
-                ? 'bg-primary-dark text-white'
-                : 'bg-neutral-200 text-neutral-600 hover:bg-neutral-300'
+                ? 'glass-btn-primary !border-blue-400/40'
+                : 'glass-btn text-white/60'
         }`;
     };
 
     return (
         <div className="flex flex-col gap-2">
-            <label className="block text-sm font-medium text-neutral-700">{label}</label>
+            <label className="block text-sm font-medium text-white/60">{label}</label>
             <div className="flex gap-2">
                 <button
                     type="button"

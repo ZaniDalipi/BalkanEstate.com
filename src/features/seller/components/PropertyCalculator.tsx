@@ -158,22 +158,22 @@ const PropertyCalculator: React.FC = () => {
     }
   };
   
-  const floatingInputClasses = "block px-2.5 pb-2.5 pt-4 w-full text-base text-neutral-900 bg-white rounded-lg border border-neutral-300 appearance-none focus:outline-none focus:ring-0 focus:border-primary peer";
-  const floatingLabelClasses = "absolute text-base text-neutral-700 duration-300 transform -translate-y-4 scale-75 top-2 z-10 origin-[0] bg-white px-2 peer-focus:px-2 peer-focus:text-primary peer-placeholder-shown:scale-100 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:top-1/2 peer-focus:top-2 peer-focus:scale-75 peer-focus:-translate-y-4 start-1";
+  const calcFloatingInputClasses = "glass-input block px-2.5 pb-2.5 pt-4 w-full text-base appearance-none peer";
+  const calcFloatingLabelClasses = "absolute text-base text-white/50 duration-300 transform -translate-y-4 scale-75 top-2 z-10 origin-[0] px-2 peer-focus:px-2 peer-focus:text-amber-400 peer-placeholder-shown:scale-100 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:top-1/2 peer-focus:top-2 peer-focus:scale-75 peer-focus:-translate-y-4 start-1";
 
   return (
     <div>
       <form onSubmit={handleSubmit}>
         <div className="space-y-8">
            <div className="relative" ref={locationContainerRef}>
-                <input type="text" name="location" id="location" className={floatingInputClasses} placeholder=" " required value={locationSearch} onChange={handleLocationChange} autoComplete="off" />
-                <label htmlFor="location" className={floatingLabelClasses}>{t('property.fields.location')}</label>
-                {isSearching && <div className="absolute inset-y-0 right-0 flex items-center pr-3"><SpinnerIcon className="h-5 w-5 text-primary" /></div>}
+                <input type="text" name="location" id="location" className={calcFloatingInputClasses} placeholder=" " required value={locationSearch} onChange={handleLocationChange} autoComplete="off" />
+                <label htmlFor="location" className={calcFloatingLabelClasses}>{t('property.fields.location')}</label>
+                {isSearching && <div className="absolute inset-y-0 right-0 flex items-center pr-3"><SpinnerIcon className="h-5 w-5 text-amber-400" /></div>}
                 {suggestions.length > 0 && (
-                     <ul className="absolute z-20 w-full mt-1 bg-white border border-neutral-200 rounded-lg shadow-lg max-h-60 overflow-y-auto">
+                     <ul className="absolute z-20 w-full mt-1 glass-panel-light max-h-60 overflow-y-auto glass-scrollbar">
                         {suggestions.map((suggestion) => (
-                            <li key={suggestion.place_id} onMouseDown={() => handleSuggestionClick(suggestion)} className="px-4 py-3 text-sm text-neutral-700 hover:bg-neutral-100 cursor-pointer flex items-center gap-2">
-                                <MapPinIcon className="w-4 h-4 text-neutral-400 flex-shrink-0" />
+                            <li key={suggestion.place_id} onMouseDown={() => handleSuggestionClick(suggestion)} className="px-4 py-3 text-sm text-white/80 hover:bg-white/10 cursor-pointer flex items-center gap-2 transition-colors">
+                                <MapPinIcon className="w-4 h-4 text-white/30 flex-shrink-0" />
                                 <span>{suggestion.display_name}</span>
                             </li>
                         ))}
@@ -181,39 +181,39 @@ const PropertyCalculator: React.FC = () => {
                 )}
           </div>
           <div className="relative">
-             <input type="number" name="sqft" id="sqft" min="0" defaultValue="100" className={floatingInputClasses} placeholder=" " required />
-             <label htmlFor="sqft" className={floatingLabelClasses}>{t('property.fields.area')}</label>
+             <input type="number" name="sqft" id="sqft" min="0" defaultValue="100" className={calcFloatingInputClasses} placeholder=" " required />
+             <label htmlFor="sqft" className={calcFloatingLabelClasses}>{t('property.fields.area')}</label>
           </div>
-           <button type="submit" disabled={loading} className="w-full flex justify-center py-2.5 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-secondary hover:bg-opacity-90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-secondary disabled:bg-opacity-50">
+           <button type="submit" disabled={loading} className="w-full glass-btn-accent py-2.5 px-4 text-sm font-bold disabled:opacity-50">
             {loading ? t('property.calculating') : t('common.calculate')}
           </button>
         </div>
       </form>
 
       {error && (
-        <div className="mt-6 bg-red-100 p-4 rounded-lg text-center">
-            <p className="text-sm font-medium text-red-800">{error}</p>
+        <div className="mt-6 glass-fieldset border-red-400/20 p-4 text-center">
+            <p className="text-sm font-medium text-red-300">{error}</p>
         </div>
       )}
 
       {result && !error && (
-        <div className="mt-6 bg-secondary/10 p-4 rounded-lg">
+        <div className="mt-6 glass-fieldset border-amber-400/20 p-4">
             <div className="text-center mb-3">
-                <p className="text-sm font-medium text-secondary/80">{t('property.results.estimatedValue')}</p>
-                <p className="text-3xl font-bold text-secondary">{formatPrice(result.value, result.country)}</p>
+                <p className="text-sm font-medium text-amber-300/70">{t('property.results.estimatedValue')}</p>
+                <p className="text-3xl font-bold text-amber-400 text-glow-amber">{formatPrice(result.value, result.country)}</p>
             </div>
-            <div className="flex justify-between text-sm text-secondary/70 border-t border-secondary/20 pt-3">
+            <div className="flex justify-between text-sm text-amber-300/60 border-t border-white/10 pt-3">
                 <div className="text-center flex-1">
-                    <p className="text-xs">{t('property.results.lowEstimate') || 'Low'}</p>
-                    <p className="font-semibold">{formatPrice(result.valueLow, result.country)}</p>
+                    <p className="text-xs text-white/40">{t('property.results.lowEstimate') || 'Low'}</p>
+                    <p className="font-semibold text-white/80">{formatPrice(result.valueLow, result.country)}</p>
                 </div>
-                <div className="text-center flex-1 border-x border-secondary/20">
-                    <p className="text-xs">{t('property.results.pricePerSqm') || 'Price/m²'}</p>
-                    <p className="font-semibold">{formatPrice(result.avgPricePerSqm, result.country)}</p>
+                <div className="text-center flex-1 border-x border-white/10">
+                    <p className="text-xs text-white/40">{t('property.results.pricePerSqm') || 'Price/m²'}</p>
+                    <p className="font-semibold text-white/80">{formatPrice(result.avgPricePerSqm, result.country)}</p>
                 </div>
                 <div className="text-center flex-1">
-                    <p className="text-xs">{t('property.results.highEstimate') || 'High'}</p>
-                    <p className="font-semibold">{formatPrice(result.valueHigh, result.country)}</p>
+                    <p className="text-xs text-white/40">{t('property.results.highEstimate') || 'High'}</p>
+                    <p className="font-semibold text-white/80">{formatPrice(result.valueHigh, result.country)}</p>
                 </div>
             </div>
         </div>

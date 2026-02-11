@@ -11,36 +11,42 @@ const CreateListingPage: React.FC = () => {
   const { state } = useAppContext();
 
   return (
-    <div className="min-h-full bg-neutral-50">
+    <div className="liquid-glass-bg min-h-full">
+      {/* Floating orbs for ambient depth */}
+      <div className="glass-orb w-72 h-72 bg-blue-500/20 top-20 -left-20" />
+      <div className="glass-orb w-96 h-96 bg-purple-500/15 top-1/3 right-0" style={{ animationDelay: '-5s' }} />
+      <div className="glass-orb w-64 h-64 bg-cyan-500/15 bottom-40 left-1/4" style={{ animationDelay: '-10s' }} />
+
       <main className="p-4 sm:p-6 lg:p-8 max-w-7xl mx-auto">
-        <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-neutral-800 mb-8">
+        <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-white/90 mb-2 text-glow">
           {state.propertyToEdit ? t('seller:createListing.editTitle') : t('seller:createListing.title')}
         </h2>
+        <div className="glass-divider mb-8" />
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
             <div className="lg:col-span-2">
-                 <div className="bg-white p-4 sm:p-6 lg:p-8 rounded-xl shadow-lg border border-neutral-200">
+                 <div className="glass-panel p-4 sm:p-6 lg:p-8 glass-shimmer-border">
                     <div className="flex items-center gap-4 mb-4">
-                        <div className="bg-primary-light p-3 rounded-full">
-                            <SparklesIcon className="w-6 h-6 text-primary"/>
+                        <div className="p-3 rounded-full bg-blue-500/15 border border-blue-400/20">
+                            <SparklesIcon className="w-6 h-6 text-blue-400"/>
                         </div>
-                        <h3 className="text-xl sm:text-2xl font-bold text-neutral-800">{t('seller:createListing.aiPowered')}</h3>
+                        <h3 className="text-xl sm:text-2xl font-bold text-white/90">{t('seller:createListing.aiPowered')}</h3>
                     </div>
-                    <p className="text-neutral-600 mb-6">
+                    <p className="text-white/50 mb-6 text-sm">
                         {t('seller:createListing.aiDescription')}
                     </p>
                     <GeminiDescriptionGenerator propertyToEdit={state.propertyToEdit} />
                 </div>
             </div>
             <div className="lg:col-span-1">
-                 <div className="bg-white p-4 sm:p-6 lg:p-8 rounded-xl shadow-lg border border-neutral-200 h-full">
+                 <div className="glass-panel p-4 sm:p-6 lg:p-8 h-full">
                     <div className="flex items-center gap-4 mb-4">
-                        <div className="bg-secondary/20 p-3 rounded-full">
-                            <CurrencyDollarIcon className="w-6 h-6 text-secondary"/>
+                        <div className="p-3 rounded-full bg-amber-500/15 border border-amber-400/20">
+                            <CurrencyDollarIcon className="w-6 h-6 text-amber-400"/>
                         </div>
-                        <h3 className="text-xl sm:text-2xl font-bold text-neutral-800">{t('seller:createListing.valueCalculator')}</h3>
+                        <h3 className="text-xl sm:text-2xl font-bold text-white/90">{t('seller:createListing.valueCalculator')}</h3>
                     </div>
-                    <p className="text-neutral-600 mb-6">
+                    <p className="text-white/50 mb-6 text-sm">
                         {t('seller:createListing.valueDescription')}
                     </p>
                     <PropertyCalculator />

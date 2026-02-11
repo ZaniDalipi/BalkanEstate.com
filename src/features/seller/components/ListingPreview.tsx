@@ -64,7 +64,11 @@ const ListingPreview: React.FC<ListingPreviewProps> = ({
     }, [onPublish]);
 
     return (
-        <div className="bg-neutral-50 min-h-screen animate-fade-in">
+        <div className="liquid-glass-bg min-h-screen animate-fade-in">
+            {/* Floating orbs */}
+            <div className="glass-orb w-64 h-64 bg-blue-500/15 top-20 -left-10" />
+            <div className="glass-orb w-80 h-80 bg-purple-500/10 bottom-40 right-0" style={{ animationDelay: '-7s' }} />
+
             {/* Image viewer modal */}
             {isViewerOpen && (
                 <ImageViewerModal
@@ -81,17 +85,17 @@ const ListingPreview: React.FC<ListingPreviewProps> = ({
             )}
 
             {/* Preview Banner */}
-            <div className="sticky top-0 z-20 bg-gradient-to-r from-amber-500 to-orange-500 text-white shadow-lg">
+            <div className="sticky top-0 z-20" style={{ background: 'linear-gradient(135deg, rgba(59,130,246,0.4), rgba(139,92,246,0.4))', backdropFilter: 'blur(20px)', WebkitBackdropFilter: 'blur(20px)', borderBottom: '1px solid rgba(255,255,255,0.1)' }}>
                 <div className="max-w-screen-xl mx-auto px-3 sm:px-4 md:px-6 py-3 flex items-center justify-between gap-3">
                     <div className="flex items-center gap-2 min-w-0">
-                        <svg className="w-5 h-5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                        <svg className="w-5 h-5 flex-shrink-0 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                             <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                             <path strokeLinecap="round" strokeLinejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
                         </svg>
-                        <span className="font-semibold text-sm sm:text-base truncate">
+                        <span className="font-semibold text-sm sm:text-base truncate text-white">
                             {t('seller:createListing.preview.banner', 'Preview Mode')}
                         </span>
-                        <span className="hidden sm:inline text-white/80 text-sm">
+                        <span className="hidden sm:inline text-white/60 text-sm">
                             — {t('seller:createListing.preview.bannerHint', 'Review your listing before publishing')}
                         </span>
                     </div>
@@ -99,7 +103,7 @@ const ListingPreview: React.FC<ListingPreviewProps> = ({
                         <button
                             type="button"
                             onClick={onBack}
-                            className="px-3 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm font-semibold bg-white/20 hover:bg-white/30 rounded-lg transition-colors backdrop-blur-sm"
+                            className="glass-btn px-3 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm font-semibold"
                         >
                             {t('seller:createListing.preview.editListing', 'Edit Listing')}
                         </button>
@@ -107,7 +111,7 @@ const ListingPreview: React.FC<ListingPreviewProps> = ({
                             type="button"
                             onClick={handlePublishClick}
                             disabled={isSubmitting}
-                            className="px-3 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm font-bold bg-white text-amber-600 hover:bg-amber-50 rounded-lg transition-colors shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
+                            className="glass-btn-primary px-3 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm font-bold disabled:opacity-50 disabled:cursor-not-allowed"
                         >
                             {isSubmitting
                                 ? t('seller:createListing.buttons.saving', 'Saving...')
@@ -174,16 +178,16 @@ const ListingPreview: React.FC<ListingPreviewProps> = ({
                 </div>
 
                 {/* Bottom action bar */}
-                <div className="sticky bottom-0 left-0 right-0 bg-white/95 backdrop-blur-sm border-t border-neutral-200 mt-8 -mx-3 sm:-mx-4 md:-mx-6 lg:-mx-8 px-3 sm:px-4 md:px-6 lg:px-8 py-3 sm:py-4 shadow-[0_-4px_12px_rgba(0,0,0,0.08)]">
+                <div className="sticky bottom-0 left-0 right-0 mt-8 -mx-3 sm:-mx-4 md:-mx-6 lg:-mx-8 px-3 sm:px-4 md:px-6 lg:px-8 py-3 sm:py-4" style={{ background: 'rgba(15,20,40,0.8)', backdropFilter: 'blur(20px)', WebkitBackdropFilter: 'blur(20px)', borderTop: '1px solid rgba(255,255,255,0.08)' }}>
                     <div className="max-w-screen-xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-3">
-                        <p className="text-sm text-neutral-500 text-center sm:text-left">
+                        <p className="text-sm text-white/50 text-center sm:text-left">
                             {t('seller:createListing.preview.satisfied', 'Satisfied with your listing?')}
                         </p>
                         <div className="flex items-center gap-3 w-full sm:w-auto">
                             <button
                                 type="button"
                                 onClick={onBack}
-                                className="flex-1 sm:flex-none px-5 py-2.5 text-sm font-semibold text-neutral-700 bg-neutral-100 hover:bg-neutral-200 rounded-lg transition-colors border border-neutral-300"
+                                className="flex-1 sm:flex-none glass-btn px-5 py-2.5 text-sm font-semibold"
                             >
                                 {t('seller:createListing.preview.goBackEdit', 'Go Back & Edit')}
                             </button>
@@ -191,7 +195,7 @@ const ListingPreview: React.FC<ListingPreviewProps> = ({
                                 type="button"
                                 onClick={handlePublishClick}
                                 disabled={isSubmitting}
-                                className="flex-1 sm:flex-none px-5 py-2.5 text-sm font-bold text-white bg-primary hover:bg-primary-dark rounded-lg transition-colors shadow-md disabled:opacity-50 disabled:cursor-not-allowed"
+                                className="flex-1 sm:flex-none glass-btn-primary px-5 py-2.5 text-sm font-bold disabled:opacity-50 disabled:cursor-not-allowed"
                             >
                                 {isSubmitting
                                     ? t('seller:createListing.buttons.saving', 'Saving...')

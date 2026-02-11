@@ -49,7 +49,7 @@ const ListingFormFields: React.FC<ListingFormFieldsProps> = ({
                         id="country"
                         value={selectedCountry}
                         onChange={handleCountryChange}
-                        className={`${floatingInputClasses} border-neutral-300`}
+                        className={`${floatingInputClasses}`}
                         required
                     >
                         <option value="">{t('seller:createListing.location.selectCountry')}</option>
@@ -60,7 +60,7 @@ const ListingFormFields: React.FC<ListingFormFieldsProps> = ({
                         ))}
                     </select>
                     <label htmlFor="country" className={floatingSelectLabelClasses}>{t('seller:createListing.location.country')}</label>
-                    <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-neutral-500">
+                    <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-white/40">
                         <svg className="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
                             <path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/>
                         </svg>
@@ -73,7 +73,7 @@ const ListingFormFields: React.FC<ListingFormFieldsProps> = ({
                         id="city"
                         value={selectedCity}
                         onChange={handleCityChange}
-                        className={`${floatingInputClasses} border-neutral-300`}
+                        className={`${floatingInputClasses}`}
                         required
                         disabled={!selectedCountry}
                     >
@@ -85,7 +85,7 @@ const ListingFormFields: React.FC<ListingFormFieldsProps> = ({
                         ))}
                     </select>
                     <label htmlFor="city" className={floatingSelectLabelClasses}>{t('seller:createListing.location.city')}</label>
-                    <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-neutral-500">
+                    <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-white/40">
                         <svg className="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
                             <path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/>
                         </svg>
@@ -111,39 +111,39 @@ const ListingFormFields: React.FC<ListingFormFieldsProps> = ({
                 )}
 
                 <div className="relative md:col-span-2 cursor-text" onClick={() => document.getElementById('title')?.focus()}>
-                    <input type="text" id="title" name="title" value={listingData.title} onChange={handleInputChange} className={`${floatingInputClasses} border-neutral-300`} placeholder=" " required maxLength={50} />
+                    <input type="text" id="title" name="title" value={listingData.title} onChange={handleInputChange} className={`${floatingInputClasses}`} placeholder=" " required maxLength={50} />
                     <label htmlFor="title" className={floatingLabelClasses}>{t('seller:createListing.fields.listingTitle')}</label>
                     <div className="flex justify-between items-center mt-1">
-                        <p className="text-xs text-neutral-500">
+                        <p className="text-xs text-white/40">
                             {t('seller:createListing.fields.titleHint')}
                         </p>
-                        <span className={`text-xs ${listingData.title.length > 40 ? 'text-amber-600' : 'text-neutral-400'}`}>
+                        <span className={`text-xs ${listingData.title.length > 40 ? 'text-amber-400' : 'text-white/30'}`}>
                             {listingData.title.length}/50
                         </span>
                     </div>
                 </div>
 
                 <div className="relative md:col-span-2 cursor-text" onClick={() => document.getElementById('streetAddress')?.focus()}>
-                    <input type="text" id="streetAddress" name="streetAddress" value={listingData.streetAddress} onChange={handleInputChange} className={`${floatingInputClasses} border-neutral-300`} placeholder=" " />
+                    <input type="text" id="streetAddress" name="streetAddress" value={listingData.streetAddress} onChange={handleInputChange} className={`${floatingInputClasses}`} placeholder=" " />
                     <label htmlFor="streetAddress" className={floatingLabelClasses}>{t('seller:createListing.location.address')}</label>
-                    <p className="mt-1 text-xs text-neutral-500">
+                    <p className="mt-1 text-xs text-white/40">
                         {t('seller:createListing.location.addressHint')}
                         <br />
-                        <span className="text-neutral-400">{t('seller:createListing.location.addressExamples')}</span>
+                        <span className="text-white/30">{t('seller:createListing.location.addressExamples')}</span>
                     </p>
                 </div>
 
                 <div className="relative md:col-span-2 cursor-text" onClick={() => document.getElementById('price')?.focus()}>
                     <input type="text" id="price" inputMode="numeric" name="price" value={listingData.price > 0 ? new Intl.NumberFormat('de-DE').format(listingData.price) : ''} onChange={handlePriceChange} className={`${floatingInputClasses} border-neutral-300 pl-8`} placeholder=" " required />
                     <label htmlFor="price" className={floatingLabelClasses}>{t('seller:createListing.fields.price')}</label>
-                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-neutral-500">{getCurrencySymbol(selectedCountry)}</span>
+                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-white/40">{getCurrencySymbol(selectedCountry)}</span>
                 </div>
             </fieldset>
 
             {/* Property Type Selection */}
             <fieldset className="grid grid-cols-1 md:grid-cols-2 gap-6 items-end">
                 <div className="relative">
-                    <select name="propertyType" id="propertyType" value={listingData.propertyType} onChange={handleInputChange} className={`${floatingInputClasses} border-neutral-300`}>
+                    <select name="propertyType" id="propertyType" value={listingData.propertyType} onChange={handleInputChange} className={`${floatingInputClasses}`}>
                         <option value="house">{t('seller:propertyTypes.house')}</option>
                         <option value="apartment">{t('seller:propertyTypes.apartment')}</option>
                         <option value="villa">{t('seller:propertyTypes.villa')}</option>
@@ -167,7 +167,7 @@ const ListingFormFields: React.FC<ListingFormFieldsProps> = ({
                                 name="orientation"
                                 value={listingData.orientation}
                                 onChange={handleInputChange}
-                                className={`${floatingInputClasses} border-neutral-300`}
+                                className={`${floatingInputClasses}`}
                             >
                                 <option value="any">{t('seller:createListing.advancedDetails.orientation.notSpecified')}</option>
                                 <option value="north">{t('seller:createListing.advancedDetails.orientation.north')}</option>
@@ -180,7 +180,7 @@ const ListingFormFields: React.FC<ListingFormFieldsProps> = ({
                                 <option value="northWest">{t('seller:createListing.advancedDetails.orientation.northWest')}</option>
                             </select>
                             <label htmlFor="orientation" className={floatingSelectLabelClasses}>{t('seller:createListing.advancedDetails.orientation.label')}</label>
-                            <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-neutral-500">
+                            <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-white/40">
                                 <svg className="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/></svg>
                             </div>
                         </div>
