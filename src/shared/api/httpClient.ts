@@ -3,12 +3,20 @@
 
 import { API_URL } from './config';
 import { tokenService } from './tokenService';
+import {
+  generateResponseKey,
+  decryptResponse,
+  invalidatePublicKey,
+  type ResponseKeyInfo,
+} from './payloadEncryption';
 
 export interface RequestOptions {
   method?: string;
   body?: any;
   headers?: Record<string, string>;
   requiresAuth?: boolean;
+  /** Encrypt the server response (only use for sensitive endpoints like auth, profile) */
+  encryptResponse?: boolean;
 }
 
 // Refresh the access token using the refresh token
@@ -52,13 +60,20 @@ export const apiRequest = async <T>(
   options: RequestOptions = {},
   retryCount = 0
 ): Promise<T> => {
-  const { method = 'GET', body, headers = {}, requiresAuth = false } = options;
+  const { method = 'GET', body, headers = {}, requiresAuth = false, encryptResponse: shouldEncrypt = false } = options;
+
+  // Only generate response encryption key for sensitive endpoints
+  let keyInfo: ResponseKeyInfo | null = null;
+  if (shouldEncrypt) {
+    keyInfo = await generateResponseKey();
+  }
 
   const config: RequestInit = {
     method,
     headers: {
       'Content-Type': 'application/json',
       ...headers,
+      ...(keyInfo ? { 'X-Response-Key': keyInfo.encryptedKeyBase64 } : {}),
     },
   };
 
@@ -100,7 +115,11 @@ export const apiRequest = async <T>(
     }
 
     if (!response.ok) {
-      const error = isJson ? await response.json() : { message: response.statusText };
+      const rawError = isJson ? await response.json() : { message: response.statusText };
+      let error = rawError;
+      if (keyInfo && rawError?.__encrypted) {
+        try { error = await decryptResponse(rawError, keyInfo.rawKey); } catch { /* use raw */ }
+      }
       const err: any = new Error(error.message || 'An error occurred');
       err.code = error.code || null;
       err.statusCode = response.status;
@@ -108,7 +127,23 @@ export const apiRequest = async <T>(
       throw err;
     }
 
-    return isJson ? await response.json() as T : ({} as T);
+    const rawData = isJson ? await response.json() : ({} as any);
+
+    // Decrypt response if it came back encrypted
+    if (keyInfo && rawData?.__encrypted) {
+      try {
+        return await decryptResponse(rawData, keyInfo.rawKey) as T;
+      } catch {
+        // Key mismatch (server restarted?) — invalidate and retry once
+        invalidatePublicKey();
+        if (retryCount === 0) {
+          return apiRequest<T>(endpoint, options, 1);
+        }
+        return rawData as T;
+      }
+    }
+
+    return rawData as T;
   } catch (error: any) {
     throw error;
   }

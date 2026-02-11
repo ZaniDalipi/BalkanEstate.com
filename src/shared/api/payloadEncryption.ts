@@ -109,7 +109,7 @@ const encryptValue = async (value: string): Promise<string> => {
   return arrayBufferToBase64(encrypted);
 };
 
-// --- Helper for ArrayBuffer -> base64 conversion ---
+// --- Helpers for ArrayBuffer <-> base64 conversion ---
 
 const arrayBufferToBase64 = (buffer: ArrayBuffer): string => {
   const bytes = new Uint8Array(buffer);
@@ -118,6 +118,85 @@ const arrayBufferToBase64 = (buffer: ArrayBuffer): string => {
     binary += String.fromCharCode(bytes[i]);
   }
   return btoa(binary);
+};
+
+const base64ToUint8Array = (b64: string): Uint8Array => {
+  const binary = atob(b64);
+  const bytes = new Uint8Array(binary.length);
+  for (let i = 0; i < binary.length; i++) {
+    bytes[i] = binary.charCodeAt(i);
+  }
+  return bytes;
+};
+
+// --- Response Encryption (opt-in, for sensitive endpoints only) ---
+
+export interface ResponseKeyInfo {
+  rawKey: ArrayBuffer;
+  encryptedKeyBase64: string;
+}
+
+/**
+ * Generate a random AES-256 key, encrypt it with the server's RSA public key.
+ * The encrypted key is sent as `X-Response-Key` header so the server can
+ * AES-encrypt its response. Returns null if Web Crypto is unavailable.
+ *
+ * Only call this for sensitive endpoints (auth, user profile) — not every request.
+ */
+export const generateResponseKey = async (): Promise<ResponseKeyInfo | null> => {
+  if (!crypto?.subtle) return null;
+
+  try {
+    const rawBytes = crypto.getRandomValues(new Uint8Array(32));
+    const serverKey = await getServerPublicKey();
+    const encryptedKey = await crypto.subtle.encrypt(
+      { name: 'RSA-OAEP' },
+      serverKey,
+      rawBytes,
+    );
+
+    return {
+      rawKey: rawBytes.buffer,
+      encryptedKeyBase64: arrayBufferToBase64(encryptedKey),
+    };
+  } catch {
+    return null;
+  }
+};
+
+/**
+ * Decrypt a server response that was AES-256-GCM encrypted.
+ * The server sends { __encrypted: true, iv, tag, data }.
+ */
+export const decryptResponse = async (
+  encrypted: { iv: string; tag: string; data: string },
+  rawKey: ArrayBuffer,
+): Promise<any> => {
+  const aesKey = await crypto.subtle.importKey(
+    'raw',
+    rawKey,
+    { name: 'AES-GCM' },
+    false,
+    ['decrypt'],
+  );
+
+  const iv = base64ToUint8Array(encrypted.iv);
+  const ciphertext = base64ToUint8Array(encrypted.data);
+  const tag = base64ToUint8Array(encrypted.tag);
+
+  // Web Crypto expects ciphertext + auth tag concatenated
+  const combined = new Uint8Array(ciphertext.length + tag.length);
+  combined.set(ciphertext);
+  combined.set(tag, ciphertext.length);
+
+  const decrypted = await crypto.subtle.decrypt(
+    { name: 'AES-GCM', iv },
+    aesKey,
+    combined,
+  );
+
+  const text = new TextDecoder().decode(decrypted);
+  return JSON.parse(text);
 };
 
 /**
