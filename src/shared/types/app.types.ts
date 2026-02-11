@@ -34,7 +34,8 @@ export type AppView =
   | 'refund'
   | 'createAgency'
   | 'createAgencyPayment'
-  | 'createAgencyConfirm';
+  | 'createAgencyConfirm'
+  | 'not-found';
 
 export type AuthModalView =
   | 'login'

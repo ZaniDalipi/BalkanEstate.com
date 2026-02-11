@@ -67,6 +67,7 @@ const PaymentCancel = lazy(() => import('./src/features/payments/components/Paym
 const ListingLimitWarningModal = lazy(() => import('./components/shared/ListingLimitWarningModal'));
 const DiscountGameModal = lazy(() => import('./components/shared/DiscountGameModal'));
 const AdminDashboard = lazy(() => import('./src/features/admin/components/AdminDashboard'));
+const NotFoundPage = lazy(() => import('./src/components/ui/not-found-2').then(m => ({ default: m.NotFound })));
 const ResetPasswordPage = lazy(() => import('./src/features/auth/components/ResetPasswordPage'));
 const VerifyEmailPage = lazy(() => import('./src/features/auth/components/VerifyEmailPage'));
 const AnalyticsPage = lazy(() => import('./src/features/analytics/components/AnalyticsPage'));
@@ -343,11 +344,10 @@ const AppContent: React.FC<{ onToggleSidebar: () => void }> = ({ onToggleSidebar
           window.history.replaceState({}, '', buildLocalizedPath('/search'));
         }
       } else {
-        // Unknown route - default to search and clear selections
+        // Unknown route - show 404 page
         dispatch({ type: 'SET_SELECTED_PROPERTY', payload: null });
         dispatch({ type: 'SET_SELECTED_AGENCY', payload: null });
-        dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'search' });
-        window.history.replaceState({}, '', buildLocalizedPath('/search'));
+        dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'not-found' });
       }
     };
 
@@ -555,6 +555,8 @@ const AppContent: React.FC<{ onToggleSidebar: () => void }> = ({ onToggleSidebar
         return <AgencyPaymentPage />;
       case 'createAgencyConfirm':
         return <AgencyPaymentPage />;
+      case 'not-found':
+        return <NotFoundPage />;
       case 'search':
       default:
         return <QueryErrorBoundary><SearchPage onToggleSidebar={onToggleSidebar} /></QueryErrorBoundary>;
