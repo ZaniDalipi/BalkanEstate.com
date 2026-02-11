@@ -66,8 +66,8 @@ const ListingPreview: React.FC<ListingPreviewProps> = ({
     return (
         <div className="liquid-glass-bg min-h-screen animate-fade-in">
             {/* Floating orbs */}
-            <div className="glass-orb w-64 h-64 bg-blue-500/15 top-20 -left-10" />
-            <div className="glass-orb w-80 h-80 bg-purple-500/10 bottom-40 right-0" style={{ animationDelay: '-7s' }} />
+            <div className="glass-orb w-64 h-64 bg-blue-200/30 top-20 -left-10" />
+            <div className="glass-orb w-80 h-80 bg-purple-200/20 bottom-40 right-0" style={{ animationDelay: '-7s' }} />
 
             {/* Image viewer modal */}
             {isViewerOpen && (
@@ -85,7 +85,7 @@ const ListingPreview: React.FC<ListingPreviewProps> = ({
             )}
 
             {/* Preview Banner */}
-            <div className="sticky top-0 z-20" style={{ background: 'linear-gradient(135deg, rgba(59,130,246,0.4), rgba(139,92,246,0.4))', backdropFilter: 'blur(20px)', WebkitBackdropFilter: 'blur(20px)', borderBottom: '1px solid rgba(255,255,255,0.1)' }}>
+            <div className="sticky top-0 z-20" style={{ background: 'linear-gradient(135deg, rgba(0,122,255,0.9), rgba(88,86,214,0.85))', backdropFilter: 'blur(20px)', WebkitBackdropFilter: 'blur(20px)', borderBottom: '1px solid rgba(255,255,255,0.2)' }}>
                 <div className="max-w-screen-xl mx-auto px-3 sm:px-4 md:px-6 py-3 flex items-center justify-between gap-3">
                     <div className="flex items-center gap-2 min-w-0">
                         <svg className="w-5 h-5 flex-shrink-0 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -178,9 +178,9 @@ const ListingPreview: React.FC<ListingPreviewProps> = ({
                 </div>
 
                 {/* Bottom action bar */}
-                <div className="sticky bottom-0 left-0 right-0 mt-8 -mx-3 sm:-mx-4 md:-mx-6 lg:-mx-8 px-3 sm:px-4 md:px-6 lg:px-8 py-3 sm:py-4" style={{ background: 'rgba(15,20,40,0.8)', backdropFilter: 'blur(20px)', WebkitBackdropFilter: 'blur(20px)', borderTop: '1px solid rgba(255,255,255,0.08)' }}>
+                <div className="sticky bottom-0 left-0 right-0 mt-8 -mx-3 sm:-mx-4 md:-mx-6 lg:-mx-8 px-3 sm:px-4 md:px-6 lg:px-8 py-3 sm:py-4" style={{ background: 'rgba(255,255,255,0.85)', backdropFilter: 'blur(20px)', WebkitBackdropFilter: 'blur(20px)', borderTop: '1px solid rgba(0,0,0,0.06)' }}>
                     <div className="max-w-screen-xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-3">
-                        <p className="text-sm text-white/50 text-center sm:text-left">
+                        <p className="text-sm text-gray-500 text-center sm:text-left">
                             {t('seller:createListing.preview.satisfied', 'Satisfied with your listing?')}
                         </p>
                         <div className="flex items-center gap-3 w-full sm:w-auto">

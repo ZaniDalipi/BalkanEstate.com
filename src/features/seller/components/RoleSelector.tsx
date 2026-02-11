@@ -187,7 +187,7 @@ const RoleSelector: React.FC<RoleSelectorProps> = ({ currentUser, selectedRole, 
             case 'free':
                 return <span className="text-xs font-semibold px-2 py-0.5 bg-white/10 text-neutral-700 rounded">{t('seller:roleSelector.badges.free')}</span>;
             case 'none':
-                return <span className="text-xs font-semibold px-2 py-0.5 bg-red-100 text-red-300 rounded">{t('seller:roleSelector.badges.proRequired')}</span>;
+                return <span className="text-xs font-semibold px-2 py-0.5 bg-red-100 text-red-600 rounded">{t('seller:roleSelector.badges.proRequired')}</span>;
             default:
                 // For any other paid plan, show as Pro
                 if (normalizedPlan && normalizedPlan !== 'free' && normalizedPlan !== 'buyer') {
@@ -198,13 +198,13 @@ const RoleSelector: React.FC<RoleSelectorProps> = ({ currentUser, selectedRole, 
     };
 
     return (
-        <div className="glass-fieldset border-blue-400/15 p-6 mb-6">
+        <div className="glass-fieldset border-blue-200 p-6 mb-6">
             <div className="flex items-center gap-2 mb-4">
-                <h3 className="text-lg font-bold text-white/85">{t('seller:roleSelector.title')}</h3>
+                <h3 className="text-lg font-bold text-gray-800">{t('seller:roleSelector.title')}</h3>
                 <div className="flex-1 glass-divider"></div>
             </div>
 
-            <p className="text-sm text-white/50 mb-4">
+            <p className="text-sm text-gray-400 mb-4">
                 {t('seller:roleSelector.description')}
             </p>
 
@@ -237,14 +237,14 @@ const RoleSelector: React.FC<RoleSelectorProps> = ({ currentUser, selectedRole, 
 
             {/* Info message for non-agents */}
             {!isRegisteredAgent && (
-                <div className="mt-4 p-3 glass-fieldset border-blue-400/15">
+                <div className="mt-4 p-3 glass-fieldset border-blue-200">
                     <div className="flex items-start gap-2">
-                        <span className="text-blue-400 text-lg">💼</span>
+                        <span className="text-blue-600 text-lg">💼</span>
                         <div>
-                            <p className="text-sm font-medium text-blue-300">
+                            <p className="text-sm font-medium text-blue-600">
                                 {t('seller:roleSelector.becomeAgent.title', 'Want to post as an agent?')}
                             </p>
-                            <p className="text-xs text-blue-300/60 mt-0.5">
+                            <p className="text-xs text-blue-500/70 mt-0.5">
                                 {t('seller:roleSelector.becomeAgent.description', 'You can register as a real estate agent from your Profile Settings to unlock agent features and higher listing limits.')}
                             </p>
                         </div>
@@ -302,7 +302,7 @@ const RoleCard: React.FC<RoleCardProps> = ({
             className={`
                 relative p-4 rounded-xl text-left transition-all duration-300
                 ${isSelected
-                    ? 'glass-panel border-blue-400/30 shadow-lg shadow-blue-500/10'
+                    ? 'glass-panel border-blue-300 shadow-lg shadow-blue-500/10'
                     : 'glass-panel-light hover:bg-white/10'
                 }
                 ${isLimitReached ? 'opacity-60 cursor-not-allowed' : 'cursor-pointer'}
@@ -310,7 +310,7 @@ const RoleCard: React.FC<RoleCardProps> = ({
         >
             {isSelected && (
                 <div className="absolute top-2 right-2">
-                    <svg className="w-6 h-6 text-blue-400" fill="currentColor" viewBox="0 0 20 20">
+                    <svg className="w-6 h-6 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
                         <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd"/>
                     </svg>
                 </div>
@@ -320,22 +320,22 @@ const RoleCard: React.FC<RoleCardProps> = ({
                 <span className="text-3xl">{icon}</span>
                 <div className="flex-1">
                     <div className="flex items-center gap-2 mb-1">
-                        <h4 className="font-bold text-white/85">{label}</h4>
+                        <h4 className="font-bold text-gray-800">{label}</h4>
                         {subscription && getPlanBadge(subscription.plan)}
                     </div>
 
                     {agencyName && (
-                        <p className="text-xs text-white/50 mb-2">{agencyName}</p>
+                        <p className="text-xs text-gray-400 mb-2">{agencyName}</p>
                     )}
 
                     {subscription ? (
                         subscription.plan === 'none' ? (
                             <div className="space-y-2">
-                                <div className="p-3 glass-fieldset border-red-400/20 rounded-lg">
-                                    <p className="text-xs text-red-300 font-medium mb-1">
+                                <div className="p-3 glass-fieldset border-red-200 rounded-lg">
+                                    <p className="text-xs text-red-600 font-medium mb-1">
                                         {t('seller:roleSelector.proRequired.title')}
                                     </p>
-                                    <p className="text-xs text-red-400">
+                                    <p className="text-xs text-red-600">
                                         {t('seller:roleSelector.proRequired.description')}
                                     </p>
                                 </div>
@@ -354,18 +354,18 @@ const RoleCard: React.FC<RoleCardProps> = ({
                             <div className="space-y-2">
                                 {/* Show shared limit info for Pro users */}
                                 {subscription.isPro ? (
-                                    <div className="mb-2 p-2 glass-fieldset border-amber-400/20 rounded">
-                                        <p className="text-xs text-amber-300 font-medium">
+                                    <div className="mb-2 p-2 glass-fieldset border-amber-200 rounded">
+                                        <p className="text-xs text-amber-600 font-medium">
                                             {t('seller:roleSelector.sharedLimit', { used: subscription.used, limit: subscription.limit })}
                                         </p>
-                                        <p className="text-xs text-amber-400/70 mt-0.5">
+                                        <p className="text-xs text-amber-500 mt-0.5">
                                             {t('seller:roleSelector.asRole', { count: subscription.roleCount || 0, role: role === UserRole.AGENT ? t('seller:roleSelector.agent').toLowerCase() : t('seller:roleSelector.privateSeller').toLowerCase() })}
                                         </p>
                                     </div>
                                 ) : (
                                     <div className="flex items-center justify-between text-sm">
-                                        <span className="text-white/50">{t('seller:roleSelector.listings')}</span>
-                                        <span className={`font-semibold ${isLimitReached ? 'text-red-400' : 'text-white/80'}`}>
+                                        <span className="text-gray-400">{t('seller:roleSelector.listings')}</span>
+                                        <span className={`font-semibold ${isLimitReached ? 'text-red-600' : 'text-gray-700'}`}>
                                             {subscription.used} / {subscription.limit}
                                         </span>
                                     </div>
@@ -386,29 +386,29 @@ const RoleCard: React.FC<RoleCardProps> = ({
                                 </div>
 
                                 {isLimitReached ? (
-                                    <p className="text-xs text-red-400 font-medium mt-1">
+                                    <p className="text-xs text-red-600 font-medium mt-1">
                                         {subscription.isPro ? t('seller:roleSelector.limitReachedShared') : t('seller:roleSelector.limitReachedUpgrade')}
                                     </p>
                                 ) : remaining <= 2 ? (
-                                    <p className="text-xs text-amber-400 font-medium mt-1">
+                                    <p className="text-xs text-amber-600 font-medium mt-1">
                                         {t('seller:roleSelector.remainingListings', { count: remaining })} {subscription.isPro ? t('seller:roleSelector.shared') : ''}
                                     </p>
                                 ) : (
-                                    <p className="text-xs text-emerald-400 font-medium mt-1">
+                                    <p className="text-xs text-emerald-600 font-medium mt-1">
                                         {t('seller:roleSelector.availableListings', { count: remaining })} {subscription.isPro ? t('seller:roleSelector.shared') : ''}
                                     </p>
                                 )}
 
                                 {/* Promotion coupons for Pro users */}
                                 {subscription.isPro && (subscription.featuredCoupons || subscription.highlightedCoupons) ? (
-                                    <div className="mt-2 p-2 glass-fieldset border-purple-400/20 rounded text-xs space-y-1.5">
-                                        <p className="text-purple-300 font-semibold flex items-center gap-1">
+                                    <div className="mt-2 p-2 glass-fieldset border-purple-200 rounded text-xs space-y-1.5">
+                                        <p className="text-purple-600 font-semibold flex items-center gap-1">
                                             <span>🎟️</span> Promotion Coupons
                                         </p>
                                         <div className="grid grid-cols-2 gap-2">
                                             {subscription.featuredCoupons !== undefined && (
                                                 <div className="bg-white/5 p-1.5 rounded">
-                                                    <p className="text-purple-300/80 font-medium">
+                                                    <p className="text-purple-600 font-medium">
                                                         ⭐ Featured: {subscription.featuredCoupons}
                                                     </p>
                                                     <p className="text-purple-500 text-[10px]">
@@ -418,7 +418,7 @@ const RoleCard: React.FC<RoleCardProps> = ({
                                             )}
                                             {subscription.highlightedCoupons !== undefined && (
                                                 <div className="bg-white/5 p-1.5 rounded">
-                                                    <p className="text-amber-400/70 font-medium">
+                                                    <p className="text-amber-500 font-medium">
                                                         🔥 Highlighted: {subscription.highlightedCoupons}
                                                     </p>
                                                     <p className="text-amber-500 text-[10px]">
@@ -428,7 +428,7 @@ const RoleCard: React.FC<RoleCardProps> = ({
                                             )}
                                         </div>
                                         {subscription.usedCoupons ? (
-                                            <p className="text-purple-600 text-[10px]">
+                                            <p className="text-purple-500 text-[10px]">
                                                 Used this month: {subscription.usedCoupons}
                                             </p>
                                         ) : null}
@@ -437,7 +437,7 @@ const RoleCard: React.FC<RoleCardProps> = ({
                             </div>
                         )
                     ) : (
-                        <p className="text-xs text-white/40">{t('seller:roleSelector.noSubscriptionData')}</p>
+                        <p className="text-xs text-gray-400">{t('seller:roleSelector.noSubscriptionData')}</p>
                     )}
                 </div>
             </div>

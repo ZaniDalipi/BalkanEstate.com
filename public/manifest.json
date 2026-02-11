@@ -1,7 +1,7 @@
 {
   "name": "BalkanEstateAI",
   "short_name": "BalkanEstateAI",
-  "description": "Find your dream property in the Balkans with AI. Browse houses, apartments, and villas for sale across Serbia, Montenegro, Croatia, Bosnia, North Macedonia, and Albania.",
+  "description": "Find your dream property in the Balkans with AI. Browse houses, apartments, and villas for sale and rent across Kosovo, Albania, North Macedonia, Serbia, Bosnia and Herzegovina, Croatia, Montenegro, Greece, Bulgaria, and Romania.",
   "start_url": "/",
   "id": "/",
   "display": "standalone",
@@ -45,22 +45,6 @@
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any"
-    }
-  ],
-  "screenshots": [
-    {
-      "src": "/screenshots/home-wide.png",
-      "sizes": "1280x720",
-      "type": "image/png",
-      "form_factor": "wide",
-      "label": "Home page showing property search"
-    },
-    {
-      "src": "/screenshots/home-narrow.png",
-      "sizes": "750x1334",
-      "type": "image/png",
-      "form_factor": "narrow",
-      "label": "Mobile home page with property listings"
     }
   ],
   "shortcuts": [

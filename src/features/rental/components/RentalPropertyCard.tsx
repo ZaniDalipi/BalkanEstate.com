@@ -26,8 +26,10 @@ const RentalPropertyCard: React.FC<RentalPropertyCardProps> = ({ property, onHov
 
     return (
         <article
-            className={`group glass-panel overflow-hidden hover:bg-white/10 transition-all duration-300 cursor-pointer ${isRented ? 'opacity-75' : ''}`}
+            className={`group glass-panel overflow-hidden hover:bg-gray-50 transition-all duration-300 cursor-pointer ${isRented ? 'opacity-75' : ''}`}
             onClick={handleClick}
+            onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); handleClick(); } }}
+            tabIndex={0}
             onMouseEnter={() => onHover?.(property.id)}
             onMouseLeave={() => onHover?.(null)}
         >
@@ -51,12 +53,12 @@ const RentalPropertyCard: React.FC<RentalPropertyCardProps> = ({ property, onHov
                     </div>
                 )}
                 {/* Listing Type Badge */}
-                <div className="absolute top-2 right-2 glass-badge text-xs font-bold px-2.5 py-1 text-blue-300">
+                <div className="absolute top-2 right-2 glass-badge text-xs font-bold px-2.5 py-1 text-blue-600">
                     {t('rental:forRent')}
                 </div>
                 {/* Available From */}
                 {property.availableFrom && !isRented && (
-                    <div className="absolute bottom-2 left-2 glass-badge text-xs px-2 py-1 text-white/80">
+                    <div className="absolute bottom-2 left-2 glass-badge text-xs px-2 py-1 text-gray-700">
                         {t('rental:availableFrom')}: {new Date(property.availableFrom).toLocaleDateString()}
                     </div>
                 )}
@@ -66,26 +68,26 @@ const RentalPropertyCard: React.FC<RentalPropertyCardProps> = ({ property, onHov
             <div className="p-3 sm:p-4">
                 {/* Price */}
                 <div className="flex items-baseline gap-1 mb-1">
-                    <span className="text-lg sm:text-xl font-bold text-white/90">
+                    <span className="text-lg sm:text-xl font-bold text-gray-900">
                         {currencySymbol}{formattedPrice}
                     </span>
-                    <span className="text-sm text-white/40">{rentPeriodLabel}</span>
+                    <span className="text-sm text-gray-400">{rentPeriodLabel}</span>
                 </div>
 
                 {/* Title / Address */}
                 {property.title && (
-                    <h3 className="text-sm font-semibold text-white/80 truncate mb-0.5">{property.title}</h3>
+                    <h3 className="text-sm font-semibold text-gray-700 truncate mb-0.5">{property.title}</h3>
                 )}
-                <p className="text-sm text-white/40 truncate">{property.address}, {property.city}</p>
+                <p className="text-sm text-gray-400 truncate">{property.address}, {property.city}</p>
 
                 {/* Key Details */}
-                <div className="flex items-center gap-3 mt-2 text-sm text-white/50">
+                <div className="flex items-center gap-3 mt-2 text-sm text-gray-400">
                     {property.propertyType !== 'land' && (
                         <>
                             <span>{property.beds} {t('common:beds')}</span>
-                            <span className="text-white/20">|</span>
+                            <span className="text-gray-300">|</span>
                             <span>{property.baths} {t('common:baths')}</span>
-                            <span className="text-white/20">|</span>
+                            <span className="text-gray-300">|</span>
                         </>
                     )}
                     <span>{property.sqft} m²</span>
@@ -94,42 +96,42 @@ const RentalPropertyCard: React.FC<RentalPropertyCardProps> = ({ property, onHov
                 {/* Rental-Specific Details */}
                 <div className="flex flex-wrap items-center gap-2 mt-2">
                     {property.securityDeposit != null && property.securityDeposit > 0 && (
-                        <span className="glass-badge text-xs px-2 py-0.5 text-amber-300/80">
+                        <span className="glass-badge text-xs px-2 py-0.5 text-amber-600">
                             {t('rental:deposit')}: {currencySymbol}{new Intl.NumberFormat('de-DE').format(property.securityDeposit)}
                         </span>
                     )}
                     {property.minimumLeaseDuration && (
-                        <span className="glass-badge text-xs px-2 py-0.5 text-blue-300/80">
+                        <span className="glass-badge text-xs px-2 py-0.5 text-blue-600">
                             {t('rental:minLease')}: {property.minimumLeaseDuration} {t('rental:months')}
                         </span>
                     )}
                     {property.utilitiesIncluded && (
-                        <span className="glass-badge text-xs px-2 py-0.5 text-emerald-300/80">
+                        <span className="glass-badge text-xs px-2 py-0.5 text-emerald-600">
                             {t('rental:utilitiesIncluded')}
                         </span>
                     )}
                     {property.furnishing && property.furnishing !== 'any' && (
-                        <span className="glass-badge text-xs px-2 py-0.5 text-purple-300/80">
+                        <span className="glass-badge text-xs px-2 py-0.5 text-purple-600">
                             {t(`rental:furnishing.${property.furnishing}`)}
                         </span>
                     )}
                     {property.petsAllowed && (
-                        <span className="glass-badge text-xs px-2 py-0.5 text-orange-300/80">
+                        <span className="glass-badge text-xs px-2 py-0.5 text-orange-600">
                             {t('rental:petsAllowed')}
                         </span>
                     )}
                 </div>
 
                 {/* Seller Info */}
-                <div className="flex items-center gap-2 mt-3 pt-2 border-t border-white/5">
+                <div className="flex items-center gap-2 mt-3 pt-2 border-t border-gray-200">
                     {property.seller?.avatarUrl ? (
-                        <img src={optimizeCloudinaryUrl(property.seller.avatarUrl, { width: 48, quality: 'auto', crop: 'fill' })} alt="" loading="lazy" decoding="async" width={24} height={24} className="w-6 h-6 rounded-full object-cover ring-1 ring-white/10" />
+                        <img src={optimizeCloudinaryUrl(property.seller.avatarUrl, { width: 48, quality: 'auto', crop: 'fill' })} alt="" loading="lazy" decoding="async" width={24} height={24} className="w-6 h-6 rounded-full object-cover ring-1 ring-gray-200" />
                     ) : (
-                        <div className="w-6 h-6 rounded-full bg-white/10 flex items-center justify-center text-xs text-white/50">
+                        <div className="w-6 h-6 rounded-full bg-gray-100 flex items-center justify-center text-xs text-gray-400">
                             {property.seller?.name?.charAt(0) || '?'}
                         </div>
                     )}
-                    <span className="text-xs text-white/40 truncate">
+                    <span className="text-xs text-gray-400 truncate">
                         {property.seller?.name}
                         {property.seller?.agencyName && ` - ${property.seller.agencyName}`}
                     </span>

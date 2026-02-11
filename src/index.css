@@ -43,9 +43,9 @@
    and ethereal depth effects.
    ============================================================================ */
 
-/* Animated gradient background for liquid glass pages */
+/* Animated gradient background for liquid glass pages — Apple iOS light theme */
 .liquid-glass-bg {
-  background: linear-gradient(135deg, #0c1220 0%, #1a1040 25%, #0d1f3c 50%, #0a1628 75%, #0c1220 100%);
+  background: linear-gradient(135deg, #f8f9fc 0%, #eef1f8 25%, #f0f4fa 50%, #e8ecf4 75%, #f8f9fc 100%);
   background-size: 400% 400%;
   animation: liquidBgShift 20s ease infinite;
   min-height: 100vh;
@@ -60,9 +60,9 @@
   right: 0;
   bottom: 0;
   background:
-    radial-gradient(ellipse at 20% 50%, rgba(59, 130, 246, 0.08) 0%, transparent 50%),
-    radial-gradient(ellipse at 80% 20%, rgba(139, 92, 246, 0.06) 0%, transparent 50%),
-    radial-gradient(ellipse at 50% 80%, rgba(6, 182, 212, 0.05) 0%, transparent 50%);
+    radial-gradient(ellipse at 20% 50%, rgba(59, 130, 246, 0.05) 0%, transparent 50%),
+    radial-gradient(ellipse at 80% 20%, rgba(139, 92, 246, 0.04) 0%, transparent 50%),
+    radial-gradient(ellipse at 50% 80%, rgba(6, 182, 212, 0.03) 0%, transparent 50%);
   pointer-events: none;
   z-index: 0;
 }
@@ -79,165 +79,165 @@
   75% { background-position: 0% 100%; }
 }
 
-/* Core glass panel */
+/* Core glass panel — frosted white */
 .glass-panel {
-  background: rgba(255, 255, 255, 0.06);
-  backdrop-filter: blur(20px) saturate(1.2);
-  -webkit-backdrop-filter: blur(20px) saturate(1.2);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.72);
+  backdrop-filter: blur(20px) saturate(1.8);
+  -webkit-backdrop-filter: blur(20px) saturate(1.8);
+  border: 1px solid rgba(0, 0, 0, 0.06);
   border-radius: 16px;
   box-shadow:
-    0 8px 32px rgba(0, 0, 0, 0.2),
-    inset 0 1px 0 rgba(255, 255, 255, 0.08);
+    0 2px 16px rgba(0, 0, 0, 0.06),
+    inset 0 1px 0 rgba(255, 255, 255, 0.8);
 }
 
 .glass-panel-light {
-  background: rgba(255, 255, 255, 0.08);
-  backdrop-filter: blur(16px) saturate(1.1);
-  -webkit-backdrop-filter: blur(16px) saturate(1.1);
-  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.6);
+  backdrop-filter: blur(16px) saturate(1.6);
+  -webkit-backdrop-filter: blur(16px) saturate(1.6);
+  border: 1px solid rgba(0, 0, 0, 0.05);
   border-radius: 12px;
   box-shadow:
-    0 4px 16px rgba(0, 0, 0, 0.15),
-    inset 0 1px 0 rgba(255, 255, 255, 0.06);
+    0 1px 8px rgba(0, 0, 0, 0.04),
+    inset 0 1px 0 rgba(255, 255, 255, 0.6);
 }
 
-/* Glass input field */
+/* Glass input field — light theme */
 .glass-input {
-  background: rgba(255, 255, 255, 0.05);
+  background: rgba(255, 255, 255, 0.7);
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
-  border: 1px solid rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(0, 0, 0, 0.1);
   border-radius: 10px;
-  color: rgba(255, 255, 255, 0.9);
+  color: rgba(0, 0, 0, 0.85);
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .glass-input::placeholder {
-  color: rgba(255, 255, 255, 0.35);
+  color: rgba(0, 0, 0, 0.35);
 }
 
 .glass-input:focus {
-  background: rgba(255, 255, 255, 0.08);
-  border-color: rgba(99, 144, 255, 0.5);
-  box-shadow: 0 0 0 3px rgba(99, 144, 255, 0.15), 0 0 20px rgba(99, 144, 255, 0.1);
+  background: rgba(255, 255, 255, 0.85);
+  border-color: rgba(0, 122, 255, 0.5);
+  box-shadow: 0 0 0 3px rgba(0, 122, 255, 0.12), 0 1px 4px rgba(0, 0, 0, 0.06);
   outline: none;
 }
 
 .glass-input option {
-  background: #1a1f36;
-  color: #e2e8f0;
+  background: #ffffff;
+  color: #1a202c;
 }
 
-/* Glass select (same as input but for selects) */
+/* Glass select — light theme */
 .glass-select {
-  background: rgba(255, 255, 255, 0.05);
+  background: rgba(255, 255, 255, 0.7);
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
-  border: 1px solid rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(0, 0, 0, 0.1);
   border-radius: 10px;
-  color: rgba(255, 255, 255, 0.9);
+  color: rgba(0, 0, 0, 0.85);
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .glass-select:focus {
-  background: rgba(255, 255, 255, 0.08);
-  border-color: rgba(99, 144, 255, 0.5);
-  box-shadow: 0 0 0 3px rgba(99, 144, 255, 0.15), 0 0 20px rgba(99, 144, 255, 0.1);
+  background: rgba(255, 255, 255, 0.85);
+  border-color: rgba(0, 122, 255, 0.5);
+  box-shadow: 0 0 0 3px rgba(0, 122, 255, 0.12), 0 1px 4px rgba(0, 0, 0, 0.06);
   outline: none;
 }
 
 .glass-select option {
-  background: #1a1f36;
-  color: #e2e8f0;
+  background: #ffffff;
+  color: #1a202c;
 }
 
-/* Glass button */
+/* Glass button — light theme */
 .glass-btn {
-  background: rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.7);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
-  border: 1px solid rgba(255, 255, 255, 0.15);
+  border: 1px solid rgba(0, 0, 0, 0.08);
   border-radius: 10px;
-  color: rgba(255, 255, 255, 0.9);
+  color: rgba(0, 0, 0, 0.75);
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .glass-btn:hover {
-  background: rgba(255, 255, 255, 0.14);
-  border-color: rgba(255, 255, 255, 0.25);
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+  background: rgba(255, 255, 255, 0.85);
+  border-color: rgba(0, 0, 0, 0.12);
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
   transform: translateY(-1px);
 }
 
-/* Primary glass button with glow */
+/* Primary glass button — Apple blue */
 .glass-btn-primary {
-  background: linear-gradient(135deg, rgba(59, 130, 246, 0.4), rgba(99, 102, 241, 0.4));
+  background: linear-gradient(135deg, rgba(0, 122, 255, 0.9), rgba(88, 86, 214, 0.9));
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
-  border: 1px solid rgba(99, 144, 255, 0.3);
+  border: 1px solid rgba(0, 122, 255, 0.3);
   border-radius: 10px;
   color: white;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  box-shadow: 0 4px 16px rgba(59, 130, 246, 0.2);
+  box-shadow: 0 2px 12px rgba(0, 122, 255, 0.2);
 }
 
 .glass-btn-primary:hover {
-  background: linear-gradient(135deg, rgba(59, 130, 246, 0.55), rgba(99, 102, 241, 0.55));
-  border-color: rgba(99, 144, 255, 0.5);
-  box-shadow: 0 6px 24px rgba(59, 130, 246, 0.35);
+  background: linear-gradient(135deg, rgba(0, 122, 255, 1), rgba(88, 86, 214, 1));
+  border-color: rgba(0, 122, 255, 0.5);
+  box-shadow: 0 4px 20px rgba(0, 122, 255, 0.3);
   transform: translateY(-1px);
 }
 
-/* Secondary/accent glass button */
+/* Secondary/accent glass button — Apple orange */
 .glass-btn-accent {
-  background: linear-gradient(135deg, rgba(245, 158, 11, 0.35), rgba(249, 115, 22, 0.35));
+  background: linear-gradient(135deg, rgba(255, 149, 0, 0.9), rgba(255, 94, 58, 0.9));
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
-  border: 1px solid rgba(245, 158, 11, 0.3);
+  border: 1px solid rgba(255, 149, 0, 0.3);
   border-radius: 10px;
   color: white;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  box-shadow: 0 4px 16px rgba(245, 158, 11, 0.15);
+  box-shadow: 0 2px 12px rgba(255, 149, 0, 0.15);
 }
 
 .glass-btn-accent:hover {
-  background: linear-gradient(135deg, rgba(245, 158, 11, 0.5), rgba(249, 115, 22, 0.5));
-  border-color: rgba(245, 158, 11, 0.5);
-  box-shadow: 0 6px 24px rgba(245, 158, 11, 0.3);
+  background: linear-gradient(135deg, rgba(255, 149, 0, 1), rgba(255, 94, 58, 1));
+  border-color: rgba(255, 149, 0, 0.5);
+  box-shadow: 0 4px 20px rgba(255, 149, 0, 0.25);
   transform: translateY(-1px);
 }
 
-/* Glass fieldset / section card */
+/* Glass fieldset / section card — light */
 .glass-fieldset {
-  background: rgba(255, 255, 255, 0.04);
+  background: rgba(255, 255, 255, 0.5);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(0, 0, 0, 0.06);
   border-radius: 14px;
   padding: 1.25rem;
 }
 
-/* Glass badge */
+/* Glass badge — light */
 .glass-badge {
-  background: rgba(255, 255, 255, 0.08);
+  background: rgba(0, 0, 0, 0.04);
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
-  border: 1px solid rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(0, 0, 0, 0.06);
   border-radius: 999px;
-  color: rgba(255, 255, 255, 0.8);
+  color: rgba(0, 0, 0, 0.7);
 }
 
-/* Glow text effect */
+/* Text glow — disabled on light theme */
 .text-glow {
-  text-shadow: 0 0 20px rgba(99, 144, 255, 0.3);
+  text-shadow: none;
 }
 
 .text-glow-amber {
-  text-shadow: 0 0 20px rgba(245, 158, 11, 0.3);
+  text-shadow: none;
 }
 
-/* Floating orb decorations */
+/* Floating orb decorations — subtle pastel washes */
 @keyframes orbFloat {
   0%, 100% { transform: translate(0, 0) scale(1); }
   33% { transform: translate(30px, -30px) scale(1.05); }
@@ -247,20 +247,20 @@
 .glass-orb {
   position: absolute;
   border-radius: 50%;
-  filter: blur(60px);
-  opacity: 0.4;
+  filter: blur(80px);
+  opacity: 0.15;
   animation: orbFloat 15s ease-in-out infinite;
   pointer-events: none;
 }
 
-/* Glass checkbox styling */
+/* Glass checkbox styling — Apple blue */
 .glass-checkbox {
-  accent-color: rgba(99, 144, 255, 0.8);
+  accent-color: rgba(0, 122, 255, 0.8);
 }
 
-/* Glass label */
+/* Glass label — light theme */
 .glass-label {
-  color: rgba(255, 255, 255, 0.6);
+  color: rgba(0, 0, 0, 0.5);
   font-size: 0.75rem;
   font-weight: 500;
   letter-spacing: 0.05em;
@@ -269,17 +269,17 @@
 
 /* Glass floating label for inputs */
 .glass-floating-label {
-  color: rgba(255, 255, 255, 0.5);
+  color: rgba(0, 0, 0, 0.45);
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-/* Glass divider */
+/* Glass divider — light */
 .glass-divider {
   height: 1px;
-  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.12), transparent);
+  background: linear-gradient(90deg, transparent, rgba(0, 0, 0, 0.08), transparent);
 }
 
-/* Glass scrollbar */
+/* Glass scrollbar — light */
 .glass-scrollbar::-webkit-scrollbar {
   width: 6px;
 }
@@ -287,14 +287,14 @@
   background: transparent;
 }
 .glass-scrollbar::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.15);
+  background: rgba(0, 0, 0, 0.12);
   border-radius: 3px;
 }
 .glass-scrollbar::-webkit-scrollbar-thumb:hover {
-  background: rgba(255, 255, 255, 0.25);
+  background: rgba(0, 0, 0, 0.2);
 }
 
-/* Shimmering border effect */
+/* Shimmering border effect — pastel */
 @keyframes shimmerBorder {
   0% { background-position: 0% 50%; }
   50% { background-position: 100% 50%; }
@@ -310,7 +310,7 @@
   inset: -1px;
   border-radius: inherit;
   padding: 1px;
-  background: linear-gradient(135deg, rgba(99,144,255,0.3), rgba(139,92,246,0.2), rgba(6,182,212,0.3), rgba(99,144,255,0.3));
+  background: linear-gradient(135deg, rgba(0,122,255,0.15), rgba(88,86,214,0.1), rgba(6,182,212,0.15), rgba(0,122,255,0.15));
   background-size: 300% 300%;
   animation: shimmerBorder 6s ease infinite;
   -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
