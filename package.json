@@ -19,7 +19,8 @@
     "test:run": "vitest run",
     "test:coverage": "vitest run --coverage",
     "test:ui": "vitest --ui",
-    "test:watch": "vitest --watch"
+    "test:watch": "vitest --watch",
+    "type-check": "NODE_OPTIONS='--max-old-space-size=4096' tsc --noEmit"
   },
   "dependencies": {
     "@google/genai": "^1.27.0",

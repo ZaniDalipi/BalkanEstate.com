@@ -24,5 +24,6 @@
     "noEmit": true,
     "types": ["leaflet"]
   },
-  "include": ["**/*.ts", "**/*.tsx", "vite-env.d.ts"]
+  "include": ["src/**/*.ts", "src/**/*.tsx", "*.ts", "*.tsx", "components/**/*.ts", "components/**/*.tsx", "config/**/*.ts", "context/**/*.tsx", "utils/**/*.ts", "services/**/*.ts", "constants/**/*.ts", "hooks/**/*.ts", "vite-env.d.ts"],
+  "exclude": ["node_modules", "dist", "backend"]
 }
