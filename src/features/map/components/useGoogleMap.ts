@@ -133,8 +133,7 @@ export function useGoogleMap(props: GoogleMapComponentProps) {
 
   // Refs - ALL useRef hooks must be at the top to maintain consistent hook order
   const clustererRef = useRef<MarkerClusterer | null>(null);
-  const markersRef = useRef<Map<string, google.maps.marker.AdvancedMarkerElement>>(new Map());
-  const markerDivsRef = useRef<Map<string, HTMLDivElement>>(new Map());
+  const markersRef = useRef<Map<string, google.maps.Marker>>(new Map());
   const lastCadastreZoomRef = useRef<number | null>(null);
   const lastMapTypeRef = useRef<string | null>(null);
   const climateLayerRef = useRef<google.maps.ImageMapType | null>(null);
@@ -149,7 +148,7 @@ export function useGoogleMap(props: GoogleMapComponentProps) {
   const drawingPropsRef = useRef({ isDrawing, onDrawComplete });
 
   // Ref to store promoted markers separately (not clustered)
-  const promotedMarkersRef = useRef<google.maps.marker.AdvancedMarkerElement[]>([]);
+  const promotedMarkersRef = useRef<google.maps.Marker[]>([]);
 
   // Keep drawing props ref updated
   useEffect(() => {
@@ -162,28 +161,7 @@ export function useGoogleMap(props: GoogleMapComponentProps) {
   }, [drawingRect]);
 
   // Load Google Maps API using centralized hook (enables preloading benefits)
-  const { isLoaded, loadError: loaderError } = useGoogleMapLoader();
-
-  // Detect Google Maps internal crashes (unhandled promise rejections from map.js/main.js)
-  const [gmapsInternalError, setGmapsInternalError] = useState(false);
-  useEffect(() => {
-    const handler = (e: PromiseRejectionEvent) => {
-      const msg = String(e.reason);
-      // Google Maps internal errors have patterns like "Cannot read properties of undefined"
-      // from minified map.js / main.js loaded via maps.googleapis.com
-      if (msg.includes('Cannot read properties of undefined') && e.reason instanceof TypeError) {
-        const stack = e.reason.stack || '';
-        if (stack.includes('map.js') || stack.includes('main.js') || stack.includes('common.js')) {
-          setGmapsInternalError(true);
-          e.preventDefault(); // Suppress console noise
-        }
-      }
-    };
-    window.addEventListener('unhandledrejection', handler);
-    return () => window.removeEventListener('unhandledrejection', handler);
-  }, []);
-
-  const loadError = loaderError || (gmapsInternalError ? new Error('Google Maps failed to initialize') : null);
+  const { isLoaded, loadError } = useGoogleMapLoader();
 
   // RainViewer precipitation radar (free, no API key) - for flood layer
   const { tileUrl: rainViewerTileUrl } = useRainViewer(selectedClimateRisk === 'flood');
@@ -514,40 +492,26 @@ export function useGoogleMap(props: GoogleMapComponentProps) {
         }),
         renderer: {
           render: ({ count, position }) => {
-            const div = document.createElement('div');
-            div.className = 'cluster-marker';
-            // Smaller cluster sizes for cleaner look
-            const size = count < 10 ? 28 : count < 50 ? 32 : count < 100 ? 36 : 40;
-            div.style.cssText = `
-              width: ${size}px;
-              height: ${size}px;
-              background: linear-gradient(135deg, #0252CD 0%, #0066FF 100%);
-              border: 2px solid white;
-              border-radius: 50%;
-              display: flex;
-              align-items: center;
-              justify-content: center;
-              color: white;
-              font-weight: bold;
-              font-size: ${count < 100 ? 11 : 10}px;
-              font-family: Inter, system-ui, sans-serif;
-              cursor: pointer;
-              box-shadow: 0 2px 8px rgba(2, 82, 205, 0.4), 0 1px 3px rgba(0,0,0,0.2);
-              transition: transform 0.2s ease-out, box-shadow 0.2s ease-out;
-            `;
-            div.textContent = String(count);
-            div.addEventListener('mouseenter', () => {
-              div.style.transform = 'scale(1.15)';
-              div.style.boxShadow = '0 4px 12px rgba(2, 82, 205, 0.5), 0 2px 4px rgba(0,0,0,0.3)';
-            });
-            div.addEventListener('mouseleave', () => {
-              div.style.transform = 'scale(1)';
-              div.style.boxShadow = '0 2px 8px rgba(2, 82, 205, 0.4), 0 1px 3px rgba(0,0,0,0.2)';
-            });
-
-            return new google.maps.marker.AdvancedMarkerElement({
+            const scale = count < 10 ? 14 : count < 50 ? 16 : count < 100 ? 18 : 20;
+            return new google.maps.Marker({
               position,
-              content: div,
+              icon: {
+                path: google.maps.SymbolPath.CIRCLE,
+                fillColor: '#0252CD',
+                fillOpacity: 1,
+                strokeColor: 'white',
+                strokeWeight: 2,
+                scale,
+                labelOrigin: new google.maps.Point(0, 0),
+              },
+              label: {
+                text: String(count),
+                color: 'white',
+                fontWeight: 'bold',
+                fontSize: count < 100 ? '11px' : '10px',
+                fontFamily: 'Inter, system-ui, sans-serif',
+              },
+              zIndex: 10,
             });
           },
         },
@@ -565,7 +529,6 @@ export function useGoogleMap(props: GoogleMapComponentProps) {
       clustererRef.current.clearMarkers();
     }
     markersRef.current.clear();
-    markerDivsRef.current.clear();
     mapInstanceRef.current = null;
     setMap(null);
   }, []);
@@ -787,16 +750,15 @@ export function useGoogleMap(props: GoogleMapComponentProps) {
     // Clear existing markers
     clustererRef.current.clearMarkers();
     markersRef.current.clear();
-    markerDivsRef.current.clear();
 
     // Remove promoted markers from map
     promotedMarkersRef.current.forEach(marker => {
-      marker.map = null;
+      marker.setMap(null);
     });
     promotedMarkersRef.current = [];
 
-    const regularMarkers: google.maps.marker.AdvancedMarkerElement[] = [];
-    const promotedMarkers: google.maps.marker.AdvancedMarkerElement[] = [];
+    const regularMarkers: google.maps.Marker[] = [];
+    const promotedMarkers: google.maps.Marker[] = [];
     const BATCH_SIZE = 100;
     let currentIndex = 0;
 
@@ -805,82 +767,55 @@ export function useGoogleMap(props: GoogleMapComponentProps) {
 
       for (let i = currentIndex; i < endIndex; i++) {
         const property = validProperties[i];
-        const markerDiv = document.createElement('div');
-        markerDiv.className = 'property-marker';
-        markerDiv.dataset.propertyId = property.id;
-
         const price = formatMarkerPrice(property.price);
         const color = PROPERTY_TYPE_COLORS[property.propertyType || 'other'] || PROPERTY_TYPE_COLORS.other;
         const isActivelyPromoted = property.isPromoted && property.promotionEndDate && property.promotionEndDate > Date.now();
-        let borderColor = 'white';
-        let borderWidth = 2;
+        let strokeColor = 'white';
+        let strokeWeight = 2;
         if (isActivelyPromoted && property.promotionTier) {
-          borderColor = PROMOTION_TIER_COLORS[property.promotionTier] || PROMOTION_TIER_COLORS.standard;
-          borderWidth = 3;
+          strokeColor = PROMOTION_TIER_COLORS[property.promotionTier] || PROMOTION_TIER_COLORS.standard;
+          strokeWeight = 3;
         }
-
-        // Add animation class for promoted markers
-        if (isActivelyPromoted && property.promotionTier) {
-          markerDiv.classList.add(`promoted-marker-${property.promotionTier}`);
-        }
-
-        markerDiv.style.cssText = `
-          padding: 2px 6px;
-          background: ${color};
-          border: ${borderWidth}px solid ${borderColor};
-          border-radius: 999px;
-          color: white;
-          font-weight: 700;
-          font-size: 10px;
-          font-family: Inter, system-ui, sans-serif;
-          cursor: pointer;
-          box-shadow: 0 1px 4px rgba(0,0,0,0.25);
-          white-space: nowrap;
-          user-select: none;
-          transition: transform 0.15s ease-out, box-shadow 0.15s ease-out;
-        `;
-        markerDiv.textContent = price;
-
-        // Hover handlers - don't override if highlighted from list
-        markerDiv.onmouseenter = () => {
-          if (!markerDiv.classList.contains('marker-highlighted')) {
-            markerDiv.style.transform = 'scale(1.25) translateY(-2px)';
-            markerDiv.style.boxShadow = '0 4px 10px rgba(0,0,0,0.35)';
-            markerDiv.style.zIndex = '1000';
-          }
-        };
-        markerDiv.onmouseleave = () => {
-          if (!markerDiv.classList.contains('marker-highlighted')) {
-            markerDiv.style.transform = '';
-            markerDiv.style.boxShadow = '';
-            markerDiv.style.zIndex = isActivelyPromoted ? '100' : '1';
-          }
-        };
-
-        markerDiv.onclick = (e) => {
-          e.stopPropagation();
-          setSelectedProperty(property);
-          mapToUse?.panTo({ lat: property.lat, lng: property.lng });
-        };
 
         try {
-          const marker = new google.maps.marker.AdvancedMarkerElement({
+          // Create pill-shaped SVG icon as data URL
+          const textLen = price.length;
+          const pillWidth = Math.max(36, textLen * 7 + 16);
+          const pillHeight = 22;
+          const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${pillWidth}" height="${pillHeight}">
+            <rect x="1" y="1" width="${pillWidth - 2}" height="${pillHeight - 2}" rx="11" ry="11"
+              fill="${color}" stroke="${strokeColor}" stroke-width="${strokeWeight}"/>
+            <text x="${pillWidth / 2}" y="15" text-anchor="middle"
+              fill="white" font-family="Inter,system-ui,sans-serif" font-size="10" font-weight="700">${price}</text>
+          </svg>`;
+          const iconUrl = 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(svg);
+
+          const marker = new google.maps.Marker({
             position: { lat: property.lat, lng: property.lng },
-            content: markerDiv,
+            icon: {
+              url: iconUrl,
+              scaledSize: new google.maps.Size(pillWidth, pillHeight),
+              anchor: new google.maps.Point(pillWidth / 2, pillHeight / 2),
+            },
             zIndex: isActivelyPromoted ? 100 : 1,
+            optimized: true,
+          });
+
+          marker.addListener('click', () => {
+            setSelectedProperty(property);
+            mapToUse?.panTo({ lat: property.lat, lng: property.lng });
           });
 
           // Separate promoted markers from regular ones
           if (isActivelyPromoted) {
             // Add promoted markers directly to map (not clustered)
-            marker.map = mapToUse;
+            marker.setMap(mapToUse);
             promotedMarkers.push(marker);
           } else {
             regularMarkers.push(marker);
           }
 
           markersRef.current.set(property.id, marker);
-          markerDivsRef.current.set(property.id, markerDiv);
         } catch (markerError) {
           console.warn('Failed to create marker for property', property.id, markerError);
         }
@@ -909,25 +844,17 @@ export function useGoogleMap(props: GoogleMapComponentProps) {
     };
   }, [validProperties, map, isLoaded]);
 
-  // Handle hover state changes from property list - use CSS classes for better performance
+  // Handle hover state changes from property list - update marker zIndex
   useEffect(() => {
-    markerDivsRef.current.forEach((div, id) => {
+    markersRef.current.forEach((marker, id) => {
       const isHovered = id === hoveredPropertyId;
       const prop = validProperties.find(p => p.id === id);
       const isPromoted = prop?.isPromoted && prop?.promotionEndDate && prop.promotionEndDate > Date.now();
 
       if (isHovered) {
-        div.classList.add('marker-highlighted');
-        // Force styles for highlighted state
-        div.style.transform = 'scale(1.3) translateY(-4px)';
-        div.style.boxShadow = '0 8px 20px rgba(0,0,0,0.4)';
-        div.style.zIndex = '2000';
+        marker.setZIndex(2000);
       } else {
-        div.classList.remove('marker-highlighted');
-        // Reset to default styles
-        div.style.transform = '';
-        div.style.boxShadow = '';
-        div.style.zIndex = isPromoted ? '100' : '1';
+        marker.setZIndex(isPromoted ? 100 : 1);
       }
     });
   }, [hoveredPropertyId, validProperties]);
@@ -1490,7 +1417,7 @@ export function useGoogleMap(props: GoogleMapComponentProps) {
   }, [map, isLoaded]);
 
   // Open-Meteo overlay for wind/heat on Google Maps (native Circle/Marker primitives)
-  const openMeteoMarkersRef = useRef<(google.maps.Circle | google.maps.marker.AdvancedMarkerElement)[]>([]);
+  const openMeteoMarkersRef = useRef<(google.maps.Circle | google.maps.Marker)[]>([]);
 
   useEffect(() => {
     if (!map || !isLoaded) return;
@@ -1548,19 +1475,25 @@ export function useGoogleMap(props: GoogleMapComponentProps) {
         else color = '#003366';
 
         const size = Math.min(28, Math.max(14, 12 + speed * 0.35));
-        const el = document.createElement('div');
-        el.innerHTML = `<svg width="${size}" height="${size}" viewBox="0 0 24 24"
-          style="transform:rotate(${dir}deg);filter:drop-shadow(0 1px 2px rgba(0,0,0,0.3))"
+        const svgIcon = `<svg width="${size}" height="${size}" viewBox="0 0 24 24"
           xmlns="http://www.w3.org/2000/svg">
-          <path d="M12 2 L8 14 L12 11 L16 14 Z"
-            fill="${color}" stroke="rgba(255,255,255,0.7)" stroke-width="1"/>
+          <g transform="rotate(${dir}, 12, 12)">
+            <path d="M12 2 L8 14 L12 11 L16 14 Z"
+              fill="${color}" stroke="rgba(255,255,255,0.7)" stroke-width="1"/>
+          </g>
         </svg>`;
-        el.style.pointerEvents = 'none';
+        const iconUrl = 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(svgIcon);
 
-        const marker = new google.maps.marker.AdvancedMarkerElement({
+        const marker = new google.maps.Marker({
           position: { lat: point.lat, lng: point.lng },
           map,
-          content: el,
+          icon: {
+            url: iconUrl,
+            scaledSize: new google.maps.Size(size, size),
+            anchor: new google.maps.Point(size / 2, size / 2),
+          },
+          clickable: false,
+          optimized: true,
         });
         openMeteoMarkersRef.current.push(marker);
       });
@@ -1569,7 +1502,7 @@ export function useGoogleMap(props: GoogleMapComponentProps) {
     return () => {
       openMeteoMarkersRef.current.forEach(m => {
         if (m instanceof google.maps.Circle) m.setMap(null);
-        else if ('map' in m) m.map = null;
+        else m.setMap(null);
       });
       openMeteoMarkersRef.current = [];
     };
