@@ -13,6 +13,7 @@ import ListingPropertyFeatures from './ListingPropertyFeatures';
 import ListingImageUpload from './ListingImageUpload';
 import ListingPreview from './ListingPreview';
 import NumberInputWithSteppers from '@/components/shared/NumberInputWithSteppers';
+import { LiquidGlassControl } from '@/components/ui/liquid-glass-control';
 import { getCurrencySymbol } from '@/utils/currency';
 import {
     LANGUAGES, CheckCircleIcon, UploadIcon, TagListInput,
@@ -112,39 +113,32 @@ const GeminiDescriptionGenerator: React.FC<{ propertyToEdit: Property | null }> 
     return (
         <>
         <form onSubmit={handleSubmit} onKeyDown={(e) => { if (e.key === 'Enter' && (e.target as HTMLElement).tagName !== 'TEXTAREA') e.preventDefault(); }}>
-            {/* Listing Type Toggle: Sale / Rent — animated segmented control */}
+            {/* Listing Type Toggle: Sale / Rent */}
             <div className="flex justify-center mb-6">
-                <div className="relative bg-gray-100/70 backdrop-blur-sm rounded-2xl p-1 flex">
-                    {/* Sliding pill indicator */}
-                    <div
-                        className="absolute top-1 bottom-1 rounded-xl bg-white shadow-sm transition-all duration-300 ease-[cubic-bezier(0.25,0.46,0.45,0.94)]"
-                        style={{ width: 'calc(50% - 4px)', left: !isRental ? '4px' : 'calc(50%)' }}
-                    />
-                    <button
-                        type="button"
-                        onClick={() => setListingData(prev => ({ ...prev, listingType: 'sale' }))}
-                        className={`relative z-10 w-1/2 px-6 py-2.5 rounded-xl text-sm font-semibold transition-colors duration-300 flex items-center justify-center gap-2 ${
-                            !isRental ? 'text-blue-600' : 'text-gray-400 hover:text-gray-500'
-                        }`}
-                    >
-                        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                            <path strokeLinecap="round" strokeLinejoin="round" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                        </svg>
-                        {t('seller:createListing.listingType.sale', 'For Sale')}
-                    </button>
-                    <button
-                        type="button"
-                        onClick={() => setListingData(prev => ({ ...prev, listingType: 'rent' }))}
-                        className={`relative z-10 w-1/2 px-6 py-2.5 rounded-xl text-sm font-semibold transition-colors duration-300 flex items-center justify-center gap-2 ${
-                            isRental ? 'text-blue-600' : 'text-gray-400 hover:text-gray-500'
-                        }`}
-                    >
-                        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                            <path strokeLinecap="round" strokeLinejoin="round" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z" />
-                        </svg>
-                        {t('seller:createListing.listingType.rent', 'For Rent')}
-                    </button>
-                </div>
+                <LiquidGlassControl
+                    options={[
+                        {
+                            value: 'sale',
+                            label: t('seller:createListing.listingType.sale', 'For Sale'),
+                            icon: (
+                                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                                    <path strokeLinecap="round" strokeLinejoin="round" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                </svg>
+                            ),
+                        },
+                        {
+                            value: 'rent',
+                            label: t('seller:createListing.listingType.rent', 'For Rent'),
+                            icon: (
+                                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                                    <path strokeLinecap="round" strokeLinejoin="round" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z" />
+                                </svg>
+                            ),
+                        },
+                    ]}
+                    value={listingData.listingType}
+                    onChange={(val) => setListingData(prev => ({ ...prev, listingType: val as 'sale' | 'rent' }))}
+                />
             </div>
 
             {/* Rental indicator */}
@@ -167,33 +161,23 @@ const GeminiDescriptionGenerator: React.FC<{ propertyToEdit: Property | null }> 
                 <p><strong className="text-blue-600">{t('seller:createListing.photoTips.title')}:</strong> {t('seller:createListing.photoTips.description')}</p>
             </div>
 
-            {/* Mode Toggle — animated segmented control */}
+            {/* Mode Toggle: AI / Manual */}
             <div className="flex justify-center mb-6">
-                <div className="relative bg-gray-100/70 backdrop-blur-sm rounded-2xl p-1 flex max-w-sm w-full">
-                    {/* Sliding pill indicator */}
-                    <div
-                        className="absolute top-1 bottom-1 rounded-xl bg-white shadow-sm transition-all duration-300 ease-[cubic-bezier(0.25,0.46,0.45,0.94)]"
-                        style={{ width: 'calc(50% - 4px)', left: mode === 'ai' ? '4px' : 'calc(50%)' }}
-                    />
-                    <button
-                        type="button"
-                        onClick={() => setMode('ai')}
-                        className={`relative z-10 w-1/2 px-4 py-2.5 rounded-xl text-sm font-semibold transition-colors duration-300 flex items-center justify-center gap-2 whitespace-nowrap ${
-                            mode === 'ai' ? 'text-blue-600' : 'text-gray-400 hover:text-gray-500'
-                        }`}
-                    >
-                        <SparklesIcon className="w-4 h-4" /> {t('seller:createListing.mode.aiCreator')}
-                    </button>
-                    <button
-                        type="button"
-                        onClick={() => setMode('manual')}
-                        className={`relative z-10 w-1/2 px-4 py-2.5 rounded-xl text-sm font-semibold transition-colors duration-300 flex items-center justify-center gap-2 whitespace-nowrap ${
-                            mode === 'manual' ? 'text-blue-600' : 'text-gray-400 hover:text-gray-500'
-                        }`}
-                    >
-                        {t('seller:createListing.mode.manualEntry')}
-                    </button>
-                </div>
+                <LiquidGlassControl
+                    options={[
+                        {
+                            value: 'ai',
+                            label: t('seller:createListing.mode.aiCreator'),
+                            icon: <SparklesIcon className="w-4 h-4" />,
+                        },
+                        {
+                            value: 'manual',
+                            label: t('seller:createListing.mode.manualEntry'),
+                        },
+                    ]}
+                    value={mode}
+                    onChange={(val) => setMode(val as 'ai' | 'manual')}
+                />
             </div>
 
             {/* Role Selector - only show when user data is fully loaded */}
