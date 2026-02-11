@@ -112,14 +112,19 @@ const GeminiDescriptionGenerator: React.FC<{ propertyToEdit: Property | null }> 
     return (
         <>
         <form onSubmit={handleSubmit} onKeyDown={(e) => { if (e.key === 'Enter' && (e.target as HTMLElement).tagName !== 'TEXTAREA') e.preventDefault(); }}>
-            {/* Listing Type Toggle: Sale / Rent */}
+            {/* Listing Type Toggle: Sale / Rent — animated segmented control */}
             <div className="flex justify-center mb-6">
-                <div className="glass-panel-light p-1 flex items-center space-x-1">
+                <div className="relative bg-gray-100/70 backdrop-blur-sm rounded-2xl p-1 flex">
+                    {/* Sliding pill indicator */}
+                    <div
+                        className="absolute top-1 bottom-1 rounded-xl bg-white shadow-sm transition-all duration-300 ease-[cubic-bezier(0.25,0.46,0.45,0.94)]"
+                        style={{ width: 'calc(50% - 4px)', left: !isRental ? '4px' : 'calc(50%)' }}
+                    />
                     <button
                         type="button"
                         onClick={() => setListingData(prev => ({ ...prev, listingType: 'sale' }))}
-                        className={`px-6 py-2.5 rounded-xl text-sm font-semibold transition-all duration-300 flex items-center gap-2 ${
-                            !isRental ? 'glass-btn-primary' : 'text-gray-400 hover:text-gray-600 hover:bg-gray-50'
+                        className={`relative z-10 w-1/2 px-6 py-2.5 rounded-xl text-sm font-semibold transition-colors duration-300 flex items-center justify-center gap-2 ${
+                            !isRental ? 'text-blue-600' : 'text-gray-400 hover:text-gray-500'
                         }`}
                     >
                         <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -130,8 +135,8 @@ const GeminiDescriptionGenerator: React.FC<{ propertyToEdit: Property | null }> 
                     <button
                         type="button"
                         onClick={() => setListingData(prev => ({ ...prev, listingType: 'rent' }))}
-                        className={`px-6 py-2.5 rounded-xl text-sm font-semibold transition-all duration-300 flex items-center gap-2 ${
-                            isRental ? 'glass-btn-primary' : 'text-gray-400 hover:text-gray-600 hover:bg-gray-50'
+                        className={`relative z-10 w-1/2 px-6 py-2.5 rounded-xl text-sm font-semibold transition-colors duration-300 flex items-center justify-center gap-2 ${
+                            isRental ? 'text-blue-600' : 'text-gray-400 hover:text-gray-500'
                         }`}
                     >
                         <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -162,11 +167,32 @@ const GeminiDescriptionGenerator: React.FC<{ propertyToEdit: Property | null }> 
                 <p><strong className="text-blue-600">{t('seller:createListing.photoTips.title')}:</strong> {t('seller:createListing.photoTips.description')}</p>
             </div>
 
-            {/* Mode Toggle */}
+            {/* Mode Toggle — animated segmented control */}
             <div className="flex justify-center mb-6">
-                 <div className="glass-panel-light p-1 flex items-center space-x-1 max-w-sm">
-                    <button type="button" onClick={() => setMode('ai')} className={`w-1/2 px-4 py-2 rounded-xl text-sm font-semibold transition-all duration-300 flex items-center justify-center gap-2 whitespace-nowrap ${mode === 'ai' ? 'glass-btn-primary' : 'text-gray-400 hover:text-gray-600 hover:bg-gray-50'}`}><SparklesIcon className="w-4 h-4" /> {t('seller:createListing.mode.aiCreator')}</button>
-                    <button type="button" onClick={() => setMode('manual')} className={`w-1/2 px-4 py-2 rounded-xl text-sm font-semibold transition-all duration-300 flex items-center justify-center gap-2 whitespace-nowrap ${mode === 'manual' ? 'glass-btn-primary' : 'text-gray-400 hover:text-gray-600 hover:bg-gray-50'}`}>{t('seller:createListing.mode.manualEntry')}</button>
+                <div className="relative bg-gray-100/70 backdrop-blur-sm rounded-2xl p-1 flex max-w-sm w-full">
+                    {/* Sliding pill indicator */}
+                    <div
+                        className="absolute top-1 bottom-1 rounded-xl bg-white shadow-sm transition-all duration-300 ease-[cubic-bezier(0.25,0.46,0.45,0.94)]"
+                        style={{ width: 'calc(50% - 4px)', left: mode === 'ai' ? '4px' : 'calc(50%)' }}
+                    />
+                    <button
+                        type="button"
+                        onClick={() => setMode('ai')}
+                        className={`relative z-10 w-1/2 px-4 py-2.5 rounded-xl text-sm font-semibold transition-colors duration-300 flex items-center justify-center gap-2 whitespace-nowrap ${
+                            mode === 'ai' ? 'text-blue-600' : 'text-gray-400 hover:text-gray-500'
+                        }`}
+                    >
+                        <SparklesIcon className="w-4 h-4" /> {t('seller:createListing.mode.aiCreator')}
+                    </button>
+                    <button
+                        type="button"
+                        onClick={() => setMode('manual')}
+                        className={`relative z-10 w-1/2 px-4 py-2.5 rounded-xl text-sm font-semibold transition-colors duration-300 flex items-center justify-center gap-2 whitespace-nowrap ${
+                            mode === 'manual' ? 'text-blue-600' : 'text-gray-400 hover:text-gray-500'
+                        }`}
+                    >
+                        {t('seller:createListing.mode.manualEntry')}
+                    </button>
                 </div>
             </div>
 
