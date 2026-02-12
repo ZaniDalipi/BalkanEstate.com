@@ -1,5 +1,6 @@
-import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
+import { cn } from '@/lib/utils';
 import { getCurrentLanguage } from '@/src/i18n';
 
 /* ------------------------------------------------------------------ */
@@ -15,76 +16,34 @@ const SplashLogo: React.FC<{ className?: string }> = ({ className }) => (
 );
 
 /* ------------------------------------------------------------------ */
-/*  MeshBackground                                                     */
-/*  Animated multi-point mesh gradient — subtle, slowly morphing.      */
+/*  AuroraLayer                                                        */
+/*  Animated aurora borealis background using CSS gradients + filter.   */
 /* ------------------------------------------------------------------ */
-const MESH_POINTS = [
-  { cx: '15%', cy: '20%',  color: 'rgba(2,82,205,0.12)',   r: '45%' },
-  { cx: '80%', cy: '10%',  color: 'rgba(0,180,216,0.10)',  r: '40%' },
-  { cx: '50%', cy: '55%',  color: 'rgba(59,130,246,0.06)', r: '50%' },
-  { cx: '85%', cy: '75%',  color: 'rgba(2,82,205,0.09)',   r: '38%' },
-  { cx: '20%', cy: '80%',  color: 'rgba(0,180,216,0.08)',  r: '42%' },
-];
-
-const drift = (idx: number) => {
-  const offsets = [
-    { x: [0, 8, -6, 0],  y: [0, -10, 6, 0] },
-    { x: [0, -10, 5, 0], y: [0, 8, -5, 0] },
-    { x: [0, 6, -8, 0],  y: [0, 5, -8, 0] },
-    { x: [0, -7, 10, 0], y: [0, -6, 9, 0] },
-    { x: [0, 9, -5, 0],  y: [0, 7, -10, 0] },
-  ];
-  return offsets[idx % offsets.length];
-};
-
-const MeshBackground: React.FC = () => (
+const AuroraLayer: React.FC = () => (
   <div className="absolute inset-0 overflow-hidden pointer-events-none">
-    {/* Base warm white → cool white gradient for depth */}
     <div
-      className="absolute inset-0"
-      style={{
-        background: 'linear-gradient(135deg, #f8faff 0%, #ffffff 40%, #f0f7ff 100%)',
-      }}
-    />
-
-    {/* Mesh nodes — large soft radial gradients that drift slowly */}
-    {MESH_POINTS.map((pt, i) => (
-      <motion.div
-        key={i}
-        className="absolute"
-        style={{
-          width: '100%',
-          height: '100%',
-          background: `radial-gradient(ellipse ${pt.r} ${pt.r} at ${pt.cx} ${pt.cy}, ${pt.color}, transparent)`,
-        }}
-        animate={{
-          x: drift(i).x.map((v) => `${v}%`),
-          y: drift(i).y.map((v) => `${v}%`),
-        }}
-        transition={{
-          duration: 10 + i * 2,
-          repeat: Infinity,
-          ease: 'easeInOut',
-        }}
-      />
-    ))}
-
-    {/* Fine noise texture overlay for tactile feel */}
-    <div
-      className="absolute inset-0 opacity-[0.03]"
-      style={{
-        backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")`,
-        backgroundSize: '180px 180px',
-      }}
+      className={cn(
+        `[--white-gradient:repeating-linear-gradient(100deg,var(--white)_0%,var(--white)_7%,var(--transparent)_10%,var(--transparent)_12%,var(--white)_16%)]
+        [--aurora:repeating-linear-gradient(100deg,var(--blue-500)_10%,var(--indigo-300)_15%,var(--blue-300)_20%,var(--violet-200)_25%,var(--blue-400)_30%)]
+        [background-image:var(--white-gradient),var(--aurora)]
+        [background-size:300%,_200%]
+        [background-position:50%_50%,50%_50%]
+        filter blur-[10px] invert
+        after:content-[""] after:absolute after:inset-0
+        after:[background-image:var(--white-gradient),var(--aurora)]
+        after:[background-size:200%,_100%]
+        after:animate-aurora after:[background-attachment:fixed] after:mix-blend-difference
+        pointer-events-none
+        absolute -inset-[10px] opacity-50 will-change-transform`,
+        `[mask-image:radial-gradient(ellipse_at_100%_0%,black_10%,var(--transparent)_70%)]`
+      )}
     />
   </div>
 );
 
 /* ------------------------------------------------------------------ */
-/*  MultiLangHello                                                     */
-/*  Cycles "hello" through Balkan languages with gooey text morphing.  */
-/*  User's chosen language greeting always appears last, then fires    */
-/*  onComplete. Uses SVG feColorMatrix threshold for the gooey effect. */
+/*  HelloGreeting                                                      */
+/*  Shows "hello" in the user's chosen language, simple fade-in.       */
 /* ------------------------------------------------------------------ */
 const BALKAN_GREETINGS: Record<string, string> = {
   en: 'hello',
@@ -99,148 +58,36 @@ const BALKAN_GREETINGS: Record<string, string> = {
   me: 'zdravo',
 };
 
-const CYCLE_ORDER = ['en', 'sq', 'sr', 'hr', 'bs', 'me', 'mk', 'bg', 'ro', 'el'];
-const MORPH_TIME = 0.8;   // seconds for the blur-morph
-const COOLDOWN_TIME = 0.6; // seconds to hold each word sharp
-
-interface MultiLangHelloProps {
+interface HelloGreetingProps {
   onComplete?: () => void;
 }
 
-const MultiLangHello: React.FC<MultiLangHelloProps> = ({ onComplete }) => {
-  const text1Ref = useRef<HTMLSpanElement>(null);
-  const text2Ref = useRef<HTMLSpanElement>(null);
-
-  const greetings = useMemo(() => {
-    const lang = getCurrentLanguage();
-    const others = CYCLE_ORDER.filter((code) => code !== lang);
-    const ordered = [...others, lang];
-    return ordered.map((code) => BALKAN_GREETINGS[code] || BALKAN_GREETINGS.en);
-  }, []);
+const HelloGreeting: React.FC<HelloGreetingProps> = ({ onComplete }) => {
+  const greeting = BALKAN_GREETINGS[getCurrentLanguage()] || BALKAN_GREETINGS.en;
 
   useEffect(() => {
-    let textIndex = 0;
-    let time = performance.now();
-    let morph = 0;
-    let cooldown = COOLDOWN_TIME;
-    let animId: number;
-    let completed = false;
-
-    // Initialise text content
-    if (text1Ref.current && text2Ref.current) {
-      text1Ref.current.textContent = greetings[0];
-      text2Ref.current.textContent = greetings[1] ?? greetings[0];
-    }
-
-    const setMorph = (fraction: number) => {
-      if (!text1Ref.current || !text2Ref.current) return;
-      text2Ref.current.style.filter = `blur(${Math.min(8 / fraction - 8, 100)}px)`;
-      text2Ref.current.style.opacity = `${Math.pow(fraction, 0.4) * 100}%`;
-
-      const inv = 1 - fraction;
-      text1Ref.current.style.filter = `blur(${Math.min(8 / inv - 8, 100)}px)`;
-      text1Ref.current.style.opacity = `${Math.pow(inv, 0.4) * 100}%`;
-    };
-
-    const doCooldown = () => {
-      morph = 0;
-      if (text1Ref.current && text2Ref.current) {
-        text2Ref.current.style.filter = '';
-        text2Ref.current.style.opacity = '100%';
-        text1Ref.current.style.filter = '';
-        text1Ref.current.style.opacity = '0%';
-      }
-    };
-
-    const doMorph = () => {
-      morph -= cooldown;
-      cooldown = 0;
-      let fraction = morph / MORPH_TIME;
-      if (fraction > 1) {
-        cooldown = COOLDOWN_TIME;
-        fraction = 1;
-      }
-      setMorph(fraction);
-    };
-
-    function animate(now: number) {
-      if (completed) return;
-      animId = requestAnimationFrame(animate);
-
-      const dt = (now - time) / 1000;
-      time = now;
-      cooldown -= dt;
-
-      if (cooldown <= 0) {
-        const shouldAdvance = morph === 0 && cooldown + dt > 0;
-        if (shouldAdvance) {
-          textIndex++;
-
-          // Reached the end — hold the last word then complete
-          if (textIndex >= greetings.length - 1) {
-            doCooldown();
-            if (text1Ref.current && text2Ref.current) {
-              text1Ref.current.style.opacity = '0%';
-              text2Ref.current.textContent = greetings[greetings.length - 1];
-              text2Ref.current.style.filter = '';
-              text2Ref.current.style.opacity = '100%';
-            }
-            completed = true;
-            cancelAnimationFrame(animId);
-            setTimeout(() => onComplete?.(), 600);
-            return;
-          }
-
-          if (text1Ref.current && text2Ref.current) {
-            text1Ref.current.textContent = greetings[textIndex];
-            text2Ref.current.textContent = greetings[textIndex + 1] ?? greetings[textIndex];
-          }
-        }
-        doMorph();
-      } else {
-        doCooldown();
-      }
-    }
-
-    animId = requestAnimationFrame(animate);
-    return () => {
-      completed = true;
-      cancelAnimationFrame(animId);
-    };
-  }, [greetings, onComplete]);
-
-  const textClass =
-    'absolute inline-block select-none text-center text-5xl sm:text-7xl md:text-8xl lg:text-9xl font-extralight italic text-neutral-800';
-  const textStyle: React.CSSProperties = {
-    fontFamily: "'Georgia', 'Times New Roman', 'SF Pro Display', serif",
-    letterSpacing: '-0.02em',
-  };
+    const t = setTimeout(() => onComplete?.(), 1400);
+    return () => clearTimeout(t);
+  }, [onComplete]);
 
   return (
-    <div className="relative flex items-center justify-center h-20 sm:h-28 md:h-36">
-      {/* SVG gooey threshold filter */}
-      <svg className="absolute h-0 w-0" aria-hidden="true" focusable="false">
-        <defs>
-          <filter id="gooey-hello">
-            <feColorMatrix
-              in="SourceGraphic"
-              type="matrix"
-              values="1 0 0 0 0
-                      0 1 0 0 0
-                      0 0 1 0 0
-                      0 0 0 255 -140"
-            />
-          </filter>
-        </defs>
-      </svg>
-
-      <div
-        className="flex items-center justify-center w-full"
-        style={{ filter: 'url(#gooey-hello)' }}
+    <div className="flex items-center justify-center h-20 sm:h-28 md:h-36">
+      <motion.span
+        initial={{ opacity: 0, y: 16, scale: 0.92 }}
+        animate={{ opacity: 1, y: 0, scale: 1 }}
+        exit={{ opacity: 0, y: -16, scale: 0.92 }}
+        transition={{
+          duration: 0.6,
+          ease: [0.22, 1, 0.36, 1],
+        }}
+        className="text-5xl sm:text-7xl md:text-8xl lg:text-9xl font-extralight italic text-neutral-800 select-none"
+        style={{
+          fontFamily: "'Georgia', 'Times New Roman', 'SF Pro Display', serif",
+          letterSpacing: '-0.02em',
+        }}
       >
-        <span ref={text1Ref} className={textClass} style={textStyle} />
-        <span ref={text2Ref} className={textClass} style={textStyle} />
-      </div>
+        {greeting}
+      </motion.span>
     </div>
   );
 };
@@ -399,11 +246,11 @@ const SplashScreen: React.FC<SplashScreenProps> = ({
           transition={{ duration: 0.7, ease: [0.25, 0.1, 0.25, 1] }}
           className="fixed inset-0 z-[99999] flex items-center justify-center overflow-hidden bg-white"
         >
-          <MeshBackground />
+          <AuroraLayer />
 
           <div className="relative z-10 flex flex-col items-center justify-center px-4 sm:px-6 w-full">
             <AnimatePresence mode="wait">
-              {/* Phase 1 — multi-language hello cycle */}
+              {/* Phase 1 — hello in user's language */}
               {phase === 'hello' && (
                 <motion.div
                   key="hello"
@@ -413,7 +260,7 @@ const SplashScreen: React.FC<SplashScreenProps> = ({
                   transition={{ duration: 0.4, ease: 'easeOut' }}
                   className="flex items-center justify-center"
                 >
-                  <MultiLangHello onComplete={handleHelloComplete} />
+                  <HelloGreeting onComplete={handleHelloComplete} />
                 </motion.div>
               )}
 
