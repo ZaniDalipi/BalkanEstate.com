@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { getCurrentLanguage } from '@/src/i18n';
 
@@ -82,8 +82,9 @@ const MeshBackground: React.FC = () => (
 
 /* ------------------------------------------------------------------ */
 /*  MultiLangHello                                                     */
-/*  Cycles "hello" through Balkan languages with smooth crossfades.    */
-/*  The user's chosen language greeting always appears last.           */
+/*  Cycles "hello" through Balkan languages with gooey text morphing.  */
+/*  User's chosen language greeting always appears last, then fires    */
+/*  onComplete. Uses SVG feColorMatrix threshold for the gooey effect. */
 /* ------------------------------------------------------------------ */
 const BALKAN_GREETINGS: Record<string, string> = {
   en: 'hello',
@@ -99,16 +100,17 @@ const BALKAN_GREETINGS: Record<string, string> = {
 };
 
 const CYCLE_ORDER = ['en', 'sq', 'sr', 'hr', 'bs', 'me', 'mk', 'bg', 'ro', 'el'];
-const HOLD_MS = 400;
+const MORPH_TIME = 0.8;   // seconds for the blur-morph
+const COOLDOWN_TIME = 0.6; // seconds to hold each word sharp
 
 interface MultiLangHelloProps {
   onComplete?: () => void;
 }
 
 const MultiLangHello: React.FC<MultiLangHelloProps> = ({ onComplete }) => {
-  const [index, setIndex] = useState(0);
+  const text1Ref = useRef<HTMLSpanElement>(null);
+  const text2Ref = useRef<HTMLSpanElement>(null);
 
-  // Build greeting list: cycle all, but end on the user's language
   const greetings = useMemo(() => {
     const lang = getCurrentLanguage();
     const others = CYCLE_ORDER.filter((code) => code !== lang);
@@ -117,35 +119,128 @@ const MultiLangHello: React.FC<MultiLangHelloProps> = ({ onComplete }) => {
   }, []);
 
   useEffect(() => {
-    if (index >= greetings.length - 1) {
-      const t = setTimeout(() => onComplete?.(), 600);
-      return () => clearTimeout(t);
+    let textIndex = 0;
+    let time = performance.now();
+    let morph = 0;
+    let cooldown = COOLDOWN_TIME;
+    let animId: number;
+    let completed = false;
+
+    // Initialise text content
+    if (text1Ref.current && text2Ref.current) {
+      text1Ref.current.textContent = greetings[0];
+      text2Ref.current.textContent = greetings[1] ?? greetings[0];
     }
-    const t = setTimeout(() => setIndex((i) => i + 1), HOLD_MS);
-    return () => clearTimeout(t);
-  }, [index, greetings.length, onComplete]);
+
+    const setMorph = (fraction: number) => {
+      if (!text1Ref.current || !text2Ref.current) return;
+      text2Ref.current.style.filter = `blur(${Math.min(8 / fraction - 8, 100)}px)`;
+      text2Ref.current.style.opacity = `${Math.pow(fraction, 0.4) * 100}%`;
+
+      const inv = 1 - fraction;
+      text1Ref.current.style.filter = `blur(${Math.min(8 / inv - 8, 100)}px)`;
+      text1Ref.current.style.opacity = `${Math.pow(inv, 0.4) * 100}%`;
+    };
+
+    const doCooldown = () => {
+      morph = 0;
+      if (text1Ref.current && text2Ref.current) {
+        text2Ref.current.style.filter = '';
+        text2Ref.current.style.opacity = '100%';
+        text1Ref.current.style.filter = '';
+        text1Ref.current.style.opacity = '0%';
+      }
+    };
+
+    const doMorph = () => {
+      morph -= cooldown;
+      cooldown = 0;
+      let fraction = morph / MORPH_TIME;
+      if (fraction > 1) {
+        cooldown = COOLDOWN_TIME;
+        fraction = 1;
+      }
+      setMorph(fraction);
+    };
+
+    function animate(now: number) {
+      if (completed) return;
+      animId = requestAnimationFrame(animate);
+
+      const dt = (now - time) / 1000;
+      time = now;
+      cooldown -= dt;
+
+      if (cooldown <= 0) {
+        const shouldAdvance = morph === 0 && cooldown + dt > 0;
+        if (shouldAdvance) {
+          textIndex++;
+
+          // Reached the end — hold the last word then complete
+          if (textIndex >= greetings.length - 1) {
+            doCooldown();
+            if (text1Ref.current && text2Ref.current) {
+              text1Ref.current.style.opacity = '0%';
+              text2Ref.current.textContent = greetings[greetings.length - 1];
+              text2Ref.current.style.filter = '';
+              text2Ref.current.style.opacity = '100%';
+            }
+            completed = true;
+            cancelAnimationFrame(animId);
+            setTimeout(() => onComplete?.(), 600);
+            return;
+          }
+
+          if (text1Ref.current && text2Ref.current) {
+            text1Ref.current.textContent = greetings[textIndex];
+            text2Ref.current.textContent = greetings[textIndex + 1] ?? greetings[textIndex];
+          }
+        }
+        doMorph();
+      } else {
+        doCooldown();
+      }
+    }
+
+    animId = requestAnimationFrame(animate);
+    return () => {
+      completed = true;
+      cancelAnimationFrame(animId);
+    };
+  }, [greetings, onComplete]);
+
+  const textClass =
+    'absolute inline-block select-none text-center text-5xl sm:text-7xl md:text-8xl lg:text-9xl font-extralight italic text-neutral-800';
+  const textStyle: React.CSSProperties = {
+    fontFamily: "'Georgia', 'Times New Roman', 'SF Pro Display', serif",
+    letterSpacing: '-0.02em',
+  };
 
   return (
-    <div className="flex items-center justify-center h-20 sm:h-28 md:h-36">
-      <AnimatePresence mode="wait">
-        <motion.span
-          key={index}
-          initial={{ opacity: 0, y: 16, scale: 0.92 }}
-          animate={{ opacity: 1, y: 0, scale: 1 }}
-          exit={{ opacity: 0, y: -16, scale: 0.92 }}
-          transition={{
-            duration: 0.25,
-            ease: [0.22, 1, 0.36, 1],
-          }}
-          className="text-5xl sm:text-7xl md:text-8xl lg:text-9xl font-extralight italic text-neutral-800 select-none"
-          style={{
-            fontFamily: "'Georgia', 'Times New Roman', 'SF Pro Display', serif",
-            letterSpacing: '-0.02em',
-          }}
-        >
-          {greetings[index]}
-        </motion.span>
-      </AnimatePresence>
+    <div className="relative flex items-center justify-center h-20 sm:h-28 md:h-36">
+      {/* SVG gooey threshold filter */}
+      <svg className="absolute h-0 w-0" aria-hidden="true" focusable="false">
+        <defs>
+          <filter id="gooey-hello">
+            <feColorMatrix
+              in="SourceGraphic"
+              type="matrix"
+              values="1 0 0 0 0
+                      0 1 0 0 0
+                      0 0 1 0 0
+                      0 0 0 255 -140"
+            />
+          </filter>
+        </defs>
+      </svg>
+
+      <div
+        className="flex items-center justify-center w-full"
+        style={{ filter: 'url(#gooey-hello)' }}
+      >
+        <span ref={text1Ref} className={textClass} style={textStyle} />
+        <span ref={text2Ref} className={textClass} style={textStyle} />
+      </div>
     </div>
   );
 };
