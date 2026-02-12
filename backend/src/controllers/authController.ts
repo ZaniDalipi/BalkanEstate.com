@@ -26,7 +26,9 @@ const buildSafeUserResponse = (user: IUser) => ({
   name: user.name,
   phone: user.phone,
   role: user.role,
-  avatarUrl: user.avatarUrl,
+  avatarUrl: user.avatarUrl ?? null,
+  avatarOptions: user.avatarOptions ?? null,
+  gender: user.gender,
   city: user.city,
   country: user.country,
   isSubscribed: user.isSubscribed,
@@ -836,7 +838,9 @@ export const getMe = async (req: Request, res: Response): Promise<void> => {
         availableRoles: user.availableRoles,
         activeRole: user.activeRole,
         primaryRole: user.primaryRole,
-        avatarUrl: user.avatarUrl,
+        avatarUrl: user.avatarUrl ?? null,
+        avatarOptions: user.avatarOptions ?? null,
+        gender: user.gender,
         city: user.city,
         country: user.country,
         agencyId: user.agencyId ? String(user.agencyId) : undefined,
@@ -844,6 +848,7 @@ export const getMe = async (req: Request, res: Response): Promise<void> => {
         agency: user.agency,
         agentId: user.agentId,
         licenseNumber: user.licenseNumber,
+        licenseVerified: user.licenseVerified,
         isSubscribed: user.isSubscribed,
         subscriptionPlan: user.subscriptionPlan,
         subscriptionExpiresAt: user.subscriptionExpiresAt,
@@ -870,7 +875,7 @@ export const updateProfile = async (
       return;
     }
 
-    const { name, phone, city, country, address, avatarUrl } = req.body;
+    const { name, phone, city, country, address, avatarUrl, gender } = req.body;
 
     const currentUser = req.user as IUser;
     const user = await User.findById(String(currentUser._id));
@@ -892,6 +897,31 @@ export const updateProfile = async (
     if (address !== undefined) user.address = address;
     if (avatarUrl) user.avatarUrl = avatarUrl;
 
+    // When gender changes, adapt saved avatarOptions for the new gender
+    if (gender && gender !== user.gender) {
+      user.gender = gender;
+      if (user.avatarOptions) {
+        try {
+          const opts = JSON.parse(user.avatarOptions);
+          const isFemale = gender === 'female';
+          const MALE_HAIRS = ['shortFlat', 'shortRound', 'shortWaved', 'shortCurly', 'theCaesar', 'theCaesarAndSidePart', 'sides', 'dreads01', 'frizzle'];
+          const FEMALE_HAIRS = ['longButNotTooLong', 'straight01', 'straight02', 'bob', 'bun', 'curly', 'curvy', 'bigHair', 'miaWallace', 'straightAndStrand', 'fro'];
+          const validHairs = isFemale ? FEMALE_HAIRS : MALE_HAIRS;
+          if (!validHairs.includes(opts.top)) {
+            opts.top = isFemale ? 'longButNotTooLong' : 'shortFlat';
+          }
+          if (isFemale) {
+            opts.facialHair = '';
+          }
+          user.avatarOptions = JSON.stringify(opts);
+        } catch {
+          // If avatarOptions is invalid, leave it as-is
+        }
+      }
+    } else if (gender) {
+      user.gender = gender;
+    }
+
     await user.save();
 
 
@@ -902,7 +932,9 @@ export const updateProfile = async (
         name: user.name,
         phone: user.phone,
         role: user.role,
-        avatarUrl: user.avatarUrl,
+        avatarUrl: user.avatarUrl ?? null,
+        avatarOptions: user.avatarOptions ?? null,
+        gender: user.gender,
         city: user.city,
         country: user.country,
         address: user.address,
@@ -1474,9 +1506,10 @@ export const uploadAvatar = async (
       maxHeight: 400,
     });
 
-    // Update user with new avatar URL and publicId
+    // Update user with new avatar URL and publicId, clear generated avatar options
     user.avatarUrl = uploadResult.url;
     user.avatarPublicId = uploadResult.publicId;
+    user.avatarOptions = undefined;
     await user.save();
 
 
@@ -1489,6 +1522,8 @@ export const uploadAvatar = async (
         phone: user.phone,
         role: user.role,
         avatarUrl: user.avatarUrl,
+        avatarOptions: null,
+        gender: user.gender,
         city: user.city,
         country: user.country,
         agencyName: user.agencyName,
@@ -1501,6 +1536,83 @@ export const uploadAvatar = async (
     });
   } catch (error: any) {
     res.status(500).json({ message: 'Error uploading avatar' });
+  }
+};
+
+// @desc    Save generated avatar options (DiceBear customization)
+// @route   POST /api/auth/save-avatar-options
+// @access  Private
+export const saveAvatarOptions = async (req: Request, res: Response): Promise<void> => {
+  try {
+    if (!req.user) {
+      res.status(401).json({ message: 'Not authenticated' });
+      return;
+    }
+
+    let { avatarOptions } = req.body;
+    if (!avatarOptions) {
+      res.status(400).json({ message: 'avatarOptions is required' });
+      return;
+    }
+
+    // Accept both object and string formats for flexibility
+    if (typeof avatarOptions === 'object') {
+      avatarOptions = JSON.stringify(avatarOptions);
+    } else if (typeof avatarOptions === 'string') {
+      // Validate that the string is valid JSON
+      try {
+        JSON.parse(avatarOptions);
+      } catch {
+        res.status(400).json({ message: 'avatarOptions must be valid JSON' });
+        return;
+      }
+    } else {
+      res.status(400).json({ message: 'avatarOptions must be a JSON string or object' });
+      return;
+    }
+
+    const user = await User.findById(req.user._id);
+    if (!user) {
+      res.status(404).json({ message: 'User not found' });
+      return;
+    }
+
+    // Save avatar options and clear uploaded photo (user chose generated avatar)
+    user.avatarOptions = avatarOptions;
+    user.avatarUrl = undefined;
+    if (user.avatarPublicId) {
+      try {
+        const { deleteImage } = require('../services/cloudinaryService');
+        await deleteImage(user.avatarPublicId);
+      } catch {
+        // Non-blocking: continue even if cloudinary deletion fails
+      }
+      user.avatarPublicId = undefined;
+    }
+    await user.save();
+
+    res.json({
+      user: {
+        id: String(user._id),
+        email: user.email,
+        name: user.name,
+        phone: user.phone,
+        role: user.role,
+        avatarUrl: null,
+        avatarOptions: user.avatarOptions,
+        gender: user.gender,
+        city: user.city,
+        country: user.country,
+        agencyName: user.agencyName,
+        agencyId: user.agencyId,
+        agentId: user.agentId,
+        licenseNumber: user.licenseNumber,
+        licenseVerified: user.licenseVerified,
+        isSubscribed: user.isSubscribed,
+      }
+    });
+  } catch (error: any) {
+    res.status(500).json({ message: 'Error saving avatar options' });
   }
 };
 

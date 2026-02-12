@@ -19,6 +19,8 @@ export function transformBackendAgent(backendAgent: any): Agent {
     email: user.email || '',
     phone: user.phone || '',
     avatarUrl: user.avatarUrl,
+    avatarOptions: user.avatarOptions || null,
+    gender: user.gender || 'male',
     city: user.city,
     country: user.country,
     address: user.address,

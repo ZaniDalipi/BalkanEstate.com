@@ -3,6 +3,7 @@ import MapComponent from '@/src/features/map/components/MapComponent';
 import PropertyList from './PropertyList';
 import { Property, ChatMessage, AiSearchQuery } from '@/types';
 import { Bars3Icon, UserCircleIcon, AdjustmentsHorizontalIcon, Squares2x2Icon, PencilIcon, XMarkIcon, MapIcon } from '@/constants';
+import DefaultAvatar from '@/components/shared/DefaultAvatar';
 import { LiquidGlassSwitch } from '@/src/components/ui/LiquidGlassSwitch';
 import AiSearch from './AiSearch';
 import Modal from '@/components/shared/Modal';
@@ -286,11 +287,13 @@ const SearchPage: React.FC<SearchPageProps> = ({ onToggleSidebar }) => {
                                                 className="min-h-[44px] min-w-[44px] flex items-center justify-center flex-shrink-0 rounded-full hover:bg-neutral-100 active:bg-neutral-200 transition-colors touch-manipulation focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-primary/50 mr-0.5"
                                                 aria-label="My account"
                                             >
-                                                {currentUser.avatarUrl ? (
-                                                    <img src={currentUser.avatarUrl} alt="" className="w-8 h-8 rounded-full object-cover" referrerPolicy="no-referrer" aria-hidden="true" />
-                                                ) : (
-                                                    <UserCircleIcon className="w-8 h-8 text-neutral-400" aria-hidden="true"/>
-                                                )}
+                                                <div className="w-8 h-8 rounded-full overflow-hidden">
+                                                    {currentUser.avatarUrl ? (
+                                                        <img src={currentUser.avatarUrl} alt="" className="w-full h-full object-cover" referrerPolicy="no-referrer" aria-hidden="true" />
+                                                    ) : (
+                                                        <DefaultAvatar gender={currentUser.gender} seed={currentUser.id || currentUser.name} avatarOptions={currentUser.avatarOptions} />
+                                                    )}
+                                                </div>
                                             </button>
                                         )}
                                     </div>

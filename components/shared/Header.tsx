@@ -4,6 +4,7 @@ import { UserIcon, Bars3Icon, UserCircleIcon } from '../../constants';
 import { UserRole } from '../../types';
 import { useAppContext } from '../../context/AppContext';
 import { useLocalizedNavigation } from '@/src/hooks/useLocalizedNavigation';
+import DefaultAvatar from './DefaultAvatar';
 
 // Lazy load NotificationCenter - only needed for authenticated users
 const NotificationCenter = lazy(() => import('@/src/shared/components/NotificationCenter'));
@@ -67,15 +68,14 @@ const Header: React.FC<HeaderProps> = ({ onToggleSidebar, isFloating }) => {
             transitionTimingFunction: 'cubic-bezier(0.175, 0.885, 0.32, 2.2)',
           }}
         >
-            <div className="absolute inset-0 z-0 rounded-[inherit]" style={{ background: 'rgba(255,255,255,0.15)' }} />
-            {currentUser.avatarUrl ? (
-              <div className="relative z-10 w-7 h-7 rounded-full overflow-hidden flex-shrink-0 ring-2 ring-white/60 shadow-sm">
+            <div className="w-7 h-7 rounded-full overflow-hidden flex-shrink-0">
+              {currentUser.avatarUrl ? (
                 <img src={currentUser.avatarUrl} alt="User Avatar" className="w-full h-full rounded-full object-cover"/>
-              </div>
-            ) : (
-              <UserCircleIcon className="relative z-10 w-7 h-7 flex-shrink-0" />
-            )}
-            <span className="relative z-10 hidden sm:inline text-sm">{t('nav:myAccount')}</span>
+              ) : (
+                <DefaultAvatar gender={currentUser.gender} seed={currentUser.id || currentUser.name} avatarOptions={currentUser.avatarOptions} />
+              )}
+            </div>
+            <span className="hidden sm:inline text-sm">{t('nav:myAccount')}</span>
         </button>
       );
     }

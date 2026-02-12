@@ -15,6 +15,7 @@ import {
     XMarkIcon,
 } from '@/constants';
 import StarRating from '@/components/shared/StarRating';
+import DefaultAvatar from '@/components/shared/DefaultAvatar';
 import AgentInquiryModal from '@/src/features/inquiries/components/AgentInquiryModal';
 import { AppraisalFormData, ConsultationFormData, MarketInsights } from './useAgentProfile';
 
@@ -176,17 +177,19 @@ const AgentContactActions: React.FC<AgentContactActionsProps> = ({
                                 onClick={() => onSelectSimilarAgent(similarAgent)}
                                 className="flex items-center gap-3 p-3 hover:bg-gray-50 rounded-xl transition-colors cursor-pointer"
                             >
-                                {similarAgent.avatarUrl ? (
-                                    <img
-                                        src={similarAgent.avatarUrl}
-                                        alt={similarAgent.name}
-                                        loading="lazy"
-                                        decoding="async"
-                                        className="w-12 h-12 rounded-full object-cover border-2 border-white shadow-sm"
-                                    />
-                                ) : (
-                                    <UserCircleIcon className="w-12 h-12 text-gray-300" />
-                                )}
+                                <div className="w-12 h-12 rounded-full overflow-hidden border-2 border-white shadow-sm">
+                                    {similarAgent.avatarUrl ? (
+                                        <img
+                                            src={similarAgent.avatarUrl}
+                                            alt={similarAgent.name}
+                                            loading="lazy"
+                                            decoding="async"
+                                            className="w-full h-full object-cover"
+                                        />
+                                    ) : (
+                                        <DefaultAvatar gender={similarAgent.gender} seed={similarAgent.agentId || similarAgent.id || similarAgent.name} avatarOptions={similarAgent.avatarOptions} show3d />
+                                    )}
+                                </div>
                                 <div className="flex-1 min-w-0">
                                     <p className="font-semibold text-gray-900 truncate">{similarAgent.name}</p>
                                     <div className="flex items-center gap-1">

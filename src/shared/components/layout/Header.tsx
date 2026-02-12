@@ -1,8 +1,9 @@
 import React, { useCallback, memo } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Menu, User, UserCircle } from 'lucide-react';
+import { Menu, User } from 'lucide-react';
 import { useAppContext } from '@/context/AppContext';
 import NotificationCenter from '../NotificationCenter';
+import DefaultAvatar from '@/components/shared/DefaultAvatar';
 
 interface HeaderProps {
   onToggleSidebar: () => void;
@@ -68,8 +69,7 @@ const Header: React.FC<HeaderProps> = ({ onToggleSidebar, isFloating }) => {
           style={glassAuthStyle}
           aria-label={t('nav:myAccount')}
         >
-          <div className="absolute inset-0 z-0 rounded-[inherit]" style={{ background: 'rgba(255,255,255,0.15)' }} />
-          <div className="relative z-10 w-7 h-7 rounded-full overflow-hidden flex-shrink-0 bg-neutral-100 ring-2 ring-white/60 shadow-sm">
+          <div className="w-7 h-7 rounded-full overflow-hidden flex-shrink-0">
             {currentUser.avatarUrl ? (
               <img
                 src={currentUser.avatarUrl}
@@ -78,7 +78,7 @@ const Header: React.FC<HeaderProps> = ({ onToggleSidebar, isFloating }) => {
                 aria-hidden="true"
               />
             ) : (
-              <UserCircle className="w-full h-full text-neutral-400" aria-hidden="true" />
+              <DefaultAvatar gender={currentUser.gender} seed={currentUser.id || currentUser.name} avatarOptions={currentUser.avatarOptions} />
             )}
           </div>
           <span className="relative z-10 hidden sm:inline text-sm">{t('nav:myAccount')}</span>

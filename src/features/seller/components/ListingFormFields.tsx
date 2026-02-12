@@ -4,8 +4,7 @@ import { BALKAN_LOCATIONS, CityData } from '@/utils/balkanLocations';
 import { getCurrencySymbol } from '@/utils/currency';
 import MapLocationPicker from './MapLocationPicker';
 import NumberInputWithSteppers from '@/components/shared/NumberInputWithSteppers';
-import FloorInputCombined from '@/src/shared/components/ui/FloorInputCombined';
-import { ListingData, ImageData, inputBaseClasses, labelClasses, selectClasses } from './ListingFormHelpers';
+import { ListingData, ImageData, floatingInputClasses, floatingLabelClasses, floatingSelectLabelClasses, inputBaseClasses } from './ListingFormHelpers';
 
 interface ListingFormFieldsProps {
     listingData: ListingData;
@@ -150,28 +149,31 @@ const ListingFormFields: React.FC<ListingFormFieldsProps> = ({
             </fieldset>
 
             {/* Property Type Selection */}
-            <fieldset className="grid grid-cols-1 md:grid-cols-2 gap-5 items-end min-w-0">
-                <div>
-                    <label htmlFor="propertyType" className={labelClasses}>{t('seller:form.propertyType')}</label>
-                    <div className="relative">
-                        <select name="propertyType" id="propertyType" value={listingData.propertyType} onChange={handleInputChange} className={selectClasses}>
-                            <option value="house">{t('seller:propertyTypes.house')}</option>
-                            <option value="apartment">{t('seller:propertyTypes.apartment')}</option>
-                            <option value="villa">{t('seller:propertyTypes.villa')}</option>
-                            <option value="land">{t('seller:propertyTypes.land')}</option>
-                            <option value="other">{t('seller:propertyTypes.other')}</option>
-                        </select>
-                        {chevronIcon}
-                    </div>
+            <fieldset className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 items-end">
+                <div className="relative">
+                    <select name="propertyType" id="propertyType" value={listingData.propertyType} onChange={handleInputChange} className={`${floatingInputClasses} border-neutral-300`}>
+                        <option value="house">{t('seller:propertyTypes.house')}</option>
+                        <option value="apartment">{t('seller:propertyTypes.apartment')}</option>
+                        <option value="villa">{t('seller:propertyTypes.villa')}</option>
+                        <option value="land">{t('seller:propertyTypes.land')}</option>
+                        <option value="other">{t('seller:propertyTypes.other')}</option>
+                    </select>
+                    <label htmlFor="propertyType" className={floatingSelectLabelClasses}>{t('seller:form.propertyType')}</label>
                 </div>
                 {listingData.propertyType === 'apartment' && (
                     <>
-                        <FloorInputCombined
+                        <NumberInputWithSteppers
                             label={t('seller:createListing.fields.floorNumber')}
-                            floorNumber={listingData.floorNumber}
-                            totalFloors={listingData.totalFloors}
-                            onFloorNumberChange={(val) => setListingData(p => ({ ...p, floorNumber: val }))}
-                            onTotalFloorsChange={(val) => setListingData(p => ({ ...p, totalFloors: val }))}
+                            value={listingData.floorNumber}
+                            min={0}
+                            max={listingData.totalFloors || 999}
+                            onChange={(val) => setListingData(p => ({ ...p, floorNumber: val }))}
+                        />
+                        <NumberInputWithSteppers
+                            label={t('seller:createListing.fields.totalFloors')}
+                            value={listingData.totalFloors}
+                            min={1}
+                            onChange={(val) => setListingData(p => ({ ...p, totalFloors: val }))}
                         />
                         <div>
                             <label htmlFor="orientation" className={labelClasses}>{t('seller:createListing.advancedDetails.orientation.label')}</label>

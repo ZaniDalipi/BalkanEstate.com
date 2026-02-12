@@ -8,6 +8,8 @@ import MyPromotions from './MyPromotions';
 import MyMeasurements from './MyMeasurements';
 import { User, UserRole, Agency } from '../../types';
 import { BuildingOfficeIcon, ChartBarIcon, UserCircleIcon, ArrowLeftOnRectangleIcon, XMarkIcon, MapPinIcon, CreditCardIcon, ShieldCheckIcon, SparklesIcon } from '../../constants';
+import DefaultAvatar from './DefaultAvatar';
+import AvatarCustomizer, { type AvatarOptions, parseAvatarOptions, getDefaultAvatarOptions } from './AvatarCustomizer';
 import AgentLicenseModal from './AgentLicenseModal';
 import AgencyManagementSection from './AgencyManagementSection';
 import { switchRole, joinAgencyByInvitationCode, getAgencies, updateAgentProfile } from '../../services/apiService';
@@ -74,10 +76,10 @@ const TabButton: React.FC<{
         <a
             href={buildLocalizedPath(`/account/${tabToRouteMap[tabKey]}`)}
             onClick={handleClick}
-            className={`flex items-center gap-3 px-4 py-3 rounded-lg font-semibold transition-colors w-full text-left ${
+            className={`flex items-center gap-3 px-4 py-3 rounded-xl font-semibold transition-all w-full text-left backdrop-blur-sm border ${
                 isActive
-                    ? 'bg-primary-light text-primary-dark'
-                    : 'text-neutral-600 hover:bg-neutral-100'
+                    ? 'bg-white/60 text-primary-dark border-white/60 shadow-sm'
+                    : 'text-neutral-600 hover:bg-white/40 border-transparent hover:border-white/30'
             }`}
         >
             {icon}
@@ -107,19 +109,19 @@ const RoleSelector: React.FC<{
     };
 
     return (
-        <div className="flex items-center space-x-1 bg-neutral-100 p-1 rounded-full border border-neutral-200">
+        <div className="flex items-center space-x-1 bg-white/30 backdrop-blur-md p-1 rounded-2xl border border-white/40 shadow-sm">
             {roles.map(role => (
                 <button
                     key={role.id}
                     type="button"
                     onClick={() => !isDisabled(role.id) && onChange(role.id)}
                     disabled={isDisabled(role.id)}
-                    className={`px-2.5 py-1.5 rounded-full text-sm font-semibold transition-all duration-300 flex-grow text-center ${
+                    className={`px-2.5 py-1.5 rounded-xl text-sm font-semibold transition-all duration-300 flex-grow text-center ${
                         selectedRole === role.id
-                        ? 'bg-white text-primary shadow'
+                        ? 'bg-white/70 text-primary shadow-md backdrop-blur-sm border border-white/50'
                         : isDisabled(role.id)
                         ? 'text-neutral-400 cursor-not-allowed opacity-50'
-                        : 'text-neutral-600 hover:bg-neutral-200'
+                        : 'text-neutral-600 hover:bg-white/40'
                     }`
                 }
                     title={isDisabled(role.id) ? t('roles.agentCannotSwitchToBuyer') : ''}
@@ -177,14 +179,14 @@ const LoginHistorySection: React.FC = () => {
 
     if (isLoading) {
         return (
-            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+            <div className="bg-blue-50/60 backdrop-blur-sm border border-blue-200/50 rounded-2xl p-4">
                 <p className="text-sm text-blue-700">{t('security.loadingLoginHistory')}</p>
             </div>
         );
     }
 
     return (
-        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+        <div className="bg-blue-50/60 backdrop-blur-sm border border-blue-200/50 rounded-2xl p-4">
             <div className="flex items-start gap-3">
                 <svg className="w-5 h-5 text-blue-600 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
@@ -197,7 +199,7 @@ const LoginHistorySection: React.FC = () => {
                         <>
                             <div className="space-y-2">
                                 {displayedHistory.map((entry, index) => (
-                                    <div key={index} className="bg-white rounded-lg p-3 border border-blue-100">
+                                    <div key={index} className="bg-white/50 backdrop-blur-sm rounded-xl p-3 border border-white/40">
                                         <div className="flex items-start justify-between">
                                             <div className="flex-1">
                                                 <div className="flex items-center gap-2">
@@ -299,7 +301,7 @@ const ChangePasswordSection: React.FC = () => {
 
     if (!isLocalAuth) {
         return (
-            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+            <div className="bg-blue-50/60 backdrop-blur-sm border border-blue-200/50 rounded-2xl p-4">
                 <div className="flex items-start gap-3">
                     <svg className="w-5 h-5 text-blue-600 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -316,11 +318,11 @@ const ChangePasswordSection: React.FC = () => {
     }
 
     return (
-        <div className="bg-white border border-gray-200 rounded-lg p-6">
+        <div className="bg-white/30 backdrop-blur-sm border border-white/40 rounded-2xl p-6">
             <h3 className="text-lg font-semibold text-neutral-800 mb-4">{t('security.changePassword')}</h3>
 
             {error && (
-                <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg flex items-start gap-2">
+                <div className="mb-4 p-3 bg-red-50/60 backdrop-blur-sm border border-red-200/50 rounded-xl flex items-start gap-2">
                     <svg className="w-5 h-5 text-red-600 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                     </svg>
@@ -329,7 +331,7 @@ const ChangePasswordSection: React.FC = () => {
             )}
 
             {success && (
-                <div className="mb-4 p-3 bg-green-50 border border-green-200 rounded-lg flex items-start gap-2">
+                <div className="mb-4 p-3 bg-green-50/60 backdrop-blur-sm border border-green-200/50 rounded-xl flex items-start gap-2">
                     <svg className="w-5 h-5 text-green-600 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                     </svg>
@@ -349,7 +351,7 @@ const ChangePasswordSection: React.FC = () => {
                             id="currentPassword"
                             value={currentPassword}
                             onChange={(e) => setCurrentPassword(e.target.value)}
-                            className="w-full px-4 py-2 pr-10 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                            className="w-full px-4 py-2 pr-10 bg-white/40 backdrop-blur-sm border border-white/50 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/40 focus:bg-white/60 transition-all shadow-sm"
                             required
                             disabled={isLoading}
                         />
@@ -383,7 +385,7 @@ const ChangePasswordSection: React.FC = () => {
                             id="newPassword"
                             value={newPassword}
                             onChange={(e) => setNewPassword(e.target.value)}
-                            className="w-full px-4 py-2 pr-10 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                            className="w-full px-4 py-2 pr-10 bg-white/40 backdrop-blur-sm border border-white/50 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/40 focus:bg-white/60 transition-all shadow-sm"
                             required
                             disabled={isLoading}
                         />
@@ -420,7 +422,7 @@ const ChangePasswordSection: React.FC = () => {
                             id="confirmPassword"
                             value={confirmPassword}
                             onChange={(e) => setConfirmPassword(e.target.value)}
-                            className="w-full px-4 py-2 pr-10 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                            className="w-full px-4 py-2 pr-10 bg-white/40 backdrop-blur-sm border border-white/50 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/40 focus:bg-white/60 transition-all shadow-sm"
                             required
                             disabled={isLoading}
                         />
@@ -447,7 +449,7 @@ const ChangePasswordSection: React.FC = () => {
                 <button
                     type="submit"
                     disabled={isLoading}
-                    className="w-full px-4 py-2 bg-primary text-white font-medium rounded-lg hover:bg-primary-dark transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="w-full px-4 py-2 bg-primary/80 backdrop-blur-sm text-white font-medium rounded-xl hover:bg-primary transition-all shadow-lg shadow-primary/20 border border-primary/30 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                     {isLoading ? t('security.changingPassword') : t('security.changePassword')}
                 </button>
@@ -487,7 +489,7 @@ const SecuritySettings: React.FC<{ logoutAllDevices: () => Promise<void> }> = ({
             <ChangePasswordSection />
 
             {/* Logout from All Devices */}
-            <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+            <div className="bg-yellow-50/60 backdrop-blur-sm border border-yellow-200/50 rounded-2xl p-4">
                 <div className="flex items-start gap-3">
                     <svg className="w-5 h-5 text-yellow-600 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
@@ -500,7 +502,7 @@ const SecuritySettings: React.FC<{ logoutAllDevices: () => Promise<void> }> = ({
                         <button
                             type="button"
                             onClick={handleLogoutAllDevices}
-                            className="mt-3 px-4 py-2 bg-yellow-600 text-white font-medium rounded-lg hover:bg-yellow-700 transition-colors text-sm"
+                            className="mt-3 px-4 py-2 bg-yellow-600/80 backdrop-blur-sm text-white font-medium rounded-xl hover:bg-yellow-600 transition-all shadow-lg shadow-yellow-600/20 border border-yellow-500/30 text-sm"
                         >
                             {t('security.logoutAllDevices')}
                         </button>
@@ -529,6 +531,7 @@ const ProfileSettings: React.FC<{ user: User }> = ({ user }) => {
     const [isJoiningAgency, setIsJoiningAgency] = useState(false);
     const [isUploadingAvatar, setIsUploadingAvatar] = useState(false);
     const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
+    const [isAvatarCustomizerOpen, setIsAvatarCustomizerOpen] = useState(false);
     const [agentData, setAgentData] = useState({
         languages: user.languages || ['English'],
         specializations: user.specializations?.join(', ') || '',
@@ -754,6 +757,7 @@ const ProfileSettings: React.FC<{ user: User }> = ({ user }) => {
                 country: agentData.country,
                 address: agentData.streetAddress || '',
                 avatarUrl: formData.avatarUrl,
+                gender: formData.gender || 'male',
             };
 
             // Update UI immediately (optimistic update)
@@ -935,8 +939,9 @@ const ProfileSettings: React.FC<{ user: User }> = ({ user }) => {
                 throw new Error(data.message || 'Failed to upload avatar');
             }
 
-            dispatch({ type: 'UPDATE_USER', payload: data.user });
-            setFormData(data.user);
+            // Merge server response; avatarOptions is null (cleared by backend)
+            dispatch({ type: 'UPDATE_USER', payload: { ...data.user, avatarOptions: null } });
+            setFormData(prev => ({ ...prev, ...data.user }));
             setIsSaved(true);
             setTimeout(() => {
                 setIsSaved(false);
@@ -950,64 +955,180 @@ const ProfileSettings: React.FC<{ user: User }> = ({ user }) => {
         }
     };
 
-    const floatingInputClasses = "block px-2.5 pb-2.5 pt-4 w-full text-base text-neutral-900 bg-white rounded-lg border border-neutral-300 appearance-none focus:outline-none focus:ring-0 focus:border-primary peer";
-    const floatingLabelClasses = "absolute text-base text-neutral-700 duration-300 transform -translate-y-4 scale-75 top-2 z-10 origin-[0] bg-white px-2 peer-focus:px-2 peer-focus:text-primary peer-placeholder-shown:scale-100 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:top-1/2 peer-focus:top-2 peer-focus:scale-75 peer-focus:-translate-y-4 start-1";
+    const handleGenderChange = (newGender: 'male' | 'female' | 'other') => {
+        // When gender changes, reset avatarOptions so the avatar reflects the new gender
+        const defaults = getDefaultAvatarOptions(newGender);
+        const currentOptions = parseAvatarOptions(formData.avatarOptions);
+
+        if (currentOptions) {
+            // Adapt existing options: swap hair to gender-appropriate default, clear facial hair for female
+            const adapted: AvatarOptions = {
+                ...currentOptions,
+                top: defaults.top,
+                facialHair: newGender === 'female' ? '' : currentOptions.facialHair,
+            };
+            setFormData(prev => ({
+                ...prev,
+                gender: newGender,
+                avatarOptions: JSON.stringify(adapted),
+            }));
+        } else {
+            setFormData(prev => ({ ...prev, gender: newGender }));
+        }
+    };
+
+    const handleSaveAvatarOptions = async (options: AvatarOptions) => {
+        setError('');
+        try {
+            const response = await fetch(`${API_URL}/auth/save-avatar-options`, {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${localStorage.getItem('balkan_estate_token')}`,
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ avatarOptions: options }),
+            });
+            const data = await response.json();
+            if (!response.ok) throw new Error(data.message || 'Failed to save avatar');
+            // Merge server response; avatarUrl is null (cleared by backend)
+            dispatch({ type: 'UPDATE_USER', payload: { ...data.user, avatarUrl: null } });
+            setFormData(prev => ({ ...prev, ...data.user, avatarUrl: undefined }));
+            setAvatarPreview(null);
+            success(t('profile.avatarSaved', 'Avatar saved successfully'));
+        } catch (err) {
+            setError(err instanceof Error ? err.message : 'Failed to save avatar options');
+        }
+    };
+
+    const handleUploadPhotoFromCustomizer = async (file: File) => {
+        setIsUploadingAvatar(true);
+        setError('');
+        try {
+            const reader = new FileReader();
+            reader.onloadend = () => setAvatarPreview(reader.result as string);
+            reader.readAsDataURL(file);
+
+            const formDataUpload = new FormData();
+            formDataUpload.append('avatar', file);
+
+            const response = await fetch(`${API_URL}/auth/upload-avatar`, {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${localStorage.getItem('balkan_estate_token')}`,
+                },
+                body: formDataUpload,
+            });
+            const data = await response.json();
+            if (!response.ok) throw new Error(data.message || 'Failed to upload avatar');
+            // Merge server response; avatarOptions is null (cleared by backend)
+            dispatch({ type: 'UPDATE_USER', payload: { ...data.user, avatarOptions: null } });
+            setFormData(prev => ({ ...prev, ...data.user }));
+            success(t('profile.avatarUploaded', 'Photo uploaded successfully'));
+            setTimeout(() => setAvatarPreview(null), 2000);
+        } catch (err) {
+            setError(err instanceof Error ? err.message : 'Failed to upload avatar');
+            setAvatarPreview(null);
+        } finally {
+            setIsUploadingAvatar(false);
+        }
+    };
+
+    const floatingInputClasses = "block px-3 pb-2.5 pt-4 w-full text-base text-neutral-900 bg-white/40 backdrop-blur-sm rounded-xl border border-white/50 appearance-none focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/40 focus:bg-white/60 transition-all peer shadow-sm";
+    const floatingLabelClasses = "absolute text-base text-neutral-600 duration-300 transform -translate-y-4 scale-75 top-2 z-10 origin-[0] bg-transparent px-2 peer-focus:px-2 peer-focus:text-primary peer-placeholder-shown:scale-100 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:top-1/2 peer-focus:top-2 peer-focus:scale-75 peer-focus:-translate-y-4 start-1";
 
     return (
         <>
-            <form onSubmit={handleSaveChanges}>
+            <form onSubmit={handleSaveChanges} className="space-y-8">
                 <fieldset>
                     <legend className="block text-sm font-medium text-neutral-700 mb-2">{t('roles.yourRole')}</legend>
                     <RoleSelector selectedRole={formData.role} originalRole={user.role} onChange={handleRoleChange} />
                     {error && (
-                        <div className="mt-3 p-3 bg-red-50 border border-red-200 rounded-lg text-sm text-red-600">
+                        <div className="mt-3 p-3 bg-red-50/60 backdrop-blur-sm border border-red-200/50 rounded-xl text-sm text-red-600">
                             {error}
                         </div>
                     )}
                 </fieldset>
 
-            {/* Avatar Upload Section */}
-            <fieldset className="border-t pt-6">
-                <legend className="block text-sm font-medium text-neutral-700 mb-4">{t('profile.profilePicture')}</legend>
-                <div className="flex items-center gap-6">
-                    <div className="relative w-24 h-24 rounded-full overflow-hidden border-4 border-white/50 bg-neutral-100 flex-shrink-0 shadow-lg" style={{ boxShadow: '0 8px 16px rgba(0,0,0,0.1), inset 2px 2px 2px 0 rgba(255,255,255,0.5), inset -1px -1px 1px 1px rgba(255,255,255,0.3)' }}>
+            {/* Avatar Section - Glass */}
+            <fieldset className="border-t border-white/30 pt-6">
+                <legend className="block text-sm font-medium text-neutral-600 mb-4">{t('profile.profilePicture')}</legend>
+                <div className="flex items-center gap-6 bg-white/20 backdrop-blur-sm rounded-2xl p-5 border border-white/30">
+                    <div className="relative w-28 h-28 flex-shrink-0">
                         {avatarPreview || formData.avatarUrl ? (
-                            <img
-                                src={avatarPreview || formData.avatarUrl}
-                                alt="Avatar"
-                                className="w-full h-full object-cover"
-                                referrerPolicy="no-referrer"
-                            />
+                            <div className="relative w-full h-full">
+                                <div className="absolute inset-1 rounded-full bg-gradient-to-b from-neutral-300/50 to-neutral-400/30 blur-xl translate-y-2 scale-95" />
+                                <div className="relative w-full h-full rounded-full overflow-hidden border-[3px] border-white/70 shadow-[0_6px_24px_rgba(0,0,0,0.18),inset_0_-2px_6px_rgba(0,0,0,0.08)]">
+                                    <img
+                                        src={avatarPreview || formData.avatarUrl}
+                                        alt="Avatar"
+                                        className="w-full h-full object-cover"
+                                        referrerPolicy="no-referrer"
+                                    />
+                                    <div className="absolute inset-0 rounded-full bg-gradient-to-br from-white/30 via-transparent to-transparent pointer-events-none" />
+                                </div>
+                            </div>
                         ) : (
-                            <UserCircleIcon className="w-full h-full text-neutral-300" />
+                            <DefaultAvatar
+                                gender={formData.gender}
+                                seed={formData.id || formData.name}
+                                avatarOptions={formData.avatarOptions}
+                                show3d
+                            />
                         )}
                         {isUploadingAvatar && (
-                            <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50">
+                            <div className="absolute inset-0 flex items-center justify-center bg-black/40 rounded-full backdrop-blur-sm">
                                 <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-white"></div>
                             </div>
                         )}
                     </div>
                     <div className="flex-1">
-                        <input
-                            type="file"
-                            id="avatar-upload"
-                            accept="image/*"
-                            onChange={handleAvatarUpload}
-                            disabled={isUploadingAvatar}
-                            className="hidden"
-                        />
-                        <label
-                            htmlFor="avatar-upload"
-                            className={`inline-block px-4 py-2 bg-primary text-white font-semibold rounded-lg shadow-sm hover:bg-primary-dark transition-colors cursor-pointer ${
-                                isUploadingAvatar ? 'opacity-50 cursor-not-allowed' : ''
-                            }`}
+                        <button
+                            type="button"
+                            onClick={() => setIsAvatarCustomizerOpen(true)}
+                            className="inline-flex items-center gap-2 px-5 py-2.5 bg-primary/80 backdrop-blur-sm text-white font-semibold rounded-xl shadow-lg shadow-primary/20 hover:bg-primary transition-all border border-primary/30"
                         >
-                            {isUploadingAvatar ? t('profile.uploading') : t('profile.changePicture')}
-                        </label>
-                        <p className="text-xs text-neutral-500 mt-2">
-                            {t('profile.imageRequirements')}
+                            <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                <path d="M12 20h9" /><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z" />
+                            </svg>
+                            {t('profile.customizeAvatar', 'Customize Avatar')}
+                        </button>
+                        <p className="text-xs text-neutral-500 mt-2.5">
+                            {t('profile.avatarDescription', 'Create a custom character or upload your own photo')}
                         </p>
                     </div>
+                </div>
+            </fieldset>
+
+            {/* Avatar Customizer Modal */}
+            <AvatarCustomizer
+                isOpen={isAvatarCustomizerOpen}
+                onClose={() => setIsAvatarCustomizerOpen(false)}
+                gender={formData.gender}
+                currentAvatarOptions={parseAvatarOptions(formData.avatarOptions)}
+                currentAvatarUrl={formData.avatarUrl}
+                onSaveAvatar={handleSaveAvatarOptions}
+                onUploadPhoto={handleUploadPhotoFromCustomizer}
+                isUploading={isUploadingAvatar}
+            />
+
+            {/* Gender Selection - Glass */}
+            <fieldset className="border-t border-white/30 pt-6">
+                <legend className="block text-sm font-medium text-neutral-600 mb-3">{t('profile.gender', 'Gender')}</legend>
+                <div className="flex gap-3 flex-wrap">
+                    {(['male', 'female', 'other'] as const).map((g) => (
+                        <button
+                            key={g}
+                            type="button"
+                            onClick={() => handleGenderChange(g)}
+                            className={`px-5 py-2.5 rounded-xl text-sm font-medium transition-all border backdrop-blur-sm ${
+                                formData.gender === g || (!formData.gender && g === 'male')
+                                    ? 'bg-primary/80 text-white border-primary/30 shadow-lg shadow-primary/20'
+                                    : 'bg-white/40 text-neutral-700 border-white/50 hover:border-primary/30 hover:bg-white/60'
+                            }`}
+                        >
+                            {t(`profile.gender_${g}`, g.charAt(0).toUpperCase() + g.slice(1))}
+                        </button>
+                    ))}
                 </div>
             </fieldset>
 
@@ -1028,11 +1149,11 @@ const ProfileSettings: React.FC<{ user: User }> = ({ user }) => {
             </fieldset>
 
             {formData.role === UserRole.AGENT && (
-                <fieldset className="space-y-6 animate-fade-in border-t pt-8">
+                <fieldset className="space-y-6 animate-fade-in border-t border-white/30 pt-8">
                      <div className="flex items-center justify-between -mt-2 mb-4">
                         <legend className="text-lg font-semibold text-neutral-700">{t('agent.agentInformation')}</legend>
                         {formData.licenseVerified && (
-                            <span className="px-3 py-1 text-sm bg-green-100 text-green-800 rounded-full font-medium">
+                            <span className="px-3 py-1 text-sm bg-green-100/60 backdrop-blur-sm text-green-800 rounded-xl border border-green-200/50 font-medium">
                                 ✓ {t('agent.licenseVerified')}
                             </span>
                         )}
@@ -1078,7 +1199,7 @@ const ProfileSettings: React.FC<{ user: User }> = ({ user }) => {
                                 <button
                                     type="button"
                                     onClick={handleAgencyClick}
-                                    className="mt-2 text-sm text-primary hover:text-primary-dark font-semibold flex items-center gap-1"
+                                    className="mt-2 text-sm text-primary hover:text-primary-dark font-semibold flex items-center gap-1 bg-white/30 backdrop-blur-sm px-3 py-1 rounded-lg border border-white/40 hover:bg-white/50 transition-all"
                                 >
                                     <BuildingOfficeIcon className="w-4 h-4" />
                                     {t('agent.viewAgencyDetails')}
@@ -1120,10 +1241,10 @@ const ProfileSettings: React.FC<{ user: User }> = ({ user }) => {
                                     key={language}
                                     type="button"
                                     onClick={() => handleLanguageToggle(language)}
-                                    className={`px-3 py-1.5 text-sm rounded-full border transition-all ${
+                                    className={`px-3 py-1.5 text-sm rounded-xl border transition-all backdrop-blur-sm ${
                                         agentData.languages.includes(language)
-                                            ? 'bg-primary text-white border-primary'
-                                            : 'bg-white text-neutral-600 border-neutral-300 hover:border-primary'
+                                            ? 'bg-primary/80 text-white border-primary/30 shadow-md shadow-primary/20'
+                                            : 'bg-white/40 text-neutral-600 border-white/50 hover:border-primary/30 hover:bg-white/60'
                                     }`}
                                 >
                                     {language}
@@ -1140,7 +1261,7 @@ const ProfileSettings: React.FC<{ user: User }> = ({ user }) => {
                             value={agentData.specializations}
                             onChange={(e) => setAgentData(prev => ({ ...prev, specializations: e.target.value }))}
                             placeholder={t('agent.specializationsPlaceholder')}
-                            className="w-full px-3 py-2 border border-neutral-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary text-sm"
+                            className="w-full px-3 py-2 bg-white/40 backdrop-blur-sm border border-white/50 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/40 focus:bg-white/60 text-sm transition-all shadow-sm"
                             rows={2}
                         />
                         <p className="text-xs text-neutral-500 mt-1">{t('agent.specializationsHint')}</p>
@@ -1157,7 +1278,7 @@ const ProfileSettings: React.FC<{ user: User }> = ({ user }) => {
                             value={agentData.yearsOfExperience === '' || agentData.yearsOfExperience === 0 ? '' : agentData.yearsOfExperience}
                             onChange={(e) => setAgentData(prev => ({ ...prev, yearsOfExperience: e.target.value === '' ? '' : parseInt(e.target.value) || 0 }))}
                             placeholder="0"
-                            className="w-full px-3 py-2 border border-neutral-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary text-sm"
+                            className="w-full px-3 py-2 bg-white/40 backdrop-blur-sm border border-white/50 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/40 focus:bg-white/60 text-sm transition-all shadow-sm"
                         />
                         <p className="text-xs text-neutral-500 mt-1">{t('agent.yearsOfExperienceHint')}</p>
                     </div>
@@ -1181,7 +1302,7 @@ const ProfileSettings: React.FC<{ user: User }> = ({ user }) => {
                         <div className="flex items-center justify-between mb-2">
                             <label className="block text-sm font-medium text-neutral-700">{t('agent.serviceAreas')}</label>
                             {agentData.serviceAreas.length > 0 && (
-                                <span className="text-xs bg-primary text-white px-2 py-1 rounded-full">
+                                <span className="text-xs bg-primary/80 text-white px-2.5 py-1 rounded-xl backdrop-blur-sm border border-primary/30">
                                     {agentData.serviceAreas.length} {agentData.serviceAreas.length !== 1 ? t('agent.areas') : t('agent.area')}
                                 </span>
                             )}
@@ -1191,7 +1312,7 @@ const ProfileSettings: React.FC<{ user: User }> = ({ user }) => {
                         {agentData.serviceAreas.length > 0 && (
                             <div className="mb-3 flex flex-wrap gap-2">
                                 {agentData.serviceAreas.map((area) => (
-                                    <div key={area} className="flex items-center gap-2 bg-primary-light px-3 py-1.5 rounded-full">
+                                    <div key={area} className="flex items-center gap-2 bg-primary/10 backdrop-blur-sm px-3 py-1.5 rounded-xl border border-primary/20">
                                         <span className="text-sm font-medium text-neutral-700">{area}</span>
                                         <button
                                             type="button"
@@ -1214,7 +1335,7 @@ const ProfileSettings: React.FC<{ user: User }> = ({ user }) => {
                                     e.target.value = '';
                                 }
                             }}
-                            className="w-full px-3 py-2 border border-neutral-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary text-sm"
+                            className="w-full px-3 py-2 bg-white/40 backdrop-blur-sm border border-white/50 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/40 focus:bg-white/60 text-sm transition-all shadow-sm"
                         >
                             <option value="">{t('agent.addServiceArea')}</option>
                             {BALKAN_LOCATIONS.map((location) => (
@@ -1233,7 +1354,7 @@ const ProfileSettings: React.FC<{ user: User }> = ({ user }) => {
             )}
 
             <div className="flex justify-end pt-4">
-                <button type="submit" disabled={isSaving} className="px-6 py-2.5 bg-primary text-white font-semibold rounded-lg shadow-sm hover:bg-primary-dark transition-colors w-36 disabled:opacity-50">
+                <button type="submit" disabled={isSaving} className="px-6 py-2.5 bg-primary/80 backdrop-blur-sm text-white font-semibold rounded-xl shadow-lg shadow-primary/20 hover:bg-primary transition-all border border-primary/30 w-36 disabled:opacity-50">
                     {isSaving ? t('profile.saving') : (isSaved ? t('profile.saved') : t('profile.saveChanges'))}
                 </button>
             </div>
@@ -1344,7 +1465,7 @@ const MyAccountPage: React.FC = () => {
     };
 
     return (
-        <div className="bg-neutral-50 min-h-screen flex flex-col">
+        <div className="bg-gradient-to-br from-slate-100 via-blue-50/60 to-indigo-50/40 min-h-screen flex flex-col">
             {/* SEO - noindex for private page */}
             <SEO
                 title={t('account:title')}
@@ -1354,42 +1475,53 @@ const MyAccountPage: React.FC = () => {
 
             <main className="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8 flex-grow">
                 <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
-                    {/* Sidebar */}
+                    {/* Sidebar - Liquid Glass */}
                     <div className="lg:col-span-1">
-                        <div className="bg-white p-4 rounded-xl shadow-md border border-neutral-200">
-                             <div className="flex flex-col items-center text-center pb-4 mb-4 border-b">
-                                <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-full overflow-hidden mb-3 bg-neutral-100 flex-shrink-0 ring-4 ring-white/50 shadow-lg" style={{ boxShadow: '0 8px 16px rgba(0,0,0,0.1), inset 2px 2px 2px 0 rgba(255,255,255,0.5), inset -1px -1px 1px 1px rgba(255,255,255,0.3)' }}>
+                        <div className="bg-white/40 backdrop-blur-2xl p-4 rounded-3xl shadow-[0_8px_48px_rgba(0,0,0,0.08)] border border-white/50 ring-1 ring-white/20">
+                             <div className="flex flex-col items-center text-center pb-4 mb-4 border-b border-white/30">
+                                <div className="w-20 h-20 sm:w-24 sm:h-24 mb-3 flex-shrink-0">
                                     {state.currentUser.avatarUrl ? (
-                                        <img src={state.currentUser.avatarUrl} alt="avatar" className="w-full h-full object-cover" referrerPolicy="no-referrer" />
+                                        <div className="relative w-full h-full">
+                                            <div className="absolute inset-1 rounded-full bg-gradient-to-b from-neutral-300/50 to-neutral-400/30 blur-lg translate-y-1 scale-95" />
+                                            <div className="relative w-full h-full rounded-full overflow-hidden border-[3px] border-white/70 shadow-[0_4px_16px_rgba(0,0,0,0.15)]">
+                                                <img src={state.currentUser.avatarUrl} alt="avatar" className="w-full h-full object-cover" referrerPolicy="no-referrer" />
+                                                <div className="absolute inset-0 rounded-full bg-gradient-to-br from-white/25 via-transparent to-transparent pointer-events-none" />
+                                            </div>
+                                        </div>
                                     ) : (
-                                        <UserCircleIcon className="w-full h-full text-neutral-300" />
+                                        <DefaultAvatar
+                                            gender={state.currentUser.gender}
+                                            seed={state.currentUser.id || state.currentUser.name}
+                                            avatarOptions={state.currentUser.avatarOptions}
+                                            show3d
+                                        />
                                     )}
                                 </div>
                                 <h2 className="font-bold text-lg sm:text-xl text-neutral-800">{state.currentUser.name}</h2>
                                 <p className="text-sm text-neutral-500 capitalize mb-2">{roleDisplayMap[state.currentUser.role]}</p>
 
-                                {/* Agency Badge - show actual agency name or "Independent Agent" */}
+                                {/* Agency Badge - Glass */}
                                 {state.currentUser.role === UserRole.AGENT && (
                                     state.currentUser.agencyName && state.currentUser.agencyName !== 'Independent Agent' ? (
                                         <button
                                             onClick={handleAgencyClick}
-                                            className="flex items-center gap-2 mt-2 px-3 py-1.5 bg-gradient-to-r from-blue-50 to-primary-light rounded-full border border-primary/20 hover:from-blue-100 hover:to-primary-light/80 transition-all cursor-pointer"
+                                            className="flex items-center gap-2 mt-2 px-3 py-1.5 bg-primary/10 backdrop-blur-sm rounded-xl border border-primary/20 hover:bg-primary/20 transition-all cursor-pointer"
                                             title="View agency details"
                                         >
                                             <BuildingOfficeIcon className="w-4 h-4 text-primary" />
                                             <span className="text-xs font-semibold text-primary">{state.currentUser.agencyName}</span>
                                         </button>
                                     ) : (
-                                        <div className="flex items-center gap-2 mt-2 px-3 py-1.5 bg-gray-50 rounded-full border border-gray-200">
+                                        <div className="flex items-center gap-2 mt-2 px-3 py-1.5 bg-white/30 backdrop-blur-sm rounded-xl border border-white/40">
                                             <BuildingOfficeIcon className="w-4 h-4 text-gray-500" />
                                             <span className="text-xs font-semibold text-gray-600">{t('account:agent.independentAgent', 'Independent Agent')}</span>
                                         </div>
                                     )
                                 )}
 
-                                {/* License Verified Badge */}
+                                {/* License Verified Badge - Glass */}
                                 {state.currentUser.role === UserRole.AGENT && state.currentUser.licenseVerified && (
-                                    <div className="flex items-center gap-1 mt-2 px-3 py-1 bg-green-50 rounded-full border border-green-200">
+                                    <div className="flex items-center gap-1 mt-2 px-3 py-1 bg-green-50/60 backdrop-blur-sm rounded-xl border border-green-200/50">
                                         <span className="text-xs font-semibold text-green-700">✓ {t('account:agent.verifiedAgent')}</span>
                                     </div>
                                 )}
@@ -1406,7 +1538,7 @@ const MyAccountPage: React.FC = () => {
                                 <TabButton label={t('account:tabs.profileSettings')} icon={<UserCircleIcon className="w-6 h-6"/>} isActive={activeTab === 'profile'} onClick={() => setActiveTab('profile')} tabKey="profile" />
                                 <TabButton label={t('account:tabs.measurements', 'Measurements')} icon={<MapPinIcon className="w-6 h-6"/>} isActive={activeTab === 'measurements'} onClick={() => setActiveTab('measurements')} tabKey="measurements" />
                                 <TabButton label={t('account:tabs.security')} icon={<ShieldCheckIcon className="w-6 h-6"/>} isActive={activeTab === 'security'} onClick={() => setActiveTab('security')} tabKey="security" />
-                                <button onClick={handleLogout} className="flex items-center gap-3 px-4 py-3 rounded-lg font-semibold transition-colors w-full text-left text-red-600 hover:bg-red-50 mt-4">
+                                <button onClick={handleLogout} className="flex items-center gap-3 px-4 py-3 rounded-xl font-semibold transition-all w-full text-left text-red-500 hover:bg-red-50/40 hover:border-red-200/40 border border-transparent backdrop-blur-sm mt-4">
                                     <ArrowLeftOnRectangleIcon className="w-6 h-6" />
                                     <span>{t('account:logout')}</span>
                                 </button>
@@ -1414,9 +1546,9 @@ const MyAccountPage: React.FC = () => {
                         </div>
                     </div>
 
-                    {/* Content */}
+                    {/* Content - Liquid Glass */}
                     <div className="lg:col-span-3">
-                        <div className="bg-white p-6 rounded-xl shadow-md border border-neutral-200 min-h-[600px]">
+                        <div className="bg-white/40 backdrop-blur-2xl p-6 sm:p-8 rounded-3xl shadow-[0_8px_48px_rgba(0,0,0,0.08)] border border-white/50 ring-1 ring-white/20 min-h-[600px]">
                             {renderContent()}
                         </div>
                     </div>

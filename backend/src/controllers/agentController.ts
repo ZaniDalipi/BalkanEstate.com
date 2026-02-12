@@ -38,7 +38,7 @@ export const getAgents = async (req: Request, res: Response): Promise<void> => {
     const skip = (pageNum - 1) * limitNum;
 
     let agents = await Agent.find(filter)
-      .populate('userId', 'name email phone avatarUrl city country address')
+      .populate('userId', 'name email phone avatarUrl avatarOptions gender city country address')
       .populate('agencyId', 'name logo coverGradient coverImage slug type')
       .populate('testimonials.userId', 'name avatarUrl')
       .sort({ rating: -1, totalSales: -1 })
@@ -103,7 +103,7 @@ export const getAgents = async (req: Request, res: Response): Promise<void> => {
 export const getAgent = async (req: Request, res: Response): Promise<void> => {
   try {
     const agent = await Agent.findById(req.params.id)
-      .populate('userId', 'name email phone avatarUrl city country address')
+      .populate('userId', 'name email phone avatarUrl avatarOptions gender city country address')
       .populate('testimonials.userId', 'name avatarUrl');
 
     if (!agent) {
@@ -124,7 +124,7 @@ export const getAgent = async (req: Request, res: Response): Promise<void> => {
 export const getAgentByUserId = async (req: Request, res: Response): Promise<void> => {
   try {
     const agent = await Agent.findOne({ userId: req.params.userId })
-      .populate('userId', 'name email phone avatarUrl city country address')
+      .populate('userId', 'name email phone avatarUrl avatarOptions gender city country address')
       .populate('testimonials.userId', 'name avatarUrl');
 
     if (!agent) {

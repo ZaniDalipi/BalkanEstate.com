@@ -5,6 +5,7 @@ import { AppView, UserRole } from '../../types';
 import { LogoIcon, AgentsIcon, SearchIcon, MagnifyingGlassPlusIcon, HeartIcon, EnvelopeIcon, UserCircleIcon, UsersIcon, ArrowLeftOnRectangleIcon, XMarkIcon, PencilIcon, StarIconSolid, BuildingOfficeIcon, ShieldCheckIcon, SparklesIcon, ChartBarIcon, CurrencyDollarIcon, ChevronDownIcon, ChevronUpIcon, CalculatorIcon, WrenchScrewdriverIcon, InformationCircleIcon, RentIcon } from '../../constants';
 import LanguageSwitcher from '../../src/components/LanguageSwitcher';
 import { useLocalizedNavigation } from '@/src/hooks/useLocalizedNavigation';
+import DefaultAvatar from './DefaultAvatar';
 
 const NavItem: React.FC<{
   view: AppView;
@@ -305,8 +306,8 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
                                 aria-label={t('nav:goToAccount', 'Go to my account')}
                                 aria-current={activeView === 'account' ? 'page' : undefined}
                             >
-                                <div className="w-5 h-5 flex-shrink-0 rounded-full overflow-hidden bg-neutral-100 ring-2 ring-white/60 shadow-sm">
-                                {currentUser.avatarUrl ? <img src={currentUser.avatarUrl} alt={t('nav:userAvatar', 'User avatar')} className="w-full h-full object-cover"/> : <UserCircleIcon className="w-full h-full text-neutral-400" aria-hidden="true" />}
+                                <div className="w-5 h-5 flex-shrink-0 rounded-full overflow-hidden bg-neutral-100">
+                                {currentUser.avatarUrl ? <img src={currentUser.avatarUrl} alt={t('nav:userAvatar', 'User avatar')} className="w-full h-full object-cover"/> : <DefaultAvatar gender={currentUser.gender} seed={currentUser.id || currentUser.name} avatarOptions={currentUser.avatarOptions} />}
                                 </div>
                                 <span className="md:hidden group-hover:md:inline whitespace-nowrap text-sm">{t('nav:myAccount')}</span>
                             </button>

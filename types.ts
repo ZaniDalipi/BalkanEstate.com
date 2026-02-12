@@ -66,6 +66,8 @@ export interface User {
     name: string;
     email: string;
     avatarUrl?: string;
+    avatarOptions?: string; // JSON string of DiceBear avatar customization options
+    gender?: 'male' | 'female' | 'other';
     phone: string;
     role: UserRole;
     provider?: 'local' | 'google' | 'facebook' | 'apple';

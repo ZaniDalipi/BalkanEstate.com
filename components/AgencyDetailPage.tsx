@@ -10,6 +10,7 @@ import AgencyJoinRequestsModal from './AgencyJoinRequestsModal';
 import InvitationCodeModal from './InvitationCodeModal';
 import FeaturedSubscriptionCard from './shared/FeaturedSubscriptionCard';
 import FeaturedSubscriptionDialog from './shared/FeaturedSubscriptionDialog';
+import DefaultAvatar from './shared/DefaultAvatar';
 import { formatPrice } from '../utils/currency';
 import { createJoinRequest, removeAgentFromAgency, addAgencyAdmin, removeAgencyAdmin, verifyInvitationCode, leaveAgency } from '../src/features/agencies/api';
 import { Agency } from '../types';
@@ -1495,8 +1496,8 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
         <div className="mb-8">
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-slate-800 to-slate-900 flex items-center justify-center shadow-lg shadow-slate-900/25">
-                <UsersIcon className="w-5 h-5 text-white" />
+              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center shadow-lg shadow-blue-500/25">
+                <UserGroupIcon className="w-5 h-5 text-white" />
               </div>
               <div>
                 <h2 className="text-xl font-bold text-slate-900">Team Members</h2>
@@ -1542,17 +1543,17 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
                       <div className="flex items-start gap-4">
                         {/* Agent Photo with Rank */}
                         <div className="relative flex-shrink-0">
-                          {agent.avatarUrl ? (
-                            <img
-                              src={agent.avatarUrl}
-                              alt={agent.name}
-                              className="w-16 h-16 rounded-xl object-cover border-2 border-white shadow-md group-hover:shadow-lg transition-shadow"
-                            />
-                          ) : (
-                            <div className="w-16 h-16 rounded-xl bg-gradient-to-br from-slate-100 to-slate-200 flex items-center justify-center border-2 border-white shadow-md">
-                              <UserCircleIcon className="w-9 h-9 text-slate-400" />
-                            </div>
-                          )}
+                          <div className="w-16 h-16 rounded-xl overflow-hidden border-2 border-white shadow-md group-hover:shadow-lg transition-shadow">
+                            {agent.avatarUrl ? (
+                              <img
+                                src={agent.avatarUrl}
+                                alt={agent.name}
+                                className="w-full h-full object-cover"
+                              />
+                            ) : (
+                              <DefaultAvatar gender={agent.gender} seed={agent.agentId || agent._id || agent.name} avatarOptions={agent.avatarOptions} show3d />
+                            )}
+                          </div>
                           {/* Rank badge on avatar */}
                           <div className={`absolute -top-2 -left-2 px-2 py-0.5 bg-gradient-to-r ${rank.color} text-white text-[10px] font-bold rounded-lg shadow-md flex items-center gap-1`}>
                             {rank.emoji && <span>{rank.emoji}</span>}

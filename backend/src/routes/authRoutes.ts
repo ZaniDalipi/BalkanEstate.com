@@ -11,6 +11,7 @@ import {
   requestPasswordReset,
   resetPassword,
   uploadAvatar,
+  saveAvatarOptions,
   refreshToken,
   verifyEmail,
   resendVerificationEmail,
@@ -211,6 +212,7 @@ router.post('/sync-stats', protect, syncStats);
 router.post('/sync-all-subscriptions', protect, syncAllSubscriptionCounters);
 router.get('/agents', getAllAgents);
 router.post('/upload-avatar', protect, upload.single('avatar'), uploadAvatar);
+router.post('/save-avatar-options', protect, saveAvatarOptions);
 
 // Token management
 router.post('/refresh-token', refreshTokenRateLimiterIP, refreshToken);
