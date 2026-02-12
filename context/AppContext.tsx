@@ -433,7 +433,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       setTimeout(() => {
         dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'pricing' });
         const currentLang = window.location.pathname.split('/')[1] || 'en';
-        const validLangs = ['en', 'sq', 'sr', 'de', 'mk'];
+        const validLangs = ['en', 'sq', 'sr', 'mk', 'bs', 'hr', 'bg', 'ro', 'el', 'me'];
         const lang = validLangs.includes(currentLang) ? currentLang : 'en';
         window.history.pushState({}, '', `/${lang}/subscribe`);
       }, 500);
@@ -441,7 +441,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       // Default: navigate to search page after login
       dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'search' });
       const currentLang = window.location.pathname.split('/')[1] || 'en';
-      const validLangs = ['en', 'sq', 'sr', 'de', 'mk'];
+      const validLangs = ['en', 'sq', 'sr', 'mk', 'bs', 'hr', 'bg', 'ro', 'el', 'me'];
       const lang = validLangs.includes(currentLang) ? currentLang : 'en';
       window.history.replaceState({}, '', `/${lang}/search`);
     }
@@ -487,7 +487,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       setTimeout(() => {
         dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'pricing' });
         const currentLang = window.location.pathname.split('/')[1] || 'en';
-        const validLangs = ['en', 'sq', 'sr', 'de', 'mk'];
+        const validLangs = ['en', 'sq', 'sr', 'mk', 'bs', 'hr', 'bg', 'ro', 'el', 'me'];
         const lang = validLangs.includes(currentLang) ? currentLang : 'en';
         window.history.pushState({}, '', `/${lang}/subscribe`);
       }, 500);
@@ -495,7 +495,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       // Default: navigate to search page after signup
       dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'search' });
       const currentLang = window.location.pathname.split('/')[1] || 'en';
-      const validLangs = ['en', 'sq', 'sr', 'de', 'mk'];
+      const validLangs = ['en', 'sq', 'sr', 'mk', 'bs', 'hr', 'bg', 'ro', 'el', 'me'];
       const lang = validLangs.includes(currentLang) ? currentLang : 'en';
       window.history.replaceState({}, '', `/${lang}/search`);
     }
@@ -567,7 +567,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         // Navigate to search page after OAuth login
         dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'search' });
         const currentLang = window.location.pathname.split('/')[1] || 'en';
-        const validLangs = ['en', 'sq', 'sr', 'de', 'mk'];
+        const validLangs = ['en', 'sq', 'sr', 'mk', 'bs', 'hr', 'bg', 'ro', 'el', 'me'];
         const lang = validLangs.includes(currentLang) ? currentLang : 'en';
         window.history.replaceState({}, '', `/${lang}/search`);
       } else {

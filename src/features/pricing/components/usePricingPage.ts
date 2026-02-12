@@ -8,7 +8,7 @@ import { usePricingPageData, type Product } from '../hooks/usePricingData';
 // Helper to build localized path
 export const buildLocalizedPath = (path: string): string => {
   const currentLang = window.location.pathname.split('/')[1] || 'en';
-  const validLangs = ['en', 'sq', 'sr', 'de', 'mk'];
+  const validLangs = ['en', 'sq', 'sr', 'mk', 'bs', 'hr', 'bg', 'ro', 'el', 'me'];
   const lang = validLangs.includes(currentLang) ? currentLang : 'en';
   return `/${lang}${path === '/' ? '' : path}`;
 };

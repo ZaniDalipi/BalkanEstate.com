@@ -41,7 +41,11 @@ export function parseLanguageFromPath(pathname: string): { lang: LanguageCode | 
  * e.g., buildLocalizedPath("/", "sq") => "/sq"
  */
 export function buildLocalizedPath(path: string, lang?: LanguageCode): string {
-  const language = lang || (i18n.language as LanguageCode) || 'en';
+  // Normalize language: i18n.language can be a full locale like 'en-US',
+  // extract the 2-letter code and validate it against supported languages
+  const raw = lang || i18n.language || 'en';
+  const short = raw.split('-')[0];
+  const language = (SUPPORTED_LANG_CODES.includes(short as LanguageCode) ? short : 'en') as LanguageCode;
 
   // Remove any existing language prefix first
   const { path: cleanPath } = parseLanguageFromPath(path);
@@ -136,5 +140,8 @@ export function initializeLanguageFromUrl(): { lang: LanguageCode; path: string 
  */
 export function getCurrentLanguageFromUrl(): LanguageCode {
   const { lang } = parseLanguageFromPath(window.location.pathname);
-  return lang || (i18n.language as LanguageCode) || 'en';
+  if (lang) return lang;
+  // Normalize: i18n.language can be 'en-US', extract 2-letter code
+  const short = (i18n.language || 'en').split('-')[0];
+  return (SUPPORTED_LANG_CODES.includes(short as LanguageCode) ? short : 'en') as LanguageCode;
 }
