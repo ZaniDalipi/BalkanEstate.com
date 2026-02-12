@@ -50,7 +50,7 @@ const ListingFormFields: React.FC<ListingFormFieldsProps> = ({
 
     return (
         <>
-            <fieldset className="grid grid-cols-1 md:grid-cols-2 gap-5">
+            <fieldset className="grid grid-cols-1 md:grid-cols-2 gap-5 min-w-0">
                 {/* Country Dropdown */}
                 <div>
                     <label htmlFor="country" className={labelClasses}>{t('seller:createListing.location.country')}</label>
@@ -150,7 +150,7 @@ const ListingFormFields: React.FC<ListingFormFieldsProps> = ({
             </fieldset>
 
             {/* Property Type Selection */}
-            <fieldset className="grid grid-cols-1 md:grid-cols-2 gap-5 items-end">
+            <fieldset className="grid grid-cols-1 md:grid-cols-2 gap-5 items-end min-w-0">
                 <div>
                     <label htmlFor="propertyType" className={labelClasses}>{t('seller:form.propertyType')}</label>
                     <div className="relative">
@@ -208,7 +208,7 @@ const ListingFormFields: React.FC<ListingFormFieldsProps> = ({
             </fieldset>
 
             {/* Property Details - hide some fields for land */}
-            <fieldset className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+            <fieldset className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 min-w-0">
                 {listingData.propertyType !== 'land' && (
                     <>
                         <NumberInputWithSteppers label={t('seller:createListing.fields.bedrooms')} value={listingData.bedrooms} onChange={(val) => setListingData(p => ({ ...p, bedrooms: val }))} />

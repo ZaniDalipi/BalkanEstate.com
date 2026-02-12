@@ -52,7 +52,7 @@ const NumberInputWithSteppers: React.FC<NumberInputWithSteppersProps> = ({ label
     const canIncrement = max === undefined || value < max;
 
     return (
-        <div>
+        <div className="min-w-0">
             <label htmlFor={id} className="block text-sm font-medium text-gray-500 mb-1.5">{label}</label>
             <div className="glass-input flex items-center h-[52px] overflow-hidden !p-0">
                 <button

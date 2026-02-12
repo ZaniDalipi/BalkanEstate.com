@@ -68,7 +68,7 @@ const FloorInputCombined: React.FC<FloorInputCombinedProps> = ({
     const inputClasses = "w-14 h-10 text-center text-lg font-semibold text-gray-900 bg-transparent outline-none border-none [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none";
 
     return (
-        <div>
+        <div className="min-w-0">
             <label htmlFor={id} className="block text-sm font-medium text-gray-500 mb-1.5">
                 {label}
             </label>
