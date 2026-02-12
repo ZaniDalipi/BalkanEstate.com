@@ -598,7 +598,9 @@ export function useSearchPage() {
         }
 
         // Filter to show only properties visible in the current map view
-        if (mapBounds) {
+        // Skip bounds filtering while properties are still loading to avoid
+        // showing empty/partial results due to race condition with map init
+        if (mapBounds && !isLoadingProperties && baseFilteredProperties.length > 0) {
             const withinView = baseFilteredProperties.filter(p => mapBounds.contains([p.lat, p.lng]));
 
             // If properties in view, show them
@@ -607,24 +609,20 @@ export function useSearchPage() {
             }
 
             // No properties in view - use smart fallback
-            if (baseFilteredProperties.length > 0) {
-                const center = mapBounds.getCenter();
-                const fallback = getSmartFallback(center.lat, center.lng);
+            const center = mapBounds.getCenter();
+            const fallback = getSmartFallback(center.lat, center.lng);
 
-                // Safety: never return empty if we have properties
-                if (fallback.properties.length === 0) {
-                    return { listProperties: baseFilteredProperties, fallbackLocationValue: null };
-                }
-
-                return { listProperties: fallback.properties, fallbackLocationValue: fallback.location };
+            // Safety: never return empty if we have properties
+            if (fallback.properties.length === 0) {
+                return { listProperties: baseFilteredProperties, fallbackLocationValue: null };
             }
 
-            return { listProperties: [], fallbackLocationValue: null };
+            return { listProperties: fallback.properties, fallbackLocationValue: fallback.location };
         }
 
         // Fallback to all filtered properties if no bounds set (initial load)
         return { listProperties: baseFilteredProperties, fallbackLocationValue: null };
-    }, [baseFilteredProperties, drawnBounds, mapBounds, isMobile, showAllOnMobile]);
+    }, [baseFilteredProperties, drawnBounds, mapBounds, isMobile, showAllOnMobile, isLoadingProperties]);
 
     // Update fallback location state when computed value changes
     useEffect(() => {
