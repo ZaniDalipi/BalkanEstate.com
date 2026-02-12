@@ -25,7 +25,6 @@ import { MUNICIPALITY_DATA } from '../services/propertyService';
 import { socketService } from '../services/socketService';
 import { notificationService } from '../services/notificationService';
 import { tokenService } from '../src/shared/api/tokenService';
-import { buildLocalizedPath } from '../src/utils/languageRouting';
 
 const initialSearchPageState: SearchPageState = {
     filters: initialFilters,
@@ -441,7 +440,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     } else {
       // Default: navigate to search page after login
       dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'search' });
-      window.history.replaceState({}, '', buildLocalizedPath('/search'));
+      const currentLang = window.location.pathname.split('/')[1] || 'en';
+      const validLangs = ['en', 'sq', 'sr', 'de', 'mk'];
+      const lang = validLangs.includes(currentLang) ? currentLang : 'en';
+      window.history.replaceState({}, '', `/${lang}/search`);
     }
 
     return user;
@@ -492,7 +494,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     } else {
       // Default: navigate to search page after signup
       dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'search' });
-      window.history.replaceState({}, '', buildLocalizedPath('/search'));
+      const currentLang = window.location.pathname.split('/')[1] || 'en';
+      const validLangs = ['en', 'sq', 'sr', 'de', 'mk'];
+      const lang = validLangs.includes(currentLang) ? currentLang : 'en';
+      window.history.replaceState({}, '', `/${lang}/search`);
     }
 
     return user;
@@ -561,7 +566,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
         // Navigate to search page after OAuth login
         dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'search' });
-        window.history.replaceState({}, '', buildLocalizedPath('/search'));
+        const currentLang = window.location.pathname.split('/')[1] || 'en';
+        const validLangs = ['en', 'sq', 'sr', 'de', 'mk'];
+        const lang = validLangs.includes(currentLang) ? currentLang : 'en';
+        window.history.replaceState({}, '', `/${lang}/search`);
       } else {
         throw new Error('Failed to fetch user profile');
       }
