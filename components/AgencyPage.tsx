@@ -3,6 +3,7 @@ import { Agency, Property } from '../types';
 import { getAgency } from '../src/features/agencies/api';
 import PropertyCard from '@/features/property-details/components/PropertyCard';
 import { BuildingOfficeIcon, PhoneIcon, EnvelopeIcon, GlobeAltIcon } from '../constants';
+import DefaultAvatar from './shared/DefaultAvatar';
 
 interface AgencyPageProps {
   agencyId: string;
@@ -131,9 +132,13 @@ const AgencyPage: React.FC<AgencyPageProps> = ({ agencyId }) => {
               {agency.agents.map((agent) => (
                 <div key={agent._id} className="bg-white rounded-lg shadow p-6 hover:shadow-lg transition-shadow">
                   <div className="flex items-center gap-4">
-                    {agent.avatarUrl && (
-                      <img src={agent.avatarUrl} alt={`${agent.name}'s avatar`} className="w-16 h-16 rounded-full" />
-                    )}
+                    <div className="w-16 h-16 rounded-full overflow-hidden">
+                      {agent.avatarUrl ? (
+                        <img src={agent.avatarUrl} alt={`${agent.name}'s avatar`} className="w-full h-full object-cover" />
+                      ) : (
+                        <DefaultAvatar gender={agent.gender} seed={agent.agentId || agent._id || agent.name} avatarOptions={agent.avatarOptions} show3d />
+                      )}
+                    </div>
                     <div>
                       <h3 className="font-bold text-neutral-800">{agent.name}</h3>
                       {agent.phone && <p className="text-sm text-neutral-600">{agent.phone}</p>}

@@ -1,8 +1,9 @@
 import React, { useCallback, memo } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Menu, User, UserCircle } from 'lucide-react';
+import { Menu, User } from 'lucide-react';
 import { useAppContext } from '@/context/AppContext';
 import NotificationCenter from '../NotificationCenter';
+import DefaultAvatar from '@/components/shared/DefaultAvatar';
 
 interface HeaderProps {
   onToggleSidebar: () => void;
@@ -65,7 +66,7 @@ const Header: React.FC<HeaderProps> = ({ onToggleSidebar, isFloating }) => {
           }`}
           aria-label={t('nav:myAccount')}
         >
-          <div className="w-7 h-7 rounded-full overflow-hidden flex-shrink-0 bg-neutral-100">
+          <div className="w-7 h-7 rounded-full overflow-hidden flex-shrink-0">
             {currentUser.avatarUrl ? (
               <img
                 src={currentUser.avatarUrl}
@@ -74,7 +75,7 @@ const Header: React.FC<HeaderProps> = ({ onToggleSidebar, isFloating }) => {
                 aria-hidden="true"
               />
             ) : (
-              <UserCircle className="w-full h-full text-neutral-400" aria-hidden="true" />
+              <DefaultAvatar gender={currentUser.gender} seed={currentUser.id || currentUser.name} avatarOptions={currentUser.avatarOptions} />
             )}
           </div>
           <span className="hidden sm:inline text-sm">{t('nav:myAccount')}</span>

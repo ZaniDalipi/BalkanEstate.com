@@ -4,6 +4,7 @@ import { useAppContext } from '../../context/AppContext';
 import { AppView, UserRole } from '../../types';
 import { LogoIcon, AgentsIcon, SearchIcon, MagnifyingGlassPlusIcon, HeartIcon, EnvelopeIcon, UserCircleIcon, UsersIcon, ArrowLeftOnRectangleIcon, XMarkIcon, PencilIcon, StarIconSolid, BuildingOfficeIcon, ShieldCheckIcon, GlobeAltIcon, ChartBarIcon } from '../../constants';
 import LanguageSwitcher from '../../src/components/LanguageSwitcher';
+import DefaultAvatar from '../../components/shared/DefaultAvatar';
 
 const NavItem: React.FC<{
   view: AppView;
@@ -215,7 +216,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
                                 }`}
                             >
                                 <div className="w-5 h-5 flex-shrink-0">
-                                {currentUser.avatarUrl ? <img src={currentUser.avatarUrl} alt="avatar" className="w-full h-full rounded-full object-cover" referrerPolicy="no-referrer" /> : <UserCircleIcon />}
+                                {currentUser.avatarUrl ? <img src={currentUser.avatarUrl} alt="avatar" className="w-full h-full rounded-full object-cover" referrerPolicy="no-referrer" /> : <DefaultAvatar gender={currentUser.gender} seed={currentUser.id || currentUser.name} avatarOptions={currentUser.avatarOptions} />}
                                 </div>
                                 <span className="md:hidden group-hover:md:inline whitespace-nowrap text-sm">{t('nav:myAccount')}</span>
                             </button>

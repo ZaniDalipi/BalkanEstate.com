@@ -5,6 +5,7 @@ import { useRealtimeProperties } from '@/src/features/properties/hooks';
 import { Property, Agent } from '@/types';
 import PropertyCard from '@/src/features/property-details/components/PropertyCard';
 import { HeartIcon, UserCircleIcon, HomeIcon, UsersIcon } from '@/constants';
+import DefaultAvatar from '@/components/shared/DefaultAvatar';
 import ComparisonBar from '@/src/features/comparison/components/ComparisonBar';
 import ComparisonModal from '@/src/features/comparison/components/ComparisonModal';
 import Toast from '@/components/shared/Toast';
@@ -100,17 +101,19 @@ const SavedPropertiesPage: React.FC = () => {
     >
       <div className="p-6">
         <div className="flex items-start gap-4">
-          {agent.avatarUrl ? (
-            <img
-              src={agent.avatarUrl}
-              alt={agent.name}
-              className="w-16 h-16 rounded-full object-cover border-2 border-gray-100"
-              loading="lazy"
-              decoding="async"
-            />
-          ) : (
-            <UserCircleIcon className="w-16 h-16 text-gray-300" />
-          )}
+          <div className="w-16 h-16 rounded-full overflow-hidden border-2 border-gray-100">
+            {agent.avatarUrl ? (
+              <img
+                src={agent.avatarUrl}
+                alt={agent.name}
+                className="w-full h-full object-cover"
+                loading="lazy"
+                decoding="async"
+              />
+            ) : (
+              <DefaultAvatar gender={agent.gender} seed={agent.agentId || agent.id || agent.name} avatarOptions={agent.avatarOptions} show3d />
+            )}
+          </div>
           <div className="flex-1 min-w-0">
             <h3 className="font-semibold text-gray-900 text-lg truncate group-hover:text-blue-600 transition-colors">
               {agent.name}
