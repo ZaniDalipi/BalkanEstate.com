@@ -34,6 +34,8 @@ export const getAllAgents = async (req: Request, res: Response): Promise<void> =
           email: agent.email,
           phone: agent.phone,
           avatarUrl: agent.avatarUrl || `https://ui-avatars.com/api/?name=${encodeURIComponent(agent.name)}&background=0D8ABC&color=fff&size=200`,
+          avatarOptions: agent.avatarOptions || null,
+          gender: agent.gender || 'male',
           city: agent.city,
           country: agent.country,
           agencyName: agent.agencyName,

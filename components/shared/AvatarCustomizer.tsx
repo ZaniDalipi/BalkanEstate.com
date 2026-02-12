@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useCallback } from 'react';
+import React, { useState, useMemo, useCallback, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { useTranslation } from 'react-i18next';
 import { XMarkIcon } from '../../constants';
@@ -238,6 +238,22 @@ const AvatarCustomizer: React.FC<AvatarCustomizerProps> = ({
 
   const isFemale = gender === 'female';
   const hairStyles = isFemale ? HAIR_STYLES_FEMALE : HAIR_STYLES_MALE;
+
+  // When gender or currentAvatarOptions change, update internal options state
+  useEffect(() => {
+    if (currentAvatarOptions) {
+      // Adapt existing options for the new gender
+      const validHairs = hairStyles.map(h => h.value);
+      const needsHairSwap = !validHairs.includes(currentAvatarOptions.top);
+      setOptions({
+        ...currentAvatarOptions,
+        top: needsHairSwap ? getDefaultAvatarOptions(gender).top : currentAvatarOptions.top,
+        facialHair: isFemale ? '' : currentAvatarOptions.facialHair,
+      });
+    } else {
+      setOptions(getDefaultAvatarOptions(gender));
+    }
+  }, [gender, currentAvatarOptions, hairStyles, isFemale]);
 
   const previewUrl = useMemo(() => buildAvatarUrl(options), [options]);
 

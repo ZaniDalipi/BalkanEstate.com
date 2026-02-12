@@ -9,7 +9,7 @@ import MyMeasurements from './MyMeasurements';
 import { User, UserRole, Agency } from '../../types';
 import { BuildingOfficeIcon, ChartBarIcon, UserCircleIcon, ArrowLeftOnRectangleIcon, XMarkIcon, MapPinIcon, CreditCardIcon, ShieldCheckIcon, SparklesIcon } from '../../constants';
 import DefaultAvatar from './DefaultAvatar';
-import AvatarCustomizer, { type AvatarOptions, parseAvatarOptions } from './AvatarCustomizer';
+import AvatarCustomizer, { type AvatarOptions, parseAvatarOptions, getDefaultAvatarOptions } from './AvatarCustomizer';
 import AgentLicenseModal from './AgentLicenseModal';
 import AgencyManagementSection from './AgencyManagementSection';
 import { switchRole, joinAgencyByInvitationCode, getAgencies, updateAgentProfile } from '../../services/apiService';
@@ -955,6 +955,28 @@ const ProfileSettings: React.FC<{ user: User }> = ({ user }) => {
         }
     };
 
+    const handleGenderChange = (newGender: 'male' | 'female' | 'other') => {
+        // When gender changes, reset avatarOptions so the avatar reflects the new gender
+        const defaults = getDefaultAvatarOptions(newGender);
+        const currentOptions = parseAvatarOptions(formData.avatarOptions);
+
+        if (currentOptions) {
+            // Adapt existing options: swap hair to gender-appropriate default, clear facial hair for female
+            const adapted: AvatarOptions = {
+                ...currentOptions,
+                top: defaults.top,
+                facialHair: newGender === 'female' ? '' : currentOptions.facialHair,
+            };
+            setFormData(prev => ({
+                ...prev,
+                gender: newGender,
+                avatarOptions: JSON.stringify(adapted),
+            }));
+        } else {
+            setFormData(prev => ({ ...prev, gender: newGender }));
+        }
+    };
+
     const handleSaveAvatarOptions = async (options: AvatarOptions) => {
         setError('');
         try {
@@ -1097,7 +1119,7 @@ const ProfileSettings: React.FC<{ user: User }> = ({ user }) => {
                         <button
                             key={g}
                             type="button"
-                            onClick={() => setFormData(prev => ({ ...prev, gender: g }))}
+                            onClick={() => handleGenderChange(g)}
                             className={`px-5 py-2.5 rounded-xl text-sm font-medium transition-all border backdrop-blur-sm ${
                                 formData.gender === g || (!formData.gender && g === 'male')
                                     ? 'bg-primary/80 text-white border-primary/30 shadow-lg shadow-primary/20'

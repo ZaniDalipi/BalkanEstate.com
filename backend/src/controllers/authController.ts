@@ -896,7 +896,31 @@ export const updateProfile = async (
     if (country) user.country = country;
     if (address !== undefined) user.address = address;
     if (avatarUrl) user.avatarUrl = avatarUrl;
-    if (gender) user.gender = gender;
+
+    // When gender changes, adapt saved avatarOptions for the new gender
+    if (gender && gender !== user.gender) {
+      user.gender = gender;
+      if (user.avatarOptions) {
+        try {
+          const opts = JSON.parse(user.avatarOptions);
+          const isFemale = gender === 'female';
+          const MALE_HAIRS = ['shortFlat', 'shortRound', 'shortWaved', 'shortCurly', 'theCaesar', 'theCaesarAndSidePart', 'sides', 'dreads01', 'frizzle'];
+          const FEMALE_HAIRS = ['longButNotTooLong', 'straight01', 'straight02', 'bob', 'bun', 'curly', 'curvy', 'bigHair', 'miaWallace', 'straightAndStrand', 'fro'];
+          const validHairs = isFemale ? FEMALE_HAIRS : MALE_HAIRS;
+          if (!validHairs.includes(opts.top)) {
+            opts.top = isFemale ? 'longButNotTooLong' : 'shortFlat';
+          }
+          if (isFemale) {
+            opts.facialHair = '';
+          }
+          user.avatarOptions = JSON.stringify(opts);
+        } catch {
+          // If avatarOptions is invalid, leave it as-is
+        }
+      }
+    } else if (gender) {
+      user.gender = gender;
+    }
 
     await user.save();
 
