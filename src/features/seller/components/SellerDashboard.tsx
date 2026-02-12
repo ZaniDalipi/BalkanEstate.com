@@ -25,7 +25,7 @@ const CreateListingPage: React.FC = () => {
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
             <div className="lg:col-span-2">
-                 <div className="glass-panel p-4 sm:p-6 lg:p-8 glass-shimmer-border">
+                 <div className="glass-panel p-4 sm:p-6 lg:p-8 glass-shimmer-border overflow-hidden">
                     <div className="flex items-center gap-4 mb-4">
                         <div className="p-3 rounded-full bg-blue-50 border border-blue-200">
                             <SparklesIcon className="w-6 h-6 text-blue-600"/>

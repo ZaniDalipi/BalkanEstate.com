@@ -73,6 +73,11 @@
   }
 }
 
+/* Fix fieldset overflow in flex/grid layouts — override browser default min-inline-size */
+fieldset {
+  min-inline-size: 0;
+}
+
 /* ============================================================================
    Liquid Glass Design System
    A magical glassmorphism design with frosted surfaces, luminous accents,
