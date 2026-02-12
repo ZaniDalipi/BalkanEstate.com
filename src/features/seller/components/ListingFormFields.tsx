@@ -164,17 +164,17 @@ const ListingFormFields: React.FC<ListingFormFieldsProps> = ({
                 {listingData.propertyType === 'apartment' && (
                     <>
                         <NumberInputWithSteppers
+                            label={t('seller:createListing.fields.totalFloors')}
+                            value={listingData.totalFloors}
+                            min={1}
+                            onChange={(val) => setListingData(p => ({ ...p, totalFloors: val }))}
+                        />
+                        <NumberInputWithSteppers
                             label={t('seller:createListing.fields.floorNumber')}
                             value={listingData.floorNumber}
                             min={0}
                             max={listingData.totalFloors || 999}
                             onChange={(val) => setListingData(p => ({ ...p, floorNumber: val }))}
-                        />
-                        <NumberInputWithSteppers
-                            label={t('seller:createListing.fields.totalFloors')}
-                            value={listingData.totalFloors}
-                            min={1}
-                            onChange={(val) => setListingData(p => ({ ...p, totalFloors: val }))}
                         />
                         <div>
                             <label htmlFor="orientation" className={labelClasses}>{t('seller:createListing.advancedDetails.orientation.label')}</label>
