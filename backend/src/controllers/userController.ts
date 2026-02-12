@@ -9,7 +9,7 @@ export const getAllAgents = async (req: Request, res: Response): Promise<void> =
   try {
     // Find all users with agent role
     const agents = await User.find({ role: 'agent' })
-      .select('name email phone avatarUrl city country agencyName agentId licenseNumber licenseVerified stats')
+      .select('name email phone avatarUrl avatarOptions gender city country agencyName agentId licenseNumber licenseVerified stats')
       .lean();
 
     // Get property counts for each agent

@@ -27,6 +27,7 @@ const buildSafeUserResponse = (user: IUser) => ({
   phone: user.phone,
   role: user.role,
   avatarUrl: user.avatarUrl,
+  avatarOptions: user.avatarOptions,
   gender: user.gender,
   city: user.city,
   country: user.country,
@@ -838,6 +839,7 @@ export const getMe = async (req: Request, res: Response): Promise<void> => {
         activeRole: user.activeRole,
         primaryRole: user.primaryRole,
         avatarUrl: user.avatarUrl,
+        avatarOptions: user.avatarOptions,
         city: user.city,
         country: user.country,
         agencyId: user.agencyId ? String(user.agencyId) : undefined,
@@ -905,6 +907,7 @@ export const updateProfile = async (
         phone: user.phone,
         role: user.role,
         avatarUrl: user.avatarUrl,
+        avatarOptions: user.avatarOptions,
         gender: user.gender,
         city: user.city,
         country: user.country,
@@ -1477,9 +1480,10 @@ export const uploadAvatar = async (
       maxHeight: 400,
     });
 
-    // Update user with new avatar URL and publicId
+    // Update user with new avatar URL and publicId, clear generated avatar options
     user.avatarUrl = uploadResult.url;
     user.avatarPublicId = uploadResult.publicId;
+    user.avatarOptions = undefined;
     await user.save();
 
 
@@ -1492,6 +1496,7 @@ export const uploadAvatar = async (
         phone: user.phone,
         role: user.role,
         avatarUrl: user.avatarUrl,
+        avatarOptions: user.avatarOptions,
         city: user.city,
         country: user.country,
         agencyName: user.agencyName,
@@ -1504,6 +1509,75 @@ export const uploadAvatar = async (
     });
   } catch (error: any) {
     res.status(500).json({ message: 'Error uploading avatar' });
+  }
+};
+
+// @desc    Save generated avatar options (DiceBear customization)
+// @route   POST /api/auth/save-avatar-options
+// @access  Private
+export const saveAvatarOptions = async (req: Request, res: Response): Promise<void> => {
+  try {
+    if (!req.user) {
+      res.status(401).json({ message: 'Not authenticated' });
+      return;
+    }
+
+    const { avatarOptions } = req.body;
+    if (!avatarOptions || typeof avatarOptions !== 'string') {
+      res.status(400).json({ message: 'avatarOptions must be a JSON string' });
+      return;
+    }
+
+    // Validate that it's valid JSON
+    try {
+      JSON.parse(avatarOptions);
+    } catch {
+      res.status(400).json({ message: 'avatarOptions must be valid JSON' });
+      return;
+    }
+
+    const user = await User.findById(req.user._id);
+    if (!user) {
+      res.status(404).json({ message: 'User not found' });
+      return;
+    }
+
+    // Save avatar options and clear uploaded photo (user chose generated avatar)
+    user.avatarOptions = avatarOptions;
+    user.avatarUrl = undefined;
+    if (user.avatarPublicId) {
+      try {
+        const { deleteImage } = require('../services/cloudinaryService');
+        await deleteImage(user.avatarPublicId);
+      } catch {
+        // Non-blocking: continue even if cloudinary deletion fails
+      }
+      user.avatarPublicId = undefined;
+    }
+    await user.save();
+
+    res.json({
+      user: {
+        id: String(user._id),
+        email: user.email,
+        name: user.name,
+        phone: user.phone,
+        role: user.role,
+        avatarUrl: user.avatarUrl,
+        avatarOptions: user.avatarOptions,
+        gender: user.gender,
+        city: user.city,
+        country: user.country,
+        agencyName: user.agencyName,
+        agencyId: user.agencyId,
+        agentId: user.agentId,
+        licenseNumber: user.licenseNumber,
+        licenseVerified: user.licenseVerified,
+        isSubscribed: user.isSubscribed,
+      }
+    });
+  } catch (error: any) {
+    res.status(500).json({ message: 'Error saving avatar options' });
   }
 };
 

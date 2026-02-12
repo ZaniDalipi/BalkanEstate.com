@@ -11,6 +11,7 @@ export interface IUser extends Document {
   phone?: string;
   avatarUrl?: string;
   avatarPublicId?: string;
+  avatarOptions?: string; // JSON string of DiceBear avatar customization options
   gender?: 'male' | 'female' | 'other';
   role: 'buyer' | 'private_seller' | 'agent' | 'admin' | 'super_admin'; // Deprecated - use availableRoles instead
   availableRoles: ('buyer' | 'private_seller' | 'agent' | 'admin' | 'super_admin')[]; // What roles user can access
@@ -308,6 +309,9 @@ const UserSchema: Schema = new Schema(
       type: String,
     },
     avatarPublicId: {
+      type: String,
+    },
+    avatarOptions: {
       type: String,
     },
     gender: {

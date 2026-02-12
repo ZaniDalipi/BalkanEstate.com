@@ -9,6 +9,7 @@ import MyMeasurements from './MyMeasurements';
 import { User, UserRole, Agency } from '../../types';
 import { BuildingOfficeIcon, ChartBarIcon, UserCircleIcon, ArrowLeftOnRectangleIcon, XMarkIcon, MapPinIcon, CreditCardIcon, ShieldCheckIcon, SparklesIcon } from '../../constants';
 import DefaultAvatar from './DefaultAvatar';
+import AvatarCustomizer, { type AvatarOptions, parseAvatarOptions } from './AvatarCustomizer';
 import AgentLicenseModal from './AgentLicenseModal';
 import AgencyManagementSection from './AgencyManagementSection';
 import { switchRole, joinAgencyByInvitationCode, getAgencies, updateAgentProfile } from '../../services/apiService';
@@ -530,6 +531,7 @@ const ProfileSettings: React.FC<{ user: User }> = ({ user }) => {
     const [isJoiningAgency, setIsJoiningAgency] = useState(false);
     const [isUploadingAvatar, setIsUploadingAvatar] = useState(false);
     const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
+    const [isAvatarCustomizerOpen, setIsAvatarCustomizerOpen] = useState(false);
     const [agentData, setAgentData] = useState({
         languages: user.languages || ['English'],
         specializations: user.specializations?.join(', ') || '',
@@ -952,6 +954,60 @@ const ProfileSettings: React.FC<{ user: User }> = ({ user }) => {
         }
     };
 
+    const handleSaveAvatarOptions = async (options: AvatarOptions) => {
+        setError('');
+        try {
+            const response = await fetch(`${API_URL}/auth/save-avatar-options`, {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${localStorage.getItem('balkan_estate_token')}`,
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ avatarOptions: JSON.stringify(options) }),
+            });
+            const data = await response.json();
+            if (!response.ok) throw new Error(data.message || 'Failed to save avatar');
+            dispatch({ type: 'UPDATE_USER', payload: data.user });
+            setFormData(data.user);
+            setAvatarPreview(null);
+            success(t('profile.avatarSaved', 'Avatar saved successfully'));
+        } catch (err) {
+            setError(err instanceof Error ? err.message : 'Failed to save avatar options');
+        }
+    };
+
+    const handleUploadPhotoFromCustomizer = async (file: File) => {
+        setIsUploadingAvatar(true);
+        setError('');
+        try {
+            const reader = new FileReader();
+            reader.onloadend = () => setAvatarPreview(reader.result as string);
+            reader.readAsDataURL(file);
+
+            const formDataUpload = new FormData();
+            formDataUpload.append('avatar', file);
+
+            const response = await fetch(`${API_URL}/auth/upload-avatar`, {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${localStorage.getItem('balkan_estate_token')}`,
+                },
+                body: formDataUpload,
+            });
+            const data = await response.json();
+            if (!response.ok) throw new Error(data.message || 'Failed to upload avatar');
+            dispatch({ type: 'UPDATE_USER', payload: data.user });
+            setFormData(data.user);
+            success(t('profile.avatarUploaded', 'Photo uploaded successfully'));
+            setTimeout(() => setAvatarPreview(null), 2000);
+        } catch (err) {
+            setError(err instanceof Error ? err.message : 'Failed to upload avatar');
+            setAvatarPreview(null);
+        } finally {
+            setIsUploadingAvatar(false);
+        }
+    };
+
     const floatingInputClasses = "block px-2.5 pb-2.5 pt-4 w-full text-base text-neutral-900 bg-white rounded-lg border border-neutral-300 appearance-none focus:outline-none focus:ring-0 focus:border-primary peer";
     const floatingLabelClasses = "absolute text-base text-neutral-700 duration-300 transform -translate-y-4 scale-75 top-2 z-10 origin-[0] bg-white px-2 peer-focus:px-2 peer-focus:text-primary peer-placeholder-shown:scale-100 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:top-1/2 peer-focus:top-2 peer-focus:scale-75 peer-focus:-translate-y-4 start-1";
 
@@ -968,7 +1024,7 @@ const ProfileSettings: React.FC<{ user: User }> = ({ user }) => {
                     )}
                 </fieldset>
 
-            {/* Avatar Upload Section */}
+            {/* Avatar Section */}
             <fieldset className="border-t pt-6">
                 <legend className="block text-sm font-medium text-neutral-700 mb-4">{t('profile.profilePicture')}</legend>
                 <div className="flex items-center gap-6">
@@ -981,7 +1037,11 @@ const ProfileSettings: React.FC<{ user: User }> = ({ user }) => {
                                 referrerPolicy="no-referrer"
                             />
                         ) : (
-                            <DefaultAvatar gender={formData.gender} seed={formData.id || formData.name} />
+                            <DefaultAvatar
+                                gender={formData.gender}
+                                seed={formData.id || formData.name}
+                                avatarOptions={(formData as any).avatarOptions}
+                            />
                         )}
                         {isUploadingAvatar && (
                             <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50">
@@ -990,28 +1050,34 @@ const ProfileSettings: React.FC<{ user: User }> = ({ user }) => {
                         )}
                     </div>
                     <div className="flex-1">
-                        <input
-                            type="file"
-                            id="avatar-upload"
-                            accept="image/*"
-                            onChange={handleAvatarUpload}
-                            disabled={isUploadingAvatar}
-                            className="hidden"
-                        />
-                        <label
-                            htmlFor="avatar-upload"
-                            className={`inline-block px-4 py-2 bg-primary text-white font-semibold rounded-lg shadow-sm hover:bg-primary-dark transition-colors cursor-pointer ${
-                                isUploadingAvatar ? 'opacity-50 cursor-not-allowed' : ''
-                            }`}
+                        <button
+                            type="button"
+                            onClick={() => setIsAvatarCustomizerOpen(true)}
+                            className="inline-flex items-center gap-2 px-4 py-2 bg-primary text-white font-semibold rounded-lg shadow-sm hover:bg-primary-dark transition-colors"
                         >
-                            {isUploadingAvatar ? t('profile.uploading') : t('profile.changePicture')}
-                        </label>
+                            <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                <path d="M12 20h9" /><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z" />
+                            </svg>
+                            {t('profile.customizeAvatar', 'Customize Avatar')}
+                        </button>
                         <p className="text-xs text-neutral-500 mt-2">
-                            {t('profile.imageRequirements')}
+                            {t('profile.avatarDescription', 'Create a custom character or upload your own photo')}
                         </p>
                     </div>
                 </div>
             </fieldset>
+
+            {/* Avatar Customizer Modal */}
+            <AvatarCustomizer
+                isOpen={isAvatarCustomizerOpen}
+                onClose={() => setIsAvatarCustomizerOpen(false)}
+                gender={formData.gender}
+                currentAvatarOptions={parseAvatarOptions((formData as any).avatarOptions)}
+                currentAvatarUrl={formData.avatarUrl}
+                onSaveAvatar={handleSaveAvatarOptions}
+                onUploadPhoto={handleUploadPhotoFromCustomizer}
+                isUploading={isUploadingAvatar}
+            />
 
             {/* Gender Selection */}
             <fieldset className="border-t pt-6">

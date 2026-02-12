@@ -19,6 +19,7 @@ export function transformBackendAgent(backendAgent: any): Agent {
     email: user.email || '',
     phone: user.phone || '',
     avatarUrl: user.avatarUrl,
+    avatarOptions: user.avatarOptions,
     city: user.city,
     country: user.country,
     address: user.address,
