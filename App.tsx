@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, lazy, Suspense } from 'react';
+import React, { useState, useEffect, useCallback, useRef, lazy, Suspense } from 'react';
 // Page transitions use lightweight CSS instead of framer-motion to reduce initial bundle
 import { HelmetProvider } from 'react-helmet-async';
 import { AppProvider, useAppContext } from './context/AppContext';
@@ -701,11 +701,22 @@ const FullScreenLoader: React.FC = () => (
 const AppWrapper: React.FC = () => {
     const { state, dispatch, checkAuthStatus, handleOAuthCallback } = useAppContext();
 
-    // Show splash screen every time the app opens to hide loading of map/resources
-    const [showSplash, setShowSplash] = useState(true);
+    // Show splash only on first visit or after login/register
+    const hasVisited = useRef(localStorage.getItem('balkanestate_visited') === 'true');
+    const [showSplash, setShowSplash] = useState(!hasVisited.current);
+    const prevAuthenticated = useRef(state.isAuthenticated);
+
+    // Show splash when user logs in or registers (isAuthenticated goes false → true)
+    useEffect(() => {
+        if (!prevAuthenticated.current && state.isAuthenticated) {
+            setShowSplash(true);
+        }
+        prevAuthenticated.current = state.isAuthenticated;
+    }, [state.isAuthenticated]);
 
     const handleSplashComplete = useCallback(() => {
         setShowSplash(false);
+        localStorage.setItem('balkanestate_visited', 'true');
     }, []);
 
     useEffect(() => {
