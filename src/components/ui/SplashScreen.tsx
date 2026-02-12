@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { AppleHelloEnglishEffect } from './apple-hello-effect';
 
 /* ------------------------------------------------------------------ */
 /*  Logo                                                               */
@@ -20,92 +19,122 @@ const SplashLogo: React.FC<{ className?: string }> = ({ className }) => (
 /* ------------------------------------------------------------------ */
 const FloatingBlobs: React.FC = () => (
   <div className="absolute inset-0 overflow-hidden pointer-events-none">
-    {/* Large blue blob — top right */}
     <motion.div
       className="absolute rounded-full"
       style={{
-        width: 500,
-        height: 500,
-        top: '-10%',
-        right: '-8%',
+        width: 500, height: 500, top: '-10%', right: '-8%',
         background: 'radial-gradient(circle, rgba(2,82,205,0.07) 0%, transparent 70%)',
       }}
-      animate={{
-        x: [0, 30, -20, 0],
-        y: [0, 20, -10, 0],
-        scale: [1, 1.08, 0.95, 1],
-      }}
+      animate={{ x: [0, 30, -20, 0], y: [0, 20, -10, 0], scale: [1, 1.08, 0.95, 1] }}
       transition={{ duration: 12, repeat: Infinity, ease: 'easeInOut' }}
     />
-    {/* Cyan blob — bottom left */}
     <motion.div
       className="absolute rounded-full"
       style={{
-        width: 400,
-        height: 400,
-        bottom: '-5%',
-        left: '-5%',
+        width: 400, height: 400, bottom: '-5%', left: '-5%',
         background: 'radial-gradient(circle, rgba(0,180,216,0.06) 0%, transparent 70%)',
       }}
-      animate={{
-        x: [0, -25, 15, 0],
-        y: [0, -15, 25, 0],
-        scale: [1, 1.1, 0.92, 1],
-      }}
+      animate={{ x: [0, -25, 15, 0], y: [0, -15, 25, 0], scale: [1, 1.1, 0.92, 1] }}
       transition={{ duration: 14, repeat: Infinity, ease: 'easeInOut' }}
     />
-    {/* Small accent blob — center-left */}
     <motion.div
       className="absolute rounded-full"
       style={{
-        width: 250,
-        height: 250,
-        top: '35%',
-        left: '15%',
+        width: 250, height: 250, top: '35%', left: '15%',
         background: 'radial-gradient(circle, rgba(2,82,205,0.04) 0%, transparent 70%)',
       }}
-      animate={{
-        x: [0, 20, -15, 0],
-        y: [0, -20, 10, 0],
-        scale: [1, 1.12, 0.9, 1],
-      }}
+      animate={{ x: [0, 20, -15, 0], y: [0, -20, 10, 0], scale: [1, 1.12, 0.9, 1] }}
       transition={{ duration: 10, repeat: Infinity, ease: 'easeInOut' }}
     />
-    {/* Tiny bright dot — top left, drifts */}
     <motion.div
       className="absolute rounded-full"
       style={{
-        width: 120,
-        height: 120,
-        top: '20%',
-        left: '30%',
+        width: 120, height: 120, top: '20%', left: '30%',
         background: 'radial-gradient(circle, rgba(59,130,246,0.05) 0%, transparent 70%)',
       }}
-      animate={{
-        x: [0, 40, -30, 0],
-        y: [0, 30, -20, 0],
-      }}
+      animate={{ x: [0, 40, -30, 0], y: [0, 30, -20, 0] }}
       transition={{ duration: 8, repeat: Infinity, ease: 'easeInOut' }}
     />
-    {/* Bottom right accent */}
     <motion.div
       className="absolute rounded-full"
       style={{
-        width: 300,
-        height: 300,
-        bottom: '15%',
-        right: '10%',
+        width: 300, height: 300, bottom: '15%', right: '10%',
         background: 'radial-gradient(circle, rgba(0,180,216,0.04) 0%, transparent 70%)',
       }}
-      animate={{
-        x: [0, -20, 30, 0],
-        y: [0, 15, -25, 0],
-        scale: [1, 0.95, 1.08, 1],
-      }}
+      animate={{ x: [0, -20, 30, 0], y: [0, 15, -25, 0], scale: [1, 0.95, 1.08, 1] }}
       transition={{ duration: 11, repeat: Infinity, ease: 'easeInOut' }}
     />
   </div>
 );
+
+/* ------------------------------------------------------------------ */
+/*  MultiLangHello                                                     */
+/*  Cycles "hello" through many languages with smooth crossfades.      */
+/*  Balkan languages featured prominently, then world languages.       */
+/* ------------------------------------------------------------------ */
+const GREETINGS = [
+  'hello',          // English
+  'përshëndetje',   // Albanian
+  'здраво',         // Serbian
+  'bok',            // Croatian
+  'merhaba',        // Turkish
+  'γεια σας',       // Greek
+  'ciao',           // Italian
+  'bonjour',        // French
+  'hola',           // Spanish
+  'hallo',          // German
+  'olá',            // Portuguese
+  'привет',         // Russian
+  'مرحبا',          // Arabic
+  'こんにちは',       // Japanese
+  '你好',           // Chinese
+  '안녕하세요',      // Korean
+  'नमस्ते',         // Hindi
+];
+
+const HOLD_MS = 350;
+
+interface MultiLangHelloProps {
+  onComplete?: () => void;
+}
+
+const MultiLangHello: React.FC<MultiLangHelloProps> = ({ onComplete }) => {
+  const [index, setIndex] = useState(0);
+
+  useEffect(() => {
+    if (index >= GREETINGS.length - 1) {
+      // Hold the last greeting a bit, then fire complete
+      const t = setTimeout(() => onComplete?.(), 500);
+      return () => clearTimeout(t);
+    }
+    const t = setTimeout(() => setIndex((i) => i + 1), HOLD_MS);
+    return () => clearTimeout(t);
+  }, [index, onComplete]);
+
+  return (
+    <div className="flex items-center justify-center h-20 sm:h-28 md:h-36">
+      <AnimatePresence mode="wait">
+        <motion.span
+          key={index}
+          initial={{ opacity: 0, y: 16, scale: 0.92 }}
+          animate={{ opacity: 1, y: 0, scale: 1 }}
+          exit={{ opacity: 0, y: -16, scale: 0.92 }}
+          transition={{
+            duration: 0.25,
+            ease: [0.22, 1, 0.36, 1],
+          }}
+          className="text-5xl sm:text-7xl md:text-8xl lg:text-9xl font-extralight italic text-neutral-800 select-none"
+          style={{
+            fontFamily: "'Georgia', 'Times New Roman', 'SF Pro Display', serif",
+            letterSpacing: '-0.02em',
+          }}
+        >
+          {GREETINGS[index]}
+        </motion.span>
+      </AnimatePresence>
+    </div>
+  );
+};
 
 /* ------------------------------------------------------------------ */
 /*  BrandReveal                                                        */
@@ -161,7 +190,7 @@ const BrandReveal: React.FC<BrandRevealProps> = ({ onComplete }) => {
             Estate
           </motion.span>
 
-          {/* ".AI" — gradient blue-to-cyan, pops in with shimmer */}
+          {/* ".AI" — gradient blue-to-cyan, pops in */}
           <motion.sup
             initial={{ opacity: 0, scale: 0.6, x: -4 }}
             animate={showAI ? { opacity: 1, scale: 1, x: 0 } : {}}
@@ -224,7 +253,6 @@ const SplashScreen: React.FC<SplashScreenProps> = ({
     setBrandDone(true);
   }, []);
 
-  // Hold after brand animation finishes
   useEffect(() => {
     if (phase === 'brand' && brandDone && minTimeReached) {
       const t = setTimeout(() => setPhase('done'), 1400);
@@ -262,26 +290,21 @@ const SplashScreen: React.FC<SplashScreenProps> = ({
           transition={{ duration: 0.7, ease: [0.25, 0.1, 0.25, 1] }}
           className="fixed inset-0 z-[99999] flex items-center justify-center overflow-hidden bg-white"
         >
-          {/* Animated background blobs */}
           <FloatingBlobs />
 
           <div className="relative z-10 flex flex-col items-center justify-center px-4 sm:px-6 w-full">
             <AnimatePresence mode="wait">
-              {/* Phase 1 — hello (faster: speed 0.55) */}
+              {/* Phase 1 — multi-language hello cycle */}
               {phase === 'hello' && (
                 <motion.div
                   key="hello"
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
-                  exit={{ opacity: 0, y: -12 }}
-                  transition={{ duration: 0.5, ease: 'easeOut' }}
+                  exit={{ opacity: 0, y: -16 }}
+                  transition={{ duration: 0.4, ease: 'easeOut' }}
                   className="flex items-center justify-center"
                 >
-                  <AppleHelloEnglishEffect
-                    className="h-16 sm:h-24 md:h-28 text-neutral-800 w-auto"
-                    speed={0.55}
-                    onAnimationComplete={handleHelloComplete}
-                  />
+                  <MultiLangHello onComplete={handleHelloComplete} />
                 </motion.div>
               )}
 
