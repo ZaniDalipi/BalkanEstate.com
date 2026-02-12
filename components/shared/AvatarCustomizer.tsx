@@ -88,6 +88,17 @@ const FACIAL_HAIR = [
   { value: 'moustacheMagnum', label: 'Magnum Mustache' },
 ];
 
+const FACIAL_HAIR_COLORS = [
+  { value: '2c1b18', label: 'Black' },
+  { value: '4a312c', label: 'Dark Brown' },
+  { value: '724133', label: 'Brown' },
+  { value: 'a55728', label: 'Auburn' },
+  { value: 'b58143', label: 'Honey' },
+  { value: 'd6b370', label: 'Blonde' },
+  { value: 'e8e1e1', label: 'Gray' },
+  { value: 'c93305', label: 'Red' },
+];
+
 const EYES = [
   { value: 'default', label: 'Default' },
   { value: 'happy', label: 'Happy' },
@@ -125,6 +136,7 @@ export interface AvatarOptions {
   clothesColor: string;
   accessories: string;
   facialHair: string;
+  facialHairColor: string;
   eyes: string;
   mouth: string;
   eyebrows: string;
@@ -139,7 +151,10 @@ export function buildAvatarUrl(options: AvatarOptions): string {
   params.set('clothesColor', options.clothesColor);
   if (options.accessories) params.set('accessories', options.accessories);
   params.set('accessoriesProbability', options.accessories ? '100' : '0');
-  if (options.facialHair) params.set('facialHair', options.facialHair);
+  if (options.facialHair) {
+    params.set('facialHair', options.facialHair);
+    if (options.facialHairColor) params.set('facialHairColor', options.facialHairColor);
+  }
   params.set('facialHairProbability', options.facialHair ? '100' : '0');
   params.set('eyes', options.eyes);
   params.set('mouth', options.mouth);
@@ -158,6 +173,7 @@ export function getDefaultAvatarOptions(gender?: 'male' | 'female' | 'other'): A
     clothesColor: '3c4f5c',
     accessories: '',
     facialHair: '',
+    facialHairColor: '2c1b18',
     eyes: 'default',
     mouth: 'smile',
     eyebrows: 'defaultNatural',
@@ -234,6 +250,7 @@ const AvatarCustomizer: React.FC<AvatarCustomizerProps> = ({
       clothesColor: pick(CLOTHES_COLORS),
       accessories: Math.random() > 0.5 ? pick(ACCESSORIES.filter(a => a.value)) : '',
       facialHair: !isFemale && Math.random() > 0.6 ? pick(FACIAL_HAIR.filter(f => f.value)) : '',
+      facialHairColor: pick(FACIAL_HAIR_COLORS),
       eyes: pick(EYES),
       mouth: pick(MOUTHS),
       eyebrows: pick(EYEBROWS),
@@ -280,29 +297,29 @@ const AvatarCustomizer: React.FC<AvatarCustomizerProps> = ({
       {/* Backdrop */}
       <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={onClose} />
 
-      {/* Modal */}
-      <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-hidden flex flex-col">
+      {/* Modal - Liquid Glass */}
+      <div className="relative bg-white/60 backdrop-blur-2xl rounded-3xl shadow-[0_8px_64px_rgba(0,0,0,0.18)] border border-white/40 w-full max-w-2xl max-h-[90vh] overflow-hidden flex flex-col ring-1 ring-white/20">
         {/* Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-neutral-200">
-          <h2 className="text-lg font-semibold text-neutral-900">
+        <div className="flex items-center justify-between px-6 py-4 border-b border-white/30 bg-white/20">
+          <h2 className="text-lg font-semibold text-neutral-800">
             {t('profile.customizeAvatar', 'Customize Your Avatar')}
           </h2>
           <button
             onClick={onClose}
-            className="p-1.5 rounded-full hover:bg-neutral-100 transition-colors"
+            className="p-1.5 rounded-full hover:bg-white/40 backdrop-blur-sm transition-all"
           >
             <XMarkIcon className="w-5 h-5 text-neutral-500" />
           </button>
         </div>
 
         {/* Tabs */}
-        <div className="flex border-b border-neutral-200">
+        <div className="flex border-b border-white/30 bg-white/10">
           <button
             onClick={() => setActiveTab('create')}
-            className={`flex-1 py-3 text-sm font-medium transition-colors relative ${
+            className={`flex-1 py-3 text-sm font-medium transition-all relative ${
               activeTab === 'create'
-                ? 'text-primary'
-                : 'text-neutral-500 hover:text-neutral-700'
+                ? 'text-primary bg-white/20'
+                : 'text-neutral-500 hover:text-neutral-700 hover:bg-white/10'
             }`}
           >
             {t('profile.createAvatar', 'Create Avatar')}
@@ -312,10 +329,10 @@ const AvatarCustomizer: React.FC<AvatarCustomizerProps> = ({
           </button>
           <button
             onClick={() => setActiveTab('upload')}
-            className={`flex-1 py-3 text-sm font-medium transition-colors relative ${
+            className={`flex-1 py-3 text-sm font-medium transition-all relative ${
               activeTab === 'upload'
-                ? 'text-primary'
-                : 'text-neutral-500 hover:text-neutral-700'
+                ? 'text-primary bg-white/20'
+                : 'text-neutral-500 hover:text-neutral-700 hover:bg-white/10'
             }`}
           >
             {t('profile.uploadPhoto', 'Upload Photo')}
@@ -329,19 +346,26 @@ const AvatarCustomizer: React.FC<AvatarCustomizerProps> = ({
         <div className="flex-1 overflow-y-auto p-6">
           {activeTab === 'create' ? (
             <div className="space-y-6">
-              {/* Preview */}
+              {/* Preview - 3D styled */}
               <div className="flex flex-col items-center gap-3">
-                <div className="w-32 h-32 rounded-full overflow-hidden border-4 border-neutral-200 shadow-lg bg-gradient-to-br from-blue-50 to-blue-100">
-                  <img
-                    src={previewUrl}
-                    alt="Avatar preview"
-                    className="w-full h-full"
-                  />
+                <div className="relative w-36 h-36 group">
+                  {/* Depth shadow */}
+                  <div className="absolute inset-2 rounded-full bg-gradient-to-b from-neutral-300/60 to-neutral-400/40 blur-xl translate-y-3" />
+                  {/* Avatar container with 3D effects */}
+                  <div className="relative w-full h-full rounded-full overflow-hidden border-[3px] border-white/70 shadow-[0_8px_32px_rgba(0,0,0,0.2),inset_0_-2px_6px_rgba(0,0,0,0.1)] bg-gradient-to-br from-sky-100 via-blue-50 to-indigo-100">
+                    <img
+                      src={previewUrl}
+                      alt="Avatar preview"
+                      className="w-full h-full"
+                    />
+                    {/* Glossy highlight overlay */}
+                    <div className="absolute inset-0 rounded-full bg-gradient-to-br from-white/40 via-transparent to-transparent pointer-events-none" />
+                  </div>
                 </div>
                 <button
                   type="button"
                   onClick={handleRandomize}
-                  className="inline-flex items-center gap-1.5 px-4 py-2 text-sm font-medium text-primary bg-primary/10 rounded-lg hover:bg-primary/20 transition-colors"
+                  className="inline-flex items-center gap-1.5 px-4 py-2 text-sm font-medium text-primary bg-white/50 backdrop-blur-sm rounded-xl hover:bg-white/70 transition-all border border-white/40 shadow-sm"
                 >
                   <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                     <path d="M21.5 2v6h-6M2.5 22v-6h6M2 11.5a10 10 0 0 1 18.8-4.3M22 12.5a10 10 0 0 1-18.8 4.2" />
@@ -406,13 +430,24 @@ const AvatarCustomizer: React.FC<AvatarCustomizerProps> = ({
 
               {/* Facial Hair (male only) */}
               {!isFemale && (
-                <OptionSection label={t('profile.facialHair', 'Facial Hair')}>
-                  <PillPicker
-                    items={FACIAL_HAIR}
-                    selected={options.facialHair}
-                    onSelect={(v) => updateOption('facialHair', v)}
-                  />
-                </OptionSection>
+                <>
+                  <OptionSection label={t('profile.facialHair', 'Facial Hair')}>
+                    <PillPicker
+                      items={FACIAL_HAIR}
+                      selected={options.facialHair}
+                      onSelect={(v) => updateOption('facialHair', v)}
+                    />
+                  </OptionSection>
+                  {options.facialHair && (
+                    <OptionSection label={t('profile.facialHairColor', 'Beard Color')}>
+                      <ColorPicker
+                        colors={FACIAL_HAIR_COLORS}
+                        selected={options.facialHairColor}
+                        onSelect={(v) => updateOption('facialHairColor', v)}
+                      />
+                    </OptionSection>
+                  )}
+                </>
               )}
 
               {/* Eyes */}
@@ -465,10 +500,10 @@ const AvatarCustomizer: React.FC<AvatarCustomizerProps> = ({
 
               {/* Drag & Drop zone */}
               <div
-                className={`relative border-2 border-dashed rounded-xl p-8 text-center transition-all ${
+                className={`relative border-2 border-dashed rounded-2xl p-8 text-center transition-all backdrop-blur-sm ${
                   dragActive
-                    ? 'border-primary bg-primary/5'
-                    : 'border-neutral-300 hover:border-primary/50 hover:bg-neutral-50'
+                    ? 'border-primary bg-primary/10'
+                    : 'border-white/60 bg-white/20 hover:border-primary/40 hover:bg-white/30'
                 }`}
                 onDrop={handleDrop}
                 onDragOver={handleDragOver}
@@ -517,12 +552,12 @@ const AvatarCustomizer: React.FC<AvatarCustomizerProps> = ({
           )}
         </div>
 
-        {/* Footer */}
-        <div className="px-6 py-4 border-t border-neutral-200 flex justify-end gap-3">
+        {/* Footer - Glass */}
+        <div className="px-6 py-4 border-t border-white/30 bg-white/20 flex justify-end gap-3">
           <button
             type="button"
             onClick={onClose}
-            className="px-5 py-2.5 text-sm font-medium text-neutral-700 bg-neutral-100 rounded-lg hover:bg-neutral-200 transition-colors"
+            className="px-5 py-2.5 text-sm font-medium text-neutral-700 bg-white/50 backdrop-blur-sm rounded-xl hover:bg-white/70 transition-all border border-white/40"
           >
             {t('common.cancel', 'Cancel')}
           </button>
@@ -533,7 +568,7 @@ const AvatarCustomizer: React.FC<AvatarCustomizerProps> = ({
                 onSaveAvatar(options);
                 onClose();
               }}
-              className="px-5 py-2.5 text-sm font-medium text-white bg-primary rounded-lg hover:bg-primary-dark transition-colors shadow-sm"
+              className="px-5 py-2.5 text-sm font-medium text-white bg-primary/80 backdrop-blur-sm rounded-xl hover:bg-primary transition-all shadow-lg shadow-primary/20 border border-primary/30"
             >
               {t('profile.saveAvatar', 'Save Avatar')}
             </button>
@@ -547,10 +582,10 @@ const AvatarCustomizer: React.FC<AvatarCustomizerProps> = ({
                   onClose();
                 }
               }}
-              className={`px-5 py-2.5 text-sm font-medium text-white rounded-lg shadow-sm transition-colors ${
+              className={`px-5 py-2.5 text-sm font-medium text-white rounded-xl shadow-lg transition-all backdrop-blur-sm border ${
                 !uploadFile || isUploading
-                  ? 'bg-neutral-300 cursor-not-allowed'
-                  : 'bg-primary hover:bg-primary-dark'
+                  ? 'bg-neutral-300/60 cursor-not-allowed border-neutral-200/40'
+                  : 'bg-primary/80 hover:bg-primary shadow-primary/20 border-primary/30'
               }`}
             >
               {isUploading
@@ -568,8 +603,8 @@ const AvatarCustomizer: React.FC<AvatarCustomizerProps> = ({
 // ─── Sub-components ──────────────────────────────────────────────────────────
 
 const OptionSection: React.FC<{ label: string; children: React.ReactNode }> = ({ label, children }) => (
-  <div>
-    <label className="block text-xs font-semibold text-neutral-500 uppercase tracking-wide mb-2">
+  <div className="bg-white/30 backdrop-blur-sm rounded-2xl p-4 border border-white/40">
+    <label className="block text-xs font-semibold text-neutral-600 uppercase tracking-wide mb-2.5">
       {label}
     </label>
     {children}
@@ -588,10 +623,10 @@ const ColorPicker: React.FC<{
         type="button"
         title={c.label}
         onClick={() => onSelect(c.value)}
-        className={`w-9 h-9 rounded-full border-2 transition-all ${
+        className={`w-9 h-9 rounded-full border-2 transition-all shadow-sm ${
           selected === c.value
-            ? 'border-primary scale-110 shadow-md'
-            : 'border-transparent hover:border-neutral-300 hover:scale-105'
+            ? 'border-primary scale-110 shadow-md ring-2 ring-primary/30'
+            : 'border-white/60 hover:border-white hover:scale-105'
         }`}
         style={{ backgroundColor: `#${c.value}` }}
       />
@@ -610,10 +645,10 @@ const PillPicker: React.FC<{
         key={item.value}
         type="button"
         onClick={() => onSelect(item.value)}
-        className={`px-3 py-1.5 rounded-full text-xs font-medium transition-all border ${
+        className={`px-3 py-1.5 rounded-xl text-xs font-medium transition-all border backdrop-blur-sm ${
           selected === item.value
-            ? 'bg-primary text-white border-primary shadow-sm'
-            : 'bg-neutral-50 text-neutral-600 border-neutral-200 hover:border-primary/40 hover:bg-primary/5'
+            ? 'bg-primary/80 text-white border-primary/40 shadow-md shadow-primary/20'
+            : 'bg-white/40 text-neutral-600 border-white/50 hover:border-primary/30 hover:bg-white/60'
         }`}
       >
         {item.label}

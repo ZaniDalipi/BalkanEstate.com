@@ -6,6 +6,7 @@ interface DefaultAvatarProps {
   seed?: string;
   avatarOptions?: string; // JSON string of AvatarOptions (stored in user profile)
   className?: string;
+  show3d?: boolean; // Enable 3D depth effects
 }
 
 // Simple deterministic hash from a string
@@ -26,6 +27,7 @@ const CLOTHING_OPTS = ['blazerAndShirt', 'blazerAndSweater', 'collarAndSweater',
 const CLOTHES_COLORS = ['262e33', '3c4f5c', '25557c', '929598', '5199e4'];
 const ACCESSORIES_OPTS = ['', '', '', 'prescription01', 'prescription02', 'round', 'wayfarers'];
 const FACIAL_HAIR_OPTS = ['', '', '', '', 'beardLight', 'beardMedium'];
+const FACIAL_HAIR_COLOR_OPTS = ['2c1b18', '4a312c', '724133', 'a55728', 'b58143', 'd6b370'];
 const EYES_OPTS = ['default', 'happy', 'wink'];
 const MOUTH_OPTS = ['smile', 'twinkle', 'default'];
 const EYEBROW_OPTS = ['defaultNatural', 'flatNatural', 'raisedExcitedNatural'];
@@ -37,6 +39,7 @@ function deterministicPick<T>(arr: T[], seed: number, offset: number): T {
 function generateFromSeed(seed: string, gender?: 'male' | 'female' | 'other'): AvatarOptions {
   const h = hashSeed(seed);
   const isFemale = gender === 'female';
+  const facialHair = isFemale ? '' : deterministicPick(FACIAL_HAIR_OPTS, h, 7);
   return {
     skinColor: deterministicPick(SKIN_COLORS, h, 1),
     hairColor: deterministicPick(HAIR_COLORS, h, 2),
@@ -44,7 +47,8 @@ function generateFromSeed(seed: string, gender?: 'male' | 'female' | 'other'): A
     clothing: deterministicPick(CLOTHING_OPTS, h, 4),
     clothesColor: deterministicPick(CLOTHES_COLORS, h, 5),
     accessories: deterministicPick(ACCESSORIES_OPTS, h, 6),
-    facialHair: isFemale ? '' : deterministicPick(FACIAL_HAIR_OPTS, h, 7),
+    facialHair,
+    facialHairColor: facialHair ? deterministicPick(FACIAL_HAIR_COLOR_OPTS, h, 11) : '2c1b18',
     eyes: deterministicPick(EYES_OPTS, h, 8),
     mouth: deterministicPick(MOUTH_OPTS, h, 9),
     eyebrows: deterministicPick(EYEBROW_OPTS, h, 10),
@@ -52,7 +56,7 @@ function generateFromSeed(seed: string, gender?: 'male' | 'female' | 'other'): A
 }
 
 /**
- * Default avatar using DiceBear Avataaars style.
+ * Default avatar using DiceBear Avataaars style with 3D depth effects.
  *
  * Priority:
  * 1. If `avatarOptions` (JSON) is provided, use those exact customization settings
@@ -64,6 +68,7 @@ const DefaultAvatar: React.FC<DefaultAvatarProps> = ({
   seed = 'default',
   avatarOptions,
   className = 'w-full h-full',
+  show3d = false,
 }) => {
   // Determine which options to use
   const parsed = parseAvatarOptions(avatarOptions);
@@ -71,6 +76,30 @@ const DefaultAvatar: React.FC<DefaultAvatarProps> = ({
     || (seed !== 'default' ? generateFromSeed(seed, gender) : getDefaultAvatarOptions(gender));
 
   const url = buildAvatarUrl(options);
+
+  if (show3d) {
+    return (
+      <div className={`relative ${className}`}>
+        {/* Depth shadow beneath */}
+        <div className="absolute inset-1 rounded-full bg-gradient-to-b from-neutral-300/50 to-neutral-400/30 blur-xl translate-y-2 scale-95" />
+        {/* Main avatar with 3D ring and glow */}
+        <div className="relative w-full h-full rounded-full overflow-hidden border-[3px] border-white/70 shadow-[0_6px_24px_rgba(0,0,0,0.18),inset_0_-2px_6px_rgba(0,0,0,0.08)] bg-gradient-to-br from-sky-100 via-blue-50 to-indigo-100">
+          <img
+            src={url}
+            alt="Avatar"
+            className="w-full h-full"
+            loading="lazy"
+            decoding="async"
+            draggable={false}
+          />
+          {/* Glossy highlight overlay */}
+          <div className="absolute inset-0 rounded-full bg-gradient-to-br from-white/35 via-transparent to-transparent pointer-events-none" />
+          {/* Bottom ambient */}
+          <div className="absolute inset-0 rounded-full bg-gradient-to-t from-black/5 via-transparent to-transparent pointer-events-none" />
+        </div>
+      </div>
+    );
+  }
 
   return (
     <img
