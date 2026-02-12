@@ -27,6 +27,7 @@ const buildSafeUserResponse = (user: IUser) => ({
   phone: user.phone,
   role: user.role,
   avatarUrl: user.avatarUrl,
+  gender: user.gender,
   city: user.city,
   country: user.country,
   isSubscribed: user.isSubscribed,
@@ -870,7 +871,7 @@ export const updateProfile = async (
       return;
     }
 
-    const { name, phone, city, country, address, avatarUrl } = req.body;
+    const { name, phone, city, country, address, avatarUrl, gender } = req.body;
 
     const currentUser = req.user as IUser;
     const user = await User.findById(String(currentUser._id));
@@ -891,6 +892,7 @@ export const updateProfile = async (
     if (country) user.country = country;
     if (address !== undefined) user.address = address;
     if (avatarUrl) user.avatarUrl = avatarUrl;
+    if (gender) user.gender = gender;
 
     await user.save();
 
@@ -903,6 +905,7 @@ export const updateProfile = async (
         phone: user.phone,
         role: user.role,
         avatarUrl: user.avatarUrl,
+        gender: user.gender,
         city: user.city,
         country: user.country,
         address: user.address,

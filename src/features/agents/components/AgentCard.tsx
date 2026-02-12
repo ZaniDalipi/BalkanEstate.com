@@ -3,8 +3,8 @@ import { useTranslation } from 'react-i18next';
 import { Agent } from '@/types';
 import { optimizeCloudinaryUrl } from '@/config/cloudinaryConfig';
 import StarRating from '@/components/shared/StarRating';
+import DefaultAvatar from '@/components/shared/DefaultAvatar';
 import {
-  UserCircleIcon,
   BuildingOfficeIcon,
   CheckBadgeIcon,
   MapPinIcon,
@@ -33,8 +33,8 @@ const AgentAvatar: React.FC<{ agent: Agent }> = ({ agent }) => {
 
   if (!agent.avatarUrl || error) {
     return (
-      <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-blue-50 to-blue-100">
-        <UserCircleIcon className="w-10 h-10 text-blue-300" />
+      <div className="absolute inset-0 flex items-center justify-center">
+        <DefaultAvatar gender={agent.gender} />
       </div>
     );
   }
