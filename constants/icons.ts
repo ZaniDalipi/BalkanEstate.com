@@ -321,7 +321,7 @@ export const ArrowUturnLeftIcon: React.FC<{ className?: string }> = ({ className
 
 export const BuildingOfficeIcon: React.FC<{ className?: string }> = ({ className }) => (
     React.createElement(Icon, { className: className },
-      React.createElement('path', { strokeLinecap: "round", strokeLinejoin: "round", d: "M3.75 21h16.5M4.5 3h15M5.25 3v18m13.5-18v18M9 6.75h6M9 11.25h6M9 15.75h6M9 20.25h6" })
+      React.createElement('path', { strokeLinecap: "round", strokeLinejoin: "round", d: "M3.75 21h16.5M4.5 3h15M5.25 3v18m13.5-18v18M9 6.75h1.5m-1.5 3h1.5m-1.5 3h1.5m3-6H15m-1.5 3H15m-1.5 3H15M9 21v-3.375c0-.621.504-1.125 1.125-1.125h3.75c.621 0 1.125.504 1.125 1.125V21" })
     )
 );
 
@@ -358,7 +358,7 @@ export const XCircleIcon: React.FC<{ className?: string }> = ({ className }) => 
 
 export const TrophyIcon: React.FC<{ className?: string }> = ({ className }) => (
     React.createElement(Icon, { className: className },
-        React.createElement('path', { strokeLinecap: "round", strokeLinejoin: "round", d: "M16.5 18.75h-9a9.75 9.75 0 001.036 3.863 1.5 1.5 0 002.632 0 9.75 9.75 0 001.036-3.863zM16.5 18.75H21m-4.5 0H12m0 0h-4.5m4.5 0V7.5m0 11.25V7.5m0 0H7.5M12 7.5h4.5M12 7.5v-3.75a3 3 0 00-3-3H9a3 3 0 00-3 3v3.75m6 0v11.25" })
+        React.createElement('path', { strokeLinecap: "round", strokeLinejoin: "round", d: "M16.5 18.75h-9m9 0a3 3 0 013-3h.75a.75.75 0 00.75-.75V9a.75.75 0 00-.75-.75h-.75A3 3 0 0116.5 5.25h-9A3 3 0 014.5 8.25h-.75a.75.75 0 00-.75.75v6c0 .414.336.75.75.75h.75a3 3 0 013 3m9 0v.75a.75.75 0 01-.75.75H8.25a.75.75 0 01-.75-.75v-.75m9 0H7.5" })
     )
 );
 
@@ -376,7 +376,7 @@ export const EnvelopeIcon: React.FC<{ className?: string }> = ({ className }) =>
 
 export const UsersIcon: React.FC<{ className?: string }> = ({ className }) => (
     React.createElement(Icon, { className: className },
-        React.createElement('path', { strokeLinecap: "round", strokeLinejoin: "round", d: "M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-4.66c.11-.341.122-.69.122-1.037v-.032c0-.42-.02-.83-.06-1.228M9 4.19v.003c-.621.328-1.203.72-1.74 1.185a6.375 6.375 0 00-3.18 5.426c0 .42.02.83.06 1.228v.032c0 .347.012.696.122 1.037.19.596.42 1.156.694 1.684a6.375 6.375 0 01-3.18-5.426C2.012 5.922 4.654 3.5 8.25 3.5c.383 0 .761.025 1.132.072v.003z" })
+        React.createElement('path', { strokeLinecap: "round", strokeLinejoin: "round", d: "M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zM18.75 7.5a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z" })
     )
 );
 
