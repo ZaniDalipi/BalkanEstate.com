@@ -49,6 +49,28 @@
   --animate-pulse-glow: pulseGlow 3s ease-in-out infinite;
   --animate-float: float 6s ease-in-out infinite;
   --animate-bounce-soft: bounceSoft 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+  --animate-aurora: aurora 60s linear infinite;
+}
+
+/* Aurora background color variables */
+:root {
+  --white: #fff;
+  --black: #000;
+  --transparent: transparent;
+  --blue-300: #93c5fd;
+  --blue-400: #60a5fa;
+  --blue-500: #3b82f6;
+  --indigo-300: #a5b4fc;
+  --violet-200: #ddd6fe;
+}
+
+@keyframes aurora {
+  from {
+    background-position: 50% 50%, 50% 50%;
+  }
+  to {
+    background-position: 350% 50%, 350% 50%;
+  }
 }
 
 /* ============================================================================
