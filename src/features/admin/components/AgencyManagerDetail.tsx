@@ -1,7 +1,9 @@
-import React from 'react';
+import React, { lazy, Suspense } from 'react';
 import { XMarkIcon, BuildingOfficeIcon } from '@/constants';
 import { Agency } from '@/types';
 import { AgencyEditForm } from './useAgencyManager';
+
+const MapLocationPicker = lazy(() => import('@/src/features/seller/components/MapLocationPicker'));
 
 interface AgencyManagerDetailProps {
   // View modal
@@ -230,8 +232,8 @@ const AgencyManagerDetail: React.FC<AgencyManagerDetailProps> = ({
       {/* Edit Modal */}
       {isEditModalOpen && editingAgency && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto">
-            <div className="p-6 border-b border-gray-200 flex items-center justify-between sticky top-0 bg-white">
+          <div className="bg-white rounded-lg max-w-3xl w-full max-h-[90vh] overflow-y-auto">
+            <div className="p-6 border-b border-gray-200 flex items-center justify-between sticky top-0 bg-white z-10">
               <h3 className="text-xl font-bold">Edit Agency</h3>
               <button onClick={() => setIsEditModalOpen(false)}>
                 <XMarkIcon className="w-6 h-6 text-gray-500 hover:text-gray-700" />
@@ -350,33 +352,24 @@ const AgencyManagerDetail: React.FC<AgencyManagerDetailProps> = ({
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Latitude
-                  </label>
-                  <input
-                    type="number"
-                    step="any"
-                    value={editForm.lat}
-                    onChange={(e) => setEditForm({ ...editForm, lat: Number(e.target.value) })}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg"
-                    placeholder="e.g., 42.6629"
+              {/* Map Location Picker */}
+              <div className="border-t pt-4">
+                <Suspense fallback={
+                  <div className="w-full h-96 rounded-lg border-2 border-gray-200 flex items-center justify-center bg-gray-50">
+                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+                  </div>
+                }>
+                  <MapLocationPicker
+                    lat={editForm.lat || 41.3275}
+                    lng={editForm.lng || 19.8187}
+                    address={editForm.address}
+                    zoom={editForm.lat ? 15 : 8}
+                    country={editForm.country}
+                    city={editForm.city}
+                    onLocationChange={(lat, lng) => setEditForm({ ...editForm, lat, lng })}
+                    onAddressChange={(address) => setEditForm({ ...editForm, address })}
                   />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Longitude
-                  </label>
-                  <input
-                    type="number"
-                    step="any"
-                    value={editForm.lng}
-                    onChange={(e) => setEditForm({ ...editForm, lng: Number(e.target.value) })}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg"
-                    placeholder="e.g., 21.1655"
-                  />
-                </div>
+                </Suspense>
               </div>
 
               <div className="border-t pt-4">
