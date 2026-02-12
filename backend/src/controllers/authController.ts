@@ -1525,17 +1525,25 @@ export const saveAvatarOptions = async (req: Request, res: Response): Promise<vo
       return;
     }
 
-    const { avatarOptions } = req.body;
-    if (!avatarOptions || typeof avatarOptions !== 'string') {
-      res.status(400).json({ message: 'avatarOptions must be a JSON string' });
+    let { avatarOptions } = req.body;
+    if (!avatarOptions) {
+      res.status(400).json({ message: 'avatarOptions is required' });
       return;
     }
 
-    // Validate that it's valid JSON
-    try {
-      JSON.parse(avatarOptions);
-    } catch {
-      res.status(400).json({ message: 'avatarOptions must be valid JSON' });
+    // Accept both object and string formats for flexibility
+    if (typeof avatarOptions === 'object') {
+      avatarOptions = JSON.stringify(avatarOptions);
+    } else if (typeof avatarOptions === 'string') {
+      // Validate that the string is valid JSON
+      try {
+        JSON.parse(avatarOptions);
+      } catch {
+        res.status(400).json({ message: 'avatarOptions must be valid JSON' });
+        return;
+      }
+    } else {
+      res.status(400).json({ message: 'avatarOptions must be a JSON string or object' });
       return;
     }
 

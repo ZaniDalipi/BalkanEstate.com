@@ -964,7 +964,7 @@ const ProfileSettings: React.FC<{ user: User }> = ({ user }) => {
                     'Authorization': `Bearer ${localStorage.getItem('balkan_estate_token')}`,
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify({ avatarOptions: JSON.stringify(options) }),
+                body: JSON.stringify({ avatarOptions: options }),
             });
             const data = await response.json();
             if (!response.ok) throw new Error(data.message || 'Failed to save avatar');
