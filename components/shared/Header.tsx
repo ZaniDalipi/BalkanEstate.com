@@ -84,6 +84,19 @@ const Header: React.FC<HeaderProps> = ({ onToggleSidebar, isFloating }) => {
     );
   };
   
+  // Shared glass button styles
+  const subscribeGlassStyle: React.CSSProperties = {
+    background: 'linear-gradient(135deg, rgba(2,82,205,0.92), rgba(59,130,246,0.92))',
+    boxShadow: '0 6px 6px rgba(2,82,205,0.25), 0 0 20px rgba(2,82,205,0.1), inset 2px 2px 1px 0 rgba(255,255,255,0.35), inset -1px -1px 1px 1px rgba(255,255,255,0.2)',
+    transitionTimingFunction: 'cubic-bezier(0.175, 0.885, 0.32, 2.2)',
+  };
+  const newListingGlassStyle: React.CSSProperties = {
+    background: 'linear-gradient(135deg, rgba(255,149,0,0.92), rgba(255,94,58,0.92))',
+    boxShadow: '0 6px 6px rgba(255,149,0,0.25), 0 0 20px rgba(255,149,0,0.1), inset 2px 2px 1px 0 rgba(255,255,255,0.35), inset -1px -1px 1px 1px rgba(255,255,255,0.2)',
+    transitionTimingFunction: 'cubic-bezier(0.175, 0.885, 0.32, 2.2)',
+  };
+  const glassButtonClasses = "relative overflow-hidden backdrop-blur-md text-white px-3 py-1.5 sm:px-3.5 sm:py-2 md:px-4 lg:px-5 lg:py-2.5 rounded-full text-[11px] sm:text-xs md:text-sm font-semibold transition-all duration-700 hover:-translate-y-px hover:brightness-110 active:brightness-95 whitespace-nowrap border border-white/25";
+
   if (isFloating) {
     // Centered on property details, top-right on other pages
     const headerPositionClass = isPropertyDetails
@@ -92,25 +105,29 @@ const Header: React.FC<HeaderProps> = ({ onToggleSidebar, isFloating }) => {
 
     return (
       <header className={headerPositionClass}>
-        <nav className="flex items-center space-x-1.5 md:space-x-2 xl:space-x-3 bg-white/60 backdrop-blur-xl p-1 md:p-1.5 rounded-full border border-white/30"
-          style={{ boxShadow: '0 6px 6px rgba(0,0,0,0.1), 0 0 20px rgba(0,0,0,0.05), inset 2px 2px 1px 0 rgba(255,255,255,0.5), inset -1px -1px 1px 1px rgba(255,255,255,0.5)' }}
+        <nav
+          className="flex items-center gap-1 sm:gap-1.5 md:gap-2 lg:gap-3 bg-white/70 backdrop-blur-xl p-1 sm:p-1.5 rounded-full border border-white/40"
+          style={{ boxShadow: '0 6px 6px rgba(0,0,0,0.12), 0 0 20px rgba(0,0,0,0.06), inset 2px 2px 1px 0 rgba(255,255,255,0.6), inset -1px -1px 1px 1px rgba(255,255,255,0.5)' }}
         >
           <button
             onClick={handleSubscribeClick}
-            className="relative overflow-hidden bg-primary/70 backdrop-blur-md text-white px-2.5 py-1.5 md:px-3 xl:px-4 xl:py-2 rounded-full text-xs xl:text-sm font-semibold transition-all duration-700 hover:bg-primary/85 hover:-translate-y-px whitespace-nowrap border border-white/20"
-            style={{ boxShadow: '0 4px 6px rgba(2,82,205,0.2), inset 1px 1px 1px 0 rgba(255,255,255,0.3), inset -1px -1px 1px 0 rgba(255,255,255,0.2)', transitionTimingFunction: 'cubic-bezier(0.175, 0.885, 0.32, 2.2)' }}
+            className={glassButtonClasses}
+            style={subscribeGlassStyle}
             aria-label={t('nav:subscribe')}
           >
-              {t('nav:subscribe')}
+            <span className="relative z-10">{t('nav:subscribe')}</span>
+            <div className="absolute inset-0 z-0 rounded-[inherit]" style={{ background: 'rgba(255,255,255,0.15)' }} />
           </button>
           <button
             onClick={handleNewListingClick}
-            className="relative overflow-hidden bg-secondary/70 backdrop-blur-md text-white px-2.5 py-1.5 md:px-3 xl:px-4 xl:py-2 rounded-full text-xs xl:text-sm font-semibold transition-all duration-700 hover:bg-secondary/85 hover:-translate-y-px whitespace-nowrap border border-white/20"
-            style={{ boxShadow: '0 4px 6px rgba(255,165,0,0.2), inset 1px 1px 1px 0 rgba(255,255,255,0.3), inset -1px -1px 1px 0 rgba(255,255,255,0.2)', transitionTimingFunction: 'cubic-bezier(0.175, 0.885, 0.32, 2.2)' }}
+            className={glassButtonClasses}
+            style={newListingGlassStyle}
             aria-label={t('nav:newListing')}
           >
-              <span className="md:hidden xl:inline">+ {t('nav:newListing')}</span>
-              <span className="hidden md:inline xl:hidden">+ New</span>
+            <span className="relative z-10 sm:hidden">+</span>
+            <span className="relative z-10 hidden sm:inline lg:hidden">+ New</span>
+            <span className="relative z-10 hidden lg:inline">+ {t('nav:newListing')}</span>
+            <div className="absolute inset-0 z-0 rounded-[inherit]" style={{ background: 'rgba(255,255,255,0.15)' }} />
           </button>
           <AuthButton floating />
           {isAuthenticated && (
@@ -125,8 +142,8 @@ const Header: React.FC<HeaderProps> = ({ onToggleSidebar, isFloating }) => {
 
   return (
     <header className="bg-white shadow-sm sticky top-0 z-20 flex-shrink-0">
-      <div className="max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between items-center py-2">
+      <div className="max-w-screen-xl mx-auto px-3 sm:px-4 md:px-6 lg:px-8">
+        <div className="flex justify-between items-center py-1.5 sm:py-2">
           <div className="flex items-center">
              <button onClick={onToggleSidebar} className="md:hidden text-neutral-600 hover:text-primary p-1.5 -ml-1.5" aria-label="Toggle sidebar navigation">
                  <Bars3Icon className="w-5 h-5"/>
@@ -136,23 +153,26 @@ const Header: React.FC<HeaderProps> = ({ onToggleSidebar, isFloating }) => {
              </div>
           </div>
 
-          <nav className="flex justify-end items-center space-x-1.5 md:space-x-2 xl:space-x-3">
+          <nav className="flex justify-end items-center gap-1.5 sm:gap-2 md:gap-2.5 lg:gap-3">
             <button
               onClick={handleSubscribeClick}
-              className="relative overflow-hidden bg-primary/70 backdrop-blur-md text-white px-2.5 py-1.5 md:px-3 xl:px-4 xl:py-2 rounded-full text-xs xl:text-sm font-semibold transition-all duration-700 hover:bg-primary/85 hover:-translate-y-px whitespace-nowrap border border-white/20"
-              style={{ boxShadow: '0 4px 6px rgba(2,82,205,0.2), inset 1px 1px 1px 0 rgba(255,255,255,0.3), inset -1px -1px 1px 0 rgba(255,255,255,0.2)', transitionTimingFunction: 'cubic-bezier(0.175, 0.885, 0.32, 2.2)' }}
+              className={glassButtonClasses}
+              style={subscribeGlassStyle}
               aria-label={t('nav:subscribe')}
             >
-                {t('nav:subscribe')}
+              <span className="relative z-10">{t('nav:subscribe')}</span>
+              <div className="absolute inset-0 z-0 rounded-[inherit]" style={{ background: 'rgba(255,255,255,0.15)' }} />
             </button>
             <button
               onClick={handleNewListingClick}
-              className="relative overflow-hidden bg-secondary/70 backdrop-blur-md text-white px-2.5 py-1.5 md:px-3 xl:px-4 xl:py-2 rounded-full text-xs xl:text-sm font-semibold transition-all duration-700 hover:bg-secondary/85 hover:-translate-y-px whitespace-nowrap border border-white/20"
-              style={{ boxShadow: '0 4px 6px rgba(255,165,0,0.2), inset 1px 1px 1px 0 rgba(255,255,255,0.3), inset -1px -1px 1px 0 rgba(255,255,255,0.2)', transitionTimingFunction: 'cubic-bezier(0.175, 0.885, 0.32, 2.2)' }}
+              className={glassButtonClasses}
+              style={newListingGlassStyle}
               aria-label={t('nav:newListing')}
             >
-                <span className="md:hidden lg:inline">+ {t('nav:newListing')}</span>
-                <span className="hidden md:inline lg:hidden">+ New</span>
+              <span className="relative z-10 sm:hidden">+</span>
+              <span className="relative z-10 hidden sm:inline lg:hidden">+ New</span>
+              <span className="relative z-10 hidden lg:inline">+ {t('nav:newListing')}</span>
+              <div className="absolute inset-0 z-0 rounded-[inherit]" style={{ background: 'rgba(255,255,255,0.15)' }} />
             </button>
             <AuthButton />
             {isAuthenticated && (

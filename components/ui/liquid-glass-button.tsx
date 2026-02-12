@@ -20,7 +20,7 @@ const buttonVariants = cva(
         ghost: "hover:bg-accent hover:text-accent-foreground",
         link: "text-primary underline-offset-4 hover:underline",
         accent: "bg-linear-to-t border border-b-2 border-orange-600/40 from-orange-500 to-orange-400 shadow-md shadow-orange-500/20 ring-1 ring-inset ring-white/25 transition-[filter] duration-200 hover:brightness-110 active:brightness-90 text-white",
-        glass: "bg-white/60 backdrop-blur-xl border border-white/30 text-black/80 transition-all duration-700 hover:bg-white/75 hover:-translate-y-px rounded-2xl",
+        glass: "bg-white/70 backdrop-blur-xl border border-white/40 text-black/85 transition-all duration-700 hover:bg-white/80 hover:-translate-y-px rounded-2xl",
       },
       size: {
         default: "h-9 px-4 py-2",
@@ -56,6 +56,10 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
             "relative overflow-hidden",
             className,
           )}
+          style={{
+            boxShadow: '0 6px 6px rgba(0,0,0,0.12), 0 0 20px rgba(0,0,0,0.06)',
+            transitionTimingFunction: 'cubic-bezier(0.175, 0.885, 0.32, 2.2)',
+          }}
           ref={ref}
           {...props}
         >
@@ -63,7 +67,7 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
           <div
             className="absolute inset-0 z-0 overflow-hidden rounded-[inherit]"
             style={{
-              backdropFilter: 'blur(3px)',
+              backdropFilter: 'blur(3px) saturate(1.8)',
               filter: 'url(#liquid-glass-distortion)',
               isolation: 'isolate',
             }}
@@ -71,14 +75,14 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
           {/* Frosted white overlay */}
           <div
             className="absolute inset-0 z-[1] rounded-[inherit]"
-            style={{ background: 'rgba(255, 255, 255, 0.25)' }}
+            style={{ background: 'rgba(255, 255, 255, 0.18)' }}
           />
           {/* Inset specular highlight */}
           <div
             className="absolute inset-0 z-[2] rounded-[inherit] overflow-hidden"
             style={{
               boxShadow:
-                'inset 2px 2px 1px 0 rgba(255, 255, 255, 0.5), inset -1px -1px 1px 1px rgba(255, 255, 255, 0.5)',
+                'inset 2px 2px 1px 0 rgba(255,255,255,0.5), inset -1px -1px 1px 1px rgba(255,255,255,0.5)',
             }}
           />
           {/* Content */}

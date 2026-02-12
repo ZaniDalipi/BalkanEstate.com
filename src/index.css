@@ -115,6 +115,11 @@
   75% { background-position: 0% 100%; }
 }
 
+@keyframes moveBackground {
+  from { background-position: 0% 0%; }
+  to { background-position: 0% -1000%; }
+}
+
 /* Core glass panel — liquid frosted white */
 .glass-panel {
   background: rgba(255, 255, 255, 0.65);
