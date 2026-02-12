@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useCallback } from 'react';
 import { XMarkIcon, CheckCircleIcon, ExclamationTriangleIcon, XCircleIcon, InformationCircleIcon } from '../../../../constants';
+import { linkifyEmail } from '../../utils/linkifyEmail';
 
 export type NotificationType = 'success' | 'error' | 'warning' | 'info';
 
@@ -110,7 +111,7 @@ const NotificationModal: React.FC<NotificationModalProps> = ({
 
   return (
     <div
-      className="fixed inset-0 bg-black/50 backdrop-blur-sm z-[9999] flex justify-center items-center p-4"
+      className="fixed inset-0 bg-black/40 backdrop-blur-sm z-[9999] flex justify-center items-center p-4"
       onClick={handleBackdropClick}
       role="alertdialog"
       aria-modal="true"
@@ -155,7 +156,7 @@ const NotificationModal: React.FC<NotificationModalProps> = ({
             id="notification-message"
             className="text-slate-600 text-center mb-6 leading-relaxed whitespace-pre-line"
           >
-            {message}
+            {linkifyEmail(message)}
           </p>
 
           {/* Action Button */}

@@ -1,5 +1,6 @@
 import React from 'react';
 import { XMarkIcon } from '../../constants';
+import { linkifyEmail } from '../../utils/linkifyEmail';
 
 export type AlertType = 'error' | 'warning' | 'success' | 'info';
 
@@ -113,7 +114,7 @@ const AlertDialog: React.FC<AlertDialogProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 z-[9999] flex justify-center items-center p-4" onClick={onClose}>
+    <div className="fixed inset-0 bg-black/40 backdrop-blur-sm z-[9999] flex justify-center items-center p-4" onClick={onClose}>
       <div
         className="bg-white rounded-xl shadow-2xl max-w-md w-full relative overflow-hidden"
         onClick={(e) => e.stopPropagation()}
@@ -145,7 +146,7 @@ const AlertDialog: React.FC<AlertDialogProps> = ({
 
           {/* Message */}
           <p className="text-neutral-700 text-center mb-6 leading-relaxed">
-            {message}
+            {linkifyEmail(message)}
           </p>
 
           {/* Actions */}

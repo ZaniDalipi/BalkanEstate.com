@@ -9,6 +9,7 @@ import { useTranslation } from 'react-i18next';
 import { Property } from '../../types';
 import { useAppContext } from '../../context/AppContext';
 import { SparklesIcon, ArrowPathIcon } from '../../constants';
+import { linkifyEmail } from '../../src/shared/utils/linkifyEmail';
 import PromotionModal from '../../src/features/promotions/components/PromotionModal';
 import PromotionHistoryModal from '../../src/features/promotions/components/PromotionHistoryModal';
 import PromotedPropertyCard, { TIER_CONFIG } from '../../src/features/promotions/components/PromotedPropertyCard';
@@ -229,7 +230,7 @@ const MyPromotions: React.FC = () => {
                 </svg>
               )}
             </div>
-            <div className="flex-1 text-sm font-medium">{toastMessage.message}</div>
+            <div className="flex-1 text-sm font-medium">{linkifyEmail(toastMessage.message)}</div>
             <button
               onClick={() => setToastMessage(null)}
               className="flex-shrink-0 p-1 rounded-full hover:bg-black/10 transition-colors"

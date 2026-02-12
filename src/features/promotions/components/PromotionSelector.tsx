@@ -1,5 +1,6 @@
 import React from 'react';
 import { RocketLaunchIcon, EyeIcon, ChatBubbleLeftRightIcon, BoltIcon, StarIconSolid, FireIcon } from '@/constants';
+import { linkifyEmail } from '@/shared/utils/linkifyEmail';
 import { usePromotionSelector, extensionTierStyles } from './usePromotionSelector';
 import type { PromotionSelectorProps, PromotionTier } from './usePromotionSelector';
 import PromotionTierCard from './PromotionTierCard';
@@ -196,7 +197,7 @@ const PromotionSelector: React.FC<PromotionSelectorProps> = (props) => {
           <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
           </svg>
-          {successMessage}
+          {linkifyEmail(successMessage)}
         </div>
       )}
 
@@ -205,7 +206,7 @@ const PromotionSelector: React.FC<PromotionSelectorProps> = (props) => {
           <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
           </svg>
-          {error}
+          {linkifyEmail(error)}
         </div>
       )}
 
