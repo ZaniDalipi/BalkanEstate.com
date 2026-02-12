@@ -34,7 +34,7 @@ const AgentAvatar: React.FC<{ agent: Agent }> = ({ agent }) => {
   if (!agent.avatarUrl || error) {
     return (
       <div className="absolute inset-0 flex items-center justify-center">
-        <DefaultAvatar gender={agent.gender} />
+        <DefaultAvatar gender={agent.gender} seed={agent.agentId || agent.id || agent.name} />
       </div>
     );
   }
@@ -153,7 +153,7 @@ const AgentCard: React.FC<AgentCardProps> = ({ agent, index = 0 }) => {
     <div
       ref={cardRef}
       className={cn(
-        'group relative overflow-hidden rounded-3xl bg-white p-6 w-full',
+        'group relative rounded-3xl bg-white p-6 w-full overflow-visible',
         'shadow-[8px_8px_16px_rgba(0,0,0,0.08),-8px_-8px_16px_rgba(255,255,255,0.9)]',
         'transition-all duration-500 cursor-pointer',
         'hover:shadow-[12px_12px_24px_rgba(0,0,0,0.12),-12px_-12px_24px_rgba(255,255,255,1)]',
@@ -197,10 +197,12 @@ const AgentCard: React.FC<AgentCardProps> = ({ agent, index = 0 }) => {
         </div>
       </div>
 
-      {/* Avatar */}
-      <div className="mb-4 flex justify-center">
-        <div className="relative">
-          <div className="h-24 w-24 overflow-hidden rounded-full bg-white p-1 shadow-[inset_4px_4px_8px_rgba(0,0,0,0.08),inset_-4px_-4px_8px_rgba(255,255,255,0.9)] transition-all duration-500 group-hover:shadow-[inset_6px_6px_12px_rgba(0,0,0,0.1),inset_-6px_-6px_12px_rgba(255,255,255,1)] group-hover:scale-110">
+      {/* Avatar — pops out of frame on hover */}
+      <div className="mb-4 flex justify-center relative z-20" style={{ marginTop: '-8px' }}>
+        <div className="relative transition-transform duration-500 ease-out group-hover:scale-[1.25] group-hover:-translate-y-3">
+          {/* Shadow underneath for floating effect */}
+          <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 w-16 h-4 bg-black/10 rounded-full blur-md transition-all duration-500 group-hover:w-12 group-hover:bg-black/15 group-hover:-bottom-4" />
+          <div className="h-24 w-24 overflow-hidden rounded-full bg-white p-1 shadow-[4px_4px_10px_rgba(0,0,0,0.12),-4px_-4px_10px_rgba(255,255,255,0.9)] transition-all duration-500 group-hover:shadow-[6px_8px_20px_rgba(0,0,0,0.2),-4px_-4px_12px_rgba(255,255,255,1)]">
             <div className="relative w-full h-full rounded-full overflow-hidden">
               <AgentAvatar agent={agent} />
             </div>

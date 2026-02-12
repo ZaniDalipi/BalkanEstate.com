@@ -981,7 +981,7 @@ const ProfileSettings: React.FC<{ user: User }> = ({ user }) => {
                                 referrerPolicy="no-referrer"
                             />
                         ) : (
-                            <DefaultAvatar gender={formData.gender} />
+                            <DefaultAvatar gender={formData.gender} seed={formData.id || formData.name} />
                         )}
                         {isUploadingAvatar && (
                             <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50">

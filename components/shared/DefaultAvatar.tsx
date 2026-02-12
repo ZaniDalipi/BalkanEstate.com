@@ -1,97 +1,102 @@
-import React from 'react';
+import React, { useState } from 'react';
 
 interface DefaultAvatarProps {
   gender?: 'male' | 'female' | 'other';
+  seed?: string;
   className?: string;
 }
 
+// ─── 3D Avatar image sets ────────────────────────────────────────────────────
+// Professional 3D-rendered avatar illustrations via DiceBear Avatars API
+// These generate unique, deterministic 3D-style avatars based on a seed string.
+
+// Simple deterministic hash from a string
+function hashSeed(seed: string): number {
+  let h = 0;
+  for (let i = 0; i < seed.length; i++) {
+    h = ((h << 5) - h + seed.charCodeAt(i)) | 0;
+  }
+  return Math.abs(h);
+}
+
+// Deterministic background colors — professional/muted tones
+const BG_COLORS = ['b6e3f4', 'c0aede', 'd1d4f9', 'ffd5dc', 'ffdfbf'];
+
 /**
- * Default avatar SVG based on gender.
- * Defaults to male if no gender is specified.
+ * 3D-style default avatar for agents/users without a profile photo.
+ *
+ * Uses the DiceBear "personas" style API to generate a unique, deterministic
+ * 3D-look character based on the seed (agent id/name). Each agent always
+ * gets the same avatar. The avatar renders as an <img> with an inline SVG
+ * fallback while loading.
+ *
+ * Males default to a professional look, females get a distinct style.
+ * If the external image fails to load, a clean gradient + initials fallback renders.
  */
-const DefaultAvatar: React.FC<DefaultAvatarProps> = ({ gender, className = 'w-full h-full' }) => {
+const DefaultAvatar: React.FC<DefaultAvatarProps> = ({ gender, seed = 'default', className = 'w-full h-full' }) => {
+  const [imgError, setImgError] = useState(false);
+
+  const bgIdx = hashSeed(seed) % BG_COLORS.length;
+  const bgColor = BG_COLORS[bgIdx];
+
+  // DiceBear "notionists" style — clean 3D-like illustrated avatars
+  // Deterministic: same seed always produces the same avatar
+  const avatarUrl = `https://api.dicebear.com/9.x/notionists/svg?seed=${encodeURIComponent(seed)}&backgroundColor=${bgColor}&gesture=hand&gestureProbability=10`;
+
+  // Get initials for fallback
+  const initials = seed
+    .split(/[\s_-]+/)
+    .filter(Boolean)
+    .slice(0, 2)
+    .map(w => w[0]?.toUpperCase() || '')
+    .join('');
+
   const isFemale = gender === 'female';
 
+  if (imgError) {
+    // Fallback: gradient circle with initials
+    return (
+      <svg
+        viewBox="0 0 200 200"
+        className={className}
+        xmlns="http://www.w3.org/2000/svg"
+        aria-hidden="true"
+      >
+        <defs>
+          <linearGradient id="fb-bg" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0%" stopColor={isFemale ? '#E8D5F5' : '#D5E5F5'} />
+            <stop offset="100%" stopColor={isFemale ? '#C4A8E0' : '#A8C4E0'} />
+          </linearGradient>
+        </defs>
+        <circle cx="100" cy="100" r="100" fill="url(#fb-bg)" />
+        <text
+          x="100"
+          y="108"
+          textAnchor="middle"
+          dominantBaseline="middle"
+          fontSize="64"
+          fontWeight="600"
+          fontFamily="Inter, system-ui, sans-serif"
+          fill={isFemale ? '#7C3AED' : '#2563EB'}
+          opacity="0.7"
+        >
+          {initials || '?'}
+        </text>
+      </svg>
+    );
+  }
+
   return (
-    <svg
-      viewBox="0 0 200 200"
+    <img
+      src={avatarUrl}
+      alt="Avatar"
       className={className}
-      xmlns="http://www.w3.org/2000/svg"
-      aria-hidden="true"
-    >
-      {/* Background circle */}
-      <circle cx="100" cy="100" r="100" fill={isFemale ? '#E8D5F5' : '#D5E5F5'} />
-
-      {/* Body/shoulders */}
-      <ellipse
-        cx="100"
-        cy="210"
-        rx={isFemale ? 65 : 70}
-        ry="60"
-        fill={isFemale ? '#C084CF' : '#6B9FD6'}
-      />
-
-      {/* Neck */}
-      <rect
-        x={isFemale ? 85 : 83}
-        y="128"
-        width={isFemale ? 30 : 34}
-        height="30"
-        rx="12"
-        fill={isFemale ? '#F5D0C5' : '#E8C4A8'}
-      />
-
-      {/* Head */}
-      <ellipse
-        cx="100"
-        cy={isFemale ? 95 : 95}
-        rx={isFemale ? 38 : 40}
-        ry={isFemale ? 42 : 44}
-        fill={isFemale ? '#F5D0C5' : '#E8C4A8'}
-      />
-
-      {isFemale ? (
-        /* Female hair */
-        <>
-          <ellipse cx="100" cy="72" rx="42" ry="32" fill="#5C3D2E" />
-          <ellipse cx="62" cy="90" rx="10" ry="25" fill="#5C3D2E" />
-          <ellipse cx="138" cy="90" rx="10" ry="25" fill="#5C3D2E" />
-          <ellipse cx="64" cy="110" rx="8" ry="18" fill="#5C3D2E" />
-          <ellipse cx="136" cy="110" rx="8" ry="18" fill="#5C3D2E" />
-        </>
-      ) : (
-        /* Male hair */
-        <>
-          <ellipse cx="100" cy="70" rx="42" ry="26" fill="#4A3728" />
-          <rect x="60" y="60" width="80" height="20" rx="8" fill="#4A3728" />
-        </>
-      )}
-
-      {/* Eyes */}
-      <ellipse cx="85" cy="100" rx="4" ry="4.5" fill="#3D3D3D" />
-      <ellipse cx="115" cy="100" rx="4" ry="4.5" fill="#3D3D3D" />
-
-      {/* Eye highlights */}
-      <circle cx="86.5" cy="98.5" r="1.5" fill="white" />
-      <circle cx="116.5" cy="98.5" r="1.5" fill="white" />
-
-      {/* Mouth - slight smile */}
-      <path
-        d="M90 115 Q100 122 110 115"
-        stroke={isFemale ? '#D4736E' : '#C08070'}
-        strokeWidth="2.5"
-        fill="none"
-        strokeLinecap="round"
-      />
-
-      {isFemale && (
-        /* Blush */
-        <>
-          <ellipse cx="75" cy="110" rx="8" ry="5" fill="#F5B0A8" opacity="0.4" />
-          <ellipse cx="125" cy="110" rx="8" ry="5" fill="#F5B0A8" opacity="0.4" />
-        </>
-      )}
-    </svg>
+      style={{ objectFit: 'cover', borderRadius: '50%' }}
+      onError={() => setImgError(true)}
+      loading="lazy"
+      decoding="async"
+      draggable={false}
+    />
   );
 };
 
