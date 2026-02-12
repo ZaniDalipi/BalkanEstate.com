@@ -709,10 +709,14 @@ const AppWrapper: React.FC = () => {
     const [showSplash, setShowSplash] = useState(!hasVisited.current);
     const prevAuthenticated = useRef(state.isAuthenticated);
 
-    // Show splash when user logs in or registers (isAuthenticated goes false → true)
+    // Show splash only for explicit login/signup, not session restore
     useEffect(() => {
         if (!prevAuthenticated.current && state.isAuthenticated) {
-            setShowSplash(true);
+            const justAuthed = sessionStorage.getItem('balkanestate_just_authed');
+            if (justAuthed) {
+                sessionStorage.removeItem('balkanestate_just_authed');
+                setShowSplash(true);
+            }
         }
         prevAuthenticated.current = state.isAuthenticated;
     }, [state.isAuthenticated]);
@@ -775,7 +779,10 @@ const AppWrapper: React.FC = () => {
                     {!state.isAuthenticating && <MainLayout />}
                 </div>
                 <Suspense fallback={<FullScreenLoader />}>
-                    <SplashScreen onComplete={handleSplashComplete} />
+                    <SplashScreen
+                        onComplete={handleSplashComplete}
+                        userName={state.currentUser?.name || state.currentUser?.email?.split('@')[0]}
+                    />
                 </Suspense>
             </>
         );

@@ -405,6 +405,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   const login = useCallback(async (emailOrPhone: string, pass: string) => {
     const user = await apiLogin(emailOrPhone, pass);
+    sessionStorage.setItem('balkanestate_just_authed', 'true');
     dispatch({ type: 'SET_AUTH_STATE', payload: { isAuthenticated: true, user } });
     dispatch({ type: 'USER_DATA_LOADING' });
     const userData = await apiGetMyData();
@@ -455,6 +456,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     }
   ) => {
     const user = await apiSignup(email, pass, options);
+    sessionStorage.setItem('balkanestate_just_authed', 'true');
     dispatch({ type: 'SET_AUTH_STATE', payload: { isAuthenticated: true, user } });
     dispatch({ type: 'USER_DATA_SUCCESS', payload: { savedHomes: [], savedSearches: [], conversations: [] } });
 
@@ -526,6 +528,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const handleOAuthCallback = useCallback(async (token: string, refreshToken?: string) => {
     // SECURITY: Store tokens securely, then fetch user data via API
     // User data is NOT passed in URL to prevent logging in browser history/server logs
+    sessionStorage.setItem('balkanestate_just_authed', 'true');
     localStorage.setItem('balkan_estate_token', token);
     if (refreshToken) {
       localStorage.setItem('balkan_estate_refresh_token', refreshToken);

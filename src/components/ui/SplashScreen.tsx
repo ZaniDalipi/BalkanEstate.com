@@ -47,17 +47,46 @@ const AuroraLayer: React.FC = () => (
 /* ------------------------------------------------------------------ */
 interface HelloGreetingProps {
   onComplete?: () => void;
+  userName?: string;
 }
 
-const HelloGreeting: React.FC<HelloGreetingProps> = ({ onComplete }) => (
-  <div className="flex items-center justify-center">
-    <AppleHelloEnglishEffect
-      className="h-24 sm:h-32 md:h-40 lg:h-48 text-neutral-800"
-      speed={0.7}
-      onAnimationComplete={onComplete}
-    />
-  </div>
-);
+const HelloGreeting: React.FC<HelloGreetingProps> = ({ onComplete, userName }) => {
+  const [showName, setShowName] = useState(false);
+
+  const handleHelloAnimComplete = useCallback(() => {
+    if (userName) {
+      setShowName(true);
+    } else {
+      onComplete?.();
+    }
+  }, [userName, onComplete]);
+
+  return (
+    <div className="flex flex-col items-center justify-center">
+      <AppleHelloEnglishEffect
+        className="h-24 sm:h-32 md:h-40 lg:h-48 text-neutral-800"
+        speed={0.7}
+        onAnimationComplete={handleHelloAnimComplete}
+      />
+      <AnimatePresence>
+        {showName && userName && (
+          <motion.p
+            initial={{ opacity: 0, y: 12, scale: 0.95 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
+            className="mt-2 text-3xl sm:text-4xl md:text-5xl font-light text-neutral-500 tracking-wide"
+            style={{ fontFamily: "'SF Pro Display', system-ui, -apple-system, sans-serif" }}
+            onAnimationComplete={() => {
+              setTimeout(() => onComplete?.(), 1000);
+            }}
+          >
+            {userName}
+          </motion.p>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+};
 
 /* ------------------------------------------------------------------ */
 /*  BrandReveal                                                        */
@@ -153,11 +182,13 @@ const BrandReveal: React.FC<BrandRevealProps> = ({ onComplete }) => {
 interface SplashScreenProps {
   onComplete: () => void;
   minimumDuration?: number;
+  userName?: string;
 }
 
 const SplashScreen: React.FC<SplashScreenProps> = ({
   onComplete,
   minimumDuration = 4500,
+  userName,
 }) => {
   const [phase, setPhase] = useState<'hello' | 'brand' | 'done'>('hello');
   const [brandDone, setBrandDone] = useState(false);
@@ -227,7 +258,7 @@ const SplashScreen: React.FC<SplashScreenProps> = ({
                   transition={{ duration: 0.4, ease: 'easeOut' }}
                   className="flex items-center justify-center"
                 >
-                  <HelloGreeting onComplete={handleHelloComplete} />
+                  <HelloGreeting onComplete={handleHelloComplete} userName={userName} />
                 </motion.div>
               )}
 
