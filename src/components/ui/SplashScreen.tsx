@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { cn } from '@/lib/utils';
-import { getCurrentLanguage } from '@/src/i18n';
+import { AppleHelloEnglishEffect } from '@/src/components/ui/apple-hello-effect';
 
 /* ------------------------------------------------------------------ */
 /*  Logo                                                               */
@@ -43,54 +43,21 @@ const AuroraLayer: React.FC = () => (
 
 /* ------------------------------------------------------------------ */
 /*  HelloGreeting                                                      */
-/*  Shows "hello" in the user's chosen language, simple fade-in.       */
+/*  Apple-style handwritten "hello" drawn with SVG path animation.     */
 /* ------------------------------------------------------------------ */
-const BALKAN_GREETINGS: Record<string, string> = {
-  en: 'hello',
-  sq: 'përshëndetje',
-  sr: 'здраво',
-  mk: 'здраво',
-  bs: 'zdravo',
-  hr: 'bok',
-  bg: 'здравейте',
-  ro: 'bună',
-  el: 'γεια σας',
-  me: 'zdravo',
-};
-
 interface HelloGreetingProps {
   onComplete?: () => void;
 }
 
-const HelloGreeting: React.FC<HelloGreetingProps> = ({ onComplete }) => {
-  const greeting = BALKAN_GREETINGS[getCurrentLanguage()] || BALKAN_GREETINGS.en;
-
-  useEffect(() => {
-    const t = setTimeout(() => onComplete?.(), 1400);
-    return () => clearTimeout(t);
-  }, [onComplete]);
-
-  return (
-    <div className="flex items-center justify-center h-20 sm:h-28 md:h-36">
-      <motion.span
-        initial={{ opacity: 0, y: 16, scale: 0.92 }}
-        animate={{ opacity: 1, y: 0, scale: 1 }}
-        exit={{ opacity: 0, y: -16, scale: 0.92 }}
-        transition={{
-          duration: 0.6,
-          ease: [0.22, 1, 0.36, 1],
-        }}
-        className="text-5xl sm:text-7xl md:text-8xl lg:text-9xl font-extralight italic text-neutral-800 select-none"
-        style={{
-          fontFamily: "'Georgia', 'Times New Roman', 'SF Pro Display', serif",
-          letterSpacing: '-0.02em',
-        }}
-      >
-        {greeting}
-      </motion.span>
-    </div>
-  );
-};
+const HelloGreeting: React.FC<HelloGreetingProps> = ({ onComplete }) => (
+  <div className="flex items-center justify-center">
+    <AppleHelloEnglishEffect
+      className="h-24 sm:h-32 md:h-40 lg:h-48 text-neutral-800"
+      speed={0.7}
+      onAnimationComplete={onComplete}
+    />
+  </div>
+);
 
 /* ------------------------------------------------------------------ */
 /*  BrandReveal                                                        */
