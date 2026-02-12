@@ -52,7 +52,7 @@ const HAIR_STYLES_FEMALE = [
 ];
 
 const CLOTHING = [
-  { value: 'blazerAndShirt', label: 'Blazer & Shirt' },
+  { value: 'blazerAndShirt', label: 'Suit & Shirt' },
   { value: 'blazerAndSweater', label: 'Blazer & Sweater' },
   { value: 'collarAndSweater', label: 'Collar & Sweater' },
   { value: 'shirtCrewNeck', label: 'Crew Neck' },
@@ -61,14 +61,18 @@ const CLOTHING = [
 ];
 
 const CLOTHES_COLORS = [
+  { value: '1a1a2e', label: 'Black' },
+  { value: '2d2d2d', label: 'Charcoal' },
   { value: '262e33', label: 'Dark' },
   { value: '3c4f5c', label: 'Navy' },
   { value: '25557c', label: 'Blue' },
-  { value: '65c9ff', label: 'Light Blue' },
+  { value: '4a3728', label: 'Brown' },
+  { value: '2e3d30', label: 'Forest' },
+  { value: '5c2a3a', label: 'Burgundy' },
   { value: '929598', label: 'Gray' },
   { value: 'e6e6e6', label: 'Light Gray' },
+  { value: '65c9ff', label: 'Light Blue' },
   { value: '5199e4', label: 'Bright Blue' },
-  { value: 'ff5c5c', label: 'Red' },
 ];
 
 const ACCESSORIES = [
@@ -171,7 +175,7 @@ export function getDefaultAvatarOptions(gender?: 'male' | 'female' | 'other'): A
     hairColor: '4a312c',
     top: isFemale ? 'longButNotTooLong' : 'shortFlat',
     clothing: 'blazerAndShirt',
-    clothesColor: '3c4f5c',
+    clothesColor: '1a1a2e',
     accessories: '',
     facialHair: '',
     facialHairColor: '2c1b18',
