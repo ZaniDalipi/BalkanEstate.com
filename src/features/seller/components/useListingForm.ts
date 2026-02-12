@@ -109,7 +109,7 @@ export const useListingForm = (propertyToEdit: Property | null) => {
     const { state, dispatch, updateUser, createListing, updateListing } = useAppContext();
     const { currentUser, properties, isPricingModalOpen, pendingProperty, isAuthenticating, isLoadingUserData } = state;
     const { showError, showWarning, showSuccess, showInfo } = useAlert();
-    const [mode, setMode] = useState<Mode>('ai');
+    const [mode, setMode] = useState<Mode>('manual');
     const [step, setStep] = useState<Step>('init');
     const [images, setImages] = useState<ImageData[]>([]);
     const [floorplanImage, setFloorplanImage] = useState<ImageData>({ file: null, previewUrl: '' });

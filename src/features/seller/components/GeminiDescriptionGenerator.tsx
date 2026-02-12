@@ -167,13 +167,13 @@ const GeminiDescriptionGenerator: React.FC<{ propertyToEdit: Property | null }> 
                 <LiquidGlassControl
                     options={[
                         {
+                            value: 'manual',
+                            label: t('seller:createListing.mode.manualEntry'),
+                        },
+                        {
                             value: 'ai',
                             label: t('seller:createListing.mode.aiCreator'),
                             icon: <SparklesIcon className="w-4 h-4" />,
-                        },
-                        {
-                            value: 'manual',
-                            label: t('seller:createListing.mode.manualEntry'),
                         },
                     ]}
                     value={mode}
