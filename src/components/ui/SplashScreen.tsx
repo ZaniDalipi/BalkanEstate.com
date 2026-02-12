@@ -15,55 +15,67 @@ const SplashLogo: React.FC<{ className?: string }> = ({ className }) => (
 );
 
 /* ------------------------------------------------------------------ */
-/*  FloatingBlobs                                                      */
-/*  Subtle animated background shapes — very low opacity, slow drift.  */
+/*  MeshBackground                                                     */
+/*  Animated multi-point mesh gradient — subtle, slowly morphing.      */
 /* ------------------------------------------------------------------ */
-const FloatingBlobs: React.FC = () => (
+const MESH_POINTS = [
+  { cx: '15%', cy: '20%',  color: 'rgba(2,82,205,0.12)',   r: '45%' },
+  { cx: '80%', cy: '10%',  color: 'rgba(0,180,216,0.10)',  r: '40%' },
+  { cx: '50%', cy: '55%',  color: 'rgba(59,130,246,0.06)', r: '50%' },
+  { cx: '85%', cy: '75%',  color: 'rgba(2,82,205,0.09)',   r: '38%' },
+  { cx: '20%', cy: '80%',  color: 'rgba(0,180,216,0.08)',  r: '42%' },
+];
+
+const drift = (idx: number) => {
+  const offsets = [
+    { x: [0, 8, -6, 0],  y: [0, -10, 6, 0] },
+    { x: [0, -10, 5, 0], y: [0, 8, -5, 0] },
+    { x: [0, 6, -8, 0],  y: [0, 5, -8, 0] },
+    { x: [0, -7, 10, 0], y: [0, -6, 9, 0] },
+    { x: [0, 9, -5, 0],  y: [0, 7, -10, 0] },
+  ];
+  return offsets[idx % offsets.length];
+};
+
+const MeshBackground: React.FC = () => (
   <div className="absolute inset-0 overflow-hidden pointer-events-none">
-    <motion.div
-      className="absolute rounded-full"
+    {/* Base warm white → cool white gradient for depth */}
+    <div
+      className="absolute inset-0"
       style={{
-        width: 500, height: 500, top: '-10%', right: '-8%',
-        background: 'radial-gradient(circle, rgba(2,82,205,0.07) 0%, transparent 70%)',
+        background: 'linear-gradient(135deg, #f8faff 0%, #ffffff 40%, #f0f7ff 100%)',
       }}
-      animate={{ x: [0, 30, -20, 0], y: [0, 20, -10, 0], scale: [1, 1.08, 0.95, 1] }}
-      transition={{ duration: 12, repeat: Infinity, ease: 'easeInOut' }}
     />
-    <motion.div
-      className="absolute rounded-full"
+
+    {/* Mesh nodes — large soft radial gradients that drift slowly */}
+    {MESH_POINTS.map((pt, i) => (
+      <motion.div
+        key={i}
+        className="absolute"
+        style={{
+          width: '100%',
+          height: '100%',
+          background: `radial-gradient(ellipse ${pt.r} ${pt.r} at ${pt.cx} ${pt.cy}, ${pt.color}, transparent)`,
+        }}
+        animate={{
+          x: drift(i).x.map((v) => `${v}%`),
+          y: drift(i).y.map((v) => `${v}%`),
+        }}
+        transition={{
+          duration: 10 + i * 2,
+          repeat: Infinity,
+          ease: 'easeInOut',
+        }}
+      />
+    ))}
+
+    {/* Fine noise texture overlay for tactile feel */}
+    <div
+      className="absolute inset-0 opacity-[0.03]"
       style={{
-        width: 400, height: 400, bottom: '-5%', left: '-5%',
-        background: 'radial-gradient(circle, rgba(0,180,216,0.06) 0%, transparent 70%)',
+        backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")`,
+        backgroundSize: '180px 180px',
       }}
-      animate={{ x: [0, -25, 15, 0], y: [0, -15, 25, 0], scale: [1, 1.1, 0.92, 1] }}
-      transition={{ duration: 14, repeat: Infinity, ease: 'easeInOut' }}
-    />
-    <motion.div
-      className="absolute rounded-full"
-      style={{
-        width: 250, height: 250, top: '35%', left: '15%',
-        background: 'radial-gradient(circle, rgba(2,82,205,0.04) 0%, transparent 70%)',
-      }}
-      animate={{ x: [0, 20, -15, 0], y: [0, -20, 10, 0], scale: [1, 1.12, 0.9, 1] }}
-      transition={{ duration: 10, repeat: Infinity, ease: 'easeInOut' }}
-    />
-    <motion.div
-      className="absolute rounded-full"
-      style={{
-        width: 120, height: 120, top: '20%', left: '30%',
-        background: 'radial-gradient(circle, rgba(59,130,246,0.05) 0%, transparent 70%)',
-      }}
-      animate={{ x: [0, 40, -30, 0], y: [0, 30, -20, 0] }}
-      transition={{ duration: 8, repeat: Infinity, ease: 'easeInOut' }}
-    />
-    <motion.div
-      className="absolute rounded-full"
-      style={{
-        width: 300, height: 300, bottom: '15%', right: '10%',
-        background: 'radial-gradient(circle, rgba(0,180,216,0.04) 0%, transparent 70%)',
-      }}
-      animate={{ x: [0, -20, 30, 0], y: [0, 15, -25, 0], scale: [1, 0.95, 1.08, 1] }}
-      transition={{ duration: 11, repeat: Infinity, ease: 'easeInOut' }}
     />
   </div>
 );
@@ -292,7 +304,7 @@ const SplashScreen: React.FC<SplashScreenProps> = ({
           transition={{ duration: 0.7, ease: [0.25, 0.1, 0.25, 1] }}
           className="fixed inset-0 z-[99999] flex items-center justify-center overflow-hidden bg-white"
         >
-          <FloatingBlobs />
+          <MeshBackground />
 
           <div className="relative z-10 flex flex-col items-center justify-center px-4 sm:px-6 w-full">
             <AnimatePresence mode="wait">
