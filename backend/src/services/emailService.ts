@@ -3275,7 +3275,6 @@ Questions? Contact us at support@balkanestateai.com
   }): Promise<void> {
     const safeName = escapeHtml(params.visitorName);
     const safeTitle = escapeHtml(params.propertyTitle);
-    const safeAddress = escapeHtml(params.propertyAddress);
     const safeDate = escapeHtml(params.date);
     const safeTime = escapeHtml(params.timeSlot);
     const safeCancelReason = escapeHtml(params.cancelReason);
