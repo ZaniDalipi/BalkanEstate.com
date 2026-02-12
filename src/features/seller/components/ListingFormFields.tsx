@@ -4,7 +4,8 @@ import { BALKAN_LOCATIONS, CityData } from '@/utils/balkanLocations';
 import { getCurrencySymbol } from '@/utils/currency';
 import MapLocationPicker from './MapLocationPicker';
 import NumberInputWithSteppers from '@/components/shared/NumberInputWithSteppers';
-import { ListingData, ImageData, floatingInputClasses, floatingLabelClasses, floatingSelectLabelClasses, inputBaseClasses } from './ListingFormHelpers';
+import type { ListingData, ImageData } from './ListingFormHelpers';
+import { floatingInputClasses, floatingSelectLabelClasses, inputBaseClasses, labelClasses, selectClasses } from './ListingFormHelpers';
 
 interface ListingFormFieldsProps {
     listingData: ListingData;
