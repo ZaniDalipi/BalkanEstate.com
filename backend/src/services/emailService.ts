@@ -3117,10 +3117,21 @@ Questions? Contact us at support@balkanestateai.com
         </table>
       </div>
       <div style="text-align: center; margin: 24px 0;">
+        <a href="${frontendUrl}/account/viewings"
+           style="display: inline-block; background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: #ffffff; text-decoration: none; padding: 14px 32px; border-radius: 10px; font-weight: 600; font-size: 15px; box-shadow: 0 4px 14px rgba(16, 185, 129, 0.3); margin-right: 8px;">
+          Manage Viewing Requests
+        </a>
+      </div>
+      <div style="text-align: center; margin: 12px 0 0 0;">
         <a href="${frontendUrl}/property/${params.propertyId}"
-           style="display: inline-block; background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); color: #ffffff; text-decoration: none; padding: 14px 32px; border-radius: 10px; font-weight: 600; font-size: 15px; box-shadow: 0 4px 14px rgba(245, 158, 11, 0.3);">
+           style="display: inline-block; background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); color: #ffffff; text-decoration: none; padding: 12px 24px; border-radius: 10px; font-weight: 600; font-size: 14px; box-shadow: 0 4px 14px rgba(245, 158, 11, 0.3);">
           View Property Listing
         </a>
+      </div>
+      <div style="background: #ecfdf5; border-radius: 8px; padding: 16px; margin: 24px 0;">
+        <p style="color: #065f46; font-size: 13px; margin: 0; line-height: 1.5;">
+          <strong>Action Required:</strong> Please review this viewing request in your account dashboard. You can approve or decline the request, and the visitor will be notified by email.
+        </p>
       </div>
     </div>
     <div style="background: #f9fafb; padding: 24px; text-align: center; border-top: 1px solid #e5e7eb;">
@@ -3136,7 +3147,217 @@ Questions? Contact us at support@balkanestateai.com
       to: params.sellerEmail,
       subject: `🏠 New Viewing Request from ${params.visitorName} - ${params.date} at ${params.timeSlot}`,
       html,
-      text: `Hello ${params.sellerName},\n\nNew viewing request!\n\nProperty: ${params.propertyTitle}\nDate: ${params.date} at ${params.timeSlot}\n\nVisitor: ${params.visitorName}\nEmail: ${params.visitorEmail}${params.visitorPhone ? `\nPhone: ${params.visitorPhone}` : ''}${params.visitorMessage ? `\nMessage: "${params.visitorMessage}"` : ''}\n\nView listing: ${frontendUrl}/property/${params.propertyId}\n\n© ${currentYear} BalkanEstateᴬᴵ`,
+      text: `Hello ${params.sellerName},\n\nNew viewing request!\n\nProperty: ${params.propertyTitle}\nDate: ${params.date} at ${params.timeSlot}\n\nVisitor: ${params.visitorName}\nEmail: ${params.visitorEmail}${params.visitorPhone ? `\nPhone: ${params.visitorPhone}` : ''}${params.visitorMessage ? `\nMessage: "${params.visitorMessage}"` : ''}\n\nManage viewings: ${frontendUrl}/account/viewings\nView listing: ${frontendUrl}/property/${params.propertyId}\n\nAction Required: Please approve or decline this viewing request in your account dashboard.\n\n© ${currentYear} BalkanEstateᴬᴵ`,
+      category: 'inquiries',
+    });
+  }
+  /**
+   * Send viewing approved email to visitor
+   */
+  async sendViewingApproved(params: {
+    visitorEmail: string;
+    visitorName: string;
+    propertyTitle: string;
+    propertyAddress: string;
+    date: string;
+    timeSlot: string;
+    sellerName: string;
+    sellerPhone?: string;
+    propertyId: string;
+  }): Promise<void> {
+    const safeName = escapeHtml(params.visitorName);
+    const safeTitle = escapeHtml(params.propertyTitle);
+    const safeAddress = escapeHtml(params.propertyAddress);
+    const safeDate = escapeHtml(params.date);
+    const safeTime = escapeHtml(params.timeSlot);
+    const safeSellerName = escapeHtml(params.sellerName);
+    const safeSellerPhone = escapeHtml(params.sellerPhone);
+    const frontendUrl = process.env.FRONTEND_URL || 'https://balkanestate.com';
+    const currentYear = new Date().getFullYear();
+
+    const html = `
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body style="margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f3f4f6; -webkit-font-smoothing: antialiased;">
+  <div style="display: none; max-height: 0; overflow: hidden;">
+    Great news! Your viewing has been confirmed for ${safeDate} at ${safeTime}
+  </div>
+  <div style="max-width: 600px; margin: 0 auto; background-color: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);">
+    <div style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); padding: 40px 24px; text-align: center;">
+      <div style="margin-bottom: 16px;">
+        <span style="display: inline-block; width: 60px; height: 60px; background: rgba(255,255,255,0.15); border-radius: 50%; line-height: 60px; font-size: 28px;">&#10003;</span>
+      </div>
+      <h1 style="color: #ffffff; margin: 0; font-size: 24px; font-weight: 700;">Viewing Confirmed!</h1>
+      <p style="color: #d1fae5; margin: 8px 0 0 0; font-size: 14px;">The property owner has approved your visit</p>
+    </div>
+    <div style="padding: 32px 24px;">
+      <p style="color: #374151; font-size: 16px; margin: 0 0 16px 0;">
+        Hello ${safeName},
+      </p>
+      <p style="color: #4b5563; font-size: 15px; line-height: 1.6; margin: 0 0 24px 0;">
+        Great news! Your viewing request has been <strong style="color: #059669;">approved</strong>. You're all set to visit the property.
+      </p>
+      <div style="background: #ecfdf5; border: 1px solid #a7f3d0; border-radius: 12px; padding: 24px; margin: 0 0 24px 0;">
+        <h2 style="color: #065f46; font-size: 16px; margin: 0 0 16px 0;">Confirmed Viewing Details</h2>
+        <table style="width: 100%; border-collapse: collapse;">
+          <tr>
+            <td style="padding: 8px 0; color: #6b7280; font-size: 14px; width: 120px;">Property:</td>
+            <td style="padding: 8px 0; color: #111827; font-size: 14px; font-weight: 600;">${safeTitle}</td>
+          </tr>
+          <tr>
+            <td style="padding: 8px 0; color: #6b7280; font-size: 14px;">Address:</td>
+            <td style="padding: 8px 0; color: #111827; font-size: 14px;">${safeAddress}</td>
+          </tr>
+          <tr>
+            <td style="padding: 8px 0; color: #6b7280; font-size: 14px;">Date:</td>
+            <td style="padding: 8px 0; color: #111827; font-size: 14px; font-weight: 600;">${safeDate}</td>
+          </tr>
+          <tr>
+            <td style="padding: 8px 0; color: #6b7280; font-size: 14px;">Time:</td>
+            <td style="padding: 8px 0; color: #111827; font-size: 14px; font-weight: 600;">${safeTime}</td>
+          </tr>
+          <tr>
+            <td style="padding: 8px 0; color: #6b7280; font-size: 14px;">Contact:</td>
+            <td style="padding: 8px 0; color: #111827; font-size: 14px;">${safeSellerName}${safeSellerPhone ? ` &mdash; <a href="tel:${safeSellerPhone}" style="color: #0252CD; text-decoration: none;">${safeSellerPhone}</a>` : ''}</td>
+          </tr>
+        </table>
+      </div>
+      <div style="text-align: center; margin: 24px 0;">
+        <a href="${frontendUrl}/property/${params.propertyId}"
+           style="display: inline-block; background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: #ffffff; text-decoration: none; padding: 14px 32px; border-radius: 10px; font-weight: 600; font-size: 15px; box-shadow: 0 4px 14px rgba(16, 185, 129, 0.3);">
+          View Property Details
+        </a>
+      </div>
+      <div style="background: #fef3c7; border-radius: 8px; padding: 16px; margin: 24px 0;">
+        <p style="color: #92400e; font-size: 13px; margin: 0; line-height: 1.5;">
+          <strong>Reminder:</strong> Please arrive on time and bring a valid ID. If you need to cancel, please let the owner know in advance.
+        </p>
+      </div>
+    </div>
+    <div style="background: #f9fafb; padding: 24px; text-align: center; border-top: 1px solid #e5e7eb;">
+      <p style="color: #6b7280; font-size: 12px; margin: 0 0 8px 0;">
+        Need help? Contact us at <a href="mailto:support@balkanestateai.com" style="color: #0252CD; text-decoration: none;">support@balkanestateai.com</a>
+      </p>
+      <p style="color: #9ca3af; font-size: 11px; margin: 0;">
+        &copy; ${currentYear} BalkanEstate<sup>AI</sup>
+      </p>
+    </div>
+  </div>
+</body>
+</html>`;
+
+    await this.sendEmail({
+      to: params.visitorEmail,
+      subject: `✅ Viewing Confirmed: ${params.propertyTitle} on ${params.date}`,
+      html,
+      text: `Hello ${params.visitorName},\n\nGreat news! Your viewing has been confirmed!\n\nProperty: ${params.propertyTitle}\nAddress: ${params.propertyAddress}\nDate: ${params.date}\nTime: ${params.timeSlot}\nContact: ${params.sellerName}${params.sellerPhone ? ` — ${params.sellerPhone}` : ''}\n\nPlease arrive on time and bring a valid ID.\n\nView property: ${frontendUrl}/property/${params.propertyId}\n\n© ${currentYear} BalkanEstateᴬᴵ`,
+      category: 'inquiries',
+    });
+  }
+
+  /**
+   * Send viewing rejected/declined email to visitor
+   */
+  async sendViewingRejected(params: {
+    visitorEmail: string;
+    visitorName: string;
+    propertyTitle: string;
+    propertyAddress: string;
+    date: string;
+    timeSlot: string;
+    sellerName: string;
+    cancelReason?: string;
+    propertyId: string;
+  }): Promise<void> {
+    const safeName = escapeHtml(params.visitorName);
+    const safeTitle = escapeHtml(params.propertyTitle);
+    const safeAddress = escapeHtml(params.propertyAddress);
+    const safeDate = escapeHtml(params.date);
+    const safeTime = escapeHtml(params.timeSlot);
+    const safeCancelReason = escapeHtml(params.cancelReason);
+    const frontendUrl = process.env.FRONTEND_URL || 'https://balkanestate.com';
+    const currentYear = new Date().getFullYear();
+
+    const html = `
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body style="margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f3f4f6; -webkit-font-smoothing: antialiased;">
+  <div style="display: none; max-height: 0; overflow: hidden;">
+    Unfortunately, your viewing for ${safeDate} at ${safeTime} could not be confirmed
+  </div>
+  <div style="max-width: 600px; margin: 0 auto; background-color: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);">
+    <div style="background: linear-gradient(135deg, #6b7280 0%, #4b5563 100%); padding: 40px 24px; text-align: center;">
+      <div style="margin-bottom: 16px;">
+        <span style="display: inline-block; width: 60px; height: 60px; background: rgba(255,255,255,0.15); border-radius: 50%; line-height: 60px; font-size: 28px;">📋</span>
+      </div>
+      <h1 style="color: #ffffff; margin: 0; font-size: 24px; font-weight: 700;">Viewing Update</h1>
+      <p style="color: #d1d5db; margin: 8px 0 0 0; font-size: 14px;">Your viewing request status has changed</p>
+    </div>
+    <div style="padding: 32px 24px;">
+      <p style="color: #374151; font-size: 16px; margin: 0 0 16px 0;">
+        Hello ${safeName},
+      </p>
+      <p style="color: #4b5563; font-size: 15px; line-height: 1.6; margin: 0 0 24px 0;">
+        Unfortunately, the property owner was unable to confirm your viewing request for the selected date and time. We apologize for any inconvenience.
+      </p>
+      <div style="background: #f3f4f6; border: 1px solid #e5e7eb; border-radius: 12px; padding: 24px; margin: 0 0 24px 0;">
+        <h2 style="color: #374151; font-size: 16px; margin: 0 0 16px 0;">Request Details</h2>
+        <table style="width: 100%; border-collapse: collapse;">
+          <tr>
+            <td style="padding: 8px 0; color: #6b7280; font-size: 14px; width: 120px;">Property:</td>
+            <td style="padding: 8px 0; color: #111827; font-size: 14px; font-weight: 600;">${safeTitle}</td>
+          </tr>
+          <tr>
+            <td style="padding: 8px 0; color: #6b7280; font-size: 14px;">Requested:</td>
+            <td style="padding: 8px 0; color: #111827; font-size: 14px;">${safeDate} at ${safeTime}</td>
+          </tr>
+          <tr>
+            <td style="padding: 8px 0; color: #6b7280; font-size: 14px;">Status:</td>
+            <td style="padding: 8px 0; color: #dc2626; font-size: 14px; font-weight: 600;">Declined</td>
+          </tr>
+          ${safeCancelReason ? `<tr>
+            <td style="padding: 8px 0; color: #6b7280; font-size: 14px; vertical-align: top;">Reason:</td>
+            <td style="padding: 8px 0; color: #111827; font-size: 14px; font-style: italic;">"${safeCancelReason}"</td>
+          </tr>` : ''}
+        </table>
+      </div>
+      <div style="background: #eff6ff; border-radius: 8px; padding: 16px; margin: 0 0 24px 0;">
+        <p style="color: #1e40af; font-size: 13px; margin: 0; line-height: 1.5;">
+          <strong>What to do next:</strong> You can try scheduling a different date or time for this property, or browse other similar properties in the area.
+        </p>
+      </div>
+      <div style="text-align: center; margin: 24px 0;">
+        <a href="${frontendUrl}/property/${params.propertyId}"
+           style="display: inline-block; background: linear-gradient(135deg, #0252CD 0%, #0369a1 100%); color: #ffffff; text-decoration: none; padding: 14px 32px; border-radius: 10px; font-weight: 600; font-size: 15px; box-shadow: 0 4px 14px rgba(2, 82, 205, 0.3);">
+          Try Another Time
+        </a>
+      </div>
+    </div>
+    <div style="background: #f9fafb; padding: 24px; text-align: center; border-top: 1px solid #e5e7eb;">
+      <p style="color: #6b7280; font-size: 12px; margin: 0 0 8px 0;">
+        Need help? Contact us at <a href="mailto:support@balkanestateai.com" style="color: #0252CD; text-decoration: none;">support@balkanestateai.com</a>
+      </p>
+      <p style="color: #9ca3af; font-size: 11px; margin: 0;">
+        &copy; ${currentYear} BalkanEstate<sup>AI</sup>
+      </p>
+    </div>
+  </div>
+</body>
+</html>`;
+
+    await this.sendEmail({
+      to: params.visitorEmail,
+      subject: `Viewing Update: ${params.propertyTitle}`,
+      html,
+      text: `Hello ${params.visitorName},\n\nUnfortunately, the property owner was unable to confirm your viewing request.\n\nProperty: ${params.propertyTitle}\nRequested: ${params.date} at ${params.timeSlot}\nStatus: Declined${params.cancelReason ? `\nReason: "${params.cancelReason}"` : ''}\n\nYou can try scheduling a different date or time.\n\nView property: ${frontendUrl}/property/${params.propertyId}\n\n© ${currentYear} BalkanEstateᴬᴵ`,
       category: 'inquiries',
     });
   }
@@ -3165,3 +3386,5 @@ export const sendAgentJoinedAgencyEmail = emailServiceInstance.sendAgentJoinedAg
 export const sendAgencyNewMemberEmail = emailServiceInstance.sendAgencyNewMemberEmail.bind(emailServiceInstance);
 export const sendViewingConfirmation = emailServiceInstance.sendViewingConfirmation.bind(emailServiceInstance);
 export const sendViewingNotification = emailServiceInstance.sendViewingNotification.bind(emailServiceInstance);
+export const sendViewingApproved = emailServiceInstance.sendViewingApproved.bind(emailServiceInstance);
+export const sendViewingRejected = emailServiceInstance.sendViewingRejected.bind(emailServiceInstance);

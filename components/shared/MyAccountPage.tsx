@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, lazy, Suspense } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useAppContext } from '../../context/AppContext';
 import MyListings from './MyListings';
@@ -6,8 +6,10 @@ import SubscriptionManagement from './SubscriptionManagement';
 import ProfileStatistics from './ProfileStatistics';
 import MyPromotions from './MyPromotions';
 import MyMeasurements from './MyMeasurements';
+
+const ViewingRequestsTab = lazy(() => import('./ViewingRequestsTab'));
 import { User, UserRole, Agency } from '../../types';
-import { BuildingOfficeIcon, ChartBarIcon, UserCircleIcon, ArrowLeftOnRectangleIcon, XMarkIcon, MapPinIcon, CreditCardIcon, ShieldCheckIcon, SparklesIcon } from '../../constants';
+import { BuildingOfficeIcon, ChartBarIcon, UserCircleIcon, ArrowLeftOnRectangleIcon, XMarkIcon, MapPinIcon, CreditCardIcon, ShieldCheckIcon, SparklesIcon, CalendarIcon } from '../../constants';
 import DefaultAvatar from './DefaultAvatar';
 import AvatarCustomizer, { type AvatarOptions, parseAvatarOptions, getDefaultAvatarOptions } from './AvatarCustomizer';
 import AgentLicenseModal from './AgentLicenseModal';
@@ -29,7 +31,7 @@ const BALKAN_LANGUAGES = [
   'Hungarian', 'German', 'Italian', 'French', 'Russian', 'Spanish'
 ];
 
-type AccountTab = 'listings' | 'performance' | 'profile' | 'subscription' | 'security' | 'promotions' | 'measurements';
+type AccountTab = 'listings' | 'performance' | 'profile' | 'subscription' | 'security' | 'promotions' | 'measurements' | 'viewings';
 
 // Map URL slugs to account tabs
 const tabRouteMap: Record<string, AccountTab> = {
@@ -47,6 +49,8 @@ const tabRouteMap: Record<string, AccountTab> = {
     'security': 'security',
     'measurements': 'measurements',
     'my-measurements': 'measurements',
+    'viewings': 'viewings',
+    'viewing-requests': 'viewings',
 };
 
 // Map account tabs to URL slugs
@@ -58,6 +62,7 @@ const tabToRouteMap: Record<AccountTab, string> = {
     'profile': 'profile',
     'security': 'security',
     'measurements': 'measurements',
+    'viewings': 'viewings',
 };
 
 const TabButton: React.FC<{
@@ -1403,7 +1408,7 @@ const MyAccountPage: React.FC = () => {
 
     // Redirect non-sellers to profile if they're on a seller-only tab
     useEffect(() => {
-        if (!isSellerProfile && (activeTab === 'listings' || activeTab === 'performance' || activeTab === 'subscription' || activeTab === 'promotions')) {
+        if (!isSellerProfile && (activeTab === 'listings' || activeTab === 'performance' || activeTab === 'subscription' || activeTab === 'promotions' || activeTab === 'viewings')) {
             setActiveTab('profile');
         }
     }, [isSellerProfile, activeTab, setActiveTab]);
@@ -1457,6 +1462,8 @@ const MyAccountPage: React.FC = () => {
                  return <SubscriptionManagement userId={state.currentUser!.id} />;
             case 'measurements':
                  return <MyMeasurements userId={state.currentUser!.id} />;
+            case 'viewings':
+                 return isSellerProfile ? <Suspense fallback={<div className="flex justify-center py-12"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div></div>}><ViewingRequestsTab /></Suspense> : null;
             case 'security':
                  return <SecuritySettings logoutAllDevices={logoutAllDevices} />;
             default:
@@ -1533,6 +1540,7 @@ const MyAccountPage: React.FC = () => {
                                         <TabButton label={t('account:tabs.promotions', 'My Promotions')} icon={<SparklesIcon className="w-6 h-6"/>} isActive={activeTab === 'promotions'} onClick={() => setActiveTab('promotions')} tabKey="promotions" />
                                         <TabButton label={t('account:tabs.performance')} icon={<ChartBarIcon className="w-6 h-6"/>} isActive={activeTab === 'performance'} onClick={() => setActiveTab('performance')} tabKey="performance" />
                                         <TabButton label={t('account:tabs.subscription')} icon={<CreditCardIcon className="w-6 h-6"/>} isActive={activeTab === 'subscription'} onClick={() => setActiveTab('subscription')} tabKey="subscription" />
+                                        <TabButton label={t('account:tabs.viewings', 'Viewing Requests')} icon={<CalendarIcon className="w-6 h-6"/>} isActive={activeTab === 'viewings'} onClick={() => setActiveTab('viewings')} tabKey="viewings" />
                                     </>
                                 )}
                                 <TabButton label={t('account:tabs.profileSettings')} icon={<UserCircleIcon className="w-6 h-6"/>} isActive={activeTab === 'profile'} onClick={() => setActiveTab('profile')} tabKey="profile" />

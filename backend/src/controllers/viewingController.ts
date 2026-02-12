@@ -2,7 +2,7 @@ import { Request, Response } from 'express';
 import Property from '../models/Property';
 import User from '../models/User';
 import Viewing from '../models/Viewing';
-import { sendViewingConfirmation, sendViewingNotification } from '../services/emailService';
+import { sendViewingConfirmation, sendViewingNotification, sendViewingApproved, sendViewingRejected } from '../services/emailService';
 import { apiLogger } from '../utils/logger';
 
 /**
@@ -237,5 +237,196 @@ export const scheduleViewing = async (req: Request, res: Response): Promise<void
   } catch (error: any) {
     apiLogger.error('Schedule viewing error:', error);
     res.status(500).json({ message: 'Error scheduling viewing', error: error.message });
+  }
+};
+
+/**
+ * @desc    Get all viewing requests for the authenticated seller/agent
+ * @route   GET /api/viewings/seller
+ * @access  Private (seller/agent)
+ */
+export const getSellerViewings = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const sellerId = req.user?._id;
+    if (!sellerId) {
+      res.status(401).json({ message: 'Not authorized' });
+      return;
+    }
+
+    const { status, page = '1', limit = '50' } = req.query;
+    const pageNum = Math.max(1, parseInt(page as string, 10));
+    const limitNum = Math.min(100, Math.max(1, parseInt(limit as string, 10)));
+
+    const filter: any = { sellerId };
+    if (status && ['pending', 'confirmed', 'cancelled', 'completed'].includes(status as string)) {
+      filter.status = status;
+    }
+
+    const [viewings, total] = await Promise.all([
+      Viewing.find(filter)
+        .populate('propertyId', 'title propertyType city country address imageUrl price listingType')
+        .sort({ date: -1, createdAt: -1 })
+        .skip((pageNum - 1) * limitNum)
+        .limit(limitNum)
+        .lean(),
+      Viewing.countDocuments(filter),
+    ]);
+
+    // Also return counts by status for the tabs
+    const [pendingCount, confirmedCount, cancelledCount, completedCount] = await Promise.all([
+      Viewing.countDocuments({ sellerId, status: 'pending' }),
+      Viewing.countDocuments({ sellerId, status: 'confirmed' }),
+      Viewing.countDocuments({ sellerId, status: 'cancelled' }),
+      Viewing.countDocuments({ sellerId, status: 'completed' }),
+    ]);
+
+    res.json({
+      viewings: viewings.map(v => ({
+        id: v._id,
+        property: v.propertyId,
+        visitorName: v.visitorName,
+        visitorEmail: v.visitorEmail,
+        visitorPhone: v.visitorPhone,
+        visitorMessage: v.visitorMessage,
+        date: v.date,
+        timeSlot: v.timeSlot,
+        status: v.status,
+        cancelledBy: v.cancelledBy,
+        cancelReason: v.cancelReason,
+        createdAt: v.createdAt,
+      })),
+      pagination: {
+        page: pageNum,
+        limit: limitNum,
+        total,
+        pages: Math.ceil(total / limitNum),
+      },
+      counts: {
+        pending: pendingCount,
+        confirmed: confirmedCount,
+        cancelled: cancelledCount,
+        completed: completedCount,
+        total: pendingCount + confirmedCount + cancelledCount + completedCount,
+      },
+    });
+  } catch (error: any) {
+    apiLogger.error('Get seller viewings error:', error);
+    res.status(500).json({ message: 'Error fetching viewings', error: error.message });
+  }
+};
+
+/**
+ * @desc    Update viewing status (approve/reject/complete)
+ * @route   PATCH /api/viewings/:viewingId/status
+ * @access  Private (seller/agent who owns the property)
+ */
+export const updateViewingStatus = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const sellerId = req.user?._id;
+    if (!sellerId) {
+      res.status(401).json({ message: 'Not authorized' });
+      return;
+    }
+
+    const { viewingId } = req.params;
+    const { status, cancelReason } = req.body;
+
+    if (!status || !['confirmed', 'cancelled', 'completed'].includes(status)) {
+      res.status(400).json({ message: 'Invalid status. Must be: confirmed, cancelled, or completed' });
+      return;
+    }
+
+    const viewing = await Viewing.findById(viewingId);
+    if (!viewing) {
+      res.status(404).json({ message: 'Viewing not found' });
+      return;
+    }
+
+    // Verify the seller owns this viewing
+    if (String(viewing.sellerId) !== String(sellerId)) {
+      res.status(403).json({ message: 'You do not have permission to manage this viewing' });
+      return;
+    }
+
+    // Validate state transitions
+    if (viewing.status === 'completed') {
+      res.status(400).json({ message: 'Cannot change status of a completed viewing' });
+      return;
+    }
+    if (viewing.status === 'cancelled') {
+      res.status(400).json({ message: 'Cannot change status of a cancelled viewing' });
+      return;
+    }
+
+    const oldStatus = viewing.status;
+    viewing.status = status;
+    if (status === 'cancelled') {
+      viewing.cancelledBy = 'seller';
+      viewing.cancelReason = cancelReason?.trim() || undefined;
+    }
+    await viewing.save();
+
+    // Get property details for the email
+    const property = await Property.findById(viewing.propertyId).select('title propertyType city country address');
+    const propertyTitle = property?.title || `${property?.propertyType || 'Property'} in ${property?.city || 'Unknown'}`;
+    const location = property ? [property.address, property.city, property.country].filter(Boolean).join(', ') : '';
+
+    const viewingDate = new Date(viewing.date);
+    const formattedDate = viewingDate.toLocaleDateString('en-US', {
+      weekday: 'long',
+      month: 'long',
+      day: 'numeric',
+      year: 'numeric',
+    });
+
+    const sellerName = req.user?.name || 'Property Owner';
+
+    // Send status notification emails
+    if (status === 'confirmed' && oldStatus === 'pending') {
+      try {
+        await sendViewingApproved({
+          visitorEmail: viewing.visitorEmail,
+          visitorName: viewing.visitorName,
+          propertyTitle,
+          propertyAddress: location,
+          date: formattedDate,
+          timeSlot: viewing.timeSlot,
+          sellerName,
+          sellerPhone: req.user?.phone,
+          propertyId: String(viewing.propertyId),
+        });
+      } catch (emailError) {
+        apiLogger.error('Failed to send viewing approved email:', emailError);
+      }
+    } else if (status === 'cancelled' && oldStatus !== 'cancelled') {
+      try {
+        await sendViewingRejected({
+          visitorEmail: viewing.visitorEmail,
+          visitorName: viewing.visitorName,
+          propertyTitle,
+          propertyAddress: location,
+          date: formattedDate,
+          timeSlot: viewing.timeSlot,
+          sellerName,
+          cancelReason: cancelReason?.trim(),
+          propertyId: String(viewing.propertyId),
+        });
+      } catch (emailError) {
+        apiLogger.error('Failed to send viewing rejected email:', emailError);
+      }
+    }
+
+    apiLogger.info(`[viewingController] Viewing ${viewingId} status updated: ${oldStatus} → ${status} by seller ${sellerId}`);
+
+    res.json({
+      message: `Viewing ${status === 'confirmed' ? 'approved' : status === 'cancelled' ? 'declined' : 'completed'} successfully`,
+      viewing: {
+        id: viewing._id,
+        status: viewing.status,
+      },
+    });
+  } catch (error: any) {
+    apiLogger.error('Update viewing status error:', error);
+    res.status(500).json({ message: 'Error updating viewing status', error: error.message });
   }
 };
