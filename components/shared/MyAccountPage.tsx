@@ -8,6 +8,7 @@ import MyPromotions from './MyPromotions';
 import MyMeasurements from './MyMeasurements';
 import { User, UserRole, Agency } from '../../types';
 import { BuildingOfficeIcon, ChartBarIcon, UserCircleIcon, ArrowLeftOnRectangleIcon, XMarkIcon, MapPinIcon, CreditCardIcon, ShieldCheckIcon, SparklesIcon } from '../../constants';
+import DefaultAvatar from './DefaultAvatar';
 import AgentLicenseModal from './AgentLicenseModal';
 import AgencyManagementSection from './AgencyManagementSection';
 import { switchRole, joinAgencyByInvitationCode, getAgencies, updateAgentProfile } from '../../services/apiService';
@@ -754,6 +755,7 @@ const ProfileSettings: React.FC<{ user: User }> = ({ user }) => {
                 country: agentData.country,
                 address: agentData.streetAddress || '',
                 avatarUrl: formData.avatarUrl,
+                gender: formData.gender || 'male',
             };
 
             // Update UI immediately (optimistic update)
@@ -979,7 +981,7 @@ const ProfileSettings: React.FC<{ user: User }> = ({ user }) => {
                                 referrerPolicy="no-referrer"
                             />
                         ) : (
-                            <UserCircleIcon className="w-full h-full text-neutral-300" />
+                            <DefaultAvatar gender={formData.gender} />
                         )}
                         {isUploadingAvatar && (
                             <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50">
@@ -1008,6 +1010,27 @@ const ProfileSettings: React.FC<{ user: User }> = ({ user }) => {
                             {t('profile.imageRequirements')}
                         </p>
                     </div>
+                </div>
+            </fieldset>
+
+            {/* Gender Selection */}
+            <fieldset className="border-t pt-6">
+                <legend className="block text-sm font-medium text-neutral-700 mb-3">{t('profile.gender', 'Gender')}</legend>
+                <div className="flex gap-3 flex-wrap">
+                    {(['male', 'female', 'other'] as const).map((g) => (
+                        <button
+                            key={g}
+                            type="button"
+                            onClick={() => setFormData(prev => ({ ...prev, gender: g }))}
+                            className={`px-5 py-2.5 rounded-lg text-sm font-medium transition-all border ${
+                                formData.gender === g || (!formData.gender && g === 'male')
+                                    ? 'bg-primary text-white border-primary shadow-md'
+                                    : 'bg-white text-neutral-700 border-neutral-300 hover:border-primary hover:bg-primary/5'
+                            }`}
+                        >
+                            {t(`profile.gender_${g}`, g.charAt(0).toUpperCase() + g.slice(1))}
+                        </button>
+                    ))}
                 </div>
             </fieldset>
 

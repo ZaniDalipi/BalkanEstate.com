@@ -11,6 +11,7 @@ export interface IUser extends Document {
   phone?: string;
   avatarUrl?: string;
   avatarPublicId?: string;
+  gender?: 'male' | 'female' | 'other';
   role: 'buyer' | 'private_seller' | 'agent' | 'admin' | 'super_admin'; // Deprecated - use availableRoles instead
   availableRoles: ('buyer' | 'private_seller' | 'agent' | 'admin' | 'super_admin')[]; // What roles user can access
   activeRole: 'buyer' | 'private_seller' | 'agent' | 'admin' | 'super_admin'; // Current UI context
@@ -308,6 +309,11 @@ const UserSchema: Schema = new Schema(
     },
     avatarPublicId: {
       type: String,
+    },
+    gender: {
+      type: String,
+      enum: ['male', 'female', 'other'],
+      default: 'male',
     },
     role: {
       type: String,

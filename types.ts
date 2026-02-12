@@ -66,6 +66,7 @@ export interface User {
     name: string;
     email: string;
     avatarUrl?: string;
+    gender?: 'male' | 'female' | 'other';
     phone: string;
     role: UserRole;
     provider?: 'local' | 'google' | 'facebook' | 'apple';

@@ -3,8 +3,8 @@ import { useTranslation } from 'react-i18next';
 import { Agent } from '@/types';
 import {
     CheckCircleIcon,
-    UserCircleIcon,
 } from '@/constants';
+import DefaultAvatar from '@/components/shared/DefaultAvatar';
 import FeaturedAgencies from '@/components/FeaturedAgencies';
 
 // Extracted sub-components
@@ -27,7 +27,7 @@ const ProfileAvatar: React.FC<{ agent: Agent }> = ({ agent }) => {
         <div className="w-32 h-32 rounded-full overflow-hidden border-4 border-white shadow-lg bg-gradient-to-br from-gray-100 to-gray-200 flex-shrink-0">
             {(!agent.avatarUrl || error) ? (
                 <div className="w-full h-full flex items-center justify-center">
-                    <UserCircleIcon className="w-20 h-20 text-gray-300" />
+                    <DefaultAvatar gender={agent.gender} />
                 </div>
             ) : (
                 <img
