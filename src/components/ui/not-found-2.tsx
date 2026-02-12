@@ -9,12 +9,29 @@ function navigate(path: string) {
 
 export function NotFound() {
 	return (
-		<div className="liquid-glass-bg fixed inset-0 flex flex-col items-center justify-center overflow-hidden px-4">
-			{/* Floating glass orbs */}
-			<div className="glass-orb w-96 h-96 bg-blue-200/30 -top-32 -left-32" />
-			<div className="glass-orb w-72 h-72 bg-purple-200/20 -bottom-20 -right-20" style={{ animationDelay: '-5s' }} />
-			<div className="glass-orb w-48 h-48 bg-cyan-200/20 top-1/4 right-1/5" style={{ animationDelay: '-10s' }} />
-			<div className="glass-orb w-32 h-32 bg-amber-200/20 bottom-1/4 left-1/5" style={{ animationDelay: '-15s' }} />
+		<div className="liquid-glass-bg fixed inset-0 z-[9999] flex flex-col items-center justify-center overflow-hidden px-4">
+			{/* Soft gradient orbs (inline styles to avoid clipping issues with CSS blur) */}
+			<div
+				className="absolute pointer-events-none"
+				style={{
+					width: '500px', height: '500px', top: '-100px', left: '-100px',
+					background: 'radial-gradient(circle, rgba(59,130,246,0.08) 0%, transparent 70%)',
+				}}
+			/>
+			<div
+				className="absolute pointer-events-none"
+				style={{
+					width: '400px', height: '400px', bottom: '-80px', right: '-80px',
+					background: 'radial-gradient(circle, rgba(139,92,246,0.06) 0%, transparent 70%)',
+				}}
+			/>
+			<div
+				className="absolute pointer-events-none"
+				style={{
+					width: '300px', height: '300px', top: '20%', right: '15%',
+					background: 'radial-gradient(circle, rgba(6,182,212,0.06) 0%, transparent 70%)',
+				}}
+			/>
 
 			{/* Animated illustration */}
 			<div className="relative z-10 w-full max-w-lg">
@@ -25,7 +42,7 @@ export function NotFound() {
 					}}
 					aria-hidden="true"
 				>
-					<h1 className="text-center font-black text-7xl sm:text-8xl md:text-9xl text-primary/15 select-none tracking-tight pt-2">
+					<h1 className="text-center font-black text-7xl sm:text-8xl md:text-9xl text-primary/10 select-none tracking-tight pt-2">
 						404
 					</h1>
 				</div>
@@ -44,10 +61,10 @@ export function NotFound() {
 				{/* Main action buttons */}
 				<div className="flex flex-col sm:flex-row gap-3 justify-center mb-10">
 					<Button
-						variant="glass"
+						variant="cool"
 						size="lg"
 						onClick={() => navigate('/search')}
-						className="rounded-2xl text-base gap-2 px-8"
+						className="rounded-2xl text-base gap-2 px-8 h-12"
 					>
 						<HomeIcon className="size-5" />
 						Go Home
@@ -56,42 +73,36 @@ export function NotFound() {
 						variant="glass"
 						size="lg"
 						onClick={() => navigate('/search')}
-						className="rounded-2xl text-base gap-2 px-8"
+						className="rounded-2xl text-base gap-2 px-8 h-12"
 					>
 						<SearchIcon className="size-5" />
 						Browse Properties
 					</Button>
 				</div>
 
-				{/* Quick links as glass pill buttons */}
+				{/* Quick links */}
 				<div className="flex flex-wrap justify-center gap-3">
-					<Button
-						variant="glass"
-						size="sm"
+					<button
 						onClick={() => navigate('/search')}
-						className="rounded-full gap-1.5 px-5"
+						className="glass-panel-light inline-flex items-center gap-1.5 px-5 py-2 text-sm font-medium text-gray-600 hover:text-gray-900 transition-all duration-300 hover:-translate-y-px cursor-pointer"
 					>
 						<SearchIcon className="size-3.5" />
 						Search
-					</Button>
-					<Button
-						variant="glass"
-						size="sm"
+					</button>
+					<button
 						onClick={() => navigate('/rentals')}
-						className="rounded-full gap-1.5 px-5"
+						className="glass-panel-light inline-flex items-center gap-1.5 px-5 py-2 text-sm font-medium text-gray-600 hover:text-gray-900 transition-all duration-300 hover:-translate-y-px cursor-pointer"
 					>
 						<BuildingIcon className="size-3.5" />
 						Rentals
-					</Button>
-					<Button
-						variant="glass"
-						size="sm"
+					</button>
+					<button
 						onClick={() => navigate('/agencies')}
-						className="rounded-full gap-1.5 px-5"
+						className="glass-panel-light inline-flex items-center gap-1.5 px-5 py-2 text-sm font-medium text-gray-600 hover:text-gray-900 transition-all duration-300 hover:-translate-y-px cursor-pointer"
 					>
 						<MapPinIcon className="size-3.5" />
 						Agencies
-					</Button>
+					</button>
 				</div>
 			</div>
 		</div>

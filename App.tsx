@@ -812,6 +812,15 @@ const AppWrapper: React.FC = () => {
         );
     }
 
+    // Render 404 page outside MainLayout for true full-screen (no sidebar)
+    if (state.activeView === 'not-found') {
+        return (
+            <Suspense fallback={<FullScreenLoader />}>
+                <NotFoundPage />
+            </Suspense>
+        );
+    }
+
     return (
         <>
             <MainLayout />
