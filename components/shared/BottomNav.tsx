@@ -71,6 +71,10 @@ const BottomNav: React.FC = () => {
                         );
                     }
 
+                    // Show avatar for account tab if user is authenticated
+                    const isAccountTab = item.view === 'account';
+                    const showAvatar = isAccountTab && isAuthenticated && currentUser?.avatarUrl;
+
                     return (
                         <button
                             key={item.view}
@@ -78,7 +82,13 @@ const BottomNav: React.FC = () => {
                             className="flex flex-col items-center justify-center flex-1 py-1.5 relative"
                         >
                             <div className="relative">
-                                <Icon className={`w-5 h-5 ${isActive ? 'text-primary' : 'text-neutral-600'}`} />
+                                {showAvatar ? (
+                                    <div className={`w-5 h-5 rounded-full overflow-hidden ring-2 ${isActive ? 'ring-primary/50' : 'ring-white/60'} shadow-sm`}>
+                                        <img src={currentUser.avatarUrl} alt="" className="w-full h-full object-cover" />
+                                    </div>
+                                ) : (
+                                    <Icon className={`w-5 h-5 ${isActive ? 'text-primary' : 'text-neutral-600'}`} />
+                                )}
                                 {item.badge && item.badge > 0 && (
                                     <span className="absolute -top-1 -right-1 bg-red-600 text-white text-xs font-bold rounded-full min-w-[16px] h-[16px] flex items-center justify-center px-1">
                                         {item.badge > 99 ? '99+' : item.badge}

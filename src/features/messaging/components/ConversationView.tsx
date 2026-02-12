@@ -321,7 +321,7 @@ const ConversationView: React.FC<ConversationViewProps> = ({ conversation, onBac
                                     className={`flex items-end gap-1.5 sm:gap-2 ${isCurrentUserMessage ? 'justify-end' : 'justify-start'}`}
                                 >
                                     {!isCurrentUserMessage && otherPerson && (
-                                        <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-full overflow-hidden flex-shrink-0 bg-neutral-100">
+                                        <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-full overflow-hidden flex-shrink-0 bg-neutral-100 ring-2 ring-white/60 shadow-sm">
                                             {otherPerson.avatarUrl ? (
                                                 <img src={otherPerson.avatarUrl} alt={otherPerson.name} loading="lazy" decoding="async" className="w-full h-full object-cover" referrerPolicy="no-referrer" />
                                             ) : (

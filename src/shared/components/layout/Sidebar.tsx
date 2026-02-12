@@ -214,7 +214,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
                                     : 'text-neutral-700 hover:bg-neutral-100'
                                 }`}
                             >
-                                <div className="w-5 h-5 flex-shrink-0">
+                                <div className="w-5 h-5 flex-shrink-0 rounded-full overflow-hidden ring-2 ring-white/60 shadow-sm">
                                 {currentUser.avatarUrl ? <img src={currentUser.avatarUrl} alt="avatar" className="w-full h-full rounded-full object-cover" referrerPolicy="no-referrer" /> : <UserCircleIcon />}
                                 </div>
                                 <span className="md:hidden group-hover:md:inline whitespace-nowrap text-sm">{t('nav:myAccount')}</span>

@@ -29,9 +29,20 @@ interface AgentCardProps {
 const AgentAvatar: React.FC<{ agent: Agent }> = ({ agent }) => {
   const [error, setError] = useState(false);
   const [loaded, setLoaded] = useState(false);
+  const { state } = useAppContext();
+
+  // Use AppContext avatar if this agent is the current user (immediate propagation)
+  const isCurrentUser = state.currentUser && (
+    agent.userId === state.currentUser.id ||
+    agent.id === state.currentUser.id ||
+    agent._id === state.currentUser._id
+  );
+  const avatarUrl = isCurrentUser && state.currentUser?.avatarUrl
+    ? state.currentUser.avatarUrl
+    : agent.avatarUrl;
 
   // Fallback placeholder when no avatar or on error
-  if (!agent.avatarUrl || error) {
+  if (!avatarUrl || error) {
     return (
       <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-blue-50 to-blue-100">
         <UserCircleIcon className="w-8 h-8 sm:w-10 sm:h-10 text-blue-300" />
@@ -46,7 +57,7 @@ const AgentAvatar: React.FC<{ agent: Agent }> = ({ agent }) => {
         <div className="absolute inset-0 bg-gradient-to-br from-blue-50 to-blue-100 animate-pulse" />
       )}
       <img
-        src={optimizeCloudinaryUrl(agent.avatarUrl, { width: 192, quality: 'auto', crop: 'fill' })}
+        src={optimizeCloudinaryUrl(avatarUrl, { width: 192, quality: 'auto', crop: 'fill' })}
         alt={agent.name}
         className={`absolute inset-0 w-full h-full object-cover object-center transition-opacity duration-300 ${
           loaded ? 'opacity-100' : 'opacity-0'
@@ -228,7 +239,7 @@ const AgentCard: React.FC<AgentCardProps> = ({ agent, index = 0 }) => {
           {/* Avatar container - outer wrapper for positioning badge */}
           <div className="relative mb-4">
             {/* Avatar image container - Fixed static dimensions */}
-            <div className="relative w-20 h-20 sm:w-24 sm:h-24 rounded-full overflow-hidden flex-shrink-0 shadow-lg ring-4 ring-white bg-gradient-to-br from-blue-50 to-blue-100">
+            <div className="relative w-20 h-20 sm:w-24 sm:h-24 rounded-full overflow-hidden flex-shrink-0 shadow-lg ring-4 ring-white/70 bg-gradient-to-br from-blue-50 to-blue-100" style={{ boxShadow: '0 8px 20px rgba(59,130,246,0.15), inset 2px 2px 2px 0 rgba(255,255,255,0.5), inset -1px -1px 1px 1px rgba(255,255,255,0.3)' }}>
               <AgentAvatar agent={agent} />
             </div>
 

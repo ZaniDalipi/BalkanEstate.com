@@ -970,7 +970,7 @@ const ProfileSettings: React.FC<{ user: User }> = ({ user }) => {
             <fieldset className="border-t pt-6">
                 <legend className="block text-sm font-medium text-neutral-700 mb-4">{t('profile.profilePicture')}</legend>
                 <div className="flex items-center gap-6">
-                    <div className="relative w-24 h-24 rounded-full overflow-hidden border-4 border-neutral-200 bg-neutral-100 flex-shrink-0">
+                    <div className="relative w-24 h-24 rounded-full overflow-hidden border-4 border-white/50 bg-neutral-100 flex-shrink-0 shadow-lg" style={{ boxShadow: '0 8px 16px rgba(0,0,0,0.1), inset 2px 2px 2px 0 rgba(255,255,255,0.5), inset -1px -1px 1px 1px rgba(255,255,255,0.3)' }}>
                         {avatarPreview || formData.avatarUrl ? (
                             <img
                                 src={avatarPreview || formData.avatarUrl}
@@ -1358,7 +1358,7 @@ const MyAccountPage: React.FC = () => {
                     <div className="lg:col-span-1">
                         <div className="bg-white p-4 rounded-xl shadow-md border border-neutral-200">
                              <div className="flex flex-col items-center text-center pb-4 mb-4 border-b">
-                                <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-full overflow-hidden mb-3 bg-neutral-100 flex-shrink-0">
+                                <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-full overflow-hidden mb-3 bg-neutral-100 flex-shrink-0 ring-4 ring-white/50 shadow-lg" style={{ boxShadow: '0 8px 16px rgba(0,0,0,0.1), inset 2px 2px 2px 0 rgba(255,255,255,0.5), inset -1px -1px 1px 1px rgba(255,255,255,0.3)' }}>
                                     {state.currentUser.avatarUrl ? (
                                         <img src={state.currentUser.avatarUrl} alt="avatar" className="w-full h-full object-cover" referrerPolicy="no-referrer" />
                                     ) : (

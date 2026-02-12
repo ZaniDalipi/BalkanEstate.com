@@ -60,26 +60,38 @@ const Header: React.FC<HeaderProps> = ({ onToggleSidebar, isFloating }) => {
       return (
         <button
           onClick={handleAccountClick}
-          className={`flex items-center space-x-2 font-semibold transition-colors py-1.5 px-2.5 rounded-full whitespace-nowrap ${floating ? 'text-neutral-700 bg-white hover:bg-neutral-100' : 'text-neutral-600 hover:text-primary hover:bg-neutral-100'}`}
+          className="relative flex items-center space-x-2 font-semibold transition-all duration-700 py-1.5 px-2.5 rounded-full whitespace-nowrap overflow-hidden backdrop-blur-md text-neutral-700 border border-white/40 hover:-translate-y-px hover:brightness-105"
+          style={{
+            background: 'linear-gradient(135deg, rgba(255,255,255,0.85), rgba(245,245,247,0.85))',
+            boxShadow: '0 4px 6px rgba(0,0,0,0.08), 0 0 15px rgba(0,0,0,0.04), inset 2px 2px 1px 0 rgba(255,255,255,0.6), inset -1px -1px 1px 1px rgba(255,255,255,0.4)',
+            transitionTimingFunction: 'cubic-bezier(0.175, 0.885, 0.32, 2.2)',
+          }}
         >
+            <div className="absolute inset-0 z-0 rounded-[inherit]" style={{ background: 'rgba(255,255,255,0.15)' }} />
             {currentUser.avatarUrl ? (
-              <div className="w-7 h-7 rounded-full overflow-hidden flex-shrink-0">
+              <div className="relative z-10 w-7 h-7 rounded-full overflow-hidden flex-shrink-0 ring-2 ring-white/60 shadow-sm">
                 <img src={currentUser.avatarUrl} alt="User Avatar" className="w-full h-full rounded-full object-cover"/>
               </div>
             ) : (
-              <UserCircleIcon className="w-7 h-7 flex-shrink-0" />
+              <UserCircleIcon className="relative z-10 w-7 h-7 flex-shrink-0" />
             )}
-            <span className="hidden sm:inline text-sm">{t('nav:myAccount')}</span>
+            <span className="relative z-10 hidden sm:inline text-sm">{t('nav:myAccount')}</span>
         </button>
       );
     }
     return (
       <button
         onClick={handleAccountClick}
-        className={`flex items-center space-x-2 font-semibold transition-colors py-1.5 px-2.5 rounded-full whitespace-nowrap ${floating ? 'text-neutral-700 bg-white hover:bg-neutral-100' : 'text-neutral-600 hover:text-primary hover:bg-neutral-100'}`}
+        className="relative flex items-center space-x-2 font-semibold transition-all duration-700 py-1.5 px-2.5 rounded-full whitespace-nowrap overflow-hidden backdrop-blur-md text-neutral-700 border border-white/40 hover:-translate-y-px hover:brightness-105"
+        style={{
+          background: 'linear-gradient(135deg, rgba(255,255,255,0.85), rgba(245,245,247,0.85))',
+          boxShadow: '0 4px 6px rgba(0,0,0,0.08), 0 0 15px rgba(0,0,0,0.04), inset 2px 2px 1px 0 rgba(255,255,255,0.6), inset -1px -1px 1px 1px rgba(255,255,255,0.4)',
+          transitionTimingFunction: 'cubic-bezier(0.175, 0.885, 0.32, 2.2)',
+        }}
       >
-          <UserIcon className="w-5 h-5" />
-          <span className="hidden sm:inline text-sm">{t('nav:loginRegister')}</span>
+          <div className="absolute inset-0 z-0 rounded-[inherit]" style={{ background: 'rgba(255,255,255,0.15)' }} />
+          <UserIcon className="relative z-10 w-5 h-5" />
+          <span className="relative z-10 hidden sm:inline text-sm">{t('nav:loginRegister')}</span>
       </button>
     );
   };

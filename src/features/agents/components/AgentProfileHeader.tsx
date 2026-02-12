@@ -17,6 +17,7 @@ import {
     HomeIcon,
 } from '@/constants';
 import { AgentStats } from './useAgentProfile';
+import { useAppContext } from '@/context/AppContext';
 
 interface AgentProfileHeaderProps {
     agent: Agent;
@@ -56,6 +57,17 @@ const AgentProfileHeader: React.FC<AgentProfileHeaderProps> = ({
     onOpenEditModal,
 }) => {
     const { t } = useTranslation(['agents']);
+    const { state } = useAppContext();
+
+    // Use AppContext avatar if this agent is the current user (immediate propagation)
+    const isCurrentUser = state.currentUser && (
+        agent.userId === state.currentUser.id ||
+        agent.id === state.currentUser.id ||
+        agent._id === state.currentUser._id
+    );
+    const resolvedAvatarUrl = isCurrentUser && state.currentUser?.avatarUrl
+        ? state.currentUser.avatarUrl
+        : agent.avatarUrl;
 
     return (
         <>
@@ -231,10 +243,10 @@ const AgentProfileHeader: React.FC<AgentProfileHeaderProps> = ({
                     <div className="flex flex-col lg:flex-row items-center lg:items-start gap-4 sm:gap-6 lg:gap-8">
                         {/* Agent Photo */}
                         <div className="relative flex-shrink-0">
-                            <div className="w-28 h-28 sm:w-36 sm:h-36 lg:w-44 lg:h-44 rounded-xl sm:rounded-2xl overflow-hidden shadow-lg sm:shadow-xl border-2 sm:border-4 border-gray-100">
-                                {agent.avatarUrl ? (
+                            <div className="w-28 h-28 sm:w-36 sm:h-36 lg:w-44 lg:h-44 rounded-xl sm:rounded-2xl overflow-hidden shadow-lg sm:shadow-xl border-2 sm:border-4 border-white/50" style={{ boxShadow: '0 10px 25px rgba(0,0,0,0.12), inset 2px 2px 2px 0 rgba(255,255,255,0.5), inset -1px -1px 1px 1px rgba(255,255,255,0.3)' }}>
+                                {resolvedAvatarUrl ? (
                                     <img
-                                        src={agent.avatarUrl}
+                                        src={resolvedAvatarUrl}
                                         alt={agent.name}
                                         className="w-full h-full object-cover"
                                     />

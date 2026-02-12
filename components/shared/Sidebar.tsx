@@ -305,7 +305,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
                                 aria-label={t('nav:goToAccount', 'Go to my account')}
                                 aria-current={activeView === 'account' ? 'page' : undefined}
                             >
-                                <div className="w-5 h-5 flex-shrink-0 rounded-full overflow-hidden bg-neutral-100">
+                                <div className="w-5 h-5 flex-shrink-0 rounded-full overflow-hidden bg-neutral-100 ring-2 ring-white/60 shadow-sm">
                                 {currentUser.avatarUrl ? <img src={currentUser.avatarUrl} alt={t('nav:userAvatar', 'User avatar')} className="w-full h-full object-cover"/> : <UserCircleIcon className="w-full h-full text-neutral-400" aria-hidden="true" />}
                                 </div>
                                 <span className="md:hidden group-hover:md:inline whitespace-nowrap text-sm">{t('nav:myAccount')}</span>
