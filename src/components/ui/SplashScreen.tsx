@@ -15,6 +15,99 @@ const SplashLogo: React.FC<{ className?: string }> = ({ className }) => (
 );
 
 /* ------------------------------------------------------------------ */
+/*  FloatingBlobs                                                      */
+/*  Subtle animated background shapes — very low opacity, slow drift.  */
+/* ------------------------------------------------------------------ */
+const FloatingBlobs: React.FC = () => (
+  <div className="absolute inset-0 overflow-hidden pointer-events-none">
+    {/* Large blue blob — top right */}
+    <motion.div
+      className="absolute rounded-full"
+      style={{
+        width: 500,
+        height: 500,
+        top: '-10%',
+        right: '-8%',
+        background: 'radial-gradient(circle, rgba(2,82,205,0.07) 0%, transparent 70%)',
+      }}
+      animate={{
+        x: [0, 30, -20, 0],
+        y: [0, 20, -10, 0],
+        scale: [1, 1.08, 0.95, 1],
+      }}
+      transition={{ duration: 12, repeat: Infinity, ease: 'easeInOut' }}
+    />
+    {/* Cyan blob — bottom left */}
+    <motion.div
+      className="absolute rounded-full"
+      style={{
+        width: 400,
+        height: 400,
+        bottom: '-5%',
+        left: '-5%',
+        background: 'radial-gradient(circle, rgba(0,180,216,0.06) 0%, transparent 70%)',
+      }}
+      animate={{
+        x: [0, -25, 15, 0],
+        y: [0, -15, 25, 0],
+        scale: [1, 1.1, 0.92, 1],
+      }}
+      transition={{ duration: 14, repeat: Infinity, ease: 'easeInOut' }}
+    />
+    {/* Small accent blob — center-left */}
+    <motion.div
+      className="absolute rounded-full"
+      style={{
+        width: 250,
+        height: 250,
+        top: '35%',
+        left: '15%',
+        background: 'radial-gradient(circle, rgba(2,82,205,0.04) 0%, transparent 70%)',
+      }}
+      animate={{
+        x: [0, 20, -15, 0],
+        y: [0, -20, 10, 0],
+        scale: [1, 1.12, 0.9, 1],
+      }}
+      transition={{ duration: 10, repeat: Infinity, ease: 'easeInOut' }}
+    />
+    {/* Tiny bright dot — top left, drifts */}
+    <motion.div
+      className="absolute rounded-full"
+      style={{
+        width: 120,
+        height: 120,
+        top: '20%',
+        left: '30%',
+        background: 'radial-gradient(circle, rgba(59,130,246,0.05) 0%, transparent 70%)',
+      }}
+      animate={{
+        x: [0, 40, -30, 0],
+        y: [0, 30, -20, 0],
+      }}
+      transition={{ duration: 8, repeat: Infinity, ease: 'easeInOut' }}
+    />
+    {/* Bottom right accent */}
+    <motion.div
+      className="absolute rounded-full"
+      style={{
+        width: 300,
+        height: 300,
+        bottom: '15%',
+        right: '10%',
+        background: 'radial-gradient(circle, rgba(0,180,216,0.04) 0%, transparent 70%)',
+      }}
+      animate={{
+        x: [0, -20, 30, 0],
+        y: [0, 15, -25, 0],
+        scale: [1, 0.95, 1.08, 1],
+      }}
+      transition={{ duration: 11, repeat: Infinity, ease: 'easeInOut' }}
+    />
+  </div>
+);
+
+/* ------------------------------------------------------------------ */
 /*  BrandReveal                                                        */
 /*  Logo on the left, "BalkanEstate" as one word, ".AI" superscript.   */
 /*  Revealed with a smooth left-to-right clip animation.               */
@@ -68,13 +161,19 @@ const BrandReveal: React.FC<BrandRevealProps> = ({ onComplete }) => {
             Estate
           </motion.span>
 
-          {/* ".AI" — pops in as superscript */}
+          {/* ".AI" — gradient blue-to-cyan, pops in with shimmer */}
           <motion.sup
             initial={{ opacity: 0, scale: 0.6, x: -4 }}
             animate={showAI ? { opacity: 1, scale: 1, x: 0 } : {}}
             transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
-            className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-normal text-neutral-300 ml-0.5"
-            style={{ fontFamily: "'SF Pro Display', system-ui, -apple-system, sans-serif" }}
+            className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-semibold ml-1"
+            style={{
+              fontFamily: "'SF Pro Display', system-ui, -apple-system, sans-serif",
+              background: 'linear-gradient(135deg, #0252CD, #00B4D8)',
+              WebkitBackgroundClip: 'text',
+              WebkitTextFillColor: 'transparent',
+              backgroundClip: 'text',
+            }}
             onAnimationComplete={() => { if (showAI) setShowTagline(true); }}
           >
             .AI
@@ -163,9 +262,12 @@ const SplashScreen: React.FC<SplashScreenProps> = ({
           transition={{ duration: 0.7, ease: [0.25, 0.1, 0.25, 1] }}
           className="fixed inset-0 z-[99999] flex items-center justify-center overflow-hidden bg-white"
         >
+          {/* Animated background blobs */}
+          <FloatingBlobs />
+
           <div className="relative z-10 flex flex-col items-center justify-center px-4 sm:px-6 w-full">
             <AnimatePresence mode="wait">
-              {/* Phase 1 — hello */}
+              {/* Phase 1 — hello (faster: speed 0.55) */}
               {phase === 'hello' && (
                 <motion.div
                   key="hello"
@@ -177,7 +279,7 @@ const SplashScreen: React.FC<SplashScreenProps> = ({
                 >
                   <AppleHelloEnglishEffect
                     className="h-16 sm:h-24 md:h-28 text-neutral-800 w-auto"
-                    speed={1}
+                    speed={0.55}
                     onAnimationComplete={handleHelloComplete}
                   />
                 </motion.div>
