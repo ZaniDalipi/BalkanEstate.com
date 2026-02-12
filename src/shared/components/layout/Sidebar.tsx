@@ -1,10 +1,10 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { useAppContext } from '../../context/AppContext';
-import { AppView, UserRole } from '../../types';
-import { LogoIcon, AgentsIcon, SearchIcon, MagnifyingGlassPlusIcon, HeartIcon, EnvelopeIcon, UserCircleIcon, UsersIcon, ArrowLeftOnRectangleIcon, XMarkIcon, PencilIcon, StarIconSolid, BuildingOfficeIcon, ShieldCheckIcon, GlobeAltIcon, ChartBarIcon } from '../../constants';
-import LanguageSwitcher from '../../src/components/LanguageSwitcher';
-import DefaultAvatar from '../../components/shared/DefaultAvatar';
+import { useAppContext } from '@/context/AppContext';
+import { AppView, UserRole, Conversation } from '@/types';
+import { LogoIcon, AgentsIcon, SearchIcon, MagnifyingGlassPlusIcon, HeartIcon, EnvelopeIcon, UserCircleIcon, UsersIcon, ArrowLeftOnRectangleIcon, XMarkIcon, PencilIcon, StarIconSolid, BuildingOfficeIcon, ShieldCheckIcon, GlobeAltIcon, ChartBarIcon } from '@/constants';
+import LanguageSwitcher from '@/src/components/LanguageSwitcher';
+import DefaultAvatar from '@/components/shared/DefaultAvatar';
 
 const NavItem: React.FC<{
   view: AppView;
@@ -48,7 +48,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
     const { activeView, isAuthenticated, currentUser, conversations } = state;
 
     // Calculate total unread messages
-    const totalUnreadCount = conversations.reduce((total, conversation) => {
+    const totalUnreadCount = (conversations as Conversation[]).reduce((total: number, conversation: Conversation) => {
         const unreadCount = conversation.messages?.filter(m => !m.isRead && m.senderId !== currentUser?.id).length || 0;
         return total + unreadCount;
     }, 0);

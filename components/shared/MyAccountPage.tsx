@@ -994,7 +994,7 @@ const ProfileSettings: React.FC<{ user: User }> = ({ user }) => {
             dispatch({ type: 'UPDATE_USER', payload: { ...data.user, avatarUrl: null } });
             setFormData(prev => ({ ...prev, ...data.user, avatarUrl: undefined }));
             setAvatarPreview(null);
-            success(t('profile.avatarSaved', 'Avatar saved successfully'));
+            success(t('profile.success', 'Success'), t('profile.avatarSaved', 'Avatar saved successfully'));
         } catch (err) {
             setError(err instanceof Error ? err.message : 'Failed to save avatar options');
         }
@@ -1023,7 +1023,7 @@ const ProfileSettings: React.FC<{ user: User }> = ({ user }) => {
             // Merge server response; avatarOptions is null (cleared by backend)
             dispatch({ type: 'UPDATE_USER', payload: { ...data.user, avatarOptions: null } });
             setFormData(prev => ({ ...prev, ...data.user }));
-            success(t('profile.avatarUploaded', 'Photo uploaded successfully'));
+            success(t('profile.success', 'Success'), t('profile.avatarUploaded', 'Photo uploaded successfully'));
             setTimeout(() => setAvatarPreview(null), 2000);
         } catch (err) {
             setError(err instanceof Error ? err.message : 'Failed to upload avatar');

@@ -17,11 +17,11 @@ interface HeaderProps {
 const Header: React.FC<HeaderProps> = ({ onToggleSidebar, isFloating }) => {
   const { t } = useTranslation(['nav']);
   const { state, dispatch } = useAppContext();
-  const { isAuthenticated, currentUser, activeView } = state;
+  const { isAuthenticated, currentUser, selectedProperty } = state;
   const { getLocalizedPath } = useLocalizedNavigation();
 
   // Center floating header only on property details page
-  const isPropertyDetails = activeView === 'property-details';
+  const isPropertyDetails = selectedProperty !== null;
 
   const handleAccountClick = useCallback(() => {
     if (isAuthenticated) {
