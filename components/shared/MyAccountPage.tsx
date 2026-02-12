@@ -1013,7 +1013,7 @@ const ProfileSettings: React.FC<{ user: User }> = ({ user }) => {
 
     return (
         <>
-            <form onSubmit={handleSaveChanges}>
+            <form onSubmit={handleSaveChanges} className="space-y-8">
                 <fieldset>
                     <legend className="block text-sm font-medium text-neutral-700 mb-2">{t('roles.yourRole')}</legend>
                     <RoleSelector selectedRole={formData.role} originalRole={user.role} onChange={handleRoleChange} />

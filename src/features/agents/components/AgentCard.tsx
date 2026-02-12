@@ -208,7 +208,7 @@ const AgentCard: React.FC<AgentCardProps> = ({ agent, index = 0 }) => {
             </div>
           </div>
           {/* Glow ring on hover */}
-          <div className="absolute inset-0 rounded-full border-2 border-blue-400 opacity-0 group-hover:opacity-100 transition-all duration-500 animate-pulse" />
+          <div className="absolute inset-0 rounded-full border-2 border-blue-400 opacity-0 group-hover:opacity-100 group-hover:animate-pulse transition-all duration-500" />
         </div>
       </div>
 
