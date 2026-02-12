@@ -4,7 +4,6 @@ import { Agent, Agency } from '@/types';
 import {
     ArrowLeftIcon,
     BuildingOfficeIcon,
-    UserCircleIcon,
     MapPinIcon,
     CheckBadgeIcon,
     ChevronRightIcon,
@@ -16,6 +15,7 @@ import {
     UsersIcon,
     HomeIcon,
 } from '@/constants';
+import DefaultAvatar from '@/components/shared/DefaultAvatar';
 import { AgentStats } from './useAgentProfile';
 
 interface AgentProfileHeaderProps {
@@ -239,9 +239,7 @@ const AgentProfileHeader: React.FC<AgentProfileHeaderProps> = ({
                                         className="w-full h-full object-cover"
                                     />
                                 ) : (
-                                    <div className={`w-full h-full flex items-center justify-center ${headerGradient}`}>
-                                        <UserCircleIcon className="w-24 h-24 text-white/80" />
-                                    </div>
+                                    <DefaultAvatar gender={agent.gender} seed={agent.agentId || agent.id || agent.name} avatarOptions={agent.avatarOptions} show3d />
                                 )}
                             </div>
                             {/* Verified Badge */}

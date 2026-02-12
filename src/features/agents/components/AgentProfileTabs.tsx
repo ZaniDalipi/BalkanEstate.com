@@ -29,6 +29,7 @@ import {
     EnvelopeIcon,
 } from '@/constants';
 import StarRating from '@/components/shared/StarRating';
+import DefaultAvatar from '@/components/shared/DefaultAvatar';
 import { formatPrice } from '@/utils/currency';
 import PropertyCard from '@/src/features/property-details/components/PropertyCard';
 import PropertyCardSkeleton from '@/src/features/property-details/components/PropertyCardSkeleton';
@@ -494,11 +495,13 @@ const AgentProfileTabs: React.FC<AgentProfileTabsProps> = ({
                                         })} eventHandlers={{ click: () => setMapCardOpen(!mapCardOpen) }}>
                                             <Popup>
                                                 <div className="text-center min-w-[200px]">
-                                                    {agent.avatarUrl && (
-                                                        <div className="w-16 h-16 rounded-full mx-auto mb-3 overflow-hidden border-2 border-gray-300 flex-shrink-0">
+                                                    <div className="w-16 h-16 rounded-full mx-auto mb-3 overflow-hidden border-2 border-gray-300 flex-shrink-0">
+                                                        {agent.avatarUrl ? (
                                                             <img src={agent.avatarUrl} alt={agent.name} className="w-full h-full object-cover" referrerPolicy="no-referrer" loading="lazy" decoding="async" />
-                                                        </div>
-                                                    )}
+                                                        ) : (
+                                                            <DefaultAvatar gender={agent.gender} seed={agent.agentId || agent.id || agent.name} avatarOptions={agent.avatarOptions} show3d />
+                                                        )}
+                                                    </div>
                                                     <p className="font-bold text-base mb-1">{agent.name}</p>
                                                     <p className="text-sm text-gray-600 mb-3">{agent.city}, {agent.country}</p>
                                                     {agent.phone && (
@@ -527,11 +530,13 @@ const AgentProfileTabs: React.FC<AgentProfileTabsProps> = ({
                                     {/* Card with Agent Info - shows on click */}
                                     <div className={`absolute inset-0 bg-gradient-to-t from-indigo-950/85 via-indigo-900/40 to-transparent transition-opacity duration-300 flex items-end p-6 ${mapCardOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'}`} onClick={() => setMapCardOpen(false)}>
                                         <div className="w-full text-white text-center pointer-events-auto" onClick={(e) => e.stopPropagation()}>
-                                            {agent.avatarUrl && (
-                                                <div className="w-20 h-20 rounded-full mx-auto mb-3 overflow-hidden border-4 border-indigo-300 flex-shrink-0">
+                                            <div className="w-20 h-20 rounded-full mx-auto mb-3 overflow-hidden border-4 border-indigo-300 flex-shrink-0">
+                                                {agent.avatarUrl ? (
                                                     <img src={agent.avatarUrl} alt={agent.name} className="w-full h-full object-cover" referrerPolicy="no-referrer" loading="lazy" decoding="async" />
-                                                </div>
-                                            )}
+                                                ) : (
+                                                    <DefaultAvatar gender={agent.gender} seed={agent.agentId || agent.id || agent.name} avatarOptions={agent.avatarOptions} show3d />
+                                                )}
+                                            </div>
                                             <p className="font-bold text-lg">{agent.name}</p>
                                             <p className="text-sm text-indigo-200 mb-3">{agent.city}, {agent.country}</p>
                                             {agent.email && (
@@ -806,17 +811,19 @@ const AgentProfileTabs: React.FC<AgentProfileTabsProps> = ({
                                     <div key={index} className="bg-white border border-gray-200 rounded-2xl p-6 hover:border-blue-300 transition-colors">
                                         <div className="flex items-start justify-between mb-4">
                                             <div className="flex items-center gap-3">
-                                                {t.userId?.avatarUrl ? (
-                                                    <img
-                                                        src={t.userId.avatarUrl}
-                                                        alt={t.userId.name || t.clientName}
-                                                        loading="lazy"
-                                                        decoding="async"
-                                                        className="w-12 h-12 rounded-full"
-                                                    />
-                                                ) : (
-                                                    <UserCircleIcon className="w-12 h-12 text-gray-300" />
-                                                )}
+                                                <div className="w-12 h-12 rounded-full overflow-hidden flex-shrink-0">
+                                                    {t.userId?.avatarUrl ? (
+                                                        <img
+                                                            src={t.userId.avatarUrl}
+                                                            alt={t.userId.name || t.clientName}
+                                                            loading="lazy"
+                                                            decoding="async"
+                                                            className="w-full h-full object-cover"
+                                                        />
+                                                    ) : (
+                                                        <DefaultAvatar gender={t.userId?.gender} seed={t.userId?.id || t.userId?.name || t.clientName || 'user'} avatarOptions={t.userId?.avatarOptions} show3d />
+                                                    )}
+                                                </div>
                                                 <div>
                                                     <p className="font-bold text-gray-900">{t.userId?.name || t.clientName || 'Anonymous'}</p>
                                                     <p className="text-sm text-gray-600">Verified Buyer • {t.rating}.0</p>
