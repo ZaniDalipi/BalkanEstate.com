@@ -139,14 +139,14 @@ export const USE_GOOGLE_MAPS = !!GOOGLE_MAPS_API_KEY;
 
 // Map provider is determined by VITE_GOOGLE_MAPS_KEY environment variable
 
-// Zillow-style: Zoom-based marker limits for performance
+// Zoom-based marker limits for performance
 // More markers when zoomed in, fewer when zoomed out
 const getMaxMarkersForZoom = (zoom: number): number => {
-  if (zoom >= 15) return 500;  // Street level - show many
-  if (zoom >= 13) return 300;  // Neighborhood level
-  if (zoom >= 11) return 150;  // City level
-  if (zoom >= 9) return 80;    // Region level
-  return 40;                    // Country level - show few
+  if (zoom >= 15) return 1000; // Street level - show many
+  if (zoom >= 13) return 600;  // Neighborhood level
+  if (zoom >= 11) return 400;  // City level
+  if (zoom >= 9) return 250;   // Region level
+  return 150;                   // Country level - still show a good amount
 };
 
 export interface MapComponentProps {
@@ -327,8 +327,8 @@ export function useMapComponent(props: MapComponentProps) {
     return valid;
   }, [properties]);
 
-  // Zillow-style: Smart property selection based on zoom level
-  // Prioritizes promoted listings, limits total for performance
+  // Smart property selection based on zoom level
+  // Shows both promoted and regular listings, with promoted getting priority styling
   const propertiesInView = useMemo(() => {
     const maxMarkers = getMaxMarkersForZoom(currentZoom);
 
@@ -336,9 +336,13 @@ export function useMapComponent(props: MapComponentProps) {
     const promoted = validProperties.filter(p => p.isPromoted);
     const regular = validProperties.filter(p => !p.isPromoted);
 
-    // Always show all promoted, fill rest with regular up to limit
-    const promotedCount = Math.min(promoted.length, maxMarkers);
-    const regularCount = Math.max(0, maxMarkers - promotedCount);
+    // Ensure regular properties always get at least 60% of slots
+    // so the map never shows only promoted listings
+    const minRegularSlots = Math.floor(maxMarkers * 0.6);
+    const maxPromotedSlots = maxMarkers - minRegularSlots;
+    const promotedCount = Math.min(promoted.length, maxPromotedSlots);
+    // Regular gets remaining slots (which is at least minRegularSlots)
+    const regularCount = Math.min(regular.length, maxMarkers - promotedCount);
 
     return [...promoted.slice(0, promotedCount), ...regular.slice(0, regularCount)];
   }, [validProperties, currentZoom]);
