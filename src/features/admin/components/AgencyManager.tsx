@@ -156,7 +156,7 @@ const AgencyManager: React.FC = () => {
                     </button>
                     <button
                       onClick={() => handleEditAgency(agency)}
-                      className="text-blue-600 hover:text-blue-900"
+                      className="text-amber-500 hover:text-amber-700"
                       title="Edit agency"
                     >
                       <PencilIcon className="w-5 h-5" />
