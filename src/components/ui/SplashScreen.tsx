@@ -1,5 +1,6 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
+import { getCurrentLanguage } from '@/src/i18n';
 
 /* ------------------------------------------------------------------ */
 /*  Logo                                                               */
@@ -69,30 +70,24 @@ const FloatingBlobs: React.FC = () => (
 
 /* ------------------------------------------------------------------ */
 /*  MultiLangHello                                                     */
-/*  Cycles "hello" through many languages with smooth crossfades.      */
-/*  Balkan languages featured prominently, then world languages.       */
+/*  Cycles "hello" through Balkan languages with smooth crossfades.    */
+/*  The user's chosen language greeting always appears last.           */
 /* ------------------------------------------------------------------ */
-const GREETINGS = [
-  'hello',          // English
-  'përshëndetje',   // Albanian
-  'здраво',         // Serbian
-  'bok',            // Croatian
-  'merhaba',        // Turkish
-  'γεια σας',       // Greek
-  'ciao',           // Italian
-  'bonjour',        // French
-  'hola',           // Spanish
-  'hallo',          // German
-  'olá',            // Portuguese
-  'привет',         // Russian
-  'مرحبا',          // Arabic
-  'こんにちは',       // Japanese
-  '你好',           // Chinese
-  '안녕하세요',      // Korean
-  'नमस्ते',         // Hindi
-];
+const BALKAN_GREETINGS: Record<string, string> = {
+  en: 'hello',
+  sq: 'përshëndetje',
+  sr: 'здраво',
+  mk: 'здраво',
+  bs: 'zdravo',
+  hr: 'bok',
+  bg: 'здравейте',
+  ro: 'bună',
+  el: 'γεια σας',
+  me: 'zdravo',
+};
 
-const HOLD_MS = 350;
+const CYCLE_ORDER = ['en', 'sq', 'sr', 'hr', 'bs', 'me', 'mk', 'bg', 'ro', 'el'];
+const HOLD_MS = 400;
 
 interface MultiLangHelloProps {
   onComplete?: () => void;
@@ -101,15 +96,22 @@ interface MultiLangHelloProps {
 const MultiLangHello: React.FC<MultiLangHelloProps> = ({ onComplete }) => {
   const [index, setIndex] = useState(0);
 
+  // Build greeting list: cycle all, but end on the user's language
+  const greetings = useMemo(() => {
+    const lang = getCurrentLanguage();
+    const others = CYCLE_ORDER.filter((code) => code !== lang);
+    const ordered = [...others, lang];
+    return ordered.map((code) => BALKAN_GREETINGS[code] || BALKAN_GREETINGS.en);
+  }, []);
+
   useEffect(() => {
-    if (index >= GREETINGS.length - 1) {
-      // Hold the last greeting a bit, then fire complete
-      const t = setTimeout(() => onComplete?.(), 500);
+    if (index >= greetings.length - 1) {
+      const t = setTimeout(() => onComplete?.(), 600);
       return () => clearTimeout(t);
     }
     const t = setTimeout(() => setIndex((i) => i + 1), HOLD_MS);
     return () => clearTimeout(t);
-  }, [index, onComplete]);
+  }, [index, greetings.length, onComplete]);
 
   return (
     <div className="flex items-center justify-center h-20 sm:h-28 md:h-36">
@@ -129,7 +131,7 @@ const MultiLangHello: React.FC<MultiLangHelloProps> = ({ onComplete }) => {
             letterSpacing: '-0.02em',
           }}
         >
-          {GREETINGS[index]}
+          {greetings[index]}
         </motion.span>
       </AnimatePresence>
     </div>
