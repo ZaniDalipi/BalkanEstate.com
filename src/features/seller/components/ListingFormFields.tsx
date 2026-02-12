@@ -4,7 +4,6 @@ import { BALKAN_LOCATIONS, CityData } from '@/utils/balkanLocations';
 import { getCurrencySymbol } from '@/utils/currency';
 import MapLocationPicker from './MapLocationPicker';
 import NumberInputWithSteppers from '@/components/shared/NumberInputWithSteppers';
-import FloorInputCombined from '@/src/shared/components/ui/FloorInputCombined';
 import { ListingData, ImageData, floatingInputClasses, floatingLabelClasses, floatingSelectLabelClasses, inputBaseClasses } from './ListingFormHelpers';
 
 interface ListingFormFieldsProps {
@@ -141,7 +140,7 @@ const ListingFormFields: React.FC<ListingFormFieldsProps> = ({
             </fieldset>
 
             {/* Property Type Selection */}
-            <fieldset className="grid grid-cols-1 md:grid-cols-2 gap-6 items-end">
+            <fieldset className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 items-end">
                 <div className="relative">
                     <select name="propertyType" id="propertyType" value={listingData.propertyType} onChange={handleInputChange} className={`${floatingInputClasses} border-neutral-300`}>
                         <option value="house">{t('seller:propertyTypes.house')}</option>
@@ -154,12 +153,18 @@ const ListingFormFields: React.FC<ListingFormFieldsProps> = ({
                 </div>
                 {listingData.propertyType === 'apartment' && (
                     <>
-                        <FloorInputCombined
+                        <NumberInputWithSteppers
                             label={t('seller:createListing.fields.floorNumber')}
-                            floorNumber={listingData.floorNumber}
-                            totalFloors={listingData.totalFloors}
-                            onFloorNumberChange={(val) => setListingData(p => ({ ...p, floorNumber: val }))}
-                            onTotalFloorsChange={(val) => setListingData(p => ({ ...p, totalFloors: val }))}
+                            value={listingData.floorNumber}
+                            min={0}
+                            max={listingData.totalFloors || 999}
+                            onChange={(val) => setListingData(p => ({ ...p, floorNumber: val }))}
+                        />
+                        <NumberInputWithSteppers
+                            label={t('seller:createListing.fields.totalFloors')}
+                            value={listingData.totalFloors}
+                            min={1}
+                            onChange={(val) => setListingData(p => ({ ...p, totalFloors: val }))}
                         />
                         <div className="relative">
                             <select

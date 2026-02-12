@@ -25,10 +25,9 @@ const NumberInputWithSteppers: React.FC<NumberInputWithSteppersProps> = ({ label
             onChange(newValue);
         }
     };
-    
+
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const inputValue = e.target.value;
-        // Allow empty input to be treated as min value (usually 0)
         if (inputValue === '') {
             onChange(min ?? 0);
             return;
@@ -42,7 +41,6 @@ const NumberInputWithSteppers: React.FC<NumberInputWithSteppersProps> = ({ label
         }
     };
 
-    // Prevent Enter key from submitting the form
     const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
         if (e.key === 'Enter') {
             e.preventDefault();
@@ -53,15 +51,15 @@ const NumberInputWithSteppers: React.FC<NumberInputWithSteppersProps> = ({ label
     return (
         <div className="relative">
             <label htmlFor={id} className="block text-sm font-medium text-neutral-700 mb-1">{label}</label>
-            <div className="flex items-center justify-between w-full h-[58px] bg-white rounded-lg border border-neutral-300 focus-within:border-primary focus-within:ring-1 focus-within:ring-primary transition-all">
+            <div className="flex items-center w-full h-[52px] bg-white rounded-xl border border-neutral-300 focus-within:border-primary focus-within:ring-1 focus-within:ring-primary transition-all overflow-hidden">
                 <button
                     type="button"
                     onClick={handleDecrement}
                     disabled={value <= min}
-                    className="px-4 sm:px-6 py-2 text-2xl sm:text-3xl font-light text-neutral-600 hover:bg-neutral-100 disabled:text-neutral-300 disabled:cursor-not-allowed h-full rounded-l-lg focus:outline-none transition-colors"
+                    className="flex-shrink-0 w-12 sm:w-14 h-full flex items-center justify-center text-xl sm:text-2xl font-medium text-neutral-600 hover:bg-neutral-100 active:bg-neutral-200 disabled:text-neutral-300 disabled:cursor-not-allowed transition-colors"
                     aria-label={`Decrease ${label}`}
                 >
-                    -
+                    −
                 </button>
                 <input
                     type="number"
@@ -69,16 +67,16 @@ const NumberInputWithSteppers: React.FC<NumberInputWithSteppersProps> = ({ label
                     value={value === undefined || value === null ? '' : value}
                     onChange={handleChange}
                     onKeyDown={handleKeyDown}
-                    className="w-full text-center text-lg font-semibold text-neutral-900 border-none focus:ring-0 bg-transparent [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                    className="flex-1 min-w-0 text-center text-lg font-semibold text-neutral-900 border-x border-neutral-200 h-full bg-transparent focus:outline-none focus:ring-0 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                     min={min}
                     max={max}
                     aria-label={label}
                 />
-                <button 
-                    type="button" 
+                <button
+                    type="button"
                     onClick={handleIncrement}
                     disabled={max !== undefined && value >= max}
-                    className="px-4 sm:px-6 py-2 text-2xl sm:text-3xl font-light text-neutral-600 hover:bg-neutral-100 disabled:text-neutral-300 disabled:cursor-not-allowed h-full rounded-r-lg focus:outline-none transition-colors"
+                    className="flex-shrink-0 w-12 sm:w-14 h-full flex items-center justify-center text-xl sm:text-2xl font-medium text-neutral-600 hover:bg-neutral-100 active:bg-neutral-200 disabled:text-neutral-300 disabled:cursor-not-allowed transition-colors"
                     aria-label={`Increase ${label}`}
                 >
                     +
