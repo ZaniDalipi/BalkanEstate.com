@@ -92,17 +92,21 @@ const Header: React.FC<HeaderProps> = ({ onToggleSidebar, isFloating }) => {
 
     return (
       <header className={headerPositionClass}>
-        <nav className="flex items-center space-x-1.5 md:space-x-2 xl:space-x-3 bg-white/90 backdrop-blur-md p-1 md:p-1.5 rounded-full shadow-lg border border-neutral-200/50">
+        <nav className="flex items-center space-x-1.5 md:space-x-2 xl:space-x-3 bg-white/60 backdrop-blur-xl p-1 md:p-1.5 rounded-full border border-white/30"
+          style={{ boxShadow: '0 6px 6px rgba(0,0,0,0.1), 0 0 20px rgba(0,0,0,0.05), inset 2px 2px 1px 0 rgba(255,255,255,0.5), inset -1px -1px 1px 1px rgba(255,255,255,0.5)' }}
+        >
           <button
             onClick={handleSubscribeClick}
-            className="bg-primary text-white px-2.5 py-1.5 md:px-3 xl:px-4 xl:py-2 rounded-full text-xs xl:text-sm font-semibold hover:bg-primary-dark transition-all shadow-sm hover:shadow-md whitespace-nowrap"
+            className="relative overflow-hidden bg-primary/70 backdrop-blur-md text-white px-2.5 py-1.5 md:px-3 xl:px-4 xl:py-2 rounded-full text-xs xl:text-sm font-semibold transition-all duration-700 hover:bg-primary/85 hover:-translate-y-px whitespace-nowrap border border-white/20"
+            style={{ boxShadow: '0 4px 6px rgba(2,82,205,0.2), inset 1px 1px 1px 0 rgba(255,255,255,0.3), inset -1px -1px 1px 0 rgba(255,255,255,0.2)', transitionTimingFunction: 'cubic-bezier(0.175, 0.885, 0.32, 2.2)' }}
             aria-label={t('nav:subscribe')}
           >
               {t('nav:subscribe')}
           </button>
           <button
             onClick={handleNewListingClick}
-            className="bg-secondary text-white px-2.5 py-1.5 md:px-3 xl:px-4 xl:py-2 rounded-full text-xs xl:text-sm font-semibold hover:bg-opacity-90 transition-all shadow-sm hover:shadow-md whitespace-nowrap"
+            className="relative overflow-hidden bg-secondary/70 backdrop-blur-md text-white px-2.5 py-1.5 md:px-3 xl:px-4 xl:py-2 rounded-full text-xs xl:text-sm font-semibold transition-all duration-700 hover:bg-secondary/85 hover:-translate-y-px whitespace-nowrap border border-white/20"
+            style={{ boxShadow: '0 4px 6px rgba(255,165,0,0.2), inset 1px 1px 1px 0 rgba(255,255,255,0.3), inset -1px -1px 1px 0 rgba(255,255,255,0.2)', transitionTimingFunction: 'cubic-bezier(0.175, 0.885, 0.32, 2.2)' }}
             aria-label={t('nav:newListing')}
           >
               <span className="md:hidden xl:inline">+ {t('nav:newListing')}</span>
@@ -135,14 +139,16 @@ const Header: React.FC<HeaderProps> = ({ onToggleSidebar, isFloating }) => {
           <nav className="flex justify-end items-center space-x-1.5 md:space-x-2 xl:space-x-3">
             <button
               onClick={handleSubscribeClick}
-              className="bg-primary text-white px-2.5 py-1.5 md:px-3 xl:px-4 xl:py-2 rounded-full text-xs xl:text-sm font-semibold hover:bg-primary-dark transition-all shadow-sm hover:shadow-md whitespace-nowrap"
+              className="relative overflow-hidden bg-primary/70 backdrop-blur-md text-white px-2.5 py-1.5 md:px-3 xl:px-4 xl:py-2 rounded-full text-xs xl:text-sm font-semibold transition-all duration-700 hover:bg-primary/85 hover:-translate-y-px whitespace-nowrap border border-white/20"
+              style={{ boxShadow: '0 4px 6px rgba(2,82,205,0.2), inset 1px 1px 1px 0 rgba(255,255,255,0.3), inset -1px -1px 1px 0 rgba(255,255,255,0.2)', transitionTimingFunction: 'cubic-bezier(0.175, 0.885, 0.32, 2.2)' }}
               aria-label={t('nav:subscribe')}
             >
                 {t('nav:subscribe')}
             </button>
             <button
               onClick={handleNewListingClick}
-              className="bg-secondary text-white px-2.5 py-1.5 md:px-3 xl:px-4 xl:py-2 rounded-full text-xs xl:text-sm font-semibold hover:bg-opacity-90 transition-all shadow-sm hover:shadow-md whitespace-nowrap"
+              className="relative overflow-hidden bg-secondary/70 backdrop-blur-md text-white px-2.5 py-1.5 md:px-3 xl:px-4 xl:py-2 rounded-full text-xs xl:text-sm font-semibold transition-all duration-700 hover:bg-secondary/85 hover:-translate-y-px whitespace-nowrap border border-white/20"
+              style={{ boxShadow: '0 4px 6px rgba(255,165,0,0.2), inset 1px 1px 1px 0 rgba(255,255,255,0.3), inset -1px -1px 1px 0 rgba(255,255,255,0.2)', transitionTimingFunction: 'cubic-bezier(0.175, 0.885, 0.32, 2.2)' }}
               aria-label={t('nav:newListing')}
             >
                 <span className="md:hidden lg:inline">+ {t('nav:newListing')}</span>
