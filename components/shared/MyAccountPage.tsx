@@ -939,8 +939,9 @@ const ProfileSettings: React.FC<{ user: User }> = ({ user }) => {
                 throw new Error(data.message || 'Failed to upload avatar');
             }
 
-            dispatch({ type: 'UPDATE_USER', payload: data.user });
-            setFormData(data.user);
+            // Merge server response; avatarOptions is null (cleared by backend)
+            dispatch({ type: 'UPDATE_USER', payload: { ...data.user, avatarOptions: null } });
+            setFormData(prev => ({ ...prev, ...data.user }));
             setIsSaved(true);
             setTimeout(() => {
                 setIsSaved(false);
@@ -967,8 +968,9 @@ const ProfileSettings: React.FC<{ user: User }> = ({ user }) => {
             });
             const data = await response.json();
             if (!response.ok) throw new Error(data.message || 'Failed to save avatar');
-            dispatch({ type: 'UPDATE_USER', payload: data.user });
-            setFormData(data.user);
+            // Merge server response; avatarUrl is null (cleared by backend)
+            dispatch({ type: 'UPDATE_USER', payload: { ...data.user, avatarUrl: null } });
+            setFormData(prev => ({ ...prev, ...data.user, avatarUrl: undefined }));
             setAvatarPreview(null);
             success(t('profile.avatarSaved', 'Avatar saved successfully'));
         } catch (err) {
@@ -996,8 +998,9 @@ const ProfileSettings: React.FC<{ user: User }> = ({ user }) => {
             });
             const data = await response.json();
             if (!response.ok) throw new Error(data.message || 'Failed to upload avatar');
-            dispatch({ type: 'UPDATE_USER', payload: data.user });
-            setFormData(data.user);
+            // Merge server response; avatarOptions is null (cleared by backend)
+            dispatch({ type: 'UPDATE_USER', payload: { ...data.user, avatarOptions: null } });
+            setFormData(prev => ({ ...prev, ...data.user }));
             success(t('profile.avatarUploaded', 'Photo uploaded successfully'));
             setTimeout(() => setAvatarPreview(null), 2000);
         } catch (err) {
@@ -1046,7 +1049,7 @@ const ProfileSettings: React.FC<{ user: User }> = ({ user }) => {
                             <DefaultAvatar
                                 gender={formData.gender}
                                 seed={formData.id || formData.name}
-                                avatarOptions={(formData as any).avatarOptions}
+                                avatarOptions={formData.avatarOptions}
                                 show3d
                             />
                         )}
@@ -1079,7 +1082,7 @@ const ProfileSettings: React.FC<{ user: User }> = ({ user }) => {
                 isOpen={isAvatarCustomizerOpen}
                 onClose={() => setIsAvatarCustomizerOpen(false)}
                 gender={formData.gender}
-                currentAvatarOptions={parseAvatarOptions((formData as any).avatarOptions)}
+                currentAvatarOptions={parseAvatarOptions(formData.avatarOptions)}
                 currentAvatarUrl={formData.avatarUrl}
                 onSaveAvatar={handleSaveAvatarOptions}
                 onUploadPhoto={handleUploadPhotoFromCustomizer}
@@ -1467,7 +1470,7 @@ const MyAccountPage: React.FC = () => {
                                         <DefaultAvatar
                                             gender={state.currentUser.gender}
                                             seed={state.currentUser.id || state.currentUser.name}
-                                            avatarOptions={(state.currentUser as any).avatarOptions}
+                                            avatarOptions={state.currentUser.avatarOptions}
                                             show3d
                                         />
                                     )}
