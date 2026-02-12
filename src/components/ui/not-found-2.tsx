@@ -1,13 +1,9 @@
 "use client";
-import { Button } from "./button";
 import { buildLocalizedPath } from '../../utils/languageRouting';
 
-function navigate(path: string) {
-	window.history.pushState({}, '', buildLocalizedPath(path));
-	window.dispatchEvent(new PopStateEvent('popstate'));
-}
-
 export function NotFound() {
+	const homePath = buildLocalizedPath('/');
+
 	return (
 		<section className="bg-white font-serif min-h-screen flex items-center justify-center">
 			<div className="container mx-auto">
@@ -21,20 +17,19 @@ export function NotFound() {
 								404
 							</h1>
 						</div>
-						<div className="mt-[-50px]">
+						<div className="relative z-10 mt-[-50px]">
 							<h3 className="text-2xl text-black sm:text-3xl font-bold mb-4">
 								Look like you're lost
 							</h3>
 							<p className="mb-6 text-black sm:mb-5">
 								The page you are looking for is not available!
 							</p>
-							<Button
-								variant="default"
-								onClick={() => navigate('/')}
-								className="my-5 bg-green-600 hover:bg-green-700"
+							<a
+								href={homePath}
+								className="inline-flex items-center justify-center rounded-md text-sm font-medium h-10 px-4 py-2 my-5 bg-green-600 hover:bg-green-700 text-white cursor-pointer transition-colors"
 							>
 								Go to Home
-							</Button>
+							</a>
 						</div>
 					</div>
 				</div>
