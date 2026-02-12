@@ -115,16 +115,18 @@
   75% { background-position: 0% 100%; }
 }
 
-/* Core glass panel — frosted white */
+/* Core glass panel — liquid frosted white */
 .glass-panel {
-  background: rgba(255, 255, 255, 0.72);
+  background: rgba(255, 255, 255, 0.65);
   backdrop-filter: blur(20px) saturate(1.8);
   -webkit-backdrop-filter: blur(20px) saturate(1.8);
-  border: 1px solid rgba(0, 0, 0, 0.06);
-  border-radius: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 20px;
   box-shadow:
-    0 2px 16px rgba(0, 0, 0, 0.06),
-    inset 0 1px 0 rgba(255, 255, 255, 0.8);
+    0 6px 6px rgba(0, 0, 0, 0.08),
+    0 0 20px rgba(0, 0, 0, 0.04),
+    inset 2px 2px 1px 0 rgba(255, 255, 255, 0.5),
+    inset -1px -1px 1px 1px rgba(255, 255, 255, 0.5);
 }
 
 .glass-panel-light {
@@ -188,21 +190,31 @@
   color: #1a202c;
 }
 
-/* Glass button — light theme */
+/* Glass button — liquid glass light theme */
 .glass-btn {
-  background: rgba(255, 255, 255, 0.7);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border: 1px solid rgba(0, 0, 0, 0.08);
-  border-radius: 10px;
-  color: rgba(0, 0, 0, 0.75);
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  background: rgba(255, 255, 255, 0.6);
+  backdrop-filter: blur(12px) saturate(1.6);
+  -webkit-backdrop-filter: blur(12px) saturate(1.6);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 16px;
+  color: rgba(0, 0, 0, 0.8);
+  box-shadow:
+    0 6px 6px rgba(0, 0, 0, 0.08),
+    0 0 20px rgba(0, 0, 0, 0.04),
+    inset 2px 2px 1px 0 rgba(255, 255, 255, 0.5),
+    inset -1px -1px 1px 1px rgba(255, 255, 255, 0.5);
+  transition: all 0.7s cubic-bezier(0.175, 0.885, 0.32, 2.2);
 }
 
 .glass-btn:hover {
-  background: rgba(255, 255, 255, 0.85);
-  border-color: rgba(0, 0, 0, 0.12);
-  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+  background: rgba(255, 255, 255, 0.75);
+  border-color: rgba(255, 255, 255, 0.4);
+  box-shadow:
+    0 8px 12px rgba(0, 0, 0, 0.1),
+    0 0 24px rgba(0, 0, 0, 0.06),
+    inset 2px 2px 1px 0 rgba(255, 255, 255, 0.6),
+    inset -1px -1px 1px 1px rgba(255, 255, 255, 0.6);
   transform: translateY(-1px);
 }
 
@@ -244,14 +256,18 @@
   transform: translateY(-1px);
 }
 
-/* Glass fieldset / section card — light */
+/* Glass fieldset / section card — liquid light */
 .glass-fieldset {
   background: rgba(255, 255, 255, 0.5);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border: 1px solid rgba(0, 0, 0, 0.06);
-  border-radius: 14px;
+  backdrop-filter: blur(12px) saturate(1.6);
+  -webkit-backdrop-filter: blur(12px) saturate(1.6);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 18px;
   padding: 1.25rem;
+  box-shadow:
+    0 4px 6px rgba(0, 0, 0, 0.04),
+    inset 1px 1px 1px 0 rgba(255, 255, 255, 0.4),
+    inset -1px -1px 1px 0 rgba(255, 255, 255, 0.4);
 }
 
 /* Glass badge — light */

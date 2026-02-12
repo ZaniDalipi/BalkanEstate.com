@@ -92,6 +92,9 @@ const CookieConsent = lazy(() => import('./src/shared/components/CookieConsent')
 // Splash screen (lazy loaded - shown on initial app load to hide loading)
 const SplashScreen = lazy(() => import('./src/components/ui/SplashScreen'));
 
+// Global liquid glass SVG filter (needed for glass buttons & controls)
+import { LiquidGlassFilter } from './components/ui/liquid-glass-button';
+
 // PWA Install Prompt (lazy loaded)
 const PWAInstallPrompt = lazy(() => import('./src/shared/components/PWAInstallPrompt'));
 
@@ -831,6 +834,8 @@ const App: React.FC = () => {
               <NotificationProvider>
                 <ConfirmationProvider>
                   <AnimationProvider>
+                    {/* Global SVG filter for liquid glass effects */}
+                    <LiquidGlassFilter />
                     {/* Lazy loaded SEO & Analytics components (don't block initial render) */}
                     <Suspense fallback={null}>
                       <SEO />

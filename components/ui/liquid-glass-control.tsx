@@ -78,25 +78,50 @@ export const LiquidGlassControl: React.FC<LiquidGlassControlProps> = ({
         ref={containerRef}
         className={`relative flex items-center rounded-2xl ${config.trackPy}`}
         style={{
-          background: 'rgba(0, 0, 0, 0.04)',
-          backdropFilter: 'blur(12px) saturate(1.5)',
-          WebkitBackdropFilter: 'blur(12px) saturate(1.5)',
+          background: 'rgba(0, 0, 0, 0.05)',
+          backdropFilter: 'blur(16px) saturate(1.8)',
+          WebkitBackdropFilter: 'blur(16px) saturate(1.8)',
+          boxShadow: 'inset 0 1px 3px rgba(0, 0, 0, 0.06), 0 1px 0 rgba(255, 255, 255, 0.5)',
         }}
       >
-        {/* Sliding glass pill */}
+        {/* Sliding liquid glass pill */}
         <div
-          className="absolute rounded-xl transition-all duration-[400ms] ease-[cubic-bezier(0.25,0.46,0.45,0.94)]"
+          className="absolute rounded-xl transition-all duration-700 overflow-hidden"
           style={{
             left: pillStyle.left,
             width: pillStyle.width,
             top: size === 'sm' ? 2 : 4,
             bottom: size === 'sm' ? 2 : 4,
-            background: 'rgba(255, 255, 255, 0.92)',
-            boxShadow: '0 1px 8px rgba(0, 0, 0, 0.08), 0 0.5px 2px rgba(0, 0, 0, 0.06), inset 0 1px 0 rgba(255, 255, 255, 0.9)',
+            background: 'rgba(255, 255, 255, 0.6)',
+            boxShadow: '0 6px 6px rgba(0, 0, 0, 0.08), 0 0 20px rgba(0, 0, 0, 0.04)',
             backdropFilter: 'blur(8px)',
             WebkitBackdropFilter: 'blur(8px)',
+            transitionTimingFunction: 'cubic-bezier(0.175, 0.885, 0.32, 2.2)',
           }}
-        />
+        >
+          {/* Glass distortion layer */}
+          <div
+            className="absolute inset-0 z-0 overflow-hidden rounded-xl"
+            style={{
+              backdropFilter: 'blur(3px)',
+              filter: 'url(#liquid-glass-distortion)',
+              isolation: 'isolate',
+            }}
+          />
+          {/* Frosted overlay */}
+          <div
+            className="absolute inset-0 z-[1] rounded-xl"
+            style={{ background: 'rgba(255, 255, 255, 0.25)' }}
+          />
+          {/* Inset specular highlight */}
+          <div
+            className="absolute inset-0 z-[2] rounded-xl"
+            style={{
+              boxShadow:
+                'inset 2px 2px 1px 0 rgba(255, 255, 255, 0.5), inset -1px -1px 1px 1px rgba(255, 255, 255, 0.5)',
+            }}
+          />
+        </div>
 
         {/* Options */}
         {options.map((option, index) => {
@@ -129,15 +154,7 @@ export const LiquidGlassControl: React.FC<LiquidGlassControlProps> = ({
         })}
       </div>
 
-      {/* SVG Glass Filter (hidden, referenced by pill) */}
-      <svg className="hidden" aria-hidden="true">
-        <defs>
-          <filter id="glass-control-filter" colorInterpolationFilters="sRGB">
-            <feGaussianBlur in="SourceGraphic" stdDeviation="0.5" result="blur" />
-            <feComposite in="blur" in2="blur" operator="over" />
-          </filter>
-        </defs>
-      </svg>
+      {/* Glass distortion filter is provided globally by LiquidGlassFilter in App.tsx */}
     </div>
   );
 };

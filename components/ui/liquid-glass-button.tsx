@@ -20,7 +20,7 @@ const buttonVariants = cva(
         ghost: "hover:bg-accent hover:text-accent-foreground",
         link: "text-primary underline-offset-4 hover:underline",
         accent: "bg-linear-to-t border border-b-2 border-orange-600/40 from-orange-500 to-orange-400 shadow-md shadow-orange-500/20 ring-1 ring-inset ring-white/25 transition-[filter] duration-200 hover:brightness-110 active:brightness-90 text-white",
-        glass: "bg-white/70 backdrop-blur-xl border border-black/8 hover:bg-white/85 hover:border-black/12 hover:shadow-md hover:-translate-y-px text-black/75 transition-all duration-300",
+        glass: "bg-white/60 backdrop-blur-xl border border-white/30 text-black/80 transition-all duration-700 hover:bg-white/75 hover:-translate-y-px rounded-2xl",
       },
       size: {
         default: "h-9 px-4 py-2",
@@ -44,18 +44,117 @@ export interface ButtonProps
 }
 
 const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
-  ({ className, variant, size, asChild = false, ...props }, ref) => {
+  ({ className, variant, size, asChild = false, children, ...props }, ref) => {
     const Comp = asChild ? Slot : "button"
+    const isGlass = variant === 'glass'
+
+    if (isGlass) {
+      return (
+        <Comp
+          className={cn(
+            buttonVariants({ variant, size }),
+            "relative overflow-hidden",
+            className,
+          )}
+          ref={ref}
+          {...props}
+        >
+          {/* Glass distortion layer */}
+          <div
+            className="absolute inset-0 z-0 overflow-hidden rounded-[inherit]"
+            style={{
+              backdropFilter: 'blur(3px)',
+              filter: 'url(#liquid-glass-distortion)',
+              isolation: 'isolate',
+            }}
+          />
+          {/* Frosted white overlay */}
+          <div
+            className="absolute inset-0 z-[1] rounded-[inherit]"
+            style={{ background: 'rgba(255, 255, 255, 0.25)' }}
+          />
+          {/* Inset specular highlight */}
+          <div
+            className="absolute inset-0 z-[2] rounded-[inherit] overflow-hidden"
+            style={{
+              boxShadow:
+                'inset 2px 2px 1px 0 rgba(255, 255, 255, 0.5), inset -1px -1px 1px 1px rgba(255, 255, 255, 0.5)',
+            }}
+          />
+          {/* Content */}
+          <span className="relative z-[3]">{children}</span>
+        </Comp>
+      )
+    }
+
     return (
       <Comp
         className={cn(buttonVariants({ variant, size, className }))}
         ref={ref}
         {...props}
-      />
+      >
+        {children}
+      </Comp>
     )
   }
 )
 Button.displayName = "Button"
+
+/** Global SVG filter for liquid glass distortion. Render once at app root. */
+const LiquidGlassFilter: React.FC = () => (
+  <svg style={{ position: 'absolute', width: 0, height: 0, overflow: 'hidden' }} aria-hidden="true">
+    <defs>
+      <filter
+        id="liquid-glass-distortion"
+        x="0%"
+        y="0%"
+        width="100%"
+        height="100%"
+        filterUnits="objectBoundingBox"
+      >
+        <feTurbulence
+          type="fractalNoise"
+          baseFrequency="0.001 0.005"
+          numOctaves={1}
+          seed={17}
+          result="turbulence"
+        />
+        <feComponentTransfer in="turbulence" result="mapped">
+          <feFuncR type="gamma" amplitude={1} exponent={10} offset={0.5} />
+          <feFuncG type="gamma" amplitude={0} exponent={1} offset={0} />
+          <feFuncB type="gamma" amplitude={0} exponent={1} offset={0.5} />
+        </feComponentTransfer>
+        <feGaussianBlur in="turbulence" stdDeviation={3} result="softMap" />
+        <feSpecularLighting
+          in="softMap"
+          surfaceScale={5}
+          specularConstant={1}
+          specularExponent={100}
+          lightingColor="white"
+          result="specLight"
+        >
+          <fePointLight x={-200} y={-200} z={300} />
+        </feSpecularLighting>
+        <feComposite
+          in="specLight"
+          operator="arithmetic"
+          k1={0}
+          k2={1}
+          k3={1}
+          k4={0}
+          result="litImage"
+        />
+        <feDisplacementMap
+          in="SourceGraphic"
+          in2="softMap"
+          scale={200}
+          xChannelSelector="R"
+          yChannelSelector="G"
+        />
+      </filter>
+    </defs>
+  </svg>
+)
 
 const liquidbuttonVariants = cva(
   "inline-flex items-center transition-colors justify-center cursor-pointer gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-[color,box-shadow] disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-4 shrink-0 [&_svg]:shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive",
@@ -373,4 +472,4 @@ export const MetalButton = React.forwardRef<
 
 MetalButton.displayName = "MetalButton";
 
-export { Button, buttonVariants, liquidbuttonVariants, LiquidButton }
+export { Button, buttonVariants, liquidbuttonVariants, LiquidButton, LiquidGlassFilter }
