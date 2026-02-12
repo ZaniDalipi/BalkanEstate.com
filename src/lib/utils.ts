@@ -1,7 +1,6 @@
 /**
- * Simple class name merge utility.
- * Concatenates class name arguments, filtering out falsy values.
+ * Utility for conditionally joining class names together.
  */
-export function cn(...inputs: (string | undefined | null | false)[]): string {
-  return inputs.filter(Boolean).join(' ');
+export function cn(...inputs: unknown[]): string {
+  return inputs.filter((v): v is string => typeof v === 'string' && v.length > 0).join(' ');
 }
