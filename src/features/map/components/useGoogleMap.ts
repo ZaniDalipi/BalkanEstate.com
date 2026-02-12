@@ -485,7 +485,7 @@ export function useGoogleMap(props: GoogleMapComponentProps) {
     const clusterer = new MarkerClusterer({
       map: mapInstance,
       algorithm: new SuperClusterAlgorithm({
-        radius: 100,
+        radius: 60,
         maxZoom: 15,
       }),
       renderer: {
