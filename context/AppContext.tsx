@@ -25,6 +25,7 @@ import { MUNICIPALITY_DATA } from '../services/propertyService';
 import { socketService } from '../services/socketService';
 import { notificationService } from '../services/notificationService';
 import { tokenService } from '../src/shared/api/tokenService';
+import { buildLocalizedPath } from '../src/utils/languageRouting';
 
 const initialSearchPageState: SearchPageState = {
     filters: initialFilters,
@@ -428,10 +429,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       const redirectTo = state.pendingRedirect;
       dispatch({ type: 'SET_PENDING_REDIRECT', payload: null });
       dispatch({ type: 'SET_ACTIVE_VIEW', payload: redirectTo });
-    }
-
-    // Check if there's a pending subscription and navigate to pricing page
-    if (state.pendingSubscription) {
+    } else if (state.pendingSubscription) {
+      // Check if there's a pending subscription and navigate to pricing page
       setTimeout(() => {
         dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'pricing' });
         const currentLang = window.location.pathname.split('/')[1] || 'en';
@@ -439,6 +438,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         const lang = validLangs.includes(currentLang) ? currentLang : 'en';
         window.history.pushState({}, '', `/${lang}/subscribe`);
       }, 500);
+    } else {
+      // Default: navigate to search page after login
+      dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'search' });
+      window.history.replaceState({}, '', buildLocalizedPath('/search'));
     }
 
     return user;
@@ -477,10 +480,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       const redirectTo = state.pendingRedirect;
       dispatch({ type: 'SET_PENDING_REDIRECT', payload: null });
       dispatch({ type: 'SET_ACTIVE_VIEW', payload: redirectTo });
-    }
-
-    // Check if there's a pending subscription and navigate to pricing page
-    if (state.pendingSubscription) {
+    } else if (state.pendingSubscription) {
+      // Check if there's a pending subscription and navigate to pricing page
       setTimeout(() => {
         dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'pricing' });
         const currentLang = window.location.pathname.split('/')[1] || 'en';
@@ -488,6 +489,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         const lang = validLangs.includes(currentLang) ? currentLang : 'en';
         window.history.pushState({}, '', `/${lang}/subscribe`);
       }, 500);
+    } else {
+      // Default: navigate to search page after signup
+      dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'search' });
+      window.history.replaceState({}, '', buildLocalizedPath('/search'));
     }
 
     return user;
@@ -553,6 +558,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         // Fetch additional user data
         const userData = await apiGetMyData();
         dispatch({ type: 'USER_DATA_SUCCESS', payload: userData });
+
+        // Navigate to search page after OAuth login
+        dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'search' });
+        window.history.replaceState({}, '', buildLocalizedPath('/search'));
       } else {
         throw new Error('Failed to fetch user profile');
       }
