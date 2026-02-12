@@ -398,7 +398,7 @@ export const updateViewingStatus = async (req: Request, res: Response): Promise<
       } catch (emailError) {
         apiLogger.error('Failed to send viewing approved email:', emailError);
       }
-    } else if (status === 'cancelled' && oldStatus !== 'cancelled') {
+    } else if (status === 'cancelled') {
       try {
         await sendViewingRejected({
           visitorEmail: viewing.visitorEmail,
