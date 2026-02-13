@@ -605,9 +605,11 @@ const MainLayout: React.FC = () => {
   }, []);
   
   const isSearchPage = state.activeView === 'search';
+  const isRentalPage = state.activeView === 'rentals';
+  const isFloatingHeaderView = isSearchPage || isRentalPage;
   const isAgencyDetailView = !!state.selectedAgencyId;
   // Agency pages should allow scrolling to show all agents and details
-  const isFullHeightView = isSearchPage || state.activeView === 'rentals' || state.activeView === 'inbox' || !!state.selectedProperty;
+  const isFullHeightView = isSearchPage || isRentalPage || state.activeView === 'inbox' || !!state.selectedProperty;
   const showHeader = !(isMobile && (isSearchPage || !!state.selectedProperty));
   // Note: Agency detail pages WILL show header on mobile to allow sidebar access
   
@@ -643,7 +645,7 @@ const MainLayout: React.FC = () => {
 
         <div className={`relative transition-all duration-300 ease-in-out h-full flex flex-col md:pl-20 overflow-x-hidden max-w-full ${isOverlayVisible ? 'blur-sm pointer-events-none' : ''}`}>
             <Suspense fallback={null}>
-              {showHeader && <Header onToggleSidebar={() => setIsSidebarOpen(true)} isFloating={isSearchPage} />}
+              {showHeader && <Header onToggleSidebar={() => setIsSidebarOpen(true)} isFloating={isFloatingHeaderView} />}
             </Suspense>
             <main id="main-content" data-scroll-container className={`flex flex-col flex-1 overflow-x-hidden ${isFullHeightView ? 'overflow-y-hidden h-full min-h-0' : 'overflow-y-auto'}`}>
                 <AppContent onToggleSidebar={() => setIsSidebarOpen(true)} />
