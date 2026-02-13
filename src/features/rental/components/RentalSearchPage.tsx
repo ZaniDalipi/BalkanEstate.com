@@ -108,8 +108,8 @@ const RentalSearchPage: React.FC<RentalSearchPageProps> = ({ onToggleSidebar }) 
                     {/* Spacer for floating mobile header */}
                     {isMobile && <div className="h-14 flex-shrink-0" />}
 
-                    {/* Header with city search */}
-                    <div className="sticky top-0 z-20" style={{ background: 'rgba(255,255,255,0.85)', backdropFilter: 'blur(20px)', WebkitBackdropFilter: 'blur(20px)', borderBottom: '1px solid rgba(0,0,0,0.06)' }}>
+                    {/* Header with city search — desktop only (mobile uses floating pill bar) */}
+                    <div className="hidden lg:block sticky top-0 z-20" style={{ background: 'rgba(255,255,255,0.85)', backdropFilter: 'blur(20px)', WebkitBackdropFilter: 'blur(20px)', borderBottom: '1px solid rgba(0,0,0,0.06)' }}>
                         <div className="px-4 py-3 flex items-center justify-between gap-3">
                             <div>
                                 <h1 className="text-lg font-bold text-gray-900 text-glow">{t('rental:title')}</h1>
@@ -122,19 +122,9 @@ const RentalSearchPage: React.FC<RentalSearchPageProps> = ({ onToggleSidebar }) 
                                     variant="accent"
                                     size="sm"
                                     onClick={handleCreateRental}
-                                    className="hidden lg:inline-flex font-semibold rounded-xl"
+                                    className="font-semibold rounded-xl"
                                 >
                                     + {t('rental:createListing')}
-                                </Button>
-                                <Button
-                                    variant="glass"
-                                    size="icon"
-                                    onClick={() => setIsFiltersOpen(!isFiltersOpen)}
-                                    className="lg:hidden rounded-xl"
-                                    aria-label="Toggle filters"
-                                    aria-expanded={isFiltersOpen}
-                                >
-                                    <AdjustmentsHorizontalIcon className="w-5 h-5 text-gray-500" />
                                 </Button>
                             </div>
                         </div>
