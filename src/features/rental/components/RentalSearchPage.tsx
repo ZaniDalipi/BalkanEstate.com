@@ -6,14 +6,19 @@ import PropertyCardSkeleton from '@/src/features/property-details/components/Pro
 import HighlightedPropertiesSection from '@/src/features/property-details/components/HighlightedPropertiesSection';
 import RentalFilters from './RentalFilters';
 import { useRentalSearch } from '../hooks/useRentalSearch';
-import { Squares2x2Icon, MapIcon, AdjustmentsHorizontalIcon, XMarkIcon, MagnifyingGlassIcon } from '@/constants';
+import { Squares2x2Icon, MapIcon, AdjustmentsHorizontalIcon, XMarkIcon, MagnifyingGlassIcon, Bars3Icon } from '@/constants';
+import DefaultAvatar from '@/components/shared/DefaultAvatar';
 import { LiquidGlassSwitch } from '@/src/components/ui/LiquidGlassSwitch';
 import { Button } from '@/components/ui/liquid-glass-button';
 import { SEO } from '@/src/components/seo';
 import { useLocalizedNavigation } from '@/src/hooks/useLocalizedNavigation';
 import { NominatimResult } from '@/types';
 
-const RentalSearchPage: React.FC = () => {
+interface RentalSearchPageProps {
+    onToggleSidebar: () => void;
+}
+
+const RentalSearchPage: React.FC<RentalSearchPageProps> = ({ onToggleSidebar }) => {
     const { t } = useTranslation(['rental', 'search', 'common']);
     const { getLocalizedPath } = useLocalizedNavigation();
 
@@ -247,21 +252,112 @@ const RentalSearchPage: React.FC = () => {
                     </div>
                 </div>
 
-                {/* Mobile/Tablet View Toggle */}
+                {/* Mobile/Tablet View Overlays */}
                 {showViewToggle && !isFiltersOpen && (
-                    <div className="absolute bottom-20 xs:bottom-24 sm:bottom-20 md:bottom-6 left-0 right-0 z-[100] p-3 sm:p-4 pointer-events-none flex justify-center" style={{ paddingBottom: 'max(env(safe-area-inset-bottom), 8px)' }}>
-                        <div className="pointer-events-auto mx-auto w-fit" role="tablist" aria-label="View toggle">
-                            <LiquidGlassSwitch
-                                options={[
-                                    { value: 'list', label: t('search:map.list'), icon: <Squares2x2Icon className="w-full h-full" /> },
-                                    { value: 'map', label: t('search:map.showMap'), icon: <MapIcon className="w-full h-full" /> },
-                                ]}
-                                value={mobileView}
-                                onChange={(val) => setMobileView(val as 'list' | 'map')}
-                                size="md"
-                            />
+                    <>
+                        {/* Mobile-only: floating search bar overlay (matches buy page pattern) */}
+                        {isMobile && (
+                            <div className="absolute top-0 left-0 right-0 z-[100] p-2 landscape:p-1.5 pointer-events-none safe-area-inset-top">
+                                <div ref={searchWrapperRef} className="pointer-events-auto w-full space-y-2">
+                                    <div
+                                        className="w-full bg-white/60 backdrop-blur-xl rounded-full p-1 flex items-center gap-0.5 sm:gap-1 border border-white/40"
+                                        style={{
+                                            boxShadow: '0 8px 32px rgba(31, 38, 135, 0.15), inset 0 0 20px rgba(255, 255, 255, 0.3)',
+                                        }}
+                                    >
+                                        <button
+                                            onClick={onToggleSidebar}
+                                            className="min-h-[44px] min-w-[44px] flex items-center justify-center flex-shrink-0 rounded-full hover:bg-neutral-100 active:bg-neutral-200 transition-colors touch-manipulation focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-primary/50"
+                                            aria-label="Open menu"
+                                        >
+                                            <Bars3Icon className="w-6 h-6 text-neutral-800"/>
+                                        </button>
+                                        <div className="flex-1 min-w-0 relative">
+                                            <div className="relative">
+                                                <MagnifyingGlassIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                                                <input
+                                                    type="text"
+                                                    value={filters.query}
+                                                    onChange={(e) => handleFilterChange('query', e.target.value)}
+                                                    onFocus={() => setIsQueryInputFocused(true)}
+                                                    onKeyDown={(e) => { if (e.key === 'Enter') handleSearch(); }}
+                                                    placeholder={t('rental:filters.searchCity', 'Search city...')}
+                                                    className="w-full pl-9 pr-8 py-2 text-sm bg-transparent border-none outline-none placeholder-gray-400"
+                                                    aria-label={t('rental:filters.searchCity', 'Search by city or location...')}
+                                                />
+                                                {filters.query && (
+                                                    <button
+                                                        onClick={() => handleFilterChange('query', '')}
+                                                        className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
+                                                        aria-label="Clear search"
+                                                    >
+                                                        <XMarkIcon className="w-4 h-4" />
+                                                    </button>
+                                                )}
+                                            </div>
+                                            {/* Location Suggestions Dropdown */}
+                                            {isQueryInputFocused && suggestions.length > 0 && (
+                                                <div className="absolute top-full left-0 right-0 mt-1 glass-panel-light z-50 max-h-60 overflow-y-auto glass-scrollbar rounded-xl">
+                                                    {suggestions.map((suggestion: NominatimResult, index: number) => (
+                                                        <button
+                                                            key={index}
+                                                            onClick={() => handleSuggestionClick(suggestion)}
+                                                            className="w-full text-left px-3 py-2.5 text-sm hover:bg-gray-100 transition-colors flex items-center gap-2 border-b border-gray-200 last:border-b-0"
+                                                        >
+                                                            <MapIcon className="w-4 h-4 text-gray-300 flex-shrink-0" />
+                                                            <span className="truncate text-gray-600">{suggestion.display_name}</span>
+                                                        </button>
+                                                    ))}
+                                                </div>
+                                            )}
+                                            {isSearchingLocation && (
+                                                <div className="absolute top-full left-0 right-0 mt-1 glass-panel-light z-50 p-3 text-center rounded-xl">
+                                                    <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-blue-400 mx-auto" />
+                                                </div>
+                                            )}
+                                        </div>
+                                        <button
+                                            onClick={() => setIsFiltersOpen(true)}
+                                            className="min-h-[44px] min-w-[44px] flex items-center justify-center flex-shrink-0 rounded-full hover:bg-neutral-100 active:bg-neutral-200 transition-colors touch-manipulation focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-primary/50"
+                                            aria-label="Open filters"
+                                        >
+                                            <AdjustmentsHorizontalIcon className="w-6 h-6 text-neutral-800"/>
+                                        </button>
+                                        {isAuthenticated && state.currentUser && (
+                                            <button
+                                                onClick={() => dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'account' })}
+                                                className="min-h-[44px] min-w-[44px] flex items-center justify-center flex-shrink-0 rounded-full hover:bg-neutral-100 active:bg-neutral-200 transition-colors touch-manipulation focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-primary/50 mr-0.5"
+                                                aria-label="My account"
+                                            >
+                                                <div className="w-8 h-8 rounded-full overflow-hidden">
+                                                    {state.currentUser.avatarUrl ? (
+                                                        <img src={state.currentUser.avatarUrl} alt="" className="w-full h-full object-cover" referrerPolicy="no-referrer" aria-hidden="true" />
+                                                    ) : (
+                                                        <DefaultAvatar gender={state.currentUser.gender} seed={state.currentUser.id || state.currentUser.name} avatarOptions={state.currentUser.avatarOptions} />
+                                                    )}
+                                                </div>
+                                            </button>
+                                        )}
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+
+                        {/* Floating List/Map toggle */}
+                        <div className="absolute bottom-20 xs:bottom-24 sm:bottom-20 md:bottom-6 landscape:bottom-14 left-0 right-0 z-[100] p-3 sm:p-4 landscape:p-2 pointer-events-none flex justify-center" style={{ paddingBottom: 'max(env(safe-area-inset-bottom), 8px)' }}>
+                            <div className="pointer-events-auto mx-auto w-fit" role="tablist" aria-label="View toggle">
+                                <LiquidGlassSwitch
+                                    options={[
+                                        { value: 'list', label: t('search:map.list'), icon: <Squares2x2Icon className="w-full h-full" /> },
+                                        { value: 'map', label: t('search:map.showMap'), icon: <MapIcon className="w-full h-full" /> },
+                                    ]}
+                                    value={mobileView}
+                                    onChange={(val) => setMobileView(val as 'list' | 'map')}
+                                    size="md"
+                                />
+                            </div>
                         </div>
-                    </div>
+                    </>
                 )}
             </div>
 

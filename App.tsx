@@ -521,7 +521,7 @@ const AppContent: React.FC<{ onToggleSidebar: () => void }> = ({ onToggleSidebar
       case 'create-listing':
         return <CreateListingPage />;
       case 'rentals':
-        return <QueryErrorBoundary><RentalSearchPage /></QueryErrorBoundary>;
+        return <QueryErrorBoundary><RentalSearchPage onToggleSidebar={onToggleSidebar} /></QueryErrorBoundary>;
       case 'create-rental':
         return <CreateListingPage />;
       case 'agents':
@@ -534,7 +534,7 @@ const AppContent: React.FC<{ onToggleSidebar: () => void }> = ({ onToggleSidebar
           return <QueryErrorBoundary><AdminDashboard /></QueryErrorBoundary>;
         }
         // Redirect non-admins to search
-        return <SearchPage />;
+        return <SearchPage onToggleSidebar={onToggleSidebar} />;
       case 'reset-password':
         return <ResetPasswordPage />;
       case 'verify-email':
@@ -610,7 +610,7 @@ const MainLayout: React.FC = () => {
   const isAgencyDetailView = !!state.selectedAgencyId;
   // Agency pages should allow scrolling to show all agents and details
   const isFullHeightView = isSearchPage || isRentalPage || state.activeView === 'inbox' || !!state.selectedProperty;
-  const showHeader = !(isMobile && (isSearchPage || !!state.selectedProperty));
+  const showHeader = !(isMobile && (isSearchPage || isRentalPage || !!state.selectedProperty));
   // Note: Agency detail pages WILL show header on mobile to allow sidebar access
   
   const anyNonAuthModalOpen = state.isListingLimitWarningOpen || state.isDiscountGameOpen;
