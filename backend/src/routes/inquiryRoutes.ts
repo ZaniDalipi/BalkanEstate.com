@@ -4,6 +4,7 @@ import {
   sendPropertyInquiry,
   sendAgentGeneralInquiry,
   sendAreaSearchInquiry,
+  sendContactInquiry,
 } from '../controllers/inquiryController';
 
 const router = express.Router();
@@ -28,5 +29,8 @@ router.post('/agent', inquiryRateLimiter, sendAgentGeneralInquiry);
 
 // Send area search inquiry (sent to multiple agents in an area)
 router.post('/area-search', inquiryRateLimiter, sendAreaSearchInquiry);
+
+// Send contact form inquiry to platform team
+router.post('/contact', inquiryRateLimiter, sendContactInquiry);
 
 export default router;

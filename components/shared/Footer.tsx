@@ -49,7 +49,7 @@ const Footer: React.FC<FooterProps> = ({ className = '', contained = false }) =>
     const { dispatch } = useAppContext();
     const { getLocalizedPath } = useLocalizedNavigation();
 
-    const handleNavigation = (view: 'search' | 'saved-searches' | 'saved-properties' | 'inbox' | 'account' | 'create-listing' | 'agents' | 'agencies' | 'admin' | 'how-it-works' | 'explore-cities' | 'privacy' | 'terms' | 'cookies' | 'refund') => {
+    const handleNavigation = (view: 'search' | 'saved-searches' | 'saved-properties' | 'inbox' | 'account' | 'create-listing' | 'agents' | 'agencies' | 'admin' | 'how-it-works' | 'explore-cities' | 'privacy' | 'terms' | 'cookies' | 'refund' | 'contact') => {
         dispatch({ type: 'SET_ACTIVE_VIEW', payload: view });
         const route = view === 'search' ? '/' : `/${view}`;
         window.history.pushState({}, '', getLocalizedPath(route));
@@ -296,6 +296,12 @@ const Footer: React.FC<FooterProps> = ({ className = '', contained = false }) =>
                             className="text-slate-500 hover:text-primary transition-colors whitespace-nowrap"
                         >
                             {t('footer:legal.refundPolicy', 'Refund Policy')}
+                        </button>
+                        <button
+                            onClick={() => handleNavigation('contact')}
+                            className="text-slate-500 hover:text-primary transition-colors whitespace-nowrap"
+                        >
+                            {t('footer:links.contactUs', 'Contact Us')}
                         </button>
                     </div>
                 </div>

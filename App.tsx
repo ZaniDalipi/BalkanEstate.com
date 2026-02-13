@@ -79,6 +79,7 @@ const PrivacyPolicyPage = lazy(() => import('./src/features/legal/components/Pri
 const TermsOfServicePage = lazy(() => import('./src/features/legal/components/TermsOfServicePage'));
 const CookiePolicyPage = lazy(() => import('./src/features/legal/components/CookiePolicyPage'));
 const RefundPolicyPage = lazy(() => import('./src/features/legal/components/RefundPolicyPage'));
+const ContactUsPage = lazy(() => import('./src/features/contact/components/ContactUsPage'));
 
 // Agency creation pages
 const CreateAgencyPage = lazy(() => import('./src/features/agencies/components/CreateAgencyPage'));
@@ -321,6 +322,7 @@ const AppContent: React.FC<{ onToggleSidebar: () => void }> = ({ onToggleSidebar
         '/cookie-policy': 'cookies',
         '/refund': 'refund',
         '/refund-policy': 'refund',
+        '/contact': 'contact',
         '/rent': 'rentals',
         '/rentals': 'rentals',
         '/create-agency': 'createAgency',
@@ -555,6 +557,8 @@ const AppContent: React.FC<{ onToggleSidebar: () => void }> = ({ onToggleSidebar
         return <CookiePolicyPage />;
       case 'refund':
         return <RefundPolicyPage />;
+      case 'contact':
+        return <ContactUsPage />;
       case 'createAgency':
         return <CreateAgencyPage />;
       case 'createAgencyPayment':

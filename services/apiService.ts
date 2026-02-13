@@ -516,6 +516,22 @@ export const sendAreaSearchInquiry = async (params: AreaSearchInquiryParams): Pr
   return response;
 };
 
+export interface ContactInquiryParams {
+  name: string;
+  email: string;
+  phone?: string;
+  subject: string;
+  message: string;
+}
+
+export const sendContactInquiry = async (params: ContactInquiryParams): Promise<{ message: string; inquiryId: string }> => {
+  const response = await apiRequest<{ message: string; inquiryId: string }>('/inquiries/contact', {
+    method: 'POST',
+    body: params,
+  });
+  return response;
+};
+
 export const updateUser = async (userData: Partial<User>): Promise<User> => {
   const response = await apiRequest<{ user: User }>('/auth/profile', {
     method: 'PUT',

@@ -32,6 +32,7 @@ export type AppView =
   | 'terms'
   | 'cookies'
   | 'refund'
+  | 'contact'
   | 'createAgency'
   | 'createAgencyPayment'
   | 'createAgencyConfirm'

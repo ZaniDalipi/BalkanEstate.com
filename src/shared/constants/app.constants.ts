@@ -63,6 +63,7 @@ export const ROUTES = {
   ADMIN: '/admin',
   ACCOUNT: '/account',
   CREATE_LISTING: '/create-listing',
+  CONTACT: '/contact',
   PAYMENT_SUCCESS: '/payment/success',
   PAYMENT_CANCEL: '/payment/cancel',
 } as const;
