@@ -25,16 +25,12 @@ export const useMapLayers = ({ map, isLoaded }: UseMapLayersProps) => {
   const lastCadastreZoomRef = useRef<number | null>(null);
   const cadastreInfoWindowRef = useRef<google.maps.InfoWindow | null>(null);
   const cadastreClickListenerRef = useRef<google.maps.MapsEventListener | null>(null);
-  const showCadastreRef = useRef(false);
 
   // Cadastre layer effect
   useEffect(() => {
     if (!map || !isLoaded) return;
 
-    showCadastreRef.current = showCadastre;
-
     const removeCadastreLayer = () => {
-      // Remove tracked layer by reference
       if (cadastreLayerRef.current) {
         const overlays = map.overlayMapTypes;
         for (let i = overlays.getLength() - 1; i >= 0; i--) {
@@ -43,14 +39,6 @@ export const useMapLayers = ({ map, isLoaded }: UseMapLayersProps) => {
           }
         }
         cadastreLayerRef.current = null;
-      }
-      // Also remove any stale cadastre overlays by name (rAF race condition)
-      const overlays = map.overlayMapTypes;
-      for (let i = overlays.getLength() - 1; i >= 0; i--) {
-        const overlay = overlays.getAt(i);
-        if (overlay && (overlay as any).name === 'Cadastre') {
-          overlays.removeAt(i);
-        }
       }
     };
 
@@ -280,8 +268,7 @@ export const useMapLayers = ({ map, isLoaded }: UseMapLayersProps) => {
         lastCadastreZoomRef.current = newZoom;
         removeCadastreLayer();
         requestAnimationFrame(() => {
-          // Check ref (not stale closure) to avoid adding layer after toggle-off
-          if (showCadastreRef.current) {
+          if (showCadastre) {
             const newLayer = createWmsLayer();
             map.overlayMapTypes.push(newLayer);
             cadastreLayerRef.current = newLayer;
