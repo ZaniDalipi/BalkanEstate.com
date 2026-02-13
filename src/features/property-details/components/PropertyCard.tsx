@@ -145,11 +145,11 @@ const PropertyCardInner = memo<PropertyCardInnerProps>(({
       {/* Image Section */}
       <div className="relative overflow-hidden">
         {imageError ? (
-          <div className="w-full h-44 sm:h-48 md:h-52 bg-gradient-to-br from-neutral-100 via-neutral-200 to-neutral-300 flex items-center justify-center">
+          <div className="w-full aspect-[4/3] bg-gradient-to-br from-neutral-100 via-neutral-200 to-neutral-300 flex items-center justify-center">
             <BuildingOfficeIcon className="w-10 h-10 text-neutral-400" />
           </div>
         ) : (
-          <div className="relative w-full h-44 sm:h-48 md:h-52 overflow-hidden bg-neutral-200">
+          <div className="relative w-full aspect-[4/3] overflow-hidden bg-neutral-200">
             {/* Blurred background - fills any gaps from object-cover edge cases */}
             <img
               src={optimizeCloudinaryUrl(property.imageUrl, { width: 100, quality: 'auto:low', crop: 'fill' })}
@@ -158,19 +158,19 @@ const PropertyCardInner = memo<PropertyCardInnerProps>(({
               loading="lazy"
               decoding="async"
               width={100}
-              height={67}
+              height={75}
               className="absolute inset-0 w-full h-full object-cover blur-2xl scale-150 opacity-80"
             />
-            {/* Main image - covers container fully */}
+            {/* Main image - server-cropped to 4:3 for consistent cards */}
             <img
-              src={optimizeCloudinaryUrl(property.imageUrl, { width: 640, quality: 'auto' })}
-              srcSet={cloudinarySrcSet(property.imageUrl, [320, 480, 640])}
+              src={optimizeCloudinaryUrl(property.imageUrl, { width: 640, height: 480, quality: 'auto', crop: 'fill', gravity: 'auto' })}
+              srcSet={`${optimizeCloudinaryUrl(property.imageUrl, { width: 320, height: 240, quality: 'auto', crop: 'fill', gravity: 'auto' })} 320w, ${optimizeCloudinaryUrl(property.imageUrl, { width: 480, height: 360, quality: 'auto', crop: 'fill', gravity: 'auto' })} 480w, ${optimizeCloudinaryUrl(property.imageUrl, { width: 640, height: 480, quality: 'auto', crop: 'fill', gravity: 'auto' })} 640w`}
               sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
               alt={`${property.title || propertyTypeLabel} - ${property.beds} bed, ${property.baths} bath ${propertyTypeLabel} for ${isRental ? 'rent' : 'sale'} in ${property.city}, ${property.country}`}
               loading="lazy"
               decoding="async"
               width={640}
-              height={427}
+              height={480}
               className={`relative w-full h-full object-cover transition-transform duration-700 ${
                 isHovered && !isSold && !isRented ? 'scale-110' : 'scale-100'
               } ${isSold || isRented ? 'grayscale' : ''}`}
