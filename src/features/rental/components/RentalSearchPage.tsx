@@ -201,7 +201,37 @@ const RentalSearchPage: React.FC<RentalSearchPageProps> = ({ onToggleSidebar }) 
                     </div>
 
                     {/* Property List */}
-                    <div className="flex-1 overflow-y-auto p-3 pb-28 lg:pb-3 glass-scrollbar" data-scroll-container aria-live="polite">
+                    <div className="flex-1 overflow-y-auto pb-28 lg:pb-3 glass-scrollbar" data-scroll-container aria-live="polite">
+                        {/* Results count + sort bar (matches buy page) */}
+                        <div className="p-4 border-b border-neutral-200 flex items-center justify-between sticky top-0 bg-white z-[100]">
+                            <p className="text-xs text-neutral-500 font-semibold">{t('search:resultsFound', { count: listProperties.length })}</p>
+                            <div className="relative z-[101]">
+                                <select
+                                    id="rentalSortBy"
+                                    name="sortBy"
+                                    value={filters.sortBy || 'newest'}
+                                    onChange={(e) => handleSortChange(e.target.value)}
+                                    aria-label={t('search:filters.sortBy', 'Sort properties by')}
+                                    className="block w-full text-xs bg-white border border-neutral-300 rounded-xl text-neutral-900 px-3 py-1.5 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all appearance-none pr-8"
+                                >
+                                    <option value="newest">{t('search:sort.newest')}</option>
+                                    <option value="oldest">{t('search:sort.oldest')}</option>
+                                    <option value="price_asc">{t('search:sort.priceAsc')}</option>
+                                    <option value="price_desc">{t('search:sort.priceDesc')}</option>
+                                    <option value="beds_desc">{t('search:sort.bedsDesc')}</option>
+                                    <option value="baths_desc">{t('search:sort.bathsDesc')}</option>
+                                    <option value="sqft_desc">{t('search:sort.areaDesc')}</option>
+                                    <option value="sqft_asc">{t('search:sort.areaAsc')}</option>
+                                    <option value="year_built_desc">{t('search:sort.yearBuiltDesc')}</option>
+                                    <option value="featured">{t('search:sort.featured')}</option>
+                                    <option value="price_reduced">{t('search:sort.priceReduced')}</option>
+                                </select>
+                                <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-neutral-500">
+                                    <svg className="fill-current h-3 w-3" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/></svg>
+                                </div>
+                            </div>
+                        </div>
+                        <div className="p-3">
                         {isLoading ? (
                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                                 {[...Array(6)].map((_, i) => (
@@ -245,6 +275,7 @@ const RentalSearchPage: React.FC<RentalSearchPageProps> = ({ onToggleSidebar }) 
                                 </div>
                             </>
                         )}
+                        </div>
                     </div>
                 </div>
 
