@@ -105,6 +105,9 @@ const RentalSearchPage: React.FC<RentalSearchPageProps> = ({ onToggleSidebar }) 
             <div className={`flex h-full w-full flex-col lg:flex-row transition-all duration-300 relative ${isFiltersOpen && (isMobile || isTablet) ? 'blur-sm pointer-events-none' : ''}`}>
                 {/* Left Panel: Search + Filters + Property List */}
                 <div className={`absolute inset-0 z-10 h-full w-full flex flex-col lg:relative lg:w-[45%] xl:w-[55%] lg:flex-shrink-0 lg:border-r lg:border-gray-200 ${showViewToggle && mobileView === 'list' ? 'translate-x-0' : showViewToggle ? '-translate-x-full' : ''} lg:translate-x-0 transition-transform duration-300`} style={{ background: 'linear-gradient(180deg, rgba(248,249,252,0.98) 0%, rgba(238,241,248,0.95) 100%)' }}>
+                    {/* Spacer for floating mobile header */}
+                    {isMobile && <div className="h-14 flex-shrink-0" />}
+
                     {/* Header with city search */}
                     <div className="sticky top-0 z-20" style={{ background: 'rgba(255,255,255,0.85)', backdropFilter: 'blur(20px)', WebkitBackdropFilter: 'blur(20px)', borderBottom: '1px solid rgba(0,0,0,0.06)' }}>
                         <div className="px-4 py-3 flex items-center justify-between gap-3">
@@ -119,7 +122,7 @@ const RentalSearchPage: React.FC<RentalSearchPageProps> = ({ onToggleSidebar }) 
                                     variant="accent"
                                     size="sm"
                                     onClick={handleCreateRental}
-                                    className="font-semibold rounded-xl"
+                                    className="hidden lg:inline-flex font-semibold rounded-xl"
                                 >
                                     + {t('rental:createListing')}
                                 </Button>
