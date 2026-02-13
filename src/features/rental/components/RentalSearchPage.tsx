@@ -11,6 +11,7 @@ import DefaultAvatar from '@/components/shared/DefaultAvatar';
 import { LiquidGlassSwitch } from '@/src/components/ui/LiquidGlassSwitch';
 import { Button } from '@/components/ui/liquid-glass-button';
 import { SEO } from '@/src/components/seo';
+import Footer from '@/components/shared/Footer';
 import { useLocalizedNavigation } from '@/src/hooks/useLocalizedNavigation';
 import { NominatimResult } from '@/types';
 
@@ -192,32 +193,54 @@ const RentalSearchPage: React.FC<RentalSearchPageProps> = ({ onToggleSidebar }) 
 
                     {/* Property List */}
                     <div className="flex-1 overflow-y-auto pb-28 lg:pb-3 glass-scrollbar" data-scroll-container aria-live="polite">
-                        {/* Results count + sort bar (matches buy page) */}
-                        <div className="p-4 border-b border-neutral-200 flex items-center justify-between sticky top-0 bg-white z-[100]">
-                            <p className="text-xs text-neutral-500 font-semibold">{t('search:resultsFound', { count: listProperties.length })}</p>
-                            <div className="relative z-[101]">
-                                <select
-                                    id="rentalSortBy"
-                                    name="sortBy"
-                                    value={filters.sortBy || 'newest'}
-                                    onChange={(e) => handleSortChange(e.target.value)}
-                                    aria-label={t('search:filters.sortBy', 'Sort properties by')}
-                                    className="block w-full text-xs bg-white border border-neutral-300 rounded-xl text-neutral-900 px-3 py-1.5 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all appearance-none pr-8"
-                                >
-                                    <option value="newest">{t('search:sort.newest')}</option>
-                                    <option value="oldest">{t('search:sort.oldest')}</option>
-                                    <option value="price_asc">{t('search:sort.priceAsc')}</option>
-                                    <option value="price_desc">{t('search:sort.priceDesc')}</option>
-                                    <option value="beds_desc">{t('search:sort.bedsDesc')}</option>
-                                    <option value="baths_desc">{t('search:sort.bathsDesc')}</option>
-                                    <option value="sqft_desc">{t('search:sort.areaDesc')}</option>
-                                    <option value="sqft_asc">{t('search:sort.areaAsc')}</option>
-                                    <option value="year_built_desc">{t('search:sort.yearBuiltDesc')}</option>
-                                    <option value="featured">{t('search:sort.featured')}</option>
-                                    <option value="price_reduced">{t('search:sort.priceReduced')}</option>
-                                </select>
-                                <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-neutral-500">
-                                    <svg className="fill-current h-3 w-3" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/></svg>
+                        {/* Results count + location + sort bar */}
+                        <div className="sticky top-0 bg-white z-[100] border-b border-neutral-200">
+                            <div className="p-4 flex items-center justify-between">
+                                <div className="flex items-center gap-2 min-w-0">
+                                    <p className="text-xs text-neutral-500 font-semibold flex-shrink-0">{t('search:resultsFound', { count: listProperties.length })}</p>
+                                    {filters.query && (
+                                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-primary/10 text-primary text-xs font-medium truncate max-w-[140px]">
+                                            <MapIcon className="w-3 h-3 flex-shrink-0" />
+                                            <span className="truncate">{filters.query}</span>
+                                        </span>
+                                    )}
+                                </div>
+                                <div className="flex items-center gap-2 flex-shrink-0">
+                                    {(filters.query || filters.country !== 'any' || filters.minPrice || filters.maxPrice || filters.beds || filters.baths || (filters.propertyType && filters.propertyType !== 'any')) && (
+                                        <button
+                                            onClick={handleResetFilters}
+                                            className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-red-50 text-red-600 text-xs font-semibold hover:bg-red-100 active:bg-red-200 transition-colors"
+                                            aria-label={t('search:filters.resetFilters', 'Reset filters')}
+                                        >
+                                            <XMarkIcon className="w-3.5 h-3.5" />
+                                            {t('common:reset', 'Reset')}
+                                        </button>
+                                    )}
+                                    <div className="relative z-[101]">
+                                        <select
+                                            id="rentalSortBy"
+                                            name="sortBy"
+                                            value={filters.sortBy || 'newest'}
+                                            onChange={(e) => handleSortChange(e.target.value)}
+                                            aria-label={t('search:filters.sortBy', 'Sort properties by')}
+                                            className="block w-full text-xs bg-white border border-neutral-300 rounded-xl text-neutral-900 px-3 py-1.5 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all appearance-none pr-8"
+                                        >
+                                            <option value="newest">{t('search:sort.newest')}</option>
+                                            <option value="oldest">{t('search:sort.oldest')}</option>
+                                            <option value="price_asc">{t('search:sort.priceAsc')}</option>
+                                            <option value="price_desc">{t('search:sort.priceDesc')}</option>
+                                            <option value="beds_desc">{t('search:sort.bedsDesc')}</option>
+                                            <option value="baths_desc">{t('search:sort.bathsDesc')}</option>
+                                            <option value="sqft_desc">{t('search:sort.areaDesc')}</option>
+                                            <option value="sqft_asc">{t('search:sort.areaAsc')}</option>
+                                            <option value="year_built_desc">{t('search:sort.yearBuiltDesc')}</option>
+                                            <option value="featured">{t('search:sort.featured')}</option>
+                                            <option value="price_reduced">{t('search:sort.priceReduced')}</option>
+                                        </select>
+                                        <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-neutral-500">
+                                            <svg className="fill-current h-3 w-3" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/></svg>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -265,6 +288,10 @@ const RentalSearchPage: React.FC<RentalSearchPageProps> = ({ onToggleSidebar }) 
                                 </div>
                             </>
                         )}
+                        {/* Footer - Integrated at bottom of property list */}
+                        <div className="mt-8 overflow-x-hidden">
+                            <Footer contained />
+                        </div>
                         </div>
                     </div>
                 </div>
