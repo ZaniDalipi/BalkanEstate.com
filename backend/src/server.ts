@@ -20,6 +20,7 @@ import {
   getCorsConfig,
   generalRateLimiter,
   sensitiveRateLimiter,
+  mutationRateLimiter,
   paymentRateLimiter,
   aiRateLimiter,
   xssSanitizer,
