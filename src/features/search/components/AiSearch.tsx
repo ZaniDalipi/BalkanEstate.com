@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect, useCallback, useMemo } from 'react';
+import { createPortal } from 'react-dom';
 import { useTranslation } from 'react-i18next';
 import { motion, AnimatePresence, PanInfo } from 'framer-motion';
 import { ChatMessage, AiSearchQuery, Property } from '@/types';
@@ -238,7 +239,9 @@ const SwipeModal: React.FC<{
     const topProperty = properties[currentIndex];
     const nextProperty = properties[currentIndex + 1];
 
-    return (
+    // Use portal to render on document.body so the modal covers the entire viewport
+    // (parent elements with transform/translate create a new containing block for fixed positioning)
+    return createPortal(
         <AnimatePresence>
             {isOpen && (
                 <motion.div
@@ -344,7 +347,8 @@ const SwipeModal: React.FC<{
                     </motion.div>
                 </motion.div>
             )}
-        </AnimatePresence>
+        </AnimatePresence>,
+        document.body
     );
 };
 

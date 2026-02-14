@@ -761,8 +761,8 @@ const PropertyList = memo<PropertyListProps>((props) => {
         return (
             <div className="flex flex-col h-full bg-transparent">
                 {/* TOP CONTROLS SECTION */}
-                <div className="flex-shrink-0 border-b border-neutral-200">
-                    <div className="p-4">
+                <div className={`${searchMode === 'ai' ? 'flex flex-col' : 'flex-shrink-0'} border-b border-neutral-200`} style={searchMode === 'ai' ? { flex: '1 1 50%', minHeight: 0 } : undefined}>
+                    <div className="p-4 flex-shrink-0">
                         <div className="bg-neutral-100 p-1 rounded-full flex items-center space-x-1 border border-neutral-200 shadow-sm max-w-sm mx-auto">
                             <button onClick={() => onSearchModeChange('manual')} className={`w-1/2 px-4 py-2 rounded-full text-sm font-semibold transition-all duration-300 flex items-center justify-center gap-2 ${searchMode === 'manual' ? 'bg-white text-primary shadow' : 'text-neutral-600 hover:bg-neutral-200'}`}>{t('search:title')}</button>
                             {isAuthenticated ? (
@@ -774,8 +774,8 @@ const PropertyList = memo<PropertyListProps>((props) => {
                             )}
                         </div>
                     </div>
-                    
-                    <div className="px-4 pb-4 relative z-[60]" style={{ height: '400px' }}>
+
+                    <div className={`px-4 pb-4 relative z-[60] ${searchMode === 'ai' ? 'flex-grow min-h-0' : ''}`} style={searchMode === 'manual' ? { height: '280px' } : undefined}>
                         {searchMode === 'manual' ? (
                             <div className="h-full overflow-y-auto pr-2">
                                 <FilterControls {...props} />
@@ -795,7 +795,7 @@ const PropertyList = memo<PropertyListProps>((props) => {
                 </div>
 
                 {/* PROPERTY LIST SECTION */}
-                <div className="flex-grow min-h-0 overflow-hidden relative z-0">
+                <div className="overflow-hidden relative z-0" style={{ flex: searchMode === 'ai' ? '1 1 50%' : '1 1 auto', minHeight: searchMode === 'ai' ? '40%' : 0 }}>
                     <div className="h-full overflow-y-auto overflow-x-hidden">
                         <div className="p-4 border-b border-neutral-200 flex items-center justify-between sticky top-0 bg-white z-[100]">
                             <p className="text-xs text-neutral-500 font-semibold">{t('search:resultsFound', { count: properties.length })}</p>

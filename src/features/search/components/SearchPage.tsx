@@ -191,18 +191,20 @@ const SearchPage: React.FC<SearchPageProps> = ({ onToggleSidebar }) => {
                 {/* --- Left Panel: List & Filters --- */}
                 {/* On mobile/tablet: full-width overlay with slide animation. On lg+: side panel in split view */}
                  <div className={`absolute inset-0 z-10 h-full w-full bg-white flex flex-col lg:relative lg:w-[45%] xl:w-[55%] lg:flex-shrink-0 lg:border-r lg:border-neutral-200 ${ showViewToggle && mobileView === 'list' ? 'translate-x-0' : showViewToggle ? '-translate-x-full' : '' } lg:translate-x-0 transition-transform duration-300`}>
-                    <SearchHeader
-                        t={t}
-                        filters={filters}
-                        suggestions={suggestions}
-                        isQueryInputFocused={isQueryInputFocused}
-                        isSearchingLocation={isSearchingLocation}
-                        searchWrapperRef={searchWrapperRef}
-                        onFilterChange={handleFilterChange}
-                        onSearch={() => handleSearch()}
-                        onQueryInputFocusChange={setIsQueryInputFocused}
-                        onSuggestionClick={handleSuggestionClick}
-                    />
+                    {searchMode !== 'ai' && (
+                        <SearchHeader
+                            t={t}
+                            filters={filters}
+                            suggestions={suggestions}
+                            isQueryInputFocused={isQueryInputFocused}
+                            isSearchingLocation={isSearchingLocation}
+                            searchWrapperRef={searchWrapperRef}
+                            onFilterChange={handleFilterChange}
+                            onSearch={() => handleSearch()}
+                            onQueryInputFocusChange={setIsQueryInputFocused}
+                            onSuggestionClick={handleSuggestionClick}
+                        />
+                    )}
                     <PropertyList {...propertyListProps} />
                 </div>
 
