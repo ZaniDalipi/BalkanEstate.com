@@ -515,13 +515,15 @@ export const getAiChatResponse = async (
           maxSqft: { type: Type.NUMBER, description: 'The maximum size in square meters.' },
           propertyType: {
             type: Type.STRING,
+            nullable: true,
             enum: ['house', 'apartment', 'villa', 'land', 'commercial'],
-            description: 'ONLY set if user explicitly mentions property type (house, apartment, etc). OMIT if not mentioned.'
+            description: 'ONLY set if user explicitly mentions property type (house, apartment, etc). Must be null if not mentioned.'
           },
           sellerType: {
             type: Type.STRING,
+            nullable: true,
             enum: ['agent', 'private'],
-            description: 'ONLY set if user explicitly says "private seller", "from owner", "agent", etc. OMIT if not mentioned.'
+            description: 'ONLY set if user explicitly says "private seller", "from owner", "agent", etc. Must be null if not mentioned.'
           },
           features: { type: Type.ARRAY, items: { type: Type.STRING } },
         },
@@ -549,6 +551,17 @@ export const getAiChatResponse = async (
   try {
     const jsonText = result.text.trim();
     const parsedResult = JSON.parse(jsonText);
+
+    // Strip null/undefined values from searchQuery so the frontend
+    // doesn't treat them as explicitly set filters
+    if (parsedResult.searchQuery) {
+      for (const key of Object.keys(parsedResult.searchQuery)) {
+        if (parsedResult.searchQuery[key] === null || parsedResult.searchQuery[key] === undefined) {
+          delete parsedResult.searchQuery[key];
+        }
+      }
+    }
+
     return parsedResult as AiChatResponse;
   } catch (_e) {
     return {
