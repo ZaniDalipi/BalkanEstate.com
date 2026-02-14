@@ -730,6 +730,8 @@ const AppWrapper: React.FC = () => {
     const handleSplashComplete = useCallback(() => {
         setShowSplash(false);
         localStorage.setItem('balkanestate_visited', 'true');
+        // Signal map markers to play entrance fly-in animation
+        (window as any).__balkanestateSplashDone = Date.now();
     }, []);
 
     useEffect(() => {

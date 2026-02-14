@@ -48,6 +48,36 @@ import {
   formatMarkerPrice,
 } from './googleMapConstants';
 
+// Inject CSS for marker entrance fly-in animation (Google Maps variant)
+if (typeof window !== 'undefined') {
+  const styleId = 'gmap-marker-entrance-animation';
+  if (!document.getElementById(styleId)) {
+    const style = document.createElement('style');
+    style.id = styleId;
+    style.textContent = `
+      @keyframes gmarkerFlyIn {
+        0% {
+          opacity: 0;
+          transform: translate(var(--fly-x, 0px), var(--fly-y, -300px)) scale(0.2) rotate(var(--fly-r, 0deg));
+        }
+        35% { opacity: 1; }
+        65% { transform: translate(0px, -8px) scale(1.18) rotate(0deg); }
+        82% { transform: translate(0px, 3px) scale(0.95) rotate(0deg); }
+        100% {
+          opacity: 1;
+          transform: translate(0px, 0px) scale(1) rotate(0deg);
+        }
+      }
+      .gmarker-entrance-fly {
+        will-change: transform, opacity;
+        animation: gmarkerFlyIn 0.85s cubic-bezier(0.22, 1, 0.36, 1) both !important;
+        animation-delay: var(--fly-delay, 0ms) !important;
+      }
+    `;
+    document.head.appendChild(style);
+  }
+}
+
 // Props interface matching the Leaflet-based MapComponent for seamless switching
 export interface GoogleMapComponentProps {
   properties: Property[];
@@ -831,10 +861,17 @@ export function useGoogleMap(props: GoogleMapComponentProps) {
 
     if (props.length === 0) return;
 
+    // Check if splash screen just completed — play entrance fly-in animation
+    const splashDone = (window as any).__balkanestateSplashDone;
+    const shouldAnimateEntrance = !!(splashDone && Date.now() - splashDone < 5000);
+    const goldenAngle = 137.508 * (Math.PI / 180);
+    const maxStagger = 2000;
+
     const regularMarkers: google.maps.marker.AdvancedMarkerElement[] = [];
     const promotedMarkers: google.maps.marker.AdvancedMarkerElement[] = [];
 
-    for (const property of props) {
+    for (let i = 0; i < props.length; i++) {
+      const property = props[i];
       const markerDiv = document.createElement('div');
       markerDiv.className = 'property-marker';
       markerDiv.dataset.propertyId = property.id;
@@ -869,18 +906,42 @@ export function useGoogleMap(props: GoogleMapComponentProps) {
         user-select: none;
         transition: transform 0.15s ease-out, box-shadow 0.15s ease-out;
       `;
+
+      // Entrance fly-in animation after splash screen
+      if (shouldAnimateEntrance) {
+        const angle = i * goldenAngle;
+        const distance = 400 + (i % 7) * 80;
+        const flyX = Math.round(Math.cos(angle) * distance);
+        const flyY = Math.round(Math.sin(angle) * distance);
+        const flyR = Math.round(Math.cos(angle * 2) * 25);
+        const delay = props.length > 1 ? Math.round((i / (props.length - 1)) * maxStagger) : 0;
+        markerDiv.classList.add('gmarker-entrance-fly');
+        markerDiv.style.setProperty('--fly-x', `${flyX}px`);
+        markerDiv.style.setProperty('--fly-y', `${flyY}px`);
+        markerDiv.style.setProperty('--fly-r', `${flyR}deg`);
+        markerDiv.style.setProperty('--fly-delay', `${delay}ms`);
+        // Clean up animation class after it completes to restore normal hover/transitions
+        const cleanupTime = delay + 900;
+        setTimeout(() => {
+          markerDiv.classList.remove('gmarker-entrance-fly');
+          markerDiv.style.removeProperty('--fly-x');
+          markerDiv.style.removeProperty('--fly-y');
+          markerDiv.style.removeProperty('--fly-r');
+          markerDiv.style.removeProperty('--fly-delay');
+        }, cleanupTime);
+      }
       markerDiv.textContent = price;
 
       // Hover handlers - don't override if highlighted from list
       markerDiv.onmouseenter = () => {
-        if (!markerDiv.classList.contains('marker-highlighted')) {
+        if (!markerDiv.classList.contains('marker-highlighted') && !markerDiv.classList.contains('gmarker-entrance-fly')) {
           markerDiv.style.transform = 'scale(1.25) translateY(-2px)';
           markerDiv.style.boxShadow = '0 4px 10px rgba(0,0,0,0.35)';
           markerDiv.style.zIndex = '1000';
         }
       };
       markerDiv.onmouseleave = () => {
-        if (!markerDiv.classList.contains('marker-highlighted')) {
+        if (!markerDiv.classList.contains('marker-highlighted') && !markerDiv.classList.contains('gmarker-entrance-fly')) {
           markerDiv.style.transform = '';
           markerDiv.style.boxShadow = '';
           markerDiv.style.zIndex = isActivelyPromoted ? '100' : '1';
@@ -915,6 +976,13 @@ export function useGoogleMap(props: GoogleMapComponentProps) {
     // Add regular markers to clusterer (promoted stay individual on map)
     clustererRef.current.addMarkers(regularMarkers);
     promotedMarkersRef.current = promotedMarkers;
+
+    // Clean up splash flag after entrance animation
+    if (shouldAnimateEntrance) {
+      setTimeout(() => {
+        delete (window as any).__balkanestateSplashDone;
+      }, 3500);
+    }
   }, []);
 
   // Update markers when properties change — debounced to avoid rapid clear/recreate
