@@ -58,6 +58,7 @@ import {
   updateContent,
   deleteContent,
   uploadVideo,
+  uploadShowcaseImage,
 } from '../controllers/siteContentController';
 import {
   getAllEmailConfigs,
@@ -203,11 +204,24 @@ const videoUpload = multer({
   },
 });
 
+const imageUpload = multer({
+  storage: multer.memoryStorage(),
+  limits: { fileSize: 10 * 1024 * 1024 }, // 10MB limit
+  fileFilter: (_req, file, cb) => {
+    if (file.mimetype.startsWith('image/')) {
+      cb(null, true);
+    } else {
+      cb(new Error('Only image files are allowed'));
+    }
+  },
+});
+
 router.get('/site-content', logAdminAction('VIEW_SITE_CONTENT'), getAllContent);
 router.post('/site-content', logAdminAction('CREATE_SITE_CONTENT'), createContent);
 router.patch('/site-content/:id', logAdminAction('UPDATE_SITE_CONTENT'), updateContent);
 router.delete('/site-content/:id', logAdminAction('DELETE_SITE_CONTENT'), deleteContent);
 router.post('/site-content/upload-video', logAdminAction('UPLOAD_VIDEO'), videoUpload.single('video'), uploadVideo);
+router.post('/site-content/upload-image', logAdminAction('UPLOAD_SHOWCASE_IMAGE'), imageUpload.single('image'), uploadShowcaseImage);
 
 // ===== Email Configuration Management =====
 router.get('/email-configs', logAdminAction('VIEW_EMAIL_CONFIGS'), getAllEmailConfigs);

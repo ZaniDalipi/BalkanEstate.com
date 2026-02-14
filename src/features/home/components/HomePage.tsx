@@ -12,6 +12,7 @@ import {
   PhoneParade,
   VideoInTablet,
 } from '@/src/components/ui/container-scroll-animation';
+import { useShowcaseImages } from '../hooks/useShowcaseImages';
 import {
   SearchIcon,
   MapIcon,
@@ -376,12 +377,72 @@ const PhoneMapScreen: React.FC = () => (
   </div>
 );
 
+// ── Interactive showcase carousel (uses admin-uploaded images) ──
+const ShowcaseCarousel: React.FC<{
+  images: { _id: string; url: string; title: string }[];
+}> = ({ images }) => {
+  const [activeIdx, setActiveIdx] = React.useState(0);
+
+  // Auto-cycle every 4 seconds
+  React.useEffect(() => {
+    if (images.length <= 1) return;
+    const timer = setInterval(() => {
+      setActiveIdx((prev) => (prev + 1) % images.length);
+    }, 4000);
+    return () => clearInterval(timer);
+  }, [images.length]);
+
+  return (
+    <div className="h-full w-full relative bg-gray-100 overflow-hidden">
+      {/* Images */}
+      {images.map((img, idx) => (
+        <img
+          key={img._id}
+          src={img.url}
+          alt={img.title}
+          className={`absolute inset-0 w-full h-full object-cover object-top transition-opacity duration-700 ${
+            idx === activeIdx ? 'opacity-100' : 'opacity-0'
+          }`}
+          draggable={false}
+        />
+      ))}
+
+      {/* Dot indicators */}
+      {images.length > 1 && (
+        <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-1.5 z-10">
+          {images.map((_, idx) => (
+            <button
+              key={idx}
+              onClick={() => setActiveIdx(idx)}
+              className={`w-2 h-2 rounded-full transition-all duration-300 ${
+                idx === activeIdx
+                  ? 'bg-primary w-5'
+                  : 'bg-white/60 hover:bg-white/80'
+              }`}
+            />
+          ))}
+        </div>
+      )}
+
+      {/* Image title overlay */}
+      {images[activeIdx] && (
+        <div className="absolute bottom-8 left-3 right-3 z-10">
+          <div className="bg-black/40 backdrop-blur-sm text-white text-xs px-3 py-1.5 rounded-lg truncate">
+            {images[activeIdx].title}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
+
 // ── Main HomePage ───────────────────────────────────────────────
 const HomePage: React.FC = () => {
   const { t } = useTranslation('common');
   const { state, dispatch } = useAppContext();
   const { navigate } = useLocalizedNavigation();
   const { recentlyViewed, clearHistory } = useRecentlyViewed(state.isAuthenticated);
+  const { images: showcaseImages } = useShowcaseImages();
 
   const handleNavigate = (route: string) => {
     navigate(route);
@@ -523,22 +584,39 @@ const HomePage: React.FC = () => {
       </ContainerScrollTablet>
 
       {/* ════════════════════════════════════════════════════════
-          5. TABLET SCROLL — Agencies view
+          5. TABLET SCROLL — Interactive showcase (admin images) or agencies fallback
           ════════════════════════════════════════════════════════ */}
       <ContainerScrollTablet
         titleComponent={
           <>
-            <p className="text-sm font-medium text-indigo-500 mb-2">Trusted partners</p>
+            <p className="text-sm font-medium text-indigo-500 mb-2">
+              {showcaseImages.length > 0 ? 'App Showcase' : 'Trusted partners'}
+            </p>
             <h2 className="text-4xl font-semibold text-gray-900">
-              Top Agencies & Agents <br />
-              <span className="text-4xl md:text-[6rem] font-bold mt-1 leading-none text-indigo-500">
-                Across the Balkans
-              </span>
+              {showcaseImages.length > 0 ? (
+                <>
+                  See What&apos;s Inside <br />
+                  <span className="text-4xl md:text-[6rem] font-bold mt-1 leading-none text-indigo-500">
+                    The Platform
+                  </span>
+                </>
+              ) : (
+                <>
+                  Top Agencies & Agents <br />
+                  <span className="text-4xl md:text-[6rem] font-bold mt-1 leading-none text-indigo-500">
+                    Across the Balkans
+                  </span>
+                </>
+              )}
             </h2>
           </>
         }
       >
-        <TabletAgenciesScreen />
+        {showcaseImages.length > 0 ? (
+          <ShowcaseCarousel images={showcaseImages} />
+        ) : (
+          <TabletAgenciesScreen />
+        )}
       </ContainerScrollTablet>
 
       {/* ════════════════════════════════════════════════════════

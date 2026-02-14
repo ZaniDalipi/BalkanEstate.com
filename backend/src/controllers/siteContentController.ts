@@ -140,6 +140,44 @@ export const deleteContent = async (req: Request, res: Response): Promise<void> 
   }
 };
 
+// Admin: Upload showcase image to Cloudinary
+export const uploadShowcaseImage = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const file = req.file;
+    if (!file) {
+      res.status(400).json({ message: 'No file uploaded' });
+      return;
+    }
+
+    const result = await new Promise<any>((resolve, reject) => {
+      const uploadStream = cloudinary.uploader.upload_stream(
+        {
+          folder: 'balkan-estate/site-content/showcase',
+          resource_type: 'image',
+          transformation: [
+            { quality: 'auto:good', fetch_format: 'auto' }
+          ],
+        },
+        (error, result) => {
+          if (error) reject(error);
+          else resolve(result);
+        }
+      );
+
+      uploadStream.end(file.buffer);
+    });
+
+    res.json({
+      url: result.secure_url,
+      publicId: result.public_id,
+      width: result.width,
+      height: result.height,
+    });
+  } catch (error: any) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
 // Admin: Upload video to Cloudinary
 export const uploadVideo = async (req: Request, res: Response): Promise<void> => {
   try {

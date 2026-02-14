@@ -1,7 +1,7 @@
 // Admin API module
 // Handles all admin-related API calls
 
-import { apiRequest } from '@/src/shared/api';
+import { apiRequest, uploadRequest } from '@/src/shared/api';
 
 // --- Admin Featured Subscriptions ---
 
@@ -372,6 +372,83 @@ export const seedPromotionPlans = async (options?: { force?: boolean }): Promise
   const queryParams = options?.force ? '?force=true' : '';
   return apiRequest(`/promotion-plans/seed${queryParams}`, {
     method: 'POST',
+    requiresAuth: true,
+  });
+};
+
+// --- Showcase Images (Homepage device sections) ---
+
+export interface ShowcaseImage {
+  _id: string;
+  key: string;
+  type: 'image';
+  contentType: 'feature';
+  url: string;
+  publicId?: string;
+  title: string;
+  description?: string;
+  section: string;
+  subsection?: string;
+  order: number;
+  isActive: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export const getShowcaseImages = async (): Promise<ShowcaseImage[]> => {
+  return apiRequest('/site-content/homepage-showcase', {});
+};
+
+export const getAllShowcaseImages = async (): Promise<ShowcaseImage[]> => {
+  const allContent = await apiRequest<ShowcaseImage[]>('/admin/site-content', {
+    requiresAuth: true,
+  });
+  return allContent.filter((item: ShowcaseImage) => item.section === 'homepage-showcase');
+};
+
+export const uploadShowcaseImage = async (file: File): Promise<{ url: string; publicId: string }> => {
+  const formData = new FormData();
+  formData.append('image', file);
+  return uploadRequest('/admin/site-content/upload-image', formData);
+};
+
+export const createShowcaseItem = async (data: {
+  title: string;
+  description?: string;
+  url: string;
+  publicId?: string;
+  order?: number;
+  subsection?: string;
+}): Promise<ShowcaseImage> => {
+  return apiRequest('/admin/site-content', {
+    method: 'POST',
+    requiresAuth: true,
+    body: {
+      key: `homepage-showcase-${Date.now()}`,
+      type: 'image',
+      contentType: 'feature',
+      section: 'homepage-showcase',
+      title: data.title,
+      description: data.description,
+      url: data.url,
+      publicId: data.publicId,
+      order: data.order || 0,
+      subsection: data.subsection || 'tablet',
+    },
+  });
+};
+
+export const updateShowcaseItem = async (id: string, data: Partial<ShowcaseImage>): Promise<ShowcaseImage> => {
+  return apiRequest(`/admin/site-content/${id}`, {
+    method: 'PATCH',
+    requiresAuth: true,
+    body: data,
+  });
+};
+
+export const deleteShowcaseItem = async (id: string): Promise<{ message: string }> => {
+  return apiRequest(`/admin/site-content/${id}`, {
+    method: 'DELETE',
     requiresAuth: true,
   });
 };
