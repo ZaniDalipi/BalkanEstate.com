@@ -113,8 +113,36 @@ const SwipeCard: React.FC<{
     property: Property;
     onSwipe: (dir: 'left' | 'right') => void;
     isTop: boolean;
-}> = ({ property, onSwipe, isTop }) => {
+    exitDir?: 'left' | 'right';
+}> = ({ property, onSwipe, isTop, exitDir }) => {
     const [dragDir, setDragDir] = useState<'left' | 'right' | null>(null);
+    const [swipeDir, setSwipeDir] = useState<'left' | 'right' | null>(null);
+    const [currentImgIdx, setCurrentImgIdx] = useState(0);
+
+    // Build image list: main image + additional images (PropertyImage has { url, tag })
+    const images = useMemo(() => {
+        const imgs: string[] = [];
+        if (property.imageUrl) imgs.push(property.imageUrl);
+        if (property.images && Array.isArray(property.images)) {
+            property.images.forEach((img) => {
+                const url = typeof img === 'string' ? img : img?.url;
+                if (url && url !== property.imageUrl) imgs.push(url);
+            });
+        }
+        return imgs;
+    }, [property.imageUrl, property.images]);
+
+    // Rapid image carousel — cycle through images quickly when card is visible
+    useEffect(() => {
+        if (!isTop || images.length <= 1) return;
+        const interval = setInterval(() => {
+            setCurrentImgIdx(prev => (prev + 1) % images.length);
+        }, 1200);
+        return () => clearInterval(interval);
+    }, [isTop, images.length]);
+
+    // Reset image index when card changes
+    useEffect(() => { setCurrentImgIdx(0); }, [property.id]);
 
     const handleDrag = (_: unknown, info: PanInfo) => {
         if (info.offset.x > 40) setDragDir('right');
@@ -123,9 +151,17 @@ const SwipeCard: React.FC<{
     };
 
     const handleDragEnd = (_: unknown, info: PanInfo) => {
-        setDragDir(null);
-        if (info.offset.x > SWIPE_THRESHOLD || info.velocity.x > SWIPE_VELOCITY) onSwipe('right');
-        else if (info.offset.x < -SWIPE_THRESHOLD || info.velocity.x < -SWIPE_VELOCITY) onSwipe('left');
+        if (info.offset.x > SWIPE_THRESHOLD || info.velocity.x > SWIPE_VELOCITY) {
+            setSwipeDir('right');
+            setDragDir(null);
+            onSwipe('right');
+        } else if (info.offset.x < -SWIPE_THRESHOLD || info.velocity.x < -SWIPE_VELOCITY) {
+            setSwipeDir('left');
+            setDragDir(null);
+            onSwipe('left');
+        } else {
+            setDragDir(null);
+        }
     };
 
     return (
@@ -139,19 +175,39 @@ const SwipeCard: React.FC<{
             onDragEnd={isTop ? handleDragEnd : undefined}
             initial={{ scale: 0.92, opacity: 0, y: 20 }}
             animate={{ scale: isTop ? 1 : 0.94, opacity: isTop ? 1 : 0.6, y: isTop ? 0 : 12 }}
-            exit={{ x: dragDir === 'right' ? 400 : -400, opacity: 0, rotate: dragDir === 'right' ? 18 : -18, transition: { duration: 0.4, ease: 'easeIn' } }}
+            exit={{
+                x: (swipeDir || dragDir || exitDir) === 'right' ? 500 : -500,
+                opacity: 0,
+                rotate: (swipeDir || dragDir || exitDir) === 'right' ? 15 : -15,
+                transition: { duration: 0.45, ease: [0.36, 0, 0.66, -0.56] },
+            }}
             transition={{ type: 'spring', stiffness: 300, damping: 25 }}
         >
-            {/* Property image — big */}
+            {/* Property image — carousel */}
             <div className="relative h-[60%] w-full overflow-hidden bg-neutral-100">
-                <img
-                    src={optimizeCloudinaryUrl(property.imageUrl, { width: 800, quality: 'auto' })}
-                    alt={property.title || `${property.propertyType} in ${property.city}`}
-                    className="w-full h-full object-cover"
-                    draggable={false}
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/10 to-transparent" />
-                <div className="absolute bottom-4 left-4 right-4">
+                <AnimatePresence mode="wait">
+                    <motion.img
+                        key={currentImgIdx}
+                        src={optimizeCloudinaryUrl(images[currentImgIdx] || property.imageUrl, { width: 800, quality: 'auto' })}
+                        alt={property.title || `${property.propertyType} in ${property.city}`}
+                        className="absolute inset-0 w-full h-full object-cover"
+                        draggable={false}
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        transition={{ duration: 0.3 }}
+                    />
+                </AnimatePresence>
+                <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/10 to-transparent pointer-events-none" />
+                {/* Image counter dots */}
+                {images.length > 1 && (
+                    <div className="absolute top-3 left-0 right-0 flex justify-center gap-1 z-10">
+                        {images.map((_, i) => (
+                            <div key={i} className={`h-[3px] rounded-full transition-all duration-300 ${i === currentImgIdx ? 'w-5 bg-white' : 'w-2 bg-white/40'}`} />
+                        ))}
+                    </div>
+                )}
+                <div className="absolute bottom-4 left-4 right-4 z-10">
                     <span className="text-white font-extrabold text-2xl drop-shadow-lg">
                         {formatPrice(property.price, property.country)}
                     </span>
@@ -178,7 +234,7 @@ const SwipeCard: React.FC<{
                     <AnimatePresence>
                         {dragDir === 'right' && (
                             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-                                className="absolute inset-0 bg-green-500/15 border-[5px] border-green-400 rounded-3xl flex items-center justify-center pointer-events-none">
+                                className="absolute inset-0 bg-green-500/15 border-[5px] border-green-400 rounded-3xl flex items-center justify-center pointer-events-none z-20">
                                 <div className="bg-green-500 text-white font-extrabold text-2xl px-8 py-3 rounded-2xl shadow-2xl rotate-[-12deg]">SAVE</div>
                             </motion.div>
                         )}
@@ -186,7 +242,7 @@ const SwipeCard: React.FC<{
                     <AnimatePresence>
                         {dragDir === 'left' && (
                             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-                                className="absolute inset-0 bg-red-500/15 border-[5px] border-red-400 rounded-3xl flex items-center justify-center pointer-events-none">
+                                className="absolute inset-0 bg-red-500/15 border-[5px] border-red-400 rounded-3xl flex items-center justify-center pointer-events-none z-20">
                                 <div className="bg-red-500 text-white font-extrabold text-2xl px-8 py-3 rounded-2xl shadow-2xl rotate-[12deg]">SKIP</div>
                             </motion.div>
                         )}
@@ -210,16 +266,18 @@ const SwipeModal: React.FC<{
     const { toggleSavedHome, state } = useAppContext();
     const [currentIndex, setCurrentIndex] = useState(0);
     const [savedProps, setSavedProps] = useState<Property[]>([]);
+    const [lastSwipeDir, setLastSwipeDir] = useState<'left' | 'right'>('left');
     const done = currentIndex >= properties.length;
 
     // Reset when modal opens with new properties
     useEffect(() => {
-        if (isOpen) { setCurrentIndex(0); setSavedProps([]); }
+        if (isOpen) { setCurrentIndex(0); setSavedProps([]); setLastSwipeDir('left'); }
     }, [isOpen, properties]);
 
     const handleSwipe = useCallback((dir: 'left' | 'right') => {
         const property = properties[currentIndex];
         if (!property) return;
+        setLastSwipeDir(dir);
         if (dir === 'right') {
             setSavedProps(prev => [...prev, property]);
             const alreadySaved = state.savedHomes.some(p => p.id === property.id);
@@ -324,7 +382,7 @@ const SwipeModal: React.FC<{
                                 <div className="relative w-full aspect-[3/4] max-h-[60vh]">
                                     <AnimatePresence mode="popLayout">
                                         {nextProperty && <SwipeCard key={nextProperty.id} property={nextProperty} onSwipe={() => {}} isTop={false} />}
-                                        {topProperty && <SwipeCard key={topProperty.id} property={topProperty} onSwipe={handleSwipe} isTop={true} />}
+                                        {topProperty && <SwipeCard key={topProperty.id} property={topProperty} onSwipe={handleSwipe} isTop={true} exitDir={lastSwipeDir} />}
                                     </AnimatePresence>
                                 </div>
 

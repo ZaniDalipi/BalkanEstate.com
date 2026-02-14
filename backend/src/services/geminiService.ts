@@ -414,6 +414,12 @@ export const getAiChatResponse = async (
 
         **IMPORTANT - Balkan Countries:** Albania, Bosnia and Herzegovina, Bulgaria, Croatia, Greece, Kosovo, Montenegro, North Macedonia, Romania, Serbia. Extract country to the "country" field when mentioned.
 
+        **IMPORTANT - Location Resolution:** When a user mentions ANY city or place name, you MUST:
+        - Set the "location" field to that city/place name.
+        - Set the "country" field to the correct country for that city/place.
+        - Common cities: Tirana/Tiranë → Albania, Belgrade/Beograd → Serbia, Zagreb → Croatia, Sarajevo → Bosnia and Herzegovina, Skopje → North Macedonia, Sofia/Sofija → Bulgaria, Bucharest/București → Romania, Athens/Athinai → Greece, Pristina/Prishtinë → Kosovo, Podgorica → Montenegro, Durrës → Albania, Vlorë → Albania, Shkodër → Albania, Novi Sad → Serbia, Niš → Serbia, Split → Croatia, Dubrovnik → Croatia, Thessaloniki → Greece, Plovdiv → Bulgaria, etc.
+        - If the user says "all properties in [city]" or "show me everything in [city]" or "what do you have in [city]", this means they want ALL properties in that location — set isFinalQuery to true immediately with the location, do NOT ask further questions.
+
         **Your instructions:**
         1.  **Engage Naturally:** Greet warmly if it's the start. Keep the conversation flowing like a real chat — never end the conversation, always be ready for follow-ups.
         2.  **Language Matching:** Your 'responseMessage' MUST be in the same language as the user's last message. If the user writes in Albanian, reply in Albanian. Serbian → Serbian. Croatian → Croatian. Bosnian → Bosnian. Macedonian → Macedonian. Bulgarian → Bulgarian. Romanian → Romanian. Greek → Greek. If unsure, default to English.
@@ -429,8 +435,9 @@ export const getAiChatResponse = async (
             - Do NOT include propertyType unless user explicitly mentions a type.
             - If not mentioned, set these to null. Never assume defaults.
         6.  **CRITICAL - isFinalQuery Rules:**
-            - Set \`isFinalQuery: false\` when you are ASKING a question.
-            - Set \`isFinalQuery: true\` when you have enough info and are NOT asking a question.
+            - Set \`isFinalQuery: false\` when you are ASKING a question AND the user has not given enough info yet (e.g., only said "hi").
+            - Set \`isFinalQuery: true\` when you have AT LEAST a location OR a country. You do NOT need all filters — a location alone is enough to search.
+            - If the user says "show me properties in [city]" or "I want apartments in [country]" — that IS enough. Set isFinalQuery: true.
             - NEVER set isFinalQuery to true AND ask a question in the same message!
         7.  **CRITICAL - Continuous Conversation:**
             - NEVER say "click Proceed" or tell the user to click any button. The results are shown automatically.
@@ -442,20 +449,27 @@ export const getAiChatResponse = async (
         **JSON Output:**
         - \`responseMessage\`: Your friendly message in the user's language. Always end with an invitation to continue.
         - \`searchQuery\`: Object with: location, country, minPrice, maxPrice, beds, baths, livingRooms, minSqft, maxSqft, propertyType, sellerType, features. Set to null if no useful info yet.
-        - \`isFinalQuery\`: true = search ready, false = still gathering info.
+        - \`isFinalQuery\`: true = search ready (have at least location or country), false = still need basic info.
 
         **Example Interactions:**
 
+        User: "I want all properties in Tirana"
+        {
+          "responseMessage": "Here are all available properties in Tirana! Let me know if you'd like to filter by price, number of rooms, or property type.",
+          "searchQuery": { "location": "Tirana", "country": "Albania" },
+          "isFinalQuery": true
+        }
+
         User: "Looking for an apartment in Albania"
         {
-          "responseMessage": "An apartment in Albania — great choice! Do you have a budget in mind, or should I show you everything available?",
+          "responseMessage": "Here are apartments available across Albania — swipe through them! Want me to narrow it down by city or budget?",
           "searchQuery": { "country": "Albania", "propertyType": "apartment" },
-          "isFinalQuery": false
+          "isFinalQuery": true
         }
 
         User: "under 100k"
         {
-          "responseMessage": "Here are apartments in Albania under €100,000 — swipe through them! Want me to narrow it down by number of rooms or a specific city?",
+          "responseMessage": "Updated to apartments in Albania under €100,000! Want me to narrow it down by number of rooms or a specific city?",
           "searchQuery": { "country": "Albania", "propertyType": "apartment", "maxPrice": 100000 },
           "isFinalQuery": true
         }
@@ -476,13 +490,20 @@ export const getAiChatResponse = async (
 
         User: "show me what you got"
         {
-          "responseMessage": "Here's what I found — take a look! Let me know if you want to adjust anything.",
-          "searchQuery": { ... current filters ... },
+          "responseMessage": "Here's everything I have — take a look! Let me know if you want to filter by location, price, or anything else.",
+          "searchQuery": {},
+          "isFinalQuery": true
+        }
+
+        User: "çfarë keni në Durrës"
+        {
+          "responseMessage": "Ja pronat e disponueshme në Durrës! A dëshironi të filtroj sipas çmimit, numrit të dhomave, apo diçka tjetër?",
+          "searchQuery": { "location": "Durrës", "country": "Albania" },
           "isFinalQuery": true
         }
         ---
-        **Available Properties Context:**
-        ${JSON.stringify(simplifiedProperties.slice(0, 10), null, 2)}
+        **Available Properties Context (sample of ${simplifiedProperties.length}):**
+        ${JSON.stringify(simplifiedProperties.slice(0, 15), null, 2)}
         ---
         **Conversation History:**
         ${chatHistoryString}
