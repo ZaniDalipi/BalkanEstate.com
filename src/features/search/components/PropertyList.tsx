@@ -654,7 +654,7 @@ const AnimatedPropertyCard = memo<{
   const entranceDelay = animateEntrance ? Math.min(index * 60, 1200) : 0;
   return (
     <div
-      className={animateEntrance ? 'card-entrance-fly' : undefined}
+      className={animateEntrance ? 'card-entrance-fly' : 'property-card-container'}
       style={animateEntrance ? { '--card-delay': `${entranceDelay}ms` } as React.CSSProperties : undefined}
       onMouseEnter={() => onHover?.(property.id)}
       onMouseLeave={() => onHover?.(null)}
@@ -667,8 +667,10 @@ const AnimatedPropertyCard = memo<{
 // CSS for property card transitions
 const PropertyListStyles = () => (
   <style>{`
-    .property-grid-transition {
-      transition: opacity 0.2s ease-out;
+    .property-card-container {
+      contain: layout style paint;
+      content-visibility: auto;
+      contain-intrinsic-size: auto 320px;
     }
 
     .property-grid-loading {
@@ -722,11 +724,13 @@ const PropertyList = memo<PropertyListProps>((props) => {
       const timer = setTimeout(() => setAnimateCards(false), 2500);
       return () => clearTimeout(timer);
     }, [animateCards]);
-    
+
+    // Reset pagination only when the user's filter criteria change,
+    // NOT on every map move (which changes the properties array reference).
+    const filtersKey = JSON.stringify(filters);
     useEffect(() => {
-      // Reset visible count when filters change
       setVisibleCount(ITEMS_PER_PAGE);
-    }, [filters, properties]);
+    }, [filtersKey]);
 
     useEffect(() => {
         const observer = new IntersectionObserver(

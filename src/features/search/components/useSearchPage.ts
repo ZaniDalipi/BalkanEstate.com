@@ -49,19 +49,12 @@ export function useSearchPage() {
 
     // Enable real-time property updates via WebSocket
     // When any property is created/updated/deleted, the list refreshes instantly
+    // Use fetchProperties directly (it's already a stable useCallback) to avoid
+    // re-subscribing to websocket events on every render.
     useRealtimeProperties({
-        onPropertyCreated: () => {
-            // Refetch properties when new listing is created
-            fetchProperties();
-        },
-        onPropertyUpdated: () => {
-            // Refetch properties when listing is updated
-            fetchProperties();
-        },
-        onPropertyDeleted: () => {
-            // Refetch properties when listing is deleted
-            fetchProperties();
-        },
+        onPropertyCreated: fetchProperties,
+        onPropertyUpdated: fetchProperties,
+        onPropertyDeleted: fetchProperties,
     });
 
     useEffect(() => {
