@@ -931,3 +931,23 @@ export const QuestionMarkCircleIcon: React.FC<{ className?: string }> = ({ class
     )
 );
 
+export const MicrophoneIcon: React.FC<{ className?: string }> = ({ className }) => (
+    React.createElement(Icon, { className },
+        React.createElement('path', {
+            strokeLinecap: "round",
+            strokeLinejoin: "round",
+            d: "M12 18.75a6 6 0 0 0 6-6v-1.5m-6 7.5a6 6 0 0 1-6-6v-1.5m6 7.5v3.75m-3.75 0h7.5M12 15.75a3 3 0 0 1-3-3V4.5a3 3 0 1 1 6 0v8.25a3 3 0 0 1-3 3Z"
+        })
+    )
+);
+
+export const StopCircleIcon: React.FC<{ className?: string }> = ({ className }) => (
+    React.createElement(SolidIcon, { className },
+        React.createElement('path', {
+            fillRule: "evenodd",
+            clipRule: "evenodd",
+            d: "M2.25 12c0-5.385 4.365-9.75 9.75-9.75s9.75 4.365 9.75 9.75-4.365 9.75-9.75 9.75S2.25 17.385 2.25 12Zm6-2.438c0-.724.588-1.312 1.313-1.312h4.874c.725 0 1.313.588 1.313 1.313v4.874c0 .725-.588 1.313-1.313 1.313H9.564a1.312 1.312 0 0 1-1.313-1.313V9.564Z"
+        })
+    )
+);
+

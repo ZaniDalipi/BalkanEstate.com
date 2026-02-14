@@ -272,7 +272,14 @@
     "tryDifferent": "Try describing what you're looking for differently",
     "suggestions": "Suggestions",
     "recentSearches": "Recent Searches",
-    "clearHistory": "Clear History"
+    "clearHistory": "Clear History",
+    "voiceHint": "Try voice search",
+    "listening": "Listening...",
+    "foundProperties": "Found {{count}} matching properties",
+    "suggestion1": "Modern apartment near city center",
+    "suggestion2": "House with garden under €200k",
+    "suggestion3": "Sea view villa in Montenegro",
+    "suggestion4": "2-bedroom flat for rent"
   },
   "energyRatings": {
     "any": "Any",

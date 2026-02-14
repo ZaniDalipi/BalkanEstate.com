@@ -179,10 +179,16 @@ export function useSearchPage() {
     }, [focusMapOnProperty, updateSearchPageState]);
 
     const toggleDrawing = useCallback(() => {
-        setIsDrawing(prev => !prev);
+        setIsDrawing(prev => {
+            // If cancelling drawing mode, clear any drawn bounds
+            if (prev) {
+                updateSearchPageState({ drawnBoundsJSON: null });
+            }
+            return !prev;
+        });
         // Hide draw hint when user starts drawing
         setShowDrawHint(false);
-    }, []);
+    }, [updateSearchPageState]);
 
     const handleClearDrawnArea = useCallback(() => {
         updateSearchPageState({ drawnBoundsJSON: null, activeFilters: filters });
