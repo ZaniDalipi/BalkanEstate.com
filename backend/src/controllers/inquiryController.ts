@@ -1,10 +1,13 @@
 import { Request, Response } from 'express';
-import { sendAgentInquiry } from '../services/emailService';
+import { sendAgentInquiry, sendEmail } from '../services/emailService';
 import User from '../models/User';
 import Agent from '../models/Agent';
 import Property from '../models/Property';
 import Inquiry from '../models/Inquiry';
 import { apiLogger } from '../utils/logger';
+
+const CONTACT_EMAIL = process.env.CONTACT_EMAIL || 'contact@balkanestateai.com';
+const VALID_SUBJECTS = ['general', 'buying', 'selling', 'agency', 'support', 'partnership'];
 
 /**
  * @desc    Send inquiry to agent about a property
@@ -304,6 +307,105 @@ export const sendAreaSearchInquiry = async (
     apiLogger.error('Send area search inquiry error:', error);
     res.status(500).json({
       message: 'Error sending inquiry',
+      error: error.message,
+    });
+  }
+};
+
+/**
+ * @desc    Send a contact form inquiry to the platform team
+ * @route   POST /api/inquiries/contact
+ * @access  Public (rate limited)
+ */
+export const sendContactInquiry = async (
+  req: Request,
+  res: Response
+): Promise<void> => {
+  try {
+    const { name, email, phone, subject, message } = req.body;
+
+    // Validate required fields
+    if (!name || !email || !subject || !message) {
+      res.status(400).json({
+        message: 'Name, email, subject, and message are required',
+      });
+      return;
+    }
+
+    // Validate name length
+    const trimmedName = String(name).trim();
+    if (trimmedName.length < 2 || trimmedName.length > 100) {
+      res.status(400).json({ message: 'Name must be between 2 and 100 characters' });
+      return;
+    }
+
+    // Validate email format
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    const trimmedEmail = String(email).trim().toLowerCase();
+    if (!emailRegex.test(trimmedEmail)) {
+      res.status(400).json({ message: 'Invalid email format' });
+      return;
+    }
+
+    // Validate subject
+    if (!VALID_SUBJECTS.includes(subject)) {
+      res.status(400).json({ message: 'Invalid subject' });
+      return;
+    }
+
+    // Validate message length
+    const trimmedMessage = String(message).trim();
+    if (trimmedMessage.length < 10 || trimmedMessage.length > 2000) {
+      res.status(400).json({ message: 'Message must be between 10 and 2000 characters' });
+      return;
+    }
+
+    // Sanitize phone if provided
+    const trimmedPhone = phone ? String(phone).trim() : undefined;
+
+    // Save the inquiry to database
+    const inquiry = await Inquiry.create({
+      type: 'contact',
+      status: 'new',
+      buyerName: trimmedName,
+      buyerEmail: trimmedEmail,
+      buyerPhone: trimmedPhone,
+      subject,
+      message: trimmedMessage,
+    });
+
+    // Send notification email to platform team
+    try {
+      await sendEmail({
+        to: CONTACT_EMAIL,
+        subject: `[Contact Form] ${subject} - from ${trimmedName}`,
+        html: `
+          <h2>New Contact Form Submission</h2>
+          <p><strong>From:</strong> ${trimmedName} (${trimmedEmail})</p>
+          ${trimmedPhone ? `<p><strong>Phone:</strong> ${trimmedPhone}</p>` : ''}
+          <p><strong>Subject:</strong> ${subject}</p>
+          <hr />
+          <p><strong>Message:</strong></p>
+          <p>${trimmedMessage.replace(/\n/g, '<br>')}</p>
+          <hr />
+          <p><em>Inquiry ID: ${inquiry._id}</em></p>
+        `,
+        text: `New contact form submission from ${trimmedName} (${trimmedEmail}). Subject: ${subject}. Message: ${trimmedMessage}`,
+      });
+    } catch (emailError) {
+      apiLogger.warn(`[inquiryController] Contact email notification failed but inquiry saved: ${emailError}`);
+    }
+
+    apiLogger.info(`[inquiryController] Contact inquiry saved: ${trimmedEmail}, subject: ${subject} (ID: ${inquiry._id})`);
+
+    res.json({
+      message: 'Your message has been sent successfully',
+      inquiryId: inquiry._id,
+    });
+  } catch (error: any) {
+    apiLogger.error('Send contact inquiry error:', error);
+    res.status(500).json({
+      message: 'Error sending message',
       error: error.message,
     });
   }

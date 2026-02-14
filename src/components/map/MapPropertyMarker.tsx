@@ -159,6 +159,60 @@ const injectMapMarkerStyles = () => {
       animation: borderPulseUrgent 1.5s ease-in-out infinite;
     }
 
+    /* ---- Marker entrance fly-in animation after splash screen ---- */
+    @keyframes markerFlyIn {
+      0% {
+        opacity: 0;
+        transform: translate(var(--fly-x, 0px), var(--fly-y, -300px)) scale(0.2) rotate(var(--fly-r, 0deg));
+      }
+      35% {
+        opacity: 1;
+      }
+      65% {
+        transform: translate(0px, -10px) scale(1.15) rotate(0deg);
+      }
+      82% {
+        transform: translate(0px, 4px) scale(0.96) rotate(0deg);
+      }
+      100% {
+        opacity: 1;
+        transform: translate(0px, 0px) scale(1) rotate(0deg);
+      }
+    }
+
+    .marker-entrance-fly {
+      will-change: transform, opacity;
+      animation: markerFlyIn 0.85s cubic-bezier(0.22, 1, 0.36, 1) both;
+      animation-delay: var(--fly-delay, 0ms);
+    }
+
+    /* Google Maps marker entrance animation */
+    @keyframes gmarkerFlyIn {
+      0% {
+        opacity: 0;
+        transform: translate(var(--fly-x, 0px), var(--fly-y, -300px)) scale(0.2) rotate(var(--fly-r, 0deg));
+      }
+      35% {
+        opacity: 1;
+      }
+      65% {
+        transform: translate(0px, -8px) scale(1.18) rotate(0deg);
+      }
+      82% {
+        transform: translate(0px, 3px) scale(0.95) rotate(0deg);
+      }
+      100% {
+        opacity: 1;
+        transform: translate(0px, 0px) scale(1) rotate(0deg);
+      }
+    }
+
+    .gmarker-entrance-fly {
+      will-change: transform, opacity;
+      animation: gmarkerFlyIn 0.85s cubic-bezier(0.22, 1, 0.36, 1) both !important;
+      animation-delay: var(--fly-delay, 0ms) !important;
+    }
+
     /* Enhanced popup styles for promoted properties */
     .promoted-property-popup .leaflet-popup-content-wrapper {
       padding: 0;
@@ -477,6 +531,35 @@ const createCustomMarkerIcon = (property: Property, zoom: number, isHovered: boo
     return createSimpleMarkerIcon(property, isHovered, isNightMode, zoom);
   }
   return createDetailedMarkerIcon(property, isHovered, isNightMode, zoom);
+};
+
+/**
+ * Wrap a Leaflet divIcon with an entrance fly-in animation wrapper.
+ * Each marker flies in from a unique direction using golden-angle distribution
+ * for a visually appealing starburst scatter-gather effect.
+ */
+const wrapIconWithEntrance = (icon: L.DivIcon, index: number, total: number): L.DivIcon => {
+  // Golden angle distribution for even spread of directions
+  const goldenAngle = 137.508 * (Math.PI / 180);
+  const angle = index * goldenAngle;
+  const distance = 400 + (index % 7) * 80;
+  const flyX = Math.round(Math.cos(angle) * distance);
+  const flyY = Math.round(Math.sin(angle) * distance);
+  const flyR = Math.round(Math.cos(angle * 2) * 25);
+  // Stagger: cap total cascade at 2s regardless of marker count
+  const maxStagger = 2000;
+  const delay = total > 1 ? Math.round((index / (total - 1)) * maxStagger) : 0;
+
+  const opts = icon.options;
+  const wrappedHtml = `<div class="marker-entrance-fly" style="--fly-x:${flyX}px;--fly-y:${flyY}px;--fly-r:${flyR}deg;--fly-delay:${delay}ms">${opts.html || ''}</div>`;
+
+  return L.divIcon({
+    html: wrappedHtml,
+    className: opts.className,
+    iconSize: opts.iconSize,
+    iconAnchor: opts.iconAnchor,
+    popupAnchor: opts.popupAnchor,
+  });
 };
 
 // Tier badge configurations for popup
@@ -804,6 +887,25 @@ const MarkersComponent: React.FC<MarkersProps> = ({ properties, onPopupClick, ho
   const prevZoomRef = React.useRef<number>(zoom);
   const prevNightModeRef = React.useRef<boolean>(isNightMode);
 
+  // Entrance animation: check if splash screen just completed
+  const [animateEntrance, setAnimateEntrance] = useState(() => {
+    const splashDone = (window as any).__balkanestateSplashDone;
+    return !!(splashDone && Date.now() - splashDone < 5000);
+  });
+  const entranceAnimatingRef = React.useRef(animateEntrance);
+
+  // Clear entrance animation flag after all fly-in animations complete
+  useEffect(() => {
+    if (!animateEntrance) return;
+    entranceAnimatingRef.current = true;
+    const timer = setTimeout(() => {
+      setAnimateEntrance(false);
+      entranceAnimatingRef.current = false;
+      delete (window as any).__balkanestateSplashDone;
+    }, 3500);
+    return () => clearTimeout(timer);
+  }, [animateEntrance]);
+
   useMapEvents({
     zoomend: () => {
       setZoom(map.getZoom());
@@ -817,6 +919,12 @@ const MarkersComponent: React.FC<MarkersProps> = ({ properties, onPopupClick, ho
     const nightModeChanged = prevNightModeRef.current !== isNightMode;
 
     if (!hoverChanged && !zoomChanged && !nightModeChanged) return;
+
+    // Skip hover-only icon updates during entrance animation to avoid interrupting fly-in
+    if (entranceAnimatingRef.current && hoverChanged && !zoomChanged && !nightModeChanged) {
+      prevHoveredIdRef.current = hoveredPropertyId;
+      return;
+    }
 
     // Only update affected markers for hover changes (performance optimization)
     if (hoverChanged && !zoomChanged && !nightModeChanged) {
@@ -858,17 +966,21 @@ const MarkersComponent: React.FC<MarkersProps> = ({ properties, onPopupClick, ho
 
   return (
     <>
-      {properties.map((prop) => {
+      {properties.map((prop, idx) => {
         // Skip properties without valid coordinates
         if (prop.lat == null || prop.lng == null || isNaN(prop.lat) || isNaN(prop.lng)) {
           return null;
         }
         const isPromoted = isPropertyPromoted(prop);
+        const baseIcon = createCustomMarkerIcon(prop, zoom, prop.id === hoveredPropertyId, isNightMode);
+        const icon = animateEntrance
+          ? wrapIconWithEntrance(baseIcon, idx, properties.length)
+          : baseIcon;
         return (
           <Marker
             key={prop.id}
             position={[prop.lat, prop.lng]}
-            icon={createCustomMarkerIcon(prop, zoom, prop.id === hoveredPropertyId, isNightMode)}
+            icon={icon}
             ref={(marker) => {
               if (marker) {
                 markerRefsMap.current.set(prop.id, marker);

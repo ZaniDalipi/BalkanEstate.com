@@ -306,12 +306,12 @@ export const getCorsConfig = () => {
 
 /**
  * General API rate limiter
- * More permissive than auth rate limiting
+ * Permissive limit for browsing, searching, and reading data
  * Active in all environments (relaxed limits in development)
  */
 export const generalRateLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
-  max: isProduction ? 200 : 500, // Relaxed but not unlimited in development
+  max: isProduction ? 500 : 1000, // Generous for normal browsing/searching
   message: {
     error: 'Too many requests',
     message: 'You have exceeded the rate limit. Please try again later.',
@@ -327,15 +327,32 @@ export const generalRateLimiter = rateLimit({
 });
 
 /**
- * Stricter rate limiter for sensitive endpoints (auth, admin)
+ * Stricter rate limiter for login/auth endpoints only
+ * Prevents brute-force and credential stuffing attacks
  * Always enforced regardless of environment
  */
 export const sensitiveRateLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
-  max: isProduction ? 30 : 60, // Stricter even in development
+  max: isProduction ? 30 : 60, // Strict for auth endpoints
   message: {
     error: 'Too many requests',
-    message: 'Too many requests to this endpoint. Please try again later.',
+    message: 'Too many login attempts. Please try again later.',
+    retryAfter: 15,
+  },
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
+/**
+ * Mutation rate limiter for write operations (create, update, delete, upload)
+ * More generous than auth limits but still protective against abuse
+ */
+export const mutationRateLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: isProduction ? 100 : 300, // Reasonable for property management workflows
+  message: {
+    error: 'Too many requests',
+    message: 'Too many write requests. Please slow down and try again shortly.',
     retryAfter: 15,
   },
   standardHeaders: true,
@@ -639,6 +656,7 @@ export default {
   getCorsConfig,
   generalRateLimiter,
   sensitiveRateLimiter,
+  mutationRateLimiter,
   paymentRateLimiter,
   aiRateLimiter,
   hppProtection,

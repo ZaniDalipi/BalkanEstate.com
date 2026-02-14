@@ -79,6 +79,7 @@ const PrivacyPolicyPage = lazy(() => import('./src/features/legal/components/Pri
 const TermsOfServicePage = lazy(() => import('./src/features/legal/components/TermsOfServicePage'));
 const CookiePolicyPage = lazy(() => import('./src/features/legal/components/CookiePolicyPage'));
 const RefundPolicyPage = lazy(() => import('./src/features/legal/components/RefundPolicyPage'));
+const ContactUsPage = lazy(() => import('./src/features/contact/components/ContactUsPage'));
 
 // Agency creation pages
 const CreateAgencyPage = lazy(() => import('./src/features/agencies/components/CreateAgencyPage'));
@@ -321,6 +322,7 @@ const AppContent: React.FC<{ onToggleSidebar: () => void }> = ({ onToggleSidebar
         '/cookie-policy': 'cookies',
         '/refund': 'refund',
         '/refund-policy': 'refund',
+        '/contact': 'contact',
         '/rent': 'rentals',
         '/rentals': 'rentals',
         '/create-agency': 'createAgency',
@@ -519,7 +521,7 @@ const AppContent: React.FC<{ onToggleSidebar: () => void }> = ({ onToggleSidebar
       case 'create-listing':
         return <CreateListingPage />;
       case 'rentals':
-        return <QueryErrorBoundary><RentalSearchPage /></QueryErrorBoundary>;
+        return <QueryErrorBoundary><RentalSearchPage onToggleSidebar={onToggleSidebar} /></QueryErrorBoundary>;
       case 'create-rental':
         return <CreateListingPage />;
       case 'agents':
@@ -532,7 +534,7 @@ const AppContent: React.FC<{ onToggleSidebar: () => void }> = ({ onToggleSidebar
           return <QueryErrorBoundary><AdminDashboard /></QueryErrorBoundary>;
         }
         // Redirect non-admins to search
-        return <SearchPage />;
+        return <SearchPage onToggleSidebar={onToggleSidebar} />;
       case 'reset-password':
         return <ResetPasswordPage />;
       case 'verify-email':
@@ -555,6 +557,8 @@ const AppContent: React.FC<{ onToggleSidebar: () => void }> = ({ onToggleSidebar
         return <CookiePolicyPage />;
       case 'refund':
         return <RefundPolicyPage />;
+      case 'contact':
+        return <ContactUsPage />;
       case 'createAgency':
         return <CreateAgencyPage />;
       case 'createAgencyPayment':
@@ -601,10 +605,12 @@ const MainLayout: React.FC = () => {
   }, []);
   
   const isSearchPage = state.activeView === 'search';
+  const isRentalPage = state.activeView === 'rentals';
+  const isFloatingHeaderView = isSearchPage || isRentalPage;
   const isAgencyDetailView = !!state.selectedAgencyId;
   // Agency pages should allow scrolling to show all agents and details
-  const isFullHeightView = isSearchPage || state.activeView === 'rentals' || state.activeView === 'inbox' || !!state.selectedProperty;
-  const showHeader = !(isMobile && (isSearchPage || !!state.selectedProperty));
+  const isFullHeightView = isSearchPage || isRentalPage || state.activeView === 'inbox' || !!state.selectedProperty;
+  const showHeader = !(isMobile && (isSearchPage || isRentalPage || !!state.selectedProperty));
   // Note: Agency detail pages WILL show header on mobile to allow sidebar access
   
   const anyNonAuthModalOpen = state.isListingLimitWarningOpen || state.isDiscountGameOpen;
@@ -639,7 +645,7 @@ const MainLayout: React.FC = () => {
 
         <div className={`relative transition-all duration-300 ease-in-out h-full flex flex-col md:pl-20 overflow-x-hidden max-w-full ${isOverlayVisible ? 'blur-sm pointer-events-none' : ''}`}>
             <Suspense fallback={null}>
-              {showHeader && <Header onToggleSidebar={() => setIsSidebarOpen(true)} isFloating={isSearchPage} />}
+              {showHeader && <Header onToggleSidebar={() => setIsSidebarOpen(true)} isFloating={isFloatingHeaderView} />}
             </Suspense>
             <main id="main-content" data-scroll-container className={`flex flex-col flex-1 overflow-x-hidden ${isFullHeightView ? 'overflow-y-hidden h-full min-h-0' : 'overflow-y-auto'}`}>
                 <AppContent onToggleSidebar={() => setIsSidebarOpen(true)} />
@@ -724,6 +730,8 @@ const AppWrapper: React.FC = () => {
     const handleSplashComplete = useCallback(() => {
         setShowSplash(false);
         localStorage.setItem('balkanestate_visited', 'true');
+        // Signal map markers to play entrance fly-in animation
+        (window as any).__balkanestateSplashDone = Date.now();
     }, []);
 
     useEffect(() => {

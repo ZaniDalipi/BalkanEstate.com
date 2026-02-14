@@ -217,14 +217,14 @@ const HighlightedCardInner = memo<HighlightedCardInnerProps>(({
               </div>
             ) : (
               <img
-                src={optimizeCloudinaryUrl(imgUrl, { width: 800, quality: 'auto' })}
-                srcSet={cloudinarySrcSet(imgUrl, [400, 640, 800, 1200])}
+                src={optimizeCloudinaryUrl(imgUrl, { width: 800, height: 600, quality: 'auto', crop: 'fill', gravity: 'auto' })}
+                srcSet={`${optimizeCloudinaryUrl(imgUrl, { width: 400, height: 300, quality: 'auto', crop: 'fill', gravity: 'auto' })} 400w, ${optimizeCloudinaryUrl(imgUrl, { width: 640, height: 480, quality: 'auto', crop: 'fill', gravity: 'auto' })} 640w, ${optimizeCloudinaryUrl(imgUrl, { width: 800, height: 600, quality: 'auto', crop: 'fill', gravity: 'auto' })} 800w`}
                 alt={`${property.title || propertyTypeLabel} - Image ${index + 1}`}
                 loading={index === 0 ? 'eager' : 'lazy'}
                 decoding="async"
                 sizes="(max-width: 768px) 100vw, 42vw"
                 width={800}
-                height={533}
+                height={600}
                 className={`w-full h-full object-cover transition-transform duration-700 ${
                   isHovered ? 'scale-105' : 'scale-100'
                 }`}

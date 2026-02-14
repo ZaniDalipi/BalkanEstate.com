@@ -2,7 +2,7 @@ import mongoose, { Document, Schema } from 'mongoose';
 
 export interface IInquiry extends Document {
   // Inquiry type
-  type: 'property' | 'agent' | 'area_search';
+  type: 'property' | 'agent' | 'area_search' | 'contact';
   status: 'new' | 'read' | 'replied' | 'archived';
 
   // Sender info (buyer)
@@ -11,10 +11,10 @@ export interface IInquiry extends Document {
   buyerPhone?: string;
   buyerId?: mongoose.Types.ObjectId; // If the sender is a registered user
 
-  // Recipient info (agent/seller)
-  recipientId: mongoose.Types.ObjectId; // User who receives the inquiry
-  recipientName: string;
-  recipientEmail: string;
+  // Recipient info (agent/seller) - optional for 'contact' type
+  recipientId?: mongoose.Types.ObjectId;
+  recipientName?: string;
+  recipientEmail?: string;
 
   // Related entities
   propertyId?: mongoose.Types.ObjectId;
@@ -22,6 +22,7 @@ export interface IInquiry extends Document {
 
   // Message content
   message: string;
+  subject?: string; // For contact form inquiries
   location?: string; // For area search inquiries
   propertyType?: string; // For area search inquiries
   budget?: number; // For area search inquiries
@@ -40,7 +41,7 @@ const InquirySchema: Schema = new Schema(
   {
     type: {
       type: String,
-      enum: ['property', 'agent', 'area_search'],
+      enum: ['property', 'agent', 'area_search', 'contact'],
       required: true,
     },
     status: {
@@ -70,19 +71,16 @@ const InquirySchema: Schema = new Schema(
       ref: 'User',
     },
 
-    // Recipient info
+    // Recipient info (optional for 'contact' type inquiries)
     recipientId: {
       type: Schema.Types.ObjectId,
       ref: 'User',
-      required: true,
     },
     recipientName: {
       type: String,
-      required: true,
     },
     recipientEmail: {
       type: String,
-      required: true,
     },
 
     // Related entities
@@ -98,6 +96,9 @@ const InquirySchema: Schema = new Schema(
     message: {
       type: String,
       required: true,
+    },
+    subject: {
+      type: String,
     },
     location: {
       type: String,

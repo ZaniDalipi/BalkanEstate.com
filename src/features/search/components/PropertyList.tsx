@@ -648,9 +648,14 @@ const AnimatedPropertyCard = memo<{
   index: number;
   onHover?: (id: string | null) => void;
   isNew?: boolean;
-}>(({ property, index, onHover }) => {
+  animateEntrance?: boolean;
+}>(({ property, index, onHover, animateEntrance }) => {
+  // Stagger delay: cap total cascade at 1.2s, each card 60ms apart
+  const entranceDelay = animateEntrance ? Math.min(index * 60, 1200) : 0;
   return (
     <div
+      className={animateEntrance ? 'card-entrance-fly' : undefined}
+      style={animateEntrance ? { '--card-delay': `${entranceDelay}ms` } as React.CSSProperties : undefined}
       onMouseEnter={() => onHover?.(property.id)}
       onMouseLeave={() => onHover?.(null)}
     >
@@ -670,6 +675,29 @@ const PropertyListStyles = () => (
       opacity: 0.6;
       pointer-events: none;
     }
+
+    @keyframes cardSlideUp {
+      0% {
+        opacity: 0;
+        transform: translateY(40px) scale(0.97);
+      }
+      50% {
+        opacity: 1;
+      }
+      75% {
+        transform: translateY(-4px) scale(1.01);
+      }
+      100% {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+      }
+    }
+
+    .card-entrance-fly {
+      opacity: 0;
+      animation: cardSlideUp 0.6s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+      animation-delay: var(--card-delay, 0ms);
+    }
   `}</style>
 );
 
@@ -683,6 +711,17 @@ const PropertyList = memo<PropertyListProps>((props) => {
     const [visibleCount, setVisibleCount] = useState(ITEMS_PER_PAGE);
     const loadMoreRef = useRef(null);
     const [isLoadingMore, setIsLoadingMore] = useState(false);
+
+    // Entrance animation: check if splash screen just completed
+    const [animateCards, setAnimateCards] = useState(() => {
+      const splashDone = (window as any).__balkanestateSplashDone;
+      return !!(splashDone && Date.now() - splashDone < 8000);
+    });
+    useEffect(() => {
+      if (!animateCards) return;
+      const timer = setTimeout(() => setAnimateCards(false), 2500);
+      return () => clearTimeout(timer);
+    }, [animateCards]);
     
     useEffect(() => {
       // Reset visible count when filters change
@@ -804,6 +843,7 @@ const PropertyList = memo<PropertyListProps>((props) => {
                                                 property={prop}
                                                 index={index}
                                                 onHover={onPropertyHover}
+                                                animateEntrance={animateCards}
                                             />
                                         ))}
                                     </div>
@@ -932,6 +972,7 @@ const PropertyList = memo<PropertyListProps>((props) => {
                                                     property={prop}
                                                     index={index}
                                                     onHover={onPropertyHover}
+                                                    animateEntrance={animateCards}
                                                 />
                                             ))}
                                         </div>
