@@ -291,7 +291,14 @@
     "muteAssistant": "Mute voice",
     "unmuteAssistant": "Unmute voice",
     "ready": "Ready to help",
-    "speakNow": "Speak now..."
+    "speakNow": "Speak now...",
+    "swipeDone": "{{count}} properties saved!",
+    "swipeNoneSaved": "No properties saved",
+    "swipeCheckFavorites": "Check your favorites to compare them",
+    "swipeTryAgain": "Try a different search to find your dream property",
+    "goToFavorites": "Go to Favorites",
+    "saved": "saved",
+    "swipeHint": "Swipe right to save, left to skip"
   },
   "energyRatings": {
     "any": "Any",
