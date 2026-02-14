@@ -4,78 +4,52 @@ import React, { useRef } from "react";
 import { useScroll, useTransform, motion, MotionValue } from "framer-motion";
 
 // ── Device frame components ───────────────────────────────────────
-// Realistic device frames for desktop monitor, tablet, and phone
-
-export const DesktopFrame: React.FC<{ children: React.ReactNode }> = ({ children }) => (
-  <div className="relative mx-auto w-full max-w-5xl">
-    {/* Monitor body */}
-    <div className="relative border-4 border-[#2a2a2a] bg-[#1a1a1a] rounded-t-xl p-1.5 md:p-3 shadow-2xl">
-      {/* Camera dot */}
-      <div className="absolute top-1.5 left-1/2 -translate-x-1/2 w-2 h-2 bg-[#333] rounded-full" />
-      {/* Screen */}
-      <div className="w-full h-[28rem] md:h-[38rem] overflow-hidden rounded-lg bg-white">
-        {children}
-      </div>
-    </div>
-    {/* Stand neck */}
-    <div className="mx-auto w-24 h-6 bg-gradient-to-b from-[#2a2a2a] to-[#3a3a3a]" />
-    {/* Stand base */}
-    <div className="mx-auto w-40 h-2 bg-[#3a3a3a] rounded-b-lg" />
-  </div>
-);
 
 export const TabletFrame: React.FC<{
   children: React.ReactNode;
   landscape?: boolean;
 }> = ({ children, landscape = false }) => (
-  <div
-    className={`relative mx-auto ${
-      landscape ? "max-w-xl" : "max-w-sm"
-    }`}
-  >
-    <div className="relative border-[6px] border-[#2a2a2a] bg-[#1a1a1a] rounded-[20px] p-1 shadow-2xl">
-      {/* Camera */}
-      <div className="absolute top-2 left-1/2 -translate-x-1/2 w-2 h-2 bg-[#333] rounded-full z-10" />
-      {/* Screen */}
+  <div className={`relative mx-auto ${landscape ? "max-w-2xl" : "max-w-md"}`}>
+    <div className="relative border-[6px] border-[#2a2a2a] bg-[#1a1a1a] rounded-[22px] p-1 shadow-2xl">
+      <div className="absolute top-2.5 left-1/2 -translate-x-1/2 w-2 h-2 bg-[#333] rounded-full z-10" />
       <div
-        className={`w-full overflow-hidden rounded-[14px] bg-white ${
-          landscape ? "h-[22rem] md:h-[28rem]" : "h-[30rem] md:h-[40rem]"
+        className={`w-full overflow-hidden rounded-[16px] bg-white ${
+          landscape ? "h-[22rem] md:h-[30rem]" : "h-[32rem] md:h-[44rem]"
         }`}
       >
         {children}
       </div>
-      {/* Home bar indicator */}
-      <div className="mx-auto mt-1 w-16 h-1 bg-[#333] rounded-full" />
+      <div className="mx-auto mt-1.5 w-16 h-1 bg-[#333] rounded-full" />
     </div>
   </div>
 );
 
-export const PhoneFrame: React.FC<{ children: React.ReactNode }> = ({ children }) => (
-  <div className="relative mx-auto max-w-[280px]">
+export const PhoneFrame: React.FC<{ children: React.ReactNode; className?: string }> = ({
+  children,
+  className = "",
+}) => (
+  <div className={`relative mx-auto max-w-[280px] ${className}`}>
     <div className="relative border-[5px] border-[#2a2a2a] bg-[#1a1a1a] rounded-[36px] p-1 shadow-2xl">
-      {/* Dynamic Island / Notch */}
       <div className="absolute top-1.5 left-1/2 -translate-x-1/2 w-24 h-[22px] bg-[#1a1a1a] rounded-full z-10" />
-      {/* Screen */}
-      <div className="w-full h-[32rem] md:h-[36rem] overflow-hidden rounded-[30px] bg-white">
+      <div className="w-full h-[34rem] md:h-[38rem] overflow-hidden rounded-[30px] bg-white">
         {children}
       </div>
-      {/* Home bar */}
       <div className="mx-auto mt-1 w-20 h-1 bg-[#444] rounded-full" />
     </div>
   </div>
 );
 
-// ── Scroll section for individual device ──────────────────────────
-// Each one of these is a scroll-linked 3D animation section
+// ── ContainerScrollDevice ─────────────────────────────────────────
+// Same Aceternity scroll animation but renders the device frame
+// INSIDE the animation (no extra box-shadow wrapper)
 
-interface ScrollDeviceSectionProps {
+interface ContainerScrollDeviceProps {
   titleComponent: React.ReactNode;
   children: React.ReactNode;
-  /** Height of the scroll container (controls how much scroll is needed) */
   scrollHeight?: string;
 }
 
-export const ScrollDeviceSection: React.FC<ScrollDeviceSectionProps> = ({
+export const ContainerScrollDevice: React.FC<ContainerScrollDeviceProps> = ({
   titleComponent,
   children,
   scrollHeight = "h-[60rem] md:h-[80rem]",
@@ -110,18 +84,13 @@ export const ScrollDeviceSection: React.FC<ScrollDeviceSectionProps> = ({
       >
         <motion.div
           style={{ translateY: translate }}
-          className="max-w-5xl mx-auto text-center mb-8"
+          className="max-w-5xl mx-auto text-center"
         >
           {titleComponent}
         </motion.div>
         <motion.div
-          style={{
-            rotateX: rotate,
-            scale,
-            boxShadow:
-              "0 0 #0000004d, 0 9px 20px #0000004a, 0 37px 37px #00000042, 0 84px 50px #00000026, 0 149px 60px #0000000a, 0 233px 65px #00000003",
-          }}
-          className="mx-auto"
+          style={{ rotateX: rotate, scale }}
+          className="-mt-12 mx-auto"
         >
           {children}
         </motion.div>
@@ -130,15 +99,10 @@ export const ScrollDeviceSection: React.FC<ScrollDeviceSectionProps> = ({
   );
 };
 
-// ── Horizontal multi-phone showcase ───────────────────────────────
-// Shows multiple phones appearing from the sides as user scrolls
+// ── Phone parade ──────────────────────────────────────────────────
 
 interface PhoneParadeProps {
-  /** Array of phone screen content (left to right) */
-  phones: {
-    content: React.ReactNode;
-    label: string;
-  }[];
+  phones: { content: React.ReactNode; label: string }[];
   titleComponent?: React.ReactNode;
 }
 
@@ -157,27 +121,18 @@ export const PhoneParade: React.FC<PhoneParadeProps> = ({
       {titleComponent && (
         <div className="text-center mb-12">{titleComponent}</div>
       )}
-
       <div className="flex items-center justify-center gap-4 md:gap-8 px-4">
-        {phones.map((phone, index) => {
-          const total = phones.length;
-          const startOffset = 0.1 + index * (0.5 / total);
-          const endOffset = startOffset + 0.25;
-
-          return (
-            <PhoneScrollItem
-              key={index}
-              scrollYProgress={scrollYProgress}
-              index={index}
-              total={total}
-              startOffset={startOffset}
-              endOffset={endOffset}
-              label={phone.label}
-            >
-              {phone.content}
-            </PhoneScrollItem>
-          );
-        })}
+        {phones.map((phone, index) => (
+          <PhoneScrollItem
+            key={index}
+            scrollYProgress={scrollYProgress}
+            index={index}
+            total={phones.length}
+            label={phone.label}
+          >
+            {phone.content}
+          </PhoneScrollItem>
+        ))}
       </div>
     </div>
   );
@@ -187,15 +142,12 @@ const PhoneScrollItem: React.FC<{
   scrollYProgress: MotionValue<number>;
   index: number;
   total: number;
-  startOffset: number;
-  endOffset: number;
   label: string;
   children: React.ReactNode;
-}> = ({ scrollYProgress, index, total, startOffset, endOffset, label, children }) => {
-  // Center items come in first, sides come in later
+}> = ({ scrollYProgress, index, total, label, children }) => {
   const centerIndex = Math.floor(total / 2);
   const distanceFromCenter = Math.abs(index - centerIndex);
-  const delayedStart = startOffset + distanceFromCenter * 0.05;
+  const delayedStart = 0.1 + index * (0.5 / total) + distanceFromCenter * 0.05;
 
   const opacity = useTransform(
     scrollYProgress,
@@ -207,7 +159,6 @@ const PhoneScrollItem: React.FC<{
     [delayedStart, Math.min(delayedStart + 0.15, 1)],
     [60, 0]
   );
-  // Slight rotation that straightens out
   const rotateZ = useTransform(
     scrollYProgress,
     [delayedStart, Math.min(delayedStart + 0.2, 1)],
@@ -217,10 +168,8 @@ const PhoneScrollItem: React.FC<{
   return (
     <motion.div style={{ opacity, y, rotateZ }} className="flex flex-col items-center">
       <div className="w-[140px] md:w-[200px]">
-        <div className="relative border-[4px] border-[#2a2a2a] bg-[#1a1a1a] rounded-[24px] md:rounded-[30px] p-0.5 shadow-xl">
-          {/* Dynamic Island */}
+        <div className="relative border-[4px] border-[#2a2a2a] bg-[#1a1a1a] rounded-[24px] md:rounded-[30px] p-0.5">
           <div className="absolute top-1 left-1/2 -translate-x-1/2 w-14 md:w-16 h-3 md:h-4 bg-[#1a1a1a] rounded-full z-10" />
-          {/* Screen */}
           <div className="w-full h-[240px] md:h-[340px] overflow-hidden rounded-[20px] md:rounded-[26px] bg-white">
             {children}
           </div>
@@ -232,20 +181,22 @@ const PhoneScrollItem: React.FC<{
   );
 };
 
-// ── Video device frame ────────────────────────────────────────────
-// Wraps a video in a device frame with autoplay on scroll-into-view
+// ── Video in device frame ─────────────────────────────────────────
 
 interface VideoDeviceProps {
   src: string;
   poster?: string;
-  device: "desktop" | "tablet" | "phone";
+  device: "tablet" | "phone";
 }
 
 export const VideoDevice: React.FC<VideoDeviceProps> = ({ src, poster, device }) => {
   const videoRef = useRef<HTMLVideoElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
+  const [hasError, setHasError] = React.useState(false);
 
   React.useEffect(() => {
+    const el = containerRef.current;
+    if (!el) return;
     const observer = new IntersectionObserver(
       ([entry]) => {
         if (entry.isIntersecting) {
@@ -256,38 +207,38 @@ export const VideoDevice: React.FC<VideoDeviceProps> = ({ src, poster, device })
       },
       { threshold: 0.3 }
     );
-    if (containerRef.current) observer.observe(containerRef.current);
+    observer.observe(el);
     return () => observer.disconnect();
   }, []);
 
-  const video = (
-    <video
-      ref={videoRef}
-      src={src}
-      poster={poster}
-      muted
-      loop
-      playsInline
-      preload="metadata"
-      className="w-full h-full object-cover object-top"
-    />
-  );
-
-  const wrapper = (
-    <div ref={containerRef} className="w-full h-full">
-      {video}
+  const content = (
+    <div ref={containerRef} className="w-full h-full relative">
+      {!hasError ? (
+        <video
+          ref={videoRef}
+          src={src}
+          poster={poster}
+          muted
+          loop
+          playsInline
+          preload="metadata"
+          className="w-full h-full object-cover object-top"
+          onError={() => setHasError(true)}
+        />
+      ) : (
+        <div className="w-full h-full flex flex-col items-center justify-center bg-gradient-to-br from-gray-50 to-gray-100 text-gray-400 gap-3">
+          <svg className="w-12 h-12" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="m15.75 10.5 4.72-4.72a.75.75 0 0 1 1.28.53v11.38a.75.75 0 0 1-1.28.53l-4.72-4.72M4.5 18.75h9a2.25 2.25 0 0 0 2.25-2.25v-9a2.25 2.25 0 0 0-2.25-2.25h-9A2.25 2.25 0 0 0 2.25 7.5v9a2.25 2.25 0 0 0 2.25 2.25Z" />
+          </svg>
+          <p className="text-sm font-medium">Drop intro.webm in public/videos/</p>
+        </div>
+      )}
     </div>
   );
 
-  switch (device) {
-    case "desktop":
-      return <DesktopFrame>{wrapper}</DesktopFrame>;
-    case "tablet":
-      return <TabletFrame>{wrapper}</TabletFrame>;
-    case "phone":
-      return <PhoneFrame>{wrapper}</PhoneFrame>;
-  }
+  if (device === "phone") return <PhoneFrame>{content}</PhoneFrame>;
+  return <TabletFrame>{content}</TabletFrame>;
 };
 
-// Re-export ContainerScroll from aceternity for convenience
+// Re-export
 export { ContainerScroll } from "./container-scroll-animation";

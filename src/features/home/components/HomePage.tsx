@@ -9,8 +9,7 @@ import {
   ContainerScroll,
 } from '@/src/components/ui/container-scroll-animation';
 import {
-  ScrollDeviceSection,
-  DesktopFrame,
+  ContainerScrollDevice,
   TabletFrame,
   PhoneFrame,
   PhoneParade,
@@ -510,47 +509,69 @@ const HomePage: React.FC = () => {
       {/* ════════════════════════════════════════════════════════
           4. TABLET SCROLL — Intro video in tablet frame
           ════════════════════════════════════════════════════════ */}
-      <ScrollDeviceSection
-        scrollHeight="h-[50rem] md:h-[70rem]"
+      <ContainerScrollDevice
+        scrollHeight="h-[60rem] md:h-[80rem]"
         titleComponent={
           <>
             <p className="text-sm font-medium text-primary mb-2">See it in action</p>
-            <h2 className="text-3xl md:text-5xl font-bold text-gray-900">
-              Experience the App
+            <h2 className="text-4xl font-semibold text-gray-900">
+              Experience the App <br />
+              <span className="text-4xl md:text-[6rem] font-bold mt-1 leading-none text-primary">
+                Live Demo
+              </span>
             </h2>
-            <p className="text-gray-500 mt-2 max-w-lg mx-auto text-base">
-              Watch how easy it is to find your perfect property
-            </p>
           </>
         }
       >
         <VideoDevice src={INTRO_VIDEO_PATH} device="tablet" />
-      </ScrollDeviceSection>
+      </ContainerScrollDevice>
 
       {/* ════════════════════════════════════════════════════════
           5. TABLET SCROLL — Agencies view
           ════════════════════════════════════════════════════════ */}
-      <ScrollDeviceSection
-        scrollHeight="h-[50rem] md:h-[70rem]"
+      <ContainerScrollDevice
+        scrollHeight="h-[60rem] md:h-[80rem]"
         titleComponent={
           <>
             <p className="text-sm font-medium text-indigo-500 mb-2">Trusted partners</p>
-            <h2 className="text-3xl md:text-5xl font-bold text-gray-900">
-              Top Agencies & Agents
+            <h2 className="text-4xl font-semibold text-gray-900">
+              Top Agencies & Agents <br />
+              <span className="text-4xl md:text-[6rem] font-bold mt-1 leading-none text-indigo-500">
+                Across the Balkans
+              </span>
             </h2>
-            <p className="text-gray-500 mt-2 max-w-lg mx-auto text-base">
-              Browse verified agencies across 8+ Balkan countries
-            </p>
           </>
         }
       >
         <TabletFrame>
           <TabletAgenciesScreen />
         </TabletFrame>
-      </ScrollDeviceSection>
+      </ContainerScrollDevice>
 
       {/* ════════════════════════════════════════════════════════
-          6. PHONE PARADE — Multiple phones showing different features
+          6. PHONE SCROLL — Single phone with Aceternity animation
+          ════════════════════════════════════════════════════════ */}
+      <ContainerScrollDevice
+        scrollHeight="h-[60rem] md:h-[80rem]"
+        titleComponent={
+          <>
+            <p className="text-sm font-medium text-primary mb-2">Mobile-first design</p>
+            <h2 className="text-4xl font-semibold text-gray-900">
+              Every Feature <br />
+              <span className="text-4xl md:text-[6rem] font-bold mt-1 leading-none text-primary">
+                In Your Pocket
+              </span>
+            </h2>
+          </>
+        }
+      >
+        <PhoneFrame>
+          <PhoneSearchScreen />
+        </PhoneFrame>
+      </ContainerScrollDevice>
+
+      {/* ════════════════════════════════════════════════════════
+          6b. PHONE PARADE — Multiple phones appearing together
           ════════════════════════════════════════════════════════ */}
       <PhoneParade
         titleComponent={
@@ -559,13 +580,10 @@ const HomePage: React.FC = () => {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
           >
-            <p className="text-sm font-medium text-primary mb-2">Mobile-first design</p>
-            <h2 className="text-3xl md:text-5xl font-bold text-gray-900">
-              Every Feature in Your Pocket
+            <p className="text-sm font-medium text-primary mb-2">All your tools</p>
+            <h2 className="text-3xl md:text-4xl font-bold text-gray-900">
+              Search, Chat, Map, Save
             </h2>
-            <p className="text-gray-500 mt-2 max-w-lg mx-auto text-base">
-              Full-featured mobile experience — search, save, chat, and explore on the go
-            </p>
           </motion.div>
         }
         phones={[
