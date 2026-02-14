@@ -133,7 +133,7 @@ const GoogleMapControls: React.FC<GoogleMapControlsProps> = ({
 
             <div className="flex items-center bg-neutral-200/50 p-0.5 rounded-full" role="radiogroup" aria-label="Map style">
               <button
-                onClick={() => setMapStyle('clean')}
+                onClick={() => { setMapStyle('clean'); if (drawnBounds) onDrawComplete(null); }}
                 className={`px-1.5 py-0.5 xl:px-2 xl:py-1 rounded-full text-[10px] xl:text-[11px] font-semibold transition-all ${
                   mapStyle === 'clean' ? 'bg-white shadow text-primary' : 'text-neutral-600 hover:bg-white/50'
                 }`}

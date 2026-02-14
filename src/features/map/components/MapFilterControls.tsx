@@ -152,7 +152,7 @@ const MapFilterControls: React.FC<MapFilterControlsProps> = ({
               </button>
               <div className="flex items-center bg-neutral-200/50 p-0.5 rounded-full" role="radiogroup" aria-label="Map style">
                 <button
-                  onClick={() => setMapType('positron')}
+                  onClick={() => { setMapType('positron'); if (drawnBounds) onDrawComplete(null); }}
                   className={`px-1.5 py-0.5 xl:px-2 xl:py-1 rounded-full text-[10px] xl:text-[11px] font-semibold transition-all ${
                     mapType === 'positron'
                       ? 'bg-white shadow text-primary'
