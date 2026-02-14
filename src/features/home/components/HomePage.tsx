@@ -7,14 +7,11 @@ import { useRecentlyViewed } from '../hooks/useRecentlyViewed';
 import RecentlyViewedSection from './RecentlyViewedSection';
 import {
   ContainerScroll,
-} from '@/src/components/ui/container-scroll-animation';
-import {
-  ContainerScrollDevice,
-  TabletFrame,
-  PhoneFrame,
+  ContainerScrollTablet,
+  ContainerScrollPhone,
   PhoneParade,
-  VideoDevice,
-} from '@/src/components/ui/container-scroll';
+  VideoInTablet,
+} from '@/src/components/ui/container-scroll-animation';
 import {
   SearchIcon,
   MapIcon,
@@ -509,8 +506,7 @@ const HomePage: React.FC = () => {
       {/* ════════════════════════════════════════════════════════
           4. TABLET SCROLL — Intro video in tablet frame
           ════════════════════════════════════════════════════════ */}
-      <ContainerScrollDevice
-        scrollHeight="h-[60rem] md:h-[80rem]"
+      <ContainerScrollTablet
         titleComponent={
           <>
             <p className="text-sm font-medium text-primary mb-2">See it in action</p>
@@ -523,14 +519,13 @@ const HomePage: React.FC = () => {
           </>
         }
       >
-        <VideoDevice src={INTRO_VIDEO_PATH} device="tablet" />
-      </ContainerScrollDevice>
+        <VideoInTablet src={INTRO_VIDEO_PATH} />
+      </ContainerScrollTablet>
 
       {/* ════════════════════════════════════════════════════════
           5. TABLET SCROLL — Agencies view
           ════════════════════════════════════════════════════════ */}
-      <ContainerScrollDevice
-        scrollHeight="h-[60rem] md:h-[80rem]"
+      <ContainerScrollTablet
         titleComponent={
           <>
             <p className="text-sm font-medium text-indigo-500 mb-2">Trusted partners</p>
@@ -543,16 +538,13 @@ const HomePage: React.FC = () => {
           </>
         }
       >
-        <TabletFrame>
-          <TabletAgenciesScreen />
-        </TabletFrame>
-      </ContainerScrollDevice>
+        <TabletAgenciesScreen />
+      </ContainerScrollTablet>
 
       {/* ════════════════════════════════════════════════════════
           6. PHONE SCROLL — Single phone with Aceternity animation
           ════════════════════════════════════════════════════════ */}
-      <ContainerScrollDevice
-        scrollHeight="h-[60rem] md:h-[80rem]"
+      <ContainerScrollPhone
         titleComponent={
           <>
             <p className="text-sm font-medium text-primary mb-2">Mobile-first design</p>
@@ -565,10 +557,8 @@ const HomePage: React.FC = () => {
           </>
         }
       >
-        <PhoneFrame>
-          <PhoneSearchScreen />
-        </PhoneFrame>
-      </ContainerScrollDevice>
+        <PhoneSearchScreen />
+      </ContainerScrollPhone>
 
       {/* ════════════════════════════════════════════════════════
           6b. PHONE PARADE — Multiple phones appearing together
