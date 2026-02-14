@@ -46,15 +46,166 @@ interface AiSearchProps {
     onHistoryChange: (history: ChatMessage[]) => void;
 }
 
+// ============================================================================
+// ANIMATION STYLES
+// ============================================================================
+const AssistantStyles = () => (
+    <style>{`
+        @keyframes voiceWave {
+            0%, 100% { transform: scaleY(0.25); }
+            50% { transform: scaleY(1); }
+        }
+        .anim-voice-wave {
+            animation: voiceWave 0.55s ease-in-out infinite;
+        }
+        @keyframes speakBar {
+            0%, 100% { transform: scaleY(0.3); }
+            50% { transform: scaleY(1); }
+        }
+        .anim-speak-bar {
+            animation: speakBar 0.45s ease-in-out infinite;
+        }
+        @keyframes orbFloat {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-6px); }
+        }
+        .anim-orb-float {
+            animation: orbFloat 3s ease-in-out infinite;
+        }
+        @keyframes orbGlow {
+            0%, 100% { box-shadow: 0 0 20px rgba(59,130,246,0.3), 0 0 60px rgba(139,92,246,0.15); }
+            50% { box-shadow: 0 0 30px rgba(59,130,246,0.5), 0 0 80px rgba(139,92,246,0.25); }
+        }
+        .anim-orb-glow {
+            animation: orbGlow 2.5s ease-in-out infinite;
+        }
+        @keyframes orbListening {
+            0%, 100% { transform: scale(1); box-shadow: 0 0 20px rgba(239,68,68,0.4); }
+            50% { transform: scale(1.08); box-shadow: 0 0 40px rgba(239,68,68,0.6), 0 0 80px rgba(239,68,68,0.2); }
+        }
+        .anim-orb-listening {
+            animation: orbListening 1.2s ease-in-out infinite;
+        }
+        @keyframes orbSpeaking {
+            0%, 100% { transform: scale(1); box-shadow: 0 0 20px rgba(59,130,246,0.4); }
+            33% { transform: scale(1.05); box-shadow: 0 0 35px rgba(139,92,246,0.5); }
+            66% { transform: scale(0.97); box-shadow: 0 0 25px rgba(59,130,246,0.5); }
+        }
+        .anim-orb-speaking {
+            animation: orbSpeaking 1.5s ease-in-out infinite;
+        }
+        @keyframes orbThinking {
+            0% { transform: scale(1) rotate(0deg); }
+            25% { transform: scale(1.03) rotate(2deg); }
+            50% { transform: scale(0.97) rotate(-2deg); }
+            75% { transform: scale(1.02) rotate(1deg); }
+            100% { transform: scale(1) rotate(0deg); }
+        }
+        .anim-orb-thinking {
+            animation: orbThinking 2s ease-in-out infinite;
+        }
+        @keyframes gradientShift {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+        .anim-gradient-bg {
+            background-size: 200% 200%;
+            animation: gradientShift 6s ease infinite;
+        }
+        @keyframes msgSlideIn {
+            from { opacity: 0; transform: translateY(12px) scale(0.97); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
+        }
+        .anim-msg-in {
+            animation: msgSlideIn 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+        @keyframes dotBounce {
+            0%, 80%, 100% { transform: translateY(0); }
+            40% { transform: translateY(-6px); }
+        }
+        .anim-dot-bounce {
+            animation: dotBounce 1.2s ease-in-out infinite;
+        }
+        @keyframes ringPulse {
+            0% { transform: scale(0.8); opacity: 0.8; }
+            100% { transform: scale(1.6); opacity: 0; }
+        }
+        .anim-ring-pulse {
+            animation: ringPulse 1.5s ease-out infinite;
+        }
+        @keyframes chipFadeIn {
+            from { opacity: 0; transform: translateY(8px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .anim-chip-in {
+            animation: chipFadeIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+        @keyframes shimmer {
+            0% { background-position: -200% 0; }
+            100% { background-position: 200% 0; }
+        }
+        .anim-shimmer {
+            background: linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.08) 50%, transparent 100%);
+            background-size: 200% 100%;
+            animation: shimmer 2s linear infinite;
+        }
+    `}</style>
+);
+
+// ============================================================================
+// SUB-COMPONENTS
+// ============================================================================
+
+// --- Animated AI Orb ---
+const AiOrb: React.FC<{ state: 'idle' | 'listening' | 'thinking' | 'speaking'; size?: 'sm' | 'md' | 'lg' }> = ({ state, size = 'md' }) => {
+    const sizeClasses = { sm: 'w-9 h-9', md: 'w-14 h-14', lg: 'w-20 h-20' };
+    const iconSizes = { sm: 'w-4 h-4', md: 'w-6 h-6', lg: 'w-9 h-9' };
+    const ringSize = { sm: '-inset-1', md: '-inset-1.5', lg: '-inset-2' };
+
+    const orbAnim = state === 'listening' ? 'anim-orb-listening'
+        : state === 'speaking' ? 'anim-orb-speaking'
+        : state === 'thinking' ? 'anim-orb-thinking'
+        : 'anim-orb-glow';
+
+    const gradientClass = state === 'listening'
+        ? 'from-red-500 via-rose-500 to-orange-500'
+        : 'from-blue-500 via-primary to-violet-500';
+
+    return (
+        <div className="relative flex-shrink-0">
+            {/* Outer pulse ring */}
+            {(state === 'listening' || state === 'speaking') && (
+                <div className={`absolute ${ringSize[size]} rounded-full ${state === 'listening' ? 'bg-red-400/30' : 'bg-primary/20'} anim-ring-pulse`} />
+            )}
+            <div className={`${sizeClasses[size]} rounded-full bg-gradient-to-br ${gradientClass} anim-gradient-bg flex items-center justify-center ${orbAnim} relative`}>
+                {state === 'listening' ? (
+                    <MicrophoneIcon className={`${iconSizes[size]} text-white`} />
+                ) : state === 'speaking' ? (
+                    <div className="flex items-center gap-[2px]" style={{ height: size === 'lg' ? 20 : size === 'md' ? 14 : 10 }}>
+                        {[...Array(4)].map((_, i) => (
+                            <div key={i} className="w-[2.5px] bg-white/90 rounded-full anim-speak-bar" style={{ animationDelay: `${i * 0.1}s`, height: '100%' }} />
+                        ))}
+                    </div>
+                ) : (
+                    <SparklesIcon className={`${iconSizes[size]} text-white`} />
+                )}
+                {/* Shimmer overlay */}
+                <div className="absolute inset-0 rounded-full anim-shimmer pointer-events-none" />
+            </div>
+        </div>
+    );
+};
+
 // --- Filter pill ---
-const FilterPill: React.FC<{ children: React.ReactNode }> = ({ children }) => (
-    <div className="bg-primary-light text-primary-dark text-xs font-semibold px-2.5 py-1.5 rounded-full flex items-center justify-center text-center">
+const FilterPill: React.FC<{ children: React.ReactNode; delay?: number }> = ({ children, delay = 0 }) => (
+    <div className="anim-chip-in bg-white/80 backdrop-blur-sm text-neutral-700 text-xs font-semibold px-3 py-1.5 rounded-full border border-neutral-200/60 shadow-sm" style={{ animationDelay: `${delay}ms` }}>
         {children}
     </div>
 );
 
-// --- Mini Property Card for inline results ---
-const MiniPropertyCard: React.FC<{ property: Property }> = ({ property }) => {
+// --- Mini Property Card ---
+const MiniPropertyCard: React.FC<{ property: Property; index: number }> = ({ property, index }) => {
     const { dispatch } = useAppContext();
 
     const handleClick = () => {
@@ -65,32 +216,33 @@ const MiniPropertyCard: React.FC<{ property: Property }> = ({ property }) => {
     return (
         <button
             onClick={handleClick}
-            className="flex-shrink-0 w-52 bg-white rounded-xl border border-neutral-200 overflow-hidden shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-200 text-left cursor-pointer group"
+            className="flex-shrink-0 w-48 bg-white rounded-2xl border border-neutral-100 overflow-hidden shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all duration-300 text-left cursor-pointer group anim-chip-in"
+            style={{ animationDelay: `${index * 80}ms` }}
         >
-            <div className="relative h-28 w-full overflow-hidden bg-neutral-200">
+            <div className="relative h-28 w-full overflow-hidden bg-neutral-100">
                 <img
                     src={optimizeCloudinaryUrl(property.imageUrl, { width: 320, quality: 'auto' })}
                     alt={property.title || `${property.propertyType} in ${property.city}`}
                     loading="lazy"
                     decoding="async"
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                    className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
-                <div className="absolute bottom-2 left-2 right-2">
-                    <span className="text-white font-bold text-sm drop-shadow-md">
+                <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/10 to-transparent" />
+                <div className="absolute bottom-2 left-2.5 right-2.5 flex items-end justify-between">
+                    <span className="text-white font-bold text-[13px] drop-shadow-lg">
                         {formatPrice(property.price, property.country)}
                     </span>
                 </div>
             </div>
             <div className="p-2.5">
                 {property.title && (
-                    <p className="text-xs font-semibold text-neutral-900 line-clamp-1 mb-1">{property.title}</p>
+                    <p className="text-[11px] font-semibold text-neutral-800 line-clamp-1 mb-1">{property.title}</p>
                 )}
-                <div className="flex items-center gap-1 text-neutral-500 mb-1.5">
+                <div className="flex items-center gap-1 text-neutral-400 mb-1">
                     <MapPinIcon className="w-3 h-3 flex-shrink-0" />
-                    <span className="text-[11px] truncate">{property.city}, {property.country}</span>
+                    <span className="text-[10px] truncate">{property.city}, {property.country}</span>
                 </div>
-                <div className="flex items-center gap-2 text-[11px] text-neutral-600">
+                <div className="flex items-center gap-2 text-[10px] text-neutral-500 font-medium">
                     {property.beds > 0 && <span>{property.beds} bed</span>}
                     {property.baths > 0 && <span>{property.baths} bath</span>}
                     {property.sqft > 0 && <span>{property.sqft}m²</span>}
@@ -100,8 +252,12 @@ const MiniPropertyCard: React.FC<{ property: Property }> = ({ property }) => {
     );
 };
 
-// --- Suggestion chips for empty state ---
-const SuggestionChips: React.FC<{ onSelect: (text: string) => void; onMicClick: () => void; voiceSupported: boolean }> = ({ onSelect, onMicClick, voiceSupported }) => {
+// --- Empty state ---
+const EmptyState: React.FC<{
+    onSelect: (text: string) => void;
+    onMicClick: () => void;
+    voiceSupported: boolean;
+}> = ({ onSelect, onMicClick, voiceSupported }) => {
     const { t } = useTranslation(['search']);
     const suggestions = [
         t('ai.suggestion1', 'Apartment in Tirana under 80k'),
@@ -112,35 +268,38 @@ const SuggestionChips: React.FC<{ onSelect: (text: string) => void; onMicClick: 
 
     return (
         <div className="flex flex-col items-center justify-center h-full px-4 text-center">
-            {/* Voice assistant orb */}
-            <div className="relative mb-6">
-                <div className="w-20 h-20 rounded-full bg-gradient-to-br from-primary via-blue-500 to-violet-500 flex items-center justify-center shadow-lg shadow-primary/25">
-                    <SparklesIcon className="w-9 h-9 text-white" />
-                </div>
-                <div className="absolute -inset-1 rounded-full bg-gradient-to-br from-primary/20 to-violet-500/20 animate-pulse -z-10" />
+            {/* Floating orb */}
+            <div className="anim-orb-float mb-5">
+                <AiOrb state="idle" size="lg" />
             </div>
-            <h3 className="text-lg font-bold text-neutral-800 mb-1">{t('ai.assistantTitle', 'Property Assistant')}</h3>
-            <p className="text-sm text-neutral-500 mb-5 max-w-[300px]">
+
+            <h3 className="text-lg font-bold text-neutral-800 mb-1 anim-chip-in" style={{ animationDelay: '100ms' }}>
+                {t('ai.assistantTitle', 'Property Assistant')}
+            </h3>
+            <p className="text-[13px] text-neutral-500 mb-5 max-w-[280px] anim-chip-in" style={{ animationDelay: '200ms' }}>
                 {t('ai.assistantHint', 'Ask me anything about properties — type or use your voice')}
             </p>
 
-            {/* Big mic button for voice-first experience */}
+            {/* Big mic button */}
             {voiceSupported && (
-                <button
-                    onClick={onMicClick}
-                    className="group mb-6 relative w-16 h-16 rounded-full bg-gradient-to-br from-primary to-blue-600 text-white flex items-center justify-center shadow-lg hover:shadow-xl hover:scale-105 active:scale-95 transition-all"
-                >
-                    <MicrophoneIcon className="w-7 h-7" />
-                    <span className="absolute -bottom-6 text-xs text-neutral-500 font-medium whitespace-nowrap">{t('ai.tapToSpeak', 'Tap to speak')}</span>
-                </button>
+                <div className="anim-chip-in mb-6" style={{ animationDelay: '300ms' }}>
+                    <button
+                        onClick={onMicClick}
+                        className="group relative w-14 h-14 rounded-full bg-gradient-to-br from-primary to-blue-600 text-white flex items-center justify-center shadow-lg shadow-primary/30 hover:shadow-xl hover:shadow-primary/40 hover:scale-110 active:scale-95 transition-all duration-300"
+                    >
+                        <MicrophoneIcon className="w-6 h-6 group-hover:scale-110 transition-transform" />
+                    </button>
+                    <p className="text-[11px] text-neutral-400 mt-2 font-medium">{t('ai.tapToSpeak', 'Tap to speak')}</p>
+                </div>
             )}
 
-            <div className="flex flex-wrap justify-center gap-2 max-w-sm mt-2">
+            <div className="flex flex-wrap justify-center gap-2 max-w-sm">
                 {suggestions.map((text, i) => (
                     <button
                         key={i}
                         onClick={() => onSelect(text)}
-                        className="px-3 py-1.5 text-xs bg-neutral-50 border border-neutral-200 text-neutral-700 rounded-full hover:bg-primary/5 hover:border-primary/30 hover:text-primary transition-colors"
+                        className="anim-chip-in px-3.5 py-2 text-xs bg-white border border-neutral-200/70 text-neutral-600 rounded-2xl hover:bg-primary/5 hover:border-primary/30 hover:text-primary transition-all duration-200 shadow-sm hover:shadow-md"
+                        style={{ animationDelay: `${400 + i * 80}ms` }}
                     >
                         {text}
                     </button>
@@ -150,7 +309,7 @@ const SuggestionChips: React.FC<{ onSelect: (text: string) => void; onMicClick: 
     );
 };
 
-// --- Helper to filter properties by AiSearchQuery ---
+// --- Helper to filter properties ---
 function filterPropertiesByQuery(properties: Property[], query: AiSearchQuery): Property[] {
     return properties.filter(p => {
         if (query.country && !p.country.toLowerCase().includes(query.country.toLowerCase())) return false;
@@ -168,60 +327,9 @@ function filterPropertiesByQuery(properties: Property[], query: AiSearchQuery): 
     });
 }
 
-// --- CSS for animations ---
-const VoiceAssistantStyles = () => (
-    <style>{`
-        @keyframes voiceWave {
-            0%, 100% { transform: scaleY(0.3); }
-            50% { transform: scaleY(1); }
-        }
-        .animate-voice-wave {
-            animation: voiceWave 0.6s ease-in-out infinite;
-        }
-        @keyframes orbPulse {
-            0%, 100% { transform: scale(1); opacity: 0.6; }
-            50% { transform: scale(1.15); opacity: 0.3; }
-        }
-        .animate-orb-pulse {
-            animation: orbPulse 2s ease-in-out infinite;
-        }
-        @keyframes speakingBounce {
-            0%, 100% { transform: scaleY(0.4); }
-            50% { transform: scaleY(1.0); }
-        }
-        .animate-speaking-bar {
-            animation: speakingBounce 0.5s ease-in-out infinite;
-        }
-    `}</style>
-);
-
-// --- Speaking indicator bars ---
-const SpeakingIndicator: React.FC = () => (
-    <div className="flex items-center gap-[2px] h-4">
-        {[...Array(4)].map((_, i) => (
-            <div
-                key={i}
-                className="w-[3px] bg-primary rounded-full animate-speaking-bar"
-                style={{ animationDelay: `${i * 0.12}s`, height: '100%' }}
-            />
-        ))}
-    </div>
-);
-
-// --- Voice waveform ---
-const VoiceWaveform: React.FC = () => (
-    <div className="flex items-center justify-center gap-[3px] h-6">
-        {[...Array(5)].map((_, i) => (
-            <div
-                key={i}
-                className="w-[3px] bg-red-400 rounded-full animate-voice-wave"
-                style={{ animationDelay: `${i * 0.1}s`, height: '100%' }}
-            />
-        ))}
-    </div>
-);
-
-// --- Main Component ---
+// ============================================================================
+// MAIN COMPONENT
+// ============================================================================
 const AiSearch: React.FC<AiSearchProps> = ({ properties, onApplyFilters, isMobile, history, onHistoryChange }) => {
     const { t } = useTranslation(['search']);
     const [input, setInput] = useState('');
@@ -240,13 +348,11 @@ const AiSearch: React.FC<AiSearchProps> = ({ properties, onApplyFilters, isMobil
     const utteranceRef = useRef<SpeechSynthesisUtterance | null>(null);
     const isVoiceSessionRef = useRef(false);
 
-    // Check speech support
     useEffect(() => {
-        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-        setVoiceSupported(!!SpeechRecognition);
+        const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+        setVoiceSupported(!!SR);
     }, []);
 
-    // Filter matching properties when finalQuery changes
     const matchedProperties = useMemo(() => {
         if (!finalQuery) return [];
         return filterPropertiesByQuery(properties, finalQuery).slice(0, 10);
@@ -260,19 +366,16 @@ const AiSearch: React.FC<AiSearchProps> = ({ properties, onApplyFilters, isMobil
 
     useEffect(scrollToBottom, [history, isSearching, finalQuery, matchedProperties]);
 
+    // Determine the orb state for the header
+    const orbState: 'idle' | 'listening' | 'thinking' | 'speaking' =
+        isListening ? 'listening' : isSpeaking ? 'speaking' : isSearching ? 'thinking' : 'idle';
+
     // --- Text-to-Speech ---
     const speak = useCallback((text: string) => {
         if (!ttsEnabled || !window.speechSynthesis) return;
-
-        // Cancel any ongoing speech
         window.speechSynthesis.cancel();
 
-        // Clean text for speech - remove emojis and special chars
-        const cleanText = text
-            .replace(/[^\p{L}\p{N}\p{P}\p{Z}]/gu, '')
-            .replace(/\s+/g, ' ')
-            .trim();
-
+        const cleanText = text.replace(/[^\p{L}\p{N}\p{P}\p{Z}]/gu, '').replace(/\s+/g, ' ').trim();
         if (!cleanText) return;
 
         const utterance = new SpeechSynthesisUtterance(cleanText);
@@ -280,7 +383,6 @@ const AiSearch: React.FC<AiSearchProps> = ({ properties, onApplyFilters, isMobil
         utterance.pitch = 1.0;
         utterance.volume = 1.0;
 
-        // Try to pick a good voice
         const voices = window.speechSynthesis.getVoices();
         const lang = document.documentElement.lang || 'en';
         const preferred = voices.find(v => v.lang.startsWith(lang) && v.name.includes('Google'))
@@ -292,11 +394,8 @@ const AiSearch: React.FC<AiSearchProps> = ({ properties, onApplyFilters, isMobil
         utterance.onstart = () => setIsSpeaking(true);
         utterance.onend = () => {
             setIsSpeaking(false);
-            // Auto-listen after AI finishes speaking (voice conversation mode)
             if (isVoiceSessionRef.current && autoListenAfterSpeak) {
-                setTimeout(() => {
-                    startListeningInternal();
-                }, 400);
+                setTimeout(() => startListeningInternal(), 400);
             }
         };
         utterance.onerror = () => setIsSpeaking(false);
@@ -310,7 +409,7 @@ const AiSearch: React.FC<AiSearchProps> = ({ properties, onApplyFilters, isMobil
         setIsSpeaking(false);
     }, []);
 
-    // Send message handler
+    // --- Send message ---
     const handleSendMessage = useCallback(async (overrideText?: string) => {
         const text = overrideText || input.trim();
         if (!text) return;
@@ -332,7 +431,6 @@ const AiSearch: React.FC<AiSearchProps> = ({ properties, onApplyFilters, isMobil
                 setFinalQuery(result.searchQuery);
             }
 
-            // Voice assistant speaks the response
             speak(result.responseMessage);
         } catch {
             const errorMessage: ChatMessage = { sender: 'ai', text: t('ai.connectionError') };
@@ -342,59 +440,32 @@ const AiSearch: React.FC<AiSearchProps> = ({ properties, onApplyFilters, isMobil
         }
     }, [input, history, properties, onHistoryChange, t, speak]);
 
-    // Voice recognition - internal start (used by auto-listen)
+    // --- Voice recognition ---
     const startListeningInternal = useCallback(() => {
-        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-        if (!SpeechRecognition) return;
-
-        // Stop any ongoing speech
+        const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+        if (!SR) return;
         stopSpeaking();
 
-        const recognition = new SpeechRecognition();
+        const recognition = new SR();
         recognition.continuous = false;
         recognition.interimResults = true;
         recognition.lang = document.documentElement.lang || 'en-US';
 
-        recognition.onstart = () => {
-            setIsListening(true);
-            setInterimTranscript('');
-        };
-
+        recognition.onstart = () => { setIsListening(true); setInterimTranscript(''); };
         recognition.onresult = (event: SpeechRecognitionEvent) => {
-            let interim = '';
-            let finalText = '';
-
+            let interim = '', finalText = '';
             for (let i = event.resultIndex; i < event.results.length; i++) {
-                const transcript = event.results[i][0].transcript;
-                if (event.results[i].isFinal) {
-                    finalText += transcript;
-                } else {
-                    interim += transcript;
-                }
+                const t = event.results[i][0].transcript;
+                if (event.results[i].isFinal) finalText += t; else interim += t;
             }
-
-            if (finalText) {
-                setInput(finalText);
-                setInterimTranscript('');
-            } else {
-                setInterimTranscript(interim);
-            }
+            if (finalText) { setInput(finalText); setInterimTranscript(''); }
+            else setInterimTranscript(interim);
         };
-
-        recognition.onerror = () => {
-            setIsListening(false);
-            setInterimTranscript('');
-        };
-
+        recognition.onerror = () => { setIsListening(false); setInterimTranscript(''); };
         recognition.onend = () => {
             setIsListening(false);
-            // Auto-send if we got a final transcript
             setInput(prev => {
-                if (prev.trim()) {
-                    setTimeout(() => {
-                        handleSendMessage(prev.trim());
-                    }, 100);
-                }
+                if (prev.trim()) setTimeout(() => handleSendMessage(prev.trim()), 100);
                 return prev;
             });
         };
@@ -403,7 +474,6 @@ const AiSearch: React.FC<AiSearchProps> = ({ properties, onApplyFilters, isMobil
         recognition.start();
     }, [handleSendMessage, stopSpeaking]);
 
-    // Voice recognition - user triggered (starts a voice session)
     const startListening = useCallback(() => {
         isVoiceSessionRef.current = true;
         setAutoListenAfterSpeak(true);
@@ -411,138 +481,109 @@ const AiSearch: React.FC<AiSearchProps> = ({ properties, onApplyFilters, isMobil
     }, [startListeningInternal]);
 
     const stopListening = useCallback(() => {
-        if (recognitionRef.current) {
-            recognitionRef.current.stop();
-        }
+        recognitionRef.current?.stop();
         isVoiceSessionRef.current = false;
         setAutoListenAfterSpeak(false);
     }, []);
 
-    // Cleanup on unmount
     useEffect(() => {
-        return () => {
-            if (recognitionRef.current) {
-                recognitionRef.current.abort();
-            }
-            window.speechSynthesis?.cancel();
-        };
+        return () => { recognitionRef.current?.abort(); window.speechSynthesis?.cancel(); };
     }, []);
 
-    // Ensure voices are loaded
     useEffect(() => {
         if (window.speechSynthesis) {
             window.speechSynthesis.getVoices();
-            window.speechSynthesis.onvoiceschanged = () => {
-                window.speechSynthesis.getVoices();
-            };
+            window.speechSynthesis.onvoiceschanged = () => window.speechSynthesis.getVoices();
         }
     }, []);
 
-    const handleApplyClick = () => {
-        if (finalQuery) {
-            onApplyFilters(finalQuery);
-        }
-    };
-
-    const handleSuggestionSelect = (text: string) => {
-        setInput(text);
-        setTimeout(() => handleSendMessage(text), 50);
-    };
+    const handleApplyClick = () => { if (finalQuery) onApplyFilters(finalQuery); };
+    const handleSuggestionSelect = (text: string) => { setInput(text); setTimeout(() => handleSendMessage(text), 50); };
 
     const renderFilters = (query: AiSearchQuery) => {
-        const formatCurrency = (val: number) => `€${new Intl.NumberFormat('de-DE').format(val)}`;
-        const pills = [];
+        const fmt = (val: number) => `€${new Intl.NumberFormat('de-DE').format(val)}`;
+        const pills: React.ReactNode[] = [];
+        let d = 0;
 
-        if (query.location) pills.push(<FilterPill key="loc">📍 {query.location}</FilterPill>);
-        if (query.country) pills.push(<FilterPill key="country">🌍 {query.country}</FilterPill>);
-
+        if (query.location) pills.push(<FilterPill key="loc" delay={d += 50}>📍 {query.location}</FilterPill>);
+        if (query.country) pills.push(<FilterPill key="country" delay={d += 50}>🌍 {query.country}</FilterPill>);
         if (query.propertyType) {
-            const typeIcons: Record<string, string> = { house: '🏠', apartment: '🏢', villa: '🏛️', land: '🏞️', commercial: '🏪' };
-            pills.push(<FilterPill key="type">{typeIcons[query.propertyType] || '🏠'} {query.propertyType}</FilterPill>);
+            const icons: Record<string, string> = { house: '🏠', apartment: '🏢', villa: '🏛️', land: '🏞️', commercial: '🏪' };
+            pills.push(<FilterPill key="type" delay={d += 50}>{icons[query.propertyType] || '🏠'} {query.propertyType}</FilterPill>);
         }
-
-        if (query.minPrice && query.maxPrice) pills.push(<FilterPill key="price">{formatCurrency(query.minPrice)} - {formatCurrency(query.maxPrice)}</FilterPill>);
-        else if (query.minPrice) pills.push(<FilterPill key="price">≥ {formatCurrency(query.minPrice)}</FilterPill>);
-        else if (query.maxPrice) pills.push(<FilterPill key="price">≤ {formatCurrency(query.maxPrice)}</FilterPill>);
-
-        if (query.beds) pills.push(<FilterPill key="beds">🛏️ {query.beds}+ {t('ai.beds')}</FilterPill>);
-        if (query.baths) pills.push(<FilterPill key="baths">🛁 {query.baths}+ {t('ai.baths')}</FilterPill>);
-        if (query.livingRooms) pills.push(<FilterPill key="lr">🛋️ {query.livingRooms}+ {t('ai.living')}</FilterPill>);
-
-        if (query.minSqft && query.maxSqft) pills.push(<FilterPill key="sqft">{query.minSqft}-{query.maxSqft} m²</FilterPill>);
-        else if (query.minSqft) pills.push(<FilterPill key="sqft">≥ {query.minSqft} m²</FilterPill>);
-        else if (query.maxSqft) pills.push(<FilterPill key="sqft">≤ {query.maxSqft} m²</FilterPill>);
-
+        if (query.minPrice && query.maxPrice) pills.push(<FilterPill key="price" delay={d += 50}>{fmt(query.minPrice)} - {fmt(query.maxPrice)}</FilterPill>);
+        else if (query.minPrice) pills.push(<FilterPill key="price" delay={d += 50}>≥ {fmt(query.minPrice)}</FilterPill>);
+        else if (query.maxPrice) pills.push(<FilterPill key="price" delay={d += 50}>≤ {fmt(query.maxPrice)}</FilterPill>);
+        if (query.beds) pills.push(<FilterPill key="beds" delay={d += 50}>🛏️ {query.beds}+ {t('ai.beds')}</FilterPill>);
+        if (query.baths) pills.push(<FilterPill key="baths" delay={d += 50}>🛁 {query.baths}+ {t('ai.baths')}</FilterPill>);
+        if (query.livingRooms) pills.push(<FilterPill key="lr" delay={d += 50}>🛋️ {query.livingRooms}+ {t('ai.living')}</FilterPill>);
+        if (query.minSqft && query.maxSqft) pills.push(<FilterPill key="sqft" delay={d += 50}>{query.minSqft}-{query.maxSqft} m²</FilterPill>);
+        else if (query.minSqft) pills.push(<FilterPill key="sqft" delay={d += 50}>≥ {query.minSqft} m²</FilterPill>);
+        else if (query.maxSqft) pills.push(<FilterPill key="sqft" delay={d += 50}>≤ {query.maxSqft} m²</FilterPill>);
         if (query.sellerType) {
-            const sellerLabel = query.sellerType === 'agent' ? '👔 Agent' : '👤 Private';
-            pills.push(<FilterPill key="seller">{sellerLabel}</FilterPill>);
+            pills.push(<FilterPill key="seller" delay={d += 50}>{query.sellerType === 'agent' ? '👔 Agent' : '👤 Private'}</FilterPill>);
         }
-
-        if (query.features && query.features.length > 0) {
-            query.features.forEach(f => pills.push(<FilterPill key={f}>{f}</FilterPill>));
-        }
+        if (query.features?.length) query.features.forEach(f => pills.push(<FilterPill key={f} delay={d += 50}>{f}</FilterPill>));
 
         return pills;
     };
 
     const showEmptyState = history.length === 0 && !isSearching;
 
+    // ========================================================================
+    // RENDER
+    // ========================================================================
     return (
-        <div className="flex flex-col h-full bg-white border border-neutral-200 rounded-lg overflow-hidden">
-            <VoiceAssistantStyles />
+        <div className="flex flex-col h-full bg-gradient-to-b from-neutral-50 to-white rounded-xl overflow-hidden border border-neutral-200/50 shadow-sm">
+            <AssistantStyles />
 
-            {/* Header with TTS toggle */}
+            {/* ---- Header ---- */}
             {history.length > 0 && (
-                <div className="flex-shrink-0 flex items-center justify-between px-4 py-2 bg-gradient-to-r from-primary/5 to-violet-500/5 border-b border-neutral-100">
-                    <div className="flex items-center gap-2">
-                        <div className="w-6 h-6 rounded-full bg-gradient-to-br from-primary to-blue-600 flex items-center justify-center">
-                            <SparklesIcon className="w-3.5 h-3.5 text-white" />
+                <div className="flex-shrink-0 flex items-center justify-between px-4 py-2.5 bg-white/80 backdrop-blur-md border-b border-neutral-100/80">
+                    <div className="flex items-center gap-2.5">
+                        <AiOrb state={orbState} size="sm" />
+                        <div>
+                            <span className="text-xs font-bold text-neutral-800">{t('ai.assistantTitle', 'Property Assistant')}</span>
+                            <p className="text-[10px] text-neutral-400 font-medium">
+                                {isListening ? t('ai.listening', 'Listening') + '...'
+                                    : isSpeaking ? t('ai.speaking', 'Speaking') + '...'
+                                    : isSearching ? t('ai.searching') + '...'
+                                    : t('ai.ready', 'Ready to help')}
+                            </p>
                         </div>
-                        <span className="text-xs font-semibold text-neutral-700">{t('ai.assistantTitle', 'Property Assistant')}</span>
-                        {isSpeaking && <SpeakingIndicator />}
                     </div>
-                    <div className="flex items-center gap-1">
-                        {/* TTS toggle */}
-                        <button
-                            onClick={() => {
-                                if (isSpeaking) stopSpeaking();
-                                setTtsEnabled(prev => !prev);
-                            }}
-                            className={`p-1.5 rounded-full transition-colors ${ttsEnabled ? 'text-primary hover:bg-primary/10' : 'text-neutral-400 hover:bg-neutral-100'}`}
-                            title={ttsEnabled ? t('ai.muteAssistant', 'Mute voice') : t('ai.unmuteAssistant', 'Unmute voice')}
-                        >
-                            {ttsEnabled ? <SpeakerWaveIcon className="w-4 h-4" /> : <SpeakerXMarkIcon className="w-4 h-4" />}
-                        </button>
-                    </div>
+                    <button
+                        onClick={() => { if (isSpeaking) stopSpeaking(); setTtsEnabled(prev => !prev); }}
+                        className={`p-2 rounded-xl transition-all duration-200 ${ttsEnabled ? 'text-primary bg-primary/8 hover:bg-primary/15' : 'text-neutral-400 bg-neutral-100 hover:bg-neutral-200'}`}
+                        title={ttsEnabled ? t('ai.muteAssistant', 'Mute voice') : t('ai.unmuteAssistant', 'Unmute voice')}
+                    >
+                        {ttsEnabled ? <SpeakerWaveIcon className="w-4 h-4" /> : <SpeakerXMarkIcon className="w-4 h-4" />}
+                    </button>
                 </div>
             )}
 
-            {/* Chat area */}
-            <div ref={scrollContainerRef} className="flex-grow min-h-0 p-4 space-y-4 overflow-y-auto">
+            {/* ---- Chat area ---- */}
+            <div ref={scrollContainerRef} className="flex-grow min-h-0 p-4 space-y-3 overflow-y-auto">
                 {showEmptyState ? (
-                    <SuggestionChips
-                        onSelect={handleSuggestionSelect}
-                        onMicClick={startListening}
-                        voiceSupported={voiceSupported}
-                    />
+                    <EmptyState onSelect={handleSuggestionSelect} onMicClick={startListening} voiceSupported={voiceSupported} />
                 ) : (
                     <>
                         {history.map((msg, index) => (
-                            <div key={index} className={`flex items-end gap-2 ${msg.sender === 'user' ? 'justify-end' : 'justify-start'}`}>
+                            <div key={index} className={`flex items-end gap-2.5 anim-msg-in ${msg.sender === 'user' ? 'justify-end' : 'justify-start'}`} style={{ animationDelay: `${Math.min(index * 50, 300)}ms` }}>
                                 {msg.sender === 'ai' && (
-                                    <div className="w-8 h-8 rounded-full bg-gradient-to-br from-primary to-blue-600 flex items-center justify-center flex-shrink-0 shadow-sm">
-                                        <SparklesIcon className="w-4 h-4 text-white" />
-                                    </div>
+                                    <AiOrb state={isSpeaking && index === history.length - 1 ? 'speaking' : 'idle'} size="sm" />
                                 )}
-                                <div className={`max-w-xs md:max-w-md p-3 rounded-2xl shadow-sm ${msg.sender === 'user' ? 'bg-primary text-white rounded-br-none' : 'bg-neutral-100 text-neutral-800 rounded-bl-none'}`}>
-                                    <p className="text-sm whitespace-pre-wrap">{msg.text}</p>
-                                    {/* Replay button on AI messages */}
+                                <div className={`max-w-[75%] ${msg.sender === 'user'
+                                    ? 'bg-gradient-to-br from-primary to-blue-600 text-white rounded-2xl rounded-br-md px-4 py-3 shadow-md shadow-primary/15'
+                                    : 'bg-white text-neutral-800 rounded-2xl rounded-bl-md px-4 py-3 shadow-sm border border-neutral-100/80'
+                                }`}>
+                                    <p className="text-[13px] leading-relaxed whitespace-pre-wrap">{msg.text}</p>
                                     {msg.sender === 'ai' && ttsEnabled && (
                                         <button
                                             onClick={() => speak(msg.text)}
-                                            className="mt-1.5 flex items-center gap-1 text-[10px] text-neutral-400 hover:text-primary transition-colors"
+                                            className="mt-2 flex items-center gap-1 text-[10px] text-neutral-400 hover:text-primary transition-colors group"
                                         >
-                                            <SpeakerWaveIcon className="w-3 h-3" />
+                                            <SpeakerWaveIcon className="w-3 h-3 group-hover:scale-110 transition-transform" />
                                             <span>{t('ai.replay', 'Replay')}</span>
                                         </button>
                                     )}
@@ -550,36 +591,32 @@ const AiSearch: React.FC<AiSearchProps> = ({ properties, onApplyFilters, isMobil
                             </div>
                         ))}
 
-                        {/* Typing indicator */}
+                        {/* Thinking indicator */}
                         {isSearching && (
-                            <div className="flex items-end gap-2 justify-start">
-                                <div className="w-8 h-8 rounded-full bg-gradient-to-br from-primary to-blue-600 flex items-center justify-center flex-shrink-0 shadow-sm">
-                                    <SparklesIcon className="w-4 h-4 text-white" />
-                                </div>
-                                <div className="p-3 rounded-2xl bg-white border shadow-sm rounded-bl-none">
-                                    <div className="flex items-center gap-2">
-                                        <div className="w-2 h-2 bg-primary/40 rounded-full animate-pulse [animation-delay:-0.3s]" />
-                                        <div className="w-2 h-2 bg-primary/40 rounded-full animate-pulse [animation-delay:-0.15s]" />
-                                        <div className="w-2 h-2 bg-primary/40 rounded-full animate-pulse" />
+                            <div className="flex items-end gap-2.5 justify-start anim-msg-in">
+                                <AiOrb state="thinking" size="sm" />
+                                <div className="bg-white border border-neutral-100/80 px-5 py-3.5 rounded-2xl rounded-bl-md shadow-sm">
+                                    <div className="flex items-center gap-1.5">
+                                        {[0, 1, 2].map(i => (
+                                            <div key={i} className="w-2 h-2 bg-primary/50 rounded-full anim-dot-bounce" style={{ animationDelay: `${i * 0.15}s` }} />
+                                        ))}
                                     </div>
                                 </div>
                             </div>
                         )}
 
-                        {/* Inline property results when AI has a final query */}
+                        {/* Property results */}
                         {finalQuery && matchedProperties.length > 0 && (
-                            <div className="animate-fade-in">
-                                <div className="flex items-end gap-2 justify-start">
-                                    <div className="w-8 h-8 rounded-full bg-gradient-to-br from-primary to-blue-600 flex items-center justify-center flex-shrink-0 shadow-sm">
-                                        <SparklesIcon className="w-4 h-4 text-white" />
-                                    </div>
+                            <div className="anim-msg-in">
+                                <div className="flex items-start gap-2.5 justify-start">
+                                    <AiOrb state="idle" size="sm" />
                                     <div className="max-w-full min-w-0 flex-1">
-                                        <p className="text-xs font-medium text-neutral-500 mb-2 ml-1">
+                                        <p className="text-[11px] font-semibold text-neutral-400 mb-2.5 ml-0.5 uppercase tracking-wider">
                                             {t('ai.foundProperties', '{{count}} properties found', { count: matchedProperties.length })}
                                         </p>
-                                        <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-thin scrollbar-thumb-neutral-300 scrollbar-track-transparent">
-                                            {matchedProperties.map(property => (
-                                                <MiniPropertyCard key={property.id} property={property} />
+                                        <div className="flex gap-2.5 overflow-x-auto pb-2 scrollbar-thin scrollbar-thumb-neutral-200 scrollbar-track-transparent">
+                                            {matchedProperties.map((property, i) => (
+                                                <MiniPropertyCard key={property.id} property={property} index={i} />
                                             ))}
                                         </div>
                                     </div>
@@ -587,15 +624,13 @@ const AiSearch: React.FC<AiSearchProps> = ({ properties, onApplyFilters, isMobil
                             </div>
                         )}
 
-                        {/* No results message */}
+                        {/* No results */}
                         {finalQuery && matchedProperties.length === 0 && (
-                            <div className="flex items-end gap-2 justify-start animate-fade-in">
-                                <div className="w-8 h-8 rounded-full bg-gradient-to-br from-primary to-blue-600 flex items-center justify-center flex-shrink-0 shadow-sm">
-                                    <SparklesIcon className="w-4 h-4 text-white" />
-                                </div>
-                                <div className="p-3 rounded-2xl bg-amber-50 border border-amber-200 text-amber-800 rounded-bl-none">
-                                    <p className="text-sm">{t('ai.noResults')}</p>
-                                    <p className="text-xs mt-1 text-amber-600">{t('ai.tryDifferent')}</p>
+                            <div className="flex items-end gap-2.5 justify-start anim-msg-in">
+                                <AiOrb state="idle" size="sm" />
+                                <div className="px-4 py-3 rounded-2xl rounded-bl-md bg-amber-50 border border-amber-200/60 shadow-sm">
+                                    <p className="text-[13px] text-amber-800">{t('ai.noResults')}</p>
+                                    <p className="text-[11px] mt-1 text-amber-600/80">{t('ai.tryDifferent')}</p>
                                 </div>
                             </div>
                         )}
@@ -604,72 +639,59 @@ const AiSearch: React.FC<AiSearchProps> = ({ properties, onApplyFilters, isMobil
                 <div ref={chatEndRef} />
             </div>
 
-            {/* Voice listening overlay */}
+            {/* ---- Listening overlay ---- */}
             {isListening && (
-                <div className="flex-shrink-0 bg-gradient-to-r from-red-50 via-rose-50 to-red-50 border-t border-red-200 px-4 py-3">
+                <div className="flex-shrink-0 bg-gradient-to-r from-red-50 via-rose-50 to-orange-50 border-t border-red-100 px-4 py-3">
                     <div className="flex items-center gap-3">
-                        <div className="relative flex-shrink-0">
-                            <div className="w-10 h-10 rounded-full bg-red-500 flex items-center justify-center">
-                                <MicrophoneIcon className="w-5 h-5 text-white" />
-                            </div>
-                            <div className="absolute inset-0 w-10 h-10 bg-red-400 rounded-full animate-ping opacity-30" />
-                        </div>
+                        <AiOrb state="listening" size="sm" />
                         <div className="flex-grow min-w-0">
-                            <div className="flex items-center gap-2 mb-1">
-                                <VoiceWaveform />
-                                <span className="text-xs font-bold text-red-600 uppercase tracking-wider">{t('ai.listening', 'Listening')}</span>
+                            <div className="flex items-center gap-2 mb-0.5">
+                                <div className="flex items-center gap-[3px] h-5">
+                                    {[...Array(5)].map((_, i) => (
+                                        <div key={i} className="w-[3px] bg-red-400 rounded-full anim-voice-wave" style={{ animationDelay: `${i * 0.08}s`, height: '100%' }} />
+                                    ))}
+                                </div>
+                                <span className="text-[10px] font-bold text-red-500 uppercase tracking-widest">{t('ai.listening', 'Listening')}</span>
                             </div>
-                            <p className="text-sm text-red-700 truncate">
+                            <p className="text-[13px] text-red-700/80 truncate font-medium">
                                 {interimTranscript || t('ai.speakNow', 'Speak now...')}
                             </p>
                         </div>
-                        <button
-                            onClick={stopListening}
-                            className="flex-shrink-0 px-3 py-1.5 bg-red-100 text-red-600 text-xs font-semibold rounded-full hover:bg-red-200 transition-colors"
-                        >
+                        <button onClick={stopListening} className="flex-shrink-0 px-3.5 py-1.5 bg-red-500 text-white text-[11px] font-bold rounded-full hover:bg-red-600 transition-all active:scale-95 shadow-sm">
                             {t('ai.stop', 'Stop')}
                         </button>
                     </div>
                 </div>
             )}
 
-            {/* AI speaking indicator */}
+            {/* ---- Speaking bar ---- */}
             {isSpeaking && !isListening && (
-                <div className="flex-shrink-0 bg-gradient-to-r from-primary/5 via-blue-50 to-violet-50 border-t border-primary/10 px-4 py-2.5">
+                <div className="flex-shrink-0 bg-gradient-to-r from-blue-50 via-violet-50 to-blue-50 border-t border-primary/10 px-4 py-2.5">
                     <div className="flex items-center gap-3">
-                        <div className="w-8 h-8 rounded-full bg-gradient-to-br from-primary to-blue-600 flex items-center justify-center">
-                            <SpeakerWaveIcon className="w-4 h-4 text-white" />
-                        </div>
-                        <SpeakingIndicator />
-                        <span className="text-xs font-medium text-primary">{t('ai.speaking', 'Speaking...')}</span>
-                        <button
-                            onClick={stopSpeaking}
-                            className="ml-auto flex-shrink-0 px-3 py-1.5 bg-primary/10 text-primary text-xs font-semibold rounded-full hover:bg-primary/20 transition-colors"
-                        >
+                        <AiOrb state="speaking" size="sm" />
+                        <span className="text-[11px] font-semibold text-primary/70">{t('ai.speaking', 'Speaking...')}</span>
+                        <button onClick={stopSpeaking} className="ml-auto px-3.5 py-1.5 bg-primary/10 text-primary text-[11px] font-bold rounded-full hover:bg-primary/20 transition-all active:scale-95">
                             {t('ai.stopSpeaking', 'Stop')}
                         </button>
                     </div>
                 </div>
             )}
 
-            {/* Input area */}
+            {/* ---- Input area ---- */}
             <form
-                onSubmit={(e) => {
-                    e.preventDefault();
-                    if (!finalQuery && !isListening && !isSpeaking) handleSendMessage();
-                }}
-                className="flex-shrink-0 p-3 bg-white border-t space-y-2"
+                onSubmit={(e) => { e.preventDefault(); if (!finalQuery && !isListening && !isSpeaking) handleSendMessage(); }}
+                className="flex-shrink-0 p-3 bg-white/90 backdrop-blur-sm border-t border-neutral-100/80 space-y-2"
             >
-                {/* Filter pills + proceed button */}
+                {/* Filter pills + proceed */}
                 {finalQuery && (
-                    <div className="animate-fade-in pb-2 border-b border-neutral-100">
-                        <div className="flex flex-wrap items-center gap-1.5 mb-2">
+                    <div className="pb-2.5 border-b border-neutral-100/60">
+                        <div className="flex flex-wrap items-center gap-1.5 mb-2.5">
                             {renderFilters(finalQuery)}
                         </div>
                         <button
                             type="button"
                             onClick={handleApplyClick}
-                            className="w-full py-2.5 bg-primary text-white font-bold rounded-xl shadow-md hover:bg-primary-dark active:scale-[0.98] transition-all text-sm"
+                            className="w-full py-2.5 bg-gradient-to-r from-primary to-blue-600 text-white font-bold rounded-xl shadow-md shadow-primary/20 hover:shadow-lg hover:shadow-primary/30 active:scale-[0.98] transition-all text-sm"
                         >
                             {t('ai.proceed')} ({matchedProperties.length})
                         </button>
@@ -684,7 +706,7 @@ const AiSearch: React.FC<AiSearchProps> = ({ properties, onApplyFilters, isMobil
                         value={isListening ? interimTranscript : input}
                         onChange={(e) => setInput(e.target.value)}
                         placeholder={isListening ? t('ai.listening', 'Listening...') : t('ai.placeholder')}
-                        className="flex-grow px-4 py-3 text-sm text-neutral-900 bg-neutral-50 border-neutral-200 border rounded-full focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary disabled:opacity-60 transition-all"
+                        className="flex-grow px-4 py-3 text-[13px] text-neutral-800 bg-neutral-50/80 border border-neutral-200/60 rounded-2xl focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary/40 focus:bg-white disabled:opacity-50 transition-all placeholder:text-neutral-400"
                         disabled={isSearching || isListening}
                     />
 
@@ -694,11 +716,10 @@ const AiSearch: React.FC<AiSearchProps> = ({ properties, onApplyFilters, isMobil
                             <button
                                 type="button"
                                 onClick={stopListening}
-                                className="relative bg-red-500 text-white rounded-full p-3.5 hover:bg-red-600 transition-colors flex-shrink-0"
+                                className="relative bg-red-500 text-white rounded-2xl p-3 hover:bg-red-600 transition-all active:scale-90 flex-shrink-0 shadow-md shadow-red-500/25"
                                 aria-label="Stop recording"
                             >
-                                <span className="absolute inset-0 rounded-full bg-red-400 animate-ping opacity-30" />
-                                <span className="absolute inset-[-4px] rounded-full border-2 border-red-300 animate-pulse" />
+                                <span className="absolute inset-0 rounded-2xl bg-red-400 anim-ring-pulse opacity-30" />
                                 <StopCircleIcon className="w-5 h-5 relative z-10" />
                             </button>
                         ) : (
@@ -706,7 +727,7 @@ const AiSearch: React.FC<AiSearchProps> = ({ properties, onApplyFilters, isMobil
                                 type="button"
                                 onClick={startListening}
                                 disabled={isSearching}
-                                className="bg-gradient-to-br from-primary to-blue-600 text-white rounded-full p-3.5 hover:shadow-lg hover:scale-105 disabled:from-neutral-200 disabled:to-neutral-300 disabled:text-neutral-400 transition-all flex-shrink-0 shadow-md"
+                                className="bg-gradient-to-br from-primary to-blue-600 text-white rounded-2xl p-3 hover:shadow-lg hover:shadow-primary/30 hover:scale-105 disabled:from-neutral-200 disabled:to-neutral-200 disabled:text-neutral-400 disabled:shadow-none transition-all duration-200 active:scale-90 flex-shrink-0 shadow-md shadow-primary/20"
                                 aria-label="Start voice assistant"
                             >
                                 <MicrophoneIcon className="w-5 h-5" />
@@ -714,12 +735,12 @@ const AiSearch: React.FC<AiSearchProps> = ({ properties, onApplyFilters, isMobil
                         )
                     )}
 
-                    {/* Send button - only show when not listening */}
+                    {/* Send button */}
                     {!isListening && (
                         <button
                             type="submit"
                             disabled={isSearching || !input.trim() || !!finalQuery}
-                            className="bg-neutral-800 text-white rounded-full p-3.5 hover:bg-neutral-900 disabled:bg-neutral-200 disabled:text-neutral-400 transition-colors flex-shrink-0"
+                            className="bg-neutral-800 text-white rounded-2xl p-3 hover:bg-neutral-900 hover:scale-105 disabled:bg-neutral-200 disabled:text-neutral-400 transition-all duration-200 active:scale-90 flex-shrink-0 shadow-sm"
                         >
                             <PaperAirplaneIcon className="w-5 h-5" />
                         </button>

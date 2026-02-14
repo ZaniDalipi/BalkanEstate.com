@@ -289,7 +289,9 @@
     "stopSpeaking": "Stop",
     "replay": "Replay",
     "muteAssistant": "Mute voice",
-    "unmuteAssistant": "Unmute voice"
+    "unmuteAssistant": "Unmute voice",
+    "ready": "Ready to help",
+    "speakNow": "Speak now..."
   },
   "energyRatings": {
     "any": "Any",
