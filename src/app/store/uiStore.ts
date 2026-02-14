@@ -5,7 +5,7 @@ import { create } from 'zustand';
 import { devtools } from 'zustand/middleware';
 
 export type AuthModalView = 'login' | 'signup' | 'forgotPassword' | 'forgotPasswordSuccess' | 'phoneCode' | 'phoneDetails';
-export type AppView = 'search' | 'explore-cities' | 'saved-searches' | 'saved-properties' | 'inbox' | 'account' | 'create-listing' | 'my-listings' | 'agents' | 'agencies' | 'agentProfile' | 'agencyDetail' | 'admin' | 'analytics' | 'reset-password' | 'verify-email' | 'valuation' | 'mortgage-calculator' | 'pricing' | 'how-it-works' | 'privacy' | 'terms' | 'cookies' | 'refund' | 'createAgency' | 'createAgencyPayment' | 'createAgencyConfirm' | 'not-found';
+export type AppView = 'home' | 'search' | 'explore-cities' | 'saved-searches' | 'saved-properties' | 'inbox' | 'account' | 'create-listing' | 'my-listings' | 'agents' | 'agencies' | 'agentProfile' | 'agencyDetail' | 'admin' | 'analytics' | 'reset-password' | 'verify-email' | 'valuation' | 'mortgage-calculator' | 'pricing' | 'how-it-works' | 'privacy' | 'terms' | 'cookies' | 'refund' | 'createAgency' | 'createAgencyPayment' | 'createAgencyConfirm' | 'not-found';
 
 interface UIState {
   // Modal states

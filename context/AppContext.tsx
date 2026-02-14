@@ -43,7 +43,7 @@ const initialState: AppState = {
   user: null,
   onboardingComplete: true,
   isAuthenticating: true,
-  activeView: 'search',
+  activeView: 'home',
   isPricingModalOpen: false,
   isFirstLoginOffer: false,
   isAgencyCreationMode: false,

@@ -19,17 +19,17 @@ const getJwtRefreshSecret = (): string => {
   return secret;
 };
 
-// Access token: Medium-lived (1 hour) - extended for better UX while maintaining security
+// Access token: Long-lived (24 hours) - extended for better UX with proactive refresh
 export const generateAccessToken = (userId: string): string => {
   const secret: string = getJwtSecret();
-  const expiresIn = process.env.ACCESS_TOKEN_EXPIRES_IN || '1h';
+  const expiresIn = process.env.ACCESS_TOKEN_EXPIRES_IN || '24h';
   return jwt.sign({ id: userId, type: 'access' }, secret, { expiresIn } as any);
 };
 
-// Refresh token: Long-lived (7 days)
+// Refresh token: Long-lived (30 days) - keeps users logged in across sessions
 export const generateRefreshToken = (userId: string): string => {
   const secret: string = getJwtRefreshSecret();
-  const expiresIn = process.env.REFRESH_TOKEN_EXPIRES_IN || '7d';
+  const expiresIn = process.env.REFRESH_TOKEN_EXPIRES_IN || '30d';
 
   // Generate a unique token identifier to allow revocation
   const tokenId = crypto.randomBytes(32).toString('hex');

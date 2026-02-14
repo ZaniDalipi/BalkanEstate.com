@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useAppContext } from '../../context/AppContext';
 import { AppView, UserRole } from '../../types';
-import { LogoIcon, AgentsIcon, SearchIcon, MagnifyingGlassPlusIcon, HeartIcon, EnvelopeIcon, UserCircleIcon, UsersIcon, ArrowLeftOnRectangleIcon, XMarkIcon, PencilIcon, StarIconSolid, BuildingOfficeIcon, ShieldCheckIcon, SparklesIcon, ChartBarIcon, CurrencyDollarIcon, ChevronDownIcon, ChevronUpIcon, CalculatorIcon, WrenchScrewdriverIcon, InformationCircleIcon, RentIcon } from '../../constants';
+import { LogoIcon, AgentsIcon, SearchIcon, MagnifyingGlassPlusIcon, HeartIcon, EnvelopeIcon, UserCircleIcon, UsersIcon, ArrowLeftOnRectangleIcon, XMarkIcon, PencilIcon, StarIconSolid, BuildingOfficeIcon, ShieldCheckIcon, SparklesIcon, ChartBarIcon, CurrencyDollarIcon, ChevronDownIcon, ChevronUpIcon, CalculatorIcon, WrenchScrewdriverIcon, InformationCircleIcon, RentIcon, HomeIcon } from '../../constants';
 import LanguageSwitcher from '../../src/components/LanguageSwitcher';
 import { useLocalizedNavigation } from '@/src/hooks/useLocalizedNavigation';
 import DefaultAvatar from './DefaultAvatar';
@@ -130,7 +130,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
             dispatch({ type: 'SET_ACTIVE_VIEW', payload: view });
 
             // Update browser URL with language prefix
-            const route = view === 'search' ? '/' : `/${view}`;
+            const route = view === 'home' ? '/' : view === 'search' ? '/search' : `/${view}`;
             window.history.pushState({}, '', getLocalizedPath(route));
         }
         onClose(); // Close sidebar on mobile after navigation
@@ -164,6 +164,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
     };
 
     const baseNavItems = [
+      { view: 'home' as AppView, label: t('nav:home', 'Home'), icon: <HomeIcon /> },
       { view: 'search' as AppView, label: t('nav:search'), icon: <SearchIcon /> },
       { view: 'rentals' as AppView, label: t('nav:rentals'), icon: <RentIcon /> },
       { view: 'explore-cities' as AppView, label: t('nav:exploreCities'), icon: <SparklesIcon /> },
@@ -195,7 +196,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
             >
                 <div className="flex items-center p-3 h-[56px] border-b border-neutral-200 flex-shrink-0 md:justify-center group-hover:md:justify-start">
                     <button
-                        onClick={() => handleNavClick('search')}
+                        onClick={() => handleNavClick('home')}
                         className="flex items-center space-x-2"
                         aria-label={t('nav:goToHome', 'Go to home page')}
                     >

@@ -15,7 +15,7 @@ import { API_URL } from './config';
 const ACCESS_TOKEN_KEY = 'balkan_estate_token';
 const REFRESH_TOKEN_KEY = 'balkan_estate_refresh_token';
 const SESSION_KEY = 'balkan_estate_session';
-const REFRESH_BUFFER_MS = 5 * 60 * 1000; // Refresh 5 minutes before expiry
+const REFRESH_BUFFER_MS = 30 * 60 * 1000; // Refresh 30 minutes before expiry for seamless UX
 const STORAGE_VERSION = 'v3'; // Used to invalidate old storage format
 
 let refreshTimer: ReturnType<typeof setTimeout> | null = null;

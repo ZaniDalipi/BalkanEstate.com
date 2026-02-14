@@ -77,6 +77,37 @@ const PropertyDetailsPage: React.FC<{ property: Property }> = ({ property: cache
     enabled: !!property.id,
   });
 
+  // Track recently viewed for logged-in users (persisted to localStorage)
+  useEffect(() => {
+    if (!property?.id || !state.isAuthenticated) return;
+    try {
+      const STORAGE_KEY = 'balkanestate_recently_viewed';
+      const MAX_ITEMS = 20;
+      const raw = localStorage.getItem(STORAGE_KEY);
+      const items = raw ? JSON.parse(raw) : [];
+      const filtered = Array.isArray(items) ? items.filter((i: any) => i.id !== property.id) : [];
+      const entry = {
+        id: property.id,
+        title: property.title,
+        address: property.address,
+        city: property.city,
+        country: property.country,
+        price: property.price,
+        imageUrl: property.imageUrl || property.images?.[0]?.url || '',
+        beds: property.beds,
+        baths: property.baths,
+        sqft: property.sqft,
+        propertyType: property.propertyType,
+        listingType: property.listingType,
+        viewedAt: Date.now(),
+      };
+      const updated = [entry, ...filtered].slice(0, MAX_ITEMS);
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
+    } catch {
+      // Silently ignore storage errors
+    }
+  }, [property?.id, state.isAuthenticated]);
+
   // Enable real-time updates - refresh when this property is updated
   useRealtimeProperties({
     onPropertyUpdated: (data) => {

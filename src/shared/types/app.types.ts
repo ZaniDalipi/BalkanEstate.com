@@ -8,6 +8,7 @@ import { MunicipalityData } from './location.types';
 import { Agency } from './agency.types';
 
 export type AppView =
+  | 'home'
   | 'search'
   | 'explore-cities'
   | 'saved-searches'

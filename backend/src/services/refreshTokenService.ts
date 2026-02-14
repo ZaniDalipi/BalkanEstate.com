@@ -20,7 +20,7 @@ import {
  */
 
 const MAX_REFRESH_TOKENS_PER_USER = 5; // Maximum devices/sessions
-const REFRESH_TOKEN_EXPIRY = process.env.REFRESH_TOKEN_EXPIRES_IN || '7d';
+const REFRESH_TOKEN_EXPIRY = process.env.REFRESH_TOKEN_EXPIRES_IN || '30d';
 
 interface TokenPair {
   accessToken: string;

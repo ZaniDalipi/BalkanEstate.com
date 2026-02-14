@@ -68,6 +68,7 @@ const ListingLimitWarningModal = lazy(() => import('./components/shared/ListingL
 const DiscountGameModal = lazy(() => import('./components/shared/DiscountGameModal'));
 const AdminDashboard = lazy(() => import('./src/features/admin/components/AdminDashboard'));
 const NotFoundPage = lazy(() => import('./src/components/ui/not-found-2').then(m => ({ default: m.NotFound })));
+const HomePage = lazy(() => import('./src/features/home/components/HomePage'));
 const ResetPasswordPage = lazy(() => import('./src/features/auth/components/ResetPasswordPage'));
 const VerifyEmailPage = lazy(() => import('./src/features/auth/components/VerifyEmailPage'));
 const AnalyticsPage = lazy(() => import('./src/features/analytics/components/AnalyticsPage'));
@@ -300,7 +301,8 @@ const AppContent: React.FC<{ onToggleSidebar: () => void }> = ({ onToggleSidebar
 
       // Main navigation routes
       const routeMap: Record<string, string> = {
-        '/': 'search',
+        '/': 'home',
+        '/home': 'home',
         '/search': 'search',
         '/explore-cities': 'explore-cities',
         '/saved-searches': 'saved-searches',
@@ -347,10 +349,6 @@ const AppContent: React.FC<{ onToggleSidebar: () => void }> = ({ onToggleSidebar
           dispatch({ type: 'SET_SELECTED_AGENT', payload: null });
         }
         dispatch({ type: 'SET_ACTIVE_VIEW', payload: view });
-        // Redirect root to /search for cleaner URL
-        if (path === '/') {
-          window.history.replaceState({}, '', buildLocalizedPath('/search'));
-        }
       } else {
         // Unknown route - show 404 page
         dispatch({ type: 'SET_SELECTED_PROPERTY', payload: null });
@@ -508,6 +506,8 @@ const AppContent: React.FC<{ onToggleSidebar: () => void }> = ({ onToggleSidebar
   // Wrap lazy loaded views in Suspense
   const renderView = () => {
     switch (state.activeView) {
+      case 'home':
+        return <HomePage />;
       case 'explore-cities':
         return <CityRecommendations />;
       case 'saved-searches':
