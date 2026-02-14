@@ -204,7 +204,7 @@ const SwipeModal: React.FC<{
     properties: Property[];
     onClose: () => void;
     onGoToFavorites: () => void;
-    t: (key: string, fallback?: string) => string;
+    t: (key: string, options?: string | Record<string, unknown>) => string;
 }> = ({ isOpen, properties, onClose, onGoToFavorites, t }) => {
     const { toggleSavedHome, state } = useAppContext();
     const [currentIndex, setCurrentIndex] = useState(0);
@@ -271,7 +271,7 @@ const SwipeModal: React.FC<{
                                 </div>
                                 <h3 className="text-xl font-extrabold text-white mb-2">
                                     {savedProps.length > 0
-                                        ? t('ai.swipeDone', `${savedProps.length} properties saved!`)
+                                        ? t('ai.swipeDone', { count: savedProps.length, defaultValue: '{{count}} properties saved!' })
                                         : t('ai.swipeNoneSaved', 'No properties saved')}
                                 </h3>
                                 <p className="text-sm text-white/70 mb-6">
@@ -645,7 +645,7 @@ const AiSearch: React.FC<AiSearchProps> = ({ properties, onApplyFilters, isMobil
                                 <AiOrb state="idle" size="sm" />
                                 <div className="bg-white text-neutral-800 rounded-2xl rounded-bl-md px-4 py-3 shadow-sm border border-neutral-100/80">
                                     <p className="text-[13px] leading-relaxed">
-                                        {t('ai.foundSwipe', `Found ${matchedProperties.length} properties! Swipe through them.`)}
+                                        {t('ai.foundSwipe', { count: matchedProperties.length, defaultValue: 'Found {{count}} properties! Swipe through them.' })}
                                     </p>
                                     {!showSwipeCards && (
                                         <button
@@ -758,7 +758,7 @@ const AiSearch: React.FC<AiSearchProps> = ({ properties, onApplyFilters, isMobil
                 properties={matchedProperties}
                 onClose={() => setShowSwipeCards(false)}
                 onGoToFavorites={handleSwipeComplete}
-                t={(k, fb) => t(k, fb || '')}
+                t={(k, opts) => t(k, typeof opts === 'string' ? opts : opts || '')}
             />
         </div>
     );

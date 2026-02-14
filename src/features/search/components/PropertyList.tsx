@@ -775,7 +775,7 @@ const PropertyList = memo<PropertyListProps>((props) => {
                         </div>
                     </div>
                     
-                    <div className="px-4 pb-4 relative z-[60]" style={{ height: '280px' }}>
+                    <div className="px-4 pb-4 relative z-[60]" style={{ height: '400px' }}>
                         {searchMode === 'manual' ? (
                             <div className="h-full overflow-y-auto pr-2">
                                 <FilterControls {...props} />

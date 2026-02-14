@@ -1,4 +1,4 @@
-import React, { useCallback, memo } from 'react';
+import React, { useCallback, memo, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Menu, User } from 'lucide-react';
 import { useAppContext } from '@/context/AppContext';
@@ -9,6 +9,21 @@ interface HeaderProps {
   onToggleSidebar: () => void;
   isFloating?: boolean;
 }
+
+const authBaseClasses = `
+  flex items-center justify-center gap-2 font-semibold transition-all
+  min-h-[44px] px-3 sm:px-4 rounded-full whitespace-nowrap
+  touch-manipulation select-none
+  focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-primary/50
+`;
+
+const glassAuthStyle: React.CSSProperties = {
+  background: 'linear-gradient(135deg, rgba(255,255,255,0.85), rgba(245,245,247,0.85))',
+  boxShadow: '0 4px 6px rgba(0,0,0,0.08), 0 0 15px rgba(0,0,0,0.04), inset 2px 2px 1px 0 rgba(255,255,255,0.6), inset -1px -1px 1px 1px rgba(255,255,255,0.4)',
+  transitionTimingFunction: 'cubic-bezier(0.175, 0.885, 0.32, 2.2)',
+};
+
+const authButtonClassName = `${authBaseClasses} relative overflow-hidden backdrop-blur-md text-neutral-700 border border-white/40 hover:-translate-y-px hover:brightness-105`;
 
 const Header: React.FC<HeaderProps> = ({ onToggleSidebar, isFloating }) => {
   const { t } = useTranslation(['nav']);
@@ -47,25 +62,13 @@ const Header: React.FC<HeaderProps> = ({ onToggleSidebar, isFloating }) => {
     window.history.pushState({}, '', `/${lang}/subscribe`);
   }, [dispatch]);
 
-  const AuthButton: React.FC<{ floating?: boolean }> = ({ floating }) => {
-    const baseClasses = `
-      flex items-center justify-center gap-2 font-semibold transition-all
-      min-h-[44px] px-3 sm:px-4 rounded-full whitespace-nowrap
-      touch-manipulation select-none
-      focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-primary/50
-    `;
-
-    const glassAuthStyle: React.CSSProperties = {
-      background: 'linear-gradient(135deg, rgba(255,255,255,0.85), rgba(245,245,247,0.85))',
-      boxShadow: '0 4px 6px rgba(0,0,0,0.08), 0 0 15px rgba(0,0,0,0.04), inset 2px 2px 1px 0 rgba(255,255,255,0.6), inset -1px -1px 1px 1px rgba(255,255,255,0.4)',
-      transitionTimingFunction: 'cubic-bezier(0.175, 0.885, 0.32, 2.2)',
-    };
-
+  // Inline auth button JSX - NOT defined as a component to avoid remount on every render
+  const authButtonContent = useMemo(() => {
     if (isAuthenticated && currentUser) {
       return (
         <button
           onClick={handleAccountClick}
-          className={`${baseClasses} relative overflow-hidden backdrop-blur-md text-neutral-700 border border-white/40 hover:-translate-y-px hover:brightness-105`}
+          className={authButtonClassName}
           style={glassAuthStyle}
           aria-label={t('nav:myAccount')}
         >
@@ -88,7 +91,7 @@ const Header: React.FC<HeaderProps> = ({ onToggleSidebar, isFloating }) => {
     return (
       <button
         onClick={handleAccountClick}
-        className={`${baseClasses} relative overflow-hidden backdrop-blur-md text-neutral-700 border border-white/40 hover:-translate-y-px hover:brightness-105`}
+        className={authButtonClassName}
         style={glassAuthStyle}
         aria-label={t('nav:loginRegister')}
       >
@@ -97,7 +100,7 @@ const Header: React.FC<HeaderProps> = ({ onToggleSidebar, isFloating }) => {
         <span className="relative z-10 hidden sm:inline text-sm">{t('nav:loginRegister')}</span>
       </button>
     );
-  };
+  }, [isAuthenticated, currentUser, handleAccountClick, t]);
 
   if (isFloating) {
     return (
@@ -123,7 +126,7 @@ const Header: React.FC<HeaderProps> = ({ onToggleSidebar, isFloating }) => {
             + {t('nav:newListing')}
           </button>
           <NotificationCenter />
-          <AuthButton floating />
+          {authButtonContent}
         </nav>
       </header>
     );
@@ -165,7 +168,7 @@ const Header: React.FC<HeaderProps> = ({ onToggleSidebar, isFloating }) => {
               <span className="sm:hidden">+ {t('nav:sell', 'Sell')}</span>
             </button>
             <NotificationCenter />
-            <AuthButton />
+            {authButtonContent}
           </nav>
         </div>
       </div>
