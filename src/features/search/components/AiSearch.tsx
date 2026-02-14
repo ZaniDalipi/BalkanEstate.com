@@ -123,55 +123,51 @@ const SwipeCard: React.FC<{
 
     const handleDragEnd = (_: unknown, info: PanInfo) => {
         setDragDir(null);
-        if (info.offset.x > SWIPE_THRESHOLD || info.velocity.x > SWIPE_VELOCITY) {
-            onSwipe('right');
-        } else if (info.offset.x < -SWIPE_THRESHOLD || info.velocity.x < -SWIPE_VELOCITY) {
-            onSwipe('left');
-        }
+        if (info.offset.x > SWIPE_THRESHOLD || info.velocity.x > SWIPE_VELOCITY) onSwipe('right');
+        else if (info.offset.x < -SWIPE_THRESHOLD || info.velocity.x < -SWIPE_VELOCITY) onSwipe('left');
     };
 
     return (
         <motion.div
-            className="absolute inset-0 rounded-2xl overflow-hidden shadow-lg border border-neutral-200/50 bg-white cursor-grab active:cursor-grabbing"
+            className="absolute inset-0 rounded-3xl overflow-hidden shadow-2xl border border-white/20 bg-white cursor-grab active:cursor-grabbing"
             style={{ touchAction: 'none' }}
             drag={isTop ? 'x' : false}
             dragConstraints={{ left: 0, right: 0 }}
             dragElastic={0.7}
             onDrag={isTop ? handleDrag : undefined}
             onDragEnd={isTop ? handleDragEnd : undefined}
-            initial={{ scale: 0.95, opacity: 0, y: 10 }}
-            animate={{ scale: isTop ? 1 : 0.95, opacity: isTop ? 1 : 0.7, y: isTop ? 0 : 8 }}
-            exit={{ x: dragDir === 'right' ? 300 : -300, opacity: 0, rotate: dragDir === 'right' ? 15 : -15, transition: { duration: 0.35 } }}
+            initial={{ scale: 0.92, opacity: 0, y: 20 }}
+            animate={{ scale: isTop ? 1 : 0.94, opacity: isTop ? 1 : 0.6, y: isTop ? 0 : 12 }}
+            exit={{ x: dragDir === 'right' ? 400 : -400, opacity: 0, rotate: dragDir === 'right' ? 18 : -18, transition: { duration: 0.4, ease: 'easeIn' } }}
             transition={{ type: 'spring', stiffness: 300, damping: 25 }}
         >
-            {/* Property image */}
-            <div className="relative h-[55%] w-full overflow-hidden bg-neutral-100">
+            {/* Property image — big */}
+            <div className="relative h-[60%] w-full overflow-hidden bg-neutral-100">
                 <img
-                    src={optimizeCloudinaryUrl(property.imageUrl, { width: 600, quality: 'auto' })}
+                    src={optimizeCloudinaryUrl(property.imageUrl, { width: 800, quality: 'auto' })}
                     alt={property.title || `${property.propertyType} in ${property.city}`}
                     className="w-full h-full object-cover"
                     draggable={false}
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent" />
-                <div className="absolute bottom-3 left-3 right-3">
-                    <span className="text-white font-bold text-lg drop-shadow-lg">
+                <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/10 to-transparent" />
+                <div className="absolute bottom-4 left-4 right-4">
+                    <span className="text-white font-extrabold text-2xl drop-shadow-lg">
                         {formatPrice(property.price, property.country)}
                     </span>
                 </div>
             </div>
 
             {/* Property info */}
-            <div className="p-3.5">
-                {property.title && <p className="text-sm font-bold text-neutral-800 line-clamp-1 mb-1">{property.title}</p>}
-                <div className="flex items-center gap-1 text-neutral-500 mb-2">
-                    <MapPinIcon className="w-3.5 h-3.5 flex-shrink-0" />
-                    <span className="text-xs">{property.city}, {property.country}</span>
+            <div className="p-5">
+                {property.title && <p className="text-base font-bold text-neutral-800 line-clamp-1 mb-1.5">{property.title}</p>}
+                <div className="flex items-center gap-1.5 text-neutral-500 mb-3">
+                    <MapPinIcon className="w-4 h-4 flex-shrink-0" />
+                    <span className="text-sm">{property.city}, {property.country}</span>
                 </div>
-                <div className="flex items-center gap-3 text-xs text-neutral-600 font-medium">
-                    {property.beds > 0 && <span>{property.beds} bed</span>}
-                    {property.baths > 0 && <span>{property.baths} bath</span>}
-                    {property.sqft > 0 && <span>{property.sqft}m²</span>}
-                    {property.yearBuilt > 0 && <span>Built {property.yearBuilt}</span>}
+                <div className="flex items-center gap-4 text-sm text-neutral-600 font-medium">
+                    {property.beds > 0 && <span className="flex items-center gap-1">🛏️ {property.beds} bed</span>}
+                    {property.baths > 0 && <span className="flex items-center gap-1">🛁 {property.baths} bath</span>}
+                    {property.sqft > 0 && <span className="flex items-center gap-1">📐 {property.sqft}m²</span>}
                 </div>
             </div>
 
@@ -180,29 +176,17 @@ const SwipeCard: React.FC<{
                 <>
                     <AnimatePresence>
                         {dragDir === 'right' && (
-                            <motion.div
-                                initial={{ opacity: 0 }}
-                                animate={{ opacity: 1 }}
-                                exit={{ opacity: 0 }}
-                                className="absolute inset-0 bg-green-500/20 border-4 border-green-400 rounded-2xl flex items-center justify-center"
-                            >
-                                <div className="bg-green-500 text-white font-bold text-lg px-5 py-2 rounded-full shadow-lg rotate-[-12deg]">
-                                    SAVE
-                                </div>
+                            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+                                className="absolute inset-0 bg-green-500/15 border-[5px] border-green-400 rounded-3xl flex items-center justify-center pointer-events-none">
+                                <div className="bg-green-500 text-white font-extrabold text-2xl px-8 py-3 rounded-2xl shadow-2xl rotate-[-12deg]">SAVE</div>
                             </motion.div>
                         )}
                     </AnimatePresence>
                     <AnimatePresence>
                         {dragDir === 'left' && (
-                            <motion.div
-                                initial={{ opacity: 0 }}
-                                animate={{ opacity: 1 }}
-                                exit={{ opacity: 0 }}
-                                className="absolute inset-0 bg-red-500/20 border-4 border-red-400 rounded-2xl flex items-center justify-center"
-                            >
-                                <div className="bg-red-500 text-white font-bold text-lg px-5 py-2 rounded-full shadow-lg rotate-[12deg]">
-                                    SKIP
-                                </div>
+                            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+                                className="absolute inset-0 bg-red-500/15 border-[5px] border-red-400 rounded-3xl flex items-center justify-center pointer-events-none">
+                                <div className="bg-red-500 text-white font-extrabold text-2xl px-8 py-3 rounded-2xl shadow-2xl rotate-[12deg]">SKIP</div>
                             </motion.div>
                         )}
                     </AnimatePresence>
@@ -212,113 +196,155 @@ const SwipeCard: React.FC<{
     );
 };
 
-const PropertySwipeStack: React.FC<{
+// ============================================================================
+// FULLSCREEN SWIPE MODAL
+// ============================================================================
+const SwipeModal: React.FC<{
+    isOpen: boolean;
     properties: Property[];
-    onComplete: (saved: Property[]) => void;
+    onClose: () => void;
+    onGoToFavorites: () => void;
     t: (key: string, fallback?: string) => string;
-}> = ({ properties, onComplete, t }) => {
+}> = ({ isOpen, properties, onClose, onGoToFavorites, t }) => {
     const { toggleSavedHome, state } = useAppContext();
     const [currentIndex, setCurrentIndex] = useState(0);
     const [savedProps, setSavedProps] = useState<Property[]>([]);
-    const [exitDir, setExitDir] = useState<'left' | 'right'>('left');
     const done = currentIndex >= properties.length;
+
+    // Reset when modal opens with new properties
+    useEffect(() => {
+        if (isOpen) { setCurrentIndex(0); setSavedProps([]); }
+    }, [isOpen, properties]);
 
     const handleSwipe = useCallback((dir: 'left' | 'right') => {
         const property = properties[currentIndex];
         if (!property) return;
-
-        setExitDir(dir);
-
         if (dir === 'right') {
             setSavedProps(prev => [...prev, property]);
-            // Actually save to favorites via API
             const alreadySaved = state.savedHomes.some(p => p.id === property.id);
-            if (!alreadySaved) {
-                toggleSavedHome(property);
-            }
+            if (!alreadySaved) toggleSavedHome(property);
         }
-
         setCurrentIndex(prev => prev + 1);
     }, [currentIndex, properties, toggleSavedHome, state.savedHomes]);
 
-    if (done) {
-        return (
-            <motion.div
-                initial={{ opacity: 0, scale: 0.95 }}
-                animate={{ opacity: 1, scale: 1 }}
-                className="flex flex-col items-center justify-center h-full text-center px-4"
-            >
-                <div className="w-16 h-16 rounded-full bg-gradient-to-br from-green-400 to-emerald-500 flex items-center justify-center mb-4 shadow-lg">
-                    <HeartIcon className="w-8 h-8 text-white" />
-                </div>
-                <h3 className="text-base font-bold text-neutral-800 mb-1">
-                    {savedProps.length > 0
-                        ? t('ai.swipeDone', `${savedProps.length} properties saved!`)
-                        : t('ai.swipeNoneSaved', 'No properties saved')}
-                </h3>
-                <p className="text-xs text-neutral-500 mb-4">
-                    {savedProps.length > 0
-                        ? t('ai.swipeCheckFavorites', 'Check your favorites to compare them')
-                        : t('ai.swipeTryAgain', 'Try a different search to find your dream property')}
-                </p>
-                {savedProps.length > 0 && (
-                    <button
-                        onClick={() => onComplete(savedProps)}
-                        className="px-5 py-2.5 bg-gradient-to-r from-primary to-blue-600 text-white font-bold rounded-xl shadow-md shadow-primary/20 hover:shadow-lg active:scale-[0.97] transition-all text-sm"
-                    >
-                        {t('ai.goToFavorites', 'Go to Favorites')}
-                    </button>
-                )}
-            </motion.div>
-        );
-    }
+    // Close on Escape
+    useEffect(() => {
+        if (!isOpen) return;
+        const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose(); };
+        window.addEventListener('keydown', onKey);
+        return () => window.removeEventListener('keydown', onKey);
+    }, [isOpen, onClose]);
 
     const topProperty = properties[currentIndex];
     const nextProperty = properties[currentIndex + 1];
 
     return (
-        <div className="flex flex-col items-center h-full">
-            {/* Counter */}
-            <div className="flex-shrink-0 flex items-center justify-between w-full px-1 mb-2">
-                <span className="text-[10px] font-semibold text-neutral-400 uppercase tracking-wider">
-                    {currentIndex + 1} / {properties.length}
-                </span>
-                <span className="text-[10px] font-semibold text-green-500">
-                    {savedProps.length} {t('ai.saved', 'saved')}
-                </span>
-            </div>
-
-            {/* Card stack */}
-            <div className="relative flex-grow w-full max-w-[280px] mx-auto" style={{ minHeight: 280 }}>
-                <AnimatePresence mode="popLayout" custom={exitDir}>
-                    {nextProperty && (
-                        <SwipeCard key={nextProperty.id} property={nextProperty} onSwipe={() => {}} isTop={false} />
-                    )}
-                    {topProperty && (
-                        <SwipeCard key={topProperty.id} property={topProperty} onSwipe={handleSwipe} isTop={true} />
-                    )}
-                </AnimatePresence>
-            </div>
-
-            {/* Action buttons */}
-            <div className="flex-shrink-0 flex items-center justify-center gap-6 mt-3">
-                <button
-                    onClick={() => handleSwipe('left')}
-                    className="w-12 h-12 rounded-full bg-red-50 border-2 border-red-200 text-red-500 flex items-center justify-center hover:bg-red-100 hover:scale-110 active:scale-90 transition-all shadow-sm"
+        <AnimatePresence>
+            {isOpen && (
+                <motion.div
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    transition={{ duration: 0.3 }}
+                    className="fixed inset-0 z-[9999] flex items-center justify-center"
                 >
-                    <XMarkIcon className="w-6 h-6" />
-                </button>
-                <button
-                    onClick={() => handleSwipe('right')}
-                    className="w-12 h-12 rounded-full bg-green-50 border-2 border-green-200 text-green-500 flex items-center justify-center hover:bg-green-100 hover:scale-110 active:scale-90 transition-all shadow-sm"
-                >
-                    <HeartIcon className="w-6 h-6" />
-                </button>
-            </div>
-            <p className="text-[10px] text-neutral-400 mt-1.5 text-center">
-                {t('ai.swipeHint', 'Swipe right to save, left to skip')}
-            </p>
-        </div>
+                    {/* Blurred backdrop */}
+                    <div className="absolute inset-0 bg-black/60 backdrop-blur-md" onClick={done ? onClose : undefined} />
+
+                    {/* Content */}
+                    <motion.div
+                        initial={{ scale: 0.9, opacity: 0, y: 30 }}
+                        animate={{ scale: 1, opacity: 1, y: 0 }}
+                        exit={{ scale: 0.9, opacity: 0, y: 30 }}
+                        transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+                        className="relative z-10 flex flex-col items-center w-full max-w-md mx-4 max-h-[90vh]"
+                    >
+                        {done ? (
+                            /* Completion screen */
+                            <motion.div
+                                initial={{ opacity: 0, scale: 0.9 }}
+                                animate={{ opacity: 1, scale: 1 }}
+                                className="flex flex-col items-center text-center px-6 py-10"
+                            >
+                                <div className="w-20 h-20 rounded-full bg-gradient-to-br from-green-400 to-emerald-500 flex items-center justify-center mb-5 shadow-xl shadow-green-500/30">
+                                    <HeartIcon className="w-10 h-10 text-white" />
+                                </div>
+                                <h3 className="text-xl font-extrabold text-white mb-2">
+                                    {savedProps.length > 0
+                                        ? t('ai.swipeDone', `${savedProps.length} properties saved!`)
+                                        : t('ai.swipeNoneSaved', 'No properties saved')}
+                                </h3>
+                                <p className="text-sm text-white/70 mb-6">
+                                    {savedProps.length > 0
+                                        ? t('ai.swipeCheckFavorites', 'Check your favorites to compare them')
+                                        : t('ai.swipeTryAgain', 'Try a different search to find your dream property')}
+                                </p>
+                                <div className="flex gap-3">
+                                    {savedProps.length > 0 && (
+                                        <button
+                                            onClick={onGoToFavorites}
+                                            className="px-6 py-3 bg-gradient-to-r from-primary to-blue-600 text-white font-bold rounded-2xl shadow-lg shadow-primary/30 hover:shadow-xl active:scale-[0.97] transition-all text-sm"
+                                        >
+                                            {t('ai.goToFavorites', 'Go to Favorites')}
+                                        </button>
+                                    )}
+                                    <button
+                                        onClick={onClose}
+                                        className="px-6 py-3 bg-white/15 backdrop-blur-sm text-white font-bold rounded-2xl hover:bg-white/25 active:scale-[0.97] transition-all text-sm border border-white/20"
+                                    >
+                                        {t('ai.backToChat', 'Back to Chat')}
+                                    </button>
+                                </div>
+                            </motion.div>
+                        ) : (
+                            <>
+                                {/* Header */}
+                                <div className="flex items-center justify-between w-full mb-4 px-2">
+                                    <div className="flex items-center gap-2">
+                                        <AiOrb state="idle" size="sm" />
+                                        <div>
+                                            <span className="text-sm font-bold text-white">{t('ai.swipeTitle', 'Your Matches')}</span>
+                                            <p className="text-[11px] text-white/50">{currentIndex + 1} / {properties.length}</p>
+                                        </div>
+                                    </div>
+                                    <div className="flex items-center gap-3">
+                                        <span className="text-xs font-bold text-green-400 bg-green-400/15 px-3 py-1 rounded-full">
+                                            {savedProps.length} {t('ai.saved', 'saved')}
+                                        </span>
+                                        <button onClick={onClose} className="w-8 h-8 rounded-full bg-white/10 text-white/70 flex items-center justify-center hover:bg-white/20 transition-all">
+                                            <XMarkIcon className="w-5 h-5" />
+                                        </button>
+                                    </div>
+                                </div>
+
+                                {/* Card stack */}
+                                <div className="relative w-full aspect-[3/4] max-h-[60vh]">
+                                    <AnimatePresence mode="popLayout">
+                                        {nextProperty && <SwipeCard key={nextProperty.id} property={nextProperty} onSwipe={() => {}} isTop={false} />}
+                                        {topProperty && <SwipeCard key={topProperty.id} property={topProperty} onSwipe={handleSwipe} isTop={true} />}
+                                    </AnimatePresence>
+                                </div>
+
+                                {/* Action buttons */}
+                                <div className="flex items-center justify-center gap-8 mt-5">
+                                    <button onClick={() => handleSwipe('left')}
+                                        className="w-16 h-16 rounded-full bg-white/10 backdrop-blur-sm border-2 border-red-400/50 text-red-400 flex items-center justify-center hover:bg-red-500/20 hover:border-red-400 hover:scale-110 active:scale-90 transition-all shadow-lg">
+                                        <XMarkIcon className="w-7 h-7" />
+                                    </button>
+                                    <button onClick={() => handleSwipe('right')}
+                                        className="w-16 h-16 rounded-full bg-white/10 backdrop-blur-sm border-2 border-green-400/50 text-green-400 flex items-center justify-center hover:bg-green-500/20 hover:border-green-400 hover:scale-110 active:scale-90 transition-all shadow-lg">
+                                        <HeartIcon className="w-7 h-7" />
+                                    </button>
+                                </div>
+                                <p className="text-xs text-white/40 mt-3 text-center">
+                                    {t('ai.swipeHint', 'Swipe right to save, left to skip')}
+                                </p>
+                            </>
+                        )}
+                    </motion.div>
+                </motion.div>
+            )}
+        </AnimatePresence>
     );
 };
 
@@ -613,18 +639,22 @@ const AiSearch: React.FC<AiSearchProps> = ({ properties, onApplyFilters, isMobil
                             </div>
                         )}
 
-                        {/* Swipe cards when results found */}
-                        {showSwipeCards && matchedProperties.length > 0 && (
-                            <div className="anim-msg-in">
-                                <div className="flex items-start gap-2.5 justify-start">
-                                    <AiOrb state="idle" size="sm" />
-                                    <div className="min-w-0 flex-1" style={{ height: isMobile ? 400 : 420 }}>
-                                        <PropertySwipeStack
-                                            properties={matchedProperties}
-                                            onComplete={handleSwipeComplete}
-                                            t={(k, fb) => t(k, fb || '')}
-                                        />
-                                    </div>
+                        {/* Matched properties message */}
+                        {finalQuery && matchedProperties.length > 0 && !isSearching && (
+                            <div className="flex items-end gap-2.5 justify-start anim-msg-in">
+                                <AiOrb state="idle" size="sm" />
+                                <div className="bg-white text-neutral-800 rounded-2xl rounded-bl-md px-4 py-3 shadow-sm border border-neutral-100/80">
+                                    <p className="text-[13px] leading-relaxed">
+                                        {t('ai.foundSwipe', `Found ${matchedProperties.length} properties! Swipe through them.`)}
+                                    </p>
+                                    {!showSwipeCards && (
+                                        <button
+                                            onClick={() => setShowSwipeCards(true)}
+                                            className="mt-2 px-4 py-1.5 bg-gradient-to-r from-primary to-blue-600 text-white text-xs font-bold rounded-xl hover:shadow-md active:scale-[0.97] transition-all"
+                                        >
+                                            {t('ai.viewMatches', 'View Matches')}
+                                        </button>
+                                    )}
                                 </div>
                             </div>
                         )}
@@ -721,6 +751,15 @@ const AiSearch: React.FC<AiSearchProps> = ({ properties, onApplyFilters, isMobil
                     )}
                 </div>
             </form>
+
+            {/* Fullscreen swipe modal */}
+            <SwipeModal
+                isOpen={showSwipeCards && matchedProperties.length > 0}
+                properties={matchedProperties}
+                onClose={() => setShowSwipeCards(false)}
+                onGoToFavorites={handleSwipeComplete}
+                t={(k, fb) => t(k, fb || '')}
+            />
         </div>
     );
 };
