@@ -1207,6 +1207,12 @@ export const markAsRented = async (
     // Accept optional rentedUntil date from request body
     if (req.body?.rentedUntil) {
       property.rentedUntil = new Date(req.body.rentedUntil);
+
+      // Set availableFrom to the day after rentedUntil
+      const availableFromDate = new Date(req.body.rentedUntil);
+      availableFromDate.setDate(availableFromDate.getDate() + 1);
+      availableFromDate.setHours(0, 0, 0, 0);
+      property.availableFrom = availableFromDate;
     }
 
     await property.save();

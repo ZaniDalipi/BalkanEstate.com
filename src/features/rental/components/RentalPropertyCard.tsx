@@ -49,7 +49,11 @@ const RentalPropertyCard: React.FC<RentalPropertyCardProps> = ({ property, onHov
                 {/* Status Badge */}
                 {isRented && (
                     <div className="absolute top-2 left-2 bg-red-500/80 backdrop-blur-sm text-white text-xs font-bold px-2.5 py-1 rounded-full">
-                        {t('rental:rented')}
+                        {property.rentedUntil ? (() => {
+                            const availableDate = new Date(property.rentedUntil);
+                            availableDate.setDate(availableDate.getDate() + 1);
+                            return t('rental:status.availableFromNotice', { date: availableDate.toLocaleDateString() });
+                        })() : t('rental:rented')}
                     </div>
                 )}
                 {/* Listing Type Badge */}
@@ -60,6 +64,15 @@ const RentalPropertyCard: React.FC<RentalPropertyCardProps> = ({ property, onHov
                 {property.availableFrom && !isRented && (
                     <div className="absolute bottom-2 left-2 glass-badge text-xs px-2 py-1 text-gray-700">
                         {t('rental:availableFrom')}: {new Date(property.availableFrom).toLocaleDateString()}
+                    </div>
+                )}
+                {isRented && property.rentedUntil && (
+                    <div className="absolute bottom-2 left-2 glass-badge text-xs px-2 py-1 text-gray-700">
+                        {t('rental:availableFrom')}: {(() => {
+                            const availableDate = new Date(property.rentedUntil);
+                            availableDate.setDate(availableDate.getDate() + 1);
+                            return availableDate.toLocaleDateString();
+                        })()}
                     </div>
                 )}
             </div>

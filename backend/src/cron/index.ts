@@ -12,6 +12,7 @@ import { runWeeklyStatsJobs } from '../jobs/weeklyStatsJob';
 import { processNewListingAlerts, processPriceDropAlerts } from '../jobs/propertyAlertsJob';
 import { sendHotHourRecommendations, cleanupOldPatterns } from '../services/proBuyerEmailService';
 import { processMonthlyCouponRefresh } from '../services/monthlyCouponService';
+import { processExpiredRentals } from '../jobs/rentalAvailabilityJob';
 
 // Helper to check if MongoDB is connected before running a job
 const isMongoConnected = (): boolean => {
@@ -39,6 +40,7 @@ let weeklyAlertsTask: cron.ScheduledTask | null = null;
 let priceDropAlertsTask: cron.ScheduledTask | null = null;
 let proBuyerHotHoursTask: cron.ScheduledTask | null = null;
 let activityCleanupTask: cron.ScheduledTask | null = null;
+let rentalAvailabilityTask: cron.ScheduledTask | null = null;
 
 export const startCronJobs = () => {
   // Check for subscriptions expiring in 1 day - runs daily at 10 AM
@@ -301,6 +303,25 @@ export const startCronJobs = () => {
   });
 
   // ===============================
+  // RENTAL AVAILABILITY AUTOMATION
+  // ===============================
+
+  // Auto-transition expired rentals back to active - runs every hour
+  // When a property's rentedUntil date has passed, it is automatically
+  // moved from 'rented' to 'active' status with availableFrom set to the day after rentedUntil
+  rentalAvailabilityTask = cron.schedule('0 * * * *', async () => {
+    await withDbConnection('rental availability check', async () => {
+      try {
+        cronLogger.info('🏠 Checking for expired rental periods...');
+        const result = await processExpiredRentals();
+        cronLogger.info(`✅ Rental availability check: ${result.transitioned} transitioned, ${result.errors} errors`);
+      } catch (error) {
+        cronLogger.error('Rental availability cron error:', error);
+      }
+    });
+  });
+
+  // ===============================
   // MONTHLY COUPON REFRESH
   // ===============================
 
@@ -322,7 +343,7 @@ export const startCronJobs = () => {
     }
   });
 
-  cronLogger.info('🕐 All cron jobs started (subscription checks, weekly stats, property alerts, pro buyer emails, monthly coupons)');
+  cronLogger.info('🕐 All cron jobs started (subscription checks, weekly stats, property alerts, pro buyer emails, rental availability, monthly coupons)');
 };
 
 export const stopCronJobs = () => {
@@ -338,5 +359,6 @@ export const stopCronJobs = () => {
   if (proBuyerHotHoursTask) proBuyerHotHoursTask.stop();
   if (activityCleanupTask) activityCleanupTask.stop();
   if (monthlyCouponTask) monthlyCouponTask.stop();
+  if (rentalAvailabilityTask) rentalAvailabilityTask.stop();
   cronLogger.info('🛑 All cron jobs stopped');
 };

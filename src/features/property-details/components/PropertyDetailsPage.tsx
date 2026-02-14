@@ -532,13 +532,17 @@ const PropertyDetailsPage: React.FC<{ property: Property }> = ({ property: cache
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 14v3m4-3v3m4-3v3M3 21h18M3 10h18M3 7l9-4 9 4M4 10h16v11H4V10z" />
             </svg>
             <span className="font-semibold text-sm md:text-base">
-              {property.rentedUntil ? (
-                <>
-                  {t('property:status.rentedBanner', 'This property has been rented')}
-                  {' — '}
-                  {t('property:status.rentedUntil', { date: new Date(property.rentedUntil).toLocaleDateString(i18n.language === 'me' ? 'sr-Latn-ME' : i18n.language === 'sq' ? 'sq-AL' : i18n.language, { day: 'numeric', month: 'long', year: 'numeric' }), defaultValue: `Available from {{date}}` })}
-                </>
-              ) : (
+              {property.rentedUntil ? (() => {
+                const availableDate = new Date(property.rentedUntil);
+                availableDate.setDate(availableDate.getDate() + 1);
+                return (
+                  <>
+                    {t('property:status.rentedBanner', 'This property has been rented')}
+                    {' — '}
+                    {t('property:status.rentedUntil', { date: availableDate.toLocaleDateString(i18n.language === 'me' ? 'sr-Latn-ME' : i18n.language === 'sq' ? 'sq-AL' : i18n.language, { day: 'numeric', month: 'long', year: 'numeric' }), defaultValue: `Available from {{date}}` })}
+                  </>
+                );
+              })() : (
                 t('property:status.rentedBanner', 'This property has been rented')
               )}
             </span>

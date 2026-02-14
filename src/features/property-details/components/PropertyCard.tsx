@@ -207,9 +207,11 @@ const PropertyCardInner = memo<PropertyCardInnerProps>(({
             {isRented && (
               <div className="bg-orange-500/85 backdrop-blur-sm text-white text-[10px] font-semibold px-2 py-[3px] rounded-full flex items-center gap-1">
                 <span className="w-1.5 h-1.5 bg-white rounded-full" />
-                {property?.rentedUntil ? (
-                  t('rental:status.availableBadge', { date: new Date(property.rentedUntil).toLocaleDateString(i18n.language === 'me' ? 'sr-Latn-ME' : i18n.language === 'sq' ? 'sq-AL' : i18n.language, { month: 'short', year: 'numeric' }).toUpperCase() })
-                ) : (
+                {property?.rentedUntil ? (() => {
+                  const availableDate = new Date(property.rentedUntil);
+                  availableDate.setDate(availableDate.getDate() + 1);
+                  return t('rental:status.availableBadge', { date: availableDate.toLocaleDateString(i18n.language === 'me' ? 'sr-Latn-ME' : i18n.language === 'sq' ? 'sq-AL' : i18n.language, { month: 'short', year: 'numeric' }).toUpperCase() });
+                })() : (
                   t('property:rented', 'RENTED').toUpperCase()
                 )}
               </div>

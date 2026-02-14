@@ -546,5 +546,7 @@ PropertySchema.index({ priceReducedAt: 1, status: 1 });
 PropertySchema.index({ listingType: 1, status: 1 });
 // Compound index for rental searches
 PropertySchema.index({ listingType: 1, propertyType: 1, city: 1, status: 1 });
+// Index for rental availability automation (expired rental lookup)
+PropertySchema.index({ status: 1, rentedUntil: 1 });
 
 export default mongoose.model<IProperty>('Property', PropertySchema);
