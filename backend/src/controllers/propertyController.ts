@@ -15,6 +15,7 @@ import { sortPropertiesWithHighlighting, getHighlightingStats } from '../utils/h
 import { recordPriceChange, processInstantAlertsForProperty } from '../jobs/propertyAlertsJob';
 import { trackUserActivity } from '../services/proBuyerEmailService';
 import { FREE_TIER_LIMITS, PRO_TIER_LIMITS } from '../config/subscriptionConstants';
+import { sanitizeProperty } from '../utils/responseSanitizer';
 import {
   emitPropertyCreated,
   emitPropertyUpdated,
@@ -270,8 +271,11 @@ export const getProperties = async (
       });
     }
 
+    // Sanitize: strip PII (email, phone, license) from list responses
+    const sanitizedProperties = enrichedProperties.map((p: any) => sanitizeProperty(p, 'list'));
+
     res.json({
-      properties: enrichedProperties,
+      properties: sanitizedProperties,
       pagination: {
         page: pageNum,
         limit: limitNum,
@@ -320,7 +324,8 @@ export const getProperty = async (
       }
     }
 
-    res.json({ property: enrichedProperty });
+    // Sanitize: detail context keeps phone for "Call Seller" button, strips email/license
+    res.json({ property: sanitizeProperty(enrichedProperty, 'detail') });
   } catch (error: any) {
     propertyLogger.error('Get property error:', error);
     res.status(500).json({ message: 'Error fetching property' });
@@ -1003,7 +1008,9 @@ export const getMyListings = async (
       .sort({ lastRenewed: -1, createdAt: -1 }); // Renewed listings appear first
 
     propertyLogger.info(`✅ Found ${properties.length} listings`);
-    res.json({ properties });
+    // Sanitize: strip PII even for own listings (frontend doesn't need it in list view)
+    const sanitizedProperties = properties.map(p => sanitizeProperty(p.toObject ? p.toObject() : p, 'list'));
+    res.json({ properties: sanitizedProperties });
   } catch (error: any) {
     propertyLogger.error('Get my listings error:', error);
     res.status(500).json({ message: 'Error fetching listings' });

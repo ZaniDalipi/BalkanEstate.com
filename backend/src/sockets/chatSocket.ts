@@ -2,6 +2,8 @@ import { Server, Socket } from 'socket.io';
 import jwt from 'jsonwebtoken';
 import Conversation from '../models/Conversation';
 
+const isProduction = process.env.NODE_ENV === 'production';
+
 // Get JWT secret - MUST be set in environment variables
 const getJwtSecret = (): string => {
   const secret = process.env.JWT_SECRET;
@@ -24,6 +26,14 @@ const userSockets = new Map<string, string>();
 const conversationRooms = new Map<string, Set<string>>();
 
 export const setupChatSocket = (io: Server) => {
+  // Transport security middleware — reject unencrypted connections in production
+  io.use((socket: AuthenticatedSocket, next) => {
+    if (isProduction && !socket.handshake.secure) {
+      return next(new Error('Security error: Encrypted connection (wss://) required'));
+    }
+    next();
+  });
+
   // Authentication middleware
   io.use(async (socket: AuthenticatedSocket, next) => {
     try {

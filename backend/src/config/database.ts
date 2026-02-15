@@ -2,6 +2,21 @@ import mongoose from 'mongoose';
 import { initializeDatabase } from '../utils/initDatabase';
 import { dbLogger } from '../utils/logger';
 
+// Strip __v from all Mongoose toJSON/toObject outputs globally.
+// This prevents MongoDB internal version keys from leaking in API responses.
+mongoose.set('toJSON', {
+  transform(_doc: any, ret: any) {
+    delete ret.__v;
+    return ret;
+  },
+});
+mongoose.set('toObject', {
+  transform(_doc: any, ret: any) {
+    delete ret.__v;
+    return ret;
+  },
+});
+
 const connectDB = async (): Promise<void> => {
   try {
     const mongoURI = process.env.MONGODB_URI || 'mongodb://localhost:27017/balkan-estate';

@@ -9,6 +9,7 @@ import { sendNewMessageNotification } from '../services/emailService';
 import { getSocketInstance } from '../utils/socketInstance';
 import { incrementInquiryCount } from '../utils/statsUpdater';
 import { apiLogger } from '../utils/logger';
+import { sanitizeConversation } from '../utils/responseSanitizer';
 
 // @desc    Get user's conversations
 // @route   GET /api/conversations
@@ -44,10 +45,10 @@ export const getConversations = async (
       lastMessages.map(m => [String(m._id), m.lastMessage])
     );
 
-    const conversationsWithMessages = conversations.map(conv => ({
-      ...conv.toObject(),
-      lastMessage: lastMessageMap.get(String(conv._id)) || null,
-    }));
+    const conversationsWithMessages = conversations.map(conv => {
+      const convObj = { ...conv.toObject(), lastMessage: lastMessageMap.get(String(conv._id)) || null };
+      return sanitizeConversation(convObj);
+    });
 
     res.json({ conversations: conversationsWithMessages });
   } catch (error: any) {
@@ -114,7 +115,7 @@ export const getConversation = async (
       ]);
     }
 
-    res.json({ conversation, messages });
+    res.json({ conversation: sanitizeConversation(conversation.toObject()), messages });
   } catch (error: any) {
     apiLogger.error('Get conversation error:', error);
     res.status(500).json({ message: 'Error fetching conversation' });
@@ -188,7 +189,7 @@ export const createConversation = async (
       );
     }
 
-    res.status(201).json({ conversation });
+    res.status(201).json({ conversation: sanitizeConversation(conversation.toObject()) });
   } catch (error: any) {
     apiLogger.error('Create conversation error:', error);
     res.status(500).json({ message: 'Error creating conversation' });

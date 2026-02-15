@@ -4,6 +4,7 @@ import Property from '../models/Property';
 import { IUser } from '../models/User';
 import { incrementSaveCount, decrementSaveCount } from '../utils/statsUpdater';
 import { apiLogger } from '../utils/logger';
+import { sanitizeProperty } from '../utils/responseSanitizer';
 
 // @desc    Get user's favorites
 // @route   GET /api/favorites
@@ -32,7 +33,16 @@ export const getFavorites = async (
     // Filter out any null properties (in case they were deleted)
     const validFavorites = favorites.filter((fav) => fav.propertyId != null);
 
-    res.json({ favorites: validFavorites });
+    // Sanitize: strip PII from populated property seller data
+    const sanitizedFavorites = validFavorites.map(fav => {
+      const favObj = fav.toObject ? fav.toObject() : fav;
+      if (favObj.propertyId && typeof favObj.propertyId === 'object') {
+        favObj.propertyId = sanitizeProperty(favObj.propertyId, 'list');
+      }
+      return favObj;
+    });
+
+    res.json({ favorites: sanitizedFavorites });
   } catch (error: any) {
     apiLogger.error('Get favorites error:', error);
     res.status(500).json({ message: 'Error fetching favorites' });

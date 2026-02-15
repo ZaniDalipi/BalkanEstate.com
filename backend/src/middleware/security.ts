@@ -8,6 +8,7 @@ import hpp from 'hpp';
 import rateLimit from 'express-rate-limit';
 import { Request, Response, NextFunction, Application } from 'express';
 import cors from 'cors';
+import crypto from 'crypto';
 import { apiLogger } from '../utils/logger';
 
 // Environment detection
@@ -317,7 +318,7 @@ export const generalRateLimiter = rateLimit({
     message: 'You have exceeded the rate limit. Please try again later.',
     retryAfter: 15,
   },
-  standardHeaders: true,
+  standardHeaders: !isProduction, // Hide rate limit config from production responses
   legacyHeaders: false,
   skip: (req: Request) => {
     // Skip rate limiting for health checks only
@@ -339,7 +340,7 @@ export const sensitiveRateLimiter = rateLimit({
     message: 'Too many login attempts. Please try again later.',
     retryAfter: 15,
   },
-  standardHeaders: true,
+  standardHeaders: !isProduction, // Hide rate limit config from production responses
   legacyHeaders: false,
 });
 
@@ -355,7 +356,7 @@ export const mutationRateLimiter = rateLimit({
     message: 'Too many write requests. Please slow down and try again shortly.',
     retryAfter: 15,
   },
-  standardHeaders: true,
+  standardHeaders: !isProduction, // Hide rate limit config from production responses
   legacyHeaders: false,
 });
 
@@ -371,7 +372,7 @@ export const paymentRateLimiter = rateLimit({
     message: 'Too many payment attempts. Please try again later.',
     retryAfter: 60,
   },
-  standardHeaders: true,
+  standardHeaders: !isProduction, // Hide rate limit config from production responses
   legacyHeaders: false,
   skip: () => isDevelopment, // Skip rate limiting entirely in development
 });
@@ -389,7 +390,7 @@ export const aiRateLimiter = rateLimit({
     message: 'You have made too many AI requests. Please try again later.',
     retryAfter: 60,
   },
-  standardHeaders: true,
+  standardHeaders: !isProduction, // Hide rate limit config from production responses
   legacyHeaders: false,
   skip: () => isDevelopment, // Skip rate limiting in development
   keyGenerator: (req: Request) => {
@@ -526,10 +527,11 @@ export const xssSanitizer = (req: Request, _res: Response, next: NextFunction): 
 
 /**
  * Request ID middleware
- * Adds unique ID to each request for tracking/debugging
+ * Adds a cryptographically random opaque ID to each request for tracking/debugging.
+ * Uses crypto.randomUUID() — does not leak server timestamps or internal state.
  */
 export const requestId = (req: Request, res: Response, next: NextFunction): void => {
-  const id = `${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
+  const id = crypto.randomUUID();
   req.headers['x-request-id'] = id;
   res.setHeader('X-Request-ID', id);
   next();
