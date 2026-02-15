@@ -13,6 +13,16 @@ const ALWAYS_STRIP_FIELDS = ['__v', 'password', 'resetPasswordToken', 'resetPass
 /** Property snapshot fields that expose creator PII */
 const PROPERTY_CREATOR_PII_FIELDS = ['createdByEmail', 'createdByLicenseNumber'] as const;
 
+/** Fields only needed on property detail pages — strip from list/bulk responses to reduce payload */
+const PROPERTY_DETAIL_ONLY_FIELDS = [
+  'rentalHistory',        // Only shown in RentalHistorySection (detail page)
+  'tenantRequirements',   // Only shown in RentalTermsSection (detail page)
+  'visitAvailability',    // Only shown in PropertyInfo (detail page)
+  'imagePublicId',        // Internal Cloudinary ID — never exposed to client
+  'floorplanPublicId',    // Internal Cloudinary ID
+  'generatedVideoPublicId', // Internal Cloudinary ID
+] as const;
+
 /**
  * Rounds a coordinate to the specified number of decimal places.
  * 5 decimals ≈ 1.1m accuracy — sufficient for property listings.
@@ -73,6 +83,13 @@ export const sanitizeProperty = (property: any, context: 'list' | 'detail' = 'li
   // Strip creator PII snapshot fields (frontend never uses these)
   for (const field of PROPERTY_CREATOR_PII_FIELDS) {
     delete cleaned[field];
+  }
+
+  // Strip detail-only fields from list responses (reduces payload + hides internal data)
+  if (context === 'list') {
+    for (const field of PROPERTY_DETAIL_ONLY_FIELDS) {
+      delete cleaned[field];
+    }
   }
 
   // Sanitize the populated seller object
