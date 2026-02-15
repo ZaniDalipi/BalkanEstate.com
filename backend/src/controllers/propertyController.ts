@@ -226,12 +226,13 @@ export const getProperties = async (
     // Trim to requested limit after sorting
     properties = properties.slice(0, limitNum);
 
+    // Convert all properties to plain objects first (required for sanitizer)
+    const plainProperties = properties.map(p => p.toObject ? p.toObject() : p);
+
     // Enrich properties with agency logos for agent sellers
-    const agencyIds = properties
+    const agencyIds = plainProperties
       .map(p => (p.sellerId as any)?.agencyId)
       .filter(Boolean);
-
-    let enrichedProperties: any[] = properties;
 
     if (agencyIds.length > 0) {
       const agencies = await Agency.find(
@@ -244,15 +245,15 @@ export const getProperties = async (
       );
 
       // Add agencyLogo to each property's seller
-      enrichedProperties = properties.map(p => {
-        const prop = p.toObject ? p.toObject() : p;
+      for (const prop of plainProperties) {
         const seller = prop.sellerId as any;
         if (seller?.agencyId) {
           seller.agencyLogo = agencyLogoMap.get(String(seller.agencyId));
         }
-        return prop;
-      });
+      }
     }
+
+    const enrichedProperties = plainProperties;
 
     // Get total count for pagination
     const total = await Property.countDocuments(filter);
