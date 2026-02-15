@@ -10,9 +10,6 @@ const ALWAYS_STRIP_FIELDS = ['__v', 'password', 'resetPasswordToken', 'resetPass
   'emailVerificationToken', 'emailVerificationExpires', 'refreshTokens', 'loginHistory',
   'loginAttempts', 'lockUntil', 'lastFailedLogin'] as const;
 
-/** Seller PII fields to strip from list/bulk responses */
-const SELLER_PII_FIELDS = ['email', 'phone', 'licenseNumber'] as const;
-
 /** Property snapshot fields that expose creator PII */
 const PROPERTY_CREATOR_PII_FIELDS = ['createdByEmail', 'createdByLicenseNumber'] as const;
 
