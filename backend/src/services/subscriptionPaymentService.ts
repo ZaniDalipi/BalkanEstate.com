@@ -217,9 +217,10 @@ export async function processSubscriptionPayment(
 
     if (!isProduction) paymentLogger.info(`✅ Payment processed successfully for user ${userId}`);
 
-    // After successful subscription, handle Enterprise-specific logic
+    // After successful subscription, handle post-payment logic
     // This runs outside the transaction since it's not critical
     const isEnterpriseProduct = productId.includes('enterprise') || productId === 'agency_yearly';
+    const isProProduct = productId.includes('pro_') || productId.includes('seller_pro_');
     const isNewSubscription = !subscription.isNew === false; // New subscription, not renewal
 
     if (isEnterpriseProduct && isNewSubscription) {
@@ -230,6 +231,13 @@ export async function processSubscriptionPayment(
         // Don't fail the subscription if coupon generation fails
         paymentLogger.error('⚠️ Error generating Enterprise agent coupons:', couponError);
       }
+    }
+
+    // Initialize promotion coupons immediately so user doesn't wait for monthly cron
+    try {
+      await initializePromotionCoupons(String(userId), productId, isProProduct, isEnterpriseProduct);
+    } catch (couponError) {
+      paymentLogger.error('⚠️ Error initializing promotion coupons:', couponError);
     }
 
     return {
@@ -464,6 +472,82 @@ export async function verifyPaymentIntegrity(
   } catch (error: any) {
     issues.push(`Verification error: ${error.message}`);
     return { valid: false, issues };
+  }
+}
+
+/**
+ * Initialize promotion coupons immediately when a user subscribes.
+ * Ensures users get their promotion coupons right away instead of
+ * waiting for the monthly cron job on the 1st.
+ */
+async function initializePromotionCoupons(
+  userId: string,
+  productId: string,
+  isProProduct: boolean,
+  isEnterpriseProduct: boolean
+): Promise<void> {
+  const now = new Date();
+
+  if (isProProduct) {
+    // Get the Pro product config for coupon amounts
+    const proProduct = await Product.findOne({ productId: 'pro_monthly' }).lean();
+    const monthlyAmount = proProduct?.promotionCoupons || 3;
+    const highlightedAmount = proProduct?.highlightedCoupons || 2;
+    const premiumAmount = proProduct?.premiumCoupons || 1;
+
+    // Check if user already has coupons (renewal - don't overwrite)
+    const user = await User.findById(userId);
+    if (user?.proSubscription?.promotionCoupons?.available && user.proSubscription.promotionCoupons.available > 0) {
+      if (!isProduction) paymentLogger.info('✅ Pro user already has promotion coupons, skipping initialization');
+      return;
+    }
+
+    await User.findByIdAndUpdate(userId, {
+      'proSubscription.promotionCoupons': {
+        monthly: monthlyAmount,
+        available: monthlyAmount,
+        used: 0,
+        rollover: 0,
+        lastRefresh: now,
+        highlightCoupons: highlightedAmount,
+        usedHighlightCoupons: 0,
+      },
+    });
+
+    paymentLogger.info(`🎟️ Initialized ${monthlyAmount} promotion coupons for Pro user ${userId} (${highlightedAmount} highlighted, ${premiumAmount} premium)`);
+  }
+
+  if (isEnterpriseProduct) {
+    // Get the Enterprise product config for coupon amounts
+    const agencyProduct = await Product.findOne({ productId: 'agency_yearly' }).lean();
+    const monthlyAmount = agencyProduct?.promotionCoupons || 5;
+
+    // Find the user's agency
+    const user = await User.findById(userId);
+    if (!user?.agencyId) {
+      if (!isProduction) paymentLogger.info('📋 No agency found yet - promotion coupons will be initialized when agency is created');
+      return;
+    }
+
+    const agency = await Agency.findById(user.agencyId);
+    if (!agency) return;
+
+    // Check if agency already has coupons (renewal - don't overwrite)
+    if (agency.promotionCoupons?.available > 0) {
+      if (!isProduction) paymentLogger.info('✅ Agency already has promotion coupons, skipping initialization');
+      return;
+    }
+
+    agency.promotionCoupons = {
+      monthly: monthlyAmount,
+      available: monthlyAmount,
+      used: 0,
+      lastRefresh: now,
+    };
+
+    await agency.save();
+
+    paymentLogger.info(`🎟️ Initialized ${monthlyAmount} promotion coupons for agency ${agency.name}`);
   }
 }
 
