@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { motion, AnimatePresence, PanInfo } from 'framer-motion';
 import { ChatMessage, AiSearchQuery, Property } from '@/types';
 import { getAiChatResponse } from '@/services/geminiService';
-import { PaperAirplaneIcon, MicrophoneIcon, StopCircleIcon, SparklesIcon, MapPinIcon, SpeakerWaveIcon, SpeakerXMarkIcon, HeartIcon, XMarkIcon } from '@/constants';
+import { PaperAirplaneIcon, MicrophoneIcon, StopCircleIcon, SparklesIcon, MapPinIcon, SpeakerWaveIcon, SpeakerXMarkIcon, HeartIcon, XMarkIcon, EyeIcon } from '@/constants';
 import { formatPrice } from '@/utils/currency';
 import { optimizeCloudinaryUrl } from '@/config/cloudinaryConfig';
 import { useAppContext } from '@/context/AppContext';
@@ -112,9 +112,10 @@ const SWIPE_VELOCITY = 500;
 const SwipeCard: React.FC<{
     property: Property;
     onSwipe: (dir: 'left' | 'right') => void;
+    onVisit?: () => void;
     isTop: boolean;
     exitDir?: 'left' | 'right';
-}> = ({ property, onSwipe, isTop, exitDir }) => {
+}> = ({ property, onSwipe, onVisit, isTop, exitDir }) => {
     const [dragDir, setDragDir] = useState<'left' | 'right' | null>(null);
     const [swipeDir, setSwipeDir] = useState<'left' | 'right' | null>(null);
     const [currentImgIdx, setCurrentImgIdx] = useState(0);
@@ -190,8 +191,8 @@ const SwipeCard: React.FC<{
             }}
             transition={{ type: 'spring', stiffness: 300, damping: 25 }}
         >
-            {/* Full-bleed image carousel */}
-            <AnimatePresence mode="wait">
+            {/* Full-bleed image carousel — crossfade (no exit so card behind never shows) */}
+            <AnimatePresence>
                 <motion.img
                     key={currentImgIdx}
                     src={optimizeCloudinaryUrl(images[currentImgIdx] || property.imageUrl, { width: 800, quality: 'auto' })}
@@ -200,8 +201,7 @@ const SwipeCard: React.FC<{
                     draggable={false}
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
-                    exit={{ opacity: 0 }}
-                    transition={{ duration: 0.3 }}
+                    transition={{ duration: 0.4 }}
                 />
             </AnimatePresence>
 
@@ -332,7 +332,7 @@ const SwipeModal: React.FC<{
     onGoToFavorites: () => void;
     t: (key: string, options?: string | Record<string, unknown>) => string;
 }> = ({ isOpen, properties, onClose, onGoToFavorites, t }) => {
-    const { toggleSavedHome, state } = useAppContext();
+    const { toggleSavedHome, state, dispatch } = useAppContext();
     const [currentIndex, setCurrentIndex] = useState(0);
     const [savedProps, setSavedProps] = useState<Property[]>([]);
     const [lastSwipeDir, setLastSwipeDir] = useState<'left' | 'right'>('left');
@@ -354,6 +354,14 @@ const SwipeModal: React.FC<{
         }
         setCurrentIndex(prev => prev + 1);
     }, [currentIndex, properties, toggleSavedHome, state.savedHomes]);
+
+    const handleVisitProperty = useCallback(() => {
+        const property = properties[currentIndex];
+        if (!property) return;
+        onClose();
+        dispatch({ type: 'SET_SELECTED_PROPERTY_OBJECT', payload: property });
+        window.history.pushState({ propertyId: property.id }, '', `/property/${property.id}`);
+    }, [currentIndex, properties, onClose, dispatch]);
 
     // Close on Escape
     useEffect(() => {
@@ -462,31 +470,41 @@ const SwipeModal: React.FC<{
                                 <div className="relative w-full aspect-[3/4] max-h-[60vh]">
                                     <AnimatePresence mode="popLayout">
                                         {nextProperty && <SwipeCard key={nextProperty.id} property={nextProperty} onSwipe={() => {}} isTop={false} />}
-                                        {topProperty && <SwipeCard key={topProperty.id} property={topProperty} onSwipe={handleSwipe} isTop={true} exitDir={lastSwipeDir} />}
+                                        {topProperty && <SwipeCard key={topProperty.id} property={topProperty} onSwipe={handleSwipe} onVisit={handleVisitProperty} isTop={true} exitDir={lastSwipeDir} />}
                                     </AnimatePresence>
                                 </div>
 
                                 {/* Action buttons — liquid glass */}
-                                <div className="flex items-center justify-center gap-6 mt-5">
+                                <div className="flex items-center justify-center gap-5 mt-5">
                                     <button onClick={() => handleSwipe('left')}
-                                        className="w-16 h-16 rounded-full flex items-center justify-center text-red-400 hover:scale-110 active:scale-90 transition-all"
+                                        className="w-14 h-14 rounded-full flex items-center justify-center text-red-400 hover:scale-110 active:scale-90 transition-all"
                                         style={{
                                             background: 'linear-gradient(135deg, rgba(239,68,68,0.1) 0%, rgba(239,68,68,0.05) 100%)',
                                             backdropFilter: 'blur(12px)',
                                             border: '2px solid rgba(239,68,68,0.3)',
                                             boxShadow: '0 0 20px rgba(239,68,68,0.15), inset 0 1px 0 rgba(255,255,255,0.1)',
                                         }}>
-                                        <XMarkIcon className="w-7 h-7" />
+                                        <XMarkIcon className="w-6 h-6" />
+                                    </button>
+                                    <button onClick={handleVisitProperty}
+                                        className="w-12 h-12 rounded-full flex items-center justify-center text-blue-400 hover:scale-110 active:scale-90 transition-all"
+                                        style={{
+                                            background: 'linear-gradient(135deg, rgba(59,130,246,0.1) 0%, rgba(59,130,246,0.05) 100%)',
+                                            backdropFilter: 'blur(12px)',
+                                            border: '2px solid rgba(59,130,246,0.3)',
+                                            boxShadow: '0 0 20px rgba(59,130,246,0.15), inset 0 1px 0 rgba(255,255,255,0.1)',
+                                        }}>
+                                        <EyeIcon className="w-5 h-5" />
                                     </button>
                                     <button onClick={() => handleSwipe('right')}
-                                        className="w-16 h-16 rounded-full flex items-center justify-center text-green-400 hover:scale-110 active:scale-90 transition-all"
+                                        className="w-14 h-14 rounded-full flex items-center justify-center text-green-400 hover:scale-110 active:scale-90 transition-all"
                                         style={{
                                             background: 'linear-gradient(135deg, rgba(34,197,94,0.1) 0%, rgba(34,197,94,0.05) 100%)',
                                             backdropFilter: 'blur(12px)',
                                             border: '2px solid rgba(34,197,94,0.3)',
                                             boxShadow: '0 0 20px rgba(34,197,94,0.15), inset 0 1px 0 rgba(255,255,255,0.1)',
                                         }}>
-                                        <HeartIcon className="w-7 h-7" />
+                                        <HeartIcon className="w-6 h-6" />
                                     </button>
                                 </div>
                                 <p className="text-[11px] text-white/30 mt-3 text-center font-medium tracking-wide">
