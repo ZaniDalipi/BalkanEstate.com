@@ -234,16 +234,26 @@ export const createAgency = async (
           autoRenew: true,
         };
 
+        // Initialize promotion coupons immediately so agency doesn't wait for monthly cron
+        const agencyProduct = await Product.findOne({ productId: 'agency_yearly' }).lean();
+        const monthlyPromotionAmount = agencyProduct?.promotionCoupons || ENTERPRISE_TIER_LIMITS.PROMOTION_COUPONS;
+        agency.promotionCoupons = {
+          monthly: monthlyPromotionAmount,
+          available: monthlyPromotionAmount,
+          used: 0,
+          lastRefresh: new Date(),
+        };
+
         await agency.save();
         agentCouponsGenerated = true;
-        agencyLogger.info(`🎟️ Generated 5 agent registration coupons for new agency ${agency.name}`);
+        agencyLogger.info(`🎟️ Generated 5 agent registration coupons and ${monthlyPromotionAmount} promotion coupons for new agency ${agency.name}`);
 
         // Send emails with coupon codes and welcome message
         try {
           const { sendAgentRegistrationCouponsEmail, sendEnterpriseWelcomeEmail } = await import('../services/emailService');
 
-          // Fetch Enterprise product to get coupon breakdown values
-          const enterpriseProduct = await Product.findOne({ productId: 'agency_yearly' }).lean();
+          // Use the already-fetched Enterprise product for coupon breakdown values
+          const enterpriseProduct = agencyProduct;
           const promotionCoupons = {
             total: enterpriseProduct?.promotionCoupons || ENTERPRISE_TIER_LIMITS.PROMOTION_COUPONS,
             premium: enterpriseProduct?.premiumCoupons || ENTERPRISE_TIER_LIMITS.PREMIUM_COUPONS,
