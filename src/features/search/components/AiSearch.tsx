@@ -166,7 +166,7 @@ const SwipeCard: React.FC<{
 
     return (
         <motion.div
-            className="absolute inset-0 rounded-3xl overflow-hidden shadow-2xl border border-white/20 bg-white cursor-grab active:cursor-grabbing"
+            className="absolute inset-0 rounded-3xl overflow-hidden shadow-2xl border border-white/20 bg-neutral-900 cursor-grab active:cursor-grabbing"
             style={{ touchAction: 'none' }}
             drag={isTop ? 'x' : false}
             dragConstraints={{ left: 0, right: 0 }}
@@ -183,45 +183,44 @@ const SwipeCard: React.FC<{
             }}
             transition={{ type: 'spring', stiffness: 300, damping: 25 }}
         >
-            {/* Property image — carousel */}
-            <div className="relative h-[60%] w-full overflow-hidden bg-neutral-100">
-                <AnimatePresence mode="wait">
-                    <motion.img
-                        key={currentImgIdx}
-                        src={optimizeCloudinaryUrl(images[currentImgIdx] || property.imageUrl, { width: 800, quality: 'auto' })}
-                        alt={property.title || `${property.propertyType} in ${property.city}`}
-                        className="absolute inset-0 w-full h-full object-cover"
-                        draggable={false}
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        exit={{ opacity: 0 }}
-                        transition={{ duration: 0.3 }}
-                    />
-                </AnimatePresence>
-                <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/10 to-transparent pointer-events-none" />
-                {/* Image counter dots */}
-                {images.length > 1 && (
-                    <div className="absolute top-3 left-0 right-0 flex justify-center gap-1 z-10">
-                        {images.map((_, i) => (
-                            <div key={i} className={`h-[3px] rounded-full transition-all duration-300 ${i === currentImgIdx ? 'w-5 bg-white' : 'w-2 bg-white/40'}`} />
-                        ))}
-                    </div>
-                )}
-                <div className="absolute bottom-4 left-4 right-4 z-10">
-                    <span className="text-white font-extrabold text-2xl drop-shadow-lg">
-                        {formatPrice(property.price, property.country)}
-                    </span>
-                </div>
-            </div>
+            {/* Full-bleed image carousel */}
+            <AnimatePresence mode="wait">
+                <motion.img
+                    key={currentImgIdx}
+                    src={optimizeCloudinaryUrl(images[currentImgIdx] || property.imageUrl, { width: 800, quality: 'auto' })}
+                    alt={property.title || `${property.propertyType} in ${property.city}`}
+                    className="absolute inset-0 w-full h-full object-cover"
+                    draggable={false}
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    transition={{ duration: 0.3 }}
+                />
+            </AnimatePresence>
 
-            {/* Property info */}
-            <div className="p-5">
-                {property.title && <p className="text-base font-bold text-neutral-800 line-clamp-1 mb-1.5">{property.title}</p>}
-                <div className="flex items-center gap-1.5 text-neutral-500 mb-3">
+            {/* Gradient overlay for text readability */}
+            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent pointer-events-none" />
+
+            {/* Image counter dots */}
+            {images.length > 1 && (
+                <div className="absolute top-3 left-0 right-0 flex justify-center gap-1 z-10">
+                    {images.map((_, i) => (
+                        <div key={i} className={`h-[3px] rounded-full transition-all duration-300 ${i === currentImgIdx ? 'w-5 bg-white' : 'w-2 bg-white/40'}`} />
+                    ))}
+                </div>
+            )}
+
+            {/* Property info — overlaid on bottom of image */}
+            <div className="absolute bottom-0 left-0 right-0 p-5 z-10">
+                <span className="text-white font-extrabold text-2xl drop-shadow-lg">
+                    {formatPrice(property.price, property.country)}
+                </span>
+                {property.title && <p className="text-white/90 font-bold text-base line-clamp-1 mt-1.5">{property.title}</p>}
+                <div className="flex items-center gap-1.5 text-white/70 mt-1">
                     <MapPinIcon className="w-4 h-4 flex-shrink-0" />
                     <span className="text-sm">{property.city}, {property.country}</span>
                 </div>
-                <div className="flex items-center gap-4 text-sm text-neutral-600 font-medium">
+                <div className="flex items-center gap-4 text-sm text-white/80 font-medium mt-2.5">
                     {property.beds > 0 && <span className="flex items-center gap-1">🛏️ {property.beds} bed</span>}
                     {property.baths > 0 && <span className="flex items-center gap-1">🛁 {property.baths} bath</span>}
                     {property.sqft > 0 && <span className="flex items-center gap-1">📐 {property.sqft}m²</span>}
