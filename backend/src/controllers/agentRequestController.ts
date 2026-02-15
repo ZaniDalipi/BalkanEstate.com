@@ -163,7 +163,7 @@ export const createAgentRequest = async (req: Request, res: Response): Promise<v
           emailsSent.push(user.email);
           emailsSentCount++;
         } catch (err) {
-          apiLogger.error(`Failed to send email to agent ${user.email}:`, err);
+          apiLogger.error(`Failed to send email to agent ${user._id}:`, err);
         }
       }
     }
@@ -188,7 +188,7 @@ export const createAgentRequest = async (req: Request, res: Response): Promise<v
           emailsSent.push(agency.email);
           emailsSentCount++;
         } catch (err) {
-          apiLogger.error(`Failed to send email to agency ${agency.email}:`, err);
+          apiLogger.error(`Failed to send email to agency ${agency._id}:`, err);
         }
       }
     }

@@ -609,7 +609,7 @@ export const getMe = async (req: Request, res: Response): Promise<void> => {
         agentRecord.agencyId = memberAgency._id as any;
         agentRecord.agencyName = memberAgency.name;
         await agentRecord.save();
-        authLogger.info(`🔄 Auto-synced Agent record for ${user.email}: ${memberAgency.name}`);
+        authLogger.info(`🔄 Auto-synced Agent record for user ${user._id}: ${memberAgency.name}`);
       }
 
       // **AUTO-CREATE SUBSCRIPTION DOCUMENT**: Ensure agency agents have a Subscription document
@@ -631,12 +631,12 @@ export const getMe = async (req: Request, res: Response): Promise<void> => {
           startDate: user.agency?.joinedAt || new Date(),
           renewalDate: subExpiresAt,
           expirationDate: subExpiresAt,
-          autoRenewing: false,
+          autoRenewing: true,
           price: 0,
           currency: 'EUR',
           isAcknowledged: true,
         });
-        authLogger.info(`✅ Auto-created Subscription document for agency agent ${user.email}`);
+        authLogger.info(`✅ Auto-created Subscription document for agency agent ${user._id}`);
       } else if (existingAgentSubscription &&
                  user.subscription?.tier === 'agency_agent' &&
                  existingAgentSubscription.productId !== 'agency_agent_yearly') {
@@ -645,7 +645,7 @@ export const getMe = async (req: Request, res: Response): Promise<void> => {
         existingAgentSubscription.store = 'agency_coupon';
         existingAgentSubscription.status = 'active';
         existingAgentSubscription.price = 0;
-        existingAgentSubscription.autoRenewing = false;
+        existingAgentSubscription.autoRenewing = true;
         const subExpiresAt = user.subscription.expiresAt ||
                             memberAgency.subscription?.expiresAt ||
                             new Date(Date.now() + 365 * 24 * 60 * 60 * 1000);
@@ -654,11 +654,11 @@ export const getMe = async (req: Request, res: Response): Promise<void> => {
         // Reset reminder flag so new reminder will be sent before new expiration
         existingAgentSubscription.expiryReminderSent = false;
         await existingAgentSubscription.save();
-        authLogger.info(`✅ Auto-updated Subscription document for agency agent ${user.email}`);
+        authLogger.info(`✅ Auto-updated Subscription document for agency agent ${user._id}`);
       }
 
       if (needsSync) {
-        authLogger.info(`🔄 Auto-synced agency data for user ${user.email}: ${memberAgency.name}`);
+        authLogger.info(`🔄 Auto-synced agency data for user ${user._id}: ${memberAgency.name}`);
       }
     }
 

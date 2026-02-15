@@ -692,7 +692,7 @@ export const activateTestProSubscription = async (req: Request, res: Response): 
 
     await user.save();
 
-    subscriptionLogger.info(`✅ Test Pro subscription activated for user ${user.email}`);
+    subscriptionLogger.info(`✅ Test Pro subscription activated for user ${user._id}`);
     subscriptionLogger.info(`   Plan: ${plan}`);
     subscriptionLogger.info(`   Expires: ${expirationDate.toISOString()}`);
     subscriptionLogger.info(`   Listings: ${user.proSubscription?.activeListingsCount || 0}/15`);
@@ -744,7 +744,7 @@ export const syncProSubscription = async (req: Request, res: Response): Promise<
     }).sort({ expirationDate: -1 });
 
     if (activeSubscription) {
-      subscriptionLogger.info(`🔄 Syncing Pro subscription for user ${user.email}`);
+      subscriptionLogger.info(`🔄 Syncing Pro subscription for user ${user._id}`);
 
       // Get product details for benefits
       const product = await Product.findOne({ productId: activeSubscription.productId });

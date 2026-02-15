@@ -162,6 +162,16 @@ export function decryptFields<T extends Record<string, any>>(
 export function encryptionPlugin(schema: any, options: { fields: string[] }) {
   const { fields } = options;
 
+  // Helper: decrypt all plugin fields on a doc or plain object
+  const decryptDoc = (doc: any) => {
+    if (!doc) return;
+    for (const field of fields) {
+      if (doc[field] && typeof doc[field] === 'string' && isEncrypted(doc[field])) {
+        doc[field] = decryptField(doc[field]);
+      }
+    }
+  };
+
   // Encrypt before save
   schema.pre('save', function (this: any, next: () => void) {
     for (const field of fields) {
@@ -172,25 +182,39 @@ export function encryptionPlugin(schema: any, options: { fields: string[] }) {
     next();
   });
 
-  // Decrypt after find
+  // Decrypt in-memory after save so the returned document has plaintext values
+  schema.post('save', function (this: any) {
+    decryptDoc(this);
+  });
+
+  // Decrypt after find (works for both .lean() and full documents)
   schema.post('find', function (docs: any[]) {
     if (!docs) return;
     for (const doc of docs) {
-      for (const field of fields) {
-        if (doc[field]) {
-          doc[field] = decryptField(doc[field]);
-        }
-      }
+      decryptDoc(doc);
     }
   });
 
   schema.post('findOne', function (doc: any) {
-    if (!doc) return;
-    for (const field of fields) {
-      if (doc[field]) {
-        doc[field] = decryptField(doc[field]);
-      }
-    }
+    decryptDoc(doc);
+  });
+
+  schema.post('findOneAndUpdate', function (doc: any) {
+    decryptDoc(doc);
+  });
+
+  // Ensure toObject() and toJSON() always return decrypted values
+  schema.set('toObject', {
+    transform: (_doc: any, ret: any) => {
+      decryptDoc(ret);
+      return ret;
+    },
+  });
+  schema.set('toJSON', {
+    transform: (_doc: any, ret: any) => {
+      decryptDoc(ret);
+      return ret;
+    },
   });
 
   // Add method to get encrypted value for queries

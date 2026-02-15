@@ -372,7 +372,7 @@ export const activateUserSubscription = async (req: Request, res: Response): Pro
       },
     });
 
-    adminLogger.info(`[Admin] Subscription activated for user ${user.email} - Plan: ${planName}, Duration: ${durationDays} days`);
+    adminLogger.info(`[Admin] Subscription activated for user ${user._id} - Plan: ${planName}, Duration: ${durationDays} days`);
 
     // Invalidate caches so subscription change reflects immediately
     invalidateCache('/api/agents');
@@ -452,7 +452,7 @@ export const cancelSubscription = async (req: Request, res: Response): Promise<v
       },
     });
 
-    adminLogger.info(`[Admin] Subscription ${id} canceled for user ${user?.email}`);
+    adminLogger.info(`[Admin] Subscription ${id} canceled for user ${user?._id}`);
 
     // Invalidate caches so cancellation reflects immediately
     invalidateCache('/api/agents');

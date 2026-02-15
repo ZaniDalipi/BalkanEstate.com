@@ -152,7 +152,7 @@ export const saveMeasurement = async (req: Request, res: Response): Promise<void
     user.savedMeasurements.push(measurement as any);
     await user.save();
 
-    apiLogger.info(`📏 Measurement saved for user ${user.email}: ${measurement.name} (${measurement.type})`);
+    apiLogger.info(`📏 Measurement saved for user ${user._id}: ${measurement.name} (${measurement.type})`);
 
     res.status(201).json({
       success: true,

@@ -514,7 +514,7 @@ export const getAgency = async (
       // Check if user is owner or admin but not in the agents array
       const isOwnerOrAdmin = userId === ownerId || agencyAdmins.includes(userId);
       if (isOwnerOrAdmin && !agencyAgents.includes(userId)) {
-        agencyLogger.info(`👤 Auto-adding owner/admin ${currentUser.email} to agency members`);
+        agencyLogger.info(`👤 Auto-adding owner/admin ${userId} to agency members`);
 
         // Add user to agents array
         agency.agents.push(new mongoose.Types.ObjectId(userId));
@@ -559,7 +559,7 @@ export const getAgency = async (
           // Update user with agent ID
           user.agentId = agentProfile.agentId;
           await user.save();
-          agencyLogger.info(`✅ User ${currentUser.email} profile updated with agency info`);
+          agencyLogger.info(`✅ User ${userId} profile updated with agency info`);
         }
 
         // Re-populate agents to include the newly added admin
@@ -1446,7 +1446,7 @@ export const leaveAgency = async (
       agencyLogger.info(`✅ Updated agent profile to Independent Agent`);
     }
 
-    agencyLogger.info(`✅ User ${user.email} left agency: ${agencyName}`);
+    agencyLogger.info(`✅ User ${user._id} left agency: ${agencyName}`);
 
     res.json({
       message: `Successfully left ${agencyName}`,
@@ -1697,14 +1697,14 @@ export const redeemAgentCoupon = async (
       existingSubscription.startDate = new Date();
       existingSubscription.renewalDate = subscriptionExpiresAt;
       existingSubscription.expirationDate = subscriptionExpiresAt;
-      existingSubscription.autoRenewing = false;
+      existingSubscription.autoRenewing = true;
       existingSubscription.price = 0;
       existingSubscription.currency = 'EUR';
       existingSubscription.isAcknowledged = true;
       // Reset reminder flag so new reminder will be sent before new expiration
       existingSubscription.expiryReminderSent = false;
       await existingSubscription.save();
-      agencyLogger.info(`✅ Updated Subscription document for ${user.email}`);
+      agencyLogger.info(`✅ Updated Subscription document for user ${user._id}`);
     } else {
       // Create new subscription document
       await Subscription.create({
@@ -1715,12 +1715,12 @@ export const redeemAgentCoupon = async (
         startDate: new Date(),
         renewalDate: subscriptionExpiresAt,
         expirationDate: subscriptionExpiresAt,
-        autoRenewing: false,
+        autoRenewing: true,
         price: 0,
         currency: 'EUR',
         isAcknowledged: true,
       });
-      agencyLogger.info(`✅ Created Subscription document for ${user.email}`);
+      agencyLogger.info(`✅ Created Subscription document for user ${user._id}`);
     }
 
     // Mark coupon as used
@@ -1766,10 +1766,10 @@ export const redeemAgentCoupon = async (
       agentRecord.agencyId = agency._id as any;
       agentRecord.agencyName = agency.name;
       await agentRecord.save();
-      agencyLogger.info(`✅ Updated Agent record for ${user.email} with agency: ${agency.name}`);
+      agencyLogger.info(`✅ Updated Agent record for user ${user._id} with agency: ${agency.name}`);
     }
 
-    agencyLogger.info(`✅ User ${user.email} redeemed agent coupon for agency ${agency.name}`);
+    agencyLogger.info(`✅ User ${user._id} redeemed agent coupon for agency ${agency.name}`);
 
     // Send email notifications (non-blocking)
     try {
@@ -2182,7 +2182,7 @@ export const migrateAgentSubscriptions = async (
             startDate: user.agency?.joinedAt || new Date(),
             renewalDate: agencyExpiresAt,
             expirationDate: agencyExpiresAt,
-            autoRenewing: false,
+            autoRenewing: true,
             price: 0,
             currency: 'EUR',
             isAcknowledged: true,
@@ -2197,7 +2197,7 @@ export const migrateAgentSubscriptions = async (
           existingSubscription.expirationDate = agencyExpiresAt;
           existingSubscription.renewalDate = agencyExpiresAt;
           existingSubscription.price = 0;
-          existingSubscription.autoRenewing = false;
+          existingSubscription.autoRenewing = true;
           // Reset reminder flag so new reminder will be sent before new expiration
           existingSubscription.expiryReminderSent = false;
           await existingSubscription.save();
@@ -2215,7 +2215,7 @@ export const migrateAgentSubscriptions = async (
         }
 
         results.push({
-          email: user.email,
+          userId: String(user._id),
           agency: agency.name,
           userUpdated,
           subscriptionCreated,

@@ -141,7 +141,7 @@ async function handleSuccessfulPayment(
       purchaseToken: callbackData.requestid,
     });
 
-    paymentLogger.info(`✅ PaySera subscription activated for user ${user.email}`);
+    paymentLogger.info(`✅ PaySera subscription activated for user ${user._id}`);
     paymentLogger.info(`   Subscription ID: ${result.subscription._id}`);
     paymentLogger.info(`   Expires: ${result.subscription.expirationDate}`);
   } catch (error: any) {

@@ -175,7 +175,7 @@ export const sendAgentGeneralInquiry = async (
       inquiryType: 'general',
     });
 
-    apiLogger.info(`[inquiryController] General inquiry sent and saved: ${buyerEmail} -> ${agent.email} (ID: ${inquiry._id})`);
+    apiLogger.info(`[inquiryController] General inquiry sent and saved: inquiry ${inquiry._id} for agent ${agent._id}`);
 
     res.json({
       message: 'Your inquiry has been sent successfully',
