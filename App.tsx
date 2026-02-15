@@ -783,7 +783,7 @@ const AppWrapper: React.FC = () => {
         return (
             <>
                 {/* Render main layout behind the splash so map/resources start loading */}
-                <div className="opacity-0 pointer-events-none" aria-hidden="true">
+                <div className="fixed inset-0 opacity-0 pointer-events-none" aria-hidden="true">
                     {!state.isAuthenticating && <MainLayout />}
                 </div>
                 <Suspense fallback={<FullScreenLoader />}>

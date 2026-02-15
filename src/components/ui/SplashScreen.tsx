@@ -65,7 +65,7 @@ const HelloGreeting: React.FC<HelloGreetingProps> = ({ onComplete, userName }) =
     <div className="flex flex-col items-center justify-center">
       <AppleHelloEnglishEffect
         className="h-24 sm:h-32 md:h-40 lg:h-48 text-neutral-800"
-        speed={0.7}
+        speed={0.35}
         onAnimationComplete={handleHelloAnimComplete}
       />
       <AnimatePresence>
@@ -73,11 +73,11 @@ const HelloGreeting: React.FC<HelloGreetingProps> = ({ onComplete, userName }) =
           <motion.p
             initial={{ opacity: 0, y: 12, scale: 0.95 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
-            transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
+            transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
             className="mt-2 text-3xl sm:text-4xl md:text-5xl font-light text-neutral-500 tracking-wide"
             style={{ fontFamily: "'SF Pro Display', system-ui, -apple-system, sans-serif" }}
             onAnimationComplete={() => {
-              setTimeout(() => onComplete?.(), 1000);
+              setTimeout(() => onComplete?.(), 300);
             }}
           >
             {userName}
@@ -109,7 +109,7 @@ const BrandReveal: React.FC<BrandRevealProps> = ({ onComplete }) => {
         <motion.div
           initial={{ opacity: 0, scale: 0.5 }}
           animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
+          transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
         >
           <SplashLogo className="w-12 h-12 sm:w-16 sm:h-16 md:w-20 md:h-20 lg:w-24 lg:h-24" />
         </motion.div>
@@ -120,7 +120,7 @@ const BrandReveal: React.FC<BrandRevealProps> = ({ onComplete }) => {
           <motion.span
             initial={{ clipPath: 'inset(0 100% 0 0)' }}
             animate={{ clipPath: 'inset(0 0% 0 0)' }}
-            transition={{ duration: 1.2, ease: [0.22, 1, 0.36, 1], delay: 0.3 }}
+            transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1], delay: 0.15 }}
             className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-bold tracking-tight text-neutral-900"
             style={{ fontFamily: "'SF Pro Display', system-ui, -apple-system, sans-serif" }}
           >
@@ -131,7 +131,7 @@ const BrandReveal: React.FC<BrandRevealProps> = ({ onComplete }) => {
           <motion.span
             initial={{ clipPath: 'inset(0 100% 0 0)' }}
             animate={{ clipPath: 'inset(0 0% 0 0)' }}
-            transition={{ duration: 1.2, ease: [0.22, 1, 0.36, 1], delay: 0.9 }}
+            transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1], delay: 0.45 }}
             className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-bold tracking-tight"
             style={{
               fontFamily: "'SF Pro Display', system-ui, -apple-system, sans-serif",
@@ -146,7 +146,7 @@ const BrandReveal: React.FC<BrandRevealProps> = ({ onComplete }) => {
           <motion.sup
             initial={{ opacity: 0, scale: 0.6, x: -4 }}
             animate={showAI ? { opacity: 1, scale: 1, x: 0 } : {}}
-            transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
+            transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
             className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-semibold ml-1"
             style={{
               fontFamily: "'SF Pro Display', system-ui, -apple-system, sans-serif",
@@ -166,7 +166,7 @@ const BrandReveal: React.FC<BrandRevealProps> = ({ onComplete }) => {
       <motion.p
         initial={{ opacity: 0, y: 6 }}
         animate={showTagline ? { opacity: 1, y: 0 } : {}}
-        transition={{ duration: 0.8, ease: 'easeOut' }}
+        transition={{ duration: 0.4, ease: 'easeOut' }}
         className="mt-4 sm:mt-5 md:mt-6 text-xs sm:text-sm md:text-base text-neutral-400 font-light tracking-wide"
         onAnimationComplete={() => { if (showTagline && onComplete) onComplete(); }}
       >
@@ -187,7 +187,7 @@ interface SplashScreenProps {
 
 const SplashScreen: React.FC<SplashScreenProps> = ({
   onComplete,
-  minimumDuration = 4500,
+  minimumDuration = 2500,
   userName,
 }) => {
   const [phase, setPhase] = useState<'hello' | 'brand' | 'done'>('hello');
@@ -209,14 +209,14 @@ const SplashScreen: React.FC<SplashScreenProps> = ({
 
   useEffect(() => {
     if (phase === 'brand' && brandDone && minTimeReached) {
-      const t = setTimeout(() => setPhase('done'), 1400);
+      const t = setTimeout(() => setPhase('done'), 500);
       return () => clearTimeout(t);
     }
   }, [phase, brandDone, minTimeReached]);
 
   useEffect(() => {
     if (phase === 'done') {
-      const t = setTimeout(onComplete, 700);
+      const t = setTimeout(onComplete, 300);
       return () => clearTimeout(t);
     }
   }, [phase, onComplete]);
@@ -241,7 +241,7 @@ const SplashScreen: React.FC<SplashScreenProps> = ({
           key="splash"
           initial={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          transition={{ duration: 0.7, ease: [0.25, 0.1, 0.25, 1] }}
+          transition={{ duration: 0.4, ease: [0.25, 0.1, 0.25, 1] }}
           className="fixed inset-0 z-[99999] flex items-center justify-center overflow-hidden bg-white"
         >
           <AuroraLayer />
