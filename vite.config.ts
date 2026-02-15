@@ -60,7 +60,7 @@ export default defineConfig(({ mode }) => {
         react(),
         VitePWA({
           registerType: 'autoUpdate',
-          includeAssets: ['icons/*.svg', 'icons/*.png', 'og-image.svg', 'robots.txt'],
+          includeAssets: ['icons/*.svg', 'icons/*.png', 'og-image.png', 'og-image.svg', 'robots.txt'],
           manifest: {
             name: 'BalkanEstateAI',
             short_name: 'BalkanEstate',
