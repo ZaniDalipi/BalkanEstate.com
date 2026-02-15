@@ -92,7 +92,7 @@ export const createDiscountCode = async (req: Request, res: Response): Promise<v
     });
   } catch (error: any) {
     apiLogger.error('Create discount code error:', error);
-    res.status(500).json({ message: 'Error creating discount code', error: error.message });
+    res.status(500).json({ message: 'Error creating discount code' });
   }
 };
 
@@ -164,7 +164,7 @@ export const generateDiscountCodes = async (req: Request, res: Response): Promis
     });
   } catch (error: any) {
     apiLogger.error('Generate discount codes error:', error);
-    res.status(500).json({ message: 'Error generating discount codes', error: error.message });
+    res.status(500).json({ message: 'Error generating discount codes' });
   }
 };
 
@@ -224,7 +224,7 @@ export const validateDiscountCode = async (req: Request, res: Response): Promise
     });
   } catch (error: any) {
     apiLogger.error('Validate discount code error:', error);
-    res.status(500).json({ message: 'Error validating discount code', error: error.message });
+    res.status(500).json({ message: 'Error validating discount code' });
   }
 };
 
@@ -281,7 +281,7 @@ export const redeemDiscountCode = async (req: Request, res: Response): Promise<v
     });
   } catch (error: any) {
     apiLogger.error('Redeem discount code error:', error);
-    res.status(500).json({ message: 'Error redeeming discount code', error: error.message });
+    res.status(500).json({ message: 'Error redeeming discount code' });
   }
 };
 
@@ -341,7 +341,7 @@ export const getAllDiscountCodes = async (req: Request, res: Response): Promise<
     });
   } catch (error: any) {
     apiLogger.error('Get discount codes error:', error);
-    res.status(500).json({ message: 'Error fetching discount codes', error: error.message });
+    res.status(500).json({ message: 'Error fetching discount codes' });
   }
 };
 
@@ -383,7 +383,7 @@ export const deactivateDiscountCode = async (req: Request, res: Response): Promi
     });
   } catch (error: any) {
     apiLogger.error('Deactivate discount code error:', error);
-    res.status(500).json({ message: 'Error deactivating discount code', error: error.message });
+    res.status(500).json({ message: 'Error deactivating discount code' });
   }
 };
 
@@ -425,6 +425,6 @@ export const deleteDiscountCode = async (req: Request, res: Response): Promise<v
     res.json({ message: 'Discount code deleted successfully' });
   } catch (error: any) {
     apiLogger.error('Delete discount code error:', error);
-    res.status(500).json({ message: 'Error deleting discount code', error: error.message });
+    res.status(500).json({ message: 'Error deleting discount code' });
   }
 };

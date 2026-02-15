@@ -199,7 +199,7 @@ export const verifyPayseraPayment = async (req: Request, res: Response): Promise
     }
   } catch (error: any) {
     paymentLogger.error('Error verifying PaySera payment:', error);
-    res.status(500).json({ message: 'Error verifying payment', error: error.message });
+    res.status(500).json({ message: 'Error verifying payment' });
   }
 };
 

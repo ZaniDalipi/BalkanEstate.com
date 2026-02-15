@@ -36,7 +36,7 @@ export const getPromotionTiers = async (
     });
   } catch (error: any) {
     promotionLogger.error('Get promotion tiers error:', error);
-    res.status(500).json({ message: 'Error fetching promotion tiers', error: error.message });
+    res.status(500).json({ message: 'Error fetching promotion tiers' });
   }
 };
 
@@ -98,7 +98,7 @@ export const getAgencyPromotionAllocation = async ( // Renamed function
     res.json({ allocation, agency: { id: agency._id, name: agency.name } });
   } catch (error: any) {
     promotionLogger.error('Get agency allocation error:', error);
-    res.status(500).json({ message: 'Error fetching agency allocation', error: error.message });
+    res.status(500).json({ message: 'Error fetching agency allocation' });
   }
 };
 
@@ -407,7 +407,7 @@ export const purchasePromotion = async (
     });
   } catch (error: any) {
     promotionLogger.error('Purchase promotion error:', error);
-    res.status(500).json({ message: 'Error creating promotion', error: error.message });
+    res.status(500).json({ message: 'Error creating promotion' });
   }
 };
 
@@ -444,7 +444,7 @@ export const getMyPromotions = async (
     res.json({ promotions: enrichedPromotions });
   } catch (error: any) {
     promotionLogger.error('Get promotions error:', error);
-    res.status(500).json({ message: 'Error fetching promotions', error: error.message });
+    res.status(500).json({ message: 'Error fetching promotions' });
   }
 };
 
@@ -499,7 +499,7 @@ export const cancelPromotion = async (
     res.json({ message: 'Promotion cancelled successfully' });
   } catch (error: any) {
     promotionLogger.error('Cancel promotion error:', error);
-    res.status(500).json({ message: 'Error cancelling promotion', error: error.message });
+    res.status(500).json({ message: 'Error cancelling promotion' });
   }
 };
 
@@ -565,7 +565,7 @@ export const getFeaturedProperties = async (
     });
   } catch (error: any) {
     promotionLogger.error('Get featured properties error:', error);
-    res.status(500).json({ message: 'Error fetching featured properties', error: error.message });
+    res.status(500).json({ message: 'Error fetching featured properties' });
   }
 };
 
@@ -639,7 +639,7 @@ export const getPromotionStats = async (
     res.json({ stats });
   } catch (error: any) {
     promotionLogger.error('Get promotion stats error:', error);
-    res.status(500).json({ message: 'Error fetching promotion stats', error: error.message });
+    res.status(500).json({ message: 'Error fetching promotion stats' });
   }
 };
 
@@ -834,7 +834,7 @@ export const createPromotionCheckout = async (
     });
   } catch (error: any) {
     promotionLogger.error('Create promotion checkout error:', error);
-    res.status(500).json({ message: 'Error creating checkout session', error: error.message });
+    res.status(500).json({ message: 'Error creating checkout session' });
   }
 };
 
@@ -897,7 +897,7 @@ export const confirmPromotionPayment = async (
     });
   } catch (error: any) {
     promotionLogger.error('Confirm promotion payment error:', error);
-    res.status(500).json({ message: 'Error confirming payment', error: error.message });
+    res.status(500).json({ message: 'Error confirming payment' });
   }
 };
 
@@ -1054,7 +1054,7 @@ export const extendPromotion = async (
     });
   } catch (error: any) {
     promotionLogger.error('Extend promotion error:', error);
-    res.status(500).json({ message: 'Error extending promotion', error: error.message });
+    res.status(500).json({ message: 'Error extending promotion' });
   }
 };
 
@@ -1104,7 +1104,7 @@ export const confirmExtensionPayment = async (
     });
   } catch (error: any) {
     promotionLogger.error('Confirm extension payment error:', error);
-    res.status(500).json({ message: 'Error confirming extension', error: error.message });
+    res.status(500).json({ message: 'Error confirming extension' });
   }
 };
 
@@ -1220,7 +1220,7 @@ export const addUrgentBadge = async (
     });
   } catch (error: any) {
     promotionLogger.error('Add urgent badge error:', error);
-    res.status(500).json({ message: 'Error adding urgent badge', error: error.message });
+    res.status(500).json({ message: 'Error adding urgent badge' });
   }
 };
 
@@ -1257,7 +1257,7 @@ export const confirmUrgentBadgePayment = async (
     });
   } catch (error: any) {
     promotionLogger.error('Confirm urgent badge payment error:', error);
-    res.status(500).json({ message: 'Error confirming urgent badge', error: error.message });
+    res.status(500).json({ message: 'Error confirming urgent badge' });
   }
 };
 
@@ -1345,7 +1345,7 @@ export const getPromotionHistory = async (
     });
   } catch (error: any) {
     promotionLogger.error('Get promotion history error:', error);
-    res.status(500).json({ message: 'Error fetching promotion history', error: error.message });
+    res.status(500).json({ message: 'Error fetching promotion history' });
   }
 };
 
@@ -1409,7 +1409,7 @@ export const updateAutoExtend = async (
     });
   } catch (error: any) {
     promotionLogger.error('Update auto-extend error:', error);
-    res.status(500).json({ message: 'Error updating auto-extend', error: error.message });
+    res.status(500).json({ message: 'Error updating auto-extend' });
   }
 };
 
@@ -1450,7 +1450,7 @@ export const confirmAutoExtendPayment = async (
     });
   } catch (error: any) {
     promotionLogger.error('Confirm auto-extend payment error:', error);
-    res.status(500).json({ message: 'Error confirming auto-extend', error: error.message });
+    res.status(500).json({ message: 'Error confirming auto-extend' });
   }
 };
 
@@ -1504,6 +1504,6 @@ export const getAutoExtendCheckout = async (
     });
   } catch (error: any) {
     promotionLogger.error('Get auto-extend checkout error:', error);
-    res.status(500).json({ message: 'Error getting auto-extend checkout', error: error.message });
+    res.status(500).json({ message: 'Error getting auto-extend checkout' });
   }
 };

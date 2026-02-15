@@ -29,7 +29,7 @@ export interface AchievementInput {
 // User (Agent) Achievements
 
 export const getUserAchievements = async (userId: string): Promise<Achievement[]> => {
-  const token = localStorage.getItem('token');
+  const token = localStorage.getItem('balkan_estate_token');
   const response = await fetch(`${API_URL}/achievements/user/${userId}`, {
     headers: {
       'Authorization': token ? `Bearer ${token}` : '',
@@ -45,7 +45,7 @@ export const getUserAchievements = async (userId: string): Promise<Achievement[]
 };
 
 export const addUserAchievement = async (achievement: AchievementInput): Promise<Achievement> => {
-  const token = localStorage.getItem('token');
+  const token = localStorage.getItem('balkan_estate_token');
   if (!token) {
     throw new Error('Not authenticated');
   }
@@ -72,7 +72,7 @@ export const updateUserAchievement = async (
   achievementId: string,
   achievement: Partial<AchievementInput>
 ): Promise<Achievement> => {
-  const token = localStorage.getItem('token');
+  const token = localStorage.getItem('balkan_estate_token');
   if (!token) {
     throw new Error('Not authenticated');
   }
@@ -96,7 +96,7 @@ export const updateUserAchievement = async (
 };
 
 export const deleteUserAchievement = async (achievementId: string): Promise<void> => {
-  const token = localStorage.getItem('token');
+  const token = localStorage.getItem('balkan_estate_token');
   if (!token) {
     throw new Error('Not authenticated');
   }
@@ -117,7 +117,7 @@ export const deleteUserAchievement = async (achievementId: string): Promise<void
 // Agency Achievements
 
 export const getAgencyAchievements = async (agencyId: string): Promise<Achievement[]> => {
-  const token = localStorage.getItem('token');
+  const token = localStorage.getItem('balkan_estate_token');
   const response = await fetch(`${API_URL}/achievements/agency/${agencyId}`, {
     headers: {
       'Authorization': token ? `Bearer ${token}` : '',
@@ -136,7 +136,7 @@ export const addAgencyAchievement = async (
   agencyId: string,
   achievement: AchievementInput
 ): Promise<Achievement> => {
-  const token = localStorage.getItem('token');
+  const token = localStorage.getItem('balkan_estate_token');
   if (!token) {
     throw new Error('Not authenticated');
   }
@@ -164,7 +164,7 @@ export const updateAgencyAchievement = async (
   achievementId: string,
   achievement: Partial<AchievementInput>
 ): Promise<Achievement> => {
-  const token = localStorage.getItem('token');
+  const token = localStorage.getItem('balkan_estate_token');
   if (!token) {
     throw new Error('Not authenticated');
   }
@@ -191,7 +191,7 @@ export const deleteAgencyAchievement = async (
   agencyId: string,
   achievementId: string
 ): Promise<void> => {
-  const token = localStorage.getItem('token');
+  const token = localStorage.getItem('balkan_estate_token');
   if (!token) {
     throw new Error('Not authenticated');
   }

@@ -98,7 +98,7 @@ export const createCoupon = async (
     });
   } catch (error: any) {
     apiLogger.error('Create coupon error:', error);
-    res.status(500).json({ message: 'Error creating coupon', error: error.message });
+    res.status(500).json({ message: 'Error creating coupon' });
   }
 };
 
@@ -238,7 +238,7 @@ export const getAllCoupons = async (
     });
   } catch (error: any) {
     apiLogger.error('Get coupons error:', error);
-    res.status(500).json({ message: 'Error fetching coupons', error: error.message });
+    res.status(500).json({ message: 'Error fetching coupons' });
   }
 };
 
@@ -267,7 +267,7 @@ export const getPublicCoupons = async (
     });
   } catch (error: any) {
     apiLogger.error('Get public coupons error:', error);
-    res.status(500).json({ message: 'Error fetching public coupons', error: error.message });
+    res.status(500).json({ message: 'Error fetching public coupons' });
   }
 };
 
@@ -329,7 +329,7 @@ export const getCouponDetails = async (
     });
   } catch (error: any) {
     apiLogger.error('Get coupon details error:', error);
-    res.status(500).json({ message: 'Error fetching coupon details', error: error.message });
+    res.status(500).json({ message: 'Error fetching coupon details' });
   }
 };
 
@@ -409,7 +409,7 @@ export const updateCoupon = async (
     });
   } catch (error: any) {
     apiLogger.error('Update coupon error:', error);
-    res.status(500).json({ message: 'Error updating coupon', error: error.message });
+    res.status(500).json({ message: 'Error updating coupon' });
   }
 };
 
@@ -457,6 +457,6 @@ export const deleteCoupon = async (
     });
   } catch (error: any) {
     apiLogger.error('Delete coupon error:', error);
-    res.status(500).json({ message: 'Error deleting coupon', error: error.message });
+    res.status(500).json({ message: 'Error deleting coupon' });
   }
 };

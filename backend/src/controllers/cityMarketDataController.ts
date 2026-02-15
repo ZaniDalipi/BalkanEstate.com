@@ -23,7 +23,6 @@ export const getFeaturedCitiesController = async (req: Request, res: Response): 
     res.status(500).json({
       success: false,
       message: 'Error fetching featured cities',
-      error: error.message,
     });
   }
 };
@@ -48,7 +47,6 @@ export const getCitiesByCountryController = async (req: Request, res: Response):
     res.status(500).json({
       success: false,
       message: 'Error fetching cities',
-      error: error.message,
     });
   }
 };
@@ -80,7 +78,6 @@ export const getCityMarketDataController = async (req: Request, res: Response): 
     res.status(500).json({
       success: false,
       message: 'Error fetching market data',
-      error: error.message,
     });
   }
 };
@@ -115,7 +112,6 @@ export const triggerMarketDataUpdateController = async (req: Request, res: Respo
     res.status(500).json({
       success: false,
       message: 'Error triggering update',
-      error: error.message,
     });
   }
 };

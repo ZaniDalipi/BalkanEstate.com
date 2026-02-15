@@ -63,7 +63,7 @@ export const updateAutoExtend = async (
     });
   } catch (error: any) {
     promotionLogger.error('Update auto-extend error:', error);
-    res.status(500).json({ message: 'Error updating auto-extend', error: error.message });
+    res.status(500).json({ message: 'Error updating auto-extend' });
   }
 };
 
@@ -92,7 +92,7 @@ export const confirmAutoExtendPayment = async (
     });
   } catch (error: any) {
     promotionLogger.error('Confirm auto-extend payment error:', error);
-    res.status(500).json({ message: 'Error confirming auto-extend', error: error.message });
+    res.status(500).json({ message: 'Error confirming auto-extend' });
   }
 };
 
@@ -138,6 +138,6 @@ export const getAutoExtendCheckout = async (
     });
   } catch (error: any) {
     promotionLogger.error('Get auto-extend checkout error:', error);
-    res.status(500).json({ message: 'Error getting auto-extend checkout', error: error.message });
+    res.status(500).json({ message: 'Error getting auto-extend checkout' });
   }
 };

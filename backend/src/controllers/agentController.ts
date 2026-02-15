@@ -93,7 +93,7 @@ export const getAgents = async (req: Request, res: Response): Promise<void> => {
     });
   } catch (error: any) {
     apiLogger.error('Get agents error:', error);
-    res.status(500).json({ message: 'Error fetching agents', error: error.message });
+    res.status(500).json({ message: 'Error fetching agents' });
   }
 };
 
@@ -114,7 +114,7 @@ export const getAgent = async (req: Request, res: Response): Promise<void> => {
     res.json({ agent });
   } catch (error: any) {
     apiLogger.error('Get agent error:', error);
-    res.status(500).json({ message: 'Error fetching agent', error: error.message });
+    res.status(500).json({ message: 'Error fetching agent' });
   }
 };
 
@@ -135,7 +135,7 @@ export const getAgentByUserId = async (req: Request, res: Response): Promise<voi
     res.json({ agent });
   } catch (error: any) {
     apiLogger.error('Get agent by user ID error:', error);
-    res.status(500).json({ message: 'Error fetching agent', error: error.message });
+    res.status(500).json({ message: 'Error fetching agent' });
   }
 };
 
@@ -203,7 +203,7 @@ export const updateAgentProfile = async (req: Request, res: Response): Promise<v
     });
   } catch (error: any) {
     apiLogger.error('Update agent profile error:', error);
-    res.status(500).json({ message: 'Error updating agent profile', error: error.message });
+    res.status(500).json({ message: 'Error updating agent profile' });
   }
 };
 
@@ -289,7 +289,7 @@ export const addReview = async (req: Request, res: Response): Promise<void> => {
     });
   } catch (error: any) {
     apiLogger.error('Add review error:', error);
-    res.status(500).json({ message: 'Error adding review', error: error.message });
+    res.status(500).json({ message: 'Error adding review' });
   }
 };
 
@@ -338,7 +338,7 @@ export const addTestimonial = async (req: Request, res: Response): Promise<void>
     });
   } catch (error: any) {
     apiLogger.error('Add testimonial error:', error);
-    res.status(500).json({ message: 'Error adding testimonial', error: error.message });
+    res.status(500).json({ message: 'Error adding testimonial' });
   }
 };
 
@@ -491,7 +491,7 @@ export const leaveAgency = async (req: Request, res: Response): Promise<void> =>
     });
   } catch (error: any) {
     apiLogger.error('Leave agency error:', error);
-    res.status(500).json({ message: 'Error leaving agency', error: error.message });
+    res.status(500).json({ message: 'Error leaving agency' });
   }
 };
 
@@ -610,6 +610,6 @@ export const getAgentMarketInsights = async (req: Request, res: Response): Promi
     });
   } catch (error: any) {
     apiLogger.error('Get agent market insights error:', error);
-    res.status(500).json({ message: 'Error fetching market insights', error: error.message });
+    res.status(500).json({ message: 'Error fetching market insights' });
   }
 };

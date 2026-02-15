@@ -134,7 +134,7 @@ export const extendPromotion = async (
     });
   } catch (error: any) {
     promotionLogger.error('Extend promotion error:', error);
-    res.status(500).json({ message: 'Error extending promotion', error: error.message });
+    res.status(500).json({ message: 'Error extending promotion' });
   }
 };
 
@@ -163,6 +163,6 @@ export const confirmExtensionPayment = async (
     });
   } catch (error: any) {
     promotionLogger.error('Confirm extension payment error:', error);
-    res.status(500).json({ message: 'Error confirming extension', error: error.message });
+    res.status(500).json({ message: 'Error confirming extension' });
   }
 };

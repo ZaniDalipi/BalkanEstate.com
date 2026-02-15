@@ -75,7 +75,7 @@ export const getViewingAvailability = async (req: Request, res: Response): Promi
     });
   } catch (error: any) {
     apiLogger.error('Get viewing availability error:', error);
-    res.status(500).json({ message: 'Error fetching availability', error: error.message });
+    res.status(500).json({ message: 'Error fetching availability' });
   }
 };
 
@@ -236,7 +236,7 @@ export const scheduleViewing = async (req: Request, res: Response): Promise<void
     });
   } catch (error: any) {
     apiLogger.error('Schedule viewing error:', error);
-    res.status(500).json({ message: 'Error scheduling viewing', error: error.message });
+    res.status(500).json({ message: 'Error scheduling viewing' });
   }
 };
 
@@ -311,7 +311,7 @@ export const getSellerViewings = async (req: Request, res: Response): Promise<vo
     });
   } catch (error: any) {
     apiLogger.error('Get seller viewings error:', error);
-    res.status(500).json({ message: 'Error fetching viewings', error: error.message });
+    res.status(500).json({ message: 'Error fetching viewings' });
   }
 };
 
@@ -427,6 +427,6 @@ export const updateViewingStatus = async (req: Request, res: Response): Promise<
     });
   } catch (error: any) {
     apiLogger.error('Update viewing status error:', error);
-    res.status(500).json({ message: 'Error updating viewing status', error: error.message });
+    res.status(500).json({ message: 'Error updating viewing status' });
   }
 };

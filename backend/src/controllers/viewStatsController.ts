@@ -225,7 +225,7 @@ export const trackView = async (req: Request, res: Response): Promise<void> => {
     });
   } catch (error: any) {
     apiLogger.error('Track view error:', error);
-    res.status(500).json({ message: 'Error tracking view', error: error.message });
+    res.status(500).json({ message: 'Error tracking view' });
   }
 };
 
@@ -246,7 +246,7 @@ export const updateViewDuration = async (req: Request, res: Response): Promise<v
     res.json({ success: true });
   } catch (error: any) {
     apiLogger.error('Update view duration error:', error);
-    res.status(500).json({ message: 'Error updating duration', error: error.message });
+    res.status(500).json({ message: 'Error updating duration' });
   }
 };
 
@@ -474,7 +474,7 @@ export const getEntityStats = async (req: Request, res: Response): Promise<void>
     });
   } catch (error: any) {
     apiLogger.error('Get entity stats error:', error);
-    res.status(500).json({ message: 'Error fetching statistics', error: error.message });
+    res.status(500).json({ message: 'Error fetching statistics' });
   }
 };
 
@@ -707,7 +707,7 @@ export const getMyPropertiesStats = async (req: Request, res: Response): Promise
     });
   } catch (error: any) {
     apiLogger.error('Get my properties stats error:', error);
-    res.status(500).json({ message: 'Error fetching statistics', error: error.message });
+    res.status(500).json({ message: 'Error fetching statistics' });
   }
 };
 
@@ -733,7 +733,7 @@ export const getMyAgentStats = async (req: Request, res: Response): Promise<void
     return getEntityStats(req, res);
   } catch (error: any) {
     apiLogger.error('Get my agent stats error:', error);
-    res.status(500).json({ message: 'Error fetching statistics', error: error.message });
+    res.status(500).json({ message: 'Error fetching statistics' });
   }
 };
 
@@ -762,7 +762,7 @@ export const getMyAgencyStats = async (req: Request, res: Response): Promise<voi
     return getEntityStats(req, res);
   } catch (error: any) {
     apiLogger.error('Get my agency stats error:', error);
-    res.status(500).json({ message: 'Error fetching statistics', error: error.message });
+    res.status(500).json({ message: 'Error fetching statistics' });
   }
 };
 
@@ -856,7 +856,7 @@ export const getComparisonStats = async (req: Request, res: Response): Promise<v
     }
   } catch (error: any) {
     apiLogger.error('Get comparison stats error:', error);
-    res.status(500).json({ message: 'Error fetching comparison', error: error.message });
+    res.status(500).json({ message: 'Error fetching comparison' });
   }
 };
 
@@ -1097,7 +1097,7 @@ export const generateReport = async (req: Request, res: Response): Promise<void>
     });
   } catch (error: any) {
     apiLogger.error('Generate report error:', error);
-    res.status(500).json({ message: 'Error generating report', error: error.message });
+    res.status(500).json({ message: 'Error generating report' });
   }
 };
 
@@ -1361,6 +1361,6 @@ export const getDashboardOverview = async (req: Request, res: Response): Promise
     });
   } catch (error: any) {
     apiLogger.error('Get dashboard overview error:', error);
-    res.status(500).json({ message: 'Error fetching dashboard', error: error.message });
+    res.status(500).json({ message: 'Error fetching dashboard' });
   }
 };

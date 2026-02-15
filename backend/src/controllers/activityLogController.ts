@@ -37,7 +37,6 @@ export const getActivityLogs = async (req: Request, res: Response): Promise<void
     res.status(500).json({
       success: false,
       message: 'Error fetching activity logs',
-      error: error.message,
     });
   }
 };
@@ -59,7 +58,6 @@ export const getDailySummary = async (req: Request, res: Response): Promise<void
     res.status(500).json({
       success: false,
       message: 'Error fetching activity summary',
-      error: error.message,
     });
   }
 };
@@ -88,7 +86,6 @@ export const getUserActivityLogs = async (req: Request, res: Response): Promise<
     res.status(500).json({
       success: false,
       message: 'Error fetching user activity logs',
-      error: error.message,
     });
   }
 };

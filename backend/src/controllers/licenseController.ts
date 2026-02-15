@@ -77,7 +77,6 @@ export const uploadLicense = async (
     apiLogger.error('Upload license error:', error);
     res.status(500).json({
       message: 'Error uploading license',
-      error: error.message
     });
   }
 };
@@ -126,7 +125,6 @@ export const getLicense = async (
     apiLogger.error('Get license error:', error);
     res.status(500).json({
       message: 'Error fetching license',
-      error: error.message
     });
   }
 };
@@ -175,7 +173,6 @@ export const deleteLicense = async (
     apiLogger.error('Delete license error:', error);
     res.status(500).json({
       message: 'Error deleting license',
-      error: error.message
     });
   }
 };

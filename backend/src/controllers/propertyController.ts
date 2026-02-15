@@ -281,7 +281,7 @@ export const getProperties = async (
     });
   } catch (error: any) {
     propertyLogger.error('Get properties error:', error);
-    res.status(500).json({ message: 'Error fetching properties', error: error.message });
+    res.status(500).json({ message: 'Error fetching properties' });
   }
 };
 
@@ -323,7 +323,7 @@ export const getProperty = async (
     res.json({ property: enrichedProperty });
   } catch (error: any) {
     propertyLogger.error('Get property error:', error);
-    res.status(500).json({ message: 'Error fetching property', error: error.message });
+    res.status(500).json({ message: 'Error fetching property' });
   }
 };
 
@@ -643,7 +643,7 @@ export const createProperty = async (
     });
   } catch (error: any) {
     propertyLogger.error('Create property error:', error);
-    res.status(500).json({ message: 'Error creating property', error: error.message });
+    res.status(500).json({ message: 'Error creating property' });
   }
 };
 
@@ -794,7 +794,7 @@ export const updateProperty = async (
     res.json({ property });
   } catch (error: any) {
     propertyLogger.error('Update property error:', error);
-    res.status(500).json({ message: 'Error updating property', error: error.message });
+    res.status(500).json({ message: 'Error updating property' });
   }
 };
 
@@ -965,7 +965,7 @@ export const deleteProperty = async (
     });
   } catch (error: any) {
     propertyLogger.error('Delete property error:', error);
-    res.status(500).json({ message: 'Error deleting property', error: error.message });
+    res.status(500).json({ message: 'Error deleting property' });
   }
 };
 
@@ -1006,7 +1006,7 @@ export const getMyListings = async (
     res.json({ properties });
   } catch (error: any) {
     propertyLogger.error('Get my listings error:', error);
-    res.status(500).json({ message: 'Error fetching listings', error: error.message });
+    res.status(500).json({ message: 'Error fetching listings' });
   }
 };
 
@@ -1057,7 +1057,7 @@ export const uploadImages = async (
     });
   } catch (error: any) {
     propertyLogger.error('❌ Upload images error:', error);
-    res.status(500).json({ message: 'Error uploading images', error: error.message });
+    res.status(500).json({ message: 'Error uploading images' });
   }
 };
 
@@ -1155,7 +1155,7 @@ export const markAsSold = async (
     res.json({ property });
   } catch (error: any) {
     propertyLogger.error('Mark as sold error:', error);
-    res.status(500).json({ message: 'Error marking property as sold', error: error.message });
+    res.status(500).json({ message: 'Error marking property as sold' });
   }
 };
 
@@ -1217,7 +1217,7 @@ export const markAsRented = async (
     res.json({ property });
   } catch (error: any) {
     propertyLogger.error('Mark as rented error:', error);
-    res.status(500).json({ message: 'Error marking property as rented', error: error.message });
+    res.status(500).json({ message: 'Error marking property as rented' });
   }
 };
 
@@ -1308,7 +1308,7 @@ export const markAsAvailable = async (
     res.json({ property: updatedProperty });
   } catch (error: any) {
     propertyLogger.error('Mark as available error:', error);
-    res.status(500).json({ message: 'Error marking property as available', error: error.message });
+    res.status(500).json({ message: 'Error marking property as available' });
   }
 };
 
@@ -1362,7 +1362,7 @@ export const addRentalHistoryEntry = async (
     res.json({ property: updatedProperty });
   } catch (error: any) {
     propertyLogger.error('Add rental history error:', error);
-    res.status(500).json({ message: 'Error adding rental history entry', error: error.message });
+    res.status(500).json({ message: 'Error adding rental history entry' });
   }
 };
 
@@ -1402,7 +1402,7 @@ export const deleteRentalHistoryEntry = async (
     res.json({ property: updatedProperty });
   } catch (error: any) {
     propertyLogger.error('Delete rental history error:', error);
-    res.status(500).json({ message: 'Error deleting rental history entry', error: error.message });
+    res.status(500).json({ message: 'Error deleting rental history entry' });
   }
 };
 
@@ -1480,6 +1480,6 @@ export const renewProperty = async (
     });
   } catch (error: any) {
     propertyLogger.error('Renew property error:', error);
-    res.status(500).json({ message: 'Error renewing property', error: error.message });
+    res.status(500).json({ message: 'Error renewing property' });
   }
 };

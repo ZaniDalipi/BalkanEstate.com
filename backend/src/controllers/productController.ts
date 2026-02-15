@@ -133,7 +133,6 @@ export const createProduct = async (req: Request, res: Response): Promise<void> 
     res.status(500).json({
       success: false,
       message: 'Failed to create product',
-      error: error.message,
     });
   }
 };
@@ -173,7 +172,6 @@ export const updateProduct = async (req: Request, res: Response): Promise<void> 
     res.status(500).json({
       success: false,
       message: 'Failed to update product',
-      error: error.message,
     });
   }
 };
@@ -208,7 +206,6 @@ export const deleteProduct = async (req: Request, res: Response): Promise<void> 
     res.status(500).json({
       success: false,
       message: 'Failed to delete product',
-      error: error.message,
     });
   }
 };
@@ -247,7 +244,6 @@ export const toggleProductVisibility = async (req: Request, res: Response): Prom
     res.status(500).json({
       success: false,
       message: 'Failed to toggle product visibility',
-      error: error.message,
     });
   }
 };
@@ -286,7 +282,6 @@ export const toggleProductStatus = async (req: Request, res: Response): Promise<
     res.status(500).json({
       success: false,
       message: 'Failed to toggle product status',
-      error: error.message,
     });
   }
 };

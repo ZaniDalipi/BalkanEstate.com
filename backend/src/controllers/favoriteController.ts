@@ -35,7 +35,7 @@ export const getFavorites = async (
     res.json({ favorites: validFavorites });
   } catch (error: any) {
     apiLogger.error('Get favorites error:', error);
-    res.status(500).json({ message: 'Error fetching favorites', error: error.message });
+    res.status(500).json({ message: 'Error fetching favorites' });
   }
 };
 
@@ -103,7 +103,7 @@ export const toggleFavorite = async (
     }
   } catch (error: any) {
     apiLogger.error('Toggle favorite error:', error);
-    res.status(500).json({ message: 'Error toggling favorite', error: error.message });
+    res.status(500).json({ message: 'Error toggling favorite' });
   }
 };
 
@@ -128,6 +128,6 @@ export const checkFavorite = async (
     res.json({ isSaved: !!favorite });
   } catch (error: any) {
     apiLogger.error('Check favorite error:', error);
-    res.status(500).json({ message: 'Error checking favorite', error: error.message });
+    res.status(500).json({ message: 'Error checking favorite' });
   }
 };

@@ -34,7 +34,7 @@ export const getSavedAgents = async (
     res.json({ savedAgents: validSavedAgents });
   } catch (error: any) {
     apiLogger.error('Get saved agents error:', error);
-    res.status(500).json({ message: 'Error fetching saved agents', error: error.message });
+    res.status(500).json({ message: 'Error fetching saved agents' });
   }
 };
 
@@ -86,7 +86,7 @@ export const toggleSavedAgent = async (
     }
   } catch (error: any) {
     apiLogger.error('Toggle saved agent error:', error);
-    res.status(500).json({ message: 'Error toggling saved agent', error: error.message });
+    res.status(500).json({ message: 'Error toggling saved agent' });
   }
 };
 
@@ -111,6 +111,6 @@ export const checkSavedAgent = async (
     res.json({ isSaved: !!savedAgent });
   } catch (error: any) {
     apiLogger.error('Check saved agent error:', error);
-    res.status(500).json({ message: 'Error checking saved agent', error: error.message });
+    res.status(500).json({ message: 'Error checking saved agent' });
   }
 };

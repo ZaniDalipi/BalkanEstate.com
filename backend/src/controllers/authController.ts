@@ -852,9 +852,18 @@ export const getMe = async (req: Request, res: Response): Promise<void> => {
         isSubscribed: user.isSubscribed,
         subscriptionPlan: user.subscriptionPlan,
         subscriptionExpiresAt: user.subscriptionExpiresAt,
-        proSubscription: user.proSubscription,
-        freeSubscription: user.freeSubscription,
-        subscription: user.subscription,
+        // SECURITY: Only expose sanitized subscription info, not raw internal objects
+        subscription: user.subscription ? {
+          tier: user.subscription.tier,
+          status: user.subscription.status,
+          listingsLimit: user.subscription.listingsLimit,
+          activeListingsCount: user.subscription.activeListingsCount,
+          privateSellerCount: user.subscription.privateSellerCount,
+          agentCount: user.subscription.agentCount,
+          promotionCoupons: user.subscription.promotionCoupons,
+          savedSearchesLimit: user.subscription.savedSearchesLimit,
+          expiresAt: user.subscription.expiresAt,
+        } : undefined,
       },
     });
   } catch (error: any) {
@@ -2008,8 +2017,6 @@ export const setActiveRole = async (req: Request, res: Response): Promise<void> 
         agentId: user.agentId,
         licenseNumber: user.licenseNumber,
         isSubscribed: user.isSubscribed,
-        proSubscription: user.proSubscription,
-        freeSubscription: user.freeSubscription,
       },
     });
   } catch (error: any) {
@@ -2093,8 +2100,6 @@ export const addRole = async (req: Request, res: Response): Promise<void> => {
         agentId: user.agentId,
         licenseNumber: user.licenseNumber,
         isSubscribed: user.isSubscribed,
-        proSubscription: user.proSubscription,
-        freeSubscription: user.freeSubscription,
       },
     });
   } catch (error: any) {

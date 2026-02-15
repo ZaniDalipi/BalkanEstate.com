@@ -141,12 +141,13 @@ export const createSubscription = async (req: Request, res: Response): Promise<v
       user: {
         id: user._id,
         email: user.email,
-        proSubscription: user.proSubscription,
+        isSubscribed: user.isSubscribed,
+        subscriptionPlan: user.subscriptionPlan,
       },
     });
   } catch (error: any) {
     subscriptionLogger.error('Error creating subscription:', error);
-    res.status(500).json({ message: 'Error creating subscription', error: error.message });
+    res.status(500).json({ message: 'Error creating subscription' });
   }
 };
 
@@ -183,7 +184,7 @@ export const getUserSubscriptions = async (req: Request, res: Response): Promise
     });
   } catch (error: any) {
     subscriptionLogger.error('Error getting subscriptions:', error);
-    res.status(500).json({ message: 'Error getting subscriptions', error: error.message });
+    res.status(500).json({ message: 'Error getting subscriptions' });
   }
 };
 
@@ -288,8 +289,7 @@ export const getCurrentSubscription = async (req: Request, res: Response): Promi
         userId: subscription.userId,
         store: subscription.store,
         productId: subscription.productId,
-        purchaseToken: subscription.purchaseToken,
-        transactionId: subscription.transactionId,
+        // SECURITY: purchaseToken and transactionId are internal store identifiers - not exposed to client
         startDate: subscription.startDate,
         renewalDate: subscription.renewalDate,
         expirationDate: subscription.expirationDate,
@@ -306,7 +306,7 @@ export const getCurrentSubscription = async (req: Request, res: Response): Promi
     });
   } catch (error: any) {
     subscriptionLogger.error('Error getting current subscription:', error);
-    res.status(500).json({ message: 'Error getting current subscription', error: error.message });
+    res.status(500).json({ message: 'Error getting current subscription' });
   }
 };
 
@@ -353,7 +353,7 @@ export const getSubscriptionById = async (req: Request, res: Response): Promise<
     });
   } catch (error: any) {
     subscriptionLogger.error('Error getting subscription:', error);
-    res.status(500).json({ message: 'Error getting subscription', error: error.message });
+    res.status(500).json({ message: 'Error getting subscription' });
   }
 };
 
@@ -420,7 +420,7 @@ export const cancelSubscription = async (req: Request, res: Response): Promise<v
     });
   } catch (error: any) {
     subscriptionLogger.error('Error canceling subscription:', error);
-    res.status(500).json({ message: 'Error canceling subscription', error: error.message });
+    res.status(500).json({ message: 'Error canceling subscription' });
   }
 };
 
@@ -476,7 +476,7 @@ export const restoreSubscription = async (req: Request, res: Response): Promise<
     });
   } catch (error: any) {
     subscriptionLogger.error('Error restoring subscription:', error);
-    res.status(500).json({ message: 'Error restoring subscription', error: error.message });
+    res.status(500).json({ message: 'Error restoring subscription' });
   }
 };
 
@@ -517,7 +517,7 @@ export const getSubscriptionEvents = async (req: Request, res: Response): Promis
     });
   } catch (error: any) {
     subscriptionLogger.error('Error getting subscription events:', error);
-    res.status(500).json({ message: 'Error getting subscription events', error: error.message });
+    res.status(500).json({ message: 'Error getting subscription events' });
   }
 };
 
@@ -560,10 +560,7 @@ export const getSubscriptionPayments = async (req: Request, res: Response): Prom
     });
   } catch (error: any) {
     subscriptionLogger.error('Error getting subscription payments:', error);
-    res.status(500).json({
-      message: 'Error getting subscription payments',
-      error: error.message,
-    });
+    res.status(500).json({ message: 'Error getting subscription payments' });
   }
 };
 
@@ -631,7 +628,7 @@ export const verifySubscription = async (req: Request, res: Response): Promise<v
     });
   } catch (error: any) {
     subscriptionLogger.error('Error verifying subscription:', error);
-    res.status(500).json({ message: 'Error verifying subscription', error: error.message });
+    res.status(500).json({ message: 'Error verifying subscription' });
   }
 };
 
@@ -709,16 +706,14 @@ export const activateTestProSubscription = async (req: Request, res: Response): 
         email: user.email,
         role: user.role,
         availableRoles: user.availableRoles,
-        proSubscription: user.proSubscription,
-        freeSubscription: user.freeSubscription,
+        isSubscribed: user.isSubscribed,
+        subscriptionPlan: user.subscriptionPlan,
+        subscriptionExpiresAt: user.subscriptionExpiresAt,
       },
     });
   } catch (error: any) {
     subscriptionLogger.error('Error activating test Pro subscription:', error);
-    res.status(500).json({
-      message: 'Error activating test Pro subscription',
-      error: error.message,
-    });
+    res.status(500).json({ message: 'Error activating test Pro subscription' });
   }
 };
 
@@ -787,7 +782,9 @@ export const syncProSubscription = async (req: Request, res: Response): Promise<
         user: {
           id: user._id,
           email: user.email,
-          proSubscription: user.proSubscription,
+          isSubscribed: user.isSubscribed,
+          subscriptionPlan: user.subscriptionPlan,
+          subscriptionExpiresAt: user.subscriptionExpiresAt,
         },
       });
     } else {
@@ -798,9 +795,6 @@ export const syncProSubscription = async (req: Request, res: Response): Promise<
     }
   } catch (error: any) {
     subscriptionLogger.error('Error syncing Pro subscription:', error);
-    res.status(500).json({
-      message: 'Error syncing Pro subscription',
-      error: error.message,
-    });
+    res.status(500).json({ message: 'Error syncing Pro subscription' });
   }
 };

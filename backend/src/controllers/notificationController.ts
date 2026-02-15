@@ -32,7 +32,7 @@ export const getNotifications = async (req: Request, res: Response): Promise<voi
     });
   } catch (error: any) {
     apiLogger.error('Get notifications error:', error);
-    res.status(500).json({ message: 'Error fetching notifications', error: error.message });
+    res.status(500).json({ message: 'Error fetching notifications' });
   }
 };
 
@@ -54,7 +54,7 @@ export const getUnreadCount = async (req: Request, res: Response): Promise<void>
     res.json({ count });
   } catch (error: any) {
     apiLogger.error('Get unread count error:', error);
-    res.status(500).json({ message: 'Error fetching unread count', error: error.message });
+    res.status(500).json({ message: 'Error fetching unread count' });
   }
 };
 
@@ -82,7 +82,7 @@ export const markAsRead = async (req: Request, res: Response): Promise<void> => 
     }
   } catch (error: any) {
     apiLogger.error('Mark as read error:', error);
-    res.status(500).json({ message: 'Error marking notification as read', error: error.message });
+    res.status(500).json({ message: 'Error marking notification as read' });
   }
 };
 
@@ -104,7 +104,7 @@ export const markAllAsRead = async (req: Request, res: Response): Promise<void> 
     res.json({ success: true, markedCount: count });
   } catch (error: any) {
     apiLogger.error('Mark all as read error:', error);
-    res.status(500).json({ message: 'Error marking notifications as read', error: error.message });
+    res.status(500).json({ message: 'Error marking notifications as read' });
   }
 };
 
@@ -128,6 +128,6 @@ export const getUnreadNotifications = async (req: Request, res: Response): Promi
     res.json({ notifications });
   } catch (error: any) {
     apiLogger.error('Get unread notifications error:', error);
-    res.status(500).json({ message: 'Error fetching unread notifications', error: error.message });
+    res.status(500).json({ message: 'Error fetching unread notifications' });
   }
 };

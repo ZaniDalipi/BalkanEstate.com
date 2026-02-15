@@ -108,7 +108,6 @@ export const sendPropertyInquiry = async (
     apiLogger.error('Send property inquiry error:', error);
     res.status(500).json({
       message: 'Error sending inquiry',
-      error: error.message,
     });
   }
 };
@@ -187,7 +186,6 @@ export const sendAgentGeneralInquiry = async (
     apiLogger.error('Send agent inquiry error:', error);
     res.status(500).json({
       message: 'Error sending inquiry',
-      error: error.message,
     });
   }
 };
@@ -307,7 +305,6 @@ export const sendAreaSearchInquiry = async (
     apiLogger.error('Send area search inquiry error:', error);
     res.status(500).json({
       message: 'Error sending inquiry',
-      error: error.message,
     });
   }
 };
@@ -406,7 +403,6 @@ export const sendContactInquiry = async (
     apiLogger.error('Send contact inquiry error:', error);
     res.status(500).json({
       message: 'Error sending message',
-      error: error.message,
     });
   }
 };

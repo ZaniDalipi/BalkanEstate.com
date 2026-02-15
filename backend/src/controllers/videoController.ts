@@ -141,7 +141,6 @@ export const generateVideo = async (req: Request, res: Response): Promise<void> 
     videoLogger.error('❌ Video generation error:', error);
     res.status(500).json({
       message: 'Failed to generate video',
-      error: error.message,
     });
   }
 };
@@ -237,7 +236,6 @@ export const startAsyncVideoGeneration = async (req: Request, res: Response): Pr
     videoLogger.error('❌ Failed to start video generation:', error);
     res.status(500).json({
       message: 'Failed to start video generation',
-      error: error.message,
     });
   }
 };
@@ -263,7 +261,6 @@ export const getJobStatus = async (req: Request, res: Response): Promise<void> =
     videoLogger.error('❌ Failed to get job status:', error);
     res.status(500).json({
       message: 'Failed to get job status',
-      error: error.message,
     });
   }
 };
@@ -326,7 +323,6 @@ export const deleteVideo = async (req: Request, res: Response): Promise<void> =>
     videoLogger.error('❌ Failed to delete video:', error);
     res.status(500).json({
       message: 'Failed to delete video',
-      error: error.message,
     });
   }
 };
@@ -419,7 +415,6 @@ export const getVideoPreview = async (req: Request, res: Response): Promise<void
     videoLogger.error('❌ Failed to get video preview:', error);
     res.status(500).json({
       message: 'Failed to get video preview',
-      error: error.message,
     });
   }
 };

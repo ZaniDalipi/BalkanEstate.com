@@ -34,7 +34,7 @@ export const getPromotionTiers = async (
     });
   } catch (error: any) {
     promotionLogger.error('Get promotion tiers error:', error);
-    res.status(500).json({ message: 'Error fetching promotion tiers', error: error.message });
+    res.status(500).json({ message: 'Error fetching promotion tiers' });
   }
 };
 
@@ -93,7 +93,7 @@ export const getAgencyPromotionAllocation = async (
     res.json({ allocation, agency: { id: agency._id, name: agency.name } });
   } catch (error: any) {
     promotionLogger.error('Get agency allocation error:', error);
-    res.status(500).json({ message: 'Error fetching agency allocation', error: error.message });
+    res.status(500).json({ message: 'Error fetching agency allocation' });
   }
 };
 
@@ -123,7 +123,7 @@ export const getMyPromotions = async (
     res.json({ promotions: enrichedPromotions });
   } catch (error: any) {
     promotionLogger.error('Get promotions error:', error);
-    res.status(500).json({ message: 'Error fetching promotions', error: error.message });
+    res.status(500).json({ message: 'Error fetching promotions' });
   }
 };
 
@@ -168,7 +168,7 @@ export const cancelPromotion = async (
     res.json({ message: 'Promotion cancelled successfully' });
   } catch (error: any) {
     promotionLogger.error('Cancel promotion error:', error);
-    res.status(500).json({ message: 'Error cancelling promotion', error: error.message });
+    res.status(500).json({ message: 'Error cancelling promotion' });
   }
 };
 
@@ -224,6 +224,6 @@ export const getFeaturedProperties = async (
     });
   } catch (error: any) {
     promotionLogger.error('Get featured properties error:', error);
-    res.status(500).json({ message: 'Error fetching featured properties', error: error.message });
+    res.status(500).json({ message: 'Error fetching featured properties' });
   }
 };

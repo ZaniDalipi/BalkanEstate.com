@@ -70,7 +70,7 @@ export const getAllSubscriptions = async (req: Request, res: Response): Promise<
     });
   } catch (error: any) {
     adminLogger.error('[Admin] Error getting subscriptions:', error);
-    res.status(500).json({ message: 'Error getting subscriptions', error: error.message });
+    res.status(500).json({ message: 'Error getting subscriptions' });
   }
 };
 
@@ -111,7 +111,7 @@ export const getSubscriptionById = async (req: Request, res: Response): Promise<
     });
   } catch (error: any) {
     adminLogger.error('[Admin] Error getting subscription:', error);
-    res.status(500).json({ message: 'Error getting subscription', error: error.message });
+    res.status(500).json({ message: 'Error getting subscription' });
   }
 };
 
@@ -182,7 +182,7 @@ export const getAllPayments = async (req: Request, res: Response): Promise<void>
     });
   } catch (error: any) {
     adminLogger.error('[Admin] Error getting payments:', error);
-    res.status(500).json({ message: 'Error getting payments', error: error.message });
+    res.status(500).json({ message: 'Error getting payments' });
   }
 };
 
@@ -211,7 +211,7 @@ export const getPaymentById = async (req: Request, res: Response): Promise<void>
     });
   } catch (error: any) {
     adminLogger.error('[Admin] Error getting payment:', error);
-    res.status(500).json({ message: 'Error getting payment', error: error.message });
+    res.status(500).json({ message: 'Error getting payment' });
   }
 };
 
@@ -302,7 +302,7 @@ export const getPaymentStats = async (req: Request, res: Response): Promise<void
     });
   } catch (error: any) {
     adminLogger.error('[Admin] Error getting payment stats:', error);
-    res.status(500).json({ message: 'Error getting payment stats', error: error.message });
+    res.status(500).json({ message: 'Error getting payment stats' });
   }
 };
 
@@ -390,7 +390,7 @@ export const activateUserSubscription = async (req: Request, res: Response): Pro
     });
   } catch (error: any) {
     adminLogger.error('[Admin] Error activating subscription:', error);
-    res.status(500).json({ message: 'Error activating subscription', error: error.message });
+    res.status(500).json({ message: 'Error activating subscription' });
   }
 };
 
@@ -464,7 +464,7 @@ export const cancelSubscription = async (req: Request, res: Response): Promise<v
     });
   } catch (error: any) {
     adminLogger.error('[Admin] Error canceling subscription:', error);
-    res.status(500).json({ message: 'Error canceling subscription', error: error.message });
+    res.status(500).json({ message: 'Error canceling subscription' });
   }
 };
 

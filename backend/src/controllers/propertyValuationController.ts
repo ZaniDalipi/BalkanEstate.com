@@ -105,7 +105,6 @@ export const createValuationController = async (req: Request, res: Response): Pr
     res.status(500).json({
       success: false,
       message: 'Error creating property valuation',
-      error: error.message,
     });
   }
 };
@@ -138,7 +137,6 @@ export const getValuationController = async (req: Request, res: Response): Promi
     res.status(500).json({
       success: false,
       message: 'Error fetching valuation',
-      error: error.message,
     });
   }
 };
@@ -173,7 +171,6 @@ export const getValuationHistoryController = async (req: Request, res: Response)
     res.status(500).json({
       success: false,
       message: 'Error fetching valuation history',
-      error: error.message,
     });
   }
 };
@@ -206,7 +203,6 @@ export const getCityStatsController = async (req: Request, res: Response): Promi
     res.status(500).json({
       success: false,
       message: 'Error fetching city statistics',
-      error: error.message,
     });
   }
 };

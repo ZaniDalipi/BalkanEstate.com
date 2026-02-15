@@ -83,7 +83,7 @@ export const createUnifiedPayment = async (req: Request, res: Response): Promise
     });
   } catch (error: any) {
     paymentLogger.error('Error creating unified payment:', error);
-    res.status(500).json({ message: 'Error creating payment', error: error.message });
+    res.status(500).json({ message: 'Error creating payment' });
   }
 };
 
@@ -118,7 +118,7 @@ export const getPaymentProviders = async (req: Request, res: Response): Promise<
     });
   } catch (error: any) {
     paymentLogger.error('Error getting payment providers:', error);
-    res.status(500).json({ message: 'Error getting providers', error: error.message });
+    res.status(500).json({ message: 'Error getting providers' });
   }
 };
 
@@ -140,7 +140,7 @@ export const getSupportedCountries = async (_req: Request, res: Response): Promi
     });
   } catch (error: any) {
     paymentLogger.error('Error getting supported countries:', error);
-    res.status(500).json({ message: 'Error getting countries', error: error.message });
+    res.status(500).json({ message: 'Error getting countries' });
   }
 };
 
@@ -220,7 +220,7 @@ export const processPayment = async (req: Request, res: Response): Promise<void>
     });
   } catch (error: any) {
     paymentLogger.error('Error processing payment:', error);
-    res.status(500).json({ message: 'Error processing payment', error: error.message });
+    res.status(500).json({ message: 'Error processing payment' });
   }
 };
 
@@ -256,7 +256,7 @@ export const getSubscriptionStatus = async (req: Request, res: Response): Promis
     });
   } catch (error: any) {
     paymentLogger.error('Error getting subscription status:', error);
-    res.status(500).json({ message: 'Error getting subscription status', error: error.message });
+    res.status(500).json({ message: 'Error getting subscription status' });
   }
 };
 
@@ -296,7 +296,7 @@ export const cancelSubscription = async (req: Request, res: Response): Promise<v
     });
   } catch (error: any) {
     paymentLogger.error('Error cancelling subscription:', error);
-    res.status(500).json({ message: 'Error cancelling subscription', error: error.message });
+    res.status(500).json({ message: 'Error cancelling subscription' });
   }
 };
 
@@ -407,6 +407,6 @@ export const applyFreeSubscription = async (req: Request, res: Response): Promis
     });
   } catch (error: any) {
     paymentLogger.error('Error applying free subscription:', error);
-    res.status(500).json({ message: 'Error applying free subscription', error: error.message });
+    res.status(500).json({ message: 'Error applying free subscription' });
   }
 };

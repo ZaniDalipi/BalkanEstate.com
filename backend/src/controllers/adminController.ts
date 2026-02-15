@@ -80,7 +80,7 @@ export const getAdminStats = async (req: Request, res: Response): Promise<void> 
     });
   } catch (error: any) {
     adminLogger.error('Get admin stats error:', error);
-    res.status(500).json({ message: 'Error fetching admin statistics', error: error.message });
+    res.status(500).json({ message: 'Error fetching admin statistics' });
   }
 };
 
@@ -125,7 +125,7 @@ export const getAllUsers = async (req: Request, res: Response): Promise<void> =>
     });
   } catch (error: any) {
     adminLogger.error('Get all users error:', error);
-    res.status(500).json({ message: 'Error fetching users', error: error.message });
+    res.status(500).json({ message: 'Error fetching users' });
   }
 };
 
@@ -177,7 +177,7 @@ export const updateUserAdmin = async (req: Request, res: Response): Promise<void
       return;
     }
 
-    res.status(500).json({ message: 'Error updating user', error: error.message });
+    res.status(500).json({ message: 'Error updating user' });
   }
 };
 
@@ -210,7 +210,7 @@ export const deleteUser = async (req: Request, res: Response): Promise<void> => 
     res.json({ message: 'User and associated data deleted successfully' });
   } catch (error: any) {
     adminLogger.error('Delete user error:', error);
-    res.status(500).json({ message: 'Error deleting user', error: error.message });
+    res.status(500).json({ message: 'Error deleting user' });
   }
 };
 
@@ -280,7 +280,7 @@ export const getAllAgenciesAdmin = async (req: Request, res: Response): Promise<
     });
   } catch (error: any) {
     adminLogger.error('Get agencies error:', error);
-    res.status(500).json({ message: 'Error fetching agencies', error: error.message });
+    res.status(500).json({ message: 'Error fetching agencies' });
   }
 };
 
@@ -382,7 +382,7 @@ export const getAgencyDetailAdmin = async (req: Request, res: Response): Promise
     });
   } catch (error: any) {
     adminLogger.error('Get agency detail error:', error);
-    res.status(500).json({ message: 'Error fetching agency details', error: error.message });
+    res.status(500).json({ message: 'Error fetching agency details' });
   }
 };
 
@@ -426,7 +426,7 @@ export const updateAgency = async (req: Request, res: Response): Promise<void> =
       return;
     }
 
-    res.status(500).json({ message: 'Error updating agency', error: error.message });
+    res.status(500).json({ message: 'Error updating agency' });
   }
 };
 
@@ -455,7 +455,7 @@ export const deleteAgency = async (req: Request, res: Response): Promise<void> =
     res.json({ message: 'Agency deleted successfully and agents unassigned' });
   } catch (error: any) {
     adminLogger.error('Delete agency error:', error);
-    res.status(500).json({ message: 'Error deleting agency', error: error.message });
+    res.status(500).json({ message: 'Error deleting agency' });
   }
 };
 
@@ -498,7 +498,7 @@ export const getAllPropertiesAdmin = async (req: Request, res: Response): Promis
     });
   } catch (error: any) {
     adminLogger.error('Get properties error:', error);
-    res.status(500).json({ message: 'Error fetching properties', error: error.message });
+    res.status(500).json({ message: 'Error fetching properties' });
   }
 };
 
@@ -541,7 +541,7 @@ export const updateProperty = async (req: Request, res: Response): Promise<void>
       return;
     }
 
-    res.status(500).json({ message: 'Error updating property', error: error.message });
+    res.status(500).json({ message: 'Error updating property' });
   }
 };
 
@@ -561,7 +561,7 @@ export const deleteProperty = async (req: Request, res: Response): Promise<void>
     res.json({ message: 'Property deleted successfully' });
   } catch (error: any) {
     adminLogger.error('Delete property error:', error);
-    res.status(500).json({ message: 'Error deleting property', error: error.message });
+    res.status(500).json({ message: 'Error deleting property' });
   }
 };
 
@@ -585,7 +585,7 @@ export const getSystemConfig = async (req: Request, res: Response): Promise<void
     });
   } catch (error: any) {
     adminLogger.error('Get system config error:', error);
-    res.status(500).json({ message: 'Error fetching system config', error: error.message });
+    res.status(500).json({ message: 'Error fetching system config' });
   }
 };
 
@@ -668,7 +668,7 @@ export const fixPropertyCoordinates = async (req: Request, res: Response): Promi
     });
   } catch (error: any) {
     adminLogger.error('Fix coordinates error:', error);
-    res.status(500).json({ message: 'Error fixing property coordinates', error: error.message });
+    res.status(500).json({ message: 'Error fixing property coordinates' });
   }
 };
 
@@ -728,7 +728,7 @@ export const fixSinglePropertyCoordinates = async (req: Request, res: Response):
     }
   } catch (error: any) {
     adminLogger.error('Fix single property coordinates error:', error);
-    res.status(500).json({ message: 'Error fixing property coordinates', error: error.message });
+    res.status(500).json({ message: 'Error fixing property coordinates' });
   }
 };
 
@@ -754,7 +754,7 @@ export const getPropertiesMissingCoords = async (req: Request, res: Response): P
     });
   } catch (error: any) {
     adminLogger.error('Get properties missing coords error:', error);
-    res.status(500).json({ message: 'Error fetching properties', error: error.message });
+    res.status(500).json({ message: 'Error fetching properties' });
   }
 };
 
@@ -831,7 +831,7 @@ export const getAllInquiries = async (req: Request, res: Response): Promise<void
     });
   } catch (error: any) {
     adminLogger.error('Get all inquiries error:', error);
-    res.status(500).json({ message: 'Error fetching inquiries', error: error.message });
+    res.status(500).json({ message: 'Error fetching inquiries' });
   }
 };
 
@@ -855,7 +855,7 @@ export const getInquiryById = async (req: Request, res: Response): Promise<void>
     res.json({ inquiry });
   } catch (error: any) {
     adminLogger.error('Get inquiry by id error:', error);
-    res.status(500).json({ message: 'Error fetching inquiry', error: error.message });
+    res.status(500).json({ message: 'Error fetching inquiry' });
   }
 };
 
@@ -899,7 +899,7 @@ export const updateInquiry = async (req: Request, res: Response): Promise<void> 
     });
   } catch (error: any) {
     adminLogger.error('Update inquiry error:', error);
-    res.status(500).json({ message: 'Error updating inquiry', error: error.message });
+    res.status(500).json({ message: 'Error updating inquiry' });
   }
 };
 
@@ -919,7 +919,7 @@ export const deleteInquiry = async (req: Request, res: Response): Promise<void> 
     res.json({ message: 'Inquiry deleted successfully' });
   } catch (error: any) {
     adminLogger.error('Delete inquiry error:', error);
-    res.status(500).json({ message: 'Error deleting inquiry', error: error.message });
+    res.status(500).json({ message: 'Error deleting inquiry' });
   }
 };
 
@@ -955,7 +955,7 @@ export const bulkUpdateInquiryStatus = async (req: Request, res: Response): Prom
     });
   } catch (error: any) {
     adminLogger.error('Bulk update inquiry status error:', error);
-    res.status(500).json({ message: 'Error updating inquiries', error: error.message });
+    res.status(500).json({ message: 'Error updating inquiries' });
   }
 };
 
@@ -1034,7 +1034,7 @@ export const getInquiryStats = async (req: Request, res: Response): Promise<void
     });
   } catch (error: any) {
     adminLogger.error('Get inquiry stats error:', error);
-    res.status(500).json({ message: 'Error fetching inquiry stats', error: error.message });
+    res.status(500).json({ message: 'Error fetching inquiry stats' });
   }
 };
 
@@ -1061,6 +1061,6 @@ export const syncPropertySchema = async (req: Request, res: Response): Promise<v
     });
   } catch (error: any) {
     adminLogger.error('Sync property schema error:', error);
-    res.status(500).json({ message: 'Error syncing property schema', error: error.message });
+    res.status(500).json({ message: 'Error syncing property schema' });
   }
 };

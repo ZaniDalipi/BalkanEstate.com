@@ -300,7 +300,7 @@ export const createAgency = async (
     });
   } catch (error: any) {
     agencyLogger.error('Create agency error:', error);
-    res.status(500).json({ message: 'Error creating agency', error: error.message });
+    res.status(500).json({ message: 'Error creating agency' });
   }
 };
 
@@ -424,7 +424,6 @@ export const getAgencies = async (
     agencyLogger.error('Stack trace:', error.stack);
     res.status(500).json({
       message: 'Error fetching agencies',
-      error: error.message,
       filters: req.query
     });
   }
@@ -650,7 +649,6 @@ export const getAgency = async (
     agencyLogger.error('Stack trace:', error.stack);
     res.status(500).json({
       message: 'Error fetching agency',
-      error: error.message,
       identifier: req.params.idOrSlug
     });
   }
@@ -696,7 +694,7 @@ export const updateAgency = async (
     res.json({ agency });
   } catch (error: any) {
     agencyLogger.error('Update agency error:', error);
-    res.status(500).json({ message: 'Error updating agency', error: error.message });
+    res.status(500).json({ message: 'Error updating agency' });
   }
 };
 
@@ -760,7 +758,7 @@ export const addAgentToAgency = async (
     res.json({ agency });
   } catch (error: any) {
     agencyLogger.error('Add agent error:', error);
-    res.status(500).json({ message: 'Error adding agent to agency', error: error.message });
+    res.status(500).json({ message: 'Error adding agent to agency' });
   }
 };
 
@@ -816,7 +814,7 @@ export const removeAgentFromAgency = async (
     res.json({ message: 'Agent removed from agency successfully' });
   } catch (error: any) {
     agencyLogger.error('Remove agent error:', error);
-    res.status(500).json({ message: 'Error removing agent from agency', error: error.message });
+    res.status(500).json({ message: 'Error removing agent from agency' });
   }
 };
 
@@ -877,7 +875,7 @@ export const getFeaturedAgencies = async (
     res.json({ agencies: rotatedAgencies });
   } catch (error: any) {
     agencyLogger.error('Get featured agencies error:', error);
-    res.status(500).json({ message: 'Error fetching featured agencies', error: error.message });
+    res.status(500).json({ message: 'Error fetching featured agencies' });
   }
 };
 
@@ -955,7 +953,7 @@ export const uploadAgencyLogo = async (
     res.json({ logo: uploadResult.url, agency });
   } catch (error: any) {
     agencyLogger.error('Upload agency logo error:', error);
-    res.status(500).json({ message: 'Error uploading logo', error: error.message });
+    res.status(500).json({ message: 'Error uploading logo' });
   }
 };
 
@@ -1033,7 +1031,7 @@ export const uploadAgencyCover = async (
     res.json({ coverImage: uploadResult.url, agency });
   } catch (error: any) {
     agencyLogger.error('Upload agency cover error:', error);
-    res.status(500).json({ message: 'Error uploading cover image', error: error.message });
+    res.status(500).json({ message: 'Error uploading cover image' });
   }
 };
 
@@ -1168,7 +1166,7 @@ export const joinAgencyByInvitationCode = async (
     });
   } catch (error: any) {
     agencyLogger.error('Join agency by invitation code error:', error);
-    res.status(500).json({ message: 'Error joining agency', error: error.message });
+    res.status(500).json({ message: 'Error joining agency' });
   }
 };
 
@@ -1209,7 +1207,7 @@ export const verifyInvitationCode = async (
     }
   } catch (error: any) {
     agencyLogger.error('Verify invitation code error:', error);
-    res.status(500).json({ valid: false, message: 'Error verifying invitation code', error: error.message });
+    res.status(500).json({ valid: false, message: 'Error verifying invitation code' });
   }
 };
 
@@ -1258,7 +1256,7 @@ export const findAgencyByInvitationCode = async (
     });
   } catch (error: any) {
     agencyLogger.error('Find agency by invitation code error:', error);
-    res.status(500).json({ message: 'Error looking up agency', error: error.message });
+    res.status(500).json({ message: 'Error looking up agency' });
   }
 };
 
@@ -1321,7 +1319,7 @@ export const addAgencyAdmin = async (
     res.json({ message: 'Admin added successfully', agency });
   } catch (error: any) {
     agencyLogger.error('Add agency admin error:', error);
-    res.status(500).json({ message: 'Error adding admin', error: error.message });
+    res.status(500).json({ message: 'Error adding admin' });
   }
 };
 
@@ -1369,7 +1367,7 @@ export const removeAgencyAdmin = async (
     res.json({ message: 'Admin removed successfully', agency });
   } catch (error: any) {
     agencyLogger.error('Remove agency admin error:', error);
-    res.status(500).json({ message: 'Error removing admin', error: error.message });
+    res.status(500).json({ message: 'Error removing admin' });
   }
 };
 
@@ -1463,7 +1461,7 @@ export const leaveAgency = async (
     });
   } catch (error: any) {
     agencyLogger.error('Leave agency error:', error);
-    res.status(500).json({ message: 'Error leaving agency', error: error.message });
+    res.status(500).json({ message: 'Error leaving agency' });
   }
 };
 
@@ -1552,7 +1550,6 @@ export const generateAgentCoupons = async (
     agencyLogger.error('Generate agent coupons error:', error);
     res.status(500).json({
       message: 'Error generating coupons',
-      error: error.message
     });
   }
 };
@@ -1828,7 +1825,6 @@ export const redeemAgentCoupon = async (
     agencyLogger.error('Redeem agent coupon error:', error);
     res.status(500).json({
       message: 'Error redeeming coupon',
-      error: error.message
     });
   }
 };
@@ -1922,7 +1918,6 @@ export const getAgencyCoupons = async (
     agencyLogger.error('Get agency coupons error:', error);
     res.status(500).json({
       message: 'Error fetching coupons',
-      error: error.message
     });
   }
 };
@@ -2014,7 +2009,6 @@ export const usePromotionCoupon = async (
     agencyLogger.error('Use promotion coupon error:', error);
     res.status(500).json({
       message: 'Error using promotion coupon',
-      error: error.message
     });
   }
 };
@@ -2089,7 +2083,6 @@ export const getAgencyAgents = async (
     agencyLogger.error('Get agency agents error:', error);
     res.status(500).json({
       message: 'Error fetching agents',
-      error: error.message
     });
   }
 };
@@ -2245,7 +2238,6 @@ export const migrateAgentSubscriptions = async (
     agencyLogger.error('Migration error:', error);
     res.status(500).json({
       message: 'Migration failed',
-      error: error.message
     });
   }
 };

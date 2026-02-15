@@ -111,6 +111,6 @@ export const confirmUrgentBadgePayment = async (
     });
   } catch (error: any) {
     promotionLogger.error('Confirm urgent badge payment error:', error);
-    res.status(500).json({ message: 'Error confirming urgent badge', error: error.message });
+    res.status(500).json({ message: 'Error confirming urgent badge' });
   }
 };

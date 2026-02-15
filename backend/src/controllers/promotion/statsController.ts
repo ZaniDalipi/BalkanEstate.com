@@ -82,7 +82,7 @@ export const getPromotionStats = async (
     res.json({ stats });
   } catch (error: any) {
     promotionLogger.error('Get promotion stats error:', error);
-    res.status(500).json({ message: 'Error fetching promotion stats', error: error.message });
+    res.status(500).json({ message: 'Error fetching promotion stats' });
   }
 };
 
@@ -165,6 +165,6 @@ export const getPromotionHistory = async (
     });
   } catch (error: any) {
     promotionLogger.error('Get promotion history error:', error);
-    res.status(500).json({ message: 'Error fetching promotion history', error: error.message });
+    res.status(500).json({ message: 'Error fetching promotion history' });
   }
 };

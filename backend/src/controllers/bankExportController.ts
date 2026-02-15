@@ -63,7 +63,7 @@ export const createExport = async (req: Request, res: Response): Promise<void> =
     });
   } catch (error: any) {
     apiLogger.error('Error creating bank export:', error);
-    res.status(500).json({ message: 'Error creating export', error: error.message });
+    res.status(500).json({ message: 'Error creating export' });
   }
 };
 
@@ -107,7 +107,7 @@ export const getExports = async (req: Request, res: Response): Promise<void> => 
     });
   } catch (error: any) {
     apiLogger.error('Error getting exports:', error);
-    res.status(500).json({ message: 'Error getting exports', error: error.message });
+    res.status(500).json({ message: 'Error getting exports' });
   }
 };
 
@@ -151,7 +151,7 @@ export const getExport = async (req: Request, res: Response): Promise<void> => {
     });
   } catch (error: any) {
     apiLogger.error('Error getting export:', error);
-    res.status(404).json({ message: 'Export not found', error: error.message });
+    res.status(404).json({ message: 'Export not found' });
   }
 };
 
@@ -186,6 +186,6 @@ export const downloadExport = async (req: Request, res: Response): Promise<void>
     });
   } catch (error: any) {
     apiLogger.error('Error downloading export:', error);
-    res.status(404).json({ message: 'Export not found', error: error.message });
+    res.status(404).json({ message: 'Export not found' });
   }
 };

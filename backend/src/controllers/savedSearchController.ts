@@ -23,7 +23,7 @@ export const getSavedSearches = async (
     res.json({ savedSearches });
   } catch (error: any) {
     apiLogger.error('Get saved searches error:', error);
-    res.status(500).json({ message: 'Error fetching saved searches', error: error.message });
+    res.status(500).json({ message: 'Error fetching saved searches' });
   }
 };
 
@@ -69,7 +69,7 @@ export const createSavedSearch = async (
     res.status(201).json({ savedSearch });
   } catch (error: any) {
     apiLogger.error('Create saved search error:', error);
-    res.status(500).json({ message: 'Error creating saved search', error: error.message });
+    res.status(500).json({ message: 'Error creating saved search' });
   }
 };
 
@@ -111,7 +111,7 @@ export const updateAccessTime = async (
     res.json({ savedSearch });
   } catch (error: any) {
     apiLogger.error('Update access time error:', error);
-    res.status(500).json({ message: 'Error updating access time', error: error.message });
+    res.status(500).json({ message: 'Error updating access time' });
   }
 };
 
@@ -159,7 +159,7 @@ export const updateSavedSearch = async (
     });
   } catch (error: any) {
     apiLogger.error('Update saved search error:', error);
-    res.status(500).json({ message: 'Error updating saved search', error: error.message });
+    res.status(500).json({ message: 'Error updating saved search' });
   }
 };
 
@@ -216,7 +216,7 @@ export const updateAlertSettings = async (
     });
   } catch (error: any) {
     apiLogger.error('Update alert settings error:', error);
-    res.status(500).json({ message: 'Error updating alert settings', error: error.message });
+    res.status(500).json({ message: 'Error updating alert settings' });
   }
 };
 
@@ -238,7 +238,7 @@ export const deleteAllSavedSearches = async (
     res.json({ message: `Deleted ${result.deletedCount} saved searches` });
   } catch (error: any) {
     apiLogger.error('Delete all saved searches error:', error);
-    res.status(500).json({ message: 'Error deleting saved searches', error: error.message });
+    res.status(500).json({ message: 'Error deleting saved searches' });
   }
 };
 
@@ -273,6 +273,6 @@ export const deleteSavedSearch = async (
     res.json({ message: 'Saved search deleted successfully' });
   } catch (error: any) {
     apiLogger.error('Delete saved search error:', error);
-    res.status(500).json({ message: 'Error deleting saved search', error: error.message });
+    res.status(500).json({ message: 'Error deleting saved search' });
   }
 };

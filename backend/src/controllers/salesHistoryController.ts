@@ -58,7 +58,7 @@ export const getMySalesHistory = async (req: Request, res: Response): Promise<vo
     });
   } catch (error: any) {
     apiLogger.error('Get sales history error:', error);
-    res.status(500).json({ message: 'Error fetching sales history', error: error.message });
+    res.status(500).json({ message: 'Error fetching sales history' });
   }
 };
 
@@ -98,7 +98,7 @@ export const getAgentSalesHistory = async (req: Request, res: Response): Promise
     });
   } catch (error: any) {
     apiLogger.error('Get agent sales history error:', error);
-    res.status(500).json({ message: 'Error fetching agent sales history', error: error.message });
+    res.status(500).json({ message: 'Error fetching agent sales history' });
   }
 };
 
@@ -132,7 +132,7 @@ export const getSaleById = async (req: Request, res: Response): Promise<void> =>
     res.json({ sale });
   } catch (error: any) {
     apiLogger.error('Get sale by ID error:', error);
-    res.status(500).json({ message: 'Error fetching sale record', error: error.message });
+    res.status(500).json({ message: 'Error fetching sale record' });
   }
 };
 
@@ -175,6 +175,6 @@ export const updateSaleRecord = async (req: Request, res: Response): Promise<voi
     res.json({ sale });
   } catch (error: any) {
     apiLogger.error('Update sale record error:', error);
-    res.status(500).json({ message: 'Error updating sale record', error: error.message });
+    res.status(500).json({ message: 'Error updating sale record' });
   }
 };

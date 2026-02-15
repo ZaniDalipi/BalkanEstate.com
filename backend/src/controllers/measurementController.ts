@@ -60,7 +60,7 @@ export const getMeasurements = async (req: Request, res: Response): Promise<void
     });
   } catch (error: any) {
     apiLogger.error('Error getting measurements:', error);
-    res.status(500).json({ message: 'Error getting measurements', error: error.message });
+    res.status(500).json({ message: 'Error getting measurements' });
   }
 };
 
@@ -163,7 +163,7 @@ export const saveMeasurement = async (req: Request, res: Response): Promise<void
     });
   } catch (error: any) {
     apiLogger.error('Error saving measurement:', error);
-    res.status(500).json({ message: 'Error saving measurement', error: error.message });
+    res.status(500).json({ message: 'Error saving measurement' });
   }
 };
 
@@ -219,7 +219,7 @@ export const updateMeasurement = async (req: Request, res: Response): Promise<vo
     });
   } catch (error: any) {
     apiLogger.error('Error updating measurement:', error);
-    res.status(500).json({ message: 'Error updating measurement', error: error.message });
+    res.status(500).json({ message: 'Error updating measurement' });
   }
 };
 
@@ -262,7 +262,7 @@ export const deleteMeasurement = async (req: Request, res: Response): Promise<vo
     });
   } catch (error: any) {
     apiLogger.error('Error deleting measurement:', error);
-    res.status(500).json({ message: 'Error deleting measurement', error: error.message });
+    res.status(500).json({ message: 'Error deleting measurement' });
   }
 };
 
@@ -301,6 +301,6 @@ export const getMeasurementById = async (req: Request, res: Response): Promise<v
     });
   } catch (error: any) {
     apiLogger.error('Error getting measurement:', error);
-    res.status(500).json({ message: 'Error getting measurement', error: error.message });
+    res.status(500).json({ message: 'Error getting measurement' });
   }
 };

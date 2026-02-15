@@ -52,7 +52,7 @@ export const getConversations = async (
     res.json({ conversations: conversationsWithMessages });
   } catch (error: any) {
     apiLogger.error('Get conversations error:', error);
-    res.status(500).json({ message: 'Error fetching conversations', error: error.message });
+    res.status(500).json({ message: 'Error fetching conversations' });
   }
 };
 
@@ -117,7 +117,7 @@ export const getConversation = async (
     res.json({ conversation, messages });
   } catch (error: any) {
     apiLogger.error('Get conversation error:', error);
-    res.status(500).json({ message: 'Error fetching conversation', error: error.message });
+    res.status(500).json({ message: 'Error fetching conversation' });
   }
 };
 
@@ -191,7 +191,7 @@ export const createConversation = async (
     res.status(201).json({ conversation });
   } catch (error: any) {
     apiLogger.error('Create conversation error:', error);
-    res.status(500).json({ message: 'Error creating conversation', error: error.message });
+    res.status(500).json({ message: 'Error creating conversation' });
   }
 };
 
@@ -322,7 +322,7 @@ export const sendMessage = async (
     res.status(201).json(response);
   } catch (error: any) {
     apiLogger.error('Send message error:', error);
-    res.status(500).json({ message: 'Error sending message', error: error.message });
+    res.status(500).json({ message: 'Error sending message' });
   }
 };
 
@@ -395,7 +395,7 @@ export const uploadMessageImage = async (
     });
   } catch (error: any) {
     apiLogger.error('Upload message image error:', error);
-    res.status(500).json({ message: 'Error uploading image', error: error.message });
+    res.status(500).json({ message: 'Error uploading image' });
   }
 };
 
@@ -450,7 +450,7 @@ export const getConversationPublicKeys = async (
     });
   } catch (error: any) {
     apiLogger.error('Get conversation public keys error:', error);
-    res.status(500).json({ message: 'Error getting public keys', error: error.message });
+    res.status(500).json({ message: 'Error getting public keys' });
   }
 };
 
@@ -505,7 +505,7 @@ export const markAsRead = async (
     res.json({ message: 'Marked as read' });
   } catch (error: any) {
     apiLogger.error('Mark as read error:', error);
-    res.status(500).json({ message: 'Error marking as read', error: error.message });
+    res.status(500).json({ message: 'Error marking as read' });
   }
 };
 
@@ -573,6 +573,6 @@ export const deleteConversation = async (
     res.json({ message: 'Conversation deleted' });
   } catch (error: any) {
     apiLogger.error('Delete conversation error:', error);
-    res.status(500).json({ message: 'Error deleting conversation', error: error.message });
+    res.status(500).json({ message: 'Error deleting conversation' });
   }
 };

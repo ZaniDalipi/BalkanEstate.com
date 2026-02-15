@@ -28,7 +28,7 @@ export const getCredentials = async (req: Request, res: Response): Promise<void>
     });
   } catch (error: any) {
     apiLogger.error('Get credentials error:', error);
-    res.status(500).json({ message: 'Error fetching credentials', error: error.message });
+    res.status(500).json({ message: 'Error fetching credentials' });
   }
 };
 
@@ -123,7 +123,7 @@ export const addCredential = async (req: Request, res: Response): Promise<void> 
     });
   } catch (error: any) {
     apiLogger.error('Add credential error:', error);
-    res.status(500).json({ message: 'Error adding credential', error: error.message });
+    res.status(500).json({ message: 'Error adding credential' });
   }
 };
 
@@ -211,7 +211,7 @@ export const updateCredential = async (req: Request, res: Response): Promise<voi
     });
   } catch (error: any) {
     apiLogger.error('Update credential error:', error);
-    res.status(500).json({ message: 'Error updating credential', error: error.message });
+    res.status(500).json({ message: 'Error updating credential' });
   }
 };
 
@@ -265,7 +265,7 @@ export const deleteCredential = async (req: Request, res: Response): Promise<voi
     });
   } catch (error: any) {
     apiLogger.error('Delete credential error:', error);
-    res.status(500).json({ message: 'Error deleting credential', error: error.message });
+    res.status(500).json({ message: 'Error deleting credential' });
   }
 };
 
@@ -294,6 +294,6 @@ export const getAgentPublicCredentials = async (req: Request, res: Response): Pr
     });
   } catch (error: any) {
     apiLogger.error('Get agent public credentials error:', error);
-    res.status(500).json({ message: 'Error fetching credentials', error: error.message });
+    res.status(500).json({ message: 'Error fetching credentials' });
   }
 };

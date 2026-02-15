@@ -41,7 +41,7 @@ export const searchLocation = async (req: Request, res: Response): Promise<void>
     res.json(data);
   } catch (error: any) {
     geocodingLogger.error('Geocoding search error:', error);
-    res.status(500).json({ message: 'Error searching location', error: error.message });
+    res.status(500).json({ message: 'Error searching location' });
   }
 };
 
@@ -81,6 +81,6 @@ export const reverseGeocode = async (req: Request, res: Response): Promise<void>
     res.json(data);
   } catch (error: any) {
     geocodingLogger.error('Reverse geocoding error:', error);
-    res.status(500).json({ message: 'Error reverse geocoding location', error: error.message });
+    res.status(500).json({ message: 'Error reverse geocoding location' });
   }
 };

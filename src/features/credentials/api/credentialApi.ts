@@ -16,7 +16,7 @@ export interface Credential {
   updatedAt: string;
 }
 
-const getToken = () => localStorage.getItem('token') || localStorage.getItem('balkan_estate_token');
+const getToken = () => localStorage.getItem('balkan_estate_token');
 
 export const getCredentials = async (): Promise<Credential[]> => {
   const token = getToken();

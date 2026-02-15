@@ -221,7 +221,7 @@ export const purchasePromotion = async (
     });
   } catch (error: any) {
     promotionLogger.error('Purchase promotion error:', error);
-    res.status(500).json({ message: 'Error creating promotion', error: error.message });
+    res.status(500).json({ message: 'Error creating promotion' });
   }
 };
 
@@ -345,7 +345,7 @@ export const createPromotionCheckout = async (
     });
   } catch (error: any) {
     promotionLogger.error('Create promotion checkout error:', error);
-    res.status(500).json({ message: 'Error creating checkout session', error: error.message });
+    res.status(500).json({ message: 'Error creating checkout session' });
   }
 };
 
@@ -374,6 +374,6 @@ export const confirmPromotionPayment = async (
     });
   } catch (error: any) {
     promotionLogger.error('Confirm promotion payment error:', error);
-    res.status(500).json({ message: 'Error confirming payment', error: error.message });
+    res.status(500).json({ message: 'Error confirming payment' });
   }
 };

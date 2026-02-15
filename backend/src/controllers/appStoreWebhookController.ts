@@ -140,7 +140,7 @@ export const handleAppStoreNotification = async (
     res.status(200).json({ message: 'Notification processed successfully' });
   } catch (error: any) {
     paymentLogger.error('Error processing App Store notification:', error);
-    res.status(500).json({ message: 'Error processing notification', error: error.message });
+    res.status(500).json({ message: 'Error processing notification' });
   }
 };
 
