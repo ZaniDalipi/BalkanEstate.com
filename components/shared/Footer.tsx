@@ -13,6 +13,8 @@ import {
     FacebookIcon,
     TwitterIcon,
     WhatsappIcon,
+    InstagramIcon,
+    TikTokIcon,
     InboxIcon,
     BellIcon,
     UserCircleIcon,
@@ -123,8 +125,9 @@ const Footer: React.FC<FooterProps> = ({ className = '', contained = false }) =>
                         {/* Social Media Links */}
                         <div className="flex gap-2 sm:gap-3 pt-1 sm:pt-2">
                             {[
+                                { icon: InstagramIcon, href: CONTACT_CONFIG.social.instagram, label: 'Instagram', color: 'hover:bg-pink-600' },
+                                { icon: TikTokIcon, href: CONTACT_CONFIG.social.tiktok, label: 'TikTok', color: 'hover:bg-slate-600' },
                                 { icon: FacebookIcon, href: 'https://facebook.com/balkanestateai', label: 'Facebook', color: 'hover:bg-blue-600' },
-                                { icon: TwitterIcon, href: 'https://twitter.com/balkanestateai', label: 'Twitter', color: 'hover:bg-sky-500' },
                                 { icon: WhatsappIcon, href: `https://wa.me/${CONTACT_CONFIG.social.whatsappNumber}`, label: 'WhatsApp', color: 'hover:bg-green-500' }
                             ].map(({ icon: Icon, href, label, color }) => (
                                 <a

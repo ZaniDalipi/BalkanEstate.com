@@ -15,7 +15,7 @@ import {
   Bell,
   UserCircle,
 } from 'lucide-react';
-import { LogoIcon, FacebookIcon, TwitterIcon, WhatsappIcon } from '@/constants';
+import { LogoIcon, FacebookIcon, WhatsappIcon, InstagramIcon, TikTokIcon } from '@/constants';
 import FooterCityscape from './FooterCityscape';
 import { CONTACT_CONFIG } from '@/src/shared/config/contact';
 
@@ -106,8 +106,9 @@ const Footer: React.FC<FooterProps> = ({ className = '' }) => {
             {/* Social Media Links */}
             <div className="flex gap-2 pt-1.5">
               {[
-                { icon: FacebookIcon, href: 'https://facebook.com', label: 'Facebook' },
-                { icon: TwitterIcon, href: 'https://twitter.com', label: 'Twitter' },
+                { icon: InstagramIcon, href: CONTACT_CONFIG.social.instagram, label: 'Instagram' },
+                { icon: TikTokIcon, href: CONTACT_CONFIG.social.tiktok, label: 'TikTok' },
+                { icon: FacebookIcon, href: 'https://facebook.com/balkanestateai', label: 'Facebook' },
                 { icon: WhatsappIcon, href: `https://wa.me/${CONTACT_CONFIG.social.whatsappNumber}`, label: 'WhatsApp' },
               ].map(({ icon: Icon, href, label }) => (
                 <a

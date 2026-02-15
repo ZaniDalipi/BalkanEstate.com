@@ -28,6 +28,8 @@ export const CONTACT_CONFIG = {
   // Social media
   social: {
     whatsappNumber: '38971967915',
+    instagram: 'https://www.instagram.com/balkanestate.ai',
+    tiktok: 'https://www.tiktok.com/@balkanestate.ai',
   },
 } as const;
 
