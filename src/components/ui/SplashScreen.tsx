@@ -65,7 +65,7 @@ const HelloGreeting: React.FC<HelloGreetingProps> = ({ onComplete, userName }) =
     <div className="flex flex-col items-center justify-center">
       <AppleHelloEnglishEffect
         className="h-24 sm:h-32 md:h-40 lg:h-48 text-neutral-800"
-        speed={0.35}
+        speed={0.5}
         onAnimationComplete={handleHelloAnimComplete}
       />
       <AnimatePresence>
