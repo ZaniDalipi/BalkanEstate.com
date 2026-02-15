@@ -606,7 +606,7 @@ const MainLayout: React.FC = () => {
   
   const isSearchPage = state.activeView === 'search';
   const isRentalPage = state.activeView === 'rentals';
-  const isFloatingHeaderView = isSearchPage || isRentalPage;
+  const isFloatingHeaderView = true;
   const isAgencyDetailView = !!state.selectedAgencyId;
   // Agency pages should allow scrolling to show all agents and details
   const isFullHeightView = isSearchPage || isRentalPage || state.activeView === 'inbox' || !!state.selectedProperty;
