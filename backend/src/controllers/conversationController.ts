@@ -301,12 +301,24 @@ export const sendMessage = async (
     if (io) {
      const conversationId = String((conversation as any)._id);
 
+      // SECURITY: Only send safe message fields — exclude imagePublicId (internal Cloudinary ID) and __v
+      const safeMessage = {
+        _id: message._id,
+        conversationId: message.conversationId,
+        senderId: message.senderId,
+        text: message.text,
+        encryptedMessage: message.encryptedMessage,
+        encryptedKeys: message.encryptedKeys,
+        iv: message.iv,
+        imageUrl: message.imageUrl,
+        isRead: message.isRead,
+        createdAt: message.createdAt,
+        updatedAt: message.updatedAt,
+      };
+
       io.to(conversationId).emit('message-received', {
-
         conversationId: conversationId,
-
-        message: message.toObject(),
-
+        message: safeMessage,
       });
 
       apiLogger.info(`📨 Emitted message to conversation room: ${conversationId}`);

@@ -106,7 +106,7 @@ export const getAllUsers = async (req: Request, res: Response): Promise<void> =>
     const sortOrder = order === 'asc' ? 1 : -1;
 
     const users = await User.find(query)
-      .select('-password')
+      .select('-password -refreshTokens -resetPasswordToken -resetPasswordExpires -emailVerificationToken -emailVerificationExpires -loginHistory -publicKey -__v')
       .sort({ [String(sortBy)]: sortOrder })
       .skip(skip)
       .limit(Number(limit))

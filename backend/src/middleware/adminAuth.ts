@@ -83,12 +83,10 @@ export const checkVPNAccess = (req: Request, res: Response, next: NextFunction):
   });
 
   if (!isIPWhitelisted) {
-    apiLogger.error('❌ Unauthorized access attempt');
+    apiLogger.error(`❌ Unauthorized admin access attempt from IP: ${normalizedIP}`);
     res.status(403).json({
       message: 'Access denied. Admin panel requires VPN connection or authorized domain.',
       error: 'ACCESS_DENIED',
-      hint: 'Connect to authorized VPN or access via allowed domain.',
-      yourIP: normalizedIP,
     });
     return;
   }
@@ -115,11 +113,10 @@ export const checkAdminRole = (req: Request, res: Response, next: NextFunction):
   const isAdmin = ADMIN_ROLES.includes(user.role);
 
   if (!isAdmin) {
-    apiLogger.error('❌ Non-admin user attempted access');
+    apiLogger.error(`❌ Non-admin user attempted access (role: ${user.role})`);
     res.status(403).json({
       message: 'Access denied. Admin privileges required.',
       error: 'INSUFFICIENT_PERMISSIONS',
-      userRole: user.role,
     });
     return;
   }

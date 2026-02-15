@@ -184,15 +184,35 @@ const handlePropertyChange = (change: any) => {
 };
 
 /**
- * Transform MongoDB document to frontend-compatible format
+ * Transform MongoDB document to frontend-compatible format.
+ * SECURITY: Only include public property fields — never spread the full document
+ * to avoid leaking seller PII, internal metadata, or populated user objects.
  */
 const transformProperty = (doc: any) => {
   if (!doc) return null;
 
   return {
     id: doc._id?.toString(),
-    ...doc,
-    _id: undefined,
+    title: doc.title,
+    price: doc.price,
+    currency: doc.currency,
+    listingType: doc.listingType,
+    status: doc.status,
+    propertyType: doc.propertyType,
+    address: doc.address,
+    city: doc.city,
+    country: doc.country,
+    description: doc.description,
+    bedrooms: doc.bedrooms,
+    bathrooms: doc.bathrooms,
+    area: doc.area,
+    imageUrl: doc.imageUrl,
+    images: doc.images,
+    location: doc.location,
+    features: doc.features,
+    sellerId: typeof doc.sellerId === 'object' ? doc.sellerId?._id?.toString() : doc.sellerId?.toString(),
+    createdAt: doc.createdAt,
+    updatedAt: doc.updatedAt,
   };
 };
 

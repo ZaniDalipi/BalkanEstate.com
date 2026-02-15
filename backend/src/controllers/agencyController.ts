@@ -492,8 +492,6 @@ export const getAgency = async (
       agencyLogger.error(`❌ Agency not found for identifier: ${identifier}`);
       res.status(404).json({
         message: 'Agency not found',
-        searchedFor: identifier,
-        attemptedMethods: ['ObjectId', 'slug', 'legacy slug format']
       });
       return;
     }
@@ -636,8 +634,10 @@ export const getAgency = async (
 
     // Include sales stats and calculated totals in agency object
     const activeProperties = properties.filter(p => p.status === 'active' || p.status === 'pending');
+    // SECURITY: Exclude invitationCode from public response - it allows anyone to join the agency
+    const { invitationCode: _invCode, __v, ...safeAgency } = agency.toObject();
     const agencyWithStats = {
-      ...agency.toObject(),
+      ...safeAgency,
       salesStats,
       totalProperties: activeProperties.length,
       totalAgents: agency.agents?.length || 0,

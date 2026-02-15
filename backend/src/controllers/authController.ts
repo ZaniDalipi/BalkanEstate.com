@@ -1006,7 +1006,6 @@ export const setPublicKey = async (req: Request, res: Response): Promise<void> =
 
     res.json({
       message: 'Public key set successfully',
-      publicKey: user.publicKey,
     });
   } catch (error: any) {
     res.status(500).json({ message: 'Error setting public key' });
@@ -1478,12 +1477,7 @@ export const uploadAvatar = async (
 
     if (!cloudinaryConfigured) {
       res.status(500).json({
-        message: 'Image upload service not configured. Please add your Cloudinary credentials to the .env file.',
-        missingFields: {
-          cloudName: !process.env.CLOUDINARY_CLOUD_NAME,
-          apiKey: !process.env.CLOUDINARY_API_KEY,
-          apiSecret: !process.env.CLOUDINARY_API_SECRET
-        }
+        message: 'Image upload service is currently unavailable.',
       });
       return;
     }
@@ -1816,9 +1810,29 @@ export const getLoginHistory = async (req: Request, res: Response): Promise<void
       new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
     );
 
+    // SECURITY: Mask IP addresses - show only first segments for user identification
+    // e.g. "192.168.1.42" -> "192.168.***"
+    const maskIP = (ip?: string): string => {
+      if (!ip) return 'unknown';
+      const parts = ip.replace('::ffff:', '').split('.');
+      if (parts.length === 4) return `${parts[0]}.${parts[1]}.***.***`;
+      // IPv6: show first 2 groups
+      const v6parts = ip.split(':');
+      if (v6parts.length > 2) return `${v6parts[0]}:${v6parts[1]}:***`;
+      return '***';
+    };
+
+    const sanitizedHistory = sortedHistory.map((entry: any) => ({
+      timestamp: entry.timestamp,
+      success: entry.success,
+      ipAddress: maskIP(entry.ipAddress),
+      deviceInfo: entry.deviceInfo,
+      failureReason: entry.failureReason,
+    }));
+
     res.json({
-      loginHistory: sortedHistory,
-      total: sortedHistory.length,
+      loginHistory: sanitizedHistory,
+      total: sanitizedHistory.length,
     });
   } catch (error: any) {
     res.status(500).json({ message: 'Error fetching login history' });

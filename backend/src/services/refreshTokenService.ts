@@ -236,13 +236,23 @@ export const getActiveSessions = async (userId: string): Promise<any[]> => {
 
     const now = new Date();
 
+    // SECURITY: Mask IP addresses - show only first segments for session identification
+    const maskIP = (ip?: string): string => {
+      if (!ip) return 'unknown';
+      const parts = ip.replace('::ffff:', '').split('.');
+      if (parts.length === 4) return `${parts[0]}.${parts[1]}.***.***`;
+      const v6parts = ip.split(':');
+      if (v6parts.length > 2) return `${v6parts[0]}:${v6parts[1]}:***`;
+      return '***';
+    };
+
     return user.refreshTokens
       .filter((t) => t.expiresAt > now)
       .map((t) => ({
         createdAt: t.createdAt,
         expiresAt: t.expiresAt,
         deviceInfo: t.deviceInfo,
-        ipAddress: t.ipAddress,
+        ipAddress: maskIP(t.ipAddress),
       }));
   } catch (error) {
         return [];

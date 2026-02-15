@@ -555,7 +555,6 @@ export const getSubscriptionPayments = async (req: Request, res: Response): Prom
         currency: payment.currency,
         status: payment.status,
         transactionDate: payment.transactionDate,
-        storeTransactionId: payment.storeTransactionId,
       })),
     });
   } catch (error: any) {
