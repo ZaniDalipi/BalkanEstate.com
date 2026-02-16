@@ -24,6 +24,7 @@ export interface GoogleMapControlsProps {
 
   // Recenter
   handleRecenter: () => void;
+  handleResetView?: () => void;
 
   // Map style
   mapStyle: MapStyleType;
@@ -78,6 +79,7 @@ const GoogleMapControls: React.FC<GoogleMapControlsProps> = ({
   isMobile,
   hideControls,
   handleRecenter,
+  handleResetView,
   mapStyle,
   setMapStyle,
   isDrawing,
@@ -505,6 +507,17 @@ const GoogleMapControls: React.FC<GoogleMapControlsProps> = ({
                 >
                   {mapStyle === 'satellite' || mapStyle === 'hybrid' ? '🗺️' : '🛰️'}
                 </button>
+                {handleResetView && (
+                  <button
+                    onClick={handleResetView}
+                    className="p-2 rounded-xl hover:bg-white/50 text-neutral-600 active:scale-95"
+                    aria-label="Reset view"
+                  >
+                    <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M9 9V4.5M9 9H4.5M9 9L3.75 3.75M9 15v4.5M9 15H4.5M9 15l-5.25 5.25M15 9h4.5M15 9V4.5M15 9l5.25-5.25M15 15h4.5M15 15v4.5m0-4.5l5.25 5.25" />
+                    </svg>
+                  </button>
+                )}
                 <button
                   onClick={handleRecenter}
                   className="p-2 rounded-xl hover:bg-white/50 text-neutral-600"

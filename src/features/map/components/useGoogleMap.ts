@@ -94,6 +94,7 @@ export interface GoogleMapComponentProps {
   flyToTarget: { center: [number, number]; zoom: number } | null;
   onFlyComplete: () => void;
   onRecenter: () => void;
+  onResetView?: () => void;
   isMobile: boolean;
   searchMode: 'manual' | 'ai';
   hoveredPropertyId?: string | null;
@@ -844,6 +845,33 @@ export function useGoogleMap(props: GoogleMapComponentProps) {
     setMeasurementPoints([]);
   }, [measurementPoints, measurementMode]);
 
+  // Compute offsets for properties sharing the same coordinates
+  const colocatedOffsets = useMemo(() => {
+    const offsets = new Map<string, { lat: number; lng: number }>();
+    const PRECISION = 5;
+    const OFFSET_RADIUS = 0.00015;
+    const groups = new Map<string, Property[]>();
+    for (const prop of validProperties) {
+      if (prop.lat == null || prop.lng == null) continue;
+      const key = `${prop.lat.toFixed(PRECISION)},${prop.lng.toFixed(PRECISION)}`;
+      const group = groups.get(key);
+      if (group) group.push(prop);
+      else groups.set(key, [prop]);
+    }
+    for (const group of groups.values()) {
+      if (group.length <= 1) continue;
+      const step = (2 * Math.PI) / group.length;
+      for (let i = 0; i < group.length; i++) {
+        const angle = i * step;
+        offsets.set(group[i].id, {
+          lat: OFFSET_RADIUS * Math.cos(angle),
+          lng: OFFSET_RADIUS * Math.sin(angle),
+        });
+      }
+    }
+    return offsets;
+  }, [validProperties]);
+
   // Create all markers for the given properties (synchronous, no batching)
   const createAllMarkers = useCallback((props: Property[], mapToUse: google.maps.Map) => {
     if (!clustererRef.current) return;
@@ -954,8 +982,12 @@ export function useGoogleMap(props: GoogleMapComponentProps) {
         mapToUse.panTo({ lat: property.lat, lng: property.lng });
       };
 
+      const posOffset = colocatedOffsets.get(property.id);
       const marker = new google.maps.marker.AdvancedMarkerElement({
-        position: { lat: property.lat, lng: property.lng },
+        position: {
+          lat: posOffset ? property.lat + posOffset.lat : property.lat,
+          lng: posOffset ? property.lng + posOffset.lng : property.lng,
+        },
         content: markerDiv,
         zIndex: isActivelyPromoted ? 100 : 1,
       });
@@ -983,7 +1015,7 @@ export function useGoogleMap(props: GoogleMapComponentProps) {
         delete (window as any).__balkanestateSplashDone;
       }, 3500);
     }
-  }, []);
+  }, [colocatedOffsets]);
 
   // Update markers when properties change — debounced to avoid rapid clear/recreate
   // cycles during initial load (API fetch + WebSocket updates can fire in quick succession)

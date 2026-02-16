@@ -12,7 +12,7 @@ import {
   deleteFolder,
 } from '../services/cloudinaryService';
 import { sortPropertiesWithHighlighting, getHighlightingStats } from '../utils/highlightingUtils';
-import { recordPriceChange, processInstantAlertsForProperty } from '../jobs/propertyAlertsJob';
+import { recordPriceChange, processInstantAlertsForProperty, processInstantPriceDropForProperty } from '../jobs/propertyAlertsJob';
 import { trackUserActivity } from '../services/proBuyerEmailService';
 import { FREE_TIER_LIMITS, PRO_TIER_LIMITS } from '../config/subscriptionConstants';
 import { sanitizeProperty } from '../utils/responseSanitizer';
@@ -777,6 +777,13 @@ export const updateProperty = async (
     if (updateData.price !== undefined && updateData.price !== previousPrice) {
       await recordPriceChange(String(property._id), property.price, previousPrice);
       propertyLogger.info(`💰 Price changed: €${previousPrice} → €${property.price}`);
+
+      // Trigger instant price change alerts for Pro users (favorites + saved searches)
+      if (property.price !== previousPrice) {
+        processInstantPriceDropForProperty(String(property._id), property.price, previousPrice).catch(err => {
+          propertyLogger.error('Error processing instant price change alerts:', err);
+        });
+      }
     }
 
     // Trigger instant alerts if property status changed to 'active'

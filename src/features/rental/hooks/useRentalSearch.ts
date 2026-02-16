@@ -18,7 +18,7 @@ export const serializeBounds = (bounds: L.LatLngBounds): string => {
 
 export function useRentalSearch() {
     const { t } = useTranslation(['search', 'rental', 'common']);
-    const { state, dispatch } = useAppContext();
+    const { state, dispatch, updateSearchPageState } = useAppContext();
     const { isAuthenticated, currentUser } = state;
 
     // Rental properties state
@@ -151,6 +151,23 @@ export function useRentalSearch() {
             );
         }
     }, []);
+
+    // Handle focusing map on a specific property (e.g., from property details "View on Map")
+    const focusMapOnProperty = state.searchPageState.focusMapOnProperty;
+    useEffect(() => {
+        if (focusMapOnProperty) {
+            setFlyToTarget({
+                center: [focusMapOnProperty.lat, focusMapOnProperty.lng],
+                zoom: focusMapOnProperty.zoom ?? 18,
+            });
+            // Switch to map view on mobile
+            if (window.innerWidth < 768) {
+                setMobileView('map');
+            }
+            // Clear the focus state
+            updateSearchPageState({ focusMapOnProperty: null });
+        }
+    }, [focusMapOnProperty, updateSearchPageState]);
 
     // Parse bounds
     const mapBounds = useMemo(() => {

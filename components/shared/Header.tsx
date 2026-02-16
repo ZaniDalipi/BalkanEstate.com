@@ -107,6 +107,8 @@ const Header: React.FC<HeaderProps> = ({ onToggleSidebar, isFloating }) => {
   const glassButtonClasses = "relative overflow-hidden backdrop-blur-md text-white px-3 py-1.5 sm:px-3.5 sm:py-2 md:px-4 lg:px-5 lg:py-2.5 rounded-full text-[11px] sm:text-xs md:text-sm font-semibold transition-all duration-700 hover:-translate-y-px hover:brightness-110 active:brightness-95 whitespace-nowrap border border-white/25";
 
   if (isFloating) {
+    // Note: Header is hidden entirely on property details via App.tsx showHeader logic
+    // PropertyDetailsPage has its own complete header with back, share, favorite, profile
     return (
       <header className="fixed top-2 right-3 z-[1001]">
         <nav

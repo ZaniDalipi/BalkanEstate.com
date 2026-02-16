@@ -155,6 +155,7 @@ export interface MapComponentProps {
   flyToTarget: { center: [number, number]; zoom: number } | null;
   onFlyComplete: () => void;
   onRecenter: () => void;
+  onResetView?: () => void;
   isMobile: boolean;
   searchMode: 'manual' | 'ai';
   hoveredPropertyId?: string | null;
