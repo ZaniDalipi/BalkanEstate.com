@@ -199,6 +199,20 @@ const CityRecommendations: React.FC = () => {
     return t('trends.stable');
   };
 
+  // Human-readable demand label + color based on score ranges
+  const getDemandInfo = (score: number) => {
+    if (score >= 70) return { label: t('cityCard.demandHigh', 'High'), color: 'text-green-600', barColor: 'from-green-400 to-green-500' };
+    if (score >= 40) return { label: t('cityCard.demandMedium', 'Moderate'), color: 'text-amber-600', barColor: 'from-amber-400 to-amber-500' };
+    return { label: t('cityCard.demandLow', 'Low'), color: 'text-red-500', barColor: 'from-red-400 to-red-500' };
+  };
+
+  // Human-readable investment label + color based on score ranges
+  const getInvestmentInfo = (score: number) => {
+    if (score >= 70) return { label: t('cityCard.investmentExcellent', 'Excellent'), color: 'text-green-600', barColor: 'from-green-400 to-green-500' };
+    if (score >= 40) return { label: t('cityCard.investmentGood', 'Good'), color: 'text-blue-600', barColor: 'from-blue-400 to-blue-500' };
+    return { label: t('cityCard.investmentFair', 'Fair'), color: 'text-neutral-500', barColor: 'from-neutral-400 to-neutral-500' };
+  };
+
   if (loading) {
     return (
       <div className="p-8">
@@ -387,79 +401,101 @@ const CityRecommendations: React.FC = () => {
 
                 {/* Card Content */}
                 <div className="p-4">
-                  {/* Price Headline Section - Most important info front and center */}
+                  {/* Price Headline Section */}
                   <div className="flex items-stretch gap-3 mb-4">
                     {/* Avg Price per sqm - Primary metric */}
                     <div className="flex-1 bg-gradient-to-br from-primary/5 to-primary/10 rounded-xl p-3 border border-primary/10">
-                      <p className="text-[11px] font-medium text-neutral-500 uppercase tracking-wide mb-1">{t('cityCard.avgPricePerSqm')}</p>
+                      <p className="text-[11px] font-medium text-neutral-500 mb-1">{t('cityCard.avgPricePerSqm')}</p>
                       <div className="flex items-baseline gap-1">
                         <span className="text-xl font-extrabold text-neutral-900">€{city.avgPricePerSqm.toLocaleString()}</span>
-                        <span className="text-xs font-medium text-neutral-500">/m²</span>
+                        <span className="text-xs font-medium text-neutral-400">/m²</span>
                       </div>
                     </div>
-                    {/* Median Property Price */}
+                    {/* Typical Property Price */}
                     <div className="flex-1 bg-neutral-50 rounded-xl p-3 border border-neutral-100">
-                      <p className="text-[11px] font-medium text-neutral-500 uppercase tracking-wide mb-1">{t('cityCard.medianPrice')}</p>
+                      <p className="text-[11px] font-medium text-neutral-500 mb-1">{t('cityCard.medianPrice')}</p>
                       <p className="text-lg font-bold text-primary">{formatPrice(city.medianPrice, city.countryCode)}</p>
                     </div>
                   </div>
 
-                  {/* Market Performance Grid - 3 key metrics in a clean grid */}
+                  {/* Key Stats - 3 columns with clear labels */}
                   <div className="grid grid-cols-3 gap-2 mb-4">
-                    {/* YoY Growth */}
-                    <div className="text-center p-2 rounded-lg bg-neutral-50">
-                      <span className={`text-base font-bold block ${
-                        city.priceGrowthYoY > 0 ? 'text-green-600' : city.priceGrowthYoY < 0 ? 'text-red-600' : 'text-neutral-600'
-                      }`}>
-                        {city.priceGrowthYoY > 0 ? '+' : ''}{city.priceGrowthYoY}%
-                      </span>
-                      <span className="text-[10px] text-neutral-500 font-medium leading-tight block mt-0.5">{t('cityCard.yoyGrowth')}</span>
+                    {/* Price Change */}
+                    <div className={`text-center p-2.5 rounded-xl ${
+                      city.priceGrowthYoY > 0 ? 'bg-green-50 border border-green-100' : city.priceGrowthYoY < 0 ? 'bg-red-50 border border-red-100' : 'bg-neutral-50 border border-neutral-100'
+                    }`}>
+                      <div className="flex items-center justify-center gap-0.5 mb-0.5">
+                        {city.priceGrowthYoY > 0 ? (
+                          <ArrowTrendingUpIcon className="w-3.5 h-3.5 text-green-500" />
+                        ) : city.priceGrowthYoY < 0 ? (
+                          <ArrowTrendingDownIcon className="w-3.5 h-3.5 text-red-500" />
+                        ) : null}
+                        <span className={`text-base font-bold ${
+                          city.priceGrowthYoY > 0 ? 'text-green-600' : city.priceGrowthYoY < 0 ? 'text-red-600' : 'text-neutral-600'
+                        }`}>
+                          {city.priceGrowthYoY > 0 ? '+' : ''}{city.priceGrowthYoY}%
+                        </span>
+                      </div>
+                      <span className="text-[10px] text-neutral-500 font-medium leading-tight block">{t('cityCard.yoyGrowth')}</span>
                     </div>
-                    {/* Rental Yield */}
-                    <div className="text-center p-2 rounded-lg bg-neutral-50">
-                      <span className="text-base font-bold text-primary block">{city.rentalYield}%</span>
-                      <span className="text-[10px] text-neutral-500 font-medium leading-tight block mt-0.5">{t('cityCard.rentalYield')}</span>
+                    {/* Rental Return */}
+                    <div className="text-center p-2.5 rounded-xl bg-blue-50 border border-blue-100">
+                      <span className="text-base font-bold text-blue-600 block mb-0.5">{city.rentalYield}%</span>
+                      <span className="text-[10px] text-neutral-500 font-medium leading-tight block">{t('cityCard.rentalYield')}</span>
                     </div>
-                    {/* Days on Market */}
-                    <div className="text-center p-2 rounded-lg bg-neutral-50">
-                      <span className="text-base font-bold text-neutral-700 block">{city.averageDaysOnMarket}</span>
-                      <span className="text-[10px] text-neutral-500 font-medium leading-tight block mt-0.5">{t('cityCard.daysOnMarket')}</span>
+                    {/* Time to Sell */}
+                    <div className="text-center p-2.5 rounded-xl bg-neutral-50 border border-neutral-100">
+                      <div className="flex items-baseline justify-center gap-0.5 mb-0.5">
+                        <span className="text-base font-bold text-neutral-700">{city.averageDaysOnMarket}</span>
+                        <span className="text-[10px] text-neutral-400 font-medium">{t('cityCard.daysUnit')}</span>
+                      </div>
+                      <span className="text-[10px] text-neutral-500 font-medium leading-tight block">{t('cityCard.daysOnMarket')}</span>
                     </div>
                   </div>
 
-                  {/* Demand & Investment Scores - Visual bars instead of text */}
-                  <div className="space-y-2.5 mb-4">
-                    <div>
-                      <div className="flex items-center justify-between mb-1">
-                        <span className="text-xs font-medium text-neutral-600 flex items-center gap-1">
-                          <FireIcon className="w-3.5 h-3.5 text-amber-500" />
-                          {t('cityCard.demand')}
-                        </span>
-                        <span className="text-xs font-bold text-amber-700">{city.demandScore}/100</span>
+                  {/* Demand & Investment - Visual bars with human-readable labels */}
+                  {(() => {
+                    const demandInfo = getDemandInfo(city.demandScore);
+                    const investmentInfo = getInvestmentInfo(city.investmentScore);
+                    return (
+                      <div className="space-y-3 mb-4">
+                        <div>
+                          <div className="flex items-center justify-between mb-1.5">
+                            <span className="text-xs font-medium text-neutral-600 flex items-center gap-1.5">
+                              <FireIcon className="w-3.5 h-3.5 text-amber-500" />
+                              {t('cityCard.demand')}
+                            </span>
+                            <span className={`text-xs font-bold ${demandInfo.color} px-2 py-0.5 rounded-full bg-white border border-current/15`}>
+                              {demandInfo.label}
+                            </span>
+                          </div>
+                          <div className="w-full h-2 bg-neutral-100 rounded-full overflow-hidden">
+                            <div
+                              className={`h-full rounded-full bg-gradient-to-r ${demandInfo.barColor} transition-all duration-500`}
+                              style={{ width: `${city.demandScore}%` }}
+                            />
+                          </div>
+                        </div>
+                        <div>
+                          <div className="flex items-center justify-between mb-1.5">
+                            <span className="text-xs font-medium text-neutral-600 flex items-center gap-1.5">
+                              <StarIcon className="w-3.5 h-3.5 text-blue-500" />
+                              {t('cityCard.investment')}
+                            </span>
+                            <span className={`text-xs font-bold ${investmentInfo.color} px-2 py-0.5 rounded-full bg-white border border-current/15`}>
+                              {investmentInfo.label}
+                            </span>
+                          </div>
+                          <div className="w-full h-2 bg-neutral-100 rounded-full overflow-hidden">
+                            <div
+                              className={`h-full rounded-full bg-gradient-to-r ${investmentInfo.barColor} transition-all duration-500`}
+                              style={{ width: `${city.investmentScore}%` }}
+                            />
+                          </div>
+                        </div>
                       </div>
-                      <div className="w-full h-1.5 bg-neutral-100 rounded-full overflow-hidden">
-                        <div
-                          className="h-full rounded-full bg-gradient-to-r from-amber-400 to-amber-500 transition-all duration-500"
-                          style={{ width: `${city.demandScore}%` }}
-                        />
-                      </div>
-                    </div>
-                    <div>
-                      <div className="flex items-center justify-between mb-1">
-                        <span className="text-xs font-medium text-neutral-600 flex items-center gap-1">
-                          <StarIcon className="w-3.5 h-3.5 text-blue-500" />
-                          {t('cityCard.investment')}
-                        </span>
-                        <span className="text-xs font-bold text-blue-700">{city.investmentScore}/100</span>
-                      </div>
-                      <div className="w-full h-1.5 bg-neutral-100 rounded-full overflow-hidden">
-                        <div
-                          className="h-full rounded-full bg-gradient-to-r from-blue-400 to-blue-500 transition-all duration-500"
-                          style={{ width: `${city.investmentScore}%` }}
-                        />
-                      </div>
-                    </div>
-                  </div>
+                    );
+                  })()}
 
                   {/* Top Neighborhoods */}
                   {city.topNeighborhoods && city.topNeighborhoods.length > 0 && (

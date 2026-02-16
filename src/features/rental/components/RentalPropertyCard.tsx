@@ -74,7 +74,7 @@ const RentalPropertyCard: React.FC<RentalPropertyCardProps> = ({ property, onHov
                     <span className="text-sm text-gray-400">{rentPeriodLabel}</span>
                     {property.sqft > 0 && property.propertyType !== 'land' && (
                         <span className="text-[10px] text-gray-400 ml-auto">
-                            {currencySymbol}{new Intl.NumberFormat('de-DE').format(Math.round(property.price / property.sqft))}/m²
+                            {currencySymbol}{new Intl.NumberFormat('de-DE').format(Math.round(property.price / property.sqft))} per m²
                         </span>
                     )}
                 </div>

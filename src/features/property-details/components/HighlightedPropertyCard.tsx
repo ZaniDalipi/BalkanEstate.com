@@ -318,7 +318,7 @@ const HighlightedCardInner = memo<HighlightedCardInnerProps>(({
             </span>
             {property.sqft > 0 && property.propertyType !== 'land' && (
               <p className="text-[11px] text-neutral-400 font-medium">
-                {formatPrice(Math.round(property.price / property.sqft), property.country)}/m²
+                {formatPrice(Math.round(property.price / property.sqft), property.country)} per m²
               </p>
             )}
           </div>
