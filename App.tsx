@@ -724,8 +724,22 @@ const MainLayout: React.FC = () => {
                   {/* Center: Page title */}
                   <span className="text-sm font-semibold text-neutral-800 truncate text-center">{pageTitle}</span>
 
-                  {/* Right: Spacer to balance the grid and keep title centered */}
-                  <div className="min-w-[44px]" />
+                  {/* Right: Home button - quick shortcut to search from deep navigation */}
+                  <button
+                    type="button"
+                    onClick={() => {
+                      dispatch({ type: 'SET_SELECTED_AGENCY', payload: null });
+                      dispatch({ type: 'SET_SELECTED_AGENT', payload: null });
+                      dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'search' });
+                      window.history.pushState({}, '', buildLocalizedPath('/search'));
+                    }}
+                    className="min-w-[44px] min-h-[44px] flex items-center justify-center text-neutral-500 active:text-primary active:opacity-70 transition-opacity pr-2"
+                    aria-label="Go to home"
+                  >
+                    <svg className="w-[22px] h-[22px]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="m2.25 12 8.954-8.955c.44-.439 1.152-.439 1.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25" />
+                    </svg>
+                  </button>
                 </div>
               </div>
             )}
