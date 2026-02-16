@@ -813,10 +813,10 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-slate-50 to-white overflow-y-auto">
-      {/* SEO Meta Tags */}
+      {/* SEO Meta Tags with AggregateRating schema */}
       <SEO
-        title={`${agencyData.name} - Real Estate Agency`}
-        description={agencyData.description || `${agencyData.name} is a trusted real estate agency in ${agencyData.city || 'the Balkans'}. Browse ${agencyData.totalProperties || 0} listings and connect with ${agencyData.totalAgents || 0} professional agents.`}
+        title={`${agencyData.name} - Real Estate Agency${agencyData.city ? ` in ${agencyData.city}` : ''}${agencyData.country ? `, ${agencyData.country}` : ''}`}
+        description={agencyData.description || `${agencyData.name} is a trusted real estate agency in ${agencyData.city || 'the Balkans'}. Browse ${agencyData.totalProperties || 0} property listings and connect with ${agencyData.totalAgents || 0} professional agents.`}
         canonical={`${typeof window !== 'undefined' ? window.location.origin : ''}/agencies/${agency.slug}`}
         image={agencyData.logo || agencyData.coverImage}
         type="website"
@@ -825,8 +825,16 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
           logo: agencyData.logo,
           description: agencyData.description,
           address: agencyData.address,
+          city: agencyData.city,
+          country: agencyData.country,
           phone: agencyData.phone,
           email: agencyData.email,
+          rating: (agencyData as any).rating,
+          totalReviews: (agencyData as any).totalReviews,
+          totalProperties: agencyData.totalProperties,
+          totalAgents: agencyData.totalAgents,
+          website: agencyData.website,
+          yearsFounded: agencyData.yearsInBusiness,
         }}
       />
 
@@ -837,7 +845,7 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
           <>
             <img
               src={agencyData.coverImage}
-              alt={agencyData.name}
+              alt={`${agencyData.name} - Real Estate Agency${agencyData.city ? ` in ${agencyData.city}` : ''}${agencyData.country ? `, ${agencyData.country}` : ''}`}
               className="absolute inset-0 w-full h-full object-cover"
             />
             <div className="absolute inset-0 bg-gradient-to-b from-slate-900/70 via-slate-900/50 to-slate-900/90" />
@@ -976,7 +984,7 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
               {agencyData.logo ? (
                 <img
                   src={agencyData.logo}
-                  alt={agencyData.name}
+                  alt={`${agencyData.name} logo - Real Estate Agency`}
                   className="w-full h-full object-cover"
                 />
               ) : (
@@ -1772,7 +1780,7 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
                     <Popup>
                       <div className="min-w-[250px]">
                         {property.imageUrl && (
-                          <img src={property.imageUrl} alt={property.address} className="w-full h-32 object-cover rounded-lg mb-2" loading="lazy" />
+                          <img src={property.imageUrl} alt={`Property for sale in ${property.city}, ${property.country} - ${property.address}`} className="w-full h-32 object-cover rounded-lg mb-2" loading="lazy" />
                         )}
                         <p className="font-semibold text-sm mb-1 text-slate-900 line-clamp-2">{property.address}</p>
                         <p className="text-xs text-slate-500 mb-2">{property.city}, {property.country}</p>

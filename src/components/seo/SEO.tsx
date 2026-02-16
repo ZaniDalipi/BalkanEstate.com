@@ -24,6 +24,10 @@ interface SEOProps {
     longitude?: number;
     datePosted?: number | string;
     dateModified?: number | string;
+    // Video/virtual tour for VideoObject schema
+    videoUrl?: string;
+    virtualTour360Url?: string;
+    listingType?: 'sale' | 'rent';
   };
   // Agency-specific fields
   agency?: {
@@ -31,8 +35,35 @@ interface SEOProps {
     logo?: string;
     description?: string;
     address?: string;
+    city?: string;
+    country?: string;
     phone?: string;
     email?: string;
+    rating?: number;
+    totalReviews?: number;
+    totalProperties?: number;
+    totalAgents?: number;
+    website?: string;
+    yearsFounded?: number;
+  };
+  // Agent-specific fields for PersonSchema + AggregateRating
+  agent?: {
+    name?: string;
+    image?: string;
+    description?: string;
+    phone?: string;
+    email?: string;
+    city?: string;
+    country?: string;
+    rating?: number;
+    totalReviews?: number;
+    activeListings?: number;
+    propertiesSold?: number;
+    specializations?: string[];
+    languages?: string[];
+    yearsOfExperience?: number;
+    agencyName?: string;
+    agencySlug?: string;
   };
 }
 
@@ -50,6 +81,7 @@ export const SEO: React.FC<SEOProps> = ({
   noindex = false,
   property,
   agency,
+  agent,
 }) => {
   const fullTitle = title ? `${title} | ${SITE_NAME}` : SITE_NAME;
   const fullImage = image.startsWith('http') ? image : `${BASE_URL}${image}`;
@@ -95,15 +127,29 @@ export const SEO: React.FC<SEOProps> = ({
         </script>
       )}
 
-      {/* Agency-specific JSON-LD */}
+      {/* VideoObject schema for properties with video/virtual tours */}
+      {property && (property.videoUrl || property.virtualTour360Url) && (
+        <script type="application/ld+json">
+          {JSON.stringify(generateVideoSchema(property, fullTitle, description, fullImage, canonicalUrl))}
+        </script>
+      )}
+
+      {/* Agency-specific JSON-LD with AggregateRating */}
       {agency && (
         <script type="application/ld+json">
           {JSON.stringify(generateAgencySchema(agency))}
         </script>
       )}
 
+      {/* Agent-specific JSON-LD with AggregateRating */}
+      {agent && (
+        <script type="application/ld+json">
+          {JSON.stringify(generateAgentSchema(agent))}
+        </script>
+      )}
+
       {/* Website-level JSON-LD */}
-      {!property && !agency && (
+      {!property && !agency && !agent && (
         <script type="application/ld+json">
           {JSON.stringify(generateWebsiteSchema())}
         </script>
@@ -186,11 +232,11 @@ function generatePropertySchema(
   return schema;
 }
 
-// Generate JSON-LD Schema for Real Estate Agencies
+// Generate JSON-LD Schema for Real Estate Agencies (with AggregateRating)
 function generateAgencySchema(agency: SEOProps['agency']) {
   if (!agency) return {};
 
-  return {
+  const schema: any = {
     '@context': 'https://schema.org',
     '@type': 'RealEstateAgent',
     name: agency.name,
@@ -200,20 +246,128 @@ function generateAgencySchema(agency: SEOProps['agency']) {
     ...(agency.address && {
       address: {
         '@type': 'PostalAddress',
-        streetAddress: agency.address
+        streetAddress: agency.address,
+        ...(agency.city && { addressLocality: agency.city }),
+        ...(agency.country && { addressCountry: agency.country }),
       }
     }),
     ...(agency.phone && { telephone: agency.phone }),
     ...(agency.email && { email: agency.email }),
+    ...(agency.website && { url: agency.website }),
+    ...(agency.yearsFounded && { foundingDate: String(agency.yearsFounded) }),
+    ...(agency.totalAgents && { numberOfEmployees: agency.totalAgents }),
     areaServed: {
       '@type': 'GeoCircle',
       geoMidpoint: {
         '@type': 'GeoCoordinates',
         latitude: 44.0165,
-        longitude: 21.0059 // Central Balkans
+        longitude: 21.0059
       },
       geoRadius: '500'
     }
+  };
+
+  // AggregateRating - critical for rich snippets with stars in SERPs
+  if (agency.rating && agency.rating > 0 && agency.totalReviews && agency.totalReviews > 0) {
+    schema.aggregateRating = {
+      '@type': 'AggregateRating',
+      ratingValue: agency.rating.toFixed(1),
+      bestRating: '5',
+      worstRating: '1',
+      ratingCount: agency.totalReviews,
+    };
+  }
+
+  return schema;
+}
+
+// Generate JSON-LD Schema for Real Estate Agents (Person + AggregateRating)
+function generateAgentSchema(agent: SEOProps['agent']) {
+  if (!agent) return {};
+
+  const schema: any = {
+    '@context': 'https://schema.org',
+    '@type': 'RealEstateAgent',
+    name: agent.name,
+    ...(agent.image && { image: agent.image }),
+    ...(agent.description && { description: agent.description }),
+    ...(agent.phone && { telephone: agent.phone }),
+    ...(agent.email && { email: agent.email }),
+    ...(agent.city && agent.country && {
+      address: {
+        '@type': 'PostalAddress',
+        addressLocality: agent.city,
+        addressCountry: agent.country,
+      }
+    }),
+    ...(agent.languages && agent.languages.length > 0 && {
+      knowsLanguage: agent.languages,
+    }),
+    ...(agent.specializations && agent.specializations.length > 0 && {
+      knowsAbout: agent.specializations,
+    }),
+    ...(agent.agencyName && {
+      worksFor: {
+        '@type': 'RealEstateAgent',
+        name: agent.agencyName,
+        ...(agent.agencySlug && {
+          url: `${BASE_URL}/agencies/${agent.agencySlug}`,
+        }),
+      },
+    }),
+    ...(agent.activeListings && {
+      makesOffer: {
+        '@type': 'Offer',
+        itemOffered: {
+          '@type': 'Service',
+          name: `${agent.activeListings} Active Property Listings`,
+        },
+      },
+    }),
+  };
+
+  // AggregateRating for agent - enables star ratings in search results
+  if (agent.rating && agent.rating > 0 && agent.totalReviews && agent.totalReviews > 0) {
+    schema.aggregateRating = {
+      '@type': 'AggregateRating',
+      ratingValue: agent.rating.toFixed(1),
+      bestRating: '5',
+      worstRating: '1',
+      ratingCount: agent.totalReviews,
+    };
+  }
+
+  return schema;
+}
+
+// Generate VideoObject schema for properties with video/virtual tours
+function generateVideoSchema(
+  property: SEOProps['property'],
+  title: string,
+  description: string,
+  thumbnail: string,
+  url: string
+) {
+  if (!property) return {};
+
+  const videoUrl = property.videoUrl || property.virtualTour360Url;
+  if (!videoUrl) return {};
+
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'VideoObject',
+    name: `${title} - Property Tour`,
+    description: `Virtual tour of ${description}`,
+    thumbnailUrl: thumbnail,
+    contentUrl: videoUrl,
+    ...(property.virtualTour360Url && { embedUrl: property.virtualTour360Url }),
+    uploadDate: property.datePosted
+      ? new Date(typeof property.datePosted === 'number' ? property.datePosted : property.datePosted).toISOString()
+      : new Date().toISOString(),
+    potentialAction: {
+      '@type': 'WatchAction',
+      target: url,
+    },
   };
 }
 

@@ -16,6 +16,7 @@ import RentalTermsSection from '@/src/features/rental/components/RentalTermsSect
 import RentalHistorySection from '@/src/features/rental/components/RentalHistorySection';
 import RentalRulesByCountry from '@/src/features/rental/components/RentalRulesByCountry';
 import { SEO, Breadcrumbs, generatePropertyBreadcrumbs } from '@/src/components/seo';
+import { generatePropertySlug } from '@/utils/slug';
 import { SocialShare } from '@/src/components/marketing/SocialShare';
 import {
   ImageEditorModal,
@@ -27,6 +28,7 @@ import {
   NeighborhoodInsights,
   SocialVideoEmbed,
 } from '@/src/components/property';
+import SimilarProperties from '@/src/components/property/SimilarProperties';
 import { useLocalizedNavigation } from '@/src/hooks/useLocalizedNavigation';
 import { useTrackView } from '@/src/features/view-stats/hooks';
 import PromotionModal from '@/src/features/promotions/components/PromotionModal';
@@ -412,21 +414,25 @@ const PropertyDetailsPage: React.FC<{ property: Property }> = ({ property: cache
   const propertyTypeLabel = property.propertyType
     ? property.propertyType.charAt(0).toUpperCase() + property.propertyType.slice(1)
     : 'Property';
-  const seoTitle = `${property.beds}-Bed ${propertyTypeLabel} in ${property.city}, ${property.country} - €${property.price?.toLocaleString()}`;
+  const isRentalProperty = property.listingType === 'rent';
+  const seoTitle = `${property.beds}-Bed ${propertyTypeLabel} for ${isRentalProperty ? 'Rent' : 'Sale'} in ${property.city}, ${property.country} - €${property.price?.toLocaleString()}${isRentalProperty ? '/mo' : ''}`;
 
   // Generate SEO description
-  const seoDescription = `${property.beds} bedroom, ${property.baths} bathroom ${property.propertyType || 'property'} for sale in ${property.city}, ${property.country}. ${property.sqft}m² for €${property.price?.toLocaleString()}. ${property.description?.slice(0, 120) || ''}`;
+  const seoDescription = `${property.beds} bedroom, ${property.baths} bathroom ${property.propertyType || 'property'} for ${isRentalProperty ? 'rent' : 'sale'} in ${property.city}, ${property.country}. ${property.sqft}m² for €${property.price?.toLocaleString()}${isRentalProperty ? '/month' : ''}. ${property.description?.slice(0, 120) || ''}`;
 
   // Get all images for SEO
   const seoImages = allImages.map(img => img.url).filter(Boolean);
 
+  // Generate SEO-friendly slug for canonical URL
+  const propertySlug = generatePropertySlug(property);
+
   return (
     <div className="bg-neutral-50 h-full overflow-y-auto overflow-x-hidden animate-fade-in" style={{ paddingBottom: 'env(safe-area-inset-bottom, 0px)', overscrollBehaviorY: 'contain', WebkitOverflowScrolling: 'touch' }}>
-      {/* SEO Meta Tags */}
+      {/* SEO Meta Tags + VideoObject for tours */}
       <SEO
         title={seoTitle}
         description={seoDescription}
-        canonical={`${window.location.origin}/property/${property.id}`}
+        canonical={`${window.location.origin}/property/${property.id}/${propertySlug}`}
         image={property.imageUrl}
         type="product"
         property={{
@@ -444,6 +450,9 @@ const PropertyDetailsPage: React.FC<{ property: Property }> = ({ property: cache
           longitude: property.lng,
           datePosted: property.createdAt,
           dateModified: property.lastRenewed || property.createdAt,
+          videoUrl: property.videoUrl || property.generatedVideoUrl,
+          virtualTour360Url: property.virtualTour360Url,
+          listingType: property.listingType,
         }}
       />
 
@@ -823,6 +832,11 @@ const PropertyDetailsPage: React.FC<{ property: Property }> = ({ property: cache
                 city={property.city}
                 country={property.country}
               />
+            </div>
+
+            {/* Similar Properties - Internal linking for SEO */}
+            <div className="mt-4 sm:mt-6 lg:mt-8 animate-slide-up" style={{ animationDelay: '450ms' }}>
+              <SimilarProperties property={property} maxItems={4} />
             </div>
 
             {/* Featured Agencies */}

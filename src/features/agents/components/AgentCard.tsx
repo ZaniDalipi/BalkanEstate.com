@@ -57,7 +57,7 @@ const AgentAvatar: React.FC<{ agent: Agent }> = ({ agent }) => {
       )}
       <img
         src={optimizeCloudinaryUrl(avatarUrl, { width: 192, quality: 'auto', crop: 'fill' })}
-        alt={agent.name}
+        alt={`${agent.name} - Real Estate Agent${agent.city ? ` in ${agent.city}` : ''}${agent.country ? `, ${agent.country}` : ''}`}
         className={`absolute inset-0 w-full h-full object-cover object-center transition-opacity duration-300 ${
           loaded ? 'opacity-100' : 'opacity-0'
         }`}
@@ -337,7 +337,7 @@ const AgentCard: React.FC<AgentCardProps> = ({ agent, index = 0 }) => {
                 <div className="w-4 h-4 rounded overflow-hidden flex-shrink-0">
                   <img
                     src={optimizeCloudinaryUrl(agent.agencyLogo, { width: 40, quality: 'auto', crop: 'fill' })}
-                    alt={agent.agencyName}
+                    alt={`${agent.agencyName} logo`}
                     loading="lazy"
                     decoding="async"
                     width={16}

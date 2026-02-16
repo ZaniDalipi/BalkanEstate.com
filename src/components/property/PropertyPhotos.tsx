@@ -162,7 +162,7 @@ export const PropertyPhotos: React.FC<PropertyPhotosProps> = ({
             >
               <img
                 src={optimizeCloudinaryUrl(img.url, { width: 200, quality: 'auto', crop: 'fill' })}
-                alt={`${property.address} - ${img.tag} ${index + 1}`}
+                alt={`${property.propertyType ? property.propertyType.charAt(0).toUpperCase() + property.propertyType.slice(1) : 'Property'} ${img.tag || 'photo'} - ${property.city}, ${property.country}`}
                 loading="lazy"
                 decoding="async"
                 width={200}

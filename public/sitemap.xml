@@ -352,6 +352,56 @@
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
+  <url>
+    <loc>https://balkanestateai.com/rentals?country=Montenegro</loc>
+    <changefreq>daily</changefreq>
+    <priority>0.75</priority>
+  </url>
+  <url>
+    <loc>https://balkanestateai.com/rentals?country=Albania</loc>
+    <changefreq>daily</changefreq>
+    <priority>0.75</priority>
+  </url>
+  <url>
+    <loc>https://balkanestateai.com/rentals?country=Serbia</loc>
+    <changefreq>daily</changefreq>
+    <priority>0.75</priority>
+  </url>
+  <url>
+    <loc>https://balkanestateai.com/rentals?country=Kosovo</loc>
+    <changefreq>daily</changefreq>
+    <priority>0.75</priority>
+  </url>
+  <url>
+    <loc>https://balkanestateai.com/rentals?country=North+Macedonia</loc>
+    <changefreq>daily</changefreq>
+    <priority>0.75</priority>
+  </url>
+  <url>
+    <loc>https://balkanestateai.com/rentals?country=Croatia</loc>
+    <changefreq>daily</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://balkanestateai.com/rentals?country=Bosnia</loc>
+    <changefreq>daily</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://balkanestateai.com/rentals?country=Bulgaria</loc>
+    <changefreq>daily</changefreq>
+    <priority>0.65</priority>
+  </url>
+  <url>
+    <loc>https://balkanestateai.com/rentals?country=Romania</loc>
+    <changefreq>daily</changefreq>
+    <priority>0.65</priority>
+  </url>
+  <url>
+    <loc>https://balkanestateai.com/rentals?country=Greece</loc>
+    <changefreq>daily</changefreq>
+    <priority>0.65</priority>
+  </url>
 
   <!-- ═══════════════════════════════════════════════════════════════
        TOOLS & RESOURCES

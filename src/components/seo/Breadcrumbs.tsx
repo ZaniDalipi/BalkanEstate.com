@@ -149,6 +149,39 @@ export const generateAgencyBreadcrumbs = (agency: {
 };
 
 /**
+ * Helper function to generate breadcrumbs for agent profile pages
+ */
+export const generateAgentBreadcrumbs = (agent: {
+  id: string;
+  name: string;
+  city?: string;
+  country?: string;
+}): BreadcrumbItem[] => {
+  const items: BreadcrumbItem[] = [
+    { label: 'Home', href: '/' },
+    { label: 'Agents', href: '/agents' },
+  ];
+
+  if (agent.country) {
+    items.push({
+      label: agent.country,
+      href: `/agents?country=${encodeURIComponent(agent.country)}`,
+    });
+  }
+
+  if (agent.city) {
+    items.push({
+      label: agent.city,
+      href: `/agents?city=${encodeURIComponent(agent.city)}`,
+    });
+  }
+
+  items.push({ label: agent.name, href: `/agents/${agent.id}` });
+
+  return items;
+};
+
+/**
  * Helper function to generate breadcrumbs for search pages
  */
 export const generateSearchBreadcrumbs = (filters: {

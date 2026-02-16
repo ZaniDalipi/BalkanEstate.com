@@ -182,6 +182,55 @@ const routes = [
     title: `Mortgage Calculator - Calculate Property Payments | ${SITE_NAME}`,
     description: 'Calculate your mortgage payments for Balkan properties. Free mortgage calculator with interest rates for Montenegro, Serbia, Albania, and more.',
   },
+
+  // ── Rental pages ──────────────────────────────────────────────────
+  {
+    path: '/rentals?country=Montenegro',
+    title: `Apartments for Rent in Montenegro - Monthly & Long-Term Rentals | ${SITE_NAME}`,
+    description: 'Find apartments and houses for rent in Montenegro. Monthly rentals in Budva, Kotor, Tivat, Podgorica. Verified listings, instant contact.',
+  },
+  {
+    path: '/rentals?country=Albania',
+    title: `Apartments for Rent in Albania - Tirana & Coastal Rentals | ${SITE_NAME}`,
+    description: 'Find apartments for rent in Albania. Tirana city rentals, Saranda beach apartments, and more. Affordable monthly rental prices.',
+  },
+  {
+    path: '/rentals?country=Serbia',
+    title: `Apartments for Rent in Belgrade & Serbia | ${SITE_NAME}`,
+    description: 'Find apartments for rent in Serbia. Belgrade city center flats, New Belgrade apartments, and rentals across Serbia.',
+  },
+  {
+    path: '/rentals?country=North+Macedonia',
+    title: `Apartments for Rent in North Macedonia - Skopje Rentals | ${SITE_NAME}`,
+    description: 'Find apartments for rent in North Macedonia. Skopje city rentals, Ohrid lakeside apartments, and affordable monthly rentals.',
+  },
+  {
+    path: '/rentals?country=Kosovo',
+    title: `Apartments for Rent in Kosovo - Pristina Rentals | ${SITE_NAME}`,
+    description: 'Find apartments for rent in Kosovo. Pristina city center, Prizren old town, and monthly rental listings across Kosovo.',
+  },
+
+  // ── Property type pages ───────────────────────────────────────────
+  {
+    path: '/search?propertyType=apartment',
+    title: `Apartments for Sale in the Balkans - Buy Flat | ${SITE_NAME}`,
+    description: 'Find apartments for sale across 11 Balkan countries. City flats, new builds, and investment apartments in Montenegro, Albania, Serbia, and more.',
+  },
+  {
+    path: '/search?propertyType=house',
+    title: `Houses for Sale in the Balkans - Buy Home | ${SITE_NAME}`,
+    description: 'Find houses for sale across the Balkans. Family homes, countryside houses, and traditional stone houses in Montenegro, Croatia, and more.',
+  },
+  {
+    path: '/search?propertyType=villa',
+    title: `Luxury Villas for Sale in the Balkans | ${SITE_NAME}`,
+    description: 'Find luxury villas for sale in the Balkans. Sea view villas, pool villas, and exclusive properties in Montenegro, Croatia, Greece, and Albania.',
+  },
+  {
+    path: '/search?propertyType=land',
+    title: `Land for Sale in the Balkans - Building Plots & Agricultural Land | ${SITE_NAME}`,
+    description: 'Find land for sale in the Balkans. Building plots, agricultural land, and development sites in Montenegro, Albania, Serbia, and more.',
+  },
 ];
 
 // ─── Generate prerendered HTML ───────────────────────────────────────────────

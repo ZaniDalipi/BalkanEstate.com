@@ -6,6 +6,7 @@ import {
 } from '@/constants';
 import DefaultAvatar from '@/components/shared/DefaultAvatar';
 import FeaturedAgencies from '@/components/FeaturedAgencies';
+import { SEO, Breadcrumbs, generateAgentBreadcrumbs } from '@/src/components/seo';
 
 // Extracted sub-components
 import { useAgentProfile } from './useAgentProfile';
@@ -53,8 +54,45 @@ const AgentProfilePage: React.FC<AgentProfilePageProps> = ({ agent }) => {
     // All state, computed values, effects, and handlers live in the hook
     const profile = useAgentProfile({ agent });
 
+    // Build SEO data
+    const agentName = profile.agentData.name;
+    const agentCity = profile.agentData.city || '';
+    const agentCountry = profile.agentData.country || '';
+    const locationStr = [agentCity, agentCountry].filter(Boolean).join(', ');
+    const seoTitle = `${agentName} - Real Estate Agent${locationStr ? ` in ${locationStr}` : ''}`;
+    const seoDescription = profile.agentData.bio
+        ? `${agentName} is a real estate agent${locationStr ? ` in ${locationStr}` : ''}. ${profile.agentData.bio.slice(0, 140)}`
+        : `${agentName} is a verified real estate agent${locationStr ? ` in ${locationStr}` : ''} on BalkanEstateAI. ${profile.stats.sold} properties sold, ${profile.stats.activeListings} active listings. Contact today.`;
+
     return (
         <div className="min-h-screen bg-gray-50">
+            {/* SEO Meta Tags + Agent Schema with AggregateRating */}
+            <SEO
+                title={seoTitle}
+                description={seoDescription}
+                canonical={`${typeof window !== 'undefined' ? window.location.origin : ''}/agents/${profile.agentData.agentId || profile.agentData.id}`}
+                image={profile.agentData.avatarUrl}
+                type="website"
+                agent={{
+                    name: agentName,
+                    image: profile.agentData.avatarUrl,
+                    description: profile.agentData.bio,
+                    phone: profile.agentData.phone,
+                    email: profile.agentData.email,
+                    city: agentCity,
+                    country: agentCountry,
+                    rating: profile.agentData.rating,
+                    totalReviews: profile.agentData.totalReviews || profile.stats.reviews,
+                    activeListings: profile.stats.activeListings,
+                    propertiesSold: profile.stats.sold,
+                    specializations: profile.agentData.specializations,
+                    languages: profile.agentData.languages,
+                    yearsOfExperience: profile.agentData.yearsOfExperience,
+                    agencyName: profile.isAgencyAgent ? profile.agentData.agencyName : undefined,
+                    agencySlug: profile.isAgencyAgent ? profile.agentData.agencySlug : undefined,
+                }}
+            />
+
             {/* Header (sticky nav bar with back/save/share) + Hero Section */}
             <AgentProfileHeader
                 agent={profile.agentData}
