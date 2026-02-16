@@ -7,7 +7,8 @@ import { useTranslation } from 'react-i18next';
 import { Property, PropertyImageTag } from '@/types';
 import { useAppContext } from '@/context/AppContext';
 import { useRealtimeProperties, useProperty } from '@/src/features/properties/hooks';
-import { ArrowLeftIcon, SparklesIcon } from '@/constants';
+import { ArrowLeftIcon, SparklesIcon, UserIcon } from '@/constants';
+import DefaultAvatar from '@/components/shared/DefaultAvatar';
 import ImageViewerModal from './ImageViewerModal';
 import FloorPlanViewerModal from './FloorPlanViewerModal';
 import FeaturedAgencies from '@/components/FeaturedAgencies';
@@ -231,9 +232,16 @@ const PropertyDetailsPage: React.FC<{ property: Property }> = ({ property: cache
 
   // Handlers
   const handleBack = () => {
-    dispatch({ type: 'SET_SELECTED_PROPERTY', payload: null });
-    const isRental = property.listingType === 'rent';
-    navigate(isRental ? '/rentals' : '/search');
+    // Use browser history for proper PWA back navigation
+    // This preserves the user's navigation context (e.g., coming from saved properties, agents, etc.)
+    if (window.history.length > 1) {
+      window.history.back();
+    } else {
+      // Fallback for direct navigation (e.g., shared link with no history)
+      dispatch({ type: 'SET_SELECTED_PROPERTY', payload: null });
+      const isRental = property.listingType === 'rent';
+      navigate(isRental ? '/rentals' : '/search');
+    }
   };
 
   const handleFavoriteClick = async () => {
@@ -299,6 +307,17 @@ const PropertyDetailsPage: React.FC<{ property: Property }> = ({ property: cache
       }, 500);
     }
   };
+
+  const handleProfileClick = useCallback(() => {
+    if (state.isAuthenticated) {
+      dispatch({ type: 'SET_SELECTED_PROPERTY', payload: null });
+      dispatch({ type: 'SET_SELECTED_AGENCY', payload: null });
+      dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'account' });
+      navigate('/account');
+    } else {
+      dispatch({ type: 'TOGGLE_AUTH_MODAL', payload: { isOpen: true, view: 'login' } });
+    }
+  }, [state.isAuthenticated, dispatch, navigate]);
 
   const handleCategorySelect = useCallback((tag: PropertyImageTag | 'all') => {
     // Smoothly scroll to top to show the gallery
@@ -701,6 +720,23 @@ const PropertyDetailsPage: React.FC<{ property: Property }> = ({ property: cache
                 />
               </svg>
             </div>
+
+            {/* Profile Button - compact avatar for PWA navigation */}
+            <button
+              onClick={handleProfileClick}
+              className="rounded-full border border-neutral-200 bg-white cursor-pointer hover:shadow-md hover:border-primary/30 transition-all overflow-hidden flex-shrink-0 w-8 h-8 sm:w-9 sm:h-9 md:w-10 md:h-10"
+              aria-label={currentUser ? t('common:myAccount', 'My Account') : t('common:login', 'Login')}
+            >
+              {currentUser?.avatarUrl ? (
+                <img src={currentUser.avatarUrl} alt="" className="w-full h-full object-cover" />
+              ) : currentUser ? (
+                <DefaultAvatar gender={currentUser.gender} seed={currentUser.id || currentUser.name} avatarOptions={currentUser.avatarOptions} />
+              ) : (
+                <div className="w-full h-full bg-neutral-100 flex items-center justify-center">
+                  <UserIcon className="w-4 h-4 sm:w-4.5 sm:h-4.5 text-neutral-400" />
+                </div>
+              )}
+            </button>
           </div>
         </div>
       </div>
