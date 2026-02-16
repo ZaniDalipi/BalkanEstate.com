@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, useRef, lazy, Suspense } from 'react';
+import React, { useState, useEffect, useCallback, useRef, useMemo, lazy, Suspense } from 'react';
 // Page transitions use lightweight CSS instead of framer-motion to reduce initial bundle
 import { HelmetProvider } from 'react-helmet-async';
 import { AppProvider, useAppContext } from './context/AppContext';
@@ -610,14 +610,70 @@ const MainLayout: React.FC = () => {
   const isAgencyDetailView = !!state.selectedAgencyId;
   // Agency pages should allow scrolling to show all agents and details
   const isFullHeightView = isSearchPage || isRentalPage || state.activeView === 'inbox' || !!state.selectedProperty;
-  const showHeader = !(isMobile && (isSearchPage || isRentalPage || !!state.selectedProperty));
-  // Note: Agency detail pages WILL show header on mobile to allow sidebar access
-  
+  // On mobile: floating header hidden, PWA top bar handles navigation
+  // On desktop: floating header shown (except property details which has its own)
+  const showHeader = !isMobile && !state.selectedProperty;
+
+  // PWA top bar: shown on mobile for internal pages only
+  // NOT shown on: search/rental (have their own search headers), property details (has its own header)
+  const isHomePage = isSearchPage || isRentalPage;
+  const showPWATopBar = isMobile && !state.selectedProperty && !isHomePage;
+
+  // Map activeView to readable page title
+  const pageTitle = useMemo(() => {
+    if (state.selectedAgencyId) return 'Agency';
+    if (state.selectedAgentId) return 'Agent';
+    const titles: Record<string, string> = {
+      search: 'Search',
+      rentals: 'Rentals',
+      inbox: 'Inbox',
+      account: 'My Account',
+      'saved-properties': 'Saved',
+      'saved-searches': 'Saved Searches',
+      agents: 'Agents',
+      agencies: 'Agencies',
+      pricing: 'Plans',
+      'create-listing': 'New Listing',
+      'edit-listing': 'Edit Listing',
+      'explore-cities': 'Explore',
+      'how-it-works': 'How It Works',
+      analytics: 'Analytics',
+      admin: 'Admin',
+      valuation: 'Valuation',
+      'mortgage-calculator': 'Calculator',
+    };
+    return titles[state.activeView] || 'BalkanEstate';
+  }, [state.activeView, state.selectedAgencyId, state.selectedAgentId]);
+
+  const handlePWABack = useCallback(() => {
+    // Clear any detail selections
+    if (state.selectedAgencyId) {
+      dispatch({ type: 'SET_SELECTED_AGENCY', payload: null });
+      dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'agencies' });
+      window.history.pushState({}, '', buildLocalizedPath('/agencies'));
+      return;
+    }
+    if (state.selectedAgentId) {
+      dispatch({ type: 'SET_SELECTED_AGENT', payload: null });
+      dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'agents' });
+      window.history.pushState({}, '', buildLocalizedPath('/agents'));
+      return;
+    }
+    // Use browser history for proper back navigation
+    if (window.history.length > 1) {
+      window.history.back();
+    } else {
+      // Fallback: go to search (home)
+      dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'search' });
+      window.history.pushState({}, '', buildLocalizedPath('/search'));
+    }
+  }, [state.selectedAgencyId, state.selectedAgentId, dispatch]);
+
   const anyNonAuthModalOpen = state.isListingLimitWarningOpen || state.isDiscountGameOpen;
-  
-  const isOverlayVisible = 
-    state.isAuthModalOpen || 
-    anyNonAuthModalOpen || 
+
+  const isOverlayVisible =
+    state.isAuthModalOpen ||
+    anyNonAuthModalOpen ||
     (isMobile && isSidebarOpen);
 
 
@@ -647,6 +703,42 @@ const MainLayout: React.FC = () => {
             <Suspense fallback={null}>
               {showHeader && <Header onToggleSidebar={() => setIsSidebarOpen(true)} isFloating={isFloatingHeaderView} />}
             </Suspense>
+
+            {/* PWA Top Bar - mobile navigation bar with back button */}
+            {showPWATopBar && (
+              <div className="bg-white/95 backdrop-blur-md border-b border-neutral-200/60 flex-shrink-0 z-20" style={{ paddingTop: 'env(safe-area-inset-top, 0px)' }}>
+                <div className="flex items-center justify-between h-11 px-1">
+                  {/* Left: Back button */}
+                  <button
+                    type="button"
+                    onClick={handlePWABack}
+                    className="flex items-center gap-1 text-primary font-medium text-sm min-w-[44px] min-h-[44px] pl-2 pr-3 active:opacity-70 transition-opacity"
+                    aria-label="Go back"
+                  >
+                    <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
+                    </svg>
+                    <span>Back</span>
+                  </button>
+
+                  {/* Center: Page title */}
+                  <span className="text-sm font-semibold text-neutral-800 truncate max-w-[50vw]">{pageTitle}</span>
+
+                  {/* Right: Hamburger menu to open sidebar */}
+                  <button
+                    type="button"
+                    onClick={() => setIsSidebarOpen(true)}
+                    className="min-w-[44px] min-h-[44px] flex items-center justify-center text-neutral-600 hover:text-primary active:opacity-70 transition-opacity pr-2"
+                    aria-label="Open menu"
+                  >
+                    <svg className="w-[22px] h-[22px]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
+                    </svg>
+                  </button>
+                </div>
+              </div>
+            )}
+
             <main id="main-content" data-scroll-container className={`flex flex-col flex-1 overflow-x-hidden ${isFullHeightView ? 'overflow-y-hidden h-full min-h-0' : 'overflow-y-auto'}`}>
                 <AppContent onToggleSidebar={() => setIsSidebarOpen(true)} />
             </main>

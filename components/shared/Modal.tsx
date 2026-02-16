@@ -22,6 +22,16 @@ const Modal: React.FC<ModalProps> = ({ isOpen, onClose, title, children, size = 
     }
   }, [isOpen]);
 
+  // Close on Escape key
+  useEffect(() => {
+    if (!isOpen) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') onClose();
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isOpen, onClose]);
+
   const handleBackdropClick = useCallback(() => {
     onClose();
   }, [onClose]);
@@ -61,16 +71,21 @@ const Modal: React.FC<ModalProps> = ({ isOpen, onClose, title, children, size = 
     ? 'fixed inset-0 bg-transparent sm:bg-black/30 sm:backdrop-blur-md z-[5000] flex justify-center items-center p-0 sm:p-3 md:p-4 overflow-x-hidden overflow-y-auto'
     : 'fixed inset-0 bg-black/30 backdrop-blur-md z-[5000] flex justify-center items-center p-2 sm:p-3 md:p-4 overflow-x-hidden overflow-y-auto';
 
+  const titleId = title ? 'modal-title' : undefined;
+
   return (
-    <div className={backdropClasses} onClick={handleBackdropClick}>
+    <div className={backdropClasses} onClick={handleBackdropClick} aria-hidden="true">
       <div
         className={`bg-white shadow-xl p-4 sm:p-4 md:p-6 w-full ${sizeClass} relative overflow-y-auto ${mobileFullScreenClasses}`}
         onClick={handleContentClick}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby={titleId}
       >
-        <button onClick={onClose} className="absolute top-3 right-3 sm:top-4 sm:right-4 text-neutral-500 hover:text-neutral-800 z-10 p-1" aria-label="Close modal">
+        <button type="button" onClick={onClose} className="absolute top-3 right-3 sm:top-4 sm:right-4 text-neutral-500 hover:text-neutral-800 z-10 p-2 min-w-[44px] min-h-[44px] flex items-center justify-center" aria-label="Close modal">
           <XMarkIcon className="w-5 h-5 sm:w-6 sm:h-6" />
         </button>
-        {title && <h2 className="text-base sm:text-lg md:text-xl font-bold text-neutral-800 mb-3 text-center pr-10">{title}</h2>}
+        {title && <h2 id={titleId} className="text-base sm:text-lg md:text-xl font-bold text-neutral-800 mb-3 text-center pr-10">{title}</h2>}
         <div className="overflow-x-hidden">{children}</div>
       </div>
     </div>

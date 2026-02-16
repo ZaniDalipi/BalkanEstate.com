@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useAppContext } from '../../context/AppContext';
 import { AppView, UserRole } from '../../types';
@@ -21,7 +21,7 @@ const NavItem: React.FC<{
       onClick={() => onClick(view)}
       aria-label={badge && badge > 0 ? `${label} (${badge} unread)` : label}
       aria-current={isActive ? 'page' : undefined}
-      className={`flex items-center gap-2.5 px-3 py-2.5 rounded-lg font-semibold transition-colors w-full text-left md:justify-center group-hover:md:justify-start relative ${
+      className={`flex items-center gap-2.5 px-3 py-3 rounded-lg font-semibold transition-colors w-full text-left md:justify-center group-hover:md:justify-start relative min-h-[44px] ${
         isActive
           ? 'bg-primary-light text-primary-dark'
           : 'text-neutral-700 hover:bg-neutral-100'
@@ -62,7 +62,8 @@ const ToolsSection: React.FC<{
       {/* Tools Header - Expandable */}
       <button
         onClick={() => setIsExpanded(!isExpanded)}
-        className={`flex items-center gap-2.5 px-3 py-2.5 rounded-lg font-semibold transition-colors w-full text-left md:justify-center group-hover:md:justify-start ${
+        aria-expanded={isExpanded}
+        className={`flex items-center gap-2.5 px-3 py-3 rounded-lg font-semibold transition-colors w-full text-left md:justify-center group-hover:md:justify-start min-h-[44px] ${
           isToolActive ? 'bg-primary-light text-primary-dark' : 'text-neutral-700 hover:bg-neutral-100'
         }`}
       >
@@ -179,19 +180,30 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
       ? [...baseNavItems, { view: 'admin' as AppView, label: t('nav:adminPanel'), icon: <ShieldCheckIcon /> }]
       : baseNavItems;
 
+    // Close sidebar on Escape key
+    useEffect(() => {
+        if (!isOpen) return;
+        const handleKeyDown = (e: KeyboardEvent) => {
+            if (e.key === 'Escape') onClose();
+        };
+        window.addEventListener('keydown', handleKeyDown);
+        return () => window.removeEventListener('keydown', handleKeyDown);
+    }, [isOpen, onClose]);
+
     return (
         <>
             {/* Overlay for mobile */}
-            <div 
+            <div
                 className={`fixed inset-0 bg-black/20 backdrop-blur-sm z-30 md:hidden transition-opacity ${isOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}
                 onClick={onClose}
+                aria-hidden="true"
             ></div>
 
             {/* Sidebar */}
             <aside
-                className={`fixed top-0 left-0 h-full bg-white border-r border-neutral-200 z-50 flex flex-col transition-all duration-300 ease-in-out group overflow-hidden ${isOpen ? 'translate-x-0 w-64' : '-translate-x-full w-64'} md:w-20 md:translate-x-0 hover:md:w-64`}
-                role="navigation"
+                className={`fixed top-0 left-0 h-full bg-white border-r border-neutral-200 z-50 flex flex-col transition-transform duration-300 ease-in-out group overflow-hidden ${isOpen ? 'translate-x-0 w-64' : '-translate-x-full w-64'} md:w-20 md:translate-x-0 hover:md:w-64`}
                 aria-label={t('nav:mainNavigation', 'Main navigation')}
+                style={{ paddingTop: 'env(safe-area-inset-top, 0px)', paddingBottom: 'env(safe-area-inset-bottom, 0px)' }}
             >
                 <div className="flex items-center p-3 h-[56px] border-b border-neutral-200 flex-shrink-0 md:justify-center group-hover:md:justify-start">
                     <button
@@ -236,7 +248,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
                      <div className="px-1.5 pt-1.5 mt-1.5 border-t border-neutral-100 space-y-0.5">
                         <button
                             onClick={handleNewListingClick}
-                            className="flex items-center gap-2.5 px-3 py-2.5 rounded-lg font-semibold transition-colors w-full text-white bg-secondary hover:bg-opacity-90 md:justify-center group-hover:md:justify-start"
+                            className="flex items-center gap-2.5 px-3 py-3 rounded-lg font-semibold transition-colors w-full text-white bg-secondary min-h-[44px] hover:bg-opacity-90 md:justify-center group-hover:md:justify-start"
                             aria-label={t('nav:createNewListing', 'Create a new listing')}
                         >
                             <PencilIcon className="w-5 h-5 flex-shrink-0" aria-hidden="true" />
@@ -244,7 +256,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
                         </button>
                         <button
                             onClick={handleSubscriptionClick}
-                            className={`flex items-center gap-2.5 px-3 py-2.5 rounded-lg font-semibold transition-colors w-full text-left md:justify-center group-hover:md:justify-start text-neutral-700 hover:bg-neutral-100`}
+                            className={`flex items-center gap-2.5 px-3 py-3 rounded-lg font-semibold transition-colors w-full text-left min-h-[44px] md:justify-center group-hover:md:justify-start text-neutral-700 hover:bg-neutral-100`}
                             aria-label={t('nav:viewSubscription', 'View subscription plans')}
                         >
                             <div className={`w-5 h-5 flex-shrink-0 text-neutral-700`} aria-hidden="true"><StarIconSolid /></div>
@@ -253,7 +265,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
                         {isAuthenticated && (
                             <button
                                 onClick={() => handleNavClick('analytics')}
-                                className={`flex items-center gap-2.5 px-3 py-2.5 rounded-lg font-semibold transition-colors w-full text-left md:justify-center group-hover:md:justify-start ${
+                                className={`flex items-center gap-2.5 px-3 py-3 rounded-lg font-semibold transition-colors w-full text-left min-h-[44px] md:justify-center group-hover:md:justify-start ${
                                     activeView === 'analytics'
                                         ? 'bg-primary-light text-primary-dark'
                                         : 'text-neutral-700 hover:bg-neutral-100'
@@ -269,7 +281,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
                         )}
                         <button
                             onClick={() => handleNavClick('inbox')}
-                            className={`flex items-center gap-2.5 px-3 py-2.5 rounded-lg font-semibold transition-colors w-full text-left md:justify-center group-hover:md:justify-start relative ${
+                            className={`flex items-center gap-2.5 px-3 py-3 rounded-lg font-semibold transition-colors w-full text-left min-h-[44px] md:justify-center group-hover:md:justify-start relative ${
                                 activeView === 'inbox'
                                     ? 'bg-primary-light text-primary-dark'
                                     : 'text-neutral-700 hover:bg-neutral-100'
@@ -298,7 +310,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
                         <div className="space-y-0.5">
                              <button
                                 onClick={() => handleNavClick('account')}
-                                className={`flex items-center gap-2.5 px-3 py-2.5 rounded-lg font-semibold transition-colors w-full text-left md:justify-center group-hover:md:justify-start ${
+                                className={`flex items-center gap-2.5 px-3 py-3 rounded-lg font-semibold transition-colors w-full text-left min-h-[44px] md:justify-center group-hover:md:justify-start ${
                                     activeView === 'account'
                                     ? 'bg-primary-light text-primary-dark'
                                     : 'text-neutral-700 hover:bg-neutral-100'
@@ -313,7 +325,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
                             </button>
                             <button
                                 onClick={handleLogout}
-                                className="flex items-center gap-2.5 px-3 py-2.5 rounded-lg font-semibold transition-colors w-full text-left text-red-600 hover:bg-red-50 md:justify-center group-hover:md:justify-start"
+                                className="flex items-center gap-2.5 px-3 py-3 rounded-lg font-semibold transition-colors w-full text-left min-h-[44px] text-red-600 hover:bg-red-50 md:justify-center group-hover:md:justify-start"
                                 aria-label={t('auth:logoutAccount', 'Log out of your account')}
                             >
                                 <ArrowLeftOnRectangleIcon className="w-5 h-5 flex-shrink-0" aria-hidden="true" />
@@ -323,7 +335,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
                     ) : (
                          <button
                             onClick={() => { dispatch({ type: 'TOGGLE_AUTH_MODAL', payload: { isOpen: true, view: 'login' } }); onClose(); }}
-                            className="flex items-center gap-2.5 px-3 py-2.5 rounded-lg font-semibold transition-colors w-full text-left text-neutral-700 hover:bg-neutral-100 md:justify-center group-hover:md:justify-start"
+                            className="flex items-center gap-2.5 px-3 py-3 rounded-lg font-semibold transition-colors w-full text-left min-h-[44px] text-neutral-700 hover:bg-neutral-100 md:justify-center group-hover:md:justify-start"
                             aria-label={t('nav:loginOrRegister', 'Login or register an account')}
                          >
                             <UserCircleIcon className="w-5 h-5 text-neutral-700 flex-shrink-0" aria-hidden="true" />
