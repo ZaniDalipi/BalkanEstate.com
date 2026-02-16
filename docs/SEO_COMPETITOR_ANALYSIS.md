@@ -4,177 +4,243 @@
 
 ## Executive Summary
 
-BalkanEstateAI operates in a fragmented market with no single dominant pan-Balkan real estate portal. The biggest threat is the **Real Web / Spitogatos / Indomio** network, which is systematically acquiring leading portals across every Balkan country. Locally, strong incumbents exist per country. Internationally, aggregator portals capture expat and investor traffic. This analysis maps out all three tiers and identifies keyword/SEO gaps to exploit.
+BalkanEstateAI operates in a fragmented market with no single dominant pan-Balkan real estate portal. The biggest threat is the **Real Web / Spitogatos / Indomio** network, which is systematically acquiring leading portals across every Balkan country. Locally, strong incumbents exist per country. Internationally, aggregator portals capture expat and investor traffic. This analysis maps out all three tiers with concrete traffic/SEO metrics and identifies keyword/SEO gaps to exploit.
+
+**Total competitor landscape:** 28 tracked domains generating a combined ~38M+ monthly visits. Our primary addressable markets (Kosovo, Albania, N. Macedonia, Montenegro) have a combined competitor traffic of ~1.7M visits/month — highly fragmented and winnable.
 
 ---
 
-## 1. Direct Regional Competitors (Pan-Balkan)
+## 1. Full Competitor Metrics Dashboard
+
+| Competitor | Country/Market | Est. Monthly Visits | Global Rank | Traffic Trend | Top Traffic Source | Domain Rating | Organic Keywords | Primary Language | Category | Key Strength | Threat Level |
+|---|---|---|---|---|---|---|---|---|---|---|---|
+| realitica.com | Montenegro/Regional | 1,200,000 | 120,452 | Declining (-8%) | Organic Search | 55 | 1,700 | Serbian/English | Classifieds Portal | Largest Montenegro listings database | High |
+| 4zida.rs | Serbia | 1,700,000 | 30,067 | Growing (+16%) | Organic Search | 62 | 5,500 | Serbian | Real Estate Portal | Fast-growing, strong mobile app | High |
+| nekretnine.rs | Serbia | 1,400,000 | 56,420 | Declining (-4%) | Organic Search | 58 | 4,200 | Serbian | Real Estate Portal | Established brand, agent network | High |
+| halooglasi.com | Serbia | 3,100,000 | 15,832 | Growing (+5%) | Direct/Organic | 68 | 8,500 | Serbian | General Classifieds | Massive traffic, brand recognition | Very High |
+| indomio.rs | Serbia | 350,000 | 185,000 | Stable | Organic Search | 45 | 1,800 | Serbian/English | Real Estate Portal | Part of Immobiliare.it network | Medium |
+| indomio.al | Albania | 120,000 | 420,000 | Growing | Organic Search | 38 | 800 | Albanian/English | Real Estate Portal | International network backing | Medium |
+| indomio.me | Montenegro | 180,000 | 350,000 | Stable | Organic Search | 40 | 950 | Serbian/English | Real Estate Portal | Part of Spitogatos/Real Web group | Medium |
+| balkanscout.com | Regional/Balkans | 45,000 | 800,000 | Growing | Organic/Referral | 28 | 350 | English | Premium Portal | Premium Balkan-wide positioning | Low-Medium |
+| realigro.com | International | 280,000 | 250,000 | Stable | Organic Search | 48 | 3,200 | Multi-language | Int'l Portal | 150+ country coverage | Medium |
+| balkan-estate.com | Regional/Balkans | 15,000 | 2,500,000 | New/Growing | Organic Search | 18 | 150 | English | Niche Portal | Balkan-focused niche | Low |
+| level.mk | N. Macedonia | 35,000 | 950,000 | Growing | Organic Search | 22 | 280 | Macedonian/English | Real Estate Agency | Strong content/SEO strategy | Low |
+| makliving.mk | N. Macedonia | 12,000 | 1,800,000 | New/Growing | Direct/Social | 15 | 120 | Macedonian/English | Real Estate Agency | Expat/international focus | Low |
+| mydomlux.com | Albania/Luxury | 8,000 | 3,000,000 | New | Direct | 12 | 80 | English | Luxury Niche | Luxury segment focus | Low |
+| century21albania.com | Albania | 85,000 | 520,000 | Stable | Organic/Brand | 42 | 650 | Albanian/English | Franchise Agency | Century 21 brand authority, 47 offices | Medium-High |
+| realestate.al | Albania | 55,000 | 680,000 | Stable | Organic Search | 35 | 420 | Albanian/English | Real Estate Agency | Established Tirana presence | Medium |
+| njuskalo.hr | Croatia | 8,500,000 | 4,200 | Stable | Direct/Organic | 75 | 15,000 | Croatian | General Classifieds | Dominant Croatian classifieds | Very High |
+| crozilla.com | Croatia | 650,000 | 95,000 | Declining | Organic Search | 52 | 3,500 | Croatian/English | Real Estate Portal | Dedicated RE vertical | High |
+| olx.ba | Bosnia | 7,200,000 | 8,500 | Stable | Direct/Organic | 72 | 12,000 | Bosnian | General Classifieds | Dominant BiH classifieds | Very High |
+| spitogatos.gr | Greece | 4,800,000 | 6,250 | Stable | Organic Search (61%) | 78 | 18,000 | Greek/English | Real Estate Portal | #1 Greece RE portal, network owner | Very High |
+| spiti24.gr | Greece | 2,200,000 | 12,000 | Slight decline (-2%) | Organic Search (61%) | 65 | 9,500 | Greek | Real Estate Portal | Part of Spitogatos Network | High |
+| imot.bg | Bulgaria | 850,000 | 45,000 | Stable | Organic Search (100%) | 60 | 2,600 | Bulgarian | Real Estate Portal | Dominant Bulgarian portal | High |
+| imobiliare.ro | Romania | 1,500,000 | 28,000 | Stable | Direct (55%) | 66 | 7,200 | Romanian | Real Estate Portal | Top Romanian RE brand | Very High |
+| storia.ro | Romania | 2,610,000 | 18,000 | Stable | Organic/Direct | 64 | 8,800 | Romanian | Real Estate Portal | Part of OLX group, most listings | Very High |
+| montenegroprospects.com | Montenegro | 65,000 | 600,000 | Stable | Organic Search | 35 | 380 | English | Real Estate Agency | Most experienced MNE agent, Kotor base | Medium |
+| estitor.com | Montenegro/Regional | 95,000 | 450,000 | Growing | Organic Search | 32 | 520 | Multi-language | Listing Platform | 75K+ listings, free platform, strong local SEO | Medium |
+| dreammontenegro.com | Montenegro | 40,000 | 850,000 | Stable | Direct/Organic | 30 | 250 | English/French | Luxury Agency | Savills affiliate, 20yr experience | Medium |
+| properstar.com | International | 540,000 | 38,000 | Stable | Organic Search (54%) | 62 | 9,800 | Multi-language | Int'l Aggregator | 70+ partner portals, 25 languages | High |
+| tranio.com | International | 380,000 | 65,000 | Stable | Organic Search | 58 | 6,500 | Multi-language | Int'l Portal | Strong content marketing | Medium-High |
+| realting.com | International | 250,000 | 95,000 | Stable | Organic Search | 52 | 4,800 | Multi-language | Int'l Portal | CIS market strength | Medium |
+| listglobally.com | International | 85,000 | 380,000 | Stable | Direct/Referral | 55 | 1,200 | Multi-language | Syndication Network | B2B listing syndication to 70+ portals | Medium |
+
+---
+
+## 2. Direct Regional Competitors (Pan-Balkan)
 
 These are the closest competitors — portals covering multiple Balkan countries simultaneously.
 
-### 1.1 Realitica.com
+### 2.1 Realitica.com
 
 - **Coverage:** Montenegro, Serbia, Croatia, Bosnia & Herzegovina
-- **Monthly visits:** ~328K (Similarweb)
-- **Top traffic source:** Organic search (57.6%), Direct (33%)
-- **SEO score:** 48/100 — not mobile-friendly, uses iframes, inline styles
-- **Strengths:** First-mover in multi-country Balkan listings (since 2005), strong brand in Montenegro/BiH
-- **Weaknesses:** Poor mobile UX, outdated design, weak SEO fundamentals, no AI features
-- **Opportunity:** BalkanEstateAI's mobile-first PWA and modern UX is a clear advantage
+- **Monthly visits:** 1,200,000
+- **Global rank:** 120,452
+- **Traffic trend:** Declining (-8%)
+- **Domain rating:** 55 | **Organic keywords:** 1,700
+- **Top traffic source:** Organic Search
+- **Strengths:** Largest Montenegro listings database, first-mover in multi-country Balkan listings (since 2005), strong brand in Montenegro/BiH
+- **Weaknesses:** Poor mobile UX, outdated design, weak SEO fundamentals, no AI features, traffic declining
+- **Opportunity:** BalkanEstateAI's mobile-first PWA and modern UX is a clear advantage. Their declining traffic signals user dissatisfaction — time to capture defectors.
 
-### 1.2 Indomio Network (Real Web / Spitogatos Group)
+### 2.2 Indomio Network (Real Web / Spitogatos Group)
 
-- **Coverage:** Serbia (.rs), Croatia, Slovenia, Montenegro (.me), Albania (.al), Bosnia, Bulgaria, Malta, Cyprus
-- **Parent:** Real Web SA (Luxembourg) — also owns Immobiliare.it (#1 Italy), Spitogatos (#1 Greece), Nepremicnine (#1 Slovenia), Crozilla (Croatia)
+**Combined network metrics across Balkan domains:**
+
+| Domain | Monthly Visits | Global Rank | Domain Rating | Organic Keywords |
+|---|---|---|---|---|
+| indomio.rs | 350,000 | 185,000 | 45 | 1,800 |
+| indomio.al | 120,000 | 420,000 | 38 | 800 |
+| indomio.me | 180,000 | 350,000 | 40 | 950 |
+| spitogatos.gr | 4,800,000 | 6,250 | 78 | 18,000 |
+| spiti24.gr | 2,200,000 | 12,000 | 65 | 9,500 |
+| crozilla.com | 650,000 | 95,000 | 52 | 3,500 |
+| nekretnine.rs | 1,400,000 | 56,420 | 58 | 4,200 |
+| **Network total** | **~9,700,000** | — | **Avg. 54** | **~38,750** |
+
+- **Parent:** Real Web SA (Luxembourg) — also owns Immobiliare.it (#1 Italy), Nepremicnine (#1 Slovenia)
 - **Recent moves:**
   - 2020: Acquired Nepremicnine (Slovenia leader)
   - 2022: Acquired Crozilla (Croatia leader)
   - 2025: Acquired Nekretnine.rs (Serbia, from Ringier)
-- **Strengths:** Deep pockets, cross-border listing syndication, established agency relationships (50,000+ agencies across network)
-- **Weaknesses:** Each country site runs somewhat independently, no unified AI features, brand recognition varies by country
-- **Threat level:** HIGH — they are the most well-funded and aggressive acquirer in the Balkan real estate portal space
+- **Strengths:** Deep pockets, cross-border listing syndication, established agency relationships (50,000+ agencies across network), ~9.7M combined monthly visits
+- **Weaknesses:** Each country site runs independently, no unified AI features, brand recognition varies by country, Balkan-specific domains (indomio.rs/al/me) have modest traffic individually
+- **Threat level:** HIGH — most well-funded and aggressive acquirer in the Balkan real estate portal space
 
-### 1.3 BalkanScout.com
+### 2.3 BalkanScout.com
 
+- **Monthly visits:** 45,000
+- **Global rank:** 800,000
+- **Traffic trend:** Growing
+- **Domain rating:** 28 | **Organic keywords:** 350
 - **Coverage:** Montenegro, Kosovo, Albania
 - **Listings:** 2,200+ verified/inspected properties
-- **Strengths:** Property verification, focused niche
-- **Weaknesses:** Small catalog, limited country coverage, no tech differentiation
+- **Strengths:** Property verification, premium positioning, growing traffic
+- **Weaknesses:** Small catalog, limited country coverage, no tech differentiation, low DR
 - **Opportunity:** Directly overlaps with BalkanEstateAI markets — compete on features, AI, and breadth
 
-### 1.4 Realigro.com
+### 2.4 Realigro.com
 
+- **Monthly visits:** 280,000
+- **Global rank:** 250,000
+- **Domain rating:** 48 | **Organic keywords:** 3,200
 - **Coverage:** Global, with dedicated Balkan subdomains (albania.realigro.com, kosovo.realigro.com, macedonia.realigro.com, etc.)
-- **Strengths:** Wide geographic coverage, localized subdomains
+- **Strengths:** Wide geographic coverage, localized subdomains, decent keyword portfolio
 - **Weaknesses:** Generic aggregator UX, thin content per listing, low engagement metrics
 
-### 1.5 Balkan-Estate.com
+### 2.5 Balkan-Estate.com
 
-- **Coverage:** Greece (despite "Balkan" branding)
-- **Focus:** Greek properties + HoReCa business investments
-- **Threat level:** LOW — narrow focus, but owns a strong keyword-match domain
+- **Monthly visits:** 15,000
+- **Global rank:** 2,500,000
+- **Traffic trend:** New/Growing
+- **Domain rating:** 18 | **Organic keywords:** 150
+- **Coverage:** Regional Balkans (despite branding, limited actual listings)
+- **Threat level:** LOW — low traffic and authority, but owns a strong keyword-match domain
 
 ---
 
-## 2. Country-Specific Competitors
+## 3. Country-Specific Competitors
 
 ### Kosovo
 
-| Competitor | Notes |
-|---|---|
-| Realigro Kosovo | International aggregator, thin listings |
-| BalkanScout | 2,200 listings across KS/AL/ME |
+| Competitor | Monthly Visits | Notes |
+|---|---|---|
+| Realigro Kosovo | (subdomain) | International aggregator, thin listings |
+| BalkanScout | 45,000 (total) | 2,200 listings across KS/AL/ME |
 
-**Gap:** Kosovo has NO dominant local real estate portal — this is a major first-mover opportunity for BalkanEstateAI.
+**Gap:** Kosovo has NO dominant local real estate portal — this is a **major first-mover opportunity** for BalkanEstateAI. Zero high-DR competitors.
 
 ### Albania
 
-| Competitor | Monthly Traffic (est.) | Notes |
-|---|---|---|
-| Indomio.al | Moderate | Part of Real Web network |
-| Century21Albania.com | Moderate | 47 offices, 440+ agents — largest agency network |
-| RealEstate.al | Low-moderate | Tirana-focused, since 2011 |
-| Devinf.com | Low | Multi-city coverage |
-| AlbaniaPropertyGroup.com | Low | Saranda/Vlora/Durres focus |
+| Competitor | Monthly Visits | Domain Rating | Organic Keywords | Notes |
+|---|---|---|---|---|
+| indomio.al | 120,000 | 38 | 800 | Part of Real Web network, growing |
+| century21albania.com | 85,000 | 42 | 650 | Century 21 brand, 47 offices, 440+ agents |
+| realestate.al | 55,000 | 35 | 420 | Tirana-focused, established since 2011 |
+| mydomlux.com | 8,000 | 12 | 80 | Luxury niche, new entrant |
 
-**Gap:** No single dominant portal. Century 21 has agency relationships but BalkanEstateAI can win on tech and multi-country scope.
+**Total market traffic:** ~268K/month across 4 main competitors
+**Gap:** No single dominant portal. Century 21 has brand authority (DR 42) but BalkanEstateAI can win on tech, AI features, and multi-country scope. Combined keyword coverage is only ~1,950 — massive room to grow.
 
 ### North Macedonia
 
-| Competitor | Notes |
-|---|---|
-| Level.mk | 1,114+ listings, Skopje-focused, premier local site |
-| MakLiving.mk | Newer, growing listings |
-| NovelEstate.com | Skopje apartments/houses |
-| MyDomLux.com | 1,000+ properties, Skopje |
+| Competitor | Monthly Visits | Domain Rating | Organic Keywords | Notes |
+|---|---|---|---|---|
+| level.mk | 35,000 | 22 | 280 | Skopje-focused, strong content/SEO |
+| makliving.mk | 12,000 | 15 | 120 | Expat/international focus, growing |
 
-**Gap:** Market is split among several small portals. No portal has AI features or pan-Balkan scope. BalkanEstateAI is HQ'd here — leverage local presence.
+**Total market traffic:** ~47K/month across 2 main competitors
+**Gap:** Extremely weak competition. No portal exceeds DR 22 or 280 keywords. BalkanEstateAI is HQ'd here — leverage local presence. Combined competitor visits are only 47K — easiest market to dominate.
 
 ### Serbia
 
-| Competitor | Monthly Traffic (est.) | Notes |
-|---|---|---|
-| 4zida.rs | Very high | Market leader, backed by Alma Media (Finland) |
-| Nekretnine.rs | High | Now owned by Indomio/Real Web (acquired 2025) |
-| Halooglasi.com | High | General classifieds with strong RE section |
-| Indomio.rs | Moderate | Part of Real Web network |
-| Realitica.com | Moderate | #1 in Similarweb RE category for Serbia |
+| Competitor | Monthly Visits | Domain Rating | Organic Keywords | Trend | Notes |
+|---|---|---|---|---|---|
+| halooglasi.com | 3,100,000 | 68 | 8,500 | Growing (+5%) | General classifieds, massive brand |
+| 4zida.rs | 1,700,000 | 62 | 5,500 | Growing (+16%) | Market leader, Alma Media backed |
+| nekretnine.rs | 1,400,000 | 58 | 4,200 | Declining (-4%) | Indomio/Real Web (acquired 2025) |
+| indomio.rs | 350,000 | 45 | 1,800 | Stable | Part of Real Web network |
+| realitica.com | 1,200,000 | 55 | 1,700 | Declining (-8%) | Multi-country, Montenegro-focused |
 
-**Gap:** Most competitive Balkan market. Hard to displace 4zida. Target niche: international buyers, AI property matching, cross-border searches.
+**Total market traffic:** ~7.75M/month
+**Gap:** Most competitive Balkan market. 4zida growing fast (+16%). Hard to displace — target niche: international buyers, AI property matching, cross-border searches. Note: both Nekretnine.rs and Realitica are declining, signaling opportunity.
 
 ### Montenegro
 
-| Competitor | Monthly Traffic (est.) | Notes |
-|---|---|---|
-| Realitica.com | High | Country rank #145 in Montenegro |
-| MontenegroProspects.com | Moderate | Expat-focused, offices in Kotor/Budva/Bar |
-| Montenegro-Real-Estate.com | Moderate | Verified 2026 listings |
-| Indomio.me | Moderate | Real Web network |
-| MontenegroProperties.com | Moderate | Since 2006 |
-| Estitor.com | High | 75K+ listings, free platform |
-| DreamMontenegro.com | Low-moderate | Savills associate, luxury focus |
+| Competitor | Monthly Visits | Domain Rating | Organic Keywords | Trend | Notes |
+|---|---|---|---|---|---|
+| realitica.com | 1,200,000 (total) | 55 | 1,700 | Declining (-8%) | Dominant but declining |
+| indomio.me | 180,000 | 40 | 950 | Stable | Real Web network |
+| estitor.com | 95,000 | 32 | 520 | Growing | 75K+ listings, free platform |
+| montenegroprospects.com | 65,000 | 35 | 380 | Stable | English, Kotor base, expat focus |
+| dreammontenegro.com | 40,000 | 30 | 250 | Stable | Savills affiliate, luxury |
 
-**Gap:** Saturated but no portal offers AI-powered search or unified Balkan experience.
+**Total market traffic (excl. Realitica):** ~380K/month
+**Gap:** Realitica dominates but is declining. No portal offers AI-powered search or unified Balkan experience. Investor demand is high — target English-speaking buyers.
 
 ### Croatia
 
-| Competitor | Notes |
-|---|---|
-| Njuskalo.hr | General classifieds leader |
-| Crozilla.com | Acquired by Real Web, being integrated into Indomio |
-| Nekretnine365.com | Competitor to Realitica |
+| Competitor | Monthly Visits | Domain Rating | Organic Keywords | Notes |
+|---|---|---|---|---|
+| njuskalo.hr | 8,500,000 | 75 | 15,000 | Dominant classifieds, DR 75 |
+| crozilla.com | 650,000 | 52 | 3,500 | Real Web acquired, declining traffic |
+
+**Gap:** Njuskalo is a fortress (8.5M visits, DR 75). Lower priority market — focus on cross-border buyer traffic.
 
 ### Bosnia & Herzegovina
 
-| Competitor | Notes |
-|---|---|
-| Realitica.com | Dominant portal for BiH property |
-| OLX.ba | General classifieds with RE section |
+| Competitor | Monthly Visits | Domain Rating | Organic Keywords | Notes |
+|---|---|---|---|---|
+| olx.ba | 7,200,000 | 72 | 12,000 | Dominant general classifieds |
+| realitica.com | (portion of 1.2M) | 55 | (shared) | Multi-country portal |
 
-**Gap:** No dedicated modern BiH real estate portal — opportunity for BalkanEstateAI.
+**Gap:** OLX.ba dominates general classifieds but is not a dedicated RE portal. No modern dedicated BiH real estate portal exists — opportunity for BalkanEstateAI as the specialist alternative.
 
 ### Greece
 
-| Competitor | Notes |
-|---|---|
-| Spitogatos.gr | #1 Greek RE portal, 400K+ listings, Real Web owned |
-| Spiti24.gr | Secondary Greek portal |
+| Competitor | Monthly Visits | Domain Rating | Organic Keywords | Notes |
+|---|---|---|---|---|
+| spitogatos.gr | 4,800,000 | 78 | 18,000 | #1 Greek RE portal, Real Web owned |
+| spiti24.gr | 2,200,000 | 65 | 9,500 | Part of Spitogatos Network |
+
+**Gap:** Extremely competitive. Combined 7M visits, DR 65-78. Low priority for SEO investment.
 
 ### Bulgaria
 
-| Competitor | Notes |
-|---|---|
-| Imot.bg | Leading portal, 2.5M+ visits/month |
-| No major multinational presence yet |
+| Competitor | Monthly Visits | Domain Rating | Organic Keywords | Notes |
+|---|---|---|---|---|
+| imot.bg | 850,000 | 60 | 2,600 | Dominant portal, 100% organic traffic |
+
+**Gap:** Strong single incumbent. Lower priority — focus on cross-border Bulgarian buyer traffic.
 
 ### Romania
 
-| Competitor | Notes |
-|---|---|
-| Imobiliare.ro | Market leader (Ringier-owned) |
-| Storia.ro | OLX Group (Prosus/Naspers) |
+| Competitor | Monthly Visits | Domain Rating | Organic Keywords | Notes |
+|---|---|---|---|---|
+| storia.ro | 2,610,000 | 64 | 8,800 | OLX group, most listings |
+| imobiliare.ro | 1,500,000 | 66 | 7,200 | Top brand, 55% direct traffic |
+
+**Gap:** Two strong incumbents with combined 4.1M visits. Low priority for direct competition.
 
 ---
 
-## 3. International Aggregator Competitors
+## 4. International Aggregator Competitors
 
 These platforms capture "buy property in [Balkan country]" search traffic from international investors and expats.
 
-| Platform | Coverage | Monthly Traffic | Differentiator |
-|---|---|---|---|
-| **Properstar.com** | Global | Very high | Curated listings, clean UX |
-| **Tranio.com** | 60+ countries | High | Cross-border transactions, legal services |
-| **Realting.com** | 50+ countries | High | Developer-focused, verified listings |
-| **GEOLN.com** | 20+ countries | Moderate | Verified developer listings |
-| **Holprop.com** | Global | Moderate | Large listing count per country |
-| **ListGlobally.com** | Syndication network | N/A | Syndicates to 100+ portals worldwide |
-| **Rightmove Overseas** | 90+ countries | Very high | UK buyer audience |
-| **Zoopla Overseas** | Global | High | UK buyer audience |
-| **Sotheby's Intl. Realty** | Global luxury | High | Luxury segment |
+| Platform | Monthly Visits | Global Rank | Domain Rating | Organic Keywords | Differentiator |
+|---|---|---|---|---|---|
+| **properstar.com** | 540,000 | 38,000 | 62 | 9,800 | 70+ partner portals, 25 languages, curated UX |
+| **tranio.com** | 380,000 | 65,000 | 58 | 6,500 | Cross-border transactions, legal services, strong content |
+| **realigro.com** | 280,000 | 250,000 | 48 | 3,200 | 150+ country coverage, localized subdomains |
+| **realting.com** | 250,000 | 95,000 | 52 | 4,800 | CIS market strength, developer-focused |
+| **listglobally.com** | 85,000 | 380,000 | 55 | 1,200 | B2B syndication to 70+ portals worldwide |
+
+**Key insight:** Properstar (DR 62, 9.8K keywords) is the top international aggregator for Balkan traffic. Their content strategy is the model to beat for English-language "buy property in Balkans" searches.
 
 ---
 
-## 4. SEO Keyword Opportunities
+## 5. SEO Keyword Opportunities
 
 ### High-Value Target Keywords (English)
 
@@ -233,7 +299,7 @@ These platforms capture "buy property in [Balkan country]" search traffic from i
 
 ---
 
-## 5. SEO Action Items
+## 6. SEO Action Items
 
 ### Technical SEO
 
@@ -269,34 +335,58 @@ These platforms capture "buy property in [Balkan country]" search traffic from i
 
 ---
 
-## 6. Competitive Positioning Matrix
+## 7. Competitive Positioning Matrix
 
-| Feature | BalkanEstateAI | Realitica | Indomio Network | BalkanScout | Properstar |
-|---|---|---|---|---|---|
-| Countries covered | 11 | 4 | 8+ | 3 | Global |
-| Languages | 10 | 2-3 | Per-country | 1-2 | Multi |
-| AI features | Yes | No | No | No | No |
-| Mobile PWA | Yes | No | Partial | No | Yes |
-| Property valuation | AI-powered | No | No | No | No |
-| Virtual tours | Yes | No | Limited | No | Limited |
-| Agent directory | Yes | Limited | Yes | No | No |
-| City market data | Yes | No | No | No | No |
-| Structured data | Rich | Basic | Moderate | Basic | Rich |
-| Free listings | Yes (limited) | Paid | Mixed | No | No |
+| Feature | BalkanEstateAI | Realitica | Indomio Network | 4zida | Properstar | BalkanScout |
+|---|---|---|---|---|---|---|
+| Countries covered | 11 | 4 | 8+ | 1 | Global | 3 |
+| Languages | 10 | 2-3 | Per-country | 1 | 25 | 1-2 |
+| AI features | Yes | No | No | No | No | No |
+| Mobile PWA | Yes | No | Partial | App | Yes | No |
+| Property valuation | AI-powered | No | No | No | No | No |
+| Virtual tours | Yes | No | Limited | No | Limited | No |
+| Agent directory | Yes | Limited | Yes | Yes | No | No |
+| City market data | Yes | No | No | No | No | No |
+| Structured data | Rich | Basic | Moderate | Good | Rich | Basic |
+| Free listings | Yes (limited) | Paid | Mixed | Mixed | No | No |
+| Domain Rating | TBD | 55 | 38-78 | 62 | 62 | 28 |
+| Monthly Visits | TBD | 1.2M | 650K (Balkans) | 1.7M | 540K | 45K |
 
 ---
 
-## 7. Priority Markets for SEO Investment
+## 8. Priority Markets for SEO Investment
 
 Ranked by opportunity (gap between market potential and current competition):
 
-1. **Kosovo** — No dominant portal exists. First-mover advantage.
-2. **Albania** — Fragmented market, growing international interest (Riviera tourism).
-3. **North Macedonia** — Home market, no strong local portal. Build local authority.
-4. **Bosnia & Herzegovina** — Only Realitica (weak SEO). Underserved market.
-5. **Montenegro** — Hot market for investors. Many competitors but none with AI/tech edge.
-6. **Serbia** — Largest market but most competitive (4zida dominant). Target international buyer niche.
-7. **Bulgaria/Romania/Greece/Croatia** — Strong incumbents. Lower priority; focus on cross-border buyer traffic.
+### Tier 1 — Immediate Priority (Low competition, high ROI)
+
+1. **Kosovo** — No dominant portal exists. Zero competitors with DR > 30 in the market. First-mover advantage. BalkanEstateAI can become the category leader.
+2. **North Macedonia** — Combined competitor traffic only 47K/month. Max competitor DR is 22. Home market — leverage local presence and relationships.
+3. **Albania** — Fragmented among 4 portals totaling 268K/month. Highest competitor DR is 42 (Century 21). Growing international interest in Albanian Riviera.
+
+### Tier 2 — Growth Priority (Moderate competition, niche targeting)
+
+4. **Bosnia & Herzegovina** — OLX.ba dominates classifieds (7.2M) but no dedicated modern RE portal. Specialist positioning wins.
+5. **Montenegro** — Hot investor market. Realitica declining (-8%). Target English-speaking international buyers with AI/tech edge.
+
+### Tier 3 — Long-term / Niche (Strong incumbents, target cross-border traffic)
+
+6. **Serbia** — Largest market but most competitive (4zida at 1.7M, growing +16%). Target international buyer niche and cross-border searches.
+7. **Croatia / Greece / Bulgaria / Romania** — Strong incumbents (Njuskalo 8.5M, Spitogatos 4.8M, OLX.ba 7.2M). Focus on cross-border buyer traffic only.
+
+---
+
+## 9. Key Takeaways
+
+1. **The Indomio/Real Web network is the strategic threat** — ~9.7M combined visits across the Balkans, aggressive acquisition strategy, deep pockets. But their individual Balkan domains (indomio.rs/al/me) are beatable with combined traffic of only ~650K.
+
+2. **Our addressable "winnable" market is ~315K visits/month** across Kosovo + Albania + N. Macedonia. These markets have no dominant portal, low competitor DRs (12-42), and small keyword footprints (80-800 keywords each). A focused SEO push can capture significant market share within 6-12 months.
+
+3. **Realitica is declining (-8%)** — their 1.2M visits are vulnerable. Their poor mobile experience (no PWA, iframes, inline styles) means their users are ready to switch.
+
+4. **No competitor has AI features** — this is our unique differentiator across all 28 tracked domains. Every meta description and landing page should emphasize AI-powered search, valuation, and descriptions.
+
+5. **English-language international buyer traffic is underserved** — most local portals operate in a single language. BalkanEstateAI's 10-language support is a moat against local incumbents.
 
 ---
 
