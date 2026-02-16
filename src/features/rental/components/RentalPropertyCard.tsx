@@ -59,7 +59,7 @@ const RentalPropertyCard: React.FC<RentalPropertyCardProps> = ({ property, onHov
                 </div>
                 {/* Price Drop Badge */}
                 {!isRented && property.originalPrice && property.originalPrice > property.price && (
-                    <div className="absolute top-2 left-2 bg-green-500/90 backdrop-blur-sm text-white text-xs font-bold px-2.5 py-1 rounded-full flex items-center gap-1">
+                    <div className="absolute top-2 left-2 bg-red-500/90 backdrop-blur-sm text-white text-xs font-bold px-2.5 py-1 rounded-full flex items-center gap-1">
                         <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
                             <path strokeLinecap="round" strokeLinejoin="round" d="M19 14l-7 7m0 0l-7-7m7 7V3" />
                         </svg>
@@ -91,7 +91,7 @@ const RentalPropertyCard: React.FC<RentalPropertyCardProps> = ({ property, onHov
                             </span>
                             <span className="text-sm text-gray-400">{rentPeriodLabel}</span>
                             {priceInfo.hasReduction && (
-                                <span className="bg-green-100 text-green-700 text-[10px] font-semibold px-1.5 py-[1px] rounded-full">
+                                <span className="bg-red-100 text-red-600 text-[10px] font-semibold px-1.5 py-[1px] rounded-full">
                                     -{priceInfo.discountPercentage}%
                                 </span>
                             )}

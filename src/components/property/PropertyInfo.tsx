@@ -136,11 +136,11 @@ export const PropertyInfo: React.FC<PropertyInfoProps> = ({ property, onOpenFloo
                     <span className="text-base sm:text-lg text-neutral-400 line-through">
                       {formatPrice(priceInfo.originalPrice, property.country)}
                     </span>
-                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-green-100 text-green-700 text-xs sm:text-sm font-semibold">
+                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-red-100 text-red-600 text-xs sm:text-sm font-semibold">
                       <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
                         <path strokeLinecap="round" strokeLinejoin="round" d="M19 14l-7 7m0 0l-7-7m7 7V3" />
                       </svg>
-                      {priceInfo.discountPercentage}%
+                      -{priceInfo.discountPercentage}%
                     </span>
                   </>
                 )}

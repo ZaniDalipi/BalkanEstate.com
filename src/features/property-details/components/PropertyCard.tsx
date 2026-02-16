@@ -218,7 +218,7 @@ const PropertyCardInner = memo<PropertyCardInnerProps>(({
 
             {/* iOS-style Price Drop Badge */}
             {!isSold && !isRented && property.originalPrice && property.originalPrice > property.price && (
-              <div className="bg-green-500/90 backdrop-blur-sm text-white text-[10px] font-semibold px-2 py-[3px] rounded-full flex items-center gap-1">
+              <div className="bg-red-500/90 backdrop-blur-sm text-white text-[10px] font-semibold px-2 py-[3px] rounded-full flex items-center gap-1">
                 <svg className="w-2.5 h-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M19 14l-7 7m0 0l-7-7m7 7V3" />
                 </svg>
@@ -318,11 +318,11 @@ const PropertyCardInner = memo<PropertyCardInnerProps>(({
                   {isRental && <span className="text-[11px] font-normal text-neutral-400">/{property.rentPeriod === 'weekly' ? t('common:wk', 'wk') : property.rentPeriod === 'daily' ? t('common:day', 'day') : t('common:mo', 'mo')}</span>}
                 </span>
                 {priceInfo.hasReduction && (
-                  <span className="bg-green-100 text-green-700 text-[10px] font-semibold px-1.5 py-[1px] rounded-full flex items-center gap-0.5">
+                  <span className="bg-red-100 text-red-600 text-[10px] font-semibold px-1.5 py-[1px] rounded-full flex items-center gap-0.5">
                     <svg className="w-2.5 h-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
                       <path strokeLinecap="round" strokeLinejoin="round" d="M19 14l-7 7m0 0l-7-7m7 7V3" />
                     </svg>
-                    {priceInfo.discountPercentage}%
+                    -{priceInfo.discountPercentage}%
                   </span>
                 )}
               </div>
