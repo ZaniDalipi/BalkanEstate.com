@@ -704,10 +704,10 @@ const MainLayout: React.FC = () => {
               {showHeader && <Header onToggleSidebar={() => setIsSidebarOpen(true)} isFloating={isFloatingHeaderView} />}
             </Suspense>
 
-            {/* PWA Top Bar - mobile navigation bar with back button */}
+            {/* PWA Top Bar - mobile navigation bar with back button and title */}
             {showPWATopBar && (
               <div className="bg-white/95 backdrop-blur-md border-b border-neutral-200/60 flex-shrink-0 z-20" style={{ paddingTop: 'env(safe-area-inset-top, 0px)' }}>
-                <div className="flex items-center justify-between h-11 px-1">
+                <div className="grid grid-cols-[auto_1fr_auto] items-center h-11 px-1">
                   {/* Left: Back button */}
                   <button
                     type="button"
@@ -722,19 +722,10 @@ const MainLayout: React.FC = () => {
                   </button>
 
                   {/* Center: Page title */}
-                  <span className="text-sm font-semibold text-neutral-800 truncate max-w-[50vw]">{pageTitle}</span>
+                  <span className="text-sm font-semibold text-neutral-800 truncate text-center">{pageTitle}</span>
 
-                  {/* Right: Hamburger menu to open sidebar */}
-                  <button
-                    type="button"
-                    onClick={() => setIsSidebarOpen(true)}
-                    className="min-w-[44px] min-h-[44px] flex items-center justify-center text-neutral-600 hover:text-primary active:opacity-70 transition-opacity pr-2"
-                    aria-label="Open menu"
-                  >
-                    <svg className="w-[22px] h-[22px]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
-                    </svg>
-                  </button>
+                  {/* Right: Spacer to balance the grid and keep title centered */}
+                  <div className="min-w-[44px]" />
                 </div>
               </div>
             )}
