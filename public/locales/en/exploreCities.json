@@ -54,7 +54,8 @@
   },
   "footer": {
     "listings": "listings",
-    "soldPerMonth": "sold/mo"
+    "soldPerMonth": "sold/mo",
+    "viewListings": "View Listings on Map"
   },
   "trends": {
     "rising": "rising",

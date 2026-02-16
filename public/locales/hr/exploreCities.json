@@ -1,0 +1,71 @@
+{
+  "title": "Istražite balkanske gradove",
+  "subtitle": "Tržišni uvidi pokretani umjetnom inteligencijom za {count} velikih gradova u 10 zemalja",
+  "page": {
+    "title": "Istražite balkanske gradove - Uvidi u tržište nekretnina"
+  },
+  "hero": {
+    "title": "Istražite balkanske gradove",
+    "subtitle": "Tržišni uvidi pokretani umjetnom inteligencijom za {{count}} velikih gradova u 10 zemalja",
+    "discoverSubtitle": "Otkrijte najbolja tržišta nekretnina diljem Balkana"
+  },
+  "empty": {
+    "title": "Nema dostupnih podataka o gradovima",
+    "message": "Tržišni podaci će uskoro biti ažurirani. Provjerite ponovo kasnije!"
+  },
+  "cards": {
+    "allCitiesTitle": "Svi gradovi",
+    "countryTitle": "Gradovi u {{country}}",
+    "subtitle": "Otkrijte mogućnosti za nekretnine u {{count}} gradova"
+  },
+  "discoverSubtitle": "Otkrijte najbolja tržišta nekretnina diljem Balkana",
+  "noCitiesTitle": "Nema dostupnih podataka o gradovima",
+  "noCitiesMessage": "Tržišni podaci će uskoro biti ažurirani. Provjerite ponovo kasnije!",
+  "stats": {
+    "totalCities": "Ukupno gradova",
+    "countries": "Zemlje",
+    "avgGrowth": "Prosječan rast",
+    "totalListings": "Ukupno oglasa"
+  },
+  "filters": {
+    "allCountries": "Sve zemlje"
+  },
+  "cityCard": {
+    "demand": "Potražnja kupaca",
+    "demandHigh": "Visoka",
+    "demandMedium": "Umjerena",
+    "demandLow": "Niska",
+    "investment": "Investicijski potencijal",
+    "investmentExcellent": "Odličan",
+    "investmentGood": "Dobar",
+    "investmentFair": "Prosječan",
+    "avgPricePerSqm": "Prosječna cijena po m²",
+    "medianPrice": "Tipična cijena nekretnine",
+    "yoyGrowth": "Promjena cijene (1 godina)",
+    "rentalYield": "Prinos od najma",
+    "rentalYieldHelper": "Godišnji prihod u odnosu na cijenu nekretnine",
+    "daysOnMarket": "Prosječno vrijeme prodaje",
+    "days": "dana",
+    "daysUnit": "dana"
+  },
+  "sections": {
+    "topNeighborhoods": "Najbolje četvrti",
+    "marketInsights": "Tržišni uvidi"
+  },
+  "footer": {
+    "listings": "oglasa",
+    "soldPerMonth": "prodano/mj.",
+    "viewListings": "Pogledajte oglase na karti"
+  },
+  "trends": {
+    "rising": "u porastu",
+    "declining": "u padu",
+    "stable": "stabilno"
+  },
+  "aiInsights": {
+    "title": "Tržišna inteligencija pokretana umjetnom inteligencijom",
+    "description": "Naši tržišni podaci pokretani su Gemini umjetnom inteligencijom i ažuriraju se dva puta mjesečno (1. i 15.). Analiziramo tržišne trendove u stvarnom vremenu, cijene nekretnina, indikatore potražnje i lokalne uvide u {count} velikih gradova na Balkanu.",
+    "lastUpdated": "Posljednje ažuriranje: {date}",
+    "dataSource": "Izvor podataka: Gemini AI + Lokalne baze nekretnina"
+  }
+}

@@ -1,0 +1,71 @@
+{
+  "title": "Explorați orașele balcanice",
+  "subtitle": "Informații de piață generate de inteligența artificială pentru {count} orașe mari din 10 țări",
+  "page": {
+    "title": "Explorați orașele balcanice - Informații despre piața imobiliară"
+  },
+  "hero": {
+    "title": "Explorați orașele balcanice",
+    "subtitle": "Informații de piață generate de inteligența artificială pentru {{count}} orașe mari din 10 țări",
+    "discoverSubtitle": "Descoperiți cele mai bune piețe imobiliare din Balcani"
+  },
+  "empty": {
+    "title": "Nu sunt disponibile date despre orașe",
+    "message": "Datele de piață vor fi actualizate în curând. Verificați din nou mai târziu!"
+  },
+  "cards": {
+    "allCitiesTitle": "Toate orașele",
+    "countryTitle": "Orașe din {{country}}",
+    "subtitle": "Descoperiți oportunități imobiliare în {{count}} orașe"
+  },
+  "discoverSubtitle": "Descoperiți cele mai bune piețe imobiliare din Balcani",
+  "noCitiesTitle": "Nu sunt disponibile date despre orașe",
+  "noCitiesMessage": "Datele de piață vor fi actualizate în curând. Verificați din nou mai târziu!",
+  "stats": {
+    "totalCities": "Total orașe",
+    "countries": "Țări",
+    "avgGrowth": "Creștere medie",
+    "totalListings": "Total anunțuri"
+  },
+  "filters": {
+    "allCountries": "Toate țările"
+  },
+  "cityCard": {
+    "demand": "Cererea cumpărătorilor",
+    "demandHigh": "Ridicată",
+    "demandMedium": "Moderată",
+    "demandLow": "Scăzută",
+    "investment": "Potențial de investiție",
+    "investmentExcellent": "Excelent",
+    "investmentGood": "Bun",
+    "investmentFair": "Moderat",
+    "avgPricePerSqm": "Preț mediu pe m²",
+    "medianPrice": "Preț tipic al proprietății",
+    "yoyGrowth": "Schimbarea prețului (1 an)",
+    "rentalYield": "Randament din chirie",
+    "rentalYieldHelper": "Venitul anual raportat la prețul proprietății",
+    "daysOnMarket": "Timp mediu de vânzare",
+    "days": "zile",
+    "daysUnit": "zile"
+  },
+  "sections": {
+    "topNeighborhoods": "Cartiere de top",
+    "marketInsights": "Informații de piață"
+  },
+  "footer": {
+    "listings": "anunțuri",
+    "soldPerMonth": "vândute/lună",
+    "viewListings": "Vedeți anunțurile pe hartă"
+  },
+  "trends": {
+    "rising": "în creștere",
+    "declining": "în scădere",
+    "stable": "stabil"
+  },
+  "aiInsights": {
+    "title": "Inteligență de piață generată de AI",
+    "description": "Datele noastre de piață sunt generate de Gemini AI și actualizate de două ori pe lună (1 și 15). Analizăm tendințele pieței în timp real, prețurile proprietăților, indicatorii cererii și informații locale în {count} orașe mari din Balcani.",
+    "lastUpdated": "Ultima actualizare: {date}",
+    "dataSource": "Sursa datelor: Gemini AI + Baze de date locale de proprietăți"
+  }
+}
