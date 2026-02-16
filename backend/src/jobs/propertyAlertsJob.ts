@@ -629,6 +629,159 @@ export async function processInstantAlertsForProperty(propertyId: string): Promi
 /**
  * Run all property alert jobs
  */
+/**
+ * Process instant price drop alerts for a specific property
+ * Called immediately when a property price is reduced
+ * Notifies:
+ * 1. Users who have this property in favorites (with price alerts enabled)
+ * 2. Users whose saved searches match this property
+ */
+export async function processInstantPriceDropForProperty(
+  propertyId: string,
+  newPrice: number,
+  previousPrice: number
+): Promise<void> {
+  cronLogger.info(`🔔 Processing instant price drop alerts for property ${propertyId}: €${previousPrice} → €${newPrice}`);
+
+  try {
+    const property = await Property.findById(propertyId);
+    if (!property) return;
+
+    const priceDrop = previousPrice - newPrice;
+    const percentageDrop = Math.round((priceDrop / previousPrice) * 100);
+
+    // Only alert for significant drops (at least 1%)
+    if (percentageDrop < 1) {
+      cronLogger.info(`   ⏭️ Price drop too small (${percentageDrop}%), skipping alerts`);
+      return;
+    }
+
+    let alertsSent = 0;
+
+    // 1. Alert users who have this property favorited
+    const favorites = await Favorite.find({
+      propertyId,
+      priceAlertEnabled: true,
+    }).populate('userId', 'email name subscription');
+
+    for (const favorite of favorites) {
+      const user = favorite.userId as any;
+      if (!user?.email || !user?.subscription) continue;
+
+      const { tier, status } = user.subscription;
+      if (!ALERT_ELIGIBLE_TIERS.includes(tier) || !ALERT_ELIGIBLE_STATUSES.includes(status)) continue;
+
+      // Skip if already alerted for this price or lower
+      if (favorite.lastAlertedPrice && favorite.lastAlertedPrice <= newPrice) continue;
+
+      try {
+        await PropertyAlert.create({
+          userId: user._id,
+          propertyId: property._id,
+          alertType: 'price_drop',
+          previousPrice,
+          newPrice,
+          percentageChange: -percentageDrop,
+          emailSent: true,
+          emailSentAt: new Date(),
+        });
+
+        await sendPriceDropAlert({
+          recipientEmail: user.email,
+          recipientName: user.name || 'User',
+          property: {
+            id: String(property._id),
+            title: property.title || `${property.address}, ${property.city}`,
+            address: property.address,
+            city: property.city,
+            previousPrice,
+            newPrice,
+            percentageDrop,
+            beds: property.beds,
+            baths: property.baths,
+            sqft: property.sqft,
+            imageUrl: property.imageUrl,
+          },
+        });
+
+        await Favorite.updateOne({ _id: favorite._id }, { lastAlertedPrice: newPrice });
+        alertsSent++;
+        cronLogger.info(`   ✉️ Sent price drop alert to ${user.email} (favorite)`);
+      } catch (err) {
+        cronLogger.error(`   Failed to send favorite price drop alert to ${user.email}:`, err);
+      }
+    }
+
+    // 2. Alert users whose saved searches match this property
+    const savedSearches = await SavedSearch.find({
+      alertsEnabled: { $ne: false },
+    }).populate('userId', 'email name subscription');
+
+    // Track which users already got an alert from favorites to avoid duplicates
+    const alertedUserIds = new Set(
+      favorites
+        .filter(f => (f.userId as any)?._id)
+        .map(f => String((f.userId as any)._id))
+    );
+
+    for (const search of savedSearches) {
+      const user = search.userId as any;
+      if (!user?.email || !user?.subscription) continue;
+
+      // Skip users already alerted via favorites
+      if (alertedUserIds.has(String(user._id))) continue;
+
+      const { tier, status } = user.subscription;
+      if (!ALERT_ELIGIBLE_TIERS.includes(tier) || !ALERT_ELIGIBLE_STATUSES.includes(status)) continue;
+
+      // Check if property matches this saved search
+      if (!propertyMatchesFilters(property, search.filters)) continue;
+
+      try {
+        await PropertyAlert.create({
+          userId: user._id,
+          propertyId: property._id,
+          alertType: 'price_drop',
+          savedSearchId: search._id,
+          previousPrice,
+          newPrice,
+          percentageChange: -percentageDrop,
+          emailSent: true,
+          emailSentAt: new Date(),
+        });
+
+        await sendPriceDropAlert({
+          recipientEmail: user.email,
+          recipientName: user.name || 'User',
+          property: {
+            id: String(property._id),
+            title: property.title || `${property.address}, ${property.city}`,
+            address: property.address,
+            city: property.city,
+            previousPrice,
+            newPrice,
+            percentageDrop,
+            beds: property.beds,
+            baths: property.baths,
+            sqft: property.sqft,
+            imageUrl: property.imageUrl,
+          },
+        });
+
+        alertedUserIds.add(String(user._id));
+        alertsSent++;
+        cronLogger.info(`   ✉️ Sent price drop alert to ${user.email} (saved search: "${search.name}")`);
+      } catch (err) {
+        cronLogger.error(`   Failed to send saved search price drop alert to ${user.email}:`, err);
+      }
+    }
+
+    cronLogger.info(`✅ Instant price drop alerts: ${alertsSent} sent for property ${propertyId}`);
+  } catch (error) {
+    cronLogger.error(`❌ Error processing instant price drop alerts for ${propertyId}:`, error);
+  }
+}
+
 export async function runPropertyAlertJobs(): Promise<void> {
   await processNewListingAlerts('instant');
   await processPriceDropAlerts();
