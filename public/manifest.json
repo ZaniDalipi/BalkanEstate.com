@@ -5,7 +5,7 @@
   "start_url": "/",
   "id": "/",
   "display": "standalone",
-  "display_override": ["standalone", "minimal-ui"],
+  "display_override": ["standalone", "minimal-ui", "browser"],
   "background_color": "#ffffff",
   "theme_color": "#0252CD",
   "orientation": "any",
@@ -13,7 +13,6 @@
   "lang": "en",
   "dir": "ltr",
   "categories": ["real estate", "property", "housing", "business"],
-  "iarc_rating_id": "",
   "prefer_related_applications": false,
   "launch_handler": {
     "client_mode": ["navigate-existing", "auto"]

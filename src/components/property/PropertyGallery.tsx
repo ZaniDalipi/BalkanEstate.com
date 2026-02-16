@@ -493,18 +493,20 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
                     e.stopPropagation();
                     handlePrevImage();
                   }}
-                  className="absolute left-2 sm:left-3 top-1/2 -translate-y-1/2 bg-white/80 backdrop-blur-sm rounded-full hover:bg-white transition-colors shadow-md z-10 w-10 h-10 sm:w-10 sm:h-10 flex items-center justify-center"
+                  className="absolute left-2 sm:left-3 top-1/2 -translate-y-1/2 bg-white/80 backdrop-blur-sm rounded-full hover:bg-white active:bg-neutral-100 transition-colors shadow-md z-10 w-11 h-11 flex items-center justify-center"
+                  aria-label="Previous image"
                 >
-                  <ChevronLeftIcon className="w-5 h-5 sm:w-5 sm:h-5 text-neutral-800" />
+                  <ChevronLeftIcon className="w-5 h-5 text-neutral-800" />
                 </button>
                 <button
                   onClick={(e) => {
                     e.stopPropagation();
                     handleNextImage();
                   }}
-                  className="absolute right-2 sm:right-3 top-1/2 -translate-y-1/2 bg-white/80 backdrop-blur-sm rounded-full hover:bg-white transition-colors shadow-md z-10 w-10 h-10 sm:w-10 sm:h-10 flex items-center justify-center"
+                  className="absolute right-2 sm:right-3 top-1/2 -translate-y-1/2 bg-white/80 backdrop-blur-sm rounded-full hover:bg-white active:bg-neutral-100 transition-colors shadow-md z-10 w-11 h-11 flex items-center justify-center"
+                  aria-label="Next image"
                 >
-                  <ChevronRightIcon className="w-5 h-5 sm:w-5 sm:h-5 text-neutral-800" />
+                  <ChevronRightIcon className="w-5 h-5 text-neutral-800" />
                 </button>
 
                 {/* Image Counter & Category Badge - Top left corner */}
@@ -519,7 +521,7 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
                     </div>
                   )}
                   {/* Image Counter */}
-                  <div className="flex items-center bg-black/60 backdrop-blur-sm px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-full">
+                  <div className="flex items-center bg-black/60 backdrop-blur-sm px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-full" role="status" aria-live="polite">
                     <span className="text-white text-[11px] sm:text-xs font-medium whitespace-nowrap">
                       {currentImageIndex + 1} / {imagesForCurrentCategory.length}
                     </span>
