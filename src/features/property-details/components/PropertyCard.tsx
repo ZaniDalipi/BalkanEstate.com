@@ -292,11 +292,18 @@ const PropertyCardInner = memo<PropertyCardInnerProps>(({
           <span className="bg-neutral-100 text-neutral-600 text-[11px] font-medium px-2 py-[3px] rounded-full">
             {propertyTypeLabel}
           </span>
-          {/* Price Badge */}
-          <span className="text-primary text-sm sm:text-base font-bold tracking-tight">
-            {formatPrice(property.price, property.country)}
-            {isRental && <span className="text-[11px] font-normal text-neutral-400">/{property.rentPeriod === 'weekly' ? t('common:wk', 'wk') : property.rentPeriod === 'daily' ? t('common:day', 'day') : t('common:mo', 'mo')}</span>}
-          </span>
+          {/* Price + Price per sqm */}
+          <div className="text-right">
+            <span className="text-primary text-sm sm:text-base font-bold tracking-tight">
+              {formatPrice(property.price, property.country)}
+              {isRental && <span className="text-[11px] font-normal text-neutral-400">/{property.rentPeriod === 'weekly' ? t('common:wk', 'wk') : property.rentPeriod === 'daily' ? t('common:day', 'day') : t('common:mo', 'mo')}</span>}
+            </span>
+            {safeProperty.sqft > 0 && property.propertyType !== 'land' && (
+              <p className="text-[10px] text-neutral-400 font-medium">
+                {formatPrice(Math.round(property.price / safeProperty.sqft), property.country)}/m²
+              </p>
+            )}
+          </div>
         </div>
         {/* Title */}
         {property.title && (

@@ -33,11 +33,11 @@
   "cityCard": {
     "demand": "Demand",
     "investment": "Investment",
-    "avgPricePerSqm": "Avg. Price/m²",
-    "medianPrice": "Median Price",
+    "avgPricePerSqm": "Avg. Price per m²",
+    "medianPrice": "Median Property Price",
     "yoyGrowth": "YoY Growth",
     "rentalYield": "Rental Yield",
-    "daysOnMarket": "Days on Market",
+    "daysOnMarket": "Avg. Days on Market",
     "days": "days"
   },
   "sections": {
