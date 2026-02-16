@@ -56,9 +56,11 @@ export const hasPriceReduction = (property: Property): boolean => {
  */
 export interface PriceReductionInfo {
   hasReduction: boolean;
+  hasIncrease: boolean;
   originalPrice: number;
   currentPrice: number;
   discountPercentage: number;
+  increasePercentage: number;
   savings: number;
   reducedAt?: number;
   intervalLabel?: string;
@@ -72,19 +74,24 @@ export const getPriceReductionInfo = (property: Property): PriceReductionInfo =>
     const originalPrice = property.originalPrice || property.price;
     const currentPrice = activeInterval.price;
     const discountPercentage = calculateDiscountPercentage(originalPrice, currentPrice);
+    const increasePercentage = originalPrice > 0 && currentPrice > originalPrice
+      ? Math.round(((currentPrice - originalPrice) / originalPrice) * 100)
+      : 0;
 
     return {
       hasReduction: discountPercentage > 0,
+      hasIncrease: increasePercentage > 0,
       originalPrice,
       currentPrice,
       discountPercentage,
+      increasePercentage,
       savings: originalPrice - currentPrice,
       reducedAt: activeInterval.startDate,
       intervalLabel: activeInterval.label,
     };
   }
 
-  // Otherwise check for regular price reduction
+  // Check for regular price reduction
   if (property.originalPrice && property.originalPrice > property.price) {
     const discountPercentage = calculateDiscountPercentage(
       property.originalPrice,
@@ -93,20 +100,42 @@ export const getPriceReductionInfo = (property: Property): PriceReductionInfo =>
 
     return {
       hasReduction: true,
+      hasIncrease: false,
       originalPrice: property.originalPrice,
       currentPrice: property.price,
       discountPercentage,
+      increasePercentage: 0,
       savings: property.originalPrice - property.price,
       reducedAt: property.priceReducedAt,
     };
   }
 
-  // No reduction
+  // Check for price increase
+  if (property.originalPrice && property.originalPrice < property.price) {
+    const increasePercentage = Math.round(
+      ((property.price - property.originalPrice) / property.originalPrice) * 100
+    );
+
+    return {
+      hasReduction: false,
+      hasIncrease: true,
+      originalPrice: property.originalPrice,
+      currentPrice: property.price,
+      discountPercentage: 0,
+      increasePercentage,
+      savings: property.originalPrice - property.price,
+      reducedAt: property.priceReducedAt,
+    };
+  }
+
+  // No change
   return {
     hasReduction: false,
+    hasIncrease: false,
     originalPrice: property.price,
     currentPrice: property.price,
     discountPercentage: 0,
+    increasePercentage: 0,
     savings: 0,
   };
 };

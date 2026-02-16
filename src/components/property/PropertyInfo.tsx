@@ -5,6 +5,7 @@ import React, { useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Property } from '../../../types';
 import { formatPrice } from '../../../utils/currency';
+import { getPriceReductionInfo } from '../../../utils/priceUtils';
 import {
   MapPinIcon,
   BedIcon,
@@ -118,9 +119,47 @@ export const PropertyInfo: React.FC<PropertyInfoProps> = ({ property, onOpenFloo
             </h1>
           )}
 
-          <p className="text-2xl sm:text-3xl lg:text-4xl font-bold text-neutral-900">
-            {formatPrice(property.price, property.country)}
-          </p>
+          {(() => {
+            const priceInfo = getPriceReductionInfo(property);
+            return (
+              <div className="flex flex-wrap items-baseline gap-2">
+                <p className="text-2xl sm:text-3xl lg:text-4xl font-bold text-neutral-900">
+                  {formatPrice(property.price, property.country)}
+                  {property.listingType === 'rent' && (
+                    <span className="text-base sm:text-lg font-normal text-neutral-400">
+                      /{property.rentPeriod === 'weekly' ? 'wk' : property.rentPeriod === 'daily' ? 'day' : 'mo'}
+                    </span>
+                  )}
+                </p>
+                {priceInfo.hasReduction && (
+                  <>
+                    <span className="text-base sm:text-lg text-neutral-400 line-through">
+                      {formatPrice(priceInfo.originalPrice, property.country)}
+                    </span>
+                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-red-100 text-red-600 text-xs sm:text-sm font-semibold">
+                      <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M19 14l-7 7m0 0l-7-7m7 7V3" />
+                      </svg>
+                      -{priceInfo.discountPercentage}%
+                    </span>
+                  </>
+                )}
+                {priceInfo.hasIncrease && (
+                  <>
+                    <span className="text-base sm:text-lg text-neutral-400 line-through">
+                      {formatPrice(priceInfo.originalPrice, property.country)}
+                    </span>
+                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-amber-100 text-amber-700 text-xs sm:text-sm font-semibold">
+                      <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M5 10l7-7m0 0l7 7m-7-7v18" />
+                      </svg>
+                      +{priceInfo.increasePercentage}%
+                    </span>
+                  </>
+                )}
+              </div>
+            );
+          })()}
 
           <div className="inline-flex items-center text-neutral-600 mt-2 flex-wrap">
             <MapPinIcon className="w-5 h-5 mr-2 text-neutral-400 flex-shrink-0" />

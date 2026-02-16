@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { Property } from '@/types';
 import { useAppContext } from '@/context/AppContext';
 import { getCurrencySymbol } from '@/utils/currency';
+import { getPriceReductionInfo } from '@/utils/priceUtils';
 import { optimizeCloudinaryUrl, cloudinarySrcSet } from '@/config/cloudinaryConfig';
 
 interface RentalPropertyCardProps {
@@ -56,6 +57,24 @@ const RentalPropertyCard: React.FC<RentalPropertyCardProps> = ({ property, onHov
                 <div className="absolute top-2 right-2 glass-badge text-xs font-bold px-2.5 py-1 text-blue-600">
                     {t('rental:forRent')}
                 </div>
+                {/* Price Drop Badge */}
+                {!isRented && property.originalPrice && property.originalPrice > property.price && (
+                    <div className="absolute top-2 left-2 bg-red-500/90 backdrop-blur-sm text-white text-xs font-bold px-2.5 py-1 rounded-full flex items-center gap-1">
+                        <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M19 14l-7 7m0 0l-7-7m7 7V3" />
+                        </svg>
+                        {t('rental:priceDrop', 'PRICE DROP')}
+                    </div>
+                )}
+                {/* Price Increase Badge */}
+                {!isRented && property.originalPrice && property.originalPrice < property.price && (
+                    <div className="absolute top-2 left-2 bg-amber-500/90 backdrop-blur-sm text-white text-xs font-bold px-2.5 py-1 rounded-full flex items-center gap-1">
+                        <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M5 10l7-7m0 0l7 7m-7-7v18" />
+                        </svg>
+                        {t('rental:priceUp', 'PRICE UP')}
+                    </div>
+                )}
                 {/* Available From */}
                 {property.availableFrom && !isRented && (
                     <div className="absolute bottom-2 left-2 glass-badge text-xs px-2 py-1 text-gray-700">
@@ -67,17 +86,32 @@ const RentalPropertyCard: React.FC<RentalPropertyCardProps> = ({ property, onHov
             {/* Content */}
             <div className="p-3 sm:p-4">
                 {/* Price */}
-                <div className="flex items-baseline gap-1 mb-1">
-                    <span className="text-lg sm:text-xl font-bold text-gray-900">
-                        {currencySymbol}{formattedPrice}
-                    </span>
-                    <span className="text-sm text-gray-400">{rentPeriodLabel}</span>
-                    {property.sqft > 0 && property.propertyType !== 'land' && (
-                        <span className="text-[10px] text-gray-400 ml-auto">
-                            {currencySymbol}{new Intl.NumberFormat('de-DE').format(Math.round(property.price / property.sqft))} per m²
-                        </span>
-                    )}
-                </div>
+                {(() => {
+                    const priceInfo = getPriceReductionInfo(property);
+                    return (
+                        <div className="flex items-baseline gap-1.5 mb-1 flex-wrap">
+                            {(priceInfo.hasReduction || priceInfo.hasIncrease) && (
+                                <span className="text-sm text-gray-400 line-through">
+                                    {currencySymbol}{new Intl.NumberFormat('de-DE').format(priceInfo.originalPrice)}
+                                </span>
+                            )}
+                            <span className="text-lg sm:text-xl font-bold text-gray-900">
+                                {currencySymbol}{formattedPrice}
+                            </span>
+                            <span className="text-sm text-gray-400">{rentPeriodLabel}</span>
+                            {priceInfo.hasReduction && (
+                                <span className="bg-red-100 text-red-600 text-[10px] font-semibold px-1.5 py-[1px] rounded-full">
+                                    -{priceInfo.discountPercentage}%
+                                </span>
+                            )}
+                            {priceInfo.hasIncrease && (
+                                <span className="bg-amber-100 text-amber-700 text-[10px] font-semibold px-1.5 py-[1px] rounded-full">
+                                    +{priceInfo.increasePercentage}%
+                                </span>
+                            )}
+                        </div>
+                    );
+                })()}
 
                 {/* Title / Address */}
                 {property.title && (

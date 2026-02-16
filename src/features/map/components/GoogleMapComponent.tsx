@@ -44,6 +44,7 @@ const GoogleMapComponent: React.FC<GoogleMapComponentProps> = (props) => {
     isDrawing,
     onDrawStart,
     isMobile,
+    onResetView,
     hideControls = false,
   } = props;
 
@@ -209,6 +210,7 @@ const GoogleMapComponent: React.FC<GoogleMapComponentProps> = (props) => {
           isMobile={isMobile}
           hideControls={hideControls}
           handleRecenter={hook.handleRecenter}
+          handleResetView={onResetView}
           mapStyle={hook.mapStyle}
           setMapStyle={hook.setMapStyle}
           isDrawing={isDrawing}

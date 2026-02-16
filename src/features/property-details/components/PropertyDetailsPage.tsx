@@ -279,6 +279,7 @@ const PropertyDetailsPage: React.FC<{ property: Property }> = ({ property: cache
   };
 
   const handleNavigateToMap = () => {
+    const isRental = property.listingType === 'rent';
     dispatch({
       type: 'UPDATE_SEARCH_PAGE_STATE',
       payload: {
@@ -290,7 +291,7 @@ const PropertyDetailsPage: React.FC<{ property: Property }> = ({ property: cache
       },
     });
     dispatch({ type: 'SET_SELECTED_PROPERTY', payload: null });
-    dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'search' });
+    dispatch({ type: 'SET_ACTIVE_VIEW', payload: isRental ? 'rentals' : 'search' });
   };
 
   // Navigate to 3D tour - scroll to map section and open 360 tour

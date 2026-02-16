@@ -234,6 +234,7 @@ const MapComponent: React.FC<MapComponentProps> = (props) => {
     flyToTarget,
     onFlyComplete,
     onRecenter,
+    onResetView,
     isMobile,
     searchMode,
     hoveredPropertyId,
@@ -286,6 +287,7 @@ const MapComponent: React.FC<MapComponentProps> = (props) => {
           flyToTarget={flyToTarget}
           onFlyComplete={onFlyComplete}
           onRecenter={onRecenter}
+          onResetView={onResetView}
           isMobile={isMobile}
           searchMode={searchMode}
           hoveredPropertyId={hoveredPropertyId}
@@ -401,6 +403,7 @@ const MapComponent: React.FC<MapComponentProps> = (props) => {
           onSaveSearch={onSaveSearch}
           isSaving={isSaving}
           onRecenter={onRecenter}
+          onResetView={onResetView}
           currentZoom={hook.currentZoom}
           mapCenterLat={hook.mapCenterLat}
           mapCenterLng={hook.mapCenterLng}

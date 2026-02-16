@@ -879,6 +879,41 @@ interface MarkersProps {
   isNightMode?: boolean;
 }
 
+// Compute small offsets for properties sharing the same coordinates
+// so they don't stack on top of each other. Uses circular distribution.
+const computeColocatedOffsets = (properties: Property[]): Map<string, [number, number]> => {
+  const offsets = new Map<string, [number, number]>();
+  const PRECISION = 5; // ~1.1m precision for grouping
+  const OFFSET_RADIUS = 0.00015; // ~17m offset radius
+
+  // Group properties by rounded lat/lng
+  const groups = new Map<string, Property[]>();
+  for (const prop of properties) {
+    if (prop.lat == null || prop.lng == null) continue;
+    const key = `${prop.lat.toFixed(PRECISION)},${prop.lng.toFixed(PRECISION)}`;
+    const group = groups.get(key);
+    if (group) {
+      group.push(prop);
+    } else {
+      groups.set(key, [prop]);
+    }
+  }
+
+  // Apply circular offsets for groups with multiple properties
+  for (const group of groups.values()) {
+    if (group.length <= 1) continue;
+    const angleStep = (2 * Math.PI) / group.length;
+    for (let i = 0; i < group.length; i++) {
+      const angle = i * angleStep;
+      const latOffset = OFFSET_RADIUS * Math.cos(angle);
+      const lngOffset = OFFSET_RADIUS * Math.sin(angle);
+      offsets.set(group[i].id, [latOffset, lngOffset]);
+    }
+  }
+
+  return offsets;
+};
+
 const MarkersComponent: React.FC<MarkersProps> = ({ properties, onPopupClick, hoveredPropertyId, isNightMode = false }) => {
   const map = useMap();
   const [zoom, setZoom] = useState(map.getZoom());
@@ -964,6 +999,9 @@ const MarkersComponent: React.FC<MarkersProps> = ({ properties, onPopupClick, ho
   const isPropertyPromoted = (prop: Property) =>
     prop.isPromoted && prop.promotionEndDate && prop.promotionEndDate > Date.now();
 
+  // Compute offsets for co-located properties
+  const colocatedOffsets = useMemo(() => computeColocatedOffsets(properties), [properties]);
+
   return (
     <>
       {properties.map((prop, idx) => {
@@ -976,10 +1014,13 @@ const MarkersComponent: React.FC<MarkersProps> = ({ properties, onPopupClick, ho
         const icon = animateEntrance
           ? wrapIconWithEntrance(baseIcon, idx, properties.length)
           : baseIcon;
+        const offset = colocatedOffsets.get(prop.id);
+        const markerLat = offset ? prop.lat + offset[0] : prop.lat;
+        const markerLng = offset ? prop.lng + offset[1] : prop.lng;
         return (
           <Marker
             key={prop.id}
-            position={[prop.lat, prop.lng]}
+            position={[markerLat, markerLng]}
             icon={icon}
             ref={(marker) => {
               if (marker) {

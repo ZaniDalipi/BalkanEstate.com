@@ -704,10 +704,10 @@ const MainLayout: React.FC = () => {
               {showHeader && <Header onToggleSidebar={() => setIsSidebarOpen(true)} isFloating={isFloatingHeaderView} />}
             </Suspense>
 
-            {/* PWA Top Bar - mobile navigation bar with back button */}
+            {/* PWA Top Bar - mobile navigation bar with back button and title */}
             {showPWATopBar && (
               <div className="bg-white/95 backdrop-blur-md border-b border-neutral-200/60 flex-shrink-0 z-20" style={{ paddingTop: 'env(safe-area-inset-top, 0px)' }}>
-                <div className="flex items-center justify-between h-11 px-1">
+                <div className="grid grid-cols-[auto_1fr_auto] items-center h-11 px-1">
                   {/* Left: Back button */}
                   <button
                     type="button"
@@ -722,17 +722,22 @@ const MainLayout: React.FC = () => {
                   </button>
 
                   {/* Center: Page title */}
-                  <span className="text-sm font-semibold text-neutral-800 truncate max-w-[50vw]">{pageTitle}</span>
+                  <span className="text-sm font-semibold text-neutral-800 truncate text-center">{pageTitle}</span>
 
-                  {/* Right: Hamburger menu to open sidebar */}
+                  {/* Right: Home button - quick shortcut to search from deep navigation */}
                   <button
                     type="button"
-                    onClick={() => setIsSidebarOpen(true)}
-                    className="min-w-[44px] min-h-[44px] flex items-center justify-center text-neutral-600 hover:text-primary active:opacity-70 transition-opacity pr-2"
-                    aria-label="Open menu"
+                    onClick={() => {
+                      dispatch({ type: 'SET_SELECTED_AGENCY', payload: null });
+                      dispatch({ type: 'SET_SELECTED_AGENT', payload: null });
+                      dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'search' });
+                      window.history.pushState({}, '', buildLocalizedPath('/search'));
+                    }}
+                    className="min-w-[44px] min-h-[44px] flex items-center justify-center text-neutral-500 active:text-primary active:opacity-70 transition-opacity pr-2"
+                    aria-label="Go to home"
                   >
-                    <svg className="w-[22px] h-[22px]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
+                    <svg className="w-[22px] h-[22px]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="m2.25 12 8.954-8.955c.44-.439 1.152-.439 1.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25" />
                     </svg>
                   </button>
                 </div>

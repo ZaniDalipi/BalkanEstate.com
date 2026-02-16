@@ -788,6 +788,11 @@ export function useSearchPage() {
         }
     }, [userLocation, showToast]);
 
+    // Reset map view to show the full Balkans region
+    const handleResetView = useCallback(() => {
+        setFlyToTarget({ center: [42.5, 20.5], zoom: 6 });
+    }, []);
+
     const handleApplyAiFilters = useCallback(async (aiQuery: AiSearchQuery) => {
         // Map for normalizing country names to our key format
         const countryNameToKey: Record<string, string> = {
@@ -1037,6 +1042,7 @@ export function useSearchPage() {
         handleAiChatHistoryChange,
         handleMapMove,
         handleRecenterOnUser,
+        handleResetView,
         handleApplyAiFilters,
         handleApplyFiltersFromModal,
         onFlyComplete,

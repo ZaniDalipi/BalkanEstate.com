@@ -72,6 +72,33 @@ export const useMapMarkers = ({
     return filtered;
   }, [properties, showOnlyPromoted]);
 
+  // Compute offsets for co-located properties
+  const colocatedOffsets = useMemo(() => {
+    const offsets = new Map<string, { lat: number; lng: number }>();
+    const PRECISION = 5;
+    const OFFSET_RADIUS = 0.00015;
+    const groups = new Map<string, Property[]>();
+    for (const prop of validProperties) {
+      if (prop.lat == null || prop.lng == null) continue;
+      const key = `${prop.lat.toFixed(PRECISION)},${prop.lng.toFixed(PRECISION)}`;
+      const group = groups.get(key);
+      if (group) group.push(prop);
+      else groups.set(key, [prop]);
+    }
+    for (const group of groups.values()) {
+      if (group.length <= 1) continue;
+      const step = (2 * Math.PI) / group.length;
+      for (let i = 0; i < group.length; i++) {
+        const angle = i * step;
+        offsets.set(group[i].id, {
+          lat: OFFSET_RADIUS * Math.cos(angle),
+          lng: OFFSET_RADIUS * Math.sin(angle),
+        });
+      }
+    }
+    return offsets;
+  }, [validProperties]);
+
   // Count promoted properties
   const promotedCount = useMemo(() => {
     return properties.filter(
@@ -232,8 +259,12 @@ export const useMapMarkers = ({
           onPropertyClick(property);
         };
 
+        const posOffset = colocatedOffsets.get(property.id);
         const marker = new google.maps.marker.AdvancedMarkerElement({
-          position: { lat: property.lat, lng: property.lng },
+          position: {
+            lat: posOffset ? property.lat + posOffset.lat : property.lat,
+            lng: posOffset ? property.lng + posOffset.lng : property.lng,
+          },
           content: markerDiv,
           zIndex: isActivelyPromoted ? 100 : 1,
         });
@@ -255,7 +286,7 @@ export const useMapMarkers = ({
     if (validProperties.length > 0) {
       createMarkerBatch();
     }
-  }, [validProperties, map, isLoaded, onPropertyClick]);
+  }, [validProperties, map, isLoaded, onPropertyClick, colocatedOffsets]);
 
   // Handle hover state changes
   useEffect(() => {
