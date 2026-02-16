@@ -144,6 +144,19 @@ export const PropertyInfo: React.FC<PropertyInfoProps> = ({ property, onOpenFloo
                     </span>
                   </>
                 )}
+                {priceInfo.hasIncrease && (
+                  <>
+                    <span className="text-base sm:text-lg text-neutral-400 line-through">
+                      {formatPrice(priceInfo.originalPrice, property.country)}
+                    </span>
+                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-amber-100 text-amber-700 text-xs sm:text-sm font-semibold">
+                      <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M5 10l7-7m0 0l7 7m-7-7v18" />
+                      </svg>
+                      +{priceInfo.increasePercentage}%
+                    </span>
+                  </>
+                )}
               </div>
             );
           })()}

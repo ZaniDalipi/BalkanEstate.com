@@ -778,10 +778,10 @@ export const updateProperty = async (
       await recordPriceChange(String(property._id), property.price, previousPrice);
       propertyLogger.info(`💰 Price changed: €${previousPrice} → €${property.price}`);
 
-      // Trigger instant price drop alerts for Pro users (favorites + saved searches)
-      if (property.price < previousPrice) {
+      // Trigger instant price change alerts for Pro users (favorites + saved searches)
+      if (property.price !== previousPrice) {
         processInstantPriceDropForProperty(String(property._id), property.price, previousPrice).catch(err => {
-          propertyLogger.error('Error processing instant price drop alerts:', err);
+          propertyLogger.error('Error processing instant price change alerts:', err);
         });
       }
     }

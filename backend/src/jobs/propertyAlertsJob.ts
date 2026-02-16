@@ -630,8 +630,8 @@ export async function processInstantAlertsForProperty(propertyId: string): Promi
  * Run all property alert jobs
  */
 /**
- * Process instant price drop alerts for a specific property
- * Called immediately when a property price is reduced
+ * Process instant price change alerts for a specific property
+ * Called immediately when a property price changes (drop or increase)
  * Notifies:
  * 1. Users who have this property in favorites (with price alerts enabled)
  * 2. Users whose saved searches match this property
@@ -641,20 +641,25 @@ export async function processInstantPriceDropForProperty(
   newPrice: number,
   previousPrice: number
 ): Promise<void> {
-  cronLogger.info(`🔔 Processing instant price drop alerts for property ${propertyId}: €${previousPrice} → €${newPrice}`);
+  const isPriceDrop = newPrice < previousPrice;
+  const changeLabel = isPriceDrop ? 'drop' : 'increase';
+  cronLogger.info(`🔔 Processing instant price ${changeLabel} alerts for property ${propertyId}: €${previousPrice} → €${newPrice}`);
 
   try {
     const property = await Property.findById(propertyId);
     if (!property) return;
 
-    const priceDrop = previousPrice - newPrice;
-    const percentageDrop = Math.round((priceDrop / previousPrice) * 100);
+    const priceChange = Math.abs(previousPrice - newPrice);
+    const percentageChange = Math.round((priceChange / previousPrice) * 100);
 
-    // Only alert for significant drops (at least 1%)
-    if (percentageDrop < 1) {
-      cronLogger.info(`   ⏭️ Price drop too small (${percentageDrop}%), skipping alerts`);
+    // Only alert for significant changes (at least 1%)
+    if (percentageChange < 1) {
+      cronLogger.info(`   ⏭️ Price ${changeLabel} too small (${percentageChange}%), skipping alerts`);
       return;
     }
+
+    const alertType = isPriceDrop ? 'price_drop' : 'price_increase';
+    const percentageDrop = isPriceDrop ? percentageChange : 0;
 
     let alertsSent = 0;
 
@@ -671,17 +676,17 @@ export async function processInstantPriceDropForProperty(
       const { tier, status } = user.subscription;
       if (!ALERT_ELIGIBLE_TIERS.includes(tier) || !ALERT_ELIGIBLE_STATUSES.includes(status)) continue;
 
-      // Skip if already alerted for this price or lower
-      if (favorite.lastAlertedPrice && favorite.lastAlertedPrice <= newPrice) continue;
+      // Skip if already alerted for this exact price
+      if (favorite.lastAlertedPrice && favorite.lastAlertedPrice === newPrice) continue;
 
       try {
         await PropertyAlert.create({
           userId: user._id,
           propertyId: property._id,
-          alertType: 'price_drop',
+          alertType,
           previousPrice,
           newPrice,
-          percentageChange: -percentageDrop,
+          percentageChange: isPriceDrop ? -percentageChange : percentageChange,
           emailSent: true,
           emailSentAt: new Date(),
         });
@@ -696,7 +701,8 @@ export async function processInstantPriceDropForProperty(
             city: property.city,
             previousPrice,
             newPrice,
-            percentageDrop,
+            percentageDrop: percentageChange,
+            isPriceIncrease: !isPriceDrop,
             beds: property.beds,
             baths: property.baths,
             sqft: property.sqft,
@@ -706,9 +712,9 @@ export async function processInstantPriceDropForProperty(
 
         await Favorite.updateOne({ _id: favorite._id }, { lastAlertedPrice: newPrice });
         alertsSent++;
-        cronLogger.info(`   ✉️ Sent price drop alert to ${user.email} (favorite)`);
+        cronLogger.info(`   ✉️ Sent price ${changeLabel} alert to ${user.email} (favorite)`);
       } catch (err) {
-        cronLogger.error(`   Failed to send favorite price drop alert to ${user.email}:`, err);
+        cronLogger.error(`   Failed to send favorite price ${changeLabel} alert to ${user.email}:`, err);
       }
     }
 
@@ -741,11 +747,11 @@ export async function processInstantPriceDropForProperty(
         await PropertyAlert.create({
           userId: user._id,
           propertyId: property._id,
-          alertType: 'price_drop',
+          alertType,
           savedSearchId: search._id,
           previousPrice,
           newPrice,
-          percentageChange: -percentageDrop,
+          percentageChange: isPriceDrop ? -percentageChange : percentageChange,
           emailSent: true,
           emailSentAt: new Date(),
         });
@@ -760,7 +766,8 @@ export async function processInstantPriceDropForProperty(
             city: property.city,
             previousPrice,
             newPrice,
-            percentageDrop,
+            percentageDrop: percentageChange,
+            isPriceIncrease: !isPriceDrop,
             beds: property.beds,
             baths: property.baths,
             sqft: property.sqft,
@@ -770,15 +777,15 @@ export async function processInstantPriceDropForProperty(
 
         alertedUserIds.add(String(user._id));
         alertsSent++;
-        cronLogger.info(`   ✉️ Sent price drop alert to ${user.email} (saved search: "${search.name}")`);
+        cronLogger.info(`   ✉️ Sent price ${changeLabel} alert to ${user.email} (saved search: "${search.name}")`);
       } catch (err) {
-        cronLogger.error(`   Failed to send saved search price drop alert to ${user.email}:`, err);
+        cronLogger.error(`   Failed to send saved search price ${changeLabel} alert to ${user.email}:`, err);
       }
     }
 
-    cronLogger.info(`✅ Instant price drop alerts: ${alertsSent} sent for property ${propertyId}`);
+    cronLogger.info(`✅ Instant price ${changeLabel} alerts: ${alertsSent} sent for property ${propertyId}`);
   } catch (error) {
-    cronLogger.error(`❌ Error processing instant price drop alerts for ${propertyId}:`, error);
+    cronLogger.error(`❌ Error processing instant price ${changeLabel} alerts for ${propertyId}:`, error);
   }
 }
 

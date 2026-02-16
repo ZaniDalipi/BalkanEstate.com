@@ -1018,6 +1018,7 @@ class EmailService {
       previousPrice: number;
       newPrice: number;
       percentageDrop: number;
+      isPriceIncrease?: boolean;
       beds: number;
       baths: number;
       sqft: number;
@@ -1027,12 +1028,46 @@ class EmailService {
     // Check if user has opted out of price drop alerts
     const { token: unsubscribeToken, canSend } = await this.getUnsubscribeInfo(params.recipientEmail, 'priceDrops');
     if (!canSend) {
-      emailLogger.info(`📧 Skipping price drop alert to ${params.recipientEmail} - user unsubscribed`);
+      emailLogger.info(`📧 Skipping price change alert to ${params.recipientEmail} - user unsubscribed`);
       return;
     }
 
     const frontendUrl = process.env.FRONTEND_URL || 'https://balkanestate.com';
-    const savings = params.property.previousPrice - params.property.newPrice;
+    const isIncrease = !!params.property.isPriceIncrease;
+    const priceDiff = Math.abs(params.property.previousPrice - params.property.newPrice);
+
+    // Dynamic content based on direction
+    const headerGradient = isIncrease
+      ? 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)'
+      : 'linear-gradient(135deg, #ef4444 0%, #dc2626 100%)';
+    const badgeText = isIncrease
+      ? `📈 ${params.property.percentageDrop}% UP`
+      : `🔥 ${params.property.percentageDrop}% OFF`;
+    const headlineText = isIncrease ? 'Price Just Increased' : 'Price Just Dropped!';
+    const subHeadline = isIncrease
+      ? `Up by €${priceDiff.toLocaleString()}`
+      : `Save €${priceDiff.toLocaleString()}`;
+    const subHeadlineColor = isIncrease ? '#fde68a' : '#fecaca';
+    const introText = isIncrease
+      ? `Heads up, <strong>${params.recipientName}</strong>! A property you saved just went up in price:`
+      : `Great news, <strong>${params.recipientName}</strong>! A property you saved just became more affordable:`;
+    const priceBoxBg = isIncrease
+      ? 'linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%)'
+      : 'linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%)';
+    const nowColor = isIncrease ? '#d97706' : '#059669';
+    const arrowColor = isIncrease ? '#f59e0b' : '#ef4444';
+    const urgencyBg = isIncrease ? '#fef3c7' : '#fffbeb';
+    const urgencyColor = isIncrease ? '#92400e' : '#92400e';
+    const urgencyText = isIncrease
+      ? '⚠️ <strong>Act now before the price rises further.</strong>'
+      : '⚡ <strong>Price drops attract buyers fast.</strong> Don\'t miss this opportunity!';
+    const ctaText = isIncrease
+      ? `View Property - Now €${params.property.newPrice.toLocaleString()} →`
+      : `Claim This Deal - Save €${priceDiff.toLocaleString()} →`;
+    const ctaGradient = headerGradient;
+    const ctaShadow = isIncrease
+      ? '0 4px 14px rgba(245, 158, 11, 0.4)'
+      : '0 4px 14px rgba(239, 68, 68, 0.4)';
 
     const html = `
 <!DOCTYPE html>
@@ -1044,22 +1079,22 @@ class EmailService {
 <body style="margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f3f4f6; -webkit-font-smoothing: antialiased;">
   <!-- Preview text -->
   <div style="display: none; max-height: 0; overflow: hidden;">
-    Save €${savings.toLocaleString()}! ${params.property.title} just dropped ${params.property.percentageDrop}% - now €${params.property.newPrice.toLocaleString()}
+    ${isIncrease ? `Price up ${params.property.percentageDrop}%!` : `Save €${priceDiff.toLocaleString()}!`} ${params.property.title} - now €${params.property.newPrice.toLocaleString()}
   </div>
 
   <div style="max-width: 500px; margin: 0 auto; background-color: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);">
-    <!-- Header with savings highlight -->
-    <div style="background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%); padding: 32px 24px; text-align: center;">
+    <!-- Header -->
+    <div style="background: ${headerGradient}; padding: 32px 24px; text-align: center;">
       <div style="display: inline-block; background: rgba(255,255,255,0.2); border-radius: 20px; padding: 6px 16px; margin-bottom: 12px;">
-        <span style="color: #ffffff; font-size: 14px; font-weight: 700;">🔥 ${params.property.percentageDrop}% OFF</span>
+        <span style="color: #ffffff; font-size: 14px; font-weight: 700;">${badgeText}</span>
       </div>
-      <h1 style="color: #ffffff; margin: 0; font-size: 26px; font-weight: 700;">Price Just Dropped!</h1>
-      <p style="color: #fecaca; margin: 12px 0 0 0; font-size: 18px; font-weight: 600;">Save €${savings.toLocaleString()}</p>
+      <h1 style="color: #ffffff; margin: 0; font-size: 26px; font-weight: 700;">${headlineText}</h1>
+      <p style="color: ${subHeadlineColor}; margin: 12px 0 0 0; font-size: 18px; font-weight: 600;">${subHeadline}</p>
     </div>
 
     <div style="padding: 24px;">
       <p style="color: #374151; font-size: 15px; margin: 0 0 20px 0;">
-        Great news, <strong>${params.recipientName}</strong>! A property you saved just became more affordable:
+        ${introText}
       </p>
 
       <!-- Property Card -->
@@ -1069,19 +1104,19 @@ class EmailService {
           <div style="font-weight: 700; color: #1f2937; font-size: 17px; margin-bottom: 6px;">${params.property.title}</div>
           <div style="font-size: 13px; color: #6b7280; margin-bottom: 16px;">📍 ${params.property.address}, ${params.property.city}</div>
 
-          <!-- Price comparison - prominent -->
-          <div style="background: linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%); border-radius: 10px; padding: 16px; margin-bottom: 16px;">
+          <!-- Price comparison -->
+          <div style="background: ${priceBoxBg}; border-radius: 10px; padding: 16px; margin-bottom: 16px;">
             <div style="display: table; width: 100%;">
               <div style="display: table-cell; text-align: center; width: 40%;">
                 <div style="font-size: 11px; color: #9ca3af; text-transform: uppercase; margin-bottom: 4px;">Was</div>
                 <div style="font-size: 18px; color: #9ca3af; text-decoration: line-through;">€${params.property.previousPrice.toLocaleString()}</div>
               </div>
               <div style="display: table-cell; text-align: center; width: 20%; vertical-align: middle;">
-                <div style="font-size: 24px; color: #ef4444;">→</div>
+                <div style="font-size: 24px; color: ${arrowColor};">→</div>
               </div>
               <div style="display: table-cell; text-align: center; width: 40%;">
-                <div style="font-size: 11px; color: #059669; text-transform: uppercase; margin-bottom: 4px; font-weight: 600;">Now</div>
-                <div style="font-size: 24px; font-weight: 700; color: #059669;">€${params.property.newPrice.toLocaleString()}</div>
+                <div style="font-size: 11px; color: ${nowColor}; text-transform: uppercase; margin-bottom: 4px; font-weight: 600;">Now</div>
+                <div style="font-size: 24px; font-weight: 700; color: ${nowColor};">€${params.property.newPrice.toLocaleString()}</div>
               </div>
             </div>
           </div>
@@ -1107,16 +1142,16 @@ class EmailService {
       </div>
 
       <!-- Urgency message -->
-      <div style="background: #fffbeb; border-radius: 8px; padding: 12px; margin-bottom: 20px; text-align: center;">
-        <p style="color: #92400e; font-size: 13px; margin: 0;">
-          ⚡ <strong>Price drops attract buyers fast.</strong> Don't miss this opportunity!
+      <div style="background: ${urgencyBg}; border-radius: 8px; padding: 12px; margin-bottom: 20px; text-align: center;">
+        <p style="color: ${urgencyColor}; font-size: 13px; margin: 0;">
+          ${urgencyText}
         </p>
       </div>
 
       <!-- CTA -->
       <a href="${frontendUrl}/property/${params.property.id}"
-         style="display: block; background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%); color: #ffffff; text-decoration: none; padding: 16px; border-radius: 10px; font-weight: 600; font-size: 16px; text-align: center; box-shadow: 0 4px 14px rgba(239, 68, 68, 0.4);">
-        Claim This Deal - Save €${savings.toLocaleString()} →
+         style="display: block; background: ${ctaGradient}; color: #ffffff; text-decoration: none; padding: 16px; border-radius: 10px; font-weight: 600; font-size: 16px; text-align: center; box-shadow: ${ctaShadow};">
+        ${ctaText}
       </a>
 
       <!-- Secondary action -->
@@ -1125,16 +1160,22 @@ class EmailService {
       </p>
     </div>
 
-    ${this.generateEmailFooter(unsubscribeToken, 'priceDrops', "You saved this property and enabled price drop alerts")}
+    ${this.generateEmailFooter(unsubscribeToken, 'priceDrops', "You saved this property and enabled price alerts")}
   </div>
 </body>
 </html>`;
 
+    const subject = isIncrease
+      ? `Price increased ${params.property.percentageDrop}% on ${params.property.title}`
+      : `Price dropped ${params.property.percentageDrop}%! Save €${priceDiff.toLocaleString()} on ${params.property.title}`;
+
     await this.sendEmail({
       to: params.recipientEmail,
-      subject: `Price dropped ${params.property.percentageDrop}%! Save €${savings.toLocaleString()} on ${params.property.title}`,
+      subject,
       html,
-      text: `Great news, ${params.recipientName}!\n\nA property you saved just dropped in price!\n\n${params.property.title}\n${params.property.address}, ${params.property.city}\n\nWas: €${params.property.previousPrice.toLocaleString()}\nNow: €${params.property.newPrice.toLocaleString()}\nYou save: €${savings.toLocaleString()} (${params.property.percentageDrop}% off)\n\n${params.property.beds} beds · ${params.property.baths} baths · ${params.property.sqft.toLocaleString()} sqft\n\nPrice drops attract buyers fast. Don't miss this opportunity!\n\nView property: ${frontendUrl}/property/${params.property.id}\n\n© ${new Date().getFullYear()} BalkanEstate<sup>AI</sup>`,
+      text: isIncrease
+        ? `Heads up, ${params.recipientName}!\n\nA property you saved just went up in price.\n\n${params.property.title}\n${params.property.address}, ${params.property.city}\n\nWas: €${params.property.previousPrice.toLocaleString()}\nNow: €${params.property.newPrice.toLocaleString()}\nIncrease: €${priceDiff.toLocaleString()} (${params.property.percentageDrop}% up)\n\n${params.property.beds} beds · ${params.property.baths} baths · ${params.property.sqft.toLocaleString()} sqft\n\nAct now before the price rises further.\n\nView property: ${frontendUrl}/property/${params.property.id}\n\n© ${new Date().getFullYear()} BalkanEstate`
+        : `Great news, ${params.recipientName}!\n\nA property you saved just dropped in price!\n\n${params.property.title}\n${params.property.address}, ${params.property.city}\n\nWas: €${params.property.previousPrice.toLocaleString()}\nNow: €${params.property.newPrice.toLocaleString()}\nYou save: €${priceDiff.toLocaleString()} (${params.property.percentageDrop}% off)\n\n${params.property.beds} beds · ${params.property.baths} baths · ${params.property.sqft.toLocaleString()} sqft\n\nPrice drops attract buyers fast. Don't miss this opportunity!\n\nView property: ${frontendUrl}/property/${params.property.id}\n\n© ${new Date().getFullYear()} BalkanEstate`,
       category: 'alerts',
     });
   }

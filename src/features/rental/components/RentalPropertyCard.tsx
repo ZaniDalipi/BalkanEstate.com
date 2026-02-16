@@ -66,6 +66,15 @@ const RentalPropertyCard: React.FC<RentalPropertyCardProps> = ({ property, onHov
                         {t('rental:priceDrop', 'PRICE DROP')}
                     </div>
                 )}
+                {/* Price Increase Badge */}
+                {!isRented && property.originalPrice && property.originalPrice < property.price && (
+                    <div className="absolute top-2 left-2 bg-amber-500/90 backdrop-blur-sm text-white text-xs font-bold px-2.5 py-1 rounded-full flex items-center gap-1">
+                        <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M5 10l7-7m0 0l7 7m-7-7v18" />
+                        </svg>
+                        {t('rental:priceUp', 'PRICE UP')}
+                    </div>
+                )}
                 {/* Available From */}
                 {property.availableFrom && !isRented && (
                     <div className="absolute bottom-2 left-2 glass-badge text-xs px-2 py-1 text-gray-700">
@@ -81,7 +90,7 @@ const RentalPropertyCard: React.FC<RentalPropertyCardProps> = ({ property, onHov
                     const priceInfo = getPriceReductionInfo(property);
                     return (
                         <div className="flex items-baseline gap-1.5 mb-1 flex-wrap">
-                            {priceInfo.hasReduction && (
+                            {(priceInfo.hasReduction || priceInfo.hasIncrease) && (
                                 <span className="text-sm text-gray-400 line-through">
                                     {currencySymbol}{new Intl.NumberFormat('de-DE').format(priceInfo.originalPrice)}
                                 </span>
@@ -93,6 +102,11 @@ const RentalPropertyCard: React.FC<RentalPropertyCardProps> = ({ property, onHov
                             {priceInfo.hasReduction && (
                                 <span className="bg-red-100 text-red-600 text-[10px] font-semibold px-1.5 py-[1px] rounded-full">
                                     -{priceInfo.discountPercentage}%
+                                </span>
+                            )}
+                            {priceInfo.hasIncrease && (
+                                <span className="bg-amber-100 text-amber-700 text-[10px] font-semibold px-1.5 py-[1px] rounded-full">
+                                    +{priceInfo.increasePercentage}%
                                 </span>
                             )}
                         </div>
