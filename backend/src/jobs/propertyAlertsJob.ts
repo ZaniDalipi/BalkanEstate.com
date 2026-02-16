@@ -659,7 +659,6 @@ export async function processInstantPriceDropForProperty(
     }
 
     const alertType = isPriceDrop ? 'price_drop' : 'price_increase';
-    const percentageDrop = isPriceDrop ? percentageChange : 0;
 
     let alertsSent = 0;
 
