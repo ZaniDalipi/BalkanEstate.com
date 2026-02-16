@@ -256,7 +256,68 @@ const FilterControls: React.FC<Omit<PropertyListProps, 'properties' | 'showList'
                     </div>
                 </div>
             </div>
-            
+
+            {/* Price per m² Range */}
+            <div>
+                <label className="block text-xs font-medium text-neutral-700 mb-1">{t('search:filters.pricePerSqm', 'Price per m²')}</label>
+                <div className="flex items-center gap-2">
+                    <div className="relative w-1/2">
+                        <input
+                            type="text"
+                            placeholder={t('search:filters.min')}
+                            value={filters.minPricePerSqm ? filters.minPricePerSqm.toLocaleString('de-DE') : ''}
+                            onChange={(e) => handleNumericInputChange('minPricePerSqm' as keyof Filters, e.target.value)}
+                            className={`${inputBaseClasses} pr-12`}
+                            aria-label={t('search:filters.min') + ' ' + t('search:filters.pricePerSqm', 'Price per m²')}
+                        />
+                        <span className="absolute right-3 top-1/2 -translate-y-1/2 text-neutral-500 text-[10px]">€/m²</span>
+                    </div>
+                    <span className="text-neutral-400">-</span>
+                    <div className="relative w-1/2">
+                        <input
+                            type="text"
+                            placeholder={t('search:filters.max')}
+                            value={filters.maxPricePerSqm ? filters.maxPricePerSqm.toLocaleString('de-DE') : ''}
+                            onChange={(e) => handleNumericInputChange('maxPricePerSqm' as keyof Filters, e.target.value)}
+                            className={`${inputBaseClasses} pr-12`}
+                            aria-label={t('search:filters.max') + ' ' + t('search:filters.pricePerSqm', 'Price per m²')}
+                        />
+                        <span className="absolute right-3 top-1/2 -translate-y-1/2 text-neutral-500 text-[10px]">€/m²</span>
+                    </div>
+                </div>
+            </div>
+
+            {/* Days on Market + Price Reduced */}
+            <div className="flex gap-3">
+                <div className="flex-1">
+                    <label className="block text-xs font-medium text-neutral-700 mb-1">{t('search:filters.daysOnMarket', 'Listed within')}</label>
+                    <select
+                        value={filters.maxDaysListed !== null ? filters.maxDaysListed : ''}
+                        onChange={(e) => onFilterChange('maxDaysListed', e.target.value ? parseInt(e.target.value) : null)}
+                        className={inputBaseClasses}
+                    >
+                        <option value="">{t('search:options.any')}</option>
+                        <option value="1">{t('search:filters.last24h', 'Last 24 hours')}</option>
+                        <option value="3">{t('search:filters.last3Days', 'Last 3 days')}</option>
+                        <option value="7">{t('search:filters.last7Days', 'Last 7 days')}</option>
+                        <option value="30">{t('search:filters.last30Days', 'Last 30 days')}</option>
+                    </select>
+                </div>
+                <div className="flex-1 flex items-end">
+                    <button
+                        type="button"
+                        onClick={() => onFilterChange('hasDiscount', filters.hasDiscount === true ? null : true)}
+                        className={`w-full py-2 px-3 rounded-lg text-xs font-medium border transition-colors ${
+                            filters.hasDiscount === true
+                                ? 'bg-red-50 border-red-300 text-red-700'
+                                : 'bg-white border-neutral-200 text-neutral-600 hover:bg-neutral-50'
+                        }`}
+                    >
+                        {t('search:filters.priceReduced', 'Price Reduced')}
+                    </button>
+                </div>
+            </div>
+
             <div className="border-t border-neutral-200 pt-4">
                 <button type="button" onClick={() => setIsAdvancedOpen(!isAdvancedOpen)} className="w-full flex justify-between items-center text-left">
                     <h3 className="text-sm font-semibold text-neutral-800">{t('search:filters.advancedFilters')}</h3>

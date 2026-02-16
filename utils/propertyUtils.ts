@@ -83,6 +83,16 @@ export const filterProperties = (properties: Property[], filters: Filters): Prop
                 : !(p.originalPrice !== undefined && p.originalPrice > p.price))
             : true;
 
+        // Price per sqm filters
+        const pricePerSqm = p.sqft > 0 ? p.price / p.sqft : 0;
+        const minPricePerSqmMatch = filters.minPricePerSqm !== null ? (p.sqft > 0 && pricePerSqm >= filters.minPricePerSqm) : true;
+        const maxPricePerSqmMatch = filters.maxPricePerSqm !== null ? (p.sqft > 0 && pricePerSqm <= filters.maxPricePerSqm) : true;
+
+        // Days listed filter
+        const maxDaysListedMatch = filters.maxDaysListed !== null ?
+            (p.createdAt && (Date.now() - new Date(p.createdAt).getTime()) <= filters.maxDaysListed * 24 * 60 * 60 * 1000)
+            : true;
+
         // Floor number filters
         const minFloorNumberMatch = filters.minFloorNumber !== null ? (p.floorNumber !== undefined && p.floorNumber >= filters.minFloorNumber) : true;
         const maxFloorNumberMatch = filters.maxFloorNumber !== null ? (p.floorNumber !== undefined && p.floorNumber <= filters.maxFloorNumber) : true;
@@ -145,6 +155,9 @@ export const filterProperties = (properties: Property[], filters: Filters): Prop
                maxDistanceToSeaMatch &&
                maxDistanceToSchoolMatch &&
                maxDistanceToHospitalMatch &&
-               amenitiesMatch;
+               amenitiesMatch &&
+               minPricePerSqmMatch &&
+               maxPricePerSqmMatch &&
+               maxDaysListedMatch;
     });
 };

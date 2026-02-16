@@ -226,6 +226,14 @@ export const getProperties = async (filters?: Filters, options?: { limit?: numbe
       params.append('propertyType', filters.propertyType);
     if (filters.listingType && filters.listingType !== 'any')
       params.append('listingType', filters.listingType);
+    if (filters.minPricePerSqm !== null && filters.minPricePerSqm !== undefined)
+      params.append('minPricePerSqm', filters.minPricePerSqm.toString());
+    if (filters.maxPricePerSqm !== null && filters.maxPricePerSqm !== undefined)
+      params.append('maxPricePerSqm', filters.maxPricePerSqm.toString());
+    if (filters.maxDaysListed !== null && filters.maxDaysListed !== undefined)
+      params.append('maxDaysListed', filters.maxDaysListed.toString());
+    if (filters.hasDiscount === true)
+      params.append('hasDiscount', 'true');
   }
 
   const queryString = params.toString();

@@ -20,6 +20,14 @@ export class PropertyApiClient {
       if (filters.sellerType && filters.sellerType !== 'any') params.append('sellerType', filters.sellerType);
       if (filters.propertyType && filters.propertyType !== 'any') params.append('propertyType', filters.propertyType);
       if (filters.country && filters.country !== 'any') params.append('country', filters.country);
+      if (filters.minPricePerSqm !== null && filters.minPricePerSqm !== undefined)
+        params.append('minPricePerSqm', filters.minPricePerSqm.toString());
+      if (filters.maxPricePerSqm !== null && filters.maxPricePerSqm !== undefined)
+        params.append('maxPricePerSqm', filters.maxPricePerSqm.toString());
+      if (filters.maxDaysListed !== null && filters.maxDaysListed !== undefined)
+        params.append('maxDaysListed', filters.maxDaysListed.toString());
+      if (filters.hasDiscount === true)
+        params.append('hasDiscount', 'true');
     }
 
     const queryString = params.toString();
