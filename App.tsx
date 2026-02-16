@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback, useRef, useMemo, lazy, Suspense } from 'react';
 // Page transitions use lightweight CSS instead of framer-motion to reduce initial bundle
-import { HelmetProvider } from 'react-helmet-async';
+import { HelmetProvider, Helmet } from 'react-helmet-async';
 import { AppProvider, useAppContext } from './context/AppContext';
 import { AlertProvider } from './context/AlertContext';
 import { ConfirmationProvider } from './src/shared/hooks/useConfirmation';
@@ -511,19 +511,19 @@ const AppContent: React.FC<{ onToggleSidebar: () => void }> = ({ onToggleSidebar
       case 'explore-cities':
         return <CityRecommendations />;
       case 'saved-searches':
-        return <SavedSearchesPage />;
+        return <><Helmet><meta name="robots" content="noindex, nofollow" /></Helmet><SavedSearchesPage /></>;
       case 'saved-properties':
-        return <SavedPropertiesPage />;
+        return <><Helmet><meta name="robots" content="noindex, nofollow" /></Helmet><SavedPropertiesPage /></>;
       case 'inbox':
-        return <InboxPage />;
+        return <><Helmet><meta name="robots" content="noindex, nofollow" /></Helmet><InboxPage /></>;
       case 'account':
-        return <MyAccountPage />;
+        return <><Helmet><meta name="robots" content="noindex, nofollow" /></Helmet><MyAccountPage /></>;
       case 'create-listing':
-        return <CreateListingPage />;
+        return <><Helmet><meta name="robots" content="noindex, nofollow" /></Helmet><CreateListingPage /></>;
       case 'rentals':
         return <QueryErrorBoundary><RentalSearchPage onToggleSidebar={onToggleSidebar} /></QueryErrorBoundary>;
       case 'create-rental':
-        return <CreateListingPage />;
+        return <><Helmet><meta name="robots" content="noindex, nofollow" /></Helmet><CreateListingPage /></>;
       case 'agents':
         return <QueryErrorBoundary><AgentsPage /></QueryErrorBoundary>;
       case 'agencies':
@@ -531,7 +531,7 @@ const AppContent: React.FC<{ onToggleSidebar: () => void }> = ({ onToggleSidebar
       case 'admin':
         // Only load admin dashboard for admin/super_admin users
         if (state.currentUser?.role === UserRole.ADMIN || state.currentUser?.role === UserRole.SUPER_ADMIN) {
-          return <QueryErrorBoundary><AdminDashboard /></QueryErrorBoundary>;
+          return <><Helmet><meta name="robots" content="noindex, nofollow" /></Helmet><QueryErrorBoundary><AdminDashboard /></QueryErrorBoundary></>;
         }
         // Redirect non-admins to search
         return <SearchPage onToggleSidebar={onToggleSidebar} />;

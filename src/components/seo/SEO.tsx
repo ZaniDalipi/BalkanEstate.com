@@ -22,6 +22,8 @@ interface SEOProps {
     images?: string[];
     latitude?: number;
     longitude?: number;
+    datePosted?: number | string;
+    dateModified?: number | string;
   };
   // Agency-specific fields
   agency?: {
@@ -127,7 +129,12 @@ function generatePropertySchema(
     description: description,
     url: url,
     image: property.images?.length ? property.images : [image],
-    datePosted: new Date().toISOString(),
+    datePosted: property.datePosted
+      ? new Date(typeof property.datePosted === 'number' ? property.datePosted : property.datePosted).toISOString()
+      : new Date().toISOString(),
+    ...(property.dateModified && {
+      dateModified: new Date(typeof property.dateModified === 'number' ? property.dateModified : property.dateModified).toISOString(),
+    }),
 
     // Property Details
     ...(property.bedrooms && { numberOfBedrooms: property.bedrooms }),

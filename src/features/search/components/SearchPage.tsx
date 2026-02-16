@@ -173,7 +173,7 @@ const SearchPage: React.FC<SearchPageProps> = ({ onToggleSidebar }) => {
             <SEO
                 title={seoTitle}
                 description={seoDescription}
-                canonical={`${window.location.origin}/search`}
+                canonical={`${window.location.origin}/search${window.location.search}`}
                 type="website"
             />
 

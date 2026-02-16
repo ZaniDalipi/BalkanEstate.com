@@ -408,8 +408,14 @@ const PropertyDetailsPage: React.FC<{ property: Property }> = ({ property: cache
     return () => window.removeEventListener('popstate', handlePopState);
   }, [dispatch]);
 
+  // Generate keyword-rich SEO title (matches target keywords like "3-Bed Apartment in Budva, Montenegro")
+  const propertyTypeLabel = property.propertyType
+    ? property.propertyType.charAt(0).toUpperCase() + property.propertyType.slice(1)
+    : 'Property';
+  const seoTitle = `${property.beds}-Bed ${propertyTypeLabel} in ${property.city}, ${property.country} - €${property.price?.toLocaleString()}`;
+
   // Generate SEO description
-  const seoDescription = `${property.beds} bedroom, ${property.baths} bathroom ${property.propertyType || 'property'} in ${property.city}, ${property.country}. ${property.sqft}m² for €${property.price?.toLocaleString()}. ${property.description?.slice(0, 100) || ''}`;
+  const seoDescription = `${property.beds} bedroom, ${property.baths} bathroom ${property.propertyType || 'property'} for sale in ${property.city}, ${property.country}. ${property.sqft}m² for €${property.price?.toLocaleString()}. ${property.description?.slice(0, 120) || ''}`;
 
   // Get all images for SEO
   const seoImages = allImages.map(img => img.url).filter(Boolean);
@@ -418,7 +424,7 @@ const PropertyDetailsPage: React.FC<{ property: Property }> = ({ property: cache
     <div className="bg-neutral-50 h-full overflow-y-auto overflow-x-hidden animate-fade-in" style={{ paddingBottom: 'env(safe-area-inset-bottom, 0px)', overscrollBehaviorY: 'contain', WebkitOverflowScrolling: 'touch' }}>
       {/* SEO Meta Tags */}
       <SEO
-        title={`${property.address}, ${property.city} - €${property.price?.toLocaleString()}`}
+        title={seoTitle}
         description={seoDescription}
         canonical={`${window.location.origin}/property/${property.id}`}
         image={property.imageUrl}
@@ -436,6 +442,8 @@ const PropertyDetailsPage: React.FC<{ property: Property }> = ({ property: cache
           images: seoImages,
           latitude: property.lat,
           longitude: property.lng,
+          datePosted: property.createdAt,
+          dateModified: property.lastRenewed || property.createdAt,
         }}
       />
 

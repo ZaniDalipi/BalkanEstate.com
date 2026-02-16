@@ -7,7 +7,7 @@
     "dev": "vite --mode development",
     "dev:staging": "vite --mode staging",
     "dev:prod": "vite --mode production",
-    "build": "vite build --mode production",
+    "build": "vite build --mode production && node scripts/prerender.mjs dist",
     "build:dev": "vite build --mode development",
     "build:staging": "vite build --mode staging",
     "preview": "vite preview --mode production",
