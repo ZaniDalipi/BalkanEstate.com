@@ -3,10 +3,17 @@
 
 User-agent: *
 Allow: /
+Allow: /search
 Allow: /property/
 Allow: /agencies/
 Allow: /agents
-Allow: /search
+Allow: /rentals
+Allow: /explore-cities
+Allow: /valuation
+Allow: /mortgage-calculator
+Allow: /how-it-works
+Allow: /contact
+Allow: /pricing
 
 # Disallow private areas
 Disallow: /account
@@ -15,7 +22,12 @@ Disallow: /admin
 Disallow: /saved-properties
 Disallow: /saved-searches
 Disallow: /create-listing
+Disallow: /edit-listing
+Disallow: /create-rental
+Disallow: /create-agency
 Disallow: /payment/
+Disallow: /reset-password
+Disallow: /verify-email
 
 # Crawl-delay for polite crawling
 Crawl-delay: 1

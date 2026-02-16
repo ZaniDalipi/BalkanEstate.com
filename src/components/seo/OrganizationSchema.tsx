@@ -28,7 +28,7 @@ export const OrganizationSchema: React.FC<OrganizationSchemaProps> = ({
   name = 'BalkanEstateAI',
   url = 'https://balkanestateai.com',
   logo = 'https://balkanestateai.com/logo.png',
-  description = 'BalkanEstateAI is the leading AI-powered real estate platform in the Balkans, connecting buyers with their dream properties across Serbia, Montenegro, Croatia, Bosnia, North Macedonia, and Albania.',
+  description = 'BalkanEstateAI is the leading AI-powered real estate platform covering all 11 Balkan countries. Find property for sale in Montenegro, Albania, Kosovo, North Macedonia, Serbia, Croatia, Bosnia, Bulgaria, Romania, and Greece. AI-powered search, valuations, and 10 languages.',
   email = CONTACT_CONFIG.email.info,
   phone,
   address,

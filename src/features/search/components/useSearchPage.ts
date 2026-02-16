@@ -8,6 +8,7 @@ import { searchLocation } from '@/services/osmService';
 import L from 'leaflet';
 import { filterProperties } from '@/utils/propertyUtils';
 import { BALKAN_COUNTRIES, normalizeCountryKey } from '@/constants/countries';
+import { generateSearchSEOTitle, generateSearchSEODescription } from '@/src/components/seo/seoKeywords';
 
 // Helper to serialize Leaflet bounds to a consistent JSON format
 export const serializeBounds = (bounds: L.LatLngBounds): string => {
@@ -937,39 +938,26 @@ export function useSearchPage() {
         updateSearchPageState({ aiChatHistory: newHistory });
     }, [updateSearchPageState]);
 
-    // Generate dynamic SEO based on current filters
+    // Generate dynamic SEO based on current filters using keyword-optimized data
     const seoTitle = useMemo(() => {
-        const parts: string[] = [];
-        if (filters.country && filters.country !== 'all') {
-            parts.push(`Properties in ${filters.country}`);
-        } else {
-            parts.push('Properties in the Balkans');
-        }
-        if (filters.query) {
-            parts[0] = `Properties in ${filters.query}`;
-        }
-        return parts[0];
-    }, [filters.country, filters.query]);
+        return generateSearchSEOTitle({
+            country: filters.country && filters.country !== 'all' ? filters.country : undefined,
+            city: filters.query || undefined,
+            propertyType: filters.propertyType && filters.propertyType !== 'all' ? filters.propertyType : undefined,
+            query: filters.query || undefined,
+        });
+    }, [filters.country, filters.query, filters.propertyType]);
 
     const seoDescription = useMemo(() => {
-        let desc = 'Browse ';
-        if (filters.beds) desc += `${filters.beds}+ bedroom `;
-        desc += 'houses, apartments, and villas for sale';
-        if (filters.country && filters.country !== 'all') {
-            desc += ` in ${filters.country}`;
-        } else if (filters.query) {
-            desc += ` in ${filters.query}`;
-        } else {
-            desc += ' across the Balkans';
-        }
-        if (filters.minPrice || filters.maxPrice) {
-            desc += '. Price range: ';
-            if (filters.minPrice) desc += `€${filters.minPrice.toLocaleString()}`;
-            if (filters.minPrice && filters.maxPrice) desc += ' - ';
-            if (filters.maxPrice) desc += `€${filters.maxPrice.toLocaleString()}`;
-        }
-        desc += '. Find your dream property with Balkan Estate.';
-        return desc;
+        return generateSearchSEODescription({
+            country: filters.country && filters.country !== 'all' ? filters.country : undefined,
+            city: filters.query || undefined,
+            propertyType: filters.propertyType && filters.propertyType !== 'all' ? filters.propertyType : undefined,
+            query: filters.query || undefined,
+            minPrice: filters.minPrice || undefined,
+            maxPrice: filters.maxPrice || undefined,
+            beds: filters.beds || undefined,
+        });
     }, [filters]);
 
     return {
