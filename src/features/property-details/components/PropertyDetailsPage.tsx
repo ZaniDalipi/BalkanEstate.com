@@ -414,7 +414,7 @@ const PropertyDetailsPage: React.FC<{ property: Property }> = ({ property: cache
   const seoImages = allImages.map(img => img.url).filter(Boolean);
 
   return (
-    <div className="bg-neutral-50 h-full overflow-y-auto overflow-x-hidden animate-fade-in" style={{ paddingBottom: 'env(safe-area-inset-bottom, 0px)' }}>
+    <div className="bg-neutral-50 h-full overflow-y-auto overflow-x-hidden animate-fade-in" style={{ paddingBottom: 'env(safe-area-inset-bottom, 0px)', overscrollBehaviorY: 'contain', WebkitOverflowScrolling: 'touch' }}>
       {/* SEO Meta Tags */}
       <SEO
         title={`${property.address}, ${property.city} - €${property.price?.toLocaleString()}`}
@@ -437,15 +437,6 @@ const PropertyDetailsPage: React.FC<{ property: Property }> = ({ property: cache
           longitude: property.lng,
         }}
       />
-
-      {/* Modals */}
-      {isEditorOpen && (
-        <ImageEditorModal
-          imageUrl={currentImageUrl}
-          property={property}
-          onClose={() => setIsEditorOpen(false)}
-        />
-      )}
 
       {/* Modals */}
       {isEditorOpen && (
@@ -524,14 +515,14 @@ const PropertyDetailsPage: React.FC<{ property: Property }> = ({ property: cache
 
       {/* Copied Toast */}
       {showCopiedToast && (
-        <div className="fixed top-20 left-1/2 -translate-x-1/2 z-50 bg-neutral-800 text-white px-4 py-2 rounded-lg shadow-lg text-sm font-medium animate-fade-in">
+        <div className="fixed left-1/2 -translate-x-1/2 z-50 bg-neutral-800 text-white px-4 py-2.5 rounded-xl shadow-lg text-sm font-medium animate-fade-in" style={{ top: 'calc(env(safe-area-inset-top, 0px) + 5rem)' }}>
           {t('property:toast.linkCopied')}
         </div>
       )}
 
       {/* Sold Banner */}
       {property.status === 'sold' && (
-        <div className="bg-gradient-to-r from-red-600 to-red-700 text-white py-3 px-4">
+        <div className="bg-gradient-to-r from-red-600 to-red-700 text-white py-3 px-4" style={{ paddingTop: 'max(0.75rem, env(safe-area-inset-top, 0.75rem))' }}>
           <div className="max-w-7xl mx-auto flex items-center justify-center gap-3">
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -545,7 +536,7 @@ const PropertyDetailsPage: React.FC<{ property: Property }> = ({ property: cache
 
       {/* Rented Banner */}
       {localStatus === 'rented' && (
-        <div className="bg-gradient-to-r from-orange-500 to-amber-600 text-white py-3 px-4">
+        <div className="bg-gradient-to-r from-orange-500 to-amber-600 text-white py-3 px-4" style={{ paddingTop: 'max(0.75rem, env(safe-area-inset-top, 0.75rem))' }}>
           <div className="max-w-7xl mx-auto flex items-center justify-center gap-3">
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 14v3m4-3v3m4-3v3M3 21h18M3 10h18M3 7l9-4 9 4M4 10h16v11H4V10z" />
@@ -676,7 +667,7 @@ const PropertyDetailsPage: React.FC<{ property: Property }> = ({ property: cache
             >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
-                className="h-4.5 w-4.5 sm:h-6 sm:w-6 md:h-7 md:w-7 text-neutral-500 hover:text-primary transition-colors"
+                className="h-[18px] w-[18px] sm:h-6 sm:w-6 md:h-7 md:w-7 text-neutral-500 hover:text-primary transition-colors"
                 fill="none"
                 viewBox="0 0 24 24"
                 stroke="currentColor"
@@ -701,7 +692,7 @@ const PropertyDetailsPage: React.FC<{ property: Property }> = ({ property: cache
             >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
-                className={`h-4.5 w-4.5 sm:h-6 sm:w-6 md:h-7 md:w-7 transition-colors duration-300 ${
+                className={`h-[18px] w-[18px] sm:h-6 sm:w-6 md:h-7 md:w-7 transition-colors duration-300 ${
                   property.status === 'sold'
                     ? 'text-neutral-300'
                     : isFavorited

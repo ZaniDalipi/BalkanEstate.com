@@ -610,7 +610,9 @@ const MainLayout: React.FC = () => {
   const isAgencyDetailView = !!state.selectedAgencyId;
   // Agency pages should allow scrolling to show all agents and details
   const isFullHeightView = isSearchPage || isRentalPage || state.activeView === 'inbox' || !!state.selectedProperty;
-  const showHeader = !(isMobile && (isSearchPage || isRentalPage || !!state.selectedProperty));
+  // Hide header on mobile search/rental (they have their own headers)
+  // Hide header entirely on property details (PropertyDetailsPage has its own complete header with back, share, favorite, profile)
+  const showHeader = !(isMobile && (isSearchPage || isRentalPage)) && !state.selectedProperty;
   // Note: Agency detail pages WILL show header on mobile to allow sidebar access
   
   const anyNonAuthModalOpen = state.isListingLimitWarningOpen || state.isDiscountGameOpen;

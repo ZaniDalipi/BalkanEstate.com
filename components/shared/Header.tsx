@@ -107,25 +107,8 @@ const Header: React.FC<HeaderProps> = ({ onToggleSidebar, isFloating }) => {
   const glassButtonClasses = "relative overflow-hidden backdrop-blur-md text-white px-3 py-1.5 sm:px-3.5 sm:py-2 md:px-4 lg:px-5 lg:py-2.5 rounded-full text-[11px] sm:text-xs md:text-sm font-semibold transition-all duration-700 hover:-translate-y-px hover:brightness-110 active:brightness-95 whitespace-nowrap border border-white/25";
 
   if (isFloating) {
-    // Minimal floating header on property details - only profile + notifications
-    if (state.selectedProperty) {
-      return (
-        <header className="fixed top-2 right-3 z-[1001]">
-          <nav
-            className="flex items-center gap-1.5 bg-white/70 backdrop-blur-xl p-1 rounded-full border border-white/40"
-            style={{ boxShadow: '0 6px 6px rgba(0,0,0,0.12), 0 0 20px rgba(0,0,0,0.06), inset 2px 2px 1px 0 rgba(255,255,255,0.6), inset -1px -1px 1px 1px rgba(255,255,255,0.5)' }}
-          >
-            <AuthButton floating />
-            {isAuthenticated && (
-              <Suspense fallback={null}>
-                <NotificationCenter />
-              </Suspense>
-            )}
-          </nav>
-        </header>
-      );
-    }
-
+    // Note: Header is hidden entirely on property details via App.tsx showHeader logic
+    // PropertyDetailsPage has its own complete header with back, share, favorite, profile
     return (
       <header className="fixed top-2 right-3 z-[1001]">
         <nav
