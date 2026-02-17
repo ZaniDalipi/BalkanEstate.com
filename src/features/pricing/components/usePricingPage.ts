@@ -147,6 +147,39 @@ export function usePricingPage() {
     return !!(isEnterpriseTier && isActiveSubscription);
   };
 
+  // Get the current user's active seller plan level (0=none/free, 1=monthly, 2=yearly, 3=enterprise)
+  const getCurrentSellerPlanLevel = (): number => {
+    const user = state.currentUser;
+    if (!user) return 0;
+
+    const isActive =
+      user.subscriptionStatus === 'active' ||
+      user.subscriptionStatus === 'trial' ||
+      user.subscriptionStatus === 'grace' ||
+      user.subscription?.status === 'active' ||
+      user.subscription?.status === 'trial';
+
+    if (!isActive) return 0;
+
+    const plan = (user.subscription?.plan || user.subscriptionPlan || '').toLowerCase();
+    const tier = user.subscription?.tier || '';
+
+    if (plan.includes('enterprise') || tier === 'agency_owner') return 3;
+    if (plan.includes('pro_yearly') || plan.includes('yearly')) return 2;
+    if (plan.includes('pro_monthly') || plan.includes('monthly')) return 1;
+
+    return 0;
+  };
+
+  // Get the plan level of a target product (0=buyer/other, 1=monthly, 2=yearly, 3=enterprise)
+  const getProductPlanLevel = (productId: string): number => {
+    const id = productId.toLowerCase();
+    if (id.includes('enterprise')) return 3;
+    if (id.includes('yearly')) return 2;
+    if (id.includes('monthly') && !id.includes('buyer')) return 1;
+    return 0;
+  };
+
   const handlePlanSelection = (product: Product) => {
     // Require authentication to proceed
     if (!state.isAuthenticated || !state.currentUser) {
@@ -164,6 +197,60 @@ export function usePricingPage() {
         payload: { isOpen: true, view: 'login' },
       });
       return;
+    }
+
+    // Enforce upgrade path: monthly → yearly → enterprise (no downgrades or same-tier)
+    const targetLevel = getProductPlanLevel(product.productId);
+    if (targetLevel > 0) {
+      const currentLevel = getCurrentSellerPlanLevel();
+
+      if (currentLevel >= 3) {
+        // Enterprise users can't switch to anything else
+        dispatch({
+          type: 'SHOW_ALERT',
+          payload: {
+            type: 'info',
+            title: t('pricing:upgrade.alreadyEnterprise', 'You Have the Top Plan'),
+            message: t(
+              'pricing:upgrade.alreadyEnterpriseMessage',
+              'You already have the Enterprise plan — the highest tier available. Manage your subscription from your account settings.'
+            ),
+          },
+        });
+        return;
+      }
+
+      if (currentLevel >= 2 && targetLevel <= 2) {
+        // Yearly users can only upgrade to enterprise
+        dispatch({
+          type: 'SHOW_ALERT',
+          payload: {
+            type: 'info',
+            title: t('pricing:upgrade.yearlyActive', 'Yearly Plan Active'),
+            message: t(
+              'pricing:upgrade.yearlyActiveMessage',
+              'You already have a Yearly plan. You can only upgrade to the Enterprise plan.'
+            ),
+          },
+        });
+        return;
+      }
+
+      if (currentLevel >= 1 && targetLevel <= 1) {
+        // Monthly users can't re-select monthly
+        dispatch({
+          type: 'SHOW_ALERT',
+          payload: {
+            type: 'info',
+            title: t('pricing:upgrade.monthlyActive', 'Monthly Plan Active'),
+            message: t(
+              'pricing:upgrade.monthlyActiveMessage',
+              'You already have a Monthly plan. You can upgrade to the Yearly or Enterprise plan.'
+            ),
+          },
+        });
+        return;
+      }
     }
 
     // For Enterprise plan, perform all checks
