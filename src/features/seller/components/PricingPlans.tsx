@@ -147,22 +147,6 @@ const PricingPlans: React.FC<PricingPlansProps> = ({ isOpen, onClose, onSubscrib
   const discountedEnterprise = applyDiscount(enterprisePrice, enterpriseDiscount);
 
   const handlePlanSelection = (planName: string, price: number, interval: 'month' | 'year', discount: number, productId: string) => {
-  // PAYMENTS COMING SOON - Show info message instead of processing payment
-  dispatch({
-    type: 'SHOW_ALERT',
-    payload: {
-      type: 'info',
-      title: t('pricing:comingSoon.title', 'Payments Coming Soon'),
-      message: t(
-        'pricing:comingSoon.message',
-        'We are setting up our payment system. Please contact sales@balkanestateai.com to process your subscription manually.'
-      ),
-    },
-  });
-  return;
-
-  // Original payment logic - temporarily disabled
-  /*
   // Check if user is authenticated (check either flag or user object)
   if (!state.isAuthenticated || !state.currentUser) {
     // Save pending subscription
@@ -199,7 +183,6 @@ const PricingPlans: React.FC<PricingPlansProps> = ({ isOpen, onClose, onSubscrib
     // For other plans, or Enterprise with pending data, show payment window
     setShowPaymentWindow(true);
   }
-  */
 };
 
   const handlePaymentSuccess = async (paymentIntentId: string) => {
