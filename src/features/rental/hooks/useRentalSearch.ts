@@ -271,7 +271,7 @@ export function useRentalSearch() {
         if (userLocation) {
             setFlyToTarget({ center: userLocation, zoom: 14 });
         } else {
-            showToast(t('search:map.locationUnavailable', 'Your location is not available.'), 'error');
+            showToast(t('search:locationUnavailable', 'Your location is not available.'), 'error');
         }
     }, [userLocation, showToast, t]);
 
@@ -340,15 +340,15 @@ export function useRentalSearch() {
                     seenPropertyIds: [],
                 };
             } else {
-                showToast(t('search:savedSearch.emptyError', 'Cannot save an empty search. Please add some criteria or move to an area on the map.'), 'error');
+                showToast(t('search:cannotSaveEmptySearch', 'Cannot save an empty search. Please add some criteria or move to an area on the map.'), 'error');
                 setIsSaving(false);
                 return;
             }
 
             await addSavedSearch(newSearch);
-            showToast(t('search:savedSearch.saveSuccess', 'Search saved successfully!'), 'success');
+            showToast(t('search:searchSaved', 'Search saved successfully!'), 'success');
         } catch (e: any) {
-            const message = e?.message || t('search:savedSearch.saveError', 'Could not save search. Please try again.');
+            const message = e?.message || t('search:couldNotSaveSearch', 'Could not save search. AI might be busy.');
             showToast(message, 'error');
         } finally {
             setIsSaving(false);
