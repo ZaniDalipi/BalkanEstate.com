@@ -433,8 +433,37 @@ const PricingPage: React.FC = () => {
             </div>
           </div>
 
-          {/* FAQ or Contact CTA */}
+          {/* Coupon CTA + Contact */}
           <div className="mt-16 text-center">
+            {/* Coupon Banner */}
+            <div className="max-w-lg mx-auto mb-8">
+              <div className="bg-gradient-to-r from-primary/5 via-indigo-50 to-primary/5 border border-primary/20 rounded-2xl p-6">
+                <div className="flex items-center justify-center gap-2 mb-2">
+                  <svg className="w-6 h-6 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M16.5 6v.75m0 3v.75m0 3v.75m0 3V18m-9-5.25h5.25M7.5 15h3M3.375 5.25c-.621 0-1.125.504-1.125 1.125v3.026a2.999 2.999 0 010 5.198v3.026c0 .621.504 1.125 1.125 1.125h17.25c.621 0 1.125-.504 1.125-1.125v-3.026a2.999 2.999 0 010-5.198V6.375c0-.621-.504-1.125-1.125-1.125H3.375z" />
+                  </svg>
+                  <h3 className="text-lg font-bold text-gray-900">
+                    {t('pricing:coupon.title', 'Do you have a coupon from the seller?')}
+                  </h3>
+                </div>
+                <p className="text-sm text-gray-600 mb-4">
+                  {t('pricing:coupon.description', 'Select any plan above and use your coupon code to activate your subscription instantly.')}
+                </p>
+                <button
+                  onClick={() => {
+                    // Scroll to plans section smoothly
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                  }}
+                  className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-primary to-indigo-600 text-white font-semibold rounded-xl hover:from-primary-dark hover:to-indigo-700 transition-all shadow-md hover:shadow-lg"
+                >
+                  <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l7.5-7.5 7.5 7.5m-15 6l7.5-7.5 7.5 7.5" />
+                  </svg>
+                  {t('pricing:coupon.selectPlan', 'Select a plan to use your coupon')}
+                </button>
+              </div>
+            </div>
+
             <p className="text-gray-600 mb-4">
               {t('pricing:contact.haveQuestions', 'Have questions?')}
             </p>
