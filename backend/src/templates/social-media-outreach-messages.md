@@ -1,8 +1,11 @@
-# Social Media Outreach Messages — Realtors & Agencies
-## TikTok DMs + Instagram DMs
+# BalkanEstateAI — Social Media Outreach Scripts
+## Professional TikTok & Instagram DM Templates for Realtor & Agency Acquisition
 
-> **Framework:** StoryBrand adapted for social — Problem → Empathy → Solution → CTA
-> **Rule:** Keep it conversational. No corporate speak. Hook in the first line.
+> **Brand Voice:** Professional, confident, AI-forward. Position BalkanEstateAI as the intelligent, technology-driven real estate platform built exclusively for the Balkan market.
+>
+> **Core Value Proposition:** AI-powered cross-border real estate platform — 10 Balkan countries, 10 languages, intelligent listing automation.
+>
+> **Website:** balkanestateai.com
 
 ---
 
@@ -12,71 +15,80 @@
 
 ## TT-1: Cold Outreach — Individual Realtor
 
-> Hey {{name}}! I saw you post properties in {{country}} — your listings look great.
+> Hi {{name}}, I came across your property content in {{country}} — really well-presented listings.
 >
-> Quick question — are your listings reaching buyers in other Balkan countries too? (Serbia, Montenegro, Croatia, Greece, etc.)
+> I wanted to ask — are your properties currently visible to qualified buyers across the wider Balkan region? Markets like Serbia, Montenegro, Croatia, and Greece have strong cross-border demand right now.
 >
-> We built a platform specifically for Balkan real estate agents — your listings go live across 10 countries in 10 languages, and AI writes all the descriptions for you.
+> I represent BalkanEstateAI — the first AI-powered real estate platform built exclusively for the Balkans. We help agents like you expand their reach across 10 countries and 10 languages, with AI that automatically generates professional listing descriptions, titles, and translations from your photos.
 >
-> Free to join, takes 3 min. Want me to send you the link?
+> It is completely free to get started. Would you be interested in learning more?
 
 ---
 
 ## TT-2: Cold Outreach — Agency
 
-> Hey {{name}}! Love what {{agency_name}} is doing in {{city/country}}.
+> Hi {{name}}, I have been following {{agency_name}}'s work in {{city/country}} — impressive presence in the market.
 >
-> We built something that might help you scale — BalkanEstate puts your agency and all your agents in front of buyers across 10 Balkan countries, automatically translated into 10 languages.
+> I am reaching out from BalkanEstateAI. We have built an AI-powered platform designed specifically for Balkan real estate agencies looking to scale beyond their local market.
 >
-> Your agency gets its own branded page, AI-generated listings, analytics dashboard — the whole thing. A lot of agencies are joining early to lock in visibility.
+> Here is what agencies are getting from us:
+> — A branded agency page with your logo, team profiles, and featured listings
+> — AI-generated listing content in 10 languages across 10 Balkan countries
+> — A centralized analytics dashboard tracking views, inquiries, and agent performance
 >
-> Worth a quick look? I can send the link.
+> We are selectively onboarding agencies during our growth phase, and firms joining now are securing strong regional visibility early.
+>
+> Would it be worth a brief conversation? I am happy to share more details.
 
 ---
 
-## TT-3: Reacting to Their Content (Comment-then-DM)
+## TT-3: Reacting to Their Content (Comment-then-DM Strategy)
 
 **Step 1 — Comment on their property video:**
-> This property is stunning! Buyers in {{neighboring country}} would love this.
+> Exceptional property. This would generate serious interest from buyers across the region.
 
 **Step 2 — Follow up in DM:**
-> Hey {{name}}! I left a comment on your listing video — seriously great property.
+> Hi {{name}}, I left a comment on your recent listing video — outstanding presentation.
 >
-> Random thought — have you considered listing it where buyers from Croatia, Serbia, Greece etc. can actually find it? Most portals only show listings in one country.
+> It got me thinking — that property has clear appeal to buyers in {{neighboring_country}} and beyond, but most Balkan portals only serve a single domestic market.
 >
-> We built BalkanEstate exactly for this — 10 countries, 10 languages, AI does the listing for you. Free to start.
+> That is exactly the problem BalkanEstateAI was built to solve. Our AI-powered platform places your listings in front of qualified buyers across 10 Balkan countries, with professional descriptions auto-generated in 10 languages.
 >
-> Want the link?
+> It is free to join and takes less than 3 minutes to set up. Shall I send you the registration link?
 
 ---
 
-## TT-4: Short & Direct (Busy Agent)
+## TT-4: Short & Direct (Concise Professional)
 
-> Hey {{name}} — saw your properties. Quick pitch:
+> Hi {{name}}, I noticed your property listings — strong portfolio.
 >
-> We built a platform that puts your listings in front of buyers across 10 Balkan countries. AI writes all descriptions in 10 languages. Free to join.
+> BalkanEstateAI is the first AI-powered real estate platform built for the Balkans. We place your listings in front of buyers across 10 countries, with AI-generated descriptions in 10 languages.
 >
-> 3 min to set up. Interested?
+> Free to join, takes 3 minutes to set up. Would you like to take a look?
 
 ---
 
-## TT-5: Pain Point Hook
+## TT-5: Pain Point — Limited Visibility
 
-> Hey {{name}}! Honest question — do you ever feel like your listings disappear into a black hole online?
+> Hi {{name}}, I have a question for you — do you feel your listings are getting the regional exposure they deserve?
 >
-> We kept hearing that from agents across the Balkans. So we built a platform where your properties are seen by buyers in 10 countries, AI handles translations, and you get a dashboard showing exactly who is looking.
+> We have spoken with hundreds of agents across the Balkans, and the most common frustration is the same: great properties, limited reach. Listings stay trapped in one market while qualified buyers sit just across the border.
 >
-> Agents who joined early are already getting cross-border inquiries. Want in? It is free to start.
+> BalkanEstateAI was purpose-built to solve this. Our AI-powered platform distributes your properties across 10 Balkan countries, generates professional descriptions in 10 languages, and gives you a real-time analytics dashboard to track engagement.
+>
+> Agents on the platform are already receiving cross-border inquiries. It is free to get started — would you like to join them?
 
 ---
 
-## TT-6: Social Proof / FOMO
+## TT-6: Social Proof & Early Access
 
-> Hey {{name}}! Agents in {{country}} are starting to join BalkanEstate and getting inquiries from buyers across the whole region — Serbia, Croatia, Montenegro, Greece, you name it.
+> Hi {{name}}, I wanted to reach out because real estate professionals across {{country}} are joining BalkanEstateAI and expanding their reach across the entire Balkan region.
 >
-> Your listings + 10 countries + AI translations = way more eyes on your properties.
+> The platform uses AI to generate your listing content in 10 languages and distribute it across 10 countries — Serbia, Croatia, Montenegro, Greece, Albania, and more.
 >
-> Did not want you to miss the early wave. Free to join — want the link?
+> We are still in our early growth phase, and agents joining now are securing the strongest visibility as the platform scales.
+>
+> It is free to start. Would you like me to send you the details?
 
 ---
 
@@ -86,171 +98,232 @@
 
 ## IG-1: Cold Outreach — Individual Realtor
 
-> Hey {{name}}! Your property photos are really well done — I can tell you take your listings seriously.
+> Hi {{name}}, your property photography and presentation are outstanding — it is clear you bring a high standard to your work.
 >
-> I wanted to reach out because we built something specifically for agents like you in the Balkans. It is called BalkanEstate.
+> I am reaching out because we have built something specifically for professionals like you. BalkanEstateAI is the first AI-powered real estate platform designed exclusively for the Balkan market.
 >
-> The problem we kept hearing: "My listings are stuck in one country while qualified buyers are right across the border."
+> The challenge we kept hearing from agents: "My properties are only visible in one country, while serious buyers are searching across the entire region."
 >
-> So we built a platform where:
-> - Your listings go live in 10 Balkan countries instantly
-> - AI writes your titles and descriptions in 10 languages
-> - You get real-time analytics on views and inquiries
-> - Buyers message you directly — no middlemen
+> Here is how BalkanEstateAI solves that:
+> — Your listings go live across 10 Balkan countries instantly
+> — AI generates professional titles, descriptions, and translations in 10 languages
+> — Real-time analytics dashboard tracks views, inquiries, and buyer engagement
+> — Buyers contact you directly through the platform — no intermediaries
+> — Verified agent profile with your credentials and portfolio
 >
-> It is free to join and takes about 3 minutes to set up.
+> It is completely free to get started and takes approximately 3 minutes to set up.
 >
-> Would you be open to checking it out? I can send you the signup link.
+> Would you be open to exploring the platform? I would be happy to send you the registration link.
 
 ---
 
 ## IG-2: Cold Outreach — Agency Owner
 
-> Hey {{name}}! I have been following {{agency_name}} — impressive portfolio.
+> Hi {{name}}, I have been following {{agency_name}}'s growth — you have built an impressive operation in {{country}}.
 >
-> I am reaching out because we built BalkanEstate, a platform made specifically for Balkan real estate professionals, and I think it could really help {{agency_name}} grow.
+> I am reaching out from BalkanEstateAI, the first AI-powered real estate platform built exclusively for the Balkan market. I believe our platform could be a valuable growth channel for {{agency_name}}.
 >
-> Here is why agencies love it:
-> - Your agency gets a branded page with your logo, team, and featured listings
-> - Every listing is automatically available in 10 countries and 10 languages
-> - AI generates descriptions from your photos in seconds
-> - Full analytics dashboard — views, inquiries, top-performing agents
-> - Your agents can manage everything from one place
+> Here is what we offer agencies:
+> — A branded agency page featuring your logo, company profile, team members, and featured listings
+> — AI-powered listing automation — professional descriptions generated from photos in 10 languages
+> — Cross-border distribution across 10 Balkan countries
+> — Centralized analytics dashboard — track views, inquiries, agent performance, and market trends
+> — Individual verified profiles for each agent on your team
+> — Direct buyer-to-agent communication — no platform intermediaries
 >
-> We are still early and agencies joining now get the most visibility as we grow across the region.
+> We are currently in a strategic growth phase, and agencies onboarding now are securing premium visibility as we scale across the region.
 >
-> Worth a conversation? Happy to walk you through it or just send the link.
+> Would you be available for a brief conversation? I am happy to walk you through the platform or simply send the registration details.
 
 ---
 
-## IG-3: Responding to Their Story (Property Showcase)
+## IG-3: Responding to Their Story (Property Feature)
 
-> Hey {{name}}! Just saw that property in your story — beautiful.
+> Hi {{name}}, I just saw the property you featured in your story — truly impressive listing.
 >
-> Have you ever thought about how many buyers in neighboring countries would jump on that? Most Balkan portals only show listings domestically.
+> Have you considered the demand that property could attract from buyers in {{neighboring_country}} and across the wider Balkan region? Most portals in our market only serve a single country, which means qualified international buyers never see your best listings.
 >
-> We built BalkanEstate to fix that — your listings go live across 10 countries, AI translates everything, buyers message you directly.
+> BalkanEstateAI was built to change that. Our AI-powered platform distributes your listings across 10 Balkan countries with professional descriptions in 10 languages — all generated automatically.
 >
-> Free to join. Want me to send the link?
-
----
-
-## IG-4: Warm Follow-Up (After They Followed Back or Liked)
-
-> Hey {{name}}! Thanks for the follow / like — appreciate it.
->
-> Since you are in real estate in {{country}}, thought this might interest you:
->
-> We built BalkanEstate — a platform where Balkan agents list properties across 10 countries with AI-powered translations. Think of it as your listings going regional instead of just local.
->
-> Agents are getting inquiries from buyers they never would have reached before.
->
-> Free to start, 3 min setup. Want the link?
+> It is free to get started. Would you like me to send you the link?
 
 ---
 
-## IG-5: Short Carousel Comment + DM (After They Post a Listing Carousel)
+## IG-4: Warm Follow-Up (After They Engaged First)
 
-**Step 1 — Comment on carousel:**
-> Great property! This would sell fast in {{neighboring country}} too.
+> Hi {{name}}, thank you for connecting — I appreciate the engagement.
+>
+> Since you are active in real estate in {{country}}, I thought this might be relevant to you.
+>
+> BalkanEstateAI is the first AI-powered platform built specifically for Balkan real estate professionals. We help agents expand their listings across 10 countries with AI-generated descriptions in 10 languages — transforming local listings into regional opportunities.
+>
+> Agents on the platform are receiving inquiries from buyers they would never have reached through traditional channels.
+>
+> It is free to get started and takes about 3 minutes. Would you like to learn more?
+
+---
+
+## IG-5: Comment + DM Strategy (Listing Carousel Post)
+
+**Step 1 — Comment on their carousel:**
+> Excellent listing. This property would attract strong interest across the region.
 
 **Step 2 — DM:**
-> Hey {{name}}! Commented on your listing post — seriously nice property.
+> Hi {{name}}, I commented on your recent listing post — exceptional property and presentation.
 >
-> Not sure if you have heard of BalkanEstate yet — it is a new platform where your listings are visible to buyers across all 10 Balkan countries. AI writes the descriptions in 10 languages so you do not have to.
+> I wanted to introduce you to BalkanEstateAI — the first AI-powered real estate platform built exclusively for the Balkan market. Your listings become visible to qualified buyers across all 10 Balkan countries, with AI generating professional descriptions in 10 languages automatically.
 >
-> A lot of agents are joining now to get early visibility. Free to start.
+> We are currently onboarding top agents across the region, and professionals joining now are securing the strongest early visibility.
 >
-> Want to check it out?
+> It is free to get started. Would you be interested in taking a look?
 
 ---
 
-## IG-6: Agency Team Pitch (For Agencies with Multiple Agents)
+## IG-6: Agency Team Pitch (Multi-Agent Firms)
 
-> Hey {{name}}! I noticed {{agency_name}} has a solid team across {{country}}.
+> Hi {{name}}, I have noticed that {{agency_name}} has built a strong team across {{country}} — that kind of scale is impressive.
 >
-> Quick thought — what if all your agents' listings were visible to buyers across 10 Balkan countries, not just {{country}}?
+> I have a question for you — what if every listing from every agent on your team was visible to qualified buyers across 10 Balkan countries, not just {{country}}?
 >
-> That is exactly what BalkanEstate does:
-> - One branded agency page for your whole team
-> - AI creates listings from photos in 10 languages
-> - Each agent gets their own verified profile
-> - You see which agents and listings perform best
-> - Buyers contact your agents directly
+> That is exactly what BalkanEstateAI delivers:
+> — One branded agency page for your entire team with your logo and company profile
+> — AI-powered listing creation — professional content generated from photos in 10 languages
+> — Individual verified profiles for each agent with credentials and portfolio
+> — Performance analytics — track which agents, listings, and markets are generating the most engagement
+> — Direct buyer communication — inquiries go straight to the responsible agent
 >
-> Agencies joining now are getting first-mover advantage in their markets. Free to start.
+> We are strategically onboarding leading agencies during our growth phase. Firms joining now are establishing dominant regional visibility early.
 >
-> Should I send you the details?
-
----
-
-## IG-7: Pain Point — Wasted Time
-
-> Hey {{name}}! Quick question — how much time do you spend writing listing descriptions every week?
->
-> We kept hearing agents say "hours" and thought that was crazy. So we built BalkanEstate — you upload photos and AI writes the whole listing for you. Title, description, details — in 10 languages.
->
-> Plus your listings go live across 10 Balkan countries, so you reach buyers you are currently missing.
->
-> Free to join. Would you be interested?
+> Shall I send you the full details, or would a brief walkthrough be more helpful?
 
 ---
 
-## IG-8: Luxury / High-End Agent
+## IG-7: Pain Point — Time & Efficiency
 
-> Hey {{name}}! Your portfolio is impressive — clearly you work with premium properties.
+> Hi {{name}}, a quick question — how much time does your team spend each week writing and translating listing descriptions?
 >
-> I wanted to reach out because high-end buyers in the Balkans often search across borders. A buyer in Belgrade might be looking for a villa in Montenegro. A buyer in Zagreb might want a coastal property in Albania.
+> In our conversations with agents across the Balkans, the answer is consistently "too much." Hours spent on content creation that could be invested in client relationships and closings.
 >
-> BalkanEstate puts your luxury listings in front of those buyers — 10 countries, 10 languages, with virtual tour integration (Matterport, 360), verified agent badges, and a professional agency page.
+> That is why we built BalkanEstateAI. Our AI analyzes your property photos and generates complete, professional listing content — titles, descriptions, specifications — in 10 languages, instantly.
 >
-> We built it specifically for serious agents in the Balkan market. Free to start.
+> Beyond the time savings, your listings are distributed across 10 Balkan countries, reaching qualified buyers you are currently not accessing.
 >
-> Worth a look?
+> It is free to get started. Would you like to see how it works?
 
 ---
 
-# QUICK REFERENCE — WHICH MESSAGE TO USE
+## IG-8: Luxury & Premium Agent
+
+> Hi {{name}}, your portfolio speaks for itself — you clearly work with exceptional properties and discerning clients.
+>
+> I wanted to reach out because premium real estate in the Balkans increasingly involves cross-border buyers. A qualified buyer in Belgrade may be searching for a villa on the Montenegrin coast. An investor in Zagreb may be looking at emerging opportunities in Albania or Greece.
+>
+> BalkanEstateAI positions your luxury listings in front of these high-intent buyers across 10 Balkan countries, with:
+> — AI-generated professional descriptions in 10 languages
+> — Virtual tour integration (Matterport, 360-degree photography)
+> — Verified agent badge and premium profile
+> — Branded agency page with curated portfolio showcase
+> — Real-time analytics on buyer engagement and market interest
+>
+> The platform was purpose-built for serious professionals in the Balkan market. It is free to get started.
+>
+> Would it be worth a conversation?
+
+---
+
+# QUICK REFERENCE — MESSAGE SELECTION GUIDE
 
 | Scenario | TikTok | Instagram |
 |---|---|---|
-| Cold outreach to individual agent | TT-1 or TT-4 | IG-1 |
-| Cold outreach to agency | TT-2 | IG-2 or IG-6 |
+| Cold outreach — individual agent | TT-1 or TT-4 | IG-1 |
+| Cold outreach — agency | TT-2 | IG-2 or IG-6 |
 | Reacting to their content | TT-3 | IG-3 or IG-5 |
 | After they engage with you first | TT-6 | IG-4 |
-| Agent who seems busy / short attention | TT-4 | IG-7 |
+| Busy agent / concise approach | TT-4 | IG-7 |
 | Luxury / premium agent | TT-5 | IG-8 |
-| FOMO / urgency angle | TT-6 | IG-2 or IG-6 |
+| Early access / urgency | TT-6 | IG-2 or IG-6 |
 
 ---
 
-# FOLLOW-UP MESSAGES (Both Platforms)
+# FOLLOW-UP RESPONSES (Both Platforms)
 
-## If they say "Send the link":
-> Here you go: balkanestate.com/register
->
-> It takes about 3 min. Once you are in, upload a listing and watch the AI do its thing — it is pretty cool.
->
-> Let me know if you have any questions!
+---
 
-## If they say "I will check it out later":
-> No rush at all! Just know that agents joining early are getting the most visibility as we grow.
->
-> I will be here if you have any questions. Good luck with your listings!
+## When they request the link:
 
-## If no reply after 3-5 days:
-> Hey {{name}}! Just following up — did you get a chance to look at BalkanEstate?
+> Thank you for your interest. Here is the registration link: balkanestateai.com/register
 >
-> No pressure at all. Just thought it could help your listings reach more buyers. Let me know if you have any questions!
+> The setup takes approximately 3 minutes. Once you are on the platform, try uploading a property — the AI will generate your listing content instantly, and you will see your property go live across 10 countries.
+>
+> Please do not hesitate to reach out if you have any questions. I am here to help.
 
-## If they ask "What does it cost?":
-> It is free to start — you can list up to 3 properties at no cost. If you want premium features like boosted visibility or unlimited listings, there are paid plans, but most agents start free to test it out.
->
-> Want me to send you the link?
+---
 
-## If they ask "How is this different from other portals?":
-> Great question. Most portals are either global (and treat the Balkans as an afterthought) or local (stuck in one country).
+## When they say they will review it later:
+
+> Of course — no rush at all. I will just mention that agents and agencies joining during this phase are securing the strongest visibility as we scale across the region.
 >
-> BalkanEstate is built ONLY for the Balkans — 10 countries, 10 languages. AI writes your listings automatically. You get analytics, direct messaging with buyers, virtual tours, a verified badge — all in one place.
+> Whenever you are ready, the link is: balkanestateai.com/register
 >
-> Nothing else like it in the region right now.
+> Feel free to reach out anytime if you have questions. Wishing you continued success with your listings.
+
+---
+
+## No reply after 3-5 days:
+
+> Hi {{name}}, I wanted to follow up briefly — did you have a chance to explore BalkanEstateAI?
+>
+> No pressure at all. I genuinely believe the platform could add value to your business by expanding your reach across the Balkan region. Happy to answer any questions if you have them.
+
+---
+
+## When they ask about pricing:
+
+> Great question. BalkanEstateAI is free to get started — you can list properties and access AI-generated content at no cost.
+>
+> For agents and agencies looking for premium features — such as boosted listing visibility, advanced analytics, priority placement, and unlimited listings — we offer professional plans at competitive rates.
+>
+> Most agents start with the free tier to experience the platform firsthand. Would you like me to send you the registration link?
+
+---
+
+## When they ask how BalkanEstateAI differs from other portals:
+
+> That is an excellent question, and it is one we hear often.
+>
+> Most real estate portals fall into two categories: global platforms that treat the Balkans as an afterthought, or local portals that are confined to a single country.
+>
+> BalkanEstateAI is fundamentally different. We are built exclusively for the Balkan market — 10 countries, 10 languages — with AI technology at the core:
+> — AI generates professional listing descriptions from your photos automatically
+> — Properties are distributed across the entire region, not just one market
+> — Real-time analytics show you exactly how your listings are performing
+> — Buyers contact you directly — no platform intermediaries
+> — Verified agent profiles build trust with cross-border buyers
+>
+> There is nothing else like it in the region. We are the only platform purpose-built for Balkan real estate professionals with AI at the center.
+
+---
+
+## When they ask who is behind BalkanEstateAI:
+
+> BalkanEstateAI was founded by a team that understands the Balkan real estate market firsthand. We saw that agents and agencies across the region were underserved by existing technology — limited reach, manual processes, no cross-border visibility.
+>
+> We built the platform to solve those problems using AI and modern technology, so that professionals like you can focus on what you do best — selling properties and building client relationships.
+>
+> You can learn more at balkanestateai.com.
+
+---
+
+# TEMPLATE VARIABLES
+
+| Variable | Description | Example |
+|---|---|---|
+| `{{name}}` | Recipient's first name | Marko, Ana, Dragan |
+| `{{country}}` | Their operating country | Serbia, Croatia, Montenegro |
+| `{{city/country}}` | Their city or country | Belgrade, Podgorica, Zagreb |
+| `{{agency_name}}` | Their agency name | Prime Properties, Adriatic Realty |
+| `{{neighboring_country}}` | A relevant nearby market | Montenegro (if they are in Serbia) |
+
+---
+
+> **Note:** Always personalize each message before sending. Reference specific properties, videos, or content from the recipient's profile when possible. Authenticity drives response rates — the template is a starting point, not a script to copy verbatim.
