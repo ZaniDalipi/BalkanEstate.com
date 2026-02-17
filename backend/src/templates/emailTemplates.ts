@@ -861,6 +861,294 @@ export const getPropertyAlertTemplate = (options: {
   });
 };
 
+/**
+ * Realtor & Agency Invitation Email Template
+ *
+ * Built using the StoryBrand SB7 framework by Donald Miller:
+ * Character (Hero) → Problem → Guide → Plan → CTA → Failure → Success
+ *
+ * The realtor/agency is the HERO. BalkanEstate is the GUIDE.
+ */
+export const getRealtorInvitationTemplate = (options: {
+  recipientName: string;
+  recipientCompany?: string;
+  signupUrl: string;
+  unsubscribeUrl?: string;
+}): string => {
+  const { recipientName, recipientCompany, signupUrl, unsubscribeUrl } = options;
+  const personalGreeting = recipientCompany
+    ? `Dear ${recipientName} at ${recipientCompany},`
+    : `Dear ${recipientName},`;
+
+  const content = `
+    ${getMinimalHeader({ tagline: 'The Balkans\' Premier Real Estate Platform' })}
+
+    <!-- HERO SECTION: 3D house + aspirational hook -->
+    ${getPromoHero({
+      title: 'Your Listings Deserve to Be Seen by Every Buyer in the Balkans',
+      subtitle: 'Join the platform built exclusively for Balkan real estate professionals.',
+      houseStyle: 'villa',
+      badge: 'Exclusive Invitation',
+      badgeColor: '#f59e0b',
+    })}
+
+    <!-- SECTION 1: EMPATHY — Acknowledge the hero's struggle (Internal Problem) -->
+    ${getTextSection({
+      greeting: personalGreeting,
+      paragraphs: [
+        'You became a real estate professional because you are great at what you do — matching people with properties that change their lives. But lately, something feels off.',
+        'You spend hours crafting listings, only to watch them disappear into outdated portals that buyers in neighboring countries never see. You know there are qualified buyers across the border in Montenegro, Serbia, Croatia, Albania, Greece — but reaching them feels impossible. Meanwhile, inquiries are slowing down and competitors with a stronger online presence are closing deals that should have been yours.',
+        '<strong>That frustration is not your fault. The tools you have been given were never built for the way the Balkan market actually works.</strong>',
+      ],
+    })}
+
+    <!-- SECTION 2: THE PROBLEM — External, Internal, Philosophical -->
+    <table role="presentation" cellpadding="0" cellspacing="0" width="100%" style="margin: 8px 0 24px 0;">
+      <tr>
+        <td>
+          <div style="background: linear-gradient(135deg, #eff6ff 0%, #f0fdf4 100%); border-radius: 12px; padding: 28px 24px;">
+            <div style="font-size: 16px; font-weight: 700; color: ${BRAND_COLORS.text}; margin-bottom: 16px;">
+              Here is what we hear from agents every day:
+            </div>
+            <table role="presentation" cellpadding="0" cellspacing="0" width="100%">
+              <tr>
+                <td style="padding: 8px 0; font-size: 14px; color: ${BRAND_COLORS.textMuted}; line-height: 1.6;">
+                  <span style="color: ${BRAND_COLORS.primary}; font-weight: 700; margin-right: 8px;">&bull;</span>
+                  "My listings are only visible in one country — I am missing buyers from the rest of the Balkans."
+                </td>
+              </tr>
+              <tr>
+                <td style="padding: 8px 0; font-size: 14px; color: ${BRAND_COLORS.textMuted}; line-height: 1.6;">
+                  <span style="color: ${BRAND_COLORS.primary}; font-weight: 700; margin-right: 8px;">&bull;</span>
+                  "I waste time writing the same descriptions over and over instead of talking to clients."
+                </td>
+              </tr>
+              <tr>
+                <td style="padding: 8px 0; font-size: 14px; color: ${BRAND_COLORS.textMuted}; line-height: 1.6;">
+                  <span style="color: ${BRAND_COLORS.primary}; font-weight: 700; margin-right: 8px;">&bull;</span>
+                  "I have no idea which listings are performing and which ones need attention."
+                </td>
+              </tr>
+              <tr>
+                <td style="padding: 8px 0; font-size: 14px; color: ${BRAND_COLORS.textMuted}; line-height: 1.6;">
+                  <span style="color: ${BRAND_COLORS.primary}; font-weight: 700; margin-right: 8px;">&bull;</span>
+                  "Language barriers are costing me international clients."
+                </td>
+              </tr>
+            </table>
+            <div style="font-size: 14px; font-weight: 600; color: ${BRAND_COLORS.text}; margin-top: 16px;">
+              If any of this sounds familiar, you are not alone — and there is now a solution.
+            </div>
+          </div>
+        </td>
+      </tr>
+    </table>
+
+    <!-- SECTION 3: THE GUIDE — Empathy + Authority (BalkanEstate positions itself) -->
+    ${getTextSection({
+      paragraphs: [
+        '<strong>We built BalkanEstate specifically to solve this problem.</strong> We understand the Balkan real estate market because that is all we do — 10 countries, 10 languages, one powerful platform. No generic global portal that treats the Balkans as an afterthought. This is your market, and we built the technology to match your ambition.',
+      ],
+    })}
+
+    <!-- SECTION 4: AUTHORITY — Stats that prove credibility -->
+    ${getStatsGrid([
+      { value: '10', label: 'Countries', color: BRAND_COLORS.primary },
+      { value: '10', label: 'Languages', color: '#10b981' },
+      { value: '5x', label: 'More Visibility', color: '#f59e0b' },
+    ])}
+
+    <!-- SECTION 5: THE PLAN — 3 simple steps (Miller's framework) -->
+    <table role="presentation" cellpadding="0" cellspacing="0" width="100%" style="margin: 24px 0;">
+      <tr>
+        <td>
+          <div style="font-size: 18px; font-weight: 700; color: ${BRAND_COLORS.text}; margin-bottom: 20px; text-align: center;">
+            Getting Started Takes 3 Minutes
+          </div>
+
+          <!-- Step 1 -->
+          <table role="presentation" cellpadding="0" cellspacing="0" width="100%" style="margin-bottom: 16px;">
+            <tr>
+              <td style="width: 48px; vertical-align: top;">
+                <div style="width: 40px; height: 40px; background-color: ${BRAND_COLORS.primary}; border-radius: 50%; text-align: center; line-height: 40px; color: #ffffff; font-weight: 700; font-size: 16px;">1</div>
+              </td>
+              <td style="vertical-align: top; padding-left: 12px;">
+                <div style="font-size: 15px; font-weight: 600; color: ${BRAND_COLORS.text}; margin-bottom: 4px;">Create Your Free Profile</div>
+                <div style="font-size: 14px; color: ${BRAND_COLORS.textMuted}; line-height: 1.5;">Sign up, add your photo, license number, and service areas. Your verified agent profile goes live instantly across all 10 countries.</div>
+              </td>
+            </tr>
+          </table>
+
+          <!-- Step 2 -->
+          <table role="presentation" cellpadding="0" cellspacing="0" width="100%" style="margin-bottom: 16px;">
+            <tr>
+              <td style="width: 48px; vertical-align: top;">
+                <div style="width: 40px; height: 40px; background-color: ${BRAND_COLORS.primary}; border-radius: 50%; text-align: center; line-height: 40px; color: #ffffff; font-weight: 700; font-size: 16px;">2</div>
+              </td>
+              <td style="vertical-align: top; padding-left: 12px;">
+                <div style="font-size: 15px; font-weight: 600; color: ${BRAND_COLORS.text}; margin-bottom: 4px;">Upload Your Listings (AI Does the Heavy Lifting)</div>
+                <div style="font-size: 14px; color: ${BRAND_COLORS.textMuted}; line-height: 1.5;">Upload photos and our AI generates titles, descriptions, and property details automatically. What used to take 30 minutes now takes 30 seconds — in all 10 languages.</div>
+              </td>
+            </tr>
+          </table>
+
+          <!-- Step 3 -->
+          <table role="presentation" cellpadding="0" cellspacing="0" width="100%" style="margin-bottom: 16px;">
+            <tr>
+              <td style="width: 48px; vertical-align: top;">
+                <div style="width: 40px; height: 40px; background-color: ${BRAND_COLORS.primary}; border-radius: 50%; text-align: center; line-height: 40px; color: #ffffff; font-weight: 700; font-size: 16px;">3</div>
+              </td>
+              <td style="vertical-align: top; padding-left: 12px;">
+                <div style="font-size: 15px; font-weight: 600; color: ${BRAND_COLORS.text}; margin-bottom: 4px;">Watch the Inquiries Come In</div>
+                <div style="font-size: 14px; color: ${BRAND_COLORS.textMuted}; line-height: 1.5;">Buyers across the Balkans will find your listings, message you directly, and book viewings — all from one dashboard with real-time analytics.</div>
+              </td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+    </table>
+
+    <!-- SECTION 6: SUCCESS — Paint the picture of transformation -->
+    <table role="presentation" cellpadding="0" cellspacing="0" width="100%" style="margin: 8px 0 24px 0;">
+      <tr>
+        <td>
+          <div style="background-color: #eff6ff; border-radius: 12px; padding: 28px 24px; border-left: 4px solid ${BRAND_COLORS.primary};">
+            <div style="font-size: 16px; font-weight: 700; color: ${BRAND_COLORS.text}; margin-bottom: 16px;">
+              Imagine This Within Your First Month
+            </div>
+            <table role="presentation" cellpadding="0" cellspacing="0" width="100%">
+              <tr>
+                <td style="padding: 6px 0; font-size: 14px; color: ${BRAND_COLORS.text}; line-height: 1.6;">
+                  <span style="color: #10b981; margin-right: 8px;">&#10003;</span>
+                  Your properties are visible to buyers in <strong>10 countries</strong> simultaneously
+                </td>
+              </tr>
+              <tr>
+                <td style="padding: 6px 0; font-size: 14px; color: ${BRAND_COLORS.text}; line-height: 1.6;">
+                  <span style="color: #10b981; margin-right: 8px;">&#10003;</span>
+                  You create listings in <strong>seconds with AI</strong> instead of spending hours writing descriptions
+                </td>
+              </tr>
+              <tr>
+                <td style="padding: 6px 0; font-size: 14px; color: ${BRAND_COLORS.text}; line-height: 1.6;">
+                  <span style="color: #10b981; margin-right: 8px;">&#10003;</span>
+                  Your <strong>analytics dashboard</strong> shows exactly which listings perform and when buyers are most active
+                </td>
+              </tr>
+              <tr>
+                <td style="padding: 6px 0; font-size: 14px; color: ${BRAND_COLORS.text}; line-height: 1.6;">
+                  <span style="color: #10b981; margin-right: 8px;">&#10003;</span>
+                  International buyers message you directly — <strong>no language barriers</strong>, no middlemen
+                </td>
+              </tr>
+              <tr>
+                <td style="padding: 6px 0; font-size: 14px; color: ${BRAND_COLORS.text}; line-height: 1.6;">
+                  <span style="color: #10b981; margin-right: 8px;">&#10003;</span>
+                  Your agency has its own <strong>branded page</strong> with your full team and featured listings
+                </td>
+              </tr>
+              <tr>
+                <td style="padding: 6px 0; font-size: 14px; color: ${BRAND_COLORS.text}; line-height: 1.6;">
+                  <span style="color: #10b981; margin-right: 8px;">&#10003;</span>
+                  You close more deals because your listings have <strong>virtual tours, videos, and 360&deg; views</strong>
+                </td>
+              </tr>
+            </table>
+          </div>
+        </td>
+      </tr>
+    </table>
+
+    <!-- SECTION 7: FAILURE — What is at stake if they do not act -->
+    ${getTextSection({
+      paragraphs: [
+        'The truth is, the Balkan real estate market is going digital fast. Agents who are not visible online — across borders and across languages — will lose ground to those who are. Every day without a strong digital presence is a day where buyers who would have chosen you are choosing someone else.',
+        '<strong>You do not have to let that happen.</strong>',
+      ],
+    })}
+
+    <!-- SECTION 8: WHAT YOU GET — Concrete features that support the transformation -->
+    <table role="presentation" cellpadding="0" cellspacing="0" width="100%" style="margin: 8px 0 24px 0;">
+      <tr>
+        <td>
+          <div style="font-size: 16px; font-weight: 700; color: ${BRAND_COLORS.text}; margin-bottom: 16px;">
+            Everything You Need to Grow — All in One Place
+          </div>
+          <table role="presentation" cellpadding="0" cellspacing="0" width="100%">
+            <tr>
+              <td style="width: 50%; vertical-align: top; padding-right: 8px;" class="stack-cell">
+                <div style="padding: 6px 0; font-size: 13px; color: ${BRAND_COLORS.textMuted}; line-height: 1.6;">
+                  <strong style="color: ${BRAND_COLORS.text};">AI Listing Generator</strong><br/>Upload photos, get instant listings in 10 languages
+                </div>
+                <div style="padding: 6px 0; font-size: 13px; color: ${BRAND_COLORS.textMuted}; line-height: 1.6;">
+                  <strong style="color: ${BRAND_COLORS.text};">Performance Analytics</strong><br/>Views, inquiries, heatmaps, and device breakdowns
+                </div>
+                <div style="padding: 6px 0; font-size: 13px; color: ${BRAND_COLORS.textMuted}; line-height: 1.6;">
+                  <strong style="color: ${BRAND_COLORS.text};">Direct Messaging</strong><br/>Real-time chat with buyers, no middlemen
+                </div>
+                <div style="padding: 6px 0; font-size: 13px; color: ${BRAND_COLORS.textMuted}; line-height: 1.6;">
+                  <strong style="color: ${BRAND_COLORS.text};">Verified Agent Badge</strong><br/>Build instant trust with a verified profile
+                </div>
+              </td>
+              <td style="width: 50%; vertical-align: top; padding-left: 8px;" class="stack-cell">
+                <div style="padding: 6px 0; font-size: 13px; color: ${BRAND_COLORS.textMuted}; line-height: 1.6;">
+                  <strong style="color: ${BRAND_COLORS.text};">360&deg; Virtual Tours</strong><br/>Matterport, Kuula, and video integration built in
+                </div>
+                <div style="padding: 6px 0; font-size: 13px; color: ${BRAND_COLORS.textMuted}; line-height: 1.6;">
+                  <strong style="color: ${BRAND_COLORS.text};">Agency Branding Page</strong><br/>Showcase your team, logo, and featured listings
+                </div>
+                <div style="padding: 6px 0; font-size: 13px; color: ${BRAND_COLORS.textMuted}; line-height: 1.6;">
+                  <strong style="color: ${BRAND_COLORS.text};">Market Insights &amp; Valuation</strong><br/>AI-powered pricing and market trend data
+                </div>
+                <div style="padding: 6px 0; font-size: 13px; color: ${BRAND_COLORS.textMuted}; line-height: 1.6;">
+                  <strong style="color: ${BRAND_COLORS.text};">Featured Promotions</strong><br/>Boost visibility up to 5x with premium placement
+                </div>
+              </td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+    </table>
+
+    <!-- SECTION 9: DIRECT CTA — Clear, unambiguous call to action -->
+    <table role="presentation" cellpadding="0" cellspacing="0" width="100%" style="margin: 16px 0;">
+      <tr>
+        <td align="center" style="padding: 32px 24px; background: linear-gradient(135deg, ${BRAND_COLORS.primary} 0%, #0369a1 100%); border-radius: 12px;">
+          <div style="font-size: 20px; font-weight: 700; color: #ffffff; margin-bottom: 8px;">
+            Ready to Grow Your Business Across the Balkans?
+          </div>
+          <div style="font-size: 14px; color: #bfdbfe; margin-bottom: 24px;">
+            Start free. No credit card required. List up to 3 properties instantly.
+          </div>
+          <a href="${signupUrl}" target="_blank" style="display: inline-block; background-color: #ffffff; color: ${BRAND_COLORS.primary}; text-decoration: none; font-size: 16px; font-weight: 700; padding: 16px 40px; border-radius: 8px;">
+            Create Your Free Account
+          </a>
+        </td>
+      </tr>
+    </table>
+
+    <!-- SECTION 10: P.S. — Personal touch and urgency -->
+    ${getTextSection({
+      paragraphs: [
+        '<strong>P.S.</strong> — The agents and agencies joining now are the ones who will own their markets online. Early members get the most visibility as we grow across the region. Do not wait until your competitors discover this first.',
+        'If you have questions, simply reply to this email. A real person from our team will get back to you personally.',
+        'To your success,<br/><strong>The BalkanEstate Team</strong>',
+      ],
+    })}
+
+    ${getMinimalFooter({
+      unsubscribeUrl,
+      reason: "You received this email because you are a real estate professional in the Balkans. If this does not apply to you, we apologize for the inconvenience.",
+      showSocial: true,
+    })}
+  `;
+
+  return getBaseTemplate({
+    content: getCardContainer(content, { maxWidth: 600, padding: '48px 40px' }),
+    preheader: 'Your listings deserve to be seen by every buyer in the Balkans. Join the platform built for Balkan real estate professionals.',
+  });
+};
+
 export default {
   get3DHouseGraphic,
   getBaseTemplate,
@@ -876,5 +1164,6 @@ export default {
   getTransactionalTemplate,
   getReportTemplate,
   getPropertyAlertTemplate,
+  getRealtorInvitationTemplate,
   BRAND_COLORS,
 };

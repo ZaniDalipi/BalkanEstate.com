@@ -1,7 +1,7 @@
 import nodemailer from 'nodemailer';
 import { Resend } from 'resend';
 import User from '../models/User';
-import { getPromoTemplate, BRAND_COLORS } from '../templates/emailTemplates';
+import { getPromoTemplate, getRealtorInvitationTemplate, BRAND_COLORS } from '../templates/emailTemplates';
 import { emailLogger } from '../utils/logger';
 
 // =============================================================================
@@ -3401,6 +3401,44 @@ Questions? Contact us at support@balkanestateai.com
       category: 'inquiries',
     });
   }
+
+  /**
+   * Send a realtor/agency invitation email
+   * Uses StoryBrand SB7 framework: Hero → Problem → Guide → Plan → CTA → Failure → Success
+   */
+  async sendRealtorInvitation(params: {
+    recipientEmail: string;
+    recipientName: string;
+    recipientCompany?: string;
+  }): Promise<void> {
+    const frontendUrl = process.env.FRONTEND_URL || 'https://balkanestate.com';
+    const signupUrl = `${frontendUrl}/register?ref=invitation&role=agent`;
+
+    const unsubscribeInfo = await this.getUnsubscribeInfo(params.recipientEmail, 'marketing');
+    if (!unsubscribeInfo.canSend) {
+      emailLogger.info(`⏭️ Skipping realtor invitation to ${params.recipientEmail} (opted out of marketing)`);
+      return;
+    }
+
+    const unsubscribeUrl = unsubscribeInfo.token
+      ? `${frontendUrl}/unsubscribe?token=${unsubscribeInfo.token}&type=marketing`
+      : undefined;
+
+    const html = getRealtorInvitationTemplate({
+      recipientName: escapeHtml(params.recipientName),
+      recipientCompany: params.recipientCompany ? escapeHtml(params.recipientCompany) : undefined,
+      signupUrl: sanitizeUrlForHtml(signupUrl),
+      unsubscribeUrl: unsubscribeUrl ? sanitizeUrlForHtml(unsubscribeUrl) : undefined,
+    });
+
+    await this.sendEmail({
+      to: params.recipientEmail,
+      subject: 'Your Listings Deserve to Be Seen by Every Buyer in the Balkans',
+      html,
+      text: `${params.recipientCompany ? `Dear ${params.recipientName} at ${params.recipientCompany},` : `Dear ${params.recipientName},`}\n\nYou became a real estate professional because you are great at what you do — matching people with properties that change their lives. But the tools you have been given were never built for the way the Balkan market actually works.\n\nWe built BalkanEstate specifically to solve this problem — 10 countries, 10 languages, one powerful platform.\n\nGetting started takes 3 minutes:\n1. Create your free profile — your verified agent profile goes live instantly across all 10 countries.\n2. Upload your listings — our AI generates titles, descriptions, and details automatically in all 10 languages.\n3. Watch the inquiries come in — buyers message you directly from one dashboard with real-time analytics.\n\nWhat you get:\n- AI-powered listing generator\n- Performance analytics (views, inquiries, heatmaps)\n- Direct messaging with buyers\n- Verified agent badge\n- 360° virtual tours and video integration\n- Agency branding page\n- AI market insights and property valuation\n- Featured promotions with up to 5x visibility\n\nStart free. No credit card required. List up to 3 properties instantly.\n\nCreate your free account: ${frontendUrl}/register?ref=invitation&role=agent\n\nP.S. — The agents joining now are the ones who will own their markets online. Do not wait until your competitors discover this first.\n\nTo your success,\nThe BalkanEstate Team\n\n© ${new Date().getFullYear()} BalkanEstate`,
+      category: 'noreply',
+    });
+  }
 }
 
 const emailServiceInstance = new EmailService();
@@ -3428,3 +3466,4 @@ export const sendViewingConfirmation = emailServiceInstance.sendViewingConfirmat
 export const sendViewingNotification = emailServiceInstance.sendViewingNotification.bind(emailServiceInstance);
 export const sendViewingApproved = emailServiceInstance.sendViewingApproved.bind(emailServiceInstance);
 export const sendViewingRejected = emailServiceInstance.sendViewingRejected.bind(emailServiceInstance);
+export const sendRealtorInvitation = emailServiceInstance.sendRealtorInvitation.bind(emailServiceInstance);
