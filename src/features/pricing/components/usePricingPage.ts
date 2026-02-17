@@ -199,6 +199,41 @@ export function usePricingPage() {
       return;
     }
 
+    // Role-based plan access: sellers/agents get seller plans, buyers get buyer plans, enterprise requires agent
+    const userRole = state.currentUser.role;
+    const isBuyerPlan = product.productId.toLowerCase().includes('buyer');
+    const isSellerPlan = !isBuyerPlan; // monthly, yearly, enterprise are all seller-track plans
+
+    if (isBuyerPlan && userRole !== UserRole.BUYER) {
+      dispatch({
+        type: 'SHOW_ALERT',
+        payload: {
+          type: 'info',
+          title: t('pricing:role.buyerPlanOnly', 'Buyer Plan'),
+          message: t(
+            'pricing:role.buyerPlanOnlyMessage',
+            'This plan is for buyers. Please switch to a Buyer account in your profile settings to subscribe.'
+          ),
+        },
+      });
+      return;
+    }
+
+    if (isSellerPlan && userRole === UserRole.BUYER) {
+      dispatch({
+        type: 'SHOW_ALERT',
+        payload: {
+          type: 'info',
+          title: t('pricing:role.sellerPlanOnly', 'Seller Plan'),
+          message: t(
+            'pricing:role.sellerPlanOnlyMessage',
+            'This plan is for sellers and agents. Please switch to a Private Seller or Agent account in your profile settings to subscribe.'
+          ),
+        },
+      });
+      return;
+    }
+
     // Enforce upgrade path: monthly → yearly → enterprise (no downgrades or same-tier)
     const targetLevel = getProductPlanLevel(product.productId);
     if (targetLevel > 0) {
