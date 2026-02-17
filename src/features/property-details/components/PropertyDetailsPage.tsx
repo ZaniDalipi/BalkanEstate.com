@@ -437,6 +437,7 @@ const PropertyDetailsPage: React.FC<{ property: Property }> = ({ property: cache
         type="product"
         property={{
           price: property.price,
+          originalPrice: property.originalPrice,
           currency: 'EUR',
           bedrooms: property.beds,
           bathrooms: property.baths,

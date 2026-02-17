@@ -7,6 +7,8 @@ import { useCreateValuation } from '../hooks/useValuation';
 import type { ValuationInput, PropertyValuation } from '../types';
 import { SparklesIcon } from '@/constants';
 import Footer from '@/components/shared/Footer';
+import { SEO } from '@/src/components/seo';
+import { Helmet } from 'react-helmet-async';
 
 const ValuationPage: React.FC = () => {
   const { t } = useTranslation(['valuation', 'common']);
@@ -32,6 +34,50 @@ const ValuationPage: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-neutral-50 via-white to-neutral-50">
+      {/* SEO Meta Tags */}
+      <SEO
+        title="Free AI Property Valuation - Instant Balkan Property Estimate"
+        description="Get a free AI-powered property valuation for any Balkan property. Instant price estimates for apartments, houses, and villas in Montenegro, Albania, Serbia, and 8 more countries."
+        canonical={`${typeof window !== 'undefined' ? window.location.origin : ''}/valuation`}
+        type="website"
+      />
+
+      {/* Service Schema for rich snippets */}
+      <Helmet>
+        <script type="application/ld+json">
+          {JSON.stringify({
+            '@context': 'https://schema.org',
+            '@type': 'Service',
+            name: 'AI Property Valuation',
+            description: 'Free AI-powered property valuation for Balkan real estate. Get instant price estimates based on comparable sales, location data, and market trends.',
+            provider: {
+              '@type': 'Organization',
+              name: 'BalkanEstateAI',
+              url: typeof window !== 'undefined' ? window.location.origin : 'https://balkanestateai.com',
+            },
+            serviceType: 'Property Valuation',
+            areaServed: [
+              { '@type': 'Country', name: 'Montenegro' },
+              { '@type': 'Country', name: 'Albania' },
+              { '@type': 'Country', name: 'Serbia' },
+              { '@type': 'Country', name: 'Kosovo' },
+              { '@type': 'Country', name: 'North Macedonia' },
+              { '@type': 'Country', name: 'Croatia' },
+              { '@type': 'Country', name: 'Bosnia and Herzegovina' },
+              { '@type': 'Country', name: 'Bulgaria' },
+              { '@type': 'Country', name: 'Romania' },
+              { '@type': 'Country', name: 'Greece' },
+            ],
+            offers: {
+              '@type': 'Offer',
+              price: '0',
+              priceCurrency: 'EUR',
+              description: 'Free property valuation',
+            },
+          })}
+        </script>
+      </Helmet>
+
       {/* Hero Section */}
       <div className="relative overflow-hidden">
         {/* Background Pattern */}

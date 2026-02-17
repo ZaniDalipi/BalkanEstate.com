@@ -6,6 +6,7 @@ import { MapPinIcon, ArrowTrendingUpIcon, ArrowTrendingDownIcon, ChartBarIcon, C
 import { useAppContext } from '@/context/AppContext';
 import Footer from '@/components/shared/Footer';
 import { SEO } from '@/src/components/seo';
+import { Helmet } from 'react-helmet-async';
 import { getCityImageUrl, getCityFallbackGradient } from '@/config/cloudinaryConfig';
 import { BALKAN_LOCATIONS } from '@/utils/balkanLocations';
 import ExploreCitiesHeroBanner from '@/components/shared/ExploreCitiesHeroBanner';
@@ -277,11 +278,32 @@ const CityRecommendations: React.FC = () => {
     <div className="min-h-screen bg-gray-50 relative">
       {/* SEO Meta Tags */}
       <SEO
-        title={t('page.title')}
-        description={t('hero.subtitle', { count: cities.length })}
+        title="Explore Balkan Cities - Property Markets, Prices & City Guides"
+        description={`Explore ${cities.length}+ cities across ${countries.length} Balkan countries. Compare property prices, rental yields, and market trends in Tirana, Budva, Belgrade, Skopje, and more.`}
         canonical={`${typeof window !== 'undefined' ? window.location.origin : ''}/explore-cities`}
         type="website"
       />
+
+      {/* ItemList schema for city guides */}
+      {filteredCities.length > 0 && (
+        <Helmet>
+          <script type="application/ld+json">
+            {JSON.stringify({
+              '@context': 'https://schema.org',
+              '@type': 'ItemList',
+              name: 'Balkan Cities Property Guide',
+              description: `Property market data for ${filteredCities.length} cities across the Balkans`,
+              numberOfItems: filteredCities.length,
+              itemListElement: filteredCities.slice(0, 15).map((city: CityMarketData, i: number) => ({
+                '@type': 'ListItem',
+                position: i + 1,
+                url: `${typeof window !== 'undefined' ? window.location.origin : ''}/search?city=${encodeURIComponent(city.city)}&country=${encodeURIComponent(city.country)}`,
+                name: `${city.city}, ${city.country} - Property Market`,
+              })),
+            })}
+          </script>
+        </Helmet>
+      )}
 
       {/* New Hero Banner */}
       <ExploreCitiesHeroBanner

@@ -11,6 +11,7 @@ interface SEOProps {
   // Property-specific fields for rich snippets
   property?: {
     price?: number;
+    originalPrice?: number;
     currency?: string;
     bedrooms?: number;
     bathrooms?: number;
@@ -233,14 +234,22 @@ function generatePropertySchema(
       }
     }),
 
-    // Price
+    // Price with optional PriceSpecification for price drops
     ...(property.price && {
       offers: {
         '@type': 'Offer',
         price: property.price,
         priceCurrency: property.currency || 'EUR',
         availability: 'https://schema.org/InStock',
-        url: url
+        url: url,
+        // If price was reduced, include original price for price drop rich results
+        ...(property.originalPrice && property.originalPrice > property.price && {
+          priceSpecification: {
+            '@type': 'PriceSpecification',
+            price: property.price,
+            priceCurrency: property.currency || 'EUR',
+          },
+        }),
       }
     }),
 

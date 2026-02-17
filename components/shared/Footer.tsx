@@ -58,6 +58,13 @@ const Footer: React.FC<FooterProps> = ({ className = '', contained = false }) =>
         window.scrollTo({ top: 0, behavior: 'smooth' });
     };
 
+    const handleCountrySearch = (countryName: string) => {
+        dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'search' });
+        dispatch({ type: 'UPDATE_SEARCH_PAGE_STATE', payload: { filters: { country: countryName } } });
+        window.history.pushState({}, '', getLocalizedPath(`/search?country=${encodeURIComponent(countryName)}`));
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    };
+
     const buyerLinks = [
         { icon: SearchIcon, labelKey: 'links.searchProperties', view: 'search' },
         { icon: SparklesIcon, labelKey: 'links.exploreCities', view: 'explore-cities' },
@@ -66,9 +73,13 @@ const Footer: React.FC<FooterProps> = ({ className = '', contained = false }) =>
         { icon: UserGroupIcon, labelKey: 'links.findAgents', view: 'agents' },
     ];
 
+    const toolsLinks = [
+        { icon: ChartBarIcon, labelKey: 'links.valuation', view: 'valuation' },
+        { icon: BuildingLibraryIcon, labelKey: 'links.browseAgencies', view: 'agencies' },
+    ];
+
     const sellerLinks = [
         { icon: BuildingOfficeIcon, labelKey: 'links.listProperty', view: 'create-listing' },
-        { icon: BuildingLibraryIcon, labelKey: 'links.browseAgencies', view: 'agencies' },
         { icon: ChartBarIcon, labelKey: 'links.analytics', view: 'account' },
         { icon: InboxIcon, labelKey: 'links.messages', view: 'inbox' },
         { icon: UserCircleIcon, labelKey: 'links.myAccount', view: 'account' }
@@ -186,8 +197,29 @@ const Footer: React.FC<FooterProps> = ({ className = '', contained = false }) =>
                         </ul>
                     </div>
 
+                    {/* Tools & Resources - crawlable internal links for SEO */}
+                    <div className="lg:col-span-2">
+                        <h3 className="text-sm font-semibold text-white mb-3 sm:mb-4 flex items-center gap-2">
+                            <span className="w-8 h-0.5 bg-gradient-to-r from-amber-500 to-orange-500 rounded-full" />
+                            {t('footer:sections.tools', 'Tools')}
+                        </h3>
+                        <ul className="space-y-2 sm:space-y-3">
+                            {toolsLinks.map(({ icon: Icon, labelKey, view }) => (
+                                <li key={labelKey}>
+                                    <button
+                                        onClick={() => handleNavigation(view as any)}
+                                        className="group flex items-center gap-2 sm:gap-2.5 text-slate-400 hover:text-white transition-all duration-200 text-left w-full"
+                                    >
+                                        <Icon className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-amber-500/70 group-hover:text-amber-500 transition-colors flex-shrink-0" />
+                                        <span className="text-xs sm:text-sm group-hover:translate-x-1 transition-transform duration-200">{t(`footer:${labelKey}`, labelKey.split('.')[1])}</span>
+                                    </button>
+                                </li>
+                            ))}
+                        </ul>
+                    </div>
+
                     {/* Contact & Countries */}
-                    <div className="sm:col-span-2 lg:col-span-4">
+                    <div className="sm:col-span-2 lg:col-span-2">
                         <h3 className="text-sm font-semibold text-white mb-3 sm:mb-4 flex items-center gap-2">
                             <span className="w-8 h-0.5 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full" />
                             {t('footer:sections.contact', 'Get In Touch')}
@@ -221,14 +253,16 @@ const Footer: React.FC<FooterProps> = ({ className = '', contained = false }) =>
                             </h4>
                             <div className="grid grid-cols-5 sm:flex sm:flex-wrap gap-1.5 sm:gap-2">
                                 {balkanCountries.map((country) => (
-                                    <span
+                                    <button
                                         key={country.code}
-                                        className="inline-flex items-center justify-center sm:justify-start gap-1 bg-slate-700/50 hover:bg-slate-700 px-1.5 sm:px-2 py-1 rounded-md text-[10px] sm:text-xs text-slate-400 hover:text-white transition-colors cursor-default"
-                                        title={country.name}
+                                        onClick={() => handleCountrySearch(country.name)}
+                                        className="inline-flex items-center justify-center sm:justify-start gap-1 bg-slate-700/50 hover:bg-slate-700 px-1.5 sm:px-2 py-1 rounded-md text-[10px] sm:text-xs text-slate-400 hover:text-white transition-colors cursor-pointer"
+                                        title={`Property for sale in ${country.name}`}
+                                        aria-label={`Browse properties in ${country.name}`}
                                     >
                                         <span className="text-sm sm:text-base">{country.flag}</span>
                                         <span className="hidden sm:inline">{country.code}</span>
-                                    </span>
+                                    </button>
                                 ))}
                             </div>
                         </div>

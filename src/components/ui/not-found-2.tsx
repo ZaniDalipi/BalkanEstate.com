@@ -1,4 +1,5 @@
 "use client";
+import { Helmet } from 'react-helmet-async';
 import { buildLocalizedPath } from '../../utils/languageRouting';
 
 export function NotFound() {
@@ -6,6 +7,11 @@ export function NotFound() {
 
 	return (
 		<section className="bg-white font-serif min-h-screen flex items-center justify-center">
+			<Helmet>
+				<title>Page Not Found | BalkanEstateAI</title>
+				<meta name="robots" content="noindex, nofollow" />
+				<meta name="description" content="The page you are looking for is not available. Return to BalkanEstateAI to find properties for sale across the Balkans." />
+			</Helmet>
 			<div className="container mx-auto">
 				<div className="flex justify-center">
 					<div className="w-full sm:w-10/12 md:w-8/12 text-center">
