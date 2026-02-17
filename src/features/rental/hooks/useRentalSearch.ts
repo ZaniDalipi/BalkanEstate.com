@@ -154,6 +154,17 @@ export function useRentalSearch() {
         }
     }, []);
 
+    // Close suggestions when clicking outside the search wrapper
+    useEffect(() => {
+        const handleClickOutside = (event: MouseEvent) => {
+            if (searchWrapperRef.current && !searchWrapperRef.current.contains(event.target as Node)) {
+                setIsQueryInputFocused(false);
+            }
+        };
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => document.removeEventListener('mousedown', handleClickOutside);
+    }, []);
+
     // Handle focusing map on a specific property (e.g., from property details "View on Map")
     const focusMapOnProperty = state.searchPageState.focusMapOnProperty;
     useEffect(() => {
@@ -208,7 +219,13 @@ export function useRentalSearch() {
 
     const listProperties = baseFilteredProperties;
 
-    // Handlers
+    // --- Handlers ---
+
+    // Toast - matches buy page pattern (Toast component handles auto-dismiss via onClose)
+    const showToast = useCallback((message: string, type: 'success' | 'error') => {
+        setToast({ show: true, message, type });
+    }, []);
+
     const handleFilterChange = useCallback((key: keyof Filters, value: any) => {
         setFilters(prev => ({ ...prev, [key]: value }));
     }, []);
@@ -219,14 +236,17 @@ export function useRentalSearch() {
 
     const handleResetFilters = useCallback(() => {
         setFilters({ ...initialFilters, listingType: 'rent' });
+        setDrawnBoundsJSON(null);
+        setFlyToTarget({ center: [42.5, 20.5], zoom: 6 });
     }, []);
 
     const handleSortChange = useCallback((sortBy: string) => {
         setFilters(prev => ({ ...prev, sortBy }));
     }, []);
 
-    const handleMapMove = useCallback((bounds: L.LatLngBounds) => {
-        setMapBoundsJSON(serializeBounds(bounds));
+    // Matches MapComponentProps signature: (bounds: L.LatLngBounds, center: L.LatLng) => void
+    const handleMapMove = useCallback((_bounds: L.LatLngBounds, _center?: L.LatLng) => {
+        setMapBoundsJSON(serializeBounds(_bounds));
     }, []);
 
     const toggleDrawing = useCallback(() => {
@@ -240,22 +260,28 @@ export function useRentalSearch() {
 
     const handleDrawComplete = useCallback((bounds: L.LatLngBounds | null) => {
         setDrawnBoundsJSON(bounds ? serializeBounds(bounds) : null);
+        // Clear query when area is drawn (matches buy page behavior)
+        if (bounds) {
+            setFilters(prev => ({ ...prev, query: '' }));
+        }
         setIsDrawing(false);
     }, []);
 
     const handleRecenterOnUser = useCallback(() => {
         if (userLocation) {
-            setFlyToTarget({ center: userLocation, zoom: 13 });
+            setFlyToTarget({ center: userLocation, zoom: 14 });
+        } else {
+            showToast(t('search:map.locationUnavailable', 'Your location is not available.'), 'error');
         }
-    }, [userLocation]);
+    }, [userLocation, showToast, t]);
+
+    // Reset map view to show the full Balkans region
+    const handleResetView = useCallback(() => {
+        setFlyToTarget({ center: [42.5, 20.5], zoom: 6 });
+    }, []);
 
     const onFlyComplete = useCallback(() => {
         setFlyToTarget(null);
-    }, []);
-
-    const showToast = useCallback((message: string, type: 'success' | 'error') => {
-        setToast({ show: true, message, type });
-        setTimeout(() => setToast({ show: false, message: '', type: 'success' }), 3000);
     }, []);
 
     const isFormSearchActive = useMemo(() => {
@@ -267,6 +293,9 @@ export function useRentalSearch() {
             dispatch({ type: 'TOGGLE_AUTH_MODAL', payload: { isOpen: true, view: 'signup' } });
             return;
         }
+
+        if (isSaving) return; // Prevent double-clicks
+
         setIsSaving(true);
         try {
             let newSearch: SavedSearch;
@@ -274,7 +303,7 @@ export function useRentalSearch() {
             // Always set listingType to 'rent' for rental saved searches
             const rentalFilters = { ...(isAreaOnly ? initialFilters : filters), listingType: 'rent' as const };
 
-            if (drawnBounds) {
+            if (drawnBounds) { // Priority 1: A user-drawn area
                 const center = drawnBounds.getCenter();
                 const name = await generateSearchNameFromCoords(center.lat, center.lng, drawnBounds);
                 const serializedBounds = serializeBounds(drawnBounds);
@@ -287,7 +316,7 @@ export function useRentalSearch() {
                     lastAccessed: now,
                     seenPropertyIds: [],
                 };
-            } else if (isFormSearchActive) {
+            } else if (isFormSearchActive) { // Priority 2: Active text/form filters
                 const name = await generateSearchName(rentalFilters);
                 newSearch = {
                     id: `ss-${now}`,
@@ -298,7 +327,7 @@ export function useRentalSearch() {
                     lastAccessed: now,
                     seenPropertyIds: [],
                 };
-            } else if (mapBounds) {
+            } else if (mapBounds) { // Priority 3: The current map view
                 const center = mapBounds.getCenter();
                 const name = await generateSearchNameFromCoords(center.lat, center.lng, mapBounds);
                 newSearch = {
@@ -311,19 +340,20 @@ export function useRentalSearch() {
                     seenPropertyIds: [],
                 };
             } else {
-                showToast("Cannot save an empty search. Please add some criteria or move to an area on the map.", 'error');
+                showToast(t('search:savedSearch.emptyError', 'Cannot save an empty search. Please add some criteria or move to an area on the map.'), 'error');
                 setIsSaving(false);
                 return;
             }
 
             await addSavedSearch(newSearch);
-            showToast("Search saved successfully!", 'success');
-        } catch (e) {
-            showToast("Could not save search. AI might be busy.", 'error');
+            showToast(t('search:savedSearch.saveSuccess', 'Search saved successfully!'), 'success');
+        } catch (e: any) {
+            const message = e?.message || t('search:savedSearch.saveError', 'Could not save search. Please try again.');
+            showToast(message, 'error');
         } finally {
             setIsSaving(false);
         }
-    }, [isAuthenticated, dispatch, addSavedSearch, filters, isFormSearchActive, showToast, drawnBounds, mapBounds]);
+    }, [isAuthenticated, isSaving, dispatch, addSavedSearch, filters, isFormSearchActive, showToast, drawnBounds, mapBounds, t]);
 
     const handleSaveSearchArea = useCallback(() => handleSaveSearch(true), [handleSaveSearch]);
 
@@ -331,10 +361,13 @@ export function useRentalSearch() {
     const handleSuggestionClick = useCallback((suggestion: NominatimResult) => {
         const lat = parseFloat(suggestion.lat);
         const lng = parseFloat(suggestion.lon);
-        const displayName = suggestion.display_name.split(',')[0];
+        if (isNaN(lat) || isNaN(lng)) return; // Validate coordinates
+
+        const displayName = suggestion.display_name.split(',').slice(0, 2).join(',').trim();
         setFilters(prev => ({ ...prev, query: displayName }));
         setSuggestions([]);
-        setFlyToTarget({ center: [lat, lng], zoom: 13 });
+        setDrawnBoundsJSON(null); // Clear drawn bounds when searching a location
+        setFlyToTarget({ center: [lat, lng], zoom: 12 });
         setIsQueryInputFocused(false);
     }, []);
 
@@ -354,7 +387,7 @@ export function useRentalSearch() {
             } finally {
                 setIsSearchingLocation(false);
             }
-        }, 300);
+        }, 500); // Match buy page debounce (500ms)
         return () => { if (debounceTimer.current) clearTimeout(debounceTimer.current); };
     }, [filters.query, isQueryInputFocused]);
 
@@ -397,9 +430,11 @@ export function useRentalSearch() {
         handleSortChange,
         handleMapMove,
         handleRecenterOnUser,
+        handleResetView,
         onFlyComplete,
         fetchRentals,
         isSaving,
         handleSaveSearchArea,
+        showToast,
     };
 }

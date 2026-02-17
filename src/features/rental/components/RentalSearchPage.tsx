@@ -5,6 +5,7 @@ import PropertyCard from '@/src/features/property-details/components/PropertyCar
 import PropertyCardSkeleton from '@/src/features/property-details/components/PropertyCardSkeleton';
 import HighlightedPropertiesSection from '@/src/features/property-details/components/HighlightedPropertiesSection';
 import RentalFilters from './RentalFilters';
+import Toast from '@/components/shared/Toast';
 import { useRentalSearch } from '../hooks/useRentalSearch';
 import { Squares2x2Icon, MapIcon, AdjustmentsHorizontalIcon, XMarkIcon, MagnifyingGlassIcon, Bars3Icon } from '@/constants';
 import DefaultAvatar from '@/components/shared/DefaultAvatar';
@@ -51,6 +52,7 @@ const RentalSearchPage: React.FC<RentalSearchPageProps> = ({ onToggleSidebar }) 
         handleSortChange,
         handleMapMove,
         handleRecenterOnUser,
+        handleResetView,
         onFlyComplete,
         // City search
         suggestions,
@@ -62,6 +64,9 @@ const RentalSearchPage: React.FC<RentalSearchPageProps> = ({ onToggleSidebar }) 
         // Save search
         isSaving,
         handleSaveSearchArea,
+        // Toast
+        toast,
+        setToast,
     } = useRentalSearch();
 
     const [isFiltersOpen, setIsFiltersOpen] = React.useState(false);
@@ -84,6 +89,7 @@ const RentalSearchPage: React.FC<RentalSearchPageProps> = ({ onToggleSidebar }) 
         flyToTarget,
         onFlyComplete,
         onRecenter: handleRecenterOnUser,
+        onResetView: handleResetView,
         isMobile,
         searchMode: 'manual' as const,
         hoveredPropertyId,
@@ -103,6 +109,8 @@ const RentalSearchPage: React.FC<RentalSearchPageProps> = ({ onToggleSidebar }) 
                 canonical={`${window.location.origin}/rentals`}
                 type="website"
             />
+
+            <Toast show={toast.show} message={toast.message} type={toast.type} onClose={() => setToast({ ...toast, show: false })} />
 
             {/* Dark gradient background for the left panel */}
             <div className="absolute inset-0 z-0" style={{ background: 'linear-gradient(135deg, #f8f9fc 0%, #eef1f8 50%, #f0f4fa 100%)' }} />
