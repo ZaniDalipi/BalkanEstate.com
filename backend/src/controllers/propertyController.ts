@@ -141,6 +141,51 @@ export const getProperties = async (
       filter.listingType = req.query.listingType;
     }
 
+    // Filter by max days listed (e.g., last 24h, 3 days, 7 days, 30 days)
+    if (req.query.maxDaysListed) {
+      const daysAgo = new Date(Date.now() - Number(req.query.maxDaysListed) * 24 * 60 * 60 * 1000);
+      filter.createdAt = { ...filter.createdAt, $gte: daysAgo };
+    }
+
+    // Filter by price reduced (has discount)
+    if (req.query.hasDiscount === 'true') {
+      filter.originalPrice = { $exists: true, $ne: null };
+      filter.$expr = { ...filter.$expr, $gt: ['$originalPrice', '$price'] };
+    }
+
+    // Filter by price increased
+    if (req.query.hasPriceIncrease === 'true') {
+      filter.originalPrice = { $exists: true, $ne: null };
+      filter.$expr = { ...filter.$expr, $lt: ['$originalPrice', '$price'] };
+    }
+
+    // Filter by price per sqm range (computed field: price / sqft)
+    if (req.query.minPricePerSqm || req.query.maxPricePerSqm) {
+      const pricePerSqmConditions: any[] = [];
+      // Ensure sqft > 0 to avoid division by zero
+      pricePerSqmConditions.push({ $gt: ['$sqft', 0] });
+
+      if (req.query.minPricePerSqm) {
+        pricePerSqmConditions.push({
+          $gte: [{ $divide: ['$price', '$sqft'] }, Number(req.query.minPricePerSqm)]
+        });
+      }
+      if (req.query.maxPricePerSqm) {
+        pricePerSqmConditions.push({
+          $lte: [{ $divide: ['$price', '$sqft'] }, Number(req.query.maxPricePerSqm)]
+        });
+      }
+
+      // Merge with any existing $expr conditions
+      if (filter.$expr) {
+        filter.$expr = { $and: [filter.$expr, ...pricePerSqmConditions] };
+      } else {
+        filter.$expr = pricePerSqmConditions.length === 1
+          ? pricePerSqmConditions[0]
+          : { $and: pricePerSqmConditions };
+      }
+    }
+
     // Filter by role context (for dual-role system)
     if (req.query.createdAsRole) {
       filter.createdAsRole = req.query.createdAsRole;

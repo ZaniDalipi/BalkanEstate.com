@@ -137,12 +137,12 @@ const SavedSearchesPage: React.FC = () => {
     }
   };
 
-  // Fetch properties if not already loaded
+  // Always fetch ALL properties (both sale and rent) on mount.
+  // The buy page loads only sale properties into state.properties, so saved rental
+  // searches would find 0 matches if we skip this fetch.
   useEffect(() => {
-    if (properties.length === 0) {
-      fetchProperties();
-    }
-  }, [properties.length, fetchProperties]);
+    fetchProperties();
+  }, [fetchProperties]);
 
   // Scroll to top on mount and when sort changes
   useEffect(() => {

@@ -1,11 +1,13 @@
 {
   "page": {
-    "title": "Explore Balkan Cities",
+    "title": "Explore Balkan Cities - Real Estate Market Insights",
     "description": "AI-powered market insights for {{count}} major cities across 10 countries"
   },
   "cards": {
     "title": "All Cities",
-    "subtitle": "Explore real estate markets across {{count}} cities in the Balkans"
+    "allCitiesTitle": "All Cities",
+    "countryTitle": "Cities in {{country}}",
+    "subtitle": "Discover real estate opportunities in {{count}} cities"
   },
   "hero": {
     "title": "Explore Balkan Cities",
@@ -26,14 +28,22 @@
     "allCountries": "All Countries"
   },
   "cityCard": {
-    "demand": "Demand",
-    "investment": "Investment",
-    "avgPricePerSqm": "Avg. Price/m²",
-    "medianPrice": "Median Price",
-    "yoyGrowth": "YoY Growth",
-    "rentalYield": "Rental Yield",
-    "daysOnMarket": "Days on Market",
-    "days": "days"
+    "demand": "Buyer Demand",
+    "demandHigh": "High",
+    "demandMedium": "Moderate",
+    "demandLow": "Low",
+    "investment": "Investment Potential",
+    "investmentExcellent": "Excellent",
+    "investmentGood": "Good",
+    "investmentFair": "Fair",
+    "avgPricePerSqm": "Average Price per m²",
+    "medianPrice": "Typical Property Price",
+    "yoyGrowth": "Price Change (1 Year)",
+    "rentalYield": "Rental Return",
+    "rentalYieldHelper": "Annual income vs. property price",
+    "daysOnMarket": "Avg. Time to Sell",
+    "days": "days",
+    "daysUnit": "days"
   },
   "sections": {
     "topNeighborhoods": "Top Neighborhoods",
@@ -41,7 +51,8 @@
   },
   "footer": {
     "listings": "listings",
-    "soldPerMonth": "sold/mo"
+    "soldPerMonth": "sold/mo",
+    "viewListings": "View Listings on Map"
   },
   "trends": {
     "rising": "rising",

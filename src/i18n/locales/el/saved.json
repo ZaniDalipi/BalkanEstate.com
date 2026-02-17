@@ -1,47 +1,47 @@
 {
   "page": {
-    "title": "Saved Searches",
-    "description": "Track your saved property searches and get updates on new listings that match your criteria."
+    "title": "Αποθηκευμένες Αναζητήσεις",
+    "description": "Παρακολουθήστε τις αποθηκευμένες αναζητήσεις ακινήτων σας και λάβετε ενημερώσεις για νέες αγγελίες που ταιριάζουν στα κριτήριά σας."
   },
   "hero": {
-    "title": "Saved Searches",
-    "subtitle": "Track your favorite search criteria and get updates",
+    "title": "Αποθηκευμένες Αναζητήσεις",
+    "subtitle": "Παρακολουθήστε τα αγαπημένα κριτήρια αναζήτησής σας και λάβετε ενημερώσεις",
     "searchCount": {
-      "singular": "Saved Search",
-      "plural": "Saved Searches"
+      "singular": "Αποθηκευμένη Αναζήτηση",
+      "plural": "Αποθηκευμένες Αναζητήσεις"
     }
   },
   "loginRequired": {
-    "title": "Log in to view your saved searches",
-    "description": "Save your favorite search criteria and get notified about new listings.",
-    "button": "Login / Register"
+    "title": "Συνδεθείτε για να δείτε τις αποθηκευμένες αναζητήσεις σας",
+    "description": "Αποθηκεύστε τα αγαπημένα κριτήρια αναζήτησής σας και ειδοποιηθείτε για νέες αγγελίες.",
+    "button": "Σύνδεση / Εγγραφή"
   },
   "empty": {
-    "title": "You haven't saved any searches yet.",
-    "description": "Perform a search and click \"Save Search\" to get started, or save this example:",
-    "startSearch": "Or, Start a New Search"
+    "title": "Δεν έχετε αποθηκεύσει ακόμα αναζητήσεις.",
+    "description": "Κάντε μια αναζήτηση και πατήστε \"Αποθήκευση Αναζήτησης\" για να ξεκινήσετε, ή αποθηκεύστε αυτό το παράδειγμα:",
+    "startSearch": "Ή, Ξεκινήστε μια Νέα Αναζήτηση"
   },
   "example": {
-    "label": "Example",
-    "name": "Belgrade, under €400k",
-    "save": "Save"
+    "label": "Παράδειγμα",
+    "name": "Βελιγράδι, κάτω από €400χιλ.",
+    "save": "Αποθήκευση"
   },
   "sort": {
-    "newest": "Newest",
-    "name": "Name",
-    "lastActive": "Last Active"
+    "newest": "Νεότερα",
+    "name": "Όνομα",
+    "lastActive": "Τελευταία Ενεργή"
   },
   "accordion": {
-    "new": "new",
-    "namePlaceholder": "Search name",
-    "save": "Save",
-    "cancel": "Cancel",
-    "rename": "Rename search",
-    "delete": "Delete search",
-    "noProperties": "No properties currently match this search.",
-    "confirmDelete": "Are you sure you want to delete \"{{name}}\"?",
-    "deleteFailed": "Failed to delete saved search. Please try again.",
-    "enterName": "Please enter a name",
-    "renameFailed": "Failed to rename saved search. Please try again."
+    "new": "νέο",
+    "namePlaceholder": "Όνομα αναζήτησης",
+    "save": "Αποθήκευση",
+    "cancel": "Ακύρωση",
+    "rename": "Μετονομασία αναζήτησης",
+    "delete": "Διαγραφή αναζήτησης",
+    "noProperties": "Κανένα ακίνητο δεν ταιριάζει αυτήν τη στιγμή σε αυτήν την αναζήτηση.",
+    "confirmDelete": "Είστε σίγουροι ότι θέλετε να διαγράψετε το \"{{name}}\";",
+    "deleteFailed": "Αποτυχία διαγραφής αποθηκευμένης αναζήτησης. Παρακαλώ δοκιμάστε ξανά.",
+    "enterName": "Παρακαλώ εισάγετε ένα όνομα",
+    "renameFailed": "Αποτυχία μετονομασίας αποθηκευμένης αναζήτησης. Παρακαλώ δοκιμάστε ξανά."
   }
 }

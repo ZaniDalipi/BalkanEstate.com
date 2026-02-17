@@ -186,6 +186,7 @@ const PaymentWindow: React.FC<PaymentWindowProps> = ({
   const [paymentWindow, setPaymentWindow] = useState<Window | null>(null);
   const [isPolling, setIsPolling] = useState(false);
   const [pollingMessage, setPollingMessage] = useState('');
+  const [showCouponInput, setShowCouponInput] = useState(false);
   const pollingIntervalRef = React.useRef<NodeJS.Timeout | null>(null);
 
   // Dynamically detect user country
@@ -658,169 +659,268 @@ const PaymentWindow: React.FC<PaymentWindowProps> = ({
     return (
       <Modal isOpen={isOpen} onClose={onClose} title="">
         <div className="max-w-md mx-auto">
-          <div className="space-y-4 sm:space-y-6">
-            {/* Header */}
+          <div className="space-y-4 sm:space-y-5">
+            {/* Header with illustration */}
             <div className="text-center pb-3 sm:pb-4 border-b border-neutral-200">
-              <div className={`w-16 h-16 sm:w-20 sm:h-20 rounded-xl sm:rounded-2xl flex items-center justify-center mx-auto mb-3 sm:mb-4 shadow-lg ${
-                canActivateFree
-                  ? 'bg-gradient-to-br from-green-400 to-emerald-500'
-                  : 'bg-gradient-to-br from-amber-400 to-orange-500'
-              }`}>
-                {canActivateFree ? (
-                  <CheckCircleIcon className="w-8 h-8 sm:w-10 sm:h-10 text-white" />
-                ) : (
-                  <ClockIcon className="w-8 h-8 sm:w-10 sm:h-10 text-white" />
-                )}
+              {/* Payment illustration */}
+              <div className="relative mx-auto mb-4 w-48 h-32 sm:w-56 sm:h-36">
+                <div className="absolute inset-0 bg-gradient-to-br from-primary/10 to-indigo-100 rounded-2xl"></div>
+                <div className="absolute top-4 left-1/2 -translate-x-1/2 w-36 h-22 sm:w-44 sm:h-26">
+                  {/* Credit card illustration */}
+                  <div className="relative">
+                    <div className="w-36 sm:w-44 h-[88px] sm:h-[100px] bg-gradient-to-br from-primary to-indigo-600 rounded-xl shadow-lg transform -rotate-6 absolute top-0 left-0">
+                      <div className="p-3 sm:p-4">
+                        <div className="flex justify-between items-start mb-3 sm:mb-4">
+                          <div className="w-8 h-5 sm:w-10 sm:h-6 bg-amber-400 rounded-sm"></div>
+                          <div className="flex gap-0.5">
+                            <div className="w-3 h-3 sm:w-4 sm:h-4 bg-white/30 rounded-full"></div>
+                            <div className="w-3 h-3 sm:w-4 sm:h-4 bg-white/20 rounded-full -ml-1.5 sm:-ml-2"></div>
+                          </div>
+                        </div>
+                        <div className="flex gap-1.5 sm:gap-2 mb-2 sm:mb-3">
+                          <div className="h-1.5 w-6 sm:w-8 bg-white/30 rounded"></div>
+                          <div className="h-1.5 w-6 sm:w-8 bg-white/30 rounded"></div>
+                          <div className="h-1.5 w-6 sm:w-8 bg-white/30 rounded"></div>
+                          <div className="h-1.5 w-6 sm:w-8 bg-white/30 rounded"></div>
+                        </div>
+                        <div className="h-1.5 w-16 sm:w-20 bg-white/20 rounded"></div>
+                      </div>
+                    </div>
+                    <div className="w-36 sm:w-44 h-[88px] sm:h-[100px] bg-gradient-to-br from-emerald-500 to-teal-600 rounded-xl shadow-lg transform rotate-6 absolute top-2 left-2">
+                      <div className="p-3 sm:p-4">
+                        <div className="flex justify-between items-start mb-3 sm:mb-4">
+                          <div className="w-8 h-5 sm:w-10 sm:h-6 bg-amber-300 rounded-sm"></div>
+                          <svg className="w-5 h-5 sm:w-6 sm:h-6 text-white/40" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 18v-5.25m0 0a6.01 6.01 0 001.5-.189m-1.5.189a6.01 6.01 0 01-1.5-.189m3.75 7.478a12.06 12.06 0 01-4.5 0m3.75 2.383a14.406 14.406 0 01-3 0M14.25 18v-.192c0-.983.658-1.823 1.508-2.316a7.5 7.5 0 10-7.517 0c.85.493 1.509 1.333 1.509 2.316V18" /></svg>
+                        </div>
+                        <div className="flex gap-1.5 sm:gap-2 mb-2 sm:mb-3">
+                          <div className="h-1.5 w-6 sm:w-8 bg-white/30 rounded"></div>
+                          <div className="h-1.5 w-6 sm:w-8 bg-white/30 rounded"></div>
+                          <div className="h-1.5 w-6 sm:w-8 bg-white/30 rounded"></div>
+                          <div className="h-1.5 w-6 sm:w-8 bg-white/30 rounded"></div>
+                        </div>
+                        <div className="h-1.5 w-16 sm:w-20 bg-white/20 rounded"></div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
               </div>
+
               <h2 className="text-xl sm:text-2xl font-bold text-neutral-800 mb-1 sm:mb-2">
-                {canActivateFree ? 'Activate Free Subscription' : 'Payment Coming Soon'}
+                {canActivateFree ? 'Activate Free Subscription' : `Subscribe to ${planName}`}
               </h2>
               <p className="text-xs sm:text-sm text-neutral-500">
                 {canActivateFree
                   ? 'Your coupon provides 100% off!'
-                  : 'Premium subscriptions launching very soon!'}
+                  : `€${planPrice.toFixed(2)}/${planInterval} - Premium features await you`}
               </p>
             </div>
 
-            {/* Plan Summary with Coupon Support */}
-            <div className={`rounded-lg sm:rounded-xl p-4 sm:p-6 border ${
-              canActivateFree
-                ? 'bg-gradient-to-br from-green-50 to-emerald-50 border-green-200'
-                : 'bg-gradient-to-br from-amber-50 to-orange-50 border-amber-200'
-            }`}>
-              <div className="flex justify-between items-start mb-3 sm:mb-4">
-                <div>
-                  <h3 className="text-base sm:text-lg font-bold text-neutral-800">{planName}</h3>
-                  <p className="text-xs sm:text-sm text-neutral-500 capitalize">Billed {planInterval}ly</p>
-                </div>
-                <div className="text-right">
-                  {(discountPercent > 0 || codeValidation?.valid) && (
-                    <>
-                      <p className="text-xs sm:text-sm text-neutral-400 line-through">€{planPrice.toFixed(2)}</p>
-                      <p className={`text-xl sm:text-2xl font-bold ${canActivateFree ? 'text-green-600' : 'text-amber-600'}`}>
-                        {canActivateFree ? 'FREE' : `€${finalPrice.toFixed(2)}`}
-                      </p>
-                      <p className="text-[10px] sm:text-xs text-green-600 font-semibold">
-                        {canActivateFree ? '100% OFF!' : `Save €${savings.toFixed(2)}`}
-                      </p>
-                    </>
-                  )}
-                  {discountPercent === 0 && !codeValidation?.valid && (
-                    <p className="text-xl sm:text-2xl font-bold text-neutral-400">€{planPrice.toFixed(2)}</p>
-                  )}
-                </div>
-              </div>
-
-              {/* Discount Code Input */}
-              {!appliedDiscountCode && (
-                <div className="mb-3 sm:mb-4">
-                  <label className="block text-xs sm:text-sm font-medium text-neutral-700 mb-1.5 sm:mb-2">
-                    Have a discount code?
-                  </label>
-                  <div className="flex gap-1.5 sm:gap-2">
-                    <input
-                      type="text"
-                      value={discountCode}
-                      onChange={(e) => setDiscountCode(e.target.value.toUpperCase())}
-                      placeholder="Enter code"
-                      className="flex-1 px-2.5 sm:px-3 py-1.5 sm:py-2 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent text-xs sm:text-sm"
-                      onKeyPress={(e) => e.key === 'Enter' && handleValidateDiscountCode()}
-                      disabled={validatingCode}
-                    />
-                    <button
-                      onClick={handleValidateDiscountCode}
-                      disabled={validatingCode || !discountCode.trim()}
-                      className="px-3 sm:px-4 py-1.5 sm:py-2 bg-primary text-white rounded-lg font-medium text-xs sm:text-sm hover:bg-primary-dark transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                    >
-                      {validatingCode ? 'Checking...' : 'Apply'}
-                    </button>
-                  </div>
-                  {codeValidation && !codeValidation.valid && (
-                    <p className="text-[10px] sm:text-xs text-red-600 mt-1">{codeValidation.message}</p>
-                  )}
-                </div>
-              )}
-
-              {/* Applied Discount Code */}
-              {appliedDiscountCode && codeValidation?.valid && (
-                <div className="bg-green-50 border border-green-200 rounded-lg p-2 sm:p-3 flex items-center justify-between gap-2">
-                  <div className="flex items-center gap-1.5 sm:gap-2">
-                    <CheckCircleIcon className="w-4 h-4 sm:w-5 sm:h-5 text-green-600 flex-shrink-0" />
+            {/* Free activation flow - show when coupon makes it free */}
+            {canActivateFree && (
+              <>
+                {/* Plan Summary */}
+                <div className="rounded-lg sm:rounded-xl p-4 sm:p-5 border bg-gradient-to-br from-green-50 to-emerald-50 border-green-200">
+                  <div className="flex justify-between items-start mb-3">
                     <div>
-                      <p className="text-xs sm:text-sm text-green-700 font-medium">
-                        Code "{appliedDiscountCode}" applied!
-                      </p>
-                      <p className="text-[10px] sm:text-xs text-green-600">{codeValidation.message}</p>
+                      <h3 className="text-base sm:text-lg font-bold text-neutral-800">{planName}</h3>
+                      <p className="text-xs sm:text-sm text-neutral-500 capitalize">Billed {planInterval}ly</p>
+                    </div>
+                    <div className="text-right">
+                      <p className="text-xs sm:text-sm text-neutral-400 line-through">€{planPrice.toFixed(2)}</p>
+                      <p className="text-xl sm:text-2xl font-bold text-green-600">FREE</p>
+                      <p className="text-[10px] sm:text-xs text-green-600 font-semibold">100% OFF!</p>
                     </div>
                   </div>
-                  <button
-                    onClick={handleRemoveDiscountCode}
-                    className="text-green-700 hover:text-green-900 text-[10px] sm:text-xs font-medium"
-                  >
-                    Remove
-                  </button>
-                </div>
-              )}
-            </div>
 
-            {/* Coming Soon Message - only show if not free */}
+                  {/* Applied Discount Code */}
+                  {appliedDiscountCode && codeValidation?.valid && (
+                    <div className="bg-green-50 border border-green-200 rounded-lg p-2 sm:p-3 flex items-center justify-between gap-2">
+                      <div className="flex items-center gap-1.5 sm:gap-2">
+                        <CheckCircleIcon className="w-4 h-4 sm:w-5 sm:h-5 text-green-600 flex-shrink-0" />
+                        <div>
+                          <p className="text-xs sm:text-sm text-green-700 font-medium">
+                            Code &quot;{appliedDiscountCode}&quot; applied!
+                          </p>
+                          <p className="text-[10px] sm:text-xs text-green-600">{codeValidation.message}</p>
+                        </div>
+                      </div>
+                      <button
+                        onClick={handleRemoveDiscountCode}
+                        className="text-green-700 hover:text-green-900 text-[10px] sm:text-xs font-medium"
+                      >
+                        Remove
+                      </button>
+                    </div>
+                  )}
+                </div>
+
+                {/* Free activation info */}
+                <div className="bg-green-50 border border-green-200 rounded-lg p-3 sm:p-4">
+                  <div className="flex gap-2 sm:gap-3">
+                    <CheckCircleIcon className="w-5 h-5 sm:w-6 sm:h-6 text-green-600 flex-shrink-0 mt-0.5" />
+                    <div className="flex-1">
+                      <p className="text-xs sm:text-sm font-semibold text-green-900 mb-0.5 sm:mb-1">Free Subscription Ready</p>
+                      <p className="text-[10px] sm:text-xs text-green-700 leading-relaxed">
+                        Your discount code provides 100% off! Click below to activate your subscription immediately - no payment required.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Activate button */}
+                <button
+                  type="button"
+                  onClick={handlePayment}
+                  disabled={isProcessing}
+                  className="w-full py-3 sm:py-4 px-4 sm:px-6 rounded-lg sm:rounded-xl font-bold text-sm sm:text-lg shadow-lg bg-gradient-to-r from-green-500 to-emerald-600 text-white hover:shadow-xl transform hover:-translate-y-0.5 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                >
+                  {isProcessing ? (
+                    <>
+                      <div className="animate-spin rounded-full h-4 w-4 sm:h-5 sm:w-5 border-2 border-white border-t-transparent"></div>
+                      <span>Activating...</span>
+                    </>
+                  ) : (
+                    <>
+                      <CheckCircleIcon className="w-4 h-4 sm:w-5 sm:h-5" />
+                      <span>Activate Free Subscription</span>
+                    </>
+                  )}
+                </button>
+              </>
+            )}
+
+            {/* Normal flow - coupon or contact */}
             {!canActivateFree && (
-              <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 sm:p-4">
-                <div className="flex gap-2 sm:gap-3">
-                  <CreditCardIcon className="w-5 h-5 sm:w-6 sm:h-6 text-blue-600 flex-shrink-0 mt-0.5" />
-                  <div className="flex-1">
-                    <p className="text-xs sm:text-sm font-semibold text-blue-900 mb-0.5 sm:mb-1">Payment System Launching Soon</p>
-                    <p className="text-[10px] sm:text-xs text-blue-700 leading-relaxed">
-                      We're finalizing our payment system. In the meantime, you can apply discount codes - including 100% off codes for immediate access!
-                    </p>
+              <>
+                {/* Option 1: Did we provide a coupon? */}
+                <div className="rounded-lg sm:rounded-xl border border-primary/20 bg-primary/5 overflow-hidden">
+                  <button
+                    type="button"
+                    onClick={() => setShowCouponInput(!showCouponInput)}
+                    className="w-full p-3 sm:p-4 flex items-center justify-between gap-3 hover:bg-primary/10 transition-colors"
+                  >
+                    <div className="flex items-center gap-2 sm:gap-3">
+                      <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
+                        <svg className="w-4 h-4 sm:w-5 sm:h-5 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M16.5 6v.75m0 3v.75m0 3v.75m0 3V18m-9-5.25h5.25M7.5 15h3M3.375 5.25c-.621 0-1.125.504-1.125 1.125v3.026a2.999 2.999 0 010 5.198v3.026c0 .621.504 1.125 1.125 1.125h17.25c.621 0 1.125-.504 1.125-1.125v-3.026a2.999 2.999 0 010-5.198V6.375c0-.621-.504-1.125-1.125-1.125H3.375z" />
+                        </svg>
+                      </div>
+                      <div className="text-left">
+                        <p className="text-sm sm:text-base font-semibold text-neutral-800">Did we provide a coupon for you?</p>
+                        <p className="text-[10px] sm:text-xs text-neutral-500">Enter your code to activate your subscription</p>
+                      </div>
+                    </div>
+                    <svg className={`w-4 h-4 sm:w-5 sm:h-5 text-neutral-400 transition-transform ${showCouponInput ? 'rotate-180' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+                    </svg>
+                  </button>
+
+                  {showCouponInput && (
+                    <div className="px-3 sm:px-4 pb-3 sm:pb-4 border-t border-primary/10">
+                      <div className="pt-3 sm:pt-4">
+                        {/* Plan summary */}
+                        <div className="flex justify-between items-start mb-3">
+                          <div>
+                            <h3 className="text-sm sm:text-base font-bold text-neutral-800">{planName}</h3>
+                            <p className="text-xs text-neutral-500 capitalize">Billed {planInterval}ly</p>
+                          </div>
+                          <div className="text-right">
+                            {codeValidation?.valid ? (
+                              <>
+                                <p className="text-xs text-neutral-400 line-through">€{planPrice.toFixed(2)}</p>
+                                <p className="text-lg sm:text-xl font-bold text-primary">€{finalPrice.toFixed(2)}</p>
+                                <p className="text-[10px] text-green-600 font-semibold">Save €{savings.toFixed(2)}</p>
+                              </>
+                            ) : (
+                              <p className="text-lg sm:text-xl font-bold text-neutral-700">€{planPrice.toFixed(2)}</p>
+                            )}
+                          </div>
+                        </div>
+
+                        {/* Coupon input */}
+                        {!appliedDiscountCode && (
+                          <div className="mb-3">
+                            <div className="flex gap-1.5 sm:gap-2">
+                              <input
+                                type="text"
+                                value={discountCode}
+                                onChange={(e) => setDiscountCode(e.target.value.toUpperCase())}
+                                placeholder="Enter coupon code"
+                                className="flex-1 px-2.5 sm:px-3 py-2 sm:py-2.5 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent text-sm"
+                                onKeyPress={(e) => e.key === 'Enter' && handleValidateDiscountCode()}
+                                disabled={validatingCode}
+                              />
+                              <button
+                                onClick={handleValidateDiscountCode}
+                                disabled={validatingCode || !discountCode.trim()}
+                                className="px-4 sm:px-5 py-2 sm:py-2.5 bg-primary text-white rounded-lg font-semibold text-sm hover:bg-primary-dark transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                              >
+                                {validatingCode ? 'Checking...' : 'Apply'}
+                              </button>
+                            </div>
+                            {codeValidation && !codeValidation.valid && (
+                              <p className="text-xs text-red-600 mt-1.5">{codeValidation.message}</p>
+                            )}
+                          </div>
+                        )}
+
+                        {/* Applied code */}
+                        {appliedDiscountCode && codeValidation?.valid && (
+                          <div className="bg-green-50 border border-green-200 rounded-lg p-2.5 flex items-center justify-between gap-2 mb-3">
+                            <div className="flex items-center gap-2">
+                              <CheckCircleIcon className="w-4 h-4 sm:w-5 sm:h-5 text-green-600 flex-shrink-0" />
+                              <div>
+                                <p className="text-xs sm:text-sm text-green-700 font-medium">Code &quot;{appliedDiscountCode}&quot; applied!</p>
+                                <p className="text-[10px] sm:text-xs text-green-600">{codeValidation.message}</p>
+                              </div>
+                            </div>
+                            <button
+                              onClick={handleRemoveDiscountCode}
+                              className="text-green-700 hover:text-green-900 text-[10px] sm:text-xs font-medium"
+                            >
+                              Remove
+                            </button>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                {/* Option 2: Self-payment (Coming soon) */}
+                <div className="rounded-lg sm:rounded-xl border border-neutral-200 bg-neutral-50 p-3 sm:p-4">
+                  <div className="flex items-center gap-2 sm:gap-3 mb-2">
+                    <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-amber-100 flex items-center justify-center flex-shrink-0">
+                      <CreditCardIcon className="w-4 h-4 sm:w-5 sm:h-5 text-amber-600" />
+                    </div>
+                    <div>
+                      <p className="text-sm sm:text-base font-semibold text-neutral-800">Self-service payment</p>
+                      <p className="text-[10px] sm:text-xs text-neutral-500">Online payment gateway launching soon</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2 px-2 py-1.5 bg-amber-50 border border-amber-200 rounded-lg">
+                    <span className="w-2 h-2 bg-amber-500 rounded-full animate-pulse flex-shrink-0"></span>
+                    <p className="text-[10px] sm:text-xs text-amber-700 font-medium">Payment integration in progress</p>
                   </div>
                 </div>
-              </div>
-            )}
 
-            {/* Free Subscription Info - only show if free */}
-            {canActivateFree && (
-              <div className="bg-green-50 border border-green-200 rounded-lg p-3 sm:p-4">
-                <div className="flex gap-2 sm:gap-3">
-                  <CheckCircleIcon className="w-5 h-5 sm:w-6 sm:h-6 text-green-600 flex-shrink-0 mt-0.5" />
-                  <div className="flex-1">
-                    <p className="text-xs sm:text-sm font-semibold text-green-900 mb-0.5 sm:mb-1">Free Subscription Ready</p>
-                    <p className="text-[10px] sm:text-xs text-green-700 leading-relaxed">
-                      Your discount code provides 100% off! Click below to activate your subscription immediately - no payment required.
-                    </p>
-                  </div>
+                {/* Contact sales */}
+                <div className="rounded-lg sm:rounded-xl border border-neutral-200 bg-white p-3 sm:p-4">
+                  <p className="text-xs sm:text-sm text-neutral-600 mb-2.5">
+                    Need help or want to subscribe manually? Contact our sales team:
+                  </p>
+                  <a
+                    href="mailto:sales@balkanestateai.com?subject=Subscription%20Request%20-%20BalkanEstate"
+                    className="inline-flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-primary to-indigo-600 text-white font-semibold rounded-lg hover:from-primary-dark hover:to-indigo-700 transition-all shadow-md hover:shadow-lg text-sm"
+                  >
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                    </svg>
+                    sales@balkanestateai.com
+                  </a>
+                  <p className="text-[10px] sm:text-xs text-neutral-400 mt-2">We typically respond within 24 hours</p>
                 </div>
-              </div>
-            )}
-
-            {/* Action Button */}
-            {canActivateFree ? (
-              <button
-                type="button"
-                onClick={handlePayment}
-                disabled={isProcessing}
-                className="w-full py-3 sm:py-4 px-4 sm:px-6 rounded-lg sm:rounded-xl font-bold text-sm sm:text-lg shadow-lg bg-gradient-to-r from-green-500 to-emerald-600 text-white hover:shadow-xl transform hover:-translate-y-0.5 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
-              >
-                {isProcessing ? (
-                  <>
-                    <div className="animate-spin rounded-full h-4 w-4 sm:h-5 sm:w-5 border-2 border-white border-t-transparent"></div>
-                    <span>Activating...</span>
-                  </>
-                ) : (
-                  <>
-                    <CheckCircleIcon className="w-4 h-4 sm:w-5 sm:h-5" />
-                    <span>Activate Free Subscription</span>
-                  </>
-                )}
-              </button>
-            ) : (
-              <button
-                type="button"
-                onClick={onClose}
-                className="w-full py-3 sm:py-4 px-4 sm:px-6 rounded-lg sm:rounded-xl font-bold text-sm sm:text-lg shadow-lg bg-gradient-to-r from-amber-500 to-orange-500 text-white hover:shadow-xl transform hover:-translate-y-0.5 transition-all"
-              >
-                Got it, notify me when available!
-              </button>
+              </>
             )}
 
             {/* Close */}

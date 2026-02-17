@@ -3,6 +3,7 @@ import mongoose, { Document, Schema } from 'mongoose';
 export interface IFilters {
   query: string;
   country: string;
+  listingType: 'any' | 'sale' | 'rent';
   minPrice: number | null;
   maxPrice: number | null;
   beds: number | null;

@@ -14,6 +14,7 @@
   "cannotSaveEmptySearch": "Nuk mund të ruhet një kërkim bosh. Ju lutemi shtoni disa kritere ose lëvizni në një zonë në hartë.",
   "searchSaved": "Kërkimi u ruajt me sukses!",
   "couldNotSaveSearch": "Nuk mund të ruhet kërkimi. AI mund të jetë i zënë.",
+  "areaNear": "Zona pranë {{name}}",
   "mobileMapInfo": "Duke shfaqur pronat e dukshme në hartë",
   "showingNearbyProperties": "Duke shfaqur prona që mund t'ju pëlqejnë në {{location}}",
   "filters": {

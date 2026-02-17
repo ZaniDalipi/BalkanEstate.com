@@ -17,6 +17,7 @@
   "internetIncluded": "Internet uklj.",
   "petsAllowed": "Kućni ljubimci OK",
   "availableFrom": "Dostupno",
+  "fetchError": "Greška pri učitavanju nekretnina za iznajmljivanje",
   "seo": {
     "title": "Iznajmljivanje nekretnina | BalkanEstate",
     "description": "Pregledajte nekretnine za iznajmljivanje širom Balkana. Pronađite stanove, kuće i vile za iznajmljivanje sa detaljnim informacijama."
@@ -49,7 +50,8 @@
     "sqftHigh": "Najveće prvo",
     "search": "Pretraži nekretnine",
     "reset": "Resetuj",
-    "searchCity": "Pretraži po gradu ili lokaciji..."
+    "searchCity": "Pretraži po gradu ili lokaciji...",
+    "acShort": "Klima"
   },
   "form": {
     "title": "Oglasite nekretninu za iznajmljivanje",

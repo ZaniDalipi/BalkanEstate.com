@@ -17,6 +17,7 @@
   "internetIncluded": "Internet incl.",
   "petsAllowed": "Pets OK",
   "availableFrom": "Available",
+  "fetchError": "Failed to fetch rental properties",
   "seo": {
     "title": "Rent Properties | BalkanEstate",
     "description": "Browse rental properties across the Balkans. Find apartments, houses, and villas for rent with detailed information."
@@ -49,7 +50,8 @@
     "sqftHigh": "Largest First",
     "search": "Search Rentals",
     "reset": "Reset",
-    "searchCity": "Search by city or location..."
+    "searchCity": "Search by city or location...",
+    "acShort": "AC"
   },
   "form": {
     "title": "List Your Property for Rent",

@@ -105,6 +105,7 @@ const PropertyCardInner = memo<PropertyCardInnerProps>(({
   };
 
   const isNew = property?.createdAt && (Date.now() - property.createdAt < 3 * 24 * 60 * 60 * 1000);
+  const isPriceReduced = property?.originalPrice !== undefined && property?.originalPrice > property?.price;
   const isSold = property?.status === 'sold';
   const isRented = property?.status === 'rented';
   const isRental = (property?.listingType || 'sale') === 'rent';
@@ -317,31 +318,38 @@ const PropertyCardInner = memo<PropertyCardInnerProps>(({
           {(() => {
             const priceInfo = getPriceReductionInfo(property);
             return (
-              <div className="flex items-center gap-1.5">
-                {(priceInfo.hasReduction || priceInfo.hasIncrease) && (
-                  <span className="text-[11px] text-neutral-400 line-through">
-                    {formatPrice(priceInfo.originalPrice, property.country)}
+              <div className="text-right">
+                <div className="flex items-center justify-end gap-1.5">
+                  {(priceInfo.hasReduction || priceInfo.hasIncrease) && (
+                    <span className="text-[11px] text-neutral-400 line-through">
+                      {formatPrice(priceInfo.originalPrice, property.country)}
+                    </span>
+                  )}
+                  <span className="text-primary text-sm sm:text-base font-bold tracking-tight">
+                    {formatPrice(property.price, property.country)}
+                    {isRental && <span className="text-[11px] font-normal text-neutral-400">/{property.rentPeriod === 'weekly' ? t('common:wk', 'wk') : property.rentPeriod === 'daily' ? t('common:day', 'day') : t('common:mo', 'mo')}</span>}
                   </span>
-                )}
-                <span className="text-primary text-sm sm:text-base font-bold tracking-tight">
-                  {formatPrice(property.price, property.country)}
-                  {isRental && <span className="text-[11px] font-normal text-neutral-400">/{property.rentPeriod === 'weekly' ? t('common:wk', 'wk') : property.rentPeriod === 'daily' ? t('common:day', 'day') : t('common:mo', 'mo')}</span>}
-                </span>
-                {priceInfo.hasReduction && (
-                  <span className="bg-red-100 text-red-600 text-[10px] font-semibold px-1.5 py-[1px] rounded-full flex items-center gap-0.5">
-                    <svg className="w-2.5 h-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M19 14l-7 7m0 0l-7-7m7 7V3" />
-                    </svg>
-                    -{priceInfo.discountPercentage}%
-                  </span>
-                )}
-                {priceInfo.hasIncrease && (
-                  <span className="bg-amber-100 text-amber-700 text-[10px] font-semibold px-1.5 py-[1px] rounded-full flex items-center gap-0.5">
-                    <svg className="w-2.5 h-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M5 10l7-7m0 0l7 7m-7-7v18" />
-                    </svg>
-                    +{priceInfo.increasePercentage}%
-                  </span>
+                  {priceInfo.hasReduction && (
+                    <span className="bg-red-100 text-red-600 text-[10px] font-semibold px-1.5 py-[1px] rounded-full flex items-center gap-0.5">
+                      <svg className="w-2.5 h-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M19 14l-7 7m0 0l-7-7m7 7V3" />
+                      </svg>
+                      -{priceInfo.discountPercentage}%
+                    </span>
+                  )}
+                  {priceInfo.hasIncrease && (
+                    <span className="bg-amber-100 text-amber-700 text-[10px] font-semibold px-1.5 py-[1px] rounded-full flex items-center gap-0.5">
+                      <svg className="w-2.5 h-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M5 10l7-7m0 0l7 7m-7-7v18" />
+                      </svg>
+                      +{priceInfo.increasePercentage}%
+                    </span>
+                  )}
+                </div>
+                {safeProperty.sqft > 0 && property.propertyType !== 'land' && (
+                  <p className="text-[10px] text-neutral-400 font-medium">
+                    {formatPrice(Math.round(property.price / safeProperty.sqft), property.country)} per m²
+                  </p>
                 )}
               </div>
             );
