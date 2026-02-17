@@ -6,6 +6,7 @@ import { searchLocation } from '@/services/osmService';
 import { generateSearchName, generateSearchNameFromCoords } from '@/services/geminiService';
 import L from 'leaflet';
 import { filterProperties } from '@/utils/propertyUtils';
+import { useRealtimeProperties } from '@/src/features/properties/hooks';
 import { API_CONFIG } from '@/src/shared/constants/app.constants';
 
 export const serializeBounds = (bounds: L.LatLngBounds): string => {
@@ -22,7 +23,7 @@ export function useRentalSearch() {
     const { state, dispatch, updateSearchPageState, addSavedSearch } = useAppContext();
     const { isAuthenticated, currentUser } = state;
 
-    // Rental properties state
+    // Full rental dataset (fetched once, filtered client-side)
     const [rentalProperties, setRentalProperties] = useState<Property[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
@@ -51,22 +52,15 @@ export function useRentalSearch() {
     const [isSaving, setIsSaving] = useState(false);
     const debounceTimer = useRef<number | null>(null);
 
-    // Fetch rental properties
+    // Fetch ALL rental properties once on mount — no filter params sent to API.
+    // Filtering & sorting happen client-side via useMemo (same pattern as buy page).
     const fetchRentals = useCallback(async () => {
         setIsLoading(true);
         setError(null);
         try {
             const params = new URLSearchParams();
             params.set('listingType', 'rent');
-            params.set('limit', '100');
-            if (filters.country && filters.country !== 'any') params.set('country', filters.country);
-            if (filters.minPrice) params.set('minPrice', String(filters.minPrice));
-            if (filters.maxPrice) params.set('maxPrice', String(filters.maxPrice));
-            if (filters.beds) params.set('beds', String(filters.beds));
-            if (filters.baths) params.set('baths', String(filters.baths));
-            if (filters.propertyType && filters.propertyType !== 'any') params.set('propertyType', filters.propertyType);
-            if (filters.query) params.set('query', filters.query);
-            if (filters.sortBy) params.set('sortBy', filters.sortBy);
+            params.set('limit', '3000');
 
             const response = await fetch(`${API_CONFIG.BASE_URL}/properties?${params.toString()}`);
             if (!response.ok) throw new Error(t('rental:fetchError', 'Failed to fetch rental properties'));
@@ -99,18 +93,22 @@ export function useRentalSearch() {
         } finally {
             setIsLoading(false);
         }
-    }, [filters.country, filters.minPrice, filters.maxPrice, filters.beds, filters.baths, filters.propertyType, filters.query, filters.sortBy]);
+    }, []); // No filter deps — fetch the full dataset once
 
+    // Load all rentals on mount
     useEffect(() => {
         fetchRentals();
     }, [fetchRentals]);
 
-    // Re-fetch when a property status changes (e.g., marked as available/rented/deleted)
-    // Also handle optimistic updates from detailed events for instant UI response
+    // Real-time updates via WebSocket (same as buy page)
+    useRealtimeProperties({
+        onPropertyCreated: fetchRentals,
+        onPropertyUpdated: fetchRentals,
+        onPropertyDeleted: fetchRentals,
+    });
+
+    // Also handle optimistic updates from window events for instant UI response
     useEffect(() => {
-        const handleStatusChange = () => {
-            fetchRentals();
-        };
         const handleOptimisticUpdate = (e: Event) => {
             const detail = (e as CustomEvent).detail;
             if (!detail?.id || !detail?.status) return;
@@ -124,15 +122,13 @@ export function useRentalSearch() {
                 setRentalProperties(prev => prev.filter(p => p.id !== detail.id));
             }
         };
-        window.addEventListener('property-status-changed', handleStatusChange);
         window.addEventListener('property-status-update', handleOptimisticUpdate);
         window.addEventListener('property-deleted', handlePropertyDeleted);
         return () => {
-            window.removeEventListener('property-status-changed', handleStatusChange);
             window.removeEventListener('property-status-update', handleOptimisticUpdate);
             window.removeEventListener('property-deleted', handlePropertyDeleted);
         };
-    }, [fetchRentals]);
+    }, []);
 
     useEffect(() => {
         const handleResize = () => {
@@ -205,17 +201,65 @@ export function useRentalSearch() {
         } catch { return null; }
     }, [drawnBoundsJSON]);
 
-    // Filter properties by map bounds
+    // Client-side filtering + sorting (same pattern as buy page — instant, no API call)
     const baseFilteredProperties = useMemo(() => {
-        let filtered = rentalProperties;
+        // 1. Apply all user filters client-side
+        const filtered = filterProperties(rentalProperties, filters);
+        const now = Date.now();
+
+        // 2. Narrow by map/drawn bounds
         const boundsToUse = drawnBounds || mapBounds;
-        if (boundsToUse) {
-            filtered = filtered.filter(p =>
-                p.lat && p.lng && boundsToUse.contains(L.latLng(p.lat, p.lng))
-            );
-        }
-        return filtered;
-    }, [rentalProperties, mapBounds, drawnBounds]);
+        const bounded = boundsToUse
+            ? filtered.filter(p => p.lat && p.lng && boundsToUse.contains(L.latLng(p.lat, p.lng)))
+            : filtered;
+
+        // 3. Promotion-aware sorting (matches buy page)
+        const getPromotionScore = (p: Property) => {
+            const isActive = p.isPromoted && p.promotionEndDate && p.promotionEndDate > now;
+            if (!isActive) return 0;
+            const tierScores: Record<string, number> = { premium: 100, highlight: 70, featured: 40, standard: 10 };
+            return (tierScores[p.promotionTier || 'standard'] || 0) + (p.hasUrgentBadge ? 5 : 0);
+        };
+
+        const toTimestamp = (v: number | string | Date | undefined | null): number => {
+            if (!v) return 0;
+            if (typeof v === 'number') return v;
+            if (typeof v === 'string') return new Date(v).getTime();
+            if (v instanceof Date) return v.getTime();
+            return 0;
+        };
+
+        const getPropertyTime = (p: Property) => Math.max(toTimestamp(p.lastRenewed), toTimestamp(p.createdAt));
+
+        const sorted = [...bounded].sort((a, b) => {
+            const sA = getPromotionScore(a);
+            const sB = getPromotionScore(b);
+            if (sA !== sB) return sB - sA;
+
+            switch (filters.sortBy) {
+                case 'price_asc': return a.price - b.price;
+                case 'price_desc': return b.price - a.price;
+                case 'sqft_asc': return a.sqft - b.sqft;
+                case 'sqft_desc': return b.sqft - a.sqft;
+                case 'beds_desc': return b.beds - a.beds;
+                case 'baths_desc': return b.baths - a.baths;
+                case 'oldest': return (a.createdAt || 0) - (b.createdAt || 0);
+                case 'year_built_desc': return (b.yearBuilt || 0) - (a.yearBuilt || 0);
+                case 'price_reduced': {
+                    const dA = a.hasDiscount ? 1 : 0;
+                    const dB = b.hasDiscount ? 1 : 0;
+                    if (dA !== dB) return dB - dA;
+                    return getPropertyTime(b) - getPropertyTime(a);
+                }
+                case 'featured':
+                case 'newest':
+                default:
+                    return getPropertyTime(b) - getPropertyTime(a);
+            }
+        });
+
+        return sorted;
+    }, [rentalProperties, filters, mapBounds, drawnBounds]);
 
     const listProperties = baseFilteredProperties;
 
@@ -230,9 +274,8 @@ export function useRentalSearch() {
         setFilters(prev => ({ ...prev, [key]: value }));
     }, []);
 
-    const handleSearch = useCallback(() => {
-        fetchRentals();
-    }, [fetchRentals]);
+    // No-op: filtering is now reactive via useMemo, no API call needed
+    const handleSearch = useCallback(() => {}, []);
 
     const handleResetFilters = useCallback(() => {
         setFilters({ ...initialFilters, listingType: 'rent' });
