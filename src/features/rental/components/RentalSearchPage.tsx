@@ -161,7 +161,7 @@ const RentalSearchPage: React.FC<RentalSearchPageProps> = ({ onToggleSidebar }) 
                                         <button
                                             onClick={() => handleFilterChange('query', '')}
                                             className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-300 hover:text-gray-600 transition-colors"
-                                            aria-label="Clear search"
+                                            aria-label={t('common:aria.clearSearch')}
                                         >
                                             <XMarkIcon className="w-4 h-4" />
                                         </button>
@@ -331,7 +331,7 @@ const RentalSearchPage: React.FC<RentalSearchPageProps> = ({ onToggleSidebar }) 
                                         <button
                                             onClick={onToggleSidebar}
                                             className="min-h-[44px] min-w-[44px] flex items-center justify-center flex-shrink-0 rounded-full hover:bg-neutral-100 active:bg-neutral-200 transition-colors touch-manipulation focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-primary/50"
-                                            aria-label="Open menu"
+                                            aria-label={t('common:aria.openMenu')}
                                         >
                                             <Bars3Icon className="w-6 h-6 text-neutral-800"/>
                                         </button>
@@ -352,7 +352,7 @@ const RentalSearchPage: React.FC<RentalSearchPageProps> = ({ onToggleSidebar }) 
                                                     <button
                                                         onClick={() => handleFilterChange('query', '')}
                                                         className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
-                                                        aria-label="Clear search"
+                                                        aria-label={t('common:aria.clearSearch')}
                                                     >
                                                         <XMarkIcon className="w-4 h-4" />
                                                     </button>
@@ -382,7 +382,7 @@ const RentalSearchPage: React.FC<RentalSearchPageProps> = ({ onToggleSidebar }) 
                                         <button
                                             onClick={() => setIsFiltersOpen(true)}
                                             className="min-h-[44px] min-w-[44px] flex items-center justify-center flex-shrink-0 rounded-full hover:bg-neutral-100 active:bg-neutral-200 transition-colors touch-manipulation focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-primary/50"
-                                            aria-label="Open filters"
+                                            aria-label={t('common:aria.openFilters')}
                                         >
                                             <AdjustmentsHorizontalIcon className="w-6 h-6 text-neutral-800"/>
                                         </button>
@@ -390,7 +390,7 @@ const RentalSearchPage: React.FC<RentalSearchPageProps> = ({ onToggleSidebar }) 
                                             <button
                                                 onClick={() => dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'account' })}
                                                 className="min-h-[44px] min-w-[44px] flex items-center justify-center flex-shrink-0 rounded-full hover:bg-neutral-100 active:bg-neutral-200 transition-colors touch-manipulation focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-primary/50 mr-0.5"
-                                                aria-label="My account"
+                                                aria-label={t('common:aria.myAccount')}
                                             >
                                                 <div className="w-8 h-8 rounded-full overflow-hidden">
                                                     {state.currentUser.avatarUrl ? (
@@ -408,7 +408,7 @@ const RentalSearchPage: React.FC<RentalSearchPageProps> = ({ onToggleSidebar }) 
 
                         {/* Floating List/Map toggle */}
                         <div className="absolute bottom-20 xs:bottom-24 sm:bottom-20 md:bottom-6 landscape:bottom-14 left-0 right-0 z-[100] p-3 sm:p-4 landscape:p-2 pointer-events-none flex justify-center" style={{ paddingBottom: 'max(env(safe-area-inset-bottom), 8px)' }}>
-                            <div className="pointer-events-auto mx-auto w-fit" role="tablist" aria-label="View toggle">
+                            <div className="pointer-events-auto mx-auto w-fit" role="tablist" aria-label={t('common:aria.viewToggle')}>
                                 <LiquidGlassSwitch
                                     options={[
                                         { value: 'list', label: t('search:map.list'), icon: <Squares2x2Icon className="w-full h-full" /> },
@@ -432,7 +432,7 @@ const RentalSearchPage: React.FC<RentalSearchPageProps> = ({ onToggleSidebar }) 
                         <div className="relative w-full sm:max-w-md sm:rounded-xl rounded-t-xl max-h-[85vh] overflow-y-auto glass-scrollbar glass-panel" onClick={e => e.stopPropagation()}>
                             <div className="sticky top-0 z-10 px-4 py-3 flex items-center justify-between" style={{ background: 'rgba(255,255,255,0.9)', backdropFilter: 'blur(20px)', WebkitBackdropFilter: 'blur(20px)', borderBottom: '1px solid rgba(0,0,0,0.06)' }}>
                                 <h2 className="text-lg font-bold text-gray-900">{t('rental:filters.title')}</h2>
-                                <Button variant="glass" size="icon" onClick={() => setIsFiltersOpen(false)} className="rounded-xl" aria-label="Close filters">
+                                <Button variant="glass" size="icon" onClick={() => setIsFiltersOpen(false)} className="rounded-xl" aria-label={t('common:aria.closeFilters')}>
                                     <XMarkIcon className="w-5 h-5 text-gray-500" />
                                 </Button>
                             </div>

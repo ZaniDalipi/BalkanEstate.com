@@ -280,7 +280,12 @@
     "changeLanguage": "Αλλαγή γλώσσας",
     "userAvatar": "Εικόνα Χρήστη",
     "showPassword": "Εμφάνιση κωδικού",
-    "hidePassword": "Απόκρυψη κωδικού"
+    "hidePassword": "Απόκρυψη κωδικού",
+    "clearSearch": "Καθαρισμός αναζήτησης",
+    "openFilters": "Άνοιγμα φίλτρων",
+    "closeFilters": "Κλείσιμο φίλτρων",
+    "myAccount": "Ο λογαριασμός μου",
+    "viewToggle": "Εναλλαγή προβολής"
   },
   "social": {
     "facebook": "Facebook",

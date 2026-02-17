@@ -14,6 +14,7 @@
   "cannotSaveEmptySearch": "Cannot save an empty search. Please add some criteria or move to an area on the map.",
   "searchSaved": "Search saved successfully!",
   "couldNotSaveSearch": "Could not save search. AI might be busy.",
+  "areaNear": "Area near {{name}}",
   "mobileMapInfo": "Showing properties visible on map",
   "showingNearbyProperties": "Showing properties you may like in {{location}}",
   "filters": {

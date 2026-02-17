@@ -280,7 +280,12 @@
     "changeLanguage": "Change language",
     "userAvatar": "User Avatar",
     "showPassword": "Show password",
-    "hidePassword": "Hide password"
+    "hidePassword": "Hide password",
+    "clearSearch": "Clear search",
+    "openFilters": "Open filters",
+    "closeFilters": "Close filters",
+    "myAccount": "My account",
+    "viewToggle": "View toggle"
   },
   "social": {
     "facebook": "Facebook",

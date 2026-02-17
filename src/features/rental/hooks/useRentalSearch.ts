@@ -69,7 +69,7 @@ export function useRentalSearch() {
             if (filters.sortBy) params.set('sortBy', filters.sortBy);
 
             const response = await fetch(`${API_CONFIG.BASE_URL}/properties?${params.toString()}`);
-            if (!response.ok) throw new Error('Failed to fetch rental properties');
+            if (!response.ok) throw new Error(t('rental:fetchError', 'Failed to fetch rental properties'));
             const data = await response.json();
 
             const transformed = (data.properties || []).map((p: any) => ({
@@ -332,7 +332,7 @@ export function useRentalSearch() {
                 const name = await generateSearchNameFromCoords(center.lat, center.lng, mapBounds);
                 newSearch = {
                     id: `ss-${now}`,
-                    name: `Area near ${name}`,
+                    name: t('search:areaNear', { name, defaultValue: `Area near ${name}` }),
                     filters: { ...initialFilters, listingType: 'rent' as const },
                     drawnBoundsJSON: serializeBounds(mapBounds),
                     createdAt: now,

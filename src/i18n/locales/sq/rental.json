@@ -17,6 +17,7 @@
   "internetIncluded": "Interneti perfsh.",
   "petsAllowed": "Kafshët OK",
   "availableFrom": "E disponueshme",
+  "fetchError": "Dështoi marrja e pronave me qira",
   "seo": {
     "title": "Prona me Qira | BalkanEstate",
     "description": "Shfletoni prona me qira ne te gjithe Ballkanin. Gjeni apartamente, shtepi dhe vila me qira me informacion te detajuar."
@@ -49,7 +50,8 @@
     "sqftHigh": "Me te medhatë",
     "search": "Kerko Qira",
     "reset": "Rivendos",
-    "searchCity": "Kerko sipas qytetit ose vendndodhjes..."
+    "searchCity": "Kerko sipas qytetit ose vendndodhjes...",
+    "acShort": "AC"
   },
   "form": {
     "title": "Listoni Pronen tuaj me Qira",

@@ -280,7 +280,12 @@
     "changeLanguage": "Промени езика",
     "userAvatar": "Аватар на потребителя",
     "showPassword": "Покажи паролата",
-    "hidePassword": "Скрий паролата"
+    "hidePassword": "Скрий паролата",
+    "clearSearch": "Изчисти търсенето",
+    "openFilters": "Отвори филтри",
+    "closeFilters": "Затвори филтри",
+    "myAccount": "Моят акаунт",
+    "viewToggle": "Промени изглед"
   },
   "social": {
     "facebook": "Facebook",
