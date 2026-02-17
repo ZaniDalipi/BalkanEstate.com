@@ -199,6 +199,20 @@ const CityRecommendations: React.FC = () => {
     return t('trends.stable');
   };
 
+  // Human-readable demand label + color based on score ranges
+  const getDemandInfo = (score: number) => {
+    if (score >= 70) return { label: t('cityCard.demandHigh', 'High'), color: 'text-green-600', barColor: 'from-green-400 to-green-500' };
+    if (score >= 40) return { label: t('cityCard.demandMedium', 'Moderate'), color: 'text-amber-600', barColor: 'from-amber-400 to-amber-500' };
+    return { label: t('cityCard.demandLow', 'Low'), color: 'text-red-500', barColor: 'from-red-400 to-red-500' };
+  };
+
+  // Human-readable investment label + color based on score ranges
+  const getInvestmentInfo = (score: number) => {
+    if (score >= 70) return { label: t('cityCard.investmentExcellent', 'Excellent'), color: 'text-green-600', barColor: 'from-green-400 to-green-500' };
+    if (score >= 40) return { label: t('cityCard.investmentGood', 'Good'), color: 'text-blue-600', barColor: 'from-blue-400 to-blue-500' };
+    return { label: t('cityCard.investmentFair', 'Fair'), color: 'text-neutral-500', barColor: 'from-neutral-400 to-neutral-500' };
+  };
+
   if (loading) {
     return (
       <div className="p-8">
@@ -333,8 +347,8 @@ const CityRecommendations: React.FC = () => {
                 onClick={() => handleCityClick(city)}
                 className="bg-white rounded-xl border border-neutral-200 overflow-hidden hover:shadow-2xl hover:border-primary hover:scale-[1.02] transition-all duration-300 text-left group shadow-md"
               >
-                {/* City Image Header with Gradient Fade */}
-                <div className="relative h-40 overflow-hidden">
+                {/* City Image Header */}
+                <div className="relative h-36 overflow-hidden">
                   {/* Background Image or Gradient Fallback */}
                   {hasImage ? (
                     <img
@@ -352,22 +366,19 @@ const CityRecommendations: React.FC = () => {
                     />
                   )}
 
-                  {/* Gradient Overlay - Fades to white at bottom */}
-                  <div className="absolute inset-0 bg-gradient-to-t from-white via-white/30 to-transparent" />
+                  {/* Dark overlay for text readability */}
+                  <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/30 to-black/60" />
 
-                  {/* Dark overlay for better text readability */}
-                  <div className="absolute inset-0 bg-gradient-to-b from-black/50 via-black/20 to-transparent" />
-
-                  {/* City Name Overlay */}
+                  {/* City Name & Trend */}
                   <div className="absolute top-3 left-3 right-3 flex items-start justify-between">
-                    <div className="bg-black/40 backdrop-blur-sm rounded-lg px-3 py-2">
-                      <div className="flex items-center gap-2 mb-0.5">
-                        <MapPinIcon className="w-5 h-5 text-white" />
-                        <h3 className="text-lg font-bold text-white group-hover:text-primary transition-colors">
+                    <div>
+                      <div className="flex items-center gap-1.5">
+                        <MapPinIcon className="w-4 h-4 text-white/90" />
+                        <h3 className="text-lg font-bold text-white group-hover:text-primary-light transition-colors">
                           {city.city}
                         </h3>
                       </div>
-                      <p className="text-xs text-white/90 ml-7">{city.country}</p>
+                      <p className="text-xs text-white/80 ml-5.5">{city.country}</p>
                     </div>
                     <div className={`px-2.5 py-1 rounded-full text-xs font-semibold flex items-center gap-1 shadow-lg ${getTrendColor(city.marketTrend)}`}>
                       {getTrendIcon(city.marketTrend)}
@@ -375,62 +386,122 @@ const CityRecommendations: React.FC = () => {
                     </div>
                   </div>
 
-                  {/* Price Overlay at Bottom */}
-                  <div className="absolute bottom-2 left-3 right-3 flex items-end justify-between">
-                    <div className="bg-white/95 backdrop-blur-sm rounded-lg px-3 py-1.5 shadow-md">
-                      <p className="text-xs text-neutral-500">{t('cityCard.avgPricePerSqm')}</p>
-                      <p className="text-lg font-bold text-neutral-900">€{city.avgPricePerSqm.toLocaleString()}/m²</p>
+                  {/* Listings & Sold count on image */}
+                  <div className="absolute bottom-2.5 left-3 right-3 flex items-center gap-2">
+                    <div className="flex items-center gap-1 bg-black/40 backdrop-blur-sm rounded-full px-2.5 py-1">
+                      <HomeIcon className="w-3.5 h-3.5 text-white/80" />
+                      <span className="text-xs font-medium text-white/90">{city.listingsCount} {t('footer.listings')}</span>
                     </div>
-                    <div className="bg-white/95 backdrop-blur-sm rounded-lg px-3 py-1.5 shadow-md text-right">
-                      <p className="text-xs text-neutral-500">{t('cityCard.medianPrice')}</p>
-                      <p className="text-base font-semibold text-primary">{formatPrice(city.medianPrice, city.countryCode)}</p>
+                    <div className="flex items-center gap-1 bg-black/40 backdrop-blur-sm rounded-full px-2.5 py-1">
+                      <CalendarIcon className="w-3.5 h-3.5 text-white/80" />
+                      <span className="text-xs font-medium text-white/90">{city.soldLastMonth} {t('footer.soldPerMonth')}</span>
                     </div>
                   </div>
                 </div>
 
                 {/* Card Content */}
-                <div className="p-5">
-                  {/* Score Badges */}
-                  <div className="flex gap-2 mb-4">
-                    <div className="flex items-center gap-1.5 bg-amber-50 text-amber-700 px-3 py-1.5 rounded-lg text-xs font-semibold">
-                      <FireIcon className="w-4 h-4" />
-                      {t('cityCard.demand')}: {city.demandScore}/100
+                <div className="p-4">
+                  {/* Price Headline Section */}
+                  <div className="flex items-stretch gap-3 mb-4">
+                    {/* Avg Price per sqm - Primary metric */}
+                    <div className="flex-1 bg-gradient-to-br from-primary/5 to-primary/10 rounded-xl p-3 border border-primary/10">
+                      <p className="text-[11px] font-medium text-neutral-500 mb-1">{t('cityCard.avgPricePerSqm')}</p>
+                      <div className="flex items-baseline gap-1">
+                        <span className="text-xl font-extrabold text-neutral-900">€{city.avgPricePerSqm.toLocaleString()}</span>
+                        <span className="text-xs font-medium text-neutral-400">/m²</span>
+                      </div>
                     </div>
-                    <div className="flex items-center gap-1.5 bg-blue-50 text-blue-700 px-3 py-1.5 rounded-lg text-xs font-semibold">
-                      <StarIcon className="w-4 h-4" />
-                      {t('cityCard.investment')}: {city.investmentScore}/100
+                    {/* Typical Property Price */}
+                    <div className="flex-1 bg-neutral-50 rounded-xl p-3 border border-neutral-100">
+                      <p className="text-[11px] font-medium text-neutral-500 mb-1">{t('cityCard.medianPrice')}</p>
+                      <p className="text-lg font-bold text-primary">{formatPrice(city.medianPrice, city.countryCode)}</p>
                     </div>
                   </div>
 
-                  {/* Key Metrics */}
-                  <div className="space-y-2.5 mb-4">
-                    <div className="flex justify-between items-center">
-                      <span className="text-sm text-neutral-600">{t('cityCard.yoyGrowth')}</span>
-                      <span className={`text-base font-semibold ${
-                        city.priceGrowthYoY > 0 ? 'text-green-600' : city.priceGrowthYoY < 0 ? 'text-red-600' : 'text-neutral-600'
-                      }`}>
-                        {city.priceGrowthYoY > 0 ? '+' : ''}{city.priceGrowthYoY}%
-                      </span>
+                  {/* Key Stats - 3 columns with clear labels */}
+                  <div className="grid grid-cols-3 gap-2 mb-4">
+                    {/* Price Change */}
+                    <div className={`text-center p-2.5 rounded-xl ${
+                      city.priceGrowthYoY > 0 ? 'bg-green-50 border border-green-100' : city.priceGrowthYoY < 0 ? 'bg-red-50 border border-red-100' : 'bg-neutral-50 border border-neutral-100'
+                    }`}>
+                      <div className="flex items-center justify-center gap-0.5 mb-0.5">
+                        {city.priceGrowthYoY > 0 ? (
+                          <ArrowTrendingUpIcon className="w-3.5 h-3.5 text-green-500" />
+                        ) : city.priceGrowthYoY < 0 ? (
+                          <ArrowTrendingDownIcon className="w-3.5 h-3.5 text-red-500" />
+                        ) : null}
+                        <span className={`text-base font-bold ${
+                          city.priceGrowthYoY > 0 ? 'text-green-600' : city.priceGrowthYoY < 0 ? 'text-red-600' : 'text-neutral-600'
+                        }`}>
+                          {city.priceGrowthYoY > 0 ? '+' : ''}{city.priceGrowthYoY}%
+                        </span>
+                      </div>
+                      <span className="text-[10px] text-neutral-500 font-medium leading-tight block">{t('cityCard.yoyGrowth')}</span>
                     </div>
-                    <div className="flex justify-between items-center">
-                      <span className="text-sm text-neutral-600">{t('cityCard.rentalYield')}</span>
-                      <span className="text-base font-semibold text-primary">
-                        {city.rentalYield}%
-                      </span>
+                    {/* Rental Return */}
+                    <div className="text-center p-2.5 rounded-xl bg-blue-50 border border-blue-100">
+                      <span className="text-base font-bold text-blue-600 block mb-0.5">{city.rentalYield}%</span>
+                      <span className="text-[10px] text-neutral-500 font-medium leading-tight block">{t('cityCard.rentalYield')}</span>
                     </div>
-                    <div className="flex justify-between items-center">
-                      <span className="text-sm text-neutral-600">{t('cityCard.daysOnMarket')}</span>
-                      <span className="text-base font-semibold text-neutral-700">
-                        {city.averageDaysOnMarket} {t('cityCard.days')}
-                      </span>
+                    {/* Time to Sell */}
+                    <div className="text-center p-2.5 rounded-xl bg-neutral-50 border border-neutral-100">
+                      <div className="flex items-baseline justify-center gap-0.5 mb-0.5">
+                        <span className="text-base font-bold text-neutral-700">{city.averageDaysOnMarket}</span>
+                        <span className="text-[10px] text-neutral-400 font-medium">{t('cityCard.daysUnit')}</span>
+                      </div>
+                      <span className="text-[10px] text-neutral-500 font-medium leading-tight block">{t('cityCard.daysOnMarket')}</span>
                     </div>
                   </div>
+
+                  {/* Demand & Investment - Visual bars with human-readable labels */}
+                  {(() => {
+                    const demandInfo = getDemandInfo(city.demandScore);
+                    const investmentInfo = getInvestmentInfo(city.investmentScore);
+                    return (
+                      <div className="space-y-3 mb-4">
+                        <div>
+                          <div className="flex items-center justify-between mb-1.5">
+                            <span className="text-xs font-medium text-neutral-600 flex items-center gap-1.5">
+                              <FireIcon className="w-3.5 h-3.5 text-amber-500" />
+                              {t('cityCard.demand')}
+                            </span>
+                            <span className={`text-xs font-bold ${demandInfo.color} px-2 py-0.5 rounded-full bg-white border border-current/15`}>
+                              {demandInfo.label}
+                            </span>
+                          </div>
+                          <div className="w-full h-2 bg-neutral-100 rounded-full overflow-hidden">
+                            <div
+                              className={`h-full rounded-full bg-gradient-to-r ${demandInfo.barColor} transition-all duration-500`}
+                              style={{ width: `${city.demandScore}%` }}
+                            />
+                          </div>
+                        </div>
+                        <div>
+                          <div className="flex items-center justify-between mb-1.5">
+                            <span className="text-xs font-medium text-neutral-600 flex items-center gap-1.5">
+                              <StarIcon className="w-3.5 h-3.5 text-blue-500" />
+                              {t('cityCard.investment')}
+                            </span>
+                            <span className={`text-xs font-bold ${investmentInfo.color} px-2 py-0.5 rounded-full bg-white border border-current/15`}>
+                              {investmentInfo.label}
+                            </span>
+                          </div>
+                          <div className="w-full h-2 bg-neutral-100 rounded-full overflow-hidden">
+                            <div
+                              className={`h-full rounded-full bg-gradient-to-r ${investmentInfo.barColor} transition-all duration-500`}
+                              style={{ width: `${city.investmentScore}%` }}
+                            />
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })()}
 
                   {/* Top Neighborhoods */}
                   {city.topNeighborhoods && city.topNeighborhoods.length > 0 && (
                     <div className="border-t border-neutral-100 pt-3 mb-3">
-                      <h4 className="text-xs font-semibold text-neutral-500 uppercase mb-2 flex items-center gap-1">
-                        <BuildingOfficeIcon className="w-3.5 h-3.5" />
+                      <h4 className="text-[10px] font-semibold text-neutral-400 uppercase tracking-wider mb-2 flex items-center gap-1">
+                        <BuildingOfficeIcon className="w-3 h-3" />
                         {t('sections.topNeighborhoods')}
                       </h4>
                       <div className="flex flex-wrap gap-1.5">
@@ -446,32 +517,20 @@ const CityRecommendations: React.FC = () => {
                   {/* Highlights */}
                   {city.highlights && city.highlights.length > 0 && (
                     <div className="border-t border-neutral-100 pt-3">
-                      <h4 className="text-xs font-semibold text-neutral-500 uppercase mb-2 flex items-center gap-1">
-                        <ChartBarIcon className="w-3.5 h-3.5" />
+                      <h4 className="text-[10px] font-semibold text-neutral-400 uppercase tracking-wider mb-2 flex items-center gap-1">
+                        <ChartBarIcon className="w-3 h-3" />
                         {t('sections.marketInsights')}
                       </h4>
                       <ul className="space-y-1.5">
                         {city.highlights.slice(0, 3).map((highlight, idx) => (
-                          <li key={idx} className="text-xs text-neutral-700 flex items-start gap-2">
-                            <span className="text-primary mt-0.5 font-bold">•</span>
-                            <span className="flex-1">{highlight}</span>
+                          <li key={idx} className="text-xs text-neutral-600 flex items-start gap-2">
+                            <span className="text-primary mt-0.5 font-bold text-[10px]">●</span>
+                            <span className="flex-1 leading-relaxed">{highlight}</span>
                           </li>
                         ))}
                       </ul>
                     </div>
                   )}
-
-                  {/* Stats Footer */}
-                  <div className="border-t border-neutral-100 pt-3 mt-3 flex items-center justify-between text-xs text-neutral-500">
-                    <div className="flex items-center gap-1">
-                      <HomeIcon className="w-4 h-4" />
-                      <span>{city.listingsCount} {t('footer.listings')}</span>
-                    </div>
-                    <div className="flex items-center gap-1">
-                      <CalendarIcon className="w-4 h-4" />
-                      <span>{city.soldLastMonth} {t('footer.soldPerMonth')}</span>
-                    </div>
-                  </div>
 
                   {/* View Listings Button */}
                   <div className="mt-4 pt-3 border-t border-neutral-100">

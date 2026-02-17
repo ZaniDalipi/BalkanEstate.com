@@ -219,12 +219,12 @@
   },
   "featuredAgencies": "Featured Agencies",
   "status": {
-    "new": "New",
-    "reduced": "Price Reduced",
-    "priceReduced": "Price Reduced",
-    "urgent": "Urgent",
-    "exclusive": "Exclusive",
-    "underOffer": "Under Offer",
+    "new": "Novo",
+    "reduced": "Snižena cijena",
+    "priceReduced": "Snižena cijena",
+    "urgent": "Hitno",
+    "exclusive": "Ekskluzivno",
+    "underOffer": "Rezervisano",
     "soldBanner": "Ova nekretnina je prodata",
     "rentedBanner": "Ova nekretnina je iznajmljena",
     "rentedUntil": "Dostupno od {{date}}"

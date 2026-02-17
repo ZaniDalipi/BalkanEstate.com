@@ -106,7 +106,7 @@ const RentalFilters: React.FC<RentalFiltersProps> = ({ filters, onFilterChange, 
                         {[
                             { key: 'petsAllowed' as keyof Filters, label: t('rental:filters.petsAllowed') },
                             { key: 'hasBalcony' as keyof Filters, label: t('rental:filters.hasBalcony') },
-                            { key: 'hasAirConditioning' as keyof Filters, label: 'AC' },
+                            { key: 'hasAirConditioning' as keyof Filters, label: t('rental:filters.acShort') },
                             { key: 'hasElevator' as keyof Filters, label: t('rental:filters.hasElevator') },
                         ].map(({ key, label }) => (
                             <label key={key} className="flex items-center gap-1 text-[11px] text-gray-400 cursor-pointer whitespace-nowrap">

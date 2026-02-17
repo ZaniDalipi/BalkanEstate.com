@@ -1,7 +1,13 @@
 {
   "page": {
-    "title": "Истражи градови на Балканот",
+    "title": "Истражете Балкански Градови - Увиди за Пазарот на Недвижности",
     "description": "AI-овозможени анализи на пазарот за {{count}} големи градови низ 10 земји"
+  },
+  "cards": {
+    "title": "Сите Градови",
+    "allCitiesTitle": "Сите Градови",
+    "countryTitle": "Градови во {{country}}",
+    "subtitle": "Откријте можности за недвижности во {{count}} градови"
   },
   "hero": {
     "title": "Истражи градови на Балканот",
@@ -22,14 +28,22 @@
     "allCountries": "Сите земји"
   },
   "cityCard": {
-    "demand": "Побарувачка",
-    "investment": "Инвестиција",
-    "avgPricePerSqm": "Просечна цена/м²",
-    "medianPrice": "Медијана цена",
-    "yoyGrowth": "Годишен раст",
+    "demand": "Побарувачка на Купувачи",
+    "demandHigh": "Висока",
+    "demandMedium": "Умерена",
+    "demandLow": "Ниска",
+    "investment": "Инвестициски Потенцијал",
+    "investmentExcellent": "Одличен",
+    "investmentGood": "Добар",
+    "investmentFair": "Просечен",
+    "avgPricePerSqm": "Просечна цена по m²",
+    "medianPrice": "Типична цена на имот",
+    "yoyGrowth": "Промена на цена (1 година)",
     "rentalYield": "Приход од изнајмување",
-    "daysOnMarket": "Дена на пазар",
-    "days": "дена"
+    "rentalYieldHelper": "Годишен приход наспроти цена на имот",
+    "daysOnMarket": "Просечно време за продажба",
+    "days": "дена",
+    "daysUnit": "дена"
   },
   "sections": {
     "topNeighborhoods": "Најдобри четврти",
@@ -37,7 +51,8 @@
   },
   "footer": {
     "listings": "огласи",
-    "soldPerMonth": "продадени/месец"
+    "soldPerMonth": "продадени/месец",
+    "viewListings": "Погледнете Огласи на Мапа"
   },
   "trends": {
     "rising": "расте",

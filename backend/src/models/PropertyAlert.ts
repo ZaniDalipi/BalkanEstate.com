@@ -1,6 +1,6 @@
 import mongoose, { Document, Schema } from 'mongoose';
 
-export type AlertType = 'new_listing' | 'price_drop' | 'back_on_market';
+export type AlertType = 'new_listing' | 'price_drop' | 'price_increase' | 'back_on_market';
 
 export interface IPropertyAlert extends Document {
   userId: mongoose.Types.ObjectId;
@@ -32,7 +32,7 @@ const PropertyAlertSchema: Schema = new Schema(
     },
     alertType: {
       type: String,
-      enum: ['new_listing', 'price_drop', 'back_on_market'],
+      enum: ['new_listing', 'price_drop', 'price_increase', 'back_on_market'],
       required: true,
     },
     savedSearchId: {

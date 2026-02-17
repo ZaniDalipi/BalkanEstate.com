@@ -17,6 +17,7 @@
   "internetIncluded": "Internet incl.",
   "petsAllowed": "Animale acceptate",
   "availableFrom": "Disponibil",
+  "fetchError": "Eroare la încărcarea proprietăților de închiriat",
   "seo": {
     "title": "Închiriere Proprietăți | BalkanEstate",
     "description": "Răsfoiți proprietățile de închiriat din Balcani. Găsiți apartamente, case și vile de închiriat cu informații detaliate."
@@ -49,7 +50,8 @@
     "sqftHigh": "Cele mai mari",
     "search": "Caută Închirieri",
     "reset": "Resetare",
-    "searchCity": "Caută după oraș sau locație..."
+    "searchCity": "Caută după oraș sau locație...",
+    "acShort": "AC"
   },
   "form": {
     "title": "Listează Proprietatea pentru Închiriere",

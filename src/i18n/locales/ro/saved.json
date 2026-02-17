@@ -1,47 +1,47 @@
 {
   "page": {
-    "title": "Saved Searches",
-    "description": "Track your saved property searches and get updates on new listings that match your criteria."
+    "title": "Căutări Salvate",
+    "description": "Urmăriți căutările salvate de proprietăți și primiți actualizări despre anunțuri noi care corespund criteriilor dvs."
   },
   "hero": {
-    "title": "Saved Searches",
-    "subtitle": "Track your favorite search criteria and get updates",
+    "title": "Căutări Salvate",
+    "subtitle": "Urmăriți criteriile de căutare favorite și primiți actualizări",
     "searchCount": {
-      "singular": "Saved Search",
-      "plural": "Saved Searches"
+      "singular": "Căutare Salvată",
+      "plural": "Căutări Salvate"
     }
   },
   "loginRequired": {
-    "title": "Log in to view your saved searches",
-    "description": "Save your favorite search criteria and get notified about new listings.",
-    "button": "Login / Register"
+    "title": "Conectați-vă pentru a vedea căutările salvate",
+    "description": "Salvați criteriile de căutare favorite și fiți notificat despre anunțuri noi.",
+    "button": "Conectare / Înregistrare"
   },
   "empty": {
-    "title": "You haven't saved any searches yet.",
-    "description": "Perform a search and click \"Save Search\" to get started, or save this example:",
-    "startSearch": "Or, Start a New Search"
+    "title": "Nu ați salvat încă nicio căutare.",
+    "description": "Efectuați o căutare și faceți clic pe \"Salvare Căutare\" pentru a începe, sau salvați acest exemplu:",
+    "startSearch": "Sau, Începeți o Căutare Nouă"
   },
   "example": {
-    "label": "Example",
-    "name": "Belgrade, under €400k",
-    "save": "Save"
+    "label": "Exemplu",
+    "name": "Belgrad, sub €400k",
+    "save": "Salvare"
   },
   "sort": {
-    "newest": "Newest",
-    "name": "Name",
-    "lastActive": "Last Active"
+    "newest": "Cele mai noi",
+    "name": "Nume",
+    "lastActive": "Ultima Activă"
   },
   "accordion": {
-    "new": "new",
-    "namePlaceholder": "Search name",
-    "save": "Save",
-    "cancel": "Cancel",
-    "rename": "Rename search",
-    "delete": "Delete search",
-    "noProperties": "No properties currently match this search.",
-    "confirmDelete": "Are you sure you want to delete \"{{name}}\"?",
-    "deleteFailed": "Failed to delete saved search. Please try again.",
-    "enterName": "Please enter a name",
-    "renameFailed": "Failed to rename saved search. Please try again."
+    "new": "nou",
+    "namePlaceholder": "Numele căutării",
+    "save": "Salvare",
+    "cancel": "Anulare",
+    "rename": "Redenumire căutare",
+    "delete": "Ștergere căutare",
+    "noProperties": "Nicio proprietate nu corespunde în prezent acestei căutări.",
+    "confirmDelete": "Sunteți sigur că doriți să ștergeți \"{{name}}\"?",
+    "deleteFailed": "Nu s-a putut șterge căutarea salvată. Vă rugăm încercați din nou.",
+    "enterName": "Vă rugăm introduceți un nume",
+    "renameFailed": "Nu s-a putut redenumi căutarea salvată. Vă rugăm încercați din nou."
   }
 }

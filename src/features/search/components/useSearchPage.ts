@@ -174,10 +174,9 @@ export function useSearchPage() {
 
     const toggleDrawing = useCallback(() => {
         setIsDrawing(prev => {
-            // If cancelling drawing mode, clear any drawn bounds
-            if (prev) {
-                updateSearchPageState({ drawnBoundsJSON: null });
-            }
+            // Clear any existing drawn bounds when toggling drawing mode
+            // Starting a new draw replaces the old one; cancelling also clears
+            updateSearchPageState({ drawnBoundsJSON: null });
             return !prev;
         });
         // Hide draw hint when user starts drawing

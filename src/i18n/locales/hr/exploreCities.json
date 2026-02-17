@@ -1,7 +1,13 @@
 {
   "page": {
-    "title": "Istražite Balkanske Gradove",
+    "title": "Istražite Balkanske Gradove - Uvidi u Tržište Nekretnina",
     "description": "AI uvidi u tržište za {{count}} glavnih gradova u 10 zemalja"
+  },
+  "cards": {
+    "title": "Svi Gradovi",
+    "allCitiesTitle": "Svi Gradovi",
+    "countryTitle": "Gradovi u {{country}}",
+    "subtitle": "Otkrijte mogućnosti za nekretnine u {{count}} gradova"
   },
   "hero": {
     "title": "Istražite Balkanske Gradove",
@@ -22,14 +28,22 @@
     "allCountries": "Sve Zemlje"
   },
   "cityCard": {
-    "demand": "Potražnja",
-    "investment": "Investicija",
-    "avgPricePerSqm": "Pros. Cijena/m²",
-    "medianPrice": "Medijalna Cijena",
-    "yoyGrowth": "Godišnji Rast",
+    "demand": "Potražnja Kupaca",
+    "demandHigh": "Visoka",
+    "demandMedium": "Umjerena",
+    "demandLow": "Niska",
+    "investment": "Investicijski Potencijal",
+    "investmentExcellent": "Odličan",
+    "investmentGood": "Dobar",
+    "investmentFair": "Prosječan",
+    "avgPricePerSqm": "Prosječna Cijena po m²",
+    "medianPrice": "Tipična Cijena Nekretnine",
+    "yoyGrowth": "Promjena Cijene (1 Godina)",
     "rentalYield": "Prinos od Najma",
-    "daysOnMarket": "Dana na Tržištu",
-    "days": "dana"
+    "rentalYieldHelper": "Godišnji prihod u odnosu na cijenu nekretnine",
+    "daysOnMarket": "Prosječno Vrijeme Prodaje",
+    "days": "dana",
+    "daysUnit": "dana"
   },
   "sections": {
     "topNeighborhoods": "Najbolje Lokacije",
@@ -37,7 +51,8 @@
   },
   "footer": {
     "listings": "oglasa",
-    "soldPerMonth": "prodano/mj"
+    "soldPerMonth": "prodano/mj.",
+    "viewListings": "Pogledajte Oglase na Karti"
   },
   "trends": {
     "rising": "u porastu",

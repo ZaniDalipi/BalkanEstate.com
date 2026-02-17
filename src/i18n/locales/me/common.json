@@ -280,7 +280,12 @@
     "changeLanguage": "Promijeni jezik",
     "userAvatar": "Korisnički avatar",
     "showPassword": "Prikaži lozinku",
-    "hidePassword": "Sakrij lozinku"
+    "hidePassword": "Sakrij lozinku",
+    "clearSearch": "Obriši pretragu",
+    "openFilters": "Otvori filtere",
+    "closeFilters": "Zatvori filtere",
+    "myAccount": "Moj nalog",
+    "viewToggle": "Promijeni prikaz"
   },
   "social": {
     "facebook": "Facebook",

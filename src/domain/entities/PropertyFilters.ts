@@ -47,7 +47,11 @@ export class PropertyFilters {
     public readonly maxDistanceToSea: number | null = null,
     public readonly maxDistanceToSchool: number | null = null,
     public readonly maxDistanceToHospital: number | null = null,
-    public readonly amenities: string[] = []
+    public readonly amenities: string[] = [],
+    public readonly minPricePerSqm: number | null = null,
+    public readonly maxPricePerSqm: number | null = null,
+    public readonly maxDaysListed: number | null = null,
+    public readonly hasPriceIncrease: boolean | null = null
   ) {}
 
   // Business logic methods
@@ -86,7 +90,11 @@ export class PropertyFilters {
       this.maxDistanceToSea !== null ||
       this.maxDistanceToSchool !== null ||
       this.maxDistanceToHospital !== null ||
-      this.amenities.length > 0
+      this.amenities.length > 0 ||
+      this.minPricePerSqm !== null ||
+      this.maxPricePerSqm !== null ||
+      this.maxDaysListed !== null ||
+      this.hasPriceIncrease !== null
     );
   }
 
@@ -125,6 +133,10 @@ export class PropertyFilters {
     if (this.maxDistanceToSchool !== null) count++;
     if (this.maxDistanceToHospital !== null) count++;
     if (this.amenities.length > 0) count += this.amenities.length;
+    if (this.minPricePerSqm !== null) count++;
+    if (this.maxPricePerSqm !== null) count++;
+    if (this.maxDaysListed !== null) count++;
+    if (this.hasPriceIncrease !== null) count++;
     return count;
   }
 
@@ -167,7 +179,11 @@ export class PropertyFilters {
       this.maxDistanceToSea,
       this.maxDistanceToSchool,
       this.maxDistanceToHospital,
-      this.amenities
+      this.amenities,
+      this.minPricePerSqm,
+      this.maxPricePerSqm,
+      this.maxDaysListed,
+      this.hasPriceIncrease
     );
   }
 
@@ -206,7 +222,11 @@ export class PropertyFilters {
       this.maxDistanceToSea,
       this.maxDistanceToSchool,
       this.maxDistanceToHospital,
-      this.amenities
+      this.amenities,
+      this.minPricePerSqm,
+      this.maxPricePerSqm,
+      this.maxDaysListed,
+      this.hasPriceIncrease
     );
   }
 
@@ -246,7 +266,11 @@ export class PropertyFilters {
       dto.maxDistanceToSea,
       dto.maxDistanceToSchool,
       dto.maxDistanceToHospital,
-      dto.amenities || []
+      dto.amenities || [],
+      dto.minPricePerSqm,
+      dto.maxPricePerSqm,
+      dto.maxDaysListed,
+      dto.hasPriceIncrease
     );
   }
 
@@ -286,6 +310,10 @@ export class PropertyFilters {
       maxDistanceToSchool: this.maxDistanceToSchool,
       maxDistanceToHospital: this.maxDistanceToHospital,
       amenities: this.amenities,
+      minPricePerSqm: this.minPricePerSqm,
+      maxPricePerSqm: this.maxPricePerSqm,
+      maxDaysListed: this.maxDaysListed,
+      hasPriceIncrease: this.hasPriceIncrease,
     };
   }
 

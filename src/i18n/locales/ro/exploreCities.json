@@ -1,57 +1,72 @@
 {
   "page": {
-    "title": "Explore Balkan Cities",
-    "description": "AI-powered market insights for {{count}} major cities across 10 countries"
+    "title": "Explorați Orașele Balcanice - Informații despre Piața Imobiliară",
+    "description": "Informații de piață generate de inteligența artificială pentru {{count}} orașe mari din 10 țări"
+  },
+  "cards": {
+    "title": "Toate Orașele",
+    "allCitiesTitle": "Toate Orașele",
+    "countryTitle": "Orașe din {{country}}",
+    "subtitle": "Descoperiți oportunități imobiliare în {{count}} orașe"
   },
   "hero": {
-    "title": "Explore Balkan Cities",
-    "subtitle": "AI-powered market insights for {{count}} major cities across 10 countries",
-    "discoverSubtitle": "Discover the best real estate markets across the Balkans"
+    "title": "Explorați Orașele Balcanice",
+    "subtitle": "Informații de piață generate de inteligența artificială pentru {{count}} orașe mari din 10 țări",
+    "discoverSubtitle": "Descoperiți cele mai bune piețe imobiliare din Balcani"
   },
   "empty": {
-    "title": "No City Data Available",
-    "message": "Market data will be updated soon. Check back later!"
+    "title": "Nu Sunt Disponibile Date despre Orașe",
+    "message": "Datele de piață vor fi actualizate în curând. Verificați din nou mai târziu!"
   },
   "stats": {
-    "totalCities": "Total Cities",
-    "countries": "Countries",
-    "avgGrowth": "Avg. Growth",
-    "totalListings": "Total Listings"
+    "totalCities": "Total Orașe",
+    "countries": "Țări",
+    "avgGrowth": "Creștere Medie",
+    "totalListings": "Total Anunțuri"
   },
   "filters": {
-    "allCountries": "All Countries"
+    "allCountries": "Toate Țările"
   },
   "cityCard": {
-    "demand": "Demand",
-    "investment": "Investment",
-    "avgPricePerSqm": "Avg. Price/m²",
-    "medianPrice": "Median Price",
-    "yoyGrowth": "YoY Growth",
-    "rentalYield": "Rental Yield",
-    "daysOnMarket": "Days on Market",
-    "days": "days"
+    "demand": "Cererea Cumpărătorilor",
+    "demandHigh": "Ridicată",
+    "demandMedium": "Moderată",
+    "demandLow": "Scăzută",
+    "investment": "Potențial de Investiție",
+    "investmentExcellent": "Excelent",
+    "investmentGood": "Bun",
+    "investmentFair": "Moderat",
+    "avgPricePerSqm": "Preț Mediu pe m²",
+    "medianPrice": "Preț Tipic al Proprietății",
+    "yoyGrowth": "Schimbarea Prețului (1 An)",
+    "rentalYield": "Randament din Chirie",
+    "rentalYieldHelper": "Venitul anual raportat la prețul proprietății",
+    "daysOnMarket": "Timp Mediu de Vânzare",
+    "days": "zile",
+    "daysUnit": "zile"
   },
   "sections": {
-    "topNeighborhoods": "Top Neighborhoods",
-    "marketInsights": "Market Insights"
+    "topNeighborhoods": "Cartiere de Top",
+    "marketInsights": "Informații de Piață"
   },
   "footer": {
-    "listings": "listings",
-    "soldPerMonth": "sold/mo"
+    "listings": "anunțuri",
+    "soldPerMonth": "vândute/lună",
+    "viewListings": "Vedeți Anunțurile pe Hartă"
   },
   "trends": {
-    "rising": "rising",
-    "declining": "declining",
-    "stable": "stable"
+    "rising": "în creștere",
+    "declining": "în scădere",
+    "stable": "stabil"
   },
   "aiInsights": {
-    "title": "AI-Powered Market Intelligence",
-    "description": "Our market data is powered by Gemini AI and updated twice monthly (1st and 15th). We analyze real-time market trends, property prices, demand indicators, and local insights across {{count}} major cities in the Balkans.",
-    "lastUpdated": "Last updated: {{date}}",
-    "dataSource": "Data source: Gemini AI + Local Property Databases"
+    "title": "Inteligență de Piață Generată de AI",
+    "description": "Datele noastre de piață sunt generate de Gemini AI și actualizate de două ori pe lună (1 și 15). Analizăm tendințele pieței în timp real, prețurile proprietăților, indicatorii cererii și informații locale în {{count}} orașe mari din Balcani.",
+    "lastUpdated": "Ultima actualizare: {{date}}",
+    "dataSource": "Sursa datelor: Gemini AI + Baze de Date Locale de Proprietăți"
   },
   "loading": {
-    "title": "Loading Cities...",
-    "message": "Fetching market data for Balkan cities"
+    "title": "Se Încarcă Orașele...",
+    "message": "Se preiau datele de piață pentru orașele balcanice"
   }
 }

@@ -1,61 +1,72 @@
 {
-"page": {
-"title": "Eksploroni Qytetet Ballkanike",
-"description": "Njohuri të pasura nga AI për {{count}} qytete kryesore në 10 vende"
-},
-"cards": {
-"title": "Të Gjitha Qytetet",
-"subtitle": "Eksploroni tregjet e pasurive të paluajtshme në {{count}} qytete në Ballkan"
-},
-"hero": {
-"title": "Eksploroni Qytetet Ballkanike",
-"subtitle": "Njohuri të pasura nga AI për {{count}} qytete kryesore në 10 vende",
-"discoverSubtitle": "Zbuloni tregjet më të mira të pasurive të paluajtshme në të gjithë Ballkanin"
-},
-"empty": {
-"title": "Nuk ka të dhëna për Qytetin",
-"message": "Të dhënat e tregut do të përditësohen së shpejti. Kontrolloni më vonë!"
-},
-"stats": {
-"totalCities": "Gjithsej Qytete",
-"countries": "Vende",
-"avgGrowth": "Rritja Mesatare",
-"totalListings": "Gjithsej Listime"
-},
-"filters": {
-"allCountries": "Të Gjitha Vendet"
-},
-"cityCard": {
-"demand": "Kërkesa",
-"investment": "Investim",
-"avgPricePerSqm": "Çmimi Mesatar/m²",
-"medianPrice": "Çmimi Mesatar",
-"yoyGrowth": "Rritje Vjetore",
-"rentalYield": "Rendimenti me Qira",
-"daysOnMarket": "Ditë në Treg",
-"days": "ditë"
-},
-"sections": {
-"topNeighborhoods": "Lagjet Më të Mira",
-"marketInsights": "Njohuri të Tregut"
-},
-"footer": {
-"listings": "listime",
-"soldPerMonth": "shitur/muaj"
-},
-"trends": {
-"rising": "në rritje",
-"declining": "në rënie",
-"stable": "stabile"
-},
-"aiInsights": {
-"title": "Inteligjencë e Tregut e Fuqizuar nga AI",
-"description": "Të dhënat tona të tregut janë fuqizuar nga Gemini AI dhe përditësohen dy herë në muaj (1 dhe 15). Ne analizojmë trendet në kohë reale të tregut, çmimet e pasurive, treguesit e kërkesës dhe njohuritë lokale në {{count}} qytete kryesore në Ballkan.",
-"lastUpdated": "Përditësuar së fundmi: {{date}}",
-"dataSource": "Burimi i të dhënave: Gemini AI + Bazat e të Dhënave Lokale të Pasurive"
-},
-"loading": {
-"title": "Po ngarkohen Qytetet...",
-"message": "Po merren të dhënat e tregut për qytetet ballkanike"
-}
+  "page": {
+    "title": "Eksploroni Qytetet Ballkanike - Njohuri për Tregun e Pasurive",
+    "description": "Njohuri të pasura nga AI për {{count}} qytete kryesore në 10 vende"
+  },
+  "cards": {
+    "title": "Të Gjitha Qytetet",
+    "allCitiesTitle": "Të Gjitha Qytetet",
+    "countryTitle": "Qytetet në {{country}}",
+    "subtitle": "Zbuloni mundësi për pasuri të paluajtshme në {{count}} qytete"
+  },
+  "hero": {
+    "title": "Eksploroni Qytetet Ballkanike",
+    "subtitle": "Njohuri të pasura nga AI për {{count}} qytete kryesore në 10 vende",
+    "discoverSubtitle": "Zbuloni tregjet më të mira të pasurive të paluajtshme në të gjithë Ballkanin"
+  },
+  "empty": {
+    "title": "Nuk ka të dhëna për Qytetin",
+    "message": "Të dhënat e tregut do të përditësohen së shpejti. Kontrolloni më vonë!"
+  },
+  "stats": {
+    "totalCities": "Gjithsej Qytete",
+    "countries": "Vende",
+    "avgGrowth": "Rritja Mesatare",
+    "totalListings": "Gjithsej Njoftime"
+  },
+  "filters": {
+    "allCountries": "Të Gjitha Vendet"
+  },
+  "cityCard": {
+    "demand": "Kërkesa e Blerësve",
+    "demandHigh": "E lartë",
+    "demandMedium": "Mesatare",
+    "demandLow": "E ulët",
+    "investment": "Potenciali i Investimit",
+    "investmentExcellent": "Shkëlqyer",
+    "investmentGood": "Mirë",
+    "investmentFair": "Mesatar",
+    "avgPricePerSqm": "Çmimi Mesatar për m²",
+    "medianPrice": "Çmimi Tipik i Pronës",
+    "yoyGrowth": "Ndryshimi i Çmimit (1 Vit)",
+    "rentalYield": "Kthimi nga Qiraja",
+    "rentalYieldHelper": "Të ardhurat vjetore kundrejt çmimit të pronës",
+    "daysOnMarket": "Koha Mesatare e Shitjes",
+    "days": "ditë",
+    "daysUnit": "ditë"
+  },
+  "sections": {
+    "topNeighborhoods": "Lagjet Më të Mira",
+    "marketInsights": "Njohuri të Tregut"
+  },
+  "footer": {
+    "listings": "njoftime",
+    "soldPerMonth": "shitur/muaj",
+    "viewListings": "Shikoni Njoftimet në Hartë"
+  },
+  "trends": {
+    "rising": "në rritje",
+    "declining": "në rënie",
+    "stable": "stabile"
+  },
+  "aiInsights": {
+    "title": "Inteligjencë e Tregut e Fuqizuar nga AI",
+    "description": "Të dhënat tona të tregut janë fuqizuar nga Gemini AI dhe përditësohen dy herë në muaj (1 dhe 15). Ne analizojmë trendet në kohë reale të tregut, çmimet e pasurive, treguesit e kërkesës dhe njohuritë lokale në {{count}} qytete kryesore në Ballkan.",
+    "lastUpdated": "Përditësuar së fundmi: {{date}}",
+    "dataSource": "Burimi i të dhënave: Gemini AI + Bazat e të Dhënave Lokale të Pasurive"
+  },
+  "loading": {
+    "title": "Po ngarkohen Qytetet...",
+    "message": "Po merren të dhënat e tregut për qytetet ballkanike"
+  }
 }

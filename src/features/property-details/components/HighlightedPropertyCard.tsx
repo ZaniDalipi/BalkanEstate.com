@@ -311,10 +311,17 @@ const HighlightedCardInner = memo<HighlightedCardInnerProps>(({
       <div className="flex-1 p-4 md:p-5 flex flex-col min-w-0">
         {/* Price & Type Row - iOS style */}
         <div className="flex items-center justify-between gap-2 mb-2">
-          <span className="text-primary text-base md:text-lg font-bold tracking-tight">
-            {formatPrice(property.price, property.country)}
-            {isRental && <span className="text-xs font-normal text-neutral-400">/{property.rentPeriod === 'weekly' ? t('common:wk', 'wk') : property.rentPeriod === 'daily' ? t('common:day', 'day') : t('common:mo', 'mo')}</span>}
-          </span>
+          <div>
+            <span className="text-primary text-base md:text-lg font-bold tracking-tight">
+              {formatPrice(property.price, property.country)}
+              {isRental && <span className="text-xs font-normal text-neutral-400">/{property.rentPeriod === 'weekly' ? t('common:wk', 'wk') : property.rentPeriod === 'daily' ? t('common:day', 'day') : t('common:mo', 'mo')}</span>}
+            </span>
+            {property.sqft > 0 && property.propertyType !== 'land' && (
+              <p className="text-[11px] text-neutral-400 font-medium">
+                {formatPrice(Math.round(property.price / property.sqft), property.country)} per m²
+              </p>
+            )}
+          </div>
           <span className="bg-neutral-100 text-neutral-600 text-[11px] font-medium px-2.5 py-[3px] rounded-full">
             {propertyTypeLabel}
           </span>

@@ -14,6 +14,7 @@
   "cannotSaveEmptySearch": "Nije moguće spremiti praznu pretragu. Molimo dodajte kriterije ili se pomaknite na područje na karti.",
   "searchSaved": "Pretraga uspješno spremljena!",
   "couldNotSaveSearch": "Nije moguće spremiti pretragu. AI bi mogao biti zauzet.",
+  "areaNear": "Područje blizu {{name}}",
   "mobileMapInfo": "Prikazane nekretnine vidljive na karti",
   "showingNearbyProperties": "Prikazujemo nekretnine koje bi vam se mogle svidjeti u {{location}}",
   "filters": {

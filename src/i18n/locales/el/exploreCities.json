@@ -1,57 +1,72 @@
 {
   "page": {
-    "title": "Explore Balkan Cities",
-    "description": "AI-powered market insights for {{count}} major cities across 10 countries"
+    "title": "Εξερευνήστε Βαλκανικές Πόλεις - Πληροφορίες Αγοράς Ακινήτων",
+    "description": "Αναλύσεις αγοράς με τεχνητή νοημοσύνη για {{count}} μεγάλες πόλεις σε 10 χώρες"
+  },
+  "cards": {
+    "title": "Όλες οι Πόλεις",
+    "allCitiesTitle": "Όλες οι Πόλεις",
+    "countryTitle": "Πόλεις στην {{country}}",
+    "subtitle": "Ανακαλύψτε ευκαιρίες ακινήτων σε {{count}} πόλεις"
   },
   "hero": {
-    "title": "Explore Balkan Cities",
-    "subtitle": "AI-powered market insights for {{count}} major cities across 10 countries",
-    "discoverSubtitle": "Discover the best real estate markets across the Balkans"
+    "title": "Εξερευνήστε Βαλκανικές Πόλεις",
+    "subtitle": "Αναλύσεις αγοράς με τεχνητή νοημοσύνη για {{count}} μεγάλες πόλεις σε 10 χώρες",
+    "discoverSubtitle": "Ανακαλύψτε τις καλύτερες αγορές ακινήτων στα Βαλκάνια"
   },
   "empty": {
-    "title": "No City Data Available",
-    "message": "Market data will be updated soon. Check back later!"
+    "title": "Δεν Υπάρχουν Διαθέσιμα Δεδομένα Πόλεων",
+    "message": "Τα δεδομένα αγοράς θα ενημερωθούν σύντομα. Ελέγξτε ξανά αργότερα!"
   },
   "stats": {
-    "totalCities": "Total Cities",
-    "countries": "Countries",
-    "avgGrowth": "Avg. Growth",
-    "totalListings": "Total Listings"
+    "totalCities": "Συνολικές Πόλεις",
+    "countries": "Χώρες",
+    "avgGrowth": "Μέση Ανάπτυξη",
+    "totalListings": "Συνολικές Αγγελίες"
   },
   "filters": {
-    "allCountries": "All Countries"
+    "allCountries": "Όλες οι Χώρες"
   },
   "cityCard": {
-    "demand": "Demand",
-    "investment": "Investment",
-    "avgPricePerSqm": "Avg. Price/m²",
-    "medianPrice": "Median Price",
-    "yoyGrowth": "YoY Growth",
-    "rentalYield": "Rental Yield",
-    "daysOnMarket": "Days on Market",
-    "days": "days"
+    "demand": "Ζήτηση Αγοραστών",
+    "demandHigh": "Υψηλή",
+    "demandMedium": "Μέτρια",
+    "demandLow": "Χαμηλή",
+    "investment": "Επενδυτικό Δυναμικό",
+    "investmentExcellent": "Εξαιρετικό",
+    "investmentGood": "Καλό",
+    "investmentFair": "Μέτριο",
+    "avgPricePerSqm": "Μέση Τιμή ανά m²",
+    "medianPrice": "Τυπική Τιμή Ακινήτου",
+    "yoyGrowth": "Μεταβολή Τιμής (1 Έτος)",
+    "rentalYield": "Απόδοση Ενοικίασης",
+    "rentalYieldHelper": "Ετήσιο εισόδημα σε σχέση με την τιμή ακινήτου",
+    "daysOnMarket": "Μέσος Χρόνος Πώλησης",
+    "days": "ημέρες",
+    "daysUnit": "ημέρες"
   },
   "sections": {
-    "topNeighborhoods": "Top Neighborhoods",
-    "marketInsights": "Market Insights"
+    "topNeighborhoods": "Κορυφαίες Γειτονιές",
+    "marketInsights": "Πληροφορίες Αγοράς"
   },
   "footer": {
-    "listings": "listings",
-    "soldPerMonth": "sold/mo"
+    "listings": "αγγελίες",
+    "soldPerMonth": "πωλ./μήνα",
+    "viewListings": "Δείτε Αγγελίες στον Χάρτη"
   },
   "trends": {
-    "rising": "rising",
-    "declining": "declining",
-    "stable": "stable"
+    "rising": "ανοδικό",
+    "declining": "καθοδικό",
+    "stable": "σταθερό"
   },
   "aiInsights": {
-    "title": "AI-Powered Market Intelligence",
-    "description": "Our market data is powered by Gemini AI and updated twice monthly (1st and 15th). We analyze real-time market trends, property prices, demand indicators, and local insights across {{count}} major cities in the Balkans.",
-    "lastUpdated": "Last updated: {{date}}",
-    "dataSource": "Data source: Gemini AI + Local Property Databases"
+    "title": "Ευφυΐα Αγοράς με Τεχνητή Νοημοσύνη",
+    "description": "Τα δεδομένα αγοράς μας τροφοδοτούνται από Gemini AI και ενημερώνονται δύο φορές τον μήνα (1η και 15η). Αναλύουμε τάσεις αγοράς σε πραγματικό χρόνο, τιμές ακινήτων, δείκτες ζήτησης και τοπικές πληροφορίες σε {{count}} μεγάλες πόλεις στα Βαλκάνια.",
+    "lastUpdated": "Τελευταία ενημέρωση: {{date}}",
+    "dataSource": "Πηγή δεδομένων: Gemini AI + Τοπικές Βάσεις Δεδομένων Ακινήτων"
   },
   "loading": {
-    "title": "Loading Cities...",
-    "message": "Fetching market data for Balkan cities"
+    "title": "Φόρτωση Πόλεων...",
+    "message": "Ανάκτηση δεδομένων αγοράς για βαλκανικές πόλεις"
   }
 }

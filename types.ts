@@ -414,6 +414,10 @@ export interface Filters {
     petsAllowed: boolean | null;
     has360Tour: boolean | null; // Filter for properties with 360 virtual tour
     hasDiscount: boolean | null; // Filter for properties with price reduction
+    hasPriceIncrease: boolean | null; // Filter for properties with price increase
+    minPricePerSqm: number | null; // Filter by min price per square meter
+    maxPricePerSqm: number | null; // Filter by max price per square meter
+    maxDaysListed: number | null; // Filter by max days since listing (e.g., 1, 3, 7, 30)
     minFloorNumber: number | null;
     maxFloorNumber: number | null;
     maxDistanceToCenter: number | null; // in km
@@ -455,6 +459,10 @@ export const initialFilters: Filters = {
     petsAllowed: null,
     has360Tour: null,
     hasDiscount: null,
+    hasPriceIncrease: null,
+    minPricePerSqm: null,
+    maxPricePerSqm: null,
+    maxDaysListed: null,
     minFloorNumber: null,
     maxFloorNumber: null,
     maxDistanceToCenter: null,

@@ -280,7 +280,12 @@
     "changeLanguage": "Schimbă limba",
     "userAvatar": "Avatar Utilizator",
     "showPassword": "Afișează parola",
-    "hidePassword": "Ascunde parola"
+    "hidePassword": "Ascunde parola",
+    "clearSearch": "Șterge căutarea",
+    "openFilters": "Deschide filtre",
+    "closeFilters": "Închide filtre",
+    "myAccount": "Contul meu",
+    "viewToggle": "Schimbă vizualizarea"
   },
   "social": {
     "facebook": "Facebook",
