@@ -50,7 +50,8 @@ export class PropertyFilters {
     public readonly amenities: string[] = [],
     public readonly minPricePerSqm: number | null = null,
     public readonly maxPricePerSqm: number | null = null,
-    public readonly maxDaysListed: number | null = null
+    public readonly maxDaysListed: number | null = null,
+    public readonly hasPriceIncrease: boolean | null = null
   ) {}
 
   // Business logic methods
@@ -92,7 +93,8 @@ export class PropertyFilters {
       this.amenities.length > 0 ||
       this.minPricePerSqm !== null ||
       this.maxPricePerSqm !== null ||
-      this.maxDaysListed !== null
+      this.maxDaysListed !== null ||
+      this.hasPriceIncrease !== null
     );
   }
 
@@ -134,6 +136,7 @@ export class PropertyFilters {
     if (this.minPricePerSqm !== null) count++;
     if (this.maxPricePerSqm !== null) count++;
     if (this.maxDaysListed !== null) count++;
+    if (this.hasPriceIncrease !== null) count++;
     return count;
   }
 
@@ -179,7 +182,8 @@ export class PropertyFilters {
       this.amenities,
       this.minPricePerSqm,
       this.maxPricePerSqm,
-      this.maxDaysListed
+      this.maxDaysListed,
+      this.hasPriceIncrease
     );
   }
 
@@ -221,7 +225,8 @@ export class PropertyFilters {
       this.amenities,
       this.minPricePerSqm,
       this.maxPricePerSqm,
-      this.maxDaysListed
+      this.maxDaysListed,
+      this.hasPriceIncrease
     );
   }
 
@@ -264,7 +269,8 @@ export class PropertyFilters {
       dto.amenities || [],
       dto.minPricePerSqm,
       dto.maxPricePerSqm,
-      dto.maxDaysListed
+      dto.maxDaysListed,
+      dto.hasPriceIncrease
     );
   }
 
@@ -307,6 +313,7 @@ export class PropertyFilters {
       minPricePerSqm: this.minPricePerSqm,
       maxPricePerSqm: this.maxPricePerSqm,
       maxDaysListed: this.maxDaysListed,
+      hasPriceIncrease: this.hasPriceIncrease,
     };
   }
 

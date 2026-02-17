@@ -28,6 +28,8 @@ export class PropertyApiClient {
         params.append('maxDaysListed', filters.maxDaysListed.toString());
       if (filters.hasDiscount === true)
         params.append('hasDiscount', 'true');
+      if (filters.hasPriceIncrease === true)
+        params.append('hasPriceIncrease', 'true');
     }
 
     const queryString = params.toString();

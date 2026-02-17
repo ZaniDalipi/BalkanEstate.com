@@ -153,6 +153,12 @@ export const getProperties = async (
       filter.$expr = { ...filter.$expr, $gt: ['$originalPrice', '$price'] };
     }
 
+    // Filter by price increased
+    if (req.query.hasPriceIncrease === 'true') {
+      filter.originalPrice = { $exists: true, $ne: null };
+      filter.$expr = { ...filter.$expr, $lt: ['$originalPrice', '$price'] };
+    }
+
     // Filter by price per sqm range (computed field: price / sqft)
     if (req.query.minPricePerSqm || req.query.maxPricePerSqm) {
       const pricePerSqmConditions: any[] = [];

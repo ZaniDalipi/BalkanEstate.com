@@ -287,35 +287,52 @@ const FilterControls: React.FC<Omit<PropertyListProps, 'properties' | 'showList'
                 </div>
             </div>
 
-            {/* Days on Market + Price Reduced */}
-            <div className="flex gap-3">
-                <div className="flex-1">
-                    <label className="block text-xs font-medium text-neutral-700 mb-1">{t('search:filters.daysOnMarket', 'Listed within')}</label>
-                    <select
-                        value={filters.maxDaysListed !== null ? filters.maxDaysListed : ''}
-                        onChange={(e) => onFilterChange('maxDaysListed', e.target.value ? parseInt(e.target.value) : null)}
-                        className={inputBaseClasses}
-                    >
-                        <option value="">{t('search:options.any')}</option>
-                        <option value="1">{t('search:filters.last24h', 'Last 24 hours')}</option>
-                        <option value="3">{t('search:filters.last3Days', 'Last 3 days')}</option>
-                        <option value="7">{t('search:filters.last7Days', 'Last 7 days')}</option>
-                        <option value="30">{t('search:filters.last30Days', 'Last 30 days')}</option>
-                    </select>
-                </div>
-                <div className="flex-1 flex items-end">
-                    <button
-                        type="button"
-                        onClick={() => onFilterChange('hasDiscount', filters.hasDiscount === true ? null : true)}
-                        className={`w-full py-2 px-3 rounded-lg text-xs font-medium border transition-colors ${
-                            filters.hasDiscount === true
-                                ? 'bg-red-50 border-red-300 text-red-700'
-                                : 'bg-white border-neutral-200 text-neutral-600 hover:bg-neutral-50'
-                        }`}
-                    >
-                        {t('search:filters.priceReduced', 'Price Reduced')}
-                    </button>
-                </div>
+            {/* Days on Market */}
+            <div>
+                <label className="block text-xs font-medium text-neutral-700 mb-1">{t('search:filters.daysOnMarket', 'Listed within')}</label>
+                <select
+                    value={filters.maxDaysListed !== null ? filters.maxDaysListed : ''}
+                    onChange={(e) => onFilterChange('maxDaysListed', e.target.value ? parseInt(e.target.value) : null)}
+                    className={inputBaseClasses}
+                >
+                    <option value="">{t('search:options.any')}</option>
+                    <option value="1">{t('search:filters.last24h', 'Last 24 hours')}</option>
+                    <option value="3">{t('search:filters.last3Days', 'Last 3 days')}</option>
+                    <option value="7">{t('search:filters.last7Days', 'Last 7 days')}</option>
+                    <option value="30">{t('search:filters.last30Days', 'Last 30 days')}</option>
+                </select>
+            </div>
+
+            {/* Price Change Filters */}
+            <div className="flex gap-2">
+                <button
+                    type="button"
+                    onClick={() => onFilterChange('hasDiscount', filters.hasDiscount === true ? null : true)}
+                    className={`flex-1 py-2 px-3 rounded-lg text-xs font-medium border transition-colors flex items-center justify-center gap-1.5 ${
+                        filters.hasDiscount === true
+                            ? 'bg-red-50 border-red-300 text-red-700'
+                            : 'bg-white border-neutral-200 text-neutral-600 hover:bg-neutral-50'
+                    }`}
+                >
+                    <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M19 14l-7 7m0 0l-7-7m7 7V3" />
+                    </svg>
+                    {t('search:filters.priceReduced', 'Price Reduced')}
+                </button>
+                <button
+                    type="button"
+                    onClick={() => onFilterChange('hasPriceIncrease', filters.hasPriceIncrease === true ? null : true)}
+                    className={`flex-1 py-2 px-3 rounded-lg text-xs font-medium border transition-colors flex items-center justify-center gap-1.5 ${
+                        filters.hasPriceIncrease === true
+                            ? 'bg-amber-50 border-amber-300 text-amber-700'
+                            : 'bg-white border-neutral-200 text-neutral-600 hover:bg-neutral-50'
+                    }`}
+                >
+                    <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M5 10l7-7m0 0l7 7m-7-7v18" />
+                    </svg>
+                    {t('search:filters.priceIncreased', 'Price Increased')}
+                </button>
             </div>
 
             <div className="border-t border-neutral-200 pt-4">

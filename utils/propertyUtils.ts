@@ -83,6 +83,13 @@ export const filterProperties = (properties: Property[], filters: Filters): Prop
                 : !(p.originalPrice !== undefined && p.originalPrice > p.price))
             : true;
 
+        // Price increase filter - property has price increase if originalPrice exists and is lower than current price
+        const hasPriceIncreaseMatch = filters.hasPriceIncrease !== null ?
+            (filters.hasPriceIncrease === true
+                ? (p.originalPrice !== undefined && p.originalPrice < p.price)
+                : !(p.originalPrice !== undefined && p.originalPrice < p.price))
+            : true;
+
         // Price per sqm filters
         const pricePerSqm = p.sqft > 0 ? p.price / p.sqft : 0;
         const minPricePerSqmMatch = filters.minPricePerSqm !== null ? (p.sqft > 0 && pricePerSqm >= filters.minPricePerSqm) : true;
@@ -149,6 +156,7 @@ export const filterProperties = (properties: Property[], filters: Filters): Prop
                petsAllowedMatch &&
                has360TourMatch &&
                hasDiscountMatch &&
+               hasPriceIncreaseMatch &&
                minFloorNumberMatch &&
                maxFloorNumberMatch &&
                maxDistanceToCenterMatch &&
