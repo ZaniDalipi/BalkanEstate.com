@@ -14,7 +14,7 @@ import { cronLogger } from '../utils/logger';
 import Favorite from '../models/Favorite';
 import PropertyAlert from '../models/PropertyAlert';
 import PriceHistory from '../models/PriceHistory';
-import { sendPropertyAlert, sendPriceDropAlert, sendNewListingsDigest } from '../services/emailService';
+import { sendPropertyAlert, sendPriceDropAlert, sendSavedSearchPriceDropAlert, sendNewListingsDigest } from '../services/emailService';
 
 // Subscription tiers that have access to property alerts
 const ALERT_ELIGIBLE_TIERS = ['buyer', 'pro', 'agency_owner', 'agency_agent'];
@@ -422,10 +422,147 @@ export async function processPriceDropAlerts(): Promise<void> {
       }
     }
 
-    cronLogger.info(`✅ Price drop alerts processed: ${alertsSent} alerts sent`);
+    cronLogger.info(`✅ Price drop alerts (favorites) processed: ${alertsSent} alerts sent`);
+
+    // ====================================================
+    // SAVED SEARCH PRICE DROP ALERTS
+    // Check properties that had recent price changes against saved searches
+    // ====================================================
+    await processSavedSearchPriceDropAlerts();
+
   } catch (error) {
     cronLogger.error('❌ Error processing price drop alerts:', error);
     throw error;
+  }
+}
+
+/**
+ * Process price drop/increase alerts for saved searches (scheduled)
+ * Finds properties with recent price changes and checks them against saved searches
+ */
+async function processSavedSearchPriceDropAlerts(): Promise<void> {
+  cronLogger.info('🔔 Processing saved search price change alerts...');
+
+  try {
+    // Find price changes from the last 2 hours (the cron runs hourly, use 2h for safety overlap)
+    const since = new Date(Date.now() - 2 * 60 * 60 * 1000);
+
+    const recentPriceChanges = await PriceHistory.find({
+      changeType: { $in: ['increase', 'decrease'] },
+      changedAt: { $gte: since },
+    });
+
+    if (recentPriceChanges.length === 0) {
+      cronLogger.info('   No recent price changes found');
+      return;
+    }
+
+    cronLogger.info(`   Found ${recentPriceChanges.length} recent price changes`);
+
+    // Get all saved searches with alerts enabled
+    const savedSearches = await SavedSearch.find({
+      alertsEnabled: { $ne: false },
+    }).populate('userId', 'email name subscription');
+
+    // Filter to eligible users
+    const eligibleSearches = savedSearches.filter(search => {
+      const user = search.userId as any;
+      if (!user || !user.subscription) return false;
+      const { tier, status } = user.subscription;
+      return ALERT_ELIGIBLE_TIERS.includes(tier) && ALERT_ELIGIBLE_STATUSES.includes(status);
+    });
+
+    if (eligibleSearches.length === 0) {
+      cronLogger.info('   No eligible saved searches with alerts');
+      return;
+    }
+
+    cronLogger.info(`   ${eligibleSearches.length} eligible saved searches to check`);
+
+    let alertsSent = 0;
+
+    // Process each price change
+    for (const priceChange of recentPriceChanges) {
+      const property = await Property.findById(priceChange.propertyId);
+      if (!property || property.status !== 'active') continue;
+
+      const previousPrice = priceChange.previousPrice;
+      const newPrice = priceChange.price;
+      if (!previousPrice || previousPrice === newPrice) continue;
+
+      const isPriceDrop = newPrice < previousPrice;
+      const priceChangeAmount = Math.abs(previousPrice - newPrice);
+      const percentageChange = Math.round((priceChangeAmount / previousPrice) * 100);
+
+      // Only alert for significant changes (at least 1%)
+      if (percentageChange < 1) continue;
+
+      const alertType = isPriceDrop ? 'price_drop' : 'price_increase';
+      const changeLabel = isPriceDrop ? 'drop' : 'increase';
+
+      for (const search of eligibleSearches) {
+        const user = search.userId as any;
+        if (!user?.email) continue;
+
+        // Check if property matches this saved search filters and bounds
+        if (!propertyMatchesFilters(property, search.filters)) continue;
+        if (!propertyInBounds(property, search.drawnBoundsJSON)) continue;
+
+        // Check if we already sent an alert for this price change (avoid duplicates)
+        const existingAlert = await PropertyAlert.findOne({
+          userId: user._id,
+          propertyId: property._id,
+          alertType,
+          newPrice,
+          createdAt: { $gte: since },
+        });
+
+        if (existingAlert) continue;
+
+        try {
+          await PropertyAlert.create({
+            userId: user._id,
+            propertyId: property._id,
+            alertType,
+            savedSearchId: search._id,
+            previousPrice,
+            newPrice,
+            percentageChange: isPriceDrop ? -percentageChange : percentageChange,
+            emailSent: true,
+            emailSentAt: new Date(),
+          });
+
+          await sendSavedSearchPriceDropAlert({
+            recipientEmail: user.email,
+            recipientName: user.name || 'User',
+            searchName: search.name,
+            property: {
+              id: String(property._id),
+              title: property.title || `${property.address}, ${property.city}`,
+              address: property.address,
+              city: property.city,
+              previousPrice,
+              newPrice,
+              percentageDrop: percentageChange,
+              isPriceIncrease: !isPriceDrop,
+              beds: property.beds,
+              baths: property.baths,
+              sqft: property.sqft,
+              imageUrl: property.imageUrl,
+            },
+          });
+
+          alertsSent++;
+          cronLogger.info(`   ✉️ Sent price ${changeLabel} alert to ${user.email} (saved search: "${search.name}", property: ${property.title || property.address})`);
+        } catch (err) {
+          cronLogger.error(`   Failed to send saved search price ${changeLabel} alert to ${user.email}:`, err);
+        }
+      }
+    }
+
+    cronLogger.info(`✅ Saved search price change alerts processed: ${alertsSent} alerts sent`);
+  } catch (error) {
+    cronLogger.error('❌ Error processing saved search price change alerts:', error);
   }
 }
 
@@ -739,8 +876,9 @@ export async function processInstantPriceDropForProperty(
       const { tier, status } = user.subscription;
       if (!ALERT_ELIGIBLE_TIERS.includes(tier) || !ALERT_ELIGIBLE_STATUSES.includes(status)) continue;
 
-      // Check if property matches this saved search
+      // Check if property matches this saved search filters and bounds
       if (!propertyMatchesFilters(property, search.filters)) continue;
+      if (!propertyInBounds(property, search.drawnBoundsJSON)) continue;
 
       try {
         await PropertyAlert.create({
@@ -755,9 +893,10 @@ export async function processInstantPriceDropForProperty(
           emailSentAt: new Date(),
         });
 
-        await sendPriceDropAlert({
+        await sendSavedSearchPriceDropAlert({
           recipientEmail: user.email,
           recipientName: user.name || 'User',
+          searchName: search.name,
           property: {
             id: String(property._id),
             title: property.title || `${property.address}, ${property.city}`,
