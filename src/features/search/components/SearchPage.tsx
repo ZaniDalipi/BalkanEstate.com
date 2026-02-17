@@ -8,6 +8,7 @@ import { LiquidGlassSwitch } from '@/src/components/ui/LiquidGlassSwitch';
 import AiSearch from './AiSearch';
 import Modal from '@/components/shared/Modal';
 import Toast from '@/components/shared/Toast';
+import { Helmet } from 'react-helmet-async';
 import { SEO } from '@/src/components/seo';
 import { useSearchPage } from './useSearchPage';
 import SearchHeader from './SearchHeader';
@@ -176,6 +177,28 @@ const SearchPage: React.FC<SearchPageProps> = ({ onToggleSidebar }) => {
                 canonical={`${window.location.origin}/search${window.location.search}`}
                 type="website"
             />
+
+            {/* ItemList JSON-LD schema for search results - enables rich carousel in Google */}
+            {listProperties.length > 0 && (
+                <Helmet>
+                    <script type="application/ld+json">
+                        {JSON.stringify({
+                            '@context': 'https://schema.org',
+                            '@type': 'ItemList',
+                            name: seoTitle,
+                            description: seoDescription,
+                            numberOfItems: listProperties.length,
+                            itemListElement: listProperties.slice(0, 10).map((p: Property, i: number) => ({
+                                '@type': 'ListItem',
+                                position: i + 1,
+                                url: `${window.location.origin}/property/${p.id}`,
+                                name: `${p.beds}-Bed ${p.propertyType || 'Property'} in ${p.city}, ${p.country}`,
+                                ...(p.imageUrl && { image: p.imageUrl }),
+                            })),
+                        })}
+                    </script>
+                </Helmet>
+            )}
 
              <div className="absolute inset-0 z-0 bg-neutral-50"></div>
             <Toast show={toast.show} message={toast.message} type={toast.type} onClose={() => setToast({ ...toast, show: false })} />

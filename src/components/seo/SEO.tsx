@@ -72,6 +72,24 @@ const DEFAULT_DESCRIPTION = 'Find property for sale across 11 Balkan countries. 
 const DEFAULT_IMAGE = '/og-image.png';
 const BASE_URL = typeof window !== 'undefined' ? window.location.origin : 'https://balkanestateai.com';
 
+// All supported languages for hreflang tags
+const HREFLANG_LANGUAGES = ['en', 'sq', 'sr', 'bg', 'hr', 'bs', 'mk', 'me', 'ro', 'el'] as const;
+
+/**
+ * Get the current page path without language prefix,
+ * so we can generate hreflang alternates for all languages.
+ */
+function getPathWithoutLang(): string {
+  if (typeof window === 'undefined') return '/';
+  const path = window.location.pathname;
+  const match = path.match(/^\/(en|sq|sr|bg|hr|bs|mk|me|ro|el)(\/|$)/);
+  if (match) {
+    const rest = path.slice(match[0].length);
+    return rest.startsWith('/') ? rest : '/' + (rest || '');
+  }
+  return path;
+}
+
 export const SEO: React.FC<SEOProps> = ({
   title,
   description = DEFAULT_DESCRIPTION,
@@ -119,6 +137,28 @@ export const SEO: React.FC<SEOProps> = ({
       {/* Geo Meta Tags for Balkans */}
       <meta name="geo.region" content="RS" />
       <meta name="geo.placename" content="Balkans" />
+
+      {/* Dynamic hreflang tags for all 10 supported languages */}
+      {HREFLANG_LANGUAGES.map(lang => (
+        <link
+          key={lang}
+          rel="alternate"
+          hrefLang={lang}
+          href={`${BASE_URL}/${lang}${getPathWithoutLang() === '/' ? '' : getPathWithoutLang()}${typeof window !== 'undefined' ? window.location.search : ''}`}
+        />
+      ))}
+      <link rel="alternate" hrefLang="x-default" href={`${BASE_URL}${getPathWithoutLang()}${typeof window !== 'undefined' ? window.location.search : ''}`} />
+
+      {/* Open Graph product price tags for property pages */}
+      {property?.price && (
+        <>
+          <meta property="product:price:amount" content={String(property.price)} />
+          <meta property="product:price:currency" content={property.currency || 'EUR'} />
+          {property.bedrooms && <meta property="product:bedrooms" content={String(property.bedrooms)} />}
+          {property.city && <meta property="og:locality" content={property.city} />}
+          {property.country && <meta property="og:country-name" content={property.country} />}
+        </>
+      )}
 
       {/* Property-specific JSON-LD */}
       {property && (

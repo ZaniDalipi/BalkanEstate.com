@@ -10,6 +10,7 @@ import { Squares2x2Icon, MapIcon, AdjustmentsHorizontalIcon, XMarkIcon, Magnifyi
 import DefaultAvatar from '@/components/shared/DefaultAvatar';
 import { LiquidGlassSwitch } from '@/src/components/ui/LiquidGlassSwitch';
 import { Button } from '@/components/ui/liquid-glass-button';
+import { Helmet } from 'react-helmet-async';
 import { SEO } from '@/src/components/seo';
 import Footer from '@/components/shared/Footer';
 import { useLocalizedNavigation } from '@/src/hooks/useLocalizedNavigation';
@@ -96,9 +97,30 @@ const RentalSearchPage: React.FC<RentalSearchPageProps> = ({ onToggleSidebar }) 
             <SEO
                 title={t('rental:seo.title', 'Properties for Rent | BalkanEstate')}
                 description={t('rental:seo.description', 'Browse rental properties across the Balkans. Find apartments, houses, and villas for rent.')}
-                canonical={`${window.location.origin}/rentals`}
+                canonical={`${window.location.origin}/rentals${window.location.search}`}
                 type="website"
             />
+
+            {/* ItemList JSON-LD for rental search results */}
+            {listProperties.length > 0 && (
+                <Helmet>
+                    <script type="application/ld+json">
+                        {JSON.stringify({
+                            '@context': 'https://schema.org',
+                            '@type': 'ItemList',
+                            name: t('rental:seo.title', 'Properties for Rent'),
+                            numberOfItems: listProperties.length,
+                            itemListElement: listProperties.slice(0, 10).map((p: any, i: number) => ({
+                                '@type': 'ListItem',
+                                position: i + 1,
+                                url: `${window.location.origin}/property/${p.id}`,
+                                name: `${p.beds}-Bed ${p.propertyType || 'Property'} for Rent in ${p.city}, ${p.country}`,
+                                ...(p.imageUrl && { image: p.imageUrl }),
+                            })),
+                        })}
+                    </script>
+                </Helmet>
+            )}
 
             {/* Dark gradient background for the left panel */}
             <div className="absolute inset-0 z-0" style={{ background: 'linear-gradient(135deg, #f8f9fc 0%, #eef1f8 50%, #f0f4fa 100%)' }} />

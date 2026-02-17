@@ -93,6 +93,18 @@ const AgentProfilePage: React.FC<AgentProfilePageProps> = ({ agent }) => {
                 }}
             />
 
+            {/* SEO Breadcrumbs - Hidden visually but provides JSON-LD BreadcrumbList schema */}
+            <div className="sr-only">
+                <Breadcrumbs
+                    items={generateAgentBreadcrumbs({
+                        id: profile.agentData.agentId || profile.agentData.id,
+                        name: agentName,
+                        city: agentCity,
+                        country: agentCountry,
+                    })}
+                />
+            </div>
+
             {/* Header (sticky nav bar with back/save/share) + Hero Section */}
             <AgentProfileHeader
                 agent={profile.agentData}
