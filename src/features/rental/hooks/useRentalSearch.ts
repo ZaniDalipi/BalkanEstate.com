@@ -1,8 +1,9 @@
 import { useState, useMemo, useCallback, useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useAppContext } from '@/context/AppContext';
-import { Property, Filters, initialFilters, NominatimResult } from '@/types';
+import { Property, Filters, initialFilters, NominatimResult, SavedSearch } from '@/types';
 import { searchLocation } from '@/services/osmService';
+import { generateSearchName, generateSearchNameFromCoords } from '@/services/geminiService';
 import L from 'leaflet';
 import { filterProperties } from '@/utils/propertyUtils';
 import { API_CONFIG } from '@/src/shared/constants/app.constants';
@@ -18,7 +19,7 @@ export const serializeBounds = (bounds: L.LatLngBounds): string => {
 
 export function useRentalSearch() {
     const { t } = useTranslation(['search', 'rental', 'common']);
-    const { state, dispatch, updateSearchPageState } = useAppContext();
+    const { state, dispatch, updateSearchPageState, addSavedSearch } = useAppContext();
     const { isAuthenticated, currentUser } = state;
 
     // Rental properties state
@@ -47,6 +48,7 @@ export function useRentalSearch() {
     const [userLocation, setUserLocation] = useState<[number, number] | null>(null);
     const [mapBoundsJSON, setMapBoundsJSON] = useState<string | null>(null);
     const [drawnBoundsJSON, setDrawnBoundsJSON] = useState<string | null>(null);
+    const [isSaving, setIsSaving] = useState(false);
     const debounceTimer = useRef<number | null>(null);
 
     // Fetch rental properties
@@ -228,7 +230,12 @@ export function useRentalSearch() {
     }, []);
 
     const toggleDrawing = useCallback(() => {
-        setIsDrawing(prev => !prev);
+        setIsDrawing(prev => {
+            // Clear any existing drawn bounds when toggling drawing mode
+            // Starting a new draw replaces the old one; cancelling also clears
+            setDrawnBoundsJSON(null);
+            return !prev;
+        });
     }, []);
 
     const handleDrawComplete = useCallback((bounds: L.LatLngBounds | null) => {
@@ -245,6 +252,80 @@ export function useRentalSearch() {
     const onFlyComplete = useCallback(() => {
         setFlyToTarget(null);
     }, []);
+
+    const showToast = useCallback((message: string, type: 'success' | 'error') => {
+        setToast({ show: true, message, type });
+        setTimeout(() => setToast({ show: false, message: '', type: 'success' }), 3000);
+    }, []);
+
+    const isFormSearchActive = useMemo(() => {
+        return filters.query.trim() !== '' || filters.minPrice !== null || filters.maxPrice !== null || filters.beds !== null || filters.baths !== null || filters.propertyType !== 'any';
+    }, [filters]);
+
+    const handleSaveSearch = useCallback(async (isAreaOnly: boolean = false) => {
+        if (!isAuthenticated) {
+            dispatch({ type: 'TOGGLE_AUTH_MODAL', payload: { isOpen: true, view: 'signup' } });
+            return;
+        }
+        setIsSaving(true);
+        try {
+            let newSearch: SavedSearch;
+            const now = Date.now();
+            // Always set listingType to 'rent' for rental saved searches
+            const rentalFilters = { ...(isAreaOnly ? initialFilters : filters), listingType: 'rent' as const };
+
+            if (drawnBounds) {
+                const center = drawnBounds.getCenter();
+                const name = await generateSearchNameFromCoords(center.lat, center.lng, drawnBounds);
+                const serializedBounds = serializeBounds(drawnBounds);
+                newSearch = {
+                    id: `ss-${now}`,
+                    name,
+                    filters: rentalFilters,
+                    drawnBoundsJSON: serializedBounds,
+                    createdAt: now,
+                    lastAccessed: now,
+                    seenPropertyIds: [],
+                };
+            } else if (isFormSearchActive) {
+                const name = await generateSearchName(rentalFilters);
+                newSearch = {
+                    id: `ss-${now}`,
+                    name,
+                    filters: rentalFilters,
+                    drawnBoundsJSON: null,
+                    createdAt: now,
+                    lastAccessed: now,
+                    seenPropertyIds: [],
+                };
+            } else if (mapBounds) {
+                const center = mapBounds.getCenter();
+                const name = await generateSearchNameFromCoords(center.lat, center.lng, mapBounds);
+                newSearch = {
+                    id: `ss-${now}`,
+                    name: `Area near ${name}`,
+                    filters: { ...initialFilters, listingType: 'rent' as const },
+                    drawnBoundsJSON: serializeBounds(mapBounds),
+                    createdAt: now,
+                    lastAccessed: now,
+                    seenPropertyIds: [],
+                };
+            } else {
+                showToast("Cannot save an empty search. Please add some criteria or move to an area on the map.", 'error');
+                setIsSaving(false);
+                return;
+            }
+
+            await addSavedSearch(newSearch);
+            showToast("Search saved successfully!", 'success');
+        } catch (e) {
+            showToast("Could not save search. AI might be busy.", 'error');
+        } finally {
+            setIsSaving(false);
+        }
+    }, [isAuthenticated, dispatch, addSavedSearch, filters, isFormSearchActive, showToast, drawnBounds, mapBounds]);
+
+    const handleSaveSearchArea = useCallback(() => handleSaveSearch(true), [handleSaveSearch]);
 
     // Location search with debounce
     const handleSuggestionClick = useCallback((suggestion: NominatimResult) => {
@@ -318,5 +399,7 @@ export function useRentalSearch() {
         handleRecenterOnUser,
         onFlyComplete,
         fetchRentals,
+        isSaving,
+        handleSaveSearchArea,
     };
 }

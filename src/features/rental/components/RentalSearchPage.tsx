@@ -59,6 +59,9 @@ const RentalSearchPage: React.FC<RentalSearchPageProps> = ({ onToggleSidebar }) 
         isQueryInputFocused,
         setIsQueryInputFocused,
         handleSuggestionClick,
+        // Save search
+        isSaving,
+        handleSaveSearchArea,
     } = useRentalSearch();
 
     const [isFiltersOpen, setIsFiltersOpen] = React.useState(false);
@@ -70,7 +73,8 @@ const RentalSearchPage: React.FC<RentalSearchPageProps> = ({ onToggleSidebar }) 
         properties: baseFilteredProperties,
         onMapMove: handleMapMove,
         userLocation,
-        isSaving: false,
+        onSaveSearch: handleSaveSearchArea,
+        isSaving,
         isAuthenticated,
         mapBounds,
         drawnBounds,
