@@ -24,6 +24,9 @@ const ALERT_ELIGIBLE_STATUSES = ['active', 'trial', 'grace', 'pending_cancellati
  * Check if a property matches saved search filters
  */
 function propertyMatchesFilters(property: IProperty, filters: IFilters): boolean {
+  // Listing type (sale vs rent)
+  if (filters.listingType && filters.listingType !== 'any' && property.listingType !== filters.listingType) return false;
+
   // Price range
   if (filters.minPrice && property.price < filters.minPrice) return false;
   if (filters.maxPrice && property.price > filters.maxPrice) return false;

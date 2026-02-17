@@ -139,12 +139,18 @@ const SavedSearchAccordion: React.FC<SavedSearchAccordionProps> = ({ search, onO
   }, [parsedBounds]);
 
   const matchingProperties = useMemo(() => {
+      const listingType = search.filters?.listingType;
+
       // If there's a valid drawn area, prioritize geographic filtering
       if (parsedBounds) {
           try {
               const drawnBounds = L.latLngBounds(parsedBounds._southWest, parsedBounds._northEast);
-              // Only filter by bounds for drawn area searches
-              const filtered = properties.filter(p => p.lat && p.lng && drawnBounds.contains([p.lat, p.lng]));
+              // Filter by bounds and listing type for drawn area searches
+              const filtered = properties.filter(p => {
+                  if (!p.lat || !p.lng || !drawnBounds.contains([p.lat, p.lng])) return false;
+                  if (listingType && listingType !== 'any' && p.listingType !== listingType) return false;
+                  return true;
+              });
               return filtered;
           } catch (e) {
               // Error removed
@@ -165,6 +171,7 @@ const SavedSearchAccordion: React.FC<SavedSearchAccordionProps> = ({ search, onO
 
   const propertyCount = matchingProperties.length;
   const newPropertyCount = newProperties.length;
+  const isRentalSearch = search.filters?.listingType === 'rent';
 
   const handleToggle = async () => {
     const nextIsOpen = !isOpen;
@@ -295,7 +302,16 @@ const SavedSearchAccordion: React.FC<SavedSearchAccordionProps> = ({ search, onO
                   placeholder={t('accordion.namePlaceholder')}
                 />
               ) : (
-                <h3 className="text-lg font-bold text-neutral-800 truncate text-left">{search.name}</h3>
+                <div className="flex items-center gap-2 min-w-0">
+                  <h3 className="text-lg font-bold text-neutral-800 truncate text-left">{search.name}</h3>
+                  <span className={`flex-shrink-0 text-[10px] font-semibold px-1.5 py-0.5 rounded-full ${
+                    isRentalSearch
+                      ? 'bg-violet-100 text-violet-700'
+                      : 'bg-emerald-100 text-emerald-700'
+                  }`}>
+                    {isRentalSearch ? t('accordion.rent', 'RENT') : t('accordion.buy', 'BUY')}
+                  </span>
+                </div>
               )}
 
               {/* Badges row - always horizontal */}
