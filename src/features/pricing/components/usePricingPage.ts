@@ -415,7 +415,7 @@ export function usePricingPage() {
     });
   };
 
-  const handleAgencyFeature = (tier: 'spotlight' | 'homepage' | 'premium') => {
+  const handleAgencyFeature = (tier: string) => {
     if (!state.isAuthenticated) {
       dispatch({ type: 'TOGGLE_AUTH_MODAL', payload: { isOpen: true, view: 'login' } });
       return;
@@ -438,16 +438,18 @@ export function usePricingPage() {
     }
 
     // Open PaymentWindow for agency featuring (one-time payment, coupon supported)
-    const price = getAgencyPrice('featured', selectedAgencyDuration);
+    const plan = agencyFeaturePlans.find(p => p.tier === tier);
+    const planName = plan?.name || 'Featured Agency';
+    const price = getAgencyPrice(tier, selectedAgencyDuration);
     const durationLabel = selectedAgencyDuration === 7 ? '1 Week'
       : selectedAgencyDuration === 14 ? '2 Weeks'
       : selectedAgencyDuration === 28 ? '4 Weeks'
       : '90 Days';
     setSelectedPlan({
-      name: `${t('pricing:agency.featuredTitle', 'Featured Agency')} - ${durationLabel}`,
+      name: `${planName} - ${durationLabel}`,
       price,
       interval: 'once' as any,
-      productId: `featured_agency_${selectedAgencyDuration}days`,
+      productId: `${tier}_agency_${selectedAgencyDuration}days`,
     });
     setShowPaymentWindow(true);
   };
@@ -580,6 +582,9 @@ export function usePricingPage() {
     proMonthlyProduct,
     buyerProduct,
     sellerProducts,
+    // Promotion plans data
+    agencyFeaturePlans,
+    loadingPlans,
     // Helper functions
     getPromotionPrice,
     getAgencyPrice,

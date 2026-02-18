@@ -64,6 +64,8 @@ const PricingPage: React.FC = () => {
     proYearlyProduct,
     proMonthlyProduct,
     buyerProduct,
+    agencyFeaturePlans,
+    loadingPlans,
     getPromotionPrice,
     getAgencyPrice,
     getUserRole,
@@ -352,6 +354,8 @@ const PricingPage: React.FC = () => {
             <AgencyFeatureSection
               t={t}
               currentUserAgencyId={state.currentUser?.agencyId}
+              agencyFeaturePlans={agencyFeaturePlans}
+              loadingPlans={loadingPlans}
               getAgencyPrice={getAgencyPrice}
               selectedAgencyDuration={selectedAgencyDuration}
               setSelectedAgencyDuration={setSelectedAgencyDuration}

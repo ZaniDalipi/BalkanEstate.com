@@ -44,13 +44,25 @@ export interface PromotionPlan {
   tier: string;
   category: 'listing' | 'agency';
   description?: string;
+  icon?: string;
   features: string[];
   pricing: {
-    duration7: number;
+    duration7?: number;
     duration14?: number;
     duration28?: number;
-    duration30: number;
-    duration90: number;
+    duration30?: number;
+    duration90?: number;
+  };
+  visibilityMultiplier?: string;
+  displayOrder?: number;
+  badge?: string;
+  highlighted?: boolean;
+  cardStyle?: {
+    gradientFrom?: string;
+    gradientTo?: string;
+    borderColor?: string;
+    iconBgColor?: string;
+    priceColor?: string;
   };
   isActive: boolean;
 }
