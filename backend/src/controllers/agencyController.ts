@@ -699,8 +699,8 @@ export const updateAgency = async (
       name, description, website, phone, email, address,
       city, country, zipCode, lat, lng,
       facebookUrl, instagramUrl, linkedinUrl, twitterUrl,
-      yearsInBusiness, specialties, specializations,
-      serviceAreas, certifications, languages, businessHours,
+      yearsInBusiness, specialties,
+      certifications, languages, businessHours,
     } = req.body;
 
     // Validation
@@ -766,8 +766,6 @@ export const updateAgency = async (
     if (twitterUrl !== undefined) agency.twitterUrl = twitterUrl;
     if (yearsInBusiness !== undefined) agency.yearsInBusiness = Number(yearsInBusiness);
     if (specialties !== undefined) agency.specialties = specialties;
-    if (specializations !== undefined) agency.specializations = specializations;
-    if (serviceAreas !== undefined) agency.serviceAreas = serviceAreas;
     if (certifications !== undefined) agency.certifications = certifications;
     if (languages !== undefined) agency.languages = languages;
     if (businessHours !== undefined) agency.businessHours = businessHours;
