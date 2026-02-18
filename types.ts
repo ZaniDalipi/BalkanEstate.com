@@ -272,6 +272,7 @@ export interface Property {
     status: PropertyStatus;
     soldAt?: number;
     rentedAt?: number;
+    rentedUntil?: number;
     price: number;
     originalPrice?: number; // Original price before any reduction
     priceReducedAt?: number; // Timestamp when price was reduced
