@@ -51,6 +51,8 @@
     "noPaymentUrl": "No payment URL received",
     "sessionCreationFailed": "Failed to create payment session",
     "invalidDiscountCode": "Invalid discount code",
+    "invalidCodeFormat": "Invalid code format. Use only letters, numbers, hyphens and underscores.",
+    "invalidPlanPrice": "Invalid plan price",
     "freeSubscriptionFailed": "Failed to apply free subscription",
     "verificationTimeout": "Payment verification timed out. If you completed the payment, your subscription will be activated shortly. Please check your email for confirmation."
   },

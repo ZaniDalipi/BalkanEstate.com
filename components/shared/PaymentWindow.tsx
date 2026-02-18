@@ -350,19 +350,20 @@ const PaymentWindow: React.FC<PaymentWindowProps> = ({
   };
 
   const handleValidateDiscountCode = async () => {
-    if (!discountCode.trim()) {
+    const trimmedCode = discountCode.trim();
+    if (!trimmedCode) {
       setCodeValidation({ valid: false, message: t('payment:checkout.enterDiscountCode') });
       return;
     }
 
     // Client-side format validation: alphanumeric, hyphens, underscores only (3-50 chars)
     if (!/^[A-Za-z0-9_-]{3,50}$/.test(trimmedCode)) {
-      setCodeValidation({ valid: false, message: 'Invalid code format. Use only letters, numbers, hyphens and underscores.' });
+      setCodeValidation({ valid: false, message: t('payment:errors.invalidCodeFormat') });
       return;
     }
 
     if (planPrice == null || planPrice < 0) {
-      setCodeValidation({ valid: false, message: 'Invalid plan price' });
+      setCodeValidation({ valid: false, message: t('payment:errors.invalidPlanPrice') });
       return;
     }
 

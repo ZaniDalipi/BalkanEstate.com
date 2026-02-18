@@ -108,6 +108,7 @@ export const PlanCard: React.FC<{
               <div className="font-bold text-amber-600 text-sm">&euro;{plan.pricing.duration90 || 0}</div>
             </div>
           </div>
+          </div>
         ) : (
           <div className="grid grid-cols-3 gap-2 mt-3">
             <div className="text-center p-2 bg-gray-50 rounded-lg">
@@ -373,10 +374,6 @@ export const EditPlanModal: React.FC<{
                         placeholder="49.99"
                       />
                     </div>
-<<<<<<< HEAD
-                    <p className="text-xs text-gray-500 mt-1">{t('admin:promotionPlans.weeklyPackageDesc', 'Featured Agency is a single weekly package shown everywhere on the platform')}</p>
-=======
->>>>>>> main
                   </div>
                 ) : (
                   <div className="grid grid-cols-3 gap-4">
