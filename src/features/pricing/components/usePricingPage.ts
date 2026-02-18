@@ -35,7 +35,7 @@ export function usePricingPage() {
   const [selectedPlan, setSelectedPlan] = useState<{
     name: string;
     price: number;
-    interval: 'month' | 'year';
+    interval: 'month' | 'year' | 'once';
     productId: string;
   } | null>(null);
   const [showContactOptions, setShowContactOptions] = useState(false);
@@ -399,15 +399,32 @@ export function usePricingPage() {
       dispatch({ type: 'TOGGLE_AUTH_MODAL', payload: { isOpen: true, view: 'login' } });
       return;
     }
-    // Payment integration pending
-    dispatch({
-      type: 'SHOW_ALERT',
-      payload: {
-        type: 'info',
-        title: t('pricing:agency.comingSoon', 'Coming Soon'),
-        message: t('pricing:agency.featureComingSoon', 'Agency featuring will be available soon!'),
-      },
+
+    // Must have an agency to feature it
+    if (!state.currentUser?.agencyId) {
+      dispatch({
+        type: 'SHOW_ALERT',
+        payload: {
+          type: 'warning',
+          title: t('pricing:agency.needAgency', "Don't have an agency yet?"),
+          message: t(
+            'pricing:agency.needAgencyDescription',
+            'Subscribe to our Enterprise plan to create your agency and unlock these features.'
+          ),
+        },
+      });
+      return;
+    }
+
+    // Open PaymentWindow for agency featuring (one-time weekly payment, coupon supported)
+    const price = getAgencyPrice('featured', 7);
+    setSelectedPlan({
+      name: t('pricing:agency.featuredTitle', 'Featured Agency'),
+      price,
+      interval: 'once' as any,
+      productId: `agency_featured_7days`,
     });
+    setShowPaymentWindow(true);
   };
 
   const getBadgeColor = (color?: string) => {

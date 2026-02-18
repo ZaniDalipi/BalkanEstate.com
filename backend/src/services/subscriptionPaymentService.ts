@@ -5,7 +5,7 @@ import PaymentRecord from '../models/PaymentRecord';
 import SubscriptionEvent from '../models/SubscriptionEvent';
 import Product from '../models/Product';
 import Agency from '../models/Agency';
-import { sendAgentRegistrationCouponsEmail, sendEnterpriseWelcomeEmail } from './emailService';
+import { sendAgentRegistrationCouponsEmail, sendEnterpriseWelcomeEmail, sendSubscriptionInvoice } from './emailService';
 import { generateSecureRandomString } from '../utils/secureRandom';
 import { paymentLogger } from '../utils/logger';
 
@@ -26,6 +26,8 @@ interface ProcessPaymentParams {
   purchaseToken?: string;
   transactionId?: string;
   startDate?: Date;
+  discountCode?: string;
+  originalAmount?: number;
 }
 
 interface ProcessPaymentResult {
@@ -238,6 +240,33 @@ export async function processSubscriptionPayment(
       await initializePromotionCoupons(String(userId), productId, isProProduct, isEnterpriseProduct);
     } catch (couponError) {
       paymentLogger.error('⚠️ Error initializing promotion coupons:', couponError);
+    }
+
+    // Send receipt/invoice email with transaction details
+    try {
+      const billingPeriod = product.billingPeriod === 'yearly' ? 'yearly' : 'monthly';
+      const invoiceDescription = params.discountCode
+        ? `${product.name} (Coupon: ${params.discountCode})`
+        : product.name;
+
+      await sendSubscriptionInvoice(
+        user.email,
+        user.name || 'Customer',
+        {
+          planName: invoiceDescription,
+          amount: params.originalAmount != null ? params.originalAmount : amount,
+          currency: currency || 'EUR',
+          billingPeriod,
+          orderId: paymentRecord._id.toString(),
+          subscriptionStartDate: startDate,
+          nextBillingDate: subscription.expirationDate,
+          autoRenewing: subscription.autoRenewing ?? true,
+        }
+      );
+      if (!isProduction) paymentLogger.info(`📧 Receipt email sent to ${user.email}`);
+    } catch (emailError) {
+      // Don't fail the subscription if email fails
+      paymentLogger.error('⚠️ Error sending receipt email:', emailError);
     }
 
     return {
