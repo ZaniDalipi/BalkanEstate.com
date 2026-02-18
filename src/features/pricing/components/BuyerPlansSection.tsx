@@ -9,6 +9,7 @@ interface BuyerPlansSectionProps {
   buyerProduct: Product | undefined;
   onPlanSelection: (product: Product) => void;
   isActivePlan: (productId: string) => boolean;
+  isPlanDisabled: (productId: string) => boolean;
 }
 
 const BuyerPlansSection: React.FC<BuyerPlansSectionProps> = ({
@@ -16,6 +17,7 @@ const BuyerPlansSection: React.FC<BuyerPlansSectionProps> = ({
   buyerProduct,
   onPlanSelection,
   isActivePlan,
+  isPlanDisabled,
 }) => {
   return (
     <Animated variant="fadeInUp" className="max-w-md mx-auto">
@@ -49,10 +51,10 @@ const BuyerPlansSection: React.FC<BuyerPlansSectionProps> = ({
           </ul>
 
           <button
-            onClick={() => !isActivePlan(buyerProduct.productId) && onPlanSelection(buyerProduct)}
-            disabled={isActivePlan(buyerProduct.productId)}
+            onClick={() => !isPlanDisabled(buyerProduct.productId) && onPlanSelection(buyerProduct)}
+            disabled={isPlanDisabled(buyerProduct.productId)}
             className={`w-full mt-8 py-4 rounded-xl font-bold transition-all duration-300 text-base ${
-              isActivePlan(buyerProduct.productId)
+              isPlanDisabled(buyerProduct.productId)
                 ? 'bg-gray-200 text-gray-500 cursor-not-allowed shadow-none'
                 : 'text-white bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 shadow-lg hover:shadow-xl'
             }`}

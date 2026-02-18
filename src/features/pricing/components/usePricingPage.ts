@@ -469,6 +469,22 @@ export function usePricingPage() {
     return false;
   };
 
+  // Determine if a plan button should be disabled (current plan OR downgrade)
+  const isPlanDisabled = (productId: string): boolean => {
+    const targetLevel = getProductPlanLevel(productId);
+
+    // Seller plans: disabled if target level <= current level (can't downgrade or re-select)
+    if (targetLevel > 0) {
+      const currentLevel = getCurrentSellerPlanLevel();
+      if (currentLevel > 0 && targetLevel <= currentLevel) return true;
+    }
+
+    // Buyer plan: disabled if already has active buyer plan
+    if (productId.toLowerCase().includes('buyer') && isActivePlan(productId)) return true;
+
+    return false;
+  };
+
   // Separate enterprise from other products
   const enterpriseProduct = products.find(p => p.productId.includes('enterprise'));
   const proYearlyProduct = products.find(p => p.productId.includes('pro_yearly') || p.productId.includes('yearly') && !p.productId.includes('enterprise'));
@@ -530,6 +546,7 @@ export function usePricingPage() {
     getBillingLabel,
     getUserRole,
     isActivePlan,
+    isPlanDisabled,
     // Handlers
     handleBack,
     handleLegalNavigation,
