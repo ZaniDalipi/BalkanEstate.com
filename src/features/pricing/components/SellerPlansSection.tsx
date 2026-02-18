@@ -16,6 +16,8 @@ interface SellerPlansSectionProps {
   proMonthlyProduct: Product | undefined;
   enterpriseProduct: Product | undefined;
   onPlanSelection: (product: Product) => void;
+  isActivePlan: (productId: string) => boolean;
+  isPlanDisabled: (productId: string) => boolean;
 }
 
 const SellerPlansSection: React.FC<SellerPlansSectionProps> = ({
@@ -24,6 +26,8 @@ const SellerPlansSection: React.FC<SellerPlansSectionProps> = ({
   proMonthlyProduct,
   enterpriseProduct,
   onPlanSelection,
+  isActivePlan,
+  isPlanDisabled,
 }) => {
   return (
     <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8 max-w-6xl mx-auto items-stretch">
@@ -85,10 +89,18 @@ const SellerPlansSection: React.FC<SellerPlansSectionProps> = ({
           </ul>
 
           <button
-            onClick={() => onPlanSelection(proYearlyProduct)}
-            className="w-full mt-8 py-4 rounded-xl font-bold text-white bg-gradient-to-r from-emerald-500 to-cyan-500 hover:from-emerald-600 hover:to-cyan-600 shadow-lg hover:shadow-xl transition-all duration-300 text-base press-effect"
+            onClick={() => !isPlanDisabled(proYearlyProduct.productId) && onPlanSelection(proYearlyProduct)}
+            disabled={isPlanDisabled(proYearlyProduct.productId)}
+            className={`w-full mt-8 py-4 rounded-xl font-bold transition-all duration-300 text-base ${
+              isPlanDisabled(proYearlyProduct.productId)
+                ? 'bg-gray-200 text-gray-500 cursor-not-allowed shadow-none'
+                : 'text-white bg-gradient-to-r from-emerald-500 to-cyan-500 hover:from-emerald-600 hover:to-cyan-600 shadow-lg hover:shadow-xl press-effect'
+            }`}
           >
-            {t('pricing:buttons.getStarted', 'Get Started')} - €{proYearlyProduct.price}{t('pricing:billing.perYear', '/year')}
+            {isActivePlan(proYearlyProduct.productId)
+              ? t('pricing:buttons.currentPlan', 'Current Plan')
+              : <>{t('pricing:buttons.getStarted', 'Get Started')} - €{proYearlyProduct.price}{t('pricing:billing.perYear', '/year')}</>
+            }
           </button>
         </div>
       </Animated>
@@ -141,10 +153,18 @@ const SellerPlansSection: React.FC<SellerPlansSectionProps> = ({
           </ul>
 
           <button
-            onClick={() => onPlanSelection(proMonthlyProduct)}
-            className="w-full mt-8 py-4 rounded-xl font-bold text-gray-700 bg-white border-2 border-gray-300 hover:border-primary hover:text-primary hover:shadow-lg transition-all duration-300 text-base press-effect"
+            onClick={() => !isPlanDisabled(proMonthlyProduct.productId) && onPlanSelection(proMonthlyProduct)}
+            disabled={isPlanDisabled(proMonthlyProduct.productId)}
+            className={`w-full mt-8 py-4 rounded-xl font-bold transition-all duration-300 text-base ${
+              isPlanDisabled(proMonthlyProduct.productId)
+                ? 'bg-gray-200 text-gray-500 cursor-not-allowed border-2 border-gray-200 shadow-none'
+                : 'text-gray-700 bg-white border-2 border-gray-300 hover:border-primary hover:text-primary hover:shadow-lg press-effect'
+            }`}
           >
-            {t('pricing:buttons.getStarted', 'Get Started')} - €{proMonthlyProduct.price}{t('pricing:billing.perMonth', '/month')}
+            {isActivePlan(proMonthlyProduct.productId)
+              ? t('pricing:buttons.currentPlan', 'Current Plan')
+              : <>{t('pricing:buttons.getStarted', 'Get Started')} - €{proMonthlyProduct.price}{t('pricing:billing.perMonth', '/month')}</>
+            }
           </button>
         </div>
       </Animated>
@@ -215,10 +235,18 @@ const SellerPlansSection: React.FC<SellerPlansSectionProps> = ({
           </ul>
 
           <button
-            onClick={() => onPlanSelection(enterpriseProduct)}
-            className="w-full mt-8 py-4 rounded-xl font-bold text-slate-900 bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-500 hover:to-amber-600 shadow-lg hover:shadow-xl transition-all duration-300 text-base relative z-10 press-effect"
+            onClick={() => !isPlanDisabled(enterpriseProduct.productId) && onPlanSelection(enterpriseProduct)}
+            disabled={isPlanDisabled(enterpriseProduct.productId)}
+            className={`w-full mt-8 py-4 rounded-xl font-bold transition-all duration-300 text-base relative z-10 ${
+              isPlanDisabled(enterpriseProduct.productId)
+                ? 'bg-gray-600 text-gray-400 cursor-not-allowed shadow-none'
+                : 'text-slate-900 bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-500 hover:to-amber-600 shadow-lg hover:shadow-xl press-effect'
+            }`}
           >
-            {t('pricing:buttons.getStarted', 'Get Started')} - €{enterpriseProduct.price}{t('pricing:billing.perYear', '/year')}
+            {isActivePlan(enterpriseProduct.productId)
+              ? t('pricing:buttons.currentPlan', 'Current Plan')
+              : <>{t('pricing:buttons.getStarted', 'Get Started')} - €{enterpriseProduct.price}{t('pricing:billing.perYear', '/year')}</>
+            }
           </button>
         </div>
       </Animated>

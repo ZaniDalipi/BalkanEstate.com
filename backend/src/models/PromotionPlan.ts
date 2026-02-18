@@ -12,7 +12,9 @@ export interface IPromotionPlan extends Document {
 
   // Pricing for different durations
   pricing: {
-    duration7?: number;  // Weekly price
+    duration7?: number;  // 1 week price
+    duration14?: number; // 2 weeks price
+    duration28?: number; // 4 weeks price
     duration30?: number; // Monthly price
     duration90?: number; // Quarterly price
     // For fixed-price items (like add-ons)
@@ -79,6 +81,8 @@ const PromotionPlanSchema: Schema = new Schema(
 
     pricing: {
       duration7: { type: Number },
+      duration14: { type: Number },
+      duration28: { type: Number },
       duration30: { type: Number },
       duration90: { type: Number },
       fixedPrice: { type: Number },

@@ -210,6 +210,12 @@
     "comingSoon": "Coming Soon",
     "featureComingSoon": "Agency featuring will be available soon!"
   },
+  "coupon": {
+    "title": "Do you have a coupon from the seller?",
+    "description": "Select any plan above and use your coupon code to activate your subscription instantly.",
+    "selectPlan": "Select a plan to use your coupon",
+    "haveDiscountCode": "Have a discount code?"
+  },
   "contact": {
     "haveQuestions": "Have questions?",
     "contactSales": "Contact our sales team",

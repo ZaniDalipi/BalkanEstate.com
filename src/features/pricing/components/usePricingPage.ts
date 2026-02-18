@@ -29,13 +29,13 @@ export const formatLimit = (value?: number): string => {
 
 export function usePricingPage() {
   const { t } = useTranslation(['pricing', 'common']);
-  const { state, dispatch } = useAppContext();
+  const { state, dispatch, checkAuthStatus } = useAppContext();
   const [activeTab, setActiveTab] = useState<'seller' | 'buyer' | 'listing' | 'agency'>('seller');
   const [showPaymentWindow, setShowPaymentWindow] = useState(false);
   const [selectedPlan, setSelectedPlan] = useState<{
     name: string;
     price: number;
-    interval: 'month' | 'year';
+    interval: 'month' | 'year' | 'once';
     productId: string;
   } | null>(null);
   const [showContactOptions, setShowContactOptions] = useState(false);
@@ -44,7 +44,7 @@ export function usePricingPage() {
   const [selectedPromoTier, setSelectedPromoTier] = useState<'featured' | 'highlight' | 'premium' | null>(null);
   const [selectedListing, setSelectedListing] = useState<UserListing | null>(null);
   const [selectedDuration, setSelectedDuration] = useState<7 | 30 | 90>(30);
-  const [selectedAgencyDuration, setSelectedAgencyDuration] = useState<7 | 30 | 90>(30);
+  const [selectedAgencyDuration, setSelectedAgencyDuration] = useState<7 | 14 | 28 | 90>(28);
   const [includeMapMarker, setIncludeMapMarker] = useState(false);
 
   // Use React Query for real-time data fetching
@@ -74,10 +74,9 @@ export function usePricingPage() {
     premium: { 7: 39, 30: 99, 90: 229 },
   };
 
-  // Default/fallback agency feature pricing (using duration-based pricing now)
+  // Default/fallback agency feature pricing (duration-based like listing promotions)
   const defaultAgencyFeaturePricing: Record<string, Record<number, number>> = {
-    featured: { 7: 19, 30: 49, 90: 119 },
-    addon: { 7: 9, 30: 25, 90: 59 },
+    featured: { 7: 6.99, 14: 11.99, 28: 24.99, 90: 49.99 },
   };
 
   // Get dynamic pricing from API or fallback to defaults
@@ -90,11 +89,11 @@ export function usePricingPage() {
     return defaultPromotionPricing[tier]?.[duration] ?? 0;
   };
 
-  // Get agency feature pricing (now uses duration-based pricing like listing promotions)
+  // Get agency feature pricing (duration-based like listing promotions)
   const getAgencyPrice = (tier: string, duration: number): number => {
     const plan = agencyFeaturePlans.find(p => p.tier === tier);
     if (plan?.pricing) {
-      const key = `duration${duration}` as 'duration7' | 'duration30' | 'duration90';
+      const key = `duration${duration}` as 'duration7' | 'duration14' | 'duration28' | 'duration30' | 'duration90';
       return plan.pricing[key] ?? defaultAgencyFeaturePricing[tier]?.[duration] ?? 0;
     }
     return defaultAgencyFeaturePricing[tier]?.[duration] ?? 0;
@@ -352,20 +351,42 @@ export function usePricingPage() {
   };
 
   const handlePaymentSuccess = async (paymentIntentId: string) => {
-    // Log removed
     setShowPaymentWindow(false);
+    setSelectedPlan(null);
+
+    // Refresh user data to get updated subscription state (buttons will now reflect new plan)
+    try {
+      await checkAuthStatus();
+    } catch {
+      // Non-critical: UI will update on next page load
+    }
+
     dispatch({
       type: 'SHOW_ALERT',
       payload: {
         type: 'success',
         title: t('pricing:success.title', 'Success!'),
-        message: t('pricing:success.subscriptionActivated', 'Your subscription has been activated.'),
+        message: t(
+          'pricing:success.subscriptionActivatedWithReceipt',
+          'Your subscription has been activated. A receipt has been sent to your email.'
+        ),
       },
     });
   };
 
   const handlePaymentError = (error: string) => {
-    // Error removed
+    setShowPaymentWindow(false);
+    dispatch({
+      type: 'SHOW_ALERT',
+      payload: {
+        type: 'error',
+        title: t('pricing:error.paymentFailed', 'Payment Failed'),
+        message: error || t(
+          'pricing:error.paymentFailedMessage',
+          'Something went wrong with your payment. Please try again or contact support.'
+        ),
+      },
+    });
   };
 
   // Listing promotion handlers
@@ -399,15 +420,36 @@ export function usePricingPage() {
       dispatch({ type: 'TOGGLE_AUTH_MODAL', payload: { isOpen: true, view: 'login' } });
       return;
     }
-    // Payment integration pending
-    dispatch({
-      type: 'SHOW_ALERT',
-      payload: {
-        type: 'info',
-        title: t('pricing:agency.comingSoon', 'Coming Soon'),
-        message: t('pricing:agency.featureComingSoon', 'Agency featuring will be available soon!'),
-      },
+
+    // Must have an agency to feature it
+    if (!state.currentUser?.agencyId) {
+      dispatch({
+        type: 'SHOW_ALERT',
+        payload: {
+          type: 'warning',
+          title: t('pricing:agency.needAgency', "Don't have an agency yet?"),
+          message: t(
+            'pricing:agency.needAgencyDescription',
+            'Subscribe to our Enterprise plan to create your agency and unlock these features.'
+          ),
+        },
+      });
+      return;
+    }
+
+    // Open PaymentWindow for agency featuring (one-time payment, coupon supported)
+    const price = getAgencyPrice('featured', selectedAgencyDuration);
+    const durationLabel = selectedAgencyDuration === 7 ? '1 Week'
+      : selectedAgencyDuration === 14 ? '2 Weeks'
+      : selectedAgencyDuration === 28 ? '4 Weeks'
+      : '90 Days';
+    setSelectedPlan({
+      name: `${t('pricing:agency.featuredTitle', 'Featured Agency')} - ${durationLabel}`,
+      price,
+      interval: 'once' as any,
+      productId: `featured_agency_${selectedAgencyDuration}days`,
     });
+    setShowPaymentWindow(true);
   };
 
   const getBadgeColor = (color?: string) => {
@@ -433,6 +475,56 @@ export function usePricingPage() {
   const getUserRole = (): 'buyer' | 'private_seller' | 'agent' => {
     if (!state.currentUser) return 'private_seller';
     return state.currentUser.role === 'agent' ? 'agent' : 'private_seller';
+  };
+
+  // Determine if a given product is the user's currently active plan
+  const isActivePlan = (productId: string): boolean => {
+    const user = state.currentUser;
+    if (!user) return false;
+
+    const isActive =
+      user.subscriptionStatus === 'active' ||
+      user.subscriptionStatus === 'trial' ||
+      user.subscriptionStatus === 'grace' ||
+      user.subscription?.status === 'active' ||
+      user.subscription?.status === 'trial';
+
+    if (!isActive) return false;
+
+    const plan = (user.subscription?.plan || user.subscriptionPlan || '').toLowerCase();
+    const tier = user.subscription?.tier || '';
+    const id = productId.toLowerCase();
+
+    // Enterprise
+    if (id.includes('enterprise') && (plan.includes('enterprise') || tier === 'agency_owner')) return true;
+    // Pro Yearly
+    if ((id.includes('pro_yearly') || (id.includes('yearly') && !id.includes('enterprise'))) &&
+        (plan.includes('pro_yearly') || plan.includes('yearly')) &&
+        !plan.includes('enterprise')) return true;
+    // Pro Monthly
+    if ((id.includes('pro_monthly') || (id.includes('monthly') && !id.includes('buyer'))) &&
+        (plan.includes('pro_monthly') || plan.includes('monthly')) &&
+        !plan.includes('yearly') && !plan.includes('enterprise')) return true;
+    // Buyer
+    if (id.includes('buyer') && plan.includes('buyer')) return true;
+
+    return false;
+  };
+
+  // Determine if a plan button should be disabled (current plan OR downgrade)
+  const isPlanDisabled = (productId: string): boolean => {
+    const targetLevel = getProductPlanLevel(productId);
+
+    // Seller plans: disabled if target level <= current level (can't downgrade or re-select)
+    if (targetLevel > 0) {
+      const currentLevel = getCurrentSellerPlanLevel();
+      if (currentLevel > 0 && targetLevel <= currentLevel) return true;
+    }
+
+    // Buyer plan: disabled if already has active buyer plan
+    if (productId.toLowerCase().includes('buyer') && isActivePlan(productId)) return true;
+
+    return false;
   };
 
   // Separate enterprise from other products
@@ -495,6 +587,8 @@ export function usePricingPage() {
     getBadgeColor,
     getBillingLabel,
     getUserRole,
+    isActivePlan,
+    isPlanDisabled,
     // Handlers
     handleBack,
     handleLegalNavigation,

@@ -142,9 +142,12 @@ discountCodeSchema.methods.isValid = function(userId?: string, planId?: string, 
   }
 
   // Check applicable plans
-  if (this.applicablePlans && this.applicablePlans.length > 0 && planId) {
+  if (this.applicablePlans && this.applicablePlans.length > 0) {
+    if (!planId) {
+      return { valid: false, reason: 'This code is restricted to specific plans' };
+    }
     if (!this.applicablePlans.includes(planId)) {
-      return { valid: false, reason: 'Code is not applicable to this plan' };
+      return { valid: false, reason: 'This code is not valid for the selected plan' };
     }
   }
 

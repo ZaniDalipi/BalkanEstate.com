@@ -205,7 +205,7 @@ export const seedPromotionPlans = async (req: Request, res: Response): Promise<v
         name: 'Featured Agency',
         description: 'Featured everywhere on the platform',
         icon: '🏢',
-        pricing: { duration7: 19 }, // Only weekly pricing
+        pricing: { duration7: 6.99, duration14: 11.99, duration28: 24.99, duration90: 49.99 },
         features: [
           'Featured in agency directory',
           'Priority in search results',

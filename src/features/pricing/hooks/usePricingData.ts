@@ -47,6 +47,8 @@ export interface PromotionPlan {
   features: string[];
   pricing: {
     duration7: number;
+    duration14?: number;
+    duration28?: number;
     duration30: number;
     duration90: number;
   };

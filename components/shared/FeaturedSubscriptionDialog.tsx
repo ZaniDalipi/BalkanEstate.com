@@ -27,7 +27,7 @@ const FeaturedSubscriptionDialog: React.FC<FeaturedSubscriptionDialogProps> = ({
   agencyId,
   onSuccess,
 }) => {
-  const [interval, setInterval] = useState<'weekly' | 'monthly' | 'yearly'>('weekly');
+  const [selectedDuration, setSelectedDuration] = useState<7 | 14 | 28 | 90>(28);
   const [couponCode, setCouponCode] = useState('');
   const [loading, setLoading] = useState(false);
   const [loadingProducts, setLoadingProducts] = useState(true);
@@ -63,54 +63,45 @@ const FeaturedSubscriptionDialog: React.FC<FeaturedSubscriptionDialogProps> = ({
     }
   };
 
-  // Build pricing from DB products or use fallback
-  const pricing = useMemo(() => {
-    const weeklyProduct = featuredProducts.find(p => p.productId === 'featured_agency_weekly');
-    const monthlyProduct = featuredProducts.find(p => p.productId === 'featured_agency_monthly');
-    const yearlyProduct = featuredProducts.find(p => p.productId === 'featured_agency_yearly');
-
-    return {
-      weekly: {
-        price: weeklyProduct?.price ?? 10,
-        period: 'week',
-        savings: 0,
-        features: weeklyProduct?.features || [],
-        badge: weeklyProduct?.badge,
-        highlighted: weeklyProduct?.highlighted,
-      },
-      monthly: {
-        price: monthlyProduct?.price ?? 35,
-        period: 'month',
-        savings: 30,
-        features: monthlyProduct?.features || [],
-        badge: monthlyProduct?.badge,
-        highlighted: monthlyProduct?.highlighted,
-      },
-      yearly: {
-        price: yearlyProduct?.price ?? 400,
-        period: 'year',
-        savings: 23,
-        features: yearlyProduct?.features || [],
-        badge: yearlyProduct?.badge,
-        highlighted: yearlyProduct?.highlighted,
-      },
+  // Build duration-based pricing from DB products or use fallback
+  const durationOptions = useMemo(() => {
+    const defaults: Record<number, { price: number; label: string; productId: string; badge?: string; highlighted?: boolean; features: string[] }> = {
+      7: { price: 6.99, label: '1 Week', productId: 'featured_agency_7days', features: [] },
+      14: { price: 11.99, label: '2 Weeks', productId: 'featured_agency_14days', features: [] },
+      28: { price: 24.99, label: '4 Weeks', productId: 'featured_agency_28days', badge: 'POPULAR', highlighted: true, features: [] },
+      90: { price: 49.99, label: '90 Days', productId: 'featured_agency_90days', badge: 'BEST VALUE', features: [] },
     };
+
+    for (const product of featuredProducts) {
+      const match = product.productId.match(/featured_agency_(\d+)days/);
+      if (match) {
+        const days = parseInt(match[1]);
+        if (defaults[days]) {
+          defaults[days].price = product.price;
+          defaults[days].features = product.features || [];
+          if (product.badge) defaults[days].badge = product.badge;
+          if (product.highlighted !== undefined) defaults[days].highlighted = product.highlighted;
+        }
+      }
+    }
+
+    return defaults;
   }, [featuredProducts]);
 
   // Get features for selected plan from DB or default
   const selectedFeatures = useMemo(() => {
-    const planFeatures = pricing[interval].features;
+    const planFeatures = durationOptions[selectedDuration]?.features || [];
     if (planFeatures.length > 0) {
       return planFeatures;
     }
     return [
-      'Top placement in search results',
-      'Featured in agency carousel',
-      'Premium badge on your profile',
-      'Monthly rotation to maintain freshness',
-      'Cancel anytime',
+      'Featured in agency directory',
+      'Priority in search results',
+      'Homepage agency carousel',
+      'Featured badge on profile',
+      'Boosted visibility everywhere',
     ];
-  }, [interval, pricing]);
+  }, [selectedDuration, durationOptions]);
 
   const handleApplyCoupon = async () => {
     if (!couponCode.trim()) {
@@ -130,7 +121,7 @@ const FeaturedSubscriptionDialog: React.FC<FeaturedSubscriptionDialogProps> = ({
         },
         body: JSON.stringify({
           couponCode: couponCode.toUpperCase(),
-          price: pricing[interval].price,
+          price: durationOptions[selectedDuration].price,
           tier: 'featured',
         }),
       });
@@ -161,7 +152,8 @@ const FeaturedSubscriptionDialog: React.FC<FeaturedSubscriptionDialogProps> = ({
       setError(null);
 
       const response = await createFeaturedSubscription(agencyId, {
-        interval,
+        interval: `${selectedDuration}days` as any,
+        duration: selectedDuration,
         couponCode: couponCode || undefined,
         startTrial: false,
       });
@@ -227,40 +219,35 @@ const FeaturedSubscriptionDialog: React.FC<FeaturedSubscriptionDialogProps> = ({
               </div>
             ) : (
               <>
-                {/* Pricing Options */}
+                {/* Duration-based Pricing Options */}
                 <div className="mb-6">
-                  <h4 className="font-semibold text-neutral-800 mb-3">Choose Your Plan</h4>
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-                    {(Object.keys(pricing) as Array<keyof typeof pricing>).map((key) => {
-                      const plan = pricing[key];
+                  <h4 className="font-semibold text-neutral-800 mb-3">Choose Duration</h4>
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                    {([7, 14, 28, 90] as const).map((days) => {
+                      const opt = durationOptions[days];
+                      const isSelected = selectedDuration === days;
                       return (
                         <button
-                          key={key}
-                          onClick={() => setInterval(key)}
+                          key={days}
+                          onClick={() => setSelectedDuration(days)}
                           className={`p-4 rounded-lg border-2 transition-all relative ${
-                            interval === key
+                            isSelected
                               ? 'border-primary bg-purple-50 shadow-md'
-                              : plan.highlighted
+                              : opt.highlighted
                                 ? 'border-green-300 hover:border-green-400 bg-green-50/30'
                                 : 'border-gray-200 hover:border-gray-300'
                           }`}
                         >
-                          {plan.badge && (
-                            <span className="absolute -top-2 left-1/2 -translate-x-1/2 bg-green-500 text-white text-xs font-bold px-2 py-0.5 rounded-full">
-                              {plan.badge}
+                          {opt.badge && (
+                            <span className="absolute -top-2 left-1/2 -translate-x-1/2 bg-green-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full whitespace-nowrap">
+                              {opt.badge}
                             </span>
                           )}
-                          <div className="text-left">
-                            <p className="text-sm text-neutral-500 capitalize">{key}</p>
-                            <p className="text-2xl font-bold text-neutral-800">
-                              €{plan.price}
+                          <div className="text-center">
+                            <p className="text-sm text-neutral-500">{opt.label}</p>
+                            <p className="text-xl font-bold text-neutral-800 mt-1">
+                              €{opt.price.toFixed(2)}
                             </p>
-                            <p className="text-xs text-neutral-500">per {plan.period}</p>
-                            {plan.savings > 0 && (
-                              <p className="text-xs text-green-600 font-semibold mt-1">
-                                Save {plan.savings}%
-                              </p>
-                            )}
                           </div>
                         </button>
                       );
@@ -320,7 +307,7 @@ const FeaturedSubscriptionDialog: React.FC<FeaturedSubscriptionDialogProps> = ({
                   <p className="text-sm font-semibold text-green-800">Coupon Applied Successfully!</p>
                 </div>
                 <div className="text-sm text-green-700">
-                  <p>Original Price: <span className="line-through">€{pricing[interval].price}</span></p>
+                  <p>Original Price: <span className="line-through">€{durationOptions[selectedDuration].price}</span></p>
                   <p>Discount: <span className="font-bold">-€{discountAmount}</span></p>
                   <p className="text-lg font-bold mt-1">
                     Final Price: {finalPrice === 0 ? (
@@ -358,7 +345,7 @@ const FeaturedSubscriptionDialog: React.FC<FeaturedSubscriptionDialogProps> = ({
                   ? finalPrice === 0
                     ? 'Activate for FREE'
                     : `Subscribe - €${finalPrice}`
-                  : `Subscribe - €${pricing[interval].price}`}
+                  : `Subscribe - €${durationOptions[selectedDuration].price}`}
               </button>
             </div>
 
@@ -368,10 +355,10 @@ const FeaturedSubscriptionDialog: React.FC<FeaturedSubscriptionDialogProps> = ({
                 finalPrice === 0 ? (
                   <span className="font-semibold text-green-600"> No payment required - 100% discount applied!</span>
                 ) : (
-                  <span> You will be charged €{finalPrice} per {pricing[interval].period}.</span>
+                  <span> You will be charged €{finalPrice} per {durationOptions[selectedDuration].label}.</span>
                 )
               ) : (
-                <span> You will be charged €{pricing[interval].price} per {pricing[interval].period}.</span>
+                <span> You will be charged €{durationOptions[selectedDuration].price} per {durationOptions[selectedDuration].label}.</span>
               )}
             </p>
           </>

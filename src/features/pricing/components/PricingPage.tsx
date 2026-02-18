@@ -50,6 +50,8 @@ const PricingPage: React.FC = () => {
     setSelectedListing,
     selectedDuration,
     setSelectedDuration,
+    selectedAgencyDuration,
+    setSelectedAgencyDuration,
     loading,
     error,
     userListings,
@@ -74,6 +76,8 @@ const PricingPage: React.FC = () => {
     handleSelectListingForPromotion,
     handlePurchasePromotion,
     handleAgencyFeature,
+    isActivePlan,
+    isPlanDisabled,
   } = usePricingPage();
 
   return (
@@ -306,6 +310,8 @@ const PricingPage: React.FC = () => {
               proMonthlyProduct={proMonthlyProduct}
               enterpriseProduct={enterpriseProduct}
               onPlanSelection={handlePlanSelection}
+              isActivePlan={isActivePlan}
+              isPlanDisabled={isPlanDisabled}
             />
           )}
 
@@ -315,6 +321,8 @@ const PricingPage: React.FC = () => {
               t={t}
               buyerProduct={buyerProduct}
               onPlanSelection={handlePlanSelection}
+              isActivePlan={isActivePlan}
+              isPlanDisabled={isPlanDisabled}
             />
           )}
 
@@ -345,6 +353,8 @@ const PricingPage: React.FC = () => {
               t={t}
               currentUserAgencyId={state.currentUser?.agencyId}
               getAgencyPrice={getAgencyPrice}
+              selectedAgencyDuration={selectedAgencyDuration}
+              setSelectedAgencyDuration={setSelectedAgencyDuration}
               onAgencyFeature={handleAgencyFeature}
               onSetActiveTab={setActiveTab}
             />

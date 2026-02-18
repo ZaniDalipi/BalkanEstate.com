@@ -3623,3 +3623,5 @@ export const sendViewingConfirmation = emailServiceInstance.sendViewingConfirmat
 export const sendViewingNotification = emailServiceInstance.sendViewingNotification.bind(emailServiceInstance);
 export const sendViewingApproved = emailServiceInstance.sendViewingApproved.bind(emailServiceInstance);
 export const sendViewingRejected = emailServiceInstance.sendViewingRejected.bind(emailServiceInstance);
+export const sendSubscriptionInvoice = emailServiceInstance.sendSubscriptionInvoice.bind(emailServiceInstance);
+export const sendPaymentConfirmation = emailServiceInstance.sendPaymentConfirmation.bind(emailServiceInstance);

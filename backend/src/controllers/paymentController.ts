@@ -385,6 +385,8 @@ export const applyFreeSubscription = async (req: Request, res: Response): Promis
       store: 'web',
       amount: 0,
       currency: 'EUR',
+      discountCode: discountCode.toUpperCase(),
+      originalAmount: product.price,
     });
 
     // Increment discount code usage
