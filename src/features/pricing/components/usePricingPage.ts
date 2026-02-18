@@ -44,7 +44,7 @@ export function usePricingPage() {
   const [selectedPromoTier, setSelectedPromoTier] = useState<'featured' | 'highlight' | 'premium' | null>(null);
   const [selectedListing, setSelectedListing] = useState<UserListing | null>(null);
   const [selectedDuration, setSelectedDuration] = useState<7 | 30 | 90>(30);
-  const [selectedAgencyDuration, setSelectedAgencyDuration] = useState<7 | 30 | 90>(30);
+  const [selectedAgencyDuration, setSelectedAgencyDuration] = useState<7 | 14 | 28 | 90>(28);
   const [includeMapMarker, setIncludeMapMarker] = useState(false);
 
   // Use React Query for real-time data fetching
@@ -74,10 +74,9 @@ export function usePricingPage() {
     premium: { 7: 39, 30: 99, 90: 229 },
   };
 
-  // Default/fallback agency feature pricing (using duration-based pricing now)
+  // Default/fallback agency feature pricing (duration-based like listing promotions)
   const defaultAgencyFeaturePricing: Record<string, Record<number, number>> = {
-    featured: { 7: 19, 30: 49, 90: 119 },
-    addon: { 7: 9, 30: 25, 90: 59 },
+    featured: { 7: 6.99, 14: 11.99, 28: 24.99, 90: 49.99 },
   };
 
   // Get dynamic pricing from API or fallback to defaults
@@ -90,11 +89,11 @@ export function usePricingPage() {
     return defaultPromotionPricing[tier]?.[duration] ?? 0;
   };
 
-  // Get agency feature pricing (now uses duration-based pricing like listing promotions)
+  // Get agency feature pricing (duration-based like listing promotions)
   const getAgencyPrice = (tier: string, duration: number): number => {
     const plan = agencyFeaturePlans.find(p => p.tier === tier);
     if (plan?.pricing) {
-      const key = `duration${duration}` as 'duration7' | 'duration30' | 'duration90';
+      const key = `duration${duration}` as 'duration7' | 'duration14' | 'duration28' | 'duration30' | 'duration90';
       return plan.pricing[key] ?? defaultAgencyFeaturePricing[tier]?.[duration] ?? 0;
     }
     return defaultAgencyFeaturePricing[tier]?.[duration] ?? 0;
@@ -438,13 +437,17 @@ export function usePricingPage() {
       return;
     }
 
-    // Open PaymentWindow for agency featuring (one-time weekly payment, coupon supported)
-    const price = getAgencyPrice('featured', 7);
+    // Open PaymentWindow for agency featuring (one-time payment, coupon supported)
+    const price = getAgencyPrice('featured', selectedAgencyDuration);
+    const durationLabel = selectedAgencyDuration === 7 ? '1 Week'
+      : selectedAgencyDuration === 14 ? '2 Weeks'
+      : selectedAgencyDuration === 28 ? '4 Weeks'
+      : '90 Days';
     setSelectedPlan({
-      name: t('pricing:agency.featuredTitle', 'Featured Agency'),
+      name: `${t('pricing:agency.featuredTitle', 'Featured Agency')} - ${durationLabel}`,
       price,
       interval: 'once' as any,
-      productId: `agency_featured_7days`,
+      productId: `featured_agency_${selectedAgencyDuration}days`,
     });
     setShowPaymentWindow(true);
   };

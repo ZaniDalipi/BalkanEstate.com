@@ -50,6 +50,8 @@ const PricingPage: React.FC = () => {
     setSelectedListing,
     selectedDuration,
     setSelectedDuration,
+    selectedAgencyDuration,
+    setSelectedAgencyDuration,
     loading,
     error,
     userListings,
@@ -351,6 +353,8 @@ const PricingPage: React.FC = () => {
               t={t}
               currentUserAgencyId={state.currentUser?.agencyId}
               getAgencyPrice={getAgencyPrice}
+              selectedAgencyDuration={selectedAgencyDuration}
+              setSelectedAgencyDuration={setSelectedAgencyDuration}
               onAgencyFeature={handleAgencyFeature}
               onSetActiveTab={setActiveTab}
             />

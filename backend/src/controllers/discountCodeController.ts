@@ -242,6 +242,7 @@ export const validateDiscountCode = async (req: Request, res: Response): Promise
         originalPrice: purchaseAmount,
         finalPrice: Math.round(finalPrice * 100) / 100,
         description: discountCode.description,
+        applicablePlans: discountCode.applicablePlans || [],
       },
     });
   } catch (error: any) {

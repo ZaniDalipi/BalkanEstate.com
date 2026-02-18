@@ -91,7 +91,7 @@ const PROMOTION_PLANS = [
     name: 'Featured Agency',
     description: 'Featured everywhere on the platform',
     icon: '🏢',
-    pricing: { duration7: 19 }, // Only 7-day option
+    pricing: { duration7: 6.99, duration14: 11.99, duration28: 24.99, duration90: 49.99 },
     features: [
       'Featured in agency directory',
       'Priority in search results',
@@ -155,7 +155,7 @@ async function seedPromotionPlans() {
     console.log('     Highlight: €19/7d, €49/30d, €119/90d (3x visibility)');
     console.log('     Premium: €39/7d, €99/30d, €229/90d (5x visibility)');
     console.log('   AGENCY PROMOTIONS:');
-    console.log('     Featured Agency: €19/week (3x visibility, shown everywhere)');
+    console.log('     Featured Agency: €6.99/7d, €11.99/14d, €24.99/28d, €49.99/90d (3x visibility)');
 
   } catch (error) {
     console.error('❌ Error seeding promotion plans:', error);
