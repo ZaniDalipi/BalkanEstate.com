@@ -257,7 +257,7 @@ export async function processSubscriptionPayment(
           amount: params.originalAmount != null ? params.originalAmount : amount,
           currency: currency || 'EUR',
           billingPeriod,
-          orderId: paymentRecord._id.toString(),
+          orderId: (paymentRecord._id as string).toString(),
           subscriptionStartDate: startDate,
           nextBillingDate: subscription.expirationDate,
           autoRenewing: subscription.autoRenewing ?? true,
