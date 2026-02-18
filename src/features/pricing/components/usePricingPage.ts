@@ -29,7 +29,7 @@ export const formatLimit = (value?: number): string => {
 
 export function usePricingPage() {
   const { t } = useTranslation(['pricing', 'common']);
-  const { state, dispatch } = useAppContext();
+  const { state, dispatch, checkAuthStatus } = useAppContext();
   const [activeTab, setActiveTab] = useState<'seller' | 'buyer' | 'listing' | 'agency'>('seller');
   const [showPaymentWindow, setShowPaymentWindow] = useState(false);
   const [selectedPlan, setSelectedPlan] = useState<{
@@ -352,20 +352,42 @@ export function usePricingPage() {
   };
 
   const handlePaymentSuccess = async (paymentIntentId: string) => {
-    // Log removed
     setShowPaymentWindow(false);
+    setSelectedPlan(null);
+
+    // Refresh user data to get updated subscription state (buttons will now reflect new plan)
+    try {
+      await checkAuthStatus();
+    } catch {
+      // Non-critical: UI will update on next page load
+    }
+
     dispatch({
       type: 'SHOW_ALERT',
       payload: {
         type: 'success',
         title: t('pricing:success.title', 'Success!'),
-        message: t('pricing:success.subscriptionActivated', 'Your subscription has been activated.'),
+        message: t(
+          'pricing:success.subscriptionActivatedWithReceipt',
+          'Your subscription has been activated. A receipt has been sent to your email.'
+        ),
       },
     });
   };
 
   const handlePaymentError = (error: string) => {
-    // Error removed
+    setShowPaymentWindow(false);
+    dispatch({
+      type: 'SHOW_ALERT',
+      payload: {
+        type: 'error',
+        title: t('pricing:error.paymentFailed', 'Payment Failed'),
+        message: error || t(
+          'pricing:error.paymentFailedMessage',
+          'Something went wrong with your payment. Please try again or contact support.'
+        ),
+      },
+    });
   };
 
   // Listing promotion handlers

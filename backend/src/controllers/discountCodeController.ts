@@ -175,13 +175,35 @@ export const validateDiscountCode = async (req: Request, res: Response): Promise
   try {
     const { code, planId, purchaseAmount } = req.body;
 
-    if (!code) {
+    if (!code || typeof code !== 'string') {
       res.status(400).json({ message: 'Discount code is required' });
       return;
     }
 
+    // Validate code format: alphanumeric, hyphens, underscores (3-50 chars)
+    const sanitizedCode = code.trim();
+    if (!/^[A-Za-z0-9_-]{3,50}$/.test(sanitizedCode)) {
+      res.status(400).json({ valid: false, message: 'Invalid discount code format' });
+      return;
+    }
+
+    // Validate purchaseAmount if provided
+    if (purchaseAmount !== undefined && purchaseAmount !== null) {
+      const amount = Number(purchaseAmount);
+      if (isNaN(amount) || amount < 0 || amount > 100000) {
+        res.status(400).json({ valid: false, message: 'Invalid purchase amount' });
+        return;
+      }
+    }
+
+    // Validate planId format if provided
+    if (planId !== undefined && planId !== null && typeof planId !== 'string') {
+      res.status(400).json({ valid: false, message: 'Invalid plan identifier' });
+      return;
+    }
+
     // Find the discount code
-    const discountCode = await DiscountCode.findOne({ code: code.toUpperCase() });
+    const discountCode = await DiscountCode.findOne({ code: sanitizedCode.toUpperCase() });
 
     if (!discountCode) {
       res.status(404).json({
