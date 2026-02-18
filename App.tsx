@@ -505,6 +505,21 @@ const AppContent: React.FC<{ onToggleSidebar: () => void }> = ({ onToggleSidebar
     );
   }
 
+  // Show email verification required before any other view (highest priority)
+  if (state.pendingEmailVerification) {
+    return (
+      <Suspense fallback={
+        <div className="flex items-center justify-center min-h-screen">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
+          </div>
+        </div>
+      }>
+        <EmailVerificationRequired email={state.pendingEmailVerification} />
+      </Suspense>
+    );
+  }
+
   // Wrap lazy loaded views in Suspense
   const renderView = () => {
     switch (state.activeView) {
@@ -831,6 +846,14 @@ const AppWrapper: React.FC = () => {
         (window as any).__balkanestateSplashDone = Date.now();
     }, []);
 
+    // Monitor user's email verification status and clear pending verification when verified
+    useEffect(() => {
+        if (state.pendingEmailVerification && state.currentUser?.isEmailVerified) {
+            // Email has been verified, clear the pending state
+            dispatch({ type: 'SET_PENDING_EMAIL_VERIFICATION', payload: null });
+        }
+    }, [state.currentUser?.isEmailVerified, state.pendingEmailVerification, dispatch]);
+
     useEffect(() => {
         // Check for OAuth callback parameters in URL
         const urlParams = new URLSearchParams(window.location.search);
@@ -876,7 +899,8 @@ const AppWrapper: React.FC = () => {
     }, [checkAuthStatus, handleOAuthCallback, dispatch]);
 
     // While splash is active, render app content behind it so resources start loading
-    if (showSplash) {
+    // But skip splash if user needs email verification (show that immediately instead)
+    if (showSplash && !state.pendingEmailVerification) {
         return (
             <>
                 {/* Render main layout behind the splash so map/resources start loading */}

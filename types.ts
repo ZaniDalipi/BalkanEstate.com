@@ -673,6 +673,7 @@ export interface AppState {
     isEnterpriseModalOpen: boolean;
     allMunicipalities: Record<string, MunicipalityData[]>;
     pendingRedirect: AppView | null; // View to redirect to after auth
+    pendingEmailVerification: string | null; // Email requiring verification after signup
     // Alert dialog state
     alertDialog: {
         isOpen: boolean;
@@ -741,6 +742,7 @@ export type AppAction =
     | { type: 'TOGGLE_DISCOUNT_GAME', payload: boolean }
     | { type: 'UPDATE_SAVED_SEARCH_ACCESS_TIME', payload: { searchId: string; seenPropertyIds?: string[] } }
     | { type: 'SET_PENDING_REDIRECT', payload: AppView | null }
+    | { type: 'SET_PENDING_EMAIL_VERIFICATION', payload: string | null }
     | { type: 'SHOW_ALERT', payload: { type: 'error' | 'warning' | 'success' | 'info'; title: string; message: string } }
     | { type: 'HIDE_ALERT' }
     | { type: 'SET_ACCOUNT_TAB', payload: string }
