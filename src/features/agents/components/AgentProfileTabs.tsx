@@ -27,6 +27,7 @@ import {
     MagnifyingGlassIcon,
     PhoneIcon,
     EnvelopeIcon,
+    GlobeAltIcon,
 } from '@/constants';
 import StarRating from '@/components/shared/StarRating';
 import DefaultAvatar from '@/components/shared/DefaultAvatar';
@@ -39,6 +40,8 @@ import { Achievement } from '@/components/shared/AchievementsSection';
 import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
 import L from 'leaflet';
 import { AgentStats, MarketInsights } from './useAgentProfile';
+import { Credential } from '@/src/features/credentials/api/credentialApi';
+import CredentialsSection from '@/src/features/credentials/components/CredentialsSection';
 
 // Component to fix map rendering issues in dynamic containers
 const MapInvalidator: React.FC = () => {
@@ -84,6 +87,7 @@ interface AgentProfileTabsProps {
     showReviewForm: boolean;
     setShowReviewForm: (show: boolean) => void;
     agentAchievements: Achievement[];
+    agentCredentials: Credential[];
     onContactAgent: () => void;
     onSearchAllProperties: () => void;
     onRequestMarketReport: () => void;
@@ -111,6 +115,7 @@ const AgentProfileTabs: React.FC<AgentProfileTabsProps> = ({
     showReviewForm,
     setShowReviewForm,
     agentAchievements,
+    agentCredentials,
     onContactAgent,
     onSearchAllProperties,
     onRequestMarketReport,
@@ -171,6 +176,62 @@ const AgentProfileTabs: React.FC<AgentProfileTabsProps> = ({
                                 )}
                             </div>
                         </div>
+
+                        {/* Contact Information */}
+                        {(agent.officePhone || agent.phone || agent.officeAddress || agent.websiteUrl || agent.email) && (
+                            <div>
+                                <h3 className="text-xl font-bold text-gray-900 mb-4 flex items-center gap-2">
+                                    <PhoneIcon className="w-6 h-6 text-blue-600" />
+                                    {t('profilePage.contactInfo', 'Contact Information')}
+                                </h3>
+                                <div className="bg-white border border-gray-200 rounded-xl p-5 space-y-3">
+                                    {(agent.officePhone || agent.phone) && (
+                                        <a href={`tel:${agent.officePhone || agent.phone}`} className="flex items-center gap-3 text-gray-700 hover:text-blue-600 transition-colors">
+                                            <div className="w-10 h-10 rounded-lg bg-green-50 flex items-center justify-center flex-shrink-0">
+                                                <PhoneIcon className="w-5 h-5 text-green-600" />
+                                            </div>
+                                            <div>
+                                                <div className="text-sm font-semibold">{agent.officePhone || agent.phone}</div>
+                                                <div className="text-xs text-gray-500">{t('profilePage.phone', 'Phone')}</div>
+                                            </div>
+                                        </a>
+                                    )}
+                                    {agent.email && (
+                                        <a href={`mailto:${agent.email}`} className="flex items-center gap-3 text-gray-700 hover:text-blue-600 transition-colors">
+                                            <div className="w-10 h-10 rounded-lg bg-blue-50 flex items-center justify-center flex-shrink-0">
+                                                <EnvelopeIcon className="w-5 h-5 text-blue-600" />
+                                            </div>
+                                            <div>
+                                                <div className="text-sm font-semibold">{agent.email}</div>
+                                                <div className="text-xs text-gray-500">{t('profilePage.email', 'Email')}</div>
+                                            </div>
+                                        </a>
+                                    )}
+                                    {agent.officeAddress && (
+                                        <div className="flex items-center gap-3 text-gray-700">
+                                            <div className="w-10 h-10 rounded-lg bg-purple-50 flex items-center justify-center flex-shrink-0">
+                                                <MapPinIcon className="w-5 h-5 text-purple-600" />
+                                            </div>
+                                            <div>
+                                                <div className="text-sm font-semibold">{agent.officeAddress}</div>
+                                                <div className="text-xs text-gray-500">{t('profilePage.officeAddress', 'Office Address')}</div>
+                                            </div>
+                                        </div>
+                                    )}
+                                    {agent.websiteUrl && (
+                                        <a href={agent.websiteUrl} target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 text-gray-700 hover:text-blue-600 transition-colors">
+                                            <div className="w-10 h-10 rounded-lg bg-indigo-50 flex items-center justify-center flex-shrink-0">
+                                                <GlobeAltIcon className="w-5 h-5 text-indigo-600" />
+                                            </div>
+                                            <div>
+                                                <div className="text-sm font-semibold">{agent.websiteUrl.replace(/^https?:\/\//, '')}</div>
+                                                <div className="text-xs text-gray-500">{t('profilePage.website', 'Website')}</div>
+                                            </div>
+                                        </a>
+                                    )}
+                                </div>
+                            </div>
+                        )}
 
                         {/* Achievements Display - Public View */}
                         {agentAchievements.length > 0 && (
@@ -233,9 +294,11 @@ const AgentProfileTabs: React.FC<AgentProfileTabsProps> = ({
                                         </div>
                                         <div className="flex-1">
                                             <h4 className="font-bold text-gray-900 text-lg mb-1">{t('profilePage.credentials.licensedAgent')}</h4>
-                                            <p className="text-blue-700 font-mono text-sm font-semibold">
-                                                {agent.licenseNumber || `${agent.country?.substring(0, 2).toUpperCase() || 'XX'}-REA-${Math.floor(10000 + Math.random() * 90000)}`}
-                                            </p>
+                                            {agent.licenseNumber && (
+                                                <p className="text-blue-700 font-mono text-sm font-semibold">
+                                                    {agent.licenseNumber}
+                                                </p>
+                                            )}
                                             <p className="text-gray-600 text-sm mt-1">
                                                 {t('profilePage.credentials.authorizedToPractice', { city: agent.city, country: agent.country })}
                                             </p>
@@ -243,53 +306,15 @@ const AgentProfileTabs: React.FC<AgentProfileTabsProps> = ({
                                     </div>
                                 </div>
 
-                                {/* Professional Certifications */}
-                                <div className="bg-white border border-gray-200 rounded-xl p-5">
-                                    <div className="flex items-start gap-4">
-                                        <div className="bg-green-100 text-green-600 p-3 rounded-lg flex-shrink-0">
-                                            <AcademicCapIcon className="w-6 h-6" />
-                                        </div>
-                                        <div className="flex-1">
-                                            <h4 className="font-bold text-gray-900 mb-2">{t('profilePage.credentials.professionalCertifications')}</h4>
-                                            {agent.certifications && Array.isArray(agent.certifications) && agent.certifications.length > 0 ? (
-                                                <ul className="space-y-2">
-                                                    {agent.certifications.map((cert, idx) => (
-                                                        <li key={idx} className="flex items-start gap-2 text-gray-700">
-                                                            <CheckCircleIcon className="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" />
-                                                            <span>{cert}</span>
-                                                        </li>
-                                                    ))}
-                                                </ul>
-                                            ) : (
-                                                <p className="text-gray-600">{t('profilePage.credentials.memberOfAssociation')}</p>
-                                            )}
-                                        </div>
-                                    </div>
-                                </div>
-
-                                {/* Awards & Recognition */}
-                                <div className="bg-gradient-to-r from-amber-50 to-yellow-50 border border-amber-200 rounded-xl p-5">
-                                    <div className="flex items-start gap-4">
-                                        <div className="bg-amber-500 text-white p-3 rounded-lg flex-shrink-0">
-                                            <TrophyIcon className="w-6 h-6" />
-                                        </div>
-                                        <div className="flex-1">
-                                            <h4 className="font-bold text-gray-900 mb-2">{t('profilePage.credentials.awardsRecognition')}</h4>
-                                            {agent.awards && Array.isArray(agent.awards) && agent.awards.length > 0 ? (
-                                                <ul className="space-y-2">
-                                                    {agent.awards.map((award, idx) => (
-                                                        <li key={idx} className="flex items-start gap-2 text-gray-700">
-                                                            <StarIcon className="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5 fill-amber-600" />
-                                                            <span>{award}</span>
-                                                        </li>
-                                                    ))}
-                                                </ul>
-                                            ) : (
-                                                <p className="text-gray-600">{t('profilePage.credentials.noAwards')}</p>
-                                            )}
-                                        </div>
-                                    </div>
-                                </div>
+                                {/* Professional Credentials from API */}
+                                {agentCredentials.length > 0 && (
+                                    <CredentialsSection
+                                        credentials={agentCredentials}
+                                        isOwner={false}
+                                        onCredentialsChange={() => {}}
+                                        className="mt-4"
+                                    />
+                                )}
                             </div>
                         </div>
 

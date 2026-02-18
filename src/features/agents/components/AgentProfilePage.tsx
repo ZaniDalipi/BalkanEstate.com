@@ -151,6 +151,7 @@ const AgentProfilePage: React.FC<AgentProfilePageProps> = ({ agent }) => {
                             showReviewForm={profile.showReviewForm}
                             setShowReviewForm={profile.setShowReviewForm}
                             agentAchievements={profile.agentAchievements}
+                            agentCredentials={profile.agentCredentials}
                             onContactAgent={profile.handleContactAgent}
                             onSearchAllProperties={profile.handleSearchAllProperties}
                             onRequestMarketReport={profile.handleRequestMarketReport}

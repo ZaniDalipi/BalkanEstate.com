@@ -694,8 +694,96 @@ export const updateAgency = async (
       return;
     }
 
-    // Update agency
-    Object.assign(agency, req.body);
+    // Whitelist of updatable fields - prevents overwriting protected fields
+    const {
+      name, description, website, phone, email, address,
+      city, country, zipCode, lat, lng,
+      facebookUrl, instagramUrl, linkedinUrl, twitterUrl,
+      yearsInBusiness, specialties, specializations,
+      serviceAreas, certifications, languages, businessHours,
+    } = req.body;
+
+    // Validation
+    if (name !== undefined) {
+      const trimmed = typeof name === 'string' ? name.trim() : '';
+      if (!trimmed) {
+        res.status(400).json({ message: 'Agency name is required' });
+        return;
+      }
+      if (trimmed.length > 200) {
+        res.status(400).json({ message: 'Agency name must be under 200 characters' });
+        return;
+      }
+    }
+
+    if (description !== undefined && typeof description === 'string' && description.length > 5000) {
+      res.status(400).json({ message: 'Description must be under 5000 characters' });
+      return;
+    }
+
+    // Validate URL fields
+    const urlFields: Record<string, string | undefined> = { website, facebookUrl, instagramUrl, linkedinUrl, twitterUrl };
+    for (const [fieldName, value] of Object.entries(urlFields)) {
+      if (value && typeof value === 'string' && value.trim()) {
+        try {
+          new URL(value);
+        } catch {
+          res.status(400).json({ message: `Invalid URL for ${fieldName}` });
+          return;
+        }
+      }
+    }
+
+    // Validate coordinates
+    if (lat !== undefined && lat !== null && lat !== 0) {
+      const latNum = Number(lat);
+      if (isNaN(latNum) || latNum < -90 || latNum > 90) {
+        res.status(400).json({ message: 'Latitude must be between -90 and 90' });
+        return;
+      }
+    }
+    if (lng !== undefined && lng !== null && lng !== 0) {
+      const lngNum = Number(lng);
+      if (isNaN(lngNum) || lngNum < -180 || lngNum > 180) {
+        res.status(400).json({ message: 'Longitude must be between -180 and 180' });
+        return;
+      }
+    }
+
+    // Apply only whitelisted fields
+    if (name !== undefined) agency.name = name.trim();
+    if (description !== undefined) agency.description = description;
+    if (website !== undefined) agency.website = website;
+    if (email !== undefined) agency.email = email;
+    if (city !== undefined) agency.city = city;
+    if (country !== undefined) agency.country = country;
+    if (zipCode !== undefined) agency.zipCode = zipCode;
+    if (lat !== undefined) agency.lat = Number(lat);
+    if (lng !== undefined) agency.lng = Number(lng);
+    if (facebookUrl !== undefined) agency.facebookUrl = facebookUrl;
+    if (instagramUrl !== undefined) agency.instagramUrl = instagramUrl;
+    if (linkedinUrl !== undefined) agency.linkedinUrl = linkedinUrl;
+    if (twitterUrl !== undefined) agency.twitterUrl = twitterUrl;
+    if (yearsInBusiness !== undefined) agency.yearsInBusiness = Number(yearsInBusiness);
+    if (specialties !== undefined) agency.specialties = specialties;
+    if (specializations !== undefined) agency.specializations = specializations;
+    if (serviceAreas !== undefined) agency.serviceAreas = serviceAreas;
+    if (certifications !== undefined) agency.certifications = certifications;
+    if (languages !== undefined) agency.languages = languages;
+    if (businessHours !== undefined) agency.businessHours = businessHours;
+
+    // Handle encrypted fields - force mark as modified so the encryption
+    // pre-save hook re-encrypts them (after post-findOne decryption,
+    // isModified() may return false for unchanged values)
+    if (phone !== undefined) {
+      agency.phone = phone;
+      agency.markModified('phone');
+    }
+    if (address !== undefined) {
+      agency.address = address;
+      agency.markModified('address');
+    }
+
     await agency.save();
 
     await agency.populate('ownerId', 'name email phone avatarUrl');
@@ -704,7 +792,16 @@ export const updateAgency = async (
     res.json({ agency });
   } catch (error: any) {
     agencyLogger.error('Update agency error:', error);
-    res.status(500).json({ message: 'Error updating agency' });
+
+    // Handle specific Mongoose errors with descriptive messages
+    if (error.code === 11000) {
+      res.status(409).json({ message: 'An agency with this name or slug already exists' });
+    } else if (error.name === 'ValidationError') {
+      const messages = Object.values(error.errors).map((e: any) => e.message);
+      res.status(400).json({ message: messages.join('. ') });
+    } else {
+      res.status(500).json({ message: 'Error updating agency' });
+    }
   }
 };
 

@@ -611,16 +611,68 @@ export function useAgentProfile({ agent }: { agent: Agent }) {
         setIsEditModalOpen(true);
     };
 
+    // Validate URL format
+    const isValidUrl = (url: string): boolean => {
+        if (!url || !url.trim()) return true; // Empty is valid (optional)
+        try {
+            new URL(url);
+            return true;
+        } catch {
+            return false;
+        }
+    };
+
     // Handle saving profile changes
-    const handleSaveProfile = async (e: React.FormEvent) => {
+    const handleSaveProfile = async (e: React.FormEvent | React.MouseEvent) => {
         e.preventDefault();
+
+        // Frontend validation
+        if (editForm.bio && editForm.bio.length > 5000) {
+            await showError(t('common:error', 'Error'), t('profilePage.editModal.bioTooLong', 'Bio must be under 5000 characters'));
+            return;
+        }
+
+        const urlFields = [
+            { name: t('profilePage.editModal.website', 'Website'), value: editForm.websiteUrl },
+            { name: 'Facebook', value: editForm.facebookUrl },
+            { name: 'Instagram', value: editForm.instagramUrl },
+            { name: 'LinkedIn', value: editForm.linkedinUrl },
+        ];
+        for (const { name, value } of urlFields) {
+            if (!isValidUrl(value)) {
+                await showError(t('common:error', 'Error'), t('profilePage.editModal.invalidUrl', `Invalid URL for {{field}}. Please include https://`, { field: name }));
+                return;
+            }
+        }
+
         setIsSavingProfile(true);
         try {
-            const updatedAgent = await updateAgentProfile(editForm);
+            // Sanitize data before sending
+            const sanitizedForm = {
+                ...editForm,
+                bio: editForm.bio.trim(),
+                specializations: editForm.specializations.filter(s => s.trim()),
+                languages: editForm.languages.filter(l => l.trim()),
+                serviceAreas: editForm.serviceAreas.filter(a => a.trim()),
+                websiteUrl: editForm.websiteUrl.trim(),
+                facebookUrl: editForm.facebookUrl.trim(),
+                instagramUrl: editForm.instagramUrl.trim(),
+                linkedinUrl: editForm.linkedinUrl.trim(),
+                officeAddress: editForm.officeAddress.trim(),
+                officePhone: editForm.officePhone.trim(),
+            };
+            const updatedAgent = await updateAgentProfile(sanitizedForm);
             setAgentData({ ...agentData, ...updatedAgent });
             setIsEditModalOpen(false);
-        } catch (error) {
-            // Error removed
+            await success(
+                t('profilePage.editModal.savedTitle', 'Profile Updated'),
+                t('profilePage.editModal.savedMessage', 'Your profile has been updated successfully')
+            );
+        } catch (err) {
+            await showError(
+                t('common:error', 'Error'),
+                err instanceof Error ? err.message : t('profilePage.editModal.saveFailed', 'Failed to save profile. Please try again.')
+            );
         } finally {
             setIsSavingProfile(false);
         }

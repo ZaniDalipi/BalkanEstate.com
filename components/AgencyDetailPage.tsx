@@ -618,19 +618,53 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
     setIsEditModalOpen(true);
   };
 
-  const handleSaveAgency = async (e: React.FormEvent) => {
+  const handleSaveAgency = async (e: React.FormEvent | React.MouseEvent) => {
     e.preventDefault();
+
+    // Frontend validation
+    if (!editForm.name || !editForm.name.trim()) {
+      await error(t('messages.errorTitle', 'Error'), t('messages.nameRequired', 'Agency name is required'));
+      return;
+    }
+
+    // Validate URL fields
+    const urlFields = [
+      { name: t('fields.website', 'Website'), value: editForm.website },
+      { name: 'Facebook', value: editForm.facebookUrl },
+      { name: 'Instagram', value: editForm.instagramUrl },
+      { name: 'LinkedIn', value: editForm.linkedinUrl },
+      { name: 'Twitter', value: editForm.twitterUrl },
+    ];
+    for (const { name: fieldName, value } of urlFields) {
+      if (value && value.trim()) {
+        try {
+          new URL(value);
+        } catch {
+          await error(t('messages.errorTitle', 'Error'), t('messages.invalidUrl', `Invalid URL for {{field}}. Please include https://`, { field: fieldName }));
+          return;
+        }
+      }
+    }
+
     try {
       const token = localStorage.getItem('balkan_estate_token');
 
-      // Filter out empty strings from arrays before submitting
+      // Sanitize: filter empty strings from arrays, trim text fields
       const sanitizedForm = {
         ...editForm,
-        specialties: editForm.specialties.filter(s => s),
-        specializations: editForm.specializations.filter(s => s),
-        serviceAreas: editForm.serviceAreas.filter(s => s),
-        certifications: editForm.certifications.filter(s => s),
-        languages: editForm.languages.filter(s => s),
+        name: editForm.name.trim(),
+        description: (editForm.description || '').trim(),
+        website: (editForm.website || '').trim(),
+        phone: (editForm.phone || '').trim(),
+        email: (editForm.email || '').trim(),
+        address: (editForm.address || '').trim(),
+        city: (editForm.city || '').trim(),
+        country: (editForm.country || '').trim(),
+        specialties: editForm.specialties.filter(s => s.trim()),
+        specializations: editForm.specializations.filter(s => s.trim()),
+        serviceAreas: editForm.serviceAreas.filter(s => s.trim()),
+        certifications: editForm.certifications.filter(s => s.trim()),
+        languages: editForm.languages.filter(s => s.trim()),
       };
 
       const response = await fetch(`${API_URL}/agencies/${agencyData._id}`, {
@@ -2154,7 +2188,7 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
               </button>
             </div>
 
-            <form onSubmit={handleSaveAgency} className="p-6 space-y-8 overflow-y-auto max-h-[calc(90vh-140px)]">
+            <div className="p-6 space-y-8 overflow-y-auto max-h-[calc(90vh-140px)]">
               {/* Basic Information */}
               <div className="space-y-4">
                 <h4 className="text-sm font-semibold text-slate-900 uppercase tracking-wider flex items-center gap-2">
@@ -2465,7 +2499,7 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
                   className="bg-slate-50 rounded-xl p-4"
                 />
               </div>
-            </form>
+            </div>
 
             {/* Action Buttons - Fixed Footer */}
             <div className="px-6 py-4 border-t border-slate-100 flex gap-3 bg-slate-50">
@@ -2477,8 +2511,7 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
                 Cancel
               </button>
               <button
-                type="submit"
-                form="editAgencyForm"
+                type="button"
                 onClick={handleSaveAgency}
                 className="flex-1 px-5 py-2.5 bg-primary text-white rounded-xl hover:bg-primary/90 font-medium transition-colors text-sm shadow-lg shadow-primary/25"
               >

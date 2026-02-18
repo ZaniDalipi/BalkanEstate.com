@@ -19,7 +19,7 @@ interface AgentEditModalProps {
     setEditForm: React.Dispatch<React.SetStateAction<EditFormData>>;
     isSavingProfile: boolean;
     agentAchievements: Achievement[];
-    onSaveProfile: (e: React.FormEvent) => void;
+    onSaveProfile: (e: React.FormEvent | React.MouseEvent) => void;
     onAddArrayItem: (field: 'specializations' | 'languages' | 'serviceAreas', value: string) => void;
     onRemoveArrayItem: (field: 'specializations' | 'languages' | 'serviceAreas', index: number) => void;
     onAddAchievement: (achievement: Omit<Achievement, 'id' | 'createdAt' | 'isVerified'>) => Promise<void>;
@@ -61,7 +61,7 @@ const AgentEditModal: React.FC<AgentEditModalProps> = ({
                         <XMarkIcon className="w-6 h-6 text-gray-500" />
                     </button>
                 </div>
-                <form onSubmit={onSaveProfile} className="p-6 space-y-6">
+                <div className="p-6 space-y-6">
                     {/* Bio */}
                     <div>
                         <label className="block text-sm font-semibold text-gray-700 mb-2">
@@ -345,7 +345,8 @@ const AgentEditModal: React.FC<AgentEditModalProps> = ({
                             {t('profilePage.editModal.cancel')}
                         </button>
                         <button
-                            type="submit"
+                            type="button"
+                            onClick={onSaveProfile}
                             disabled={isSavingProfile}
                             className="flex-1 px-4 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-semibold rounded-xl hover:from-blue-700 hover:to-indigo-700 transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
                         >
@@ -359,7 +360,7 @@ const AgentEditModal: React.FC<AgentEditModalProps> = ({
                             )}
                         </button>
                     </div>
-                </form>
+                </div>
             </div>
         </div>
     );
