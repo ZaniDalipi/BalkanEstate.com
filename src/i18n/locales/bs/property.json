@@ -215,7 +215,9 @@
   "virtualTour": {
     "title": "360° virtuelna tura",
     "description": "Istražite ovu nekretninu u imerzivnom 360°",
-    "openInNewTab": "Otvori u novom tabu za potpuno iskustvo"
+    "openInNewTab": "Otvori u novom tabu za potpuno iskustvo",
+    "failedToLoad": "Failed to load virtual tour",
+    "loading": "Loading virtual tour..."
   },
   "featuredAgencies": "Istaknute agencije",
   "status": {
@@ -331,7 +333,9 @@
         "highlight": "ISTAKNUTO",
         "featured": "IZDVOJENO",
         "standard": "PROMOVISANO"
-      }
+      },
+      "promotedCount_one": "{{count}} promoted listing",
+      "promotedCount_other": "{{count}} promoted listings"
     },
     "heatMapLegend": "Gustina nekretnina",
     "low": "Niska",
@@ -362,7 +366,10 @@
       "pool": "Bazen",
       "view": "Pogled",
       "other": "Ostalo"
-    }
+    },
+    "images": "photos",
+    "view": "View",
+    "tapToView": "Tap to view in gallery"
   },
   "mapLink": {
     "title": "Pogledaj na mapi",
@@ -451,5 +458,16 @@
     "highlighted": "Istaknute nekretnine",
     "highlightedCount": "premium oglasi",
     "moreListings": "Više oglasa"
+  },
+  "gallery": {
+    "mute": "Mute",
+    "unmute": "Unmute",
+    "fullscreen": "Fullscreen",
+    "exitFullscreen": "Exit fullscreen",
+    "enterFullscreen": "Enter fullscreen",
+    "propertyShowcase": "Property Showcase",
+    "skipVideo": "Skip Video",
+    "videoTour": "Video Tour",
+    "enter3DTour": "Enter 3D Tour"
   }
 }

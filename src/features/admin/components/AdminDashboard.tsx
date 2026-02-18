@@ -79,7 +79,7 @@ const AdminDashboard: React.FC = () => {
     const checkAdminAccess = async () => {
       const token = localStorage.getItem('balkan_estate_token');
       if (!token) {
-        setError('Not authenticated');
+        setError(t('admin:errors.notAuthenticated', 'Not authenticated'));
         return;
       }
 
@@ -90,7 +90,7 @@ const AdminDashboard: React.FC = () => {
 
       // Check if user has admin role
       if (state.currentUser.role !== 'admin' && state.currentUser.role !== 'super_admin') {
-        setError('Admin access required');
+        setError(t('admin:errors.adminAccessRequired', 'Admin access required'));
         return;
       }
 
@@ -166,7 +166,7 @@ const AdminDashboard: React.FC = () => {
         <div className="text-center">
           <div className="w-16 h-16 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto"></div>
           <p className="mt-4 text-gray-600 font-medium">{t('admin:table.loading')}</p>
-          <p className="mt-1 text-gray-400 text-sm">Verifying admin access...</p>
+          <p className="mt-1 text-gray-400 text-sm">{t('admin:errors.verifyingAccess', 'Verifying admin access...')}</p>
         </div>
       </div>
     );

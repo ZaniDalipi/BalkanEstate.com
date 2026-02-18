@@ -530,7 +530,7 @@ const ScheduleViewingModal: React.FC<ScheduleViewingModalProps> = ({ property, i
                                     className={`w-full px-3 py-2.5 text-sm border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all ${
                                         fieldErrors.name ? 'border-red-300 bg-red-50' : 'border-neutral-200'
                                     }`}
-                                    placeholder="John Doe"
+                                    placeholder={t('rental:viewing.placeholders.name', 'John Doe')}
                                 />
                                 {fieldErrors.name && <p className="text-xs text-red-500 mt-1">{fieldErrors.name}</p>}
                             </div>
@@ -543,7 +543,7 @@ const ScheduleViewingModal: React.FC<ScheduleViewingModalProps> = ({ property, i
                                     className={`w-full px-3 py-2.5 text-sm border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all ${
                                         fieldErrors.email ? 'border-red-300 bg-red-50' : 'border-neutral-200'
                                     }`}
-                                    placeholder="john@example.com"
+                                    placeholder={t('rental:viewing.placeholders.email', 'john@example.com')}
                                 />
                                 {fieldErrors.email && <p className="text-xs text-red-500 mt-1">{fieldErrors.email}</p>}
                             </div>
@@ -554,7 +554,7 @@ const ScheduleViewingModal: React.FC<ScheduleViewingModalProps> = ({ property, i
                                     value={phone}
                                     onChange={(e) => setPhone(e.target.value)}
                                     className="w-full px-3 py-2.5 text-sm border border-neutral-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                                    placeholder="+1 234 567 8900"
+                                    placeholder={t('rental:viewing.placeholders.phone', '+1 234 567 8900')}
                                 />
                             </div>
                             <div>

@@ -61,7 +61,8 @@
     "floorNumber": "Етаж",
     "advancedFilters": "Разширени филтри",
     "moreFilters": "Още филтри",
-    "lessFilters": "По-малко филтри"
+    "lessFilters": "По-малко филтри",
+    "anyCountry": "Any Country"
   },
   "options": {
     "any": "Всички",
@@ -152,7 +153,9 @@
     "bathsDesc": "Най-много бани",
     "featured": "Препоръчани първо",
     "priceReduced": "Наскоро намалени",
-    "pricePerSqm": "Цена на м²"
+    "pricePerSqm": "Цена на м²",
+    "yearBuiltDesc": "Newest Built",
+    "yearBuiltAsc": "Oldest Built"
   },
   "results": {
     "showing": "Показват се {{count}} имота",
@@ -222,7 +225,19 @@
       "wind": "Вятър",
       "air": "Въздух",
       "heat": "Горещина"
-    }
+    },
+    "nightMode": "Night Mode",
+    "dayMode": "Day Mode",
+    "heatMap": "Heat Map",
+    "showHeatMap": "Show Heat Map",
+    "hideHeatMap": "Hide Heat Map",
+    "heat": "Heat",
+    "useMyLocation": "Use My Location",
+    "geolocationNotSupported": "Geolocation is not supported by your browser.",
+    "locationPermissionDenied": "Location permission denied. Please enable location access in your browser settings.",
+    "locationUnavailable": "Location information is unavailable. Please try again.",
+    "locationTimeout": "Location request timed out. Please try again.",
+    "locationError": "An error occurred while getting your location. Please try again."
   },
   "newsletter": {
     "title": "Бъдете в течение с нови имоти",
@@ -257,7 +272,36 @@
     "tryDifferent": "Опитайте да опишете търсенето си по друг начин",
     "suggestions": "Предложения",
     "recentSearches": "Последни търсения",
-    "clearHistory": "Изчисти историята"
+    "clearHistory": "Изчисти историята",
+    "voiceHint": "Try voice search",
+    "listening": "Listening",
+    "foundProperties": "{{count}} properties found",
+    "suggestion1": "Modern apartment near city center",
+    "suggestion2": "House with garden under €200k",
+    "suggestion3": "Sea view villa in Montenegro",
+    "suggestion4": "2-bedroom flat for rent",
+    "assistantTitle": "Property Assistant",
+    "assistantHint": "Ask me anything about properties — type or use your voice",
+    "tapToSpeak": "Tap to speak",
+    "speakNow": "Speak now...",
+    "stop": "Stop",
+    "speaking": "Speaking...",
+    "stopSpeaking": "Stop",
+    "replay": "Replay",
+    "muteAssistant": "Mute voice",
+    "unmuteAssistant": "Unmute voice",
+    "ready": "Ready to help",
+    "swipeDone": "{{count}} properties saved!",
+    "swipeNoneSaved": "No properties saved",
+    "swipeCheckFavorites": "Check your favorites to compare them",
+    "swipeTryAgain": "Try a different search to find your dream property",
+    "goToFavorites": "Go to Favorites",
+    "saved": "saved",
+    "swipeHint": "Swipe right to save, left to skip",
+    "backToChat": "Back to Chat",
+    "swipeTitle": "Your Matches",
+    "foundSwipe": "Found {{count}} properties! Swipe through them.",
+    "viewMatches": "View Matches"
   },
   "energyRatings": {
     "any": "Всички",

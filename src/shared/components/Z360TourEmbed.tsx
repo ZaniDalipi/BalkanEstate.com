@@ -6,6 +6,7 @@
  */
 
 import React, { useState, useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 import { isZ360TourUrl, normalizeZ360Url, is360TourUrl } from '../utils/z360Tour';
 
 interface Z360TourEmbedProps {
@@ -31,6 +32,7 @@ export const Z360TourEmbed: React.FC<Z360TourEmbedProps> = ({
   onLoad,
   onError,
 }) => {
+  const { t } = useTranslation(['property']);
   const [isLoading, setIsLoading] = useState(true);
   const [hasError, setHasError] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
@@ -107,14 +109,14 @@ export const Z360TourEmbed: React.FC<Z360TourEmbedProps> = ({
               d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
             />
           </svg>
-          <p className="text-neutral-600">Failed to load virtual tour</p>
+          <p className="text-neutral-600">{t('property:virtualTour.failedToLoad')}</p>
           <a
             href={url}
             target="_blank"
             rel="noopener noreferrer"
             className="text-purple-600 hover:text-purple-800 text-sm mt-2 inline-block"
           >
-            Open tour in new tab
+            {t('property:virtualTour.openInNewTab')}
           </a>
         </div>
       </div>
@@ -135,7 +137,7 @@ export const Z360TourEmbed: React.FC<Z360TourEmbedProps> = ({
           <div className="absolute inset-0 flex items-center justify-center bg-neutral-900">
             <div className="text-center">
               <div className="w-12 h-12 border-4 border-purple-500 border-t-transparent rounded-full animate-spin mx-auto mb-4" />
-              <p className="text-white text-sm">Loading virtual tour...</p>
+              <p className="text-white text-sm">{t('property:virtualTour.loading')}</p>
             </div>
           </div>
         )}
@@ -169,7 +171,7 @@ export const Z360TourEmbed: React.FC<Z360TourEmbedProps> = ({
         <button
           onClick={handleFullscreen}
           className="absolute bottom-3 right-3 bg-black/60 backdrop-blur-sm rounded-lg p-2 text-white hover:bg-black/80 transition-colors"
-          title={isFullscreen ? 'Exit fullscreen' : 'Enter fullscreen'}
+          title={isFullscreen ? t('property:gallery.exitFullscreen') : t('property:gallery.enterFullscreen')}
         >
           {isFullscreen ? (
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -201,7 +203,7 @@ export const Z360TourEmbed: React.FC<Z360TourEmbedProps> = ({
           rel="noopener noreferrer"
           className="absolute bottom-3 left-3 bg-black/60 backdrop-blur-sm rounded-lg px-3 py-1.5 text-white text-xs hover:bg-black/80 transition-colors flex items-center gap-1"
         >
-          <span>Open in new tab</span>
+          <span>{t('property:virtualTour.openInNewTab')}</span>
           <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path
               strokeLinecap="round"

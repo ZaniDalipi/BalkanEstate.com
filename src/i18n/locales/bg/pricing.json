@@ -228,7 +228,8 @@
       "priorityInSearch": "Приоритет в резултатите от търсенето",
       "homepageCarousel": "Карусел с агенции на началната страница",
       "featuredBadge": "Значка Препоръчан в профила",
-      "boostedVisibility": "Повишена видимост навсякъде (3 пъти)"
+      "boostedVisibility": "Повишена видимост навсякъде (3 пъти)",
+      "mapMarker": "Agency marker on property map"
     },
     "mapMarker": {
       "title": "Маркер на картата",
@@ -249,7 +250,10 @@
     "needAgencyDescription": "Абонирайте се за нашия Корпоративен план, за да създадете агенция и отключите тези функции.",
     "viewEnterprise": "Вижте Корпоративен План",
     "comingSoon": "Очаквайте скоро",
-    "featureComingSoon": "Препоръчването на агенции ще бъде достъпно скоро!"
+    "featureComingSoon": "Препоръчването на агенции ще бъде достъпно скоро!",
+    "oneWeek": "1 WEEK",
+    "perWeek": "per week",
+    "showsEverywhere": "Shows everywhere!"
   },
   "contact": {
     "haveQuestions": "Имате въпроси?",
@@ -264,5 +268,10 @@
     "privacyPolicy": "Политика за поверителност",
     "refundPolicy": "Политика за възстановяване",
     "providerNote": "Плащанията се обработват от LemonSqueezy като търговец на запис. ДДС/данъци са включени, където е приложимо."
+  },
+  "duration": {
+    "7days": "7 days",
+    "30days": "30 days",
+    "90days": "90 days"
   }
 }

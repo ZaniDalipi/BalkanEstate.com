@@ -16,17 +16,35 @@
     "tabs": {
       "location": "Vendndodhja",
       "name": "Emri i Agjentit",
-      "specialization": "Specializimi"
+      "specialization": "Specializimi",
+      "all": "All"
     },
     "placeholders": {
       "location": "Kërkoni sipas qytetit, lagjes, ose shtetit...",
       "name": "Kërkoni sipas emrit të agjentit...",
-      "specialization": "Kërkoni sipas specializimit (p.sh., Luksoze, Komerciale)..."
+      "specialization": "Kërkoni sipas specializimit (p.sh., Luksoze, Komerciale)...",
+      "all": "Search by name, city, or specialty..."
     },
     "clearSearch": "Pastro kërkimin",
     "searchButton": "Kërko",
     "popularSearches": "Kërkime të njohura:",
-    "viewAll": "Shiko të Gjitha"
+    "viewAll": "Shiko të Gjitha",
+    "quickSearch": {
+      "topRated": "Top Rated",
+      "verified": "Verified",
+      "expert": "Expert",
+      "serbia": "Serbia",
+      "croatia": "Croatia",
+      "albania": "Albania",
+      "montenegro": "Montenegro",
+      "bosnia": "Bosnia",
+      "luxury": "Luxury",
+      "commercial": "Commercial",
+      "residential": "Residential",
+      "investment": "Investment",
+      "belgrade": "Belgrade",
+      "zagreb": "Zagreb"
+    }
   },
   "stats": {
     "verifiedAgents": "Agjentë të Verifikuar",
@@ -136,7 +154,128 @@
     "website": "Faqe",
     "viewProfile": "Shiko Profilin",
     "view": "Shiko",
-    "more": "+{{count}} më shumë"
+    "more": "+{{count}} më shumë",
+    "universalSearchPlaceholder": "Search agencies...",
+    "search": "Search",
+    "verifiedAgencies": "Verified Agencies",
+    "premiumSupport": "Premium Support",
+    "rank1st": "1st",
+    "rank2nd": "2nd",
+    "rank3rd": "3rd",
+    "loginRequired": "Login Required",
+    "loginToCreateAgency": "Please login to create an agency.",
+    "alreadyHaveAgency": "You Already Have an Agency",
+    "viewYourAgency": "You are already part of an agency. View your agency from the filters above.",
+    "agentRequired": "Agent Status Required",
+    "becomeAgentFirst": "You must be a registered agent to create an agency. Please update your profile to become an agent first.",
+    "topAgencies": "Top Agencies",
+    "contact": {
+      "getInTouch": "Get in Touch",
+      "phone": "Phone",
+      "email": "Email",
+      "address": "Address"
+    },
+    "map": {
+      "noLocationData": "No agencies with location data found",
+      "street": "Street",
+      "satellite": "Satellite",
+      "legend": "Legend",
+      "regularAgency": "Regular Agency",
+      "featuredAgency": "Featured Agency"
+    },
+    "creation": {
+      "editTitle": "Edit Agency Details",
+      "createTitle": "Create Your Agency",
+      "enterpriseSubtitle": "You have an active Enterprise subscription! Set up your agency profile now.",
+      "editSubtitle": "Update your agency information before proceeding to payment",
+      "createSubtitle": "Set up your agency profile to showcase your team and properties",
+      "enterpriseActive": "Enterprise Subscription Active - No Payment Required",
+      "agentStatusRequired": "Agent Status Required",
+      "proSubscriptionRequired": "Pro Subscription Required",
+      "becomeAgentFirst": "Become an Agent First",
+      "upgradeToPro": "Upgrade to Pro",
+      "successTitle": "Agency Created!",
+      "successMessage": "Your agency \"{{name}}\" has been created successfully.",
+      "successMessageEnterprise": "Your agency \"{{name}}\" has been created successfully with your Enterprise subscription.",
+      "paymentSuccessButFailed": "Payment successful but failed to create agency. Please contact support.",
+      "paymentFailed": "Payment failed: {{error}}",
+      "createFailed": "Failed to create agency. Please try again.",
+      "creatingAgency": "Creating Agency...",
+      "createAgencyButton": "Create Agency",
+      "continueToPayment": "Continue to Payment",
+      "validation": {
+        "nameRequired": "Agency name is required",
+        "cityCountryRequired": "City and country are required",
+        "emailRequired": "Email is required",
+        "invalidEmail": "Please enter a valid email address",
+        "invalidWebsite": "Website URL must start with http:// or https://"
+      },
+      "sections": {
+        "basicInfo": "Basic Information",
+        "location": "Location",
+        "contactInfo": "Contact Information",
+        "professionalDetails": "Professional Details",
+        "socialMedia": "Social Media (Optional)",
+        "businessHours": "Business Hours (Optional)"
+      },
+      "fields": {
+        "agencyName": "Agency Name",
+        "description": "Description",
+        "country": "Country",
+        "city": "City",
+        "streetAddress": "Street Address",
+        "email": "Email",
+        "phone": "Phone Number",
+        "websiteUrl": "Website URL",
+        "licenseNumber": "Agent License Number",
+        "yearsInBusiness": "Years in Business",
+        "languagesSpoken": "Languages Spoken"
+      },
+      "placeholders": {
+        "agencyName": "e.g., Premier Real Estate Agency",
+        "description": "Tell potential clients about your agency, your expertise, and what makes you unique...",
+        "selectCountry": "Select a country",
+        "selectCity": "Select a city",
+        "selectCountryFirst": "Select country first",
+        "streetAddress": "e.g., 123 Main Street, Building A",
+        "email": "contact@agency.com",
+        "phone": "+381 11 123 4567",
+        "website": "https://yourwebsite.com",
+        "licenseNumber": "e.g., RE-123456",
+        "yearsInBusiness": "e.g., 5"
+      },
+      "hints": {
+        "agencyName": "Choose a professional name that represents your brand",
+        "description": "A compelling description helps clients understand your value",
+        "streetAddress": "Optional: Full street address for office location",
+        "email": "Primary contact email for inquiries",
+        "phone": "Include country code",
+        "website": "Optional: Your agency's website",
+        "licenseNumber": "Required for agency registration",
+        "yearsInBusiness": "How long you've been in real estate",
+        "languages": "Select languages your team can communicate in",
+        "socialMedia": "Connect your social profiles to increase visibility",
+        "businessHours": "Let clients know when you're available"
+      },
+      "days": {
+        "monday": "Monday",
+        "tuesday": "Tuesday",
+        "wednesday": "Wednesday",
+        "thursday": "Thursday",
+        "friday": "Friday",
+        "saturday": "Saturday",
+        "sunday": "Sunday"
+      },
+      "features": {
+        "title": "What You'll Get",
+        "dedicatedPage": "Dedicated agency page on platform",
+        "displayAgents": "Display all agents & properties",
+        "featuredAds": "Featured in homepage ads",
+        "contactInfo": "Full contact info displayed",
+        "invitationCode": "Unique invitation code for agents",
+        "prioritySupport": "Priority customer support"
+      }
+    }
   },
   "contact": {
     "title": "Merrni ndihmë për të gjetur një agjent",
@@ -231,7 +370,26 @@
     "lowest": "Vlerësimi më i Ulët",
     "mostHelpful": "Më të Dobishmet",
     "noReviews": "Ende pa vlerësime",
-    "beFirst": "Bëhu i pari që vlerëson këtë agjent"
+    "beFirst": "Bëhu i pari që vlerëson këtë agjent",
+    "submitted": "Review Submitted!",
+    "thankYouMessage": "Thank you for sharing your experience with {{name}}.",
+    "starCount_one": "{{count}} star",
+    "starCount_other": "{{count}} stars",
+    "minCharacters": "Minimum {{min}} characters ({{current}}/{{min}})",
+    "publicNotice": "Your review will be publicly visible and associated with your account.",
+    "validation": {
+      "required": "Please write a review",
+      "minLength": "Review must be at least 10 characters long",
+      "submitFailed": "Failed to submit review. Please try again."
+    },
+    "beforeLeaving": {
+      "title": "Before Leaving a Review",
+      "description": "To ensure authentic testimonials, please inquire about one of {{name}}'s properties first. Browse their current offerings below and start a conversation!"
+    },
+    "inquireProperty": "Inquire About This Property",
+    "noActiveListings": "This agent currently has no active listings.",
+    "contactDirectly": "Please contact them directly to start a conversation.",
+    "contactAgent": "Contact {{name}}"
   },
   "card": {
     "properties": "Prona",
@@ -282,210 +440,6 @@
     "workWithUs": "Punoni me Ne",
     "joinOurTeam": "Bashkohuni me Ekipin",
     "careerOpportunities": "Mundësi Karriere"
-  },
-  "profilePage": {
-    "header": {
-      "back": "Kthehu",
-      "backToAgents": "Kthehu te Agjentët",
-      "viewAgencyProfile": "Shiko Profilin e Agjencisë →",
-      "save": "Ruaj",
-      "saved": "Ruajtur",
-      "share": "Ndaj",
-      "independentAgent": "Agjent i Pavarur",
-      "editProfile": "Ndrysho Profilin"
-    },
-    "about": {
-      "title": "Rreth Agjentit",
-      "defaultBio": "Ky agjent është një profesionist i përkushtuar në pasuri të paluajtshme me {{years}} vite përvojë në industri{{agency}}. Specializohet në ndihmën e klientëve për të arritur objektivat e tyre përmes njohurive të tregut dhe shërbimit të personalizuar.",
-      "asPartOf": " si pjesë e ekipit {{agencyName}}"
-    },
-    "credentials": {
-      "title": "Kualifikimet & Certifikimet",
-      "licensedAgent": "Agjent i Licencuar i Pasurive të Paluajtshme",
-      "authorizedToPractice": "I autorizuar për të praktikuar në {{city}}, {{country}}",
-      "professionalCertifications": "Certifikime Profesionale",
-      "memberOfAssociation": "Anëtar i Shoqatës Kombëtare",
-      "awardsRecognition": "Çmime & Njohje",
-      "noAwards": "Nuk ka çmime të listuara",
-      "addCredential": "Shto Kualifikim",
-      "editCredential": "Ndrysho Kualifikimin",
-      "deleteCredential": "Fshi Kualifikimin",
-      "uploadDocument": "Ngarko Dokumentin",
-      "viewDocument": "Shiko Dokumentin",
-      "types": {
-        "license": "Licencë",
-        "certification": "Certifikim",
-        "award": "Çmim",
-        "membership": "Anëtarësim"
-      },
-      "status": {
-        "pending": "Në Pritje të Verifikimit",
-        "verified": "I Verifikuar",
-        "rejected": "I Refuzuar",
-        "expired": "I Skaduar"
-      },
-      "form": {
-        "type": "Lloji i Kualifikimit",
-        "title": "Titulli",
-        "titlePlaceholder": "p.sh., Agjent i Licencuar i Pasurive të Paluajtshme",
-        "issuer": "Organizata Lëshuese",
-        "issuerPlaceholder": "p.sh., Shoqata Kombëtare e Pasurive të Paluajtshme",
-        "issueNumber": "Numri i Licencës/Certifikatës",
-        "issueNumberPlaceholder": "p.sh., RE-12345",
-        "issueDate": "Data e Lëshimit",
-        "expiryDate": "Data e Skadimit",
-        "isPublic": "Shfaq në profilin publik",
-        "document": "Dokumenti Mbështetës",
-        "documentHint": "Ngarko një PDF ose imazh të kualifikimit (max 10MB)",
-        "save": "Ruaj Kualifikimin",
-        "saving": "Duke ruajtur...",
-        "cancel": "Anulo"
-      },
-      "messages": {
-        "added": "Kualifikimi u shtua me sukses",
-        "updated": "Kualifikimi u përditësua me sukses",
-        "deleted": "Kualifikimi u fshi me sukses",
-        "deleteConfirm": "A jeni të sigurt që doni të fshini këtë kualifikim?"
-      },
-      "empty": {
-        "title": "Nuk ka kualifikime të shtuara ende",
-        "description": "Shtoni licencat, certifikimet dhe çmimet tuaja profesionale për të ndërtuar besim me klientët potencial."
-      }
-    },
-    "marketInsights": {
-      "title": "Analiza e Tregut Lokal",
-      "subtitle": "Të dhëna tregu në kohë reale për {{city}}",
-      "avgDaysOnMarket": "Mesatarja e Ditëve në Treg",
-      "days": "ditë",
-      "fasterThanAverage": "Më shpejt se mesatarja",
-      "slowerThanAverage": "Më ngadalë se mesatarja",
-      "priceGrowthYoY": "Rritja e Çmimit (Vjetor)",
-      "healthyAppreciation": "Vlerësim i shëndetshëm",
-      "stableMarket": "Treg i qëndrueshëm",
-      "decliningMarket": "Treg në rënie",
-      "marketActivity": "Aktiviteti i Tregut",
-      "high": "I Lartë",
-      "medium": "Mesatar",
-      "low": "I Ulët",
-      "strongDemand": "Kërkesë e fortë",
-      "moderateDemand": "Kërkesë mesatare",
-      "lowDemand": "Kërkesë e ulët",
-      "requestFullReport": "Kërko Raportin e Plotë të Tregut",
-      "getDetailedInsights": "Merrni analiza të detajuara për tregun e pasurive të paluajtshme në {{city}}",
-      "avgPricePerSqm": "Çmimi Mesatar për m²",
-      "demandScore": "Rezultati i Kërkesës",
-      "investmentScore": "Rezultati i Investimit",
-      "rentalYield": "Rendimenti i Qirasë",
-      "topNeighborhoods": "Lagjet Kryesore",
-      "marketTrend": "Trendi i Tregut",
-      "trends": {
-        "rising": "Në Rritje",
-        "stable": "I Qëndrueshëm",
-        "declining": "Në Rënie"
-      },
-      "agentMetrics": {
-        "title": "Performanca e Agjentit në Zonë",
-        "avgDaysOnMarket": "Mesatarja e Ditëve të Agjentit në Treg",
-        "activeListings": "Listime Aktive",
-        "totalSold": "Prona të Shitura",
-        "marketShare": "Pjesa e Tregut"
-      },
-      "noData": {
-        "title": "Të dhënat e tregut nuk janë të disponueshme",
-        "description": "Analizat e tregut për këtë zonë nuk janë ende të disponueshme."
-      },
-      "lastUpdated": "Përditësuar së fundmi: {{date}}"
-    },
-    "editModal": {
-      "title": "Ndrysho Profilin",
-      "bio": "Rreth Meje",
-      "bioPlaceholder": "Tregoni klientëve për veten tuaj, përvojën tuaj dhe çfarë ju bën unik...",
-      "yearsOfExperience": "Vitet e Përvojës",
-      "specializations": "Specializimet",
-      "addSpecialization": "Shto specializim...",
-      "languages": "Gjuhët e Folura",
-      "addLanguage": "Shto gjuhë...",
-      "serviceAreas": "Zonat e Shërbimit",
-      "addServiceArea": "Shto zonë shërbimi...",
-      "contactInfo": "Informacioni i Kontaktit",
-      "officePhone": "Telefoni i Zyrës",
-      "officeAddress": "Adresa e Zyrës",
-      "officeAddressPlaceholder": "Shkruani adresën e zyrës tuaj...",
-      "socialLinks": "Lidhjet Sociale",
-      "website": "Faqja e Internetit",
-      "cancel": "Anulo",
-      "saving": "Duke ruajtur...",
-      "saveChanges": "Ruaj Ndryshimet"
-    },
-    "editButton": "Ndrysho Profilin"
-  },
-  "verification": {
-    "title": "Verifikimi i Agjentit",
-    "description": "Verifikoni identitetin tuaj dhe licencën për t'u bërë agjent i verifikuar",
-    "benefits": {
-      "title": "Përfitimet e Verifikimit",
-      "trust": "Besueshmëri e shtuar nga klientët",
-      "badge": "Distinktiv i verifikuar në profilin tuaj",
-      "priority": "Prioritet në rezultatet e kërkimit",
-      "features": "Akses në veçori premium"
-    },
-    "requirements": {
-      "title": "Kërkesat",
-      "validLicense": "Licencë e vlefshme patundshmërie",
-      "idDocument": "Dokument identifikimi i lëshuar nga qeveria",
-      "photo": "Foto profesionale",
-      "contact": "Informacion kontakti i verifikuar"
-    },
-    "status": {
-      "pending": "Verifikimi në Pritje",
-      "approved": "I Verifikuar",
-      "rejected": "Verifikimi u Refuzua",
-      "expired": "Verifikimi Skadoi"
-    },
-    "startVerification": "Fillo Verifikimin",
-    "uploadDocuments": "Ngarko Dokumentet",
-    "pendingReview": "Dokumentet tuaja janë nën rishikim"
-  },
-  "invite": {
-    "title": "Fto Agjent",
-    "description": "Ftoni një agjent të bashkohet me agjencin tuaj",
-    "email": "Emaili i Agjentit",
-    "emailPlaceholder": "Futni adresën email të agjentit",
-    "message": "Mesazh Personal",
-    "messagePlaceholder": "Shtoni një mesazh personal (opsional)",
-    "send": "Dërgo Ftesën",
-    "sending": "Duke dërguar...",
-    "sent": "Ftesa u Dërgua!",
-    "pending": "Ftesa në Pritje",
-    "resend": "Ridërgo",
-    "cancel": "Anulo Ftesën",
-    "expired": "Skaduar",
-    "accepted": "Pranuar"
-  },
-  "manage": {
-    "title": "Menaxho Agjencin",
-    "teamMembers": "Anëtarët e Ekipit",
-    "addMember": "Shto Anëtar Ekipi",
-    "removeMember": "Hiq Anëtarin",
-    "changeRole": "Ndrysho Rolin",
-    "roles": {
-      "admin": "Admin",
-      "manager": "Menaxher",
-      "agent": "Agjent"
-    },
-    "invitationCodes": "Kodet e Ftesës",
-    "generateCode": "Gjenero Kod të Ri",
-    "codeGenerated": "Kodi u Gjenerua",
-    "copyCode": "Kopjo Kodin",
-    "codeCopied": "Kodi u Kopjua!",
-    "codeExpiry": "Skadon pas {{days}} ditësh",
-    "revokeCode": "Anulo Kodin",
-    "agencySettings": "Konfigurimet e Agjencisë",
-    "updateLogo": "Përditëso Logon",
-    "updateCover": "Përditëso Foton e Kopertinës",
-    "updateDescription": "Përditëso Përshkrimin",
-    "socialLinks": "Linket e Rrjeteve Sociale",
-    "contactInfo": "Informacioni i Kontaktit"
   },
   "profilePage": {
     "header": {
@@ -556,6 +510,33 @@
         "verified": "Verifikuar",
         "rejected": "Refuzuar",
         "expired": "Skaduar"
+      },
+      "form": {
+        "type": "Credential Type",
+        "title": "Title",
+        "titlePlaceholder": "e.g., Licensed Real Estate Agent",
+        "issuer": "Issuing Organization",
+        "issuerPlaceholder": "e.g., National Real Estate Association",
+        "issueNumber": "License/Certificate Number",
+        "issueNumberPlaceholder": "e.g., RE-12345",
+        "issueDate": "Issue Date",
+        "expiryDate": "Expiry Date",
+        "isPublic": "Show on public profile",
+        "document": "Supporting Document",
+        "documentHint": "Upload a PDF or image of your credential (max 10MB)",
+        "save": "Save Credential",
+        "saving": "Saving...",
+        "cancel": "Cancel"
+      },
+      "messages": {
+        "added": "Credential added successfully",
+        "updated": "Credential updated successfully",
+        "deleted": "Credential deleted successfully",
+        "deleteConfirm": "Are you sure you want to delete this credential?"
+      },
+      "empty": {
+        "title": "No credentials added yet",
+        "description": "Add your professional licenses, certifications, and awards to build trust with potential clients."
       }
     },
     "listingsTab": {
@@ -569,6 +550,264 @@
       "forSale": "Për Shitje",
       "forRent": "Për Qira",
       "noListings": "Nuk ka listime të disponueshme"
-    }
+    },
+    "marketInsights": {
+      "title": "Local Market Insights",
+      "subtitle": "Real-time market data for {{city}}",
+      "avgDaysOnMarket": "Avg. Days on Market",
+      "days": "days",
+      "fasterThanAverage": "Faster than average",
+      "slowerThanAverage": "Slower than average",
+      "priceGrowthYoY": "Price Growth (YoY)",
+      "healthyAppreciation": "Healthy appreciation",
+      "stableMarket": "Stable market",
+      "decliningMarket": "Declining market",
+      "marketActivity": "Market Activity",
+      "high": "High",
+      "medium": "Medium",
+      "low": "Low",
+      "strongDemand": "Strong demand",
+      "moderateDemand": "Moderate demand",
+      "lowDemand": "Low demand",
+      "requestFullReport": "Request Full Market Report",
+      "getDetailedInsights": "Get detailed insights about the {{city}} real estate market",
+      "avgPricePerSqm": "Avg. Price per m²",
+      "demandScore": "Demand Score",
+      "investmentScore": "Investment Score",
+      "rentalYield": "Rental Yield",
+      "topNeighborhoods": "Top Neighborhoods",
+      "marketTrend": "Market Trend",
+      "trends": {
+        "rising": "Rising",
+        "stable": "Stable",
+        "declining": "Declining"
+      },
+      "agentMetrics": {
+        "title": "Agent Performance in Area",
+        "avgDaysOnMarket": "Agent Avg. Days on Market",
+        "activeListings": "Active Listings",
+        "totalSold": "Properties Sold",
+        "marketShare": "Market Share"
+      },
+      "noData": {
+        "title": "Market data unavailable",
+        "description": "Market insights for this area are not yet available."
+      },
+      "lastUpdated": "Last updated: {{date}}"
+    },
+    "propertiesMap": {
+      "title": "Properties Map",
+      "active": "active",
+      "sold": "sold",
+      "forSale": "For Sale",
+      "soldLabel": "Sold",
+      "viewSoldProperty": "View Sold Property",
+      "viewDetails": "View Details",
+      "beds": "beds",
+      "baths": "baths"
+    },
+    "serviceArea": {
+      "title": "Service Area Location",
+      "call": "Call",
+      "email": "Email"
+    },
+    "expertise": {
+      "title": "Areas of Expertise",
+      "residential": "Residential Properties",
+      "firstTimeBuyers": "First Time Homebuyers",
+      "propertyManagement": "Property Management"
+    },
+    "languages": {
+      "title": "Languages Spoken"
+    },
+    "reviewsTab": {
+      "verifiedReviews": "verified reviews",
+      "topPerformer": "{{name}} is rated as a Top Performer Agent",
+      "reliableAgent": "{{name}} is rated as a Reliable Agent",
+      "writeReview": "Write a Review",
+      "verifiedBuyer": "Verified Buyer",
+      "recently": "Recently",
+      "responseFrom": "Response from {{name}}",
+      "noReviews": "No reviews yet",
+      "beFirstToReview": "Be the first to review {{name}}'s services"
+    },
+    "contact": {
+      "title": "Contact {{name}}",
+      "callDirect": "Call Direct",
+      "sendEmail": "Send Email"
+    },
+    "appraisal": {
+      "title": "Get a Free Property Appraisal",
+      "description": "Curious what your property is worth? {{name}} can provide a free, no-obligation market appraisal.",
+      "requestAppraisal": "Request Appraisal",
+      "freeNoObligation": "Free • No obligation"
+    },
+    "similarAgents": {
+      "fromSameAgency": "Agents from Same Agency",
+      "otherInArea": "Other Agents in Area",
+      "noSimilarAgents": "No similar agents found",
+      "viewMoreIn": "View more agents in {{city}} →",
+      "viewMoreGeneric": "View more agents in this area →"
+    },
+    "bottomCta": {
+      "readyToWork": "Ready to work with {{name}}?",
+      "contactToday": "Contact {{name}} today for expert real estate advice and personalized service.",
+      "callNow": "Call Now: {{phone}}",
+      "contactForNumber": "(Contact for number)",
+      "scheduleConsultation": "Schedule Consultation"
+    },
+    "featuredAgencies": "Featured Agencies",
+    "linkCopied": "Link copied to clipboard!",
+    "appraisalModal": {
+      "title": "Request Property Appraisal",
+      "propertyAddress": "Property Address *",
+      "enterAddress": "Enter property address",
+      "propertyType": "Property Type *",
+      "selectType": "Select property type",
+      "apartment": "Apartment",
+      "house": "House",
+      "villa": "Villa",
+      "land": "Land",
+      "commercial": "Commercial",
+      "other": "Other",
+      "additionalNotes": "Additional Notes",
+      "additionalInfo": "Any additional information about the property...",
+      "cancel": "Cancel",
+      "sending": "Sending...",
+      "submitRequest": "Submit Request"
+    },
+    "consultationModal": {
+      "title": "Schedule Consultation",
+      "preferredDate": "Preferred Date *",
+      "preferredTime": "Preferred Time *",
+      "selectTime": "Select time",
+      "topic": "Topic *",
+      "selectTopic": "Select topic",
+      "buyingProperty": "Buying a Property",
+      "sellingProperty": "Selling a Property",
+      "realEstateInvestment": "Real Estate Investment",
+      "marketAnalysis": "Market Analysis",
+      "other": "Other",
+      "additionalNotes": "Additional Notes",
+      "whatToDiscuss": "What would you like to discuss?",
+      "cancel": "Cancel",
+      "scheduling": "Scheduling...",
+      "scheduleConsultation": "Schedule Consultation"
+    },
+    "editModal": {
+      "title": "Edit Profile",
+      "bio": "About Me",
+      "bioPlaceholder": "Tell clients about yourself, your experience, and what makes you unique...",
+      "yearsOfExperience": "Years of Experience",
+      "specializations": "Specializations",
+      "addSpecialization": "Add specialization...",
+      "languages": "Languages Spoken",
+      "addLanguage": "Add language...",
+      "serviceAreas": "Service Areas",
+      "addServiceArea": "Add service area...",
+      "contactInfo": "Contact Information",
+      "officePhone": "Office Phone",
+      "officeAddress": "Office Address",
+      "officeAddressPlaceholder": "Enter your office address...",
+      "socialLinks": "Social Links",
+      "website": "Website",
+      "cancel": "Cancel",
+      "saving": "Saving...",
+      "saveChanges": "Save Changes"
+    },
+    "editButton": "Edit Profile"
+  },
+  "verification": {
+    "title": "Verifikimi i Agjentit",
+    "description": "Verifikoni identitetin tuaj dhe licencën për t'u bërë agjent i verifikuar",
+    "benefits": {
+      "title": "Përfitimet e Verifikimit",
+      "trust": "Besueshmëri e shtuar nga klientët",
+      "badge": "Distinktiv i verifikuar në profilin tuaj",
+      "priority": "Prioritet në rezultatet e kërkimit",
+      "features": "Akses në veçori premium"
+    },
+    "requirements": {
+      "title": "Kërkesat",
+      "validLicense": "Licencë e vlefshme patundshmërie",
+      "idDocument": "Dokument identifikimi i lëshuar nga qeveria",
+      "photo": "Foto profesionale",
+      "contact": "Informacion kontakti i verifikuar"
+    },
+    "status": {
+      "pending": "Verifikimi në Pritje",
+      "approved": "I Verifikuar",
+      "rejected": "Verifikimi u Refuzua",
+      "expired": "Verifikimi Skadoi"
+    },
+    "startVerification": "Fillo Verifikimin",
+    "uploadDocuments": "Ngarko Dokumentet",
+    "pendingReview": "Dokumentet tuaja janë nën rishikim"
+  },
+  "invite": {
+    "title": "Fto Agjent",
+    "description": "Ftoni një agjent të bashkohet me agjencin tuaj",
+    "email": "Emaili i Agjentit",
+    "emailPlaceholder": "Futni adresën email të agjentit",
+    "message": "Mesazh Personal",
+    "messagePlaceholder": "Shtoni një mesazh personal (opsional)",
+    "send": "Dërgo Ftesën",
+    "sending": "Duke dërguar...",
+    "sent": "Ftesa u Dërgua!",
+    "pending": "Ftesa në Pritje",
+    "resend": "Ridërgo",
+    "cancel": "Anulo Ftesën",
+    "expired": "Skaduar",
+    "accepted": "Pranuar"
+  },
+  "manage": {
+    "title": "Menaxho Agjencin",
+    "teamMembers": "Anëtarët e Ekipit",
+    "addMember": "Shto Anëtar Ekipi",
+    "removeMember": "Hiq Anëtarin",
+    "changeRole": "Ndrysho Rolin",
+    "roles": {
+      "admin": "Admin",
+      "manager": "Menaxher",
+      "agent": "Agjent"
+    },
+    "invitationCodes": "Kodet e Ftesës",
+    "generateCode": "Gjenero Kod të Ri",
+    "codeGenerated": "Kodi u Gjenerua",
+    "copyCode": "Kopjo Kodin",
+    "codeCopied": "Kodi u Kopjua!",
+    "codeExpiry": "Skadon pas {{days}} ditësh",
+    "revokeCode": "Anulo Kodin",
+    "agencySettings": "Konfigurimet e Agjencisë",
+    "updateLogo": "Përditëso Logon",
+    "updateCover": "Përditëso Foton e Kopertinës",
+    "updateDescription": "Përditëso Përshkrimin",
+    "socialLinks": "Linket e Rrjeteve Sociale",
+    "contactInfo": "Informacioni i Kontaktit"
+  },
+  "badges": {
+    "verifiedAgents": "Verified Agents",
+    "topRated": "Top Rated",
+    "premiumSupport": "Premium Support"
+  },
+  "languages": {
+    "english": "English",
+    "serbian": "Serbian",
+    "croatian": "Croatian",
+    "slovenian": "Slovenian",
+    "bosnian": "Bosnian",
+    "macedonian": "Macedonian",
+    "albanian": "Albanian",
+    "montenegrin": "Montenegrin",
+    "bulgarian": "Bulgarian",
+    "romanian": "Romanian",
+    "greek": "Greek",
+    "turkish": "Turkish",
+    "hungarian": "Hungarian",
+    "german": "German",
+    "italian": "Italian",
+    "french": "French",
+    "russian": "Russian",
+    "spanish": "Spanish"
   }
 }

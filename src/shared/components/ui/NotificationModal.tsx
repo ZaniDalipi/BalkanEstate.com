@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 import { XMarkIcon, CheckCircleIcon, ExclamationTriangleIcon, XCircleIcon, InformationCircleIcon } from '../../../../constants';
 
 export type NotificationType = 'success' | 'error' | 'warning' | 'info';
@@ -18,11 +19,14 @@ const NotificationModal: React.FC<NotificationModalProps> = ({
   onClose,
   title,
   message,
-  buttonLabel = 'OK',
+  buttonLabel,
   type = 'info',
   icon,
 }) => {
+  const { t } = useTranslation(['common']);
   const buttonRef = useRef<HTMLButtonElement>(null);
+
+  const resolvedButtonLabel = buttonLabel || t('common:ok');
 
   // Lock body scroll when modal is open
   useEffect(() => {
@@ -165,7 +169,7 @@ const NotificationModal: React.FC<NotificationModalProps> = ({
               onClick={onClose}
               className={`px-8 py-3 rounded-xl font-semibold transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 text-white ${styles.button} shadow-lg hover:shadow-xl transform hover:-translate-y-0.5`}
             >
-              {buttonLabel}
+              {resolvedButtonLabel}
             </button>
           </div>
         </div>

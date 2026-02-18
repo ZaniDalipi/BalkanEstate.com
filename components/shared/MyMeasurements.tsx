@@ -86,7 +86,7 @@ const FitBoundsToMeasurements: React.FC<{ measurements: SavedMeasurement[], sele
 };
 
 const MyMeasurements: React.FC<MyMeasurementsProps> = ({ userId }) => {
-  const { t } = useTranslation(['account']);
+  const { t } = useTranslation(['common', 'account']);
 
   const [measurements, setMeasurements] = useState<SavedMeasurement[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -115,7 +115,7 @@ const MyMeasurements: React.FC<MyMeasurementsProps> = ({ userId }) => {
       setMaxAllowed(response.maxAllowed);
       setIsPro(response.isPro);
     } catch (err: any) {
-      setError(err.message || 'Failed to load measurements');
+      setError(err.message || t('common:measurements.errors.loadFailed'));
     } finally {
       setIsLoading(false);
     }
@@ -153,7 +153,7 @@ const MyMeasurements: React.FC<MyMeasurementsProps> = ({ userId }) => {
       setEditingId(null);
       fetchMeasurements();
     } catch (err: any) {
-      setError(err.message || 'Failed to update measurement');
+      setError(err.message || t('common:measurements.errors.updateFailed'));
     }
   };
 
@@ -174,7 +174,7 @@ const MyMeasurements: React.FC<MyMeasurementsProps> = ({ userId }) => {
       if (selectedMeasurement === id) setSelectedMeasurement(null);
       fetchMeasurements();
     } catch (err: any) {
-      setError(err.message || 'Failed to delete measurement');
+      setError(err.message || t('common:measurements.errors.deleteFailed'));
     } finally {
       setIsDeleting(false);
     }
@@ -193,15 +193,15 @@ const MyMeasurements: React.FC<MyMeasurementsProps> = ({ userId }) => {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-xl font-semibold text-gray-800">My Measurements</h2>
+          <h2 className="text-xl font-semibold text-gray-800">{t('common:measurements.title')}</h2>
           <p className="text-sm text-gray-500 mt-1">
-            {measurements.length} of {maxAllowed} measurements used
+            {t('common:measurements.usageCount', { count: measurements.length, max: maxAllowed })}
           </p>
         </div>
         <span className={`px-2 py-1 rounded-full text-xs font-medium ${
           isPro ? 'bg-blue-100 text-blue-700' : 'bg-gray-100 text-gray-600'
         }`}>
-          {isPro ? 'Pro' : 'Free'}: {maxAllowed} max
+          {isPro ? t('common:measurements.planPro') : t('common:measurements.planFree')}: {t('common:measurements.maxAllowed', { count: maxAllowed })}
         </span>
       </div>
 
@@ -225,15 +225,15 @@ const MyMeasurements: React.FC<MyMeasurementsProps> = ({ userId }) => {
       {measurements.length === 0 && !error && (
         <div className="text-center py-12 bg-gray-50 rounded-xl">
           <div className="text-4xl mb-3">📏</div>
-          <h3 className="text-lg font-medium text-gray-700 mb-2">No Measurements Yet</h3>
+          <h3 className="text-lg font-medium text-gray-700 mb-2">{t('common:measurements.emptyTitle')}</h3>
           <p className="text-gray-500 text-sm max-w-md mx-auto">
-            Use the measurement tool on the map to measure land distances and areas.
+            {t('common:measurements.emptyDescription')}
           </p>
           <a
             href="/map"
             className="inline-flex items-center gap-2 mt-4 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
           >
-            <span>🗺️</span> Open Map
+            <span>🗺️</span> {t('common:measurements.openMap')}
           </a>
         </div>
       )}
@@ -244,13 +244,13 @@ const MyMeasurements: React.FC<MyMeasurementsProps> = ({ userId }) => {
           {/* Mini Map showing all measurements */}
           <div className="bg-white border border-gray-200 rounded-xl overflow-hidden" style={{ height: '500px' }}>
             <div className="bg-gray-100 px-3 py-2 border-b flex items-center justify-between">
-              <span className="text-sm font-medium text-gray-700">📍 All Measurements</span>
+              <span className="text-sm font-medium text-gray-700">📍 {t('common:measurements.allMeasurements')}</span>
               {selectedMeasurement && (
                 <button
                   onClick={() => setSelectedMeasurement(null)}
                   className="text-xs text-blue-600 hover:underline"
                 >
-                  Show All
+                  {t('common:measurements.showAll')}
                 </button>
               )}
             </div>
@@ -328,7 +328,7 @@ const MyMeasurements: React.FC<MyMeasurementsProps> = ({ userId }) => {
                                 ? 'bg-green-100 text-green-700'
                                 : 'bg-blue-100 text-blue-700'
                             }`}>
-                              {measurement.type === 'area' ? '📐 Area' : '📏 Distance'}
+                              {measurement.type === 'area' ? `📐 ${t('common:measurements.typeArea')}` : `📏 ${t('common:measurements.typeDistance')}`}
                             </span>
                           </div>
                           <div className="mt-2 pt-2 border-t border-gray-100">
@@ -374,28 +374,28 @@ const MyMeasurements: React.FC<MyMeasurementsProps> = ({ userId }) => {
                       type="text"
                       value={editName}
                       onChange={(e) => setEditName(e.target.value)}
-                      placeholder="Name"
+                      placeholder={t('common:measurements.form.namePlaceholder')}
                       className="w-full px-2 py-1.5 text-sm border rounded focus:ring-2 focus:ring-blue-500"
                     />
                     <input
                       type="text"
                       value={editAddress}
                       onChange={(e) => setEditAddress(e.target.value)}
-                      placeholder="Address"
+                      placeholder={t('common:measurements.form.addressPlaceholder')}
                       className="w-full px-2 py-1.5 text-sm border rounded focus:ring-2 focus:ring-blue-500"
                     />
                     <div className="flex gap-2">
-                      <button onClick={handleCancelEdit} className="flex-1 px-2 py-1 text-xs rounded bg-gray-100 hover:bg-gray-200">Cancel</button>
-                      <button onClick={() => handleSaveEdit(measurement.id)} className="flex-1 px-2 py-1 text-xs rounded bg-blue-600 text-white hover:bg-blue-700">Save</button>
+                      <button onClick={handleCancelEdit} className="flex-1 px-2 py-1 text-xs rounded bg-gray-100 hover:bg-gray-200">{t('common:cancel')}</button>
+                      <button onClick={() => handleSaveEdit(measurement.id)} className="flex-1 px-2 py-1 text-xs rounded bg-blue-600 text-white hover:bg-blue-700">{t('common:save')}</button>
                     </div>
                   </div>
                 ) : deletingId === measurement.id ? (
                   // Delete confirmation
                   <div className="text-center py-2" onClick={e => e.stopPropagation()}>
-                    <p className="text-xs text-gray-600 mb-2">Delete "{measurement.name}"?</p>
+                    <p className="text-xs text-gray-600 mb-2">{t('common:measurements.deleteConfirmation', { name: measurement.name })}</p>
                     <div className="flex gap-2 justify-center">
-                      <button onClick={() => setDeletingId(null)} disabled={isDeleting} className="px-3 py-1 text-xs rounded bg-gray-100 hover:bg-gray-200 disabled:opacity-50">Cancel</button>
-                      <button onClick={() => handleDelete(measurement.id)} disabled={isDeleting} className="px-3 py-1 text-xs rounded bg-red-600 text-white hover:bg-red-700 disabled:opacity-50">{isDeleting ? 'Deleting...' : 'Delete'}</button>
+                      <button onClick={() => setDeletingId(null)} disabled={isDeleting} className="px-3 py-1 text-xs rounded bg-gray-100 hover:bg-gray-200 disabled:opacity-50">{t('common:cancel')}</button>
+                      <button onClick={() => handleDelete(measurement.id)} disabled={isDeleting} className="px-3 py-1 text-xs rounded bg-red-600 text-white hover:bg-red-700 disabled:opacity-50">{isDeleting ? t('common:measurements.deleting') : t('common:delete')}</button>
                     </div>
                   </div>
                 ) : (
@@ -415,7 +415,7 @@ const MyMeasurements: React.FC<MyMeasurementsProps> = ({ userId }) => {
                         <span className={`px-1.5 py-0.5 rounded text-[10px] font-medium ${
                           measurement.type === 'area' ? 'bg-green-100 text-green-700' : 'bg-blue-100 text-blue-700'
                         }`}>
-                          {measurement.type === 'area' ? 'Area' : 'Dist'}
+                          {measurement.type === 'area' ? t('common:measurements.typeArea') : t('common:measurements.typeDistShort')}
                         </span>
                       </div>
                       <div className="text-xs text-gray-500 mt-0.5">
@@ -432,21 +432,21 @@ const MyMeasurements: React.FC<MyMeasurementsProps> = ({ userId }) => {
                       <button
                         onClick={() => setSelectedMeasurement(measurement.id)}
                         className="p-1.5 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded"
-                        title="View on map"
+                        title={t('common:measurements.viewOnMap')}
                       >
                         🎯
                       </button>
                       <button
                         onClick={() => handleEdit(measurement)}
                         className="p-1.5 text-gray-400 hover:text-amber-600 hover:bg-amber-50 rounded"
-                        title="Edit"
+                        title={t('common:edit')}
                       >
                         ✏️
                       </button>
                       <button
                         onClick={() => setDeletingId(measurement.id)}
                         className="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded"
-                        title="Delete"
+                        title={t('common:delete')}
                       >
                         🗑️
                       </button>

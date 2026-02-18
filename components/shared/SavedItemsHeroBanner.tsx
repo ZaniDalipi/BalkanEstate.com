@@ -27,7 +27,7 @@ const SavedItemsHeroBanner: React.FC<SavedItemsHeroBannerProps> = ({
   onTabChange,
   groupedCountries = 0
 }) => {
-  const { t } = useTranslation(['property', 'agents']);
+  const { t } = useTranslation(['saved']);
 
   const totalSaved = savedPropertiesCount + savedAgentsCount;
 
@@ -74,7 +74,7 @@ const SavedItemsHeroBanner: React.FC<SavedItemsHeroBannerProps> = ({
             <div className="inline-flex items-center gap-2 px-4 py-2 bg-white/10 backdrop-blur-md rounded-full border border-white/20">
               <HeartIcon className="w-4 h-4 text-rose-400" />
               <span className="text-white/90 font-semibold text-sm uppercase tracking-wider">
-                {t('property:saved.badge', 'Your Favorites Collection')}
+                {t('saved:favorites.badge')}
               </span>
               <HeartIcon className="w-4 h-4 text-rose-400" />
             </div>
@@ -83,13 +83,13 @@ const SavedItemsHeroBanner: React.FC<SavedItemsHeroBannerProps> = ({
           {/* Main heading */}
           <div className="text-center mb-8 sm:mb-10">
             <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-black text-white mb-4 sm:mb-6 leading-tight">
-              {t('property:saved.heroTitle', 'Your Curated')}
+              {t('saved:favorites.heroTitle')}
               <span className="block mt-2 bg-gradient-to-r from-rose-400 via-pink-400 to-fuchsia-400 bg-clip-text text-transparent">
-                {t('property:saved.heroTitleHighlight', 'Favorites Collection')}
+                {t('saved:favorites.heroTitleHighlight')}
               </span>
             </h1>
             <p className="text-base sm:text-lg lg:text-xl text-white/70 max-w-3xl mx-auto leading-relaxed">
-              {t('property:saved.heroDescription', 'All your saved properties and trusted agents in one place, organized and ready to explore')}
+              {t('saved:favorites.heroDescription')}
             </p>
           </div>
 
@@ -103,7 +103,7 @@ const SavedItemsHeroBanner: React.FC<SavedItemsHeroBannerProps> = ({
                 </div>
                 <div className="text-2xl sm:text-3xl lg:text-4xl font-black text-white mb-1">{savedPropertiesCount}</div>
                 <div className="text-[10px] sm:text-xs lg:text-sm text-white/60 font-medium uppercase tracking-wide">
-                  {t('property:saved.stats.properties', 'Properties')}
+                  {t('saved:favorites.stats.properties')}
                 </div>
               </div>
             </div>
@@ -116,7 +116,7 @@ const SavedItemsHeroBanner: React.FC<SavedItemsHeroBannerProps> = ({
                 </div>
                 <div className="text-2xl sm:text-3xl lg:text-4xl font-black text-white mb-1">{savedAgentsCount}</div>
                 <div className="text-[10px] sm:text-xs lg:text-sm text-white/60 font-medium uppercase tracking-wide">
-                  {t('property:saved.stats.agents', 'Agents')}
+                  {t('saved:favorites.stats.agents')}
                 </div>
               </div>
             </div>
@@ -129,7 +129,7 @@ const SavedItemsHeroBanner: React.FC<SavedItemsHeroBannerProps> = ({
                 </div>
                 <div className="text-2xl sm:text-3xl lg:text-4xl font-black text-white mb-1">{groupedCountries || (savedPropertiesCount > 0 ? 1 : 0)}</div>
                 <div className="text-[10px] sm:text-xs lg:text-sm text-white/60 font-medium uppercase tracking-wide">
-                  {t('property:saved.stats.countries', 'Countries')}
+                  {t('saved:favorites.stats.countries')}
                 </div>
               </div>
             </div>
@@ -148,7 +148,7 @@ const SavedItemsHeroBanner: React.FC<SavedItemsHeroBannerProps> = ({
                   }`}
                 >
                   <HomeIcon className="w-5 h-5" />
-                  <span>{t('property:saved.tabs.properties', 'Properties')}</span>
+                  <span>{t('saved:favorites.tabs.properties')}</span>
                   {savedPropertiesCount > 0 && (
                     <span className={`ml-1 px-2 py-0.5 rounded-full text-xs ${
                       activeTab === 'properties' ? 'bg-rose-100 text-rose-600' : 'bg-white/20'
@@ -167,7 +167,7 @@ const SavedItemsHeroBanner: React.FC<SavedItemsHeroBannerProps> = ({
                   }`}
                 >
                   <UsersIcon className="w-5 h-5" />
-                  <span>{t('property:saved.tabs.agents', 'Agents')}</span>
+                  <span>{t('saved:favorites.tabs.agents')}</span>
                   {savedAgentsCount > 0 && (
                     <span className={`ml-1 px-2 py-0.5 rounded-full text-xs ${
                       activeTab === 'agents' ? 'bg-pink-100 text-pink-600' : 'bg-white/20'
@@ -184,17 +184,17 @@ const SavedItemsHeroBanner: React.FC<SavedItemsHeroBannerProps> = ({
           <div className="flex flex-wrap justify-center items-center gap-4 sm:gap-8 mt-8 text-white/50 text-xs sm:text-sm">
             <div className="flex items-center gap-2">
               <HeartIcon className="w-4 h-4 text-rose-400" />
-              <span>{t('property:saved.badges.quickAccess', 'Quick Access')}</span>
+              <span>{t('saved:favorites.badges.quickAccess')}</span>
             </div>
-            <span className="hidden sm:inline">•</span>
+            <span className="hidden sm:inline">&bull;</span>
             <div className="flex items-center gap-2">
               <BuildingOfficeIcon className="w-4 h-4 text-pink-400" />
-              <span>{t('property:saved.badges.organized', 'Organized by Location')}</span>
+              <span>{t('saved:favorites.badges.organized')}</span>
             </div>
-            <span className="hidden sm:inline">•</span>
+            <span className="hidden sm:inline">&bull;</span>
             <div className="flex items-center gap-2">
               <SparklesIcon className="w-4 h-4 text-fuchsia-400" />
-              <span>{t('property:saved.badges.compare', 'Easy Comparison')}</span>
+              <span>{t('saved:favorites.badges.compare')}</span>
             </div>
           </div>
         </div>

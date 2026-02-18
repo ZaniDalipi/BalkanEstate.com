@@ -34,7 +34,8 @@
     "imageFailedToLoad": "Imaginea nu a putut fi încărcată.",
     "failedToUploadImage": "Încărcarea imaginii a eșuat. Vă rugăm încercați din nou.",
     "failedToSendMessage": "Trimiterea mesajului a eșuat. Vă rugăm încercați din nou.",
-    "failedToDeleteConversation": "Ștergerea conversației a eșuat. Vă rugăm încercați din nou."
+    "failedToDeleteConversation": "Ștergerea conversației a eșuat. Vă rugăm încercați din nou.",
+    "allConversations": "All Conversations"
   },
   "quickReplies": {
     "scheduleTour": "Programează o Vizită",

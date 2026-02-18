@@ -4,7 +4,8 @@
     "overview": "Prezentare",
     "properties": "Proprietăți",
     "agents": "Agenți",
-    "reviews": "Recenzii"
+    "reviews": "Recenzii",
+    "back": "Back"
   },
   "seo": {
     "title": "{{name}} - Agenție Imobiliară",
@@ -16,7 +17,13 @@
     "memberSince": "Membru din",
     "contact": "Contact",
     "website": "Vizitați Website-ul",
-    "share": "Distribuie"
+    "share": "Distribuie",
+    "gradients": "Gradients",
+    "uploadImage": "Upload Image",
+    "uploading": "Uploading...",
+    "chooseGradient": "Choose Gradient",
+    "customImageHint": "Or upload a custom image using the button above",
+    "changeLogo": "Change Logo"
   },
   "stats": {
     "totalProperties": "Total Proprietăți",
@@ -24,7 +31,11 @@
     "totalAgents": "Membri Echipă",
     "avgRating": "Rating Mediu",
     "propertiesSold": "Proprietăți Vândute",
-    "yearsExperience": "Ani de Experiență"
+    "yearsExperience": "Ani de Experiență",
+    "totalListings": "Total Listings",
+    "yearsInBusiness": "Years in Business",
+    "rating": "Rating",
+    "notAvailable": "N/A"
   },
   "salesPerformance": {
     "title": "Performanță Vânzări",
@@ -36,7 +47,10 @@
       "sales": "Vânzări",
       "listings": "Anunțuri",
       "views": "Vizualizări"
-    }
+    },
+    "salesLast12Months": "Sales last 12 months",
+    "priceRange": "Price range",
+    "averagePrice": "Average price"
   },
   "about": {
     "title": "Despre Noi",
@@ -44,7 +58,11 @@
     "specializations": "Specializări",
     "areasServed": "Zone Deservite",
     "languages": "Limbi",
-    "established": "Înființată"
+    "established": "Înființată",
+    "contactInfo": "Contact Information",
+    "specialties": "Specialties",
+    "serviceAreas": "Service Areas",
+    "languagesSpoken": "Languages Spoken"
   },
   "invitationCode": {
     "title": "Cod de Invitație Echipă",
@@ -65,7 +83,10 @@
     "verify": "Solicită Verificare",
     "message": "Trimite Mesaj",
     "call": "Sună",
-    "email": "Trimite Email"
+    "email": "Trimite Email",
+    "editAgency": "Edit Agency",
+    "manageJoinRequests": "Manage Join Requests",
+    "requestToJoin": "Request to Join Agency"
   },
   "teamMembers": {
     "title": "Membri Echipă",
@@ -77,7 +98,24 @@
     "contact": "Contact",
     "owner": "Proprietar",
     "admin": "Administrator",
-    "agent": "Agent"
+    "agent": "Agent",
+    "showTopPerformers": "Show Top Performers",
+    "showAllMembers": "Show All Members",
+    "rankedByPerformance": "Ranked by Performance",
+    "topAgent": "Top Agent",
+    "secondPlace": "2nd Place",
+    "thirdPlace": "3rd Place",
+    "license": "License",
+    "totalSales": "Total Sales",
+    "propertiesSold": "Properties Sold",
+    "activeListings": "Active Listings",
+    "removeAdmin": "Remove Admin",
+    "makeAdmin": "Make Admin",
+    "remove": "Remove",
+    "removing": "Removing...",
+    "leaveAgency": "Leave Agency",
+    "leaving": "Leaving...",
+    "noAgentsFound": "No agents found for this agency"
   },
   "properties": {
     "title": "Anunțuri Proprietăți",
@@ -90,7 +128,16 @@
       "all": "Toate",
       "forSale": "De Vânzare",
       "forRent": "De Închiriat"
-    }
+    },
+    "activeListings": "ACTIVE LISTINGS",
+    "soldProperties": "SOLD PROPERTIES",
+    "activeListingsTitle": "Active Listings",
+    "soldPropertiesTitle": "Sold Properties",
+    "propertiesCount": "{count} properties",
+    "noActiveListings": "No active listings at the moment",
+    "noSoldProperties": "No sold properties yet",
+    "checkBackSoon": "Check back soon for new properties",
+    "soldWillAppear": "Sold properties will appear here"
   },
   "editModal": {
     "title": "Editează Agenția",
@@ -105,7 +152,30 @@
     "logo": "Logo",
     "cover": "Copertă",
     "save": "Salvează Modificările",
-    "cancel": "Anulează"
+    "cancel": "Anulează",
+    "basicInfo": "Basic Information",
+    "agencyName": "Agency Name",
+    "yearsInBusiness": "Years in Business",
+    "location": "Location",
+    "zipCode": "Zip Code",
+    "latitude": "Latitude",
+    "longitude": "Longitude",
+    "socialMedia": "Social Media",
+    "facebookUrl": "Facebook URL",
+    "instagramUrl": "Instagram URL",
+    "linkedinUrl": "LinkedIn URL",
+    "twitterUrl": "Twitter URL",
+    "specialtiesCerts": "Specialties & Certifications",
+    "specialtiesLabel": "Specialties (comma-separated)",
+    "specialtiesPlaceholder": "Residential, Commercial, Luxury Properties",
+    "certificationsLabel": "Certifications (comma-separated)",
+    "certificationsPlaceholder": "Licensed Real Estate Agency, ISO Certified",
+    "languagesLabel": "Languages Spoken (comma-separated)",
+    "languagesPlaceholder": "English, Serbian, Croatian, Albanian",
+    "languagesHint": "Languages are auto-synced when agents join/leave",
+    "businessHours": "Business Hours",
+    "businessHoursPlaceholder": "9:00 AM - 6:00 PM",
+    "saveChanges": "Save Changes"
   },
   "confirmations": {
     "delete": {
@@ -119,14 +189,35 @@
       "message": "Sunteți sigur că doriți să părăsiți această agenție?",
       "confirm": "Da, Părăsește",
       "cancel": "Anulează"
-    }
+    },
+    "removeAgent": "Are you sure you want to remove {name} from {agency}?",
+    "removeAgentDetails": "This will:\n- Remove them from your agency\n- Clear their agency affiliation\n- Keep their properties and reviews intact",
+    "leaveAgency": "Are you sure you want to leave {agency}?",
+    "leaveAgencyDetails": "This will:\n- Remove you from this agency\n- Clear your agency affiliation\n- Keep your properties and reviews intact\n- Change your status to Independent Agent",
+    "toggleAdmin": "Are you sure you want to {action} {name}?",
+    "removeAdminRights": "remove admin rights from",
+    "makeAdminRights": "make admin"
   },
   "messages": {
     "updated": "Agenție actualizată cu succes",
     "deleted": "Agenție ștearsă cu succes",
     "codeCopied": "Cod de invitație copiat",
     "codeGenerated": "Cod de invitație nou generat",
-    "error": "A apărut o eroare. Vă rugăm încercați din nou."
+    "error": "A apărut o eroare. Vă rugăm încercați din nou.",
+    "logoUpdated": "Logo updated successfully!",
+    "coverUpdated": "Cover image updated successfully!",
+    "gradientUpdated": "Banner gradient updated successfully!",
+    "agencyUpdated": "Agency updated successfully!",
+    "agentRemoved": "{name} has been removed from the agency successfully.",
+    "leftAgency": "You have successfully left {agency}",
+    "invitationCopied": "Invitation code copied to clipboard!",
+    "joinRequestSent": "Join request sent successfully! The agency admin will review your request.",
+    "adminAdded": "{name} is now an admin!",
+    "adminRemoved": "{name} is no longer an admin.",
+    "onlyOwnerCanManage": "Only the agency owner can manage admins",
+    "onlyAdminCanRemove": "Only agency admins can remove agents",
+    "selectImageFile": "Please select an image file",
+    "imageSizeLimit": "Image size must be less than 5MB"
   },
   "weekdays": {
     "monday": "Luni",
@@ -146,5 +237,21 @@
     "call": "Sună",
     "email": "Email",
     "website": "Site web"
+  },
+  "gradientPresets": {
+    "oceanBlue": "Ocean Blue",
+    "sunset": "Sunset",
+    "forest": "Forest",
+    "royalPurple": "Royal Purple",
+    "fire": "Fire",
+    "nightSky": "Night Sky",
+    "mintFresh": "Mint Fresh",
+    "roseGold": "Rose Gold"
+  },
+  "featuredSubscription": {
+    "title": "Featured Subscription",
+    "subtitle": "Boost Your Visibility",
+    "proTip": "Pro Tip:",
+    "proTipMessage": "Featured agencies get up to 5x more visibility and appear at the top of search results!"
   }
 }

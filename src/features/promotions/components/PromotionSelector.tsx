@@ -1,4 +1,5 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { RocketLaunchIcon, EyeIcon, ChatBubbleLeftRightIcon, BoltIcon, StarIconSolid, FireIcon } from '@/constants';
 import { usePromotionSelector, extensionTierStyles } from './usePromotionSelector';
 import type { PromotionSelectorProps, PromotionTier } from './usePromotionSelector';
@@ -50,6 +51,8 @@ const PromotionSelector: React.FC<PromotionSelectorProps> = (props) => {
     calculateNewEndDate,
   } = usePromotionSelector(props);
 
+  const { t } = useTranslation(['common']);
+
   if (loading) {
     return (
       <div className="flex items-center justify-center py-12">
@@ -61,12 +64,12 @@ const PromotionSelector: React.FC<PromotionSelectorProps> = (props) => {
   if (!tiersData) {
     return (
       <div className="text-center py-12">
-        <p className="text-red-600">{error || 'Failed to load promotion options'}</p>
+        <p className="text-red-600">{error || t('common:promotions.failedToLoad')}</p>
         <button
           onClick={onSkip}
           className="mt-4 px-6 py-2 bg-neutral-200 text-neutral-700 rounded-lg hover:bg-neutral-300"
         >
-          Skip for Now
+          {t('common:promotions.skipForNow')}
         </button>
       </div>
     );
@@ -82,7 +85,7 @@ const PromotionSelector: React.FC<PromotionSelectorProps> = (props) => {
           {/* Urgent Badge Mode Header */}
           <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-gradient-to-r from-red-500 to-orange-500 text-white text-sm font-semibold mb-4 shadow-lg">
             <FireIcon className="w-4 h-4" />
-            <span>Add Urgent Badge</span>
+            <span>{t('common:promotions.addUrgentBadge')}</span>
           </div>
 
           <div className="inline-block p-3 bg-gradient-to-br from-red-400 to-orange-500 rounded-2xl mb-4 shadow-xl">
@@ -90,20 +93,20 @@ const PromotionSelector: React.FC<PromotionSelectorProps> = (props) => {
           </div>
 
           <h2 className={`${inModal ? 'text-xl md:text-2xl' : 'text-3xl md:text-4xl'} font-bold text-gray-900 mb-3`}>
-            {alreadyHasUrgent ? 'Upgrade Your Promotion' : 'Add Urgent Badge'}
+            {alreadyHasUrgent ? t('common:promotions.upgradePromotion') : t('common:promotions.addUrgentBadge')}
           </h2>
 
           <p className={`text-neutral-600 ${inModal ? 'text-sm' : 'text-base'} max-w-xl mx-auto mb-4`}>
             {alreadyHasUrgent
-              ? 'Your listing already has an urgent badge. Would you like to upgrade to a higher tier for more visibility?'
-              : 'Get a flashing urgent badge on your listing to attract more buyers and sell faster.'}
+              ? t('common:promotions.alreadyHasUrgentDescription')
+              : t('common:promotions.urgentBadgeDescription')}
           </p>
 
           {/* Current Tier Display */}
           {currentTier && (
             <div className={`inline-flex items-center gap-3 bg-gradient-to-r ${extensionTierStyles[currentTier].lightBg} border ${extensionTierStyles[currentTier].border} rounded-xl px-5 py-3 shadow-sm`}>
               <div className="text-left">
-                <p className="text-xs text-gray-500 uppercase tracking-wide">Current Plan</p>
+                <p className="text-xs text-gray-500 uppercase tracking-wide">{t('common:promotions.currentPlan')}</p>
                 <p className={`text-lg font-bold ${extensionTierStyles[currentTier].text}`}>
                   {extensionTierStyles[currentTier].tierName}
                 </p>
@@ -116,7 +119,7 @@ const PromotionSelector: React.FC<PromotionSelectorProps> = (props) => {
           {/* Tier Badge */}
           <div className={`inline-flex items-center gap-2 px-4 py-2 rounded-full bg-gradient-to-r ${extStyle.headerGradient} text-white text-sm font-semibold mb-4 shadow-lg`}>
             <StarIconSolid className="w-4 h-4" />
-            <span>{extStyle.tierName} Promotion</span>
+            <span>{extStyle.tierName} {t('common:promotions.promotion')}</span>
           </div>
 
           <div className={`inline-block p-3 ${extStyle.iconBg} rounded-2xl mb-4 shadow-xl`}>
@@ -126,13 +129,13 @@ const PromotionSelector: React.FC<PromotionSelectorProps> = (props) => {
           </div>
 
           <h2 className={`${inModal ? 'text-xl md:text-2xl' : 'text-3xl md:text-4xl'} font-bold text-gray-900 mb-3`}>
-            Extend Your Promotion
+            {t('common:promotions.extendPromotion')}
           </h2>
 
           {/* Current Status Card */}
           <div className={`inline-flex items-center gap-4 bg-gradient-to-r ${extStyle.lightBg} border ${extStyle.border} rounded-xl px-5 py-3 shadow-sm`}>
             <div className="text-left">
-              <p className="text-xs text-gray-500 uppercase tracking-wide">Current End Date</p>
+              <p className="text-xs text-gray-500 uppercase tracking-wide">{t('common:promotions.currentEndDate')}</p>
               <p className="text-lg font-bold text-gray-900">
                 {currentEndDate ? new Date(currentEndDate).toLocaleDateString('en-US', {
                   month: 'short',
@@ -143,7 +146,7 @@ const PromotionSelector: React.FC<PromotionSelectorProps> = (props) => {
             </div>
             <div className={`w-px h-10 bg-gradient-to-b ${extStyle.headerGradient}`}></div>
             <div className="text-left">
-              <p className="text-xs text-gray-500 uppercase tracking-wide">New End Date</p>
+              <p className="text-xs text-gray-500 uppercase tracking-wide">{t('common:promotions.newEndDate')}</p>
               <p className={`text-lg font-bold ${extStyle.text}`}>
                 {calculateNewEndDate().toLocaleDateString('en-US', {
                   month: 'short',
@@ -160,10 +163,10 @@ const PromotionSelector: React.FC<PromotionSelectorProps> = (props) => {
             <RocketLaunchIcon className={`${inModal ? 'w-6 h-6' : 'w-8 h-8'} text-white`} />
           </div>
           <h2 className={`${inModal ? 'text-xl md:text-2xl' : 'text-3xl md:text-4xl'} font-bold bg-gradient-to-r from-neutral-900 via-neutral-800 to-neutral-900 bg-clip-text text-transparent mb-2`}>
-            Promote Your Listing
+            {t('common:promotions.promoteYourListing')}
           </h2>
           <p className={`text-neutral-600 ${inModal ? 'text-sm' : 'text-base md:text-lg'} max-w-2xl mx-auto`}>
-            Get up to 5x more views and inquiries with promoted placement. Choose the perfect plan for your needs.
+            {t('common:promotions.description')}
           </p>
         </div>
       )}
@@ -178,13 +181,13 @@ const PromotionSelector: React.FC<PromotionSelectorProps> = (props) => {
               </svg>
             </div>
             <div className="flex-1">
-              <p className="font-semibold mb-1">This promotion has expired</p>
-              <p className="text-amber-700 mb-3">To add an urgent badge, you first need to extend your promotion. Click the button below to extend and then add the urgent badge.</p>
+              <p className="font-semibold mb-1">{t('common:promotions.promotionExpired')}</p>
+              <p className="text-amber-700 mb-3">{t('common:promotions.promotionExpiredDescription')}</p>
               <button
                 onClick={onSkip}
                 className="bg-amber-500 hover:bg-amber-600 text-white font-semibold px-4 py-2 rounded-lg transition-colors text-sm"
               >
-                Close & Extend Promotion
+                {t('common:promotions.closeAndExtend')}
               </button>
             </div>
           </div>
@@ -219,9 +222,9 @@ const PromotionSelector: React.FC<PromotionSelectorProps> = (props) => {
               </svg>
             </div>
             <div className="flex-1">
-              <p className="font-semibold text-blue-900 mb-1">Online Payment Coming Soon</p>
+              <p className="font-semibold text-blue-900 mb-1">{t('common:promotions.paymentComingSoon')}</p>
               <p className="text-blue-700 text-sm mb-3">
-                We're working on adding online payments. In the meantime, you can use a coupon code to upgrade your listing for free!
+                {t('common:promotions.paymentComingSoonDescription')}
               </p>
               <div className="flex flex-wrap gap-2">
                 <button
@@ -235,13 +238,13 @@ const PromotionSelector: React.FC<PromotionSelectorProps> = (props) => {
                   }}
                   className="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-4 py-2 rounded-lg transition-colors text-sm"
                 >
-                  I Have a Coupon
+                  {t('common:promotions.iHaveCoupon')}
                 </button>
                 <button
                   onClick={onSkip}
                   className="bg-white hover:bg-gray-50 text-gray-700 font-medium px-4 py-2 rounded-lg transition-colors text-sm border border-gray-200"
                 >
-                  Maybe Later
+                  {t('common:promotions.maybeLater')}
                 </button>
               </div>
             </div>
@@ -262,22 +265,22 @@ const PromotionSelector: React.FC<PromotionSelectorProps> = (props) => {
             <div className={`${inModal ? 'w-12 h-12 mb-2' : 'w-14 h-14 mb-3'} ${isExtension ? extStyle.iconBg : 'bg-gradient-to-br from-amber-400 to-orange-500'} rounded-2xl flex items-center justify-center shadow-lg`}>
               <EyeIcon className={`${inModal ? 'w-5 h-5' : 'w-7 h-7'} text-white`} />
             </div>
-            <h3 className={`font-semibold text-gray-900 ${inModal ? 'text-xs' : 'text-sm'}`}>Higher Visibility</h3>
-            {!inModal && <p className="text-xs text-gray-500 mt-0.5">Top of search results</p>}
+            <h3 className={`font-semibold text-gray-900 ${inModal ? 'text-xs' : 'text-sm'}`}>{t('common:promotions.higherVisibility')}</h3>
+            {!inModal && <p className="text-xs text-gray-500 mt-0.5">{t('common:promotions.topOfSearchResults')}</p>}
           </div>
           <div className="flex flex-col items-center text-center">
             <div className={`${inModal ? 'w-12 h-12 mb-2' : 'w-14 h-14 mb-3'} ${isExtension ? extStyle.iconBg : 'bg-gradient-to-br from-blue-400 to-indigo-500'} rounded-2xl flex items-center justify-center shadow-lg`}>
               <ChatBubbleLeftRightIcon className={`${inModal ? 'w-5 h-5' : 'w-7 h-7'} text-white`} />
             </div>
-            <h3 className={`font-semibold text-gray-900 ${inModal ? 'text-xs' : 'text-sm'}`}>More Inquiries</h3>
-            {!inModal && <p className="text-xs text-gray-500 mt-0.5">Serious buyer contacts</p>}
+            <h3 className={`font-semibold text-gray-900 ${inModal ? 'text-xs' : 'text-sm'}`}>{t('common:promotions.moreInquiries')}</h3>
+            {!inModal && <p className="text-xs text-gray-500 mt-0.5">{t('common:promotions.seriousBuyerContacts')}</p>}
           </div>
           <div className="flex flex-col items-center text-center">
             <div className={`${inModal ? 'w-12 h-12 mb-2' : 'w-14 h-14 mb-3'} ${isExtension ? extStyle.iconBg : 'bg-gradient-to-br from-emerald-400 to-teal-500'} rounded-2xl flex items-center justify-center shadow-lg`}>
               <BoltIcon className={`${inModal ? 'w-5 h-5' : 'w-7 h-7'} text-white`} />
             </div>
-            <h3 className={`font-semibold text-gray-900 ${inModal ? 'text-xs' : 'text-sm'}`}>Sell Faster</h3>
-            {!inModal && <p className="text-xs text-gray-500 mt-0.5">3x faster results</p>}
+            <h3 className={`font-semibold text-gray-900 ${inModal ? 'text-xs' : 'text-sm'}`}>{t('common:promotions.sellFaster')}</h3>
+            {!inModal && <p className="text-xs text-gray-500 mt-0.5">{t('common:promotions.fasterResults')}</p>}
           </div>
         </div>
       </div>
@@ -301,7 +304,7 @@ const PromotionSelector: React.FC<PromotionSelectorProps> = (props) => {
                       {tiersData.urgentModifier.name}
                     </span>
                     <span className="bg-gradient-to-r from-red-500 to-orange-500 text-white text-xs font-bold px-2.5 py-1 rounded-full animate-pulse inline-flex items-center gap-1">
-                      <FireIcon className="w-3 h-3" /> Urgent
+                      <FireIcon className="w-3 h-3" /> {t('common:promotions.urgent')}
                     </span>
                     <span className="text-base font-bold text-red-600">
                       €{tiersData.urgentModifier.price}
@@ -322,10 +325,10 @@ const PromotionSelector: React.FC<PromotionSelectorProps> = (props) => {
                 <span className="w-8 h-8 bg-gradient-to-br from-violet-400 to-purple-500 rounded-lg flex items-center justify-center">
                   <StarIconSolid className="w-4 h-4 text-white" />
                 </span>
-                Upgrade Your Plan?
+                {t('common:promotions.upgradeYourPlan')}
               </h3>
               <label className="flex items-center gap-2 cursor-pointer">
-                <span className="text-sm text-gray-600">Show upgrade options</span>
+                <span className="text-sm text-gray-600">{t('common:promotions.showUpgradeOptions')}</span>
                 <div className="relative">
                   <input
                     type="checkbox"
@@ -340,8 +343,8 @@ const PromotionSelector: React.FC<PromotionSelectorProps> = (props) => {
 
             {!wantsTierUpgrade ? (
               <p className="text-sm text-gray-500">
-                You're currently on the <span className="font-semibold">{currentTier ? extensionTierStyles[currentTier].tierName : 'Standard'}</span> plan.
-                {currentTier !== 'premium' && ' Enable upgrade options to boost your listing with a higher tier.'}
+                {t('common:promotions.currentlyOnPlan', { plan: currentTier ? extensionTierStyles[currentTier].tierName : t('common:promotions.standard') })}
+                {currentTier !== 'premium' && ` ${t('common:promotions.enableUpgradeOptions')}`}
               </p>
             ) : (
               /* Show Tier Selection when upgrade is wanted */
@@ -374,7 +377,7 @@ const PromotionSelector: React.FC<PromotionSelectorProps> = (props) => {
       {/* Tier Selection - Only show if not in extension mode and not in focusUrgent mode */}
       {!isExtension && !focusUrgent && (
         <div className={inModal ? 'mb-5' : 'mb-8'}>
-          <h3 className={`${inModal ? 'text-base' : 'text-xl'} font-bold text-neutral-900 mb-4`}>Choose Your Plan</h3>
+          <h3 className={`${inModal ? 'text-base' : 'text-xl'} font-bold text-neutral-900 mb-4`}>{t('common:promotions.chooseYourPlan')}</h3>
           <div className={`grid grid-cols-1 md:grid-cols-3 ${inModal ? 'gap-3' : 'gap-5'}`}>
             {(['featured', 'highlight', 'premium'] as PromotionTier[]).map((tierId) => {
               const tier = tiers[tierId];
@@ -425,7 +428,7 @@ const PromotionSelector: React.FC<PromotionSelectorProps> = (props) => {
                       {tiersData.urgentModifier.name}
                     </span>
                     <span className="bg-gradient-to-r from-red-500 to-orange-500 text-white text-xs font-bold px-2.5 py-1 rounded-full animate-pulse inline-flex items-center gap-1">
-                      <FireIcon className="w-3 h-3" /> Urgent
+                      <FireIcon className="w-3 h-3" /> {t('common:promotions.urgent')}
                     </span>
                     <span className="text-sm font-bold text-red-600">
                       +€{tiersData.urgentModifier.price}
@@ -452,24 +455,24 @@ const PromotionSelector: React.FC<PromotionSelectorProps> = (props) => {
                 <div className="flex-1">
                   <div className="flex items-center gap-2 mb-1">
                     <span className="text-sm font-semibold text-neutral-800">
-                      Use Agency Allocation
+                      {t('common:promotions.useAgencyAllocation')}
                     </span>
                     <span className="bg-green-600 text-white text-xs font-medium px-2 py-0.5 rounded">
-                      Free
+                      {t('common:promotions.free')}
                     </span>
                   </div>
                   <p className="text-xs text-neutral-600 mb-2">
-                    Your {agencyAllocation.plan.planName} plan includes monthly promotions. Use one of your remaining {selectedTier} slots this month.
+                    {t('common:promotions.agencyAllocationDescription', { planName: agencyAllocation.plan.planName, tier: selectedTier })}
                   </p>
                   <div className="flex gap-3 text-xs text-neutral-700">
                     <div>
-                      Featured: {agencyAllocation.remaining.featured}/{agencyAllocation.plan.monthlyFeaturedAds}
+                      {t('common:promotions.featured')}: {agencyAllocation.remaining.featured}/{agencyAllocation.plan.monthlyFeaturedAds}
                     </div>
                     <div>
-                      Highlight: {agencyAllocation.remaining.highlight}/{agencyAllocation.plan.monthlyHighlightAds}
+                      {t('common:promotions.highlight')}: {agencyAllocation.remaining.highlight}/{agencyAllocation.plan.monthlyHighlightAds}
                     </div>
                     <div>
-                      Premium: {agencyAllocation.remaining.premium}/{agencyAllocation.plan.monthlyPremiumAds}
+                      {t('common:promotions.premium')}: {agencyAllocation.remaining.premium}/{agencyAllocation.plan.monthlyPremiumAds}
                     </div>
                   </div>
                 </div>
@@ -480,13 +483,13 @@ const PromotionSelector: React.FC<PromotionSelectorProps> = (props) => {
           {/* Coupon Code */}
           {!useAgencyAllocation && (
             <div className="bg-white rounded-lg border border-neutral-200 p-5 mb-4">
-              <h3 className="text-sm font-semibold text-neutral-800 mb-3">Coupon Code</h3>
+              <h3 className="text-sm font-semibold text-neutral-800 mb-3">{t('common:promotions.couponCode')}</h3>
               <div className="flex gap-2">
                 <input
                   type="text"
                   value={couponCode}
                   onChange={(e) => setCouponCode(e.target.value.toUpperCase())}
-                  placeholder="Enter code"
+                  placeholder={t('common:promotions.enterCode')}
                   className="flex-1 px-3 py-2 text-sm border border-neutral-300 rounded focus:outline-none focus:ring-1 focus:ring-neutral-800 focus:border-neutral-800"
                 />
                 {validatingCoupon && (
@@ -505,7 +508,7 @@ const PromotionSelector: React.FC<PromotionSelectorProps> = (props) => {
                 >
                   {couponValidation.isValid ? (
                     <span>
-                      Coupon applied! You save €{couponValidation.discount.toFixed(2)}
+                      {t('common:promotions.couponApplied', { amount: couponValidation.discount.toFixed(2) })}
                     </span>
                   ) : (
                     <span>{couponValidation.message}</span>
@@ -543,7 +546,7 @@ const PromotionSelector: React.FC<PromotionSelectorProps> = (props) => {
               disabled={isProcessing}
               className="px-6 py-2.5 bg-white border border-neutral-300 text-neutral-700 rounded-xl text-sm font-medium hover:bg-neutral-50 transition-colors mr-3 disabled:opacity-50"
             >
-              ← Back to Form
+              {t('common:promotions.backToForm')}
             </button>
           )}
           <button
@@ -551,11 +554,11 @@ const PromotionSelector: React.FC<PromotionSelectorProps> = (props) => {
             disabled={isProcessing}
             className="px-6 py-2.5 bg-white border border-neutral-300 text-neutral-700 rounded-xl text-sm font-medium hover:bg-neutral-50 transition-colors disabled:opacity-50"
           >
-            {pendingPropertyData ? 'Post Without Promotion' : 'Skip for Now'}
+            {pendingPropertyData ? t('common:promotions.postWithoutPromotion') : t('common:promotions.skipForNow')}
           </button>
           {pendingPropertyData && (
             <p className="text-xs text-neutral-500 mt-2">
-              You can promote your listing anytime from your dashboard
+              {t('common:promotions.promoteFromDashboard')}
             </p>
           )}
         </div>

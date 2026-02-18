@@ -46,7 +46,11 @@
       "location": "Локација",
       "review": "Преглед"
     },
-    "progress": "Чекор {{current}} од {{total}}",
+    "progress": {
+      "compressing": "Компресирање на слики...",
+      "uploading": "Прикачување на облак...",
+      "creating": "Креирање на оглас..."
+    },
     "nextStep": "Следен чекор",
     "previousStep": "Претходен чекор",
     "skipToManual": "Прескокни на рачен внес",
@@ -234,11 +238,6 @@
       "hint": "Залепете го embed или share URL-от од Вашиот провајдер на 360 тура. Турата ќе се прикаже како интерактивен iframe на Вашиот оглас.",
       "z360Hint": "Креирајте ја Вашата тура на z360-virtual-tour.vercel.app и залепете го линкот тука"
     },
-    "progress": {
-      "compressing": "Компресирање на слики...",
-      "uploading": "Прикачување на облак...",
-      "creating": "Креирање на оглас..."
-    },
     "promotion": {
       "title": "Промовирајте го Вашиот оглас",
       "description": "Добијте повеќе видливост и барања со промовирана позиција",
@@ -275,6 +274,13 @@
       "proReached": "Го достигнавте Вашиот Pro лимит за огласи.",
       "agentProRequired": "Агентите мора да имаат активна Pro претплата за да објавуваат огласи. Претплатете се сега за да добиете 25 активни огласи!",
       "buyerCannotCreate": "Купувачите не можат да креираат огласи за имоти. Ве молиме префрлете се на улога Приватен продавач или Агент за да креирате огласи."
+    },
+    "video": {
+      "title": "Property Video (Optional)",
+      "description": "Add a video to showcase your property! Videos auto-play when visitors view your listing, creating an engaging first impression.",
+      "label": "Video URL",
+      "placeholder": "https://youtube.com/watch?v=... or https://tiktok.com/...",
+      "hint": "Paste a link from YouTube, TikTok, Instagram Reels, or Vimeo. The video will auto-play when visitors open your listing!"
     }
   },
   "myListings": {
@@ -453,7 +459,8 @@
       "allRooms": "Фотографирајте ги сите соби",
       "exterior": "Вклучете надворешни снимки",
       "clearPhotos": "Користете јасни фотографии со висок квалитет"
-    }
+    },
+    "locationHint": "Adding location helps AI generate more accurate, location-specific descriptions"
   },
   "promotion": {
     "title": "Промовирајте го Вашиот оглас",
@@ -617,5 +624,9 @@
     "subscribeToPro": "Претплатете се на Pro",
     "viewMyListings": "Прегледај ги моите огласи",
     "switchRole": "Промени улога"
+  },
+  "listings": {
+    "confirmSold": "Are you sure you want to mark this property as sold? This action cannot be undone.",
+    "confirmDelete": "Are you sure you want to delete this listing? This action cannot be undone."
   }
 }

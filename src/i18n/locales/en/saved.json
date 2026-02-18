@@ -75,5 +75,25 @@
     "deleteFailed": "Failed to delete saved search. Please try again.",
     "enterName": "Please enter a name",
     "renameFailed": "Failed to rename saved search. Please try again."
+  },
+  "favorites": {
+    "badge": "Your Favorites Collection",
+    "heroTitle": "Your Curated",
+    "heroTitleHighlight": "Favorites Collection",
+    "heroDescription": "All your saved properties and trusted agents in one place, organized and ready to explore",
+    "stats": {
+      "properties": "Properties",
+      "agents": "Agents",
+      "countries": "Countries"
+    },
+    "tabs": {
+      "properties": "Properties",
+      "agents": "Agents"
+    },
+    "badges": {
+      "quickAccess": "Quick Access",
+      "organized": "Organized by Location",
+      "compare": "Easy Comparison"
+    }
   }
 }

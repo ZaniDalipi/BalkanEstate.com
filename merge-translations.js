@@ -3,7 +3,7 @@ const path = require('path');
 
 const localesDir = path.join(__dirname, 'src/i18n/locales');
 const enDir = path.join(localesDir, 'en');
-const targetLangs = ['sq', 'sr', 'bg'];
+const targetLangs = ['sq', 'sr', 'mk', 'bs', 'hr', 'bg', 'ro', 'el', 'me'];
 
 // Deep merge function - adds missing keys from source to target
 function deepMerge(target, source) {

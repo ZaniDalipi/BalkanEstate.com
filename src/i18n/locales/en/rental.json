@@ -141,6 +141,11 @@
     "optional": "optional",
     "message": "Message",
     "messagePlaceholder": "Any questions or preferences...",
+    "placeholders": {
+      "name": "John Doe",
+      "email": "john@example.com",
+      "phone": "+1 234 567 8900"
+    },
     "confirmDetails": "Confirm your viewing",
     "back": "Back",
     "continue": "Continue",

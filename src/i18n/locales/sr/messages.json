@@ -34,7 +34,8 @@
     "imageFailedToLoad": "Slika nije učitana.",
     "failedToUploadImage": "Slanje slike nije uspelo. Pokušajte ponovo.",
     "failedToSendMessage": "Slanje poruke nije uspelo. Pokušajte ponovo.",
-    "failedToDeleteConversation": "Brisanje razgovora nije uspelo. Pokušajte ponovo."
+    "failedToDeleteConversation": "Brisanje razgovora nije uspelo. Pokušajte ponovo.",
+    "allConversations": "All Conversations"
   },
   "quickReplies": {
     "scheduleTour": "Zakaži Obilazak",

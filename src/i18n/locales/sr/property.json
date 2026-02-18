@@ -215,7 +215,9 @@
   "virtualTour": {
     "title": "360° Виртуелна Тура",
     "description": "Истражите ову некретнину у имерзивном 360°",
-    "openInNewTab": "Отвори у новом табу за потпуно искуство"
+    "openInNewTab": "Отвори у новом табу за потпуно искуство",
+    "failedToLoad": "Failed to load virtual tour",
+    "loading": "Loading virtual tour..."
   },
   "featuredAgencies": "Истакнуте Агенције",
   "status": {
@@ -331,7 +333,9 @@
         "highlight": "ИСТАКНУТО",
         "featured": "ИЗДВОЈЕНО",
         "standard": "ПРОМОВИСАНО"
-      }
+      },
+      "promotedCount_one": "{{count}} promoted listing",
+      "promotedCount_other": "{{count}} promoted listings"
     },
     "heatMapLegend": "Густина Некретнина",
     "low": "Ниска",
@@ -362,7 +366,10 @@
       "pool": "Базен",
       "view": "Поглед",
       "other": "Остало"
-    }
+    },
+    "images": "photos",
+    "view": "View",
+    "tapToView": "Tap to view in gallery"
   },
   "mapLink": {
     "title": "Погледај на Мапи",
@@ -451,5 +458,16 @@
     "highlighted": "Издвојене Некретнине",
     "highlightedCount": "premium огласи",
     "moreListings": "Више Огласа"
+  },
+  "gallery": {
+    "mute": "Mute",
+    "unmute": "Unmute",
+    "fullscreen": "Fullscreen",
+    "exitFullscreen": "Exit fullscreen",
+    "enterFullscreen": "Enter fullscreen",
+    "propertyShowcase": "Property Showcase",
+    "skipVideo": "Skip Video",
+    "videoTour": "Video Tour",
+    "enter3DTour": "Enter 3D Tour"
   }
 }

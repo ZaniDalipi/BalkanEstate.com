@@ -215,7 +215,9 @@
   "virtualTour": {
     "title": "Tur Virtual 360°",
     "description": "Explorează această proprietate în 360° imersiv",
-    "openInNewTab": "Deschide într-o fereastră nouă pentru experiența completă"
+    "openInNewTab": "Deschide într-o fereastră nouă pentru experiența completă",
+    "failedToLoad": "Failed to load virtual tour",
+    "loading": "Loading virtual tour..."
   },
   "featuredAgencies": "Agenții Recomandate",
   "status": {
@@ -311,7 +313,9 @@
         "highlight": "EVIDENȚIAT",
         "featured": "RECOMANDAT",
         "standard": "PROMOVAT"
-      }
+      },
+      "promotedCount_one": "{{count}} promoted listing",
+      "promotedCount_other": "{{count}} promoted listings"
     },
     "agentRecommendations": {
       "premium": {
@@ -362,7 +366,10 @@
       "pool": "Piscină",
       "view": "Vedere",
       "other": "Altele"
-    }
+    },
+    "images": "photos",
+    "view": "View",
+    "tapToView": "Tap to view in gallery"
   },
   "mapLink": {
     "title": "Vezi pe Hartă",
@@ -451,5 +458,16 @@
     "highlighted": "Proprietăți Recomandate",
     "highlightedCount": "anunțuri premium",
     "moreListings": "Mai Multe Anunțuri"
+  },
+  "gallery": {
+    "mute": "Mute",
+    "unmute": "Unmute",
+    "fullscreen": "Fullscreen",
+    "exitFullscreen": "Exit fullscreen",
+    "enterFullscreen": "Enter fullscreen",
+    "propertyShowcase": "Property Showcase",
+    "skipVideo": "Skip Video",
+    "videoTour": "Video Tour",
+    "enter3DTour": "Enter 3D Tour"
   }
 }

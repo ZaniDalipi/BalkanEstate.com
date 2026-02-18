@@ -163,7 +163,10 @@
     "tourUrlPlaceholder": "Unesite YouTube ili Vimeo URL",
     "virtualTour360": "360° Virtuelna Tura URL",
     "virtualTour360Placeholder": "Unesite Z360, Matterport, Kuula, ili drugi 360 tura URL",
-    "z360Hint": "Kreirajte ture na z360-virtual-tour.vercel.app"
+    "z360Hint": "Kreirajte ture na z360-virtual-tour.vercel.app",
+    "openZ360": "Open Z360",
+    "tourPreview": "360° Tour Preview",
+    "openInNewTab": "Open in new tab"
   },
   "floorplan": {
     "title": "Osnova",

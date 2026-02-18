@@ -2,6 +2,7 @@
 // Provides loading states for code-split components
 
 import React, { ReactNode, Suspense as ReactSuspense } from 'react';
+import { useTranslation } from 'react-i18next';
 
 interface SuspenseProps {
   children: ReactNode;
@@ -30,11 +31,12 @@ export function Suspense({ children, fallback }: SuspenseProps) {
  * Default loading UI for Suspense
  */
 function DefaultSuspenseFallback() {
+  const { t } = useTranslation('common');
   return (
     <div className="flex items-center justify-center min-h-screen">
       <div className="text-center">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
-        <p className="text-gray-600">Loading...</p>
+        <p className="text-gray-600">{t('loading')}</p>
       </div>
     </div>
   );
@@ -44,11 +46,12 @@ function DefaultSuspenseFallback() {
  * Page-level loading UI
  */
 export function PageLoader() {
+  const { t } = useTranslation('common');
   return (
     <div className="flex items-center justify-center min-h-screen">
       <div className="text-center">
         <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-primary mx-auto mb-4"></div>
-        <p className="text-gray-700 text-lg">Loading page...</p>
+        <p className="text-gray-700 text-lg">{t('loadingPage')}</p>
       </div>
     </div>
   );
@@ -58,11 +61,12 @@ export function PageLoader() {
  * Feature-level loading UI (smaller)
  */
 export function FeatureLoader() {
+  const { t } = useTranslation('common');
   return (
     <div className="flex items-center justify-center min-h-[400px]">
       <div className="text-center">
         <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-primary mx-auto mb-3"></div>
-        <p className="text-gray-600">Loading...</p>
+        <p className="text-gray-600">{t('loading')}</p>
       </div>
     </div>
   );

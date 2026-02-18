@@ -350,7 +350,7 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
                     }
                   }}
                   className="absolute top-3 right-3 z-20 flex items-center justify-center w-10 h-10 bg-black/60 backdrop-blur-sm text-white rounded-full hover:bg-black/80 transition-colors"
-                  title={isMuted ? 'Unmute' : 'Mute'}
+                  title={isMuted ? t('property:gallery.unmute') : t('property:gallery.mute')}
                 >
                   {isMuted ? (
                     <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -433,7 +433,7 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
             <button
               onClick={() => setIsFullscreen(!isFullscreen)}
               className="absolute top-4 right-4 bg-white/90 backdrop-blur-sm p-3 rounded-full shadow-lg hover:bg-white transition-colors z-10 md:hidden"
-              title={isFullscreen ? 'Exit fullscreen' : 'Fullscreen'}
+              title={isFullscreen ? t('property:gallery.exitFullscreen') : t('property:gallery.fullscreen')}
             >
               {isFullscreen ? (
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">

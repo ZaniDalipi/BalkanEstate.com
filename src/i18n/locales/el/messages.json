@@ -34,7 +34,8 @@
     "imageFailedToLoad": "Η εικόνα απέτυχε να φορτώσει.",
     "failedToUploadImage": "Η μεταφόρτωση εικόνας απέτυχε. Παρακαλώ δοκιμάστε ξανά.",
     "failedToSendMessage": "Η αποστολή μηνύματος απέτυχε. Παρακαλώ δοκιμάστε ξανά.",
-    "failedToDeleteConversation": "Η διαγραφή συνομιλίας απέτυχε. Παρακαλώ δοκιμάστε ξανά."
+    "failedToDeleteConversation": "Η διαγραφή συνομιλίας απέτυχε. Παρακαλώ δοκιμάστε ξανά.",
+    "allConversations": "All Conversations"
   },
   "quickReplies": {
     "scheduleTour": "Προγραμματισμός Επίσκεψης",

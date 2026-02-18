@@ -2,6 +2,7 @@
 // Prevents entire app from crashing on component errors
 
 import React, { Component, ErrorInfo, ReactNode } from 'react';
+import { useTranslation } from 'react-i18next';
 import { captureError, addBreadcrumb } from '@/src/lib/sentry';
 
 interface Props {
@@ -120,6 +121,7 @@ interface FallbackProps {
  * Default error fallback UI
  */
 function ErrorFallback({ error, errorInfo, onReset, level = 'app' }: FallbackProps) {
+  const { t } = useTranslation('common');
   const isAppLevel = level === 'app';
   const isRouteLevel = level === 'route';
 
@@ -147,14 +149,14 @@ function ErrorFallback({ error, errorInfo, onReset, level = 'app' }: FallbackPro
 
         {/* Title */}
         <h1 className="text-2xl font-bold text-gray-900 text-center mb-2">
-          {isAppLevel ? 'Something went wrong' : 'Error loading content'}
+          {isAppLevel ? t('errorBoundary.appTitle') : t('errorBoundary.routeTitle')}
         </h1>
 
         {/* Description */}
         <p className="text-gray-600 text-center mb-6">
           {isAppLevel
-            ? "We're sorry, but something unexpected happened. Please try refreshing the page."
-            : 'We encountered an error loading this section. Please try again.'}
+            ? t('errorBoundary.appDescription')
+            : t('errorBoundary.routeDescription')}
         </p>
 
         {/* Error details (development only) */}
@@ -162,16 +164,16 @@ function ErrorFallback({ error, errorInfo, onReset, level = 'app' }: FallbackPro
           <div className="mb-6">
             <details className="bg-gray-100 rounded p-4">
               <summary className="cursor-pointer font-semibold text-gray-700 mb-2">
-                Error Details (Dev Only)
+                {t('errorBoundary.devErrorDetails')}
               </summary>
               <div className="mt-2 space-y-2">
                 <div>
-                  <p className="text-sm font-semibold text-gray-700">Error:</p>
+                  <p className="text-sm font-semibold text-gray-700">{t('errorBoundary.errorLabel')}</p>
                   <p className="text-sm text-red-600 font-mono">{error.message}</p>
                 </div>
                 {error.stack && (
                   <div>
-                    <p className="text-sm font-semibold text-gray-700">Stack Trace:</p>
+                    <p className="text-sm font-semibold text-gray-700">{t('errorBoundary.stackTrace')}</p>
                     <pre className="text-xs text-gray-600 overflow-auto max-h-40 mt-1">
                       {error.stack}
                     </pre>
@@ -179,7 +181,7 @@ function ErrorFallback({ error, errorInfo, onReset, level = 'app' }: FallbackPro
                 )}
                 {errorInfo?.componentStack && (
                   <div>
-                    <p className="text-sm font-semibold text-gray-700">Component Stack:</p>
+                    <p className="text-sm font-semibold text-gray-700">{t('errorBoundary.componentStack')}</p>
                     <pre className="text-xs text-gray-600 overflow-auto max-h-40 mt-1">
                       {errorInfo.componentStack}
                     </pre>
@@ -197,7 +199,7 @@ function ErrorFallback({ error, errorInfo, onReset, level = 'app' }: FallbackPro
               onClick={onReset}
               className="flex-1 bg-primary text-white py-2 px-4 rounded-lg hover:bg-primary-dark transition-colors"
             >
-              Try Again
+              {t('errorBoundary.tryAgain')}
             </button>
           )}
           <button
@@ -208,14 +210,14 @@ function ErrorFallback({ error, errorInfo, onReset, level = 'app' }: FallbackPro
                 : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
             } py-2 px-4 rounded-lg transition-colors`}
           >
-            Refresh Page
+            {t('errorBoundary.refreshPage')}
           </button>
         </div>
 
         {/* Help text */}
         {isAppLevel && (
           <p className="text-sm text-gray-500 text-center mt-6">
-            If this problem persists, please contact support.
+            {t('errorBoundary.persistMessage')}
           </p>
         )}
       </div>

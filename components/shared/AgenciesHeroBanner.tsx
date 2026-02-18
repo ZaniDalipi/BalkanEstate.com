@@ -77,7 +77,7 @@ const AgenciesHeroBanner: React.FC<AgenciesHeroBannerProps> = ({
             <div className="inline-flex items-center gap-2 px-4 py-2 bg-white/10 backdrop-blur-md rounded-full border border-white/20">
               <SparklesIcon className="w-4 h-4 text-amber-400" />
               <span className="text-white/90 font-semibold text-sm uppercase tracking-wider">
-                {t('agencies.badge', 'Premium Real Estate Network')}
+                {t('agencies.badge')}
               </span>
               <SparklesIcon className="w-4 h-4 text-amber-400" />
             </div>
@@ -86,13 +86,13 @@ const AgenciesHeroBanner: React.FC<AgenciesHeroBannerProps> = ({
           {/* Main heading */}
           <div className="text-center mb-8 sm:mb-10">
             <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-black text-white mb-4 sm:mb-6 leading-tight">
-              {t('agencies.heroTitle', 'Discover Top Real Estate')}
+              {t('agencies.heroTitle')}
               <span className="block mt-2 bg-gradient-to-r from-blue-400 via-violet-400 to-purple-400 bg-clip-text text-transparent">
-                {t('agencies.heroTitleHighlight', 'Agencies in the Balkans')}
+                {t('agencies.heroTitleHighlight')}
               </span>
             </h1>
             <p className="text-base sm:text-lg lg:text-xl text-white/70 max-w-3xl mx-auto leading-relaxed">
-              {t('agencies.heroSubtitle', 'Connect with verified professional agencies and find your perfect property partner')}
+              {t('agencies.heroSubtitle')}
             </p>
           </div>
 
@@ -106,7 +106,7 @@ const AgenciesHeroBanner: React.FC<AgenciesHeroBannerProps> = ({
                 </div>
                 <div className="text-2xl sm:text-3xl lg:text-4xl font-black text-white mb-1">{totalAgencies}</div>
                 <div className="text-[10px] sm:text-xs lg:text-sm text-white/60 font-medium uppercase tracking-wide">
-                  {t('agencies.professionalAgencies', 'Agencies')}
+                  {t('agencies.professionalAgencies')}
                 </div>
               </div>
             </div>
@@ -119,7 +119,7 @@ const AgenciesHeroBanner: React.FC<AgenciesHeroBannerProps> = ({
                 </div>
                 <div className="text-2xl sm:text-3xl lg:text-4xl font-black text-white mb-1">{totalAgents}</div>
                 <div className="text-[10px] sm:text-xs lg:text-sm text-white/60 font-medium uppercase tracking-wide">
-                  {t('agencies.expertAgents', 'Expert Agents')}
+                  {t('agencies.expertAgents')}
                 </div>
               </div>
             </div>
@@ -132,7 +132,7 @@ const AgenciesHeroBanner: React.FC<AgenciesHeroBannerProps> = ({
                 </div>
                 <div className="text-2xl sm:text-3xl lg:text-4xl font-black text-white mb-1">{totalProperties.toLocaleString()}</div>
                 <div className="text-[10px] sm:text-xs lg:text-sm text-white/60 font-medium uppercase tracking-wide">
-                  {t('agencies.listedProperties', 'Properties')}
+                  {t('agencies.listedProperties')}
                 </div>
               </div>
             </div>
@@ -143,10 +143,10 @@ const AgenciesHeroBanner: React.FC<AgenciesHeroBannerProps> = ({
             <div className="relative bg-white/10 backdrop-blur-xl rounded-2xl sm:rounded-3xl p-4 sm:p-6 border border-white/20 shadow-2xl">
               <div className="text-center mb-4">
                 <h2 className="text-lg sm:text-xl font-bold text-white mb-1">
-                  {t('agencies.findIdealAgency', 'Find Your Ideal Agency')}
+                  {t('agencies.findIdealAgency')}
                 </h2>
                 <p className="text-white/60 text-xs sm:text-sm">
-                  {t('agencies.searchAgencies', 'Search by name, city, or specialty', { count: totalAgencies })}
+                  {t('agencies.searchAgencies', { count: totalAgencies })}
                 </p>
               </div>
 
@@ -160,21 +160,21 @@ const AgenciesHeroBanner: React.FC<AgenciesHeroBannerProps> = ({
                   value={searchQuery}
                   onChange={(e) => onSearchChange(e.target.value)}
                   onKeyDown={(e) => e.key === 'Enter' && onSearch()}
-                  placeholder={t('agencies.universalSearchPlaceholder', 'Search agencies...')}
+                  placeholder={t('agencies.universalSearchPlaceholder')}
                   className="w-full pl-10 sm:pl-12 pr-24 sm:pr-28 py-3 sm:py-4 bg-white/10 border border-white/20 rounded-xl sm:rounded-2xl text-white placeholder-white/40 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/30 transition-all text-sm sm:text-base"
                 />
                 <button
                   onClick={onSearch}
                   className="absolute right-2 top-1/2 -translate-y-1/2 px-4 sm:px-6 py-2 sm:py-2.5 bg-gradient-to-r from-primary to-blue-600 hover:from-primary-dark hover:to-blue-700 text-white font-bold rounded-lg sm:rounded-xl text-xs sm:text-sm transition-all hover:shadow-lg active:scale-95"
                 >
-                  {t('agencies.search', 'Search')}
+                  {t('agencies.search')}
                 </button>
               </div>
 
               {/* Popular searches */}
               {!searchQuery && (
                 <div className="text-center">
-                  <p className="text-white/50 text-xs mb-2">{t('agencies.popularSearches', 'Popular:')}</p>
+                  <p className="text-white/50 text-xs mb-2">{t('agencies.popularSearches')}</p>
                   <div className="flex flex-wrap justify-center gap-2">
                     {popularSearches.slice(0, 5).map((term) => (
                       <button
@@ -195,17 +195,17 @@ const AgenciesHeroBanner: React.FC<AgenciesHeroBannerProps> = ({
           <div className="flex flex-wrap items-center justify-center gap-4 sm:gap-6 mt-8 sm:mt-10">
             <div className="flex items-center gap-2 text-white/50">
               <ShieldCheckIcon className="w-4 h-4 sm:w-5 sm:h-5 text-emerald-400" />
-              <span className="text-xs sm:text-sm font-medium">{t('agencies.verifiedAgencies', 'Verified Agencies')}</span>
+              <span className="text-xs sm:text-sm font-medium">{t('agencies.verifiedAgencies')}</span>
             </div>
             <div className="hidden sm:block w-1 h-1 bg-white/30 rounded-full" />
             <div className="flex items-center gap-2 text-white/50">
               <TrophyIcon className="w-4 h-4 sm:w-5 sm:h-5 text-amber-400" />
-              <span className="text-xs sm:text-sm font-medium">{t('agencies.topRated', 'Top Rated')}</span>
+              <span className="text-xs sm:text-sm font-medium">{t('agencies.topRated')}</span>
             </div>
             <div className="hidden sm:block w-1 h-1 bg-white/30 rounded-full" />
             <div className="flex items-center gap-2 text-white/50">
               <StarIcon className="w-4 h-4 sm:w-5 sm:h-5 text-yellow-400" />
-              <span className="text-xs sm:text-sm font-medium">{t('agencies.premiumSupport', 'Premium Support')}</span>
+              <span className="text-xs sm:text-sm font-medium">{t('agencies.premiumSupport')}</span>
             </div>
           </div>
         </div>

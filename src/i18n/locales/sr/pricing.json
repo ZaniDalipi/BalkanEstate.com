@@ -228,7 +228,8 @@
       "priorityInSearch": "Prioritet u rezultatima pretrage",
       "homepageCarousel": "Karusel agencija na početnoj stranici",
       "featuredBadge": "Značka istaknuto na profilu",
-      "boostedVisibility": "Pojačana vidljivost svuda (3x)"
+      "boostedVisibility": "Pojačana vidljivost svuda (3x)",
+      "mapMarker": "Agency marker on property map"
     },
     "mapMarker": {
       "title": "Oznaka na mapi",
@@ -249,7 +250,10 @@
     "needAgencyDescription": "Pretplatite se na naš Enterprise plan da kreirate svoju agenciju i otključate ove funkcije.",
     "viewEnterprise": "Pogledajte Enterprise plan",
     "comingSoon": "Uskoro",
-    "featureComingSoon": "Isticanje agencije biće uskoro dostupno!"
+    "featureComingSoon": "Isticanje agencije biće uskoro dostupno!",
+    "oneWeek": "1 WEEK",
+    "perWeek": "per week",
+    "showsEverywhere": "Shows everywhere!"
   },
   "contact": {
     "haveQuestions": "Imate pitanja?",
@@ -264,5 +268,10 @@
     "privacyPolicy": "Politika privatnosti",
     "refundPolicy": "Politika povrata",
     "providerNote": "Plaćanja obrađuje LemonSqueezy kao trgovac. PDV/porezi uključeni gde je primenljivo."
+  },
+  "duration": {
+    "7days": "7 days",
+    "30days": "30 days",
+    "90days": "90 days"
   }
 }

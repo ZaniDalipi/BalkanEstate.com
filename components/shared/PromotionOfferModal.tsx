@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import Modal from './Modal';
 import PaymentWindow from './PaymentWindow';
 import { SparklesIcon, BoltIcon, ChartBarIcon } from '../../constants';
@@ -26,6 +27,7 @@ const PromotionOfferModal: React.FC<PromotionOfferModalProps> = ({
     property,
     onPromotionComplete
 }) => {
+    const { t } = useTranslation(['common']);
     const { state, dispatch } = useAppContext();
     const { currentUser } = state;
     const [showPaymentWindow, setShowPaymentWindow] = useState(false);
@@ -88,10 +90,10 @@ const PromotionOfferModal: React.FC<PromotionOfferModalProps> = ({
                     onClose();
                 } else {
                     const data = await response.json();
-                    throw new Error(data.message || 'Failed to activate promotion');
+                    throw new Error(data.message || t('common:promotions.failedToActivate'));
                 }
             } catch (error: any) {
-                setPaymentErrorMessage(`Payment was successful but failed to activate promotion: ${error.message}. Please contact support.`);
+                setPaymentErrorMessage(t('common:promotions.paymentSuccessActivationFailed', { error: error.message }));
                 setShowPaymentError(true);
             }
         }
@@ -121,7 +123,7 @@ const PromotionOfferModal: React.FC<PromotionOfferModalProps> = ({
     // Show payment error view
     if (showPaymentError) {
         return (
-            <Modal isOpen={isOpen} onClose={handleSkipPromotion} title="Payment Issue">
+            <Modal isOpen={isOpen} onClose={handleSkipPromotion} title={t('common:promotions.paymentIssueTitle')}>
                 <div className="p-6 text-center">
                     <div className="w-16 h-16 mx-auto mb-4 bg-amber-100 rounded-full flex items-center justify-center">
                         <svg className="w-8 h-8 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -129,18 +131,18 @@ const PromotionOfferModal: React.FC<PromotionOfferModalProps> = ({
                         </svg>
                     </div>
 
-                    <h3 className="text-xl font-bold text-neutral-800 mb-2">Something Went Wrong</h3>
+                    <h3 className="text-xl font-bold text-neutral-800 mb-2">{t('common:promotions.somethingWentWrong')}</h3>
                     <p className="text-neutral-600 mb-4">
-                        {paymentErrorMessage || 'There was an issue processing your payment.'}
+                        {paymentErrorMessage || t('common:promotions.paymentProcessingIssue')}
                     </p>
 
                     <div className="bg-green-50 border border-green-200 rounded-lg p-4 mb-6">
                         <div className="flex items-center gap-2 text-green-800">
                             <TickIcon />
-                            <span className="font-semibold">Good news! Your listing was published successfully.</span>
+                            <span className="font-semibold">{t('common:promotions.listingPublishedGoodNews')}</span>
                         </div>
                         <p className="text-sm text-green-700 mt-2">
-                            Your property is now live and visible to potential buyers. You can promote it anytime from your dashboard.
+                            {t('common:promotions.listingLivePromoteLater')}
                         </p>
                     </div>
 
@@ -152,18 +154,18 @@ const PromotionOfferModal: React.FC<PromotionOfferModalProps> = ({
                             }}
                             className="flex-1 px-6 py-3 bg-primary text-white font-bold rounded-lg hover:bg-primary-dark transition-colors"
                         >
-                            Try Again
+                            {t('common:tryAgain')}
                         </button>
                         <button
                             onClick={handleSkipPromotion}
                             className="flex-1 px-6 py-3 border border-neutral-300 text-neutral-700 font-medium rounded-lg hover:bg-neutral-50 transition-colors"
                         >
-                            Continue Without Promotion
+                            {t('common:promotions.continueWithoutPromotion')}
                         </button>
                     </div>
 
                     <p className="text-xs text-neutral-500 mt-4">
-                        You can promote your listing at any time from your account dashboard.
+                        {t('common:promotions.promoteAnytimeFromDashboard')}
                     </p>
                 </div>
             </Modal>
@@ -177,7 +179,7 @@ const PromotionOfferModal: React.FC<PromotionOfferModalProps> = ({
                     {loading ? (
                         <div className="text-center py-8">
                             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
-                            <p className="mt-4 text-neutral-600">Loading promotion options...</p>
+                            <p className="mt-4 text-neutral-600">{t('common:promotions.loadingOptions')}</p>
                         </div>
                     ) : (
                         <>
@@ -190,8 +192,8 @@ const PromotionOfferModal: React.FC<PromotionOfferModalProps> = ({
                                         </svg>
                                     </div>
                                     <div>
-                                        <h3 className="font-bold text-green-800">Listing Published Successfully!</h3>
-                                        <p className="text-sm text-green-700">Your property is now live and visible to potential buyers.</p>
+                                        <h3 className="font-bold text-green-800">{t('common:promotions.listingPublished')}</h3>
+                                        <p className="text-sm text-green-700">{t('common:promotions.listingNowLive')}</p>
                                     </div>
                                 </div>
                             </div>
@@ -199,9 +201,9 @@ const PromotionOfferModal: React.FC<PromotionOfferModalProps> = ({
                             {/* Promotion Offer */}
                             <div className="text-center mb-6">
                                 <BoltIcon className="w-12 h-12 text-amber-500 mx-auto mb-3" />
-                                <h2 className="text-2xl font-bold text-neutral-800 mb-2">Boost Your Listing!</h2>
+                                <h2 className="text-2xl font-bold text-neutral-800 mb-2">{t('common:promotions.boostYourListing')}</h2>
                                 <p className="text-neutral-600">
-                                    Get up to <span className="font-bold text-primary">3x more views</span> with a featured promotion
+                                    {t('common:promotions.moreViewsDescription')}
                                 </p>
                             </div>
 
@@ -209,31 +211,31 @@ const PromotionOfferModal: React.FC<PromotionOfferModalProps> = ({
                             <div className="border-2 border-amber-300 bg-gradient-to-br from-amber-50 to-orange-50 rounded-xl p-6 mb-6">
                                 <div className="flex items-center justify-between mb-4">
                                     <div>
-                                        <h3 className="text-xl font-bold text-neutral-800">15-Day Featured Promotion</h3>
-                                        <p className="text-neutral-600">Stand out from the competition</p>
+                                        <h3 className="text-xl font-bold text-neutral-800">{t('common:promotions.fifteenDayPromotion')}</h3>
+                                        <p className="text-neutral-600">{t('common:promotions.standOutFromCompetition')}</p>
                                     </div>
                                     <div className="text-right">
-                                        <span className="text-3xl font-extrabold text-amber-600">€{promotionPrice}</span>
-                                        <span className="text-neutral-600 ml-1 block text-sm">(one-time)</span>
+                                        <span className="text-3xl font-extrabold text-amber-600">{t('common:currency')}{ promotionPrice}</span>
+                                        <span className="text-neutral-600 ml-1 block text-sm">{t('common:promotions.oneTime')}</span>
                                     </div>
                                 </div>
 
                                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-4">
                                     <div className="flex items-center">
                                         <TickIcon />
-                                        <span className="text-sm text-neutral-700">Featured badge on listing</span>
+                                        <span className="text-sm text-neutral-700">{t('common:promotions.features.featuredBadge')}</span>
                                     </div>
                                     <div className="flex items-center">
                                         <TickIcon />
-                                        <span className="text-sm text-neutral-700">Top placement in search</span>
+                                        <span className="text-sm text-neutral-700">{t('common:promotions.features.topPlacement')}</span>
                                     </div>
                                     <div className="flex items-center">
                                         <TickIcon />
-                                        <span className="text-sm text-neutral-700">Homepage carousel exposure</span>
+                                        <span className="text-sm text-neutral-700">{t('common:promotions.features.homepageCarousel')}</span>
                                     </div>
                                     <div className="flex items-center">
                                         <TickIcon />
-                                        <span className="text-sm text-neutral-700">Priority in buyer alerts</span>
+                                        <span className="text-sm text-neutral-700">{t('common:promotions.features.priorityAlerts')}</span>
                                     </div>
                                 </div>
 
@@ -242,7 +244,7 @@ const PromotionOfferModal: React.FC<PromotionOfferModalProps> = ({
                                     className="w-full py-3 bg-amber-500 text-white font-bold rounded-lg hover:bg-amber-600 transition-colors flex items-center justify-center gap-2"
                                 >
                                     <SparklesIcon className="w-5 h-5" />
-                                    Promote Now for €{promotionPrice}
+                                    {t('common:promotions.promoteNowForPrice', { price: promotionPrice })}
                                 </button>
                             </div>
 
@@ -250,22 +252,22 @@ const PromotionOfferModal: React.FC<PromotionOfferModalProps> = ({
                             <div className="grid grid-cols-3 gap-4 mb-6">
                                 <div className="text-center p-3 bg-neutral-50 rounded-lg">
                                     <ChartBarIcon className="w-6 h-6 text-primary mx-auto mb-1" />
-                                    <span className="block text-lg font-bold text-neutral-800">3x</span>
-                                    <span className="text-xs text-neutral-600">More Views</span>
+                                    <span className="block text-lg font-bold text-neutral-800">{t('common:promotions.benefitStats.viewsMultiplier')}</span>
+                                    <span className="text-xs text-neutral-600">{t('common:promotions.benefitStats.moreViews')}</span>
                                 </div>
                                 <div className="text-center p-3 bg-neutral-50 rounded-lg">
                                     <svg className="w-6 h-6 text-green-500 mx-auto mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
                                     </svg>
-                                    <span className="block text-lg font-bold text-neutral-800">2x</span>
-                                    <span className="text-xs text-neutral-600">More Inquiries</span>
+                                    <span className="block text-lg font-bold text-neutral-800">{t('common:promotions.benefitStats.inquiriesMultiplier')}</span>
+                                    <span className="text-xs text-neutral-600">{t('common:promotions.benefitStats.moreInquiries')}</span>
                                 </div>
                                 <div className="text-center p-3 bg-neutral-50 rounded-lg">
                                     <svg className="w-6 h-6 text-amber-500 mx-auto mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                                     </svg>
-                                    <span className="block text-lg font-bold text-neutral-800">40%</span>
-                                    <span className="text-xs text-neutral-600">Faster Sale</span>
+                                    <span className="block text-lg font-bold text-neutral-800">{t('common:promotions.benefitStats.fasterSalePercent')}</span>
+                                    <span className="text-xs text-neutral-600">{t('common:promotions.benefitStats.fasterSale')}</span>
                                 </div>
                             </div>
 
@@ -275,10 +277,10 @@ const PromotionOfferModal: React.FC<PromotionOfferModalProps> = ({
                                     onClick={handleSkipPromotion}
                                     className="text-neutral-500 hover:text-neutral-700 underline text-sm"
                                 >
-                                    No thanks, continue without promotion
+                                    {t('common:promotions.noThanks')}
                                 </button>
                                 <p className="text-xs text-neutral-400 mt-2">
-                                    You can promote your listing anytime from your dashboard
+                                    {t('common:promotions.promoteAnytimeFromDashboard')}
                                 </p>
                             </div>
                         </>

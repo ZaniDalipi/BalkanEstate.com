@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
+import { useTranslation } from 'react-i18next';
 import { cn } from '@/lib/utils';
 import { AppleHelloEnglishEffect } from '@/src/components/ui/apple-hello-effect';
 
@@ -98,6 +99,7 @@ interface BrandRevealProps {
 }
 
 const BrandReveal: React.FC<BrandRevealProps> = ({ onComplete }) => {
+  const { t } = useTranslation(['common']);
   const [showAI, setShowAI] = useState(false);
   const [showTagline, setShowTagline] = useState(false);
 
@@ -170,7 +172,7 @@ const BrandReveal: React.FC<BrandRevealProps> = ({ onComplete }) => {
         className="mt-4 sm:mt-5 md:mt-6 text-xs sm:text-sm md:text-base text-neutral-400 font-light tracking-wide"
         onAnimationComplete={() => { if (showTagline && onComplete) onComplete(); }}
       >
-        AI-powered property search across the Balkans
+        {t('common:splash.tagline')}
       </motion.p>
     </div>
   );

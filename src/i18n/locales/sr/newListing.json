@@ -162,7 +162,11 @@
     "tourUrl": "URL Видео Туре",
     "tourUrlPlaceholder": "Унесите YouTube или Vimeo URL",
     "virtualTour360": "URL 360° Виртуелне Туре",
-    "virtualTour360Placeholder": "Унесите Matterport, Kuula или други 360 URL туре"
+    "virtualTour360Placeholder": "Унесите Matterport, Kuula или други 360 URL туре",
+    "z360Hint": "Create tours at z360-virtual-tour.vercel.app",
+    "openZ360": "Open Z360",
+    "tourPreview": "360° Tour Preview",
+    "openInNewTab": "Open in new tab"
   },
   "floorplan": {
     "title": "План Етаже",
@@ -208,12 +212,19 @@
     "goBack": "Врати се Назад"
   },
   "validation": {
-    "required": "Ово поље је обавезно",
-    "minImages": "Молимо отпремите најмање {count} слика",
-    "selectCountry": "Молимо изаберите државу",
-    "selectCity": "Молимо изаберите град",
-    "setLocation": "Молимо поставите локацију некретнине на мапи",
-    "invalidPrice": "Молимо унесите важећу цену"
+    "imagesRequired": "Молимо отпремите најмање једну слику.",
+    "selectCountryCity": "Молимо изаберите државу и град.",
+    "selectValidCity": "Молимо изаберите важећи град.",
+    "apartmentFloorNumber": "За станове, молимо унесите важећи број спрата (1 или више).",
+    "houseTotalFloors": "За куће и виле, молимо унесите укупан број спратова (1 или више).",
+    "apartmentElevator": "За станове, молимо наведите да ли постоји лифт (Да или Не).",
+    "floorExceedsTotal": "Број спрата не може бити већи од укупног броја спратова.",
+    "required": "This field is required",
+    "minImages": "Please upload at least {{count}} images",
+    "selectCountry": "Please select a country",
+    "selectCity": "Please select a city",
+    "setLocation": "Please set the property location on the map",
+    "invalidPrice": "Please enter a valid price"
   },
   "success": {
     "title": "Оглас Објављен!",
@@ -238,14 +249,5 @@
     "removeImagesFirst": "Молимо уклоните неке слике пре додавања нових.",
     "onlyMoreImages": "Може се додати само још {{count}} слика.",
     "publishFailed": "Објављивање огласа није успело. Молимо покушајте поново."
-  },
-  "validation": {
-    "imagesRequired": "Молимо отпремите најмање једну слику.",
-    "selectCountryCity": "Молимо изаберите државу и град.",
-    "selectValidCity": "Молимо изаберите важећи град.",
-    "apartmentFloorNumber": "За станове, молимо унесите важећи број спрата (1 или више).",
-    "houseTotalFloors": "За куће и виле, молимо унесите укупан број спратова (1 или више).",
-    "apartmentElevator": "За станове, молимо наведите да ли постоји лифт (Да или Не).",
-    "floorExceedsTotal": "Број спрата не може бити већи од укупног броја спратова."
   }
 }

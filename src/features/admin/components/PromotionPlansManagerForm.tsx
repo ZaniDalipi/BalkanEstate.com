@@ -56,7 +56,7 @@ export const PlanCard: React.FC<{
                 <h3 className="font-bold text-white text-lg">{plan.name}</h3>
                 {plan.isAddOn && (
                   <span className="px-2 py-0.5 bg-white/30 text-white text-xs font-bold rounded-full">
-                    Add-on
+                    {t('admin:promotionPlans.addOn', 'Add-on')}
                   </span>
                 )}
               </div>
@@ -87,22 +87,22 @@ export const PlanCard: React.FC<{
         {/* Agency Featured shows only weekly price, listing plans show all durations */}
         {plan.category === 'agency' ? (
           <div className="mt-3 text-center p-3 bg-gradient-to-r from-amber-50 to-orange-50 rounded-lg border border-amber-200">
-            <div className="text-xs text-amber-600 font-medium">per week</div>
+            <div className="text-xs text-amber-600 font-medium">{t('admin:promotionPlans.perWeek', 'per week')}</div>
             <div className="text-3xl font-bold text-amber-600">&euro;{plan.pricing.duration7 || 0}</div>
-            <div className="text-xs text-gray-500 mt-1">Featured everywhere on platform</div>
+            <div className="text-xs text-gray-500 mt-1">{t('admin:promotionPlans.featuredEverywhere', 'Featured everywhere on platform')}</div>
           </div>
         ) : (
           <div className="grid grid-cols-3 gap-2 mt-3">
             <div className="text-center p-2 bg-gray-50 rounded-lg">
-              <div className="text-xs text-gray-500">7 days</div>
+              <div className="text-xs text-gray-500">{t('admin:promotionPlans.sevenDays', '7 days')}</div>
               <div className="font-bold text-gray-900">&euro;{plan.pricing.duration7 || 0}</div>
             </div>
             <div className="text-center p-2 bg-gray-50 rounded-lg">
-              <div className="text-xs text-gray-500">30 days</div>
+              <div className="text-xs text-gray-500">{t('admin:promotionPlans.thirtyDays', '30 days')}</div>
               <div className="font-bold text-gray-900">&euro;{plan.pricing.duration30 || 0}</div>
             </div>
             <div className="text-center p-2 bg-gray-50 rounded-lg">
-              <div className="text-xs text-gray-500">90 days</div>
+              <div className="text-xs text-gray-500">{t('admin:promotionPlans.ninetyDays', '90 days')}</div>
               <div className="font-bold text-gray-900">&euro;{plan.pricing.duration90 || 0}</div>
             </div>
           </div>
@@ -120,7 +120,7 @@ export const PlanCard: React.FC<{
             </li>
           ))}
           {plan.features.length > 3 && (
-            <li className="text-xs text-gray-400">+{plan.features.length - 3} more features</li>
+            <li className="text-xs text-gray-400">{t('admin:promotionPlans.moreFeatures', '+{{count}} more features', { count: plan.features.length - 3 })}</li>
           )}
         </ul>
       </div>
@@ -139,7 +139,7 @@ export const PlanCard: React.FC<{
           {isMutating ? (
             <span className="flex items-center gap-1">
               <span className="w-3 h-3 border-2 border-current border-t-transparent rounded-full animate-spin" />
-              Updating...
+              {t('admin:common.updating', 'Updating...')}
             </span>
           ) : (
             plan.isActive ? t('admin:common.active', 'Active') : t('admin:common.inactive', 'Inactive')
@@ -288,7 +288,7 @@ export const EditPlanModal: React.FC<{
                   {t('admin:promotionPlans.pricing', 'Pricing')}
                   {plan.category === 'agency' && (
                     <span className="px-2 py-0.5 bg-amber-200 text-amber-700 text-xs font-bold rounded-full ml-auto">
-                      Weekly
+                      {t('admin:promotionPlans.weekly', 'Weekly')}
                     </span>
                   )}
                 </h4>
@@ -311,7 +311,7 @@ export const EditPlanModal: React.FC<{
                         placeholder="19"
                       />
                     </div>
-                    <p className="text-xs text-gray-500 mt-1">Featured Agency is a single weekly package shown everywhere on the platform</p>
+                    <p className="text-xs text-gray-500 mt-1">{t('admin:promotionPlans.weeklyPackageDesc', 'Featured Agency is a single weekly package shown everywhere on the platform')}</p>
                   </div>
                 ) : (
                   <div className="grid grid-cols-3 gap-4">
@@ -518,7 +518,7 @@ export const EditPlanModal: React.FC<{
             {isSaving ? (
               <>
                 <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
-                Saving...
+                {t('admin:common.saving', 'Saving...')}
               </>
             ) : (
               t('common:save', 'Save Changes')

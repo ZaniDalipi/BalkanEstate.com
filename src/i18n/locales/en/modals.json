@@ -66,10 +66,15 @@
     }
   },
   "listingLimit": {
-    "title": "Free Listing Limit Reached",
+    "title": "Listing Limit Reached",
     "message": "You've used all your free listings! To publish more, you'll need to subscribe.",
-    "discountOffer": "But first, play a quick game for a chance to win a big discount on your first subscription!",
-    "playForDiscount": "Play for a Discount!"
+    "messageDynamic": "You've reached your {{tierName}} tier limit of {{limit}} active listings.",
+    "draftSaved": "Don't worry! Your listing has been saved as a draft.",
+    "discountOffer": "Win up to 50% OFF!",
+    "gameDescription": "Play a quick game to win a discount on your Pro subscription. Get up to 250 listings + promotions!",
+    "playForDiscount": "Play for Discount",
+    "maybeLater": "Maybe Later",
+    "draftNote": "Your draft will be waiting for you when you come back."
   },
   "agentLicense": {
     "title": "Agent License Verification",
@@ -103,7 +108,9 @@
     "verifying": "Verifying...",
     "joining": "Joining...",
     "verifyAndBecomeAgent": "Verify & Become Agent",
-    "joinAgency": "Join Agency"
+    "joinAgency": "Join Agency",
+    "verifyFailed": "Failed to verify license. Please check your information and try again.",
+    "locationNA": "Location N/A"
   },
   "invitationCode": {
     "title": "Enter Invitation Code",
@@ -111,10 +118,31 @@
     "label": "Invitation Code",
     "placeholder": "AGY-XXXXXX-XXXXXX",
     "formatHint": "The invitation code format: AGY-XXXXXX-XXXXXX",
-    "enterCode": "Please enter an invitation code",
-    "verifyFailed": "Failed to verify invitation code",
+    "enterCode": "Please enter a code",
+    "verifyFailed": "Failed to verify code. Please try again.",
     "verifying": "Verifying...",
-    "submit": "Submit Request"
+    "submit": "Submit Request",
+    "joinTitle": "Join {{agencyName}}",
+    "joinDescription": "Enter your code to join this agency and get Pro subscription benefits.",
+    "agentCoupon": "Agent Coupon",
+    "couponShort": "Coupon",
+    "invitationCode": "Invitation Code",
+    "inviteShort": "Invite",
+    "invitationCodeLabel": "Invitation Code",
+    "agentRegistrationCode": "Agent Registration Code",
+    "keepTypingInvitation": "Keep typing... (AGY-XXXXXX-XXXXXX)",
+    "invalidFormatInvitation": "Invalid format. Expected: AGY-XXXXXX-XXXXXX",
+    "validInvitationFormat": "Valid invitation code format",
+    "keepTypingCoupon": "Keep typing... (IND-XXXXXXXX)",
+    "invalidFormatCoupon": "Invalid format. Expected: IND-XXXXXXXX",
+    "validCouponFormat": "Valid coupon code format",
+    "invalidCodeFormat": "Invalid code format",
+    "formatHintInvitation": "Format: AGY-XXXXXX-XXXXXX",
+    "formatHintCoupon": "Format: IND-XXXXXXXX",
+    "invitationCodeInfo": "The invitation code lets you request to join the agency. The admin will review your request.",
+    "couponCodeInfo": "The agent coupon gives you instant Pro subscription (25 listings/year) as part of this agency.",
+    "submitRequest": "Submit Request",
+    "redeemCoupon": "Redeem Coupon"
   },
   "imageEditor": {
     "download": "Download",

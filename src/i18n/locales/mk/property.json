@@ -215,7 +215,9 @@
   "virtualTour": {
     "title": "360° Виртуелна тура",
     "description": "Истражете ја оваа недвижност во импресивен 360°",
-    "openInNewTab": "Отворете во нов прозорец за целосно искуство"
+    "openInNewTab": "Отворете во нов прозорец за целосно искуство",
+    "failedToLoad": "Failed to load virtual tour",
+    "loading": "Loading virtual tour..."
   },
   "featuredAgencies": "Истакнати агенции",
   "status": {
@@ -331,7 +333,9 @@
         "highlight": "ИСТАКНАТО",
         "featured": "ПРЕПОРАЧАНО",
         "standard": "ПРОМОВИРАНО"
-      }
+      },
+      "promotedCount_one": "{{count}} promoted listing",
+      "promotedCount_other": "{{count}} promoted listings"
     },
     "heatMapLegend": "Густина на недвижности",
     "low": "Ниска",
@@ -362,7 +366,10 @@
       "pool": "Базен",
       "view": "Поглед",
       "other": "Друго"
-    }
+    },
+    "images": "photos",
+    "view": "View",
+    "tapToView": "Tap to view in gallery"
   },
   "mapLink": {
     "title": "Видете на мапа",
@@ -451,5 +458,16 @@
     "highlighted": "Истакнати недвижности",
     "highlightedCount": "премиум огласи",
     "moreListings": "Повеќе огласи"
+  },
+  "gallery": {
+    "mute": "Mute",
+    "unmute": "Unmute",
+    "fullscreen": "Fullscreen",
+    "exitFullscreen": "Exit fullscreen",
+    "enterFullscreen": "Enter fullscreen",
+    "propertyShowcase": "Property Showcase",
+    "skipVideo": "Skip Video",
+    "videoTour": "Video Tour",
+    "enter3DTour": "Enter 3D Tour"
   }
 }

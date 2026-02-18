@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback, useRef, useMemo, lazy, Suspense } from 'react';
+import { useTranslation } from 'react-i18next';
 // Page transitions use lightweight CSS instead of framer-motion to reduce initial bundle
 import { HelmetProvider, Helmet } from 'react-helmet-async';
 import { AppProvider, useAppContext } from './context/AppContext';
@@ -111,6 +112,7 @@ const PageLoader: React.FC = () => (
 
 const AppContent: React.FC<{ onToggleSidebar: () => void }> = ({ onToggleSidebar }) => {
   const { state, dispatch } = useAppContext();
+  const { t } = useTranslation('common');
   const [selectedAgency, setSelectedAgency] = useState<Agency | null>(null);
   const [isLoadingAgency, setIsLoadingAgency] = useState(false);
 
@@ -491,7 +493,7 @@ const AppContent: React.FC<{ onToggleSidebar: () => void }> = ({ onToggleSidebar
         <div className="flex items-center justify-center min-h-screen">
           <div className="text-center">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
-            <p className="text-gray-600">Loading agency details...</p>
+            <p className="text-gray-600">{t('common:loadingAgency')}</p>
           </div>
         </div>
       );
@@ -595,6 +597,7 @@ const AppContent: React.FC<{ onToggleSidebar: () => void }> = ({ onToggleSidebar
 
 const MainLayout: React.FC = () => {
   const { state, dispatch, updateUser, createListing } = useAppContext();
+  const { t } = useTranslation(['nav', 'common']);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
 
@@ -621,29 +624,30 @@ const MainLayout: React.FC = () => {
 
   // Map activeView to readable page title
   const pageTitle = useMemo(() => {
-    if (state.selectedAgencyId) return 'Agency';
-    if (state.selectedAgentId) return 'Agent';
-    const titles: Record<string, string> = {
-      search: 'Search',
-      rentals: 'Rentals',
-      inbox: 'Inbox',
-      account: 'My Account',
-      'saved-properties': 'Saved',
-      'saved-searches': 'Saved Searches',
-      agents: 'Agents',
-      agencies: 'Agencies',
-      pricing: 'Plans',
-      'create-listing': 'New Listing',
-      'edit-listing': 'Edit Listing',
-      'explore-cities': 'Explore',
-      'how-it-works': 'How It Works',
-      analytics: 'Analytics',
-      admin: 'Admin',
-      valuation: 'Valuation',
-      'mortgage-calculator': 'Calculator',
+    if (state.selectedAgencyId) return t('nav:pageTitles.agency');
+    if (state.selectedAgentId) return t('nav:pageTitles.agent');
+    const titleKeys: Record<string, string> = {
+      search: 'nav:pageTitles.search',
+      rentals: 'nav:pageTitles.rentals',
+      inbox: 'nav:pageTitles.inbox',
+      account: 'nav:pageTitles.account',
+      'saved-properties': 'nav:pageTitles.savedProperties',
+      'saved-searches': 'nav:pageTitles.savedSearches',
+      agents: 'nav:pageTitles.agents',
+      agencies: 'nav:pageTitles.agencies',
+      pricing: 'nav:pageTitles.pricing',
+      'create-listing': 'nav:pageTitles.createListing',
+      'edit-listing': 'nav:pageTitles.editListing',
+      'explore-cities': 'nav:pageTitles.exploreCities',
+      'how-it-works': 'nav:pageTitles.howItWorks',
+      analytics: 'nav:pageTitles.analytics',
+      admin: 'nav:pageTitles.admin',
+      valuation: 'nav:pageTitles.valuation',
+      'mortgage-calculator': 'nav:pageTitles.mortgageCalculator',
     };
-    return titles[state.activeView] || 'BalkanEstate';
-  }, [state.activeView, state.selectedAgencyId, state.selectedAgentId]);
+    const key = titleKeys[state.activeView];
+    return key ? t(key) : t('nav:pageTitles.default');
+  }, [state.activeView, state.selectedAgencyId, state.selectedAgentId, t]);
 
   const handlePWABack = useCallback(() => {
     // Clear any detail selections
@@ -713,12 +717,12 @@ const MainLayout: React.FC = () => {
                     type="button"
                     onClick={handlePWABack}
                     className="flex items-center gap-1 text-primary font-medium text-sm min-w-[44px] min-h-[44px] pl-2 pr-3 active:opacity-70 transition-opacity"
-                    aria-label="Go back"
+                    aria-label={t('common:aria.goBack')}
                   >
                     <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
                       <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
                     </svg>
-                    <span>Back</span>
+                    <span>{t('common:back')}</span>
                   </button>
 
                   {/* Center: Page title */}
@@ -734,7 +738,7 @@ const MainLayout: React.FC = () => {
                       window.history.pushState({}, '', buildLocalizedPath('/search'));
                     }}
                     className="min-w-[44px] min-h-[44px] flex items-center justify-center text-neutral-500 active:text-primary active:opacity-70 transition-opacity pr-2"
-                    aria-label="Go to home"
+                    aria-label={t('common:aria.goHome', 'Go to home')}
                   >
                     <svg className="w-[22px] h-[22px]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
                       <path strokeLinecap="round" strokeLinejoin="round" d="m2.25 12 8.954-8.955c.44-.439 1.152-.439 1.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25" />
@@ -796,16 +800,20 @@ const MainLayout: React.FC = () => {
   );
 };
 
-const FullScreenLoader: React.FC = () => (
-    <div className="w-screen h-screen flex flex-col items-center justify-center bg-neutral-50">
-        <LogoIcon className="w-16 h-16 text-primary animate-pulse" />
-        <p className="mt-4 text-neutral-600 font-semibold">Loading Balkan Estate...</p>
-    </div>
-);
+const FullScreenLoader: React.FC = () => {
+    const { t } = useTranslation('common');
+    return (
+        <div className="w-screen h-screen flex flex-col items-center justify-center bg-neutral-50">
+            <LogoIcon className="w-16 h-16 text-primary animate-pulse" />
+            <p className="mt-4 text-neutral-600 font-semibold">{t('common:splash.loading')}</p>
+        </div>
+    );
+};
 
 
 const AppWrapper: React.FC = () => {
     const { state, dispatch, checkAuthStatus, handleOAuthCallback } = useAppContext();
+    const { t } = useTranslation('common');
 
     // Show splash only on first visit or after login/register
     const hasVisited = useRef(localStorage.getItem('balkanestate_visited') === 'true');
@@ -857,8 +865,8 @@ const AppWrapper: React.FC = () => {
                     type: 'SHOW_ALERT',
                     payload: {
                         type: 'error',
-                        title: 'Authentication Failed',
-                        message: 'Authentication failed. Please try again.',
+                        title: t('common:errors.authFailed'),
+                        message: t('common:errors.authFailedMessage'),
                     },
                 });
                 return;

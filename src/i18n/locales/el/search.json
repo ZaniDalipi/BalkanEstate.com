@@ -61,7 +61,8 @@
     "floorNumber": "Αριθμός Ορόφου",
     "advancedFilters": "Προχωρημένα Φίλτρα",
     "moreFilters": "Περισσότερα Φίλτρα",
-    "lessFilters": "Λιγότερα Φίλτρα"
+    "lessFilters": "Λιγότερα Φίλτρα",
+    "anyCountry": "Any Country"
   },
   "options": {
     "any": "Οποιοδήποτε",
@@ -152,7 +153,9 @@
     "bathsDesc": "Περισσότερα Μπάνια",
     "featured": "Προτεινόμενα Πρώτα",
     "priceReduced": "Πρόσφατη Μείωση Τιμής",
-    "pricePerSqm": "Τιμή ανά m²"
+    "pricePerSqm": "Τιμή ανά m²",
+    "yearBuiltDesc": "Newest Built",
+    "yearBuiltAsc": "Oldest Built"
   },
   "results": {
     "showing": "Εμφάνιση {{count}} ακινήτων",
@@ -221,7 +224,20 @@
       "wind": "Άνεμος",
       "air": "Αέρας",
       "heat": "Καύσωνας"
-    }
+    },
+    "mapLegend": "Map Legend",
+    "nightMode": "Night Mode",
+    "dayMode": "Day Mode",
+    "heatMap": "Heat Map",
+    "showHeatMap": "Show Heat Map",
+    "hideHeatMap": "Hide Heat Map",
+    "heat": "Heat",
+    "useMyLocation": "Use My Location",
+    "geolocationNotSupported": "Geolocation is not supported by your browser.",
+    "locationPermissionDenied": "Location permission denied. Please enable location access in your browser settings.",
+    "locationUnavailable": "Location information is unavailable. Please try again.",
+    "locationTimeout": "Location request timed out. Please try again.",
+    "locationError": "An error occurred while getting your location. Please try again."
   },
   "newsletter": {
     "title": "Μείνετε Ενημερωμένοι για Νέα Ακίνητα",
@@ -256,7 +272,36 @@
     "tryDifferent": "Δοκιμάστε να περιγράψετε διαφορετικά αυτό που ψάχνετε",
     "suggestions": "Προτάσεις",
     "recentSearches": "Πρόσφατες Αναζητήσεις",
-    "clearHistory": "Εκκαθάριση Ιστορικού"
+    "clearHistory": "Εκκαθάριση Ιστορικού",
+    "voiceHint": "Try voice search",
+    "listening": "Listening",
+    "foundProperties": "{{count}} properties found",
+    "suggestion1": "Modern apartment near city center",
+    "suggestion2": "House with garden under €200k",
+    "suggestion3": "Sea view villa in Montenegro",
+    "suggestion4": "2-bedroom flat for rent",
+    "assistantTitle": "Property Assistant",
+    "assistantHint": "Ask me anything about properties — type or use your voice",
+    "tapToSpeak": "Tap to speak",
+    "speakNow": "Speak now...",
+    "stop": "Stop",
+    "speaking": "Speaking...",
+    "stopSpeaking": "Stop",
+    "replay": "Replay",
+    "muteAssistant": "Mute voice",
+    "unmuteAssistant": "Unmute voice",
+    "ready": "Ready to help",
+    "swipeDone": "{{count}} properties saved!",
+    "swipeNoneSaved": "No properties saved",
+    "swipeCheckFavorites": "Check your favorites to compare them",
+    "swipeTryAgain": "Try a different search to find your dream property",
+    "goToFavorites": "Go to Favorites",
+    "saved": "saved",
+    "swipeHint": "Swipe right to save, left to skip",
+    "backToChat": "Back to Chat",
+    "swipeTitle": "Your Matches",
+    "foundSwipe": "Found {{count}} properties! Swipe through them.",
+    "viewMatches": "View Matches"
   },
   "energyRatings": {
     "any": "Οποιαδήποτε",
@@ -334,7 +379,10 @@
     "viewComparison": "Προβολή Σύγκρισης",
     "maxProperties": "Μπορείτε να συγκρίνετε έως {{max}} ακίνητα",
     "noProperties": "Προσθέστε ακίνητα για σύγκριση",
-    "selected": "{{count}} επιλεγμένα"
+    "selected": "{{count}} επιλεγμένα",
+    "clearAll": "Clear All",
+    "selectedOfMax": "{{count}} of {{max}} selected",
+    "compareNow": "Compare Now ({{count}})"
   },
   "alerts": {
     "title": "Ειδοποιήσεις Ακινήτων",

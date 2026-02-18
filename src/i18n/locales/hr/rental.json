@@ -148,7 +148,12 @@
     "confirmRequest": "Potvrdite zahtjev",
     "requestSent": "Zahtjev za razgledavanje poslan!",
     "requestSentDesc": "Najmodavac ce uskoro potvrditi vase razgledavanje.",
-    "done": "Gotovo"
+    "done": "Gotovo",
+    "placeholders": {
+      "name": "John Doe",
+      "email": "john@example.com",
+      "phone": "+1 234 567 8900"
+    }
   },
   "status": {
     "markAsRented": "Oznaci kao iznajmljeno",
@@ -173,73 +178,239 @@
     "countries": {
       "albania": {
         "summary": "Albansko pravo najma regulirano je Gradanskim zakonikom (clanci 801-849). Ugovori dulji od 1 godine trebaju biti registrirani.",
-        "lease": ["Preporucuje se pisani ugovor; usmeni ugovori su valjani, ali ih je tesko provesti", "Najmovi dulji od 1 godine moraju biti ovjereni kod javnog biljeznika i registrirani u IPRO-u", "Ugovor treba sadrzavati iznos najamnine, uvjete placanja, trajanje i polog"],
-        "deposit": ["Obicno 1-2 mjesecne najamnine", "Mora biti vracen u roku od 30 dana od zavrsetka najma ako nema ostecenja", "Najmodavac mora dostaviti popis odbitaka ako zadrzi polog"],
-        "tenant": ["Najmodavac mora odrzavati nekretninu u useljivom stanju", "Najmoprimac ne moze biti isseljen bez sudskog naloga", "Minimalni otkazni rok od 3 mjeseca za raskid najma", "Povecanje najamnine zahtijeva obostrani dogovor ili ugovornu klauzulu"],
-        "landlord": ["Platiti porez na imovinu i naknade za odrzavanje zgrade", "Prijaviti prihod od najma poreznim tijelima (15% porez na dohodak)", "Osigurati da nekretnina zadovoljava standarde sigurnosti i useljivosti"]
+        "lease": [
+          "Preporucuje se pisani ugovor; usmeni ugovori su valjani, ali ih je tesko provesti",
+          "Najmovi dulji od 1 godine moraju biti ovjereni kod javnog biljeznika i registrirani u IPRO-u",
+          "Ugovor treba sadrzavati iznos najamnine, uvjete placanja, trajanje i polog"
+        ],
+        "deposit": [
+          "Obicno 1-2 mjesecne najamnine",
+          "Mora biti vracen u roku od 30 dana od zavrsetka najma ako nema ostecenja",
+          "Najmodavac mora dostaviti popis odbitaka ako zadrzi polog"
+        ],
+        "tenant": [
+          "Najmodavac mora odrzavati nekretninu u useljivom stanju",
+          "Najmoprimac ne moze biti isseljen bez sudskog naloga",
+          "Minimalni otkazni rok od 3 mjeseca za raskid najma",
+          "Povecanje najamnine zahtijeva obostrani dogovor ili ugovornu klauzulu"
+        ],
+        "landlord": [
+          "Platiti porez na imovinu i naknade za odrzavanje zgrade",
+          "Prijaviti prihod od najma poreznim tijelima (15% porez na dohodak)",
+          "Osigurati da nekretnina zadovoljava standarde sigurnosti i useljivosti"
+        ]
       },
       "bosnia-herzegovina": {
         "summary": "Pravo najma razlikuje se po entitetima (Federacija BiH i Republika Srpska). Pisani ugovori se strogo preporucuju.",
-        "lease": ["Pisani ugovor je potreban za pravnu zastitu", "Mora biti registriran kod lokalnog poreznog tijela", "Standardni uvjeti najma: 1 godina s mogucnoscu produljenja"],
-        "deposit": ["Obicno 1-2 mjesecne najamnine", "Uvjeti povrata trebaju biti navedeni u ugovoru"],
-        "tenant": ["Pravo na useljivu nekretninu s osnovnim komunalijama", "Iseljenje zahtijeva sudski postupak; minimalni otkazni rok od 30 dana", "Najmoprimac moze raskinuti ugovor uz otkazni rok naveden u ugovoru"],
-        "landlord": ["Registrirati ugovor o najmu kod poreznih tijela", "Platiti porez na dohodak od najma (10% pausal)", "Odrzavati strukturni integritet nekretnine"]
+        "lease": [
+          "Pisani ugovor je potreban za pravnu zastitu",
+          "Mora biti registriran kod lokalnog poreznog tijela",
+          "Standardni uvjeti najma: 1 godina s mogucnoscu produljenja"
+        ],
+        "deposit": [
+          "Obicno 1-2 mjesecne najamnine",
+          "Uvjeti povrata trebaju biti navedeni u ugovoru"
+        ],
+        "tenant": [
+          "Pravo na useljivu nekretninu s osnovnim komunalijama",
+          "Iseljenje zahtijeva sudski postupak; minimalni otkazni rok od 30 dana",
+          "Najmoprimac moze raskinuti ugovor uz otkazni rok naveden u ugovoru"
+        ],
+        "landlord": [
+          "Registrirati ugovor o najmu kod poreznih tijela",
+          "Platiti porez na dohodak od najma (10% pausal)",
+          "Odrzavati strukturni integritet nekretnine"
+        ]
       },
       "bulgaria": {
         "summary": "Bugarsko pravo najma temelji se na Zakonu o obvezama i ugovorima. Najmovi dulji od 1 godine moraju biti u pisanom obliku.",
-        "lease": ["Pisani ugovor obavezan za najmove dulje od 1 godine", "Ugovor bi trebao biti ovjeren kod javnog biljeznika radi sudske provedivosti", "Maksimalno trajanje najma: 10 godina (moze se obnoviti)"],
-        "deposit": ["Obicno 1-2 mjesecne najamnine", "Mora biti vracen na kraju najma umanjeno za opravdane odbitke"],
-        "tenant": ["Pravo na mirno uzivanje nekretnine", "Najmodavac mora dati otkazni rok od 1 mjeseca prije raskida", "Najmoprimac moze raskinuti ugovor uz pisanu obavijest od 1 mjeseca", "Povecanje najamnine ograniceno na jednom godisnje"],
-        "landlord": ["Platiti pausal porez od 10% na prihod od najma", "Odrzavati nekretninu u dogovorenom stanju", "Registrirati ugovor kod Nacionalne agencije za prihode"]
+        "lease": [
+          "Pisani ugovor obavezan za najmove dulje od 1 godine",
+          "Ugovor bi trebao biti ovjeren kod javnog biljeznika radi sudske provedivosti",
+          "Maksimalno trajanje najma: 10 godina (moze se obnoviti)"
+        ],
+        "deposit": [
+          "Obicno 1-2 mjesecne najamnine",
+          "Mora biti vracen na kraju najma umanjeno za opravdane odbitke"
+        ],
+        "tenant": [
+          "Pravo na mirno uzivanje nekretnine",
+          "Najmodavac mora dati otkazni rok od 1 mjeseca prije raskida",
+          "Najmoprimac moze raskinuti ugovor uz pisanu obavijest od 1 mjeseca",
+          "Povecanje najamnine ograniceno na jednom godisnje"
+        ],
+        "landlord": [
+          "Platiti pausal porez od 10% na prihod od najma",
+          "Odrzavati nekretninu u dogovorenom stanju",
+          "Registrirati ugovor kod Nacionalne agencije za prihode"
+        ]
       },
       "croatia": {
         "summary": "Hrvatsko pravo najma regulirano je Zakonom o najmu stanova. Ugovori moraju biti u pisanom obliku.",
-        "lease": ["Pisani ugovor je obavezan", "Mora biti registriran u lokalnom poreznom uredu u roku od 30 dana", "Ugovor mora sadrzavati: stranke, opis nekretnine, najamninu, trajanje, uvjete raskida"],
-        "deposit": ["Uobicajena praksa: 1-2 mjesecne najamnine", "Nije zakonski obavezan, ali je standard u praksi", "Uvjeti povrata trebaju biti navedeni u ugovoru"],
-        "tenant": ["Najmoprimac zasticen od proizvoljnog iseljenja", "Minimalni otkazni rok od 90 dana za raskid od strane najmodavca", "Najmoprimac moze zatraziti potrebne popravke", "Podnajam samo uz pisanu suglasnost najmodavca"],
-        "landlord": ["Platiti 12% porez na dohodak od najma", "Odrzavati nekretninu prema standardima useljivosti", "Izdati potvrdu o placanju najamnine na zahtjev"]
+        "lease": [
+          "Pisani ugovor je obavezan",
+          "Mora biti registriran u lokalnom poreznom uredu u roku od 30 dana",
+          "Ugovor mora sadrzavati: stranke, opis nekretnine, najamninu, trajanje, uvjete raskida"
+        ],
+        "deposit": [
+          "Uobicajena praksa: 1-2 mjesecne najamnine",
+          "Nije zakonski obavezan, ali je standard u praksi",
+          "Uvjeti povrata trebaju biti navedeni u ugovoru"
+        ],
+        "tenant": [
+          "Najmoprimac zasticen od proizvoljnog iseljenja",
+          "Minimalni otkazni rok od 90 dana za raskid od strane najmodavca",
+          "Najmoprimac moze zatraziti potrebne popravke",
+          "Podnajam samo uz pisanu suglasnost najmodavca"
+        ],
+        "landlord": [
+          "Platiti 12% porez na dohodak od najma",
+          "Odrzavati nekretninu prema standardima useljivosti",
+          "Izdati potvrdu o placanju najamnine na zahtjev"
+        ]
       },
       "greece": {
         "summary": "Grcko pravo najma pruza snaznu zastitu najmoprimaca. Stambeni najmovi imaju zakonski minimalno trajanje od 3 godine.",
-        "lease": ["Pisani ili usmeni ugovori su valjani; pisani se strogo preporucuju", "Minimalno trajanje stambenog najma: 3 godine (zakonski)", "Najmodavac ne moze raskinuti ugovor prije 3 godine bez opravdanog razloga", "Ugovor treba biti prijavljen Nezavisnom tijelu za javne prihode"],
-        "deposit": ["Obicno 2 mjesecne najamnine", "Mora biti vracen u roku od 2 mjeseca od zavrsetka najma", "Najmodavac mora poloziti polog na kamatonosni racun"],
-        "tenant": ["Snazna zastita prema Grckom gradanskom zakoniku (clanci 574-618)", "Najmoprimac ne moze biti isseljen tijekom minimalnog razdoblja od 3 godine", "Povecanje najamnine ograniceno na 75% godisnjeg rasta indeksa potrosackih cijena", "Pravo na obnovu najma pod slicnim uvjetima"],
-        "landlord": ["Prijaviti prihod od najma (oporezuje se progresivno od 15-45%)", "Izdati godisniju prijavu prihoda od najma", "Odrzavati nekretninu u stanju dogovorenom pri potpisivanju najma"]
+        "lease": [
+          "Pisani ili usmeni ugovori su valjani; pisani se strogo preporucuju",
+          "Minimalno trajanje stambenog najma: 3 godine (zakonski)",
+          "Najmodavac ne moze raskinuti ugovor prije 3 godine bez opravdanog razloga",
+          "Ugovor treba biti prijavljen Nezavisnom tijelu za javne prihode"
+        ],
+        "deposit": [
+          "Obicno 2 mjesecne najamnine",
+          "Mora biti vracen u roku od 2 mjeseca od zavrsetka najma",
+          "Najmodavac mora poloziti polog na kamatonosni racun"
+        ],
+        "tenant": [
+          "Snazna zastita prema Grckom gradanskom zakoniku (clanci 574-618)",
+          "Najmoprimac ne moze biti isseljen tijekom minimalnog razdoblja od 3 godine",
+          "Povecanje najamnine ograniceno na 75% godisnjeg rasta indeksa potrosackih cijena",
+          "Pravo na obnovu najma pod slicnim uvjetima"
+        ],
+        "landlord": [
+          "Prijaviti prihod od najma (oporezuje se progresivno od 15-45%)",
+          "Izdati godisniju prijavu prihoda od najma",
+          "Odrzavati nekretninu u stanju dogovorenom pri potpisivanju najma"
+        ]
       },
       "kosovo": {
         "summary": "Pravo najma na Kosovu temelji se na Zakonu o obligacijskim odnosima. Preporucuju se pisani ugovori.",
-        "lease": ["Pisani ugovor preporucen za pravnu provedivost", "Treba sadrzavati iznos najamnine, trajanje i uvjete", "Registracija nije obavezna, ali je preporucljiva u porezne svrhe"],
-        "deposit": ["Obicno 1 mjesecna najamnina", "Uvjeti se dogovaraju izmedu stranaka"],
-        "tenant": ["Pravo na useljivo prebivaliste", "Iseljenje zahtijeva razuman otkazni rok (obicno 30 dana)", "Najmoprimac moze zatraziti nuzne popravke"],
-        "landlord": ["Prijaviti prihod od najma Poreznoj upravi Kosova", "Platiti porez na dohodak od najma (9% za fizicke osobe)", "Odrzavati sigurnost i useljivost nekretnine"]
+        "lease": [
+          "Pisani ugovor preporucen za pravnu provedivost",
+          "Treba sadrzavati iznos najamnine, trajanje i uvjete",
+          "Registracija nije obavezna, ali je preporucljiva u porezne svrhe"
+        ],
+        "deposit": [
+          "Obicno 1 mjesecna najamnina",
+          "Uvjeti se dogovaraju izmedu stranaka"
+        ],
+        "tenant": [
+          "Pravo na useljivo prebivaliste",
+          "Iseljenje zahtijeva razuman otkazni rok (obicno 30 dana)",
+          "Najmoprimac moze zatraziti nuzne popravke"
+        ],
+        "landlord": [
+          "Prijaviti prihod od najma Poreznoj upravi Kosova",
+          "Platiti porez na dohodak od najma (9% za fizicke osobe)",
+          "Odrzavati sigurnost i useljivost nekretnine"
+        ]
       },
       "montenegro": {
         "summary": "Crnogorsko pravo najma slijedi Zakon o stanovanju. Pisani ugovori o najmu moraju biti registrirani.",
-        "lease": ["Pisani ugovor obavezan", "Mora biti registriran kod lokalne opcine", "Treba navesti sve uvjete ukljucujuci odgovornost za komunalije"],
-        "deposit": ["Uobicajeno 1-2 mjesecne najamnine", "Mora biti jasno definiran u ugovoru"],
-        "tenant": ["Pravo na mirno uzivanje", "Ne moze biti isseljen bez odgovarajuce obavijesti i zakonskog postupka", "Pravo na useljive zivotne uvjete"],
-        "landlord": ["Registrirati najam kod opcinskih tijela", "Platiti 9% porez na prihod od najma", "Odrzavati strukturni integritet nekretnine"]
+        "lease": [
+          "Pisani ugovor obavezan",
+          "Mora biti registriran kod lokalne opcine",
+          "Treba navesti sve uvjete ukljucujuci odgovornost za komunalije"
+        ],
+        "deposit": [
+          "Uobicajeno 1-2 mjesecne najamnine",
+          "Mora biti jasno definiran u ugovoru"
+        ],
+        "tenant": [
+          "Pravo na mirno uzivanje",
+          "Ne moze biti isseljen bez odgovarajuce obavijesti i zakonskog postupka",
+          "Pravo na useljive zivotne uvjete"
+        ],
+        "landlord": [
+          "Registrirati najam kod opcinskih tijela",
+          "Platiti 9% porez na prihod od najma",
+          "Odrzavati strukturni integritet nekretnine"
+        ]
       },
       "north-macedonia": {
         "summary": "Pravo najma Sjeverne Makedonije temelji se na Zakonu o obveznim odnosima. Pisani ugovori pruzaju najbolju pravnu zastitu.",
-        "lease": ["Pisani ugovor se izrazito preporucuje", "Ovjera kod javnog biljeznika povecava provedivost", "Treba sadrzavati najamninu, raspored placanja, trajanje i klauzule o raskidu"],
-        "deposit": ["Obicno 1 mjesecna najamnina", "Uvjeti povrata navedeni u ugovoru"],
-        "tenant": ["Pravo na useljivu nekretninu", "Minimalni otkazni rok od 30 dana za iseljenje", "Moze zatraziti popravke za osnovne usluge"],
-        "landlord": ["Prijaviti prihod od najma Uredu za javne prihode", "Platiti 10% porez na osobni dohodak od najma", "Odrzavati nekretninu prema dogovorenim standardima"]
+        "lease": [
+          "Pisani ugovor se izrazito preporucuje",
+          "Ovjera kod javnog biljeznika povecava provedivost",
+          "Treba sadrzavati najamninu, raspored placanja, trajanje i klauzule o raskidu"
+        ],
+        "deposit": [
+          "Obicno 1 mjesecna najamnina",
+          "Uvjeti povrata navedeni u ugovoru"
+        ],
+        "tenant": [
+          "Pravo na useljivu nekretninu",
+          "Minimalni otkazni rok od 30 dana za iseljenje",
+          "Moze zatraziti popravke za osnovne usluge"
+        ],
+        "landlord": [
+          "Prijaviti prihod od najma Uredu za javne prihode",
+          "Platiti 10% porez na osobni dohodak od najma",
+          "Odrzavati nekretninu prema dogovorenim standardima"
+        ]
       },
       "romania": {
         "summary": "Rumunjsko pravo najma regulirano je Gradanskim zakonikom (2011). Ugovori moraju biti registrirani kod ANAF-a radi porezne uskladenosti.",
-        "lease": ["Pisani ugovor se izrazito preporucuje", "Mora biti registriran kod ANAF-a (porezno tijelo) u roku od 30 dana", "Registrirani ugovori su provedivi kao ovrsne isprave", "Uobicajeno trajanje: 1-5 godina"],
-        "deposit": ["Obicno 1-3 mjesecne najamnine", "Mora biti vracen u roku od 30 dana od zavrsetka najma", "Odbitci moraju biti dokumentirani dokazima"],
-        "tenant": ["Pravo na useljivu nekretninu u dobrom stanju", "Ne moze biti isseljen bez sudskog naloga", "Minimalni otkazni rok od 60 dana za neobnavljanje od strane najmodavca", "Uvjeti povecanja najamnine moraju biti navedeni u ugovoru"],
-        "landlord": ["Platiti 10% porez na dohodak od najma", "Registrirati ugovor kod ANAF-a", "Izdati potvrde za sva placanja najamnine", "Odrzavati nekretninu i platiti vece popravke"]
+        "lease": [
+          "Pisani ugovor se izrazito preporucuje",
+          "Mora biti registriran kod ANAF-a (porezno tijelo) u roku od 30 dana",
+          "Registrirani ugovori su provedivi kao ovrsne isprave",
+          "Uobicajeno trajanje: 1-5 godina"
+        ],
+        "deposit": [
+          "Obicno 1-3 mjesecne najamnine",
+          "Mora biti vracen u roku od 30 dana od zavrsetka najma",
+          "Odbitci moraju biti dokumentirani dokazima"
+        ],
+        "tenant": [
+          "Pravo na useljivu nekretninu u dobrom stanju",
+          "Ne moze biti isseljen bez sudskog naloga",
+          "Minimalni otkazni rok od 60 dana za neobnavljanje od strane najmodavca",
+          "Uvjeti povecanja najamnine moraju biti navedeni u ugovoru"
+        ],
+        "landlord": [
+          "Platiti 10% porez na dohodak od najma",
+          "Registrirati ugovor kod ANAF-a",
+          "Izdati potvrde za sva placanja najamnine",
+          "Odrzavati nekretninu i platiti vece popravke"
+        ]
       },
       "serbia": {
         "summary": "Srpsko pravo najma temelji se na Zakonu o stanovanju i odrzavanju zgrada. Pisani ugovori su obavezni.",
-        "lease": ["Pisani ugovor je zakonski obavezan", "Mora biti ovjeren kod javnog biljeznika za punu provedivost", "Najmoprimac mora biti prijavljen na adresi nekretnine", "Ugovor treba biti prijavljen Poreznoj upravi"],
-        "deposit": ["Obicno 1-2 mjesecne najamnine", "Obicno ga drzi najmodavac, ne na posebnom racunu", "Uvjeti povrata trebaju biti navedeni u ugovoru"],
-        "tenant": ["Pravo na mirno uzivanje nekretnine", "Iseljenje samo putem zakonskog sudskog postupka", "Minimalni otkazni rok od 90 dana za neobnavljanje najma od strane najmodavca", "Najmoprimac moze odbiti troskove popravka od najamnine ako najmodavac ne reagira"],
-        "landlord": ["Platiti 20% porez na dohodak od najma", "Prijaviti najmoprimca na adresi nekretnine", "Podnositi godisnje porezne prijave ukljucujuci prihod od najma", "Odrzavati zajednicke prostore i strukturne elemente"]
+        "lease": [
+          "Pisani ugovor je zakonski obavezan",
+          "Mora biti ovjeren kod javnog biljeznika za punu provedivost",
+          "Najmoprimac mora biti prijavljen na adresi nekretnine",
+          "Ugovor treba biti prijavljen Poreznoj upravi"
+        ],
+        "deposit": [
+          "Obicno 1-2 mjesecne najamnine",
+          "Obicno ga drzi najmodavac, ne na posebnom racunu",
+          "Uvjeti povrata trebaju biti navedeni u ugovoru"
+        ],
+        "tenant": [
+          "Pravo na mirno uzivanje nekretnine",
+          "Iseljenje samo putem zakonskog sudskog postupka",
+          "Minimalni otkazni rok od 90 dana za neobnavljanje najma od strane najmodavca",
+          "Najmoprimac moze odbiti troskove popravka od najamnine ako najmodavac ne reagira"
+        ],
+        "landlord": [
+          "Platiti 20% porez na dohodak od najma",
+          "Prijaviti najmoprimca na adresi nekretnine",
+          "Podnositi godisnje porezne prijave ukljucujuci prihod od najma",
+          "Odrzavati zajednicke prostore i strukturne elemente"
+        ]
       }
     }
   },

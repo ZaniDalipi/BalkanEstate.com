@@ -46,7 +46,11 @@
       "location": "Location",
       "review": "Review"
     },
-    "progress": "Step {{current}} of {{total}}",
+    "progress": {
+      "compressing": "Compressing images...",
+      "uploading": "Uploading to cloud...",
+      "creating": "Creating listing..."
+    },
     "nextStep": "Next Step",
     "previousStep": "Previous Step",
     "skipToManual": "Skip to Manual Entry",
@@ -231,12 +235,8 @@
       "description": "Add an immersive 360° virtual tour to help buyers explore your property remotely. Supports Matterport, Kuula, Zillow 3D Home, and other 360 tour providers.",
       "label": "360° Tour URL",
       "placeholder": "https://my.matterport.com/show/?m=... or https://kuula.co/share/...",
-      "hint": "Paste the embed or share URL from your 360 tour provider. The tour will be displayed as an interactive iframe on your listing."
-    },
-    "progress": {
-      "compressing": "Compressing images...",
-      "uploading": "Uploading to cloud...",
-      "creating": "Creating listing..."
+      "hint": "Paste the embed or share URL from your 360 tour provider. The tour will be displayed as an interactive iframe on your listing.",
+      "z360Hint": "Create your tour at z360-virtual-tour.vercel.app and paste the link here"
     },
     "promotion": {
       "title": "Promote Your Listing",
@@ -274,6 +274,13 @@
       "proReached": "You have reached your Pro listing limit.",
       "agentProRequired": "Agents must have an active Pro subscription to post listings. Subscribe now to get 25 active listings!",
       "buyerCannotCreate": "Buyers cannot create property listings. Please switch to Private Seller or Agent role to create listings."
+    },
+    "video": {
+      "title": "Property Video (Optional)",
+      "description": "Add a video to showcase your property! Videos auto-play when visitors view your listing, creating an engaging first impression.",
+      "label": "Video URL",
+      "placeholder": "https://youtube.com/watch?v=... or https://tiktok.com/...",
+      "hint": "Paste a link from YouTube, TikTok, Instagram Reels, or Vimeo. The video will auto-play when visitors open your listing!"
     }
   },
   "myListings": {
@@ -452,7 +459,8 @@
       "allRooms": "Capture all rooms",
       "exterior": "Include exterior shots",
       "clearPhotos": "Use clear, high-quality photos"
-    }
+    },
+    "locationHint": "Adding location helps AI generate more accurate, location-specific descriptions"
   },
   "promotion": {
     "title": "Promote Your Listing",
@@ -492,7 +500,16 @@
     "discountApplied": "Discount applied!",
     "invalidCode": "Invalid discount code",
     "total": "Total",
-    "proceedToPayment": "Proceed to Payment"
+    "proceedToPayment": "Proceed to Payment",
+    "day": "day",
+    "selectTier": "Please select a promotion tier",
+    "extendedSuccess": "Promotion extended successfully! New end date: {{date}}",
+    "activatedSuccess": "Promotion activated successfully!",
+    "activatedFree": "Promotion activated (free with coupon)!",
+    "loadFailed": "Failed to load promotion options",
+    "freeWithCoupon": "(Free with coupon)",
+    "skipForNow": "Skip for Now",
+    "postWithoutPromotion": "Post Without Promotion"
   },
   "distances": {
     "title": "Distance Information",
@@ -607,5 +624,9 @@
     "subscribeToPro": "Pretplati se na Pro",
     "viewMyListings": "Pogledaj Moje Oglase",
     "switchRole": "Promijeni Ulogu"
+  },
+  "listings": {
+    "confirmSold": "Are you sure you want to mark this property as sold? This action cannot be undone.",
+    "confirmDelete": "Are you sure you want to delete this listing? This action cannot be undone."
   }
 }

@@ -31,7 +31,16 @@
     "support": "Support",
     "logs": "Activity Logs",
     "notifications": "Notifications",
-    "backToSite": "Back to Site"
+    "backToSite": "Back to Site",
+    "usersAndAgents": "Users & Agents",
+    "promotionCoupons": "Promotion Coupons",
+    "activityLog": "Activity Log",
+    "overview": "Overview",
+    "contentManagement": "Content Management",
+    "marketing": "Marketing & Sales",
+    "system": "System",
+    "inquiries": "Inquiries",
+    "pricing": "Pricing & Plans"
   },
   "properties": {
     "title": "Property Manager",
@@ -49,6 +58,20 @@
       "pending": "Pending",
       "sold": "Sold",
       "inactive": "Inactive"
+    },
+    "deleteTitle": "Delete Property",
+    "details": "Property Details",
+    "specifications": "Specifications",
+    "features": "Features",
+    "promoted": "Promoted",
+    "notPromoted": "Not Promoted",
+    "types": {
+      "house": "House",
+      "apartment": "Apartment",
+      "villa": "Villa",
+      "land": "Land",
+      "commercial": "Commercial",
+      "other": "Other"
     }
   },
   "users": {
@@ -461,6 +484,33 @@
   "promotionPlans": {
     "title": "Planuri de Promovare",
     "subtitle": "Gestionați prețurile de promovare a anunțurilor și funcțiile agenției",
-    "loading": "Se încarcă planurile de promovare..."
+    "loading": "Se încarcă planurile de promovare...",
+    "listingPromotions": "Listing Promotions",
+    "agencyFeatures": "Agency Features",
+    "addPlan": "Add Plan",
+    "createFirst": "Create First Plan",
+    "seedDefaults": "Seed Default Plans",
+    "noPlans": "No plans found",
+    "createSuccess": "Plan created successfully!",
+    "updateSuccess": "Plan updated successfully!",
+    "deleteSuccess": "Plan deleted successfully!",
+    "confirmDelete": "Are you sure you want to delete this plan?",
+    "editPlan": "Edit Plan",
+    "createPlan": "Create Plan",
+    "name": "Name",
+    "icon": "Icon (Emoji)",
+    "description": "Description",
+    "tier": "Tier",
+    "displayOrder": "Display Order",
+    "pricing": "Pricing",
+    "weeklyPrice": "Weekly Price (7 Days)",
+    "features": "Features",
+    "addFeature": "Add a feature...",
+    "displaySettings": "Display Settings",
+    "badge": "Badge Text",
+    "visibility": "Visibility Multiplier",
+    "highlighted": "Highlighted",
+    "visible": "Visible",
+    "colorPreset": "Color Preset"
   }
 }

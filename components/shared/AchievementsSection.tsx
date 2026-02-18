@@ -213,10 +213,10 @@ const AchievementsSection: React.FC<AchievementsSectionProps> = ({
           </div>
           <div>
             <h2 className="text-base sm:text-lg font-bold text-neutral-900">
-              {t('achievements.title', 'Achievements & Awards')}
+              {t('common:achievements.title')}
             </h2>
             <p className="text-xs sm:text-sm text-neutral-500">
-              {t('achievements.subtitle', 'Professional recognitions and certifications')}
+              {t('common:achievements.subtitle')}
             </p>
           </div>
         </div>
@@ -227,7 +227,7 @@ const AchievementsSection: React.FC<AchievementsSectionProps> = ({
             className="relative flex items-center gap-2 px-4 py-2 sm:py-2.5 bg-white/70 backdrop-blur-sm border border-amber-200/60 text-amber-700 rounded-xl hover:bg-amber-50/80 hover:border-amber-300/60 transition-all shadow-sm text-sm font-semibold"
           >
             <PlusIcon className="w-4 h-4 sm:w-5 sm:h-5" />
-            <span>{t('achievements.add', 'Add Achievement')}</span>
+            <span>{t('common:achievements.add')}</span>
           </button>
         )}
       </div>
@@ -256,12 +256,12 @@ const AchievementsSection: React.FC<AchievementsSectionProps> = ({
                   {achievement.isVerified && (
                     <div className="flex items-center gap-1 px-2 py-0.5 bg-green-50/80 backdrop-blur-sm text-green-700 text-[10px] sm:text-xs font-medium rounded-full border border-green-200/50">
                       <CheckCircleIcon className="w-3 h-3" />
-                      {t('achievements.verified', 'Verified')}
+                      {t('common:achievements.verified')}
                     </div>
                   )}
                   {expired && (
                     <div className="px-2 py-0.5 bg-red-50/80 backdrop-blur-sm text-red-700 text-[10px] sm:text-xs font-medium rounded-full border border-red-200/50">
-                      {t('achievements.expired', 'Expired')}
+                      {t('common:achievements.expired')}
                     </div>
                   )}
                 </div>
@@ -274,7 +274,7 @@ const AchievementsSection: React.FC<AchievementsSectionProps> = ({
                 {/* Content */}
                 <div className="relative space-y-1.5 sm:space-y-2">
                   <div className="text-[10px] sm:text-xs font-medium text-neutral-400 uppercase tracking-wider">
-                    {t(`achievements.types.${achievement.type}`, achievement.type)}
+                    {t(`common:achievements.types.${achievement.type}`)}
                   </div>
                   <h3 className="font-bold text-neutral-900 text-sm sm:text-lg line-clamp-2 pr-16">
                     {achievement.title}
@@ -311,7 +311,7 @@ const AchievementsSection: React.FC<AchievementsSectionProps> = ({
                       className="inline-flex items-center gap-1.5 text-xs sm:text-sm text-blue-600 hover:underline"
                     >
                       <DocumentTextIcon className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
-                      {t('achievements.viewDocument', 'View Document')}
+                      {t('common:achievements.viewDocument')}
                     </a>
                   )}
                 </div>
@@ -324,7 +324,7 @@ const AchievementsSection: React.FC<AchievementsSectionProps> = ({
                         type="button"
                         onClick={() => handleOpenEditModal(achievement)}
                         className="p-1.5 sm:p-2 bg-white/80 backdrop-blur-sm text-neutral-600 rounded-lg hover:bg-neutral-100 transition-colors border border-neutral-200/50"
-                        title={t('common:edit', 'Edit')}
+                        title={t('common:edit')}
                       >
                         <PencilIcon className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                       </button>
@@ -335,7 +335,7 @@ const AchievementsSection: React.FC<AchievementsSectionProps> = ({
                         onClick={() => handleDelete(achievement.id)}
                         disabled={deletingId === achievement.id}
                         className="p-1.5 sm:p-2 bg-red-50/80 backdrop-blur-sm text-red-600 rounded-lg hover:bg-red-100 transition-colors disabled:opacity-50 border border-red-200/50"
-                        title={t('common:delete', 'Delete')}
+                        title={t('common:delete')}
                       >
                         {deletingId === achievement.id ? (
                           <div className="w-3.5 h-3.5 sm:w-4 sm:h-4 border-2 border-red-600 border-t-transparent rounded-full animate-spin" />
@@ -362,8 +362,8 @@ const AchievementsSection: React.FC<AchievementsSectionProps> = ({
             </div>
             <p className="text-sm sm:text-base text-neutral-500 max-w-sm mx-auto">
               {isOwner
-                ? t('achievements.emptyOwner', 'Showcase your achievements and certifications to build trust with clients.')
-                : t('achievements.empty', 'No achievements to display yet.')}
+                ? t('common:achievements.emptyOwner')
+                : t('common:achievements.empty')}
             </p>
             {isOwner && onAdd && (
               <button
@@ -372,7 +372,7 @@ const AchievementsSection: React.FC<AchievementsSectionProps> = ({
                 className="mt-4 sm:mt-5 inline-flex items-center gap-2 px-5 py-2.5 bg-white/70 backdrop-blur-sm border border-amber-200/60 text-amber-700 rounded-xl hover:bg-amber-50/80 hover:border-amber-300/60 transition-all shadow-sm text-sm font-semibold"
               >
                 <PlusIcon className="w-4 h-4 sm:w-5 sm:h-5" />
-                {t('achievements.addFirst', 'Add Your First Achievement')}
+                {t('common:achievements.addFirst')}
               </button>
             )}
           </div>
@@ -391,8 +391,8 @@ const AchievementsSection: React.FC<AchievementsSectionProps> = ({
             <div className="sticky top-0 bg-white/90 backdrop-blur-md z-10 flex items-center justify-between px-5 sm:px-6 py-4 border-b border-neutral-100">
               <h3 className="text-lg sm:text-xl font-bold text-neutral-900">
                 {editingAchievement
-                  ? t('achievements.editTitle', 'Edit Achievement')
-                  : t('achievements.addTitle', 'Add Achievement')}
+                  ? t('common:achievements.editTitle')
+                  : t('common:achievements.addTitle')}
               </h3>
               <button
                 type="button"
@@ -407,7 +407,7 @@ const AchievementsSection: React.FC<AchievementsSectionProps> = ({
               {/* Type Selection */}
               <div>
                 <label className="block text-sm font-medium text-neutral-700 mb-2">
-                  {t('achievements.form.type', 'Type')} *
+                  {t('common:achievements.form.type')} *
                 </label>
                 <div className="grid grid-cols-3 sm:grid-cols-5 gap-2">
                   {ACHIEVEMENT_TYPES.map(({ value, label, icon: Icon }) => (
@@ -423,7 +423,7 @@ const AchievementsSection: React.FC<AchievementsSectionProps> = ({
                     >
                       <Icon className={`w-4 h-4 sm:w-5 sm:h-5 ${formData.type === value ? 'text-amber-600' : 'text-neutral-400'}`} />
                       <span className={`text-[10px] sm:text-xs font-medium ${formData.type === value ? 'text-amber-700' : 'text-neutral-500'}`}>
-                        {t(`achievements.types.${value}`, label)}
+                        {t(`common:achievements.types.${value}`)}
                       </span>
                     </button>
                   ))}
@@ -433,13 +433,13 @@ const AchievementsSection: React.FC<AchievementsSectionProps> = ({
               {/* Title */}
               <div>
                 <label className="block text-sm font-medium text-neutral-700 mb-2">
-                  {t('achievements.form.title', 'Title')} *
+                  {t('common:achievements.form.title')} *
                 </label>
                 <input
                   type="text"
                   value={formData.title}
                   onChange={(e) => setFormData(prev => ({ ...prev, title: e.target.value }))}
-                  placeholder={t('achievements.form.titlePlaceholder', 'e.g., Top Producer Award 2024')}
+                  placeholder={t('common:achievements.form.titlePlaceholder')}
                   className="w-full px-4 py-3 bg-neutral-50 border border-neutral-200 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-transparent text-sm sm:text-base"
                   required
                 />
@@ -448,13 +448,13 @@ const AchievementsSection: React.FC<AchievementsSectionProps> = ({
               {/* Issuing Organization */}
               <div>
                 <label className="block text-sm font-medium text-neutral-700 mb-2">
-                  {t('achievements.form.organization', 'Issuing Organization')} *
+                  {t('common:achievements.form.organization')} *
                 </label>
                 <input
                   type="text"
                   value={formData.issuingOrganization}
                   onChange={(e) => setFormData(prev => ({ ...prev, issuingOrganization: e.target.value }))}
-                  placeholder={t('achievements.form.organizationPlaceholder', 'e.g., National Association of Realtors')}
+                  placeholder={t('common:achievements.form.organizationPlaceholder')}
                   className="w-full px-4 py-3 bg-neutral-50 border border-neutral-200 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-transparent text-sm sm:text-base"
                   required
                 />
@@ -463,12 +463,12 @@ const AchievementsSection: React.FC<AchievementsSectionProps> = ({
               {/* Description */}
               <div>
                 <label className="block text-sm font-medium text-neutral-700 mb-2">
-                  {t('achievements.form.description', 'Description')}
+                  {t('common:achievements.form.description')}
                 </label>
                 <textarea
                   value={formData.description}
                   onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
-                  placeholder={t('achievements.form.descriptionPlaceholder', 'Brief description of this achievement...')}
+                  placeholder={t('common:achievements.form.descriptionPlaceholder')}
                   rows={3}
                   className="w-full px-4 py-3 bg-neutral-50 border border-neutral-200 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-transparent resize-none text-sm sm:text-base"
                 />
@@ -478,7 +478,7 @@ const AchievementsSection: React.FC<AchievementsSectionProps> = ({
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                 <div>
                   <label className="block text-sm font-medium text-neutral-700 mb-2">
-                    {t('achievements.form.dateReceived', 'Date Received')} *
+                    {t('common:achievements.form.dateReceived')} *
                   </label>
                   <input
                     type="date"
@@ -490,7 +490,7 @@ const AchievementsSection: React.FC<AchievementsSectionProps> = ({
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-neutral-700 mb-2">
-                    {t('achievements.form.expiryDate', 'Expiry Date')}
+                    {t('common:achievements.form.expiryDate')}
                   </label>
                   <input
                     type="date"
@@ -504,7 +504,7 @@ const AchievementsSection: React.FC<AchievementsSectionProps> = ({
               {/* Document URL */}
               <div>
                 <label className="block text-sm font-medium text-neutral-700 mb-2">
-                  {t('achievements.form.documentUrl', 'Document/Certificate URL')}
+                  {t('common:achievements.form.documentUrl')}
                 </label>
                 <input
                   type="url"
@@ -514,7 +514,7 @@ const AchievementsSection: React.FC<AchievementsSectionProps> = ({
                   className="w-full px-4 py-3 bg-neutral-50 border border-neutral-200 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-transparent text-sm sm:text-base"
                 />
                 <p className="mt-1 text-[10px] sm:text-xs text-neutral-400">
-                  {t('achievements.form.documentHint', 'Link to your certificate or supporting documentation')}
+                  {t('common:achievements.form.documentHint')}
                 </p>
               </div>
 
@@ -525,7 +525,7 @@ const AchievementsSection: React.FC<AchievementsSectionProps> = ({
                   onClick={handleCloseModal}
                   className="px-4 py-2.5 text-neutral-600 hover:bg-neutral-100 rounded-xl transition-colors text-sm font-medium"
                 >
-                  {t('common:cancel', 'Cancel')}
+                  {t('common:cancel')}
                 </button>
                 <button
                   type="submit"
@@ -535,14 +535,14 @@ const AchievementsSection: React.FC<AchievementsSectionProps> = ({
                   {isSubmitting ? (
                     <>
                       <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                      {t('common:saving', 'Saving...')}
+                      {t('common:saving')}
                     </>
                   ) : (
                     <>
                       <CheckCircleIcon className="w-4 h-4 sm:w-5 sm:h-5" />
                       {editingAchievement
-                        ? t('common:saveChanges', 'Save Changes')
-                        : t('achievements.addButton', 'Add Achievement')}
+                        ? t('common:saveChanges')
+                        : t('common:achievements.addButton')}
                     </>
                   )}
                 </button>

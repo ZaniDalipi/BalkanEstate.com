@@ -2,7 +2,11 @@
   "modal": {
     "title": "Изберете Вашия План",
     "subtitle": "Отключете премиум функции за по-добро изживяване с имоти",
-    "close": "Затвори"
+    "close": "Затвори",
+    "tabs": {
+      "forBuyers": "For Buyers",
+      "forSellers": "For Sellers"
+    }
   },
   "buyerPlan": {
     "title": "План за Купувачи",
@@ -11,7 +15,18 @@
       "savedSearches": "Неограничени запазени търсения",
       "alerts": "Известия за имоти в реално време",
       "analytics": "Пазарна аналитика",
-      "support": "Приоритетна поддръжка"
+      "support": "Приоритетна поддръжка",
+      "notifications": "Instant email & SMS notifications",
+      "earlyAccess": "Early access to new listings",
+      "marketInsights": "Advanced market insights"
+    },
+    "price": "€{price}",
+    "perMonth": "/month",
+    "form": {
+      "emailLabel": "Email Address",
+      "emailPlaceholder": "you@example.com",
+      "continueToPayment": "Continue to Payment",
+      "securePayment": "Secure payment powered by LemonSqueezy"
     }
   },
   "sellerPlan": {
@@ -22,6 +37,53 @@
       "featured": "Опции за представени имоти",
       "analytics": "Аналитика на обявите",
       "support": "Специализирана поддръжка за продавачи"
+    },
+    "tiers": {
+      "featured": {
+        "title": "Featured",
+        "emoji": "⭐",
+        "description": "Priority in search results",
+        "price": "€1.99+",
+        "duration": "7-90 days",
+        "benefits": {
+          "topResults": "Top of search results",
+          "badge": "Featured badge",
+          "visibility": "2x visibility boost"
+        }
+      },
+      "highlight": {
+        "title": "Highlight",
+        "emoji": "💎",
+        "description": "Stand out with color",
+        "price": "€3.99+",
+        "duration": "7-90 days",
+        "popular": "Popular",
+        "benefits": {
+          "allFeatured": "All Featured benefits",
+          "coloredBg": "Colored background",
+          "visibility": "3x visibility boost"
+        }
+      },
+      "premium": {
+        "title": "Premium",
+        "emoji": "👑",
+        "description": "Homepage featuring",
+        "price": "€7.99+",
+        "duration": "7-90 days",
+        "benefits": {
+          "allHighlight": "All Highlight benefits",
+          "carousel": "Homepage carousel",
+          "visibility": "5x visibility boost"
+        }
+      }
+    },
+    "howItWorks": {
+      "title": "How it works:",
+      "description": "When creating a listing, select your promotion tier and duration. Payment is processed before publishing. Discount coupons are supported!"
+    },
+    "actions": {
+      "viewSubscriptionPlans": "View Subscription Plans",
+      "startCreatingListing": "Start Creating Listing"
     }
   },
   "management": {
@@ -35,7 +97,90 @@
     "active": "Активен",
     "cancelled": "Отменен",
     "expired": "Изтекъл",
-    "freeTier": "Безплатно Ниво"
+    "freeTier": "Безплатно Ниво",
+    "noActiveSubscription": "No Active Subscription",
+    "unlockFeatures": "Unlock premium features and take your experience to the next level",
+    "viewPlans": "View Plans & Pricing",
+    "refresh": "Refresh",
+    "timeRemaining": "Time Remaining",
+    "dayLeft": "day left",
+    "daysLeft": "days left",
+    "listingLimit": "Listing Limit",
+    "remaining": "remaining",
+    "couponSubscription": "Coupon Subscription",
+    "cancellationPending": "Subscription Cancellation Pending",
+    "autoRenewal": "Auto-Renewal",
+    "on": "On",
+    "off": "Off",
+    "paymentSource": "Payment Source",
+    "web": "Web",
+    "cancelPlan": "Cancel Plan",
+    "upgradePlan": "Upgrade Your Plan",
+    "upgradeNow": "Upgrade Now",
+    "proRatedPricing": "Pro-rated Upgrade Pricing",
+    "confirmUpgrade": "Confirm Upgrade",
+    "upgradingTo": "Upgrading to:",
+    "originalPrice": "Original Price",
+    "proRatedCredit": "Pro-rated Credit",
+    "totalDue": "Total Due",
+    "cancelling": "CANCELLING",
+    "features": {
+      "prioritySupport": "Priority Support",
+      "advancedAnalytics": "Advanced Analytics",
+      "listings25": "25 Listings",
+      "premiumPlacement": "Premium Placement"
+    },
+    "cancelModal": {
+      "cancellingTrial": "Cancelling your free trial:",
+      "whatHappens": "What happens when you cancel:",
+      "loseAccess": "You will lose access to premium features",
+      "listingsDeactivated": "Your listings may be deactivated",
+      "canResubscribe": "You can resubscribe anytime",
+      "cancelAtEnd": "Cancel at end of billing period",
+      "cancelNowRefund": "Cancel now & get €{{amount}} refund",
+      "keepSubscription": "Keep {{subscription}}"
+    },
+    "whatsIncluded": {
+      "title": "What's Included in Your {{plan}} Plan",
+      "activeListings": "{{count}} Active Listings",
+      "activeListingsDesc": "Create and manage up to {{count}} property listings",
+      "savedSearches": "{{count}} Saved Search",
+      "savedSearches_plural": "{{count}} Saved Searches",
+      "savedSearchesDesc": "Save and get alerts for your property searches",
+      "promotionCoupons": "3 Promotion Coupons/Month",
+      "noPromotionCoupons": "No Promotion Coupons",
+      "promotionCouponsDesc": "Boost your listings with featured placement",
+      "upgradeForPromotion": "Upgrade to Pro for promotion features",
+      "advancedAnalytics": "Advanced Analytics",
+      "basicAnalytics": "Basic Analytics",
+      "advancedAnalyticsDesc": "Detailed insights on views, saves, and inquiries",
+      "basicAnalyticsDesc": "Basic view counts only",
+      "prioritySupport": "Priority Support",
+      "emailSupport": "Email Support",
+      "prioritySupportDesc": "Fast response times and dedicated help",
+      "emailSupportDesc": "Standard email support",
+      "verifiedBadge": "Verified Pro Badge",
+      "noBadge": "No Badge",
+      "verifiedBadgeDesc": "Show buyers you're a trusted seller",
+      "noBadgeDesc": "Upgrade to get the Pro badge",
+      "wantMoreFeatures": "Want more features?",
+      "upgradeToProDesc": "Upgrade to Pro for 25 listings, promotions, and more!"
+    },
+    "validation": {
+      "confirmCancel": "Are you sure you want to cancel your subscription?",
+      "confirmRestore": "Do you want to restore auto-renewal for your subscription?",
+      "confirmToggleAutoRenewal": "Do you want to {{action}} auto-renewal?",
+      "enableAutoRenewal": "enable",
+      "disableAutoRenewal": "disable",
+      "cancelSuccess": "Subscription cancellation scheduled successfully",
+      "cancelError": "Failed to cancel subscription. Please try again.",
+      "restoreSuccess": "Subscription restored successfully",
+      "restoreError": "Failed to restore subscription. Please try again.",
+      "toggleAutoRenewalSuccess": "Auto-renewal {{status}} successfully",
+      "toggleAutoRenewalError": "Failed to update auto-renewal. Please try again.",
+      "enabled": "enabled",
+      "disabled": "disabled"
+    }
   },
   "featuredAgency": {
     "title": "Представена Агенция",
@@ -46,7 +191,46 @@
       "analytics": "Подобрена аналитика",
       "priority": "Приоритетна поддръжка"
     },
-    "cta": "Станете Представени"
+    "cta": "Станете Представени",
+    "featureYourAgency": "Feature Your Agency",
+    "startPlan": "Start €10/week Plan",
+    "currentlyFeatured": "Agency Currently Featured ✨",
+    "featuredDescription": "Your agency is currently featured and receiving enhanced visibility.",
+    "timeRemaining": "Time Remaining",
+    "expires": "Expires:",
+    "boostVisibility": "Boost Your Visibility",
+    "status": {
+      "active": "Active",
+      "trial": "Trial",
+      "expired": "Expired",
+      "canceled": "Canceled"
+    },
+    "progress": {
+      "freeTrialProgress": "Free Trial Progress",
+      "subscriptionPeriod": "Subscription Period",
+      "daysLeft": "left"
+    },
+    "details": {
+      "interval": "Interval",
+      "price": "Price",
+      "startDate": "Start Date",
+      "renewsOn": "Renews On",
+      "endedOn": "Ended On"
+    },
+    "trial": {
+      "title": "Free Trial Active",
+      "description": "Your free trial ends on {date}"
+    },
+    "coupon": {
+      "applied": "Coupon {code} applied"
+    },
+    "cancelNotice": "Subscription will be canceled at the end of the current period",
+    "renewStatus": {
+      "title": "Renew Your Featured Status",
+      "description": "Continue enjoying enhanced visibility and top placement in search results.",
+      "renewNow": "Renew Now"
+    },
+    "visibilityTip": "Featured agencies get up to 5x more visibility and appear at the top of search results!"
   },
   "featuredDialog": {
     "title": "Представете Вашата Агенция",
@@ -57,7 +241,47 @@
     "year": "1 Година",
     "totalPrice": "Обща Цена",
     "confirm": "Потвърди Плащането",
-    "cancel": "Отказ"
+    "cancel": "Отказ",
+    "subscriptionCreated": "Subscription Created!",
+    "agencyFeatured": "Your agency is now featured. Redirecting...",
+    "getFeatured": "Get Featured!",
+    "boostAgency": "Boost your agency's visibility and get more leads with a featured listing",
+    "choosePlan": "Choose Your Plan",
+    "perPeriod": "per {{period}}",
+    "savingsPercent": "Save {{savings}}%",
+    "whatsIncluded": "What's Included:",
+    "benefits": {
+      "topPlacement": "Top placement in search results",
+      "featuredCarousel": "Featured in agency carousel",
+      "premiumBadge": "Premium badge on your profile",
+      "monthlyRotation": "Monthly rotation to maintain freshness",
+      "cancelAnytime": "Cancel anytime"
+    },
+    "coupon": {
+      "haveCoupon": "Have a coupon code?",
+      "enterCode": "Enter coupon code",
+      "validating": "Validating...",
+      "apply": "Apply",
+      "appliedSuccess": "Coupon Applied Successfully!",
+      "originalPrice": "Original Price:",
+      "discount": "Discount:",
+      "freeWithCoupon": "FREE!",
+      "finalPrice": "Final Price:"
+    },
+    "buttons": {
+      "cancel": "Cancel",
+      "processing": "Processing...",
+      "activateFree": "Activate for FREE",
+      "subscribe": "Subscribe - €{{price}}"
+    },
+    "terms": "By subscribing, you agree to our terms and conditions.",
+    "noPaymentRequired": "No payment required - 100% discount applied!",
+    "chargeNotice": "You will be charged €{{price}} per {{period}}.",
+    "errors": {
+      "enterCoupon": "Please enter a coupon code",
+      "invalidCoupon": "Invalid coupon",
+      "createFailed": "Failed to create subscription"
+    }
   },
   "payment": {
     "title": "Плащане",
@@ -69,7 +293,11 @@
     "cardNumber": "Номер на Картата",
     "expiry": "Дата на Изтичане",
     "cvv": "CVV",
-    "nameOnCard": "Име на Картата"
+    "nameOnCard": "Име на Картата",
+    "error": "Payment failed",
+    "cardDetails": "Card Details",
+    "payNow": "Pay Now",
+    "cancel": "Cancel"
   },
   "validation": {
     "cardRequired": "Номерът на картата е задължителен",
@@ -78,7 +306,9 @@
     "expiryInvalid": "Невалидна дата на изтичане",
     "cvvRequired": "CVV е задължителен",
     "cvvInvalid": "Невалиден CVV",
-    "nameRequired": "Името на картата е задължително"
+    "nameRequired": "Името на картата е задължително",
+    "invalidEmail": "Please enter a valid email address",
+    "emailRequired": "Email is required"
   },
   "messages": {
     "subscriptionUpdated": "Абонаментът е актуализиран успешно",
@@ -86,7 +316,9 @@
     "subscriptionReactivated": "Абонаментът е реактивиран",
     "paymentSuccessful": "Плащането е успешно",
     "paymentFailed": "Плащането е неуспешно. Моля, опитайте отново.",
-    "error": "Възникна грешка. Моля, опитайте отново."
+    "error": "Възникна грешка. Моля, опитайте отново.",
+    "subscriptionActivated": "Subscription activated successfully!",
+    "subscriptionCanceled": "Subscription canceled successfully"
   },
   "coupons": {
     "title": "Имате код за отстъпка?",
@@ -95,11 +327,17 @@
     "applied": "Кодът е приложен!",
     "invalid": "Невалиден код за отстъпка",
     "expired": "Този код е изтекъл",
-    "discount": "Отстъпка"
+    "discount": "Отстъпка",
+    "haveCoupon": "Have a coupon?",
+    "enterCode": "Enter coupon code"
   },
   "intervals": {
     "monthly": "Месечно",
     "yearly": "Годишно",
-    "saveWithYearly": "Спестете 20% с годишно плащане"
+    "saveWithYearly": "Спестете 20% с годишно плащане",
+    "weekly": "Weekly",
+    "perWeek": "per week",
+    "perMonth": "per month",
+    "perYear": "per year"
   }
 }
