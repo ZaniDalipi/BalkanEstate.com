@@ -52,7 +52,9 @@
     "sessionCreationFailed": "Kreiranje sesije plaćanja nije uspelo",
     "invalidDiscountCode": "Nevažeći kod za popust",
     "freeSubscriptionFailed": "Failed to apply free subscription",
-    "verificationTimeout": "Payment verification timed out. If you completed the payment, your subscription will be activated shortly. Please check your email for confirmation."
+    "verificationTimeout": "Payment verification timed out. If you completed the payment, your subscription will be activated shortly. Please check your email for confirmation.",
+    "invalidCodeFormat": "Invalid code format. Use only letters, numbers, hyphens and underscores.",
+    "invalidPlanPrice": "Invalid plan price"
   },
   "checkout": {
     "secureCheckout": "Sigurno Plaćanje",

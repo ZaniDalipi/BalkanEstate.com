@@ -153,7 +153,11 @@
     "confirmRequest": "Confirm Request",
     "requestSent": "Viewing Request Sent!",
     "requestSentDesc": "The landlord will confirm your viewing shortly.",
-    "done": "Done"
+    "done": "Done",
+    "ics": {
+      "summary": "Property Viewing",
+      "description": "Scheduled viewing for"
+    }
   },
   "status": {
     "markAsRented": "Mark as Rented",

@@ -278,8 +278,8 @@ const CityRecommendations: React.FC = () => {
     <div className="min-h-screen bg-gray-50 relative">
       {/* SEO Meta Tags */}
       <SEO
-        title="Explore Balkan Cities - Property Markets, Prices & City Guides"
-        description={`Explore ${cities.length}+ cities across ${countries.length} Balkan countries. Compare property prices, rental yields, and market trends in Tirana, Budva, Belgrade, Skopje, and more.`}
+        title={t('exploreCities:seo.title')}
+        description={t('exploreCities:seo.description', { cityCount: cities.length, countryCount: countries.length })}
         canonical={`${typeof window !== 'undefined' ? window.location.origin : ''}/explore-cities`}
         type="website"
       />
@@ -291,8 +291,8 @@ const CityRecommendations: React.FC = () => {
             {JSON.stringify({
               '@context': 'https://schema.org',
               '@type': 'ItemList',
-              name: 'Balkan Cities Property Guide',
-              description: `Property market data for ${filteredCities.length} cities across the Balkans`,
+              name: t('exploreCities:seo.schemaName'),
+              description: t('exploreCities:seo.schemaDescription', { count: filteredCities.length }),
               numberOfItems: filteredCities.length,
               itemListElement: filteredCities.slice(0, 15).map((city: CityMarketData, i: number) => ({
                 '@type': 'ListItem',

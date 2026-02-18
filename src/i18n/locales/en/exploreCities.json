@@ -1,4 +1,10 @@
 {
+  "seo": {
+    "title": "Explore Balkan Cities - Property Markets, Prices & City Guides",
+    "description": "Explore {{cityCount}}+ cities across {{countryCount}} Balkan countries. Compare property prices, rental yields, and market trends in Tirana, Budva, Belgrade, Skopje, and more.",
+    "schemaName": "Balkan Cities Property Guide",
+    "schemaDescription": "Property market data for {{count}} cities across the Balkans"
+  },
   "page": {
     "title": "Explore Balkan Cities - Real Estate Market Insights",
     "description": "AI-powered market insights for {{count}} major cities across 10 countries"

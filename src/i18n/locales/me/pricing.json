@@ -273,5 +273,11 @@
     "7days": "7 days",
     "30days": "30 days",
     "90days": "90 days"
+  },
+  "coupon": {
+    "title": "Do you have a coupon from the seller?",
+    "description": "Select any plan above and use your coupon code to activate your subscription instantly.",
+    "selectPlan": "Select a plan to use your coupon",
+    "haveDiscountCode": "Have a discount code?"
   }
 }

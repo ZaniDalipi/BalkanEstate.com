@@ -50,7 +50,7 @@ function generateTimeSlotsFromConfig(startTime: string, endTime: string, duratio
     return slots;
 }
 
-function generateICSFile(property: Property, date: string, timeSlot: string, durationMinutes: number): string {
+function generateICSFile(property: Property, date: string, timeSlot: string, durationMinutes: number, summaryLabel: string, descriptionLabel: string): string {
     const [hours, minutes] = timeSlot.split(':').map(Number);
     const startDate = new Date(date);
     startDate.setHours(hours, minutes, 0, 0);
@@ -67,8 +67,8 @@ function generateICSFile(property: Property, date: string, timeSlot: string, dur
         'BEGIN:VEVENT',
         `DTSTART:${fmt(startDate)}`,
         `DTEND:${fmt(endDate)}`,
-        `SUMMARY:Property Viewing - ${title}`,
-        `DESCRIPTION:Scheduled viewing for ${title} at ${location}`,
+        `SUMMARY:${summaryLabel} - ${title}`,
+        `DESCRIPTION:${descriptionLabel} ${title} at ${location}`,
         `LOCATION:${location}`,
         'STATUS:CONFIRMED',
         `UID:${Date.now()}@balkanestate.com`,
@@ -280,7 +280,7 @@ const ScheduleViewingModal: React.FC<ScheduleViewingModalProps> = ({ property, i
 
     const handleDownloadCalendar = () => {
         const duration = availability?.slotDurationMinutes || 30;
-        const icsContent = generateICSFile(property, selectedDate, selectedTime, duration);
+        const icsContent = generateICSFile(property, selectedDate, selectedTime, duration, t('rental:viewing.ics.summary'), t('rental:viewing.ics.description'));
         const blob = new Blob([icsContent], { type: 'text/calendar;charset=utf-8' });
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');

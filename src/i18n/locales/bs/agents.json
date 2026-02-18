@@ -275,6 +275,14 @@
         "invitationCode": "Unique invitation code for agents",
         "prioritySupport": "Priority customer support"
       }
+    },
+    "popularSearch": {
+      "belgrade": "Belgrade",
+      "zagreb": "Zagreb",
+      "luxury": "Luxury",
+      "tirana": "Tirana",
+      "commercial": "Commercial",
+      "residential": "Residential"
     }
   },
   "contact": {

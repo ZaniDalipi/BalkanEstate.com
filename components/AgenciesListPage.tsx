@@ -471,7 +471,7 @@ const AgenciesListPage: React.FC = () => {
         totalAgencies={agencies.length}
         totalAgents={totalStats.totalAgents}
         totalProperties={totalStats.totalProperties}
-        popularSearches={['Belgrade', 'Zagreb', 'Luxury', 'Tirana', 'Commercial', 'Residential']}
+        popularSearches={[t('agencies.popularSearch.belgrade'), t('agencies.popularSearch.zagreb'), t('agencies.popularSearch.luxury'), t('agencies.popularSearch.tirana'), t('agencies.popularSearch.commercial'), t('agencies.popularSearch.residential')]}
       />
 
       {/* Main Content */}

@@ -52,7 +52,9 @@
     "sessionCreationFailed": "Dështoi krijimi i sesionit të pagesës",
     "invalidDiscountCode": "Kodi i zbritjes i pavlefshëm",
     "freeSubscriptionFailed": "Failed to apply free subscription",
-    "verificationTimeout": "Payment verification timed out. If you completed the payment, your subscription will be activated shortly. Please check your email for confirmation."
+    "verificationTimeout": "Payment verification timed out. If you completed the payment, your subscription will be activated shortly. Please check your email for confirmation.",
+    "invalidCodeFormat": "Invalid code format. Use only letters, numbers, hyphens and underscores.",
+    "invalidPlanPrice": "Invalid plan price"
   },
   "checkout": {
     "secureCheckout": "Pagesë e Sigurt",
