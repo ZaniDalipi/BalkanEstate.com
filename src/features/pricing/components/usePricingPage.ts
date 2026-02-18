@@ -435,6 +435,40 @@ export function usePricingPage() {
     return state.currentUser.role === 'agent' ? 'agent' : 'private_seller';
   };
 
+  // Determine if a given product is the user's currently active plan
+  const isActivePlan = (productId: string): boolean => {
+    const user = state.currentUser;
+    if (!user) return false;
+
+    const isActive =
+      user.subscriptionStatus === 'active' ||
+      user.subscriptionStatus === 'trial' ||
+      user.subscriptionStatus === 'grace' ||
+      user.subscription?.status === 'active' ||
+      user.subscription?.status === 'trial';
+
+    if (!isActive) return false;
+
+    const plan = (user.subscription?.plan || user.subscriptionPlan || '').toLowerCase();
+    const tier = user.subscription?.tier || '';
+    const id = productId.toLowerCase();
+
+    // Enterprise
+    if (id.includes('enterprise') && (plan.includes('enterprise') || tier === 'agency_owner')) return true;
+    // Pro Yearly
+    if ((id.includes('pro_yearly') || (id.includes('yearly') && !id.includes('enterprise'))) &&
+        (plan.includes('pro_yearly') || plan.includes('yearly')) &&
+        !plan.includes('enterprise')) return true;
+    // Pro Monthly
+    if ((id.includes('pro_monthly') || (id.includes('monthly') && !id.includes('buyer'))) &&
+        (plan.includes('pro_monthly') || plan.includes('monthly')) &&
+        !plan.includes('yearly') && !plan.includes('enterprise')) return true;
+    // Buyer
+    if (id.includes('buyer') && plan.includes('buyer')) return true;
+
+    return false;
+  };
+
   // Separate enterprise from other products
   const enterpriseProduct = products.find(p => p.productId.includes('enterprise'));
   const proYearlyProduct = products.find(p => p.productId.includes('pro_yearly') || p.productId.includes('yearly') && !p.productId.includes('enterprise'));
@@ -495,6 +529,7 @@ export function usePricingPage() {
     getBadgeColor,
     getBillingLabel,
     getUserRole,
+    isActivePlan,
     // Handlers
     handleBack,
     handleLegalNavigation,

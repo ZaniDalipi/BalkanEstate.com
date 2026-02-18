@@ -74,6 +74,7 @@ const PricingPage: React.FC = () => {
     handleSelectListingForPromotion,
     handlePurchasePromotion,
     handleAgencyFeature,
+    isActivePlan,
   } = usePricingPage();
 
   return (
@@ -306,6 +307,7 @@ const PricingPage: React.FC = () => {
               proMonthlyProduct={proMonthlyProduct}
               enterpriseProduct={enterpriseProduct}
               onPlanSelection={handlePlanSelection}
+              isActivePlan={isActivePlan}
             />
           )}
 
@@ -315,6 +317,7 @@ const PricingPage: React.FC = () => {
               t={t}
               buyerProduct={buyerProduct}
               onPlanSelection={handlePlanSelection}
+              isActivePlan={isActivePlan}
             />
           )}
 

@@ -8,12 +8,14 @@ interface BuyerPlansSectionProps {
   t: any;
   buyerProduct: Product | undefined;
   onPlanSelection: (product: Product) => void;
+  isActivePlan: (productId: string) => boolean;
 }
 
 const BuyerPlansSection: React.FC<BuyerPlansSectionProps> = ({
   t,
   buyerProduct,
   onPlanSelection,
+  isActivePlan,
 }) => {
   return (
     <Animated variant="fadeInUp" className="max-w-md mx-auto">
@@ -47,10 +49,18 @@ const BuyerPlansSection: React.FC<BuyerPlansSectionProps> = ({
           </ul>
 
           <button
-            onClick={() => onPlanSelection(buyerProduct)}
-            className="w-full mt-8 py-4 rounded-xl font-bold text-white bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 shadow-lg hover:shadow-xl transition-all duration-300 text-base"
+            onClick={() => !isActivePlan(buyerProduct.productId) && onPlanSelection(buyerProduct)}
+            disabled={isActivePlan(buyerProduct.productId)}
+            className={`w-full mt-8 py-4 rounded-xl font-bold transition-all duration-300 text-base ${
+              isActivePlan(buyerProduct.productId)
+                ? 'bg-gray-200 text-gray-500 cursor-not-allowed shadow-none'
+                : 'text-white bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 shadow-lg hover:shadow-xl'
+            }`}
           >
-            {t('pricing:buttons.getStarted', 'Get Started')} - €{buyerProduct.price}{t('pricing:billing.perMonth', '/month')}
+            {isActivePlan(buyerProduct.productId)
+              ? t('pricing:buttons.currentPlan', 'Current Plan')
+              : <>{t('pricing:buttons.getStarted', 'Get Started')} - €{buyerProduct.price}{t('pricing:billing.perMonth', '/month')}</>
+            }
           </button>
         </div>
       ) : (
