@@ -1,5 +1,6 @@
-import React from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
+import { User } from 'lucide-react';
 import { Agent, Agency } from '@/types';
 import {
     ArrowLeftIcon,
@@ -16,6 +17,7 @@ import {
     HomeIcon,
 } from '@/constants';
 import DefaultAvatar from '@/components/shared/DefaultAvatar';
+import NotificationCenter from '@/shared/components/NotificationCenter';
 import { AgentStats } from './useAgentProfile';
 import { useAppContext } from '@/context/AppContext';
 
@@ -56,8 +58,72 @@ const AgentProfileHeader: React.FC<AgentProfileHeaderProps> = ({
     onVisitAgency,
     onOpenEditModal,
 }) => {
-    const { t } = useTranslation(['agents']);
-    const { state } = useAppContext();
+    const { t } = useTranslation(['agents', 'nav']);
+    const { state, dispatch } = useAppContext();
+    const { isAuthenticated, currentUser } = state;
+
+    const handleAccountClick = useCallback(() => {
+        if (isAuthenticated) {
+            dispatch({ type: 'SET_SELECTED_PROPERTY', payload: null });
+            dispatch({ type: 'SET_SELECTED_AGENCY', payload: null });
+            dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'account' });
+            window.history.pushState({}, '', '/account');
+        } else {
+            dispatch({ type: 'TOGGLE_AUTH_MODAL', payload: { isOpen: true, view: 'login' } });
+        }
+    }, [isAuthenticated, dispatch]);
+
+    const handleNewListingClick = useCallback(() => {
+        if (isAuthenticated) {
+            dispatch({ type: 'SET_SELECTED_PROPERTY', payload: null });
+            dispatch({ type: 'SET_SELECTED_AGENCY', payload: null });
+            dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'create-listing' });
+            window.history.pushState({}, '', '/create-listing');
+        } else {
+            dispatch({ type: 'TOGGLE_AUTH_MODAL', payload: { isOpen: true, view: 'signup' } });
+        }
+    }, [isAuthenticated, dispatch]);
+
+    const handleSubscribeClick = useCallback(() => {
+        dispatch({ type: 'SET_SELECTED_PROPERTY', payload: null });
+        dispatch({ type: 'SET_SELECTED_AGENCY', payload: null });
+        dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'pricing' });
+        const currentLang = window.location.pathname.split('/')[1] || 'en';
+        const validLangs = ['en', 'sq', 'sr', 'de', 'mk'];
+        const lang = validLangs.includes(currentLang) ? currentLang : 'en';
+        window.history.pushState({}, '', `/${lang}/subscribe`);
+    }, [dispatch]);
+
+    const accountButton = useMemo(() => {
+        if (isAuthenticated && currentUser) {
+            return (
+                <button
+                    onClick={handleAccountClick}
+                    className="flex items-center gap-1.5 px-2 sm:px-3 py-1.5 text-white/80 hover:text-white bg-white/[0.06] hover:bg-white/[0.12] rounded-xl transition-all border border-white/[0.08]"
+                    aria-label={t('nav:myAccount')}
+                >
+                    <div className="w-6 h-6 rounded-full overflow-hidden flex-shrink-0">
+                        {currentUser.avatarUrl ? (
+                            <img src={currentUser.avatarUrl} alt="" className="w-full h-full object-cover" aria-hidden="true" />
+                        ) : (
+                            <DefaultAvatar gender={currentUser.gender} seed={currentUser.id || currentUser.name} avatarOptions={currentUser.avatarOptions} />
+                        )}
+                    </div>
+                    <span className="hidden lg:inline text-xs font-medium">{t('nav:myAccount')}</span>
+                </button>
+            );
+        }
+        return (
+            <button
+                onClick={handleAccountClick}
+                className="flex items-center gap-1.5 px-2 sm:px-3 py-1.5 text-white/80 hover:text-white bg-white/[0.06] hover:bg-white/[0.12] rounded-xl transition-all border border-white/[0.08]"
+                aria-label={t('nav:loginRegister')}
+            >
+                <User className="w-4 h-4" aria-hidden="true" />
+                <span className="hidden lg:inline text-xs font-medium">{t('nav:loginRegister')}</span>
+            </button>
+        );
+    }, [isAuthenticated, currentUser, handleAccountClick, t]);
 
     // Use AppContext avatar if this agent is the current user (immediate propagation)
     const isCurrentUser = state.currentUser && (
@@ -172,6 +238,25 @@ const AgentProfileHeader: React.FC<AgentProfileHeaderProps> = ({
                                         <ShareIcon className="w-4 h-4" />
                                         <span className="hidden md:inline text-xs font-medium">{t('profilePage.header.share')}</span>
                                     </button>
+
+                                    {/* Divider */}
+                                    <div className="hidden sm:block w-px h-6 bg-white/20 mx-0.5" />
+
+                                    {/* Global Nav Actions */}
+                                    <button
+                                        onClick={handleSubscribeClick}
+                                        className="hidden sm:flex items-center gap-1.5 px-2.5 py-1.5 bg-primary/80 hover:bg-primary text-white rounded-xl transition-all text-xs font-semibold border border-white/[0.08]"
+                                    >
+                                        <span>{t('nav:subscribe')}</span>
+                                    </button>
+                                    <button
+                                        onClick={handleNewListingClick}
+                                        className="hidden md:flex items-center gap-1.5 px-2.5 py-1.5 bg-secondary/80 hover:bg-secondary text-white rounded-xl transition-all text-xs font-semibold border border-white/[0.08]"
+                                    >
+                                        + {t('nav:newListing')}
+                                    </button>
+                                    <NotificationCenter />
+                                    {accountButton}
                                 </div>
                             </div>
                         </div>
@@ -230,6 +315,25 @@ const AgentProfileHeader: React.FC<AgentProfileHeaderProps> = ({
                                         <ShareIcon className="w-5 h-5" />
                                         <span className="hidden md:inline text-sm font-medium">{t('profilePage.header.share')}</span>
                                     </button>
+
+                                    {/* Divider */}
+                                    <div className="hidden sm:block w-px h-6 bg-white/20 mx-0.5" />
+
+                                    {/* Global Nav Actions */}
+                                    <button
+                                        onClick={handleSubscribeClick}
+                                        className="hidden sm:flex items-center gap-1.5 px-3 py-2 bg-primary/80 hover:bg-primary text-white rounded-lg transition-all text-sm font-semibold"
+                                    >
+                                        {t('nav:subscribe')}
+                                    </button>
+                                    <button
+                                        onClick={handleNewListingClick}
+                                        className="hidden md:flex items-center gap-1.5 px-3 py-2 bg-secondary/80 hover:bg-secondary text-white rounded-lg transition-all text-sm font-semibold"
+                                    >
+                                        + {t('nav:newListing')}
+                                    </button>
+                                    <NotificationCenter />
+                                    {accountButton}
                                 </div>
                             </div>
                         </div>
