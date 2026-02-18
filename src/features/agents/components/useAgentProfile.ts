@@ -33,12 +33,13 @@ export interface AgentStats {
 }
 
 export interface MarketInsights {
-    avgDaysOnMarket: number;
-    priceGrowth: number;
-    activityLevel: 'Low' | 'Moderate' | 'High' | 'Very High';
-    daysDescription: string;
-    growthDescription: string;
-    activityDescription: string;
+    avgPrice: number;
+    avgDaysToSell: number;
+    totalSold: number;
+    totalActive: number;
+    totalRented: number;
+    priceRange: { min: number; max: number } | null;
+    hasRealSalesData: boolean;
 }
 
 export interface EditFormData {
@@ -180,62 +181,44 @@ export function useAgentProfile({ agent }: { agent: Agent }) {
         maxPrice: agent.maxPrice || 3800000,
     }), [agent, isAgencyAgent]);
 
-    // Compute real market insights from agent data
+    // Compute market insights from real property data
     const marketInsights: MarketInsights = useMemo(() => {
-        const propertiesSold = agent.propertiesSold || 0;
-        const activeListingsCount = agent.activeListings || activeListings.length || 0;
-        const yearsExp = agent.yearsOfExperience || 0;
-        const avgPrice = agent.averageprice || 0;
+        // Compute average price from real properties
+        const allPrices = allAgentProperties.filter(p => p.price > 0).map(p => p.price);
+        const avgPrice = allPrices.length > 0
+            ? Math.round(allPrices.reduce((sum, p) => sum + p, 0) / allPrices.length)
+            : (agent.averageprice || 0);
 
-        // Calculate avg days on market based on agent's efficiency
-        // More experienced agents with higher sales tend to sell faster
-        let avgDaysOnMarket = 45; // Base average
-        if (propertiesSold > 50) avgDaysOnMarket -= 15;
-        else if (propertiesSold > 20) avgDaysOnMarket -= 10;
-        else if (propertiesSold > 10) avgDaysOnMarket -= 5;
-        if (yearsExp > 10) avgDaysOnMarket -= 8;
-        else if (yearsExp > 5) avgDaysOnMarket -= 4;
-        avgDaysOnMarket = Math.max(14, avgDaysOnMarket); // Minimum 14 days
+        // Compute price range from real listings
+        const priceRange = allPrices.length > 0
+            ? { min: Math.min(...allPrices), max: Math.max(...allPrices) }
+            : null;
 
-        // Calculate price growth based on region (Balkans average ~4-8% YoY)
-        // Higher-priced markets tend to have slightly lower growth rates
-        let priceGrowth = 5.5; // Base for Balkans
-        if (avgPrice > 500000) priceGrowth = 3.8;
-        else if (avgPrice > 200000) priceGrowth = 4.5;
-        else if (avgPrice < 100000) priceGrowth = 6.2;
-        // Add slight variation based on agent's city
-        const cityHash = (agent.city || '').split('').reduce((a, c) => a + c.charCodeAt(0), 0);
-        priceGrowth += (cityHash % 20 - 10) / 10; // +/- 1% variation
-        priceGrowth = Math.round(priceGrowth * 10) / 10;
-
-        // Determine market activity level based on listings and sales
-        let activityLevel: 'Low' | 'Moderate' | 'High' | 'Very High' = 'Moderate';
-        const activityScore = activeListingsCount + (propertiesSold * 0.5);
-        if (activityScore > 30) activityLevel = 'Very High';
-        else if (activityScore > 15) activityLevel = 'High';
-        else if (activityScore > 5) activityLevel = 'Moderate';
-        else activityLevel = 'Low';
-
-        // Determine description based on metrics
-        const daysDescription = avgDaysOnMarket < 30 ? 'profilePage.marketInsights.fasterThanAverage' :
-                               avgDaysOnMarket < 45 ? 'profilePage.marketInsights.averageTime' :
-                               'profilePage.marketInsights.slowerThanAverage';
-        const growthDescription = priceGrowth > 5 ? 'profilePage.marketInsights.healthyAppreciation' :
-                                 priceGrowth > 3 ? 'profilePage.marketInsights.steadyGrowth' :
-                                 'profilePage.marketInsights.stableMarket';
-        const activityDescription = activityLevel === 'Very High' || activityLevel === 'High' ?
-                                   'profilePage.marketInsights.strongDemand' :
-                                   'profilePage.marketInsights.moderateDemand';
+        // Compute average days to sell from sold properties with real dates
+        let avgDaysToSell = 0;
+        let hasRealSalesData = false;
+        const soldWithDates = soldProperties.filter(p => p.createdAt && p.soldAt);
+        if (soldWithDates.length > 0) {
+            hasRealSalesData = true;
+            const totalDays = soldWithDates.reduce((sum, p) => {
+                const created = typeof p.createdAt === 'number' ? p.createdAt : new Date(p.createdAt!).getTime();
+                const sold = typeof p.soldAt === 'number' ? p.soldAt : new Date(p.soldAt!).getTime();
+                const days = Math.max(1, Math.round((sold - created) / (1000 * 60 * 60 * 24)));
+                return sum + days;
+            }, 0);
+            avgDaysToSell = Math.round(totalDays / soldWithDates.length);
+        }
 
         return {
-            avgDaysOnMarket,
-            priceGrowth,
-            activityLevel,
-            daysDescription,
-            growthDescription,
-            activityDescription
+            avgPrice,
+            avgDaysToSell,
+            totalSold: soldProperties.length || (agent.propertiesSold || 0),
+            totalActive: activeListings.length,
+            totalRented: rentedProperties.length,
+            priceRange,
+            hasRealSalesData,
         };
-    }, [agent, activeListings.length]);
+    }, [allAgentProperties, soldProperties, activeListings.length, rentedProperties.length, agent.averageprice, agent.propertiesSold]);
 
     const firstName = agent.name?.split(' ')[0] || 'Agent';
     const canWriteReview = currentUser && currentUser.id !== agentUserId;

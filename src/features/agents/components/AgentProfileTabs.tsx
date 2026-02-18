@@ -11,9 +11,6 @@ import {
     AcademicCapIcon,
     TrophyIcon,
     ChartBarIcon,
-    ClockIcon,
-    ArrowTrendingUpIcon,
-    FireIcon,
     DocumentTextIcon,
     ArrowRightIcon,
     MapIcon,
@@ -318,84 +315,69 @@ const AgentProfileTabs: React.FC<AgentProfileTabsProps> = ({
                             </div>
                         </div>
 
-                        {/* Local Market Insights */}
+                        {/* Agent's Property Overview - Simple, real data */}
+                        {(marketInsights.totalSold > 0 || marketInsights.totalActive > 0 || marketInsights.avgPrice > 0) && (
                         <div>
-                            <h3 className="text-xl font-bold text-gray-900 mb-6 flex items-center gap-2">
+                            <h3 className="text-xl font-bold text-gray-900 mb-4 flex items-center gap-2">
                                 <ChartBarIcon className="w-6 h-6 text-blue-600" />
-                                {t('profilePage.marketInsights.title')}
-                                {agent.city && <span className="text-sm font-normal text-gray-600 ml-2">({agent.city})</span>}
+                                {t('profilePage.marketInsights.title', 'Property Overview')}
+                                {agent.city && <span className="text-sm font-normal text-gray-500 ml-1">- {agent.city}</span>}
                             </h3>
 
-                            <div className="bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 border border-blue-200 rounded-xl p-4 sm:p-6">
-                                <div className="grid grid-cols-1 gap-4 sm:grid-cols-3 sm:gap-6 mb-6">
-                                    {/* Avg Days on Market */}
-                                    <div className="bg-white/80 backdrop-blur-sm rounded-lg p-4 border border-gray-200 shadow-sm">
-                                        <div className="flex items-center gap-3 mb-2">
-                                            <div className="bg-blue-100 p-2 rounded-lg">
-                                                <ClockIcon className="w-5 h-5 text-blue-600" />
-                                            </div>
-                                            <div>
-                                                <p className="text-xs text-gray-600 font-medium">{t('profilePage.marketInsights.avgDaysOnMarket')}</p>
-                                                <p className="text-2xl font-bold text-gray-900">
-                                                    {marketInsights.avgDaysOnMarket} <span className="text-sm font-normal text-gray-600">{t('profilePage.marketInsights.days')}</span>
-                                                </p>
-                                            </div>
-                                        </div>
-                                        <p className="text-xs text-gray-500">{t(marketInsights.daysDescription)}</p>
+                            <div className="bg-white border border-gray-200 rounded-xl p-4 sm:p-6">
+                                {/* Stats Grid */}
+                                <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-5">
+                                    {/* Active Listings */}
+                                    <div className="text-center p-3 rounded-lg bg-green-50 border border-green-100">
+                                        <div className="text-2xl font-bold text-green-700">{marketInsights.totalActive}</div>
+                                        <div className="text-xs font-medium text-green-800 mt-1">{t('profilePage.marketInsights.activeListings', 'Active Listings')}</div>
                                     </div>
-
-                                    {/* Price Growth */}
-                                    <div className="bg-white/80 backdrop-blur-sm rounded-lg p-4 border border-gray-200 shadow-sm">
-                                        <div className="flex items-center gap-3 mb-2">
-                                            <div className="bg-green-100 p-2 rounded-lg">
-                                                <ArrowTrendingUpIcon className="w-5 h-5 text-green-600" />
-                                            </div>
-                                            <div>
-                                                <p className="text-xs text-gray-600 font-medium">{t('profilePage.marketInsights.priceGrowthYoY')}</p>
-                                                <p className="text-2xl font-bold text-green-600">
-                                                    +{marketInsights.priceGrowth}%
-                                                </p>
-                                            </div>
-                                        </div>
-                                        <p className="text-xs text-gray-500">{t(marketInsights.growthDescription)}</p>
+                                    {/* Properties Sold */}
+                                    <div className="text-center p-3 rounded-lg bg-blue-50 border border-blue-100">
+                                        <div className="text-2xl font-bold text-blue-700">{marketInsights.totalSold}</div>
+                                        <div className="text-xs font-medium text-blue-800 mt-1">{t('profilePage.marketInsights.propertiesSold', 'Properties Sold')}</div>
                                     </div>
-
-                                    {/* Market Activity */}
-                                    <div className="bg-white/80 backdrop-blur-sm rounded-lg p-4 border border-gray-200 shadow-sm">
-                                        <div className="flex items-center gap-3 mb-2">
-                                            <div className="bg-purple-100 p-2 rounded-lg">
-                                                <FireIcon className="w-5 h-5 text-purple-600" />
-                                            </div>
-                                            <div>
-                                                <p className="text-xs text-gray-600 font-medium">{t('profilePage.marketInsights.marketActivity')}</p>
-                                                <p className={`text-2xl font-bold ${
-                                                    marketInsights.activityLevel === 'Very High' ? 'text-red-600' :
-                                                    marketInsights.activityLevel === 'High' ? 'text-purple-600' :
-                                                    marketInsights.activityLevel === 'Moderate' ? 'text-blue-600' :
-                                                    'text-gray-600'
-                                                }`}>
-                                                    {t(`profilePage.marketInsights.activity.${marketInsights.activityLevel.toLowerCase().replace(' ', '')}`, marketInsights.activityLevel)}
-                                                </p>
-                                            </div>
-                                        </div>
-                                        <p className="text-xs text-gray-500">{t(marketInsights.activityDescription)}</p>
+                                    {/* Average Price */}
+                                    {marketInsights.avgPrice > 0 && (
+                                    <div className="text-center p-3 rounded-lg bg-purple-50 border border-purple-100">
+                                        <div className="text-lg sm:text-xl font-bold text-purple-700 truncate">{formatPrice(marketInsights.avgPrice, agent.country)}</div>
+                                        <div className="text-xs font-medium text-purple-800 mt-1">{t('profilePage.marketInsights.avgPrice', 'Avg. Price')}</div>
                                     </div>
+                                    )}
+                                    {/* Avg Days to Sell */}
+                                    {marketInsights.hasRealSalesData && marketInsights.avgDaysToSell > 0 && (
+                                    <div className="text-center p-3 rounded-lg bg-orange-50 border border-orange-100">
+                                        <div className="text-2xl font-bold text-orange-700">{marketInsights.avgDaysToSell}</div>
+                                        <div className="text-xs font-medium text-orange-800 mt-1">{t('profilePage.marketInsights.avgDaysToSell', 'Avg. Days to Sell')}</div>
+                                    </div>
+                                    )}
                                 </div>
 
-                                {/* Request Full Report Button */}
+                                {/* Price Range */}
+                                {marketInsights.priceRange && marketInsights.priceRange.min !== marketInsights.priceRange.max && (
+                                    <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg border border-gray-100 mb-5">
+                                        <BanknotesIcon className="w-5 h-5 text-gray-500 flex-shrink-0" />
+                                        <div className="text-sm text-gray-700">
+                                            <span className="font-medium">{t('profilePage.marketInsights.priceRange', 'Price Range')}:</span>{' '}
+                                            <span className="font-semibold text-gray-900">{formatPrice(marketInsights.priceRange.min, agent.country)}</span>
+                                            {' - '}
+                                            <span className="font-semibold text-gray-900">{formatPrice(marketInsights.priceRange.max, agent.country)}</span>
+                                        </div>
+                                    </div>
+                                )}
+
+                                {/* Contact CTA */}
                                 <button
                                     onClick={onRequestMarketReport}
-                                    className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-bold py-3.5 px-6 rounded-xl transition-all shadow-md hover:shadow-lg flex items-center justify-center gap-2 group"
+                                    className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-semibold py-3 px-6 rounded-xl transition-all shadow-sm hover:shadow-md flex items-center justify-center gap-2 group"
                                 >
                                     <DocumentTextIcon className="w-5 h-5" />
-                                    <span>{t('profilePage.marketInsights.requestFullReport')}</span>
+                                    <span>{t('profilePage.marketInsights.requestReport', 'Ask for a Market Report')}</span>
                                     <ArrowRightIcon className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
                                 </button>
-                                <p className="text-center text-xs text-gray-600 mt-3">
-                                    {t('profilePage.marketInsights.getDetailedInsights', { city: agent.city })}
-                                </p>
                             </div>
                         </div>
+                        )}
 
                         {/* Properties Map - Shows agent's active and sold properties */}
                         {allAgentProperties.length > 0 && allAgentProperties.some(p => p.lat && p.lng) && (
