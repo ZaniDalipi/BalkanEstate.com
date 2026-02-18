@@ -9,7 +9,7 @@ import {
 } from '../hooks/useAdminData';
 
 export interface DiscountCode {
-  _id: string;
+  id: string;
   code: string;
   discountType: 'percentage' | 'fixed';
   discountValue: number;

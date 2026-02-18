@@ -141,7 +141,7 @@ const DiscountCodeManager: React.FC = () => {
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
             {filteredCodes.map((code, index) => (
-              <tr key={code._id || `discount-code-${index}`} className="hover:bg-gray-50">
+              <tr key={code.id || `discount-code-${index}`} className="hover:bg-gray-50">
                 <td className="px-6 py-4 whitespace-nowrap">
                   <div className="font-mono font-bold text-gray-900">{code.code}</div>
                   {code.description && (
@@ -180,14 +180,14 @@ const DiscountCodeManager: React.FC = () => {
                   <div className="flex gap-2">
                     {code.isActive && (
                       <button
-                        onClick={() => handleDeactivate(code._id)}
+                        onClick={() => handleDeactivate(code.id)}
                         className="text-yellow-600 hover:text-yellow-900"
                       >
                         Deactivate
                       </button>
                     )}
                     <button
-                      onClick={() => handleDelete(code._id)}
+                      onClick={() => handleDelete(code.id)}
                       className="text-red-600 hover:text-red-900"
                     >
                       Delete
