@@ -385,42 +385,46 @@ const PropertyCardInner = memo<PropertyCardInnerProps>(({
         </div>
 
         {/* Property Stats - Liquid Glass Design */}
-        <div className="grid grid-cols-4 gap-1.5 mb-2.5">
-          {/* Beds */}
-          <div
-            className="group relative flex flex-col items-center py-2 px-1 rounded-xl bg-white/60 backdrop-blur-md border border-white/80 shadow-[0_2px_8px_rgba(0,0,0,0.04),inset_0_1px_0_rgba(255,255,255,0.8)] hover:shadow-[0_4px_12px_rgba(59,130,246,0.15),inset_0_1px_0_rgba(255,255,255,0.9)] hover:border-blue-200/60 transition-all duration-300"
-            aria-label={`${safeProperty.beds} ${t('property:features.bedrooms')}`}
-          >
-            <div className="absolute inset-0 rounded-xl bg-gradient-to-br from-blue-50/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-            <svg className="w-4 h-4 text-blue-500 mb-1 relative z-10 drop-shadow-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M2 17V8a2 2 0 012-2h16a2 2 0 012 2v9M2 17v2a1 1 0 001 1h1m16-3v2a1 1 0 01-1 1h-1M2 17h20M6 12h12a2 2 0 012 2v1H4v-1a2 2 0 012-2z" />
-            </svg>
-            <span className="font-bold text-xs text-neutral-700 relative z-10">{safeProperty.beds}</span>
-          </div>
+        <div className={`grid ${property.propertyType === 'land' ? 'grid-cols-1' : 'grid-cols-4'} gap-1.5 mb-2.5`}>
+          {property.propertyType !== 'land' && (
+            <>
+              {/* Beds */}
+              <div
+                className="group relative flex flex-col items-center py-2 px-1 rounded-xl bg-white/60 backdrop-blur-md border border-white/80 shadow-[0_2px_8px_rgba(0,0,0,0.04),inset_0_1px_0_rgba(255,255,255,0.8)] hover:shadow-[0_4px_12px_rgba(59,130,246,0.15),inset_0_1px_0_rgba(255,255,255,0.9)] hover:border-blue-200/60 transition-all duration-300"
+                aria-label={`${safeProperty.beds} ${t('property:features.bedrooms')}`}
+              >
+                <div className="absolute inset-0 rounded-xl bg-gradient-to-br from-blue-50/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                <svg className="w-4 h-4 text-blue-500 mb-1 relative z-10 drop-shadow-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M2 17V8a2 2 0 012-2h16a2 2 0 012 2v9M2 17v2a1 1 0 001 1h1m16-3v2a1 1 0 01-1 1h-1M2 17h20M6 12h12a2 2 0 012 2v1H4v-1a2 2 0 012-2z" />
+                </svg>
+                <span className="font-bold text-xs text-neutral-700 relative z-10">{safeProperty.beds}</span>
+              </div>
 
-          {/* Baths */}
-          <div
-            className="group relative flex flex-col items-center py-2 px-1 rounded-xl bg-white/60 backdrop-blur-md border border-white/80 shadow-[0_2px_8px_rgba(0,0,0,0.04),inset_0_1px_0_rgba(255,255,255,0.8)] hover:shadow-[0_4px_12px_rgba(16,185,129,0.15),inset_0_1px_0_rgba(255,255,255,0.9)] hover:border-emerald-200/60 transition-all duration-300"
-            aria-label={`${safeProperty.baths} ${t('property:features.bathrooms')}`}
-          >
-            <div className="absolute inset-0 rounded-xl bg-gradient-to-br from-emerald-50/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-            <svg className="w-4 h-4 text-emerald-500 mb-1 relative z-10 drop-shadow-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M4 12h16M4 12v6a2 2 0 002 2h12a2 2 0 002-2v-6M4 12V7a3 3 0 013-3h1M8 4v4M12 4v2m-1 2a1 1 0 102 0 1 1 0 00-2 0z" />
-            </svg>
-            <span className="font-bold text-xs text-neutral-700 relative z-10">{safeProperty.baths}</span>
-          </div>
+              {/* Baths */}
+              <div
+                className="group relative flex flex-col items-center py-2 px-1 rounded-xl bg-white/60 backdrop-blur-md border border-white/80 shadow-[0_2px_8px_rgba(0,0,0,0.04),inset_0_1px_0_rgba(255,255,255,0.8)] hover:shadow-[0_4px_12px_rgba(16,185,129,0.15),inset_0_1px_0_rgba(255,255,255,0.9)] hover:border-emerald-200/60 transition-all duration-300"
+                aria-label={`${safeProperty.baths} ${t('property:features.bathrooms')}`}
+              >
+                <div className="absolute inset-0 rounded-xl bg-gradient-to-br from-emerald-50/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                <svg className="w-4 h-4 text-emerald-500 mb-1 relative z-10 drop-shadow-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M4 12h16M4 12v6a2 2 0 002 2h12a2 2 0 002-2v-6M4 12V7a3 3 0 013-3h1M8 4v4M12 4v2m-1 2a1 1 0 102 0 1 1 0 00-2 0z" />
+                </svg>
+                <span className="font-bold text-xs text-neutral-700 relative z-10">{safeProperty.baths}</span>
+              </div>
 
-          {/* Living Rooms */}
-          <div
-            className="group relative flex flex-col items-center py-2 px-1 rounded-xl bg-white/60 backdrop-blur-md border border-white/80 shadow-[0_2px_8px_rgba(0,0,0,0.04),inset_0_1px_0_rgba(255,255,255,0.8)] hover:shadow-[0_4px_12px_rgba(168,85,247,0.15),inset_0_1px_0_rgba(255,255,255,0.9)] hover:border-purple-200/60 transition-all duration-300"
-            aria-label={`${safeProperty.livingRooms} ${t('property:features.livingRooms')}`}
-          >
-            <div className="absolute inset-0 rounded-xl bg-gradient-to-br from-purple-50/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-            <svg className="w-4 h-4 text-purple-500 mb-1 relative z-10 drop-shadow-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M3 12h18M3 12v6a1 1 0 001 1h2v-4h12v4h2a1 1 0 001-1v-6M3 12V9a3 3 0 013-3h12a3 3 0 013 3v3M7 19v-4m10 4v-4" />
-            </svg>
-            <span className="font-bold text-xs text-neutral-700 relative z-10">{safeProperty.livingRooms}</span>
-          </div>
+              {/* Living Rooms */}
+              <div
+                className="group relative flex flex-col items-center py-2 px-1 rounded-xl bg-white/60 backdrop-blur-md border border-white/80 shadow-[0_2px_8px_rgba(0,0,0,0.04),inset_0_1px_0_rgba(255,255,255,0.8)] hover:shadow-[0_4px_12px_rgba(168,85,247,0.15),inset_0_1px_0_rgba(255,255,255,0.9)] hover:border-purple-200/60 transition-all duration-300"
+                aria-label={`${safeProperty.livingRooms} ${t('property:features.livingRooms')}`}
+              >
+                <div className="absolute inset-0 rounded-xl bg-gradient-to-br from-purple-50/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                <svg className="w-4 h-4 text-purple-500 mb-1 relative z-10 drop-shadow-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M3 12h18M3 12v6a1 1 0 001 1h2v-4h12v4h2a1 1 0 001-1v-6M3 12V9a3 3 0 013-3h12a3 3 0 013 3v3M7 19v-4m10 4v-4" />
+                </svg>
+                <span className="font-bold text-xs text-neutral-700 relative z-10">{safeProperty.livingRooms}</span>
+              </div>
+            </>
+          )}
 
           {/* Sqft - Highlighted */}
           <div

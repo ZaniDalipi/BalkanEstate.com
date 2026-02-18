@@ -193,25 +193,29 @@ export const PropertyInfo: React.FC<PropertyInfoProps> = ({ property, onOpenFloo
           </div>
 
           <div className="mt-6 flex flex-wrap justify-around text-base sm:text-lg text-neutral-800 border-t border-neutral-200 pt-4 gap-4">
-            <div className="flex items-center gap-3 p-2 rounded-lg hover:bg-primary-light/50 transition-all duration-200 cursor-default group">
-              <BedIcon className="w-6 h-6 text-primary group-hover:scale-110 transition-transform" />
-              <span>
-                <span className="font-bold">{property.beds}</span> {t('features.beds').toLowerCase()}
-              </span>
-            </div>
-            <div className="flex items-center gap-3 p-2 rounded-lg hover:bg-primary-light/50 transition-all duration-200 cursor-default group">
-              <BathIcon className="w-6 h-6 text-primary group-hover:scale-110 transition-transform" />
-              <span>
-                <span className="font-bold">{property.baths}</span> {t('features.baths').toLowerCase()}
-              </span>
-            </div>
-            <div className="flex items-center gap-3 p-2 rounded-lg hover:bg-primary-light/50 transition-all duration-200 cursor-default group">
-              <LivingRoomIcon className="w-6 h-6 text-primary group-hover:scale-110 transition-transform" />
-              <span>
-                <span className="font-bold">{property.livingRooms}</span>{' '}
-                {property.livingRooms === 1 ? t('details.livingRoom') : t('details.livingRoomPlural')}
-              </span>
-            </div>
+            {property.propertyType !== 'land' && (
+              <>
+                <div className="flex items-center gap-3 p-2 rounded-lg hover:bg-primary-light/50 transition-all duration-200 cursor-default group">
+                  <BedIcon className="w-6 h-6 text-primary group-hover:scale-110 transition-transform" />
+                  <span>
+                    <span className="font-bold">{property.beds}</span> {t('features.beds').toLowerCase()}
+                  </span>
+                </div>
+                <div className="flex items-center gap-3 p-2 rounded-lg hover:bg-primary-light/50 transition-all duration-200 cursor-default group">
+                  <BathIcon className="w-6 h-6 text-primary group-hover:scale-110 transition-transform" />
+                  <span>
+                    <span className="font-bold">{property.baths}</span> {t('features.baths').toLowerCase()}
+                  </span>
+                </div>
+                <div className="flex items-center gap-3 p-2 rounded-lg hover:bg-primary-light/50 transition-all duration-200 cursor-default group">
+                  <LivingRoomIcon className="w-6 h-6 text-primary group-hover:scale-110 transition-transform" />
+                  <span>
+                    <span className="font-bold">{property.livingRooms}</span>{' '}
+                    {property.livingRooms === 1 ? t('details.livingRoom') : t('details.livingRoomPlural')}
+                  </span>
+                </div>
+              </>
+            )}
             <div className="flex items-center gap-3 p-2 rounded-lg hover:bg-primary-light/50 transition-all duration-200 cursor-default group">
               <SqftIcon className="w-6 h-6 text-primary group-hover:scale-110 transition-transform" />
               <span>
