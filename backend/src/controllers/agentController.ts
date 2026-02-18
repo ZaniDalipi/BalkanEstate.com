@@ -181,13 +181,72 @@ export const updateAgentProfile = async (req: Request, res: Response): Promise<v
       officePhone,
     } = req.body;
 
+    // Validation
+    if (bio !== undefined && typeof bio === 'string' && bio.length > 5000) {
+      res.status(400).json({ message: 'Bio must be under 5000 characters' });
+      return;
+    }
+
+    if (yearsOfExperience !== undefined) {
+      const years = Number(yearsOfExperience);
+      if (isNaN(years) || years < 0 || years > 100) {
+        res.status(400).json({ message: 'Years of experience must be between 0 and 100' });
+        return;
+      }
+    }
+
+    // Validate URL fields
+    const urlFields: Record<string, string | undefined> = { websiteUrl, facebookUrl, instagramUrl, linkedinUrl };
+    for (const [fieldName, value] of Object.entries(urlFields)) {
+      if (value && typeof value === 'string' && value.trim()) {
+        try {
+          new URL(value);
+        } catch {
+          res.status(400).json({ message: `Invalid URL for ${fieldName}` });
+          return;
+        }
+      }
+    }
+
+    // Validate coordinates
+    if (lat !== undefined && lat !== null) {
+      const latNum = Number(lat);
+      if (isNaN(latNum) || latNum < -90 || latNum > 90) {
+        res.status(400).json({ message: 'Latitude must be between -90 and 90' });
+        return;
+      }
+    }
+    if (lng !== undefined && lng !== null) {
+      const lngNum = Number(lng);
+      if (isNaN(lngNum) || lngNum < -180 || lngNum > 180) {
+        res.status(400).json({ message: 'Longitude must be between -180 and 180' });
+        return;
+      }
+    }
+
+    // Validate array fields
+    const arrayFields: Record<string, string[] | undefined> = { specializations, languages, serviceAreas };
+    for (const [fieldName, arr] of Object.entries(arrayFields)) {
+      if (arr !== undefined) {
+        if (!Array.isArray(arr)) {
+          res.status(400).json({ message: `${fieldName} must be an array` });
+          return;
+        }
+        if (arr.length > 50) {
+          res.status(400).json({ message: `${fieldName} cannot have more than 50 items` });
+          return;
+        }
+      }
+    }
+
+    // Apply validated fields
     if (bio !== undefined) agent.bio = bio;
     if (specializations !== undefined) agent.specializations = specializations;
-    if (yearsOfExperience !== undefined) agent.yearsOfExperience = yearsOfExperience;
+    if (yearsOfExperience !== undefined) agent.yearsOfExperience = Number(yearsOfExperience);
     if (languages !== undefined) agent.languages = languages;
     if (serviceAreas !== undefined) agent.serviceAreas = serviceAreas;
-    if (lat !== undefined) agent.lat = lat;
-    if (lng !== undefined) agent.lng = lng;
+    if (lat !== undefined) agent.lat = Number(lat);
+    if (lng !== undefined) agent.lng = Number(lng);
     if (websiteUrl !== undefined) agent.websiteUrl = websiteUrl;
     if (facebookUrl !== undefined) agent.facebookUrl = facebookUrl;
     if (instagramUrl !== undefined) agent.instagramUrl = instagramUrl;
@@ -203,7 +262,12 @@ export const updateAgentProfile = async (req: Request, res: Response): Promise<v
     });
   } catch (error: any) {
     apiLogger.error('Update agent profile error:', error);
-    res.status(500).json({ message: 'Error updating agent profile' });
+    if (error.name === 'ValidationError') {
+      const messages = Object.values(error.errors).map((e: any) => e.message);
+      res.status(400).json({ message: messages.join('. ') });
+    } else {
+      res.status(500).json({ message: 'Error updating agent profile' });
+    }
   }
 };
 

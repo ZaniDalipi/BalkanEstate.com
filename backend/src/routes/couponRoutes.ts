@@ -9,14 +9,15 @@ import {
   deleteCoupon,
 } from '../controllers/couponController';
 import { protect } from '../middleware/auth';
+import { couponValidationRateLimiterIP } from '../middleware/rateLimiter';
 
 const router = express.Router();
 
 // Public routes
 router.get('/public', getPublicCoupons); // Get public coupons
 
-// Protected routes
-router.post('/validate', protect, validateCoupon); // Validate a coupon code
+// Protected routes (rate-limited to prevent code enumeration)
+router.post('/validate', couponValidationRateLimiterIP, protect, validateCoupon); // Validate a coupon code
 
 // Admin routes
 router.post('/', protect, createCoupon); // Create coupon (admin)

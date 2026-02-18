@@ -65,11 +65,11 @@ const FeaturedSubscriptionCard: React.FC<FeaturedSubscriptionCardProps> = React.
       const response = await fetch(`${API_URL}/products`);
       if (response.ok) {
         const data = await response.json();
-        const weeklyProduct = (data.products || []).find(
-          (p: any) => p.productId === 'featured_agency_weekly'
+        const cheapestProduct = (data.products || []).find(
+          (p: any) => p.productId === 'featured_agency_7days'
         );
-        if (weeklyProduct?.price) {
-          setStartingPrice(weeklyProduct.price);
+        if (cheapestProduct?.price) {
+          setStartingPrice(cheapestProduct.price);
         }
       }
     } catch (err) {

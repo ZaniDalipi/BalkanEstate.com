@@ -11,9 +11,6 @@ import {
     AcademicCapIcon,
     TrophyIcon,
     ChartBarIcon,
-    ClockIcon,
-    ArrowTrendingUpIcon,
-    FireIcon,
     DocumentTextIcon,
     ArrowRightIcon,
     MapIcon,
@@ -27,6 +24,7 @@ import {
     MagnifyingGlassIcon,
     PhoneIcon,
     EnvelopeIcon,
+    GlobeAltIcon,
 } from '@/constants';
 import StarRating from '@/components/shared/StarRating';
 import DefaultAvatar from '@/components/shared/DefaultAvatar';
@@ -39,6 +37,8 @@ import { Achievement } from '@/components/shared/AchievementsSection';
 import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
 import L from 'leaflet';
 import { AgentStats, MarketInsights } from './useAgentProfile';
+import { Credential } from '@/src/features/credentials/api/credentialApi';
+import CredentialsSection from '@/src/features/credentials/components/CredentialsSection';
 
 // Component to fix map rendering issues in dynamic containers
 const MapInvalidator: React.FC = () => {
@@ -84,6 +84,7 @@ interface AgentProfileTabsProps {
     showReviewForm: boolean;
     setShowReviewForm: (show: boolean) => void;
     agentAchievements: Achievement[];
+    agentCredentials: Credential[];
     onContactAgent: () => void;
     onSearchAllProperties: () => void;
     onRequestMarketReport: () => void;
@@ -111,6 +112,7 @@ const AgentProfileTabs: React.FC<AgentProfileTabsProps> = ({
     showReviewForm,
     setShowReviewForm,
     agentAchievements,
+    agentCredentials,
     onContactAgent,
     onSearchAllProperties,
     onRequestMarketReport,
@@ -171,6 +173,62 @@ const AgentProfileTabs: React.FC<AgentProfileTabsProps> = ({
                                 )}
                             </div>
                         </div>
+
+                        {/* Contact Information */}
+                        {(agent.officePhone || agent.phone || agent.officeAddress || agent.websiteUrl || agent.email) && (
+                            <div>
+                                <h3 className="text-xl font-bold text-gray-900 mb-4 flex items-center gap-2">
+                                    <PhoneIcon className="w-6 h-6 text-blue-600" />
+                                    {t('profilePage.contactInfo', 'Contact Information')}
+                                </h3>
+                                <div className="bg-white border border-gray-200 rounded-xl p-5 space-y-3">
+                                    {(agent.officePhone || agent.phone) && (
+                                        <a href={`tel:${agent.officePhone || agent.phone}`} className="flex items-center gap-3 text-gray-700 hover:text-blue-600 transition-colors">
+                                            <div className="w-10 h-10 rounded-lg bg-green-50 flex items-center justify-center flex-shrink-0">
+                                                <PhoneIcon className="w-5 h-5 text-green-600" />
+                                            </div>
+                                            <div>
+                                                <div className="text-sm font-semibold">{agent.officePhone || agent.phone}</div>
+                                                <div className="text-xs text-gray-500">{t('profilePage.phone', 'Phone')}</div>
+                                            </div>
+                                        </a>
+                                    )}
+                                    {agent.email && (
+                                        <a href={`mailto:${agent.email}`} className="flex items-center gap-3 text-gray-700 hover:text-blue-600 transition-colors">
+                                            <div className="w-10 h-10 rounded-lg bg-blue-50 flex items-center justify-center flex-shrink-0">
+                                                <EnvelopeIcon className="w-5 h-5 text-blue-600" />
+                                            </div>
+                                            <div>
+                                                <div className="text-sm font-semibold">{agent.email}</div>
+                                                <div className="text-xs text-gray-500">{t('profilePage.email', 'Email')}</div>
+                                            </div>
+                                        </a>
+                                    )}
+                                    {agent.officeAddress && (
+                                        <div className="flex items-center gap-3 text-gray-700">
+                                            <div className="w-10 h-10 rounded-lg bg-purple-50 flex items-center justify-center flex-shrink-0">
+                                                <MapPinIcon className="w-5 h-5 text-purple-600" />
+                                            </div>
+                                            <div>
+                                                <div className="text-sm font-semibold">{agent.officeAddress}</div>
+                                                <div className="text-xs text-gray-500">{t('profilePage.officeAddress', 'Office Address')}</div>
+                                            </div>
+                                        </div>
+                                    )}
+                                    {agent.websiteUrl && (
+                                        <a href={agent.websiteUrl} target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 text-gray-700 hover:text-blue-600 transition-colors">
+                                            <div className="w-10 h-10 rounded-lg bg-indigo-50 flex items-center justify-center flex-shrink-0">
+                                                <GlobeAltIcon className="w-5 h-5 text-indigo-600" />
+                                            </div>
+                                            <div>
+                                                <div className="text-sm font-semibold">{agent.websiteUrl.replace(/^https?:\/\//, '')}</div>
+                                                <div className="text-xs text-gray-500">{t('profilePage.website', 'Website')}</div>
+                                            </div>
+                                        </a>
+                                    )}
+                                </div>
+                            </div>
+                        )}
 
                         {/* Achievements Display - Public View */}
                         {agentAchievements.length > 0 && (
@@ -233,9 +291,11 @@ const AgentProfileTabs: React.FC<AgentProfileTabsProps> = ({
                                         </div>
                                         <div className="flex-1">
                                             <h4 className="font-bold text-gray-900 text-lg mb-1">{t('profilePage.credentials.licensedAgent')}</h4>
-                                            <p className="text-blue-700 font-mono text-sm font-semibold">
-                                                {agent.licenseNumber || `${agent.country?.substring(0, 2).toUpperCase() || 'XX'}-REA-${Math.floor(10000 + Math.random() * 90000)}`}
-                                            </p>
+                                            {agent.licenseNumber && (
+                                                <p className="text-blue-700 font-mono text-sm font-semibold">
+                                                    {agent.licenseNumber}
+                                                </p>
+                                            )}
                                             <p className="text-gray-600 text-sm mt-1">
                                                 {t('profilePage.credentials.authorizedToPractice', { city: agent.city, country: agent.country })}
                                             </p>
@@ -243,134 +303,81 @@ const AgentProfileTabs: React.FC<AgentProfileTabsProps> = ({
                                     </div>
                                 </div>
 
-                                {/* Professional Certifications */}
-                                <div className="bg-white border border-gray-200 rounded-xl p-5">
-                                    <div className="flex items-start gap-4">
-                                        <div className="bg-green-100 text-green-600 p-3 rounded-lg flex-shrink-0">
-                                            <AcademicCapIcon className="w-6 h-6" />
-                                        </div>
-                                        <div className="flex-1">
-                                            <h4 className="font-bold text-gray-900 mb-2">{t('profilePage.credentials.professionalCertifications')}</h4>
-                                            {agent.certifications && Array.isArray(agent.certifications) && agent.certifications.length > 0 ? (
-                                                <ul className="space-y-2">
-                                                    {agent.certifications.map((cert, idx) => (
-                                                        <li key={idx} className="flex items-start gap-2 text-gray-700">
-                                                            <CheckCircleIcon className="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" />
-                                                            <span>{cert}</span>
-                                                        </li>
-                                                    ))}
-                                                </ul>
-                                            ) : (
-                                                <p className="text-gray-600">{t('profilePage.credentials.memberOfAssociation')}</p>
-                                            )}
-                                        </div>
-                                    </div>
-                                </div>
-
-                                {/* Awards & Recognition */}
-                                <div className="bg-gradient-to-r from-amber-50 to-yellow-50 border border-amber-200 rounded-xl p-5">
-                                    <div className="flex items-start gap-4">
-                                        <div className="bg-amber-500 text-white p-3 rounded-lg flex-shrink-0">
-                                            <TrophyIcon className="w-6 h-6" />
-                                        </div>
-                                        <div className="flex-1">
-                                            <h4 className="font-bold text-gray-900 mb-2">{t('profilePage.credentials.awardsRecognition')}</h4>
-                                            {agent.awards && Array.isArray(agent.awards) && agent.awards.length > 0 ? (
-                                                <ul className="space-y-2">
-                                                    {agent.awards.map((award, idx) => (
-                                                        <li key={idx} className="flex items-start gap-2 text-gray-700">
-                                                            <StarIcon className="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5 fill-amber-600" />
-                                                            <span>{award}</span>
-                                                        </li>
-                                                    ))}
-                                                </ul>
-                                            ) : (
-                                                <p className="text-gray-600">{t('profilePage.credentials.noAwards')}</p>
-                                            )}
-                                        </div>
-                                    </div>
-                                </div>
+                                {/* Professional Credentials from API */}
+                                {agentCredentials.length > 0 && (
+                                    <CredentialsSection
+                                        credentials={agentCredentials}
+                                        isOwner={false}
+                                        onCredentialsChange={() => {}}
+                                        className="mt-4"
+                                    />
+                                )}
                             </div>
                         </div>
 
-                        {/* Local Market Insights */}
+                        {/* Agent's Property Overview - Simple, real data */}
+                        {(marketInsights.totalSold > 0 || marketInsights.totalActive > 0 || marketInsights.avgPrice > 0) && (
                         <div>
-                            <h3 className="text-xl font-bold text-gray-900 mb-6 flex items-center gap-2">
+                            <h3 className="text-xl font-bold text-gray-900 mb-4 flex items-center gap-2">
                                 <ChartBarIcon className="w-6 h-6 text-blue-600" />
-                                {t('profilePage.marketInsights.title')}
-                                {agent.city && <span className="text-sm font-normal text-gray-600 ml-2">({agent.city})</span>}
+                                {t('profilePage.marketInsights.title', 'Property Overview')}
+                                {agent.city && <span className="text-sm font-normal text-gray-500 ml-1">- {agent.city}</span>}
                             </h3>
 
-                            <div className="bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 border border-blue-200 rounded-xl p-4 sm:p-6">
-                                <div className="grid grid-cols-1 gap-4 sm:grid-cols-3 sm:gap-6 mb-6">
-                                    {/* Avg Days on Market */}
-                                    <div className="bg-white/80 backdrop-blur-sm rounded-lg p-4 border border-gray-200 shadow-sm">
-                                        <div className="flex items-center gap-3 mb-2">
-                                            <div className="bg-blue-100 p-2 rounded-lg">
-                                                <ClockIcon className="w-5 h-5 text-blue-600" />
-                                            </div>
-                                            <div>
-                                                <p className="text-xs text-gray-600 font-medium">{t('profilePage.marketInsights.avgDaysOnMarket')}</p>
-                                                <p className="text-2xl font-bold text-gray-900">
-                                                    {marketInsights.avgDaysOnMarket} <span className="text-sm font-normal text-gray-600">{t('profilePage.marketInsights.days')}</span>
-                                                </p>
-                                            </div>
-                                        </div>
-                                        <p className="text-xs text-gray-500">{t(marketInsights.daysDescription)}</p>
+                            <div className="bg-white border border-gray-200 rounded-xl p-4 sm:p-6">
+                                {/* Stats Grid */}
+                                <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-5">
+                                    {/* Active Listings */}
+                                    <div className="text-center p-3 rounded-lg bg-green-50 border border-green-100">
+                                        <div className="text-2xl font-bold text-green-700">{marketInsights.totalActive}</div>
+                                        <div className="text-xs font-medium text-green-800 mt-1">{t('profilePage.marketInsights.activeListings', 'Active Listings')}</div>
                                     </div>
-
-                                    {/* Price Growth */}
-                                    <div className="bg-white/80 backdrop-blur-sm rounded-lg p-4 border border-gray-200 shadow-sm">
-                                        <div className="flex items-center gap-3 mb-2">
-                                            <div className="bg-green-100 p-2 rounded-lg">
-                                                <ArrowTrendingUpIcon className="w-5 h-5 text-green-600" />
-                                            </div>
-                                            <div>
-                                                <p className="text-xs text-gray-600 font-medium">{t('profilePage.marketInsights.priceGrowthYoY')}</p>
-                                                <p className="text-2xl font-bold text-green-600">
-                                                    +{marketInsights.priceGrowth}%
-                                                </p>
-                                            </div>
-                                        </div>
-                                        <p className="text-xs text-gray-500">{t(marketInsights.growthDescription)}</p>
+                                    {/* Properties Sold */}
+                                    <div className="text-center p-3 rounded-lg bg-blue-50 border border-blue-100">
+                                        <div className="text-2xl font-bold text-blue-700">{marketInsights.totalSold}</div>
+                                        <div className="text-xs font-medium text-blue-800 mt-1">{t('profilePage.marketInsights.propertiesSold', 'Properties Sold')}</div>
                                     </div>
-
-                                    {/* Market Activity */}
-                                    <div className="bg-white/80 backdrop-blur-sm rounded-lg p-4 border border-gray-200 shadow-sm">
-                                        <div className="flex items-center gap-3 mb-2">
-                                            <div className="bg-purple-100 p-2 rounded-lg">
-                                                <FireIcon className="w-5 h-5 text-purple-600" />
-                                            </div>
-                                            <div>
-                                                <p className="text-xs text-gray-600 font-medium">{t('profilePage.marketInsights.marketActivity')}</p>
-                                                <p className={`text-2xl font-bold ${
-                                                    marketInsights.activityLevel === 'Very High' ? 'text-red-600' :
-                                                    marketInsights.activityLevel === 'High' ? 'text-purple-600' :
-                                                    marketInsights.activityLevel === 'Moderate' ? 'text-blue-600' :
-                                                    'text-gray-600'
-                                                }`}>
-                                                    {t(`profilePage.marketInsights.activity.${marketInsights.activityLevel.toLowerCase().replace(' ', '')}`, marketInsights.activityLevel)}
-                                                </p>
-                                            </div>
-                                        </div>
-                                        <p className="text-xs text-gray-500">{t(marketInsights.activityDescription)}</p>
+                                    {/* Average Price */}
+                                    {marketInsights.avgPrice > 0 && (
+                                    <div className="text-center p-3 rounded-lg bg-purple-50 border border-purple-100">
+                                        <div className="text-lg sm:text-xl font-bold text-purple-700 truncate">{formatPrice(marketInsights.avgPrice, agent.country)}</div>
+                                        <div className="text-xs font-medium text-purple-800 mt-1">{t('profilePage.marketInsights.avgPrice', 'Avg. Price')}</div>
                                     </div>
+                                    )}
+                                    {/* Avg Days to Sell */}
+                                    {marketInsights.hasRealSalesData && marketInsights.avgDaysToSell > 0 && (
+                                    <div className="text-center p-3 rounded-lg bg-orange-50 border border-orange-100">
+                                        <div className="text-2xl font-bold text-orange-700">{marketInsights.avgDaysToSell}</div>
+                                        <div className="text-xs font-medium text-orange-800 mt-1">{t('profilePage.marketInsights.avgDaysToSell', 'Avg. Days to Sell')}</div>
+                                    </div>
+                                    )}
                                 </div>
 
-                                {/* Request Full Report Button */}
+                                {/* Price Range */}
+                                {marketInsights.priceRange && marketInsights.priceRange.min !== marketInsights.priceRange.max && (
+                                    <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg border border-gray-100 mb-5">
+                                        <BanknotesIcon className="w-5 h-5 text-gray-500 flex-shrink-0" />
+                                        <div className="text-sm text-gray-700">
+                                            <span className="font-medium">{t('profilePage.marketInsights.priceRange', 'Price Range')}:</span>{' '}
+                                            <span className="font-semibold text-gray-900">{formatPrice(marketInsights.priceRange.min, agent.country)}</span>
+                                            {' - '}
+                                            <span className="font-semibold text-gray-900">{formatPrice(marketInsights.priceRange.max, agent.country)}</span>
+                                        </div>
+                                    </div>
+                                )}
+
+                                {/* Contact CTA */}
                                 <button
                                     onClick={onRequestMarketReport}
-                                    className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-bold py-3.5 px-6 rounded-xl transition-all shadow-md hover:shadow-lg flex items-center justify-center gap-2 group"
+                                    className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-semibold py-3 px-6 rounded-xl transition-all shadow-sm hover:shadow-md flex items-center justify-center gap-2 group"
                                 >
                                     <DocumentTextIcon className="w-5 h-5" />
-                                    <span>{t('profilePage.marketInsights.requestFullReport')}</span>
+                                    <span>{t('profilePage.marketInsights.requestReport', 'Ask for a Market Report')}</span>
                                     <ArrowRightIcon className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
                                 </button>
-                                <p className="text-center text-xs text-gray-600 mt-3">
-                                    {t('profilePage.marketInsights.getDetailedInsights', { city: agent.city })}
-                                </p>
                             </div>
                         </div>
+                        )}
 
                         {/* Properties Map - Shows agent's active and sold properties */}
                         {allAgentProperties.length > 0 && allAgentProperties.some(p => p.lat && p.lng) && (

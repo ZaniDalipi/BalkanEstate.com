@@ -48,6 +48,7 @@ const initialState: AppState = {
   isFirstLoginOffer: false,
   isAgencyCreationMode: false,
   isSubscriptionModalOpen: false,
+  pendingEmailVerification: null,
   subscriptionEmail: null,
   isAuthModalOpen: false,
   authModalView: 'login',
@@ -320,6 +321,8 @@ const appReducer = (state: AppState, action: AppAction): AppState => {
         };
     case 'SET_PENDING_REDIRECT':
         return { ...state, pendingRedirect: action.payload };
+    case 'SET_PENDING_EMAIL_VERIFICATION':
+        return { ...state, pendingEmailVerification: action.payload };
     case 'SHOW_ALERT':
         return {
             ...state,
@@ -423,6 +426,12 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     // Initialize proactive token refresh
     tokenService.initializeProactiveRefresh();
 
+    // Check if email verification is required
+    if (!user.isEmailVerified) {
+      dispatch({ type: 'SET_PENDING_EMAIL_VERIFICATION', payload: user.email });
+      return user;
+    }
+
     // Check if there's a pending redirect (e.g., from "I want to sell" flow)
     if (state.pendingRedirect) {
       const redirectTo = state.pendingRedirect;
@@ -476,6 +485,13 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
     // Initialize proactive token refresh
     tokenService.initializeProactiveRefresh();
+
+    // Check if email verification is required
+    if (!user.isEmailVerified) {
+      dispatch({ type: 'SET_PENDING_EMAIL_VERIFICATION', payload: user.email });
+      // Don't navigate away - let the App.tsx handle showing the verification page
+      return user;
+    }
 
     // Check if there's a pending redirect (e.g., from "I want to sell" flow)
     if (state.pendingRedirect) {

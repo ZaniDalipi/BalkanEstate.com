@@ -65,6 +65,12 @@ const RATE_LIMIT_CONFIG = {
     windowMs: 15 * 60 * 1000,
     blockDurationMs: isProduction ? 15 * 60 * 1000 : 5 * 60 * 1000,
   },
+  // Discount/coupon code validation: per-IP limits (prevent brute-force enumeration)
+  COUPON_VALIDATION_IP: {
+    maxAttempts: isProduction ? 30 : 100,
+    windowMs: 15 * 60 * 1000, // 15 minutes
+    blockDurationMs: isProduction ? 30 * 60 * 1000 : 5 * 60 * 1000, // 30min prod, 5min dev
+  },
 };
 
 /**
@@ -234,6 +240,29 @@ export const refreshTokenRateLimiterIP = (
   if (!result.allowed) {
     res.status(429).json({
       message: 'Too many requests. Please try again later.',
+      retryAfter: result.retryAfter,
+    });
+    return;
+  }
+
+  next();
+};
+
+/**
+ * Coupon/discount code validation rate limiter (IP-based)
+ * Prevents brute-force enumeration of valid discount codes
+ */
+export const couponValidationRateLimiterIP = (
+  req: Request,
+  res: Response,
+  next: NextFunction
+): void => {
+  const ip = getClientIp(req);
+  const result = checkRateLimit(`coupon_validate_ip_${ip}`, ipLimitStore, RATE_LIMIT_CONFIG.COUPON_VALIDATION_IP);
+
+  if (!result.allowed) {
+    res.status(429).json({
+      message: 'Too many validation attempts. Please try again later.',
       retryAfter: result.retryAfter,
     });
     return;

@@ -252,37 +252,34 @@ const AgentContactActions: React.FC<AgentContactActionsProps> = ({
                 </div>
             </div>
 
-            {/* Market Insights */}
-            <div className="bg-gradient-to-br from-purple-50 to-pink-50 rounded-2xl border border-purple-200 p-6 mt-6">
-                <h3 className="text-xl font-bold text-gray-900 mb-4">{t('profilePage.marketInsights.title')}</h3>
-                <div className="space-y-3">
-                    <div className="flex justify-between items-center p-3 bg-white/50 rounded-lg">
-                        <span className="font-medium text-gray-700">{t('profilePage.marketInsights.avgDaysOnMarket')}</span>
-                        <span className="font-bold text-purple-600">{marketInsights?.avgDaysOnMarket || 30} {t('profilePage.marketInsights.days')}</span>
+            {/* Quick Stats */}
+            {marketInsights && (marketInsights.totalSold > 0 || marketInsights.totalActive > 0) && (
+            <div className="bg-white rounded-2xl border border-gray-200 p-5 mt-6">
+                <h3 className="text-lg font-bold text-gray-900 mb-3">{t('profilePage.marketInsights.quickStats', 'Quick Stats')}</h3>
+                <div className="space-y-2.5">
+                    <div className="flex justify-between items-center p-2.5 bg-green-50 rounded-lg">
+                        <span className="text-sm text-gray-700">{t('profilePage.marketInsights.activeListings', 'Active Listings')}</span>
+                        <span className="font-bold text-green-700">{marketInsights.totalActive}</span>
                     </div>
-                    <div className="flex justify-between items-center p-3 bg-white/50 rounded-lg">
-                        <span className="font-medium text-gray-700">{t('profilePage.marketInsights.priceGrowthYoY')}</span>
-                        <span className="font-bold text-green-600">+{marketInsights?.priceGrowth || 5.2}%</span>
+                    <div className="flex justify-between items-center p-2.5 bg-blue-50 rounded-lg">
+                        <span className="text-sm text-gray-700">{t('profilePage.marketInsights.propertiesSold', 'Properties Sold')}</span>
+                        <span className="font-bold text-blue-700">{marketInsights.totalSold}</span>
                     </div>
-                    <div className="flex justify-between items-center p-3 bg-white/50 rounded-lg">
-                        <span className="font-medium text-gray-700">{t('profilePage.marketInsights.marketActivity')}</span>
-                        <span className={`font-bold ${
-                            marketInsights?.activityLevel === 'Very High' ? 'text-red-600' :
-                            marketInsights?.activityLevel === 'High' ? 'text-purple-600' :
-                            marketInsights?.activityLevel === 'Moderate' ? 'text-blue-600' :
-                            'text-gray-600'
-                        }`}>
-                            {t(`profilePage.marketInsights.activity.${(marketInsights?.activityLevel || 'Moderate').toLowerCase().replace(' ', '')}`, marketInsights?.activityLevel || 'Moderate')}
-                        </span>
+                    {marketInsights.hasRealSalesData && marketInsights.avgDaysToSell > 0 && (
+                    <div className="flex justify-between items-center p-2.5 bg-orange-50 rounded-lg">
+                        <span className="text-sm text-gray-700">{t('profilePage.marketInsights.avgDaysToSell', 'Avg. Days to Sell')}</span>
+                        <span className="font-bold text-orange-700">{marketInsights.avgDaysToSell} {t('profilePage.marketInsights.days', 'days')}</span>
                     </div>
+                    )}
                 </div>
                 <button
                     onClick={onRequestMarketReport}
-                    className="w-full mt-4 text-center text-purple-600 hover:text-purple-700 font-semibold text-sm py-2"
+                    className="w-full mt-3 text-center text-blue-600 hover:text-blue-700 font-semibold text-sm py-2"
                 >
-                    {t('profilePage.marketInsights.requestFullReport')} →
+                    {t('profilePage.marketInsights.requestReport', 'Ask for a Market Report')} →
                 </button>
             </div>
+            )}
 
             {/* Appraisal Request Modal */}
             {showAppraisalModal && (

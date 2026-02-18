@@ -84,12 +84,29 @@ export const PlanCard: React.FC<{
           )}
         </div>
 
-        {/* Agency Featured shows only weekly price, listing plans show all durations */}
+        {/* Duration-based pricing display */}
         {plan.category === 'agency' ? (
           <div className="mt-3 text-center p-3 bg-gradient-to-r from-amber-50 to-orange-50 rounded-lg border border-amber-200">
             <div className="text-xs text-amber-600 font-medium">{t('admin:promotionPlans.perWeek', 'per week')}</div>
             <div className="text-3xl font-bold text-amber-600">&euro;{plan.pricing.duration7 || 0}</div>
             <div className="text-xs text-gray-500 mt-1">{t('admin:promotionPlans.featuredEverywhere', 'Featured everywhere on platform')}</div>
+          <div className="grid grid-cols-4 gap-1.5 mt-3">
+            <div className="text-center p-2 bg-gradient-to-r from-amber-50 to-orange-50 rounded-lg border border-amber-200">
+              <div className="text-[10px] text-amber-600 font-medium">7 days</div>
+              <div className="font-bold text-amber-600 text-sm">&euro;{plan.pricing.duration7 || 0}</div>
+            </div>
+            <div className="text-center p-2 bg-gradient-to-r from-amber-50 to-orange-50 rounded-lg border border-amber-200">
+              <div className="text-[10px] text-amber-600 font-medium">14 days</div>
+              <div className="font-bold text-amber-600 text-sm">&euro;{plan.pricing.duration14 || 0}</div>
+            </div>
+            <div className="text-center p-2 bg-gradient-to-r from-amber-50 to-orange-50 rounded-lg border border-amber-200">
+              <div className="text-[10px] text-amber-600 font-medium">28 days</div>
+              <div className="font-bold text-amber-600 text-sm">&euro;{plan.pricing.duration28 || 0}</div>
+            </div>
+            <div className="text-center p-2 bg-gradient-to-r from-amber-50 to-orange-50 rounded-lg border border-amber-200">
+              <div className="text-[10px] text-amber-600 font-medium">90 days</div>
+              <div className="font-bold text-amber-600 text-sm">&euro;{plan.pricing.duration90 || 0}</div>
+            </div>
           </div>
         ) : (
           <div className="grid grid-cols-3 gap-2 mt-3">
@@ -289,15 +306,15 @@ export const EditPlanModal: React.FC<{
                   {plan.category === 'agency' && (
                     <span className="px-2 py-0.5 bg-amber-200 text-amber-700 text-xs font-bold rounded-full ml-auto">
                       {t('admin:promotionPlans.weekly', 'Weekly')}
+                      Duration-Based
                     </span>
                   )}
                 </h4>
-                {/* Agency plans only have weekly pricing */}
+                {/* Agency plans have 4 duration options */}
                 {plan.category === 'agency' ? (
-                  <div>
-                    <label className="block text-sm text-gray-700 mb-1">{t('admin:promotionPlans.weeklyPrice', 'Weekly Price (7 Days)')}</label>
-                    <div className="relative">
-                      <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500">&euro;</span>
+                  <div className="grid grid-cols-4 gap-3">
+                    <div>
+                      <label className="block text-sm text-gray-700 mb-1">7 Days</label>
                       <input
                         type="number"
                         min="0"
@@ -305,13 +322,61 @@ export const EditPlanModal: React.FC<{
                         value={plan.pricing.duration7 || ''}
                         onChange={(e) => onChange({
                           ...plan,
-                          pricing: { duration7: parseFloat(e.target.value) || 0 }
+                          pricing: { ...plan.pricing, duration7: parseFloat(e.target.value) || 0 }
                         })}
-                        className="w-full pl-8 pr-3 py-2 border rounded-lg text-2xl font-bold"
-                        placeholder="19"
+                        className="w-full px-3 py-2 border rounded-lg"
+                        placeholder="6.99"
                       />
                     </div>
+                    <div>
+                      <label className="block text-sm text-gray-700 mb-1">14 Days</label>
+                      <input
+                        type="number"
+                        min="0"
+                        step="0.01"
+                        value={plan.pricing.duration14 || ''}
+                        onChange={(e) => onChange({
+                          ...plan,
+                          pricing: { ...plan.pricing, duration14: parseFloat(e.target.value) || 0 }
+                        })}
+                        className="w-full px-3 py-2 border rounded-lg"
+                        placeholder="11.99"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm text-gray-700 mb-1">28 Days</label>
+                      <input
+                        type="number"
+                        min="0"
+                        step="0.01"
+                        value={plan.pricing.duration28 || ''}
+                        onChange={(e) => onChange({
+                          ...plan,
+                          pricing: { ...plan.pricing, duration28: parseFloat(e.target.value) || 0 }
+                        })}
+                        className="w-full px-3 py-2 border rounded-lg"
+                        placeholder="24.99"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm text-gray-700 mb-1">90 Days</label>
+                      <input
+                        type="number"
+                        min="0"
+                        step="0.01"
+                        value={plan.pricing.duration90 || ''}
+                        onChange={(e) => onChange({
+                          ...plan,
+                          pricing: { ...plan.pricing, duration90: parseFloat(e.target.value) || 0 }
+                        })}
+                        className="w-full px-3 py-2 border rounded-lg"
+                        placeholder="49.99"
+                      />
+                    </div>
+<<<<<<< HEAD
                     <p className="text-xs text-gray-500 mt-1">{t('admin:promotionPlans.weeklyPackageDesc', 'Featured Agency is a single weekly package shown everywhere on the platform')}</p>
+=======
+>>>>>>> main
                   </div>
                 ) : (
                   <div className="grid grid-cols-3 gap-4">

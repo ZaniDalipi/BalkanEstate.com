@@ -50,7 +50,9 @@ export function usePromotionPlansManager() {
   const handleSave = async () => {
     if (!editingPlan) return;
     if (!editingPlan.name.trim()) return;
-    if (!editingPlan.pricing.duration7 && !editingPlan.pricing.duration30 && !editingPlan.pricing.duration90) return;
+    const hasAnyPrice = editingPlan.pricing.duration7 || editingPlan.pricing.duration14 ||
+      editingPlan.pricing.duration28 || editingPlan.pricing.duration30 || editingPlan.pricing.duration90;
+    if (!hasAnyPrice) return;
 
     try {
       const isNew = !editingPlan._id;
@@ -126,7 +128,9 @@ export function usePromotionPlansManager() {
       name: '',
       description: '',
       icon: category === 'listing' ? '⭐' : (isAddOn ? '📍' : '🏢'),
-      pricing: { duration7: 0, duration30: 0, duration90: 0 },
+      pricing: category === 'agency'
+        ? { duration7: 0, duration14: 0, duration28: 0, duration90: 0 }
+        : { duration7: 0, duration30: 0, duration90: 0 },
       features: [],
       displayOrder: plans.filter(p => p.category === category).length + 1,
       highlighted: false,

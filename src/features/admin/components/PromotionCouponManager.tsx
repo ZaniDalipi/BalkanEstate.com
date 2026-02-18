@@ -140,7 +140,7 @@ const PromotionCouponManager: React.FC = () => {
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
             {filteredCoupons.map((coupon: PromotionCoupon, index: number) => (
-              <tr key={coupon._id || `coupon-${index}`} className="hover:bg-gray-50">
+              <tr key={coupon.id || `coupon-${index}`} className="hover:bg-gray-50">
                 <td className="px-6 py-4 whitespace-nowrap">
                   <div className="font-mono font-bold text-gray-900">{coupon.code}</div>
                   {coupon.description && (
@@ -209,7 +209,7 @@ const PromotionCouponManager: React.FC = () => {
                 <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                   {coupon.status === 'active' && (
                     <button
-                      onClick={() => handleDisableCoupon(coupon._id)}
+                      onClick={() => handleDisableCoupon(coupon.id)}
                       disabled={disableMutation.isPending}
                       className="text-red-600 hover:text-red-900 disabled:opacity-50"
                     >

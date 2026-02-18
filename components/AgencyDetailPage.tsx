@@ -2,8 +2,10 @@ import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
 import L from 'leaflet';
+import { User } from 'lucide-react';
 import { useAppContext } from '../context/AppContext';
 import { BuildingOfficeIcon, PhoneIcon, EnvelopeIcon, MapPinIcon, StarIcon, ArrowLeftIcon, UserCircleIcon, BellIcon, TrophyIcon, ChartBarIcon, HomeIcon, UsersIcon, XMarkIcon, ShieldCheckIcon, PencilIcon, SparklesIcon, UserGroupIcon, CalendarIcon, AcademicCapIcon, GlobeAltIcon, ChevronRightIcon } from '../constants';
+import NotificationCenter from '../src/shared/components/NotificationCenter';
 import PropertyCard from '../src/features/property-details/components/PropertyCard';
 import PropertyCardSkeleton from '../src/features/property-details/components/PropertyCardSkeleton';
 import AgencyJoinRequestsModal from './AgencyJoinRequestsModal';
@@ -93,7 +95,7 @@ const GRADIENT_PRESETS = [
 ];
 
 const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
-  const { t } = useTranslation('agencyDetails');
+  const { t } = useTranslation(['agencyDetails', 'nav']);
   const { state, dispatch } = useAppContext();
   const { currentUser, isAuthenticated } = state;
   const { confirm } = useConfirmation();
@@ -193,6 +195,39 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
     !currentUser?.agency?.agencyId &&
     !isAlreadyMember &&
     !isUserInThisAgency;
+
+  // Global nav handlers (integrated from floating header)
+  const handleAccountClick = useCallback(() => {
+    if (isAuthenticated) {
+      dispatch({ type: 'SET_SELECTED_PROPERTY', payload: null });
+      dispatch({ type: 'SET_SELECTED_AGENCY', payload: null });
+      dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'account' });
+      window.history.pushState({}, '', '/account');
+    } else {
+      dispatch({ type: 'TOGGLE_AUTH_MODAL', payload: { isOpen: true, view: 'login' } });
+    }
+  }, [isAuthenticated, dispatch]);
+
+  const handleNewListingClick = useCallback(() => {
+    if (isAuthenticated) {
+      dispatch({ type: 'SET_SELECTED_PROPERTY', payload: null });
+      dispatch({ type: 'SET_SELECTED_AGENCY', payload: null });
+      dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'create-listing' });
+      window.history.pushState({}, '', '/create-listing');
+    } else {
+      dispatch({ type: 'TOGGLE_AUTH_MODAL', payload: { isOpen: true, view: 'signup' } });
+    }
+  }, [isAuthenticated, dispatch]);
+
+  const handleSubscribeClick = useCallback(() => {
+    dispatch({ type: 'SET_SELECTED_PROPERTY', payload: null });
+    dispatch({ type: 'SET_SELECTED_AGENCY', payload: null });
+    dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'pricing' });
+    const currentLang = window.location.pathname.split('/')[1] || 'en';
+    const validLangs = ['en', 'sq', 'sr', 'de', 'mk'];
+    const lang = validLangs.includes(currentLang) ? currentLang : 'en';
+    window.history.pushState({}, '', `/${lang}/subscribe`);
+  }, [dispatch]);
 
   // Scroll to top on mount and when agency changes
   useEffect(() => {
@@ -583,19 +618,53 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
     setIsEditModalOpen(true);
   };
 
-  const handleSaveAgency = async (e: React.FormEvent) => {
+  const handleSaveAgency = async (e: React.FormEvent | React.MouseEvent) => {
     e.preventDefault();
+
+    // Frontend validation
+    if (!editForm.name || !editForm.name.trim()) {
+      await error(t('messages.errorTitle', 'Error'), t('messages.nameRequired', 'Agency name is required'));
+      return;
+    }
+
+    // Validate URL fields
+    const urlFields = [
+      { name: t('fields.website', 'Website'), value: editForm.website },
+      { name: 'Facebook', value: editForm.facebookUrl },
+      { name: 'Instagram', value: editForm.instagramUrl },
+      { name: 'LinkedIn', value: editForm.linkedinUrl },
+      { name: 'Twitter', value: editForm.twitterUrl },
+    ];
+    for (const { name: fieldName, value } of urlFields) {
+      if (value && value.trim()) {
+        try {
+          new URL(value);
+        } catch {
+          await error(t('messages.errorTitle', 'Error'), t('messages.invalidUrl', `Invalid URL for {{field}}. Please include https://`, { field: fieldName }));
+          return;
+        }
+      }
+    }
+
     try {
       const token = localStorage.getItem('balkan_estate_token');
 
-      // Filter out empty strings from arrays before submitting
+      // Sanitize: filter empty strings from arrays, trim text fields
       const sanitizedForm = {
         ...editForm,
-        specialties: editForm.specialties.filter(s => s),
-        specializations: editForm.specializations.filter(s => s),
-        serviceAreas: editForm.serviceAreas.filter(s => s),
-        certifications: editForm.certifications.filter(s => s),
-        languages: editForm.languages.filter(s => s),
+        name: editForm.name.trim(),
+        description: (editForm.description || '').trim(),
+        website: (editForm.website || '').trim(),
+        phone: (editForm.phone || '').trim(),
+        email: (editForm.email || '').trim(),
+        address: (editForm.address || '').trim(),
+        city: (editForm.city || '').trim(),
+        country: (editForm.country || '').trim(),
+        specialties: editForm.specialties.filter(s => s.trim()),
+        specializations: editForm.specializations.filter(s => s.trim()),
+        serviceAreas: editForm.serviceAreas.filter(s => s.trim()),
+        certifications: editForm.certifications.filter(s => s.trim()),
+        languages: editForm.languages.filter(s => s.trim()),
       };
 
       const response = await fetch(`${API_URL}/agencies/${agencyData._id}`, {
@@ -885,93 +954,141 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
               </div>
             </div>
 
-            {/* Right Side - Cover Controls (For owners and admins) */}
-            {isAdmin && (
-              <div className="relative flex gap-2">
-                {/* Gradient Picker Button */}
-                <button
-                  onClick={() => setShowGradientPicker(!showGradientPicker)}
-                  className="inline-flex items-center gap-2 px-3 py-2 bg-white/10 backdrop-blur-md text-white text-sm font-medium rounded-xl border border-white/20 hover:bg-white/20 transition-all duration-300"
-                >
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01" />
-                  </svg>
-                  <span className="hidden sm:inline">{t('banner.gradients')}</span>
-                </button>
+            {/* Right Side - Admin Controls + Global Nav */}
+            <div className="flex items-center gap-2">
+              {/* Cover Controls (For owners and admins) */}
+              {isAdmin && (
+                <div className="relative flex gap-2">
+                  {/* Gradient Picker Button */}
+                  <button
+                    onClick={() => setShowGradientPicker(!showGradientPicker)}
+                    className="inline-flex items-center gap-2 px-3 py-2 bg-white/10 backdrop-blur-md text-white text-sm font-medium rounded-xl border border-white/20 hover:bg-white/20 transition-all duration-300"
+                  >
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01" />
+                    </svg>
+                    <span className="hidden sm:inline">{t('banner.gradients')}</span>
+                  </button>
 
-                {/* Upload Image Button */}
-                <input
-                  type="file"
-                  id="cover-upload"
-                  accept="image/*"
-                  onChange={handleCoverUpload}
-                  disabled={isUploadingCover}
-                  className="hidden"
-                />
-                <label
-                  htmlFor="cover-upload"
-                  className={`inline-flex items-center gap-2 px-3 py-2 bg-white/10 backdrop-blur-md text-white text-sm font-medium rounded-xl border border-white/20 hover:bg-white/20 transition-all duration-300 cursor-pointer ${
-                    isUploadingCover ? 'opacity-50 cursor-not-allowed' : ''
-                  }`}
-                >
-                  {isUploadingCover ? (
-                    <>
-                      <div className="animate-spin rounded-full h-4 w-4 border-2 border-white/30 border-t-white"></div>
-                      <span className="hidden sm:inline">{t('banner.uploading')}</span>
-                    </>
-                  ) : (
-                    <>
-                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                      </svg>
-                      <span className="hidden sm:inline">{t('banner.uploadImage')}</span>
-                    </>
-                  )}
-                </label>
+                  {/* Upload Image Button */}
+                  <input
+                    type="file"
+                    id="cover-upload"
+                    accept="image/*"
+                    onChange={handleCoverUpload}
+                    disabled={isUploadingCover}
+                    className="hidden"
+                  />
+                  <label
+                    htmlFor="cover-upload"
+                    className={`inline-flex items-center gap-2 px-3 py-2 bg-white/10 backdrop-blur-md text-white text-sm font-medium rounded-xl border border-white/20 hover:bg-white/20 transition-all duration-300 cursor-pointer ${
+                      isUploadingCover ? 'opacity-50 cursor-not-allowed' : ''
+                    }`}
+                  >
+                    {isUploadingCover ? (
+                      <>
+                        <div className="animate-spin rounded-full h-4 w-4 border-2 border-white/30 border-t-white"></div>
+                        <span className="hidden sm:inline">{t('banner.uploading')}</span>
+                      </>
+                    ) : (
+                      <>
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                        </svg>
+                        <span className="hidden sm:inline">{t('banner.uploadImage')}</span>
+                      </>
+                    )}
+                  </label>
 
-                {/* Gradient Picker Dropdown */}
-                {showGradientPicker && (
-                  <div className="absolute top-full right-0 mt-2 bg-white/95 backdrop-blur-xl rounded-2xl shadow-2xl p-4 w-80 max-h-96 overflow-y-auto border border-slate-200 z-50">
-                    <div className="flex items-center justify-between mb-4">
-                      <h3 className="text-lg font-semibold text-slate-900">{t('banner.chooseGradient')}</h3>
-                      <button
-                        onClick={() => setShowGradientPicker(false)}
-                        className="text-slate-400 hover:text-slate-600 transition-colors"
-                      >
-                        <XMarkIcon className="w-5 h-5" />
-                      </button>
-                    </div>
-                    <div className="grid grid-cols-2 gap-2">
-                      {GRADIENT_PRESETS.map((preset) => (
+                  {/* Gradient Picker Dropdown */}
+                  {showGradientPicker && (
+                    <div className="absolute top-full right-0 mt-2 bg-white/95 backdrop-blur-xl rounded-2xl shadow-2xl p-4 w-80 max-h-96 overflow-y-auto border border-slate-200 z-50">
+                      <div className="flex items-center justify-between mb-4">
+                        <h3 className="text-lg font-semibold text-slate-900">{t('banner.chooseGradient')}</h3>
                         <button
-                          key={preset.id}
-                          onClick={() => handleGradientSelect(preset.id)}
-                          className="group relative h-20 rounded-xl overflow-hidden border-2 border-slate-200 hover:border-primary transition-all duration-300 hover:scale-[1.02]"
+                          onClick={() => setShowGradientPicker(false)}
+                          className="text-slate-400 hover:text-slate-600 transition-colors"
                         >
-                          <div className={`absolute inset-0 bg-gradient-to-br ${preset.gradient}`} />
-                          <div className="absolute inset-0 bg-black/10 group-hover:bg-black/0 transition-colors" />
-                          <div className="absolute inset-0 flex items-center justify-center">
-                            <span className="text-white font-medium text-xs drop-shadow-lg">
-                              {preset.name}
-                            </span>
-                          </div>
-                          {(agencyData as any).coverGradient === preset.gradient && (
-                            <div className="absolute top-1.5 right-1.5 w-5 h-5 bg-white rounded-full flex items-center justify-center shadow">
-                              <svg className="w-3 h-3 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
-                              </svg>
-                            </div>
-                          )}
+                          <XMarkIcon className="w-5 h-5" />
                         </button>
-                      ))}
+                      </div>
+                      <div className="grid grid-cols-2 gap-2">
+                        {GRADIENT_PRESETS.map((preset) => (
+                          <button
+                            key={preset.id}
+                            onClick={() => handleGradientSelect(preset.id)}
+                            className="group relative h-20 rounded-xl overflow-hidden border-2 border-slate-200 hover:border-primary transition-all duration-300 hover:scale-[1.02]"
+                          >
+                            <div className={`absolute inset-0 bg-gradient-to-br ${preset.gradient}`} />
+                            <div className="absolute inset-0 bg-black/10 group-hover:bg-black/0 transition-colors" />
+                            <div className="absolute inset-0 flex items-center justify-center">
+                              <span className="text-white font-medium text-xs drop-shadow-lg">
+                                {preset.name}
+                              </span>
+                            </div>
+                            {(agencyData as any).coverGradient === preset.gradient && (
+                              <div className="absolute top-1.5 right-1.5 w-5 h-5 bg-white rounded-full flex items-center justify-center shadow">
+                                <svg className="w-3 h-3 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+                                </svg>
+                              </div>
+                            )}
+                          </button>
+                        ))}
+                      </div>
+                      <p className="text-xs text-slate-500 mt-3 text-center">
+                        {t('banner.customImageHint')}
+                      </p>
                     </div>
-                    <p className="text-xs text-slate-500 mt-3 text-center">
-                      {t('banner.customImageHint')}
-                    </p>
-                  </div>
+                  )}
+                </div>
+              )}
+
+              {/* Divider between admin controls and nav */}
+              {isAdmin && <div className="hidden sm:block w-px h-8 bg-white/20 mx-1" />}
+
+              {/* Global Nav Actions */}
+              <div className="flex items-center gap-1.5 sm:gap-2">
+                <button
+                  onClick={handleSubscribeClick}
+                  className="hidden sm:inline-flex items-center gap-1.5 px-3 py-2 bg-primary/80 hover:bg-primary text-white text-sm font-semibold rounded-xl border border-white/20 transition-all duration-300"
+                >
+                  {t('nav:subscribe')}
+                </button>
+                <button
+                  onClick={handleNewListingClick}
+                  className="hidden md:inline-flex items-center gap-1.5 px-3 py-2 bg-secondary/80 hover:bg-secondary text-white text-sm font-semibold rounded-xl border border-white/20 transition-all duration-300"
+                >
+                  + {t('nav:newListing')}
+                </button>
+                <NotificationCenter />
+                {isAuthenticated && currentUser ? (
+                  <button
+                    onClick={handleAccountClick}
+                    className="inline-flex items-center gap-1.5 px-2.5 py-1.5 bg-white/10 backdrop-blur-md text-white text-sm font-medium rounded-xl border border-white/20 hover:bg-white/20 transition-all duration-300"
+                    aria-label={t('nav:myAccount')}
+                  >
+                    <div className="w-6 h-6 rounded-full overflow-hidden flex-shrink-0">
+                      {currentUser.avatarUrl ? (
+                        <img src={currentUser.avatarUrl} alt="" className="w-full h-full object-cover" aria-hidden="true" />
+                      ) : (
+                        <DefaultAvatar gender={currentUser.gender} seed={currentUser.id || currentUser.name} avatarOptions={currentUser.avatarOptions} />
+                      )}
+                    </div>
+                    <span className="hidden lg:inline">{t('nav:myAccount')}</span>
+                  </button>
+                ) : (
+                  <button
+                    onClick={handleAccountClick}
+                    className="inline-flex items-center gap-1.5 px-2.5 py-1.5 bg-white/10 backdrop-blur-md text-white text-sm font-medium rounded-xl border border-white/20 hover:bg-white/20 transition-all duration-300"
+                    aria-label={t('nav:loginRegister')}
+                  >
+                    <User className="w-4 h-4" aria-hidden="true" />
+                    <span className="hidden lg:inline">{t('nav:loginRegister')}</span>
+                  </button>
                 )}
               </div>
-            )}
+            </div>
           </div>
         </div>
 
@@ -2071,7 +2188,7 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
               </button>
             </div>
 
-            <form onSubmit={handleSaveAgency} className="p-6 space-y-8 overflow-y-auto max-h-[calc(90vh-140px)]">
+            <div className="p-6 space-y-8 overflow-y-auto max-h-[calc(90vh-140px)]">
               {/* Basic Information */}
               <div className="space-y-4">
                 <h4 className="text-sm font-semibold text-slate-900 uppercase tracking-wider flex items-center gap-2">
@@ -2382,7 +2499,7 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
                   className="bg-slate-50 rounded-xl p-4"
                 />
               </div>
-            </form>
+            </div>
 
             {/* Action Buttons - Fixed Footer */}
             <div className="px-6 py-4 border-t border-slate-100 flex gap-3 bg-slate-50">
@@ -2394,8 +2511,7 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
                 Cancel
               </button>
               <button
-                type="submit"
-                form="editAgencyForm"
+                type="button"
                 onClick={handleSaveAgency}
                 className="flex-1 px-5 py-2.5 bg-primary text-white rounded-xl hover:bg-primary/90 font-medium transition-colors text-sm shadow-lg shadow-primary/25"
               >

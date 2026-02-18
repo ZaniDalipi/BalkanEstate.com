@@ -12,7 +12,7 @@ import { apiRequest } from '@/src/shared/api/httpClient';
 // ============================================================================
 
 export interface PromotionCoupon {
-  _id: string;
+  id: string;
   code: string;
   description?: string;
   discountType: 'percentage' | 'fixed';
@@ -210,7 +210,7 @@ export function useDisablePromotionCoupon() {
         queryClient.setQueryData<CouponsResponse>(promotionCouponKeys.list(), {
           ...previousCoupons,
           coupons: previousCoupons.coupons.map((coupon) =>
-            coupon._id === id ? { ...coupon, status: 'disabled' as const } : coupon
+            coupon.id === id ? { ...coupon, status: 'disabled' as const } : coupon
           ),
         });
       }
