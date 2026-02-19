@@ -67,6 +67,18 @@ interface AgencyCreationModalProps {
   onAgencyCreated: (agencyId: string) => void;
 }
 
+// ─── Small helpers (module-level to avoid remount on every render) ─────────────
+
+const Required = () => <span className="text-red-500 ml-0.5">*</span>;
+
+const FieldError = ({ field, fieldErrors }: { field: string; fieldErrors: Record<string, string> }) =>
+  fieldErrors[field] ? (
+    <p className="flex items-center gap-1 text-xs text-red-600 mt-1.5 font-medium">
+      <ExclamationTriangleIcon className="w-3.5 h-3.5" />
+      {fieldErrors[field]}
+    </p>
+  ) : null;
+
 // ─── Component ────────────────────────────────────────────────────────────────
 
 const AgencyCreationModal: React.FC<AgencyCreationModalProps> = ({
@@ -427,15 +439,6 @@ const AgencyCreationModal: React.FC<AgencyCreationModalProps> = ({
 
   const labelCls = 'block text-xs font-semibold text-gray-700 mb-1.5 uppercase tracking-wider';
 
-  const FieldError = ({ field }: { field: string }) =>
-    fieldErrors[field] ? (
-      <p className="flex items-center gap-1 text-xs text-red-600 mt-1.5 font-medium">
-        <ExclamationTriangleIcon className="w-3.5 h-3.5" />
-        {fieldErrors[field]}
-      </p>
-    ) : null;
-
-  const Required = () => <span className="text-red-500 ml-0.5">*</span>;
 
   const isLastStep = step === STEPS.length;
 
@@ -458,7 +461,7 @@ const AgencyCreationModal: React.FC<AgencyCreationModalProps> = ({
                 disabled={isCreating}
                 autoFocus
               />
-              <FieldError field="name" />
+              <FieldError field="name" fieldErrors={fieldErrors} />
               <p className="text-xs text-gray-400 mt-1">Choose a professional name that represents your brand</p>
             </div>
             <div>
@@ -498,7 +501,7 @@ const AgencyCreationModal: React.FC<AgencyCreationModalProps> = ({
                   </select>
                   <ChevronRight className="absolute right-3 top-1/2 -translate-y-1/2 rotate-90 w-4 h-4 text-gray-400 pointer-events-none" />
                 </div>
-                <FieldError field="country" />
+                <FieldError field="country" fieldErrors={fieldErrors} />
               </div>
               <div>
                 <label className={labelCls}>City <Required /></label>
@@ -518,7 +521,7 @@ const AgencyCreationModal: React.FC<AgencyCreationModalProps> = ({
                   </select>
                   <ChevronRight className="absolute right-3 top-1/2 -translate-y-1/2 rotate-90 w-4 h-4 text-gray-400 pointer-events-none" />
                 </div>
-                <FieldError field="city" />
+                <FieldError field="city" fieldErrors={fieldErrors} />
               </div>
             </div>
 
@@ -580,7 +583,7 @@ const AgencyCreationModal: React.FC<AgencyCreationModalProps> = ({
                 className={inputCls('email')}
                 disabled={isCreating}
               />
-              <FieldError field="email" />
+              <FieldError field="email" fieldErrors={fieldErrors} />
               <p className="text-xs text-gray-400 mt-1">Primary contact email for inquiries</p>
             </div>
             <div>
@@ -593,7 +596,7 @@ const AgencyCreationModal: React.FC<AgencyCreationModalProps> = ({
                 className={inputCls('phone')}
                 disabled={isCreating}
               />
-              <FieldError field="phone" />
+              <FieldError field="phone" fieldErrors={fieldErrors} />
               <p className="text-xs text-gray-400 mt-1">Include country code (e.g. +381 for Serbia)</p>
             </div>
             <div>
@@ -606,7 +609,7 @@ const AgencyCreationModal: React.FC<AgencyCreationModalProps> = ({
                 className={inputCls('website')}
                 disabled={isCreating}
               />
-              <FieldError field="website" />
+              <FieldError field="website" fieldErrors={fieldErrors} />
               <p className="text-xs text-gray-400 mt-1">Optional: Your agency's website</p>
             </div>
           </div>
