@@ -98,7 +98,7 @@ const Modal: React.FC<ModalProps> = ({
 
   return (
     <div
-      className="fixed inset-0 bg-black/40 backdrop-blur-sm z-[5000] flex justify-center items-center p-2 sm:p-3 md:p-4 overflow-x-hidden overflow-y-auto"
+      className="fixed inset-0 bg-black/40 backdrop-blur-sm z-[5000] flex items-stretch sm:items-center justify-center p-0 sm:p-3 md:p-4 overflow-x-hidden overflow-y-auto"
       onClick={handleBackdropClick}
       role="presentation"
     >
@@ -109,11 +109,11 @@ const Modal: React.FC<ModalProps> = ({
         aria-labelledby={titleId}
         aria-describedby={ariaDescribedBy}
         className={`
-          bg-white/95 backdrop-blur-xl rounded-2xl shadow-2xl shadow-black/10
-          p-3 sm:p-4 md:p-6 w-full ${sizeClass} relative
+          bg-white/95 backdrop-blur-xl shadow-2xl shadow-black/10
+          p-4 sm:p-4 md:p-6 w-full ${sizeClass} relative
           overflow-y-auto border border-white/50
-          max-h-[calc(100vh-1rem)] sm:max-h-[95vh] md:max-h-[90vh]
-          landscape:max-h-[calc(100vh-1rem)] landscape:sm:max-h-[85vh]
+          h-full sm:h-auto rounded-none sm:rounded-2xl
+          max-h-full sm:max-h-[95vh] md:max-h-[90vh]
         `}
         onClick={handleContentClick}
       >

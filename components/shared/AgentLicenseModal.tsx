@@ -167,29 +167,19 @@ const AgentLicenseModal: React.FC<AgentLicenseModalProps> = ({
      */
     <div
       className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50
-                 flex items-end justify-center
-                 sm:items-center sm:p-4"
+                 flex items-stretch sm:items-center justify-center
+                 p-0 sm:p-4"
       onClick={handleClose}
     >
-      {/*
-       * Sheet / Dialog container:
-       *  - Mobile  : full-width, rounded top, max-h ~92dvh
-       *  - Tablet+ : max-w-lg, fully rounded, max-h 90vh
-       */}
       <div
         className="
           bg-white w-full flex flex-col
-          rounded-t-3xl
-          max-h-[92dvh] min-h-[50dvh]
-          sm:rounded-2xl sm:max-w-lg sm:max-h-[90vh]
-          shadow-2xl
+          h-full sm:h-auto
+          rounded-none sm:rounded-2xl sm:max-w-lg sm:max-h-[90vh]
+          shadow-2xl overflow-y-auto
         "
         onClick={e => e.stopPropagation()}
       >
-        {/* Drag handle – visible on mobile only */}
-        <div className="flex justify-center pt-3 pb-1 sm:hidden flex-shrink-0">
-          <div className="w-10 h-1 rounded-full bg-gray-300" />
-        </div>
 
         {/* Header */}
         <div className="flex items-start justify-between px-5 pt-4 pb-3 border-b border-gray-100 flex-shrink-0">

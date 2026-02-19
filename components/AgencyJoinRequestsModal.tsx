@@ -86,8 +86,8 @@ const AgencyJoinRequestsModal: React.FC<AgencyJoinRequestsModalProps> = ({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-      <div className="bg-white rounded-2xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-hidden flex flex-col">
+    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-stretch sm:items-center justify-center p-0 sm:p-4">
+      <div className="bg-white sm:rounded-2xl shadow-2xl sm:max-w-4xl w-full h-full sm:h-auto sm:max-h-[90vh] overflow-hidden flex flex-col">
         {/* Header */}
         <div className="bg-gradient-to-r from-primary to-primary-dark text-white p-6 flex items-center justify-between">
           <div>

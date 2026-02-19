@@ -8,10 +8,11 @@ interface ModalProps {
   children: React.ReactNode;
   size?: 'sm' | 'md' | 'lg' | 'xl' | '2xl' | '3xl' | '4xl' | '5xl' | '6xl' | '7xl';
   maxWidth?: string;
+  /** @deprecated all modals are now full-screen on mobile */
   fullScreenOnMobile?: boolean;
 }
 
-const Modal: React.FC<ModalProps> = ({ isOpen, onClose, title, children, size = 'lg', maxWidth, fullScreenOnMobile = false }) => {
+const Modal: React.FC<ModalProps> = ({ isOpen, onClose, title, children, size = 'lg', maxWidth }) => {
   // Lock body scroll when modal is open to prevent map jumping
   useEffect(() => {
     if (isOpen) {
@@ -60,23 +61,16 @@ const Modal: React.FC<ModalProps> = ({ isOpen, onClose, title, children, size = 
     sizeClass = sizeMap[size || 'lg'] || 'max-w-lg';
   }
 
-  // Full screen mobile classes
-  const mobileFullScreenClasses = fullScreenOnMobile
-    ? 'fixed inset-0 sm:relative sm:inset-auto rounded-none sm:rounded-lg max-h-full sm:max-h-[95vh] md:max-h-[90vh]'
-    : 'rounded-lg max-h-screen sm:max-h-[95vh] md:max-h-[90vh]';
-
-  // For fullScreenOnMobile: no backdrop on mobile (modal fills screen), blurry backdrop on desktop
-  // For regular modals: blurry backdrop on all screen sizes
-  const backdropClasses = fullScreenOnMobile
-    ? 'fixed inset-0 bg-transparent sm:bg-black/30 sm:backdrop-blur-md z-[5000] flex justify-center items-center p-0 sm:p-3 md:p-4 overflow-x-hidden overflow-y-auto'
-    : 'fixed inset-0 bg-black/30 backdrop-blur-md z-[5000] flex justify-center items-center p-2 sm:p-3 md:p-4 overflow-x-hidden overflow-y-auto';
-
   const titleId = title ? 'modal-title' : undefined;
 
   return (
-    <div className={backdropClasses} onClick={handleBackdropClick} aria-hidden="true">
+    <div
+      className="fixed inset-0 bg-black/30 backdrop-blur-md z-[5000] flex items-stretch sm:items-center justify-center p-0 sm:p-3 md:p-4 overflow-x-hidden overflow-y-auto"
+      onClick={handleBackdropClick}
+      aria-hidden="true"
+    >
       <div
-        className={`bg-white shadow-xl p-4 sm:p-4 md:p-6 w-full ${sizeClass} relative overflow-y-auto ${mobileFullScreenClasses}`}
+        className={`bg-white shadow-xl p-4 md:p-6 w-full ${sizeClass} relative overflow-y-auto h-full sm:h-auto rounded-none sm:rounded-lg max-h-full sm:max-h-[95vh] md:max-h-[90vh]`}
         onClick={handleContentClick}
         role="dialog"
         aria-modal="true"
