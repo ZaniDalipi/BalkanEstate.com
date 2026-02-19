@@ -1803,6 +1803,7 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
             </div>
           </div>
         </div>
+        </div>
 
         {/* Featured Subscription Section - Only visible to agency owner */}
         {isOwner && (
