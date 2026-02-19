@@ -227,7 +227,7 @@ const InvitationCodeModal: React.FC<InvitationCodeModalProps> = ({
                 <p className="text-xs text-gray-500">
                   {codeType === 'invitation'
                     ? 'Format: AGY-XXXXXX-XXXXXX'
-                    : 'Format: XXX-XXXXXXXX (e.g. KRA-LMR65G1O)'}
+                    : 'Format: ABC-XXXXXXXX'}
                 </p>
               )}
             </div>
