@@ -42,7 +42,6 @@ const AgentLicenseModal: React.FC<AgentLicenseModalProps> = ({
   const [loadingAgencies, setLoadingAgencies] = useState(false);
   const [languages, setLanguages] = useState<string[]>(['english']);
 
-  // Check if user is already an agent (joining agency) vs becoming new agent
   const isJoiningAgency = Boolean(currentLicenseNumber && currentAgentId);
 
   const handleLanguageToggle = (language: string) => {
@@ -53,7 +52,6 @@ const AgentLicenseModal: React.FC<AgentLicenseModalProps> = ({
     );
   };
 
-  // Fetch agencies when modal opens
   useEffect(() => {
     if (isOpen && agencies.length === 0 && !loadingAgencies) {
       fetchAgencies();
@@ -64,7 +62,6 @@ const AgentLicenseModal: React.FC<AgentLicenseModalProps> = ({
     }
   }, [isOpen]);
 
-  // Lock body scroll when open
   useEffect(() => {
     if (isOpen) {
       document.body.style.overflow = 'hidden';
@@ -155,36 +152,38 @@ const AgentLicenseModal: React.FC<AgentLicenseModalProps> = ({
     setError('');
   };
 
-  // Input base classes – uniform on all screen sizes
   const inputCls =
-    'w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all disabled:bg-gray-100 disabled:cursor-not-allowed';
+    'w-full px-4 py-3.5 border border-gray-200 rounded-2xl text-base focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all disabled:bg-gray-50 disabled:cursor-not-allowed placeholder:text-gray-400';
 
   return (
     /*
-     * Overlay:
-     *  - Mobile  : slide-up bottom sheet  (items-end, p-0)
-     *  - Tablet+ : centered dialog        (items-center, p-4)
+     * Overlay
+     *  mobile : items-end  → bottom sheet slides up, backdrop above
+     *  sm+    : items-center → centered dialog
      */
     <div
       className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50
-                 flex items-stretch sm:items-center justify-center
-                 p-0 sm:p-4"
+                 flex items-end sm:items-center justify-center p-0 sm:p-4"
       onClick={handleClose}
     >
       <div
         className="
           bg-white w-full flex flex-col
-          h-full sm:h-auto
-          rounded-none sm:rounded-2xl sm:max-w-lg sm:max-h-[90vh]
-          shadow-2xl overflow-y-auto
+          rounded-t-3xl sm:rounded-2xl
+          max-h-[92dvh] sm:max-h-[90vh] sm:max-w-lg
+          shadow-2xl
         "
         onClick={e => e.stopPropagation()}
       >
+        {/* Drag handle – mobile only */}
+        <div className="flex justify-center pt-3 pb-1 sm:hidden flex-shrink-0">
+          <div className="w-10 h-1 rounded-full bg-gray-300" />
+        </div>
 
         {/* Header */}
-        <div className="flex items-start justify-between px-5 pt-4 pb-3 border-b border-gray-100 flex-shrink-0">
+        <div className="flex items-center justify-between px-5 pt-3 pb-4 sm:pt-5 border-b border-gray-100 flex-shrink-0">
           <div className="flex items-center gap-3 min-w-0">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center flex-shrink-0">
+            <div className="w-11 h-11 rounded-2xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center flex-shrink-0">
               <ShieldCheck className="w-5 h-5 text-white" />
             </div>
             <div className="min-w-0">
@@ -193,7 +192,7 @@ const AgentLicenseModal: React.FC<AgentLicenseModalProps> = ({
                   ? t('agentLicense.joinAgencyTitle')
                   : t('agentLicense.title')}
               </h2>
-              <p className="text-xs text-gray-400 mt-0.5 truncate">
+              <p className="text-sm text-gray-400 mt-0.5 truncate">
                 {isJoiningAgency
                   ? t('agentLicense.joinAgencyDescription')
                   : t('agentLicense.newAgentDescription')}
@@ -203,33 +202,33 @@ const AgentLicenseModal: React.FC<AgentLicenseModalProps> = ({
           <button
             onClick={handleClose}
             disabled={isSubmitting}
-            className="p-2 hover:bg-gray-100 rounded-xl transition-colors disabled:opacity-40 flex-shrink-0 ml-2"
+            className="w-10 h-10 flex items-center justify-center hover:bg-gray-100 active:bg-gray-200 rounded-2xl transition-colors disabled:opacity-40 flex-shrink-0 ml-2"
             aria-label={t('common.close')}
           >
-            <X className="w-5 h-5 text-gray-400" />
+            <X className="w-5 h-5 text-gray-500" />
           </button>
         </div>
 
         {/* Scrollable form body */}
         <form
           onSubmit={handleSubmit}
-          className="flex-1 overflow-y-auto px-5 py-4 space-y-4"
+          className="flex-1 overflow-y-auto overscroll-contain px-5 py-5 space-y-5"
         >
           {/* Error banner */}
           {error && (
-            <div className="p-3 bg-red-50 border border-red-200 rounded-xl text-sm text-red-600 font-medium">
+            <div className="p-3.5 bg-red-50 border border-red-200 rounded-2xl text-sm text-red-600 font-medium">
               {error}
             </div>
           )}
 
-          {/* ── License Number ───────────────────────────────── */}
-          <div>
+          {/* ── License Number ─────────────────────────────── */}
+          <div className="space-y-1.5">
             <label
               htmlFor="licenseNumber"
-              className="flex items-center gap-1.5 text-xs font-semibold text-gray-700 mb-1.5 uppercase tracking-wider"
+              className="flex items-center gap-1.5 text-sm font-semibold text-gray-800"
             >
-              <ShieldCheck className="w-3.5 h-3.5" />
-              {t('agentLicense.licenseNumber')}{' '}
+              <ShieldCheck className="w-4 h-4 text-blue-500" />
+              {t('agentLicense.licenseNumber')}
               <span className="text-red-400">*</span>
             </label>
             <input
@@ -243,23 +242,23 @@ const AgentLicenseModal: React.FC<AgentLicenseModalProps> = ({
               className={inputCls}
               required
             />
-            <p className="text-xs text-gray-400 mt-1">
+            <p className="text-xs text-gray-400 px-1">
               {isJoiningAgency
                 ? t('agentLicense.verifiedLicense')
                 : t('agentLicense.officialLicense')}
             </p>
           </div>
 
-          {/* ── Agent ID ─────────────────────────────────────── */}
-          <div>
+          {/* ── Agent ID ───────────────────────────────────── */}
+          <div className="space-y-1.5">
             <label
               htmlFor="agentId"
-              className="flex items-center gap-1.5 text-xs font-semibold text-gray-700 mb-1.5 uppercase tracking-wider"
+              className="flex items-center gap-1.5 text-sm font-semibold text-gray-800"
             >
-              <KeyRound className="w-3.5 h-3.5" />
-              {t('agentLicense.agentId')}{' '}
+              <KeyRound className="w-4 h-4 text-blue-500" />
+              {t('agentLicense.agentId')}
               {!isJoiningAgency && (
-                <span className="text-gray-400 font-normal normal-case tracking-normal">
+                <span className="text-gray-400 font-normal text-xs">
                   ({t('agentLicense.optional')})
                 </span>
               )}
@@ -274,56 +273,63 @@ const AgentLicenseModal: React.FC<AgentLicenseModalProps> = ({
               placeholder={t('agentLicense.agentIdPlaceholder')}
               className={inputCls}
             />
-            <p className="text-xs text-gray-400 mt-1">
+            <p className="text-xs text-gray-400 px-1">
               {isJoiningAgency
                 ? t('agentLicense.verifiedAgentId')
                 : t('agentLicense.autoGeneratedAgentId')}
             </p>
           </div>
 
-          {/* ── Languages (new agents only) ──────────────────── */}
+          {/* ── Languages (new agents only) ────────────────── */}
           {!isJoiningAgency && (
-            <div>
-              <label className="flex items-center gap-1.5 text-xs font-semibold text-gray-700 mb-2 uppercase tracking-wider">
-                <Globe className="w-3.5 h-3.5" />
+            <div className="space-y-2">
+              <label className="flex items-center gap-1.5 text-sm font-semibold text-gray-800">
+                <Globe className="w-4 h-4 text-blue-500" />
                 {t('agentLicense.languagesSpoken')}
               </label>
-              {/* Responsive tag cloud – wraps naturally on all widths */}
-              <div className="flex flex-wrap gap-2">
-                {BALKAN_LANGUAGE_KEYS.map((language: string) => (
-                  <button
-                    key={language}
-                    type="button"
-                    onClick={() => handleLanguageToggle(language)}
-                    disabled={isSubmitting}
-                    className={`px-3 py-1.5 text-xs rounded-full border transition-all
-                      ${languages.includes(language)
-                        ? 'bg-blue-600 text-white border-blue-600 shadow-sm'
-                        : 'bg-white text-gray-600 border-gray-200 hover:border-blue-400 hover:text-blue-600'
-                      } disabled:opacity-50`}
-                  >
-                    {language}
-                  </button>
-                ))}
+              {/* 3-column grid for easy tapping on mobile */}
+              <div className="grid grid-cols-3 gap-2">
+                {BALKAN_LANGUAGE_KEYS.map((language: string) => {
+                  const selected = languages.includes(language);
+                  return (
+                    <button
+                      key={language}
+                      type="button"
+                      onClick={() => handleLanguageToggle(language)}
+                      disabled={isSubmitting}
+                      className={`
+                        min-h-[44px] px-2 py-2 text-sm rounded-2xl border font-medium
+                        transition-all active:scale-95 capitalize
+                        ${selected
+                          ? 'bg-blue-600 text-white border-blue-600 shadow-sm'
+                          : 'bg-gray-50 text-gray-600 border-gray-200 active:bg-gray-100'
+                        }
+                        disabled:opacity-50
+                      `}
+                    >
+                      {language}
+                    </button>
+                  );
+                })}
               </div>
-              <p className="text-xs text-gray-400 mt-1.5">
+              <p className="text-xs text-gray-400 px-1">
                 {t('agentLicense.selectLanguages')}
               </p>
             </div>
           )}
 
-          {/* ── Agency Selection ─────────────────────────────── */}
-          <div>
+          {/* ── Agency Selection ───────────────────────────── */}
+          <div className="space-y-1.5">
             <label
               htmlFor="agencySelect"
-              className="flex items-center gap-1.5 text-xs font-semibold text-gray-700 mb-1.5 uppercase tracking-wider"
+              className="flex items-center gap-1.5 text-sm font-semibold text-gray-800"
             >
-              <Building2 className="w-3.5 h-3.5" />
-              {t('agentLicense.selectAgency')}{' '}
+              <Building2 className="w-4 h-4 text-blue-500" />
+              {t('agentLicense.selectAgency')}
               {isJoiningAgency ? (
                 <span className="text-red-400">*</span>
               ) : (
-                <span className="text-gray-400 font-normal normal-case tracking-normal">
+                <span className="text-gray-400 font-normal text-xs">
                   ({t('agentLicense.optional')})
                 </span>
               )}
@@ -357,25 +363,25 @@ const AgentLicenseModal: React.FC<AgentLicenseModalProps> = ({
                 <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
               </div>
             )}
-            <p className="text-xs text-gray-400 mt-1">
+            <p className="text-xs text-gray-400 px-1">
               {isJoiningAgency
                 ? t('agentLicense.chooseAgency')
                 : t('agentLicense.selectAgencyOrIndependent')}
             </p>
           </div>
 
-          {/* ── Invitation Code ──────────────────────────────── */}
-          <div>
+          {/* ── Invitation Code ────────────────────────────── */}
+          <div className="space-y-1.5">
             <label
               htmlFor="agencyInvitationCode"
-              className="flex items-center gap-1.5 text-xs font-semibold text-gray-700 mb-1.5 uppercase tracking-wider"
+              className="flex items-center gap-1.5 text-sm font-semibold text-gray-800"
             >
-              <KeyRound className="w-3.5 h-3.5" />
-              {t('agentLicense.invitationCode')}{' '}
+              <KeyRound className="w-4 h-4 text-blue-500" />
+              {t('agentLicense.invitationCode')}
               {isJoiningAgency ? (
                 <span className="text-red-400">*</span>
               ) : (
-                <span className="text-gray-400 font-normal normal-case tracking-normal">
+                <span className="text-gray-400 font-normal text-xs">
                   ({t('agentLicense.optional')})
                 </span>
               )}
@@ -392,7 +398,7 @@ const AgentLicenseModal: React.FC<AgentLicenseModalProps> = ({
               className={`${inputCls} font-mono tracking-widest`}
               required={isJoiningAgency}
             />
-            <p className="text-xs text-gray-400 mt-1">
+            <p className="text-xs text-gray-400 px-1">
               {isJoiningAgency
                 ? t('agentLicense.enterInvitationCode')
                 : t('agentLicense.leaveEmptyForIndependent')}
@@ -400,13 +406,16 @@ const AgentLicenseModal: React.FC<AgentLicenseModalProps> = ({
           </div>
         </form>
 
-        {/* Sticky footer – action buttons */}
-        <div className="flex gap-3 px-5 py-4 border-t border-gray-100 bg-white rounded-b-3xl sm:rounded-b-2xl flex-shrink-0">
+        {/* Sticky footer */}
+        <div
+          className="flex gap-3 px-5 pt-4 pb-5 border-t border-gray-100 bg-white rounded-b-2xl flex-shrink-0"
+          style={{ paddingBottom: 'max(1.25rem, env(safe-area-inset-bottom))' }}
+        >
           <button
             type="button"
             onClick={handleClose}
             disabled={isSubmitting}
-            className="flex-1 px-4 py-3 border border-gray-200 text-gray-600 font-semibold rounded-xl hover:bg-gray-50 transition-colors text-sm disabled:opacity-40"
+            className="flex-1 px-4 py-3.5 border border-gray-200 text-gray-700 font-semibold rounded-2xl hover:bg-gray-50 active:bg-gray-100 transition-colors text-base disabled:opacity-40"
           >
             {t('common.cancel')}
           </button>
@@ -414,7 +423,7 @@ const AgentLicenseModal: React.FC<AgentLicenseModalProps> = ({
             type="button"
             onClick={runSubmit}
             disabled={isSubmitting}
-            className="flex-1 px-4 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-semibold rounded-xl hover:from-blue-700 hover:to-indigo-700 transition-all disabled:opacity-40 disabled:cursor-not-allowed text-sm flex items-center justify-center gap-2 shadow-sm"
+            className="flex-1 px-4 py-3.5 bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-semibold rounded-2xl hover:from-blue-700 hover:to-indigo-700 active:opacity-90 transition-all disabled:opacity-40 disabled:cursor-not-allowed text-base flex items-center justify-center gap-2 shadow-sm"
           >
             {isSubmitting ? (
               <>
