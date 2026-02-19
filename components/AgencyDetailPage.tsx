@@ -455,7 +455,8 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
                 role: data.agency.role ?? 'agent',
                 joinedAt: new Date().toISOString(),
               },
-            },
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            } as any,
           });
 
           // Refresh user data from server to ensure full sync
@@ -1666,7 +1667,7 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
                 )}
 
                 {/* Agent Registration Codes */}
-                {agencyData.agentCoupons?.coupons?.length > 0 && (
+                {agencyData.agentCoupons && agencyData.agentCoupons.coupons && agencyData.agentCoupons.coupons.length > 0 && (
                   <div className="p-5 bg-gradient-to-br from-emerald-50 to-teal-50 border border-emerald-200 rounded-xl">
                     <div className="flex items-center gap-3 mb-4">
                       <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-emerald-400 to-teal-500 flex items-center justify-center shadow-lg shadow-emerald-500/25 flex-shrink-0">
