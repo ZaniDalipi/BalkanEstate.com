@@ -6,11 +6,12 @@ import {
   ExclamationTriangleIcon,
 } from '../../constants';
 import { useAppContext } from '../../context/AppContext';
-import { BALKAN_LOCATIONS } from '../../utils/balkanLocations';
+import { BALKAN_LOCATIONS, CityData } from '../../utils/balkanLocations';
 import { canCreateAgency } from '../../src/shared/utils/subscriptionHelpers';
 import { UserRole } from '../../types';
 import { createAgency } from '../../src/features/agencies/api/agencyApi';
 import { API_URL } from '../../src/shared/api/config';
+import MapLocationPicker from '../../src/features/seller/components/MapLocationPicker';
 import { ChevronLeft, ChevronRight, X } from 'lucide-react';
 
 // ─── Constants ────────────────────────────────────────────────────────────────
@@ -77,7 +78,8 @@ const AgencyCreationModal: React.FC<AgencyCreationModalProps> = ({
   const [isCreating, setIsCreating] = useState(false);
   const [globalError, setGlobalError] = useState('');
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
-  const [availableCities, setAvailableCities] = useState<string[]>([]);
+  const [availableCities, setAvailableCities] = useState<CityData[]>([]);
+  const [selectedCityData, setSelectedCityData] = useState<CityData | null>(null);
   const [showPaymentWindow, setShowPaymentWindow] = useState(false);
   const [pendingAgencyData, setPendingAgencyData] = useState<any>(null);
   const [enterprisePlan, setEnterprisePlan] = useState<EnterprisePlan>(DEFAULT_ENTERPRISE_PLAN);
@@ -88,6 +90,8 @@ const AgencyCreationModal: React.FC<AgencyCreationModalProps> = ({
     address: '',
     city: '',
     country: '',
+    lat: 0,
+    lng: 0,
     phone: '',
     email: '',
     website: '',
@@ -204,7 +208,10 @@ const AgencyCreationModal: React.FC<AgencyCreationModalProps> = ({
       });
       if (source.country) {
         const countryData = BALKAN_LOCATIONS.find(c => c.name === source.country);
-        setAvailableCities(countryData?.cities.map(c => c.name) ?? []);
+        const cities = countryData?.cities ?? [];
+        setAvailableCities(cities);
+        const cityObj = cities.find(c => c.name === source.city) ?? null;
+        setSelectedCityData(cityObj);
       }
     } else if (user) {
       setFormData(prev => ({
@@ -218,7 +225,12 @@ const AgencyCreationModal: React.FC<AgencyCreationModalProps> = ({
       }));
       if (user.country) {
         const countryData = BALKAN_LOCATIONS.find(c => c.name === user.country);
-        setAvailableCities(countryData?.cities.map(c => c.name) ?? []);
+        const cities = countryData?.cities ?? [];
+        setAvailableCities(cities);
+        if (user.city) {
+          const cityObj = cities.find(c => c.name === user.city) ?? null;
+          setSelectedCityData(cityObj);
+        }
       }
     }
   }, [isOpen, state.currentUser, state.pendingAgencyData]);
@@ -227,9 +239,10 @@ const AgencyCreationModal: React.FC<AgencyCreationModalProps> = ({
   useEffect(() => {
     if (formData.country) {
       const countryData = BALKAN_LOCATIONS.find(c => c.name === formData.country);
-      setAvailableCities(countryData?.cities.map(c => c.name) ?? []);
+      setAvailableCities(countryData?.cities ?? []);
     } else {
       setAvailableCities([]);
+      setSelectedCityData(null);
     }
   }, [formData.country]);
 
@@ -237,11 +250,25 @@ const AgencyCreationModal: React.FC<AgencyCreationModalProps> = ({
 
   const set = (field: string, value: any) => {
     setFormData(prev => {
-      if (field === 'country') return { ...prev, country: value, city: '' };
+      if (field === 'country') return { ...prev, country: value, city: '', lat: 0, lng: 0 };
+      if (field === 'city') {
+        // when city changes, look up lat/lng and update
+        const cityObj = availableCities.find(c => c.name === value) ?? null;
+        setSelectedCityData(cityObj);
+        return { ...prev, city: value, lat: cityObj?.lat ?? 0, lng: cityObj?.lng ?? 0 };
+      }
       return { ...prev, [field]: value };
     });
-    // clear field error on change
     setFieldErrors(prev => ({ ...prev, [field]: '' }));
+  };
+
+  const handleMapLocationChange = (lat: number, lng: number) => {
+    setFormData(prev => ({ ...prev, lat, lng }));
+  };
+
+  const handleMapAddressChange = (addr: string) => {
+    setFormData(prev => ({ ...prev, address: addr }));
+    setFieldErrors(prev => ({ ...prev, address: '' }));
   };
 
   const setHours = (day: string, value: string) =>
@@ -450,6 +477,7 @@ const AgencyCreationModal: React.FC<AgencyCreationModalProps> = ({
       case 2:
         return (
           <div className="space-y-5">
+            {/* Country + City */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
                 <label className={labelCls}>Country <Required /></label>
@@ -482,7 +510,7 @@ const AgencyCreationModal: React.FC<AgencyCreationModalProps> = ({
                       {formData.country ? 'Select a city' : 'Select country first'}
                     </option>
                     {availableCities.map(c => (
-                      <option key={c} value={c}>{c}</option>
+                      <option key={c.name} value={c.name}>{c.name}</option>
                     ))}
                   </select>
                   <ChevronRight className="absolute right-3 top-1/2 -translate-y-1/2 rotate-90 w-4 h-4 text-gray-400 pointer-events-none" />
@@ -490,6 +518,33 @@ const AgencyCreationModal: React.FC<AgencyCreationModalProps> = ({
                 <FieldError field="city" />
               </div>
             </div>
+
+            {/* Interactive map — shown once a city is selected (matches listing form behaviour) */}
+            {formData.city && selectedCityData && (
+              <div>
+                <label className={labelCls}>Pin Exact Location</label>
+                <p className="text-xs text-gray-400 mb-2">
+                  Drag the marker or click the map to set your office's precise position.
+                  The street address below will update automatically.
+                </p>
+                <div className="rounded-xl overflow-hidden border border-gray-200 shadow-sm">
+                  <MapLocationPicker
+                    lat={formData.lat || selectedCityData.lat}
+                    lng={formData.lng || selectedCityData.lng}
+                    address={formData.address || `${formData.city}, ${formData.country}`}
+                    zoom={13}
+                    country={formData.country}
+                    city={formData.city}
+                    cityLat={selectedCityData.lat}
+                    cityLng={selectedCityData.lng}
+                    onLocationChange={handleMapLocationChange}
+                    onAddressChange={handleMapAddressChange}
+                  />
+                </div>
+              </div>
+            )}
+
+            {/* Street Address — auto-filled by map, also editable manually */}
             <div>
               <label className={labelCls}>Street Address</label>
               <input
@@ -500,7 +555,10 @@ const AgencyCreationModal: React.FC<AgencyCreationModalProps> = ({
                 className={inputCls('address')}
                 disabled={isCreating}
               />
-              <p className="text-xs text-gray-400 mt-1">Optional: Full street address for your office</p>
+              <p className="text-xs text-gray-400 mt-1">
+                Auto-filled from the map above, or type manually.
+                Include building number, street name, and any suite/floor.
+              </p>
             </div>
           </div>
         );
