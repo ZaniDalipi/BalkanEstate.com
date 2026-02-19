@@ -1145,7 +1145,10 @@ const SubscriptionManagement: React.FC<SubscriptionManagementProps> = ({ userId 
             <div>
               <p className="font-semibold text-neutral-800">Listing Limit</p>
               <p className="text-sm text-neutral-500">
-                {user.subscription?.activeListingsCount || user.listingsCount || 0} of {currentProduct?.listingsLimit ?? subscriptionDetails.currentPlan.listingLimit} listings used
+                {user.subscription?.activeListingsCount || user.listingsCount || 0} of {currentProduct?.listingsLimit ?? subscriptionDetails.currentPlan.listingLimit} used
+                {(user.subscription?.tier === 'agency_agent' || user.subscription?.tier === 'agency_owner') && (
+                  <span className="ml-1 text-neutral-400">· per month</span>
+                )}
               </p>
             </div>
           </div>
@@ -1182,8 +1185,13 @@ const SubscriptionManagement: React.FC<SubscriptionManagementProps> = ({ userId 
                 {currentProduct?.listingsLimit ?? subscriptionDetails.currentPlan.listingLimit} Active Listings
               </p>
               <p className="text-sm text-neutral-500">
-                {subscriptionDetails.currentPlan.period === 'year' ? 'Per year' : subscriptionDetails.currentPlan.period === 'month' ? 'Per month' : 'Total available'}
+                {subscriptionDetails.currentPlan.tier === 2 || user.subscription?.tier === 'agency_agent' || user.subscription?.tier === 'agency_owner'
+                  ? 'Per month, per agent'
+                  : subscriptionDetails.currentPlan.period === 'month' ? 'Per month' : 'Total available'}
               </p>
+              {(subscriptionDetails.currentPlan.tier === 2 || user.subscription?.tier === 'agency_agent' || user.subscription?.tier === 'agency_owner') && (
+                <p className="text-xs text-neutral-400 mt-0.5">750 listing pool / year across the agency</p>
+              )}
             </div>
           </div>
 

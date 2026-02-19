@@ -57,6 +57,7 @@ import {
   getPaymentStats,
   activateUserSubscription,
   cancelSubscription,
+  adjustListingLimit,
 } from '../controllers/adminSubscriptionController';
 import {
   getAllContent,
@@ -137,6 +138,7 @@ router.get('/subscriptions', logAdminAction('VIEW_SUBSCRIPTIONS'), getAllSubscri
 router.get('/subscriptions/:id', logAdminAction('VIEW_SUBSCRIPTION'), getSubscriptionById);
 router.post('/subscriptions/activate', logAdminAction('ACTIVATE_SUBSCRIPTION'), activateUserSubscription);
 router.post('/subscriptions/:id/cancel', logAdminAction('CANCEL_SUBSCRIPTION'), cancelSubscription);
+router.patch('/subscriptions/listing-limit/:userId', logAdminAction('ADJUST_LISTING_LIMIT'), adjustListingLimit);
 router.get('/payments/stats', logAdminAction('VIEW_PAYMENT_STATS'), getPaymentStats);
 router.get('/payments', logAdminAction('VIEW_PAYMENTS'), getAllPayments);
 router.get('/payments/:id', logAdminAction('VIEW_PAYMENT'), getPaymentById);

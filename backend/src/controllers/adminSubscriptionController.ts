@@ -468,6 +468,72 @@ export const cancelSubscription = async (req: Request, res: Response): Promise<v
   }
 };
 
+/**
+ * @desc    Directly adjust a user's active listing limit (admin override)
+ * @route   PATCH /api/admin/subscriptions/listing-limit/:userId
+ * @access  Admin
+ */
+export const adjustListingLimit = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { userId } = req.params;
+    const { listingsLimit, reason } = req.body;
+
+    if (listingsLimit === undefined || listingsLimit === null || Number(listingsLimit) < 0) {
+      res.status(400).json({ message: 'listingsLimit must be a non-negative number' });
+      return;
+    }
+
+    const user = await User.findById(userId);
+    if (!user) {
+      res.status(404).json({ message: 'User not found' });
+      return;
+    }
+
+    const newLimit = Number(listingsLimit);
+
+    // Update unified subscription object
+    if (user.subscription) {
+      user.subscription.listingsLimit = newLimit;
+      user.markModified('subscription');
+    }
+    // Also update legacy field if present
+    if (user.listingsLimit !== undefined) {
+      user.listingsLimit = newLimit;
+    }
+
+    await user.save();
+
+    // Audit trail
+    await SubscriptionEvent.create({
+      userId,
+      eventType: 'subscription_updated',
+      store: 'web',
+      metadata: {
+        action: 'admin_listing_limit_override',
+        newListingsLimit: newLimit,
+        adminUserId: (req as any).user?._id,
+        reason: reason || 'Admin manual override',
+      },
+    });
+
+    invalidateCache('/api/agents');
+    invalidateCache('/api/properties');
+
+    adminLogger.info(`[Admin] Listing limit for user ${userId} set to ${newLimit} by admin ${(req as any).user?._id}`);
+
+    res.json({
+      success: true,
+      message: `Listing limit updated to ${newLimit} for ${user.email}`,
+      listingsLimit: newLimit,
+      userId: user._id,
+      email: user.email,
+    });
+  } catch (error: any) {
+    adminLogger.error('[Admin] Error adjusting listing limit:', error);
+    res.status(500).json({ message: 'Error adjusting listing limit' });
+  }
+};
+
 export default {
   getAllSubscriptions,
   getSubscriptionById,
@@ -476,4 +542,5 @@ export default {
   getPaymentStats,
   activateUserSubscription,
   cancelSubscription,
+  adjustListingLimit,
 };
