@@ -705,10 +705,22 @@ export const getAgency = async (
 
     // Include sales stats and calculated totals in agency object
     const activeProperties = properties.filter(p => p.status === 'active' || p.status === 'pending');
-    // SECURITY: Exclude invitationCode from public response - it allows anyone to join the agency
-    const { invitationCode: _invCode, __v, ...safeAgency } = agency.toObject();
+
+    // SECURITY: Only include invitationCode for owner, admins, or existing members
+    const requestUserId = req.user ? String((req.user as IUser)._id) : null;
+    const ownerId = String(agency.ownerId._id || agency.ownerId);
+    const adminIds = agency.admins?.map((id: any) => String(id._id || id)) || [];
+    const agentIds = agency.agents.map((agent: any) => String(agent._id || agent));
+    const isMemberOrAdmin = requestUserId && (
+      requestUserId === ownerId ||
+      adminIds.includes(requestUserId) ||
+      agentIds.includes(requestUserId)
+    );
+
+    const { invitationCode, __v, ...publicAgencyFields } = agency.toObject();
     const agencyWithStats = {
-      ...safeAgency,
+      ...publicAgencyFields,
+      ...(isMemberOrAdmin ? { invitationCode } : {}),
       salesStats,
       totalProperties: activeProperties.length,
       totalAgents: agency.agents?.length || 0,

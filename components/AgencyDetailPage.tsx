@@ -1528,8 +1528,8 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
               </div>
             </div>
 
-            {/* Admin Section - Invitation Code */}
-            {isAdmin && agencyData.invitationCode && (
+            {/* Invitation Code - visible to owner, admins, and members */}
+            {(isAdmin || isAlreadyMember || isUserInThisAgency) && agencyData.invitationCode && (
               <div className="mt-8 p-5 bg-gradient-to-br from-amber-50 to-orange-50 border border-amber-200 rounded-xl">
                 <div className="flex items-start gap-4">
                   <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center shadow-lg shadow-amber-500/25 flex-shrink-0">
@@ -1537,7 +1537,11 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
                   </div>
                   <div className="flex-1">
                     <h4 className="font-semibold text-slate-900 mb-1">Agency Invitation Code</h4>
-                    <p className="text-sm text-slate-600 mb-3">Share this code with agents you want to join your agency</p>
+                    <p className="text-sm text-slate-600 mb-3">
+                      {isAdmin
+                        ? 'Share this code with agents you want to join your agency'
+                        : 'Your agency invitation code — share with other agents to join'}
+                    </p>
                     <div className="flex items-center gap-3 flex-wrap">
                       <code className="px-4 py-2.5 bg-white border border-amber-200 rounded-lg font-mono text-base font-bold text-slate-900 tracking-widest shadow-sm">
                         {agencyData.invitationCode}

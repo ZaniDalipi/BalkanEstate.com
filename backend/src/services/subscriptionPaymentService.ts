@@ -565,8 +565,9 @@ async function initializePromotionCoupons(
   const now = new Date();
 
   if (isProProduct) {
-    // Get the Pro product config for coupon amounts
-    const proProduct = await Product.findOne({ productId: 'pro_monthly' }).lean();
+    // Get the Pro product config for coupon amounts - use actual subscribed product, fallback to pro_monthly
+    const proProduct = await Product.findOne({ productId }).lean()
+      ?? await Product.findOne({ productId: 'pro_monthly' }).lean();
     const monthlyAmount = proProduct?.promotionCoupons || 3;
     const highlightedAmount = proProduct?.highlightedCoupons || 2;
     const premiumAmount = proProduct?.premiumCoupons || 1;
