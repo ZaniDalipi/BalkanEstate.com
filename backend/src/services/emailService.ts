@@ -141,11 +141,18 @@ const DEFAULT_EMAIL_ADDRESSES: Record<EmailCategory, string> = {
   inquiries: 'BalkanEstateᴬᴵ <inquiries@balkanestateai.com>',
 };
 
+// Minimum gap between consecutive email sends (ms). Default 5 minutes.
+const EMAIL_SEND_INTERVAL_MS = parseInt(process.env.EMAIL_SEND_INTERVAL_MS ?? '300000', 10);
+
 class EmailService {
   private transporter: nodemailer.Transporter | null = null;
   private resend: Resend | null = null;
   private provider: EmailProvider = 'none';
   private fromEmails: Record<EmailCategory, string>;
+
+  // Simple in-memory send queue to avoid hitting provider rate limits
+  private sendQueue: Array<{ config: EmailConfig; resolve: () => void; reject: (err: unknown) => void }> = [];
+  private queueRunning = false;
 
   constructor() {
     // Initialize from addresses (can be overridden via env vars)
@@ -191,7 +198,42 @@ class EmailService {
     return this.fromEmails[category];
   }
 
+  /**
+   * Background queue processor — sends one email at a time with a
+   * EMAIL_SEND_INTERVAL_MS gap (default 5 min) to stay under provider rate limits.
+   */
+  private async processQueue(): Promise<void> {
+    if (this.queueRunning) return;
+    this.queueRunning = true;
+    while (this.sendQueue.length > 0) {
+      const item = this.sendQueue.shift()!;
+      try {
+        await this.dispatchEmail(item.config);
+        item.resolve();
+      } catch (err) {
+        item.reject(err);
+      }
+      if (this.sendQueue.length > 0) {
+        await new Promise(r => setTimeout(r, EMAIL_SEND_INTERVAL_MS));
+      }
+    }
+    this.queueRunning = false;
+  }
+
+  /**
+   * Enqueue an email. Returns a promise that resolves once the email is sent.
+   */
   async sendEmail(config: EmailConfig): Promise<void> {
+    return new Promise((resolve, reject) => {
+      this.sendQueue.push({ config, resolve, reject });
+      this.processQueue().catch(err => emailLogger.error('Queue processor error:', err));
+    });
+  }
+
+  /**
+   * Actually dispatch the email through the configured provider.
+   */
+  private async dispatchEmail(config: EmailConfig): Promise<void> {
     // Validate email address
     if (!isValidEmail(config.to)) {
       emailLogger.error(`❌ Invalid email address: ${config.to}`);
