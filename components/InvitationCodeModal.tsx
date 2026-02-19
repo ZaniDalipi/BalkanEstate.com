@@ -13,7 +13,7 @@ type CodeType = 'invitation' | 'coupon';
 
 // Validation patterns
 const INVITATION_CODE_PATTERN = /^AGY-[A-Z0-9]{6}-[A-Z0-9]{6}$/;
-const COUPON_CODE_PATTERN = /^IND-[A-Z0-9]{8}$/;
+const COUPON_CODE_PATTERN = /^[A-Z0-9]{3}-[A-Z0-9]{8}$/;
 
 const InvitationCodeModal: React.FC<InvitationCodeModalProps> = ({
   isOpen,
@@ -67,10 +67,10 @@ const InvitationCodeModal: React.FC<InvitationCodeModalProps> = ({
       }
     } else {
       if (upperCode.length > 0 && upperCode.length < 12) {
-        return { valid: false, message: 'Keep typing... (IND-XXXXXXXX)' };
+        return { valid: false, message: 'Keep typing... (XXX-XXXXXXXX)' };
       }
       if (upperCode.length >= 12 && !COUPON_CODE_PATTERN.test(upperCode)) {
-        return { valid: false, message: 'Invalid format. Expected: IND-XXXXXXXX' };
+        return { valid: false, message: 'Invalid format. Expected: XXX-XXXXXXXX' };
       }
       if (COUPON_CODE_PATTERN.test(upperCode)) {
         return { valid: true, message: 'Valid coupon code format' };
@@ -200,7 +200,7 @@ const InvitationCodeModal: React.FC<InvitationCodeModalProps> = ({
               id="codeInput"
               value={code}
               onChange={handleCodeChange}
-              placeholder={codeType === 'invitation' ? 'AGY-XXXXXX-XXXXXX' : 'IND-XXXXXXXX'}
+              placeholder={codeType === 'invitation' ? 'AGY-XXXXXX-XXXXXX' : 'XXX-XXXXXXXX'}
               className={`w-full px-3 sm:px-4 py-2.5 sm:py-3 border rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent font-mono text-base sm:text-lg tracking-wider uppercase transition-colors ${
                 error ? 'border-red-300 bg-red-50' :
                 validationMessage?.includes('Valid') ? 'border-green-300 bg-green-50' :
@@ -227,7 +227,7 @@ const InvitationCodeModal: React.FC<InvitationCodeModalProps> = ({
                 <p className="text-xs text-gray-500">
                   {codeType === 'invitation'
                     ? 'Format: AGY-XXXXXX-XXXXXX'
-                    : 'Format: IND-XXXXXXXX'}
+                    : 'Format: XXX-XXXXXXXX (e.g. KRA-LMR65G1O)'}
                 </p>
               )}
             </div>

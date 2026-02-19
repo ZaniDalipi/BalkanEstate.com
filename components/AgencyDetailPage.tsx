@@ -376,9 +376,8 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
     try {
       const trimmedCode = code.trim().toUpperCase();
 
-      // Check if this is an agent coupon (IND-XXXXXXXX format) or invitation code (AGY-XXXXXX-XXXXXX format)
-      const isAgentCoupon = trimmedCode.startsWith('IND-') ||
-                           (trimmedCode.length >= 8 && !trimmedCode.startsWith('AGY-'));
+      // Check if this is an agent coupon (XXX-XXXXXXXX format, agency-prefixed) or invitation code (AGY-XXXXXX-XXXXXX format)
+      const isAgentCoupon = !trimmedCode.startsWith('AGY-') && /^[A-Z0-9]{3}-[A-Z0-9]{8}$/.test(trimmedCode);
 
       if (isAgentCoupon) {
         // Redeem agent coupon for Pro subscription

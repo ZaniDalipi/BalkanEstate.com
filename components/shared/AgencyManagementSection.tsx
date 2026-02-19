@@ -605,7 +605,7 @@ const AgencyManagementSection: React.FC<AgencyManagementSectionProps> = ({ curre
                         setError('');
                       }}
                       disabled={loading || !isUserAgent()}
-                      placeholder="e.g., IND-XXXXXXXX or ABC-12345678"
+                      placeholder="e.g., KRA-LMR65G1O"
                       className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent disabled:bg-gray-100 disabled:cursor-not-allowed font-mono text-sm uppercase"
                     />
                     <p className="text-xs text-gray-600 mt-1">
