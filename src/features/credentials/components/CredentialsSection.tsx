@@ -170,6 +170,15 @@ const CredentialsSection: React.FC<CredentialsSectionProps> = ({
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const formRef = useRef<HTMLFormElement>(null);
+
+  // Prevent body scroll while modal is open
+  React.useEffect(() => {
+    if (showModal) {
+      document.body.style.overflow = 'hidden';
+      return () => { document.body.style.overflow = ''; };
+    }
+  }, [showModal]);
 
   const [formData, setFormData] = useState({
     type: 'certification' as Credential['type'],
@@ -500,17 +509,29 @@ const CredentialsSection: React.FC<CredentialsSectionProps> = ({
       {/* ─── Add/Edit Modal ──────────────────────────────────────────────────── */}
       {showModal && (
         <div
-          className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[70] flex items-end sm:items-center justify-center p-0 sm:p-4"
+          className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[70]
+                     flex items-end sm:items-center justify-center
+                     sm:p-4"
           onClick={() => { if (!isSubmitting) { setShowModal(false); resetForm(); } }}
         >
           <div
-            className="bg-white rounded-t-2xl sm:rounded-2xl max-w-lg w-full max-h-[85vh] sm:max-h-[90vh] overflow-y-auto shadow-2xl"
+            className="
+              bg-white flex flex-col w-full
+              rounded-t-3xl max-h-[92dvh] min-h-[40dvh]
+              sm:rounded-2xl sm:max-w-lg sm:max-h-[90vh]
+              shadow-2xl overflow-hidden
+            "
             onClick={(e) => e.stopPropagation()}
           >
+            {/* Drag handle – mobile only */}
+            <div className="flex justify-center pt-3 pb-1 sm:hidden flex-shrink-0">
+              <div className="w-10 h-1 rounded-full bg-gray-300" />
+            </div>
+
             {/* Modal Header */}
-            <div className="sticky top-0 bg-white border-b border-gray-100 px-5 py-4 flex items-center justify-between rounded-t-2xl z-10">
+            <div className="flex items-start justify-between px-5 pt-4 pb-3 border-b border-gray-100 flex-shrink-0">
               <div>
-                <h3 className="text-lg font-bold text-gray-900">
+                <h3 className="text-base font-bold text-gray-900">
                   {editingId ? t('profilePage.credentials.editCredential', 'Edit Credential') : t('profilePage.credentials.addCredential', 'Add New Credential')}
                 </h3>
                 <p className="text-xs text-gray-400 mt-0.5">
@@ -521,14 +542,14 @@ const CredentialsSection: React.FC<CredentialsSectionProps> = ({
                 type="button"
                 onClick={() => { if (!isSubmitting) { setShowModal(false); resetForm(); } }}
                 disabled={isSubmitting}
-                className="p-2 hover:bg-gray-100 rounded-xl transition-colors disabled:opacity-40"
+                className="p-2 hover:bg-gray-100 rounded-xl transition-colors disabled:opacity-40 ml-3 flex-shrink-0"
               >
                 <XMarkIcon className="w-5 h-5 text-gray-400" />
               </button>
             </div>
 
             {/* Form */}
-            <form onSubmit={handleSubmit} className="p-5 space-y-5">
+            <form ref={formRef} onSubmit={handleSubmit} className="flex-1 overflow-y-auto p-5 space-y-5">
               {/* Submit Error Banner */}
               {submitError && (
                 <div className="flex items-start gap-2.5 px-4 py-3 bg-red-50 border border-red-200 rounded-xl text-sm text-red-700">
@@ -739,44 +760,42 @@ const CredentialsSection: React.FC<CredentialsSectionProps> = ({
                 </button>
               </div>
 
-              {/* Actions */}
-              <div className="flex gap-3 pt-1">
-                <button
-                  type="button"
-                  onClick={() => { setShowModal(false); resetForm(); }}
-                  disabled={isSubmitting}
-                  className="flex-1 px-4 py-3 border border-gray-200 text-gray-600 font-semibold rounded-xl hover:bg-gray-50 transition-colors text-sm disabled:opacity-40"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  disabled={isSubmitting || !formData.title.trim() || !formData.issuer.trim()}
-                  className="flex-1 px-4 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-semibold rounded-xl hover:from-blue-700 hover:to-indigo-700 transition-all disabled:opacity-40 disabled:cursor-not-allowed text-sm flex items-center justify-center gap-2 shadow-sm hover:shadow-md"
-                >
-                  {isSubmitting ? (
-                    <>
-                      <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                      <span>{editingId ? 'Saving...' : 'Adding...'}</span>
-                    </>
-                  ) : (
-                    <>
-                      {editingId ? (
-                        <>
-                          <CheckCircleIcon className="w-4 h-4" />
-                          <span>Save Changes</span>
-                        </>
-                      ) : (
-                        <>
-                          <PlusIcon className="w-4 h-4" />
-                          <span>Add Credential</span>
-                        </>
-                      )}
-                    </>
-                  )}
-                </button>
-              </div>
             </form>
+
+            {/* Sticky footer – action buttons outside scrollable form */}
+            <div className="flex gap-3 px-5 py-4 border-t border-gray-100 bg-white rounded-b-3xl sm:rounded-b-2xl flex-shrink-0">
+              <button
+                type="button"
+                onClick={() => { setShowModal(false); resetForm(); }}
+                disabled={isSubmitting}
+                className="flex-1 px-4 py-3 border border-gray-200 text-gray-600 font-semibold rounded-xl hover:bg-gray-50 transition-colors text-sm disabled:opacity-40"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={() => formRef.current?.requestSubmit()}
+                disabled={isSubmitting || !formData.title.trim() || !formData.issuer.trim()}
+                className="flex-1 px-4 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-semibold rounded-xl hover:from-blue-700 hover:to-indigo-700 transition-all disabled:opacity-40 disabled:cursor-not-allowed text-sm flex items-center justify-center gap-2 shadow-sm hover:shadow-md"
+              >
+                {isSubmitting ? (
+                  <>
+                    <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                    <span>{editingId ? 'Saving...' : 'Adding...'}</span>
+                  </>
+                ) : editingId ? (
+                  <>
+                    <CheckCircleIcon className="w-4 h-4" />
+                    <span>Save Changes</span>
+                  </>
+                ) : (
+                  <>
+                    <PlusIcon className="w-4 h-4" />
+                    <span>Add Credential</span>
+                  </>
+                )}
+              </button>
+            </div>
           </div>
         </div>
       )}

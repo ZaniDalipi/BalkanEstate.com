@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { X } from 'lucide-react';
+import { X, ShieldCheck, Building2, KeyRound, Globe, ChevronDown } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { getAgencies } from '../../services/apiService';
 
@@ -13,7 +13,13 @@ const BALKAN_LANGUAGES = [
 interface AgentLicenseModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSubmit: (licenseData: { licenseNumber: string; agencyInvitationCode?: string; agentId?: string; selectedAgencyId?: string; languages?: string[] }) => Promise<void>;
+  onSubmit: (licenseData: {
+    licenseNumber: string;
+    agencyInvitationCode?: string;
+    agentId?: string;
+    selectedAgencyId?: string;
+    languages?: string[];
+  }) => Promise<void>;
   currentLicenseNumber?: string;
   currentAgentId?: string;
 }
@@ -23,7 +29,7 @@ const AgentLicenseModal: React.FC<AgentLicenseModalProps> = ({
   onClose,
   onSubmit,
   currentLicenseNumber,
-  currentAgentId
+  currentAgentId,
 }) => {
   const { t } = useTranslation(['modals']);
   const [licenseNumber, setLicenseNumber] = useState(currentLicenseNumber || '');
@@ -36,6 +42,9 @@ const AgentLicenseModal: React.FC<AgentLicenseModalProps> = ({
   const [loadingAgencies, setLoadingAgencies] = useState(false);
   const [languages, setLanguages] = useState<string[]>(['English']);
 
+  // Check if user is already an agent (joining agency) vs becoming new agent
+  const isJoiningAgency = Boolean(currentLicenseNumber && currentAgentId);
+
   const handleLanguageToggle = (language: string) => {
     setLanguages(prev =>
       prev.includes(language)
@@ -44,28 +53,31 @@ const AgentLicenseModal: React.FC<AgentLicenseModalProps> = ({
     );
   };
 
-  // Check if user is already an agent (joining agency) vs becoming new agent
-  const isJoiningAgency = Boolean(currentLicenseNumber && currentAgentId);
-
   // Fetch agencies when modal opens
   useEffect(() => {
-    // Fetch agencies when modal opens (for both new agents and joining scenarios)
     if (isOpen && agencies.length === 0 && !loadingAgencies) {
       fetchAgencies();
     }
-    // Cleanup when modal closes
     if (!isOpen && agencies.length > 0) {
       setAgencies([]);
       setSelectedAgency('');
     }
   }, [isOpen]);
 
+  // Lock body scroll when open
+  useEffect(() => {
+    if (isOpen) {
+      document.body.style.overflow = 'hidden';
+      return () => { document.body.style.overflow = ''; };
+    }
+  }, [isOpen]);
+
   const fetchAgencies = async () => {
     try {
       setLoadingAgencies(true);
-      const response = await getAgencies({ limit: 100 }); // Get all agencies
+      const response = await getAgencies({ limit: 100 });
       setAgencies(response.agencies || []);
-    } catch (err) {
+    } catch {
       setAgencies([]);
     } finally {
       setLoadingAgencies(false);
@@ -74,23 +86,15 @@ const AgentLicenseModal: React.FC<AgentLicenseModalProps> = ({
 
   if (!isOpen) return null;
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    e.stopPropagation(); // Prevent event bubbling
-
-    // Validate license number is provided
+  const runSubmit = async () => {
     if (!licenseNumber.trim()) {
       setError(t('agentLicense.licenseRequired'));
       return;
     }
-
-    // If user selected an agency, require the invitation code
     if (selectedAgency && !agencyInvitationCode.trim()) {
       setError(t('agentLicense.invitationCodeRequired'));
       return;
     }
-
-    // If user entered a code, require agency selection
     if (agencyInvitationCode.trim() && !selectedAgency) {
       setError(t('agentLicense.selectAgencyRequired'));
       return;
@@ -108,8 +112,6 @@ const AgentLicenseModal: React.FC<AgentLicenseModalProps> = ({
         languages: languages.length > 0 ? languages : undefined,
       });
 
-
-      // Reset form and close
       if (!isJoiningAgency) {
         setLicenseNumber('');
         setAgentId('');
@@ -119,12 +121,20 @@ const AgentLicenseModal: React.FC<AgentLicenseModalProps> = ({
       setError('');
       onClose();
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Failed to verify license. Please check your information and try again.';
+      const errorMessage =
+        err instanceof Error
+          ? err.message
+          : 'Failed to verify license. Please check your information and try again.';
       setError(errorMessage);
-      // Modal stays open - don't close, don't navigate, just show error
     } finally {
       setIsSubmitting(false);
     }
+  };
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    runSubmit();
   };
 
   const handleClose = () => {
@@ -142,195 +152,294 @@ const AgentLicenseModal: React.FC<AgentLicenseModalProps> = ({
 
   const handleAgencySelect = (agencyId: string) => {
     setSelectedAgency(agencyId);
-    const selected = agencies.find(a => a._id === agencyId);
-    if (selected && selected.invitationCode) {
-      // Show a hint about the invitation code format
-      setError('');
-    }
+    setError('');
   };
 
+  // Input base classes – uniform on all screen sizes
+  const inputCls =
+    'w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all disabled:bg-gray-100 disabled:cursor-not-allowed';
+
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-lg shadow-xl max-w-md w-full">
+    /*
+     * Overlay:
+     *  - Mobile  : slide-up bottom sheet  (items-end, p-0)
+     *  - Tablet+ : centered dialog        (items-center, p-4)
+     */
+    <div
+      className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50
+                 flex items-end justify-center
+                 sm:items-center sm:p-4"
+      onClick={handleClose}
+    >
+      {/*
+       * Sheet / Dialog container:
+       *  - Mobile  : full-width, rounded top, max-h ~92dvh
+       *  - Tablet+ : max-w-lg, fully rounded, max-h 90vh
+       */}
+      <div
+        className="
+          bg-white w-full flex flex-col
+          rounded-t-3xl
+          max-h-[92dvh] min-h-[50dvh]
+          sm:rounded-2xl sm:max-w-lg sm:max-h-[90vh]
+          shadow-2xl
+        "
+        onClick={e => e.stopPropagation()}
+      >
+        {/* Drag handle – visible on mobile only */}
+        <div className="flex justify-center pt-3 pb-1 sm:hidden flex-shrink-0">
+          <div className="w-10 h-1 rounded-full bg-gray-300" />
+        </div>
+
         {/* Header */}
-        <div className="flex items-center justify-between p-6 border-b">
-          <h2 className="text-xl font-semibold text-gray-900">
-            {isJoiningAgency ? t('agentLicense.joinAgencyTitle') : t('agentLicense.title')}
-          </h2>
+        <div className="flex items-start justify-between px-5 pt-4 pb-3 border-b border-gray-100 flex-shrink-0">
+          <div className="flex items-center gap-3 min-w-0">
+            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center flex-shrink-0">
+              <ShieldCheck className="w-5 h-5 text-white" />
+            </div>
+            <div className="min-w-0">
+              <h2 className="text-base font-bold text-gray-900 leading-tight">
+                {isJoiningAgency
+                  ? t('agentLicense.joinAgencyTitle')
+                  : t('agentLicense.title')}
+              </h2>
+              <p className="text-xs text-gray-400 mt-0.5 truncate">
+                {isJoiningAgency
+                  ? t('agentLicense.joinAgencyDescription')
+                  : t('agentLicense.newAgentDescription')}
+              </p>
+            </div>
+          </div>
           <button
             onClick={handleClose}
             disabled={isSubmitting}
-            className="text-gray-400 hover:text-gray-600 transition-colors disabled:opacity-50"
+            className="p-2 hover:bg-gray-100 rounded-xl transition-colors disabled:opacity-40 flex-shrink-0 ml-2"
             aria-label={t('common.close')}
           >
-            <X className="w-5 h-5" />
+            <X className="w-5 h-5 text-gray-400" />
           </button>
         </div>
 
-        {/* Content */}
-        <form onSubmit={handleSubmit} className="p-6">
-          <p className="text-sm text-gray-600 mb-6">
-            {isJoiningAgency
-              ? t('agentLicense.joinAgencyDescription')
-              : t('agentLicense.newAgentDescription')}
-          </p>
-
+        {/* Scrollable form body */}
+        <form
+          onSubmit={handleSubmit}
+          className="flex-1 overflow-y-auto px-5 py-4 space-y-4"
+        >
+          {/* Error banner */}
           {error && (
-            <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg text-sm text-red-600">
+            <div className="p-3 bg-red-50 border border-red-200 rounded-xl text-sm text-red-600 font-medium">
               {error}
             </div>
           )}
 
-          <div className="space-y-4">
-            {/* License Number */}
-            <div>
-              <label htmlFor="licenseNumber" className="block text-sm font-medium text-gray-700 mb-1">
-                {t('agentLicense.licenseNumber')} <span className="text-red-500">*</span>
-              </label>
-              <input
-                type="text"
-                id="licenseNumber"
-                value={licenseNumber}
-                onChange={(e) => setLicenseNumber(e.target.value)}
-                disabled={isSubmitting || isJoiningAgency}
-                placeholder={t('agentLicense.licenseNumberPlaceholder')}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-gray-100 disabled:cursor-not-allowed"
-                required
-                readOnly={isJoiningAgency}
-              />
-              <p className="text-xs text-gray-500 mt-1">
-                {isJoiningAgency
-                  ? t('agentLicense.verifiedLicense')
-                  : t('agentLicense.officialLicense')}
-              </p>
-            </div>
+          {/* ── License Number ───────────────────────────────── */}
+          <div>
+            <label
+              htmlFor="licenseNumber"
+              className="flex items-center gap-1.5 text-xs font-semibold text-gray-700 mb-1.5 uppercase tracking-wider"
+            >
+              <ShieldCheck className="w-3.5 h-3.5" />
+              {t('agentLicense.licenseNumber')}{' '}
+              <span className="text-red-400">*</span>
+            </label>
+            <input
+              type="text"
+              id="licenseNumber"
+              value={licenseNumber}
+              onChange={e => setLicenseNumber(e.target.value)}
+              disabled={isSubmitting || isJoiningAgency}
+              readOnly={isJoiningAgency}
+              placeholder={t('agentLicense.licenseNumberPlaceholder')}
+              className={inputCls}
+              required
+            />
+            <p className="text-xs text-gray-400 mt-1">
+              {isJoiningAgency
+                ? t('agentLicense.verifiedLicense')
+                : t('agentLicense.officialLicense')}
+            </p>
+          </div>
 
-            {/* Agent ID */}
-            <div>
-              <label htmlFor="agentId" className="block text-sm font-medium text-gray-700 mb-1">
-                {t('agentLicense.agentId')} {!isJoiningAgency && <span className="text-gray-400">({t('agentLicense.optional')})</span>}
-              </label>
-              <input
-                type="text"
-                id="agentId"
-                value={agentId}
-                onChange={(e) => setAgentId(e.target.value)}
-                disabled={isSubmitting || isJoiningAgency}
-                placeholder={t('agentLicense.agentIdPlaceholder')}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-gray-100 disabled:cursor-not-allowed"
-                readOnly={isJoiningAgency}
-              />
-              <p className="text-xs text-gray-500 mt-1">
-                {isJoiningAgency
-                  ? t('agentLicense.verifiedAgentId')
-                  : t('agentLicense.autoGeneratedAgentId')}
-              </p>
-            </div>
+          {/* ── Agent ID ─────────────────────────────────────── */}
+          <div>
+            <label
+              htmlFor="agentId"
+              className="flex items-center gap-1.5 text-xs font-semibold text-gray-700 mb-1.5 uppercase tracking-wider"
+            >
+              <KeyRound className="w-3.5 h-3.5" />
+              {t('agentLicense.agentId')}{' '}
+              {!isJoiningAgency && (
+                <span className="text-gray-400 font-normal normal-case tracking-normal">
+                  ({t('agentLicense.optional')})
+                </span>
+              )}
+            </label>
+            <input
+              type="text"
+              id="agentId"
+              value={agentId}
+              onChange={e => setAgentId(e.target.value)}
+              disabled={isSubmitting || isJoiningAgency}
+              readOnly={isJoiningAgency}
+              placeholder={t('agentLicense.agentIdPlaceholder')}
+              className={inputCls}
+            />
+            <p className="text-xs text-gray-400 mt-1">
+              {isJoiningAgency
+                ? t('agentLicense.verifiedAgentId')
+                : t('agentLicense.autoGeneratedAgentId')}
+            </p>
+          </div>
 
-            {/* Languages - Only for new agents */}
-            {!isJoiningAgency && (
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  {t('agentLicense.languagesSpoken')}
-                </label>
-                <div className="flex flex-wrap gap-1.5">
-                  {BALKAN_LANGUAGES.map((language) => (
-                    <button
-                      key={language}
-                      type="button"
-                      onClick={() => handleLanguageToggle(language)}
-                      disabled={isSubmitting}
-                      className={`px-2.5 py-1 text-xs rounded-full border transition-all ${
-                        languages.includes(language)
-                          ? 'bg-blue-600 text-white border-blue-600'
-                          : 'bg-white text-gray-600 border-gray-300 hover:border-blue-400'
+          {/* ── Languages (new agents only) ──────────────────── */}
+          {!isJoiningAgency && (
+            <div>
+              <label className="flex items-center gap-1.5 text-xs font-semibold text-gray-700 mb-2 uppercase tracking-wider">
+                <Globe className="w-3.5 h-3.5" />
+                {t('agentLicense.languagesSpoken')}
+              </label>
+              {/* Responsive tag cloud – wraps naturally on all widths */}
+              <div className="flex flex-wrap gap-2">
+                {BALKAN_LANGUAGES.map(language => (
+                  <button
+                    key={language}
+                    type="button"
+                    onClick={() => handleLanguageToggle(language)}
+                    disabled={isSubmitting}
+                    className={`px-3 py-1.5 text-xs rounded-full border transition-all
+                      ${languages.includes(language)
+                        ? 'bg-blue-600 text-white border-blue-600 shadow-sm'
+                        : 'bg-white text-gray-600 border-gray-200 hover:border-blue-400 hover:text-blue-600'
                       } disabled:opacity-50`}
-                    >
-                      {language}
-                    </button>
-                  ))}
-                </div>
-                <p className="text-xs text-gray-500 mt-1.5">{t('agentLicense.selectLanguages')}</p>
+                  >
+                    {language}
+                  </button>
+                ))}
               </div>
-            )}
+              <p className="text-xs text-gray-400 mt-1.5">
+                {t('agentLicense.selectLanguages')}
+              </p>
+            </div>
+          )}
 
-            {/* Agency Selection - Always shown but optional for new agents */}
-            <div>
-              <label htmlFor="agencySelect" className="block text-sm font-medium text-gray-700 mb-1">
-                {t('agentLicense.selectAgency')} {isJoiningAgency ? <span className="text-red-500">*</span> : <span className="text-gray-400">({t('agentLicense.optional')})</span>}
-              </label>
-              {loadingAgencies ? (
-                <div className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-50 text-gray-500 text-sm">
-                  {t('agentLicense.loadingAgencies')}
-                </div>
+          {/* ── Agency Selection ─────────────────────────────── */}
+          <div>
+            <label
+              htmlFor="agencySelect"
+              className="flex items-center gap-1.5 text-xs font-semibold text-gray-700 mb-1.5 uppercase tracking-wider"
+            >
+              <Building2 className="w-3.5 h-3.5" />
+              {t('agentLicense.selectAgency')}{' '}
+              {isJoiningAgency ? (
+                <span className="text-red-400">*</span>
               ) : (
+                <span className="text-gray-400 font-normal normal-case tracking-normal">
+                  ({t('agentLicense.optional')})
+                </span>
+              )}
+            </label>
+            {loadingAgencies ? (
+              <div className={`${inputCls} text-gray-400 flex items-center gap-2`}>
+                <div className="w-4 h-4 border-2 border-gray-300 border-t-blue-500 rounded-full animate-spin" />
+                {t('agentLicense.loadingAgencies')}
+              </div>
+            ) : (
+              <div className="relative">
                 <select
                   id="agencySelect"
                   value={selectedAgency}
-                  onChange={(e) => handleAgencySelect(e.target.value)}
+                  onChange={e => handleAgencySelect(e.target.value)}
                   disabled={isSubmitting}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-gray-100 disabled:cursor-not-allowed"
                   required={isJoiningAgency}
+                  className={`${inputCls} appearance-none pr-10`}
                 >
-                  <option value="">{isJoiningAgency ? t('agentLicense.selectAnAgency') : t('agentLicense.independentAgent')}</option>
-                  {agencies.map((agency) => (
+                  <option value="">
+                    {isJoiningAgency
+                      ? t('agentLicense.selectAnAgency')
+                      : t('agentLicense.independentAgent')}
+                  </option>
+                  {agencies.map(agency => (
                     <option key={agency._id} value={agency._id}>
-                      {agency.name} ({agency.city || 'Location N/A'})
+                      {agency.name} ({agency.city || 'N/A'})
                     </option>
                   ))}
                 </select>
-              )}
-              <p className="text-xs text-gray-500 mt-1">
-                {isJoiningAgency
-                  ? t('agentLicense.chooseAgency')
-                  : t('agentLicense.selectAgencyOrIndependent')}
-              </p>
-            </div>
-
-            {/* Agency Invitation Code */}
-            <div>
-              <label htmlFor="agencyInvitationCode" className="block text-sm font-medium text-gray-700 mb-1">
-                {t('agentLicense.invitationCode')} {isJoiningAgency ? <span className="text-red-500">*</span> : <span className="text-gray-400">({t('agentLicense.optional')})</span>}
-              </label>
-              <input
-                type="text"
-                id="agencyInvitationCode"
-                value={agencyInvitationCode}
-                onChange={(e) => setAgencyInvitationCode(e.target.value.toUpperCase())}
-                disabled={isSubmitting}
-                placeholder={t('agentLicense.invitationCodePlaceholder')}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-gray-100 disabled:cursor-not-allowed font-mono"
-                required={isJoiningAgency}
-              />
-              <p className="text-xs text-gray-500 mt-1">
-                {isJoiningAgency
-                  ? t('agentLicense.enterInvitationCode')
-                  : t('agentLicense.leaveEmptyForIndependent')}
-              </p>
-            </div>
+                <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
+              </div>
+            )}
+            <p className="text-xs text-gray-400 mt-1">
+              {isJoiningAgency
+                ? t('agentLicense.chooseAgency')
+                : t('agentLicense.selectAgencyOrIndependent')}
+            </p>
           </div>
 
-          {/* Actions */}
-          <div className="flex gap-3 mt-6">
-            <button
-              type="button"
-              onClick={handleClose}
-              disabled={isSubmitting}
-              className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          {/* ── Invitation Code ──────────────────────────────── */}
+          <div>
+            <label
+              htmlFor="agencyInvitationCode"
+              className="flex items-center gap-1.5 text-xs font-semibold text-gray-700 mb-1.5 uppercase tracking-wider"
             >
-              {t('common.cancel')}
-            </button>
-            <button
-              type="submit"
+              <KeyRound className="w-3.5 h-3.5" />
+              {t('agentLicense.invitationCode')}{' '}
+              {isJoiningAgency ? (
+                <span className="text-red-400">*</span>
+              ) : (
+                <span className="text-gray-400 font-normal normal-case tracking-normal">
+                  ({t('agentLicense.optional')})
+                </span>
+              )}
+            </label>
+            <input
+              type="text"
+              id="agencyInvitationCode"
+              value={agencyInvitationCode}
+              onChange={e =>
+                setAgencyInvitationCode(e.target.value.toUpperCase())
+              }
               disabled={isSubmitting}
-              className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              {isSubmitting
-                ? (isJoiningAgency ? t('agentLicense.joining') : t('agentLicense.verifying'))
-                : (isJoiningAgency ? t('agentLicense.joinAgency') : t('agentLicense.verifyAndBecomeAgent'))}
-            </button>
+              placeholder={t('agentLicense.invitationCodePlaceholder')}
+              className={`${inputCls} font-mono tracking-widest`}
+              required={isJoiningAgency}
+            />
+            <p className="text-xs text-gray-400 mt-1">
+              {isJoiningAgency
+                ? t('agentLicense.enterInvitationCode')
+                : t('agentLicense.leaveEmptyForIndependent')}
+            </p>
           </div>
         </form>
+
+        {/* Sticky footer – action buttons */}
+        <div className="flex gap-3 px-5 py-4 border-t border-gray-100 bg-white rounded-b-3xl sm:rounded-b-2xl flex-shrink-0">
+          <button
+            type="button"
+            onClick={handleClose}
+            disabled={isSubmitting}
+            className="flex-1 px-4 py-3 border border-gray-200 text-gray-600 font-semibold rounded-xl hover:bg-gray-50 transition-colors text-sm disabled:opacity-40"
+          >
+            {t('common.cancel')}
+          </button>
+          <button
+            type="button"
+            onClick={runSubmit}
+            disabled={isSubmitting}
+            className="flex-1 px-4 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-semibold rounded-xl hover:from-blue-700 hover:to-indigo-700 transition-all disabled:opacity-40 disabled:cursor-not-allowed text-sm flex items-center justify-center gap-2 shadow-sm"
+          >
+            {isSubmitting ? (
+              <>
+                <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                {isJoiningAgency
+                  ? t('agentLicense.joining')
+                  : t('agentLicense.verifying')}
+              </>
+            ) : isJoiningAgency ? (
+              t('agentLicense.joinAgency')
+            ) : (
+              t('agentLicense.verifyAndBecomeAgent')
+            )}
+          </button>
+        </div>
       </div>
     </div>
   );
