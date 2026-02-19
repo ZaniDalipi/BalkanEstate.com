@@ -289,26 +289,39 @@ const AgencyPaymentPage: React.FC = () => {
   // ─── CONFIRM MODE: User already has Enterprise subscription ───────────────
   if (isConfirmMode) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50">
+      <div className="min-h-screen" style={{ background: 'linear-gradient(135deg, #f8fafc 0%, #eff6ff 50%, #eef2ff 100%)' }}>
         {/* Header */}
-        <div className="relative overflow-hidden bg-gradient-to-br from-slate-900 via-blue-900 to-indigo-900 py-12 sm:py-16">
-          <div className="absolute top-10 left-[10%] w-72 h-72 bg-amber-500/20 rounded-full blur-3xl animate-pulse" />
-          <div className="absolute bottom-10 right-[10%] w-96 h-96 bg-orange-500/20 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }} />
+        <div
+          className="relative overflow-hidden py-12 sm:py-16"
+          style={{ background: 'linear-gradient(135deg, #0f172a 0%, #1e3a8a 55%, #312e81 100%)' }}
+        >
+          <div
+            className="absolute rounded-full blur-3xl animate-pulse"
+            style={{ top: 40, left: '10%', width: 288, height: 288, background: 'rgba(245,158,11,0.18)' }}
+          />
+          <div
+            className="absolute rounded-full blur-3xl animate-pulse"
+            style={{ bottom: 40, right: '10%', width: 384, height: 384, background: 'rgba(249,115,22,0.15)', animationDelay: '1s' }}
+          />
           <div className="relative z-10 max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
             <button
               onClick={handleGoBack}
-              className="inline-flex items-center gap-2 text-white/70 hover:text-white mb-6 transition-colors"
+              className="inline-flex items-center gap-2 mb-6 transition-colors"
+              style={{ color: 'rgba(255,255,255,0.7)' }}
             >
               <ArrowLeftIcon className="w-5 h-5" />
               <span>{t('payment.backToDetails', 'Back to Agency Details')}</span>
             </button>
-            <div className="w-20 h-20 bg-gradient-to-br from-amber-500 to-orange-600 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-2xl">
+            <div
+              className="w-20 h-20 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-2xl"
+              style={{ background: 'linear-gradient(135deg, #f59e0b 0%, #ea580c 100%)' }}
+            >
               <BuildingOfficeIcon className="w-10 h-10 text-white" />
             </div>
             <h1 className="text-3xl sm:text-4xl font-black text-white mb-4">
               {t('confirm.title', 'Create Your Agency')}
             </h1>
-            <p className="text-lg text-white/70">
+            <p className="text-lg" style={{ color: 'rgba(255,255,255,0.7)' }}>
               {t('confirm.subtitle', 'Your Enterprise subscription is active. Review the details and confirm.')}
             </p>
           </div>
@@ -332,9 +345,9 @@ const AgencyPaymentPage: React.FC = () => {
               </h2>
 
               {/* Agency Preview */}
-              <div className="bg-gradient-to-br from-amber-50 to-orange-50 rounded-xl p-5 mb-6 border border-amber-200">
+              <div className="rounded-xl p-5 mb-6 border border-amber-200" style={{ background: 'linear-gradient(135deg, #fffbeb 0%, #fff7ed 100%)' }}>
                 <div className="flex items-center gap-3 mb-4">
-                  <div className="w-12 h-12 bg-gradient-to-br from-amber-500 to-orange-600 rounded-xl flex items-center justify-center flex-shrink-0">
+                  <div className="w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: 'linear-gradient(135deg, #f59e0b 0%, #ea580c 100%)' }}>
                     <BuildingOfficeIcon className="w-6 h-6 text-white" />
                   </div>
                   <div>
@@ -365,7 +378,7 @@ const AgencyPaymentPage: React.FC = () => {
               </div>
 
               {/* Enterprise benefits reminder */}
-              <div className="bg-gradient-to-br from-slate-800 to-slate-900 rounded-xl p-4 mb-6 border border-slate-700">
+              <div className="rounded-xl p-4 mb-6 border border-slate-700" style={{ background: 'linear-gradient(135deg, #1e293b 0%, #0f172a 100%)' }}>
                 <p className="text-amber-400 font-semibold text-sm mb-2">✓ Enterprise Plan Active</p>
                 <ul className="text-slate-300 text-sm space-y-1">
                   <li>• 5 agent registration codes will be emailed to you</li>
@@ -394,7 +407,8 @@ const AgencyPaymentPage: React.FC = () => {
                   type="button"
                   onClick={handleCreateAgency}
                   disabled={isLoading}
-                  className="flex-1 px-6 py-3 bg-gradient-to-r from-amber-500 to-orange-600 text-white rounded-xl hover:from-amber-600 hover:to-orange-700 font-semibold transition-all shadow-md disabled:opacity-60 disabled:cursor-not-allowed"
+                  className="flex-1 px-6 py-3 text-white rounded-xl font-semibold transition-all shadow-md disabled:opacity-60 disabled:cursor-not-allowed"
+                  style={{ background: 'linear-gradient(135deg, #f59e0b 0%, #ea580c 100%)' }}
                 >
                   {isLoading ? (
                     <span className="flex items-center justify-center gap-2">
