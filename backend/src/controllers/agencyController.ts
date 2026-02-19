@@ -250,7 +250,6 @@ export const createAgency = async (
         agencyLogger.info(`🎟️ Generated 5 agent registration coupons and ${monthlyPromotionAmount} promotion coupons for new agency ${agency.name}`);
 
         // Send emails with coupon codes and welcome message
-        let emailSent = false;
         try {
           const { sendAgentRegistrationCouponsEmail, sendEnterpriseWelcomeEmail } = await import('../services/emailService');
 
@@ -281,7 +280,6 @@ export const createAgency = async (
             teamMembersLimit: enterpriseProduct?.teamMembersLimit || ENTERPRISE_TIER_LIMITS.TEAM_MEMBERS,
             listingsLimit: enterpriseProduct?.listingsLimit || ENTERPRISE_TIER_LIMITS.LISTINGS,
           });
-          emailSent = true;
           agentCouponsEmailSent = true;
           agencyLogger.info(`📧 Enterprise welcome emails sent to ${user.email}`);
         } catch (emailError) {
