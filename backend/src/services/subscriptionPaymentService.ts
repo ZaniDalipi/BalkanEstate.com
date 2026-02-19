@@ -650,6 +650,14 @@ async function initializePromotionCoupons(
  * Creates 5 coupon codes and sends email to the agency owner
  */
 /**
+/**
+ * Maximum validity period for generated promotion coupons (30 days).
+ * Regardless of the caller-supplied validUntil (e.g. end-of-month or
+ * subscription expiry), coupons will never be valid for more than this.
+ */
+const MAX_COUPON_VALIDITY_DAYS = 30;
+
+/**
  * Generate PromotionCoupon records for a new Pro subscriber.
  * Returns an array of { tier, code } objects to embed in the welcome email.
  */
@@ -661,6 +669,11 @@ async function generateProSubscriptionCoupons(
   validUntil: Date,
 ): Promise<Array<{ tier: 'highlight' | 'premium' | 'featured'; code: string }>> {
   const results: Array<{ tier: 'highlight' | 'premium' | 'featured'; code: string }> = [];
+
+  // Cap validity to MAX_COUPON_VALIDITY_DAYS from now regardless of what the
+  // caller passed (end-of-month or subscription expiry can exceed 30 days).
+  const maxExpiry = new Date(Date.now() + MAX_COUPON_VALIDITY_DAYS * 24 * 60 * 60 * 1000);
+  const cappedValidUntil = validUntil < maxExpiry ? validUntil : maxExpiry;
 
   const tiers: Array<{ tier: 'highlight' | 'premium' | 'featured'; count: number }> = [
     { tier: 'highlight', count: highlightedCount },
@@ -679,10 +692,10 @@ async function generateProSubscriptionCoupons(
         discountType: 'percentage',
         discountValue: 100,
         validFrom: new Date(),
-        validUntil,
+        validUntil: cappedValidUntil,
         status: 'active',
-        maxTotalUses: 1,
-        maxUsesPerUser: 1,
+        maxTotalUses: 1,   // single-use only
+        maxUsesPerUser: 1, // single-use only
         applicableTiers: [tier],
         isPublic: false,
         notes: `Auto-generated for userId:${userId}`,
