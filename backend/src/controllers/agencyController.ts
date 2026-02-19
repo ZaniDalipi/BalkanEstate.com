@@ -271,7 +271,7 @@ export const createAgency = async (
             ownerName: user.name || 'Agency Owner',
             agencyName: agency.name,
             coupons: generatedCoupons,
-            agentListingsLimit: agentProduct?.listingsLimit ?? 20,
+            agentListingsLimit: agentProduct?.listingsLimit ?? 25,
           });
 
           // Send welcome/thank you email with promotion coupon breakdown

@@ -116,8 +116,8 @@ const AGENCY_AGENT_PLAN: Plan = {
   price: 0,
   period: 'year',
   periodMonths: 12,
-  features: ['20 active listings', 'Unlimited saved searches', 'Unlimited AI chat', 'Full analytics', 'Agency team support'],
-  listingLimit: 20,
+  features: ['25 active listings', 'Unlimited saved searches', 'Unlimited AI chat', 'Full analytics', 'Agency team support'],
+  listingLimit: 25,
   color: 'from-emerald-500 to-teal-600',
   tier: 2,
   badge: 'Agency Member',
@@ -152,7 +152,7 @@ const LISTING_LIMITS: Record<string, number> = {
   agency_yearly: 500,  // 500 listings for enterprise
   buyer_monthly: 0,  // Buyers don't create listings
   // Agency agent tier (joined via coupon)
-  agency_agent_yearly: 20,  // 20 listings per year for agency agents (fallback; real value comes from DB)
+  agency_agent_yearly: 25,  // 25 listings per year for agency agents (fallback; real value comes from DB)
 };
 
 // Map product IDs to gradient colors
@@ -400,6 +400,15 @@ const SubscriptionManagement: React.FC<SubscriptionManagementProps> = ({ userId 
     };
   }, [fetchSubscription]);
 
+  // Derive max team members from the enterprise product in DB (owner + agents)
+  const enterpriseMaxAgents = useMemo(() => {
+    const enterpriseProduct = products.find(p =>
+      p.productId === 'agency_yearly' || p.productId === 'seller_enterprise_yearly'
+    );
+    // teamMembersLimit = number of agent slots; add 1 for the agency owner
+    return (enterpriseProduct?.teamMembersLimit ?? 5) + 1;
+  }, [products]);
+
   // Fetch agency team data if user is an agency owner
   useEffect(() => {
     const fetchAgencyTeamData = async () => {
@@ -544,15 +553,6 @@ const SubscriptionManagement: React.FC<SubscriptionManagementProps> = ({ userId 
       renewalDate,
     };
   }, [subscription, plans]);
-
-  // Derive max team members from the enterprise product in DB (owner + agents)
-  const enterpriseMaxAgents = useMemo(() => {
-    const enterpriseProduct = products.find(p =>
-      p.productId === 'agency_yearly' || p.productId === 'seller_enterprise_yearly'
-    );
-    // teamMembersLimit = number of agent slots; add 1 for the agency owner
-    return (enterpriseProduct?.teamMembersLimit ?? 5) + 1;
-  }, [products]);
 
   // Get current product for placeholder replacement
   const currentProduct = useMemo((): ProductValues | null => {

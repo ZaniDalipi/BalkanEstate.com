@@ -2557,7 +2557,7 @@ Questions? Contact us at support@balkanestateai.com
     // Sanitize user inputs
     const safeOwnerName = escapeHtml(params.ownerName);
     const safeAgencyName = escapeHtml(params.agencyName);
-    const agentListingsLimit = params.agentListingsLimit ?? 20;
+    const agentListingsLimit = params.agentListingsLimit ?? 25;
 
     const currentYear = new Date().getFullYear();
 
