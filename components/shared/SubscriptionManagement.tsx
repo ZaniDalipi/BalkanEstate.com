@@ -99,7 +99,7 @@ const FREE_PLAN: Plan = {
   periodMonths: 0,
   features: ['3 active listings', '3 saved searches', '3 AI messages', '3 generate insights', 'Basic property details'],
   listingLimit: 3,
-  color: 'from-gray-400 to-gray-500',
+  color: 'linear-gradient(135deg, #9ca3af 0%, #6b7280 100%)',
   tier: 0,
   savedSearchesLimit: 3,
   promotionCouponsMonthly: 0,
@@ -118,7 +118,7 @@ const AGENCY_AGENT_PLAN: Plan = {
   periodMonths: 12,
   features: ['25 active listings', 'Unlimited saved searches', 'Unlimited AI chat', 'Full analytics', 'Agency team support'],
   listingLimit: 25,
-  color: 'from-emerald-500 to-teal-600',
+  color: 'linear-gradient(135deg, #10b981 0%, #0d9488 100%)',
   tier: 2,
   badge: 'Agency Member',
   badgeColor: 'emerald',
@@ -155,17 +155,17 @@ const LISTING_LIMITS: Record<string, number> = {
   agency_agent_yearly: 25,  // 25 listings per year for agency agents (fallback; real value comes from DB)
 };
 
-// Map product IDs to gradient colors
+// Map product IDs to CSS gradient strings (inline styles to avoid Tailwind purge)
 const PLAN_COLORS: Record<string, string> = {
-  free: 'from-gray-400 to-gray-500',
-  buyer_monthly: 'from-blue-500 to-indigo-600',   // Buyer Pro
-  buyer_pro_monthly: 'from-blue-500 to-indigo-600',
-  buyer_pro_yearly: 'from-indigo-500 to-purple-600',
-  seller_pro_monthly: 'from-blue-500 to-blue-600',
-  seller_pro_yearly: 'from-purple-500 to-purple-600',
-  seller_enterprise_yearly: 'from-amber-500 to-orange-600',
-  agency_yearly: 'from-amber-500 to-orange-600',  // Enterprise for agency creators (same orange as enterprise)
-  agency_agent_yearly: 'from-emerald-500 to-teal-600',
+  free: 'linear-gradient(135deg, #9ca3af 0%, #6b7280 100%)',
+  buyer_monthly: 'linear-gradient(135deg, #3b82f6 0%, #4f46e5 100%)',
+  buyer_pro_monthly: 'linear-gradient(135deg, #3b82f6 0%, #4f46e5 100%)',
+  buyer_pro_yearly: 'linear-gradient(135deg, #6366f1 0%, #9333ea 100%)',
+  seller_pro_monthly: 'linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)',
+  seller_pro_yearly: 'linear-gradient(135deg, #a855f7 0%, #9333ea 100%)',
+  seller_enterprise_yearly: 'linear-gradient(135deg, #f59e0b 0%, #ea580c 100%)',
+  agency_yearly: 'linear-gradient(135deg, #f59e0b 0%, #ea580c 100%)',  // Enterprise for agency creators (same orange)
+  agency_agent_yearly: 'linear-gradient(135deg, #10b981 0%, #0d9488 100%)',
 };
 
 // Map product IDs to tiers
@@ -356,7 +356,7 @@ const SubscriptionManagement: React.FC<SubscriptionManagementProps> = ({ userId 
       features: product.features,
       // Use actual DB values for all limits
       listingLimit: product.listingsLimit ?? LISTING_LIMITS[product.productId] ?? 3,
-      color: PLAN_COLORS[product.productId] || 'from-gray-400 to-gray-500',
+      color: PLAN_COLORS[product.productId] || 'linear-gradient(135deg, #9ca3af 0%, #6b7280 100%)',
       tier: tier,
       badge: product.badge,
       badgeColor: product.badgeColor,
@@ -1011,7 +1011,7 @@ const SubscriptionManagement: React.FC<SubscriptionManagementProps> = ({ userId 
       </div>
 
       {/* Current Subscription Card */}
-      <div className={`bg-gradient-to-br ${subscriptionDetails.currentPlan.color} rounded-2xl p-6 text-white shadow-xl relative overflow-hidden`}>
+      <div className="rounded-2xl p-6 text-white shadow-xl relative overflow-hidden" style={{ background: subscriptionDetails.currentPlan.color }}>
         {/* Coupon Badge - positioned to not overlap with content */}
         {subscriptionDetails.isCoupon && (
           <div className="absolute top-0 left-0 right-0 flex justify-center -mt-0">
@@ -1771,7 +1771,7 @@ const SubscriptionManagement: React.FC<SubscriptionManagementProps> = ({ userId 
                       {isEnterprise ? 'Best for Agencies' : plan.badge}
                     </div>
                   )}
-                  <div className={`bg-gradient-to-r ${plan.color} p-4 text-white`}>
+                  <div className="p-4 text-white" style={{ background: plan.color }}>
                     <h4 className="font-bold text-lg">{plan.name}</h4>
                     <div className="flex items-baseline gap-1 mt-1">
                       {pricing.discount > 0 && (
@@ -1802,7 +1802,8 @@ const SubscriptionManagement: React.FC<SubscriptionManagementProps> = ({ userId 
                     </ul>
                     <button
                       onClick={() => handleUpgradeClick(key)}
-                      className={`w-full py-2.5 rounded-lg font-bold text-white bg-gradient-to-r ${plan.color} hover:opacity-90 transition-opacity`}
+                      className="w-full py-2.5 rounded-lg font-bold text-white hover:opacity-90 transition-opacity"
+                      style={{ background: plan.color }}
                     >
                       {isEnterprise ? 'Start Your Agency' : 'Upgrade Now'}
                     </button>

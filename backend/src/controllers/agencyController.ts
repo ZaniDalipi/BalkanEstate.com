@@ -284,6 +284,20 @@ export const createAgency = async (
             teamMembersLimit: enterpriseProduct?.teamMembersLimit || ENTERPRISE_TIER_LIMITS.TEAM_MEMBERS,
             listingsLimit: enterpriseProduct?.listingsLimit || ENTERPRISE_TIER_LIMITS.LISTINGS,
           });
+
+          // Send promotion coupons summary email right away at creation
+          const { sendPromotionCouponsEmail } = await import('../services/emailService');
+          await sendPromotionCouponsEmail({
+            email: user.email,
+            ownerName: user.name || 'Agency Owner',
+            agencyName: agency.name,
+            promotionCoupons: {
+              monthly: monthlyPromotionAmount,
+              available: monthlyPromotionAmount,
+              used: 0,
+            },
+          });
+
           agentCouponsEmailSent = true;
           agencyLogger.info(`📧 Enterprise welcome emails sent to ${user.email}`);
         } catch (emailError) {

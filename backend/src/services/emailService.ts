@@ -2586,7 +2586,7 @@ Questions? Contact us at support@balkanestateai.com
 </head>
 <body style="margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f3f4f6; -webkit-font-smoothing: antialiased;">
   <div style="display: none; max-height: 0; overflow: hidden;">
-    Your Enterprise subscription is active! Here are your 5 agent registration codes.
+    Your Enterprise subscription is active! Here are your ${params.coupons.length} agent registration codes.
   </div>
 
   <div style="max-width: 650px; margin: 0 auto; background-color: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);">
@@ -2606,7 +2606,7 @@ Questions? Contact us at support@balkanestateai.com
 
       <p style="color: #4b5563; font-size: 15px; line-height: 1.6; margin: 0 0 24px 0;">
         Congratulations! Your Enterprise subscription for <strong>${safeAgencyName}</strong> is now active.
-        Below are <strong>5 agent registration codes</strong> that your team members can use to join with a full <strong>yearly Pro subscription</strong> included!
+        Below are <strong>${params.coupons.length} agent registration codes</strong> that your team members can use to join with a full <strong>yearly Pro subscription</strong> included!
       </p>
 
       <!-- Agent Coupons Table -->
@@ -2680,9 +2680,9 @@ Questions? Contact us at support@balkanestateai.com
 
     await this.sendEmail({
       to: params.email,
-      subject: `🏢 Welcome to Enterprise! Your 5 Agent Registration Codes Are Ready`,
+      subject: `🏢 Welcome to Enterprise! Your ${params.coupons.length} Agent Registration Codes Are Ready`,
       html,
-      text: `Hello ${params.ownerName}!\n\nCongratulations! Your Enterprise subscription for ${params.agencyName} is now active.\n\nHere are your 5 agent registration codes:\n\n${couponList}\n\nHow to use:\n1. Share a code with each team member\n2. They register or log in to BalkanEstateᴬᴵ\n3. Go to Agency → Redeem Code\n4. Enter the code to join your agency with a yearly Pro subscription!\n\nGo to your agency dashboard: ${frontendUrl}/agency/dashboard\n\n© ${currentYear} BalkanEstateᴬᴵ`,
+      text: `Hello ${params.ownerName}!\n\nCongratulations! Your Enterprise subscription for ${params.agencyName} is now active.\n\nHere are your ${params.coupons.length} agent registration codes:\n\n${couponList}\n\nHow to use:\n1. Share a code with each team member\n2. They register or log in to BalkanEstateᴬᴵ\n3. Go to Agency → Redeem Code\n4. Enter the code to join your agency with a yearly Pro subscription!\n\nGo to your agency dashboard: ${frontendUrl}/agency/dashboard\n\n© ${currentYear} BalkanEstateᴬᴵ`,
       category: 'alerts',
     });
   }
@@ -2816,7 +2816,7 @@ Questions? Contact us at support@balkanestateai.com
       <div style="background: #1e293b; border-radius: 8px; padding: 20px; margin-bottom: 24px; border: 1px solid #334155;">
         <h3 style="color: #ffffff; font-size: 16px; font-weight: 600; margin: 0 0 12px 0;">📋 Your Next Steps</h3>
         <ol style="color: #e2e8f0; font-size: 14px; margin: 0; padding-left: 20px; line-height: 1.8;">
-          <li>Check your inbox for <strong style="color: #10b981;">5 agent registration codes</strong></li>
+          <li>Check your inbox for <strong style="color: #10b981;">${agentCoupons} agent registration codes</strong></li>
           <li>Share codes with your team members to onboard them</li>
           <li>Set up your agency profile with branding and description</li>
           <li>Start listing properties and watch your agency grow!</li>
@@ -3697,7 +3697,7 @@ Questions? Contact us at support@balkanestateai.com
       subject: `🎁 Promotion Coupons Summary — ${safeAgencyName}`,
       html,
       text: `Hello ${params.ownerName},\n\nHere's your promotion coupons summary for ${params.agencyName}.\n\nMonthly: ${monthly}\nAvailable: ${available}\nUsed: ${used}\n\nUse these coupons to highlight, feature, or boost your listings!\n\nVisit: ${frontendUrl}/agency/dashboard\n\n© ${currentYear} BalkanEstateᴬᴵ`,
-      category: 'subscriptions',
+      category: 'alerts',
     });
   }
 }
