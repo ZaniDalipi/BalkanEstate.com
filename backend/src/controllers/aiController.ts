@@ -1,6 +1,16 @@
 import { Request, Response } from 'express';
 import { apiLogger } from '../utils/logger';
 import * as geminiService from '../services/geminiService';
+import User from '../models/User';
+import Product from '../models/Product';
+
+function getNextMonthStart(): Date {
+  const d = new Date();
+  d.setMonth(d.getMonth() + 1);
+  d.setDate(1);
+  d.setHours(0, 0, 0, 0);
+  return d;
+}
 
 /**
  * Check if the GOOGLE_AI_API_KEY is configured
@@ -26,6 +36,52 @@ export const generateDescription = async (req: Request, res: Response): Promise<
     if (!files || files.length === 0) {
       res.status(400).json({ message: 'At least one image is required.' });
       return;
+    }
+
+    // Enforce imageDescriptionLimit per plan
+    const userId = (req.user as any)?._id;
+    if (userId) {
+      const user = await User.findById(userId);
+      if (user) {
+        // Reset monthly counter if needed
+        const now = new Date();
+        if (!user.imageDescriptionUsage) {
+          user.imageDescriptionUsage = { monthlyCount: 0, monthResetDate: getNextMonthStart() };
+        }
+        if (now >= user.imageDescriptionUsage.monthResetDate) {
+          user.imageDescriptionUsage.monthlyCount = 0;
+          user.imageDescriptionUsage.monthResetDate = getNextMonthStart();
+        }
+
+        // Get limit from product
+        const isSubscribed = user.isSubscribed && user.hasActiveSubscription();
+        if (isSubscribed && user.subscriptionPlan) {
+          const product = await Product.findOne({ productId: user.subscriptionPlan });
+          const rawLimit = product?.imageDescriptionLimit;
+          const limit = typeof rawLimit === 'number' ? rawLimit : undefined;
+
+          if (typeof limit === 'number' && limit !== -1) {
+            const wouldExceed = user.imageDescriptionUsage.monthlyCount + files.length > limit;
+            if (wouldExceed) {
+              const remaining = Math.max(0, limit - user.imageDescriptionUsage.monthlyCount);
+              res.status(429).json({
+                message: `Auto-label limit reached. You can label ${remaining} more image${remaining === 1 ? '' : 's'} this month (limit: ${limit}/month).`,
+                limit,
+                used: user.imageDescriptionUsage.monthlyCount,
+                remaining,
+                resetDate: user.imageDescriptionUsage.monthResetDate,
+              });
+              return;
+            }
+          }
+
+          // Count the images used
+          if (typeof limit === 'number' && limit !== -1) {
+            user.imageDescriptionUsage.monthlyCount += files.length;
+            await user.save();
+          }
+        }
+      }
     }
 
     const { language, propertyType } = req.body;
@@ -137,6 +193,44 @@ export const aiChat = async (req: Request, res: Response): Promise<void> => {
     if (!properties || !Array.isArray(properties)) {
       res.status(400).json({ message: 'properties is required and must be an array.' });
       return;
+    }
+
+    // Enforce aiMessagesLimit per plan
+    const userId = (req.user as any)?._id;
+    if (userId) {
+      const user = await User.findById(userId);
+      if (user) {
+        const now = new Date();
+        if (!user.aiMessagesUsage) {
+          user.aiMessagesUsage = { monthlyCount: 0, monthResetDate: getNextMonthStart() };
+        }
+        if (now >= user.aiMessagesUsage.monthResetDate) {
+          user.aiMessagesUsage.monthlyCount = 0;
+          user.aiMessagesUsage.monthResetDate = getNextMonthStart();
+        }
+
+        const isSubscribed = user.isSubscribed && user.hasActiveSubscription();
+        if (isSubscribed && user.subscriptionPlan) {
+          const product = await Product.findOne({ productId: user.subscriptionPlan });
+          const rawLimit = product?.aiMessagesLimit;
+          const limit = typeof rawLimit === 'number' ? rawLimit : undefined;
+
+          if (typeof limit === 'number' && limit !== -1) {
+            if (user.aiMessagesUsage.monthlyCount >= limit) {
+              res.status(429).json({
+                message: `AI message limit reached. You have used all ${limit} messages for this month.`,
+                limit,
+                used: user.aiMessagesUsage.monthlyCount,
+                remaining: 0,
+                resetDate: user.aiMessagesUsage.monthResetDate,
+              });
+              return;
+            }
+            user.aiMessagesUsage.monthlyCount += 1;
+            await user.save();
+          }
+        }
+      }
     }
 
     apiLogger.info(`Processing AI chat with ${history.length} messages and ${properties.length} properties`);

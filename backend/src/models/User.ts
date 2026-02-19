@@ -213,6 +213,18 @@ export interface IUser extends Document {
     monthResetDate: Date;        // When the monthly counter resets
   };
 
+  // AI Chat Messages Usage Tracking
+  aiMessagesUsage?: {
+    monthlyCount: number;        // Number of AI chat messages sent this month
+    monthResetDate: Date;        // When the monthly counter resets
+  };
+
+  // Image Auto-label Usage Tracking
+  imageDescriptionUsage?: {
+    monthlyCount: number;        // Number of images auto-labeled this month
+    monthResetDate: Date;        // When the monthly counter resets
+  };
+
   // Weekly Search Usage Tracking
   weeklySearches?: {
     weeklyCount: number;         // Number of searches performed this week
@@ -751,6 +763,39 @@ const UserSchema: Schema = new Schema(
           nextWeek.setDate(nextWeek.getDate() + 7);
           nextWeek.setHours(0, 0, 0, 0);
           return nextWeek;
+        },
+      },
+    },
+
+    aiMessagesUsage: {
+      monthlyCount: {
+        type: Number,
+        default: 0,
+      },
+      monthResetDate: {
+        type: Date,
+        default: () => {
+          const nextMonth = new Date();
+          nextMonth.setMonth(nextMonth.getMonth() + 1);
+          nextMonth.setDate(1);
+          nextMonth.setHours(0, 0, 0, 0);
+          return nextMonth;
+        },
+      },
+    },
+    imageDescriptionUsage: {
+      monthlyCount: {
+        type: Number,
+        default: 0,
+      },
+      monthResetDate: {
+        type: Date,
+        default: () => {
+          const nextMonth = new Date();
+          nextMonth.setMonth(nextMonth.getMonth() + 1);
+          nextMonth.setDate(1);
+          nextMonth.setHours(0, 0, 0, 0);
+          return nextMonth;
         },
       },
     },

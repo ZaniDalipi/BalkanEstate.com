@@ -587,7 +587,7 @@ const PRODUCTS = [
     featuredCoupons: 0,
     agentCoupons: 0,
     savedSearchesLimit: 3,
-    aiMessagesLimit: -1, // unlimited (rate limited)
+    aiMessagesLimit: 50,
     aiInsightsLimit: 30,
     imageDescriptionLimit: 50,
   },
@@ -627,7 +627,7 @@ const PRODUCTS = [
     featuredCoupons: 0,
     agentCoupons: 0,
     savedSearchesLimit: 3,
-    aiMessagesLimit: -1,
+    aiMessagesLimit: 50,
     aiInsightsLimit: 30,
     imageDescriptionLimit: 50,
   },
