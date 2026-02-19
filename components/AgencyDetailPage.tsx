@@ -172,6 +172,9 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
     String(adminId) === String(currentUser.id) || String(adminId) === String(currentUser._id)
   ));
 
+  // Check if current user is a platform-level admin or super admin
+  const isPlatformAdmin = currentUser?.role === 'admin' || currentUser?.role === 'super_admin';
+
   // Check if current user is already a member of this agency
   const isAlreadyMember = currentUser && agents.some(agent => {
     // Check multiple possible ID fields
@@ -799,7 +802,7 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
 
   const handleCoverUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (!file || !isOwner) return;
+    if (!file || !isAdmin) return;
 
     if (!file.type.startsWith('image/')) {
       setUploadError(t('messages.selectImageFile'));
@@ -1471,6 +1474,68 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
                     </div>
                   </div>
                 )}
+
+                {/* Admin-only: Agency Meta Stats */}
+                {(isAdmin || isPlatformAdmin) && (
+                  <div className="bg-gradient-to-br from-slate-50 to-white rounded-xl p-5 border border-slate-200">
+                    <div className="flex items-center gap-2 mb-4">
+                      <div className="w-8 h-8 rounded-lg bg-slate-800 flex items-center justify-center">
+                        <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                        </svg>
+                      </div>
+                      <h3 className="text-sm font-bold text-slate-900">Agency Stats</h3>
+                      <span className="ml-auto text-xs bg-slate-100 text-slate-500 px-2 py-0.5 rounded-full font-medium">Admin only</span>
+                    </div>
+                    <div className="space-y-2.5">
+                      <div className="flex items-center justify-between text-sm">
+                        <span className="text-slate-500">Profile Views</span>
+                        <span className="font-semibold text-slate-800">{(agencyData as any).views ?? 0}</span>
+                      </div>
+                      {agencyData.yearsInBusiness > 0 && (
+                        <div className="flex items-center justify-between text-sm">
+                          <span className="text-slate-500">Years in Business</span>
+                          <span className="font-semibold text-slate-800">{agencyData.yearsInBusiness}</span>
+                        </div>
+                      )}
+                      <div className="flex items-center justify-between text-sm">
+                        <span className="text-slate-500">Subscription Plan</span>
+                        <span className={`font-semibold px-2 py-0.5 rounded-full text-xs ${
+                          (agencyData as any).subscriptionPlan === 'free'
+                            ? 'bg-slate-100 text-slate-600'
+                            : 'bg-amber-100 text-amber-700'
+                        }`}>
+                          {(agencyData as any).subscriptionPlan ?? 'free'}
+                        </span>
+                      </div>
+                      <div className="flex items-center justify-between text-sm">
+                        <span className="text-slate-500">Featured Status</span>
+                        {(agencyData as any).isFeatured ? (
+                          <span className="font-semibold text-amber-600 flex items-center gap-1">
+                            <svg className="w-3.5 h-3.5 fill-current" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" /></svg>
+                            Featured
+                          </span>
+                        ) : (
+                          <span className="text-slate-400 text-xs">Not featured</span>
+                        )}
+                      </div>
+                      {(agencyData as any).isFeatured && (agencyData as any).featuredEndDate && (
+                        <div className="flex items-center justify-between text-sm">
+                          <span className="text-slate-500">Featured Until</span>
+                          <span className="font-semibold text-slate-800">
+                            {new Date((agencyData as any).featuredEndDate).toLocaleDateString()}
+                          </span>
+                        </div>
+                      )}
+                      <div className="flex items-center justify-between text-sm">
+                        <span className="text-slate-500">Member Since</span>
+                        <span className="font-semibold text-slate-800">
+                          {agencyData.createdAt ? new Date(agencyData.createdAt).toLocaleDateString() : '—'}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                )}
               </div>
 
               {/* Right Column - Expertise */}
@@ -1528,8 +1593,8 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
               </div>
             </div>
 
-            {/* Invitation Code - visible to owner, admins, and members */}
-            {(isAdmin || isAlreadyMember || isUserInThisAgency) && agencyData.invitationCode && (
+            {/* Invitation Code - visible only to agency admin/owner or platform admin */}
+            {(isAdmin || isPlatformAdmin) && agencyData.invitationCode && (
               <div className="mt-8 p-5 bg-gradient-to-br from-amber-50 to-orange-50 border border-amber-200 rounded-xl">
                 <div className="flex items-start gap-4">
                   <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center shadow-lg shadow-amber-500/25 flex-shrink-0">
@@ -1564,77 +1629,141 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
               </div>
             )}
 
-            {/* Admin Section - Agent Coupon Codes */}
-            {isOwner && agencyData.agentCoupons?.coupons?.length > 0 && (
-              <div className="mt-6 p-5 bg-gradient-to-br from-emerald-50 to-teal-50 border border-emerald-200 rounded-xl">
-                <div className="flex items-center justify-between mb-3">
-                  <div className="flex items-center gap-3">
-                    <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-emerald-400 to-teal-500 flex items-center justify-center shadow-lg shadow-emerald-500/25 flex-shrink-0">
-                      <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z" />
-                      </svg>
+            {/* Admin Section - Coupon Usage Overview */}
+            {(isAdmin || isPlatformAdmin) && (
+              <div className="mt-6 space-y-4">
+
+                {/* Promotion Coupons Summary */}
+                {agencyData.promotionCoupons && (
+                  <div className="p-5 bg-gradient-to-br from-violet-50 to-purple-50 border border-violet-200 rounded-xl">
+                    <div className="flex items-center gap-3 mb-4">
+                      <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center shadow-lg shadow-violet-500/25 flex-shrink-0">
+                        <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
+                        </svg>
+                      </div>
+                      <div>
+                        <h4 className="font-semibold text-slate-900">Promotion Coupons</h4>
+                        <p className="text-xs text-slate-500">Monthly listing promotion allocation</p>
+                      </div>
                     </div>
-                    <div>
-                      <h4 className="font-semibold text-slate-900">Agent Registration Codes</h4>
-                      <p className="text-xs text-slate-500">
-                        <span className="text-emerald-600 font-medium">{agencyData.agentCoupons.available} available</span>
-                        {' · '}
-                        <span className="text-slate-400">{agencyData.agentCoupons.used} used</span>
-                        {agencyData.agentCoupons.expired > 0 && (
-                          <><span className="text-slate-400"> · </span><span className="text-red-400">{agencyData.agentCoupons.expired} expired</span></>
-                        )}
-                      </p>
+                    <div className="grid grid-cols-3 gap-3">
+                      <div className="bg-white rounded-lg p-3 border border-violet-100 text-center">
+                        <p className="text-2xl font-bold text-violet-600">{agencyData.promotionCoupons.monthly ?? 0}</p>
+                        <p className="text-xs text-slate-500 mt-0.5">Monthly</p>
+                      </div>
+                      <div className="bg-white rounded-lg p-3 border border-violet-100 text-center">
+                        <p className="text-2xl font-bold text-emerald-600">{agencyData.promotionCoupons.available ?? 0}</p>
+                        <p className="text-xs text-slate-500 mt-0.5">Available</p>
+                      </div>
+                      <div className="bg-white rounded-lg p-3 border border-violet-100 text-center">
+                        <p className="text-2xl font-bold text-slate-600">{agencyData.promotionCoupons.used ?? 0}</p>
+                        <p className="text-xs text-slate-500 mt-0.5">Used</p>
+                      </div>
+                    </div>
+                    {agencyData.promotionCoupons.monthly > 0 && (
+                      <div className="mt-3">
+                        <div className="flex justify-between text-xs text-slate-500 mb-1">
+                          <span>Used this month</span>
+                          <span>{agencyData.promotionCoupons.used ?? 0} / {agencyData.promotionCoupons.monthly}</span>
+                        </div>
+                        <div className="h-2 bg-violet-100 rounded-full overflow-hidden">
+                          <div
+                            className="h-full bg-gradient-to-r from-violet-500 to-purple-600 rounded-full transition-all"
+                            style={{ width: `${Math.min(100, ((agencyData.promotionCoupons.used ?? 0) / agencyData.promotionCoupons.monthly) * 100)}%` }}
+                          />
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {/* Agent Registration Codes */}
+                {agencyData.agentCoupons?.coupons?.length > 0 && (
+                  <div className="p-5 bg-gradient-to-br from-emerald-50 to-teal-50 border border-emerald-200 rounded-xl">
+                    <div className="flex items-center gap-3 mb-4">
+                      <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-emerald-400 to-teal-500 flex items-center justify-center shadow-lg shadow-emerald-500/25 flex-shrink-0">
+                        <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z" />
+                        </svg>
+                      </div>
+                      <div>
+                        <h4 className="font-semibold text-slate-900">Agent Registration Codes</h4>
+                        <p className="text-xs text-slate-500">
+                          <span className="text-emerald-600 font-medium">{agencyData.agentCoupons.available} available</span>
+                          {' · '}
+                          <span className="text-slate-500">{agencyData.agentCoupons.used} used</span>
+                          {agencyData.agentCoupons.total > 0 && (
+                            <> · <span className="text-slate-400">{agencyData.agentCoupons.total} total</span></>
+                          )}
+                          {agencyData.agentCoupons.expired > 0 && (
+                            <> · <span className="text-red-400">{agencyData.agentCoupons.expired} expired</span></>
+                          )}
+                        </p>
+                      </div>
+                    </div>
+
+                    {/* Usage bar */}
+                    {agencyData.agentCoupons.total > 0 && (
+                      <div className="mb-4">
+                        <div className="h-2 bg-emerald-100 rounded-full overflow-hidden">
+                          <div
+                            className="h-full bg-gradient-to-r from-emerald-400 to-teal-500 rounded-full transition-all"
+                            style={{ width: `${Math.min(100, (agencyData.agentCoupons.used / agencyData.agentCoupons.total) * 100)}%` }}
+                          />
+                        </div>
+                        <p className="text-xs text-slate-400 mt-1 text-right">{agencyData.agentCoupons.used} of {agencyData.agentCoupons.total} seats filled</p>
+                      </div>
+                    )}
+
+                    <div className="space-y-2">
+                      {agencyData.agentCoupons.coupons.map((coupon: any) => (
+                        <div
+                          key={coupon.code}
+                          className={`flex items-center justify-between p-3 rounded-lg border ${
+                            coupon.status === 'used'
+                              ? 'bg-slate-50 border-slate-200'
+                              : coupon.status === 'expired'
+                                ? 'bg-red-50 border-red-200 opacity-60'
+                                : 'bg-white border-emerald-200'
+                          }`}
+                        >
+                          <div className="flex items-center gap-3">
+                            <code className={`font-mono text-sm font-bold tracking-widest ${
+                              coupon.status === 'used' ? 'text-slate-400 line-through' : 'text-slate-900'
+                            }`}>
+                              {coupon.code}
+                            </code>
+                            <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${
+                              coupon.status === 'available' ? 'bg-emerald-100 text-emerald-700'
+                                : coupon.status === 'used' ? 'bg-slate-100 text-slate-500'
+                                : 'bg-red-100 text-red-600'
+                            }`}>
+                              {coupon.status}
+                            </span>
+                          </div>
+                          <div className="flex items-center gap-3">
+                            {coupon.status === 'used' ? (
+                              <span className="text-xs text-slate-500">
+                                Used by <strong className="text-slate-700">{coupon.usedBy?.name ?? 'Unknown'}</strong>
+                              </span>
+                            ) : coupon.status === 'available' ? (
+                              <button
+                                onClick={async () => {
+                                  navigator.clipboard.writeText(coupon.code);
+                                  await success('Copied!', `Code ${coupon.code} copied to clipboard`);
+                                }}
+                                className="text-xs px-3 py-1 bg-emerald-500 text-white rounded-lg hover:bg-emerald-600 transition-colors font-medium"
+                              >
+                                Copy
+                              </button>
+                            ) : null}
+                          </div>
+                        </div>
+                      ))}
                     </div>
                   </div>
-                </div>
-                <div className="space-y-2">
-                  {agencyData.agentCoupons!.coupons!.map((coupon) => (
-                    <div
-                      key={coupon.code}
-                      className={`flex items-center justify-between p-3 rounded-lg border ${
-                        coupon.status === 'used'
-                          ? 'bg-slate-50 border-slate-200'
-                          : coupon.status === 'expired'
-                            ? 'bg-red-50 border-red-200 opacity-60'
-                            : 'bg-white border-emerald-200'
-                      }`}
-                    >
-                      <div className="flex items-center gap-3">
-                        <code className={`font-mono text-sm font-bold tracking-widest ${
-                          coupon.status === 'used' ? 'text-slate-400 line-through' : 'text-slate-900'
-                        }`}>
-                          {coupon.code}
-                        </code>
-                        <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${
-                          coupon.status === 'available'
-                            ? 'bg-emerald-100 text-emerald-700'
-                            : coupon.status === 'used'
-                              ? 'bg-slate-100 text-slate-500'
-                              : 'bg-red-100 text-red-600'
-                        }`}>
-                          {coupon.status}
-                        </span>
-                      </div>
-                      <div className="flex items-center gap-3 text-right">
-                        {coupon.status === 'used' ? (
-                          <span className="text-xs text-slate-500">
-                            Used by <strong className="text-slate-700">{coupon.usedBy?.name ?? 'Unknown'}</strong>
-                          </span>
-                        ) : coupon.status === 'available' ? (
-                          <button
-                            onClick={async () => {
-                              navigator.clipboard.writeText(coupon.code);
-                              await success('Copied!', `Code ${coupon.code} copied to clipboard`);
-                            }}
-                            className="text-xs px-2 py-1 bg-emerald-500 text-white rounded-md hover:bg-emerald-600 transition-colors"
-                          >
-                            Copy
-                          </button>
-                        ) : null}
-                      </div>
-                    </div>
-                  ))}
-                </div>
+                )}
               </div>
             )}
 
