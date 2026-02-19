@@ -23,6 +23,23 @@ interface AgentLicenseModalProps {
   currentAgentId?: string;
 }
 
+const Field = ({
+  id, label, icon, hint, required, children
+}: {
+  id?: string; label: string; icon: React.ReactNode;
+  hint?: string; required?: boolean; children: React.ReactNode;
+}) => (
+  <div className="space-y-1.5">
+    <label htmlFor={id} className="flex items-center gap-1.5 text-[11px] font-semibold text-gray-400 uppercase tracking-widest select-none">
+      {icon}
+      {label}
+      {required && <span className="text-red-400 normal-case tracking-normal font-normal">*</span>}
+    </label>
+    {children}
+    {hint && <p className="text-xs text-gray-400 leading-relaxed">{hint}</p>}
+  </div>
+);
+
 const AgentLicenseModal: React.FC<AgentLicenseModalProps> = ({
   isOpen,
   onClose,
@@ -126,23 +143,6 @@ const AgentLicenseModal: React.FC<AgentLicenseModalProps> = ({
       onClose();
     }
   };
-
-  const Field = ({
-    id, label, icon, hint, required, children
-  }: {
-    id?: string; label: string; icon: React.ReactNode;
-    hint?: string; required?: boolean; children: React.ReactNode;
-  }) => (
-    <div className="space-y-1.5">
-      <label htmlFor={id} className="flex items-center gap-1.5 text-[11px] font-semibold text-gray-400 uppercase tracking-widest select-none">
-        {icon}
-        {label}
-        {required && <span className="text-red-400 normal-case tracking-normal font-normal">*</span>}
-      </label>
-      {children}
-      {hint && <p className="text-xs text-gray-400 leading-relaxed">{hint}</p>}
-    </div>
-  );
 
   const inputCls =
     'w-full px-3.5 py-2.5 bg-white border border-gray-200 rounded-lg text-sm text-gray-900 ' +
