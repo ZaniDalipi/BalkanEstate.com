@@ -379,9 +379,10 @@ export const applyFreeSubscription = async (req: Request, res: Response): Promis
     }
 
     // Process the subscription payment with 0 amount
+    // Use product.productId (the actual DB field) to ensure it matches what was found/created above
     const result = await processSubscriptionPayment({
       userId,
-      productId: productId || 'default',
+      productId: product.productId,
       store: 'web',
       amount: 0,
       currency: 'EUR',

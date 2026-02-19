@@ -580,7 +580,7 @@ const PaymentWindow: React.FC<PaymentWindowProps> = ({
   // Show subscription conflict message if user already has this plan or is trying to downgrade
   if (subscriptionCheck.hasConflict) {
     return (
-      <Modal isOpen={isOpen} onClose={onClose} title="">
+      <Modal isOpen={isOpen} onClose={onClose} title="" fullScreenOnMobile>
         <div className="max-w-md mx-auto">
           <div className="space-y-6">
             {/* Header */}
@@ -668,8 +668,82 @@ const PaymentWindow: React.FC<PaymentWindowProps> = ({
     // Allow 100% off coupons to work even in "coming soon" mode
     const canActivateFree = finalPrice === 0 || finalPrice < 0.01;
 
+    // Show error dialog inside modal when activation fails
+    if (showError) {
+      return (
+        <Modal isOpen={isOpen} onClose={onClose} title="" fullScreenOnMobile>
+          <div className="max-w-md mx-auto text-center py-4 sm:py-6">
+            <div className="w-14 h-14 sm:w-16 sm:h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-3 sm:mb-4">
+              <ExclamationTriangleIcon className="w-7 h-7 sm:w-8 sm:h-8 text-red-500" />
+            </div>
+            <h2 className="text-lg sm:text-xl font-bold text-neutral-800 mb-2">Activation Failed</h2>
+            <p className="text-sm text-neutral-600 mb-2 px-2">{errorMessage}</p>
+            <div className="bg-amber-50 border border-amber-200 rounded-lg p-3 sm:p-4 mb-5 text-left">
+              <p className="text-xs sm:text-sm text-amber-800 font-semibold mb-1">What you can do:</p>
+              <ul className="text-xs sm:text-sm text-amber-700 space-y-1 list-disc list-inside">
+                <li>Check your internet connection</li>
+                <li>Make sure the coupon code is valid</li>
+                <li>Try again in a few moments</li>
+                <li>Contact support if the issue persists</li>
+              </ul>
+            </div>
+            <div className="flex gap-3 justify-center">
+              <button
+                onClick={() => setShowError(false)}
+                className="px-5 sm:px-6 py-2.5 bg-primary text-white rounded-lg font-medium text-sm hover:bg-primary-dark transition-colors"
+              >
+                Try Again
+              </button>
+              <button
+                onClick={onClose}
+                className="px-5 sm:px-6 py-2.5 border border-neutral-300 text-neutral-700 rounded-lg font-medium text-sm hover:bg-neutral-50 transition-colors"
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </Modal>
+      );
+    }
+
+    // Show success dialog inside modal when activation succeeds
+    if (showSuccess) {
+      return (
+        <Modal isOpen={isOpen} onClose={onClose} title="" fullScreenOnMobile>
+          <div className="text-center py-4 sm:py-8">
+            <div className="w-20 h-20 sm:w-24 sm:h-24 bg-gradient-to-br from-green-400 to-emerald-500 rounded-full flex items-center justify-center mx-auto mb-4 sm:mb-6 shadow-lg animate-bounce">
+              <CheckCircleIcon className="w-10 h-10 sm:w-12 sm:h-12 text-white" />
+            </div>
+            <h2 className="text-xl sm:text-2xl font-bold text-neutral-800 mb-2 sm:mb-3">
+              Subscription Activated!
+            </h2>
+            <p className="text-sm sm:text-base text-neutral-600 mb-4 sm:mb-6">
+              Your free subscription has been successfully activated.
+            </p>
+            <div className="bg-green-50 border border-green-200 rounded-xl p-4 mb-4 sm:mb-6 text-left">
+              <div className="flex items-center gap-3">
+                <div className="w-9 h-9 sm:w-10 sm:h-10 bg-green-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                  <CheckCircleIcon className="w-5 h-5 sm:w-6 sm:h-6 text-green-600" />
+                </div>
+                <div>
+                  <p className="font-semibold text-green-800 text-sm sm:text-base">{planName}</p>
+                  <p className="text-xs sm:text-sm text-green-600">Now active on your account</p>
+                </div>
+              </div>
+            </div>
+            <button
+              onClick={() => { onClose(); window.location.reload(); }}
+              className="w-full py-3 sm:py-4 px-6 rounded-xl font-bold text-sm sm:text-lg shadow-lg bg-gradient-to-r from-green-500 to-emerald-600 text-white hover:shadow-xl transform hover:-translate-y-0.5 transition-all"
+            >
+              Continue to Dashboard
+            </button>
+          </div>
+        </Modal>
+      );
+    }
+
     return (
-      <Modal isOpen={isOpen} onClose={onClose} title="">
+      <Modal isOpen={isOpen} onClose={onClose} title="" fullScreenOnMobile>
         <div className="max-w-md mx-auto">
           <div className="space-y-4 sm:space-y-5">
             {/* Header with illustration */}
@@ -951,7 +1025,7 @@ const PaymentWindow: React.FC<PaymentWindowProps> = ({
   // Payment in Progress state (polling for confirmation)
   if (isPolling) {
     return (
-      <Modal isOpen={isOpen} onClose={() => {}} title="">
+      <Modal isOpen={isOpen} onClose={() => {}} title="" fullScreenOnMobile>
         <div className="max-w-md mx-auto">
           <div className="space-y-6">
             {/* Header */}
@@ -1045,7 +1119,7 @@ const PaymentWindow: React.FC<PaymentWindowProps> = ({
 
   // Original payment UI (will be shown when PAYMENTS_COMING_SOON = false)
   return (
-    <Modal isOpen={isOpen} onClose={onClose} title="">
+    <Modal isOpen={isOpen} onClose={onClose} title="" fullScreenOnMobile>
       <div className="max-w-md mx-auto">
         {showError ? (
           <div className="text-center py-6 sm:py-8">

@@ -1406,9 +1406,9 @@ const MyAccountPage: React.FC = () => {
 
     const isSellerProfile = state.currentUser.role === UserRole.AGENT || state.currentUser.role === UserRole.PRIVATE_SELLER;
 
-    // Redirect non-sellers to profile if they're on a seller-only tab
+    // Redirect non-sellers away from seller-only tabs (listings and subscription are available to all)
     useEffect(() => {
-        if (!isSellerProfile && (activeTab === 'listings' || activeTab === 'performance' || activeTab === 'subscription' || activeTab === 'promotions' || activeTab === 'viewings')) {
+        if (!isSellerProfile && (activeTab === 'performance' || activeTab === 'promotions' || activeTab === 'viewings')) {
             setActiveTab('profile');
         }
     }, [isSellerProfile, activeTab, setActiveTab]);
@@ -1451,7 +1451,8 @@ const MyAccountPage: React.FC = () => {
     const renderContent = () => {
         switch (activeTab) {
             case 'listings':
-                return isSellerProfile ? <MyListings sellerId={state.currentUser!.id} /> : null;
+                // All roles can manage listings (buyers get 3 free listings)
+                return <MyListings sellerId={state.currentUser!.id} />;
             case 'promotions':
                 return isSellerProfile ? <MyPromotions /> : null;
             case 'profile':
@@ -1534,12 +1535,15 @@ const MyAccountPage: React.FC = () => {
                                 )}
                             </div>
                             <nav className="space-y-2">
+                                {/* My Listings: all roles can manage listings (buyers get 3 free) */}
+                                <TabButton label={t('account:tabs.myListings')} icon={<BuildingOfficeIcon className="w-6 h-6"/>} isActive={activeTab === 'listings'} onClick={() => setActiveTab('listings')} tabKey="listings" />
+                                {/* Subscription: visible to all roles */}
+                                <TabButton label={t('account:tabs.subscription')} icon={<CreditCardIcon className="w-6 h-6"/>} isActive={activeTab === 'subscription'} onClick={() => setActiveTab('subscription')} tabKey="subscription" />
+                                {/* Seller/Agent-only tabs */}
                                 {isSellerProfile && (
                                     <>
-                                        <TabButton label={t('account:tabs.myListings')} icon={<BuildingOfficeIcon className="w-6 h-6"/>} isActive={activeTab === 'listings'} onClick={() => setActiveTab('listings')} tabKey="listings" />
                                         <TabButton label={t('account:tabs.promotions', 'My Promotions')} icon={<SparklesIcon className="w-6 h-6"/>} isActive={activeTab === 'promotions'} onClick={() => setActiveTab('promotions')} tabKey="promotions" />
                                         <TabButton label={t('account:tabs.performance')} icon={<ChartBarIcon className="w-6 h-6"/>} isActive={activeTab === 'performance'} onClick={() => setActiveTab('performance')} tabKey="performance" />
-                                        <TabButton label={t('account:tabs.subscription')} icon={<CreditCardIcon className="w-6 h-6"/>} isActive={activeTab === 'subscription'} onClick={() => setActiveTab('subscription')} tabKey="subscription" />
                                         <TabButton label={t('account:tabs.viewings', 'Viewing Requests')} icon={<CalendarIcon className="w-6 h-6"/>} isActive={activeTab === 'viewings'} onClick={() => setActiveTab('viewings')} tabKey="viewings" />
                                     </>
                                 )}
