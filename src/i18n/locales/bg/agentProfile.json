@@ -3,20 +3,24 @@
     "backToAgents": "Обратно към Агентите",
     "overview": "Преглед",
     "listings": "Обяви",
-    "reviews": "Отзиви"
+    "reviews": "Отзиви",
+    "back": "Back to Agents"
   },
   "tabs": {
     "about": "За Мен",
     "listings": "Обяви",
     "reviews": "Отзиви",
-    "contact": "Контакт"
+    "contact": "Контакт",
+    "overview": "Overview"
   },
   "badges": {
     "verified": "Верифициран Агент",
     "featured": "Представен",
     "topRated": "Топ Рейтинг",
     "superAgent": "Супер Агент",
-    "newAgent": "Нов Агент"
+    "newAgent": "Нов Агент",
+    "premierAgent": "Premier Agent",
+    "superhost": "Superhost"
   },
   "contact": {
     "title": "Информация за Контакт",
@@ -25,7 +29,11 @@
     "whatsapp": "WhatsApp",
     "schedule": "Насрочи Обаждане",
     "message": "Изпрати Съобщение",
-    "responseTime": "Обикновено отговаря в рамките на"
+    "responseTime": "Обикновено отговаря в рамките на",
+    "callNow": "Call Now",
+    "sendEmail": "Send Email",
+    "sendMessage": "Send Message",
+    "scheduleCall": "Schedule a Call"
   },
   "stats": {
     "propertiesSold": "Продадени Имоти",
@@ -33,7 +41,11 @@
     "totalReviews": "Общо Отзиви",
     "avgRating": "Среден Рейтинг",
     "responseRate": "Процент на Отговор",
-    "yearsExperience": "Години Опит"
+    "yearsExperience": "Години Опит",
+    "totalSales": "Total Sales",
+    "avgResponseTime": "Avg. Response Time",
+    "satisfactionRate": "Satisfaction Rate",
+    "languages": "Languages Spoken"
   },
   "overview": {
     "about": "За Мен",
@@ -41,7 +53,9 @@
     "areasServed": "Обслужвани Райони",
     "languages": "Езици, които Говоря",
     "certifications": "Сертификати",
-    "education": "Образование"
+    "education": "Образование",
+    "aboutMe": "About Me",
+    "serviceAreas": "Service Areas"
   },
   "listings": {
     "title": "Моите Обяви",
@@ -49,7 +63,9 @@
     "sold": "Продадени",
     "pending": "Изчакващи",
     "viewAll": "Виж Всички",
-    "noListings": "Все още няма обяви"
+    "noListings": "Все още няма обяви",
+    "activeListings": "Active Listings",
+    "soldListings": "Sold Listings"
   },
   "reviews": {
     "title": "Отзиви от Клиенти",
@@ -57,39 +73,66 @@
     "noReviews": "Все още няма отзиви",
     "verifiedPurchase": "Верифициран Клиент",
     "helpful": "Полезно",
-    "report": "Докладвай"
+    "report": "Докладвай",
+    "averageRating": "Average Rating",
+    "totalReviews": "Total Reviews",
+    "beFirst": "Be the first to leave a review for this agent",
+    "reportReview": "Report Review"
   },
   "consultation": {
     "title": "Резервирайте Безплатна Консултация",
     "description": "Получете персонализирани съвети за вашите нужди от недвижими имоти",
     "button": "Резервирай Сега",
     "duration": "30 минути",
-    "free": "Безплатно"
+    "free": "Безплатно",
+    "selectDate": "Select Date",
+    "selectTime": "Select Time",
+    "yourName": "Your Name",
+    "yourEmail": "Your Email",
+    "yourPhone": "Your Phone",
+    "message": "Message (optional)",
+    "messagePlaceholder": "Tell us about your property requirements...",
+    "bookNow": "Book Consultation",
+    "confirmBooking": "Confirm Booking"
   },
   "appraisal": {
     "title": "Оценка на Имота",
     "description": "Разберете стойността на вашия имот днес",
-    "button": "Заявка за Оценка"
+    "button": "Заявка за Оценка",
+    "propertyAddress": "Property Address",
+    "propertyType": "Property Type",
+    "requestAppraisal": "Request Appraisal"
   },
   "agency": {
     "title": "Агенция",
     "worksWith": "Работи с",
     "viewAgency": "Виж Агенцията",
-    "independent": "Независим Агент"
+    "independent": "Независим Агент",
+    "partOf": "Part of",
+    "independentAgent": "Independent Agent"
   },
   "similarAgents": {
     "title": "Подобни Агенти",
-    "viewAll": "Виж Всички"
+    "viewAll": "Виж Всички",
+    "inArea": "in {area}"
   },
   "actions": {
     "share": "Сподели Профила",
     "save": "Запази Агента",
-    "report": "Докладвай Агента"
+    "report": "Докладвай Агента",
+    "shareProfile": "Share Profile",
+    "saveAgent": "Save Agent",
+    "reportAgent": "Report Agent"
   },
   "messages": {
     "saved": "Агентът е запазен в любими",
     "removed": "Агентът е премахнат от любими",
     "messageSent": "Съобщението е изпратено успешно",
-    "error": "Възникна грешка. Моля, опитайте отново."
+    "error": "Възникна грешка. Моля, опитайте отново.",
+    "consultationBooked": "Consultation booked successfully!",
+    "appraisalRequested": "Appraisal request sent successfully!",
+    "profileShared": "Profile link copied to clipboard!",
+    "agentSaved": "Agent saved to your favorites!",
+    "reviewSubmitted": "Review submitted successfully!"
   }
 }

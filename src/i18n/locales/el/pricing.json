@@ -228,7 +228,8 @@
       "priorityInSearch": "Προτεραιότητα στα αποτελέσματα αναζήτησης",
       "homepageCarousel": "Καρουσέλ μεσιτικών στην αρχική σελίδα",
       "featuredBadge": "Σήμα προτεινόμενου στο προφίλ",
-      "boostedVisibility": "Ενισχυμένη ορατότητα παντού (3x)"
+      "boostedVisibility": "Ενισχυμένη ορατότητα παντού (3x)",
+      "mapMarker": "Agency marker on property map"
     },
     "mapMarker": {
       "title": "Δείκτης χάρτη",
@@ -249,7 +250,10 @@
     "needAgencyDescription": "Εγγραφείτε στο πλάνο Enterprise για να δημιουργήσετε το μεσιτικό σας και να ξεκλειδώσετε αυτές τις λειτουργίες.",
     "viewEnterprise": "Δείτε το Πλάνο Enterprise",
     "comingSoon": "Σύντομα διαθέσιμο",
-    "featureComingSoon": "Η προβολή μεσιτικού θα είναι διαθέσιμη σύντομα!"
+    "featureComingSoon": "Η προβολή μεσιτικού θα είναι διαθέσιμη σύντομα!",
+    "oneWeek": "1 WEEK",
+    "perWeek": "per week",
+    "showsEverywhere": "Shows everywhere!"
   },
   "contact": {
     "haveQuestions": "Έχετε ερωτήσεις;",
@@ -264,5 +268,16 @@
     "privacyPolicy": "Πολιτική απορρήτου",
     "refundPolicy": "Πολιτική επιστροφών",
     "providerNote": "Οι πληρωμές διαχειρίζονται από την LemonSqueezy ως Έμπορος Καταγραφής. ΦΠΑ/φόροι συμπεριλαμβάνονται όπου ισχύει."
+  },
+  "duration": {
+    "7days": "7 days",
+    "30days": "30 days",
+    "90days": "90 days"
+  },
+  "coupon": {
+    "title": "Do you have a coupon from the seller?",
+    "description": "Select any plan above and use your coupon code to activate your subscription instantly.",
+    "selectPlan": "Select a plan to use your coupon",
+    "haveDiscountCode": "Have a discount code?"
   }
 }

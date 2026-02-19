@@ -1,4 +1,5 @@
 import React, { useEffect, useState, useCallback, useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import { User, UserRole } from '../../types';
 import { ChartBarIcon, HomeIcon, EyeIcon, HeartIcon, EnvelopeIcon, CalendarIcon, MapPinIcon, BuildingOfficeIcon, BedIcon, BathIcon, SqftIcon } from '../../constants';
 import { formatPrice } from '../../utils/currency';
@@ -96,6 +97,7 @@ const StatCard: React.FC<{
 
 // Sold Property Card Component
 const SoldPropertyCard: React.FC<{ sale: SaleRecord }> = ({ sale }) => {
+  const { t } = useTranslation(['account']);
   const [imageError, setImageError] = useState(false);
 
   return (
@@ -117,7 +119,7 @@ const SoldPropertyCard: React.FC<{ sale: SaleRecord }> = ({ sale }) => {
         {/* Sold Badge */}
         <div className="absolute top-2 left-2 bg-red-600 text-white text-[10px] font-bold px-2 py-1 rounded-md shadow flex items-center gap-1">
           <span className="w-1.5 h-1.5 bg-white rounded-full"></span>
-          SOLD
+          {t('account:statistics.sold')}
         </div>
         {/* Property Type */}
         <div className="absolute bottom-2 left-2 bg-white/90 backdrop-blur-sm text-neutral-800 text-[10px] font-semibold px-2 py-1 rounded-md capitalize">
@@ -176,7 +178,7 @@ const SoldPropertyCard: React.FC<{ sale: SaleRecord }> = ({ sale }) => {
             <span>{new Date(sale.soldAt).toLocaleDateString()}</span>
           </div>
           <span className="bg-blue-50 text-blue-700 px-1.5 py-0.5 rounded font-medium">
-            {sale.daysOnMarket} days on market
+            {t('account:statistics.daysOnMarket', { count: sale.daysOnMarket })}
           </span>
         </div>
       </div>
@@ -185,6 +187,7 @@ const SoldPropertyCard: React.FC<{ sale: SaleRecord }> = ({ sale }) => {
 };
 
 const ProfileStatistics: React.FC<ProfileStatisticsProps> = ({ user }) => {
+  const { t } = useTranslation(['account', 'common']);
   const [stats, setStats] = useState<UserStats>({
     activeListings: user.listingsCount || 0,
     totalListings: user.totalListingsCreated || 0,
@@ -555,13 +558,13 @@ const ProfileStatistics: React.FC<ProfileStatisticsProps> = ({ user }) => {
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-3">
           <ChartBarIcon className="w-8 h-8 text-primary" />
-          <h2 className="text-2xl font-bold text-neutral-800">Your Statistics</h2>
+          <h2 className="text-2xl font-bold text-neutral-800">{t('account:statistics.title')}</h2>
         </div>
         <button
           onClick={handleRefreshStats}
           disabled={syncing}
           className="flex items-center gap-2 px-4 py-2 text-sm bg-primary text-white rounded-lg hover:bg-primary-dark transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-          title="Refresh statistics"
+          title={t('account:statistics.refreshTitle')}
         >
           <svg
             className={`w-4 h-4 ${syncing ? 'animate-spin' : ''}`}
@@ -576,7 +579,7 @@ const ProfileStatistics: React.FC<ProfileStatisticsProps> = ({ user }) => {
               d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
             />
           </svg>
-          {syncing ? 'Syncing...' : 'Refresh'}
+          {syncing ? t('account:statistics.syncing') : t('account:statistics.refresh')}
         </button>
       </div>
 
@@ -586,25 +589,25 @@ const ProfileStatistics: React.FC<ProfileStatisticsProps> = ({ user }) => {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             <StatCard
               icon={<HomeIcon className="w-6 h-6" />}
-              label="Active Listings"
+              label={t('account:statistics.activeListings')}
               value={stats.activeListings}
-              subtext={`${stats.totalListings} total created`}
+              subtext={t('account:statistics.totalCreated', { count: stats.totalListings })}
               color="from-blue-500 to-blue-600"
               loading={loading}
             />
             <StatCard
               icon={<EyeIcon className="w-6 h-6" />}
-              label="Total Views"
+              label={t('account:statistics.totalViews')}
               value={formatNumber(stats.totalViews)}
-              subtext="Across all listings"
+              subtext={t('account:statistics.acrossAllListings')}
               color="from-purple-500 to-purple-600"
               loading={loading}
             />
             <StatCard
               icon={<HeartIcon className="w-6 h-6" />}
-              label="Total Saves"
+              label={t('account:statistics.totalSaves')}
               value={formatNumber(stats.totalSaves)}
-              subtext="Properties favorited"
+              subtext={t('account:statistics.propertiesFavorited')}
               color="from-pink-500 to-pink-600"
               loading={loading}
             />
@@ -614,9 +617,9 @@ const ProfileStatistics: React.FC<ProfileStatisticsProps> = ({ user }) => {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             <StatCard
               icon={<EnvelopeIcon className="w-6 h-6" />}
-              label="Total Inquiries"
+              label={t('account:statistics.totalInquiries')}
               value={formatNumber(stats.totalInquiries)}
-              subtext="Buyer messages received"
+              subtext={t('account:statistics.buyerMessagesReceived')}
               color="from-green-500 to-green-600"
               loading={loading}
             />
@@ -625,17 +628,17 @@ const ProfileStatistics: React.FC<ProfileStatisticsProps> = ({ user }) => {
               <>
                 <StatCard
                   icon={<HomeIcon className="w-6 h-6" />}
-                  label="Properties Sold"
+                  label={t('account:statistics.propertiesSold')}
                   value={stats.propertiesSold || 0}
-                  subtext="Successful sales"
+                  subtext={t('account:statistics.successfulSales')}
                   color="from-orange-500 to-orange-600"
                   loading={loading}
                 />
                 <StatCard
                   icon={<ChartBarIcon className="w-6 h-6" />}
-                  label="Total Sales Value"
+                  label={t('account:statistics.totalSalesValue')}
                   value={formatCurrency(stats.totalSalesValue || 0)}
-                  subtext="Lifetime revenue"
+                  subtext={t('account:statistics.lifetimeRevenue')}
                   color="from-teal-500 to-teal-600"
                   loading={loading}
                 />
@@ -650,17 +653,17 @@ const ProfileStatistics: React.FC<ProfileStatisticsProps> = ({ user }) => {
                 <div className="p-2 bg-blue-100 rounded-lg">
                   <ChartBarIcon className="w-5 h-5 text-blue-600" />
                 </div>
-                <h3 className="text-lg font-semibold text-neutral-800">Agency Performance</h3>
+                <h3 className="text-lg font-semibold text-neutral-800">{t('account:statistics.agencyPerformance')}</h3>
               </div>
               <p className="text-neutral-600">
-                You are part of <span className="font-semibold text-primary">{user.agencyName}</span>
+                {t('account:statistics.partOfAgency', { agency: user.agencyName })}
               </p>
               {user.licenseVerified && (
                 <div className="mt-2 flex items-center gap-2">
                   <span className="px-3 py-1 text-xs bg-green-100 text-green-800 rounded-full font-medium">
-                    ✓ Verified License
+                    {t('account:statistics.verifiedLicense')}
                   </span>
-                  <span className="text-sm text-neutral-500">License #{user.licenseNumber}</span>
+                  <span className="text-sm text-neutral-500">{t('account:statistics.licenseNumber', { number: user.licenseNumber })}</span>
                 </div>
               )}
             </div>
@@ -670,13 +673,13 @@ const ProfileStatistics: React.FC<ProfileStatisticsProps> = ({ user }) => {
           {(stats.propertiesSold || 0) > 0 && (
             <div className="mt-8">
               <div className="flex items-center justify-between mb-4">
-                <h3 className="text-xl font-bold text-neutral-800">Sales History</h3>
+                <h3 className="text-xl font-bold text-neutral-800">{t('account:statistics.salesHistory')}</h3>
                 <button
                   onClick={fetchSalesHistory}
                   disabled={loadingHistory}
                   className="px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary-dark transition-colors disabled:opacity-50"
                 >
-                  {loadingHistory ? 'Loading...' : showSalesHistory ? 'Hide History' : 'View History'}
+                  {loadingHistory ? t('common:loading') : showSalesHistory ? t('account:statistics.hideHistory') : t('account:statistics.viewHistory')}
                 </button>
               </div>
 
@@ -685,7 +688,7 @@ const ProfileStatistics: React.FC<ProfileStatisticsProps> = ({ user }) => {
                   {/* Filters */}
                   <div className="bg-white rounded-xl border border-neutral-200 p-4">
                     <div className="flex flex-wrap items-center gap-3 mb-4">
-                      <span className="text-sm font-semibold text-neutral-700">Filters:</span>
+                      <span className="text-sm font-semibold text-neutral-700">{t('account:statistics.filters')}:</span>
 
                       {/* Type Filter */}
                       <select
@@ -693,12 +696,12 @@ const ProfileStatistics: React.FC<ProfileStatisticsProps> = ({ user }) => {
                         onChange={(e) => setTypeFilter(e.target.value as PropertyTypeFilter)}
                         className="px-3 py-1.5 text-sm border border-neutral-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary"
                       >
-                        <option value="all">All Types</option>
-                        <option value="apartment">Apartment</option>
-                        <option value="house">House</option>
-                        <option value="villa">Villa</option>
-                        <option value="land">Land</option>
-                        <option value="commercial">Commercial</option>
+                        <option value="all">{t('account:statistics.filterTypes.all')}</option>
+                        <option value="apartment">{t('account:statistics.filterTypes.apartment')}</option>
+                        <option value="house">{t('account:statistics.filterTypes.house')}</option>
+                        <option value="villa">{t('account:statistics.filterTypes.villa')}</option>
+                        <option value="land">{t('account:statistics.filterTypes.land')}</option>
+                        <option value="commercial">{t('account:statistics.filterTypes.commercial')}</option>
                       </select>
 
                       {/* Date Filter */}
@@ -707,12 +710,12 @@ const ProfileStatistics: React.FC<ProfileStatisticsProps> = ({ user }) => {
                         onChange={(e) => setDateFilter(e.target.value as DateFilter)}
                         className="px-3 py-1.5 text-sm border border-neutral-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary"
                       >
-                        <option value="all">All Time</option>
-                        <option value="thisMonth">This Month</option>
-                        <option value="last3Months">Last 3 Months</option>
-                        <option value="last6Months">Last 6 Months</option>
-                        <option value="thisYear">This Year</option>
-                        <option value="lastYear">Last Year</option>
+                        <option value="all">{t('account:statistics.filterDates.all')}</option>
+                        <option value="thisMonth">{t('account:statistics.filterDates.thisMonth')}</option>
+                        <option value="last3Months">{t('account:statistics.filterDates.last3Months')}</option>
+                        <option value="last6Months">{t('account:statistics.filterDates.last6Months')}</option>
+                        <option value="thisYear">{t('account:statistics.filterDates.thisYear')}</option>
+                        <option value="lastYear">{t('account:statistics.filterDates.lastYear')}</option>
                       </select>
 
                       {/* Price Filter */}
@@ -721,11 +724,11 @@ const ProfileStatistics: React.FC<ProfileStatisticsProps> = ({ user }) => {
                         onChange={(e) => setPriceFilter(e.target.value as PriceFilter)}
                         className="px-3 py-1.5 text-sm border border-neutral-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary"
                       >
-                        <option value="all">All Prices</option>
-                        <option value="under100k">Under €100K</option>
-                        <option value="100k-500k">€100K - €500K</option>
-                        <option value="500k-1m">€500K - €1M</option>
-                        <option value="over1m">Over €1M</option>
+                        <option value="all">{t('account:statistics.filterPrices.all')}</option>
+                        <option value="under100k">{t('account:statistics.filterPrices.under100k')}</option>
+                        <option value="100k-500k">{t('account:statistics.filterPrices.100kTo500k')}</option>
+                        <option value="500k-1m">{t('account:statistics.filterPrices.500kTo1m')}</option>
+                        <option value="over1m">{t('account:statistics.filterPrices.over1m')}</option>
                       </select>
 
                       {/* Clear Filters */}
@@ -738,7 +741,7 @@ const ProfileStatistics: React.FC<ProfileStatisticsProps> = ({ user }) => {
                           }}
                           className="px-3 py-1.5 text-sm text-red-600 hover:text-red-700 font-medium"
                         >
-                          Clear Filters
+                          {t('account:statistics.clearFilters')}
                         </button>
                       )}
 
@@ -753,14 +756,14 @@ const ProfileStatistics: React.FC<ProfileStatisticsProps> = ({ user }) => {
                           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
                           </svg>
-                          Download CSV
+                          {t('account:statistics.downloadCSV')}
                         </button>
                       ) : (
-                        <div className="flex items-center gap-2 px-4 py-1.5 text-sm bg-neutral-100 text-neutral-500 rounded-lg cursor-not-allowed" title="Upgrade to Pro or Enterprise to download">
+                        <div className="flex items-center gap-2 px-4 py-1.5 text-sm bg-neutral-100 text-neutral-500 rounded-lg cursor-not-allowed" title={t('account:statistics.upgradeToDownload')}>
                           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
                           </svg>
-                          <span>Pro/Enterprise</span>
+                          <span>{t('account:statistics.proEnterprise')}</span>
                         </div>
                       )}
                     </div>
@@ -768,7 +771,7 @@ const ProfileStatistics: React.FC<ProfileStatisticsProps> = ({ user }) => {
                     {/* Active fi.   lters display */}
                     {(typeFilter !== 'all' || dateFilter !== 'all' || priceFilter !== 'all') && (
                       <div className="text-xs text-neutral-500">
-                        Showing {filteredSales.length} of {salesHistory.sales.length} sales
+                        {t('account:statistics.showingOfSales', { shown: filteredSales.length, total: salesHistory.sales.length })}
                       </div>
                     )}
                   </div>
@@ -776,19 +779,19 @@ const ProfileStatistics: React.FC<ProfileStatisticsProps> = ({ user }) => {
                   {/* Summary Cards - Based on filtered data */}
                   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                     <div className="bg-gradient-to-br from-emerald-500 to-emerald-600 rounded-lg p-4 text-white">
-                      <div className="text-sm opacity-90">Total Revenue</div>
+                      <div className="text-sm opacity-90">{t('account:statistics.totalRevenue')}</div>
                       <div className="text-2xl font-bold">{formatCurrency(filteredSummary.totalRevenue)}</div>
                     </div>
                     <div className="bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg p-4 text-white">
-                      <div className="text-sm opacity-90">Avg. Sale Price</div>
+                      <div className="text-sm opacity-90">{t('account:statistics.avgSalePrice')}</div>
                       <div className="text-2xl font-bold">{formatCurrency(filteredSummary.averageSalePrice)}</div>
                     </div>
                     <div className="bg-gradient-to-br from-purple-500 to-purple-600 rounded-lg p-4 text-white">
-                      <div className="text-sm opacity-90">Avg. Days on Market</div>
+                      <div className="text-sm opacity-90">{t('account:statistics.avgDaysOnMarket')}</div>
                       <div className="text-2xl font-bold">{Math.round(filteredSummary.averageDaysOnMarket)}</div>
                     </div>
                     <div className="bg-gradient-to-br from-amber-500 to-amber-600 rounded-lg p-4 text-white">
-                      <div className="text-sm opacity-90">Total Sales</div>
+                      <div className="text-sm opacity-90">{t('account:statistics.totalSalesCount')}</div>
                       <div className="text-2xl font-bold">{filteredSummary.totalSales}</div>
                     </div>
                   </div>
@@ -803,14 +806,14 @@ const ProfileStatistics: React.FC<ProfileStatisticsProps> = ({ user }) => {
                   ) : (
                     <div className="text-center py-12 bg-neutral-50 rounded-xl border border-neutral-200">
                       <HomeIcon className="w-12 h-12 text-neutral-300 mx-auto mb-3" />
-                      <p className="text-neutral-600 font-medium">No sales match your filters</p>
-                      <p className="text-sm text-neutral-500 mt-1">Try adjusting your filter criteria</p>
+                      <p className="text-neutral-600 font-medium">{t('account:statistics.noSalesMatchFilters')}</p>
+                      <p className="text-sm text-neutral-500 mt-1">{t('account:statistics.tryAdjustingFilters')}</p>
                     </div>
                   )}
 
                   {salesHistory.pagination.total > salesHistory.pagination.limit && (
                     <div className="text-center text-sm text-neutral-600">
-                      Showing {filteredSales.length} of {salesHistory.pagination.total} total sales
+                      {t('account:statistics.showingOfTotalSales', { shown: filteredSales.length, total: salesHistory.pagination.total })}
                     </div>
                   )}
                 </div>
@@ -821,9 +824,9 @@ const ProfileStatistics: React.FC<ProfileStatisticsProps> = ({ user }) => {
       ) : (
         <div className="p-8 text-center bg-neutral-50 rounded-xl border-2 border-dashed border-neutral-300">
           <ChartBarIcon className="w-16 h-16 text-neutral-300 mx-auto mb-4" />
-          <h3 className="text-lg font-semibold text-neutral-700 mb-2">Statistics Available for Sellers</h3>
+          <h3 className="text-lg font-semibold text-neutral-700 mb-2">{t('account:statistics.availableForSellers')}</h3>
           <p className="text-neutral-500">
-            Switch to Agent or Private Seller role to see your property statistics.
+            {t('account:statistics.switchToSellerRole')}
           </p>
         </div>
       )}

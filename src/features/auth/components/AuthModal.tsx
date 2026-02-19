@@ -84,48 +84,50 @@ const checkPasswordRequirements = (password: string): PasswordRequirements => {
     };
 };
 
-const validatePassword = (password: string) => {
+const validatePassword = (password: string, t?: (key: string, defaultValue?: string, options?: Record<string, string>) => string) => {
     const requirements = checkPasswordRequirements(password);
+    const tr = t || ((key: string, defaultValue?: string) => defaultValue || key);
 
     if (!requirements.minLength) {
-        return "Password must be at least 8 characters long.";
+        return tr('auth:validation.password.minLength', 'Password must be at least 8 characters long.');
     }
     if (!requirements.hasUppercase) {
-        return "Password must contain at least one uppercase letter.";
+        return tr('auth:validation.password.hasUppercase', 'Password must contain at least one uppercase letter.');
     }
     if (!requirements.hasLowercase) {
-        return "Password must contain at least one lowercase letter.";
+        return tr('auth:validation.password.hasLowercase', 'Password must contain at least one lowercase letter.');
     }
     if (!requirements.hasNumber) {
-        return "Password must contain at least one number.";
+        return tr('auth:validation.password.hasNumber', 'Password must contain at least one number.');
     }
     if (!requirements.hasSpecialChar) {
-        return "Password must contain at least one special character.";
+        return tr('auth:validation.password.hasSpecialChar', 'Password must contain at least one special character.');
     }
     if (!requirements.noSequential) {
         const sequentialMatch = findSequentialCharacters(password);
         if (sequentialMatch) {
-            return `Password contains sequential characters "${sequentialMatch}". Avoid sequences like 123, abc, or qwe.`;
+            return tr('auth:validation.password.sequentialWithMatch', 'Password contains sequential characters "{{match}}". Avoid sequences like 123, abc, or qwe.', { match: sequentialMatch });
         }
-        return "Password should not contain sequential characters (like 123, abc).";
+        return tr('auth:validation.password.sequential', 'Password should not contain sequential characters (like 123, abc).');
     }
     if (!requirements.notCommon) {
         const commonMatch = getCommonPasswordMatch(password);
         if (commonMatch) {
-            return `Password contains a common pattern "${commonMatch}". Please avoid common words and phrases.`;
+            return tr('auth:validation.password.commonWithMatch', 'Password contains a common pattern "{{match}}". Please avoid common words and phrases.', { match: commonMatch });
         }
-        return "Password is too common. Please choose a more unique password.";
+        return tr('auth:validation.password.common', 'Password is too common. Please choose a more unique password.');
     }
     return null;
 };
 
-const validateEmail = (email: string): string | null => {
+const validateEmail = (email: string, t?: (key: string, defaultValue?: string) => string): string | null => {
+    const tr = t || ((key: string, defaultValue?: string) => defaultValue || key);
     if (!email.trim()) {
-        return "Please enter your email address";
+        return tr('auth:validation.email.required', 'Please enter your email address');
     }
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(email)) {
-        return "Please enter a valid email address";
+        return tr('auth:validation.email.invalid', 'Please enter a valid email address');
     }
     return null;
 };
@@ -176,15 +178,15 @@ const PasswordRequirementsIndicator: React.FC<{ requirements: PasswordRequiremen
 
     return (
         <div className="mt-3 p-4 bg-white/40 backdrop-blur-sm rounded-2xl border border-white/50 space-y-2.5 shadow-inner">
-            <p className="text-xs font-semibold text-neutral-600 mb-3">Password requirements:</p>
+            <p className="text-xs font-semibold text-neutral-600 mb-3">{t('auth:validation.passwordRequirements', 'Password requirements:')}</p>
             <div className="grid grid-cols-1 gap-2">
-                <RequirementItem met={requirements.minLength} text="At least 8 characters" />
-                <RequirementItem met={requirements.hasUppercase} text="One uppercase letter (A-Z)" />
-                <RequirementItem met={requirements.hasLowercase} text="One lowercase letter (a-z)" />
-                <RequirementItem met={requirements.hasNumber} text="One number (0-9)" />
-                <RequirementItem met={requirements.hasSpecialChar} text="One special character (!@#$%...)" />
-                <RequirementItem met={requirements.noSequential} text="No sequential characters (123, abc)" />
-                <RequirementItem met={requirements.notCommon} text="Not a common password" />
+                <RequirementItem met={requirements.minLength} text={t('auth:validation.requirements.minLength', 'At least 8 characters')} />
+                <RequirementItem met={requirements.hasUppercase} text={t('auth:validation.requirements.hasUppercase', 'One uppercase letter (A-Z)')} />
+                <RequirementItem met={requirements.hasLowercase} text={t('auth:validation.requirements.hasLowercase', 'One lowercase letter (a-z)')} />
+                <RequirementItem met={requirements.hasNumber} text={t('auth:validation.requirements.hasNumber', 'One number (0-9)')} />
+                <RequirementItem met={requirements.hasSpecialChar} text={t('auth:validation.requirements.hasSpecialChar', 'One special character (!@#$%...)')} />
+                <RequirementItem met={requirements.noSequential} text={t('auth:validation.requirements.noSequential', 'No sequential characters (123, abc)')} />
+                <RequirementItem met={requirements.notCommon} text={t('auth:validation.requirements.notCommon', 'Not a common password')} />
             </div>
         </div>
     );
@@ -254,14 +256,14 @@ const AuthPage: React.FC = () => {
 
         // Validate on blur
         if (field === 'email') {
-            const emailError = validateEmail(email);
+            const emailError = validateEmail(email, t);
             setFieldErrors(prev => ({ ...prev, email: emailError || undefined }));
         } else if (field === 'password' && state.authModalView === 'signup') {
-            const passwordError = validatePassword(password);
+            const passwordError = validatePassword(password, t);
             setFieldErrors(prev => ({ ...prev, password: passwordError || undefined }));
         } else if (field === 'confirmPassword') {
             if (password !== confirmPassword) {
-                setFieldErrors(prev => ({ ...prev, confirmPassword: "Passwords do not match" }));
+                setFieldErrors(prev => ({ ...prev, confirmPassword: t('auth:validation.passwordsDoNotMatch', 'Passwords do not match') }));
             } else {
                 setFieldErrors(prev => ({ ...prev, confirmPassword: undefined }));
             }
@@ -286,7 +288,7 @@ const AuthPage: React.FC = () => {
         // Also check confirm password match if it's been touched
         if (touched.confirmPassword && confirmPassword) {
             if (newPassword !== confirmPassword) {
-                setFieldErrors(prev => ({ ...prev, confirmPassword: "Passwords do not match" }));
+                setFieldErrors(prev => ({ ...prev, confirmPassword: t('auth:validation.passwordsDoNotMatch', 'Passwords do not match') }));
             } else {
                 setFieldErrors(prev => ({ ...prev, confirmPassword: undefined }));
             }
@@ -309,19 +311,19 @@ const AuthPage: React.FC = () => {
         e.preventDefault();
 
         // Custom validation before submit
-        const emailError = validateEmail(email);
+        const emailError = validateEmail(email, t);
         let passwordError: string | null = null;
         let confirmError: string | null = null;
 
         if (state.authModalView === 'signup') {
             passwordError = validatePassword(password);
             if (password !== confirmPassword) {
-                confirmError = "Passwords do not match";
+                confirmError = t('auth:validation.passwordsDoNotMatch', 'Passwords do not match');
             }
         } else {
             // Login - just check if password is provided
             if (!password.trim()) {
-                passwordError = "Please enter your password";
+                passwordError = t('auth:validation.pleaseEnterPassword', 'Please enter your password');
             }
         }
 
@@ -350,7 +352,7 @@ const AuthPage: React.FC = () => {
             }
             handleClose();
         } catch (err) {
-            setError(err instanceof Error ? err.message : "An error occurred. Please try again.");
+            setError(err instanceof Error ? err.message : t('auth:validation.genericError', 'An error occurred. Please try again.'));
         } finally {
             setIsLoading(false);
         }
@@ -360,7 +362,7 @@ const AuthPage: React.FC = () => {
         e.preventDefault();
 
         // Validate email first
-        const emailError = validateEmail(email);
+        const emailError = validateEmail(email, t);
         setTouched({ email: true });
         setFieldErrors({ email: emailError || undefined });
 
@@ -372,7 +374,7 @@ const AuthPage: React.FC = () => {
             await requestPasswordReset(email);
             dispatch({ type: 'SET_AUTH_MODAL_VIEW', payload: 'forgotPasswordSuccess' });
         } catch(err) {
-            setError(err instanceof Error ? err.message : "An error occurred. Please try again.");
+            setError(err instanceof Error ? err.message : t('auth:validation.genericError', 'An error occurred. Please try again.'));
         } finally {
             setIsLoading(false);
         }
@@ -439,7 +441,7 @@ const AuthPage: React.FC = () => {
                                     onChange={e => {
                                         setEmail(e.target.value);
                                         if (touched.email) {
-                                            const err = validateEmail(e.target.value);
+                                            const err = validateEmail(e.target.value, t);
                                             setFieldErrors(prev => ({ ...prev, email: err || undefined }));
                                         }
                                     }}
@@ -464,7 +466,7 @@ const AuthPage: React.FC = () => {
                                         onChange={state.authModalView === 'signup' ? handlePasswordChange : (e => {
                                             setPassword(e.target.value);
                                             if (touched.password && !e.target.value.trim()) {
-                                                setFieldErrors(prev => ({ ...prev, password: "Please enter your password" }));
+                                                setFieldErrors(prev => ({ ...prev, password: t('auth:validation.pleaseEnterPassword', 'Please enter your password') }));
                                             } else if (touched.password) {
                                                 setFieldErrors(prev => ({ ...prev, password: undefined }));
                                             }
@@ -478,7 +480,7 @@ const AuthPage: React.FC = () => {
                                         type="button"
                                         onClick={() => setShowPassword(!showPassword)}
                                         className="absolute right-4 top-1/2 -translate-y-1/2 text-neutral-400 hover:text-neutral-600 focus:outline-none transition-colors p-1 rounded-lg hover:bg-white/50"
-                                        aria-label={showPassword ? "Hide password" : "Show password"}
+                                        aria-label={showPassword ? t('auth:validation.hidePassword', 'Hide password') : t('auth:validation.showPassword', 'Show password')}
                                     >
                                         {showPassword ? (
                                             <EyeSlashIcon className="w-5 h-5" />
@@ -521,7 +523,7 @@ const AuthPage: React.FC = () => {
                                                 setConfirmPassword(e.target.value);
                                                 if (touched.confirmPassword) {
                                                     if (password !== e.target.value) {
-                                                        setFieldErrors(prev => ({ ...prev, confirmPassword: "Passwords do not match" }));
+                                                        setFieldErrors(prev => ({ ...prev, confirmPassword: t('auth:validation.passwordsDoNotMatch', 'Passwords do not match') }));
                                                     } else {
                                                         setFieldErrors(prev => ({ ...prev, confirmPassword: undefined }));
                                                     }
@@ -535,7 +537,7 @@ const AuthPage: React.FC = () => {
                                             type="button"
                                             onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                                             className="absolute right-4 top-1/2 -translate-y-1/2 text-neutral-400 hover:text-neutral-600 focus:outline-none transition-colors p-1 rounded-lg hover:bg-white/50"
-                                            aria-label={showConfirmPassword ? "Hide password" : "Show password"}
+                                            aria-label={showConfirmPassword ? t('auth:validation.hidePassword', 'Hide password') : t('auth:validation.showPassword', 'Show password')}
                                         >
                                             {showConfirmPassword ? (
                                                 <EyeSlashIcon className="w-5 h-5" />
@@ -628,7 +630,7 @@ const AuthPage: React.FC = () => {
                                     onChange={e => {
                                         setEmail(e.target.value);
                                         if (touched.email) {
-                                            const err = validateEmail(e.target.value);
+                                            const err = validateEmail(e.target.value, t);
                                             setFieldErrors(prev => ({ ...prev, email: err || undefined }));
                                         }
                                     }}
@@ -752,7 +754,7 @@ const AuthPage: React.FC = () => {
                                    text-neutral-500 hover:text-neutral-800 hover:bg-white/80
                                    transition-all duration-300 hover:scale-110 active:scale-95
                                    shadow-lg shadow-black/5"
-                        aria-label="Close authentication modal"
+                        aria-label={t('auth:validation.closeAuthModal', 'Close authentication modal')}
                     >
                         <XMarkIcon className="w-5 h-5" />
                     </button>

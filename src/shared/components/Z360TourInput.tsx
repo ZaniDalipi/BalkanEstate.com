@@ -32,7 +32,7 @@ export const Z360TourInput: React.FC<Z360TourInputProps> = ({
   showPreview = true,
   error,
 }) => {
-  const { t } = useTranslation(['newListing', 'seller']);
+  const { t } = useTranslation(['newListing', 'seller', 'common']);
   const [isPreviewOpen, setIsPreviewOpen] = useState(false);
   const [inputFocused, setInputFocused] = useState(false);
 
@@ -144,7 +144,7 @@ export const Z360TourInput: React.FC<Z360TourInputProps> = ({
             onClick={handleOpenZ360}
             className="text-purple-600 hover:text-purple-800 underline"
           >
-            Open Z360
+            {t('newListing:virtualTour.openZ360')}
           </button>
         </div>
       )}
@@ -165,7 +165,7 @@ export const Z360TourInput: React.FC<Z360TourInputProps> = ({
                 {isZ360 && (
                   <img src="/images/partners/z360-logo.svg" alt="Z360" className="h-6" />
                 )}
-                <h3 className="font-semibold text-neutral-800">360° Tour Preview</h3>
+                <h3 className="font-semibold text-neutral-800">{t('newListing:virtualTour.tourPreview')}</h3>
               </div>
               <button
                 onClick={handleClosePreview}
@@ -196,7 +196,7 @@ export const Z360TourInput: React.FC<Z360TourInputProps> = ({
                 rel="noopener noreferrer"
                 className="text-sm text-purple-600 hover:text-purple-800 flex items-center gap-1"
               >
-                Open in new tab
+                {t('newListing:virtualTour.openInNewTab')}
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
                 </svg>
@@ -205,7 +205,7 @@ export const Z360TourInput: React.FC<Z360TourInputProps> = ({
                 onClick={handleClosePreview}
                 className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors"
               >
-                Done
+                {t('common:done')}
               </button>
             </div>
           </div>

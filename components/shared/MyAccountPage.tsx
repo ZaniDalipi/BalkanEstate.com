@@ -1044,6 +1044,7 @@ const ProfileSettings: React.FC<{ user: User }> = ({ user }) => {
     return (
         <>
             <form onSubmit={handleSaveChanges} className="space-y-8">
+                {!['admin', 'super_admin'].includes(user.role) && (
                 <fieldset>
                     <legend className="block text-sm font-medium text-neutral-700 mb-2">{t('roles.yourRole')}</legend>
                     <RoleSelector selectedRole={formData.role} originalRole={user.role} onChange={handleRoleChange} />
@@ -1053,6 +1054,7 @@ const ProfileSettings: React.FC<{ user: User }> = ({ user }) => {
                         </div>
                     )}
                 </fieldset>
+                )}
 
             {/* Avatar Section - Glass */}
             <fieldset className="border-t border-white/30 pt-6">

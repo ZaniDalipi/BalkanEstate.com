@@ -215,7 +215,9 @@
   "virtualTour": {
     "title": "Εικονική Ξενάγηση 360°",
     "description": "Εξερευνήστε αυτό το ακίνητο σε immersive 360°",
-    "openInNewTab": "Ανοίξτε σε νέα καρτέλα για πλήρη εμπειρία"
+    "openInNewTab": "Ανοίξτε σε νέα καρτέλα για πλήρη εμπειρία",
+    "failedToLoad": "Failed to load virtual tour",
+    "loading": "Loading virtual tour..."
   },
   "featuredAgencies": "Προτεινόμενα Μεσιτικά Γραφεία",
   "status": {
@@ -311,7 +313,9 @@
         "highlight": "ΕΠΙΣΗΜΑΝΣΗ",
         "featured": "ΠΡΟΤΕΙΝΟΜΕΝΟ",
         "standard": "ΠΡΟΩΘΗΜΕΝΟ"
-      }
+      },
+      "promotedCount_one": "{{count}} promoted listing",
+      "promotedCount_other": "{{count}} promoted listings"
     },
     "agentRecommendations": {
       "premium": {
@@ -362,7 +366,10 @@
       "pool": "Πισίνα",
       "view": "Θέα",
       "other": "Άλλο"
-    }
+    },
+    "images": "photos",
+    "view": "View",
+    "tapToView": "Tap to view in gallery"
   },
   "mapLink": {
     "title": "Δείτε στον Χάρτη",
@@ -451,5 +458,16 @@
     "highlighted": "Προτεινόμενα Ακίνητα",
     "highlightedCount": "premium αγγελίες",
     "moreListings": "Περισσότερες Αγγελίες"
+  },
+  "gallery": {
+    "mute": "Mute",
+    "unmute": "Unmute",
+    "fullscreen": "Fullscreen",
+    "exitFullscreen": "Exit fullscreen",
+    "enterFullscreen": "Enter fullscreen",
+    "propertyShowcase": "Property Showcase",
+    "skipVideo": "Skip Video",
+    "videoTour": "Video Tour",
+    "enter3DTour": "Enter 3D Tour"
   }
 }

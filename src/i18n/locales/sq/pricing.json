@@ -273,5 +273,11 @@
     "privacyPolicy": "Politika e Privatësisë",
     "refundPolicy": "Politika e Rimbursimit",
     "providerNote": "Pagesat menaxhohen nga LemonSqueezy si Tregtari i Regjistruar. TVSH/taksat janë përfshirë ku aplikohen."
+  },
+  "coupon": {
+    "title": "Do you have a coupon from the seller?",
+    "description": "Select any plan above and use your coupon code to activate your subscription instantly.",
+    "selectPlan": "Select a plan to use your coupon",
+    "haveDiscountCode": "Have a discount code?"
   }
 }

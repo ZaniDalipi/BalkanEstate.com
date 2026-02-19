@@ -46,7 +46,11 @@
       "location": "Vendndodhje",
       "review": "Rishikim"
     },
-    "progress": "Hapi {{current}} nga {{total}}",
+    "progress": {
+      "compressing": "Duke kompresuar imazhet...",
+      "uploading": "Duke ngarkuar në cloud...",
+      "creating": "Duke krijuar listimin..."
+    },
     "nextStep": "Hapi Tjetër",
     "previousStep": "Hapi i Mëparshëm",
     "skipToManual": "Kalo te Futja Manuale",
@@ -231,7 +235,8 @@
       "description": "Shtoni një tur virtual 360° për të ndihmuar blerësit të eksplorojnë pronën tuaj nga distanca. Mbështet Matterport, Kuula, Zillow 3D Home dhe ofrues të tjerë turash 360.",
       "label": "URL e Turit 360°",
       "placeholder": "https://my.matterport.com/show/?m=... ose https://kuula.co/share/...",
-      "hint": "Ngjisni URL-në e embed ose share nga ofruesi juaj i turit 360. Turi do të shfaqet si një iframe interaktive në listimin tuaj."
+      "hint": "Ngjisni URL-në e embed ose share nga ofruesi juaj i turit 360. Turi do të shfaqet si një iframe interaktive në listimin tuaj.",
+      "z360Hint": "Create your tour at z360-virtual-tour.vercel.app and paste the link here"
     },
     "video": {
       "title": "Video e Pronës (Opsionale)",
@@ -239,11 +244,6 @@
       "label": "URL e Videos",
       "placeholder": "https://youtube.com/watch?v=... ose https://tiktok.com/...",
       "hint": "Ngjisni një link nga YouTube, TikTok, Instagram Reels ose Vimeo. Videoja do të luhet automatikisht kur vizitorët hapin listimin tuaj!"
-    },
-    "progress": {
-      "compressing": "Duke kompresuar imazhet...",
-      "uploading": "Duke ngarkuar në cloud...",
-      "creating": "Duke krijuar listimin..."
     },
     "promotion": {
       "title": "Promovo Listimin Tënd",
@@ -562,7 +562,8 @@
       "allRooms": "Kapni të gjitha dhomat",
       "exterior": "Përfshini foto të jashtme",
       "clearPhotos": "Përdorni foto të qarta me cilësi të lartë"
-    }
+    },
+    "locationHint": "Adding location helps AI generate more accurate, location-specific descriptions"
   },
   "promotion": {
     "title": "Promovo Listimin Tënd",
@@ -623,5 +624,9 @@
     "publicTransport": "Deri te Transporti Publik",
     "km": "km",
     "m": "m"
+  },
+  "listings": {
+    "confirmSold": "Are you sure you want to mark this property as sold? This action cannot be undone.",
+    "confirmDelete": "Are you sure you want to delete this listing? This action cannot be undone."
   }
 }

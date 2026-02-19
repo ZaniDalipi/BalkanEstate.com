@@ -46,7 +46,11 @@
       "location": "Τοποθεσία",
       "review": "Επισκόπηση"
     },
-    "progress": "Βήμα {{current}} από {{total}}",
+    "progress": {
+      "compressing": "Συμπίεση εικόνων...",
+      "uploading": "Ανέβασμα στο cloud...",
+      "creating": "Δημιουργία αγγελίας..."
+    },
     "nextStep": "Επόμενο Βήμα",
     "previousStep": "Προηγούμενο Βήμα",
     "skipToManual": "Μετάβαση σε Χειροκίνητη Εισαγωγή",
@@ -231,12 +235,8 @@
       "description": "Προσθέστε μια εμβυθιστική εικονική περιήγηση 360° για να βοηθήσετε τους αγοραστές να εξερευνήσουν το ακίνητό σας εξ αποστάσεως. Υποστηρίζει Matterport, Kuula, Zillow 3D Home και άλλους παρόχους 360 περιηγήσεων.",
       "label": "URL Περιήγησης 360°",
       "placeholder": "https://my.matterport.com/show/?m=... ή https://kuula.co/share/...",
-      "hint": "Επικολλήστε το URL ενσωμάτωσης ή κοινοποίησης από τον πάροχο 360 περιήγησης. Η περιήγηση θα εμφανίζεται ως διαδραστικό iframe στην αγγελία σας."
-    },
-    "progress": {
-      "compressing": "Συμπίεση εικόνων...",
-      "uploading": "Ανέβασμα στο cloud...",
-      "creating": "Δημιουργία αγγελίας..."
+      "hint": "Επικολλήστε το URL ενσωμάτωσης ή κοινοποίησης από τον πάροχο 360 περιήγησης. Η περιήγηση θα εμφανίζεται ως διαδραστικό iframe στην αγγελία σας.",
+      "z360Hint": "Create your tour at z360-virtual-tour.vercel.app and paste the link here"
     },
     "promotion": {
       "title": "Προωθήστε την Αγγελία σας",
@@ -274,6 +274,13 @@
       "proReached": "Έχετε φτάσει το όριο αγγελιών Pro.",
       "agentProRequired": "Οι πράκτορες πρέπει να έχουν ενεργή συνδρομή Pro για να δημοσιεύσουν αγγελίες. Εγγραφείτε τώρα για 25 ενεργές αγγελίες!",
       "buyerCannotCreate": "Οι αγοραστές δεν μπορούν να δημιουργήσουν αγγελίες ακινήτων. Παρακαλώ αλλάξτε σε ρόλο Ιδιώτη Πωλητή ή Πράκτορα."
+    },
+    "video": {
+      "title": "Property Video (Optional)",
+      "description": "Add a video to showcase your property! Videos auto-play when visitors view your listing, creating an engaging first impression.",
+      "label": "Video URL",
+      "placeholder": "https://youtube.com/watch?v=... or https://tiktok.com/...",
+      "hint": "Paste a link from YouTube, TikTok, Instagram Reels, or Vimeo. The video will auto-play when visitors open your listing!"
     }
   },
   "myListings": {
@@ -452,7 +459,8 @@
       "allRooms": "Φωτογραφίστε όλα τα δωμάτια",
       "exterior": "Συμπεριλάβετε εξωτερικές λήψεις",
       "clearPhotos": "Χρησιμοποιήστε καθαρές, υψηλής ποιότητας φωτογραφίες"
-    }
+    },
+    "locationHint": "Adding location helps AI generate more accurate, location-specific descriptions"
   },
   "promotion": {
     "title": "Προωθήστε την Αγγελία σας",
@@ -492,7 +500,16 @@
     "discountApplied": "Η έκπτωση εφαρμόστηκε!",
     "invalidCode": "Μη έγκυρος κωδικός έκπτωσης",
     "total": "Σύνολο",
-    "proceedToPayment": "Συνέχεια στην Πληρωμή"
+    "proceedToPayment": "Συνέχεια στην Πληρωμή",
+    "day": "day",
+    "selectTier": "Please select a promotion tier",
+    "extendedSuccess": "Promotion extended successfully! New end date: {{date}}",
+    "activatedSuccess": "Promotion activated successfully!",
+    "activatedFree": "Promotion activated (free with coupon)!",
+    "loadFailed": "Failed to load promotion options",
+    "freeWithCoupon": "(Free with coupon)",
+    "skipForNow": "Skip for Now",
+    "postWithoutPromotion": "Post Without Promotion"
   },
   "distances": {
     "title": "Πληροφορίες Απόστασης",
@@ -607,5 +624,9 @@
     "subscribeToPro": "Εγγραφή στο Pro",
     "viewMyListings": "Δείτε τις Καταχωρήσεις μου",
     "switchRole": "Αλλαγή Ρόλου"
+  },
+  "listings": {
+    "confirmSold": "Are you sure you want to mark this property as sold? This action cannot be undone.",
+    "confirmDelete": "Are you sure you want to delete this listing? This action cannot be undone."
   }
 }

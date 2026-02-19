@@ -148,7 +148,16 @@
     "confirmRequest": "Konfirmo Kerkesen",
     "requestSent": "Kerkesa per Vizite u Dergua!",
     "requestSentDesc": "Pronari do te konfirmoje viziten tuaj se shpejti.",
-    "done": "Perfunduar"
+    "done": "Perfunduar",
+    "placeholders": {
+      "name": "John Doe",
+      "email": "john@example.com",
+      "phone": "+1 234 567 8900"
+    },
+    "ics": {
+      "summary": "Property Viewing",
+      "description": "Scheduled viewing for"
+    }
   },
   "status": {
     "markAsRented": "Sheno si te dhene me Qira",
@@ -173,73 +182,239 @@
     "countries": {
       "albania": {
         "summary": "Ligji shqiptar i qirase rregullohet nga Kodi Civil (Nenet 801-849). Kontratat mbi 1 vit duhet te regjistrohen.",
-        "lease": ["Kontrata me shkrim rekomandohet; kontratat gojore jane te vlefshme por te veshtira per t'u zbatuar", "Kontratat mbi 1 vit duhet te noterizohen dhe regjistrohen ne IPRO", "Kontrata duhet te specifikoje shumen e qirase, kushtet e pageses, kohezgjatjen dhe depoziten"],
-        "deposit": ["Zakonisht 1-2 muaj qira", "Duhet te kthehet brenda 30 diteve nga perfundimi i kontrates nese nuk ka demtime", "Pronari duhet te jape zbritje te detajuara nese mban depoziten"],
-        "tenant": ["Pronari duhet ta mirembaje pronen ne gjendje te banueshme", "Qiramarresi nuk mund te debohet pa urdher gjyqesor", "Njoftim minimal 3-mujor per perfundimin e kontrates", "Rritjet e qirase kerkojne marreveshje reciproke ose klauzole kontrate"],
-        "landlord": ["Paguani tatimin e prones dhe tarifat e mirembajtjes se nderteses", "Deklaroni te ardhurat nga qiraja tek autoritetet tatimore (15% tatim mbi te ardhurat)", "Siguroni qe prona ploteson standardet e sigurise dhe banueshmrise"]
+        "lease": [
+          "Kontrata me shkrim rekomandohet; kontratat gojore jane te vlefshme por te veshtira per t'u zbatuar",
+          "Kontratat mbi 1 vit duhet te noterizohen dhe regjistrohen ne IPRO",
+          "Kontrata duhet te specifikoje shumen e qirase, kushtet e pageses, kohezgjatjen dhe depoziten"
+        ],
+        "deposit": [
+          "Zakonisht 1-2 muaj qira",
+          "Duhet te kthehet brenda 30 diteve nga perfundimi i kontrates nese nuk ka demtime",
+          "Pronari duhet te jape zbritje te detajuara nese mban depoziten"
+        ],
+        "tenant": [
+          "Pronari duhet ta mirembaje pronen ne gjendje te banueshme",
+          "Qiramarresi nuk mund te debohet pa urdher gjyqesor",
+          "Njoftim minimal 3-mujor per perfundimin e kontrates",
+          "Rritjet e qirase kerkojne marreveshje reciproke ose klauzole kontrate"
+        ],
+        "landlord": [
+          "Paguani tatimin e prones dhe tarifat e mirembajtjes se nderteses",
+          "Deklaroni te ardhurat nga qiraja tek autoritetet tatimore (15% tatim mbi te ardhurat)",
+          "Siguroni qe prona ploteson standardet e sigurise dhe banueshmrise"
+        ]
       },
       "bosnia-herzegovina": {
         "summary": "Ligji i qirase ndryshon sipas entitetit (Federata e BiH dhe Republika Srpska). Kontratat me shkrim rekomandohen fuqimisht.",
-        "lease": ["Kontrata me shkrim kerkohet per mbrojtje ligjore", "Duhet te regjistrohet ne autoritetet tatimore lokale", "Kushtet standarde te kontrates: 1 vit me mundesi rinovimi"],
-        "deposit": ["Zakonisht 1-2 muaj qira", "Kushtet e kthimit duhet te specifikohen ne kontrate"],
-        "tenant": ["E drejta per nje prone te banueshme me sherbime baze", "Debimi kerkon proces gjyqesor; njoftim minimal 30-ditor", "Qiramarresi mund te perfundoje kontraten me njoftim sic specifikohet ne kontrate"],
-        "landlord": ["Regjistroni kontraten e qirase tek autoritetet tatimore", "Paguani tatimin mbi te ardhurat nga qiraja (10% norme fikse)", "Mirembani integritetin strukturor te prones"]
+        "lease": [
+          "Kontrata me shkrim kerkohet per mbrojtje ligjore",
+          "Duhet te regjistrohet ne autoritetet tatimore lokale",
+          "Kushtet standarde te kontrates: 1 vit me mundesi rinovimi"
+        ],
+        "deposit": [
+          "Zakonisht 1-2 muaj qira",
+          "Kushtet e kthimit duhet te specifikohen ne kontrate"
+        ],
+        "tenant": [
+          "E drejta per nje prone te banueshme me sherbime baze",
+          "Debimi kerkon proces gjyqesor; njoftim minimal 30-ditor",
+          "Qiramarresi mund te perfundoje kontraten me njoftim sic specifikohet ne kontrate"
+        ],
+        "landlord": [
+          "Regjistroni kontraten e qirase tek autoritetet tatimore",
+          "Paguani tatimin mbi te ardhurat nga qiraja (10% norme fikse)",
+          "Mirembani integritetin strukturor te prones"
+        ]
       },
       "bulgaria": {
         "summary": "Ligji bullgar i qirase bazohet ne Ligjin e Detyrimeve dhe Kontratave. Kontratat mbi 1 vit duhet te jene me shkrim.",
-        "lease": ["Kontrata me shkrim kerkohet per kontratat mbi 1 vit", "Kontrata duhet te noterizohet per zbatueshmeri gjyqesore", "Kohezgjatja maksimale e kontrates: 10 vjet (mund te rinovohet)"],
-        "deposit": ["Zakonisht 1-2 muaj qira", "Duhet te kthehet ne fund te kontrates minus zbritjet legjitime"],
-        "tenant": ["E drejta per gezim te qete te prones", "Pronari duhet te jape njoftim 1-mujor perpara perfundimit", "Qiramarresi mund te perfundoje me njoftim 1-mujor me shkrim", "Rritja e qirase e kufizuar ne nje here ne vit"],
-        "landlord": ["Paguani 10% tatim te sheshte mbi te ardhurat nga qiraja", "Mirembani pronen ne gjendjen e rene dakord", "Regjistroni kontraten ne Agjencine Kombetare te te Ardhurave"]
+        "lease": [
+          "Kontrata me shkrim kerkohet per kontratat mbi 1 vit",
+          "Kontrata duhet te noterizohet per zbatueshmeri gjyqesore",
+          "Kohezgjatja maksimale e kontrates: 10 vjet (mund te rinovohet)"
+        ],
+        "deposit": [
+          "Zakonisht 1-2 muaj qira",
+          "Duhet te kthehet ne fund te kontrates minus zbritjet legjitime"
+        ],
+        "tenant": [
+          "E drejta per gezim te qete te prones",
+          "Pronari duhet te jape njoftim 1-mujor perpara perfundimit",
+          "Qiramarresi mund te perfundoje me njoftim 1-mujor me shkrim",
+          "Rritja e qirase e kufizuar ne nje here ne vit"
+        ],
+        "landlord": [
+          "Paguani 10% tatim te sheshte mbi te ardhurat nga qiraja",
+          "Mirembani pronen ne gjendjen e rene dakord",
+          "Regjistroni kontraten ne Agjencine Kombetare te te Ardhurave"
+        ]
       },
       "croatia": {
         "summary": "Ligji kroat i qirase rregullohet nga Ligji per Qirane e Banesave. Kontratat duhet te jene me shkrim.",
-        "lease": ["Kontrata me shkrim eshte e detyrueshme", "Duhet te regjistrohet ne zyren tatimore lokale brenda 30 diteve", "Kontrata duhet te perfshije: palet, pershkrimin e prones, qirane, kohezgjatjen, kushtet e perfundimit"],
-        "deposit": ["Praktika e zakonshme: 1-2 muaj qira", "Nuk kerkohet ligerisht por eshte standarde ne praktike", "Kushtet e kthimit duhet te shkruhen ne kontrate"],
-        "tenant": ["Qiramarresi mbrohet nga debimi arbitrar", "Periudhe njoftimi minimale 90-ditore per perfundim nga pronari", "Qiramarresi mund te kerkoje riparime te nevojshme", "Nenkontraktimi vetem me pelqimin me shkrim te pronarit"],
-        "landlord": ["Paguani 12% tatim mbi te ardhurat nga qiraja", "Mirembani pronen sipas standardeve te banueshmrise", "Siguroni faturen e pageses se qirase nese kerkohet"]
+        "lease": [
+          "Kontrata me shkrim eshte e detyrueshme",
+          "Duhet te regjistrohet ne zyren tatimore lokale brenda 30 diteve",
+          "Kontrata duhet te perfshije: palet, pershkrimin e prones, qirane, kohezgjatjen, kushtet e perfundimit"
+        ],
+        "deposit": [
+          "Praktika e zakonshme: 1-2 muaj qira",
+          "Nuk kerkohet ligerisht por eshte standarde ne praktike",
+          "Kushtet e kthimit duhet te shkruhen ne kontrate"
+        ],
+        "tenant": [
+          "Qiramarresi mbrohet nga debimi arbitrar",
+          "Periudhe njoftimi minimale 90-ditore per perfundim nga pronari",
+          "Qiramarresi mund te kerkoje riparime te nevojshme",
+          "Nenkontraktimi vetem me pelqimin me shkrim te pronarit"
+        ],
+        "landlord": [
+          "Paguani 12% tatim mbi te ardhurat nga qiraja",
+          "Mirembani pronen sipas standardeve te banueshmrise",
+          "Siguroni faturen e pageses se qirase nese kerkohet"
+        ]
       },
       "greece": {
         "summary": "Ligji grek i qirase ofron mbrojtje te forte per qiramarresin. Kontratat e banimit kane kohezgjatje minimale 3-vjecare sipas ligjit.",
-        "lease": ["Kontratat me shkrim ose gojore jane te vlefshme; me shkrim rekomandohet fuqimisht", "Kohezgjatja minimale e kontrates se banimit: 3 vjet (sipas ligjit)", "Pronari nuk mund ta perfundoje para 3 vjeteve pa shkak", "Kontrata duhet te depozitohet ne Autoritetin e Pavarur te te Ardhurave Publike"],
-        "deposit": ["Zakonisht 2 muaj qira", "Duhet te kthehet brenda 2 muajve nga perfundimi i kontrates", "Pronari duhet ta vendose depoziten ne llogari me interes"],
-        "tenant": ["Mbrojtje e forte sipas Kodit Civil Grek (Nenet 574-618)", "Qiramarresi nuk mund te debohet gjate periudhes minimale 3-vjecare", "Rritjet e qirase te kufizuara ne 75% te rritjes vjetore te ICP", "E drejta per te rinovuar kontraten me kushte te ngjashme"],
-        "landlord": ["Deklaroni te ardhurat nga qiraja (tatohen ne 15-45% ne menyre progresive)", "Leshoni deklaraten vjetore te te ardhurave nga qiraja", "Mirembani pronen ne gjendjen e rene dakord ne kontraten e qirase"]
+        "lease": [
+          "Kontratat me shkrim ose gojore jane te vlefshme; me shkrim rekomandohet fuqimisht",
+          "Kohezgjatja minimale e kontrates se banimit: 3 vjet (sipas ligjit)",
+          "Pronari nuk mund ta perfundoje para 3 vjeteve pa shkak",
+          "Kontrata duhet te depozitohet ne Autoritetin e Pavarur te te Ardhurave Publike"
+        ],
+        "deposit": [
+          "Zakonisht 2 muaj qira",
+          "Duhet te kthehet brenda 2 muajve nga perfundimi i kontrates",
+          "Pronari duhet ta vendose depoziten ne llogari me interes"
+        ],
+        "tenant": [
+          "Mbrojtje e forte sipas Kodit Civil Grek (Nenet 574-618)",
+          "Qiramarresi nuk mund te debohet gjate periudhes minimale 3-vjecare",
+          "Rritjet e qirase te kufizuara ne 75% te rritjes vjetore te ICP",
+          "E drejta per te rinovuar kontraten me kushte te ngjashme"
+        ],
+        "landlord": [
+          "Deklaroni te ardhurat nga qiraja (tatohen ne 15-45% ne menyre progresive)",
+          "Leshoni deklaraten vjetore te te ardhurave nga qiraja",
+          "Mirembani pronen ne gjendjen e rene dakord ne kontraten e qirase"
+        ]
       },
       "kosovo": {
         "summary": "Ligji i qirase ne Kosove bazohet ne Ligjin per Marredheniet e Detyrimeve. Kontratat me shkrim rekomandohen.",
-        "lease": ["Kontrata me shkrim rekomandohet per zbatueshmeri ligjore", "Duhet te perfshije shumen e qirase, kohezgjatjen dhe kushtet", "Regjistrimi nuk eshte i detyrueshem por keshillohet per qellime tatimore"],
-        "deposit": ["Zakonisht 1 muaj qira", "Kushtet negociohen midis paleve"],
-        "tenant": ["E drejta per nje banim te banueshme", "Debimi kerkon njoftim te arsyeshem (zakonisht 30 dite)", "Qiramarresi mund te kerkoje riparime themelore"],
-        "landlord": ["Deklaroni te ardhurat nga qiraja ne Administraten Tatimore te Kosoves", "Paguani tatimin mbi te ardhurat nga qiraja (9% per individet)", "Mirembani sigurine dhe banueshmrine e prones"]
+        "lease": [
+          "Kontrata me shkrim rekomandohet per zbatueshmeri ligjore",
+          "Duhet te perfshije shumen e qirase, kohezgjatjen dhe kushtet",
+          "Regjistrimi nuk eshte i detyrueshem por keshillohet per qellime tatimore"
+        ],
+        "deposit": [
+          "Zakonisht 1 muaj qira",
+          "Kushtet negociohen midis paleve"
+        ],
+        "tenant": [
+          "E drejta per nje banim te banueshme",
+          "Debimi kerkon njoftim te arsyeshem (zakonisht 30 dite)",
+          "Qiramarresi mund te kerkoje riparime themelore"
+        ],
+        "landlord": [
+          "Deklaroni te ardhurat nga qiraja ne Administraten Tatimore te Kosoves",
+          "Paguani tatimin mbi te ardhurat nga qiraja (9% per individet)",
+          "Mirembani sigurine dhe banueshmrine e prones"
+        ]
       },
       "montenegro": {
         "summary": "Ligji malazez i qirase ndjek Ligjin per Banimin. Kontratat e qirase me shkrim duhet te regjistrohen.",
-        "lease": ["Kontrata me shkrim kerkohet", "Duhet te regjistrohet ne komunen lokale", "Duhet te specifikoje te gjitha kushtet perfshire pergjegjesine per sherbimet"],
-        "deposit": ["Zakonisht 1-2 muaj qira", "Duhet te percaktohet qarte ne kontrate"],
-        "tenant": ["E drejta per gezim te qete", "Nuk mund te debohet pa njoftim te duhur dhe proces ligjor", "Ka te drejte per kushte te banueshme jetese"],
-        "landlord": ["Regjistroni kontraten e qirase ne autoritetet komunale", "Paguani 9% tatim mbi te ardhurat nga qiraja", "Mirembani integritetin strukturor te prones"]
+        "lease": [
+          "Kontrata me shkrim kerkohet",
+          "Duhet te regjistrohet ne komunen lokale",
+          "Duhet te specifikoje te gjitha kushtet perfshire pergjegjesine per sherbimet"
+        ],
+        "deposit": [
+          "Zakonisht 1-2 muaj qira",
+          "Duhet te percaktohet qarte ne kontrate"
+        ],
+        "tenant": [
+          "E drejta per gezim te qete",
+          "Nuk mund te debohet pa njoftim te duhur dhe proces ligjor",
+          "Ka te drejte per kushte te banueshme jetese"
+        ],
+        "landlord": [
+          "Regjistroni kontraten e qirase ne autoritetet komunale",
+          "Paguani 9% tatim mbi te ardhurat nga qiraja",
+          "Mirembani integritetin strukturor te prones"
+        ]
       },
       "north-macedonia": {
         "summary": "Ligji i qirase ne Maqedonine e Veriut bazohet ne Ligjin e Detyrimeve. Kontratat me shkrim ofrojne mbrojtjen me te mire ligjore.",
-        "lease": ["Kontrata me shkrim rekomandohet fuqimisht", "Noterizimi shton zbatueshmeri", "Duhet te perfshije qirane, orarin e pageses, kohezgjatjen dhe klauzolat e perfundimit"],
-        "deposit": ["Zakonisht 1 muaj qira", "Kushtet e kthimit specifikohen ne kontrate"],
-        "tenant": ["E drejta per nje prone te banueshme", "Njoftim minimal 30-ditor per debim", "Mund te kerkoje riparime per sherbimet themelore"],
-        "landlord": ["Deklaroni te ardhurat nga qiraja ne Zyren e te Ardhurave Publike", "Paguani 10% tatim mbi te ardhurat personale nga qiraja", "Mirembani pronen sipas standardeve te rena dakord"]
+        "lease": [
+          "Kontrata me shkrim rekomandohet fuqimisht",
+          "Noterizimi shton zbatueshmeri",
+          "Duhet te perfshije qirane, orarin e pageses, kohezgjatjen dhe klauzolat e perfundimit"
+        ],
+        "deposit": [
+          "Zakonisht 1 muaj qira",
+          "Kushtet e kthimit specifikohen ne kontrate"
+        ],
+        "tenant": [
+          "E drejta per nje prone te banueshme",
+          "Njoftim minimal 30-ditor per debim",
+          "Mund te kerkoje riparime per sherbimet themelore"
+        ],
+        "landlord": [
+          "Deklaroni te ardhurat nga qiraja ne Zyren e te Ardhurave Publike",
+          "Paguani 10% tatim mbi te ardhurat personale nga qiraja",
+          "Mirembani pronen sipas standardeve te rena dakord"
+        ]
       },
       "romania": {
         "summary": "Ligji rumun i qirase rregullohet nga Kodi Civil (2011). Kontratat duhet te regjistrohen ne ANAF per perputhshmeri tatimore.",
-        "lease": ["Kontrata me shkrim rekomandohet fuqimisht", "Duhet te regjistrohet ne ANAF (autoriteti tatimor) brenda 30 diteve", "Kontratat e regjistruara jane te zbatueshme si tituj ekzekutive", "Kohezgjatja tipike: 1-5 vjet"],
-        "deposit": ["Zakonisht 1-3 muaj qira", "Duhet te kthehet brenda 30 diteve nga perfundimi i kontrates", "Zbritjet duhet te dokumentohen me prova"],
-        "tenant": ["E drejta per nje prone te banueshme ne gjendje te mire", "Nuk mund te debohet pa urdher gjyqesor", "Njoftim minimal 60-ditor per mosrinovim nga pronari", "Kushtet e rritjes se qirase duhet te jene ne kontrate"],
-        "landlord": ["Paguani 10% tatim mbi te ardhurat nga qiraja", "Regjistroni kontraten ne ANAF", "Leshoni fatura per te gjitha pagesat e qirase", "Mirembani pronen dhe paguani per riparimet kryesore"]
+        "lease": [
+          "Kontrata me shkrim rekomandohet fuqimisht",
+          "Duhet te regjistrohet ne ANAF (autoriteti tatimor) brenda 30 diteve",
+          "Kontratat e regjistruara jane te zbatueshme si tituj ekzekutive",
+          "Kohezgjatja tipike: 1-5 vjet"
+        ],
+        "deposit": [
+          "Zakonisht 1-3 muaj qira",
+          "Duhet te kthehet brenda 30 diteve nga perfundimi i kontrates",
+          "Zbritjet duhet te dokumentohen me prova"
+        ],
+        "tenant": [
+          "E drejta per nje prone te banueshme ne gjendje te mire",
+          "Nuk mund te debohet pa urdher gjyqesor",
+          "Njoftim minimal 60-ditor per mosrinovim nga pronari",
+          "Kushtet e rritjes se qirase duhet te jene ne kontrate"
+        ],
+        "landlord": [
+          "Paguani 10% tatim mbi te ardhurat nga qiraja",
+          "Regjistroni kontraten ne ANAF",
+          "Leshoni fatura per te gjitha pagesat e qirase",
+          "Mirembani pronen dhe paguani per riparimet kryesore"
+        ]
       },
       "serbia": {
         "summary": "Ligji serb i qirase bazohet ne Ligjin per Banimin dhe Mirembajtjen e Ndertesave. Kontratat me shkrim jane te detyrueshme.",
-        "lease": ["Kontrata me shkrim kerkohet ligerisht", "Duhet te vertetohet nga nje noter per zbatueshmeri te plote", "Qiramarresi duhet te regjistrohet ne adresen e prones", "Kontrata duhet t'i raportohet Administrates Tatimore"],
-        "deposit": ["Zakonisht 1-2 muaj qira", "Zakonisht mbahet nga pronari, jo ne eskrou", "Kushtet e kthimit duhet te specifikohen ne kontrate"],
-        "tenant": ["E drejta per gezim paqesor te prones", "Debimi vetem permes procesit gjyqesor ligjor", "Njoftim minimal 90-ditor per mosrinovim te kontrates nga pronari", "Qiramarresi mund te zbrese kostot e riparimit nga qiraja nese pronari nuk vepron"],
-        "landlord": ["Paguani 20% tatim mbi te ardhurat nga qiraja", "Regjistroni qiramarresin ne adresen e prones", "Dorezoni deklaratat vjetore tatimore perfshire te ardhurat nga qiraja", "Mirembani zonat e perbashketa dhe elementet strukturore"]
+        "lease": [
+          "Kontrata me shkrim kerkohet ligerisht",
+          "Duhet te vertetohet nga nje noter per zbatueshmeri te plote",
+          "Qiramarresi duhet te regjistrohet ne adresen e prones",
+          "Kontrata duhet t'i raportohet Administrates Tatimore"
+        ],
+        "deposit": [
+          "Zakonisht 1-2 muaj qira",
+          "Zakonisht mbahet nga pronari, jo ne eskrou",
+          "Kushtet e kthimit duhet te specifikohen ne kontrate"
+        ],
+        "tenant": [
+          "E drejta per gezim paqesor te prones",
+          "Debimi vetem permes procesit gjyqesor ligjor",
+          "Njoftim minimal 90-ditor per mosrinovim te kontrates nga pronari",
+          "Qiramarresi mund te zbrese kostot e riparimit nga qiraja nese pronari nuk vepron"
+        ],
+        "landlord": [
+          "Paguani 20% tatim mbi te ardhurat nga qiraja",
+          "Regjistroni qiramarresin ne adresen e prones",
+          "Dorezoni deklaratat vjetore tatimore perfshire te ardhurat nga qiraja",
+          "Mirembani zonat e perbashketa dhe elementet strukturore"
+        ]
       }
     }
   },

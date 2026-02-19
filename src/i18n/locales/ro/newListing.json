@@ -6,12 +6,22 @@
     "details": "Detalii",
     "media": "Media",
     "pricing": "Preț",
-    "review": "Verificare"
+    "review": "Verificare",
+    "init": "Get Started",
+    "loading": "Analyzing...",
+    "form": "Property Details",
+    "floorplan": "Floor Plan",
+    "payment": "Payment",
+    "success": "Published!"
   },
   "modes": {
     "sale": "De Vânzare",
     "rent": "De Închiriat",
-    "both": "Vânzare și Închiriere"
+    "both": "Vânzare și Închiriere",
+    "ai": "AI-Powered",
+    "aiDescription": "Upload photos and let AI generate your listing",
+    "manual": "Manual Entry",
+    "manualDescription": "Fill in all property details yourself"
   },
   "imageUpload": {
     "title": "Imagini Proprietate",
@@ -24,7 +34,13 @@
     "setAsMain": "Setează ca Principală",
     "remove": "Elimină",
     "uploading": "Se încarcă...",
-    "maxImages": "Maximum {{count}} imagini"
+    "maxImages": "Maximum {{count}} imagini",
+    "subtitle": "Drag and drop images or click to browse",
+    "hint": "Upload at least 3 photos for best results",
+    "orClick": "or click to browse",
+    "supportedFormats": "Supported formats: JPG, PNG, WebP",
+    "compressing": "Compressing images...",
+    "uploadProgress": "Upload Progress"
   },
   "imageTags": {
     "title": "Etichetă Imagine",
@@ -37,7 +53,8 @@
     "garden": "Grădină",
     "pool": "Piscină",
     "view": "Vedere",
-    "other": "Altele"
+    "other": "Altele",
+    "selectTag": "Select Tag"
   },
   "propertyDetails": {
     "title": "Detalii Proprietate",
@@ -54,6 +71,18 @@
       "land": "Teren",
       "commercial": "Spațiu Comercial",
       "office": "Birou"
+    },
+    "basicInfo": "Basic Information",
+    "propertyTitlePlaceholder": "Enter a descriptive title for your property",
+    "streetAddress": "Street Address",
+    "streetAddressPlaceholder": "Enter the street address",
+    "price": "Price",
+    "pricePlaceholder": "Enter the asking price",
+    "propertyTypes": {
+      "house": "House",
+      "apartment": "Apartment",
+      "villa": "Villa",
+      "other": "Other"
     }
   },
   "location": {
@@ -67,7 +96,12 @@
     "postalCode": "Cod Poștal",
     "country": "Țară",
     "mapPin": "Plasați Pin pe Hartă",
-    "mapInstructions": "Faceți clic pe hartă pentru a seta locația exactă"
+    "mapInstructions": "Faceți clic pe hartă pentru a seta locația exactă",
+    "selectCountry": "Select Country",
+    "selectCity": "Select City",
+    "searchAddress": "Search for address",
+    "dragPin": "Drag the pin to set exact location",
+    "coordinates": "Coordinates"
   },
   "roomDetails": {
     "title": "Camere și Configurație",
@@ -76,7 +110,9 @@
     "totalRooms": "Total Camere",
     "floor": "Etaj",
     "totalFloors": "Total Etaje",
-    "parkingSpaces": "Locuri de Parcare"
+    "parkingSpaces": "Locuri de Parcare",
+    "livingRooms": "Living Rooms",
+    "floorNumber": "Floor Number"
   },
   "sizeAndAge": {
     "title": "Dimensiune și Vechime",
@@ -85,7 +121,9 @@
     "plotSize": "Suprafață Teren",
     "sqm": "mp",
     "yearBuilt": "Anul Construcției",
-    "renovated": "Renovat"
+    "renovated": "Renovat",
+    "sqMeters": "Square Meters",
+    "parkingSpots": "Parking Spots"
   },
   "amenities": {
     "title": "Facilități",
@@ -100,7 +138,19 @@
     "elevator": "Lift",
     "security": "Sistem de Securitate",
     "storage": "Debara",
-    "furnished": "Mobilat"
+    "furnished": "Mobilat",
+    "hasBalcony": "Balcony",
+    "hasGarden": "Garden",
+    "hasElevator": "Elevator",
+    "hasSecurity": "Security",
+    "hasAirConditioning": "Air Conditioning",
+    "hasPool": "Pool",
+    "petsAllowed": "Pets Allowed",
+    "states": {
+      "no": "No",
+      "any": "Any",
+      "yes": "Yes"
+    }
   },
   "advancedFeatures": {
     "title": "Caracteristici Avansate",
@@ -109,34 +159,118 @@
     "windowType": "Tip Ferestre",
     "flooringType": "Tip Pardoseală",
     "orientation": "Orientare",
-    "view": "Vedere"
+    "view": "Vedere",
+    "furnishing": "Furnishing Status",
+    "furnishingOptions": {
+      "any": "Any",
+      "unfurnished": "Unfurnished",
+      "partlyFurnished": "Partly Furnished",
+      "fullyFurnished": "Fully Furnished"
+    },
+    "heatingOptions": {
+      "any": "Any",
+      "central": "Central Heating",
+      "electric": "Electric",
+      "gas": "Gas",
+      "wood": "Wood",
+      "solar": "Solar",
+      "geothermal": "Geothermal",
+      "none": "None"
+    },
+    "condition": "Property Condition",
+    "conditionOptions": {
+      "any": "Any",
+      "new": "New",
+      "excellent": "Excellent",
+      "good": "Good",
+      "fair": "Fair",
+      "needsRenovation": "Needs Renovation"
+    },
+    "viewType": "View Type",
+    "viewOptions": {
+      "any": "Any",
+      "sea": "Sea View",
+      "mountain": "Mountain View",
+      "city": "City View",
+      "garden": "Garden View",
+      "park": "Park View",
+      "lake": "Lake View",
+      "river": "River View",
+      "none": "No Special View"
+    },
+    "energyOptions": {
+      "any": "Any",
+      "aPlus": "A+",
+      "a": "A",
+      "b": "B",
+      "c": "C",
+      "d": "D",
+      "e": "E",
+      "f": "F",
+      "g": "G"
+    }
   },
   "description": {
     "title": "Descriere",
     "placeholder": "Descrieți detaliat proprietatea dumneavoastră...",
     "minLength": "Minimum 100 caractere",
-    "charCount": "{{count}} caractere"
+    "charCount": "{{count}} caractere",
+    "descriptionLabel": "Property Description",
+    "descriptionPlaceholder": "Describe your property in detail...",
+    "specialFeatures": "Special Features",
+    "specialFeaturesPlaceholder": "Add special features...",
+    "materials": "Building Materials",
+    "materialsPlaceholder": "Add materials...",
+    "additionalAmenities": "Additional Amenities",
+    "additionalAmenitiesPlaceholder": "Add amenities...",
+    "addTagHint": "Press Enter or comma to add"
   },
   "virtualTour": {
     "title": "Tur Virtual",
     "url": "URL Tur Virtual",
     "urlPlaceholder": "Introduceți linkul turului virtual",
-    "preview": "Previzualizare"
+    "preview": "Previzualizare",
+    "tourUrl": "Video Tour URL",
+    "tourUrlPlaceholder": "Enter YouTube or Vimeo URL",
+    "virtualTour360": "360° Virtual Tour URL",
+    "virtualTour360Placeholder": "Enter Z360, Matterport, Kuula, or other 360 tour URL",
+    "z360Hint": "Create tours at z360-virtual-tour.vercel.app",
+    "openZ360": "Open Z360",
+    "tourPreview": "360° Tour Preview",
+    "openInNewTab": "Open in new tab"
   },
   "floorplan": {
     "title": "Plan Etaj",
     "upload": "Încărcați Plan Etaj",
-    "formats": "PDF, JPG, sau PNG"
+    "formats": "PDF, JPG, sau PNG",
+    "uploadFloorplan": "Upload Floor Plan",
+    "optional": "Optional - Add a floor plan image",
+    "skip": "Skip Floor Plan"
   },
   "language": {
     "title": "Limba Anunțului",
     "primary": "Limba Principală",
-    "additional": "Limbi Adiționale"
+    "additional": "Limbi Adiționale",
+    "selectLanguage": "Select Language",
+    "languages": {
+      "english": "English",
+      "albanian": "Albanian",
+      "macedonian": "Macedonian",
+      "serbian": "Serbian",
+      "bosnian": "Bosnian",
+      "croatian": "Croatian",
+      "montenegrin": "Montenegrin",
+      "greek": "Greek",
+      "bulgarian": "Bulgarian",
+      "romanian": "Romanian"
+    }
   },
   "role": {
     "title": "Publicați ca",
     "owner": "Proprietar",
-    "agent": "Agent Imobiliar"
+    "agent": "Agent Imobiliar",
+    "selectRole": "Select your role for this listing",
+    "privateSeller": "Private Seller"
   },
   "promotion": {
     "title": "Promovare Anunț",
@@ -145,7 +279,9 @@
     "highlighted": "Anunț Evidențiat",
     "highlightedDesc": "Ieșiți în evidență cu chenar accentuat",
     "premium": "Poziționare Premium",
-    "premiumDesc": "Vizibilitate maximă în toate secțiunile"
+    "premiumDesc": "Vizibilitate maximă în toate secțiunile",
+    "wantToPromote": "I want to promote my listing",
+    "selectPromotion": "Select Promotion Type"
   },
   "actions": {
     "saveDraft": "Salvează Ciornă",
@@ -153,7 +289,12 @@
     "publish": "Publică Anunțul",
     "next": "Următorul",
     "previous": "Anterior",
-    "cancel": "Anulează"
+    "cancel": "Anulează",
+    "generateWithAi": "Generate with AI",
+    "analyzing": "Analyzing images...",
+    "update": "Update Listing",
+    "publishing": "Publishing...",
+    "goBack": "Go Back"
   },
   "validation": {
     "titleRequired": "Titlul este obligatoriu",
@@ -170,7 +311,13 @@
     "apartmentFloorNumber": "Pentru apartamente, vă rugăm introduceți un număr de etaj valid (1 sau mai mare).",
     "houseTotalFloors": "Pentru case și vile, vă rugăm introduceți numărul total de etaje (1 sau mai mare).",
     "apartmentElevator": "Pentru apartamente, vă rugăm specificați dacă există lift (Da sau Nu).",
-    "floorExceedsTotal": "Numărul etajului nu poate depăși numărul total de etaje."
+    "floorExceedsTotal": "Numărul etajului nu poate depăși numărul total de etaje.",
+    "required": "This field is required",
+    "minImages": "Please upload at least {{count}} images",
+    "selectCountry": "Please select a country",
+    "selectCity": "Please select a city",
+    "setLocation": "Please set the property location on the map",
+    "invalidPrice": "Please enter a valid price"
   },
   "success": {
     "title": "Anunț Publicat!",
@@ -195,6 +342,8 @@
     "failedToCreate": "Crearea Anunțului a Eșuat",
     "failedToCreateMessage": "Crearea anunțului a eșuat. Vă rugăm încercați din nou.",
     "removeImagesFirst": "Vă rugăm eliminați câteva imagini înainte de a adăuga mai multe.",
-    "onlyMoreImages": "Mai pot fi adăugate doar {{count}} imagini."
-  }
+    "onlyMoreImages": "Mai pot fi adăugate doar {{count}} imagini.",
+    "publishFailed": "Failed to publish listing. Please try again."
+  },
+  "editTitle": "Edit Listing"
 }

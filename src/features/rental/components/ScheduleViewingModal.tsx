@@ -50,7 +50,7 @@ function generateTimeSlotsFromConfig(startTime: string, endTime: string, duratio
     return slots;
 }
 
-function generateICSFile(property: Property, date: string, timeSlot: string, durationMinutes: number): string {
+function generateICSFile(property: Property, date: string, timeSlot: string, durationMinutes: number, summaryLabel: string, descriptionLabel: string): string {
     const [hours, minutes] = timeSlot.split(':').map(Number);
     const startDate = new Date(date);
     startDate.setHours(hours, minutes, 0, 0);
@@ -67,8 +67,8 @@ function generateICSFile(property: Property, date: string, timeSlot: string, dur
         'BEGIN:VEVENT',
         `DTSTART:${fmt(startDate)}`,
         `DTEND:${fmt(endDate)}`,
-        `SUMMARY:Property Viewing - ${title}`,
-        `DESCRIPTION:Scheduled viewing for ${title} at ${location}`,
+        `SUMMARY:${summaryLabel} - ${title}`,
+        `DESCRIPTION:${descriptionLabel} ${title} at ${location}`,
         `LOCATION:${location}`,
         'STATUS:CONFIRMED',
         `UID:${Date.now()}@balkanestate.com`,
@@ -280,7 +280,7 @@ const ScheduleViewingModal: React.FC<ScheduleViewingModalProps> = ({ property, i
 
     const handleDownloadCalendar = () => {
         const duration = availability?.slotDurationMinutes || 30;
-        const icsContent = generateICSFile(property, selectedDate, selectedTime, duration);
+        const icsContent = generateICSFile(property, selectedDate, selectedTime, duration, t('rental:viewing.ics.summary'), t('rental:viewing.ics.description'));
         const blob = new Blob([icsContent], { type: 'text/calendar;charset=utf-8' });
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
@@ -530,7 +530,7 @@ const ScheduleViewingModal: React.FC<ScheduleViewingModalProps> = ({ property, i
                                     className={`w-full px-3 py-2.5 text-sm border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all ${
                                         fieldErrors.name ? 'border-red-300 bg-red-50' : 'border-neutral-200'
                                     }`}
-                                    placeholder="John Doe"
+                                    placeholder={t('rental:viewing.placeholders.name', 'John Doe')}
                                 />
                                 {fieldErrors.name && <p className="text-xs text-red-500 mt-1">{fieldErrors.name}</p>}
                             </div>
@@ -543,7 +543,7 @@ const ScheduleViewingModal: React.FC<ScheduleViewingModalProps> = ({ property, i
                                     className={`w-full px-3 py-2.5 text-sm border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all ${
                                         fieldErrors.email ? 'border-red-300 bg-red-50' : 'border-neutral-200'
                                     }`}
-                                    placeholder="john@example.com"
+                                    placeholder={t('rental:viewing.placeholders.email', 'john@example.com')}
                                 />
                                 {fieldErrors.email && <p className="text-xs text-red-500 mt-1">{fieldErrors.email}</p>}
                             </div>
@@ -554,7 +554,7 @@ const ScheduleViewingModal: React.FC<ScheduleViewingModalProps> = ({ property, i
                                     value={phone}
                                     onChange={(e) => setPhone(e.target.value)}
                                     className="w-full px-3 py-2.5 text-sm border border-neutral-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                                    placeholder="+1 234 567 8900"
+                                    placeholder={t('rental:viewing.placeholders.phone', '+1 234 567 8900')}
                                 />
                             </div>
                             <div>

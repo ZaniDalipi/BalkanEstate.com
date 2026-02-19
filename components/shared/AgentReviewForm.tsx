@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { addAgentReview } from '../../services/apiService';
 import { StarIcon, EnvelopeIcon, HomeIcon } from '../../constants';
 import { Property } from '../../types';
@@ -19,6 +20,7 @@ const AgentReviewForm: React.FC<AgentReviewFormProps> = ({
   onContactAgent,
   onReviewSubmitted
 }) => {
+  const { t } = useTranslation(['agents']);
   const [rating, setRating] = useState<number>(5);
   const [hoveredRating, setHoveredRating] = useState<number>(0);
   const [quote, setQuote] = useState<string>('');
@@ -31,12 +33,12 @@ const AgentReviewForm: React.FC<AgentReviewFormProps> = ({
     e.preventDefault();
 
     if (!quote.trim()) {
-      setError('Please write a review');
+      setError(t('reviews.validation.required'));
       return;
     }
 
     if (quote.trim().length < 10) {
-      setError('Review must be at least 10 characters long');
+      setError(t('reviews.validation.minLength'));
       return;
     }
 
@@ -55,7 +57,7 @@ const AgentReviewForm: React.FC<AgentReviewFormProps> = ({
         setSuccess(false);
       }, 2000);
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Failed to submit review. Please try again.';
+      const errorMessage = err instanceof Error ? err.message : t('reviews.validation.submitFailed');
       setError(errorMessage);
 
       // Check if error is about needing to contact agent first
@@ -74,21 +76,21 @@ const AgentReviewForm: React.FC<AgentReviewFormProps> = ({
     return (
       <div className="bg-green-50 border border-green-200 rounded-lg p-6 text-center">
         <div className="text-green-600 text-5xl mb-3">✓</div>
-        <h3 className="text-xl font-bold text-green-800 mb-2">Review Submitted!</h3>
-        <p className="text-green-700">Thank you for sharing your experience with {agentName}.</p>
+        <h3 className="text-xl font-bold text-green-800 mb-2">{t('reviews.submitted')}</h3>
+        <p className="text-green-700">{t('reviews.thankYouMessage', { name: agentName })}</p>
       </div>
     );
   }
 
   return (
     <div className="bg-white border border-neutral-200 rounded-lg p-6 shadow-sm">
-      <h3 className="text-xl font-bold text-neutral-800 mb-4">Write a Review</h3>
+      <h3 className="text-xl font-bold text-neutral-800 mb-4">{t('reviews.writeReview')}</h3>
 
       <form onSubmit={handleSubmit} className="space-y-5">
         {/* Star Rating */}
         <div>
           <label className="block text-sm font-semibold text-neutral-700 mb-2">
-            Your Rating
+            {t('reviews.yourRating')}
           </label>
           <div className="flex items-center gap-1">
             {[1, 2, 3, 4, 5].map((star) => (
@@ -110,7 +112,7 @@ const AgentReviewForm: React.FC<AgentReviewFormProps> = ({
               </button>
             ))}
             <span className="ml-3 text-lg font-semibold text-neutral-700">
-              {rating} {rating === 1 ? 'star' : 'stars'}
+              {t('reviews.starCount', { count: rating })}
             </span>
           </div>
         </div>
@@ -118,19 +120,19 @@ const AgentReviewForm: React.FC<AgentReviewFormProps> = ({
         {/* Review Text */}
         <div>
           <label htmlFor="review-text" className="block text-sm font-semibold text-neutral-700 mb-2">
-            Your Review
+            {t('reviews.yourReview')}
           </label>
           <textarea
             id="review-text"
             value={quote}
             onChange={(e) => setQuote(e.target.value)}
-            placeholder={`Share your experience working with ${agentName}...`}
+            placeholder={t('reviews.reviewPlaceholder', { name: agentName })}
             rows={4}
             className="w-full px-4 py-3 border-2 border-neutral-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary resize-none"
             disabled={isSubmitting}
           />
           <p className="text-xs text-neutral-500 mt-1">
-            Minimum 10 characters ({quote.length}/10)
+            {t('reviews.minCharacters', { current: quote.length, min: 10 })}
           </p>
         </div>
 
@@ -149,11 +151,10 @@ const AgentReviewForm: React.FC<AgentReviewFormProps> = ({
                 <HomeIcon className="w-8 h-8 text-blue-600" />
               </div>
               <h4 className="text-xl font-bold text-gray-900 mb-2">
-                Before Leaving a Review
+                {t('reviews.beforeLeaving.title')}
               </h4>
               <p className="text-gray-700 leading-relaxed">
-                To ensure authentic testimonials, please inquire about one of {agentName}'s properties first.
-                Browse their current offerings below and start a conversation!
+                {t('reviews.beforeLeaving.description', { name: agentName })}
               </p>
             </div>
 
@@ -197,7 +198,7 @@ const AgentReviewForm: React.FC<AgentReviewFormProps> = ({
                         className="w-full sm:w-auto flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium transition-colors text-sm"
                       >
                         <EnvelopeIcon className="w-4 h-4" />
-                        <span>Inquire About This Property</span>
+                        <span>{t('reviews.inquireProperty')}</span>
                       </button>
                     </div>
                   </div>
@@ -208,15 +209,15 @@ const AgentReviewForm: React.FC<AgentReviewFormProps> = ({
             {agentProperties.length === 0 && (
               <div className="text-center py-8 text-gray-500">
                 <HomeIcon className="w-12 h-12 mx-auto mb-3 text-gray-300" />
-                <p>This agent currently has no active listings.</p>
-                <p className="text-sm mt-2">Please contact them directly to start a conversation.</p>
+                <p>{t('reviews.noActiveListings')}</p>
+                <p className="text-sm mt-2">{t('reviews.contactDirectly')}</p>
                 {onContactAgent && (
                   <button
                     onClick={onContactAgent}
                     className="mt-4 flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-medium transition-colors mx-auto"
                   >
                     <EnvelopeIcon className="w-5 h-5" />
-                    <span>Contact {agentName}</span>
+                    <span>{t('reviews.contactAgent', { name: agentName })}</span>
                   </button>
                 )}
               </div>
@@ -233,16 +234,16 @@ const AgentReviewForm: React.FC<AgentReviewFormProps> = ({
           {isSubmitting ? (
             <>
               <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-              Submitting...
+              {t('reviews.submitting')}
             </>
           ) : (
-            'Submit Review'
+            t('reviews.submitReview')
           )}
         </button>
       </form>
 
       <p className="text-xs text-neutral-500 mt-4 text-center">
-        Your review will be publicly visible and associated with your account.
+        {t('reviews.publicNotice')}
       </p>
     </div>
   );

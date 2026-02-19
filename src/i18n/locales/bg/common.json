@@ -285,7 +285,28 @@
     "openFilters": "Отвори филтри",
     "closeFilters": "Затвори филтри",
     "myAccount": "Моят акаунт",
-    "viewToggle": "Промени изглед"
+    "viewToggle": "Промени изглед",
+    "goHome": "Go to home",
+    "mapStyle": "Map style",
+    "cleanMapStyle": "Clean map style - minimal, properties stand out",
+    "colorMapStyle": "Color map style - shows neighborhoods, parks, amenities",
+    "streetMapStyle": "Street map style",
+    "satelliteMapStyle": "Satellite aerial imagery",
+    "showAllListings": "Show all listings",
+    "showOnlyPremium": "Show only premium listings",
+    "toggle3DBuildings": "Toggle 3D buildings",
+    "togglePointsOfInterest": "Toggle points of interest",
+    "toggleMeasurementTool": "Toggle measurement tool",
+    "toggleCadastreParcels": "Toggle cadastre parcels",
+    "resetView": "Reset view",
+    "mapStyleLabel": "Map Style",
+    "buildings3D": "3D Buildings",
+    "poi": "POI",
+    "cadastre": "Cadastre",
+    "measure": "Measure",
+    "legend": "Legend",
+    "climate": "Climate",
+    "premiumOnly": "Premium Only"
   },
   "social": {
     "facebook": "Facebook",
@@ -310,7 +331,11 @@
     "authRequired": "Изисква се удостоверяване",
     "unknown": "Неизвестна грешка",
     "submitFailed": "Неуспешно изпращане на заявката. Моля, опитайте отново.",
-    "genericError": "Възникна грешка. Моля, опитайте отново по-късно."
+    "genericError": "Възникна грешка. Моля, опитайте отново по-късно.",
+    "authFailed": "Authentication Failed",
+    "authFailedMessage": "Authentication failed. Please try again.",
+    "errorLoadingGoogleMaps": "Error loading Google Maps",
+    "checkApiKeyConfiguration": "Please check your API key configuration"
   },
   "validation": {
     "required": "Това поле е задължително",
@@ -417,5 +442,103 @@
     "updateButton": "Актуализирай сега",
     "offlineReady": "Приложението е готово за офлайн употреба",
     "offlineMessage": "Сега можеш да използваш BalkanEstate дори без интернет връзка."
+  },
+  "measurements": {
+    "title": "My Measurements",
+    "usageCount": "{{count}} of {{max}} measurements used",
+    "planPro": "Pro",
+    "planFree": "Free",
+    "maxAllowed": "{{count}} max",
+    "emptyTitle": "No Measurements Yet",
+    "emptyDescription": "Use the measurement tool on the map to measure land distances and areas.",
+    "openMap": "Open Map",
+    "allMeasurements": "All Measurements",
+    "showAll": "Show All",
+    "typeArea": "Area",
+    "typeDistance": "Distance",
+    "typeDistShort": "Dist",
+    "viewOnMap": "View on map",
+    "deleteConfirmation": "Delete \"{{name}}\"?",
+    "deleting": "Deleting...",
+    "form": {
+      "namePlaceholder": "Name",
+      "addressPlaceholder": "Address"
+    },
+    "errors": {
+      "loadFailed": "Failed to load measurements",
+      "updateFailed": "Failed to update measurement",
+      "deleteFailed": "Failed to delete measurement"
+    }
+  },
+  "splash": {
+    "loading": "Loading Balkan Estate...",
+    "tagline": "AI-powered property search across the Balkans"
+  },
+  "notFound": {
+    "pageTitle": "Page Not Found | BalkanEstate",
+    "metaDescription": "The page you are looking for is not available. Return to BalkanEstate to find properties for sale across the Balkans.",
+    "title": "Looks like you're lost",
+    "message": "The page you are looking for is not available!",
+    "goHome": "Go to Home"
+  },
+  "floorInput": {
+    "total": "Total",
+    "floor": "Floor",
+    "helperText": "e.g., 14-story building, Floor 8"
+  },
+  "loadingAgency": "Loading agency details...",
+  "loadingPage": "Loading page...",
+  "errorBoundary": {
+    "appTitle": "Something went wrong",
+    "routeTitle": "Error loading content",
+    "appDescription": "We're sorry, but something unexpected happened. Please try refreshing the page.",
+    "routeDescription": "We encountered an error loading this section. Please try again.",
+    "devErrorDetails": "Error Details (Dev Only)",
+    "errorLabel": "Error:",
+    "stackTrace": "Stack Trace:",
+    "componentStack": "Component Stack:",
+    "tryAgain": "Try Again",
+    "refreshPage": "Refresh Page",
+    "persistMessage": "If this problem persists, please contact support."
+  },
+  "queryError": {
+    "title": "Failed to load data",
+    "description": "We couldn't load the requested data. This might be a temporary network issue.",
+    "retry": "Retry"
+  },
+  "promotions": {
+    "paymentIssueTitle": "Payment Issue",
+    "somethingWentWrong": "Something Went Wrong",
+    "paymentProcessingIssue": "There was an issue processing your payment.",
+    "listingPublishedGoodNews": "Good news! Your listing was published successfully.",
+    "listingLivePromoteLater": "Your property is now live and visible to potential buyers. You can promote it anytime from your dashboard.",
+    "continueWithoutPromotion": "Continue Without Promotion",
+    "promoteAnytimeFromDashboard": "You can promote your listing anytime from your dashboard",
+    "loadingOptions": "Loading promotion options...",
+    "listingPublished": "Listing Published Successfully!",
+    "listingNowLive": "Your property is now live and visible to potential buyers.",
+    "boostYourListing": "Boost Your Listing!",
+    "moreViewsDescription": "Get up to <1>3x more views</1> with a featured promotion",
+    "fifteenDayPromotion": "15-Day Featured Promotion",
+    "standOutFromCompetition": "Stand out from the competition",
+    "oneTime": "(one-time)",
+    "features": {
+      "featuredBadge": "Featured badge on listing",
+      "topPlacement": "Top placement in search",
+      "homepageCarousel": "Homepage carousel exposure",
+      "priorityAlerts": "Priority in buyer alerts"
+    },
+    "promoteNowForPrice": "Promote Now for €{{price}}",
+    "benefitStats": {
+      "viewsMultiplier": "3x",
+      "moreViews": "More Views",
+      "inquiriesMultiplier": "2x",
+      "moreInquiries": "More Inquiries",
+      "fasterSalePercent": "40%",
+      "fasterSale": "Faster Sale"
+    },
+    "noThanks": "No thanks, continue without promotion",
+    "failedToActivate": "Failed to activate promotion",
+    "paymentSuccessActivationFailed": "Payment was successful but failed to activate promotion: {{error}}. Please contact support."
   }
 }

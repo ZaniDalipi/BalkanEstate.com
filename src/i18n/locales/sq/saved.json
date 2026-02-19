@@ -75,5 +75,25 @@
     "deleteFailed": "Fshirja e kërkimit dështoi. Ju lutemi provoni përsëri.",
     "enterName": "Ju lutemi shkruani një emër",
     "renameFailed": "Riemërimi i kërkimit dështoi. Ju lutemi provoni përsëri."
+  },
+  "favorites": {
+    "badge": "Your Favorites Collection",
+    "heroTitle": "Your Curated",
+    "heroTitleHighlight": "Favorites Collection",
+    "heroDescription": "All your saved properties and trusted agents in one place, organized and ready to explore",
+    "stats": {
+      "properties": "Properties",
+      "agents": "Agents",
+      "countries": "Countries"
+    },
+    "tabs": {
+      "properties": "Properties",
+      "agents": "Agents"
+    },
+    "badges": {
+      "quickAccess": "Quick Access",
+      "organized": "Organized by Location",
+      "compare": "Easy Comparison"
+    }
   }
 }

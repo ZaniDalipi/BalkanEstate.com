@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 import { XMarkIcon, ExclamationTriangleIcon, TrashIcon, InformationCircleIcon } from '../../constants';
 
 export type ConfirmationType = 'danger' | 'warning' | 'info';
@@ -22,14 +23,18 @@ const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
   onConfirm,
   title,
   message,
-  confirmLabel = 'Confirm',
-  cancelLabel = 'Cancel',
+  confirmLabel,
+  cancelLabel,
   type = 'danger',
   isLoading = false,
   icon,
 }) => {
+  const { t } = useTranslation(['common']);
   const confirmButtonRef = useRef<HTMLButtonElement>(null);
   const cancelButtonRef = useRef<HTMLButtonElement>(null);
+
+  const resolvedConfirmLabel = confirmLabel || t('common:confirm');
+  const resolvedCancelLabel = cancelLabel || t('common:cancel');
 
   // Lock body scroll when modal is open
   useEffect(() => {
@@ -152,7 +157,7 @@ const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
               disabled={isLoading}
               className="px-5 py-2.5 rounded-lg font-semibold transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 bg-neutral-200 text-neutral-800 hover:bg-neutral-300 focus:ring-neutral-400 disabled:opacity-50"
             >
-              {cancelLabel}
+              {resolvedCancelLabel}
             </button>
             <button
               ref={confirmButtonRef}
@@ -178,7 +183,7 @@ const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
                   />
                 </svg>
               )}
-              {confirmLabel}
+              {resolvedConfirmLabel}
             </button>
           </div>
         </div>

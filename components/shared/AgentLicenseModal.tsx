@@ -3,11 +3,11 @@ import { X } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { getAgencies } from '../../services/apiService';
 
-// Common languages spoken in the Balkan region
-const BALKAN_LANGUAGES = [
-  'English', 'Serbian', 'Croatian', 'Slovenian', 'Bosnian', 'Macedonian',
-  'Albanian', 'Montenegrin', 'Bulgarian', 'Romanian', 'Greek', 'Turkish',
-  'Hungarian', 'German', 'Italian', 'French', 'Russian', 'Spanish'
+// Language keys for the Balkan region - display names come from i18n
+const BALKAN_LANGUAGE_KEYS = [
+  'english', 'serbian', 'croatian', 'slovenian', 'bosnian', 'macedonian',
+  'albanian', 'montenegrin', 'bulgarian', 'romanian', 'greek', 'turkish',
+  'hungarian', 'german', 'italian', 'french', 'russian', 'spanish'
 ];
 
 interface AgentLicenseModalProps {
@@ -25,7 +25,7 @@ const AgentLicenseModal: React.FC<AgentLicenseModalProps> = ({
   currentLicenseNumber,
   currentAgentId
 }) => {
-  const { t } = useTranslation(['modals']);
+  const { t } = useTranslation(['agents', 'modals', 'common']);
   const [licenseNumber, setLicenseNumber] = useState(currentLicenseNumber || '');
   const [agencyInvitationCode, setAgencyInvitationCode] = useState('');
   const [agentId, setAgentId] = useState(currentAgentId || '');
@@ -34,7 +34,7 @@ const AgentLicenseModal: React.FC<AgentLicenseModalProps> = ({
   const [agencies, setAgencies] = useState<any[]>([]);
   const [selectedAgency, setSelectedAgency] = useState<string>('');
   const [loadingAgencies, setLoadingAgencies] = useState(false);
-  const [languages, setLanguages] = useState<string[]>(['English']);
+  const [languages, setLanguages] = useState<string[]>(['english']);
 
   const handleLanguageToggle = (language: string) => {
     setLanguages(prev =>
@@ -80,19 +80,19 @@ const AgentLicenseModal: React.FC<AgentLicenseModalProps> = ({
 
     // Validate license number is provided
     if (!licenseNumber.trim()) {
-      setError(t('agentLicense.licenseRequired'));
+      setError(t('modals:agentLicense.licenseRequired'));
       return;
     }
 
     // If user selected an agency, require the invitation code
     if (selectedAgency && !agencyInvitationCode.trim()) {
-      setError(t('agentLicense.invitationCodeRequired'));
+      setError(t('modals:agentLicense.invitationCodeRequired'));
       return;
     }
 
     // If user entered a code, require agency selection
     if (agencyInvitationCode.trim() && !selectedAgency) {
-      setError(t('agentLicense.selectAgencyRequired'));
+      setError(t('modals:agentLicense.selectAgencyRequired'));
       return;
     }
 
@@ -119,7 +119,7 @@ const AgentLicenseModal: React.FC<AgentLicenseModalProps> = ({
       setError('');
       onClose();
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Failed to verify license. Please check your information and try again.';
+      const errorMessage = err instanceof Error ? err.message : t('modals:agentLicense.verifyFailed');
       setError(errorMessage);
       // Modal stays open - don't close, don't navigate, just show error
     } finally {
@@ -155,13 +155,13 @@ const AgentLicenseModal: React.FC<AgentLicenseModalProps> = ({
         {/* Header */}
         <div className="flex items-center justify-between p-6 border-b">
           <h2 className="text-xl font-semibold text-gray-900">
-            {isJoiningAgency ? t('agentLicense.joinAgencyTitle') : t('agentLicense.title')}
+            {isJoiningAgency ? t('modals:agentLicense.joinAgencyTitle') : t('modals:agentLicense.title')}
           </h2>
           <button
             onClick={handleClose}
             disabled={isSubmitting}
             className="text-gray-400 hover:text-gray-600 transition-colors disabled:opacity-50"
-            aria-label={t('common.close')}
+            aria-label={t('common:close')}
           >
             <X className="w-5 h-5" />
           </button>
@@ -171,8 +171,8 @@ const AgentLicenseModal: React.FC<AgentLicenseModalProps> = ({
         <form onSubmit={handleSubmit} className="p-6">
           <p className="text-sm text-gray-600 mb-6">
             {isJoiningAgency
-              ? t('agentLicense.joinAgencyDescription')
-              : t('agentLicense.newAgentDescription')}
+              ? t('modals:agentLicense.joinAgencyDescription')
+              : t('modals:agentLicense.newAgentDescription')}
           </p>
 
           {error && (
@@ -185,7 +185,7 @@ const AgentLicenseModal: React.FC<AgentLicenseModalProps> = ({
             {/* License Number */}
             <div>
               <label htmlFor="licenseNumber" className="block text-sm font-medium text-gray-700 mb-1">
-                {t('agentLicense.licenseNumber')} <span className="text-red-500">*</span>
+                {t('modals:agentLicense.licenseNumber')} <span className="text-red-500">*</span>
               </label>
               <input
                 type="text"
@@ -193,22 +193,22 @@ const AgentLicenseModal: React.FC<AgentLicenseModalProps> = ({
                 value={licenseNumber}
                 onChange={(e) => setLicenseNumber(e.target.value)}
                 disabled={isSubmitting || isJoiningAgency}
-                placeholder={t('agentLicense.licenseNumberPlaceholder')}
+                placeholder={t('modals:agentLicense.licenseNumberPlaceholder')}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-gray-100 disabled:cursor-not-allowed"
                 required
                 readOnly={isJoiningAgency}
               />
               <p className="text-xs text-gray-500 mt-1">
                 {isJoiningAgency
-                  ? t('agentLicense.verifiedLicense')
-                  : t('agentLicense.officialLicense')}
+                  ? t('modals:agentLicense.verifiedLicense')
+                  : t('modals:agentLicense.officialLicense')}
               </p>
             </div>
 
             {/* Agent ID */}
             <div>
               <label htmlFor="agentId" className="block text-sm font-medium text-gray-700 mb-1">
-                {t('agentLicense.agentId')} {!isJoiningAgency && <span className="text-gray-400">({t('agentLicense.optional')})</span>}
+                {t('modals:agentLicense.agentId')} {!isJoiningAgency && <span className="text-gray-400">({t('modals:agentLicense.optional')})</span>}
               </label>
               <input
                 type="text"
@@ -216,14 +216,14 @@ const AgentLicenseModal: React.FC<AgentLicenseModalProps> = ({
                 value={agentId}
                 onChange={(e) => setAgentId(e.target.value)}
                 disabled={isSubmitting || isJoiningAgency}
-                placeholder={t('agentLicense.agentIdPlaceholder')}
+                placeholder={t('modals:agentLicense.agentIdPlaceholder')}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-gray-100 disabled:cursor-not-allowed"
                 readOnly={isJoiningAgency}
               />
               <p className="text-xs text-gray-500 mt-1">
                 {isJoiningAgency
-                  ? t('agentLicense.verifiedAgentId')
-                  : t('agentLicense.autoGeneratedAgentId')}
+                  ? t('modals:agentLicense.verifiedAgentId')
+                  : t('modals:agentLicense.autoGeneratedAgentId')}
               </p>
             </div>
 
@@ -231,37 +231,37 @@ const AgentLicenseModal: React.FC<AgentLicenseModalProps> = ({
             {!isJoiningAgency && (
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  {t('agentLicense.languagesSpoken')}
+                  {t('modals:agentLicense.languagesSpoken')}
                 </label>
                 <div className="flex flex-wrap gap-1.5">
-                  {BALKAN_LANGUAGES.map((language) => (
+                  {BALKAN_LANGUAGE_KEYS.map((langKey) => (
                     <button
-                      key={language}
+                      key={langKey}
                       type="button"
-                      onClick={() => handleLanguageToggle(language)}
+                      onClick={() => handleLanguageToggle(langKey)}
                       disabled={isSubmitting}
                       className={`px-2.5 py-1 text-xs rounded-full border transition-all ${
-                        languages.includes(language)
+                        languages.includes(langKey)
                           ? 'bg-blue-600 text-white border-blue-600'
                           : 'bg-white text-gray-600 border-gray-300 hover:border-blue-400'
                       } disabled:opacity-50`}
                     >
-                      {language}
+                      {t(`agents:languages.${langKey}`)}
                     </button>
                   ))}
                 </div>
-                <p className="text-xs text-gray-500 mt-1.5">{t('agentLicense.selectLanguages')}</p>
+                <p className="text-xs text-gray-500 mt-1.5">{t('modals:agentLicense.selectLanguages')}</p>
               </div>
             )}
 
             {/* Agency Selection - Always shown but optional for new agents */}
             <div>
               <label htmlFor="agencySelect" className="block text-sm font-medium text-gray-700 mb-1">
-                {t('agentLicense.selectAgency')} {isJoiningAgency ? <span className="text-red-500">*</span> : <span className="text-gray-400">({t('agentLicense.optional')})</span>}
+                {t('modals:agentLicense.selectAgency')} {isJoiningAgency ? <span className="text-red-500">*</span> : <span className="text-gray-400">({t('modals:agentLicense.optional')})</span>}
               </label>
               {loadingAgencies ? (
                 <div className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-50 text-gray-500 text-sm">
-                  {t('agentLicense.loadingAgencies')}
+                  {t('modals:agentLicense.loadingAgencies')}
                 </div>
               ) : (
                 <select
@@ -272,25 +272,25 @@ const AgentLicenseModal: React.FC<AgentLicenseModalProps> = ({
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-gray-100 disabled:cursor-not-allowed"
                   required={isJoiningAgency}
                 >
-                  <option value="">{isJoiningAgency ? t('agentLicense.selectAnAgency') : t('agentLicense.independentAgent')}</option>
+                  <option value="">{isJoiningAgency ? t('modals:agentLicense.selectAnAgency') : t('modals:agentLicense.independentAgent')}</option>
                   {agencies.map((agency) => (
                     <option key={agency._id} value={agency._id}>
-                      {agency.name} ({agency.city || 'Location N/A'})
+                      {agency.name} ({agency.city || t('modals:agentLicense.locationNA')})
                     </option>
                   ))}
                 </select>
               )}
               <p className="text-xs text-gray-500 mt-1">
                 {isJoiningAgency
-                  ? t('agentLicense.chooseAgency')
-                  : t('agentLicense.selectAgencyOrIndependent')}
+                  ? t('modals:agentLicense.chooseAgency')
+                  : t('modals:agentLicense.selectAgencyOrIndependent')}
               </p>
             </div>
 
             {/* Agency Invitation Code */}
             <div>
               <label htmlFor="agencyInvitationCode" className="block text-sm font-medium text-gray-700 mb-1">
-                {t('agentLicense.invitationCode')} {isJoiningAgency ? <span className="text-red-500">*</span> : <span className="text-gray-400">({t('agentLicense.optional')})</span>}
+                {t('modals:agentLicense.invitationCode')} {isJoiningAgency ? <span className="text-red-500">*</span> : <span className="text-gray-400">({t('modals:agentLicense.optional')})</span>}
               </label>
               <input
                 type="text"
@@ -298,14 +298,14 @@ const AgentLicenseModal: React.FC<AgentLicenseModalProps> = ({
                 value={agencyInvitationCode}
                 onChange={(e) => setAgencyInvitationCode(e.target.value.toUpperCase())}
                 disabled={isSubmitting}
-                placeholder={t('agentLicense.invitationCodePlaceholder')}
+                placeholder={t('modals:agentLicense.invitationCodePlaceholder')}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-gray-100 disabled:cursor-not-allowed font-mono"
                 required={isJoiningAgency}
               />
               <p className="text-xs text-gray-500 mt-1">
                 {isJoiningAgency
-                  ? t('agentLicense.enterInvitationCode')
-                  : t('agentLicense.leaveEmptyForIndependent')}
+                  ? t('modals:agentLicense.enterInvitationCode')
+                  : t('modals:agentLicense.leaveEmptyForIndependent')}
               </p>
             </div>
           </div>
@@ -318,7 +318,7 @@ const AgentLicenseModal: React.FC<AgentLicenseModalProps> = ({
               disabled={isSubmitting}
               className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {t('common.cancel')}
+              {t('common:cancel')}
             </button>
             <button
               type="submit"
@@ -326,8 +326,8 @@ const AgentLicenseModal: React.FC<AgentLicenseModalProps> = ({
               className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {isSubmitting
-                ? (isJoiningAgency ? t('agentLicense.joining') : t('agentLicense.verifying'))
-                : (isJoiningAgency ? t('agentLicense.joinAgency') : t('agentLicense.verifyAndBecomeAgent'))}
+                ? (isJoiningAgency ? t('modals:agentLicense.joining') : t('modals:agentLicense.verifying'))
+                : (isJoiningAgency ? t('modals:agentLicense.joinAgency') : t('modals:agentLicense.verifyAndBecomeAgent'))}
             </button>
           </div>
         </form>

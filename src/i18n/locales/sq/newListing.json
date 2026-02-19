@@ -162,7 +162,11 @@
     "tourUrl": "URL e Turit Video",
     "tourUrlPlaceholder": "Vendosni URL të YouTube ose Vimeo",
     "virtualTour360": "URL e Turit Virtual 360°",
-    "virtualTour360Placeholder": "Vendosni URL të Matterport, Kuula ose tureve të tjera 360"
+    "virtualTour360Placeholder": "Vendosni URL të Matterport, Kuula ose tureve të tjera 360",
+    "z360Hint": "Create tours at z360-virtual-tour.vercel.app",
+    "openZ360": "Open Z360",
+    "tourPreview": "360° Tour Preview",
+    "openInNewTab": "Open in new tab"
   },
   "floorplan": {
     "title": "Planimetria",

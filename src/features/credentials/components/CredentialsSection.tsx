@@ -96,11 +96,11 @@ const TYPE_CONFIG: Record<string, { icon: React.ReactNode; color: string; bg: st
   },
 };
 
-const STATUS_CONFIG: Record<string, { bg: string; text: string; icon: React.ReactNode; label: string }> = {
-  verified: { bg: 'bg-green-50 border-green-200', text: 'text-green-700', icon: <CheckCircleIcon className="w-3.5 h-3.5" />, label: 'Verified' },
-  pending: { bg: 'bg-amber-50 border-amber-200', text: 'text-amber-700', icon: <ClockIcon className="w-3.5 h-3.5" />, label: 'Pending Review' },
-  rejected: { bg: 'bg-red-50 border-red-200', text: 'text-red-700', icon: <ExclamationTriangleIcon className="w-3.5 h-3.5" />, label: 'Rejected' },
-  expired: { bg: 'bg-gray-100 border-gray-300', text: 'text-gray-500', icon: <ClockIcon className="w-3.5 h-3.5" />, label: 'Expired' },
+const STATUS_CONFIG: Record<string, { bg: string; text: string; icon: React.ReactNode; labelKey: string }> = {
+  verified: { bg: 'bg-green-50 border-green-200', text: 'text-green-700', icon: <CheckCircleIcon className="w-3.5 h-3.5" />, labelKey: 'verified' },
+  pending: { bg: 'bg-amber-50 border-amber-200', text: 'text-amber-700', icon: <ClockIcon className="w-3.5 h-3.5" />, labelKey: 'pending' },
+  rejected: { bg: 'bg-red-50 border-red-200', text: 'text-red-700', icon: <ExclamationTriangleIcon className="w-3.5 h-3.5" />, labelKey: 'rejected' },
+  expired: { bg: 'bg-gray-100 border-gray-300', text: 'text-gray-500', icon: <ClockIcon className="w-3.5 h-3.5" />, labelKey: 'expired' },
 };
 
 // ─── Validation ───────────────────────────────────────────────────────────────
@@ -115,34 +115,35 @@ interface ValidationErrors {
 const validate = (
   data: { title: string; issuer: string; expiryDate: string; issueDate: string },
   file: File | null,
+  t: (key: string, defaultValue?: string) => string,
 ): ValidationErrors => {
   const errors: ValidationErrors = {};
 
   if (!data.title.trim()) {
-    errors.title = 'Title is required';
+    errors.title = t('profilePage.credentials.validation.titleRequired', 'Title is required');
   } else if (data.title.trim().length < 3) {
-    errors.title = 'Title must be at least 3 characters';
+    errors.title = t('profilePage.credentials.validation.titleMinLength', 'Title must be at least 3 characters');
   } else if (data.title.trim().length > 120) {
-    errors.title = 'Title must be under 120 characters';
+    errors.title = t('profilePage.credentials.validation.titleMaxLength', 'Title must be under 120 characters');
   }
 
   if (!data.issuer.trim()) {
-    errors.issuer = 'Issuing organization is required';
+    errors.issuer = t('profilePage.credentials.validation.issuerRequired', 'Issuing organization is required');
   } else if (data.issuer.trim().length < 2) {
-    errors.issuer = 'Organization name must be at least 2 characters';
+    errors.issuer = t('profilePage.credentials.validation.issuerMinLength', 'Organization name must be at least 2 characters');
   }
 
   if (file) {
     if (file.size > FILE_SIZE_LIMIT) {
-      errors.file = 'File must be under 10 MB';
+      errors.file = t('profilePage.credentials.validation.fileTooLarge', 'File must be under 10 MB');
     } else if (!ALLOWED_TYPES.includes(file.type)) {
-      errors.file = 'Only images (JPG, PNG, WebP) and PDFs are allowed';
+      errors.file = t('profilePage.credentials.validation.fileTypeNotAllowed', 'Only images (JPG, PNG, WebP) and PDFs are allowed');
     }
   }
 
   if (data.expiryDate && data.issueDate) {
     if (new Date(data.expiryDate) <= new Date(data.issueDate)) {
-      errors.expiryDate = 'Expiry date must be after the issue date';
+      errors.expiryDate = t('profilePage.credentials.validation.expiryAfterIssue', 'Expiry date must be after the issue date');
     }
   }
 
@@ -228,11 +229,11 @@ const CredentialsSection: React.FC<CredentialsSectionProps> = ({
     if (file) {
       // Immediate validation
       if (file.size > FILE_SIZE_LIMIT) {
-        setErrors(prev => ({ ...prev, file: 'File must be under 10 MB' }));
+        setErrors(prev => ({ ...prev, file: t('profilePage.credentials.validation.fileTooLarge', 'File must be under 10 MB') }));
         return;
       }
       if (!ALLOWED_TYPES.includes(file.type)) {
-        setErrors(prev => ({ ...prev, file: 'Only images (JPG, PNG, WebP) and PDFs are allowed' }));
+        setErrors(prev => ({ ...prev, file: t('profilePage.credentials.validation.fileTypeNotAllowed', 'Only images (JPG, PNG, WebP) and PDFs are allowed') }));
         return;
       }
       setErrors(prev => ({ ...prev, file: undefined }));
@@ -247,7 +248,7 @@ const CredentialsSection: React.FC<CredentialsSectionProps> = ({
     e.stopPropagation();
 
     // Validate
-    const validationErrors = validate(formData, selectedFile);
+    const validationErrors = validate(formData, selectedFile, t);
     if (Object.keys(validationErrors).length > 0) {
       setErrors(validationErrors);
       return;
@@ -260,18 +261,18 @@ const CredentialsSection: React.FC<CredentialsSectionProps> = ({
       if (editingId) {
         const updated = await updateCredential(editingId, formData, selectedFile || undefined);
         onCredentialsChange(credentials.map(c => c._id === editingId ? updated : c));
-        setSuccessMessage('Credential updated');
+        setSuccessMessage(t('profilePage.credentials.credentialUpdated', 'Credential updated'));
       } else {
         const added = await addCredential(formData, selectedFile || undefined);
         onCredentialsChange([...credentials, added]);
-        setSuccessMessage('Credential added');
+        setSuccessMessage(t('profilePage.credentials.credentialAdded', 'Credential added'));
       }
       setShowModal(false);
       resetForm();
       // Auto-dismiss success message
       setTimeout(() => setSuccessMessage(null), 3000);
     } catch (err: any) {
-      const message = err?.message || 'Something went wrong. Please try again.';
+      const message = err?.message || t('profilePage.credentials.saveFailed', 'Something went wrong. Please try again.');
       setSubmitError(message);
     } finally {
       setIsSubmitting(false);
@@ -285,10 +286,10 @@ const CredentialsSection: React.FC<CredentialsSectionProps> = ({
     try {
       await deleteCredential(id);
       onCredentialsChange(credentials.filter(c => c._id !== id));
-      setSuccessMessage('Credential removed');
+      setSuccessMessage(t('profilePage.credentials.credentialRemoved', 'Credential removed'));
       setTimeout(() => setSuccessMessage(null), 3000);
     } catch (err: any) {
-      setSubmitError(err?.message || 'Failed to delete. Please try again.');
+      setSubmitError(err?.message || t('profilePage.credentials.deleteFailed', 'Failed to delete. Please try again.'));
       setTimeout(() => setSubmitError(null), 4000);
     } finally {
       setDeletingId(null);
@@ -310,7 +311,7 @@ const CredentialsSection: React.FC<CredentialsSectionProps> = ({
               {t('profilePage.credentials.professionalCertifications')}
             </h3>
             <p className="text-[11px] text-gray-400 font-medium">
-              {credentials.length} {credentials.length === 1 ? 'credential' : 'credentials'}
+              {t('profilePage.credentials.credentialCount', '{{count}} credentials', { count: credentials.length })}
             </p>
           </div>
         </div>
@@ -350,7 +351,7 @@ const CredentialsSection: React.FC<CredentialsSectionProps> = ({
           </div>
           <p className="text-sm font-medium text-gray-500">{t('profilePage.credentials.empty.title', 'No certifications added yet')}</p>
           <p className="text-xs text-gray-400 mt-1 max-w-[240px] mx-auto">
-            Showcase your professional qualifications and build trust with clients
+            {t('profilePage.credentials.empty.subtitle', 'Showcase your professional qualifications and build trust with clients')}
           </p>
           {isOwner && (
             <button
@@ -410,7 +411,7 @@ const CredentialsSection: React.FC<CredentialsSectionProps> = ({
                         {expired ? STATUS_CONFIG.expired.icon : statusStyle.icon}
                         {expired
                           ? t('profilePage.credentials.status.expired', 'Expired')
-                          : t(`profilePage.credentials.status.${cred.status}`, statusStyle.label)
+                          : t(`profilePage.credentials.status.${cred.status}`)
                         }
                       </div>
                     </div>
@@ -429,18 +430,18 @@ const CredentialsSection: React.FC<CredentialsSectionProps> = ({
                         {issueDateFormatted && (
                           <div className="flex items-center gap-1.5">
                             <CalendarIcon className="w-3.5 h-3.5 text-gray-400" />
-                            <span>Issued {issueDateFormatted}</span>
+                            <span>{t('profilePage.credentials.issued', 'Issued')} {issueDateFormatted}</span>
                           </div>
                         )}
                         {expiryDateFormatted && (
                           <div className={`flex items-center gap-1.5 ${expired ? 'text-red-500 font-medium' : expiresIn && parseInt(expiresIn) <= 3 ? 'text-amber-600 font-medium' : ''}`}>
                             <span className="text-gray-300">·</span>
                             {expired ? (
-                              <span>Expired {expiryDateFormatted}</span>
+                              <span>{t('profilePage.credentials.expired', 'Expired')} {expiryDateFormatted}</span>
                             ) : (
                               <span>
-                                Expires {expiryDateFormatted}
-                                {expiresIn && <span className="ml-1 text-[10px] opacity-75">({expiresIn} left)</span>}
+                                {t('profilePage.credentials.expires', 'Expires')} {expiryDateFormatted}
+                                {expiresIn && <span className="ml-1 text-[10px] opacity-75">({expiresIn} {t('profilePage.credentials.left', 'left')})</span>}
                               </span>
                             )}
                           </div>
@@ -473,7 +474,7 @@ const CredentialsSection: React.FC<CredentialsSectionProps> = ({
                             type="button"
                             onClick={() => openEdit(cred)}
                             className="p-1.5 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
-                            title="Edit"
+                            title={t('profilePage.credentials.edit', 'Edit')}
                           >
                             <PencilIcon className="w-3.5 h-3.5" />
                           </button>
@@ -482,7 +483,7 @@ const CredentialsSection: React.FC<CredentialsSectionProps> = ({
                             onClick={() => handleDelete(cred._id)}
                             disabled={isBeingDeleted}
                             className="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors disabled:opacity-40"
-                            title="Delete"
+                            title={t('profilePage.credentials.delete', 'Delete')}
                           >
                             <TrashIcon className="w-3.5 h-3.5" />
                           </button>
@@ -514,7 +515,7 @@ const CredentialsSection: React.FC<CredentialsSectionProps> = ({
                   {editingId ? t('profilePage.credentials.editCredential', 'Edit Credential') : t('profilePage.credentials.addCredential', 'Add New Credential')}
                 </h3>
                 <p className="text-xs text-gray-400 mt-0.5">
-                  {editingId ? 'Update your credential details below' : 'Fill in the details for your new credential'}
+                  {editingId ? t('profilePage.credentials.editSubtitle', 'Update your credential details below') : t('profilePage.credentials.addSubtitle', 'Fill in the details for your new credential')}
                 </p>
               </div>
               <button
@@ -534,7 +535,7 @@ const CredentialsSection: React.FC<CredentialsSectionProps> = ({
                 <div className="flex items-start gap-2.5 px-4 py-3 bg-red-50 border border-red-200 rounded-xl text-sm text-red-700">
                   <ExclamationTriangleIcon className="w-5 h-5 flex-shrink-0 mt-0.5" />
                   <div>
-                    <p className="font-semibold">Failed to save</p>
+                    <p className="font-semibold">{t('profilePage.credentials.failedToSave', 'Failed to save')}</p>
                     <p className="text-xs text-red-600 mt-0.5">{submitError}</p>
                   </div>
                 </div>
@@ -543,7 +544,7 @@ const CredentialsSection: React.FC<CredentialsSectionProps> = ({
               {/* Type Selector - Visual Cards */}
               <div>
                 <label className="block text-xs font-semibold text-gray-700 mb-2 uppercase tracking-wider">
-                  Type
+                  {t('profilePage.credentials.form.type', 'Type')}
                 </label>
                 <div className="grid grid-cols-2 gap-2">
                   {(['certification', 'license', 'membership', 'award'] as const).map((type) => {
@@ -573,7 +574,7 @@ const CredentialsSection: React.FC<CredentialsSectionProps> = ({
               {/* Title */}
               <div>
                 <label className="block text-xs font-semibold text-gray-700 mb-1.5 uppercase tracking-wider">
-                  Title <span className="text-red-400">*</span>
+                  {t('profilePage.credentials.form.title', 'Title')} <span className="text-red-400">*</span>
                 </label>
                 <input
                   type="text"
@@ -582,7 +583,7 @@ const CredentialsSection: React.FC<CredentialsSectionProps> = ({
                   className={`w-full px-4 py-3 border rounded-xl text-sm transition-all focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 ${
                     errors.title ? 'border-red-300 bg-red-50/30' : 'border-gray-200'
                   }`}
-                  placeholder="e.g., Certified Real Estate Agent"
+                  placeholder={t('profilePage.credentials.form.titlePlaceholder', 'e.g., Certified Real Estate Agent')}
                 />
                 {errors.title && (
                   <p className="mt-1.5 text-xs text-red-500 font-medium flex items-center gap-1">
@@ -595,7 +596,7 @@ const CredentialsSection: React.FC<CredentialsSectionProps> = ({
               {/* Issuer */}
               <div>
                 <label className="block text-xs font-semibold text-gray-700 mb-1.5 uppercase tracking-wider">
-                  Issuing Organization <span className="text-red-400">*</span>
+                  {t('profilePage.credentials.form.issuingOrganization', 'Issuing Organization')} <span className="text-red-400">*</span>
                 </label>
                 <input
                   type="text"
@@ -604,7 +605,7 @@ const CredentialsSection: React.FC<CredentialsSectionProps> = ({
                   className={`w-full px-4 py-3 border rounded-xl text-sm transition-all focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 ${
                     errors.issuer ? 'border-red-300 bg-red-50/30' : 'border-gray-200'
                   }`}
-                  placeholder="e.g., National Association of Realtors"
+                  placeholder={t('profilePage.credentials.form.issuerPlaceholder', 'e.g., National Association of Realtors')}
                 />
                 {errors.issuer && (
                   <p className="mt-1.5 text-xs text-red-500 font-medium flex items-center gap-1">
@@ -617,14 +618,14 @@ const CredentialsSection: React.FC<CredentialsSectionProps> = ({
               {/* Issue Number */}
               <div>
                 <label className="block text-xs font-semibold text-gray-700 mb-1.5 uppercase tracking-wider">
-                  Certificate / License Number
+                  {t('profilePage.credentials.form.certificateNumber', 'Certificate / License Number')}
                 </label>
                 <input
                   type="text"
                   value={formData.issueNumber}
                   onChange={(e) => handleFieldChange('issueNumber', e.target.value)}
                   className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 font-mono"
-                  placeholder="e.g., REA-2024-12345"
+                  placeholder={t('profilePage.credentials.form.certificateNumberPlaceholder', 'e.g., REA-2024-12345')}
                 />
               </div>
 
@@ -632,7 +633,7 @@ const CredentialsSection: React.FC<CredentialsSectionProps> = ({
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <label className="block text-xs font-semibold text-gray-700 mb-1.5 uppercase tracking-wider">
-                    Issue Date
+                    {t('profilePage.credentials.form.issueDate', 'Issue Date')}
                   </label>
                   <input
                     type="date"
@@ -644,7 +645,7 @@ const CredentialsSection: React.FC<CredentialsSectionProps> = ({
                 </div>
                 <div>
                   <label className="block text-xs font-semibold text-gray-700 mb-1.5 uppercase tracking-wider">
-                    Expiry Date
+                    {t('profilePage.credentials.form.expiryDate', 'Expiry Date')}
                   </label>
                   <input
                     type="date"
@@ -666,7 +667,7 @@ const CredentialsSection: React.FC<CredentialsSectionProps> = ({
               {/* File Upload */}
               <div>
                 <label className="block text-xs font-semibold text-gray-700 mb-1.5 uppercase tracking-wider">
-                  Supporting Document
+                  {t('profilePage.credentials.form.supportingDocument', 'Supporting Document')}
                 </label>
                 <div className={`border-2 border-dashed rounded-xl p-5 text-center transition-all ${
                   errors.file ? 'border-red-300 bg-red-50/30' : selectedFile ? 'border-blue-300 bg-blue-50/30' : 'border-gray-200 hover:border-blue-300 hover:bg-blue-50/20'
@@ -710,8 +711,8 @@ const CredentialsSection: React.FC<CredentialsSectionProps> = ({
                         <div className="w-12 h-12 rounded-2xl bg-gray-100 flex items-center justify-center mx-auto mb-2">
                           <DocumentTextIcon className="w-6 h-6 text-gray-400" />
                         </div>
-                        <p className="text-sm font-medium text-gray-600">Click to upload certificate</p>
-                        <p className="text-[11px] text-gray-400 mt-0.5">JPG, PNG, WebP, or PDF up to 10 MB</p>
+                        <p className="text-sm font-medium text-gray-600">{t('profilePage.credentials.form.clickToUpload', 'Click to upload certificate')}</p>
+                        <p className="text-[11px] text-gray-400 mt-0.5">{t('profilePage.credentials.form.fileTypes', 'JPG, PNG, WebP, or PDF up to 10 MB')}</p>
                       </div>
                     )}
                   </label>
@@ -727,8 +728,8 @@ const CredentialsSection: React.FC<CredentialsSectionProps> = ({
               {/* Visibility Toggle */}
               <div className="flex items-center justify-between p-3.5 bg-gray-50 rounded-xl">
                 <div>
-                  <p className="text-sm font-medium text-gray-700">Public visibility</p>
-                  <p className="text-[11px] text-gray-400">Show this on your public profile</p>
+                  <p className="text-sm font-medium text-gray-700">{t('profilePage.credentials.form.publicVisibility', 'Public visibility')}</p>
+                  <p className="text-[11px] text-gray-400">{t('profilePage.credentials.form.publicVisibilityDesc', 'Show this on your public profile')}</p>
                 </div>
                 <button
                   type="button"
@@ -747,7 +748,7 @@ const CredentialsSection: React.FC<CredentialsSectionProps> = ({
                   disabled={isSubmitting}
                   className="flex-1 px-4 py-3 border border-gray-200 text-gray-600 font-semibold rounded-xl hover:bg-gray-50 transition-colors text-sm disabled:opacity-40"
                 >
-                  Cancel
+                  {t('profilePage.credentials.form.cancel', 'Cancel')}
                 </button>
                 <button
                   type="submit"
@@ -757,19 +758,19 @@ const CredentialsSection: React.FC<CredentialsSectionProps> = ({
                   {isSubmitting ? (
                     <>
                       <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                      <span>{editingId ? 'Saving...' : 'Adding...'}</span>
+                      <span>{editingId ? t('profilePage.credentials.form.saving', 'Saving...') : t('profilePage.credentials.form.adding', 'Adding...')}</span>
                     </>
                   ) : (
                     <>
                       {editingId ? (
                         <>
                           <CheckCircleIcon className="w-4 h-4" />
-                          <span>Save Changes</span>
+                          <span>{t('profilePage.credentials.form.saveChanges', 'Save Changes')}</span>
                         </>
                       ) : (
                         <>
                           <PlusIcon className="w-4 h-4" />
-                          <span>Add Credential</span>
+                          <span>{t('profilePage.credentials.addCredential', 'Add Credential')}</span>
                         </>
                       )}
                     </>

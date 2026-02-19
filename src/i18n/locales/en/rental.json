@@ -141,6 +141,11 @@
     "optional": "optional",
     "message": "Message",
     "messagePlaceholder": "Any questions or preferences...",
+    "placeholders": {
+      "name": "John Doe",
+      "email": "john@example.com",
+      "phone": "+1 234 567 8900"
+    },
     "confirmDetails": "Confirm your viewing",
     "back": "Back",
     "continue": "Continue",
@@ -148,7 +153,11 @@
     "confirmRequest": "Confirm Request",
     "requestSent": "Viewing Request Sent!",
     "requestSentDesc": "The landlord will confirm your viewing shortly.",
-    "done": "Done"
+    "done": "Done",
+    "ics": {
+      "summary": "Property Viewing",
+      "description": "Scheduled viewing for"
+    }
   },
   "status": {
     "markAsRented": "Mark as Rented",

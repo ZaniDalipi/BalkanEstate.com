@@ -93,9 +93,9 @@ const checkExistingSubscription = (
   currentUser: { subscriptionPlan?: string; subscriptionStatus?: string; subscriptionExpiresAt?: string | Date } | null,
   productId: string | undefined,
   planInterval: 'month' | 'year' | 'once'
-): { hasConflict: boolean; message: string; isUpgrade: boolean; isDowngrade: boolean; isSamePlan: boolean } => {
+): { hasConflict: boolean; messageKey: string; isUpgrade: boolean; isDowngrade: boolean; isSamePlan: boolean } => {
   if (!currentUser?.subscriptionPlan || currentUser.subscriptionStatus !== 'active') {
-    return { hasConflict: false, message: '', isUpgrade: false, isDowngrade: false, isSamePlan: false };
+    return { hasConflict: false, messageKey: '', isUpgrade: false, isDowngrade: false, isSamePlan: false };
   }
 
   const currentPlan = currentUser.subscriptionPlan.toLowerCase();
@@ -105,7 +105,7 @@ const checkExistingSubscription = (
   if (currentPlan === targetPlan) {
     return {
       hasConflict: true,
-      message: 'You already have this subscription active.',
+      messageKey: 'payment:subscription.alreadyActive',
       isUpgrade: false,
       isDowngrade: false,
       isSamePlan: true
@@ -123,14 +123,14 @@ const checkExistingSubscription = (
   if (currentTier === targetTier && currentIsYearly && targetIsMonthly) {
     return {
       hasConflict: true,
-      message: 'You have a yearly subscription active. Cancel it first before switching to monthly.',
+      messageKey: 'payment:subscription.cancelYearlyFirst',
       isUpgrade: false,
       isDowngrade: true,
       isSamePlan: false
     };
   }
 
-  return { hasConflict: false, message: '', isUpgrade: false, isDowngrade: false, isSamePlan: false };
+  return { hasConflict: false, messageKey: '', isUpgrade: false, isDowngrade: false, isSamePlan: false };
 };
 
 interface PaymentWindowProps {
@@ -214,7 +214,7 @@ const PaymentWindow: React.FC<PaymentWindowProps> = ({
       // Validate user is authenticated when opening payment modal
       const token = localStorage.getItem('balkan_estate_token');
       if (!state.isAuthenticated || !token) {
-        onError(t('payment:errors.loginRequired', 'Please log in to complete your purchase'));
+        onError(t('payment:errors.loginRequired'));
         onClose();
         return;
       }
@@ -256,7 +256,7 @@ const PaymentWindow: React.FC<PaymentWindowProps> = ({
     // In development, don't poll aggressively - just show success message
     if (IS_DEVELOPMENT) {
       setIsPolling(true);
-      setPollingMessage('Development mode: Payment window opened. Complete payment manually, then refresh to see subscription status.');
+      setPollingMessage(t('payment:polling.devMode'));
       // Just do a few quick checks then stop
       setTimeout(() => {
         setIsPolling(false);
@@ -267,14 +267,14 @@ const PaymentWindow: React.FC<PaymentWindowProps> = ({
 
     let attempts = 0;
     setIsPolling(true);
-    setPollingMessage(t('payment:polling.waitingForPayment', 'Waiting for payment confirmation...'));
+    setPollingMessage(t('payment:polling.waitingForPayment'));
 
     pollingIntervalRef.current = setInterval(async () => {
       attempts++;
 
       // Check if payment window was closed
       if (paymentWindow && paymentWindow.closed) {
-        setPollingMessage(t('payment:polling.windowClosed', 'Payment window closed. Verifying payment...'));
+        setPollingMessage(t('payment:polling.windowClosed'));
       }
 
       try {
@@ -318,9 +318,9 @@ const PaymentWindow: React.FC<PaymentWindowProps> = ({
 
         // Update polling message based on status
         if (data.paymentStatus === 'processing') {
-          setPollingMessage(t('payment:polling.processing', 'Payment is being processed...'));
+          setPollingMessage(t('payment:polling.processing'));
         } else if (attempts > 10 && paymentWindow?.closed) {
-          setPollingMessage(t('payment:polling.verifying', 'Verifying your payment with our payment provider...'));
+          setPollingMessage(t('payment:polling.verifying'));
         }
 
       } catch (error) {
@@ -335,7 +335,7 @@ const PaymentWindow: React.FC<PaymentWindowProps> = ({
 
         // If window is closed and we haven't confirmed payment, show message
         if (paymentWindow?.closed) {
-          setErrorMessage(t('payment:errors.verificationTimeout', 'Payment verification timed out. If you completed the payment, your subscription will be activated shortly. Please check your email for confirmation.'));
+          setErrorMessage(t('payment:errors.verificationTimeout'));
           setShowError(true);
         }
       }
@@ -345,25 +345,25 @@ const PaymentWindow: React.FC<PaymentWindowProps> = ({
   // Handle payment window close
   const handlePaymentWindowClosed = () => {
     if (!showSuccess && isPolling) {
-      setPollingMessage(t('payment:polling.verifyingAfterClose', 'Verifying payment status...'));
+      setPollingMessage(t('payment:polling.verifyingAfterClose'));
     }
   };
 
   const handleValidateDiscountCode = async () => {
     const trimmedCode = discountCode.trim();
     if (!trimmedCode) {
-      setCodeValidation({ valid: false, message: 'Please enter a discount code' });
+      setCodeValidation({ valid: false, message: t('payment:checkout.enterDiscountCode') });
       return;
     }
 
     // Client-side format validation: alphanumeric, hyphens, underscores only (3-50 chars)
     if (!/^[A-Za-z0-9_-]{3,50}$/.test(trimmedCode)) {
-      setCodeValidation({ valid: false, message: 'Invalid code format. Use only letters, numbers, hyphens and underscores.' });
+      setCodeValidation({ valid: false, message: t('payment:errors.invalidCodeFormat') });
       return;
     }
 
     if (planPrice == null || planPrice < 0) {
-      setCodeValidation({ valid: false, message: 'Invalid plan price' });
+      setCodeValidation({ valid: false, message: t('payment:errors.invalidPlanPrice') });
       return;
     }
 
@@ -388,7 +388,7 @@ const PaymentWindow: React.FC<PaymentWindowProps> = ({
       if (response.ok && data.valid) {
         setCodeValidation({
           valid: true,
-          message: `Discount applied: Save €${data.discount.discountAmount.toFixed(2)}!`,
+          message: t('payment:checkout.discountAppliedSave', { amount: data.discount.discountAmount.toFixed(2) }),
           discountAmount: data.discount.discountAmount,
           finalPrice: data.discount.finalPrice,
         });
@@ -396,13 +396,13 @@ const PaymentWindow: React.FC<PaymentWindowProps> = ({
       } else {
         setCodeValidation({
           valid: false,
-          message: data.message || 'Invalid discount code',
+          message: data.message || t('payment:errors.invalidDiscountCode'),
         });
       }
     } catch (error) {
       setCodeValidation({
         valid: false,
-        message: 'Failed to validate discount code',
+        message: t('payment:checkout.validationFailed'),
       });
     } finally {
       setValidatingCode(false);
@@ -423,7 +423,7 @@ const PaymentWindow: React.FC<PaymentWindowProps> = ({
       const token = localStorage.getItem('balkan_estate_token');
 
       if (!token) {
-        throw new Error('Please log in to complete your purchase');
+        throw new Error(t('payment:errors.loginRequired'));
       }
 
       // Check if this is a 100% off coupon (free subscription)
@@ -447,7 +447,7 @@ const PaymentWindow: React.FC<PaymentWindowProps> = ({
         const data = await response.json();
 
         if (!response.ok) {
-          throw new Error(data.message || 'Failed to apply free subscription');
+          throw new Error(data.message || t('payment:errors.freeSubscriptionFailed'));
         }
 
         // Track free subscription in Google Analytics
@@ -508,7 +508,7 @@ const PaymentWindow: React.FC<PaymentWindowProps> = ({
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.message || 'Failed to create payment session');
+        throw new Error(data.message || t('payment:errors.sessionCreationFailed'));
       }
 
       // Open payment checkout page in new window
@@ -563,11 +563,11 @@ const PaymentWindow: React.FC<PaymentWindowProps> = ({
           window.location.href = data.paymentUrl;
         }
       } else {
-        throw new Error('No payment URL received');
+        throw new Error(t('payment:errors.noPaymentUrl'));
       }
 
     } catch (error) {
-      const message = error instanceof Error ? error.message : t('payment:errors.paymentFailed', 'Failed to initialize payment');
+      const message = error instanceof Error ? error.message : t('payment:errors.paymentFailed');
       setErrorMessage(message);
       setShowError(true);
       onError(message);
@@ -589,10 +589,10 @@ const PaymentWindow: React.FC<PaymentWindowProps> = ({
                 <CheckCircleIcon className="w-10 h-10 text-white" />
               </div>
               <h2 className="text-2xl font-bold text-neutral-800 mb-2">
-                {subscriptionCheck.isSamePlan ? 'Already Subscribed' : 'Subscription Active'}
+                {subscriptionCheck.isSamePlan ? t('payment:subscription.alreadySubscribed') : t('payment:subscription.subscriptionActive')}
               </h2>
               <p className="text-sm text-neutral-500">
-                {subscriptionCheck.message}
+                {t(subscriptionCheck.messageKey)}
               </p>
             </div>
 
@@ -600,17 +600,17 @@ const PaymentWindow: React.FC<PaymentWindowProps> = ({
             <div className="rounded-xl p-6 border bg-gradient-to-br from-green-50 to-emerald-50 border-green-200">
               <div className="flex justify-between items-start mb-4">
                 <div>
-                  <p className="text-sm text-neutral-500 mb-1">Current Plan</p>
+                  <p className="text-sm text-neutral-500 mb-1">{t('payment:subscription.currentPlan')}</p>
                   <h3 className="text-lg font-bold text-neutral-800">
                     {state.currentUser?.subscriptionProductName || state.currentUser?.subscriptionPlan || 'Pro'}
                   </h3>
                   <p className="text-sm text-green-600 font-medium mt-1">
-                    {state.currentUser?.subscriptionStatus === 'active' ? '✓ Active' : state.currentUser?.subscriptionStatus}
+                    {state.currentUser?.subscriptionStatus === 'active' ? t('payment:subscription.active') : state.currentUser?.subscriptionStatus}
                   </p>
                 </div>
                 {state.currentUser?.subscriptionExpiresAt && (
                   <div className="text-right">
-                    <p className="text-xs text-neutral-500">Renews on</p>
+                    <p className="text-xs text-neutral-500">{t('payment:subscription.renewsOn')}</p>
                     <p className="text-sm font-medium text-neutral-700">
                       {new Date(state.currentUser.subscriptionExpiresAt).toLocaleDateString()}
                     </p>
@@ -627,12 +627,12 @@ const PaymentWindow: React.FC<PaymentWindowProps> = ({
                 </svg>
                 <div className="flex-1">
                   <p className="text-sm font-semibold text-blue-900 mb-1">
-                    {subscriptionCheck.isDowngrade ? 'Want to switch plans?' : 'Manage your subscription'}
+                    {subscriptionCheck.isDowngrade ? t('payment:subscription.wantToSwitch') : t('payment:subscription.manageYourSubscription')}
                   </p>
                   <p className="text-xs text-blue-700 leading-relaxed">
                     {subscriptionCheck.isDowngrade
-                      ? 'To switch from yearly to monthly billing, please cancel your current subscription first. After it expires, you can subscribe to the monthly plan.'
-                      : 'You can manage your subscription from your Account Settings. Cancel anytime before the renewal date.'}
+                      ? t('payment:subscription.switchToMonthlyInfo')
+                      : t('payment:subscription.manageInfo')}
                   </p>
                 </div>
               </div>
@@ -648,14 +648,14 @@ const PaymentWindow: React.FC<PaymentWindowProps> = ({
               }}
               className="w-full py-4 px-6 rounded-xl font-bold text-lg shadow-lg bg-gradient-to-r from-primary to-primary-dark text-white hover:shadow-xl transform hover:-translate-y-0.5 transition-all"
             >
-              Manage Subscription
+              {t('payment:subscription.manageSubscription')}
             </button>
 
             <button
               onClick={onClose}
               className="w-full py-3 text-neutral-600 hover:text-neutral-800 font-medium transition-colors"
             >
-              Close
+              {t('common:close')}
             </button>
           </div>
         </div>
@@ -792,12 +792,12 @@ const PaymentWindow: React.FC<PaymentWindowProps> = ({
               </div>
 
               <h2 className="text-xl sm:text-2xl font-bold text-neutral-800 mb-1 sm:mb-2">
-                {canActivateFree ? 'Activate Free Subscription' : `Subscribe to ${planName}`}
+                {canActivateFree ? t('payment:checkout.activateFreeSubscription') : t('payment:checkout.subscribeTo', { plan: planName })}
               </h2>
               <p className="text-xs sm:text-sm text-neutral-500">
                 {canActivateFree
-                  ? 'Your coupon provides 100% off!'
-                  : `€${planPrice.toFixed(2)}/${planInterval} - Premium features await you`}
+                  ? t('payment:checkout.coupon100Off')
+                  : t('payment:checkout.priceDescription', { price: planPrice.toFixed(2), interval: planInterval })}
               </p>
             </div>
 
@@ -809,12 +809,12 @@ const PaymentWindow: React.FC<PaymentWindowProps> = ({
                   <div className="flex justify-between items-start mb-3">
                     <div>
                       <h3 className="text-base sm:text-lg font-bold text-neutral-800">{planName}</h3>
-                      <p className="text-xs sm:text-sm text-neutral-500 capitalize">Billed {planInterval}ly</p>
+                      <p className="text-xs sm:text-sm text-neutral-500 capitalize">{planInterval === 'year' ? t('payment:checkout.billedYearly') : planInterval === 'month' ? t('payment:checkout.billedMonthly') : t('payment:checkout.billedOnce')}</p>
                     </div>
                     <div className="text-right">
                       <p className="text-xs sm:text-sm text-neutral-400 line-through">€{planPrice.toFixed(2)}</p>
-                      <p className="text-xl sm:text-2xl font-bold text-green-600">FREE</p>
-                      <p className="text-[10px] sm:text-xs text-green-600 font-semibold">100% OFF!</p>
+                      <p className="text-xl sm:text-2xl font-bold text-green-600">{t('payment:checkout.free')}</p>
+                      <p className="text-[10px] sm:text-xs text-green-600 font-semibold">{t('payment:checkout.fullDiscount')}</p>
                     </div>
                   </div>
 
@@ -825,7 +825,7 @@ const PaymentWindow: React.FC<PaymentWindowProps> = ({
                         <CheckCircleIcon className="w-4 h-4 sm:w-5 sm:h-5 text-green-600 flex-shrink-0" />
                         <div>
                           <p className="text-xs sm:text-sm text-green-700 font-medium">
-                            Code &quot;{appliedDiscountCode}&quot; applied!
+                            {t('payment:checkout.codeApplied', { code: appliedDiscountCode })}
                           </p>
                           <p className="text-[10px] sm:text-xs text-green-600">{codeValidation.message}</p>
                         </div>
@@ -834,7 +834,7 @@ const PaymentWindow: React.FC<PaymentWindowProps> = ({
                         onClick={handleRemoveDiscountCode}
                         className="text-green-700 hover:text-green-900 text-[10px] sm:text-xs font-medium"
                       >
-                        Remove
+                        {t('payment:checkout.remove')}
                       </button>
                     </div>
                   )}
@@ -845,9 +845,9 @@ const PaymentWindow: React.FC<PaymentWindowProps> = ({
                   <div className="flex gap-2 sm:gap-3">
                     <CheckCircleIcon className="w-5 h-5 sm:w-6 sm:h-6 text-green-600 flex-shrink-0 mt-0.5" />
                     <div className="flex-1">
-                      <p className="text-xs sm:text-sm font-semibold text-green-900 mb-0.5 sm:mb-1">Free Subscription Ready</p>
+                      <p className="text-xs sm:text-sm font-semibold text-green-900 mb-0.5 sm:mb-1">{t('payment:checkout.freeSubscriptionReady')}</p>
                       <p className="text-[10px] sm:text-xs text-green-700 leading-relaxed">
-                        Your discount code provides 100% off! Click below to activate your subscription immediately - no payment required.
+                        {t('payment:checkout.freeSubscriptionReadyDescription')}
                       </p>
                     </div>
                   </div>
@@ -863,12 +863,12 @@ const PaymentWindow: React.FC<PaymentWindowProps> = ({
                   {isProcessing ? (
                     <>
                       <div className="animate-spin rounded-full h-4 w-4 sm:h-5 sm:w-5 border-2 border-white border-t-transparent"></div>
-                      <span>Activating...</span>
+                      <span>{t('payment:checkout.activating')}</span>
                     </>
                   ) : (
                     <>
                       <CheckCircleIcon className="w-4 h-4 sm:w-5 sm:h-5" />
-                      <span>Activate Free Subscription</span>
+                      <span>{t('payment:checkout.activateFreeSubscription')}</span>
                     </>
                   )}
                 </button>
@@ -892,8 +892,8 @@ const PaymentWindow: React.FC<PaymentWindowProps> = ({
                         </svg>
                       </div>
                       <div className="text-left">
-                        <p className="text-sm sm:text-base font-semibold text-neutral-800">Did we provide a coupon for you?</p>
-                        <p className="text-[10px] sm:text-xs text-neutral-500">Enter your code to activate your subscription</p>
+                        <p className="text-sm sm:text-base font-semibold text-neutral-800">{t('payment:checkout.haveCoupon')}</p>
+                        <p className="text-[10px] sm:text-xs text-neutral-500">{t('payment:checkout.enterCodeToActivate')}</p>
                       </div>
                     </div>
                     <svg className={`w-4 h-4 sm:w-5 sm:h-5 text-neutral-400 transition-transform ${showCouponInput ? 'rotate-180' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -908,14 +908,14 @@ const PaymentWindow: React.FC<PaymentWindowProps> = ({
                         <div className="flex justify-between items-start mb-3">
                           <div>
                             <h3 className="text-sm sm:text-base font-bold text-neutral-800">{planName}</h3>
-                            <p className="text-xs text-neutral-500 capitalize">Billed {planInterval}ly</p>
+                            <p className="text-xs text-neutral-500 capitalize">{planInterval === 'year' ? t('payment:checkout.billedYearly') : planInterval === 'month' ? t('payment:checkout.billedMonthly') : t('payment:checkout.billedOnce')}</p>
                           </div>
                           <div className="text-right">
                             {codeValidation?.valid ? (
                               <>
                                 <p className="text-xs text-neutral-400 line-through">€{planPrice.toFixed(2)}</p>
                                 <p className="text-lg sm:text-xl font-bold text-primary">€{finalPrice.toFixed(2)}</p>
-                                <p className="text-[10px] text-green-600 font-semibold">Save €{savings.toFixed(2)}</p>
+                                <p className="text-[10px] text-green-600 font-semibold">{t('payment:checkout.save', { amount: savings.toFixed(2) })}</p>
                               </>
                             ) : (
                               <p className="text-lg sm:text-xl font-bold text-neutral-700">€{planPrice.toFixed(2)}</p>
@@ -931,7 +931,7 @@ const PaymentWindow: React.FC<PaymentWindowProps> = ({
                                 type="text"
                                 value={discountCode}
                                 onChange={(e) => setDiscountCode(e.target.value.toUpperCase())}
-                                placeholder="Enter coupon code"
+                                placeholder={t('payment:checkout.enterCouponCode')}
                                 className="flex-1 px-2.5 sm:px-3 py-2 sm:py-2.5 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent text-sm"
                                 onKeyPress={(e) => e.key === 'Enter' && handleValidateDiscountCode()}
                                 disabled={validatingCode}
@@ -941,7 +941,7 @@ const PaymentWindow: React.FC<PaymentWindowProps> = ({
                                 disabled={validatingCode || !discountCode.trim()}
                                 className="px-4 sm:px-5 py-2 sm:py-2.5 bg-primary text-white rounded-lg font-semibold text-sm hover:bg-primary-dark transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                               >
-                                {validatingCode ? 'Checking...' : 'Apply'}
+                                {validatingCode ? t('payment:checkout.checking') : t('payment:checkout.apply')}
                               </button>
                             </div>
                             {codeValidation && !codeValidation.valid && (
@@ -956,7 +956,7 @@ const PaymentWindow: React.FC<PaymentWindowProps> = ({
                             <div className="flex items-center gap-2">
                               <CheckCircleIcon className="w-4 h-4 sm:w-5 sm:h-5 text-green-600 flex-shrink-0" />
                               <div>
-                                <p className="text-xs sm:text-sm text-green-700 font-medium">Code &quot;{appliedDiscountCode}&quot; applied!</p>
+                                <p className="text-xs sm:text-sm text-green-700 font-medium">{t('payment:checkout.codeApplied', { code: appliedDiscountCode })}</p>
                                 <p className="text-[10px] sm:text-xs text-green-600">{codeValidation.message}</p>
                               </div>
                             </div>
@@ -964,7 +964,7 @@ const PaymentWindow: React.FC<PaymentWindowProps> = ({
                               onClick={handleRemoveDiscountCode}
                               className="text-green-700 hover:text-green-900 text-[10px] sm:text-xs font-medium"
                             >
-                              Remove
+                              {t('payment:checkout.remove')}
                             </button>
                           </div>
                         )}
@@ -980,20 +980,20 @@ const PaymentWindow: React.FC<PaymentWindowProps> = ({
                       <CreditCardIcon className="w-4 h-4 sm:w-5 sm:h-5 text-amber-600" />
                     </div>
                     <div>
-                      <p className="text-sm sm:text-base font-semibold text-neutral-800">Self-service payment</p>
-                      <p className="text-[10px] sm:text-xs text-neutral-500">Online payment gateway launching soon</p>
+                      <p className="text-sm sm:text-base font-semibold text-neutral-800">{t('payment:comingSoon.selfServicePayment')}</p>
+                      <p className="text-[10px] sm:text-xs text-neutral-500">{t('payment:comingSoon.launchingSoon')}</p>
                     </div>
                   </div>
                   <div className="flex items-center gap-2 px-2 py-1.5 bg-amber-50 border border-amber-200 rounded-lg">
                     <span className="w-2 h-2 bg-amber-500 rounded-full animate-pulse flex-shrink-0"></span>
-                    <p className="text-[10px] sm:text-xs text-amber-700 font-medium">Payment integration in progress</p>
+                    <p className="text-[10px] sm:text-xs text-amber-700 font-medium">{t('payment:comingSoon.integrationInProgress')}</p>
                   </div>
                 </div>
 
                 {/* Contact sales */}
                 <div className="rounded-lg sm:rounded-xl border border-neutral-200 bg-white p-3 sm:p-4">
                   <p className="text-xs sm:text-sm text-neutral-600 mb-2.5">
-                    Need help or want to subscribe manually? Contact our sales team:
+                    {t('payment:comingSoon.contactSalesDescription')}
                   </p>
                   <a
                     href="mailto:sales@balkanestateai.com?subject=Subscription%20Request%20-%20BalkanEstate"
@@ -1004,7 +1004,7 @@ const PaymentWindow: React.FC<PaymentWindowProps> = ({
                     </svg>
                     sales@balkanestateai.com
                   </a>
-                  <p className="text-[10px] sm:text-xs text-neutral-400 mt-2">We typically respond within 24 hours</p>
+                  <p className="text-[10px] sm:text-xs text-neutral-400 mt-2">{t('payment:comingSoon.responseTime')}</p>
                 </div>
               </>
             )}
@@ -1014,7 +1014,7 @@ const PaymentWindow: React.FC<PaymentWindowProps> = ({
               onClick={onClose}
               className="w-full py-2 sm:py-3 text-neutral-600 hover:text-neutral-800 font-medium text-sm sm:text-base transition-colors"
             >
-              Close
+              {t('common:close')}
             </button>
           </div>
         </div>
@@ -1034,10 +1034,10 @@ const PaymentWindow: React.FC<PaymentWindowProps> = ({
                 <div className="animate-spin rounded-full h-10 w-10 border-4 border-white border-t-transparent"></div>
               </div>
               <h2 className="text-2xl font-bold text-neutral-800 mb-2">
-                {t('payment:inProgress.title', 'Payment in Progress')}
+                {t('payment:inProgress.title')}
               </h2>
               <p className="text-sm text-neutral-500">
-                {pollingMessage || t('payment:inProgress.description', 'Please complete your payment in the new window')}
+                {pollingMessage || t('payment:inProgress.description')}
               </p>
             </div>
 
@@ -1047,7 +1047,7 @@ const PaymentWindow: React.FC<PaymentWindowProps> = ({
                 <div>
                   <h3 className="text-lg font-bold text-neutral-800">{planName}</h3>
                   <p className="text-sm text-neutral-500 capitalize">
-                    {t('payment:inProgress.billed', 'Billed')} {planInterval === 'year' ? t('payment:inProgress.yearly', 'yearly') : t('payment:inProgress.monthly', 'monthly')}
+                    {planInterval === 'year' ? t('payment:checkout.billedYearly') : t('payment:checkout.billedMonthly')}
                   </p>
                 </div>
                 <div className="text-right">
@@ -1062,10 +1062,10 @@ const PaymentWindow: React.FC<PaymentWindowProps> = ({
                 <ClockIcon className="w-6 h-6 text-amber-600 flex-shrink-0 mt-0.5" />
                 <div className="flex-1">
                   <p className="text-sm font-semibold text-amber-900 mb-1">
-                    {t('payment:inProgress.waitingTitle', 'Waiting for Payment')}
+                    {t('payment:inProgress.waitingTitle')}
                   </p>
                   <p className="text-xs text-amber-700 leading-relaxed">
-                    {t('payment:inProgress.waitingMessage', 'Complete your payment in the popup window. This page will update automatically once your payment is confirmed.')}
+                    {t('payment:inProgress.waitingMessage')}
                   </p>
                 </div>
               </div>
@@ -1077,12 +1077,12 @@ const PaymentWindow: React.FC<PaymentWindowProps> = ({
                 <CreditCardIcon className="w-6 h-6 text-blue-600 flex-shrink-0 mt-0.5" />
                 <div className="flex-1">
                   <p className="text-sm font-semibold text-blue-900 mb-1">
-                    {t('payment:inProgress.subscriptionInfo', 'Subscription Information')}
+                    {t('payment:inProgress.subscriptionInfo')}
                   </p>
                   <ul className="text-xs text-blue-700 leading-relaxed space-y-1">
-                    <li>• {t('payment:inProgress.autoRenewal', 'Your subscription will automatically renew at the end of each billing period')}</li>
-                    <li>• {t('payment:inProgress.renewalReminder', 'You will receive a reminder email 7 days before renewal')}</li>
-                    <li>• {t('payment:inProgress.cancelAnytime', 'You can cancel anytime from your account settings')}</li>
+                    <li>• {t('payment:inProgress.autoRenewal')}</li>
+                    <li>• {t('payment:inProgress.renewalReminder')}</li>
+                    <li>• {t('payment:inProgress.cancelAnytime')}</li>
                   </ul>
                 </div>
               </div>
@@ -1104,12 +1104,12 @@ const PaymentWindow: React.FC<PaymentWindowProps> = ({
               }}
               className="w-full py-3 text-neutral-600 hover:text-neutral-800 font-medium transition-colors border border-neutral-300 rounded-xl hover:bg-neutral-50"
             >
-              {t('payment:inProgress.cancel', 'Cancel and Close')}
+              {t('payment:inProgress.cancel')}
             </button>
 
             {/* Help text */}
             <p className="text-xs text-center text-neutral-400">
-              {t('payment:inProgress.helpText', 'If the payment window didn\'t open, please check your popup blocker')}
+              {t('payment:inProgress.helpText')}
             </p>
           </div>
         </div>
@@ -1127,19 +1127,19 @@ const PaymentWindow: React.FC<PaymentWindowProps> = ({
               <ExclamationTriangleIcon className="w-8 h-8 sm:w-10 sm:h-10 text-red-500" />
             </div>
             <h2 className="text-xl sm:text-2xl font-bold text-neutral-800 mb-2">
-              {t('payment:errors.title', 'Payment Error')}
+              {t('payment:errors.title')}
             </h2>
             <p className="text-sm sm:text-base text-neutral-600 mb-4 px-4">
               {errorMessage}
             </p>
             <div className="bg-amber-50 border border-amber-200 rounded-lg p-3 sm:p-4 mb-4 mx-4 text-left">
               <p className="text-xs sm:text-sm text-amber-800">
-                <strong>{t('payment:errors.whatToDo', 'What you can do:')}</strong>
+                <strong>{t('payment:errors.whatToDo')}</strong>
               </p>
               <ul className="text-xs sm:text-sm text-amber-700 mt-2 space-y-1 list-disc list-inside">
-                <li>{t('payment:errors.checkConnection', 'Check your internet connection')}</li>
-                <li>{t('payment:errors.tryAgain', 'Try again in a few moments')}</li>
-                <li>{t('payment:errors.contactSupport', 'Contact support if the issue persists')}</li>
+                <li>{t('payment:errors.checkConnection')}</li>
+                <li>{t('payment:errors.tryAgain')}</li>
+                <li>{t('payment:errors.contactSupport')}</li>
               </ul>
             </div>
             <div className="flex gap-3 justify-center">
@@ -1147,13 +1147,13 @@ const PaymentWindow: React.FC<PaymentWindowProps> = ({
                 onClick={() => setShowError(false)}
                 className="px-6 py-2.5 bg-primary text-white rounded-lg font-medium text-sm hover:bg-primary-dark transition-colors"
               >
-                {t('common:tryAgain', 'Try Again')}
+                {t('common:tryAgain')}
               </button>
               <button
                 onClick={onClose}
                 className="px-6 py-2.5 border border-neutral-300 text-neutral-700 rounded-lg font-medium text-sm hover:bg-neutral-50 transition-colors"
               >
-                {t('common:close', 'Close')}
+                {t('common:close')}
               </button>
             </div>
           </div>
@@ -1165,11 +1165,11 @@ const PaymentWindow: React.FC<PaymentWindowProps> = ({
             </div>
 
             <h2 className="text-2xl sm:text-3xl font-bold text-neutral-800 mb-3">
-              {t('payment:success.title', 'Payment Successful!')}
+              {t('payment:success.title')}
             </h2>
 
             <p className="text-base text-neutral-600 mb-6">
-              {t('payment:success.message', 'Your subscription has been activated.')}
+              {t('payment:success.message')}
             </p>
 
             {/* Plan activated info */}
@@ -1180,18 +1180,18 @@ const PaymentWindow: React.FC<PaymentWindowProps> = ({
                 </div>
                 <div>
                   <p className="font-semibold text-green-800">{planName}</p>
-                  <p className="text-sm text-green-600">Now active on your account</p>
+                  <p className="text-sm text-green-600">{t('payment:success.nowActive')}</p>
                 </div>
               </div>
             </div>
 
             {/* What's next */}
             <div className="bg-blue-50 border border-blue-200 rounded-xl p-4 mb-6 text-left">
-              <p className="font-semibold text-blue-900 mb-2">What happens next?</p>
+              <p className="font-semibold text-blue-900 mb-2">{t('payment:success.whatsNext')}</p>
               <ul className="text-sm text-blue-700 space-y-1">
-                <li>• You now have access to all premium features</li>
-                <li>• A confirmation email has been sent to you</li>
-                <li>• Manage your subscription in Account Settings</li>
+                <li>• {t('payment:success.premiumAccess')}</li>
+                <li>• {t('payment:success.confirmationSent')}</li>
+                <li>• {t('payment:success.subscriptionActive')}</li>
               </ul>
             </div>
 
@@ -1204,7 +1204,7 @@ const PaymentWindow: React.FC<PaymentWindowProps> = ({
               }}
               className="w-full py-4 px-6 rounded-xl font-bold text-lg shadow-lg bg-gradient-to-r from-green-500 to-emerald-600 text-white hover:shadow-xl transform hover:-translate-y-0.5 transition-all"
             >
-              {t('payment:success.continue', 'Continue to Dashboard')}
+              {t('payment:success.continue')}
             </button>
           </div>
         ) : (
@@ -1214,8 +1214,8 @@ const PaymentWindow: React.FC<PaymentWindowProps> = ({
               <div className="w-12 h-12 sm:w-16 sm:h-16 bg-gradient-to-br from-primary to-primary-dark rounded-xl sm:rounded-2xl flex items-center justify-center mx-auto mb-3 sm:mb-4 shadow-lg">
                 <CreditCardIcon className="w-6 h-6 sm:w-8 sm:h-8 text-white" />
               </div>
-              <h2 className="text-lg sm:text-2xl font-bold text-neutral-800 mb-1 sm:mb-2">Secure Checkout</h2>
-              <p className="text-xs sm:text-sm text-neutral-500">Complete your purchase on our secure payment partner</p>
+              <h2 className="text-lg sm:text-2xl font-bold text-neutral-800 mb-1 sm:mb-2">{t('payment:checkout.secureCheckout')}</h2>
+              <p className="text-xs sm:text-sm text-neutral-500">{t('payment:checkout.secureCheckoutDescription')}</p>
             </div>
 
             {/* Plan Summary */}
@@ -1227,7 +1227,7 @@ const PaymentWindow: React.FC<PaymentWindowProps> = ({
               <div className="flex justify-between items-start mb-3 sm:mb-4">
                 <div>
                   <h3 className="text-base sm:text-lg font-bold text-neutral-800">{planName}</h3>
-                  <p className="text-xs sm:text-sm text-neutral-500 capitalize">Billed {planInterval}ly</p>
+                  <p className="text-xs sm:text-sm text-neutral-500 capitalize">{planInterval === 'year' ? t('payment:checkout.billedYearly') : planInterval === 'month' ? t('payment:checkout.billedMonthly') : t('payment:checkout.billedOnce')}</p>
                 </div>
                 <div className="text-right">
                   {(discountPercent > 0 || codeValidation?.valid) && (
@@ -1236,10 +1236,10 @@ const PaymentWindow: React.FC<PaymentWindowProps> = ({
                       <p className={`text-xl sm:text-2xl font-bold ${
                         finalPrice === 0 || finalPrice < 0.01 ? 'text-green-600' : 'text-primary'
                       }`}>
-                        {finalPrice === 0 || finalPrice < 0.01 ? 'FREE' : `€${finalPrice.toFixed(2)}`}
+                        {finalPrice === 0 || finalPrice < 0.01 ? t('payment:checkout.free') : `€${finalPrice.toFixed(2)}`}
                       </p>
                       <p className="text-[10px] sm:text-xs text-green-600 font-semibold">
-                        {finalPrice === 0 || finalPrice < 0.01 ? '100% OFF!' : `Save €${savings.toFixed(2)}`}
+                        {finalPrice === 0 || finalPrice < 0.01 ? t('payment:checkout.fullDiscount') : t('payment:checkout.save', { amount: savings.toFixed(2) })}
                       </p>
                     </>
                   )}
@@ -1253,14 +1253,14 @@ const PaymentWindow: React.FC<PaymentWindowProps> = ({
               {!appliedDiscountCode && (
                 <div className="mb-3 sm:mb-4">
                   <label className="block text-xs sm:text-sm font-medium text-neutral-700 mb-1.5 sm:mb-2">
-                    Have a discount code?
+                    {t('payment:checkout.haveDiscountCode')}
                   </label>
                   <div className="flex gap-1.5 sm:gap-2">
                     <input
                       type="text"
                       value={discountCode}
                       onChange={(e) => setDiscountCode(e.target.value.toUpperCase())}
-                      placeholder="Enter code"
+                      placeholder={t('payment:checkout.enterCode')}
                       className="flex-1 px-2.5 sm:px-3 py-1.5 sm:py-2 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent text-xs sm:text-sm"
                       onKeyPress={(e) => e.key === 'Enter' && handleValidateDiscountCode()}
                       disabled={validatingCode}
@@ -1270,7 +1270,7 @@ const PaymentWindow: React.FC<PaymentWindowProps> = ({
                       disabled={validatingCode || !discountCode.trim()}
                       className="px-3 sm:px-4 py-1.5 sm:py-2 bg-primary text-white rounded-lg font-medium text-xs sm:text-sm hover:bg-primary-dark transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                     >
-                      {validatingCode ? 'Checking...' : 'Apply'}
+                      {validatingCode ? t('payment:checkout.checking') : t('payment:checkout.apply')}
                     </button>
                   </div>
                   {codeValidation && !codeValidation.valid && (
@@ -1286,7 +1286,7 @@ const PaymentWindow: React.FC<PaymentWindowProps> = ({
                     <CheckCircleIcon className="w-4 h-4 sm:w-5 sm:h-5 text-green-600 flex-shrink-0" />
                     <div>
                       <p className="text-xs sm:text-sm text-green-700 font-medium">
-                        Code "{appliedDiscountCode}" applied!
+                        {t('payment:checkout.codeApplied', { code: appliedDiscountCode })}
                       </p>
                       <p className="text-[10px] sm:text-xs text-green-600">{codeValidation.message}</p>
                     </div>
@@ -1295,7 +1295,7 @@ const PaymentWindow: React.FC<PaymentWindowProps> = ({
                     onClick={handleRemoveDiscountCode}
                     className="text-green-700 hover:text-green-900 text-[10px] sm:text-xs font-medium"
                   >
-                    Remove
+                    {t('payment:checkout.remove')}
                   </button>
                 </div>
               )}
@@ -1304,7 +1304,7 @@ const PaymentWindow: React.FC<PaymentWindowProps> = ({
                 <div className="bg-green-50 border border-green-200 rounded-lg p-2 sm:p-3 flex items-center gap-1.5 sm:gap-2">
                   <CheckCircleIcon className="w-4 h-4 sm:w-5 sm:h-5 text-green-600 flex-shrink-0" />
                   <p className="text-xs sm:text-sm text-green-700 font-medium">
-                    {discountPercent}% discount applied!
+                    {t('payment:checkout.discountApplied', { percent: discountPercent })}
                   </p>
                 </div>
               )}
@@ -1315,9 +1315,9 @@ const PaymentWindow: React.FC<PaymentWindowProps> = ({
               <div className="bg-green-50 border border-green-200 rounded-lg p-3 sm:p-4 flex gap-2 sm:gap-3">
                 <CheckCircleIcon className="w-4 h-4 sm:w-5 sm:h-5 text-green-600 flex-shrink-0 mt-0.5" />
                 <div className="flex-1">
-                  <p className="text-xs sm:text-sm font-semibold text-green-900 mb-0.5 sm:mb-1">Free Subscription Activated</p>
+                  <p className="text-xs sm:text-sm font-semibold text-green-900 mb-0.5 sm:mb-1">{t('payment:checkout.freeSubscriptionActivated')}</p>
                   <p className="text-[10px] sm:text-xs text-green-700 leading-relaxed">
-                    Your discount code provides 100% off! Click the button below to activate your free subscription immediately. No payment required.
+                    {t('payment:checkout.freeSubscriptionDescription')}
                   </p>
                 </div>
               </div>
@@ -1325,10 +1325,9 @@ const PaymentWindow: React.FC<PaymentWindowProps> = ({
               <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 sm:p-4 flex gap-2 sm:gap-3">
                 <LockClosedIcon className="w-4 h-4 sm:w-5 sm:h-5 text-blue-600 flex-shrink-0 mt-0.5" />
                 <div className="flex-1">
-                  <p className="text-xs sm:text-sm font-semibold text-blue-900 mb-0.5 sm:mb-1">Secure External Payment</p>
+                  <p className="text-xs sm:text-sm font-semibold text-blue-900 mb-0.5 sm:mb-1">{t('payment:checkout.secureExternalPayment')}</p>
                   <p className="text-[10px] sm:text-xs text-blue-700 leading-relaxed">
-                    You'll be redirected to our secure payment partner (LemonSqueezy) to complete your purchase.
-                    We never store your card details - they're handled entirely by our certified payment processor.
+                    {t('payment:checkout.secureExternalPaymentDescription')}
                   </p>
                 </div>
               </div>
@@ -1342,10 +1341,10 @@ const PaymentWindow: React.FC<PaymentWindowProps> = ({
                 </svg>
                 <div className="flex-1">
                   <p className="text-xs sm:text-sm font-semibold text-amber-900 mb-0.5 sm:mb-1">
-                    {t('payment:taxNotice.title', 'Taxes May Apply')}
+                    {t('payment:taxNotice.title')}
                   </p>
                   <p className="text-[10px] sm:text-xs text-amber-700 leading-relaxed">
-                    {t('payment:taxNotice.description', 'The final price at checkout may include applicable VAT/taxes based on your location. LemonSqueezy, as Merchant of Record, handles all tax compliance automatically.')}
+                    {t('payment:taxNotice.description')}
                   </p>
                 </div>
               </div>
@@ -1363,21 +1362,21 @@ const PaymentWindow: React.FC<PaymentWindowProps> = ({
                   />
                 </div>
                 <span className="text-xs sm:text-sm text-gray-700 leading-relaxed">
-                  {t('payment:termsAcceptance.text', 'I agree to the')}{' '}
+                  {t('payment:termsAcceptance.text')}{' '}
                   <a href="/terms" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline font-medium">
-                    {t('payment:termsAcceptance.terms', 'Terms of Service')}
+                    {t('payment:termsAcceptance.terms')}
                   </a>
                   {', '}
                   <a href="/privacy" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline font-medium">
-                    {t('payment:termsAcceptance.privacy', 'Privacy Policy')}
+                    {t('payment:termsAcceptance.privacy')}
                   </a>
                   {', '}
-                  {t('payment:termsAcceptance.and', 'and')}{' '}
+                  {t('payment:termsAcceptance.and')}{' '}
                   <a href="/refund" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline font-medium">
-                    {t('payment:termsAcceptance.refund', 'Refund Policy')}
+                    {t('payment:termsAcceptance.refund')}
                   </a>
                   {'. '}
-                  {t('payment:termsAcceptance.lemonsqueezy', 'Payments are processed by LemonSqueezy as Merchant of Record.')}
+                  {t('payment:termsAcceptance.lemonsqueezy')}
                 </span>
               </label>
             </div>
@@ -1400,11 +1399,11 @@ const PaymentWindow: React.FC<PaymentWindowProps> = ({
               {isProcessing ? (
                 <>
                   <div className="animate-spin rounded-full h-4 w-4 sm:h-5 sm:w-5 border-2 border-white border-t-transparent"></div>
-                  <span className="text-xs sm:text-base">{finalPrice === 0 || finalPrice < 0.01 ? 'Activating...' : 'Redirecting...'}</span>
+                  <span className="text-xs sm:text-base">{finalPrice === 0 || finalPrice < 0.01 ? t('payment:checkout.activating') : t('payment:checkout.redirecting')}</span>
                 </>
               ) : (
                 <>
-                  <span>{finalPrice === 0 || finalPrice < 0.01 ? 'Activate Free Subscription' : 'Continue to Payment'}</span>
+                  <span>{finalPrice === 0 || finalPrice < 0.01 ? t('payment:checkout.activateFreeSubscription') : t('payment:checkout.continueToPayment')}</span>
                   {finalPrice === 0 || finalPrice < 0.01 ? (
                     <CheckCircleIcon className="w-4 h-4 sm:w-5 sm:h-5" />
                   ) : (
@@ -1420,7 +1419,7 @@ const PaymentWindow: React.FC<PaymentWindowProps> = ({
               disabled={isProcessing}
               className="w-full py-2 sm:py-3 text-neutral-600 hover:text-neutral-800 font-medium text-sm sm:text-base transition-colors disabled:opacity-50"
             >
-              Cancel
+              {t('common:cancel')}
             </button>
 
             {/* Trust Badges */}
@@ -1428,15 +1427,15 @@ const PaymentWindow: React.FC<PaymentWindowProps> = ({
               <div className="flex flex-wrap items-center justify-center gap-2 sm:gap-4 text-[10px] sm:text-xs text-neutral-400">
                 <div className="flex items-center gap-1">
                   <LockClosedIcon className="w-2.5 h-2.5 sm:w-3 sm:h-3" />
-                  <span>SSL Secured</span>
+                  <span>{t('payment:checkout.sslSecured')}</span>
                 </div>
                 <span className="hidden sm:inline">•</span>
                 <div className="flex items-center gap-1">
                   <CheckCircleIcon className="w-2.5 h-2.5 sm:w-3 sm:h-3" />
-                  <span>PCI Compliant</span>
+                  <span>{t('payment:checkout.pciCompliant')}</span>
                 </div>
                 <span className="hidden sm:inline">•</span>
-                <span>Secure Payment</span>
+                <span>{t('payment:checkout.securePayment')}</span>
               </div>
             </div>
           </div>

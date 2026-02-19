@@ -46,7 +46,11 @@
       "location": "Locație",
       "review": "Revizuire"
     },
-    "progress": "Pasul {{current}} din {{total}}",
+    "progress": {
+      "compressing": "Se comprimă imaginile...",
+      "uploading": "Se încarcă în cloud...",
+      "creating": "Se creează anunțul..."
+    },
     "nextStep": "Pasul Următor",
     "previousStep": "Pasul Anterior",
     "skipToManual": "Treci la Introducere Manuală",
@@ -231,12 +235,8 @@
       "description": "Adaugă un tur virtual 360° imersiv pentru a ajuta cumpărătorii să exploreze proprietatea ta de la distanță. Suportă Matterport, Kuula, Zillow 3D Home și alți furnizori de tururi 360.",
       "label": "URL Tur 360°",
       "placeholder": "https://my.matterport.com/show/?m=... sau https://kuula.co/share/...",
-      "hint": "Lipește URL-ul de încorporare sau partajare de la furnizorul tău de tururi 360. Turul va fi afișat ca un iframe interactiv în anunțul tău."
-    },
-    "progress": {
-      "compressing": "Se comprimă imaginile...",
-      "uploading": "Se încarcă în cloud...",
-      "creating": "Se creează anunțul..."
+      "hint": "Lipește URL-ul de încorporare sau partajare de la furnizorul tău de tururi 360. Turul va fi afișat ca un iframe interactiv în anunțul tău.",
+      "z360Hint": "Create your tour at z360-virtual-tour.vercel.app and paste the link here"
     },
     "promotion": {
       "title": "Promovează-ți Anunțul",
@@ -274,6 +274,13 @@
       "proReached": "Ai atins limita de anunțuri Pro.",
       "agentProRequired": "Agenții trebuie să aibă un abonament Pro activ pentru a posta anunțuri. Abonează-te acum pentru 25 anunțuri active!",
       "buyerCannotCreate": "Cumpărătorii nu pot crea anunțuri de proprietăți. Te rugăm să treci la rolul de Vânzător Privat sau Agent."
+    },
+    "video": {
+      "title": "Property Video (Optional)",
+      "description": "Add a video to showcase your property! Videos auto-play when visitors view your listing, creating an engaging first impression.",
+      "label": "Video URL",
+      "placeholder": "https://youtube.com/watch?v=... or https://tiktok.com/...",
+      "hint": "Paste a link from YouTube, TikTok, Instagram Reels, or Vimeo. The video will auto-play when visitors open your listing!"
     }
   },
   "myListings": {
@@ -452,7 +459,8 @@
       "allRooms": "Fotografiază toate camerele",
       "exterior": "Include fotografii exterioare",
       "clearPhotos": "Folosește fotografii clare, de înaltă calitate"
-    }
+    },
+    "locationHint": "Adding location helps AI generate more accurate, location-specific descriptions"
   },
   "promotion": {
     "title": "Promovează-ți Anunțul",
@@ -492,7 +500,16 @@
     "discountApplied": "Reducerea a fost aplicată!",
     "invalidCode": "Cod de reducere invalid",
     "total": "Total",
-    "proceedToPayment": "Continuă la Plată"
+    "proceedToPayment": "Continuă la Plată",
+    "day": "day",
+    "selectTier": "Please select a promotion tier",
+    "extendedSuccess": "Promotion extended successfully! New end date: {{date}}",
+    "activatedSuccess": "Promotion activated successfully!",
+    "activatedFree": "Promotion activated (free with coupon)!",
+    "loadFailed": "Failed to load promotion options",
+    "freeWithCoupon": "(Free with coupon)",
+    "skipForNow": "Skip for Now",
+    "postWithoutPromotion": "Post Without Promotion"
   },
   "distances": {
     "title": "Informații Distanță",
@@ -607,5 +624,9 @@
     "subscribeToPro": "Abonează-te la Pro",
     "viewMyListings": "Vezi Anunțurile Mele",
     "switchRole": "Schimbă Rolul"
+  },
+  "listings": {
+    "confirmSold": "Are you sure you want to mark this property as sold? This action cannot be undone.",
+    "confirmDelete": "Are you sure you want to delete this listing? This action cannot be undone."
   }
 }

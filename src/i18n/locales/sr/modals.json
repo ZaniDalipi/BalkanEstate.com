@@ -53,13 +53,28 @@
       },
       "viewSubscriptionPlans": "Pogledaj Planove Pretplate",
       "startCreatingListing": "Počni Kreiranje Oglasa"
+    },
+    "buyerPro": {
+      "name": "Buyer Pro",
+      "description": "Never miss a new listing! Get notified the moment a property matching your criteria hits the market.",
+      "features": {
+        "notifications": "Instant email & SMS notifications",
+        "unlimitedSearches": "Save unlimited searches",
+        "earlyAccess": "Early access to new listings",
+        "marketInsights": "Advanced market insights"
+      }
     }
   },
   "listingLimit": {
     "title": "Limit Besplatnih Oglasa Dostignut",
     "message": "Iskoristili ste sve besplatne oglase! Za objavljivanje više, morate se pretplatiti.",
     "discountOffer": "Ali prvo, odigrajte brzu igru za šansu da osvojite veliki popust na vašu prvu pretplatu!",
-    "playForDiscount": "Igraj za Popust!"
+    "playForDiscount": "Igraj za Popust!",
+    "messageDynamic": "You've reached your {{tierName}} tier limit of {{limit}} active listings.",
+    "draftSaved": "Don't worry! Your listing has been saved as a draft.",
+    "gameDescription": "Play a quick game to win a discount on your Pro subscription. Get up to 250 listings + promotions!",
+    "maybeLater": "Maybe Later",
+    "draftNote": "Your draft will be waiting for you when you come back."
   },
   "agentLicense": {
     "title": "Verifikacija Licence Agenta",
@@ -93,7 +108,9 @@
     "verifying": "Verifikujem...",
     "joining": "Pridruživanje...",
     "verifyAndBecomeAgent": "Verifikuj i Postani Agent",
-    "joinAgency": "Pridruži se Agenciji"
+    "joinAgency": "Pridruži se Agenciji",
+    "verifyFailed": "Failed to verify license. Please check your information and try again.",
+    "locationNA": "Location N/A"
   },
   "invitationCode": {
     "title": "Unesite Kod za Pozivnicu",
@@ -104,7 +121,28 @@
     "enterCode": "Molimo unesite kod za pozivnicu",
     "verifyFailed": "Neuspela verifikacija koda za pozivnicu",
     "verifying": "Verifikujem...",
-    "submit": "Pošalji Zahtev"
+    "submit": "Pošalji Zahtev",
+    "joinTitle": "Join {{agencyName}}",
+    "joinDescription": "Enter your code to join this agency and get Pro subscription benefits.",
+    "agentCoupon": "Agent Coupon",
+    "couponShort": "Coupon",
+    "invitationCode": "Invitation Code",
+    "inviteShort": "Invite",
+    "invitationCodeLabel": "Invitation Code",
+    "agentRegistrationCode": "Agent Registration Code",
+    "keepTypingInvitation": "Keep typing... (AGY-XXXXXX-XXXXXX)",
+    "invalidFormatInvitation": "Invalid format. Expected: AGY-XXXXXX-XXXXXX",
+    "validInvitationFormat": "Valid invitation code format",
+    "keepTypingCoupon": "Keep typing... (IND-XXXXXXXX)",
+    "invalidFormatCoupon": "Invalid format. Expected: IND-XXXXXXXX",
+    "validCouponFormat": "Valid coupon code format",
+    "invalidCodeFormat": "Invalid code format",
+    "formatHintInvitation": "Format: AGY-XXXXXX-XXXXXX",
+    "formatHintCoupon": "Format: IND-XXXXXXXX",
+    "invitationCodeInfo": "The invitation code lets you request to join the agency. The admin will review your request.",
+    "couponCodeInfo": "The agent coupon gives you instant Pro subscription (25 listings/year) as part of this agency.",
+    "submitRequest": "Submit Request",
+    "redeemCoupon": "Redeem Coupon"
   },
   "imageEditor": {
     "download": "Preuzmi",

@@ -1,4 +1,5 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { XMarkIcon } from '@/constants';
 import type { PromotionCoupon, CreateCouponData } from './usePromotionCouponManager';
 
@@ -25,11 +26,12 @@ export const CreateCouponModal: React.FC<CreateCouponModalProps> = ({
   onClose,
   isCreating,
 }) => {
+  const { t } = useTranslation(['admin']);
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
       <div className="bg-white rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto">
         <div className="p-6 border-b border-gray-200 flex items-center justify-between sticky top-0 bg-white">
-          <h3 className="text-xl font-bold">Create Promotion Coupon</h3>
+          <h3 className="text-xl font-bold">{t('admin:promotionCoupons.createCoupon', 'Create Promotion Coupon')}</h3>
           <button onClick={onClose}>
             <XMarkIcon className="w-6 h-6 text-gray-500 hover:text-gray-700" />
           </button>
@@ -44,7 +46,7 @@ export const CreateCouponModal: React.FC<CreateCouponModalProps> = ({
               onClick={() => applyPreset('test100')}
               className="px-3 py-1.5 text-xs bg-gray-100 text-gray-700 rounded hover:bg-gray-200"
             >
-              Test 100% Off
+              {t('admin:promotionCoupons.presets.test100', 'Test 100% Off')}
             </button>
           )}
           <button
@@ -52,47 +54,47 @@ export const CreateCouponModal: React.FC<CreateCouponModalProps> = ({
             onClick={() => applyPreset('welcome')}
             className="px-3 py-1.5 text-xs bg-blue-100 text-blue-700 rounded hover:bg-blue-200"
           >
-            Welcome 15%
+            {t('admin:promotionCoupons.presets.welcome', 'Welcome 15%')}
           </button>
           <button
             type="button"
             onClick={() => applyPreset('seasonal')}
             className="px-3 py-1.5 text-xs bg-amber-100 text-amber-700 rounded hover:bg-amber-200"
           >
-            Seasonal 25%
+            {t('admin:promotionCoupons.presets.seasonal', 'Seasonal 25%')}
           </button>
         </div>
 
         <form onSubmit={onSubmit} className="p-6 space-y-4">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              Code <span className="text-red-500">*</span>
+              {t('admin:promotionCoupons.form.code', 'Code')} <span className="text-red-500">*</span>
             </label>
             <input
               type="text"
               value={newCoupon.code}
               onChange={(e) => setNewCoupon({ ...newCoupon, code: e.target.value.toUpperCase() })}
               className="w-full px-4 py-2 border border-gray-300 rounded-lg font-mono uppercase"
-              placeholder="SUMMER25"
+              placeholder={t('admin:promotionCoupons.form.codePlaceholder', 'SUMMER25')}
               required
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">{t('admin:promotionCoupons.form.description', 'Description')}</label>
             <input
               type="text"
               value={newCoupon.description}
               onChange={(e) => setNewCoupon({ ...newCoupon, description: e.target.value })}
               className="w-full px-4 py-2 border border-gray-300 rounded-lg"
-              placeholder="Summer promotion - 25% off"
+              placeholder={t('admin:promotionCoupons.form.descriptionPlaceholder', 'Summer promotion - 25% off')}
             />
           </div>
 
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Discount Type
+                {t('admin:promotionCoupons.form.discountType', 'Discount Type')}
               </label>
               <select
                 value={newCoupon.discountType}
@@ -101,14 +103,14 @@ export const CreateCouponModal: React.FC<CreateCouponModalProps> = ({
                 }
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg"
               >
-                <option value="percentage">Percentage (%)</option>
-                <option value="fixed">Fixed Amount (&euro;)</option>
+                <option value="percentage">{t('admin:promotionCoupons.form.percentage', 'Percentage (%)')}</option>
+                <option value="fixed">{t('admin:promotionCoupons.form.fixedAmount', 'Fixed Amount (\u20AC)')}</option>
               </select>
             </div>
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Discount Value <span className="text-red-500">*</span>
+                {t('admin:promotionCoupons.form.discountValue', 'Discount Value')} <span className="text-red-500">*</span>
               </label>
               <input
                 type="number"
@@ -127,7 +129,7 @@ export const CreateCouponModal: React.FC<CreateCouponModalProps> = ({
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Valid Until <span className="text-red-500">*</span>
+                {t('admin:promotionCoupons.form.validUntil', 'Valid Until')} <span className="text-red-500">*</span>
               </label>
               <input
                 type="datetime-local"
@@ -141,7 +143,7 @@ export const CreateCouponModal: React.FC<CreateCouponModalProps> = ({
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Min. Purchase (&euro;)
+                {t('admin:promotionCoupons.form.minPurchase', 'Min. Purchase (\u20AC)')}
               </label>
               <input
                 type="number"
@@ -154,7 +156,7 @@ export const CreateCouponModal: React.FC<CreateCouponModalProps> = ({
                 }
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg"
                 min="0"
-                placeholder="0 (optional)"
+                placeholder={t('admin:promotionCoupons.form.optionalPlaceholder', '0 (optional)')}
               />
             </div>
           </div>
@@ -162,7 +164,7 @@ export const CreateCouponModal: React.FC<CreateCouponModalProps> = ({
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Total Usage Limit
+                {t('admin:promotionCoupons.form.totalUsageLimit', 'Total Usage Limit')}
               </label>
               <input
                 type="number"
@@ -175,14 +177,14 @@ export const CreateCouponModal: React.FC<CreateCouponModalProps> = ({
                 }
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg"
                 min="1"
-                placeholder="Unlimited (optional)"
+                placeholder={t('admin:promotionCoupons.form.unlimitedPlaceholder', 'Unlimited (optional)')}
               />
-              <p className="text-xs text-gray-500 mt-1">Leave empty for unlimited uses</p>
+              <p className="text-xs text-gray-500 mt-1">{t('admin:promotionCoupons.form.leaveEmptyUnlimited', 'Leave empty for unlimited uses')}</p>
             </div>
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Uses Per User
+                {t('admin:promotionCoupons.form.usesPerUser', 'Uses Per User')}
               </label>
               <input
                 type="number"
@@ -199,7 +201,7 @@ export const CreateCouponModal: React.FC<CreateCouponModalProps> = ({
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              Applicable Promotion Tiers
+              {t('admin:promotionCoupons.form.applicableTiers', 'Applicable Promotion Tiers')}
             </label>
             <div className="flex flex-wrap gap-3">
               {['featured', 'highlight', 'premium'].map((tier) => (
@@ -233,7 +235,7 @@ export const CreateCouponModal: React.FC<CreateCouponModalProps> = ({
               ))}
             </div>
             <p className="text-xs text-gray-500 mt-1">
-              Leave all unchecked to apply to all tiers
+              {t('admin:promotionCoupons.form.leaveUncheckedAllTiers', 'Leave all unchecked to apply to all tiers')}
             </p>
           </div>
 
@@ -245,23 +247,23 @@ export const CreateCouponModal: React.FC<CreateCouponModalProps> = ({
                 onChange={(e) => setNewCoupon({ ...newCoupon, isPublic: e.target.checked })}
                 className="rounded border-gray-300 text-purple-600 focus:ring-purple-500"
               />
-              <span className="text-sm font-medium text-gray-700">Public Coupon</span>
+              <span className="text-sm font-medium text-gray-700">{t('admin:promotionCoupons.form.publicCoupon', 'Public Coupon')}</span>
             </label>
             <p className="text-xs text-gray-500 mt-1 ml-6">
-              Public coupons can be displayed to users on the promotion page
+              {t('admin:promotionCoupons.form.publicCouponDesc', 'Public coupons can be displayed to users on the promotion page')}
             </p>
           </div>
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              Internal Notes
+              {t('admin:promotionCoupons.form.internalNotes', 'Internal Notes')}
             </label>
             <textarea
               value={newCoupon.notes}
               onChange={(e) => setNewCoupon({ ...newCoupon, notes: e.target.value })}
               className="w-full px-4 py-2 border border-gray-300 rounded-lg"
               rows={2}
-              placeholder="Internal notes about this coupon..."
+              placeholder={t('admin:promotionCoupons.form.notesPlaceholder', 'Internal notes about this coupon...')}
             />
           </div>
 
@@ -271,14 +273,14 @@ export const CreateCouponModal: React.FC<CreateCouponModalProps> = ({
               onClick={onClose}
               className="flex-1 px-6 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 font-medium"
             >
-              Cancel
+              {t('admin:common.cancel', 'Cancel')}
             </button>
             <button
               type="submit"
               disabled={isCreating}
               className="flex-1 px-6 py-3 bg-purple-600 text-white rounded-lg hover:bg-purple-700 font-medium disabled:opacity-50"
             >
-              {isCreating ? 'Creating...' : 'Create Coupon'}
+              {isCreating ? t('admin:promotionCoupons.form.creating', 'Creating...') : t('admin:promotionCoupons.form.createCoupon', 'Create Coupon')}
             </button>
           </div>
         </form>

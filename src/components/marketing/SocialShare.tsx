@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 
 interface SocialShareProps {
   url: string;
@@ -11,7 +12,7 @@ interface SocialShareProps {
 }
 
 interface SharePlatform {
-  name: string;
+  nameKey: string;
   icon: React.ReactNode;
   color: string;
   getUrl: (url: string, title: string, description?: string) => string;
@@ -19,7 +20,7 @@ interface SharePlatform {
 
 const sharePlatforms: Record<string, SharePlatform> = {
   facebook: {
-    name: 'Facebook',
+    nameKey: 'social.facebook',
     color: 'bg-[#1877F2] hover:bg-[#166FE5]',
     icon: (
       <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
@@ -29,7 +30,7 @@ const sharePlatforms: Record<string, SharePlatform> = {
     getUrl: (url, title) => `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}&quote=${encodeURIComponent(title)}`,
   },
   twitter: {
-    name: 'Twitter',
+    nameKey: 'social.twitter',
     color: 'bg-[#1DA1F2] hover:bg-[#1A94DA]',
     icon: (
       <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
@@ -39,7 +40,7 @@ const sharePlatforms: Record<string, SharePlatform> = {
     getUrl: (url, title) => `https://twitter.com/intent/tweet?url=${encodeURIComponent(url)}&text=${encodeURIComponent(title)}`,
   },
   linkedin: {
-    name: 'LinkedIn',
+    nameKey: 'social.linkedin',
     color: 'bg-[#0A66C2] hover:bg-[#095196]',
     icon: (
       <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
@@ -49,7 +50,7 @@ const sharePlatforms: Record<string, SharePlatform> = {
     getUrl: (url, title, description) => `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(url)}`,
   },
   whatsapp: {
-    name: 'WhatsApp',
+    nameKey: 'social.whatsapp',
     color: 'bg-[#25D366] hover:bg-[#20BD5A]',
     icon: (
       <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
@@ -59,7 +60,7 @@ const sharePlatforms: Record<string, SharePlatform> = {
     getUrl: (url, title) => `https://wa.me/?text=${encodeURIComponent(`${title} ${url}`)}`,
   },
   telegram: {
-    name: 'Telegram',
+    nameKey: 'social.telegram',
     color: 'bg-[#0088CC] hover:bg-[#007AB8]',
     icon: (
       <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
@@ -69,7 +70,7 @@ const sharePlatforms: Record<string, SharePlatform> = {
     getUrl: (url, title) => `https://t.me/share/url?url=${encodeURIComponent(url)}&text=${encodeURIComponent(title)}`,
   },
   email: {
-    name: 'Email',
+    nameKey: 'social.email',
     color: 'bg-neutral-600 hover:bg-neutral-700',
     icon: (
       <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -89,8 +90,14 @@ export const SocialShare: React.FC<SocialShareProps> = ({
   platforms = ['facebook', 'twitter', 'whatsapp', 'linkedin', 'email', 'copy'],
   className = '',
 }) => {
+  const { t } = useTranslation(['common']);
   const [copied, setCopied] = useState(false);
   const [showDropdown, setShowDropdown] = useState(false);
+
+  const getPlatformName = (platform: string) => {
+    const p = sharePlatforms[platform];
+    return p ? t(p.nameKey) : platform;
+  };
 
   const handleShare = (platform: string) => {
     if (platform === 'copy') {
@@ -133,7 +140,7 @@ export const SocialShare: React.FC<SocialShareProps> = ({
           <svg className="w-5 h-5 text-neutral-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
           </svg>
-          <span className="text-sm font-medium text-neutral-700">Share</span>
+          <span className="text-sm font-medium text-neutral-700">{t('common:share')}</span>
         </button>
 
         {showDropdown && (
@@ -152,12 +159,12 @@ export const SocialShare: React.FC<SocialShareProps> = ({
                     <svg className="w-5 h-5 text-neutral-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3" />
                     </svg>
-                    <span className="text-sm text-neutral-700">{copied ? 'Copied!' : 'Copy Link'}</span>
+                    <span className="text-sm text-neutral-700">{copied ? t('common:copied') : t('common:copyLink')}</span>
                   </>
                 ) : (
                   <>
                     <span className="text-neutral-600">{sharePlatforms[platform]?.icon}</span>
-                    <span className="text-sm text-neutral-700">{sharePlatforms[platform]?.name}</span>
+                    <span className="text-sm text-neutral-700">{getPlatformName(platform)}</span>
                   </>
                 )}
               </button>
@@ -184,12 +191,12 @@ export const SocialShare: React.FC<SocialShareProps> = ({
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3" />
                 </svg>
-                <span className="text-sm font-medium">{copied ? 'Copied!' : 'Copy'}</span>
+                <span className="text-sm font-medium">{copied ? t('common:copied') : t('common:copy')}</span>
               </>
             ) : (
               <>
                 {sharePlatforms[platform]?.icon}
-                <span className="text-sm font-medium">{sharePlatforms[platform]?.name}</span>
+                <span className="text-sm font-medium">{getPlatformName(platform)}</span>
               </>
             )}
           </button>
@@ -208,7 +215,7 @@ export const SocialShare: React.FC<SocialShareProps> = ({
           className={`p-2 rounded-full text-white transition-all hover:scale-110 ${
             platform === 'copy' ? 'bg-neutral-600 hover:bg-neutral-700' : sharePlatforms[platform]?.color
           }`}
-          title={platform === 'copy' ? (copied ? 'Copied!' : 'Copy Link') : `Share on ${sharePlatforms[platform]?.name}`}
+          title={platform === 'copy' ? (copied ? t('common:copied') : t('common:copyLink')) : t('common:social.shareOn', { platform: getPlatformName(platform) })}
         >
           {platform === 'copy' ? (
             copied ? (

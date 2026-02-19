@@ -701,6 +701,7 @@ export const updateAgency = async (
       facebookUrl, instagramUrl, linkedinUrl, twitterUrl,
       yearsInBusiness, specialties,
       certifications, languages, businessHours,
+      coverGradient, coverImage,
     } = req.body;
 
     // Validation
@@ -769,6 +770,8 @@ export const updateAgency = async (
     if (certifications !== undefined) agency.certifications = certifications;
     if (languages !== undefined) agency.languages = languages;
     if (businessHours !== undefined) agency.businessHours = businessHours;
+    if (coverGradient !== undefined) (agency as any).coverGradient = coverGradient;
+    if (coverImage !== undefined) (agency as any).coverImage = coverImage;
 
     // Handle encrypted fields - force mark as modified so the encryption
     // pre-save hook re-encrypts them (after post-findOne decryption,

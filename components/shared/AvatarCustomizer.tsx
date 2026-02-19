@@ -6,129 +6,129 @@ import { XMarkIcon } from '../../constants';
 // ─── DiceBear Avataaars customization options ────────────────────────────────
 
 const SKIN_COLORS = [
-  { value: 'f8d5c0', label: 'Light' },
-  { value: 'edb98a', label: 'Light tan' },
-  { value: 'd08b5b', label: 'Tan' },
-  { value: 'ae5d29', label: 'Brown' },
-  { value: '614335', label: 'Dark' },
-  { value: 'ffdbb4', label: 'Peach' },
+  { value: 'f8d5c0', labelKey: 'account:avatar.skinColors.light' },
+  { value: 'edb98a', labelKey: 'account:avatar.skinColors.lightTan' },
+  { value: 'd08b5b', labelKey: 'account:avatar.skinColors.tan' },
+  { value: 'ae5d29', labelKey: 'account:avatar.skinColors.brown' },
+  { value: '614335', labelKey: 'account:avatar.skinColors.dark' },
+  { value: 'ffdbb4', labelKey: 'account:avatar.skinColors.peach' },
 ];
 
 const HAIR_COLORS = [
-  { value: '2c1b18', label: 'Black' },
-  { value: '4a312c', label: 'Dark Brown' },
-  { value: '724133', label: 'Brown' },
-  { value: 'a55728', label: 'Auburn' },
-  { value: 'b58143', label: 'Honey' },
-  { value: 'd6b370', label: 'Blonde' },
-  { value: 'e8e1e1', label: 'Gray' },
-  { value: 'c93305', label: 'Red' },
+  { value: '2c1b18', labelKey: 'account:avatar.hairColors.black' },
+  { value: '4a312c', labelKey: 'account:avatar.hairColors.darkBrown' },
+  { value: '724133', labelKey: 'account:avatar.hairColors.brown' },
+  { value: 'a55728', labelKey: 'account:avatar.hairColors.auburn' },
+  { value: 'b58143', labelKey: 'account:avatar.hairColors.honey' },
+  { value: 'd6b370', labelKey: 'account:avatar.hairColors.blonde' },
+  { value: 'e8e1e1', labelKey: 'account:avatar.hairColors.gray' },
+  { value: 'c93305', labelKey: 'account:avatar.hairColors.red' },
 ];
 
 const HAIR_STYLES_MALE = [
-  { value: 'shortFlat', label: 'Short Flat' },
-  { value: 'shortRound', label: 'Short Round' },
-  { value: 'shortWaved', label: 'Short Wavy' },
-  { value: 'shortCurly', label: 'Short Curly' },
-  { value: 'theCaesar', label: 'Caesar' },
-  { value: 'theCaesarAndSidePart', label: 'Caesar Side Part' },
-  { value: 'sides', label: 'Sides' },
-  { value: 'dreads01', label: 'Dreads' },
-  { value: 'frizzle', label: 'Frizzle' },
+  { value: 'shortFlat', labelKey: 'account:avatar.hairStyles.shortFlat' },
+  { value: 'shortRound', labelKey: 'account:avatar.hairStyles.shortRound' },
+  { value: 'shortWaved', labelKey: 'account:avatar.hairStyles.shortWavy' },
+  { value: 'shortCurly', labelKey: 'account:avatar.hairStyles.shortCurly' },
+  { value: 'theCaesar', labelKey: 'account:avatar.hairStyles.caesar' },
+  { value: 'theCaesarAndSidePart', labelKey: 'account:avatar.hairStyles.caesarSidePart' },
+  { value: 'sides', labelKey: 'account:avatar.hairStyles.sides' },
+  { value: 'dreads01', labelKey: 'account:avatar.hairStyles.dreads' },
+  { value: 'frizzle', labelKey: 'account:avatar.hairStyles.frizzle' },
 ];
 
 const HAIR_STYLES_FEMALE = [
-  { value: 'longButNotTooLong', label: 'Long' },
-  { value: 'straight01', label: 'Straight' },
-  { value: 'straight02', label: 'Straight 2' },
-  { value: 'bob', label: 'Bob' },
-  { value: 'bun', label: 'Bun' },
-  { value: 'curly', label: 'Curly' },
-  { value: 'curvy', label: 'Curvy' },
-  { value: 'bigHair', label: 'Big Hair' },
-  { value: 'miaWallace', label: 'Sleek' },
-  { value: 'straightAndStrand', label: 'With Strand' },
-  { value: 'fro', label: 'Afro' },
+  { value: 'longButNotTooLong', labelKey: 'account:avatar.hairStyles.long' },
+  { value: 'straight01', labelKey: 'account:avatar.hairStyles.straight' },
+  { value: 'straight02', labelKey: 'account:avatar.hairStyles.straight2' },
+  { value: 'bob', labelKey: 'account:avatar.hairStyles.bob' },
+  { value: 'bun', labelKey: 'account:avatar.hairStyles.bun' },
+  { value: 'curly', labelKey: 'account:avatar.hairStyles.curly' },
+  { value: 'curvy', labelKey: 'account:avatar.hairStyles.curvy' },
+  { value: 'bigHair', labelKey: 'account:avatar.hairStyles.bigHair' },
+  { value: 'miaWallace', labelKey: 'account:avatar.hairStyles.sleek' },
+  { value: 'straightAndStrand', labelKey: 'account:avatar.hairStyles.withStrand' },
+  { value: 'fro', labelKey: 'account:avatar.hairStyles.afro' },
 ];
 
 const CLOTHING = [
-  { value: 'blazerAndShirt', label: 'Suit & Shirt' },
-  { value: 'blazerAndSweater', label: 'Blazer & Sweater' },
-  { value: 'collarAndSweater', label: 'Collar & Sweater' },
-  { value: 'shirtCrewNeck', label: 'Crew Neck' },
-  { value: 'shirtVNeck', label: 'V-Neck' },
-  { value: 'shirtScoopNeck', label: 'Scoop Neck' },
+  { value: 'blazerAndShirt', labelKey: 'account:avatar.clothing.suitAndShirt' },
+  { value: 'blazerAndSweater', labelKey: 'account:avatar.clothing.blazerAndSweater' },
+  { value: 'collarAndSweater', labelKey: 'account:avatar.clothing.collarAndSweater' },
+  { value: 'shirtCrewNeck', labelKey: 'account:avatar.clothing.crewNeck' },
+  { value: 'shirtVNeck', labelKey: 'account:avatar.clothing.vNeck' },
+  { value: 'shirtScoopNeck', labelKey: 'account:avatar.clothing.scoopNeck' },
 ];
 
 const CLOTHES_COLORS = [
-  { value: '1a1a2e', label: 'Black' },
-  { value: '2d2d2d', label: 'Charcoal' },
-  { value: '262e33', label: 'Dark' },
-  { value: '3c4f5c', label: 'Navy' },
-  { value: '25557c', label: 'Blue' },
-  { value: '4a3728', label: 'Brown' },
-  { value: '2e3d30', label: 'Forest' },
-  { value: '5c2a3a', label: 'Burgundy' },
-  { value: '929598', label: 'Gray' },
-  { value: 'e6e6e6', label: 'Light Gray' },
-  { value: '65c9ff', label: 'Light Blue' },
-  { value: '5199e4', label: 'Bright Blue' },
+  { value: '1a1a2e', labelKey: 'account:avatar.clothesColors.black' },
+  { value: '2d2d2d', labelKey: 'account:avatar.clothesColors.charcoal' },
+  { value: '262e33', labelKey: 'account:avatar.clothesColors.dark' },
+  { value: '3c4f5c', labelKey: 'account:avatar.clothesColors.navy' },
+  { value: '25557c', labelKey: 'account:avatar.clothesColors.blue' },
+  { value: '4a3728', labelKey: 'account:avatar.clothesColors.brown' },
+  { value: '2e3d30', labelKey: 'account:avatar.clothesColors.forest' },
+  { value: '5c2a3a', labelKey: 'account:avatar.clothesColors.burgundy' },
+  { value: '929598', labelKey: 'account:avatar.clothesColors.gray' },
+  { value: 'e6e6e6', labelKey: 'account:avatar.clothesColors.lightGray' },
+  { value: '65c9ff', labelKey: 'account:avatar.clothesColors.lightBlue' },
+  { value: '5199e4', labelKey: 'account:avatar.clothesColors.brightBlue' },
 ];
 
 const ACCESSORIES = [
-  { value: '', label: 'None' },
-  { value: 'prescription01', label: 'Glasses 1' },
-  { value: 'prescription02', label: 'Glasses 2' },
-  { value: 'round', label: 'Round Glasses' },
-  { value: 'wayfarers', label: 'Wayfarers' },
-  { value: 'sunglasses', label: 'Sunglasses' },
+  { value: '', labelKey: 'account:avatar.accessories.none' },
+  { value: 'prescription01', labelKey: 'account:avatar.accessories.glasses1' },
+  { value: 'prescription02', labelKey: 'account:avatar.accessories.glasses2' },
+  { value: 'round', labelKey: 'account:avatar.accessories.roundGlasses' },
+  { value: 'wayfarers', labelKey: 'account:avatar.accessories.wayfarers' },
+  { value: 'sunglasses', labelKey: 'account:avatar.accessories.sunglasses' },
 ];
 
 const FACIAL_HAIR = [
-  { value: '', label: 'None' },
-  { value: 'beardLight', label: 'Light Beard' },
-  { value: 'beardMedium', label: 'Medium Beard' },
-  { value: 'beardMajestic', label: 'Full Beard' },
-  { value: 'moustacheFancy', label: 'Fancy Mustache' },
-  { value: 'moustacheMagnum', label: 'Magnum Mustache' },
+  { value: '', labelKey: 'account:avatar.facialHair.none' },
+  { value: 'beardLight', labelKey: 'account:avatar.facialHair.lightBeard' },
+  { value: 'beardMedium', labelKey: 'account:avatar.facialHair.mediumBeard' },
+  { value: 'beardMajestic', labelKey: 'account:avatar.facialHair.fullBeard' },
+  { value: 'moustacheFancy', labelKey: 'account:avatar.facialHair.fancyMustache' },
+  { value: 'moustacheMagnum', labelKey: 'account:avatar.facialHair.magnumMustache' },
 ];
 
 const FACIAL_HAIR_COLORS = [
-  { value: '2c1b18', label: 'Black' },
-  { value: '4a312c', label: 'Dark Brown' },
-  { value: '724133', label: 'Brown' },
-  { value: 'a55728', label: 'Auburn' },
-  { value: 'b58143', label: 'Honey' },
-  { value: 'd6b370', label: 'Blonde' },
-  { value: 'e8e1e1', label: 'Gray' },
-  { value: 'c93305', label: 'Red' },
+  { value: '2c1b18', labelKey: 'account:avatar.facialHairColors.black' },
+  { value: '4a312c', labelKey: 'account:avatar.facialHairColors.darkBrown' },
+  { value: '724133', labelKey: 'account:avatar.facialHairColors.brown' },
+  { value: 'a55728', labelKey: 'account:avatar.facialHairColors.auburn' },
+  { value: 'b58143', labelKey: 'account:avatar.facialHairColors.honey' },
+  { value: 'd6b370', labelKey: 'account:avatar.facialHairColors.blonde' },
+  { value: 'e8e1e1', labelKey: 'account:avatar.facialHairColors.gray' },
+  { value: 'c93305', labelKey: 'account:avatar.facialHairColors.red' },
 ];
 
 const EYES = [
-  { value: 'default', label: 'Default' },
-  { value: 'happy', label: 'Happy' },
-  { value: 'wink', label: 'Wink' },
-  { value: 'squint', label: 'Squint' },
-  { value: 'side', label: 'Side' },
-  { value: 'surprised', label: 'Surprised' },
+  { value: 'default', labelKey: 'account:avatar.eyes.default' },
+  { value: 'happy', labelKey: 'account:avatar.eyes.happy' },
+  { value: 'wink', labelKey: 'account:avatar.eyes.wink' },
+  { value: 'squint', labelKey: 'account:avatar.eyes.squint' },
+  { value: 'side', labelKey: 'account:avatar.eyes.side' },
+  { value: 'surprised', labelKey: 'account:avatar.eyes.surprised' },
 ];
 
 const MOUTHS = [
-  { value: 'smile', label: 'Smile' },
-  { value: 'twinkle', label: 'Twinkle' },
-  { value: 'default', label: 'Default' },
-  { value: 'serious', label: 'Serious' },
-  { value: 'grimace', label: 'Grimace' },
-  { value: 'eating', label: 'Smirk' },
+  { value: 'smile', labelKey: 'account:avatar.mouths.smile' },
+  { value: 'twinkle', labelKey: 'account:avatar.mouths.twinkle' },
+  { value: 'default', labelKey: 'account:avatar.mouths.default' },
+  { value: 'serious', labelKey: 'account:avatar.mouths.serious' },
+  { value: 'grimace', labelKey: 'account:avatar.mouths.grimace' },
+  { value: 'eating', labelKey: 'account:avatar.mouths.smirk' },
 ];
 
 const EYEBROWS = [
-  { value: 'defaultNatural', label: 'Default' },
-  { value: 'flatNatural', label: 'Flat' },
-  { value: 'raisedExcitedNatural', label: 'Excited' },
-  { value: 'upDownNatural', label: 'Quirky' },
-  { value: 'frownNatural', label: 'Frown' },
-  { value: 'angryNatural', label: 'Intense' },
+  { value: 'defaultNatural', labelKey: 'account:avatar.eyebrows.default' },
+  { value: 'flatNatural', labelKey: 'account:avatar.eyebrows.flat' },
+  { value: 'raisedExcitedNatural', labelKey: 'account:avatar.eyebrows.excited' },
+  { value: 'upDownNatural', labelKey: 'account:avatar.eyebrows.quirky' },
+  { value: 'frownNatural', labelKey: 'account:avatar.eyebrows.frown' },
+  { value: 'angryNatural', labelKey: 'account:avatar.eyebrows.intense' },
 ];
 
 // ─── Types ───────────────────────────────────────────────────────────────────
@@ -225,7 +225,7 @@ const AvatarCustomizer: React.FC<AvatarCustomizerProps> = ({
   onUploadPhoto,
   isUploading = false,
 }) => {
-  const { t } = useTranslation();
+  const { t } = useTranslation(['account', 'common']);
   const [activeTab, setActiveTab] = useState<TabType>('create');
   const [options, setOptions] = useState<AvatarOptions>(
     currentAvatarOptions || getDefaultAvatarOptions(gender)
@@ -238,6 +238,25 @@ const AvatarCustomizer: React.FC<AvatarCustomizerProps> = ({
 
   const isFemale = gender === 'female';
   const hairStyles = isFemale ? HAIR_STYLES_FEMALE : HAIR_STYLES_MALE;
+
+  // Resolve labels for arrays using t()
+  const resolveLabels = useCallback(
+    (items: { value: string; labelKey: string }[]) =>
+      items.map((item) => ({ value: item.value, label: t(item.labelKey) })),
+    [t]
+  );
+
+  const skinColors = useMemo(() => resolveLabels(SKIN_COLORS), [resolveLabels]);
+  const hairColors = useMemo(() => resolveLabels(HAIR_COLORS), [resolveLabels]);
+  const resolvedHairStyles = useMemo(() => resolveLabels(hairStyles), [resolveLabels, hairStyles]);
+  const clothing = useMemo(() => resolveLabels(CLOTHING), [resolveLabels]);
+  const clothesColors = useMemo(() => resolveLabels(CLOTHES_COLORS), [resolveLabels]);
+  const accessories = useMemo(() => resolveLabels(ACCESSORIES), [resolveLabels]);
+  const facialHair = useMemo(() => resolveLabels(FACIAL_HAIR), [resolveLabels]);
+  const facialHairColors = useMemo(() => resolveLabels(FACIAL_HAIR_COLORS), [resolveLabels]);
+  const eyes = useMemo(() => resolveLabels(EYES), [resolveLabels]);
+  const mouths = useMemo(() => resolveLabels(MOUTHS), [resolveLabels]);
+  const eyebrows = useMemo(() => resolveLabels(EYEBROWS), [resolveLabels]);
 
   // When gender or currentAvatarOptions change, update internal options state
   useEffect(() => {
@@ -281,11 +300,11 @@ const AvatarCustomizer: React.FC<AvatarCustomizerProps> = ({
   const handleFileSelect = useCallback((file: File) => {
     setUploadError('');
     if (!file.type.startsWith('image/')) {
-      setUploadError(t('errors.selectImage', 'Please select an image file'));
+      setUploadError(t('account:errors.selectImage'));
       return;
     }
     if (file.size > 5 * 1024 * 1024) {
-      setUploadError(t('errors.imageTooLarge', 'Image must be less than 5MB'));
+      setUploadError(t('account:errors.imageTooLarge'));
       return;
     }
     setUploadFile(file);
@@ -323,7 +342,7 @@ const AvatarCustomizer: React.FC<AvatarCustomizerProps> = ({
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-white/30 bg-white/20">
           <h2 className="text-lg font-semibold text-neutral-800">
-            {t('profile.customizeAvatar', 'Customize Your Avatar')}
+            {t('account:avatar.customizeYourAvatar')}
           </h2>
           <button
             onClick={onClose}
@@ -343,7 +362,7 @@ const AvatarCustomizer: React.FC<AvatarCustomizerProps> = ({
                 : 'text-neutral-500 hover:text-neutral-700 hover:bg-white/10'
             }`}
           >
-            {t('profile.createAvatar', 'Create Avatar')}
+            {t('account:avatar.createAvatar')}
             {activeTab === 'create' && (
               <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary" />
             )}
@@ -356,7 +375,7 @@ const AvatarCustomizer: React.FC<AvatarCustomizerProps> = ({
                 : 'text-neutral-500 hover:text-neutral-700 hover:bg-white/10'
             }`}
           >
-            {t('profile.uploadPhoto', 'Upload Photo')}
+            {t('account:avatar.uploadPhoto')}
             {activeTab === 'upload' && (
               <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary" />
             )}
@@ -376,7 +395,7 @@ const AvatarCustomizer: React.FC<AvatarCustomizerProps> = ({
                   <div className="relative w-full h-full rounded-full overflow-hidden border-[3px] border-white/70 shadow-[0_8px_32px_rgba(0,0,0,0.2),inset_0_-2px_6px_rgba(0,0,0,0.1)] bg-gradient-to-br from-sky-100 via-blue-50 to-indigo-100">
                     <img
                       src={previewUrl}
-                      alt="Avatar preview"
+                      alt={t('account:avatar.avatarPreviewAlt')}
                       className="w-full h-full"
                     />
                     {/* Glossy highlight overlay */}
@@ -391,59 +410,59 @@ const AvatarCustomizer: React.FC<AvatarCustomizerProps> = ({
                   <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                     <path d="M21.5 2v6h-6M2.5 22v-6h6M2 11.5a10 10 0 0 1 18.8-4.3M22 12.5a10 10 0 0 1-18.8 4.2" />
                   </svg>
-                  {t('profile.randomize', 'Randomize')}
+                  {t('account:avatar.randomize')}
                 </button>
               </div>
 
               {/* Skin Color */}
-              <OptionSection label={t('profile.skinColor', 'Skin Color')}>
+              <OptionSection label={t('account:avatar.sections.skinColor')}>
                 <ColorPicker
-                  colors={SKIN_COLORS}
+                  colors={skinColors}
                   selected={options.skinColor}
                   onSelect={(v) => updateOption('skinColor', v)}
                 />
               </OptionSection>
 
               {/* Hair Style */}
-              <OptionSection label={t('profile.hairStyle', 'Hair Style')}>
+              <OptionSection label={t('account:avatar.sections.hairStyle')}>
                 <PillPicker
-                  items={hairStyles}
+                  items={resolvedHairStyles}
                   selected={options.top}
                   onSelect={(v) => updateOption('top', v)}
                 />
               </OptionSection>
 
               {/* Hair Color */}
-              <OptionSection label={t('profile.hairColor', 'Hair Color')}>
+              <OptionSection label={t('account:avatar.sections.hairColor')}>
                 <ColorPicker
-                  colors={HAIR_COLORS}
+                  colors={hairColors}
                   selected={options.hairColor}
                   onSelect={(v) => updateOption('hairColor', v)}
                 />
               </OptionSection>
 
               {/* Clothing */}
-              <OptionSection label={t('profile.clothing', 'Clothing')}>
+              <OptionSection label={t('account:avatar.sections.clothing')}>
                 <PillPicker
-                  items={CLOTHING}
+                  items={clothing}
                   selected={options.clothing}
                   onSelect={(v) => updateOption('clothing', v)}
                 />
               </OptionSection>
 
               {/* Clothes Color */}
-              <OptionSection label={t('profile.clothesColor', 'Clothes Color')}>
+              <OptionSection label={t('account:avatar.sections.clothesColor')}>
                 <ColorPicker
-                  colors={CLOTHES_COLORS}
+                  colors={clothesColors}
                   selected={options.clothesColor}
                   onSelect={(v) => updateOption('clothesColor', v)}
                 />
               </OptionSection>
 
               {/* Accessories */}
-              <OptionSection label={t('profile.accessories', 'Glasses')}>
+              <OptionSection label={t('account:avatar.sections.glasses')}>
                 <PillPicker
-                  items={ACCESSORIES}
+                  items={accessories}
                   selected={options.accessories}
                   onSelect={(v) => updateOption('accessories', v)}
                 />
@@ -452,17 +471,17 @@ const AvatarCustomizer: React.FC<AvatarCustomizerProps> = ({
               {/* Facial Hair (male only) */}
               {!isFemale && (
                 <>
-                  <OptionSection label={t('profile.facialHair', 'Facial Hair')}>
+                  <OptionSection label={t('account:avatar.sections.facialHair')}>
                     <PillPicker
-                      items={FACIAL_HAIR}
+                      items={facialHair}
                       selected={options.facialHair}
                       onSelect={(v) => updateOption('facialHair', v)}
                     />
                   </OptionSection>
                   {options.facialHair && (
-                    <OptionSection label={t('profile.facialHairColor', 'Beard Color')}>
+                    <OptionSection label={t('account:avatar.sections.beardColor')}>
                       <ColorPicker
-                        colors={FACIAL_HAIR_COLORS}
+                        colors={facialHairColors}
                         selected={options.facialHairColor}
                         onSelect={(v) => updateOption('facialHairColor', v)}
                       />
@@ -472,27 +491,27 @@ const AvatarCustomizer: React.FC<AvatarCustomizerProps> = ({
               )}
 
               {/* Eyes */}
-              <OptionSection label={t('profile.eyes', 'Eyes')}>
+              <OptionSection label={t('account:avatar.sections.eyes')}>
                 <PillPicker
-                  items={EYES}
+                  items={eyes}
                   selected={options.eyes}
                   onSelect={(v) => updateOption('eyes', v)}
                 />
               </OptionSection>
 
               {/* Eyebrows */}
-              <OptionSection label={t('profile.eyebrows', 'Eyebrows')}>
+              <OptionSection label={t('account:avatar.sections.eyebrows')}>
                 <PillPicker
-                  items={EYEBROWS}
+                  items={eyebrows}
                   selected={options.eyebrows}
                   onSelect={(v) => updateOption('eyebrows', v)}
                 />
               </OptionSection>
 
               {/* Mouth */}
-              <OptionSection label={t('profile.mouth', 'Mouth')}>
+              <OptionSection label={t('account:avatar.sections.mouth')}>
                 <PillPicker
-                  items={MOUTHS}
+                  items={mouths}
                   selected={options.mouth}
                   onSelect={(v) => updateOption('mouth', v)}
                 />
@@ -507,13 +526,13 @@ const AvatarCustomizer: React.FC<AvatarCustomizerProps> = ({
                   <div className="w-32 h-32 rounded-full overflow-hidden border-4 border-neutral-200 shadow-lg">
                     <img
                       src={uploadPreview || currentAvatarUrl}
-                      alt="Photo preview"
+                      alt={t('account:avatar.photoPreviewAlt')}
                       className="w-full h-full object-cover"
                     />
                   </div>
                   {uploadPreview && (
                     <p className="text-sm text-green-600 font-medium">
-                      {t('profile.readyToUpload', 'Ready to upload')}
+                      {t('account:avatar.readyToUpload')}
                     </p>
                   )}
                 </div>
@@ -550,18 +569,18 @@ const AvatarCustomizer: React.FC<AvatarCustomizerProps> = ({
                   </div>
                   <div>
                     <p className="text-sm font-medium text-neutral-700">
-                      {t('profile.dragDropPhoto', 'Drag & drop your photo here, or')}
+                      {t('account:avatar.dragDropPhoto')}
                     </p>
                     <button
                       type="button"
                       onClick={() => fileInputRef.current?.click()}
                       className="text-sm font-semibold text-primary hover:text-primary-dark transition-colors"
                     >
-                      {t('profile.browseFiles', 'browse files')}
+                      {t('account:avatar.browseFiles')}
                     </button>
                   </div>
                   <p className="text-xs text-neutral-400">
-                    {t('profile.imageRequirements', 'JPG, PNG or WebP. Max 5MB.')}
+                    {t('account:avatar.imageRequirements')}
                   </p>
                 </div>
               </div>
@@ -580,7 +599,7 @@ const AvatarCustomizer: React.FC<AvatarCustomizerProps> = ({
             onClick={onClose}
             className="px-5 py-2.5 text-sm font-medium text-neutral-700 bg-white/50 backdrop-blur-sm rounded-xl hover:bg-white/70 transition-all border border-white/40"
           >
-            {t('common.cancel', 'Cancel')}
+            {t('common:cancel')}
           </button>
           {activeTab === 'create' ? (
             <button
@@ -591,7 +610,7 @@ const AvatarCustomizer: React.FC<AvatarCustomizerProps> = ({
               }}
               className="px-5 py-2.5 text-sm font-medium text-white bg-primary/80 backdrop-blur-sm rounded-xl hover:bg-primary transition-all shadow-lg shadow-primary/20 border border-primary/30"
             >
-              {t('profile.saveAvatar', 'Save Avatar')}
+              {t('account:avatar.saveAvatar')}
             </button>
           ) : (
             <button
@@ -610,8 +629,8 @@ const AvatarCustomizer: React.FC<AvatarCustomizerProps> = ({
               }`}
             >
               {isUploading
-                ? t('profile.uploading', 'Uploading...')
-                : t('profile.uploadAndSave', 'Upload & Save')
+                ? t('account:avatar.uploading')
+                : t('account:avatar.uploadAndSave')
               }
             </button>
           )}

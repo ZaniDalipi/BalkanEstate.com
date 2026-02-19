@@ -148,7 +148,16 @@
     "confirmRequest": "Potvrdite zahtev",
     "requestSent": "Zahtev za razgledanje je poslat!",
     "requestSentDesc": "Zakupodavac će uskoro potvrditi vaše razgledanje.",
-    "done": "Gotovo"
+    "done": "Gotovo",
+    "placeholders": {
+      "name": "John Doe",
+      "email": "john@example.com",
+      "phone": "+1 234 567 8900"
+    },
+    "ics": {
+      "summary": "Property Viewing",
+      "description": "Scheduled viewing for"
+    }
   },
   "status": {
     "markAsRented": "Označi kao iznajmljeno",
@@ -173,73 +182,239 @@
     "countries": {
       "albania": {
         "summary": "Albansko zakonodavstvo o zakupu regulisano je Građanskim zakonikom (članovi 801-849). Ugovori duži od 1 godine treba da budu registrovani.",
-        "lease": ["Pisani ugovor se preporučuje; usmeni ugovori važe ali ih je teško sprovoditi", "Zakupi duži od 1 godine moraju biti overeni kod notara i registrovani u IPRO", "Ugovor treba da sadrži iznos kirije, uslove plaćanja, trajanje i depozit"],
-        "deposit": ["Obično 1-2 mesečne kirije", "Mora biti vraćen u roku od 30 dana od isteka zakupa ako nema oštećenja", "Zakupodavac mora dostaviti detaljan spisak odbitaka ako zadržava depozit"],
-        "tenant": ["Zakupodavac mora održavati nekretninu u useljivom stanju", "Zakupac ne može biti iseljen bez sudskog naloga", "Minimalni rok za otkazivanje zakupa je 3 meseca", "Povećanje kirije zahteva obostrani dogovor ili ugovornu klauzulu"],
-        "landlord": ["Platiti porez na imovinu i troškove održavanja zgrade", "Prijaviti prihod od zakupa poreskim organima (15% porez na dohodak)", "Obezbediti da nekretnina ispunjava standarde bezbednosti i useljivosti"]
+        "lease": [
+          "Pisani ugovor se preporučuje; usmeni ugovori važe ali ih je teško sprovoditi",
+          "Zakupi duži od 1 godine moraju biti overeni kod notara i registrovani u IPRO",
+          "Ugovor treba da sadrži iznos kirije, uslove plaćanja, trajanje i depozit"
+        ],
+        "deposit": [
+          "Obično 1-2 mesečne kirije",
+          "Mora biti vraćen u roku od 30 dana od isteka zakupa ako nema oštećenja",
+          "Zakupodavac mora dostaviti detaljan spisak odbitaka ako zadržava depozit"
+        ],
+        "tenant": [
+          "Zakupodavac mora održavati nekretninu u useljivom stanju",
+          "Zakupac ne može biti iseljen bez sudskog naloga",
+          "Minimalni rok za otkazivanje zakupa je 3 meseca",
+          "Povećanje kirije zahteva obostrani dogovor ili ugovornu klauzulu"
+        ],
+        "landlord": [
+          "Platiti porez na imovinu i troškove održavanja zgrade",
+          "Prijaviti prihod od zakupa poreskim organima (15% porez na dohodak)",
+          "Obezbediti da nekretnina ispunjava standarde bezbednosti i useljivosti"
+        ]
       },
       "bosnia-herzegovina": {
         "summary": "Zakonodavstvo o zakupu varira po entitetu (Federacija BiH i Republika Srpska). Pisani ugovori se snažno preporučuju.",
-        "lease": ["Pisani ugovor je neophodan za pravnu zaštitu", "Mora biti registrovan kod lokalne poreske uprave", "Standardni uslovi zakupa: 1 godina sa mogućnošću produženja"],
-        "deposit": ["Obično 1-2 mesečne kirije", "Uslovi za povraćaj treba da budu navedeni u ugovoru"],
-        "tenant": ["Pravo na useljivu nekretninu sa osnovnim komunalijama", "Iseljenje zahteva sudski postupak; minimalni rok obaveštenja je 30 dana", "Zakupac može raskinuti ugovor uz otkazni rok naveden u ugovoru"],
-        "landlord": ["Registrovati ugovor o zakupu kod poreskih organa", "Platiti porez na dohodak od zakupa (10% paušalna stopa)", "Održavati strukturalni integritet nekretnine"]
+        "lease": [
+          "Pisani ugovor je neophodan za pravnu zaštitu",
+          "Mora biti registrovan kod lokalne poreske uprave",
+          "Standardni uslovi zakupa: 1 godina sa mogućnošću produženja"
+        ],
+        "deposit": [
+          "Obično 1-2 mesečne kirije",
+          "Uslovi za povraćaj treba da budu navedeni u ugovoru"
+        ],
+        "tenant": [
+          "Pravo na useljivu nekretninu sa osnovnim komunalijama",
+          "Iseljenje zahteva sudski postupak; minimalni rok obaveštenja je 30 dana",
+          "Zakupac može raskinuti ugovor uz otkazni rok naveden u ugovoru"
+        ],
+        "landlord": [
+          "Registrovati ugovor o zakupu kod poreskih organa",
+          "Platiti porez na dohodak od zakupa (10% paušalna stopa)",
+          "Održavati strukturalni integritet nekretnine"
+        ]
       },
       "bulgaria": {
         "summary": "Bugarsko zakonodavstvo o zakupu zasnovano je na Zakonu o obligacijama i ugovorima. Zakupi duži od 1 godine moraju biti u pisanoj formi.",
-        "lease": ["Pisani ugovor je obavezan za zakupe duže od 1 godine", "Ugovor treba da bude notarski overen radi sudske sprovodivosti", "Maksimalno trajanje zakupa: 10 godina (može se obnoviti)"],
-        "deposit": ["Obično 1-2 mesečne kirije", "Mora biti vraćen po isteku zakupa umanjeno za legitimne odbitke"],
-        "tenant": ["Pravo na mirno uživanje nekretnine", "Zakupodavac mora dati otkazni rok od 1 mesec pre raskida", "Zakupac može raskinuti ugovor uz pisano obaveštenje od 1 mesec", "Povećanje kirije ograničeno na jednom godišnje"],
-        "landlord": ["Platiti 10% paušalni porez na prihod od zakupa", "Održavati nekretninu u dogovorenom stanju", "Registrovati ugovor kod Nacionalne agencije za prihode"]
+        "lease": [
+          "Pisani ugovor je obavezan za zakupe duže od 1 godine",
+          "Ugovor treba da bude notarski overen radi sudske sprovodivosti",
+          "Maksimalno trajanje zakupa: 10 godina (može se obnoviti)"
+        ],
+        "deposit": [
+          "Obično 1-2 mesečne kirije",
+          "Mora biti vraćen po isteku zakupa umanjeno za legitimne odbitke"
+        ],
+        "tenant": [
+          "Pravo na mirno uživanje nekretnine",
+          "Zakupodavac mora dati otkazni rok od 1 mesec pre raskida",
+          "Zakupac može raskinuti ugovor uz pisano obaveštenje od 1 mesec",
+          "Povećanje kirije ograničeno na jednom godišnje"
+        ],
+        "landlord": [
+          "Platiti 10% paušalni porez na prihod od zakupa",
+          "Održavati nekretninu u dogovorenom stanju",
+          "Registrovati ugovor kod Nacionalne agencije za prihode"
+        ]
       },
       "croatia": {
         "summary": "Hrvatsko zakonodavstvo o zakupu regulisano je Zakonom o najmu stanova. Ugovori moraju biti u pisanoj formi.",
-        "lease": ["Pisani ugovor je obavezan", "Mora biti registrovan kod lokalne poreske uprave u roku od 30 dana", "Ugovor mora sadržati: strane, opis nekretnine, kiriju, trajanje, uslove raskida"],
-        "deposit": ["Uobičajena praksa: 1-2 mesečne kirije", "Zakonski nije obavezan ali je standardna praksa", "Uslovi povraćaja treba da budu navedeni u ugovoru"],
-        "tenant": ["Zakupac je zaštićen od proizvoljnog iseljenja", "Minimalni otkazni rok od strane zakupodavca je 90 dana", "Zakupac može zahtevati neophodne popravke", "Podzakup samo uz pisanu saglasnost zakupodavca"],
-        "landlord": ["Platiti 12% porez na dohodak od zakupa", "Održavati nekretninu prema standardima useljivosti", "Izdati potvrdu o uplati kirije na zahtev"]
+        "lease": [
+          "Pisani ugovor je obavezan",
+          "Mora biti registrovan kod lokalne poreske uprave u roku od 30 dana",
+          "Ugovor mora sadržati: strane, opis nekretnine, kiriju, trajanje, uslove raskida"
+        ],
+        "deposit": [
+          "Uobičajena praksa: 1-2 mesečne kirije",
+          "Zakonski nije obavezan ali je standardna praksa",
+          "Uslovi povraćaja treba da budu navedeni u ugovoru"
+        ],
+        "tenant": [
+          "Zakupac je zaštićen od proizvoljnog iseljenja",
+          "Minimalni otkazni rok od strane zakupodavca je 90 dana",
+          "Zakupac može zahtevati neophodne popravke",
+          "Podzakup samo uz pisanu saglasnost zakupodavca"
+        ],
+        "landlord": [
+          "Platiti 12% porez na dohodak od zakupa",
+          "Održavati nekretninu prema standardima useljivosti",
+          "Izdati potvrdu o uplati kirije na zahtev"
+        ]
       },
       "greece": {
         "summary": "Grčko zakonodavstvo o zakupu pruža snažnu zaštitu zakupaca. Stambeni zakupi imaju zakonski minimalno trajanje od 3 godine.",
-        "lease": ["Pisani ili usmeni ugovori su važeći; pisani se snažno preporučuju", "Minimalno trajanje stambenog zakupa: 3 godine (po zakonu)", "Zakupodavac ne može raskinuti ugovor pre 3 godine bez opravdanog razloga", "Ugovor treba da bude podnet Nezavisnom organu za javne prihode"],
-        "deposit": ["Obično 2 mesečne kirije", "Mora biti vraćen u roku od 2 meseca po isteku zakupa", "Zakupodavac mora položiti depozit na kamatonosni račun"],
-        "tenant": ["Snažna zaštita prema Grčkom građanskom zakoniku (članovi 574-618)", "Zakupac ne može biti iseljen tokom minimalnog perioda od 3 godine", "Povećanje kirije ograničeno na 75% godišnjeg rasta potrošačkih cena", "Pravo na obnovu zakupa pod sličnim uslovima"],
-        "landlord": ["Prijaviti prihod od zakupa (oporezuje se progresivno od 15-45%)", "Izdati godišnju izjavu o prihodima od zakupa", "Održavati nekretninu u stanju dogovorenom pri potpisivanju zakupa"]
+        "lease": [
+          "Pisani ili usmeni ugovori su važeći; pisani se snažno preporučuju",
+          "Minimalno trajanje stambenog zakupa: 3 godine (po zakonu)",
+          "Zakupodavac ne može raskinuti ugovor pre 3 godine bez opravdanog razloga",
+          "Ugovor treba da bude podnet Nezavisnom organu za javne prihode"
+        ],
+        "deposit": [
+          "Obično 2 mesečne kirije",
+          "Mora biti vraćen u roku od 2 meseca po isteku zakupa",
+          "Zakupodavac mora položiti depozit na kamatonosni račun"
+        ],
+        "tenant": [
+          "Snažna zaštita prema Grčkom građanskom zakoniku (članovi 574-618)",
+          "Zakupac ne može biti iseljen tokom minimalnog perioda od 3 godine",
+          "Povećanje kirije ograničeno na 75% godišnjeg rasta potrošačkih cena",
+          "Pravo na obnovu zakupa pod sličnim uslovima"
+        ],
+        "landlord": [
+          "Prijaviti prihod od zakupa (oporezuje se progresivno od 15-45%)",
+          "Izdati godišnju izjavu o prihodima od zakupa",
+          "Održavati nekretninu u stanju dogovorenom pri potpisivanju zakupa"
+        ]
       },
       "kosovo": {
         "summary": "Zakonodavstvo o zakupu na Kosovu zasnovano je na Zakonu o obligacionim odnosima. Pisani ugovori se preporučuju.",
-        "lease": ["Pisani ugovor se preporučuje radi pravne sprovodivosti", "Treba da sadrži iznos kirije, trajanje i uslove", "Registracija nije obavezna ali je preporučljiva iz poreskih razloga"],
-        "deposit": ["Obično 1 mesečna kirija", "Uslovi se dogovaraju između strana"],
-        "tenant": ["Pravo na useljiv stan", "Iseljenje zahteva razuman otkazni rok (obično 30 dana)", "Zakupac može zahtevati neophodne popravke"],
-        "landlord": ["Prijaviti prihod od zakupa Poreskoj upravi Kosova", "Platiti porez na dohodak od zakupa (9% za fizička lica)", "Održavati bezbednost i useljivost nekretnine"]
+        "lease": [
+          "Pisani ugovor se preporučuje radi pravne sprovodivosti",
+          "Treba da sadrži iznos kirije, trajanje i uslove",
+          "Registracija nije obavezna ali je preporučljiva iz poreskih razloga"
+        ],
+        "deposit": [
+          "Obično 1 mesečna kirija",
+          "Uslovi se dogovaraju između strana"
+        ],
+        "tenant": [
+          "Pravo na useljiv stan",
+          "Iseljenje zahteva razuman otkazni rok (obično 30 dana)",
+          "Zakupac može zahtevati neophodne popravke"
+        ],
+        "landlord": [
+          "Prijaviti prihod od zakupa Poreskoj upravi Kosova",
+          "Platiti porez na dohodak od zakupa (9% za fizička lica)",
+          "Održavati bezbednost i useljivost nekretnine"
+        ]
       },
       "montenegro": {
         "summary": "Crnogorsko zakonodavstvo o zakupu prati Zakon o stanovanju. Pisani ugovori o zakupu moraju biti registrovani.",
-        "lease": ["Pisani ugovor je obavezan", "Mora biti registrovan kod lokalne opštine", "Treba da navede sve uslove uključujući odgovornost za komunalije"],
-        "deposit": ["Uobičajeno 1-2 mesečne kirije", "Mora biti jasno definisan u ugovoru"],
-        "tenant": ["Pravo na mirno uživanje", "Ne može biti iseljen bez odgovarajućeg obaveštenja i zakonskog postupka", "Pravo na useljive životne uslove"],
-        "landlord": ["Registrovati zakup kod opštinskih organa", "Platiti 9% poreza na prihod od zakupa", "Održavati strukturalni integritet nekretnine"]
+        "lease": [
+          "Pisani ugovor je obavezan",
+          "Mora biti registrovan kod lokalne opštine",
+          "Treba da navede sve uslove uključujući odgovornost za komunalije"
+        ],
+        "deposit": [
+          "Uobičajeno 1-2 mesečne kirije",
+          "Mora biti jasno definisan u ugovoru"
+        ],
+        "tenant": [
+          "Pravo na mirno uživanje",
+          "Ne može biti iseljen bez odgovarajućeg obaveštenja i zakonskog postupka",
+          "Pravo na useljive životne uslove"
+        ],
+        "landlord": [
+          "Registrovati zakup kod opštinskih organa",
+          "Platiti 9% poreza na prihod od zakupa",
+          "Održavati strukturalni integritet nekretnine"
+        ]
       },
       "north-macedonia": {
         "summary": "Zakonodavstvo o zakupu u Severnoj Makedoniji zasnovano je na Zakonu o obligacijama. Pisani ugovori pružaju najbolju pravnu zaštitu.",
-        "lease": ["Pisani ugovor se snažno preporučuje", "Notarska overa povećava sprovodivost", "Treba da sadrži kiriju, raspored plaćanja, trajanje i klauzule o raskidu"],
-        "deposit": ["Obično 1 mesečna kirija", "Uslovi povraćaja navedeni u ugovoru"],
-        "tenant": ["Pravo na useljivu nekretninu", "Minimalni otkazni rok za iseljenje je 30 dana", "Može zahtevati popravke za osnovne usluge"],
-        "landlord": ["Prijaviti prihod od zakupa Upravi javnih prihoda", "Platiti 10% poreza na lični dohodak od zakupa", "Održavati nekretninu prema dogovorenim standardima"]
+        "lease": [
+          "Pisani ugovor se snažno preporučuje",
+          "Notarska overa povećava sprovodivost",
+          "Treba da sadrži kiriju, raspored plaćanja, trajanje i klauzule o raskidu"
+        ],
+        "deposit": [
+          "Obično 1 mesečna kirija",
+          "Uslovi povraćaja navedeni u ugovoru"
+        ],
+        "tenant": [
+          "Pravo na useljivu nekretninu",
+          "Minimalni otkazni rok za iseljenje je 30 dana",
+          "Može zahtevati popravke za osnovne usluge"
+        ],
+        "landlord": [
+          "Prijaviti prihod od zakupa Upravi javnih prihoda",
+          "Platiti 10% poreza na lični dohodak od zakupa",
+          "Održavati nekretninu prema dogovorenim standardima"
+        ]
       },
       "romania": {
         "summary": "Rumunsko zakonodavstvo o zakupu regulisano je Građanskim zakonikom (2011). Ugovori moraju biti registrovani kod ANAF-a radi poreske usaglašenosti.",
-        "lease": ["Pisani ugovor se snažno preporučuje", "Mora biti registrovan kod ANAF-a (poreskog organa) u roku od 30 dana", "Registrovani ugovori su izvršni kao izvršne isprave", "Uobičajeno trajanje: 1-5 godina"],
-        "deposit": ["Obično 1-3 mesečne kirije", "Mora biti vraćen u roku od 30 dana po isteku zakupa", "Odbici moraju biti dokumentovani dokazima"],
-        "tenant": ["Pravo na useljivu nekretninu u dobrom stanju", "Ne može biti iseljen bez sudskog naloga", "Minimalni rok obaveštenja za neproduženje od strane zakupodavca je 60 dana", "Uslovi za povećanje kirije moraju biti navedeni u ugovoru"],
-        "landlord": ["Platiti 10% poreza na dohodak od zakupa", "Registrovati ugovor kod ANAF-a", "Izdati priznanice za sve uplate kirije", "Održavati nekretninu i plaćati veće popravke"]
+        "lease": [
+          "Pisani ugovor se snažno preporučuje",
+          "Mora biti registrovan kod ANAF-a (poreskog organa) u roku od 30 dana",
+          "Registrovani ugovori su izvršni kao izvršne isprave",
+          "Uobičajeno trajanje: 1-5 godina"
+        ],
+        "deposit": [
+          "Obično 1-3 mesečne kirije",
+          "Mora biti vraćen u roku od 30 dana po isteku zakupa",
+          "Odbici moraju biti dokumentovani dokazima"
+        ],
+        "tenant": [
+          "Pravo na useljivu nekretninu u dobrom stanju",
+          "Ne može biti iseljen bez sudskog naloga",
+          "Minimalni rok obaveštenja za neproduženje od strane zakupodavca je 60 dana",
+          "Uslovi za povećanje kirije moraju biti navedeni u ugovoru"
+        ],
+        "landlord": [
+          "Platiti 10% poreza na dohodak od zakupa",
+          "Registrovati ugovor kod ANAF-a",
+          "Izdati priznanice za sve uplate kirije",
+          "Održavati nekretninu i plaćati veće popravke"
+        ]
       },
       "serbia": {
         "summary": "Srpsko zakonodavstvo o zakupu zasnovano je na Zakonu o stanovanju i održavanju zgrada. Pisani ugovori su obavezni.",
-        "lease": ["Pisani ugovor je zakonski obavezan", "Mora biti overen kod notara za punu sprovodivost", "Zakupac mora biti prijavljen na adresi nekretnine", "Ugovor treba da bude prijavljen Poreskoj upravi"],
-        "deposit": ["Obično 1-2 mesečne kirije", "Obično ga drži zakupodavac, ne na escrow računu", "Uslovi povraćaja treba da budu navedeni u ugovoru"],
-        "tenant": ["Pravo na mirno uživanje nekretnine", "Iseljenje samo kroz zakonski sudski postupak", "Minimalni otkazni rok za neproduženje zakupa od strane zakupodavca je 90 dana", "Zakupac može odbiti troškove popravke od kirije ako zakupodavac ne reaguje"],
-        "landlord": ["Platiti 20% poreza na dohodak od zakupa", "Prijaviti zakupca na adresi nekretnine", "Podnositi godišnje poreske prijave uključujući prihod od zakupa", "Održavati zajedničke prostorije i konstruktivne elemente"]
+        "lease": [
+          "Pisani ugovor je zakonski obavezan",
+          "Mora biti overen kod notara za punu sprovodivost",
+          "Zakupac mora biti prijavljen na adresi nekretnine",
+          "Ugovor treba da bude prijavljen Poreskoj upravi"
+        ],
+        "deposit": [
+          "Obično 1-2 mesečne kirije",
+          "Obično ga drži zakupodavac, ne na escrow računu",
+          "Uslovi povraćaja treba da budu navedeni u ugovoru"
+        ],
+        "tenant": [
+          "Pravo na mirno uživanje nekretnine",
+          "Iseljenje samo kroz zakonski sudski postupak",
+          "Minimalni otkazni rok za neproduženje zakupa od strane zakupodavca je 90 dana",
+          "Zakupac može odbiti troškove popravke od kirije ako zakupodavac ne reaguje"
+        ],
+        "landlord": [
+          "Platiti 20% poreza na dohodak od zakupa",
+          "Prijaviti zakupca na adresi nekretnine",
+          "Podnositi godišnje poreske prijave uključujući prihod od zakupa",
+          "Održavati zajedničke prostorije i konstruktivne elemente"
+        ]
       }
     }
   },

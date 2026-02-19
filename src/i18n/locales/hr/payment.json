@@ -20,7 +20,11 @@
     "goToAccount": "Idi na Moj Račun",
     "browseProperties": "Pregledaj Nekretnine",
     "noSessionFound": "Nema pronađene sesije plaćanja",
-    "loginToVerify": "Molimo prijavite se da verificirate svoje plaćanje"
+    "loginToVerify": "Molimo prijavite se da verificirate svoje plaćanje",
+    "plan": "Plan",
+    "validUntil": "Valid Until",
+    "nowActive": "Now active on your account",
+    "continue": "Continue to Dashboard"
   },
   "cancel": {
     "title": "Plaćanje Otkazano",
@@ -46,7 +50,11 @@
     "contactSupport": "Kontaktirajte podršku ako se problem nastavi",
     "noPaymentUrl": "Nema primljenog URL-a za plaćanje",
     "sessionCreationFailed": "Neuspjelo kreiranje sesije plaćanja",
-    "invalidDiscountCode": "Nevažeći kod popusta"
+    "invalidDiscountCode": "Nevažeći kod popusta",
+    "freeSubscriptionFailed": "Failed to apply free subscription",
+    "verificationTimeout": "Payment verification timed out. If you completed the payment, your subscription will be activated shortly. Please check your email for confirmation.",
+    "invalidCodeFormat": "Invalid code format. Use only letters, numbers, hyphens and underscores.",
+    "invalidPlanPrice": "Invalid plan price"
   },
   "checkout": {
     "secureCheckout": "Sigurna Naplata",
@@ -74,7 +82,18 @@
     "fullDiscount": "100% POPUSTA!",
     "sslSecured": "SSL Zaštićeno",
     "pciCompliant": "PCI Usklađeno",
-    "securePayment": "Sigurno Plaćanje"
+    "securePayment": "Sigurno Plaćanje",
+    "freeSubscriptionReady": "Free Subscription Ready",
+    "freeSubscriptionReadyDescription": "Your discount code provides 100% off! Click below to activate your subscription immediately - no payment required.",
+    "enterCouponCode": "Enter coupon code",
+    "enterDiscountCode": "Please enter a discount code",
+    "discountAppliedSave": "Discount applied: Save €{{amount}}!",
+    "validationFailed": "Failed to validate discount code",
+    "subscribeTo": "Subscribe to {{plan}}",
+    "coupon100Off": "Your coupon provides 100% off!",
+    "priceDescription": "€{{price}}/{{interval}} - Premium features await you",
+    "haveCoupon": "Did we provide a coupon for you?",
+    "enterCodeToActivate": "Enter your code to activate your subscription"
   },
   "termsAcceptance": {
     "text": "Prihvaćam",
@@ -83,5 +102,50 @@
     "refund": "Politiku povrata",
     "and": "i",
     "lemonsqueezy": "Plaćanja obrađuje naš pružatelj platnih usluga kao Trgovac evidencije."
+  },
+  "subscription": {
+    "alreadySubscribed": "Already Subscribed",
+    "subscriptionActive": "Subscription Active",
+    "alreadyActive": "You already have this subscription active.",
+    "cancelYearlyFirst": "You have a yearly subscription active. Cancel it first before switching to monthly.",
+    "currentPlan": "Current Plan",
+    "active": "✓ Active",
+    "renewsOn": "Renews on",
+    "wantToSwitch": "Want to switch plans?",
+    "manageYourSubscription": "Manage your subscription",
+    "switchToMonthlyInfo": "To switch from yearly to monthly billing, please cancel your current subscription first. After it expires, you can subscribe to the monthly plan.",
+    "manageInfo": "You can manage your subscription from your Account Settings. Cancel anytime before the renewal date.",
+    "manageSubscription": "Manage Subscription"
+  },
+  "polling": {
+    "waitingForPayment": "Waiting for payment confirmation...",
+    "windowClosed": "Payment window closed. Verifying payment...",
+    "processing": "Payment is being processed...",
+    "verifying": "Verifying your payment with our payment provider...",
+    "verifyingAfterClose": "Verifying payment status...",
+    "devMode": "Development mode: Payment window opened. Complete payment manually, then refresh to see subscription status."
+  },
+  "inProgress": {
+    "title": "Payment in Progress",
+    "description": "Please complete your payment in the new window",
+    "waitingTitle": "Waiting for Payment",
+    "waitingMessage": "Complete your payment in the popup window. This page will update automatically once your payment is confirmed.",
+    "subscriptionInfo": "Subscription Information",
+    "autoRenewal": "Your subscription will automatically renew at the end of each billing period",
+    "renewalReminder": "You will receive a reminder email 7 days before renewal",
+    "cancelAnytime": "You can cancel anytime from your account settings",
+    "cancel": "Cancel and Close",
+    "helpText": "If the payment window didn't open, please check your popup blocker"
+  },
+  "comingSoon": {
+    "selfServicePayment": "Self-service payment",
+    "launchingSoon": "Online payment gateway launching soon",
+    "integrationInProgress": "Payment integration in progress",
+    "contactSalesDescription": "Need help or want to subscribe manually? Contact our sales team:",
+    "responseTime": "We typically respond within 24 hours"
+  },
+  "taxNotice": {
+    "title": "Taxes May Apply",
+    "description": "The final price at checkout may include applicable VAT/taxes based on your location. LemonSqueezy, as Merchant of Record, handles all tax compliance automatically."
   }
 }

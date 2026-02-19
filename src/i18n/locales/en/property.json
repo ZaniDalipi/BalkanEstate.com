@@ -216,7 +216,20 @@
   "virtualTour": {
     "title": "360° Virtual Tour",
     "description": "Explore this property in immersive 360°",
-    "openInNewTab": "Open in new tab for full experience"
+    "openInNewTab": "Open in new tab for full experience",
+    "failedToLoad": "Failed to load virtual tour",
+    "loading": "Loading virtual tour..."
+  },
+  "gallery": {
+    "mute": "Mute",
+    "unmute": "Unmute",
+    "fullscreen": "Fullscreen",
+    "exitFullscreen": "Exit fullscreen",
+    "enterFullscreen": "Enter fullscreen",
+    "propertyShowcase": "Property Showcase",
+    "skipVideo": "Skip Video",
+    "videoTour": "Video Tour",
+    "enter3DTour": "Enter 3D Tour"
   },
   "featuredAgencies": "Featured Agencies",
   "status": {
@@ -307,6 +320,8 @@
       "recommendation": "Recommendation",
       "prev": "Prev",
       "next": "Next",
+      "promotedCount_one": "{{count}} promoted listing",
+      "promotedCount_other": "{{count}} promoted listings",
       "tierLabels": {
         "premium": "PREMIUM PREMIERE",
         "highlight": "HIGHLIGHT",

@@ -48,7 +48,7 @@ const GoogleMapComponent: React.FC<GoogleMapComponentProps> = (props) => {
     hideControls = false,
   } = props;
 
-  const { t } = useTranslation(['search']);
+  const { t } = useTranslation(['search', 'common']);
 
   // All state, refs, effects, and handlers from the custom hook
   const hook = useGoogleMap(props);
@@ -58,8 +58,8 @@ const GoogleMapComponent: React.FC<GoogleMapComponentProps> = (props) => {
     return (
       <div className="w-full h-full flex items-center justify-center bg-gray-100">
         <div className="text-center p-4">
-          <p className="text-red-500 font-semibold">Error loading Google Maps</p>
-          <p className="text-gray-500 text-sm mt-2">Please check your API key configuration</p>
+          <p className="text-red-500 font-semibold">{t('common:errors.errorLoadingGoogleMaps')}</p>
+          <p className="text-gray-500 text-sm mt-2">{t('common:errors.checkApiKeyConfiguration')}</p>
         </div>
       </div>
     );

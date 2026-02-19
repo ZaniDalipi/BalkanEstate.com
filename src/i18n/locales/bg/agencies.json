@@ -2,18 +2,31 @@
   "hero": {
     "title": "Намерете Топ Агенции за Недвижими Имоти",
     "subtitle": "Свържете се с доверени професионалисти по недвижими имоти във вашия район",
-    "searchPlaceholder": "Търсене на агенции по име или локация..."
+    "searchPlaceholder": "Търсене на агенции по име или локация...",
+    "badge": "Premier Real Estate Networks",
+    "titleHighlight": "Agencies in Balkans"
   },
   "search": {
     "placeholder": "Търсене на агенции...",
     "button": "Търси",
-    "clear": "Изчисти"
+    "clear": "Изчисти",
+    "title": "Find Your Ideal Agency",
+    "subtitle": "Search {count}+ professional agencies across the Balkans",
+    "tabs": {
+      "city": "City",
+      "agencyName": "Agency Name"
+    },
+    "clearSearch": "Clear search",
+    "popularSearches": "Popular searches:"
   },
   "stats": {
     "totalAgencies": "Общо Агенции",
     "totalAgents": "Професионални Агенти",
     "propertiesListed": "Обявени Имоти",
-    "citiesCovered": "Покрити Градове"
+    "citiesCovered": "Покрити Градове",
+    "professionalAgencies": "Professional Agencies",
+    "expertAgents": "Expert Agents",
+    "listedProperties": "Listed Properties"
   },
   "filters": {
     "title": "Филтри",
@@ -23,7 +36,10 @@
     "allSpecializations": "Всички Специализации",
     "rating": "Рейтинг",
     "anyRating": "Всякакъв Рейтинг",
-    "reset": "Нулирай Филтрите"
+    "reset": "Нулирай Филтрите",
+    "allAgencies": "All Agencies",
+    "featured": "Featured",
+    "myAgency": "My Agency"
   },
   "sort": {
     "label": "Сортирай по",
@@ -31,13 +47,24 @@
     "nameDesc": "Име (Я-А)",
     "ratingDesc": "Най-висок Рейтинг",
     "propertiesDesc": "Най-много Имоти",
-    "newest": "Най-нови Първо"
+    "newest": "Най-нови Първо",
+    "mostProperties": "Most Properties",
+    "mostAgents": "Most Agents",
+    "mostExperienced": "Most Experienced",
+    "alphabetical": "Alphabetical"
   },
   "results": {
     "showing": "Показване на {{count}} агенции",
     "of": "от",
     "noResults": "Не са намерени агенции",
-    "tryAdjusting": "Опитайте да промените филтрите"
+    "tryAdjusting": "Опитайте да промените филтрите",
+    "title": "Top Real Estate Agencies",
+    "featuredTitle": "Featured Agencies",
+    "yourAgencyTitle": "Your Agency",
+    "showingMatching": "Showing {count} agencies matching \"{query}\"",
+    "browseAgencies": "Browse professional agencies with experienced teams",
+    "agenciesFound": "agencies found",
+    "moreAgencies": "More Agencies"
   },
   "card": {
     "properties": "имота",
@@ -45,23 +72,174 @@
     "viewProfile": "Виж Профила",
     "contact": "Контакт",
     "featured": "Представена",
-    "verified": "Верифицирана"
+    "verified": "Верифицирана",
+    "certified": "Certified",
+    "years": "Years",
+    "certs": "Certs",
+    "view": "View",
+    "more": "+{count} more"
   },
   "empty": {
     "title": "Не са Намерени Агенции",
     "description": "Не са намерени агенции, отговарящи на вашите критерии",
-    "resetFilters": "Нулирай Филтрите"
+    "resetFilters": "Нулирай Филтрите",
+    "noAgenciesTitle": "No Agencies Found",
+    "noAgenciesYet": "No Agencies Yet",
+    "noMyAgency": "No Agency Found",
+    "adjustSearch": "Try adjusting your search criteria or browse all agencies.",
+    "noMyAgencyMessage": "You haven't created an agency yet. Start your journey today!",
+    "beFirst": "Be the first to create an agency and showcase your properties!"
   },
   "cta": {
     "title": "Вие Професионалист по Недвижими Имоти ли сте?",
     "description": "Присъединете се към нашата мрежа от доверени агенции и разширете бизнеса си",
-    "button": "Регистрирайте Вашата Агенция"
+    "button": "Регистрирайте Вашата Агенция",
+    "createAgency": "Create Agency",
+    "readyToGrow": "Ready to Grow Your Agency?",
+    "ctaDescription": "Join our network of premier real estate agencies and get featured to thousands of potential clients. Showcase your properties, connect with buyers, and expand your reach.",
+    "createToday": "Create Your Agency Today"
   },
   "loading": {
-    "text": "Зареждане на агенции..."
+    "text": "Зареждане на агенции...",
+    "title": "Finding Agencies...",
+    "message": "Searching through our network of professional real estate agencies"
   },
   "error": {
     "title": "Грешка при Зареждане на Агенции",
-    "retry": "Опитай Отново"
+    "retry": "Опитай Отново",
+    "unableToLoad": "Unable to Load Agencies"
+  },
+  "statsCards": {
+    "mostProperties": "Most Properties",
+    "mostAgents": "Most Agents",
+    "mostExperience": "Most Experience"
+  },
+  "featured": {
+    "title": "Featured Agencies",
+    "subtitle": "Discover properties through our trusted network of professional real estate partners",
+    "badge": "Featured",
+    "viewAgency": "View Agency",
+    "exploreAll": "Explore All Agencies",
+    "selectedByAlgorithm": "Each agency is carefully selected for quality and trust",
+    "selectedByAlgorithmMobile": "Carefully selected agencies",
+    "properties": "Properties",
+    "agents": "Agents",
+    "agencyTypes": {
+      "luxury": "Luxury Properties",
+      "commercial": "Commercial Properties",
+      "boutique": "Boutique Agency",
+      "team": "Team Agency",
+      "default": "Real Estate"
+    },
+    "empty": {
+      "title": "No featured agencies available at the moment",
+      "message": "Check back soon for our featured partners!"
+    }
+  },
+  "create": {
+    "title": "Create Your Agency",
+    "subtitle": "Set up your agency profile to showcase your team and properties",
+    "backToAccount": "Back to Account",
+    "enterpriseActive": "Enterprise Subscription Active",
+    "steps": {
+      "basic": "Basic Info",
+      "location": "Location",
+      "contact": "Contact",
+      "details": "Details"
+    },
+    "sections": {
+      "basicInfo": "Basic Information",
+      "location": "Location",
+      "contact": "Contact Information",
+      "professional": "Professional Details",
+      "businessHours": "Business Hours"
+    },
+    "fields": {
+      "agencyName": "Agency Name",
+      "description": "Description",
+      "country": "Country",
+      "city": "City",
+      "address": "Street Address",
+      "email": "Email",
+      "phone": "Phone Number",
+      "website": "Website URL",
+      "license": "Agent License Number",
+      "yearsInBusiness": "Years in Business",
+      "languages": "Languages Spoken"
+    },
+    "placeholders": {
+      "agencyName": "e.g., Premier Real Estate Agency",
+      "description": "Tell potential clients about your agency, your expertise, and what makes you unique...",
+      "selectCountry": "Select a country",
+      "selectCity": "Select a city",
+      "selectCountryFirst": "Select country first",
+      "address": "e.g., 123 Main Street, Building A",
+      "email": "contact@agency.com",
+      "phone": "+381 11 123 4567",
+      "website": "https://yourwebsite.com",
+      "license": "e.g., RE-123456"
+    },
+    "hints": {
+      "agencyName": "Choose a professional name that represents your brand",
+      "description": "A compelling description helps clients understand your value",
+      "address": "Optional: Full street address for office location"
+    },
+    "days": {
+      "monday": "Monday",
+      "tuesday": "Tuesday",
+      "wednesday": "Wednesday",
+      "thursday": "Thursday",
+      "friday": "Friday",
+      "saturday": "Saturday",
+      "sunday": "Sunday"
+    },
+    "benefits": {
+      "title": "What You'll Get",
+      "dedicatedPage": "Dedicated agency page on platform",
+      "displayAgents": "Display all agents & properties",
+      "featured": "Featured in homepage ads",
+      "contactInfo": "Full contact info displayed",
+      "invitationCode": "Unique invitation code for agents",
+      "support": "Priority customer support"
+    },
+    "warnings": {
+      "agentRequired": "Agent Status Required",
+      "proRequired": "Pro Subscription Required"
+    },
+    "errors": {
+      "nameRequired": "Agency name is required",
+      "locationRequired": "City and country are required",
+      "emailRequired": "Email is required"
+    },
+    "becomeAgent": "Become an Agent First",
+    "upgradeToPro": "Upgrade to Pro",
+    "createAgency": "Create Agency",
+    "continueToPayment": "Continue to Payment"
+  },
+  "payment": {
+    "title": "Complete Your Purchase",
+    "subtitle": "Subscribe to Enterprise plan to create your agency",
+    "backToDetails": "Back to Agency Details",
+    "steps": {
+      "details": "Agency Details",
+      "payment": "Payment",
+      "confirmation": "Confirmation"
+    },
+    "orderSummary": "Order Summary",
+    "total": "Total",
+    "couponCode": "Have a coupon code?",
+    "enterCoupon": "Enter coupon code",
+    "apply": "Apply",
+    "invalidCoupon": "Invalid coupon code",
+    "couponError": "Failed to validate coupon",
+    "whatsIncluded": "What's Included",
+    "securePayment": "Secure Payment",
+    "teamSupport": "Team Support",
+    "unlimitedProperties": "500 Listings",
+    "fullAnalytics": "Full Analytics",
+    "payNow": "Pay",
+    "processing": "Processing...",
+    "stripeSecure": "Payments are securely processed by Stripe",
+    "error": "Failed to initiate payment. Please try again."
   }
 }

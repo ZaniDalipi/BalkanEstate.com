@@ -140,8 +140,8 @@ const AgenciesListPage: React.FC = () => {
         type: 'SHOW_ALERT',
         payload: {
           type: 'warning',
-          title: t('agencies.loginRequired', 'Login Required'),
-          message: t('agencies.loginToCreateAgency', 'Please login to create an agency.'),
+          title: t('agencies.loginRequired'),
+          message: t('agencies.loginToCreateAgency'),
         },
       });
       dispatch({ type: 'TOGGLE_AUTH_MODAL', payload: { isOpen: true, view: 'login' } });
@@ -154,8 +154,8 @@ const AgenciesListPage: React.FC = () => {
         type: 'SHOW_ALERT',
         payload: {
           type: 'info',
-          title: t('agencies.alreadyHaveAgency', 'You Already Have an Agency'),
-          message: t('agencies.viewYourAgency', 'You are already part of an agency. View your agency from the filters above.'),
+          title: t('agencies.alreadyHaveAgency'),
+          message: t('agencies.viewYourAgency'),
         },
       });
       setFilter('myAgency');
@@ -168,8 +168,8 @@ const AgenciesListPage: React.FC = () => {
         type: 'SHOW_ALERT',
         payload: {
           type: 'warning',
-          title: t('agencies.agentRequired', 'Agent Status Required'),
-          message: t('agencies.becomeAgentFirst', 'You must be a registered agent to create an agency. Please update your profile to become an agent first.'),
+          title: t('agencies.agentRequired'),
+          message: t('agencies.becomeAgentFirst'),
         },
       });
       // Navigate to profile page where they can become an agent
@@ -191,9 +191,9 @@ const AgenciesListPage: React.FC = () => {
   };
 
   const getRankStyle = (index: number) => {
-    if (index === 0) return { bg: 'from-amber-400 to-amber-600', text: '1st', emoji: '🏆' };
-    if (index === 1) return { bg: 'from-slate-300 to-slate-500', text: '2nd', emoji: '🥈' };
-    if (index === 2) return { bg: 'from-orange-400 to-orange-600', text: '3rd', emoji: '🥉' };
+    if (index === 0) return { bg: 'from-amber-400 to-amber-600', text: t('agencies.rank1st'), emoji: '🏆' };
+    if (index === 1) return { bg: 'from-slate-300 to-slate-500', text: t('agencies.rank2nd'), emoji: '🥈' };
+    if (index === 2) return { bg: 'from-orange-400 to-orange-600', text: t('agencies.rank3rd'), emoji: '🥉' };
     return { bg: 'from-primary to-primary-dark', text: `${index + 1}`, emoji: '' };
   };
 
@@ -249,7 +249,7 @@ const AgenciesListPage: React.FC = () => {
           {agency.isFeatured && (
             <div className="absolute top-3 left-3 px-2.5 py-1 bg-gradient-to-r from-amber-400 to-orange-500 rounded-lg text-white text-xs font-bold flex items-center gap-1 shadow-lg">
               <SparklesIcon className="w-3 h-3" />
-              <span>Featured</span>
+              <span>{t('agencies.featured')}</span>
             </div>
           )}
         </div>
@@ -454,8 +454,8 @@ const AgenciesListPage: React.FC = () => {
 
       {/* SEO Meta Tags */}
       <SEO
-        title="Real Estate Agencies in the Balkans"
-        description={`Discover ${agencies.length}+ trusted real estate agencies across Serbia, Montenegro, Croatia, Bosnia, and the Balkans. Find professional agencies to help with your property needs.`}
+        title={t('agencies.pageTitle')}
+        description={t('agencies.pageDescription', { count: agencies.length })}
         canonical={`${typeof window !== 'undefined' ? window.location.origin : ''}/agencies`}
         type="website"
       />
@@ -471,7 +471,7 @@ const AgenciesListPage: React.FC = () => {
         totalAgencies={agencies.length}
         totalAgents={totalStats.totalAgents}
         totalProperties={totalStats.totalProperties}
-        popularSearches={['Belgrade', 'Zagreb', 'Luxury', 'Tirana', 'Commercial', 'Residential']}
+        popularSearches={[t('agencies.popularSearch.belgrade'), t('agencies.popularSearch.zagreb'), t('agencies.popularSearch.luxury'), t('agencies.popularSearch.tirana'), t('agencies.popularSearch.commercial'), t('agencies.popularSearch.residential')]}
       />
 
       {/* Main Content */}
@@ -676,7 +676,7 @@ const AgenciesListPage: React.FC = () => {
                   <div className="mb-6 sm:mb-10">
                     <div className="flex items-center gap-2 mb-4 sm:mb-6">
                       <TrophyIcon className="w-5 h-5 sm:w-6 sm:h-6 text-amber-500" />
-                      <h3 className="text-base sm:text-lg font-bold text-gray-900">{t('agencies.topAgencies', 'Top Agencies')}</h3>
+                      <h3 className="text-base sm:text-lg font-bold text-gray-900">{t('agencies.topAgencies')}</h3>
                     </div>
                     <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
                       {agencies.slice(0, 3).map((agency, index) => (
@@ -701,7 +701,7 @@ const AgenciesListPage: React.FC = () => {
                         </div>
                         <div className="relative flex justify-center">
                           <span className="px-4 sm:px-6 py-1.5 sm:py-2 bg-white text-gray-600 text-xs sm:text-sm font-semibold rounded-full border border-gray-200 shadow-sm">
-                            {t('agencies.moreAgencies', 'More Agencies')} ({agencies.length - 3})
+                            {t('agencies.moreAgencies')} ({agencies.length - 3})
                           </span>
                         </div>
                       </div>

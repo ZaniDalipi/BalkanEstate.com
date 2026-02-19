@@ -215,7 +215,9 @@
   "virtualTour": {
     "title": "Tur Virtual 360°",
     "description": "Eksploroni këtë pronë në 360° imersive",
-    "openInNewTab": "Hap në skedë të re për përvojë të plotë"
+    "openInNewTab": "Hap në skedë të re për përvojë të plotë",
+    "failedToLoad": "Failed to load virtual tour",
+    "loading": "Loading virtual tour..."
   },
   "featuredAgencies": "Agjenci të Zgjedhura",
   "status": {
@@ -311,7 +313,9 @@
         "highlight": "TË THEKSUAR",
         "featured": "TË VEÇUAR",
         "standard": "PROMOVUAR"
-      }
+      },
+      "promotedCount_one": "{{count}} promoted listing",
+      "promotedCount_other": "{{count}} promoted listings"
     },
     "agentRecommendations": {
       "premium": {
@@ -454,5 +458,16 @@
     "highlighted": "Prona të Veçuara",
     "highlightedCount": "listime premium",
     "moreListings": "Më Shumë Listime"
+  },
+  "gallery": {
+    "mute": "Mute",
+    "unmute": "Unmute",
+    "fullscreen": "Fullscreen",
+    "exitFullscreen": "Exit fullscreen",
+    "enterFullscreen": "Enter fullscreen",
+    "propertyShowcase": "Property Showcase",
+    "skipVideo": "Skip Video",
+    "videoTour": "Video Tour",
+    "enter3DTour": "Enter 3D Tour"
   }
 }

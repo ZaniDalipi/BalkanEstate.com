@@ -109,7 +109,7 @@ const GoogleMapControls: React.FC<GoogleMapControlsProps> = ({
   isLayerMenuOpen,
   setIsLayerMenuOpen,
 }) => {
-  const { t } = useTranslation(['search', 'property']);
+  const { t } = useTranslation(['search', 'property', 'common']);
 
   return (
     <>
@@ -133,13 +133,13 @@ const GoogleMapControls: React.FC<GoogleMapControlsProps> = ({
               <CrosshairsIcon className="w-4 h-4 xl:w-5 xl:h-5 text-neutral-700" />
             </button>
 
-            <div className="flex items-center bg-neutral-200/50 p-0.5 rounded-full" role="radiogroup" aria-label="Map style">
+            <div className="flex items-center bg-neutral-200/50 p-0.5 rounded-full" role="radiogroup" aria-label={t('common:aria.mapStyle')}>
               <button
                 onClick={() => { setMapStyle('clean'); if (drawnBounds) onDrawComplete(null); }}
                 className={`px-1.5 py-0.5 xl:px-2 xl:py-1 rounded-full text-[10px] xl:text-[11px] font-semibold transition-all ${
                   mapStyle === 'clean' ? 'bg-white shadow text-primary' : 'text-neutral-600 hover:bg-white/50'
                 }`}
-                aria-label="Clean map style - minimal, properties stand out"
+                aria-label={t('common:aria.cleanMapStyle')}
                 aria-pressed={mapStyle === 'clean'}
               >
                 {t('search:map.clean', 'Clean')}
@@ -149,7 +149,7 @@ const GoogleMapControls: React.FC<GoogleMapControlsProps> = ({
                 className={`px-1.5 py-0.5 xl:px-2 xl:py-1 rounded-full text-[10px] xl:text-[11px] font-semibold transition-all ${
                   mapStyle === 'color' ? 'bg-white shadow text-primary' : 'text-neutral-600 hover:bg-white/50'
                 }`}
-                aria-label="Color map style - shows neighborhoods, parks, amenities"
+                aria-label={t('common:aria.colorMapStyle')}
                 aria-pressed={mapStyle === 'color'}
               >
                 {t('search:map.color', 'Color')}
@@ -159,7 +159,7 @@ const GoogleMapControls: React.FC<GoogleMapControlsProps> = ({
                 className={`px-1.5 py-0.5 xl:px-2 xl:py-1 rounded-full text-[10px] xl:text-[11px] font-semibold transition-all ${
                   mapStyle === 'street' ? 'bg-white shadow text-primary' : 'text-neutral-600 hover:bg-white/50'
                 }`}
-                aria-label="Street map style"
+                aria-label={t('common:aria.streetMapStyle')}
                 aria-pressed={mapStyle === 'street'}
               >
                 {t('search:map.street', 'Street')}
@@ -169,7 +169,7 @@ const GoogleMapControls: React.FC<GoogleMapControlsProps> = ({
                 className={`px-1.5 py-0.5 xl:px-2 xl:py-1 rounded-full text-[10px] xl:text-[11px] font-semibold transition-all ${
                   mapStyle === 'satellite' ? 'bg-white shadow text-primary' : 'text-neutral-600 hover:bg-white/50'
                 }`}
-                aria-label="Satellite aerial imagery"
+                aria-label={t('common:aria.satelliteMapStyle')}
                 aria-pressed={mapStyle === 'satellite'}
               >
                 {t('search:map.satellite', 'Satellite')}
@@ -235,7 +235,7 @@ const GoogleMapControls: React.FC<GoogleMapControlsProps> = ({
               className={`relative flex items-center gap-1 px-1.5 py-1 xl:px-2.5 xl:py-1.5 text-[10px] xl:text-xs font-semibold rounded-full transition-all ${
                 showOnlyPromoted ? 'bg-gradient-to-r from-amber-500 to-orange-500 text-white' : 'text-neutral-600 hover:bg-neutral-200'
               }`}
-              aria-label={showOnlyPromoted ? 'Show all listings' : 'Show only premium & promoted'}
+              aria-label={showOnlyPromoted ? t('common:aria.showAllListings') : t('common:aria.showOnlyPremium')}
               aria-pressed={showOnlyPromoted}
             >
               <span className="text-xs xl:text-sm">👑</span>
@@ -255,7 +255,7 @@ const GoogleMapControls: React.FC<GoogleMapControlsProps> = ({
               className={`flex items-center gap-1 px-1.5 py-1 xl:px-2.5 xl:py-1.5 text-[10px] xl:text-xs font-semibold rounded-full transition-all ${
                 show3DBuildings ? 'bg-slate-700 text-white' : 'text-neutral-600 hover:bg-neutral-200'
               }`}
-              aria-label="Toggle 3D buildings"
+              aria-label={t('common:aria.toggle3DBuildings')}
               aria-pressed={show3DBuildings}
             >
               <span className="text-xs xl:text-sm">🏢</span>
@@ -268,7 +268,7 @@ const GoogleMapControls: React.FC<GoogleMapControlsProps> = ({
               className={`flex items-center gap-1 px-1.5 py-1 xl:px-2.5 xl:py-1.5 text-[10px] xl:text-xs font-semibold rounded-full transition-all ${
                 showLandmarks ? 'bg-primary text-white' : 'text-neutral-600 hover:bg-neutral-200'
               }`}
-              aria-label="Toggle points of interest"
+              aria-label={t('common:aria.togglePointsOfInterest')}
               aria-pressed={showLandmarks}
             >
               <span className="text-xs xl:text-sm">🏛️</span>
@@ -281,7 +281,7 @@ const GoogleMapControls: React.FC<GoogleMapControlsProps> = ({
               className={`flex items-center gap-1 px-1.5 py-1 xl:px-2.5 xl:py-1.5 text-[10px] xl:text-xs font-semibold rounded-full transition-all ${
                 showMeasurement ? 'bg-emerald-600 text-white' : 'text-neutral-600 hover:bg-neutral-200'
               }`}
-              aria-label="Toggle measurement tool"
+              aria-label={t('common:aria.toggleMeasurementTool')}
               aria-pressed={showMeasurement}
             >
               <span className="text-xs xl:text-sm">📏</span>
@@ -294,7 +294,7 @@ const GoogleMapControls: React.FC<GoogleMapControlsProps> = ({
               className={`flex items-center gap-1 px-1.5 py-1 xl:px-2.5 xl:py-1.5 text-[10px] xl:text-xs font-semibold rounded-full transition-all ${
                 showCadastre ? 'bg-orange-500 text-white' : 'text-neutral-600 hover:bg-neutral-200'
               }`}
-              aria-label="Toggle cadastre parcels"
+              aria-label={t('common:aria.toggleCadastreParcels')}
               aria-pressed={showCadastre}
             >
               <span className="text-xs xl:text-sm">📐</span>
@@ -372,7 +372,7 @@ const GoogleMapControls: React.FC<GoogleMapControlsProps> = ({
                   }}
                 >
                   {/* Map Styles */}
-                  <p className="text-[9px] font-bold text-gray-400 uppercase tracking-wider px-2 pt-1">Map Style</p>
+                  <p className="text-[9px] font-bold text-gray-400 uppercase tracking-wider px-2 pt-1">{t('common:aria.mapStyle')}</p>
                   <div className="flex gap-1 px-1 pb-1">
                     {(['clean', 'color', 'street', 'satellite'] as MapStyleType[]).map((style) => (
                       <button
@@ -399,7 +399,7 @@ const GoogleMapControls: React.FC<GoogleMapControlsProps> = ({
                     }`}
                   >
                     <span>🏢</span>
-                    <span>3D Buildings</span>
+                    <span>{t('common:aria.threeDBuildings')}</span>
                   </button>
                   <button
                     onClick={() => setShowLandmarks(!showLandmarks)}
@@ -408,7 +408,7 @@ const GoogleMapControls: React.FC<GoogleMapControlsProps> = ({
                     }`}
                   >
                     <span>🏛️</span>
-                    <span>POI</span>
+                    <span>{t('common:aria.poi')}</span>
                   </button>
                   <button
                     onClick={() => setShowCadastre(!showCadastre)}
@@ -417,7 +417,7 @@ const GoogleMapControls: React.FC<GoogleMapControlsProps> = ({
                     }`}
                   >
                     <span>📐</span>
-                    <span>Cadastre</span>
+                    <span>{t('common:aria.cadastre')}</span>
                   </button>
                   <button
                     onClick={() => { setShowMeasurement(!showMeasurement); setIsLayerMenuOpen(false); }}
@@ -426,7 +426,7 @@ const GoogleMapControls: React.FC<GoogleMapControlsProps> = ({
                     }`}
                   >
                     <span>📏</span>
-                    <span>Measure</span>
+                    <span>{t('common:aria.measure')}</span>
                   </button>
                   <button
                     onClick={() => setIsLegendOpen(!isLegendOpen)}
@@ -435,13 +435,13 @@ const GoogleMapControls: React.FC<GoogleMapControlsProps> = ({
                     }`}
                   >
                     <MapLegendIcon className="w-4 h-4" />
-                    <span>Legend</span>
+                    <span>{t('common:aria.legend')}</span>
                   </button>
 
                   <div className="h-px bg-gray-200 my-1" />
 
                   {/* Climate Risks */}
-                  <p className="text-[9px] font-bold text-gray-400 uppercase tracking-wider px-2 pt-1">Climate</p>
+                  <p className="text-[9px] font-bold text-gray-400 uppercase tracking-wider px-2 pt-1">{t('common:aria.climate')}</p>
                   <div className="flex flex-wrap gap-1 px-1 pb-1">
                     {(['none', 'flood', 'fire', 'wind', 'air', 'heat'] as ClimateRiskType[]).map((risk) => (
                       <button
@@ -468,7 +468,7 @@ const GoogleMapControls: React.FC<GoogleMapControlsProps> = ({
                     }`}
                   >
                     <span>👑</span>
-                    <span>Premium Only</span>
+                    <span>{t('common:aria.premiumOnly')}</span>
                     {promotedCount > 0 && !showOnlyPromoted && (
                       <span className="ml-auto min-w-[18px] h-[18px] flex items-center justify-center text-[9px] font-bold bg-amber-500 text-white rounded-full px-1">
                         {promotedCount}
@@ -511,7 +511,7 @@ const GoogleMapControls: React.FC<GoogleMapControlsProps> = ({
                   <button
                     onClick={handleResetView}
                     className="p-2 rounded-xl hover:bg-white/50 text-neutral-600 active:scale-95"
-                    aria-label="Reset view"
+                    aria-label={t('common:aria.resetView')}
                   >
                     <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
                       <path strokeLinecap="round" strokeLinejoin="round" d="M9 9V4.5M9 9H4.5M9 9L3.75 3.75M9 15v4.5M9 15H4.5M9 15l-5.25 5.25M15 9h4.5M15 9V4.5M15 9l5.25-5.25M15 15h4.5M15 15v4.5m0-4.5l5.25 5.25" />

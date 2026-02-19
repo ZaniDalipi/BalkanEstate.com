@@ -1068,6 +1068,14 @@ export const switchRole = async (req: Request, res: Response): Promise<void> => 
     }
 
     const currentUser = req.user as IUser;
+
+    // Prevent admin/super_admin from switching profiles
+    const adminRoles = ['admin', 'super_admin'];
+    if (adminRoles.includes(currentUser.role)) {
+      res.status(403).json({ message: 'Admin users cannot switch profiles' });
+      return;
+    }
+
     const user = await User.findById(String(currentUser._id));
 
     if (!user) {

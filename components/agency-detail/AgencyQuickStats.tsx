@@ -4,6 +4,7 @@
  */
 
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import {
   HomeIcon,
   StarIcon,
@@ -24,11 +25,13 @@ const AgencyQuickStats: React.FC<AgencyQuickStatsProps> = ({
   yearsInBusiness = 1,
   rating = 5.0,
 }) => {
+  const { t } = useTranslation(['agents']);
+
   const stats = [
     {
       icon: HomeIcon,
       value: listingsCount,
-      label: 'Listings',
+      label: t('agencies.listedProperties'),
       bgColor: 'rgba(59, 130, 246, 0.05)',
       iconBgColor: 'bg-primary/15',
       iconColor: 'text-primary',
@@ -36,7 +39,7 @@ const AgencyQuickStats: React.FC<AgencyQuickStatsProps> = ({
     {
       icon: UserGroupIcon,
       value: agentsCount,
-      label: 'Agents',
+      label: t('agencies.agents'),
       bgColor: 'rgba(16, 185, 129, 0.05)',
       iconBgColor: 'bg-emerald-500/15',
       iconColor: 'text-emerald-600',
@@ -44,7 +47,7 @@ const AgencyQuickStats: React.FC<AgencyQuickStatsProps> = ({
     {
       icon: CalendarIcon,
       value: `${yearsInBusiness}+`,
-      label: 'Years',
+      label: t('agencies.years'),
       bgColor: 'rgba(139, 92, 246, 0.05)',
       iconBgColor: 'bg-violet-500/15',
       iconColor: 'text-violet-600',
@@ -52,7 +55,7 @@ const AgencyQuickStats: React.FC<AgencyQuickStatsProps> = ({
     {
       icon: StarIcon,
       value: rating.toFixed(1),
-      label: 'Rating',
+      label: t('profile.rating'),
       bgColor: 'rgba(245, 158, 11, 0.05)',
       iconBgColor: 'bg-amber-500/15',
       iconColor: 'text-amber-500',

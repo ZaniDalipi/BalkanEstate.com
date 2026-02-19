@@ -1,4 +1,5 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { XMarkIcon } from '../../constants';
 
 export type AlertType = 'error' | 'warning' | 'success' | 'info';
@@ -31,6 +32,8 @@ const AlertDialog: React.FC<AlertDialogProps> = ({
   showCloseButton = true,
   icon,
 }) => {
+  const { t } = useTranslation(['common']);
+
   if (!isOpen) return null;
 
   // Icon colors and backgrounds based on type
@@ -92,7 +95,7 @@ const AlertDialog: React.FC<AlertDialogProps> = ({
   // Default actions if none provided
   const displayActions = actions || [
     {
-      label: 'Close',
+      label: t('common:close'),
       onClick: onClose,
       variant: 'secondary' as const,
     },

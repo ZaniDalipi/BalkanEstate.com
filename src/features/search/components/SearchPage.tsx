@@ -1,4 +1,5 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import MapComponent from '@/src/features/map/components/MapComponent';
 import PropertyList from './PropertyList';
 import { Property, ChatMessage, AiSearchQuery } from '@/types';
@@ -22,13 +23,16 @@ const AiChatModal: React.FC<{
     onApplyFilters: (query: AiSearchQuery) => void;
     history: ChatMessage[];
     onHistoryChange: (history: ChatMessage[]) => void;
-}> = ({ isOpen, onClose, ...aiSearchProps }) => (
-    <Modal isOpen={isOpen} onClose={onClose} size="lg" title="AI Property Search">
+}> = ({ isOpen, onClose, ...aiSearchProps }) => {
+    const { t } = useTranslation(['search']);
+    return (
+    <Modal isOpen={isOpen} onClose={onClose} size="lg" title={t('search:ai.title', 'AI Property Search')}>
         <div className="h-[70vh] flex flex-col">
             <AiSearch {...aiSearchProps} isMobile={true} />
         </div>
     </Modal>
-);
+    );
+};
 
 interface SearchPageProps {
     onToggleSidebar: () => void;

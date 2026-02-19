@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { MapContainer, TileLayer, Marker, Popup, useMap, useMapEvents } from 'react-leaflet';
 import L from 'leaflet';
 import { Agency } from '../types';
@@ -86,6 +87,7 @@ const MapEvents: React.FC = () => {
 };
 
 const AgenciesMap: React.FC<AgenciesMapProps> = ({ agencies, onAgencyClick }) => {
+  const { t } = useTranslation(['agents']);
   const [mapType, setMapType] = useState<'street' | 'satellite'>('street');
 
   // Filter agencies with valid coordinates
@@ -112,7 +114,7 @@ const AgenciesMap: React.FC<AgenciesMapProps> = ({ agencies, onAgencyClick }) =>
       <div className="w-full h-full bg-gray-100 flex items-center justify-center rounded-2xl">
         <div className="text-center">
           <BuildingOfficeIcon className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-          <p className="text-gray-600 font-semibold">No agencies with location data found</p>
+          <p className="text-gray-600 font-semibold">{t('agencies.map.noLocationData')}</p>
         </div>
       </div>
     );
@@ -183,7 +185,7 @@ const AgenciesMap: React.FC<AgenciesMapProps> = ({ agencies, onAgencyClick }) =>
                     {agency.isFeatured && (
                       <div className="flex items-center gap-1 mt-1">
                         <StarIcon className="w-3 h-3 text-amber-500" />
-                        <span className="text-xs font-semibold text-amber-600">Featured</span>
+                        <span className="text-xs font-semibold text-amber-600">{t('agencies.featured')}</span>
                       </div>
                     )}
                   </div>
@@ -198,16 +200,16 @@ const AgenciesMap: React.FC<AgenciesMapProps> = ({ agencies, onAgencyClick }) =>
                 <div className="flex gap-4 mb-3 text-xs">
                   <div>
                     <span className="font-bold text-gray-900">{agency.totalProperties}</span>
-                    <span className="text-gray-500 ml-1">Properties</span>
+                    <span className="text-gray-500 ml-1">{t('agencies.properties')}</span>
                   </div>
                   <div>
                     <span className="font-bold text-gray-900">{agency.totalAgents}</span>
-                    <span className="text-gray-500 ml-1">Agents</span>
+                    <span className="text-gray-500 ml-1">{t('agencies.agents')}</span>
                   </div>
                   {agency.yearsInBusiness && (
                     <div>
                       <span className="font-bold text-gray-900">{agency.yearsInBusiness}</span>
-                      <span className="text-gray-500 ml-1">Years</span>
+                      <span className="text-gray-500 ml-1">{t('agencies.years')}</span>
                     </div>
                   )}
                 </div>
@@ -239,7 +241,7 @@ const AgenciesMap: React.FC<AgenciesMapProps> = ({ agencies, onAgencyClick }) =>
                   className="w-full mt-3 bg-gray-900 text-white font-semibold py-2 px-4 rounded-lg hover:bg-gray-800 transition-colors text-sm"
                   onClick={() => handleAgencyClick(agency._id)}
                 >
-                  View Agency
+                  {t('agencies.view')}
                 </button>
               </div>
             </Popup>
@@ -258,7 +260,7 @@ const AgenciesMap: React.FC<AgenciesMapProps> = ({ agencies, onAgencyClick }) =>
                 : 'text-gray-600 hover:bg-gray-100'
             }`}
           >
-            Street
+            {t('agencies.map.street')}
           </button>
           <button
             onClick={() => setMapType('satellite')}
@@ -268,7 +270,7 @@ const AgenciesMap: React.FC<AgenciesMapProps> = ({ agencies, onAgencyClick }) =>
                 : 'text-gray-600 hover:bg-gray-100'
             }`}
           >
-            Satellite
+            {t('agencies.map.satellite')}
           </button>
         </div>
       </div>
@@ -276,20 +278,20 @@ const AgenciesMap: React.FC<AgenciesMapProps> = ({ agencies, onAgencyClick }) =>
       {/* Legend */}
       <div className="absolute bottom-4 left-4 z-[1000]">
         <div className="bg-white/90 backdrop-blur-sm p-3 rounded-lg shadow-lg border border-gray-200">
-          <h4 className="font-bold text-sm mb-2 text-gray-900">Legend</h4>
+          <h4 className="font-bold text-sm mb-2 text-gray-900">{t('agencies.map.legend')}</h4>
           <div className="space-y-2">
             <div className="flex items-center gap-2">
               <div className="w-6 h-6 rounded-full bg-gray-900 flex items-center justify-center">
                 <BuildingOfficeIcon className="w-3 h-3 text-white" />
               </div>
-              <span className="text-xs font-semibold text-gray-700">Regular Agency</span>
+              <span className="text-xs font-semibold text-gray-700">{t('agencies.map.regularAgency')}</span>
             </div>
             <div className="flex items-center gap-2">
               <div className="w-6 h-6 rounded-full bg-amber-500 flex items-center justify-center relative">
                 <BuildingOfficeIcon className="w-3 h-3 text-white" />
                 <span className="absolute -top-1 -right-1 text-xs">⭐</span>
               </div>
-              <span className="text-xs font-semibold text-gray-700">Featured Agency</span>
+              <span className="text-xs font-semibold text-gray-700">{t('agencies.map.featuredAgency')}</span>
             </div>
           </div>
         </div>

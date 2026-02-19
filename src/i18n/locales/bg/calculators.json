@@ -8,12 +8,17 @@
     },
     "calculating": "Изчисляване...",
     "results": {
-      "estimatedValue": "Приблизителна Стойност"
+      "estimatedValue": "Приблизителна Стойност",
+      "lowEstimate": "Low",
+      "highEstimate": "High",
+      "pricePerSqm": "Price/m²",
+      "valueRange": "Value Range"
     },
     "errors": {
       "selectLocation": "Моля, изберете валидно местоположение от предложенията.",
       "locationNotDetermined": "Не може да се определи градът и държавата от избраното местоположение.",
-      "insufficientData": "Съжаляваме, нямаме достатъчно данни за {{city}}, за да предоставим надеждна оценка."
+      "insufficientData": "Съжаляваме, нямаме достатъчно данни за {{city}}, за да предоставим надеждна оценка.",
+      "calculationFailed": "Failed to calculate property value. Please try again."
     }
   },
   "mortgage": {
@@ -27,7 +32,9 @@
       "interestRate": "Лихвен процент (%)",
       "loanTerm": "Срок на кредита",
       "years": "години",
-      "yrs": "г."
+      "yrs": "г.",
+      "country": "Country",
+      "quickSelect": "Quick select:"
     },
     "results": {
       "monthlyPayment": "Месечно плащане",
@@ -43,7 +50,22 @@
       "yearly": "Годишно",
       "total": "Общо"
     },
-    "disclaimer": "Това е приблизителна оценка само за информационни цели. Консултирайте се с финансов специалист за реални проценти и плащания."
+    "disclaimer": "Това е приблизителна оценка само за информационни цели. Консултирайте се с финансов специалист за реални проценти и плащания.",
+    "features": {
+      "accurate": "Accurate Estimates",
+      "accurateDesc": "Get precise monthly payment calculations",
+      "flexible": "Flexible Terms",
+      "flexibleDesc": "Compare different loan terms and rates",
+      "local": "Local Currencies",
+      "localDesc": "Support for all Balkan currencies"
+    },
+    "howItWorks": "How It Works",
+    "step1Title": "Enter Property Price",
+    "step1Desc": "Input the price of the property you want to buy",
+    "step2Title": "Adjust Parameters",
+    "step2Desc": "Set your down payment, loan term, and interest rate",
+    "step3Title": "See Your Payment",
+    "step3Desc": "Get your estimated monthly mortgage payment instantly"
   },
   "rentVsBuy": {
     "title": "Калкулатор: Наем срещу покупка",

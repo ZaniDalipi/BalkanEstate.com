@@ -1,4 +1,5 @@
 import React, { useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 
 interface FloorInputCombinedProps {
     label: string;
@@ -19,6 +20,7 @@ const FloorInputCombined: React.FC<FloorInputCombinedProps> = ({
     onFloorNumberChange,
     onTotalFloorsChange,
 }) => {
+    const { t } = useTranslation(['common']);
     const id = useMemo(() => `floor-input-combined`, []);
 
     const handleFloorChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -74,7 +76,7 @@ const FloorInputCombined: React.FC<FloorInputCombinedProps> = ({
             </label>
             <div className="glass-input flex items-center justify-center gap-2 h-[52px] !px-4">
                 <div className="flex flex-col items-center">
-                    <span className="text-[10px] uppercase tracking-wider text-gray-400">Total</span>
+                    <span className="text-[10px] uppercase tracking-wider text-gray-400">{t('common:floorInput.total')}</span>
                     <input
                         type="number"
                         id={`${id}-total`}
@@ -90,7 +92,7 @@ const FloorInputCombined: React.FC<FloorInputCombinedProps> = ({
                 </div>
                 <span className="text-xl font-light text-gray-300 mt-3">/</span>
                 <div className="flex flex-col items-center">
-                    <span className="text-[10px] uppercase tracking-wider text-gray-400">Floor</span>
+                    <span className="text-[10px] uppercase tracking-wider text-gray-400">{t('common:floorInput.floor')}</span>
                     <input
                         type="number"
                         id={`${id}-floor`}
@@ -112,7 +114,7 @@ const FloorInputCombined: React.FC<FloorInputCombinedProps> = ({
                 </div>
             </div>
             <p className="text-xs text-gray-400 mt-1">
-                e.g., 14-story building, Floor 8
+                {t('common:floorInput.helperText')}
             </p>
         </div>
     );

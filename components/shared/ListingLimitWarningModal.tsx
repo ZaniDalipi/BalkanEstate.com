@@ -31,7 +31,7 @@ const ListingLimitWarningModal: React.FC<ListingLimitWarningModalProps> = ({
     tierName = 'Free',
     listingLimit = 3,
 }) => {
-    const { t } = useTranslation(['modals']);
+    const { t } = useTranslation(['modals', 'common']);
 
     return (
         <Modal isOpen={isOpen} onClose={onClose} title="">
@@ -46,12 +46,12 @@ const ListingLimitWarningModal: React.FC<ListingLimitWarningModalProps> = ({
 
                 {/* Title */}
                 <h3 className="text-2xl font-bold text-neutral-800 mb-3">
-                    {t('listingLimit.title', 'Listing Limit Reached')}
+                    {t('listingLimit.title')}
                 </h3>
 
                 {/* Message - Dynamic based on tier */}
                 <p className="text-neutral-600 mb-4">
-                    {t('listingLimit.messageDynamic', `You've reached your ${tierName} tier limit of ${listingLimit} active listings.`, { tierName, limit: listingLimit })}
+                    {t('listingLimit.messageDynamic', { tierName, limit: listingLimit })}
                 </p>
 
                 {/* Draft saved notice */}
@@ -60,17 +60,17 @@ const ListingLimitWarningModal: React.FC<ListingLimitWarningModalProps> = ({
                         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                         </svg>
-                        {t('listingLimit.draftSaved', "Don't worry! Your listing has been saved as a draft.")}
+                        {t('listingLimit.draftSaved')}
                     </p>
                 </div>
 
                 {/* Discount offer */}
                 <div className="bg-gradient-to-r from-amber-50 to-orange-50 border-2 border-amber-300 rounded-xl p-4 mb-6">
                     <p className="font-bold text-amber-800 text-lg mb-1">
-                        {t('listingLimit.discountOffer', 'Win up to 50% OFF!')}
+                        {t('listingLimit.discountOffer')}
                     </p>
                     <p className="text-sm text-amber-700">
-                        {t('listingLimit.gameDescription', 'Play a quick game to win a discount on your Pro subscription. Get up to 250 listings + promotions!')}
+                        {t('listingLimit.gameDescription')}
                     </p>
                 </div>
 
@@ -81,19 +81,19 @@ const ListingLimitWarningModal: React.FC<ListingLimitWarningModalProps> = ({
                         className="flex-1 flex items-center justify-center gap-2 px-6 py-3 bg-gradient-to-r from-amber-500 to-orange-500 text-white font-bold rounded-lg shadow-lg hover:from-amber-600 hover:to-orange-600 transition-all transform hover:scale-105"
                     >
                         <GameIcon className="w-5 h-5" />
-                        {t('listingLimit.playForDiscount', 'Play for Discount')}
+                        {t('listingLimit.playForDiscount')}
                     </button>
                     <button
                         onClick={onClose}
                         className="flex-1 px-6 py-3 bg-neutral-100 text-neutral-700 font-semibold rounded-lg hover:bg-neutral-200 transition-colors"
                     >
-                        {t('listingLimit.maybeLater', 'Maybe Later')}
+                        {t('listingLimit.maybeLater')}
                     </button>
                 </div>
 
                 {/* Small note */}
                 <p className="text-xs text-neutral-500 mt-4">
-                    {t('listingLimit.draftNote', 'Your draft will be waiting for you when you come back.')}
+                    {t('listingLimit.draftNote')}
                 </p>
             </div>
         </Modal>

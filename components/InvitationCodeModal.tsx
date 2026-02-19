@@ -21,12 +21,13 @@ const InvitationCodeModal: React.FC<InvitationCodeModalProps> = ({
   onSubmit,
   agencyName,
 }) => {
-  const { t } = useTranslation(['modals']);
+  const { t } = useTranslation(['modals', 'common']);
   const [code, setCode] = useState('');
   const [codeType, setCodeType] = useState<CodeType>('coupon');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState('');
   const [validationMessage, setValidationMessage] = useState<string | null>(null);
+  const [validationStatus, setValidationStatus] = useState<'valid' | 'typing' | 'invalid' | null>(null);
 
   // Reset state when modal opens/closes
   useEffect(() => {
@@ -34,6 +35,7 @@ const InvitationCodeModal: React.FC<InvitationCodeModalProps> = ({
       setCode('');
       setError('');
       setValidationMessage(null);
+      setValidationStatus(null);
       setCodeType('coupon');
     }
   }, [isOpen]);
@@ -48,37 +50,37 @@ const InvitationCodeModal: React.FC<InvitationCodeModalProps> = ({
   }, []);
 
   // Validate code format
-  const validateCode = useCallback((inputCode: string, type: CodeType): { valid: boolean; message: string | null } => {
+  const validateCode = useCallback((inputCode: string, type: CodeType): { valid: boolean; message: string | null; status: 'valid' | 'typing' | 'invalid' | null } => {
     if (!inputCode.trim()) {
-      return { valid: false, message: null };
+      return { valid: false, message: null, status: null };
     }
 
     const upperCode = inputCode.toUpperCase();
 
     if (type === 'invitation') {
       if (upperCode.length > 0 && upperCode.length < 18) {
-        return { valid: false, message: 'Keep typing... (AGY-XXXXXX-XXXXXX)' };
+        return { valid: false, message: t('invitationCode.keepTypingInvitation'), status: 'typing' };
       }
       if (upperCode.length >= 18 && !INVITATION_CODE_PATTERN.test(upperCode)) {
-        return { valid: false, message: 'Invalid format. Expected: AGY-XXXXXX-XXXXXX' };
+        return { valid: false, message: t('invitationCode.invalidFormatInvitation'), status: 'invalid' };
       }
       if (INVITATION_CODE_PATTERN.test(upperCode)) {
-        return { valid: true, message: 'Valid invitation code format' };
+        return { valid: true, message: t('invitationCode.validInvitationFormat'), status: 'valid' };
       }
     } else {
       if (upperCode.length > 0 && upperCode.length < 12) {
-        return { valid: false, message: 'Keep typing... (IND-XXXXXXXX)' };
+        return { valid: false, message: t('invitationCode.keepTypingCoupon'), status: 'typing' };
       }
       if (upperCode.length >= 12 && !COUPON_CODE_PATTERN.test(upperCode)) {
-        return { valid: false, message: 'Invalid format. Expected: IND-XXXXXXXX' };
+        return { valid: false, message: t('invitationCode.invalidFormatCoupon'), status: 'invalid' };
       }
       if (COUPON_CODE_PATTERN.test(upperCode)) {
-        return { valid: true, message: 'Valid coupon code format' };
+        return { valid: true, message: t('invitationCode.validCouponFormat'), status: 'valid' };
       }
     }
 
-    return { valid: false, message: null };
-  }, []);
+    return { valid: false, message: null, status: null };
+  }, [t]);
 
   // Handle code input change
   const handleCodeChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
@@ -95,6 +97,7 @@ const InvitationCodeModal: React.FC<InvitationCodeModalProps> = ({
     // Validate
     const validation = validateCode(newCode, detectedType);
     setValidationMessage(validation.message);
+    setValidationStatus(validation.status);
   }, [codeType, detectCodeType, validateCode]);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -103,14 +106,14 @@ const InvitationCodeModal: React.FC<InvitationCodeModalProps> = ({
     const trimmedCode = code.trim().toUpperCase();
 
     if (!trimmedCode) {
-      setError('Please enter a code');
+      setError(t('invitationCode.enterCode'));
       return;
     }
 
     // Validate format before submitting
     const validation = validateCode(trimmedCode, codeType);
     if (!validation.valid && trimmedCode.length >= (codeType === 'invitation' ? 18 : 12)) {
-      setError(validation.message || 'Invalid code format');
+      setError(validation.message || t('invitationCode.invalidCodeFormat'));
       return;
     }
 
@@ -122,7 +125,7 @@ const InvitationCodeModal: React.FC<InvitationCodeModalProps> = ({
       setCode('');
       onClose();
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Failed to verify code. Please try again.';
+      const errorMessage = err instanceof Error ? err.message : t('invitationCode.verifyFailed');
       setError(errorMessage);
     } finally {
       setIsSubmitting(false);
@@ -134,6 +137,7 @@ const InvitationCodeModal: React.FC<InvitationCodeModalProps> = ({
     setCode('');
     setError('');
     setValidationMessage(null);
+    setValidationStatus(null);
     setCodeType('coupon');
     onClose();
   };
@@ -143,6 +147,7 @@ const InvitationCodeModal: React.FC<InvitationCodeModalProps> = ({
     setCode('');
     setError('');
     setValidationMessage(null);
+    setValidationStatus(null);
   };
 
   // Check if code is valid for submission
@@ -153,10 +158,10 @@ const InvitationCodeModal: React.FC<InvitationCodeModalProps> = ({
       <div className="pt-2 sm:pt-4">
         {/* Header - Mobile responsive */}
         <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-1 sm:mb-2 pr-8">
-          Join {agencyName}
+          {t('invitationCode.joinTitle', { agencyName })}
         </h2>
         <p className="text-sm sm:text-base text-gray-600 mb-4 sm:mb-6">
-          Enter your code to join this agency and get Pro subscription benefits.
+          {t('invitationCode.joinDescription')}
         </p>
 
         {/* Code Type Toggle - Mobile responsive */}
@@ -171,8 +176,8 @@ const InvitationCodeModal: React.FC<InvitationCodeModalProps> = ({
             }`}
             disabled={isSubmitting}
           >
-            <span className="hidden sm:inline">Agent Coupon</span>
-            <span className="sm:hidden">Coupon</span>
+            <span className="hidden sm:inline">{t('invitationCode.agentCoupon')}</span>
+            <span className="sm:hidden">{t('invitationCode.couponShort')}</span>
           </button>
           <button
             type="button"
@@ -184,8 +189,8 @@ const InvitationCodeModal: React.FC<InvitationCodeModalProps> = ({
             }`}
             disabled={isSubmitting}
           >
-            <span className="hidden sm:inline">Invitation Code</span>
-            <span className="sm:hidden">Invite</span>
+            <span className="hidden sm:inline">{t('invitationCode.invitationCode')}</span>
+            <span className="sm:hidden">{t('invitationCode.inviteShort')}</span>
           </button>
         </div>
 
@@ -193,7 +198,7 @@ const InvitationCodeModal: React.FC<InvitationCodeModalProps> = ({
         <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6">
           <div>
             <label htmlFor="codeInput" className="block text-sm font-medium text-gray-700 mb-1.5 sm:mb-2">
-              {codeType === 'invitation' ? 'Invitation Code' : 'Agent Registration Code'}
+              {codeType === 'invitation' ? t('invitationCode.invitationCodeLabel') : t('invitationCode.agentRegistrationCode')}
             </label>
             <input
               type="text"
@@ -203,7 +208,7 @@ const InvitationCodeModal: React.FC<InvitationCodeModalProps> = ({
               placeholder={codeType === 'invitation' ? 'AGY-XXXXXX-XXXXXX' : 'IND-XXXXXXXX'}
               className={`w-full px-3 sm:px-4 py-2.5 sm:py-3 border rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent font-mono text-base sm:text-lg tracking-wider uppercase transition-colors ${
                 error ? 'border-red-300 bg-red-50' :
-                validationMessage?.includes('Valid') ? 'border-green-300 bg-green-50' :
+                validationStatus === 'valid' ? 'border-green-300 bg-green-50' :
                 'border-gray-300'
               }`}
               disabled={isSubmitting}
@@ -217,8 +222,8 @@ const InvitationCodeModal: React.FC<InvitationCodeModalProps> = ({
             <div className="mt-1.5 sm:mt-2 min-h-[20px]">
               {validationMessage ? (
                 <p className={`text-xs sm:text-sm ${
-                  validationMessage.includes('Valid') ? 'text-green-600' :
-                  validationMessage.includes('Keep typing') ? 'text-gray-500' :
+                  validationStatus === 'valid' ? 'text-green-600' :
+                  validationStatus === 'typing' ? 'text-gray-500' :
                   'text-amber-600'
                 }`}>
                   {validationMessage}
@@ -226,8 +231,8 @@ const InvitationCodeModal: React.FC<InvitationCodeModalProps> = ({
               ) : (
                 <p className="text-xs text-gray-500">
                   {codeType === 'invitation'
-                    ? 'Format: AGY-XXXXXX-XXXXXX'
-                    : 'Format: IND-XXXXXXXX'}
+                    ? t('invitationCode.formatHintInvitation')
+                    : t('invitationCode.formatHintCoupon')}
                 </p>
               )}
             </div>
@@ -243,8 +248,8 @@ const InvitationCodeModal: React.FC<InvitationCodeModalProps> = ({
               codeType === 'invitation' ? 'text-blue-700' : 'text-amber-700'
             }`}>
               {codeType === 'invitation'
-                ? 'The invitation code lets you request to join the agency. The admin will review your request.'
-                : 'The agent coupon gives you instant Pro subscription (25 listings/year) as part of this agency.'}
+                ? t('invitationCode.invitationCodeInfo')
+                : t('invitationCode.couponCodeInfo')}
             </p>
           </div>
 
@@ -266,7 +271,7 @@ const InvitationCodeModal: React.FC<InvitationCodeModalProps> = ({
               className="w-full sm:flex-1 px-4 sm:px-6 py-2.5 sm:py-3 border border-gray-300 text-gray-700 font-semibold rounded-xl hover:bg-gray-50 transition-colors disabled:opacity-50"
               disabled={isSubmitting}
             >
-              Cancel
+              {t('common:cancel')}
             </button>
             <button
               type="submit"
@@ -279,10 +284,10 @@ const InvitationCodeModal: React.FC<InvitationCodeModalProps> = ({
                     <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                     <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                   </svg>
-                  <span>Verifying...</span>
+                  <span>{t('invitationCode.verifying')}</span>
                 </>
               ) : (
-                <span>{codeType === 'invitation' ? 'Submit Request' : 'Redeem Coupon'}</span>
+                <span>{codeType === 'invitation' ? t('invitationCode.submitRequest') : t('invitationCode.redeemCoupon')}</span>
               )}
             </button>
           </div>

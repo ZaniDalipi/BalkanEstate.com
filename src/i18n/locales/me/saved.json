@@ -9,7 +9,10 @@
     "searchCount": {
       "singular": "Sačuvana Pretraga",
       "plural": "Sačuvane Pretrage"
-    }
+    },
+    "badge": "Smart Property Alerts",
+    "titleHighlight": "Property Searches",
+    "description": "Track your favorite search criteria and get notified when new properties match"
   },
   "loginRequired": {
     "title": "Prijavite se da vidite vaše sačuvane pretrage",
@@ -43,5 +46,54 @@
     "deleteFailed": "Brisanje sačuvane pretrage nije uspjelo. Pokušajte ponovo.",
     "enterName": "Molimo unesite ime",
     "renameFailed": "Preimenovanje sačuvane pretrage nije uspjelo. Pokušajte ponovo."
+  },
+  "stats": {
+    "savedSearches": "Saved Searches",
+    "alerts": "Email Alerts",
+    "countries": "Countries",
+    "toggleAlerts": "Toggle email alerts",
+    "upgradeForAlerts": "Upgrade to Pro for email alerts",
+    "proOnly": "Pro Feature"
+  },
+  "badges": {
+    "instantAlerts": "Instant Alerts",
+    "customAreas": "Custom Areas",
+    "smartMatching": "Smart Matching"
+  },
+  "alerts": {
+    "enabledTitle": "Alerts Enabled",
+    "enabledMessage": "You will receive email notifications for all saved searches",
+    "disabledTitle": "Alerts Disabled",
+    "disabledMessage": "Email notifications have been turned off",
+    "toggleFailed": "Failed to update alert settings"
+  },
+  "clearAll": {
+    "button": "Clear All",
+    "clearing": "Clearing...",
+    "confirmTitle": "Delete All Saved Searches",
+    "confirmMessage": "Are you sure you want to delete all saved searches? This cannot be undone.",
+    "confirmButton": "Delete All",
+    "cancelButton": "Cancel"
+  },
+  "sortBy": "Sort by",
+  "favorites": {
+    "badge": "Your Favorites Collection",
+    "heroTitle": "Your Curated",
+    "heroTitleHighlight": "Favorites Collection",
+    "heroDescription": "All your saved properties and trusted agents in one place, organized and ready to explore",
+    "stats": {
+      "properties": "Properties",
+      "agents": "Agents",
+      "countries": "Countries"
+    },
+    "tabs": {
+      "properties": "Properties",
+      "agents": "Agents"
+    },
+    "badges": {
+      "quickAccess": "Quick Access",
+      "organized": "Organized by Location",
+      "compare": "Easy Comparison"
+    }
   }
 }

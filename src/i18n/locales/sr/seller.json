@@ -46,7 +46,11 @@
       "location": "Локација",
       "review": "Преглед"
     },
-    "progress": "Корак {{current}} од {{total}}",
+    "progress": {
+      "compressing": "Компресовање слика...",
+      "uploading": "Отпремање у облак...",
+      "creating": "Креирање огласа..."
+    },
     "nextStep": "Следећи Корак",
     "previousStep": "Претходни Корак",
     "skipToManual": "Пређи на Ручни Унос",
@@ -234,11 +238,6 @@
       "hint": "Налепите embed или share URL од вашег провајдера 360 туре. Тура ће бити приказана као интерактивни iframe на вашем огласу.",
       "z360Hint": "Креирајте вашу туру на z360-virtual-tour.vercel.app и налепите линк овде"
     },
-    "progress": {
-      "compressing": "Компресовање слика...",
-      "uploading": "Отпремање у облак...",
-      "creating": "Креирање огласа..."
-    },
     "promotion": {
       "title": "Промовишите Ваш Оглас",
       "description": "Добијте већу видљивост и упите са промовисаним позиционирањем",
@@ -275,6 +274,13 @@
       "proReached": "Достигли сте ваш Pro лимит огласа.",
       "agentProRequired": "Агенти морају имати активну Pro претплату за постављање огласа. Претплатите се сада за 25 активних огласа!",
       "buyerCannotCreate": "Купци не могу креирати огласе за некретнине. Молимо пређите на улогу Приватног Продавца или Агента."
+    },
+    "video": {
+      "title": "Property Video (Optional)",
+      "description": "Add a video to showcase your property! Videos auto-play when visitors view your listing, creating an engaging first impression.",
+      "label": "Video URL",
+      "placeholder": "https://youtube.com/watch?v=... or https://tiktok.com/...",
+      "hint": "Paste a link from YouTube, TikTok, Instagram Reels, or Vimeo. The video will auto-play when visitors open your listing!"
     }
   },
   "myListings": {
@@ -453,7 +459,8 @@
       "allRooms": "Снимите све собе",
       "exterior": "Укључите екстеријерне снимке",
       "clearPhotos": "Користите јасне, високо квалитетне фотографије"
-    }
+    },
+    "locationHint": "Adding location helps AI generate more accurate, location-specific descriptions"
   },
   "promotion": {
     "title": "Промовишите Ваш Оглас",
@@ -617,5 +624,9 @@
     "subscribeToPro": "Претплати се на Pro",
     "viewMyListings": "Погледај Моје Огласе",
     "switchRole": "Промени Улогу"
+  },
+  "listings": {
+    "confirmSold": "Are you sure you want to mark this property as sold? This action cannot be undone.",
+    "confirmDelete": "Are you sure you want to delete this listing? This action cannot be undone."
   }
 }

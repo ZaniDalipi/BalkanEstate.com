@@ -2,6 +2,7 @@
 // Handles query errors with retry and reset functionality
 
 import React, { ReactNode } from 'react';
+import { useTranslation } from 'react-i18next';
 import { QueryErrorResetBoundary, useQueryErrorResetBoundary } from '@tanstack/react-query';
 import { ErrorBoundary } from './ErrorBoundary';
 
@@ -57,6 +58,7 @@ interface FallbackProps {
  * Default fallback for query errors
  */
 function QueryErrorFallback({ onReset }: FallbackProps) {
+  const { t } = useTranslation('common');
   return (
     <div className="flex items-center justify-center min-h-[400px] px-4">
       <div className="max-w-md w-full bg-white rounded-lg shadow p-6 text-center">
@@ -77,11 +79,11 @@ function QueryErrorFallback({ onReset }: FallbackProps) {
         </div>
 
         <h3 className="text-lg font-semibold text-gray-900 mb-2">
-          Failed to load data
+          {t('queryError.title')}
         </h3>
 
         <p className="text-gray-600 mb-4">
-          We couldn't load the requested data. This might be a temporary network issue.
+          {t('queryError.description')}
         </p>
 
         <button
@@ -91,7 +93,7 @@ function QueryErrorFallback({ onReset }: FallbackProps) {
           }}
           className="bg-primary text-white py-2 px-6 rounded-lg hover:bg-primary-dark transition-colors"
         >
-          Retry
+          {t('queryError.retry')}
         </button>
       </div>
     </div>

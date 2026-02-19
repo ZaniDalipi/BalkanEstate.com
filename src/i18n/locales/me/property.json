@@ -215,7 +215,9 @@
   "virtualTour": {
     "title": "360° Virtual Tour",
     "description": "Explore this property in immersive 360°",
-    "openInNewTab": "Open in new tab for full experience"
+    "openInNewTab": "Open in new tab for full experience",
+    "failedToLoad": "Failed to load virtual tour",
+    "loading": "Loading virtual tour..."
   },
   "featuredAgencies": "Featured Agencies",
   "status": {
@@ -331,7 +333,9 @@
         "highlight": "ISTAKNUTO",
         "featured": "IZDVOJENO",
         "standard": "PROMOVISANO"
-      }
+      },
+      "promotedCount_one": "{{count}} promoted listing",
+      "promotedCount_other": "{{count}} promoted listings"
     },
     "heatMapLegend": "Gustina nekretnina",
     "low": "Niska",
@@ -362,7 +366,10 @@
       "pool": "Pool",
       "view": "View",
       "other": "Other"
-    }
+    },
+    "images": "photos",
+    "view": "View",
+    "tapToView": "Tap to view in gallery"
   },
   "mapLink": {
     "title": "View on Map",
@@ -451,5 +458,16 @@
     "highlighted": "Featured Properties",
     "highlightedCount": "premium listings",
     "moreListings": "More Listings"
+  },
+  "gallery": {
+    "mute": "Mute",
+    "unmute": "Unmute",
+    "fullscreen": "Fullscreen",
+    "exitFullscreen": "Exit fullscreen",
+    "enterFullscreen": "Enter fullscreen",
+    "propertyShowcase": "Property Showcase",
+    "skipVideo": "Skip Video",
+    "videoTour": "Video Tour",
+    "enter3DTour": "Enter 3D Tour"
   }
 }

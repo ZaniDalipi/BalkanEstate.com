@@ -150,7 +150,7 @@ const MapAgentAvatar: React.FC<MapAgentAvatarProps> = ({ onPropertySelect }) => 
                 <span className="text-xs sm:text-sm">{tierConfig.icon}</span>
               </div>
               <div>
-                <p className="text-white text-[8px] sm:text-[10px] font-medium opacity-90">Recommendation</p>
+                <p className="text-white text-[8px] sm:text-[10px] font-medium opacity-90">{t('property:map.popup.recommendation')}</p>
                 <p className="text-white font-bold text-[10px] sm:text-xs">{tierConfig.label}</p>
               </div>
             </div>
@@ -193,7 +193,7 @@ const MapAgentAvatar: React.FC<MapAgentAvatarProps> = ({ onPropertySelect }) => 
                   className="absolute top-1.5 right-1.5 sm:top-2 sm:right-2 bg-red-500 text-white text-[8px] sm:text-[10px] font-bold px-1 sm:px-1.5 py-0.5 rounded animate-pulse flex items-center gap-0.5"
                   style={{ boxShadow: '0 0 10px 2px rgba(239, 68, 68, 0.6), 0 0 16px 4px rgba(239, 68, 68, 0.3)' }}
                 >
-                  <span>🔥</span> <span className="hidden xs:inline">URGENT</span>
+                  <span>🔥</span> <span className="hidden xs:inline">{t('property:status.urgent')}</span>
                 </div>
               )}
             </div>
@@ -215,19 +215,19 @@ const MapAgentAvatar: React.FC<MapAgentAvatarProps> = ({ onPropertySelect }) => 
             <div className="grid grid-cols-4 gap-1 sm:gap-1.5 mb-1.5 sm:mb-2">
               <div className="text-center bg-gray-50 rounded py-1 sm:py-1.5">
                 <div className="font-bold text-gray-900 text-[10px] sm:text-xs">{currentMapFeatured.beds}</div>
-                <div className="text-[7px] sm:text-[9px] text-gray-500">Beds</div>
+                <div className="text-[7px] sm:text-[9px] text-gray-500">{t('property:map.beds')}</div>
               </div>
               <div className="text-center bg-gray-50 rounded py-1 sm:py-1.5">
                 <div className="font-bold text-gray-900 text-[10px] sm:text-xs">{currentMapFeatured.baths}</div>
-                <div className="text-[7px] sm:text-[9px] text-gray-500">Baths</div>
+                <div className="text-[7px] sm:text-[9px] text-gray-500">{t('property:map.baths')}</div>
               </div>
               <div className="text-center bg-gray-50 rounded py-1 sm:py-1.5">
                 <div className="font-bold text-gray-900 text-[10px] sm:text-xs">{currentMapFeatured.livingRooms || '-'}</div>
-                <div className="text-[7px] sm:text-[9px] text-gray-500">Living</div>
+                <div className="text-[7px] sm:text-[9px] text-gray-500">{t('property:map.living')}</div>
               </div>
               <div className="text-center bg-gray-50 rounded py-1 sm:py-1.5 border border-gray-200">
                 <div className="font-bold text-gray-900 text-[10px] sm:text-xs">{currentMapFeatured.sqft}</div>
-                <div className="text-[7px] sm:text-[9px] text-gray-500">m²</div>
+                <div className="text-[7px] sm:text-[9px] text-gray-500">{t('property:map.area')}</div>
               </div>
             </div>
 
@@ -241,7 +241,7 @@ const MapAgentAvatar: React.FC<MapAgentAvatarProps> = ({ onPropertySelect }) => 
                 <svg className="w-2.5 h-2.5 sm:w-3 sm:h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
                 </svg>
-                <span className="text-[10px] sm:text-xs font-medium">Prev</span>
+                <span className="text-[10px] sm:text-xs font-medium">{t('property:map.popup.prev')}</span>
               </button>
 
               {/* Counter with dots */}
@@ -271,7 +271,7 @@ const MapAgentAvatar: React.FC<MapAgentAvatarProps> = ({ onPropertySelect }) => 
                 disabled={isAnimating}
                 className="flex items-center gap-0.5 px-1.5 sm:px-2 py-1 sm:py-1.5 bg-gray-100 hover:bg-gray-200 active:bg-gray-300 rounded-md transition-colors disabled:opacity-50 touch-manipulation min-h-[32px]"
               >
-                <span className="text-[10px] sm:text-xs font-medium">Next</span>
+                <span className="text-[10px] sm:text-xs font-medium">{t('property:map.popup.next')}</span>
                 <svg className="w-2.5 h-2.5 sm:w-3 sm:h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                 </svg>
@@ -288,7 +288,7 @@ const MapAgentAvatar: React.FC<MapAgentAvatarProps> = ({ onPropertySelect }) => 
               onClick={handleViewProperty}
               className={`text-[9px] sm:text-[10px] font-bold px-2 py-1 rounded text-white bg-gradient-to-r ${tierConfig.gradient} hover:opacity-90 active:scale-95 transition-all touch-manipulation min-h-[28px]`}
             >
-              View Details
+              {t('property:map.popup.viewDetails')}
             </button>
           </div>
         </div>
@@ -353,7 +353,7 @@ const MapAgentAvatar: React.FC<MapAgentAvatarProps> = ({ onPropertySelect }) => 
         {/* Tooltip on hover - hidden on mobile */}
         {isExpanded && !showPanel && !showHint && (
           <div className="hidden lg:block absolute right-full mr-3 top-1/2 -translate-y-1/2 bg-gray-900/95 backdrop-blur-sm text-white text-[10px] px-2.5 py-1.5 rounded-lg whitespace-nowrap animate-fade-in shadow-xl">
-            <span className="font-semibold">{highlightedProperties.length}</span> Promoted
+            <span className="font-semibold">{highlightedProperties.length}</span> {t('property:map.promotedListings')}
             <div className="absolute left-full top-1/2 -translate-y-1/2 border-4 border-transparent border-l-gray-900" />
           </div>
         )}
@@ -370,9 +370,9 @@ const MapAgentAvatar: React.FC<MapAgentAvatarProps> = ({ onPropertySelect }) => 
             style={{ borderLeftColor: tierConfig.color }}
           >
             <p className="text-[11px] font-semibold text-gray-800">
-              {highlightedProperties.length} promoted {highlightedProperties.length === 1 ? 'listing' : 'listings'}
+              {t('property:map.popup.promotedCount', { count: highlightedProperties.length })}
             </p>
-            <p className="text-[9px] text-gray-500">Tap to explore</p>
+            <p className="text-[9px] text-gray-500">{t('property:map.agentHint')}</p>
           </div>
           {/* Arrow pointing to button */}
           <div

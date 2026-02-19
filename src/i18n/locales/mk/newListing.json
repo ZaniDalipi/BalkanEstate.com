@@ -163,7 +163,10 @@
     "tourUrlPlaceholder": "Внесете YouTube или Vimeo URL",
     "virtualTour360": "360° URL на виртуелна тура",
     "virtualTour360Placeholder": "Внесете Z360, Matterport, Kuula, или друг 360 тура URL",
-    "z360Hint": "Креирајте тури на z360-virtual-tour.vercel.app"
+    "z360Hint": "Креирајте тури на z360-virtual-tour.vercel.app",
+    "openZ360": "Open Z360",
+    "tourPreview": "360° Tour Preview",
+    "openInNewTab": "Open in new tab"
   },
   "floorplan": {
     "title": "Основ",

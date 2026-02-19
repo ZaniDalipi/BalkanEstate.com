@@ -163,7 +163,10 @@
     "tourUrlPlaceholder": "Enter YouTube or Vimeo URL",
     "virtualTour360": "360° Virtual Tour URL",
     "virtualTour360Placeholder": "Enter Z360, Matterport, Kuula, or other 360 tour URL",
-    "z360Hint": "Create tours at z360-virtual-tour.vercel.app"
+    "z360Hint": "Create tours at z360-virtual-tour.vercel.app",
+    "openZ360": "Open Z360",
+    "tourPreview": "360° Tour Preview",
+    "openInNewTab": "Open in new tab"
   },
   "floorplan": {
     "title": "Floor Plan",

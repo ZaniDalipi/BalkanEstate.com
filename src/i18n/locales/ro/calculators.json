@@ -8,12 +8,17 @@
     },
     "calculating": "Calculating...",
     "results": {
-      "estimatedValue": "Estimated Value"
+      "estimatedValue": "Estimated Value",
+      "lowEstimate": "Low",
+      "highEstimate": "High",
+      "pricePerSqm": "Price/m²",
+      "valueRange": "Value Range"
     },
     "errors": {
       "selectLocation": "Please select a valid location from the suggestions.",
       "locationNotDetermined": "Could not determine city and country from selected location.",
-      "insufficientData": "Sorry, we don't have enough data for {{city}} to provide a reliable estimate."
+      "insufficientData": "Sorry, we don't have enough data for {{city}} to provide a reliable estimate.",
+      "calculationFailed": "Failed to calculate property value. Please try again."
     }
   },
   "mortgage": {
@@ -27,7 +32,9 @@
       "interestRate": "Interest Rate (%)",
       "loanTerm": "Loan Term",
       "years": "years",
-      "yrs": "yrs"
+      "yrs": "yrs",
+      "country": "Country",
+      "quickSelect": "Quick select:"
     },
     "results": {
       "monthlyPayment": "Monthly Payment",
@@ -43,7 +50,22 @@
       "yearly": "Yearly",
       "total": "Total"
     },
-    "disclaimer": "This is an estimate for informational purposes only. Consult with a financial professional for actual rates and payments."
+    "disclaimer": "This is an estimate for informational purposes only. Consult with a financial professional for actual rates and payments.",
+    "features": {
+      "accurate": "Accurate Estimates",
+      "accurateDesc": "Get precise monthly payment calculations",
+      "flexible": "Flexible Terms",
+      "flexibleDesc": "Compare different loan terms and rates",
+      "local": "Local Currencies",
+      "localDesc": "Support for all Balkan currencies"
+    },
+    "howItWorks": "How It Works",
+    "step1Title": "Enter Property Price",
+    "step1Desc": "Input the price of the property you want to buy",
+    "step2Title": "Adjust Parameters",
+    "step2Desc": "Set your down payment, loan term, and interest rate",
+    "step3Title": "See Your Payment",
+    "step3Desc": "Get your estimated monthly mortgage payment instantly"
   },
   "rentVsBuy": {
     "title": "Rent vs. Buy Calculator",

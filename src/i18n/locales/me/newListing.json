@@ -163,7 +163,10 @@
     "tourUrlPlaceholder": "Enter YouTube or Vimeo URL",
     "virtualTour360": "360° Virtual Tour URL",
     "virtualTour360Placeholder": "Enter Z360, Matterport, Kuula, or other 360 tour URL",
-    "z360Hint": "Create tours at z360-virtual-tour.vercel.app"
+    "z360Hint": "Create tours at z360-virtual-tour.vercel.app",
+    "openZ360": "Open Z360",
+    "tourPreview": "360° Tour Preview",
+    "openInNewTab": "Open in new tab"
   },
   "floorplan": {
     "title": "Floor Plan",
@@ -210,11 +213,18 @@
   },
   "validation": {
     "required": "This field is required",
-    "minImages": "Please upload at least {count} images",
+    "minImages": "Please upload at least {{count}} images",
     "selectCountry": "Please select a country",
     "selectCity": "Please select a city",
     "setLocation": "Please set the property location on the map",
-    "invalidPrice": "Please enter a valid price"
+    "invalidPrice": "Please enter a valid price",
+    "imagesRequired": "Please upload at least one image.",
+    "selectCountryCity": "Please select both country and city.",
+    "selectValidCity": "Please select a valid city to set the location.",
+    "apartmentFloorNumber": "For apartments, please enter a valid floor number (1 or greater).",
+    "houseTotalFloors": "For houses and villas, please enter the total number of floors (1 or greater).",
+    "apartmentElevator": "Za stanove, molimo navedite da li postoji lift (Da ili Ne).",
+    "floorExceedsTotal": "Broj sprata ne može biti veći od ukupnog broja spratova."
   },
   "success": {
     "title": "Listing Published!",
@@ -239,20 +249,5 @@
     "failedToCreateMessage": "Failed to create listing. Please try again.",
     "removeImagesFirst": "Please remove some images before adding more.",
     "onlyMoreImages": "Only {{count}} more image(s) can be added."
-  },
-  "validation": {
-    "required": "This field is required",
-    "minImages": "Please upload at least {{count}} images",
-    "selectCountry": "Please select a country",
-    "selectCity": "Please select a city",
-    "setLocation": "Please set the property location on the map",
-    "invalidPrice": "Please enter a valid price",
-    "imagesRequired": "Please upload at least one image.",
-    "selectCountryCity": "Please select both country and city.",
-    "selectValidCity": "Please select a valid city to set the location.",
-    "apartmentFloorNumber": "For apartments, please enter a valid floor number (1 or greater).",
-    "houseTotalFloors": "For houses and villas, please enter the total number of floors (1 or greater).",
-    "apartmentElevator": "Za stanove, molimo navedite da li postoji lift (Da ili Ne).",
-    "floorExceedsTotal": "Broj sprata ne može biti veći od ukupnog broja spratova."
   }
 }
