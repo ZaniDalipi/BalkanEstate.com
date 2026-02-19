@@ -51,12 +51,15 @@ const MapInvalidator: React.FC = () => {
 
 interface Agent {
   agentId: string;
+  userId?: string;
   _id?: string;
   id: string;
   name: string;
   email: string;
   phone?: string;
   avatarUrl?: string;
+  avatarOptions?: string;
+  gender?: 'male' | 'female' | 'other';
   rating?: number;
   totalSalesValue?: number;
   propertiesSold?: number;
@@ -76,6 +79,20 @@ interface Agent {
 interface ExtendedAgency extends Agency {
   id?: string;
   rating?: number;
+  promotionCoupons?: {
+    monthly: number;
+    available: number;
+    used: number;
+    rollover?: number;
+    lastRefresh?: Date | string;
+  };
+  agentCoupons?: {
+    available: number;
+    used: number;
+    total: number;
+    expired: number;
+    coupons: any[];
+  };
 }
 
 interface AgencyDetailPageProps {
@@ -183,19 +200,15 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
     return String(agentUserId) === String(currentUserId);
   });
 
-  // Check if user's agency matches this agency (multiple ways to check)
+  // Check if user's agency matches this agency
   const isUserInThisAgency = currentUser && (
-    // Check top-level agencyId
-    (currentUser.agencyId && String(currentUser.agencyId) === String(agencyData._id)) ||
-    // Check nested agency.agencyId
-    (currentUser.agency?.agencyId && String(currentUser.agency.agencyId) === String(agencyData._id))
+    currentUser.agencyId && String(currentUser.agencyId) === String(agencyData._id)
   );
 
   // Can only request to join if: authenticated, is agent, not already in ANY agency, and not already a member of THIS agency
   const canRequestToJoin = isAuthenticated &&
     currentUser?.role === 'agent' &&
     !currentUser?.agencyId &&
-    !currentUser?.agency?.agencyId &&
     !isAlreadyMember &&
     !isUserInThisAgency;
 
@@ -286,7 +299,7 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
 
       // Also try to fetch achievements separately if not in agency data
       try {
-        const achievements = await getAgencyAchievements(agency._id || agency.id);
+        const achievements = await getAgencyAchievements(agency._id || agency.id || '');
         setAgencyAchievements(achievements);
       } catch {
         // Achievements fetch failed, use what we have
@@ -430,6 +443,9 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
                 tier: data.subscription.tier,
                 status: data.subscription.status,
                 listingsLimit: data.subscription.listingsLimit,
+                activeListingsCount: state.currentUser?.subscription?.activeListingsCount ?? 0,
+                privateSellerCount: state.currentUser?.subscription?.privateSellerCount ?? 0,
+                agentCount: state.currentUser?.subscription?.agentCount ?? 0,
                 expiresAt: data.subscription.expiresAt,
               },
               agencyId: data.agency.id,
@@ -709,7 +725,7 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
   // Achievement handlers
   const handleAddAchievement = async (achievement: Omit<Achievement, 'id' | 'createdAt' | 'isVerified'>) => {
     try {
-      const newAchievement = await addAgencyAchievement(agencyData._id || agencyData.id, {
+      const newAchievement = await addAgencyAchievement(agencyData._id || agencyData.id || '', {
         type: achievement.type,
         title: achievement.title,
         description: achievement.description,
@@ -728,7 +744,7 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
 
   const handleEditAchievement = async (id: string, achievement: Partial<Achievement>) => {
     try {
-      const updated = await updateAgencyAchievement(agencyData._id || agencyData.id, id, {
+      const updated = await updateAgencyAchievement(agencyData._id || agencyData.id || '', id, {
         type: achievement.type,
         title: achievement.title,
         description: achievement.description,
@@ -747,7 +763,7 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
 
   const handleDeleteAchievement = async (id: string) => {
     try {
-      await deleteAgencyAchievement(agencyData._id || agencyData.id, id);
+      await deleteAgencyAchievement(agencyData._id || agencyData.id || '', id);
       setAgencyAchievements(prev => prev.filter(a => a.id !== id));
       await success(t('achievements.deletedTitle', 'Achievement Deleted'), t('achievements.deletedMessage', 'The achievement has been deleted'));
     } catch (err) {
@@ -1499,7 +1515,7 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
                         <span className="text-slate-500">Profile Views</span>
                         <span className="font-semibold text-slate-800">{(agencyData as any).views ?? 0}</span>
                       </div>
-                      {agencyData.yearsInBusiness > 0 && (
+                      {(agencyData.yearsInBusiness ?? 0) > 0 && (
                         <div className="flex items-center justify-between text-sm">
                           <span className="text-slate-500">Years in Business</span>
                           <span className="font-semibold text-slate-800">{agencyData.yearsInBusiness}</span>
