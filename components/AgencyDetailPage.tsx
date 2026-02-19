@@ -1546,6 +1546,80 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
               </div>
             )}
 
+            {/* Admin Section - Agent Coupon Codes */}
+            {isOwner && agencyData.agentCoupons && (
+              <div className="mt-6 p-5 bg-gradient-to-br from-emerald-50 to-teal-50 border border-emerald-200 rounded-xl">
+                <div className="flex items-center justify-between mb-3">
+                  <div className="flex items-center gap-3">
+                    <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-emerald-400 to-teal-500 flex items-center justify-center shadow-lg shadow-emerald-500/25 flex-shrink-0">
+                      <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z" />
+                      </svg>
+                    </div>
+                    <div>
+                      <h4 className="font-semibold text-slate-900">Agent Registration Codes</h4>
+                      <p className="text-xs text-slate-500">
+                        <span className="text-emerald-600 font-medium">{agencyData.agentCoupons.available} available</span>
+                        {' · '}
+                        <span className="text-slate-400">{agencyData.agentCoupons.used} used</span>
+                        {agencyData.agentCoupons.expired > 0 && (
+                          <><span className="text-slate-400"> · </span><span className="text-red-400">{agencyData.agentCoupons.expired} expired</span></>
+                        )}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  {agencyData.agentCoupons.coupons.map((coupon, idx) => (
+                    <div
+                      key={idx}
+                      className={`flex items-center justify-between p-3 rounded-lg border ${
+                        coupon.status === 'used'
+                          ? 'bg-slate-50 border-slate-200'
+                          : coupon.status === 'expired'
+                            ? 'bg-red-50 border-red-200 opacity-60'
+                            : 'bg-white border-emerald-200'
+                      }`}
+                    >
+                      <div className="flex items-center gap-3">
+                        <code className={`font-mono text-sm font-bold tracking-widest ${
+                          coupon.status === 'used' ? 'text-slate-400 line-through' : 'text-slate-900'
+                        }`}>
+                          {coupon.code}
+                        </code>
+                        <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${
+                          coupon.status === 'available'
+                            ? 'bg-emerald-100 text-emerald-700'
+                            : coupon.status === 'used'
+                              ? 'bg-slate-100 text-slate-500'
+                              : 'bg-red-100 text-red-600'
+                        }`}>
+                          {coupon.status}
+                        </span>
+                      </div>
+                      <div className="flex items-center gap-3 text-right">
+                        {coupon.status === 'used' && coupon.usedBy ? (
+                          <span className="text-xs text-slate-500">
+                            Used by <strong className="text-slate-700">{coupon.usedBy.name}</strong>
+                          </span>
+                        ) : coupon.status === 'available' ? (
+                          <button
+                            onClick={async () => {
+                              navigator.clipboard.writeText(coupon.code);
+                              await success('Copied!', `Code ${coupon.code} copied to clipboard`);
+                            }}
+                            className="text-xs px-2 py-1 bg-emerald-500 text-white rounded-md hover:bg-emerald-600 transition-colors"
+                          >
+                            Copy
+                          </button>
+                        ) : null}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
             {/* Action Buttons */}
             <div className="mt-8 pt-6 border-t border-slate-100 flex flex-wrap gap-3">
               {isAdmin && (

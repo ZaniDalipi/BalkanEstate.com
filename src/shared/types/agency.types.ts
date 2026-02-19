@@ -60,6 +60,20 @@ export interface Agency {
   ownerId?: string | { _id: string; name: string; email: string; role?: string };
   admins?: string[];
   invitationCode?: string;
+  agentCoupons?: {
+    coupons: Array<{
+      code: string;
+      status: 'available' | 'used' | 'expired';
+      generatedAt?: string;
+      expiresAt?: string;
+      usedBy?: { _id: string; name: string; email: string } | null;
+      usedAt?: string;
+    }>;
+    available: number;
+    used: number;
+    expired: number;
+    canGenerateMore: boolean;
+  };
   createdAt?: string;
   updatedAt?: string;
   totalListings?: number;
