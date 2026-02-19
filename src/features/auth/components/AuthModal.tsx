@@ -161,6 +161,7 @@ const ValidationError: React.FC<{ message?: string; show: boolean }> = ({ messag
 );
 
 const PasswordRequirementsIndicator: React.FC<{ requirements: PasswordRequirements }> = ({ requirements }) => {
+    const { t } = useTranslation(['auth']);
     const RequirementItem: React.FC<{ met: boolean; text: string }> = ({ met, text }) => (
         <div className="flex items-center gap-2 transition-all duration-300">
             <div className={`w-4 h-4 rounded-full flex items-center justify-center transition-all duration-300 ${met ? 'bg-green-500 scale-100' : 'bg-neutral-300/60 scale-90'}`}>
