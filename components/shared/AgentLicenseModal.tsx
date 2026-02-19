@@ -290,7 +290,7 @@ const AgentLicenseModal: React.FC<AgentLicenseModalProps> = ({
               </label>
               {/* Responsive tag cloud – wraps naturally on all widths */}
               <div className="flex flex-wrap gap-2">
-                {BALKAN_LANGUAGES.map(language => (
+                {BALKAN_LANGUAGE_KEYS.map((language: string) => (
                   <button
                     key={language}
                     type="button"

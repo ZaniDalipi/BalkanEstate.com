@@ -120,7 +120,6 @@ const resolveGradientCss = (stored?: string): string => {
   const preset = GRADIENT_PRESETS.find(p => p.gradient === stored || p.id === stored);
   return preset?.css ?? DEFAULT_GRADIENT_CSS;
 };
-];
 
 const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
   const { t } = useTranslation(['agencyDetails', 'nav']);

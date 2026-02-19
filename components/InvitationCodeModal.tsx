@@ -63,20 +63,20 @@ const InvitationCodeModal: React.FC<InvitationCodeModalProps> = ({
 
     if (type === 'invitation') {
       if (upperCode.length > 0 && upperCode.length < INVITATION_CODE_MIN_LENGTH) {
-        return { valid: false, message: 'Keep typing... (AGY-XXXXXX-XXXXXX)' };
+        return { valid: false, message: 'Keep typing... (AGY-XXXXXX-XXXXXX)', status: 'typing' };
       }
       if (upperCode.length >= INVITATION_CODE_MIN_LENGTH && !INVITATION_CODE_PATTERN.test(upperCode)) {
-        return { valid: false, message: 'Invalid format. Expected: AGY-XXXXXX-XXXXXX' };
+        return { valid: false, message: 'Invalid format. Expected: AGY-XXXXXX-XXXXXX', status: 'invalid' };
       }
       if (INVITATION_CODE_PATTERN.test(upperCode)) {
         return { valid: true, message: t('invitationCode.validInvitationFormat'), status: 'valid' };
       }
     } else {
       if (upperCode.length > 0 && upperCode.length < 12) {
-        return { valid: false, message: 'Keep typing... (XXX-XXXXXXXX)' };
+        return { valid: false, message: 'Keep typing... (XXX-XXXXXXXX)', status: 'typing' };
       }
       if (upperCode.length >= COUPON_CODE_MIN_LENGTH && !COUPON_CODE_PATTERN.test(upperCode)) {
-        return { valid: false, message: 'Invalid format. Expected: XXX-XXXXXXXX' };
+        return { valid: false, message: 'Invalid format. Expected: XXX-XXXXXXXX', status: 'invalid' };
       }
       if (COUPON_CODE_PATTERN.test(upperCode)) {
         return { valid: true, message: t('invitationCode.validCouponFormat'), status: 'valid' };

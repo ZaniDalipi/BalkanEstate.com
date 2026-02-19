@@ -122,6 +122,13 @@ const ROLE_HINTS: Record<UserRole, { icon: string; titleKey: string; descKey: st
         features: [],
         color: 'gray',
     },
+    [UserRole.SUPER_ADMIN]: {
+        icon: '🛡️',
+        titleKey: 'roles.hints.superAdmin.title',
+        descKey: 'roles.hints.superAdmin.description',
+        features: [],
+        color: 'gray',
+    },
 };
 
 const ROLE_HINT_DEFAULTS: Record<UserRole, { title: string; description: string; features: string[] }> = {
@@ -143,6 +150,11 @@ const ROLE_HINT_DEFAULTS: Record<UserRole, { title: string; description: string;
     [UserRole.ADMIN]: {
         title: 'Admin',
         description: 'Platform administration.',
+        features: [],
+    },
+    [UserRole.SUPER_ADMIN]: {
+        title: 'Super Admin',
+        description: 'Full platform administration.',
         features: [],
     },
 };

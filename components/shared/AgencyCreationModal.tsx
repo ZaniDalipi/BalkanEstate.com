@@ -196,6 +196,8 @@ const AgencyCreationModal: React.FC<AgencyCreationModalProps> = ({
         address: source.address || '',
         city: source.city || '',
         country: source.country || '',
+        lat: source.lat ?? 0,
+        lng: source.lng ?? 0,
         phone: source.phone || '',
         email: source.email || '',
         website: source.website || '',

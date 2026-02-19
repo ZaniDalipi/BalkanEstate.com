@@ -40,7 +40,7 @@ export interface PromotionCoupons {
 export interface UserSubscription {
   tier: SubscriptionTier;
   status: SubscriptionStatus;
-  plan: SubscriptionPlan;
+  plan?: SubscriptionPlan;
 
   // Listing management
   listingsLimit: number;
