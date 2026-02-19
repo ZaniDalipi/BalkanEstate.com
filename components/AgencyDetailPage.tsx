@@ -100,15 +100,26 @@ interface AgencyDetailPageProps {
 }
 
 // Gradient presets for agency banners
+// `css` is used for rendering (immune to Tailwind build purge); `gradient` is the stored key
 const GRADIENT_PRESETS = [
-  { id: 'default', name: 'Ocean Blue', gradient: 'from-blue-600 via-blue-700 to-indigo-900' },
-  { id: 'sunset', name: 'Sunset', gradient: 'from-orange-500 via-pink-500 to-purple-600' },
-  { id: 'forest', name: 'Forest', gradient: 'from-green-600 via-teal-600 to-cyan-700' },
-  { id: 'royal', name: 'Royal Purple', gradient: 'from-purple-600 via-purple-700 to-indigo-900' },
-  { id: 'fire', name: 'Fire', gradient: 'from-red-600 via-orange-600 to-yellow-500' },
-  { id: 'night', name: 'Night Sky', gradient: 'from-gray-900 via-blue-900 to-purple-900' },
-  { id: 'mint', name: 'Mint Fresh', gradient: 'from-emerald-400 via-teal-500 to-cyan-600' },
-  { id: 'rose', name: 'Rose Gold', gradient: 'from-pink-400 via-rose-400 to-red-500' },
+  { id: 'default', name: 'Ocean Blue',   gradient: 'from-blue-600 via-blue-700 to-indigo-900',   css: 'linear-gradient(135deg, #2563eb, #1d4ed8, #312e81)' },
+  { id: 'sunset',  name: 'Sunset',       gradient: 'from-orange-500 via-pink-500 to-purple-600',  css: 'linear-gradient(135deg, #f97316, #ec4899, #9333ea)' },
+  { id: 'forest',  name: 'Forest',       gradient: 'from-green-600 via-teal-600 to-cyan-700',     css: 'linear-gradient(135deg, #16a34a, #0d9488, #0e7490)' },
+  { id: 'royal',   name: 'Royal Purple', gradient: 'from-purple-600 via-purple-700 to-indigo-900',css: 'linear-gradient(135deg, #9333ea, #7e22ce, #312e81)' },
+  { id: 'fire',    name: 'Fire',         gradient: 'from-red-600 via-orange-600 to-yellow-500',   css: 'linear-gradient(135deg, #dc2626, #ea580c, #eab308)' },
+  { id: 'night',   name: 'Night Sky',    gradient: 'from-gray-900 via-blue-900 to-purple-900',    css: 'linear-gradient(135deg, #111827, #1e3a5f, #581c87)' },
+  { id: 'mint',    name: 'Mint Fresh',   gradient: 'from-emerald-400 via-teal-500 to-cyan-600',   css: 'linear-gradient(135deg, #34d399, #14b8a6, #0891b2)' },
+  { id: 'rose',    name: 'Rose Gold',    gradient: 'from-pink-400 via-rose-400 to-red-500',       css: 'linear-gradient(135deg, #f472b6, #fb7185, #ef4444)' },
+];
+
+const DEFAULT_GRADIENT_CSS = 'linear-gradient(135deg, #1e293b, #0f172a, #1e1b4b)';
+
+// Resolve a stored coverGradient value (Tailwind class string or preset id) to a real CSS gradient
+const resolveGradientCss = (stored?: string): string => {
+  if (!stored) return DEFAULT_GRADIENT_CSS;
+  const preset = GRADIENT_PRESETS.find(p => p.gradient === stored || p.id === stored);
+  return preset?.css ?? DEFAULT_GRADIENT_CSS;
+};
 ];
 
 const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
@@ -960,7 +971,10 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
             <div className="absolute inset-0 bg-gradient-to-b from-slate-900/70 via-slate-900/50 to-slate-900/90" />
           </>
         ) : (
-          <div className={`absolute inset-0 bg-gradient-to-br ${(agencyData as any).coverGradient || 'from-slate-800 via-slate-900 to-slate-950'}`} />
+          <div
+            className="absolute inset-0"
+            style={{ backgroundImage: resolveGradientCss((agencyData as any).coverGradient) }}
+          />
         )}
 
         {/* Subtle Pattern Overlay */}
@@ -981,8 +995,8 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
                 {t('navigation.back')}
               </button>
 
-              {/* Breadcrumbs - Below back button */}
-              <div className="ml-1">
+              {/* Breadcrumbs - Below back button, hidden on mobile */}
+              <div className="ml-1 hidden sm:block">
                 <Breadcrumbs
                   items={generateAgencyBreadcrumbs({
                     slug: agency.slug || '',
@@ -1059,14 +1073,14 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
                             onClick={() => handleGradientSelect(preset.id)}
                             className="group relative h-20 rounded-xl overflow-hidden border-2 border-slate-200 hover:border-primary transition-all duration-300 hover:scale-[1.02]"
                           >
-                            <div className={`absolute inset-0 bg-gradient-to-br ${preset.gradient}`} />
+                            <div className="absolute inset-0" style={{ backgroundImage: preset.css }} />
                             <div className="absolute inset-0 bg-black/10 group-hover:bg-black/0 transition-colors" />
                             <div className="absolute inset-0 flex items-center justify-center">
                               <span className="text-white font-medium text-xs drop-shadow-lg">
                                 {preset.name}
                               </span>
                             </div>
-                            {(agencyData as any).coverGradient === preset.gradient && (
+                            {((agencyData as any).coverGradient === preset.gradient || (agencyData as any).coverGradient === preset.id) && (
                               <div className="absolute top-1.5 right-1.5 w-5 h-5 bg-white rounded-full flex items-center justify-center shadow">
                                 <svg className="w-3 h-3 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
