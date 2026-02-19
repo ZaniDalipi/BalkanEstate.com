@@ -153,6 +153,8 @@ class EmailService {
   // Simple in-memory send queue to avoid hitting provider rate limits
   private sendQueue: Array<{ config: EmailConfig; resolve: () => void; reject: (err: unknown) => void }> = [];
   private queueRunning = false;
+  private lastSentAt = 0; // timestamp of last successful/attempted send
+  private readonly MIN_SEND_GAP_MS = 1000; // 1 s between sends — safely under Resend's 2 req/s limit
 
   constructor() {
     // Initialize from addresses (can be overridden via env vars)
@@ -206,13 +208,23 @@ class EmailService {
     if (this.queueRunning) return;
     this.queueRunning = true;
     while (this.sendQueue.length > 0) {
+      // Always enforce minimum gap since last send (even when queue had only one item)
+      const sinceLastSend = Date.now() - this.lastSentAt;
+      const minWait = Math.max(0, this.MIN_SEND_GAP_MS - sinceLastSend);
+      if (minWait > 0) {
+        await new Promise(r => setTimeout(r, minWait));
+      }
+
       const item = this.sendQueue.shift()!;
+      this.lastSentAt = Date.now();
       try {
         await this.dispatchEmail(item.config);
         item.resolve();
       } catch (err) {
         item.reject(err);
       }
+
+      // Extra breathing room between batched items (e.g. bulk campaigns)
       if (this.sendQueue.length > 0) {
         await new Promise(r => setTimeout(r, EMAIL_SEND_INTERVAL_MS));
       }
