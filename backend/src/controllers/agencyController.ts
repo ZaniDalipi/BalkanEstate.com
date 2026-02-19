@@ -39,57 +39,6 @@ export const createAgency = async (
       return;
     }
 
-    // Check if user is already an agent with active Pro subscription
-    const isDevelopment = process.env.NODE_ENV === 'development';
-    const isAgent = user.role === 'agent' || user.availableRoles?.includes('agent');
-    const hasProSubscription = user.subscription?.tier === 'pro' ||
-                               user.subscription?.status === 'active' ||
-                               user.proSubscription?.isActive ||
-                               user.isSubscribed;
-
-    // RULE: Must be an agent first
-    if (!isDevelopment && !isAgent) {
-      res.status(403).json({
-        message: 'You must be an agent to create an agency. Please register as an agent first and subscribe to a Pro plan.',
-        code: 'AGENT_REQUIRED',
-      });
-      return;
-    }
-
-    // RULE: Must have active Pro subscription to create agency
-    if (!isDevelopment && !hasProSubscription) {
-      res.status(403).json({
-        message: 'You need an active Pro subscription to create an agency. Please subscribe to a Pro plan first.',
-        code: 'PRO_SUBSCRIPTION_REQUIRED',
-      });
-      return;
-    }
-
-    // Check if user has Enterprise subscription (skip in development mode)
-    const hasEnterpriseSubscription =
-      user.subscriptionPlan?.includes('enterprise') ||
-      user.subscriptionPlan === 'agency_yearly' ||
-      user.isEnterpriseTier;
-    if (!isDevelopment && !hasEnterpriseSubscription) {
-      res.status(403).json({
-        message: 'Agency profiles are only available for Enterprise tier subscribers. Please upgrade your plan to create an agency.',
-        code: 'ENTERPRISE_REQUIRED',
-      });
-      return;
-    }
-
-    if (isDevelopment) {
-      if (!isAgent) {
-        agencyLogger.info('🔧 Development mode: Bypassing agent status check for agency creation');
-      }
-      if (!hasProSubscription) {
-        agencyLogger.info('🔧 Development mode: Bypassing Pro subscription check for agency creation');
-      }
-      if (!hasEnterpriseSubscription) {
-        agencyLogger.info('🔧 Development mode: Bypassing Enterprise subscription check for agency creation');
-      }
-    }
-
     // Check if agency already exists for this user
     const existingAgency = await Agency.findOne({ ownerId: user._id });
     if (existingAgency) {
