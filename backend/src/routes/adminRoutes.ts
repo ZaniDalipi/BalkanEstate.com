@@ -37,6 +37,10 @@ import {
   sendTestAgencyCouponEmail,
   runMonthlyCouponRefreshManually,
 } from '../jobs/monthlyCouponJob';
+import { sendProSubscriptionWelcomeEmail, sendMonthlyCouponEmail } from '../services/emailService';
+import Product from '../models/Product';
+import User from '../models/User';
+import Subscription from '../models/Subscription';
 import {
   getActivityLogs,
   getDailySummary,
@@ -177,6 +181,75 @@ router.post('/test-emails/run-monthly-refresh', logAdminAction('RUN_MONTHLY_COUP
     res.json({ success: true, message: 'Monthly coupon refresh completed' });
   } catch (error) {
     res.status(500).json({ message: 'Failed to run monthly refresh', error: String(error) });
+  }
+});
+
+// Resend Pro subscription welcome + coupons email to a specific user by email address
+router.post('/test-emails/resend-pro-welcome', logAdminAction('RESEND_PRO_WELCOME_EMAIL'), async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { email } = req.body;
+    if (!email) {
+      res.status(400).json({ message: 'email is required' });
+      return;
+    }
+
+    const user = await User.findOne({ email });
+    if (!user) {
+      res.status(404).json({ message: `No user found with email: ${email}` });
+      return;
+    }
+
+    const subscription = await Subscription.findOne({
+      userId: user._id,
+      status: { $in: ['active', 'trial', 'grace', 'pending_cancellation'] },
+    }).sort({ expirationDate: -1 });
+
+    if (!subscription) {
+      res.status(404).json({ message: `No active subscription found for ${email}` });
+      return;
+    }
+
+    const product = await Product.findOne({ productId: subscription.productId });
+    if (!product) {
+      res.status(404).json({ message: `Product not found: ${subscription.productId}` });
+      return;
+    }
+
+    const billingPeriod = product.billingPeriod === 'yearly' ? 'yearly' : 'monthly';
+    const listingsLimit = product.listingsLimit ?? (billingPeriod === 'monthly' ? 20 : 250);
+    const totalCoupons = product.promotionCoupons ?? 3;
+    const highlightedCoupons = product.highlightedCoupons ?? 2;
+    const premiumCoupons = product.premiumCoupons ?? 1;
+
+    await sendProSubscriptionWelcomeEmail({
+      email: user.email,
+      userName: user.name || user.email.split('@')[0],
+      planName: product.name,
+      listingsLimit,
+      promotionCoupons: { total: totalCoupons, highlighted: highlightedCoupons, premium: premiumCoupons },
+      aiInsightsLimit: product.aiInsightsLimit ?? 20,
+      aiMessagesLimit: product.aiMessagesLimit ?? -1,
+      savedSearchesLimit: product.savedSearchesLimit ?? -1,
+      billingPeriod,
+      expiresAt: subscription.expirationDate,
+    });
+
+    await sendMonthlyCouponEmail({
+      email: user.email,
+      userName: user.name || user.email.split('@')[0],
+      planName: product.name,
+      totalCoupons,
+      newCoupons: totalCoupons,
+      rolledOver: 0,
+      breakdown: { highlighted: highlightedCoupons, premium: premiumCoupons, featured: 0 },
+    });
+
+    res.json({
+      success: true,
+      message: `Welcome email + coupons email resent to ${email} (${product.name})`,
+    });
+  } catch (error) {
+    res.status(500).json({ message: 'Failed to resend welcome email', error: String(error) });
   }
 });
 

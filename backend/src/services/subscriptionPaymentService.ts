@@ -84,13 +84,14 @@ export async function processSubscriptionPayment(
 
     // 4. Create or update subscription
     if (!isProduction) paymentLogger.info('🔍 Checking for existing subscription...');
-    let subscription = await Subscription.findOne({
+    const existingSubscription = await Subscription.findOne({
       userId,
       productId,
       status: { $in: ['active', 'grace', 'pending_cancellation'] },
     }).session(session);
+    let subscription = existingSubscription;
 
-    if (subscription) {
+    if (existingSubscription) {
       if (!isProduction) paymentLogger.info('🔄 Renewing existing subscription:', subscription._id);
       // Renew existing subscription
       subscription.expirationDate = expirationDate;
@@ -223,7 +224,7 @@ export async function processSubscriptionPayment(
     // This runs outside the transaction since it's not critical
     const isEnterpriseProduct = productId.includes('enterprise') || productId === 'agency_yearly';
     const isProProduct = productId.includes('pro_') || productId.includes('seller_pro_');
-    const isNewSubscription = !subscription.isNew === false; // New subscription, not renewal
+    const isNewSubscription = !existingSubscription; // true only when no prior subscription was found
 
     if (isEnterpriseProduct && isNewSubscription) {
       try {
