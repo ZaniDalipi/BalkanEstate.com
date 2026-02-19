@@ -66,7 +66,11 @@ export const createAgency = async (
     }
 
     // Check if user has Enterprise subscription (skip in development mode)
-    if (!isDevelopment && user.subscriptionPlan !== 'enterprise') {
+    const hasEnterpriseSubscription =
+      user.subscriptionPlan?.includes('enterprise') ||
+      user.subscriptionPlan === 'agency_yearly' ||
+      user.isEnterpriseTier;
+    if (!isDevelopment && !hasEnterpriseSubscription) {
       res.status(403).json({
         message: 'Agency profiles are only available for Enterprise tier subscribers. Please upgrade your plan to create an agency.',
         code: 'ENTERPRISE_REQUIRED',
@@ -81,7 +85,7 @@ export const createAgency = async (
       if (!hasProSubscription) {
         agencyLogger.info('🔧 Development mode: Bypassing Pro subscription check for agency creation');
       }
-      if (user.subscriptionPlan !== 'enterprise') {
+      if (!hasEnterpriseSubscription) {
         agencyLogger.info('🔧 Development mode: Bypassing Enterprise subscription check for agency creation');
       }
     }

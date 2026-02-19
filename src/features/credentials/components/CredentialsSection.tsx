@@ -115,7 +115,7 @@ interface ValidationErrors {
 const validate = (
   data: { title: string; issuer: string; expiryDate: string; issueDate: string },
   file: File | null,
-  t: (key: string, defaultValue?: string) => string,
+  t: (key: string, defaultValue?: string | Record<string, unknown>) => string,
 ): ValidationErrors => {
   const errors: ValidationErrors = {};
 

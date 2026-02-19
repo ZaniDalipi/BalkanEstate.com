@@ -120,7 +120,6 @@ const AgencyCreationModal: React.FC<AgencyCreationModalProps> = ({
   const isUserAgent =
     state.currentUser?.availableRoles?.includes(UserRole.AGENT) ||
     state.currentUser?.role === UserRole.AGENT ||
-    state.currentUser?.role === 'agent' ||
     !!state.currentUser?.agentId ||
     !!state.currentUser?.licenseNumber;
 
