@@ -580,7 +580,7 @@ const PRODUCTS = [
     trialPeriodDays: 7,
     gracePeriodDays: 3,
     // Limits
-    listingsLimit: 0, // Buyers don't create listings
+    listingsLimit: 3, // Buyer Pro can post up to 3 listings
     promotionCoupons: 0,
     premiumCoupons: 0,
     highlightedCoupons: 0,

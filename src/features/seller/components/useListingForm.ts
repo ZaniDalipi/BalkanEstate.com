@@ -126,17 +126,13 @@ export const useListingForm = (propertyToEdit: Property | null) => {
     const [wantToPromote, setWantToPromote] = useState(false);
     const [pendingPropertyData, setPendingPropertyData] = useState<Property | null>(null);
 
-    // Smart role selection: If user is buyer, default to private_seller (buyers can't create listings)
-    // If user has agent in availableRoles, prefer agent. Otherwise use private_seller.
+    // Smart role selection: Buyer Pro users always post as private_seller.
+    // Non-pro buyers (shouldn't reach here) also fall back to private_seller.
     const getInitialRole = (): UserRole => {
         const currentRole = currentUser?.activeRole || currentUser?.role;
 
-        // If current role is buyer, choose a valid seller role
+        // Buyers always post under private_seller role context
         if (currentRole === 'buyer' || currentRole === UserRole.BUYER) {
-            // Prefer agent if available, otherwise private_seller
-            if (currentUser?.availableRoles?.includes('agent')) {
-                return UserRole.AGENT;
-            }
             return UserRole.PRIVATE_SELLER;
         }
 
@@ -897,6 +893,16 @@ export const useListingForm = (propertyToEdit: Property | null) => {
                 } : {}),
             };
 
+            // Phone number is required to create or edit a listing
+            if (!currentUser.phone || currentUser.phone.trim() === '') {
+                showError(
+                    t('seller:errors.phoneRequired', 'Phone number required'),
+                    t('seller:errors.phoneRequiredMessage', 'Please add a mobile phone number in your Profile Settings before creating a listing.')
+                );
+                setIsSubmitting(false);
+                return;
+            }
+
             // Check if user has reached their listing limit (from PLAN_LISTING_LIMITS as source of truth)
             if (!propertyToEdit) {
                 const userListings = properties.filter(p => p.sellerId === currentUser.id);
@@ -1021,6 +1027,23 @@ export const useListingForm = (propertyToEdit: Property | null) => {
                         },
                         {
                             label: t('common:actions.cancel'),
+                            onClick: () => {},
+                            variant: 'secondary',
+                        },
+                    ]
+                );
+            } else if (errorCode === 'PHONE_REQUIRED') {
+                showError(
+                    t('seller:errors.phoneRequired', 'Phone number required'),
+                    t('seller:errors.phoneRequiredMessage', 'Please add a mobile phone number in your Profile Settings before creating a listing.'),
+                    [
+                        {
+                            label: t('account:tabs.profileSettings', 'Profile Settings'),
+                            onClick: () => dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'account' }),
+                            variant: 'primary',
+                        },
+                        {
+                            label: t('common:actions.close'),
                             onClick: () => {},
                             variant: 'secondary',
                         },

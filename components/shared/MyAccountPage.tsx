@@ -1552,13 +1552,16 @@ const MyAccountPage: React.FC = () => {
     }
 
     const isSellerProfile = state.currentUser.role === UserRole.AGENT || state.currentUser.role === UserRole.PRIVATE_SELLER;
+    // Buyer Pro users (listingsLimit > 0) get the same account tabs as sellers
+    const isBuyerPro = state.currentUser.role === UserRole.BUYER && (state.currentUser.subscription?.listingsLimit ?? 0) > 0;
+    const hasSellerTabs = isSellerProfile || isBuyerPro;
 
-    // Redirect non-sellers to profile if they're on a seller-only tab
+    // Redirect users without seller tabs to profile if they land on a seller-only tab
     useEffect(() => {
-        if (!isSellerProfile && (activeTab === 'listings' || activeTab === 'performance' || activeTab === 'subscription' || activeTab === 'promotions' || activeTab === 'viewings')) {
+        if (!hasSellerTabs && (activeTab === 'listings' || activeTab === 'performance' || activeTab === 'subscription' || activeTab === 'promotions' || activeTab === 'viewings')) {
             setActiveTab('profile');
         }
-    }, [isSellerProfile, activeTab, setActiveTab]);
+    }, [hasSellerTabs, activeTab, setActiveTab]);
 
     useEffect(() => {
         if (activeTab === 'performance') {
@@ -1598,9 +1601,9 @@ const MyAccountPage: React.FC = () => {
     const renderContent = () => {
         switch (activeTab) {
             case 'listings':
-                return isSellerProfile ? <MyListings sellerId={state.currentUser!.id} /> : null;
+                return hasSellerTabs ? <MyListings sellerId={state.currentUser!.id} /> : null;
             case 'promotions':
-                return isSellerProfile ? <MyPromotions /> : null;
+                return hasSellerTabs ? <MyPromotions /> : null;
             case 'profile':
                 return <ProfileSettings user={state.currentUser!} />;
             case 'performance':
@@ -1610,7 +1613,7 @@ const MyAccountPage: React.FC = () => {
             case 'measurements':
                  return <MyMeasurements userId={state.currentUser!.id} />;
             case 'viewings':
-                 return isSellerProfile ? <Suspense fallback={<div className="flex justify-center py-12"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div></div>}><ViewingRequestsTab /></Suspense> : null;
+                 return hasSellerTabs ? <Suspense fallback={<div className="flex justify-center py-12"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div></div>}><ViewingRequestsTab /></Suspense> : null;
             case 'security':
                  return <SecuritySettings logoutAllDevices={logoutAllDevices} />;
             default:
@@ -1681,7 +1684,7 @@ const MyAccountPage: React.FC = () => {
                                 )}
                             </div>
                             <nav className="space-y-2">
-                                {isSellerProfile && (
+                                {hasSellerTabs && (
                                     <>
                                         <TabButton label={t('account:tabs.myListings')} icon={<BuildingOfficeIcon className="w-6 h-6"/>} isActive={activeTab === 'listings'} onClick={() => setActiveTab('listings')} tabKey="listings" />
                                         <TabButton label={t('account:tabs.promotions', 'My Promotions')} icon={<SparklesIcon className="w-6 h-6"/>} isActive={activeTab === 'promotions'} onClick={() => setActiveTab('promotions')} tabKey="promotions" />
