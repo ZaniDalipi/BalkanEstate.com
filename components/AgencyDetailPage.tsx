@@ -832,13 +832,20 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.message || t('messages.coverUpdated'));
+        throw new Error(data.message || 'Failed to upload cover image');
       }
 
-      setAgencyData(data.agency);
-      await success(t('messages.coverUpdatedTitle', 'Cover Updated'), t('messages.coverUpdated'));
+      // Reset the file input so the same file can be re-selected if needed
+      const fileInput = document.getElementById('cover-upload') as HTMLInputElement;
+      if (fileInput) fileInput.value = '';
+
+      // Refresh full agency data (populated) instead of using unpopulated upload response
+      await fetchAgencyData();
+      await success(t('messages.coverUpdatedTitle', 'Cover Updated'), t('messages.coverUpdated', 'Banner image updated successfully'));
     } catch (err) {
-      setUploadError(err instanceof Error ? err.message : t('messages.uploadFailed', 'Upload failed'));
+      const msg = err instanceof Error ? err.message : t('messages.uploadFailed', 'Upload failed');
+      setUploadError(msg);
+      await error('Upload Failed', msg);
     } finally {
       setIsUploadingCover(false);
     }
@@ -1593,42 +1600,6 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
               </div>
             </div>
 
-            {/* Invitation Code - visible only to agency admin/owner or platform admin */}
-            {(isAdmin || isPlatformAdmin) && agencyData.invitationCode && (
-              <div className="mt-8 p-5 bg-gradient-to-br from-amber-50 to-orange-50 border border-amber-200 rounded-xl">
-                <div className="flex items-start gap-4">
-                  <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center shadow-lg shadow-amber-500/25 flex-shrink-0">
-                    <ShieldCheckIcon className="w-5 h-5 text-white" />
-                  </div>
-                  <div className="flex-1">
-                    <h4 className="font-semibold text-slate-900 mb-1">Agency Invitation Code</h4>
-                    <p className="text-sm text-slate-600 mb-3">
-                      {isAdmin
-                        ? 'Share this code with agents you want to join your agency'
-                        : 'Your agency invitation code — share with other agents to join'}
-                    </p>
-                    <div className="flex items-center gap-3 flex-wrap">
-                      <code className="px-4 py-2.5 bg-white border border-amber-200 rounded-lg font-mono text-base font-bold text-slate-900 tracking-widest shadow-sm">
-                        {agencyData.invitationCode}
-                      </code>
-                      <button
-                        onClick={async () => {
-                          navigator.clipboard.writeText(agencyData.invitationCode || '');
-                          await success(t('messages.copiedTitle', 'Copied!'), t('messages.invitationCodeCopied', 'Invitation code copied to clipboard!'));
-                        }}
-                        className="inline-flex items-center gap-2 px-4 py-2.5 bg-amber-500 text-white text-sm font-medium rounded-lg hover:bg-amber-600 transition-all duration-300 shadow-md shadow-amber-500/25"
-                      >
-                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
-                        </svg>
-                        Copy
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            )}
-
             {/* Admin Section - Coupon Usage Overview */}
             {(isAdmin || isPlatformAdmin) && (
               <div className="mt-6 space-y-4">
@@ -1768,7 +1739,37 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
             )}
 
             {/* Action Buttons */}
-            <div className="mt-8 pt-6 border-t border-slate-100 flex flex-wrap gap-3">
+            <div className="mt-8 pt-6 border-t border-slate-100">
+              {/* Invitation Code — always visible at top for admins */}
+              {(isAdmin || isPlatformAdmin) && (
+                <div className="mb-5 p-4 bg-gradient-to-br from-amber-50 to-orange-50 border border-amber-200 rounded-xl">
+                  <div className="flex items-center gap-3 mb-2">
+                    <ShieldCheckIcon className="w-4 h-4 text-amber-600 flex-shrink-0" />
+                    <h4 className="font-semibold text-slate-900 text-sm">Invitation Code</h4>
+                    <span className="text-xs text-slate-400">Share with agents to join your agency</span>
+                  </div>
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <code className="px-3 py-2 bg-white border border-amber-200 rounded-lg font-mono text-sm font-bold text-slate-900 tracking-widest shadow-sm">
+                      {agencyData.invitationCode || '—'}
+                    </code>
+                    {agencyData.invitationCode && (
+                      <button
+                        onClick={async () => {
+                          navigator.clipboard.writeText(agencyData.invitationCode || '');
+                          await success(t('messages.copiedTitle', 'Copied!'), t('messages.invitationCodeCopied', 'Invitation code copied to clipboard!'));
+                        }}
+                        className="inline-flex items-center gap-1.5 px-3 py-2 bg-amber-500 text-white text-xs font-semibold rounded-lg hover:bg-amber-600 transition-colors shadow-sm"
+                      >
+                        <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                        </svg>
+                        Copy
+                      </button>
+                    )}
+                  </div>
+                </div>
+              )}
+              <div className="flex flex-wrap gap-3">
               {isAdmin && (
                 <>
                   <button
