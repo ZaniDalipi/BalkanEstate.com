@@ -1,6 +1,6 @@
 import User from '../models/User';
 import Agency from '../models/Agency';
-import Product from '../models/Product';
+import Product, { IProduct } from '../models/Product';
 import Subscription from '../models/Subscription';
 import { sendMonthlyCouponEmail } from './emailService';
 import { generateProSubscriptionCoupons } from './subscriptionPaymentService';
@@ -42,9 +42,9 @@ export async function refreshProUserCoupons(): Promise<{ refreshed: number; emai
   const PRO_PRODUCT_IDS = ['pro_monthly', 'pro_yearly', 'seller_pro_monthly', 'seller_pro_yearly'];
 
   // Pre-load all Pro products once so we're not hitting DB per user
-  const productCache = new Map<string, Awaited<ReturnType<typeof Product.findOne>>>();
+  const productCache = new Map<string, IProduct>();
   for (const pid of PRO_PRODUCT_IDS) {
-    const p = await Product.findOne({ productId: pid }).lean();
+    const p = await Product.findOne({ productId: pid }).lean<IProduct>();
     if (p) productCache.set(pid, p);
   }
 
@@ -156,9 +156,9 @@ export async function refreshAgencyCoupons(): Promise<{ refreshed: number; email
 
   const AGENCY_PRODUCT_IDS = ['agency_yearly', 'seller_enterprise_yearly'];
 
-  let agencyProduct: any = null;
+  let agencyProduct: IProduct | null = null;
   for (const pid of AGENCY_PRODUCT_IDS) {
-    agencyProduct = await Product.findOne({ productId: pid }).lean();
+    agencyProduct = await Product.findOne({ productId: pid }).lean<IProduct>();
     if (agencyProduct) break;
   }
 
