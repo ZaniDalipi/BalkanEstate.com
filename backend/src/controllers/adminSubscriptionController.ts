@@ -496,10 +496,6 @@ export const adjustListingLimit = async (req: Request, res: Response): Promise<v
       user.subscription.listingsLimit = newLimit;
       user.markModified('subscription');
     }
-    // Also update legacy field if present
-    if (user.listingsLimit !== undefined) {
-      user.listingsLimit = newLimit;
-    }
 
     await user.save();
 
