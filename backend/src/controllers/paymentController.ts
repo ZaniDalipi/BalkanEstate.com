@@ -351,6 +351,28 @@ export const applyFreeSubscription = async (req: Request, res: Response): Promis
       return;
     }
 
+    // Check if this user already used this code
+    if (discount.usedBy && discount.usedBy.length > 0) {
+      const alreadyUsed = discount.usedBy.some(
+        (id: any) => id.toString() === userId.toString()
+      );
+      if (alreadyUsed) {
+        res.status(400).json({ message: 'You have already used this discount code' });
+        return;
+      }
+    }
+
+    // Check if code is restricted to specific plans
+    const effectiveProductId = productId || '';
+    if (discount.applicablePlans && discount.applicablePlans.length > 0) {
+      if (!effectiveProductId || !discount.applicablePlans.includes(effectiveProductId)) {
+        res.status(400).json({
+          message: `This discount code is not valid for the selected plan`,
+        });
+        return;
+      }
+    }
+
     // Find or create product
     let product = await Product.findOne({ productId });
 
@@ -389,9 +411,8 @@ export const applyFreeSubscription = async (req: Request, res: Response): Promis
       originalAmount: product.price,
     });
 
-    // Increment discount code usage
-    discount.usedCount = (discount.usedCount || 0) + 1;
-    await discount.save();
+    // Mark discount code as used (updates usedCount + usedBy for re-use prevention)
+    await discount.markAsUsed(userId.toString());
 
     res.status(200).json({
       success: true,

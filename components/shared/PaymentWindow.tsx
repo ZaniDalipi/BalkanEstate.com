@@ -502,6 +502,8 @@ const PaymentWindow: React.FC<PaymentWindowProps> = ({
           productId: finalProductId,
           countryCode: userCountry,
           language: navigator.language?.split('-')[0] || 'en',
+          // Pass discount code so backend can mark it used after payment
+          ...(appliedDiscountCode ? { discountCode: appliedDiscountCode } : {}),
         }),
       });
 

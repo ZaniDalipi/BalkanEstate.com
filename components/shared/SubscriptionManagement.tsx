@@ -157,19 +157,25 @@ const LISTING_LIMITS: Record<string, number> = {
 // Map product IDs to gradient colors
 const PLAN_COLORS: Record<string, string> = {
   free: 'from-gray-400 to-gray-500',
+  buyer_monthly: 'from-blue-500 to-indigo-600',   // Buyer Pro
+  buyer_pro_monthly: 'from-blue-500 to-indigo-600',
+  buyer_pro_yearly: 'from-indigo-500 to-purple-600',
   seller_pro_monthly: 'from-blue-500 to-blue-600',
   seller_pro_yearly: 'from-purple-500 to-purple-600',
   seller_enterprise_yearly: 'from-amber-500 to-orange-600',
-  agency_agent_yearly: 'from-emerald-500 to-teal-600',  // Agency agent color
+  agency_agent_yearly: 'from-emerald-500 to-teal-600',
 };
 
 // Map product IDs to tiers
 const PLAN_TIERS: Record<string, number> = {
   free: 0,
+  buyer_monthly: 1,          // Buyer Pro
+  buyer_pro_monthly: 1,
+  buyer_pro_yearly: 2,
   seller_pro_monthly: 1,
   seller_pro_yearly: 2,
   seller_enterprise_yearly: 3,
-  agency_agent_yearly: 2,  // Same tier as pro yearly
+  agency_agent_yearly: 2,
 };
 
 // Gift/Coupon icon component
@@ -248,17 +254,34 @@ const SubscriptionManagement: React.FC<SubscriptionManagementProps> = ({ userId 
 
   const user = state.currentUser as User;
 
-  // Fetch products from database
+  // Fetch products from database — include buyer plans so subscription displays correctly
   const fetchProducts = useCallback(async () => {
     try {
-      const response = await fetch(`${API_URL}/products?role=seller`);
-      if (response.ok) {
-        const data = await response.json();
-        if (data.products) {
-          setProducts(data.products);
+      // Fetch both seller and buyer products so we can display any plan correctly
+      const [sellerRes, buyerRes] = await Promise.all([
+        fetch(`${API_URL}/products?role=seller`),
+        fetch(`${API_URL}/products?role=buyer`),
+      ]);
+      const allProducts: ProductData[] = [];
+      if (sellerRes.ok) {
+        const d = await sellerRes.json();
+        if (d.products) allProducts.push(...d.products);
+      }
+      if (buyerRes.ok) {
+        const d = await buyerRes.json();
+        if (d.products) {
+          // Avoid duplicates
+          const existingIds = new Set(allProducts.map(p => p.productId));
+          d.products.forEach((p: ProductData) => {
+            if (!existingIds.has(p.productId)) allProducts.push(p);
+          });
         }
       }
-    } catch (error) {
+      if (allProducts.length > 0) {
+        setProducts(allProducts);
+      }
+    } catch {
+      // Silently continue with empty products
     }
   }, []);
 
