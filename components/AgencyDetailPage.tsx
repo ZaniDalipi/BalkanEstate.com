@@ -1788,7 +1788,7 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
                       <button
                         onClick={async () => {
                           try {
-                            const token = localStorage.getItem('token');
+                            const token = localStorage.getItem('balkan_estate_token');
                             const response = await fetch(`${API_URL}/agencies/${agencyData._id || agencyData.id}`, {
                               method: 'PUT',
                               headers: {

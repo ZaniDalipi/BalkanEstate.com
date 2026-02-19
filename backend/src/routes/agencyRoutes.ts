@@ -24,7 +24,7 @@ import {
   migrateAgentSubscriptions,
   sendPromotionCouponsEmailEndpoint,
 } from '../controllers/agencyController';
-import { protect } from '../middleware/auth';
+import { protect, optionalAuth } from '../middleware/auth';
 
 const router = express.Router();
 
@@ -47,8 +47,8 @@ const upload = multer({
 // Public routes
 router.get('/', getAgencies);
 router.get('/featured/rotation', getFeaturedAgencies);
-router.get('/:country/:name', getAgency); // Format: /agencies/:country/:name (e.g., /agencies/albania/zano-real-estate)
-router.get('/:idOrSlug', getAgency); // Fallback for ID or single-segment slug lookups
+router.get('/:country/:name', optionalAuth, getAgency); // Format: /agencies/:country/:name (e.g., /agencies/albania/zano-real-estate)
+router.get('/:idOrSlug', optionalAuth, getAgency); // Fallback for ID or single-segment slug lookups
 
 // Protected routes
 router.post('/', protect, createAgency);
