@@ -1859,6 +1859,7 @@ export const redeemAgentCoupon = async (
       // Update existing subscription
       existingSubscription.productId = 'agency_agent_yearly';
       existingSubscription.store = 'agency_coupon';
+      existingSubscription.purchaseToken = couponCode;
       existingSubscription.status = 'active';
       existingSubscription.startDate = new Date();
       existingSubscription.renewalDate = subscriptionExpiresAt;
@@ -1872,11 +1873,13 @@ export const redeemAgentCoupon = async (
       await existingSubscription.save();
       agencyLogger.info(`✅ Updated Subscription document for user ${user._id}`);
     } else {
-      // Create new subscription document
+      // Create new subscription document — purchaseToken must be the unique coupon code
+      // to avoid duplicate-key errors on the (store, purchaseToken) unique index
       await Subscription.create({
         userId: user._id,
         productId: 'agency_agent_yearly',
         store: 'agency_coupon',
+        purchaseToken: couponCode,
         status: 'active',
         startDate: new Date(),
         renewalDate: subscriptionExpiresAt,
@@ -2399,6 +2402,7 @@ export const migrateAgentSubscriptions = async (
             userId: user._id,
             productId: 'agency_agent_yearly',
             store: 'agency_coupon',
+            purchaseToken: `agency_coupon_${user._id.toString()}`,
             status: 'active',
             startDate: user.agency?.joinedAt || new Date(),
             renewalDate: agencyExpiresAt,
@@ -2414,6 +2418,9 @@ export const migrateAgentSubscriptions = async (
           // Update existing subscription
           existingSubscription.productId = 'agency_agent_yearly';
           existingSubscription.store = 'agency_coupon';
+          if (!existingSubscription.purchaseToken) {
+            existingSubscription.purchaseToken = `agency_coupon_${user._id.toString()}`;
+          }
           existingSubscription.status = 'active';
           existingSubscription.expirationDate = agencyExpiresAt;
           existingSubscription.renewalDate = agencyExpiresAt;
