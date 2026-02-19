@@ -118,7 +118,6 @@ const AgencyFeaturedSubscriptionSchema: Schema = new Schema(
     },
     externalSubscriptionId: {
       type: String,
-      index: true,
       sparse: true,
     },
     externalCustomerId: {

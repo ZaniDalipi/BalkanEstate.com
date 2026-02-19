@@ -861,7 +861,7 @@ UserSchema.index(
   { provider: 1, providerId: 1 },
   {
     unique: true,
-    partialFilterExpression: { providerId: { $ne: null } }
+    partialFilterExpression: { providerId: { $exists: true } }
   }
 );
 
