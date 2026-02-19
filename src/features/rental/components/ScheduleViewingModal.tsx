@@ -167,7 +167,7 @@ const ScheduleViewingModal: React.FC<ScheduleViewingModalProps> = ({ property, i
         }
     }, [isOpen]);
 
-    // Generate available dates (next 14 days, filtered by allowed days)
+    // Generate available dates (next 21 days, filtered by allowed days)
     const availableDates = useMemo(() => {
         const dates: { value: string; label: string; dayName: string; dayOfWeek: number }[] = [];
         const today = new Date();
@@ -176,8 +176,10 @@ const ScheduleViewingModal: React.FC<ScheduleViewingModalProps> = ({ property, i
             const d = new Date(today);
             d.setDate(d.getDate() + i);
             if (allowedDays.includes(d.getDay())) {
+                // Use local year/month/day to avoid UTC offset shifting the date
+                const localDateStr = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
                 dates.push({
-                    value: d.toISOString().split('T')[0],
+                    value: localDateStr,
                     label: d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
                     dayName: d.toLocaleDateString('en-US', { weekday: 'short' }),
                     dayOfWeek: d.getDay(),
