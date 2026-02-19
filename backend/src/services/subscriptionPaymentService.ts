@@ -5,7 +5,7 @@ import PaymentRecord from '../models/PaymentRecord';
 import SubscriptionEvent from '../models/SubscriptionEvent';
 import Product from '../models/Product';
 import Agency from '../models/Agency';
-import { sendAgentRegistrationCouponsEmail, sendEnterpriseWelcomeEmail, sendSubscriptionInvoice } from './emailService';
+import { sendAgentRegistrationCouponsEmail, sendEnterpriseWelcomeEmail, sendSubscriptionInvoice, sendProSubscriptionWelcomeEmail, sendMonthlyCouponEmail } from './emailService';
 import { generateSecureRandomString } from '../utils/secureRandom';
 import { paymentLogger } from '../utils/logger';
 
@@ -240,6 +240,53 @@ export async function processSubscriptionPayment(
       await initializePromotionCoupons(String(userId), productId, isProProduct, isEnterpriseProduct);
     } catch (couponError) {
       paymentLogger.error('⚠️ Error initializing promotion coupons:', couponError);
+    }
+
+    // Send welcome email with plan benefits for new Pro subscriptions
+    if (isProProduct && isNewSubscription) {
+      try {
+        const billingPeriod = product.billingPeriod === 'yearly' ? 'yearly' : 'monthly';
+        const listingsLimit = product.listingsLimit ?? (billingPeriod === 'monthly' ? 20 : 250);
+        const totalCoupons = product.promotionCoupons ?? 3;
+        const highlightedCoupons = product.highlightedCoupons ?? 2;
+        const premiumCoupons = product.premiumCoupons ?? 1;
+
+        await sendProSubscriptionWelcomeEmail({
+          email: user.email,
+          userName: user.name || user.email.split('@')[0],
+          planName: product.name,
+          listingsLimit,
+          promotionCoupons: {
+            total: totalCoupons,
+            highlighted: highlightedCoupons,
+            premium: premiumCoupons,
+          },
+          aiInsightsLimit: product.aiInsightsLimit ?? 20,
+          aiMessagesLimit: product.aiMessagesLimit ?? -1,
+          savedSearchesLimit: product.savedSearchesLimit ?? -1,
+          billingPeriod,
+          expiresAt: subscription.expirationDate,
+        });
+        if (!isProduction) paymentLogger.info(`📧 Pro welcome email sent to ${user.email}`);
+
+        // Also send the initial monthly coupons email right away
+        await sendMonthlyCouponEmail({
+          email: user.email,
+          userName: user.name || user.email.split('@')[0],
+          planName: product.name,
+          totalCoupons,
+          newCoupons: totalCoupons,
+          rolledOver: 0,
+          breakdown: {
+            highlighted: highlightedCoupons,
+            premium: premiumCoupons,
+            featured: 0,
+          },
+        });
+        if (!isProduction) paymentLogger.info(`🎟️ Initial coupons email sent to ${user.email}`);
+      } catch (emailError) {
+        paymentLogger.error('⚠️ Error sending Pro welcome/coupons email:', emailError);
+      }
     }
 
     // Send receipt/invoice email with transaction details

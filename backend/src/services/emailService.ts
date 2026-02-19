@@ -3700,6 +3700,163 @@ Questions? Contact us at support@balkanestateai.com
       category: 'alerts',
     });
   }
+
+  async sendProSubscriptionWelcomeEmail(params: {
+    email: string;
+    userName: string;
+    planName: string;
+    listingsLimit: number;
+    promotionCoupons: {
+      total: number;
+      highlighted: number;
+      premium: number;
+    };
+    aiInsightsLimit: number;
+    aiMessagesLimit: number;
+    savedSearchesLimit: number;
+    billingPeriod: 'monthly' | 'yearly';
+    expiresAt: Date;
+  }): Promise<void> {
+    const frontendUrl = process.env.FRONTEND_URL || 'https://balkanestateai.com';
+    const safeUserName = escapeHtml(params.userName);
+    const safePlanName = escapeHtml(params.planName);
+    const currentYear = new Date().getFullYear();
+
+    const formatLimit = (n: number) => (n === -1 ? 'Unlimited' : String(n));
+    const expiryStr = params.expiresAt.toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
+    const couponBreakdown = `${params.promotionCoupons.highlighted} Highlighted + ${params.promotionCoupons.premium} Premium`;
+
+    const html = `
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body style="margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f3f4f6; -webkit-font-smoothing: antialiased;">
+  <div style="display: none; max-height: 0; overflow: hidden;">
+    Welcome to ${safePlanName}! Here's everything you get with your new subscription.
+  </div>
+
+  <div style="max-width: 600px; margin: 0 auto; background-color: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);">
+    <!-- Header -->
+    <div style="background: linear-gradient(135deg, #f59e0b 0%, #ea580c 100%); padding: 40px 24px; text-align: center;">
+      <div style="margin-bottom: 16px;">
+        <span style="display: inline-block; width: 80px; height: 80px; background: rgba(255,255,255,0.2); border-radius: 50%; line-height: 80px; font-size: 40px;">🎉</span>
+      </div>
+      <h1 style="color: #ffffff; margin: 0; font-size: 28px; font-weight: 700;">Welcome to ${safePlanName}!</h1>
+      <p style="color: #fef3c7; margin: 12px 0 0 0; font-size: 15px;">Your subscription is now active</p>
+    </div>
+
+    <div style="padding: 32px 24px;">
+      <p style="color: #374151; font-size: 17px; margin: 0 0 20px 0;">
+        Hi ${safeUserName}! 👋
+      </p>
+
+      <p style="color: #4b5563; font-size: 15px; line-height: 1.7; margin: 0 0 28px 0;">
+        Thank you for subscribing to <strong>${safePlanName}</strong>. Your account is now fully activated and you have access to all Pro features. Here's a summary of everything included in your plan.
+      </p>
+
+      <!-- Plan Benefits -->
+      <div style="background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%); border-radius: 12px; padding: 24px; margin-bottom: 24px;">
+        <h2 style="color: #ffffff; margin: 0 0 16px 0; font-size: 18px; font-weight: 600;">🚀 Your Plan Benefits</h2>
+        <table style="width: 100%; border-collapse: collapse;">
+          <tr>
+            <td style="padding: 10px 0; border-bottom: 1px solid rgba(255,255,255,0.08);">
+              <span style="display: inline-block; width: 28px; height: 28px; background: #059669; border-radius: 50%; text-align: center; line-height: 28px; font-size: 14px; color: white; vertical-align: middle;">✓</span>
+              <span style="color: #e2e8f0; font-size: 14px; margin-left: 12px; vertical-align: middle;">
+                <strong style="color: #fbbf24;">${params.listingsLimit}</strong> active listings per ${params.billingPeriod === 'monthly' ? 'month' : 'year'}
+              </span>
+            </td>
+          </tr>
+          <tr>
+            <td style="padding: 10px 0; border-bottom: 1px solid rgba(255,255,255,0.08);">
+              <span style="display: inline-block; width: 28px; height: 28px; background: #059669; border-radius: 50%; text-align: center; line-height: 28px; font-size: 14px; color: white; vertical-align: middle;">✓</span>
+              <span style="color: #e2e8f0; font-size: 14px; margin-left: 12px; vertical-align: middle;">
+                <strong style="color: #fbbf24;">${params.promotionCoupons.total} promotion coupons/month</strong> — ${couponBreakdown}
+              </span>
+            </td>
+          </tr>
+          <tr>
+            <td style="padding: 10px 0; border-bottom: 1px solid rgba(255,255,255,0.08);">
+              <span style="display: inline-block; width: 28px; height: 28px; background: #059669; border-radius: 50%; text-align: center; line-height: 28px; font-size: 14px; color: white; vertical-align: middle;">✓</span>
+              <span style="color: #e2e8f0; font-size: 14px; margin-left: 12px; vertical-align: middle;">
+                <strong style="color: #fbbf24;">${formatLimit(params.aiMessagesLimit)} AI messages</strong> — intelligent property assistant
+              </span>
+            </td>
+          </tr>
+          <tr>
+            <td style="padding: 10px 0; border-bottom: 1px solid rgba(255,255,255,0.08);">
+              <span style="display: inline-block; width: 28px; height: 28px; background: #059669; border-radius: 50%; text-align: center; line-height: 28px; font-size: 14px; color: white; vertical-align: middle;">✓</span>
+              <span style="color: #e2e8f0; font-size: 14px; margin-left: 12px; vertical-align: middle;">
+                <strong style="color: #fbbf24;">${formatLimit(params.aiInsightsLimit)} market insights/month</strong> — smart analytics
+              </span>
+            </td>
+          </tr>
+          <tr>
+            <td style="padding: 10px 0; border-bottom: 1px solid rgba(255,255,255,0.08);">
+              <span style="display: inline-block; width: 28px; height: 28px; background: #059669; border-radius: 50%; text-align: center; line-height: 28px; font-size: 14px; color: white; vertical-align: middle;">✓</span>
+              <span style="color: #e2e8f0; font-size: 14px; margin-left: 12px; vertical-align: middle;">
+                <strong style="color: #fbbf24;">${formatLimit(params.savedSearchesLimit)} saved searches</strong> — track the market
+              </span>
+            </td>
+          </tr>
+          <tr>
+            <td style="padding: 10px 0;">
+              <span style="display: inline-block; width: 28px; height: 28px; background: #059669; border-radius: 50%; text-align: center; line-height: 28px; font-size: 14px; color: white; vertical-align: middle;">✓</span>
+              <span style="color: #e2e8f0; font-size: 14px; margin-left: 12px; vertical-align: middle;">
+                <strong style="color: #fbbf24;">Unlimited</strong> auto-generate image descriptions
+              </span>
+            </td>
+          </tr>
+        </table>
+      </div>
+
+      <!-- Promotion Coupons Note -->
+      <div style="background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%); border-radius: 10px; padding: 16px; margin-bottom: 24px; border: 2px solid #f59e0b;">
+        <p style="color: #92400e; font-size: 14px; font-weight: 600; margin: 0 0 6px 0;">🎟️ Your first ${params.promotionCoupons.total} promotion coupons are ready!</p>
+        <p style="color: #78350f; font-size: 13px; margin: 0; line-height: 1.5;">
+          Use them to <strong>highlight</strong> or add <strong>premium placement</strong> to your listings and get more views.
+          New coupons refresh at the start of each month.
+        </p>
+      </div>
+
+      <!-- Subscription Details -->
+      <div style="background: #f8fafc; border-radius: 8px; padding: 16px; margin-bottom: 28px; border: 1px solid #e2e8f0;">
+        <p style="color: #64748b; font-size: 13px; margin: 0;"><strong>Plan:</strong> ${safePlanName}</p>
+        <p style="color: #64748b; font-size: 13px; margin: 6px 0 0 0;"><strong>Active until:</strong> ${expiryStr}</p>
+      </div>
+
+      <!-- CTA Button -->
+      <div style="text-align: center; margin: 28px 0;">
+        <a href="${frontendUrl}/sell"
+           style="display: inline-block; background: linear-gradient(135deg, #f59e0b 0%, #ea580c 100%); color: #ffffff; text-decoration: none; padding: 16px 32px; border-radius: 10px; font-weight: 600; font-size: 16px; box-shadow: 0 4px 14px rgba(245, 158, 11, 0.3);">
+          Post Your First Listing →
+        </a>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <div style="background: #0f172a; padding: 20px; text-align: center; border-top: 1px solid #334155;">
+      <p style="color: #64748b; font-size: 12px; margin: 0 0 8px 0;">
+        &copy; ${currentYear} BalkanEstate<sup>AI</sup> • All rights reserved
+      </p>
+      <p style="color: #475569; font-size: 11px; margin: 0;">
+        If you have any questions, contact us at <a href="mailto:support@balkanestateai.com" style="color: #f59e0b;">support@balkanestateai.com</a>
+      </p>
+    </div>
+  </div>
+</body>
+</html>`;
+
+    await this.sendEmail({
+      to: params.email,
+      subject: `🎉 Welcome to ${params.planName} — Your Benefits Are Ready!`,
+      html,
+      text: `Hi ${params.userName},\n\nWelcome to ${params.planName}! Your subscription is now active.\n\nYour plan includes:\n- ${params.listingsLimit} active listings per ${params.billingPeriod === 'monthly' ? 'month' : 'year'}\n- ${params.promotionCoupons.total} promotion coupons/month (${couponBreakdown})\n- ${formatLimit(params.aiMessagesLimit)} AI messages\n- ${formatLimit(params.aiInsightsLimit)} market insights/month\n- ${formatLimit(params.savedSearchesLimit)} saved searches\n- Unlimited auto-generate image descriptions\n\nYour first ${params.promotionCoupons.total} promotion coupons are already available!\n\nPlan: ${params.planName}\nActive until: ${expiryStr}\n\nStart posting: ${frontendUrl}/sell\n\n© ${currentYear} BalkanEstateᴬᴵ`,
+      category: 'alerts',
+    });
+  }
 }
 
 const emailServiceInstance = new EmailService();
@@ -3731,3 +3888,4 @@ export const sendViewingRejected = emailServiceInstance.sendViewingRejected.bind
 export const sendSubscriptionInvoice = emailServiceInstance.sendSubscriptionInvoice.bind(emailServiceInstance);
 export const sendPaymentConfirmation = emailServiceInstance.sendPaymentConfirmation.bind(emailServiceInstance);
 export const sendPromotionCouponsEmail = emailServiceInstance.sendPromotionCouponsEmail.bind(emailServiceInstance);
+export const sendProSubscriptionWelcomeEmail = emailServiceInstance.sendProSubscriptionWelcomeEmail.bind(emailServiceInstance);

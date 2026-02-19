@@ -86,10 +86,10 @@ const RoleSelector: React.FC<RoleSelectorProps> = ({ currentUser, selectedRole, 
 
             // Get the correct listing limit based on subscription status
             // If subscription is not active, fall back to free tier (3 listings)
-            // Priority: 1) PLAN_LISTING_LIMITS[productId] 2) sub.listingsLimit 3) LISTING_LIMITS[tier] 4) fallback to 3
+            // Priority: 1) sub.listingsLimit (from DB) 2) PLAN_LISTING_LIMITS[productId] 3) LISTING_LIMITS[tier] 4) fallback to 3
             const productId = sub.productId as keyof typeof PLAN_LISTING_LIMITS | undefined;
             const limit = isActiveSubscription
-                ? (productId && PLAN_LISTING_LIMITS[productId]) || sub.listingsLimit || LISTING_LIMITS[tier] || 3
+                ? sub.listingsLimit || (productId && PLAN_LISTING_LIMITS[productId]) || LISTING_LIMITS[tier] || 3
                 : 3; // Free tier limit
 
             // Get counts
