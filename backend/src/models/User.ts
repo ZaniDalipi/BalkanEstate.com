@@ -53,7 +53,7 @@ export interface IUser extends Document {
 
   // Enhanced Subscription Fields
   isSubscribed: boolean;
-  subscriptionPlan?: string; // Product ID (e.g., 'buyer_pro_monthly')
+  subscriptionPlan?: string; // Product ID (e.g., 'buyer_monthly')
   subscriptionProductName?: string; // Human-readable name (e.g., 'Buyer Pro Monthly')
   subscriptionSource?: 'google' | 'apple' | 'web'; // Where subscription came from
   subscriptionExternalId?: string; // External subscription ID from payment provider
@@ -210,6 +210,18 @@ export interface IUser extends Document {
   neighborhoodInsights?: {
     monthlyCount: number;        // Number of insights generated this month
     lastUsed?: Date;             // Last time insights were requested
+    monthResetDate: Date;        // When the monthly counter resets
+  };
+
+  // AI Chat Messages Usage Tracking
+  aiMessagesUsage?: {
+    monthlyCount: number;        // Number of AI chat messages sent this month
+    monthResetDate: Date;        // When the monthly counter resets
+  };
+
+  // Image Auto-label Usage Tracking
+  imageDescriptionUsage?: {
+    monthlyCount: number;        // Number of images auto-labeled this month
     monthResetDate: Date;        // When the monthly counter resets
   };
 
@@ -414,7 +426,7 @@ const UserSchema: Schema = new Schema(
       index: true, // Index for fast subscription queries
     },
     subscriptionPlan: {
-      type: String, // Product ID (e.g., 'buyer_pro_monthly', 'seller_premium_yearly')
+      type: String, // Product ID (e.g., 'buyer_monthly', 'seller_pro_yearly')
     },
     subscriptionProductName: {
       type: String, // Human-readable name (e.g., 'Buyer Pro Monthly')
@@ -755,6 +767,39 @@ const UserSchema: Schema = new Schema(
       },
     },
 
+    aiMessagesUsage: {
+      monthlyCount: {
+        type: Number,
+        default: 0,
+      },
+      monthResetDate: {
+        type: Date,
+        default: () => {
+          const nextMonth = new Date();
+          nextMonth.setMonth(nextMonth.getMonth() + 1);
+          nextMonth.setDate(1);
+          nextMonth.setHours(0, 0, 0, 0);
+          return nextMonth;
+        },
+      },
+    },
+    imageDescriptionUsage: {
+      monthlyCount: {
+        type: Number,
+        default: 0,
+      },
+      monthResetDate: {
+        type: Date,
+        default: () => {
+          const nextMonth = new Date();
+          nextMonth.setMonth(nextMonth.getMonth() + 1);
+          nextMonth.setDate(1);
+          nextMonth.setHours(0, 0, 0, 0);
+          return nextMonth;
+        },
+      },
+    },
+
     // Saved Land Measurements
     savedMeasurements: [{
       id: {
@@ -861,7 +906,7 @@ UserSchema.index(
   { provider: 1, providerId: 1 },
   {
     unique: true,
-    partialFilterExpression: { providerId: { $ne: null } }
+    partialFilterExpression: { providerId: { $exists: true } }
   }
 );
 

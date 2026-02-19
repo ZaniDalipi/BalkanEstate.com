@@ -109,6 +109,7 @@ export interface User {
     specializations?: string[];
     serviceAreas?: string[];
     yearsOfExperience?: number;
+    isEnterpriseTier?: boolean;
     // Dual-Role System fields
     availableRoles?: UserRole[];
     activeRole?: UserRole;

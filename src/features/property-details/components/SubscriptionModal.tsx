@@ -169,7 +169,7 @@ const SubscriptionModal: React.FC<SubscriptionModalProps> = ({ isOpen, onClose, 
   const inputBaseClasses = "block w-full text-base bg-neutral-50 border border-neutral-300 rounded-lg text-neutral-900 shadow-sm px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition-colors focus:bg-white placeholder:text-neutral-700";
 
   // Get buyer product (default to first buyer product or fallback values)
-  const buyerProduct = buyerProducts.find(p => p.productId === 'buyer_pro_monthly') || buyerProducts[0];
+  const buyerProduct = buyerProducts.find(p => p.productId === 'buyer_monthly') || buyerProducts[0];
   const buyerPrice = buyerProduct?.price || 1.50;
   const buyerName = buyerProduct?.name || t('modals:subscription.buyerPro.name');
   const buyerFeatures = buyerProduct?.features || [
@@ -484,6 +484,7 @@ const SubscriptionModal: React.FC<SubscriptionModalProps> = ({ isOpen, onClose, 
         planName={buyerName}
         planPrice={buyerPrice}
         planInterval="month"
+        productId={buyerProduct?.productId}
         userRole="buyer"
         userEmail={email}
         userCountry={state.currentUser?.country || 'RS'}

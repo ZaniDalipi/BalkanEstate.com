@@ -631,7 +631,19 @@ AgencySchema.pre<IAgency>('save', async function (next) {
       .replace(/^-+|-+$/g, '');     // Remove leading/trailing dashes
 
     // Combine with forward slash: country/name
-    this.slug = `${countrySlug}/${nameSlug}`;
+    const baseSlug = `${countrySlug}/${nameSlug}`;
+
+    // Check for slug collision and append unique suffix if needed
+    const AgencyModel = this.constructor as any;
+    let slug = baseSlug;
+    let attempts = 0;
+    while (await AgencyModel.findOne({ slug, _id: { $ne: this._id } }).lean()) {
+      attempts++;
+      const suffix = generateSecureRandomString(4, 'abcdefghijklmnopqrstuvwxyz0123456789');
+      slug = `${baseSlug}-${suffix}`;
+      if (attempts > 10) break; // Safety limit
+    }
+    this.slug = slug;
   } else if (!this.slug) {
     // Fallback if no country: just use name
     this.slug = this.name

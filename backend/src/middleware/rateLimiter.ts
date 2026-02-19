@@ -23,8 +23,7 @@ interface RateLimitEntry {
 const ipLimitStore = new Map<string, RateLimitEntry>();
 const accountLimitStore = new Map<string, RateLimitEntry>();
 
-// Rate limiting is ALWAYS enabled for auth endpoints (even in development)
-// to prevent brute-force attacks. Limits are relaxed in development for convenience.
+// Rate limiting is disabled in development for convenience
 const isProduction = process.env.NODE_ENV === 'production';
 
 // Configuration - auth rate limits apply in ALL environments
@@ -138,6 +137,7 @@ export const loginRateLimiterIP = (
   res: Response,
   next: NextFunction
 ): void => {
+  if (!isProduction) return next();
   const ip = getClientIp(req);
   const result = checkRateLimit(`login_ip_${ip}`, ipLimitStore, RATE_LIMIT_CONFIG.LOGIN_IP);
 
@@ -157,6 +157,7 @@ export const loginRateLimiterIP = (
  * Call this after identifying the account
  */
 export const loginRateLimiterAccount = (email: string): { allowed: boolean; retryAfter?: number } => {
+  if (!isProduction) return { allowed: true };
   return checkRateLimit(
     `login_account_${email.toLowerCase()}`,
     accountLimitStore,
@@ -172,6 +173,7 @@ export const signupRateLimiterIP = (
   res: Response,
   next: NextFunction
 ): void => {
+  if (!isProduction) return next();
   const ip = getClientIp(req);
   const result = checkRateLimit(`signup_ip_${ip}`, ipLimitStore, RATE_LIMIT_CONFIG.SIGNUP_IP);
 
@@ -194,6 +196,7 @@ export const passwordResetRateLimiterIP = (
   res: Response,
   next: NextFunction
 ): void => {
+  if (!isProduction) return next();
   const ip = getClientIp(req);
   const result = checkRateLimit(
     `password_reset_ip_${ip}`,
@@ -218,6 +221,7 @@ export const passwordResetRateLimiterIP = (
 export const passwordResetRateLimiterAccount = (
   email: string
 ): { allowed: boolean; retryAfter?: number } => {
+  if (!isProduction) return { allowed: true };
   return checkRateLimit(
     `password_reset_account_${email.toLowerCase()}`,
     accountLimitStore,
@@ -234,6 +238,7 @@ export const refreshTokenRateLimiterIP = (
   res: Response,
   next: NextFunction
 ): void => {
+  if (!isProduction) return next();
   const ip = getClientIp(req);
   const result = checkRateLimit(`refresh_token_ip_${ip}`, ipLimitStore, RATE_LIMIT_CONFIG.REFRESH_TOKEN_IP);
 
@@ -257,6 +262,7 @@ export const couponValidationRateLimiterIP = (
   res: Response,
   next: NextFunction
 ): void => {
+  if (!isProduction) return next();
   const ip = getClientIp(req);
   const result = checkRateLimit(`coupon_validate_ip_${ip}`, ipLimitStore, RATE_LIMIT_CONFIG.COUPON_VALIDATION_IP);
 

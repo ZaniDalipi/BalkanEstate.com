@@ -255,7 +255,6 @@ const PropertyValuationSchema = new Schema<IPropertyValuation>({
   expiresAt: {
     type: Date,
     required: true,
-    index: true,
   },
 }, {
   timestamps: true,

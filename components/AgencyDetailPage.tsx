@@ -51,12 +51,15 @@ const MapInvalidator: React.FC = () => {
 
 interface Agent {
   agentId: string;
+  userId?: string;
   _id?: string;
   id: string;
   name: string;
   email: string;
   phone?: string;
   avatarUrl?: string;
+  avatarOptions?: string;
+  gender?: 'male' | 'female' | 'other';
   rating?: number;
   totalSalesValue?: number;
   propertiesSold?: number;
@@ -76,6 +79,20 @@ interface Agent {
 interface ExtendedAgency extends Agency {
   id?: string;
   rating?: number;
+  promotionCoupons?: {
+    monthly: number;
+    available: number;
+    used: number;
+    rollover?: number;
+    lastRefresh?: Date | string;
+  };
+  agentCoupons?: {
+    available: number;
+    used: number;
+    total: number;
+    expired: number;
+    coupons: any[];
+  };
 }
 
 interface AgencyDetailPageProps {
@@ -83,15 +100,26 @@ interface AgencyDetailPageProps {
 }
 
 // Gradient presets for agency banners
+// `css` is used for rendering (immune to Tailwind build purge); `gradient` is the stored key
 const GRADIENT_PRESETS = [
-  { id: 'default', name: 'Ocean Blue', gradient: 'from-blue-600 via-blue-700 to-indigo-900' },
-  { id: 'sunset', name: 'Sunset', gradient: 'from-orange-500 via-pink-500 to-purple-600' },
-  { id: 'forest', name: 'Forest', gradient: 'from-green-600 via-teal-600 to-cyan-700' },
-  { id: 'royal', name: 'Royal Purple', gradient: 'from-purple-600 via-purple-700 to-indigo-900' },
-  { id: 'fire', name: 'Fire', gradient: 'from-red-600 via-orange-600 to-yellow-500' },
-  { id: 'night', name: 'Night Sky', gradient: 'from-gray-900 via-blue-900 to-purple-900' },
-  { id: 'mint', name: 'Mint Fresh', gradient: 'from-emerald-400 via-teal-500 to-cyan-600' },
-  { id: 'rose', name: 'Rose Gold', gradient: 'from-pink-400 via-rose-400 to-red-500' },
+  { id: 'default', name: 'Ocean Blue',   gradient: 'from-blue-600 via-blue-700 to-indigo-900',   css: 'linear-gradient(135deg, #2563eb, #1d4ed8, #312e81)' },
+  { id: 'sunset',  name: 'Sunset',       gradient: 'from-orange-500 via-pink-500 to-purple-600',  css: 'linear-gradient(135deg, #f97316, #ec4899, #9333ea)' },
+  { id: 'forest',  name: 'Forest',       gradient: 'from-green-600 via-teal-600 to-cyan-700',     css: 'linear-gradient(135deg, #16a34a, #0d9488, #0e7490)' },
+  { id: 'royal',   name: 'Royal Purple', gradient: 'from-purple-600 via-purple-700 to-indigo-900',css: 'linear-gradient(135deg, #9333ea, #7e22ce, #312e81)' },
+  { id: 'fire',    name: 'Fire',         gradient: 'from-red-600 via-orange-600 to-yellow-500',   css: 'linear-gradient(135deg, #dc2626, #ea580c, #eab308)' },
+  { id: 'night',   name: 'Night Sky',    gradient: 'from-gray-900 via-blue-900 to-purple-900',    css: 'linear-gradient(135deg, #111827, #1e3a5f, #581c87)' },
+  { id: 'mint',    name: 'Mint Fresh',   gradient: 'from-emerald-400 via-teal-500 to-cyan-600',   css: 'linear-gradient(135deg, #34d399, #14b8a6, #0891b2)' },
+  { id: 'rose',    name: 'Rose Gold',    gradient: 'from-pink-400 via-rose-400 to-red-500',       css: 'linear-gradient(135deg, #f472b6, #fb7185, #ef4444)' },
+];
+
+const DEFAULT_GRADIENT_CSS = 'linear-gradient(135deg, #1e293b, #0f172a, #1e1b4b)';
+
+// Resolve a stored coverGradient value (Tailwind class string or preset id) to a real CSS gradient
+const resolveGradientCss = (stored?: string): string => {
+  if (!stored) return DEFAULT_GRADIENT_CSS;
+  const preset = GRADIENT_PRESETS.find(p => p.gradient === stored || p.id === stored);
+  return preset?.css ?? DEFAULT_GRADIENT_CSS;
+};
 ];
 
 const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
@@ -172,6 +200,9 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
     String(adminId) === String(currentUser.id) || String(adminId) === String(currentUser._id)
   ));
 
+  // Check if current user is a platform-level admin or super admin
+  const isPlatformAdmin = currentUser?.role === 'admin' || currentUser?.role === 'super_admin';
+
   // Check if current user is already a member of this agency
   const isAlreadyMember = currentUser && agents.some(agent => {
     // Check multiple possible ID fields
@@ -180,19 +211,15 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
     return String(agentUserId) === String(currentUserId);
   });
 
-  // Check if user's agency matches this agency (multiple ways to check)
+  // Check if user's agency matches this agency
   const isUserInThisAgency = currentUser && (
-    // Check top-level agencyId
-    (currentUser.agencyId && String(currentUser.agencyId) === String(agencyData._id)) ||
-    // Check nested agency.agencyId
-    (currentUser.agency?.agencyId && String(currentUser.agency.agencyId) === String(agencyData._id))
+    currentUser.agencyId && String(currentUser.agencyId) === String(agencyData._id)
   );
 
   // Can only request to join if: authenticated, is agent, not already in ANY agency, and not already a member of THIS agency
   const canRequestToJoin = isAuthenticated &&
     currentUser?.role === 'agent' &&
     !currentUser?.agencyId &&
-    !currentUser?.agency?.agencyId &&
     !isAlreadyMember &&
     !isUserInThisAgency;
 
@@ -283,7 +310,7 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
 
       // Also try to fetch achievements separately if not in agency data
       try {
-        const achievements = await getAgencyAchievements(agency._id || agency.id);
+        const achievements = await getAgencyAchievements(agency._id || agency.id || '');
         setAgencyAchievements(achievements);
       } catch {
         // Achievements fetch failed, use what we have
@@ -376,13 +403,15 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
     try {
       const trimmedCode = code.trim().toUpperCase();
 
-      // Check if this is an agent coupon (IND-XXXXXXXX format) or invitation code (AGY-XXXXXX-XXXXXX format)
-      const isAgentCoupon = trimmedCode.startsWith('IND-') ||
-                           (trimmedCode.length >= 8 && !trimmedCode.startsWith('AGY-'));
+      // Check if this is an agent coupon (XXX-XXXXXXXX format, agency-prefixed) or invitation code (AGY-XXXXXX-XXXXXX format)
+      const isAgentCoupon = !trimmedCode.startsWith('AGY-') && /^[A-Z0-9]{3}-[A-Z0-9]{8}$/.test(trimmedCode);
 
       if (isAgentCoupon) {
         // Redeem agent coupon for Pro subscription
-        const token = localStorage.getItem('balkan_estate_token');
+        const token = localStorage.getItem('balkan_estate_token')?.trim();
+        if (!token) {
+          throw new Error('You are not logged in. Please log in and try again.');
+        }
         const response = await fetch(`${API_URL}/agencies/coupons/redeem`, {
           method: 'POST',
           headers: {
@@ -392,12 +421,17 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
           body: JSON.stringify({ couponCode: trimmedCode }),
         });
 
-        const data = await response.json();
+        let data: any;
+        try {
+          data = await response.json();
+        } catch {
+          throw new Error('Unexpected response from server. Please try again.');
+        }
 
         if (!response.ok) {
-          // Handle specific error codes
-          switch (data.code) {
+          switch (data?.code) {
             case 'INVALID_COUPON':
+            case 'INVALID_COUPON_FORMAT':
               throw new Error('Invalid coupon code. Please check and try again.');
             case 'COUPON_ALREADY_USED':
               throw new Error('This coupon has already been used.');
@@ -406,12 +440,12 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
             case 'AGENCY_SUBSCRIPTION_INACTIVE':
               throw new Error('The agency subscription is no longer active.');
             default:
-              throw new Error(data.message || 'Failed to redeem coupon.');
+              throw new Error(data?.message || 'Failed to redeem coupon.');
           }
         }
 
         // Update user context with new subscription data
-        if (data.subscription && data.agency) {
+        if (data?.subscription && data?.agency?.id) {
           dispatch({
             type: 'UPDATE_USER',
             payload: {
@@ -420,25 +454,35 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
                 tier: data.subscription.tier,
                 status: data.subscription.status,
                 listingsLimit: data.subscription.listingsLimit,
+                activeListingsCount: state.currentUser?.subscription?.activeListingsCount ?? 0,
+                privateSellerCount: state.currentUser?.subscription?.privateSellerCount ?? 0,
+                agentCount: state.currentUser?.subscription?.agentCount ?? 0,
                 expiresAt: data.subscription.expiresAt,
               },
               agencyId: data.agency.id,
-              agencyName: data.agency.name,
+              agencyName: data.agency.name ?? '',
               agency: {
                 agencyId: data.agency.id,
-                role: data.agency.role,
+                role: data.agency.role ?? 'agent',
                 joinedAt: new Date().toISOString(),
               },
-            },
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            } as any,
           });
 
           // Refresh user data from server to ensure full sync
-          const meResponse = await fetch(`${API_URL}/auth/me`, {
-            headers: { 'Authorization': `Bearer ${token}` },
-          });
-          if (meResponse.ok) {
-            const userData = await meResponse.json();
-            dispatch({ type: 'UPDATE_USER', payload: userData.user });
+          try {
+            const meResponse = await fetch(`${API_URL}/auth/me`, {
+              headers: { 'Authorization': `Bearer ${token}` },
+            });
+            if (meResponse.ok) {
+              const userData = await meResponse.json();
+              if (userData?.user) {
+                dispatch({ type: 'UPDATE_USER', payload: userData.user });
+              }
+            }
+          } catch {
+            // Non-critical: local state already updated above
           }
         }
 
@@ -693,7 +737,7 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
   // Achievement handlers
   const handleAddAchievement = async (achievement: Omit<Achievement, 'id' | 'createdAt' | 'isVerified'>) => {
     try {
-      const newAchievement = await addAgencyAchievement(agencyData._id || agencyData.id, {
+      const newAchievement = await addAgencyAchievement(agencyData._id || agencyData.id || '', {
         type: achievement.type,
         title: achievement.title,
         description: achievement.description,
@@ -712,7 +756,7 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
 
   const handleEditAchievement = async (id: string, achievement: Partial<Achievement>) => {
     try {
-      const updated = await updateAgencyAchievement(agencyData._id || agencyData.id, id, {
+      const updated = await updateAgencyAchievement(agencyData._id || agencyData.id || '', id, {
         type: achievement.type,
         title: achievement.title,
         description: achievement.description,
@@ -731,7 +775,7 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
 
   const handleDeleteAchievement = async (id: string) => {
     try {
-      await deleteAgencyAchievement(agencyData._id || agencyData.id, id);
+      await deleteAgencyAchievement(agencyData._id || agencyData.id || '', id);
       setAgencyAchievements(prev => prev.filter(a => a.id !== id));
       await success(t('achievements.deletedTitle', 'Achievement Deleted'), t('achievements.deletedMessage', 'The achievement has been deleted'));
     } catch (err) {
@@ -786,7 +830,7 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
 
   const handleCoverUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (!file || !isOwner) return;
+    if (!file || !isAdmin) return;
 
     if (!file.type.startsWith('image/')) {
       setUploadError(t('messages.selectImageFile'));
@@ -816,13 +860,20 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.message || t('messages.coverUpdated'));
+        throw new Error(data.message || 'Failed to upload cover image');
       }
 
-      setAgencyData(data.agency);
-      await success(t('messages.coverUpdatedTitle', 'Cover Updated'), t('messages.coverUpdated'));
+      // Reset the file input so the same file can be re-selected if needed
+      const fileInput = document.getElementById('cover-upload') as HTMLInputElement;
+      if (fileInput) fileInput.value = '';
+
+      // Refresh full agency data (populated) instead of using unpopulated upload response
+      await fetchAgencyData();
+      await success(t('messages.coverUpdatedTitle', 'Cover Updated'), t('messages.coverUpdated', 'Banner image updated successfully'));
     } catch (err) {
-      setUploadError(err instanceof Error ? err.message : t('messages.uploadFailed', 'Upload failed'));
+      const msg = err instanceof Error ? err.message : t('messages.uploadFailed', 'Upload failed');
+      setUploadError(msg);
+      await error('Upload Failed', msg);
     } finally {
       setIsUploadingCover(false);
     }
@@ -920,7 +971,10 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
             <div className="absolute inset-0 bg-gradient-to-b from-slate-900/70 via-slate-900/50 to-slate-900/90" />
           </>
         ) : (
-          <div className={`absolute inset-0 bg-gradient-to-br ${(agencyData as any).coverGradient || 'from-slate-800 via-slate-900 to-slate-950'}`} />
+          <div
+            className="absolute inset-0"
+            style={{ backgroundImage: resolveGradientCss((agencyData as any).coverGradient) }}
+          />
         )}
 
         {/* Subtle Pattern Overlay */}
@@ -941,8 +995,8 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
                 {t('navigation.back')}
               </button>
 
-              {/* Breadcrumbs - Below back button */}
-              <div className="ml-1">
+              {/* Breadcrumbs - Below back button, hidden on mobile */}
+              <div className="ml-1 hidden sm:block">
                 <Breadcrumbs
                   items={generateAgencyBreadcrumbs({
                     slug: agency.slug || '',
@@ -1019,14 +1073,14 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
                             onClick={() => handleGradientSelect(preset.id)}
                             className="group relative h-20 rounded-xl overflow-hidden border-2 border-slate-200 hover:border-primary transition-all duration-300 hover:scale-[1.02]"
                           >
-                            <div className={`absolute inset-0 bg-gradient-to-br ${preset.gradient}`} />
+                            <div className="absolute inset-0" style={{ backgroundImage: preset.css }} />
                             <div className="absolute inset-0 bg-black/10 group-hover:bg-black/0 transition-colors" />
                             <div className="absolute inset-0 flex items-center justify-center">
                               <span className="text-white font-medium text-xs drop-shadow-lg">
                                 {preset.name}
                               </span>
                             </div>
-                            {(agencyData as any).coverGradient === preset.gradient && (
+                            {((agencyData as any).coverGradient === preset.gradient || (agencyData as any).coverGradient === preset.id) && (
                               <div className="absolute top-1.5 right-1.5 w-5 h-5 bg-white rounded-full flex items-center justify-center shadow">
                                 <svg className="w-3 h-3 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
@@ -1458,6 +1512,68 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
                     </div>
                   </div>
                 )}
+
+                {/* Admin-only: Agency Meta Stats */}
+                {(isAdmin || isPlatformAdmin) && (
+                  <div className="bg-gradient-to-br from-slate-50 to-white rounded-xl p-5 border border-slate-200">
+                    <div className="flex items-center gap-2 mb-4">
+                      <div className="w-8 h-8 rounded-lg bg-slate-800 flex items-center justify-center">
+                        <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                        </svg>
+                      </div>
+                      <h3 className="text-sm font-bold text-slate-900">{t('adminStats.title', 'Agency Stats')}</h3>
+                      <span className="ml-auto text-xs bg-slate-100 text-slate-500 px-2 py-0.5 rounded-full font-medium">{t('adminStats.adminOnly', 'Admin only')}</span>
+                    </div>
+                    <div className="space-y-2.5">
+                      <div className="flex items-center justify-between text-sm">
+                        <span className="text-slate-500">{t('adminStats.profileViews', 'Profile Views')}</span>
+                        <span className="font-semibold text-slate-800">{(agencyData as any).views ?? 0}</span>
+                      </div>
+                      {(agencyData.yearsInBusiness ?? 0) > 0 && (
+                        <div className="flex items-center justify-between text-sm">
+                          <span className="text-slate-500">{t('stats.yearsInBusiness', 'Years in Business')}</span>
+                          <span className="font-semibold text-slate-800">{agencyData.yearsInBusiness}</span>
+                        </div>
+                      )}
+                      <div className="flex items-center justify-between text-sm">
+                        <span className="text-slate-500">{t('adminStats.subscriptionPlan', 'Subscription Plan')}</span>
+                        <span className={`font-semibold px-2 py-0.5 rounded-full text-xs ${
+                          (agencyData as any).subscriptionPlan === 'free'
+                            ? 'bg-slate-100 text-slate-600'
+                            : 'bg-amber-100 text-amber-700'
+                        }`}>
+                          {(agencyData as any).subscriptionPlan ?? 'free'}
+                        </span>
+                      </div>
+                      <div className="flex items-center justify-between text-sm">
+                        <span className="text-slate-500">{t('adminStats.featuredStatus', 'Featured Status')}</span>
+                        {(agencyData as any).isFeatured ? (
+                          <span className="font-semibold text-amber-600 flex items-center gap-1">
+                            <svg className="w-3.5 h-3.5 fill-current" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" /></svg>
+                            {t('adminStats.featured', 'Featured')}
+                          </span>
+                        ) : (
+                          <span className="text-slate-400 text-xs">{t('adminStats.notFeatured', 'Not featured')}</span>
+                        )}
+                      </div>
+                      {(agencyData as any).isFeatured && (agencyData as any).featuredEndDate && (
+                        <div className="flex items-center justify-between text-sm">
+                          <span className="text-slate-500">{t('adminStats.featuredUntil', 'Featured Until')}</span>
+                          <span className="font-semibold text-slate-800">
+                            {new Date((agencyData as any).featuredEndDate).toLocaleDateString()}
+                          </span>
+                        </div>
+                      )}
+                      <div className="flex items-center justify-between text-sm">
+                        <span className="text-slate-500">{t('adminStats.memberSince', 'Member Since')}</span>
+                        <span className="font-semibold text-slate-800">
+                          {agencyData.createdAt ? new Date(agencyData.createdAt).toLocaleDateString() : '—'}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                )}
               </div>
 
               {/* Right Column - Expertise */}
@@ -1515,40 +1631,208 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
               </div>
             </div>
 
-            {/* Admin Section - Invitation Code */}
-            {isAdmin && agencyData.invitationCode && (
-              <div className="mt-8 p-5 bg-gradient-to-br from-amber-50 to-orange-50 border border-amber-200 rounded-xl">
-                <div className="flex items-start gap-4">
-                  <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center shadow-lg shadow-amber-500/25 flex-shrink-0">
-                    <ShieldCheckIcon className="w-5 h-5 text-white" />
-                  </div>
-                  <div className="flex-1">
-                    <h4 className="font-semibold text-slate-900 mb-1">Agency Invitation Code</h4>
-                    <p className="text-sm text-slate-600 mb-3">Share this code with agents you want to join your agency</p>
-                    <div className="flex items-center gap-3 flex-wrap">
-                      <code className="px-4 py-2.5 bg-white border border-amber-200 rounded-lg font-mono text-base font-bold text-slate-900 tracking-widest shadow-sm">
-                        {agencyData.invitationCode}
-                      </code>
-                      <button
-                        onClick={async () => {
-                          navigator.clipboard.writeText(agencyData.invitationCode || '');
-                          await success(t('messages.copiedTitle', 'Copied!'), t('messages.invitationCodeCopied', 'Invitation code copied to clipboard!'));
-                        }}
-                        className="inline-flex items-center gap-2 px-4 py-2.5 bg-amber-500 text-white text-sm font-medium rounded-lg hover:bg-amber-600 transition-all duration-300 shadow-md shadow-amber-500/25"
-                      >
-                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+            {/* Admin Section - Coupon Usage Overview */}
+            {(isAdmin || isPlatformAdmin) && (
+              <div className="mt-6 space-y-4">
+
+                {/* Promotion Coupons Summary */}
+                {agencyData.promotionCoupons && (
+                  <div className="p-5 bg-gradient-to-br from-violet-50 to-purple-50 border border-violet-200 rounded-xl">
+                    <div className="flex items-center gap-3 mb-4">
+                      <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center shadow-lg shadow-violet-500/25 flex-shrink-0">
+                        <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
                         </svg>
-                        Copy
-                      </button>
+                      </div>
+                      <div>
+                        <h4 className="font-semibold text-slate-900">{t('coupons.promotionTitle', 'Promotion Coupons')}</h4>
+                        <p className="text-xs text-slate-500">{t('coupons.promotionSubtitle', 'Monthly listing promotion allocation')}</p>
+                      </div>
+                    </div>
+                    <div className="grid grid-cols-3 gap-3">
+                      <div className="bg-white rounded-lg p-3 border border-violet-100 text-center">
+                        <p className="text-2xl font-bold text-violet-600">{agencyData.promotionCoupons.monthly ?? 0}</p>
+                        <p className="text-xs text-slate-500 mt-0.5">{t('coupons.monthly', 'Monthly')}</p>
+                      </div>
+                      <div className="bg-white rounded-lg p-3 border border-violet-100 text-center">
+                        <p className="text-2xl font-bold text-emerald-600">{agencyData.promotionCoupons.available ?? 0}</p>
+                        <p className="text-xs text-slate-500 mt-0.5">{t('coupons.available', 'Available')}</p>
+                      </div>
+                      <div className="bg-white rounded-lg p-3 border border-violet-100 text-center">
+                        <p className="text-2xl font-bold text-slate-600">{agencyData.promotionCoupons.used ?? 0}</p>
+                        <p className="text-xs text-slate-500 mt-0.5">{t('coupons.used', 'Used')}</p>
+                      </div>
+                    </div>
+                    {agencyData.promotionCoupons.monthly > 0 && (
+                      <div className="mt-3">
+                        <div className="flex justify-between text-xs text-slate-500 mb-1">
+                          <span>{t('coupons.usedThisMonth', 'Used this month')}</span>
+                          <span>{agencyData.promotionCoupons.used ?? 0} / {agencyData.promotionCoupons.monthly}</span>
+                        </div>
+                        <div className="h-2 bg-violet-100 rounded-full overflow-hidden">
+                          <div
+                            className="h-full bg-gradient-to-r from-violet-500 to-purple-600 rounded-full transition-all"
+                            style={{ width: `${Math.min(100, ((agencyData.promotionCoupons.used ?? 0) / agencyData.promotionCoupons.monthly) * 100)}%` }}
+                          />
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {/* Agent Registration Codes */}
+                {agencyData.agentCoupons && agencyData.agentCoupons.coupons && agencyData.agentCoupons.coupons.length > 0 && (
+                  <div className="p-5 bg-gradient-to-br from-emerald-50 to-teal-50 border border-emerald-200 rounded-xl">
+                    <div className="flex items-center gap-3 mb-4">
+                      <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-emerald-400 to-teal-500 flex items-center justify-center shadow-lg shadow-emerald-500/25 flex-shrink-0">
+                        <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z" />
+                        </svg>
+                      </div>
+                      <div>
+                        <h4 className="font-semibold text-slate-900">{t('coupons.agentCodesTitle', 'Agent Registration Codes')}</h4>
+                        <p className="text-xs text-slate-500">
+                          <span className="text-emerald-600 font-medium">{agencyData.agentCoupons.available} {t('coupons.available', 'available')}</span>
+                          {' · '}
+                          <span className="text-slate-500">{agencyData.agentCoupons.used} {t('coupons.used', 'used')}</span>
+                          {agencyData.agentCoupons.total > 0 && (
+                            <> · <span className="text-slate-400">{agencyData.agentCoupons.total} {t('coupons.total', 'total')}</span></>
+                          )}
+                          {agencyData.agentCoupons.expired > 0 && (
+                            <> · <span className="text-red-400">{agencyData.agentCoupons.expired} {t('coupons.expired', 'expired')}</span></>
+                          )}
+                        </p>
+                      </div>
+                    </div>
+
+                    {/* Usage bar */}
+                    {agencyData.agentCoupons.total > 0 && (
+                      <div className="mb-4">
+                        <div className="h-2 bg-emerald-100 rounded-full overflow-hidden">
+                          <div
+                            className="h-full bg-gradient-to-r from-emerald-400 to-teal-500 rounded-full transition-all"
+                            style={{ width: `${Math.min(100, (agencyData.agentCoupons.used / agencyData.agentCoupons.total) * 100)}%` }}
+                          />
+                        </div>
+                        <p className="text-xs text-slate-400 mt-1 text-right">{t('coupons.seatsFilled', '{{used}} of {{total}} seats filled', { used: agencyData.agentCoupons.used, total: agencyData.agentCoupons.total })}</p>
+                      </div>
+                    )}
+
+                    <div className="space-y-2">
+                      {agencyData.agentCoupons.coupons.map((coupon: any) => (
+                        <div
+                          key={coupon.code}
+                          className={`flex items-center justify-between p-3 rounded-lg border ${
+                            coupon.status === 'used'
+                              ? 'bg-slate-50 border-slate-200'
+                              : coupon.status === 'expired'
+                                ? 'bg-red-50 border-red-200 opacity-60'
+                                : 'bg-white border-emerald-200'
+                          }`}
+                        >
+                          <div className="flex items-center gap-3">
+                            <code className={`font-mono text-sm font-bold tracking-widest ${
+                              coupon.status === 'used' ? 'text-slate-400 line-through' : 'text-slate-900'
+                            }`}>
+                              {coupon.code}
+                            </code>
+                            <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${
+                              coupon.status === 'available' ? 'bg-emerald-100 text-emerald-700'
+                                : coupon.status === 'used' ? 'bg-slate-100 text-slate-500'
+                                : 'bg-red-100 text-red-600'
+                            }`}>
+                              {coupon.status}
+                            </span>
+                          </div>
+                          <div className="flex items-center gap-3">
+                            {coupon.status === 'used' ? (
+                              <span className="text-xs text-slate-500">
+                                {t('messages.usedBy', 'Used by')} <strong className="text-slate-700">{coupon.usedBy?.name ?? t('messages.unknown', 'Unknown')}</strong>
+                              </span>
+                            ) : coupon.status === 'available' ? (
+                              <button
+                                onClick={async () => {
+                                  navigator.clipboard.writeText(coupon.code);
+                                  await success(t('messages.copiedTitle', 'Copied!'), t('messages.invitationCodeCopied', 'Invitation code copied to clipboard!'));
+                                }}
+                                className="text-xs px-3 py-1 bg-emerald-500 text-white rounded-lg hover:bg-emerald-600 transition-colors font-medium"
+                              >
+                                {t('invitationCode.copy', 'Copy')}
+                              </button>
+                            ) : null}
+                          </div>
+                        </div>
+                      ))}
                     </div>
                   </div>
-                </div>
+                )}
               </div>
             )}
 
             {/* Action Buttons */}
-            <div className="mt-8 pt-6 border-t border-slate-100 flex flex-wrap gap-3">
+            <div className="mt-8 pt-6 border-t border-slate-100">
+              {/* Invitation Code — always visible at top for admins */}
+              {(isAdmin || isPlatformAdmin) && (
+                <div className="mb-5 p-4 bg-gradient-to-br from-amber-50 to-orange-50 border border-amber-200 rounded-xl">
+                  <div className="flex items-center gap-3 mb-2">
+                    <ShieldCheckIcon className="w-4 h-4 text-amber-600 flex-shrink-0" />
+                    <h4 className="font-semibold text-slate-900 text-sm">{t('invitationCode.title', 'Invitation Code')}</h4>
+                    <span className="text-xs text-slate-400">{t('invitationCode.description', 'Share with agents to join your agency')}</span>
+                  </div>
+                  <div className="flex items-center gap-2 flex-wrap">
+                    {agencyData.invitationCode ? (
+                      <>
+                        <code className="px-3 py-2 bg-white border border-amber-200 rounded-lg font-mono text-sm font-bold text-slate-900 tracking-widest shadow-sm">
+                          {agencyData.invitationCode}
+                        </code>
+                        <button
+                          onClick={async () => {
+                            navigator.clipboard.writeText(agencyData.invitationCode || '');
+                            await success(t('messages.copiedTitle', 'Copied!'), t('messages.invitationCodeCopied', 'Invitation code copied to clipboard!'));
+                          }}
+                          className="inline-flex items-center gap-1.5 px-3 py-2 bg-amber-500 text-white text-xs font-semibold rounded-lg hover:bg-amber-600 transition-colors shadow-sm"
+                        >
+                          <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                          </svg>
+                          {t('invitationCode.copy', 'Copy')}
+                        </button>
+                      </>
+                    ) : (
+                      <button
+                        onClick={async () => {
+                          try {
+                            const token = localStorage.getItem('balkan_estate_token');
+                            const response = await fetch(`${API_URL}/agencies/${agencyData._id || agencyData.id}`, {
+                              method: 'PUT',
+                              headers: {
+                                'Content-Type': 'application/json',
+                                'Authorization': `Bearer ${token}`,
+                              },
+                              body: JSON.stringify({ generateInvitationCode: true }),
+                            });
+                            if (!response.ok) throw new Error('Failed to generate code');
+                            const data = await response.json();
+                            if (data.agency?.invitationCode) {
+                              setAgencyData(prev => ({ ...prev, invitationCode: data.agency.invitationCode }));
+                              await success(t('invitationCode.generatedTitle', 'Code Generated'), t('invitationCode.generatedMessage', 'Invitation code has been generated successfully'));
+                            }
+                          } catch {
+                            await error(t('messages.errorTitle', 'Error'), t('invitationCode.generateFailed', 'Failed to generate invitation code'));
+                          }
+                        }}
+                        className="inline-flex items-center gap-1.5 px-3 py-2 bg-amber-500 text-white text-xs font-semibold rounded-lg hover:bg-amber-600 transition-colors shadow-sm"
+                      >
+                        <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                        </svg>
+                        {t('invitationCode.generate', 'Generate Code')}
+                      </button>
+                    )}
+                  </div>
+                </div>
+              )}
+              <div className="flex flex-wrap gap-3">
               {isAdmin && (
                 <>
                   <button
@@ -1556,14 +1840,14 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
                     className="inline-flex items-center gap-2 px-5 py-2.5 bg-slate-900 text-white text-sm font-semibold rounded-xl hover:bg-slate-800 transition-all duration-300 shadow-lg shadow-slate-900/25"
                   >
                     <PencilIcon className="w-4 h-4" />
-                    Edit Agency
+                    {t('actions.editAgency', 'Edit Agency')}
                   </button>
                   <button
                     onClick={() => setIsJoinRequestsModalOpen(true)}
                     className="inline-flex items-center gap-2 px-5 py-2.5 bg-primary text-white text-sm font-semibold rounded-xl hover:bg-primary/90 transition-all duration-300 shadow-lg shadow-primary/25"
                   >
                     <BellIcon className="w-4 h-4" />
-                    Manage Join Requests
+                    {t('actions.manageJoinRequests', 'Manage Join Requests')}
                   </button>
                 </>
               )}
@@ -1576,11 +1860,12 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
                   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
                   </svg>
-                  Request to Join Agency
+                  {t('actions.requestToJoin', 'Request to Join Agency')}
                 </button>
               )}
             </div>
           </div>
+        </div>
         </div>
 
         {/* Featured Subscription Section - Only visible to agency owner */}

@@ -22,8 +22,9 @@ import {
   usePromotionCoupon,
   getAgencyAgents,
   migrateAgentSubscriptions,
+  sendPromotionCouponsEmailEndpoint,
 } from '../controllers/agencyController';
-import { protect } from '../middleware/auth';
+import { protect, optionalAuth } from '../middleware/auth';
 
 const router = express.Router();
 
@@ -46,8 +47,8 @@ const upload = multer({
 // Public routes
 router.get('/', getAgencies);
 router.get('/featured/rotation', getFeaturedAgencies);
-router.get('/:country/:name', getAgency); // Format: /agencies/:country/:name (e.g., /agencies/albania/zano-real-estate)
-router.get('/:idOrSlug', getAgency); // Fallback for ID or single-segment slug lookups
+router.get('/:country/:name', optionalAuth, getAgency); // Format: /agencies/:country/:name (e.g., /agencies/albania/zano-real-estate)
+router.get('/:idOrSlug', optionalAuth, getAgency); // Fallback for ID or single-segment slug lookups
 
 // Protected routes
 router.post('/', protect, createAgency);
@@ -72,6 +73,7 @@ router.post('/:id/coupons/generate', protect, generateAgentCoupons); // Generate
 router.post('/coupons/redeem', protect, redeemAgentCoupon); // Redeem agent coupon (any user)
 router.get('/:id/coupons', protect, getAgencyCoupons); // Get coupon status (owner + agents)
 router.post('/:id/coupons/use-promotion', protect, usePromotionCoupon); // Use promotion coupon (owner + agents)
+router.post('/:id/coupons/send-promotion-email', protect, sendPromotionCouponsEmailEndpoint); // Send promotion coupons email (owner only)
 router.get('/:id/agents', protect, getAgencyAgents); // Get agent list with details (owner only)
 
 // Migration route (run once to fix existing agents)

@@ -37,6 +37,12 @@ import {
   sendTestAgencyCouponEmail,
   runMonthlyCouponRefreshManually,
 } from '../jobs/monthlyCouponJob';
+import { sendProSubscriptionWelcomeEmail, sendMonthlyCouponEmail, sendSubscriptionInvoice } from '../services/emailService';
+import { generateProSubscriptionCoupons } from '../services/subscriptionPaymentService';
+import PaymentRecord from '../models/PaymentRecord';
+import Product from '../models/Product';
+import User from '../models/User';
+import Subscription from '../models/Subscription';
 import {
   getActivityLogs,
   getDailySummary,
@@ -51,6 +57,7 @@ import {
   getPaymentStats,
   activateUserSubscription,
   cancelSubscription,
+  adjustListingLimit,
 } from '../controllers/adminSubscriptionController';
 import {
   getAllContent,
@@ -131,6 +138,7 @@ router.get('/subscriptions', logAdminAction('VIEW_SUBSCRIPTIONS'), getAllSubscri
 router.get('/subscriptions/:id', logAdminAction('VIEW_SUBSCRIPTION'), getSubscriptionById);
 router.post('/subscriptions/activate', logAdminAction('ACTIVATE_SUBSCRIPTION'), activateUserSubscription);
 router.post('/subscriptions/:id/cancel', logAdminAction('CANCEL_SUBSCRIPTION'), cancelSubscription);
+router.patch('/subscriptions/listing-limit/:userId', logAdminAction('ADJUST_LISTING_LIMIT'), adjustListingLimit);
 router.get('/payments/stats', logAdminAction('VIEW_PAYMENT_STATS'), getPaymentStats);
 router.get('/payments', logAdminAction('VIEW_PAYMENTS'), getAllPayments);
 router.get('/payments/:id', logAdminAction('VIEW_PAYMENT'), getPaymentById);
@@ -177,6 +185,109 @@ router.post('/test-emails/run-monthly-refresh', logAdminAction('RUN_MONTHLY_COUP
     res.json({ success: true, message: 'Monthly coupon refresh completed' });
   } catch (error) {
     res.status(500).json({ message: 'Failed to run monthly refresh', error: String(error) });
+  }
+});
+
+// Resend Pro subscription welcome + coupons email (with generated codes) + invoice to a user
+router.post('/test-emails/resend-pro-welcome', logAdminAction('RESEND_PRO_WELCOME_EMAIL'), async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { email } = req.body;
+    if (!email) {
+      res.status(400).json({ message: 'email is required' });
+      return;
+    }
+
+    const user = await User.findOne({ email });
+    if (!user) {
+      res.status(404).json({ message: `No user found with email: ${email}` });
+      return;
+    }
+
+    const subscription = await Subscription.findOne({
+      userId: user._id,
+      status: { $in: ['active', 'trial', 'grace', 'pending_cancellation'] },
+    }).sort({ expirationDate: -1 });
+
+    if (!subscription) {
+      res.status(404).json({ message: `No active subscription found for ${email}` });
+      return;
+    }
+
+    const product = await Product.findOne({ productId: subscription.productId });
+    if (!product) {
+      res.status(404).json({ message: `Product not found: ${subscription.productId}` });
+      return;
+    }
+
+    const billingPeriod = product.billingPeriod === 'yearly' ? 'yearly' : 'monthly';
+    const totalCoupons = product.promotionCoupons ?? 0;
+    const highlightedCoupons = product.highlightedCoupons ?? 0;
+    const premiumCoupons = product.premiumCoupons ?? 0;
+    const featuredCoupons = product.featuredCoupons ?? 0;
+
+    // Generate actual PromotionCoupon codes
+    const generatedCodes = await generateProSubscriptionCoupons(
+      String(user._id),
+      highlightedCoupons,
+      premiumCoupons,
+      featuredCoupons,
+      subscription.expirationDate,
+    );
+
+    await sendProSubscriptionWelcomeEmail({
+      email: user.email,
+      userName: user.name || user.email.split('@')[0],
+      planName: product.name,
+      listingsLimit: product.listingsLimit ?? 0,
+      promotionCoupons: {
+        total: totalCoupons,
+        highlighted: highlightedCoupons,
+        premium: premiumCoupons,
+        featured: featuredCoupons,
+      },
+      aiInsightsLimit: product.aiInsightsLimit ?? 0,
+      aiMessagesLimit: product.aiMessagesLimit ?? -1,
+      savedSearchesLimit: product.savedSearchesLimit ?? -1,
+      billingPeriod,
+      expiresAt: subscription.expirationDate,
+      couponCodes: generatedCodes,
+    });
+
+    await sendMonthlyCouponEmail({
+      email: user.email,
+      userName: user.name || user.email.split('@')[0],
+      planName: product.name,
+      totalCoupons,
+      newCoupons: totalCoupons,
+      rolledOver: 0,
+      breakdown: { highlighted: highlightedCoupons, premium: premiumCoupons, featured: featuredCoupons },
+      couponCodes: generatedCodes,
+    });
+
+    // Also send the invoice
+    const paymentRecord = await PaymentRecord.findOne({ userId: user._id })
+      .sort({ createdAt: -1 });
+
+    if (paymentRecord) {
+      await sendSubscriptionInvoice(user.email, user.name || 'Customer', {
+        planName: product.name,
+        amount: paymentRecord.amount,
+        currency: paymentRecord.currency || 'EUR',
+        billingPeriod,
+        orderId: String(paymentRecord._id),
+        subscriptionStartDate: subscription.startDate,
+        nextBillingDate: subscription.expirationDate,
+        autoRenewing: subscription.autoRenewing ?? true,
+      });
+    }
+
+    res.json({
+      success: true,
+      message: `Welcome + coupons + invoice resent to ${email} (${product.name}). Generated ${generatedCodes.length} coupon codes.`,
+      couponCodes: generatedCodes,
+    });
+  } catch (error) {
+    res.status(500).json({ message: 'Failed to resend emails', error: String(error) });
   }
 });
 

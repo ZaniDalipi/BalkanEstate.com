@@ -197,16 +197,32 @@ const AgencyManagementSection: React.FC<AgencyManagementSectionProps> = ({ curre
       return;
     }
 
+    // Validate format before hitting the server
+    const COUPON_FORMAT = /^[A-Z0-9]{2,6}-[A-Z0-9]{8}$/;
+    if (!COUPON_FORMAT.test(trimmedCode)) {
+      setError('Invalid code format. Expected: ABC-XXXXXXXX');
+      return;
+    }
+
     // Validate user is an agent
     if (!isUserAgent()) {
       setError('Only registered agents can redeem agency coupons. Please register as an agent first.');
       return;
     }
 
+    if (!currentUser) {
+      setError('User data unavailable. Please refresh the page.');
+      return;
+    }
+
     try {
       setLoading(true);
 
-      const token = localStorage.getItem('balkan_estate_token');
+      const token = localStorage.getItem('balkan_estate_token')?.trim();
+      if (!token) {
+        setError('You are not logged in. Please log in and try again.');
+        return;
+      }
 
       const response = await fetch(`${API_URL}/agencies/coupons/redeem`, {
         method: 'POST',
@@ -217,7 +233,13 @@ const AgencyManagementSection: React.FC<AgencyManagementSectionProps> = ({ curre
         body: JSON.stringify({ couponCode: trimmedCode }),
       });
 
-      const data = await response.json();
+      let data: any;
+      try {
+        data = await response.json();
+      } catch {
+        setError('Unexpected response from server. Please try again.');
+        return;
+      }
 
       if (!response.ok) {
         // Handle specific error codes
@@ -244,23 +266,23 @@ const AgencyManagementSection: React.FC<AgencyManagementSectionProps> = ({ curre
       }
 
       // Success! Update context and local state immediately
-      if (data.subscription && data.agency) {
+      if (data?.subscription && data?.agency?.id) {
         // Update app context
         dispatch({
           type: 'UPDATE_USER',
           payload: {
             subscription: {
-              ...currentUser.subscription,
+              ...(currentUser.subscription ?? {}),
               tier: data.subscription.tier,
               status: data.subscription.status,
               listingsLimit: data.subscription.listingsLimit,
               expiresAt: data.subscription.expiresAt,
             },
             agencyId: data.agency.id,
-            agencyName: data.agency.name,
+            agencyName: data.agency.name ?? '',
             agency: {
               agencyId: data.agency.id,
-              role: data.agency.role,
+              role: data.agency.role ?? 'agent',
               joinedAt: new Date().toISOString(),
             },
           },
@@ -286,8 +308,9 @@ const AgencyManagementSection: React.FC<AgencyManagementSectionProps> = ({ curre
         // Refresh user data from server
         onAgencyChange();
       }
-    } catch {
-      setError('Network error. Please check your connection and try again.');
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Network error. Please check your connection and try again.';
+      setError(message);
     } finally {
       setLoading(false);
     }
@@ -605,7 +628,7 @@ const AgencyManagementSection: React.FC<AgencyManagementSectionProps> = ({ curre
                         setError('');
                       }}
                       disabled={loading || !isUserAgent()}
-                      placeholder="e.g., IND-XXXXXXXX or ABC-12345678"
+                      placeholder="e.g., ABC-XXXXXXXX"
                       className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent disabled:bg-gray-100 disabled:cursor-not-allowed font-mono text-sm uppercase"
                     />
                     <p className="text-xs text-gray-600 mt-1">

@@ -118,7 +118,6 @@ const AgencyFeaturedSubscriptionSchema: Schema = new Schema(
     },
     externalSubscriptionId: {
       type: String,
-      index: true,
       sparse: true,
     },
     externalCustomerId: {
@@ -175,7 +174,7 @@ const AgencyFeaturedSubscriptionSchema: Schema = new Schema(
 AgencyFeaturedSubscriptionSchema.index({ agencyId: 1, status: 1 });
 AgencyFeaturedSubscriptionSchema.index({ userId: 1, status: 1 });
 AgencyFeaturedSubscriptionSchema.index({ currentPeriodEnd: 1, status: 1 });
-AgencyFeaturedSubscriptionSchema.index({ externalSubscriptionId: 1 }, { unique: true, sparse: true });
+AgencyFeaturedSubscriptionSchema.index({ externalSubscriptionId: 1 }, { sparse: true });
 
 // Instance methods
 AgencyFeaturedSubscriptionSchema.methods.isActive = function(): boolean {

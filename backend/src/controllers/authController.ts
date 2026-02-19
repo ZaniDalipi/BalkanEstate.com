@@ -665,6 +665,7 @@ export const getMe = async (req: Request, res: Response): Promise<void> => {
     // **AUTO-MIGRATION & SYNC**: Initialize or sync subscription object
     const Property = (await import('../models/Property')).default;
     const Subscription = (await import('../models/Subscription')).default;
+    const Product = (await import('../models/Product')).default;
 
     // Check if user has an active Pro subscription (legacy or new system)
     let tier: 'free' | 'pro' | 'agency_owner' | 'agency_agent' | 'buyer' = 'free';
@@ -712,25 +713,31 @@ export const getMe = async (req: Request, res: Response): Promise<void> => {
     if (dbSubscription) {
       const productId = dbSubscription.productId;
       subscriptionStatus = dbSubscription.status;
+
+      // Look up product limits from DB - single source of truth
+      const dbProduct = productId ? await Product.findOne({ productId }).lean() : null;
+
       // Check if it's a Pro subscription
       if (productId?.includes('pro') || productId === 'pro_monthly' || productId === 'pro_yearly') {
         tier = 'pro';
-        // Use plan-specific listing limits
+        // Use DB product listingsLimit if available, fallback to constants
         if (productId === 'pro_monthly' || productId === 'seller_pro_monthly') {
-          listingsLimit = PRO_TIER_LIMITS.MONTHLY.LISTINGS;
+          listingsLimit = dbProduct?.listingsLimit ?? PRO_TIER_LIMITS.MONTHLY.LISTINGS;
         } else if (productId === 'pro_yearly' || productId === 'seller_pro_yearly') {
-          listingsLimit = PRO_TIER_LIMITS.YEARLY.LISTINGS;
+          listingsLimit = dbProduct?.listingsLimit ?? PRO_TIER_LIMITS.YEARLY.LISTINGS;
         } else {
-          listingsLimit = PRO_TIER_LIMITS.YEARLY.LISTINGS; // Default to yearly for other pro plans
+          listingsLimit = dbProduct?.listingsLimit ?? PRO_TIER_LIMITS.YEARLY.LISTINGS;
         }
-        promotionCoupons = { monthly: PRO_TIER_LIMITS.YEARLY.PROMOTION_COUPONS, available: PRO_TIER_LIMITS.YEARLY.PROMOTION_COUPONS, used: 0, rollover: 0, lastRefresh: new Date() };
-        savedSearchesLimit = PRO_TIER_LIMITS.YEARLY.SAVED_SEARCHES; // Unlimited for Pro
+        const proMonthlyCoupons = dbProduct?.promotionCoupons ?? PRO_TIER_LIMITS.YEARLY.PROMOTION_COUPONS;
+        promotionCoupons = { monthly: proMonthlyCoupons, available: proMonthlyCoupons, used: 0, rollover: 0, lastRefresh: new Date() };
+        savedSearchesLimit = dbProduct?.savedSearchesLimit ?? PRO_TIER_LIMITS.YEARLY.SAVED_SEARCHES;
         subscriptionExpiresAt = dbSubscription.expirationDate;
       } else if (productId?.includes('enterprise') || productId?.includes('agency')) {
         tier = 'agency_owner';
-        listingsLimit = ENTERPRISE_TIER_LIMITS.LISTINGS;
-        promotionCoupons = { monthly: ENTERPRISE_TIER_LIMITS.PROMOTION_COUPONS, available: ENTERPRISE_TIER_LIMITS.PROMOTION_COUPONS, used: 0, rollover: 0, lastRefresh: new Date() };
-        savedSearchesLimit = ENTERPRISE_TIER_LIMITS.SAVED_SEARCHES; // Unlimited for Enterprise
+        listingsLimit = dbProduct?.listingsLimit ?? ENTERPRISE_TIER_LIMITS.LISTINGS;
+        const agencyMonthlyCoupons = dbProduct?.promotionCoupons ?? ENTERPRISE_TIER_LIMITS.PROMOTION_COUPONS;
+        promotionCoupons = { monthly: agencyMonthlyCoupons, available: agencyMonthlyCoupons, used: 0, rollover: 0, lastRefresh: new Date() };
+        savedSearchesLimit = dbProduct?.savedSearchesLimit ?? ENTERPRISE_TIER_LIMITS.SAVED_SEARCHES;
         subscriptionExpiresAt = dbSubscription.expirationDate;
       }
     } else {

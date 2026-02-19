@@ -3,6 +3,7 @@ import EmailConfig, { IEmailConfig } from '../models/EmailConfig';
 import { seedEmailConfigs } from '../seeds/emailConfigSeed';
 import emailService from '../services/emailService';
 import { apiLogger } from '../utils/logger';
+import { replaceVariables, renderEmailConfig } from '../utils/emailTemplateRenderer';
 
 // Get all email configurations
 export const getAllEmailConfigs = async (req: Request, res: Response): Promise<void> => {
@@ -440,85 +441,9 @@ export const duplicateEmailConfig = async (req: Request, res: Response): Promise
   }
 };
 
-// Helper function to replace variables in a string
-function replaceVariables(template: string, variables: Record<string, string>): string {
-  let result = template;
-  for (const [key, value] of Object.entries(variables)) {
-    const regex = new RegExp(`\\{\\{${key}\\}\\}`, 'g');
-    result = result.replace(regex, value);
-  }
-  // Remove any remaining conditional blocks (simple implementation)
-  result = result.replace(/\{\{#if\s+\w+\}\}[\s\S]*?\{\{\/if\}\}/g, '');
-  return result;
-}
-
-// Helper function to generate full email HTML from config
+// Delegate to shared utility — keeps admin preview/test rendering identical to actual sending
 function generateEmailHtml(config: IEmailConfig, variables: Record<string, string>): string {
-  const frontendUrl = variables.frontendUrl || process.env.FRONTEND_URL || 'https://balkanestate.com';
-  const year = new Date().getFullYear();
-
-  // Replace variables in all template parts
-  const headerTitle = replaceVariables(config.headerTitle, variables);
-  const headerSubtitle = config.headerSubtitle ? replaceVariables(config.headerSubtitle, variables) : '';
-  const bodyContent = replaceVariables(config.bodyTemplate, variables);
-  const ctaText = config.ctaText ? replaceVariables(config.ctaText, variables) : '';
-  const ctaUrl = config.ctaUrl ? replaceVariables(config.ctaUrl, variables) : '';
-  const footerReason = config.footerReason ? replaceVariables(config.footerReason, variables) : '';
-
-  return `
-<!DOCTYPE html>
-<html>
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  ${config.preheaderText ? `<meta name="x-apple-data-detectors" content="none">` : ''}
-</head>
-<body style="margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f3f4f6;">
-  ${config.preheaderText ? `
-  <div style="display: none; max-height: 0; overflow: hidden;">
-    ${replaceVariables(config.preheaderText, variables)}
-  </div>
-  ` : ''}
-
-  <div style="max-width: 600px; margin: 0 auto; background-color: #ffffff;">
-    <!-- Header -->
-    <div style="background: ${config.headerGradient || 'linear-gradient(135deg, #0252CD 0%, #0369a1 100%)'}; padding: 32px 24px; text-align: center;">
-      <h1 style="color: #ffffff; margin: 0; font-size: 28px; font-weight: 700;">
-        ${config.headerEmoji ? `${config.headerEmoji} ` : ''}${headerTitle}
-      </h1>
-      ${headerSubtitle ? `<p style="color: #bfdbfe; margin: 8px 0 0 0; font-size: 14px;">${headerSubtitle}</p>` : ''}
-    </div>
-
-    <!-- Body -->
-    <div style="padding: 24px;">
-      ${bodyContent}
-
-      ${config.ctaEnabled && ctaText && ctaUrl ? `
-      <!-- CTA Button -->
-      <div style="margin-top: 32px; text-align: center;">
-        <a href="${ctaUrl}"
-           style="display: inline-block; background: ${config.headerGradient || 'linear-gradient(135deg, #0252CD 0%, #0369a1 100%)'}; color: #ffffff; text-decoration: none; padding: 14px 32px; border-radius: 8px; font-weight: 600; font-size: 14px;">
-          ${ctaText}
-        </a>
-      </div>
-      ` : ''}
-    </div>
-
-    <!-- Footer -->
-    <div style="background: #f9fafb; padding: 24px; text-align: center; border-top: 1px solid #e5e7eb;">
-      ${footerReason ? `<p style="color: #6b7280; font-size: 12px; margin: 0 0 12px 0;">${footerReason}</p>` : ''}
-      ${config.showUnsubscribe ? `
-      <p style="color: #9ca3af; font-size: 11px; margin: 0 0 8px 0;">
-        <a href="${frontendUrl}/settings/notifications" style="color: #9ca3af; text-decoration: underline;">Manage email preferences</a>
-      </p>
-      ` : ''}
-      <p style="color: #9ca3af; font-size: 11px; margin: 8px 0 0 0;">
-        &copy; ${year} BalkanEstate<sup>AI</sup>. All rights reserved.
-      </p>
-    </div>
-  </div>
-</body>
-</html>`;
+  return renderEmailConfig(config, variables).html;
 }
 
 // =============================================================================

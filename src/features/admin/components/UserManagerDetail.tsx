@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
   XMarkIcon,
   CheckIcon,
@@ -6,6 +6,7 @@ import {
   ShieldCheckIcon,
 } from '@/constants';
 import { User, UserEditForm } from './useUserManager';
+import { API_URL } from '@/src/shared/api/config';
 
 interface UserManagerDetailProps {
   // Detail modal
@@ -131,33 +132,7 @@ const UserManagerDetail: React.FC<UserManagerDetailProps> = ({
               </div>
 
               {/* Subscription Info */}
-              <div className="bg-green-50 rounded-lg p-4">
-                <h5 className="font-semibold text-gray-700 mb-3">Subscription</h5>
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <label className="text-xs text-gray-500">Status</label>
-                    <p className="font-medium">
-                      {viewingUser.isSubscribed ? (
-                        <span className="px-2 py-1 text-xs font-medium rounded-full bg-green-100 text-green-800">
-                          {viewingUser.subscriptionPlan || 'Active'}
-                        </span>
-                      ) : (
-                        <span className="text-gray-500">Free</span>
-                      )}
-                    </p>
-                  </div>
-                  {viewingUser.subscriptionStatus && (
-                    <div>
-                      <label className="text-xs text-gray-500">Subscription Status</label>
-                      <p className="font-medium capitalize">{viewingUser.subscriptionStatus}</p>
-                    </div>
-                  )}
-                  <div>
-                    <label className="text-xs text-gray-500">Enterprise Tier</label>
-                    <p className="font-medium">{viewingUser.isEnterpriseTier ? 'Yes' : 'No'}</p>
-                  </div>
-                </div>
-              </div>
+              <SubscriptionPanel viewingUser={viewingUser} />
 
               {/* Agency Info */}
               {viewingUser.agencyName && (
@@ -388,7 +363,7 @@ const UserManagerDetail: React.FC<UserManagerDetailProps> = ({
                       value={editForm.subscriptionPlan}
                       onChange={(e) => setEditForm({ ...editForm, subscriptionPlan: e.target.value })}
                       className="w-full px-4 py-2 border border-gray-300 rounded-lg"
-                      placeholder="e.g., buyer_pro_monthly"
+                      placeholder="e.g., buyer_monthly"
                     />
                   </div>
                   <div>
@@ -440,5 +415,102 @@ const UserManagerDetail: React.FC<UserManagerDetailProps> = ({
     </>
   );
 };
+
+// ─── Subscription info + listing-limit override panel ───────────────────────
+function SubscriptionPanel({ viewingUser }: { viewingUser: User }) {
+  const currentLimit = viewingUser.subscription?.listingsLimit ?? 0;
+  const [inputLimit, setInputLimit] = useState(String(currentLimit));
+  const [saving, setSaving] = useState(false);
+  const [saved, setSaved] = useState(false);
+  const [err, setErr] = useState('');
+
+  const handleSave = async () => {
+    const val = Number(inputLimit);
+    if (isNaN(val) || val < 0) { setErr('Enter a valid number'); return; }
+    setSaving(true); setErr('');
+    try {
+      const token = localStorage.getItem('balkan_estate_token');
+      const res = await fetch(`${API_URL}/admin/subscriptions/listing-limit/${viewingUser._id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+        body: JSON.stringify({ listingsLimit: val, reason: 'Admin manual override' }),
+      });
+      if (!res.ok) throw new Error((await res.json()).message || 'Failed');
+      setSaved(true);
+      setTimeout(() => setSaved(false), 3000);
+    } catch (e: any) {
+      setErr(e.message || 'Error saving');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  return (
+    <div className="bg-green-50 rounded-lg p-4 space-y-3">
+      <h5 className="font-semibold text-gray-700">Subscription</h5>
+
+      {/* Status row */}
+      <div className="grid grid-cols-2 gap-4">
+        <div>
+          <label className="text-xs text-gray-500">Status</label>
+          <p className="font-medium">
+            {viewingUser.isSubscribed ? (
+              <span className="px-2 py-1 text-xs font-medium rounded-full bg-green-100 text-green-800">
+                {viewingUser.subscriptionPlan || 'Active'}
+              </span>
+            ) : (
+              <span className="text-gray-500">Free</span>
+            )}
+          </p>
+        </div>
+        {viewingUser.subscriptionStatus && (
+          <div>
+            <label className="text-xs text-gray-500">Subscription Status</label>
+            <p className="font-medium capitalize">{viewingUser.subscriptionStatus}</p>
+          </div>
+        )}
+        <div>
+          <label className="text-xs text-gray-500">Enterprise Tier</label>
+          <p className="font-medium">{viewingUser.isEnterpriseTier ? 'Yes' : 'No'}</p>
+        </div>
+        {viewingUser.subscription?.tier && (
+          <div>
+            <label className="text-xs text-gray-500">Tier</label>
+            <p className="font-medium capitalize">{viewingUser.subscription.tier.replace(/_/g, ' ')}</p>
+          </div>
+        )}
+      </div>
+
+      {/* Listing limit override */}
+      <div className="border-t border-green-200 pt-3">
+        <label className="text-xs font-semibold text-gray-600 block mb-1">
+          Listing Limit Override
+          <span className="font-normal text-gray-400 ml-1">
+            (currently {currentLimit}/month · {viewingUser.subscription?.activeListingsCount ?? 0} active)
+          </span>
+        </label>
+        <div className="flex items-center gap-2">
+          <input
+            type="number"
+            min={0}
+            value={inputLimit}
+            onChange={e => { setInputLimit(e.target.value); setSaved(false); }}
+            className="w-24 px-3 py-1.5 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+          />
+          <button
+            onClick={handleSave}
+            disabled={saving || String(currentLimit) === inputLimit}
+            className="px-4 py-1.5 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-700 disabled:opacity-40 disabled:cursor-not-allowed font-medium transition-colors"
+          >
+            {saving ? 'Saving…' : saved ? '✓ Saved' : 'Apply'}
+          </button>
+          <span className="text-xs text-gray-400">listings / month</span>
+        </div>
+        {err && <p className="text-xs text-red-500 mt-1">{err}</p>}
+        {saved && <p className="text-xs text-green-600 mt-1">Limit updated — user will see the change on next login.</p>}
+      </div>
+    </div>
+  );
+}
 
 export default UserManagerDetail;

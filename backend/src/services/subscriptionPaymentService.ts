@@ -5,7 +5,8 @@ import PaymentRecord from '../models/PaymentRecord';
 import SubscriptionEvent from '../models/SubscriptionEvent';
 import Product from '../models/Product';
 import Agency from '../models/Agency';
-import { sendAgentRegistrationCouponsEmail, sendEnterpriseWelcomeEmail, sendSubscriptionInvoice } from './emailService';
+import PromotionCoupon from '../models/PromotionCoupon';
+import { sendAgentRegistrationCouponsEmail, sendEnterpriseWelcomeEmail, sendSubscriptionInvoice, sendProSubscriptionWelcomeEmail, sendMonthlyCouponEmail } from './emailService';
 import { generateSecureRandomString } from '../utils/secureRandom';
 import { paymentLogger } from '../utils/logger';
 
@@ -84,21 +85,24 @@ export async function processSubscriptionPayment(
 
     // 4. Create or update subscription
     if (!isProduction) paymentLogger.info('🔍 Checking for existing subscription...');
-    let subscription = await Subscription.findOne({
+    const existingSubscription = await Subscription.findOne({
       userId,
       productId,
       status: { $in: ['active', 'grace', 'pending_cancellation'] },
     }).session(session);
+    // eslint-disable-next-line prefer-const
+    let subscription!: NonNullable<typeof existingSubscription>;
 
-    if (subscription) {
-      if (!isProduction) paymentLogger.info('🔄 Renewing existing subscription:', subscription._id);
+    if (existingSubscription) {
+      if (!isProduction) paymentLogger.info('🔄 Renewing existing subscription:', existingSubscription._id);
       // Renew existing subscription
-      subscription.expirationDate = expirationDate;
-      subscription.renewalDate = expirationDate;
-      subscription.status = 'active';
-      subscription.autoRenewing = true;
-      subscription.lastUpdated = new Date();
-      await subscription.save({ session });
+      existingSubscription.expirationDate = expirationDate;
+      existingSubscription.renewalDate = expirationDate;
+      existingSubscription.status = 'active';
+      existingSubscription.autoRenewing = true;
+      existingSubscription.lastUpdated = new Date();
+      await existingSubscription.save({ session });
+      subscription = existingSubscription;
       if (!isProduction) paymentLogger.info('✅ Subscription renewed successfully');
     } else {
       if (!isProduction) paymentLogger.info('➕ Creating new subscription...');
@@ -180,7 +184,7 @@ export async function processSubscriptionPayment(
     // 6. Update user with subscription info
     if (!isProduction) paymentLogger.info('👤 Updating user subscription info...');
     user.isSubscribed = true;
-    user.subscriptionPlan = productId; // Product ID (e.g., 'buyer_pro_monthly')
+    user.subscriptionPlan = productId; // Product ID (e.g., 'buyer_monthly')
     user.subscriptionProductName = product.name; // Human-readable name
     user.subscriptionSource = store; // Track where subscription came from
     user.subscriptionExpiresAt = expirationDate;
@@ -223,7 +227,7 @@ export async function processSubscriptionPayment(
     // This runs outside the transaction since it's not critical
     const isEnterpriseProduct = productId.includes('enterprise') || productId === 'agency_yearly';
     const isProProduct = productId.includes('pro_') || productId.includes('seller_pro_');
-    const isNewSubscription = !subscription.isNew === false; // New subscription, not renewal
+    const isNewSubscription = !existingSubscription; // true only when no prior subscription was found
 
     if (isEnterpriseProduct && isNewSubscription) {
       try {
@@ -240,6 +244,66 @@ export async function processSubscriptionPayment(
       await initializePromotionCoupons(String(userId), productId, isProProduct, isEnterpriseProduct);
     } catch (couponError) {
       paymentLogger.error('⚠️ Error initializing promotion coupons:', couponError);
+    }
+
+    // Send welcome email with plan benefits for new Pro subscriptions
+    if (isProProduct && isNewSubscription) {
+      try {
+        const billingPeriod = product.billingPeriod === 'yearly' ? 'yearly' : 'monthly';
+        const listingsLimit = product.listingsLimit;
+        const totalCoupons = product.promotionCoupons;
+        const highlightedCoupons = product.highlightedCoupons;
+        const premiumCoupons = product.premiumCoupons;
+        const featuredCoupons = product.featuredCoupons;
+
+        // Generate actual PromotionCoupon codes for the user
+        const generatedCodes = await generateProSubscriptionCoupons(
+          String(userId),
+          highlightedCoupons ?? 0,
+          premiumCoupons ?? 0,
+          featuredCoupons ?? 0,
+          subscription.expirationDate,
+        );
+
+        await sendProSubscriptionWelcomeEmail({
+          email: user.email,
+          userName: user.name || user.email.split('@')[0],
+          planName: product.name,
+          listingsLimit: listingsLimit ?? 0,
+          promotionCoupons: {
+            total: totalCoupons ?? 0,
+            highlighted: highlightedCoupons ?? 0,
+            premium: premiumCoupons ?? 0,
+            featured: featuredCoupons ?? 0,
+          },
+          aiInsightsLimit: product.aiInsightsLimit ?? 0,
+          aiMessagesLimit: product.aiMessagesLimit ?? -1,
+          savedSearchesLimit: product.savedSearchesLimit ?? -1,
+          billingPeriod,
+          expiresAt: subscription.expirationDate,
+          // Coupon codes are sent in a dedicated follow-up email below
+        });
+        if (!isProduction) paymentLogger.info(`📧 Pro welcome email sent to ${user.email}`);
+
+        // Also send the initial monthly coupons email right away
+        await sendMonthlyCouponEmail({
+          email: user.email,
+          userName: user.name || user.email.split('@')[0],
+          planName: product.name,
+          totalCoupons: totalCoupons ?? 0,
+          newCoupons: totalCoupons ?? 0,
+          rolledOver: 0,
+          breakdown: {
+            highlighted: highlightedCoupons ?? 0,
+            premium: premiumCoupons ?? 0,
+            featured: featuredCoupons ?? 0,
+          },
+          couponCodes: generatedCodes,
+        });
+        if (!isProduction) paymentLogger.info(`🎟️ Initial coupons email sent to ${user.email}`);
+      } catch (emailError) {
+        paymentLogger.error('⚠️ Error sending Pro welcome/coupons email:', emailError);
+      }
     }
 
     // Send receipt/invoice email with transaction details
@@ -518,8 +582,9 @@ async function initializePromotionCoupons(
   const now = new Date();
 
   if (isProProduct) {
-    // Get the Pro product config for coupon amounts
-    const proProduct = await Product.findOne({ productId: 'pro_monthly' }).lean();
+    // Get the Pro product config for coupon amounts - use actual subscribed product, fallback to pro_monthly
+    const proProduct = await Product.findOne({ productId }).lean()
+      ?? await Product.findOne({ productId: 'pro_monthly' }).lean();
     const monthlyAmount = proProduct?.promotionCoupons || 3;
     const highlightedAmount = proProduct?.highlightedCoupons || 2;
     const premiumAmount = proProduct?.premiumCoupons || 1;
@@ -584,6 +649,65 @@ async function initializePromotionCoupons(
  * Generate agent coupon codes for new Enterprise subscriptions
  * Creates 5 coupon codes and sends email to the agency owner
  */
+/**
+/**
+ * Maximum validity period for generated promotion coupons (30 days).
+ * Regardless of the caller-supplied validUntil (e.g. end-of-month or
+ * subscription expiry), coupons will never be valid for more than this.
+ */
+const MAX_COUPON_VALIDITY_DAYS = 30;
+
+/**
+ * Generate PromotionCoupon records for a new Pro subscriber.
+ * Returns an array of { tier, code } objects to embed in the welcome email.
+ */
+async function generateProSubscriptionCoupons(
+  userId: string,
+  highlightedCount: number,
+  premiumCount: number,
+  featuredCount: number,
+  validUntil: Date,
+): Promise<Array<{ tier: 'highlight' | 'premium' | 'featured'; code: string }>> {
+  const results: Array<{ tier: 'highlight' | 'premium' | 'featured'; code: string }> = [];
+
+  // Cap validity to MAX_COUPON_VALIDITY_DAYS from now regardless of what the
+  // caller passed (end-of-month or subscription expiry can exceed 30 days).
+  const maxExpiry = new Date(Date.now() + MAX_COUPON_VALIDITY_DAYS * 24 * 60 * 60 * 1000);
+  const cappedValidUntil = validUntil < maxExpiry ? validUntil : maxExpiry;
+
+  const tiers: Array<{ tier: 'highlight' | 'premium' | 'featured'; count: number }> = [
+    { tier: 'highlight', count: highlightedCount },
+    { tier: 'premium', count: premiumCount },
+    { tier: 'featured', count: featuredCount },
+  ];
+
+  for (const { tier, count } of tiers) {
+    for (let i = 0; i < count; i++) {
+      const prefix = tier === 'highlight' ? 'HL' : tier === 'premium' ? 'PR' : 'FT';
+      const code = `${prefix}-${userId.slice(-5).toUpperCase()}-${generateSecureRandomString(6).toUpperCase()}`;
+
+      await PromotionCoupon.create({
+        code,
+        description: `Pro subscription ${tier} coupon for user ${userId}`,
+        discountType: 'percentage',
+        discountValue: 100,
+        validFrom: new Date(),
+        validUntil: cappedValidUntil,
+        status: 'active',
+        maxTotalUses: 1,   // single-use only
+        maxUsesPerUser: 1, // single-use only
+        applicableTiers: [tier],
+        isPublic: false,
+        notes: `Auto-generated for userId:${userId}`,
+      });
+
+      results.push({ tier, code });
+    }
+  }
+
+  return results;
+}
+
 async function generateEnterpriseAgentCoupons(
   userId: string,
   ownerName: string,
@@ -676,8 +800,7 @@ async function generateEnterpriseAgentCoupons(
   }
 }
 
-// Named export for the function
-export { generateEnterpriseAgentCoupons };
+export { generateEnterpriseAgentCoupons, generateProSubscriptionCoupons };
 
 export default {
   processSubscriptionPayment,
@@ -685,4 +808,5 @@ export default {
   updateExpiredSubscriptions,
   verifyPaymentIntegrity,
   generateEnterpriseAgentCoupons,
+  generateProSubscriptionCoupons,
 };

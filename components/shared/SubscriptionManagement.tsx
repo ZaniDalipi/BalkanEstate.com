@@ -99,7 +99,7 @@ const FREE_PLAN: Plan = {
   periodMonths: 0,
   features: ['3 active listings', '3 saved searches', '3 AI messages', '3 generate insights', 'Basic property details'],
   listingLimit: 3,
-  color: 'from-gray-400 to-gray-500',
+  color: 'linear-gradient(135deg, #9ca3af 0%, #6b7280 100%)',
   tier: 0,
   savedSearchesLimit: 3,
   promotionCouponsMonthly: 0,
@@ -108,7 +108,8 @@ const FREE_PLAN: Plan = {
   supportType: 'email',
 };
 
-// Agency agent plan (obtained via coupon redemption, not purchasable)
+// Agency agent plan fallback (obtained via coupon redemption, not purchasable)
+// This is only used if the DB product fetch fails — real values come from DB
 const AGENCY_AGENT_PLAN: Plan = {
   id: 'agency_agent_yearly',
   name: 'Agency Pro',
@@ -117,7 +118,7 @@ const AGENCY_AGENT_PLAN: Plan = {
   periodMonths: 12,
   features: ['25 active listings', 'Unlimited saved searches', 'Unlimited AI chat', 'Full analytics', 'Agency team support'],
   listingLimit: 25,
-  color: 'from-emerald-500 to-teal-600',
+  color: 'linear-gradient(135deg, #10b981 0%, #0d9488 100%)',
   tier: 2,
   badge: 'Agency Member',
   badgeColor: 'emerald',
@@ -151,25 +152,35 @@ const LISTING_LIMITS: Record<string, number> = {
   agency_yearly: 500,  // 500 listings for enterprise
   buyer_monthly: 0,  // Buyers don't create listings
   // Agency agent tier (joined via coupon)
-  agency_agent_yearly: 25,  // 25 listings per year for agency agents
+  agency_agent_yearly: 25,  // 25 listings per year for agency agents (fallback; real value comes from DB)
 };
 
-// Map product IDs to gradient colors
+// Map product IDs to CSS gradient strings (inline styles to avoid Tailwind purge)
 const PLAN_COLORS: Record<string, string> = {
-  free: 'from-gray-400 to-gray-500',
-  seller_pro_monthly: 'from-blue-500 to-blue-600',
-  seller_pro_yearly: 'from-purple-500 to-purple-600',
-  seller_enterprise_yearly: 'from-amber-500 to-orange-600',
-  agency_agent_yearly: 'from-emerald-500 to-teal-600',  // Agency agent color
+  free: 'linear-gradient(135deg, #9ca3af 0%, #6b7280 100%)',
+  buyer_monthly: 'linear-gradient(135deg, #3b82f6 0%, #4f46e5 100%)',
+  buyer_pro_monthly: 'linear-gradient(135deg, #3b82f6 0%, #4f46e5 100%)',
+  buyer_pro_yearly: 'linear-gradient(135deg, #6366f1 0%, #9333ea 100%)',
+  seller_pro_monthly: 'linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)',
+  seller_pro_yearly: 'linear-gradient(135deg, #a855f7 0%, #9333ea 100%)',
+  seller_enterprise_yearly: 'linear-gradient(135deg, #f59e0b 0%, #ea580c 100%)',
+  agency_yearly: 'linear-gradient(135deg, #f59e0b 0%, #ea580c 100%)',  // Enterprise for agency creators (same orange)
+  agency_agent_yearly: 'linear-gradient(135deg, #10b981 0%, #0d9488 100%)',
 };
 
 // Map product IDs to tiers
 const PLAN_TIERS: Record<string, number> = {
   free: 0,
+  buyer_monthly: 1,          // Buyer Pro
+  buyer_pro_monthly: 1,
+  buyer_pro_yearly: 2,
   seller_pro_monthly: 1,
+  pro_monthly: 1,
   seller_pro_yearly: 2,
+  pro_yearly: 2,
   seller_enterprise_yearly: 3,
-  agency_agent_yearly: 2,  // Same tier as pro yearly
+  agency_yearly: 3,          // Enterprise for agency creators
+  agency_agent_yearly: 2,
 };
 
 // Gift/Coupon icon component
@@ -203,6 +214,14 @@ interface AgentCouponData {
   usedAt?: string;
 }
 
+// Promotion coupon data from backend
+interface PromotionCouponData {
+  monthly: number;
+  available: number;
+  used: number;
+  lastRefresh: string;
+}
+
 interface AgencyTeamData {
   agencyId: string;
   invitationCode: string;
@@ -214,6 +233,7 @@ interface AgencyTeamData {
     used: number;
     canGenerateMore: boolean;
   } | null;
+  promotionCoupons: PromotionCouponData | null;
 }
 
 const SubscriptionManagement: React.FC<SubscriptionManagementProps> = ({ userId }) => {
@@ -236,6 +256,8 @@ const SubscriptionManagement: React.FC<SubscriptionManagementProps> = ({ userId 
   const [loadingAgencyData, setLoadingAgencyData] = useState(false);
   const [copiedCode, setCopiedCode] = useState<string | null>(null);
   const [generatingCoupons, setGeneratingCoupons] = useState(false);
+  const [sendingPromotionEmail, setSendingPromotionEmail] = useState(false);
+  const [promotionEmailSent, setPromotionEmailSent] = useState(false);
 
   // Payment window state
   const [showPaymentWindow, setShowPaymentWindow] = useState(false);
@@ -248,17 +270,42 @@ const SubscriptionManagement: React.FC<SubscriptionManagementProps> = ({ userId 
 
   const user = state.currentUser as User;
 
-  // Fetch products from database
+  // Fetch products from database — include seller, buyer, and agent plans so all subscriptions display correctly
   const fetchProducts = useCallback(async () => {
     try {
-      const response = await fetch(`${API_URL}/products?role=seller`);
-      if (response.ok) {
-        const data = await response.json();
-        if (data.products) {
-          setProducts(data.products);
+      // Fetch seller, buyer, and agent products so we can display any plan correctly
+      const [sellerRes, buyerRes, agentRes] = await Promise.all([
+        fetch(`${API_URL}/products?role=seller`),
+        fetch(`${API_URL}/products?role=buyer`),
+        fetch(`${API_URL}/products?role=agent`),
+      ]);
+      const allProducts: ProductData[] = [];
+      if (sellerRes.ok) {
+        const d = await sellerRes.json();
+        if (d.products) allProducts.push(...d.products);
+      }
+      const existingIds = new Set(allProducts.map(p => p.productId));
+      if (buyerRes.ok) {
+        const d = await buyerRes.json();
+        if (d.products) {
+          d.products.forEach((p: ProductData) => {
+            if (!existingIds.has(p.productId)) { allProducts.push(p); existingIds.add(p.productId); }
+          });
         }
       }
-    } catch (error) {
+      if (agentRes.ok) {
+        const d = await agentRes.json();
+        if (d.products) {
+          d.products.forEach((p: ProductData) => {
+            if (!existingIds.has(p.productId)) { allProducts.push(p); existingIds.add(p.productId); }
+          });
+        }
+      }
+      if (allProducts.length > 0) {
+        setProducts(allProducts);
+      }
+    } catch {
+      // Silently continue with empty products
     }
   }, []);
 
@@ -309,7 +356,7 @@ const SubscriptionManagement: React.FC<SubscriptionManagementProps> = ({ userId 
       features: product.features,
       // Use actual DB values for all limits
       listingLimit: product.listingsLimit ?? LISTING_LIMITS[product.productId] ?? 3,
-      color: PLAN_COLORS[product.productId] || 'from-gray-400 to-gray-500',
+      color: PLAN_COLORS[product.productId] || 'linear-gradient(135deg, #9ca3af 0%, #6b7280 100%)',
       tier: tier,
       badge: product.badge,
       badgeColor: product.badgeColor,
@@ -364,6 +411,15 @@ const SubscriptionManagement: React.FC<SubscriptionManagementProps> = ({ userId 
     };
   }, [fetchSubscription]);
 
+  // Derive max team members from the enterprise product in DB (owner + agents)
+  const enterpriseMaxAgents = useMemo(() => {
+    const enterpriseProduct = products.find(p =>
+      p.productId === 'agency_yearly' || p.productId === 'seller_enterprise_yearly'
+    );
+    // teamMembersLimit = number of agent slots; add 1 for the agency owner
+    return (enterpriseProduct?.teamMembersLimit ?? 5) + 1;
+  }, [products]);
+
   // Fetch agency team data if user is an agency owner
   useEffect(() => {
     const fetchAgencyTeamData = async () => {
@@ -394,17 +450,20 @@ const SubscriptionManagement: React.FC<SubscriptionManagementProps> = ({ userId 
         });
 
         let agentCoupons = null;
+        let promotionCoupons: PromotionCouponData | null = null;
         if (couponsResponse.ok) {
           const couponsData = await couponsResponse.json();
           agentCoupons = couponsData.agentCoupons;
+          promotionCoupons = couponsData.promotionCoupons || null;
         }
 
         setAgencyTeamData({
           agencyId: String(agency._id),
           invitationCode: agency.invitationCode || '',
           totalAgents: agency.totalAgents || agency.agents?.length || 0,
-          maxAgents: 6, // Agency plan includes owner + 5 agents via coupons
+          maxAgents: enterpriseMaxAgents, // Derived from enterprise product teamMembersLimit in DB
           agentCoupons,
+          promotionCoupons,
         });
       } catch (error) {
       } finally {
@@ -413,7 +472,7 @@ const SubscriptionManagement: React.FC<SubscriptionManagementProps> = ({ userId 
     };
 
     fetchAgencyTeamData();
-  }, [user?.agencyId, refreshKey]);
+  }, [user?.agencyId, refreshKey, enterpriseMaxAgents]);
 
   // Handle copying code to clipboard
   const handleCopyCode = async (code: string) => {
@@ -454,6 +513,36 @@ const SubscriptionManagement: React.FC<SubscriptionManagementProps> = ({ userId 
     }
   };
 
+  // Handle sending promotion coupons email
+  const handleSendPromotionEmail = async () => {
+    if (!agencyTeamData?.agencyId) return;
+
+    setSendingPromotionEmail(true);
+    setPromotionEmailSent(false);
+    try {
+      const token = localStorage.getItem('balkan_estate_token');
+      const response = await fetch(`${API_URL}/agencies/${agencyTeamData.agencyId}/coupons/send-promotion-email`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (response.ok) {
+        setPromotionEmailSent(true);
+        setTimeout(() => setPromotionEmailSent(false), 3000);
+      } else {
+        const data = await response.json();
+        setActionError(data.message || 'Failed to send promotion coupons email');
+      }
+    } catch (error) {
+      setActionError('Failed to send promotion coupons email');
+    } finally {
+      setSendingPromotionEmail(false);
+    }
+  };
+
   // Calculate actual days in the subscription period based on calendar
   const calculateActualDays = (startDate: Date, endDate: Date): number => {
     const diffTime = Math.abs(endDate.getTime() - startDate.getTime());
@@ -474,7 +563,12 @@ const SubscriptionManagement: React.FC<SubscriptionManagementProps> = ({ userId 
     const daysUsed = Math.max(0, Math.ceil((now.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24)));
     const daysRemaining = Math.max(0, Math.ceil((expirationDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24)));
 
-    const currentPlanKey = subscription.productId || 'free';
+    // Agency creators (isEnterpriseTier) should always show Enterprise plan,
+    // even if their subscription record says agency_agent_yearly
+    const rawPlanKey = subscription.productId || 'free';
+    const currentPlanKey = (user?.isEnterpriseTier && (rawPlanKey === 'agency_agent_yearly' || rawPlanKey === 'free'))
+      ? 'agency_yearly'
+      : rawPlanKey;
     const currentPlan = plans[currentPlanKey] || FREE_PLAN;
 
     // Calculate daily rate based on actual subscription price and days
@@ -512,7 +606,11 @@ const SubscriptionManagement: React.FC<SubscriptionManagementProps> = ({ userId 
   // Get current product for placeholder replacement
   const currentProduct = useMemo((): ProductValues | null => {
     if (!subscription) return null;
-    const product = products.find(p => p.productId === subscription.productId);
+    // For enterprise users, look up the agency_yearly product instead of their subscription productId
+    const effectiveProductId = (user?.isEnterpriseTier && (subscription.productId === 'agency_agent_yearly' || subscription.productId === 'free'))
+      ? 'agency_yearly'
+      : subscription.productId;
+    const product = products.find(p => p.productId === effectiveProductId) || products.find(p => p.productId === subscription.productId);
     if (!product) return null;
     return {
       listingsLimit: product.listingsLimit,
@@ -856,6 +954,17 @@ const SubscriptionManagement: React.FC<SubscriptionManagementProps> = ({ userId 
     (subscription?.status === 'expired');
 
   if (showNoSubscription && !isCancelledButActive) {
+    // Build benefit list from DB product data based on user role
+    const isBuyerRole = user?.role === 'buyer';
+    const featuredProduct = isBuyerRole
+      ? products.find(p => p.productId === 'buyer_monthly') || products.find(p => p.targetRole === 'buyer')
+      : products.find(p => p.productId === 'seller_pro_yearly') || products.find(p => p.productId === 'pro_yearly') || products.find(p => p.targetRole === 'seller' && p.billingPeriod === 'yearly');
+    const noBenefits: string[] = featuredProduct?.features?.slice(0, 4) ?? (
+      isBuyerRole
+        ? ['Instant Property Alerts', 'Unlimited Saved Searches', 'Early Access to Listings', 'Advanced Market Insights']
+        : ['250 Listings/Year', '3 Promo Coupons/Month', 'Unlimited AI Chat', '20 Insights/Month']
+    );
+
     return (
       <div className="max-w-2xl mx-auto">
         <div className="relative overflow-hidden bg-gradient-to-br from-white via-primary-light/5 to-white rounded-2xl shadow-lg border border-neutral-200/50 p-8 md:p-12">
@@ -875,7 +984,7 @@ const SubscriptionManagement: React.FC<SubscriptionManagementProps> = ({ userId 
             </div>
 
             <div className="grid sm:grid-cols-2 gap-3 max-w-lg mx-auto pt-4">
-              {['250 Listings/Year', '3 Promo Coupons/Month', 'Unlimited AI Chat', '20 Insights/Month'].map((benefit, idx) => (
+              {noBenefits.map((benefit, idx) => (
                 <div key={idx} className="flex items-center gap-3 p-3 bg-white rounded-lg border border-neutral-200">
                   <CheckCircleIcon className="w-5 h-5 text-primary flex-shrink-0" />
                   <span className="text-sm text-neutral-700">{benefit}</span>
@@ -913,7 +1022,7 @@ const SubscriptionManagement: React.FC<SubscriptionManagementProps> = ({ userId 
       </div>
 
       {/* Current Subscription Card */}
-      <div className={`bg-gradient-to-br ${subscriptionDetails.currentPlan.color} rounded-2xl p-6 text-white shadow-xl relative overflow-hidden`}>
+      <div className="rounded-2xl p-6 text-white shadow-xl relative overflow-hidden" style={{ background: subscriptionDetails.currentPlan.color }}>
         {/* Coupon Badge - positioned to not overlap with content */}
         {subscriptionDetails.isCoupon && (
           <div className="absolute top-0 left-0 right-0 flex justify-center -mt-0">
@@ -1036,7 +1145,10 @@ const SubscriptionManagement: React.FC<SubscriptionManagementProps> = ({ userId 
             <div>
               <p className="font-semibold text-neutral-800">Listing Limit</p>
               <p className="text-sm text-neutral-500">
-                {user.subscription?.activeListingsCount || user.listingsCount || 0} of {currentProduct?.listingsLimit ?? subscriptionDetails.currentPlan.listingLimit} listings used
+                {user.subscription?.activeListingsCount || user.listingsCount || 0} of {currentProduct?.listingsLimit ?? subscriptionDetails.currentPlan.listingLimit} used
+                {(user.subscription?.tier === 'agency_agent' || user.subscription?.tier === 'agency_owner') && (
+                  <span className="ml-1 text-neutral-400">· per month</span>
+                )}
               </p>
             </div>
           </div>
@@ -1073,8 +1185,13 @@ const SubscriptionManagement: React.FC<SubscriptionManagementProps> = ({ userId 
                 {currentProduct?.listingsLimit ?? subscriptionDetails.currentPlan.listingLimit} Active Listings
               </p>
               <p className="text-sm text-neutral-500">
-                {subscriptionDetails.currentPlan.period === 'year' ? 'Per year' : subscriptionDetails.currentPlan.period === 'month' ? 'Per month' : 'Total available'}
+                {subscriptionDetails.currentPlan.tier === 2 || user.subscription?.tier === 'agency_agent' || user.subscription?.tier === 'agency_owner'
+                  ? 'Per month, per agent'
+                  : subscriptionDetails.currentPlan.period === 'month' ? 'Per month' : 'Total available'}
               </p>
+              {(subscriptionDetails.currentPlan.tier === 2 || user.subscription?.tier === 'agency_agent' || user.subscription?.tier === 'agency_owner') && (
+                <p className="text-xs text-neutral-400 mt-0.5">750 listing pool / year across the agency</p>
+              )}
             </div>
           </div>
 
@@ -1213,35 +1330,44 @@ const SubscriptionManagement: React.FC<SubscriptionManagementProps> = ({ userId 
         )}
       </div>
 
-      {/* Team Members Section - Only show for agency owners */}
-      {agencyTeamData && (
+      {/* Team Members Section - Only show for agency creators (Enterprise plan holders) */}
+      {agencyTeamData && user?.isEnterpriseTier && (
         <div className="bg-white rounded-xl border border-neutral-200 p-4 shadow-sm">
-          {/* Header with count */}
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="p-2 bg-purple-100 rounded-lg">
-                <TeamIcon className="w-5 h-5 text-purple-600" />
-              </div>
-              <div>
-                <p className="font-semibold text-neutral-800">Team Members</p>
-                <p className="text-sm text-neutral-500">
-                  {agencyTeamData.totalAgents} of {agencyTeamData.maxAgents} agents registered
-                </p>
-              </div>
-            </div>
-            <div className="text-right">
-              <p className="text-2xl font-bold text-neutral-800">
-                {agencyTeamData.maxAgents - agencyTeamData.totalAgents}
-              </p>
-              <p className="text-xs text-neutral-500">slots remaining</p>
-            </div>
-          </div>
-          <div className="mt-3 w-full bg-neutral-100 rounded-full h-2 overflow-hidden">
-            <div
-              className="bg-purple-500 h-full rounded-full transition-all duration-500"
-              style={{ width: `${Math.min(100, (agencyTeamData.totalAgents / agencyTeamData.maxAgents) * 100)}%` }}
-            />
-          </div>
+          {/* Header with coupon usage count */}
+          {(() => {
+            const totalCoupons = agencyTeamData.agentCoupons?.coupons?.length ?? 5;
+            const usedCoupons = agencyTeamData.agentCoupons?.used ?? 0;
+            const remainingCoupons = totalCoupons - usedCoupons;
+            return (
+              <>
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="p-2 bg-purple-100 rounded-lg">
+                      <TeamIcon className="w-5 h-5 text-purple-600" />
+                    </div>
+                    <div>
+                      <p className="font-semibold text-neutral-800">Team Members</p>
+                      <p className="text-sm text-neutral-500">
+                        {usedCoupons} of {totalCoupons} codes used
+                      </p>
+                    </div>
+                  </div>
+                  <div className="text-right">
+                    <p className="text-2xl font-bold text-neutral-800">
+                      {remainingCoupons}
+                    </p>
+                    <p className="text-xs text-neutral-500">codes remaining</p>
+                  </div>
+                </div>
+                <div className="mt-3 w-full bg-neutral-100 rounded-full h-2 overflow-hidden">
+                  <div
+                    className="bg-purple-500 h-full rounded-full transition-all duration-500"
+                    style={{ width: `${totalCoupons > 0 ? Math.min(100, (usedCoupons / totalCoupons) * 100) : 0}%` }}
+                  />
+                </div>
+              </>
+            );
+          })()}
 
           {/* Invitation Code */}
           {agencyTeamData.invitationCode && (
@@ -1376,11 +1502,72 @@ const SubscriptionManagement: React.FC<SubscriptionManagementProps> = ({ userId 
             </div>
           )}
 
+          {/* Promotion Coupons Section */}
+          {agencyTeamData.promotionCoupons && (
+            <div className="mt-4 pt-4 border-t border-neutral-100">
+              <div className="flex items-center justify-between mb-3">
+                <div>
+                  <p className="text-sm font-medium text-neutral-700">Promotion Coupons</p>
+                  <p className="text-xs text-neutral-500">
+                    {agencyTeamData.promotionCoupons.available} available • {agencyTeamData.promotionCoupons.used} used this month
+                  </p>
+                </div>
+                <button
+                  onClick={handleSendPromotionEmail}
+                  disabled={sendingPromotionEmail}
+                  className="inline-flex items-center gap-1.5 text-sm text-primary hover:text-primary-dark font-medium disabled:opacity-50"
+                >
+                  {sendingPromotionEmail ? (
+                    <>
+                      <svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                      </svg>
+                      Sending...
+                    </>
+                  ) : promotionEmailSent ? (
+                    <>
+                      <CheckCircleIcon className="w-4 h-4 text-green-500" />
+                      Sent!
+                    </>
+                  ) : (
+                    <>
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                      </svg>
+                      Send via Email
+                    </>
+                  )}
+                </button>
+              </div>
+
+              {/* Promotion coupons breakdown */}
+              <div className="grid grid-cols-3 gap-2">
+                <div className="bg-amber-50 border border-amber-200 rounded-lg p-2.5 text-center">
+                  <p className="text-lg font-bold text-amber-700">{agencyTeamData.promotionCoupons.monthly}</p>
+                  <p className="text-xs text-amber-600">Monthly</p>
+                </div>
+                <div className="bg-green-50 border border-green-200 rounded-lg p-2.5 text-center">
+                  <p className="text-lg font-bold text-green-700">{agencyTeamData.promotionCoupons.available}</p>
+                  <p className="text-xs text-green-600">Available</p>
+                </div>
+                <div className="bg-neutral-50 border border-neutral-200 rounded-lg p-2.5 text-center">
+                  <p className="text-lg font-bold text-neutral-700">{agencyTeamData.promotionCoupons.used}</p>
+                  <p className="text-xs text-neutral-500">Used</p>
+                </div>
+              </div>
+
+              <p className="text-xs text-neutral-400 mt-2">
+                Refreshes monthly • Last refresh: {new Date(agencyTeamData.promotionCoupons.lastRefresh).toLocaleDateString()}
+              </p>
+            </div>
+          )}
+
           {/* Info about agent benefits */}
           <div className="mt-4 pt-4 border-t border-neutral-100">
             <div className="bg-purple-50 rounded-lg p-3">
               <p className="text-xs text-purple-700">
-                <strong>Agent Benefits:</strong> Each agent gets 20 active listings per month with their subscription coupon.
+                <strong>Agent Benefits:</strong> Each agent gets 25 active listings per year with their subscription coupon.
                 Agents can use the agency promotion pool for featured listings.
               </p>
             </div>
@@ -1603,7 +1790,7 @@ const SubscriptionManagement: React.FC<SubscriptionManagementProps> = ({ userId 
                       {isEnterprise ? 'Best for Agencies' : plan.badge}
                     </div>
                   )}
-                  <div className={`bg-gradient-to-r ${plan.color} p-4 text-white`}>
+                  <div className="p-4 text-white" style={{ background: plan.color }}>
                     <h4 className="font-bold text-lg">{plan.name}</h4>
                     <div className="flex items-baseline gap-1 mt-1">
                       {pricing.discount > 0 && (
@@ -1634,7 +1821,8 @@ const SubscriptionManagement: React.FC<SubscriptionManagementProps> = ({ userId 
                     </ul>
                     <button
                       onClick={() => handleUpgradeClick(key)}
-                      className={`w-full py-2.5 rounded-lg font-bold text-white bg-gradient-to-r ${plan.color} hover:opacity-90 transition-opacity`}
+                      className="w-full py-2.5 rounded-lg font-bold text-white hover:opacity-90 transition-opacity"
+                      style={{ background: plan.color }}
                     >
                       {isEnterprise ? 'Start Your Agency' : 'Upgrade Now'}
                     </button>

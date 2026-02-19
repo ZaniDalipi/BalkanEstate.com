@@ -199,6 +199,7 @@ export const createAgency = async (
 
     // Generate 5 agent registration coupons for Enterprise subscribers
     let agentCouponsGenerated = false;
+    let agentCouponsEmailSent = false;
     let generatedCoupons: Array<{ code: string; expiresAt: Date }> = [];
 
     // Check if user has Enterprise subscription
@@ -235,7 +236,10 @@ export const createAgency = async (
         };
 
         // Initialize promotion coupons immediately so agency doesn't wait for monthly cron
-        const agencyProduct = await Product.findOne({ productId: 'agency_yearly' }).lean();
+        const [agencyProduct, agentProduct] = await Promise.all([
+          Product.findOne({ productId: 'agency_yearly' }).lean(),
+          Product.findOne({ productId: 'agency_agent_yearly' }).lean(),
+        ]);
         const monthlyPromotionAmount = agencyProduct?.promotionCoupons || ENTERPRISE_TIER_LIMITS.PROMOTION_COUPONS;
         agency.promotionCoupons = {
           monthly: monthlyPromotionAmount,
@@ -261,14 +265,14 @@ export const createAgency = async (
             featured: enterpriseProduct?.featuredCoupons || ENTERPRISE_TIER_LIMITS.FEATURED_COUPONS,
           };
 
-          // Send agent registration coupons email
+          // Send agent registration coupons email with dynamic limit from DB
           await sendAgentRegistrationCouponsEmail({
             email: user.email,
             ownerName: user.name || 'Agency Owner',
             agencyName: agency.name,
             coupons: generatedCoupons,
+            agentListingsLimit: agentProduct?.listingsLimit ?? 25,
           });
-          // Sent agent registration coupons email
 
           // Send welcome/thank you email with promotion coupon breakdown
           await sendEnterpriseWelcomeEmail({
@@ -280,7 +284,22 @@ export const createAgency = async (
             teamMembersLimit: enterpriseProduct?.teamMembersLimit || ENTERPRISE_TIER_LIMITS.TEAM_MEMBERS,
             listingsLimit: enterpriseProduct?.listingsLimit || ENTERPRISE_TIER_LIMITS.LISTINGS,
           });
-          // Sent Enterprise welcome email with coupon breakdown
+
+          // Send promotion coupons summary email right away at creation
+          const { sendPromotionCouponsEmail } = await import('../services/emailService');
+          await sendPromotionCouponsEmail({
+            email: user.email,
+            ownerName: user.name || 'Agency Owner',
+            agencyName: agency.name,
+            promotionCoupons: {
+              monthly: monthlyPromotionAmount,
+              available: monthlyPromotionAmount,
+              used: 0,
+            },
+          });
+
+          agentCouponsEmailSent = true;
+          agencyLogger.info(`📧 Enterprise welcome emails sent to ${user.email}`);
         } catch (emailError) {
           agencyLogger.error('⚠️ Failed to send Enterprise emails:', emailError);
         }
@@ -304,13 +323,55 @@ export const createAgency = async (
         ? {
             generated: true,
             count: generatedCoupons.length,
-            message: '🎟️ 5 agent registration codes have been sent to your email!',
+            codes: generatedCoupons.map(c => ({ code: c.code, expiresAt: c.expiresAt })),
+            emailSent: agentCouponsEmailSent,
+            message: '🎟️ 5 agent registration codes generated! Check your email or the codes below.',
           }
         : undefined,
     });
   } catch (error: any) {
     agencyLogger.error('Create agency error:', error);
-    res.status(500).json({ message: 'Error creating agency' });
+
+    // Handle MongoDB duplicate key errors with specific messages
+    if (error.code === 11000) {
+      const keyPattern = error.keyPattern || {};
+      const field = Object.keys(keyPattern)[0] || '';
+
+      if (field === 'slug') {
+        res.status(400).json({
+          message: 'An agency with this name already exists in this country. Please choose a different agency name.',
+          code: 'DUPLICATE_AGENCY_NAME',
+        });
+      } else if (field === 'ownerId') {
+        res.status(400).json({
+          message: 'You already have an agency profile associated with your account.',
+          code: 'AGENCY_ALREADY_EXISTS',
+        });
+      } else if (field === 'invitationCode') {
+        res.status(400).json({
+          message: 'Could not generate a unique invitation code. Please try again.',
+          code: 'DUPLICATE_INVITATION_CODE',
+        });
+      } else {
+        res.status(400).json({
+          message: 'An agency with this information already exists. Please check your details and try again.',
+          code: 'DUPLICATE_KEY',
+        });
+      }
+      return;
+    }
+
+    // Handle Mongoose validation errors
+    if (error.name === 'ValidationError') {
+      const messages = Object.values(error.errors).map((e: any) => e.message).join(', ');
+      res.status(400).json({
+        message: `Validation failed: ${messages}`,
+        code: 'VALIDATION_ERROR',
+      });
+      return;
+    }
+
+    res.status(500).json({ message: 'Error creating agency. Please try again.' });
   }
 };
 
@@ -644,10 +705,22 @@ export const getAgency = async (
 
     // Include sales stats and calculated totals in agency object
     const activeProperties = properties.filter(p => p.status === 'active' || p.status === 'pending');
-    // SECURITY: Exclude invitationCode from public response - it allows anyone to join the agency
-    const { invitationCode: _invCode, __v, ...safeAgency } = agency.toObject();
+
+    // SECURITY: Only include invitationCode for owner, admins, or existing members
+    const requestUserId = req.user ? String((req.user as IUser)._id) : null;
+    const ownerId = String(agency.ownerId._id || agency.ownerId);
+    const adminIds = agency.admins?.map((id: any) => String(id._id || id)) || [];
+    const agentIds = agency.agents.map((agent: any) => String(agent._id || agent));
+    const isMemberOrAdmin = requestUserId && (
+      requestUserId === ownerId ||
+      adminIds.includes(requestUserId) ||
+      agentIds.includes(requestUserId)
+    );
+
+    const { invitationCode, __v, ...publicAgencyFields } = agency.toObject();
     const agencyWithStats = {
-      ...safeAgency,
+      ...publicAgencyFields,
+      ...(isMemberOrAdmin ? { invitationCode } : {}),
       salesStats,
       totalProperties: activeProperties.length,
       totalAgents: agency.agents?.length || 0,
@@ -1615,34 +1688,54 @@ export const generateAgentCoupons = async (
       return;
     }
 
-    // Check if agency can generate more coupons
-    if (!agency.canGenerateMoreCoupons()) {
+    // Fetch the enterprise product to get the max coupons limit dynamically
+    const enterpriseProduct = await Product.findOne({ productId: 'agency_yearly' }).lean();
+    const maxAgentCoupons: number = enterpriseProduct?.agentCoupons ?? ENTERPRISE_TIER_LIMITS.TEAM_MEMBERS;
+
+    const availableCoupons = (agency.agentCoupons ?? []).filter(c => c.status === 'available').length;
+
+    if (availableCoupons >= maxAgentCoupons) {
       res.status(400).json({
-        message: 'Maximum of 5 agent coupons can be active at once. Revoke or wait for coupons to be used.',
+        message: `Maximum of ${maxAgentCoupons} agent coupons can be active at once. Revoke or wait for coupons to be used.`,
         code: 'MAX_COUPONS_REACHED',
-        currentCoupons: agency.agentCoupons.filter(c => c.status === 'available').length,
+        currentCoupons: availableCoupons,
+        maxAllowed: maxAgentCoupons,
       });
       return;
     }
 
-    // Generate coupon codes (up to 5 total)
-    const availableCoupons = agency.agentCoupons.filter(c => c.status === 'available').length;
-    const couponsToGenerate = 5 - availableCoupons;
+    const couponsToGenerate = maxAgentCoupons - availableCoupons;
+
+    // Expiry aligned with agency subscription if available, otherwise 1 year
+    const agencyExpiry = agency.subscription?.expiresAt;
+    const couponExpiry = agencyExpiry && new Date(agencyExpiry) > new Date()
+      ? new Date(agencyExpiry)
+      : new Date(new Date().setFullYear(new Date().getFullYear() + 1));
 
     const newCoupons = [];
     for (let i = 0; i < couponsToGenerate; i++) {
       const code = agency.generateCouponCode();
-      const expiresAt = new Date();
-      expiresAt.setFullYear(expiresAt.getFullYear() + 1); // Valid for 1 year
+      if (!code || !/^[A-Z0-9]{2,6}-[A-Z0-9]{8}$/.test(code)) {
+        agencyLogger.error(`Invalid coupon code generated for agency ${agency.name}: "${code}"`);
+        continue;
+      }
 
       agency.agentCoupons.push({
         code,
         generatedAt: new Date(),
-        expiresAt,
+        expiresAt: couponExpiry,
         status: 'available',
       } as any);
 
-      newCoupons.push({ code, expiresAt });
+      newCoupons.push({ code, expiresAt: couponExpiry });
+    }
+
+    if (newCoupons.length === 0) {
+      res.status(500).json({
+        message: 'Failed to generate valid coupon codes',
+        code: 'GENERATION_FAILED',
+      });
+      return;
     }
 
     await agency.save();
@@ -1676,12 +1769,31 @@ export const redeemAgentCoupon = async (
     }
 
     const currentUser = req.user as IUser;
-    const { couponCode } = req.body;
 
-    if (!couponCode) {
+    // Normalize and type-validate the coupon code
+    const rawCode = req.body.couponCode;
+    if (!rawCode || typeof rawCode !== 'string') {
       res.status(400).json({
         message: 'Coupon code is required',
-        code: 'MISSING_COUPON_CODE'
+        code: 'MISSING_COUPON_CODE',
+      });
+      return;
+    }
+    const couponCode = rawCode.trim().toUpperCase();
+    if (!couponCode) {
+      res.status(400).json({
+        message: 'Coupon code cannot be empty',
+        code: 'MISSING_COUPON_CODE',
+      });
+      return;
+    }
+
+    // Validate format before hitting the DB: agency-prefix + 8 alphanumeric chars
+    const COUPON_FORMAT = /^[A-Z0-9]{2,6}-[A-Z0-9]{8}$/;
+    if (!COUPON_FORMAT.test(couponCode)) {
+      res.status(400).json({
+        message: 'Invalid coupon code format',
+        code: 'INVALID_COUPON_FORMAT',
       });
       return;
     }
@@ -1694,17 +1806,17 @@ export const redeemAgentCoupon = async (
     if (!agency) {
       res.status(404).json({
         message: 'Invalid coupon code',
-        code: 'INVALID_COUPON'
+        code: 'INVALID_COUPON',
       });
       return;
     }
 
-    // Find the specific coupon
-    const coupon = agency.agentCoupons.find(c => c.code === couponCode);
+    // Find the specific coupon (null-safe array access)
+    const coupon = agency.agentCoupons?.find(c => c.code === couponCode);
     if (!coupon) {
       res.status(404).json({
         message: 'Coupon not found',
-        code: 'COUPON_NOT_FOUND'
+        code: 'COUPON_NOT_FOUND',
       });
       return;
     }
@@ -1714,13 +1826,22 @@ export const redeemAgentCoupon = async (
       res.status(400).json({
         message: 'This coupon has already been used',
         code: 'COUPON_ALREADY_USED',
-        usedBy: coupon.usedBy,
         usedAt: coupon.usedAt,
       });
       return;
     }
 
-    if (coupon.status === 'expired' || new Date(coupon.expiresAt) < new Date()) {
+    // Validate expiration date is parseable before comparing
+    const expiryDate = new Date(coupon.expiresAt);
+    if (isNaN(expiryDate.getTime())) {
+      agencyLogger.error(`Coupon ${couponCode} has invalid expiresAt value: ${coupon.expiresAt}`);
+      res.status(500).json({
+        message: 'Coupon has an invalid expiration date',
+        code: 'INVALID_COUPON_DATA',
+      });
+      return;
+    }
+    if (coupon.status === 'expired' || expiryDate < new Date()) {
       coupon.status = 'expired';
       await agency.save();
       res.status(400).json({
@@ -1740,18 +1861,24 @@ export const redeemAgentCoupon = async (
       return;
     }
 
-    const user = await User.findById(currentUser._id);
+    const [user, agentProduct] = await Promise.all([
+      User.findById(currentUser._id),
+      Product.findOne({ productId: 'agency_agent_yearly' }).lean(),
+    ]);
     if (!user) {
-      res.status(404).json({ message: 'User not found' });
+      res.status(404).json({ message: 'User not found', code: 'USER_NOT_FOUND' });
       return;
     }
+
+    // Dynamic limits from DB product, fallback to constants
+    const agentListingsLimit = agentProduct?.listingsLimit ?? 25;
 
     // Initialize subscription if doesn't exist
     if (!user.subscription) {
       user.subscription = {
         tier: 'free',
         status: 'active',
-        listingsLimit: 3,
+        listingsLimit: agentListingsLimit,
         activeListingsCount: 0,
         privateSellerCount: 0,
         agentCount: 0,
@@ -1767,14 +1894,14 @@ export const redeemAgentCoupon = async (
       };
     }
 
-    // Upgrade user to agency_agent tier with Pro benefits
+    // Upgrade user to agency_agent tier — all limits come from DB product
     user.subscription.tier = 'agency_agent';
     user.subscription.status = 'active';
-    user.subscription.listingsLimit = 25;
+    user.subscription.listingsLimit = agentListingsLimit;
     if (user.subscription.promotionCoupons) {
-      user.subscription.promotionCoupons.monthly = 0; // Agency agents share agency pool
+      user.subscription.promotionCoupons.monthly = 0; // Agency agents share the agency pool
     }
-    user.subscription.expiresAt = new Date(coupon.expiresAt); // 1 year from coupon generation
+    user.subscription.expiresAt = expiryDate; // already validated above
 
     // Associate user with agency
     if (!user.agency) {
@@ -1801,6 +1928,7 @@ export const redeemAgentCoupon = async (
       // Update existing subscription
       existingSubscription.productId = 'agency_agent_yearly';
       existingSubscription.store = 'agency_coupon';
+      existingSubscription.purchaseToken = couponCode;
       existingSubscription.status = 'active';
       existingSubscription.startDate = new Date();
       existingSubscription.renewalDate = subscriptionExpiresAt;
@@ -1814,11 +1942,13 @@ export const redeemAgentCoupon = async (
       await existingSubscription.save();
       agencyLogger.info(`✅ Updated Subscription document for user ${user._id}`);
     } else {
-      // Create new subscription document
+      // Create new subscription document — purchaseToken must be the unique coupon code
+      // to avoid duplicate-key errors on the (store, purchaseToken) unique index
       await Subscription.create({
         userId: user._id,
         productId: 'agency_agent_yearly',
         store: 'agency_coupon',
+        purchaseToken: couponCode,
         status: 'active',
         startDate: new Date(),
         renewalDate: subscriptionExpiresAt,
@@ -2121,6 +2251,61 @@ export const usePromotionCoupon = async (
   }
 };
 
+// @desc    Send promotion coupons summary email to agency owner
+// @route   POST /api/agencies/:id/coupons/send-promotion-email
+// @access  Private (Agency owner)
+export const sendPromotionCouponsEmailEndpoint = async (
+  req: Request,
+  res: Response
+): Promise<void> => {
+  try {
+    if (!req.user) {
+      res.status(401).json({ message: 'Not authorized' });
+      return;
+    }
+
+    const currentUser = req.user as IUser;
+    const agency = await Agency.findById(req.params.id);
+
+    if (!agency) {
+      res.status(404).json({ message: 'Agency not found' });
+      return;
+    }
+
+    // Only agency owner can send this email
+    if (String(agency.ownerId) !== String(currentUser._id)) {
+      res.status(403).json({ message: 'Only the agency owner can request this email' });
+      return;
+    }
+
+    const user = await User.findById(String(currentUser._id));
+    if (!user) {
+      res.status(404).json({ message: 'User not found' });
+      return;
+    }
+
+    const promotionCoupons = agency.promotionCoupons || { monthly: 0, available: 0, used: 0 };
+
+    const { sendPromotionCouponsEmail } = await import('../services/emailService');
+    await sendPromotionCouponsEmail({
+      email: user.email,
+      ownerName: user.name || 'Agency Owner',
+      agencyName: agency.name,
+      promotionCoupons: {
+        monthly: promotionCoupons.monthly,
+        available: promotionCoupons.available,
+        used: promotionCoupons.used,
+      },
+    });
+
+    agencyLogger.info(`📧 Promotion coupons email sent to ${user.email} for agency ${agency.name}`);
+    res.json({ message: 'Promotion coupons email sent successfully' });
+  } catch (error) {
+    agencyLogger.error('Error sending promotion coupons email:', error);
+    res.status(500).json({ message: 'Failed to send promotion coupons email' });
+  }
+};
+
 // @desc    Get agency agents with subscription details
 // @route   GET /api/agencies/:id/agents
 // @access  Private (Agency owner)
@@ -2286,6 +2471,7 @@ export const migrateAgentSubscriptions = async (
             userId: user._id,
             productId: 'agency_agent_yearly',
             store: 'agency_coupon',
+            purchaseToken: `agency_coupon_${user._id.toString()}`,
             status: 'active',
             startDate: user.agency?.joinedAt || new Date(),
             renewalDate: agencyExpiresAt,
@@ -2301,6 +2487,9 @@ export const migrateAgentSubscriptions = async (
           // Update existing subscription
           existingSubscription.productId = 'agency_agent_yearly';
           existingSubscription.store = 'agency_coupon';
+          if (!existingSubscription.purchaseToken) {
+            existingSubscription.purchaseToken = `agency_coupon_${user._id.toString()}`;
+          }
           existingSubscription.status = 'active';
           existingSubscription.expirationDate = agencyExpiresAt;
           existingSubscription.renewalDate = agencyExpiresAt;

@@ -3,6 +3,7 @@ import { Resend } from 'resend';
 import User from '../models/User';
 import { getPromoTemplate, BRAND_COLORS } from '../templates/emailTemplates';
 import { emailLogger } from '../utils/logger';
+import { getActiveEmailConfig, renderEmailConfig, buildCouponCodesHtml } from '../utils/emailTemplateRenderer';
 
 // =============================================================================
 // Security Utilities
@@ -140,11 +141,20 @@ const DEFAULT_EMAIL_ADDRESSES: Record<EmailCategory, string> = {
   inquiries: 'BalkanEstateᴬᴵ <inquiries@balkanestateai.com>',
 };
 
+// Minimum gap between consecutive email sends (ms). Default 5 minutes.
+const EMAIL_SEND_INTERVAL_MS = parseInt(process.env.EMAIL_SEND_INTERVAL_MS ?? '300000', 10);
+
 class EmailService {
   private transporter: nodemailer.Transporter | null = null;
   private resend: Resend | null = null;
   private provider: EmailProvider = 'none';
   private fromEmails: Record<EmailCategory, string>;
+
+  // Simple in-memory send queue to avoid hitting provider rate limits
+  private sendQueue: Array<{ config: EmailConfig; resolve: () => void; reject: (err: unknown) => void }> = [];
+  private queueRunning = false;
+  private lastSentAt = 0; // timestamp of last successful/attempted send
+  private readonly MIN_SEND_GAP_MS = 1000; // 1 s between sends — safely under Resend's 2 req/s limit
 
   constructor() {
     // Initialize from addresses (can be overridden via env vars)
@@ -190,7 +200,52 @@ class EmailService {
     return this.fromEmails[category];
   }
 
+  /**
+   * Background queue processor — sends one email at a time with a
+   * EMAIL_SEND_INTERVAL_MS gap (default 5 min) to stay under provider rate limits.
+   */
+  private async processQueue(): Promise<void> {
+    if (this.queueRunning) return;
+    this.queueRunning = true;
+    while (this.sendQueue.length > 0) {
+      // Always enforce minimum gap since last send (even when queue had only one item)
+      const sinceLastSend = Date.now() - this.lastSentAt;
+      const minWait = Math.max(0, this.MIN_SEND_GAP_MS - sinceLastSend);
+      if (minWait > 0) {
+        await new Promise(r => setTimeout(r, minWait));
+      }
+
+      const item = this.sendQueue.shift()!;
+      this.lastSentAt = Date.now();
+      try {
+        await this.dispatchEmail(item.config);
+        item.resolve();
+      } catch (err) {
+        item.reject(err);
+      }
+
+      // Extra breathing room between batched items (e.g. bulk campaigns)
+      if (this.sendQueue.length > 0) {
+        await new Promise(r => setTimeout(r, EMAIL_SEND_INTERVAL_MS));
+      }
+    }
+    this.queueRunning = false;
+  }
+
+  /**
+   * Enqueue an email. Returns a promise that resolves once the email is sent.
+   */
   async sendEmail(config: EmailConfig): Promise<void> {
+    return new Promise((resolve, reject) => {
+      this.sendQueue.push({ config, resolve, reject });
+      this.processQueue().catch(err => emailLogger.error('Queue processor error:', err));
+    });
+  }
+
+  /**
+   * Actually dispatch the email through the configured provider.
+   */
+  private async dispatchEmail(config: EmailConfig): Promise<void> {
     // Validate email address
     if (!isValidEmail(config.to)) {
       emailLogger.error(`❌ Invalid email address: ${config.to}`);
@@ -2408,17 +2463,64 @@ Questions? Contact us at support@balkanestateai.com
     isAgency?: boolean;
     agencyName?: string;
     isAgentNotification?: boolean;
+    couponCodes?: Array<{ tier: 'highlight' | 'premium' | 'featured'; code: string }>;
   }): Promise<void> {
+    if (!params.email || !isValidEmail(params.email)) {
+      throw new Error(`sendMonthlyCouponEmail: invalid recipient email "${params.email}"`);
+    }
+    if (typeof params.totalCoupons !== 'number' || params.totalCoupons < 0) {
+      throw new Error('sendMonthlyCouponEmail: totalCoupons must be a non-negative number');
+    }
+    const breakdown = params.breakdown ?? { highlighted: 0, premium: 0, featured: 0 };
+    const computedTotal = breakdown.highlighted + breakdown.premium + breakdown.featured;
+    // newCoupons should equal the tier sum; warn if mismatched but don't reject
+    if (params.newCoupons !== computedTotal) {
+      emailLogger.warn(`sendMonthlyCouponEmail: newCoupons (${params.newCoupons}) ≠ breakdown sum (${computedTotal}) for ${params.email}`);
+    }
+
     const frontendUrl = process.env.FRONTEND_URL || 'https://balkanestateai.com';
-
-    // Sanitize user inputs
-    const safeUserName = escapeHtml(params.userName);
-    const safePlanName = escapeHtml(params.planName);
-    const safeAgencyName = escapeHtml(params.agencyName);
-
     const monthNames = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
     const currentMonth = monthNames[new Date().getMonth()];
     const currentYear = new Date().getFullYear();
+
+    const couponCodesHtml = buildCouponCodesHtml(params.couponCodes ?? []);
+
+    // Try admin-editable template first
+    const configKey = params.isAgency ? 'agency-monthly-coupon' : 'monthly-coupon';
+    const config = await getActiveEmailConfig(configKey);
+
+    if (config) {
+      const isAgentText = params.isAgentNotification
+        ? `Great news! Your agency <strong>${escapeHtml(params.agencyName)}</strong> has received its fresh promotion coupons for <strong>${currentMonth}</strong>. These are shared across your team.`
+        : params.isAgency
+          ? `<strong>${escapeHtml(params.agencyName)}</strong>'s Enterprise plan has been refreshed with <strong>${params.newCoupons} new promotion coupons</strong> for <strong>${currentMonth}</strong>. Coordinate with your team to get maximum visibility.`
+          : `Your <strong>${escapeHtml(params.planName)}</strong> subscription has been refreshed with <strong>${params.newCoupons} new promotion coupons</strong> for <strong>${currentMonth}</strong>.`;
+
+      const variables: Record<string, string> = {
+        userName:           escapeHtml(params.userName) || 'there',
+        planName:           escapeHtml(params.planName) || 'Pro',
+        agencyName:         escapeHtml(params.agencyName) || '',
+        currentMonth,
+        totalCoupons:       String(params.totalCoupons),
+        newCoupons:         String(params.newCoupons),
+        rolledOver:         String(params.rolledOver),
+        highlightedCoupons: String(breakdown.highlighted),
+        premiumCoupons:     String(breakdown.premium),
+        featuredCoupons:    String(breakdown.featured),
+        isAgentText,
+        couponCodesList:    couponCodesHtml,
+        frontendUrl,
+      };
+
+      const { html, subject } = renderEmailConfig(config, variables);
+      await this.sendEmail({ to: params.email, subject, html, category: config.fromCategory as any });
+      return;
+    }
+
+    // ── Fallback: inline HTML (used if template is missing or disabled) ──
+    const safeUserName = escapeHtml(params.userName);
+    const safePlanName = escapeHtml(params.planName);
+    const safeAgencyName = escapeHtml(params.agencyName);
 
     const html = `
 <!DOCTYPE html>
@@ -2498,6 +2600,21 @@ Questions? Contact us at support@balkanestateai.com
         </div>
       </div>
 
+      <!-- Coupon Codes -->
+      ${params.couponCodes && params.couponCodes.length > 0 ? `
+      <div style="background: #f0fdf4; border-radius: 8px; padding: 16px; margin-bottom: 20px; border: 1px solid #86efac;">
+        <p style="color: #166534; font-size: 13px; font-weight: 600; margin: 0 0 10px 0;">🎫 Your coupon codes — copy and use when promoting a listing:</p>
+        ${params.couponCodes.map(c => {
+          const label = c.tier === 'highlight' ? '✨ Highlighted' : c.tier === 'premium' ? '💎 Premium' : '🔥 Featured';
+          const bg = c.tier === 'highlight' ? '#059669' : c.tier === 'premium' ? '#7c3aed' : '#dc2626';
+          return `<div style="display:flex; align-items:center; margin-bottom:6px;">
+            <span style="background:${bg}; color:#fff; border-radius:4px; padding:2px 8px; font-size:11px; font-weight:600; margin-right:8px; white-space:nowrap;">${label}</span>
+            <code style="background:#fff; border:1px solid #86efac; border-radius:4px; padding:4px 10px; font-size:13px; font-weight:700; letter-spacing:1px; color:#166534;">${escapeHtml(c.code)}</code>
+          </div>`;
+        }).join('')}
+      </div>
+      ` : ''}
+
       <!-- Info Box -->
       <div style="background: #eff6ff; border-radius: 8px; padding: 16px; margin-bottom: 24px; border-left: 4px solid #3b82f6;">
         <p style="color: #1e40af; font-size: 13px; margin: 0; line-height: 1.5;">
@@ -2532,11 +2649,14 @@ Questions? Contact us at support@balkanestateai.com
 </body>
 </html>`;
 
+    const codesText = (params.couponCodes ?? []).length > 0
+      ? `\nYour coupon codes:\n${(params.couponCodes ?? []).map(c => `- ${c.tier.toUpperCase()}: ${c.code}`).join('\n')}\n`
+      : '';
     await this.sendEmail({
       to: params.email,
       subject: `🎟️ Your ${currentMonth} Promotion Coupons Are Ready! (${params.totalCoupons} available)`,
       html,
-      text: `Hey ${params.userName}!\n\nYour ${currentMonth} promotion coupons are ready!\n\nTotal Coupons: ${params.totalCoupons}\n- New this month: ${params.newCoupons}\n- Rolled over: ${params.rolledOver}\n\nBreakdown:\n- Highlighted: ${params.breakdown.highlighted}\n- Premium: ${params.breakdown.premium}\n- Featured: ${params.breakdown.featured}\n\nUse your coupons to boost your listings and get up to 5x more visibility!\n\nUse your coupons: ${frontendUrl}/promotions\n\n© ${currentYear} BalkanEstateᴬᴵ`,
+      text: `Hey ${params.userName}!\n\nYour ${currentMonth} promotion coupons are ready!\n\nTotal: ${params.totalCoupons} (${params.newCoupons} new + ${params.rolledOver} rolled over)\n\nBreakdown:\n- Highlighted: ${breakdown.highlighted}\n- Premium: ${breakdown.premium}\n- Featured: ${breakdown.featured}\n${codesText}\nUse coupons to boost listings and get up to 5× more views.\n${frontendUrl}/promotions\n\n© ${currentYear} BalkanEstateᴬᴵ`,
       category: 'alerts',
     });
   }
@@ -2550,12 +2670,14 @@ Questions? Contact us at support@balkanestateai.com
     ownerName: string;
     agencyName: string;
     coupons: Array<{ code: string; expiresAt: Date }>;
+    agentListingsLimit?: number;
   }): Promise<void> {
     const frontendUrl = process.env.FRONTEND_URL || 'https://balkanestateai.com';
 
     // Sanitize user inputs
     const safeOwnerName = escapeHtml(params.ownerName);
     const safeAgencyName = escapeHtml(params.agencyName);
+    const agentListingsLimit = params.agentListingsLimit ?? 25;
 
     const currentYear = new Date().getFullYear();
 
@@ -2584,7 +2706,7 @@ Questions? Contact us at support@balkanestateai.com
 </head>
 <body style="margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f3f4f6; -webkit-font-smoothing: antialiased;">
   <div style="display: none; max-height: 0; overflow: hidden;">
-    Your Enterprise subscription is active! Here are your 5 agent registration codes.
+    Your Enterprise subscription is active! Here are your ${params.coupons.length} agent registration codes.
   </div>
 
   <div style="max-width: 650px; margin: 0 auto; background-color: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);">
@@ -2604,7 +2726,7 @@ Questions? Contact us at support@balkanestateai.com
 
       <p style="color: #4b5563; font-size: 15px; line-height: 1.6; margin: 0 0 24px 0;">
         Congratulations! Your Enterprise subscription for <strong>${safeAgencyName}</strong> is now active.
-        Below are <strong>5 agent registration codes</strong> that your team members can use to join with a full <strong>yearly Pro subscription</strong> included!
+        Below are <strong>${params.coupons.length} agent registration codes</strong> that your team members can use to join with a full <strong>yearly Pro subscription</strong> included!
       </p>
 
       <!-- Agent Coupons Table -->
@@ -2642,7 +2764,7 @@ Questions? Contact us at support@balkanestateai.com
         <h3 style="color: #fbbf24; font-size: 14px; font-weight: 600; margin: 0 0 8px 0;">✨ What Each Agent Gets</h3>
         <ul style="color: #e2e8f0; font-size: 13px; margin: 0; padding-left: 20px; line-height: 1.6;">
           <li><strong style="color: #fbbf24;">Full Year</strong> of Pro features included</li>
-          <li><strong style="color: #fbbf24;">20 listings per month</strong> under your agency</li>
+          <li><strong style="color: #fbbf24;">${agentListingsLimit} listings per year</strong> under your agency</li>
           <li><strong style="color: #fbbf24;">Monthly promotion coupons</strong> shared with the team</li>
           <li><strong style="color: #fbbf24;">Priority support</strong> and agency branding</li>
         </ul>
@@ -2678,9 +2800,9 @@ Questions? Contact us at support@balkanestateai.com
 
     await this.sendEmail({
       to: params.email,
-      subject: `🏢 Welcome to Enterprise! Your 5 Agent Registration Codes Are Ready`,
+      subject: `🏢 Welcome to Enterprise! Your ${params.coupons.length} Agent Registration Codes Are Ready`,
       html,
-      text: `Hello ${params.ownerName}!\n\nCongratulations! Your Enterprise subscription for ${params.agencyName} is now active.\n\nHere are your 5 agent registration codes:\n\n${couponList}\n\nHow to use:\n1. Share a code with each team member\n2. They register or log in to BalkanEstateᴬᴵ\n3. Go to Agency → Redeem Code\n4. Enter the code to join your agency with a yearly Pro subscription!\n\nGo to your agency dashboard: ${frontendUrl}/agency/dashboard\n\n© ${currentYear} BalkanEstateᴬᴵ`,
+      text: `Hello ${params.ownerName}!\n\nCongratulations! Your Enterprise subscription for ${params.agencyName} is now active.\n\nHere are your ${params.coupons.length} agent registration codes:\n\n${couponList}\n\nHow to use:\n1. Share a code with each team member\n2. They register or log in to BalkanEstateᴬᴵ\n3. Go to Agency → Redeem Code\n4. Enter the code to join your agency with a yearly Pro subscription!\n\nGo to your agency dashboard: ${frontendUrl}/agency/dashboard\n\n© ${currentYear} BalkanEstateᴬᴵ`,
       category: 'alerts',
     });
   }
@@ -2814,7 +2936,7 @@ Questions? Contact us at support@balkanestateai.com
       <div style="background: #1e293b; border-radius: 8px; padding: 20px; margin-bottom: 24px; border: 1px solid #334155;">
         <h3 style="color: #ffffff; font-size: 16px; font-weight: 600; margin: 0 0 12px 0;">📋 Your Next Steps</h3>
         <ol style="color: #e2e8f0; font-size: 14px; margin: 0; padding-left: 20px; line-height: 1.8;">
-          <li>Check your inbox for <strong style="color: #10b981;">5 agent registration codes</strong></li>
+          <li>Check your inbox for <strong style="color: #10b981;">${agentCoupons} agent registration codes</strong></li>
           <li>Share codes with your team members to onboard them</li>
           <li>Set up your agency profile with branding and description</li>
           <li>Start listing properties and watch your agency grow!</li>
@@ -3595,6 +3717,319 @@ Questions? Contact us at support@balkanestateai.com
       category: 'inquiries',
     });
   }
+  // Send promotion coupons summary email to agency owner
+  async sendPromotionCouponsEmail(params: {
+    email: string;
+    ownerName: string;
+    agencyName: string;
+    promotionCoupons: {
+      monthly: number;
+      available: number;
+      used: number;
+    };
+  }): Promise<void> {
+    const frontendUrl = process.env.FRONTEND_URL || 'https://balkanestateai.com';
+    const safeOwnerName = escapeHtml(params.ownerName);
+    const safeAgencyName = escapeHtml(params.agencyName);
+    const currentYear = new Date().getFullYear();
+    const { monthly, available, used } = params.promotionCoupons;
+
+    const html = `
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body style="margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f3f4f6; -webkit-font-smoothing: antialiased;">
+  <div style="display: none; max-height: 0; overflow: hidden;">
+    Your promotion coupons summary for ${safeAgencyName}.
+  </div>
+
+  <div style="max-width: 650px; margin: 0 auto; background-color: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);">
+    <!-- Header -->
+    <div style="background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); padding: 32px 24px; text-align: center;">
+      <div style="margin-bottom: 12px;">
+        <span style="display: inline-block; width: 60px; height: 60px; background: rgba(255,255,255,0.2); border-radius: 50%; line-height: 60px; font-size: 28px;">🎁</span>
+      </div>
+      <h1 style="color: #ffffff; margin: 0; font-size: 24px; font-weight: 700;">Promotion Coupons</h1>
+      <p style="color: rgba(255,255,255,0.85); margin: 8px 0 0 0; font-size: 14px;">${safeAgencyName} • Monthly Summary</p>
+    </div>
+
+    <div style="padding: 28px 24px;">
+      <p style="color: #374151; font-size: 16px; margin: 0 0 20px 0;">
+        Hello ${safeOwnerName}! 👋
+      </p>
+
+      <p style="color: #4b5563; font-size: 15px; line-height: 1.6; margin: 0 0 24px 0;">
+        Here's your current promotion coupons summary for <strong>${safeAgencyName}</strong>.
+        Use these coupons to highlight, feature, or boost your agency's property listings!
+      </p>
+
+      <!-- Coupons Summary -->
+      <div style="display: flex; gap: 12px; margin-bottom: 24px;">
+        <div style="flex: 1; background: #fffbeb; border: 1px solid #fde68a; border-radius: 12px; padding: 16px; text-align: center;">
+          <p style="color: #d97706; font-size: 28px; font-weight: 700; margin: 0;">${monthly}</p>
+          <p style="color: #92400e; font-size: 12px; margin: 4px 0 0 0; text-transform: uppercase; font-weight: 600;">Monthly</p>
+        </div>
+        <div style="flex: 1; background: #ecfdf5; border: 1px solid #a7f3d0; border-radius: 12px; padding: 16px; text-align: center;">
+          <p style="color: #059669; font-size: 28px; font-weight: 700; margin: 0;">${available}</p>
+          <p style="color: #065f46; font-size: 12px; margin: 4px 0 0 0; text-transform: uppercase; font-weight: 600;">Available</p>
+        </div>
+        <div style="flex: 1; background: #f3f4f6; border: 1px solid #e5e7eb; border-radius: 12px; padding: 16px; text-align: center;">
+          <p style="color: #374151; font-size: 28px; font-weight: 700; margin: 0;">${used}</p>
+          <p style="color: #6b7280; font-size: 12px; margin: 4px 0 0 0; text-transform: uppercase; font-weight: 600;">Used</p>
+        </div>
+      </div>
+
+      <!-- How to Use -->
+      <div style="background: #1e293b; border-radius: 8px; padding: 16px; margin-bottom: 24px; border-left: 4px solid #f59e0b;">
+        <h3 style="color: #ffffff; font-size: 14px; font-weight: 600; margin: 0 0 8px 0;">📋 How to Use Promotion Coupons</h3>
+        <ol style="color: #e2e8f0; font-size: 13px; margin: 0; padding-left: 20px; line-height: 1.6;">
+          <li>Go to any of your active listings</li>
+          <li>Click <strong style="color: #fbbf24;">Promote Listing</strong></li>
+          <li>Select the promotion type (Highlight, Premium, or Featured)</li>
+          <li>Your coupon will be applied automatically!</li>
+        </ol>
+      </div>
+
+      <!-- CTA Button -->
+      <div style="text-align: center; margin: 28px 0;">
+        <a href="${frontendUrl}/agency/dashboard"
+           style="display: inline-block; background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); color: #ffffff; text-decoration: none; padding: 16px 32px; border-radius: 10px; font-weight: 600; font-size: 16px; box-shadow: 0 4px 14px rgba(245, 158, 11, 0.3);">
+          Go to Dashboard →
+        </a>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <div style="background: #0f172a; padding: 20px; text-align: center; border-top: 1px solid #334155;">
+      <p style="color: #64748b; font-size: 12px; margin: 0;">
+        &copy; ${currentYear} BalkanEstate<sup>AI</sup> • Promotion coupons refresh monthly
+      </p>
+    </div>
+  </div>
+</body>
+</html>`;
+
+    await this.sendEmail({
+      to: params.email,
+      subject: `🎁 Promotion Coupons Summary — ${safeAgencyName}`,
+      html,
+      text: `Hello ${params.ownerName},\n\nHere's your promotion coupons summary for ${params.agencyName}.\n\nMonthly: ${monthly}\nAvailable: ${available}\nUsed: ${used}\n\nUse these coupons to highlight, feature, or boost your listings!\n\nVisit: ${frontendUrl}/agency/dashboard\n\n© ${currentYear} BalkanEstateᴬᴵ`,
+      category: 'alerts',
+    });
+  }
+
+  async sendProSubscriptionWelcomeEmail(params: {
+    email: string;
+    userName: string;
+    planName: string;
+    listingsLimit: number;
+    promotionCoupons: {
+      total: number;
+      highlighted: number;
+      premium: number;
+      featured: number;
+    };
+    aiInsightsLimit: number;
+    aiMessagesLimit: number;
+    savedSearchesLimit: number;
+    billingPeriod: 'monthly' | 'yearly';
+    expiresAt: Date;
+    couponCodes?: Array<{ tier: 'highlight' | 'premium' | 'featured'; code: string }>;
+  }): Promise<void> {
+    if (!params.email || !isValidEmail(params.email)) {
+      throw new Error(`sendProSubscriptionWelcomeEmail: invalid recipient email "${params.email}"`);
+    }
+    if (!params.expiresAt || !(params.expiresAt instanceof Date)) {
+      throw new Error('sendProSubscriptionWelcomeEmail: expiresAt must be a valid Date');
+    }
+
+    const frontendUrl = process.env.FRONTEND_URL || 'https://balkanestateai.com';
+    const formatLimit = (n: number) => (n === -1 || n === undefined ? 'Unlimited' : String(n));
+    const expiryStr = params.expiresAt.toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
+    const currentYear = new Date().getFullYear();
+
+    const breakdownParts = [
+      params.promotionCoupons.highlighted > 0 ? `${params.promotionCoupons.highlighted} Highlighted` : '',
+      params.promotionCoupons.premium > 0 ? `${params.promotionCoupons.premium} Premium` : '',
+      params.promotionCoupons.featured > 0 ? `${params.promotionCoupons.featured} Featured` : '',
+    ].filter(Boolean);
+    const couponBreakdown = breakdownParts.join(' + ') || `${params.promotionCoupons.total} coupons`;
+    const couponCodesHtml = buildCouponCodesHtml(params.couponCodes ?? []);
+
+    // Try admin-editable template first
+    const config = await getActiveEmailConfig('pro-subscription-welcome');
+    if (config) {
+      const variables: Record<string, string> = {
+        userName:           escapeHtml(params.userName) || 'there',
+        planName:           escapeHtml(params.planName),
+        listingsLimit:      String(params.listingsLimit),
+        billingPeriodLabel: params.billingPeriod === 'yearly' ? 'year' : 'month',
+        totalCoupons:       String(params.promotionCoupons.total),
+        couponBreakdown,
+        aiMessagesLabel:    formatLimit(params.aiMessagesLimit),
+        aiInsightsLabel:    formatLimit(params.aiInsightsLimit),
+        expiresAt:          expiryStr,
+        couponCodesList:    couponCodesHtml,
+        frontendUrl,
+      };
+      const { html: cfgHtml, subject: cfgSubject } = renderEmailConfig(config, variables);
+      await this.sendEmail({ to: params.email, subject: cfgSubject, html: cfgHtml, category: config.fromCategory as any });
+      return;
+    }
+
+    // ── Fallback: inline HTML ──
+    const safeUserName = escapeHtml(params.userName);
+    const safePlanName = escapeHtml(params.planName);
+
+    const html = `
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body style="margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f3f4f6; -webkit-font-smoothing: antialiased;">
+  <div style="display: none; max-height: 0; overflow: hidden;">
+    Welcome to ${safePlanName}! Here's everything you get with your new subscription.
+  </div>
+
+  <div style="max-width: 600px; margin: 0 auto; background-color: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);">
+    <!-- Header -->
+    <div style="background: linear-gradient(135deg, #f59e0b 0%, #ea580c 100%); padding: 40px 24px; text-align: center;">
+      <div style="margin-bottom: 16px;">
+        <span style="display: inline-block; width: 80px; height: 80px; background: rgba(255,255,255,0.2); border-radius: 50%; line-height: 80px; font-size: 40px;">🎉</span>
+      </div>
+      <h1 style="color: #ffffff; margin: 0; font-size: 28px; font-weight: 700;">Welcome to ${safePlanName}!</h1>
+      <p style="color: #fef3c7; margin: 12px 0 0 0; font-size: 15px;">Your subscription is now active</p>
+    </div>
+
+    <div style="padding: 32px 24px;">
+      <p style="color: #374151; font-size: 17px; margin: 0 0 20px 0;">
+        Hi ${safeUserName}! 👋
+      </p>
+
+      <p style="color: #4b5563; font-size: 15px; line-height: 1.7; margin: 0 0 28px 0;">
+        Thank you for subscribing to <strong>${safePlanName}</strong>. Your account is now fully activated and you have access to all Pro features. Here's a summary of everything included in your plan.
+      </p>
+
+      <!-- Plan Benefits -->
+      <div style="background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%); border-radius: 12px; padding: 24px; margin-bottom: 24px;">
+        <h2 style="color: #ffffff; margin: 0 0 16px 0; font-size: 18px; font-weight: 600;">🚀 Your Plan Benefits</h2>
+        <table style="width: 100%; border-collapse: collapse;">
+          <tr>
+            <td style="padding: 10px 0; border-bottom: 1px solid rgba(255,255,255,0.08);">
+              <span style="display: inline-block; width: 28px; height: 28px; background: #059669; border-radius: 50%; text-align: center; line-height: 28px; font-size: 14px; color: white; vertical-align: middle;">✓</span>
+              <span style="color: #e2e8f0; font-size: 14px; margin-left: 12px; vertical-align: middle;">
+                <strong style="color: #fbbf24;">${params.listingsLimit}</strong> active listings per ${params.billingPeriod === 'monthly' ? 'month' : 'year'}
+              </span>
+            </td>
+          </tr>
+          <tr>
+            <td style="padding: 10px 0; border-bottom: 1px solid rgba(255,255,255,0.08);">
+              <span style="display: inline-block; width: 28px; height: 28px; background: #059669; border-radius: 50%; text-align: center; line-height: 28px; font-size: 14px; color: white; vertical-align: middle;">✓</span>
+              <span style="color: #e2e8f0; font-size: 14px; margin-left: 12px; vertical-align: middle;">
+                <strong style="color: #fbbf24;">${params.promotionCoupons.total} promotion coupons/month</strong> — ${couponBreakdown}
+              </span>
+            </td>
+          </tr>
+          <tr>
+            <td style="padding: 10px 0; border-bottom: 1px solid rgba(255,255,255,0.08);">
+              <span style="display: inline-block; width: 28px; height: 28px; background: #059669; border-radius: 50%; text-align: center; line-height: 28px; font-size: 14px; color: white; vertical-align: middle;">✓</span>
+              <span style="color: #e2e8f0; font-size: 14px; margin-left: 12px; vertical-align: middle;">
+                <strong style="color: #fbbf24;">${formatLimit(params.aiMessagesLimit)} AI messages</strong> — intelligent property assistant
+              </span>
+            </td>
+          </tr>
+          <tr>
+            <td style="padding: 10px 0; border-bottom: 1px solid rgba(255,255,255,0.08);">
+              <span style="display: inline-block; width: 28px; height: 28px; background: #059669; border-radius: 50%; text-align: center; line-height: 28px; font-size: 14px; color: white; vertical-align: middle;">✓</span>
+              <span style="color: #e2e8f0; font-size: 14px; margin-left: 12px; vertical-align: middle;">
+                <strong style="color: #fbbf24;">${formatLimit(params.aiInsightsLimit)} market insights/month</strong> — smart analytics
+              </span>
+            </td>
+          </tr>
+          <tr>
+            <td style="padding: 10px 0; border-bottom: 1px solid rgba(255,255,255,0.08);">
+              <span style="display: inline-block; width: 28px; height: 28px; background: #059669; border-radius: 50%; text-align: center; line-height: 28px; font-size: 14px; color: white; vertical-align: middle;">✓</span>
+              <span style="color: #e2e8f0; font-size: 14px; margin-left: 12px; vertical-align: middle;">
+                <strong style="color: #fbbf24;">${formatLimit(params.savedSearchesLimit)} saved searches</strong> — track the market
+              </span>
+            </td>
+          </tr>
+          <tr>
+            <td style="padding: 10px 0;">
+              <span style="display: inline-block; width: 28px; height: 28px; background: #059669; border-radius: 50%; text-align: center; line-height: 28px; font-size: 14px; color: white; vertical-align: middle;">✓</span>
+              <span style="color: #e2e8f0; font-size: 14px; margin-left: 12px; vertical-align: middle;">
+                <strong style="color: #fbbf24;">Unlimited</strong> auto-generate image descriptions
+              </span>
+            </td>
+          </tr>
+        </table>
+      </div>
+
+      <!-- Promotion Coupons -->
+      <div style="background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%); border-radius: 10px; padding: 20px; margin-bottom: 24px; border: 2px solid #f59e0b;">
+        <p style="color: #92400e; font-size: 14px; font-weight: 600; margin: 0 0 10px 0;">🎟️ Your first ${params.promotionCoupons.total} promotion coupons are ready! (${couponBreakdown})</p>
+        ${params.couponCodes && params.couponCodes.length > 0 ? `
+        <div style="margin-bottom: 10px;">
+          ${params.couponCodes.map(c => {
+            const label = c.tier === 'highlight' ? '✨ Highlighted' : c.tier === 'premium' ? '💎 Premium' : '🔥 Featured';
+            const bg = c.tier === 'highlight' ? '#059669' : c.tier === 'premium' ? '#7c3aed' : '#dc2626';
+            return `<div style="display: flex; align-items: center; margin-bottom: 6px;">
+              <span style="background:${bg}; color:#fff; border-radius:4px; padding:2px 8px; font-size:11px; font-weight:600; margin-right:8px; white-space:nowrap;">${label}</span>
+              <code style="background:#fff; border:1px solid #f59e0b; border-radius:4px; padding:4px 10px; font-size:13px; font-weight:700; letter-spacing:1px; color:#92400e;">${escapeHtml(c.code)}</code>
+            </div>`;
+          }).join('')}
+        </div>
+        ` : ''}
+        <p style="color: #78350f; font-size: 12px; margin: 0; line-height: 1.5;">
+          Copy a code and paste it when promoting a listing to use it for free.
+          New coupons refresh at the start of each month.
+        </p>
+      </div>
+
+      <!-- Subscription Details -->
+      <div style="background: #f8fafc; border-radius: 8px; padding: 16px; margin-bottom: 28px; border: 1px solid #e2e8f0;">
+        <p style="color: #64748b; font-size: 13px; margin: 0;"><strong>Plan:</strong> ${safePlanName}</p>
+        <p style="color: #64748b; font-size: 13px; margin: 6px 0 0 0;"><strong>Active until:</strong> ${expiryStr}</p>
+      </div>
+
+      <!-- CTA Button -->
+      <div style="text-align: center; margin: 28px 0;">
+        <a href="${frontendUrl}/sell"
+           style="display: inline-block; background: linear-gradient(135deg, #f59e0b 0%, #ea580c 100%); color: #ffffff; text-decoration: none; padding: 16px 32px; border-radius: 10px; font-weight: 600; font-size: 16px; box-shadow: 0 4px 14px rgba(245, 158, 11, 0.3);">
+          Post Your First Listing →
+        </a>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <div style="background: #0f172a; padding: 20px; text-align: center; border-top: 1px solid #334155;">
+      <p style="color: #64748b; font-size: 12px; margin: 0 0 8px 0;">
+        &copy; ${currentYear} BalkanEstate<sup>AI</sup> • All rights reserved
+      </p>
+      <p style="color: #475569; font-size: 11px; margin: 0;">
+        If you have any questions, contact us at <a href="mailto:support@balkanestateai.com" style="color: #f59e0b;">support@balkanestateai.com</a>
+      </p>
+    </div>
+  </div>
+</body>
+</html>`;
+
+    const codesText = (params.couponCodes ?? []).length > 0
+      ? `\nYour coupon codes:\n${(params.couponCodes ?? []).map(c => `- ${c.tier.toUpperCase()}: ${c.code}`).join('\n')}\n`
+      : '';
+    await this.sendEmail({
+      to: params.email,
+      subject: `🎉 Welcome to ${params.planName} — Your Benefits Are Ready!`,
+      html,
+      text: `Hi ${params.userName},\n\nWelcome to ${params.planName}! Your subscription is now active.\n\n- ${params.listingsLimit} listings per ${params.billingPeriod === 'monthly' ? 'month' : 'year'}\n- ${params.promotionCoupons.total} promotion coupons/month (${couponBreakdown})\n- ${formatLimit(params.aiMessagesLimit)} AI messages\n- ${formatLimit(params.aiInsightsLimit)} insights/month\n- Unlimited saved searches\n${codesText}\nActive until: ${expiryStr}\nStart posting: ${frontendUrl}/sell\n\n© ${currentYear} BalkanEstateᴬᴵ`,
+      category: 'alerts',
+    });
+  }
 }
 
 const emailServiceInstance = new EmailService();
@@ -3625,3 +4060,5 @@ export const sendViewingApproved = emailServiceInstance.sendViewingApproved.bind
 export const sendViewingRejected = emailServiceInstance.sendViewingRejected.bind(emailServiceInstance);
 export const sendSubscriptionInvoice = emailServiceInstance.sendSubscriptionInvoice.bind(emailServiceInstance);
 export const sendPaymentConfirmation = emailServiceInstance.sendPaymentConfirmation.bind(emailServiceInstance);
+export const sendPromotionCouponsEmail = emailServiceInstance.sendPromotionCouponsEmail.bind(emailServiceInstance);
+export const sendProSubscriptionWelcomeEmail = emailServiceInstance.sendProSubscriptionWelcomeEmail.bind(emailServiceInstance);
