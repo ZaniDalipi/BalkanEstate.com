@@ -155,6 +155,6 @@ const emailConfigSchema = new Schema<IEmailConfig>(
 
 // Indexes for efficient queries
 emailConfigSchema.index({ category: 1, isActive: 1 });
-emailConfigSchema.index({ key: 1 });
+emailConfigSchema.index({ key: 1 }, { unique: true });
 
 export default mongoose.model<IEmailConfig>('EmailConfig', emailConfigSchema);
