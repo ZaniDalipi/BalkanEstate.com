@@ -120,6 +120,8 @@ const PropertyDetailsPage: React.FC<{ property: Property }> = ({ property: cache
   const [showAvailableConfirm, setShowAvailableConfirm] = useState(false);
   const [rentedUntilDate, setRentedUntilDate] = useState('');
   const [localStatus, setLocalStatus] = useState(property.status);
+  // Sync if the property prop is updated externally (re-fetch / real-time update)
+  useEffect(() => { setLocalStatus(property.status); }, [property.status]);
 
   // State for mobile breadcrumb collapse on scroll
   const [isBreadcrumbCollapsed, setIsBreadcrumbCollapsed] = useState(false);
