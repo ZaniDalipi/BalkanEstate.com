@@ -281,7 +281,7 @@ export async function processSubscriptionPayment(
           savedSearchesLimit: product.savedSearchesLimit ?? -1,
           billingPeriod,
           expiresAt: subscription.expirationDate,
-          couponCodes: generatedCodes,
+          // Coupon codes are sent in a dedicated follow-up email below
         });
         if (!isProduction) paymentLogger.info(`📧 Pro welcome email sent to ${user.email}`);
 
