@@ -108,15 +108,16 @@ const FREE_PLAN: Plan = {
   supportType: 'email',
 };
 
-// Agency agent plan (obtained via coupon redemption, not purchasable)
+// Agency agent plan fallback (obtained via coupon redemption, not purchasable)
+// This is only used if the DB product fetch fails — real values come from DB
 const AGENCY_AGENT_PLAN: Plan = {
   id: 'agency_agent_yearly',
   name: 'Agency Pro',
   price: 0,
   period: 'year',
   periodMonths: 12,
-  features: ['25 active listings', 'Unlimited saved searches', 'Unlimited AI chat', 'Full analytics', 'Agency team support'],
-  listingLimit: 25,
+  features: ['20 active listings', 'Unlimited saved searches', 'Unlimited AI chat', 'Full analytics', 'Agency team support'],
+  listingLimit: 20,
   color: 'from-emerald-500 to-teal-600',
   tier: 2,
   badge: 'Agency Member',
@@ -151,7 +152,7 @@ const LISTING_LIMITS: Record<string, number> = {
   agency_yearly: 500,  // 500 listings for enterprise
   buyer_monthly: 0,  // Buyers don't create listings
   // Agency agent tier (joined via coupon)
-  agency_agent_yearly: 25,  // 25 listings per year for agency agents
+  agency_agent_yearly: 20,  // 20 listings per year for agency agents (fallback; real value comes from DB)
 };
 
 // Map product IDs to gradient colors
@@ -163,6 +164,7 @@ const PLAN_COLORS: Record<string, string> = {
   seller_pro_monthly: 'from-blue-500 to-blue-600',
   seller_pro_yearly: 'from-purple-500 to-purple-600',
   seller_enterprise_yearly: 'from-amber-500 to-orange-600',
+  agency_yearly: 'from-amber-500 to-orange-600',  // Enterprise for agency creators (same orange as enterprise)
   agency_agent_yearly: 'from-emerald-500 to-teal-600',
 };
 
@@ -173,8 +175,11 @@ const PLAN_TIERS: Record<string, number> = {
   buyer_pro_monthly: 1,
   buyer_pro_yearly: 2,
   seller_pro_monthly: 1,
+  pro_monthly: 1,
   seller_pro_yearly: 2,
+  pro_yearly: 2,
   seller_enterprise_yearly: 3,
+  agency_yearly: 3,          // Enterprise for agency creators
   agency_agent_yearly: 2,
 };
 
@@ -254,26 +259,34 @@ const SubscriptionManagement: React.FC<SubscriptionManagementProps> = ({ userId 
 
   const user = state.currentUser as User;
 
-  // Fetch products from database — include buyer plans so subscription displays correctly
+  // Fetch products from database — include seller, buyer, and agent plans so all subscriptions display correctly
   const fetchProducts = useCallback(async () => {
     try {
-      // Fetch both seller and buyer products so we can display any plan correctly
-      const [sellerRes, buyerRes] = await Promise.all([
+      // Fetch seller, buyer, and agent products so we can display any plan correctly
+      const [sellerRes, buyerRes, agentRes] = await Promise.all([
         fetch(`${API_URL}/products?role=seller`),
         fetch(`${API_URL}/products?role=buyer`),
+        fetch(`${API_URL}/products?role=agent`),
       ]);
       const allProducts: ProductData[] = [];
       if (sellerRes.ok) {
         const d = await sellerRes.json();
         if (d.products) allProducts.push(...d.products);
       }
+      const existingIds = new Set(allProducts.map(p => p.productId));
       if (buyerRes.ok) {
         const d = await buyerRes.json();
         if (d.products) {
-          // Avoid duplicates
-          const existingIds = new Set(allProducts.map(p => p.productId));
           d.products.forEach((p: ProductData) => {
-            if (!existingIds.has(p.productId)) allProducts.push(p);
+            if (!existingIds.has(p.productId)) { allProducts.push(p); existingIds.add(p.productId); }
+          });
+        }
+      }
+      if (agentRes.ok) {
+        const d = await agentRes.json();
+        if (d.products) {
+          d.products.forEach((p: ProductData) => {
+            if (!existingIds.has(p.productId)) { allProducts.push(p); existingIds.add(p.productId); }
           });
         }
       }
@@ -426,7 +439,7 @@ const SubscriptionManagement: React.FC<SubscriptionManagementProps> = ({ userId 
           agencyId: String(agency._id),
           invitationCode: agency.invitationCode || '',
           totalAgents: agency.totalAgents || agency.agents?.length || 0,
-          maxAgents: 6, // Agency plan includes owner + 5 agents via coupons
+          maxAgents: enterpriseMaxAgents, // Derived from enterprise product teamMembersLimit in DB
           agentCoupons,
         });
       } catch (error) {
@@ -436,7 +449,7 @@ const SubscriptionManagement: React.FC<SubscriptionManagementProps> = ({ userId 
     };
 
     fetchAgencyTeamData();
-  }, [user?.agencyId, refreshKey]);
+  }, [user?.agencyId, refreshKey, enterpriseMaxAgents]);
 
   // Handle copying code to clipboard
   const handleCopyCode = async (code: string) => {
@@ -531,6 +544,15 @@ const SubscriptionManagement: React.FC<SubscriptionManagementProps> = ({ userId 
       renewalDate,
     };
   }, [subscription, plans]);
+
+  // Derive max team members from the enterprise product in DB (owner + agents)
+  const enterpriseMaxAgents = useMemo(() => {
+    const enterpriseProduct = products.find(p =>
+      p.productId === 'agency_yearly' || p.productId === 'seller_enterprise_yearly'
+    );
+    // teamMembersLimit = number of agent slots; add 1 for the agency owner
+    return (enterpriseProduct?.teamMembersLimit ?? 5) + 1;
+  }, [products]);
 
   // Get current product for placeholder replacement
   const currentProduct = useMemo((): ProductValues | null => {

@@ -236,7 +236,10 @@ export const createAgency = async (
         };
 
         // Initialize promotion coupons immediately so agency doesn't wait for monthly cron
-        const agencyProduct = await Product.findOne({ productId: 'agency_yearly' }).lean();
+        const [agencyProduct, agentProduct] = await Promise.all([
+          Product.findOne({ productId: 'agency_yearly' }).lean(),
+          Product.findOne({ productId: 'agency_agent_yearly' }).lean(),
+        ]);
         const monthlyPromotionAmount = agencyProduct?.promotionCoupons || ENTERPRISE_TIER_LIMITS.PROMOTION_COUPONS;
         agency.promotionCoupons = {
           monthly: monthlyPromotionAmount,
@@ -262,12 +265,13 @@ export const createAgency = async (
             featured: enterpriseProduct?.featuredCoupons || ENTERPRISE_TIER_LIMITS.FEATURED_COUPONS,
           };
 
-          // Send agent registration coupons email
+          // Send agent registration coupons email with dynamic limit from DB
           await sendAgentRegistrationCouponsEmail({
             email: user.email,
             ownerName: user.name || 'Agency Owner',
             agencyName: agency.name,
             coupons: generatedCoupons,
+            agentListingsLimit: agentProduct?.listingsLimit ?? 20,
           });
 
           // Send welcome/thank you email with promotion coupon breakdown

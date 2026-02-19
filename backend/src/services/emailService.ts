@@ -2550,12 +2550,14 @@ Questions? Contact us at support@balkanestateai.com
     ownerName: string;
     agencyName: string;
     coupons: Array<{ code: string; expiresAt: Date }>;
+    agentListingsLimit?: number;
   }): Promise<void> {
     const frontendUrl = process.env.FRONTEND_URL || 'https://balkanestateai.com';
 
     // Sanitize user inputs
     const safeOwnerName = escapeHtml(params.ownerName);
     const safeAgencyName = escapeHtml(params.agencyName);
+    const agentListingsLimit = params.agentListingsLimit ?? 20;
 
     const currentYear = new Date().getFullYear();
 
@@ -2642,7 +2644,7 @@ Questions? Contact us at support@balkanestateai.com
         <h3 style="color: #fbbf24; font-size: 14px; font-weight: 600; margin: 0 0 8px 0;">✨ What Each Agent Gets</h3>
         <ul style="color: #e2e8f0; font-size: 13px; margin: 0; padding-left: 20px; line-height: 1.6;">
           <li><strong style="color: #fbbf24;">Full Year</strong> of Pro features included</li>
-          <li><strong style="color: #fbbf24;">20 listings per month</strong> under your agency</li>
+          <li><strong style="color: #fbbf24;">${agentListingsLimit} listings per year</strong> under your agency</li>
           <li><strong style="color: #fbbf24;">Monthly promotion coupons</strong> shared with the team</li>
           <li><strong style="color: #fbbf24;">Priority support</strong> and agency branding</li>
         </ul>
