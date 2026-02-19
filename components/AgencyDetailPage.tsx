@@ -1547,7 +1547,7 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
             )}
 
             {/* Admin Section - Agent Coupon Codes */}
-            {isOwner && agencyData.agentCoupons && (
+            {isOwner && agencyData.agentCoupons?.coupons?.length > 0 && (
               <div className="mt-6 p-5 bg-gradient-to-br from-emerald-50 to-teal-50 border border-emerald-200 rounded-xl">
                 <div className="flex items-center justify-between mb-3">
                   <div className="flex items-center gap-3">
@@ -1570,7 +1570,7 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
                   </div>
                 </div>
                 <div className="space-y-2">
-                  {agencyData.agentCoupons.coupons.map((coupon, idx) => (
+                  {agencyData.agentCoupons!.coupons!.map((coupon, idx) => (
                     <div
                       key={idx}
                       className={`flex items-center justify-between p-3 rounded-lg border ${
