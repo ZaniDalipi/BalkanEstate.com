@@ -287,6 +287,7 @@ const PRODUCTS = [
     highlightedCoupons: 2, // 2 highlighted
     featuredCoupons: 1, // 1 featured
     agentCoupons: 5,
+    teamMembersLimit: 5, // 5 agents via coupons (owner is +1 on top)
     savedSearchesLimit: -1,
     aiMessagesLimit: -1,
     aiInsightsLimit: -1, // unlimited
@@ -338,9 +339,58 @@ const PRODUCTS = [
     highlightedCoupons: 2, // 2 highlighted
     featuredCoupons: 1, // 1 featured
     agentCoupons: 5, // 5 team member registration codes
+    teamMembersLimit: 5, // 5 agents via coupons (owner is +1 on top)
     savedSearchesLimit: -1, // unlimited
     aiMessagesLimit: -1, // unlimited (rate limited)
     aiInsightsLimit: -1, // unlimited for all agents
+    imageDescriptionLimit: -1, // unlimited
+  },
+
+  // ============================================================================
+  // AGENCY AGENT PLAN - Granted via agent registration code (not purchasable)
+  // ============================================================================
+  {
+    productId: 'agency_agent_yearly',
+    name: 'Agency Pro',
+    description: 'Agency team member plan — included with agent registration code. Not available for direct purchase.',
+    type: 'subscription' as const,
+    tier: 'pro' as const,
+    price: 0,
+    currency: 'EUR',
+    billingPeriod: 'yearly' as const,
+    durationDays: 365,
+    features: [
+      '{listingsLimit} active listings per year',
+      'Unlimited saved searches',
+      'Unlimited AI chat',
+      'Unlimited generate insights',
+      'Full analytics',
+      'Agency team support',
+    ],
+    targetRole: 'agent' as const,
+    displayOrder: 9,
+    badge: 'Agency Member',
+    badgeColor: 'green',
+    highlighted: false,
+    cardStyle: {
+      backgroundColor: 'from-emerald-500 to-teal-600',
+      textColor: 'text-white',
+    },
+    isActive: true,
+    isVisible: false, // Not shown in pricing page — only granted via coupon
+    hasFreeTrial: false,
+    gracePeriodDays: 7,
+    // Limits — admin can update these via admin panel
+    listingsLimit: 25, // 25 listings per year for agency agents
+    promotionCoupons: 0, // Shared with agency pool, not individual
+    premiumCoupons: 0,
+    highlightedCoupons: 0,
+    featuredCoupons: 0,
+    agentCoupons: 0,
+    teamMembersLimit: 1,
+    savedSearchesLimit: -1, // unlimited
+    aiMessagesLimit: -1, // unlimited (rate limited)
+    aiInsightsLimit: -1, // unlimited
     imageDescriptionLimit: -1, // unlimited
   },
 
@@ -530,16 +580,56 @@ const PRODUCTS = [
     trialPeriodDays: 7,
     gracePeriodDays: 3,
     // Limits
-    listingsLimit: 0, // Buyers don't create listings
+    listingsLimit: 3, // Buyer Pro can post up to 3 listings
     promotionCoupons: 0,
     premiumCoupons: 0,
     highlightedCoupons: 0,
     featuredCoupons: 0,
     agentCoupons: 0,
-    savedSearchesLimit: -1, // unlimited
-    aiMessagesLimit: -1, // unlimited (rate limited)
-    aiInsightsLimit: -1, // unlimited
-    imageDescriptionLimit: -1, // unlimited
+    savedSearchesLimit: 3,
+    aiMessagesLimit: 50,
+    aiInsightsLimit: 30,
+    imageDescriptionLimit: 50,
+  },
+
+  // Alias for existing subscribers created before the buyer_monthly rename
+  {
+    productId: 'buyer_pro_monthly',
+    name: 'Buyer Pro',
+    description: 'Never miss your dream property with instant alerts and market insights.',
+    type: 'subscription' as const,
+    tier: 'buyer' as const,
+    price: 3,
+    currency: 'EUR',
+    billingPeriod: 'monthly' as const,
+    durationDays: 30,
+    features: [
+      'Instant email & SMS notifications',
+      '3 saved searches',
+      'Early access to new listings',
+      'Advanced market insights',
+      '30 AI insights/month',
+      '50 auto-label images',
+    ],
+    targetRole: 'buyer' as const,
+    displayOrder: 5,
+    badge: 'FOR BUYERS',
+    badgeColor: 'blue',
+    highlighted: false,
+    isActive: true,
+    isVisible: false, // not shown in pricing — alias only
+    hasFreeTrial: false,
+    gracePeriodDays: 5,
+    listingsLimit: 3,
+    promotionCoupons: 0,
+    premiumCoupons: 0,
+    highlightedCoupons: 0,
+    featuredCoupons: 0,
+    agentCoupons: 0,
+    savedSearchesLimit: 3,
+    aiMessagesLimit: 50,
+    aiInsightsLimit: 30,
+    imageDescriptionLimit: 50,
   },
 
   // ============================================================================
@@ -904,6 +994,7 @@ async function seedProducts() {
     console.log('   Pro Monthly: €25 (20 listings/mo, 3 promo coupons/mo, 20 insights/mo, unlimited AI & searches)');
     console.log('   Pro Yearly: €200 (250 listings/year, 3 promo coupons/mo, 20 insights/mo, unlimited AI & searches)');
     console.log('   Enterprise: €1000/year (500 listings, 5 team members, 5 promo coupons, unlimited everything)');
+    console.log('   Agency Agent: €0 (granted via agent registration code, 25 listings/year, unlimited AI & searches)');
     console.log('   Buyer Pro: €3/month (unlimited searches, instant alerts, early access, market insights)');
 
   } catch (error) {

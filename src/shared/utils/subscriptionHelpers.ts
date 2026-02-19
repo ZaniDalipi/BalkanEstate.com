@@ -27,7 +27,7 @@ export const LISTING_LIMITS: Record<SubscriptionTier, number> = {
   pro: 250, // Pro yearly gets 250 listings/year (pro_monthly handled separately at 20/month)
   agency_owner: 500, // Enterprise: 500 listings
   agency_agent: 25,
-  buyer: 0,
+  buyer: 3,
 };
 
 /**

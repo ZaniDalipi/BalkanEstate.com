@@ -11,9 +11,13 @@ interface InvitationCodeModalProps {
 
 type CodeType = 'invitation' | 'coupon';
 
-// Validation patterns
+// Validation patterns — must match backend generateSecureAgencyCouponCode output
 const INVITATION_CODE_PATTERN = /^AGY-[A-Z0-9]{6}-[A-Z0-9]{6}$/;
-const COUPON_CODE_PATTERN = /^IND-[A-Z0-9]{8}$/;
+const COUPON_CODE_PATTERN = /^[A-Z0-9]{2,6}-[A-Z0-9]{8}$/;
+
+// Code lengths derived from the patterns so they stay in sync
+const INVITATION_CODE_MIN_LENGTH = 18; // AGY-XXXXXX-XXXXXX
+const COUPON_CODE_MIN_LENGTH = 12;     // XXX-XXXXXXXX
 
 const InvitationCodeModal: React.FC<InvitationCodeModalProps> = ({
   isOpen,
@@ -58,21 +62,21 @@ const InvitationCodeModal: React.FC<InvitationCodeModalProps> = ({
     const upperCode = inputCode.toUpperCase();
 
     if (type === 'invitation') {
-      if (upperCode.length > 0 && upperCode.length < 18) {
-        return { valid: false, message: t('invitationCode.keepTypingInvitation'), status: 'typing' };
+      if (upperCode.length > 0 && upperCode.length < INVITATION_CODE_MIN_LENGTH) {
+        return { valid: false, message: 'Keep typing... (AGY-XXXXXX-XXXXXX)' };
       }
-      if (upperCode.length >= 18 && !INVITATION_CODE_PATTERN.test(upperCode)) {
-        return { valid: false, message: t('invitationCode.invalidFormatInvitation'), status: 'invalid' };
+      if (upperCode.length >= INVITATION_CODE_MIN_LENGTH && !INVITATION_CODE_PATTERN.test(upperCode)) {
+        return { valid: false, message: 'Invalid format. Expected: AGY-XXXXXX-XXXXXX' };
       }
       if (INVITATION_CODE_PATTERN.test(upperCode)) {
         return { valid: true, message: t('invitationCode.validInvitationFormat'), status: 'valid' };
       }
     } else {
       if (upperCode.length > 0 && upperCode.length < 12) {
-        return { valid: false, message: t('invitationCode.keepTypingCoupon'), status: 'typing' };
+        return { valid: false, message: 'Keep typing... (XXX-XXXXXXXX)' };
       }
-      if (upperCode.length >= 12 && !COUPON_CODE_PATTERN.test(upperCode)) {
-        return { valid: false, message: t('invitationCode.invalidFormatCoupon'), status: 'invalid' };
+      if (upperCode.length >= COUPON_CODE_MIN_LENGTH && !COUPON_CODE_PATTERN.test(upperCode)) {
+        return { valid: false, message: 'Invalid format. Expected: XXX-XXXXXXXX' };
       }
       if (COUPON_CODE_PATTERN.test(upperCode)) {
         return { valid: true, message: t('invitationCode.validCouponFormat'), status: 'valid' };
@@ -112,8 +116,8 @@ const InvitationCodeModal: React.FC<InvitationCodeModalProps> = ({
 
     // Validate format before submitting
     const validation = validateCode(trimmedCode, codeType);
-    if (!validation.valid && trimmedCode.length >= (codeType === 'invitation' ? 18 : 12)) {
-      setError(validation.message || t('invitationCode.invalidCodeFormat'));
+    if (!validation.valid && trimmedCode.length >= (codeType === 'invitation' ? INVITATION_CODE_MIN_LENGTH : COUPON_CODE_MIN_LENGTH)) {
+      setError(validation.message || 'Invalid code format');
       return;
     }
 
@@ -151,7 +155,7 @@ const InvitationCodeModal: React.FC<InvitationCodeModalProps> = ({
   };
 
   // Check if code is valid for submission
-  const isCodeValid = code.trim().length >= (codeType === 'invitation' ? 18 : 12);
+  const isCodeValid = code.trim().length >= (codeType === 'invitation' ? INVITATION_CODE_MIN_LENGTH : COUPON_CODE_MIN_LENGTH);
 
   return (
     <Modal isOpen={isOpen} onClose={handleClose} size="md">
@@ -205,14 +209,14 @@ const InvitationCodeModal: React.FC<InvitationCodeModalProps> = ({
               id="codeInput"
               value={code}
               onChange={handleCodeChange}
-              placeholder={codeType === 'invitation' ? 'AGY-XXXXXX-XXXXXX' : 'IND-XXXXXXXX'}
+              placeholder={codeType === 'invitation' ? 'AGY-XXXXXX-XXXXXX' : 'XXX-XXXXXXXX'}
               className={`w-full px-3 sm:px-4 py-2.5 sm:py-3 border rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent font-mono text-base sm:text-lg tracking-wider uppercase transition-colors ${
                 error ? 'border-red-300 bg-red-50' :
                 validationStatus === 'valid' ? 'border-green-300 bg-green-50' :
                 'border-gray-300'
               }`}
               disabled={isSubmitting}
-              maxLength={codeType === 'invitation' ? 18 : 12}
+              maxLength={codeType === 'invitation' ? INVITATION_CODE_MIN_LENGTH : COUPON_CODE_MIN_LENGTH}
               autoComplete="off"
               autoCapitalize="characters"
               spellCheck={false}
@@ -231,8 +235,8 @@ const InvitationCodeModal: React.FC<InvitationCodeModalProps> = ({
               ) : (
                 <p className="text-xs text-gray-500">
                   {codeType === 'invitation'
-                    ? t('invitationCode.formatHintInvitation')
-                    : t('invitationCode.formatHintCoupon')}
+                    ? 'Format: AGY-XXXXXX-XXXXXX'
+                    : 'Format: ABC-XXXXXXXX'}
                 </p>
               )}
             </div>

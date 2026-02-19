@@ -14,6 +14,7 @@ import {
   UsersIcon,
   HomeIcon,
   ChartBarIcon,
+  ExclamationTriangleIcon,
 } from '@/constants';
 import { API_URL } from '@/src/shared/api/config';
 
@@ -47,6 +48,7 @@ const AgencyPaymentPage: React.FC = () => {
   const { state, dispatch } = useAppContext();
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
+  const [successMessage, setSuccessMessage] = useState('');
   const [enterprisePlan, setEnterprisePlan] = useState<EnterprisePlan>(DEFAULT_ENTERPRISE_PLAN);
   const [loadingPlan, setLoadingPlan] = useState(true);
   const [couponCode, setCouponCode] = useState('');
@@ -54,6 +56,20 @@ const AgencyPaymentPage: React.FC = () => {
   const [applyingCoupon, setApplyingCoupon] = useState(false);
 
   const pendingAgencyData = state.pendingAgencyData;
+
+  // Detect if user already has an Enterprise subscription and can skip payment
+  const hasEnterpriseSubscription =
+    state.currentUser?.subscription?.tier === 'agency_owner' ||
+    state.currentUser?.subscriptionPlan?.toLowerCase().includes('enterprise') ||
+    state.currentUser?.subscriptionPlan?.toLowerCase().includes('agency') ||
+    state.currentUser?.isEnterpriseTier;
+
+  const hasActiveSubscription =
+    state.currentUser?.subscriptionStatus === 'active' ||
+    state.currentUser?.subscriptionStatus === 'trial' ||
+    state.currentUser?.subscriptionStatus === 'grace';
+
+  const isConfirmMode = hasEnterpriseSubscription && hasActiveSubscription;
 
   // Redirect if no pending agency data
   useEffect(() => {
@@ -188,6 +204,77 @@ const AgencyPaymentPage: React.FC = () => {
     }
   };
 
+  // Handle direct agency creation when user already has Enterprise subscription
+  const handleCreateAgency = async () => {
+    if (!pendingAgencyData) return;
+
+    setIsLoading(true);
+    setError('');
+    setSuccessMessage('');
+
+    try {
+      const token = localStorage.getItem('balkan_estate_token');
+      if (!token) throw new Error('Please log in to create your agency');
+
+      const agencyData = {
+        ...pendingAgencyData,
+        yearsInBusiness: pendingAgencyData.yearsInBusiness
+          ? parseInt(pendingAgencyData.yearsInBusiness)
+          : undefined,
+      };
+
+      const response = await fetch(`${API_URL}/agencies`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+        body: JSON.stringify(agencyData),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || 'Failed to create agency. Please try again.');
+      }
+
+      // Clear pending data and show success
+      dispatch({ type: 'SET_PENDING_AGENCY_DATA', payload: null });
+
+      let msg = `Your agency "${pendingAgencyData.name}" has been created successfully!`;
+      if (data.agentCoupons?.generated) {
+        if (data.agentCoupons.emailSent) {
+          msg += ' 5 agent registration codes have been sent to your email.';
+        } else {
+          const codesList = data.agentCoupons.codes?.map((c: any) => c.code).join(', ');
+          msg += ` Your 5 agent codes: ${codesList || '(check agency dashboard)'}`;
+        }
+      }
+      setSuccessMessage(msg);
+
+      // Refresh user data
+      setTimeout(async () => {
+        try {
+          const userResponse = await fetch(`${API_URL}/auth/me`, {
+            headers: { 'Authorization': `Bearer ${token}` },
+          });
+          if (userResponse.ok) {
+            const userData = await userResponse.json();
+            dispatch({ type: 'SET_CURRENT_USER', payload: userData });
+          }
+        } catch {
+          // Non-critical
+        }
+        dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'agencies' });
+        window.history.pushState({}, '', '/agencies');
+      }, 3000);
+    } catch (err: any) {
+      setError(err.message || 'Failed to create agency. Please try again.');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const handleGoBack = () => {
     dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'createAgency' });
     window.history.pushState({}, '', '/create-agency');
@@ -198,6 +285,151 @@ const AgencyPaymentPage: React.FC = () => {
   }
 
   const finalPrice = calculateFinalPrice();
+
+  // ─── CONFIRM MODE: User already has Enterprise subscription ───────────────
+  if (isConfirmMode) {
+    return (
+      <div className="min-h-screen" style={{ background: 'linear-gradient(135deg, #f8fafc 0%, #eff6ff 50%, #eef2ff 100%)' }}>
+        {/* Header */}
+        <div
+          className="relative overflow-hidden py-12 sm:py-16"
+          style={{ background: 'linear-gradient(135deg, #0f172a 0%, #1e3a8a 55%, #312e81 100%)' }}
+        >
+          <div
+            className="absolute rounded-full blur-3xl animate-pulse"
+            style={{ top: 40, left: '10%', width: 288, height: 288, background: 'rgba(245,158,11,0.18)' }}
+          />
+          <div
+            className="absolute rounded-full blur-3xl animate-pulse"
+            style={{ bottom: 40, right: '10%', width: 384, height: 384, background: 'rgba(249,115,22,0.15)', animationDelay: '1s' }}
+          />
+          <div className="relative z-10 max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+            <button
+              onClick={handleGoBack}
+              className="inline-flex items-center gap-2 mb-6 transition-colors"
+              style={{ color: 'rgba(255,255,255,0.7)' }}
+            >
+              <ArrowLeftIcon className="w-5 h-5" />
+              <span>{t('payment.backToDetails', 'Back to Agency Details')}</span>
+            </button>
+            <div
+              className="w-20 h-20 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-2xl"
+              style={{ background: 'linear-gradient(135deg, #f59e0b 0%, #ea580c 100%)' }}
+            >
+              <BuildingOfficeIcon className="w-10 h-10 text-white" />
+            </div>
+            <h1 className="text-3xl sm:text-4xl font-black text-white mb-4">
+              {t('confirm.title', 'Create Your Agency')}
+            </h1>
+            <p className="text-lg" style={{ color: 'rgba(255,255,255,0.7)' }}>
+              {t('confirm.subtitle', 'Your Enterprise subscription is active. Review the details and confirm.')}
+            </p>
+          </div>
+        </div>
+
+        {/* Content */}
+        <div className="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+          {successMessage ? (
+            <div className="bg-white rounded-2xl shadow-lg p-8 text-center border border-neutral-100">
+              <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <CheckCircleIcon className="w-8 h-8 text-green-600" />
+              </div>
+              <h2 className="text-xl font-bold text-neutral-800 mb-2">Agency Created!</h2>
+              <p className="text-neutral-600 mb-6">{successMessage}</p>
+              <p className="text-sm text-neutral-500">Redirecting to agencies page...</p>
+            </div>
+          ) : (
+            <div className="bg-white rounded-2xl shadow-lg p-6 sm:p-8 border border-neutral-100">
+              <h2 className="text-xl font-bold text-neutral-800 mb-6">
+                {t('confirm.reviewDetails', 'Review Agency Details')}
+              </h2>
+
+              {/* Agency Preview */}
+              <div className="rounded-xl p-5 mb-6 border border-amber-200" style={{ background: 'linear-gradient(135deg, #fffbeb 0%, #fff7ed 100%)' }}>
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: 'linear-gradient(135deg, #f59e0b 0%, #ea580c 100%)' }}>
+                    <BuildingOfficeIcon className="w-6 h-6 text-white" />
+                  </div>
+                  <div>
+                    <h3 className="font-bold text-neutral-800 text-lg">{pendingAgencyData.name}</h3>
+                    <p className="text-sm text-neutral-600">{pendingAgencyData.city}, {pendingAgencyData.country}</p>
+                  </div>
+                </div>
+                <div className="grid grid-cols-2 gap-3 text-sm">
+                  {pendingAgencyData.phone && (
+                    <div className="flex flex-col">
+                      <span className="text-neutral-500 text-xs uppercase tracking-wide">Phone</span>
+                      <span className="text-neutral-700 font-medium">{pendingAgencyData.phone}</span>
+                    </div>
+                  )}
+                  {pendingAgencyData.email && (
+                    <div className="flex flex-col">
+                      <span className="text-neutral-500 text-xs uppercase tracking-wide">Email</span>
+                      <span className="text-neutral-700 font-medium">{pendingAgencyData.email}</span>
+                    </div>
+                  )}
+                  {pendingAgencyData.licenseNumber && (
+                    <div className="flex flex-col">
+                      <span className="text-neutral-500 text-xs uppercase tracking-wide">License</span>
+                      <span className="text-neutral-700 font-medium">{pendingAgencyData.licenseNumber}</span>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Enterprise benefits reminder */}
+              <div className="rounded-xl p-4 mb-6 border border-slate-700" style={{ background: 'linear-gradient(135deg, #1e293b 0%, #0f172a 100%)' }}>
+                <p className="text-amber-400 font-semibold text-sm mb-2">✓ Enterprise Plan Active</p>
+                <ul className="text-slate-300 text-sm space-y-1">
+                  <li>• 5 agent registration codes will be emailed to you</li>
+                  <li>• Monthly listing promotion coupons included</li>
+                  <li>• 7-day featured agency trial starts immediately</li>
+                </ul>
+              </div>
+
+              {/* Error display */}
+              {error && (
+                <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded-xl flex items-start gap-3">
+                  <ExclamationTriangleIcon className="w-5 h-5 text-red-500 flex-shrink-0 mt-0.5" />
+                  <p className="text-sm text-red-700">{error}</p>
+                </div>
+              )}
+
+              <div className="flex gap-3">
+                <button
+                  type="button"
+                  onClick={handleGoBack}
+                  className="flex-1 px-6 py-3 border border-neutral-300 text-neutral-700 rounded-xl hover:bg-neutral-50 font-medium transition-colors"
+                >
+                  {t('common:back', 'Back')}
+                </button>
+                <button
+                  type="button"
+                  onClick={handleCreateAgency}
+                  disabled={isLoading}
+                  className="flex-1 px-6 py-3 text-white rounded-xl font-semibold transition-all shadow-md disabled:opacity-60 disabled:cursor-not-allowed"
+                  style={{ background: 'linear-gradient(135deg, #f59e0b 0%, #ea580c 100%)' }}
+                >
+                  {isLoading ? (
+                    <span className="flex items-center justify-center gap-2">
+                      <svg className="animate-spin w-5 h-5" fill="none" viewBox="0 0 24 24">
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z" />
+                      </svg>
+                      Creating...
+                    </span>
+                  ) : t('confirm.createAgency', 'Create My Agency')}
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
+
+        <Footer />
+      </div>
+    );
+  }
+  // ─── END CONFIRM MODE ────────────────────────────────────────────────────
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50">

@@ -180,7 +180,6 @@ const AnalyticsSchema: Schema = new Schema(
       type: Date,
       required: true,
       default: Date.now,
-      index: true,
     },
   },
   {

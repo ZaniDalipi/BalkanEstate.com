@@ -29,6 +29,11 @@ export interface User {
     totalInquiries?: number;
     activeListings?: number;
   };
+  subscription?: {
+    tier?: string;
+    listingsLimit?: number;
+    activeListingsCount?: number;
+  };
 }
 
 export interface UserEditForm {

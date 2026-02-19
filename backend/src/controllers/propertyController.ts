@@ -563,12 +563,27 @@ export const createProperty = async (
       user.activeRole = createdAsRole as 'private_seller' | 'agent';
     }
 
-    // **CRITICAL: Buyers cannot create listings**
-    if (createdAsRole === 'buyer') {
+    // Buyers without an active paid subscription (listingsLimit === 0) cannot create listings.
+    // Buyer Pro subscribers get listingsLimit = 3 and ARE allowed.
+    if (user.role === 'buyer' && (user.subscription?.listingsLimit ?? 0) === 0) {
       res.status(403).json({
-        message: 'Buyers cannot create property listings. Please switch to or add a Private Seller or Agent role to create listings.',
+        message: 'Buyers cannot create property listings. Upgrade to Buyer Pro to post up to 3 listings.',
         code: 'BUYER_CANNOT_CREATE_LISTING',
         availableRoles: user.availableRoles,
+      });
+      return;
+    }
+
+    // Buyer Pro posts always go under 'private_seller' role context
+    if (user.role === 'buyer') {
+      createdAsRole = 'private_seller';
+    }
+
+    // **Phone number is required to create a listing**
+    if (!user.phone || user.phone.trim() === '') {
+      res.status(422).json({
+        message: 'A mobile phone number is required to create a listing. Please add your phone number in Profile Settings first.',
+        code: 'PHONE_REQUIRED',
       });
       return;
     }

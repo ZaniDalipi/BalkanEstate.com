@@ -367,6 +367,26 @@ const PaymentWindow: React.FC<PaymentWindowProps> = ({
       return;
     }
 
+    // Resolve effective plan ID - same fallback logic as payment creation
+    let effectivePlanId = productId;
+    if (!effectivePlanId) {
+      if (planName.toLowerCase().includes('buyer') && planInterval === 'month') {
+        effectivePlanId = 'buyer_monthly';
+      } else if (planName.toLowerCase().includes('buyer') && planInterval === 'year') {
+        effectivePlanId = 'buyer_yearly';
+      } else if (planName.toLowerCase().includes('seller') && planInterval === 'month') {
+        effectivePlanId = 'seller_pro_monthly';
+      } else if (planName.toLowerCase().includes('seller') && planInterval === 'year') {
+        effectivePlanId = 'seller_pro_yearly';
+      } else if (planName.toLowerCase().includes('agent') && planInterval === 'month') {
+        effectivePlanId = 'agent_pro_monthly';
+      } else if (planName.toLowerCase().includes('agent') && planInterval === 'year') {
+        effectivePlanId = 'agent_pro_yearly';
+      } else if (planName.toLowerCase().includes('enterprise')) {
+        effectivePlanId = 'seller_enterprise_yearly';
+      }
+    }
+
     setValidatingCode(true);
     setCodeValidation(null);
 
@@ -378,7 +398,7 @@ const PaymentWindow: React.FC<PaymentWindowProps> = ({
         },
         body: JSON.stringify({
           code: trimmedCode,
-          planId: productId,
+          planId: effectivePlanId,
           purchaseAmount: planPrice,
         }),
       });
@@ -466,17 +486,17 @@ const PaymentWindow: React.FC<PaymentWindowProps> = ({
         return;
       }
 
-      // Determine product ID if not provided
+      // Determine product ID if not provided (must match DB product IDs)
       let finalProductId = productId;
       if (!finalProductId) {
         if (planName.toLowerCase().includes('buyer') && planInterval === 'month') {
-          finalProductId = 'buyer_pro_monthly';
+          finalProductId = 'buyer_monthly';
         } else if (planName.toLowerCase().includes('buyer') && planInterval === 'year') {
-          finalProductId = 'buyer_pro_yearly';
+          finalProductId = 'buyer_yearly';
         } else if (planName.toLowerCase().includes('seller') && planInterval === 'month') {
-          finalProductId = 'seller_premium_monthly';
+          finalProductId = 'seller_pro_monthly';
         } else if (planName.toLowerCase().includes('seller') && planInterval === 'year') {
-          finalProductId = 'seller_premium_yearly';
+          finalProductId = 'seller_pro_yearly';
         } else if (planName.toLowerCase().includes('agent') && planInterval === 'month') {
           finalProductId = 'agent_pro_monthly';
         } else if (planName.toLowerCase().includes('agent') && planInterval === 'year') {
@@ -484,7 +504,7 @@ const PaymentWindow: React.FC<PaymentWindowProps> = ({
         } else if (planName.toLowerCase().includes('enterprise')) {
           finalProductId = 'enterprise_tier_' + Date.now();
         } else {
-          finalProductId = 'buyer_pro_monthly';
+          finalProductId = 'buyer_monthly';
         }
       }
 
@@ -502,6 +522,8 @@ const PaymentWindow: React.FC<PaymentWindowProps> = ({
           productId: finalProductId,
           countryCode: userCountry,
           language: navigator.language?.split('-')[0] || 'en',
+          // Pass discount code so backend can mark it used after payment
+          ...(appliedDiscountCode ? { discountCode: appliedDiscountCode } : {}),
         }),
       });
 

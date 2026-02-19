@@ -93,47 +93,194 @@ const TabButton: React.FC<{
     );
 };
 
+const ROLE_HINTS: Record<UserRole, { icon: string; titleKey: string; descKey: string; features: string[]; color: string }> = {
+    [UserRole.BUYER]: {
+        icon: '🔍',
+        titleKey: 'roles.hints.buyer.title',
+        descKey: 'roles.hints.buyer.description',
+        features: ['roles.hints.buyer.f1', 'roles.hints.buyer.f2', 'roles.hints.buyer.f3'],
+        color: 'blue',
+    },
+    [UserRole.PRIVATE_SELLER]: {
+        icon: '🏠',
+        titleKey: 'roles.hints.privateSeller.title',
+        descKey: 'roles.hints.privateSeller.description',
+        features: ['roles.hints.privateSeller.f1', 'roles.hints.privateSeller.f2', 'roles.hints.privateSeller.f3'],
+        color: 'emerald',
+    },
+    [UserRole.AGENT]: {
+        icon: '🏢',
+        titleKey: 'roles.hints.agent.title',
+        descKey: 'roles.hints.agent.description',
+        features: ['roles.hints.agent.f1', 'roles.hints.agent.f2', 'roles.hints.agent.f3'],
+        color: 'indigo',
+    },
+    [UserRole.ADMIN]: {
+        icon: '⚙️',
+        titleKey: 'roles.hints.admin.title',
+        descKey: 'roles.hints.admin.description',
+        features: [],
+        color: 'gray',
+    },
+};
+
+const ROLE_HINT_DEFAULTS: Record<UserRole, { title: string; description: string; features: string[] }> = {
+    [UserRole.BUYER]: {
+        title: 'Buyer',
+        description: 'Browse and save properties. No listing or agent features.',
+        features: ['Search & filter all properties', 'Save favourite listings', 'Request viewings & contact agents'],
+    },
+    [UserRole.PRIVATE_SELLER]: {
+        title: 'Private Seller',
+        description: 'List your own properties without agency affiliation.',
+        features: ['Post up to your plan\'s listing limit', 'Manage & promote your listings', 'Receive direct buyer inquiries'],
+    },
+    [UserRole.AGENT]: {
+        title: 'Real Estate Agent',
+        description: 'Full professional tools. Requires a valid license number.',
+        features: ['Agent profile & verified badge', 'Higher listing limits & promotions', 'Join or manage an agency'],
+    },
+    [UserRole.ADMIN]: {
+        title: 'Admin',
+        description: 'Platform administration.',
+        features: [],
+    },
+};
+
 const RoleSelector: React.FC<{
     selectedRole: UserRole;
     originalRole: UserRole;
     onChange: (role: UserRole) => void;
 }> = ({ selectedRole, originalRole, onChange }) => {
     const { t } = useTranslation(['account']);
-    const roles: { id: UserRole, labelKey: string }[] = [
-        { id: UserRole.BUYER, labelKey: 'roles.buyer' },
-        { id: UserRole.PRIVATE_SELLER, labelKey: 'roles.privateSeller' },
-        { id: UserRole.AGENT, labelKey: 'roles.agent' }
+    const [pendingRole, setPendingRole] = useState<UserRole | null>(null);
+
+    const roles: { id: UserRole; labelKey: string; icon: string }[] = [
+        { id: UserRole.BUYER, labelKey: 'roles.buyer', icon: '🔍' },
+        { id: UserRole.PRIVATE_SELLER, labelKey: 'roles.privateSeller', icon: '🏠' },
+        { id: UserRole.AGENT, labelKey: 'roles.agent', icon: '🏢' },
     ];
 
-    // Agents cannot switch to buyer
-    const isDisabled = (role: UserRole) => {
-        if (originalRole === UserRole.AGENT && role === UserRole.BUYER) {
-            return true;
+    const isDisabled = (role: UserRole) =>
+        originalRole === UserRole.AGENT && role === UserRole.BUYER;
+
+    const handleRoleClick = (role: UserRole) => {
+        if (isDisabled(role)) return;
+        if (role === selectedRole) {
+            setPendingRole(null);
+            return;
         }
-        return false;
+        setPendingRole(role);
+    };
+
+    const handleConfirm = () => {
+        if (pendingRole) {
+            onChange(pendingRole);
+            setPendingRole(null);
+        }
+    };
+
+    const handleCancel = () => {
+        setPendingRole(null);
+    };
+
+    const hintRole = pendingRole;
+    const hint = hintRole ? (ROLE_HINT_DEFAULTS[hintRole]) : null;
+    const hintConfig = hintRole ? ROLE_HINTS[hintRole] : null;
+
+    const colorMap: Record<string, string> = {
+        blue: 'bg-blue-50/80 border-blue-200/60 text-blue-800',
+        emerald: 'bg-emerald-50/80 border-emerald-200/60 text-emerald-800',
+        indigo: 'bg-indigo-50/80 border-indigo-200/60 text-indigo-800',
+        gray: 'bg-gray-50/80 border-gray-200/60 text-gray-800',
+    };
+    const confirmColorMap: Record<string, string> = {
+        blue: 'bg-blue-600 hover:bg-blue-700 text-white shadow-blue-200',
+        emerald: 'bg-emerald-600 hover:bg-emerald-700 text-white shadow-emerald-200',
+        indigo: 'bg-indigo-600 hover:bg-indigo-700 text-white shadow-indigo-200',
+        gray: 'bg-gray-600 hover:bg-gray-700 text-white shadow-gray-200',
+    };
+    const featureDotMap: Record<string, string> = {
+        blue: 'bg-blue-500',
+        emerald: 'bg-emerald-500',
+        indigo: 'bg-indigo-500',
+        gray: 'bg-gray-500',
     };
 
     return (
-        <div className="flex items-center space-x-1 bg-white/30 backdrop-blur-md p-1 rounded-2xl border border-white/40 shadow-sm">
-            {roles.map(role => (
-                <button
-                    key={role.id}
-                    type="button"
-                    onClick={() => !isDisabled(role.id) && onChange(role.id)}
-                    disabled={isDisabled(role.id)}
-                    className={`px-2.5 py-1.5 rounded-xl text-sm font-semibold transition-all duration-300 flex-grow text-center ${
-                        selectedRole === role.id
-                        ? 'bg-white/70 text-primary shadow-md backdrop-blur-sm border border-white/50'
-                        : isDisabled(role.id)
-                        ? 'text-neutral-400 cursor-not-allowed opacity-50'
-                        : 'text-neutral-600 hover:bg-white/40'
-                    }`
-                }
-                    title={isDisabled(role.id) ? t('roles.agentCannotSwitchToBuyer') : ''}
-                >
-                    {t(role.labelKey)}
-                </button>
-            ))}
+        <div className="space-y-3">
+            {/* Role Pills */}
+            <div className="flex items-center gap-1 bg-white/30 backdrop-blur-md p-1 rounded-2xl border border-white/40 shadow-sm">
+                {roles.map(role => {
+                    const active = selectedRole === role.id;
+                    const isPending = pendingRole === role.id;
+                    const disabled = isDisabled(role.id);
+                    return (
+                        <button
+                            key={role.id}
+                            type="button"
+                            onClick={() => handleRoleClick(role.id)}
+                            disabled={disabled}
+                            aria-pressed={active}
+                            title={disabled ? t('roles.agentCannotSwitchToBuyer') : ''}
+                            className={`
+                                flex items-center justify-center gap-1.5 px-2.5 py-2 rounded-xl text-sm font-semibold
+                                transition-all duration-200 flex-1 min-w-0
+                                ${active
+                                    ? 'bg-white/70 text-primary shadow-md backdrop-blur-sm border border-white/50'
+                                    : isPending
+                                    ? 'bg-white/50 text-neutral-700 border border-white/40 ring-2 ring-primary/20'
+                                    : disabled
+                                    ? 'text-neutral-400 cursor-not-allowed opacity-50'
+                                    : 'text-neutral-600 hover:bg-white/40 border border-transparent'
+                                }
+                            `}
+                        >
+                            <span className="text-base leading-none hidden xs:inline sm:inline">{role.icon}</span>
+                            <span className="truncate">{t(role.labelKey)}</span>
+                        </button>
+                    );
+                })}
+            </div>
+
+            {/* Role Hint Card */}
+            {hintRole && hint && hintConfig && (
+                <div className={`rounded-2xl border p-4 backdrop-blur-sm transition-all duration-200 animate-in fade-in slide-in-from-top-2 ${colorMap[hintConfig.color]}`}>
+                    <div className="flex items-start gap-3">
+                        <span className="text-2xl flex-shrink-0 mt-0.5">{hintConfig.icon}</span>
+                        <div className="flex-1 min-w-0">
+                            <p className="font-bold text-sm leading-tight">{hint.title}</p>
+                            <p className="text-xs mt-0.5 opacity-80">{hint.description}</p>
+                            {hint.features.length > 0 && (
+                                <ul className="mt-2 space-y-1">
+                                    {hint.features.map((f, i) => (
+                                        <li key={i} className="flex items-center gap-2 text-xs opacity-90">
+                                            <span className={`w-1.5 h-1.5 rounded-full flex-shrink-0 ${featureDotMap[hintConfig.color]}`} />
+                                            {f}
+                                        </li>
+                                    ))}
+                                </ul>
+                            )}
+                        </div>
+                    </div>
+                    <div className="flex gap-2 mt-3">
+                        <button
+                            type="button"
+                            onClick={handleCancel}
+                            className="flex-1 px-3 py-2 text-xs font-semibold rounded-xl border border-current/20 bg-white/40 hover:bg-white/60 transition-colors"
+                        >
+                            {t('roles.hints.cancel', 'Cancel')}
+                        </button>
+                        <button
+                            type="button"
+                            onClick={handleConfirm}
+                            className={`flex-1 px-3 py-2 text-xs font-bold rounded-xl shadow-lg transition-all ${confirmColorMap[hintConfig.color]}`}
+                        >
+                            {t('roles.hints.switchTo', 'Switch to')} {hint.title}
+                        </button>
+                    </div>
+                </div>
+            )}
         </div>
     );
 };
@@ -1407,13 +1554,16 @@ const MyAccountPage: React.FC = () => {
     }
 
     const isSellerProfile = state.currentUser.role === UserRole.AGENT || state.currentUser.role === UserRole.PRIVATE_SELLER;
+    // Buyer Pro users (listingsLimit > 0) get the same account tabs as sellers
+    const isBuyerPro = state.currentUser.role === UserRole.BUYER && (state.currentUser.subscription?.listingsLimit ?? 0) > 0;
+    const hasSellerTabs = isSellerProfile || isBuyerPro;
 
-    // Redirect non-sellers away from seller-only tabs (listings and subscription are available to all)
+    // Redirect users without seller tabs to profile if they land on a seller-only tab
     useEffect(() => {
-        if (!isSellerProfile && (activeTab === 'performance' || activeTab === 'promotions' || activeTab === 'viewings')) {
+        if (!hasSellerTabs && (activeTab === 'listings' || activeTab === 'performance' || activeTab === 'subscription' || activeTab === 'promotions' || activeTab === 'viewings')) {
             setActiveTab('profile');
         }
-    }, [isSellerProfile, activeTab, setActiveTab]);
+    }, [hasSellerTabs, activeTab, setActiveTab]);
 
     useEffect(() => {
         if (activeTab === 'performance') {
@@ -1453,10 +1603,9 @@ const MyAccountPage: React.FC = () => {
     const renderContent = () => {
         switch (activeTab) {
             case 'listings':
-                // All roles can manage listings (buyers get 3 free listings)
-                return <MyListings sellerId={state.currentUser!.id} />;
+                return hasSellerTabs ? <MyListings sellerId={state.currentUser!.id} /> : null;
             case 'promotions':
-                return isSellerProfile ? <MyPromotions /> : null;
+                return hasSellerTabs ? <MyPromotions /> : null;
             case 'profile':
                 return <ProfileSettings user={state.currentUser!} />;
             case 'performance':
@@ -1466,7 +1615,7 @@ const MyAccountPage: React.FC = () => {
             case 'measurements':
                  return <MyMeasurements userId={state.currentUser!.id} />;
             case 'viewings':
-                 return isSellerProfile ? <Suspense fallback={<div className="flex justify-center py-12"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div></div>}><ViewingRequestsTab /></Suspense> : null;
+                 return hasSellerTabs ? <Suspense fallback={<div className="flex justify-center py-12"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div></div>}><ViewingRequestsTab /></Suspense> : null;
             case 'security':
                  return <SecuritySettings logoutAllDevices={logoutAllDevices} />;
             default:
@@ -1537,12 +1686,7 @@ const MyAccountPage: React.FC = () => {
                                 )}
                             </div>
                             <nav className="space-y-2">
-                                {/* My Listings: all roles can manage listings (buyers get 3 free) */}
-                                <TabButton label={t('account:tabs.myListings')} icon={<BuildingOfficeIcon className="w-6 h-6"/>} isActive={activeTab === 'listings'} onClick={() => setActiveTab('listings')} tabKey="listings" />
-                                {/* Subscription: visible to all roles */}
-                                <TabButton label={t('account:tabs.subscription')} icon={<CreditCardIcon className="w-6 h-6"/>} isActive={activeTab === 'subscription'} onClick={() => setActiveTab('subscription')} tabKey="subscription" />
-                                {/* Seller/Agent-only tabs */}
-                                {isSellerProfile && (
+                                {hasSellerTabs && (
                                     <>
                                         <TabButton label={t('account:tabs.promotions', 'My Promotions')} icon={<SparklesIcon className="w-6 h-6"/>} isActive={activeTab === 'promotions'} onClick={() => setActiveTab('promotions')} tabKey="promotions" />
                                         <TabButton label={t('account:tabs.performance')} icon={<ChartBarIcon className="w-6 h-6"/>} isActive={activeTab === 'performance'} onClick={() => setActiveTab('performance')} tabKey="performance" />

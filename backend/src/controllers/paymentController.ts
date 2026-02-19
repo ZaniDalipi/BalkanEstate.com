@@ -165,16 +165,16 @@ export const processPayment = async (req: Request, res: Response): Promise<void>
       return;
     }
 
-    // Determine product ID based on plan name and interval
-    let productId = 'buyer_pro_monthly';
+    // Determine product ID based on plan name and interval (must match DB product IDs)
+    let productId = 'buyer_monthly';
     if (planName.toLowerCase().includes('buyer') && planInterval === 'month') {
-      productId = 'buyer_pro_monthly';
+      productId = 'buyer_monthly';
     } else if (planName.toLowerCase().includes('buyer') && planInterval === 'year') {
-      productId = 'buyer_pro_yearly';
+      productId = 'buyer_yearly';
     } else if (planName.toLowerCase().includes('seller') && planInterval === 'month') {
-      productId = 'seller_premium_monthly';
+      productId = 'seller_pro_monthly';
     } else if (planName.toLowerCase().includes('seller') && planInterval === 'year') {
-      productId = 'seller_premium_yearly';
+      productId = 'seller_pro_yearly';
     }
 
     // Try to find the product, or create a default one
@@ -351,6 +351,28 @@ export const applyFreeSubscription = async (req: Request, res: Response): Promis
       return;
     }
 
+    // Check if this user already used this code
+    if (discount.usedBy && discount.usedBy.length > 0) {
+      const alreadyUsed = discount.usedBy.some(
+        (id: any) => id.toString() === userId.toString()
+      );
+      if (alreadyUsed) {
+        res.status(400).json({ message: 'You have already used this discount code' });
+        return;
+      }
+    }
+
+    // Check if code is restricted to specific plans
+    const effectiveProductId = productId || '';
+    if (discount.applicablePlans && discount.applicablePlans.length > 0) {
+      if (!effectiveProductId || !discount.applicablePlans.includes(effectiveProductId)) {
+        res.status(400).json({
+          message: `This discount code is not valid for the selected plan`,
+        });
+        return;
+      }
+    }
+
     // Find or create product
     let product = await Product.findOne({ productId });
 
@@ -390,9 +412,8 @@ export const applyFreeSubscription = async (req: Request, res: Response): Promis
       originalAmount: product.price,
     });
 
-    // Increment discount code usage
-    discount.usedCount = (discount.usedCount || 0) + 1;
-    await discount.save();
+    // Mark discount code as used (updates usedCount + usedBy for re-use prevention)
+    await discount.markAsUsed(userId.toString());
 
     res.status(200).json({
       success: true,
