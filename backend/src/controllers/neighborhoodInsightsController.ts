@@ -1,11 +1,11 @@
 import { Request, Response } from 'express';
 import { getNeighborhoodInsights as getNeighborhoodInsightsFromGemini } from '../services/geminiService';
 import User from '../models/User';
+import Product from '../models/Product';
 import { apiLogger } from '../utils/logger';
 
 // Usage limits
 const FREE_USER_MONTHLY_LIMIT = 3; // Free users get 3 insights per month
-const SUBSCRIBED_USER_MONTHLY_LIMIT = 20; // Subscribed users get 20 insights per month
 
 /**
  * Get neighborhood insights for a property location
@@ -69,12 +69,20 @@ export const getNeighborhoodInsights = async (req: Request, res: Response) => {
       user.neighborhoodInsights.monthResetDate = getNextMonthStart();
     }
 
-    // Determine usage limit based on subscription status
+    // Determine usage limit based on subscription plan from DB
     const isSubscribed = user.isSubscribed && user.hasActiveSubscription();
-    const monthlyLimit = isSubscribed ? SUBSCRIBED_USER_MONTHLY_LIMIT : FREE_USER_MONTHLY_LIMIT;
+    let monthlyLimit = FREE_USER_MONTHLY_LIMIT;
+    if (isSubscribed && user.subscriptionPlan) {
+      const product = await Product.findOne({ productId: user.subscriptionPlan });
+      if (product && product.aiInsightsLimit === -1) {
+        monthlyLimit = -1; // unlimited
+      } else if (product && product.aiInsightsLimit > 0) {
+        monthlyLimit = product.aiInsightsLimit;
+      }
+    }
 
-    // Check if user has exceeded their monthly limit
-    if (user.neighborhoodInsights.monthlyCount >= monthlyLimit) {
+    // Check if user has exceeded their monthly limit (-1 = unlimited, skip check)
+    if (monthlyLimit !== -1 && user.neighborhoodInsights.monthlyCount >= monthlyLimit) {
       return res.status(429).json({
         message: `You have reached your monthly limit of ${monthlyLimit} neighborhood insights. ${isSubscribed ? 'Your limit will reset next month.' : 'Upgrade to a premium plan for more insights.'}`,
         limit: monthlyLimit,
@@ -106,7 +114,7 @@ export const getNeighborhoodInsights = async (req: Request, res: Response) => {
           used: user.neighborhoodInsights.monthlyCount,
           limit: monthlyLimit,
           resetDate: user.neighborhoodInsights.monthResetDate,
-          remaining: monthlyLimit - user.neighborhoodInsights.monthlyCount,
+          remaining: monthlyLimit === -1 ? -1 : monthlyLimit - user.neighborhoodInsights.monthlyCount,
         },
       });
     } catch (error) {
@@ -162,13 +170,21 @@ export const getUsageStats = async (req: Request, res: Response) => {
     }
 
     const isSubscribed = user.isSubscribed && user.hasActiveSubscription();
-    const monthlyLimit = isSubscribed ? SUBSCRIBED_USER_MONTHLY_LIMIT : FREE_USER_MONTHLY_LIMIT;
+    let monthlyLimit = FREE_USER_MONTHLY_LIMIT;
+    if (isSubscribed && user.subscriptionPlan) {
+      const product = await Product.findOne({ productId: user.subscriptionPlan });
+      if (product && product.aiInsightsLimit === -1) {
+        monthlyLimit = -1; // unlimited
+      } else if (product && product.aiInsightsLimit > 0) {
+        monthlyLimit = product.aiInsightsLimit;
+      }
+    }
 
     return res.status(200).json({
       used: user.neighborhoodInsights.monthlyCount,
       limit: monthlyLimit,
       resetDate: user.neighborhoodInsights.monthResetDate,
-      remaining: monthlyLimit - user.neighborhoodInsights.monthlyCount,
+      remaining: monthlyLimit === -1 ? -1 : monthlyLimit - user.neighborhoodInsights.monthlyCount,
       isSubscribed,
     });
   } catch (error) {

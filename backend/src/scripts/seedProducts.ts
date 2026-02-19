@@ -586,10 +586,50 @@ const PRODUCTS = [
     highlightedCoupons: 0,
     featuredCoupons: 0,
     agentCoupons: 0,
-    savedSearchesLimit: -1, // unlimited
+    savedSearchesLimit: 3,
     aiMessagesLimit: -1, // unlimited (rate limited)
-    aiInsightsLimit: -1, // unlimited
-    imageDescriptionLimit: -1, // unlimited
+    aiInsightsLimit: 30,
+    imageDescriptionLimit: 50,
+  },
+
+  // Alias for existing subscribers created before the buyer_monthly rename
+  {
+    productId: 'buyer_pro_monthly',
+    name: 'Buyer Pro',
+    description: 'Never miss your dream property with instant alerts and market insights.',
+    type: 'subscription' as const,
+    tier: 'buyer' as const,
+    price: 3,
+    currency: 'EUR',
+    billingPeriod: 'monthly' as const,
+    durationDays: 30,
+    features: [
+      'Instant email & SMS notifications',
+      '3 saved searches',
+      'Early access to new listings',
+      'Advanced market insights',
+      '30 AI insights/month',
+      '50 auto-label images',
+    ],
+    targetRole: 'buyer' as const,
+    displayOrder: 5,
+    badge: 'FOR BUYERS',
+    badgeColor: 'blue',
+    highlighted: false,
+    isActive: true,
+    isVisible: false, // not shown in pricing — alias only
+    hasFreeTrial: false,
+    gracePeriodDays: 5,
+    listingsLimit: 3,
+    promotionCoupons: 0,
+    premiumCoupons: 0,
+    highlightedCoupons: 0,
+    featuredCoupons: 0,
+    agentCoupons: 0,
+    savedSearchesLimit: 3,
+    aiMessagesLimit: -1,
+    aiInsightsLimit: 30,
+    imageDescriptionLimit: 50,
   },
 
   // ============================================================================
