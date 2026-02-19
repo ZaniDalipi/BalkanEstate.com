@@ -380,7 +380,7 @@ const AgentsPage: React.FC = () => {
 
   // Show agent profile if we have a selected agent
   if (selectedAgent) {
-    return <AgentProfilePage agent={selectedAgent} />;
+    return <AgentProfilePage key={selectedAgent.agentId || selectedAgent.id} agent={selectedAgent} />;
   }
 
   // Show loading if we're fetching a specific agent
