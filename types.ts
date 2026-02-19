@@ -258,6 +258,27 @@ export interface PropertyImage {
     tag: PropertyImageTag;
 }
 
+export type FloorPlanAnnotationIcon =
+    | 'bedroom'
+    | 'bathroom'
+    | 'kitchen'
+    | 'living'
+    | 'dining'
+    | 'garage'
+    | 'garden'
+    | 'office'
+    | 'storage'
+    | 'balcony';
+
+export interface FloorPlanAnnotation {
+    id: string;
+    x: number;
+    y: number;
+    label: string;
+    size?: string;
+    icon: FloorPlanAnnotationIcon;
+}
+
 export type FurnishingStatus = 'any' | 'furnished' | 'semi-furnished' | 'unfurnished';
 export type HeatingType = 'any' | 'central' | 'electric' | 'gas' | 'oil' | 'heat-pump' | 'solar' | 'wood' | 'none';
 export type PropertyCondition = 'any' | 'new' | 'excellent' | 'good' | 'fair' | 'needs-renovation';
@@ -301,6 +322,7 @@ export interface Property {
     floorNumber?: number;
     totalFloors?: number;
     floorplanUrl?: string;
+    floorplanAnnotations?: FloorPlanAnnotation[];
     createdAt?: number;
     lastRenewed?: number;
     views?: number;

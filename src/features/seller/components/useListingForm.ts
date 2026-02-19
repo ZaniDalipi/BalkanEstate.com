@@ -1,6 +1,6 @@
 import { useState, useCallback, useMemo, useRef, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Property, PropertyImage, PropertyImageTag, UserRole } from '@/types';
+import { Property, PropertyImage, PropertyImageTag, UserRole, FloorPlanAnnotation } from '@/types';
 import { generateDescriptionFromImages, calculatePropertyDistances, LocationContext } from '@/services/geminiService';
 import { useAppContext } from '@/context/AppContext';
 import { useAlert } from '@/context/AlertContext';
@@ -22,6 +22,7 @@ export function buildPreviewProperty(
     selectedRole: UserRole,
     currentUser: { id: string; name: string; phone?: string; avatarUrl?: string } | null,
     propertyToEdit: Property | null,
+    floorplanAnnotations?: FloorPlanAnnotation[],
 ): Property {
     const imageUrls = images.map((img, index) => {
         const tagInfo = listingData.image_tags.find(t => t.index === index);
@@ -68,6 +69,7 @@ export function buildPreviewProperty(
         floorNumber: Number(listingData.floorNumber) || undefined,
         totalFloors: Number(listingData.totalFloors) || undefined,
         floorplanUrl: floorplanImage.previewUrl || undefined,
+        floorplanAnnotations: floorplanAnnotations && floorplanAnnotations.length > 0 ? floorplanAnnotations : undefined,
         createdAt: propertyToEdit?.createdAt || Date.now(),
         lastRenewed: Date.now(),
         views: propertyToEdit?.views || 0,
@@ -113,6 +115,7 @@ export const useListingForm = (propertyToEdit: Property | null) => {
     const [step, setStep] = useState<Step>('init');
     const [images, setImages] = useState<ImageData[]>([]);
     const [floorplanImage, setFloorplanImage] = useState<ImageData>({ file: null, previewUrl: '' });
+    const [floorplanAnnotations, setFloorplanAnnotations] = useState<FloorPlanAnnotation[]>([]);
 
     // Determine initial listingType based on current view
     const initialType = state.activeView === 'create-rental' ? 'rent' : 'sale';
@@ -615,12 +618,12 @@ export const useListingForm = (propertyToEdit: Property | null) => {
         const preview = buildPreviewProperty(
             listingData, images, floorplanImage,
             selectedCountry, selectedCity, selectedRole,
-            currentUser, propertyToEdit,
+            currentUser, propertyToEdit, floorplanAnnotations,
         );
         setPreviewProperty(preview);
         setStep('preview');
         window.scrollTo({ top: 0, behavior: 'smooth' });
-    }, [listingData, images, floorplanImage, selectedCountry, selectedCity, selectedRole, currentUser, propertyToEdit]);
+    }, [listingData, images, floorplanImage, selectedCountry, selectedCity, selectedRole, currentUser, propertyToEdit, floorplanAnnotations]);
 
     const handleBackToForm = useCallback(() => {
         setStep('form');
@@ -852,6 +855,7 @@ export const useListingForm = (propertyToEdit: Property | null) => {
                 floorNumber: Number(listingData.floorNumber) || undefined,
                 totalFloors: Number(listingData.totalFloors) || undefined,
                 floorplanUrl: floorplanImage.previewUrl || undefined,
+                floorplanAnnotations: floorplanAnnotations.length > 0 ? floorplanAnnotations : undefined,
                 createdAt: propertyToEdit ? propertyToEdit.createdAt : Date.now(),
                 lastRenewed: Date.now(),
                 views: propertyToEdit?.views || 0,
@@ -1150,6 +1154,7 @@ export const useListingForm = (propertyToEdit: Property | null) => {
         step, setStep,
         images, setImages,
         floorplanImage, setFloorplanImage,
+        floorplanAnnotations, setFloorplanAnnotations,
         listingData, setListingData,
         language, setLanguage,
         aiPropertyType, setAiPropertyType,

@@ -476,6 +476,7 @@ const PropertyDetailsPage: React.FC<{ property: Property }> = ({ property: cache
         <FloorPlanViewerModal
           imageUrl={property.floorplanUrl}
           onClose={() => setIsFloorPlanOpen(false)}
+          annotations={property.floorplanAnnotations}
         />
       )}
       {isPromotionModalOpen && (

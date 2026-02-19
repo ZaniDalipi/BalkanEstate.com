@@ -82,6 +82,7 @@ const ListingPreview: React.FC<ListingPreviewProps> = ({
                 <FloorPlanViewerModal
                     imageUrl={property.floorplanUrl}
                     onClose={() => setIsFloorPlanOpen(false)}
+                    annotations={property.floorplanAnnotations}
                 />
             )}
 

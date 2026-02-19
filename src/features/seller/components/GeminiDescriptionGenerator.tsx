@@ -30,6 +30,7 @@ const GeminiDescriptionGenerator: React.FC<{ propertyToEdit: Property | null }> 
         step, setStep,
         images,
         floorplanImage, setFloorplanImage,
+        floorplanAnnotations, setFloorplanAnnotations,
         listingData, setListingData,
         language, setLanguage,
         aiPropertyType, setAiPropertyType,
@@ -610,6 +611,8 @@ const GeminiDescriptionGenerator: React.FC<{ propertyToEdit: Property | null }> 
                         handleDrop={handleDrop}
                         handleImageTagChange={handleImageTagChange}
                         setFloorplanImage={setFloorplanImage}
+                        floorplanAnnotations={floorplanAnnotations}
+                        setFloorplanAnnotations={setFloorplanAnnotations}
                     />
 
                     {/* 360 Virtual Tour URL */}

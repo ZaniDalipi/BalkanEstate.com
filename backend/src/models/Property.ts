@@ -81,6 +81,14 @@ export interface IProperty extends Document {
   totalFloors?: number;
   floorplanUrl?: string;
   floorplanPublicId?: string; // Cloudinary public_id for floorplan
+  floorplanAnnotations?: Array<{
+    id: string;
+    x: number;
+    y: number;
+    label: string;
+    size?: string;
+    icon: string;
+  }>;
   lastRenewed: Date;
   views: number;
   saves: number;
@@ -346,6 +354,19 @@ const PropertySchema: Schema = new Schema(
     },
     floorplanPublicId: {
       type: String,
+    },
+    floorplanAnnotations: {
+      type: [
+        {
+          id: { type: String, required: true },
+          x: { type: Number, required: true },
+          y: { type: Number, required: true },
+          label: { type: String, required: true },
+          size: { type: String },
+          icon: { type: String, required: true },
+        },
+      ],
+      default: undefined,
     },
     lastRenewed: {
       type: Date,

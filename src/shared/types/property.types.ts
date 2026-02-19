@@ -20,6 +20,27 @@ export interface PropertyImage {
   tag: PropertyImageTag;
 }
 
+export type FloorPlanAnnotationIcon =
+  | 'bedroom'
+  | 'bathroom'
+  | 'kitchen'
+  | 'living'
+  | 'dining'
+  | 'garage'
+  | 'garden'
+  | 'office'
+  | 'storage'
+  | 'balcony';
+
+export interface FloorPlanAnnotation {
+  id: string;
+  x: number; // percentage from left (0-100)
+  y: number; // percentage from top (0-100)
+  label: string;
+  size?: string; // e.g. "18m²"
+  icon: FloorPlanAnnotationIcon;
+}
+
 export interface Seller {
   type: 'agent' | 'private';
   name: string;
@@ -92,6 +113,7 @@ export interface Property {
   floorNumber?: number;
   totalFloors?: number;
   floorplanUrl?: string;
+  floorplanAnnotations?: FloorPlanAnnotation[];
   createdAt?: number;
   lastRenewed?: number;
   views?: number;
