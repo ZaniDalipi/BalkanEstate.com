@@ -74,10 +74,11 @@ export const getNeighborhoodInsights = async (req: Request, res: Response) => {
     let monthlyLimit = FREE_USER_MONTHLY_LIMIT;
     if (isSubscribed && user.subscriptionPlan) {
       const product = await Product.findOne({ productId: user.subscriptionPlan });
-      if (product && product.aiInsightsLimit === -1) {
+      const limit = product?.aiInsightsLimit ?? undefined;
+      if (limit === -1) {
         monthlyLimit = -1; // unlimited
-      } else if (product && product.aiInsightsLimit > 0) {
-        monthlyLimit = product.aiInsightsLimit;
+      } else if (typeof limit === 'number' && limit > 0) {
+        monthlyLimit = limit;
       }
     }
 
@@ -173,10 +174,11 @@ export const getUsageStats = async (req: Request, res: Response) => {
     let monthlyLimit = FREE_USER_MONTHLY_LIMIT;
     if (isSubscribed && user.subscriptionPlan) {
       const product = await Product.findOne({ productId: user.subscriptionPlan });
-      if (product && product.aiInsightsLimit === -1) {
+      const limit = product?.aiInsightsLimit ?? undefined;
+      if (limit === -1) {
         monthlyLimit = -1; // unlimited
-      } else if (product && product.aiInsightsLimit > 0) {
-        monthlyLimit = product.aiInsightsLimit;
+      } else if (typeof limit === 'number' && limit > 0) {
+        monthlyLimit = limit;
       }
     }
 
