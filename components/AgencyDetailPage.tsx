@@ -381,7 +381,10 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
 
       if (isAgentCoupon) {
         // Redeem agent coupon for Pro subscription
-        const token = localStorage.getItem('balkan_estate_token');
+        const token = localStorage.getItem('balkan_estate_token')?.trim();
+        if (!token) {
+          throw new Error('You are not logged in. Please log in and try again.');
+        }
         const response = await fetch(`${API_URL}/agencies/coupons/redeem`, {
           method: 'POST',
           headers: {
@@ -391,12 +394,17 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
           body: JSON.stringify({ couponCode: trimmedCode }),
         });
 
-        const data = await response.json();
+        let data: any;
+        try {
+          data = await response.json();
+        } catch {
+          throw new Error('Unexpected response from server. Please try again.');
+        }
 
         if (!response.ok) {
-          // Handle specific error codes
-          switch (data.code) {
+          switch (data?.code) {
             case 'INVALID_COUPON':
+            case 'INVALID_COUPON_FORMAT':
               throw new Error('Invalid coupon code. Please check and try again.');
             case 'COUPON_ALREADY_USED':
               throw new Error('This coupon has already been used.');
@@ -405,12 +413,12 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
             case 'AGENCY_SUBSCRIPTION_INACTIVE':
               throw new Error('The agency subscription is no longer active.');
             default:
-              throw new Error(data.message || 'Failed to redeem coupon.');
+              throw new Error(data?.message || 'Failed to redeem coupon.');
           }
         }
 
         // Update user context with new subscription data
-        if (data.subscription && data.agency) {
+        if (data?.subscription && data?.agency?.id) {
           dispatch({
             type: 'UPDATE_USER',
             payload: {
@@ -422,22 +430,28 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
                 expiresAt: data.subscription.expiresAt,
               },
               agencyId: data.agency.id,
-              agencyName: data.agency.name,
+              agencyName: data.agency.name ?? '',
               agency: {
                 agencyId: data.agency.id,
-                role: data.agency.role,
+                role: data.agency.role ?? 'agent',
                 joinedAt: new Date().toISOString(),
               },
             },
           });
 
           // Refresh user data from server to ensure full sync
-          const meResponse = await fetch(`${API_URL}/auth/me`, {
-            headers: { 'Authorization': `Bearer ${token}` },
-          });
-          if (meResponse.ok) {
-            const userData = await meResponse.json();
-            dispatch({ type: 'UPDATE_USER', payload: userData.user });
+          try {
+            const meResponse = await fetch(`${API_URL}/auth/me`, {
+              headers: { 'Authorization': `Bearer ${token}` },
+            });
+            if (meResponse.ok) {
+              const userData = await meResponse.json();
+              if (userData?.user) {
+                dispatch({ type: 'UPDATE_USER', payload: userData.user });
+              }
+            }
+          } catch {
+            // Non-critical: local state already updated above
           }
         }
 
@@ -1570,9 +1584,9 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
                   </div>
                 </div>
                 <div className="space-y-2">
-                  {agencyData.agentCoupons!.coupons!.map((coupon, idx) => (
+                  {agencyData.agentCoupons!.coupons!.map((coupon) => (
                     <div
-                      key={idx}
+                      key={coupon.code}
                       className={`flex items-center justify-between p-3 rounded-lg border ${
                         coupon.status === 'used'
                           ? 'bg-slate-50 border-slate-200'
@@ -1598,9 +1612,9 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
                         </span>
                       </div>
                       <div className="flex items-center gap-3 text-right">
-                        {coupon.status === 'used' && coupon.usedBy ? (
+                        {coupon.status === 'used' ? (
                           <span className="text-xs text-slate-500">
-                            Used by <strong className="text-slate-700">{coupon.usedBy.name}</strong>
+                            Used by <strong className="text-slate-700">{coupon.usedBy?.name ?? 'Unknown'}</strong>
                           </span>
                         ) : coupon.status === 'available' ? (
                           <button

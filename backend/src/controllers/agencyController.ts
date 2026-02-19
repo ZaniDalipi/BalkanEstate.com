@@ -1673,34 +1673,54 @@ export const generateAgentCoupons = async (
       return;
     }
 
-    // Check if agency can generate more coupons
-    if (!agency.canGenerateMoreCoupons()) {
+    // Fetch the enterprise product to get the max coupons limit dynamically
+    const enterpriseProduct = await Product.findOne({ productId: 'agency_yearly' }).lean();
+    const maxAgentCoupons: number = enterpriseProduct?.agentCoupons ?? ENTERPRISE_TIER_LIMITS.TEAM_MEMBERS;
+
+    const availableCoupons = (agency.agentCoupons ?? []).filter(c => c.status === 'available').length;
+
+    if (availableCoupons >= maxAgentCoupons) {
       res.status(400).json({
-        message: 'Maximum of 5 agent coupons can be active at once. Revoke or wait for coupons to be used.',
+        message: `Maximum of ${maxAgentCoupons} agent coupons can be active at once. Revoke or wait for coupons to be used.`,
         code: 'MAX_COUPONS_REACHED',
-        currentCoupons: agency.agentCoupons.filter(c => c.status === 'available').length,
+        currentCoupons: availableCoupons,
+        maxAllowed: maxAgentCoupons,
       });
       return;
     }
 
-    // Generate coupon codes (up to 5 total)
-    const availableCoupons = agency.agentCoupons.filter(c => c.status === 'available').length;
-    const couponsToGenerate = 5 - availableCoupons;
+    const couponsToGenerate = maxAgentCoupons - availableCoupons;
+
+    // Expiry aligned with agency subscription if available, otherwise 1 year
+    const agencyExpiry = agency.subscription?.expiresAt;
+    const couponExpiry = agencyExpiry && new Date(agencyExpiry) > new Date()
+      ? new Date(agencyExpiry)
+      : new Date(new Date().setFullYear(new Date().getFullYear() + 1));
 
     const newCoupons = [];
     for (let i = 0; i < couponsToGenerate; i++) {
       const code = agency.generateCouponCode();
-      const expiresAt = new Date();
-      expiresAt.setFullYear(expiresAt.getFullYear() + 1); // Valid for 1 year
+      if (!code || !/^[A-Z0-9]{2,6}-[A-Z0-9]{8}$/.test(code)) {
+        agencyLogger.error(`Invalid coupon code generated for agency ${agency.name}: "${code}"`);
+        continue;
+      }
 
       agency.agentCoupons.push({
         code,
         generatedAt: new Date(),
-        expiresAt,
+        expiresAt: couponExpiry,
         status: 'available',
       } as any);
 
-      newCoupons.push({ code, expiresAt });
+      newCoupons.push({ code, expiresAt: couponExpiry });
+    }
+
+    if (newCoupons.length === 0) {
+      res.status(500).json({
+        message: 'Failed to generate valid coupon codes',
+        code: 'GENERATION_FAILED',
+      });
+      return;
     }
 
     await agency.save();
@@ -1734,12 +1754,31 @@ export const redeemAgentCoupon = async (
     }
 
     const currentUser = req.user as IUser;
-    const { couponCode } = req.body;
 
-    if (!couponCode) {
+    // Normalize and type-validate the coupon code
+    const rawCode = req.body.couponCode;
+    if (!rawCode || typeof rawCode !== 'string') {
       res.status(400).json({
         message: 'Coupon code is required',
-        code: 'MISSING_COUPON_CODE'
+        code: 'MISSING_COUPON_CODE',
+      });
+      return;
+    }
+    const couponCode = rawCode.trim().toUpperCase();
+    if (!couponCode) {
+      res.status(400).json({
+        message: 'Coupon code cannot be empty',
+        code: 'MISSING_COUPON_CODE',
+      });
+      return;
+    }
+
+    // Validate format before hitting the DB: agency-prefix + 8 alphanumeric chars
+    const COUPON_FORMAT = /^[A-Z0-9]{2,6}-[A-Z0-9]{8}$/;
+    if (!COUPON_FORMAT.test(couponCode)) {
+      res.status(400).json({
+        message: 'Invalid coupon code format',
+        code: 'INVALID_COUPON_FORMAT',
       });
       return;
     }
@@ -1752,17 +1791,17 @@ export const redeemAgentCoupon = async (
     if (!agency) {
       res.status(404).json({
         message: 'Invalid coupon code',
-        code: 'INVALID_COUPON'
+        code: 'INVALID_COUPON',
       });
       return;
     }
 
-    // Find the specific coupon
-    const coupon = agency.agentCoupons.find(c => c.code === couponCode);
+    // Find the specific coupon (null-safe array access)
+    const coupon = agency.agentCoupons?.find(c => c.code === couponCode);
     if (!coupon) {
       res.status(404).json({
         message: 'Coupon not found',
-        code: 'COUPON_NOT_FOUND'
+        code: 'COUPON_NOT_FOUND',
       });
       return;
     }
@@ -1772,13 +1811,22 @@ export const redeemAgentCoupon = async (
       res.status(400).json({
         message: 'This coupon has already been used',
         code: 'COUPON_ALREADY_USED',
-        usedBy: coupon.usedBy,
         usedAt: coupon.usedAt,
       });
       return;
     }
 
-    if (coupon.status === 'expired' || new Date(coupon.expiresAt) < new Date()) {
+    // Validate expiration date is parseable before comparing
+    const expiryDate = new Date(coupon.expiresAt);
+    if (isNaN(expiryDate.getTime())) {
+      agencyLogger.error(`Coupon ${couponCode} has invalid expiresAt value: ${coupon.expiresAt}`);
+      res.status(500).json({
+        message: 'Coupon has an invalid expiration date',
+        code: 'INVALID_COUPON_DATA',
+      });
+      return;
+    }
+    if (coupon.status === 'expired' || expiryDate < new Date()) {
       coupon.status = 'expired';
       await agency.save();
       res.status(400).json({
@@ -1798,18 +1846,24 @@ export const redeemAgentCoupon = async (
       return;
     }
 
-    const user = await User.findById(currentUser._id);
+    const [user, agentProduct] = await Promise.all([
+      User.findById(currentUser._id),
+      Product.findOne({ productId: 'agency_agent_yearly' }).lean(),
+    ]);
     if (!user) {
-      res.status(404).json({ message: 'User not found' });
+      res.status(404).json({ message: 'User not found', code: 'USER_NOT_FOUND' });
       return;
     }
+
+    // Dynamic limits from DB product, fallback to constants
+    const agentListingsLimit = agentProduct?.listingsLimit ?? 25;
 
     // Initialize subscription if doesn't exist
     if (!user.subscription) {
       user.subscription = {
         tier: 'free',
         status: 'active',
-        listingsLimit: 3,
+        listingsLimit: agentListingsLimit,
         activeListingsCount: 0,
         privateSellerCount: 0,
         agentCount: 0,
@@ -1825,14 +1879,14 @@ export const redeemAgentCoupon = async (
       };
     }
 
-    // Upgrade user to agency_agent tier with Pro benefits
+    // Upgrade user to agency_agent tier — all limits come from DB product
     user.subscription.tier = 'agency_agent';
     user.subscription.status = 'active';
-    user.subscription.listingsLimit = 25;
+    user.subscription.listingsLimit = agentListingsLimit;
     if (user.subscription.promotionCoupons) {
-      user.subscription.promotionCoupons.monthly = 0; // Agency agents share agency pool
+      user.subscription.promotionCoupons.monthly = 0; // Agency agents share the agency pool
     }
-    user.subscription.expiresAt = new Date(coupon.expiresAt); // 1 year from coupon generation
+    user.subscription.expiresAt = expiryDate; // already validated above
 
     // Associate user with agency
     if (!user.agency) {

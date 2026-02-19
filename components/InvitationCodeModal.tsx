@@ -11,9 +11,13 @@ interface InvitationCodeModalProps {
 
 type CodeType = 'invitation' | 'coupon';
 
-// Validation patterns
+// Validation patterns — must match backend generateSecureAgencyCouponCode output
 const INVITATION_CODE_PATTERN = /^AGY-[A-Z0-9]{6}-[A-Z0-9]{6}$/;
-const COUPON_CODE_PATTERN = /^[A-Z0-9]{3}-[A-Z0-9]{8}$/;
+const COUPON_CODE_PATTERN = /^[A-Z0-9]{2,6}-[A-Z0-9]{8}$/;
+
+// Code lengths derived from the patterns so they stay in sync
+const INVITATION_CODE_MIN_LENGTH = 18; // AGY-XXXXXX-XXXXXX
+const COUPON_CODE_MIN_LENGTH = 12;     // XXX-XXXXXXXX
 
 const InvitationCodeModal: React.FC<InvitationCodeModalProps> = ({
   isOpen,
@@ -56,10 +60,10 @@ const InvitationCodeModal: React.FC<InvitationCodeModalProps> = ({
     const upperCode = inputCode.toUpperCase();
 
     if (type === 'invitation') {
-      if (upperCode.length > 0 && upperCode.length < 18) {
+      if (upperCode.length > 0 && upperCode.length < INVITATION_CODE_MIN_LENGTH) {
         return { valid: false, message: 'Keep typing... (AGY-XXXXXX-XXXXXX)' };
       }
-      if (upperCode.length >= 18 && !INVITATION_CODE_PATTERN.test(upperCode)) {
+      if (upperCode.length >= INVITATION_CODE_MIN_LENGTH && !INVITATION_CODE_PATTERN.test(upperCode)) {
         return { valid: false, message: 'Invalid format. Expected: AGY-XXXXXX-XXXXXX' };
       }
       if (INVITATION_CODE_PATTERN.test(upperCode)) {
@@ -69,7 +73,7 @@ const InvitationCodeModal: React.FC<InvitationCodeModalProps> = ({
       if (upperCode.length > 0 && upperCode.length < 12) {
         return { valid: false, message: 'Keep typing... (XXX-XXXXXXXX)' };
       }
-      if (upperCode.length >= 12 && !COUPON_CODE_PATTERN.test(upperCode)) {
+      if (upperCode.length >= COUPON_CODE_MIN_LENGTH && !COUPON_CODE_PATTERN.test(upperCode)) {
         return { valid: false, message: 'Invalid format. Expected: XXX-XXXXXXXX' };
       }
       if (COUPON_CODE_PATTERN.test(upperCode)) {
@@ -109,7 +113,7 @@ const InvitationCodeModal: React.FC<InvitationCodeModalProps> = ({
 
     // Validate format before submitting
     const validation = validateCode(trimmedCode, codeType);
-    if (!validation.valid && trimmedCode.length >= (codeType === 'invitation' ? 18 : 12)) {
+    if (!validation.valid && trimmedCode.length >= (codeType === 'invitation' ? INVITATION_CODE_MIN_LENGTH : COUPON_CODE_MIN_LENGTH)) {
       setError(validation.message || 'Invalid code format');
       return;
     }
@@ -146,7 +150,7 @@ const InvitationCodeModal: React.FC<InvitationCodeModalProps> = ({
   };
 
   // Check if code is valid for submission
-  const isCodeValid = code.trim().length >= (codeType === 'invitation' ? 18 : 12);
+  const isCodeValid = code.trim().length >= (codeType === 'invitation' ? INVITATION_CODE_MIN_LENGTH : COUPON_CODE_MIN_LENGTH);
 
   return (
     <Modal isOpen={isOpen} onClose={handleClose} size="md">
@@ -207,7 +211,7 @@ const InvitationCodeModal: React.FC<InvitationCodeModalProps> = ({
                 'border-gray-300'
               }`}
               disabled={isSubmitting}
-              maxLength={codeType === 'invitation' ? 18 : 12}
+              maxLength={codeType === 'invitation' ? INVITATION_CODE_MIN_LENGTH : COUPON_CODE_MIN_LENGTH}
               autoComplete="off"
               autoCapitalize="characters"
               spellCheck={false}
