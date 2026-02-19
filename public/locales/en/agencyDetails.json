@@ -147,7 +147,34 @@
     "onlyOwnerCanManage": "Only the agency owner can manage admins",
     "onlyAdminCanRemove": "Only agency admins can remove agents",
     "selectImageFile": "Please select an image file",
-    "imageSizeLimit": "Image size must be less than 5MB"
+    "imageSizeLimit": "Image size must be less than 5MB",
+    "usedBy": "Used by",
+    "unknown": "Unknown",
+    "copiedTitle": "Copied!",
+    "invitationCodeCopied": "Invitation code copied to clipboard!"
+  },
+  "adminStats": {
+    "title": "Agency Stats",
+    "adminOnly": "Admin only",
+    "profileViews": "Profile Views",
+    "subscriptionPlan": "Subscription Plan",
+    "featuredStatus": "Featured Status",
+    "featured": "Featured",
+    "notFeatured": "Not featured",
+    "featuredUntil": "Featured Until",
+    "memberSince": "Member Since"
+  },
+  "coupons": {
+    "promotionTitle": "Promotion Coupons",
+    "promotionSubtitle": "Monthly listing promotion allocation",
+    "monthly": "Monthly",
+    "available": "Available",
+    "used": "Used",
+    "usedThisMonth": "Used this month",
+    "agentCodesTitle": "Agent Registration Codes",
+    "total": "total",
+    "expired": "expired",
+    "seatsFilled": "{{used}} of {{total}} seats filled"
   },
   "weekdays": {
     "monday": "Monday",
