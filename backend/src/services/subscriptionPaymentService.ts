@@ -89,17 +89,19 @@ export async function processSubscriptionPayment(
       productId,
       status: { $in: ['active', 'grace', 'pending_cancellation'] },
     }).session(session);
-    let subscription = existingSubscription;
+    // eslint-disable-next-line prefer-const
+    let subscription!: NonNullable<typeof existingSubscription>;
 
     if (existingSubscription) {
-      if (!isProduction) paymentLogger.info('🔄 Renewing existing subscription:', subscription._id);
+      if (!isProduction) paymentLogger.info('🔄 Renewing existing subscription:', existingSubscription._id);
       // Renew existing subscription
-      subscription.expirationDate = expirationDate;
-      subscription.renewalDate = expirationDate;
-      subscription.status = 'active';
-      subscription.autoRenewing = true;
-      subscription.lastUpdated = new Date();
-      await subscription.save({ session });
+      existingSubscription.expirationDate = expirationDate;
+      existingSubscription.renewalDate = expirationDate;
+      existingSubscription.status = 'active';
+      existingSubscription.autoRenewing = true;
+      existingSubscription.lastUpdated = new Date();
+      await existingSubscription.save({ session });
+      subscription = existingSubscription;
       if (!isProduction) paymentLogger.info('✅ Subscription renewed successfully');
     } else {
       if (!isProduction) paymentLogger.info('➕ Creating new subscription...');
