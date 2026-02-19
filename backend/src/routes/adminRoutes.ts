@@ -37,7 +37,9 @@ import {
   sendTestAgencyCouponEmail,
   runMonthlyCouponRefreshManually,
 } from '../jobs/monthlyCouponJob';
-import { sendProSubscriptionWelcomeEmail, sendMonthlyCouponEmail } from '../services/emailService';
+import { sendProSubscriptionWelcomeEmail, sendMonthlyCouponEmail, sendSubscriptionInvoice } from '../services/emailService';
+import { generateProSubscriptionCoupons } from '../services/subscriptionPaymentService';
+import PaymentRecord from '../models/PaymentRecord';
 import Product from '../models/Product';
 import User from '../models/User';
 import Subscription from '../models/Subscription';
@@ -184,7 +186,7 @@ router.post('/test-emails/run-monthly-refresh', logAdminAction('RUN_MONTHLY_COUP
   }
 });
 
-// Resend Pro subscription welcome + coupons email to a specific user by email address
+// Resend Pro subscription welcome + coupons email (with generated codes) + invoice to a user
 router.post('/test-emails/resend-pro-welcome', logAdminAction('RESEND_PRO_WELCOME_EMAIL'), async (req: Request, res: Response): Promise<void> => {
   try {
     const { email } = req.body;
@@ -216,22 +218,37 @@ router.post('/test-emails/resend-pro-welcome', logAdminAction('RESEND_PRO_WELCOM
     }
 
     const billingPeriod = product.billingPeriod === 'yearly' ? 'yearly' : 'monthly';
-    const listingsLimit = product.listingsLimit ?? (billingPeriod === 'monthly' ? 20 : 250);
-    const totalCoupons = product.promotionCoupons ?? 3;
-    const highlightedCoupons = product.highlightedCoupons ?? 2;
-    const premiumCoupons = product.premiumCoupons ?? 1;
+    const totalCoupons = product.promotionCoupons ?? 0;
+    const highlightedCoupons = product.highlightedCoupons ?? 0;
+    const premiumCoupons = product.premiumCoupons ?? 0;
+    const featuredCoupons = product.featuredCoupons ?? 0;
+
+    // Generate actual PromotionCoupon codes
+    const generatedCodes = await generateProSubscriptionCoupons(
+      String(user._id),
+      highlightedCoupons,
+      premiumCoupons,
+      featuredCoupons,
+      subscription.expirationDate,
+    );
 
     await sendProSubscriptionWelcomeEmail({
       email: user.email,
       userName: user.name || user.email.split('@')[0],
       planName: product.name,
-      listingsLimit,
-      promotionCoupons: { total: totalCoupons, highlighted: highlightedCoupons, premium: premiumCoupons },
-      aiInsightsLimit: product.aiInsightsLimit ?? 20,
+      listingsLimit: product.listingsLimit ?? 0,
+      promotionCoupons: {
+        total: totalCoupons,
+        highlighted: highlightedCoupons,
+        premium: premiumCoupons,
+        featured: featuredCoupons,
+      },
+      aiInsightsLimit: product.aiInsightsLimit ?? 0,
       aiMessagesLimit: product.aiMessagesLimit ?? -1,
       savedSearchesLimit: product.savedSearchesLimit ?? -1,
       billingPeriod,
       expiresAt: subscription.expirationDate,
+      couponCodes: generatedCodes,
     });
 
     await sendMonthlyCouponEmail({
@@ -241,15 +258,34 @@ router.post('/test-emails/resend-pro-welcome', logAdminAction('RESEND_PRO_WELCOM
       totalCoupons,
       newCoupons: totalCoupons,
       rolledOver: 0,
-      breakdown: { highlighted: highlightedCoupons, premium: premiumCoupons, featured: 0 },
+      breakdown: { highlighted: highlightedCoupons, premium: premiumCoupons, featured: featuredCoupons },
+      couponCodes: generatedCodes,
     });
+
+    // Also send the invoice
+    const paymentRecord = await PaymentRecord.findOne({ userId: user._id })
+      .sort({ createdAt: -1 });
+
+    if (paymentRecord) {
+      await sendSubscriptionInvoice(user.email, user.name || 'Customer', {
+        planName: product.name,
+        amount: paymentRecord.amount,
+        currency: paymentRecord.currency || 'EUR',
+        billingPeriod,
+        orderId: String(paymentRecord._id),
+        subscriptionStartDate: subscription.startDate,
+        nextBillingDate: subscription.expirationDate,
+        autoRenewing: subscription.autoRenewing ?? true,
+      });
+    }
 
     res.json({
       success: true,
-      message: `Welcome email + coupons email resent to ${email} (${product.name})`,
+      message: `Welcome + coupons + invoice resent to ${email} (${product.name}). Generated ${generatedCodes.length} coupon codes.`,
+      couponCodes: generatedCodes,
     });
   } catch (error) {
-    res.status(500).json({ message: 'Failed to resend welcome email', error: String(error) });
+    res.status(500).json({ message: 'Failed to resend emails', error: String(error) });
   }
 });
 

@@ -2408,6 +2408,7 @@ Questions? Contact us at support@balkanestateai.com
     isAgency?: boolean;
     agencyName?: string;
     isAgentNotification?: boolean;
+    couponCodes?: Array<{ tier: 'highlight' | 'premium' | 'featured'; code: string }>;
   }): Promise<void> {
     const frontendUrl = process.env.FRONTEND_URL || 'https://balkanestateai.com';
 
@@ -2498,6 +2499,21 @@ Questions? Contact us at support@balkanestateai.com
         </div>
       </div>
 
+      <!-- Coupon Codes -->
+      ${params.couponCodes && params.couponCodes.length > 0 ? `
+      <div style="background: #f0fdf4; border-radius: 8px; padding: 16px; margin-bottom: 20px; border: 1px solid #86efac;">
+        <p style="color: #166534; font-size: 13px; font-weight: 600; margin: 0 0 10px 0;">🎫 Your coupon codes — copy and use when promoting a listing:</p>
+        ${params.couponCodes.map(c => {
+          const label = c.tier === 'highlight' ? '✨ Highlighted' : c.tier === 'premium' ? '💎 Premium' : '🔥 Featured';
+          const bg = c.tier === 'highlight' ? '#059669' : c.tier === 'premium' ? '#7c3aed' : '#dc2626';
+          return `<div style="display:flex; align-items:center; margin-bottom:6px;">
+            <span style="background:${bg}; color:#fff; border-radius:4px; padding:2px 8px; font-size:11px; font-weight:600; margin-right:8px; white-space:nowrap;">${label}</span>
+            <code style="background:#fff; border:1px solid #86efac; border-radius:4px; padding:4px 10px; font-size:13px; font-weight:700; letter-spacing:1px; color:#166534;">${escapeHtml(c.code)}</code>
+          </div>`;
+        }).join('')}
+      </div>
+      ` : ''}
+
       <!-- Info Box -->
       <div style="background: #eff6ff; border-radius: 8px; padding: 16px; margin-bottom: 24px; border-left: 4px solid #3b82f6;">
         <p style="color: #1e40af; font-size: 13px; margin: 0; line-height: 1.5;">
@@ -2536,7 +2552,7 @@ Questions? Contact us at support@balkanestateai.com
       to: params.email,
       subject: `🎟️ Your ${currentMonth} Promotion Coupons Are Ready! (${params.totalCoupons} available)`,
       html,
-      text: `Hey ${params.userName}!\n\nYour ${currentMonth} promotion coupons are ready!\n\nTotal Coupons: ${params.totalCoupons}\n- New this month: ${params.newCoupons}\n- Rolled over: ${params.rolledOver}\n\nBreakdown:\n- Highlighted: ${params.breakdown.highlighted}\n- Premium: ${params.breakdown.premium}\n- Featured: ${params.breakdown.featured}\n\nUse your coupons to boost your listings and get up to 5x more visibility!\n\nUse your coupons: ${frontendUrl}/promotions\n\n© ${currentYear} BalkanEstateᴬᴵ`,
+      text: `Hey ${params.userName}!\n\nYour ${currentMonth} promotion coupons are ready!\n\nTotal Coupons: ${params.totalCoupons}\n- New this month: ${params.newCoupons}\n- Rolled over: ${params.rolledOver}\n\nBreakdown:\n- Highlighted: ${params.breakdown.highlighted}\n- Premium: ${params.breakdown.premium}\n- Featured: ${params.breakdown.featured}\n${(params.couponCodes || []).length > 0 ? `\nYour coupon codes:\n${(params.couponCodes || []).map(c => `- ${c.tier.toUpperCase()}: ${c.code}`).join('\n')}\n` : ''}\nUse your coupons to boost your listings and get up to 5x more visibility!\n\nUse your coupons: ${frontendUrl}/promotions\n\n© ${currentYear} BalkanEstateᴬᴵ`,
       category: 'alerts',
     });
   }
@@ -3710,12 +3726,14 @@ Questions? Contact us at support@balkanestateai.com
       total: number;
       highlighted: number;
       premium: number;
+      featured: number;
     };
     aiInsightsLimit: number;
     aiMessagesLimit: number;
     savedSearchesLimit: number;
     billingPeriod: 'monthly' | 'yearly';
     expiresAt: Date;
+    couponCodes?: Array<{ tier: 'highlight' | 'premium' | 'featured'; code: string }>;
   }): Promise<void> {
     const frontendUrl = process.env.FRONTEND_URL || 'https://balkanestateai.com';
     const safeUserName = escapeHtml(params.userName);
@@ -3724,7 +3742,13 @@ Questions? Contact us at support@balkanestateai.com
 
     const formatLimit = (n: number) => (n === -1 ? 'Unlimited' : String(n));
     const expiryStr = params.expiresAt.toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
-    const couponBreakdown = `${params.promotionCoupons.highlighted} Highlighted + ${params.promotionCoupons.premium} Premium`;
+
+    const breakdownParts = [
+      params.promotionCoupons.highlighted > 0 ? `${params.promotionCoupons.highlighted} Highlighted` : '',
+      params.promotionCoupons.premium > 0 ? `${params.promotionCoupons.premium} Premium` : '',
+      params.promotionCoupons.featured > 0 ? `${params.promotionCoupons.featured} Featured` : '',
+    ].filter(Boolean);
+    const couponBreakdown = breakdownParts.join(' + ') || `${params.promotionCoupons.total} coupons`;
 
     const html = `
 <!DOCTYPE html>
@@ -3812,11 +3836,23 @@ Questions? Contact us at support@balkanestateai.com
         </table>
       </div>
 
-      <!-- Promotion Coupons Note -->
-      <div style="background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%); border-radius: 10px; padding: 16px; margin-bottom: 24px; border: 2px solid #f59e0b;">
-        <p style="color: #92400e; font-size: 14px; font-weight: 600; margin: 0 0 6px 0;">🎟️ Your first ${params.promotionCoupons.total} promotion coupons are ready!</p>
-        <p style="color: #78350f; font-size: 13px; margin: 0; line-height: 1.5;">
-          Use them to <strong>highlight</strong> or add <strong>premium placement</strong> to your listings and get more views.
+      <!-- Promotion Coupons -->
+      <div style="background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%); border-radius: 10px; padding: 20px; margin-bottom: 24px; border: 2px solid #f59e0b;">
+        <p style="color: #92400e; font-size: 14px; font-weight: 600; margin: 0 0 10px 0;">🎟️ Your first ${params.promotionCoupons.total} promotion coupons are ready! (${couponBreakdown})</p>
+        ${params.couponCodes && params.couponCodes.length > 0 ? `
+        <div style="margin-bottom: 10px;">
+          ${params.couponCodes.map(c => {
+            const label = c.tier === 'highlight' ? '✨ Highlighted' : c.tier === 'premium' ? '💎 Premium' : '🔥 Featured';
+            const bg = c.tier === 'highlight' ? '#059669' : c.tier === 'premium' ? '#7c3aed' : '#dc2626';
+            return `<div style="display: flex; align-items: center; margin-bottom: 6px;">
+              <span style="background:${bg}; color:#fff; border-radius:4px; padding:2px 8px; font-size:11px; font-weight:600; margin-right:8px; white-space:nowrap;">${label}</span>
+              <code style="background:#fff; border:1px solid #f59e0b; border-radius:4px; padding:4px 10px; font-size:13px; font-weight:700; letter-spacing:1px; color:#92400e;">${escapeHtml(c.code)}</code>
+            </div>`;
+          }).join('')}
+        </div>
+        ` : ''}
+        <p style="color: #78350f; font-size: 12px; margin: 0; line-height: 1.5;">
+          Copy a code and paste it when promoting a listing to use it for free.
           New coupons refresh at the start of each month.
         </p>
       </div>
@@ -3853,7 +3889,7 @@ Questions? Contact us at support@balkanestateai.com
       to: params.email,
       subject: `🎉 Welcome to ${params.planName} — Your Benefits Are Ready!`,
       html,
-      text: `Hi ${params.userName},\n\nWelcome to ${params.planName}! Your subscription is now active.\n\nYour plan includes:\n- ${params.listingsLimit} active listings per ${params.billingPeriod === 'monthly' ? 'month' : 'year'}\n- ${params.promotionCoupons.total} promotion coupons/month (${couponBreakdown})\n- ${formatLimit(params.aiMessagesLimit)} AI messages\n- ${formatLimit(params.aiInsightsLimit)} market insights/month\n- ${formatLimit(params.savedSearchesLimit)} saved searches\n- Unlimited auto-generate image descriptions\n\nYour first ${params.promotionCoupons.total} promotion coupons are already available!\n\nPlan: ${params.planName}\nActive until: ${expiryStr}\n\nStart posting: ${frontendUrl}/sell\n\n© ${currentYear} BalkanEstateᴬᴵ`,
+      text: `Hi ${params.userName},\n\nWelcome to ${params.planName}! Your subscription is now active.\n\nYour plan includes:\n- ${params.listingsLimit} active listings per ${params.billingPeriod === 'monthly' ? 'month' : 'year'}\n- ${params.promotionCoupons.total} promotion coupons/month (${couponBreakdown})\n- ${formatLimit(params.aiMessagesLimit)} AI messages\n- ${formatLimit(params.aiInsightsLimit)} market insights/month\n- ${formatLimit(params.savedSearchesLimit)} saved searches\n- Unlimited auto-generate image descriptions\n\nYour first ${params.promotionCoupons.total} promotion coupon codes:\n${(params.couponCodes || []).map(c => `- ${c.tier.toUpperCase()}: ${c.code}`).join('\n') || '(check your dashboard)'}\n\nPlan: ${params.planName}\nActive until: ${expiryStr}\n\nStart posting: ${frontendUrl}/sell\n\n© ${currentYear} BalkanEstateᴬᴵ`,
       category: 'alerts',
     });
   }

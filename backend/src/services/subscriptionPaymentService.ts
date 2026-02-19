@@ -5,6 +5,7 @@ import PaymentRecord from '../models/PaymentRecord';
 import SubscriptionEvent from '../models/SubscriptionEvent';
 import Product from '../models/Product';
 import Agency from '../models/Agency';
+import PromotionCoupon from '../models/PromotionCoupon';
 import { sendAgentRegistrationCouponsEmail, sendEnterpriseWelcomeEmail, sendSubscriptionInvoice, sendProSubscriptionWelcomeEmail, sendMonthlyCouponEmail } from './emailService';
 import { generateSecureRandomString } from '../utils/secureRandom';
 import { paymentLogger } from '../utils/logger';
@@ -249,26 +250,38 @@ export async function processSubscriptionPayment(
     if (isProProduct && isNewSubscription) {
       try {
         const billingPeriod = product.billingPeriod === 'yearly' ? 'yearly' : 'monthly';
-        const listingsLimit = product.listingsLimit ?? (billingPeriod === 'monthly' ? 20 : 250);
-        const totalCoupons = product.promotionCoupons ?? 3;
-        const highlightedCoupons = product.highlightedCoupons ?? 2;
-        const premiumCoupons = product.premiumCoupons ?? 1;
+        const listingsLimit = product.listingsLimit;
+        const totalCoupons = product.promotionCoupons;
+        const highlightedCoupons = product.highlightedCoupons;
+        const premiumCoupons = product.premiumCoupons;
+        const featuredCoupons = product.featuredCoupons;
+
+        // Generate actual PromotionCoupon codes for the user
+        const generatedCodes = await generateProSubscriptionCoupons(
+          String(userId),
+          highlightedCoupons ?? 0,
+          premiumCoupons ?? 0,
+          featuredCoupons ?? 0,
+          subscription.expirationDate,
+        );
 
         await sendProSubscriptionWelcomeEmail({
           email: user.email,
           userName: user.name || user.email.split('@')[0],
           planName: product.name,
-          listingsLimit,
+          listingsLimit: listingsLimit ?? 0,
           promotionCoupons: {
-            total: totalCoupons,
-            highlighted: highlightedCoupons,
-            premium: premiumCoupons,
+            total: totalCoupons ?? 0,
+            highlighted: highlightedCoupons ?? 0,
+            premium: premiumCoupons ?? 0,
+            featured: featuredCoupons ?? 0,
           },
-          aiInsightsLimit: product.aiInsightsLimit ?? 20,
+          aiInsightsLimit: product.aiInsightsLimit ?? 0,
           aiMessagesLimit: product.aiMessagesLimit ?? -1,
           savedSearchesLimit: product.savedSearchesLimit ?? -1,
           billingPeriod,
           expiresAt: subscription.expirationDate,
+          couponCodes: generatedCodes,
         });
         if (!isProduction) paymentLogger.info(`📧 Pro welcome email sent to ${user.email}`);
 
@@ -277,14 +290,15 @@ export async function processSubscriptionPayment(
           email: user.email,
           userName: user.name || user.email.split('@')[0],
           planName: product.name,
-          totalCoupons,
-          newCoupons: totalCoupons,
+          totalCoupons: totalCoupons ?? 0,
+          newCoupons: totalCoupons ?? 0,
           rolledOver: 0,
           breakdown: {
-            highlighted: highlightedCoupons,
-            premium: premiumCoupons,
-            featured: 0,
+            highlighted: highlightedCoupons ?? 0,
+            premium: premiumCoupons ?? 0,
+            featured: featuredCoupons ?? 0,
           },
+          couponCodes: generatedCodes,
         });
         if (!isProduction) paymentLogger.info(`🎟️ Initial coupons email sent to ${user.email}`);
       } catch (emailError) {
@@ -635,6 +649,52 @@ async function initializePromotionCoupons(
  * Generate agent coupon codes for new Enterprise subscriptions
  * Creates 5 coupon codes and sends email to the agency owner
  */
+/**
+ * Generate PromotionCoupon records for a new Pro subscriber.
+ * Returns an array of { tier, code } objects to embed in the welcome email.
+ */
+async function generateProSubscriptionCoupons(
+  userId: string,
+  highlightedCount: number,
+  premiumCount: number,
+  featuredCount: number,
+  validUntil: Date,
+): Promise<Array<{ tier: 'highlight' | 'premium' | 'featured'; code: string }>> {
+  const results: Array<{ tier: 'highlight' | 'premium' | 'featured'; code: string }> = [];
+
+  const tiers: Array<{ tier: 'highlight' | 'premium' | 'featured'; count: number }> = [
+    { tier: 'highlight', count: highlightedCount },
+    { tier: 'premium', count: premiumCount },
+    { tier: 'featured', count: featuredCount },
+  ];
+
+  for (const { tier, count } of tiers) {
+    for (let i = 0; i < count; i++) {
+      const prefix = tier === 'highlight' ? 'HL' : tier === 'premium' ? 'PR' : 'FT';
+      const code = `${prefix}-${userId.slice(-5).toUpperCase()}-${generateSecureRandomString(6).toUpperCase()}`;
+
+      await PromotionCoupon.create({
+        code,
+        description: `Pro subscription ${tier} coupon for user ${userId}`,
+        discountType: 'percentage',
+        discountValue: 100,
+        validFrom: new Date(),
+        validUntil,
+        status: 'active',
+        maxTotalUses: 1,
+        maxUsesPerUser: 1,
+        applicableTiers: [tier],
+        isPublic: false,
+        notes: `Auto-generated for userId:${userId}`,
+      });
+
+      results.push({ tier, code });
+    }
+  }
+
+  return results;
+}
+
 async function generateEnterpriseAgentCoupons(
   userId: string,
   ownerName: string,
@@ -727,8 +787,7 @@ async function generateEnterpriseAgentCoupons(
   }
 }
 
-// Named export for the function
-export { generateEnterpriseAgentCoupons };
+export { generateEnterpriseAgentCoupons, generateProSubscriptionCoupons };
 
 export default {
   processSubscriptionPayment,
@@ -736,4 +795,5 @@ export default {
   updateExpiredSubscriptions,
   verifyPaymentIntegrity,
   generateEnterpriseAgentCoupons,
+  generateProSubscriptionCoupons,
 };
