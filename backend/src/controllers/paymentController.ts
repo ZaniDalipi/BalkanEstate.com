@@ -165,16 +165,16 @@ export const processPayment = async (req: Request, res: Response): Promise<void>
       return;
     }
 
-    // Determine product ID based on plan name and interval
-    let productId = 'buyer_pro_monthly';
+    // Determine product ID based on plan name and interval (must match DB product IDs)
+    let productId = 'buyer_monthly';
     if (planName.toLowerCase().includes('buyer') && planInterval === 'month') {
-      productId = 'buyer_pro_monthly';
+      productId = 'buyer_monthly';
     } else if (planName.toLowerCase().includes('buyer') && planInterval === 'year') {
-      productId = 'buyer_pro_yearly';
+      productId = 'buyer_yearly';
     } else if (planName.toLowerCase().includes('seller') && planInterval === 'month') {
-      productId = 'seller_premium_monthly';
+      productId = 'seller_pro_monthly';
     } else if (planName.toLowerCase().includes('seller') && planInterval === 'year') {
-      productId = 'seller_premium_yearly';
+      productId = 'seller_pro_yearly';
     }
 
     // Try to find the product, or create a default one

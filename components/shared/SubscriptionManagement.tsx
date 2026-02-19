@@ -954,6 +954,17 @@ const SubscriptionManagement: React.FC<SubscriptionManagementProps> = ({ userId 
     (subscription?.status === 'expired');
 
   if (showNoSubscription && !isCancelledButActive) {
+    // Build benefit list from DB product data based on user role
+    const isBuyerRole = user?.role === 'buyer';
+    const featuredProduct = isBuyerRole
+      ? products.find(p => p.productId === 'buyer_monthly') || products.find(p => p.targetRole === 'buyer')
+      : products.find(p => p.productId === 'seller_pro_yearly') || products.find(p => p.productId === 'pro_yearly') || products.find(p => p.targetRole === 'seller' && p.billingPeriod === 'yearly');
+    const noBenefits: string[] = featuredProduct?.features?.slice(0, 4) ?? (
+      isBuyerRole
+        ? ['Instant Property Alerts', 'Unlimited Saved Searches', 'Early Access to Listings', 'Advanced Market Insights']
+        : ['250 Listings/Year', '3 Promo Coupons/Month', 'Unlimited AI Chat', '20 Insights/Month']
+    );
+
     return (
       <div className="max-w-2xl mx-auto">
         <div className="relative overflow-hidden bg-gradient-to-br from-white via-primary-light/5 to-white rounded-2xl shadow-lg border border-neutral-200/50 p-8 md:p-12">
@@ -973,7 +984,7 @@ const SubscriptionManagement: React.FC<SubscriptionManagementProps> = ({ userId 
             </div>
 
             <div className="grid sm:grid-cols-2 gap-3 max-w-lg mx-auto pt-4">
-              {['250 Listings/Year', '3 Promo Coupons/Month', 'Unlimited AI Chat', '20 Insights/Month'].map((benefit, idx) => (
+              {noBenefits.map((benefit, idx) => (
                 <div key={idx} className="flex items-center gap-3 p-3 bg-white rounded-lg border border-neutral-200">
                   <CheckCircleIcon className="w-5 h-5 text-primary flex-shrink-0" />
                   <span className="text-sm text-neutral-700">{benefit}</span>

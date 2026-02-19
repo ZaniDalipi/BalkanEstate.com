@@ -53,7 +53,7 @@ export interface IUser extends Document {
 
   // Enhanced Subscription Fields
   isSubscribed: boolean;
-  subscriptionPlan?: string; // Product ID (e.g., 'buyer_pro_monthly')
+  subscriptionPlan?: string; // Product ID (e.g., 'buyer_monthly')
   subscriptionProductName?: string; // Human-readable name (e.g., 'Buyer Pro Monthly')
   subscriptionSource?: 'google' | 'apple' | 'web'; // Where subscription came from
   subscriptionExternalId?: string; // External subscription ID from payment provider
@@ -414,7 +414,7 @@ const UserSchema: Schema = new Schema(
       index: true, // Index for fast subscription queries
     },
     subscriptionPlan: {
-      type: String, // Product ID (e.g., 'buyer_pro_monthly', 'seller_premium_yearly')
+      type: String, // Product ID (e.g., 'buyer_monthly', 'seller_pro_yearly')
     },
     subscriptionProductName: {
       type: String, // Human-readable name (e.g., 'Buyer Pro Monthly')

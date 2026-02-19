@@ -388,7 +388,7 @@ const UserManagerDetail: React.FC<UserManagerDetailProps> = ({
                       value={editForm.subscriptionPlan}
                       onChange={(e) => setEditForm({ ...editForm, subscriptionPlan: e.target.value })}
                       className="w-full px-4 py-2 border border-gray-300 rounded-lg"
-                      placeholder="e.g., buyer_pro_monthly"
+                      placeholder="e.g., buyer_monthly"
                     />
                   </div>
                   <div>

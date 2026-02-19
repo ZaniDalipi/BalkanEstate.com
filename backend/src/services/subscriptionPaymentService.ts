@@ -184,7 +184,7 @@ export async function processSubscriptionPayment(
     // 6. Update user with subscription info
     if (!isProduction) paymentLogger.info('👤 Updating user subscription info...');
     user.isSubscribed = true;
-    user.subscriptionPlan = productId; // Product ID (e.g., 'buyer_pro_monthly')
+    user.subscriptionPlan = productId; // Product ID (e.g., 'buyer_monthly')
     user.subscriptionProductName = product.name; // Human-readable name
     user.subscriptionSource = store; // Track where subscription came from
     user.subscriptionExpiresAt = expirationDate;
