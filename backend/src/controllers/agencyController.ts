@@ -2165,6 +2165,61 @@ export const usePromotionCoupon = async (
   }
 };
 
+// @desc    Send promotion coupons summary email to agency owner
+// @route   POST /api/agencies/:id/coupons/send-promotion-email
+// @access  Private (Agency owner)
+export const sendPromotionCouponsEmailEndpoint = async (
+  req: Request,
+  res: Response
+): Promise<void> => {
+  try {
+    if (!req.user) {
+      res.status(401).json({ message: 'Not authorized' });
+      return;
+    }
+
+    const currentUser = req.user as IUser;
+    const agency = await Agency.findById(req.params.id);
+
+    if (!agency) {
+      res.status(404).json({ message: 'Agency not found' });
+      return;
+    }
+
+    // Only agency owner can send this email
+    if (String(agency.ownerId) !== String(currentUser._id)) {
+      res.status(403).json({ message: 'Only the agency owner can request this email' });
+      return;
+    }
+
+    const user = await User.findById(String(currentUser._id));
+    if (!user) {
+      res.status(404).json({ message: 'User not found' });
+      return;
+    }
+
+    const promotionCoupons = agency.promotionCoupons || { monthly: 0, available: 0, used: 0 };
+
+    const { sendPromotionCouponsEmail } = await import('../services/emailService');
+    await sendPromotionCouponsEmail({
+      email: user.email,
+      ownerName: user.name || 'Agency Owner',
+      agencyName: agency.name,
+      promotionCoupons: {
+        monthly: promotionCoupons.monthly,
+        available: promotionCoupons.available,
+        used: promotionCoupons.used,
+      },
+    });
+
+    agencyLogger.info(`📧 Promotion coupons email sent to ${user.email} for agency ${agency.name}`);
+    res.json({ message: 'Promotion coupons email sent successfully' });
+  } catch (error) {
+    agencyLogger.error('Error sending promotion coupons email:', error);
+    res.status(500).json({ message: 'Failed to send promotion coupons email' });
+  }
+};
+
 // @desc    Get agency agents with subscription details
 // @route   GET /api/agencies/:id/agents
 // @access  Private (Agency owner)

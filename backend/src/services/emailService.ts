@@ -3597,6 +3597,109 @@ Questions? Contact us at support@balkanestateai.com
       category: 'inquiries',
     });
   }
+  // Send promotion coupons summary email to agency owner
+  async sendPromotionCouponsEmail(params: {
+    email: string;
+    ownerName: string;
+    agencyName: string;
+    promotionCoupons: {
+      monthly: number;
+      available: number;
+      used: number;
+    };
+  }): Promise<void> {
+    const frontendUrl = process.env.FRONTEND_URL || 'https://balkanestateai.com';
+    const safeOwnerName = escapeHtml(params.ownerName);
+    const safeAgencyName = escapeHtml(params.agencyName);
+    const currentYear = new Date().getFullYear();
+    const { monthly, available, used } = params.promotionCoupons;
+
+    const html = `
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body style="margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f3f4f6; -webkit-font-smoothing: antialiased;">
+  <div style="display: none; max-height: 0; overflow: hidden;">
+    Your promotion coupons summary for ${safeAgencyName}.
+  </div>
+
+  <div style="max-width: 650px; margin: 0 auto; background-color: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);">
+    <!-- Header -->
+    <div style="background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); padding: 32px 24px; text-align: center;">
+      <div style="margin-bottom: 12px;">
+        <span style="display: inline-block; width: 60px; height: 60px; background: rgba(255,255,255,0.2); border-radius: 50%; line-height: 60px; font-size: 28px;">🎁</span>
+      </div>
+      <h1 style="color: #ffffff; margin: 0; font-size: 24px; font-weight: 700;">Promotion Coupons</h1>
+      <p style="color: rgba(255,255,255,0.85); margin: 8px 0 0 0; font-size: 14px;">${safeAgencyName} • Monthly Summary</p>
+    </div>
+
+    <div style="padding: 28px 24px;">
+      <p style="color: #374151; font-size: 16px; margin: 0 0 20px 0;">
+        Hello ${safeOwnerName}! 👋
+      </p>
+
+      <p style="color: #4b5563; font-size: 15px; line-height: 1.6; margin: 0 0 24px 0;">
+        Here's your current promotion coupons summary for <strong>${safeAgencyName}</strong>.
+        Use these coupons to highlight, feature, or boost your agency's property listings!
+      </p>
+
+      <!-- Coupons Summary -->
+      <div style="display: flex; gap: 12px; margin-bottom: 24px;">
+        <div style="flex: 1; background: #fffbeb; border: 1px solid #fde68a; border-radius: 12px; padding: 16px; text-align: center;">
+          <p style="color: #d97706; font-size: 28px; font-weight: 700; margin: 0;">${monthly}</p>
+          <p style="color: #92400e; font-size: 12px; margin: 4px 0 0 0; text-transform: uppercase; font-weight: 600;">Monthly</p>
+        </div>
+        <div style="flex: 1; background: #ecfdf5; border: 1px solid #a7f3d0; border-radius: 12px; padding: 16px; text-align: center;">
+          <p style="color: #059669; font-size: 28px; font-weight: 700; margin: 0;">${available}</p>
+          <p style="color: #065f46; font-size: 12px; margin: 4px 0 0 0; text-transform: uppercase; font-weight: 600;">Available</p>
+        </div>
+        <div style="flex: 1; background: #f3f4f6; border: 1px solid #e5e7eb; border-radius: 12px; padding: 16px; text-align: center;">
+          <p style="color: #374151; font-size: 28px; font-weight: 700; margin: 0;">${used}</p>
+          <p style="color: #6b7280; font-size: 12px; margin: 4px 0 0 0; text-transform: uppercase; font-weight: 600;">Used</p>
+        </div>
+      </div>
+
+      <!-- How to Use -->
+      <div style="background: #1e293b; border-radius: 8px; padding: 16px; margin-bottom: 24px; border-left: 4px solid #f59e0b;">
+        <h3 style="color: #ffffff; font-size: 14px; font-weight: 600; margin: 0 0 8px 0;">📋 How to Use Promotion Coupons</h3>
+        <ol style="color: #e2e8f0; font-size: 13px; margin: 0; padding-left: 20px; line-height: 1.6;">
+          <li>Go to any of your active listings</li>
+          <li>Click <strong style="color: #fbbf24;">Promote Listing</strong></li>
+          <li>Select the promotion type (Highlight, Premium, or Featured)</li>
+          <li>Your coupon will be applied automatically!</li>
+        </ol>
+      </div>
+
+      <!-- CTA Button -->
+      <div style="text-align: center; margin: 28px 0;">
+        <a href="${frontendUrl}/agency/dashboard"
+           style="display: inline-block; background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); color: #ffffff; text-decoration: none; padding: 16px 32px; border-radius: 10px; font-weight: 600; font-size: 16px; box-shadow: 0 4px 14px rgba(245, 158, 11, 0.3);">
+          Go to Dashboard →
+        </a>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <div style="background: #0f172a; padding: 20px; text-align: center; border-top: 1px solid #334155;">
+      <p style="color: #64748b; font-size: 12px; margin: 0;">
+        &copy; ${currentYear} BalkanEstate<sup>AI</sup> • Promotion coupons refresh monthly
+      </p>
+    </div>
+  </div>
+</body>
+</html>`;
+
+    await this.sendEmail({
+      to: params.email,
+      subject: `🎁 Promotion Coupons Summary — ${safeAgencyName}`,
+      html,
+      text: `Hello ${params.ownerName},\n\nHere's your promotion coupons summary for ${params.agencyName}.\n\nMonthly: ${monthly}\nAvailable: ${available}\nUsed: ${used}\n\nUse these coupons to highlight, feature, or boost your listings!\n\nVisit: ${frontendUrl}/agency/dashboard\n\n© ${currentYear} BalkanEstateᴬᴵ`,
+      category: 'subscriptions',
+    });
+  }
 }
 
 const emailServiceInstance = new EmailService();
@@ -3627,3 +3730,4 @@ export const sendViewingApproved = emailServiceInstance.sendViewingApproved.bind
 export const sendViewingRejected = emailServiceInstance.sendViewingRejected.bind(emailServiceInstance);
 export const sendSubscriptionInvoice = emailServiceInstance.sendSubscriptionInvoice.bind(emailServiceInstance);
 export const sendPaymentConfirmation = emailServiceInstance.sendPaymentConfirmation.bind(emailServiceInstance);
+export const sendPromotionCouponsEmail = emailServiceInstance.sendPromotionCouponsEmail.bind(emailServiceInstance);

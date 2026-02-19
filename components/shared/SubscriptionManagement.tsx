@@ -214,6 +214,14 @@ interface AgentCouponData {
   usedAt?: string;
 }
 
+// Promotion coupon data from backend
+interface PromotionCouponData {
+  monthly: number;
+  available: number;
+  used: number;
+  lastRefresh: string;
+}
+
 interface AgencyTeamData {
   agencyId: string;
   invitationCode: string;
@@ -225,6 +233,7 @@ interface AgencyTeamData {
     used: number;
     canGenerateMore: boolean;
   } | null;
+  promotionCoupons: PromotionCouponData | null;
 }
 
 const SubscriptionManagement: React.FC<SubscriptionManagementProps> = ({ userId }) => {
@@ -247,6 +256,8 @@ const SubscriptionManagement: React.FC<SubscriptionManagementProps> = ({ userId 
   const [loadingAgencyData, setLoadingAgencyData] = useState(false);
   const [copiedCode, setCopiedCode] = useState<string | null>(null);
   const [generatingCoupons, setGeneratingCoupons] = useState(false);
+  const [sendingPromotionEmail, setSendingPromotionEmail] = useState(false);
+  const [promotionEmailSent, setPromotionEmailSent] = useState(false);
 
   // Payment window state
   const [showPaymentWindow, setShowPaymentWindow] = useState(false);
@@ -439,9 +450,11 @@ const SubscriptionManagement: React.FC<SubscriptionManagementProps> = ({ userId 
         });
 
         let agentCoupons = null;
+        let promotionCoupons: PromotionCouponData | null = null;
         if (couponsResponse.ok) {
           const couponsData = await couponsResponse.json();
           agentCoupons = couponsData.agentCoupons;
+          promotionCoupons = couponsData.promotionCoupons || null;
         }
 
         setAgencyTeamData({
@@ -450,6 +463,7 @@ const SubscriptionManagement: React.FC<SubscriptionManagementProps> = ({ userId 
           totalAgents: agency.totalAgents || agency.agents?.length || 0,
           maxAgents: enterpriseMaxAgents, // Derived from enterprise product teamMembersLimit in DB
           agentCoupons,
+          promotionCoupons,
         });
       } catch (error) {
       } finally {
@@ -499,6 +513,36 @@ const SubscriptionManagement: React.FC<SubscriptionManagementProps> = ({ userId 
     }
   };
 
+  // Handle sending promotion coupons email
+  const handleSendPromotionEmail = async () => {
+    if (!agencyTeamData?.agencyId) return;
+
+    setSendingPromotionEmail(true);
+    setPromotionEmailSent(false);
+    try {
+      const token = localStorage.getItem('balkan_estate_token');
+      const response = await fetch(`${API_URL}/agencies/${agencyTeamData.agencyId}/coupons/send-promotion-email`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (response.ok) {
+        setPromotionEmailSent(true);
+        setTimeout(() => setPromotionEmailSent(false), 3000);
+      } else {
+        const data = await response.json();
+        setActionError(data.message || 'Failed to send promotion coupons email');
+      }
+    } catch (error) {
+      setActionError('Failed to send promotion coupons email');
+    } finally {
+      setSendingPromotionEmail(false);
+    }
+  };
+
   // Calculate actual days in the subscription period based on calendar
   const calculateActualDays = (startDate: Date, endDate: Date): number => {
     const diffTime = Math.abs(endDate.getTime() - startDate.getTime());
@@ -519,7 +563,12 @@ const SubscriptionManagement: React.FC<SubscriptionManagementProps> = ({ userId 
     const daysUsed = Math.max(0, Math.ceil((now.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24)));
     const daysRemaining = Math.max(0, Math.ceil((expirationDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24)));
 
-    const currentPlanKey = subscription.productId || 'free';
+    // Agency creators (isEnterpriseTier) should always show Enterprise plan,
+    // even if their subscription record says agency_agent_yearly
+    const rawPlanKey = subscription.productId || 'free';
+    const currentPlanKey = (user?.isEnterpriseTier && (rawPlanKey === 'agency_agent_yearly' || rawPlanKey === 'free'))
+      ? 'agency_yearly'
+      : rawPlanKey;
     const currentPlan = plans[currentPlanKey] || FREE_PLAN;
 
     // Calculate daily rate based on actual subscription price and days
@@ -557,7 +606,11 @@ const SubscriptionManagement: React.FC<SubscriptionManagementProps> = ({ userId 
   // Get current product for placeholder replacement
   const currentProduct = useMemo((): ProductValues | null => {
     if (!subscription) return null;
-    const product = products.find(p => p.productId === subscription.productId);
+    // For enterprise users, look up the agency_yearly product instead of their subscription productId
+    const effectiveProductId = (user?.isEnterpriseTier && (subscription.productId === 'agency_agent_yearly' || subscription.productId === 'free'))
+      ? 'agency_yearly'
+      : subscription.productId;
+    const product = products.find(p => p.productId === effectiveProductId) || products.find(p => p.productId === subscription.productId);
     if (!product) return null;
     return {
       listingsLimit: product.listingsLimit,
@@ -1258,35 +1311,44 @@ const SubscriptionManagement: React.FC<SubscriptionManagementProps> = ({ userId 
         )}
       </div>
 
-      {/* Team Members Section - Only show for agency owners */}
-      {agencyTeamData && (
+      {/* Team Members Section - Only show for agency creators (Enterprise plan holders) */}
+      {agencyTeamData && user?.isEnterpriseTier && (
         <div className="bg-white rounded-xl border border-neutral-200 p-4 shadow-sm">
-          {/* Header with count */}
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="p-2 bg-purple-100 rounded-lg">
-                <TeamIcon className="w-5 h-5 text-purple-600" />
-              </div>
-              <div>
-                <p className="font-semibold text-neutral-800">Team Members</p>
-                <p className="text-sm text-neutral-500">
-                  {agencyTeamData.totalAgents} of {agencyTeamData.maxAgents} agents registered
-                </p>
-              </div>
-            </div>
-            <div className="text-right">
-              <p className="text-2xl font-bold text-neutral-800">
-                {agencyTeamData.maxAgents - agencyTeamData.totalAgents}
-              </p>
-              <p className="text-xs text-neutral-500">slots remaining</p>
-            </div>
-          </div>
-          <div className="mt-3 w-full bg-neutral-100 rounded-full h-2 overflow-hidden">
-            <div
-              className="bg-purple-500 h-full rounded-full transition-all duration-500"
-              style={{ width: `${Math.min(100, (agencyTeamData.totalAgents / agencyTeamData.maxAgents) * 100)}%` }}
-            />
-          </div>
+          {/* Header with coupon usage count */}
+          {(() => {
+            const totalCoupons = agencyTeamData.agentCoupons?.coupons?.length ?? 5;
+            const usedCoupons = agencyTeamData.agentCoupons?.used ?? 0;
+            const remainingCoupons = totalCoupons - usedCoupons;
+            return (
+              <>
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="p-2 bg-purple-100 rounded-lg">
+                      <TeamIcon className="w-5 h-5 text-purple-600" />
+                    </div>
+                    <div>
+                      <p className="font-semibold text-neutral-800">Team Members</p>
+                      <p className="text-sm text-neutral-500">
+                        {usedCoupons} of {totalCoupons} codes used
+                      </p>
+                    </div>
+                  </div>
+                  <div className="text-right">
+                    <p className="text-2xl font-bold text-neutral-800">
+                      {remainingCoupons}
+                    </p>
+                    <p className="text-xs text-neutral-500">codes remaining</p>
+                  </div>
+                </div>
+                <div className="mt-3 w-full bg-neutral-100 rounded-full h-2 overflow-hidden">
+                  <div
+                    className="bg-purple-500 h-full rounded-full transition-all duration-500"
+                    style={{ width: `${totalCoupons > 0 ? Math.min(100, (usedCoupons / totalCoupons) * 100) : 0}%` }}
+                  />
+                </div>
+              </>
+            );
+          })()}
 
           {/* Invitation Code */}
           {agencyTeamData.invitationCode && (
@@ -1421,11 +1483,72 @@ const SubscriptionManagement: React.FC<SubscriptionManagementProps> = ({ userId 
             </div>
           )}
 
+          {/* Promotion Coupons Section */}
+          {agencyTeamData.promotionCoupons && (
+            <div className="mt-4 pt-4 border-t border-neutral-100">
+              <div className="flex items-center justify-between mb-3">
+                <div>
+                  <p className="text-sm font-medium text-neutral-700">Promotion Coupons</p>
+                  <p className="text-xs text-neutral-500">
+                    {agencyTeamData.promotionCoupons.available} available • {agencyTeamData.promotionCoupons.used} used this month
+                  </p>
+                </div>
+                <button
+                  onClick={handleSendPromotionEmail}
+                  disabled={sendingPromotionEmail}
+                  className="inline-flex items-center gap-1.5 text-sm text-primary hover:text-primary-dark font-medium disabled:opacity-50"
+                >
+                  {sendingPromotionEmail ? (
+                    <>
+                      <svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                      </svg>
+                      Sending...
+                    </>
+                  ) : promotionEmailSent ? (
+                    <>
+                      <CheckCircleIcon className="w-4 h-4 text-green-500" />
+                      Sent!
+                    </>
+                  ) : (
+                    <>
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                      </svg>
+                      Send via Email
+                    </>
+                  )}
+                </button>
+              </div>
+
+              {/* Promotion coupons breakdown */}
+              <div className="grid grid-cols-3 gap-2">
+                <div className="bg-amber-50 border border-amber-200 rounded-lg p-2.5 text-center">
+                  <p className="text-lg font-bold text-amber-700">{agencyTeamData.promotionCoupons.monthly}</p>
+                  <p className="text-xs text-amber-600">Monthly</p>
+                </div>
+                <div className="bg-green-50 border border-green-200 rounded-lg p-2.5 text-center">
+                  <p className="text-lg font-bold text-green-700">{agencyTeamData.promotionCoupons.available}</p>
+                  <p className="text-xs text-green-600">Available</p>
+                </div>
+                <div className="bg-neutral-50 border border-neutral-200 rounded-lg p-2.5 text-center">
+                  <p className="text-lg font-bold text-neutral-700">{agencyTeamData.promotionCoupons.used}</p>
+                  <p className="text-xs text-neutral-500">Used</p>
+                </div>
+              </div>
+
+              <p className="text-xs text-neutral-400 mt-2">
+                Refreshes monthly • Last refresh: {new Date(agencyTeamData.promotionCoupons.lastRefresh).toLocaleDateString()}
+              </p>
+            </div>
+          )}
+
           {/* Info about agent benefits */}
           <div className="mt-4 pt-4 border-t border-neutral-100">
             <div className="bg-purple-50 rounded-lg p-3">
               <p className="text-xs text-purple-700">
-                <strong>Agent Benefits:</strong> Each agent gets 20 active listings per month with their subscription coupon.
+                <strong>Agent Benefits:</strong> Each agent gets 25 active listings per year with their subscription coupon.
                 Agents can use the agency promotion pool for featured listings.
               </p>
             </div>
