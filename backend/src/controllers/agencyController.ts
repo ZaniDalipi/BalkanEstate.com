@@ -199,6 +199,7 @@ export const createAgency = async (
 
     // Generate 5 agent registration coupons for Enterprise subscribers
     let agentCouponsGenerated = false;
+    let agentCouponsEmailSent = false;
     let generatedCoupons: Array<{ code: string; expiresAt: Date }> = [];
 
     // Check if user has Enterprise subscription
@@ -249,6 +250,7 @@ export const createAgency = async (
         agencyLogger.info(`🎟️ Generated 5 agent registration coupons and ${monthlyPromotionAmount} promotion coupons for new agency ${agency.name}`);
 
         // Send emails with coupon codes and welcome message
+        let emailSent = false;
         try {
           const { sendAgentRegistrationCouponsEmail, sendEnterpriseWelcomeEmail } = await import('../services/emailService');
 
@@ -268,7 +270,6 @@ export const createAgency = async (
             agencyName: agency.name,
             coupons: generatedCoupons,
           });
-          // Sent agent registration coupons email
 
           // Send welcome/thank you email with promotion coupon breakdown
           await sendEnterpriseWelcomeEmail({
@@ -280,7 +281,9 @@ export const createAgency = async (
             teamMembersLimit: enterpriseProduct?.teamMembersLimit || ENTERPRISE_TIER_LIMITS.TEAM_MEMBERS,
             listingsLimit: enterpriseProduct?.listingsLimit || ENTERPRISE_TIER_LIMITS.LISTINGS,
           });
-          // Sent Enterprise welcome email with coupon breakdown
+          emailSent = true;
+          agentCouponsEmailSent = true;
+          agencyLogger.info(`📧 Enterprise welcome emails sent to ${user.email}`);
         } catch (emailError) {
           agencyLogger.error('⚠️ Failed to send Enterprise emails:', emailError);
         }
@@ -304,13 +307,55 @@ export const createAgency = async (
         ? {
             generated: true,
             count: generatedCoupons.length,
-            message: '🎟️ 5 agent registration codes have been sent to your email!',
+            codes: generatedCoupons.map(c => ({ code: c.code, expiresAt: c.expiresAt })),
+            emailSent: agentCouponsEmailSent,
+            message: '🎟️ 5 agent registration codes generated! Check your email or the codes below.',
           }
         : undefined,
     });
   } catch (error: any) {
     agencyLogger.error('Create agency error:', error);
-    res.status(500).json({ message: 'Error creating agency' });
+
+    // Handle MongoDB duplicate key errors with specific messages
+    if (error.code === 11000) {
+      const keyPattern = error.keyPattern || {};
+      const field = Object.keys(keyPattern)[0] || '';
+
+      if (field === 'slug') {
+        res.status(400).json({
+          message: 'An agency with this name already exists in this country. Please choose a different agency name.',
+          code: 'DUPLICATE_AGENCY_NAME',
+        });
+      } else if (field === 'ownerId') {
+        res.status(400).json({
+          message: 'You already have an agency profile associated with your account.',
+          code: 'AGENCY_ALREADY_EXISTS',
+        });
+      } else if (field === 'invitationCode') {
+        res.status(400).json({
+          message: 'Could not generate a unique invitation code. Please try again.',
+          code: 'DUPLICATE_INVITATION_CODE',
+        });
+      } else {
+        res.status(400).json({
+          message: 'An agency with this information already exists. Please check your details and try again.',
+          code: 'DUPLICATE_KEY',
+        });
+      }
+      return;
+    }
+
+    // Handle Mongoose validation errors
+    if (error.name === 'ValidationError') {
+      const messages = Object.values(error.errors).map((e: any) => e.message).join(', ');
+      res.status(400).json({
+        message: `Validation failed: ${messages}`,
+        code: 'VALIDATION_ERROR',
+      });
+      return;
+    }
+
+    res.status(500).json({ message: 'Error creating agency. Please try again.' });
   }
 };
 
