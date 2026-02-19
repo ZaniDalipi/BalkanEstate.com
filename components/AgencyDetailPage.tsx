@@ -1766,21 +1766,53 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
                     <span className="text-xs text-slate-400">{t('invitationCode.description', 'Share with agents to join your agency')}</span>
                   </div>
                   <div className="flex items-center gap-2 flex-wrap">
-                    <code className="px-3 py-2 bg-white border border-amber-200 rounded-lg font-mono text-sm font-bold text-slate-900 tracking-widest shadow-sm">
-                      {agencyData.invitationCode || '—'}
-                    </code>
-                    {agencyData.invitationCode && (
+                    {agencyData.invitationCode ? (
+                      <>
+                        <code className="px-3 py-2 bg-white border border-amber-200 rounded-lg font-mono text-sm font-bold text-slate-900 tracking-widest shadow-sm">
+                          {agencyData.invitationCode}
+                        </code>
+                        <button
+                          onClick={async () => {
+                            navigator.clipboard.writeText(agencyData.invitationCode || '');
+                            await success(t('messages.copiedTitle', 'Copied!'), t('messages.invitationCodeCopied', 'Invitation code copied to clipboard!'));
+                          }}
+                          className="inline-flex items-center gap-1.5 px-3 py-2 bg-amber-500 text-white text-xs font-semibold rounded-lg hover:bg-amber-600 transition-colors shadow-sm"
+                        >
+                          <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                          </svg>
+                          {t('invitationCode.copy', 'Copy')}
+                        </button>
+                      </>
+                    ) : (
                       <button
                         onClick={async () => {
-                          navigator.clipboard.writeText(agencyData.invitationCode || '');
-                          await success(t('messages.copiedTitle', 'Copied!'), t('messages.invitationCodeCopied', 'Invitation code copied to clipboard!'));
+                          try {
+                            const token = localStorage.getItem('token');
+                            const response = await fetch(`${API_URL}/agencies/${agencyData._id || agencyData.id}`, {
+                              method: 'PUT',
+                              headers: {
+                                'Content-Type': 'application/json',
+                                'Authorization': `Bearer ${token}`,
+                              },
+                              body: JSON.stringify({ generateInvitationCode: true }),
+                            });
+                            if (!response.ok) throw new Error('Failed to generate code');
+                            const data = await response.json();
+                            if (data.agency?.invitationCode) {
+                              setAgencyData(prev => ({ ...prev, invitationCode: data.agency.invitationCode }));
+                              await success(t('invitationCode.generatedTitle', 'Code Generated'), t('invitationCode.generatedMessage', 'Invitation code has been generated successfully'));
+                            }
+                          } catch {
+                            await error(t('messages.errorTitle', 'Error'), t('invitationCode.generateFailed', 'Failed to generate invitation code'));
+                          }
                         }}
                         className="inline-flex items-center gap-1.5 px-3 py-2 bg-amber-500 text-white text-xs font-semibold rounded-lg hover:bg-amber-600 transition-colors shadow-sm"
                       >
                         <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
                         </svg>
-                        {t('invitationCode.copy', 'Copy')}
+                        {t('invitationCode.generate', 'Generate Code')}
                       </button>
                     )}
                   </div>

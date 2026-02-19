@@ -45,7 +45,11 @@
   "invitationCode": {
     "title": "Agency Invitation Code",
     "description": "Share this code with agents you want to join your agency",
-    "copy": "Copy"
+    "copy": "Copy",
+    "generate": "Generate Code",
+    "generatedTitle": "Code Generated",
+    "generatedMessage": "Invitation code has been generated successfully",
+    "generateFailed": "Failed to generate invitation code"
   },
   "actions": {
     "editAgency": "Edit Agency",
