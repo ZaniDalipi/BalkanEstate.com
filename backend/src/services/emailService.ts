@@ -3,6 +3,7 @@ import { Resend } from 'resend';
 import User from '../models/User';
 import { getPromoTemplate, BRAND_COLORS } from '../templates/emailTemplates';
 import { emailLogger } from '../utils/logger';
+import { getActiveEmailConfig, renderEmailConfig, buildCouponCodesHtml } from '../utils/emailTemplateRenderer';
 
 // =============================================================================
 // Security Utilities
@@ -2410,16 +2411,62 @@ Questions? Contact us at support@balkanestateai.com
     isAgentNotification?: boolean;
     couponCodes?: Array<{ tier: 'highlight' | 'premium' | 'featured'; code: string }>;
   }): Promise<void> {
+    if (!params.email || !isValidEmail(params.email)) {
+      throw new Error(`sendMonthlyCouponEmail: invalid recipient email "${params.email}"`);
+    }
+    if (typeof params.totalCoupons !== 'number' || params.totalCoupons < 0) {
+      throw new Error('sendMonthlyCouponEmail: totalCoupons must be a non-negative number');
+    }
+    const breakdown = params.breakdown ?? { highlighted: 0, premium: 0, featured: 0 };
+    const computedTotal = breakdown.highlighted + breakdown.premium + breakdown.featured;
+    // newCoupons should equal the tier sum; warn if mismatched but don't reject
+    if (params.newCoupons !== computedTotal) {
+      emailLogger.warn(`sendMonthlyCouponEmail: newCoupons (${params.newCoupons}) ≠ breakdown sum (${computedTotal}) for ${params.email}`);
+    }
+
     const frontendUrl = process.env.FRONTEND_URL || 'https://balkanestateai.com';
-
-    // Sanitize user inputs
-    const safeUserName = escapeHtml(params.userName);
-    const safePlanName = escapeHtml(params.planName);
-    const safeAgencyName = escapeHtml(params.agencyName);
-
     const monthNames = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
     const currentMonth = monthNames[new Date().getMonth()];
     const currentYear = new Date().getFullYear();
+
+    const couponCodesHtml = buildCouponCodesHtml(params.couponCodes ?? []);
+
+    // Try admin-editable template first
+    const configKey = params.isAgency ? 'agency-monthly-coupon' : 'monthly-coupon';
+    const config = await getActiveEmailConfig(configKey);
+
+    if (config) {
+      const isAgentText = params.isAgentNotification
+        ? `Great news! Your agency <strong>${escapeHtml(params.agencyName)}</strong> has received its fresh promotion coupons for <strong>${currentMonth}</strong>. These are shared across your team.`
+        : params.isAgency
+          ? `<strong>${escapeHtml(params.agencyName)}</strong>'s Enterprise plan has been refreshed with <strong>${params.newCoupons} new promotion coupons</strong> for <strong>${currentMonth}</strong>. Coordinate with your team to get maximum visibility.`
+          : `Your <strong>${escapeHtml(params.planName)}</strong> subscription has been refreshed with <strong>${params.newCoupons} new promotion coupons</strong> for <strong>${currentMonth}</strong>.`;
+
+      const variables: Record<string, string> = {
+        userName:           escapeHtml(params.userName) || 'there',
+        planName:           escapeHtml(params.planName) || 'Pro',
+        agencyName:         escapeHtml(params.agencyName) || '',
+        currentMonth,
+        totalCoupons:       String(params.totalCoupons),
+        newCoupons:         String(params.newCoupons),
+        rolledOver:         String(params.rolledOver),
+        highlightedCoupons: String(breakdown.highlighted),
+        premiumCoupons:     String(breakdown.premium),
+        featuredCoupons:    String(breakdown.featured),
+        isAgentText,
+        couponCodesList:    couponCodesHtml,
+        frontendUrl,
+      };
+
+      const { html, subject } = renderEmailConfig(config, variables);
+      await this.sendEmail({ to: params.email, subject, html, category: config.fromCategory as any });
+      return;
+    }
+
+    // ── Fallback: inline HTML (used if template is missing or disabled) ──
+    const safeUserName = escapeHtml(params.userName);
+    const safePlanName = escapeHtml(params.planName);
+    const safeAgencyName = escapeHtml(params.agencyName);
 
     const html = `
 <!DOCTYPE html>
@@ -2548,11 +2595,14 @@ Questions? Contact us at support@balkanestateai.com
 </body>
 </html>`;
 
+    const codesText = (params.couponCodes ?? []).length > 0
+      ? `\nYour coupon codes:\n${(params.couponCodes ?? []).map(c => `- ${c.tier.toUpperCase()}: ${c.code}`).join('\n')}\n`
+      : '';
     await this.sendEmail({
       to: params.email,
       subject: `🎟️ Your ${currentMonth} Promotion Coupons Are Ready! (${params.totalCoupons} available)`,
       html,
-      text: `Hey ${params.userName}!\n\nYour ${currentMonth} promotion coupons are ready!\n\nTotal Coupons: ${params.totalCoupons}\n- New this month: ${params.newCoupons}\n- Rolled over: ${params.rolledOver}\n\nBreakdown:\n- Highlighted: ${params.breakdown.highlighted}\n- Premium: ${params.breakdown.premium}\n- Featured: ${params.breakdown.featured}\n${(params.couponCodes || []).length > 0 ? `\nYour coupon codes:\n${(params.couponCodes || []).map(c => `- ${c.tier.toUpperCase()}: ${c.code}`).join('\n')}\n` : ''}\nUse your coupons to boost your listings and get up to 5x more visibility!\n\nUse your coupons: ${frontendUrl}/promotions\n\n© ${currentYear} BalkanEstateᴬᴵ`,
+      text: `Hey ${params.userName}!\n\nYour ${currentMonth} promotion coupons are ready!\n\nTotal: ${params.totalCoupons} (${params.newCoupons} new + ${params.rolledOver} rolled over)\n\nBreakdown:\n- Highlighted: ${breakdown.highlighted}\n- Premium: ${breakdown.premium}\n- Featured: ${breakdown.featured}\n${codesText}\nUse coupons to boost listings and get up to 5× more views.\n${frontendUrl}/promotions\n\n© ${currentYear} BalkanEstateᴬᴵ`,
       category: 'alerts',
     });
   }
@@ -3735,13 +3785,17 @@ Questions? Contact us at support@balkanestateai.com
     expiresAt: Date;
     couponCodes?: Array<{ tier: 'highlight' | 'premium' | 'featured'; code: string }>;
   }): Promise<void> {
-    const frontendUrl = process.env.FRONTEND_URL || 'https://balkanestateai.com';
-    const safeUserName = escapeHtml(params.userName);
-    const safePlanName = escapeHtml(params.planName);
-    const currentYear = new Date().getFullYear();
+    if (!params.email || !isValidEmail(params.email)) {
+      throw new Error(`sendProSubscriptionWelcomeEmail: invalid recipient email "${params.email}"`);
+    }
+    if (!params.expiresAt || !(params.expiresAt instanceof Date)) {
+      throw new Error('sendProSubscriptionWelcomeEmail: expiresAt must be a valid Date');
+    }
 
-    const formatLimit = (n: number) => (n === -1 ? 'Unlimited' : String(n));
+    const frontendUrl = process.env.FRONTEND_URL || 'https://balkanestateai.com';
+    const formatLimit = (n: number) => (n === -1 || n === undefined ? 'Unlimited' : String(n));
     const expiryStr = params.expiresAt.toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
+    const currentYear = new Date().getFullYear();
 
     const breakdownParts = [
       params.promotionCoupons.highlighted > 0 ? `${params.promotionCoupons.highlighted} Highlighted` : '',
@@ -3749,6 +3803,32 @@ Questions? Contact us at support@balkanestateai.com
       params.promotionCoupons.featured > 0 ? `${params.promotionCoupons.featured} Featured` : '',
     ].filter(Boolean);
     const couponBreakdown = breakdownParts.join(' + ') || `${params.promotionCoupons.total} coupons`;
+    const couponCodesHtml = buildCouponCodesHtml(params.couponCodes ?? []);
+
+    // Try admin-editable template first
+    const config = await getActiveEmailConfig('pro-subscription-welcome');
+    if (config) {
+      const variables: Record<string, string> = {
+        userName:           escapeHtml(params.userName) || 'there',
+        planName:           escapeHtml(params.planName),
+        listingsLimit:      String(params.listingsLimit),
+        billingPeriodLabel: params.billingPeriod === 'yearly' ? 'year' : 'month',
+        totalCoupons:       String(params.promotionCoupons.total),
+        couponBreakdown,
+        aiMessagesLabel:    formatLimit(params.aiMessagesLimit),
+        aiInsightsLabel:    formatLimit(params.aiInsightsLimit),
+        expiresAt:          expiryStr,
+        couponCodesList:    couponCodesHtml,
+        frontendUrl,
+      };
+      const { html: cfgHtml, subject: cfgSubject } = renderEmailConfig(config, variables);
+      await this.sendEmail({ to: params.email, subject: cfgSubject, html: cfgHtml, category: config.fromCategory as any });
+      return;
+    }
+
+    // ── Fallback: inline HTML ──
+    const safeUserName = escapeHtml(params.userName);
+    const safePlanName = escapeHtml(params.planName);
 
     const html = `
 <!DOCTYPE html>
@@ -3885,11 +3965,14 @@ Questions? Contact us at support@balkanestateai.com
 </body>
 </html>`;
 
+    const codesText = (params.couponCodes ?? []).length > 0
+      ? `\nYour coupon codes:\n${(params.couponCodes ?? []).map(c => `- ${c.tier.toUpperCase()}: ${c.code}`).join('\n')}\n`
+      : '';
     await this.sendEmail({
       to: params.email,
       subject: `🎉 Welcome to ${params.planName} — Your Benefits Are Ready!`,
       html,
-      text: `Hi ${params.userName},\n\nWelcome to ${params.planName}! Your subscription is now active.\n\nYour plan includes:\n- ${params.listingsLimit} active listings per ${params.billingPeriod === 'monthly' ? 'month' : 'year'}\n- ${params.promotionCoupons.total} promotion coupons/month (${couponBreakdown})\n- ${formatLimit(params.aiMessagesLimit)} AI messages\n- ${formatLimit(params.aiInsightsLimit)} market insights/month\n- ${formatLimit(params.savedSearchesLimit)} saved searches\n- Unlimited auto-generate image descriptions\n\nYour first ${params.promotionCoupons.total} promotion coupon codes:\n${(params.couponCodes || []).map(c => `- ${c.tier.toUpperCase()}: ${c.code}`).join('\n') || '(check your dashboard)'}\n\nPlan: ${params.planName}\nActive until: ${expiryStr}\n\nStart posting: ${frontendUrl}/sell\n\n© ${currentYear} BalkanEstateᴬᴵ`,
+      text: `Hi ${params.userName},\n\nWelcome to ${params.planName}! Your subscription is now active.\n\n- ${params.listingsLimit} listings per ${params.billingPeriod === 'monthly' ? 'month' : 'year'}\n- ${params.promotionCoupons.total} promotion coupons/month (${couponBreakdown})\n- ${formatLimit(params.aiMessagesLimit)} AI messages\n- ${formatLimit(params.aiInsightsLimit)} insights/month\n- Unlimited saved searches\n${codesText}\nActive until: ${expiryStr}\nStart posting: ${frontendUrl}/sell\n\n© ${currentYear} BalkanEstateᴬᴵ`,
       category: 'alerts',
     });
   }
