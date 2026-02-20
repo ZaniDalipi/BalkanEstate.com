@@ -568,6 +568,7 @@ export function useAgentProfile({ agent }: { agent: Agent }) {
         window.scrollTo({ top: 0, behavior: 'smooth' });
         const agentIdentifier = selectedAgent.agentId || selectedAgent.id;
         dispatch({ type: 'SET_SELECTED_AGENT', payload: agentIdentifier });
+        dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'agents' });
         window.history.pushState({}, '', `/agents/${agentIdentifier}`);
     };
 
