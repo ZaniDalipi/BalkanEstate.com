@@ -565,7 +565,7 @@ export function useAgentProfile({ agent }: { agent: Agent }) {
     };
 
     const handleSelectSimilarAgent = (selectedAgent: Agent) => {
-        window.scrollTo(0, 0);
+        window.scrollTo({ top: 0, behavior: 'smooth' });
         const agentIdentifier = selectedAgent.agentId || selectedAgent.id;
         dispatch({ type: 'SET_SELECTED_AGENT', payload: agentIdentifier });
         window.history.pushState({}, '', `/agents/${agentIdentifier}`);
