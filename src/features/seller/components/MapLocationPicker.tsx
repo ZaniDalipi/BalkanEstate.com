@@ -330,7 +330,14 @@ const MapLocationPicker: React.FC<MapLocationPickerProps> = ({ lat, lng, address
       }
     }
 
-    // Update marker and map
+    // Directly move marker and map (don't rely solely on prop re-render)
+    if (markerRef.current) {
+      markerRef.current.setLatLng([newLat, newLng]);
+      markerRef.current.setPopupContent(`<b>${t('search:map.locationSet')}</b><br>Lat: ${newLat.toFixed(6)}, Lng: ${newLng.toFixed(6)}`);
+      markerRef.current.openPopup();
+    }
+
+    // Update parent state
     onLocationChange(newLat, newLng);
 
     // Use the full display_name as the address to preserve complete location information
@@ -471,6 +478,14 @@ const MapLocationPicker: React.FC<MapLocationPickerProps> = ({ lat, lng, address
             value={searchQuery}
             onChange={handleSearchChange}
             onFocus={() => searchResults.length > 0 && setShowResults(true)}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') {
+                e.preventDefault();
+                if (searchResults.length > 0) {
+                  handleResultSelect(searchResults[0]);
+                }
+              }
+            }}
             placeholder={t('search:map.searchPlaceholder')}
             className="w-full px-4 py-2.5 pr-10 text-sm border-2 border-neutral-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary"
             autoComplete="off"
