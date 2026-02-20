@@ -257,7 +257,7 @@ const CredentialsSection: React.FC<CredentialsSectionProps> = ({
     e.stopPropagation();
 
     // Validate
-    const validationErrors = validate(formData, selectedFile, t as (key: string, defaultValue?: string) => string);
+    const validationErrors = validate(formData, selectedFile, t as (key: string, defaultValue?: string | Record<string, unknown>) => string);
     if (Object.keys(validationErrors).length > 0) {
       setErrors(validationErrors);
       return;
