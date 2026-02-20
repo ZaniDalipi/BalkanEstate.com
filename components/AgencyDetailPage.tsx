@@ -981,250 +981,171 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
           {/* Subtle Pattern Overlay */}
           <div className="absolute inset-0 opacity-5" style={{ backgroundImage: 'url("data:image/svg+xml,%3Csvg width="60" height="60" viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg"%3E%3Cg fill="none" fill-rule="evenodd"%3E%3Cg fill="%23ffffff" fill-opacity="1"%3E%3Cpath d="M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z"/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")' }} />
 
-        {/* Top Navigation Bar */}
-        <div className="absolute top-0 left-0 right-0 z-20 px-4 md:px-6 py-4">
-          <div className="flex items-start justify-between">
-            {/* Left Side - Back Button and Breadcrumbs stacked */}
-            <div className="flex flex-col gap-2">
-              {/* Back Button */}
-              <button
-                onClick={handleBack}
-                className="inline-flex items-center gap-2 text-white/90 font-medium px-4 py-2 rounded-xl bg-white/10 backdrop-blur-md border border-white/20 hover:bg-white/20 transition-all duration-300 w-fit"
-                aria-label={t('navigation.backToAgencies')}
-              >
-                <ArrowLeftIcon className="w-4 h-4" />
-                {t('navigation.back')}
-              </button>
+          {/* Top Navigation Bar */}
+          <div className="absolute top-0 left-0 right-0 z-20 px-4 md:px-6 py-4">
+            <div className="flex items-start justify-between">
+              {/* Left Side - Back Button and Breadcrumbs stacked */}
+              <div className="flex flex-col gap-2">
+                {/* Back Button */}
+                <button
+                  onClick={handleBack}
+                  className="inline-flex items-center gap-2 text-white/90 font-medium px-4 py-2 rounded-xl bg-white/10 backdrop-blur-md border border-white/20 hover:bg-white/20 transition-all duration-300 w-fit"
+                  aria-label={t('navigation.backToAgencies')}
+                >
+                  <ArrowLeftIcon className="w-4 h-4" />
+                  {t('navigation.back')}
+                </button>
 
-              {/* Breadcrumbs - Below back button, hidden on mobile */}
-              <div className="ml-1 hidden sm:block">
-                <Breadcrumbs
-                  items={generateAgencyBreadcrumbs({
-                    slug: agency.slug || '',
-                    name: agencyData.name,
-                    country: agencyData.country,
-                  })}
-                  className="text-white/70 text-sm"
-                />
-              </div>
-            </div>
-
-            {/* Right Side - Admin Controls + Global Nav */}
-            <div className="flex items-center gap-2">
-              {/* Cover Controls (For owners and admins) */}
-              {isAdmin && (
-                <div className="relative flex gap-2">
-                  {/* Gradient Picker Button */}
-                  <button
-                    onClick={() => setShowGradientPicker(!showGradientPicker)}
-                    className="inline-flex items-center gap-2 px-3 py-2 bg-white/10 backdrop-blur-md text-white text-sm font-medium rounded-xl border border-white/20 hover:bg-white/20 transition-all duration-300"
-                  >
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01" />
-                    </svg>
-                    <span className="hidden sm:inline">{t('banner.gradients')}</span>
-                  </button>
-
-                  {/* Upload Image Button */}
-                  <input
-                    type="file"
-                    id="cover-upload"
-                    accept="image/*"
-                    onChange={handleCoverUpload}
-                    disabled={isUploadingCover}
-                    className="hidden"
+                {/* Breadcrumbs - Below back button, hidden on mobile */}
+                <div className="ml-1 hidden sm:block">
+                  <Breadcrumbs
+                    items={generateAgencyBreadcrumbs({
+                      slug: agency.slug || '',
+                      name: agencyData.name,
+                      country: agencyData.country,
+                    })}
+                    className="text-white/70 text-sm"
                   />
-                  <label
-                    htmlFor="cover-upload"
-                    className={`inline-flex items-center gap-2 px-3 py-2 bg-white/10 backdrop-blur-md text-white text-sm font-medium rounded-xl border border-white/20 hover:bg-white/20 transition-all duration-300 cursor-pointer ${
-                      isUploadingCover ? 'opacity-50 cursor-not-allowed' : ''
-                    }`}
-                  >
-                    {isUploadingCover ? (
-                      <>
-                        <div className="animate-spin rounded-full h-4 w-4 border-2 border-white/30 border-t-white"></div>
-                        <span className="hidden sm:inline">{t('banner.uploading')}</span>
-                      </>
-                    ) : (
-                      <>
-                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                        </svg>
-                        <span className="hidden sm:inline">{t('banner.uploadImage')}</span>
-                      </>
-                    )}
-                  </label>
+                </div>
+              </div>
 
-                  {/* Gradient Picker Dropdown */}
-                  {showGradientPicker && (
-                    <div className="absolute top-full right-0 mt-2 bg-white/95 backdrop-blur-xl rounded-2xl shadow-2xl p-4 w-80 max-h-96 overflow-y-auto border border-slate-200 z-50">
-                      <div className="flex items-center justify-between mb-4">
-                        <h3 className="text-lg font-semibold text-slate-900">{t('banner.chooseGradient')}</h3>
-                        <button
-                          onClick={() => setShowGradientPicker(false)}
-                          className="text-slate-400 hover:text-slate-600 transition-colors"
-                        >
-                          <XMarkIcon className="w-5 h-5" />
-                        </button>
-                      </div>
-                      <div className="grid grid-cols-2 gap-2">
-                        {GRADIENT_PRESETS.map((preset) => (
+              {/* Right Side - Admin Controls + Global Nav */}
+              <div className="flex items-center gap-2">
+                {/* Cover Controls (For owners and admins) */}
+                {isAdmin && (
+                  <div className="relative flex gap-2">
+                    {/* Gradient Picker Button */}
+                    <button
+                      onClick={() => setShowGradientPicker(!showGradientPicker)}
+                      className="inline-flex items-center gap-2 px-3 py-2 bg-white/10 backdrop-blur-md text-white text-sm font-medium rounded-xl border border-white/20 hover:bg-white/20 transition-all duration-300"
+                    >
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01" />
+                      </svg>
+                      <span className="hidden sm:inline">{t('banner.gradients')}</span>
+                    </button>
+
+                    {/* Upload Image Button */}
+                    <input
+                      type="file"
+                      id="cover-upload"
+                      accept="image/*"
+                      onChange={handleCoverUpload}
+                      disabled={isUploadingCover}
+                      className="hidden"
+                    />
+                    <label
+                      htmlFor="cover-upload"
+                      className={`inline-flex items-center gap-2 px-3 py-2 bg-white/10 backdrop-blur-md text-white text-sm font-medium rounded-xl border border-white/20 hover:bg-white/20 transition-all duration-300 cursor-pointer ${
+                        isUploadingCover ? 'opacity-50 cursor-not-allowed' : ''
+                      }`}
+                    >
+                      {isUploadingCover ? (
+                        <>
+                          <div className="animate-spin rounded-full h-4 w-4 border-2 border-white/30 border-t-white"></div>
+                          <span className="hidden sm:inline">{t('banner.uploading')}</span>
+                        </>
+                      ) : (
+                        <>
+                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                          </svg>
+                          <span className="hidden sm:inline">{t('banner.uploadImage')}</span>
+                        </>
+                      )}
+                    </label>
+
+                    {/* Gradient Picker Dropdown */}
+                    {showGradientPicker && (
+                      <div className="absolute top-full right-0 mt-2 bg-white/95 backdrop-blur-xl rounded-2xl shadow-2xl p-4 w-80 max-h-96 overflow-y-auto border border-slate-200 z-50">
+                        <div className="flex items-center justify-between mb-4">
+                          <h3 className="text-lg font-semibold text-slate-900">{t('banner.chooseGradient')}</h3>
                           <button
-                            key={preset.id}
-                            onClick={() => handleGradientSelect(preset.id)}
-                            className="group relative h-20 rounded-xl overflow-hidden border-2 border-slate-200 hover:border-primary transition-all duration-300 hover:scale-[1.02]"
+                            onClick={() => setShowGradientPicker(false)}
+                            className="text-slate-400 hover:text-slate-600 transition-colors"
                           >
-                            <div className="absolute inset-0" style={{ backgroundImage: preset.css }} />
-                            <div className="absolute inset-0 bg-black/10 group-hover:bg-black/0 transition-colors" />
-                            <div className="absolute inset-0 flex items-center justify-center">
-                              <span className="text-white font-medium text-xs drop-shadow-lg">
-                                {preset.name}
-                              </span>
-                            </div>
-                            {((agencyData as any).coverGradient === preset.gradient || (agencyData as any).coverGradient === preset.id) && (
-                              <div className="absolute top-1.5 right-1.5 w-5 h-5 bg-white rounded-full flex items-center justify-center shadow">
-                                <svg className="w-3 h-3 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
-                                </svg>
-                              </div>
-                            )}
+                            <XMarkIcon className="w-5 h-5" />
                           </button>
-                        ))}
+                        </div>
+                        <div className="grid grid-cols-2 gap-2">
+                          {GRADIENT_PRESETS.map((preset) => (
+                            <button
+                              key={preset.id}
+                              onClick={() => handleGradientSelect(preset.id)}
+                              className="group relative h-20 rounded-xl overflow-hidden border-2 border-slate-200 hover:border-primary transition-all duration-300 hover:scale-[1.02]"
+                            >
+                              <div className="absolute inset-0" style={{ backgroundImage: preset.css }} />
+                              <div className="absolute inset-0 bg-black/10 group-hover:bg-black/0 transition-colors" />
+                              <div className="absolute inset-0 flex items-center justify-center">
+                                <span className="text-white font-medium text-xs drop-shadow-lg">
+                                  {preset.name}
+                                </span>
+                              </div>
+                              {((agencyData as any).coverGradient === preset.gradient || (agencyData as any).coverGradient === preset.id) && (
+                                <div className="absolute top-1.5 right-1.5 w-5 h-5 bg-white rounded-full flex items-center justify-center shadow">
+                                  <svg className="w-3 h-3 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+                                  </svg>
+                                </div>
+                              )}
+                            </button>
+                          ))}
+                        </div>
+                        <p className="text-xs text-slate-500 mt-3 text-center">
+                          {t('banner.customImageHint')}
+                        </p>
                       </div>
-                      <p className="text-xs text-slate-500 mt-3 text-center">
-                        {t('banner.customImageHint')}
-                      </p>
-                    </div>
+                    )}
+                  </div>
+                )}
+
+                {/* Divider between admin controls and nav */}
+                {isAdmin && <div className="hidden sm:block w-px h-8 bg-white/20 mx-1" />}
+
+                {/* Global Nav Actions */}
+                <div className="flex items-center gap-1.5 sm:gap-2">
+                  <button
+                    onClick={handleSubscribeClick}
+                    className="hidden sm:inline-flex items-center gap-1.5 px-3 py-2 bg-primary/80 hover:bg-primary text-white text-sm font-semibold rounded-xl border border-white/20 transition-all duration-300"
+                  >
+                    {t('nav:subscribe')}
+                  </button>
+                  <button
+                    onClick={handleNewListingClick}
+                    className="hidden md:inline-flex items-center gap-1.5 px-3 py-2 bg-secondary/80 hover:bg-secondary text-white text-sm font-semibold rounded-xl border border-white/20 transition-all duration-300"
+                  >
+                    + {t('nav:newListing')}
+                  </button>
+                  <NotificationCenter />
+                  {isAuthenticated && currentUser ? (
+                    <button
+                      onClick={handleAccountClick}
+                      className="inline-flex items-center gap-1.5 px-2.5 py-1.5 bg-white/10 backdrop-blur-md text-white text-sm font-medium rounded-xl border border-white/20 hover:bg-white/20 transition-all duration-300"
+                      aria-label={t('nav:myAccount')}
+                    >
+                      <div className="w-6 h-6 rounded-full overflow-hidden flex-shrink-0">
+                        {currentUser.avatarUrl ? (
+                          <img src={currentUser.avatarUrl} alt="" className="w-full h-full object-cover" aria-hidden="true" />
+                        ) : (
+                          <DefaultAvatar gender={currentUser.gender} seed={currentUser.id || currentUser.name} avatarOptions={currentUser.avatarOptions} />
+                        )}
+                      </div>
+                      <span className="hidden lg:inline">{t('nav:myAccount')}</span>
+                    </button>
+                  ) : (
+                    <button
+                      onClick={handleAccountClick}
+                      className="inline-flex items-center gap-1.5 px-2.5 py-1.5 bg-white/10 backdrop-blur-md text-white text-sm font-medium rounded-xl border border-white/20 hover:bg-white/20 transition-all duration-300"
+                      aria-label={t('nav:loginRegister')}
+                    >
+                      <User className="w-4 h-4" aria-hidden="true" />
+                      <span className="hidden lg:inline">{t('nav:loginRegister')}</span>
+                    </button>
                   )}
                 </div>
               </div>
-
-              {/* Divider between admin controls and nav */}
-              {isAdmin && <div className="hidden sm:block w-px h-8 bg-white/20 mx-1" />}
-
-              {/* Global Nav Actions */}
-              <div className="flex items-center gap-1.5 sm:gap-2">
-                <button
-                  onClick={handleSubscribeClick}
-                  className="hidden sm:inline-flex items-center gap-1.5 px-3 py-2 bg-primary/80 hover:bg-primary text-white text-sm font-semibold rounded-xl border border-white/20 transition-all duration-300"
-                >
-                  {t('nav:subscribe')}
-                </button>
-                <button
-                  onClick={handleNewListingClick}
-                  className="hidden md:inline-flex items-center gap-1.5 px-3 py-2 bg-secondary/80 hover:bg-secondary text-white text-sm font-semibold rounded-xl border border-white/20 transition-all duration-300"
-                >
-                  + {t('nav:newListing')}
-                </button>
-                <NotificationCenter />
-                {isAuthenticated && currentUser ? (
-                  <button
-                    onClick={handleAccountClick}
-                    className="inline-flex items-center gap-1.5 px-2.5 py-1.5 bg-white/10 backdrop-blur-md text-white text-sm font-medium rounded-xl border border-white/20 hover:bg-white/20 transition-all duration-300"
-                    aria-label={t('nav:myAccount')}
-                  >
-                    <div className="w-6 h-6 rounded-full overflow-hidden flex-shrink-0">
-                      {currentUser.avatarUrl ? (
-                        <img src={currentUser.avatarUrl} alt="" className="w-full h-full object-cover" aria-hidden="true" />
-                      ) : (
-                        <DefaultAvatar gender={currentUser.gender} seed={currentUser.id || currentUser.name} avatarOptions={currentUser.avatarOptions} />
-                      )}
-                    </div>
-                    <span className="hidden lg:inline">{t('nav:myAccount')}</span>
-                  </button>
-                ) : (
-                  <button
-                    onClick={handleAccountClick}
-                    className="inline-flex items-center gap-1.5 px-2.5 py-1.5 bg-white/10 backdrop-blur-md text-white text-sm font-medium rounded-xl border border-white/20 hover:bg-white/20 transition-all duration-300"
-                    aria-label={t('nav:loginRegister')}
-                  >
-                    <User className="w-4 h-4" aria-hidden="true" />
-                    <span className="hidden lg:inline">{t('nav:loginRegister')}</span>
-                  </button>
-                )}
-              </div>
             </div>
           </div>
-
-          {/* Admin Banner Controls - bottom-right of banner */}
-          {isAdmin && (
-            <div className="absolute bottom-3 right-4 z-20 flex gap-2">
-              <button
-                onClick={() => setShowGradientPicker(!showGradientPicker)}
-                className="inline-flex items-center gap-2 px-3 py-2 bg-white/10 backdrop-blur-md text-white text-sm font-medium rounded-xl border border-white/20 hover:bg-white/20 transition-all duration-300"
-              >
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01" />
-                </svg>
-                <span className="hidden sm:inline">{t('banner.gradients')}</span>
-              </button>
-              <input
-                type="file"
-                id="cover-upload"
-                accept="image/*"
-                onChange={handleCoverUpload}
-                disabled={isUploadingCover}
-                className="hidden"
-              />
-              <label
-                htmlFor="cover-upload"
-                className={`inline-flex items-center gap-2 px-3 py-2 bg-white/10 backdrop-blur-md text-white text-sm font-medium rounded-xl border border-white/20 hover:bg-white/20 transition-all duration-300 cursor-pointer ${
-                  isUploadingCover ? 'opacity-50 cursor-not-allowed' : ''
-                }`}
-              >
-                {isUploadingCover ? (
-                  <>
-                    <div className="animate-spin rounded-full h-4 w-4 border-2 border-white/30 border-t-white"></div>
-                    <span className="hidden sm:inline">{t('banner.uploading')}</span>
-                  </>
-                ) : (
-                  <>
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                    </svg>
-                    <span className="hidden sm:inline">{t('banner.uploadImage')}</span>
-                  </>
-                )}
-              </label>
-              {/* Gradient Picker Dropdown */}
-              {showGradientPicker && (
-                <div className="absolute bottom-full right-0 mb-2 bg-white/95 backdrop-blur-xl rounded-2xl shadow-2xl p-4 w-80 max-h-96 overflow-y-auto border border-slate-200 z-50">
-                  <div className="flex items-center justify-between mb-4">
-                    <h3 className="text-lg font-semibold text-slate-900">{t('banner.chooseGradient')}</h3>
-                    <button
-                      onClick={() => setShowGradientPicker(false)}
-                      className="text-slate-400 hover:text-slate-600 transition-colors"
-                    >
-                      <XMarkIcon className="w-5 h-5" />
-                    </button>
-                  </div>
-                  <div className="grid grid-cols-2 gap-2">
-                    {GRADIENT_PRESETS.map((preset) => (
-                      <button
-                        key={preset.id}
-                        onClick={() => handleGradientSelect(preset.id)}
-                        className="group relative h-20 rounded-xl overflow-hidden border-2 border-slate-200 hover:border-primary transition-all duration-300 hover:scale-[1.02]"
-                      >
-                        <div className="absolute inset-0" style={{ backgroundImage: preset.css }} />
-                        <div className="absolute inset-0 bg-black/10 group-hover:bg-black/0 transition-colors" />
-                        <div className="absolute inset-0 flex items-center justify-center">
-                          <span className="text-white font-medium text-xs drop-shadow-lg">{preset.name}</span>
-                        </div>
-                        {((agencyData as any).coverGradient === preset.gradient || (agencyData as any).coverGradient === preset.id) && (
-                          <div className="absolute top-1.5 right-1.5 w-5 h-5 bg-white rounded-full flex items-center justify-center shadow">
-                            <svg className="w-3 h-3 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
-                            </svg>
-                          </div>
-                        )}
-                      </button>
-                    ))}
-                  </div>
-                  <p className="text-xs text-slate-500 mt-3 text-center">{t('banner.customImageHint')}</p>
-                </div>
-              )}
-            </div>
-          )}
         </div>
 
         {/* Profile Row - Logo overlapping banner + Agency Info */}
@@ -1314,67 +1235,6 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
                   </div>
                 </div>
               </div>
-            )}
-
-            {/* Logo Upload Button */}
-            {isOwner && (
-              <div className="absolute -bottom-3 left-1/2 transform -translate-x-1/2">
-                <input
-                  type="file"
-                  id="logo-upload"
-                  accept="image/*"
-                  onChange={handleLogoUpload}
-                  disabled={isUploadingLogo}
-                  className="hidden"
-                />
-                <label
-                  htmlFor="logo-upload"
-                  className={`inline-flex items-center gap-1.5 px-3 py-1.5 bg-white text-slate-700 font-medium rounded-lg shadow-lg hover:bg-slate-50 transition-all duration-300 cursor-pointer text-xs ${
-                    isUploadingLogo ? 'opacity-50 cursor-not-allowed' : ''
-                  }`}
-                >
-                  {isUploadingLogo ? (
-                    <>
-                      <div className="animate-spin rounded-full h-3 w-3 border-2 border-slate-300 border-t-primary"></div>
-                      {t('banner.uploading')}
-                    </>
-                  ) : (
-                    t('banner.changeLogo')
-                  )}
-                </label>
-              </div>
-            )}
-          </div>
-
-          {/* Agency Name */}
-          <h1 className="mt-8 text-3xl md:text-4xl lg:text-5xl font-bold text-white text-center tracking-tight">
-            {agencyData.name}
-          </h1>
-
-          {/* Location Badge */}
-          <div className="mt-4 inline-flex items-center gap-2 px-4 py-2 bg-white/10 backdrop-blur-md rounded-full border border-white/20">
-            <MapPinIcon className="w-4 h-4 text-white/80" />
-            <span className="text-white/90 font-medium text-sm">{agencyData.city}, {agencyData.country}</span>
-          </div>
-
-          {/* Quick Stats Row */}
-          <div className="mt-6 flex items-center gap-6 md:gap-8">
-            <div className="text-center">
-              <p className="text-2xl md:text-3xl font-bold text-white">{agencyProperties.length}</p>
-              <p className="text-xs md:text-sm text-white/60 font-medium uppercase tracking-wider">Listings</p>
-            </div>
-            <div className="w-px h-8 bg-white/20"></div>
-            <div className="text-center">
-              <p className="text-2xl md:text-3xl font-bold text-white">{agencyData.totalAgents}</p>
-              <p className="text-xs md:text-sm text-white/60 font-medium uppercase tracking-wider">Agents</p>
-            </div>
-            <div className="w-px h-8 bg-white/20"></div>
-            <div className="text-center">
-              <div className="flex items-center justify-center gap-1">
-                <StarIcon className="w-5 h-5 text-amber-400 fill-current" />
-                <p className="text-2xl md:text-3xl font-bold text-white">4.8</p>
-              </div>
-              <p className="text-xs md:text-sm text-white/60 font-medium uppercase tracking-wider">Rating</p>
             </div>
           </div>
         </div>
