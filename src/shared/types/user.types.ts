@@ -49,7 +49,7 @@ export interface UserSubscription {
   agentCount: number;
 
   // Promotion coupons
-  promotionCoupons: PromotionCoupons;
+  promotionCoupons?: PromotionCoupons;
 
   // Agency reference (for agency_agent tier)
   agencyId?: string;
