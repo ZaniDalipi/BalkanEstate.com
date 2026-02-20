@@ -102,17 +102,17 @@ export const getAgents = async (req: Request, res: Response): Promise<void> => {
 // @access  Public
 export const getAgent = async (req: Request, res: Response): Promise<void> => {
   try {
-    const populateOpts = [
-      { path: 'userId', select: 'name email phone avatarUrl avatarOptions gender city country address' },
-      { path: 'agencyId', select: 'name logo coverGradient coverImage slug type' },
-      { path: 'testimonials.userId', select: 'name avatarUrl' },
-    ];
-
     // Try finding by MongoDB _id first, then by custom agentId field
-    let agent = await Agent.findById(req.params.id).populate(populateOpts);
+    let agent = await Agent.findById(req.params.id)
+      .populate('userId', 'name email phone avatarUrl avatarOptions gender city country address')
+      .populate('agencyId', 'name logo coverGradient coverImage slug type')
+      .populate('testimonials.userId', 'name avatarUrl');
 
     if (!agent) {
-      agent = await Agent.findOne({ agentId: req.params.id }).populate(populateOpts);
+      agent = await Agent.findOne({ agentId: req.params.id })
+        .populate('userId', 'name email phone avatarUrl avatarOptions gender city country address')
+        .populate('agencyId', 'name logo coverGradient coverImage slug type')
+        .populate('testimonials.userId', 'name avatarUrl');
     }
 
     if (!agent) {
