@@ -9,9 +9,10 @@ import Product from '../models/Product';
 import { geocodeAgency } from '../services/geocodingService';
 import { uploadImage, deleteImage } from '../services/cloudinaryService';
 import { generateSecureAgentId } from '../utils/secureRandom';
-import { sendAgentJoinedAgencyEmail, sendAgencyNewMemberEmail } from '../services/emailService';
+
 import { ENTERPRISE_TIER_LIMITS } from '../config/subscriptionConstants';
 import { agencyLogger } from '../utils/logger';
+import Notification from '../models/Notification';
 
 // Helper function to generate unique Agent ID using secure random
 function generateAgentId(): string {
@@ -945,6 +946,22 @@ export const removeAgentFromAgency = async (
       await agentRecord.save();
     }
 
+    // Notify the removed agent
+    if (agentUser) {
+      Notification.create({
+        userId: agentUser._id,
+        type: 'agent_left_agency',
+        title: 'Removed from Agency',
+        message: `You have been removed from ${agency.name}.`,
+        icon: 'user-minus',
+        priority: 'high',
+        data: {
+          agencyId: String(agency._id),
+          agencyName: agency.name,
+        },
+      }).catch(err => agencyLogger.error('Failed to create removal notification:', err));
+    }
+
     res.json({ message: 'Agent removed from agency successfully' });
   } catch (error: any) {
     agencyLogger.error('Remove agent error:', error);
@@ -1376,34 +1393,50 @@ export const joinAgencyByInvitationCode = async (
 
     agencyLogger.info(`✅ User ${user._id} joined agency ${agency.name} via invitation code with agency_agent subscription`);
 
-    // Send email notifications (non-blocking)
+    // Send in-app notifications (non-blocking)
     try {
-      const owner = await User.findById(agency.ownerId);
-
-      sendAgentJoinedAgencyEmail({
-        agentEmail: user.email,
-        agentName: user.name || 'Agent',
-        agencyName: agency.name,
-        agencyId: String(agency._id),
-        subscriptionTier: user.subscription.tier,
-        listingsLimit: user.subscription.listingsLimit,
-        expiresAt: user.subscription.expiresAt || agencyExpiresAt,
-      }).catch(err => agencyLogger.error('Failed to send agent welcome email:', err));
-
-      if (owner && owner.email) {
-        sendAgencyNewMemberEmail({
-          ownerEmail: owner.email,
-          ownerName: owner.name || 'Agency Owner',
-          agencyName: agency.name,
+      // Notify agency owner: new agent joined
+      await Notification.create({
+        userId: agency.ownerId,
+        type: 'agent_joined_agency',
+        title: 'New Agent Joined',
+        message: `${user.name || 'An agent'} has joined ${agency.name} using an invitation code.`,
+        icon: 'user-plus',
+        priority: 'normal',
+        data: {
           agencyId: String(agency._id),
-          newAgentName: user.name || 'New Agent',
-          newAgentEmail: user.email,
-          couponCode: invitationCode,
+          agencySlug: agency.slug,
+          agencyName: agency.name,
+          agentName: user.name || 'Agent',
+          agentEmail: user.email,
           totalAgents: agency.agents.length,
-        }).catch(err => agencyLogger.error('Failed to send agency notification email:', err));
-      }
-    } catch (emailError) {
-      agencyLogger.error('Error sending email notifications:', emailError);
+          actionUrl: `/agency/${agency.slug || agency._id}`,
+          actionLabel: 'View Agency',
+        },
+      });
+
+      // Notify the joining agent: welcome to agency
+      await Notification.create({
+        userId: user._id,
+        type: 'agency_join_welcome',
+        title: `Welcome to ${agency.name}!`,
+        message: `You have successfully joined ${agency.name}. You now have access to ${user.subscription.listingsLimit} listings.`,
+        icon: 'building',
+        priority: 'normal',
+        data: {
+          agencyId: String(agency._id),
+          agencySlug: agency.slug,
+          agencyName: agency.name,
+          subscriptionTier: user.subscription.tier,
+          listingsLimit: user.subscription.listingsLimit,
+          actionUrl: `/agency/${agency.slug || agency._id}`,
+          actionLabel: 'View Agency',
+        },
+      });
+
+      agencyLogger.info(`📨 In-app notifications sent for invitation code join`);
+    } catch (notifError) {
+      agencyLogger.error('Error sending in-app notifications:', notifError);
     }
 
     // Return complete user and agency data
@@ -1727,6 +1760,26 @@ export const leaveAgency = async (
     }
 
     agencyLogger.info(`✅ User ${user._id} left agency: ${agencyName}`);
+
+    // Notify agency owner that an agent left
+    Notification.create({
+      userId: agency.ownerId,
+      type: 'agent_left_agency',
+      title: 'Agent Left Agency',
+      message: `${user.name || 'An agent'} has left ${agencyName}.`,
+      icon: 'user-minus',
+      priority: 'normal',
+      data: {
+        agencyId: String(agency._id),
+        agencySlug: agency.slug,
+        agencyName: agencyName,
+        agentName: user.name || 'Agent',
+        agentEmail: user.email,
+        totalAgents: agency.agents.length,
+        actionUrl: `/agency/${agency.slug || agency._id}`,
+        actionLabel: 'View Agency',
+      },
+    }).catch(err => agencyLogger.error('Failed to create leave notification:', err));
 
     res.json({
       message: `Successfully left ${agencyName}`,
@@ -2110,40 +2163,52 @@ export const redeemAgentCoupon = async (
 
     agencyLogger.info(`✅ User ${user._id} redeemed agent coupon for agency ${agency.name}`);
 
-    // Send email notifications (non-blocking)
+    // Send in-app notifications (non-blocking)
     try {
-      // Get agency owner information
-      const owner = await User.findById(agency.ownerId);
-
-      // Send email to the new agent
-      sendAgentJoinedAgencyEmail({
-        agentEmail: user.email,
-        agentName: user.name || 'Agent',
-        agencyName: agency.name,
-        agencyId: String(agency._id),
-        subscriptionTier: user.subscription.tier,
-        listingsLimit: user.subscription.listingsLimit,
-        expiresAt: user.subscription.expiresAt || new Date(Date.now() + 365 * 24 * 60 * 60 * 1000),
-      }).catch(err => agencyLogger.error('Failed to send agent welcome email:', err));
-
-      // Send email to the agency owner
-      if (owner && owner.email) {
-        sendAgencyNewMemberEmail({
-          ownerEmail: owner.email,
-          ownerName: owner.name || 'Agency Owner',
-          agencyName: agency.name,
+      // Notify agency owner: agent redeemed coupon
+      await Notification.create({
+        userId: agency.ownerId,
+        type: 'agency_coupon_redeemed',
+        title: 'Agent Coupon Redeemed',
+        message: `${user.name || 'An agent'} has joined ${agency.name} using coupon ${couponCode}.`,
+        icon: 'ticket',
+        priority: 'normal',
+        data: {
           agencyId: String(agency._id),
-          newAgentName: user.name || 'New Agent',
-          newAgentEmail: user.email,
-          couponCode: couponCode,
+          agencySlug: agency.slug,
+          agencyName: agency.name,
+          agentName: user.name || 'Agent',
+          agentEmail: user.email,
+          couponCode,
           totalAgents: agency.agents.length,
-        }).catch(err => agencyLogger.error('Failed to send agency notification email:', err));
-      }
+          actionUrl: `/agency/${agency.slug || agency._id}`,
+          actionLabel: 'View Agency',
+        },
+      });
 
-      agencyLogger.info(`📧 Email notifications sent for coupon redemption`);
-    } catch (emailError) {
-      // Don't fail the redemption if emails fail
-      agencyLogger.error('Error sending email notifications:', emailError);
+      // Notify the joining agent: welcome to agency
+      await Notification.create({
+        userId: user._id,
+        type: 'agency_join_welcome',
+        title: `Welcome to ${agency.name}!`,
+        message: `You have successfully joined ${agency.name} with a Pro subscription. You now have access to ${user.subscription.listingsLimit} listings.`,
+        icon: 'building',
+        priority: 'normal',
+        data: {
+          agencyId: String(agency._id),
+          agencySlug: agency.slug,
+          agencyName: agency.name,
+          subscriptionTier: user.subscription.tier,
+          listingsLimit: user.subscription.listingsLimit,
+          actionUrl: `/agency/${agency.slug || agency._id}`,
+          actionLabel: 'View Agency',
+        },
+      });
+
+      agencyLogger.info(`📨 In-app notifications sent for coupon redemption`);
+    } catch (notifError) {
+      // Don't fail the redemption if notifications fail
+      agencyLogger.error('Error sending in-app notifications:', notifError);
     }
 
     res.status(200).json({
