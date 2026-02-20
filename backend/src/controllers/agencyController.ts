@@ -1871,9 +1871,8 @@ export const redeemAgentCoupon = async (
     user.agencyId = agency._id as any;
     user.agencyName = agency.name;
 
-    await user.save();
-
-    // Create or update Subscription document for proper subscription endpoint compatibility
+    // Create or update Subscription document FIRST to catch duplicate-key errors
+    // before mutating user/agency state (prevents inconsistent state on failure)
     const subscriptionExpiresAt = new Date(coupon.expiresAt);
     const existingSubscription = await Subscription.findOne({ userId: user._id });
 
@@ -1882,6 +1881,7 @@ export const redeemAgentCoupon = async (
       existingSubscription.productId = 'agency_agent_yearly';
       existingSubscription.store = 'agency_coupon';
       existingSubscription.purchaseToken = couponCode;
+      existingSubscription.transactionId = couponCode;
       existingSubscription.status = 'active';
       existingSubscription.startDate = new Date();
       existingSubscription.renewalDate = subscriptionExpiresAt;
@@ -1895,13 +1895,14 @@ export const redeemAgentCoupon = async (
       await existingSubscription.save();
       agencyLogger.info(`✅ Updated Subscription document for user ${user._id}`);
     } else {
-      // Create new subscription document — purchaseToken must be the unique coupon code
-      // to avoid duplicate-key errors on the (store, purchaseToken) unique index
+      // Create new subscription document — purchaseToken and transactionId must be the
+      // unique coupon code to avoid duplicate-key errors on the compound unique indexes
       await Subscription.create({
         userId: user._id,
         productId: 'agency_agent_yearly',
         store: 'agency_coupon',
         purchaseToken: couponCode,
+        transactionId: couponCode,
         status: 'active',
         startDate: new Date(),
         renewalDate: subscriptionExpiresAt,
@@ -1913,6 +1914,8 @@ export const redeemAgentCoupon = async (
       });
       agencyLogger.info(`✅ Created Subscription document for user ${user._id}`);
     }
+
+    await user.save();
 
     // Mark coupon as used
     coupon.status = 'used';
