@@ -959,35 +959,43 @@ const SubscriptionManagement: React.FC<SubscriptionManagementProps> = ({ userId 
     const featuredProduct = isBuyerRole
       ? products.find(p => p.productId === 'buyer_monthly') || products.find(p => p.targetRole === 'buyer')
       : products.find(p => p.productId === 'seller_pro_yearly') || products.find(p => p.productId === 'pro_yearly') || products.find(p => p.targetRole === 'seller' && p.billingPeriod === 'yearly');
-    const noBenefits: string[] = featuredProduct?.features?.slice(0, 4) ?? (
+    const rawBenefits: string[] = featuredProduct?.features?.slice(0, 4) ?? (
       isBuyerRole
         ? ['Instant Property Alerts', 'Unlimited Saved Searches', 'Early Access to Listings', 'Advanced Market Insights']
         : ['250 Listings/Year', '3 Promo Coupons/Month', 'Unlimited AI Chat', '20 Insights/Month']
     );
+    // Replace {listingsLimit} and other placeholders with actual product values
+    const noBenefits = featuredProduct
+      ? rawBenefits.map(b => replacePlaceholders(b, featuredProduct as ProductValues))
+      : rawBenefits;
 
     return (
       <div className="max-w-2xl mx-auto">
-        <div className="relative overflow-hidden bg-gradient-to-br from-white via-primary-light/5 to-white rounded-2xl shadow-lg border border-neutral-200/50 p-8 md:p-12">
+        <div className="relative overflow-hidden bg-gradient-to-br from-white via-primary-light/10 to-primary-light/5 rounded-2xl shadow-lg border border-primary/10 p-8 md:p-12">
           <div className="absolute top-0 right-0 w-64 h-64 bg-primary/5 rounded-full blur-3xl -z-10"></div>
           <div className="absolute bottom-0 left-0 w-48 h-48 bg-secondary/5 rounded-full blur-3xl -z-10"></div>
 
           <div className="text-center space-y-6">
-            <div className="inline-flex items-center justify-center w-20 h-20 rounded-full bg-gradient-to-br from-neutral-100 to-neutral-200 mb-2">
-              <XCircleIcon className="w-10 h-10 text-neutral-400" />
+            <div className="inline-flex items-center justify-center w-20 h-20 rounded-full bg-gradient-to-br from-primary/10 to-primary/20 mb-2">
+              <SparklesIcon className="w-10 h-10 text-primary" />
             </div>
 
             <div>
-              <h3 className="text-2xl md:text-3xl font-bold text-neutral-900 mb-3">No Active Subscription</h3>
+              <h3 className="text-2xl md:text-3xl font-bold text-neutral-900 mb-3">
+                {isBuyerRole ? 'Get Buyer Pro' : 'Upgrade Your Listings'}
+              </h3>
               <p className="text-neutral-600 text-lg max-w-md mx-auto">
-                Unlock premium features and take your experience to the next level
+                {isBuyerRole
+                  ? 'Be the first to know about new properties matching your criteria'
+                  : 'Publish more listings, boost visibility, and grow your business'}
               </p>
             </div>
 
             <div className="grid sm:grid-cols-2 gap-3 max-w-lg mx-auto pt-4">
               {noBenefits.map((benefit, idx) => (
-                <div key={idx} className="flex items-center gap-3 p-3 bg-white rounded-lg border border-neutral-200">
+                <div key={idx} className="flex items-center gap-3 p-3 bg-white rounded-lg border border-primary/10 shadow-sm">
                   <CheckCircleIcon className="w-5 h-5 text-primary flex-shrink-0" />
-                  <span className="text-sm text-neutral-700">{benefit}</span>
+                  <span className="text-sm font-medium text-neutral-700">{benefit}</span>
                 </div>
               ))}
             </div>
