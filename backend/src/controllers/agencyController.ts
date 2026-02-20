@@ -1244,16 +1244,124 @@ export const joinAgencyByInvitationCode = async (
       }
     }
 
+    // Get agent product limits from DB, fallback to defaults
+    const agentProduct = await Product.findOne({ productId: 'agency_agent_yearly' }).lean();
+    const agentListingsLimit = agentProduct?.listingsLimit ?? 25;
+
+    // Determine subscription expiration from the agency's subscription
+    const agencyExpiresAt = agency.subscription?.expiresAt ||
+      new Date(Date.now() + 365 * 24 * 60 * 60 * 1000);
+
     // Add agent to new agency
     const userObjectId = user._id as unknown as mongoose.Types.ObjectId;
     agency.agents.push(userObjectId);
     agency.totalAgents = agency.agents.length;
+
+    // Add to agentDetails for tracking
+    if (!agency.agentDetails) {
+      agency.agentDetails = [];
+    }
+    const existingAgentDetail = agency.agentDetails.find(
+      ad => String(ad.userId) === String(user._id)
+    );
+    if (!existingAgentDetail) {
+      agency.agentDetails.push({
+        userId: user._id,
+        joinedAt: new Date(),
+        isActive: true,
+      } as any);
+    } else {
+      existingAgentDetail.isActive = true;
+      existingAgentDetail.leftAt = undefined;
+    }
+
+    // Update agency stats
+    agency.stats.totalAgents = agency.agents.length;
     await agency.save();
 
-    // Update agent's agency info
+    // Upgrade agent's subscription to agency_agent tier
+    if (!user.subscription) {
+      user.subscription = {
+        tier: 'free',
+        status: 'active',
+        listingsLimit: 0,
+        activeListingsCount: 0,
+        privateSellerCount: 0,
+        agentCount: 0,
+        promotionCoupons: {
+          monthly: 0,
+          available: 0,
+          used: 0,
+          rollover: 0,
+          lastRefresh: new Date(),
+        },
+        savedSearchesLimit: 1,
+        totalPaid: 0,
+      };
+    }
+
+    user.subscription.tier = 'agency_agent';
+    user.subscription.status = 'active';
+    user.subscription.listingsLimit = agentListingsLimit;
+    user.subscription.expiresAt = agencyExpiresAt;
+    if (user.subscription.promotionCoupons) {
+      user.subscription.promotionCoupons.monthly = 0; // Agency agents share the agency pool
+    }
+
+    // Associate user with agency
+    if (!user.agency) {
+      user.agency = {
+        role: 'none',
+      };
+    }
+    user.agency.agencyId = agency._id as any;
+    user.agency.role = 'agent';
+    user.agency.joinedAt = new Date();
+
+    // Set top-level agency fields
     user.agencyName = agency.name;
     user.agencyId = agency._id as mongoose.Types.ObjectId;
+    user.isSubscribed = true;
+    user.subscriptionPlan = 'agency_agent_yearly';
+
     await user.save();
+
+    // Create or update Subscription document for proper tracking
+    const existingSubscription = await Subscription.findOne({ userId: user._id });
+    const inviteToken = `invite_${agency._id}_${user._id}`;
+
+    if (existingSubscription) {
+      existingSubscription.productId = 'agency_agent_yearly';
+      existingSubscription.store = 'agency_coupon';
+      existingSubscription.purchaseToken = inviteToken;
+      existingSubscription.status = 'active';
+      existingSubscription.startDate = new Date();
+      existingSubscription.renewalDate = agencyExpiresAt;
+      existingSubscription.expirationDate = agencyExpiresAt;
+      existingSubscription.autoRenewing = true;
+      existingSubscription.price = 0;
+      existingSubscription.currency = 'EUR';
+      existingSubscription.isAcknowledged = true;
+      existingSubscription.expiryReminderSent = false;
+      await existingSubscription.save();
+      agencyLogger.info(`✅ Updated Subscription document for user ${user._id} (invitation code join)`);
+    } else {
+      await Subscription.create({
+        userId: user._id,
+        productId: 'agency_agent_yearly',
+        store: 'agency_coupon',
+        purchaseToken: inviteToken,
+        status: 'active',
+        startDate: new Date(),
+        renewalDate: agencyExpiresAt,
+        expirationDate: agencyExpiresAt,
+        autoRenewing: true,
+        price: 0,
+        currency: 'EUR',
+        isAcknowledged: true,
+      });
+      agencyLogger.info(`✅ Created Subscription document for user ${user._id} (invitation code join)`);
+    }
 
     // Also update the Agent document with both agency name and ID
     const Agent = mongoose.model('Agent');
@@ -1265,6 +1373,38 @@ export const joinAgencyByInvitationCode = async (
       },
       { new: true }
     );
+
+    agencyLogger.info(`✅ User ${user._id} joined agency ${agency.name} via invitation code with agency_agent subscription`);
+
+    // Send email notifications (non-blocking)
+    try {
+      const owner = await User.findById(agency.ownerId);
+
+      sendAgentJoinedAgencyEmail({
+        agentEmail: user.email,
+        agentName: user.name || 'Agent',
+        agencyName: agency.name,
+        agencyId: String(agency._id),
+        subscriptionTier: user.subscription.tier,
+        listingsLimit: user.subscription.listingsLimit,
+        expiresAt: user.subscription.expiresAt || agencyExpiresAt,
+      }).catch(err => agencyLogger.error('Failed to send agent welcome email:', err));
+
+      if (owner && owner.email) {
+        sendAgencyNewMemberEmail({
+          ownerEmail: owner.email,
+          ownerName: owner.name || 'Agency Owner',
+          agencyName: agency.name,
+          agencyId: String(agency._id),
+          newAgentName: user.name || 'New Agent',
+          newAgentEmail: user.email,
+          couponCode: invitationCode,
+          totalAgents: agency.agents.length,
+        }).catch(err => agencyLogger.error('Failed to send agency notification email:', err));
+      }
+    } catch (emailError) {
+      agencyLogger.error('Error sending email notifications:', emailError);
+    }
 
     // Return complete user and agency data
     res.json({
@@ -1295,6 +1435,12 @@ export const joinAgencyByInvitationCode = async (
         isSubscribed: user.isSubscribed,
         subscriptionPlan: user.subscriptionPlan,
         listingsCount: user.listingsCount,
+      },
+      subscription: {
+        tier: user.subscription.tier,
+        status: user.subscription.status,
+        listingsLimit: user.subscription.listingsLimit,
+        expiresAt: user.subscription.expiresAt,
       },
       agent: updatedAgent,
     });
@@ -1870,6 +2016,8 @@ export const redeemAgentCoupon = async (
     // Set top-level agency fields for UI compatibility
     user.agencyId = agency._id as any;
     user.agencyName = agency.name;
+    user.isSubscribed = true;
+    user.subscriptionPlan = 'agency_agent_yearly';
 
     await user.save();
 
