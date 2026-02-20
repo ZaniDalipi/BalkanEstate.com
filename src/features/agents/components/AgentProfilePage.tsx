@@ -15,6 +15,7 @@ import AgentProfileHeader from './AgentProfileHeader';
 import AgentProfileTabs from './AgentProfileTabs';
 import AgentEditModal from './AgentEditModal';
 import AgentContactActions from './AgentContactActions';
+import MarketReportModal from './MarketReportModal';
 
 // ─── Inline Helpers (not extracted) ─────────────────────────────────────────
 
@@ -239,6 +240,16 @@ const AgentProfilePage: React.FC<AgentProfilePageProps> = ({ agent }) => {
                     <span>{t('profilePage.linkCopied')}</span>
                 </div>
             )}
+
+            {/* Market Report Modal */}
+            <MarketReportModal
+                isOpen={profile.showMarketReportModal}
+                onClose={() => profile.setShowMarketReportModal(false)}
+                city={profile.agentData.city || ''}
+                country={profile.agentData.country || ''}
+                agentName={profile.firstName}
+                onContactAgent={profile.handleMarketReportContact}
+            />
 
             {/* Edit Profile Modal */}
             <AgentEditModal
