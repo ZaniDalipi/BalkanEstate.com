@@ -623,9 +623,11 @@ export const getMe = async (req: Request, res: Response): Promise<void> => {
                             memberAgency.subscription?.expiresAt ||
                             new Date(Date.now() + 365 * 24 * 60 * 60 * 1000);
 
-        // Use coupon code as unique identifier, or generate one from userId to avoid
-        // duplicate-key errors on the (store, transactionId) compound unique index
-        const agentCouponId = user.agency?.couponCode || `agent_${user._id}`;
+        // Include userId so multiple agents sharing the same coupon code don't
+        // collide on the (store, transactionId) compound unique index
+        const agentCouponId = user.agency?.couponCode
+          ? `${user.agency.couponCode}_${user._id}`
+          : `agent_${user._id}`;
         await Subscription.create({
           userId: user._id,
           productId: 'agency_agent_yearly',

@@ -1880,8 +1880,8 @@ export const redeemAgentCoupon = async (
       // Update existing subscription
       existingSubscription.productId = 'agency_agent_yearly';
       existingSubscription.store = 'agency_coupon';
-      existingSubscription.purchaseToken = couponCode;
-      existingSubscription.transactionId = couponCode;
+      existingSubscription.purchaseToken = `${couponCode}_${user._id}`;
+      existingSubscription.transactionId = `${couponCode}_${user._id}`;
       existingSubscription.status = 'active';
       existingSubscription.startDate = new Date();
       existingSubscription.renewalDate = subscriptionExpiresAt;
@@ -1895,14 +1895,14 @@ export const redeemAgentCoupon = async (
       await existingSubscription.save();
       agencyLogger.info(`✅ Updated Subscription document for user ${user._id}`);
     } else {
-      // Create new subscription document — purchaseToken and transactionId must be the
-      // unique coupon code to avoid duplicate-key errors on the compound unique indexes
+      // Create new subscription document — include userId so multiple agents can
+      // redeem the same coupon without hitting the compound unique indexes
       await Subscription.create({
         userId: user._id,
         productId: 'agency_agent_yearly',
         store: 'agency_coupon',
-        purchaseToken: couponCode,
-        transactionId: couponCode,
+        purchaseToken: `${couponCode}_${user._id}`,
+        transactionId: `${couponCode}_${user._id}`,
         status: 'active',
         startDate: new Date(),
         renewalDate: subscriptionExpiresAt,
