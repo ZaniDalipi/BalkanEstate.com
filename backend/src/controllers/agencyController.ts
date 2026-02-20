@@ -1847,6 +1847,82 @@ export const redeemAgentCoupon = async (
       };
     }
 
+    // Create or update Subscription document FIRST — if this fails (e.g. duplicate
+    // key) we haven't mutated user/agency yet, so state stays consistent.
+    const subscriptionExpiresAt = new Date(coupon.expiresAt);
+    const uniqueToken = `${couponCode}_${user._id}`;
+
+    try {
+      const existingSubscription = await Subscription.findOne({ userId: user._id });
+
+      if (existingSubscription) {
+        existingSubscription.productId = 'agency_agent_yearly';
+        existingSubscription.store = 'agency_coupon';
+        existingSubscription.purchaseToken = uniqueToken;
+        existingSubscription.transactionId = uniqueToken;
+        existingSubscription.status = 'active';
+        existingSubscription.startDate = new Date();
+        existingSubscription.renewalDate = subscriptionExpiresAt;
+        existingSubscription.expirationDate = subscriptionExpiresAt;
+        existingSubscription.autoRenewing = true;
+        existingSubscription.price = 0;
+        existingSubscription.currency = 'EUR';
+        existingSubscription.isAcknowledged = true;
+        existingSubscription.expiryReminderSent = false;
+        await existingSubscription.save();
+        agencyLogger.info(`✅ Updated Subscription document for user ${user._id}`);
+      } else {
+        await Subscription.create({
+          userId: user._id,
+          productId: 'agency_agent_yearly',
+          store: 'agency_coupon',
+          purchaseToken: uniqueToken,
+          transactionId: uniqueToken,
+          status: 'active',
+          startDate: new Date(),
+          renewalDate: subscriptionExpiresAt,
+          expirationDate: subscriptionExpiresAt,
+          autoRenewing: true,
+          price: 0,
+          currency: 'EUR',
+          isAcknowledged: true,
+        });
+        agencyLogger.info(`✅ Created Subscription document for user ${user._id}`);
+      }
+    } catch (subError: any) {
+      // Duplicate key (code 11000) means the subscription already exists for this
+      // user+coupon combo — log and continue rather than failing the redemption.
+      if (subError.code === 11000) {
+        agencyLogger.warn(
+          `Duplicate subscription key for user ${user._id} / coupon ${couponCode}, ` +
+          `falling back to findOneAndUpdate`
+        );
+        await Subscription.findOneAndUpdate(
+          { userId: user._id },
+          {
+            $set: {
+              productId: 'agency_agent_yearly',
+              store: 'agency_coupon',
+              purchaseToken: uniqueToken,
+              transactionId: uniqueToken,
+              status: 'active',
+              startDate: new Date(),
+              renewalDate: subscriptionExpiresAt,
+              expirationDate: subscriptionExpiresAt,
+              autoRenewing: true,
+              price: 0,
+              currency: 'EUR',
+              isAcknowledged: true,
+              expiryReminderSent: false,
+            },
+          },
+          { upsert: true }
+        );
+      } else {
+        throw subError;
+      }
+    }
+
     // Upgrade user to agency_agent tier — all limits come from DB product
     user.subscription.tier = 'agency_agent';
     user.subscription.status = 'active';
@@ -1870,50 +1946,6 @@ export const redeemAgentCoupon = async (
     // Set top-level agency fields for UI compatibility
     user.agencyId = agency._id as any;
     user.agencyName = agency.name;
-
-    // Create or update Subscription document FIRST to catch duplicate-key errors
-    // before mutating user/agency state (prevents inconsistent state on failure)
-    const subscriptionExpiresAt = new Date(coupon.expiresAt);
-    const existingSubscription = await Subscription.findOne({ userId: user._id });
-
-    if (existingSubscription) {
-      // Update existing subscription
-      existingSubscription.productId = 'agency_agent_yearly';
-      existingSubscription.store = 'agency_coupon';
-      existingSubscription.purchaseToken = `${couponCode}_${user._id}`;
-      existingSubscription.transactionId = `${couponCode}_${user._id}`;
-      existingSubscription.status = 'active';
-      existingSubscription.startDate = new Date();
-      existingSubscription.renewalDate = subscriptionExpiresAt;
-      existingSubscription.expirationDate = subscriptionExpiresAt;
-      existingSubscription.autoRenewing = true;
-      existingSubscription.price = 0;
-      existingSubscription.currency = 'EUR';
-      existingSubscription.isAcknowledged = true;
-      // Reset reminder flag so new reminder will be sent before new expiration
-      existingSubscription.expiryReminderSent = false;
-      await existingSubscription.save();
-      agencyLogger.info(`✅ Updated Subscription document for user ${user._id}`);
-    } else {
-      // Create new subscription document — include userId so multiple agents can
-      // redeem the same coupon without hitting the compound unique indexes
-      await Subscription.create({
-        userId: user._id,
-        productId: 'agency_agent_yearly',
-        store: 'agency_coupon',
-        purchaseToken: `${couponCode}_${user._id}`,
-        transactionId: `${couponCode}_${user._id}`,
-        status: 'active',
-        startDate: new Date(),
-        renewalDate: subscriptionExpiresAt,
-        expirationDate: subscriptionExpiresAt,
-        autoRenewing: true,
-        price: 0,
-        currency: 'EUR',
-        isAcknowledged: true,
-      });
-      agencyLogger.info(`✅ Created Subscription document for user ${user._id}`);
-    }
 
     await user.save();
 
@@ -2017,9 +2049,22 @@ export const redeemAgentCoupon = async (
     });
   } catch (error: any) {
     agencyLogger.error('Redeem agent coupon error:', error);
-    res.status(500).json({
-      message: 'Error redeeming coupon',
-    });
+
+    if (error.code === 11000) {
+      res.status(409).json({
+        message: 'A subscription already exists for this account. Please contact support.',
+        code: 'DUPLICATE_SUBSCRIPTION',
+      });
+    } else if (error.name === 'ValidationError') {
+      res.status(400).json({
+        message: 'Invalid subscription data',
+        code: 'VALIDATION_ERROR',
+      });
+    } else {
+      res.status(500).json({
+        message: 'Error redeeming coupon',
+      });
+    }
   }
 };
 
@@ -2420,41 +2465,70 @@ export const migrateAgentSubscriptions = async (
         }
 
         // Check/create Subscription document
-        const existingSubscription = await Subscription.findOne({ userId: user._id });
+        const migrationToken = user.agency?.couponCode
+          ? `${user.agency.couponCode}_${user._id}`
+          : `agency_coupon_${user._id}`;
 
-        if (!existingSubscription) {
-          await Subscription.create({
-            userId: user._id,
-            productId: 'agency_agent_yearly',
-            store: 'agency_coupon',
-            purchaseToken: `agency_coupon_${user._id.toString()}`,
-            status: 'active',
-            startDate: user.agency?.joinedAt || new Date(),
-            renewalDate: agencyExpiresAt,
-            expirationDate: agencyExpiresAt,
-            autoRenewing: true,
-            price: 0,
-            currency: 'EUR',
-            isAcknowledged: true,
-          });
-          subscriptionCreated = true;
-          totalCreated++;
-        } else if (existingSubscription.productId !== 'agency_agent_yearly') {
-          // Update existing subscription
-          existingSubscription.productId = 'agency_agent_yearly';
-          existingSubscription.store = 'agency_coupon';
-          if (!existingSubscription.purchaseToken) {
-            existingSubscription.purchaseToken = `agency_coupon_${user._id.toString()}`;
+        try {
+          const existingSubscription = await Subscription.findOne({ userId: user._id });
+
+          if (!existingSubscription) {
+            await Subscription.create({
+              userId: user._id,
+              productId: 'agency_agent_yearly',
+              store: 'agency_coupon',
+              purchaseToken: migrationToken,
+              transactionId: migrationToken,
+              status: 'active',
+              startDate: user.agency?.joinedAt || new Date(),
+              renewalDate: agencyExpiresAt,
+              expirationDate: agencyExpiresAt,
+              autoRenewing: true,
+              price: 0,
+              currency: 'EUR',
+              isAcknowledged: true,
+            });
+            subscriptionCreated = true;
+            totalCreated++;
+          } else if (existingSubscription.productId !== 'agency_agent_yearly') {
+            existingSubscription.productId = 'agency_agent_yearly';
+            existingSubscription.store = 'agency_coupon';
+            existingSubscription.purchaseToken = migrationToken;
+            existingSubscription.transactionId = migrationToken;
+            existingSubscription.status = 'active';
+            existingSubscription.expirationDate = agencyExpiresAt;
+            existingSubscription.renewalDate = agencyExpiresAt;
+            existingSubscription.price = 0;
+            existingSubscription.autoRenewing = true;
+            existingSubscription.expiryReminderSent = false;
+            await existingSubscription.save();
+            totalUpdated++;
           }
-          existingSubscription.status = 'active';
-          existingSubscription.expirationDate = agencyExpiresAt;
-          existingSubscription.renewalDate = agencyExpiresAt;
-          existingSubscription.price = 0;
-          existingSubscription.autoRenewing = true;
-          // Reset reminder flag so new reminder will be sent before new expiration
-          existingSubscription.expiryReminderSent = false;
-          await existingSubscription.save();
-          totalUpdated++;
+        } catch (subError: any) {
+          if (subError.code === 11000) {
+            agencyLogger.warn(`Migration: duplicate subscription key for user ${user._id}, using upsert`);
+            await Subscription.findOneAndUpdate(
+              { userId: user._id },
+              {
+                $set: {
+                  productId: 'agency_agent_yearly',
+                  store: 'agency_coupon',
+                  purchaseToken: migrationToken,
+                  transactionId: migrationToken,
+                  status: 'active',
+                  expirationDate: agencyExpiresAt,
+                  renewalDate: agencyExpiresAt,
+                  price: 0,
+                  autoRenewing: true,
+                  expiryReminderSent: false,
+                },
+              },
+              { upsert: true }
+            );
+            totalUpdated++;
+          } else {
+            agencyLogger.error(`Migration: subscription error for user ${user._id}:`, subError);
+          }
         }
 
         // Update Agent record if exists
