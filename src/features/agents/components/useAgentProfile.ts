@@ -93,6 +93,7 @@ export function useAgentProfile({ agent }: { agent: Agent }) {
     const [loadingSimilarAgents, setLoadingSimilarAgents] = useState(false);
     const [showAppraisalModal, setShowAppraisalModal] = useState(false);
     const [showConsultationModal, setShowConsultationModal] = useState(false);
+    const [showMarketReportModal, setShowMarketReportModal] = useState(false);
     const [showInquiryModal, setShowInquiryModal] = useState(false);
     const [appraisalForm, setAppraisalForm] = useState<AppraisalFormData>({ address: '', propertyType: '', notes: '' });
     const [consultationForm, setConsultationForm] = useState<ConsultationFormData>({ date: '', time: '', topic: '', notes: '' });
@@ -546,19 +547,13 @@ export function useAgentProfile({ agent }: { agent: Agent }) {
         }
     };
 
-    const handleRequestMarketReport = async () => {
-        if (!state.isAuthenticated) {
-            dispatch({ type: 'TOGGLE_AUTH_MODAL', payload: { isOpen: true } });
-            return;
-        }
-        try {
-            const conversation = await createConversation(agent.id);
-            dispatch({ type: 'SET_ACTIVE_CONVERSATION', payload: conversation.id });
-            window.history.pushState({ page: 'inbox' }, '', '/inbox');
-            dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'inbox' });
-        } catch (error) {
-            // Error removed
-        }
+    const handleRequestMarketReport = () => {
+        setShowMarketReportModal(true);
+    };
+
+    const handleMarketReportContact = () => {
+        setShowMarketReportModal(false);
+        setShowInquiryModal(true);
     };
 
     const handleSearchAllProperties = () => {
@@ -785,6 +780,7 @@ export function useAgentProfile({ agent }: { agent: Agent }) {
         loadingSimilarAgents,
         showAppraisalModal, setShowAppraisalModal,
         showConsultationModal, setShowConsultationModal,
+        showMarketReportModal, setShowMarketReportModal,
         showInquiryModal, setShowInquiryModal,
         appraisalForm, setAppraisalForm,
         consultationForm, setConsultationForm,
@@ -825,6 +821,7 @@ export function useAgentProfile({ agent }: { agent: Agent }) {
         handleScheduleConsultation,
         handleSubmitConsultation,
         handleRequestMarketReport,
+        handleMarketReportContact,
         handleSearchAllProperties,
         handleVisitAgency,
         handleViewMoreAgents,
