@@ -2001,6 +2001,7 @@ export const redeemAgentCoupon = async (
     // Notify all viewers of the agency page so the new agent appears in real-time
     try {
       const io = getSocketInstance();
+      if (!io) throw new Error('Socket not available');
       io.emit(`agency-update-${String(agency._id)}`, {
         type: 'member-added',
         agencyId: String(agency._id),
