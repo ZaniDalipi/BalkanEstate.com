@@ -47,6 +47,28 @@ export const getFavorites = async (): Promise<Property[]> => {
     .map((fav) => transformBackendProperty(fav.propertyId));
 };
 
+// --- Agency Favorites API ---
+
+export const toggleAgencyFavorite = async (
+  agencyId: string
+): Promise<{ isSaved: boolean }> => {
+  const response = await apiRequest<{ isSaved: boolean }>('/agency-favorites/toggle', {
+    method: 'POST',
+    body: { agencyId },
+    requiresAuth: true,
+  });
+  return response;
+};
+
+export const checkAgencyFavorite = async (
+  agencyId: string
+): Promise<boolean> => {
+  const response = await apiRequest<{ isSaved: boolean }>(`/agency-favorites/check/${agencyId}`, {
+    requiresAuth: true,
+  });
+  return response.isSaved;
+};
+
 // --- Saved Searches API ---
 
 export const addSavedSearch = async (search: SavedSearch): Promise<SavedSearch> => {

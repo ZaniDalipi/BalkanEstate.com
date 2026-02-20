@@ -32,6 +32,8 @@ import {
 import { API_URL } from '../src/shared/api/config';
 import MapLocationPicker from '../src/features/seller/components/MapLocationPicker';
 import { searchLocation } from '../services/osmService';
+import { toggleAgencyFavorite, checkAgencyFavorite } from '../src/features/saved/api/savedApi';
+import { SocialShare } from '../src/components/marketing/SocialShare';
 
 // Map icon SVG for section headers
 const MapIcon: React.FC<{ className?: string }> = ({ className }) => (
@@ -123,7 +125,7 @@ const resolveGradientCss = (stored?: string): string => {
 };
 
 const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
-  const { t } = useTranslation(['agencyDetails', 'nav']);
+  const { t } = useTranslation(['agencyDetails', 'nav', 'common']);
   const { state, dispatch } = useAppContext();
   const { currentUser, isAuthenticated } = state;
   const { confirm } = useConfirmation();
@@ -157,6 +159,9 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
   const [subscriptionKey, setSubscriptionKey] = useState(0);
   const [showGradientPicker, setShowGradientPicker] = useState(false);
   const [showCoverControls, setShowCoverControls] = useState(false);
+  const [isFavourited, setIsFavourited] = useState(false);
+  const [isTogglingFavourite, setIsTogglingFavourite] = useState(false);
+  const [showShareDropdown, setShowShareDropdown] = useState(false);
   const [editForm, setEditForm] = useState({
     name: '',
     description: '',
@@ -322,6 +327,32 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
       if (geocodeTimeoutRef.current) clearTimeout(geocodeTimeoutRef.current);
     };
   }, [editForm.city, editForm.country, isEditModalOpen]);
+
+  // Check if agency is favourited on load
+  useEffect(() => {
+    if (!isAuthenticated || !agency._id) return;
+    checkAgencyFavorite(agency._id)
+      .then(setIsFavourited)
+      .catch(() => {});
+  }, [agency._id, isAuthenticated]);
+
+  const handleToggleFavourite = useCallback(async () => {
+    if (!isAuthenticated) {
+      dispatch({ type: 'TOGGLE_AUTH_MODAL', payload: { isOpen: true } });
+      return;
+    }
+    if (isTogglingFavourite) return;
+    setIsTogglingFavourite(true);
+    setIsFavourited(prev => !prev); // optimistic
+    try {
+      const result = await toggleAgencyFavorite(agency._id);
+      setIsFavourited(result.isSaved);
+    } catch {
+      setIsFavourited(prev => !prev); // rollback
+    } finally {
+      setIsTogglingFavourite(false);
+    }
+  }, [agency._id, isAuthenticated, isTogglingFavourite, dispatch]);
 
   const fetchAgencyData = async () => {
     setLoading(true);
@@ -1002,6 +1033,14 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
     window.scrollTo(0, 0);
   }, [propertyView]);
 
+  // Close share dropdown on outside click
+  useEffect(() => {
+    if (!showShareDropdown) return;
+    const handler = () => setShowShareDropdown(false);
+    document.addEventListener('click', handler);
+    return () => document.removeEventListener('click', handler);
+  }, [showShareDropdown]);
+
   return (
     <div className="min-h-screen bg-gradient-to-b from-slate-50 to-white overflow-y-auto">
       {/* SEO Meta Tags with AggregateRating schema */}
@@ -1298,6 +1337,70 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
           <div className="mt-4 inline-flex items-center gap-2 px-4 py-2 bg-white/10 backdrop-blur-md rounded-full border border-white/20">
             <MapPinIcon className="w-4 h-4 text-white/80" />
             <span className="text-white/90 font-medium text-sm">{agencyData.city}, {agencyData.country}</span>
+          </div>
+
+          {/* Share & Favourite Actions */}
+          <div className="mt-4 flex items-center gap-3">
+            {/* Favourite Button */}
+            <button
+              onClick={handleToggleFavourite}
+              disabled={isTogglingFavourite}
+              className={`inline-flex items-center gap-2 px-4 py-2 rounded-full backdrop-blur-md border transition-all duration-300 text-sm font-medium ${
+                isFavourited
+                  ? 'bg-red-500/90 border-red-400/50 text-white'
+                  : 'bg-white/10 border-white/20 text-white/90 hover:bg-white/20'
+              }`}
+              aria-label={isFavourited ? t('common:removeFromFavorites') : t('common:addToFavorites')}
+              aria-pressed={isFavourited}
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className={`w-4 h-4 ${isFavourited ? 'fill-current' : ''}`}
+                fill={isFavourited ? 'currentColor' : 'none'}
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+                strokeWidth={isFavourited ? 0 : 1.5}
+              >
+                <path strokeLinecap="round" strokeLinejoin="round" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+              </svg>
+              {isFavourited ? t('common:saved') : t('common:save')}
+            </button>
+
+            {/* Share Button */}
+            <div className="relative">
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  if (typeof navigator !== 'undefined' && navigator.share) {
+                    navigator.share({
+                      title: agencyData.name,
+                      text: agencyData.description || `${agencyData.name} - Real Estate Agency`,
+                      url: window.location.href,
+                    }).catch(() => {});
+                  } else {
+                    setShowShareDropdown(!showShareDropdown);
+                  }
+                }}
+                className="inline-flex items-center gap-2 px-4 py-2 bg-white/10 backdrop-blur-md text-white/90 text-sm font-medium rounded-full border border-white/20 hover:bg-white/20 transition-all duration-300"
+                aria-label={t('common:share')}
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M7.217 10.907a2.25 2.25 0 100 2.186m0-2.186c.18.324.283.696.283 1.093s-.103.77-.283 1.093m0-2.186l9.566-5.314m-9.566 7.5l9.566 5.314m0 0a2.25 2.25 0 103.935 2.186 2.25 2.25 0 00-3.935-2.186zm0-12.863a2.25 2.25 0 103.935-2.186 2.25 2.25 0 00-3.935 2.186z" />
+                </svg>
+                {t('common:share')}
+              </button>
+              {showShareDropdown && (
+                <div className="absolute top-full left-1/2 -translate-x-1/2 mt-2 z-50">
+                  <SocialShare
+                    url={typeof window !== 'undefined' ? window.location.href : ''}
+                    title={`${agencyData.name} - Real Estate Agency`}
+                    description={agencyData.description || `${agencyData.totalAgents} agents, ${agencyProperties.length} listings`}
+                    variant="icons"
+                    platforms={['facebook', 'twitter', 'whatsapp', 'linkedin', 'email', 'copy']}
+                  />
+                </div>
+              )}
+            </div>
           </div>
 
           {/* Quick Stats Row */}
