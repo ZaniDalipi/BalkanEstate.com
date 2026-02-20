@@ -11,6 +11,7 @@ import { uploadImage, deleteImage } from '../services/cloudinaryService';
 import { generateSecureAgentId } from '../utils/secureRandom';
 import { sendAgentJoinedAgencyEmail, sendAgencyNewMemberEmail } from '../services/emailService';
 import { ENTERPRISE_TIER_LIMITS } from '../config/subscriptionConstants';
+import { getSocketInstance } from '../utils/socketInstance';
 import { agencyLogger } from '../utils/logger';
 
 // Helper function to generate unique Agent ID using secure random
@@ -1996,6 +1997,19 @@ export const redeemAgentCoupon = async (
     }
 
     agencyLogger.info(`✅ User ${user._id} redeemed agent coupon for agency ${agency.name}`);
+
+    // Notify all viewers of the agency page so the new agent appears in real-time
+    try {
+      const io = getSocketInstance();
+      io.emit(`agency-update-${String(agency._id)}`, {
+        type: 'member-added',
+        agencyId: String(agency._id),
+        agentId: String(user._id),
+        agentName: user.name,
+      });
+    } catch {
+      // Socket not available — non-critical
+    }
 
     // Send email notifications (non-blocking)
     try {

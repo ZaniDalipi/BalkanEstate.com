@@ -1082,7 +1082,7 @@ export const switchRole = async (req: Request, res: Response): Promise<void> => 
       return;
     }
 
-    const { role, licenseNumber, agencyInvitationCode, agentId, languages } = req.body;
+    const { role, licenseNumber, agencyInvitationCode, agentId, languages, phone } = req.body;
 
     // Validate role
     const validRoles = ['buyer', 'private_seller', 'agent'];
@@ -1105,6 +1105,33 @@ export const switchRole = async (req: Request, res: Response): Promise<void> => 
     if (!user) {
       res.status(404).json({ message: 'User not found' });
       return;
+    }
+
+    // Phone number is required for agent and private_seller roles.
+    // Accept it from the request body OR check if the user already has one on file.
+    if (role === 'agent' || role === 'private_seller') {
+      const hasPhone = phone?.trim() || user.phone;
+      if (!hasPhone) {
+        res.status(400).json({
+          message: 'Phone number is required to become an agent or seller',
+          code: 'PHONE_REQUIRED',
+        });
+        return;
+      }
+
+      // If a new phone was provided, validate format and persist it
+      if (phone?.trim()) {
+        const cleaned = phone.trim().replace(/[\s\-\(\)\.]/g, '');
+        const phoneRegex = /^\+?[0-9]{7,15}$/;
+        if (!phoneRegex.test(cleaned)) {
+          res.status(400).json({
+            message: 'Invalid phone number format. Use 7-15 digits, optionally starting with +',
+            code: 'INVALID_PHONE',
+          });
+          return;
+        }
+        user.phone = phone.trim();
+      }
     }
 
     // If switching to agent role

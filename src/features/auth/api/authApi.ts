@@ -283,6 +283,7 @@ export const setPublicKey = async (publicKey: string): Promise<void> => {
 
 export interface SwitchRoleData {
   licenseNumber?: string;
+  phone?: string;
   agencyInvitationCode?: string;
   agentId?: string;
   languages?: string[];

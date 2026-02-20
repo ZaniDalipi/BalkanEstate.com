@@ -813,7 +813,14 @@ const ProfileSettings: React.FC<{ user: User }> = ({ user }) => {
             return;
         }
 
-        // For other role switches (including agent ↔ private_seller), allow freely
+        // If switching to agent or private_seller but user has no phone, open modal to collect it
+        if ((role === UserRole.AGENT || role === UserRole.PRIVATE_SELLER) && !user.phone) {
+            setPendingRole(role);
+            setIsLicenseModalOpen(true);
+            return;
+        }
+
+        // For other role switches (including agent ↔ private_seller with phone on file), allow freely
         try {
             setIsSaving(true);
             const updatedUser = await switchRole(role);
@@ -828,7 +835,7 @@ const ProfileSettings: React.FC<{ user: User }> = ({ user }) => {
         }
     };
 
-    const handleLicenseSubmit = async (licenseData: { licenseNumber: string; agencyInvitationCode?: string; agentId?: string; selectedAgencyId?: string; languages?: string[] }) => {
+    const handleLicenseSubmit = async (licenseData: { licenseNumber: string; phone?: string; agencyInvitationCode?: string; agentId?: string; selectedAgencyId?: string; languages?: string[] }) => {
         setIsSaving(true);
         setError('');
         try {
@@ -1535,6 +1542,7 @@ const ProfileSettings: React.FC<{ user: User }> = ({ user }) => {
             onSubmit={handleLicenseSubmit}
             currentLicenseNumber={user.licenseNumber}
             currentAgentId={user.agentId}
+            currentPhone={user.phone}
         />
         </>
     );

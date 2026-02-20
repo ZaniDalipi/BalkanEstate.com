@@ -488,8 +488,8 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
         setIsInvitationCodeModalOpen(false);
         await success('Coupon Redeemed!', `You've joined ${data.agency?.name || agency.name} with a Pro subscription!`);
 
-        // Refresh the page to show updated data
-        window.location.reload();
+        // Refetch agency data so the new agent appears in the list immediately
+        await fetchAgencyData();
       } else {
         // Handle invitation code (AGY-XXXXXX-XXXXXX format)
         const verification = await verifyInvitationCode(agency._id, trimmedCode);

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { X, ShieldCheck, Building2, KeyRound, Globe, ChevronDown, BadgeCheck, AlertCircle } from 'lucide-react';
+import { X, ShieldCheck, Building2, KeyRound, Globe, ChevronDown, BadgeCheck, AlertCircle, Phone } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { getAgencies } from '../../services/apiService';
 
@@ -14,6 +14,7 @@ interface AgentLicenseModalProps {
   onClose: () => void;
   onSubmit: (licenseData: {
     licenseNumber: string;
+    phone?: string;
     agencyInvitationCode?: string;
     agentId?: string;
     selectedAgencyId?: string;
@@ -21,6 +22,7 @@ interface AgentLicenseModalProps {
   }) => Promise<void>;
   currentLicenseNumber?: string;
   currentAgentId?: string;
+  currentPhone?: string;
 }
 
 const Field = ({
@@ -46,9 +48,11 @@ const AgentLicenseModal: React.FC<AgentLicenseModalProps> = ({
   onSubmit,
   currentLicenseNumber,
   currentAgentId,
+  currentPhone,
 }) => {
   const { t } = useTranslation(['agents', 'modals', 'common']);
   const [licenseNumber, setLicenseNumber] = useState(currentLicenseNumber || '');
+  const [phone, setPhone] = useState(currentPhone || '');
   const [agencyInvitationCode, setAgencyInvitationCode] = useState('');
   const [agentId, setAgentId] = useState(currentAgentId || '');
   const [error, setError] = useState('');
@@ -97,10 +101,25 @@ const AgentLicenseModal: React.FC<AgentLicenseModalProps> = ({
 
   if (!isOpen) return null;
 
+  // Phone is required when the user doesn't already have one on file
+  const phoneRequired = !currentPhone;
+
   const runSubmit = async () => {
     if (!licenseNumber.trim()) {
       setError(t('modals:agentLicense.licenseRequired'));
       return;
+    }
+    // Validate phone — required if user has no phone on record
+    if (phoneRequired && !phone.trim()) {
+      setError(t('modals:agentLicense.phoneRequired', 'Phone number is required'));
+      return;
+    }
+    if (phone.trim()) {
+      const cleaned = phone.trim().replace(/[\s\-()\.]/g, '');
+      if (!/^\+?[0-9]{7,15}$/.test(cleaned)) {
+        setError(t('modals:agentLicense.invalidPhone', 'Invalid phone number format'));
+        return;
+      }
     }
     if (selectedAgency && !agencyInvitationCode.trim()) {
       setError(t('modals:agentLicense.invitationCodeRequired'));
@@ -115,6 +134,7 @@ const AgentLicenseModal: React.FC<AgentLicenseModalProps> = ({
     try {
       await onSubmit({
         licenseNumber: licenseNumber.trim(),
+        phone: phone.trim() || undefined,
         agencyInvitationCode: agencyInvitationCode.trim() || undefined,
         agentId: agentId.trim() || undefined,
         selectedAgencyId: selectedAgency || undefined,
@@ -261,6 +281,28 @@ const AgentLicenseModal: React.FC<AgentLicenseModalProps> = ({
                 </div>
               </Field>
             </div>
+
+            {/* Phone number — required if user has none on file */}
+            {phoneRequired && (
+              <Field
+                id="phone"
+                label={t('modals:agentLicense.phoneNumber', 'Phone Number')}
+                icon={<Phone className="w-3 h-3" />}
+                required
+                hint={t('modals:agentLicense.phoneHint', 'Required for agents and sellers. Clients will use this to contact you.')}
+              >
+                <input
+                  type="tel"
+                  id="phone"
+                  value={phone}
+                  onChange={e => setPhone(e.target.value)}
+                  disabled={isSubmitting}
+                  placeholder={t('modals:agentLicense.phonePlaceholder', '+383 44 123 456')}
+                  className={inputCls}
+                  required
+                />
+              </Field>
+            )}
 
             {/* Languages — new agents only */}
             {!isJoiningAgency && (
