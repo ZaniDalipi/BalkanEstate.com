@@ -19,7 +19,7 @@ import {
  * - Automatic cleanup of expired tokens
  */
 
-const MAX_REFRESH_TOKENS_PER_USER = 5; // Maximum devices/sessions
+const MAX_REFRESH_TOKENS_PER_USER = 10; // Maximum devices/sessions
 const REFRESH_TOKEN_EXPIRY = process.env.REFRESH_TOKEN_EXPIRES_IN || '7d';
 
 interface TokenPair {

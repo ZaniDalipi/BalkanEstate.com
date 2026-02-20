@@ -109,6 +109,11 @@ export function useAgentProfile({ agent }: { agent: Agent }) {
     const [loadingProperties, setLoadingProperties] = useState(true);
     const { success, error: showError } = useNotification();
     const shareToastTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+    const isMountedRef = useRef(true);
+    useEffect(() => {
+        isMountedRef.current = true;
+        return () => { isMountedRef.current = false; };
+    }, []);
     const [editForm, setEditForm] = useState<EditFormData>({
         bio: agent.bio || '',
         specializations: agent.specializations || [],
@@ -253,19 +258,20 @@ export function useAgentProfile({ agent }: { agent: Agent }) {
 
     // Function to fetch agent's properties
     const fetchAgentProperties = useCallback(async () => {
+        if (!isMountedRef.current) return;
         setLoadingProperties(true);
         try {
             // Try fetching with agent.userId first, then agent.id
             const userId = agent.userId || agent.id;
             if (userId) {
                 const properties = await getPropertiesBySellerId(String(userId));
-                setFetchedProperties(properties);
+                if (isMountedRef.current) setFetchedProperties(properties);
             }
         } catch (error) {
             // Error removed
             // Don't clear - we still have state.properties as fallback
         } finally {
-            setLoadingProperties(false);
+            if (isMountedRef.current) setLoadingProperties(false);
         }
     }, [agent.userId, agent.id]);
 
@@ -292,12 +298,15 @@ export function useAgentProfile({ agent }: { agent: Agent }) {
 
     // Fetch similar agents from same agency or city and fetch agency gradient
     useEffect(() => {
+        let cancelled = false;
         const fetchSimilarAgents = async () => {
+            if (cancelled) return;
             setLoadingSimilarAgents(true);
             try {
                 if (isAgencyAgent && agent.agencyId) {
                     // Fetch agents from same agency and fetch agency gradient
                     const response = await getAgencyAgents(agent.agencyId);
+                    if (cancelled) return;
                     const agencyAgents = (response.agents || [])
                         .filter((a: Agent) => a.id !== agent.id && a.userId !== agent.userId)
                         .slice(0, 4);
@@ -306,6 +315,7 @@ export function useAgentProfile({ agent }: { agent: Agent }) {
                     // Fetch agency details
                     try {
                         const agencyResponse = await fetch(`${API_URL}/agencies/${agent.agencyId}`);
+                        if (cancelled) return;
                         if (agencyResponse.ok) {
                             const agencyDataResponse = await agencyResponse.json();
                             const agency = agencyDataResponse.agency;
@@ -323,6 +333,7 @@ export function useAgentProfile({ agent }: { agent: Agent }) {
                 } else {
                     // Fetch agents from same city
                     const response = await getAllAgents();
+                    if (cancelled) return;
                     const cityAgents = (response.agents || [])
                         .filter((a: Agent) =>
                             (a.id !== agent.id && a.userId !== agent.userId) &&
@@ -334,11 +345,12 @@ export function useAgentProfile({ agent }: { agent: Agent }) {
             } catch (error) {
                 // Error removed
             } finally {
-                setLoadingSimilarAgents(false);
+                if (!cancelled) setLoadingSimilarAgents(false);
             }
         };
 
         fetchSimilarAgents();
+        return () => { cancelled = true; };
     }, [agent.id, agent.agencyId, agent.city, agent.country, isAgencyAgent]);
 
     // Check if agent is saved on mount
@@ -553,7 +565,7 @@ export function useAgentProfile({ agent }: { agent: Agent }) {
     };
 
     const handleSelectSimilarAgent = (selectedAgent: Agent) => {
-        window.scrollTo(0, 0);
+        window.scrollTo({ top: 0, behavior: 'smooth' });
         const agentIdentifier = selectedAgent.agentId || selectedAgent.id;
         dispatch({ type: 'SET_SELECTED_AGENT', payload: agentIdentifier });
         window.history.pushState({}, '', `/agents/${agentIdentifier}`);

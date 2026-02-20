@@ -958,27 +958,29 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
         }}
       />
 
-      {/* Hero Banner - Professional Design */}
-      <div className="relative h-[28rem] md:h-[32rem] overflow-hidden flex-shrink-0">
-        {/* Background Layer */}
-        {agencyData.coverImage ? (
-          <>
-            <img
-              src={agencyData.coverImage}
-              alt={`${agencyData.name} - Real Estate Agency${agencyData.city ? ` in ${agencyData.city}` : ''}${agencyData.country ? `, ${agencyData.country}` : ''}`}
-              className="absolute inset-0 w-full h-full object-cover"
+      {/* Agency Header - sticky banner with LinkedIn-style overlapping logo */}
+      <div className="sticky top-0 z-30 bg-white shadow-sm">
+        {/* Cover Banner */}
+        <div className="relative h-44 md:h-56 overflow-hidden">
+          {/* Background Layer */}
+          {agencyData.coverImage ? (
+            <>
+              <img
+                src={agencyData.coverImage}
+                alt={`${agencyData.name} - Real Estate Agency${agencyData.city ? ` in ${agencyData.city}` : ''}${agencyData.country ? `, ${agencyData.country}` : ''}`}
+                className="absolute inset-0 w-full h-full object-cover"
+              />
+              <div className="absolute inset-0 bg-gradient-to-b from-slate-900/60 via-slate-900/30 to-slate-900/50" />
+            </>
+          ) : (
+            <div
+              className="absolute inset-0"
+              style={{ backgroundImage: resolveGradientCss((agencyData as any).coverGradient) }}
             />
-            <div className="absolute inset-0 bg-gradient-to-b from-slate-900/70 via-slate-900/50 to-slate-900/90" />
-          </>
-        ) : (
-          <div
-            className="absolute inset-0"
-            style={{ backgroundImage: resolveGradientCss((agencyData as any).coverGradient) }}
-          />
-        )}
+          )}
 
-        {/* Subtle Pattern Overlay */}
-        <div className="absolute inset-0 opacity-5" style={{ backgroundImage: 'url("data:image/svg+xml,%3Csvg width="60" height="60" viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg"%3E%3Cg fill="none" fill-rule="evenodd"%3E%3Cg fill="%23ffffff" fill-opacity="1"%3E%3Cpath d="M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z"/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")' }} />
+          {/* Subtle Pattern Overlay */}
+          <div className="absolute inset-0 opacity-5" style={{ backgroundImage: 'url("data:image/svg+xml,%3Csvg width="60" height="60" viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg"%3E%3Cg fill="none" fill-rule="evenodd"%3E%3Cg fill="%23ffffff" fill-opacity="1"%3E%3Cpath d="M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z"/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")' }} />
 
         {/* Top Navigation Bar */}
         <div className="absolute top-0 left-0 right-0 z-20 px-4 md:px-6 py-4">
@@ -1142,7 +1144,7 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
                     </div>
                   )}
                 </div>
-              )}
+              </div>
 
               {/* Global Nav Actions */}
               <div className="flex items-center gap-1.5 sm:gap-2">
@@ -1187,32 +1189,174 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
               </div>
             </div>
           </div>
+
+          {/* Admin Banner Controls - bottom-right of banner */}
+          {isAdmin && (
+            <div className="absolute bottom-3 right-4 z-20 flex gap-2">
+              <button
+                onClick={() => setShowGradientPicker(!showGradientPicker)}
+                className="inline-flex items-center gap-2 px-3 py-2 bg-white/10 backdrop-blur-md text-white text-sm font-medium rounded-xl border border-white/20 hover:bg-white/20 transition-all duration-300"
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01" />
+                </svg>
+                <span className="hidden sm:inline">{t('banner.gradients')}</span>
+              </button>
+              <input
+                type="file"
+                id="cover-upload"
+                accept="image/*"
+                onChange={handleCoverUpload}
+                disabled={isUploadingCover}
+                className="hidden"
+              />
+              <label
+                htmlFor="cover-upload"
+                className={`inline-flex items-center gap-2 px-3 py-2 bg-white/10 backdrop-blur-md text-white text-sm font-medium rounded-xl border border-white/20 hover:bg-white/20 transition-all duration-300 cursor-pointer ${
+                  isUploadingCover ? 'opacity-50 cursor-not-allowed' : ''
+                }`}
+              >
+                {isUploadingCover ? (
+                  <>
+                    <div className="animate-spin rounded-full h-4 w-4 border-2 border-white/30 border-t-white"></div>
+                    <span className="hidden sm:inline">{t('banner.uploading')}</span>
+                  </>
+                ) : (
+                  <>
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                    </svg>
+                    <span className="hidden sm:inline">{t('banner.uploadImage')}</span>
+                  </>
+                )}
+              </label>
+              {/* Gradient Picker Dropdown */}
+              {showGradientPicker && (
+                <div className="absolute bottom-full right-0 mb-2 bg-white/95 backdrop-blur-xl rounded-2xl shadow-2xl p-4 w-80 max-h-96 overflow-y-auto border border-slate-200 z-50">
+                  <div className="flex items-center justify-between mb-4">
+                    <h3 className="text-lg font-semibold text-slate-900">{t('banner.chooseGradient')}</h3>
+                    <button
+                      onClick={() => setShowGradientPicker(false)}
+                      className="text-slate-400 hover:text-slate-600 transition-colors"
+                    >
+                      <XMarkIcon className="w-5 h-5" />
+                    </button>
+                  </div>
+                  <div className="grid grid-cols-2 gap-2">
+                    {GRADIENT_PRESETS.map((preset) => (
+                      <button
+                        key={preset.id}
+                        onClick={() => handleGradientSelect(preset.id)}
+                        className="group relative h-20 rounded-xl overflow-hidden border-2 border-slate-200 hover:border-primary transition-all duration-300 hover:scale-[1.02]"
+                      >
+                        <div className="absolute inset-0" style={{ backgroundImage: preset.css }} />
+                        <div className="absolute inset-0 bg-black/10 group-hover:bg-black/0 transition-colors" />
+                        <div className="absolute inset-0 flex items-center justify-center">
+                          <span className="text-white font-medium text-xs drop-shadow-lg">{preset.name}</span>
+                        </div>
+                        {((agencyData as any).coverGradient === preset.gradient || (agencyData as any).coverGradient === preset.id) && (
+                          <div className="absolute top-1.5 right-1.5 w-5 h-5 bg-white rounded-full flex items-center justify-center shadow">
+                            <svg className="w-3 h-3 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+                            </svg>
+                          </div>
+                        )}
+                      </button>
+                    ))}
+                  </div>
+                  <p className="text-xs text-slate-500 mt-3 text-center">{t('banner.customImageHint')}</p>
+                </div>
+              )}
+            </div>
+          )}
         </div>
 
-        {/* Agency Identity - Centered Content */}
-        <div className="absolute inset-0 flex flex-col items-center justify-center px-4">
-          {/* Logo Container */}
-          <div className="relative group">
-            <div className="absolute -inset-1 bg-gradient-to-r from-primary/50 to-blue-500/50 rounded-2xl blur-lg opacity-75 group-hover:opacity-100 transition-opacity duration-500"></div>
-            <div className="relative w-28 h-28 md:w-32 md:h-32 rounded-2xl border-2 border-white/30 shadow-2xl overflow-hidden bg-white/10 backdrop-blur-md flex-shrink-0">
-              {agencyData.logo ? (
-                <img
-                  src={agencyData.logo}
-                  alt={`${agencyData.name} logo - Real Estate Agency`}
-                  className="w-full h-full object-cover"
-                />
-              ) : (
-                <div className="w-full h-full flex items-center justify-center">
-                  <BuildingOfficeIcon className="w-14 h-14 text-white" />
+        {/* Profile Row - Logo overlapping banner + Agency Info */}
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex items-end gap-4 sm:gap-6">
+            {/* Agency Logo - overlaps the banner bottom edge */}
+            <div className="relative -mt-14 sm:-mt-16 flex-shrink-0 pb-4">
+              <div className="absolute -inset-1 bg-gradient-to-r from-primary/50 to-blue-500/50 rounded-2xl blur-lg opacity-75"></div>
+              <div className="relative w-24 h-24 sm:w-28 sm:h-28 rounded-2xl border-4 border-white shadow-xl overflow-hidden bg-white">
+                {agencyData.logo ? (
+                  <img
+                    src={agencyData.logo}
+                    alt={`${agencyData.name} logo - Real Estate Agency`}
+                    className="w-full h-full object-cover"
+                  />
+                ) : (
+                  <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-slate-700 to-blue-900">
+                    <BuildingOfficeIcon className="w-12 h-12 text-white" />
+                  </div>
+                )}
+              </div>
+              {/* Featured Badge */}
+              {agencyData.isFeatured && (
+                <div className="absolute -top-2 -right-2 bg-gradient-to-r from-amber-400 to-orange-500 text-white px-2.5 py-1 rounded-lg text-xs font-semibold shadow-lg flex items-center gap-1 z-10">
+                  <StarIcon className="w-3 h-3 fill-current" />
+                  {t('common.featured')}
+                </div>
+              )}
+              {/* Logo Upload Button */}
+              {isOwner && (
+                <div className="absolute -bottom-3 left-1/2 -translate-x-1/2 z-10">
+                  <input
+                    type="file"
+                    id="logo-upload"
+                    accept="image/*"
+                    onChange={handleLogoUpload}
+                    disabled={isUploadingLogo}
+                    className="hidden"
+                  />
+                  <label
+                    htmlFor="logo-upload"
+                    className={`inline-flex items-center gap-1.5 px-3 py-1.5 bg-white text-slate-700 font-medium rounded-lg shadow-lg hover:bg-slate-50 transition-all duration-300 cursor-pointer text-xs ${
+                      isUploadingLogo ? 'opacity-50 cursor-not-allowed' : ''
+                    }`}
+                  >
+                    {isUploadingLogo ? (
+                      <>
+                        <div className="animate-spin rounded-full h-3 w-3 border-2 border-slate-300 border-t-primary"></div>
+                        {t('banner.uploading')}
+                      </>
+                    ) : (
+                      t('banner.changeLogo')
+                    )}
+                  </label>
                 </div>
               )}
             </div>
 
-            {/* Featured Badge */}
-            {agencyData.isFeatured && (
-              <div className="absolute -top-2 -right-2 bg-gradient-to-r from-amber-400 to-orange-500 text-white px-2.5 py-1 rounded-lg text-xs font-semibold shadow-lg flex items-center gap-1">
-                <StarIcon className="w-3 h-3 fill-current" />
-                {t('common.featured')}
+            {/* Agency Info */}
+            <div className="flex-1 min-w-0 pt-3 pb-4">
+              <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-3">
+                <div>
+                  <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-slate-900 truncate">{agencyData.name}</h1>
+                  <div className="flex items-center gap-1.5 mt-1">
+                    <MapPinIcon className="w-4 h-4 text-slate-400 flex-shrink-0" />
+                    <span className="text-sm text-slate-500">{agencyData.city}, {agencyData.country}</span>
+                  </div>
+                </div>
+                {/* Quick Stats */}
+                <div className="flex items-center gap-4 md:gap-6">
+                  <div className="text-center">
+                    <p className="text-xl font-bold text-slate-900">{agencyProperties.length}</p>
+                    <p className="text-[10px] text-slate-400 font-medium uppercase tracking-wider">Listings</p>
+                  </div>
+                  <div className="w-px h-6 bg-slate-200" />
+                  <div className="text-center">
+                    <p className="text-xl font-bold text-slate-900">{agencyData.totalAgents}</p>
+                    <p className="text-[10px] text-slate-400 font-medium uppercase tracking-wider">Agents</p>
+                  </div>
+                  <div className="w-px h-6 bg-slate-200" />
+                  <div className="text-center">
+                    <div className="flex items-center gap-0.5 justify-center">
+                      <StarIcon className="w-4 h-4 text-amber-400 fill-current" />
+                      <p className="text-xl font-bold text-slate-900">4.8</p>
+                    </div>
+                    <p className="text-[10px] text-slate-400 font-medium uppercase tracking-wider">Rating</p>
+                  </div>
+                </div>
               </div>
             )}
 
@@ -1250,10 +1394,11 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
             </div>
           </div>
         </div>
+        <div className="border-b border-slate-200" />
       </div>
 
       {/* Main Content */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 -mt-12 relative z-10 pb-16">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6 pb-16">
         {/* Upload Error Message */}
         {uploadError && (
           <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-xl mb-6 flex items-center gap-3">

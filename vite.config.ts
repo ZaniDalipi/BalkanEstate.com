@@ -177,7 +177,13 @@ export default defineConfig(({ mode }) => {
             maximumFileSizeToCacheInBytes: 5 * 1024 * 1024, // 5 MB limit
             // Exclude API routes from service worker interception
             // API calls (especially payments) should always be live, not cached
-            navigateFallbackDenylist: [/^\/api\//],
+            // Exclude OAuth callback: Safari throws "Response served by service worker
+            // has redirections" (WebKitInternal:0) when the SW intercepts a navigation
+            // that arrived via a server-side 302 redirect (e.g. /api/auth/google/callback
+            // → /auth/callback?token=...). The SW's response.redirected===true causes
+            // WebKit to reject it. Excluding the path lets the CDN serve index.html
+            // directly so React picks up the ?token= query params normally.
+            navigateFallbackDenylist: [/^\/api\//, /^\/auth\/callback/],
             runtimeCaching: [
               {
                 urlPattern: /^https:\/\/fonts\.googleapis\.com\/.*/i,
