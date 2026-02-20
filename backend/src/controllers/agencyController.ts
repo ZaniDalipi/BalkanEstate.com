@@ -56,13 +56,30 @@ export const createAgency = async (
       country: req.body.country,
     });
 
+    // Whitelist allowed fields to prevent mass assignment attacks
+    // (e.g., attacker setting isFeatured, verified, admins, etc.)
     const agencyData = {
-      ...req.body,
+      name: req.body.name,
+      description: req.body.description,
+      email: req.body.email,
+      phone: req.body.phone,
+      address: req.body.address,
+      city: req.body.city,
+      country: req.body.country,
+      zipCode: req.body.zipCode,
+      website: req.body.website,
+      specialties: req.body.specialties,
+      certifications: req.body.certifications,
+      languages: req.body.languages,
+      facebookUrl: req.body.facebookUrl,
+      instagramUrl: req.body.instagramUrl,
+      linkedinUrl: req.body.linkedinUrl,
+      twitterUrl: req.body.twitterUrl,
       ownerId: user._id,
-      agents: [user._id], // Add the owner as the first agent
-      admins: [user._id], // Add the owner as admin
-      isFeatured: req.body.isFeatured || false, // Can be set manually or defaults to false
-      totalAgents: 1, // Initialize with 1 agent (the owner)
+      agents: [user._id],
+      admins: [user._id],
+      isFeatured: false,
+      totalAgents: 1,
       // Add geocoded coordinates (will be undefined if geocoding failed)
       ...(coordinates.lat && coordinates.lng && {
         lat: coordinates.lat,

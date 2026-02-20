@@ -64,7 +64,7 @@ const AgentProfilePage: React.FC<AgentProfilePageProps> = ({ agent }) => {
     const seoTitle = `${agentName} - Real Estate Agent${locationStr ? ` in ${locationStr}` : ''}`;
     const seoDescription = profile.agentData.bio
         ? `${agentName} is a real estate agent${locationStr ? ` in ${locationStr}` : ''}. ${profile.agentData.bio.slice(0, 140)}`
-        : `${agentName} is a verified real estate agent${locationStr ? ` in ${locationStr}` : ''} on BalkanEstateAI. ${profile.stats.sold} properties sold, ${profile.stats.activeListings} active listings. Contact today.`;
+        : `${agentName} is a verified real estate agent${locationStr ? ` in ${locationStr}` : ''} on BalkanEstateAI. ${profile.stats.totalSales} properties sold, ${profile.activeListings.length} active listings. Contact today.`;
 
     return (
         <div className="min-h-screen bg-gray-50">
@@ -85,8 +85,8 @@ const AgentProfilePage: React.FC<AgentProfilePageProps> = ({ agent }) => {
                     country: agentCountry,
                     rating: profile.agentData.rating,
                     totalReviews: profile.agentData.totalReviews || profile.stats.reviews,
-                    activeListings: profile.stats.activeListings,
-                    propertiesSold: profile.stats.sold,
+                    activeListings: profile.activeListings.length,
+                    propertiesSold: profile.stats.totalSales,
                     specializations: profile.agentData.specializations,
                     languages: profile.agentData.languages,
                     yearsOfExperience: profile.agentData.yearsOfExperience,

@@ -918,7 +918,7 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.message || t('messages.logoUpdated'));
+        throw new Error(data.message || t('messages.uploadFailed', 'Failed to upload logo'));
       }
 
       setAgencyData(data.agency);
@@ -1003,7 +1003,7 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.message || t('messages.gradientUpdated'));
+        throw new Error(data.message || t('messages.updateFailed', 'Failed to update gradient'));
       }
 
       setAgencyData(data.agency);
@@ -1418,7 +1418,7 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
             <div className="text-center">
               <div className="flex items-center justify-center gap-1">
                 <StarIcon className="w-5 h-5 text-amber-400 fill-current" />
-                <p className="text-2xl md:text-3xl font-bold text-white">4.8</p>
+                <p className="text-2xl md:text-3xl font-bold text-white">{agencyData.rating?.toFixed(1) || 'N/A'}</p>
               </div>
               <p className="text-xs md:text-sm text-white/60 font-medium uppercase tracking-wider">Rating</p>
             </div>

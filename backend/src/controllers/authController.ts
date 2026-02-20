@@ -2116,6 +2116,13 @@ export const addRole = async (req: Request, res: Response): Promise<void> => {
       return;
     }
 
+    // Whitelist allowed roles to prevent privilege escalation
+    const ALLOWED_ROLES = ['buyer', 'agent', 'private_seller'];
+    if (!ALLOWED_ROLES.includes(newRole)) {
+      res.status(400).json({ message: 'Invalid role specified' });
+      return;
+    }
+
     const user = await User.findById((req.user as IUser)._id);
 
     if (!user) {
