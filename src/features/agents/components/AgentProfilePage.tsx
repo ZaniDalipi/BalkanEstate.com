@@ -7,6 +7,7 @@ import {
 import DefaultAvatar from '@/components/shared/DefaultAvatar';
 import FeaturedAgencies from '@/components/FeaturedAgencies';
 import { SEO, Breadcrumbs, generateAgentBreadcrumbs } from '@/src/components/seo';
+import { PageTransition, Animated } from '@/src/components/ui/Animations';
 
 // Extracted sub-components
 import { useAgentProfile } from './useAgentProfile';
@@ -106,6 +107,7 @@ const AgentProfilePage: React.FC<AgentProfilePageProps> = ({ agent }) => {
             </div>
 
             {/* Header (sticky nav bar with back/save/share) + Hero Section */}
+            <PageTransition>
             <AgentProfileHeader
                 agent={profile.agentData}
                 stats={profile.stats}
@@ -124,12 +126,13 @@ const AgentProfilePage: React.FC<AgentProfilePageProps> = ({ agent }) => {
                 onVisitAgency={profile.handleVisitAgency}
                 onOpenEditModal={profile.handleOpenEditModal}
             />
+            </PageTransition>
 
             {/* Main Content Area */}
             <main className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-4 sm:py-6 lg:py-8">
                 <div className="lg:flex lg:gap-8">
                     {/* Left Column - Main Content */}
-                    <div className="lg:w-2/3">
+                    <Animated variant="fadeInUp" delay={100} className="lg:w-2/3">
                         <AgentProfileTabs
                             agent={profile.agentData}
                             stats={profile.stats}
@@ -157,10 +160,10 @@ const AgentProfilePage: React.FC<AgentProfilePageProps> = ({ agent }) => {
                             onRequestMarketReport={profile.handleRequestMarketReport}
                             onViewProperty={profile.handleViewProperty}
                         />
-                    </div>
+                    </Animated>
 
                     {/* Right Column - Sidebar */}
-                    <div className="lg:w-1/3">
+                    <Animated variant="fadeInUp" delay={200} className="lg:w-1/3">
                         <AgentContactActions
                             agent={profile.agentData}
                             firstName={profile.firstName}
@@ -187,7 +190,7 @@ const AgentProfilePage: React.FC<AgentProfilePageProps> = ({ agent }) => {
                             onViewMoreAgents={profile.handleViewMoreAgents}
                             marketInsights={profile.marketInsights}
                         />
-                    </div>
+                    </Animated>
                 </div>
             </main>
 

@@ -497,8 +497,10 @@ export const login = async (req: Request, res: Response): Promise<void> => {
 
     await user.save();
 
-    // Reset account-level rate limit on successful login
-    resetLoginRateLimit(user.email, clientIp);
+    // Reset rate limits on successful login
+    // Admins also get their IP limit cleared so they can switch accounts freely
+    const isAdminUser = user.role === 'admin' || user.role === 'super_admin';
+    resetLoginRateLimit(user.email, clientIp, isAdminUser);
 
     // Generate token pair (access + refresh)
     const deviceInfo = {

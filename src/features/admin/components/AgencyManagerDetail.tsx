@@ -366,8 +366,8 @@ const AgencyManagerDetail: React.FC<AgencyManagerDetailProps> = ({
                     zoom={editForm.lat ? 15 : 8}
                     country={editForm.country}
                     city={editForm.city}
-                    onLocationChange={(lat, lng) => setEditForm({ ...editForm, lat, lng })}
-                    onAddressChange={(address) => setEditForm({ ...editForm, address })}
+                    onLocationChange={(lat, lng) => setEditForm(prev => ({ ...prev, lat, lng }))}
+                    onAddressChange={(address) => setEditForm(prev => ({ ...prev, address }))}
                   />
                 </Suspense>
               </div>

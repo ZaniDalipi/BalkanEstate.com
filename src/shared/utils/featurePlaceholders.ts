@@ -58,8 +58,8 @@ export const availablePlaceholders = [
  * Format a value for display
  * -1 means unlimited, 0 might mean not available
  */
-function formatValue(value: number | undefined, defaultValue: string = '0'): string {
-  if (value === undefined) return defaultValue;
+function formatValue(value: number | undefined | null, defaultValue: string = '0'): string {
+  if (value === undefined || value === null || Number.isNaN(value)) return defaultValue;
   if (value === -1) return 'Unlimited';
   return value.toString();
 }
@@ -72,6 +72,8 @@ function formatValue(value: number | undefined, defaultValue: string = '0'): str
  * @returns The feature string with placeholders replaced
  */
 export function replacePlaceholders(feature: string, product: ProductValues): string {
+  if (!product) return feature;
+
   let result = feature;
 
   // Replace each placeholder with its value

@@ -35,6 +35,24 @@ import AgenciesHeroBanner from './shared/AgenciesHeroBanner';
 import { FloatingSphere, GlossyPill, AbstractBlob, RealEstateOrb, Decorative3DStyles } from './shared/Decorative3D';
 import { API_URL } from '../src/shared/api/config';
 
+// Gradient presets for agency banners (same as AgencyDetailPage)
+const GRADIENT_PRESETS = [
+  { id: 'default', gradient: 'from-blue-600 via-blue-700 to-indigo-900',   css: 'linear-gradient(135deg, #2563eb, #1d4ed8, #312e81)' },
+  { id: 'sunset',  gradient: 'from-orange-500 via-pink-500 to-purple-600',  css: 'linear-gradient(135deg, #f97316, #ec4899, #9333ea)' },
+  { id: 'forest',  gradient: 'from-green-600 via-teal-600 to-cyan-700',     css: 'linear-gradient(135deg, #16a34a, #0d9488, #0e7490)' },
+  { id: 'royal',   gradient: 'from-purple-600 via-purple-700 to-indigo-900',css: 'linear-gradient(135deg, #9333ea, #7e22ce, #312e81)' },
+  { id: 'fire',    gradient: 'from-red-600 via-orange-600 to-yellow-500',   css: 'linear-gradient(135deg, #dc2626, #ea580c, #eab308)' },
+  { id: 'night',   gradient: 'from-gray-900 via-blue-900 to-purple-900',    css: 'linear-gradient(135deg, #111827, #1e3a5f, #581c87)' },
+  { id: 'mint',    gradient: 'from-emerald-400 via-teal-500 to-cyan-600',   css: 'linear-gradient(135deg, #34d399, #14b8a6, #0891b2)' },
+  { id: 'rose',    gradient: 'from-pink-400 via-rose-400 to-red-500',       css: 'linear-gradient(135deg, #f472b6, #fb7185, #ef4444)' },
+];
+
+const resolveGradientCss = (stored?: string): string | null => {
+  if (!stored) return null;
+  const preset = GRADIENT_PRESETS.find(p => p.gradient === stored || p.id === stored);
+  return preset?.css ?? null;
+};
+
 const AgenciesListPage: React.FC = () => {
   const { t } = useTranslation(['agents']);
   const { dispatch, state } = useAppContext();
@@ -191,10 +209,10 @@ const AgenciesListPage: React.FC = () => {
   };
 
   const getRankStyle = (index: number) => {
-    if (index === 0) return { bg: 'from-amber-400 to-amber-600', text: t('agencies.rank1st'), emoji: '🏆' };
-    if (index === 1) return { bg: 'from-slate-300 to-slate-500', text: t('agencies.rank2nd'), emoji: '🥈' };
-    if (index === 2) return { bg: 'from-orange-400 to-orange-600', text: t('agencies.rank3rd'), emoji: '🥉' };
-    return { bg: 'from-primary to-primary-dark', text: `${index + 1}`, emoji: '' };
+    if (index === 0) return { bg: 'from-amber-400 to-amber-600', css: 'linear-gradient(135deg, #fbbf24, #d97706)', text: t('agencies.rank1st'), emoji: '🏆' };
+    if (index === 1) return { bg: 'from-slate-300 to-slate-500', css: 'linear-gradient(135deg, #cbd5e1, #64748b)', text: t('agencies.rank2nd'), emoji: '🥈' };
+    if (index === 2) return { bg: 'from-orange-400 to-orange-600', css: 'linear-gradient(135deg, #fb923c, #ea580c)', text: t('agencies.rank3rd'), emoji: '🥉' };
+    return { bg: 'from-primary to-primary-dark', css: 'linear-gradient(135deg, #1e293b, #0f172a, #1e1b4b)', text: `${index + 1}`, emoji: '' };
   };
 
   const renderAgencyCard = (agency: Agency, index: number, isCompact: boolean = false) => {
@@ -207,8 +225,11 @@ const AgenciesListPage: React.FC = () => {
         onClick={() => handleViewAgency(agency)}
         className="group relative bg-white rounded-2xl sm:rounded-3xl shadow-lg hover:shadow-2xl transition-all duration-500 cursor-pointer overflow-hidden border border-gray-100/80 hover:border-primary/30"
       >
-        {/* Top banner - use agency cover image or gradient fallback */}
-        <div className={`h-24 sm:h-28 relative overflow-hidden ${!agency.coverImage ? `bg-gradient-to-br ${index < 3 ? rankStyle.bg : 'from-slate-700 via-blue-800 to-indigo-900'}` : ''}`}>
+        {/* Top banner - use agency cover image, agency gradient, or rank-based fallback */}
+        <div
+          className="h-24 sm:h-28 relative overflow-hidden"
+          style={!agency.coverImage ? { backgroundImage: resolveGradientCss((agency as any).coverGradient) || rankStyle.css } : undefined}
+        >
           {/* Agency cover image */}
           {agency.coverImage && (
             <img

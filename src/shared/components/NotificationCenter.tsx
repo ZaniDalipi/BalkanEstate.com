@@ -1,28 +1,39 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Bell, X, Check, CheckCheck, Home, TrendingDown, MessageSquare, AlertCircle } from 'lucide-react';
+import {
+  Bell, X, CheckCheck, Home, TrendingDown, MessageSquare, AlertCircle,
+  Building2, UserPlus, UserMinus, Ticket, Star, TrendingUp,
+} from 'lucide-react';
 import { useAppContext } from '@/context/AppContext';
 import { API_URL } from '@/src/shared/api/config';
 
+interface NotificationData {
+  propertyId?: string;
+  propertyTitle?: string;
+  previousPrice?: number;
+  newPrice?: number;
+  conversationId?: string;
+  agencyId?: string;
+  agencySlug?: string;
+  agencyName?: string;
+  actionUrl?: string;
+  actionLabel?: string;
+  [key: string]: any;
+}
+
 interface Notification {
   _id: string;
-  type: 'new_listing' | 'price_drop' | 'new_message' | 'new_inquiry' | 'listing_milestone' | 'system';
+  type: string;
   title: string;
   message: string;
   isRead: boolean;
   createdAt: string;
-  data?: {
-    propertyId?: string;
-    propertyTitle?: string;
-    previousPrice?: number;
-    newPrice?: number;
-    conversationId?: string;
-  };
+  data?: NotificationData;
 }
 
 const NotificationCenter: React.FC = () => {
   const { t } = useTranslation(['common']);
-  const { state } = useAppContext();
+  const { state, dispatch } = useAppContext();
   const { isAuthenticated } = state;
 
   const [isOpen, setIsOpen] = useState(false);
@@ -111,6 +122,44 @@ const NotificationCenter: React.FC = () => {
     }
   };
 
+  // Handle notification click - mark as read and navigate
+  const handleNotificationClick = (notification: Notification) => {
+    if (!notification.isRead) {
+      markAsRead(notification._id);
+    }
+
+    const data = notification.data;
+    if (!data) return;
+
+    // Navigate to agency detail page
+    if (data.agencyId && (
+      notification.type === 'agent_joined_agency' ||
+      notification.type === 'agent_left_agency' ||
+      notification.type === 'agency_join_welcome' ||
+      notification.type === 'agency_coupon_redeemed'
+    )) {
+      setIsOpen(false);
+      dispatch({ type: 'SET_SELECTED_AGENCY', payload: data.agencySlug || data.agencyId });
+      dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'agencyDetail' });
+      return;
+    }
+
+    // Navigate to property detail
+    if (data.propertyId) {
+      setIsOpen(false);
+      dispatch({ type: 'SET_SELECTED_PROPERTY', payload: data.propertyId });
+      dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'propertyDetail' });
+      return;
+    }
+
+    // Navigate to conversations
+    if (data.conversationId) {
+      setIsOpen(false);
+      dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'messages' });
+      return;
+    }
+  };
+
   // Fetch on mount and poll every 5 minutes (reduced from 1 minute)
   // Also pause polling when tab is hidden and resume when visible
   useEffect(() => {
@@ -160,9 +209,29 @@ const NotificationCenter: React.FC = () => {
       case 'new_message':
       case 'new_inquiry':
         return <MessageSquare className="w-4 h-4 text-purple-500" />;
+      case 'listing_milestone':
+      case 'listing_trending':
+        return <TrendingUp className="w-4 h-4 text-orange-500" />;
+      case 'promotion_suggestion':
+      case 'promotion_success':
+        return <Star className="w-4 h-4 text-yellow-500" />;
+      case 'agent_joined_agency':
+      case 'agency_join_welcome':
+        return <UserPlus className="w-4 h-4 text-green-600" />;
+      case 'agent_left_agency':
+        return <UserMinus className="w-4 h-4 text-red-500" />;
+      case 'agency_coupon_redeemed':
+        return <Ticket className="w-4 h-4 text-indigo-500" />;
       default:
         return <AlertCircle className="w-4 h-4 text-gray-500" />;
     }
+  };
+
+  // Check if notification is clickable (has a navigation target)
+  const isClickable = (notification: Notification): boolean => {
+    const data = notification.data;
+    if (!data) return false;
+    return !!(data.agencyId || data.propertyId || data.conversationId);
   };
 
   // Format relative time
@@ -246,7 +315,7 @@ const NotificationCenter: React.FC = () => {
                   className={`px-4 py-3 border-b border-white/10 hover:bg-white/40 cursor-pointer transition-colors ${
                     !notification.isRead ? 'bg-primary/5' : ''
                   }`}
-                  onClick={() => !notification.isRead && markAsRead(notification._id)}
+                  onClick={() => handleNotificationClick(notification)}
                 >
                   <div className="flex gap-3">
                     <div className="flex-shrink-0 mt-0.5">
@@ -264,9 +333,16 @@ const NotificationCenter: React.FC = () => {
                       <p className="text-xs text-gray-600 mt-0.5 line-clamp-2">
                         {notification.message}
                       </p>
-                      <p className="text-xs text-gray-400 mt-1">
-                        {formatTime(notification.createdAt)}
-                      </p>
+                      <div className="flex items-center justify-between mt-1">
+                        <p className="text-xs text-gray-400">
+                          {formatTime(notification.createdAt)}
+                        </p>
+                        {isClickable(notification) && notification.data?.actionLabel && (
+                          <span className="text-xs text-primary font-medium">
+                            {notification.data.actionLabel}
+                          </span>
+                        )}
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -280,7 +356,6 @@ const NotificationCenter: React.FC = () => {
               <button
                 onClick={() => {
                   setIsOpen(false);
-                  // Navigate to full notifications page if you have one
                 }}
                 className="text-sm text-primary hover:text-primary-dark w-full text-center"
               >

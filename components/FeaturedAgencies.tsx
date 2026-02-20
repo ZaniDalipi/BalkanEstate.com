@@ -5,6 +5,31 @@ import { BuildingStorefrontIcon, SparklesIcon, ArrowRightIcon, MapPinIcon } from
 import { useFeaturedAgencies } from '../src/features/agencies/hooks/useAgencies';
 import { Agency } from '../types';
 
+// Gradient presets for agency banners (shared with AgencyDetailPage)
+const GRADIENT_PRESETS = [
+  { id: 'default', gradient: 'from-blue-600 via-blue-700 to-indigo-900',   css: 'linear-gradient(135deg, #2563eb, #1d4ed8, #312e81)' },
+  { id: 'sunset',  gradient: 'from-orange-500 via-pink-500 to-purple-600',  css: 'linear-gradient(135deg, #f97316, #ec4899, #9333ea)' },
+  { id: 'forest',  gradient: 'from-green-600 via-teal-600 to-cyan-700',     css: 'linear-gradient(135deg, #16a34a, #0d9488, #0e7490)' },
+  { id: 'royal',   gradient: 'from-purple-600 via-purple-700 to-indigo-900',css: 'linear-gradient(135deg, #9333ea, #7e22ce, #312e81)' },
+  { id: 'fire',    gradient: 'from-red-600 via-orange-600 to-yellow-500',   css: 'linear-gradient(135deg, #dc2626, #ea580c, #eab308)' },
+  { id: 'night',   gradient: 'from-gray-900 via-blue-900 to-purple-900',    css: 'linear-gradient(135deg, #111827, #1e3a5f, #581c87)' },
+  { id: 'mint',    gradient: 'from-emerald-400 via-teal-500 to-cyan-600',   css: 'linear-gradient(135deg, #34d399, #14b8a6, #0891b2)' },
+  { id: 'rose',    gradient: 'from-pink-400 via-rose-400 to-red-500',       css: 'linear-gradient(135deg, #f472b6, #fb7185, #ef4444)' },
+];
+
+const FALLBACK_CARD_GRADIENTS = [
+  'linear-gradient(135deg, #7c3aed, #9333ea, #4338ca)',  // violet
+  'linear-gradient(135deg, #f43f5e, #ec4899, #c026d3)',  // rose
+  'linear-gradient(135deg, #f59e0b, #f97316, #ef4444)',  // amber
+  'linear-gradient(135deg, #10b981, #14b8a6, #0891b2)',  // emerald
+];
+
+const resolveGradientCss = (stored?: string): string | null => {
+  if (!stored) return null;
+  const preset = GRADIENT_PRESETS.find(p => p.gradient === stored || p.id === stored);
+  return preset?.css ?? null;
+};
+
 const FeaturedAgencies: React.FC = () => {
   const { t } = useTranslation('agencies');
   const { dispatch } = useAppContext();
@@ -152,7 +177,10 @@ const FeaturedAgencies: React.FC = () => {
                           <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent" />
                         </div>
                       ) : (
-                        <div className={`absolute inset-0 bg-gradient-to-br ${style.gradient}`}>
+                        <div
+                          className="absolute inset-0"
+                          style={{ backgroundImage: resolveGradientCss((agency as any).coverGradient) || FALLBACK_CARD_GRADIENTS[index % FALLBACK_CARD_GRADIENTS.length] }}
+                        >
                           {/* Decorative pattern */}
                           <div className="absolute inset-0 opacity-20">
                             <div className="absolute top-4 right-4 w-32 h-32 border-4 border-white/30 rounded-full" />
