@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
 import L from 'leaflet';
@@ -31,6 +31,7 @@ import {
 } from '../src/features/achievements/api/achievementApi';
 import { API_URL } from '../src/shared/api/config';
 import MapLocationPicker from '../src/features/seller/components/MapLocationPicker';
+import { searchLocation } from '../services/osmService';
 
 // Map icon SVG for section headers
 const MapIcon: React.FC<{ className?: string }> = ({ className }) => (
@@ -277,6 +278,50 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
       unsubscribe();
     };
   }, [agency._id]);
+
+  // Geocode when city/country changes in edit form to update marker position
+  const geocodeTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  useEffect(() => {
+    if (!isEditModalOpen) return;
+
+    const city = editForm.city?.trim();
+    const country = editForm.country?.trim();
+    if (!city && !country) return;
+
+    // Don't geocode if city/country haven't actually changed from the original
+    if (city === (agencyData.city || '').trim() && country === (agencyData.country || '').trim()) return;
+
+    if (geocodeTimeoutRef.current) clearTimeout(geocodeTimeoutRef.current);
+    geocodeTimeoutRef.current = setTimeout(async () => {
+      try {
+        const query = [city, country].filter(Boolean).join(', ');
+        if (query.length < 3) return;
+
+        const countryCodeMap: Record<string, string> = {
+          'Serbia': 'RS', 'Kosovo': 'XK', 'Albania': 'AL', 'North Macedonia': 'MK',
+          'Bosnia and Herzegovina': 'BA', 'Montenegro': 'ME', 'Croatia': 'HR',
+          'Slovenia': 'SI', 'Bulgaria': 'BG', 'Romania': 'RO', 'Greece': 'GR',
+        };
+        const countryCode = country ? countryCodeMap[country] : undefined;
+        const results = await searchLocation(query, countryCode);
+
+        if (results.length > 0) {
+          const best = results[0];
+          setEditForm(prev => ({
+            ...prev,
+            lat: parseFloat(best.lat),
+            lng: parseFloat(best.lon),
+          }));
+        }
+      } catch {
+        // Geocoding failed silently — user can still set location via map
+      }
+    }, 800);
+
+    return () => {
+      if (geocodeTimeoutRef.current) clearTimeout(geocodeTimeoutRef.current);
+    };
+  }, [editForm.city, editForm.country, isEditModalOpen]);
 
   const fetchAgencyData = async () => {
     setLoading(true);
@@ -669,6 +714,32 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
     if (!editForm.name || !editForm.name.trim()) {
       await error(t('messages.errorTitle', 'Error'), t('messages.nameRequired', 'Agency name is required'));
       return;
+    }
+
+    if (editForm.name.trim().length < 2) {
+      await error(t('messages.errorTitle', 'Error'), 'Agency name must be at least 2 characters');
+      return;
+    }
+
+    if (editForm.description && editForm.description.length > 5000) {
+      await error(t('messages.errorTitle', 'Error'), 'Description must be under 5,000 characters');
+      return;
+    }
+
+    if (editForm.email && editForm.email.trim()) {
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(editForm.email.trim())) {
+        await error(t('messages.errorTitle', 'Error'), 'Please enter a valid email address');
+        return;
+      }
+    }
+
+    if (editForm.phone && editForm.phone.trim()) {
+      const phoneClean = editForm.phone.replace(/[\s\-().]/g, '');
+      if (phoneClean.length < 6 || !/^\+?\d+$/.test(phoneClean)) {
+        await error(t('messages.errorTitle', 'Error'), 'Please enter a valid phone number');
+        return;
+      }
     }
 
     // Validate URL fields
@@ -1336,12 +1407,40 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
           </div>
 
           <div className="p-6 md:p-8">
-            {/* Description with Quote Style */}
-            {agencyData.description && (
-              <div className="relative mb-8 pl-4 border-l-4 border-primary/30">
-                <p className="text-slate-600 leading-relaxed text-base italic">{agencyData.description}</p>
-              </div>
-            )}
+            {/* Description with Rich Formatting */}
+            {agencyData.description && (() => {
+              const paragraphs = agencyData.description
+                .split(/\n\s*\n|\n/)
+                .map((p: string) => p.trim())
+                .filter((p: string) => p.length > 0);
+
+              return (
+                <div className="relative mb-8">
+                  {/* Decorative accent */}
+                  <div className="absolute -left-2 top-0 w-1 h-full rounded-full bg-gradient-to-b from-primary via-primary/40 to-transparent" />
+
+                  <div className="pl-5 space-y-4">
+                    {/* Opening quote icon */}
+                    <svg className="w-8 h-8 text-primary/20 -mb-2" fill="currentColor" viewBox="0 0 24 24">
+                      <path d="M14.017 21v-7.391c0-5.704 3.731-9.57 8.983-10.609l.995 2.151c-2.432.917-3.995 3.638-3.995 5.849h4v10H14.017zM0 21v-7.391c0-5.704 3.731-9.57 8.983-10.609L9.978 5.151c-2.432.917-3.995 3.638-3.995 5.849h4v10H0z" />
+                    </svg>
+
+                    {paragraphs.map((paragraph: string, idx: number) => (
+                      <p
+                        key={idx}
+                        className={`leading-relaxed ${
+                          idx === 0
+                            ? 'text-slate-700 text-base font-medium first-letter:text-3xl first-letter:font-bold first-letter:text-primary first-letter:float-left first-letter:mr-1.5 first-letter:mt-0.5 first-letter:leading-none'
+                            : 'text-slate-600 text-sm'
+                        }`}
+                      >
+                        {paragraph}
+                      </p>
+                    ))}
+                  </div>
+                </div>
+              );
+            })()}
 
             {/* Achievements Display - Public View */}
             {agencyAchievements.length > 0 && (
@@ -2515,11 +2614,25 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
                   </label>
                   <textarea
                     value={editForm.description}
-                    onChange={(e) => setEditForm({ ...editForm, description: e.target.value })}
-                    className="w-full px-4 py-2.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-primary/20 focus:border-primary transition-colors text-sm resize-none"
+                    onChange={(e) => {
+                      if (e.target.value.length <= 5000) {
+                        setEditForm({ ...editForm, description: e.target.value });
+                      }
+                    }}
+                    className={`w-full px-4 py-2.5 border rounded-xl focus:ring-2 focus:ring-primary/20 focus:border-primary transition-colors text-sm resize-none ${
+                      editForm.description.length > 4800 ? 'border-amber-300' : 'border-slate-200'
+                    }`}
                     rows={4}
                     placeholder="Tell clients about your agency..."
                   />
+                  <div className="flex justify-between mt-1">
+                    <p className="text-xs text-slate-400">Use line breaks to separate paragraphs</p>
+                    <span className={`text-xs ${
+                      editForm.description.length > 4800 ? 'text-amber-500 font-medium' : 'text-slate-400'
+                    }`}>
+                      {editForm.description.length}/5,000
+                    </span>
+                  </div>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

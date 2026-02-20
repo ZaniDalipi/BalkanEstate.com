@@ -6,7 +6,7 @@ import { useRealtimeProperties } from '@/src/features/properties/hooks';
 import { getAgencyAgents, getAllAgents } from '@/services/apiService';
 import { getPropertiesBySellerId } from '@/src/features/properties/api/propertyApi';
 import { useTrackView } from '@/src/features/view-stats/hooks';
-import { updateAgentProfile, toggleSavedAgent, checkSavedAgent } from '@/src/features/agents/api/agentApi';
+import { updateAgentProfile, toggleSavedAgent, checkSavedAgent, getAgent as fetchAgentById } from '@/src/features/agents/api/agentApi';
 import { Achievement } from '@/components/shared/AchievementsSection';
 import {
   getUserAchievements,
@@ -244,6 +244,23 @@ export function useAgentProfile({ agent }: { agent: Agent }) {
             }
         };
     }, []);
+
+    // Fetch fresh agent data from API on mount to ensure latest data is shown
+    useEffect(() => {
+        const fetchFreshAgentData = async () => {
+            try {
+                const agentIdentifier = agent.agentId || agent.id;
+                if (!agentIdentifier) return;
+                const freshAgent = await fetchAgentById(agentIdentifier);
+                if (isMountedRef.current && freshAgent) {
+                    setAgentData(prev => ({ ...prev, ...freshAgent }));
+                }
+            } catch {
+                // Silently fail - we still have the prop data as fallback
+            }
+        };
+        fetchFreshAgentData();
+    }, [agent.id, agent.agentId]);
 
     // Scroll to top on mount - scroll the main content container
     useEffect(() => {
