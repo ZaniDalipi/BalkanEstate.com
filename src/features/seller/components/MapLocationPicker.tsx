@@ -49,6 +49,21 @@ const MapLocationPicker: React.FC<MapLocationPickerProps> = ({ lat, lng, address
   const satelliteLayerRef = useRef<L.TileLayer | null>(null);
   const resizeTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
+  // Use refs to hold current prop values so event handlers always access latest values
+  const latRef = useRef(lat);
+  const lngRef = useRef(lng);
+  const cityRef = useRef(city);
+  const cityLatRef = useRef(cityLat);
+  const cityLngRef = useRef(cityLng);
+  const addressRef = useRef(address);
+
+  useEffect(() => { latRef.current = lat; }, [lat]);
+  useEffect(() => { lngRef.current = lng; }, [lng]);
+  useEffect(() => { cityRef.current = city; }, [city]);
+  useEffect(() => { cityLatRef.current = cityLat; }, [cityLat]);
+  useEffect(() => { cityLngRef.current = cityLng; }, [cityLng]);
+  useEffect(() => { addressRef.current = address; }, [address]);
+
   // Calculate distance between two coordinates in kilometers
   const calculateDistance = (lat1: number, lon1: number, lat2: number, lon2: number): number => {
     const R = 6371; // Earth's radius in km
@@ -120,19 +135,23 @@ const MapLocationPicker: React.FC<MapLocationPickerProps> = ({ lat, lng, address
       setIsDragging(false);
 
       // If city is selected, validate that the dragged location is within the city area
-      if (city && cityLat && cityLng) {
-        const distance = calculateDistance(cityLat, cityLng, position.lat, position.lng);
+      // Use refs to always access current city values (not stale closure)
+      const currentCity = cityRef.current;
+      const currentCityLat = cityLatRef.current;
+      const currentCityLng = cityLngRef.current;
+      if (currentCity && currentCityLat && currentCityLng) {
+        const distance = calculateDistance(currentCityLat, currentCityLng, position.lat, position.lng);
         if (distance > 30) {
           // Snap marker back to previous position
-          marker.setLatLng([lat, lng]);
-          marker.setPopupContent(`<b>${t('search:map.locationTooFarTitle', 'Location Too Far')}</b><br>${t('search:map.locationTooFar', { distance: distance.toFixed(1), city })}`);
+          marker.setLatLng([latRef.current, lngRef.current]);
+          marker.setPopupContent(`<b>${t('search:map.locationTooFarTitle', 'Location Too Far')}</b><br>${t('search:map.locationTooFar', { distance: distance.toFixed(1), city: currentCity })}`);
           marker.openPopup();
           dispatch({
             type: 'SHOW_ALERT',
             payload: {
               type: 'warning',
               title: t('search:map.locationTooFarTitle', 'Location Too Far'),
-              message: t('search:map.locationTooFar', { distance: distance.toFixed(1), city }),
+              message: t('search:map.locationTooFar', { distance: distance.toFixed(1), city: currentCity }),
             },
           });
           return;
@@ -289,12 +308,14 @@ const MapLocationPicker: React.FC<MapLocationPickerProps> = ({ lat, lng, address
         const countryCode = country ? countryCodeMap[country] : undefined;
         let results = await searchLocation(query, countryCode);
 
-        // If city is selected, filter results to only show locations within ~30km of the city center
-        if (city && cityLat && cityLng) {
+        // If city is selected, filter results to only show locations within ~30km of the current city center
+        const currentCityLat = cityLatRef.current;
+        const currentCityLng = cityLngRef.current;
+        if (cityRef.current && currentCityLat && currentCityLng) {
           results = results.filter(result => {
             const resultLat = parseFloat(result.lat);
             const resultLng = parseFloat(result.lon);
-            const distance = calculateDistance(cityLat, cityLng, resultLat, resultLng);
+            const distance = calculateDistance(currentCityLat, currentCityLng, resultLat, resultLng);
             return distance <= 30; // Only show results within 30km of city center
           });
         }
@@ -315,15 +336,18 @@ const MapLocationPicker: React.FC<MapLocationPickerProps> = ({ lat, lng, address
     const newLng = parseFloat(result.lon);
 
     // If city is selected, validate that the location is within the city area
-    if (city && cityLat && cityLng) {
-      const distance = calculateDistance(cityLat, cityLng, newLat, newLng);
+    const currentCity = cityRef.current;
+    const currentCityLat = cityLatRef.current;
+    const currentCityLng = cityLngRef.current;
+    if (currentCity && currentCityLat && currentCityLng) {
+      const distance = calculateDistance(currentCityLat, currentCityLng, newLat, newLng);
       if (distance > 30) {
         dispatch({
           type: 'SHOW_ALERT',
           payload: {
             type: 'warning',
             title: t('search:map.locationTooFarTitle', 'Location Too Far'),
-            message: t('search:map.locationTooFar', { distance: distance.toFixed(1), city }),
+            message: t('search:map.locationTooFar', { distance: distance.toFixed(1), city: currentCity }),
           },
         });
         return;
@@ -396,8 +420,11 @@ const MapLocationPicker: React.FC<MapLocationPickerProps> = ({ lat, lng, address
         const { latitude, longitude } = position.coords;
 
         // If city is selected, validate that the current location is within the city area
-        if (city && cityLat && cityLng) {
-          const distance = calculateDistance(cityLat, cityLng, latitude, longitude);
+        const currentCity = cityRef.current;
+        const currentCityLat = cityLatRef.current;
+        const currentCityLng = cityLngRef.current;
+        if (currentCity && currentCityLat && currentCityLng) {
+          const distance = calculateDistance(currentCityLat, currentCityLng, latitude, longitude);
           if (distance > 30) {
             setIsGettingLocation(false);
             dispatch({
@@ -405,7 +432,7 @@ const MapLocationPicker: React.FC<MapLocationPickerProps> = ({ lat, lng, address
               payload: {
                 type: 'warning',
                 title: t('search:map.locationTooFarTitle', 'Location Too Far'),
-                message: t('search:map.locationTooFar', { distance: distance.toFixed(1), city }),
+                message: t('search:map.locationTooFar', { distance: distance.toFixed(1), city: currentCity }),
               },
             });
             return;

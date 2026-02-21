@@ -643,11 +643,16 @@ export const createProperty = async (
       'description', 'specialFeatures', 'materials',
       'tourUrl', 'virtualTour360Url', 'hasVirtualTour360', 'videoUrl',
       'imageUrl', 'imagePublicId', 'images',
+      'lat', 'lng',
       'propertyType', 'floorNumber', 'totalFloors', 'floorplanUrl', 'floorplanPublicId',
       'amenities', 'hasBalcony', 'hasGarden', 'hasElevator', 'hasSecurity',
       'hasAirConditioning', 'hasPool', 'petsAllowed',
       'distanceToCenter', 'distanceToSea', 'distanceToSchool', 'distanceToHospital',
       'furnishing', 'heatingType', 'condition', 'viewType', 'energyRating', 'orientation',
+      // Rental-specific fields
+      'rentPeriod', 'securityDeposit', 'minimumLeaseDuration', 'maximumLeaseDuration',
+      'availableFrom', 'utilitiesIncluded', 'internetIncluded',
+      'tenantRequirements', 'maxOccupants',
       'visitAvailability',
     ] as const;
 
@@ -670,7 +675,7 @@ export const createProperty = async (
         createdByAgencyName: user.agencyName,
         createdByLicenseNumber: user.licenseNumber,
       }),
-      // Add geocoded coordinates (will be undefined if geocoding failed)
+      // Override with geocoded coordinates if geocoding succeeded, otherwise keep frontend values
       ...(coordinates.lat && coordinates.lng && {
         lat: coordinates.lat,
         lng: coordinates.lng,

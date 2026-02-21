@@ -33,7 +33,44 @@ interface FieldErrors {
     email?: string;
     password?: string;
     confirmPassword?: string;
+    phone?: string;
 }
+
+// Balkan country codes for phone number input
+const BALKAN_COUNTRY_CODES = [
+    { code: '+383', country: 'XK', label: 'Kosovo' },
+    { code: '+355', country: 'AL', label: 'Albania' },
+    { code: '+381', country: 'RS', label: 'Serbia' },
+    { code: '+389', country: 'MK', label: 'N. Macedonia' },
+    { code: '+387', country: 'BA', label: 'Bosnia' },
+    { code: '+382', country: 'ME', label: 'Montenegro' },
+    { code: '+385', country: 'HR', label: 'Croatia' },
+    { code: '+386', country: 'SI', label: 'Slovenia' },
+    { code: '+359', country: 'BG', label: 'Bulgaria' },
+    { code: '+40', country: 'RO', label: 'Romania' },
+    { code: '+30', country: 'GR', label: 'Greece' },
+] as const;
+
+const validatePhone = (countryCode: string, phoneNumber: string, t?: (key: string, defaultValue?: string) => string): string | null => {
+    const tr = t || ((key: string, defaultValue?: string) => defaultValue || key);
+    if (!countryCode) {
+        return tr('auth:validation.phone.selectCountryCode', 'Please select a country code');
+    }
+    if (!phoneNumber.trim()) {
+        return tr('auth:validation.phone.required', 'Phone number is required');
+    }
+    // Remove any spaces or dashes from the number
+    const cleanNumber = phoneNumber.replace(/[\s\-()]/g, '');
+    // Must be digits only
+    if (!/^\d+$/.test(cleanNumber)) {
+        return tr('auth:validation.phone.digitsOnly', 'Phone number must contain only digits');
+    }
+    // Must be between 6 and 12 digits
+    if (cleanNumber.length < 6 || cleanNumber.length > 12) {
+        return tr('auth:validation.phone.invalidLength', 'Phone number must be between 6 and 12 digits');
+    }
+    return null;
+};
 
 // Common weak passwords to reject (matching backend)
 const COMMON_PASSWORDS = [
@@ -206,10 +243,12 @@ const AuthPage: React.FC = () => {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
+    const [phoneCountryCode, setPhoneCountryCode] = useState(BALKAN_COUNTRY_CODES[0].code);
+    const [phoneNumber, setPhoneNumber] = useState('');
 
     // Field-level errors for custom validation
     const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
-    const [touched, setTouched] = useState<{ email?: boolean; password?: boolean; confirmPassword?: boolean }>({});
+    const [touched, setTouched] = useState<{ email?: boolean; password?: boolean; confirmPassword?: boolean; phone?: boolean }>({});
 
     // Password requirements state for real-time feedback
     const [passwordRequirements, setPasswordRequirements] = useState<PasswordRequirements>({
@@ -252,7 +291,7 @@ const AuthPage: React.FC = () => {
         dispatch({ type: 'TOGGLE_AUTH_MODAL', payload: { isOpen: false } });
     };
 
-    const handleBlur = (field: 'email' | 'password' | 'confirmPassword') => {
+    const handleBlur = (field: 'email' | 'password' | 'confirmPassword' | 'phone') => {
         setTouched(prev => ({ ...prev, [field]: true }));
 
         // Validate on blur
@@ -268,6 +307,9 @@ const AuthPage: React.FC = () => {
             } else {
                 setFieldErrors(prev => ({ ...prev, confirmPassword: undefined }));
             }
+        } else if (field === 'phone') {
+            const phoneError = validatePhone(phoneCountryCode, phoneNumber, t);
+            setFieldErrors(prev => ({ ...prev, phone: phoneError || undefined }));
         }
     };
 
@@ -315,12 +357,14 @@ const AuthPage: React.FC = () => {
         const emailError = validateEmail(email, t);
         let passwordError: string | null = null;
         let confirmError: string | null = null;
+        let phoneError: string | null = null;
 
         if (state.authModalView === 'signup') {
             passwordError = validatePassword(password);
             if (password !== confirmPassword) {
                 confirmError = t('auth:validation.passwordsDoNotMatch', 'Passwords do not match');
             }
+            phoneError = validatePhone(phoneCountryCode, phoneNumber, t);
         } else {
             // Login - just check if password is provided
             if (!password.trim()) {
@@ -329,15 +373,16 @@ const AuthPage: React.FC = () => {
         }
 
         // Set all errors and mark fields as touched
-        setTouched({ email: true, password: true, confirmPassword: true });
+        setTouched({ email: true, password: true, confirmPassword: true, phone: true });
         setFieldErrors({
             email: emailError || undefined,
             password: passwordError || undefined,
-            confirmPassword: confirmError || undefined
+            confirmPassword: confirmError || undefined,
+            phone: phoneError || undefined,
         });
 
         // If any errors, don't proceed
-        if (emailError || passwordError || confirmError) {
+        if (emailError || passwordError || confirmError || phoneError) {
             return;
         }
 
@@ -348,8 +393,11 @@ const AuthPage: React.FC = () => {
             if (state.authModalView === 'login') {
                 await login(email, password);
             } else {
+                // Build full phone number with country code
+                const cleanNumber = phoneNumber.replace(/[\s\-()]/g, '');
+                const fullPhone = `${phoneCountryCode}${cleanNumber}`;
                 // All users register as buyers - they can upgrade to agent from profile settings
-                await signup(email, password, { role: 'buyer' });
+                await signup(email, password, { role: 'buyer', phone: fullPhone });
             }
             handleClose();
         } catch (err) {
@@ -456,6 +504,53 @@ const AuthPage: React.FC = () => {
                                     show={!!touched.email && !!fieldErrors.email}
                                 />
                             </div>
+
+                            {/* Phone number field (signup only) */}
+                            {state.authModalView === 'signup' && (
+                                <div>
+                                    <div className="flex gap-2">
+                                        <select
+                                            value={phoneCountryCode}
+                                            onChange={(e) => {
+                                                setPhoneCountryCode(e.target.value);
+                                                if (touched.phone) {
+                                                    const err = validatePhone(e.target.value, phoneNumber, t);
+                                                    setFieldErrors(prev => ({ ...prev, phone: err || undefined }));
+                                                }
+                                            }}
+                                            className={`${glassInputClasses(!!fieldErrors.phone && touched.phone)} w-[130px] flex-shrink-0 pr-2`}
+                                        >
+                                            {BALKAN_COUNTRY_CODES.map((cc) => (
+                                                <option key={cc.code} value={cc.code}>
+                                                    {cc.code} {cc.country}
+                                                </option>
+                                            ))}
+                                        </select>
+                                        <input
+                                            type="tel"
+                                            id="phone"
+                                            value={phoneNumber}
+                                            onChange={(e) => {
+                                                // Only allow digits, spaces, dashes
+                                                const val = e.target.value.replace(/[^0-9\s\-]/g, '');
+                                                setPhoneNumber(val);
+                                                if (touched.phone) {
+                                                    const err = validatePhone(phoneCountryCode, val, t);
+                                                    setFieldErrors(prev => ({ ...prev, phone: err || undefined }));
+                                                }
+                                            }}
+                                            onBlur={() => handleBlur('phone')}
+                                            className={`${glassInputClasses(!!fieldErrors.phone && touched.phone)} flex-1`}
+                                            placeholder={t('auth:signup.phonePlaceholder', 'Enter your phone number')}
+                                            autoComplete="tel-national"
+                                        />
+                                    </div>
+                                    <ValidationError
+                                        message={fieldErrors.phone}
+                                        show={!!touched.phone && !!fieldErrors.phone}
+                                    />
+                                </div>
+                            )}
 
                             {/* Password field */}
                             <div>

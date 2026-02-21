@@ -75,6 +75,26 @@ export const signup = async (req: Request, res: Response): Promise<void> => {
       return;
     }
 
+    // Validate phone number (required for all signups)
+    if (!phone || typeof phone !== 'string' || phone.trim() === '') {
+      res.status(400).json({
+        message: 'Phone number is required',
+        code: 'PHONE_REQUIRED'
+      });
+      return;
+    }
+
+    // Phone must start with + and a valid country code, followed by 6-12 digits
+    const phoneRegex = /^\+\d{1,4}\d{6,12}$/;
+    const cleanPhone = phone.replace(/[\s\-()]/g, '');
+    if (!phoneRegex.test(cleanPhone)) {
+      res.status(400).json({
+        message: 'Invalid phone number format. Must include country code (e.g., +383 44 123 456)',
+        code: 'INVALID_PHONE_FORMAT'
+      });
+      return;
+    }
+
     // Validate email format
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(email)) {
@@ -220,7 +240,7 @@ export const signup = async (req: Request, res: Response): Promise<void> => {
       email: email.toLowerCase(),
       password,
       name,
-      phone,
+      phone: cleanPhone,
       role: role || 'buyer',
       licenseNumber: role === 'agent' ? licenseNumber : undefined,
       agencyName: agencyName,
