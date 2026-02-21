@@ -5,6 +5,8 @@
 
 import { MongoMemoryServer } from 'mongodb-memory-server';
 import mongoose from 'mongoose';
+import request from 'supertest';
+import express from 'express';
 
 let mongoServer: MongoMemoryServer;
 
@@ -42,26 +44,53 @@ process.env.JWT_EXPIRES_IN = '1d';
 process.env.JWT_REFRESH_EXPIRES_IN = '7d';
 process.env.ENCRYPTION_KEY = 'test-encryption-key-32-chars!!';
 
-// Global test utilities
-export const createTestUser = async (userData: Partial<{
-  email: string;
-  password: string;
-  firstName: string;
-  lastName: string;
-  role: string;
-}> = {}) => {
-  const User = mongoose.model('User');
+/**
+ * Creates mock user data matching the User model schema.
+ * Single source of truth — if the schema changes, fix it here only.
+ */
+export const createMockUser = (overrides: Record<string, any> = {}) => ({
+  name: 'Test User',
+  email: `test-${Date.now()}@example.com`,
+  password: 'SecurePassword123!',
+  role: 'buyer',
+  isEmailVerified: true,
+  ...overrides,
+});
 
-  const defaultData = {
-    email: `test-${Date.now()}@example.com`,
-    password: 'TestPassword123!',
-    firstName: 'Test',
-    lastName: 'User',
-    role: 'user',
-    isVerified: true,
-    ...userData,
+/**
+ * Creates a mock user signup payload for the /api/auth/signup endpoint.
+ */
+export const createSignupPayload = (overrides: Record<string, any> = {}) => ({
+  name: 'Test User',
+  email: `test-${Date.now()}@example.com`,
+  password: 'SecurePassword123!',
+  ...overrides,
+});
+
+/**
+ * Signs up a user via the API and returns the accessToken.
+ * Centralizes token extraction so tests don't break if response shape changes.
+ */
+export const getAuthToken = async (app: express.Express, userOverrides: Record<string, any> = {}) => {
+  const payload = createSignupPayload(userOverrides);
+
+  const res = await request(app)
+    .post('/api/auth/signup')
+    .send(payload);
+
+  return {
+    accessToken: res.body.accessToken,
+    refreshToken: res.body.refreshToken,
+    user: res.body.user,
+    signupPayload: payload,
   };
+};
 
-  const user = await User.create(defaultData);
-  return user;
+/**
+ * Persists a user directly to the database using mongoose.
+ * Use this when you need a user without going through the signup API.
+ */
+export const createTestUserInDb = async (overrides: Record<string, any> = {}) => {
+  const User = mongoose.model('User');
+  return User.create(createMockUser(overrides));
 };

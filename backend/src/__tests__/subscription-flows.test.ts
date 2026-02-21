@@ -55,10 +55,10 @@ describe('Subscription Tiers', () => {
         isActive: true,
       },
       {
-        productId: 'enterprise_yearly',
-        name: 'Enterprise Yearly',
-        tier: 'enterprise',
-        description: 'Enterprise tier',
+        productId: 'agency_yearly',
+        name: 'Agency Yearly',
+        tier: 'agency',
+        description: 'Agency tier',
         price: 999.99,
         currency: 'EUR',
         billingPeriod: 'yearly',
@@ -116,12 +116,12 @@ describe('Subscription Tiers', () => {
     });
   });
 
-  describe('Enterprise Tier', () => {
-    test('enterprise tier has highest listings limit', async () => {
-      const enterprise = await Product.findOne({ productId: 'enterprise_yearly' });
+  describe('Agency Tier', () => {
+    test('agency tier has highest listings limit', async () => {
+      const agency = await Product.findOne({ productId: 'agency_yearly' });
       const pro = await Product.findOne({ productId: 'pro_yearly' });
 
-      expect(enterprise?.listingsLimit).toBeGreaterThan(pro?.listingsLimit || 0);
+      expect(agency?.listingsLimit).toBeGreaterThan(pro?.listingsLimit || 0);
     });
   });
 });

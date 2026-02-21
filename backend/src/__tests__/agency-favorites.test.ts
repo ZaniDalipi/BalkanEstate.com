@@ -7,6 +7,7 @@ import request from 'supertest';
 import express from 'express';
 import mongoose from 'mongoose';
 import jwt from 'jsonwebtoken';
+import { createMockUser } from './setup';
 
 // Import models to register them with mongoose
 import '../models/User';
@@ -31,15 +32,7 @@ const createToken = (userId: string) => {
 
 const createTestUser = async () => {
   const User = mongoose.model('User');
-  const user = await User.create({
-    email: `test-${Date.now()}@example.com`,
-    password: 'TestPassword123!',
-    firstName: 'Test',
-    lastName: 'User',
-    role: 'user',
-    isVerified: true,
-  });
-  return user;
+  return User.create(createMockUser());
 };
 
 const createTestAgency = async (ownerId: string) => {

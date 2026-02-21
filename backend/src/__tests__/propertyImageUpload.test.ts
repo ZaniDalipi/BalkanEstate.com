@@ -1,6 +1,5 @@
 import request from 'supertest';
 import mongoose from 'mongoose';
-import { MongoMemoryServer } from 'mongodb-memory-server';
 import express, { Express } from 'express';
 import path from 'path';
 import fs from 'fs';
@@ -9,6 +8,7 @@ import User from '../models/User';
 import propertyRoutes from '../routes/propertyRoutes';
 import { protect } from '../middleware/auth';
 import jwt from 'jsonwebtoken';
+import { createMockUser } from './setup';
 
 // Mock Cloudinary to avoid actual uploads during tests
 jest.mock('../config/cloudinary', () => ({
@@ -44,34 +44,26 @@ jest.mock('sharp', () => {
 });
 
 describe('Property Image Upload', () => {
-  let mongoServer: MongoMemoryServer;
   let app: Express;
   let testUser: any;
   let authToken: string;
 
   beforeAll(async () => {
-    // Setup in-memory MongoDB
-    mongoServer = await MongoMemoryServer.create();
-    const mongoUri = mongoServer.getUri();
-    await mongoose.connect(mongoUri);
-
-    // Setup Express app
+    // Setup Express app (MongoDB connection is handled by global setup.ts)
     app = express();
     app.use(express.json());
     app.use('/api/properties', propertyRoutes);
 
     // Create test user
-    testUser = await User.create({
-      name: 'Test User',
+    testUser = await User.create(createMockUser({
       email: 'test@example.com',
-      password: 'hashedpassword123',
       phone: '+1234567890',
       role: 'private_seller',
       isSubscribed: false,
       subscriptionPlan: 'free',
       listingsCount: 0,
       totalListingsCreated: 0,
-    });
+    }));
 
     // Generate auth token
     authToken = jwt.sign(
@@ -79,11 +71,6 @@ describe('Property Image Upload', () => {
       process.env.JWT_SECRET || 'test-secret',
       { expiresIn: '1h' }
     );
-  });
-
-  afterAll(async () => {
-    await mongoose.disconnect();
-    await mongoServer.stop();
   });
 
   afterEach(async () => {
