@@ -104,8 +104,8 @@ const AgentLicenseModal: React.FC<AgentLicenseModalProps> = ({
 
   if (!isOpen) return null;
 
-  // Phone is required when the user doesn't already have one on file
-  const phoneRequired = !currentPhone;
+  // Phone is always required for agents and sellers
+  const phoneRequired = true;
 
   const runSubmit = async () => {
     if (phoneOnly) {
