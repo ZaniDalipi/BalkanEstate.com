@@ -755,7 +755,10 @@ const ProfileSettings: React.FC<{ user: User }> = ({ user }) => {
                 }
             });
 
-            if (!response.ok) return;
+            if (!response.ok) {
+                console.warn(`Failed to fetch agent data: HTTP ${response.status}`);
+                return;
+            }
 
             const data = await response.json();
             if (data.agent) {
@@ -813,7 +816,14 @@ const ProfileSettings: React.FC<{ user: User }> = ({ user }) => {
             return;
         }
 
-        // For other role switches (including agent ↔ private_seller), allow freely
+        // If switching to agent or private_seller but user has no phone, open modal to collect it
+        if ((role === UserRole.AGENT || role === UserRole.PRIVATE_SELLER) && !user.phone) {
+            setPendingRole(role);
+            setIsLicenseModalOpen(true);
+            return;
+        }
+
+        // For other role switches (including agent ↔ private_seller with phone on file), allow freely
         try {
             setIsSaving(true);
             const updatedUser = await switchRole(role);
@@ -828,16 +838,76 @@ const ProfileSettings: React.FC<{ user: User }> = ({ user }) => {
         }
     };
 
-    const handleLicenseSubmit = async (licenseData: { licenseNumber: string; agencyInvitationCode?: string; agentId?: string; selectedAgencyId?: string; languages?: string[] }) => {
+    const handleLicenseSubmit = async (licenseData: { licenseNumber: string; phone?: string; agencyInvitationCode?: string; agentId?: string; selectedAgencyId?: string; languages?: string[] }) => {
         setIsSaving(true);
         setError('');
         try {
             const roleToSwitch = pendingRole || formData.role;
             const updatedUser = await switchRole(roleToSwitch, licenseData);
 
+            // Also save the profile form data (name, phone, gender, city, etc.)
+            // that the user may have filled in on the background form
+            const parsedSpecializations = agentData.specializations
+                .split(',')
+                .map(s => s.trim())
+                .filter(s => s.length > 0);
+
+            const basicUserData = {
+                name: formData.name,
+                phone: licenseData.phone || formData.phone,
+                city: agentData.city,
+                country: agentData.country,
+                address: agentData.streetAddress || '',
+                avatarUrl: formData.avatarUrl,
+                gender: formData.gender || 'male',
+            };
+
+            let finalUser = updatedUser;
+            try {
+                const savedUser = await updateUser(basicUserData);
+                finalUser = { ...savedUser, ...updatedUser, phone: basicUserData.phone || updatedUser.phone };
+            } catch {
+                // Profile save failed, but role switch succeeded — continue
+            }
+
+            // Use languages from the license modal if provided, otherwise fall back to profile form
+            const modalLanguages = licenseData.languages && licenseData.languages.length > 0
+                ? licenseData.languages
+                : agentData.languages;
+
+            // If switching to agent, also save agent-specific fields
+            if (roleToSwitch === UserRole.AGENT) {
+                const yearsExp = agentData.yearsOfExperience === '' ? 0 : Number(agentData.yearsOfExperience) || 0;
+                try {
+                    const updatedAgent = await updateAgentProfile({
+                        languages: modalLanguages,
+                        specializations: parsedSpecializations,
+                        serviceAreas: agentData.serviceAreas,
+                        yearsOfExperience: yearsExp,
+                        lat: agentData.lat,
+                        lng: agentData.lng,
+                    });
+                    finalUser = {
+                        ...finalUser,
+                        languages: updatedAgent.languages || modalLanguages,
+                        specializations: updatedAgent.specializations || parsedSpecializations,
+                        serviceAreas: updatedAgent.serviceAreas || agentData.serviceAreas,
+                        yearsOfExperience: updatedAgent.yearsOfExperience !== undefined ? updatedAgent.yearsOfExperience : yearsExp,
+                        lat: updatedAgent.lat !== undefined ? updatedAgent.lat : agentData.lat,
+                        lng: updatedAgent.lng !== undefined ? updatedAgent.lng : agentData.lng,
+                    };
+                } catch {
+                    // Agent profile save failed — still use modal languages
+                    finalUser = { ...finalUser, languages: modalLanguages };
+                }
+            }
+
+            // Always sync languages from the modal into the profile form state
+            setAgentData(prev => ({ ...prev, languages: finalUser.languages || modalLanguages }));
+
             // Update context and form data
-            dispatch({ type: 'UPDATE_USER', payload: updatedUser });
-            setFormData(updatedUser);
+            dispatch({ type: 'UPDATE_USER', payload: finalUser });
+            setFormData(finalUser);
 
             // Close modal and show success
             setIsLicenseModalOpen(false);
@@ -1034,11 +1104,12 @@ const ProfileSettings: React.FC<{ user: User }> = ({ user }) => {
                 body: JSON.stringify({ invitationCode }),
             });
 
-            const data = await response.json();
-
             if (!response.ok) {
-                throw new Error(data.message || 'Failed to join agency');
+                const errorData = await response.json().catch(() => null);
+                throw new Error(errorData?.message || 'Failed to join agency');
             }
+
+            const data = await response.json();
 
             // Update user in context with new agency info
             if (data.user) {
@@ -1097,11 +1168,12 @@ const ProfileSettings: React.FC<{ user: User }> = ({ user }) => {
                 body: formData,
             });
 
-            const data = await response.json();
-
             if (!response.ok) {
-                throw new Error(data.message || 'Failed to upload avatar');
+                const errorData = await response.json().catch(() => null);
+                throw new Error(errorData?.message || 'Failed to upload avatar');
             }
+
+            const data = await response.json();
 
             // Merge server response; avatarOptions is null (cleared by backend)
             dispatch({ type: 'UPDATE_USER', payload: { ...data.user, avatarOptions: null } });
@@ -1152,8 +1224,11 @@ const ProfileSettings: React.FC<{ user: User }> = ({ user }) => {
                 },
                 body: JSON.stringify({ avatarOptions: options }),
             });
+            if (!response.ok) {
+                const errorData = await response.json().catch(() => null);
+                throw new Error(errorData?.message || 'Failed to save avatar');
+            }
             const data = await response.json();
-            if (!response.ok) throw new Error(data.message || 'Failed to save avatar');
             // Merge server response; avatarUrl is null (cleared by backend)
             dispatch({ type: 'UPDATE_USER', payload: { ...data.user, avatarUrl: null } });
             setFormData(prev => ({ ...prev, ...data.user, avatarUrl: undefined }));
@@ -1182,8 +1257,11 @@ const ProfileSettings: React.FC<{ user: User }> = ({ user }) => {
                 },
                 body: formDataUpload,
             });
+            if (!response.ok) {
+                const errorData = await response.json().catch(() => null);
+                throw new Error(errorData?.message || 'Failed to upload avatar');
+            }
             const data = await response.json();
-            if (!response.ok) throw new Error(data.message || 'Failed to upload avatar');
             // Merge server response; avatarOptions is null (cleared by backend)
             dispatch({ type: 'UPDATE_USER', payload: { ...data.user, avatarOptions: null } });
             setFormData(prev => ({ ...prev, ...data.user }));
@@ -1461,6 +1539,7 @@ const ProfileSettings: React.FC<{ user: User }> = ({ user }) => {
                         onLocationChange={handleLocationChange}
                         onAddressChange={handleAddressChange}
                         zoom={10}
+                        autoDetectLocation={!agentData.lat && !agentData.lng}
                     />
 
                     {/* Service Areas */}
@@ -1535,6 +1614,8 @@ const ProfileSettings: React.FC<{ user: User }> = ({ user }) => {
             onSubmit={handleLicenseSubmit}
             currentLicenseNumber={user.licenseNumber}
             currentAgentId={user.agentId}
+            currentPhone={user.phone}
+            phoneOnly={pendingRole === UserRole.PRIVATE_SELLER && !user.phone}
         />
         </>
     );

@@ -126,12 +126,12 @@ const FeaturedSubscriptionDialog: React.FC<FeaturedSubscriptionDialogProps> = ({
         }),
       });
 
-      const data = await response.json();
-
       if (!response.ok) {
-        throw new Error(data.error || 'Invalid coupon');
+        const errorData = await response.json().catch(() => null);
+        throw new Error(errorData?.error || 'Invalid coupon');
       }
 
+      const data = await response.json();
       setFinalPrice(data.finalPrice);
       setDiscountAmount(data.discount);
       setCouponApplied(true);

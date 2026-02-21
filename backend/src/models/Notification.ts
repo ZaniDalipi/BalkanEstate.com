@@ -8,6 +8,10 @@ export type NotificationType =
   | 'new_message'           // New conversation message
   | 'new_inquiry'           // New property inquiry
   | 'subscription_expiring' // Subscription about to expire
+  | 'agent_joined_agency'   // Agent joined your agency
+  | 'agent_left_agency'     // Agent left your agency
+  | 'agency_join_welcome'   // Welcome notification for agent joining agency
+  | 'agency_coupon_redeemed' // Agent redeemed a coupon for your agency
   | 'system';               // System notifications
 
 export type NotificationPriority = 'low' | 'normal' | 'high' | 'urgent';
@@ -55,6 +59,10 @@ const NotificationSchema: Schema = new Schema(
         'new_message',
         'new_inquiry',
         'subscription_expiring',
+        'agent_joined_agency',
+        'agent_left_agency',
+        'agency_join_welcome',
+        'agency_coupon_redeemed',
         'system',
       ],
       required: true,

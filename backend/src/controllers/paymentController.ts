@@ -96,20 +96,21 @@ export const createUnifiedPayment = async (req: Request, res: Response): Promise
  */
 export const getPaymentProviders = async (req: Request, res: Response): Promise<void> => {
   try {
-    const { countryCode } = req.params;
+    const countryCode = req.params.countryCode as string;
 
-    if (!countryCode) {
-      res.status(400).json({ message: 'Country code is required' });
+    if (!countryCode || !/^[A-Za-z]{2}$/.test(countryCode)) {
+      res.status(400).json({ message: 'A valid 2-letter country code is required' });
       return;
     }
 
-    const mapping = paymentProviderFactory.getCountryMapping(countryCode.toUpperCase());
-    const provider = paymentProviderFactory.getProviderForCountry(countryCode);
+    const upperCode = countryCode.toUpperCase();
+    const mapping = paymentProviderFactory.getCountryMapping(upperCode);
+    const provider = paymentProviderFactory.getProviderForCountry(upperCode);
     const providerInfo = paymentProviderFactory.getProviderInfo(provider);
 
     res.status(200).json({
       success: true,
-      countryCode: countryCode.toUpperCase(),
+      countryCode: upperCode,
       countryName: mapping?.countryName || 'Unknown',
       provider,
       providerInfo,

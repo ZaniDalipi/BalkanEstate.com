@@ -110,7 +110,12 @@
     "verifyAndBecomeAgent": "Верифицирайте и Станете Агент",
     "joinAgency": "Присъединете се към Агенция",
     "verifyFailed": "Failed to verify license. Please check your information and try again.",
-    "locationNA": "Location N/A"
+    "locationNA": "Location N/A",
+    "phoneOnlyTitle": "Добавете телефонен номер",
+    "phoneOnlyDescription": "Телефонен номер е необходим за контакт и за създаване на обяви за имоти",
+    "phoneOnlyHint": "Вашият телефонен номер ще бъде показан в обявите, за да могат купувачите да се свържат с вас.",
+    "saving": "Запазване...",
+    "saveAndContinue": "Запази и продължи"
   },
   "invitationCode": {
     "title": "Въведете Код за Покана",

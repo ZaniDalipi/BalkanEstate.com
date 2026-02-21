@@ -1094,7 +1094,7 @@ export const useListingForm = (propertyToEdit: Property | null) => {
     };
 
     // Handler for when promotion payment succeeds
-    const handlePromotionPaymentSuccess = async (promotionData: { tier: string; duration: number; hasUrgent: boolean }) => {
+    const handlePromotionPaymentSuccess = async (promotionData: { tier: string; duration: number; hasUrgent: boolean; couponCode?: string }) => {
         if (!pendingPropertyData || !currentUser) return;
 
         try {
@@ -1120,6 +1120,7 @@ export const useListingForm = (propertyToEdit: Property | null) => {
                     promotionTier: promotionData.tier,
                     duration: promotionData.duration,
                     hasUrgentBadge: promotionData.hasUrgent,
+                    couponCode: promotionData.couponCode,
                 }),
             });
 

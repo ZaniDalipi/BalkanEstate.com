@@ -23,6 +23,7 @@ import {
 } from '../sockets/propertySocket';
 import { propertyLogger } from '../utils/logger';
 import { invalidateCache } from '../middleware/cache';
+import { getObjectIdParam, getParam } from '../utils/validateParams';
 
 /**
  * ═══════════════════════════════════════════════════════════════════════════
@@ -343,7 +344,10 @@ export const getProperty = async (
   res: Response
 ): Promise<void> => {
   try {
-    const property = await Property.findById(req.params.id).populate(
+    const id = getObjectIdParam(req, res, 'id');
+    if (!id) return;
+
+    const property = await Property.findById(id).populate(
       'sellerId',
       'name email phone avatarUrl role agencyName agencyId licenseNumber'
     );
@@ -630,8 +634,37 @@ export const createProperty = async (
       country: req.body.country,
     });
 
+    // Whitelist allowed fields to prevent mass assignment attacks
+    // (e.g., attacker setting isPromoted, views, saves, etc.)
+    const ALLOWED_PROPERTY_FIELDS = [
+      'listingType', 'title', 'status', 'price', 'originalPrice', 'priceIntervals',
+      'address', 'city', 'country',
+      'beds', 'baths', 'livingRooms', 'sqft', 'yearBuilt', 'parking',
+      'description', 'specialFeatures', 'materials',
+      'tourUrl', 'virtualTour360Url', 'hasVirtualTour360', 'videoUrl',
+      'imageUrl', 'imagePublicId', 'images',
+      'lat', 'lng',
+      'propertyType', 'floorNumber', 'totalFloors', 'floorplanUrl', 'floorplanPublicId',
+      'amenities', 'hasBalcony', 'hasGarden', 'hasElevator', 'hasSecurity',
+      'hasAirConditioning', 'hasPool', 'petsAllowed',
+      'distanceToCenter', 'distanceToSea', 'distanceToSchool', 'distanceToHospital',
+      'furnishing', 'heatingType', 'condition', 'viewType', 'energyRating', 'orientation',
+      // Rental-specific fields
+      'rentPeriod', 'securityDeposit', 'minimumLeaseDuration', 'maximumLeaseDuration',
+      'availableFrom', 'utilitiesIncluded', 'internetIncluded',
+      'tenantRequirements', 'maxOccupants',
+      'visitAvailability',
+    ] as const;
+
+    const sanitizedBody: Record<string, any> = {};
+    for (const field of ALLOWED_PROPERTY_FIELDS) {
+      if (req.body[field] !== undefined) {
+        sanitizedBody[field] = req.body[field];
+      }
+    }
+
     const propertyData = {
-      ...req.body,
+      ...sanitizedBody,
       sellerId: String(currentUser._id),
       // Add user identification for 1:1 relationship tracking
       createdByName: user.name,
@@ -642,7 +675,7 @@ export const createProperty = async (
         createdByAgencyName: user.agencyName,
         createdByLicenseNumber: user.licenseNumber,
       }),
-      // Add geocoded coordinates (will be undefined if geocoding failed)
+      // Override with geocoded coordinates if geocoding succeeded, otherwise keep frontend values
       ...(coordinates.lat && coordinates.lng && {
         lat: coordinates.lat,
         lng: coordinates.lng,
@@ -668,7 +701,7 @@ export const createProperty = async (
     await user.save();
 
     // Update stats for active listings
-    if (propertyData.status === 'active') {
+    if (sanitizedBody.status === 'active') {
       await incrementActiveListings(String(user._id));
 
       // Trigger instant alerts for saved searches that match this property
@@ -726,7 +759,10 @@ export const updateProperty = async (
       return;
     }
 
-    const property = await Property.findById(req.params.id);
+    const id = getObjectIdParam(req, res, 'id');
+    if (!id) return;
+
+    const property = await Property.findById(id);
 
     if (!property) {
       res.status(404).json({ message: 'Property not found' });
@@ -884,7 +920,10 @@ export const deleteProperty = async (
       return;
     }
 
-    const property = await Property.findById(req.params.id);
+    const id = getObjectIdParam(req, res, 'id');
+    if (!id) return;
+
+    const property = await Property.findById(id);
 
     if (!property) {
       res.status(404).json({ message: 'Property not found' });
@@ -1106,7 +1145,15 @@ export const uploadImages = async (
 
     const files = req.files as Express.Multer.File[];
     const userId = req.user.id;
-    const propertyId = req.params.propertyId || req.body.propertyId;
+
+    // Get propertyId from route params or request body
+    let propertyId: string | undefined = req.body.propertyId;
+    const propertyIdParam = getParam(req, 'propertyId');
+    if (propertyIdParam) {
+      const paramId = getObjectIdParam(req, res, 'propertyId');
+      if (!paramId) return;
+      propertyId = paramId;
+    }
 
     // If propertyId is provided, verify ownership
     if (propertyId) {
@@ -1149,7 +1196,10 @@ export const markAsSold = async (
       return;
     }
 
-    const property = await Property.findById(req.params.id);
+    const id = getObjectIdParam(req, res, 'id');
+    if (!id) return;
+
+    const property = await Property.findById(id);
 
     if (!property) {
       res.status(404).json({ message: 'Property not found' });
@@ -1247,7 +1297,10 @@ export const markAsRented = async (
       return;
     }
 
-    const property = await Property.findById(req.params.id);
+    const id = getObjectIdParam(req, res, 'id');
+    if (!id) return;
+
+    const property = await Property.findById(id);
 
     if (!property) {
       res.status(404).json({ message: 'Property not found' });
@@ -1309,7 +1362,10 @@ export const markAsAvailable = async (
       return;
     }
 
-    const property = await Property.findById(req.params.id);
+    const id = getObjectIdParam(req, res, 'id');
+    if (!id) return;
+
+    const property = await Property.findById(id);
 
     if (!property) {
       res.status(404).json({ message: 'Property not found' });
@@ -1400,7 +1456,10 @@ export const addRentalHistoryEntry = async (
       return;
     }
 
-    const property = await Property.findById(req.params.id);
+    const id = getObjectIdParam(req, res, 'id');
+    if (!id) return;
+
+    const property = await Property.findById(id);
     if (!property) {
       res.status(404).json({ message: 'Property not found' });
       return;
@@ -1454,7 +1513,13 @@ export const deleteRentalHistoryEntry = async (
       return;
     }
 
-    const property = await Property.findById(req.params.id);
+    const id = getObjectIdParam(req, res, 'id');
+    if (!id) return;
+
+    const entryId = getObjectIdParam(req, res, 'entryId');
+    if (!entryId) return;
+
+    const property = await Property.findById(id);
     if (!property) {
       res.status(404).json({ message: 'Property not found' });
       return;
@@ -1468,7 +1533,7 @@ export const deleteRentalHistoryEntry = async (
 
     await Property.updateOne(
       { _id: property._id },
-      { $pull: { rentalHistory: { _id: req.params.entryId } } }
+      { $pull: { rentalHistory: { _id: entryId } } }
     );
 
     const updatedProperty = await Property.findById(property._id);
@@ -1489,7 +1554,10 @@ export const renewProperty = async (
   res: Response
 ): Promise<void> => {
   try {
-    propertyLogger.info('🔄 Renew property request:', req.params.id);
+    const id = getObjectIdParam(req, res, 'id');
+    if (!id) return;
+
+    propertyLogger.info('🔄 Renew property request:', id);
 
     if (!req.user) {
       propertyLogger.info('❌ Renew failed: Not authorized');
@@ -1497,7 +1565,7 @@ export const renewProperty = async (
       return;
     }
 
-    const property = await Property.findById(req.params.id);
+    const property = await Property.findById(id);
 
     if (!property) {
       res.status(404).json({ message: 'Property not found' });

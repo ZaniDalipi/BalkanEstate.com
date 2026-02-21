@@ -11,6 +11,7 @@ import { processSubscriptionPayment } from '../services/subscriptionPaymentServi
 import User from '../models/User';
 import Product from '../models/Product';
 import { paymentLogger } from '../utils/logger';
+import { getParam } from '../utils/validateParams';
 
 /**
  * PaySera callback status codes
@@ -93,8 +94,8 @@ async function handleSuccessfulPayment(
   metadata: { userId: string; productId: string; planName: string; planInterval: string } | null
 ): Promise<void> {
   try {
-    // Extract userId from metadata or personcode
-    const userId = metadata?.userId || callbackData.personcode;
+    // Extract userId from verified metadata only (personcode is no longer sent)
+    const userId = metadata?.userId;
     const productId = metadata?.productId;
 
     if (!userId) {
@@ -157,7 +158,7 @@ async function handleSuccessfulPayment(
  */
 export const verifyPayseraPayment = async (req: Request, res: Response): Promise<void> => {
   try {
-    const { orderId } = req.params;
+    const orderId = getParam(req, 'orderId');
     const userId = (req as any).user?._id;
 
     if (!userId) {

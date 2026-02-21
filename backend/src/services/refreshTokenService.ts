@@ -19,7 +19,7 @@ import {
  * - Automatic cleanup of expired tokens
  */
 
-const MAX_REFRESH_TOKENS_PER_USER = 5; // Maximum devices/sessions
+const MAX_REFRESH_TOKENS_PER_USER = 10; // Maximum devices/sessions
 const REFRESH_TOKEN_EXPIRY = process.env.REFRESH_TOKEN_EXPIRES_IN || '7d';
 
 interface TokenPair {
@@ -39,8 +39,8 @@ export const generateTokenPair = async (
   user: IUser,
   deviceInfo?: DeviceInfo
 ): Promise<TokenPair> => {
-  const accessToken = generateAccessToken(user._id);
-  const refreshToken = generateRefreshToken(user._id);
+  const accessToken = generateAccessToken(String(user._id));
+  const refreshToken = generateRefreshToken(String(user._id));
 
   // Calculate expiration date
   const expiresAt = getTokenExpirationDate(REFRESH_TOKEN_EXPIRY);

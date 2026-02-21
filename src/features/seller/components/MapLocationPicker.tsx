@@ -28,9 +28,10 @@ interface MapLocationPickerProps {
   cityLng?: number;
   onLocationChange: (lat: number, lng: number) => void;
   onAddressChange?: (address: string) => void;
+  autoDetectLocation?: boolean;
 }
 
-const MapLocationPicker: React.FC<MapLocationPickerProps> = ({ lat, lng, address, zoom = 15, country, city, cityLat, cityLng, onLocationChange, onAddressChange }) => {
+const MapLocationPicker: React.FC<MapLocationPickerProps> = ({ lat, lng, address, zoom = 15, country, city, cityLat, cityLng, onLocationChange, onAddressChange, autoDetectLocation }) => {
   const { t } = useTranslation(['search']);
   const { dispatch } = useAppContext();
   const mapRef = useRef<L.Map | null>(null);
@@ -48,6 +49,21 @@ const MapLocationPicker: React.FC<MapLocationPickerProps> = ({ lat, lng, address
   const streetLayerRef = useRef<L.TileLayer | null>(null);
   const satelliteLayerRef = useRef<L.TileLayer | null>(null);
   const resizeTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  // Use refs to hold current prop values so event handlers always access latest values
+  const latRef = useRef(lat);
+  const lngRef = useRef(lng);
+  const cityRef = useRef(city);
+  const cityLatRef = useRef(cityLat);
+  const cityLngRef = useRef(cityLng);
+  const addressRef = useRef(address);
+
+  useEffect(() => { latRef.current = lat; }, [lat]);
+  useEffect(() => { lngRef.current = lng; }, [lng]);
+  useEffect(() => { cityRef.current = city; }, [city]);
+  useEffect(() => { cityLatRef.current = cityLat; }, [cityLat]);
+  useEffect(() => { cityLngRef.current = cityLng; }, [cityLng]);
+  useEffect(() => { addressRef.current = address; }, [address]);
 
   // Calculate distance between two coordinates in kilometers
   const calculateDistance = (lat1: number, lon1: number, lat2: number, lon2: number): number => {
@@ -120,19 +136,23 @@ const MapLocationPicker: React.FC<MapLocationPickerProps> = ({ lat, lng, address
       setIsDragging(false);
 
       // If city is selected, validate that the dragged location is within the city area
-      if (city && cityLat && cityLng) {
-        const distance = calculateDistance(cityLat, cityLng, position.lat, position.lng);
+      // Use refs to always access current city values (not stale closure)
+      const currentCity = cityRef.current;
+      const currentCityLat = cityLatRef.current;
+      const currentCityLng = cityLngRef.current;
+      if (currentCity && currentCityLat && currentCityLng) {
+        const distance = calculateDistance(currentCityLat, currentCityLng, position.lat, position.lng);
         if (distance > 30) {
           // Snap marker back to previous position
-          marker.setLatLng([lat, lng]);
-          marker.setPopupContent(`<b>${t('search:map.locationTooFarTitle', 'Location Too Far')}</b><br>${t('search:map.locationTooFar', { distance: distance.toFixed(1), city })}`);
+          marker.setLatLng([latRef.current, lngRef.current]);
+          marker.setPopupContent(`<b>${t('search:map.locationTooFarTitle', 'Location Too Far')}</b><br>${t('search:map.locationTooFar', { distance: distance.toFixed(1), city: currentCity })}`);
           marker.openPopup();
           dispatch({
             type: 'SHOW_ALERT',
             payload: {
               type: 'warning',
               title: t('search:map.locationTooFarTitle', 'Location Too Far'),
-              message: t('search:map.locationTooFar', { distance: distance.toFixed(1), city }),
+              message: t('search:map.locationTooFar', { distance: distance.toFixed(1), city: currentCity }),
             },
           });
           return;
@@ -213,6 +233,50 @@ const MapLocationPicker: React.FC<MapLocationPickerProps> = ({ lat, lng, address
     };
   }, []); // Only run once on mount
 
+  // Auto-detect user's current location on mount when no saved location exists
+  useEffect(() => {
+    if (!autoDetectLocation || !navigator.geolocation) return;
+
+    // Small delay to ensure map is fully initialized
+    const timer = setTimeout(() => {
+      setIsGettingLocation(true);
+      navigator.geolocation.getCurrentPosition(
+        async (position) => {
+          const { latitude, longitude } = position.coords;
+          onLocationChange(latitude, longitude);
+
+          if (mapRef.current) {
+            mapRef.current.flyTo([latitude, longitude], 16, {
+              duration: 1.0,
+              easeLinearity: 0.4,
+            });
+          }
+
+          if (onAddressChange) {
+            try {
+              const result = await reverseGeocode(latitude, longitude);
+              if (result) {
+                onAddressChange(result.display_name);
+                setSearchQuery(result.display_name);
+              }
+            } catch {
+              // Reverse geocode failed silently
+            }
+          }
+
+          setIsGettingLocation(false);
+        },
+        () => {
+          // Geolocation failed silently — user can manually pick location
+          setIsGettingLocation(false);
+        },
+        { enableHighAccuracy: true, timeout: 10000, maximumAge: 300000 }
+      );
+    }, 300);
+
+    return () => clearTimeout(timer);
+  }, [autoDetectLocation]); // Only run when autoDetectLocation changes
+
   // Update marker position when lat/lng changes externally with optimized animation
   useEffect(() => {
     if (markerRef.current && mapRef.current && !isDragging) {
@@ -289,12 +353,14 @@ const MapLocationPicker: React.FC<MapLocationPickerProps> = ({ lat, lng, address
         const countryCode = country ? countryCodeMap[country] : undefined;
         let results = await searchLocation(query, countryCode);
 
-        // If city is selected, filter results to only show locations within ~30km of the city center
-        if (city && cityLat && cityLng) {
+        // If city is selected, filter results to only show locations within ~30km of the current city center
+        const currentCityLat = cityLatRef.current;
+        const currentCityLng = cityLngRef.current;
+        if (cityRef.current && currentCityLat && currentCityLng) {
           results = results.filter(result => {
             const resultLat = parseFloat(result.lat);
             const resultLng = parseFloat(result.lon);
-            const distance = calculateDistance(cityLat, cityLng, resultLat, resultLng);
+            const distance = calculateDistance(currentCityLat, currentCityLng, resultLat, resultLng);
             return distance <= 30; // Only show results within 30km of city center
           });
         }
@@ -315,22 +381,32 @@ const MapLocationPicker: React.FC<MapLocationPickerProps> = ({ lat, lng, address
     const newLng = parseFloat(result.lon);
 
     // If city is selected, validate that the location is within the city area
-    if (city && cityLat && cityLng) {
-      const distance = calculateDistance(cityLat, cityLng, newLat, newLng);
+    const currentCity = cityRef.current;
+    const currentCityLat = cityLatRef.current;
+    const currentCityLng = cityLngRef.current;
+    if (currentCity && currentCityLat && currentCityLng) {
+      const distance = calculateDistance(currentCityLat, currentCityLng, newLat, newLng);
       if (distance > 30) {
         dispatch({
           type: 'SHOW_ALERT',
           payload: {
             type: 'warning',
             title: t('search:map.locationTooFarTitle', 'Location Too Far'),
-            message: t('search:map.locationTooFar', { distance: distance.toFixed(1), city }),
+            message: t('search:map.locationTooFar', { distance: distance.toFixed(1), city: currentCity }),
           },
         });
         return;
       }
     }
 
-    // Update marker and map
+    // Directly move marker and map (don't rely solely on prop re-render)
+    if (markerRef.current) {
+      markerRef.current.setLatLng([newLat, newLng]);
+      markerRef.current.setPopupContent(`<b>${t('search:map.locationSet')}</b><br>Lat: ${newLat.toFixed(6)}, Lng: ${newLng.toFixed(6)}`);
+      markerRef.current.openPopup();
+    }
+
+    // Update parent state
     onLocationChange(newLat, newLng);
 
     // Use the full display_name as the address to preserve complete location information
@@ -389,8 +465,11 @@ const MapLocationPicker: React.FC<MapLocationPickerProps> = ({ lat, lng, address
         const { latitude, longitude } = position.coords;
 
         // If city is selected, validate that the current location is within the city area
-        if (city && cityLat && cityLng) {
-          const distance = calculateDistance(cityLat, cityLng, latitude, longitude);
+        const currentCity = cityRef.current;
+        const currentCityLat = cityLatRef.current;
+        const currentCityLng = cityLngRef.current;
+        if (currentCity && currentCityLat && currentCityLng) {
+          const distance = calculateDistance(currentCityLat, currentCityLng, latitude, longitude);
           if (distance > 30) {
             setIsGettingLocation(false);
             dispatch({
@@ -398,7 +477,7 @@ const MapLocationPicker: React.FC<MapLocationPickerProps> = ({ lat, lng, address
               payload: {
                 type: 'warning',
                 title: t('search:map.locationTooFarTitle', 'Location Too Far'),
-                message: t('search:map.locationTooFar', { distance: distance.toFixed(1), city }),
+                message: t('search:map.locationTooFar', { distance: distance.toFixed(1), city: currentCity }),
               },
             });
             return;
@@ -471,6 +550,14 @@ const MapLocationPicker: React.FC<MapLocationPickerProps> = ({ lat, lng, address
             value={searchQuery}
             onChange={handleSearchChange}
             onFocus={() => searchResults.length > 0 && setShowResults(true)}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') {
+                e.preventDefault();
+                if (searchResults.length > 0) {
+                  handleResultSelect(searchResults[0]);
+                }
+              }
+            }}
             placeholder={t('search:map.searchPlaceholder')}
             className="w-full px-4 py-2.5 pr-10 text-sm border-2 border-neutral-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary"
             autoComplete="off"

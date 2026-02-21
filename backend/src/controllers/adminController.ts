@@ -10,6 +10,7 @@ import { getWhitelistConfig } from '../middleware/adminAuth';
 import { adminLogger } from '../utils/logger';
 import { invalidateCache } from '../middleware/cache';
 import { migratePropertySchema } from '../utils/migratePropertySchema';
+import { getObjectIdParam } from '../utils/validateParams';
 
 
 // @desc    Get admin dashboard statistics
@@ -134,7 +135,8 @@ export const getAllUsers = async (req: Request, res: Response): Promise<void> =>
 // @access  Private/Admin + VPN
 export const updateUserAdmin = async (req: Request, res: Response): Promise<void> => {
   try {
-    const { id } = req.params;
+    const id = getObjectIdParam(req, res, 'id');
+    if (!id) return;
     const updates = req.body;
 
     // Prevent updating password through this endpoint
@@ -186,7 +188,8 @@ export const updateUserAdmin = async (req: Request, res: Response): Promise<void
 // @access  Private/Admin + VPN
 export const deleteUser = async (req: Request, res: Response): Promise<void> => {
   try {
-    const { id } = req.params;
+    const id = getObjectIdParam(req, res, 'id');
+    if (!id) return;
 
     const user = await User.findById(id);
     if (!user) {
@@ -289,7 +292,8 @@ export const getAllAgenciesAdmin = async (req: Request, res: Response): Promise<
 // @access  Private/Admin + VPN
 export const getAgencyDetailAdmin = async (req: Request, res: Response): Promise<void> => {
   try {
-    const { id } = req.params;
+    const id = getObjectIdParam(req, res, 'id');
+    if (!id) return;
 
     const agency = await Agency.findById(id)
       .populate('ownerId', 'name email phone subscription avatarUrl')
@@ -391,7 +395,8 @@ export const getAgencyDetailAdmin = async (req: Request, res: Response): Promise
 // @access  Private/Admin
 export const updateAgency = async (req: Request, res: Response): Promise<void> => {
   try {
-    const { id } = req.params;
+    const id = getObjectIdParam(req, res, 'id');
+    if (!id) return;
     const updates = req.body;
 
     // Prevent updating certain fields through this endpoint
@@ -435,7 +440,8 @@ export const updateAgency = async (req: Request, res: Response): Promise<void> =
 // @access  Private/Admin
 export const deleteAgency = async (req: Request, res: Response): Promise<void> => {
   try {
-    const { id } = req.params;
+    const id = getObjectIdParam(req, res, 'id');
+    if (!id) return;
 
     const agency = await Agency.findById(id);
     if (!agency) {
@@ -507,7 +513,8 @@ export const getAllPropertiesAdmin = async (req: Request, res: Response): Promis
 // @access  Private/Admin
 export const updateProperty = async (req: Request, res: Response): Promise<void> => {
   try {
-    const { id } = req.params;
+    const id = getObjectIdParam(req, res, 'id');
+    if (!id) return;
     const updates = req.body;
 
     // Prevent updating certain fields through this endpoint
@@ -550,7 +557,8 @@ export const updateProperty = async (req: Request, res: Response): Promise<void>
 // @access  Private/Admin + VPN
 export const deleteProperty = async (req: Request, res: Response): Promise<void> => {
   try {
-    const { id } = req.params;
+    const id = getObjectIdParam(req, res, 'id');
+    if (!id) return;
 
     const property = await Property.findByIdAndDelete(id);
     if (!property) {
@@ -677,7 +685,8 @@ export const fixPropertyCoordinates = async (req: Request, res: Response): Promi
 // @access  Private/Admin
 export const fixSinglePropertyCoordinates = async (req: Request, res: Response): Promise<void> => {
   try {
-    const { propertyId } = req.params;
+    const propertyId = getObjectIdParam(req, res, 'propertyId');
+    if (!propertyId) return;
 
     const property = await Property.findById(propertyId);
     if (!property) {
@@ -840,7 +849,8 @@ export const getAllInquiries = async (req: Request, res: Response): Promise<void
 // @access  Private/Admin
 export const getInquiryById = async (req: Request, res: Response): Promise<void> => {
   try {
-    const { id } = req.params;
+    const id = getObjectIdParam(req, res, 'id');
+    if (!id) return;
 
     const inquiry = await Inquiry.findById(id)
       .populate('recipientId', 'name email role avatarUrl phone')
@@ -864,7 +874,8 @@ export const getInquiryById = async (req: Request, res: Response): Promise<void>
 // @access  Private/Admin
 export const updateInquiry = async (req: Request, res: Response): Promise<void> => {
   try {
-    const { id } = req.params;
+    const id = getObjectIdParam(req, res, 'id');
+    if (!id) return;
     const { status, adminNotes } = req.body;
 
     const updates: any = {};
@@ -908,7 +919,8 @@ export const updateInquiry = async (req: Request, res: Response): Promise<void> 
 // @access  Private/Admin
 export const deleteInquiry = async (req: Request, res: Response): Promise<void> => {
   try {
-    const { id } = req.params;
+    const id = getObjectIdParam(req, res, 'id');
+    if (!id) return;
 
     const inquiry = await Inquiry.findByIdAndDelete(id);
     if (!inquiry) {

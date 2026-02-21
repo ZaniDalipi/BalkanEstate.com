@@ -2,6 +2,7 @@ import { Request, Response } from 'express';
 import { getFeaturedCities, getCitiesByCountry, getCityMarketData } from '../services/cityMarketDataService';
 import { triggerMarketDataUpdate } from '../jobs/updateCityMarketData';
 import { apiLogger } from '../utils/logger';
+import { getParam } from '../utils/validateParams';
 
 /**
  * @desc    Get featured city recommendations
@@ -34,7 +35,7 @@ export const getFeaturedCitiesController = async (req: Request, res: Response): 
  */
 export const getCitiesByCountryController = async (req: Request, res: Response): Promise<void> => {
   try {
-    const { country } = req.params;
+    const country = getParam(req, 'country');
     const cities = await getCitiesByCountry(country);
 
     res.json({
@@ -58,7 +59,8 @@ export const getCitiesByCountryController = async (req: Request, res: Response):
  */
 export const getCityMarketDataController = async (req: Request, res: Response): Promise<void> => {
   try {
-    const { city, country } = req.params;
+    const city = getParam(req, 'city');
+    const country = getParam(req, 'country');
     const marketData = await getCityMarketData(city, country);
 
     if (!marketData) {

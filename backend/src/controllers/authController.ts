@@ -75,6 +75,26 @@ export const signup = async (req: Request, res: Response): Promise<void> => {
       return;
     }
 
+    // Validate phone number (required for all signups)
+    if (!phone || typeof phone !== 'string' || phone.trim() === '') {
+      res.status(400).json({
+        message: 'Phone number is required',
+        code: 'PHONE_REQUIRED'
+      });
+      return;
+    }
+
+    // Phone must start with + and a valid country code, followed by 6-12 digits
+    const phoneRegex = /^\+\d{1,4}\d{6,12}$/;
+    const cleanPhone = phone.replace(/[\s\-()]/g, '');
+    if (!phoneRegex.test(cleanPhone)) {
+      res.status(400).json({
+        message: 'Invalid phone number format. Must include country code (e.g., +383 44 123 456)',
+        code: 'INVALID_PHONE_FORMAT'
+      });
+      return;
+    }
+
     // Validate email format
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(email)) {
@@ -220,7 +240,7 @@ export const signup = async (req: Request, res: Response): Promise<void> => {
       email: email.toLowerCase(),
       password,
       name,
-      phone,
+      phone: cleanPhone,
       role: role || 'buyer',
       licenseNumber: role === 'agent' ? licenseNumber : undefined,
       agencyName: agencyName,
@@ -419,8 +439,8 @@ export const login = async (req: Request, res: Response): Promise<void> => {
       return;
     }
 
-    // Check if account is locked
-    if (user.isAccountLocked()) {
+    // Check if account is locked (production only — skip in dev to allow free testing)
+    if (process.env.NODE_ENV === 'production' && user.isAccountLocked()) {
       const lockTime = user.lockUntil!.getTime() - Date.now();
       const minutesRemaining = Math.ceil(lockTime / (60 * 1000));
 
@@ -464,8 +484,10 @@ export const login = async (req: Request, res: Response): Promise<void> => {
         user.loginHistory = user.loginHistory.slice(-100);
       }
 
-      // Increment failed login attempts
-      await user.incrementLoginAttempts();
+      // Increment failed login attempts (production only)
+      if (process.env.NODE_ENV === 'production') {
+        await user.incrementLoginAttempts();
+      }
 
       // Log failed login attempt
       activityLogger.logLoginFailed(email, 'Invalid password', req);
@@ -497,8 +519,10 @@ export const login = async (req: Request, res: Response): Promise<void> => {
 
     await user.save();
 
-    // Reset account-level rate limit on successful login
-    resetLoginRateLimit(user.email, clientIp);
+    // Reset rate limits on successful login
+    // Admins also get their IP limit cleared so they can switch accounts freely
+    const isAdminUser = user.role === 'admin' || user.role === 'super_admin';
+    resetLoginRateLimit(user.email, clientIp, isAdminUser);
 
     // Generate token pair (access + refresh)
     const deviceInfo = {
@@ -615,46 +639,63 @@ export const getMe = async (req: Request, res: Response): Promise<void> => {
       // **AUTO-CREATE SUBSCRIPTION DOCUMENT**: Ensure agency agents have a Subscription document
       // This is needed because getCurrentSubscription checks the Subscription collection first
       const Subscription = (await import('../models/Subscription')).default;
-      const existingAgentSubscription = await Subscription.findOne({ userId: user._id });
 
-      if (!existingAgentSubscription && user.subscription?.tier === 'agency_agent') {
-        // Get expiration from agency or user subscription
-        const subExpiresAt = user.subscription.expiresAt ||
-                            memberAgency.subscription?.expiresAt ||
-                            new Date(Date.now() + 365 * 24 * 60 * 60 * 1000);
+      try {
+        const existingAgentSubscription = await Subscription.findOne({ userId: user._id });
+        // Include userId so multiple agents sharing the same coupon code don't
+        // collide on the (store, transactionId) compound unique index
+        const agentCouponId = user.agency?.couponCode
+          ? `${user.agency.couponCode}_${user._id}`
+          : `agent_${user._id}`;
 
-        await Subscription.create({
-          userId: user._id,
-          productId: 'agency_agent_yearly',
-          store: 'agency_coupon',
-          status: 'active',
-          startDate: user.agency?.joinedAt || new Date(),
-          renewalDate: subExpiresAt,
-          expirationDate: subExpiresAt,
-          autoRenewing: true,
-          price: 0,
-          currency: 'EUR',
-          isAcknowledged: true,
-        });
-        authLogger.info(`✅ Auto-created Subscription document for agency agent ${user._id}`);
-      } else if (existingAgentSubscription &&
-                 user.subscription?.tier === 'agency_agent' &&
-                 existingAgentSubscription.productId !== 'agency_agent_yearly') {
-        // Update existing subscription to reflect agency agent status
-        existingAgentSubscription.productId = 'agency_agent_yearly';
-        existingAgentSubscription.store = 'agency_coupon';
-        existingAgentSubscription.status = 'active';
-        existingAgentSubscription.price = 0;
-        existingAgentSubscription.autoRenewing = true;
-        const subExpiresAt = user.subscription.expiresAt ||
-                            memberAgency.subscription?.expiresAt ||
-                            new Date(Date.now() + 365 * 24 * 60 * 60 * 1000);
-        existingAgentSubscription.expirationDate = subExpiresAt;
-        existingAgentSubscription.renewalDate = subExpiresAt;
-        // Reset reminder flag so new reminder will be sent before new expiration
-        existingAgentSubscription.expiryReminderSent = false;
-        await existingAgentSubscription.save();
-        authLogger.info(`✅ Auto-updated Subscription document for agency agent ${user._id}`);
+        if (!existingAgentSubscription && user.subscription?.tier === 'agency_agent') {
+          const subExpiresAt = user.subscription.expiresAt ||
+                              memberAgency.subscription?.expiresAt ||
+                              new Date(Date.now() + 365 * 24 * 60 * 60 * 1000);
+
+          await Subscription.create({
+            userId: user._id,
+            productId: 'agency_agent_yearly',
+            store: 'agency_coupon',
+            purchaseToken: agentCouponId,
+            transactionId: agentCouponId,
+            status: 'active',
+            startDate: user.agency?.joinedAt || new Date(),
+            renewalDate: subExpiresAt,
+            expirationDate: subExpiresAt,
+            autoRenewing: true,
+            price: 0,
+            currency: 'EUR',
+            isAcknowledged: true,
+          });
+          authLogger.info(`✅ Auto-created Subscription document for agency agent ${user._id}`);
+        } else if (existingAgentSubscription &&
+                   user.subscription?.tier === 'agency_agent' &&
+                   existingAgentSubscription.productId !== 'agency_agent_yearly') {
+          existingAgentSubscription.productId = 'agency_agent_yearly';
+          existingAgentSubscription.store = 'agency_coupon';
+          existingAgentSubscription.purchaseToken = agentCouponId;
+          existingAgentSubscription.transactionId = agentCouponId;
+          existingAgentSubscription.status = 'active';
+          existingAgentSubscription.price = 0;
+          existingAgentSubscription.autoRenewing = true;
+          const subExpiresAt = user.subscription.expiresAt ||
+                              memberAgency.subscription?.expiresAt ||
+                              new Date(Date.now() + 365 * 24 * 60 * 60 * 1000);
+          existingAgentSubscription.expirationDate = subExpiresAt;
+          existingAgentSubscription.renewalDate = subExpiresAt;
+          existingAgentSubscription.expiryReminderSent = false;
+          await existingAgentSubscription.save();
+          authLogger.info(`✅ Auto-updated Subscription document for agency agent ${user._id}`);
+        }
+      } catch (subError: any) {
+        // Don't let subscription sync errors break the /me endpoint —
+        // the next request will retry automatically
+        if (subError.code === 11000) {
+          authLogger.warn(`Auto-sync: duplicate subscription key for agent ${user._id}, skipping`);
+        } else {
+          authLogger.error(`Auto-sync: subscription error for agent ${user._id}:`, subError);
+        }
       }
 
       if (needsSync) {
@@ -1065,7 +1106,7 @@ export const switchRole = async (req: Request, res: Response): Promise<void> => 
       return;
     }
 
-    const { role, licenseNumber, agencyInvitationCode, agentId, languages } = req.body;
+    const { role, licenseNumber, agencyInvitationCode, agentId, languages, phone } = req.body;
 
     // Validate role
     const validRoles = ['buyer', 'private_seller', 'agent'];
@@ -1088,6 +1129,33 @@ export const switchRole = async (req: Request, res: Response): Promise<void> => 
     if (!user) {
       res.status(404).json({ message: 'User not found' });
       return;
+    }
+
+    // Phone number is required for agent and private_seller roles.
+    // Accept it from the request body OR check if the user already has one on file.
+    if (role === 'agent' || role === 'private_seller') {
+      const hasPhone = phone?.trim() || user.phone;
+      if (!hasPhone) {
+        res.status(400).json({
+          message: 'Phone number is required to become an agent or seller',
+          code: 'PHONE_REQUIRED',
+        });
+        return;
+      }
+
+      // If a new phone was provided, validate format and persist it
+      if (phone?.trim()) {
+        const cleaned = phone.trim().replace(/[\s\-\(\)\.]/g, '');
+        const phoneRegex = /^\+?[0-9]{7,15}$/;
+        if (!phoneRegex.test(cleaned)) {
+          res.status(400).json({
+            message: 'Invalid phone number format. Use 7-15 digits, optionally starting with +',
+            code: 'INVALID_PHONE',
+          });
+          return;
+        }
+        user.phone = phone.trim();
+      }
     }
 
     // If switching to agent role
@@ -2067,6 +2135,13 @@ export const addRole = async (req: Request, res: Response): Promise<void> => {
 
     if (!newRole) {
       res.status(400).json({ message: 'New role is required' });
+      return;
+    }
+
+    // Whitelist allowed roles to prevent privilege escalation
+    const ALLOWED_ROLES = ['buyer', 'agent', 'private_seller'];
+    if (!ALLOWED_ROLES.includes(newRole)) {
+      res.status(400).json({ message: 'Invalid role specified' });
       return;
     }
 

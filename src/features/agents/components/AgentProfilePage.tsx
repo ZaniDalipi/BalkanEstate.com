@@ -7,6 +7,7 @@ import {
 import DefaultAvatar from '@/components/shared/DefaultAvatar';
 import FeaturedAgencies from '@/components/FeaturedAgencies';
 import { SEO, Breadcrumbs, generateAgentBreadcrumbs } from '@/src/components/seo';
+import { PageTransition, Animated } from '@/src/components/ui/Animations';
 
 // Extracted sub-components
 import { useAgentProfile } from './useAgentProfile';
@@ -14,6 +15,7 @@ import AgentProfileHeader from './AgentProfileHeader';
 import AgentProfileTabs from './AgentProfileTabs';
 import AgentEditModal from './AgentEditModal';
 import AgentContactActions from './AgentContactActions';
+import MarketReportModal from './MarketReportModal';
 
 // ─── Inline Helpers (not extracted) ─────────────────────────────────────────
 
@@ -62,7 +64,7 @@ const AgentProfilePage: React.FC<AgentProfilePageProps> = ({ agent }) => {
     const seoTitle = `${agentName} - Real Estate Agent${locationStr ? ` in ${locationStr}` : ''}`;
     const seoDescription = profile.agentData.bio
         ? `${agentName} is a real estate agent${locationStr ? ` in ${locationStr}` : ''}. ${profile.agentData.bio.slice(0, 140)}`
-        : `${agentName} is a verified real estate agent${locationStr ? ` in ${locationStr}` : ''} on BalkanEstateAI. ${profile.stats.sold} properties sold, ${profile.stats.activeListings} active listings. Contact today.`;
+        : `${agentName} is a verified real estate agent${locationStr ? ` in ${locationStr}` : ''} on BalkanEstateAI. ${profile.stats.totalSales} properties sold, ${profile.activeListings.length} active listings. Contact today.`;
 
     return (
         <div className="min-h-screen bg-gray-50">
@@ -83,8 +85,8 @@ const AgentProfilePage: React.FC<AgentProfilePageProps> = ({ agent }) => {
                     country: agentCountry,
                     rating: profile.agentData.rating,
                     totalReviews: profile.agentData.totalReviews || profile.stats.reviews,
-                    activeListings: profile.stats.activeListings,
-                    propertiesSold: profile.stats.sold,
+                    activeListings: profile.activeListings.length,
+                    propertiesSold: profile.stats.totalSales,
                     specializations: profile.agentData.specializations,
                     languages: profile.agentData.languages,
                     yearsOfExperience: profile.agentData.yearsOfExperience,
@@ -106,6 +108,7 @@ const AgentProfilePage: React.FC<AgentProfilePageProps> = ({ agent }) => {
             </div>
 
             {/* Header (sticky nav bar with back/save/share) + Hero Section */}
+            <PageTransition>
             <AgentProfileHeader
                 agent={profile.agentData}
                 stats={profile.stats}
@@ -124,12 +127,13 @@ const AgentProfilePage: React.FC<AgentProfilePageProps> = ({ agent }) => {
                 onVisitAgency={profile.handleVisitAgency}
                 onOpenEditModal={profile.handleOpenEditModal}
             />
+            </PageTransition>
 
             {/* Main Content Area */}
             <main className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-4 sm:py-6 lg:py-8">
                 <div className="lg:flex lg:gap-8">
                     {/* Left Column - Main Content */}
-                    <div className="lg:w-2/3">
+                    <Animated variant="fadeInUp" delay={100} className="lg:w-2/3">
                         <AgentProfileTabs
                             agent={profile.agentData}
                             stats={profile.stats}
@@ -157,10 +161,10 @@ const AgentProfilePage: React.FC<AgentProfilePageProps> = ({ agent }) => {
                             onRequestMarketReport={profile.handleRequestMarketReport}
                             onViewProperty={profile.handleViewProperty}
                         />
-                    </div>
+                    </Animated>
 
                     {/* Right Column - Sidebar */}
-                    <div className="lg:w-1/3">
+                    <Animated variant="fadeInUp" delay={200} className="lg:w-1/3">
                         <AgentContactActions
                             agent={profile.agentData}
                             firstName={profile.firstName}
@@ -187,7 +191,7 @@ const AgentProfilePage: React.FC<AgentProfilePageProps> = ({ agent }) => {
                             onViewMoreAgents={profile.handleViewMoreAgents}
                             marketInsights={profile.marketInsights}
                         />
-                    </div>
+                    </Animated>
                 </div>
             </main>
 
@@ -236,6 +240,16 @@ const AgentProfilePage: React.FC<AgentProfilePageProps> = ({ agent }) => {
                     <span>{t('profilePage.linkCopied')}</span>
                 </div>
             )}
+
+            {/* Market Report Modal */}
+            <MarketReportModal
+                isOpen={profile.showMarketReportModal}
+                onClose={() => profile.setShowMarketReportModal(false)}
+                city={profile.agentData.city || ''}
+                country={profile.agentData.country || ''}
+                agentName={profile.firstName}
+                onContactAgent={profile.handleMarketReportContact}
+            />
 
             {/* Edit Profile Modal */}
             <AgentEditModal

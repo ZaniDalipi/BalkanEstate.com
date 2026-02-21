@@ -2,6 +2,7 @@ import { Request, Response } from 'express';
 import PromotionPlan from '../models/PromotionPlan';
 import { promotionLogger } from '../utils/logger';
 import { invalidateCache } from '../middleware/cache';
+import { getObjectIdParam } from '../utils/validateParams';
 
 // Get all promotion plans (public)
 export const getPromotionPlans = async (req: Request, res: Response) => {
@@ -53,7 +54,8 @@ export const createPromotionPlan = async (req: Request, res: Response) => {
 // Update a promotion plan (admin only)
 export const updatePromotionPlan = async (req: Request, res: Response): Promise<void> => {
   try {
-    const { id } = req.params;
+    const id = getObjectIdParam(req, res, 'id');
+    if (!id) return;
     const plan = await PromotionPlan.findByIdAndUpdate(
       id,
       { $set: req.body },
@@ -79,7 +81,8 @@ export const updatePromotionPlan = async (req: Request, res: Response): Promise<
 // Delete a promotion plan (admin only)
 export const deletePromotionPlan = async (req: Request, res: Response): Promise<void> => {
   try {
-    const { id } = req.params;
+    const id = getObjectIdParam(req, res, 'id');
+    if (!id) return;
     const plan = await PromotionPlan.findByIdAndDelete(id);
 
     if (!plan) {
@@ -101,7 +104,8 @@ export const deletePromotionPlan = async (req: Request, res: Response): Promise<
 // Toggle plan active status (admin only)
 export const togglePromotionPlanStatus = async (req: Request, res: Response): Promise<void> => {
   try {
-    const { id } = req.params;
+    const id = getObjectIdParam(req, res, 'id');
+    if (!id) return;
     const plan = await PromotionPlan.findById(id);
 
     if (!plan) {

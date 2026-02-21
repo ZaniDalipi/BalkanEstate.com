@@ -5,6 +5,7 @@ import { IUser } from '../models/User';
 import { incrementSaveCount, decrementSaveCount } from '../utils/statsUpdater';
 import { apiLogger } from '../utils/logger';
 import { sanitizeProperty } from '../utils/responseSanitizer';
+import { getObjectIdParam } from '../utils/validateParams';
 
 // @desc    Get user's favorites
 // @route   GET /api/favorites
@@ -130,9 +131,12 @@ export const checkFavorite = async (
       return;
     }
 
+    const propertyId = getObjectIdParam(req, res, 'propertyId');
+    if (!propertyId) return;
+
     const favorite = await Favorite.findOne({
       userId: String((req.user as IUser)._id),
-      propertyId: req.params.propertyId,
+      propertyId,
     });
 
     res.json({ isSaved: !!favorite });

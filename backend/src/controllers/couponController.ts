@@ -2,6 +2,7 @@ import { Request, Response } from 'express';
 import PromotionCoupon from '../models/PromotionCoupon';
 import User, { IUser } from '../models/User';
 import { apiLogger } from '../utils/logger';
+import { getObjectIdParam } from '../utils/validateParams';
 
 /**
  * @desc    Create a new promotion coupon (Admin only)
@@ -294,7 +295,10 @@ export const getCouponDetails = async (
       return;
     }
 
-    const coupon = await PromotionCoupon.findById(req.params.id)
+    const id = getObjectIdParam(req, res, 'id');
+    if (!id) return;
+
+    const coupon = await PromotionCoupon.findById(id)
       .populate('createdBy', 'name email')
       .populate('usageHistory.userId', 'name email')
       .populate('usageHistory.promotionId', 'type tier status startDate endDate');
@@ -356,7 +360,10 @@ export const updateCoupon = async (
       return;
     }
 
-    const coupon = await PromotionCoupon.findById(req.params.id);
+    const id = getObjectIdParam(req, res, 'id');
+    if (!id) return;
+
+    const coupon = await PromotionCoupon.findById(id);
 
     if (!coupon) {
       res.status(404).json({ message: 'Coupon not found' });
@@ -436,7 +443,10 @@ export const deleteCoupon = async (
       return;
     }
 
-    const coupon = await PromotionCoupon.findById(req.params.id);
+    const id = getObjectIdParam(req, res, 'id');
+    if (!id) return;
+
+    const coupon = await PromotionCoupon.findById(id);
 
     if (!coupon) {
       res.status(404).json({ message: 'Coupon not found' });

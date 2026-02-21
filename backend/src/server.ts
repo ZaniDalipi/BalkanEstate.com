@@ -72,6 +72,7 @@ import bankExportRoutes from './routes/bankExportRoutes';
 import promotionRoutes from './routes/promotionRoutes';
 import couponRoutes from './routes/couponRoutes';
 import agencyRoutes from './routes/agencyRoutes';
+import agencyFavoriteRoutes from './routes/agencyFavoriteRoutes';
 import agencyJoinRequestRoutes from './routes/agencyJoinRequestRoutes';
 import agentRoutes from './routes/agentRoutes';
 import agentRequestRoutes from './routes/agentRequestRoutes';
@@ -278,6 +279,7 @@ app.use('/api/promotions', promotionRoutes);
 app.use('/api/coupons', couponRoutes);
 app.use('/api', agencyFeaturedSubscriptionRoutes); // Register BEFORE agencyRoutes to prevent conflicts
 app.use('/api/agencies', agencyRoutes);
+app.use('/api/agency-favorites', agencyFavoriteRoutes);
 app.use('/api/agency-join-requests', agencyJoinRequestRoutes);
 app.use('/api/agents', agentRoutes);
 app.use('/api/agent-requests', agentRequestRoutes);

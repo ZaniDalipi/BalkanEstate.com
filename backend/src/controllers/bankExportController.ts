@@ -126,7 +126,7 @@ export const getExport = async (req: Request, res: Response): Promise<void> => {
       return;
     }
 
-    const { batchId } = req.params;
+    const batchId = req.params.batchId as string;
 
     const bankExport = await getExportByBatchId(batchId);
 
@@ -170,7 +170,7 @@ export const downloadExport = async (req: Request, res: Response): Promise<void>
       return;
     }
 
-    const { batchId } = req.params;
+    const batchId = req.params.batchId as string;
 
     const bankExport = await getExportByBatchId(batchId);
 

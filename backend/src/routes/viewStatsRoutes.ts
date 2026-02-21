@@ -73,6 +73,8 @@ router.post('/track', optionalAuth, trackView);
  *         description: Duration updated
  */
 router.patch('/:viewId/duration', updateViewDuration);
+// Also accept POST for navigator.sendBeacon() which only sends POST requests
+router.post('/:viewId/duration', updateViewDuration);
 
 /**
  * @swagger

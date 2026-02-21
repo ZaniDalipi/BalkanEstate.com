@@ -293,6 +293,9 @@ export interface Property {
     tourUrl?: string;
     virtualTour360Url?: string; // URL for 360 virtual tour
     hasVirtualTour360?: boolean; // Flag indicating if 360 virtual tour is available
+    videoUrl?: string; // URL for embedded video (YouTube, TikTok, Instagram, Vimeo, or generated)
+    generatedVideoUrl?: string; // URL for auto-generated property video
+    hasGeneratedVideo?: boolean;
     imageUrl: string;
     images?: PropertyImage[];
     lat: number;

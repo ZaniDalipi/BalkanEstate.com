@@ -11,6 +11,85 @@ import CredentialsSection from '@/src/features/credentials/components/Credential
 import { Credential } from '@/src/features/credentials/api/credentialApi';
 import { EditFormData } from './useAgentProfile';
 
+// Shared input classes (module-level to avoid recreation)
+const inputCls =
+    'w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 text-sm transition-all';
+
+/** Helper – tag input row (specializations / languages / service areas) */
+const TagInputRow = ({
+    field,
+    tags,
+    placeholder,
+    colorScheme,
+    onAddArrayItem,
+    onRemoveArrayItem,
+}: {
+    field: 'specializations' | 'languages' | 'serviceAreas';
+    tags: string[];
+    placeholder: string;
+    colorScheme: { bg: string; text: string; hover: string };
+    onAddArrayItem: (field: 'specializations' | 'languages' | 'serviceAreas', value: string) => void;
+    onRemoveArrayItem: (field: 'specializations' | 'languages' | 'serviceAreas', index: number) => void;
+}) => {
+    const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            const val = (e.currentTarget as HTMLInputElement).value.trim();
+            if (val) {
+                onAddArrayItem(field, val);
+                (e.currentTarget as HTMLInputElement).value = '';
+            }
+        }
+    };
+
+    const handleAdd = (e: React.MouseEvent<HTMLButtonElement>) => {
+        const input = e.currentTarget
+            .previousElementSibling as HTMLInputElement;
+        const val = input.value.trim();
+        if (val) {
+            onAddArrayItem(field, val);
+            input.value = '';
+        }
+    };
+
+    return (
+        <div>
+            <div className="flex flex-wrap gap-2 mb-2">
+                {tags.map((tag, i) => (
+                    <span
+                        key={i}
+                        className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-sm ${colorScheme.bg} ${colorScheme.text}`}
+                    >
+                        {tag}
+                        <button
+                            type="button"
+                            onClick={() => onRemoveArrayItem(field, i)}
+                            className={`hover:${colorScheme.hover} transition-colors`}
+                        >
+                            <XMarkIcon className="w-3.5 h-3.5" />
+                        </button>
+                    </span>
+                ))}
+            </div>
+            <div className="flex gap-2">
+                <input
+                    type="text"
+                    placeholder={placeholder}
+                    className={`flex-1 ${inputCls}`}
+                    onKeyDown={handleKeyDown}
+                />
+                <button
+                    type="button"
+                    onClick={handleAdd}
+                    className="px-3 py-2.5 bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition-colors flex-shrink-0"
+                >
+                    <PlusIcon className="w-4 h-4" />
+                </button>
+            </div>
+        </div>
+    );
+};
+
 interface AgentEditModalProps {
     isOpen: boolean;
     onClose: () => void;
@@ -56,81 +135,6 @@ const AgentEditModal: React.FC<AgentEditModalProps> = ({
 
     if (!isOpen) return null;
 
-    // Shared input classes
-    const inputCls =
-        'w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 text-sm transition-all';
-
-    /** Helper – tag input row (specializations / languages / service areas) */
-    const TagInputRow = ({
-        field,
-        tags,
-        placeholder,
-        colorScheme,
-    }: {
-        field: 'specializations' | 'languages' | 'serviceAreas';
-        tags: string[];
-        placeholder: string;
-        colorScheme: { bg: string; text: string; hover: string };
-    }) => {
-        const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-            if (e.key === 'Enter') {
-                e.preventDefault();
-                const val = (e.currentTarget as HTMLInputElement).value.trim();
-                if (val) {
-                    onAddArrayItem(field, val);
-                    (e.currentTarget as HTMLInputElement).value = '';
-                }
-            }
-        };
-
-        const handleAdd = (e: React.MouseEvent<HTMLButtonElement>) => {
-            const input = e.currentTarget
-                .previousElementSibling as HTMLInputElement;
-            const val = input.value.trim();
-            if (val) {
-                onAddArrayItem(field, val);
-                input.value = '';
-            }
-        };
-
-        return (
-            <div>
-                <div className="flex flex-wrap gap-2 mb-2">
-                    {tags.map((tag, i) => (
-                        <span
-                            key={i}
-                            className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-sm ${colorScheme.bg} ${colorScheme.text}`}
-                        >
-                            {tag}
-                            <button
-                                type="button"
-                                onClick={() => onRemoveArrayItem(field, i)}
-                                className={`hover:${colorScheme.hover} transition-colors`}
-                            >
-                                <XMarkIcon className="w-3.5 h-3.5" />
-                            </button>
-                        </span>
-                    ))}
-                </div>
-                <div className="flex gap-2">
-                    <input
-                        type="text"
-                        placeholder={placeholder}
-                        className={`flex-1 ${inputCls}`}
-                        onKeyDown={handleKeyDown}
-                    />
-                    <button
-                        type="button"
-                        onClick={handleAdd}
-                        className="px-3 py-2.5 bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition-colors flex-shrink-0"
-                    >
-                        <PlusIcon className="w-4 h-4" />
-                    </button>
-                </div>
-            </div>
-        );
-    };
-
     return (
         /*
          * Overlay:
@@ -154,7 +158,7 @@ const AgentEditModal: React.FC<AgentEditModalProps> = ({
                             {t('profilePage.editModal.title')}
                         </h2>
                         <p className="text-xs text-gray-400 mt-0.5 hidden sm:block">
-                            Update your agent profile details
+                            {t('profilePage.editModal.subtitle', 'Update your agent profile details')}
                         </p>
                     </div>
                     <button
@@ -212,6 +216,8 @@ const AgentEditModal: React.FC<AgentEditModalProps> = ({
                             tags={editForm.specializations}
                             placeholder={t('profilePage.editModal.addSpecialization')}
                             colorScheme={{ bg: 'bg-blue-100', text: 'text-blue-700', hover: 'text-blue-900' }}
+                            onAddArrayItem={onAddArrayItem}
+                            onRemoveArrayItem={onRemoveArrayItem}
                         />
                     </section>
 
@@ -225,6 +231,8 @@ const AgentEditModal: React.FC<AgentEditModalProps> = ({
                             tags={editForm.languages}
                             placeholder={t('profilePage.editModal.addLanguage')}
                             colorScheme={{ bg: 'bg-green-100', text: 'text-green-700', hover: 'text-green-900' }}
+                            onAddArrayItem={onAddArrayItem}
+                            onRemoveArrayItem={onRemoveArrayItem}
                         />
                     </section>
 
@@ -238,6 +246,8 @@ const AgentEditModal: React.FC<AgentEditModalProps> = ({
                             tags={editForm.serviceAreas}
                             placeholder={t('profilePage.editModal.addServiceArea')}
                             colorScheme={{ bg: 'bg-purple-100', text: 'text-purple-700', hover: 'text-purple-900' }}
+                            onAddArrayItem={onAddArrayItem}
+                            onRemoveArrayItem={onRemoveArrayItem}
                         />
                     </section>
 
@@ -288,9 +298,9 @@ const AgentEditModal: React.FC<AgentEditModalProps> = ({
                             {(
                                 [
                                     { key: 'websiteUrl' as keyof EditFormData, label: t('profilePage.editModal.website'), placeholder: 'https://www.yourwebsite.com' },
-                                    { key: 'facebookUrl' as keyof EditFormData, label: 'Facebook', placeholder: 'https://facebook.com/yourprofile' },
-                                    { key: 'instagramUrl' as keyof EditFormData, label: 'Instagram', placeholder: 'https://instagram.com/yourprofile' },
-                                    { key: 'linkedinUrl' as keyof EditFormData, label: 'LinkedIn', placeholder: 'https://linkedin.com/in/yourprofile' },
+                                    { key: 'facebookUrl' as keyof EditFormData, label: t('profilePage.editModal.facebook', 'Facebook'), placeholder: 'https://facebook.com/yourprofile' },
+                                    { key: 'instagramUrl' as keyof EditFormData, label: t('profilePage.editModal.instagram', 'Instagram'), placeholder: 'https://instagram.com/yourprofile' },
+                                    { key: 'linkedinUrl' as keyof EditFormData, label: t('profilePage.editModal.linkedin', 'LinkedIn'), placeholder: 'https://linkedin.com/in/yourprofile' },
                                 ]
                             ).map(({ key, label, placeholder }) => (
                                 <div key={key}>

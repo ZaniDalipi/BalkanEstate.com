@@ -4,6 +4,7 @@ import {
   startAsyncVideoGeneration,
   getJobStatus,
   deleteVideo,
+  addVideoToListing,
   getVideoPreview,
 } from '../controllers/videoController';
 import { protect } from '../middleware/auth';
@@ -284,5 +285,43 @@ router.get('/status/:jobId', protect, getJobStatus);
  *         $ref: '#/components/responses/NotFound'
  */
 router.delete('/:propertyId', protect, deleteVideo);
+
+/**
+ * @swagger
+ * /api/videos/{propertyId}/add-to-listing:
+ *   patch:
+ *     summary: Add generated video to listing (replaces existing YouTube/Instagram URL)
+ *     tags: [Videos]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: propertyId
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Property ID
+ *     requestBody:
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               videoUrl:
+ *                 type: string
+ *                 description: Optional video URL to use (defaults to generated video)
+ *     responses:
+ *       200:
+ *         description: Video added to listing
+ *       400:
+ *         description: No generated video found
+ *       401:
+ *         $ref: '#/components/responses/Unauthorized'
+ *       403:
+ *         description: Not authorized
+ *       404:
+ *         $ref: '#/components/responses/NotFound'
+ */
+router.patch('/:propertyId/add-to-listing', protect, addVideoToListing);
 
 export default router;

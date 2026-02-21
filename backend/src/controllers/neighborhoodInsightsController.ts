@@ -3,9 +3,15 @@ import { getNeighborhoodInsights as getNeighborhoodInsightsFromGemini } from '..
 import User from '../models/User';
 import Product from '../models/Product';
 import { apiLogger } from '../utils/logger';
+import {
+  FREE_TIER_LIMITS,
+  PRO_TIER_LIMITS,
+  ENTERPRISE_TIER_LIMITS,
+  PRO_BUYER_LIMITS,
+} from '../config/subscriptionConstants';
 
 // Usage limits
-const FREE_USER_MONTHLY_LIMIT = 3; // Free users get 3 insights per month
+const FREE_USER_MONTHLY_LIMIT = FREE_TIER_LIMITS.AI_INSIGHTS; // Free users get 3 insights per month
 
 /**
  * Get neighborhood insights for a property location
@@ -79,6 +85,18 @@ export const getNeighborhoodInsights = async (req: Request, res: Response) => {
         monthlyLimit = -1; // unlimited
       } else if (typeof limit === 'number' && limit > 0) {
         monthlyLimit = limit;
+      } else {
+        // Product doesn't have aiInsightsLimit set - use plan-based defaults
+        const plan = user.subscriptionPlan.toLowerCase();
+        if (plan.includes('enterprise') || plan.includes('agency')) {
+          monthlyLimit = ENTERPRISE_TIER_LIMITS.AI_INSIGHTS;
+        } else if (plan.includes('buyer')) {
+          monthlyLimit = PRO_BUYER_LIMITS.AI_INSIGHTS;
+        } else if (plan.includes('yearly')) {
+          monthlyLimit = PRO_TIER_LIMITS.YEARLY.AI_INSIGHTS;
+        } else if (plan.includes('monthly')) {
+          monthlyLimit = PRO_TIER_LIMITS.MONTHLY.AI_INSIGHTS;
+        }
       }
     }
 
@@ -179,6 +197,18 @@ export const getUsageStats = async (req: Request, res: Response) => {
         monthlyLimit = -1; // unlimited
       } else if (typeof limit === 'number' && limit > 0) {
         monthlyLimit = limit;
+      } else {
+        // Product doesn't have aiInsightsLimit set - use plan-based defaults
+        const plan = user.subscriptionPlan.toLowerCase();
+        if (plan.includes('enterprise') || plan.includes('agency')) {
+          monthlyLimit = ENTERPRISE_TIER_LIMITS.AI_INSIGHTS;
+        } else if (plan.includes('buyer')) {
+          monthlyLimit = PRO_BUYER_LIMITS.AI_INSIGHTS;
+        } else if (plan.includes('yearly')) {
+          monthlyLimit = PRO_TIER_LIMITS.YEARLY.AI_INSIGHTS;
+        } else if (plan.includes('monthly')) {
+          monthlyLimit = PRO_TIER_LIMITS.MONTHLY.AI_INSIGHTS;
+        }
       }
     }
 

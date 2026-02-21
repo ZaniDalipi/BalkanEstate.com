@@ -12,6 +12,7 @@ import {
   PromotionTierType,
 } from '../../services/promotion/promotionService';
 import { promotionLogger } from '../../utils/logger';
+import { getObjectIdParam } from '../../utils/validateParams';
 
 /**
  * @desc    Get promotion statistics
@@ -29,7 +30,9 @@ export const getPromotionStats = async (
     }
 
     const userId = String((req.user as IUser)._id);
-    const promotion = await Promotion.findById(req.params.id).populate('propertyId', 'title images price city country address propertyType status sellerId views saves inquiries');
+    const promotionId = getObjectIdParam(req, res, 'id');
+    if (!promotionId) return;
+    const promotion = await Promotion.findById(promotionId).populate('propertyId', 'title images price city country address propertyType status sellerId views saves inquiries');
 
     if (!promotion) {
       res.status(404).json({ message: 'Promotion not found' });
@@ -101,7 +104,8 @@ export const getPromotionHistory = async (
       return;
     }
 
-    const propertyId = req.params.propertyId;
+    const propertyId = getObjectIdParam(req, res, 'propertyId');
+    if (!propertyId) return;
     const userId = String((req.user as IUser)._id);
 
     const property = await Property.findById(propertyId);

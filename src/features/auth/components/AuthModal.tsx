@@ -33,7 +33,45 @@ interface FieldErrors {
     email?: string;
     password?: string;
     confirmPassword?: string;
+    phone?: string;
 }
+
+// Balkan country codes for phone number input
+const BALKAN_COUNTRY_CODES = [
+    { code: '+383', country: 'XK', label: 'Kosovo', flag: '🇽🇰' },
+    { code: '+355', country: 'AL', label: 'Albania', flag: '🇦🇱' },
+    { code: '+381', country: 'RS', label: 'Serbia', flag: '🇷🇸' },
+    { code: '+389', country: 'MK', label: 'N. Macedonia', flag: '🇲🇰' },
+    { code: '+387', country: 'BA', label: 'Bosnia', flag: '🇧🇦' },
+    { code: '+382', country: 'ME', label: 'Montenegro', flag: '🇲🇪' },
+    { code: '+385', country: 'HR', label: 'Croatia', flag: '🇭🇷' },
+    { code: '+386', country: 'SI', label: 'Slovenia', flag: '🇸🇮' },
+    { code: '+359', country: 'BG', label: 'Bulgaria', flag: '🇧🇬' },
+    { code: '+40', country: 'RO', label: 'Romania', flag: '🇷🇴' },
+    { code: '+30', country: 'GR', label: 'Greece', flag: '🇬🇷' },
+] as const;
+
+const validatePhone = (countryCode: string, phoneNumber: string, t?: (key: string, defaultValue?: string) => string): string | null => {
+    const tr = t || ((key: string, defaultValue?: string) => defaultValue || key);
+    // Phone is optional - only validate format if user entered something
+    if (!phoneNumber.trim()) {
+        return null;
+    }
+    if (!countryCode) {
+        return tr('auth:validation.phone.selectCountryCode', 'Please select a country code');
+    }
+    // Remove any spaces or dashes from the number
+    const cleanNumber = phoneNumber.replace(/[\s\-()]/g, '');
+    // Must be digits only
+    if (!/^\d+$/.test(cleanNumber)) {
+        return tr('auth:validation.phone.digitsOnly', 'Phone number must contain only digits');
+    }
+    // Must be between 6 and 12 digits
+    if (cleanNumber.length < 6 || cleanNumber.length > 12) {
+        return tr('auth:validation.phone.invalidLength', 'Phone number must be between 6 and 12 digits');
+    }
+    return null;
+};
 
 // Common weak passwords to reject (matching backend)
 const COMMON_PASSWORDS = [
@@ -206,10 +244,12 @@ const AuthPage: React.FC = () => {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
+    const [phoneCountryCode, setPhoneCountryCode] = useState(BALKAN_COUNTRY_CODES[0].code);
+    const [phoneNumber, setPhoneNumber] = useState('');
 
     // Field-level errors for custom validation
     const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
-    const [touched, setTouched] = useState<{ email?: boolean; password?: boolean; confirmPassword?: boolean }>({});
+    const [touched, setTouched] = useState<{ email?: boolean; password?: boolean; confirmPassword?: boolean; phone?: boolean }>({});
 
     // Password requirements state for real-time feedback
     const [passwordRequirements, setPasswordRequirements] = useState<PasswordRequirements>({
@@ -252,7 +292,13 @@ const AuthPage: React.FC = () => {
         dispatch({ type: 'TOGGLE_AUTH_MODAL', payload: { isOpen: false } });
     };
 
-    const handleBlur = (field: 'email' | 'password' | 'confirmPassword') => {
+    const handleBlur = (field: 'email' | 'password' | 'confirmPassword' | 'phone') => {
+        // For phone: only mark as touched if the user has actually typed something,
+        // so tabbing past an empty phone field doesn't trigger a premature error
+        if (field === 'phone' && !phoneNumber.trim()) {
+            return;
+        }
+
         setTouched(prev => ({ ...prev, [field]: true }));
 
         // Validate on blur
@@ -268,6 +314,9 @@ const AuthPage: React.FC = () => {
             } else {
                 setFieldErrors(prev => ({ ...prev, confirmPassword: undefined }));
             }
+        } else if (field === 'phone') {
+            const phoneError = validatePhone(phoneCountryCode, phoneNumber, t);
+            setFieldErrors(prev => ({ ...prev, phone: phoneError || undefined }));
         }
     };
 
@@ -315,11 +364,16 @@ const AuthPage: React.FC = () => {
         const emailError = validateEmail(email, t);
         let passwordError: string | null = null;
         let confirmError: string | null = null;
+        let phoneError: string | null = null;
 
         if (state.authModalView === 'signup') {
             passwordError = validatePassword(password);
             if (password !== confirmPassword) {
                 confirmError = t('auth:validation.passwordsDoNotMatch', 'Passwords do not match');
+            }
+            // Phone is optional - only validate format if user entered something
+            if (phoneNumber.trim()) {
+                phoneError = validatePhone(phoneCountryCode, phoneNumber, t);
             }
         } else {
             // Login - just check if password is provided
@@ -329,15 +383,16 @@ const AuthPage: React.FC = () => {
         }
 
         // Set all errors and mark fields as touched
-        setTouched({ email: true, password: true, confirmPassword: true });
+        setTouched({ email: true, password: true, confirmPassword: true, phone: !!phoneNumber.trim() });
         setFieldErrors({
             email: emailError || undefined,
             password: passwordError || undefined,
-            confirmPassword: confirmError || undefined
+            confirmPassword: confirmError || undefined,
+            phone: phoneError || undefined,
         });
 
         // If any errors, don't proceed
-        if (emailError || passwordError || confirmError) {
+        if (emailError || passwordError || confirmError || phoneError) {
             return;
         }
 
@@ -348,8 +403,11 @@ const AuthPage: React.FC = () => {
             if (state.authModalView === 'login') {
                 await login(email, password);
             } else {
+                // Build full phone number with country code (only if provided)
+                const cleanNumber = phoneNumber.replace(/[\s\-()]/g, '');
+                const fullPhone = cleanNumber ? `${phoneCountryCode}${cleanNumber}` : '';
                 // All users register as buyers - they can upgrade to agent from profile settings
-                await signup(email, password, { role: 'buyer' });
+                await signup(email, password, { role: 'buyer', phone: fullPhone });
             }
             handleClose();
         } catch (err) {
@@ -456,6 +514,58 @@ const AuthPage: React.FC = () => {
                                     show={!!touched.email && !!fieldErrors.email}
                                 />
                             </div>
+
+                            {/* Phone number field (signup only, optional) */}
+                            {state.authModalView === 'signup' && (
+                                <div>
+                                    <div className={`flex items-center rounded-2xl border-2 transition-all duration-300 bg-white/50 backdrop-blur-sm ${
+                                        fieldErrors.phone && touched.phone
+                                            ? 'border-red-300 focus-within:border-red-400 focus-within:ring-4 focus-within:ring-red-100'
+                                            : 'border-white/60 hover:border-white/80 focus-within:border-primary/50 focus-within:ring-4 focus-within:ring-primary/10'
+                                    }`}>
+                                        <select
+                                            value={phoneCountryCode}
+                                            onChange={(e) => {
+                                                setPhoneCountryCode(e.target.value);
+                                                if (touched.phone) {
+                                                    const err = validatePhone(e.target.value, phoneNumber, t);
+                                                    setFieldErrors(prev => ({ ...prev, phone: err || undefined }));
+                                                }
+                                            }}
+                                            className="bg-transparent text-sm text-neutral-700 font-medium pl-4 pr-1 py-4 border-none focus:outline-none focus:ring-0 cursor-pointer"
+                                        >
+                                            {BALKAN_COUNTRY_CODES.map((cc) => (
+                                                <option key={cc.code} value={cc.code}>
+                                                    {cc.flag} {cc.code} {cc.country}
+                                                </option>
+                                            ))}
+                                        </select>
+                                        <div className="w-px h-6 bg-neutral-300/60 flex-shrink-0" />
+                                        <input
+                                            type="tel"
+                                            id="phone"
+                                            value={phoneNumber}
+                                            onChange={(e) => {
+                                                // Only allow digits, spaces, dashes
+                                                const val = e.target.value.replace(/[^0-9\s\-]/g, '');
+                                                setPhoneNumber(val);
+                                                if (touched.phone) {
+                                                    const err = validatePhone(phoneCountryCode, val, t);
+                                                    setFieldErrors(prev => ({ ...prev, phone: err || undefined }));
+                                                }
+                                            }}
+                                            onBlur={() => handleBlur('phone')}
+                                            className="flex-1 bg-transparent text-base text-neutral-900 px-3 py-4 border-none focus:outline-none focus:ring-0 placeholder:text-neutral-400"
+                                            placeholder={t('auth:signup.phonePlaceholder', 'Phone number (optional)')}
+                                            autoComplete="tel-national"
+                                        />
+                                    </div>
+                                    <ValidationError
+                                        message={fieldErrors.phone}
+                                        show={!!touched.phone && !!fieldErrors.phone}
+                                    />
+                                </div>
+                            )}
 
                             {/* Password field */}
                             <div>

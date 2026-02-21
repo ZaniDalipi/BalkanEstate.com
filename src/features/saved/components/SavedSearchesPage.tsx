@@ -71,11 +71,21 @@ const SavedSearchesPage: React.FC = () => {
 
   // Check if user has Pro subscription (buyer tier or higher)
   const isPro = useMemo(() => {
-    if (!currentUser?.subscription) return false;
-    const { tier, status } = currentUser.subscription;
-    const eligibleTiers = ['buyer', 'pro', 'agency_owner', 'agency_agent'];
-    const eligibleStatuses = ['active', 'trial', 'grace'];
-    return eligibleTiers.includes(tier) && eligibleStatuses.includes(status);
+    if (!currentUser) return false;
+    // Check unified subscription object
+    if (currentUser.subscription) {
+      const { tier, status } = currentUser.subscription;
+      const eligibleTiers = ['buyer', 'pro', 'agency_owner', 'agency_agent'];
+      // Include 'canceled' and 'pending_cancellation' - backend already ensures subscription hasn't expired
+      const eligibleStatuses = ['active', 'trial', 'grace', 'canceled', 'pending_cancellation'];
+      if (eligibleTiers.includes(tier) && eligibleStatuses.includes(status)) return true;
+    }
+    // Fallback: check legacy subscription fields
+    if (currentUser.isSubscribed && currentUser.subscriptionPlan &&
+        (!currentUser.subscriptionStatus || ['active', 'trial', 'grace'].includes(currentUser.subscriptionStatus))) {
+      return true;
+    }
+    return false;
   }, [currentUser]);
 
   // Check if any saved search has alerts enabled
@@ -92,6 +102,15 @@ const SavedSearchesPage: React.FC = () => {
       const validLangs = ['en', 'sq', 'sr', 'de', 'mk'];
       const lang = validLangs.includes(currentLang) ? currentLang : 'en';
       window.history.pushState({}, '', `/${lang}/subscribe`);
+      return;
+    }
+
+    // If no saved searches exist, inform the user
+    if (savedSearches.length === 0) {
+      await showError(
+        t('alerts.noSearchesTitle', 'No Saved Searches'),
+        t('alerts.noSearchesMessage', 'Save a property search first, then enable email alerts to get notified about new matches')
+      );
       return;
     }
 

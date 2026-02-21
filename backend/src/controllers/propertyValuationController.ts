@@ -6,6 +6,7 @@ import {
   getCityValuationStats,
 } from '../services/propertyValuationService';
 import { apiLogger } from '../utils/logger';
+import { getObjectIdParam, getParam } from '../utils/validateParams';
 
 /**
  * @desc    Create a new property valuation
@@ -116,7 +117,8 @@ export const createValuationController = async (req: Request, res: Response): Pr
  */
 export const getValuationController = async (req: Request, res: Response): Promise<void> => {
   try {
-    const { id } = req.params;
+    const id = getObjectIdParam(req, res, 'id');
+    if (!id) return;
 
     const valuation = await getValuationById(id);
 
@@ -182,7 +184,8 @@ export const getValuationHistoryController = async (req: Request, res: Response)
  */
 export const getCityStatsController = async (req: Request, res: Response): Promise<void> => {
   try {
-    const { city, country } = req.params;
+    const city = getParam(req, 'city');
+    const country = getParam(req, 'country');
 
     if (!city || !country) {
       res.status(400).json({

@@ -349,6 +349,7 @@
     "loginAndGenerate": "Conectare și Generare Analize",
     "usageInfo": "Utilizare: {{used}}/{{limit}} analize folosite luna aceasta",
     "remainingInfo": "{{remaining}} din {{limit}} analize rămase luna aceasta",
+    "unlimitedInsights": "Analize nelimitate disponibile cu planul tău",
     "upgradePrompt": "Treci la premium pentru mai multe analize!",
     "tryAgain": "Încearcă din nou"
   },

@@ -16,6 +16,7 @@ import {
   clearPropertyPromotion,
 } from '../../services/promotion/promotionService';
 import { promotionLogger } from '../../utils/logger';
+import { getObjectIdParam } from '../../utils/validateParams';
 
 /**
  * @desc    Get available promotion tiers and pricing
@@ -142,7 +143,9 @@ export const cancelPromotion = async (
       return;
     }
 
-    const promotion = await Promotion.findById(req.params.id);
+    const promotionId = getObjectIdParam(req, res, 'id');
+    if (!promotionId) return;
+    const promotion = await Promotion.findById(promotionId);
 
     if (!promotion) {
       res.status(404).json({ message: 'Promotion not found' });

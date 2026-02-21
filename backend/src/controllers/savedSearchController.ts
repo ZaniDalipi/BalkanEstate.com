@@ -2,6 +2,7 @@ import { Request, Response } from 'express';
 import SavedSearch from '../models/SavedSearch';
 import { IUser } from '../models/User';
 import { apiLogger } from '../utils/logger';
+import { getObjectIdParam } from '../utils/validateParams';
 
 // @desc    Get user's saved searches
 // @route   GET /api/saved-searches
@@ -86,7 +87,10 @@ export const updateAccessTime = async (
       return;
     }
 
-    const savedSearch = await SavedSearch.findById(req.params.id);
+    const id = getObjectIdParam(req, res, 'id');
+    if (!id) return;
+
+    const savedSearch = await SavedSearch.findById(id);
 
     if (!savedSearch) {
       res.status(404).json({ message: 'Saved search not found' });
@@ -128,7 +132,10 @@ export const updateSavedSearch = async (
       return;
     }
 
-    const savedSearch = await SavedSearch.findById(req.params.id);
+    const id = getObjectIdParam(req, res, 'id');
+    if (!id) return;
+
+    const savedSearch = await SavedSearch.findById(id);
 
     if (!savedSearch) {
       res.status(404).json({ message: 'Saved search not found' });
@@ -176,7 +183,10 @@ export const updateAlertSettings = async (
       return;
     }
 
-    const savedSearch = await SavedSearch.findById(req.params.id);
+    const id = getObjectIdParam(req, res, 'id');
+    if (!id) return;
+
+    const savedSearch = await SavedSearch.findById(id);
 
     if (!savedSearch) {
       res.status(404).json({ message: 'Saved search not found' });
@@ -255,7 +265,10 @@ export const deleteSavedSearch = async (
       return;
     }
 
-    const savedSearch = await SavedSearch.findById(req.params.id);
+    const id = getObjectIdParam(req, res, 'id');
+    if (!id) return;
+
+    const savedSearch = await SavedSearch.findById(id);
 
     if (!savedSearch) {
       res.status(404).json({ message: 'Saved search not found' });

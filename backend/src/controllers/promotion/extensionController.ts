@@ -16,6 +16,7 @@ import {
   PromotionTierType,
 } from '../../services/promotion/promotionService';
 import { promotionLogger } from '../../utils/logger';
+import { getObjectIdParam } from '../../utils/validateParams';
 
 /**
  * @desc    Extend an existing promotion
@@ -33,7 +34,8 @@ export const extendPromotion = async (
     }
 
     const { duration, couponCode } = req.body;
-    const idParam = req.params.id;
+    const idParam = getObjectIdParam(req, res, 'id');
+    if (!idParam) return;
 
     if (!isValidDuration(duration)) {
       res.status(400).json({ message: 'Invalid duration', code: 'INVALID_DURATION' });

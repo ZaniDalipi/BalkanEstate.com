@@ -97,18 +97,18 @@ export const NeighborhoodInsights: React.FC<NeighborhoodInsightsProps> = ({
         body: JSON.stringify({ lat, lng, address, city, country, language: languageName }),
       });
 
-      const data = await response.json();
-
       if (!response.ok) {
+        const errorData = await response.json().catch(() => null);
         if (response.status === 429) {
-          setError(data.message);
-          setUsage({ used: data.used, limit: data.limit, remaining: 0 });
+          setError(errorData?.message || 'Rate limit exceeded');
+          setUsage({ used: errorData?.used ?? 0, limit: errorData?.limit ?? 0, remaining: 0 });
         } else {
-          setError(data.message || 'Failed to fetch neighborhood insights');
+          setError(errorData?.message || 'Failed to fetch neighborhood insights');
         }
         return;
       }
 
+      const data = await response.json();
       setInsights(data.insights);
       setUsage(data.usage);
     } catch (err) {
@@ -160,7 +160,7 @@ export const NeighborhoodInsights: React.FC<NeighborhoodInsightsProps> = ({
           <p className="text-center">
             <strong>{error}</strong>
           </p>
-          {usage && (
+          {usage && usage.limit !== -1 && (
             <p className="text-sm text-center mt-2">
               {t('neighborhood.usageInfo', { used: usage.used, limit: usage.limit })}
             </p>
@@ -184,8 +184,11 @@ export const NeighborhoodInsights: React.FC<NeighborhoodInsightsProps> = ({
           {usage && usage.remaining !== undefined && (
             <div className="mt-4 p-3 bg-blue-50 rounded-lg border border-blue-200">
               <p className="text-sm text-blue-800 text-center">
-                {t('neighborhood.remainingInfo', { remaining: usage.remaining, limit: usage.limit })}
-                {usage.remaining === 0 && !state.currentUser?.isSubscribed && (
+                {usage.limit === -1 || usage.remaining === -1
+                  ? t('neighborhood.unlimitedInsights', 'Unlimited insights available with your plan')
+                  : t('neighborhood.remainingInfo', { remaining: usage.remaining, limit: usage.limit })
+                }
+                {usage.remaining === 0 && usage.limit !== -1 && !state.currentUser?.isSubscribed && (
                   <span className="block mt-1 text-xs">
                     {t('neighborhood.upgradePrompt')}
                   </span>

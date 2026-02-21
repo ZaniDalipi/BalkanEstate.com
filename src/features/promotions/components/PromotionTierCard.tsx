@@ -1,4 +1,5 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { StarIconSolid } from '@/constants';
 import type { PromotionTier, PromotionDuration } from './usePromotionSelector';
 
@@ -90,6 +91,7 @@ const PromotionTierCard: React.FC<PromotionTierCardProps> = ({
   variant = 'default',
   currentTier,
 }) => {
+  const { t } = useTranslation(['common']);
   const style = tierStyles[tierId];
   const border = isSelected ? style.borderSelected : style.borderDefault;
   const shadow = isSelected ? style.shadowSelected : '';
@@ -108,12 +110,12 @@ const PromotionTierCard: React.FC<PromotionTierCardProps> = ({
       >
         {isCurrent && (
           <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-gray-600 text-white text-xs font-bold px-3 py-1 rounded-full">
-            Current
+            {t('common:promotions.current', 'Current')}
           </div>
         )}
         {isUpgrade && !isCurrent && (
           <div className={`absolute -top-3 left-1/2 -translate-x-1/2 ${style.badge} text-white text-xs font-bold px-3 py-1 rounded-full`}>
-            Upgrade
+            {t('common:promotions.upgrade', 'Upgrade')}
           </div>
         )}
 
@@ -126,7 +128,7 @@ const PromotionTierCard: React.FC<PromotionTierCardProps> = ({
           </h3>
           <div className="flex items-baseline justify-center gap-1">
             <span className="text-xl font-bold text-gray-900">€{price}</span>
-            <span className="text-xs text-gray-500">/{selectedDuration}d</span>
+            <span className="text-xs text-gray-500">/{selectedDuration}{t('common:promotions.daysShort', 'd')}</span>
           </div>
         </div>
 
@@ -151,7 +153,7 @@ const PromotionTierCard: React.FC<PromotionTierCardProps> = ({
     >
       {tier.highlight && (
         <div className={`absolute -top-3 left-1/2 -translate-x-1/2 ${style.badge} text-white text-xs font-bold px-4 py-1.5 rounded-full shadow-lg`}>
-          Most Popular
+          {t('common:promotions.mostPopular', 'Most Popular')}
         </div>
       )}
 
@@ -164,7 +166,7 @@ const PromotionTierCard: React.FC<PromotionTierCardProps> = ({
         </h3>
         <div className="flex items-baseline justify-center gap-1">
           <span className="text-3xl font-bold text-gray-900">€{price}</span>
-          <span className="text-sm text-gray-500">/{selectedDuration} days</span>
+          <span className="text-sm text-gray-500">/{selectedDuration} {t('common:promotions.days', 'days')}</span>
         </div>
       </div>
 

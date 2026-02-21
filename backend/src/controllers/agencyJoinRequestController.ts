@@ -6,6 +6,7 @@ import User, { IUser } from '../models/User';
 import Agent from '../models/Agent';
 import { getSocketInstance } from '../utils/socketInstance';
 import { agencyLogger } from '../utils/logger';
+import { getObjectIdParam } from '../utils/validateParams';
 
 // Create a join request
 export const createJoinRequest = async (req: Request, res: Response): Promise<void> => {
@@ -87,7 +88,8 @@ export const createJoinRequest = async (req: Request, res: Response): Promise<vo
 // Get join requests for an agency (for agency owner)
 export const getAgencyJoinRequests = async (req: Request, res: Response): Promise<void> => {
   try {
-    const { agencyId } = req.params;
+    const agencyId = getObjectIdParam(req, res, 'agencyId');
+    if (!agencyId) return;
 
     if (!req.user) {
       res.status(401).json({ message: 'Unauthorized' });
@@ -144,7 +146,8 @@ export const getAgentJoinRequests = async (req: Request, res: Response): Promise
 // Approve a join request
 export const approveJoinRequest = async (req: Request, res: Response): Promise<void> => {
   try {
-    const { requestId } = req.params;
+    const requestId = getObjectIdParam(req, res, 'requestId');
+    if (!requestId) return;
 
     if (!req.user) {
       res.status(401).json({ message: 'Unauthorized' });
@@ -282,7 +285,8 @@ export const approveJoinRequest = async (req: Request, res: Response): Promise<v
 // Reject a join request
 export const rejectJoinRequest = async (req: Request, res: Response): Promise<void> => {
   try {
-    const { requestId } = req.params;
+    const requestId = getObjectIdParam(req, res, 'requestId');
+    if (!requestId) return;
 
     if (!req.user) {
       res.status(401).json({ message: 'Unauthorized' });
@@ -333,7 +337,8 @@ export const rejectJoinRequest = async (req: Request, res: Response): Promise<vo
 // Cancel a join request (by the agent)
 export const cancelJoinRequest = async (req: Request, res: Response): Promise<void> => {
   try {
-    const { requestId } = req.params;
+    const requestId = getObjectIdParam(req, res, 'requestId');
+    if (!requestId) return;
 
     if (!req.user) {
       res.status(401).json({ message: 'Unauthorized' });

@@ -3,6 +3,7 @@ import Agent, { ICredential } from '../models/Agent';
 import { IUser } from '../models/User';
 import { uploadImage, deleteImages } from '../services/cloudinaryService';
 import { apiLogger } from '../utils/logger';
+import { getObjectIdParam } from '../utils/validateParams';
 
 // @desc    Get agent credentials
 // @route   GET /api/credentials
@@ -138,7 +139,8 @@ export const updateCredential = async (req: Request, res: Response): Promise<voi
     }
 
     const currentUser = req.user as IUser;
-    const { credentialId } = req.params;
+    const credentialId = getObjectIdParam(req, res, 'credentialId');
+    if (!credentialId) return;
 
     if (currentUser.role !== 'agent') {
       res.status(403).json({ message: 'Only agents can update credentials' });
@@ -226,7 +228,8 @@ export const deleteCredential = async (req: Request, res: Response): Promise<voi
     }
 
     const currentUser = req.user as IUser;
-    const { credentialId } = req.params;
+    const credentialId = getObjectIdParam(req, res, 'credentialId');
+    if (!credentialId) return;
 
     if (currentUser.role !== 'agent') {
       res.status(403).json({ message: 'Only agents can delete credentials' });
@@ -274,7 +277,8 @@ export const deleteCredential = async (req: Request, res: Response): Promise<voi
 // @access  Public
 export const getAgentPublicCredentials = async (req: Request, res: Response): Promise<void> => {
   try {
-    const { agentId } = req.params;
+    const agentId = getObjectIdParam(req, res, 'agentId');
+    if (!agentId) return;
 
     const agent = await Agent.findById(agentId);
 

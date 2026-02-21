@@ -3,6 +3,7 @@ import SavedAgent from '../models/SavedAgent';
 import Agent from '../models/Agent';
 import { IUser } from '../models/User';
 import { apiLogger } from '../utils/logger';
+import { getObjectIdParam } from '../utils/validateParams';
 
 // @desc    Get user's saved agents
 // @route   GET /api/saved-agents
@@ -103,9 +104,12 @@ export const checkSavedAgent = async (
       return;
     }
 
+    const agentId = getObjectIdParam(req, res, 'agentId');
+    if (!agentId) return;
+
     const savedAgent = await SavedAgent.findOne({
       userId: String((req.user as IUser)._id),
-      agentId: req.params.agentId,
+      agentId,
     });
 
     res.json({ isSaved: !!savedAgent });

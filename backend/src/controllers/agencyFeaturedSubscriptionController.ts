@@ -3,10 +3,12 @@ import AgencyFeaturedSubscription from '../models/AgencyFeaturedSubscription';
 import Agency from '../models/Agency';
 import PromotionCoupon from '../models/PromotionCoupon';
 import { agencyLogger } from '../utils/logger';
+import { getObjectIdParam } from '../utils/validateParams';
 
 export const createFeaturedSubscription = async (req: Request, res: Response): Promise<void> => {
   try {
-    const { agencyId } = req.params;
+    const agencyId = getObjectIdParam(req, res, 'agencyId');
+    if (!agencyId) return;
     const { interval = 'weekly', couponCode, startTrial = false } = req.body;
     const userId = (req as any).user?.id || (req as any).user?._id;
 
@@ -187,7 +189,8 @@ export const createFeaturedSubscription = async (req: Request, res: Response): P
  */
 export const getFeaturedSubscription = async (req: Request, res: Response): Promise<void> => {
   try {
-    const { agencyId } = req.params;
+    const agencyId = getObjectIdParam(req, res, 'agencyId');
+    if (!agencyId) return;
 
     // Fetch both subscription and agency data in parallel for optimal performance
     const [subscription, agency] = await Promise.all([
@@ -248,7 +251,8 @@ export const getFeaturedSubscription = async (req: Request, res: Response): Prom
  */
 export const cancelFeaturedSubscription = async (req: Request, res: Response): Promise<void> => {
   try {
-    const { agencyId } = req.params;
+    const agencyId = getObjectIdParam(req, res, 'agencyId');
+    if (!agencyId) return;
     const { immediately = false } = req.body;
     const userId = (req as any).user?.id || (req as any).user?._id;
 
@@ -312,7 +316,8 @@ export const cancelFeaturedSubscription = async (req: Request, res: Response): P
  */
 export const confirmPayment = async (req: Request, res: Response): Promise<void> => {
   try {
-    const { agencyId } = req.params;
+    const agencyId = getObjectIdParam(req, res, 'agencyId');
+    if (!agencyId) return;
     const { externalSubscriptionId, externalCustomerId } = req.body;
 
     const subscription = await AgencyFeaturedSubscription.findOne({
@@ -359,7 +364,8 @@ export const confirmPayment = async (req: Request, res: Response): Promise<void>
  */
 export const applyCoupon = async (req: Request, res: Response): Promise<void> => {
   try {
-    const { agencyId } = req.params;
+    const agencyId = getObjectIdParam(req, res, 'agencyId');
+    if (!agencyId) return;
     const { couponCode } = req.body;
     const userId = (req as any).user?.id || (req as any).user?._id;
 

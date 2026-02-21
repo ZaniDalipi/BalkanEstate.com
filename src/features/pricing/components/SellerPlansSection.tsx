@@ -34,7 +34,7 @@ const SellerPlansSection: React.FC<SellerPlansSectionProps> = ({
 
       {/* Pro Yearly - Most Popular */}
       {proYearlyProduct && (
-        <Animated variant="fadeInUp" delay={0} className="relative order-1 lg:order-1 pt-4 lg:-translate-y-4">
+        <Animated variant="fadeInUp" delay={0} className={`relative order-1 lg:order-1 pt-4 lg:-translate-y-4 ${isPlanDisabled(proYearlyProduct.productId) && !isActivePlan(proYearlyProduct.productId) ? 'opacity-40 blur-[1px] pointer-events-none select-none' : ''}`}>
         {/* Badge - Outside the card */}
         <div className="absolute -top-0 left-1/2 -translate-x-1/2 z-20">
           <span className="inline-flex items-center gap-1.5 bg-gradient-to-r from-red-500 to-rose-600 text-white text-xs font-bold px-4 py-2 rounded-full shadow-lg whitespace-nowrap">
@@ -108,7 +108,7 @@ const SellerPlansSection: React.FC<SellerPlansSectionProps> = ({
 
     {/* Pro Monthly */}
     {proMonthlyProduct && (
-      <Animated variant="fadeInUp" delay={100} className="relative order-2 lg:order-2 pt-4">
+      <Animated variant="fadeInUp" delay={100} className={`relative order-2 lg:order-2 pt-4 ${isPlanDisabled(proMonthlyProduct.productId) && !isActivePlan(proMonthlyProduct.productId) ? 'opacity-40 blur-[1px] pointer-events-none select-none' : ''}`}>
         <div className="rounded-3xl p-6 sm:p-8 flex flex-col bg-white border border-gray-200 shadow-lg h-full">
           <div className="text-center pt-2">
             <h3 className="text-2xl font-bold text-gray-900">{proMonthlyProduct.name}</h3>
@@ -172,7 +172,7 @@ const SellerPlansSection: React.FC<SellerPlansSectionProps> = ({
 
     {/* Enterprise - For Teams */}
     {enterpriseProduct && (
-      <Animated variant="fadeInUp" delay={200} className="relative order-3 lg:order-3 pt-4">
+      <Animated variant="fadeInUp" delay={200} className={`relative order-3 lg:order-3 pt-4 ${isPlanDisabled(enterpriseProduct.productId) && !isActivePlan(enterpriseProduct.productId) ? 'opacity-40 blur-[1px] pointer-events-none select-none' : ''}`}>
         {/* Badge - Outside the card to prevent clipping */}
         <div className="absolute -top-0 left-1/2 -translate-x-1/2 z-20">
           <span className="inline-flex items-center gap-1.5 bg-gradient-to-r from-amber-500 to-orange-500 text-white text-xs font-bold px-4 py-2 rounded-full shadow-lg whitespace-nowrap">

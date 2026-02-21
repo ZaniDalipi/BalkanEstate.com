@@ -39,10 +39,10 @@ describe('PaymentProviderFactory', () => {
     });
   });
 
-  describe('getCountryInfo', () => {
+  describe('getCountryMapping', () => {
 
     test('returns correct info for Serbia', () => {
-      const info = paymentProviderFactory.getCountryInfo('RS');
+      const info = paymentProviderFactory.getCountryMapping('RS');
       expect(info).toBeDefined();
       expect(info?.countryName).toBe('Serbia');
       expect(info?.provider).toBe('web');
@@ -51,7 +51,7 @@ describe('PaymentProviderFactory', () => {
     });
 
     test('returns correct info for Greece', () => {
-      const info = paymentProviderFactory.getCountryInfo('GR');
+      const info = paymentProviderFactory.getCountryMapping('GR');
       expect(info).toBeDefined();
       expect(info?.countryName).toBe('Greece');
       expect(info?.provider).toBe('web');
@@ -59,7 +59,7 @@ describe('PaymentProviderFactory', () => {
     });
 
     test('returns null for unknown country', () => {
-      const info = paymentProviderFactory.getCountryInfo('XX');
+      const info = paymentProviderFactory.getCountryMapping('XX');
       expect(info).toBeNull();
     });
   });

@@ -4,6 +4,7 @@ import User from '../models/User';
 import Viewing from '../models/Viewing';
 import { sendViewingConfirmation, sendViewingNotification, sendViewingApproved, sendViewingRejected } from '../services/emailService';
 import { apiLogger } from '../utils/logger';
+import { getObjectIdParam } from '../utils/validateParams';
 
 /**
  * Generate time slots based on property's visit availability
@@ -30,7 +31,8 @@ function generateTimeSlots(startTime: string, endTime: string, durationMinutes: 
  */
 export const getViewingAvailability = async (req: Request, res: Response): Promise<void> => {
   try {
-    const { propertyId } = req.params;
+    const propertyId = getObjectIdParam(req, res, 'propertyId');
+    if (!propertyId) return;
 
     const property = await Property.findById(propertyId).select('visitAvailability status');
     if (!property) {
@@ -328,7 +330,8 @@ export const updateViewingStatus = async (req: Request, res: Response): Promise<
       return;
     }
 
-    const { viewingId } = req.params;
+    const viewingId = getObjectIdParam(req, res, 'viewingId');
+    if (!viewingId) return;
     const { status, cancelReason } = req.body;
 
     if (!status || !['confirmed', 'cancelled', 'completed'].includes(status)) {

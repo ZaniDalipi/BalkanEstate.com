@@ -3,6 +3,7 @@ import DiscountCode from '../models/DiscountCode';
 import User, { IUser } from '../models/User';
 import { generateSecureRandomString } from '../utils/secureRandom';
 import { apiLogger } from '../utils/logger';
+import { getObjectIdParam } from '../utils/validateParams';
 
 /**
  * Helper to check if user is admin
@@ -386,7 +387,10 @@ export const deactivateDiscountCode = async (req: Request, res: Response): Promi
       return;
     }
 
-    const discountCode = await DiscountCode.findById(req.params.id);
+    const id = getObjectIdParam(req, res, 'id');
+    if (!id) return;
+
+    const discountCode = await DiscountCode.findById(id);
 
     if (!discountCode) {
       res.status(404).json({ message: 'Discount code not found' });
@@ -428,7 +432,10 @@ export const deleteDiscountCode = async (req: Request, res: Response): Promise<v
       return;
     }
 
-    const discountCode = await DiscountCode.findById(req.params.id);
+    const id = getObjectIdParam(req, res, 'id');
+    if (!id) return;
+
+    const discountCode = await DiscountCode.findById(id);
 
     if (!discountCode) {
       res.status(404).json({ message: 'Discount code not found' });

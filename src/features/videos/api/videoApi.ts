@@ -144,6 +144,23 @@ export const deletePropertyVideo = async (propertyId: string): Promise<{ message
 };
 
 /**
+ * Add generated video to listing (replaces existing YouTube/Instagram URL if any)
+ */
+export const addVideoToListing = async (
+  propertyId: string,
+  videoUrl?: string
+): Promise<{ success: boolean; message: string; videoUrl: string; previousVideoUrl: string | null }> => {
+  return apiRequest<{ success: boolean; message: string; videoUrl: string; previousVideoUrl: string | null }>(
+    `/videos/${propertyId}/add-to-listing`,
+    {
+      method: 'PATCH',
+      body: videoUrl ? { videoUrl } : {},
+      requiresAuth: true,
+    }
+  );
+};
+
+/**
  * Poll for job completion
  * Polls every 2 seconds until job is completed or failed
  */

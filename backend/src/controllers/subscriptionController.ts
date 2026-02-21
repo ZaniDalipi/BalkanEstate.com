@@ -7,6 +7,7 @@ import User from '../models/User';
 import { getGooglePlayService } from '../services/googlePlayService';
 import { getAppStoreService } from '../services/appStoreService';
 import { subscriptionLogger } from '../utils/logger';
+import { getObjectIdParam } from '../utils/validateParams';
 
 /**
  * @desc    Create a new subscription (web purchases)
@@ -318,7 +319,8 @@ export const getCurrentSubscription = async (req: Request, res: Response): Promi
 export const getSubscriptionById = async (req: Request, res: Response): Promise<void> => {
   try {
     const userId = (req as any).user?._id;
-    const { id } = req.params;
+    const id = getObjectIdParam(req, res, 'id');
+    if (!id) return;
 
     if (!userId) {
       res.status(401).json({ message: 'User not authenticated' });
@@ -365,7 +367,8 @@ export const getSubscriptionById = async (req: Request, res: Response): Promise<
 export const cancelSubscription = async (req: Request, res: Response): Promise<void> => {
   try {
     const userId = (req as any).user?._id;
-    const { id } = req.params;
+    const id = getObjectIdParam(req, res, 'id');
+    if (!id) return;
 
     if (!userId) {
       res.status(401).json({ message: 'User not authenticated' });
@@ -432,7 +435,8 @@ export const cancelSubscription = async (req: Request, res: Response): Promise<v
 export const restoreSubscription = async (req: Request, res: Response): Promise<void> => {
   try {
     const userId = (req as any).user?._id;
-    const { id } = req.params;
+    const id = getObjectIdParam(req, res, 'id');
+    if (!id) return;
 
     if (!userId) {
       res.status(401).json({ message: 'User not authenticated' });
@@ -488,7 +492,8 @@ export const restoreSubscription = async (req: Request, res: Response): Promise<
 export const getSubscriptionEvents = async (req: Request, res: Response): Promise<void> => {
   try {
     const userId = (req as any).user?._id;
-    const { id } = req.params;
+    const id = getObjectIdParam(req, res, 'id');
+    if (!id) return;
 
     if (!userId) {
       res.status(401).json({ message: 'User not authenticated' });
@@ -529,7 +534,8 @@ export const getSubscriptionEvents = async (req: Request, res: Response): Promis
 export const getSubscriptionPayments = async (req: Request, res: Response): Promise<void> => {
   try {
     const userId = (req as any).user?._id;
-    const { id } = req.params;
+    const id = getObjectIdParam(req, res, 'id');
+    if (!id) return;
 
     if (!userId) {
       res.status(401).json({ message: 'User not authenticated' });
@@ -571,7 +577,8 @@ export const getSubscriptionPayments = async (req: Request, res: Response): Prom
 export const verifySubscription = async (req: Request, res: Response): Promise<void> => {
   try {
     const userId = (req as any).user?._id;
-    const { id } = req.params;
+    const id = getObjectIdParam(req, res, 'id');
+    if (!id) return;
 
     if (!userId) {
       res.status(401).json({ message: 'User not authenticated' });

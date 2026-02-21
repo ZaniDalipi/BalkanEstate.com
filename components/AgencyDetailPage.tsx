@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
 import L from 'leaflet';
@@ -31,6 +31,9 @@ import {
 } from '../src/features/achievements/api/achievementApi';
 import { API_URL } from '../src/shared/api/config';
 import MapLocationPicker from '../src/features/seller/components/MapLocationPicker';
+import { searchLocation } from '../services/osmService';
+import { toggleAgencyFavorite, checkAgencyFavorite } from '../src/features/saved/api/savedApi';
+import { SocialShare } from '../src/components/marketing/SocialShare';
 
 // Map icon SVG for section headers
 const MapIcon: React.FC<{ className?: string }> = ({ className }) => (
@@ -122,7 +125,7 @@ const resolveGradientCss = (stored?: string): string => {
 };
 
 const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
-  const { t } = useTranslation(['agencyDetails', 'nav']);
+  const { t } = useTranslation(['agencyDetails', 'nav', 'common']);
   const { state, dispatch } = useAppContext();
   const { currentUser, isAuthenticated } = state;
   const { confirm } = useConfirmation();
@@ -155,6 +158,10 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
   const [propertyTypeView, setPropertyTypeView] = useState<'all' | 'sale' | 'rent'>('all');
   const [subscriptionKey, setSubscriptionKey] = useState(0);
   const [showGradientPicker, setShowGradientPicker] = useState(false);
+  const [showCoverControls, setShowCoverControls] = useState(false);
+  const [isFavourited, setIsFavourited] = useState(false);
+  const [isTogglingFavourite, setIsTogglingFavourite] = useState(false);
+  const [showShareDropdown, setShowShareDropdown] = useState(false);
   const [editForm, setEditForm] = useState({
     name: '',
     description: '',
@@ -276,6 +283,76 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
       unsubscribe();
     };
   }, [agency._id]);
+
+  // Geocode when city/country changes in edit form to update marker position
+  const geocodeTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  useEffect(() => {
+    if (!isEditModalOpen) return;
+
+    const city = editForm.city?.trim();
+    const country = editForm.country?.trim();
+    if (!city && !country) return;
+
+    // Don't geocode if city/country haven't actually changed from the original
+    if (city === (agencyData.city || '').trim() && country === (agencyData.country || '').trim()) return;
+
+    if (geocodeTimeoutRef.current) clearTimeout(geocodeTimeoutRef.current);
+    geocodeTimeoutRef.current = setTimeout(async () => {
+      try {
+        const query = [city, country].filter(Boolean).join(', ');
+        if (query.length < 3) return;
+
+        const countryCodeMap: Record<string, string> = {
+          'Serbia': 'RS', 'Kosovo': 'XK', 'Albania': 'AL', 'North Macedonia': 'MK',
+          'Bosnia and Herzegovina': 'BA', 'Montenegro': 'ME', 'Croatia': 'HR',
+          'Slovenia': 'SI', 'Bulgaria': 'BG', 'Romania': 'RO', 'Greece': 'GR',
+        };
+        const countryCode = country ? countryCodeMap[country] : undefined;
+        const results = await searchLocation(query, countryCode);
+
+        if (results.length > 0) {
+          const best = results[0];
+          setEditForm(prev => ({
+            ...prev,
+            lat: parseFloat(best.lat),
+            lng: parseFloat(best.lon),
+          }));
+        }
+      } catch {
+        // Geocoding failed silently — user can still set location via map
+      }
+    }, 800);
+
+    return () => {
+      if (geocodeTimeoutRef.current) clearTimeout(geocodeTimeoutRef.current);
+    };
+  }, [editForm.city, editForm.country, isEditModalOpen]);
+
+  // Check if agency is favourited on load
+  useEffect(() => {
+    if (!isAuthenticated || !agency._id) return;
+    checkAgencyFavorite(agency._id)
+      .then(setIsFavourited)
+      .catch(() => {});
+  }, [agency._id, isAuthenticated]);
+
+  const handleToggleFavourite = useCallback(async () => {
+    if (!isAuthenticated) {
+      dispatch({ type: 'TOGGLE_AUTH_MODAL', payload: { isOpen: true } });
+      return;
+    }
+    if (isTogglingFavourite) return;
+    setIsTogglingFavourite(true);
+    setIsFavourited(prev => !prev); // optimistic
+    try {
+      const result = await toggleAgencyFavorite(agency._id);
+      setIsFavourited(result.isSaved);
+    } catch {
+      setIsFavourited(prev => !prev); // rollback
+    } finally {
+      setIsTogglingFavourite(false);
+    }
+  }, [agency._id, isAuthenticated, isTogglingFavourite, dispatch]);
 
   const fetchAgencyData = async () => {
     setLoading(true);
@@ -488,8 +565,8 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
         setIsInvitationCodeModalOpen(false);
         await success('Coupon Redeemed!', `You've joined ${data.agency?.name || agency.name} with a Pro subscription!`);
 
-        // Refresh the page to show updated data
-        window.location.reload();
+        // Refetch agency data so the new agent appears in the list immediately
+        await fetchAgencyData();
       } else {
         // Handle invitation code (AGY-XXXXXX-XXXXXX format)
         const verification = await verifyInvitationCode(agency._id, trimmedCode);
@@ -670,6 +747,32 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
       return;
     }
 
+    if (editForm.name.trim().length < 2) {
+      await error(t('messages.errorTitle', 'Error'), 'Agency name must be at least 2 characters');
+      return;
+    }
+
+    if (editForm.description && editForm.description.length > 5000) {
+      await error(t('messages.errorTitle', 'Error'), 'Description must be under 5,000 characters');
+      return;
+    }
+
+    if (editForm.email && editForm.email.trim()) {
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(editForm.email.trim())) {
+        await error(t('messages.errorTitle', 'Error'), 'Please enter a valid email address');
+        return;
+      }
+    }
+
+    if (editForm.phone && editForm.phone.trim()) {
+      const phoneClean = editForm.phone.replace(/[\s\-().]/g, '');
+      if (phoneClean.length < 6 || !/^\+?\d+$/.test(phoneClean)) {
+        await error(t('messages.errorTitle', 'Error'), 'Please enter a valid phone number');
+        return;
+      }
+    }
+
     // Validate URL fields
     const urlFields = [
       { name: t('fields.website', 'Website'), value: editForm.website },
@@ -812,12 +915,12 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
         body: formData,
       });
 
-      const data = await response.json();
-
       if (!response.ok) {
-        throw new Error(data.message || t('messages.logoUpdated'));
+        const errorData = await response.json().catch(() => null);
+        throw new Error(errorData?.message || t('messages.uploadFailed', 'Failed to upload logo'));
       }
 
+      const data = await response.json();
       setAgencyData(data.agency);
       await success(t('messages.logoUpdatedTitle', 'Logo Updated'), t('messages.logoUpdated'));
     } catch (err) {
@@ -856,11 +959,12 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
         body: formData,
       });
 
-      const data = await response.json();
-
       if (!response.ok) {
-        throw new Error(data.message || 'Failed to upload cover image');
+        const errorData = await response.json().catch(() => null);
+        throw new Error(errorData?.message || 'Failed to upload cover image');
       }
+
+      const data = await response.json();
 
       // Reset the file input so the same file can be re-selected if needed
       const fileInput = document.getElementById('cover-upload') as HTMLInputElement;
@@ -897,12 +1001,12 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
         }),
       });
 
-      const data = await response.json();
-
       if (!response.ok) {
-        throw new Error(data.message || t('messages.gradientUpdated'));
+        const errorData = await response.json().catch(() => null);
+        throw new Error(errorData?.message || t('messages.updateFailed', 'Failed to update gradient'));
       }
 
+      const data = await response.json();
       setAgencyData(data.agency);
       setShowGradientPicker(false);
       await success(t('messages.gradientUpdatedTitle', 'Gradient Updated'), t('messages.gradientUpdated'));
@@ -929,6 +1033,14 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
   useEffect(() => {
     window.scrollTo(0, 0);
   }, [propertyView]);
+
+  // Close share dropdown on outside click
+  useEffect(() => {
+    if (!showShareDropdown) return;
+    const handler = () => setShowShareDropdown(false);
+    document.addEventListener('click', handler);
+    return () => document.removeEventListener('click', handler);
+  }, [showShareDropdown]);
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-slate-50 to-white overflow-y-auto">
@@ -979,20 +1091,20 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
         {/* Subtle Pattern Overlay */}
         <div className="absolute inset-0 opacity-5" style={{ backgroundImage: 'url("data:image/svg+xml,%3Csvg width="60" height="60" viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg"%3E%3Cg fill="none" fill-rule="evenodd"%3E%3Cg fill="%23ffffff" fill-opacity="1"%3E%3Cpath d="M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z"/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")' }} />
 
-        {/* Top Navigation Bar */}
-        <div className="absolute top-0 left-0 right-0 z-20 px-4 md:px-6 py-4">
-          <div className="flex items-start justify-between">
-            {/* Left Side - Back Button and Breadcrumbs stacked */}
-            <div className="flex flex-col gap-2">
-              {/* Back Button */}
-              <button
-                onClick={handleBack}
-                className="inline-flex items-center gap-2 text-white/90 font-medium px-4 py-2 rounded-xl bg-white/10 backdrop-blur-md border border-white/20 hover:bg-white/20 transition-all duration-300 w-fit"
-                aria-label={t('navigation.backToAgencies')}
-              >
-                <ArrowLeftIcon className="w-4 h-4" />
-                {t('navigation.back')}
-              </button>
+          {/* Top Navigation Bar */}
+          <div className="absolute top-0 left-0 right-0 z-20 px-4 md:px-6 py-4">
+            <div className="flex items-start justify-between">
+              {/* Left Side - Back Button and Breadcrumbs stacked */}
+              <div className="flex flex-col gap-2">
+                {/* Back Button */}
+                <button
+                  onClick={handleBack}
+                  className="inline-flex items-center gap-2 text-white/90 font-medium px-4 py-2 rounded-xl bg-white/10 backdrop-blur-md border border-white/20 hover:bg-white/20 transition-all duration-300 w-fit"
+                  aria-label={t('navigation.backToAgencies')}
+                >
+                  <ArrowLeftIcon className="w-4 h-4" />
+                  {t('navigation.back')}
+                </button>
 
               {/* Breadcrumbs - Below back button, hidden on mobile */}
               <div className="ml-1 hidden sm:block">
@@ -1007,98 +1119,141 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
               </div>
             </div>
 
-            {/* Right Side - Admin Controls + Global Nav */}
+            {/* Right Side - Global Nav */}
             <div className="flex items-center gap-2">
-              {/* Cover Controls (For owners and admins) */}
+              {/* Single Customize Button for owners/admins */}
               {isAdmin && (
-                <div className="relative flex gap-2">
-                  {/* Gradient Picker Button */}
+                <div className="relative">
                   <button
-                    onClick={() => setShowGradientPicker(!showGradientPicker)}
-                    className="inline-flex items-center gap-2 px-3 py-2 bg-white/10 backdrop-blur-md text-white text-sm font-medium rounded-xl border border-white/20 hover:bg-white/20 transition-all duration-300"
-                  >
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01" />
-                    </svg>
-                    <span className="hidden sm:inline">{t('banner.gradients')}</span>
-                  </button>
-
-                  {/* Upload Image Button */}
-                  <input
-                    type="file"
-                    id="cover-upload"
-                    accept="image/*"
-                    onChange={handleCoverUpload}
-                    disabled={isUploadingCover}
-                    className="hidden"
-                  />
-                  <label
-                    htmlFor="cover-upload"
-                    className={`inline-flex items-center gap-2 px-3 py-2 bg-white/10 backdrop-blur-md text-white text-sm font-medium rounded-xl border border-white/20 hover:bg-white/20 transition-all duration-300 cursor-pointer ${
-                      isUploadingCover ? 'opacity-50 cursor-not-allowed' : ''
+                    onClick={() => { setShowCoverControls(!showCoverControls); if (showGradientPicker) setShowGradientPicker(false); }}
+                    className={`inline-flex items-center gap-1.5 px-3 py-2 backdrop-blur-md text-white text-sm font-medium rounded-xl border border-white/20 transition-all duration-300 ${
+                      showCoverControls ? 'bg-white/30' : 'bg-white/10 hover:bg-white/20'
                     }`}
                   >
-                    {isUploadingCover ? (
-                      <>
-                        <div className="animate-spin rounded-full h-4 w-4 border-2 border-white/30 border-t-white"></div>
-                        <span className="hidden sm:inline">{t('banner.uploading')}</span>
-                      </>
-                    ) : (
-                      <>
-                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                        </svg>
-                        <span className="hidden sm:inline">{t('banner.uploadImage')}</span>
-                      </>
-                    )}
-                  </label>
+                    <PencilIcon className="w-4 h-4" />
+                    <span className="hidden sm:inline">{t('banner.customize', 'Customize')}</span>
+                  </button>
 
-                  {/* Gradient Picker Dropdown */}
-                  {showGradientPicker && (
-                    <div className="absolute top-full right-0 mt-2 bg-white/95 backdrop-blur-xl rounded-2xl shadow-2xl p-4 w-80 max-h-96 overflow-y-auto border border-slate-200 z-50">
-                      <div className="flex items-center justify-between mb-4">
-                        <h3 className="text-lg font-semibold text-slate-900">{t('banner.chooseGradient')}</h3>
-                        <button
-                          onClick={() => setShowGradientPicker(false)}
-                          className="text-slate-400 hover:text-slate-600 transition-colors"
-                        >
-                          <XMarkIcon className="w-5 h-5" />
-                        </button>
-                      </div>
-                      <div className="grid grid-cols-2 gap-2">
-                        {GRADIENT_PRESETS.map((preset) => (
-                          <button
-                            key={preset.id}
-                            onClick={() => handleGradientSelect(preset.id)}
-                            className="group relative h-20 rounded-xl overflow-hidden border-2 border-slate-200 hover:border-primary transition-all duration-300 hover:scale-[1.02]"
-                          >
-                            <div className="absolute inset-0" style={{ backgroundImage: preset.css }} />
-                            <div className="absolute inset-0 bg-black/10 group-hover:bg-black/0 transition-colors" />
-                            <div className="absolute inset-0 flex items-center justify-center">
-                              <span className="text-white font-medium text-xs drop-shadow-lg">
-                                {preset.name}
-                              </span>
-                            </div>
-                            {((agencyData as any).coverGradient === preset.gradient || (agencyData as any).coverGradient === preset.id) && (
-                              <div className="absolute top-1.5 right-1.5 w-5 h-5 bg-white rounded-full flex items-center justify-center shadow">
-                                <svg className="w-3 h-3 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
-                                </svg>
-                              </div>
-                            )}
-                          </button>
-                        ))}
-                      </div>
-                      <p className="text-xs text-slate-500 mt-3 text-center">
-                        {t('banner.customImageHint')}
-                      </p>
+                  {/* Expanded Cover Controls Dropdown */}
+                  {showCoverControls && (
+                    <div className="absolute top-full right-0 mt-2 bg-white/95 backdrop-blur-xl rounded-2xl shadow-2xl border border-slate-200 z-50 overflow-hidden min-w-[200px]">
+                      {/* Gradient Option */}
+                      <button
+                        onClick={() => { setShowGradientPicker(!showGradientPicker); }}
+                        className="w-full flex items-center gap-3 px-4 py-3 text-sm text-slate-700 hover:bg-slate-50 transition-colors"
+                      >
+                        <svg className="w-4 h-4 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01" />
+                        </svg>
+                        {t('banner.gradients')}
+                      </button>
+
+                      {/* Upload Cover Image Option */}
+                      <input
+                        type="file"
+                        id="cover-upload"
+                        accept="image/*"
+                        onChange={handleCoverUpload}
+                        disabled={isUploadingCover}
+                        className="hidden"
+                      />
+                      <label
+                        htmlFor="cover-upload"
+                        className={`w-full flex items-center gap-3 px-4 py-3 text-sm text-slate-700 hover:bg-slate-50 transition-colors cursor-pointer ${
+                          isUploadingCover ? 'opacity-50 cursor-not-allowed' : ''
+                        }`}
+                      >
+                        {isUploadingCover ? (
+                          <>
+                            <div className="animate-spin rounded-full h-4 w-4 border-2 border-slate-300 border-t-primary"></div>
+                            {t('banner.uploading')}
+                          </>
+                        ) : (
+                          <>
+                            <svg className="w-4 h-4 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                            </svg>
+                            {t('banner.uploadImage')}
+                          </>
+                        )}
+                      </label>
+
+                      {/* Change Logo Option */}
+                      <input
+                        type="file"
+                        id="logo-upload-menu"
+                        accept="image/*"
+                        onChange={handleLogoUpload}
+                        disabled={isUploadingLogo}
+                        className="hidden"
+                      />
+                      <label
+                        htmlFor="logo-upload-menu"
+                        className={`w-full flex items-center gap-3 px-4 py-3 text-sm text-slate-700 hover:bg-slate-50 transition-colors cursor-pointer border-t border-slate-100 ${
+                          isUploadingLogo ? 'opacity-50 cursor-not-allowed' : ''
+                        }`}
+                      >
+                        {isUploadingLogo ? (
+                          <>
+                            <div className="animate-spin rounded-full h-4 w-4 border-2 border-slate-300 border-t-primary"></div>
+                            {t('banner.uploading')}
+                          </>
+                        ) : (
+                          <>
+                            <svg className="w-4 h-4 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
+                            </svg>
+                            {t('banner.changeLogo')}
+                          </>
+                        )}
+                      </label>
+
+                      {/* Gradient Picker - Nested */}
+                      {showGradientPicker && (
+                        <div className="border-t border-slate-200 p-4 max-h-72 overflow-y-auto">
+                          <div className="flex items-center justify-between mb-3">
+                            <h3 className="text-sm font-semibold text-slate-900">{t('banner.chooseGradient')}</h3>
+                            <button
+                              onClick={() => setShowGradientPicker(false)}
+                              className="text-slate-400 hover:text-slate-600 transition-colors"
+                            >
+                              <XMarkIcon className="w-4 h-4" />
+                            </button>
+                          </div>
+                          <div className="grid grid-cols-2 gap-2">
+                            {GRADIENT_PRESETS.map((preset) => (
+                              <button
+                                key={preset.id}
+                                onClick={() => handleGradientSelect(preset.id)}
+                                className="group relative h-16 rounded-xl overflow-hidden border-2 border-slate-200 hover:border-primary transition-all duration-300 hover:scale-[1.02]"
+                              >
+                                <div className="absolute inset-0" style={{ backgroundImage: preset.css }} />
+                                <div className="absolute inset-0 bg-black/10 group-hover:bg-black/0 transition-colors" />
+                                <div className="absolute inset-0 flex items-center justify-center">
+                                  <span className="text-white font-medium text-xs drop-shadow-lg">
+                                    {preset.name}
+                                  </span>
+                                </div>
+                                {((agencyData as any).coverGradient === preset.gradient || (agencyData as any).coverGradient === preset.id) && (
+                                  <div className="absolute top-1 right-1 w-4 h-4 bg-white rounded-full flex items-center justify-center shadow">
+                                    <svg className="w-2.5 h-2.5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+                                    </svg>
+                                  </div>
+                                )}
+                              </button>
+                            ))}
+                          </div>
+                          <p className="text-xs text-slate-500 mt-2 text-center">
+                            {t('banner.customImageHint')}
+                          </p>
+                        </div>
+                      )}
                     </div>
                   )}
                 </div>
               )}
-
-              {/* Divider between admin controls and nav */}
-              {isAdmin && <div className="hidden sm:block w-px h-8 bg-white/20 mx-1" />}
 
               {/* Global Nav Actions */}
               <div className="flex items-center gap-1.5 sm:gap-2">
@@ -1172,34 +1327,6 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
               </div>
             )}
 
-            {/* Logo Upload Button */}
-            {isOwner && (
-              <div className="absolute -bottom-3 left-1/2 transform -translate-x-1/2">
-                <input
-                  type="file"
-                  id="logo-upload"
-                  accept="image/*"
-                  onChange={handleLogoUpload}
-                  disabled={isUploadingLogo}
-                  className="hidden"
-                />
-                <label
-                  htmlFor="logo-upload"
-                  className={`inline-flex items-center gap-1.5 px-3 py-1.5 bg-white text-slate-700 font-medium rounded-lg shadow-lg hover:bg-slate-50 transition-all duration-300 cursor-pointer text-xs ${
-                    isUploadingLogo ? 'opacity-50 cursor-not-allowed' : ''
-                  }`}
-                >
-                  {isUploadingLogo ? (
-                    <>
-                      <div className="animate-spin rounded-full h-3 w-3 border-2 border-slate-300 border-t-primary"></div>
-                      {t('banner.uploading')}
-                    </>
-                  ) : (
-                    t('banner.changeLogo')
-                  )}
-                </label>
-              </div>
-            )}
           </div>
 
           {/* Agency Name */}
@@ -1213,24 +1340,88 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
             <span className="text-white/90 font-medium text-sm">{agencyData.city}, {agencyData.country}</span>
           </div>
 
+          {/* Share & Favourite Actions */}
+          <div className="mt-4 flex items-center gap-3">
+            {/* Favourite Button */}
+            <button
+              onClick={handleToggleFavourite}
+              disabled={isTogglingFavourite}
+              className={`inline-flex items-center gap-2 px-4 py-2 rounded-full backdrop-blur-md border transition-all duration-300 text-sm font-medium ${
+                isFavourited
+                  ? 'bg-red-500/90 border-red-400/50 text-white'
+                  : 'bg-white/10 border-white/20 text-white/90 hover:bg-white/20'
+              }`}
+              aria-label={isFavourited ? t('common:removeFromFavorites') : t('common:addToFavorites')}
+              aria-pressed={isFavourited}
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className={`w-4 h-4 ${isFavourited ? 'fill-current' : ''}`}
+                fill={isFavourited ? 'currentColor' : 'none'}
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+                strokeWidth={isFavourited ? 0 : 1.5}
+              >
+                <path strokeLinecap="round" strokeLinejoin="round" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+              </svg>
+              {isFavourited ? t('common:saved') : t('common:save')}
+            </button>
+
+            {/* Share Button */}
+            <div className="relative">
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  if (typeof navigator !== 'undefined' && navigator.share) {
+                    navigator.share({
+                      title: agencyData.name,
+                      text: agencyData.description || `${agencyData.name} - Real Estate Agency`,
+                      url: window.location.href,
+                    }).catch(() => {});
+                  } else {
+                    setShowShareDropdown(!showShareDropdown);
+                  }
+                }}
+                className="inline-flex items-center gap-2 px-4 py-2 bg-white/10 backdrop-blur-md text-white/90 text-sm font-medium rounded-full border border-white/20 hover:bg-white/20 transition-all duration-300"
+                aria-label={t('common:share')}
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M7.217 10.907a2.25 2.25 0 100 2.186m0-2.186c.18.324.283.696.283 1.093s-.103.77-.283 1.093m0-2.186l9.566-5.314m-9.566 7.5l9.566 5.314m0 0a2.25 2.25 0 103.935 2.186 2.25 2.25 0 00-3.935-2.186zm0-12.863a2.25 2.25 0 103.935-2.186 2.25 2.25 0 00-3.935 2.186z" />
+                </svg>
+                {t('common:share')}
+              </button>
+              {showShareDropdown && (
+                <div className="absolute top-full left-1/2 -translate-x-1/2 mt-2 z-50">
+                  <SocialShare
+                    url={typeof window !== 'undefined' ? window.location.href : ''}
+                    title={`${agencyData.name} - Real Estate Agency`}
+                    description={agencyData.description || `${agencyData.totalAgents} agents, ${agencyProperties.length} listings`}
+                    variant="icons"
+                    platforms={['facebook', 'twitter', 'whatsapp', 'linkedin', 'email', 'copy']}
+                  />
+                </div>
+              )}
+            </div>
+          </div>
+
           {/* Quick Stats Row */}
           <div className="mt-6 flex items-center gap-6 md:gap-8">
             <div className="text-center">
               <p className="text-2xl md:text-3xl font-bold text-white">{agencyProperties.length}</p>
-              <p className="text-xs md:text-sm text-white/60 font-medium uppercase tracking-wider">Listings</p>
+              <p className="text-xs md:text-sm text-white/60 font-medium uppercase tracking-wider">{t('agencyDetails:stats.totalListings')}</p>
             </div>
             <div className="w-px h-8 bg-white/20"></div>
             <div className="text-center">
               <p className="text-2xl md:text-3xl font-bold text-white">{agencyData.totalAgents}</p>
-              <p className="text-xs md:text-sm text-white/60 font-medium uppercase tracking-wider">Agents</p>
+              <p className="text-xs md:text-sm text-white/60 font-medium uppercase tracking-wider">{t('agencyDetails:stats.totalAgents')}</p>
             </div>
             <div className="w-px h-8 bg-white/20"></div>
             <div className="text-center">
               <div className="flex items-center justify-center gap-1">
                 <StarIcon className="w-5 h-5 text-amber-400 fill-current" />
-                <p className="text-2xl md:text-3xl font-bold text-white">4.8</p>
+                <p className="text-2xl md:text-3xl font-bold text-white">{agencyData.rating?.toFixed(1) || 'N/A'}</p>
               </div>
-              <p className="text-xs md:text-sm text-white/60 font-medium uppercase tracking-wider">Rating</p>
+              <p className="text-xs md:text-sm text-white/60 font-medium uppercase tracking-wider">{t('agencyDetails:stats.rating')}</p>
             </div>
           </div>
         </div>
@@ -1306,12 +1497,12 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
                 <BuildingOfficeIcon className="w-7 h-7 text-primary" />
               </div>
               <div>
-                <h2 className="text-xl md:text-2xl font-bold text-slate-900 mb-1">About {agencyData.name}</h2>
+                <h2 className="text-xl md:text-2xl font-bold text-slate-900 mb-1">{t('agencyDetails:about.title', { agencyName: agencyData.name })}</h2>
                 {agencyData.yearsInBusiness && (
                   <div className="flex items-center gap-2">
                     <span className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-primary/10 rounded-full text-primary text-xs font-medium">
                       <SparklesIcon className="w-3.5 h-3.5" />
-                      {agencyData.yearsInBusiness}+ Years of Excellence
+                      {t('agencyDetails:about.yearsOfExcellence', '{{years}}+ Years of Excellence', { years: agencyData.yearsInBusiness })}
                     </span>
                   </div>
                 )}
@@ -1320,12 +1511,40 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
           </div>
 
           <div className="p-6 md:p-8">
-            {/* Description with Quote Style */}
-            {agencyData.description && (
-              <div className="relative mb-8 pl-4 border-l-4 border-primary/30">
-                <p className="text-slate-600 leading-relaxed text-base italic">{agencyData.description}</p>
-              </div>
-            )}
+            {/* Description with Rich Formatting */}
+            {agencyData.description && (() => {
+              const paragraphs = agencyData.description
+                .split(/\n\s*\n|\n/)
+                .map((p: string) => p.trim())
+                .filter((p: string) => p.length > 0);
+
+              return (
+                <div className="relative mb-8">
+                  {/* Decorative accent */}
+                  <div className="absolute -left-2 top-0 w-1 h-full rounded-full bg-gradient-to-b from-primary via-primary/40 to-transparent" />
+
+                  <div className="pl-5 space-y-4">
+                    {/* Opening quote icon */}
+                    <svg className="w-8 h-8 text-primary/20 -mb-2" fill="currentColor" viewBox="0 0 24 24">
+                      <path d="M14.017 21v-7.391c0-5.704 3.731-9.57 8.983-10.609l.995 2.151c-2.432.917-3.995 3.638-3.995 5.849h4v10H14.017zM0 21v-7.391c0-5.704 3.731-9.57 8.983-10.609L9.978 5.151c-2.432.917-3.995 3.638-3.995 5.849h4v10H0z" />
+                    </svg>
+
+                    {paragraphs.map((paragraph: string, idx: number) => (
+                      <p
+                        key={idx}
+                        className={`leading-relaxed ${
+                          idx === 0
+                            ? 'text-slate-700 text-base font-medium first-letter:text-3xl first-letter:font-bold first-letter:text-primary first-letter:float-left first-letter:mr-1.5 first-letter:mt-0.5 first-letter:leading-none'
+                            : 'text-slate-600 text-sm'
+                        }`}
+                      >
+                        {paragraph}
+                      </p>
+                    ))}
+                  </div>
+                </div>
+              );
+            })()}
 
             {/* Achievements Display - Public View */}
             {agencyAchievements.length > 0 && (
@@ -1348,7 +1567,7 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
                   <HomeIcon className="w-5 h-5 text-primary" />
                 </div>
                 <div className="text-2xl font-bold text-slate-900">{agencyProperties?.length || 0}</div>
-                <div className="text-xs text-slate-500 font-medium">Listings</div>
+                <div className="text-xs text-slate-500 font-medium">{t('agencyDetails:stats.totalListings')}</div>
               </div>
               <div
                 className="text-center p-4 rounded-xl border border-slate-200/60"
@@ -1358,7 +1577,7 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
                   <UserGroupIcon className="w-5 h-5 text-emerald-600" />
                 </div>
                 <div className="text-2xl font-bold text-slate-900">{agents?.length || 0}</div>
-                <div className="text-xs text-slate-500 font-medium">Agents</div>
+                <div className="text-xs text-slate-500 font-medium">{t('agencyDetails:stats.totalAgents')}</div>
               </div>
               <div
                 className="text-center p-4 rounded-xl border border-slate-200/60"
@@ -1378,7 +1597,7 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
                   <StarIcon className="w-5 h-5 text-amber-500" />
                 </div>
                 <div className="text-2xl font-bold text-slate-900">{agencyData.rating?.toFixed(1) || '5.0'}</div>
-                <div className="text-xs text-slate-500 font-medium">Rating</div>
+                <div className="text-xs text-slate-500 font-medium">{t('agencyDetails:stats.rating')}</div>
               </div>
             </div>
 
@@ -1391,7 +1610,7 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
                     <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center">
                       <PhoneIcon className="w-4 h-4 text-white" />
                     </div>
-                    <h3 className="text-sm font-bold text-slate-900">Get in Touch</h3>
+                    <h3 className="text-sm font-bold text-slate-900">{t('agencyDetails:about.getInTouch', 'Get in Touch')}</h3>
                   </div>
                   <div className="space-y-3">
                     <a href={`tel:${agencyData.phone}`} className="flex items-center gap-3 p-3 bg-white rounded-lg border border-slate-100 hover:border-primary/30 hover:shadow-md transition-all group">
@@ -1399,7 +1618,7 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
                         <PhoneIcon className="w-5 h-5 text-primary group-hover:text-white transition-colors" />
                       </div>
                       <div>
-                        <div className="text-xs text-slate-400 font-medium">Phone</div>
+                        <div className="text-xs text-slate-400 font-medium">{t('agencyDetails:labels.call', 'Phone')}</div>
                         <span className="font-semibold text-slate-700 group-hover:text-primary transition-colors">{agencyData.phone}</span>
                       </div>
                     </a>
@@ -1408,7 +1627,7 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
                         <EnvelopeIcon className="w-5 h-5 text-primary group-hover:text-white transition-colors" />
                       </div>
                       <div>
-                        <div className="text-xs text-slate-400 font-medium">Email</div>
+                        <div className="text-xs text-slate-400 font-medium">{t('agencyDetails:labels.email')}</div>
                         <span className="font-semibold text-slate-700 group-hover:text-primary transition-colors">{agencyData.email}</span>
                       </div>
                     </a>
@@ -1418,7 +1637,7 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
                           <MapPinIcon className="w-5 h-5 text-primary" />
                         </div>
                         <div>
-                          <div className="text-xs text-slate-400 font-medium">Address</div>
+                          <div className="text-xs text-slate-400 font-medium">{t('agencyDetails:about.address', 'Address')}</div>
                           <span className="font-medium text-slate-700 text-sm leading-snug">{agencyData.address}</span>
                         </div>
                       </div>
@@ -1431,7 +1650,7 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
                           <GlobeAltIcon className="w-5 h-5 text-primary group-hover:text-white transition-colors" />
                         </div>
                         <div className="min-w-0 flex-1">
-                          <div className="text-xs text-slate-400 font-medium">Website</div>
+                          <div className="text-xs text-slate-400 font-medium">{t('agencyDetails:labels.website')}</div>
                           <span className="font-semibold text-slate-700 group-hover:text-primary transition-colors text-sm truncate block">{agencyData.website}</span>
                         </div>
                       </a>
@@ -1448,7 +1667,7 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
                           <path strokeLinecap="round" strokeLinejoin="round" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
                         </svg>
                       </div>
-                      <h3 className="text-sm font-bold text-slate-900">{t('social.title', 'Follow Us')}</h3>
+                      <h3 className="text-sm font-bold text-slate-900">{t('agencyDetails:about.followUs', 'Follow Us')}</h3>
                     </div>
                     <div className="grid grid-cols-2 gap-2">
                       {agencyData.facebookUrl && (
@@ -1500,7 +1719,7 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
                   <div className="bg-gradient-to-br from-emerald-50/50 to-white rounded-xl p-5 border border-emerald-100">
                     <div className="flex items-center gap-2 mb-3">
                       <MapPinIcon className="w-5 h-5 text-emerald-600" />
-                      <h3 className="text-sm font-bold text-slate-900">Service Areas</h3>
+                      <h3 className="text-sm font-bold text-slate-900">{t('agencyDetails:about.serviceAreas')}</h3>
                     </div>
                     <div className="flex flex-wrap gap-2">
                       {agencyData.serviceAreas.map((area, index) => (
@@ -1582,7 +1801,7 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
                   <div className="bg-gradient-to-br from-primary/5 to-white rounded-xl p-5 border border-primary/10">
                     <div className="flex items-center gap-2 mb-3">
                       <SparklesIcon className="w-5 h-5 text-primary" />
-                      <h3 className="text-sm font-bold text-slate-900">What We Do Best</h3>
+                      <h3 className="text-sm font-bold text-slate-900">{t('agencyDetails:about.specialties')}</h3>
                     </div>
                     <div className="flex flex-wrap gap-2">
                       {agencyData.specialties.map((specialty, index) => (
@@ -1599,7 +1818,7 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
                   <div className="bg-gradient-to-br from-violet-50/50 to-white rounded-xl p-5 border border-violet-100">
                     <div className="flex items-center gap-2 mb-3">
                       <AcademicCapIcon className="w-5 h-5 text-violet-600" />
-                      <h3 className="text-sm font-bold text-slate-900">Expertise Areas</h3>
+                      <h3 className="text-sm font-bold text-slate-900">{t('agencyDetails:about.specializations')}</h3>
                     </div>
                     <div className="flex flex-wrap gap-2">
                       {agencyData.specializations.map((spec, index) => (
@@ -1616,7 +1835,7 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
                   <div className="bg-gradient-to-br from-sky-50/50 to-white rounded-xl p-5 border border-sky-100">
                     <div className="flex items-center gap-2 mb-3">
                       <GlobeAltIcon className="w-5 h-5 text-sky-600" />
-                      <h3 className="text-sm font-bold text-slate-900">We Speak Your Language</h3>
+                      <h3 className="text-sm font-bold text-slate-900">{t('agencyDetails:about.languagesSpoken')}</h3>
                     </div>
                     <div className="flex flex-wrap gap-2">
                       {agencyData.languages.map((lang, index) => (
@@ -1880,8 +2099,8 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
                     <StarIcon className="w-5 h-5 text-white fill-current" />
                   </div>
                   <div>
-                    <h2 className="text-xl font-bold text-slate-900">Featured Subscription</h2>
-                    <p className="text-xs text-slate-500">Boost your visibility</p>
+                    <h2 className="text-xl font-bold text-slate-900">{t('agencyDetails:featuredSubscription.title')}</h2>
+                    <p className="text-xs text-slate-500">{t('agencyDetails:featuredSubscription.subtitle')}</p>
                   </div>
                 </div>
               </div>
@@ -1894,7 +2113,7 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
 
               <div className="mt-5 p-4 bg-gradient-to-br from-violet-50 to-purple-50 rounded-xl border border-violet-100">
                 <p className="text-sm text-slate-700">
-                  <span className="font-semibold text-violet-700">Pro Tip:</span> Featured agencies get up to 5x more visibility and appear at the top of search results!
+                  <span className="font-semibold text-violet-700">{t('agencyDetails:featuredSubscription.proTip')}</span> {t('agencyDetails:featuredSubscription.proTipMessage')}
                 </p>
               </div>
             </div>
@@ -1909,8 +2128,8 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
                 <UserGroupIcon className="w-5 h-5 text-white" />
               </div>
               <div>
-                <h2 className="text-xl font-bold text-slate-900">Team Members</h2>
-                <p className="text-xs text-slate-500">{agents.length} agents • Ranked by performance</p>
+                <h2 className="text-xl font-bold text-slate-900">{t('agencyDetails:teamMembers.title')}</h2>
+                <p className="text-xs text-slate-500">{t('agencyDetails:teamMembers.rankedByPerformance', '{{count}} agents \u2022 Ranked by performance', { count: agents.length })}</p>
               </div>
             </div>
             <button
@@ -1918,7 +2137,7 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
               className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-slate-600 bg-slate-100 rounded-lg hover:bg-slate-200 transition-colors"
             >
               <TrophyIcon className="w-4 h-4 text-amber-500" />
-              {showAllMembers ? 'Show Top Performers' : 'Show All Members'}
+              {showAllMembers ? t('agencyDetails:teamMembers.showTopPerformers') : t('agencyDetails:teamMembers.showAllMembers')}
             </button>
           </div>
 
@@ -1926,7 +2145,7 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
             <div className="flex items-center justify-center py-16">
               <div className="flex flex-col items-center gap-3">
                 <div className="animate-spin rounded-full h-10 w-10 border-2 border-primary/30 border-t-primary"></div>
-                <p className="text-sm text-slate-500">Loading team members...</p>
+                <p className="text-sm text-slate-500">{t('agencyDetails:teamMembers.loading', 'Loading team members...')}</p>
               </div>
             </div>
           ) : rankedAgents.length > 0 ? (
@@ -1984,13 +2203,13 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
                             {isAgentOwner && (
                               <span className="px-2 py-0.5 bg-gradient-to-r from-purple-500 to-purple-600 text-white text-[10px] font-bold rounded-md flex items-center gap-0.5">
                                 <ShieldCheckIcon className="w-2.5 h-2.5" />
-                                Owner
+                                {t('agencyDetails:teamMembers.owner')}
                               </span>
                             )}
                             {isAgentAdmin && !isAgentOwner && (
                               <span className="px-2 py-0.5 bg-gradient-to-r from-sky-500 to-blue-600 text-white text-[10px] font-bold rounded-md flex items-center gap-0.5">
                                 <ShieldCheckIcon className="w-2.5 h-2.5" />
-                                Admin
+                                {t('agencyDetails:teamMembers.admin')}
                               </span>
                             )}
                           </div>
@@ -2006,7 +2225,7 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
                           )}
 
                           {agent.licenseNumber && (
-                            <p className="text-[11px] text-slate-400 mb-2">License: {agent.licenseNumber}</p>
+                            <p className="text-[11px] text-slate-400 mb-2">{t('agencyDetails:teamMembers.license')}: {agent.licenseNumber}</p>
                           )}
                         </div>
 
@@ -2020,17 +2239,17 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
                           <p className="text-lg font-bold text-slate-800">
                             {formatPrice(agent.stats?.totalSalesValue || 0, agency.country || 'Serbia').replace(/\.\d+/, '').replace(/\s/g, '')}
                           </p>
-                          <p className="text-[9px] text-slate-500 font-medium uppercase tracking-wide">Sales Value</p>
+                          <p className="text-[9px] text-slate-500 font-medium uppercase tracking-wide">{t('agencyDetails:teamMembers.totalSales')}</p>
                         </div>
                         <div className="relative overflow-hidden bg-gradient-to-br from-emerald-50 to-emerald-100/50 rounded-xl p-2.5 text-center">
                           <div className="absolute -top-3 -right-3 w-8 h-8 bg-emerald-200/30 rounded-full blur-lg" />
                           <p className="text-lg font-bold text-emerald-600">{agent.stats?.propertiesSold || 0}</p>
-                          <p className="text-[9px] text-slate-500 font-medium uppercase tracking-wide">Sold</p>
+                          <p className="text-[9px] text-slate-500 font-medium uppercase tracking-wide">{t('agencyDetails:teamMembers.propertiesSold')}</p>
                         </div>
                         <div className="relative overflow-hidden bg-gradient-to-br from-sky-50 to-sky-100/50 rounded-xl p-2.5 text-center">
                           <div className="absolute -top-3 -right-3 w-8 h-8 bg-sky-200/30 rounded-full blur-lg" />
                           <p className="text-lg font-bold text-sky-600">{agent.stats?.activeListings || 0}</p>
-                          <p className="text-[9px] text-slate-500 font-medium uppercase tracking-wide">Active</p>
+                          <p className="text-[9px] text-slate-500 font-medium uppercase tracking-wide">{t('agencyDetails:teamMembers.activeListings')}</p>
                         </div>
                       </div>
 
@@ -2063,7 +2282,7 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
                               title={isAgentAdmin ? 'Remove admin rights' : 'Make admin'}
                             >
                               <ShieldCheckIcon className="w-3 h-3" />
-                              {isAgentAdmin ? 'Remove Admin' : 'Make Admin'}
+                              {isAgentAdmin ? t('agencyDetails:teamMembers.removeAdmin') : t('agencyDetails:teamMembers.makeAdmin')}
                             </button>
 
                             <button
@@ -2078,12 +2297,12 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
                               {removingAgentId === agentId ? (
                                 <>
                                   <div className="animate-spin rounded-full h-2.5 w-2.5 border-b border-red-600"></div>
-                                  Removing...
+                                  {t('agencyDetails:teamMembers.removing')}
                                 </>
                               ) : (
                                 <>
                                   <XMarkIcon className="w-3 h-3" />
-                                  Remove
+                                  {t('agencyDetails:teamMembers.remove')}
                                 </>
                               )}
                             </button>
@@ -2105,12 +2324,12 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
                               {isLeavingAgency ? (
                                 <>
                                   <div className="animate-spin rounded-full h-2.5 w-2.5 border-b border-red-600"></div>
-                                  Leaving...
+                                  {t('agencyDetails:teamMembers.leaving')}
                                 </>
                               ) : (
                                 <>
                                   <XMarkIcon className="w-3 h-3" />
-                                  Leave Agency
+                                  {t('agencyDetails:teamMembers.leaveAgency')}
                                 </>
                               )}
                             </button>
@@ -2128,8 +2347,8 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
               <div className="w-16 h-16 bg-slate-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
                 <UsersIcon className="w-8 h-8 text-slate-300" />
               </div>
-              <p className="text-slate-500 font-medium">No agents found for this agency</p>
-              <p className="text-sm text-slate-400 mt-1">Team members will appear here once they join</p>
+              <p className="text-slate-500 font-medium">{t('agencyDetails:teamMembers.noAgentsFound')}</p>
+              <p className="text-sm text-slate-400 mt-1">{t('agencyDetails:teamMembers.noAgentsHelpText', 'Team members will appear here once they join')}</p>
             </div>
           )}
         </div>
@@ -2142,9 +2361,9 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
                 <MapIcon className="w-5 h-5 text-white" />
               </div>
               <div>
-                <h2 className="text-xl font-bold text-slate-900">Properties Map</h2>
+                <h2 className="text-xl font-bold text-slate-900">{t('agencyDetails:properties.map', 'Properties Map')}</h2>
                 <p className="text-xs text-slate-500">
-                  ({activeProperties.length} active, {soldProperties.length} sold)
+                  ({t('agencyDetails:properties.activeCount', '{{count}} active', { count: activeProperties.length })}, {t('agencyDetails:properties.soldCount', '{{count}} sold', { count: soldProperties.length })})
                 </p>
               </div>
             </div>
@@ -2187,9 +2406,9 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
                         <p className="text-xs text-slate-500 mb-2">{property.city}, {property.country}</p>
                         <p className="font-bold text-emerald-600 mb-2">{formatPrice(property.price, property.country)}</p>
                         <div className="flex gap-2 text-xs text-slate-600 mb-3">
-                          <span>{property.beds} beds</span>
+                          <span>{property.beds} {t('agencyDetails:properties.beds', 'beds')}</span>
                           <span>•</span>
-                          <span>{property.baths} baths</span>
+                          <span>{property.baths} {t('agencyDetails:properties.baths', 'baths')}</span>
                           <span>•</span>
                           <span>{property.sqft} m²</span>
                         </div>
@@ -2201,7 +2420,7 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
                           }}
                           className={`w-full text-white px-3 py-2 rounded-lg font-semibold text-sm ${property.status === 'sold' ? 'bg-red-600 hover:bg-red-700' : 'bg-emerald-600 hover:bg-emerald-700'}`}
                         >
-                          View Details
+                          {t('agencyDetails:properties.viewDetails', 'View Details')}
                         </button>
                       </div>
                     </Popup>
@@ -2212,11 +2431,11 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
             <div className="mt-4 flex items-center justify-center gap-6 text-sm">
               <div className="flex items-center gap-2">
                 <div className="w-4 h-4 bg-emerald-500 rounded-full"></div>
-                <span className="text-slate-600">For Sale ({activeProperties.length})</span>
+                <span className="text-slate-600">{t('agencyDetails:properties.forSaleCount', 'For Sale ({{count}})', { count: activeProperties.length })}</span>
               </div>
               <div className="flex items-center gap-2">
                 <div className="w-4 h-4 bg-red-500 rounded-full"></div>
-                <span className="text-slate-600">Sold ({soldProperties.length})</span>
+                <span className="text-slate-600">{t('agencyDetails:properties.soldCountLabel', 'Sold ({{count}})', { count: soldProperties.length })}</span>
               </div>
             </div>
           </div>
@@ -2230,7 +2449,7 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
                 <MapPinIcon className="w-5 h-5 text-white" />
               </div>
               <div>
-                <h2 className="text-xl font-bold text-slate-900">Service Area Location</h2>
+                <h2 className="text-xl font-bold text-slate-900">{t('agencyDetails:properties.serviceAreaLocation', 'Service Area Location')}</h2>
                 <p className="text-xs text-slate-500">{agencyData.city}, {agencyData.country}</p>
               </div>
             </div>
@@ -2287,8 +2506,8 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
                 <HomeIcon className="w-5 h-5 text-white" />
               </div>
               <div>
-                <h2 className="text-xl font-bold text-slate-900">Property Portfolio</h2>
-                <p className="text-xs text-slate-500">{agencyProperties.length} total properties</p>
+                <h2 className="text-xl font-bold text-slate-900">{t('agencyDetails:properties.portfolio', 'Property Portfolio')}</h2>
+                <p className="text-xs text-slate-500">{t('agencyDetails:properties.totalProperties', '{{count}} total properties', { count: agencyProperties.length })}</p>
               </div>
             </div>
 
@@ -2303,7 +2522,7 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
                 }`}
               >
                 <span className={`w-2 h-2 rounded-full ${propertyView === 'active' ? 'bg-emerald-500' : 'bg-slate-300'}`}></span>
-                Active
+                {t('agencyDetails:properties.activeListingsTitle')}
                 <span className={`ml-1 px-2 py-0.5 text-xs font-bold rounded-md ${
                   propertyView === 'active' ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-200 text-slate-500'
                 }`}>
@@ -2319,7 +2538,7 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
                 }`}
               >
                 <span className={`w-2 h-2 rounded-full ${propertyView === 'sold' ? 'bg-amber-500' : 'bg-slate-300'}`}></span>
-                Sold
+                {t('agencyDetails:properties.soldPropertiesTitle')}
                 <span className={`ml-1 px-2 py-0.5 text-xs font-bold rounded-md ${
                   propertyView === 'sold' ? 'bg-amber-100 text-amber-700' : 'bg-slate-200 text-slate-500'
                 }`}>
@@ -2336,7 +2555,7 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
                   }`}
                 >
                   <span className={`w-2 h-2 rounded-full ${propertyView === 'rented' ? 'bg-orange-500' : 'bg-slate-300'}`}></span>
-                  Rented
+                  {t('agencyDetails:properties.rented', 'Rented')}
                   <span className={`ml-1 px-2 py-0.5 text-xs font-bold rounded-md ${
                     propertyView === 'rented' ? 'bg-orange-100 text-orange-700' : 'bg-slate-200 text-slate-500'
                   }`}>
@@ -2364,7 +2583,7 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
                       propertyTypeView === 'all' ? 'bg-slate-800 text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
                     }`}
                   >
-                    All ({currentProps.length})
+                    {t('agencyDetails:properties.allCount', 'All ({{count}})', { count: currentProps.length })}
                   </button>
                   <button
                     onClick={() => setPropertyTypeView('sale')}
@@ -2372,7 +2591,7 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
                       propertyTypeView === 'sale' ? 'bg-emerald-600 text-white' : 'bg-emerald-50 text-emerald-700 hover:bg-emerald-100'
                     }`}
                   >
-                    For Sale ({saleCount})
+                    {t('agencyDetails:properties.forSaleCount', 'For Sale ({{count}})', { count: saleCount })}
                   </button>
                   <button
                     onClick={() => setPropertyTypeView('rent')}
@@ -2380,7 +2599,7 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
                       propertyTypeView === 'rent' ? 'bg-blue-600 text-white' : 'bg-blue-50 text-blue-700 hover:bg-blue-100'
                     }`}
                   >
-                    For Rent ({rentCount})
+                    {t('agencyDetails:properties.forRentCount', 'For Rent ({{count}})', { count: rentCount })}
                   </button>
                 </div>
               );
@@ -2414,10 +2633,10 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
                   <HomeIcon className="w-8 h-8 text-slate-300" />
                 </div>
                 <p className="text-slate-500 font-medium">
-                  {propertyView === 'active' ? 'No active listings at the moment' : 'No sold properties yet'}
+                  {propertyView === 'active' ? t('agencyDetails:properties.noActiveListings') : t('agencyDetails:properties.noSoldProperties')}
                 </p>
                 <p className="text-sm text-slate-400 mt-1">
-                  {propertyView === 'active' ? 'New listings will appear here' : 'Sold properties will be shown here'}
+                  {propertyView === 'active' ? t('agencyDetails:properties.checkBackSoon') : t('agencyDetails:properties.soldWillAppear')}
                 </p>
               </div>
             );
@@ -2460,8 +2679,8 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
                   <PencilIcon className="w-5 h-5 text-white" />
                 </div>
                 <div>
-                  <h3 className="text-lg font-bold text-slate-900">Edit Agency</h3>
-                  <p className="text-xs text-slate-500">Update your agency information</p>
+                  <h3 className="text-lg font-bold text-slate-900">{t('agencyDetails:editModal.title')}</h3>
+                  <p className="text-xs text-slate-500">{t('agencyDetails:editModal.subtitle', 'Update your agency information')}</p>
                 </div>
               </div>
               <button
@@ -2477,12 +2696,12 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
               <div className="space-y-4">
                 <h4 className="text-sm font-semibold text-slate-900 uppercase tracking-wider flex items-center gap-2">
                   <span className="w-1.5 h-1.5 rounded-full bg-primary"></span>
-                  Basic Information
+                  {t('agencyDetails:editModal.basicInfo')}
                 </h4>
 
                 <div>
                   <label className="block text-xs font-medium text-slate-600 mb-1.5">
-                    Agency Name *
+                    {t('agencyDetails:editModal.agencyName')} {t('agencyDetails:common.required', '*')}
                   </label>
                   <input
                     type="text"
@@ -2495,21 +2714,35 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
 
                 <div>
                   <label className="block text-xs font-medium text-slate-600 mb-1.5">
-                    Description
+                    {t('agencyDetails:editModal.description')}
                   </label>
                   <textarea
                     value={editForm.description}
-                    onChange={(e) => setEditForm({ ...editForm, description: e.target.value })}
-                    className="w-full px-4 py-2.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-primary/20 focus:border-primary transition-colors text-sm resize-none"
+                    onChange={(e) => {
+                      if (e.target.value.length <= 5000) {
+                        setEditForm({ ...editForm, description: e.target.value });
+                      }
+                    }}
+                    className={`w-full px-4 py-2.5 border rounded-xl focus:ring-2 focus:ring-primary/20 focus:border-primary transition-colors text-sm resize-none ${
+                      editForm.description.length > 4800 ? 'border-amber-300' : 'border-slate-200'
+                    }`}
                     rows={4}
                     placeholder="Tell clients about your agency..."
                   />
+                  <div className="flex justify-between mt-1">
+                    <p className="text-xs text-slate-400">{t('agencyDetails:editModal.descriptionHint', 'Use line breaks to separate paragraphs')}</p>
+                    <span className={`text-xs ${
+                      editForm.description.length > 4800 ? 'text-amber-500 font-medium' : 'text-slate-400'
+                    }`}>
+                      {editForm.description.length}/5,000
+                    </span>
+                  </div>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
                     <label className="block text-xs font-medium text-slate-600 mb-1.5">
-                      Email *
+                      {t('agencyDetails:editModal.email')} {t('agencyDetails:common.required', '*')}
                     </label>
                     <input
                       type="email"
@@ -2521,7 +2754,7 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
                   </div>
                   <div>
                     <label className="block text-xs font-medium text-slate-600 mb-1.5">
-                      Phone *
+                      {t('agencyDetails:editModal.phone')} {t('agencyDetails:common.required', '*')}
                     </label>
                     <input
                       type="tel"
@@ -2536,7 +2769,7 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
                     <label className="block text-xs font-medium text-slate-600 mb-1.5">
-                      Website
+                      {t('agencyDetails:editModal.website')}
                     </label>
                     <input
                       type="url"
@@ -2548,7 +2781,7 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
                   </div>
                   <div>
                     <label className="block text-xs font-medium text-slate-600 mb-1.5">
-                      Years in Business
+                      {t('agencyDetails:editModal.yearsInBusiness')}
                     </label>
                     <input
                       type="number"
@@ -2565,12 +2798,12 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
               <div className="space-y-4">
                 <h4 className="text-sm font-semibold text-slate-900 uppercase tracking-wider flex items-center gap-2">
                   <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
-                  Location
+                  {t('agencyDetails:editModal.location')}
                 </h4>
 
                 <div>
                   <label className="block text-xs font-medium text-slate-600 mb-1.5">
-                    Address
+                    {t('agencyDetails:editModal.address')}
                   </label>
                   <input
                     type="text"
@@ -2583,7 +2816,7 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   <div>
                     <label className="block text-xs font-medium text-slate-600 mb-1.5">
-                      City
+                      {t('agencyDetails:editModal.city')}
                     </label>
                     <input
                       type="text"
@@ -2594,7 +2827,7 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
                   </div>
                   <div>
                     <label className="block text-xs font-medium text-slate-600 mb-1.5">
-                      Country
+                      {t('agencyDetails:editModal.country')}
                     </label>
                     <input
                       type="text"
@@ -2605,7 +2838,7 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
                   </div>
                   <div>
                     <label className="block text-xs font-medium text-slate-600 mb-1.5">
-                      Zip Code
+                      {t('agencyDetails:editModal.zipCode')}
                     </label>
                     <input
                       type="text"
@@ -2623,8 +2856,8 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
                   address={editForm.address}
                   country={editForm.country}
                   city={editForm.city}
-                  onLocationChange={(lat, lng) => setEditForm({ ...editForm, lat, lng })}
-                  onAddressChange={(address) => setEditForm({ ...editForm, address })}
+                  onLocationChange={(lat, lng) => setEditForm(prev => ({ ...prev, lat, lng }))}
+                  onAddressChange={(address) => setEditForm(prev => ({ ...prev, address }))}
                 />
               </div>
 
@@ -2632,12 +2865,12 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
               <div className="space-y-4">
                 <h4 className="text-sm font-semibold text-slate-900 uppercase tracking-wider flex items-center gap-2">
                   <span className="w-1.5 h-1.5 rounded-full bg-sky-500"></span>
-                  Social Media
+                  {t('agencyDetails:editModal.socialMedia')}
                 </h4>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
                     <label className="block text-xs font-medium text-slate-600 mb-1.5">
-                      Facebook URL
+                      {t('agencyDetails:editModal.facebookUrl')}
                     </label>
                     <input
                       type="url"
@@ -2649,7 +2882,7 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
                   </div>
                   <div>
                     <label className="block text-xs font-medium text-slate-600 mb-1.5">
-                      Instagram URL
+                      {t('agencyDetails:editModal.instagramUrl')}
                     </label>
                     <input
                       type="url"
@@ -2661,7 +2894,7 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
                   </div>
                   <div>
                     <label className="block text-xs font-medium text-slate-600 mb-1.5">
-                      LinkedIn URL
+                      {t('agencyDetails:editModal.linkedinUrl')}
                     </label>
                     <input
                       type="url"
@@ -2673,7 +2906,7 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
                   </div>
                   <div>
                     <label className="block text-xs font-medium text-slate-600 mb-1.5">
-                      Twitter URL
+                      {t('agencyDetails:editModal.twitterUrl')}
                     </label>
                     <input
                       type="url"
@@ -2690,11 +2923,11 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
               <div className="space-y-4">
                 <h4 className="text-sm font-semibold text-slate-900 uppercase tracking-wider flex items-center gap-2">
                   <span className="w-1.5 h-1.5 rounded-full bg-violet-500"></span>
-                  Specialties & Certifications
+                  {t('agencyDetails:editModal.specialtiesCerts')}
                 </h4>
                 <div>
                   <label className="block text-xs font-medium text-slate-600 mb-1.5">
-                    Specialties (comma-separated)
+                    {t('agencyDetails:editModal.specialtiesLabel')}
                   </label>
                   <input
                     type="text"
@@ -2709,7 +2942,7 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
                 </div>
                 <div>
                   <label className="block text-xs font-medium text-slate-600 mb-1.5">
-                    Certifications (comma-separated)
+                    {t('agencyDetails:editModal.certificationsLabel')}
                   </label>
                   <input
                     type="text"
@@ -2724,7 +2957,7 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
                 </div>
                 <div>
                   <label className="block text-xs font-medium text-slate-600 mb-1.5">
-                    Languages Spoken (comma-separated)
+                    {t('agencyDetails:editModal.languagesLabel')}
                   </label>
                   <input
                     type="text"
@@ -2736,7 +2969,7 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
                     className="w-full px-4 py-2.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-primary/20 focus:border-primary transition-colors text-sm"
                     placeholder="English, Serbian, Croatian, Albanian"
                   />
-                  <p className="text-xs text-slate-400 mt-1.5">Languages are auto-synced when agents join/leave</p>
+                  <p className="text-xs text-slate-400 mt-1.5">{t('agencyDetails:editModal.languagesHint')}</p>
                 </div>
               </div>
 
@@ -2744,7 +2977,7 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
               <div className="space-y-4">
                 <h4 className="text-sm font-semibold text-slate-900 uppercase tracking-wider flex items-center gap-2">
                   <span className="w-1.5 h-1.5 rounded-full bg-amber-500"></span>
-                  Business Hours
+                  {t('agencyDetails:editModal.businessHours')}
                 </h4>
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                   {['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'].map((day) => (
@@ -2771,7 +3004,7 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
               <div className="space-y-4 border-t border-slate-100 pt-6">
                 <h4 className="text-sm font-semibold text-slate-900 uppercase tracking-wider flex items-center gap-2">
                   <span className="w-1.5 h-1.5 rounded-full bg-amber-500"></span>
-                  Awards & Achievements
+                  {t('agencyDetails:editModal.achievements', 'Awards & Achievements')}
                 </h4>
                 <AchievementsSection
                   achievements={agencyAchievements}
@@ -2792,14 +3025,14 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
                 onClick={() => setIsEditModalOpen(false)}
                 className="flex-1 px-5 py-2.5 border border-slate-200 text-slate-700 rounded-xl hover:bg-white font-medium transition-colors text-sm"
               >
-                Cancel
+                {t('agencyDetails:common.cancel')}
               </button>
               <button
                 type="button"
                 onClick={handleSaveAgency}
                 className="flex-1 px-5 py-2.5 bg-primary text-white rounded-xl hover:bg-primary/90 font-medium transition-colors text-sm shadow-lg shadow-primary/25"
               >
-                Save Changes
+                {t('agencyDetails:editModal.saveChanges')}
               </button>
             </div>
           </div>

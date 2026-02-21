@@ -39,11 +39,21 @@ const SavedSearchAccordion: React.FC<SavedSearchAccordionProps> = ({ search, onO
 
   // Check if user has buyer subscription for alerts
   const hasBuyerSubscription = useMemo(() => {
-    if (!currentUser?.subscription) return false;
-    const { tier, status } = currentUser.subscription;
-    const eligibleTiers = ['buyer', 'pro', 'agency_owner', 'agency_agent'];
-    const eligibleStatuses = ['active', 'trial', 'grace'];
-    return eligibleTiers.includes(tier) && eligibleStatuses.includes(status);
+    if (!currentUser) return false;
+    // Check unified subscription object
+    if (currentUser.subscription) {
+      const { tier, status } = currentUser.subscription;
+      const eligibleTiers = ['buyer', 'pro', 'agency_owner', 'agency_agent'];
+      // Include 'canceled' and 'pending_cancellation' - backend already ensures subscription hasn't expired
+      const eligibleStatuses = ['active', 'trial', 'grace', 'canceled', 'pending_cancellation'];
+      if (eligibleTiers.includes(tier) && eligibleStatuses.includes(status)) return true;
+    }
+    // Fallback: check legacy subscription fields
+    if (currentUser.isSubscribed && currentUser.subscriptionPlan &&
+        (!currentUser.subscriptionStatus || ['active', 'trial', 'grace'].includes(currentUser.subscriptionStatus))) {
+      return true;
+    }
+    return false;
   }, [currentUser]);
 
   // Close alert dropdown on outside click

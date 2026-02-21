@@ -11,6 +11,7 @@ import {
   isValidDuration,
 } from '../../services/promotion/promotionService';
 import { promotionLogger } from '../../utils/logger';
+import { getObjectIdParam } from '../../utils/validateParams';
 
 /**
  * @desc    Update auto-extend settings
@@ -27,7 +28,8 @@ export const updateAutoExtend = async (
       return;
     }
 
-    const promotionId = req.params.id;
+    const promotionId = getObjectIdParam(req, res, 'id');
+    if (!promotionId) return;
     const userId = String((req.user as IUser)._id);
     const { autoExtend, autoExtendDuration } = req.body;
 
@@ -111,7 +113,8 @@ export const getAutoExtendCheckout = async (
       return;
     }
 
-    const promotionId = req.params.id;
+    const promotionId = getObjectIdParam(req, res, 'id');
+    if (!promotionId) return;
     const userId = String((req.user as IUser)._id);
 
     const { promotion, error } = await verifyPromotionOwnership(promotionId, userId);

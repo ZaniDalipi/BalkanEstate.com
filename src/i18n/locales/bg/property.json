@@ -349,6 +349,7 @@
     "loginAndGenerate": "Влезте и генерирайте анализи",
     "usageInfo": "Използване: {{used}}/{{limit}} анализа използвани този месец",
     "remainingInfo": "{{remaining}} от {{limit}} анализа оставащи този месец",
+    "unlimitedInsights": "Неограничени анализи налични с вашия план",
     "upgradePrompt": "Преминете към premium за повече анализи!",
     "tryAgain": "Опитайте отново"
   },

@@ -8,7 +8,7 @@
 import request from 'supertest';
 import mongoose from 'mongoose';
 import { MongoMemoryServer } from 'mongodb-memory-server';
-import app from '../index';
+import app from '../server';
 import User from '../models/User';
 import Product from '../models/Product';
 

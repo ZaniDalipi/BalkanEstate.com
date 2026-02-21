@@ -2,7 +2,7 @@ import React, { useState, useCallback, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Property } from '@/types';
 import { useVideoPreview, useGenerateVideo, useDeleteVideo } from '../hooks/useVideoGeneration';
-import { VideoFormat, VideoQuality, MusicStyle, BackgroundStyle, GeneratedVideo } from '../api/videoApi';
+import { VideoFormat, VideoQuality, MusicStyle, BackgroundStyle, GeneratedVideo, addVideoToListing } from '../api/videoApi';
 
 interface VideoGeneratorProps {
   property: Property;
@@ -142,6 +142,10 @@ const VideoGenerator: React.FC<VideoGeneratorProps> = ({
   // Delete video mutation
   const deleteVideoMutation = useDeleteVideo();
 
+  // Add to listing state
+  const [isAddingToListing, setIsAddingToListing] = useState(false);
+  const [addedToListing, setAddedToListing] = useState(false);
+
   // Check if property has enough images
   const hasImages = property.images && property.images.length > 0;
   const imageCount = property.images?.length || 0;
@@ -169,12 +173,34 @@ const VideoGenerator: React.FC<VideoGeneratorProps> = ({
     });
   }, [property.id, format, quality, duration, musicStyle, backgroundStyle, includeWatermark, embedInListing, imageCount, generateVideo]);
 
+  // Wrap reset to also clear addedToListing state
+  const handleReset = useCallback(() => {
+    setAddedToListing(false);
+    reset();
+  }, [reset]);
+
   // Handle delete video
   const handleDelete = useCallback(() => {
     if (confirm('Are you sure you want to delete this video?')) {
       deleteVideoMutation.mutate(property.id);
     }
   }, [property.id, deleteVideoMutation]);
+
+  // Handle add video to listing
+  const handleAddToListing = useCallback(async () => {
+    const videoUrl = generatedVideo?.url || property.generatedVideoUrl;
+    if (!videoUrl) return;
+
+    try {
+      setIsAddingToListing(true);
+      await addVideoToListing(property.id, videoUrl);
+      setAddedToListing(true);
+    } catch (err) {
+      // Silently handle - button will remain clickable
+    } finally {
+      setIsAddingToListing(false);
+    }
+  }, [generatedVideo, property.id, property.generatedVideoUrl]);
 
   // Handle download video
   const handleDownload = useCallback(() => {
@@ -249,7 +275,6 @@ const VideoGenerator: React.FC<VideoGeneratorProps> = ({
                 src={generatedVideo.url}
                 controls
                 autoPlay
-                muted
                 playsInline
                 loop
                 className="w-full h-full object-contain"
@@ -258,16 +283,34 @@ const VideoGenerator: React.FC<VideoGeneratorProps> = ({
             </div>
 
             {/* Action buttons */}
-            <div className="flex gap-3 justify-center mb-6">
+            <div className="flex flex-wrap gap-3 justify-center mb-6">
+              <button
+                onClick={handleAddToListing}
+                disabled={isAddingToListing || addedToListing}
+                className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-colors ${
+                  addedToListing
+                    ? 'bg-green-100 text-green-700 cursor-default'
+                    : 'bg-primary text-white hover:bg-primary-dark'
+                } disabled:opacity-70`}
+              >
+                {isAddingToListing ? (
+                  <SpinnerIcon className="w-5 h-5" />
+                ) : addedToListing ? (
+                  <CheckIcon className="w-5 h-5" />
+                ) : (
+                  <VideoIcon className="w-5 h-5" />
+                )}
+                {addedToListing ? 'Added to Listing' : 'Add to Listing'}
+              </button>
               <button
                 onClick={handleDownload}
-                className="flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary-dark transition-colors"
+                className="flex items-center gap-2 px-4 py-2 bg-neutral-100 text-neutral-700 rounded-lg hover:bg-neutral-200 transition-colors"
               >
                 <DownloadIcon className="w-5 h-5" />
                 Download
               </button>
               <button
-                onClick={reset}
+                onClick={handleReset}
                 className="flex items-center gap-2 px-4 py-2 bg-neutral-100 text-neutral-700 rounded-lg hover:bg-neutral-200 transition-colors"
               >
                 Create Another
@@ -288,7 +331,6 @@ const VideoGenerator: React.FC<VideoGeneratorProps> = ({
                     src={existingVideo}
                     controls
                     autoPlay
-                    muted
                     playsInline
                     loop
                     className="w-full h-full object-contain"

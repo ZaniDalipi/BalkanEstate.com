@@ -9,9 +9,12 @@ import Product from '../models/Product';
 import { geocodeAgency } from '../services/geocodingService';
 import { uploadImage, deleteImage } from '../services/cloudinaryService';
 import { generateSecureAgentId } from '../utils/secureRandom';
-import { sendAgentJoinedAgencyEmail, sendAgencyNewMemberEmail } from '../services/emailService';
+import { getParam, getObjectIdParam, isValidObjectId } from '../utils/validateParams';
+
 import { ENTERPRISE_TIER_LIMITS } from '../config/subscriptionConstants';
+import { getSocketInstance } from '../utils/socketInstance';
 import { agencyLogger } from '../utils/logger';
+import Notification from '../models/Notification';
 
 // Helper function to generate unique Agent ID using secure random
 function generateAgentId(): string {
@@ -54,13 +57,30 @@ export const createAgency = async (
       country: req.body.country,
     });
 
+    // Whitelist allowed fields to prevent mass assignment attacks
+    // (e.g., attacker setting isFeatured, verified, admins, etc.)
     const agencyData = {
-      ...req.body,
+      name: req.body.name,
+      description: req.body.description,
+      email: req.body.email,
+      phone: req.body.phone,
+      address: req.body.address,
+      city: req.body.city,
+      country: req.body.country,
+      zipCode: req.body.zipCode,
+      website: req.body.website,
+      specialties: req.body.specialties,
+      certifications: req.body.certifications,
+      languages: req.body.languages,
+      facebookUrl: req.body.facebookUrl,
+      instagramUrl: req.body.instagramUrl,
+      linkedinUrl: req.body.linkedinUrl,
+      twitterUrl: req.body.twitterUrl,
       ownerId: user._id,
-      agents: [user._id], // Add the owner as the first agent
-      admins: [user._id], // Add the owner as admin
-      isFeatured: req.body.isFeatured || false, // Can be set manually or defaults to false
-      totalAgents: 1, // Initialize with 1 agent (the owner)
+      agents: [user._id],
+      admins: [user._id],
+      isFeatured: false,
+      totalAgents: 1,
       // Add geocoded coordinates (will be undefined if geocoding failed)
       ...(coordinates.lat && coordinates.lng && {
         lat: coordinates.lat,
@@ -461,10 +481,12 @@ export const getAgency = async (
   res: Response
 ): Promise<void> => {
   try {
-    const { country, name, idOrSlug } = req.params;
+    const country = getParam(req, 'country');
+    const name = getParam(req, 'name');
+    const idOrSlug = getParam(req, 'idOrSlug');
 
     // Construct slug from country/name or use idOrSlug
-    let identifier = idOrSlug;
+    let identifier = idOrSlug as string | undefined;
     if (country && name) {
       identifier = `${country}/${name}`;
       agencyLogger.info(`🔍 Looking up agency by country/name: ${identifier}`);
@@ -482,7 +504,7 @@ export const getAgency = async (
     let agency;
     let lookupMethod = '';
 
-    if (mongoose.Types.ObjectId.isValid(identifier)) {
+    if (isValidObjectId(identifier)) {
       lookupMethod = 'ID';
       agencyLogger.info(`🔑 Attempting lookup by ObjectId: ${identifier}`);
       agency = await Agency.findById(identifier)
@@ -685,7 +707,7 @@ export const getAgency = async (
     agencyLogger.error('Stack trace:', error.stack);
     res.status(500).json({
       message: 'Error fetching agency',
-      identifier: req.params.idOrSlug
+      identifier: getParam(req, 'idOrSlug')
     });
   }
 };
@@ -703,7 +725,10 @@ export const updateAgency = async (
       return;
     }
 
-    const agency = await Agency.findById(req.params.id);
+    const id = getObjectIdParam(req, res, 'id');
+    if (!id) return;
+
+    const agency = await Agency.findById(id);
 
     if (!agency) {
       res.status(404).json({ message: 'Agency not found' });
@@ -845,8 +870,11 @@ export const addAgentToAgency = async (
       return;
     }
 
+    const id = getObjectIdParam(req, res, 'id');
+    if (!id) return;
+
     const { agentUserId } = req.body;
-    const agency = await Agency.findById(req.params.id);
+    const agency = await Agency.findById(id);
 
     if (!agency) {
       res.status(404).json({ message: 'Agency not found' });
@@ -909,7 +937,12 @@ export const removeAgentFromAgency = async (
       return;
     }
 
-    const agency = await Agency.findById(req.params.id);
+    const id = getObjectIdParam(req, res, 'id');
+    if (!id) return;
+    const agentId = getObjectIdParam(req, res, 'agentId');
+    if (!agentId) return;
+
+    const agency = await Agency.findById(id);
 
     if (!agency) {
       res.status(404).json({ message: 'Agency not found' });
@@ -924,13 +957,13 @@ export const removeAgentFromAgency = async (
 
     // Remove agent from agency
     agency.agents = agency.agents.filter(
-      id => id.toString() !== req.params.agentId
+      id => id.toString() !== agentId
     );
     agency.totalAgents = agency.agents.length;
     await agency.save();
 
     // Clear agent's agency info in User model
-    const agentUser = await User.findById(req.params.agentId);
+    const agentUser = await User.findById(agentId);
     if (agentUser) {
       agentUser.agencyName = undefined;
       agentUser.agencyId = undefined;
@@ -938,11 +971,27 @@ export const removeAgentFromAgency = async (
     }
 
     // Clear agent's agency info in Agent model
-    const agentRecord = await Agent.findOne({ userId: req.params.agentId });
+    const agentRecord = await Agent.findOne({ userId: agentId });
     if (agentRecord) {
       agentRecord.agencyName = 'Independent Agent';
       agentRecord.agencyId = undefined;
       await agentRecord.save();
+    }
+
+    // Notify the removed agent
+    if (agentUser) {
+      Notification.create({
+        userId: agentUser._id,
+        type: 'agent_left_agency',
+        title: 'Removed from Agency',
+        message: `You have been removed from ${agency.name}.`,
+        icon: 'user-minus',
+        priority: 'high',
+        data: {
+          agencyId: String(agency._id),
+          agencyName: agency.name,
+        },
+      }).catch(err => agencyLogger.error('Failed to create removal notification:', err));
     }
 
     res.json({ message: 'Agent removed from agency successfully' });
@@ -1038,7 +1087,10 @@ export const uploadAgencyLogo = async (
       return;
     }
 
-    const agency = await Agency.findById(req.params.id);
+    const id = getObjectIdParam(req, res, 'id');
+    if (!id) return;
+
+    const agency = await Agency.findById(id);
 
     if (!agency) {
       res.status(404).json({ message: 'Agency not found' });
@@ -1116,7 +1168,10 @@ export const uploadAgencyCover = async (
       return;
     }
 
-    const agency = await Agency.findById(req.params.id);
+    const id = getObjectIdParam(req, res, 'id');
+    if (!id) return;
+
+    const agency = await Agency.findById(id);
 
     if (!agency) {
       res.status(404).json({ message: 'Agency not found' });
@@ -1244,16 +1299,124 @@ export const joinAgencyByInvitationCode = async (
       }
     }
 
+    // Get agent product limits from DB, fallback to defaults
+    const agentProduct = await Product.findOne({ productId: 'agency_agent_yearly' }).lean();
+    const agentListingsLimit = agentProduct?.listingsLimit ?? 25;
+
+    // Determine subscription expiration from the agency's subscription
+    const agencyExpiresAt = agency.subscription?.expiresAt ||
+      new Date(Date.now() + 365 * 24 * 60 * 60 * 1000);
+
     // Add agent to new agency
     const userObjectId = user._id as unknown as mongoose.Types.ObjectId;
     agency.agents.push(userObjectId);
     agency.totalAgents = agency.agents.length;
+
+    // Add to agentDetails for tracking
+    if (!agency.agentDetails) {
+      agency.agentDetails = [];
+    }
+    const existingAgentDetail = agency.agentDetails.find(
+      ad => String(ad.userId) === String(user._id)
+    );
+    if (!existingAgentDetail) {
+      agency.agentDetails.push({
+        userId: user._id,
+        joinedAt: new Date(),
+        isActive: true,
+      } as any);
+    } else {
+      existingAgentDetail.isActive = true;
+      existingAgentDetail.leftAt = undefined;
+    }
+
+    // Update agency stats
+    agency.stats.totalAgents = agency.agents.length;
     await agency.save();
 
-    // Update agent's agency info
+    // Upgrade agent's subscription to agency_agent tier
+    if (!user.subscription) {
+      user.subscription = {
+        tier: 'free',
+        status: 'active',
+        listingsLimit: 0,
+        activeListingsCount: 0,
+        privateSellerCount: 0,
+        agentCount: 0,
+        promotionCoupons: {
+          monthly: 0,
+          available: 0,
+          used: 0,
+          rollover: 0,
+          lastRefresh: new Date(),
+        },
+        savedSearchesLimit: 1,
+        totalPaid: 0,
+      };
+    }
+
+    user.subscription.tier = 'agency_agent';
+    user.subscription.status = 'active';
+    user.subscription.listingsLimit = agentListingsLimit;
+    user.subscription.expiresAt = agencyExpiresAt;
+    if (user.subscription.promotionCoupons) {
+      user.subscription.promotionCoupons.monthly = 0; // Agency agents share the agency pool
+    }
+
+    // Associate user with agency
+    if (!user.agency) {
+      user.agency = {
+        role: 'none',
+      };
+    }
+    user.agency.agencyId = agency._id as any;
+    user.agency.role = 'agent';
+    user.agency.joinedAt = new Date();
+
+    // Set top-level agency fields
     user.agencyName = agency.name;
     user.agencyId = agency._id as mongoose.Types.ObjectId;
+    user.isSubscribed = true;
+    user.subscriptionPlan = 'agency_agent_yearly';
+
     await user.save();
+
+    // Create or update Subscription document for proper tracking
+    const existingSubscription = await Subscription.findOne({ userId: user._id });
+    const inviteToken = `invite_${agency._id}_${user._id}`;
+
+    if (existingSubscription) {
+      existingSubscription.productId = 'agency_agent_yearly';
+      existingSubscription.store = 'agency_coupon';
+      existingSubscription.purchaseToken = inviteToken;
+      existingSubscription.status = 'active';
+      existingSubscription.startDate = new Date();
+      existingSubscription.renewalDate = agencyExpiresAt;
+      existingSubscription.expirationDate = agencyExpiresAt;
+      existingSubscription.autoRenewing = true;
+      existingSubscription.price = 0;
+      existingSubscription.currency = 'EUR';
+      existingSubscription.isAcknowledged = true;
+      existingSubscription.expiryReminderSent = false;
+      await existingSubscription.save();
+      agencyLogger.info(`✅ Updated Subscription document for user ${user._id} (invitation code join)`);
+    } else {
+      await Subscription.create({
+        userId: user._id,
+        productId: 'agency_agent_yearly',
+        store: 'agency_coupon',
+        purchaseToken: inviteToken,
+        status: 'active',
+        startDate: new Date(),
+        renewalDate: agencyExpiresAt,
+        expirationDate: agencyExpiresAt,
+        autoRenewing: true,
+        price: 0,
+        currency: 'EUR',
+        isAcknowledged: true,
+      });
+      agencyLogger.info(`✅ Created Subscription document for user ${user._id} (invitation code join)`);
+    }
 
     // Also update the Agent document with both agency name and ID
     const Agent = mongoose.model('Agent');
@@ -1265,6 +1428,54 @@ export const joinAgencyByInvitationCode = async (
       },
       { new: true }
     );
+
+    agencyLogger.info(`✅ User ${user._id} joined agency ${agency.name} via invitation code with agency_agent subscription`);
+
+    // Send in-app notifications (non-blocking)
+    try {
+      // Notify agency owner: new agent joined
+      await Notification.create({
+        userId: agency.ownerId,
+        type: 'agent_joined_agency',
+        title: 'New Agent Joined',
+        message: `${user.name || 'An agent'} has joined ${agency.name} using an invitation code.`,
+        icon: 'user-plus',
+        priority: 'normal',
+        data: {
+          agencyId: String(agency._id),
+          agencySlug: agency.slug,
+          agencyName: agency.name,
+          agentName: user.name || 'Agent',
+          agentEmail: user.email,
+          totalAgents: agency.agents.length,
+          actionUrl: `/agency/${agency.slug || agency._id}`,
+          actionLabel: 'View Agency',
+        },
+      });
+
+      // Notify the joining agent: welcome to agency
+      await Notification.create({
+        userId: user._id,
+        type: 'agency_join_welcome',
+        title: `Welcome to ${agency.name}!`,
+        message: `You have successfully joined ${agency.name}. You now have access to ${user.subscription.listingsLimit} listings.`,
+        icon: 'building',
+        priority: 'normal',
+        data: {
+          agencyId: String(agency._id),
+          agencySlug: agency.slug,
+          agencyName: agency.name,
+          subscriptionTier: user.subscription.tier,
+          listingsLimit: user.subscription.listingsLimit,
+          actionUrl: `/agency/${agency.slug || agency._id}`,
+          actionLabel: 'View Agency',
+        },
+      });
+
+      agencyLogger.info(`📨 In-app notifications sent for invitation code join`);
+    } catch (notifError) {
+      agencyLogger.error('Error sending in-app notifications:', notifError);
+    }
 
     // Return complete user and agency data
     res.json({
@@ -1296,6 +1507,12 @@ export const joinAgencyByInvitationCode = async (
         subscriptionPlan: user.subscriptionPlan,
         listingsCount: user.listingsCount,
       },
+      subscription: {
+        tier: user.subscription.tier,
+        status: user.subscription.status,
+        listingsLimit: user.subscription.listingsLimit,
+        expiresAt: user.subscription.expiresAt,
+      },
       agent: updatedAgent,
     });
   } catch (error: any) {
@@ -1312,7 +1529,8 @@ export const verifyInvitationCode = async (
   res: Response
 ): Promise<void> => {
   try {
-    const { id } = req.params;
+    const id = getObjectIdParam(req, res, 'id');
+    if (!id) return;
     const { code } = req.body;
 
     if (!code) {
@@ -1407,7 +1625,8 @@ export const addAgencyAdmin = async (
       return;
     }
 
-    const { id } = req.params;
+    const id = getObjectIdParam(req, res, 'id');
+    if (!id) return;
     const { userId } = req.body;
     const currentUser = req.user as IUser;
 
@@ -1470,7 +1689,10 @@ export const removeAgencyAdmin = async (
       return;
     }
 
-    const { id, userId } = req.params;
+    const id = getObjectIdParam(req, res, 'id');
+    if (!id) return;
+    const userId = getObjectIdParam(req, res, 'userId');
+    if (!userId) return;
     const currentUser = req.user as IUser;
 
     // Find the agency
@@ -1582,6 +1804,26 @@ export const leaveAgency = async (
 
     agencyLogger.info(`✅ User ${user._id} left agency: ${agencyName}`);
 
+    // Notify agency owner that an agent left
+    Notification.create({
+      userId: agency.ownerId,
+      type: 'agent_left_agency',
+      title: 'Agent Left Agency',
+      message: `${user.name || 'An agent'} has left ${agencyName}.`,
+      icon: 'user-minus',
+      priority: 'normal',
+      data: {
+        agencyId: String(agency._id),
+        agencySlug: agency.slug,
+        agencyName: agencyName,
+        agentName: user.name || 'Agent',
+        agentEmail: user.email,
+        totalAgents: agency.agents.length,
+        actionUrl: `/agency/${agency.slug || agency._id}`,
+        actionLabel: 'View Agency',
+      },
+    }).catch(err => agencyLogger.error('Failed to create leave notification:', err));
+
     res.json({
       message: `Successfully left ${agencyName}`,
       user: {
@@ -1613,7 +1855,8 @@ export const generateAgentCoupons = async (
     }
 
     const currentUser = req.user as IUser;
-    const { id } = req.params;
+    const id = getObjectIdParam(req, res, 'id');
+    if (!id) return;
 
     const agency = await Agency.findById(id);
     if (!agency) {
@@ -1847,6 +2090,82 @@ export const redeemAgentCoupon = async (
       };
     }
 
+    // Create or update Subscription document FIRST — if this fails (e.g. duplicate
+    // key) we haven't mutated user/agency yet, so state stays consistent.
+    const subscriptionExpiresAt = new Date(coupon.expiresAt);
+    const uniqueToken = `${couponCode}_${user._id}`;
+
+    try {
+      const existingSubscription = await Subscription.findOne({ userId: user._id });
+
+      if (existingSubscription) {
+        existingSubscription.productId = 'agency_agent_yearly';
+        existingSubscription.store = 'agency_coupon';
+        existingSubscription.purchaseToken = uniqueToken;
+        existingSubscription.transactionId = uniqueToken;
+        existingSubscription.status = 'active';
+        existingSubscription.startDate = new Date();
+        existingSubscription.renewalDate = subscriptionExpiresAt;
+        existingSubscription.expirationDate = subscriptionExpiresAt;
+        existingSubscription.autoRenewing = true;
+        existingSubscription.price = 0;
+        existingSubscription.currency = 'EUR';
+        existingSubscription.isAcknowledged = true;
+        existingSubscription.expiryReminderSent = false;
+        await existingSubscription.save();
+        agencyLogger.info(`✅ Updated Subscription document for user ${user._id}`);
+      } else {
+        await Subscription.create({
+          userId: user._id,
+          productId: 'agency_agent_yearly',
+          store: 'agency_coupon',
+          purchaseToken: uniqueToken,
+          transactionId: uniqueToken,
+          status: 'active',
+          startDate: new Date(),
+          renewalDate: subscriptionExpiresAt,
+          expirationDate: subscriptionExpiresAt,
+          autoRenewing: true,
+          price: 0,
+          currency: 'EUR',
+          isAcknowledged: true,
+        });
+        agencyLogger.info(`✅ Created Subscription document for user ${user._id}`);
+      }
+    } catch (subError: any) {
+      // Duplicate key (code 11000) means the subscription already exists for this
+      // user+coupon combo — log and continue rather than failing the redemption.
+      if (subError.code === 11000) {
+        agencyLogger.warn(
+          `Duplicate subscription key for user ${user._id} / coupon ${couponCode}, ` +
+          `falling back to findOneAndUpdate`
+        );
+        await Subscription.findOneAndUpdate(
+          { userId: user._id },
+          {
+            $set: {
+              productId: 'agency_agent_yearly',
+              store: 'agency_coupon',
+              purchaseToken: uniqueToken,
+              transactionId: uniqueToken,
+              status: 'active',
+              startDate: new Date(),
+              renewalDate: subscriptionExpiresAt,
+              expirationDate: subscriptionExpiresAt,
+              autoRenewing: true,
+              price: 0,
+              currency: 'EUR',
+              isAcknowledged: true,
+              expiryReminderSent: false,
+            },
+          },
+          { upsert: true }
+        );
+      } else {
+        throw subError;
+      }
+    }
+
     // Upgrade user to agency_agent tier — all limits come from DB product
     user.subscription.tier = 'agency_agent';
     user.subscription.status = 'active';
@@ -1870,49 +2189,10 @@ export const redeemAgentCoupon = async (
     // Set top-level agency fields for UI compatibility
     user.agencyId = agency._id as any;
     user.agencyName = agency.name;
+    user.isSubscribed = true;
+    user.subscriptionPlan = 'agency_agent_yearly';
 
     await user.save();
-
-    // Create or update Subscription document for proper subscription endpoint compatibility
-    const subscriptionExpiresAt = new Date(coupon.expiresAt);
-    const existingSubscription = await Subscription.findOne({ userId: user._id });
-
-    if (existingSubscription) {
-      // Update existing subscription
-      existingSubscription.productId = 'agency_agent_yearly';
-      existingSubscription.store = 'agency_coupon';
-      existingSubscription.purchaseToken = couponCode;
-      existingSubscription.status = 'active';
-      existingSubscription.startDate = new Date();
-      existingSubscription.renewalDate = subscriptionExpiresAt;
-      existingSubscription.expirationDate = subscriptionExpiresAt;
-      existingSubscription.autoRenewing = true;
-      existingSubscription.price = 0;
-      existingSubscription.currency = 'EUR';
-      existingSubscription.isAcknowledged = true;
-      // Reset reminder flag so new reminder will be sent before new expiration
-      existingSubscription.expiryReminderSent = false;
-      await existingSubscription.save();
-      agencyLogger.info(`✅ Updated Subscription document for user ${user._id}`);
-    } else {
-      // Create new subscription document — purchaseToken must be the unique coupon code
-      // to avoid duplicate-key errors on the (store, purchaseToken) unique index
-      await Subscription.create({
-        userId: user._id,
-        productId: 'agency_agent_yearly',
-        store: 'agency_coupon',
-        purchaseToken: couponCode,
-        status: 'active',
-        startDate: new Date(),
-        renewalDate: subscriptionExpiresAt,
-        expirationDate: subscriptionExpiresAt,
-        autoRenewing: true,
-        price: 0,
-        currency: 'EUR',
-        isAcknowledged: true,
-      });
-      agencyLogger.info(`✅ Created Subscription document for user ${user._id}`);
-    }
 
     // Mark coupon as used
     coupon.status = 'used';
@@ -1962,40 +2242,66 @@ export const redeemAgentCoupon = async (
 
     agencyLogger.info(`✅ User ${user._id} redeemed agent coupon for agency ${agency.name}`);
 
+    // Notify all viewers of the agency page so the new agent appears in real-time
+    try {
+      const io = getSocketInstance();
+      if (!io) throw new Error('Socket not available');
+      io.emit(`agency-update-${String(agency._id)}`, {
+        type: 'member-added',
+        agencyId: String(agency._id),
+        agentId: String(user._id),
+        agentName: user.name,
+      });
+    } catch {
+      // Socket not available — non-critical
+    }
+
     // Send email notifications (non-blocking)
     try {
-      // Get agency owner information
-      const owner = await User.findById(agency.ownerId);
-
-      // Send email to the new agent
-      sendAgentJoinedAgencyEmail({
-        agentEmail: user.email,
-        agentName: user.name || 'Agent',
-        agencyName: agency.name,
-        agencyId: String(agency._id),
-        subscriptionTier: user.subscription.tier,
-        listingsLimit: user.subscription.listingsLimit,
-        expiresAt: user.subscription.expiresAt || new Date(Date.now() + 365 * 24 * 60 * 60 * 1000),
-      }).catch(err => agencyLogger.error('Failed to send agent welcome email:', err));
-
-      // Send email to the agency owner
-      if (owner && owner.email) {
-        sendAgencyNewMemberEmail({
-          ownerEmail: owner.email,
-          ownerName: owner.name || 'Agency Owner',
-          agencyName: agency.name,
+      // Notify agency owner: agent redeemed coupon
+      await Notification.create({
+        userId: agency.ownerId,
+        type: 'agency_coupon_redeemed',
+        title: 'Agent Coupon Redeemed',
+        message: `${user.name || 'An agent'} has joined ${agency.name} using coupon ${couponCode}.`,
+        icon: 'ticket',
+        priority: 'normal',
+        data: {
           agencyId: String(agency._id),
-          newAgentName: user.name || 'New Agent',
-          newAgentEmail: user.email,
-          couponCode: couponCode,
+          agencySlug: agency.slug,
+          agencyName: agency.name,
+          agentName: user.name || 'Agent',
+          agentEmail: user.email,
+          couponCode,
           totalAgents: agency.agents.length,
-        }).catch(err => agencyLogger.error('Failed to send agency notification email:', err));
-      }
+          actionUrl: `/agency/${agency.slug || agency._id}`,
+          actionLabel: 'View Agency',
+        },
+      });
 
-      agencyLogger.info(`📧 Email notifications sent for coupon redemption`);
-    } catch (emailError) {
-      // Don't fail the redemption if emails fail
-      agencyLogger.error('Error sending email notifications:', emailError);
+      // Notify the joining agent: welcome to agency
+      await Notification.create({
+        userId: user._id,
+        type: 'agency_join_welcome',
+        title: `Welcome to ${agency.name}!`,
+        message: `You have successfully joined ${agency.name} with a Pro subscription. You now have access to ${user.subscription.listingsLimit} listings.`,
+        icon: 'building',
+        priority: 'normal',
+        data: {
+          agencyId: String(agency._id),
+          agencySlug: agency.slug,
+          agencyName: agency.name,
+          subscriptionTier: user.subscription.tier,
+          listingsLimit: user.subscription.listingsLimit,
+          actionUrl: `/agency/${agency.slug || agency._id}`,
+          actionLabel: 'View Agency',
+        },
+      });
+
+      agencyLogger.info(`📨 In-app notifications sent for coupon redemption`);
+    } catch (notifError) {
+      // Don't fail the redemption if notifications fail
+      agencyLogger.error('Error sending in-app notifications:', notifError);
     }
 
     res.status(200).json({
@@ -2014,9 +2320,22 @@ export const redeemAgentCoupon = async (
     });
   } catch (error: any) {
     agencyLogger.error('Redeem agent coupon error:', error);
-    res.status(500).json({
-      message: 'Error redeeming coupon',
-    });
+
+    if (error.code === 11000) {
+      res.status(409).json({
+        message: 'A subscription already exists for this account. Please contact support.',
+        code: 'DUPLICATE_SUBSCRIPTION',
+      });
+    } else if (error.name === 'ValidationError') {
+      res.status(400).json({
+        message: 'Invalid subscription data',
+        code: 'VALIDATION_ERROR',
+      });
+    } else {
+      res.status(500).json({
+        message: 'Error redeeming coupon',
+      });
+    }
   }
 };
 
@@ -2034,7 +2353,8 @@ export const getAgencyCoupons = async (
     }
 
     const currentUser = req.user as IUser;
-    const { id } = req.params;
+    const id = getObjectIdParam(req, res, 'id');
+    if (!id) return;
 
     const agency = await Agency.findById(id);
     if (!agency) {
@@ -2127,7 +2447,8 @@ export const usePromotionCoupon = async (
     }
 
     const currentUser = req.user as IUser;
-    const { id } = req.params;
+    const id = getObjectIdParam(req, res, 'id');
+    if (!id) return;
     const { propertyId } = req.body;
 
     if (!propertyId) {
@@ -2218,7 +2539,10 @@ export const sendPromotionCouponsEmailEndpoint = async (
     }
 
     const currentUser = req.user as IUser;
-    const agency = await Agency.findById(req.params.id);
+    const id = getObjectIdParam(req, res, 'id');
+    if (!id) return;
+
+    const agency = await Agency.findById(id);
 
     if (!agency) {
       res.status(404).json({ message: 'Agency not found' });
@@ -2273,7 +2597,8 @@ export const getAgencyAgents = async (
     }
 
     const currentUser = req.user as IUser;
-    const { id } = req.params;
+    const id = getObjectIdParam(req, res, 'id');
+    if (!id) return;
 
     const agency = await Agency.findById(id).populate('agents', 'name email phone avatarUrl subscription agency agentLicense');
     if (!agency) {
@@ -2417,41 +2742,70 @@ export const migrateAgentSubscriptions = async (
         }
 
         // Check/create Subscription document
-        const existingSubscription = await Subscription.findOne({ userId: user._id });
+        const migrationToken = user.agency?.couponCode
+          ? `${user.agency.couponCode}_${user._id}`
+          : `agency_coupon_${user._id}`;
 
-        if (!existingSubscription) {
-          await Subscription.create({
-            userId: user._id,
-            productId: 'agency_agent_yearly',
-            store: 'agency_coupon',
-            purchaseToken: `agency_coupon_${user._id.toString()}`,
-            status: 'active',
-            startDate: user.agency?.joinedAt || new Date(),
-            renewalDate: agencyExpiresAt,
-            expirationDate: agencyExpiresAt,
-            autoRenewing: true,
-            price: 0,
-            currency: 'EUR',
-            isAcknowledged: true,
-          });
-          subscriptionCreated = true;
-          totalCreated++;
-        } else if (existingSubscription.productId !== 'agency_agent_yearly') {
-          // Update existing subscription
-          existingSubscription.productId = 'agency_agent_yearly';
-          existingSubscription.store = 'agency_coupon';
-          if (!existingSubscription.purchaseToken) {
-            existingSubscription.purchaseToken = `agency_coupon_${user._id.toString()}`;
+        try {
+          const existingSubscription = await Subscription.findOne({ userId: user._id });
+
+          if (!existingSubscription) {
+            await Subscription.create({
+              userId: user._id,
+              productId: 'agency_agent_yearly',
+              store: 'agency_coupon',
+              purchaseToken: migrationToken,
+              transactionId: migrationToken,
+              status: 'active',
+              startDate: user.agency?.joinedAt || new Date(),
+              renewalDate: agencyExpiresAt,
+              expirationDate: agencyExpiresAt,
+              autoRenewing: true,
+              price: 0,
+              currency: 'EUR',
+              isAcknowledged: true,
+            });
+            subscriptionCreated = true;
+            totalCreated++;
+          } else if (existingSubscription.productId !== 'agency_agent_yearly') {
+            existingSubscription.productId = 'agency_agent_yearly';
+            existingSubscription.store = 'agency_coupon';
+            existingSubscription.purchaseToken = migrationToken;
+            existingSubscription.transactionId = migrationToken;
+            existingSubscription.status = 'active';
+            existingSubscription.expirationDate = agencyExpiresAt;
+            existingSubscription.renewalDate = agencyExpiresAt;
+            existingSubscription.price = 0;
+            existingSubscription.autoRenewing = true;
+            existingSubscription.expiryReminderSent = false;
+            await existingSubscription.save();
+            totalUpdated++;
           }
-          existingSubscription.status = 'active';
-          existingSubscription.expirationDate = agencyExpiresAt;
-          existingSubscription.renewalDate = agencyExpiresAt;
-          existingSubscription.price = 0;
-          existingSubscription.autoRenewing = true;
-          // Reset reminder flag so new reminder will be sent before new expiration
-          existingSubscription.expiryReminderSent = false;
-          await existingSubscription.save();
-          totalUpdated++;
+        } catch (subError: any) {
+          if (subError.code === 11000) {
+            agencyLogger.warn(`Migration: duplicate subscription key for user ${user._id}, using upsert`);
+            await Subscription.findOneAndUpdate(
+              { userId: user._id },
+              {
+                $set: {
+                  productId: 'agency_agent_yearly',
+                  store: 'agency_coupon',
+                  purchaseToken: migrationToken,
+                  transactionId: migrationToken,
+                  status: 'active',
+                  expirationDate: agencyExpiresAt,
+                  renewalDate: agencyExpiresAt,
+                  price: 0,
+                  autoRenewing: true,
+                  expiryReminderSent: false,
+                },
+              },
+              { upsert: true }
+            );
+            totalUpdated++;
+          } else {
+            agencyLogger.error(`Migration: subscription error for user ${user._id}:`, subError);
+          }
         }
 
         // Update Agent record if exists

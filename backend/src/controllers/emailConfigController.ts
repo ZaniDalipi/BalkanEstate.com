@@ -4,6 +4,7 @@ import { seedEmailConfigs } from '../seeds/emailConfigSeed';
 import emailService from '../services/emailService';
 import { apiLogger } from '../utils/logger';
 import { replaceVariables, renderEmailConfig } from '../utils/emailTemplateRenderer';
+import { getParam } from '../utils/validateParams';
 
 // Get all email configurations
 export const getAllEmailConfigs = async (req: Request, res: Response): Promise<void> => {
@@ -60,7 +61,7 @@ export const getAllEmailConfigs = async (req: Request, res: Response): Promise<v
 // Get single email configuration
 export const getEmailConfigByKey = async (req: Request, res: Response): Promise<void> => {
   try {
-    const { key } = req.params;
+    const key = getParam(req, 'key');
 
     const config = await EmailConfig.findOne({ key }).lean();
 
@@ -79,7 +80,7 @@ export const getEmailConfigByKey = async (req: Request, res: Response): Promise<
 // Update email configuration
 export const updateEmailConfig = async (req: Request, res: Response): Promise<void> => {
   try {
-    const { key } = req.params;
+    const key = getParam(req, 'key');
     const updateData = req.body;
     const userId = (req as any).user?._id;
 
@@ -118,7 +119,7 @@ export const updateEmailConfig = async (req: Request, res: Response): Promise<vo
 // Toggle email active status
 export const toggleEmailStatus = async (req: Request, res: Response): Promise<void> => {
   try {
-    const { key } = req.params;
+    const key = getParam(req, 'key');
     const userId = (req as any).user?._id;
 
     const config = await EmailConfig.findOne({ key });
@@ -149,7 +150,7 @@ export const toggleEmailStatus = async (req: Request, res: Response): Promise<vo
 // Reset email configuration to default
 export const resetEmailConfig = async (req: Request, res: Response): Promise<void> => {
   try {
-    const { key } = req.params;
+    const key = getParam(req, 'key');
 
     // Import default configs
     const { defaultEmailConfigs } = await import('../seeds/emailConfigSeed');
@@ -199,7 +200,7 @@ export const resetAllEmailConfigs = async (_req: Request, res: Response): Promis
 // Send test email
 export const sendTestEmail = async (req: Request, res: Response): Promise<void> => {
   try {
-    const { key } = req.params;
+    const key = getParam(req, 'key');
     const { testEmail, testVariables } = req.body;
 
     if (!testEmail) {
@@ -250,7 +251,7 @@ export const sendTestEmail = async (req: Request, res: Response): Promise<void> 
 // Preview email HTML
 export const previewEmail = async (req: Request, res: Response): Promise<void> => {
   try {
-    const { key } = req.params;
+    const key = getParam(req, 'key');
     const { testVariables } = req.body;
 
     const config = await EmailConfig.findOne({ key });
@@ -362,7 +363,7 @@ export const createEmailConfig = async (req: Request, res: Response): Promise<vo
 // Delete email configuration
 export const deleteEmailConfig = async (req: Request, res: Response): Promise<void> => {
   try {
-    const { key } = req.params;
+    const key = getParam(req, 'key');
 
     // Check if this is a system email (from seed data)
     const { defaultEmailConfigs } = await import('../seeds/emailConfigSeed');
@@ -394,7 +395,7 @@ export const deleteEmailConfig = async (req: Request, res: Response): Promise<vo
 // Duplicate an existing email configuration
 export const duplicateEmailConfig = async (req: Request, res: Response): Promise<void> => {
   try {
-    const { key } = req.params;
+    const key = getParam(req, 'key');
     const { newKey, newName } = req.body;
     const userId = (req as any).user?._id;
 
@@ -462,7 +463,7 @@ import {
  */
 export const previewMinimalisticTemplate = async (req: Request, res: Response): Promise<void> => {
   try {
-    const { templateType } = req.params;
+    const templateType = getParam(req, 'templateType');
     const testData = req.body || {};
 
     let html = '';

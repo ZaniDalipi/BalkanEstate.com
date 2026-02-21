@@ -349,6 +349,7 @@
     "loginAndGenerate": "Prijava i generisanje uvida",
     "usageInfo": "Upotreba: {{used}}/{{limit}} uvida korišteno ovaj mjesec",
     "remainingInfo": "{{remaining}} od {{limit}} uvida preostalo ovaj mjesec",
+    "unlimitedInsights": "Neograničeni uvidi dostupni s vašim planom",
     "upgradePrompt": "Nadogradite na premium za više uvida!",
     "tryAgain": "Pokušaj ponovo"
   },

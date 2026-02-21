@@ -17,7 +17,11 @@ const CityRecommendations: React.FC = () => {
   const { t } = useTranslation(['exploreCities']);
   const [cities, setCities] = useState<CityMarketData[]>([]);
   const [loading, setLoading] = useState(true);
-  const [selectedCountry, setSelectedCountry] = useState<string>('all');
+  // Read ?country= URL param to pre-select a country on mount
+  const [selectedCountry, setSelectedCountry] = useState<string>(() => {
+    const params = new URLSearchParams(window.location.search);
+    return params.get('country') || 'all';
+  });
   const [failedImages, setFailedImages] = useState<Set<string>>(new Set());
   const { dispatch, updateSearchPageState } = useAppContext();
 

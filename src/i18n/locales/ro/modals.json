@@ -110,7 +110,12 @@
     "verifyAndBecomeAgent": "Verifică și Devino Agent",
     "joinAgency": "Alătură-te Agenției",
     "verifyFailed": "Failed to verify license. Please check your information and try again.",
-    "locationNA": "Location N/A"
+    "locationNA": "Location N/A",
+    "phoneOnlyTitle": "Adăugați numărul de telefon",
+    "phoneOnlyDescription": "Un număr de telefon este necesar pentru contact și pentru a crea anunțuri imobiliare",
+    "phoneOnlyHint": "Numărul dvs. de telefon va fi afișat pe anunțuri pentru ca cumpărătorii să vă poată contacta.",
+    "saving": "Se salvează...",
+    "saveAndContinue": "Salvează și continuă"
   },
   "invitationCode": {
     "title": "Introduceți Codul de Invitație",

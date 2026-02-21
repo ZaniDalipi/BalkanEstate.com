@@ -2,6 +2,7 @@ import { Request, Response } from 'express';
 import Product from '../models/Product';
 import { apiLogger } from '../utils/logger';
 import { invalidateCache } from '../middleware/cache';
+import { getObjectIdParam, getParam } from '../utils/validateParams';
 
 // ============================================================================
 // PUBLIC ENDPOINTS
@@ -52,7 +53,7 @@ export const getProducts = async (req: Request, res: Response): Promise<void> =>
  */
 export const getProductById = async (req: Request, res: Response): Promise<void> => {
   try {
-    const { productId } = req.params;
+    const productId = getParam(req, 'productId');
 
     const product = await Product.findOne({ productId, isActive: true, isVisible: true });
 
@@ -143,7 +144,8 @@ export const createProduct = async (req: Request, res: Response): Promise<void> 
  */
 export const updateProduct = async (req: Request, res: Response): Promise<void> => {
   try {
-    const { id } = req.params;
+    const id = getObjectIdParam(req, res, 'id');
+    if (!id) return;
 
     const product = await Product.findByIdAndUpdate(
       id,
@@ -182,7 +184,8 @@ export const updateProduct = async (req: Request, res: Response): Promise<void> 
  */
 export const deleteProduct = async (req: Request, res: Response): Promise<void> => {
   try {
-    const { id } = req.params;
+    const id = getObjectIdParam(req, res, 'id');
+    if (!id) return;
 
     const product = await Product.findByIdAndDelete(id);
 
@@ -216,7 +219,8 @@ export const deleteProduct = async (req: Request, res: Response): Promise<void> 
  */
 export const toggleProductVisibility = async (req: Request, res: Response): Promise<void> => {
   try {
-    const { id } = req.params;
+    const id = getObjectIdParam(req, res, 'id');
+    if (!id) return;
 
     const product = await Product.findById(id);
 
@@ -254,7 +258,8 @@ export const toggleProductVisibility = async (req: Request, res: Response): Prom
  */
 export const toggleProductStatus = async (req: Request, res: Response): Promise<void> => {
   try {
-    const { id } = req.params;
+    const id = getObjectIdParam(req, res, 'id');
+    if (!id) return;
 
     const product = await Product.findById(id);
 

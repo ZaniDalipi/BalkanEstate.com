@@ -13,6 +13,7 @@ import SubscriptionEvent from '../models/SubscriptionEvent';
 import User from '../models/User';
 import { adminLogger } from '../utils/logger';
 import { invalidateCache } from '../middleware/cache';
+import { getObjectIdParam } from '../utils/validateParams';
 
 /**
  * @desc    Get all subscriptions with pagination and filters
@@ -81,7 +82,8 @@ export const getAllSubscriptions = async (req: Request, res: Response): Promise<
  */
 export const getSubscriptionById = async (req: Request, res: Response): Promise<void> => {
   try {
-    const { id } = req.params;
+    const id = getObjectIdParam(req, res, 'id');
+    if (!id) return;
 
     const subscription = await Subscription.findById(id)
       .populate('userId', 'email name phone role isSubscribed subscriptionStatus')
@@ -193,7 +195,8 @@ export const getAllPayments = async (req: Request, res: Response): Promise<void>
  */
 export const getPaymentById = async (req: Request, res: Response): Promise<void> => {
   try {
-    const { id } = req.params;
+    const id = getObjectIdParam(req, res, 'id');
+    if (!id) return;
 
     const payment = await PaymentRecord.findById(id)
       .populate('userId', 'email name phone role')
@@ -401,7 +404,8 @@ export const activateUserSubscription = async (req: Request, res: Response): Pro
  */
 export const cancelSubscription = async (req: Request, res: Response): Promise<void> => {
   try {
-    const { id } = req.params;
+    const id = getObjectIdParam(req, res, 'id');
+    if (!id) return;
     const { reason, immediate } = req.body;
 
     const subscription = await Subscription.findById(id);
@@ -475,7 +479,8 @@ export const cancelSubscription = async (req: Request, res: Response): Promise<v
  */
 export const adjustListingLimit = async (req: Request, res: Response): Promise<void> => {
   try {
-    const { userId } = req.params;
+    const userId = getObjectIdParam(req, res, 'userId');
+    if (!userId) return;
     const { listingsLimit, reason } = req.body;
 
     if (listingsLimit === undefined || listingsLimit === null || Number(listingsLimit) < 0) {

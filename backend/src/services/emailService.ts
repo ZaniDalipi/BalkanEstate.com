@@ -2512,7 +2512,17 @@ Questions? Contact us at support@balkanestateai.com
         frontendUrl,
       };
 
-      const { html, subject } = renderEmailConfig(config, variables);
+      let { html, subject } = renderEmailConfig(config, variables);
+
+      // Safety net: if the DB template is missing {{couponCodesList}} and there
+      // are codes to show, inject them just before the body closing tag.
+      if (couponCodesHtml && !html.includes(couponCodesHtml)) {
+        html = html.replace(
+          '</div>\n</body>',
+          `<div style="padding:0 24px 24px;">${couponCodesHtml}</div>\n</div>\n</body>`,
+        );
+      }
+
       await this.sendEmail({ to: params.email, subject, html, category: config.fromCategory as any });
       return;
     }

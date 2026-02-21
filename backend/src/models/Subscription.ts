@@ -240,8 +240,17 @@ const SubscriptionSchema: Schema = new Schema(
 
 // Compound indexes for efficient queries
 SubscriptionSchema.index({ userId: 1, status: 1 });
-SubscriptionSchema.index({ store: 1, purchaseToken: 1 }, { unique: true, sparse: true });
-SubscriptionSchema.index({ store: 1, transactionId: 1 }, { unique: true, sparse: true });
+// Use partialFilterExpression instead of sparse — sparse compound indexes still
+// include documents where at least one key exists (store is always set), so
+// multiple docs with transactionId/purchaseToken absent collide on null.
+SubscriptionSchema.index(
+  { store: 1, purchaseToken: 1 },
+  { unique: true, partialFilterExpression: { purchaseToken: { $exists: true } } }
+);
+SubscriptionSchema.index(
+  { store: 1, transactionId: 1 },
+  { unique: true, partialFilterExpression: { transactionId: { $exists: true } } }
+);
 SubscriptionSchema.index({ expirationDate: 1, status: 1 });
 SubscriptionSchema.index({ lastValidated: 1 });
 

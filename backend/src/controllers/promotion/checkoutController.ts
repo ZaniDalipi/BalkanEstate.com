@@ -280,6 +280,7 @@ export const createPromotionCheckout = async (
     let finalPrice = getPromotionPrice(promotionTier, duration, hasUrgentBadge);
     let couponDiscount = 0;
     let appliedCouponCode: string | undefined;
+    let appliedCoupon: any = null;
 
     if (couponCode && finalPrice > 0) {
       const couponResult = await applyCoupon(couponCode, finalPrice, String(user._id), promotionTier);
@@ -287,6 +288,7 @@ export const createPromotionCheckout = async (
         finalPrice = couponResult.finalPrice;
         couponDiscount = couponResult.couponDiscount;
         appliedCouponCode = couponCode;
+        appliedCoupon = couponResult.coupon;
       }
     }
 
@@ -320,6 +322,11 @@ export const createPromotionCheckout = async (
         promotionEndDate: endDate,
         hasUrgentBadge,
       });
+
+      // Record coupon usage so it can't be reused beyond its limits
+      if (appliedCoupon && couponDiscount > 0) {
+        await appliedCoupon.recordUsage(user._id, promotion._id, couponDiscount);
+      }
 
       res.status(201).json({
         success: true,
