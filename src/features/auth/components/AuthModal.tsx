@@ -292,6 +292,12 @@ const AuthPage: React.FC = () => {
     };
 
     const handleBlur = (field: 'email' | 'password' | 'confirmPassword' | 'phone') => {
+        // For phone: only mark as touched if the user has actually typed something,
+        // so tabbing past an empty phone field doesn't trigger a premature error
+        if (field === 'phone' && !phoneNumber.trim()) {
+            return;
+        }
+
         setTouched(prev => ({ ...prev, [field]: true }));
 
         // Validate on blur
