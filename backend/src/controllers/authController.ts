@@ -439,8 +439,8 @@ export const login = async (req: Request, res: Response): Promise<void> => {
       return;
     }
 
-    // Check if account is locked
-    if (user.isAccountLocked()) {
+    // Check if account is locked (production only — skip in dev to allow free testing)
+    if (process.env.NODE_ENV === 'production' && user.isAccountLocked()) {
       const lockTime = user.lockUntil!.getTime() - Date.now();
       const minutesRemaining = Math.ceil(lockTime / (60 * 1000));
 
@@ -484,8 +484,10 @@ export const login = async (req: Request, res: Response): Promise<void> => {
         user.loginHistory = user.loginHistory.slice(-100);
       }
 
-      // Increment failed login attempts
-      await user.incrementLoginAttempts();
+      // Increment failed login attempts (production only)
+      if (process.env.NODE_ENV === 'production') {
+        await user.incrementLoginAttempts();
+      }
 
       // Log failed login attempt
       activityLogger.logLoginFailed(email, 'Invalid password', req);

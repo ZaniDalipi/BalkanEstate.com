@@ -873,24 +873,31 @@ const ProfileSettings: React.FC<{ user: User }> = ({ user }) => {
             // If switching to agent, also save agent-specific fields
             if (roleToSwitch === UserRole.AGENT) {
                 const yearsExp = agentData.yearsOfExperience === '' ? 0 : Number(agentData.yearsOfExperience) || 0;
+                // Use languages from the license modal if provided, otherwise fall back to profile form
+                const agentLanguages = licenseData.languages && licenseData.languages.length > 0
+                    ? licenseData.languages
+                    : agentData.languages;
                 try {
                     const updatedAgent = await updateAgentProfile({
-                        languages: agentData.languages,
+                        languages: agentLanguages,
                         specializations: parsedSpecializations,
                         serviceAreas: agentData.serviceAreas,
                         yearsOfExperience: yearsExp,
                         lat: agentData.lat,
                         lng: agentData.lng,
                     });
+                    const savedLanguages = updatedAgent.languages || agentLanguages;
                     finalUser = {
                         ...finalUser,
-                        languages: updatedAgent.languages || agentData.languages,
+                        languages: savedLanguages,
                         specializations: updatedAgent.specializations || parsedSpecializations,
                         serviceAreas: updatedAgent.serviceAreas || agentData.serviceAreas,
                         yearsOfExperience: updatedAgent.yearsOfExperience !== undefined ? updatedAgent.yearsOfExperience : yearsExp,
                         lat: updatedAgent.lat !== undefined ? updatedAgent.lat : agentData.lat,
                         lng: updatedAgent.lng !== undefined ? updatedAgent.lng : agentData.lng,
                     };
+                    // Keep profile form in sync with what was saved
+                    setAgentData(prev => ({ ...prev, languages: savedLanguages }));
                 } catch {
                     // Agent profile save failed, but role switch succeeded — continue
                 }
