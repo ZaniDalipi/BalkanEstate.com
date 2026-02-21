@@ -303,25 +303,25 @@ const AgencyCreationModal: React.FC<AgencyCreationModalProps> = ({
   const validateStep = (s: number): Record<string, string> => {
     const errs: Record<string, string> = {};
     if (s === 1) {
-      if (!formData.name.trim()) errs.name = 'Agency name is required';
+      if (!formData.name.trim()) errs.name = t('agents:agencyCreation.validation.nameRequired', 'Agency name is required');
     }
     if (s === 2) {
-      if (!formData.country) errs.country = 'Country is required';
-      if (!formData.city) errs.city = 'City is required';
+      if (!formData.country) errs.country = t('agents:agencyCreation.validation.countryRequired', 'Country is required');
+      if (!formData.city) errs.city = t('agents:agencyCreation.validation.cityRequired', 'City is required');
     }
     if (s === 3) {
       if (!formData.email.trim()) {
-        errs.email = 'Email address is required';
+        errs.email = t('agents:agencyCreation.validation.emailRequired', 'Email address is required');
       } else if (!emailRegex.test(formData.email.trim())) {
-        errs.email = 'Please enter a valid email address';
+        errs.email = t('agents:agencyCreation.validation.emailInvalid', 'Please enter a valid email address');
       }
       if (!formData.phone.trim()) {
-        errs.phone = 'Phone number is required';
+        errs.phone = t('agents:agencyCreation.validation.phoneRequired', 'Phone number is required');
       } else if (!/^[+\d\s\-().]{7,20}$/.test(formData.phone.trim())) {
-        errs.phone = 'Please enter a valid phone number (e.g. +381 11 123 4567)';
+        errs.phone = t('agents:agencyCreation.validation.phoneInvalid', 'Please enter a valid phone number (e.g. +381 11 123 4567)');
       }
       if (formData.website && !/^https?:\/\/.+/.test(formData.website)) {
-        errs.website = 'Website must start with http:// or https://';
+        errs.website = t('agents:agencyCreation.validation.websiteInvalid', 'Website must start with http:// or https://');
       }
     }
     return errs;
@@ -352,7 +352,7 @@ const AgencyCreationModal: React.FC<AgencyCreationModalProps> = ({
     try {
       const result = await createAgency(pendingAgencyData);
       if (result && (result.agency || result._id || result.id)) {
-        dispatch({ type: 'SHOW_ALERT', payload: { type: 'success', title: 'Agency Created!', message: `Your agency "${pendingAgencyData.name}" has been created.` } });
+        dispatch({ type: 'SHOW_ALERT', payload: { type: 'success', title: t('agents:agencyCreation.alerts.createdTitle', 'Agency Created!'), message: t('agents:agencyCreation.alerts.createdMessage', { name: pendingAgencyData.name, defaultValue: `Your agency "${pendingAgencyData.name}" has been created.` }) } });
         dispatch({ type: 'SET_PENDING_AGENCY_DATA', payload: null });
         onClose();
         const slug = result.agency?.slug || result.agency?._id || result._id;
@@ -363,7 +363,7 @@ const AgencyCreationModal: React.FC<AgencyCreationModalProps> = ({
         }
         onAgencyCreated(result.agency?._id || result._id);
       } else {
-        setGlobalError('Payment succeeded but agency creation failed. Please contact support.');
+        setGlobalError(t('agents:agencyCreation.alerts.paymentSucceededButFailed', 'Payment succeeded but agency creation failed. Please contact support.'));
       }
     } catch (err: any) {
       setGlobalError(err.message || 'Payment succeeded but agency creation failed.');
@@ -374,7 +374,7 @@ const AgencyCreationModal: React.FC<AgencyCreationModalProps> = ({
   };
 
   const handlePaymentError = (msg: string) => {
-    setGlobalError(`Payment failed: ${msg}`);
+    setGlobalError(t('agents:agencyCreation.alerts.paymentFailed', { error: msg, defaultValue: `Payment failed: ${msg}` }));
     setShowPaymentWindow(false);
   };
 
@@ -400,7 +400,7 @@ const AgencyCreationModal: React.FC<AgencyCreationModalProps> = ({
       try {
         const result = await createAgency(agencyData);
         if (result && (result.agency || result._id || result.id)) {
-          dispatch({ type: 'SHOW_ALERT', payload: { type: 'success', title: 'Agency Created!', message: `Your agency "${agencyData.name}" has been created successfully.` } });
+          dispatch({ type: 'SHOW_ALERT', payload: { type: 'success', title: t('agents:agencyCreation.alerts.createdTitle', 'Agency Created!'), message: t('agents:agencyCreation.alerts.createdMessage', { name: agencyData.name, defaultValue: `Your agency "${agencyData.name}" has been created successfully.` }) } });
           onClose();
           const slug = result.agency?.slug || result.agency?._id || result._id;
           if (slug) {
@@ -410,10 +410,10 @@ const AgencyCreationModal: React.FC<AgencyCreationModalProps> = ({
           }
           onAgencyCreated(result.agency?._id || result._id);
         } else {
-          setGlobalError('Failed to create agency. Please try again.');
+          setGlobalError(t('agents:agencyCreation.alerts.createFailed', 'Failed to create agency. Please try again.'));
         }
       } catch (err: any) {
-        setGlobalError(err.message || 'Failed to create agency. Please try again.');
+        setGlobalError(err.message || t('agents:agencyCreation.alerts.createFailed', 'Failed to create agency. Please try again.'));
       } finally {
         setIsCreating(false);
       }
@@ -451,30 +451,30 @@ const AgencyCreationModal: React.FC<AgencyCreationModalProps> = ({
         return (
           <div className="space-y-5">
             <div>
-              <label className={labelCls}>Agency Name <Required /></label>
+              <label className={labelCls}>{t('agents:agencyCreation.fields.agencyName', 'Agency Name')} <Required /></label>
               <input
                 type="text"
                 value={formData.name}
                 onChange={e => set('name', e.target.value)}
-                placeholder="e.g., Premier Real Estate Agency"
+                placeholder={t('agents:agencyCreation.placeholders.agencyName', 'e.g., Premier Real Estate Agency')}
                 className={inputCls('name')}
                 disabled={isCreating}
                 autoFocus
               />
               <FieldError field="name" fieldErrors={fieldErrors} />
-              <p className="text-xs text-gray-400 mt-1">Choose a professional name that represents your brand</p>
+              <p className="text-xs text-gray-400 mt-1">{t('agents:agencyCreation.hints.agencyName', 'Choose a professional name that represents your brand')}</p>
             </div>
             <div>
-              <label className={labelCls}>Description</label>
+              <label className={labelCls}>{t('agents:agencyCreation.fields.description', 'Description')}</label>
               <textarea
                 value={formData.description}
                 onChange={e => set('description', e.target.value)}
-                placeholder="Tell potential clients about your agency, your expertise, and what makes you unique..."
+                placeholder={t('agents:agencyCreation.placeholders.description', 'Tell potential clients about your agency, your expertise, and what makes you unique...')}
                 rows={4}
                 className={`${inputCls('description')} resize-none`}
                 disabled={isCreating}
               />
-              <p className="text-xs text-gray-400 mt-1">A compelling description helps clients understand your value</p>
+              <p className="text-xs text-gray-400 mt-1">{t('agents:agencyCreation.hints.description', 'A compelling description helps clients understand your value')}</p>
             </div>
           </div>
         );
@@ -486,7 +486,7 @@ const AgencyCreationModal: React.FC<AgencyCreationModalProps> = ({
             {/* Country + City */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
-                <label className={labelCls}>Country <Required /></label>
+                <label className={labelCls}>{t('agents:agencyCreation.fields.country', 'Country')} <Required /></label>
                 <div className="relative">
                   <select
                     value={formData.country}
@@ -494,7 +494,7 @@ const AgencyCreationModal: React.FC<AgencyCreationModalProps> = ({
                     className={`${inputCls('country')} appearance-none pr-8`}
                     disabled={isCreating}
                   >
-                    <option value="">Select a country</option>
+                    <option value="">{t('agents:agencyCreation.placeholders.selectCountry', 'Select a country')}</option>
                     {BALKAN_LOCATIONS.map(c => (
                       <option key={c.code} value={c.name}>{c.name}</option>
                     ))}
@@ -504,7 +504,7 @@ const AgencyCreationModal: React.FC<AgencyCreationModalProps> = ({
                 <FieldError field="country" fieldErrors={fieldErrors} />
               </div>
               <div>
-                <label className={labelCls}>City <Required /></label>
+                <label className={labelCls}>{t('agents:agencyCreation.fields.city', 'City')} <Required /></label>
                 <div className="relative">
                   <select
                     value={formData.city}
@@ -513,7 +513,7 @@ const AgencyCreationModal: React.FC<AgencyCreationModalProps> = ({
                     disabled={isCreating || !formData.country}
                   >
                     <option value="">
-                      {formData.country ? 'Select a city' : 'Select country first'}
+                      {formData.country ? t('agents:agencyCreation.placeholders.selectCity', 'Select a city') : t('agents:agencyCreation.placeholders.selectCountryFirst', 'Select country first')}
                     </option>
                     {availableCities.map(c => (
                       <option key={c.name} value={c.name}>{c.name}</option>
@@ -528,10 +528,9 @@ const AgencyCreationModal: React.FC<AgencyCreationModalProps> = ({
             {/* Interactive map — shown once a city is selected (matches listing form behaviour) */}
             {formData.city && selectedCityData && (
               <div>
-                <label className={labelCls}>Pin Exact Location</label>
+                <label className={labelCls}>{t('agents:agencyCreation.fields.pinLocation', 'Pin Exact Location')}</label>
                 <p className="text-xs text-gray-400 mb-2">
-                  Drag the marker or click the map to set your office's precise position.
-                  The street address below will update automatically.
+                  {t('agents:agencyCreation.hints.pinLocation', 'Drag the marker or click the map to set your office\'s precise position. The street address below will update automatically.')}
                 </p>
                 <div className="rounded-xl overflow-hidden border border-gray-200 shadow-sm">
                   <MapLocationPicker
@@ -552,18 +551,17 @@ const AgencyCreationModal: React.FC<AgencyCreationModalProps> = ({
 
             {/* Street Address — auto-filled by map, also editable manually */}
             <div>
-              <label className={labelCls}>Street Address</label>
+              <label className={labelCls}>{t('agents:agencyCreation.fields.streetAddress', 'Street Address')}</label>
               <input
                 type="text"
                 value={formData.address}
                 onChange={e => set('address', e.target.value)}
-                placeholder="e.g., 123 Main Street, Building A"
+                placeholder={t('agents:agencyCreation.placeholders.streetAddress', 'e.g., 123 Main Street, Building A')}
                 className={inputCls('address')}
                 disabled={isCreating}
               />
               <p className="text-xs text-gray-400 mt-1">
-                Auto-filled from the map above, or type manually.
-                Include building number, street name, and any suite/floor.
+                {t('agents:agencyCreation.hints.streetAddress', 'Auto-filled from the map above, or type manually. Include building number, street name, and any suite/floor.')}
               </p>
             </div>
           </div>
@@ -574,7 +572,7 @@ const AgencyCreationModal: React.FC<AgencyCreationModalProps> = ({
         return (
           <div className="space-y-5">
             <div>
-              <label className={labelCls}>Email Address <Required /></label>
+              <label className={labelCls}>{t('agents:agencyCreation.fields.email', 'Email Address')} <Required /></label>
               <input
                 type="email"
                 value={formData.email}
@@ -584,10 +582,10 @@ const AgencyCreationModal: React.FC<AgencyCreationModalProps> = ({
                 disabled={isCreating}
               />
               <FieldError field="email" fieldErrors={fieldErrors} />
-              <p className="text-xs text-gray-400 mt-1">Primary contact email for inquiries</p>
+              <p className="text-xs text-gray-400 mt-1">{t('agents:agencyCreation.hints.email', 'Primary contact email for inquiries')}</p>
             </div>
             <div>
-              <label className={labelCls}>Phone Number <Required /></label>
+              <label className={labelCls}>{t('agents:agencyCreation.fields.phone', 'Phone Number')} <Required /></label>
               <input
                 type="tel"
                 value={formData.phone}
@@ -597,10 +595,10 @@ const AgencyCreationModal: React.FC<AgencyCreationModalProps> = ({
                 disabled={isCreating}
               />
               <FieldError field="phone" fieldErrors={fieldErrors} />
-              <p className="text-xs text-gray-400 mt-1">Include country code (e.g. +381 for Serbia)</p>
+              <p className="text-xs text-gray-400 mt-1">{t('agents:agencyCreation.hints.phone', 'Include country code (e.g. +381 for Serbia)')}</p>
             </div>
             <div>
-              <label className={labelCls}>Website URL</label>
+              <label className={labelCls}>{t('agents:agencyCreation.fields.website', 'Website URL')}</label>
               <input
                 type="url"
                 value={formData.website}
@@ -610,7 +608,7 @@ const AgencyCreationModal: React.FC<AgencyCreationModalProps> = ({
                 disabled={isCreating}
               />
               <FieldError field="website" fieldErrors={fieldErrors} />
-              <p className="text-xs text-gray-400 mt-1">Optional: Your agency's website</p>
+              <p className="text-xs text-gray-400 mt-1">{t('agents:agencyCreation.hints.website', 'Optional: Your agency\'s website')}</p>
             </div>
           </div>
         );
@@ -621,7 +619,7 @@ const AgencyCreationModal: React.FC<AgencyCreationModalProps> = ({
           <div className="space-y-5">
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
-                <label className={labelCls}>Agent License Number</label>
+                <label className={labelCls}>{t('agents:agencyCreation.fields.licenseNumber', 'Agent License Number')}</label>
                 <input
                   type="text"
                   value={formData.licenseNumber}
@@ -630,10 +628,10 @@ const AgencyCreationModal: React.FC<AgencyCreationModalProps> = ({
                   className={inputCls('licenseNumber')}
                   disabled={isCreating}
                 />
-                <p className="text-xs text-gray-400 mt-1">Your official real estate license</p>
+                <p className="text-xs text-gray-400 mt-1">{t('agents:agencyCreation.hints.licenseNumber', 'Your official real estate license')}</p>
               </div>
               <div>
-                <label className={labelCls}>Years in Business</label>
+                <label className={labelCls}>{t('agents:agencyCreation.fields.yearsInBusiness', 'Years in Business')}</label>
                 <input
                   type="number"
                   value={formData.yearsInBusiness}
@@ -644,11 +642,11 @@ const AgencyCreationModal: React.FC<AgencyCreationModalProps> = ({
                   className={inputCls('yearsInBusiness')}
                   disabled={isCreating}
                 />
-                <p className="text-xs text-gray-400 mt-1">How long you've been in real estate</p>
+                <p className="text-xs text-gray-400 mt-1">{t('agents:agencyCreation.hints.yearsInBusiness', 'How long you\'ve been in real estate')}</p>
               </div>
             </div>
             <div>
-              <label className={labelCls}>Languages Spoken</label>
+              <label className={labelCls}>{t('agents:agencyCreation.fields.languages', 'Languages Spoken')}</label>
               <div className="flex flex-wrap gap-2 mt-1">
                 {BALKAN_LANGUAGES.map(lang => (
                   <button
@@ -666,7 +664,7 @@ const AgencyCreationModal: React.FC<AgencyCreationModalProps> = ({
                   </button>
                 ))}
               </div>
-              <p className="text-xs text-gray-400 mt-2">Select all languages your team can communicate in</p>
+              <p className="text-xs text-gray-400 mt-2">{t('agents:agencyCreation.hints.languages', 'Select all languages your team can communicate in')}</p>
             </div>
           </div>
         );
@@ -677,7 +675,7 @@ const AgencyCreationModal: React.FC<AgencyCreationModalProps> = ({
           <div className="space-y-6">
             {/* Social Links */}
             <div>
-              <h3 className="text-sm font-bold text-gray-800 mb-3">Social Media <span className="text-gray-400 font-normal">(optional)</span></h3>
+              <h3 className="text-sm font-bold text-gray-800 mb-3">{t('agents:agencyCreation.fields.socialMedia', 'Social Media')} <span className="text-gray-400 font-normal">{t('agents:agencyCreation.fields.optional', '(optional)')}</span></h3>
               <div className="space-y-4">
                 {[
                   { field: 'facebookUrl', label: 'Facebook', placeholder: 'https://facebook.com/yourpage' },
@@ -701,7 +699,7 @@ const AgencyCreationModal: React.FC<AgencyCreationModalProps> = ({
 
             {/* Business Hours */}
             <div>
-              <h3 className="text-sm font-bold text-gray-800 mb-3">Business Hours <span className="text-gray-400 font-normal">(optional)</span></h3>
+              <h3 className="text-sm font-bold text-gray-800 mb-3">{t('agents:agencyCreation.fields.businessHours', 'Business Hours')} <span className="text-gray-400 font-normal">{t('agents:agencyCreation.fields.optional', '(optional)')}</span></h3>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 {DAYS.map(day => (
                   <div key={day}>
@@ -755,10 +753,10 @@ const AgencyCreationModal: React.FC<AgencyCreationModalProps> = ({
               </div>
               <div className="min-w-0">
                 <h2 className="text-base font-bold text-gray-900 leading-tight">
-                  {state.pendingAgencyData ? 'Edit Agency Details' : 'Create Your Agency'}
+                  {state.pendingAgencyData ? t('agents:agencyCreation.header.edit', 'Edit Agency Details') : t('agents:agencyCreation.header.create', 'Create Your Agency')}
                 </h2>
                 <p className="text-xs text-gray-400">
-                  Step {step} of {STEPS.length} — {STEPS[step - 1].label}
+                  {t('agents:agencyCreation.header.stepIndicator', { step, total: STEPS.length, label: t(`agents:agencyCreation.steps.${STEPS[step - 1].label.toLowerCase()}`, STEPS[step - 1].label), defaultValue: `Step ${step} of ${STEPS.length} — ${STEPS[step - 1].label}` })}
                 </p>
               </div>
             </div>
@@ -795,7 +793,7 @@ const AgencyCreationModal: React.FC<AgencyCreationModalProps> = ({
                 <span className={`text-[10px] font-semibold uppercase tracking-wide ${
                   s.id === step ? 'text-blue-600' : s.id < step ? 'text-green-600' : 'text-gray-400'
                 }`}>
-                  {s.icon} {s.label}
+                  {s.icon} {t(`agents:agencyCreation.steps.${s.label.toLowerCase()}`, s.label)}
                 </span>
               </div>
             ))}
@@ -808,7 +806,7 @@ const AgencyCreationModal: React.FC<AgencyCreationModalProps> = ({
                 <ExclamationTriangleIcon className="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5" />
                 <div className="flex-1 min-w-0">
                   <p className="text-sm font-semibold text-amber-800">
-                    {agencyEligibility.reason?.includes('agent') ? 'Agent Status Required' : 'Pro Subscription Required'}
+                    {agencyEligibility.reason?.includes('agent') ? t('agents:agencyCreation.eligibility.agentRequired', 'Agent Status Required') : t('agents:agencyCreation.eligibility.proRequired', 'Pro Subscription Required')}
                   </p>
                   <p className="text-xs text-amber-700 mt-0.5">{agencyEligibility.reason}</p>
                   <button
@@ -824,7 +822,7 @@ const AgencyCreationModal: React.FC<AgencyCreationModalProps> = ({
                     }}
                     className="mt-2 px-3 py-1.5 bg-amber-500 text-white text-xs font-semibold rounded-lg hover:bg-amber-600 transition-colors"
                   >
-                    {!isUserAgent ? 'Become an Agent First' : 'Upgrade to Pro'}
+                    {!isUserAgent ? t('agents:agencyCreation.eligibility.becomeAgent', 'Become an Agent First') : t('agents:agencyCreation.eligibility.upgradeToPro', 'Upgrade to Pro')}
                   </button>
                 </div>
               </div>
@@ -835,7 +833,7 @@ const AgencyCreationModal: React.FC<AgencyCreationModalProps> = ({
             <div className="mx-5 mb-3 flex-shrink-0">
               <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-green-100 text-green-700 rounded-full text-xs font-semibold">
                 <CheckCircleIcon className="w-3.5 h-3.5" />
-                Enterprise Active — No Payment Required
+                {t('agents:agencyCreation.enterprise.active', 'Enterprise Active — No Payment Required')}
               </div>
             </div>
           )}
@@ -863,7 +861,7 @@ const AgencyCreationModal: React.FC<AgencyCreationModalProps> = ({
                 className="flex items-center gap-1.5 px-4 py-3 border border-gray-200 text-gray-600 font-semibold rounded-xl hover:bg-gray-50 transition-colors text-sm disabled:opacity-40"
               >
                 <ChevronLeft className="w-4 h-4" />
-                Back
+                {t('common:back', 'Back')}
               </button>
             ) : (
               <button
@@ -872,7 +870,7 @@ const AgencyCreationModal: React.FC<AgencyCreationModalProps> = ({
                 disabled={isCreating}
                 className="flex-1 px-4 py-3 border border-gray-200 text-gray-600 font-semibold rounded-xl hover:bg-gray-50 transition-colors text-sm disabled:opacity-40"
               >
-                Cancel
+                {t('common:cancel', 'Cancel')}
               </button>
             )}
 
@@ -886,15 +884,15 @@ const AgencyCreationModal: React.FC<AgencyCreationModalProps> = ({
                 {isCreating ? (
                   <>
                     <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                    Creating Agency…
+                    {t('agents:agencyCreation.buttons.creating', 'Creating Agency…')}
                   </>
                 ) : canSkipPayment ? (
                   <>
                     <BuildingOfficeIcon className="w-4 h-4" />
-                    Create Agency
+                    {t('agents:agencyCreation.buttons.create', 'Create Agency')}
                   </>
                 ) : (
-                  'Continue to Payment →'
+                  t('agents:agencyCreation.buttons.continueToPayment', 'Continue to Payment →')
                 )}
               </button>
             ) : (
@@ -904,7 +902,7 @@ const AgencyCreationModal: React.FC<AgencyCreationModalProps> = ({
                 disabled={isCreating}
                 className="flex-1 flex items-center justify-center gap-1.5 px-4 py-3 bg-blue-600 text-white font-semibold rounded-xl hover:bg-blue-700 transition-colors text-sm shadow-sm disabled:opacity-40"
               >
-                Next
+                {t('common:next', 'Next')}
                 <ChevronRight className="w-4 h-4" />
               </button>
             )}

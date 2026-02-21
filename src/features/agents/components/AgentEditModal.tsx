@@ -158,7 +158,7 @@ const AgentEditModal: React.FC<AgentEditModalProps> = ({
                             {t('profilePage.editModal.title')}
                         </h2>
                         <p className="text-xs text-gray-400 mt-0.5 hidden sm:block">
-                            Update your agent profile details
+                            {t('profilePage.editModal.subtitle', 'Update your agent profile details')}
                         </p>
                     </div>
                     <button
@@ -298,9 +298,9 @@ const AgentEditModal: React.FC<AgentEditModalProps> = ({
                             {(
                                 [
                                     { key: 'websiteUrl' as keyof EditFormData, label: t('profilePage.editModal.website'), placeholder: 'https://www.yourwebsite.com' },
-                                    { key: 'facebookUrl' as keyof EditFormData, label: 'Facebook', placeholder: 'https://facebook.com/yourprofile' },
-                                    { key: 'instagramUrl' as keyof EditFormData, label: 'Instagram', placeholder: 'https://instagram.com/yourprofile' },
-                                    { key: 'linkedinUrl' as keyof EditFormData, label: 'LinkedIn', placeholder: 'https://linkedin.com/in/yourprofile' },
+                                    { key: 'facebookUrl' as keyof EditFormData, label: t('profilePage.editModal.facebook', 'Facebook'), placeholder: 'https://facebook.com/yourprofile' },
+                                    { key: 'instagramUrl' as keyof EditFormData, label: t('profilePage.editModal.instagram', 'Instagram'), placeholder: 'https://instagram.com/yourprofile' },
+                                    { key: 'linkedinUrl' as keyof EditFormData, label: t('profilePage.editModal.linkedin', 'LinkedIn'), placeholder: 'https://linkedin.com/in/yourprofile' },
                                 ]
                             ).map(({ key, label, placeholder }) => (
                                 <div key={key}>

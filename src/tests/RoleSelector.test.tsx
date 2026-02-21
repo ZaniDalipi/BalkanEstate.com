@@ -9,6 +9,14 @@ import '@testing-library/jest-dom';
 import RoleSelector from '../features/seller/components/RoleSelector';
 import { User, UserRole } from '@/types';
 
+// Mock AppContext so RoleSelector can access dispatch without a full AppProvider
+vi.mock('@/context/AppContext', () => ({
+  useAppContext: () => ({
+    dispatch: vi.fn(),
+    state: {},
+  }),
+}));
+
 // Mock console.log to avoid cluttering test output
 vi.spyOn(console, 'log').mockImplementation(() => {});
 

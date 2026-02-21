@@ -794,7 +794,11 @@
       "website": "Website",
       "cancel": "Cancel",
       "saving": "Saving...",
-      "saveChanges": "Save Changes"
+      "saveChanges": "Save Changes",
+      "subtitle": "Update your agent profile details",
+      "facebook": "Facebook",
+      "instagram": "Instagram",
+      "linkedin": "LinkedIn"
     },
     "editButton": "Edit Profile"
   },

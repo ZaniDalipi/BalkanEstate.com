@@ -4,14 +4,8 @@
  */
 
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { CheckCircleIcon, SparklesIcon } from '@/constants';
-
-const DEFAULT_BENEFITS = [
-  '250 Listings/Year',
-  '3 Promo Coupons/Month',
-  'Unlimited AI Chat',
-  '20 Insights/Month',
-];
 
 interface NoSubscriptionViewProps {
   title?: string;
@@ -21,11 +15,23 @@ interface NoSubscriptionViewProps {
 }
 
 const NoSubscriptionView: React.FC<NoSubscriptionViewProps> = ({
-  title = 'Upgrade Your Listings',
-  subtitle = 'Publish more listings, boost visibility, and grow your business',
-  benefits = DEFAULT_BENEFITS,
+  title,
+  subtitle,
+  benefits,
   subscribeUrl = '/subscribe',
 }) => {
+  const { t } = useTranslation(['subscription']);
+
+  const defaultBenefits = [
+    t('subscription:noSubscription.benefit1', '250 Listings/Year'),
+    t('subscription:noSubscription.benefit2', '3 Promo Coupons/Month'),
+    t('subscription:noSubscription.benefit3', 'Unlimited AI Chat'),
+    t('subscription:noSubscription.benefit4', '20 Insights/Month'),
+  ];
+
+  const resolvedTitle = title ?? t('subscription:noSubscription.title', 'Upgrade Your Listings');
+  const resolvedSubtitle = subtitle ?? t('subscription:noSubscription.subtitle', 'Publish more listings, boost visibility, and grow your business');
+  const resolvedBenefits = benefits ?? defaultBenefits;
   return (
     <div className="max-w-2xl mx-auto">
       <div className="relative overflow-hidden bg-gradient-to-br from-white via-primary-light/10 to-primary-light/5 rounded-2xl shadow-lg border border-primary/10 p-8 md:p-12">
@@ -42,16 +48,16 @@ const NoSubscriptionView: React.FC<NoSubscriptionViewProps> = ({
           {/* Text */}
           <div>
             <h3 className="text-2xl md:text-3xl font-bold text-neutral-900 mb-3">
-              {title}
+              {resolvedTitle}
             </h3>
             <p className="text-neutral-600 text-lg max-w-md mx-auto">
-              {subtitle}
+              {resolvedSubtitle}
             </p>
           </div>
 
           {/* Benefits grid */}
           <div className="grid sm:grid-cols-2 gap-3 max-w-lg mx-auto pt-4">
-            {benefits.map((benefit, idx) => (
+            {resolvedBenefits.map((benefit, idx) => (
               <div
                 key={idx}
                 className="flex items-center gap-3 p-3 bg-white rounded-lg border border-primary/10 shadow-sm"
@@ -68,7 +74,7 @@ const NoSubscriptionView: React.FC<NoSubscriptionViewProps> = ({
             className="inline-flex items-center gap-2 px-8 py-4 bg-gradient-to-r from-primary to-primary-dark text-white font-bold rounded-xl hover:shadow-xl hover:scale-105 transition-all duration-300 mt-4 cursor-pointer"
           >
             <SparklesIcon className="w-5 h-5" />
-            View Plans & Pricing
+            {t('subscription:noSubscription.viewPlans', 'View Plans & Pricing')}
           </a>
         </div>
       </div>

@@ -1408,12 +1408,12 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
           <div className="mt-6 flex items-center gap-6 md:gap-8">
             <div className="text-center">
               <p className="text-2xl md:text-3xl font-bold text-white">{agencyProperties.length}</p>
-              <p className="text-xs md:text-sm text-white/60 font-medium uppercase tracking-wider">Listings</p>
+              <p className="text-xs md:text-sm text-white/60 font-medium uppercase tracking-wider">{t('agencyDetails:stats.totalListings')}</p>
             </div>
             <div className="w-px h-8 bg-white/20"></div>
             <div className="text-center">
               <p className="text-2xl md:text-3xl font-bold text-white">{agencyData.totalAgents}</p>
-              <p className="text-xs md:text-sm text-white/60 font-medium uppercase tracking-wider">Agents</p>
+              <p className="text-xs md:text-sm text-white/60 font-medium uppercase tracking-wider">{t('agencyDetails:stats.totalAgents')}</p>
             </div>
             <div className="w-px h-8 bg-white/20"></div>
             <div className="text-center">
@@ -1421,7 +1421,7 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
                 <StarIcon className="w-5 h-5 text-amber-400 fill-current" />
                 <p className="text-2xl md:text-3xl font-bold text-white">{agencyData.rating?.toFixed(1) || 'N/A'}</p>
               </div>
-              <p className="text-xs md:text-sm text-white/60 font-medium uppercase tracking-wider">Rating</p>
+              <p className="text-xs md:text-sm text-white/60 font-medium uppercase tracking-wider">{t('agencyDetails:stats.rating')}</p>
             </div>
           </div>
         </div>
@@ -1497,12 +1497,12 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
                 <BuildingOfficeIcon className="w-7 h-7 text-primary" />
               </div>
               <div>
-                <h2 className="text-xl md:text-2xl font-bold text-slate-900 mb-1">About {agencyData.name}</h2>
+                <h2 className="text-xl md:text-2xl font-bold text-slate-900 mb-1">{t('agencyDetails:about.title', { agencyName: agencyData.name })}</h2>
                 {agencyData.yearsInBusiness && (
                   <div className="flex items-center gap-2">
                     <span className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-primary/10 rounded-full text-primary text-xs font-medium">
                       <SparklesIcon className="w-3.5 h-3.5" />
-                      {agencyData.yearsInBusiness}+ Years of Excellence
+                      {t('agencyDetails:about.yearsOfExcellence', '{{years}}+ Years of Excellence', { years: agencyData.yearsInBusiness })}
                     </span>
                   </div>
                 )}
@@ -1567,7 +1567,7 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
                   <HomeIcon className="w-5 h-5 text-primary" />
                 </div>
                 <div className="text-2xl font-bold text-slate-900">{agencyProperties?.length || 0}</div>
-                <div className="text-xs text-slate-500 font-medium">Listings</div>
+                <div className="text-xs text-slate-500 font-medium">{t('agencyDetails:stats.totalListings')}</div>
               </div>
               <div
                 className="text-center p-4 rounded-xl border border-slate-200/60"
@@ -1577,7 +1577,7 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
                   <UserGroupIcon className="w-5 h-5 text-emerald-600" />
                 </div>
                 <div className="text-2xl font-bold text-slate-900">{agents?.length || 0}</div>
-                <div className="text-xs text-slate-500 font-medium">Agents</div>
+                <div className="text-xs text-slate-500 font-medium">{t('agencyDetails:stats.totalAgents')}</div>
               </div>
               <div
                 className="text-center p-4 rounded-xl border border-slate-200/60"
@@ -1597,7 +1597,7 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
                   <StarIcon className="w-5 h-5 text-amber-500" />
                 </div>
                 <div className="text-2xl font-bold text-slate-900">{agencyData.rating?.toFixed(1) || '5.0'}</div>
-                <div className="text-xs text-slate-500 font-medium">Rating</div>
+                <div className="text-xs text-slate-500 font-medium">{t('agencyDetails:stats.rating')}</div>
               </div>
             </div>
 
@@ -1610,7 +1610,7 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
                     <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center">
                       <PhoneIcon className="w-4 h-4 text-white" />
                     </div>
-                    <h3 className="text-sm font-bold text-slate-900">Get in Touch</h3>
+                    <h3 className="text-sm font-bold text-slate-900">{t('agencyDetails:about.getInTouch', 'Get in Touch')}</h3>
                   </div>
                   <div className="space-y-3">
                     <a href={`tel:${agencyData.phone}`} className="flex items-center gap-3 p-3 bg-white rounded-lg border border-slate-100 hover:border-primary/30 hover:shadow-md transition-all group">
@@ -1618,7 +1618,7 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
                         <PhoneIcon className="w-5 h-5 text-primary group-hover:text-white transition-colors" />
                       </div>
                       <div>
-                        <div className="text-xs text-slate-400 font-medium">Phone</div>
+                        <div className="text-xs text-slate-400 font-medium">{t('agencyDetails:labels.call', 'Phone')}</div>
                         <span className="font-semibold text-slate-700 group-hover:text-primary transition-colors">{agencyData.phone}</span>
                       </div>
                     </a>
@@ -1627,7 +1627,7 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
                         <EnvelopeIcon className="w-5 h-5 text-primary group-hover:text-white transition-colors" />
                       </div>
                       <div>
-                        <div className="text-xs text-slate-400 font-medium">Email</div>
+                        <div className="text-xs text-slate-400 font-medium">{t('agencyDetails:labels.email')}</div>
                         <span className="font-semibold text-slate-700 group-hover:text-primary transition-colors">{agencyData.email}</span>
                       </div>
                     </a>
@@ -1637,7 +1637,7 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
                           <MapPinIcon className="w-5 h-5 text-primary" />
                         </div>
                         <div>
-                          <div className="text-xs text-slate-400 font-medium">Address</div>
+                          <div className="text-xs text-slate-400 font-medium">{t('agencyDetails:about.address', 'Address')}</div>
                           <span className="font-medium text-slate-700 text-sm leading-snug">{agencyData.address}</span>
                         </div>
                       </div>
@@ -1650,7 +1650,7 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
                           <GlobeAltIcon className="w-5 h-5 text-primary group-hover:text-white transition-colors" />
                         </div>
                         <div className="min-w-0 flex-1">
-                          <div className="text-xs text-slate-400 font-medium">Website</div>
+                          <div className="text-xs text-slate-400 font-medium">{t('agencyDetails:labels.website')}</div>
                           <span className="font-semibold text-slate-700 group-hover:text-primary transition-colors text-sm truncate block">{agencyData.website}</span>
                         </div>
                       </a>
@@ -1667,7 +1667,7 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
                           <path strokeLinecap="round" strokeLinejoin="round" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
                         </svg>
                       </div>
-                      <h3 className="text-sm font-bold text-slate-900">{t('social.title', 'Follow Us')}</h3>
+                      <h3 className="text-sm font-bold text-slate-900">{t('agencyDetails:about.followUs', 'Follow Us')}</h3>
                     </div>
                     <div className="grid grid-cols-2 gap-2">
                       {agencyData.facebookUrl && (
@@ -1719,7 +1719,7 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
                   <div className="bg-gradient-to-br from-emerald-50/50 to-white rounded-xl p-5 border border-emerald-100">
                     <div className="flex items-center gap-2 mb-3">
                       <MapPinIcon className="w-5 h-5 text-emerald-600" />
-                      <h3 className="text-sm font-bold text-slate-900">Service Areas</h3>
+                      <h3 className="text-sm font-bold text-slate-900">{t('agencyDetails:about.serviceAreas')}</h3>
                     </div>
                     <div className="flex flex-wrap gap-2">
                       {agencyData.serviceAreas.map((area, index) => (
@@ -1801,7 +1801,7 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
                   <div className="bg-gradient-to-br from-primary/5 to-white rounded-xl p-5 border border-primary/10">
                     <div className="flex items-center gap-2 mb-3">
                       <SparklesIcon className="w-5 h-5 text-primary" />
-                      <h3 className="text-sm font-bold text-slate-900">What We Do Best</h3>
+                      <h3 className="text-sm font-bold text-slate-900">{t('agencyDetails:about.specialties')}</h3>
                     </div>
                     <div className="flex flex-wrap gap-2">
                       {agencyData.specialties.map((specialty, index) => (

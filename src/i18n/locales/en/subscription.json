@@ -282,5 +282,14 @@
     "perWeek": "per week",
     "perMonth": "per month",
     "perYear": "per year"
+  },
+  "noSubscription": {
+    "title": "Upgrade Your Listings",
+    "subtitle": "Publish more listings, boost visibility, and grow your business",
+    "benefit1": "250 Listings/Year",
+    "benefit2": "3 Promo Coupons/Month",
+    "benefit3": "Unlimited AI Chat",
+    "benefit4": "20 Insights/Month",
+    "viewPlans": "View Plans & Pricing"
   }
 }
