@@ -349,6 +349,7 @@
     "loginAndGenerate": "Login & Generate Insights",
     "usageInfo": "Usage: {{used}}/{{limit}} insights used this month",
     "remainingInfo": "{{remaining}} of {{limit}} insights remaining this month",
+    "unlimitedInsights": "Neograničeni uvidi dostupni sa vašim planom",
     "upgradePrompt": "Upgrade to premium for more insights!",
     "tryAgain": "Try again"
   },
