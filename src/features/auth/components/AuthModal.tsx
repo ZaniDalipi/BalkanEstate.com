@@ -53,11 +53,12 @@ const BALKAN_COUNTRY_CODES = [
 
 const validatePhone = (countryCode: string, phoneNumber: string, t?: (key: string, defaultValue?: string) => string): string | null => {
     const tr = t || ((key: string, defaultValue?: string) => defaultValue || key);
+    // Phone is optional - only validate format if user entered something
+    if (!phoneNumber.trim()) {
+        return null;
+    }
     if (!countryCode) {
         return tr('auth:validation.phone.selectCountryCode', 'Please select a country code');
-    }
-    if (!phoneNumber.trim()) {
-        return tr('auth:validation.phone.required', 'Phone number is required');
     }
     // Remove any spaces or dashes from the number
     const cleanNumber = phoneNumber.replace(/[\s\-()]/g, '');
@@ -370,7 +371,10 @@ const AuthPage: React.FC = () => {
             if (password !== confirmPassword) {
                 confirmError = t('auth:validation.passwordsDoNotMatch', 'Passwords do not match');
             }
-            phoneError = validatePhone(phoneCountryCode, phoneNumber, t);
+            // Phone is optional - only validate format if user entered something
+            if (phoneNumber.trim()) {
+                phoneError = validatePhone(phoneCountryCode, phoneNumber, t);
+            }
         } else {
             // Login - just check if password is provided
             if (!password.trim()) {
@@ -379,7 +383,7 @@ const AuthPage: React.FC = () => {
         }
 
         // Set all errors and mark fields as touched
-        setTouched({ email: true, password: true, confirmPassword: true, phone: true });
+        setTouched({ email: true, password: true, confirmPassword: true, phone: !!phoneNumber.trim() });
         setFieldErrors({
             email: emailError || undefined,
             password: passwordError || undefined,
@@ -399,9 +403,9 @@ const AuthPage: React.FC = () => {
             if (state.authModalView === 'login') {
                 await login(email, password);
             } else {
-                // Build full phone number with country code
+                // Build full phone number with country code (only if provided)
                 const cleanNumber = phoneNumber.replace(/[\s\-()]/g, '');
-                const fullPhone = `${phoneCountryCode}${cleanNumber}`;
+                const fullPhone = cleanNumber ? `${phoneCountryCode}${cleanNumber}` : '';
                 // All users register as buyers - they can upgrade to agent from profile settings
                 await signup(email, password, { role: 'buyer', phone: fullPhone });
             }
@@ -511,10 +515,14 @@ const AuthPage: React.FC = () => {
                                 />
                             </div>
 
-                            {/* Phone number field (signup only) */}
+                            {/* Phone number field (signup only, optional) */}
                             {state.authModalView === 'signup' && (
                                 <div>
-                                    <div className="flex gap-2">
+                                    <div className={`flex items-center rounded-2xl border-2 transition-all duration-300 bg-white/50 backdrop-blur-sm ${
+                                        fieldErrors.phone && touched.phone
+                                            ? 'border-red-300 focus-within:border-red-400 focus-within:ring-4 focus-within:ring-red-100'
+                                            : 'border-white/60 hover:border-white/80 focus-within:border-primary/50 focus-within:ring-4 focus-within:ring-primary/10'
+                                    }`}>
                                         <select
                                             value={phoneCountryCode}
                                             onChange={(e) => {
@@ -524,7 +532,7 @@ const AuthPage: React.FC = () => {
                                                     setFieldErrors(prev => ({ ...prev, phone: err || undefined }));
                                                 }
                                             }}
-                                            className={`${glassInputClasses(!!fieldErrors.phone && touched.phone)} w-[130px] flex-shrink-0 pr-2`}
+                                            className="bg-transparent text-sm text-neutral-700 font-medium pl-4 pr-1 py-4 border-none focus:outline-none focus:ring-0 cursor-pointer"
                                         >
                                             {BALKAN_COUNTRY_CODES.map((cc) => (
                                                 <option key={cc.code} value={cc.code}>
@@ -532,6 +540,7 @@ const AuthPage: React.FC = () => {
                                                 </option>
                                             ))}
                                         </select>
+                                        <div className="w-px h-6 bg-neutral-300/60 flex-shrink-0" />
                                         <input
                                             type="tel"
                                             id="phone"
@@ -546,8 +555,8 @@ const AuthPage: React.FC = () => {
                                                 }
                                             }}
                                             onBlur={() => handleBlur('phone')}
-                                            className={`${glassInputClasses(!!fieldErrors.phone && touched.phone)} flex-1`}
-                                            placeholder={t('auth:signup.phonePlaceholder', 'Enter your phone number')}
+                                            className="flex-1 bg-transparent text-base text-neutral-900 px-3 py-4 border-none focus:outline-none focus:ring-0 placeholder:text-neutral-400"
+                                            placeholder={t('auth:signup.phonePlaceholder', 'Phone number (optional)')}
                                             autoComplete="tel-national"
                                         />
                                     </div>
