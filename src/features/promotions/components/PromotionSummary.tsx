@@ -1,4 +1,5 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { FireIcon, StarIconSolid } from '@/constants';
 import type { PromotionDuration, ExtensionTierStyle } from './usePromotionSelector';
 
@@ -39,6 +40,8 @@ const PromotionSummary: React.FC<PromotionSummaryProps> = ({
   onSkip,
   onPurchase,
 }) => {
+  const { t } = useTranslation(['common']);
+
   return (
     <>
       {/* Price Summary - Enhanced for Extension and Urgent Mode */}
@@ -52,38 +55,42 @@ const PromotionSummary: React.FC<PromotionSummaryProps> = ({
         <h3 className="text-sm font-semibold text-neutral-800 mb-3 flex items-center gap-2">
           {focusUrgent && <FireIcon className="w-4 h-4 text-red-500" />}
           {isExtension && <StarIconSolid className="w-4 h-4 text-current" />}
-          {focusUrgent ? 'Urgent Badge Summary' : isExtension ? 'Extension Summary' : 'Summary'}
+          {focusUrgent
+            ? t('common:promotions.urgentBadgeSummary', 'Urgent Badge Summary')
+            : isExtension
+              ? t('common:promotions.extensionSummary', 'Extension Summary')
+              : t('common:promotions.summary', 'Summary')}
         </h3>
         <div className="space-y-2 text-sm">
           {isExtension && (
             <div className="flex justify-between text-gray-600">
-              <span>Duration:</span>
-              <span className="font-semibold">+{selectedDuration} days</span>
+              <span>{t('common:promotions.duration', 'Duration')}:</span>
+              <span className="font-semibold">+{selectedDuration} {t('common:promotions.days', 'days')}</span>
             </div>
           )}
           {priceInfo.original !== priceInfo.final && (
             <div className="flex justify-between text-neutral-600">
-              <span>Original Price:</span>
+              <span>{t('common:promotions.originalPrice', 'Original Price')}:</span>
               <span className="line-through">€{priceInfo.original.toFixed(2)}</span>
             </div>
           )}
           {priceInfo.savings > 0 && (
             <div className="flex justify-between text-green-600 font-medium">
-              <span>Savings:</span>
+              <span>{t('common:promotions.savings', 'Savings')}:</span>
               <span>-€{priceInfo.savings.toFixed(2)}</span>
             </div>
           )}
           <div className={`flex justify-between text-lg font-bold text-neutral-900 pt-3 border-t ${
             isExtension ? extStyle.border : 'border-neutral-300'
           }`}>
-            <span>Total:</span>
+            <span>{t('common:promotions.total', 'Total')}:</span>
             <span className={isExtension ? extStyle.text : ''}>
               €{priceInfo.final.toFixed(2)}
               {useAgencyAllocation && priceInfo.final === 0 && (
-                <span className="text-sm text-green-600 ml-2 font-normal">(Free)</span>
+                <span className="text-sm text-green-600 ml-2 font-normal">({t('common:promotions.free', 'Free')})</span>
               )}
               {isExtension && priceInfo.final === 0 && !useAgencyAllocation && couponValidation?.isValid && (
-                <span className="text-sm text-green-600 ml-2 font-normal">(Free with coupon)</span>
+                <span className="text-sm text-green-600 ml-2 font-normal">({t('common:promotions.freeWithCoupon', 'Free with coupon')})</span>
               )}
             </span>
           </div>
@@ -98,7 +105,7 @@ const PromotionSummary: React.FC<PromotionSummaryProps> = ({
             disabled={isProcessing}
             className="px-6 py-3.5 bg-white border border-gray-200 text-gray-700 rounded-xl text-sm font-medium hover:bg-gray-50 hover:border-gray-300 transition-colors disabled:opacity-50 shadow-sm"
           >
-            ← Back
+            ← {t('common:promotions.back', 'Back')}
           </button>
         )}
         <button
@@ -110,7 +117,11 @@ const PromotionSummary: React.FC<PromotionSummaryProps> = ({
               : 'border-gray-200 hover:bg-gray-50 hover:border-gray-300'
           }`}
         >
-          {isExtension || focusUrgent ? 'Cancel' : hasPendingProperty ? 'Post Without Promotion' : 'Skip for Now'}
+          {isExtension || focusUrgent
+            ? t('common:promotions.cancel', 'Cancel')
+            : hasPendingProperty
+              ? t('common:promotions.postWithoutPromotion', 'Post Without Promotion')
+              : t('common:promotions.skipForNow', 'Skip for Now')}
         </button>
         <button
           onClick={onPurchase}
@@ -126,31 +137,31 @@ const PromotionSummary: React.FC<PromotionSummaryProps> = ({
           {isProcessing ? (
             <span className="flex items-center justify-center gap-2">
               <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
-              {focusUrgent ? 'Processing...' : isExtension ? 'Extending...' : hasPendingProperty ? 'Creating Listing...' : 'Processing...'}
+              {t('common:promotions.processing', 'Processing...')}
             </span>
           ) : successMessage ? (
             <span className="flex items-center justify-center gap-2">
               <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
               </svg>
-              Success!
+              {t('common:promotions.success', 'Success!')}
             </span>
           ) : focusUrgent ? (
             <span className="flex items-center justify-center gap-2">
               <FireIcon className="w-4 h-4" />
               {wantsTierUpgrade
-                ? `Upgrade & Add Urgent - €${priceInfo.final.toFixed(2)}`
-                : `Add Urgent Badge - €${priceInfo.final.toFixed(2)}`}
+                ? t('common:promotions.upgradeAndAddUrgent', 'Upgrade & Add Urgent - €{{price}}', { price: priceInfo.final.toFixed(2) })
+                : t('common:promotions.addUrgentBadgePrice', 'Add Urgent Badge - €{{price}}', { price: priceInfo.final.toFixed(2) })}
             </span>
           ) : isExtension ? (
             <span className="flex items-center justify-center gap-2">
               <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6l4 2" />
               </svg>
-              Extend +{selectedDuration} days - €{priceInfo.final.toFixed(2)}
+              {t('common:promotions.extendDays', 'Extend +{{days}} days - €{{price}}', { days: selectedDuration, price: priceInfo.final.toFixed(2) })}
             </span>
           ) : (
-            `Continue - €${priceInfo.final.toFixed(2)}`
+            t('common:promotions.continuePrice', 'Continue - €{{price}}', { price: priceInfo.final.toFixed(2) })
           )}
         </button>
       </div>

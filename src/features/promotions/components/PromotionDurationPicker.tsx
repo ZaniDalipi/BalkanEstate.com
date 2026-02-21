@@ -1,4 +1,5 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { ClockIcon } from '@/constants';
 import type { PromotionDuration, ExtensionTierStyle } from './usePromotionSelector';
 
@@ -33,13 +34,17 @@ const PromotionDurationPicker: React.FC<PromotionDurationPickerProps> = ({
   isExtension,
   extStyle,
 }) => {
+  const { t } = useTranslation(['common']);
+
   return (
     <div className={`bg-white rounded-xl border ${isExtension ? extStyle.border : 'border-gray-200'} p-5 mb-4 shadow-sm`}>
       <h3 className="text-base font-semibold text-gray-900 mb-4 flex items-center gap-2">
         <span className={`w-8 h-8 ${isExtension ? extStyle.iconBg : 'bg-primary/10'} rounded-lg flex items-center justify-center`}>
           <ClockIcon className={`w-4 h-4 ${isExtension ? 'text-white' : 'text-primary'}`} />
         </span>
-        {isExtension ? 'Choose Extension Duration' : 'Select Duration'}
+        {isExtension
+          ? t('common:promotions.chooseExtensionDuration', 'Choose Extension Duration')
+          : t('common:promotions.selectDuration', 'Select Duration')}
       </h3>
       <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
         {DURATIONS.map((duration) => {
@@ -61,7 +66,7 @@ const PromotionDurationPicker: React.FC<PromotionDurationPickerProps> = ({
               onClick={() => onDurationChange(duration)}
               className={`p-3 rounded-xl border-2 transition-all text-sm ${durationStyle} text-gray-900`}
             >
-              <div className="font-bold">{duration} days</div>
+              <div className="font-bold">{duration} {t('common:promotions.days', 'days')}</div>
               <div className={`text-xs font-semibold mt-1 ${
                 isSelected
                   ? isExtension ? extStyle.text : 'text-primary'
@@ -71,7 +76,7 @@ const PromotionDurationPicker: React.FC<PromotionDurationPickerProps> = ({
               </div>
               {isExtension && isSelected && (
                 <div className="text-[10px] text-gray-400 mt-1">
-                  +{duration} days
+                  +{duration} {t('common:promotions.days', 'days')}
                 </div>
               )}
             </button>
