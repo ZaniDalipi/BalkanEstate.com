@@ -285,6 +285,7 @@ export function useGoogleMap(props: GoogleMapComponentProps) {
     if (!map) return;
 
     const mapDiv = map.getDiv();
+    if (!mapDiv) return;
     if (isDrawing) {
       mapDiv.style.cursor = 'crosshair';
       map.setOptions({ draggable: false, scrollwheel: false });
@@ -305,6 +306,7 @@ export function useGoogleMap(props: GoogleMapComponentProps) {
     if (!map) return;
 
     const mapDiv = map.getDiv();
+    if (!mapDiv) return;
 
     const getLatLngFromEvent = (e: MouseEvent | TouchEvent): { lat: number; lng: number } | null => {
       const clientX = 'touches' in e ? e.touches[0]?.clientX : e.clientX;
@@ -1307,6 +1309,7 @@ export function useGoogleMap(props: GoogleMapComponentProps) {
       if (!zoom || zoom < minZoom) return;
 
       const mapDiv = map.getDiv();
+      if (!mapDiv) return;
       const mapWidth = mapDiv.offsetWidth;
       const mapHeight = mapDiv.offsetHeight;
       const bounds = map.getBounds();
