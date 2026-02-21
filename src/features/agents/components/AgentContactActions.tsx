@@ -170,14 +170,15 @@ const AgentContactActions: React.FC<AgentContactActionsProps> = ({
                         ))}
                     </div>
                 ) : similarAgents.length > 0 ? (
-                    <div className="space-y-4">
-                        {similarAgents.map((similarAgent) => (
+                    <div className="space-y-2">
+                        {similarAgents.map((similarAgent, index) => (
                             <div
                                 key={similarAgent.id}
                                 onClick={() => onSelectSimilarAgent(similarAgent)}
-                                className="flex items-center gap-3 p-3 hover:bg-gray-50 rounded-xl transition-colors cursor-pointer"
+                                className="group flex items-center gap-3 p-3 hover:bg-blue-50 rounded-xl transition-all duration-300 cursor-pointer hover:shadow-md hover:scale-[1.02] active:scale-[0.98]"
+                                style={{ animationDelay: `${index * 80}ms` }}
                             >
-                                <div className="w-12 h-12 rounded-full overflow-hidden border-2 border-white shadow-sm">
+                                <div className="w-12 h-12 rounded-full overflow-hidden border-2 border-white shadow-sm transition-shadow duration-300 group-hover:shadow-md group-hover:border-blue-200">
                                     {similarAgent.avatarUrl ? (
                                         <img
                                             src={similarAgent.avatarUrl}
@@ -202,7 +203,7 @@ const AgentContactActions: React.FC<AgentContactActionsProps> = ({
                                         {similarAgent.agencyName || `${similarAgent.city || ''}, ${similarAgent.country || ''}`}
                                     </p>
                                 </div>
-                                <ChevronRightIcon className="w-5 h-5 text-gray-400" />
+                                <ChevronRightIcon className="w-5 h-5 text-gray-400 transition-all duration-300 group-hover:text-blue-500 group-hover:translate-x-1" />
                             </div>
                         ))}
                     </div>

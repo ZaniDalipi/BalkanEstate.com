@@ -115,7 +115,7 @@ interface ValidationErrors {
 const validate = (
   data: { title: string; issuer: string; expiryDate: string; issueDate: string },
   file: File | null,
-  t: (key: string, defaultValue?: string | Record<string, unknown>) => string,
+  t: (key: string, defaultValue?: string) => string,
 ): ValidationErrors => {
   const errors: ValidationErrors = {};
 
@@ -257,7 +257,7 @@ const CredentialsSection: React.FC<CredentialsSectionProps> = ({
     e.stopPropagation();
 
     // Validate
-    const validationErrors = validate(formData, selectedFile, t as (key: string, defaultValue?: string) => string);
+    const validationErrors = validate(formData, selectedFile, (key, def) => t(key, def ?? ''));
     if (Object.keys(validationErrors).length > 0) {
       setErrors(validationErrors);
       return;

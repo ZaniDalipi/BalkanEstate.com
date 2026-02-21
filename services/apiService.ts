@@ -556,7 +556,7 @@ export const updateAgentProfile = async (agentData: any): Promise<any> => {
 
 export const switchRole = async (
   role: UserRole,
-  licenseData?: { licenseNumber: string; agencyInvitationCode?: string; agentId?: string; languages?: string[] }
+  licenseData?: { licenseNumber: string; phone?: string; agencyInvitationCode?: string; agentId?: string; languages?: string[] }
 ): Promise<User> => {
   const response = await apiRequest<{ user: User; message: string }>('/auth/switch-role', {
     method: 'POST',

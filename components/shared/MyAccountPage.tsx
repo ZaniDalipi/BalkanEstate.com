@@ -755,7 +755,10 @@ const ProfileSettings: React.FC<{ user: User }> = ({ user }) => {
                 }
             });
 
-            if (!response.ok) return;
+            if (!response.ok) {
+                console.warn(`Failed to fetch agent data: HTTP ${response.status}`);
+                return;
+            }
 
             const data = await response.json();
             if (data.agent) {
@@ -813,7 +816,14 @@ const ProfileSettings: React.FC<{ user: User }> = ({ user }) => {
             return;
         }
 
-        // For other role switches (including agent ↔ private_seller), allow freely
+        // If switching to agent or private_seller but user has no phone, open modal to collect it
+        if ((role === UserRole.AGENT || role === UserRole.PRIVATE_SELLER) && !user.phone) {
+            setPendingRole(role);
+            setIsLicenseModalOpen(true);
+            return;
+        }
+
+        // For other role switches (including agent ↔ private_seller with phone on file), allow freely
         try {
             setIsSaving(true);
             const updatedUser = await switchRole(role);
@@ -828,7 +838,7 @@ const ProfileSettings: React.FC<{ user: User }> = ({ user }) => {
         }
     };
 
-    const handleLicenseSubmit = async (licenseData: { licenseNumber: string; agencyInvitationCode?: string; agentId?: string; selectedAgencyId?: string; languages?: string[] }) => {
+    const handleLicenseSubmit = async (licenseData: { licenseNumber: string; phone?: string; agencyInvitationCode?: string; agentId?: string; selectedAgencyId?: string; languages?: string[] }) => {
         setIsSaving(true);
         setError('');
         try {
@@ -1034,11 +1044,12 @@ const ProfileSettings: React.FC<{ user: User }> = ({ user }) => {
                 body: JSON.stringify({ invitationCode }),
             });
 
-            const data = await response.json();
-
             if (!response.ok) {
-                throw new Error(data.message || 'Failed to join agency');
+                const errorData = await response.json().catch(() => null);
+                throw new Error(errorData?.message || 'Failed to join agency');
             }
+
+            const data = await response.json();
 
             // Update user in context with new agency info
             if (data.user) {
@@ -1097,11 +1108,12 @@ const ProfileSettings: React.FC<{ user: User }> = ({ user }) => {
                 body: formData,
             });
 
-            const data = await response.json();
-
             if (!response.ok) {
-                throw new Error(data.message || 'Failed to upload avatar');
+                const errorData = await response.json().catch(() => null);
+                throw new Error(errorData?.message || 'Failed to upload avatar');
             }
+
+            const data = await response.json();
 
             // Merge server response; avatarOptions is null (cleared by backend)
             dispatch({ type: 'UPDATE_USER', payload: { ...data.user, avatarOptions: null } });
@@ -1152,8 +1164,11 @@ const ProfileSettings: React.FC<{ user: User }> = ({ user }) => {
                 },
                 body: JSON.stringify({ avatarOptions: options }),
             });
+            if (!response.ok) {
+                const errorData = await response.json().catch(() => null);
+                throw new Error(errorData?.message || 'Failed to save avatar');
+            }
             const data = await response.json();
-            if (!response.ok) throw new Error(data.message || 'Failed to save avatar');
             // Merge server response; avatarUrl is null (cleared by backend)
             dispatch({ type: 'UPDATE_USER', payload: { ...data.user, avatarUrl: null } });
             setFormData(prev => ({ ...prev, ...data.user, avatarUrl: undefined }));
@@ -1182,8 +1197,11 @@ const ProfileSettings: React.FC<{ user: User }> = ({ user }) => {
                 },
                 body: formDataUpload,
             });
+            if (!response.ok) {
+                const errorData = await response.json().catch(() => null);
+                throw new Error(errorData?.message || 'Failed to upload avatar');
+            }
             const data = await response.json();
-            if (!response.ok) throw new Error(data.message || 'Failed to upload avatar');
             // Merge server response; avatarOptions is null (cleared by backend)
             dispatch({ type: 'UPDATE_USER', payload: { ...data.user, avatarOptions: null } });
             setFormData(prev => ({ ...prev, ...data.user }));
@@ -1535,6 +1553,7 @@ const ProfileSettings: React.FC<{ user: User }> = ({ user }) => {
             onSubmit={handleLicenseSubmit}
             currentLicenseNumber={user.licenseNumber}
             currentAgentId={user.agentId}
+            currentPhone={user.phone}
         />
         </>
     );

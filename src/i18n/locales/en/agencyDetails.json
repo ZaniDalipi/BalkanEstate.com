@@ -40,12 +40,16 @@
     "averagePrice": "Average price"
   },
   "about": {
-    "title": "About {agencyName}",
+    "title": "About {{agencyName}}",
     "contactInfo": "Contact Information",
     "specialties": "Specialties",
     "specializations": "Specializations",
     "serviceAreas": "Service Areas",
-    "languagesSpoken": "Languages Spoken"
+    "languagesSpoken": "Languages Spoken",
+    "yearsOfExcellence": "{{years}}+ Years of Excellence",
+    "getInTouch": "Get in Touch",
+    "address": "Address",
+    "followUs": "Follow Us"
   },
   "invitationCode": {
     "title": "Agency Invitation Code",
@@ -67,7 +71,7 @@
     "title": "Team Members",
     "showTopPerformers": "Show Top Performers",
     "showAllMembers": "Show All Members",
-    "rankedByPerformance": "Ranked by Performance",
+    "rankedByPerformance": "{{count}} agents \u2022 Ranked by performance",
     "topAgent": "Top Agent",
     "secondPlace": "2nd Place",
     "thirdPlace": "3rd Place",
@@ -83,18 +87,34 @@
     "removing": "Removing...",
     "leaveAgency": "Leave Agency",
     "leaving": "Leaving...",
-    "noAgentsFound": "No agents found for this agency"
+    "noAgentsFound": "No agents found for this agency",
+    "noAgentsHelpText": "Team members will appear here once they join",
+    "loading": "Loading team members..."
   },
   "properties": {
     "activeListings": "ACTIVE LISTINGS",
     "soldProperties": "SOLD PROPERTIES",
     "activeListingsTitle": "Active Listings",
     "soldPropertiesTitle": "Sold Properties",
-    "propertiesCount": "{count} properties",
+    "propertiesCount": "{{count}} properties",
     "noActiveListings": "No active listings at the moment",
     "noSoldProperties": "No sold properties yet",
     "checkBackSoon": "Check back soon for new properties",
-    "soldWillAppear": "Sold properties will appear here"
+    "soldWillAppear": "Sold properties will appear here",
+    "map": "Properties Map",
+    "activeCount": "{{count}} active",
+    "soldCount": "{{count}} sold",
+    "beds": "beds",
+    "baths": "baths",
+    "viewDetails": "View Details",
+    "forSaleCount": "For Sale ({{count}})",
+    "soldCountLabel": "Sold ({{count}})",
+    "serviceAreaLocation": "Service Area Location",
+    "portfolio": "Property Portfolio",
+    "totalProperties": "{{count}} total properties",
+    "rented": "Rented",
+    "allCount": "All ({{count}})",
+    "forRentCount": "For Rent ({{count}})"
   },
   "editModal": {
     "title": "Edit Agency",
@@ -127,7 +147,10 @@
     "languagesHint": "Languages are auto-synced when agents join/leave",
     "businessHours": "Business Hours",
     "businessHoursPlaceholder": "9:00 AM - 6:00 PM",
-    "saveChanges": "Save Changes"
+    "saveChanges": "Save Changes",
+    "subtitle": "Update your agency information",
+    "descriptionHint": "Use line breaks to separate paragraphs",
+    "achievements": "Awards & Achievements"
   },
   "confirmations": {
     "removeAgent": "Are you sure you want to remove {name} from {agency}?",

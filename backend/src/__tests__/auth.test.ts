@@ -4,7 +4,7 @@
 
 import request from 'supertest';
 import express from 'express';
-import mongoose from 'mongoose';
+import { createSignupPayload, getAuthToken } from './setup';
 
 // Create a minimal express app for testing
 const createTestApp = () => {
@@ -24,12 +24,10 @@ describe('Auth API', () => {
     it('should create a new user with valid data', async () => {
       const app = createTestApp();
 
-      const userData = {
+      const userData = createSignupPayload({
         email: 'newuser@example.com',
-        password: 'SecurePassword123!',
-        firstName: 'John',
-        lastName: 'Doe',
-      };
+        name: 'John Doe',
+      });
 
       const response = await request(app)
         .post('/api/auth/signup')
@@ -39,10 +37,9 @@ describe('Auth API', () => {
       // Check response structure
       expect(response.status).toBe(201);
       expect(response.body).toHaveProperty('user');
-      expect(response.body).toHaveProperty('token');
+      expect(response.body).toHaveProperty('accessToken');
       expect(response.body.user.email).toBe(userData.email);
-      expect(response.body.user.firstName).toBe(userData.firstName);
-      expect(response.body.user.lastName).toBe(userData.lastName);
+      expect(response.body.user.name).toBe(userData.name);
       // Password should not be returned
       expect(response.body.user.password).toBeUndefined();
     });
@@ -64,12 +61,7 @@ describe('Auth API', () => {
 
       const response = await request(app)
         .post('/api/auth/signup')
-        .send({
-          email: 'invalid-email',
-          password: 'SecurePassword123!',
-          firstName: 'John',
-          lastName: 'Doe',
-        })
+        .send(createSignupPayload({ email: 'invalid-email' }))
         .expect('Content-Type', /json/);
 
       expect(response.status).toBe(400);
@@ -80,12 +72,10 @@ describe('Auth API', () => {
 
       const response = await request(app)
         .post('/api/auth/signup')
-        .send({
+        .send(createSignupPayload({
           email: 'test@example.com',
           password: '123', // Too weak
-          firstName: 'John',
-          lastName: 'Doe',
-        })
+        }))
         .expect('Content-Type', /json/);
 
       expect(response.status).toBe(400);
@@ -94,12 +84,10 @@ describe('Auth API', () => {
     it('should reject duplicate email registration', async () => {
       const app = createTestApp();
 
-      const userData = {
+      const userData = createSignupPayload({
         email: 'duplicate@example.com',
-        password: 'SecurePassword123!',
-        firstName: 'John',
-        lastName: 'Doe',
-      };
+        name: 'John Doe',
+      });
 
       // First signup should succeed
       await request(app)
@@ -119,19 +107,17 @@ describe('Auth API', () => {
   });
 
   describe('POST /api/auth/login', () => {
-    const testUser = {
+    const loginUserPayload = createSignupPayload({
       email: 'logintest@example.com',
-      password: 'SecurePassword123!',
-      firstName: 'Login',
-      lastName: 'Test',
-    };
+      name: 'Login Test',
+    });
 
     beforeEach(async () => {
       const app = createTestApp();
       // Create a user before login tests
       await request(app)
         .post('/api/auth/signup')
-        .send(testUser);
+        .send(loginUserPayload);
     });
 
     it('should login with valid credentials', async () => {
@@ -140,16 +126,16 @@ describe('Auth API', () => {
       const response = await request(app)
         .post('/api/auth/login')
         .send({
-          email: testUser.email,
-          password: testUser.password,
+          email: loginUserPayload.email,
+          password: loginUserPayload.password,
         })
         .expect('Content-Type', /json/);
 
       expect(response.status).toBe(200);
       expect(response.body).toHaveProperty('user');
-      expect(response.body).toHaveProperty('token');
+      expect(response.body).toHaveProperty('accessToken');
       expect(response.body).toHaveProperty('refreshToken');
-      expect(response.body.user.email).toBe(testUser.email);
+      expect(response.body.user.email).toBe(loginUserPayload.email);
     });
 
     it('should reject login with wrong password', async () => {
@@ -158,7 +144,7 @@ describe('Auth API', () => {
       const response = await request(app)
         .post('/api/auth/login')
         .send({
-          email: testUser.email,
+          email: loginUserPayload.email,
           password: 'WrongPassword123!',
         })
         .expect('Content-Type', /json/);
@@ -186,29 +172,20 @@ describe('Auth API', () => {
     it('should return user profile with valid token', async () => {
       const app = createTestApp();
 
-      // First create and login a user
-      const userData = {
+      const { accessToken, signupPayload } = await getAuthToken(app, {
         email: 'profile@example.com',
-        password: 'SecurePassword123!',
-        firstName: 'Profile',
-        lastName: 'User',
-      };
-
-      const signupResponse = await request(app)
-        .post('/api/auth/signup')
-        .send(userData);
-
-      const token = signupResponse.body.token;
+        name: 'Profile User',
+      });
 
       // Now get profile
       const response = await request(app)
         .get('/api/auth/me')
-        .set('Authorization', `Bearer ${token}`)
+        .set('Authorization', `Bearer ${accessToken}`)
         .expect('Content-Type', /json/);
 
       expect(response.status).toBe(200);
-      expect(response.body.email).toBe(userData.email);
-      expect(response.body.firstName).toBe(userData.firstName);
+      expect(response.body.user.email).toBe(signupPayload.email);
+      expect(response.body.user.name).toBe(signupPayload.name);
     });
 
     it('should reject request without token', async () => {

@@ -464,11 +464,12 @@ const PaymentWindow: React.FC<PaymentWindowProps> = ({
           }),
         });
 
-        const data = await response.json();
-
         if (!response.ok) {
-          throw new Error(data.message || t('payment:errors.freeSubscriptionFailed'));
+          const errorData = await response.json().catch(() => null);
+          throw new Error(errorData?.message || t('payment:errors.freeSubscriptionFailed'));
         }
+
+        const data = await response.json();
 
         // Track free subscription in Google Analytics
         trackEcommerce.subscribe(planName, 0);
@@ -527,11 +528,12 @@ const PaymentWindow: React.FC<PaymentWindowProps> = ({
         }),
       });
 
-      const data = await response.json();
-
       if (!response.ok) {
-        throw new Error(data.message || t('payment:errors.sessionCreationFailed'));
+        const errorData = await response.json().catch(() => null);
+        throw new Error(errorData?.message || t('payment:errors.sessionCreationFailed'));
       }
+
+      const data = await response.json();
 
       // Open payment checkout page in new window
       if (data.paymentUrl) {
@@ -954,14 +956,14 @@ const PaymentWindow: React.FC<PaymentWindowProps> = ({
                                 value={discountCode}
                                 onChange={(e) => setDiscountCode(e.target.value.toUpperCase())}
                                 placeholder={t('payment:checkout.enterCouponCode')}
-                                className="flex-1 px-2.5 sm:px-3 py-2 sm:py-2.5 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent text-sm"
+                                className="flex-1 min-w-0 px-2.5 sm:px-3 py-2 sm:py-2.5 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent text-sm"
                                 onKeyPress={(e) => e.key === 'Enter' && handleValidateDiscountCode()}
                                 disabled={validatingCode}
                               />
                               <button
                                 onClick={handleValidateDiscountCode}
                                 disabled={validatingCode || !discountCode.trim()}
-                                className="px-4 sm:px-5 py-2 sm:py-2.5 bg-primary text-white rounded-lg font-semibold text-sm hover:bg-primary-dark transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                                className="flex-shrink-0 px-4 sm:px-5 py-2 sm:py-2.5 bg-primary text-white rounded-lg font-semibold text-sm hover:bg-primary-dark transition-colors disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap"
                               >
                                 {validatingCode ? t('payment:checkout.checking') : t('payment:checkout.apply')}
                               </button>
@@ -1283,14 +1285,14 @@ const PaymentWindow: React.FC<PaymentWindowProps> = ({
                       value={discountCode}
                       onChange={(e) => setDiscountCode(e.target.value.toUpperCase())}
                       placeholder={t('payment:checkout.enterCode')}
-                      className="flex-1 px-2.5 sm:px-3 py-1.5 sm:py-2 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent text-xs sm:text-sm"
+                      className="flex-1 min-w-0 px-2.5 sm:px-3 py-1.5 sm:py-2 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent text-xs sm:text-sm"
                       onKeyPress={(e) => e.key === 'Enter' && handleValidateDiscountCode()}
                       disabled={validatingCode}
                     />
                     <button
                       onClick={handleValidateDiscountCode}
                       disabled={validatingCode || !discountCode.trim()}
-                      className="px-3 sm:px-4 py-1.5 sm:py-2 bg-primary text-white rounded-lg font-medium text-xs sm:text-sm hover:bg-primary-dark transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                      className="flex-shrink-0 px-3 sm:px-4 py-1.5 sm:py-2 bg-primary text-white rounded-lg font-medium text-xs sm:text-sm hover:bg-primary-dark transition-colors disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap"
                     >
                       {validatingCode ? t('payment:checkout.checking') : t('payment:checkout.apply')}
                     </button>

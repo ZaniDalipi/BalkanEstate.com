@@ -119,8 +119,8 @@ const AgentsPage: React.FC = () => {
     const fetchSpecificAgent = async () => {
       if (!selectedAgentId || loading) return;
 
-      // Check if agent exists in the current list
-      const existsInList = agents.some(a => a.agentId === selectedAgentId || a.id === selectedAgentId);
+      // Check if agent exists in the current list (by agentId, id, or userId)
+      const existsInList = agents.some(a => a.agentId === selectedAgentId || a.id === selectedAgentId || a.userId === selectedAgentId);
       if (existsInList) {
         setFetchedAgent(null);
         return;
@@ -345,8 +345,8 @@ const AgentsPage: React.FC = () => {
 
   const selectedAgent = useMemo(() => {
     if (!selectedAgentId) return null;
-    // First check the agents list, then fall back to the fetched agent
-    const fromList = agents.find(a => a.agentId === selectedAgentId || a.id === selectedAgentId);
+    // First check the agents list (by agentId, id, or userId), then fall back to the fetched agent
+    const fromList = agents.find(a => a.agentId === selectedAgentId || a.id === selectedAgentId || a.userId === selectedAgentId);
     return fromList || fetchedAgent;
   }, [selectedAgentId, agents, fetchedAgent]);
 

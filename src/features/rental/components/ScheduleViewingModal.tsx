@@ -167,7 +167,7 @@ const ScheduleViewingModal: React.FC<ScheduleViewingModalProps> = ({ property, i
         }
     }, [isOpen]);
 
-    // Generate available dates (next 14 days, filtered by allowed days)
+    // Generate available dates (next 21 days, filtered by allowed days)
     const availableDates = useMemo(() => {
         const dates: { value: string; label: string; dayName: string; dayOfWeek: number }[] = [];
         const today = new Date();
@@ -176,8 +176,10 @@ const ScheduleViewingModal: React.FC<ScheduleViewingModalProps> = ({ property, i
             const d = new Date(today);
             d.setDate(d.getDate() + i);
             if (allowedDays.includes(d.getDay())) {
+                // Use local year/month/day to avoid UTC offset shifting the date
+                const localDateStr = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
                 dates.push({
-                    value: d.toISOString().split('T')[0],
+                    value: localDateStr,
                     label: d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
                     dayName: d.toLocaleDateString('en-US', { weekday: 'short' }),
                     dayOfWeek: d.getDay(),
@@ -253,9 +255,8 @@ const ScheduleViewingModal: React.FC<ScheduleViewingModalProps> = ({ property, i
                 }),
             });
 
-            const data = await response.json();
-
             if (!response.ok) {
+                const errorData = await response.json().catch(() => null);
                 // Handle specific backend errors
                 if (response.status === 409) {
                     // Slot was booked by someone else — refresh booked slots
@@ -266,9 +267,10 @@ const ScheduleViewingModal: React.FC<ScheduleViewingModalProps> = ({ property, i
                     setSelectedTime('');
                     setStep('datetime');
                 }
-                throw new Error(data.message || 'Failed to schedule viewing');
+                throw new Error(errorData?.message || 'Failed to schedule viewing');
             }
 
+            const data = await response.json();
             setIsSubmitted(true);
         } catch (err: unknown) {
             const message = err instanceof Error ? err.message : String(err);

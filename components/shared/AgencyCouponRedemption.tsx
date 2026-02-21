@@ -112,11 +112,10 @@ const AgencyCouponRedemption: React.FC<AgencyCouponRedemptionProps> = ({
         body: JSON.stringify({ couponCode: trimmedCode }),
       });
 
-      const data = await response.json();
-
       if (!response.ok) {
-        // Handle specific error codes
-        switch (data.code) {
+        // Handle specific error codes from backend
+        const errorData = await response.json().catch(() => null);
+        switch (errorData?.code) {
           case 'INVALID_COUPON':
             setError('Invalid coupon code. Please check the code and try again.');
             break;
@@ -136,10 +135,12 @@ const AgencyCouponRedemption: React.FC<AgencyCouponRedemptionProps> = ({
             setError('Please enter a coupon code.');
             break;
           default:
-            setError(data.message || 'Failed to redeem coupon. Please try again.');
+            setError(errorData?.message || 'Failed to redeem coupon. Please try again.');
         }
         return;
       }
+
+      const data = await response.json();
 
       // Success! Update user context
       setSuccess(data);

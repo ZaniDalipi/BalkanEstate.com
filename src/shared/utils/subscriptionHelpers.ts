@@ -357,7 +357,7 @@ export function canBecomeAgent(subscription: UserSubscription | undefined): {
  * Database is the single source of truth for agent status
  */
 export function canCreateAgency(
-  subscription: UserSubscription | undefined,
+  subscription: Pick<UserSubscription, 'tier'> | undefined,
   availableRoles: UserRole[] | undefined,
   userFields?: {
     role?: UserRole | string;

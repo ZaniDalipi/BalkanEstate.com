@@ -6,7 +6,7 @@ import { useRealtimeProperties } from '@/src/features/properties/hooks';
 import { getAgencyAgents, getAllAgents } from '@/services/apiService';
 import { getPropertiesBySellerId } from '@/src/features/properties/api/propertyApi';
 import { useTrackView } from '@/src/features/view-stats/hooks';
-import { updateAgentProfile, toggleSavedAgent, checkSavedAgent } from '@/src/features/agents/api/agentApi';
+import { updateAgentProfile, toggleSavedAgent, checkSavedAgent, getAgent as fetchAgentById } from '@/src/features/agents/api/agentApi';
 import { Achievement } from '@/components/shared/AchievementsSection';
 import {
   getUserAchievements,
@@ -16,6 +16,7 @@ import {
 } from '@/src/features/achievements/api/achievementApi';
 import { Credential, getCredentials, getAgentPublicCredentials } from '@/src/features/credentials/api/credentialApi';
 import { useNotification } from '@/src/shared/hooks/useNotification';
+import { sendMessage } from '@/src/features/conversations/api/conversationApi';
 import { API_URL } from '@/src/shared/api/config';
 
 // ─── Shared Types ────────────────────────────────────────────────────────────
@@ -93,6 +94,7 @@ export function useAgentProfile({ agent }: { agent: Agent }) {
     const [loadingSimilarAgents, setLoadingSimilarAgents] = useState(false);
     const [showAppraisalModal, setShowAppraisalModal] = useState(false);
     const [showConsultationModal, setShowConsultationModal] = useState(false);
+    const [showMarketReportModal, setShowMarketReportModal] = useState(false);
     const [showInquiryModal, setShowInquiryModal] = useState(false);
     const [appraisalForm, setAppraisalForm] = useState<AppraisalFormData>({ address: '', propertyType: '', notes: '' });
     const [consultationForm, setConsultationForm] = useState<ConsultationFormData>({ date: '', time: '', topic: '', notes: '' });
@@ -109,6 +111,11 @@ export function useAgentProfile({ agent }: { agent: Agent }) {
     const [loadingProperties, setLoadingProperties] = useState(true);
     const { success, error: showError } = useNotification();
     const shareToastTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+    const isMountedRef = useRef(true);
+    useEffect(() => {
+        isMountedRef.current = true;
+        return () => { isMountedRef.current = false; };
+    }, []);
     const [editForm, setEditForm] = useState<EditFormData>({
         bio: agent.bio || '',
         specializations: agent.specializations || [],
@@ -240,6 +247,23 @@ export function useAgentProfile({ agent }: { agent: Agent }) {
         };
     }, []);
 
+    // Fetch fresh agent data from API on mount to ensure latest data is shown
+    useEffect(() => {
+        const fetchFreshAgentData = async () => {
+            try {
+                const agentIdentifier = agent.agentId || agent.id;
+                if (!agentIdentifier) return;
+                const freshAgent = await fetchAgentById(agentIdentifier);
+                if (isMountedRef.current && freshAgent) {
+                    setAgentData(prev => ({ ...prev, ...freshAgent }));
+                }
+            } catch {
+                // Silently fail - we still have the prop data as fallback
+            }
+        };
+        fetchFreshAgentData();
+    }, [agent.id, agent.agentId]);
+
     // Scroll to top on mount - scroll the main content container
     useEffect(() => {
         // The main scroll container has id="main-content"
@@ -253,19 +277,20 @@ export function useAgentProfile({ agent }: { agent: Agent }) {
 
     // Function to fetch agent's properties
     const fetchAgentProperties = useCallback(async () => {
+        if (!isMountedRef.current) return;
         setLoadingProperties(true);
         try {
             // Try fetching with agent.userId first, then agent.id
             const userId = agent.userId || agent.id;
             if (userId) {
                 const properties = await getPropertiesBySellerId(String(userId));
-                setFetchedProperties(properties);
+                if (isMountedRef.current) setFetchedProperties(properties);
             }
         } catch (error) {
             // Error removed
             // Don't clear - we still have state.properties as fallback
         } finally {
-            setLoadingProperties(false);
+            if (isMountedRef.current) setLoadingProperties(false);
         }
     }, [agent.userId, agent.id]);
 
@@ -292,12 +317,15 @@ export function useAgentProfile({ agent }: { agent: Agent }) {
 
     // Fetch similar agents from same agency or city and fetch agency gradient
     useEffect(() => {
+        let cancelled = false;
         const fetchSimilarAgents = async () => {
+            if (cancelled) return;
             setLoadingSimilarAgents(true);
             try {
                 if (isAgencyAgent && agent.agencyId) {
                     // Fetch agents from same agency and fetch agency gradient
                     const response = await getAgencyAgents(agent.agencyId);
+                    if (cancelled) return;
                     const agencyAgents = (response.agents || [])
                         .filter((a: Agent) => a.id !== agent.id && a.userId !== agent.userId)
                         .slice(0, 4);
@@ -306,6 +334,7 @@ export function useAgentProfile({ agent }: { agent: Agent }) {
                     // Fetch agency details
                     try {
                         const agencyResponse = await fetch(`${API_URL}/agencies/${agent.agencyId}`);
+                        if (cancelled) return;
                         if (agencyResponse.ok) {
                             const agencyDataResponse = await agencyResponse.json();
                             const agency = agencyDataResponse.agency;
@@ -323,6 +352,7 @@ export function useAgentProfile({ agent }: { agent: Agent }) {
                 } else {
                     // Fetch agents from same city
                     const response = await getAllAgents();
+                    if (cancelled) return;
                     const cityAgents = (response.agents || [])
                         .filter((a: Agent) =>
                             (a.id !== agent.id && a.userId !== agent.userId) &&
@@ -334,11 +364,12 @@ export function useAgentProfile({ agent }: { agent: Agent }) {
             } catch (error) {
                 // Error removed
             } finally {
-                setLoadingSimilarAgents(false);
+                if (!cancelled) setLoadingSimilarAgents(false);
             }
         };
 
         fetchSimilarAgents();
+        return () => { cancelled = true; };
     }, [agent.id, agent.agencyId, agent.city, agent.country, isAgencyAgent]);
 
     // Check if agent is saved on mount
@@ -474,9 +505,12 @@ export function useAgentProfile({ agent }: { agent: Agent }) {
         try {
             // Send appraisal request via message to agent
             const conversation = await createConversation(agent.id);
-            const message = `Property Appraisal Request:\n\nAddress: ${appraisalForm.address}\nProperty Type: ${appraisalForm.propertyType}\nNotes: ${appraisalForm.notes || 'No additional notes'}`;
+            const messageText = `Property Appraisal Request:\n\nAddress: ${appraisalForm.address}\nProperty Type: ${appraisalForm.propertyType}\nNotes: ${appraisalForm.notes || 'No additional notes'}`;
 
-            // The conversation is created, redirect to inbox
+            // Actually send the message to the conversation
+            await sendMessage(conversation.id, { text: messageText });
+
+            // Redirect to inbox
             dispatch({ type: 'SET_ACTIVE_CONVERSATION', payload: conversation.id });
             window.history.pushState({ page: 'inbox' }, '', '/inbox');
             dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'inbox' });
@@ -503,7 +537,10 @@ export function useAgentProfile({ agent }: { agent: Agent }) {
         try {
             // Send consultation request via message to agent
             const conversation = await createConversation(agent.id);
-            const message = `Consultation Request:\n\nPreferred Date: ${consultationForm.date}\nPreferred Time: ${consultationForm.time}\nTopic: ${consultationForm.topic}\nNotes: ${consultationForm.notes || 'No additional notes'}`;
+            const messageText = `Consultation Request:\n\nPreferred Date: ${consultationForm.date}\nPreferred Time: ${consultationForm.time}\nTopic: ${consultationForm.topic}\nNotes: ${consultationForm.notes || 'No additional notes'}`;
+
+            // Actually send the message to the conversation
+            await sendMessage(conversation.id, { text: messageText });
 
             dispatch({ type: 'SET_ACTIVE_CONVERSATION', payload: conversation.id });
             window.history.pushState({ page: 'inbox' }, '', '/inbox');
@@ -517,19 +554,13 @@ export function useAgentProfile({ agent }: { agent: Agent }) {
         }
     };
 
-    const handleRequestMarketReport = async () => {
-        if (!state.isAuthenticated) {
-            dispatch({ type: 'TOGGLE_AUTH_MODAL', payload: { isOpen: true } });
-            return;
-        }
-        try {
-            const conversation = await createConversation(agent.id);
-            dispatch({ type: 'SET_ACTIVE_CONVERSATION', payload: conversation.id });
-            window.history.pushState({ page: 'inbox' }, '', '/inbox');
-            dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'inbox' });
-        } catch (error) {
-            // Error removed
-        }
+    const handleRequestMarketReport = () => {
+        setShowMarketReportModal(true);
+    };
+
+    const handleMarketReportContact = () => {
+        setShowMarketReportModal(false);
+        setShowInquiryModal(true);
     };
 
     const handleSearchAllProperties = () => {
@@ -553,9 +584,10 @@ export function useAgentProfile({ agent }: { agent: Agent }) {
     };
 
     const handleSelectSimilarAgent = (selectedAgent: Agent) => {
-        window.scrollTo(0, 0);
+        window.scrollTo({ top: 0, behavior: 'smooth' });
         const agentIdentifier = selectedAgent.agentId || selectedAgent.id;
         dispatch({ type: 'SET_SELECTED_AGENT', payload: agentIdentifier });
+        dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'agents' });
         window.history.pushState({}, '', `/agents/${agentIdentifier}`);
     };
 
@@ -755,6 +787,7 @@ export function useAgentProfile({ agent }: { agent: Agent }) {
         loadingSimilarAgents,
         showAppraisalModal, setShowAppraisalModal,
         showConsultationModal, setShowConsultationModal,
+        showMarketReportModal, setShowMarketReportModal,
         showInquiryModal, setShowInquiryModal,
         appraisalForm, setAppraisalForm,
         consultationForm, setConsultationForm,
@@ -795,6 +828,7 @@ export function useAgentProfile({ agent }: { agent: Agent }) {
         handleScheduleConsultation,
         handleSubmitConsultation,
         handleRequestMarketReport,
+        handleMarketReportContact,
         handleSearchAllProperties,
         handleVisitAgency,
         handleViewMoreAgents,

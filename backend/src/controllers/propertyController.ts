@@ -630,8 +630,32 @@ export const createProperty = async (
       country: req.body.country,
     });
 
+    // Whitelist allowed fields to prevent mass assignment attacks
+    // (e.g., attacker setting isPromoted, views, saves, etc.)
+    const ALLOWED_PROPERTY_FIELDS = [
+      'listingType', 'title', 'status', 'price', 'originalPrice', 'priceIntervals',
+      'address', 'city', 'country',
+      'beds', 'baths', 'livingRooms', 'sqft', 'yearBuilt', 'parking',
+      'description', 'specialFeatures', 'materials',
+      'tourUrl', 'virtualTour360Url', 'hasVirtualTour360', 'videoUrl',
+      'imageUrl', 'imagePublicId', 'images',
+      'propertyType', 'floorNumber', 'totalFloors', 'floorplanUrl', 'floorplanPublicId',
+      'amenities', 'hasBalcony', 'hasGarden', 'hasElevator', 'hasSecurity',
+      'hasAirConditioning', 'hasPool', 'petsAllowed',
+      'distanceToCenter', 'distanceToSea', 'distanceToSchool', 'distanceToHospital',
+      'furnishing', 'heatingType', 'condition', 'viewType', 'energyRating', 'orientation',
+      'visitAvailability',
+    ] as const;
+
+    const sanitizedBody: Record<string, any> = {};
+    for (const field of ALLOWED_PROPERTY_FIELDS) {
+      if (req.body[field] !== undefined) {
+        sanitizedBody[field] = req.body[field];
+      }
+    }
+
     const propertyData = {
-      ...req.body,
+      ...sanitizedBody,
       sellerId: String(currentUser._id),
       // Add user identification for 1:1 relationship tracking
       createdByName: user.name,
@@ -668,7 +692,7 @@ export const createProperty = async (
     await user.save();
 
     // Update stats for active listings
-    if (propertyData.status === 'active') {
+    if (sanitizedBody.status === 'active') {
       await incrementActiveListings(String(user._id));
 
       // Trigger instant alerts for saved searches that match this property

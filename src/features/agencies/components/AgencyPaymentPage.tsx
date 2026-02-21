@@ -232,11 +232,12 @@ const AgencyPaymentPage: React.FC = () => {
         body: JSON.stringify(agencyData),
       });
 
-      const data = await response.json();
-
       if (!response.ok) {
-        throw new Error(data.message || 'Failed to create agency. Please try again.');
+        const errorData = await response.json().catch(() => null);
+        throw new Error(errorData?.message || 'Failed to create agency. Please try again.');
       }
+
+      const data = await response.json();
 
       // Clear pending data and show success
       dispatch({ type: 'SET_PENDING_AGENCY_DATA', payload: null });
@@ -570,12 +571,13 @@ const AgencyPaymentPage: React.FC = () => {
                     value={couponCode}
                     onChange={(e) => setCouponCode(e.target.value.toUpperCase())}
                     placeholder={t('payment.enterCoupon', 'Enter coupon code')}
-                    className="flex-1 px-4 py-2.5 border border-neutral-300 rounded-xl focus:ring-2 focus:ring-primary focus:border-primary"
+                    className="flex-1 min-w-0 px-4 py-2.5 border border-neutral-300 rounded-xl focus:ring-2 focus:ring-primary focus:border-primary"
+                    onKeyDown={(e) => e.key === 'Enter' && !applyingCoupon && couponCode.trim() && handleApplyCoupon()}
                   />
                   <button
                     onClick={handleApplyCoupon}
                     disabled={applyingCoupon || !couponCode.trim()}
-                    className="px-4 py-2.5 bg-primary text-white font-semibold rounded-xl hover:bg-primary-dark transition-colors disabled:opacity-50"
+                    className="flex-shrink-0 px-5 py-2.5 bg-primary text-white font-semibold rounded-xl hover:bg-primary-dark transition-colors disabled:opacity-50 whitespace-nowrap"
                   >
                     {applyingCoupon ? '...' : t('payment.apply', 'Apply')}
                   </button>

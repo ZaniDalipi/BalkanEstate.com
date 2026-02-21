@@ -1,4 +1,5 @@
 import { Request, Response } from 'express';
+import mongoose from 'mongoose';
 import Agent from '../models/Agent';
 import User, { IUser } from '../models/User';
 import Agency from '../models/Agency';
@@ -102,9 +103,31 @@ export const getAgents = async (req: Request, res: Response): Promise<void> => {
 // @access  Public
 export const getAgent = async (req: Request, res: Response): Promise<void> => {
   try {
-    const agent = await Agent.findById(req.params.id)
-      .populate('userId', 'name email phone avatarUrl avatarOptions gender city country address')
-      .populate('testimonials.userId', 'name avatarUrl');
+    let agent = null;
+
+    // Only try findById if the id is a valid ObjectId format (avoids CastError)
+    if (mongoose.Types.ObjectId.isValid(req.params.id)) {
+      agent = await Agent.findById(req.params.id)
+        .populate('userId', 'name email phone avatarUrl avatarOptions gender city country address')
+        .populate('agencyId', 'name logo coverGradient coverImage slug type')
+        .populate('testimonials.userId', 'name avatarUrl');
+    }
+
+    // Fallback: search by custom agentId field
+    if (!agent) {
+      agent = await Agent.findOne({ agentId: req.params.id })
+        .populate('userId', 'name email phone avatarUrl avatarOptions gender city country address')
+        .populate('agencyId', 'name logo coverGradient coverImage slug type')
+        .populate('testimonials.userId', 'name avatarUrl');
+    }
+
+    // Fallback: search by userId (for agency agent listings that use User ObjectId)
+    if (!agent && mongoose.Types.ObjectId.isValid(req.params.id)) {
+      agent = await Agent.findOne({ userId: req.params.id })
+        .populate('userId', 'name email phone avatarUrl avatarOptions gender city country address')
+        .populate('agencyId', 'name logo coverGradient coverImage slug type')
+        .populate('testimonials.userId', 'name avatarUrl');
+    }
 
     if (!agent) {
       res.status(404).json({ message: 'Agent not found' });
@@ -125,6 +148,7 @@ export const getAgentByUserId = async (req: Request, res: Response): Promise<voi
   try {
     const agent = await Agent.findOne({ userId: req.params.userId })
       .populate('userId', 'name email phone avatarUrl avatarOptions gender city country address')
+      .populate('agencyId', 'name logo coverGradient coverImage slug type')
       .populate('testimonials.userId', 'name avatarUrl');
 
     if (!agent) {
@@ -255,6 +279,10 @@ export const updateAgentProfile = async (req: Request, res: Response): Promise<v
     if (officePhone !== undefined) agent.officePhone = officePhone;
 
     await agent.save();
+
+    // Populate userId and agencyId so the response includes full user/agency data
+    await agent.populate('userId', 'name email phone avatarUrl avatarOptions gender city country address');
+    await agent.populate('agencyId', 'name logo coverGradient coverImage slug type');
 
     res.json({
       message: 'Agent profile updated successfully',

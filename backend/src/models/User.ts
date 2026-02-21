@@ -4,7 +4,7 @@ import crypto from 'crypto';
 import { encryptionPlugin } from '../utils/fieldEncryption';
 
 export interface IUser extends Document {
-  _id: string;
+  _id: mongoose.Types.ObjectId;
   email: string;
   password?: string;
   name: string;

@@ -97,18 +97,18 @@ export const NeighborhoodInsights: React.FC<NeighborhoodInsightsProps> = ({
         body: JSON.stringify({ lat, lng, address, city, country, language: languageName }),
       });
 
-      const data = await response.json();
-
       if (!response.ok) {
+        const errorData = await response.json().catch(() => null);
         if (response.status === 429) {
-          setError(data.message);
-          setUsage({ used: data.used, limit: data.limit, remaining: 0 });
+          setError(errorData?.message || 'Rate limit exceeded');
+          setUsage({ used: errorData?.used ?? 0, limit: errorData?.limit ?? 0, remaining: 0 });
         } else {
-          setError(data.message || 'Failed to fetch neighborhood insights');
+          setError(errorData?.message || 'Failed to fetch neighborhood insights');
         }
         return;
       }
 
+      const data = await response.json();
       setInsights(data.insights);
       setUsage(data.usage);
     } catch (err) {

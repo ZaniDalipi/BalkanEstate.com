@@ -698,13 +698,13 @@ const SubscriptionManagement: React.FC<SubscriptionManagementProps> = ({ userId 
 
   const getStatusLabel = (status?: string) => {
     switch (status) {
-      case 'pending_cancellation': return 'CANCELLING';
-      case 'canceled': return 'CANCELLED';
-      case 'active': return 'ACTIVE';
-      case 'expired': return 'EXPIRED';
-      case 'trial': return 'TRIAL';
-      case 'grace': return 'GRACE PERIOD';
-      default: return status?.toUpperCase() || 'FREE';
+      case 'pending_cancellation': return t('management.cancelling', 'CANCELLING');
+      case 'canceled': return t('management.status.cancelled', 'CANCELLED');
+      case 'active': return t('management.status.active', 'ACTIVE');
+      case 'expired': return t('management.status.expired', 'EXPIRED');
+      case 'trial': return t('management.status.trial', 'TRIAL');
+      case 'grace': return t('management.status.gracePeriod', 'GRACE PERIOD');
+      default: return status?.toUpperCase() || t('management.status.free', 'FREE');
     }
   };
 
@@ -941,7 +941,7 @@ const SubscriptionManagement: React.FC<SubscriptionManagementProps> = ({ userId 
             <div className="absolute inset-0 border-4 border-primary/20 rounded-full"></div>
             <div className="absolute inset-0 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
           </div>
-          <p className="text-neutral-600 font-medium">Loading your subscription...</p>
+          <p className="text-neutral-600 font-medium">{t('management.loading', 'Loading your subscription...')}</p>
         </div>
       </div>
     );
@@ -959,35 +959,43 @@ const SubscriptionManagement: React.FC<SubscriptionManagementProps> = ({ userId 
     const featuredProduct = isBuyerRole
       ? products.find(p => p.productId === 'buyer_monthly') || products.find(p => p.targetRole === 'buyer')
       : products.find(p => p.productId === 'seller_pro_yearly') || products.find(p => p.productId === 'pro_yearly') || products.find(p => p.targetRole === 'seller' && p.billingPeriod === 'yearly');
-    const noBenefits: string[] = featuredProduct?.features?.slice(0, 4) ?? (
+    const rawBenefits: string[] = featuredProduct?.features?.slice(0, 4) ?? (
       isBuyerRole
         ? ['Instant Property Alerts', 'Unlimited Saved Searches', 'Early Access to Listings', 'Advanced Market Insights']
         : ['250 Listings/Year', '3 Promo Coupons/Month', 'Unlimited AI Chat', '20 Insights/Month']
     );
+    // Replace {listingsLimit} and other placeholders with actual product values
+    const noBenefits = featuredProduct
+      ? rawBenefits.map(b => replacePlaceholders(b, featuredProduct as ProductValues))
+      : rawBenefits;
 
     return (
       <div className="max-w-2xl mx-auto">
-        <div className="relative overflow-hidden bg-gradient-to-br from-white via-primary-light/5 to-white rounded-2xl shadow-lg border border-neutral-200/50 p-8 md:p-12">
+        <div className="relative overflow-hidden bg-gradient-to-br from-white via-primary-light/10 to-primary-light/5 rounded-2xl shadow-lg border border-primary/10 p-8 md:p-12">
           <div className="absolute top-0 right-0 w-64 h-64 bg-primary/5 rounded-full blur-3xl -z-10"></div>
           <div className="absolute bottom-0 left-0 w-48 h-48 bg-secondary/5 rounded-full blur-3xl -z-10"></div>
 
           <div className="text-center space-y-6">
-            <div className="inline-flex items-center justify-center w-20 h-20 rounded-full bg-gradient-to-br from-neutral-100 to-neutral-200 mb-2">
-              <XCircleIcon className="w-10 h-10 text-neutral-400" />
+            <div className="inline-flex items-center justify-center w-20 h-20 rounded-full bg-gradient-to-br from-primary/10 to-primary/20 mb-2">
+              <SparklesIcon className="w-10 h-10 text-primary" />
             </div>
 
             <div>
-              <h3 className="text-2xl md:text-3xl font-bold text-neutral-900 mb-3">No Active Subscription</h3>
+              <h3 className="text-2xl md:text-3xl font-bold text-neutral-900 mb-3">
+                {isBuyerRole ? t('management.getBuyerPro', 'Get Buyer Pro') : t('management.upgradeListings', 'Upgrade Your Listings')}
+              </h3>
               <p className="text-neutral-600 text-lg max-w-md mx-auto">
-                Unlock premium features and take your experience to the next level
+                {isBuyerRole
+                  ? t('management.buyerDescription', 'Be the first to know about new properties matching your criteria')
+                  : t('management.sellerDescription', 'Publish more listings, boost visibility, and grow your business')}
               </p>
             </div>
 
             <div className="grid sm:grid-cols-2 gap-3 max-w-lg mx-auto pt-4">
               {noBenefits.map((benefit, idx) => (
-                <div key={idx} className="flex items-center gap-3 p-3 bg-white rounded-lg border border-neutral-200">
+                <div key={idx} className="flex items-center gap-3 p-3 bg-white rounded-lg border border-primary/10 shadow-sm">
                   <CheckCircleIcon className="w-5 h-5 text-primary flex-shrink-0" />
-                  <span className="text-sm text-neutral-700">{benefit}</span>
+                  <span className="text-sm font-medium text-neutral-700">{benefit}</span>
                 </div>
               ))}
             </div>
@@ -997,7 +1005,7 @@ const SubscriptionManagement: React.FC<SubscriptionManagementProps> = ({ userId 
               className="inline-flex items-center gap-2 px-8 py-4 bg-gradient-to-r from-primary to-primary-dark text-white font-bold rounded-xl hover:shadow-xl hover:scale-105 transition-all duration-300 mt-4 cursor-pointer"
             >
               <SparklesIcon className="w-5 h-5" />
-              View Plans & Pricing
+              {t('management.viewPlans', 'View Plans & Pricing')}
             </a>
           </div>
         </div>
@@ -1009,7 +1017,7 @@ const SubscriptionManagement: React.FC<SubscriptionManagementProps> = ({ userId 
     <div className="space-y-6">
       {/* Header with refresh */}
       <div className="flex items-center justify-between">
-        <h2 className="text-xl font-bold text-neutral-800">Subscription Management</h2>
+        <h2 className="text-xl font-bold text-neutral-800">{t('management.title', 'Subscription Management')}</h2>
         <button
           onClick={handleRefresh}
           className="text-sm text-primary hover:text-primary-dark flex items-center gap-1"
@@ -1017,7 +1025,7 @@ const SubscriptionManagement: React.FC<SubscriptionManagementProps> = ({ userId 
           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
           </svg>
-          Refresh
+          {t('management.refresh', 'Refresh')}
         </button>
       </div>
 
@@ -1028,7 +1036,7 @@ const SubscriptionManagement: React.FC<SubscriptionManagementProps> = ({ userId 
           <div className="absolute top-0 left-0 right-0 flex justify-center -mt-0">
             <div className="flex items-center gap-1.5 px-4 py-1.5 bg-yellow-400 text-yellow-900 rounded-b-lg shadow-md">
               <GiftIconComponent className="w-4 h-4" />
-              <span className="text-xs font-bold">COUPON APPLIED</span>
+              <span className="text-xs font-bold">{t('management.couponApplied', 'COUPON APPLIED')}</span>
             </div>
           </div>
         )}
@@ -1047,12 +1055,12 @@ const SubscriptionManagement: React.FC<SubscriptionManagementProps> = ({ userId 
                   </span>
                   {subscriptionDetails.isCoupon && (
                     <span className="inline-block px-2 py-0.5 rounded-full text-xs font-semibold bg-yellow-100 text-yellow-800">
-                      FREE TRIAL
+                      {t('management.freeTrial', 'FREE TRIAL')}
                     </span>
                   )}
                   {isPendingCancellation && (
                     <span className="inline-block px-2 py-0.5 rounded-full text-xs font-semibold bg-orange-100 text-orange-800">
-                      Ends {formatDate(subscriptionDetails.expirationDate)}
+                      {t('management.endsOn', { date: formatDate(subscriptionDetails.expirationDate), defaultValue: 'Ends {{date}}' })}
                     </span>
                   )}
                 </div>
@@ -1060,11 +1068,11 @@ const SubscriptionManagement: React.FC<SubscriptionManagementProps> = ({ userId 
             </div>
             <p className="text-white/80 text-sm">
               {subscriptionDetails.isCoupon ? (
-                'Free coupon subscription'
+                t('management.freeDescription', 'Free coupon subscription')
               ) : subscriptionDetails.currentPlan.price > 0 ? (
                 `€${subscriptionDetails.price}/${subscriptionDetails.currentPlan.period}`
               ) : (
-                'Free forever'
+                t('management.freeForever', 'Free forever')
               )}
             </p>
           </div>
@@ -1072,11 +1080,11 @@ const SubscriptionManagement: React.FC<SubscriptionManagementProps> = ({ userId 
           {/* Days remaining progress */}
           <div className="bg-white/20 backdrop-blur-sm rounded-xl p-4 min-w-[200px] md:min-w-[220px] flex-shrink-0">
             <div className="flex items-center justify-between mb-2">
-              <span className="text-sm text-white/80">Time Remaining</span>
+              <span className="text-sm text-white/80">{t('management.timeRemaining', 'Time Remaining')}</span>
               <span className="text-2xl font-bold">{subscriptionDetails.daysRemaining}</span>
             </div>
             <div className="text-xs text-white/70 text-right mb-2">
-              {subscriptionDetails.daysRemaining === 1 ? 'day left' : 'days left'}
+              {subscriptionDetails.daysRemaining === 1 ? t('management.dayLeft', 'day left') : t('management.daysLeft', 'days left')}
             </div>
             <div className="w-full bg-white/30 rounded-full h-3 overflow-hidden">
               <div
@@ -1087,8 +1095,8 @@ const SubscriptionManagement: React.FC<SubscriptionManagementProps> = ({ userId 
               </div>
             </div>
             <div className="flex justify-between text-xs text-white/70 mt-2">
-              <span>{subscriptionDetails.daysUsed} used</span>
-              <span>{subscriptionDetails.totalDays} total</span>
+              <span>{subscriptionDetails.daysUsed} {t('management.used', 'used')}</span>
+              <span>{subscriptionDetails.totalDays} {t('management.total', 'total')}</span>
             </div>
           </div>
         </div>
@@ -1096,25 +1104,25 @@ const SubscriptionManagement: React.FC<SubscriptionManagementProps> = ({ userId 
         {/* Subscription dates */}
         <div className="mt-4 pt-4 border-t border-white/20 grid grid-cols-2 md:grid-cols-3 gap-4 text-sm">
           <div>
-            <span className="text-white/70">Started</span>
+            <span className="text-white/70">{t('management.started', 'Started')}</span>
             <p className="font-semibold">{formatDate(subscriptionDetails.startDate)}</p>
           </div>
           <div>
-            <span className="text-white/70">Expires</span>
+            <span className="text-white/70">{t('management.expires', 'Expires')}</span>
             <p className="font-semibold">{formatDate(subscriptionDetails.expirationDate)}</p>
           </div>
           <div>
-            <span className="text-white/70">Auto-Renew</span>
+            <span className="text-white/70">{t('management.autoRenew', 'Auto-Renew')}</span>
             <p className="font-semibold flex items-center gap-1">
               {subscriptionDetails.autoRenewing ? (
                 <>
                   <CheckCircleIcon className="w-4 h-4 text-green-300" />
-                  <span>Enabled</span>
+                  <span>{t('management.enabled', 'Enabled')}</span>
                 </>
               ) : (
                 <>
                   <XCircleIcon className="w-4 h-4 text-red-300" />
-                  <span>Disabled</span>
+                  <span>{t('management.disabled', 'Disabled')}</span>
                 </>
               )}
             </p>
@@ -1123,7 +1131,7 @@ const SubscriptionManagement: React.FC<SubscriptionManagementProps> = ({ userId 
 
         {/* Plan features */}
         <div className="mt-4 pt-4 border-t border-white/20">
-          <p className="text-sm text-white/70 mb-2">Your plan includes:</p>
+          <p className="text-sm text-white/70 mb-2">{t('management.planIncludes', 'Your plan includes:')}</p>
           <div className="flex flex-wrap gap-2">
             {subscriptionDetails.currentPlan.features.map((feature, idx) => (
               <span key={idx} className="inline-flex items-center gap-1 px-2 py-1 bg-white/20 rounded-full text-xs">
@@ -1143,11 +1151,11 @@ const SubscriptionManagement: React.FC<SubscriptionManagementProps> = ({ userId 
               <HomeIcon className="w-5 h-5 text-blue-600" />
             </div>
             <div>
-              <p className="font-semibold text-neutral-800">Listing Limit</p>
+              <p className="font-semibold text-neutral-800">{t('management.listingLimit', 'Listing Limit')}</p>
               <p className="text-sm text-neutral-500">
-                {user.subscription?.activeListingsCount || user.listingsCount || 0} of {currentProduct?.listingsLimit ?? subscriptionDetails.currentPlan.listingLimit} used
+                {t('management.listingUsage', { used: user.subscription?.activeListingsCount || user.listingsCount || 0, limit: currentProduct?.listingsLimit ?? subscriptionDetails.currentPlan.listingLimit, defaultValue: '{{used}} of {{limit}} used' })}
                 {(user.subscription?.tier === 'agency_agent' || user.subscription?.tier === 'agency_owner') && (
-                  <span className="ml-1 text-neutral-400">· per month</span>
+                  <span className="ml-1 text-neutral-400">· {t('management.perMonth', 'per month')}</span>
                 )}
               </p>
             </div>
@@ -1156,7 +1164,7 @@ const SubscriptionManagement: React.FC<SubscriptionManagementProps> = ({ userId 
             <p className="text-2xl font-bold text-neutral-800">
               {(currentProduct?.listingsLimit ?? subscriptionDetails.currentPlan.listingLimit) - (user.subscription?.activeListingsCount || user.listingsCount || 0)}
             </p>
-            <p className="text-xs text-neutral-500">remaining</p>
+            <p className="text-xs text-neutral-500">{t('management.remaining', 'remaining')}</p>
           </div>
         </div>
         <div className="mt-3 w-full bg-neutral-100 rounded-full h-2 overflow-hidden">
@@ -1182,15 +1190,15 @@ const SubscriptionManagement: React.FC<SubscriptionManagementProps> = ({ userId 
             </div>
             <div>
               <p className="font-semibold text-neutral-800">
-                {currentProduct?.listingsLimit ?? subscriptionDetails.currentPlan.listingLimit} Active Listings
+                {t('management.activeListings', { count: currentProduct?.listingsLimit ?? subscriptionDetails.currentPlan.listingLimit, defaultValue: '{{count}} Active Listings' })}
               </p>
               <p className="text-sm text-neutral-500">
                 {subscriptionDetails.currentPlan.tier === 2 || user.subscription?.tier === 'agency_agent' || user.subscription?.tier === 'agency_owner'
-                  ? 'Per month, per agent'
-                  : subscriptionDetails.currentPlan.period === 'month' ? 'Per month' : 'Total available'}
+                  ? t('management.perMonthPerAgent', 'Per month, per agent')
+                  : subscriptionDetails.currentPlan.period === 'month' ? t('management.perMonthLabel', 'Per month') : t('management.totalAvailable', 'Total available')}
               </p>
               {(subscriptionDetails.currentPlan.tier === 2 || user.subscription?.tier === 'agency_agent' || user.subscription?.tier === 'agency_owner') && (
-                <p className="text-xs text-neutral-400 mt-0.5">750 listing pool / year across the agency</p>
+                <p className="text-xs text-neutral-400 mt-0.5">{t('management.agencyPoolDesc', '750 listing pool / year across the agency')}</p>
               )}
             </div>
           </div>
@@ -1205,8 +1213,8 @@ const SubscriptionManagement: React.FC<SubscriptionManagementProps> = ({ userId 
             <div>
               <p className="font-semibold text-neutral-800">
                 {(currentProduct?.savedSearchesLimit ?? -1) === -1 || subscriptionDetails.currentPlan.savedSearchesLimit === 'unlimited'
-                  ? 'Unlimited Saved Searches'
-                  : `${currentProduct?.savedSearchesLimit ?? subscriptionDetails.currentPlan.savedSearchesLimit ?? 3} Saved Searches`}
+                  ? t('management.unlimitedSavedSearches', 'Unlimited Saved Searches')
+                  : t('management.savedSearchesCount', { count: currentProduct?.savedSearchesLimit ?? subscriptionDetails.currentPlan.savedSearchesLimit ?? 3, defaultValue: '{{count}} Saved Searches' })}
               </p>
               <p className="text-sm text-neutral-500">
                 {t('management.whatsIncluded.savedSearchesDesc')}
@@ -1227,14 +1235,14 @@ const SubscriptionManagement: React.FC<SubscriptionManagementProps> = ({ userId 
                 <div>
                   <p className={`font-semibold ${hasPromoCoupons ? 'text-neutral-800' : 'text-neutral-400'}`}>
                     {isShared
-                      ? 'Shared Agency Pool'
+                      ? t('management.sharedPool', 'Shared Agency Pool')
                       : promoCoupons > 0
-                        ? `${promoCoupons} Promotion Coupons/Month`
+                        ? t('management.promotionCouponsCount', { count: promoCoupons, defaultValue: '{{count}} Promotion Coupons/Month' })
                         : t('management.whatsIncluded.noPromotionCoupons')}
                   </p>
                   <p className="text-sm text-neutral-500">
                     {isShared
-                      ? 'Use promotion coupons from agency pool'
+                      ? t('management.sharedPoolDesc', 'Use promotion coupons from agency pool')
                       : promoCoupons > 0
                         ? t('management.whatsIncluded.promotionCouponsDesc')
                         : t('management.whatsIncluded.upgradeForPromotion')}
@@ -1252,7 +1260,7 @@ const SubscriptionManagement: React.FC<SubscriptionManagementProps> = ({ userId 
             <div>
               <p className={`font-semibold ${subscriptionDetails.currentPlan.analyticsLevel !== 'basic' ? 'text-neutral-800' : 'text-neutral-400'}`}>
                 {subscriptionDetails.currentPlan.analyticsLevel === 'full'
-                  ? 'Full Analytics'
+                  ? t('management.fullAnalytics', 'Full Analytics')
                   : subscriptionDetails.currentPlan.analyticsLevel === 'advanced'
                     ? t('management.whatsIncluded.advancedAnalytics')
                     : t('management.whatsIncluded.basicAnalytics')}
@@ -1275,14 +1283,14 @@ const SubscriptionManagement: React.FC<SubscriptionManagementProps> = ({ userId 
             <div>
               <p className={`font-semibold ${subscriptionDetails.currentPlan.supportType !== 'email' ? 'text-neutral-800' : 'text-neutral-400'}`}>
                 {subscriptionDetails.currentPlan.supportType === 'agency'
-                  ? 'Agency Team Support'
+                  ? t('management.agencyTeamSupport', 'Agency Team Support')
                   : subscriptionDetails.currentPlan.supportType === 'priority'
                     ? t('management.whatsIncluded.prioritySupport')
                     : t('management.whatsIncluded.emailSupport')}
               </p>
               <p className="text-sm text-neutral-500">
                 {subscriptionDetails.currentPlan.supportType === 'agency'
-                  ? 'Get help from your agency admin'
+                  ? t('management.agencyHelpDesc', 'Get help from your agency admin')
                   : subscriptionDetails.currentPlan.supportType === 'priority'
                     ? t('management.whatsIncluded.prioritySupportDesc')
                     : t('management.whatsIncluded.emailSupportDesc')}
@@ -1346,9 +1354,9 @@ const SubscriptionManagement: React.FC<SubscriptionManagementProps> = ({ userId 
                       <TeamIcon className="w-5 h-5 text-purple-600" />
                     </div>
                     <div>
-                      <p className="font-semibold text-neutral-800">Team Members</p>
+                      <p className="font-semibold text-neutral-800">{t('management.teamMembers', 'Team Members')}</p>
                       <p className="text-sm text-neutral-500">
-                        {usedCoupons} of {totalCoupons} codes used
+                        {t('management.codesUsed', { used: usedCoupons, total: totalCoupons, defaultValue: '{{used}} of {{total}} codes used' })}
                       </p>
                     </div>
                   </div>
@@ -1356,7 +1364,7 @@ const SubscriptionManagement: React.FC<SubscriptionManagementProps> = ({ userId 
                     <p className="text-2xl font-bold text-neutral-800">
                       {remainingCoupons}
                     </p>
-                    <p className="text-xs text-neutral-500">codes remaining</p>
+                    <p className="text-xs text-neutral-500">{t('management.codesRemaining', 'codes remaining')}</p>
                   </div>
                 </div>
                 <div className="mt-3 w-full bg-neutral-100 rounded-full h-2 overflow-hidden">
@@ -1372,14 +1380,14 @@ const SubscriptionManagement: React.FC<SubscriptionManagementProps> = ({ userId 
           {/* Invitation Code */}
           {agencyTeamData.invitationCode && (
             <div className="mt-4 pt-4 border-t border-neutral-100">
-              <p className="text-sm font-medium text-neutral-700 mb-2">Agency Invitation Code</p>
+              <p className="text-sm font-medium text-neutral-700 mb-2">{t('management.invitationCode', 'Agency Invitation Code')}</p>
               <div className="flex items-center gap-2">
                 <div className="flex-1 flex items-center justify-between bg-neutral-50 border border-neutral-200 rounded-lg px-3 py-2">
                   <code className="text-sm font-mono text-neutral-800">{agencyTeamData.invitationCode}</code>
                   <button
                     onClick={() => handleCopyCode(agencyTeamData.invitationCode)}
                     className="p-1.5 text-neutral-500 hover:text-primary hover:bg-neutral-100 rounded-md transition-colors"
-                    title="Copy code"
+                    title={t('management.copyCode', 'Copy code')}
                   >
                     {copiedCode === agencyTeamData.invitationCode ? (
                       <CheckCircleIcon className="w-4 h-4 text-green-500" />
@@ -1390,7 +1398,7 @@ const SubscriptionManagement: React.FC<SubscriptionManagementProps> = ({ userId 
                 </div>
               </div>
               <p className="text-xs text-neutral-500 mt-1">
-                Share this code with agents to let them join your agency
+                {t('management.shareCodeHint', 'Share this code with agents to let them join your agency')}
               </p>
             </div>
           )}
@@ -1400,9 +1408,9 @@ const SubscriptionManagement: React.FC<SubscriptionManagementProps> = ({ userId 
             <div className="mt-4 pt-4 border-t border-neutral-100">
               <div className="flex items-center justify-between mb-3">
                 <div>
-                  <p className="text-sm font-medium text-neutral-700">Agent Subscription Coupons</p>
+                  <p className="text-sm font-medium text-neutral-700">{t('management.agentCoupons', 'Agent Subscription Coupons')}</p>
                   <p className="text-xs text-neutral-500">
-                    {agencyTeamData.agentCoupons.available} available • {agencyTeamData.agentCoupons.used} used
+                    {t('management.agentCouponsAvailable', { available: agencyTeamData.agentCoupons.available, defaultValue: '{{available}} available' })} • {t('management.agentCouponsUsed', { used: agencyTeamData.agentCoupons.used, defaultValue: '{{used}} used' })}
                   </p>
                 </div>
                 {agencyTeamData.agentCoupons.canGenerateMore && (
@@ -1411,7 +1419,7 @@ const SubscriptionManagement: React.FC<SubscriptionManagementProps> = ({ userId 
                     disabled={generatingCoupons}
                     className="text-sm text-primary hover:text-primary-dark font-medium disabled:opacity-50"
                   >
-                    {generatingCoupons ? 'Generating...' : '+ Generate Coupons'}
+                    {generatingCoupons ? t('management.generating', 'Generating...') : t('management.generateCoupons', '+ Generate Coupons')}
                   </button>
                 )}
               </div>
@@ -1434,13 +1442,13 @@ const SubscriptionManagement: React.FC<SubscriptionManagementProps> = ({ userId 
                           </div>
                           <div className="flex items-center justify-between sm:justify-end gap-2 pl-4 sm:pl-0">
                             <span className="text-xs text-green-600 whitespace-nowrap">
-                              <span className="hidden sm:inline">Expires: </span>
+                              <span className="hidden sm:inline">{t('management.expiresLabel', 'Expires:')} </span>
                               {new Date(coupon.expiresAt).toLocaleDateString()}
                             </span>
                             <button
                               onClick={() => handleCopyCode(coupon.code)}
                               className="p-1.5 text-green-600 hover:text-green-700 hover:bg-green-100 rounded-md transition-colors flex-shrink-0"
-                              title="Copy coupon"
+                              title={t('management.copyCoupon', 'Copy coupon')}
                             >
                               {copiedCode === coupon.code ? (
                                 <CheckCircleIcon className="w-4 h-4" />
@@ -1455,9 +1463,9 @@ const SubscriptionManagement: React.FC<SubscriptionManagementProps> = ({ userId 
                 </div>
               ) : (
                 <div className="text-center py-4 bg-neutral-50 rounded-lg">
-                  <p className="text-sm text-neutral-500">No available coupons</p>
+                  <p className="text-sm text-neutral-500">{t('management.noCoupons', 'No available coupons')}</p>
                   <p className="text-xs text-neutral-400 mt-1">
-                    Generate coupons to invite agents to your agency
+                    {t('management.generateHint', 'Generate coupons to invite agents to your agency')}
                   </p>
                 </div>
               )}
@@ -1465,7 +1473,7 @@ const SubscriptionManagement: React.FC<SubscriptionManagementProps> = ({ userId 
               {/* Used coupons list */}
               {agencyTeamData.agentCoupons.coupons.filter(c => c.status === 'used').length > 0 && (
                 <div className="mt-4 pt-4 border-t border-neutral-100">
-                  <p className="text-sm font-medium text-neutral-700 mb-2">Redeemed Coupons</p>
+                  <p className="text-sm font-medium text-neutral-700 mb-2">{t('management.redeemedCoupons', 'Redeemed Coupons')}</p>
                   <div className="space-y-2">
                     {agencyTeamData.agentCoupons.coupons
                       .filter(c => c.status === 'used')
@@ -1480,11 +1488,11 @@ const SubscriptionManagement: React.FC<SubscriptionManagementProps> = ({ userId 
                               <span className="w-2 h-2 bg-amber-500 rounded-full flex-shrink-0"></span>
                               <code className="text-xs sm:text-sm font-mono text-amber-800">{coupon.code}</code>
                               <span className="px-1.5 py-0.5 text-[10px] sm:text-xs font-semibold bg-amber-200 text-amber-800 rounded">
-                                USED
+                                {t('management.usedBadge', 'USED')}
                               </span>
                             </div>
                             <span className="text-xs text-amber-700 pl-3.5 sm:pl-0">
-                              {coupon.usedAt ? new Date(coupon.usedAt).toLocaleDateString() : 'Redeemed'}
+                              {coupon.usedAt ? new Date(coupon.usedAt).toLocaleDateString() : t('management.redeemed', 'Redeemed')}
                             </span>
                           </div>
                           {coupon.usedBy && (
@@ -1507,9 +1515,9 @@ const SubscriptionManagement: React.FC<SubscriptionManagementProps> = ({ userId 
             <div className="mt-4 pt-4 border-t border-neutral-100">
               <div className="flex items-center justify-between mb-3">
                 <div>
-                  <p className="text-sm font-medium text-neutral-700">Promotion Coupons</p>
+                  <p className="text-sm font-medium text-neutral-700">{t('management.promotionCoupons', 'Promotion Coupons')}</p>
                   <p className="text-xs text-neutral-500">
-                    {agencyTeamData.promotionCoupons.available} available • {agencyTeamData.promotionCoupons.used} used this month
+                    {t('management.promotionAvailable', { available: agencyTeamData.promotionCoupons.available, defaultValue: '{{available}} available' })} • {t('management.promotionUsedMonth', { used: agencyTeamData.promotionCoupons.used, defaultValue: '{{used}} used this month' })}
                   </p>
                 </div>
                 <button
@@ -1523,19 +1531,19 @@ const SubscriptionManagement: React.FC<SubscriptionManagementProps> = ({ userId 
                         <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                         <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                       </svg>
-                      Sending...
+                      {t('management.sending', 'Sending...')}
                     </>
                   ) : promotionEmailSent ? (
                     <>
                       <CheckCircleIcon className="w-4 h-4 text-green-500" />
-                      Sent!
+                      {t('management.sent', 'Sent!')}
                     </>
                   ) : (
                     <>
                       <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                       </svg>
-                      Send via Email
+                      {t('management.sendViaEmail', 'Send via Email')}
                     </>
                   )}
                 </button>
@@ -1545,20 +1553,20 @@ const SubscriptionManagement: React.FC<SubscriptionManagementProps> = ({ userId 
               <div className="grid grid-cols-3 gap-2">
                 <div className="bg-amber-50 border border-amber-200 rounded-lg p-2.5 text-center">
                   <p className="text-lg font-bold text-amber-700">{agencyTeamData.promotionCoupons.monthly}</p>
-                  <p className="text-xs text-amber-600">Monthly</p>
+                  <p className="text-xs text-amber-600">{t('management.monthly', 'Monthly')}</p>
                 </div>
                 <div className="bg-green-50 border border-green-200 rounded-lg p-2.5 text-center">
                   <p className="text-lg font-bold text-green-700">{agencyTeamData.promotionCoupons.available}</p>
-                  <p className="text-xs text-green-600">Available</p>
+                  <p className="text-xs text-green-600">{t('management.available', 'Available')}</p>
                 </div>
                 <div className="bg-neutral-50 border border-neutral-200 rounded-lg p-2.5 text-center">
                   <p className="text-lg font-bold text-neutral-700">{agencyTeamData.promotionCoupons.used}</p>
-                  <p className="text-xs text-neutral-500">Used</p>
+                  <p className="text-xs text-neutral-500">{t('management.usedLabel', 'Used')}</p>
                 </div>
               </div>
 
               <p className="text-xs text-neutral-400 mt-2">
-                Refreshes monthly • Last refresh: {new Date(agencyTeamData.promotionCoupons.lastRefresh).toLocaleDateString()}
+                {t('management.refreshesMonthly', 'Refreshes monthly')} • {t('management.lastRefresh', { date: new Date(agencyTeamData.promotionCoupons.lastRefresh).toLocaleDateString(), defaultValue: 'Last refresh: {{date}}' })}
               </p>
             </div>
           )}
@@ -1567,8 +1575,7 @@ const SubscriptionManagement: React.FC<SubscriptionManagementProps> = ({ userId 
           <div className="mt-4 pt-4 border-t border-neutral-100">
             <div className="bg-purple-50 rounded-lg p-3">
               <p className="text-xs text-purple-700">
-                <strong>Agent Benefits:</strong> Each agent gets 25 active listings per year with their subscription coupon.
-                Agents can use the agency promotion pool for featured listings.
+                <strong>{t('management.agentBenefits', 'Agent Benefits:')}</strong> {t('management.agentBenefitsDesc', 'Each agent gets 25 active listings per year with their subscription coupon. Agents can use the agency promotion pool for featured listings.')}
               </p>
             </div>
           </div>
@@ -1583,13 +1590,12 @@ const SubscriptionManagement: React.FC<SubscriptionManagementProps> = ({ userId 
               <GiftIconComponent className="w-5 h-5 text-yellow-600" />
             </div>
             <div>
-              <h4 className="font-semibold text-yellow-900">Coupon Subscription</h4>
+              <h4 className="font-semibold text-yellow-900">{t('management.couponTitle', 'Coupon Subscription')}</h4>
               <p className="text-sm text-yellow-700 mt-1">
-                You're enjoying this plan for free through a coupon code. When your free period ends,
-                you can continue by subscribing to a paid plan.
+                {t('management.couponDescription', "You're enjoying this plan for free through a coupon code. When your free period ends, you can continue by subscribing to a paid plan.")}
               </p>
               <p className="text-xs text-yellow-600 mt-2">
-                Coupon value: FREE • Expires: {formatDate(subscriptionDetails.expirationDate)}
+                {t('management.couponValue', 'Coupon value: FREE')} • {t('management.couponExpires', { date: formatDate(subscriptionDetails.expirationDate), defaultValue: 'Expires: {{date}}' })}
               </p>
             </div>
           </div>
@@ -1606,11 +1612,9 @@ const SubscriptionManagement: React.FC<SubscriptionManagementProps> = ({ userId 
               </svg>
             </div>
             <div className="flex-1">
-              <h4 className="font-semibold text-orange-900">Subscription Cancellation Pending</h4>
+              <h4 className="font-semibold text-orange-900">{t('management.cancelPending', 'Subscription Cancellation Pending')}</h4>
               <p className="text-sm text-orange-700 mt-1">
-                Your subscription will be cancelled at the end of your billing period on{' '}
-                <span className="font-semibold">{formatDate(subscriptionDetails.expirationDate)}</span>.
-                You'll continue to have access to all features until then.
+                {t('management.cancelPendingDesc', { date: formatDate(subscriptionDetails.expirationDate), defaultValue: "Your subscription will be cancelled at the end of your billing period on {{date}}. You'll continue to have access to all features until then." })}
               </p>
               <button
                 onClick={handleRestoreSubscription}
@@ -1623,14 +1627,14 @@ const SubscriptionManagement: React.FC<SubscriptionManagementProps> = ({ userId 
                       <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                       <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                     </svg>
-                    Restoring...
+                    {t('management.restoring', 'Restoring...')}
                   </>
                 ) : (
                   <>
                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
                     </svg>
-                    Keep My Subscription
+                    {t('management.keepSubscription', 'Keep My Subscription')}
                   </>
                 )}
               </button>
@@ -1649,11 +1653,9 @@ const SubscriptionManagement: React.FC<SubscriptionManagementProps> = ({ userId 
               </svg>
             </div>
             <div className="flex-1">
-              <h4 className="font-semibold text-red-900">Subscription Cancelled</h4>
+              <h4 className="font-semibold text-red-900">{t('management.cancelled', 'Subscription Cancelled')}</h4>
               <p className="text-sm text-red-700 mt-1">
-                Your subscription has been cancelled but you still have access until{' '}
-                <span className="font-semibold">{formatDate(subscriptionDetails?.expirationDate || null)}</span>.
-                After this date, you'll be downgraded to the free plan.
+                {t('management.cancelledDesc', { date: formatDate(subscriptionDetails?.expirationDate || null), defaultValue: "Your subscription has been cancelled but you still have access until {{date}}. After this date, you'll be downgraded to the free plan." })}
               </p>
               <div className="mt-3 flex flex-wrap gap-2">
                 <a
@@ -1661,7 +1663,7 @@ const SubscriptionManagement: React.FC<SubscriptionManagementProps> = ({ userId 
                   className="inline-flex items-center gap-2 px-4 py-2 bg-primary text-white text-sm font-semibold rounded-lg hover:bg-primary-dark transition-colors"
                 >
                   <SparklesIcon className="w-4 h-4" />
-                  Resubscribe
+                  {t('management.resubscribe', 'Resubscribe')}
                 </a>
               </div>
             </div>
@@ -1677,7 +1679,7 @@ const SubscriptionManagement: React.FC<SubscriptionManagementProps> = ({ userId 
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
             </svg>
-            Subscription Settings
+            {t('management.settings', 'Subscription Settings')}
           </h3>
 
           {/* Error message */}
@@ -1691,16 +1693,16 @@ const SubscriptionManagement: React.FC<SubscriptionManagementProps> = ({ userId 
             {/* Auto-Renew Toggle - Mobile friendly layout */}
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between py-3 border-b border-neutral-100 gap-3">
               <div className="flex-1">
-                <p className="font-medium text-neutral-800">Auto-Renewal</p>
+                <p className="font-medium text-neutral-800">{t('management.autoRenewal', 'Auto-Renewal')}</p>
                 <p className="text-sm text-neutral-500">
                   {subscriptionDetails.autoRenewing
-                    ? `Renews on ${formatDate(subscriptionDetails.renewalDate)}`
-                    : `Expires on ${formatDate(subscriptionDetails.expirationDate)}`}
+                    ? t('management.renewsOn', { date: formatDate(subscriptionDetails.renewalDate), defaultValue: 'Renews on {{date}}' })
+                    : t('management.expiresOn', { date: formatDate(subscriptionDetails.expirationDate), defaultValue: 'Expires on {{date}}' })}
                 </p>
               </div>
               <div className="flex items-center gap-3">
                 <span className={`text-xs font-medium ${subscriptionDetails.autoRenewing ? 'text-green-600' : 'text-neutral-500'}`}>
-                  {subscriptionDetails.autoRenewing ? 'ON' : 'OFF'}
+                  {subscriptionDetails.autoRenewing ? t('management.on', 'ON') : t('management.off', 'OFF')}
                 </span>
                 <button
                   onClick={handleToggleAutoRenewal}
@@ -1733,27 +1735,27 @@ const SubscriptionManagement: React.FC<SubscriptionManagementProps> = ({ userId 
             {/* Payment Method Info - Mobile friendly */}
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between py-3 border-b border-neutral-100 gap-2">
               <div>
-                <p className="font-medium text-neutral-800">Payment Source</p>
-                <p className="text-sm text-neutral-500 capitalize">{subscription.store || 'Web'} Payment</p>
+                <p className="font-medium text-neutral-800">{t('management.paymentSource', 'Payment Source')}</p>
+                <p className="text-sm text-neutral-500 capitalize">{t('management.storePayment', { store: subscription.store || t('management.web', 'Web'), defaultValue: '{{store}} Payment' })}</p>
               </div>
               <span className="px-3 py-1 text-sm font-medium rounded-full bg-blue-100 text-blue-800 capitalize w-fit">
-                {subscription.store || 'Web'}
+                {subscription.store || t('management.web', 'Web')}
               </span>
             </div>
 
             {/* Cancel Subscription - Mobile friendly */}
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between py-3 gap-3">
               <div>
-                <p className="font-medium text-neutral-800">Cancel Subscription</p>
+                <p className="font-medium text-neutral-800">{t('management.cancelSubscription', 'Cancel Subscription')}</p>
                 <p className="text-sm text-neutral-500">
-                  You'll keep access until {formatDate(subscriptionDetails.expirationDate)}
+                  {t('management.keepAccessUntil', { date: formatDate(subscriptionDetails.expirationDate), defaultValue: "You'll keep access until {{date}}" })}
                 </p>
               </div>
               <button
                 onClick={() => setShowCancelModal(true)}
                 className="px-4 py-2 text-sm font-medium text-red-600 hover:text-red-700 hover:bg-red-50 rounded-lg transition-colors border border-red-200 sm:border-0 text-center"
               >
-                Cancel Plan
+                {t('management.cancelPlan', 'Cancel Plan')}
               </button>
             </div>
           </div>
@@ -1763,20 +1765,20 @@ const SubscriptionManagement: React.FC<SubscriptionManagementProps> = ({ userId 
       {/* Upgrade Options */}
       {upgradeOptions.length > 0 && (
         <div>
-          <h3 className="text-lg font-bold text-neutral-800 mb-4">Upgrade Your Plan</h3>
+          <h3 className="text-lg font-bold text-neutral-800 mb-4">{t('management.upgradePlan', 'Upgrade Your Plan')}</h3>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {upgradeOptions.map(({ key, plan, pricing }) => {
               // Enhanced features for Enterprise plan
               const isEnterprise = key.includes('enterprise') || key.includes('agency_yearly');
               const displayFeatures = isEnterprise ? [
-                '500 Active Listings',
-                'Create Your Own Agency',
-                '5 Agent Invitation Coupons',
-                'Unlimited Saved Searches',
-                'Full Analytics Dashboard',
-                'Priority Support',
-                '10 Monthly Promotion Coupons',
-                'Team Management Tools',
+                t('management.enterpriseFeatures.listings500', '500 Active Listings'),
+                t('management.enterpriseFeatures.createAgency', 'Create Your Own Agency'),
+                t('management.enterpriseFeatures.agentCoupons5', '5 Agent Invitation Coupons'),
+                t('management.enterpriseFeatures.unlimitedSearches', 'Unlimited Saved Searches'),
+                t('management.enterpriseFeatures.fullAnalytics', 'Full Analytics Dashboard'),
+                t('management.enterpriseFeatures.prioritySupport', 'Priority Support'),
+                t('management.enterpriseFeatures.promoCoupons10', '10 Monthly Promotion Coupons'),
+                t('management.enterpriseFeatures.teamTools', 'Team Management Tools'),
               ] : plan.features;
 
               return (
@@ -1787,7 +1789,7 @@ const SubscriptionManagement: React.FC<SubscriptionManagementProps> = ({ userId 
                   {/* Badge */}
                   {(plan.badge || isEnterprise) && (
                     <div className={`absolute top-0 right-0 px-3 py-1 text-xs font-bold text-white ${isEnterprise ? 'bg-amber-500' : plan.badgeColor === 'red' ? 'bg-red-500' : plan.badgeColor === 'green' ? 'bg-green-500' : 'bg-amber-500'} rounded-bl-lg`}>
-                      {isEnterprise ? 'Best for Agencies' : plan.badge}
+                      {isEnterprise ? t('management.bestForAgencies', 'Best for Agencies') : plan.badge}
                     </div>
                   )}
                   <div className="p-4 text-white" style={{ background: plan.color }}>
@@ -1806,7 +1808,7 @@ const SubscriptionManagement: React.FC<SubscriptionManagementProps> = ({ userId 
                     )}
                     {isEnterprise && (
                       <p className="text-xs mt-2 text-white/80">
-                        Build and manage your real estate agency
+                        {t('management.buildAgencyDesc', 'Build and manage your real estate agency')}
                       </p>
                     )}
                   </div>
@@ -1824,7 +1826,7 @@ const SubscriptionManagement: React.FC<SubscriptionManagementProps> = ({ userId 
                       className="w-full py-2.5 rounded-lg font-bold text-white hover:opacity-90 transition-opacity"
                       style={{ background: plan.color }}
                     >
-                      {isEnterprise ? 'Start Your Agency' : 'Upgrade Now'}
+                      {isEnterprise ? t('management.startYourAgency', 'Start Your Agency') : t('management.upgradeNow', 'Upgrade Now')}
                     </button>
                   </div>
                 </div>
@@ -1844,15 +1846,12 @@ const SubscriptionManagement: React.FC<SubscriptionManagementProps> = ({ userId 
               </svg>
             </div>
             <div>
-              <h4 className="font-semibold text-blue-900">Pro-rated Upgrade Pricing</h4>
+              <h4 className="font-semibold text-blue-900">{t('management.proRatedPricing', 'Pro-rated Upgrade Pricing')}</h4>
               <p className="text-sm text-blue-700 mt-1">
-                When you upgrade, we calculate the unused value from your current plan (€{subscriptionDetails.remainingValue.toFixed(2)} remaining)
-                and apply it as a discount to your new plan.
+                {t('management.proRatedDesc', { remaining: subscriptionDetails.remainingValue.toFixed(2), defaultValue: 'When you upgrade, we calculate the unused value from your current plan (€{{remaining}} remaining) and apply it as a discount to your new plan.' })}
               </p>
               <p className="text-xs text-blue-600 mt-2">
-                Daily rate: €{subscriptionDetails.dailyRate.toFixed(2)}/day •
-                Days used: {subscriptionDetails.daysUsed} of {subscriptionDetails.totalDays} •
-                Credit available: €{subscriptionDetails.remainingValue.toFixed(2)}
+                {t('management.dailyRateInfo', { rate: subscriptionDetails.dailyRate.toFixed(2), used: subscriptionDetails.daysUsed, total: subscriptionDetails.totalDays, credit: subscriptionDetails.remainingValue.toFixed(2), defaultValue: 'Daily rate: €{{rate}}/day • Days used: {{used}} of {{total}} • Credit available: €{{credit}}' })}
               </p>
             </div>
           </div>
@@ -1863,7 +1862,7 @@ const SubscriptionManagement: React.FC<SubscriptionManagementProps> = ({ userId 
       {showUpgradeModal && selectedUpgrade && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl">
-            <h3 className="text-xl font-bold text-neutral-800 mb-4">Confirm Upgrade</h3>
+            <h3 className="text-xl font-bold text-neutral-800 mb-4">{t('management.confirmUpgrade', 'Confirm Upgrade')}</h3>
             {(() => {
               const plan = plans[selectedUpgrade];
               const pricing = calculateUpgradePrice(selectedUpgrade);
@@ -1871,21 +1870,21 @@ const SubscriptionManagement: React.FC<SubscriptionManagementProps> = ({ userId 
               return (
                 <>
                   <div className="bg-neutral-50 rounded-xl p-4 mb-4">
-                    <p className="text-sm text-neutral-600 mb-2">Upgrading to:</p>
+                    <p className="text-sm text-neutral-600 mb-2">{t('management.upgradingTo', 'Upgrading to:')}</p>
                     <p className="text-lg font-bold text-neutral-800">{plan.name}</p>
                     <div className="mt-4 space-y-2">
                       <div className="flex justify-between text-sm">
-                        <span className="text-neutral-600">Original Price</span>
+                        <span className="text-neutral-600">{t('management.originalPrice', 'Original Price')}</span>
                         <span className="font-medium">€{pricing.originalPrice}</span>
                       </div>
                       {pricing.discount > 0 && (
                         <div className="flex justify-between text-sm text-green-600">
-                          <span>Pro-rated Credit</span>
+                          <span>{t('management.proRatedCredit', 'Pro-rated Credit')}</span>
                           <span className="font-medium">-€{pricing.discount.toFixed(2)}</span>
                         </div>
                       )}
                       <div className="flex justify-between text-lg font-bold pt-2 border-t border-neutral-200">
-                        <span>Total Due</span>
+                        <span>{t('management.totalDue', 'Total Due')}</span>
                         <span className="text-primary">€{pricing.finalPrice.toFixed(2)}</span>
                       </div>
                     </div>
@@ -1898,13 +1897,13 @@ const SubscriptionManagement: React.FC<SubscriptionManagementProps> = ({ userId 
                       onClick={() => setShowUpgradeModal(false)}
                       className="flex-1 py-2.5 rounded-lg font-semibold text-neutral-700 bg-neutral-100 hover:bg-neutral-200 transition-colors"
                     >
-                      Cancel
+                      {t('common:cancel', 'Cancel')}
                     </button>
                     <button
                       onClick={handleConfirmUpgrade}
                       className="flex-1 py-2.5 rounded-lg font-bold text-white bg-primary hover:bg-primary-dark transition-colors"
                     >
-                      Pay €{pricing.finalPrice.toFixed(2)}
+                      {t('management.payAmount', { price: pricing.finalPrice.toFixed(2), defaultValue: 'Pay €{{price}}' })}
                     </button>
                   </div>
                 </>
@@ -1929,10 +1928,10 @@ const SubscriptionManagement: React.FC<SubscriptionManagementProps> = ({ userId 
                 )}
               </div>
               <h3 className="text-xl font-bold text-neutral-800 mb-2">
-                {subscriptionDetails?.isCoupon ? 'Cancel Free Trial?' : 'Cancel Subscription?'}
+                {subscriptionDetails?.isCoupon ? t('management.cancelFreeTrial', 'Cancel Free Trial?') : t('management.cancelSubscriptionQuestion', 'Cancel Subscription?')}
               </h3>
               <p className="text-neutral-600">
-                Are you sure you want to cancel your <span className="font-semibold">{subscriptionDetails?.currentPlan.name}</span> {subscriptionDetails?.isCoupon ? 'free trial' : 'subscription'}?
+                {t('management.cancelConfirmMessage', { plan: subscriptionDetails?.currentPlan.name, type: subscriptionDetails?.isCoupon ? t('management.freeTrial', 'free trial').toLowerCase() : t('management.cancelSubscription', 'subscription').toLowerCase(), defaultValue: 'Are you sure you want to cancel your {{plan}} {{type}}?' })}
               </p>
             </div>
 
@@ -1940,28 +1939,28 @@ const SubscriptionManagement: React.FC<SubscriptionManagementProps> = ({ userId 
             {subscriptionDetails?.isCoupon ? (
               // Coupon/free trial subscription - continues until expiration
               <div className="bg-yellow-50 rounded-xl p-4 mb-6 border border-yellow-200">
-                <h4 className="text-sm font-semibold text-yellow-800 mb-2">What happens when you cancel:</h4>
+                <h4 className="text-sm font-semibold text-yellow-800 mb-2">{t('management.cancelModal.whatHappens', 'What happens when you cancel:')}</h4>
                 <ul className="space-y-2 text-sm text-yellow-700">
                   <li className="flex items-start gap-2">
                     <CheckCircleIcon className="w-4 h-4 text-green-500 mt-0.5 flex-shrink-0" />
-                    <span>Your free trial continues until <span className="font-semibold">{formatDate(subscriptionDetails?.expirationDate || null)}</span></span>
+                    <span>{t('management.cancelModal.trialContinues', { date: formatDate(subscriptionDetails?.expirationDate || null), defaultValue: 'Your free trial continues until {{date}}' })}</span>
                   </li>
                   <li className="flex items-start gap-2">
                     <CheckCircleIcon className="w-4 h-4 text-green-500 mt-0.5 flex-shrink-0" />
-                    <span>You'll keep all premium features until then</span>
+                    <span>{t('management.cancelModal.keepPremium', "You'll keep all premium features until then")}</span>
                   </li>
                   <li className="flex items-start gap-2">
                     <CheckCircleIcon className="w-4 h-4 text-green-500 mt-0.5 flex-shrink-0" />
-                    <span>You won't be charged after the trial ends</span>
+                    <span>{t('management.cancelModal.noChargeAfter', "You won't be charged after the trial ends")}</span>
                   </li>
                   <li className="flex items-start gap-2">
                     <XCircleIcon className="w-4 h-4 text-yellow-600 mt-0.5 flex-shrink-0" />
-                    <span>After expiration, you'll revert to the free plan (3 listings max)</span>
+                    <span>{t('management.cancelModal.revertToFree', "After expiration, you'll revert to the free plan (3 listings max)")}</span>
                   </li>
                 </ul>
                 <div className="mt-3 pt-3 border-t border-yellow-200">
                   <p className="text-xs text-yellow-600">
-                    <span className="font-semibold">Note:</span> If you don't cancel, you'll automatically be subscribed to the paid plan at the end of your trial and your payment method will be charged.
+                    <span className="font-semibold">Note:</span> {t('management.cancelModal.trialNote', "If you don't cancel, you'll automatically be subscribed to the paid plan at the end of your trial and your payment method will be charged.")}
                   </p>
                 </div>
               </div>
@@ -1969,19 +1968,19 @@ const SubscriptionManagement: React.FC<SubscriptionManagementProps> = ({ userId 
               // Paid subscription - offer refund
               <>
                 <div className="bg-neutral-50 rounded-xl p-4 mb-4">
-                  <h4 className="text-sm font-semibold text-neutral-700 mb-2">What happens when you cancel:</h4>
+                  <h4 className="text-sm font-semibold text-neutral-700 mb-2">{t('management.cancelModal.whatHappens', 'What happens when you cancel:')}</h4>
                   <ul className="space-y-2 text-sm text-neutral-600">
                     <li className="flex items-start gap-2">
                       <CheckCircleIcon className="w-4 h-4 text-green-500 mt-0.5 flex-shrink-0" />
-                      <span>You'll keep access until <span className="font-medium">{formatDate(subscriptionDetails?.expirationDate || null)}</span></span>
+                      <span>{t('management.cancelModal.keepAccessUntil', { date: formatDate(subscriptionDetails?.expirationDate || null), defaultValue: "You'll keep access until {{date}}" })}</span>
                     </li>
                     <li className="flex items-start gap-2">
                       <CheckCircleIcon className="w-4 h-4 text-green-500 mt-0.5 flex-shrink-0" />
-                      <span>Your listings will remain active during this time</span>
+                      <span>{t('management.cancelModal.listingsActive', 'Your listings will remain active during this time')}</span>
                     </li>
                     <li className="flex items-start gap-2">
                       <XCircleIcon className="w-4 h-4 text-red-500 mt-0.5 flex-shrink-0" />
-                      <span>After that, you'll revert to the free plan (3 listings max)</span>
+                      <span>{t('management.cancelModal.revertToFreePaid', "After that, you'll revert to the free plan (3 listings max)")}</span>
                     </li>
                   </ul>
                 </div>
@@ -1993,20 +1992,20 @@ const SubscriptionManagement: React.FC<SubscriptionManagementProps> = ({ userId 
                       <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                       </svg>
-                      Refund Available
+                      {t('management.cancelModal.refundAvailable', 'Refund Available')}
                     </h4>
                     <div className="space-y-1 text-sm">
                       <div className="flex justify-between text-green-700">
-                        <span>Days remaining:</span>
-                        <span className="font-medium">{subscriptionDetails.daysRemaining} of {subscriptionDetails.totalDays}</span>
+                        <span>{t('management.cancelModal.daysRemaining', 'Days remaining:')}</span>
+                        <span className="font-medium">{t('management.cancelModal.daysRemainingValue', { remaining: subscriptionDetails.daysRemaining, total: subscriptionDetails.totalDays, defaultValue: '{{remaining}} of {{total}}' })}</span>
                       </div>
                       <div className="flex justify-between text-green-700">
-                        <span>Pro-rated refund:</span>
+                        <span>{t('management.cancelModal.proRatedRefund', 'Pro-rated refund:')}</span>
                         <span className="font-bold text-green-800">€{subscriptionDetails.remainingValue.toFixed(2)}</span>
                       </div>
                     </div>
                     <p className="text-xs text-green-600 mt-2">
-                      If you cancel now and request a refund, we'll refund the unused portion of your subscription to your original payment method.
+                      {t('management.cancelModal.refundDesc', "If you cancel now and request a refund, we'll refund the unused portion of your subscription to your original payment method.")}
                     </p>
                   </div>
                 )}
@@ -2028,7 +2027,7 @@ const SubscriptionManagement: React.FC<SubscriptionManagementProps> = ({ userId 
                     disabled={cancelling}
                     className="w-full py-2.5 rounded-lg font-semibold text-neutral-700 bg-neutral-100 hover:bg-neutral-200 transition-colors disabled:opacity-50 text-sm"
                   >
-                    Cancel at end of billing period
+                    {t('management.cancelModal.cancelAtEnd', 'Cancel at end of billing period')}
                   </button>
                   <button
                     onClick={() => {
@@ -2044,11 +2043,11 @@ const SubscriptionManagement: React.FC<SubscriptionManagementProps> = ({ userId 
                           <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                           <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                         </svg>
-                        Processing...
+                        {t('management.cancelModal.processing', 'Processing...')}
                       </>
                     ) : (
                       <>
-                        Cancel now & get €{subscriptionDetails.remainingValue.toFixed(2)} refund
+                        {t('management.cancelModal.cancelNowWithRefund', { amount: subscriptionDetails.remainingValue.toFixed(2), defaultValue: 'Cancel now & get €{{amount}} refund' })}
                       </>
                     )}
                   </button>
@@ -2065,10 +2064,10 @@ const SubscriptionManagement: React.FC<SubscriptionManagementProps> = ({ userId 
                         <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                         <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                       </svg>
-                      Cancelling...
+                      {t('management.cancelModal.cancellingAction', 'Cancelling...')}
                     </>
                   ) : (
-                    subscriptionDetails?.isCoupon ? 'Yes, Cancel Auto-Renewal' : 'Yes, Cancel'
+                    subscriptionDetails?.isCoupon ? t('management.cancelModal.yesCancelAutoRenewal', 'Yes, Cancel Auto-Renewal') : t('management.cancelModal.yesCancel', 'Yes, Cancel')
                   )}
                 </button>
               )}
@@ -2079,7 +2078,7 @@ const SubscriptionManagement: React.FC<SubscriptionManagementProps> = ({ userId 
                 }}
                 className="w-full py-2.5 rounded-lg font-semibold text-neutral-600 hover:text-neutral-800 hover:bg-neutral-50 transition-colors"
               >
-                {subscriptionDetails?.isCoupon ? 'Keep Auto-Renewal' : 'Keep Subscription'}
+                {subscriptionDetails?.isCoupon ? t('management.cancelModal.keepAutoRenewal', 'Keep Auto-Renewal') : t('management.cancelModal.keepSub', 'Keep Subscription')}
               </button>
             </div>
           </div>
