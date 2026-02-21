@@ -1855,7 +1855,8 @@ export const generateAgentCoupons = async (
     }
 
     const currentUser = req.user as IUser;
-    const { id } = req.params;
+    const id = getObjectIdParam(req, res, 'id');
+    if (!id) return;
 
     const agency = await Agency.findById(id);
     if (!agency) {
@@ -2352,7 +2353,8 @@ export const getAgencyCoupons = async (
     }
 
     const currentUser = req.user as IUser;
-    const { id } = req.params;
+    const id = getObjectIdParam(req, res, 'id');
+    if (!id) return;
 
     const agency = await Agency.findById(id);
     if (!agency) {
@@ -2445,7 +2447,8 @@ export const usePromotionCoupon = async (
     }
 
     const currentUser = req.user as IUser;
-    const { id } = req.params;
+    const id = getObjectIdParam(req, res, 'id');
+    if (!id) return;
     const { propertyId } = req.body;
 
     if (!propertyId) {
@@ -2536,7 +2539,10 @@ export const sendPromotionCouponsEmailEndpoint = async (
     }
 
     const currentUser = req.user as IUser;
-    const agency = await Agency.findById(req.params.id);
+    const id = getObjectIdParam(req, res, 'id');
+    if (!id) return;
+
+    const agency = await Agency.findById(id);
 
     if (!agency) {
       res.status(404).json({ message: 'Agency not found' });
@@ -2591,7 +2597,8 @@ export const getAgencyAgents = async (
     }
 
     const currentUser = req.user as IUser;
-    const { id } = req.params;
+    const id = getObjectIdParam(req, res, 'id');
+    if (!id) return;
 
     const agency = await Agency.findById(id).populate('agents', 'name email phone avatarUrl subscription agency agentLicense');
     if (!agency) {

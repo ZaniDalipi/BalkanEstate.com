@@ -1,5 +1,4 @@
 import { Request, Response } from 'express';
-import mongoose from 'mongoose';
 import Agent from '../models/Agent';
 import User, { IUser } from '../models/User';
 import Agency from '../models/Agency';

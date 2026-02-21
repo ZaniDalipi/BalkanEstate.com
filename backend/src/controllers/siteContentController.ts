@@ -1,11 +1,13 @@
 import { Request, Response } from 'express';
 import SiteContent from '../models/SiteContent';
 import cloudinary from '../config/cloudinary';
+import { getParam, getObjectIdParam } from '../utils/validateParams';
 
 // Get all content for a section (public)
 export const getContentBySection = async (req: Request, res: Response) => {
   try {
-    const { section, subsection } = req.params;
+    const section = getParam(req, 'section');
+    const subsection = getParam(req, 'subsection');
     const query: any = { section, isActive: true };
     if (subsection) query.subsection = subsection;
 
@@ -91,7 +93,8 @@ export const createContent = async (req: Request, res: Response): Promise<void> 
 // Admin: Update content
 export const updateContent = async (req: Request, res: Response): Promise<void> => {
   try {
-    const { id } = req.params;
+    const id = getObjectIdParam(req, res, 'id');
+    if (!id) return;
     const updates = req.body;
 
     const content = await SiteContent.findByIdAndUpdate(
@@ -114,7 +117,8 @@ export const updateContent = async (req: Request, res: Response): Promise<void> 
 // Admin: Delete content
 export const deleteContent = async (req: Request, res: Response): Promise<void> => {
   try {
-    const { id } = req.params;
+    const id = getObjectIdParam(req, res, 'id');
+    if (!id) return;
 
     const content = await SiteContent.findById(id);
     if (!content) {

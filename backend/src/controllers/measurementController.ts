@@ -2,6 +2,7 @@ import { Request, Response } from 'express';
 import User from '../models/User';
 import { generateSecureMeasurementId } from '../utils/secureRandom';
 import { apiLogger } from '../utils/logger';
+import { getParam } from '../utils/validateParams';
 
 interface MeasurementPoint {
   lat: number;
@@ -175,7 +176,7 @@ export const saveMeasurement = async (req: Request, res: Response): Promise<void
 export const updateMeasurement = async (req: Request, res: Response): Promise<void> => {
   try {
     const userId = (req as any).user?._id;
-    const { id } = req.params;
+    const id = getParam(req, 'id');
 
     if (!userId) {
       res.status(401).json({ message: 'User not authenticated' });
@@ -231,7 +232,7 @@ export const updateMeasurement = async (req: Request, res: Response): Promise<vo
 export const deleteMeasurement = async (req: Request, res: Response): Promise<void> => {
   try {
     const userId = (req as any).user?._id;
-    const { id } = req.params;
+    const id = getParam(req, 'id');
 
     if (!userId) {
       res.status(401).json({ message: 'User not authenticated' });
@@ -274,7 +275,7 @@ export const deleteMeasurement = async (req: Request, res: Response): Promise<vo
 export const getMeasurementById = async (req: Request, res: Response): Promise<void> => {
   try {
     const userId = (req as any).user?._id;
-    const { id } = req.params;
+    const id = getParam(req, 'id');
 
     if (!userId) {
       res.status(401).json({ message: 'User not authenticated' });

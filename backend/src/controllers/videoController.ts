@@ -9,6 +9,7 @@ import {
   VideoGenerationOptions,
 } from '../services/videoGenerationService';
 import { videoLogger } from '../utils/logger';
+import { getParam, getObjectIdParam } from '../utils/validateParams';
 
 /**
  * @desc    Generate video for a property (synchronous - for smaller videos)
@@ -17,7 +18,8 @@ import { videoLogger } from '../utils/logger';
  */
 export const generateVideo = async (req: Request, res: Response): Promise<void> => {
   try {
-    const { propertyId } = req.params;
+    const propertyId = getObjectIdParam(req, res, 'propertyId');
+    if (!propertyId) return;
 
     if (!req.user) {
       res.status(401).json({ message: 'Unauthorized' });
@@ -152,7 +154,8 @@ export const generateVideo = async (req: Request, res: Response): Promise<void> 
  */
 export const startAsyncVideoGeneration = async (req: Request, res: Response): Promise<void> => {
   try {
-    const { propertyId } = req.params;
+    const propertyId = getObjectIdParam(req, res, 'propertyId');
+    if (!propertyId) return;
 
     if (!req.user) {
       res.status(401).json({ message: 'Unauthorized' });
@@ -247,7 +250,7 @@ export const startAsyncVideoGeneration = async (req: Request, res: Response): Pr
  */
 export const getJobStatus = async (req: Request, res: Response): Promise<void> => {
   try {
-    const { jobId } = req.params;
+    const jobId = getParam(req, 'jobId');
 
     const job = getVideoGenerationJobStatus(jobId);
 
@@ -272,7 +275,8 @@ export const getJobStatus = async (req: Request, res: Response): Promise<void> =
  */
 export const deleteVideo = async (req: Request, res: Response): Promise<void> => {
   try {
-    const { propertyId } = req.params;
+    const propertyId = getObjectIdParam(req, res, 'propertyId');
+    if (!propertyId) return;
 
     if (!req.user) {
       res.status(401).json({ message: 'Unauthorized' });
@@ -334,7 +338,8 @@ export const deleteVideo = async (req: Request, res: Response): Promise<void> =>
  */
 export const getVideoPreview = async (req: Request, res: Response): Promise<void> => {
   try {
-    const { propertyId } = req.params;
+    const propertyId = getObjectIdParam(req, res, 'propertyId');
+    if (!propertyId) return;
 
     if (!req.user) {
       res.status(401).json({ message: 'Unauthorized' });

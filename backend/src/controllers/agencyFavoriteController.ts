@@ -3,6 +3,7 @@ import AgencyFavorite from '../models/AgencyFavorite';
 import Agency from '../models/Agency';
 import { IUser } from '../models/User';
 import { apiLogger } from '../utils/logger';
+import { getObjectIdParam } from '../utils/validateParams';
 
 // @desc    Get user's favourite agencies
 // @route   GET /api/agency-favorites
@@ -89,10 +90,13 @@ export const checkAgencyFavorite = async (
       return;
     }
 
+    const agencyId = getObjectIdParam(req, res, 'agencyId');
+    if (!agencyId) return;
+
     const userId = String((req.user as IUser)._id);
     const favorite = await AgencyFavorite.findOne({
       userId,
-      agencyId: req.params.agencyId,
+      agencyId,
     });
 
     res.json({ isSaved: !!favorite });
