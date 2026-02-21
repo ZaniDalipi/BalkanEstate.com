@@ -3,6 +3,12 @@ import { apiLogger } from '../utils/logger';
 import * as geminiService from '../services/geminiService';
 import User from '../models/User';
 import Product from '../models/Product';
+import {
+  FREE_TIER_LIMITS,
+  PRO_TIER_LIMITS,
+  ENTERPRISE_TIER_LIMITS,
+  PRO_BUYER_LIMITS,
+} from '../config/subscriptionConstants';
 
 function getNextMonthStart(): Date {
   const d = new Date();
@@ -210,25 +216,44 @@ export const aiChat = async (req: Request, res: Response): Promise<void> => {
         }
 
         const isSubscribed = user.isSubscribed && user.hasActiveSubscription();
+        let messageLimit: number = FREE_TIER_LIMITS.AI_MESSAGES; // Default for free users
+
         if (isSubscribed && user.subscriptionPlan) {
           const product = await Product.findOne({ productId: user.subscriptionPlan });
           const rawLimit = product?.aiMessagesLimit;
           const limit = typeof rawLimit === 'number' ? rawLimit : undefined;
 
-          if (typeof limit === 'number' && limit !== -1) {
-            if (user.aiMessagesUsage.monthlyCount >= limit) {
-              res.status(429).json({
-                message: `AI message limit reached. You have used all ${limit} messages for this month.`,
-                limit,
-                used: user.aiMessagesUsage.monthlyCount,
-                remaining: 0,
-                resetDate: user.aiMessagesUsage.monthResetDate,
-              });
-              return;
+          if (typeof limit === 'number') {
+            messageLimit = limit;
+          } else {
+            // Product doesn't have aiMessagesLimit set - use plan-based defaults
+            const plan = user.subscriptionPlan.toLowerCase();
+            if (plan.includes('enterprise') || plan.includes('agency')) {
+              messageLimit = ENTERPRISE_TIER_LIMITS.AI_MESSAGES;
+            } else if (plan.includes('buyer')) {
+              messageLimit = PRO_BUYER_LIMITS.AI_MESSAGES;
+            } else if (plan.includes('yearly')) {
+              messageLimit = PRO_TIER_LIMITS.YEARLY.AI_MESSAGES;
+            } else if (plan.includes('monthly')) {
+              messageLimit = PRO_TIER_LIMITS.MONTHLY.AI_MESSAGES;
             }
-            user.aiMessagesUsage.monthlyCount += 1;
-            await user.save();
           }
+        }
+
+        // Enforce limit (-1 = unlimited, skip check)
+        if (messageLimit !== -1) {
+          if (user.aiMessagesUsage.monthlyCount >= messageLimit) {
+            res.status(429).json({
+              message: `AI message limit reached. You have used all ${messageLimit} messages for this month.`,
+              limit: messageLimit,
+              used: user.aiMessagesUsage.monthlyCount,
+              remaining: 0,
+              resetDate: user.aiMessagesUsage.monthResetDate,
+            });
+            return;
+          }
+          user.aiMessagesUsage.monthlyCount += 1;
+          await user.save();
         }
       }
     }

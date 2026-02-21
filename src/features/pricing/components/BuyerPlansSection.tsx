@@ -22,7 +22,7 @@ const BuyerPlansSection: React.FC<BuyerPlansSectionProps> = ({
   return (
     <Animated variant="fadeInUp" className="max-w-md mx-auto">
       {buyerProduct ? (
-        <div className="relative rounded-3xl p-8 flex flex-col bg-gradient-to-br from-blue-50 via-white to-indigo-50 border-2 border-blue-300 shadow-xl hover-lift">
+        <div className={`relative rounded-3xl p-8 flex flex-col bg-gradient-to-br from-blue-50 via-white to-indigo-50 border-2 border-blue-300 shadow-xl ${isPlanDisabled(buyerProduct.productId) && !isActivePlan(buyerProduct.productId) ? 'opacity-40 blur-[1px] pointer-events-none select-none' : 'hover-lift'}`}>
           <div className="absolute -top-4 left-1/2 -translate-x-1/2">
             <span className="inline-flex items-center gap-1.5 bg-gradient-to-r from-blue-500 to-indigo-600 text-white text-xs font-bold px-4 py-2 rounded-full shadow-lg">
               <SparklesIcon className="w-3.5 h-3.5" />
