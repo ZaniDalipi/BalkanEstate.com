@@ -870,38 +870,40 @@ const ProfileSettings: React.FC<{ user: User }> = ({ user }) => {
                 // Profile save failed, but role switch succeeded — continue
             }
 
+            // Use languages from the license modal if provided, otherwise fall back to profile form
+            const modalLanguages = licenseData.languages && licenseData.languages.length > 0
+                ? licenseData.languages
+                : agentData.languages;
+
             // If switching to agent, also save agent-specific fields
             if (roleToSwitch === UserRole.AGENT) {
                 const yearsExp = agentData.yearsOfExperience === '' ? 0 : Number(agentData.yearsOfExperience) || 0;
-                // Use languages from the license modal if provided, otherwise fall back to profile form
-                const agentLanguages = licenseData.languages && licenseData.languages.length > 0
-                    ? licenseData.languages
-                    : agentData.languages;
                 try {
                     const updatedAgent = await updateAgentProfile({
-                        languages: agentLanguages,
+                        languages: modalLanguages,
                         specializations: parsedSpecializations,
                         serviceAreas: agentData.serviceAreas,
                         yearsOfExperience: yearsExp,
                         lat: agentData.lat,
                         lng: agentData.lng,
                     });
-                    const savedLanguages = updatedAgent.languages || agentLanguages;
                     finalUser = {
                         ...finalUser,
-                        languages: savedLanguages,
+                        languages: updatedAgent.languages || modalLanguages,
                         specializations: updatedAgent.specializations || parsedSpecializations,
                         serviceAreas: updatedAgent.serviceAreas || agentData.serviceAreas,
                         yearsOfExperience: updatedAgent.yearsOfExperience !== undefined ? updatedAgent.yearsOfExperience : yearsExp,
                         lat: updatedAgent.lat !== undefined ? updatedAgent.lat : agentData.lat,
                         lng: updatedAgent.lng !== undefined ? updatedAgent.lng : agentData.lng,
                     };
-                    // Keep profile form in sync with what was saved
-                    setAgentData(prev => ({ ...prev, languages: savedLanguages }));
                 } catch {
-                    // Agent profile save failed, but role switch succeeded — continue
+                    // Agent profile save failed — still use modal languages
+                    finalUser = { ...finalUser, languages: modalLanguages };
                 }
             }
+
+            // Always sync languages from the modal into the profile form state
+            setAgentData(prev => ({ ...prev, languages: finalUser.languages || modalLanguages }));
 
             // Update context and form data
             dispatch({ type: 'UPDATE_USER', payload: finalUser });

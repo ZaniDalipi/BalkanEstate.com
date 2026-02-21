@@ -4,9 +4,9 @@ import { useTranslation } from 'react-i18next';
 import { getAgencies } from '../../services/apiService';
 
 const BALKAN_LANGUAGE_KEYS = [
-  'english', 'serbian', 'croatian', 'slovenian', 'bosnian', 'macedonian',
-  'albanian', 'montenegrin', 'bulgarian', 'romanian', 'greek', 'turkish',
-  'hungarian', 'german', 'italian', 'french', 'russian', 'spanish'
+  'English', 'Serbian', 'Croatian', 'Slovenian', 'Bosnian', 'Macedonian',
+  'Albanian', 'Montenegrin', 'Bulgarian', 'Romanian', 'Greek', 'Turkish',
+  'Hungarian', 'German', 'Italian', 'French', 'Russian', 'Spanish'
 ];
 
 interface AgentLicenseModalProps {
@@ -63,7 +63,7 @@ const AgentLicenseModal: React.FC<AgentLicenseModalProps> = ({
   const [agencies, setAgencies] = useState<any[]>([]);
   const [selectedAgency, setSelectedAgency] = useState<string>('');
   const [loadingAgencies, setLoadingAgencies] = useState(false);
-  const [languages, setLanguages] = useState<string[]>(['english']);
+  const [languages, setLanguages] = useState<string[]>(['English']);
 
   const isJoiningAgency = Boolean(currentLicenseNumber && currentAgentId);
 
