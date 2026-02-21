@@ -332,6 +332,60 @@ export const deleteVideo = async (req: Request, res: Response): Promise<void> =>
 };
 
 /**
+ * @desc    Add generated video to listing (sets videoUrl, replacing YouTube/Instagram if present)
+ * @route   PATCH /api/videos/:propertyId/add-to-listing
+ * @access  Private (property owner only)
+ */
+export const addVideoToListing = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const propertyId = getObjectIdParam(req, res, 'propertyId');
+    if (!propertyId) return;
+
+    if (!req.user) {
+      res.status(401).json({ message: 'Unauthorized' });
+      return;
+    }
+
+    const currentUser = req.user as IUser;
+    const userId = String(currentUser._id);
+
+    const property = await Property.findById(propertyId);
+    if (!property) {
+      res.status(404).json({ message: 'Property not found' });
+      return;
+    }
+
+    if (property.sellerId.toString() !== userId) {
+      res.status(403).json({ message: 'Not authorized to modify this property' });
+      return;
+    }
+
+    // Use the generated video URL, or accept a videoUrl from the request body
+    const videoUrl = req.body.videoUrl || property.generatedVideoUrl;
+    if (!videoUrl) {
+      res.status(400).json({ message: 'No generated video found. Generate a video first.' });
+      return;
+    }
+
+    const previousVideoUrl = property.videoUrl;
+    property.videoUrl = videoUrl;
+    await property.save();
+
+    videoLogger.info(`🎬 Added generated video to listing ${propertyId} (replaced: ${previousVideoUrl || 'none'})`);
+
+    res.status(200).json({
+      success: true,
+      message: previousVideoUrl ? 'Video replaced on listing' : 'Video added to listing',
+      videoUrl,
+      previousVideoUrl: previousVideoUrl || null,
+    });
+  } catch (error: any) {
+    videoLogger.error('❌ Failed to add video to listing:', error);
+    res.status(500).json({ message: 'Failed to add video to listing' });
+  }
+};
+
+/**
  * @desc    Get video generation preview (estimate duration and size)
  * @route   GET /api/videos/preview/:propertyId
  * @access  Private (property owner only)
