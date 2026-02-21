@@ -96,8 +96,8 @@ export const getPaymentProviders = async (req: Request, res: Response): Promise<
   try {
     const countryCode = req.params.countryCode as string;
 
-    if (!countryCode) {
-      res.status(400).json({ message: 'Country code is required' });
+    if (!countryCode || !/^[A-Za-z]{2}$/.test(countryCode)) {
+      res.status(400).json({ message: 'A valid 2-letter country code is required' });
       return;
     }
 

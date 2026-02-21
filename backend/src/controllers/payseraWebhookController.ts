@@ -93,8 +93,8 @@ async function handleSuccessfulPayment(
   metadata: { userId: string; productId: string; planName: string; planInterval: string } | null
 ): Promise<void> {
   try {
-    // Extract userId from metadata or personcode
-    const userId = metadata?.userId || callbackData.personcode;
+    // Extract userId from verified metadata only (personcode is no longer sent)
+    const userId = metadata?.userId;
     const productId = metadata?.productId;
 
     if (!userId) {

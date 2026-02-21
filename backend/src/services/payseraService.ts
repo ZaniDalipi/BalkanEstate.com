@@ -147,19 +147,22 @@ class PayseraService {
         p_lastname: request.lastName || '',
         lang: this.mapLanguage(request.language || 'en'),
         paytext: request.description,
-        // Custom metadata for webhook processing
-        personcode: request.userId, // Using personcode to pass userId
         payment: 'card,wallet,bank', // Allow all payment methods
       };
 
-      // Add metadata as encoded JSON in paytext
+      // Add HMAC-signed metadata to paytext for secure webhook processing
       const metadata = {
         userId: request.userId,
         productId: request.productId,
         planName: request.planName,
         planInterval: request.planInterval,
       };
-      params.paytext = `${request.description} | META:${Buffer.from(JSON.stringify(metadata)).toString('base64')}`;
+      const metaPayload = Buffer.from(JSON.stringify(metadata)).toString('base64');
+      const metaSignature = crypto
+        .createHmac('sha256', this.config.signPassword)
+        .update(metaPayload)
+        .digest('hex');
+      params.paytext = `${request.description} | META:${metaPayload}.${metaSignature}`;
 
       // Encode parameters
       const queryString = Object.entries(params)
@@ -219,15 +222,24 @@ class PayseraService {
         payer: params.get('payer') || '',
       };
 
-      // Extract metadata from paytext if present
+      // Extract and verify HMAC-signed metadata from paytext
       let metadata = null;
       const paytext = callbackData.paytext || '';
-      const metaMatch = paytext.match(/META:([A-Za-z0-9+/=]+)/);
+      const metaMatch = paytext.match(/META:([A-Za-z0-9+/=]+)\.([a-f0-9]+)/);
       if (metaMatch) {
-        try {
-          metadata = JSON.parse(Buffer.from(metaMatch[1], 'base64').toString('utf-8'));
-        } catch {
-          paymentLogger.warn('Failed to parse PaySera metadata');
+        const [, metaPayload, metaSignature] = metaMatch;
+        const expectedSignature = crypto
+          .createHmac('sha256', this.config.signPassword)
+          .update(metaPayload)
+          .digest('hex');
+        if (crypto.timingSafeEqual(Buffer.from(metaSignature, 'hex'), Buffer.from(expectedSignature, 'hex'))) {
+          try {
+            metadata = JSON.parse(Buffer.from(metaPayload, 'base64').toString('utf-8'));
+          } catch {
+            paymentLogger.warn('Failed to parse PaySera metadata');
+          }
+        } else {
+          paymentLogger.warn('PaySera metadata signature verification failed - possible tampering');
         }
       }
 
