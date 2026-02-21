@@ -32,17 +32,18 @@ interface FooterProps {
 }
 
 // Balkan countries with flags
+// `name` is the full name used for filtering; `label` is the short display name
 const balkanCountries = [
-    { code: 'AL', name: 'Albania', flag: '🇦🇱' },
-    { code: 'BA', name: 'Bosnia', flag: '🇧🇦' },
-    { code: 'BG', name: 'Bulgaria', flag: '🇧🇬' },
-    { code: 'HR', name: 'Croatia', flag: '🇭🇷' },
-    { code: 'GR', name: 'Greece', flag: '🇬🇷' },
-    { code: 'XK', name: 'Kosovo', flag: '🇽🇰' },
-    { code: 'ME', name: 'Montenegro', flag: '🇲🇪' },
-    { code: 'MK', name: 'N. Macedonia', flag: '🇲🇰' },
-    { code: 'RO', name: 'Romania', flag: '🇷🇴' },
-    { code: 'RS', name: 'Serbia', flag: '🇷🇸' },
+    { code: 'AL', name: 'Albania', label: 'Albania', flag: '🇦🇱' },
+    { code: 'BA', name: 'Bosnia and Herzegovina', label: 'Bosnia', flag: '🇧🇦' },
+    { code: 'BG', name: 'Bulgaria', label: 'Bulgaria', flag: '🇧🇬' },
+    { code: 'HR', name: 'Croatia', label: 'Croatia', flag: '🇭🇷' },
+    { code: 'GR', name: 'Greece', label: 'Greece', flag: '🇬🇷' },
+    { code: 'XK', name: 'Kosovo', label: 'Kosovo', flag: '🇽🇰' },
+    { code: 'ME', name: 'Montenegro', label: 'Montenegro', flag: '🇲🇪' },
+    { code: 'MK', name: 'North Macedonia', label: 'N. Macedonia', flag: '🇲🇰' },
+    { code: 'RO', name: 'Romania', label: 'Romania', flag: '🇷🇴' },
+    { code: 'RS', name: 'Serbia', label: 'Serbia', flag: '🇷🇸' },
 ];
 
 const Footer: React.FC<FooterProps> = ({ className = '', contained = false }) => {
@@ -59,9 +60,8 @@ const Footer: React.FC<FooterProps> = ({ className = '', contained = false }) =>
     };
 
     const handleCountrySearch = (countryName: string) => {
-        dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'search' });
-        dispatch({ type: 'UPDATE_SEARCH_PAGE_STATE', payload: { filters: { country: countryName } } });
-        window.history.pushState({}, '', getLocalizedPath(`/search?country=${encodeURIComponent(countryName)}`));
+        dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'explore-cities' });
+        window.history.pushState({}, '', getLocalizedPath(`/explore-cities?country=${encodeURIComponent(countryName)}`));
         window.scrollTo({ top: 0, behavior: 'smooth' });
     };
 
@@ -246,11 +246,11 @@ const Footer: React.FC<FooterProps> = ({ className = '', contained = false }) =>
                                     key={country.code}
                                     onClick={() => handleCountrySearch(country.name)}
                                     className="inline-flex items-center gap-1.5 bg-slate-700/30 hover:bg-slate-700/60 px-2.5 py-1.5 rounded-lg text-xs text-slate-400 hover:text-white transition-all duration-200 cursor-pointer text-left group"
-                                    title={`Property for sale in ${country.name}`}
-                                    aria-label={`Browse properties in ${country.name}`}
+                                    title={`Explore cities in ${country.label}`}
+                                    aria-label={`Explore cities in ${country.label}`}
                                 >
                                     <span className="text-sm leading-none flex-shrink-0">{country.flag}</span>
-                                    <span className="group-hover:translate-x-0.5 transition-transform duration-200">{country.name}</span>
+                                    <span className="group-hover:translate-x-0.5 transition-transform duration-200">{country.label}</span>
                                 </button>
                             ))}
                         </div>
