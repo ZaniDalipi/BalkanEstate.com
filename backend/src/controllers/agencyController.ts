@@ -483,7 +483,7 @@ export const getAgency = async (
     const { country, name, idOrSlug } = req.params;
 
     // Construct slug from country/name or use idOrSlug
-    let identifier = idOrSlug;
+    let identifier = idOrSlug as string | undefined;
     if (country && name) {
       identifier = `${country}/${name}`;
       agencyLogger.info(`🔍 Looking up agency by country/name: ${identifier}`);
