@@ -1539,6 +1539,7 @@ const ProfileSettings: React.FC<{ user: User }> = ({ user }) => {
                         onLocationChange={handleLocationChange}
                         onAddressChange={handleAddressChange}
                         zoom={10}
+                        autoDetectLocation={!agentData.lat && !agentData.lng}
                     />
 
                     {/* Service Areas */}

@@ -28,9 +28,10 @@ interface MapLocationPickerProps {
   cityLng?: number;
   onLocationChange: (lat: number, lng: number) => void;
   onAddressChange?: (address: string) => void;
+  autoDetectLocation?: boolean;
 }
 
-const MapLocationPicker: React.FC<MapLocationPickerProps> = ({ lat, lng, address, zoom = 15, country, city, cityLat, cityLng, onLocationChange, onAddressChange }) => {
+const MapLocationPicker: React.FC<MapLocationPickerProps> = ({ lat, lng, address, zoom = 15, country, city, cityLat, cityLng, onLocationChange, onAddressChange, autoDetectLocation }) => {
   const { t } = useTranslation(['search']);
   const { dispatch } = useAppContext();
   const mapRef = useRef<L.Map | null>(null);
@@ -231,6 +232,50 @@ const MapLocationPicker: React.FC<MapLocationPickerProps> = ({ lat, lng, address
       }
     };
   }, []); // Only run once on mount
+
+  // Auto-detect user's current location on mount when no saved location exists
+  useEffect(() => {
+    if (!autoDetectLocation || !navigator.geolocation) return;
+
+    // Small delay to ensure map is fully initialized
+    const timer = setTimeout(() => {
+      setIsGettingLocation(true);
+      navigator.geolocation.getCurrentPosition(
+        async (position) => {
+          const { latitude, longitude } = position.coords;
+          onLocationChange(latitude, longitude);
+
+          if (mapRef.current) {
+            mapRef.current.flyTo([latitude, longitude], 16, {
+              duration: 1.0,
+              easeLinearity: 0.4,
+            });
+          }
+
+          if (onAddressChange) {
+            try {
+              const result = await reverseGeocode(latitude, longitude);
+              if (result) {
+                onAddressChange(result.display_name);
+                setSearchQuery(result.display_name);
+              }
+            } catch {
+              // Reverse geocode failed silently
+            }
+          }
+
+          setIsGettingLocation(false);
+        },
+        () => {
+          // Geolocation failed silently — user can manually pick location
+          setIsGettingLocation(false);
+        },
+        { enableHighAccuracy: true, timeout: 10000, maximumAge: 300000 }
+      );
+    }, 300);
+
+    return () => clearTimeout(timer);
+  }, [autoDetectLocation]); // Only run when autoDetectLocation changes
 
   // Update marker position when lat/lng changes externally with optimized animation
   useEffect(() => {
