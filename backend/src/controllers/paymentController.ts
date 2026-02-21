@@ -117,7 +117,7 @@ export const getPaymentProviders = async (req: Request, res: Response): Promise<
       isEU: mapping?.isEU || false,
       isSEPA: mapping?.isSEPA || false,
       currency: mapping?.currency || 'EUR',
-      supportedMethods: paymentProviderFactory.getAvailablePaymentMethods(countryCode),
+      supportedMethods: paymentProviderFactory.getAvailablePaymentMethods(upperCode),
     });
   } catch (error: any) {
     paymentLogger.error('Error getting payment providers:', error);
@@ -490,18 +490,19 @@ export const getCustomerPortal = async (req: Request, res: Response): Promise<vo
  */
 export const getAvailablePaymentMethods = async (req: Request, res: Response): Promise<void> => {
   try {
-    const { countryCode } = req.params;
+    const countryCode = req.params.countryCode as string;
     if (!countryCode) {
       res.status(400).json({ message: 'Country code is required' });
       return;
     }
 
-    const methods = paymentProviderFactory.getAvailablePaymentMethods(countryCode);
-    const mapping = paymentProviderFactory.getCountryMapping(countryCode.toUpperCase());
+    const code = countryCode.toUpperCase();
+    const methods = paymentProviderFactory.getAvailablePaymentMethods(code);
+    const mapping = paymentProviderFactory.getCountryMapping(code);
 
     res.status(200).json({
       success: true,
-      countryCode: countryCode.toUpperCase(),
+      countryCode: code,
       methods,
       provider: mapping?.provider || 'lemon_squeezy',
       isEU: mapping?.isEU || false,
