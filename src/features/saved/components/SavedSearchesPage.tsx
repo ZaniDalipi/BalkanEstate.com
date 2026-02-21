@@ -105,6 +105,15 @@ const SavedSearchesPage: React.FC = () => {
       return;
     }
 
+    // If no saved searches exist, inform the user
+    if (savedSearches.length === 0) {
+      await showError(
+        t('alerts.noSearchesTitle', 'No Saved Searches'),
+        t('alerts.noSearchesMessage', 'Save a property search first, then enable email alerts to get notified about new matches')
+      );
+      return;
+    }
+
     // Toggle all saved searches alerts
     const newAlertsState = !emailAlertsEnabled;
     setIsTogglingAlerts(true);

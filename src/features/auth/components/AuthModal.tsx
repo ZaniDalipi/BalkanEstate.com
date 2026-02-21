@@ -38,17 +38,17 @@ interface FieldErrors {
 
 // Balkan country codes for phone number input
 const BALKAN_COUNTRY_CODES = [
-    { code: '+383', country: 'XK', label: 'Kosovo' },
-    { code: '+355', country: 'AL', label: 'Albania' },
-    { code: '+381', country: 'RS', label: 'Serbia' },
-    { code: '+389', country: 'MK', label: 'N. Macedonia' },
-    { code: '+387', country: 'BA', label: 'Bosnia' },
-    { code: '+382', country: 'ME', label: 'Montenegro' },
-    { code: '+385', country: 'HR', label: 'Croatia' },
-    { code: '+386', country: 'SI', label: 'Slovenia' },
-    { code: '+359', country: 'BG', label: 'Bulgaria' },
-    { code: '+40', country: 'RO', label: 'Romania' },
-    { code: '+30', country: 'GR', label: 'Greece' },
+    { code: '+383', country: 'XK', label: 'Kosovo', flag: '🇽🇰' },
+    { code: '+355', country: 'AL', label: 'Albania', flag: '🇦🇱' },
+    { code: '+381', country: 'RS', label: 'Serbia', flag: '🇷🇸' },
+    { code: '+389', country: 'MK', label: 'N. Macedonia', flag: '🇲🇰' },
+    { code: '+387', country: 'BA', label: 'Bosnia', flag: '🇧🇦' },
+    { code: '+382', country: 'ME', label: 'Montenegro', flag: '🇲🇪' },
+    { code: '+385', country: 'HR', label: 'Croatia', flag: '🇭🇷' },
+    { code: '+386', country: 'SI', label: 'Slovenia', flag: '🇸🇮' },
+    { code: '+359', country: 'BG', label: 'Bulgaria', flag: '🇧🇬' },
+    { code: '+40', country: 'RO', label: 'Romania', flag: '🇷🇴' },
+    { code: '+30', country: 'GR', label: 'Greece', flag: '🇬🇷' },
 ] as const;
 
 const validatePhone = (countryCode: string, phoneNumber: string, t?: (key: string, defaultValue?: string) => string): string | null => {
@@ -536,7 +536,7 @@ const AuthPage: React.FC = () => {
                                         >
                                             {BALKAN_COUNTRY_CODES.map((cc) => (
                                                 <option key={cc.code} value={cc.code}>
-                                                    {cc.code} {cc.country}
+                                                    {cc.flag} {cc.code} {cc.country}
                                                 </option>
                                             ))}
                                         </select>
