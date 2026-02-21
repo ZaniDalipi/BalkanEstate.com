@@ -8,6 +8,7 @@ import { IUser } from '../models/User';
 import { incrementViewCount } from '../utils/statsUpdater';
 import { checkViewMilestone } from '../services/engagementService';
 import { apiLogger } from '../utils/logger';
+import { getParam, getObjectIdParam } from '../utils/validateParams';
 
 /**
  * Helper function to hash IP address for privacy
@@ -234,7 +235,8 @@ export const trackView = async (req: Request, res: Response): Promise<void> => {
 // @access  Public
 export const updateViewDuration = async (req: Request, res: Response): Promise<void> => {
   try {
-    const { viewId } = req.params;
+    const viewId = getObjectIdParam(req, res, 'viewId');
+    if (!viewId) return;
     const { duration } = req.body;
 
     if (!duration || typeof duration !== 'number') {
@@ -255,7 +257,9 @@ export const updateViewDuration = async (req: Request, res: Response): Promise<v
 // @access  Private (owner only)
 export const getEntityStats = async (req: Request, res: Response): Promise<void> => {
   try {
-    const { entityType, entityId } = req.params;
+    const entityType = getParam(req, 'entityType');
+    const entityId = getObjectIdParam(req, res, 'entityId');
+    if (!entityId) return;
     const { period = '30d' } = req.query;
 
     if (!req.user) {

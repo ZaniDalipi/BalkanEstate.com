@@ -11,6 +11,7 @@ import { processSubscriptionPayment } from '../services/subscriptionPaymentServi
 import User from '../models/User';
 import Product from '../models/Product';
 import { paymentLogger } from '../utils/logger';
+import { getParam } from '../utils/validateParams';
 
 /**
  * PaySera callback status codes
@@ -157,7 +158,7 @@ async function handleSuccessfulPayment(
  */
 export const verifyPayseraPayment = async (req: Request, res: Response): Promise<void> => {
   try {
-    const { orderId } = req.params;
+    const orderId = getParam(req, 'orderId');
     const userId = (req as any).user?._id;
 
     if (!userId) {

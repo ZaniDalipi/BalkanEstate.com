@@ -2,6 +2,7 @@ import { Request, Response } from 'express';
 import SalesHistory from '../models/SalesHistory';
 import { IUser } from '../models/User';
 import { apiLogger } from '../utils/logger';
+import { getObjectIdParam } from '../utils/validateParams';
 
 /**
  * Get sales history for the current user (agent/seller)
@@ -69,7 +70,8 @@ export const getMySalesHistory = async (req: Request, res: Response): Promise<vo
  */
 export const getAgentSalesHistory = async (req: Request, res: Response): Promise<void> => {
   try {
-    const { agentId } = req.params;
+    const agentId = getObjectIdParam(req, res, 'agentId');
+    if (!agentId) return;
     const { page = 1, limit = 10 } = req.query;
 
     const pageNum = Number(page);
@@ -114,7 +116,8 @@ export const getSaleById = async (req: Request, res: Response): Promise<void> =>
       return;
     }
 
-    const { id } = req.params;
+    const id = getObjectIdParam(req, res, 'id');
+    if (!id) return;
     const sale = await SalesHistory.findById(id).populate('propertyId', 'title images price city country address propertyType status currency');
 
     if (!sale) {
@@ -148,7 +151,8 @@ export const updateSaleRecord = async (req: Request, res: Response): Promise<voi
       return;
     }
 
-    const { id } = req.params;
+    const id = getObjectIdParam(req, res, 'id');
+    if (!id) return;
     const { commission, commissionRate, notes } = req.body;
 
     const sale = await SalesHistory.findById(id);
