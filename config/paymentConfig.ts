@@ -8,16 +8,19 @@
  * - Country to provider routing
  *
  * Provider Selection Strategy:
- * - LemonSqueezy: Primary provider for all Balkan countries (Merchant of Record)
- *   Handles VAT/tax compliance globally - ~5% + $0.50 fees
- * - Stripe: Fallback for EU countries - ~2.9% + €0.25 fees
+ * - LemonSqueezy: Primary Merchant of Record for all 11 Balkan countries.
+ *   Handles card, Google Pay, Apple Pay, VAT/tax compliance globally.
+ *   Works for MK-based companies (MoR processes under their merchant account).
+ *   Fees: ~5% + $0.50 per transaction.
+ * - Paysera: Secondary provider for bank transfers in non-EU Balkans.
+ *   Available for direct bank/SEPA payments. Fees: ~1.5-2.5%.
  *
  * Easy to modify and maintain as payment options change over time
  */
 
 // ====== PAYMENT PROVIDERS ======
 
-export type PaymentProvider = 'web';
+export type PaymentProvider = 'lemon_squeezy' | 'paysera' | 'web';
 
 export interface PaymentProviderInfo {
   id: PaymentProvider;
@@ -30,14 +33,32 @@ export interface PaymentProviderInfo {
 }
 
 export const PAYMENT_PROVIDERS: Record<PaymentProvider, PaymentProviderInfo> = {
+  lemon_squeezy: {
+    id: 'lemon_squeezy',
+    name: 'LemonSqueezy',
+    description: 'Secure payments with card, Google Pay, and Apple Pay',
+    fees: '~5% + $0.50 (includes VAT handling)',
+    logo: 'lemon-squeezy',
+    supportedCountries: ['GR', 'HR', 'BG', 'RO', 'SI', 'RS', 'AL', 'BA', 'MK', 'ME', 'XK'],
+    supportedMethods: ['card', 'apple_pay', 'google_pay', 'sepa_debit'],
+  },
+  paysera: {
+    id: 'paysera',
+    name: 'Paysera',
+    description: 'Bank transfer payments for Balkan countries',
+    fees: '~1.5-2.5% for bank transfers',
+    logo: 'paysera',
+    supportedCountries: ['RS', 'AL', 'BA', 'MK', 'ME', 'XK'],
+    supportedMethods: ['bank_transfer', 'wallet'],
+  },
   web: {
-    id: 'web' as PaymentProvider,
+    id: 'web',
     name: 'Web Payment',
     description: 'Secure online payments',
-    fees: 'TBD',
+    fees: 'Standard fees',
     logo: 'payment',
     supportedCountries: ['GR', 'HR', 'BG', 'RO', 'SI', 'RS', 'AL', 'BA', 'MK', 'ME', 'XK'],
-    supportedMethods: ['card', 'paypal', 'apple_pay', 'google_pay'],
+    supportedMethods: ['card', 'apple_pay', 'google_pay'],
   },
 };
 
@@ -53,21 +74,21 @@ export interface CountryPaymentInfo {
   flag: string;
 }
 
-// All countries now use LemonSqueezy as primary provider
+// LemonSqueezy as primary MoR for all countries, Paysera fallback for non-EU bank transfers
 export const COUNTRY_PAYMENT_MAP: Record<string, CountryPaymentInfo> = {
-  // EU Countries
-  GR: { countryCode: 'GR', countryName: 'Greece', provider: 'web' as PaymentProvider, currency: 'EUR', isEU: true, isSEPA: true, flag: '🇬🇷' },
-  HR: { countryCode: 'HR', countryName: 'Croatia', provider: 'web' as PaymentProvider, currency: 'EUR', isEU: true, isSEPA: true, flag: '🇭🇷' },
-  BG: { countryCode: 'BG', countryName: 'Bulgaria', provider: 'web' as PaymentProvider, currency: 'EUR', isEU: true, isSEPA: true, flag: '🇧🇬' },
-  RO: { countryCode: 'RO', countryName: 'Romania', provider: 'web' as PaymentProvider, currency: 'EUR', isEU: true, isSEPA: true, flag: '🇷🇴' },
-  SI: { countryCode: 'SI', countryName: 'Slovenia', provider: 'web' as PaymentProvider, currency: 'EUR', isEU: true, isSEPA: true, flag: '🇸🇮' },
-  // Non-EU Balkans
-  RS: { countryCode: 'RS', countryName: 'Serbia', provider: 'web' as PaymentProvider, currency: 'EUR', isEU: false, isSEPA: true, flag: '🇷🇸' },
-  AL: { countryCode: 'AL', countryName: 'Albania', provider: 'web' as PaymentProvider, currency: 'EUR', isEU: false, isSEPA: true, flag: '🇦🇱' },
-  BA: { countryCode: 'BA', countryName: 'Bosnia and Herzegovina', provider: 'web' as PaymentProvider, currency: 'EUR', isEU: false, isSEPA: false, flag: '🇧🇦' },
-  MK: { countryCode: 'MK', countryName: 'North Macedonia', provider: 'web' as PaymentProvider, currency: 'EUR', isEU: false, isSEPA: true, flag: '🇲🇰' },
-  ME: { countryCode: 'ME', countryName: 'Montenegro', provider: 'web' as PaymentProvider, currency: 'EUR', isEU: false, isSEPA: true, flag: '🇲🇪' },
-  XK: { countryCode: 'XK', countryName: 'Kosovo', provider: 'web' as PaymentProvider, currency: 'EUR', isEU: false, isSEPA: false, flag: '🇽🇰' },
+  // EU Countries — LemonSqueezy only (card, Google Pay, Apple Pay)
+  GR: { countryCode: 'GR', countryName: 'Greece', provider: 'lemon_squeezy', currency: 'EUR', isEU: true, isSEPA: true, flag: '🇬🇷' },
+  HR: { countryCode: 'HR', countryName: 'Croatia', provider: 'lemon_squeezy', currency: 'EUR', isEU: true, isSEPA: true, flag: '🇭🇷' },
+  BG: { countryCode: 'BG', countryName: 'Bulgaria', provider: 'lemon_squeezy', currency: 'EUR', isEU: true, isSEPA: true, flag: '🇧🇬' },
+  RO: { countryCode: 'RO', countryName: 'Romania', provider: 'lemon_squeezy', currency: 'EUR', isEU: true, isSEPA: true, flag: '🇷🇴' },
+  SI: { countryCode: 'SI', countryName: 'Slovenia', provider: 'lemon_squeezy', currency: 'EUR', isEU: true, isSEPA: true, flag: '🇸🇮' },
+  // Non-EU Balkans — LemonSqueezy primary, Paysera for bank transfers
+  RS: { countryCode: 'RS', countryName: 'Serbia', provider: 'lemon_squeezy', currency: 'EUR', isEU: false, isSEPA: true, flag: '🇷🇸' },
+  AL: { countryCode: 'AL', countryName: 'Albania', provider: 'lemon_squeezy', currency: 'EUR', isEU: false, isSEPA: true, flag: '🇦🇱' },
+  BA: { countryCode: 'BA', countryName: 'Bosnia and Herzegovina', provider: 'lemon_squeezy', currency: 'EUR', isEU: false, isSEPA: false, flag: '🇧🇦' },
+  MK: { countryCode: 'MK', countryName: 'North Macedonia', provider: 'lemon_squeezy', currency: 'EUR', isEU: false, isSEPA: true, flag: '🇲🇰' },
+  ME: { countryCode: 'ME', countryName: 'Montenegro', provider: 'lemon_squeezy', currency: 'EUR', isEU: false, isSEPA: true, flag: '🇲🇪' },
+  XK: { countryCode: 'XK', countryName: 'Kosovo', provider: 'lemon_squeezy', currency: 'EUR', isEU: false, isSEPA: false, flag: '🇽🇰' },
 };
 
 /**
@@ -75,7 +96,7 @@ export const COUNTRY_PAYMENT_MAP: Record<string, CountryPaymentInfo> = {
  */
 export function getProviderForCountry(countryCode: string): PaymentProvider {
   const info = COUNTRY_PAYMENT_MAP[countryCode.toUpperCase()];
-  return info?.provider || 'web'; // Default to web
+  return info?.provider || 'lemon_squeezy';
 }
 
 /**

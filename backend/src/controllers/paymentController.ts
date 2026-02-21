@@ -4,6 +4,7 @@ import Product from '../models/Product';
 import DiscountCode from '../models/DiscountCode';
 import { processSubscriptionPayment } from '../services/subscriptionPaymentService';
 import { paymentProviderFactory } from '../services/paymentProviderFactory';
+import { lemonSqueezyService } from '../services/lemonSqueezy';
 import { paymentLogger } from '../utils/logger';
 
 /**
@@ -16,7 +17,7 @@ import { paymentLogger } from '../utils/logger';
  */
 export const createUnifiedPayment = async (req: Request, res: Response): Promise<void> => {
   try {
-    const { planName, planInterval, amount, productId, countryCode, language } = req.body;
+    const { planName, planInterval, amount, productId, countryCode, language, preferredProvider } = req.body;
     const userId = (req as any).user?._id;
 
     if (!userId) {
@@ -49,7 +50,7 @@ export const createUnifiedPayment = async (req: Request, res: Response): Promise
       paymentLogger.warn(`Country ${userCountry} not in our supported list`);
     }
 
-    // Create payment using the factory
+    // Create payment using the factory (routes to LemonSqueezy or Paysera)
     const result = await paymentProviderFactory.createPayment({
       userId: userId.toString(),
       userEmail: user.email,
@@ -61,6 +62,7 @@ export const createUnifiedPayment = async (req: Request, res: Response): Promise
       language: language || 'en',
       firstName: user.name?.split(' ')[0],
       lastName: user.name?.split(' ').slice(1).join(' '),
+      preferredProvider,
     });
 
     if (!result.success) {
@@ -114,7 +116,7 @@ export const getPaymentProviders = async (req: Request, res: Response): Promise<
       isEU: mapping?.isEU || false,
       isSEPA: mapping?.isSEPA || false,
       currency: mapping?.currency || 'EUR',
-      supportedMethods: ['card', 'bank_transfer', 'wallet'],
+      supportedMethods: paymentProviderFactory.getAvailablePaymentMethods(countryCode),
     });
   } catch (error: any) {
     paymentLogger.error('Error getting payment providers:', error);
@@ -432,5 +434,80 @@ export const applyFreeSubscription = async (req: Request, res: Response): Promis
   } catch (error: any) {
     paymentLogger.error('Error applying free subscription:', error);
     res.status(500).json({ message: 'Error applying free subscription' });
+  }
+};
+
+/**
+ * @desc    Get LemonSqueezy customer portal URL for managing subscription
+ * @route   GET /api/payments/customer-portal
+ * @access  Private
+ */
+export const getCustomerPortal = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const userId = (req as any).user?._id;
+    if (!userId) {
+      res.status(401).json({ message: 'User not authenticated' });
+      return;
+    }
+
+    const user = await User.findById(userId).lean();
+    if (!user) {
+      res.status(404).json({ message: 'User not found' });
+      return;
+    }
+
+    const lsSubscriptionId = (user as any).subscriptionMetadata?.lemonSqueezySubscriptionId;
+    if (!lsSubscriptionId) {
+      res.status(404).json({ message: 'No active LemonSqueezy subscription found' });
+      return;
+    }
+
+    const subscription = await lemonSqueezyService.getSubscription(lsSubscriptionId);
+    const portalUrl = subscription?.data?.attributes?.urls?.customer_portal;
+    const updatePaymentUrl = subscription?.data?.attributes?.urls?.update_payment_method;
+
+    if (!portalUrl) {
+      res.status(404).json({ message: 'Customer portal not available' });
+      return;
+    }
+
+    res.status(200).json({
+      success: true,
+      portalUrl,
+      updatePaymentUrl,
+    });
+  } catch (error: any) {
+    paymentLogger.error('Error getting customer portal:', error);
+    res.status(500).json({ message: 'Error getting customer portal' });
+  }
+};
+
+/**
+ * @desc    Get available payment methods for a country
+ * @route   GET /api/payments/methods/:countryCode
+ * @access  Public
+ */
+export const getAvailablePaymentMethods = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { countryCode } = req.params;
+    if (!countryCode) {
+      res.status(400).json({ message: 'Country code is required' });
+      return;
+    }
+
+    const methods = paymentProviderFactory.getAvailablePaymentMethods(countryCode);
+    const mapping = paymentProviderFactory.getCountryMapping(countryCode.toUpperCase());
+
+    res.status(200).json({
+      success: true,
+      countryCode: countryCode.toUpperCase(),
+      methods,
+      provider: mapping?.provider || 'lemon_squeezy',
+      isEU: mapping?.isEU || false,
+      isSEPA: mapping?.isSEPA || false,
+    });
+  } catch (error: any) {
+    paymentLogger.error('Error getting payment methods:', error);
+    res.status(500).json({ message: 'Error getting payment methods' });
   }
 };

@@ -64,6 +64,12 @@ export interface IUser extends Document {
   lastPaymentAmount?: number;
   totalPaid?: number; // Track lifetime payment value
   subscriptionStatus?: 'active' | 'expired' | 'trial' | 'grace' | 'canceled';
+  subscriptionRenewalDate?: Date;
+  subscriptionMetadata?: {
+    lemonSqueezySubscriptionId?: string;
+    lemonSqueezyCustomerId?: string;
+    payseraOrderId?: string;
+  };
 
   resetPasswordToken?: string;
   resetPasswordExpires?: Date;
@@ -465,6 +471,15 @@ const UserSchema: Schema = new Schema(
     subscriptionStatus: {
       type: String,
       enum: ['active', 'expired', 'trial', 'grace', 'canceled'],
+    },
+    subscriptionRenewalDate: {
+      type: Date,
+    },
+    // Payment provider metadata (LemonSqueezy, Paysera, etc.)
+    subscriptionMetadata: {
+      lemonSqueezySubscriptionId: { type: String, index: true },
+      lemonSqueezyCustomerId: { type: String, index: true },
+      payseraOrderId: { type: String },
     },
     // Tier-specific features
     promotedAdsCount: {
