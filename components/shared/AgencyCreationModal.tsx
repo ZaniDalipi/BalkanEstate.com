@@ -756,7 +756,7 @@ const AgencyCreationModal: React.FC<AgencyCreationModalProps> = ({
                   {state.pendingAgencyData ? t('agents:agencyCreation.header.edit', 'Edit Agency Details') : t('agents:agencyCreation.header.create', 'Create Your Agency')}
                 </h2>
                 <p className="text-xs text-gray-400">
-                  {t('agents:agencyCreation.header.stepIndicator', { step, total: STEPS.length, label: t(`agents:agencyCreation.steps.${STEPS[step - 1].label.toLowerCase()}`, STEPS[step - 1].label), defaultValue: `Step ${step} of ${STEPS.length} — ${STEPS[step - 1].label}` })}
+                  {t('agents:agencyCreation.header.stepIndicator', { step, total: STEPS.length, label: t(`agents:agencyCreation.steps.${STEPS[step - 1].label.toLowerCase().replace(/\s+(\w)/g, (_, c: string) => c.toUpperCase())}`, STEPS[step - 1].label), defaultValue: `Step ${step} of ${STEPS.length} — ${STEPS[step - 1].label}` })}
                 </p>
               </div>
             </div>
@@ -793,7 +793,7 @@ const AgencyCreationModal: React.FC<AgencyCreationModalProps> = ({
                 <span className={`text-[10px] font-semibold uppercase tracking-wide ${
                   s.id === step ? 'text-blue-600' : s.id < step ? 'text-green-600' : 'text-gray-400'
                 }`}>
-                  {s.icon} {t(`agents:agencyCreation.steps.${s.label.toLowerCase()}`, s.label)}
+                  {s.icon} {t(`agents:agencyCreation.steps.${s.label.toLowerCase().replace(/\s+(\w)/g, (_, c) => c.toUpperCase())}`, s.label)}
                 </span>
               </div>
             ))}

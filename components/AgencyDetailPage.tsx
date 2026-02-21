@@ -1818,7 +1818,7 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
                   <div className="bg-gradient-to-br from-violet-50/50 to-white rounded-xl p-5 border border-violet-100">
                     <div className="flex items-center gap-2 mb-3">
                       <AcademicCapIcon className="w-5 h-5 text-violet-600" />
-                      <h3 className="text-sm font-bold text-slate-900">Expertise Areas</h3>
+                      <h3 className="text-sm font-bold text-slate-900">{t('agencyDetails:about.specializations')}</h3>
                     </div>
                     <div className="flex flex-wrap gap-2">
                       {agencyData.specializations.map((spec, index) => (
@@ -1835,7 +1835,7 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
                   <div className="bg-gradient-to-br from-sky-50/50 to-white rounded-xl p-5 border border-sky-100">
                     <div className="flex items-center gap-2 mb-3">
                       <GlobeAltIcon className="w-5 h-5 text-sky-600" />
-                      <h3 className="text-sm font-bold text-slate-900">We Speak Your Language</h3>
+                      <h3 className="text-sm font-bold text-slate-900">{t('agencyDetails:about.languagesSpoken')}</h3>
                     </div>
                     <div className="flex flex-wrap gap-2">
                       {agencyData.languages.map((lang, index) => (
@@ -2099,8 +2099,8 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
                     <StarIcon className="w-5 h-5 text-white fill-current" />
                   </div>
                   <div>
-                    <h2 className="text-xl font-bold text-slate-900">Featured Subscription</h2>
-                    <p className="text-xs text-slate-500">Boost your visibility</p>
+                    <h2 className="text-xl font-bold text-slate-900">{t('agencyDetails:featuredSubscription.title')}</h2>
+                    <p className="text-xs text-slate-500">{t('agencyDetails:featuredSubscription.subtitle')}</p>
                   </div>
                 </div>
               </div>
@@ -2113,7 +2113,7 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
 
               <div className="mt-5 p-4 bg-gradient-to-br from-violet-50 to-purple-50 rounded-xl border border-violet-100">
                 <p className="text-sm text-slate-700">
-                  <span className="font-semibold text-violet-700">Pro Tip:</span> Featured agencies get up to 5x more visibility and appear at the top of search results!
+                  <span className="font-semibold text-violet-700">{t('agencyDetails:featuredSubscription.proTip')}</span> {t('agencyDetails:featuredSubscription.proTipMessage')}
                 </p>
               </div>
             </div>
@@ -2128,8 +2128,8 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
                 <UserGroupIcon className="w-5 h-5 text-white" />
               </div>
               <div>
-                <h2 className="text-xl font-bold text-slate-900">Team Members</h2>
-                <p className="text-xs text-slate-500">{agents.length} agents • Ranked by performance</p>
+                <h2 className="text-xl font-bold text-slate-900">{t('agencyDetails:teamMembers.title')}</h2>
+                <p className="text-xs text-slate-500">{t('agencyDetails:teamMembers.rankedByPerformance', '{{count}} agents \u2022 Ranked by performance', { count: agents.length })}</p>
               </div>
             </div>
             <button
@@ -2137,7 +2137,7 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
               className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-slate-600 bg-slate-100 rounded-lg hover:bg-slate-200 transition-colors"
             >
               <TrophyIcon className="w-4 h-4 text-amber-500" />
-              {showAllMembers ? 'Show Top Performers' : 'Show All Members'}
+              {showAllMembers ? t('agencyDetails:teamMembers.showTopPerformers') : t('agencyDetails:teamMembers.showAllMembers')}
             </button>
           </div>
 
@@ -2145,7 +2145,7 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
             <div className="flex items-center justify-center py-16">
               <div className="flex flex-col items-center gap-3">
                 <div className="animate-spin rounded-full h-10 w-10 border-2 border-primary/30 border-t-primary"></div>
-                <p className="text-sm text-slate-500">Loading team members...</p>
+                <p className="text-sm text-slate-500">{t('agencyDetails:teamMembers.loading', 'Loading team members...')}</p>
               </div>
             </div>
           ) : rankedAgents.length > 0 ? (
@@ -2203,13 +2203,13 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
                             {isAgentOwner && (
                               <span className="px-2 py-0.5 bg-gradient-to-r from-purple-500 to-purple-600 text-white text-[10px] font-bold rounded-md flex items-center gap-0.5">
                                 <ShieldCheckIcon className="w-2.5 h-2.5" />
-                                Owner
+                                {t('agencyDetails:teamMembers.owner')}
                               </span>
                             )}
                             {isAgentAdmin && !isAgentOwner && (
                               <span className="px-2 py-0.5 bg-gradient-to-r from-sky-500 to-blue-600 text-white text-[10px] font-bold rounded-md flex items-center gap-0.5">
                                 <ShieldCheckIcon className="w-2.5 h-2.5" />
-                                Admin
+                                {t('agencyDetails:teamMembers.admin')}
                               </span>
                             )}
                           </div>
@@ -2225,7 +2225,7 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
                           )}
 
                           {agent.licenseNumber && (
-                            <p className="text-[11px] text-slate-400 mb-2">License: {agent.licenseNumber}</p>
+                            <p className="text-[11px] text-slate-400 mb-2">{t('agencyDetails:teamMembers.license')}: {agent.licenseNumber}</p>
                           )}
                         </div>
 
@@ -2239,17 +2239,17 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
                           <p className="text-lg font-bold text-slate-800">
                             {formatPrice(agent.stats?.totalSalesValue || 0, agency.country || 'Serbia').replace(/\.\d+/, '').replace(/\s/g, '')}
                           </p>
-                          <p className="text-[9px] text-slate-500 font-medium uppercase tracking-wide">Sales Value</p>
+                          <p className="text-[9px] text-slate-500 font-medium uppercase tracking-wide">{t('agencyDetails:teamMembers.totalSales')}</p>
                         </div>
                         <div className="relative overflow-hidden bg-gradient-to-br from-emerald-50 to-emerald-100/50 rounded-xl p-2.5 text-center">
                           <div className="absolute -top-3 -right-3 w-8 h-8 bg-emerald-200/30 rounded-full blur-lg" />
                           <p className="text-lg font-bold text-emerald-600">{agent.stats?.propertiesSold || 0}</p>
-                          <p className="text-[9px] text-slate-500 font-medium uppercase tracking-wide">Sold</p>
+                          <p className="text-[9px] text-slate-500 font-medium uppercase tracking-wide">{t('agencyDetails:teamMembers.propertiesSold')}</p>
                         </div>
                         <div className="relative overflow-hidden bg-gradient-to-br from-sky-50 to-sky-100/50 rounded-xl p-2.5 text-center">
                           <div className="absolute -top-3 -right-3 w-8 h-8 bg-sky-200/30 rounded-full blur-lg" />
                           <p className="text-lg font-bold text-sky-600">{agent.stats?.activeListings || 0}</p>
-                          <p className="text-[9px] text-slate-500 font-medium uppercase tracking-wide">Active</p>
+                          <p className="text-[9px] text-slate-500 font-medium uppercase tracking-wide">{t('agencyDetails:teamMembers.activeListings')}</p>
                         </div>
                       </div>
 
@@ -2282,7 +2282,7 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
                               title={isAgentAdmin ? 'Remove admin rights' : 'Make admin'}
                             >
                               <ShieldCheckIcon className="w-3 h-3" />
-                              {isAgentAdmin ? 'Remove Admin' : 'Make Admin'}
+                              {isAgentAdmin ? t('agencyDetails:teamMembers.removeAdmin') : t('agencyDetails:teamMembers.makeAdmin')}
                             </button>
 
                             <button
@@ -2297,12 +2297,12 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
                               {removingAgentId === agentId ? (
                                 <>
                                   <div className="animate-spin rounded-full h-2.5 w-2.5 border-b border-red-600"></div>
-                                  Removing...
+                                  {t('agencyDetails:teamMembers.removing')}
                                 </>
                               ) : (
                                 <>
                                   <XMarkIcon className="w-3 h-3" />
-                                  Remove
+                                  {t('agencyDetails:teamMembers.remove')}
                                 </>
                               )}
                             </button>
@@ -2324,12 +2324,12 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
                               {isLeavingAgency ? (
                                 <>
                                   <div className="animate-spin rounded-full h-2.5 w-2.5 border-b border-red-600"></div>
-                                  Leaving...
+                                  {t('agencyDetails:teamMembers.leaving')}
                                 </>
                               ) : (
                                 <>
                                   <XMarkIcon className="w-3 h-3" />
-                                  Leave Agency
+                                  {t('agencyDetails:teamMembers.leaveAgency')}
                                 </>
                               )}
                             </button>
@@ -2347,8 +2347,8 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
               <div className="w-16 h-16 bg-slate-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
                 <UsersIcon className="w-8 h-8 text-slate-300" />
               </div>
-              <p className="text-slate-500 font-medium">No agents found for this agency</p>
-              <p className="text-sm text-slate-400 mt-1">Team members will appear here once they join</p>
+              <p className="text-slate-500 font-medium">{t('agencyDetails:teamMembers.noAgentsFound')}</p>
+              <p className="text-sm text-slate-400 mt-1">{t('agencyDetails:teamMembers.noAgentsHelpText', 'Team members will appear here once they join')}</p>
             </div>
           )}
         </div>
@@ -2361,9 +2361,9 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
                 <MapIcon className="w-5 h-5 text-white" />
               </div>
               <div>
-                <h2 className="text-xl font-bold text-slate-900">Properties Map</h2>
+                <h2 className="text-xl font-bold text-slate-900">{t('agencyDetails:properties.map', 'Properties Map')}</h2>
                 <p className="text-xs text-slate-500">
-                  ({activeProperties.length} active, {soldProperties.length} sold)
+                  ({t('agencyDetails:properties.activeCount', '{{count}} active', { count: activeProperties.length })}, {t('agencyDetails:properties.soldCount', '{{count}} sold', { count: soldProperties.length })})
                 </p>
               </div>
             </div>
@@ -2406,9 +2406,9 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
                         <p className="text-xs text-slate-500 mb-2">{property.city}, {property.country}</p>
                         <p className="font-bold text-emerald-600 mb-2">{formatPrice(property.price, property.country)}</p>
                         <div className="flex gap-2 text-xs text-slate-600 mb-3">
-                          <span>{property.beds} beds</span>
+                          <span>{property.beds} {t('agencyDetails:properties.beds', 'beds')}</span>
                           <span>•</span>
-                          <span>{property.baths} baths</span>
+                          <span>{property.baths} {t('agencyDetails:properties.baths', 'baths')}</span>
                           <span>•</span>
                           <span>{property.sqft} m²</span>
                         </div>
@@ -2420,7 +2420,7 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
                           }}
                           className={`w-full text-white px-3 py-2 rounded-lg font-semibold text-sm ${property.status === 'sold' ? 'bg-red-600 hover:bg-red-700' : 'bg-emerald-600 hover:bg-emerald-700'}`}
                         >
-                          View Details
+                          {t('agencyDetails:properties.viewDetails', 'View Details')}
                         </button>
                       </div>
                     </Popup>
@@ -2431,11 +2431,11 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
             <div className="mt-4 flex items-center justify-center gap-6 text-sm">
               <div className="flex items-center gap-2">
                 <div className="w-4 h-4 bg-emerald-500 rounded-full"></div>
-                <span className="text-slate-600">For Sale ({activeProperties.length})</span>
+                <span className="text-slate-600">{t('agencyDetails:properties.forSaleCount', 'For Sale ({{count}})', { count: activeProperties.length })}</span>
               </div>
               <div className="flex items-center gap-2">
                 <div className="w-4 h-4 bg-red-500 rounded-full"></div>
-                <span className="text-slate-600">Sold ({soldProperties.length})</span>
+                <span className="text-slate-600">{t('agencyDetails:properties.soldCountLabel', 'Sold ({{count}})', { count: soldProperties.length })}</span>
               </div>
             </div>
           </div>
@@ -2449,7 +2449,7 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
                 <MapPinIcon className="w-5 h-5 text-white" />
               </div>
               <div>
-                <h2 className="text-xl font-bold text-slate-900">Service Area Location</h2>
+                <h2 className="text-xl font-bold text-slate-900">{t('agencyDetails:properties.serviceAreaLocation', 'Service Area Location')}</h2>
                 <p className="text-xs text-slate-500">{agencyData.city}, {agencyData.country}</p>
               </div>
             </div>
@@ -2506,8 +2506,8 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
                 <HomeIcon className="w-5 h-5 text-white" />
               </div>
               <div>
-                <h2 className="text-xl font-bold text-slate-900">Property Portfolio</h2>
-                <p className="text-xs text-slate-500">{agencyProperties.length} total properties</p>
+                <h2 className="text-xl font-bold text-slate-900">{t('agencyDetails:properties.portfolio', 'Property Portfolio')}</h2>
+                <p className="text-xs text-slate-500">{t('agencyDetails:properties.totalProperties', '{{count}} total properties', { count: agencyProperties.length })}</p>
               </div>
             </div>
 
@@ -2522,7 +2522,7 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
                 }`}
               >
                 <span className={`w-2 h-2 rounded-full ${propertyView === 'active' ? 'bg-emerald-500' : 'bg-slate-300'}`}></span>
-                Active
+                {t('agencyDetails:properties.activeListingsTitle')}
                 <span className={`ml-1 px-2 py-0.5 text-xs font-bold rounded-md ${
                   propertyView === 'active' ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-200 text-slate-500'
                 }`}>
@@ -2538,7 +2538,7 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
                 }`}
               >
                 <span className={`w-2 h-2 rounded-full ${propertyView === 'sold' ? 'bg-amber-500' : 'bg-slate-300'}`}></span>
-                Sold
+                {t('agencyDetails:properties.soldPropertiesTitle')}
                 <span className={`ml-1 px-2 py-0.5 text-xs font-bold rounded-md ${
                   propertyView === 'sold' ? 'bg-amber-100 text-amber-700' : 'bg-slate-200 text-slate-500'
                 }`}>
@@ -2555,7 +2555,7 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
                   }`}
                 >
                   <span className={`w-2 h-2 rounded-full ${propertyView === 'rented' ? 'bg-orange-500' : 'bg-slate-300'}`}></span>
-                  Rented
+                  {t('agencyDetails:properties.rented', 'Rented')}
                   <span className={`ml-1 px-2 py-0.5 text-xs font-bold rounded-md ${
                     propertyView === 'rented' ? 'bg-orange-100 text-orange-700' : 'bg-slate-200 text-slate-500'
                   }`}>
@@ -2583,7 +2583,7 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
                       propertyTypeView === 'all' ? 'bg-slate-800 text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
                     }`}
                   >
-                    All ({currentProps.length})
+                    {t('agencyDetails:properties.allCount', 'All ({{count}})', { count: currentProps.length })}
                   </button>
                   <button
                     onClick={() => setPropertyTypeView('sale')}
@@ -2591,7 +2591,7 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
                       propertyTypeView === 'sale' ? 'bg-emerald-600 text-white' : 'bg-emerald-50 text-emerald-700 hover:bg-emerald-100'
                     }`}
                   >
-                    For Sale ({saleCount})
+                    {t('agencyDetails:properties.forSaleCount', 'For Sale ({{count}})', { count: saleCount })}
                   </button>
                   <button
                     onClick={() => setPropertyTypeView('rent')}
@@ -2599,7 +2599,7 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
                       propertyTypeView === 'rent' ? 'bg-blue-600 text-white' : 'bg-blue-50 text-blue-700 hover:bg-blue-100'
                     }`}
                   >
-                    For Rent ({rentCount})
+                    {t('agencyDetails:properties.forRentCount', 'For Rent ({{count}})', { count: rentCount })}
                   </button>
                 </div>
               );
@@ -2633,10 +2633,10 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
                   <HomeIcon className="w-8 h-8 text-slate-300" />
                 </div>
                 <p className="text-slate-500 font-medium">
-                  {propertyView === 'active' ? 'No active listings at the moment' : 'No sold properties yet'}
+                  {propertyView === 'active' ? t('agencyDetails:properties.noActiveListings') : t('agencyDetails:properties.noSoldProperties')}
                 </p>
                 <p className="text-sm text-slate-400 mt-1">
-                  {propertyView === 'active' ? 'New listings will appear here' : 'Sold properties will be shown here'}
+                  {propertyView === 'active' ? t('agencyDetails:properties.checkBackSoon') : t('agencyDetails:properties.soldWillAppear')}
                 </p>
               </div>
             );
@@ -2679,8 +2679,8 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
                   <PencilIcon className="w-5 h-5 text-white" />
                 </div>
                 <div>
-                  <h3 className="text-lg font-bold text-slate-900">Edit Agency</h3>
-                  <p className="text-xs text-slate-500">Update your agency information</p>
+                  <h3 className="text-lg font-bold text-slate-900">{t('agencyDetails:editModal.title')}</h3>
+                  <p className="text-xs text-slate-500">{t('agencyDetails:editModal.subtitle', 'Update your agency information')}</p>
                 </div>
               </div>
               <button
@@ -2696,12 +2696,12 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
               <div className="space-y-4">
                 <h4 className="text-sm font-semibold text-slate-900 uppercase tracking-wider flex items-center gap-2">
                   <span className="w-1.5 h-1.5 rounded-full bg-primary"></span>
-                  Basic Information
+                  {t('agencyDetails:editModal.basicInfo')}
                 </h4>
 
                 <div>
                   <label className="block text-xs font-medium text-slate-600 mb-1.5">
-                    Agency Name *
+                    {t('agencyDetails:editModal.agencyName')} {t('agencyDetails:common.required', '*')}
                   </label>
                   <input
                     type="text"
@@ -2714,7 +2714,7 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
 
                 <div>
                   <label className="block text-xs font-medium text-slate-600 mb-1.5">
-                    Description
+                    {t('agencyDetails:editModal.description')}
                   </label>
                   <textarea
                     value={editForm.description}
@@ -2730,7 +2730,7 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
                     placeholder="Tell clients about your agency..."
                   />
                   <div className="flex justify-between mt-1">
-                    <p className="text-xs text-slate-400">Use line breaks to separate paragraphs</p>
+                    <p className="text-xs text-slate-400">{t('agencyDetails:editModal.descriptionHint', 'Use line breaks to separate paragraphs')}</p>
                     <span className={`text-xs ${
                       editForm.description.length > 4800 ? 'text-amber-500 font-medium' : 'text-slate-400'
                     }`}>
@@ -2742,7 +2742,7 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
                     <label className="block text-xs font-medium text-slate-600 mb-1.5">
-                      Email *
+                      {t('agencyDetails:editModal.email')} {t('agencyDetails:common.required', '*')}
                     </label>
                     <input
                       type="email"
@@ -2754,7 +2754,7 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
                   </div>
                   <div>
                     <label className="block text-xs font-medium text-slate-600 mb-1.5">
-                      Phone *
+                      {t('agencyDetails:editModal.phone')} {t('agencyDetails:common.required', '*')}
                     </label>
                     <input
                       type="tel"
@@ -2769,7 +2769,7 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
                     <label className="block text-xs font-medium text-slate-600 mb-1.5">
-                      Website
+                      {t('agencyDetails:editModal.website')}
                     </label>
                     <input
                       type="url"
@@ -2781,7 +2781,7 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
                   </div>
                   <div>
                     <label className="block text-xs font-medium text-slate-600 mb-1.5">
-                      Years in Business
+                      {t('agencyDetails:editModal.yearsInBusiness')}
                     </label>
                     <input
                       type="number"
@@ -2798,12 +2798,12 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
               <div className="space-y-4">
                 <h4 className="text-sm font-semibold text-slate-900 uppercase tracking-wider flex items-center gap-2">
                   <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
-                  Location
+                  {t('agencyDetails:editModal.location')}
                 </h4>
 
                 <div>
                   <label className="block text-xs font-medium text-slate-600 mb-1.5">
-                    Address
+                    {t('agencyDetails:editModal.address')}
                   </label>
                   <input
                     type="text"
@@ -2816,7 +2816,7 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   <div>
                     <label className="block text-xs font-medium text-slate-600 mb-1.5">
-                      City
+                      {t('agencyDetails:editModal.city')}
                     </label>
                     <input
                       type="text"
@@ -2827,7 +2827,7 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
                   </div>
                   <div>
                     <label className="block text-xs font-medium text-slate-600 mb-1.5">
-                      Country
+                      {t('agencyDetails:editModal.country')}
                     </label>
                     <input
                       type="text"
@@ -2838,7 +2838,7 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
                   </div>
                   <div>
                     <label className="block text-xs font-medium text-slate-600 mb-1.5">
-                      Zip Code
+                      {t('agencyDetails:editModal.zipCode')}
                     </label>
                     <input
                       type="text"
@@ -2865,12 +2865,12 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
               <div className="space-y-4">
                 <h4 className="text-sm font-semibold text-slate-900 uppercase tracking-wider flex items-center gap-2">
                   <span className="w-1.5 h-1.5 rounded-full bg-sky-500"></span>
-                  Social Media
+                  {t('agencyDetails:editModal.socialMedia')}
                 </h4>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
                     <label className="block text-xs font-medium text-slate-600 mb-1.5">
-                      Facebook URL
+                      {t('agencyDetails:editModal.facebookUrl')}
                     </label>
                     <input
                       type="url"
@@ -2882,7 +2882,7 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
                   </div>
                   <div>
                     <label className="block text-xs font-medium text-slate-600 mb-1.5">
-                      Instagram URL
+                      {t('agencyDetails:editModal.instagramUrl')}
                     </label>
                     <input
                       type="url"
@@ -2894,7 +2894,7 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
                   </div>
                   <div>
                     <label className="block text-xs font-medium text-slate-600 mb-1.5">
-                      LinkedIn URL
+                      {t('agencyDetails:editModal.linkedinUrl')}
                     </label>
                     <input
                       type="url"
@@ -2906,7 +2906,7 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
                   </div>
                   <div>
                     <label className="block text-xs font-medium text-slate-600 mb-1.5">
-                      Twitter URL
+                      {t('agencyDetails:editModal.twitterUrl')}
                     </label>
                     <input
                       type="url"
@@ -2923,11 +2923,11 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
               <div className="space-y-4">
                 <h4 className="text-sm font-semibold text-slate-900 uppercase tracking-wider flex items-center gap-2">
                   <span className="w-1.5 h-1.5 rounded-full bg-violet-500"></span>
-                  Specialties & Certifications
+                  {t('agencyDetails:editModal.specialtiesCerts')}
                 </h4>
                 <div>
                   <label className="block text-xs font-medium text-slate-600 mb-1.5">
-                    Specialties (comma-separated)
+                    {t('agencyDetails:editModal.specialtiesLabel')}
                   </label>
                   <input
                     type="text"
@@ -2942,7 +2942,7 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
                 </div>
                 <div>
                   <label className="block text-xs font-medium text-slate-600 mb-1.5">
-                    Certifications (comma-separated)
+                    {t('agencyDetails:editModal.certificationsLabel')}
                   </label>
                   <input
                     type="text"
@@ -2957,7 +2957,7 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
                 </div>
                 <div>
                   <label className="block text-xs font-medium text-slate-600 mb-1.5">
-                    Languages Spoken (comma-separated)
+                    {t('agencyDetails:editModal.languagesLabel')}
                   </label>
                   <input
                     type="text"
@@ -2969,7 +2969,7 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
                     className="w-full px-4 py-2.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-primary/20 focus:border-primary transition-colors text-sm"
                     placeholder="English, Serbian, Croatian, Albanian"
                   />
-                  <p className="text-xs text-slate-400 mt-1.5">Languages are auto-synced when agents join/leave</p>
+                  <p className="text-xs text-slate-400 mt-1.5">{t('agencyDetails:editModal.languagesHint')}</p>
                 </div>
               </div>
 
@@ -2977,7 +2977,7 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
               <div className="space-y-4">
                 <h4 className="text-sm font-semibold text-slate-900 uppercase tracking-wider flex items-center gap-2">
                   <span className="w-1.5 h-1.5 rounded-full bg-amber-500"></span>
-                  Business Hours
+                  {t('agencyDetails:editModal.businessHours')}
                 </h4>
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                   {['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'].map((day) => (
@@ -3004,7 +3004,7 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
               <div className="space-y-4 border-t border-slate-100 pt-6">
                 <h4 className="text-sm font-semibold text-slate-900 uppercase tracking-wider flex items-center gap-2">
                   <span className="w-1.5 h-1.5 rounded-full bg-amber-500"></span>
-                  Awards & Achievements
+                  {t('agencyDetails:editModal.achievements', 'Awards & Achievements')}
                 </h4>
                 <AchievementsSection
                   achievements={agencyAchievements}
@@ -3025,14 +3025,14 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
                 onClick={() => setIsEditModalOpen(false)}
                 className="flex-1 px-5 py-2.5 border border-slate-200 text-slate-700 rounded-xl hover:bg-white font-medium transition-colors text-sm"
               >
-                Cancel
+                {t('agencyDetails:common.cancel')}
               </button>
               <button
                 type="button"
                 onClick={handleSaveAgency}
                 className="flex-1 px-5 py-2.5 bg-primary text-white rounded-xl hover:bg-primary/90 font-medium transition-colors text-sm shadow-lg shadow-primary/25"
               >
-                Save Changes
+                {t('agencyDetails:editModal.saveChanges')}
               </button>
             </div>
           </div>

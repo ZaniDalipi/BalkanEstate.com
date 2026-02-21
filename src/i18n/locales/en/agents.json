@@ -821,5 +821,87 @@
     "french": "French",
     "russian": "Russian",
     "spanish": "Spanish"
+  },
+  "agencyCreation": {
+    "steps": {
+      "agencyInfo": "Agency Info",
+      "location": "Location",
+      "contact": "Contact",
+      "professional": "Professional",
+      "online": "Online"
+    },
+    "header": {
+      "edit": "Edit Agency Details",
+      "create": "Create Your Agency",
+      "stepIndicator": "Step {{step}} of {{total}} — {{label}}"
+    },
+    "fields": {
+      "agencyName": "Agency Name",
+      "description": "Description",
+      "country": "Country",
+      "city": "City",
+      "pinLocation": "Pin Exact Location",
+      "streetAddress": "Street Address",
+      "email": "Email Address",
+      "phone": "Phone Number",
+      "website": "Website URL",
+      "licenseNumber": "Agent License Number",
+      "yearsInBusiness": "Years in Business",
+      "languages": "Languages Spoken",
+      "socialMedia": "Social Media",
+      "businessHours": "Business Hours",
+      "optional": "(optional)"
+    },
+    "placeholders": {
+      "agencyName": "e.g., Premier Real Estate Agency",
+      "description": "Tell potential clients about your agency, your expertise, and what makes you unique...",
+      "selectCountry": "Select a country",
+      "selectCity": "Select a city",
+      "selectCountryFirst": "Select country first",
+      "streetAddress": "e.g., 123 Main Street, Building A"
+    },
+    "hints": {
+      "agencyName": "Choose a professional name that represents your brand",
+      "description": "A compelling description helps clients understand your value",
+      "pinLocation": "Drag the marker or click the map to set your office's precise position. The street address below will update automatically.",
+      "streetAddress": "Auto-filled from the map above, or type manually. Include building number, street name, and any suite/floor.",
+      "email": "Primary contact email for inquiries",
+      "phone": "Include country code (e.g. +381 for Serbia)",
+      "website": "Optional: Your agency's website",
+      "licenseNumber": "Your official real estate license",
+      "yearsInBusiness": "How long you've been in real estate",
+      "languages": "Select all languages your team can communicate in"
+    },
+    "validation": {
+      "nameRequired": "Agency name is required",
+      "countryRequired": "Country is required",
+      "cityRequired": "City is required",
+      "emailRequired": "Email address is required",
+      "emailInvalid": "Please enter a valid email address",
+      "phoneRequired": "Phone number is required",
+      "phoneInvalid": "Please enter a valid phone number (e.g. +381 11 123 4567)",
+      "websiteInvalid": "Website must start with http:// or https://"
+    },
+    "alerts": {
+      "createdTitle": "Agency Created!",
+      "createdMessage": "Your agency \"{{name}}\" has been created.",
+      "paymentSucceededButFailed": "Payment succeeded but agency creation failed. Please contact support.",
+      "createFailed": "Failed to create agency. Please try again.",
+      "paymentFailed": "Payment failed: {{error}}"
+    },
+    "eligibility": {
+      "agentRequired": "Agent Status Required",
+      "proRequired": "Pro Subscription Required",
+      "becomeAgent": "Become an Agent First",
+      "upgradeToPro": "Upgrade to Pro"
+    },
+    "enterprise": {
+      "active": "Enterprise Active — No Payment Required"
+    },
+    "buttons": {
+      "creating": "Creating Agency…",
+      "create": "Create Agency",
+      "continueToPayment": "Continue to Payment →"
+    }
   }
 }
