@@ -692,7 +692,7 @@ export const createProperty = async (
     await user.save();
 
     // Update stats for active listings
-    if (propertyData.status === 'active') {
+    if (sanitizedBody.status === 'active') {
       await incrementActiveListings(String(user._id));
 
       // Trigger instant alerts for saved searches that match this property
