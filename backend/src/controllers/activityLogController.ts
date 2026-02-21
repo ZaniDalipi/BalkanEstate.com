@@ -1,6 +1,7 @@
 import { Request, Response } from 'express';
 import { activityLogger } from '../services/activityLogger';
 import { ActivityCategory, ActivitySeverity } from '../models/ActivityLog';
+import { getObjectIdParam } from '../utils/validateParams';
 
 /**
  * @desc    Get activity logs with filters
@@ -69,7 +70,8 @@ export const getDailySummary = async (req: Request, res: Response): Promise<void
  */
 export const getUserActivityLogs = async (req: Request, res: Response): Promise<void> => {
   try {
-    const { userId } = req.params;
+    const userId = getObjectIdParam(req, res, 'userId');
+    if (!userId) return;
     const { page = '1', limit = '50' } = req.query;
 
     const result = await activityLogger.getLogs({

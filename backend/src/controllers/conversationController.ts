@@ -10,6 +10,7 @@ import { getSocketInstance } from '../utils/socketInstance';
 import { incrementInquiryCount } from '../utils/statsUpdater';
 import { apiLogger } from '../utils/logger';
 import { sanitizeConversation } from '../utils/responseSanitizer';
+import { getObjectIdParam } from '../utils/validateParams';
 
 // @desc    Get user's conversations
 // @route   GET /api/conversations
@@ -70,7 +71,10 @@ export const getConversation = async (
       return;
     }
 
-    const conversation = await Conversation.findById(req.params.id)
+    const id = getObjectIdParam(req, res, 'id');
+    if (!id) return;
+
+    const conversation = await Conversation.findById(id)
       .populate('propertyId', 'title imageUrl images price city country address propertyType sellerId')
       .populate('buyerId', 'name email phone avatarUrl')
       .populate('sellerId', 'name email phone avatarUrl role agencyName');
@@ -217,7 +221,10 @@ export const sendMessage = async (
       return;
     }
 
-    const conversation = await Conversation.findById(req.params.id);
+    const id = getObjectIdParam(req, res, 'id');
+    if (!id) return;
+
+    const conversation = await Conversation.findById(id);
 
     if (!conversation) {
       res.status(404).json({ message: 'Conversation not found' });
@@ -357,7 +364,10 @@ export const uploadMessageImage = async (
       return;
     }
 
-    const conversation = await Conversation.findById(req.params.id);
+    const id = getObjectIdParam(req, res, 'id');
+    if (!id) return;
+
+    const conversation = await Conversation.findById(id);
 
     if (!conversation) {
       res.status(404).json({ message: 'Conversation not found' });
@@ -435,7 +445,10 @@ export const getConversationPublicKeys = async (
       return;
     }
 
-    const conversation = await Conversation.findById(req.params.id);
+    const id = getObjectIdParam(req, res, 'id');
+    if (!id) return;
+
+    const conversation = await Conversation.findById(id);
 
     if (!conversation) {
       res.status(404).json({ message: 'Conversation not found' });
@@ -480,7 +493,10 @@ export const markAsRead = async (
       return;
     }
 
-    const conversation = await Conversation.findById(req.params.id);
+    const id = getObjectIdParam(req, res, 'id');
+    if (!id) return;
+
+    const conversation = await Conversation.findById(id);
 
     if (!conversation) {
       res.status(404).json({ message: 'Conversation not found' });
@@ -535,7 +551,10 @@ export const deleteConversation = async (
       return;
     }
 
-    const conversation = await Conversation.findById(req.params.id);
+    const id = getObjectIdParam(req, res, 'id');
+    if (!id) return;
+
+    const conversation = await Conversation.findById(id);
 
     if (!conversation) {
       res.status(404).json({ message: 'Conversation not found' });
@@ -579,9 +598,9 @@ export const deleteConversation = async (
     await Message.deleteMany({ conversationId: conversation._id });
 
     // Delete the conversation
-    await Conversation.findByIdAndDelete(req.params.id);
+    await Conversation.findByIdAndDelete(id);
 
-    apiLogger.info(`🗑️  Deleted conversation ${req.params.id} and ${messagesWithImages.length} images`);
+    apiLogger.info(`🗑️  Deleted conversation ${id} and ${messagesWithImages.length} images`);
 
     res.json({ message: 'Conversation deleted' });
   } catch (error: any) {

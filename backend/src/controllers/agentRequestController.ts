@@ -5,6 +5,7 @@ import Agency from '../models/Agency';
 import emailService from '../services/emailService';
 import { geocodeFreeformLocation, calculateDistanceKm } from '../services/geocodingService';
 import { apiLogger } from '../utils/logger';
+import { getParam, getObjectIdParam } from '../utils/validateParams';
 
 const SEARCH_RADIUS_KM = 25; // 20-25 km radius for finding nearby agents
 
@@ -337,7 +338,7 @@ export const getAllAgentRequests = async (req: Request, res: Response): Promise<
 // Get requests assigned to a specific agent
 export const getAgentRequests = async (req: Request, res: Response): Promise<void> => {
   try {
-    const agentId = req.params.agentId;
+    const agentId = getParam(req, 'agentId');
 
     const agent = await Agent.findOne({ agentId });
     if (!agent) {
@@ -360,7 +361,8 @@ export const getAgentRequests = async (req: Request, res: Response): Promise<voi
 // Update request status
 export const updateAgentRequestStatus = async (req: Request, res: Response): Promise<void> => {
   try {
-    const { id } = req.params;
+    const id = getObjectIdParam(req, res, 'id');
+    if (!id) return;
     const { status, outcome, notes, contactedBy } = req.body;
 
     if (status && !['pending', 'assigned', 'contacted', 'completed', 'cancelled'].includes(status)) {

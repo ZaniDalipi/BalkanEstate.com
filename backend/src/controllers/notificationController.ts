@@ -3,6 +3,7 @@ import { IUser } from '../models/User';
 import engagementService from '../services/engagementService';
 import { NotificationType } from '../models/Notification';
 import { apiLogger } from '../utils/logger';
+import { getObjectIdParam } from '../utils/validateParams';
 
 /**
  * @desc    Get user's notifications
@@ -71,7 +72,8 @@ export const markAsRead = async (req: Request, res: Response): Promise<void> => 
     }
 
     const userId = String((req.user as IUser)._id);
-    const notificationId = req.params.id;
+    const notificationId = getObjectIdParam(req, res, 'id');
+    if (!notificationId) return;
 
     const success = await engagementService.markAsRead(notificationId, userId);
 

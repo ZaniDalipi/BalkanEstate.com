@@ -3,6 +3,7 @@ import User, { IUser } from '../models/User';
 import Agency from '../models/Agency';
 import crypto from 'crypto';
 import { apiLogger } from '../utils/logger';
+import { getParam, getObjectIdParam } from '../utils/validateParams';
 
 // Generate unique ID for achievements
 const generateAchievementId = () => {
@@ -17,7 +18,8 @@ const validTypes = ['award', 'certification', 'milestone', 'recognition', 'membe
 // @access  Public
 export const getUserAchievements = async (req: Request, res: Response): Promise<void> => {
   try {
-    const { userId } = req.params;
+    const userId = getObjectIdParam(req, res, 'userId');
+    if (!userId) return;
 
     const user = await User.findById(userId).select('achievements');
 
@@ -106,7 +108,7 @@ export const addUserAchievement = async (req: Request, res: Response): Promise<v
 export const updateUserAchievement = async (req: Request, res: Response): Promise<void> => {
   try {
     const currentUser = req.user as IUser;
-    const { achievementId } = req.params;
+    const achievementId = getParam(req, 'achievementId');
 
     if (!currentUser) {
       res.status(401).json({ message: 'Not authorized' });
@@ -164,7 +166,7 @@ export const updateUserAchievement = async (req: Request, res: Response): Promis
 export const deleteUserAchievement = async (req: Request, res: Response): Promise<void> => {
   try {
     const currentUser = req.user as IUser;
-    const { achievementId } = req.params;
+    const achievementId = getParam(req, 'achievementId');
 
     if (!currentUser) {
       res.status(401).json({ message: 'Not authorized' });
@@ -199,7 +201,8 @@ export const deleteUserAchievement = async (req: Request, res: Response): Promis
 // @access  Public
 export const getAgencyAchievements = async (req: Request, res: Response): Promise<void> => {
   try {
-    const { agencyId } = req.params;
+    const agencyId = getObjectIdParam(req, res, 'agencyId');
+    if (!agencyId) return;
 
     const agency = await Agency.findById(agencyId).select('achievements');
 
@@ -221,7 +224,8 @@ export const getAgencyAchievements = async (req: Request, res: Response): Promis
 export const addAgencyAchievement = async (req: Request, res: Response): Promise<void> => {
   try {
     const currentUser = req.user as IUser;
-    const { agencyId } = req.params;
+    const agencyId = getObjectIdParam(req, res, 'agencyId');
+    if (!agencyId) return;
 
     if (!currentUser) {
       res.status(401).json({ message: 'Not authorized' });
@@ -292,7 +296,9 @@ export const addAgencyAchievement = async (req: Request, res: Response): Promise
 export const updateAgencyAchievement = async (req: Request, res: Response): Promise<void> => {
   try {
     const currentUser = req.user as IUser;
-    const { agencyId, achievementId } = req.params;
+    const agencyId = getObjectIdParam(req, res, 'agencyId');
+    if (!agencyId) return;
+    const achievementId = getParam(req, 'achievementId');
 
     if (!currentUser) {
       res.status(401).json({ message: 'Not authorized' });
@@ -359,7 +365,9 @@ export const updateAgencyAchievement = async (req: Request, res: Response): Prom
 export const deleteAgencyAchievement = async (req: Request, res: Response): Promise<void> => {
   try {
     const currentUser = req.user as IUser;
-    const { agencyId, achievementId } = req.params;
+    const agencyId = getObjectIdParam(req, res, 'agencyId');
+    if (!agencyId) return;
+    const achievementId = getParam(req, 'achievementId');
 
     if (!currentUser) {
       res.status(401).json({ message: 'Not authorized' });
@@ -401,7 +409,10 @@ export const deleteAgencyAchievement = async (req: Request, res: Response): Prom
 export const verifyAchievement = async (req: Request, res: Response): Promise<void> => {
   try {
     const currentUser = req.user as IUser;
-    const { type, entityId, achievementId } = req.params;
+    const type = getParam(req, 'type');
+    const entityId = getObjectIdParam(req, res, 'entityId');
+    if (!entityId) return;
+    const achievementId = getParam(req, 'achievementId');
 
     if (!currentUser) {
       res.status(401).json({ message: 'Not authorized' });

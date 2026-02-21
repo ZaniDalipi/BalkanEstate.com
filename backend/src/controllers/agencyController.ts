@@ -9,6 +9,7 @@ import Product from '../models/Product';
 import { geocodeAgency } from '../services/geocodingService';
 import { uploadImage, deleteImage } from '../services/cloudinaryService';
 import { generateSecureAgentId } from '../utils/secureRandom';
+import { getParam, getObjectIdParam, isValidObjectId } from '../utils/validateParams';
 
 import { ENTERPRISE_TIER_LIMITS } from '../config/subscriptionConstants';
 import { getSocketInstance } from '../utils/socketInstance';
@@ -480,7 +481,9 @@ export const getAgency = async (
   res: Response
 ): Promise<void> => {
   try {
-    const { country, name, idOrSlug } = req.params;
+    const country = getParam(req, 'country');
+    const name = getParam(req, 'name');
+    const idOrSlug = getParam(req, 'idOrSlug');
 
     // Construct slug from country/name or use idOrSlug
     let identifier = idOrSlug as string | undefined;
@@ -501,7 +504,7 @@ export const getAgency = async (
     let agency;
     let lookupMethod = '';
 
-    if (mongoose.Types.ObjectId.isValid(identifier)) {
+    if (isValidObjectId(identifier)) {
       lookupMethod = 'ID';
       agencyLogger.info(`🔑 Attempting lookup by ObjectId: ${identifier}`);
       agency = await Agency.findById(identifier)
@@ -704,7 +707,7 @@ export const getAgency = async (
     agencyLogger.error('Stack trace:', error.stack);
     res.status(500).json({
       message: 'Error fetching agency',
-      identifier: req.params.idOrSlug
+      identifier: getParam(req, 'idOrSlug')
     });
   }
 };
@@ -722,7 +725,10 @@ export const updateAgency = async (
       return;
     }
 
-    const agency = await Agency.findById(req.params.id);
+    const id = getObjectIdParam(req, res, 'id');
+    if (!id) return;
+
+    const agency = await Agency.findById(id);
 
     if (!agency) {
       res.status(404).json({ message: 'Agency not found' });
@@ -864,8 +870,11 @@ export const addAgentToAgency = async (
       return;
     }
 
+    const id = getObjectIdParam(req, res, 'id');
+    if (!id) return;
+
     const { agentUserId } = req.body;
-    const agency = await Agency.findById(req.params.id);
+    const agency = await Agency.findById(id);
 
     if (!agency) {
       res.status(404).json({ message: 'Agency not found' });
@@ -928,7 +937,12 @@ export const removeAgentFromAgency = async (
       return;
     }
 
-    const agency = await Agency.findById(req.params.id);
+    const id = getObjectIdParam(req, res, 'id');
+    if (!id) return;
+    const agentId = getObjectIdParam(req, res, 'agentId');
+    if (!agentId) return;
+
+    const agency = await Agency.findById(id);
 
     if (!agency) {
       res.status(404).json({ message: 'Agency not found' });
@@ -943,13 +957,13 @@ export const removeAgentFromAgency = async (
 
     // Remove agent from agency
     agency.agents = agency.agents.filter(
-      id => id.toString() !== req.params.agentId
+      id => id.toString() !== agentId
     );
     agency.totalAgents = agency.agents.length;
     await agency.save();
 
     // Clear agent's agency info in User model
-    const agentUser = await User.findById(req.params.agentId);
+    const agentUser = await User.findById(agentId);
     if (agentUser) {
       agentUser.agencyName = undefined;
       agentUser.agencyId = undefined;
@@ -957,7 +971,7 @@ export const removeAgentFromAgency = async (
     }
 
     // Clear agent's agency info in Agent model
-    const agentRecord = await Agent.findOne({ userId: req.params.agentId });
+    const agentRecord = await Agent.findOne({ userId: agentId });
     if (agentRecord) {
       agentRecord.agencyName = 'Independent Agent';
       agentRecord.agencyId = undefined;
@@ -1073,7 +1087,10 @@ export const uploadAgencyLogo = async (
       return;
     }
 
-    const agency = await Agency.findById(req.params.id);
+    const id = getObjectIdParam(req, res, 'id');
+    if (!id) return;
+
+    const agency = await Agency.findById(id);
 
     if (!agency) {
       res.status(404).json({ message: 'Agency not found' });
@@ -1151,7 +1168,10 @@ export const uploadAgencyCover = async (
       return;
     }
 
-    const agency = await Agency.findById(req.params.id);
+    const id = getObjectIdParam(req, res, 'id');
+    if (!id) return;
+
+    const agency = await Agency.findById(id);
 
     if (!agency) {
       res.status(404).json({ message: 'Agency not found' });
@@ -1509,7 +1529,8 @@ export const verifyInvitationCode = async (
   res: Response
 ): Promise<void> => {
   try {
-    const { id } = req.params;
+    const id = getObjectIdParam(req, res, 'id');
+    if (!id) return;
     const { code } = req.body;
 
     if (!code) {
@@ -1604,7 +1625,8 @@ export const addAgencyAdmin = async (
       return;
     }
 
-    const { id } = req.params;
+    const id = getObjectIdParam(req, res, 'id');
+    if (!id) return;
     const { userId } = req.body;
     const currentUser = req.user as IUser;
 
@@ -1667,7 +1689,10 @@ export const removeAgencyAdmin = async (
       return;
     }
 
-    const { id, userId } = req.params;
+    const id = getObjectIdParam(req, res, 'id');
+    if (!id) return;
+    const userId = getObjectIdParam(req, res, 'userId');
+    if (!userId) return;
     const currentUser = req.user as IUser;
 
     // Find the agency

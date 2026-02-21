@@ -8,6 +8,7 @@ import Property from '../models/Property';
 import CityMarketData from '../models/CityMarketData';
 import { getSocketInstance } from '../utils/socketInstance';
 import { apiLogger } from '../utils/logger';
+import { getParam, getObjectIdParam, isValidObjectId } from '../utils/validateParams';
 
 
 
@@ -104,10 +105,11 @@ export const getAgents = async (req: Request, res: Response): Promise<void> => {
 export const getAgent = async (req: Request, res: Response): Promise<void> => {
   try {
     let agent = null;
+    const id = getParam(req, 'id');
 
     // Only try findById if the id is a valid ObjectId format (avoids CastError)
-    if (mongoose.Types.ObjectId.isValid(req.params.id)) {
-      agent = await Agent.findById(req.params.id)
+    if (isValidObjectId(id)) {
+      agent = await Agent.findById(id)
         .populate('userId', 'name email phone avatarUrl avatarOptions gender city country address')
         .populate('agencyId', 'name logo coverGradient coverImage slug type')
         .populate('testimonials.userId', 'name avatarUrl');
@@ -115,15 +117,15 @@ export const getAgent = async (req: Request, res: Response): Promise<void> => {
 
     // Fallback: search by custom agentId field
     if (!agent) {
-      agent = await Agent.findOne({ agentId: req.params.id })
+      agent = await Agent.findOne({ agentId: id })
         .populate('userId', 'name email phone avatarUrl avatarOptions gender city country address')
         .populate('agencyId', 'name logo coverGradient coverImage slug type')
         .populate('testimonials.userId', 'name avatarUrl');
     }
 
     // Fallback: search by userId (for agency agent listings that use User ObjectId)
-    if (!agent && mongoose.Types.ObjectId.isValid(req.params.id)) {
-      agent = await Agent.findOne({ userId: req.params.id })
+    if (!agent && isValidObjectId(id)) {
+      agent = await Agent.findOne({ userId: id })
         .populate('userId', 'name email phone avatarUrl avatarOptions gender city country address')
         .populate('agencyId', 'name logo coverGradient coverImage slug type')
         .populate('testimonials.userId', 'name avatarUrl');
@@ -146,7 +148,10 @@ export const getAgent = async (req: Request, res: Response): Promise<void> => {
 // @access  Public
 export const getAgentByUserId = async (req: Request, res: Response): Promise<void> => {
   try {
-    const agent = await Agent.findOne({ userId: req.params.userId })
+    const userId = getObjectIdParam(req, res, 'userId');
+    if (!userId) return;
+
+    const agent = await Agent.findOne({ userId })
       .populate('userId', 'name email phone avatarUrl avatarOptions gender city country address')
       .populate('agencyId', 'name logo coverGradient coverImage slug type')
       .populate('testimonials.userId', 'name avatarUrl');
@@ -322,7 +327,10 @@ export const addReview = async (req: Request, res: Response): Promise<void> => {
       return;
     }
 
-    const agent = await Agent.findById(req.params.id);
+    const id = getObjectIdParam(req, res, 'id');
+    if (!id) return;
+
+    const agent = await Agent.findById(id);
 
     if (!agent) {
       res.status(404).json({ message: 'Agent not found' });
@@ -407,7 +415,10 @@ export const addTestimonial = async (req: Request, res: Response): Promise<void>
       return;
     }
 
-    const agent = await Agent.findById(req.params.id);
+    const id = getObjectIdParam(req, res, 'id');
+    if (!id) return;
+
+    const agent = await Agent.findById(id);
 
     if (!agent) {
       res.status(404).json({ message: 'Agent not found' });
@@ -592,7 +603,10 @@ export const leaveAgency = async (req: Request, res: Response): Promise<void> =>
 // @access  Public
 export const getAgentMarketInsights = async (req: Request, res: Response): Promise<void> => {
   try {
-    const agent = await Agent.findById(req.params.id)
+    const id = getObjectIdParam(req, res, 'id');
+    if (!id) return;
+
+    const agent = await Agent.findById(id)
       .populate('userId', 'city country');
 
     if (!agent) {
