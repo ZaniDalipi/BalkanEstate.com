@@ -110,7 +110,12 @@
     "verifyAndBecomeAgent": "Verifikuj i Postani Agent",
     "joinAgency": "Pridruži se Agenciji",
     "verifyFailed": "Failed to verify license. Please check your information and try again.",
-    "locationNA": "Location N/A"
+    "locationNA": "Location N/A",
+    "phoneOnlyTitle": "Додајте број телефона",
+    "phoneOnlyDescription": "Број телефона је потребан за контакт и за креирање огласа за некретнине",
+    "phoneOnlyHint": "Ваш број телефона ће бити приказан на огласима тако да вас купци могу контактирати.",
+    "saving": "Чување...",
+    "saveAndContinue": "Сачувај и настави"
   },
   "invitationCode": {
     "title": "Unesite Kod za Pozivnicu",

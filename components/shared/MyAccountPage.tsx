@@ -1554,6 +1554,7 @@ const ProfileSettings: React.FC<{ user: User }> = ({ user }) => {
             currentLicenseNumber={user.licenseNumber}
             currentAgentId={user.agentId}
             currentPhone={user.phone}
+            phoneOnly={pendingRole === UserRole.PRIVATE_SELLER && !user.phone}
         />
         </>
     );

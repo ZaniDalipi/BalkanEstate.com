@@ -23,6 +23,8 @@ interface AgentLicenseModalProps {
   currentLicenseNumber?: string;
   currentAgentId?: string;
   currentPhone?: string;
+  /** When true, only show the phone number field (for private seller role switch) */
+  phoneOnly?: boolean;
 }
 
 const Field = ({
@@ -49,6 +51,7 @@ const AgentLicenseModal: React.FC<AgentLicenseModalProps> = ({
   currentLicenseNumber,
   currentAgentId,
   currentPhone,
+  phoneOnly = false,
 }) => {
   const { t } = useTranslation(['agents', 'modals', 'common']);
   const [licenseNumber, setLicenseNumber] = useState(currentLicenseNumber || '');
@@ -105,6 +108,34 @@ const AgentLicenseModal: React.FC<AgentLicenseModalProps> = ({
   const phoneRequired = !currentPhone;
 
   const runSubmit = async () => {
+    if (phoneOnly) {
+      // Phone-only mode: only validate phone
+      if (!phone.trim()) {
+        setError(t('modals:agentLicense.phoneRequired', 'Phone number is required'));
+        return;
+      }
+      const cleaned = phone.trim().replace(/[\s\-()\.]/g, '');
+      if (!/^\+?[0-9]{7,15}$/.test(cleaned)) {
+        setError(t('modals:agentLicense.invalidPhone', 'Invalid phone number format'));
+        return;
+      }
+      setError('');
+      setIsSubmitting(true);
+      try {
+        await onSubmit({
+          licenseNumber: '',
+          phone: phone.trim(),
+        });
+        setError('');
+        onClose();
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'Failed to save phone number.');
+      } finally {
+        setIsSubmitting(false);
+      }
+      return;
+    }
+
     if (!licenseNumber.trim()) {
       setError(t('modals:agentLicense.licenseRequired'));
       return;
@@ -185,21 +216,27 @@ const AgentLicenseModal: React.FC<AgentLicenseModalProps> = ({
 
         {/* Header */}
         <div className="relative flex items-center gap-4 px-6 pt-5 pb-5 sm:pt-6 flex-shrink-0 border-b border-gray-100">
-          <div className="w-10 h-10 rounded-xl bg-blue-600 flex items-center justify-center flex-shrink-0">
-            {isJoiningAgency
-              ? <Building2 className="w-5 h-5 text-white" />
-              : <ShieldCheck className="w-5 h-5 text-white" />}
+          <div className={`w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 ${phoneOnly ? 'bg-emerald-600' : 'bg-blue-600'}`}>
+            {phoneOnly
+              ? <Phone className="w-5 h-5 text-white" />
+              : isJoiningAgency
+                ? <Building2 className="w-5 h-5 text-white" />
+                : <ShieldCheck className="w-5 h-5 text-white" />}
           </div>
           <div className="flex-1 min-w-0">
             <h2 className="text-base font-bold text-gray-900 leading-snug">
-              {isJoiningAgency
-                ? t('modals:agentLicense.joinAgencyTitle')
-                : t('modals:agentLicense.title')}
+              {phoneOnly
+                ? t('modals:agentLicense.phoneOnlyTitle', 'Add Your Phone Number')
+                : isJoiningAgency
+                  ? t('modals:agentLicense.joinAgencyTitle')
+                  : t('modals:agentLicense.title')}
             </h2>
             <p className="text-xs text-gray-400 mt-0.5 truncate">
-              {isJoiningAgency
-                ? t('modals:agentLicense.joinAgencyDescription')
-                : t('modals:agentLicense.newAgentDescription')}
+              {phoneOnly
+                ? t('modals:agentLicense.phoneOnlyDescription', 'A phone number is needed for contact and to create property listings')
+                : isJoiningAgency
+                  ? t('modals:agentLicense.joinAgencyDescription')
+                  : t('modals:agentLicense.newAgentDescription')}
             </p>
           </div>
           <button
@@ -224,72 +261,14 @@ const AgentLicenseModal: React.FC<AgentLicenseModalProps> = ({
               </div>
             )}
 
-            {/* License + Agent ID — side by side on desktop */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <Field
-                id="licenseNumber"
-                label={t('modals:agentLicense.licenseNumber')}
-                icon={<ShieldCheck className="w-3 h-3" />}
-                required
-                hint={isJoiningAgency
-                  ? undefined
-                  : t('modals:agentLicense.officialLicense')}
-              >
-                <input
-                  type="text"
-                  id="licenseNumber"
-                  value={licenseNumber}
-                  onChange={e => setLicenseNumber(e.target.value)}
-                  disabled={isSubmitting || isJoiningAgency}
-                  readOnly={isJoiningAgency}
-                  placeholder={t('modals:agentLicense.licenseNumberPlaceholder')}
-                  className={inputCls}
-                  required
-                />
-                {isJoiningAgency && (
-                  <p className="flex items-center gap-1 text-xs text-emerald-600 font-medium mt-1">
-                    <BadgeCheck className="w-3.5 h-3.5" />
-                    {t('modals:agentLicense.verifiedLicense')}
-                  </p>
-                )}
-              </Field>
-
-              <Field
-                id="agentId"
-                label={t('modals:agentLicense.agentId')}
-                icon={<KeyRound className="w-3 h-3" />}
-                hint={isJoiningAgency
-                  ? t('modals:agentLicense.verifiedAgentId')
-                  : t('modals:agentLicense.autoGeneratedAgentId')}
-              >
-                <div className="relative">
-                  <input
-                    type="text"
-                    id="agentId"
-                    value={agentId}
-                    onChange={e => setAgentId(e.target.value)}
-                    disabled={isSubmitting || isJoiningAgency}
-                    readOnly={isJoiningAgency}
-                    placeholder={t('modals:agentLicense.agentIdPlaceholder')}
-                    className={inputCls}
-                  />
-                  {!isJoiningAgency && (
-                    <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[10px] font-medium text-gray-300 pointer-events-none">
-                      {t('modals:agentLicense.optional')}
-                    </span>
-                  )}
-                </div>
-              </Field>
-            </div>
-
-            {/* Phone number — required if user has none on file */}
-            {phoneRequired && (
+            {phoneOnly ? (
+              /* Phone-only mode for private seller role switch */
               <Field
                 id="phone"
                 label={t('modals:agentLicense.phoneNumber', 'Phone Number')}
                 icon={<Phone className="w-3 h-3" />}
                 required
-                hint={t('modals:agentLicense.phoneHint', 'Required for agents and sellers. Clients will use this to contact you.')}
+                hint={t('modals:agentLicense.phoneOnlyHint', 'Your phone number will be shown on your listings so buyers can reach you.')}
               >
                 <input
                   type="tel"
@@ -299,115 +278,199 @@ const AgentLicenseModal: React.FC<AgentLicenseModalProps> = ({
                   disabled={isSubmitting}
                   placeholder={t('modals:agentLicense.phonePlaceholder', '+383 44 123 456')}
                   className={inputCls}
+                  autoFocus
                   required
                 />
               </Field>
-            )}
+            ) : (
+              /* Full agent registration form */
+              <>
+                {/* License + Agent ID — side by side on desktop */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <Field
+                    id="licenseNumber"
+                    label={t('modals:agentLicense.licenseNumber')}
+                    icon={<ShieldCheck className="w-3 h-3" />}
+                    required
+                    hint={isJoiningAgency
+                      ? undefined
+                      : t('modals:agentLicense.officialLicense')}
+                  >
+                    <input
+                      type="text"
+                      id="licenseNumber"
+                      value={licenseNumber}
+                      onChange={e => setLicenseNumber(e.target.value)}
+                      disabled={isSubmitting || isJoiningAgency}
+                      readOnly={isJoiningAgency}
+                      placeholder={t('modals:agentLicense.licenseNumberPlaceholder')}
+                      className={inputCls}
+                      required
+                    />
+                    {isJoiningAgency && (
+                      <p className="flex items-center gap-1 text-xs text-emerald-600 font-medium mt-1">
+                        <BadgeCheck className="w-3.5 h-3.5" />
+                        {t('modals:agentLicense.verifiedLicense')}
+                      </p>
+                    )}
+                  </Field>
 
-            {/* Languages — new agents only */}
-            {!isJoiningAgency && (
-              <div className="space-y-2.5">
-                <label className="flex items-center gap-1.5 text-[11px] font-semibold text-gray-400 uppercase tracking-widest select-none">
-                  <Globe className="w-3 h-3" />
-                  {t('modals:agentLicense.languagesSpoken')}
-                </label>
-                <div className="flex flex-wrap gap-1.5">
-                  {BALKAN_LANGUAGE_KEYS.map(lang => {
-                    const on = languages.includes(lang);
-                    return (
-                      <button
-                        key={lang}
-                        type="button"
-                        onClick={() => handleLanguageToggle(lang)}
-                        disabled={isSubmitting}
-                        className={`px-2.5 py-1 rounded-md text-xs font-medium border capitalize transition-all disabled:opacity-50 ${
-                          on
-                            ? 'bg-blue-600 text-white border-blue-600'
-                            : 'bg-white text-gray-500 border-gray-200 hover:border-gray-300 hover:text-gray-700'
-                        }`}
-                      >
-                        {lang}
-                      </button>
-                    );
-                  })}
+                  <Field
+                    id="agentId"
+                    label={t('modals:agentLicense.agentId')}
+                    icon={<KeyRound className="w-3 h-3" />}
+                    hint={isJoiningAgency
+                      ? t('modals:agentLicense.verifiedAgentId')
+                      : t('modals:agentLicense.autoGeneratedAgentId')}
+                  >
+                    <div className="relative">
+                      <input
+                        type="text"
+                        id="agentId"
+                        value={agentId}
+                        onChange={e => setAgentId(e.target.value)}
+                        disabled={isSubmitting || isJoiningAgency}
+                        readOnly={isJoiningAgency}
+                        placeholder={t('modals:agentLicense.agentIdPlaceholder')}
+                        className={inputCls}
+                      />
+                      {!isJoiningAgency && (
+                        <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[10px] font-medium text-gray-300 pointer-events-none">
+                          {t('modals:agentLicense.optional')}
+                        </span>
+                      )}
+                    </div>
+                  </Field>
                 </div>
-                <p className="text-xs text-gray-400">{t('modals:agentLicense.selectLanguages')}</p>
-              </div>
-            )}
 
-            {/* Divider */}
-            <div className="border-t border-gray-100" />
-
-            {/* Agency + Invitation Code — side by side on desktop */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <Field
-                id="agencySelect"
-                label={t('modals:agentLicense.selectAgency')}
-                icon={<Building2 className="w-3 h-3" />}
-                required={isJoiningAgency}
-                hint={isJoiningAgency
-                  ? t('modals:agentLicense.chooseAgency')
-                  : t('modals:agentLicense.selectAgencyOrIndependent')}
-              >
-                {loadingAgencies ? (
-                  <div className={`${inputCls} flex items-center gap-2 text-gray-300`}>
-                    <div className="w-3.5 h-3.5 border-2 border-gray-200 border-t-blue-400 rounded-full animate-spin flex-shrink-0" />
-                    {t('modals:agentLicense.loadingAgencies')}
-                  </div>
-                ) : (
-                  <div className="relative">
-                    <select
-                      id="agencySelect"
-                      value={selectedAgency}
-                      onChange={e => { setSelectedAgency(e.target.value); setError(''); }}
+                {/* Phone number — required if user has none on file */}
+                {phoneRequired && (
+                  <Field
+                    id="phone"
+                    label={t('modals:agentLicense.phoneNumber', 'Phone Number')}
+                    icon={<Phone className="w-3 h-3" />}
+                    required
+                    hint={t('modals:agentLicense.phoneHint', 'Required for agents and sellers. Clients will use this to contact you.')}
+                  >
+                    <input
+                      type="tel"
+                      id="phone"
+                      value={phone}
+                      onChange={e => setPhone(e.target.value)}
                       disabled={isSubmitting}
-                      required={isJoiningAgency}
-                      className={`${inputCls} appearance-none pr-8`}
-                    >
-                      <option value="">
-                        {isJoiningAgency
-                          ? t('modals:agentLicense.selectAnAgency')
-                          : t('modals:agentLicense.independentAgent')}
-                      </option>
-                      {agencies.map(a => (
-                        <option key={a._id} value={a._id}>
-                          {a.name} ({a.city || t('modals:agentLicense.locationNA')})
-                        </option>
-                      ))}
-                    </select>
-                    <ChevronDown className="absolute right-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-gray-300 pointer-events-none" />
+                      placeholder={t('modals:agentLicense.phonePlaceholder', '+383 44 123 456')}
+                      className={inputCls}
+                      required
+                    />
+                  </Field>
+                )}
+
+                {/* Languages — new agents only */}
+                {!isJoiningAgency && (
+                  <div className="space-y-2.5">
+                    <label className="flex items-center gap-1.5 text-[11px] font-semibold text-gray-400 uppercase tracking-widest select-none">
+                      <Globe className="w-3 h-3" />
+                      {t('modals:agentLicense.languagesSpoken')}
+                    </label>
+                    <div className="flex flex-wrap gap-1.5">
+                      {BALKAN_LANGUAGE_KEYS.map(lang => {
+                        const on = languages.includes(lang);
+                        return (
+                          <button
+                            key={lang}
+                            type="button"
+                            onClick={() => handleLanguageToggle(lang)}
+                            disabled={isSubmitting}
+                            className={`px-2.5 py-1 rounded-md text-xs font-medium border capitalize transition-all disabled:opacity-50 ${
+                              on
+                                ? 'bg-blue-600 text-white border-blue-600'
+                                : 'bg-white text-gray-500 border-gray-200 hover:border-gray-300 hover:text-gray-700'
+                            }`}
+                          >
+                            {lang}
+                          </button>
+                        );
+                      })}
+                    </div>
+                    <p className="text-xs text-gray-400">{t('modals:agentLicense.selectLanguages')}</p>
                   </div>
                 )}
-              </Field>
 
-              <Field
-                id="agencyInvitationCode"
-                label={t('modals:agentLicense.invitationCode')}
-                icon={<KeyRound className="w-3 h-3" />}
-                required={isJoiningAgency}
-                hint={isJoiningAgency
-                  ? t('modals:agentLicense.enterInvitationCode')
-                  : t('modals:agentLicense.leaveEmptyForIndependent')}
-              >
-                <div className="relative">
-                  <input
-                    type="text"
-                    id="agencyInvitationCode"
-                    value={agencyInvitationCode}
-                    onChange={e => setAgencyInvitationCode(e.target.value.toUpperCase())}
-                    disabled={isSubmitting}
-                    placeholder={t('modals:agentLicense.invitationCodePlaceholder')}
-                    className={`${inputCls} font-mono tracking-widest`}
+                {/* Divider */}
+                <div className="border-t border-gray-100" />
+
+                {/* Agency + Invitation Code — side by side on desktop */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <Field
+                    id="agencySelect"
+                    label={t('modals:agentLicense.selectAgency')}
+                    icon={<Building2 className="w-3 h-3" />}
                     required={isJoiningAgency}
-                  />
-                  {!isJoiningAgency && (
-                    <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[10px] font-medium text-gray-300 pointer-events-none">
-                      {t('modals:agentLicense.optional')}
-                    </span>
-                  )}
+                    hint={isJoiningAgency
+                      ? t('modals:agentLicense.chooseAgency')
+                      : t('modals:agentLicense.selectAgencyOrIndependent')}
+                  >
+                    {loadingAgencies ? (
+                      <div className={`${inputCls} flex items-center gap-2 text-gray-300`}>
+                        <div className="w-3.5 h-3.5 border-2 border-gray-200 border-t-blue-400 rounded-full animate-spin flex-shrink-0" />
+                        {t('modals:agentLicense.loadingAgencies')}
+                      </div>
+                    ) : (
+                      <div className="relative">
+                        <select
+                          id="agencySelect"
+                          value={selectedAgency}
+                          onChange={e => { setSelectedAgency(e.target.value); setError(''); }}
+                          disabled={isSubmitting}
+                          required={isJoiningAgency}
+                          className={`${inputCls} appearance-none pr-8`}
+                        >
+                          <option value="">
+                            {isJoiningAgency
+                              ? t('modals:agentLicense.selectAnAgency')
+                              : t('modals:agentLicense.independentAgent')}
+                          </option>
+                          {agencies.map(a => (
+                            <option key={a._id} value={a._id}>
+                              {a.name} ({a.city || t('modals:agentLicense.locationNA')})
+                            </option>
+                          ))}
+                        </select>
+                        <ChevronDown className="absolute right-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-gray-300 pointer-events-none" />
+                      </div>
+                    )}
+                  </Field>
+
+                  <Field
+                    id="agencyInvitationCode"
+                    label={t('modals:agentLicense.invitationCode')}
+                    icon={<KeyRound className="w-3 h-3" />}
+                    required={isJoiningAgency}
+                    hint={isJoiningAgency
+                      ? t('modals:agentLicense.enterInvitationCode')
+                      : t('modals:agentLicense.leaveEmptyForIndependent')}
+                  >
+                    <div className="relative">
+                      <input
+                        type="text"
+                        id="agencyInvitationCode"
+                        value={agencyInvitationCode}
+                        onChange={e => setAgencyInvitationCode(e.target.value.toUpperCase())}
+                        disabled={isSubmitting}
+                        placeholder={t('modals:agentLicense.invitationCodePlaceholder')}
+                        className={`${inputCls} font-mono tracking-widest`}
+                        required={isJoiningAgency}
+                      />
+                      {!isJoiningAgency && (
+                        <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[10px] font-medium text-gray-300 pointer-events-none">
+                          {t('modals:agentLicense.optional')}
+                        </span>
+                      )}
+                    </div>
+                  </Field>
                 </div>
-              </Field>
-            </div>
+              </>
+            )}
           </div>
         </form>
 
@@ -433,13 +496,17 @@ const AgentLicenseModal: React.FC<AgentLicenseModalProps> = ({
             {isSubmitting ? (
               <>
                 <div className="w-3.5 h-3.5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                {isJoiningAgency
-                  ? t('modals:agentLicense.joining')
-                  : t('modals:agentLicense.verifying')}
+                {phoneOnly
+                  ? t('modals:agentLicense.saving', 'Saving...')
+                  : isJoiningAgency
+                    ? t('modals:agentLicense.joining')
+                    : t('modals:agentLicense.verifying')}
               </>
-            ) : isJoiningAgency
-              ? t('modals:agentLicense.joinAgency')
-              : t('modals:agentLicense.verifyAndBecomeAgent')
+            ) : phoneOnly
+              ? t('modals:agentLicense.saveAndContinue', 'Save & Continue')
+              : isJoiningAgency
+                ? t('modals:agentLicense.joinAgency')
+                : t('modals:agentLicense.verifyAndBecomeAgent')
             }
           </button>
         </div>

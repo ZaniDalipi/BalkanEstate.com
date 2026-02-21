@@ -110,7 +110,12 @@
     "verifyAndBecomeAgent": "Επαλήθευση & Γίνετε Μεσίτης",
     "joinAgency": "Συμμετοχή σε Γραφείο",
     "verifyFailed": "Failed to verify license. Please check your information and try again.",
-    "locationNA": "Location N/A"
+    "locationNA": "Location N/A",
+    "phoneOnlyTitle": "Προσθέστε τον αριθμό τηλεφώνου σας",
+    "phoneOnlyDescription": "Ένας αριθμός τηλεφώνου χρειάζεται για επικοινωνία και για τη δημιουργία αγγελιών ακινήτων",
+    "phoneOnlyHint": "Ο αριθμός τηλεφώνου σας θα εμφανίζεται στις αγγελίες σας ώστε οι αγοραστές να μπορούν να επικοινωνήσουν μαζί σας.",
+    "saving": "Αποθήκευση...",
+    "saveAndContinue": "Αποθήκευση & Συνέχεια"
   },
   "invitationCode": {
     "title": "Εισαγωγή Κωδικού Πρόσκλησης",

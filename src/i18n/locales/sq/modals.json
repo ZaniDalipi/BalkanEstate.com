@@ -110,7 +110,12 @@
     "verifyAndBecomeAgent": "Verifiko & Bëhu Agjent",
     "joinAgency": "Bashkohu me Agjenci",
     "verifyFailed": "Failed to verify license. Please check your information and try again.",
-    "locationNA": "Location N/A"
+    "locationNA": "Location N/A",
+    "phoneOnlyTitle": "Shto Numrin e Telefonit",
+    "phoneOnlyDescription": "Numri i telefonit nevojitet për kontakt dhe për të krijuar lista pronash",
+    "phoneOnlyHint": "Numri juaj i telefonit do të shfaqet në listat tuaja në mënyrë që blerësit të mund t'ju kontaktojnë.",
+    "saving": "Duke ruajtur...",
+    "saveAndContinue": "Ruaj & Vazhdo"
   },
   "invitationCode": {
     "title": "Futni Kodin e Ftesës",

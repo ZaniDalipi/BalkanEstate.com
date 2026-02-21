@@ -110,7 +110,12 @@
     "verifyAndBecomeAgent": "Verify & Become Agent",
     "joinAgency": "Join Agency",
     "verifyFailed": "Failed to verify license. Please check your information and try again.",
-    "locationNA": "Location N/A"
+    "locationNA": "Location N/A",
+    "phoneOnlyTitle": "Add Your Phone Number",
+    "phoneOnlyDescription": "A phone number is needed for contact and to create property listings",
+    "phoneOnlyHint": "Your phone number will be shown on your listings so buyers can reach you.",
+    "saving": "Saving...",
+    "saveAndContinue": "Save & Continue"
   },
   "invitationCode": {
     "title": "Enter Invitation Code",
