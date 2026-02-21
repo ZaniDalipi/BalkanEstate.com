@@ -42,7 +42,8 @@ process.env.JWT_SECRET = 'test-jwt-secret';
 process.env.JWT_REFRESH_SECRET = 'test-jwt-refresh-secret';
 process.env.JWT_EXPIRES_IN = '1d';
 process.env.JWT_REFRESH_EXPIRES_IN = '7d';
-process.env.ENCRYPTION_KEY = 'test-encryption-key-32-chars!!';
+process.env.ENCRYPTION_KEY = 'test-encryption-key-must-be-32-chars!!';
+process.env.FIELD_ENCRYPTION_KEY = 'test-encryption-key-must-be-32-chars!!';
 
 /**
  * Creates mock user data matching the User model schema.
