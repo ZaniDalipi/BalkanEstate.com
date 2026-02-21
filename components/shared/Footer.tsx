@@ -71,9 +71,6 @@ const Footer: React.FC<FooterProps> = ({ className = '', contained = false }) =>
         { icon: HeartIcon, labelKey: 'links.savedProperties', view: 'saved-properties' },
         { icon: BellIcon, labelKey: 'links.savedSearches', view: 'saved-searches' },
         { icon: UserGroupIcon, labelKey: 'links.findAgents', view: 'agents' },
-    ];
-
-    const toolsLinks = [
         { icon: ChartBarIcon, labelKey: 'links.valuation', view: 'valuation' },
         { icon: BuildingLibraryIcon, labelKey: 'links.browseAgencies', view: 'agencies' },
     ];
@@ -110,10 +107,10 @@ const Footer: React.FC<FooterProps> = ({ className = '', contained = false }) =>
 
             {/* Main Footer Content */}
             <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8 sm:pt-10 lg:pt-12" style={{ paddingBottom: 'max(1.5rem, env(safe-area-inset-bottom, 1.5rem))' }}>
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-12 gap-6 sm:gap-8 lg:gap-10 xl:gap-12">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-12 gap-6 sm:gap-8 lg:gap-8 xl:gap-10">
 
                     {/* Brand Section */}
-                    <div className="sm:col-span-2 lg:col-span-4 space-y-4 sm:space-y-5">
+                    <div className="sm:col-span-2 lg:col-span-3 space-y-4 sm:space-y-5">
                         <div className="flex items-center gap-3">
                             <div className="p-2.5 bg-gradient-to-br from-primary to-blue-600 rounded-xl shadow-lg shadow-primary/20">
                                 <LogoIcon className="w-6 h-6 text-white" />
@@ -161,7 +158,7 @@ const Footer: React.FC<FooterProps> = ({ className = '', contained = false }) =>
                             <span className="w-8 h-0.5 bg-gradient-to-r from-primary to-blue-500 rounded-full" />
                             {t('footer:sections.forBuyers', 'For Buyers')}
                         </h3>
-                        <ul className="space-y-2 sm:space-y-3">
+                        <ul className="space-y-2 sm:space-y-2.5">
                             {buyerLinks.map(({ icon: Icon, labelKey, view }) => (
                                 <li key={labelKey}>
                                     <button
@@ -182,7 +179,7 @@ const Footer: React.FC<FooterProps> = ({ className = '', contained = false }) =>
                             <span className="w-8 h-0.5 bg-gradient-to-r from-green-500 to-emerald-500 rounded-full" />
                             {t('footer:sections.forSellers', 'For Sellers')}
                         </h3>
-                        <ul className="space-y-2 sm:space-y-3">
+                        <ul className="space-y-2 sm:space-y-2.5">
                             {sellerLinks.map(({ icon: Icon, labelKey, view }) => (
                                 <li key={labelKey}>
                                     <button
@@ -197,34 +194,13 @@ const Footer: React.FC<FooterProps> = ({ className = '', contained = false }) =>
                         </ul>
                     </div>
 
-                    {/* Tools & Resources - crawlable internal links for SEO */}
+                    {/* Get In Touch */}
                     <div className="lg:col-span-2">
-                        <h3 className="text-sm font-semibold text-white mb-3 sm:mb-4 flex items-center gap-2">
-                            <span className="w-8 h-0.5 bg-gradient-to-r from-amber-500 to-orange-500 rounded-full" />
-                            {t('footer:sections.tools', 'Tools')}
-                        </h3>
-                        <ul className="space-y-2 sm:space-y-3">
-                            {toolsLinks.map(({ icon: Icon, labelKey, view }) => (
-                                <li key={labelKey}>
-                                    <button
-                                        onClick={() => handleNavigation(view as any)}
-                                        className="group flex items-center gap-2 sm:gap-2.5 text-slate-400 hover:text-white transition-all duration-200 text-left w-full"
-                                    >
-                                        <Icon className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-amber-500/70 group-hover:text-amber-500 transition-colors flex-shrink-0" />
-                                        <span className="text-xs sm:text-sm group-hover:translate-x-1 transition-transform duration-200">{t(`footer:${labelKey}`, labelKey.split('.')[1])}</span>
-                                    </button>
-                                </li>
-                            ))}
-                        </ul>
-                    </div>
-
-                    {/* Contact & Countries */}
-                    <div className="sm:col-span-2 lg:col-span-2">
                         <h3 className="text-sm font-semibold text-white mb-3 sm:mb-4 flex items-center gap-2">
                             <span className="w-8 h-0.5 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full" />
                             {t('footer:sections.contact', 'Get In Touch')}
                         </h3>
-                        <ul className="space-y-2 sm:space-y-3 mb-4 sm:mb-6">
+                        <ul className="space-y-2 sm:space-y-3">
                             <li>
                                 <a
                                     href={`mailto:${CONTACT_CONFIG.email.contact}`}
@@ -243,28 +219,40 @@ const Footer: React.FC<FooterProps> = ({ className = '', contained = false }) =>
                                     <span className="text-xs sm:text-sm">{CONTACT_CONFIG.phone.primary}</span>
                                 </a>
                             </li>
+                            <li>
+                                <a
+                                    href={`https://wa.me/${CONTACT_CONFIG.social.whatsappNumber}`}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="flex items-center gap-2 sm:gap-2.5 text-slate-400 hover:text-white transition-all duration-200 group"
+                                >
+                                    <WhatsappIcon className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-purple-500/70 group-hover:text-green-500 transition-colors flex-shrink-0" />
+                                    <span className="text-xs sm:text-sm">WhatsApp</span>
+                                </a>
+                            </li>
                         </ul>
+                    </div>
 
-                        {/* Countries We Serve */}
-                        <div>
-                            <h4 className="text-[10px] sm:text-xs font-medium text-slate-500 uppercase tracking-wider mb-2 sm:mb-3 flex items-center gap-2">
-                                <GlobeAltIcon className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
-                                {t('footer:sections.countriesWeServe', 'Countries We Serve')}
-                            </h4>
-                            <div className="grid grid-cols-2 gap-1.5">
-                                {balkanCountries.map((country) => (
-                                    <button
-                                        key={country.code}
-                                        onClick={() => handleCountrySearch(country.name)}
-                                        className="inline-flex items-center gap-1.5 bg-slate-700/50 hover:bg-slate-700 px-2 py-1.5 rounded-md text-xs text-slate-400 hover:text-white transition-colors cursor-pointer text-left"
-                                        title={`Property for sale in ${country.name}`}
-                                        aria-label={`Browse properties in ${country.name}`}
-                                    >
-                                        <span className="text-sm leading-none flex-shrink-0">{country.flag}</span>
-                                        <span className="truncate">{country.name}</span>
-                                    </button>
-                                ))}
-                            </div>
+                    {/* Countries We Serve */}
+                    <div className="sm:col-span-2 lg:col-span-3">
+                        <h3 className="text-sm font-semibold text-white mb-3 sm:mb-4 flex items-center gap-2">
+                            <span className="w-8 h-0.5 bg-gradient-to-r from-amber-500 to-orange-500 rounded-full" />
+                            <GlobeAltIcon className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                            {t('footer:sections.countriesWeServe', 'Countries We Serve')}
+                        </h3>
+                        <div className="grid grid-cols-2 gap-1.5">
+                            {balkanCountries.map((country) => (
+                                <button
+                                    key={country.code}
+                                    onClick={() => handleCountrySearch(country.name)}
+                                    className="inline-flex items-center gap-1.5 bg-slate-700/30 hover:bg-slate-700/60 px-2.5 py-1.5 rounded-lg text-xs text-slate-400 hover:text-white transition-all duration-200 cursor-pointer text-left group"
+                                    title={`Property for sale in ${country.name}`}
+                                    aria-label={`Browse properties in ${country.name}`}
+                                >
+                                    <span className="text-sm leading-none flex-shrink-0">{country.flag}</span>
+                                    <span className="group-hover:translate-x-0.5 transition-transform duration-200">{country.name}</span>
+                                </button>
+                            ))}
                         </div>
                     </div>
                 </div>
