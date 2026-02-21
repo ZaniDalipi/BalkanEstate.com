@@ -195,7 +195,7 @@ const Footer: React.FC<FooterProps> = ({ className = '', contained = false }) =>
                     </div>
 
                     {/* Get In Touch */}
-                    <div className="lg:col-span-2">
+                    <div className="lg:col-span-2 min-w-0">
                         <h3 className="text-sm font-semibold text-white mb-3 sm:mb-4 flex items-center gap-2">
                             <span className="w-8 h-0.5 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full" />
                             {t('footer:sections.contact', 'Get In Touch')}
@@ -207,7 +207,7 @@ const Footer: React.FC<FooterProps> = ({ className = '', contained = false }) =>
                                     className="flex items-center gap-2 sm:gap-2.5 text-slate-400 hover:text-white transition-all duration-200 group"
                                 >
                                     <EnvelopeIcon className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-purple-500/70 group-hover:text-purple-500 transition-colors flex-shrink-0" />
-                                    <span className="text-xs sm:text-sm break-all sm:break-normal">{CONTACT_CONFIG.email.contact}</span>
+                                    <span className="text-xs sm:text-sm break-all">{CONTACT_CONFIG.email.contact}</span>
                                 </a>
                             </li>
                             <li>
