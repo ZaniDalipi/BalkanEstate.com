@@ -28,7 +28,7 @@ export const addUrgentBadge = async (
       return;
     }
 
-    const promotionId = req.params.id;
+    const promotionId = req.params.id as string;
     const userId = String((req.user as IUser)._id);
 
     const { promotion, error } = await verifyPromotionOwnership(promotionId, userId);
