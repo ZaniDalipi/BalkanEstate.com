@@ -17,6 +17,68 @@ vi.mock('@/context/AppContext', () => ({
   }),
 }));
 
+// Override the global i18n mock with translations that support interpolation
+// so tests can assert on English text rather than raw translation keys
+vi.mock('react-i18next', () => {
+  const translations: Record<string, string> = {
+    'seller:roleSelector.title': 'Post Listing As',
+    'seller:roleSelector.description': 'Choose which role to use when creating this listing. Each role has separate listing limits and subscriptions.',
+    'seller:roleSelector.agent': 'Agent',
+    'seller:roleSelector.privateSeller': 'Private Seller',
+    'seller:roleSelector.badges.trial': 'Trial',
+    'seller:roleSelector.badges.pro': 'Pro',
+    'seller:roleSelector.badges.enterprise': 'Enterprise',
+    'seller:roleSelector.badges.agencyOwner': 'Agency Owner',
+    'seller:roleSelector.badges.agencyAgent': 'Agency Agent',
+    'seller:roleSelector.badges.buyer': 'Buyer',
+    'seller:roleSelector.badges.free': 'Free',
+    'seller:roleSelector.badges.proRequired': 'Pro Required',
+    'seller:roleSelector.listings': 'Listings',
+    'seller:roleSelector.sharedLimit': 'Shared Limit: {{used}}/{{limit}} total listings',
+    'seller:roleSelector.asRole': '({{count}} as {{role}})',
+    'seller:roleSelector.limitReachedShared': 'Shared limit reached across both roles.',
+    'seller:roleSelector.limitReachedUpgrade': 'Listing limit reached. Upgrade to Pro for 25 listings!',
+    'seller:roleSelector.remainingListings': '{{count}} listing(s) remaining',
+    'seller:roleSelector.availableListings': '{{count}} listing(s) available',
+    'seller:roleSelector.shared': '(shared)',
+    'seller:roleSelector.noSubscriptionData': 'No subscription data',
+    'seller:roleSelector.proRequired.title': 'Pro Subscription Required',
+    'seller:roleSelector.proRequired.description': 'To post listings as an agent, you need to subscribe to the Pro plan.',
+    'seller:roleSelector.proRequired.button': 'Subscribe to Pro',
+    'seller:roleSelector.becomeAgent.title': 'Want to post as an agent?',
+    'seller:roleSelector.becomeAgent.description': 'Register as an agent from your Profile Settings.',
+  };
+
+  return {
+    useTranslation: () => ({
+      t: (key: string, optionsOrDefault?: string | Record<string, unknown>) => {
+        let text = translations[key];
+        if (!text) {
+          // Key not found: use default value if string, otherwise return key
+          if (typeof optionsOrDefault === 'string') return optionsOrDefault;
+          return key;
+        }
+        // Handle interpolation: replace {{var}} with values from options
+        if (optionsOrDefault && typeof optionsOrDefault === 'object') {
+          Object.entries(optionsOrDefault).forEach(([k, v]) => {
+            text = text.replace(new RegExp(`\\{\\{${k}\\}\\}`, 'g'), String(v));
+          });
+        }
+        return text;
+      },
+      i18n: {
+        language: 'en',
+        changeLanguage: vi.fn(),
+      },
+    }),
+    Trans: ({ children }: { children: React.ReactNode }) => children,
+    initReactI18next: {
+      type: '3rdParty',
+      init: vi.fn(),
+    },
+  };
+});
+
 // Mock console.log to avoid cluttering test output
 vi.spyOn(console, 'log').mockImplementation(() => {});
 
@@ -58,14 +120,13 @@ describe('RoleSelector Component', () => {
         />
       );
 
-      // Should show Pro badge
-      expect(screen.getByText('Pro')).toBeInTheDocument();
+      // Should show Pro badge (both role cards display it)
+      const proBadges = screen.getAllByText('Pro');
+      expect(proBadges.length).toBeGreaterThanOrEqual(1);
 
-      // Should show correct limits (20 for pro)
-      expect(screen.getByText(/20/)).toBeInTheDocument();
-
-      // Should show correct usage count
-      expect(screen.getByText(/2/)).toBeInTheDocument();
+      // Should show shared limit with correct values: 2/20
+      const sharedLimitElements = screen.getAllByText(/2\/20/);
+      expect(sharedLimitElements.length).toBeGreaterThanOrEqual(1);
     });
 
     it('should display Free subscription with 3 listings limit', () => {
@@ -105,11 +166,8 @@ describe('RoleSelector Component', () => {
       // Should show Free badge
       expect(screen.getByText('Free')).toBeInTheDocument();
 
-      // Should show 3 listings limit
-      expect(screen.getByText(/3/)).toBeInTheDocument();
-
-      // Should show 1 listing used
-      expect(screen.getByText(/1/)).toBeInTheDocument();
+      // Should show 1 / 3 listings (non-Pro path renders used / limit)
+      expect(screen.getByText('1 / 3')).toBeInTheDocument();
     });
 
     it('should show correct role-specific counts', () => {
@@ -123,9 +181,9 @@ describe('RoleSelector Component', () => {
           tier: 'pro',
           status: 'active',
           listingsLimit: 20,
-          activeListingsCount: 5, // Total across both roles
-          privateSellerCount: 2, // As private seller
-          agentCount: 3, // As agent
+          activeListingsCount: 5,
+          privateSellerCount: 2,
+          agentCount: 3,
           promotionCoupons: {
             monthly: 3,
             available: 3,
@@ -146,9 +204,9 @@ describe('RoleSelector Component', () => {
         />
       );
 
-      // Private seller should show 2 used (privateSellerCount)
+      // Private seller card should show role-specific count: (2 as private seller)
       const privateSellerCard = screen.getByText('Private Seller').closest('button');
-      expect(privateSellerCard).toHaveTextContent('2');
+      expect(privateSellerCard).toHaveTextContent('(2 as private seller)');
 
       // Re-render with agent selected
       rerender(
@@ -159,9 +217,9 @@ describe('RoleSelector Component', () => {
         />
       );
 
-      // Agent should show 3 used (agentCount)
-      const agentCard = screen.getByText(/Agent|Independent Agent/).closest('button');
-      expect(agentCard).toHaveTextContent('3');
+      // Agent card should show role-specific count: (3 as agent)
+      const agentCard = screen.getByText('Agent').closest('button');
+      expect(agentCard).toHaveTextContent('(3 as agent)');
     });
   });
 
@@ -196,9 +254,9 @@ describe('RoleSelector Component', () => {
         />
       );
 
-      // Should still show Pro subscription from legacy field
-      expect(screen.getByText(/20/)).toBeInTheDocument();
-      expect(screen.getByText(/3/)).toBeInTheDocument();
+      // Should show Pro subscription from legacy field
+      // Legacy pro: isPro=true, shared limit shows 3/20
+      expect(screen.getByText(/3\/20/)).toBeInTheDocument();
     });
 
     it('should fall back to free subscription when no subscription data', () => {
@@ -222,10 +280,10 @@ describe('RoleSelector Component', () => {
         />
       );
 
-      // Should show free tier limits
+      // Should show free tier badge and limits
       expect(screen.getByText('Free')).toBeInTheDocument();
-      expect(screen.getByText(/3/)).toBeInTheDocument();
-      expect(screen.getByText(/2/)).toBeInTheDocument();
+      // Non-Pro path renders used / limit directly
+      expect(screen.getByText('2 / 3')).toBeInTheDocument();
     });
   });
 
@@ -264,11 +322,10 @@ describe('RoleSelector Component', () => {
         />
       );
 
-      // Should show "Listing limit reached" message
-      expect(screen.getByText(/listing limit reached/i)).toBeInTheDocument();
-
-      // Should show upgrade message
-      expect(screen.getByText(/upgrade to pro/i)).toBeInTheDocument();
+      // Should show "Listing limit reached" warning with upgrade message
+      // The full text is: "Listing limit reached. Upgrade to Pro for 25 listings!"
+      expect(screen.getByText(/listing limit reached/i, { selector: 'p' })).toBeInTheDocument();
+      expect(screen.getByText(/upgrade to pro/i, { selector: 'p' })).toBeInTheDocument();
     });
 
     it('should show available listings count', () => {
@@ -305,8 +362,8 @@ describe('RoleSelector Component', () => {
         />
       );
 
-      // Should show "2 listings available" or similar
-      expect(screen.getByText(/2.*available/i)).toBeInTheDocument();
+      // 3 - 1 = 2 remaining (remaining <= 2 triggers the warning path)
+      expect(screen.getByText(/2 listing\(s\) remaining/, { selector: 'p' })).toBeInTheDocument();
     });
   });
 
@@ -321,7 +378,7 @@ describe('RoleSelector Component', () => {
         subscription: {
           tier: 'agency_owner',
           status: 'active',
-          listingsLimit: 0, // Agency owners don't get direct listings
+          listingsLimit: 0,
           activeListingsCount: 0,
           privateSellerCount: 0,
           agentCount: 0,
@@ -346,7 +403,10 @@ describe('RoleSelector Component', () => {
         />
       );
 
-      expect(screen.getByText('Agency Owner')).toBeInTheDocument();
+      // Both cards render (agency_owner != agency_agent so hasPrivateSeller=true)
+      // Both show Agency Owner badge
+      const badges = screen.getAllByText('Agency Owner');
+      expect(badges.length).toBeGreaterThanOrEqual(1);
     });
 
     it('should display Agency Agent badge', () => {
@@ -384,6 +444,7 @@ describe('RoleSelector Component', () => {
         />
       );
 
+      // agency_agent tier hides private seller card, only agent card renders
       expect(screen.getByText('Agency Agent')).toBeInTheDocument();
     });
   });
