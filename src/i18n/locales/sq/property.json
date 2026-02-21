@@ -349,6 +349,7 @@
     "loginAndGenerate": "Hyni dhe Gjenero Analiza",
     "usageInfo": "Përdorimi: {{used}}/{{limit}} analiza të përdorura këtë muaj",
     "remainingInfo": "{{remaining}} nga {{limit}} analiza të mbetura këtë muaj",
+    "unlimitedInsights": "Analiza pa limit me planin tuaj",
     "upgradePrompt": "Kaloni në premium për më shumë analiza!",
     "tryAgain": "Provo përsëri"
   },
