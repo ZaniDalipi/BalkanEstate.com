@@ -269,19 +269,28 @@ class PaymentProviderFactory {
   public async createPromotionPayment(params: {
     userId: string;
     userEmail: string;
-    countryCode: string;
+    userName?: string;
+    countryCode?: string;
     amount: number;
-    promotionType: string;
+    promotionType?: string;
+    promotionTier?: 'featured' | 'highlight' | 'premium';
     propertyId: string;
+    propertyTitle?: string;
+    duration?: number;
+    hasUrgentBadge?: boolean;
+    couponCode?: string;
+    couponDiscount?: number;
     language?: string;
     firstName?: string;
     lastName?: string;
   }): Promise<PaymentResult> {
     // Promotions are one-time payments routed through LemonSqueezy
+    const promoType = params.promotionType || params.promotionTier || 'standard';
     return this.createLemonSqueezyPayment({
       ...params,
-      productId: `promotion_${params.promotionType}`,
-      planName: `${params.promotionType}_promotion`,
+      countryCode: params.countryCode || 'GR',
+      productId: `promotion_${promoType}`,
+      planName: `${promoType}_promotion`,
       planInterval: 'one_time',
     });
   }

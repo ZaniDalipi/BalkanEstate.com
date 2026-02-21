@@ -28,7 +28,6 @@ import Subscription from '../models/Subscription';
 import { paymentLogger } from '../utils/logger';
 import type {
   WebhookEvent,
-  WebhookEventName,
   SubscriptionAttributes,
   SubscriptionInvoiceAttributes,
   CheckoutCustomData,
@@ -62,7 +61,7 @@ function verifyWebhookSignature(rawBody: Buffer, signature: string): boolean {
 /**
  * Extract custom data from webhook event
  */
-function getCustomData(event: WebhookEvent): CheckoutCustomData | null {
+function getCustomData<T>(event: WebhookEvent<T>): CheckoutCustomData | null {
   return event.meta?.custom_data || null;
 }
 
@@ -120,43 +119,43 @@ export const handleLemonSqueezyWebhook = async (req: Request, res: Response): Pr
     // Route to appropriate handler
     switch (eventName) {
       case 'subscription_created':
-        await handleSubscriptionCreated(event as WebhookEvent<SubscriptionAttributes>);
+        await handleSubscriptionCreated(event as unknown as WebhookEvent<SubscriptionAttributes>);
         break;
 
       case 'subscription_updated':
-        await handleSubscriptionUpdated(event as WebhookEvent<SubscriptionAttributes>);
+        await handleSubscriptionUpdated(event as unknown as WebhookEvent<SubscriptionAttributes>);
         break;
 
       case 'subscription_cancelled':
-        await handleSubscriptionCancelled(event as WebhookEvent<SubscriptionAttributes>);
+        await handleSubscriptionCancelled(event as unknown as WebhookEvent<SubscriptionAttributes>);
         break;
 
       case 'subscription_resumed':
-        await handleSubscriptionResumed(event as WebhookEvent<SubscriptionAttributes>);
+        await handleSubscriptionResumed(event as unknown as WebhookEvent<SubscriptionAttributes>);
         break;
 
       case 'subscription_expired':
-        await handleSubscriptionExpired(event as WebhookEvent<SubscriptionAttributes>);
+        await handleSubscriptionExpired(event as unknown as WebhookEvent<SubscriptionAttributes>);
         break;
 
       case 'subscription_paused':
-        await handleSubscriptionPaused(event as WebhookEvent<SubscriptionAttributes>);
+        await handleSubscriptionPaused(event as unknown as WebhookEvent<SubscriptionAttributes>);
         break;
 
       case 'subscription_unpaused':
-        await handleSubscriptionUnpaused(event as WebhookEvent<SubscriptionAttributes>);
+        await handleSubscriptionUnpaused(event as unknown as WebhookEvent<SubscriptionAttributes>);
         break;
 
       case 'subscription_payment_success':
-        await handlePaymentSuccess(event as WebhookEvent<SubscriptionInvoiceAttributes>);
+        await handlePaymentSuccess(event as unknown as WebhookEvent<SubscriptionInvoiceAttributes>);
         break;
 
       case 'subscription_payment_failed':
-        await handlePaymentFailed(event as WebhookEvent<SubscriptionInvoiceAttributes>);
+        await handlePaymentFailed(event as unknown as WebhookEvent<SubscriptionInvoiceAttributes>);
         break;
 
       case 'subscription_payment_recovered':
-        await handlePaymentRecovered(event as WebhookEvent<SubscriptionInvoiceAttributes>);
+        await handlePaymentRecovered(event as unknown as WebhookEvent<SubscriptionInvoiceAttributes>);
         break;
 
       case 'order_created':
@@ -313,7 +312,7 @@ async function handleSubscriptionCancelled(
 
   if (subscription) {
     await cancelSubscriptionSecurely(
-      subscription._id as string,
+      subscription._id.toString(),
       userId,
       'Cancelled via LemonSqueezy'
     );
