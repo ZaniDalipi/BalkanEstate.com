@@ -37,6 +37,7 @@ jest.mock('../config/cloudinary', () => ({
 // Mock Sharp for image processing
 jest.mock('sharp', () => {
   return jest.fn(() => ({
+    metadata: jest.fn().mockResolvedValue({ width: 1920, height: 1080, format: 'jpeg' }),
     resize: jest.fn().mockReturnThis(),
     jpeg: jest.fn().mockReturnThis(),
     toBuffer: jest.fn().mockResolvedValue(Buffer.from('mock-image-data')),
@@ -67,7 +68,7 @@ describe('Property Image Upload', () => {
 
     // Generate auth token
     authToken = jwt.sign(
-      { id: testUser._id, email: testUser.email },
+      { id: testUser._id, type: 'access' },
       process.env.JWT_SECRET || 'test-secret',
       { expiresIn: '1h' }
     );

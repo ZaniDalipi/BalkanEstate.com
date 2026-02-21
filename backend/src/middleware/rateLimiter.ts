@@ -307,5 +307,7 @@ export const cleanupRateLimitStore = (): void => {
   cleanStore(accountLimitStore);
 };
 
-// Schedule cleanup every 5 minutes
-setInterval(cleanupRateLimitStore, 5 * 60 * 1000);
+// Schedule cleanup every 5 minutes (skip in test to avoid open handles)
+if (process.env.NODE_ENV !== 'test') {
+  setInterval(cleanupRateLimitStore, 5 * 60 * 1000);
+}

@@ -191,8 +191,9 @@ describe('Agency Favorites API', () => {
 
     it('should return favourited agencies', async () => {
       const user = await createTestUser();
+      const user2 = await createTestUser();
       const agency1 = await createTestAgency(String(user._id));
-      const agency2 = await createTestAgency(String(user._id));
+      const agency2 = await createTestAgency(String(user2._id));
       const token = createToken(String(user._id));
 
       // Add both to favourites

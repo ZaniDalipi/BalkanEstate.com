@@ -122,8 +122,10 @@ const cleanCache = (): void => {
   }
 };
 
-// Run cache cleanup every minute
-setInterval(cleanCache, 60 * 1000);
+// Run cache cleanup every minute (skip in test to avoid open handles)
+if (process.env.NODE_ENV !== 'test') {
+  setInterval(cleanCache, 60 * 1000);
+}
 
 // Routes that should NOT be cached even if they match patterns (personalized data)
 const cacheBlacklist = [

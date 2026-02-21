@@ -52,7 +52,7 @@ process.env.FIELD_ENCRYPTION_KEY = 'test-encryption-key-must-be-32-chars!!';
 export const createMockUser = (overrides: Record<string, any> = {}) => ({
   name: 'Test User',
   email: `test-${Date.now()}@example.com`,
-  password: 'SecurePassword123!',
+  password: 'S3cur€Pass!x9Kw',
   role: 'buyer',
   isEmailVerified: true,
   ...overrides,
@@ -64,7 +64,7 @@ export const createMockUser = (overrides: Record<string, any> = {}) => ({
 export const createSignupPayload = (overrides: Record<string, any> = {}) => ({
   name: 'Test User',
   email: `test-${Date.now()}@example.com`,
-  password: 'SecurePassword123!',
+  password: 'S3cur€Pass!x9Kw',
   ...overrides,
 });
 
