@@ -232,11 +232,12 @@ const AgencyPaymentPage: React.FC = () => {
         body: JSON.stringify(agencyData),
       });
 
-      const data = await response.json();
-
       if (!response.ok) {
-        throw new Error(data.message || 'Failed to create agency. Please try again.');
+        const errorData = await response.json().catch(() => null);
+        throw new Error(errorData?.message || 'Failed to create agency. Please try again.');
       }
+
+      const data = await response.json();
 
       // Clear pending data and show success
       dispatch({ type: 'SET_PENDING_AGENCY_DATA', payload: null });

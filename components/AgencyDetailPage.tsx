@@ -915,12 +915,12 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
         body: formData,
       });
 
-      const data = await response.json();
-
       if (!response.ok) {
-        throw new Error(data.message || t('messages.uploadFailed', 'Failed to upload logo'));
+        const errorData = await response.json().catch(() => null);
+        throw new Error(errorData?.message || t('messages.uploadFailed', 'Failed to upload logo'));
       }
 
+      const data = await response.json();
       setAgencyData(data.agency);
       await success(t('messages.logoUpdatedTitle', 'Logo Updated'), t('messages.logoUpdated'));
     } catch (err) {
@@ -959,11 +959,12 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
         body: formData,
       });
 
-      const data = await response.json();
-
       if (!response.ok) {
-        throw new Error(data.message || 'Failed to upload cover image');
+        const errorData = await response.json().catch(() => null);
+        throw new Error(errorData?.message || 'Failed to upload cover image');
       }
+
+      const data = await response.json();
 
       // Reset the file input so the same file can be re-selected if needed
       const fileInput = document.getElementById('cover-upload') as HTMLInputElement;
@@ -1000,12 +1001,12 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
         }),
       });
 
-      const data = await response.json();
-
       if (!response.ok) {
-        throw new Error(data.message || t('messages.updateFailed', 'Failed to update gradient'));
+        const errorData = await response.json().catch(() => null);
+        throw new Error(errorData?.message || t('messages.updateFailed', 'Failed to update gradient'));
       }
 
+      const data = await response.json();
       setAgencyData(data.agency);
       setShowGradientPicker(false);
       await success(t('messages.gradientUpdatedTitle', 'Gradient Updated'), t('messages.gradientUpdated'));

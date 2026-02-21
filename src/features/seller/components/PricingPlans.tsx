@@ -206,11 +206,12 @@ const PricingPlans: React.FC<PricingPlansProps> = ({ isOpen, onClose, onSubscrib
           body: JSON.stringify(state.pendingAgencyData),
         });
 
-        const data = await response.json();
-
         if (!response.ok) {
-          throw new Error(data.message || 'Failed to create agency');
+          const errorData = await response.json().catch(() => null);
+          throw new Error(errorData?.message || 'Failed to create agency');
         }
+
+        const data = await response.json();
 
         // Clear pending agency data
         dispatch({ type: 'SET_PENDING_AGENCY_DATA', payload: null });

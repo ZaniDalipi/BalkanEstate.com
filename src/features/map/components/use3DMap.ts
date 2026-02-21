@@ -115,7 +115,10 @@ export function use3DMap(props: Map3DBuildingsProps) {
         body: `data=${encodeURIComponent(query)}`,
         headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
       });
-      if (!response.ok) return;
+      if (!response.ok) {
+        console.warn(`Failed to fetch POI data: HTTP ${response.status}`);
+        return;
+      }
       const data = await response.json();
 
       // Clear existing POI markers

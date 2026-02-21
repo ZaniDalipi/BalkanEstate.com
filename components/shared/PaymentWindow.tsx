@@ -464,11 +464,12 @@ const PaymentWindow: React.FC<PaymentWindowProps> = ({
           }),
         });
 
-        const data = await response.json();
-
         if (!response.ok) {
-          throw new Error(data.message || t('payment:errors.freeSubscriptionFailed'));
+          const errorData = await response.json().catch(() => null);
+          throw new Error(errorData?.message || t('payment:errors.freeSubscriptionFailed'));
         }
+
+        const data = await response.json();
 
         // Track free subscription in Google Analytics
         trackEcommerce.subscribe(planName, 0);
@@ -527,11 +528,12 @@ const PaymentWindow: React.FC<PaymentWindowProps> = ({
         }),
       });
 
-      const data = await response.json();
-
       if (!response.ok) {
-        throw new Error(data.message || t('payment:errors.sessionCreationFailed'));
+        const errorData = await response.json().catch(() => null);
+        throw new Error(errorData?.message || t('payment:errors.sessionCreationFailed'));
       }
+
+      const data = await response.json();
 
       // Open payment checkout page in new window
       if (data.paymentUrl) {

@@ -255,9 +255,8 @@ const ScheduleViewingModal: React.FC<ScheduleViewingModalProps> = ({ property, i
                 }),
             });
 
-            const data = await response.json();
-
             if (!response.ok) {
+                const errorData = await response.json().catch(() => null);
                 // Handle specific backend errors
                 if (response.status === 409) {
                     // Slot was booked by someone else — refresh booked slots
@@ -268,9 +267,10 @@ const ScheduleViewingModal: React.FC<ScheduleViewingModalProps> = ({ property, i
                     setSelectedTime('');
                     setStep('datetime');
                 }
-                throw new Error(data.message || 'Failed to schedule viewing');
+                throw new Error(errorData?.message || 'Failed to schedule viewing');
             }
 
+            const data = await response.json();
             setIsSubmitted(true);
         } catch (err: unknown) {
             const message = err instanceof Error ? err.message : String(err);
