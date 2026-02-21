@@ -275,7 +275,6 @@ const VideoGenerator: React.FC<VideoGeneratorProps> = ({
                 src={generatedVideo.url}
                 controls
                 autoPlay
-                muted
                 playsInline
                 loop
                 className="w-full h-full object-contain"
@@ -332,7 +331,6 @@ const VideoGenerator: React.FC<VideoGeneratorProps> = ({
                     src={existingVideo}
                     controls
                     autoPlay
-                    muted
                     playsInline
                     loop
                     className="w-full h-full object-contain"
