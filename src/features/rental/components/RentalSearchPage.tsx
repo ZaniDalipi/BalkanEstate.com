@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect, useRef, memo } from 'react';
 import { useTranslation } from 'react-i18next';
 import MapComponent from '@/src/features/map/components/MapComponent';
 import PropertyCard from '@/src/features/property-details/components/PropertyCard';
@@ -15,7 +15,50 @@ import { Helmet } from 'react-helmet-async';
 import { SEO } from '@/src/components/seo';
 import Footer from '@/components/shared/Footer';
 import { useLocalizedNavigation } from '@/src/hooks/useLocalizedNavigation';
-import { NominatimResult } from '@/types';
+import { NominatimResult, Property } from '@/types';
+
+const ITEMS_PER_PAGE = 20;
+
+// Animated property card — staggered fly-in entrance (matches buy page)
+const AnimatedPropertyCard = memo<{
+    property: Property;
+    index: number;
+    onHover?: (id: string | null) => void;
+    animateEntrance?: boolean;
+}>(({ property, index, onHover, animateEntrance }) => {
+    const entranceDelay = animateEntrance ? Math.min(index * 60, 1200) : 0;
+    return (
+        <div
+            className={animateEntrance ? 'rental-card-entrance-fly' : undefined}
+            style={animateEntrance ? { '--card-delay': `${entranceDelay}ms` } as React.CSSProperties : undefined}
+            onMouseEnter={() => onHover?.(property.id)}
+            onMouseLeave={() => onHover?.(null)}
+        >
+            <PropertyCard property={property} />
+        </div>
+    );
+});
+
+// CSS animation keyframes for rental card entrance
+const RentalCardAnimationStyles = () => (
+    <style>{`
+    @keyframes rentalCardSlideUp {
+      0% {
+        opacity: 0;
+        transform: translateY(30px) scale(0.97);
+      }
+      100% {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+      }
+    }
+    .rental-card-entrance-fly {
+      opacity: 0;
+      animation: rentalCardSlideUp 0.6s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+      animation-delay: var(--card-delay, 0ms);
+    }
+  `}</style>
+);
 
 interface RentalSearchPageProps {
     onToggleSidebar: () => void;
@@ -71,6 +114,44 @@ const RentalSearchPage: React.FC<RentalSearchPageProps> = ({ onToggleSidebar }) 
     } = useRentalSearch();
 
     const [isFiltersOpen, setIsFiltersOpen] = React.useState(false);
+
+    // Entrance animation: animate cards when rental data first loads
+    const [animateCards, setAnimateCards] = useState(true);
+    const prevLoadingRef = useRef(true);
+    useEffect(() => {
+        // Trigger animation when loading transitions from true -> false (data arrived)
+        if (prevLoadingRef.current && !isLoading) {
+            setAnimateCards(true);
+            const timer = setTimeout(() => setAnimateCards(false), 2500);
+            return () => clearTimeout(timer);
+        }
+        prevLoadingRef.current = isLoading;
+    }, [isLoading]);
+
+    // Pagination with infinite scroll (matches buy page)
+    const [visibleCount, setVisibleCount] = useState(ITEMS_PER_PAGE);
+    const loadMoreRef = useRef<HTMLDivElement>(null);
+
+    // Reset pagination when filters change
+    const filtersKey = JSON.stringify(filters);
+    useEffect(() => {
+        setVisibleCount(ITEMS_PER_PAGE);
+    }, [filtersKey]);
+
+    // Infinite scroll observer
+    useEffect(() => {
+        if (!loadMoreRef.current) return;
+        const observer = new IntersectionObserver(
+            (entries) => {
+                if (entries[0].isIntersecting && visibleCount < listProperties.length) {
+                    setVisibleCount(prev => Math.min(prev + ITEMS_PER_PAGE, listProperties.length));
+                }
+            },
+            { rootMargin: '200px' }
+        );
+        observer.observe(loadMoreRef.current);
+        return () => observer.disconnect();
+    }, [visibleCount, listProperties.length]);
 
     const showSplitView = !isMobile && !isTablet;
     const showViewToggle = isMobile || isTablet;
@@ -285,20 +366,27 @@ const RentalSearchPage: React.FC<RentalSearchPageProps> = ({ onToggleSidebar }) 
                             </div>
                         ) : (
                             <>
+                                <RentalCardAnimationStyles />
                                 <HighlightedPropertiesSection properties={listProperties} />
                                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                                    {listProperties.map(property => (
-                                        <div
+                                    {listProperties.slice(0, visibleCount).map((property, index) => (
+                                        <AnimatedPropertyCard
                                             key={property.id}
-                                            onMouseEnter={() => setHoveredPropertyId(property.id)}
-                                            onMouseLeave={() => setHoveredPropertyId(null)}
-                                        >
-                                            <PropertyCard
-                                                property={property}
-                                            />
-                                        </div>
+                                            property={property}
+                                            index={index}
+                                            onHover={setHoveredPropertyId}
+                                            animateEntrance={animateCards}
+                                        />
                                     ))}
                                 </div>
+                                {visibleCount < listProperties.length && (
+                                    <div ref={loadMoreRef} className="text-center p-4">
+                                        <div className="flex justify-center items-center space-x-2 text-neutral-500">
+                                            <svg className="animate-spin h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+                                            <span>{t('common:loadingMore', 'Loading more...')}</span>
+                                        </div>
+                                    </div>
+                                )}
                             </>
                         )}
                         {/* Footer - Integrated at bottom of property list */}
