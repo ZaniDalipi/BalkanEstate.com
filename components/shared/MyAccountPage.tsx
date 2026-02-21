@@ -845,9 +845,60 @@ const ProfileSettings: React.FC<{ user: User }> = ({ user }) => {
             const roleToSwitch = pendingRole || formData.role;
             const updatedUser = await switchRole(roleToSwitch, licenseData);
 
+            // Also save the profile form data (name, phone, gender, city, etc.)
+            // that the user may have filled in on the background form
+            const parsedSpecializations = agentData.specializations
+                .split(',')
+                .map(s => s.trim())
+                .filter(s => s.length > 0);
+
+            const basicUserData = {
+                name: formData.name,
+                phone: licenseData.phone || formData.phone,
+                city: agentData.city,
+                country: agentData.country,
+                address: agentData.streetAddress || '',
+                avatarUrl: formData.avatarUrl,
+                gender: formData.gender || 'male',
+            };
+
+            let finalUser = updatedUser;
+            try {
+                const savedUser = await updateUser(basicUserData);
+                finalUser = { ...savedUser, ...updatedUser, phone: basicUserData.phone || updatedUser.phone };
+            } catch {
+                // Profile save failed, but role switch succeeded — continue
+            }
+
+            // If switching to agent, also save agent-specific fields
+            if (roleToSwitch === UserRole.AGENT) {
+                const yearsExp = agentData.yearsOfExperience === '' ? 0 : Number(agentData.yearsOfExperience) || 0;
+                try {
+                    const updatedAgent = await updateAgentProfile({
+                        languages: agentData.languages,
+                        specializations: parsedSpecializations,
+                        serviceAreas: agentData.serviceAreas,
+                        yearsOfExperience: yearsExp,
+                        lat: agentData.lat,
+                        lng: agentData.lng,
+                    });
+                    finalUser = {
+                        ...finalUser,
+                        languages: updatedAgent.languages || agentData.languages,
+                        specializations: updatedAgent.specializations || parsedSpecializations,
+                        serviceAreas: updatedAgent.serviceAreas || agentData.serviceAreas,
+                        yearsOfExperience: updatedAgent.yearsOfExperience !== undefined ? updatedAgent.yearsOfExperience : yearsExp,
+                        lat: updatedAgent.lat !== undefined ? updatedAgent.lat : agentData.lat,
+                        lng: updatedAgent.lng !== undefined ? updatedAgent.lng : agentData.lng,
+                    };
+                } catch {
+                    // Agent profile save failed, but role switch succeeded — continue
+                }
+            }
+
             // Update context and form data
-            dispatch({ type: 'UPDATE_USER', payload: updatedUser });
-            setFormData(updatedUser);
+            dispatch({ type: 'UPDATE_USER', payload: finalUser });
+            setFormData(finalUser);
 
             // Close modal and show success
             setIsLicenseModalOpen(false);
