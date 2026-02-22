@@ -45,9 +45,9 @@ const ListingImageUpload: React.FC<ListingImageUploadProps> = ({
     return (
         <>
             {/* Image Management */}
-            <fieldset>
+            <fieldset className="overflow-visible relative z-20">
                 <label className="block text-sm font-medium text-gray-500 mb-1">{t('seller:createListing.imageManagement.title')}</label>
-                <div className="p-4 glass-fieldset">
+                <div className="p-4 glass-fieldset overflow-visible">
                      <label htmlFor="image-upload-manual" className="flex flex-col items-center justify-center w-full h-32 border-2 border-gray-200 border-dashed rounded-xl cursor-pointer glass-fieldset hover:bg-gray-50 transition-colors mb-4">
                         <div className="flex flex-col items-center justify-center">
                             <UploadIcon className="w-8 h-8 mb-2 text-gray-300" />
@@ -62,7 +62,7 @@ const ListingImageUpload: React.FC<ListingImageUploadProps> = ({
                                 <InfoIcon className="w-8 h-8 flex-shrink-0"/>
                                 <p>{t('seller:createListing.imageManagement.dragToReorder')}</p>
                             </div>
-                            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-4 gap-4">
+                            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-4 gap-4 overflow-visible">
                                 {images.map((img, index) => (
                                     <div
                                         key={img.previewUrl}

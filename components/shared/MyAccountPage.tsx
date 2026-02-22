@@ -825,9 +825,6 @@ const SecuritySettings: React.FC<{ logoutAllDevices: () => Promise<void> }> = ({
             {/* Login History */}
             <LoginHistorySection />
 
-            {/* Delete Agency */}
-            <DeleteAgencySection />
-
             {/* Delete Account */}
             <DeleteAccountSection />
         </div>
@@ -1758,6 +1755,11 @@ const ProfileSettings: React.FC<{ user: User }> = ({ user }) => {
                 </button>
             </div>
         </form>
+
+        {/* Change Password Section */}
+        <div className="mt-8 border-t border-white/30 pt-8">
+            <ChangePasswordSection />
+        </div>
 
         <AgentLicenseModal
             isOpen={isLicenseModalOpen}

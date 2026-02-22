@@ -10,11 +10,12 @@ import {
   BuildingOfficeIcon
 } from '@/constants';
 
-type TabOption = 'properties' | 'agents';
+type TabOption = 'properties' | 'agents' | 'agencies';
 
 interface SavedItemsHeroBannerProps {
   savedPropertiesCount: number;
   savedAgentsCount: number;
+  savedAgenciesCount?: number;
   activeTab: TabOption;
   onTabChange: (tab: TabOption) => void;
   groupedCountries?: number;
@@ -23,13 +24,14 @@ interface SavedItemsHeroBannerProps {
 const SavedItemsHeroBanner: React.FC<SavedItemsHeroBannerProps> = ({
   savedPropertiesCount,
   savedAgentsCount,
+  savedAgenciesCount = 0,
   activeTab,
   onTabChange,
   groupedCountries = 0
 }) => {
   const { t } = useTranslation(['saved']);
 
-  const totalSaved = savedPropertiesCount + savedAgentsCount;
+  const totalSaved = savedPropertiesCount + savedAgentsCount + savedAgenciesCount;
 
   return (
     <div className="relative overflow-hidden">
@@ -125,11 +127,11 @@ const SavedItemsHeroBanner: React.FC<SavedItemsHeroBannerProps> = ({
               <div className="absolute inset-0 bg-gradient-to-br from-fuchsia-500 to-fuchsia-600 rounded-xl sm:rounded-2xl blur-lg opacity-50 group-hover:opacity-70 transition-opacity" />
               <div className="relative bg-white/10 backdrop-blur-md rounded-xl sm:rounded-2xl p-3 sm:p-4 lg:p-6 border border-white/20 text-center hover:bg-white/15 transition-all">
                 <div className="w-10 h-10 sm:w-12 sm:h-12 mx-auto mb-2 sm:mb-3 bg-fuchsia-500 rounded-xl flex items-center justify-center shadow-lg shadow-fuchsia-500/30">
-                  <MapPinIcon className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
+                  <BuildingOfficeIcon className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
                 </div>
-                <div className="text-2xl sm:text-3xl lg:text-4xl font-black text-white mb-1">{groupedCountries || (savedPropertiesCount > 0 ? 1 : 0)}</div>
+                <div className="text-2xl sm:text-3xl lg:text-4xl font-black text-white mb-1">{savedAgenciesCount}</div>
                 <div className="text-[10px] sm:text-xs lg:text-sm text-white/60 font-medium uppercase tracking-wide">
-                  {t('saved:favorites.stats.countries')}
+                  {t('saved:favorites.stats.agencies', 'Agencies')}
                 </div>
               </div>
             </div>
@@ -173,6 +175,25 @@ const SavedItemsHeroBanner: React.FC<SavedItemsHeroBannerProps> = ({
                       activeTab === 'agents' ? 'bg-pink-100 text-pink-600' : 'bg-white/20'
                     }`}>
                       {savedAgentsCount}
+                    </span>
+                  )}
+                </button>
+
+                <button
+                  onClick={() => onTabChange('agencies')}
+                  className={`flex-1 flex items-center justify-center gap-2 px-4 py-3 sm:py-4 rounded-xl sm:rounded-2xl text-sm sm:text-base font-bold transition-all duration-300 ${
+                    activeTab === 'agencies'
+                      ? 'bg-white text-slate-900 shadow-lg'
+                      : 'bg-white/10 text-white/80 hover:bg-white/20 border border-white/20'
+                  }`}
+                >
+                  <BuildingOfficeIcon className="w-5 h-5" />
+                  <span>{t('saved:favorites.tabs.agencies', 'Agencies')}</span>
+                  {savedAgenciesCount > 0 && (
+                    <span className={`ml-1 px-2 py-0.5 rounded-full text-xs ${
+                      activeTab === 'agencies' ? 'bg-fuchsia-100 text-fuchsia-600' : 'bg-white/20'
+                    }`}>
+                      {savedAgenciesCount}
                     </span>
                   )}
                 </button>

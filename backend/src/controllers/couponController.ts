@@ -187,7 +187,7 @@ export const validateCoupon = async (req: Request, res: Response): Promise<void>
 
     // Check applicable durations
     if (actualDuration && coupon.applicableDurations && coupon.applicableDurations.length > 0) {
-      if (!coupon.applicableDurations.includes(actualDuration)) {
+      if (!coupon.applicableDurations.includes(actualDuration as 7 | 15 | 30 | 60 | 90)) {
         const allowedDurations = coupon.applicableDurations.map((d: number) => `${d} days`).join(', ');
         res.status(400).json({ message: `This coupon is only valid for ${allowedDurations} promotion durations.` });
         return;

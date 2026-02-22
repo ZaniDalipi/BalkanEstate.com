@@ -69,6 +69,25 @@ export const checkAgencyFavorite = async (
   return response.isSaved;
 };
 
+export const getAgencyFavorites = async (): Promise<any[]> => {
+  const response = await apiRequest<{ favorites: any[] }>('/agency-favorites', {
+    requiresAuth: true,
+  });
+  return response.favorites
+    .filter((fav) => fav.agencyId)
+    .map((fav) => ({
+      _id: fav.agencyId._id,
+      name: fav.agencyId.name,
+      slug: fav.agencyId.slug,
+      logo: fav.agencyId.logo,
+      city: fav.agencyId.city,
+      country: fav.agencyId.country,
+      totalAgents: fav.agencyId.totalAgents || 0,
+      totalProperties: fav.agencyId.totalProperties || 0,
+      isFeatured: fav.agencyId.isFeatured || false,
+    }));
+};
+
 // --- Saved Searches API ---
 
 export const addSavedSearch = async (search: SavedSearch): Promise<SavedSearch> => {

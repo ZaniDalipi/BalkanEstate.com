@@ -23,7 +23,6 @@ import {
   getAgencyAgents,
   migrateAgentSubscriptions,
   sendPromotionCouponsEmailEndpoint,
-  deleteAgency,
 } from '../controllers/agencyController';
 import { protect, optionalAuth } from '../middleware/auth';
 
@@ -54,7 +53,6 @@ router.get('/:idOrSlug', optionalAuth, getAgency); // Fallback for ID or single-
 // Protected routes
 router.post('/', protect, createAgency);
 router.put('/:id', protect, updateAgency);
-router.delete('/:id', protect, deleteAgency);
 router.post('/:id/agents', protect, addAgentToAgency);
 router.delete('/:id/agents/:agentId', protect, removeAgentFromAgency);
 router.post('/join-by-code', protect, joinAgencyByInvitationCode);

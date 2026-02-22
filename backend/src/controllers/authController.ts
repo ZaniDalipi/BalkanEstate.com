@@ -2158,7 +2158,7 @@ export const deleteAccount = async (req: Request, res: Response): Promise<void> 
       const agency = await Agency.findById(user.agencyId);
       if (agency && String(agency.ownerId) === userId) {
         res.status(400).json({
-          message: 'You must delete your agency before deleting your account. Go to your agency settings to delete it first.',
+          message: 'You must delete your agency before deleting your account. Please contact an administrator to delete your agency first.',
         });
         return;
       }
