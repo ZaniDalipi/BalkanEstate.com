@@ -532,7 +532,14 @@ const FloorPlanViewerModal: React.FC<FloorPlanViewerModalProps> = ({ imageUrl, o
                     }}
                 >
                     {/* Floor plan image */}
-                    <div className="relative" style={{ width: imageDimensions.width || 'auto', height: imageDimensions.height || 'auto' }}>
+                    <div
+                        className="relative"
+                        style={{
+                            width: imageDimensions.width || 'auto',
+                            height: imageDimensions.height || 'auto',
+                            perspective: '1200px',
+                        }}
+                    >
                         <img
                             ref={imageRef}
                             src={imageUrl}
@@ -541,6 +548,9 @@ const FloorPlanViewerModal: React.FC<FloorPlanViewerModalProps> = ({ imageUrl, o
                             style={{
                                 imageRendering: transform.scale > 2 ? 'pixelated' : 'auto',
                                 maxWidth: 'none',
+                                transform: 'rotateX(12deg)',
+                                boxShadow: '0 25px 60px -10px rgba(0, 0, 0, 0.5), 0 10px 20px -5px rgba(0, 0, 0, 0.3)',
+                                borderRadius: '4px',
                             }}
                             onLoad={handleImageLoad}
                             onError={handleImageError}
