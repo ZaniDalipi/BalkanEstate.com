@@ -754,6 +754,7 @@ export const updateAgency = async (
       yearsInBusiness, specialties,
       certifications, languages, businessHours,
       coverGradient, coverImage,
+      logoPosition, coverPosition,
     } = req.body;
 
     // Validation
@@ -824,6 +825,16 @@ export const updateAgency = async (
     if (businessHours !== undefined) agency.businessHours = businessHours;
     if (coverGradient !== undefined) (agency as any).coverGradient = coverGradient;
     if (coverImage !== undefined) (agency as any).coverImage = coverImage;
+    if (logoPosition !== undefined && typeof logoPosition === 'object') {
+      const lx = Math.max(0, Math.min(100, Number(logoPosition.x) || 50));
+      const ly = Math.max(0, Math.min(100, Number(logoPosition.y) || 50));
+      (agency as any).logoPosition = { x: lx, y: ly };
+    }
+    if (coverPosition !== undefined && typeof coverPosition === 'object') {
+      const cx = Math.max(0, Math.min(100, Number(coverPosition.x) || 50));
+      const cy = Math.max(0, Math.min(100, Number(coverPosition.y) || 50));
+      (agency as any).coverPosition = { x: cx, y: cy };
+    }
 
     // Handle encrypted fields - force mark as modified so the encryption
     // pre-save hook re-encrypts them (after post-findOne decryption,
