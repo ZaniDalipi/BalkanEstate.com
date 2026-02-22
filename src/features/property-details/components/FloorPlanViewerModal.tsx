@@ -121,6 +121,12 @@ const FloorPlanViewerModal: React.FC<FloorPlanViewerModalProps> = ({ imageUrl, o
         if (e.button !== 0) return;
 
         if (mode === 'annotate') {
+            // Prevent browser default focus behavior — without this, the browser
+            // steals focus from the annotation input on the subsequent click event,
+            // triggering onBlur which removes the empty-label annotation instantly.
+            e.preventDefault();
+            e.stopPropagation();
+
             // Add annotation at clicked position
             const container = imageContainerRef.current;
             if (!container) return;
@@ -287,14 +293,16 @@ const FloorPlanViewerModal: React.FC<FloorPlanViewerModalProps> = ({ imageUrl, o
         setAnnotations(prev => prev.map(a => a.id === id ? { ...a, label } : a));
     }, []);
 
-    const handleAnnotationLabelSubmit = useCallback((id: string) => {
-        setAnnotations(prev => {
-            const ann = prev.find(a => a.id === id);
-            if (ann && !ann.label.trim()) {
-                return prev.filter(a => a.id !== id);
-            }
-            return prev;
-        });
+    const handleAnnotationLabelSubmit = useCallback((id: string, removeIfEmpty = true) => {
+        if (removeIfEmpty) {
+            setAnnotations(prev => {
+                const ann = prev.find(a => a.id === id);
+                if (ann && !ann.label.trim()) {
+                    return prev.filter(a => a.id !== id);
+                }
+                return prev;
+            });
+        }
         setEditingAnnotation(null);
     }, []);
 
@@ -595,54 +603,57 @@ const FloorPlanViewerModal: React.FC<FloorPlanViewerModalProps> = ({ imageUrl, o
                                     pointerEvents: 'auto',
                                 }}
                             >
-                                {editingAnnotation === ann.id ? (
-                                    <div className="flex items-center gap-1" style={{ transform: 'translateY(-100%)' }}>
-                                        <input
-                                            ref={annotationInputRef}
-                                            type="text"
-                                            value={ann.label}
-                                            onChange={(e) => handleAnnotationLabelChange(ann.id, e.target.value)}
-                                            onKeyDown={(e) => {
-                                                if (e.key === 'Enter') handleAnnotationLabelSubmit(ann.id);
-                                                if (e.key === 'Escape') { removeAnnotation(ann.id); }
-                                            }}
-                                            onBlur={() => handleAnnotationLabelSubmit(ann.id)}
-                                            placeholder="Room name..."
-                                            className="px-2 py-1 text-xs bg-white text-neutral-800 rounded-md border-2 border-amber-400 outline-none shadow-lg min-w-[100px]"
-                                            autoFocus
-                                        />
+                                {/* Pin - always visible */}
+                                <div className="group relative">
+                                    <div className={`w-5 h-5 bg-amber-500 rounded-full border-2 border-white shadow-lg flex items-center justify-center cursor-pointer hover:scale-110 transition-transform ${editingAnnotation === ann.id ? 'ring-2 ring-amber-300 ring-offset-1 ring-offset-transparent' : ''}`}
+                                        onClick={(e) => { e.stopPropagation(); setEditingAnnotation(ann.id); }}
+                                    >
+                                        <div className="w-1.5 h-1.5 bg-white rounded-full" />
                                     </div>
-                                ) : (
-                                    <div className="group relative">
-                                        {/* Pin */}
-                                        <div className="w-5 h-5 bg-amber-500 rounded-full border-2 border-white shadow-lg flex items-center justify-center cursor-pointer hover:scale-110 transition-transform"
+
+                                    {/* Editing input */}
+                                    {editingAnnotation === ann.id && (
+                                        <div className="absolute left-1/2 -translate-x-1/2 bottom-full mb-2 whitespace-nowrap z-10">
+                                            <input
+                                                ref={annotationInputRef}
+                                                type="text"
+                                                value={ann.label}
+                                                onChange={(e) => handleAnnotationLabelChange(ann.id, e.target.value)}
+                                                onKeyDown={(e) => {
+                                                    if (e.key === 'Enter') handleAnnotationLabelSubmit(ann.id, true);
+                                                    if (e.key === 'Escape') { removeAnnotation(ann.id); }
+                                                }}
+                                                onBlur={() => handleAnnotationLabelSubmit(ann.id, false)}
+                                                placeholder="Room name..."
+                                                className="px-2 py-1 text-xs bg-white text-neutral-800 rounded-md border-2 border-amber-400 outline-none shadow-lg min-w-[100px]"
+                                                autoFocus
+                                            />
+                                        </div>
+                                    )}
+
+                                    {/* Label tooltip */}
+                                    {editingAnnotation !== ann.id && ann.label && (
+                                        <div
+                                            className="absolute left-1/2 -translate-x-1/2 bottom-full mb-1 whitespace-nowrap"
                                             onClick={(e) => { e.stopPropagation(); setEditingAnnotation(ann.id); }}
                                         >
-                                            <div className="w-1.5 h-1.5 bg-white rounded-full" />
-                                        </div>
-                                        {/* Label */}
-                                        {ann.label && (
-                                            <div
-                                                className="absolute left-1/2 -translate-x-1/2 bottom-full mb-1 whitespace-nowrap"
-                                                onClick={(e) => { e.stopPropagation(); setEditingAnnotation(ann.id); }}
-                                            >
-                                                <div className="relative px-2.5 py-1 bg-amber-500 text-white text-xs font-semibold rounded-md shadow-lg cursor-pointer hover:bg-amber-600 transition-colors">
-                                                    {ann.label}
-                                                    {/* Triangle pointer */}
-                                                    <div className="absolute left-1/2 -translate-x-1/2 top-full w-0 h-0 border-l-4 border-r-4 border-t-4 border-l-transparent border-r-transparent border-t-amber-500" />
-                                                </div>
+                                            <div className="relative px-2.5 py-1 bg-amber-500 text-white text-xs font-semibold rounded-md shadow-lg cursor-pointer hover:bg-amber-600 transition-colors">
+                                                {ann.label}
+                                                {/* Triangle pointer */}
+                                                <div className="absolute left-1/2 -translate-x-1/2 top-full w-0 h-0 border-l-4 border-r-4 border-t-4 border-l-transparent border-r-transparent border-t-amber-500" />
                                             </div>
-                                        )}
-                                        {/* Remove button */}
-                                        <button
-                                            onClick={(e) => { e.stopPropagation(); removeAnnotation(ann.id); }}
-                                            className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 text-white rounded-full text-[10px] leading-none flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity shadow-sm"
-                                            aria-label="Remove label"
-                                        >
-                                            &times;
-                                        </button>
-                                    </div>
-                                )}
+                                        </div>
+                                    )}
+
+                                    {/* Remove button */}
+                                    <button
+                                        onClick={(e) => { e.stopPropagation(); removeAnnotation(ann.id); }}
+                                        className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 text-white rounded-full text-[10px] leading-none flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity shadow-sm"
+                                        aria-label="Remove label"
+                                    >
+                                        &times;
+                                    </button>
+                                </div>
                             </div>
                         ))}
                     </div>
