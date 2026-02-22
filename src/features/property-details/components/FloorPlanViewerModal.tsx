@@ -531,19 +531,15 @@ const FloorPlanViewerModal: React.FC<FloorPlanViewerModalProps> = ({ imageUrl, o
                         willChange: 'transform',
                     }}
                 >
-                    {/* Floor plan image - perspective wrapper */}
-                    <div style={{ perspective: '1200px' }}>
-                      <div
+                    <div
                         className="relative"
                         style={{
                             width: imageDimensions.width || 'auto',
                             height: imageDimensions.height || 'auto',
-                            transform: 'rotateX(12deg)',
-                            transformStyle: 'preserve-3d',
                             boxShadow: '0 25px 60px -10px rgba(0, 0, 0, 0.5), 0 10px 20px -5px rgba(0, 0, 0, 0.3)',
                             borderRadius: '4px',
                         }}
-                      >
+                    >
                         <img
                             ref={imageRef}
                             src={imageUrl}
@@ -625,7 +621,6 @@ const FloorPlanViewerModal: React.FC<FloorPlanViewerModalProps> = ({ imageUrl, o
                             </div>
                         ))}
                     </div>
-                  </div>
                 </div>
             </div>
 
