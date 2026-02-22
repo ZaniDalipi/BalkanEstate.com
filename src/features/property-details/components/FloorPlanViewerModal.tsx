@@ -132,7 +132,6 @@ const FloorPlanViewerModal: React.FC<FloorPlanViewerModalProps> = ({ imageUrl, o
                 const newId = `ann-${Date.now()}`;
                 setAnnotations(prev => [...prev, { id: newId, x: imgX, y: imgY, label: '' }]);
                 setEditingAnnotation(newId);
-                setTimeout(() => annotationInputRef.current?.focus(), 50);
             }
             return;
         }
@@ -178,6 +177,23 @@ const FloorPlanViewerModal: React.FC<FloorPlanViewerModalProps> = ({ imageUrl, o
         e.preventDefault();
 
         if (e.touches.length === 1) {
+            // In annotate mode, single tap creates an annotation
+            if (mode === 'annotate') {
+                const container = imageContainerRef.current;
+                if (!container) return;
+                const rect = container.getBoundingClientRect();
+                const touch = e.touches[0];
+                const imgX = ((touch.clientX - rect.left - transform.x) / transform.scale / imageDimensions.width) * 100;
+                const imgY = ((touch.clientY - rect.top - transform.y) / transform.scale / imageDimensions.height) * 100;
+
+                if (imgX >= 0 && imgX <= 100 && imgY >= 0 && imgY <= 100) {
+                    const newId = `ann-${Date.now()}`;
+                    setAnnotations(prev => [...prev, { id: newId, x: imgX, y: imgY, label: '' }]);
+                    setEditingAnnotation(newId);
+                }
+                return;
+            }
+
             // Double-tap detection
             const now = Date.now();
             if (now - lastTapRef.current < 300) {
@@ -208,7 +224,7 @@ const FloorPlanViewerModal: React.FC<FloorPlanViewerModalProps> = ({ imageUrl, o
             setTouchStartScale(transform.scale);
             setTouchStartCenter(getTouchCenter(e.touches));
         }
-    }, [transform]);
+    }, [mode, transform, imageDimensions]);
 
     const handleTouchMove = useCallback((e: React.TouchEvent) => {
         e.preventDefault();
@@ -281,6 +297,15 @@ const FloorPlanViewerModal: React.FC<FloorPlanViewerModalProps> = ({ imageUrl, o
         });
         setEditingAnnotation(null);
     }, []);
+
+    // Focus annotation input when editing starts
+    useEffect(() => {
+        if (editingAnnotation) {
+            requestAnimationFrame(() => {
+                annotationInputRef.current?.focus();
+            });
+        }
+    }, [editingAnnotation]);
 
     const removeAnnotation = useCallback((id: string) => {
         setAnnotations(prev => prev.filter(a => a.id !== id));
