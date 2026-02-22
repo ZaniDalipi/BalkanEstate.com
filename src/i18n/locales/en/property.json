@@ -91,6 +91,7 @@
     "specialFeatures": "Special Features",
     "notListed": "Not listed",
     "viewFloorPlan": "View Interactive Floor Plan",
+    "floorPlanInteractiveHint": "Interactive viewer with zoom, pan & labels",
     "soldMessage": "This property has been sold and is no longer available.",
     "amenitiesFeatures": "Amenities & Features",
     "propertyAmenities": "Property Amenities",
