@@ -832,7 +832,7 @@ async function generateEnterpriseAgentCoupons(
       promotionCoupons,
       agentCoupons: enterpriseProduct?.agentCoupons || 5,
       teamMembersLimit: enterpriseProduct?.teamMembersLimit || 5,
-      listingsLimit: enterpriseProduct?.listingsLimit || 500,
+      listingsLimit: enterpriseProduct?.listingsLimit || 750,
     });
     // Sent Enterprise welcome email with coupon breakdown
   } catch (emailError) {

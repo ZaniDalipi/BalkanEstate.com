@@ -25,7 +25,7 @@ import {
 export const LISTING_LIMITS: Record<SubscriptionTier, number> = {
   free: 3,
   pro: 250, // Pro yearly gets 250 listings/year (pro_monthly handled separately at 20/month)
-  agency_owner: 500, // Enterprise: 500 listings
+  agency_owner: 750, // Enterprise: 750 listings
   agency_agent: 25,
   buyer: 3,
 };
@@ -37,13 +37,13 @@ export const PLAN_LISTING_LIMITS: Record<SubscriptionPlan, number> = {
   free: 3,
   pro_monthly: 20, // 20 listings per month
   pro_yearly: 250, // 250 listings per year
-  enterprise_yearly: 500, // 500 listings for enterprise
+  enterprise_yearly: 750, // 750 listings for enterprise
 };
 
 /**
  * Agency pool listing limit (shared among all agents)
  */
-export const AGENCY_POOL_LISTINGS = 500;
+export const AGENCY_POOL_LISTINGS = 750;
 
 /**
  * Promotion coupon configurations by plan
@@ -262,7 +262,7 @@ export function getDefaultAgencyOwnerSubscription(expiresAt: Date): UserSubscrip
     tier: 'agency_owner',
     status: 'active',
     plan: 'enterprise_yearly',
-    listingsLimit: PLAN_LISTING_LIMITS.enterprise_yearly, // 500 listings for enterprise
+    listingsLimit: PLAN_LISTING_LIMITS.enterprise_yearly, // 750 listings for enterprise
     activeListingsCount: 0,
     privateSellerCount: 0,
     agentCount: 0,
@@ -656,7 +656,7 @@ export function getUpgradeOptions(
       price: SUBSCRIPTION_PRICING.enterprise_yearly,
       benefits: [
         'Create and manage your agency',
-        '500 listings for your agency',
+        '750 listings for your agency',
         '5 team members included',
         '5 promotion coupons per month (2 premier + 2 highlighted + 1 featured)',
         'Unlimited insights for all agents',

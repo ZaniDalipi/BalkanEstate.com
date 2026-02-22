@@ -144,12 +144,12 @@ const LISTING_LIMITS: Record<string, number> = {
   free: 3,
   seller_pro_monthly: 20,  // 20 listings per month
   seller_pro_yearly: 250,  // 250 listings per year
-  seller_enterprise_yearly: 500, // 500 listings for enterprise
+  seller_enterprise_yearly: 750, // 750 listings for enterprise
   // New tiers (from new monetization system)
   free_tier: 3,
   pro_monthly: 20,  // 20 listings per month
   pro_yearly: 250,  // 250 listings per year
-  agency_yearly: 500,  // 500 listings for enterprise
+  agency_yearly: 750,  // 750 listings for enterprise
   buyer_monthly: 0,  // Buyers don't create listings
   // Agency agent tier (joined via coupon)
   agency_agent_yearly: 25,  // 25 listings per year for agency agents (fallback; real value comes from DB)
@@ -1771,7 +1771,7 @@ const SubscriptionManagement: React.FC<SubscriptionManagementProps> = ({ userId 
               // Enhanced features for Enterprise plan
               const isEnterprise = key.includes('enterprise') || key.includes('agency_yearly');
               const displayFeatures = isEnterprise ? [
-                t('management.enterpriseFeatures.listings500', '500 Active Listings'),
+                t('management.enterpriseFeatures.listings750', '750 Active Listings'),
                 t('management.enterpriseFeatures.createAgency', 'Create Your Own Agency'),
                 t('management.enterpriseFeatures.agentCoupons5', '5 Agent Invitation Coupons'),
                 t('management.enterpriseFeatures.unlimitedSearches', 'Unlimited Saved Searches'),

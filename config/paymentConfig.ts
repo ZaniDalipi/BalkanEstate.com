@@ -397,7 +397,7 @@ export const PAYMENT_PLANS: Record<string, PaymentPlan> = {
   enterprise: {
     id: 'enterprise',
     name: 'Enterprise',
-    price: 1000, // €1000/year - 500 listings, 5 team members
+    price: 1000, // €1000/year - 750 listings, 5 team members
     currency: 'EUR',
     interval: 'year',
     externalPriceId: undefined,
