@@ -477,6 +477,7 @@ const PropertyDetailsPage: React.FC<{ property: Property }> = ({ property: cache
       {isFloorPlanOpen && property.floorplanUrl && (
         <FloorPlanViewerModal
           imageUrl={property.floorplanUrl}
+          propertyId={property.id}
           onClose={() => setIsFloorPlanOpen(false)}
         />
       )}

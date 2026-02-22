@@ -3,21 +3,87 @@ import { XMarkIcon, MagnifyingGlassPlusIcon, MagnifyingGlassMinusIcon, ArrowPath
 
 interface FloorPlanViewerModalProps {
     imageUrl: string;
+    propertyId?: string;
     onClose: () => void;
 }
+
+type RoomType = 'bedroom' | 'bathroom' | 'kitchen' | 'living' | 'dining' | 'office' | 'garage' | 'storage' | 'balcony' | 'hallway' | 'other';
+
+const ROOM_TYPE_CONFIG: Record<RoomType, { label: string; color: string; bg: string; border: string; ring: string }> = {
+    bedroom: { label: 'Bedroom', color: 'bg-blue-500', bg: 'bg-blue-500', border: 'border-t-blue-500', ring: 'ring-blue-300' },
+    bathroom: { label: 'Bathroom', color: 'bg-cyan-500', bg: 'bg-cyan-500', border: 'border-t-cyan-500', ring: 'ring-cyan-300' },
+    kitchen: { label: 'Kitchen', color: 'bg-orange-500', bg: 'bg-orange-500', border: 'border-t-orange-500', ring: 'ring-orange-300' },
+    living: { label: 'Living Room', color: 'bg-emerald-500', bg: 'bg-emerald-500', border: 'border-t-emerald-500', ring: 'ring-emerald-300' },
+    dining: { label: 'Dining Room', color: 'bg-violet-500', bg: 'bg-violet-500', border: 'border-t-violet-500', ring: 'ring-violet-300' },
+    office: { label: 'Office', color: 'bg-indigo-500', bg: 'bg-indigo-500', border: 'border-t-indigo-500', ring: 'ring-indigo-300' },
+    garage: { label: 'Garage', color: 'bg-neutral-500', bg: 'bg-neutral-500', border: 'border-t-neutral-500', ring: 'ring-neutral-300' },
+    storage: { label: 'Storage', color: 'bg-stone-500', bg: 'bg-stone-500', border: 'border-t-stone-500', ring: 'ring-stone-300' },
+    balcony: { label: 'Balcony', color: 'bg-teal-500', bg: 'bg-teal-500', border: 'border-t-teal-500', ring: 'ring-teal-300' },
+    hallway: { label: 'Hallway', color: 'bg-rose-400', bg: 'bg-rose-400', border: 'border-t-rose-400', ring: 'ring-rose-300' },
+    other: { label: 'Other', color: 'bg-amber-500', bg: 'bg-amber-500', border: 'border-t-amber-500', ring: 'ring-amber-300' },
+};
+
+const LABEL_MAX_LENGTH = 40;
+const NOTES_MAX_LENGTH = 200;
+const AREA_MAX = 99999;
 
 interface Annotation {
     id: string;
     x: number; // percentage of image width
     y: number; // percentage of image height
     label: string;
+    roomType: RoomType;
+    area: string; // stored as string to avoid NaN issues, validated on save
+    notes: string;
 }
 
 type InteractionMode = 'pan' | 'annotate';
 
 const ZOOM_LEVELS = [0.25, 0.5, 0.75, 1, 1.25, 1.5, 2, 3, 5, 8];
 
-const FloorPlanViewerModal: React.FC<FloorPlanViewerModalProps> = ({ imageUrl, onClose }) => {
+const getStorageKey = (propertyId?: string) =>
+    propertyId ? `floorplan-annotations-${propertyId}` : null;
+
+const loadAnnotations = (propertyId?: string): Annotation[] => {
+    const key = getStorageKey(propertyId);
+    if (!key) return [];
+    try {
+        const raw = localStorage.getItem(key);
+        if (!raw) return [];
+        const parsed = JSON.parse(raw);
+        if (!Array.isArray(parsed)) return [];
+        // Validate each annotation shape
+        return parsed.filter((a: unknown): a is Annotation => {
+            if (!a || typeof a !== 'object') return false;
+            const obj = a as Record<string, unknown>;
+            return (
+                typeof obj.id === 'string' &&
+                typeof obj.x === 'number' && obj.x >= 0 && obj.x <= 100 &&
+                typeof obj.y === 'number' && obj.y >= 0 && obj.y <= 100 &&
+                typeof obj.label === 'string' && obj.label.length <= LABEL_MAX_LENGTH &&
+                typeof obj.roomType === 'string' && obj.roomType in ROOM_TYPE_CONFIG &&
+                typeof obj.area === 'string' &&
+                typeof obj.notes === 'string' && obj.notes.length <= NOTES_MAX_LENGTH
+            );
+        });
+    } catch {
+        return [];
+    }
+};
+
+const saveAnnotations = (propertyId: string | undefined, annotations: Annotation[]) => {
+    const key = getStorageKey(propertyId);
+    if (!key) return;
+    try {
+        // Only save annotations that have labels (completed)
+        const toSave = annotations.filter(a => a.label.trim());
+        localStorage.setItem(key, JSON.stringify(toSave));
+    } catch {
+        // localStorage full or unavailable — silently fail
+    }
+};
+
+const FloorPlanViewerModal: React.FC<FloorPlanViewerModalProps> = ({ imageUrl, propertyId, onClose }) => {
     // Transform state
     const [transform, setTransform] = useState({ scale: 1, x: 0, y: 0 });
     const [isPanning, setIsPanning] = useState(false);
@@ -30,8 +96,9 @@ const FloorPlanViewerModal: React.FC<FloorPlanViewerModalProps> = ({ imageUrl, o
 
     // Interaction mode
     const [mode, setMode] = useState<InteractionMode>('pan');
-    const [annotations, setAnnotations] = useState<Annotation[]>([]);
+    const [annotations, setAnnotations] = useState<Annotation[]>(() => loadAnnotations(propertyId));
     const [editingAnnotation, setEditingAnnotation] = useState<string | null>(null);
+    const [detailAnnotation, setDetailAnnotation] = useState<string | null>(null);
 
     // Touch state
     const [touchStartDistance, setTouchStartDistance] = useState<number | null>(null);
@@ -43,6 +110,11 @@ const FloorPlanViewerModal: React.FC<FloorPlanViewerModalProps> = ({ imageUrl, o
     const imageContainerRef = useRef<HTMLDivElement>(null);
     const imageRef = useRef<HTMLImageElement>(null);
     const annotationInputRef = useRef<HTMLInputElement>(null);
+
+    // Persist annotations to localStorage whenever they change
+    useEffect(() => {
+        saveAnnotations(propertyId, annotations);
+    }, [annotations, propertyId]);
 
     // Fit image to container on load
     const fitToScreen = useCallback(() => {
@@ -136,13 +208,15 @@ const FloorPlanViewerModal: React.FC<FloorPlanViewerModalProps> = ({ imageUrl, o
 
             if (imgX >= 0 && imgX <= 100 && imgY >= 0 && imgY <= 100) {
                 const newId = `ann-${Date.now()}`;
-                setAnnotations(prev => [...prev, { id: newId, x: imgX, y: imgY, label: '' }]);
+                setAnnotations(prev => [...prev, { id: newId, x: imgX, y: imgY, label: '', roomType: 'other', area: '', notes: '' }]);
                 setEditingAnnotation(newId);
+                setDetailAnnotation(null);
             }
             return;
         }
 
         e.preventDefault();
+        setDetailAnnotation(null);
         setIsPanning(true);
         setPanStart({ x: e.clientX - transform.x, y: e.clientY - transform.y });
     }, [mode, transform, imageDimensions]);
@@ -194,8 +268,9 @@ const FloorPlanViewerModal: React.FC<FloorPlanViewerModalProps> = ({ imageUrl, o
 
                 if (imgX >= 0 && imgX <= 100 && imgY >= 0 && imgY <= 100) {
                     const newId = `ann-${Date.now()}`;
-                    setAnnotations(prev => [...prev, { id: newId, x: imgX, y: imgY, label: '' }]);
+                    setAnnotations(prev => [...prev, { id: newId, x: imgX, y: imgY, label: '', roomType: 'other', area: '', notes: '' }]);
                     setEditingAnnotation(newId);
+                    setDetailAnnotation(null);
                 }
                 return;
             }
@@ -290,6 +365,7 @@ const FloorPlanViewerModal: React.FC<FloorPlanViewerModalProps> = ({ imageUrl, o
 
     // Annotation handlers
     const handleAnnotationLabelChange = useCallback((id: string, label: string) => {
+        if (label.length > LABEL_MAX_LENGTH) return;
         setAnnotations(prev => prev.map(a => a.id === id ? { ...a, label } : a));
     }, []);
 
@@ -318,14 +394,44 @@ const FloorPlanViewerModal: React.FC<FloorPlanViewerModalProps> = ({ imageUrl, o
     const removeAnnotation = useCallback((id: string) => {
         setAnnotations(prev => prev.filter(a => a.id !== id));
         if (editingAnnotation === id) setEditingAnnotation(null);
-    }, [editingAnnotation]);
+        if (detailAnnotation === id) setDetailAnnotation(null);
+    }, [editingAnnotation, detailAnnotation]);
+
+    // Room detail handlers
+    const handleRoomTypeChange = useCallback((id: string, roomType: RoomType) => {
+        setAnnotations(prev => prev.map(a => a.id === id ? { ...a, roomType } : a));
+    }, []);
+
+    const handleAreaChange = useCallback((id: string, value: string) => {
+        // Only allow digits and a single decimal point
+        const sanitized = value.replace(/[^0-9.]/g, '');
+        // Prevent multiple decimal points
+        const parts = sanitized.split('.');
+        const cleaned = parts.length > 2 ? parts[0] + '.' + parts.slice(1).join('') : sanitized;
+        // Validate range
+        const num = parseFloat(cleaned);
+        if (cleaned !== '' && (num < 0 || num > AREA_MAX)) return;
+        setAnnotations(prev => prev.map(a => a.id === id ? { ...a, area: cleaned } : a));
+    }, []);
+
+    const handleNotesChange = useCallback((id: string, notes: string) => {
+        if (notes.length > NOTES_MAX_LENGTH) return;
+        setAnnotations(prev => prev.map(a => a.id === id ? { ...a, notes } : a));
+    }, []);
+
+    const toggleDetailPanel = useCallback((id: string) => {
+        setDetailAnnotation(prev => prev === id ? null : id);
+        setEditingAnnotation(null);
+    }, []);
 
     // Keyboard handling
     useEffect(() => {
         const handleKeyDown = (e: KeyboardEvent) => {
             switch (e.key) {
                 case 'Escape':
-                    if (editingAnnotation) {
+                    if (detailAnnotation) {
+                        setDetailAnnotation(null);
+                    } else if (editingAnnotation) {
                         handleAnnotationLabelSubmit(editingAnnotation);
                     } else if (mode === 'annotate') {
                         setMode('pan');
@@ -347,7 +453,7 @@ const FloorPlanViewerModal: React.FC<FloorPlanViewerModalProps> = ({ imageUrl, o
         };
         window.addEventListener('keydown', handleKeyDown);
         return () => window.removeEventListener('keydown', handleKeyDown);
-    }, [onClose, zoom, resetTransform, mode, editingAnnotation, handleAnnotationLabelSubmit]);
+    }, [onClose, zoom, resetTransform, mode, editingAnnotation, detailAnnotation, handleAnnotationLabelSubmit]);
 
     // Prevent body scroll when modal is open
     useEffect(() => {
@@ -425,7 +531,7 @@ const FloorPlanViewerModal: React.FC<FloorPlanViewerModalProps> = ({ imageUrl, o
                     {/* Annotation count badge */}
                     {annotations.length > 0 && (
                         <button
-                            onClick={() => setAnnotations([])}
+                            onClick={() => { setAnnotations([]); setEditingAnnotation(null); setDetailAnnotation(null); }}
                             className="flex items-center gap-1 px-2.5 py-1.5 bg-red-500/20 text-red-300 hover:bg-red-500/30 rounded-lg backdrop-blur-md text-xs font-medium transition-colors border border-red-500/20"
                             title="Clear all labels"
                         >
@@ -589,7 +695,12 @@ const FloorPlanViewerModal: React.FC<FloorPlanViewerModalProps> = ({ imageUrl, o
                         />
 
                         {/* Annotations layer */}
-                        {annotations.map(ann => (
+                        {annotations.map(ann => {
+                            const cfg = ROOM_TYPE_CONFIG[ann.roomType] || ROOM_TYPE_CONFIG.other;
+                            const isEditing = editingAnnotation === ann.id;
+                            const isDetailOpen = detailAnnotation === ann.id;
+
+                            return (
                             <div
                                 key={ann.id}
                                 className="absolute"
@@ -601,18 +712,26 @@ const FloorPlanViewerModal: React.FC<FloorPlanViewerModalProps> = ({ imageUrl, o
                                     transform: `translate(-50%, -50%) scale(${1 / transform.scale})`,
                                     transformOrigin: 'center',
                                     pointerEvents: 'auto',
+                                    zIndex: isEditing || isDetailOpen ? 20 : 10,
                                 }}
                             >
-                                {/* Pin - always visible */}
+                                {/* Pin - color-coded by room type */}
                                 <div className="group relative">
-                                    <div className={`w-5 h-5 bg-amber-500 rounded-full border-2 border-white shadow-lg flex items-center justify-center cursor-pointer hover:scale-110 transition-transform ${editingAnnotation === ann.id ? 'ring-2 ring-amber-300 ring-offset-1 ring-offset-transparent' : ''}`}
-                                        onClick={(e) => { e.stopPropagation(); setEditingAnnotation(ann.id); }}
+                                    <div className={`w-5 h-5 ${cfg.bg} rounded-full border-2 border-white shadow-lg flex items-center justify-center cursor-pointer hover:scale-110 transition-transform ${isEditing ? `ring-2 ${cfg.ring} ring-offset-1 ring-offset-transparent` : ''}`}
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            if (ann.label.trim()) {
+                                                toggleDetailPanel(ann.id);
+                                            } else {
+                                                setEditingAnnotation(ann.id);
+                                            }
+                                        }}
                                     >
                                         <div className="w-1.5 h-1.5 bg-white rounded-full" />
                                     </div>
 
-                                    {/* Editing input */}
-                                    {editingAnnotation === ann.id && (
+                                    {/* Editing input — shown for new annotations */}
+                                    {isEditing && (
                                         <div className="absolute left-1/2 -translate-x-1/2 bottom-full mb-2 whitespace-nowrap z-10">
                                             <input
                                                 ref={annotationInputRef}
@@ -620,32 +739,133 @@ const FloorPlanViewerModal: React.FC<FloorPlanViewerModalProps> = ({ imageUrl, o
                                                 value={ann.label}
                                                 onChange={(e) => handleAnnotationLabelChange(ann.id, e.target.value)}
                                                 onKeyDown={(e) => {
-                                                    if (e.key === 'Enter') handleAnnotationLabelSubmit(ann.id, true);
+                                                    if (e.key === 'Enter') {
+                                                        handleAnnotationLabelSubmit(ann.id, true);
+                                                        if (ann.label.trim()) setDetailAnnotation(ann.id);
+                                                    }
                                                     if (e.key === 'Escape') { removeAnnotation(ann.id); }
                                                 }}
-                                                onBlur={() => handleAnnotationLabelSubmit(ann.id, false)}
+                                                onBlur={() => {
+                                                    handleAnnotationLabelSubmit(ann.id, false);
+                                                }}
                                                 placeholder="Room name..."
-                                                className="px-2 py-1 text-xs bg-white text-neutral-800 rounded-md border-2 border-amber-400 outline-none shadow-lg min-w-[100px]"
+                                                maxLength={LABEL_MAX_LENGTH}
+                                                className={`px-2 py-1 text-xs bg-white text-neutral-800 rounded-md border-2 outline-none shadow-lg min-w-[100px]`}
+                                                style={{ borderColor: `var(--pin-color, #f59e0b)` }}
                                                 autoFocus
                                             />
                                         </div>
                                     )}
 
-                                    {/* Label tooltip */}
-                                    {editingAnnotation !== ann.id && ann.label && (
+                                    {/* Label tooltip — color-coded */}
+                                    {!isEditing && ann.label && (
                                         <div
                                             className="absolute left-1/2 -translate-x-1/2 bottom-full mb-1 whitespace-nowrap"
-                                            onClick={(e) => { e.stopPropagation(); setEditingAnnotation(ann.id); }}
+                                            onClick={(e) => { e.stopPropagation(); toggleDetailPanel(ann.id); }}
                                         >
-                                            <div className="relative px-2.5 py-1 bg-amber-500 text-white text-xs font-semibold rounded-md shadow-lg cursor-pointer hover:bg-amber-600 transition-colors">
+                                            <div className={`relative px-2.5 py-1 ${cfg.bg} text-white text-xs font-semibold rounded-md shadow-lg cursor-pointer hover:opacity-90 transition-opacity`}>
                                                 {ann.label}
+                                                {ann.area && <span className="ml-1 opacity-80">({ann.area}m²)</span>}
                                                 {/* Triangle pointer */}
-                                                <div className="absolute left-1/2 -translate-x-1/2 top-full w-0 h-0 border-l-4 border-r-4 border-t-4 border-l-transparent border-r-transparent border-t-amber-500" />
+                                                <div className={`absolute left-1/2 -translate-x-1/2 top-full w-0 h-0 border-l-4 border-r-4 border-t-4 border-l-transparent border-r-transparent ${cfg.border}`} />
                                             </div>
                                         </div>
                                     )}
 
-                                    {/* Remove button */}
+                                    {/* Detail popover */}
+                                    {isDetailOpen && ann.label && (
+                                        <div
+                                            className="absolute left-1/2 -translate-x-1/2 top-full mt-3 z-30"
+                                            onClick={(e) => e.stopPropagation()}
+                                        >
+                                            <div className="bg-white rounded-xl shadow-2xl border border-neutral-200 w-56 overflow-hidden">
+                                                {/* Header */}
+                                                <div className={`${cfg.bg} px-3 py-2 flex items-center justify-between`}>
+                                                    <span className="text-white text-xs font-bold truncate">{ann.label}</span>
+                                                    <button
+                                                        onClick={(e) => { e.stopPropagation(); setDetailAnnotation(null); }}
+                                                        className="text-white/80 hover:text-white ml-2 flex-shrink-0"
+                                                        aria-label="Close details"
+                                                    >
+                                                        <XMarkIcon className="w-3.5 h-3.5" />
+                                                    </button>
+                                                </div>
+
+                                                <div className="p-3 space-y-2.5">
+                                                    {/* Room type selector */}
+                                                    <div>
+                                                        <label className="block text-[10px] font-semibold text-neutral-500 uppercase tracking-wide mb-1">Room Type</label>
+                                                        <select
+                                                            value={ann.roomType}
+                                                            onChange={(e) => handleRoomTypeChange(ann.id, e.target.value as RoomType)}
+                                                            className="w-full text-xs px-2 py-1.5 border border-neutral-200 rounded-md bg-white focus:outline-none focus:ring-1 focus:ring-neutral-300"
+                                                        >
+                                                            {(Object.keys(ROOM_TYPE_CONFIG) as RoomType[]).map(type => (
+                                                                <option key={type} value={type}>
+                                                                    {ROOM_TYPE_CONFIG[type].label}
+                                                                </option>
+                                                            ))}
+                                                        </select>
+                                                    </div>
+
+                                                    {/* Area input */}
+                                                    <div>
+                                                        <label className="block text-[10px] font-semibold text-neutral-500 uppercase tracking-wide mb-1">Area (m²)</label>
+                                                        <input
+                                                            type="text"
+                                                            inputMode="decimal"
+                                                            value={ann.area}
+                                                            onChange={(e) => handleAreaChange(ann.id, e.target.value)}
+                                                            placeholder="e.g. 25"
+                                                            className="w-full text-xs px-2 py-1.5 border border-neutral-200 rounded-md focus:outline-none focus:ring-1 focus:ring-neutral-300"
+                                                        />
+                                                    </div>
+
+                                                    {/* Notes */}
+                                                    <div>
+                                                        <label className="block text-[10px] font-semibold text-neutral-500 uppercase tracking-wide mb-1">
+                                                            Notes
+                                                            <span className="text-neutral-400 ml-1 normal-case">({ann.notes.length}/{NOTES_MAX_LENGTH})</span>
+                                                        </label>
+                                                        <textarea
+                                                            value={ann.notes}
+                                                            onChange={(e) => handleNotesChange(ann.id, e.target.value)}
+                                                            placeholder="Window facing south, built-in closet..."
+                                                            rows={2}
+                                                            maxLength={NOTES_MAX_LENGTH}
+                                                            className="w-full text-xs px-2 py-1.5 border border-neutral-200 rounded-md resize-none focus:outline-none focus:ring-1 focus:ring-neutral-300"
+                                                        />
+                                                    </div>
+
+                                                    {/* Edit label / Delete */}
+                                                    <div className="flex items-center gap-2 pt-1 border-t border-neutral-100">
+                                                        <button
+                                                            onClick={(e) => {
+                                                                e.stopPropagation();
+                                                                setDetailAnnotation(null);
+                                                                setEditingAnnotation(ann.id);
+                                                            }}
+                                                            className="flex-1 text-[11px] text-neutral-600 hover:text-neutral-800 font-medium py-1 rounded hover:bg-neutral-50 transition-colors"
+                                                        >
+                                                            Rename
+                                                        </button>
+                                                        <div className="w-px h-4 bg-neutral-200" />
+                                                        <button
+                                                            onClick={(e) => { e.stopPropagation(); removeAnnotation(ann.id); }}
+                                                            className="flex-1 text-[11px] text-red-500 hover:text-red-700 font-medium py-1 rounded hover:bg-red-50 transition-colors"
+                                                        >
+                                                            Delete
+                                                        </button>
+                                                    </div>
+                                                </div>
+
+                                                {/* Arrow pointing up */}
+                                                <div className="absolute left-1/2 -translate-x-1/2 -top-1.5 w-3 h-3 bg-white border-l border-t border-neutral-200 rotate-45" />
+                                            </div>
+                                        </div>
+                                    )}
+
+                                    {/* Remove button on hover */}
                                     <button
                                         onClick={(e) => { e.stopPropagation(); removeAnnotation(ann.id); }}
                                         className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 text-white rounded-full text-[10px] leading-none flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity shadow-sm"
@@ -655,7 +875,8 @@ const FloorPlanViewerModal: React.FC<FloorPlanViewerModalProps> = ({ imageUrl, o
                                     </button>
                                 </div>
                             </div>
-                        ))}
+                            );
+                        })}
                     </div>
                 </div>
             </div>
@@ -690,6 +911,37 @@ const FloorPlanViewerModal: React.FC<FloorPlanViewerModalProps> = ({ imageUrl, o
                     <span className="text-white/50 text-xs font-mono min-w-[3rem] text-center">{zoomPercent}%</span>
                 </div>
             </div>
+
+            {/* Annotation list panel — visible when annotations exist */}
+            {annotations.filter(a => a.label.trim()).length > 0 && (
+                <div className="absolute top-16 sm:top-20 left-3 z-30 pointer-events-auto hidden sm:block">
+                    <div className="bg-neutral-900/80 backdrop-blur-md rounded-xl border border-white/10 w-48 max-h-[50vh] overflow-y-auto">
+                        <div className="px-3 py-2 border-b border-white/10">
+                            <span className="text-white/70 text-[10px] font-semibold uppercase tracking-wider">Room Labels</span>
+                        </div>
+                        <div className="p-1.5 space-y-0.5">
+                            {annotations.filter(a => a.label.trim()).map(ann => {
+                                const c = ROOM_TYPE_CONFIG[ann.roomType] || ROOM_TYPE_CONFIG.other;
+                                return (
+                                    <button
+                                        key={ann.id}
+                                        onClick={() => toggleDetailPanel(ann.id)}
+                                        className={`w-full flex items-center gap-2 px-2 py-1.5 rounded-lg text-left transition-colors ${detailAnnotation === ann.id ? 'bg-white/15' : 'hover:bg-white/10'}`}
+                                    >
+                                        <div className={`w-2.5 h-2.5 rounded-full ${c.bg} flex-shrink-0`} />
+                                        <div className="min-w-0 flex-1">
+                                            <div className="text-white text-xs font-medium truncate">{ann.label}</div>
+                                            {ann.area && (
+                                                <div className="text-white/50 text-[10px]">{ann.area} m²</div>
+                                            )}
+                                        </div>
+                                    </button>
+                                );
+                            })}
+                        </div>
+                    </div>
+                </div>
+            )}
 
             {/* Keyboard shortcuts hint - hidden on mobile */}
             <div className="absolute bottom-4 right-4 z-20 hidden lg:block pointer-events-none">
