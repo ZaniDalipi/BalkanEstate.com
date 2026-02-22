@@ -104,6 +104,8 @@ export interface User {
   avatarUrl?: string;
   phone: string;
   role: UserRole;
+  provider?: 'local' | 'google' | 'facebook' | 'apple';
+  hasPassword?: boolean;
   city?: string;
   country?: string;
   address?: string;

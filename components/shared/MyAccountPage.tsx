@@ -443,7 +443,7 @@ const ChangePasswordSection: React.FC = () => {
     const [success, setSuccess] = useState<string | null>(null);
     const [isLoading, setIsLoading] = useState(false);
 
-    const isLocalAuth = state.user?.provider === 'local';
+    const hasPassword = state.user?.hasPassword === true;
 
     const validatePasswordStrength = (pw: string): string | null => {
         if (pw.length < 8) return t('security.passwordMinLength', 'Password must be at least 8 characters');
@@ -516,8 +516,8 @@ const ChangePasswordSection: React.FC = () => {
         );
     };
 
-    // Social login user: show "Set Password" form
-    if (!isLocalAuth) {
+    // User without password: show "Set Password" form
+    if (!hasPassword) {
         return (
             <div className="bg-white/30 backdrop-blur-sm border border-white/40 rounded-2xl p-6">
                 <h3 className="text-lg font-semibold text-neutral-800 mb-2">{t('security.setPassword', 'Set a Password')}</h3>

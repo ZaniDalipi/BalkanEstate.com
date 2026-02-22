@@ -26,6 +26,8 @@ const buildSafeUserResponse = (user: IUser) => ({
   name: user.name,
   phone: user.phone,
   role: user.role,
+  provider: user.provider || 'local',
+  hasPassword: !!user.password,
   avatarUrl: user.avatarUrl ?? null,
   avatarOptions: user.avatarOptions ?? null,
   gender: user.gender,
@@ -882,6 +884,8 @@ export const getMe = async (req: Request, res: Response): Promise<void> => {
         name: user.name,
         phone: user.phone,
         role: user.role,
+        provider: user.provider || 'local',
+        hasPassword: !!user.password,
         isEmailVerified: user.isEmailVerified,
         availableRoles: user.availableRoles,
         activeRole: user.activeRole,
@@ -1946,10 +1950,10 @@ export const changePassword = async (req: Request, res: Response): Promise<void>
       return;
     }
 
-    // Check if user has a password (local auth only)
-    if (!user.password || user.provider !== 'local') {
+    // Check if user has a password to change
+    if (!user.password) {
       res.status(400).json({
-        message: 'This account uses social login. Password change is not available.'
+        message: 'You don\'t have a password set. Use the set password option first.'
       });
       return;
     }
@@ -2081,8 +2085,8 @@ export const setPassword = async (req: Request, res: Response): Promise<void> =>
       return;
     }
 
-    // Only allow for social login users who don't have a password
-    if (user.provider === 'local' && user.password) {
+    // Only allow setting a password if user doesn't have one yet
+    if (user.password) {
       res.status(400).json({
         message: 'You already have a password. Use change password instead.',
       });
@@ -2108,9 +2112,8 @@ export const setPassword = async (req: Request, res: Response): Promise<void> =>
       return;
     }
 
-    // Set the password and update provider to local so they can also log in with email/password
+    // Set the password (keep original provider — user remains a social account)
     user.password = newPassword;
-    user.provider = 'local';
     await user.save();
 
     res.json({
