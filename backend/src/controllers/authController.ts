@@ -2057,6 +2057,70 @@ export const changePassword = async (req: Request, res: Response): Promise<void>
   }
 };
 
+// @desc    Set password for social login users (who don't have a password yet)
+// @route   POST /api/auth/set-password
+// @access  Private
+export const setPassword = async (req: Request, res: Response): Promise<void> => {
+  try {
+    if (!req.user) {
+      res.status(401).json({ message: 'Not authorized' });
+      return;
+    }
+
+    const { newPassword } = req.body;
+
+    if (!newPassword) {
+      res.status(400).json({ message: 'New password is required' });
+      return;
+    }
+
+    const user = await User.findById((req.user as IUser)._id);
+
+    if (!user) {
+      res.status(404).json({ message: 'User not found' });
+      return;
+    }
+
+    // Only allow for social login users who don't have a password
+    if (user.provider === 'local' && user.password) {
+      res.status(400).json({
+        message: 'You already have a password. Use change password instead.',
+      });
+      return;
+    }
+
+    // Validate new password strength
+    const passwordValidation = validatePassword(newPassword);
+    if (!passwordValidation.isValid) {
+      res.status(400).json({
+        message: 'Password does not meet security requirements',
+        errors: passwordValidation.errors,
+      });
+      return;
+    }
+
+    // Check if password contains user info (email, name)
+    const userInfo = [user.email.split('@')[0], user.name];
+    if (passwordContainsUserInfo(newPassword, userInfo)) {
+      res.status(400).json({
+        message: 'Password should not contain your email or name',
+      });
+      return;
+    }
+
+    // Set the password and update provider to local so they can also log in with email/password
+    user.password = newPassword;
+    user.provider = 'local';
+    await user.save();
+
+    res.json({
+      message: 'Password set successfully. You can now log in with your email and password.',
+    });
+  } catch (error: any) {
+    res.status(500).json({ message: 'Error setting password' });
+  }
+};
+
 // @desc    Delete user account permanently
 // @route   POST /api/auth/delete-account
 // @access  Private

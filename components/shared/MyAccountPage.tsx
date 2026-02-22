@@ -413,9 +413,26 @@ const LoginHistorySection: React.FC = () => {
     );
 };
 
+const PasswordToggleButton: React.FC<{ show: boolean; onToggle: () => void }> = ({ show, onToggle }) => (
+    <button type="button" onClick={onToggle} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">
+        {show ? (
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" />
+            </svg>
+        ) : (
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+            </svg>
+        )}
+    </button>
+);
+
+const passwordInputClasses = "w-full px-4 py-2 pr-10 bg-white/40 backdrop-blur-sm border border-white/50 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/40 focus:bg-white/60 transition-all shadow-sm";
+
 const ChangePasswordSection: React.FC = () => {
     const { t } = useTranslation(['account']);
-    const { state, dispatch } = useAppContext();
+    const { state, dispatch, checkAuthStatus } = useAppContext();
     const [currentPassword, setCurrentPassword] = useState('');
     const [newPassword, setNewPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
@@ -426,31 +443,32 @@ const ChangePasswordSection: React.FC = () => {
     const [success, setSuccess] = useState<string | null>(null);
     const [isLoading, setIsLoading] = useState(false);
 
-    // Check if user is using local auth (not social login)
     const isLocalAuth = state.user?.provider === 'local';
 
-    const handleSubmit = async (e: React.FormEvent) => {
+    const validatePasswordStrength = (pw: string): string | null => {
+        if (pw.length < 8) return t('security.passwordMinLength', 'Password must be at least 8 characters');
+        if (!/[A-Z]/.test(pw)) return t('security.passwordNeedsUppercase', 'Password must contain an uppercase letter');
+        if (!/[a-z]/.test(pw)) return t('security.passwordNeedsLowercase', 'Password must contain a lowercase letter');
+        if (!/\d/.test(pw)) return t('security.passwordNeedsNumber', 'Password must contain a number');
+        if (!/[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(pw)) return t('security.passwordNeedsSpecial', 'Password must contain a special character');
+        return null;
+    };
+
+    const handleChangePassword = async (e: React.FormEvent) => {
         e.preventDefault();
         setError(null);
         setSuccess(null);
 
-        if (newPassword !== confirmPassword) {
-            setError(t('security.passwordsDoNotMatch'));
-            return;
-        }
+        const strengthError = validatePasswordStrength(newPassword);
+        if (strengthError) { setError(strengthError); return; }
+        if (newPassword !== confirmPassword) { setError(t('security.passwordsDoNotMatch')); return; }
 
         setIsLoading(true);
-
         try {
             const { changePassword } = await import('../../services/apiService');
             await changePassword(currentPassword, newPassword);
-
             setSuccess(t('security.passwordChangedSuccess'));
-            setCurrentPassword('');
-            setNewPassword('');
-            setConfirmPassword('');
-
-            // After 2 seconds, log the user out and redirect to login
+            setCurrentPassword(''); setNewPassword(''); setConfirmPassword('');
             setTimeout(() => {
                 dispatch({ type: 'SET_AUTH_STATE', payload: { isAuthenticated: false, user: null } });
                 dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'search' });
@@ -458,163 +476,114 @@ const ChangePasswordSection: React.FC = () => {
             }, 2000);
         } catch (err) {
             setError(err instanceof Error ? err.message : 'Failed to change password');
-        } finally {
-            setIsLoading(false);
-        }
+        } finally { setIsLoading(false); }
     };
 
+    const handleSetPassword = async (e: React.FormEvent) => {
+        e.preventDefault();
+        setError(null);
+        setSuccess(null);
+
+        const strengthError = validatePasswordStrength(newPassword);
+        if (strengthError) { setError(strengthError); return; }
+        if (newPassword !== confirmPassword) { setError(t('security.passwordsDoNotMatch')); return; }
+
+        setIsLoading(true);
+        try {
+            const { setPasswordForSocialUser } = await import('../../services/apiService');
+            await setPasswordForSocialUser(newPassword);
+            setSuccess(t('security.passwordSetSuccess', 'Password set successfully! You can now also log in with your email and password.'));
+            setNewPassword(''); setConfirmPassword('');
+            // Refresh user state to reflect the provider change
+            await checkAuthStatus();
+        } catch (err) {
+            setError(err instanceof Error ? err.message : 'Failed to set password');
+        } finally { setIsLoading(false); }
+    };
+
+    const alertBox = (type: 'error' | 'success', message: string) => {
+        const isErr = type === 'error';
+        return (
+            <div className={`mb-4 p-3 ${isErr ? 'bg-red-50/60 border-red-200/50' : 'bg-green-50/60 border-green-200/50'} backdrop-blur-sm border rounded-xl flex items-start gap-2`}>
+                <svg className={`w-5 h-5 ${isErr ? 'text-red-600' : 'text-green-600'} mt-0.5 flex-shrink-0`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    {isErr
+                        ? <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        : <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                    }
+                </svg>
+                <p className={`${isErr ? 'text-red-800' : 'text-green-800'} text-sm`}>{message}</p>
+            </div>
+        );
+    };
+
+    // Social login user: show "Set Password" form
     if (!isLocalAuth) {
         return (
-            <div className="bg-blue-50/60 backdrop-blur-sm border border-blue-200/50 rounded-2xl p-4">
-                <div className="flex items-start gap-3">
-                    <svg className="w-5 h-5 text-blue-600 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
+            <div className="bg-white/30 backdrop-blur-sm border border-white/40 rounded-2xl p-6">
+                <h3 className="text-lg font-semibold text-neutral-800 mb-2">{t('security.setPassword', 'Set a Password')}</h3>
+                <p className="text-sm text-neutral-500 mb-4">
+                    {t('security.setPasswordDescription', 'You signed in with a social account. Set a password to also be able to log in with your email and password.')}
+                </p>
+
+                {error && alertBox('error', error)}
+                {success && alertBox('success', success)}
+
+                <form onSubmit={handleSetPassword} className="space-y-4">
                     <div>
-                        <h4 className="font-semibold text-blue-800 text-sm">{t('security.socialLoginAccount')}</h4>
-                        <p className="text-sm text-blue-700 mt-1">
-                            {t('security.socialLoginDescription')}
-                        </p>
+                        <label htmlFor="newPasswordSet" className="block text-sm font-medium text-gray-700 mb-1">{t('security.newPassword')}</label>
+                        <div className="relative">
+                            <input type={showNewPassword ? "text" : "password"} id="newPasswordSet" value={newPassword} onChange={(e) => setNewPassword(e.target.value)} className={passwordInputClasses} required disabled={isLoading} />
+                            <PasswordToggleButton show={showNewPassword} onToggle={() => setShowNewPassword(!showNewPassword)} />
+                        </div>
+                        <p className="text-xs text-gray-500 mt-1">{t('security.passwordRequirements')}</p>
                     </div>
-                </div>
+                    <div>
+                        <label htmlFor="confirmPasswordSet" className="block text-sm font-medium text-gray-700 mb-1">{t('security.confirmNewPassword')}</label>
+                        <div className="relative">
+                            <input type={showConfirmPassword ? "text" : "password"} id="confirmPasswordSet" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} className={passwordInputClasses} required disabled={isLoading} />
+                            <PasswordToggleButton show={showConfirmPassword} onToggle={() => setShowConfirmPassword(!showConfirmPassword)} />
+                        </div>
+                    </div>
+                    <button type="submit" disabled={isLoading} className="w-full px-4 py-2 bg-primary/80 backdrop-blur-sm text-white font-medium rounded-xl hover:bg-primary transition-all shadow-lg shadow-primary/20 border border-primary/30 disabled:opacity-50 disabled:cursor-not-allowed">
+                        {isLoading ? t('security.settingPassword', 'Setting password...') : t('security.setPassword', 'Set a Password')}
+                    </button>
+                </form>
             </div>
         );
     }
 
+    // Local auth user: show "Change Password" form
     return (
         <div className="bg-white/30 backdrop-blur-sm border border-white/40 rounded-2xl p-6">
             <h3 className="text-lg font-semibold text-neutral-800 mb-4">{t('security.changePassword')}</h3>
 
-            {error && (
-                <div className="mb-4 p-3 bg-red-50/60 backdrop-blur-sm border border-red-200/50 rounded-xl flex items-start gap-2">
-                    <svg className="w-5 h-5 text-red-600 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
-                    <p className="text-red-800 text-sm">{error}</p>
-                </div>
-            )}
+            {error && alertBox('error', error)}
+            {success && alertBox('success', success)}
 
-            {success && (
-                <div className="mb-4 p-3 bg-green-50/60 backdrop-blur-sm border border-green-200/50 rounded-xl flex items-start gap-2">
-                    <svg className="w-5 h-5 text-green-600 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                    </svg>
-                    <p className="text-green-800 text-sm">{success}</p>
-                </div>
-            )}
-
-            <form onSubmit={handleSubmit} className="space-y-4">
-                {/* Current Password */}
+            <form onSubmit={handleChangePassword} className="space-y-4">
                 <div>
-                    <label htmlFor="currentPassword" className="block text-sm font-medium text-gray-700 mb-1">
-                        {t('security.currentPassword')}
-                    </label>
+                    <label htmlFor="currentPassword" className="block text-sm font-medium text-gray-700 mb-1">{t('security.currentPassword')}</label>
                     <div className="relative">
-                        <input
-                            type={showCurrentPassword ? "text" : "password"}
-                            id="currentPassword"
-                            value={currentPassword}
-                            onChange={(e) => setCurrentPassword(e.target.value)}
-                            className="w-full px-4 py-2 pr-10 bg-white/40 backdrop-blur-sm border border-white/50 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/40 focus:bg-white/60 transition-all shadow-sm"
-                            required
-                            disabled={isLoading}
-                        />
-                        <button
-                            type="button"
-                            onClick={() => setShowCurrentPassword(!showCurrentPassword)}
-                            className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
-                        >
-                            {showCurrentPassword ? (
-                                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" />
-                                </svg>
-                            ) : (
-                                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                                </svg>
-                            )}
-                        </button>
+                        <input type={showCurrentPassword ? "text" : "password"} id="currentPassword" value={currentPassword} onChange={(e) => setCurrentPassword(e.target.value)} className={passwordInputClasses} required disabled={isLoading} />
+                        <PasswordToggleButton show={showCurrentPassword} onToggle={() => setShowCurrentPassword(!showCurrentPassword)} />
                     </div>
                 </div>
-
-                {/* New Password */}
                 <div>
-                    <label htmlFor="newPassword" className="block text-sm font-medium text-gray-700 mb-1">
-                        {t('security.newPassword')}
-                    </label>
+                    <label htmlFor="newPassword" className="block text-sm font-medium text-gray-700 mb-1">{t('security.newPassword')}</label>
                     <div className="relative">
-                        <input
-                            type={showNewPassword ? "text" : "password"}
-                            id="newPassword"
-                            value={newPassword}
-                            onChange={(e) => setNewPassword(e.target.value)}
-                            className="w-full px-4 py-2 pr-10 bg-white/40 backdrop-blur-sm border border-white/50 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/40 focus:bg-white/60 transition-all shadow-sm"
-                            required
-                            disabled={isLoading}
-                        />
-                        <button
-                            type="button"
-                            onClick={() => setShowNewPassword(!showNewPassword)}
-                            className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
-                        >
-                            {showNewPassword ? (
-                                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" />
-                                </svg>
-                            ) : (
-                                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                                </svg>
-                            )}
-                        </button>
+                        <input type={showNewPassword ? "text" : "password"} id="newPassword" value={newPassword} onChange={(e) => setNewPassword(e.target.value)} className={passwordInputClasses} required disabled={isLoading} />
+                        <PasswordToggleButton show={showNewPassword} onToggle={() => setShowNewPassword(!showNewPassword)} />
                     </div>
-                    <p className="text-xs text-gray-500 mt-1">
-                        {t('security.passwordRequirements')}
-                    </p>
+                    <p className="text-xs text-gray-500 mt-1">{t('security.passwordRequirements')}</p>
                 </div>
-
-                {/* Confirm New Password */}
                 <div>
-                    <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700 mb-1">
-                        {t('security.confirmNewPassword')}
-                    </label>
+                    <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700 mb-1">{t('security.confirmNewPassword')}</label>
                     <div className="relative">
-                        <input
-                            type={showConfirmPassword ? "text" : "password"}
-                            id="confirmPassword"
-                            value={confirmPassword}
-                            onChange={(e) => setConfirmPassword(e.target.value)}
-                            className="w-full px-4 py-2 pr-10 bg-white/40 backdrop-blur-sm border border-white/50 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/40 focus:bg-white/60 transition-all shadow-sm"
-                            required
-                            disabled={isLoading}
-                        />
-                        <button
-                            type="button"
-                            onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                            className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
-                        >
-                            {showConfirmPassword ? (
-                                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" />
-                                </svg>
-                            ) : (
-                                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                                </svg>
-                            )}
-                        </button>
+                        <input type={showConfirmPassword ? "text" : "password"} id="confirmPassword" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} className={passwordInputClasses} required disabled={isLoading} />
+                        <PasswordToggleButton show={showConfirmPassword} onToggle={() => setShowConfirmPassword(!showConfirmPassword)} />
                     </div>
                 </div>
-
-                {/* Submit Button */}
-                <button
-                    type="submit"
-                    disabled={isLoading}
-                    className="w-full px-4 py-2 bg-primary/80 backdrop-blur-sm text-white font-medium rounded-xl hover:bg-primary transition-all shadow-lg shadow-primary/20 border border-primary/30 disabled:opacity-50 disabled:cursor-not-allowed"
-                >
+                <button type="submit" disabled={isLoading} className="w-full px-4 py-2 bg-primary/80 backdrop-blur-sm text-white font-medium rounded-xl hover:bg-primary transition-all shadow-lg shadow-primary/20 border border-primary/30 disabled:opacity-50 disabled:cursor-not-allowed">
                     {isLoading ? t('security.changingPassword') : t('security.changePassword')}
                 </button>
             </form>
@@ -694,14 +663,15 @@ const DeleteAccountSection: React.FC = () => {
     const { state, dispatch } = useAppContext();
     const { confirm } = useConfirmation();
     const [password, setPassword] = useState('');
+    const [showPassword, setShowPassword] = useState(false);
     const [isDeleting, setIsDeleting] = useState(false);
     const [error, setError] = useState('');
 
-    const isSocialLogin = !!(state.currentUser?.googleId || state.currentUser?.facebookId);
+    const isLocalAuth = state.user?.provider === 'local';
 
     const handleDeleteAccount = async () => {
         setError('');
-        if (!isSocialLogin && !password) {
+        if (isLocalAuth && !password.trim()) {
             setError(t('security.passwordRequiredToDelete', 'Please enter your password to confirm deletion'));
             return;
         }
@@ -724,7 +694,7 @@ const DeleteAccountSection: React.FC = () => {
                     'Content-Type': 'application/json',
                     'Authorization': `Bearer ${localStorage.getItem('balkan_estate_token')}`,
                 },
-                body: JSON.stringify({ password: isSocialLogin ? undefined : password }),
+                body: JSON.stringify({ password: isLocalAuth ? password : undefined }),
             });
 
             const data = await response.json();
@@ -733,9 +703,10 @@ const DeleteAccountSection: React.FC = () => {
                 return;
             }
 
+            // Immediately clear all auth state and redirect
             localStorage.removeItem('balkan_estate_token');
             localStorage.removeItem('balkan_estate_refresh_token');
-            dispatch({ type: 'LOGOUT' });
+            dispatch({ type: 'SET_AUTH_STATE', payload: { isAuthenticated: false, user: null } });
             dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'search' });
         } catch {
             setError(t('security.deleteAccountFailed', 'Failed to delete account'));
@@ -745,36 +716,56 @@ const DeleteAccountSection: React.FC = () => {
     };
 
     return (
-        <div className="bg-red-50/60 backdrop-blur-sm border border-red-200/50 rounded-2xl p-4">
-            <div className="flex items-start gap-3">
+        <div className="bg-red-50/60 backdrop-blur-sm border border-red-200/50 rounded-2xl p-6">
+            <div className="flex items-start gap-3 mb-4">
                 <svg className="w-5 h-5 text-red-600 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                 </svg>
-                <div className="flex-1">
+                <div>
                     <h4 className="font-semibold text-red-800 text-sm">{t('security.deleteAccount', 'Delete Account')}</h4>
                     <p className="text-sm text-red-700 mt-1">
                         {t('security.deleteAccountDescription', 'Permanently delete your account and all associated data. This action cannot be undone.')}
                     </p>
-                    {!isSocialLogin && (
-                        <input
-                            type="password"
-                            value={password}
-                            onChange={(e) => { setPassword(e.target.value); setError(''); }}
-                            placeholder={t('security.enterPasswordToConfirm', 'Enter your password to confirm')}
-                            className="mt-3 w-full max-w-xs px-3 py-2 border border-red-200 rounded-xl text-sm focus:ring-2 focus:ring-red-300 focus:border-red-300 bg-white"
-                        />
-                    )}
-                    {error && <p className="text-sm text-red-600 mt-1">{error}</p>}
-                    <button
-                        type="button"
-                        onClick={handleDeleteAccount}
-                        disabled={isDeleting}
-                        className="mt-3 px-4 py-2 bg-red-600/80 backdrop-blur-sm text-white font-medium rounded-xl hover:bg-red-600 transition-all shadow-lg shadow-red-600/20 border border-red-500/30 text-sm disabled:opacity-50"
-                    >
-                        {isDeleting ? t('security.deleting', 'Deleting...') : t('security.deleteAccount', 'Delete Account')}
-                    </button>
                 </div>
             </div>
+
+            {isLocalAuth && (
+                <div className="mb-4">
+                    <label htmlFor="deletePassword" className="block text-sm font-medium text-red-800 mb-1">
+                        {t('security.enterPasswordToConfirm', 'Enter your password to confirm')}
+                    </label>
+                    <div className="relative max-w-sm">
+                        <input
+                            type={showPassword ? "text" : "password"}
+                            id="deletePassword"
+                            value={password}
+                            onChange={(e) => { setPassword(e.target.value); setError(''); }}
+                            placeholder={t('security.password', 'Password')}
+                            className="w-full px-4 py-2 pr-10 border border-red-200 rounded-xl text-sm focus:ring-2 focus:ring-red-300 focus:border-red-300 bg-white/60 backdrop-blur-sm"
+                            disabled={isDeleting}
+                        />
+                        <PasswordToggleButton show={showPassword} onToggle={() => setShowPassword(!showPassword)} />
+                    </div>
+                </div>
+            )}
+
+            {error && (
+                <div className="mb-4 p-3 bg-red-100/60 border border-red-300/50 rounded-xl flex items-start gap-2">
+                    <svg className="w-4 h-4 text-red-600 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    <p className="text-sm text-red-700">{error}</p>
+                </div>
+            )}
+
+            <button
+                type="button"
+                onClick={handleDeleteAccount}
+                disabled={isDeleting || (isLocalAuth && !password.trim())}
+                className="px-5 py-2.5 bg-red-600/80 backdrop-blur-sm text-white font-medium rounded-xl hover:bg-red-600 transition-all shadow-lg shadow-red-600/20 border border-red-500/30 text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+                {isDeleting ? t('security.deleting', 'Deleting...') : t('security.deleteAccount', 'Delete Account')}
+            </button>
         </div>
     );
 };

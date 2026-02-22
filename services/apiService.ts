@@ -415,6 +415,15 @@ export const changePassword = async (currentPassword: string, newPassword: strin
   return response;
 };
 
+export const setPasswordForSocialUser = async (newPassword: string): Promise<{ message: string }> => {
+  return secureAuthRequest<{ message: string }>('/auth/set-password', {
+    method: 'POST',
+    requiresAuth: true,
+    body: { newPassword },
+    sensitiveFields: ['newPassword'],
+  });
+};
+
 export const getAvailableOAuthProviders = async (): Promise<{ google: boolean; apple: boolean }> => {
   try {
     const response = await apiRequest<{ providers: { google: boolean; apple: boolean } }>('/auth/oauth/providers');
