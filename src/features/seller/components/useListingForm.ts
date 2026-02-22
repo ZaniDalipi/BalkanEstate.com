@@ -287,11 +287,12 @@ export const useListingForm = (propertyToEdit: Property | null) => {
 
         const city = availableCities.find(c => c.name === cityName);
         if (city) {
-            // Set coordinates to city center
+            // Set coordinates to city center and default address to "City, Country"
             setListingData(prev => ({
                 ...prev,
                 lat: city.lat,
                 lng: city.lng,
+                streetAddress: `${cityName}, ${selectedCountry}`,
             }));
         }
     };

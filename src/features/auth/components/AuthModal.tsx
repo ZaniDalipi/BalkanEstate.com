@@ -53,9 +53,9 @@ const BALKAN_COUNTRY_CODES = [
 
 const validatePhone = (countryCode: string, phoneNumber: string, t?: (key: string, defaultValue?: string) => string): string | null => {
     const tr = t || ((key: string, defaultValue?: string) => defaultValue || key);
-    // Phone is optional - only validate format if user entered something
+    // Phone is required
     if (!phoneNumber.trim()) {
-        return null;
+        return tr('auth:validation.phone.required', 'Phone number is required');
     }
     if (!countryCode) {
         return tr('auth:validation.phone.selectCountryCode', 'Please select a country code');
@@ -293,11 +293,6 @@ const AuthPage: React.FC = () => {
     };
 
     const handleBlur = (field: 'email' | 'password' | 'confirmPassword' | 'phone') => {
-        // For phone: only mark as touched if the user has actually typed something,
-        // so tabbing past an empty phone field doesn't trigger a premature error
-        if (field === 'phone' && !phoneNumber.trim()) {
-            return;
-        }
 
         setTouched(prev => ({ ...prev, [field]: true }));
 
@@ -371,10 +366,8 @@ const AuthPage: React.FC = () => {
             if (password !== confirmPassword) {
                 confirmError = t('auth:validation.passwordsDoNotMatch', 'Passwords do not match');
             }
-            // Phone is optional - only validate format if user entered something
-            if (phoneNumber.trim()) {
-                phoneError = validatePhone(phoneCountryCode, phoneNumber, t);
-            }
+            // Phone is required - validate on signup
+            phoneError = validatePhone(phoneCountryCode, phoneNumber, t);
         } else {
             // Login - just check if password is provided
             if (!password.trim()) {
@@ -383,7 +376,7 @@ const AuthPage: React.FC = () => {
         }
 
         // Set all errors and mark fields as touched
-        setTouched({ email: true, password: true, confirmPassword: true, phone: !!phoneNumber.trim() });
+        setTouched({ email: true, password: true, confirmPassword: true, phone: true });
         setFieldErrors({
             email: emailError || undefined,
             password: passwordError || undefined,
@@ -515,7 +508,7 @@ const AuthPage: React.FC = () => {
                                 />
                             </div>
 
-                            {/* Phone number field (signup only, optional) */}
+                            {/* Phone number field (signup only, required) */}
                             {state.authModalView === 'signup' && (
                                 <div>
                                     <div className={`flex items-center rounded-2xl border-2 transition-all duration-300 bg-white/50 backdrop-blur-sm ${
@@ -556,7 +549,7 @@ const AuthPage: React.FC = () => {
                                             }}
                                             onBlur={() => handleBlur('phone')}
                                             className="flex-1 bg-transparent text-base text-neutral-900 px-3 py-4 border-none focus:outline-none focus:ring-0 placeholder:text-neutral-400"
-                                            placeholder={t('auth:signup.phonePlaceholder', 'Phone number (optional)')}
+                                            placeholder={t('auth:signup.phonePlaceholder', 'Phone number')}
                                             autoComplete="tel-national"
                                         />
                                     </div>
