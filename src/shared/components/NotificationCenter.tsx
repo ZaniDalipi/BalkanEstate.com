@@ -148,14 +148,14 @@ const NotificationCenter: React.FC = () => {
     if (data.propertyId) {
       setIsOpen(false);
       dispatch({ type: 'SET_SELECTED_PROPERTY', payload: data.propertyId });
-      dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'propertyDetail' });
+      dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'property-details' });
       return;
     }
 
     // Navigate to conversations
     if (data.conversationId) {
       setIsOpen(false);
-      dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'messages' });
+      dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'inbox' });
       return;
     }
   };

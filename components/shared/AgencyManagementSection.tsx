@@ -53,7 +53,6 @@ const AgencyManagementSection: React.FC<AgencyManagementSectionProps> = ({ curre
     return (
       currentUser.availableRoles?.includes(UserRole.AGENT) ||
       currentUser.role === UserRole.AGENT ||
-      currentUser.role === 'agent' ||
       !!currentUser.agentId ||
       !!currentUser.licenseNumber
     );
@@ -277,14 +276,9 @@ const AgencyManagementSection: React.FC<AgencyManagementSectionProps> = ({ curre
               status: data.subscription.status,
               listingsLimit: data.subscription.listingsLimit,
               expiresAt: data.subscription.expiresAt,
-            },
+            } as any,
             agencyId: data.agency.id,
             agencyName: data.agency.name ?? '',
-            agency: {
-              agencyId: data.agency.id,
-              role: data.agency.role ?? 'agent',
-              joinedAt: new Date().toISOString(),
-            },
           },
         });
 

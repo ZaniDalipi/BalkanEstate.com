@@ -651,8 +651,8 @@ const PricingManagerForm: React.FC<PricingManagerFormProps> = ({
                 <label className="block text-sm font-medium text-gray-700 mb-1">{t('admin:pricing.form.stripeProductId', 'Stripe Product ID')}</label>
                 <input
                   type="text"
-                  value={editingProduct.stripeProductId || ''}
-                  onChange={(e) => setEditingProduct({ ...editingProduct, stripeProductId: e.target.value })}
+                  value={editingProduct.externalProductId || ''}
+                  onChange={(e) => setEditingProduct({ ...editingProduct, externalProductId: e.target.value })}
                   placeholder={t('admin:pricing.form.stripeProductPlaceholder', 'prod_...')}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-500 focus:border-transparent"
                 />
@@ -661,8 +661,8 @@ const PricingManagerForm: React.FC<PricingManagerFormProps> = ({
                 <label className="block text-sm font-medium text-gray-700 mb-1">{t('admin:pricing.form.stripePriceId', 'Stripe Price ID')}</label>
                 <input
                   type="text"
-                  value={editingProduct.stripePriceId || ''}
-                  onChange={(e) => setEditingProduct({ ...editingProduct, stripePriceId: e.target.value })}
+                  value={editingProduct.externalPriceId || ''}
+                  onChange={(e) => setEditingProduct({ ...editingProduct, externalPriceId: e.target.value })}
                   placeholder={t('admin:pricing.form.stripePricePlaceholder', 'price_...')}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-500 focus:border-transparent"
                 />

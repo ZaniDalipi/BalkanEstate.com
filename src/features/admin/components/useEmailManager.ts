@@ -15,7 +15,9 @@ import {
 export type { EmailConfig };
 
 export function useEmailManager() {
-  const { showNotification } = useNotification();
+  const notification = useNotification();
+  const showNotification = (opts: { type?: string; message: string; title?: string }) =>
+    notification.notify({ title: opts.title || (opts.type === 'error' ? 'Error' : 'Success'), message: opts.message, type: opts.type as any });
   const { confirm } = useConfirmation();
 
   // State
@@ -122,8 +124,8 @@ export function useEmailManager() {
           ? 'This will prevent the system from sending this type of email.'
           : 'This will allow the system to send this type of email.'
       }`,
-      confirmText: email.isActive ? 'Disable' : 'Enable',
-      variant: email.isActive ? 'danger' : 'primary',
+      confirmLabel: email.isActive ? 'Disable' : 'Enable',
+      type: email.isActive ? 'danger' : 'info',
     });
 
     if (!confirmed) return;
@@ -131,11 +133,13 @@ export function useEmailManager() {
     try {
       await toggleMutation.mutateAsync(email.key);
       showNotification({
+        title: 'Success',
         type: 'success',
         message: `Email ${action}d successfully`,
       });
     } catch (err: any) {
       showNotification({
+        title: 'Error',
         type: 'error',
         message: err.message || `Failed to ${action} email`,
       });
@@ -146,8 +150,8 @@ export function useEmailManager() {
     const confirmed = await confirm({
       title: 'Reset to Default',
       message: `Are you sure you want to reset "${email.name}" to its default configuration? This will overwrite any customizations you've made.`,
-      confirmText: 'Reset',
-      variant: 'danger',
+      confirmLabel: 'Reset',
+      type: 'danger',
     });
 
     if (!confirmed) return;
@@ -171,8 +175,8 @@ export function useEmailManager() {
       title: 'Reset All Emails',
       message:
         'Are you sure you want to reset ALL email configurations to their defaults? This will overwrite any customizations you\'ve made to any emails.',
-      confirmText: 'Reset All',
-      variant: 'danger',
+      confirmLabel: 'Reset All',
+      type: 'danger',
     });
 
     if (!confirmed) return;

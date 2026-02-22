@@ -284,7 +284,7 @@ export function useCinematicFlythrough(
         const elapsed = performance.now() - startTimeRef.current;
         updateProgress(elapsed);
 
-        if (phase !== 'complete' && phase !== 'idle') {
+        if ((phase as string) !== 'complete' && (phase as string) !== 'idle') {
           animationFrameRef.current = requestAnimationFrame(trackProgress);
         }
       };

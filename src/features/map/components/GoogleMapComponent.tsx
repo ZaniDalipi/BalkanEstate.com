@@ -128,6 +128,7 @@ const GoogleMapComponent: React.FC<GoogleMapComponentProps> = (props) => {
                 strokeColor: '#0252CD',
                 strokeOpacity: 1,
                 strokeWeight: 2,
+                // @ts-ignore google maps strokeDashArray
                 strokeDashArray: [5, 5],
                 fillColor: '#0252CD',
                 fillOpacity: 0.1,

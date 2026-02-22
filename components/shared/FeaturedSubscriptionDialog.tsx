@@ -153,7 +153,6 @@ const FeaturedSubscriptionDialog: React.FC<FeaturedSubscriptionDialogProps> = ({
 
       const response = await createFeaturedSubscription(agencyId, {
         interval: `${selectedDuration}days` as any,
-        duration: selectedDuration,
         couponCode: couponCode || undefined,
         startTrial: false,
       });

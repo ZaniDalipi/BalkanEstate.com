@@ -103,7 +103,7 @@ export function usePromotionPlansManager() {
 
   const handleSeedPlans = async () => {
     try {
-      const response = await seedPlansMutation.mutateAsync();
+      const response = await seedPlansMutation.mutateAsync(undefined);
       setSuccessMessage(response.message);
       setTimeout(() => setSuccessMessage(null), 3000);
     } catch (err) {

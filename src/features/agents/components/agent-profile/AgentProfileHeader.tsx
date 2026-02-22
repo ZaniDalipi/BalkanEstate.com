@@ -92,15 +92,14 @@ const AgentProfileHeader: React.FC<AgentProfileHeaderProps> = ({
                 <AgencyBadge
                   agencyName={agent.agencyName}
                   agencyLogo={agent.agencyLogo}
-                  agencyId={agent.agencyId}
-                  variant="light"
+                  variant="default"
                 />
               </div>
             )}
 
             {/* Rating */}
             <div className="flex items-center gap-2 mb-4">
-              <StarRating rating={agent.rating || 0} size="md" />
+              <StarRating rating={agent.rating || 0} className="h-5 w-5" />
               <span className="text-white/80">
                 ({agent.totalReviews || 0} {t('agents:profilePage.reviews')})
               </span>

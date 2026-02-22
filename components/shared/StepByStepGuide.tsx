@@ -18,8 +18,8 @@ import {
   PlayCircleIcon,
   BookOpenIcon,
   SparklesIcon,
-} from '@heroicons/react/24/outline';
-import { CheckIcon } from '@heroicons/react/24/solid';
+  CheckIcon,
+} from '../../constants';
 
 interface Step {
   stepNumber: number;

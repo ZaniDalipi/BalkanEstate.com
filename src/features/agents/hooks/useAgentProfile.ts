@@ -6,12 +6,14 @@
  */
 import { useState, useMemo, useEffect, useCallback, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Agent, Agency, Achievement } from '@/types';
+import { Agent, Agency } from '@/types';
+import { Achievement } from '@/components/shared/AchievementsSection';
 import { useAppContext } from '@/context/AppContext';
 import { useNotification } from '@/shared/hooks/useNotification';
-import { fetchAgentByIdDirectly, fetchAgencyById, updateAgentProfile } from '../api/agentApi';
-import { fetchAgentProperties } from '@/utils/api';
+import { updateAgentProfile } from '../api/agentApi';
+import { getPropertiesBySellerId } from '@/src/features/properties/api/propertyApi';
 import { useRealtimeProperties } from '@/features/properties/hooks/useRealtimeProperties';
+import { API_URL } from '@/src/shared/api/config';
 
 interface EditForm {
   bio: string;
@@ -182,7 +184,7 @@ export function useAgentProfile(agent: Agent) {
   const allAgentProperties = useMemo(() => {
     const stateProperties = state.properties.filter(p =>
       String(p.sellerId) === String(agentUserId) ||
-      String(p.agentId) === String(agent.id)
+      String(p.sellerId) === String(agent.id)
     );
 
     const combinedMap = new Map();
@@ -211,7 +213,7 @@ export function useAgentProfile(agent: Agent) {
     if (!agentUserId) return;
     setLoadingProperties(true);
     try {
-      const response = await fetchAgentProperties(agentUserId);
+      const response = await getPropertiesBySellerId(String(agentUserId));
       if (response && Array.isArray(response)) {
         setFetchedProperties(response);
       }
@@ -239,10 +241,13 @@ export function useAgentProfile(agent: Agent) {
     const fetchAgency = async () => {
       if (isAgencyAgent && agent.agencyId) {
         try {
-          const agency = await fetchAgencyById(agent.agencyId);
+          const response = await fetch(`${API_URL}/agencies/${agent.agencyId}`);
+          if (!response.ok) throw new Error('Failed to fetch agency');
+          const data = await response.json();
+          const agency = data.agency;
           setAgencyData(agency);
-          if (agency?.brandColor) {
-            setAgencyGradient(`bg-gradient-to-r from-[${agency.brandColor}] via-[${agency.brandColor}] to-[${agency.brandColor}]`);
+          if (agency?.coverGradient) {
+            setAgencyGradient(`bg-gradient-to-r ${agency.coverGradient}`);
           }
         } catch {
           // Silently handle error
@@ -277,35 +282,32 @@ export function useAgentProfile(agent: Agent) {
     }
 
     if (!agentUserId) {
-      showError(t('profilePage.contactError', 'Unable to contact agent'));
+      showError(t('profilePage.contactError', 'Error'), t('profilePage.contactErrorMessage', 'Unable to contact agent'));
       return;
     }
 
     try {
-      const conversationId = await createConversation({
-        recipientId: agentUserId,
-        agentId: agent.id,
-      });
-      dispatch({ type: 'SET_ACTIVE_CONVERSATION_ID', payload: conversationId });
+      const conversation = await createConversation(agent.id);
+      dispatch({ type: 'SET_ACTIVE_CONVERSATION', payload: conversation.id });
       dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'inbox' });
     } catch {
-      showError(t('profilePage.contactError', 'Failed to start conversation'));
+      showError(t('profilePage.contactError', 'Error'), t('profilePage.contactErrorMessage', 'Failed to start conversation'));
     }
   }, [state.isAuthenticated, dispatch, agentUserId, agent.id, createConversation, showError, t]);
 
   const handleSaveProfile = useCallback(async () => {
     setIsSavingProfile(true);
     try {
-      const updatedAgent = await updateAgentProfile(agent.id, editForm);
+      const updatedAgent = await updateAgentProfile(editForm as Parameters<typeof updateAgentProfile>[0]);
       setAgentData(prev => ({ ...prev, ...updatedAgent }));
       setIsEditModalOpen(false);
-      success(t('profilePage.editModal.saveSuccess', 'Profile updated successfully'));
+      success(t('profilePage.editModal.saveSuccess', 'Profile updated successfully'), '');
     } catch {
-      showError(t('profilePage.editModal.saveError', 'Failed to update profile'));
+      showError(t('profilePage.editModal.saveError', 'Failed to update profile'), '');
     } finally {
       setIsSavingProfile(false);
     }
-  }, [agent.id, editForm, success, showError, t]);
+  }, [editForm, success, showError, t]);
 
   const handleAddArrayItem = useCallback((
     field: 'specializations' | 'languages' | 'serviceAreas',

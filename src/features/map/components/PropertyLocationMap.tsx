@@ -31,6 +31,7 @@ const PropertyLocationMap: React.FC<PropertyLocationMapProps> = ({ lat, lng, add
             scrollWheelZoom={false}
             className="w-full h-full rounded-lg"
             preferCanvas={true}
+            // @ts-expect-error leaflet types
             updateWhenIdle={true}
             updateWhenZooming={false}
         >

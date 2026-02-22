@@ -21,9 +21,10 @@ interface AgentStatsProps {
     yearsExperience: number;
   };
   activeListingsCount: number;
+  country?: string;
 }
 
-const AgentStats: React.FC<AgentStatsProps> = ({ stats, activeListingsCount }) => {
+const AgentStats: React.FC<AgentStatsProps> = ({ stats, activeListingsCount, country = '' }) => {
   const { t } = useTranslation(['agents']);
 
   const statItems = [
@@ -43,7 +44,7 @@ const AgentStats: React.FC<AgentStatsProps> = ({ stats, activeListingsCount }) =
     },
     {
       icon: CurrencyDollarIcon,
-      value: formatPrice(stats.avgPrice),
+      value: formatPrice(stats.avgPrice, country),
       label: t('agents:profilePage.stats.avgPrice'),
       color: 'text-purple-600',
       bgColor: 'bg-purple-50',

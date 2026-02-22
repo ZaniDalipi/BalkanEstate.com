@@ -100,7 +100,7 @@ const GeminiDescriptionGenerator: React.FC<{ propertyToEdit: Property | null }> 
         return (
              <div className="text-center py-12 flex flex-col items-center min-h-[70vh]">
                 <MarketInsightsAnimation
-                    city={selectedCity?.name}
+                    city={selectedCity}
                     country={selectedCountry || 'Serbia'}
                     propertyType={listingData.propertyType}
                 />

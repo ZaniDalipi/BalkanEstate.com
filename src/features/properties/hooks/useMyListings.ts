@@ -31,7 +31,7 @@ export function useMyListings(options?: { enablePolling?: boolean }) {
     dataUpdatedAt,
   } = useQuery({
     queryKey: propertyKeys.myListings(),
-    queryFn: getMyListings,
+    queryFn: () => getMyListings(),
     staleTime: 5 * 1000, // 5 seconds - consider stale quickly for real-time feel
     gcTime: 10 * 60 * 1000, // 10 minutes cache retention
     refetchInterval: enablePolling ? 10 * 1000 : false, // Auto-refresh every 10 seconds

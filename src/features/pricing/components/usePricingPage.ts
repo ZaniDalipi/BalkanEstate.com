@@ -160,7 +160,7 @@ export function usePricingPage() {
 
     if (!isActive) return 0;
 
-    const plan = (user.subscription?.plan || user.subscriptionPlan || '').toLowerCase();
+    const plan = ((user.subscription as any)?.plan || user.subscriptionPlan || '').toLowerCase();
     const tier = user.subscription?.tier || '';
 
     if (plan.includes('enterprise') || tier === 'agency_owner') return 3;
@@ -493,7 +493,7 @@ export function usePricingPage() {
 
     if (!isActive) return false;
 
-    const plan = (user.subscription?.plan || user.subscriptionPlan || '').toLowerCase();
+    const plan = ((user.subscription as any)?.plan || user.subscriptionPlan || '').toLowerCase();
     const tier = user.subscription?.tier || '';
     const id = productId.toLowerCase();
 
@@ -584,7 +584,6 @@ export function usePricingPage() {
     sellerProducts,
     // Promotion plans data
     agencyFeaturePlans,
-    loadingPlans,
     // Helper functions
     getPromotionPrice,
     getAgencyPrice,

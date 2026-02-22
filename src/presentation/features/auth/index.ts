@@ -1,7 +1,8 @@
 // Auth Feature - Public exports
 
+// TODO: Uncomment when auth components are implemented
 // Components
-export * from './components';
+// export * from './components';
 
 // Hooks
 export * from './hooks';

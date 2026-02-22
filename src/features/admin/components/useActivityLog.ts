@@ -108,8 +108,8 @@ export function useActivityLog() {
         `/analytics/activity-log?page=${currentPage}&category=${filter}&dateRange=${dateRange}`,
         { requiresAuth: true }
       );
-      setActivities(data.activities || []);
-      setTotalPages(data.pagination?.totalPages || 1);
+      setActivities((data as any).activities || []);
+      setTotalPages((data as any).pagination?.totalPages || 1);
     } catch (err) {
       setActivities([]);
     } finally {
@@ -124,7 +124,7 @@ export function useActivityLog() {
         `/analytics/dashboard?dateRange=${dateRange}`,
         { requiresAuth: true }
       );
-      setDashboardStats(data.summary || null);
+      setDashboardStats((data as any).summary || null);
     } catch (err) {
       setDashboardStats(null);
     } finally {
@@ -139,7 +139,7 @@ export function useActivityLog() {
         `/analytics/heatmap?dateRange=${dateRange}`,
         { requiresAuth: true }
       );
-      setHeatmapData(data || null);
+      setHeatmapData((data as any) || null);
     } catch (err) {
       setHeatmapData(null);
     } finally {
@@ -153,7 +153,7 @@ export function useActivityLog() {
         `/analytics/subscriptions/recent?limit=5`,
         { requiresAuth: true }
       );
-      setRecentSubscriptions(data.events || []);
+      setRecentSubscriptions((data as any).events || []);
     } catch (err) {
       setRecentSubscriptions([]);
     }

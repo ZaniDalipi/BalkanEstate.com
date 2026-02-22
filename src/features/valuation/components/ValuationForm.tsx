@@ -12,7 +12,7 @@ interface ValuationFormProps {
 
 // Property type icons
 const PropertyTypeIcon: React.FC<{ type: PropertyType; className?: string }> = ({ type, className = 'w-6 h-6' }) => {
-  const icons: Record<PropertyType, JSX.Element> = {
+  const icons: Record<PropertyType, React.ReactElement> = {
     apartment: (
       <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor">
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
@@ -44,7 +44,7 @@ const PropertyTypeIcon: React.FC<{ type: PropertyType; className?: string }> = (
 
 // Amenity icons
 const AmenityIcon: React.FC<{ type: string; className?: string }> = ({ type, className = 'w-5 h-5' }) => {
-  const icons: Record<string, JSX.Element> = {
+  const icons: Record<string, React.ReactElement> = {
     balcony: (
       <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor">
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 6h16M4 6v8a2 2 0 002 2h12a2 2 0 002-2V6M4 6l2-4h12l2 4M8 16v4m8-4v4M6 20h12" />

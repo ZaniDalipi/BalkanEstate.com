@@ -28,7 +28,7 @@ export type RentPeriod = 'monthly' | 'weekly' | 'daily';
 
 export type PropertyImageTag = 'exterior' | 'living_room' | 'kitchen' | 'bedroom' | 'bathroom' | 'other';
 
-export type AppView = 'search' | 'explore-cities' | 'saved-searches' | 'saved-properties' | 'inbox' | 'account' | 'create-listing' | 'create-rental' | 'rentals' | 'my-listings' | 'agents' | 'agencies' | 'agentProfile' | 'agencyDetail' | 'admin' | 'analytics' | 'reset-password' | 'verify-email' | 'valuation' | 'mortgage-calculator' | 'pricing' | 'how-it-works' | 'privacy' | 'terms' | 'cookies' | 'refund' | 'contact' | 'createAgency' | 'createAgencyPayment' | 'createAgencyConfirm' | 'not-found';
+export type AppView = 'search' | 'explore-cities' | 'saved-searches' | 'saved-properties' | 'inbox' | 'account' | 'create-listing' | 'create-rental' | 'rentals' | 'my-listings' | 'agents' | 'agencies' | 'agentProfile' | 'agencyDetail' | 'admin' | 'analytics' | 'reset-password' | 'verify-email' | 'valuation' | 'mortgage-calculator' | 'pricing' | 'how-it-works' | 'privacy' | 'terms' | 'cookies' | 'refund' | 'contact' | 'createAgency' | 'createAgencyPayment' | 'createAgencyConfirm' | 'property-details' | 'not-found';
 
 export type HowItWorksTab = 'getting-started' | 'premium-features' | 'agencies' | 'agents' | 'buyers' | 'sellers';
 
@@ -55,8 +55,11 @@ export interface Testimonial {
     createdAt?: string;
     userId?: {
         _id: string;
+        id?: string;
         name: string;
         avatarUrl?: string;
+        avatarOptions?: string;
+        gender?: 'male' | 'female' | 'other';
     };
 }
 
@@ -138,6 +141,8 @@ export interface User {
     subscription?: {
         tier: 'free' | 'pro' | 'agency_owner' | 'agency_agent' | 'buyer';
         status: 'active' | 'canceled' | 'expired' | 'trial';
+        plan?: string; // e.g., 'pro_monthly', 'pro_yearly', 'enterprise_yearly'
+        productId?: string; // Payment product ID
         listingsLimit: number; // 3 for free, 20 for pro_monthly, 250 for pro_yearly, 500 for enterprise
         activeListingsCount: number;
         privateSellerCount: number;
@@ -146,6 +151,12 @@ export interface User {
             monthly: number;
             available: number;
             used: number;
+            featured?: number;
+            highlighted?: number;
+            premium?: number;
+            featuredDuration?: number;
+            highlightedDuration?: number;
+            premiumDuration?: number;
             rollover?: number;
             lastRefresh?: Date | string;
         };
@@ -264,6 +275,16 @@ export type HeatingType = 'any' | 'central' | 'electric' | 'gas' | 'oil' | 'heat
 export type PropertyCondition = 'any' | 'new' | 'excellent' | 'good' | 'fair' | 'needs-renovation';
 export type ViewType = 'any' | 'sea' | 'mountain' | 'city' | 'park' | 'garden' | 'street';
 export type EnergyRating = 'any' | 'A+' | 'A' | 'B' | 'C' | 'D' | 'E' | 'F' | 'G';
+export type Orientation = 'any' | 'north' | 'south' | 'east' | 'west' | 'northEast' | 'northWest' | 'southEast' | 'southWest';
+
+export interface VisitAvailability {
+    enabled: boolean;
+    days: number[];
+    startTime: string;
+    endTime: string;
+    slotDurationMinutes: number;
+    notes?: string;
+}
 
 export interface Property {
     id: string;
@@ -295,6 +316,9 @@ export interface Property {
     hasVirtualTour360?: boolean; // Flag indicating if 360 virtual tour is available
     videoUrl?: string; // URL for embedded video (YouTube, TikTok, Instagram, Vimeo, or generated)
     generatedVideoUrl?: string; // URL for auto-generated property video
+    generatedVideoPublicId?: string; // Cloudinary public_id for generated video
+    generatedVideoFormat?: 'vertical' | 'horizontal' | 'square';
+    generatedVideoDuration?: number; // Duration in seconds
     hasGeneratedVideo?: boolean;
     imageUrl: string;
     images?: PropertyImage[];
@@ -318,6 +342,7 @@ export interface Property {
     condition?: PropertyCondition;
     viewType?: ViewType;
     energyRating?: EnergyRating;
+    orientation?: Orientation;
     hasBalcony?: boolean;
     hasGarden?: boolean;
     hasElevator?: boolean;
@@ -345,6 +370,32 @@ export interface Property {
     internetIncluded?: boolean;
     tenantRequirements?: string[];
     maxOccupants?: number;
+    // Visit scheduling
+    visitAvailability?: VisitAvailability;
+    // Rental history
+    rentalHistory?: RentalHistoryEntry[];
+    // Currency
+    currency?: string;
+    // Price discount
+    hasDiscount?: boolean;
+}
+
+export interface RentalHistoryEntry {
+    _id: string;
+    startDate: number;
+    endDate: number;
+    monthlyRent: number;
+    tenantName?: string;
+    notes?: string;
+}
+
+export interface Achievement {
+    id: string;
+    title: string;
+    description: string;
+    icon?: string;
+    dateEarned?: string;
+    category?: string;
 }
 
 export interface Message {
@@ -630,7 +681,7 @@ export interface SearchPageState {
     aiChatHistory: ChatMessage[];
     isAiChatModalOpen: boolean;
     isFiltersOpen: boolean;
-    focusMapOnProperty: { lat: number; lng: number; address: string } | null; // Property location to focus map on
+    focusMapOnProperty: { lat: number; lng: number; address: string; zoom?: number } | null; // Property location to focus map on
 }
 
 export interface PendingSubscription {
@@ -712,7 +763,7 @@ export type AppAction =
     | { type: 'SET_SELECTED_PROPERTY_OBJECT', payload: Property | null }
     | { type: 'SET_PROPERTY_TO_EDIT', payload: Property | null }
     | { type: 'SET_SELECTED_AGENT', payload: string | null }
-    | { type: 'SET_SELECTED_AGENCY', payload: string | null }
+    | { type: 'SET_SELECTED_AGENCY', payload: string | Agency | null }
     | { type: 'PROPERTIES_LOADING' }
     | { type: 'PROPERTIES_SUCCESS', payload: Property[] }
     | { type: 'PROPERTIES_ERROR', payload: string }
@@ -730,6 +781,8 @@ export type AppAction =
     | { type: 'UPDATE_PROPERTY', payload: Property }
     | { type: 'RENEW_PROPERTY', payload: string }
     | { type: 'MARK_PROPERTY_SOLD', payload: string }
+    | { type: 'MARK_PROPERTY_RENTED', payload: { id: string; rentedAt?: number; rentedUntil?: number } }
+    | { type: 'MARK_PROPERTY_AVAILABLE', payload: string }
     | { type: 'DELETE_PROPERTY', payload: string }
     | { type: 'UPDATE_USER', payload: Partial<User> }
     | { type: 'CREATE_CONVERSATION', payload: Conversation }
@@ -754,5 +807,6 @@ export type AppAction =
     | { type: 'SET_HOW_IT_WORKS_TAB', payload: HowItWorksTab }
     | { type: 'SET_ADMIN_SECTION', payload: AdminSection }
     | { type: 'CLEAR_ALL_SAVED_SEARCHES' }
+    | { type: 'SET_CURRENT_USER', payload: User }
     | { type: 'SESSION_EXPIRED' }
     | { type: 'HIDE_SESSION_EXPIRED_MODAL' };

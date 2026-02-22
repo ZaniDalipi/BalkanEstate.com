@@ -78,9 +78,10 @@ export function useCreateConversation() {
   return useMutation({
     mutationFn: (data: {
       propertyId: string;
+      buyerId?: string;
       sellerId: string;
       initialMessage?: string;
-    }) => conversationApiClient.createConversation(data),
+    }) => conversationApiClient.createConversation(data as any),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: conversationKeys.lists() });
     },
@@ -104,7 +105,7 @@ export function useSendMessage() {
         imageUrl?: string;
         encryptedContent?: string;
       };
-    }) => conversationApiClient.sendMessage(conversationId, data),
+    }) => conversationApiClient.sendMessage(conversationId, data as any),
     onSuccess: (_, { conversationId }) => {
       // Invalidate specific conversation and list
       queryClient.invalidateQueries({ queryKey: conversationKeys.detail(conversationId) });

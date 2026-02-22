@@ -174,7 +174,7 @@ const PropertyInquiryModal: React.FC<PropertyInquiryModalProps> = ({
                   <p className="font-semibold text-neutral-900 truncate">{property.title}</p>
                   <p className="text-sm text-neutral-500">{property.city}, {property.country}</p>
                   <p className="text-lg font-bold text-primary mt-1">
-                    {property.currency || '€'}{property.price.toLocaleString()}
+                    {(property as any).currency || '€'}{property.price.toLocaleString()}
                   </p>
                 </div>
               </div>

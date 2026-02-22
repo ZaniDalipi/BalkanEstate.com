@@ -36,7 +36,7 @@ export function QueryProvider({ children }: QueryProviderProps) {
         <Suspense fallback={null}>
           <ReactQueryDevtools
             initialIsOpen={false}
-            position="bottom-right"
+            position={"bottom-right" as any}
           />
         </Suspense>
       )}

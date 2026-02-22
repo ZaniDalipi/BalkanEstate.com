@@ -106,7 +106,7 @@ export const SelectableCadastreLayer: React.FC<SelectableCadastreLayerProps> = (
           });
 
           layer.on('mouseover', () => {
-            layer.setStyle({
+            (layer as any).setStyle({
               weight: 3,
               fillOpacity: 0.2,
             });
@@ -114,7 +114,7 @@ export const SelectableCadastreLayer: React.FC<SelectableCadastreLayerProps> = (
 
           layer.on('mouseout', () => {
             if (selectedParcel?.properties?.id !== feature.properties?.id) {
-              layer.setStyle({
+              (layer as any).setStyle({
                 weight: 2,
                 fillOpacity: 0.1,
               });
@@ -185,7 +185,7 @@ export const SelectableCadastreLayer: React.FC<SelectableCadastreLayerProps> = (
     onParcelSelect?.({
       properties: feature.properties,
       geometry: feature.geometry,
-      bounds: layer.getBounds(),
+      bounds: (layer as any).getBounds(),
     });
 
     const popupContent = createParcelPopup(feature);

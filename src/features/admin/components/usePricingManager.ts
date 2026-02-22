@@ -205,8 +205,8 @@ export function usePricingManager() {
       savedSearchesLimit: Number(editingProduct.savedSearchesLimit) || 0,
       earlyAccessListings: Boolean(editingProduct.earlyAccessListings),
       advancedMarketInsights: Boolean(editingProduct.advancedMarketInsights),
-      stripeProductId: editingProduct.stripeProductId || '',
-      stripePriceId: editingProduct.stripePriceId || '',
+      externalProductId: editingProduct.externalProductId || '',
+      externalPriceId: editingProduct.externalPriceId || '',
       // Agency/Enterprise features
       maxActiveSubscriptions: Number(editingProduct.maxActiveSubscriptions) || 0,
       cardStyle,

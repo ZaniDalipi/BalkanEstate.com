@@ -10,7 +10,7 @@ interface SignupParams {
   password: string;
   name?: string;
   phone?: string;
-  role?: 'buyer' | 'seller' | 'agent';
+  role?: 'buyer' | 'private_seller' | 'agent';
 }
 
 /**

@@ -1568,7 +1568,7 @@ const HowItWorksPage: React.FC = () => {
                   <div key={idx} className="bg-white rounded-2xl border border-neutral-200 p-6 hover:shadow-lg transition-all hover:-translate-y-1">
                     <div className={`w-12 h-12 bg-${feature.color}-100 rounded-xl flex items-center justify-center mb-4`}
                          style={{ backgroundColor: feature.color === 'blue' ? '#dbeafe' : feature.color === 'red' ? '#fee2e2' : feature.color === 'purple' ? '#f3e8ff' : feature.color === 'green' ? '#dcfce7' : feature.color === 'orange' ? '#ffedd5' : '#e0e7ff' }}>
-                      <Icon className={`w-6 h-6`} style={{ color: feature.color === 'blue' ? '#2563eb' : feature.color === 'red' ? '#dc2626' : feature.color === 'purple' ? '#9333ea' : feature.color === 'green' ? '#16a34a' : feature.color === 'orange' ? '#ea580c' : '#4f46e5' }} />
+                      <Icon className={`w-6 h-6 ${feature.color === 'blue' ? 'text-blue-600' : feature.color === 'red' ? 'text-red-600' : feature.color === 'purple' ? 'text-purple-600' : feature.color === 'green' ? 'text-green-600' : feature.color === 'orange' ? 'text-orange-600' : 'text-indigo-600'}`} />
                     </div>
                     <h3 className="font-semibold text-neutral-800 mb-2">{feature.title}</h3>
                     <p className="text-sm text-neutral-600">{feature.description}</p>
@@ -1806,7 +1806,7 @@ const HowItWorksPage: React.FC = () => {
                   <div key={promo.title} className="border border-neutral-200 rounded-xl p-5 hover:border-green-300 transition-colors">
                     <div className="flex items-center justify-between mb-3">
                       <h4 className="font-semibold text-neutral-800">{promo.title}</h4>
-                      <StarIcon className={`w-5 h-5`} style={{ color: promo.color === 'amber' ? '#f59e0b' : promo.color === 'orange' ? '#f97316' : '#3b82f6' }} />
+                      <StarIcon className={`w-5 h-5 ${promo.color === 'amber' ? 'text-amber-500' : promo.color === 'orange' ? 'text-orange-500' : 'text-blue-500'}`} />
                     </div>
                     <div className="flex items-baseline gap-1 mb-3">
                       <span className="text-2xl font-bold text-neutral-800">{promo.price}</span>

@@ -13,7 +13,7 @@ export type PropertyCondition = 'any' | 'new' | 'excellent' | 'good' | 'fair' | 
 export type ViewType = 'any' | 'sea' | 'mountain' | 'city' | 'park' | 'garden' | 'street';
 export type EnergyRating = 'any' | 'A+' | 'A' | 'B' | 'C' | 'D' | 'E' | 'F' | 'G';
 export type Orientation = 'any' | 'north' | 'south' | 'east' | 'west' | 'northEast' | 'northWest' | 'southEast' | 'southWest';
-export type PromotionTier = 'standard' | 'featured' | 'highlight' | 'premium';
+export type PropertyPromotionTier = 'standard' | 'featured' | 'highlight' | 'premium';
 
 export interface PropertyImage {
   url: string;
@@ -118,7 +118,7 @@ export interface Property {
   distanceToHospital?: number;
   // Promotion fields
   isPromoted?: boolean;
-  promotionTier?: PromotionTier;
+  promotionTier?: PropertyPromotionTier;
   promotionStartDate?: number;
   promotionEndDate?: number;
   hasUrgentBadge?: boolean;
@@ -132,11 +132,20 @@ export interface Property {
   internetIncluded?: boolean;
   tenantRequirements?: string[];
   maxOccupants?: number;
-  rentedAt?: number;
   rentedUntil?: number;
   rentalHistory?: RentalHistoryEntry[];
   // Visit/viewing availability
   visitAvailability?: VisitAvailability;
+  // Currency
+  currency?: string;
+  // Computed price discount flag
+  hasDiscount?: boolean;
+  // Alias fields (for component compatibility)
+  bedrooms?: number;
+  bathrooms?: number;
+  size?: number;
+  // Agent reference
+  agentId?: string;
 }
 
 export interface VisitAvailability {
@@ -188,7 +197,12 @@ export interface Filters {
   maxDistanceToHospital: number | null;
   amenities: string[];
   // Price discount filter
+  has360Tour: boolean | null;
   hasDiscount: boolean | null;
+  hasPriceIncrease: boolean | null;
+  minPricePerSqm: number | null;
+  maxPricePerSqm: number | null;
+  maxDaysListed: number | null;
 }
 
 export const initialFilters: Filters = {
@@ -227,5 +241,10 @@ export const initialFilters: Filters = {
   maxDistanceToSchool: null,
   maxDistanceToHospital: null,
   amenities: [],
+  has360Tour: null,
   hasDiscount: null,
+  hasPriceIncrease: null,
+  minPricePerSqm: null,
+  maxPricePerSqm: null,
+  maxDaysListed: null,
 };

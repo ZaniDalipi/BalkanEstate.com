@@ -102,7 +102,7 @@ const MarketReportModal: React.FC<MarketReportModalProps> = ({
                                 onClick={onContactAgent}
                                 className="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2.5 px-6 rounded-xl transition-colors"
                             >
-                                {t('profilePage.marketReport.contactAgent', { name: agentName }, `Contact ${agentName} for a report`)}
+                                {t('profilePage.marketReport.contactAgent', { name: agentName, defaultValue: `Contact ${agentName} for a report` })}
                             </button>
                         </div>
                     )}
@@ -219,7 +219,7 @@ const MarketReportModal: React.FC<MarketReportModalProps> = ({
                                 onClick={onContactAgent}
                                 className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-semibold py-3 px-6 rounded-xl transition-all shadow-sm hover:shadow-md"
                             >
-                                {t('profilePage.marketReport.personalizedReport', { name: agentName }, `Get a personalized report from ${agentName}`)}
+                                {t('profilePage.marketReport.personalizedReport', { name: agentName, defaultValue: `Get a personalized report from ${agentName}` })}
                             </button>
                         </>
                     )}

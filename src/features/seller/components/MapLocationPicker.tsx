@@ -89,7 +89,7 @@ const MapLocationPicker: React.FC<MapLocationPickerProps> = ({ lat, lng, address
       updateWhenIdle: true, // Only update map after user stops interacting
       updateWhenZooming: false, // Don't update during zoom animation
       keepBuffer: 2, // Keep 2 screens worth of tiles in buffer for smoother panning
-    }).setView([lat, lng], zoom);
+    } as any).setView([lat, lng], zoom);
 
     // Create street view layer with performance optimizations
     const streetLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {

@@ -392,7 +392,7 @@ export function useApproveJoinRequest() {
     mutationFn: (requestId: string) => approveJoinRequest(requestId),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: agencyKeys.joinRequests() });
-      queryClient.invalidateQueries({ queryKey: agencyKeys.agents });
+      queryClient.invalidateQueries({ queryKey: agencyKeys.all });
     },
   });
 }

@@ -10,11 +10,11 @@ import { ClockIcon, BuildingOfficeIcon, MapPinIcon, ChartBarIcon, StarIconSolid,
 import { optimizeCloudinaryUrl } from '@/config/cloudinaryConfig';
 
 // Tier configuration
-export const TIER_CONFIG: Record<string, { color: string; bg: string; label: string }> = {
-  premium: { color: 'text-amber-700', bg: 'bg-amber-100', label: 'Premium Premiere' },
-  highlight: { color: 'text-sky-700', bg: 'bg-sky-100', label: 'Highlight' },
-  featured: { color: 'text-violet-600', bg: 'bg-violet-50', label: 'Featured' },
-  standard: { color: 'text-gray-700', bg: 'bg-gray-100', label: 'Standard' },
+export const TIER_CONFIG: Record<string, { color: string; bg: string; label: string; icon: string }> = {
+  premium: { color: 'text-amber-700', bg: 'bg-amber-100', label: 'Premium Premiere', icon: '👑' },
+  highlight: { color: 'text-sky-700', bg: 'bg-sky-100', label: 'Highlight', icon: '✨' },
+  featured: { color: 'text-violet-600', bg: 'bg-violet-50', label: 'Featured', icon: '⭐' },
+  standard: { color: 'text-gray-700', bg: 'bg-gray-100', label: 'Standard', icon: '📋' },
 };
 
 interface TimeRemaining {

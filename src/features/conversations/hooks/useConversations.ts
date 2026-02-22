@@ -36,7 +36,7 @@ export function useConversations() {
 
   // Calculate unread count
   const unreadCount = conversations.reduce((count: number, conv: Conversation) => {
-    return count + (conv.unreadCount || 0);
+    return count + ((conv as any).unreadCount || conv.buyerUnreadCount || conv.sellerUnreadCount || 0);
   }, 0);
 
   return {

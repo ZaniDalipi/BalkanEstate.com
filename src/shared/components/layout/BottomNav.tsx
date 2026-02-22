@@ -1,8 +1,8 @@
 import React, { useMemo, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useAppContext } from '../../context/AppContext';
-import { AppView } from '../../types';
-import { SearchIcon, HeartIcon, EnvelopeIcon, UserCircleIcon, PencilIcon } from '../../constants';
+import { useAppContext } from '@/context/AppContext';
+import { AppView } from '@/types';
+import { SearchIcon, HeartIcon, EnvelopeIcon, UserCircleIcon, PencilIcon } from '@/constants';
 
 const BottomNav: React.FC = () => {
     const { t } = useTranslation(['nav']);

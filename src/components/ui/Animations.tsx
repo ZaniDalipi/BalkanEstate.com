@@ -20,6 +20,8 @@ type AnimationVariant =
 
 type AnimationDuration = 'fast' | 'normal' | 'slow' | 'slower';
 
+type CommonHTMLElement = 'div' | 'section' | 'article' | 'main' | 'aside' | 'header' | 'footer' | 'nav' | 'span' | 'p' | 'ul' | 'ol' | 'li';
+
 interface AnimatedProps {
   children: React.ReactNode;
   variant?: AnimationVariant;
@@ -28,7 +30,7 @@ interface AnimatedProps {
   className?: string;
   once?: boolean; // Only animate once when entering viewport
   threshold?: number; // Intersection observer threshold (0-1)
-  as?: keyof JSX.IntrinsicElements;
+  as?: CommonHTMLElement;
 }
 
 interface StaggeredListProps {
@@ -40,8 +42,8 @@ interface StaggeredListProps {
   itemClassName?: string;
   once?: boolean;
   threshold?: number;
-  as?: keyof JSX.IntrinsicElements;
-  itemAs?: keyof JSX.IntrinsicElements;
+  as?: CommonHTMLElement;
+  itemAs?: React.ElementType;
 }
 
 interface PageTransitionProps {
@@ -199,7 +201,8 @@ export const Animated = memo(function Animated({
 
   return (
     <Component
-      ref={ref as React.RefObject<HTMLDivElement>}
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      ref={ref as any}
       className={`${baseClasses} ${durationClass} ${isVisible ? animatedClass : initialClass} ${className}`}
       style={delayStyle}
     >
@@ -279,7 +282,8 @@ export const StaggeredList = memo(function StaggeredList({
   const animatedClass = variantAnimatedClasses[variant];
 
   return (
-    <Container ref={ref as React.RefObject<HTMLDivElement>} className={className}>
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    <Container ref={ref as any} className={className}>
       {React.Children.map(children, (child, index) => (
         <ItemComponent
           key={index}

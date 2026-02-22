@@ -54,9 +54,9 @@ export function useOpenMeteoGrid(bounds: MapBounds | null, dataType: DataType | 
   const [data, setData] = useState<WeatherGridPoint[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const debounceRef = useRef<ReturnType<typeof setTimeout>>();
+  const debounceRef = useRef<ReturnType<typeof setTimeout>>(undefined);
   const cacheRef = useRef<Map<string, { data: WeatherGridPoint[]; time: number }>>(new Map());
-  const abortRef = useRef<AbortController>();
+  const abortRef = useRef<AbortController>(undefined);
 
   const fetchGrid = useCallback(async (b: MapBounds, type: DataType) => {
     const key = `${roundBounds(b)}_${type}`;

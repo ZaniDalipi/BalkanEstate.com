@@ -110,22 +110,22 @@ const MapPropertyPopup: React.FC<MapPropertyPopupProps> = ({ property, onClose, 
 
         {/* Quick stats */}
         <div className="flex items-center gap-2 text-[10px] text-gray-600 mb-2">
-          {property.bedrooms !== undefined && (
+          {property.beds !== undefined && (
             <span className="flex items-center gap-0.5">
               <span>🛏️</span>
-              <span>{property.bedrooms}</span>
+              <span>{property.beds}</span>
             </span>
           )}
-          {property.bathrooms !== undefined && (
+          {property.baths !== undefined && (
             <span className="flex items-center gap-0.5">
               <span>🚿</span>
-              <span>{property.bathrooms}</span>
+              <span>{property.baths}</span>
             </span>
           )}
-          {property.size && (
+          {property.sqft && (
             <span className="flex items-center gap-0.5">
               <span>📐</span>
-              <span>{property.size}m²</span>
+              <span>{property.sqft}m²</span>
             </span>
           )}
         </div>

@@ -232,7 +232,8 @@ const PasswordRequirementsIndicator: React.FC<{ requirements: PasswordRequiremen
 };
 
 const AuthPage: React.FC = () => {
-    const { t } = useTranslation(['auth', 'common']);
+    const { t: rawT } = useTranslation(['auth', 'common']);
+    const t = rawT as (key: string, defaultValue?: string, options?: Record<string, string>) => string;
     const { state, dispatch, login, signup, requestPasswordReset, loginWithSocial } = useAppContext();
 
     const [isLoading, setIsLoading] = useState(false);
@@ -244,7 +245,7 @@ const AuthPage: React.FC = () => {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
-    const [phoneCountryCode, setPhoneCountryCode] = useState(BALKAN_COUNTRY_CODES[0].code);
+    const [phoneCountryCode, setPhoneCountryCode] = useState<string>(BALKAN_COUNTRY_CODES[0].code);
     const [phoneNumber, setPhoneNumber] = useState('');
 
     // Field-level errors for custom validation
@@ -303,10 +304,10 @@ const AuthPage: React.FC = () => {
 
         // Validate on blur
         if (field === 'email') {
-            const emailError = validateEmail(email, t);
+            const emailError = validateEmail(email, t as any);
             setFieldErrors(prev => ({ ...prev, email: emailError || undefined }));
         } else if (field === 'password' && state.authModalView === 'signup') {
-            const passwordError = validatePassword(password, t);
+            const passwordError = validatePassword(password, t as any);
             setFieldErrors(prev => ({ ...prev, password: passwordError || undefined }));
         } else if (field === 'confirmPassword') {
             if (password !== confirmPassword) {
@@ -315,7 +316,7 @@ const AuthPage: React.FC = () => {
                 setFieldErrors(prev => ({ ...prev, confirmPassword: undefined }));
             }
         } else if (field === 'phone') {
-            const phoneError = validatePhone(phoneCountryCode, phoneNumber, t);
+            const phoneError = validatePhone(phoneCountryCode, phoneNumber, t as any);
             setFieldErrors(prev => ({ ...prev, phone: phoneError || undefined }));
         }
     };
@@ -361,7 +362,7 @@ const AuthPage: React.FC = () => {
         e.preventDefault();
 
         // Custom validation before submit
-        const emailError = validateEmail(email, t);
+        const emailError = validateEmail(email, t as any);
         let passwordError: string | null = null;
         let confirmError: string | null = null;
         let phoneError: string | null = null;
@@ -373,7 +374,7 @@ const AuthPage: React.FC = () => {
             }
             // Phone is optional - only validate format if user entered something
             if (phoneNumber.trim()) {
-                phoneError = validatePhone(phoneCountryCode, phoneNumber, t);
+                phoneError = validatePhone(phoneCountryCode, phoneNumber, t as any);
             }
         } else {
             // Login - just check if password is provided
@@ -421,7 +422,7 @@ const AuthPage: React.FC = () => {
         e.preventDefault();
 
         // Validate email first
-        const emailError = validateEmail(email, t);
+        const emailError = validateEmail(email, t as any);
         setTouched({ email: true });
         setFieldErrors({ email: emailError || undefined });
 
@@ -500,7 +501,7 @@ const AuthPage: React.FC = () => {
                                     onChange={e => {
                                         setEmail(e.target.value);
                                         if (touched.email) {
-                                            const err = validateEmail(e.target.value, t);
+                                            const err = validateEmail(e.target.value, t as any);
                                             setFieldErrors(prev => ({ ...prev, email: err || undefined }));
                                         }
                                     }}
@@ -528,7 +529,7 @@ const AuthPage: React.FC = () => {
                                             onChange={(e) => {
                                                 setPhoneCountryCode(e.target.value);
                                                 if (touched.phone) {
-                                                    const err = validatePhone(e.target.value, phoneNumber, t);
+                                                    const err = validatePhone(e.target.value, phoneNumber, t as any);
                                                     setFieldErrors(prev => ({ ...prev, phone: err || undefined }));
                                                 }
                                             }}
@@ -550,7 +551,7 @@ const AuthPage: React.FC = () => {
                                                 const val = e.target.value.replace(/[^0-9\s\-]/g, '');
                                                 setPhoneNumber(val);
                                                 if (touched.phone) {
-                                                    const err = validatePhone(phoneCountryCode, val, t);
+                                                    const err = validatePhone(phoneCountryCode, val, t as any);
                                                     setFieldErrors(prev => ({ ...prev, phone: err || undefined }));
                                                 }
                                             }}
@@ -741,7 +742,7 @@ const AuthPage: React.FC = () => {
                                     onChange={e => {
                                         setEmail(e.target.value);
                                         if (touched.email) {
-                                            const err = validateEmail(e.target.value, t);
+                                            const err = validateEmail(e.target.value, t as any);
                                             setFieldErrors(prev => ({ ...prev, email: err || undefined }));
                                         }
                                     }}
@@ -787,7 +788,7 @@ const AuthPage: React.FC = () => {
                             </svg>
                         </div>
                         <h3 className="text-xl font-bold mb-3 text-neutral-800">{t('auth:forgotPassword.checkEmail')}</h3>
-                        <p className="text-sm text-neutral-500 mb-6">{t('auth:forgotPassword.emailSent', { email })}</p>
+                        <p className="text-sm text-neutral-500 mb-6">{(rawT as any)('auth:forgotPassword.emailSent', { email })}</p>
                         <button
                             onClick={() => dispatch({ type: 'SET_AUTH_MODAL_VIEW', payload: 'login' })}
                             className="w-full py-4 px-6 rounded-2xl font-bold text-white

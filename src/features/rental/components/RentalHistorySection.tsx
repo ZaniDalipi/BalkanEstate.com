@@ -1,6 +1,7 @@
 import React, { useState, useMemo, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Property, RentalHistoryEntry } from '@/types';
+import { Property } from '@/types';
+import { RentalHistoryEntry } from '@/src/shared/types/property.types';
 import { getCurrencySymbol } from '@/utils/currency';
 import * as api from '@/services/apiService';
 

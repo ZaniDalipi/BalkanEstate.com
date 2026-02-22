@@ -13,4 +13,5 @@ export interface SavedSearch {
   // Alert settings
   alertsEnabled?: boolean;
   alertFrequency?: 'instant' | 'daily' | 'weekly';
+  lastAlertSentAt?: string;
 }

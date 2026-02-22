@@ -32,8 +32,8 @@ const RoleSelector: React.FC<RoleSelectorProps> = ({ currentUser, selectedRole, 
     // - agentId exists (registered through agent process)
     const isRegisteredAgent =
         currentUser.availableRoles?.includes('agent' as UserRole) ||
-        currentUser.role === 'agent' ||
-        currentUser.role === UserRole.AGENT ||
+        (currentUser.role as string) === 'agent' ||
+        (currentUser.role as string) === (UserRole.AGENT as string) ||
         !!currentUser.agentId ||
         !!currentUser.licenseNumber;
 
@@ -99,7 +99,7 @@ const RoleSelector: React.FC<RoleSelectorProps> = ({ currentUser, selectedRole, 
                 : (sub.privateSellerCount || 0);
 
             // Get promotion coupons - only if subscription is active
-            const promotionCoupons = isActiveSubscription ? (sub.promotionCoupons || {}) : {};
+            const promotionCoupons: any = isActiveSubscription ? (sub.promotionCoupons || {}) : {};
             const featuredCoupons = promotionCoupons.featured || 0;
             const highlightedCoupons = promotionCoupons.highlighted || 0;
             const totalCoupons = promotionCoupons.available ?? (featuredCoupons + highlightedCoupons);
@@ -291,6 +291,7 @@ const RoleCard: React.FC<RoleCardProps> = ({
     agencyName
 }) => {
     const { t } = useTranslation(['seller']);
+    const { dispatch } = useAppContext();
     const remaining = subscription ? subscription.limit - subscription.used : 0;
     const isLimitReached = subscription ? (subscription.plan === 'none' || subscription.used >= subscription.limit) : false;
 

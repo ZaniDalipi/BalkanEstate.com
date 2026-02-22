@@ -49,7 +49,6 @@ const AgencyCouponRedemption: React.FC<AgencyCouponRedemptionProps> = ({
     return (
       user.availableRoles?.includes(UserRole.AGENT) ||
       user.role === UserRole.AGENT ||
-      user.role === 'agent' ||
       !!user.agentId ||
       !!user.licenseNumber
     );
@@ -58,7 +57,7 @@ const AgencyCouponRedemption: React.FC<AgencyCouponRedemptionProps> = ({
   // Check if user already belongs to an agency
   const userHasAgency = (): boolean => {
     const user = state.currentUser;
-    return !!(user?.agencyId || user?.agency?.agencyId);
+    return !!user?.agencyId;
   };
 
   // Check if user already has a Pro/Enterprise subscription
@@ -159,11 +158,6 @@ const AgencyCouponRedemption: React.FC<AgencyCouponRedemptionProps> = ({
             },
             agencyId: data.agency.id,
             agencyName: data.agency.name,
-            agency: {
-              agencyId: data.agency.id,
-              role: data.agency.role,
-              joinedAt: new Date().toISOString(),
-            },
           },
         });
 

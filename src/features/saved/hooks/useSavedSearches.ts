@@ -7,7 +7,7 @@ import {
   updateSavedSearchAccessTime,
   updateSavedSearch,
 } from '../api';
-import type { SavedSearch } from '@/types';
+import type { SavedSearch } from '@/src/shared/types';
 
 /**
  * Hook to get user's saved searches

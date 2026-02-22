@@ -7,7 +7,7 @@ export const preventClickjacking = () => {
   if (typeof window !== 'undefined') {
     if (window.self !== window.top) {
       // We're in an iframe - redirect to break out
-      window.top!.location = window.self.location;
+      window.top!.location.href = window.self.location.href;
     }
   }
 };

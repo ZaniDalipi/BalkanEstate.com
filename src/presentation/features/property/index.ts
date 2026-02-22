@@ -1,7 +1,8 @@
 // Property Feature - Public exports
 
+// TODO: Uncomment when property components are implemented
 // Components
-export * from './components';
+// export * from './components';
 
 // Hooks
 export * from './hooks';

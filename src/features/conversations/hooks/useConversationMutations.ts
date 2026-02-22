@@ -101,7 +101,7 @@ export function useSendMessage() {
         if (!old) return old;
         return {
           ...old,
-          messages: [...(old.messages || []).filter((m: Message) => m.status !== 'sending'), result.message],
+          messages: [...(old.messages || []).filter((m: Message) => (m as any).status !== 'sending'), result.message],
         };
       });
 

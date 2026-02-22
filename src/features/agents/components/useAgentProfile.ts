@@ -132,7 +132,9 @@ export function useAgentProfile({ agent }: { agent: Agent }) {
 
     // ─── Computed Values ─────────────────────────────────────────────────────
 
-    const isAgencyAgent = agent.agencyName && agent.agencyName !== 'Independent Agent';
+    const isAgencyAgent: string | false = agent.agencyName && agent.agencyName !== 'Independent Agent'
+        ? agent.agencyName
+        : false;
 
     // Validate agent coordinates - must be valid and within Balkans region (roughly lat: 35-47, lng: 13-31)
     // Coordinates of (0, 0) are in the Atlantic Ocean and clearly invalid
@@ -234,7 +236,9 @@ export function useAgentProfile({ agent }: { agent: Agent }) {
     const headerGradient = agencyGradient;
 
     // Check if agency has cover image
-    const hasCoverImage = isAgencyAgent && agent.agencyCoverImage;
+    const hasCoverImage: string | false = isAgencyAgent && agent.agencyCoverImage
+        ? agent.agencyCoverImage
+        : false;
 
     // ─── Effects ─────────────────────────────────────────────────────────────
 

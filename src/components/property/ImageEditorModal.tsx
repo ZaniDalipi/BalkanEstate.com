@@ -241,10 +241,12 @@ export const ImageEditorModal: React.FC<ImageEditorModalProps> = ({ imageUrl, pr
           const uploadedImageUrl = await uploadMessageImage(conversationId, file);
 
           await sendMessage(conversationId, {
+            id: `msg-${Date.now()}`,
             text: 'I have some questions about this property. Please see my annotations:',
             imageUrl: uploadedImageUrl,
-            sender: state.currentUser?.id || '',
+            senderId: state.currentUser?.id || '',
             timestamp: Date.now(),
+            isRead: false,
           });
 
           setSentConversationId(conversationId);

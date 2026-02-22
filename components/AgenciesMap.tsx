@@ -133,6 +133,7 @@ const AgenciesMap: React.FC<AgenciesMapProps> = ({ agencies, onAgencyClick }) =>
         maxBounds={BALKAN_BOUNDS}
         maxBoundsViscosity={0.8}
         preferCanvas={true}
+        // @ts-expect-error leaflet types
         updateWhenIdle={true}
         updateWhenZooming={false}
         keepBuffer={2}

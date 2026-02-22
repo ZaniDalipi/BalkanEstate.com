@@ -5,7 +5,7 @@ import { BALKAN_COUNTRIES } from '@/constants/countries';
 import SearchLocationBar from './SearchLocationBar';
 
 interface SearchHeaderProps {
-    t: (key: string) => string;
+    t: (key: string, defaultValue?: string) => string;
     filters: Filters;
     suggestions: NominatimResult[];
     isQueryInputFocused: boolean;

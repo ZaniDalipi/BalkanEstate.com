@@ -1,7 +1,7 @@
 // Auth State - Authentication and user management
 // Pure state definition with actions (MVI pattern)
 
-import { User } from '../../../domain/entities/User';
+import { User } from '../../../../domain/entities/User';
 
 export type AuthModalView = 'login' | 'signup' | 'forgotPassword' | 'forgotPasswordSuccess' | 'phoneCode' | 'phoneDetails';
 

@@ -3,6 +3,7 @@
 
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { propertyKeys, markPropertyAsSold, uploadPropertyImages } from '../api';
+import { apiRequest } from '@/src/shared/api';
 import type { Property } from '@/types';
 
 /**
@@ -51,7 +52,7 @@ export function usePromoteProperty() {
 
   const mutation = useMutation({
     mutationFn: async (propertyId: string): Promise<any> => {
-      return await api.promoteProperty(propertyId);
+      return await apiRequest(`/properties/${propertyId}/promote`, { method: 'POST', requiresAuth: true });
     },
     onSuccess: (_, propertyId) => {
       // Invalidate property to refetch with updated promotion status

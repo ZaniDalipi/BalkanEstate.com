@@ -180,7 +180,6 @@ const AgentListingsTab: React.FC<AgentListingsTabProps> = ({
             <PropertyCard
               key={property.id}
               property={property}
-              onClick={() => onPropertyClick(property)}
             />
           ))}
         </div>

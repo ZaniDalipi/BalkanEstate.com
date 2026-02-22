@@ -101,7 +101,7 @@ export function renderEmailConfig(
  */
 export async function getActiveEmailConfig(key: string): Promise<IEmailConfig | null> {
   try {
-    return await EmailConfig.findOne({ key, isActive: true }).lean() as IEmailConfig | null;
+    return await EmailConfig.findOne({ key, isActive: true }).lean() as unknown as IEmailConfig | null;
   } catch {
     return null;
   }

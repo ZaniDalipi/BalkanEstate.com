@@ -350,6 +350,8 @@ const appReducer = (state: AppState, action: AppAction): AppState => {
         };
     case 'HIDE_SESSION_EXPIRED_MODAL':
         return { ...state, isSessionExpiredModalOpen: false };
+    case 'SET_CURRENT_USER':
+        return { ...state, currentUser: action.payload, isAuthenticated: true };
     default:
       return state;
   }

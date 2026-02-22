@@ -244,7 +244,7 @@ describe('RoleSelector Component', () => {
             used: 0,
           }
         }
-      } as User;
+      } as unknown as User;
 
       render(
         <RoleSelector

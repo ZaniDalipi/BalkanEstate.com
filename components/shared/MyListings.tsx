@@ -509,7 +509,7 @@ const MyListings: React.FC<{ sellerId: string }> = ({ sellerId }) => {
                 }));
             }
             // Re-fetch to restore accurate state
-            fetchProperties();
+            fetchMyListings();
         }
     };
 
@@ -644,7 +644,7 @@ const MyListings: React.FC<{ sellerId: string }> = ({ sellerId }) => {
                 }
             } catch (error) {
                 // If backend fails, re-fetch to restore accurate state
-                fetchProperties();
+                fetchMyListings();
             }
             return;
         }

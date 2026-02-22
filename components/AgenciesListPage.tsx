@@ -74,7 +74,6 @@ const AgenciesListPage: React.FC = () => {
   const isUserAgent =
     currentUser?.availableRoles?.includes(UserRole.AGENT) ||
     currentUser?.role === UserRole.AGENT ||
-    currentUser?.role === 'agent' ||
     !!currentUser?.agentId ||
     !!currentUser?.licenseNumber;
 

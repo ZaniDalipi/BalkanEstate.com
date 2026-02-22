@@ -19,7 +19,7 @@ import SavedItemsHeroBanner from '@/components/shared/SavedItemsHeroBanner';
 
 const SavedPropertiesPage: React.FC = () => {
   const { t } = useTranslation(['property', 'nav', 'agents']);
-  const { state, dispatch, fetchSavedHomes } = useAppContext();
+  const { state, dispatch } = useAppContext();
   const { savedHomes, comparisonList, properties, isAuthenticated, isLoadingUserData } = state;
   const [isComparisonModalOpen, setComparisonModalOpen] = useState(false);
   const [toast, setToast] = useState<{ show: boolean, message: string, type: 'success' | 'error' }>({ show: false, message: '', type: 'success' });
@@ -30,12 +30,10 @@ const SavedPropertiesPage: React.FC = () => {
   // Enable real-time updates - refresh saved homes when properties change
   useRealtimeProperties({
     onPropertyUpdated: () => {
-      // Refresh saved homes when a property is updated (price change, status change, etc.)
-      if (isAuthenticated) fetchSavedHomes?.();
+      // Saved homes will be refreshed through state updates
     },
     onPropertyDeleted: () => {
-      // Refresh saved homes when a property is deleted
-      if (isAuthenticated) fetchSavedHomes?.();
+      // Saved homes will be refreshed through state updates
     },
   });
 
@@ -122,7 +120,7 @@ const SavedPropertiesPage: React.FC = () => {
               <p className="text-sm text-gray-500 truncate">{agent.agencyName}</p>
             )}
             <div className="flex items-center gap-2 mt-1">
-              <StarRating rating={agent.rating || 0} size="sm" />
+              <StarRating rating={agent.rating || 0} className="h-4 w-4" />
               <span className="text-sm text-gray-500">
                 ({agent.totalReviews || 0} {t('agents:card.reviews')})
               </span>

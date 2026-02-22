@@ -1,7 +1,7 @@
 // User Mapper
 // Converts between API DTOs and domain User/Agent entities
 
-import { User, Agent, UserRole } from '../../domain/entities/User';
+import { User, UserRole } from '../../domain/entities/User';
 
 export class UserMapper {
   static toDomain(dto: any): User {
@@ -33,8 +33,8 @@ export class UserMapper {
     return user.toDTO();
   }
 
-  static toAgentDomain(dto: any): Agent {
-    return Agent.fromDTO({
+  static toAgentDomain(dto: any): any {
+    return User.fromDTO({
       id: dto._id || dto.id,
       _id: dto._id,
       name: dto.name,

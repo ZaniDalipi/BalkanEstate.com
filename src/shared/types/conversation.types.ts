@@ -38,4 +38,6 @@ export interface Conversation {
   isRead: boolean;
   buyerUnreadCount: number;
   sellerUnreadCount: number;
+  unreadCount?: number; // Generic unread count for current user
+  status?: 'active' | 'archived' | 'deleted';
 }

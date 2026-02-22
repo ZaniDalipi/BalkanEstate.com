@@ -19,7 +19,7 @@ import { realEstateFAQs } from './src/components/seo';
 
 // Lazy load Analytics (only loads if env vars exist)
 const Analytics = lazy(() => import('./src/components/marketing/Analytics'));
-import { UserRole, HowItWorksTab, AdminSection, Agency } from './types';
+import { UserRole, HowItWorksTab, AdminSection, Agency, AppView } from './types';
 import { API_CONFIG, SUPPORTED_LANGUAGES, DEFAULT_LANGUAGE, ROUTES, HOW_IT_WORKS_TABS, ADMIN_SECTIONS } from './src/shared/constants/app.constants';
 
 // Inline LogoIcon to avoid importing all icons from constants
@@ -301,7 +301,7 @@ const AppContent: React.FC<{ onToggleSidebar: () => void }> = ({ onToggleSidebar
       }
 
       // Main navigation routes
-      const routeMap: Record<string, string> = {
+      const routeMap: Record<string, AppView> = {
         '/': 'search',
         '/search': 'search',
         '/explore-cities': 'explore-cities',

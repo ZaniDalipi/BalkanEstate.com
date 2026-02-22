@@ -4,7 +4,7 @@ export interface CardProps extends React.HTMLAttributes<HTMLDivElement> {
   variant?: 'default' | 'elevated' | 'outlined' | 'glass';
   padding?: 'none' | 'sm' | 'md' | 'lg';
   hoverable?: boolean;
-  as?: keyof JSX.IntrinsicElements;
+  as?: 'div' | 'section' | 'article' | 'aside' | 'main' | 'span';
 }
 
 const variantClasses: Record<string, string> = {
@@ -30,8 +30,9 @@ export const Card: React.FC<CardProps> = ({
   as: Component = 'div',
   ...props
 }) => {
+  const Tag = Component as React.ElementType;
   return (
-    <Component
+    <Tag
       className={`
         rounded-xl
         ${variantClasses[variant]}
@@ -42,7 +43,7 @@ export const Card: React.FC<CardProps> = ({
       {...props}
     >
       {children}
-    </Component>
+    </Tag>
   );
 };
 

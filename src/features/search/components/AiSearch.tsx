@@ -934,7 +934,11 @@ const AiSearch: React.FC<AiSearchProps> = ({ properties, onApplyFilters, isMobil
                 properties={matchedProperties}
                 onClose={() => setShowSwipeCards(false)}
                 onGoToFavorites={handleSwipeComplete}
-                t={(k, opts) => t(k, typeof opts === 'string' ? opts : opts || '')}
+                t={(k, opts) => {
+                        if (typeof opts === 'string') return t(k, opts) as string;
+                        if (opts) return t(k, opts as Record<string, string>) as string;
+                        return t(k) as string;
+                    }}
             />
         </div>
     );

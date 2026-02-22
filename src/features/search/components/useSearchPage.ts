@@ -53,9 +53,9 @@ export function useSearchPage() {
     // Use fetchProperties directly (it's already a stable useCallback) to avoid
     // re-subscribing to websocket events on every render.
     useRealtimeProperties({
-        onPropertyCreated: fetchProperties,
-        onPropertyUpdated: fetchProperties,
-        onPropertyDeleted: fetchProperties,
+        onPropertyCreated: (() => fetchProperties()) as any,
+        onPropertyUpdated: (() => fetchProperties()) as any,
+        onPropertyDeleted: (() => fetchProperties()) as any,
     });
 
     useEffect(() => {
@@ -945,18 +945,18 @@ export function useSearchPage() {
     // Generate dynamic SEO based on current filters using keyword-optimized data
     const seoTitle = useMemo(() => {
         return generateSearchSEOTitle({
-            country: filters.country && filters.country !== 'all' ? filters.country : undefined,
+            country: filters.country && filters.country !== 'any' ? filters.country : undefined,
             city: filters.query || undefined,
-            propertyType: filters.propertyType && filters.propertyType !== 'all' ? filters.propertyType : undefined,
+            propertyType: filters.propertyType && filters.propertyType !== 'any' ? filters.propertyType : undefined,
             query: filters.query || undefined,
         });
     }, [filters.country, filters.query, filters.propertyType]);
 
     const seoDescription = useMemo(() => {
         return generateSearchSEODescription({
-            country: filters.country && filters.country !== 'all' ? filters.country : undefined,
+            country: filters.country && filters.country !== 'any' ? filters.country : undefined,
             city: filters.query || undefined,
-            propertyType: filters.propertyType && filters.propertyType !== 'all' ? filters.propertyType : undefined,
+            propertyType: filters.propertyType && filters.propertyType !== 'any' ? filters.propertyType : undefined,
             query: filters.query || undefined,
             minPrice: filters.minPrice || undefined,
             maxPrice: filters.maxPrice || undefined,

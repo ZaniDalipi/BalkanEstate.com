@@ -132,7 +132,7 @@ export const useListingForm = (propertyToEdit: Property | null) => {
         const currentRole = currentUser?.activeRole || currentUser?.role;
 
         // Buyers always post under private_seller role context
-        if (currentRole === 'buyer' || currentRole === UserRole.BUYER) {
+        if (currentRole === 'buyer' || (currentRole as string) === (UserRole.BUYER as string)) {
             return UserRole.PRIVATE_SELLER;
         }
 
@@ -253,7 +253,7 @@ export const useListingForm = (propertyToEdit: Property | null) => {
             // Robustly load existing images - handle both object and string formats
             const existingImages: ImageData[] = (propertyToEdit.images || []).map(img => {
                 // Handle both {url: string} objects and plain string URLs
-                const imageUrl = typeof img === 'string' ? img : (img?.url || img?.previewUrl || '');
+                const imageUrl = typeof img === 'string' ? img : (img?.url || (img as any)?.previewUrl || '');
                 return { file: null, previewUrl: imageUrl };
             }).filter(img => img.previewUrl); // Filter out any empty URLs
             setImages(existingImages);
@@ -959,7 +959,7 @@ export const useListingForm = (propertyToEdit: Property | null) => {
                     propertyType: listingData.propertyType,
                     createdAsRole: selectedRole,
                 };
-                dispatch({ type: 'SET_PENDING_PROPERTY', payload: propertyToSave });
+                dispatch({ type: 'SET_PENDING_PROPERTY', payload: propertyToSave as any });
                 setPendingPropertyData(propertyToSave as any);
 
                 // Show the discount game modal

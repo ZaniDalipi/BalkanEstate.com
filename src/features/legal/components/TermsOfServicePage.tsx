@@ -21,7 +21,7 @@ const TermsOfServicePage: React.FC = () => {
   };
 
   const handleNavigate = (view: string) => {
-    dispatch({ type: 'SET_ACTIVE_VIEW', payload: view });
+    dispatch({ type: 'SET_ACTIVE_VIEW', payload: view as any });
     window.history.pushState({}, '', `/${view}`);
   };
 

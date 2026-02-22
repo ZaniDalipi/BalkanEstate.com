@@ -99,6 +99,7 @@ const CityRecommendations: React.FC = () => {
       filters: {
         country: 'any',
         query: displayName, // Show city name in search field for context
+        listingType: 'sale',
         minPrice: null,
         maxPrice: null,
         beds: null,
@@ -131,10 +132,17 @@ const CityRecommendations: React.FC = () => {
         maxDistanceToSchool: null,
         maxDistanceToHospital: null,
         amenities: [],
+        has360Tour: null,
+        hasDiscount: null,
+        hasPriceIncrease: null,
+        minPricePerSqm: null,
+        maxPricePerSqm: null,
+        maxDaysListed: null,
       },
       activeFilters: {
         country: 'any',
         query: '', // Empty for filtering - use geographic bounds instead
+        listingType: 'sale',
         minPrice: null,
         maxPrice: null,
         beds: null,
@@ -167,6 +175,12 @@ const CityRecommendations: React.FC = () => {
         maxDistanceToSchool: null,
         maxDistanceToHospital: null,
         amenities: [],
+        has360Tour: null,
+        hasDiscount: null,
+        hasPriceIncrease: null,
+        minPricePerSqm: null,
+        maxPricePerSqm: null,
+        maxDaysListed: null,
       },
       // Set city bounding box as the search area
       drawnBoundsJSON: drawnBoundsJSON,

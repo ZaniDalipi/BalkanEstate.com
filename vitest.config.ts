@@ -5,6 +5,7 @@ import path from 'path';
 
 export default defineConfig({
   plugins: [react()],
+  // @ts-expect-error vitest test config types may differ across versions
   test: {
     globals: true,
     environment: 'jsdom',
@@ -23,8 +24,10 @@ export default defineConfig({
       ],
     },
     // Mock browser APIs
-    deps: {
-      inline: ['@tanstack/react-query'],
+    server: {
+      deps: {
+        inline: ['@tanstack/react-query'],
+      },
     },
   },
   resolve: {
