@@ -2141,7 +2141,7 @@ export const deleteAccount = async (req: Request, res: Response): Promise<void> 
     }
 
     // For non-social accounts, require password confirmation
-    if (!(user as any).googleId && !(user as any).facebookId && !(user as any).appleId) {
+    if (user.provider === 'local') {
       if (!password) {
         res.status(400).json({ message: 'Password is required to delete your account' });
         return;
