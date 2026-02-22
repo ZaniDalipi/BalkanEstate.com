@@ -26,13 +26,27 @@ export function usePromotionCouponManager() {
   const [localError, setLocalError] = useState<string | null>(null);
   const [filterStatus, setFilterStatus] = useState<'all' | 'active' | 'expired' | 'disabled'>('all');
 
+  // Coupon duration options (in days) — aligned with subscription plans
+  const COUPON_DURATION_OPTIONS = [
+    { value: 1, label: '24 Hours' },
+    { value: 3, label: '3 Days' },
+    { value: 7, label: '1 Week' },
+    { value: 14, label: '2 Weeks' },
+    { value: 30, label: '1 Month' },
+    { value: 90, label: '3 Months' },
+    { value: 180, label: '6 Months' },
+    { value: 365, label: '1 Year' },
+    { value: 0, label: 'Custom' },
+  ] as const;
+
   // Form state
+  const [couponDuration, setCouponDurationRaw] = useState<number>(30); // default 30 days
   const [newCoupon, setNewCoupon] = useState<CreateCouponData>({
     code: '',
     description: '',
     discountType: 'percentage',
     discountValue: 10,
-    validUntil: '',
+    validUntil: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().slice(0, 16),
     maxTotalUses: 100,
     maxUsesPerUser: 1,
     applicableTiers: [],
@@ -41,6 +55,15 @@ export function usePromotionCouponManager() {
     isPublic: false,
     notes: '',
   });
+
+  // When duration changes, auto-calculate validUntil
+  const setCouponDuration = (days: number) => {
+    setCouponDurationRaw(days);
+    if (days > 0) {
+      const validUntil = new Date(Date.now() + days * 24 * 60 * 60 * 1000).toISOString().slice(0, 16);
+      setNewCoupon(prev => ({ ...prev, validUntil }));
+    }
+  };
 
   const handleCreateCoupon = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -115,12 +138,13 @@ export function usePromotionCouponManager() {
   };
 
   const resetForm = () => {
+    setCouponDurationRaw(30);
     setNewCoupon({
       code: '',
       description: '',
       discountType: 'percentage',
       discountValue: 10,
-      validUntil: '',
+      validUntil: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().slice(0, 16),
       maxTotalUses: 100,
       maxUsesPerUser: 1,
       applicableTiers: [],
@@ -132,6 +156,11 @@ export function usePromotionCouponManager() {
   };
 
   const applyPreset = (preset: 'test100' | 'welcome' | 'seasonal') => {
+    const presetDurations: Record<string, number> = {
+      test100: 365,
+      welcome: 180,
+      seasonal: 90,
+    };
     const presets: Record<string, CreateCouponData> = {
       test100: {
         code: 'TEST100',
@@ -176,6 +205,7 @@ export function usePromotionCouponManager() {
         notes: 'Seasonal promotion campaign',
       },
     };
+    setCouponDurationRaw(presetDurations[preset]);
     setNewCoupon(presets[preset]);
   };
 
@@ -231,6 +261,9 @@ export function usePromotionCouponManager() {
     setFilterStatus,
     newCoupon,
     setNewCoupon,
+    couponDuration,
+    setCouponDuration,
+    COUPON_DURATION_OPTIONS,
     createMutation,
     disableMutation,
     refreshCoupons,

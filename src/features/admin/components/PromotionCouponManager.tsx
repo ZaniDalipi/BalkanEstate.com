@@ -24,6 +24,9 @@ const PromotionCouponManager: React.FC = () => {
     setFilterStatus,
     newCoupon,
     setNewCoupon,
+    couponDuration,
+    setCouponDuration,
+    COUPON_DURATION_OPTIONS,
     createMutation,
     disableMutation,
     refreshCoupons,
@@ -236,6 +239,9 @@ const PromotionCouponManager: React.FC = () => {
         <CreateCouponModal
           newCoupon={newCoupon}
           setNewCoupon={setNewCoupon}
+          couponDuration={couponDuration}
+          setCouponDuration={setCouponDuration}
+          durationOptions={COUPON_DURATION_OPTIONS}
           applyPreset={applyPreset}
           getTierBadgeColor={getTierBadgeColor}
           onSubmit={handleCreateCoupon}
