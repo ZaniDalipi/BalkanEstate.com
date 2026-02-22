@@ -12,6 +12,70 @@ import {
 import { useAppContext } from '../../context/AppContext';
 import { API_URL } from '../../src/shared/api/config';
 import { trackEcommerce, trackEvent } from '../../src/components/marketing/Analytics';
+import { encryptSensitiveFields } from '../../src/shared/api/payloadEncryption';
+
+// ====== Encrypted Session Storage ======
+// AES-256-GCM encryption for payment data stored in sessionStorage.
+// Key lives only in memory — never persisted — so data cannot be read
+// after tab reload or by extensions that scrape storage.
+
+let _storageKey: CryptoKey | null = null;
+
+async function getStorageKey(): Promise<CryptoKey> {
+  if (_storageKey) return _storageKey;
+  _storageKey = await crypto.subtle.generateKey(
+    { name: 'AES-GCM', length: 256 },
+    false,       // not extractable
+    ['encrypt', 'decrypt'],
+  );
+  return _storageKey;
+}
+
+async function encryptToStorage(key: string, data: Record<string, any>): Promise<void> {
+  try {
+    const aesKey = await getStorageKey();
+    const iv = crypto.getRandomValues(new Uint8Array(12));
+    const encoded = new TextEncoder().encode(JSON.stringify(data));
+    const ciphertext = await crypto.subtle.encrypt(
+      { name: 'AES-GCM', iv },
+      aesKey,
+      encoded,
+    );
+    // Store IV + ciphertext as base64
+    const combined = new Uint8Array(iv.length + new Uint8Array(ciphertext).length);
+    combined.set(iv);
+    combined.set(new Uint8Array(ciphertext), iv.length);
+    sessionStorage.setItem(key, btoa(String.fromCharCode(...combined)));
+  } catch {
+    // Fallback: don't store anything if encryption fails
+    sessionStorage.removeItem(key);
+  }
+}
+
+async function decryptFromStorage(key: string): Promise<Record<string, any> | null> {
+  try {
+    const raw = sessionStorage.getItem(key);
+    if (!raw) return null;
+    const aesKey = await getStorageKey();
+    const combined = Uint8Array.from(atob(raw), c => c.charCodeAt(0));
+    const iv = combined.slice(0, 12);
+    const ciphertext = combined.slice(12);
+    const decrypted = await crypto.subtle.decrypt(
+      { name: 'AES-GCM', iv },
+      aesKey,
+      ciphertext,
+    );
+    return JSON.parse(new TextDecoder().decode(decrypted));
+  } catch {
+    return null;
+  }
+}
+
+// ====== Input Sanitization ======
+/** Strip anything except alphanumeric, hyphens, underscores */
+function sanitizeDiscountCode(code: string): string {
+  return code.replace(/[^A-Za-z0-9_-]/g, '').slice(0, 50);
+}
 
 // Country code mapping from language to country code
 const LANGUAGE_TO_COUNTRY: Record<string, string> = {
@@ -397,16 +461,20 @@ const PaymentWindow: React.FC<PaymentWindowProps> = ({
     setCodeValidation(null);
 
     try {
+      // Encrypt the discount code before sending
+      const rawBody = {
+        code: sanitizeDiscountCode(trimmedCode),
+        planId: effectivePlanId,
+        purchaseAmount: planPrice,
+      };
+      const encryptedBody = await encryptSensitiveFields(rawBody, ['code']);
+
       const response = await fetch(`${API_URL}/discount-codes/validate`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
-          code: trimmedCode,
-          planId: effectivePlanId,
-          purchaseAmount: planPrice,
-        }),
+        body: JSON.stringify(encryptedBody),
       });
 
       const data = await response.json();
@@ -456,18 +524,21 @@ const PaymentWindow: React.FC<PaymentWindowProps> = ({
       if (finalPrice === 0 || finalPrice < 0.01) {
 
         // Handle free subscription with 100% off coupon
+        // Encrypt discount code before sending
+        const freeBody = await encryptSensitiveFields({
+          planName,
+          planInterval,
+          productId: productId,
+          discountCode: appliedDiscountCode ? sanitizeDiscountCode(appliedDiscountCode) : undefined,
+        }, ['discountCode']);
+
         const response = await fetch(`${API_URL}/payments/apply-free-subscription`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
             'Authorization': `Bearer ${token}`,
           },
-          body: JSON.stringify({
-            planName,
-            planInterval,
-            productId: productId,
-            discountCode: appliedDiscountCode,
-          }),
+          body: JSON.stringify(freeBody),
         });
 
         if (!response.ok) {
@@ -477,12 +548,11 @@ const PaymentWindow: React.FC<PaymentWindowProps> = ({
 
         const data = await response.json();
 
-        // Track free subscription in Google Analytics
+        // Track free subscription (no sensitive data in analytics)
         trackEcommerce.subscribe(planName, 0);
         trackEvent('free_subscription_applied', {
           plan_name: planName,
           plan_interval: planInterval,
-          discount_code: appliedDiscountCode,
         });
 
         // Success! Call the success handler with a special ID for free subscriptions
@@ -516,22 +586,24 @@ const PaymentWindow: React.FC<PaymentWindowProps> = ({
       }
 
       // Create unified payment session with backend (routes to Paysera)
+      // Encrypt discount code if present
+      const paymentBody = await encryptSensitiveFields({
+        planName,
+        planInterval,
+        amount: finalPrice,
+        productId: finalProductId,
+        countryCode: userCountry,
+        language: navigator.language?.split('-')[0] || 'en',
+        ...(appliedDiscountCode ? { discountCode: sanitizeDiscountCode(appliedDiscountCode) } : {}),
+      }, ['discountCode']);
+
       const response = await fetch(`${API_URL}/payments/create-payment`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`,
         },
-        body: JSON.stringify({
-          planName,
-          planInterval,
-          amount: finalPrice,
-          productId: finalProductId,
-          countryCode: userCountry,
-          language: navigator.language?.split('-')[0] || 'en',
-          // Pass discount code so backend can mark it used after payment
-          ...(appliedDiscountCode ? { discountCode: appliedDiscountCode } : {}),
-        }),
+        body: JSON.stringify(paymentBody),
       });
 
       if (!response.ok) {
@@ -544,15 +616,15 @@ const PaymentWindow: React.FC<PaymentWindowProps> = ({
       // Open payment checkout page in new window
       if (data.paymentUrl) {
 
-        // Store payment info for callback
-        sessionStorage.setItem('pending_payment', JSON.stringify({
+        // Store payment info for callback (AES-256-GCM encrypted)
+        await encryptToStorage('pending_payment', {
           sessionId: data.sessionId,
           orderId: data.orderId,
           provider: data.provider,
           planName,
           planInterval,
           productId: finalProductId,
-        }));
+        });
 
         // Track payment initiation in Google Analytics
         trackEvent('begin_checkout', {

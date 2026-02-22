@@ -12,6 +12,7 @@ import {
 } from '../controllers/paymentController';
 import { handlePayseraWebhook, verifyPayseraPayment } from '../controllers/payseraWebhookController';
 import { protect } from '../middleware/auth';
+import { decryptPayload } from '../middleware/decryptPayload';
 import {
   validateCreatePayment,
   validateCountryCode,
@@ -29,7 +30,7 @@ const router = express.Router();
  * POST /api/payments/create-payment
  * Body: { planName, planInterval, amount, productId, countryCode, language, preferredProvider? }
  */
-router.post('/create-payment', protect, validateCreatePayment, createUnifiedPayment);
+router.post('/create-payment', protect, decryptPayload, validateCreatePayment, createUnifiedPayment);
 
 /**
  * Get payment provider info for a specific country
@@ -54,7 +55,7 @@ router.get('/methods/:countryCode', validateCountryCode, getAvailablePaymentMeth
 // ============================================================
 
 /** Apply free subscription with 100% off coupon */
-router.post('/apply-free-subscription', protect, validateFreeSubscription, applyFreeSubscription);
+router.post('/apply-free-subscription', protect, decryptPayload, validateFreeSubscription, applyFreeSubscription);
 
 /** Get subscription status */
 router.get('/subscription-status', protect, getSubscriptionStatus);

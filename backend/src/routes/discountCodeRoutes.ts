@@ -9,12 +9,13 @@ import {
   deleteDiscountCode,
 } from '../controllers/discountCodeController';
 import { protect } from '../middleware/auth';
+import { decryptPayload } from '../middleware/decryptPayload';
 import { couponValidationRateLimiterIP } from '../middleware/rateLimiter';
 
 const router = express.Router();
 
 // Public routes (rate-limited to prevent code enumeration)
-router.post('/validate', couponValidationRateLimiterIP, validateDiscountCode);
+router.post('/validate', couponValidationRateLimiterIP, decryptPayload, validateDiscountCode);
 
 // Protected routes (authentication required)
 router.post('/redeem', protect, redeemDiscountCode);
