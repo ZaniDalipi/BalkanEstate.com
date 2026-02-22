@@ -25,6 +25,16 @@ const CityRecommendations: React.FC = () => {
   const [failedImages, setFailedImages] = useState<Set<string>>(new Set());
   const { dispatch, updateSearchPageState } = useAppContext();
 
+  // Listen for country filter changes from footer (when component is already mounted)
+  useEffect(() => {
+    const handleCountryFilter = (e: Event) => {
+      const country = (e as CustomEvent).detail;
+      if (country) setSelectedCountry(country);
+    };
+    window.addEventListener('country-filter-change', handleCountryFilter);
+    return () => window.removeEventListener('country-filter-change', handleCountryFilter);
+  }, []);
+
   // Handle image load error - fallback to gradient
   const handleImageError = (cityName: string) => {
     setFailedImages(prev => new Set(prev).add(cityName));

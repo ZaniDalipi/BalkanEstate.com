@@ -826,13 +826,17 @@ export const updateAgency = async (
     if (coverGradient !== undefined) (agency as any).coverGradient = coverGradient;
     if (coverImage !== undefined) (agency as any).coverImage = coverImage;
     if (logoPosition !== undefined && typeof logoPosition === 'object') {
-      const lx = Math.max(0, Math.min(100, Number(logoPosition.x) || 50));
-      const ly = Math.max(0, Math.min(100, Number(logoPosition.y) || 50));
+      const rawLx = Number(logoPosition.x);
+      const rawLy = Number(logoPosition.y);
+      const lx = Math.max(0, Math.min(100, isNaN(rawLx) ? 50 : rawLx));
+      const ly = Math.max(0, Math.min(100, isNaN(rawLy) ? 50 : rawLy));
       (agency as any).logoPosition = { x: lx, y: ly };
     }
     if (coverPosition !== undefined && typeof coverPosition === 'object') {
-      const cx = Math.max(0, Math.min(100, Number(coverPosition.x) || 50));
-      const cy = Math.max(0, Math.min(100, Number(coverPosition.y) || 50));
+      const rawCx = Number(coverPosition.x);
+      const rawCy = Number(coverPosition.y);
+      const cx = Math.max(0, Math.min(100, isNaN(rawCx) ? 50 : rawCx));
+      const cy = Math.max(0, Math.min(100, isNaN(rawCy) ? 50 : rawCy));
       (agency as any).coverPosition = { x: cx, y: cy };
     }
 
