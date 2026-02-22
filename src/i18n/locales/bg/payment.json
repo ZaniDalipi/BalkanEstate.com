@@ -45,8 +45,7 @@
     "terms": "Условията за ползване",
     "privacy": "Политиката за поверителност",
     "refund": "Политиката за възстановяване",
-    "and": "и",
-    "lemonsqueezy": "Плащанията се обработват от нашия доставчик на плащания като Търговец на запис."
+    "and": "и"
   },
   "errors": {
     "title": "Payment Error",
@@ -68,7 +67,7 @@
     "secureCheckout": "Secure Checkout",
     "secureCheckoutDescription": "Complete your purchase on our secure payment partner",
     "secureExternalPayment": "Secure External Payment",
-    "secureExternalPaymentDescription": "You'll be redirected to our secure payment partner (LemonSqueezy) to complete your purchase. We never store your card details - they're handled entirely by our certified payment processor.",
+    "secureExternalPaymentDescription": "You'll be redirected to our secure payment partner (Paysera) to complete your purchase. We never store your card details - they're handled entirely by our certified payment processor.",
     "freeSubscriptionActivated": "Free Subscription Activated",
     "freeSubscriptionDescription": "Your discount code provides 100% off! Click the button below to activate your free subscription immediately. No payment required.",
     "freeSubscriptionReady": "Free Subscription Ready",
@@ -146,6 +145,6 @@
   },
   "taxNotice": {
     "title": "Taxes May Apply",
-    "description": "The final price at checkout may include applicable VAT/taxes based on your location. LemonSqueezy, as Merchant of Record, handles all tax compliance automatically."
+    "description": "The final price at checkout may include applicable VAT/taxes based on your location. Paysera handles all tax compliance automatically."
   }
 }

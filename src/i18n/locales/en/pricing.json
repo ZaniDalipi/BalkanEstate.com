@@ -224,11 +224,11 @@
   },
   "legal": {
     "title": "Secure Payments & Policies",
-    "description": "All payments are processed securely by LemonSqueezy. By subscribing, you agree to our policies:",
+    "description": "All payments are processed securely by Paysera. By subscribing, you agree to our policies:",
     "termsOfService": "Terms of Service",
     "privacyPolicy": "Privacy Policy",
     "refundPolicy": "Refund Policy",
-    "providerNote": "Payments handled by LemonSqueezy as Merchant of Record. VAT/taxes included where applicable."
+    "providerNote": "Payments handled by Paysera. VAT/taxes included where applicable."
   },
   "duration": {
     "7days": "7 days",

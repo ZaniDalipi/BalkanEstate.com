@@ -100,8 +100,7 @@
     "terms": "Uvjete korištenja",
     "privacy": "Politiku privatnosti",
     "refund": "Politiku povrata",
-    "and": "i",
-    "lemonsqueezy": "Plaćanja obrađuje naš pružatelj platnih usluga kao Trgovac evidencije."
+    "and": "i"
   },
   "subscription": {
     "alreadySubscribed": "Already Subscribed",
@@ -146,6 +145,6 @@
   },
   "taxNotice": {
     "title": "Taxes May Apply",
-    "description": "The final price at checkout may include applicable VAT/taxes based on your location. LemonSqueezy, as Merchant of Record, handles all tax compliance automatically."
+    "description": "The final price at checkout may include applicable VAT/taxes based on your location. Paysera handles all tax compliance automatically."
   }
 }

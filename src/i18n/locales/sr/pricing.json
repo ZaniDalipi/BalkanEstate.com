@@ -263,11 +263,11 @@
   },
   "legal": {
     "title": "Sigurna plaćanja i politike",
-    "description": "Sva plaćanja se bezbedno obrađuju preko LemonSqueezy-a. Pretplatom prihvatate naše politike:",
+    "description": "Sva plaćanja se bezbedno obrađuju preko Paysera. Pretplatom prihvatate naše politike:",
     "termsOfService": "Uslovi korišćenja",
     "privacyPolicy": "Politika privatnosti",
     "refundPolicy": "Politika povrata",
-    "providerNote": "Plaćanja obrađuje LemonSqueezy kao trgovac. PDV/porezi uključeni gde je primenljivo."
+    "providerNote": "Plaćanja obrađuje Paysera. PDV/porezi uključeni gde je primenljivo."
   },
   "duration": {
     "7days": "7 days",

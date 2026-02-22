@@ -358,43 +358,43 @@ backend/
 | `CLOUDINARY_API_SECRET` | Cloudinary API secret | Yes | - |
 | `FRONTEND_URL` | Frontend URL for CORS | No | http://localhost:5173 |
 
-### LemonSqueezy Payment Configuration
+### Paysera Payment Configuration
 
 | Variable | Description | Required |
 |----------|-------------|----------|
-| `LEMONSQUEEZY_API_KEY` | LemonSqueezy API key | Yes |
-| `LEMONSQUEEZY_STORE_ID` | LemonSqueezy store ID | Yes |
-| `LEMONSQUEEZY_WEBHOOK_SECRET` | Webhook signing secret | Yes (prod) |
-| `LEMONSQUEEZY_TEST_MODE` | Enable test mode | No |
+| `PAYSERA_PROJECT_ID` | Paysera project ID | Yes |
+| `PAYSERA_PROJECT_PASSWORD` | Paysera project password | Yes |
+| `PAYSERA_WEBHOOK_SECRET` | Webhook signing secret | Yes (prod) |
+| `PAYSERA_TEST_MODE` | Enable test mode | No |
 
-#### Subscription Variant IDs
+#### Subscription Plan IDs
 | Variable | Description |
 |----------|-------------|
-| `LEMONSQUEEZY_VARIANT_BUYER_PRO_MONTHLY` | Buyer Pro monthly subscription |
-| `LEMONSQUEEZY_VARIANT_PRO_MONTHLY` | Pro monthly subscription |
-| `LEMONSQUEEZY_VARIANT_PRO_YEARLY` | Pro yearly subscription |
-| `LEMONSQUEEZY_VARIANT_ENTERPRISE_YEARLY` | Enterprise yearly subscription |
+| `PAYSERA_PLAN_BUYER_PRO_MONTHLY` | Buyer Pro monthly subscription |
+| `PAYSERA_PLAN_PRO_MONTHLY` | Pro monthly subscription |
+| `PAYSERA_PLAN_PRO_YEARLY` | Pro yearly subscription |
+| `PAYSERA_PLAN_ENTERPRISE_YEARLY` | Enterprise yearly subscription |
 
-#### Property Promotion Variant IDs
+#### Property Promotion Plan IDs
 | Variable | Description |
 |----------|-------------|
-| `LEMONSQUEEZY_VARIANT_PROMO_FEATURED` | Featured promotion (any duration) |
-| `LEMONSQUEEZY_VARIANT_PROMO_HIGHLIGHT` | Highlight promotion (any duration) |
-| `LEMONSQUEEZY_VARIANT_PROMO_PREMIUM` | Premium promotion (any duration) |
-| `LEMONSQUEEZY_VARIANT_PROMO_FEATURED_7` | Featured 7-day promotion |
-| `LEMONSQUEEZY_VARIANT_PROMO_FEATURED_15` | Featured 15-day promotion |
-| `LEMONSQUEEZY_VARIANT_PROMO_FEATURED_30` | Featured 30-day promotion |
-| `LEMONSQUEEZY_VARIANT_PROMO_HIGHLIGHT_7` | Highlight 7-day promotion |
-| `LEMONSQUEEZY_VARIANT_PROMO_HIGHLIGHT_30` | Highlight 30-day promotion |
-| `LEMONSQUEEZY_VARIANT_PROMO_PREMIUM_30` | Premium 30-day promotion |
-| `LEMONSQUEEZY_VARIANT_PROMO_PREMIUM_90` | Premium 90-day promotion |
+| `PAYSERA_PLAN_PROMO_FEATURED` | Featured promotion (any duration) |
+| `PAYSERA_PLAN_PROMO_HIGHLIGHT` | Highlight promotion (any duration) |
+| `PAYSERA_PLAN_PROMO_PREMIUM` | Premium promotion (any duration) |
+| `PAYSERA_PLAN_PROMO_FEATURED_7` | Featured 7-day promotion |
+| `PAYSERA_PLAN_PROMO_FEATURED_15` | Featured 15-day promotion |
+| `PAYSERA_PLAN_PROMO_FEATURED_30` | Featured 30-day promotion |
+| `PAYSERA_PLAN_PROMO_HIGHLIGHT_7` | Highlight 7-day promotion |
+| `PAYSERA_PLAN_PROMO_HIGHLIGHT_30` | Highlight 30-day promotion |
+| `PAYSERA_PLAN_PROMO_PREMIUM_30` | Premium 30-day promotion |
+| `PAYSERA_PLAN_PROMO_PREMIUM_90` | Premium 90-day promotion |
 
-#### Agency Featured Variant IDs
+#### Agency Featured Plan IDs
 | Variable | Description |
 |----------|-------------|
-| `LEMONSQUEEZY_VARIANT_AGENCY_FEATURED_WEEKLY` | Agency weekly featured |
-| `LEMONSQUEEZY_VARIANT_AGENCY_FEATURED_MONTHLY` | Agency monthly featured |
-| `LEMONSQUEEZY_VARIANT_AGENCY_FEATURED_YEARLY` | Agency yearly featured |
+| `PAYSERA_PLAN_AGENCY_FEATURED_WEEKLY` | Agency weekly featured |
+| `PAYSERA_PLAN_AGENCY_FEATURED_MONTHLY` | Agency monthly featured |
+| `PAYSERA_PLAN_AGENCY_FEATURED_YEARLY` | Agency yearly featured |
 
 ## Development Tips
 

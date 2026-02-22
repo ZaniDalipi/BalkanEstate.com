@@ -62,7 +62,7 @@ router.get('/subscription-status', protect, getSubscriptionStatus);
 /** Cancel subscription */
 router.post('/cancel-subscription', protect, cancelSubscription);
 
-/** Get customer portal URL (LemonSqueezy — update payment method, view invoices) */
+/** Get customer portal URL (update payment method, view invoices) */
 router.get('/customer-portal', protect, getCustomerPortal);
 
 // ============================================================

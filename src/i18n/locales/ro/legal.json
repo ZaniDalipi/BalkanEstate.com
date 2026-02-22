@@ -160,11 +160,10 @@
       "cancel": "Puteți anula abonamentul în orice moment prin setările contului",
       "refund": "Rambursările sunt disponibile în termen de 7 zile (lunar) sau 30 de zile (anual) de la cumpărare dacă nu sunteți mulțumit (consultați Politica noastră de rambursare)",
       "price": "Putem modifica prețurile abonamentelor cu preaviz de 30 de zile",
-      "lemonsqueezy": {
-        "title": "Comerciant înregistrat",
-        "morStatement": "Procesul nostru de comandă este gestionat de revânzătorul nostru online și furnizorul de servicii de plată. Furnizorul nostru de servicii de plată este Comerciantul înregistrat pentru toate comenzile noastre și gestionează toate întrebările de asistență pentru clienți și retururile.",
-        "text": "Când faceți o achiziție, efectuați o tranzacție cu furnizorul nostru de servicii de plată, care gestionează procesarea plăților, facturarea, conformitatea TVA/impozite și rambursările.",
-        "buyerTerms": "Prin efectuarea unei achiziții, acceptați și Termenii pentru cumpărători ai furnizorului nostru de servicii de plată."
+      "paysera": {
+        "title": "Procesarea plăților",
+        "text": "Când faceți o achiziție, efectuați o tranzacție cu furnizorul nostru de servicii de plată Paysera, care gestionează procesarea plăților, facturarea, conformitatea TVA/impozite și rambursările.",
+        "buyerTerms": "Prin efectuarea unei achiziții, acceptați și Termenii de utilizare Paysera."
       }
     },
     "prohibited": {

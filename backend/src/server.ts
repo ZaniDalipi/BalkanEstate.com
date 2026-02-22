@@ -205,14 +205,6 @@ serverLogger.info('✅ Monthly coupon refresh job started (1st of each month)');
 applySecurityMiddleware(app);
 
 // Body parser
-// For webhook routes: capture raw body buffer for HMAC signature verification
-// This must be registered BEFORE the general JSON parser
-app.use('/api/webhooks/lemon-squeezy', express.json({
-  limit: '1mb',
-  verify: (req: any, _res, buf) => {
-    req.rawBody = buf;
-  },
-}));
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 

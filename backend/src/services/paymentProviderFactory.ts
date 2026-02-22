@@ -4,19 +4,15 @@
  * Unified payment routing system for all 11 Balkan countries.
  *
  * Provider Strategy:
- * - LemonSqueezy (Primary): Merchant of Record for all countries.
- *   Handles card, Google Pay, Apple Pay, VAT/tax compliance globally.
- *   Works for MK-based companies (MoR processes under their merchant account).
- * - Paysera (Secondary): Bank transfers / SEPA for non-EU Balkans.
- *   Available for direct bank payments where users prefer it.
+ * - Paysera (Primary): Handles card, Google Pay, Apple Pay, bank transfers,
+ *   SEPA, and e-wallet payments for all Balkan countries.
  */
 
-import { lemonSqueezyService } from './lemonSqueezy';
 import { payseraService, type PayseraPaymentMethod } from './payseraService';
 import { paymentLogger } from '../utils/logger';
 
 // Payment provider types
-export type PaymentProvider = 'lemon_squeezy' | 'paysera' | 'web';
+export type PaymentProvider = 'paysera' | 'web';
 
 // Country to provider mapping
 export interface CountryProviderMapping {
@@ -26,29 +22,27 @@ export interface CountryProviderMapping {
   currency: string;
   isEU: boolean;
   isSEPA: boolean;
-  fallbackProvider?: PaymentProvider;
 }
 
 /**
  * Country to Payment Provider Mapping
- * All countries use LemonSqueezy as primary (MoR handles tax/compliance).
- * Non-EU countries have Paysera as fallback for bank transfers.
+ * All countries use Paysera as the primary payment provider.
  */
 export const COUNTRY_PROVIDER_MAP: Record<string, CountryProviderMapping> = {
-  // EU Countries — LemonSqueezy primary
-  GR: { countryCode: 'GR', countryName: 'Greece', provider: 'lemon_squeezy', currency: 'EUR', isEU: true, isSEPA: true },
-  HR: { countryCode: 'HR', countryName: 'Croatia', provider: 'lemon_squeezy', currency: 'EUR', isEU: true, isSEPA: true },
-  BG: { countryCode: 'BG', countryName: 'Bulgaria', provider: 'lemon_squeezy', currency: 'EUR', isEU: true, isSEPA: true },
-  RO: { countryCode: 'RO', countryName: 'Romania', provider: 'lemon_squeezy', currency: 'EUR', isEU: true, isSEPA: true },
-  SI: { countryCode: 'SI', countryName: 'Slovenia', provider: 'lemon_squeezy', currency: 'EUR', isEU: true, isSEPA: true },
+  // EU Countries
+  GR: { countryCode: 'GR', countryName: 'Greece', provider: 'paysera', currency: 'EUR', isEU: true, isSEPA: true },
+  HR: { countryCode: 'HR', countryName: 'Croatia', provider: 'paysera', currency: 'EUR', isEU: true, isSEPA: true },
+  BG: { countryCode: 'BG', countryName: 'Bulgaria', provider: 'paysera', currency: 'EUR', isEU: true, isSEPA: true },
+  RO: { countryCode: 'RO', countryName: 'Romania', provider: 'paysera', currency: 'EUR', isEU: true, isSEPA: true },
+  SI: { countryCode: 'SI', countryName: 'Slovenia', provider: 'paysera', currency: 'EUR', isEU: true, isSEPA: true },
 
-  // Non-EU Balkans — LemonSqueezy primary, Paysera fallback for bank transfers
-  RS: { countryCode: 'RS', countryName: 'Serbia', provider: 'lemon_squeezy', currency: 'EUR', isEU: false, isSEPA: true, fallbackProvider: 'paysera' },
-  AL: { countryCode: 'AL', countryName: 'Albania', provider: 'lemon_squeezy', currency: 'EUR', isEU: false, isSEPA: true, fallbackProvider: 'paysera' },
-  BA: { countryCode: 'BA', countryName: 'Bosnia and Herzegovina', provider: 'lemon_squeezy', currency: 'EUR', isEU: false, isSEPA: false, fallbackProvider: 'paysera' },
-  MK: { countryCode: 'MK', countryName: 'North Macedonia', provider: 'lemon_squeezy', currency: 'EUR', isEU: false, isSEPA: true, fallbackProvider: 'paysera' },
-  ME: { countryCode: 'ME', countryName: 'Montenegro', provider: 'lemon_squeezy', currency: 'EUR', isEU: false, isSEPA: true, fallbackProvider: 'paysera' },
-  XK: { countryCode: 'XK', countryName: 'Kosovo', provider: 'lemon_squeezy', currency: 'EUR', isEU: false, isSEPA: false, fallbackProvider: 'paysera' },
+  // Non-EU Balkans
+  RS: { countryCode: 'RS', countryName: 'Serbia', provider: 'paysera', currency: 'EUR', isEU: false, isSEPA: true },
+  AL: { countryCode: 'AL', countryName: 'Albania', provider: 'paysera', currency: 'EUR', isEU: false, isSEPA: true },
+  BA: { countryCode: 'BA', countryName: 'Bosnia and Herzegovina', provider: 'paysera', currency: 'EUR', isEU: false, isSEPA: false },
+  MK: { countryCode: 'MK', countryName: 'North Macedonia', provider: 'paysera', currency: 'EUR', isEU: false, isSEPA: true },
+  ME: { countryCode: 'ME', countryName: 'Montenegro', provider: 'paysera', currency: 'EUR', isEU: false, isSEPA: true },
+  XK: { countryCode: 'XK', countryName: 'Kosovo', provider: 'paysera', currency: 'EUR', isEU: false, isSEPA: false },
 };
 
 export interface CreatePaymentParams {
@@ -79,35 +73,18 @@ export interface PaymentResult {
 /**
  * Payment Provider Factory Class
  *
- * Routes payment creation to the appropriate provider based on country,
- * configuration availability, and user preference.
+ * Routes payment creation to Paysera based on country and configuration.
  */
 class PaymentProviderFactory {
   /**
    * Get the appropriate payment provider for a country.
-   *
-   * Resolution order:
-   * 1. If LemonSqueezy (or future MoR) is configured → use it (card + Google Pay + Apple Pay)
-   * 2. If Paysera is configured → use it (bank transfers, SEPA, e-wallet)
-   * 3. Return the default provider from the mapping (unconfigured — will show setup error)
-   *
-   * Note: LemonSqueezy may not be available for MK-registered companies.
-   * If MoR env vars are not set, Paysera is used as primary for ALL countries.
    */
   public getProviderForCountry(countryCode: string): PaymentProvider {
-    const mapping = COUNTRY_PROVIDER_MAP[countryCode.toUpperCase()];
-
-    // If the MoR (LemonSqueezy) is configured, use it as primary
-    if (lemonSqueezyService.isConfigured()) {
-      return 'lemon_squeezy';
-    }
-
-    // MoR not configured — fall back to Paysera for all countries if configured
     if (payseraService.isConfigured()) {
       return 'paysera';
     }
 
-    // Neither configured — return mapping default (will show config error)
+    const mapping = COUNTRY_PROVIDER_MAP[countryCode.toUpperCase()];
     return mapping?.provider || 'paysera';
   }
 
@@ -146,77 +123,17 @@ class PaymentProviderFactory {
     const provider = params.preferredProvider || this.getProviderForCountry(params.countryCode);
 
     switch (provider) {
-      case 'lemon_squeezy':
-        return this.createLemonSqueezyPayment(params);
-
       case 'paysera':
         return this.createPayseraPayment(params);
 
       default:
-        // Try any configured provider
-        if (lemonSqueezyService.isConfigured()) return this.createLemonSqueezyPayment(params);
         if (payseraService.isConfigured()) return this.createPayseraPayment(params);
         return {
           success: false,
           provider: 'web',
-          error: 'No payment provider is configured. Please set up LemonSqueezy or Paysera environment variables.',
+          error: 'No payment provider is configured. Please set up Paysera environment variables.',
         };
     }
-  }
-
-  /**
-   * Create a LemonSqueezy checkout session (MoR — card, Google Pay, Apple Pay)
-   */
-  private async createLemonSqueezyPayment(params: CreatePaymentParams): Promise<PaymentResult> {
-    if (!lemonSqueezyService.isConfigured()) {
-      // Fall back to Paysera if available
-      if (payseraService.isConfigured()) {
-        paymentLogger.info('LemonSqueezy not configured, falling back to Paysera');
-        return this.createPayseraPayment(params);
-      }
-      return {
-        success: false,
-        provider: 'lemon_squeezy',
-        error: 'Payment provider is not configured. Please contact support.',
-      };
-    }
-
-    const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
-    const successUrl = `${frontendUrl}/payment/success?provider=lemon_squeezy`;
-
-    const result = await lemonSqueezyService.createCheckout({
-      email: params.userEmail,
-      name: params.firstName
-        ? `${params.firstName}${params.lastName ? ` ${params.lastName}` : ''}`
-        : undefined,
-      userId: params.userId,
-      planName: params.planName,
-      planInterval: params.planInterval === 'one_time' ? 'month' : params.planInterval,
-      countryCode: params.countryCode,
-      productId: params.productId,
-      successUrl,
-    });
-
-    if (result.success) {
-      return {
-        success: true,
-        provider: 'lemon_squeezy',
-        paymentUrl: result.checkoutUrl,
-        sessionId: result.checkoutId,
-      };
-    }
-
-    // If LemonSqueezy fails, try Paysera as fallback for any country
-    if (payseraService.isConfigured()) {
-      paymentLogger.warn('LemonSqueezy checkout failed, falling back to Paysera');
-      return this.createPayseraPayment(params);
-    }
-
-    return {
-      success: false,
-      provider: 'lemon_squeezy',
-      error: result.error || 'Failed to create checkout session',
-    };
   }
 
   /**
@@ -287,9 +204,8 @@ class PaymentProviderFactory {
     firstName?: string;
     lastName?: string;
   }): Promise<PaymentResult> {
-    // Promotions are one-time payments routed through LemonSqueezy
     const promoType = params.promotionType || params.promotionTier || 'standard';
-    return this.createLemonSqueezyPayment({
+    return this.createPayseraPayment({
       ...params,
       countryCode: params.countryCode || 'GR',
       productId: `promotion_${promoType}`,
@@ -303,12 +219,6 @@ class PaymentProviderFactory {
    */
   public getProviderInfo(provider: PaymentProvider): { name: string; description: string; fees: string } {
     switch (provider) {
-      case 'lemon_squeezy':
-        return {
-          name: 'LemonSqueezy',
-          description: 'Secure payment processing with card, Google Pay, and Apple Pay',
-          fees: '~5% + $0.50 (includes VAT handling)',
-        };
       case 'paysera':
         return {
           name: 'Paysera',
@@ -328,19 +238,10 @@ class PaymentProviderFactory {
    * Get available payment methods for a country based on active providers
    */
   public getAvailablePaymentMethods(countryCode: string): string[] {
-    const provider = this.getProviderForCountry(countryCode);
     const mapping = this.getCountryMapping(countryCode);
     const methods: string[] = [];
 
-    if (provider === 'lemon_squeezy' && lemonSqueezyService.isConfigured()) {
-      // MoR handles card, Google Pay, Apple Pay globally
-      methods.push('card', 'google_pay', 'apple_pay');
-      if (mapping?.isSEPA) methods.push('sepa_debit');
-    }
-
-    if (provider === 'paysera' || payseraService.isConfigured()) {
-      // Paysera supports card, Google Pay, Apple Pay (via card gateway),
-      // bank transfers, SEPA, and e-wallet
+    if (payseraService.isConfigured()) {
       methods.push('card', 'google_pay', 'apple_pay');
       methods.push('bank_transfer');
       if (mapping?.isSEPA) methods.push('sepa_debit');

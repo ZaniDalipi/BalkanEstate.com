@@ -4,7 +4,6 @@ import Product from '../models/Product';
 import DiscountCode from '../models/DiscountCode';
 import { processSubscriptionPayment } from '../services/subscriptionPaymentService';
 import { paymentProviderFactory } from '../services/paymentProviderFactory';
-import { lemonSqueezyService } from '../services/lemonSqueezy';
 import { paymentLogger } from '../utils/logger';
 
 /**
@@ -50,7 +49,7 @@ export const createUnifiedPayment = async (req: Request, res: Response): Promise
       paymentLogger.warn(`Country ${userCountry} not in our supported list`);
     }
 
-    // Create payment using the factory (routes to LemonSqueezy or Paysera)
+    // Create payment using the factory (routes to Paysera)
     const result = await paymentProviderFactory.createPayment({
       userId: userId.toString(),
       userEmail: user.email,
@@ -440,7 +439,7 @@ export const applyFreeSubscription = async (req: Request, res: Response): Promis
 };
 
 /**
- * @desc    Get LemonSqueezy customer portal URL for managing subscription
+ * @desc    Get customer portal URL for managing subscription
  * @route   GET /api/payments/customer-portal
  * @access  Private
  */
@@ -458,26 +457,8 @@ export const getCustomerPortal = async (req: Request, res: Response): Promise<vo
       return;
     }
 
-    const lsSubscriptionId = (user as any).subscriptionMetadata?.lemonSqueezySubscriptionId;
-    if (!lsSubscriptionId) {
-      res.status(404).json({ message: 'No active LemonSqueezy subscription found' });
-      return;
-    }
-
-    const subscription = await lemonSqueezyService.getSubscription(lsSubscriptionId);
-    const portalUrl = subscription?.data?.attributes?.urls?.customer_portal;
-    const updatePaymentUrl = subscription?.data?.attributes?.urls?.update_payment_method;
-
-    if (!portalUrl) {
-      res.status(404).json({ message: 'Customer portal not available' });
-      return;
-    }
-
-    res.status(200).json({
-      success: true,
-      portalUrl,
-      updatePaymentUrl,
-    });
+    // Customer portal is not currently available
+    res.status(404).json({ message: 'Customer portal not available' });
   } catch (error: any) {
     paymentLogger.error('Error getting customer portal:', error);
     res.status(500).json({ message: 'Error getting customer portal' });
@@ -505,7 +486,7 @@ export const getAvailablePaymentMethods = async (req: Request, res: Response): P
       success: true,
       countryCode: code,
       methods,
-      provider: mapping?.provider || 'lemon_squeezy',
+      provider: mapping?.provider || 'paysera',
       isEU: mapping?.isEU || false,
       isSEPA: mapping?.isSEPA || false,
     });

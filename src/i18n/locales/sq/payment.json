@@ -100,8 +100,7 @@
     "terms": "Kushtet e Shërbimit",
     "privacy": "Politikën e Privatësisë",
     "refund": "Politikën e Rimbursimit",
-    "and": "dhe",
-    "lemonsqueezy": "Pagesat përpunohen nga ofruesi ynë i pagesave si Tregtari i Regjistruar."
+    "and": "dhe"
   },
   "subscription": {
     "alreadySubscribed": "Already Subscribed",
@@ -146,6 +145,6 @@
   },
   "taxNotice": {
     "title": "Taxes May Apply",
-    "description": "The final price at checkout may include applicable VAT/taxes based on your location. LemonSqueezy, as Merchant of Record, handles all tax compliance automatically."
+    "description": "The final price at checkout may include applicable VAT/taxes based on your location. Paysera handles all tax compliance automatically."
   }
 }

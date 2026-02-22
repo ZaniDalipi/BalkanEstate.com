@@ -66,8 +66,6 @@ export interface IUser extends Document {
   subscriptionStatus?: 'active' | 'expired' | 'trial' | 'grace' | 'canceled';
   subscriptionRenewalDate?: Date;
   subscriptionMetadata?: {
-    lemonSqueezySubscriptionId?: string;
-    lemonSqueezyCustomerId?: string;
     payseraOrderId?: string;
   };
 
@@ -475,10 +473,8 @@ const UserSchema: Schema = new Schema(
     subscriptionRenewalDate: {
       type: Date,
     },
-    // Payment provider metadata (LemonSqueezy, Paysera, etc.)
+    // Payment provider metadata (Paysera)
     subscriptionMetadata: {
-      lemonSqueezySubscriptionId: { type: String, index: true },
-      lemonSqueezyCustomerId: { type: String, index: true },
       payseraOrderId: { type: String },
     },
     // Tier-specific features

@@ -2,8 +2,8 @@
  * Payment API Service
  *
  * Handles all payment-related API calls.
- * Routes to LemonSqueezy (primary MoR) or Paysera (bank transfers)
- * based on country. The backend auto-routes via PaymentProviderFactory.
+ * Routes to Paysera based on country.
+ * The backend auto-routes via PaymentProviderFactory.
  */
 
 import { apiRequest } from '@/shared/api/httpClient';
@@ -122,7 +122,7 @@ export interface CustomerPortalResponse {
 
 /**
  * Create a payment session using the unified endpoint
- * Backend automatically routes to LemonSqueezy or Paysera based on country
+ * Backend automatically routes to Paysera based on country
  */
 export async function createPayment(request: CreatePaymentRequest): Promise<CreatePaymentResponse> {
   try {
@@ -161,14 +161,14 @@ export async function getPaymentProvider(countryCode: string): Promise<PaymentPr
         countryName: info.countryName,
         provider: info.provider,
         providerInfo: {
-          name: info.provider === 'lemon_squeezy' ? 'LemonSqueezy' : 'Web Payment',
+          name: 'Paysera',
           description: 'Secure online payments',
-          fees: info.provider === 'lemon_squeezy' ? '~5% + $0.50' : 'Standard fees',
+          fees: '~1.5-2.5%',
         },
         isEU: info.isEU,
         isSEPA: info.isSEPA,
         currency: info.currency,
-        supportedMethods: ['card', 'google_pay', 'apple_pay'],
+        supportedMethods: ['card', 'google_pay', 'apple_pay', 'bank_transfer'],
       };
     }
     return null;
@@ -192,9 +192,9 @@ export async function getSupportedCountries(): Promise<SupportedCountriesRespons
       countries: countries.map(c => ({
         ...c,
         providerInfo: {
-          name: c.provider === 'lemon_squeezy' ? 'LemonSqueezy' : 'Web Payment',
+          name: 'Paysera',
           description: 'Secure online payments',
-          fees: c.provider === 'lemon_squeezy' ? '~5% + $0.50' : 'Standard fees',
+          fees: '~1.5-2.5%',
         },
       })),
     };
@@ -232,26 +232,15 @@ export async function verifyPayment(params: URLSearchParams): Promise<VerifyPaym
         endpoint,
         { method: 'GET', requiresAuth: true }
       );
-      return { ...response, provider: provider || 'lemon_squeezy' };
+      return { ...response, provider: provider || 'paysera' };
     } catch (error: any) {
-      // For LemonSqueezy, the webhook may take a moment to process
       return {
         success: true,
         paymentStatus: 'pending_confirmation',
-        provider: provider || 'lemon_squeezy',
+        provider: provider || 'paysera',
         message: 'Payment received! Your subscription will be activated shortly.',
       };
     }
-  }
-
-  // LemonSqueezy redirects back without session_id — check subscription status
-  if (provider === 'lemon_squeezy') {
-    return {
-      success: true,
-      paymentStatus: 'pending_confirmation',
-      provider: 'lemon_squeezy',
-      message: 'Payment received! Your subscription will be activated shortly.',
-    };
   }
 
   return {
@@ -322,7 +311,7 @@ export async function applyFreeSubscription(params: {
 }
 
 /**
- * Get customer portal URL (LemonSqueezy — manage subscription, update payment method)
+ * Get customer portal URL (manage subscription, update payment method)
  */
 export async function getCustomerPortal(): Promise<CustomerPortalResponse> {
   try {
@@ -349,7 +338,7 @@ export function redirectToPayment(paymentUrl: string): void {
 
 /**
  * Initiate payment flow
- * Creates payment session and redirects to LemonSqueezy checkout
+ * Creates payment session and redirects to Paysera checkout
  */
 export async function initiatePayment(request: CreatePaymentRequest): Promise<{
   success: boolean;

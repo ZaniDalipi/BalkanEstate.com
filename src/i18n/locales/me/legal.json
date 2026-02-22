@@ -160,11 +160,10 @@
       "cancel": "Možete otkazati pretplatu u bilo kom trenutku putem podešavanja naloga",
       "refund": "Povrati su dostupni u roku od 7 dana (mjesečno) ili 30 dana (godišnje) od kupovine ako nijeste zadovoljni (pogledajte našu Politiku povrata)",
       "price": "Možemo promijeniti cijene pretplate uz obavještenje od 30 dana",
-      "lemonsqueezy": {
-        "title": "Trgovac evidencije",
-        "morStatement": "Naš proces naručivanja vodi naš online preprodavač i pružalac usluga plaćanja. Naš pružalac usluga plaćanja je Trgovac evidencije za sve naše narudžbe i pruža sve upite korisničke podrške i upravlja povratima.",
-        "text": "Kada izvršite kupovinu, obavljate transakciju sa našim pružaocem usluga plaćanja, koji upravlja obradom plaćanja, fakturisanjem, usklađenošću sa PDV-om/porezima i povratima.",
-        "buyerTerms": "Kupovinom takođe prihvatate Uslove za kupce našeg pružaoca usluga plaćanja."
+      "paysera": {
+        "title": "Obrada plaćanja",
+        "text": "Kada izvršite kupovinu, obavljate transakciju sa našim pružaocem usluga plaćanja Paysera, koji upravlja obradom plaćanja, fakturisanjem, usklađenošću sa PDV-om/porezima i povratima.",
+        "buyerTerms": "Kupovinom takođe prihvatate Uslove za korišćenje usluge Paysera."
       }
     },
     "prohibited": {

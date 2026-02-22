@@ -252,7 +252,7 @@ const PaymentWindow: React.FC<PaymentWindowProps> = ({
   // Start polling for payment verification
   // In development: skip polling entirely to avoid rate limiting
   // In production: poll every 6 seconds with max 30 attempts
-  const startPaymentPolling = (sessionId: string, maxAttempts = IS_DEVELOPMENT ? 3 : 30, provider = 'lemon_squeezy') => {
+  const startPaymentPolling = (sessionId: string, maxAttempts = IS_DEVELOPMENT ? 3 : 30, provider = 'paysera') => {
     // In development, don't poll aggressively - just show success message
     if (IS_DEVELOPMENT) {
       setIsPolling(true);
@@ -515,7 +515,7 @@ const PaymentWindow: React.FC<PaymentWindowProps> = ({
         }
       }
 
-      // Create unified payment session with backend (routes to LemonSqueezy or Paysera)
+      // Create unified payment session with backend (routes to Paysera)
       const response = await fetch(`${API_URL}/payments/create-payment`, {
         method: 'POST',
         headers: {
@@ -1430,7 +1430,7 @@ const PaymentWindow: React.FC<PaymentWindowProps> = ({
               </div>
             )}
 
-            {/* Terms Acceptance Checkbox - Required by LemonSqueezy */}
+            {/* Terms Acceptance Checkbox */}
             <div className="bg-gray-50 border border-gray-200 rounded-lg p-3 sm:p-4">
               <label className="flex items-start gap-3 cursor-pointer group">
                 <div className="relative flex-shrink-0 mt-0.5">
@@ -1455,8 +1455,7 @@ const PaymentWindow: React.FC<PaymentWindowProps> = ({
                   <a href="/refund" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline font-medium">
                     {t('payment:termsAcceptance.refund')}
                   </a>
-                  {'. '}
-                  {t('payment:termsAcceptance.lemonsqueezy')}
+                  {'.'}
                 </span>
               </label>
             </div>
