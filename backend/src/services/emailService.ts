@@ -3737,12 +3737,33 @@ Questions? Contact us at support@balkanestateai.com
       available: number;
       used: number;
     };
+    couponCodes?: Array<{ tier: 'highlight' | 'premium' | 'featured'; code: string }>;
   }): Promise<void> {
     const frontendUrl = process.env.FRONTEND_URL || 'https://balkanestateai.com';
     const safeOwnerName = escapeHtml(params.ownerName);
     const safeAgencyName = escapeHtml(params.agencyName);
     const currentYear = new Date().getFullYear();
     const { monthly, available, used } = params.promotionCoupons;
+
+    // Build coupon codes HTML section
+    const couponCodesHtml = params.couponCodes && params.couponCodes.length > 0 ? `
+      <div style="background: #f0fdf4; border-radius: 12px; padding: 20px; margin-bottom: 24px; border: 1px solid #86efac;">
+        <p style="color: #166534; font-size: 14px; font-weight: 700; margin: 0 0 12px 0;">🎫 Your Coupon Codes</p>
+        <p style="color: #4b5563; font-size: 12px; margin: 0 0 12px 0;">Copy and use these codes when promoting a listing:</p>
+        ${params.couponCodes.map(c => {
+          const label = c.tier === 'highlight' ? '✨ Highlighted' : c.tier === 'premium' ? '💎 Premium' : '🔥 Featured';
+          const bg = c.tier === 'highlight' ? '#059669' : c.tier === 'premium' ? '#7c3aed' : '#dc2626';
+          return `<div style="margin-bottom: 8px;">
+            <span style="display: inline-block; background:${bg}; color:#fff; border-radius:4px; padding:3px 10px; font-size:11px; font-weight:600; margin-right:8px; vertical-align:middle;">${label}</span>
+            <code style="display: inline-block; background:#fff; border:1px solid #86efac; border-radius:6px; padding:5px 12px; font-size:14px; font-weight:700; letter-spacing:1.5px; color:#166534; vertical-align:middle;">${escapeHtml(c.code)}</code>
+          </div>`;
+        }).join('')}
+      </div>
+    ` : '';
+
+    const couponCodesText = (params.couponCodes ?? []).length > 0
+      ? `\nYour coupon codes:\n${(params.couponCodes ?? []).map(c => `- ${c.tier.toUpperCase()}: ${c.code}`).join('\n')}\n`
+      : '';
 
     const html = `
 <!DOCTYPE html>
@@ -3792,6 +3813,9 @@ Questions? Contact us at support@balkanestateai.com
         </div>
       </div>
 
+      <!-- Coupon Codes -->
+      ${couponCodesHtml}
+
       <!-- How to Use -->
       <div style="background: #1e293b; border-radius: 8px; padding: 16px; margin-bottom: 24px; border-left: 4px solid #f59e0b;">
         <h3 style="color: #ffffff; font-size: 14px; font-weight: 600; margin: 0 0 8px 0;">📋 How to Use Promotion Coupons</h3>
@@ -3826,7 +3850,7 @@ Questions? Contact us at support@balkanestateai.com
       to: params.email,
       subject: `🎁 Promotion Coupons Summary — ${safeAgencyName}`,
       html,
-      text: `Hello ${params.ownerName},\n\nHere's your promotion coupons summary for ${params.agencyName}.\n\nMonthly: ${monthly}\nAvailable: ${available}\nUsed: ${used}\n\nUse these coupons to highlight, feature, or boost your listings!\n\nVisit: ${frontendUrl}/agency/dashboard\n\n© ${currentYear} BalkanEstateᴬᴵ`,
+      text: `Hello ${params.ownerName},\n\nHere's your promotion coupons summary for ${params.agencyName}.\n\nMonthly: ${monthly}\nAvailable: ${available}\nUsed: ${used}\n${couponCodesText}\nUse these coupons to highlight, feature, or boost your listings!\n\nVisit: ${frontendUrl}/agency/dashboard\n\n© ${currentYear} BalkanEstateᴬᴵ`,
       category: 'alerts',
     });
   }

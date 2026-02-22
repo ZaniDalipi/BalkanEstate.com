@@ -622,6 +622,163 @@ const ChangePasswordSection: React.FC = () => {
     );
 };
 
+const DeleteAgencySection: React.FC = () => {
+    const { t } = useTranslation(['account']);
+    const { state, dispatch, checkAuthStatus } = useAppContext();
+    const { confirm } = useConfirmation();
+    const [isDeleting, setIsDeleting] = useState(false);
+    const [error, setError] = useState('');
+
+    const agencyId = state.currentUser?.agencyId;
+    if (!agencyId) return null;
+
+    const handleDeleteAgency = async () => {
+        setError('');
+        const confirmed = await confirm({
+            title: t('security.deleteAgencyTitle', 'Delete Agency'),
+            message: t('security.deleteAgencyConfirm', 'This will permanently delete your agency. All agents will be transferred to a Pro monthly plan for the remaining duration of the agency subscription. This cannot be undone.'),
+            confirmLabel: t('security.deleteAgencyButton', 'Yes, Delete Agency'),
+            cancelLabel: t('security.cancelButton', 'Cancel'),
+            type: 'danger',
+        });
+        if (!confirmed) return;
+
+        setIsDeleting(true);
+        try {
+            const response = await fetch(`${API_URL}/agencies/${agencyId}`, {
+                method: 'DELETE',
+                headers: {
+                    'Authorization': `Bearer ${localStorage.getItem('balkan_estate_token')}`,
+                },
+            });
+            const data = await response.json();
+            if (!response.ok) {
+                setError(data.message || t('security.deleteAgencyFailed', 'Failed to delete agency'));
+                return;
+            }
+            await checkAuthStatus();
+            dispatch({ type: 'SHOW_ALERT', payload: { type: 'success', title: t('security.agencyDeleted', 'Agency Deleted'), message: data.message } });
+        } catch {
+            setError(t('security.deleteAgencyFailed', 'Failed to delete agency'));
+        } finally {
+            setIsDeleting(false);
+        }
+    };
+
+    return (
+        <div className="bg-red-50/60 backdrop-blur-sm border border-red-200/50 rounded-2xl p-4">
+            <div className="flex items-start gap-3">
+                <BuildingOfficeIcon className="w-5 h-5 text-red-600 mt-0.5 flex-shrink-0" />
+                <div className="flex-1">
+                    <h4 className="font-semibold text-red-800 text-sm">{t('security.deleteAgency', 'Delete Agency')}</h4>
+                    <p className="text-sm text-red-700 mt-1">
+                        {t('security.deleteAgencyDescription', 'Permanently delete your agency. Active agents will be transferred to Pro monthly plan until the current subscription expires.')}
+                    </p>
+                    {error && <p className="text-sm text-red-600 mt-2">{error}</p>}
+                    <button
+                        type="button"
+                        onClick={handleDeleteAgency}
+                        disabled={isDeleting}
+                        className="mt-3 px-4 py-2 bg-red-600/80 backdrop-blur-sm text-white font-medium rounded-xl hover:bg-red-600 transition-all shadow-lg shadow-red-600/20 border border-red-500/30 text-sm disabled:opacity-50"
+                    >
+                        {isDeleting ? t('security.deleting', 'Deleting...') : t('security.deleteAgency', 'Delete Agency')}
+                    </button>
+                </div>
+            </div>
+        </div>
+    );
+};
+
+const DeleteAccountSection: React.FC = () => {
+    const { t } = useTranslation(['account']);
+    const { state, dispatch } = useAppContext();
+    const { confirm } = useConfirmation();
+    const [password, setPassword] = useState('');
+    const [isDeleting, setIsDeleting] = useState(false);
+    const [error, setError] = useState('');
+
+    const isSocialLogin = !!(state.currentUser?.googleId || state.currentUser?.facebookId);
+
+    const handleDeleteAccount = async () => {
+        setError('');
+        if (!isSocialLogin && !password) {
+            setError(t('security.passwordRequiredToDelete', 'Please enter your password to confirm deletion'));
+            return;
+        }
+
+        const confirmed = await confirm({
+            title: t('security.deleteAccountTitle', 'Delete Account'),
+            message: t('security.deleteAccountConfirm', 'This action is PERMANENT and cannot be undone. All your data, listings, and subscriptions will be deleted. Are you sure?'),
+            confirmLabel: t('security.deleteAccountButton', 'Yes, Delete My Account'),
+            cancelLabel: t('security.cancelButton', 'Cancel'),
+            type: 'danger',
+        });
+
+        if (!confirmed) return;
+
+        setIsDeleting(true);
+        try {
+            const response = await fetch(`${API_URL}/auth/delete-account`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${localStorage.getItem('balkan_estate_token')}`,
+                },
+                body: JSON.stringify({ password: isSocialLogin ? undefined : password }),
+            });
+
+            const data = await response.json();
+            if (!response.ok) {
+                setError(data.message || t('security.deleteAccountFailed', 'Failed to delete account'));
+                return;
+            }
+
+            localStorage.removeItem('balkan_estate_token');
+            localStorage.removeItem('balkan_estate_refresh_token');
+            dispatch({ type: 'LOGOUT' });
+            dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'search' });
+        } catch {
+            setError(t('security.deleteAccountFailed', 'Failed to delete account'));
+        } finally {
+            setIsDeleting(false);
+        }
+    };
+
+    return (
+        <div className="bg-red-50/60 backdrop-blur-sm border border-red-200/50 rounded-2xl p-4">
+            <div className="flex items-start gap-3">
+                <svg className="w-5 h-5 text-red-600 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                </svg>
+                <div className="flex-1">
+                    <h4 className="font-semibold text-red-800 text-sm">{t('security.deleteAccount', 'Delete Account')}</h4>
+                    <p className="text-sm text-red-700 mt-1">
+                        {t('security.deleteAccountDescription', 'Permanently delete your account and all associated data. This action cannot be undone.')}
+                    </p>
+                    {!isSocialLogin && (
+                        <input
+                            type="password"
+                            value={password}
+                            onChange={(e) => { setPassword(e.target.value); setError(''); }}
+                            placeholder={t('security.enterPasswordToConfirm', 'Enter your password to confirm')}
+                            className="mt-3 w-full max-w-xs px-3 py-2 border border-red-200 rounded-xl text-sm focus:ring-2 focus:ring-red-300 focus:border-red-300 bg-white"
+                        />
+                    )}
+                    {error && <p className="text-sm text-red-600 mt-1">{error}</p>}
+                    <button
+                        type="button"
+                        onClick={handleDeleteAccount}
+                        disabled={isDeleting}
+                        className="mt-3 px-4 py-2 bg-red-600/80 backdrop-blur-sm text-white font-medium rounded-xl hover:bg-red-600 transition-all shadow-lg shadow-red-600/20 border border-red-500/30 text-sm disabled:opacity-50"
+                    >
+                        {isDeleting ? t('security.deleting', 'Deleting...') : t('security.deleteAccount', 'Delete Account')}
+                    </button>
+                </div>
+            </div>
+        </div>
+    );
+};
+
 const SecuritySettings: React.FC<{ logoutAllDevices: () => Promise<void> }> = ({ logoutAllDevices }) => {
     const { t } = useTranslation(['account']);
     const { dispatch } = useAppContext();
@@ -676,6 +833,12 @@ const SecuritySettings: React.FC<{ logoutAllDevices: () => Promise<void> }> = ({
 
             {/* Login History */}
             <LoginHistorySection />
+
+            {/* Delete Agency */}
+            <DeleteAgencySection />
+
+            {/* Delete Account */}
+            <DeleteAccountSection />
         </div>
     );
 };

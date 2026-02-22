@@ -363,10 +363,11 @@ export const applyFreeSubscription = async (req: Request, res: Response): Promis
       }
     }
 
-    // Check if code is restricted to specific plans
+    // Check if code is restricted to specific plans (use isValid for consistent family matching)
     const effectiveProductId = productId || '';
     if (discount.applicablePlans && discount.applicablePlans.length > 0) {
-      if (!effectiveProductId || !discount.applicablePlans.includes(effectiveProductId)) {
+      const validation = discount.isValid(userId, effectiveProductId);
+      if (!validation.valid && validation.reason?.includes('not valid for the selected plan')) {
         res.status(400).json({
           message: `This discount code is not valid for the selected plan`,
         });

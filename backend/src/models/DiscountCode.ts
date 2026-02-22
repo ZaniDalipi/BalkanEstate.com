@@ -109,6 +109,17 @@ discountCodeSchema.index({ code: 1, isActive: 1 });
 discountCodeSchema.index({ validFrom: 1, validUntil: 1 });
 discountCodeSchema.index({ source: 1 });
 
+// Get the plan family for flexible matching (e.g. buyer_monthly and buyer_pro_monthly both → 'buyer')
+function getPlanFamily(planId: string): string {
+  const id = planId.toLowerCase();
+  if (id.startsWith('buyer')) return 'buyer';
+  if (id.includes('enterprise') || id.startsWith('seller_enterprise')) return 'enterprise';
+  if (id.startsWith('seller_pro') || id === 'pro_monthly' || id === 'pro_yearly') return 'seller_pro';
+  if (id.startsWith('agent_pro') || id.startsWith('agent_')) return 'agent_pro';
+  if (id.startsWith('listing_promotion')) return 'listing_promotion';
+  return id;
+}
+
 // Method to check if code is valid
 discountCodeSchema.methods.isValid = function(userId?: string, planId?: string, purchaseAmount?: number): { valid: boolean; reason?: string } {
   const now = new Date();
@@ -141,12 +152,16 @@ discountCodeSchema.methods.isValid = function(userId?: string, planId?: string, 
     return { valid: false, reason: `Minimum purchase amount is €${this.minPurchaseAmount}` };
   }
 
-  // Check applicable plans
+  // Check applicable plans - use family matching for flexibility
   if (this.applicablePlans && this.applicablePlans.length > 0) {
     if (!planId) {
       return { valid: false, reason: 'This code is restricted to specific plans' };
     }
-    if (!this.applicablePlans.includes(planId)) {
+    const incomingFamily = getPlanFamily(planId);
+    const matches = this.applicablePlans.some((ap: string) =>
+      ap === planId || getPlanFamily(ap) === incomingFamily
+    );
+    if (!matches) {
       return { valid: false, reason: 'This code is not valid for the selected plan' };
     }
   }

@@ -2057,6 +2057,101 @@ export const changePassword = async (req: Request, res: Response): Promise<void>
   }
 };
 
+// @desc    Delete user account permanently
+// @route   POST /api/auth/delete-account
+// @access  Private
+export const deleteAccount = async (req: Request, res: Response): Promise<void> => {
+  try {
+    if (!req.user) {
+      res.status(401).json({ message: 'Not authorized' });
+      return;
+    }
+
+    const { password } = req.body;
+    const userId = String((req.user as IUser)._id);
+    const user = await User.findById(userId).select('+password');
+
+    if (!user) {
+      res.status(404).json({ message: 'User not found' });
+      return;
+    }
+
+    // For non-social accounts, require password confirmation
+    if (!(user as any).googleId && !(user as any).facebookId && !(user as any).appleId) {
+      if (!password) {
+        res.status(400).json({ message: 'Password is required to delete your account' });
+        return;
+      }
+      const isMatch = await user.comparePassword(password);
+      if (!isMatch) {
+        res.status(401).json({ message: 'Incorrect password' });
+        return;
+      }
+    }
+
+    // If user owns an agency, prevent deletion (must delete agency first)
+    if (user.agencyId) {
+      const agency = await Agency.findById(user.agencyId);
+      if (agency && String(agency.ownerId) === userId) {
+        res.status(400).json({
+          message: 'You must delete your agency before deleting your account. Go to your agency settings to delete it first.',
+        });
+        return;
+      }
+    }
+
+    // Clean up related data
+    const { revokeAllRefreshTokens } = await import('../services/refreshTokenService');
+    const Property = (await import('../models/Property')).default;
+    const Subscription = (await import('../models/Subscription')).default;
+    const PromotionCoupon = (await import('../models/PromotionCoupon')).default;
+
+    // Revoke all refresh tokens
+    await revokeAllRefreshTokens(userId);
+
+    // Cancel active subscriptions
+    await Subscription.updateMany(
+      { userId: user._id, status: { $in: ['active', 'trial'] } },
+      { $set: { status: 'cancelled', cancelledAt: new Date() } }
+    );
+
+    // Expire user's promotion coupons
+    await PromotionCoupon.updateMany(
+      { generatedForUserId: user._id, status: 'active' },
+      { $set: { status: 'expired' } }
+    );
+
+    // Remove user from any agency they're a member of (not owner - blocked above)
+    if (user.agencyId) {
+      await Agency.updateOne(
+        { _id: user.agencyId },
+        { $pull: { agents: user._id, members: user._id } }
+      );
+    }
+
+    // Delete agent profile if exists
+    if (user.agentId) {
+      await Agent.findByIdAndDelete(user.agentId);
+    }
+
+    // Unlist user's properties (don't delete - keep data but mark as inactive)
+    await Property.updateMany(
+      { userId: user._id },
+      { $set: { status: 'inactive', isActive: false } }
+    );
+
+    // Delete the user
+    await User.findByIdAndDelete(userId);
+
+    authLogger.info(`🗑️ Account deleted: ${user.email} (${userId})`);
+
+    res.json({ message: 'Your account has been permanently deleted.' });
+  } catch (error: any) {
+    authLogger.error('Error deleting account:', error);
+    res.status(500).json({ message: 'Error deleting account' });
+  }
+};
+
 // @desc    Set active role (switch context)
 // @route   POST /api/auth/set-active-role
 // @access  Private

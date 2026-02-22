@@ -151,6 +151,8 @@ export const CreateCodeModal: React.FC<CreateCodeModalProps> = ({
                 { value: 'seller_pro_monthly', label: 'Seller Pro (Monthly)' },
                 { value: 'seller_pro_yearly', label: 'Seller Pro (Yearly)' },
                 { value: 'seller_enterprise_yearly', label: 'Enterprise Plan' },
+                { value: 'agent_pro_monthly', label: 'Agent Pro (Monthly)' },
+                { value: 'agent_pro_yearly', label: 'Agent Pro (Yearly)' },
                 { value: 'buyer_monthly', label: 'Buyer Pro' },
               ].map((plan) => (
                 <label key={plan.value} className="flex items-center gap-2">
