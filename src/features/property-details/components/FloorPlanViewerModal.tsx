@@ -552,6 +552,8 @@ const FloorPlanViewerModal: React.FC<FloorPlanViewerModalProps> = ({ imageUrl, o
                             <div
                                 key={ann.id}
                                 className="absolute"
+                                onMouseDown={(e) => e.stopPropagation()}
+                                onTouchStart={(e) => e.stopPropagation()}
                                 style={{
                                     left: `${ann.x}%`,
                                     top: `${ann.y}%`,
