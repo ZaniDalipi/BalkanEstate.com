@@ -82,7 +82,7 @@ const detectUserCountry = (userProfileCountry?: string): string => {
 // ============================================
 // COMING SOON FLAG - Set to false when ready to launch payments
 // ============================================
-const PAYMENTS_COMING_SOON = true;
+const PAYMENTS_COMING_SOON = false;
 // ============================================
 
 // Check if we're in development mode - disable aggressive polling

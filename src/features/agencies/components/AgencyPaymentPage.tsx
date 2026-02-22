@@ -3,7 +3,6 @@ import { useTranslation } from 'react-i18next';
 import { useAppContext } from '@/context/AppContext';
 import { createAgency } from '@/src/features/agencies/api/agencyApi';
 import Footer from '@/components/shared/Footer';
-import PaymentComingSoon from '@/src/components/shared/PaymentComingSoon';
 import {
   BuildingOfficeIcon,
   CheckCircleIcon,
@@ -630,12 +629,26 @@ const AgencyPaymentPage: React.FC = () => {
               </div>
             </div>
 
-            {/* Coming Soon Notice */}
-            <PaymentComingSoon
-              title={t('payment.comingSoon.title', 'Payments Coming Soon')}
-              message={t('payment.comingSoon.message', 'We are setting up our payment system. Contact us to set up your agency manually.')}
-              className="mt-6"
-            />
+            {/* Payment Button */}
+            <div className="mt-6">
+              <button
+                onClick={handlePayment}
+                disabled={isLoading}
+                className="w-full py-4 px-6 rounded-xl font-bold text-lg shadow-lg bg-gradient-to-r from-primary to-primary-dark text-white hover:shadow-xl transform hover:-translate-y-0.5 transition-all disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none flex items-center justify-center gap-2"
+              >
+                {isLoading ? (
+                  <>
+                    <div className="animate-spin rounded-full h-5 w-5 border-2 border-white border-t-transparent"></div>
+                    <span>{t('payment.processing', 'Processing...')}</span>
+                  </>
+                ) : (
+                  <>
+                    <CreditCardIcon className="w-5 h-5" />
+                    <span>{finalPrice === 0 ? t('payment.activateFree', 'Activate Free') : t('payment.payNow', `Pay €${finalPrice.toFixed(2)}/${enterprisePlan.interval}`)}</span>
+                  </>
+                )}
+              </button>
+            </div>
           </div>
         </div>
       </div>

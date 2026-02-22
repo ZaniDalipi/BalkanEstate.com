@@ -284,22 +284,11 @@ export function usePromotionSelector({
             setSuccessMessage(null);
           }
         }
-        // Online payment coming soon - but coupon still works
-        if (finalPrice > 0) {
-          setError(null);
-          setSubmitting(false);
-          // Show friendly message with coupon option
-          return;
-        }
+        // Urgent badge requires payment — let it fall through to checkout below
       }
 
-      // ONLINE PAYMENTS COMING SOON - If payment is required, show info message
-      if (finalPrice > 0) {
-        setError(null);
-        setShowPaymentComingSoon(true);
-        setSubmitting(false);
-        return;
-      }
+      // If payment is required and no coupon, proceed to checkout with Paysera
+      // (Free promotions with coupons also go through checkout below)
 
       // Free promotions (via coupon or agency allocation) can proceed
 
@@ -317,8 +306,13 @@ export function usePromotionSelector({
           return;
         }
 
-        // Payment required but payments coming soon
-        setSuccessMessage('Payments coming soon! Please contact sales@balkanestateai.com to extend your promotion manually.');
+        // Payment required — redirect to Paysera checkout
+        if (result.url) {
+          window.location.href = result.url;
+          return;
+        }
+
+        setError('Failed to create extension payment session. Please try again.');
         return;
       }
 
@@ -367,8 +361,13 @@ export function usePromotionSelector({
           return;
         }
 
-        // Payment required but payments coming soon
-        setSuccessMessage('Payments coming soon! Please contact sales@balkanestateai.com to promote your listing manually.');
+        // Payment required — redirect to Paysera checkout
+        if (result.url) {
+          window.location.href = result.url;
+          return;
+        }
+
+        setError('Failed to create payment session. Please try again.');
       }
     } catch (err: any) {
       setError(err.message || 'Failed to process request');
