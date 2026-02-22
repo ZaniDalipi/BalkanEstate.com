@@ -35,6 +35,7 @@ export interface IPromotionCoupon extends Document {
 
   // Metadata
   createdBy?: mongoose.Types.ObjectId; // Admin who created the coupon
+  generatedForUserId?: mongoose.Types.ObjectId; // User this coupon was generated for (Pro/Enterprise subscriptions)
   notes?: string; // Internal notes
   isPublic: boolean; // If true, show in public coupon list; if false, only direct use
 
@@ -136,6 +137,11 @@ const PromotionCouponSchema: Schema = new Schema(
       ref: 'User',
       index: true,
     },
+    generatedForUserId: {
+      type: Schema.Types.ObjectId,
+      ref: 'User',
+      index: true,
+    },
     notes: {
       type: String,
     },
@@ -153,6 +159,7 @@ const PromotionCouponSchema: Schema = new Schema(
 PromotionCouponSchema.index({ code: 1, status: 1 });
 PromotionCouponSchema.index({ validFrom: 1, validUntil: 1 });
 PromotionCouponSchema.index({ status: 1, validUntil: 1 });
+PromotionCouponSchema.index({ generatedForUserId: 1, status: 1 });
 
 // Validation: Percentage discount must be between 1-100
 PromotionCouponSchema.pre('save', function(next) {

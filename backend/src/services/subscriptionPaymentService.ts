@@ -246,6 +246,46 @@ export async function processSubscriptionPayment(
       paymentLogger.error('⚠️ Error initializing promotion coupons:', couponError);
     }
 
+    // Generate promotion coupon codes and send email for new Enterprise subscriptions
+    if (isEnterpriseProduct && isNewSubscription) {
+      try {
+        const totalCoupons = product.promotionCoupons;
+        const highlightedCoupons = product.highlightedCoupons;
+        const premiumCoupons = product.premiumCoupons;
+        const featuredCoupons = product.featuredCoupons;
+
+        // Generate actual PromotionCoupon codes for the enterprise user
+        const generatedCodes = await generateProSubscriptionCoupons(
+          String(userId),
+          highlightedCoupons ?? 0,
+          premiumCoupons ?? 0,
+          featuredCoupons ?? 0,
+          subscription.expirationDate,
+        );
+
+        // Send the initial promotion coupons email with codes
+        await sendMonthlyCouponEmail({
+          email: user.email,
+          userName: user.name || user.email.split('@')[0],
+          planName: product.name ?? 'Enterprise',
+          totalCoupons: totalCoupons ?? 0,
+          newCoupons: totalCoupons ?? 0,
+          rolledOver: 0,
+          breakdown: {
+            highlighted: highlightedCoupons ?? 0,
+            premium: premiumCoupons ?? 0,
+            featured: featuredCoupons ?? 0,
+          },
+          isAgency: true,
+          agencyName: user.agencyName || 'Your Agency',
+          couponCodes: generatedCodes,
+        });
+        if (!isProduction) paymentLogger.info(`🎟️ Enterprise promotion coupons generated and emailed to ${user.email}`);
+      } catch (couponError) {
+        paymentLogger.error('⚠️ Error generating/emailing Enterprise promotion coupons:', couponError);
+      }
+    }
+
     // Send welcome email with plan benefits for new Pro subscriptions
     if (isProProduct && isNewSubscription) {
       try {
@@ -698,6 +738,7 @@ async function generateProSubscriptionCoupons(
         maxUsesPerUser: 1, // single-use only
         applicableTiers: [tier],
         isPublic: false,
+        generatedForUserId: new mongoose.Types.ObjectId(userId),
         notes: `Auto-generated for userId:${userId}`,
       });
 

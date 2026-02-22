@@ -30,8 +30,10 @@ export interface IAgency extends Document {
   description?: string;
   logo?: string;
   logoPublicId?: string; // Cloudinary ID for cleanup
+  logoPosition?: { x: number; y: number }; // object-position percentages (0-100)
   coverImage?: string;
   coverImagePublicId?: string;
+  coverPosition?: { x: number; y: number }; // object-position percentages (0-100)
   coverGradient?: string; // Tailwind gradient classes for banner background
   email: string;
   phone: string;
@@ -208,11 +210,19 @@ const AgencySchema: Schema = new Schema(
     logoPublicId: {
       type: String,
     },
+    logoPosition: {
+      x: { type: Number, default: 50 },
+      y: { type: Number, default: 50 },
+    },
     coverImage: {
       type: String,
     },
     coverImagePublicId: {
       type: String,
+    },
+    coverPosition: {
+      x: { type: Number, default: 50 },
+      y: { type: Number, default: 50 },
     },
     coverGradient: {
       type: String,

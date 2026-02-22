@@ -11,6 +11,7 @@ import { uploadImage, deleteImage } from '../services/cloudinaryService';
 import { generateSecureAgentId } from '../utils/secureRandom';
 import { getParam, getObjectIdParam, isValidObjectId } from '../utils/validateParams';
 
+import PromotionCoupon from '../models/PromotionCoupon';
 import { ENTERPRISE_TIER_LIMITS } from '../config/subscriptionConstants';
 import { getSocketInstance } from '../utils/socketInstance';
 import { agencyLogger } from '../utils/logger';
@@ -753,6 +754,7 @@ export const updateAgency = async (
       yearsInBusiness, specialties,
       certifications, languages, businessHours,
       coverGradient, coverImage,
+      logoPosition, coverPosition,
     } = req.body;
 
     // Validation
@@ -823,6 +825,16 @@ export const updateAgency = async (
     if (businessHours !== undefined) agency.businessHours = businessHours;
     if (coverGradient !== undefined) (agency as any).coverGradient = coverGradient;
     if (coverImage !== undefined) (agency as any).coverImage = coverImage;
+    if (logoPosition !== undefined && typeof logoPosition === 'object') {
+      const lx = Math.max(0, Math.min(100, Number(logoPosition.x) || 50));
+      const ly = Math.max(0, Math.min(100, Number(logoPosition.y) || 50));
+      (agency as any).logoPosition = { x: lx, y: ly };
+    }
+    if (coverPosition !== undefined && typeof coverPosition === 'object') {
+      const cx = Math.max(0, Math.min(100, Number(coverPosition.x) || 50));
+      const cy = Math.max(0, Math.min(100, Number(coverPosition.y) || 50));
+      (agency as any).coverPosition = { x: cx, y: cy };
+    }
 
     // Handle encrypted fields - force mark as modified so the encryption
     // pre-save hook re-encrypts them (after post-findOne decryption,
@@ -2405,6 +2417,61 @@ export const getAgencyCoupons = async (
       }));
     }
 
+    // Fetch actual promotion coupon codes for the agency owner
+    // These are visible to all agency members (owner + agents)
+    const ownerId = String(agency.ownerId);
+    let promotionCouponCodes: Array<{
+      code: string;
+      tier: string;
+      status: string;
+      validFrom: Date;
+      validUntil: Date;
+      used: boolean;
+      usedAt?: Date;
+      usedBy?: { name: string; email: string } | null;
+    }> = [];
+
+    try {
+      const coupons = await PromotionCoupon.find({
+        $or: [
+          { generatedForUserId: new mongoose.Types.ObjectId(ownerId) },
+          { notes: { $regex: `userId:${ownerId}`, $options: 'i' } },
+        ],
+      }).sort({ createdAt: -1 }).limit(50);
+
+      // Collect user IDs from usage history for name lookup
+      const couponUserIds = new Set<string>();
+      for (const c of coupons) {
+        for (const usage of c.usageHistory || []) {
+          couponUserIds.add(String(usage.userId));
+        }
+      }
+      const couponUsersMap = new Map<string, { name: string; email: string }>();
+      if (couponUserIds.size > 0) {
+        const couponUsers = await User.find({ _id: { $in: Array.from(couponUserIds) } }).select('name email');
+        couponUsers.forEach(u => couponUsersMap.set(String(u._id), { name: u.name, email: u.email }));
+      }
+
+      promotionCouponCodes = coupons.map(c => {
+        const isUsed = c.currentTotalUses > 0 || (c.maxTotalUses && c.currentTotalUses >= c.maxTotalUses);
+        const isExpired = c.status === 'expired' || new Date(c.validUntil) < new Date();
+        const lastUsage = c.usageHistory?.[c.usageHistory.length - 1];
+
+        return {
+          code: c.code,
+          tier: c.applicableTiers?.[0] || 'featured',
+          status: isUsed ? 'used' : isExpired ? 'expired' : 'available',
+          validFrom: c.validFrom,
+          validUntil: c.validUntil,
+          used: !!isUsed,
+          usedAt: lastUsage?.usedAt,
+          usedBy: lastUsage?.userId ? couponUsersMap.get(String(lastUsage.userId)) || null : null,
+        };
+      });
+    } catch (err) {
+      agencyLogger.error('Error fetching promotion coupon codes:', err);
+    }
+
     res.status(200).json({
       subscription: {
         status: agency.subscription.status,
@@ -2423,6 +2490,7 @@ export const getAgencyCoupons = async (
         available: agency.promotionCoupons.available,
         used: agency.promotionCoupons.used,
         lastRefresh: agency.promotionCoupons.lastRefresh,
+        codes: promotionCouponCodes,
       },
     });
   } catch (error: any) {

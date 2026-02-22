@@ -253,6 +253,8 @@ export interface Agency {
     ownerId?: string | { _id: string; name: string; email: string; role?: string }; // Owner user ID (also the creator/admin) - can be populated
     admins?: string[]; // Array of admin user IDs
     invitationCode?: string; // Code required to join agency
+    logoPosition?: { x: number; y: number };
+    coverPosition?: { x: number; y: number };
     createdAt?: string;
     updatedAt?: string;
     totalListings?: number;
