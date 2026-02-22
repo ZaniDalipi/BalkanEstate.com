@@ -420,6 +420,26 @@ export const useListingForm = (propertyToEdit: Property | null) => {
         if (e.target.files && e.target.files[0]) {
             const file = e.target.files[0];
 
+            // Validate file format
+            const ALLOWED_FORMATS = ['image/jpeg', 'image/png', 'image/webp', 'image/gif', 'image/svg+xml'];
+            if (!ALLOWED_FORMATS.includes(file.type)) {
+                showError(
+                    t('newListing:floorplan.invalidFormat', 'Invalid File Format'),
+                    t('newListing:floorplan.invalidFormatMessage', 'Please upload a valid image file (JPEG, PNG, WebP, GIF, or SVG).')
+                );
+                return;
+            }
+
+            // Validate file size (max 10MB before compression)
+            const MAX_FILE_SIZE = 10 * 1024 * 1024;
+            if (file.size > MAX_FILE_SIZE) {
+                showError(
+                    t('newListing:floorplan.fileTooLarge', 'File Too Large'),
+                    t('newListing:floorplan.fileTooLargeMessage', 'Floor plan image must be under 10MB. Your file is {{size}}MB.', { size: (file.size / (1024 * 1024)).toFixed(1) })
+                );
+                return;
+            }
+
             // Compress floorplan image
             setIsCompressing(true);
             try {
@@ -427,17 +447,14 @@ export const useListingForm = (propertyToEdit: Property | null) => {
                     maxSizeMB: 0.5,
                     maxWidthOrHeight: 1920,
                     useWebWorker: true,
-                    fileType: 'image/jpeg',
+                    fileType: 'image/jpeg' as const,
                     initialQuality: 0.8,
                 };
 
-                // Log removed
                 const compressedFile = await imageCompression(file, compressionOptions);
-                // Log removed
 
                 setFloorplanImage({ file: compressedFile, previewUrl: URL.createObjectURL(compressedFile) });
             } catch (error) {
-                // Error removed
                 // Fallback to original
                 setFloorplanImage({ file, previewUrl: URL.createObjectURL(file) });
             } finally {
@@ -752,8 +769,29 @@ export const useListingForm = (propertyToEdit: Property | null) => {
                 // Warning removed
             }
 
+            // Step 2: Upload floorplan to Cloudinary if a new file was selected
+            let floorplanUrl: string | undefined = undefined;
+            if (floorplanImage.file) {
+                try {
+                    const uploadedFloorplan = await api.uploadPropertyImages([floorplanImage.file]);
+                    if (uploadedFloorplan.length > 0) {
+                        floorplanUrl = uploadedFloorplan[0].url;
+                    }
+                } catch (floorplanError: unknown) {
+                    const errorMsg = floorplanError instanceof Error ? floorplanError.message : t('common:errors.unknown');
+                    showError(
+                        t('newListing:errors.uploadFailed'),
+                        t('newListing:floorplan.uploadFailedMessage', 'Failed to upload floor plan: {{error}}', { error: errorMsg })
+                    );
+                    setIsSubmitting(false);
+                    return;
+                }
+            } else if (floorplanImage.previewUrl && !floorplanImage.previewUrl.startsWith('blob:')) {
+                // Existing Cloudinary URL from editing
+                floorplanUrl = floorplanImage.previewUrl;
+            }
+
             const { lat, lng } = listingData;
-            // Log removed
 
             // Use the address from Property Location (map search) - do not duplicate city/country
             const finalAddress = listingData.streetAddress.trim();
@@ -848,7 +886,7 @@ export const useListingForm = (propertyToEdit: Property | null) => {
                 propertyType: listingData.propertyType,
                 floorNumber: Number(listingData.floorNumber) || undefined,
                 totalFloors: Number(listingData.totalFloors) || undefined,
-                floorplanUrl: floorplanImage.previewUrl || undefined,
+                floorplanUrl,
                 createdAt: propertyToEdit ? propertyToEdit.createdAt : Date.now(),
                 lastRenewed: Date.now(),
                 views: propertyToEdit?.views || 0,

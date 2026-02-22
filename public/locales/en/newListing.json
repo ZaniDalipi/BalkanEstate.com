@@ -168,7 +168,12 @@
     "title": "Floor Plan",
     "uploadFloorplan": "Upload Floor Plan",
     "optional": "Optional - Add a floor plan image",
-    "skip": "Skip Floor Plan"
+    "skip": "Skip Floor Plan",
+    "invalidFormat": "Invalid File Format",
+    "invalidFormatMessage": "Please upload a valid image file (JPEG, PNG, WebP, GIF, or SVG).",
+    "fileTooLarge": "File Too Large",
+    "fileTooLargeMessage": "Floor plan image must be under 10MB. Your file is {{size}}MB.",
+    "uploadFailedMessage": "Failed to upload floor plan: {{error}}"
   },
   "language": {
     "title": "Listing Language",
