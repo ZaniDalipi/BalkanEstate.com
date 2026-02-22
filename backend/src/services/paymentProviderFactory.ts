@@ -9,7 +9,6 @@
  */
 
 import { payseraService, type PayseraPaymentMethod } from './payseraService';
-import { paymentLogger } from '../utils/logger';
 
 // Payment provider types
 export type PaymentProvider = 'paysera' | 'web';
