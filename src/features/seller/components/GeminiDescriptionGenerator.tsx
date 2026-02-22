@@ -64,6 +64,9 @@ const GeminiDescriptionGenerator: React.FC<{ propertyToEdit: Property | null }> 
             <ListingPreview
                 property={previewProperty}
                 isSubmitting={isSubmitting}
+                isCompressing={isCompressing}
+                isUploading={isUploading}
+                uploadProgress={uploadProgress}
                 wantToPromote={wantToPromote}
                 isEditing={!!propertyToEdit}
                 onBack={handleBackToForm}
