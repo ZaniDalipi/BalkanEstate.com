@@ -1700,7 +1700,8 @@ export const confirmPromotionPayment = async (sessionId: string): Promise<{
 export const validateCoupon = async (
   couponCode: string,
   promotionTier: string,
-  price: number
+  price: number,
+  duration?: number
 ): Promise<CouponValidationResult> => {
   try {
     const response = await apiRequest<{
@@ -1714,7 +1715,7 @@ export const validateCoupon = async (
       error?: string;
     }>('/coupons/validate', {
       method: 'POST',
-      body: { couponCode, promotionTier, price },
+      body: { couponCode, promotionTier, price, duration },
       requiresAuth: true,
     });
 

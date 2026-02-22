@@ -186,7 +186,7 @@ export function usePromotionSelector({
       setValidatingCoupon(true);
       try {
         const price = calculateBasePrice();
-        const result = await api.validateCoupon(couponCode, selectedTier, price);
+        const result = await api.validateCoupon(couponCode, selectedTier, price, selectedDuration);
         setCouponValidation(result);
       } catch (err: any) {
         setCouponValidation({

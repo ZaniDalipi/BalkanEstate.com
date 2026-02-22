@@ -28,6 +28,7 @@ export interface IPromotionCoupon extends Document {
 
   // Applicable to
   applicableTiers?: ('featured' | 'highlight' | 'premium')[]; // null = all tiers
+  applicableDurations?: (7 | 15 | 30 | 60 | 90)[]; // null/empty = all durations
   minimumPurchaseAmount?: number; // Minimum purchase amount to apply coupon
 
   // Usage tracking
@@ -126,6 +127,10 @@ const PromotionCouponSchema: Schema = new Schema(
     applicableTiers: [{
       type: String,
       enum: ['featured', 'highlight', 'premium'],
+    }],
+    applicableDurations: [{
+      type: Number,
+      enum: [7, 15, 30, 60, 90],
     }],
     minimumPurchaseAmount: {
       type: Number,

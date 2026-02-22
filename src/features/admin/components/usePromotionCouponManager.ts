@@ -36,6 +36,7 @@ export function usePromotionCouponManager() {
     maxTotalUses: 100,
     maxUsesPerUser: 1,
     applicableTiers: [],
+    applicableDurations: [],
     minimumPurchaseAmount: 0,
     isPublic: false,
     notes: '',
@@ -71,6 +72,9 @@ export function usePromotionCouponManager() {
     }
     if (newCoupon.applicableTiers && newCoupon.applicableTiers.length > 0) {
       payload.applicableTiers = newCoupon.applicableTiers;
+    }
+    if (newCoupon.applicableDurations && newCoupon.applicableDurations.length > 0) {
+      payload.applicableDurations = newCoupon.applicableDurations;
     }
 
     createMutation.mutate(payload, {
@@ -120,6 +124,7 @@ export function usePromotionCouponManager() {
       maxTotalUses: 100,
       maxUsesPerUser: 1,
       applicableTiers: [],
+      applicableDurations: [],
       minimumPurchaseAmount: 0,
       isPublic: false,
       notes: '',
@@ -137,6 +142,7 @@ export function usePromotionCouponManager() {
         maxTotalUses: 1000,
         maxUsesPerUser: 100,
         applicableTiers: [],
+        applicableDurations: [],
         minimumPurchaseAmount: 0,
         isPublic: false,
         notes: 'Development testing only',
@@ -150,6 +156,7 @@ export function usePromotionCouponManager() {
         maxTotalUses: 500,
         maxUsesPerUser: 1,
         applicableTiers: [],
+        applicableDurations: [],
         minimumPurchaseAmount: 0,
         isPublic: true,
         notes: 'Welcome coupon for new users',
@@ -163,6 +170,7 @@ export function usePromotionCouponManager() {
         maxTotalUses: 200,
         maxUsesPerUser: 3,
         applicableTiers: [],
+        applicableDurations: [],
         minimumPurchaseAmount: 0,
         isPublic: true,
         notes: 'Seasonal promotion campaign',
