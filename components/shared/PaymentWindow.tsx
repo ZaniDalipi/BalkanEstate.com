@@ -252,7 +252,7 @@ const PaymentWindow: React.FC<PaymentWindowProps> = ({
   // Start polling for payment verification
   // In development: skip polling entirely to avoid rate limiting
   // In production: poll every 6 seconds with max 30 attempts
-  const startPaymentPolling = (sessionId: string, maxAttempts = IS_DEVELOPMENT ? 3 : 30) => {
+  const startPaymentPolling = (sessionId: string, maxAttempts = IS_DEVELOPMENT ? 3 : 30, provider = 'lemon_squeezy') => {
     // In development, don't poll aggressively - just show success message
     if (IS_DEVELOPMENT) {
       setIsPolling(true);
@@ -279,7 +279,11 @@ const PaymentWindow: React.FC<PaymentWindowProps> = ({
 
       try {
         const token = localStorage.getItem('balkan_estate_token');
-        const response = await fetch(`${API_URL}/payments/lemonsqueezy/verify`, {
+        // Verify payment status — use provider-specific endpoint
+        const verifyUrl = provider === 'paysera'
+          ? `${API_URL}/payments/paysera/verify/${sessionId}`
+          : `${API_URL}/payments/subscription-status`;
+        const response = await fetch(verifyUrl, {
           method: 'GET',
           headers: {
             'Content-Type': 'application/json',
@@ -289,7 +293,9 @@ const PaymentWindow: React.FC<PaymentWindowProps> = ({
 
         const data = await response.json();
 
-        if (data.success && data.paymentStatus === 'paid') {
+        const isPaid = (data.success && data.paymentStatus === 'paid')
+          || (data.isSubscribed && data.subscriptionStatus === 'active');
+        if (isPaid) {
           // Payment successful!
           clearInterval(pollingIntervalRef.current!);
           pollingIntervalRef.current = null;
@@ -509,7 +515,7 @@ const PaymentWindow: React.FC<PaymentWindowProps> = ({
         }
       }
 
-      // Create unified payment session with backend (routes to LemonSqueezy)
+      // Create unified payment session with backend (routes to LemonSqueezy or Paysera)
       const response = await fetch(`${API_URL}/payments/create-payment`, {
         method: 'POST',
         headers: {
@@ -561,7 +567,7 @@ const PaymentWindow: React.FC<PaymentWindowProps> = ({
           payment_provider: data.provider,
         });
 
-        // Open LemonSqueezy checkout in a new window
+        // Open payment provider checkout in a new window
         const checkoutWindow = window.open(
           data.paymentUrl,
           'PaymentWindow',
@@ -572,8 +578,8 @@ const PaymentWindow: React.FC<PaymentWindowProps> = ({
           setPaymentWindow(checkoutWindow);
           setIsProcessing(false);
 
-          // Start polling for payment verification
-          startPaymentPolling(data.sessionId || data.orderId);
+          // Start polling for payment verification (pass provider for correct endpoint)
+          startPaymentPolling(data.sessionId || data.orderId, undefined, data.provider);
 
           // Monitor if window is closed
           const checkWindowClosed = setInterval(() => {
@@ -1008,6 +1014,24 @@ const PaymentWindow: React.FC<PaymentWindowProps> = ({
                       <p className="text-[10px] sm:text-xs text-neutral-500">{t('payment:comingSoon.launchingSoon')}</p>
                     </div>
                   </div>
+                  {/* Payment method badges */}
+                  <div className="flex flex-wrap items-center gap-2 mb-2">
+                    <span className="inline-flex items-center gap-1 px-2 py-1 bg-white border border-neutral-200 rounded text-[10px] sm:text-xs text-neutral-600 font-medium">
+                      <CreditCardIcon className="w-3 h-3" /> Card
+                    </span>
+                    <span className="inline-flex items-center gap-1 px-2 py-1 bg-white border border-neutral-200 rounded text-[10px] sm:text-xs text-neutral-600 font-medium">
+                      <svg className="w-3 h-3" viewBox="0 0 24 24" fill="none"><path d="M12.24 10.285V14.4h5.92c-.24 1.54-1.77 4.5-5.92 4.5-3.56 0-6.47-2.95-6.47-6.58s2.91-6.58 6.47-6.58c2.03 0 3.39.86 4.17 1.61l2.84-2.73C17.46 3.09 15.1 2 12.24 2 6.73 2 2.24 6.48 2.24 12s4.49 10 10 10c5.77 0 9.6-4.06 9.6-9.77 0-.66-.07-1.16-.16-1.66h-9.44z" fill="#4285F4"/></svg>
+                      Google Pay
+                    </span>
+                    <span className="inline-flex items-center gap-1 px-2 py-1 bg-white border border-neutral-200 rounded text-[10px] sm:text-xs text-neutral-600 font-medium">
+                      <svg className="w-3 h-3" viewBox="0 0 24 24" fill="currentColor"><path d="M17.05 20.28c-.98.95-2.05.88-3.08.4-1.09-.5-2.08-.48-3.24 0-1.44.62-2.2.44-3.06-.4C2.79 15.25 3.51 7.59 9.05 7.31c1.35.07 2.29.74 3.08.8 1.18-.24 2.31-.93 3.57-.84 1.51.12 2.65.72 3.4 1.8-3.12 1.87-2.38 5.98.48 7.13-.57 1.5-1.31 2.99-2.53 4.09zM12.03 7.25c-.15-2.23 1.66-4.07 3.74-4.25.29 2.58-2.34 4.5-3.74 4.25z"/></svg>
+                      Apple Pay
+                    </span>
+                    <span className="inline-flex items-center gap-1 px-2 py-1 bg-white border border-neutral-200 rounded text-[10px] sm:text-xs text-neutral-600 font-medium">
+                      <svg className="w-3 h-3 text-neutral-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M8 14v3m4-3v3m4-3v3M3 21h18M3 10h18M3 7l9-4 9 4M4 10h16v11H4V10z" /></svg>
+                      Bank
+                    </span>
+                  </div>
                   <div className="flex items-center gap-2 px-2 py-1.5 bg-amber-50 border border-amber-200 rounded-lg">
                     <span className="w-2 h-2 bg-amber-500 rounded-full animate-pulse flex-shrink-0"></span>
                     <p className="text-[10px] sm:text-xs text-amber-700 font-medium">{t('payment:comingSoon.integrationInProgress')}</p>
@@ -1353,6 +1377,38 @@ const PaymentWindow: React.FC<PaymentWindowProps> = ({
                   <p className="text-[10px] sm:text-xs text-blue-700 leading-relaxed">
                     {t('payment:checkout.secureExternalPaymentDescription')}
                   </p>
+                </div>
+              </div>
+            )}
+
+            {/* Accepted Payment Methods */}
+            {finalPrice > 0 && (
+              <div className="flex flex-wrap items-center justify-center gap-3 py-2">
+                {/* Card */}
+                <div className="flex items-center gap-1.5 px-3 py-1.5 bg-neutral-50 border border-neutral-200 rounded-lg">
+                  <CreditCardIcon className="w-4 h-4 text-neutral-500" />
+                  <span className="text-xs text-neutral-600 font-medium">Card</span>
+                </div>
+                {/* Google Pay */}
+                <div className="flex items-center gap-1.5 px-3 py-1.5 bg-neutral-50 border border-neutral-200 rounded-lg">
+                  <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none">
+                    <path d="M12.24 10.285V14.4h5.92c-.24 1.54-1.77 4.5-5.92 4.5-3.56 0-6.47-2.95-6.47-6.58s2.91-6.58 6.47-6.58c2.03 0 3.39.86 4.17 1.61l2.84-2.73C17.46 3.09 15.1 2 12.24 2 6.73 2 2.24 6.48 2.24 12s4.49 10 10 10c5.77 0 9.6-4.06 9.6-9.77 0-.66-.07-1.16-.16-1.66h-9.44z" fill="#4285F4"/>
+                  </svg>
+                  <span className="text-xs text-neutral-600 font-medium">Google Pay</span>
+                </div>
+                {/* Apple Pay */}
+                <div className="flex items-center gap-1.5 px-3 py-1.5 bg-neutral-50 border border-neutral-200 rounded-lg">
+                  <svg className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M17.05 20.28c-.98.95-2.05.88-3.08.4-1.09-.5-2.08-.48-3.24 0-1.44.62-2.2.44-3.06-.4C2.79 15.25 3.51 7.59 9.05 7.31c1.35.07 2.29.74 3.08.8 1.18-.24 2.31-.93 3.57-.84 1.51.12 2.65.72 3.4 1.8-3.12 1.87-2.38 5.98.48 7.13-.57 1.5-1.31 2.99-2.53 4.09zM12.03 7.25c-.15-2.23 1.66-4.07 3.74-4.25.29 2.58-2.34 4.5-3.74 4.25z"/>
+                  </svg>
+                  <span className="text-xs text-neutral-600 font-medium">Apple Pay</span>
+                </div>
+                {/* Bank Transfer */}
+                <div className="flex items-center gap-1.5 px-3 py-1.5 bg-neutral-50 border border-neutral-200 rounded-lg">
+                  <svg className="w-4 h-4 text-neutral-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M8 14v3m4-3v3m4-3v3M3 21h18M3 10h18M3 7l9-4 9 4M4 10h16v11H4V10z" />
+                  </svg>
+                  <span className="text-xs text-neutral-600 font-medium">Bank</span>
                 </div>
               </div>
             )}

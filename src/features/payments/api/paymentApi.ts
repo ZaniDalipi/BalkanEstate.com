@@ -24,6 +24,8 @@ export interface CreatePaymentRequest {
   countryCode: string;
   language?: string;
   preferredProvider?: PaymentProvider;
+  /** Preferred payment method (e.g. 'google_pay', 'apple_pay', 'card', 'bank') */
+  paymentMethod?: string;
 }
 
 export interface CreatePaymentResponse {

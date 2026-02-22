@@ -30,6 +30,20 @@ export interface PayseraConfig {
   callbackUrl: string;
 }
 
+/**
+ * Paysera payment method identifiers.
+ * Google Pay and Apple Pay are available through Paysera's checkout gateway
+ * when card payments are enabled — the checkout page auto-detects device
+ * capabilities and shows the appropriate wallet buttons.
+ */
+export type PayseraPaymentMethod =
+  | 'card'
+  | 'google_pay'
+  | 'apple_pay'
+  | 'wallet'
+  | 'bank'
+  | 'all';
+
 export interface PayseraPaymentRequest {
   orderId: string;
   amount: number; // Amount in cents
@@ -44,6 +58,8 @@ export interface PayseraPaymentRequest {
   firstName?: string;
   lastName?: string;
   language?: string;
+  /** Preferred payment method — filters checkout to show only this type */
+  paymentMethod?: PayseraPaymentMethod;
 }
 
 export interface PayseraPaymentResponse {
@@ -147,7 +163,7 @@ class PayseraService {
         p_lastname: request.lastName || '',
         lang: this.mapLanguage(request.language || 'en'),
         paytext: request.description,
-        payment: 'card,wallet,bank', // Allow all payment methods
+        payment: this.resolvePaymentMethodParam(request.paymentMethod),
       };
 
       // Add HMAC-signed metadata to paytext for secure webhook processing
@@ -300,6 +316,46 @@ class PayseraService {
    */
   public isCountrySupported(countryCode: string): boolean {
     return this.getSupportedCountries().includes(countryCode.toUpperCase());
+  }
+
+  /**
+   * Get supported payment methods for Paysera.
+   * Google Pay and Apple Pay are available through Paysera's hosted checkout
+   * when card payments are enabled — the checkout auto-detects device
+   * capabilities and renders the appropriate wallet buttons.
+   */
+  public getSupportedPaymentMethods(): PayseraPaymentMethod[] {
+    return ['card', 'google_pay', 'apple_pay', 'wallet', 'bank'];
+  }
+
+  /**
+   * Resolve the `payment` parameter for the Paysera API.
+   *
+   * - 'google_pay' / 'apple_pay': Route through card gateway (Paysera shows
+   *   the wallet button automatically on its checkout page for supported devices).
+   * - 'card': Standard card-only checkout.
+   * - 'bank': Bank transfer only.
+   * - 'wallet': E-wallet only.
+   * - 'all' / undefined: Show all available methods.
+   */
+  private resolvePaymentMethodParam(method?: PayseraPaymentMethod): string {
+    switch (method) {
+      case 'google_pay':
+      case 'apple_pay':
+        // Google Pay and Apple Pay are processed through the card gateway.
+        // Paysera's checkout overlay detects the device and renders the
+        // appropriate wallet button when the card method is active.
+        return 'card';
+      case 'card':
+        return 'card';
+      case 'bank':
+        return 'bank';
+      case 'wallet':
+        return 'wallet';
+      default:
+        // Show all available payment methods
+        return 'card,wallet,bank';
+    }
   }
 }
 

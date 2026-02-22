@@ -17,7 +17,7 @@ import { paymentLogger } from '../utils/logger';
  */
 export const createUnifiedPayment = async (req: Request, res: Response): Promise<void> => {
   try {
-    const { planName, planInterval, amount, productId, countryCode, language, preferredProvider } = req.body;
+    const { planName, planInterval, amount, productId, countryCode, language, preferredProvider, paymentMethod } = req.body;
     const userId = (req as any).user?._id;
 
     if (!userId) {
@@ -63,6 +63,7 @@ export const createUnifiedPayment = async (req: Request, res: Response): Promise
       firstName: user.name?.split(' ')[0],
       lastName: user.name?.split(' ').slice(1).join(' '),
       preferredProvider,
+      paymentMethod,
     });
 
     if (!result.success) {

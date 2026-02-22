@@ -52,7 +52,7 @@ export const handlePayseraWebhook = async (req: Request, res: Response): Promise
     const metadata = callbackResult.metadata;
 
     paymentLogger.info(`📥 PaySera webhook received for order ${callbackData.orderid}`);
-    paymentLogger.info(`   Status: ${callbackData.status}, Amount: ${callbackData.payamount} ${callbackData.paycurrency}`);
+    paymentLogger.info(`   Status: ${callbackData.status}, Amount: ${callbackData.payamount} ${callbackData.paycurrency}, Method: ${callbackData.payment || 'unknown'}`);
 
     // Handle based on status
     switch (callbackData.status) {

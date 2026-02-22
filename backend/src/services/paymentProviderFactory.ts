@@ -12,7 +12,7 @@
  */
 
 import { lemonSqueezyService } from './lemonSqueezy';
-import { payseraService } from './payseraService';
+import { payseraService, type PayseraPaymentMethod } from './payseraService';
 import { paymentLogger } from '../utils/logger';
 
 // Payment provider types
@@ -63,6 +63,8 @@ export interface CreatePaymentParams {
   firstName?: string;
   lastName?: string;
   preferredProvider?: PaymentProvider;
+  /** Preferred payment method (e.g. 'google_pay', 'apple_pay', 'card', 'bank') */
+  paymentMethod?: string;
 }
 
 export interface PaymentResult {
@@ -218,7 +220,7 @@ class PaymentProviderFactory {
   }
 
   /**
-   * Create a Paysera payment session (bank transfers for non-EU Balkans)
+   * Create a Paysera payment session (card, Google Pay, Apple Pay, bank transfers)
    */
   private async createPayseraPayment(params: CreatePaymentParams): Promise<PaymentResult> {
     if (!payseraService.isConfigured()) {
@@ -245,6 +247,7 @@ class PaymentProviderFactory {
       firstName: params.firstName,
       lastName: params.lastName,
       language: params.language,
+      paymentMethod: params.paymentMethod as PayseraPaymentMethod,
     });
 
     if (result.success) {
@@ -309,8 +312,8 @@ class PaymentProviderFactory {
       case 'paysera':
         return {
           name: 'Paysera',
-          description: 'Bank transfer payments for Balkan countries',
-          fees: '~1.5-2.5% for bank transfers',
+          description: 'Secure payments with card, Google Pay, Apple Pay, and bank transfer',
+          fees: '~1.5-2.5% for card/wallet, lower for bank transfers',
         };
       default:
         return {
@@ -336,10 +339,11 @@ class PaymentProviderFactory {
     }
 
     if (provider === 'paysera' || payseraService.isConfigured()) {
-      // Paysera: bank transfers, SEPA, e-wallet, card (EU merchants only)
+      // Paysera supports card, Google Pay, Apple Pay (via card gateway),
+      // bank transfers, SEPA, and e-wallet
+      methods.push('card', 'google_pay', 'apple_pay');
       methods.push('bank_transfer');
       if (mapping?.isSEPA) methods.push('sepa_debit');
-      // Paysera card payments for bank links + e-wallet
       methods.push('wallet');
     }
 
