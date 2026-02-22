@@ -51,6 +51,43 @@ const BALKAN_COUNTRY_CODES = [
     { code: '+30', country: 'GR', label: 'Greece', flag: '🇬🇷' },
 ] as const;
 
+// Phone number format patterns per country code (groups of digits)
+const PHONE_FORMAT_PATTERNS: Record<string, number[]> = {
+    '+383': [2, 3, 4],    // Kosovo: 44 123 4567
+    '+355': [2, 3, 4],    // Albania: 69 123 4567
+    '+381': [2, 3, 4],    // Serbia: 63 123 4567
+    '+389': [2, 3, 3],    // N. Macedonia: 70 123 456
+    '+387': [2, 3, 3],    // Bosnia: 61 123 456
+    '+382': [2, 3, 3],    // Montenegro: 67 123 456
+    '+385': [2, 3, 4],    // Croatia: 91 123 4567
+    '+386': [2, 3, 2, 2], // Slovenia: 31 123 45 67
+    '+359': [2, 3, 4],    // Bulgaria: 88 123 4567
+    '+40':  [3, 3, 3],    // Romania: 721 123 456
+    '+30':  [3, 3, 4],    // Greece: 694 123 4567
+};
+
+const formatPhoneNumber = (countryCode: string, digits: string): string => {
+    const clean = digits.replace(/\D/g, '');
+    const pattern = PHONE_FORMAT_PATTERNS[countryCode] || [3, 3, 4];
+    const parts: string[] = [];
+    let pos = 0;
+    for (const groupSize of pattern) {
+        if (pos >= clean.length) break;
+        parts.push(clean.slice(pos, pos + groupSize));
+        pos += groupSize;
+    }
+    // Append any remaining digits to the last group
+    if (pos < clean.length && parts.length > 0) {
+        parts[parts.length - 1] += clean.slice(pos);
+    }
+    return parts.join(' ');
+};
+
+const getPhonePlaceholder = (countryCode: string): string => {
+    const pattern = PHONE_FORMAT_PATTERNS[countryCode] || [3, 3, 4];
+    return pattern.map(n => 'X'.repeat(n)).join(' ');
+};
+
 const validatePhone = (countryCode: string, phoneNumber: string, t?: (key: string, defaultValue?: string) => string): string | null => {
     const tr = t || ((key: string, defaultValue?: string) => defaultValue || key);
     // Phone is required
@@ -519,9 +556,15 @@ const AuthPage: React.FC = () => {
                                         <select
                                             value={phoneCountryCode}
                                             onChange={(e) => {
-                                                setPhoneCountryCode(e.target.value);
+                                                const newCode = e.target.value;
+                                                setPhoneCountryCode(newCode);
+                                                // Re-format existing number with new country pattern
+                                                if (phoneNumber) {
+                                                    const digits = phoneNumber.replace(/\D/g, '');
+                                                    setPhoneNumber(formatPhoneNumber(newCode, digits));
+                                                }
                                                 if (touched.phone) {
-                                                    const err = validatePhone(e.target.value, phoneNumber, t);
+                                                    const err = validatePhone(newCode, phoneNumber, t);
                                                     setFieldErrors(prev => ({ ...prev, phone: err || undefined }));
                                                 }
                                             }}
@@ -539,17 +582,18 @@ const AuthPage: React.FC = () => {
                                             id="phone"
                                             value={phoneNumber}
                                             onChange={(e) => {
-                                                // Only allow digits, spaces, dashes
-                                                const val = e.target.value.replace(/[^0-9\s\-]/g, '');
-                                                setPhoneNumber(val);
+                                                // Strip non-digits, then format based on country
+                                                const digits = e.target.value.replace(/\D/g, '');
+                                                const formatted = formatPhoneNumber(phoneCountryCode, digits);
+                                                setPhoneNumber(formatted);
                                                 if (touched.phone) {
-                                                    const err = validatePhone(phoneCountryCode, val, t);
+                                                    const err = validatePhone(phoneCountryCode, formatted, t);
                                                     setFieldErrors(prev => ({ ...prev, phone: err || undefined }));
                                                 }
                                             }}
                                             onBlur={() => handleBlur('phone')}
                                             className="flex-1 bg-transparent text-base text-neutral-900 px-3 py-4 border-none focus:outline-none focus:ring-0 placeholder:text-neutral-400"
-                                            placeholder={t('auth:signup.phonePlaceholder', 'Phone number')}
+                                            placeholder={getPhonePlaceholder(phoneCountryCode)}
                                             autoComplete="tel-national"
                                         />
                                     </div>
