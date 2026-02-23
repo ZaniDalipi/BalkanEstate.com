@@ -563,7 +563,7 @@ export function use3DMap(props: Map3DBuildingsProps) {
     const adjustedFloorHeight = finalBuildingHeight / totalFlrs;
 
     // Scale up the building coordinates to fully cover the original and prevent z-fighting
-    const scaleFactor = 1.05; // 5% larger to fully cover original building
+    const scaleFactor = 1.1; // 10% larger to fully cover original building
 
     // Calculate centroid for scaling and label positioning
     const outerRing = buildingCoords[0];
@@ -585,33 +585,40 @@ export function use3DMap(props: Map3DBuildingsProps) {
       ])
     );
 
-    // First, try to hide the original building by setting a filter that excludes buildings at this location
-    // We'll do this by creating a small exclusion zone around the property
-    if (mapInstance.getLayer('3d-buildings')) {
-      // Get the current filter and add exclusion for this building's area
-      const latTolerance = 0.0003; // ~30m tolerance
-      const lngTolerance = 0.0003;
+    // Hide the original building so custom floor layers render without z-fighting
+    if (mapInstance.getLayer('3d-buildings') && buildingFeature) {
+      const layer3d = mapInstance.getLayer('3d-buildings') as any;
+      const sourceName = layer3d.source || 'openmaptiles';
 
-      // Apply filter to exclude the original building (by checking if building is within our area)
-      // This uses a bounding box check
-      mapInstance.setFilter('3d-buildings', [
-        'any',
-        ['<', ['get', 'render_height'], 5], // Keep short buildings
-        ['all',
-          ['any',
-            ['<', ['geometry-type'], 'Polygon'], // Keep non-polygons
-            ['any',
-              // Keep buildings outside our exclusion zone
-              // We can't easily filter by geometry center, so use a workaround
-              // by relying on the custom building to cover the original
+      if (buildingFeature.id !== undefined && buildingFeature.id !== null) {
+        try {
+          // Mark the original building as hidden via feature-state
+          mapInstance.setFeatureState(
+            { source: sourceName, sourceLayer: 'building', id: buildingFeature.id },
+            { hidden: true }
+          );
+
+          // Update 3d-buildings paint so hidden features become fully transparent
+          mapInstance.setPaintProperty('3d-buildings', 'fill-extrusion-opacity', [
+            'case',
+            ['boolean', ['feature-state', 'hidden'], false],
+            0,
+            0.92
+          ]);
+        } catch (_e) {
+          // feature-state failed — fall back to collapsing the building to zero height
+          mapInstance.setPaintProperty('3d-buildings', 'fill-extrusion-height', [
+            'case',
+            ['boolean', ['feature-state', 'hidden'], false],
+            0,
+            ['coalesce',
+              ['get', 'render_height'],
+              ['*', ['coalesce', ['get', 'building:levels'], 3], 3.5],
+              10,
             ]
-          ]
-        ]
-      ]);
-
-      // Alternative: Just let the custom building cover the original
-      // Remove the filter and rely on proper z-ordering
-      mapInstance.setFilter('3d-buildings', null);
+          ]);
+        }
+      }
     }
 
     // Add source for the custom building using actual geometry
@@ -639,7 +646,10 @@ export function use3DMap(props: Map3DBuildingsProps) {
       });
     }
 
-    // Remove existing floor layers if any
+    // Remove existing floor layers and shell if any
+    if (mapInstance.getLayer('building-shell')) {
+      mapInstance.removeLayer('building-shell');
+    }
     for (let floor = 1; floor <= 100; floor++) {
       const layerId = `building-floor-${floor}`;
       if (mapInstance.getLayer(layerId)) {
@@ -647,7 +657,21 @@ export function use3DMap(props: Map3DBuildingsProps) {
       }
     }
 
-    // Add floor slice layers - each floor is a separate layer for the striped effect
+    // Add a solid shell layer that fully covers the original building.
+    // This prevents the original building from showing through gaps between floors.
+    mapInstance.addLayer({
+      id: 'building-shell',
+      type: 'fill-extrusion',
+      source: 'custom-building',
+      paint: {
+        'fill-extrusion-color': '#374151', // Dark grey shell
+        'fill-extrusion-height': finalBuildingHeight + 0.5,
+        'fill-extrusion-base': 0,
+        'fill-extrusion-opacity': 1,
+      },
+    });
+
+    // Add floor slice layers on top of the shell
     // For houses/villas: ALL floors are green (entire building highlighted)
     // For apartments: only the specific floor is green
     const isWholeBuilding = propType === 'house' || propType === 'villa';
@@ -666,9 +690,9 @@ export function use3DMap(props: Map3DBuildingsProps) {
           'fill-extrusion-color': isHighlightedFloor
             ? '#22c55e' // Bright green for highlighted floor(s)
             : floor % 2 === 0 ? '#4b5563' : '#6b7280', // Alternating grey for other floors
-          'fill-extrusion-height': floorTop - 0.15, // Gap between floors for visual separation
+          'fill-extrusion-height': floorTop - 0.15, // Small gap between floors for visual separation
           'fill-extrusion-base': floorBase + 0.05,
-          'fill-extrusion-opacity': isHighlightedFloor ? 1 : 0.92,
+          'fill-extrusion-opacity': 1,
         },
       });
     }
@@ -862,9 +886,9 @@ export function use3DMap(props: Map3DBuildingsProps) {
       minZoom: 14, // Prevent zooming out too far - keep building visible
       maxZoom: 20,
       maxPitch: 85,
-      antialias: true, // Enable antialiasing for smoother 3D buildings
+      canvasContextAttributes: { antialias: true }, // Enable antialiasing for smoother 3D buildings
       attributionControl: false,
-    } as maplibregl.MapOptions);
+    });
 
     map.current = mapInstance;
 
@@ -1019,7 +1043,7 @@ export function use3DMap(props: Map3DBuildingsProps) {
       // Add 360 tour door marker for properties without floor visualization
       // Houses/villas get floor viz with any floor count; apartments need >3 floors
       const isHouseOrVilla = propertyType === 'house' || propertyType === 'villa';
-      const willHaveFloorViz = floorNumber != null && totalFloors != null && (isHouseOrVilla ? totalFloors > 0 : totalFloors > 3);
+      const willHaveFloorViz = floorNumber != null && totalFloors != null && (isHouseOrVilla ? totalFloors > 0 : totalFloors > 1);
       if (!willHaveFloorViz && virtualTour360Url) {
         const doorEl = document.createElement('div');
         doorEl.className = 'apartment-door-marker';
@@ -1072,46 +1096,47 @@ export function use3DMap(props: Map3DBuildingsProps) {
 
       // Add custom 3D building with floor slices
       // Houses/villas: show with any floor count (entire building green)
-      // Apartments: show only for buildings with >3 floors (specific floor green)
-      if (floorNumber != null && totalFloors != null && (isHouseOrVilla ? totalFloors > 0 : totalFloors > 3)) {
-        // Retry mechanism to ensure building tiles are loaded
+      // Apartments: show for buildings with >1 floor (specific floor green)
+      if (floorNumber != null && totalFloors != null && (isHouseOrVilla ? totalFloors > 0 : totalFloors > 1)) {
         let retryCount = 0;
         const maxRetries = 5;
 
         const tryAddCustomBuilding = () => {
-          // First zoom to the building location to ensure tiles load
-          mapInstance.flyTo({
-            center: [lng, lat],
-            zoom: Math.max(mapInstance.getZoom(), 17),
-            padding: { top: 0, bottom: 120, left: 0, right: 0 },
-            duration: 1500,
-          });
+          addCustomBuilding3D(
+            mapInstance,
+            lat,
+            lng,
+            floorNumber,
+            totalFloors,
+            virtualTour360Url,
+            virtualTour360Url ? handleEnterBuilding : undefined,
+            propertyType
+          );
 
-          // Wait for the fly animation and tiles to load
-          setTimeout(() => {
-            addCustomBuilding3D(
-              mapInstance,
-              lat,
-              lng,
-              floorNumber,
-              totalFloors,
-              virtualTour360Url,
-              virtualTour360Url ? handleEnterBuilding : undefined,
-              propertyType
-            );
-
-            // Check if source was added successfully - if not, retry
-            if (!mapInstance.getSource('custom-building') && retryCount < maxRetries) {
-              retryCount++;
-              setTimeout(tryAddCustomBuilding, 1000);
-            }
-          }, 2000);
+          // Check if actual floor layers were created (not just the source, which always gets created via fallback)
+          const hasFloorLayers = mapInstance.getLayer('building-floor-1');
+          if (!hasFloorLayers && retryCount < maxRetries) {
+            retryCount++;
+            // Wait for tiles to load and retry
+            const onIdle = () => {
+              mapInstance.off('idle', onIdle);
+              tryAddCustomBuilding();
+            };
+            mapInstance.on('idle', onIdle);
+          }
         };
 
-        // Start the process after initial load
+        // Zoom in to ensure building tiles are loaded, then add on idle
+        mapInstance.flyTo({
+          center: [lng, lat],
+          zoom: Math.max(mapInstance.getZoom(), 17),
+          padding: { top: 0, bottom: 120, left: 0, right: 0 },
+          duration: 1500,
+        });
+
         const addBuildingOnIdle = () => {
-          tryAddCustomBuilding();
           mapInstance.off('idle', addBuildingOnIdle);
+          tryAddCustomBuilding();
         };
         mapInstance.on('idle', addBuildingOnIdle);
       }
@@ -1156,9 +1181,13 @@ export function use3DMap(props: Map3DBuildingsProps) {
         30, lighting.buildingHighlight,
         80, '#ffffff',
       ]);
-      map.current.setPaintProperty('3d-buildings', 'fill-extrusion-opacity',
-        0.7 + lighting.ambientIntensity * 0.25
-      );
+      const timelapseOpacity = 0.7 + lighting.ambientIntensity * 0.25;
+      map.current.setPaintProperty('3d-buildings', 'fill-extrusion-opacity', [
+        'case',
+        ['boolean', ['feature-state', 'hidden'], false],
+        0,
+        timelapseOpacity
+      ]);
     }
 
     // Subtle bearing rotation for sun movement

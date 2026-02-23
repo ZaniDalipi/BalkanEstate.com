@@ -239,7 +239,7 @@ function generateEnterpriseWelcomeEmail(params: {
         <div style="display: grid; gap: 12px;">
           <div style="display: flex; align-items: center; gap: 12px;">
             <span style="display: inline-block; width: 32px; height: 32px; background: #059669; border-radius: 50%; text-align: center; line-height: 32px; font-size: 16px;">✓</span>
-            <span style="color: #e2e8f0; font-size: 14px;"><strong>500 Listings</strong> - Expandable as you grow</span>
+            <span style="color: #e2e8f0; font-size: 14px;"><strong>750 Listings</strong> - Expandable as you grow</span>
           </div>
           <div style="display: flex; align-items: center; gap: 12px;">
             <span style="display: inline-block; width: 32px; height: 32px; background: #059669; border-radius: 50%; text-align: center; line-height: 32px; font-size: 16px;">✓</span>

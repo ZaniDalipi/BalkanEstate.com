@@ -5,6 +5,7 @@ import { SparklesIcon, MapPinIcon } from '@/constants';
 import MarketInsightsAnimation from './MarketInsightsAnimation';
 import MapLocationPicker from './MapLocationPicker';
 import PromotionSelector from '@/src/features/promotions/components/PromotionSelector';
+import Modal from '@/src/shared/components/ui/Modal';
 import RoleSelector from './RoleSelector';
 import { BALKAN_LOCATIONS } from '@/utils/balkanLocations';
 import { useListingForm } from './useListingForm';
@@ -64,6 +65,9 @@ const GeminiDescriptionGenerator: React.FC<{ propertyToEdit: Property | null }> 
             <ListingPreview
                 property={previewProperty}
                 isSubmitting={isSubmitting}
+                isCompressing={isCompressing}
+                isUploading={isUploading}
+                uploadProgress={uploadProgress}
                 wantToPromote={wantToPromote}
                 isEditing={!!propertyToEdit}
                 onBack={handleBackToForm}
@@ -72,17 +76,7 @@ const GeminiDescriptionGenerator: React.FC<{ propertyToEdit: Property | null }> 
         );
     }
 
-    if (step === 'payment' && pendingPropertyData) {
-        return (
-            <PromotionSelector
-                pendingPropertyData={pendingPropertyData}
-                onPaymentSuccess={handlePromotionPaymentSuccess}
-                onSkip={handlePostWithoutPromotion}
-                onBack={() => setStep('form')}
-                isSubmitting={isSubmitting}
-            />
-        );
-    }
+    // Payment step is now rendered as a modal overlay (see bottom of component)
 
     if (step === 'success') {
         return (
@@ -782,6 +776,22 @@ const GeminiDescriptionGenerator: React.FC<{ propertyToEdit: Property | null }> 
                  </div>
             )}
         </form>
+
+        {/* Promotion Selector Modal - shown when step is 'payment' */}
+        <Modal
+            isOpen={step === 'payment' && !!pendingPropertyData}
+            onClose={handlePostWithoutPromotion}
+            size="5xl"
+        >
+            <PromotionSelector
+                pendingPropertyData={pendingPropertyData!}
+                onPaymentSuccess={handlePromotionPaymentSuccess}
+                onSkip={handlePostWithoutPromotion}
+                onBack={() => setStep('form')}
+                isSubmitting={isSubmitting}
+                inModal={true}
+            />
+        </Modal>
         </>
     );
 };

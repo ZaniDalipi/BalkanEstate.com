@@ -217,7 +217,7 @@ const SellerPlansSection: React.FC<SellerPlansSectionProps> = ({
             {(enterpriseProduct.features && enterpriseProduct.features.length > 0
               ? enterpriseProduct.features
               : [
-                  '500 listings (expandable)',
+                  '750 listings (expandable)',
                   'Unlimited team members',
                   'Agency branding page',
                   '5 promo coupons/month',

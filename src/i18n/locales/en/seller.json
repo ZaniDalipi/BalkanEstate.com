@@ -247,8 +247,11 @@
     },
     "progress": {
       "compressing": "Compressing images...",
+      "compressingHint": "Optimizing your images for the best quality...",
       "uploading": "Uploading to cloud...",
-      "creating": "Creating listing..."
+      "uploadingHint": "Securely uploading your photos...",
+      "creating": "Creating listing...",
+      "creatingHint": "Almost there! Saving your listing..."
     },
     "promotion": {
       "title": "Promote Your Listing",

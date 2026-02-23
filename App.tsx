@@ -637,6 +637,12 @@ const MainLayout: React.FC = () => {
   const isHomePage = isSearchPage || isRentalPage;
   const showPWATopBar = isMobile && !state.selectedProperty && !isHomePage;
 
+  // Main tab views show hamburger menu; detail views show back button
+  const isMainTabView = !state.selectedAgentId && !state.selectedAgencyId && [
+    'agents', 'agencies', 'saved-properties', 'saved-searches', 'explore-cities',
+    'inbox', 'pricing', 'how-it-works', 'valuation', 'mortgage-calculator', 'analytics', 'admin',
+  ].includes(state.activeView);
+
   // Map activeView to readable page title
   const pageTitle = useMemo(() => {
     if (state.selectedAgencyId) return t('nav:pageTitles.agency');
@@ -727,18 +733,31 @@ const MainLayout: React.FC = () => {
             {showPWATopBar && (
               <div className="bg-white/95 backdrop-blur-md border-b border-neutral-200/60 flex-shrink-0 z-20" style={{ paddingTop: 'env(safe-area-inset-top, 0px)' }}>
                 <div className="grid grid-cols-[auto_1fr_auto] items-center h-11 px-1">
-                  {/* Left: Back button */}
-                  <button
-                    type="button"
-                    onClick={handlePWABack}
-                    className="flex items-center gap-1 text-primary font-medium text-sm min-w-[44px] min-h-[44px] pl-2 pr-3 active:opacity-70 transition-opacity"
-                    aria-label={t('common:aria.goBack')}
-                  >
-                    <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
-                    </svg>
-                    <span>{t('common:back')}</span>
-                  </button>
+                  {/* Left: Hamburger menu for main tabs, Back button for detail pages */}
+                  {isMainTabView ? (
+                    <button
+                      type="button"
+                      onClick={() => setIsSidebarOpen(true)}
+                      className="flex items-center justify-center min-w-[44px] min-h-[44px] text-neutral-700 active:opacity-70 transition-opacity pl-2"
+                      aria-label={t('common:aria.openMenu', 'Open menu')}
+                    >
+                      <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
+                      </svg>
+                    </button>
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={handlePWABack}
+                      className="flex items-center gap-1 text-primary font-medium text-sm min-w-[44px] min-h-[44px] pl-2 pr-3 active:opacity-70 transition-opacity"
+                      aria-label={t('common:aria.goBack')}
+                    >
+                      <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
+                      </svg>
+                      <span>{t('common:back')}</span>
+                    </button>
+                  )}
 
                   {/* Center: Page title */}
                   <span className="text-sm font-semibold text-neutral-800 truncate text-center">{pageTitle}</span>

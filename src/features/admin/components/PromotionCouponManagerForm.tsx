@@ -10,6 +10,9 @@ import type { PromotionCoupon, CreateCouponData } from './usePromotionCouponMana
 interface CreateCouponModalProps {
   newCoupon: CreateCouponData;
   setNewCoupon: React.Dispatch<React.SetStateAction<CreateCouponData>>;
+  couponDuration: number;
+  setCouponDuration: (days: number) => void;
+  durationOptions: ReadonlyArray<{ value: number; label: string }>;
   applyPreset: (preset: 'test100' | 'welcome' | 'seasonal') => void;
   getTierBadgeColor: (tier: string) => string;
   onSubmit: (e: React.FormEvent) => void;
@@ -20,6 +23,9 @@ interface CreateCouponModalProps {
 export const CreateCouponModal: React.FC<CreateCouponModalProps> = ({
   newCoupon,
   setNewCoupon,
+  couponDuration,
+  setCouponDuration,
+  durationOptions,
   applyPreset,
   getTierBadgeColor,
   onSubmit,
@@ -126,6 +132,32 @@ export const CreateCouponModal: React.FC<CreateCouponModalProps> = ({
             </div>
           </div>
 
+          {/* Coupon Duration */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              {t('admin:promotionCoupons.form.couponDuration', 'Coupon Duration')} <span className="text-red-500">*</span>
+            </label>
+            <div className="flex flex-wrap gap-2">
+              {durationOptions.map((opt) => (
+                <button
+                  key={opt.value}
+                  type="button"
+                  onClick={() => setCouponDuration(opt.value)}
+                  className={`px-3 py-1.5 text-sm rounded-lg border transition-all ${
+                    couponDuration === opt.value
+                      ? 'bg-purple-600 text-white border-purple-600 shadow-sm'
+                      : 'bg-white text-gray-700 border-gray-300 hover:border-purple-400 hover:text-purple-600'
+                  }`}
+                >
+                  {opt.label}
+                </button>
+              ))}
+            </div>
+            <p className="text-xs text-gray-500 mt-1">
+              {t('admin:promotionCoupons.form.couponDurationDesc', 'How long this coupon will be available for use')}
+            </p>
+          </div>
+
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -134,11 +166,21 @@ export const CreateCouponModal: React.FC<CreateCouponModalProps> = ({
               <input
                 type="datetime-local"
                 value={newCoupon.validUntil}
-                onChange={(e) => setNewCoupon({ ...newCoupon, validUntil: e.target.value })}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg"
+                onChange={(e) => {
+                  setCouponDuration(0); // Switch to custom when manually editing
+                  setNewCoupon({ ...newCoupon, validUntil: e.target.value });
+                }}
+                className={`w-full px-4 py-2 border border-gray-300 rounded-lg ${
+                  couponDuration !== 0 ? 'bg-gray-50 text-gray-500' : ''
+                }`}
                 min={new Date().toISOString().slice(0, 16)}
                 required
               />
+              {couponDuration !== 0 && (
+                <p className="text-xs text-purple-600 mt-1">
+                  {t('admin:promotionCoupons.form.autoCalculated', 'Auto-calculated from duration')}
+                </p>
+              )}
             </div>
 
             <div>

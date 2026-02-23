@@ -254,13 +254,14 @@ export async function processSubscriptionPayment(
         const premiumCoupons = product.premiumCoupons;
         const featuredCoupons = product.featuredCoupons;
 
-        // Generate actual PromotionCoupon codes for the enterprise user
+        // Generate actual PromotionCoupon codes for the enterprise user (2-week validity)
         const generatedCodes = await generateProSubscriptionCoupons(
           String(userId),
           highlightedCoupons ?? 0,
           premiumCoupons ?? 0,
           featuredCoupons ?? 0,
           subscription.expirationDate,
+          MAX_COUPON_VALIDITY_DAYS_AGENCY,
         );
 
         // Send the initial promotion coupons email with codes
@@ -691,11 +692,11 @@ async function initializePromotionCoupons(
  */
 /**
 /**
- * Maximum validity period for generated promotion coupons (30 days).
- * Regardless of the caller-supplied validUntil (e.g. end-of-month or
- * subscription expiry), coupons will never be valid for more than this.
+ * Maximum validity period for generated promotion coupons.
+ * Pro users get 30 days, agencies/enterprise get 14 days (2 weeks).
  */
-const MAX_COUPON_VALIDITY_DAYS = 30;
+const MAX_COUPON_VALIDITY_DAYS_PRO = 30;
+const MAX_COUPON_VALIDITY_DAYS_AGENCY = 14;
 
 /**
  * Generate PromotionCoupon records for a new Pro subscriber.
@@ -707,12 +708,13 @@ async function generateProSubscriptionCoupons(
   premiumCount: number,
   featuredCount: number,
   validUntil: Date,
+  maxValidityDays: number = MAX_COUPON_VALIDITY_DAYS_PRO,
 ): Promise<Array<{ tier: 'highlight' | 'premium' | 'featured'; code: string }>> {
   const results: Array<{ tier: 'highlight' | 'premium' | 'featured'; code: string }> = [];
 
-  // Cap validity to MAX_COUPON_VALIDITY_DAYS from now regardless of what the
-  // caller passed (end-of-month or subscription expiry can exceed 30 days).
-  const maxExpiry = new Date(Date.now() + MAX_COUPON_VALIDITY_DAYS * 24 * 60 * 60 * 1000);
+  // Cap validity to maxValidityDays from now regardless of what the
+  // caller passed (end-of-month or subscription expiry can exceed the limit).
+  const maxExpiry = new Date(Date.now() + maxValidityDays * 24 * 60 * 60 * 1000);
   const cappedValidUntil = validUntil < maxExpiry ? validUntil : maxExpiry;
 
   const tiers: Array<{ tier: 'highlight' | 'premium' | 'featured'; count: number }> = [
@@ -832,7 +834,7 @@ async function generateEnterpriseAgentCoupons(
       promotionCoupons,
       agentCoupons: enterpriseProduct?.agentCoupons || 5,
       teamMembersLimit: enterpriseProduct?.teamMembersLimit || 5,
-      listingsLimit: enterpriseProduct?.listingsLimit || 500,
+      listingsLimit: enterpriseProduct?.listingsLimit || 750,
     });
     // Sent Enterprise welcome email with coupon breakdown
   } catch (emailError) {

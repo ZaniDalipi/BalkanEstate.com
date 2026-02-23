@@ -60,8 +60,10 @@ const Footer: React.FC<FooterProps> = ({ className = '', contained = false }) =>
     };
 
     const handleCountrySearch = (countryName: string) => {
-        dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'explore-cities' });
         window.history.pushState({}, '', getLocalizedPath(`/explore-cities?country=${encodeURIComponent(countryName)}`));
+        dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'explore-cities' });
+        // Notify already-mounted components about the country filter change
+        window.dispatchEvent(new CustomEvent('country-filter-change', { detail: countryName }));
         window.scrollTo({ top: 0, behavior: 'smooth' });
     };
 

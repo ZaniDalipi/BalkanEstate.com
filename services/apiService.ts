@@ -415,6 +415,15 @@ export const changePassword = async (currentPassword: string, newPassword: strin
   return response;
 };
 
+export const setPasswordForSocialUser = async (newPassword: string): Promise<{ message: string }> => {
+  return secureAuthRequest<{ message: string }>('/auth/set-password', {
+    method: 'POST',
+    requiresAuth: true,
+    body: { newPassword },
+    sensitiveFields: ['newPassword'],
+  });
+};
+
 export const getAvailableOAuthProviders = async (): Promise<{ google: boolean; apple: boolean }> => {
   try {
     const response = await apiRequest<{ providers: { google: boolean; apple: boolean } }>('/auth/oauth/providers');
@@ -1691,7 +1700,8 @@ export const confirmPromotionPayment = async (sessionId: string): Promise<{
 export const validateCoupon = async (
   couponCode: string,
   promotionTier: string,
-  price: number
+  price: number,
+  duration?: number
 ): Promise<CouponValidationResult> => {
   try {
     const response = await apiRequest<{
@@ -1705,7 +1715,7 @@ export const validateCoupon = async (
       error?: string;
     }>('/coupons/validate', {
       method: 'POST',
-      body: { couponCode, promotionTier, price },
+      body: { couponCode, promotionTier, price, duration },
       requiresAuth: true,
     });
 

@@ -2019,7 +2019,7 @@ class EmailService {
         <span style="display: inline-block; width: 60px; height: 60px; background: rgba(255,255,255,0.15); border-radius: 16px; line-height: 60px; font-size: 32px;">🏠</span>
       </div>
       <h1 style="color: #ffffff; margin: 0; font-size: 26px; font-weight: 700; letter-spacing: -0.5px;">Welcome to BalkanEstate<sup>AI</sup>!</h1>
-      <p style="color: #bfdbfe; margin: 8px 0 0 0; font-size: 15px;">Your journey to the perfect property starts here</p>
+      <p style="color: #ffffff; margin: 8px 0 0 0; font-size: 15px; opacity: 0.9;">Your journey to the perfect property starts here</p>
     </div>
 
     <div style="padding: 32px 24px;">
@@ -2087,17 +2087,17 @@ class EmailService {
         </div>
       </div>
 
-      <p style="color: #9ca3af; font-size: 12px; margin: 0; text-align: center;">
+      <p style="color: #6b7280; font-size: 12px; margin: 0; text-align: center;">
         Didn't sign up for BalkanEstate<sup>AI</sup>? No worries—just ignore this email.
       </p>
     </div>
 
     <!-- Footer -->
     <div style="background: #f9fafb; padding: 24px; text-align: center; border-top: 1px solid #e5e7eb;">
-      <p style="color: #6b7280; font-size: 12px; margin: 0 0 8px 0;">
+      <p style="color: #4b5563; font-size: 12px; margin: 0 0 8px 0;">
         Questions? We're here to help at <a href="mailto:support@balkanestateai.com" style="color: #0252CD; text-decoration: none;">support@balkanestateai.com</a>
       </p>
-      <p style="color: #9ca3af; font-size: 11px; margin: 0;">
+      <p style="color: #6b7280; font-size: 11px; margin: 0;">
         © ${new Date().getFullYear()} BalkanEstate<sup>AI</sup> · Find your place in the Balkans
       </p>
     </div>
@@ -2844,7 +2844,7 @@ Questions? Contact us at support@balkanestateai.com
     const currentYear = new Date().getFullYear();
 
     // Default values if not provided
-    const listingsLimit = params.listingsLimit || 500;
+    const listingsLimit = params.listingsLimit || 750;
     const teamMembersLimit = params.teamMembersLimit || 5;
     const agentCoupons = params.agentCoupons || 5;
     const promotionCoupons = params.promotionCoupons || {
@@ -2876,7 +2876,7 @@ Questions? Contact us at support@balkanestateai.com
         <span style="display: inline-block; width: 80px; height: 80px; background: rgba(255,255,255,0.2); border-radius: 50%; line-height: 80px; font-size: 40px;">🎉</span>
       </div>
       <h1 style="color: #ffffff; margin: 0; font-size: 28px; font-weight: 700;">Thank You!</h1>
-      <p style="color: #fef3c7; margin: 12px 0 0 0; font-size: 16px;">Welcome to the Enterprise family</p>
+      <p style="color: #ffffff; margin: 12px 0 0 0; font-size: 16px; opacity: 0.9;">Welcome to the Enterprise family</p>
     </div>
 
     <div style="padding: 32px 24px;">
@@ -2918,7 +2918,7 @@ Questions? Contact us at support@balkanestateai.com
           </tr>
           <tr>
             <td style="padding: 8px 0; padding-left: 40px;">
-              <span style="color: #94a3b8; font-size: 13px;">${couponBreakdown}</span>
+              <span style="color: #cbd5e1; font-size: 13px;">${couponBreakdown}</span>
             </td>
           </tr>
           <tr>
@@ -2945,7 +2945,7 @@ Questions? Contact us at support@balkanestateai.com
       <!-- Next Steps -->
       <div style="background: #1e293b; border-radius: 8px; padding: 20px; margin-bottom: 24px; border: 1px solid #334155;">
         <h3 style="color: #ffffff; font-size: 16px; font-weight: 600; margin: 0 0 12px 0;">📋 Your Next Steps</h3>
-        <ol style="color: #e2e8f0; font-size: 14px; margin: 0; padding-left: 20px; line-height: 1.8;">
+        <ol style="color: #f1f5f9; font-size: 14px; margin: 0; padding-left: 20px; line-height: 1.8;">
           <li>Check your inbox for <strong style="color: #10b981;">${agentCoupons} agent registration codes</strong></li>
           <li>Share codes with your team members to onboard them</li>
           <li>Set up your agency profile with branding and description</li>
@@ -2955,7 +2955,7 @@ Questions? Contact us at support@balkanestateai.com
 
       <!-- Personal Note -->
       <div style="background: linear-gradient(135deg, #1e3a5f 0%, #0f172a 100%); border-radius: 8px; padding: 20px; margin-bottom: 28px; border-left: 4px solid #f59e0b;">
-        <p style="color: #e2e8f0; font-size: 14px; margin: 0; line-height: 1.6; font-style: italic;">
+        <p style="color: #f1f5f9; font-size: 14px; margin: 0; line-height: 1.6; font-style: italic;">
           "We built BalkanEstate<sup>AI</sup> to empower real estate professionals across the Balkans.
           Your success is our success. If you ever need anything, don't hesitate to reach out!"
         </p>
@@ -2973,8 +2973,8 @@ Questions? Contact us at support@balkanestateai.com
       </div>
 
       <p style="text-align: center; margin: 0;">
-        <a href="${frontendUrl}/agency/settings" style="color: #6b7280; font-size: 13px; text-decoration: none; margin-right: 16px;">Agency Settings</a>
-        <a href="${frontendUrl}/support" style="color: #6b7280; font-size: 13px; text-decoration: none;">Contact Support</a>
+        <a href="${frontendUrl}/agency/settings" style="color: #4b5563; font-size: 13px; text-decoration: none; margin-right: 16px;">Agency Settings</a>
+        <a href="${frontendUrl}/support" style="color: #4b5563; font-size: 13px; text-decoration: none;">Contact Support</a>
       </p>
     </div>
 
@@ -2983,10 +2983,10 @@ Questions? Contact us at support@balkanestateai.com
       <p style="color: #ffffff; font-size: 13px; margin: 0 0 8px 0; font-weight: 600;">
         ${safeAgencyName}
       </p>
-      <p style="color: #94a3b8; font-size: 12px; margin: 0 0 4px 0;">
+      <p style="color: #cbd5e1; font-size: 12px; margin: 0 0 4px 0;">
         Enterprise Subscriber · €999/year
       </p>
-      <p style="color: #64748b; font-size: 11px; margin: 12px 0 0 0;">
+      <p style="color: #94a3b8; font-size: 11px; margin: 12px 0 0 0;">
         © ${currentYear} BalkanEstate<sup>AI</sup> · Find your place in the Balkans
       </p>
     </div>
@@ -3737,12 +3737,33 @@ Questions? Contact us at support@balkanestateai.com
       available: number;
       used: number;
     };
+    couponCodes?: Array<{ tier: 'highlight' | 'premium' | 'featured'; code: string }>;
   }): Promise<void> {
     const frontendUrl = process.env.FRONTEND_URL || 'https://balkanestateai.com';
     const safeOwnerName = escapeHtml(params.ownerName);
     const safeAgencyName = escapeHtml(params.agencyName);
     const currentYear = new Date().getFullYear();
     const { monthly, available, used } = params.promotionCoupons;
+
+    // Build coupon codes HTML section
+    const couponCodesHtml = params.couponCodes && params.couponCodes.length > 0 ? `
+      <div style="background: #f0fdf4; border-radius: 12px; padding: 20px; margin-bottom: 24px; border: 1px solid #86efac;">
+        <p style="color: #166534; font-size: 14px; font-weight: 700; margin: 0 0 12px 0;">🎫 Your Coupon Codes</p>
+        <p style="color: #4b5563; font-size: 12px; margin: 0 0 12px 0;">Copy and use these codes when promoting a listing:</p>
+        ${params.couponCodes.map(c => {
+          const label = c.tier === 'highlight' ? '✨ Highlighted' : c.tier === 'premium' ? '💎 Premium' : '🔥 Featured';
+          const bg = c.tier === 'highlight' ? '#059669' : c.tier === 'premium' ? '#7c3aed' : '#dc2626';
+          return `<div style="margin-bottom: 8px;">
+            <span style="display: inline-block; background:${bg}; color:#fff; border-radius:4px; padding:3px 10px; font-size:11px; font-weight:600; margin-right:8px; vertical-align:middle;">${label}</span>
+            <code style="display: inline-block; background:#fff; border:1px solid #86efac; border-radius:6px; padding:5px 12px; font-size:14px; font-weight:700; letter-spacing:1.5px; color:#166534; vertical-align:middle;">${escapeHtml(c.code)}</code>
+          </div>`;
+        }).join('')}
+      </div>
+    ` : '';
+
+    const couponCodesText = (params.couponCodes ?? []).length > 0
+      ? `\nYour coupon codes:\n${(params.couponCodes ?? []).map(c => `- ${c.tier.toUpperCase()}: ${c.code}`).join('\n')}\n`
+      : '';
 
     const html = `
 <!DOCTYPE html>
@@ -3792,6 +3813,9 @@ Questions? Contact us at support@balkanestateai.com
         </div>
       </div>
 
+      <!-- Coupon Codes -->
+      ${couponCodesHtml}
+
       <!-- How to Use -->
       <div style="background: #1e293b; border-radius: 8px; padding: 16px; margin-bottom: 24px; border-left: 4px solid #f59e0b;">
         <h3 style="color: #ffffff; font-size: 14px; font-weight: 600; margin: 0 0 8px 0;">📋 How to Use Promotion Coupons</h3>
@@ -3826,7 +3850,7 @@ Questions? Contact us at support@balkanestateai.com
       to: params.email,
       subject: `🎁 Promotion Coupons Summary — ${safeAgencyName}`,
       html,
-      text: `Hello ${params.ownerName},\n\nHere's your promotion coupons summary for ${params.agencyName}.\n\nMonthly: ${monthly}\nAvailable: ${available}\nUsed: ${used}\n\nUse these coupons to highlight, feature, or boost your listings!\n\nVisit: ${frontendUrl}/agency/dashboard\n\n© ${currentYear} BalkanEstateᴬᴵ`,
+      text: `Hello ${params.ownerName},\n\nHere's your promotion coupons summary for ${params.agencyName}.\n\nMonthly: ${monthly}\nAvailable: ${available}\nUsed: ${used}\n${couponCodesText}\nUse these coupons to highlight, feature, or boost your listings!\n\nVisit: ${frontendUrl}/agency/dashboard\n\n© ${currentYear} BalkanEstateᴬᴵ`,
       category: 'alerts',
     });
   }

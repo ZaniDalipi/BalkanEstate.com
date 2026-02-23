@@ -37,6 +37,7 @@ export const createCoupon = async (
       maxTotalUses,
       maxUsesPerUser,
       applicableTiers,
+      applicableDurations,
       minimumPurchaseAmount,
       notes,
       isPublic,
@@ -61,6 +62,19 @@ export const createCoupon = async (
       return;
     }
 
+    // Validate applicableDurations if provided
+    const validDurations = [7, 15, 30, 60, 90];
+    if (applicableDurations && Array.isArray(applicableDurations)) {
+      const invalidDurations = applicableDurations.filter((d: number) => !validDurations.includes(d));
+      if (invalidDurations.length > 0) {
+        res.status(400).json({
+          message: `Invalid durations: ${invalidDurations.join(', ')}. Must be one of: ${validDurations.join(', ')}`,
+          code: 'INVALID_DURATIONS',
+        });
+        return;
+      }
+    }
+
     // Create coupon
     const coupon = await PromotionCoupon.create({
       code: code.toUpperCase(),
@@ -72,6 +86,7 @@ export const createCoupon = async (
       maxTotalUses,
       maxUsesPerUser: maxUsesPerUser || 1,
       applicableTiers,
+      applicableDurations: applicableDurations?.length ? applicableDurations : undefined,
       minimumPurchaseAmount,
       notes,
       isPublic: isPublic || false,
@@ -93,6 +108,7 @@ export const createCoupon = async (
         maxTotalUses: coupon.maxTotalUses,
         maxUsesPerUser: coupon.maxUsesPerUser,
         applicableTiers: coupon.applicableTiers,
+        applicableDurations: coupon.applicableDurations,
         minimumPurchaseAmount: coupon.minimumPurchaseAmount,
         isPublic: coupon.isPublic,
       },
@@ -111,54 +127,76 @@ export const createCoupon = async (
 export const validateCoupon = async (req: Request, res: Response): Promise<void> => {
   try {
     // Support both new and old parameter names for backward compatibility
-    const { couponCode, price, tier, code, amount, promotionTier } = req.body;
+    const { couponCode, price, tier, code, amount, promotionTier, duration } = req.body;
     const userId = (req as any).user?.id || (req as any).user?._id;
 
     const actualCode = couponCode || code;
     const actualPrice = price !== undefined ? price : amount;
     const actualTier = tier || promotionTier;
+    const actualDuration = duration ? Number(duration) : undefined;
 
     if (!userId) {
-      res.status(401).json({ error: 'Unauthorized' });
+      res.status(401).json({ message: 'You must be logged in to use a coupon' });
       return;
     }
 
     if (!actualCode || actualPrice === undefined) {
-      res.status(400).json({ error: 'Coupon code and price are required' });
+      res.status(400).json({ message: 'Please enter a coupon code' });
       return;
     }
 
     const coupon = await PromotionCoupon.findOne({
       code: actualCode.toUpperCase(),
-      status: 'active',
     });
 
     if (!coupon) {
-      res.status(404).json({ error: 'Coupon not found or expired' });
+      res.status(404).json({ message: 'This coupon code does not exist. Please check the code and try again.' });
       return;
     }
 
-    if (!coupon.isValid()) {
-      res.status(400).json({ error: 'Coupon is not valid or expired' });
+    if (coupon.status === 'disabled') {
+      res.status(400).json({ message: 'This coupon has been deactivated and is no longer available.' });
+      return;
+    }
+
+    if (coupon.status === 'expired' || !coupon.isValid()) {
+      const expiredDate = coupon.validUntil ? new Date(coupon.validUntil).toLocaleDateString() : '';
+      res.status(400).json({ message: `This coupon expired on ${expiredDate}. It is no longer valid.` });
+      return;
+    }
+
+    // Check total usage limit
+    if (coupon.maxTotalUses && coupon.currentTotalUses >= coupon.maxTotalUses) {
+      res.status(400).json({ message: 'This coupon has reached its maximum number of uses and is no longer available.' });
       return;
     }
 
     const canUse = await coupon.canBeUsedBy(userId as any);
     if (!canUse) {
-      res.status(400).json({ error: 'You have already used this coupon' });
+      res.status(400).json({ message: 'You have already used this coupon the maximum number of times allowed.' });
       return;
     }
 
     if (actualTier && coupon.applicableTiers && coupon.applicableTiers.length > 0) {
       if (!coupon.applicableTiers.includes(actualTier)) {
-        res.status(400).json({ error: 'Coupon not applicable to this subscription tier' });
+        const allowedTiers = coupon.applicableTiers.map((t: string) => t.charAt(0).toUpperCase() + t.slice(1)).join(', ');
+        res.status(400).json({ message: `This coupon is only valid for ${allowedTiers} promotion tiers.` });
+        return;
+      }
+    }
+
+    // Check applicable durations
+    if (actualDuration && coupon.applicableDurations && coupon.applicableDurations.length > 0) {
+      if (!coupon.applicableDurations.includes(actualDuration as 7 | 15 | 30 | 60 | 90)) {
+        const allowedDurations = coupon.applicableDurations.map((d: number) => `${d} days`).join(', ');
+        res.status(400).json({ message: `This coupon is only valid for ${allowedDurations} promotion durations.` });
         return;
       }
     }
 
     if (coupon.minimumPurchaseAmount && actualPrice < coupon.minimumPurchaseAmount) {
       res.status(400).json({
-        error: 'Minimum purchase amount of €' + coupon.minimumPurchaseAmount + ' required'
+        message: `This coupon requires a minimum purchase of €${coupon.minimumPurchaseAmount.toFixed(2)}.`
       });
       return;
     }
@@ -176,7 +214,7 @@ export const validateCoupon = async (req: Request, res: Response): Promise<void>
     });
   } catch (error) {
     apiLogger.error('Error validating coupon:', error);
-    res.status(500).json({ error: 'Failed to validate coupon' });
+    res.status(500).json({ message: 'Something went wrong while validating the coupon. Please try again.' });
   }
 };
 
@@ -228,6 +266,7 @@ export const getAllCoupons = async (
         maxUsesPerUser: coupon.maxUsesPerUser,
         currentTotalUses: coupon.currentTotalUses,
         applicableTiers: coupon.applicableTiers,
+        applicableDurations: coupon.applicableDurations,
         minimumPurchaseAmount: coupon.minimumPurchaseAmount,
         isPublic: coupon.isPublic,
         createdBy: coupon.createdBy,
@@ -322,6 +361,7 @@ export const getCouponDetails = async (
         maxUsesPerUser: coupon.maxUsesPerUser,
         currentTotalUses: coupon.currentTotalUses,
         applicableTiers: coupon.applicableTiers,
+        applicableDurations: coupon.applicableDurations,
         minimumPurchaseAmount: coupon.minimumPurchaseAmount,
         isPublic: coupon.isPublic,
         createdBy: coupon.createdBy,

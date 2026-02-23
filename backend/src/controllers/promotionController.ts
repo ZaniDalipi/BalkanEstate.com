@@ -195,6 +195,7 @@ export const purchasePromotion = async (
 
     let isFromAgencyAllocation = false;
     let agencyId = null;
+    let allocationAgency: any = null; // Reference to agency for coupon counter update
     let finalPrice = 0;
     let appliedCoupon = null;
     let couponDiscount = 0;
@@ -249,6 +250,7 @@ export const purchasePromotion = async (
 
       isFromAgencyAllocation = true;
       agencyId = agency._id;
+      allocationAgency = agency;
       originalPrice = hasUrgentBadge ? URGENT_MODIFIER.price : 0;
       finalPrice = originalPrice; // Urgent badge still costs if agency allocation is used
 
@@ -372,6 +374,31 @@ export const purchasePromotion = async (
       await appliedCoupon.recordUsage(user._id, promotion._id, couponDiscount);
     }
 
+    // Update agency promotion coupon counters when using agency allocation
+    if (isFromAgencyAllocation && allocationAgency) {
+      // Refresh monthly pool if a new month has started
+      if (allocationAgency.refreshPromotionCoupons) {
+        allocationAgency.refreshPromotionCoupons();
+      }
+      if (allocationAgency.promotionCoupons && allocationAgency.promotionCoupons.available > 0) {
+        allocationAgency.promotionCoupons.available -= 1;
+        allocationAgency.promotionCoupons.used += 1;
+      }
+
+      // Also update the specific coupon code status if a coupon code from the agency pool was used
+      if (couponCode && allocationAgency.promotionCoupons?.codes?.length > 0) {
+        const matchingCode = allocationAgency.promotionCoupons.codes.find(
+          (c: any) => c.code === couponCode && c.status === 'available'
+        );
+        if (matchingCode) {
+          matchingCode.status = 'used';
+          matchingCode.usedBy = { name: user.name || user.email };
+        }
+      }
+
+      await allocationAgency.save();
+    }
+
     // Update property
     property.isPromoted = true;
     property.promotionTier = promotionTier;
@@ -405,6 +432,14 @@ export const purchasePromotion = async (
           discountValue: appliedCoupon.discountValue,
         } : null,
       },
+      // Include updated coupon counters so frontend can update immediately
+      ...(isFromAgencyAllocation && allocationAgency?.promotionCoupons ? {
+        promotionCoupons: {
+          available: allocationAgency.promotionCoupons.available,
+          used: allocationAgency.promotionCoupons.used,
+          monthly: allocationAgency.promotionCoupons.monthly,
+        },
+      } : {}),
     });
   } catch (error: any) {
     promotionLogger.error('Purchase promotion error:', error);

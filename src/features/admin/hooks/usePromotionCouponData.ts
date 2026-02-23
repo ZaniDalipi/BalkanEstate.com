@@ -24,6 +24,7 @@ export interface PromotionCoupon {
   maxUsesPerUser: number;
   currentTotalUses: number;
   applicableTiers: string[];
+  applicableDurations: number[];
   minimumPurchaseAmount?: number;
   isPublic: boolean;
   notes?: string;
@@ -46,6 +47,7 @@ export interface CreateCouponData {
   maxTotalUses?: number;
   maxUsesPerUser: number;
   applicableTiers?: string[];
+  applicableDurations?: number[];
   minimumPurchaseAmount?: number;
   isPublic: boolean;
   notes?: string;

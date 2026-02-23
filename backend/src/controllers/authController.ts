@@ -26,6 +26,8 @@ const buildSafeUserResponse = (user: IUser) => ({
   name: user.name,
   phone: user.phone,
   role: user.role,
+  provider: user.provider || 'local',
+  hasPassword: !!user.password,
   avatarUrl: user.avatarUrl ?? null,
   avatarOptions: user.avatarOptions ?? null,
   gender: user.gender,
@@ -882,6 +884,8 @@ export const getMe = async (req: Request, res: Response): Promise<void> => {
         name: user.name,
         phone: user.phone,
         role: user.role,
+        provider: user.provider || 'local',
+        hasPassword: !!user.password,
         isEmailVerified: user.isEmailVerified,
         availableRoles: user.availableRoles,
         activeRole: user.activeRole,
@@ -1946,10 +1950,10 @@ export const changePassword = async (req: Request, res: Response): Promise<void>
       return;
     }
 
-    // Check if user has a password (local auth only)
-    if (!user.password || user.provider !== 'local') {
+    // Check if user has a password to change
+    if (!user.password) {
       res.status(400).json({
-        message: 'This account uses social login. Password change is not available.'
+        message: 'You don\'t have a password set. Use the set password option first.'
       });
       return;
     }
@@ -2054,6 +2058,164 @@ export const changePassword = async (req: Request, res: Response): Promise<void>
     });
   } catch (error: any) {
     res.status(500).json({ message: 'Error changing password' });
+  }
+};
+
+// @desc    Set password for social login users (who don't have a password yet)
+// @route   POST /api/auth/set-password
+// @access  Private
+export const setPassword = async (req: Request, res: Response): Promise<void> => {
+  try {
+    if (!req.user) {
+      res.status(401).json({ message: 'Not authorized' });
+      return;
+    }
+
+    const { newPassword } = req.body;
+
+    if (!newPassword) {
+      res.status(400).json({ message: 'New password is required' });
+      return;
+    }
+
+    const user = await User.findById((req.user as IUser)._id);
+
+    if (!user) {
+      res.status(404).json({ message: 'User not found' });
+      return;
+    }
+
+    // Only allow setting a password if user doesn't have one yet
+    if (user.password) {
+      res.status(400).json({
+        message: 'You already have a password. Use change password instead.',
+      });
+      return;
+    }
+
+    // Validate new password strength
+    const passwordValidation = validatePassword(newPassword);
+    if (!passwordValidation.isValid) {
+      res.status(400).json({
+        message: 'Password does not meet security requirements',
+        errors: passwordValidation.errors,
+      });
+      return;
+    }
+
+    // Check if password contains user info (email, name)
+    const userInfo = [user.email.split('@')[0], user.name];
+    if (passwordContainsUserInfo(newPassword, userInfo)) {
+      res.status(400).json({
+        message: 'Password should not contain your email or name',
+      });
+      return;
+    }
+
+    // Set the password (keep original provider — user remains a social account)
+    user.password = newPassword;
+    await user.save();
+
+    res.json({
+      message: 'Password set successfully. You can now log in with your email and password.',
+    });
+  } catch (error: any) {
+    res.status(500).json({ message: 'Error setting password' });
+  }
+};
+
+// @desc    Delete user account permanently
+// @route   POST /api/auth/delete-account
+// @access  Private
+export const deleteAccount = async (req: Request, res: Response): Promise<void> => {
+  try {
+    if (!req.user) {
+      res.status(401).json({ message: 'Not authorized' });
+      return;
+    }
+
+    const { password } = req.body;
+    const userId = String((req.user as IUser)._id);
+    const user = await User.findById(userId).select('+password');
+
+    if (!user) {
+      res.status(404).json({ message: 'User not found' });
+      return;
+    }
+
+    // For users with a password, require password confirmation
+    if (user.password) {
+      if (!password) {
+        res.status(400).json({ message: 'Password is required to delete your account' });
+        return;
+      }
+      const isMatch = await user.comparePassword(password);
+      if (!isMatch) {
+        res.status(401).json({ message: 'Incorrect password' });
+        return;
+      }
+    }
+
+    // If user owns an agency, prevent deletion (must delete agency first)
+    if (user.agencyId) {
+      const agency = await Agency.findById(user.agencyId);
+      if (agency && String(agency.ownerId) === userId) {
+        res.status(400).json({
+          message: 'You must delete your agency before deleting your account. Please contact an administrator to delete your agency first.',
+        });
+        return;
+      }
+    }
+
+    // Clean up related data
+    const { revokeAllRefreshTokens } = await import('../services/refreshTokenService');
+    const Property = (await import('../models/Property')).default;
+    const Subscription = (await import('../models/Subscription')).default;
+    const PromotionCoupon = (await import('../models/PromotionCoupon')).default;
+
+    // Revoke all refresh tokens
+    await revokeAllRefreshTokens(userId);
+
+    // Cancel active subscriptions
+    await Subscription.updateMany(
+      { userId: user._id, status: { $in: ['active', 'trial'] } },
+      { $set: { status: 'cancelled', cancelledAt: new Date() } }
+    );
+
+    // Expire user's promotion coupons
+    await PromotionCoupon.updateMany(
+      { generatedForUserId: user._id, status: 'active' },
+      { $set: { status: 'expired' } }
+    );
+
+    // Remove user from any agency they're a member of (not owner - blocked above)
+    if (user.agencyId) {
+      await Agency.updateOne(
+        { _id: user.agencyId },
+        { $pull: { agents: user._id, members: user._id } }
+      );
+    }
+
+    // Delete agent profile if exists
+    if (user.agentId) {
+      await Agent.findOneAndDelete({ agentId: user.agentId });
+    }
+
+    // Unlist user's properties (don't delete - keep data but mark as inactive)
+    await Property.updateMany(
+      { userId: user._id },
+      { $set: { status: 'inactive', isActive: false } }
+    );
+
+    // Delete the user
+    await User.findByIdAndDelete(userId);
+
+    authLogger.info(`🗑️ Account deleted: ${user.email} (${userId})`);
+
+    res.json({ message: 'Your account has been permanently deleted.' });
+  } catch (error: any) {
+    authLogger.error('Error deleting account:', error);
+    res.status(500).json({ message: 'Error deleting account' });
   }
 };
 

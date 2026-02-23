@@ -4,7 +4,7 @@ import { useAppContext } from '@/context/AppContext';
 import { useRealtimeProperties } from '@/src/features/properties/hooks';
 import { Property, Agent } from '@/types';
 import PropertyCard from '@/src/features/property-details/components/PropertyCard';
-import { HeartIcon, UserCircleIcon, HomeIcon, UsersIcon } from '@/constants';
+import { HeartIcon, UserCircleIcon, HomeIcon, UsersIcon, BuildingOfficeIcon } from '@/constants';
 import DefaultAvatar from '@/components/shared/DefaultAvatar';
 import ComparisonBar from '@/src/features/comparison/components/ComparisonBar';
 import ComparisonModal from '@/src/features/comparison/components/ComparisonModal';
@@ -13,6 +13,7 @@ import PropertyCardSkeleton from '@/src/features/property-details/components/Pro
 import FeaturedAgencies from '@/components/FeaturedAgencies';
 import Footer from '@/components/shared/Footer';
 import { getSavedAgents } from '@/src/features/agents/api/agentApi';
+import { getAgencyFavorites } from '@/src/features/saved/api/savedApi';
 import StarRating from '@/components/shared/StarRating';
 import { FloatingSphere, Decorative3DStyles } from '@/components/shared/Decorative3D';
 import SavedItemsHeroBanner from '@/components/shared/SavedItemsHeroBanner';
@@ -23,9 +24,11 @@ const SavedPropertiesPage: React.FC = () => {
   const { savedHomes, comparisonList, properties, isAuthenticated, isLoadingUserData } = state;
   const [isComparisonModalOpen, setComparisonModalOpen] = useState(false);
   const [toast, setToast] = useState<{ show: boolean, message: string, type: 'success' | 'error' }>({ show: false, message: '', type: 'success' });
-  const [activeTab, setActiveTab] = useState<'properties' | 'agents'>('properties');
+  const [activeTab, setActiveTab] = useState<'properties' | 'agents' | 'agencies'>('properties');
   const [savedAgentsList, setSavedAgentsList] = useState<Agent[]>([]);
   const [isLoadingAgents, setIsLoadingAgents] = useState(false);
+  const [savedAgenciesList, setSavedAgenciesList] = useState<any[]>([]);
+  const [isLoadingAgencies, setIsLoadingAgencies] = useState(false);
 
   // Enable real-time updates - refresh saved homes when properties change
   useRealtimeProperties({
@@ -56,6 +59,23 @@ const SavedPropertiesPage: React.FC = () => {
       }
     };
     fetchSavedAgents();
+  }, [isAuthenticated, activeTab]);
+
+  // Fetch saved agencies when tab changes to agencies
+  useEffect(() => {
+    const fetchSavedAgencies = async () => {
+      if (!isAuthenticated || activeTab !== 'agencies') return;
+      setIsLoadingAgencies(true);
+      try {
+        const agencies = await getAgencyFavorites();
+        setSavedAgenciesList(agencies);
+      } catch (error) {
+        // Error fetching agencies
+      } finally {
+        setIsLoadingAgencies(false);
+      }
+    };
+    fetchSavedAgencies();
   }, [isAuthenticated, activeTab]);
 
   // New nested grouping type for Country -> City -> Properties
@@ -89,6 +109,24 @@ const SavedPropertiesPage: React.FC = () => {
   const handleBrowseAgents = () => {
     dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'agents' });
     window.history.pushState({}, '', '/agents');
+  };
+
+  const handleAgencyClick = async (agency: any) => {
+    try {
+      const response = await fetch(`${import.meta.env.VITE_API_URL || ''}/api/agencies/${agency._id}`);
+      if (response.ok) {
+        const data = await response.json();
+        dispatch({ type: 'SET_SELECTED_AGENCY', payload: data.agency });
+        dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'agencyDetail' });
+      }
+    } catch (error) {
+      // Error navigating to agency
+    }
+  };
+
+  const handleBrowseAgencies = () => {
+    dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'agencies' });
+    window.history.pushState({}, '', '/agencies');
   };
 
   const renderAgentCard = (agent: Agent) => (
@@ -285,6 +323,104 @@ const SavedPropertiesPage: React.FC = () => {
     }
   };
 
+  const renderAgencyCard = (agency: any) => (
+    <div
+      key={agency._id}
+      onClick={() => handleAgencyClick(agency)}
+      className="bg-white rounded-xl shadow-md hover:shadow-lg transition-all duration-300 cursor-pointer overflow-hidden border border-gray-100 group"
+    >
+      <div className="p-6">
+        <div className="flex items-start gap-4">
+          <div className="w-16 h-16 rounded-xl overflow-hidden border-2 border-gray-100 bg-gray-50 flex items-center justify-center flex-shrink-0">
+            {agency.logo ? (
+              <img
+                src={agency.logo}
+                alt={agency.name}
+                className="w-full h-full object-cover"
+                loading="lazy"
+                decoding="async"
+              />
+            ) : (
+              <BuildingOfficeIcon className="w-8 h-8 text-gray-400" />
+            )}
+          </div>
+          <div className="flex-1 min-w-0">
+            <h3 className="font-semibold text-gray-900 text-lg truncate group-hover:text-blue-600 transition-colors">
+              {agency.name}
+            </h3>
+            {agency.city && agency.country && (
+              <p className="text-sm text-gray-500 truncate">{agency.city}, {agency.country}</p>
+            )}
+            {agency.isFeatured && (
+              <span className="inline-block mt-1 px-2 py-0.5 bg-amber-50 text-amber-600 text-xs rounded-full font-medium">
+                Featured
+              </span>
+            )}
+          </div>
+        </div>
+
+        <div className="mt-4 flex items-center gap-4 text-sm text-gray-600">
+          <span>{agency.totalProperties || 0} {t('property:saved.agencies.listings', 'Listings')}</span>
+          <span>{agency.totalAgents || 0} {t('property:saved.agencies.agents', 'Agents')}</span>
+        </div>
+      </div>
+    </div>
+  );
+
+  const renderAgenciesContent = () => {
+    if (isLoadingAgencies) {
+      return (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          {Array.from({ length: 3 }).map((_, index) => (
+            <div key={index} className="bg-white rounded-xl shadow-md p-6 animate-pulse">
+              <div className="flex items-start gap-4">
+                <div className="w-16 h-16 bg-gray-200 rounded-xl" />
+                <div className="flex-1">
+                  <div className="h-5 bg-gray-200 rounded w-3/4 mb-2" />
+                  <div className="h-4 bg-gray-200 rounded w-1/2" />
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      );
+    }
+
+    if (savedAgenciesList.length > 0) {
+      return (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          {savedAgenciesList.map(renderAgencyCard)}
+        </div>
+      );
+    } else {
+      return (
+        <div className="text-center py-16 px-4 bg-white rounded-2xl shadow-lg relative overflow-hidden">
+          <div className="absolute inset-0 pointer-events-none opacity-40">
+            <div className="absolute top-4 left-8">
+              <FloatingSphere size="md" color="blue" />
+            </div>
+            <div className="absolute bottom-8 right-8">
+              <FloatingSphere size="sm" color="purple" animate={false} />
+            </div>
+          </div>
+          <div className="relative z-10">
+            <div className="w-20 h-20 mx-auto mb-4 rounded-full bg-gradient-to-br from-fuchsia-100 to-purple-100 flex items-center justify-center">
+              <BuildingOfficeIcon className="w-10 h-10 text-fuchsia-400" />
+            </div>
+            <h3 className="text-xl font-semibold text-neutral-800">{t('property:saved.agencies.noSaved', 'No Saved Agencies')}</h3>
+            <p className="text-neutral-500 mt-2">{t('property:saved.agencies.clickHeart', 'Save agencies you like to find them quickly later.')}</p>
+            <button
+              onClick={handleBrowseAgencies}
+              className="mt-6 px-6 py-3 bg-primary text-white font-bold rounded-lg shadow-md hover:bg-primary-dark transition-colors"
+            >
+              {t('property:saved.agencies.browseAgencies', 'Browse Agencies')}
+            </button>
+          </div>
+        </div>
+      );
+    }
+  };
+
   const renderContent = () => {
     if (!isAuthenticated) {
       return (
@@ -302,10 +438,12 @@ const SavedPropertiesPage: React.FC = () => {
       );
     }
 
-    return activeTab === 'properties' ? renderPropertiesContent() : renderAgentsContent();
+    if (activeTab === 'properties') return renderPropertiesContent();
+    if (activeTab === 'agents') return renderAgentsContent();
+    return renderAgenciesContent();
   };
 
-  const totalSaved = savedHomes.length + savedAgentsList.length;
+  const totalSaved = savedHomes.length + savedAgentsList.length + savedAgenciesList.length;
 
   return (
     <div className="bg-neutral-50 flex flex-col">
@@ -326,6 +464,7 @@ const SavedPropertiesPage: React.FC = () => {
       <SavedItemsHeroBanner
         savedPropertiesCount={savedHomes.length}
         savedAgentsCount={savedAgentsList.length}
+        savedAgenciesCount={savedAgenciesList.length}
         activeTab={activeTab}
         onTabChange={setActiveTab}
         groupedCountries={Object.keys(groupedHomes).length}

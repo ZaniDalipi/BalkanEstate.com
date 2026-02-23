@@ -259,8 +259,22 @@ export const createAgency = async (
             listingsLimit: enterpriseProduct?.listingsLimit || ENTERPRISE_TIER_LIMITS.LISTINGS,
           });
 
-          // Send promotion coupons summary email right away at creation
+          // Generate promotion coupon codes and send summary email with codes
           const { sendPromotionCouponsEmail } = await import('../services/emailService');
+          const { generateProSubscriptionCoupons } = await import('../services/subscriptionPaymentService');
+          const subscriptionEnd = user.subscriptionExpiresAt || new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
+          let promotionCouponCodes: Array<{ tier: 'highlight' | 'premium' | 'featured'; code: string }> = [];
+          try {
+            promotionCouponCodes = await generateProSubscriptionCoupons(
+              String(user._id),
+              enterpriseProduct?.highlightedCoupons || ENTERPRISE_TIER_LIMITS.HIGHLIGHTED_COUPONS,
+              enterpriseProduct?.premiumCoupons || ENTERPRISE_TIER_LIMITS.PREMIUM_COUPONS,
+              enterpriseProduct?.featuredCoupons || ENTERPRISE_TIER_LIMITS.FEATURED_COUPONS,
+              subscriptionEnd,
+            );
+          } catch (codeErr) {
+            agencyLogger.error('⚠️ Failed to generate promotion coupon codes:', codeErr);
+          }
           await sendPromotionCouponsEmail({
             email: user.email,
             ownerName: user.name || 'Agency Owner',
@@ -270,6 +284,7 @@ export const createAgency = async (
               available: monthlyPromotionAmount,
               used: 0,
             },
+            couponCodes: promotionCouponCodes,
           });
 
           agentCouponsEmailSent = true;
@@ -826,13 +841,17 @@ export const updateAgency = async (
     if (coverGradient !== undefined) (agency as any).coverGradient = coverGradient;
     if (coverImage !== undefined) (agency as any).coverImage = coverImage;
     if (logoPosition !== undefined && typeof logoPosition === 'object') {
-      const lx = Math.max(0, Math.min(100, Number(logoPosition.x) || 50));
-      const ly = Math.max(0, Math.min(100, Number(logoPosition.y) || 50));
+      const rawLx = Number(logoPosition.x);
+      const rawLy = Number(logoPosition.y);
+      const lx = Math.max(0, Math.min(100, isNaN(rawLx) ? 50 : rawLx));
+      const ly = Math.max(0, Math.min(100, isNaN(rawLy) ? 50 : rawLy));
       (agency as any).logoPosition = { x: lx, y: ly };
     }
     if (coverPosition !== undefined && typeof coverPosition === 'object') {
-      const cx = Math.max(0, Math.min(100, Number(coverPosition.x) || 50));
-      const cy = Math.max(0, Math.min(100, Number(coverPosition.y) || 50));
+      const rawCx = Number(coverPosition.x);
+      const rawCy = Number(coverPosition.y);
+      const cx = Math.max(0, Math.min(100, isNaN(rawCx) ? 50 : rawCx));
+      const cy = Math.max(0, Math.min(100, isNaN(rawCy) ? 50 : rawCy));
       (agency as any).coverPosition = { x: cx, y: cy };
     }
 
@@ -2631,6 +2650,18 @@ export const sendPromotionCouponsEmailEndpoint = async (
 
     const promotionCoupons = agency.promotionCoupons || { monthly: 0, available: 0, used: 0 };
 
+    // Fetch active coupon codes for this user to include in the email
+    const PromotionCoupon = (await import('../models/PromotionCoupon')).default;
+    const activeCoupons = await PromotionCoupon.find({
+      generatedForUserId: currentUser._id,
+      status: 'active',
+      validUntil: { $gte: new Date() },
+    }).lean();
+    const couponCodes = activeCoupons.map((c: any) => ({
+      tier: (c.applicableTiers?.[0] || 'featured') as 'highlight' | 'premium' | 'featured',
+      code: c.code,
+    }));
+
     const { sendPromotionCouponsEmail } = await import('../services/emailService');
     await sendPromotionCouponsEmail({
       email: user.email,
@@ -2641,6 +2672,7 @@ export const sendPromotionCouponsEmailEndpoint = async (
         available: promotionCoupons.available,
         used: promotionCoupons.used,
       },
+      couponCodes,
     });
 
     agencyLogger.info(`📧 Promotion coupons email sent to ${user.email} for agency ${agency.name}`);
@@ -2648,6 +2680,130 @@ export const sendPromotionCouponsEmailEndpoint = async (
   } catch (error) {
     agencyLogger.error('Error sending promotion coupons email:', error);
     res.status(500).json({ message: 'Failed to send promotion coupons email' });
+  }
+};
+
+// @desc    Delete agency and transfer agents to Pro monthly
+// @route   DELETE /api/agencies/:id
+// @access  Private (Agency owner only)
+export const deleteAgency = async (req: Request, res: Response): Promise<void> => {
+  try {
+    if (!req.user) {
+      res.status(401).json({ message: 'Not authorized' });
+      return;
+    }
+
+    const currentUser = req.user as IUser;
+    const id = getObjectIdParam(req, res, 'id');
+    if (!id) return;
+
+    const agency = await Agency.findById(id);
+    if (!agency) {
+      res.status(404).json({ message: 'Agency not found' });
+      return;
+    }
+
+    if (String(agency.ownerId) !== String(currentUser._id)) {
+      res.status(403).json({ message: 'Only the agency owner can delete this agency' });
+      return;
+    }
+
+    const Subscription = (await import('../models/Subscription')).default;
+    const Product = (await import('../models/Product')).default;
+
+    // Find the agency subscription to get the expiration date
+    const agencySubscription = await Subscription.findOne({
+      userId: currentUser._id,
+      productId: { $in: ['agency_yearly', 'seller_enterprise_yearly'] },
+      status: { $in: ['active', 'trial', 'grace'] },
+    });
+
+    const agencyExpirationDate = agencySubscription?.expirationDate || agency.subscription?.expiresAt;
+
+    // Find all agents in the agency (excluding owner)
+    const agentMembers = await User.find({
+      agencyId: agency._id,
+      _id: { $ne: currentUser._id },
+    });
+
+    // Transfer each agent to Pro monthly plan until the agency subscription expires
+    if (agencyExpirationDate && agentMembers.length > 0) {
+      const proMonthlyProduct = await Product.findOne({ productId: 'seller_pro_monthly' }).lean();
+
+      for (const agent of agentMembers) {
+        try {
+          // Create a Pro monthly subscription that expires when the agency subscription would have expired
+          await Subscription.create({
+            userId: agent._id,
+            store: 'web',
+            productId: 'seller_pro_monthly',
+            startDate: new Date(),
+            expirationDate: agencyExpirationDate,
+            status: 'active',
+            autoRenewing: false,
+            price: 0,
+            currency: 'EUR',
+            country: agent.country || 'RS',
+            notes: `Transferred from deleted agency "${agency.name}" — active until original agency expiration`,
+          });
+
+          // Update agent's subscription fields
+          agent.subscriptionPlan = 'seller_pro_monthly';
+          agent.subscriptionStatus = 'active';
+          agent.subscriptionExpiresAt = agencyExpirationDate;
+          (agent as any).subscription = {
+            plan: 'seller_pro_monthly',
+            tier: 'pro',
+            status: 'active',
+            expiresAt: agencyExpirationDate,
+            listingsLimit: proMonthlyProduct?.listingsLimit ?? 20,
+            promotionCoupons: proMonthlyProduct?.promotionCoupons ?? 3,
+          };
+
+          // Remove agency association
+          (agent as any).agencyId = undefined;
+          await agent.save();
+
+          agencyLogger.info(`🔄 Agent ${agent.email} transferred to Pro monthly (expires ${agencyExpirationDate.toISOString()})`);
+        } catch (transferError) {
+          agencyLogger.error(`⚠️ Failed to transfer agent ${agent.email}:`, transferError);
+        }
+      }
+    } else {
+      // No active subscription — just remove agency association from agents
+      for (const agent of agentMembers) {
+        (agent as any).agencyId = undefined;
+        (agent as any).subscription = undefined;
+        await agent.save();
+      }
+    }
+
+    // Cancel the agency subscription
+    if (agencySubscription) {
+      agencySubscription.status = 'cancelled' as any;
+      agencySubscription.canceledAt = new Date();
+      await agencySubscription.save();
+    }
+
+    // Remove agency reference from owner
+    const owner = await User.findById(currentUser._id);
+    if (owner) {
+      (owner as any).agencyId = undefined;
+      await owner.save();
+    }
+
+    // Delete the agency
+    await Agency.findByIdAndDelete(id);
+
+    agencyLogger.info(`🗑️ Agency "${agency.name}" deleted by owner ${currentUser.email}. ${agentMembers.length} agents transferred to Pro monthly.`);
+
+    res.json({
+      message: `Agency deleted successfully. ${agentMembers.length} agent(s) have been transferred to Pro monthly plan${agencyExpirationDate ? ` until ${agencyExpirationDate.toLocaleDateString()}` : ''}.`,
+      agentsTransferred: agentMembers.length,
+    });
+  } catch (error) {
+    agencyLogger.error('Error deleting agency:', error);
+    res.status(500).json({ message: 'Failed to delete agency' });
   }
 };
 

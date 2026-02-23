@@ -31,7 +31,7 @@ const DEFAULT_ENTERPRISE_PLAN: EnterprisePlan = {
   interval: 'year',
   productId: 'seller_enterprise_yearly',
   features: [
-    '500 Active Listings',
+    '750 Active Listings',
     'Create & Manage Your Agency',
     '5 Agent Invitation Coupons',
     'Unlimited Saved Searches',
@@ -620,7 +620,7 @@ const AgencyPaymentPage: React.FC = () => {
                 </div>
                 <div className="flex items-center gap-2 text-sm text-neutral-600">
                   <HomeIcon className="w-5 h-5 text-purple-500" />
-                  <span>{t('payment.unlimitedProperties', '500 Listings')}</span>
+                  <span>{t('payment.unlimitedProperties', '750 Listings')}</span>
                 </div>
                 <div className="flex items-center gap-2 text-sm text-neutral-600">
                   <ChartBarIcon className="w-5 h-5 text-amber-500" />

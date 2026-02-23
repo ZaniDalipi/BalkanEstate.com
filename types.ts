@@ -74,6 +74,7 @@ export interface User {
     phone: string;
     role: UserRole;
     provider?: 'local' | 'google' | 'facebook' | 'apple';
+    hasPassword?: boolean;
     isEmailVerified?: boolean;
     city?: string;
     country?: string;
@@ -331,6 +332,7 @@ export interface Property {
     floorNumber?: number;
     totalFloors?: number;
     floorplanUrl?: string;
+    orientation?: 'any' | 'north' | 'south' | 'east' | 'west' | 'northEast' | 'northWest' | 'southEast' | 'southWest';
     createdAt?: number;
     lastRenewed?: number;
     views?: number;

@@ -321,12 +321,23 @@ export const PropertyInfo: React.FC<PropertyInfoProps> = ({ property, onOpenFloo
             <div className="col-span-2 sm:col-span-3 lg:col-span-4 mt-2">
               <button
                 onClick={onOpenFloorPlan}
-                className="w-full flex items-center gap-3 py-3 px-4 rounded-xl bg-primary/5 border border-primary/15 hover:bg-primary/10 hover:border-primary/25 transition-all duration-200 group"
+                className="w-full flex items-center gap-3 py-3 px-4 rounded-xl bg-gradient-to-r from-primary/5 to-primary/10 border border-primary/15 hover:from-primary/10 hover:to-primary/15 hover:border-primary/25 hover:shadow-md transition-all duration-300 group"
               >
-                <CubeTransparentIcon className="w-5 h-5 text-primary" />
-                <span className="text-sm font-semibold text-primary">{t('details.viewFloorPlan')}</span>
-                <svg className="w-4 h-4 text-primary/60 ml-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                <div className="relative w-12 h-12 rounded-lg overflow-hidden border border-primary/20 flex-shrink-0 bg-white shadow-sm">
+                  <img
+                    src={property.floorplanUrl}
+                    alt=""
+                    className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
+                    loading="lazy"
+                  />
+                  <div className="absolute inset-0 bg-primary/10 group-hover:bg-transparent transition-colors" />
+                </div>
+                <div className="flex flex-col items-start gap-0.5">
+                  <span className="text-sm font-semibold text-primary">{t('details.viewFloorPlan')}</span>
+                  <span className="text-[11px] text-primary/50">{t('details.floorPlanInteractiveHint', 'Interactive viewer with zoom, pan & labels')}</span>
+                </div>
+                <svg className="w-5 h-5 text-primary/40 ml-auto group-hover:text-primary/70 group-hover:translate-x-0.5 transition-all" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
                 </svg>
               </button>
             </div>

@@ -175,7 +175,7 @@ const PricingPage: React.FC = () => {
           </div>
 
         {/* Tab Switcher - Clean Pill Style */}
-        <div className="flex justify-center mb-10 sm:mb-14">
+        <div id="plans-section" className="flex justify-center mb-10 sm:mb-14">
           {/* Desktop: Single row with all tabs */}
           <div className="hidden sm:inline-flex bg-gray-100 p-1.5 rounded-full shadow-lg">
             {[
@@ -466,7 +466,17 @@ const PricingPage: React.FC = () => {
                 <button
                   onClick={() => {
                     // Scroll to plans section smoothly
-                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                    const plansSection = document.getElementById('plans-section');
+                    if (plansSection) {
+                      plansSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    } else {
+                      // Fallback: scroll main content container
+                      const mainContent = document.getElementById('main-content');
+                      if (mainContent) {
+                        mainContent.scrollTo({ top: 0, behavior: 'smooth' });
+                      }
+                      window.scrollTo({ top: 0, behavior: 'smooth' });
+                    }
                   }}
                   className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-primary to-indigo-600 text-white font-semibold rounded-xl hover:from-primary-dark hover:to-indigo-700 transition-all shadow-md hover:shadow-lg"
                 >

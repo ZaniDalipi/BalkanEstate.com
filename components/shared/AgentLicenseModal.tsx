@@ -9,6 +9,56 @@ const BALKAN_LANGUAGE_KEYS = [
   'Hungarian', 'German', 'Italian', 'French', 'Russian', 'Spanish'
 ];
 
+// Balkan country codes for phone number input (matching AuthModal)
+const BALKAN_COUNTRY_CODES = [
+  { code: '+383', country: 'XK', label: 'Kosovo', flag: '🇽🇰' },
+  { code: '+355', country: 'AL', label: 'Albania', flag: '🇦🇱' },
+  { code: '+381', country: 'RS', label: 'Serbia', flag: '🇷🇸' },
+  { code: '+389', country: 'MK', label: 'N. Macedonia', flag: '🇲🇰' },
+  { code: '+387', country: 'BA', label: 'Bosnia', flag: '🇧🇦' },
+  { code: '+382', country: 'ME', label: 'Montenegro', flag: '🇲🇪' },
+  { code: '+385', country: 'HR', label: 'Croatia', flag: '🇭🇷' },
+  { code: '+386', country: 'SI', label: 'Slovenia', flag: '🇸🇮' },
+  { code: '+359', country: 'BG', label: 'Bulgaria', flag: '🇧🇬' },
+  { code: '+40', country: 'RO', label: 'Romania', flag: '🇷🇴' },
+  { code: '+30', country: 'GR', label: 'Greece', flag: '🇬🇷' },
+] as const;
+
+const PHONE_FORMAT_PATTERNS: Record<string, number[]> = {
+  '+383': [2, 3, 4],
+  '+355': [2, 3, 4],
+  '+381': [2, 3, 4],
+  '+389': [2, 3, 3],
+  '+387': [2, 3, 3],
+  '+382': [2, 3, 3],
+  '+385': [2, 3, 4],
+  '+386': [2, 3, 2, 2],
+  '+359': [2, 3, 4],
+  '+40':  [3, 3, 3],
+  '+30':  [3, 3, 4],
+};
+
+const formatPhoneNumber = (countryCode: string, digits: string): string => {
+  const clean = digits.replace(/\D/g, '');
+  const pattern = PHONE_FORMAT_PATTERNS[countryCode] || [3, 3, 4];
+  const parts: string[] = [];
+  let pos = 0;
+  for (const groupSize of pattern) {
+    if (pos >= clean.length) break;
+    parts.push(clean.slice(pos, pos + groupSize));
+    pos += groupSize;
+  }
+  if (pos < clean.length && parts.length > 0) {
+    parts[parts.length - 1] += clean.slice(pos);
+  }
+  return parts.join(' ');
+};
+
+const getPhonePlaceholder = (countryCode: string): string => {
+  const pattern = PHONE_FORMAT_PATTERNS[countryCode] || [3, 3, 4];
+  return pattern.map(n => 'X'.repeat(n)).join(' ');
+};
+
 interface AgentLicenseModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -55,7 +105,24 @@ const AgentLicenseModal: React.FC<AgentLicenseModalProps> = ({
 }) => {
   const { t } = useTranslation(['agents', 'modals', 'common']);
   const [licenseNumber, setLicenseNumber] = useState(currentLicenseNumber || '');
-  const [phone, setPhone] = useState(currentPhone || '');
+  // Parse existing phone into country code + local number
+  const [phoneCountryCode, setPhoneCountryCode] = useState(() => {
+    if (currentPhone) {
+      const match = BALKAN_COUNTRY_CODES.find(cc => currentPhone.startsWith(cc.code));
+      if (match) return match.code;
+    }
+    return BALKAN_COUNTRY_CODES[0].code;
+  });
+  const [phone, setPhone] = useState(() => {
+    if (currentPhone) {
+      const match = BALKAN_COUNTRY_CODES.find(cc => currentPhone.startsWith(cc.code));
+      if (match) {
+        const local = currentPhone.slice(match.code.length).replace(/\D/g, '');
+        return formatPhoneNumber(match.code, local);
+      }
+    }
+    return '';
+  });
   const [agencyInvitationCode, setAgencyInvitationCode] = useState('');
   const [agentId, setAgentId] = useState(currentAgentId || '');
   const [error, setError] = useState('');
@@ -107,6 +174,11 @@ const AgentLicenseModal: React.FC<AgentLicenseModalProps> = ({
   // Phone is always required for agents and sellers
   const phoneRequired = true;
 
+  const getFullPhone = () => {
+    const digits = phone.replace(/\D/g, '');
+    return digits ? `${phoneCountryCode}${digits}` : '';
+  };
+
   const runSubmit = async () => {
     if (phoneOnly) {
       // Phone-only mode: only validate phone
@@ -114,8 +186,8 @@ const AgentLicenseModal: React.FC<AgentLicenseModalProps> = ({
         setError(t('modals:agentLicense.phoneRequired', 'Phone number is required'));
         return;
       }
-      const cleaned = phone.trim().replace(/[\s\-()\.]/g, '');
-      if (!/^\+?[0-9]{7,15}$/.test(cleaned)) {
+      const digits = phone.replace(/\D/g, '');
+      if (digits.length < 6 || digits.length > 12) {
         setError(t('modals:agentLicense.invalidPhone', 'Invalid phone number format'));
         return;
       }
@@ -124,7 +196,7 @@ const AgentLicenseModal: React.FC<AgentLicenseModalProps> = ({
       try {
         await onSubmit({
           licenseNumber: '',
-          phone: phone.trim(),
+          phone: getFullPhone(),
         });
         setError('');
         onClose();
@@ -146,8 +218,8 @@ const AgentLicenseModal: React.FC<AgentLicenseModalProps> = ({
       return;
     }
     if (phone.trim()) {
-      const cleaned = phone.trim().replace(/[\s\-()\.]/g, '');
-      if (!/^\+?[0-9]{7,15}$/.test(cleaned)) {
+      const digits = phone.replace(/\D/g, '');
+      if (digits.length < 6 || digits.length > 12) {
         setError(t('modals:agentLicense.invalidPhone', 'Invalid phone number format'));
         return;
       }
@@ -165,7 +237,7 @@ const AgentLicenseModal: React.FC<AgentLicenseModalProps> = ({
     try {
       await onSubmit({
         licenseNumber: licenseNumber.trim(),
-        phone: phone.trim() || undefined,
+        phone: getFullPhone() || undefined,
         agencyInvitationCode: agencyInvitationCode.trim() || undefined,
         agentId: agentId.trim() || undefined,
         selectedAgencyId: selectedAgency || undefined,
@@ -270,17 +342,42 @@ const AgentLicenseModal: React.FC<AgentLicenseModalProps> = ({
                 required
                 hint={t('modals:agentLicense.phoneOnlyHint', 'Your phone number will be shown on your listings so buyers can reach you.')}
               >
-                <input
-                  type="tel"
-                  id="phone"
-                  value={phone}
-                  onChange={e => setPhone(e.target.value)}
-                  disabled={isSubmitting}
-                  placeholder={t('modals:agentLicense.phonePlaceholder', '+383 44 123 456')}
-                  className={inputCls}
-                  autoFocus
-                  required
-                />
+                <div className="flex items-center rounded-lg border border-gray-200 bg-white focus-within:ring-2 focus-within:ring-blue-500/20 focus-within:border-blue-400 transition-all">
+                  <select
+                    value={phoneCountryCode}
+                    onChange={(e) => {
+                      const newCode = e.target.value;
+                      setPhoneCountryCode(newCode);
+                      if (phone) {
+                        const digits = phone.replace(/\D/g, '');
+                        setPhone(formatPhoneNumber(newCode, digits));
+                      }
+                    }}
+                    disabled={isSubmitting}
+                    className="bg-transparent text-sm text-gray-700 font-medium pl-3 pr-1 py-2.5 border-none focus:outline-none focus:ring-0 cursor-pointer"
+                  >
+                    {BALKAN_COUNTRY_CODES.map((cc) => (
+                      <option key={cc.code} value={cc.code}>
+                        {cc.flag} {cc.code}
+                      </option>
+                    ))}
+                  </select>
+                  <div className="w-px h-5 bg-gray-200 flex-shrink-0" />
+                  <input
+                    type="tel"
+                    id="phone"
+                    value={phone}
+                    onChange={(e) => {
+                      const digits = e.target.value.replace(/\D/g, '');
+                      setPhone(formatPhoneNumber(phoneCountryCode, digits));
+                    }}
+                    disabled={isSubmitting}
+                    placeholder={getPhonePlaceholder(phoneCountryCode)}
+                    className="flex-1 bg-transparent text-sm text-gray-900 px-3 py-2.5 border-none focus:outline-none focus:ring-0 placeholder:text-gray-300"
+                    autoFocus
+                    required
+                  />
+                </div>
               </Field>
             ) : (
               /* Full agent registration form */
@@ -352,16 +449,41 @@ const AgentLicenseModal: React.FC<AgentLicenseModalProps> = ({
                     required
                     hint={t('modals:agentLicense.phoneHint', 'Required for agents and sellers. Clients will use this to contact you.')}
                   >
-                    <input
-                      type="tel"
-                      id="phone"
-                      value={phone}
-                      onChange={e => setPhone(e.target.value)}
-                      disabled={isSubmitting}
-                      placeholder={t('modals:agentLicense.phonePlaceholder', '+383 44 123 456')}
-                      className={inputCls}
-                      required
-                    />
+                    <div className="flex items-center rounded-lg border border-gray-200 bg-white focus-within:ring-2 focus-within:ring-blue-500/20 focus-within:border-blue-400 transition-all">
+                      <select
+                        value={phoneCountryCode}
+                        onChange={(e) => {
+                          const newCode = e.target.value;
+                          setPhoneCountryCode(newCode);
+                          if (phone) {
+                            const digits = phone.replace(/\D/g, '');
+                            setPhone(formatPhoneNumber(newCode, digits));
+                          }
+                        }}
+                        disabled={isSubmitting}
+                        className="bg-transparent text-sm text-gray-700 font-medium pl-3 pr-1 py-2.5 border-none focus:outline-none focus:ring-0 cursor-pointer"
+                      >
+                        {BALKAN_COUNTRY_CODES.map((cc) => (
+                          <option key={cc.code} value={cc.code}>
+                            {cc.flag} {cc.code}
+                          </option>
+                        ))}
+                      </select>
+                      <div className="w-px h-5 bg-gray-200 flex-shrink-0" />
+                      <input
+                        type="tel"
+                        id="phone"
+                        value={phone}
+                        onChange={(e) => {
+                          const digits = e.target.value.replace(/\D/g, '');
+                          setPhone(formatPhoneNumber(phoneCountryCode, digits));
+                        }}
+                        disabled={isSubmitting}
+                        placeholder={getPhonePlaceholder(phoneCountryCode)}
+                        className="flex-1 bg-transparent text-sm text-gray-900 px-3 py-2.5 border-none focus:outline-none focus:ring-0 placeholder:text-gray-300"
+                        required
+                      />
+                    </div>
                   </Field>
                 )}
 

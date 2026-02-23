@@ -203,7 +203,7 @@ export async function refreshAgencyCoupons(): Promise<{ refreshed: number; email
       await agency.save();
       refreshed++;
 
-      // Generate codes for the owner (shared with the whole agency)
+      // Generate codes for the owner (shared with the whole agency) — 2-week validity
       let couponCodes: Array<{ tier: 'highlight' | 'premium' | 'featured'; code: string }> = [];
       try {
         couponCodes = await generateProSubscriptionCoupons(
@@ -212,6 +212,7 @@ export async function refreshAgencyCoupons(): Promise<{ refreshed: number; email
           premiumAmount,
           featuredAmount,
           monthEnd,
+          14, // Agency coupons expire in 2 weeks
         );
       } catch (codeErr) {
         errors.push(`Failed to generate codes for agency ${agency.name}: ${codeErr}`);

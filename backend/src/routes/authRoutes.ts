@@ -20,6 +20,8 @@ import {
   getActiveSessions,
   getLoginHistory,
   changePassword,
+  setPassword,
+  deleteAccount,
   setActiveRole,
   addRole,
   getEmailPreferences,
@@ -227,6 +229,8 @@ router.post('/resend-verification', resendVerificationEmail);
 router.post('/forgot-password', passwordResetRateLimiterIP, decryptPayload, requestPasswordReset);
 router.post('/reset-password', decryptPayload, resetPassword);
 router.post('/change-password', protect, decryptPayload, changePassword);
+router.post('/set-password', protect, decryptPayload, setPassword);
+router.post('/delete-account', protect, decryptPayload, deleteAccount);
 
 // Role management routes
 router.post('/set-active-role', protect, setActiveRole);

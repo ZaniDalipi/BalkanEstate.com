@@ -207,7 +207,7 @@ export const ImageTagSelector: React.FC<{
                 <svg className={`w-4 h-4 ml-2 transition-transform text-gray-400 ${isOpen ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"></path></svg>
             </button>
             {isOpen && (
-                <ul className="absolute z-10 w-full mt-1 glass-panel-light max-h-40 overflow-y-auto">
+                <ul className="absolute z-50 w-full mt-1 glass-panel-light max-h-40 overflow-y-auto shadow-lg">
                     {options.map(tag => (
                         <li
                             key={tag}

@@ -109,6 +109,8 @@ export interface User {
   gender?: 'male' | 'female' | 'other';
   phone: string;
   role: UserRole;
+  provider?: 'local' | 'google' | 'facebook' | 'apple';
+  hasPassword?: boolean;
   city?: string;
   country?: string;
   address?: string;

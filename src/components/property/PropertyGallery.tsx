@@ -532,6 +532,75 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
           </>
         )}
 
+        {/* Building Floor Overlay - Shows apartment position in building */}
+        {viewMode === 'photos' && property.propertyType === 'apartment' && property.floorNumber && property.totalFloors && property.totalFloors > 1 && (
+          <div className="absolute bottom-[calc(2.5rem-1px)] sm:bottom-[calc(3rem-1px)] left-2 sm:left-3 z-10 animate-fade-in">
+            <div className="bg-slate-900/85 backdrop-blur-sm rounded-xl shadow-lg border border-slate-700/50 overflow-hidden w-[52px] sm:w-[60px]">
+              {/* Building visualization */}
+              <div className="relative px-2 sm:px-2.5 pt-2 sm:pt-2.5 pb-1">
+                {/* Roof */}
+                <div className="mx-auto w-0 h-0 border-l-[14px] sm:border-l-[16px] border-r-[14px] sm:border-r-[16px] border-b-[6px] sm:border-b-[7px] border-l-transparent border-r-transparent border-b-slate-600 mb-px" />
+                {/* Building outline */}
+                <div
+                  className="relative mx-auto w-7 sm:w-8 rounded-b-sm overflow-hidden border border-slate-600/80 bg-slate-800/60"
+                  style={{ height: `${Math.min(Math.max(property.totalFloors * 7, 35), 80)}px` }}
+                >
+                  {Array.from({ length: property.totalFloors }).map((_, i) => {
+                    const floor = property.totalFloors! - i;
+                    const isHighlighted = floor === property.floorNumber;
+                    return (
+                      <div
+                        key={floor}
+                        className="absolute left-0 right-0 border-b border-slate-700/40"
+                        style={{
+                          height: `${100 / property.totalFloors!}%`,
+                          top: `${(i / property.totalFloors!) * 100}%`,
+                          background: isHighlighted
+                            ? 'linear-gradient(90deg, rgba(34, 197, 94, 0.9), rgba(22, 163, 74, 0.9))'
+                            : 'transparent',
+                          boxShadow: isHighlighted ? '0 0 6px rgba(34, 197, 94, 0.5)' : 'none',
+                        }}
+                      >
+                        {isHighlighted && (
+                          <div className="absolute inset-0 animate-pulse bg-gradient-to-r from-green-400/20 to-emerald-400/20" />
+                        )}
+                      </div>
+                    );
+                  })}
+                  {/* Window dots for non-highlighted floors */}
+                  {property.totalFloors <= 12 && Array.from({ length: property.totalFloors }).map((_, i) => {
+                    const floor = property.totalFloors! - i;
+                    if (floor === property.floorNumber) return null;
+                    return (
+                      <div
+                        key={`win-${floor}`}
+                        className="absolute left-1/2 -translate-x-1/2 flex gap-0.5"
+                        style={{
+                          top: `${((i + 0.35) / property.totalFloors!) * 100}%`,
+                        }}
+                      >
+                        <div className="w-1 h-0.5 bg-slate-600/60 rounded-[0.5px]" />
+                        <div className="w-1 h-0.5 bg-slate-600/60 rounded-[0.5px]" />
+                      </div>
+                    );
+                  })}
+                </div>
+                {/* Ground */}
+                <div className="w-9 sm:w-10 h-0.5 mx-auto bg-slate-600 rounded-b" />
+              </div>
+              {/* Floor label */}
+              <div className="px-1 py-1 text-center border-t border-slate-700/50">
+                <div className="text-[10px] sm:text-xs font-bold text-green-400 leading-none">
+                  {property.floorNumber}/{property.totalFloors}
+                </div>
+                <div className="text-[7px] sm:text-[8px] text-slate-400 leading-tight mt-0.5">
+                  {t('property:gallery.floor', 'floor')}
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* View Mode Toggle (Video / Photos / Street View) - Liquid Glass Style */}
         <div className="absolute bottom-2 sm:bottom-3 left-1/2 -translate-x-1/2 z-10">
           {/* Mobile version - smaller */}

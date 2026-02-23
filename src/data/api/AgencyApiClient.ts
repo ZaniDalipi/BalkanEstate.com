@@ -24,10 +24,6 @@ export class AgencyApiClient {
     return await httpClient.put(`/agencies/${id}`, data, true);
   }
 
-  async deleteAgency(id: string): Promise<void> {
-    await httpClient.delete(`/agencies/${id}`, true);
-  }
-
   async getAgencyAgents(agencyId: string): Promise<any> {
     return await httpClient.get(`/agencies/${agencyId}/agents`);
   }

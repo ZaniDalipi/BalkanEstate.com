@@ -164,6 +164,7 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
   const [showAllMembers, setShowAllMembers] = useState(true);
   const [isLeavingAgency, setIsLeavingAgency] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [isSavingAgency, setIsSavingAgency] = useState(false);
   const [propertyView, setPropertyView] = useState<'active' | 'sold' | 'rented'>('active');
   const [propertyTypeView, setPropertyTypeView] = useState<'all' | 'sale' | 'rent'>('all');
   const [subscriptionKey, setSubscriptionKey] = useState(0);
@@ -176,9 +177,13 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
   const [isRepositioningLogo, setIsRepositioningLogo] = useState(false);
   const [coverPos, setCoverPos] = useState<{ x: number; y: number }>({ x: agency.coverPosition?.x ?? 50, y: agency.coverPosition?.y ?? 50 });
   const [logoPos, setLogoPos] = useState<{ x: number; y: number }>({ x: agency.logoPosition?.x ?? 50, y: agency.logoPosition?.y ?? 50 });
+  const [coverDragActive, setCoverDragActive] = useState(false);
+  const [logoDragActive, setLogoDragActive] = useState(false);
   const coverRef = useRef<HTMLDivElement>(null);
   const logoRef = useRef<HTMLDivElement>(null);
   const dragStartRef = useRef<{ x: number; y: number; posX: number; posY: number } | null>(null);
+  const coverDragCounter = useRef(0);
+  const logoDragCounter = useRef(0);
   const [editForm, setEditForm] = useState({
     name: '',
     description: '',
@@ -334,6 +339,57 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
       unsubscribe();
     };
   }, [agency._id]);
+
+  // Listen for coupon usage events to update the promotion coupons card immediately
+  useEffect(() => {
+    const handleCouponUsed = (e: Event) => {
+      const detail = (e as CustomEvent).detail;
+      if (detail?.promotionCoupons) {
+        setAgencyData(prev => ({
+          ...prev,
+          promotionCoupons: {
+            ...prev.promotionCoupons,
+            available: detail.promotionCoupons.available ?? prev.promotionCoupons?.available ?? 0,
+            used: detail.promotionCoupons.used ?? prev.promotionCoupons?.used ?? 0,
+            monthly: detail.promotionCoupons.monthly ?? prev.promotionCoupons?.monthly ?? 0,
+          },
+        }));
+      }
+    };
+    window.addEventListener('agency-coupon-used', handleCouponUsed);
+
+    // Also re-fetch coupon data when the page regains focus (in case coupons were used on another page)
+    const handleVisibility = () => {
+      if (document.visibilityState === 'visible' && agencyData.promotionCoupons) {
+        const agencyId = agencyData._id || agencyData.id;
+        if (!agencyId) return;
+        const token = localStorage.getItem('balkan_estate_token');
+        if (!token) return;
+        fetch(`${API_URL}/agencies/${agencyId}/coupons`, {
+          headers: { 'Authorization': `Bearer ${token}` },
+        }).then(r => r.ok ? r.json() : null).then(data => {
+          if (data?.promotionCoupons) {
+            setAgencyData(prev => ({
+              ...prev,
+              promotionCoupons: {
+                ...prev.promotionCoupons,
+                available: data.promotionCoupons.available ?? prev.promotionCoupons?.available ?? 0,
+                used: data.promotionCoupons.used ?? prev.promotionCoupons?.used ?? 0,
+                monthly: data.promotionCoupons.monthly ?? prev.promotionCoupons?.monthly ?? 0,
+                codes: data.promotionCoupons.codes ?? prev.promotionCoupons?.codes,
+              },
+            }));
+          }
+        }).catch(() => {});
+      }
+    };
+    document.addEventListener('visibilitychange', handleVisibility);
+
+    return () => {
+      window.removeEventListener('agency-coupon-used', handleCouponUsed);
+      document.removeEventListener('visibilitychange', handleVisibility);
+    };
+  }, [agencyData._id, agencyData.id]);
 
   // Geocode when city/country changes in edit form to update marker position
   const geocodeTimeoutRef = useRef<NodeJS.Timeout | null>(null);
@@ -843,26 +899,32 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
       }
     }
 
+    // Sanitize: filter empty strings from arrays, trim text fields
+    const sanitizedForm = {
+      ...editForm,
+      name: editForm.name.trim(),
+      description: (editForm.description || '').trim(),
+      website: (editForm.website || '').trim(),
+      phone: (editForm.phone || '').trim(),
+      email: (editForm.email || '').trim(),
+      address: (editForm.address || '').trim(),
+      city: (editForm.city || '').trim(),
+      country: (editForm.country || '').trim(),
+      specialties: editForm.specialties.filter(s => s.trim()),
+      specializations: editForm.specializations.filter(s => s.trim()),
+      serviceAreas: editForm.serviceAreas.filter(s => s.trim()),
+      certifications: editForm.certifications.filter(s => s.trim()),
+      languages: editForm.languages.filter(s => s.trim()),
+    };
+
+    // Optimistic update: apply changes immediately, close modal, save in background
+    const previousData = { ...agencyData };
+    setAgencyData(prev => ({ ...prev, ...sanitizedForm }));
+    setIsEditModalOpen(false);
+    setIsSavingAgency(true);
+
     try {
       const token = localStorage.getItem('balkan_estate_token');
-
-      // Sanitize: filter empty strings from arrays, trim text fields
-      const sanitizedForm = {
-        ...editForm,
-        name: editForm.name.trim(),
-        description: (editForm.description || '').trim(),
-        website: (editForm.website || '').trim(),
-        phone: (editForm.phone || '').trim(),
-        email: (editForm.email || '').trim(),
-        address: (editForm.address || '').trim(),
-        city: (editForm.city || '').trim(),
-        country: (editForm.country || '').trim(),
-        specialties: editForm.specialties.filter(s => s.trim()),
-        specializations: editForm.specializations.filter(s => s.trim()),
-        serviceAreas: editForm.serviceAreas.filter(s => s.trim()),
-        certifications: editForm.certifications.filter(s => s.trim()),
-        languages: editForm.languages.filter(s => s.trim()),
-      };
 
       const response = await fetch(`${API_URL}/agencies/${agencyData._id}`, {
         method: 'PUT',
@@ -879,11 +941,15 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
       }
 
       const data = await response.json();
-      setAgencyData(data.agency);
-      setIsEditModalOpen(false);
+      // Apply server response to ensure data consistency
+      setAgencyData(prev => ({ ...prev, ...data.agency }));
       await success(t('messages.agencyUpdatedTitle', 'Agency Updated'), t('messages.agencyUpdated'));
     } catch (err) {
+      // Revert optimistic update on failure
+      setAgencyData(previousData);
       await error(t('messages.errorTitle', 'Error'), err instanceof Error ? err.message : t('messages.updateFailed', 'Failed to update agency'));
+    } finally {
+      setIsSavingAgency(false);
     }
   };
 
@@ -937,9 +1003,8 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
     }
   };
 
-  const handleLogoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file || !isOwner) return;
+  const uploadLogoFile = async (file: File) => {
+    if (!isOwner) return;
 
     if (!file.type.startsWith('image/')) {
       setUploadError(t('messages.selectImageFile'));
@@ -951,6 +1016,10 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
       return;
     }
 
+    // Optimistic preview: show the image immediately while uploading
+    const previousLogo = agencyData.logo;
+    const previewUrl = URL.createObjectURL(file);
+    setAgencyData(prev => ({ ...prev, logo: previewUrl }));
     setIsUploadingLogo(true);
     setUploadError('');
 
@@ -972,18 +1041,31 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
       }
 
       const data = await response.json();
-      setAgencyData(data.agency);
+      // Apply server URL (Cloudinary optimized) to replace the local preview
+      setAgencyData(prev => ({
+        ...prev,
+        logo: data.logo || data.agency?.logo || prev.logo,
+        logoPublicId: data.agency?.logoPublicId || prev.logoPublicId,
+      }));
       await success(t('messages.logoUpdatedTitle', 'Logo Updated'), t('messages.logoUpdated'));
     } catch (err) {
+      // Revert optimistic preview on failure
+      setAgencyData(prev => ({ ...prev, logo: previousLogo }));
       setUploadError(err instanceof Error ? err.message : t('messages.uploadFailed', 'Upload failed'));
     } finally {
+      URL.revokeObjectURL(previewUrl);
       setIsUploadingLogo(false);
     }
   };
 
-  const handleCoverUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleLogoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (!file || !isAdmin) return;
+    if (!file) return;
+    await uploadLogoFile(file);
+  };
+
+  const uploadCoverFile = async (file: File) => {
+    if (!isAdmin) return;
 
     if (!file.type.startsWith('image/')) {
       setUploadError(t('messages.selectImageFile'));
@@ -995,6 +1077,9 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
       return;
     }
 
+    // Optimistic preview: show the image immediately while uploading
+    const previewUrl = URL.createObjectURL(file);
+    setAgencyData(prev => ({ ...prev, coverImage: previewUrl }));
     setIsUploadingCover(true);
     setUploadError('');
 
@@ -1021,25 +1106,109 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
       const fileInput = document.getElementById('cover-upload') as HTMLInputElement;
       if (fileInput) fileInput.value = '';
 
-      // Refresh full agency data (populated) instead of using unpopulated upload response
-      await fetchAgencyData();
+      // Apply server URL (Cloudinary optimized) to replace the local preview
+      setAgencyData(prev => ({
+        ...prev,
+        coverImage: data.coverImage || data.agency?.coverImage || prev.coverImage,
+        coverImagePublicId: data.agency?.coverImagePublicId || prev.coverImagePublicId,
+      }));
       await success(t('messages.coverUpdatedTitle', 'Cover Updated'), t('messages.coverUpdated', 'Banner image updated successfully'));
     } catch (err) {
+      // Revert optimistic preview on failure
+      setAgencyData(prev => ({ ...prev, coverImage: agencyData.coverImage }));
       const msg = err instanceof Error ? err.message : t('messages.uploadFailed', 'Upload failed');
       setUploadError(msg);
       await error('Upload Failed', msg);
     } finally {
+      URL.revokeObjectURL(previewUrl);
       setIsUploadingCover(false);
     }
+  };
+
+  const handleCoverUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    await uploadCoverFile(file);
+  };
+
+  // Drag-and-drop handlers for cover image
+  const handleCoverDragEnter = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    coverDragCounter.current++;
+    if (e.dataTransfer.types.includes('Files')) {
+      setCoverDragActive(true);
+    }
+  };
+
+  const handleCoverDragLeave = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    coverDragCounter.current--;
+    if (coverDragCounter.current === 0) {
+      setCoverDragActive(false);
+    }
+  };
+
+  const handleCoverDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+  };
+
+  const handleCoverDrop = async (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setCoverDragActive(false);
+    coverDragCounter.current = 0;
+    const file = e.dataTransfer.files?.[0];
+    if (file) await uploadCoverFile(file);
+  };
+
+  // Drag-and-drop handlers for logo
+  const handleLogoDragEnter = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    logoDragCounter.current++;
+    if (e.dataTransfer.types.includes('Files')) {
+      setLogoDragActive(true);
+    }
+  };
+
+  const handleLogoDragLeave = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    logoDragCounter.current--;
+    if (logoDragCounter.current === 0) {
+      setLogoDragActive(false);
+    }
+  };
+
+  const handleLogoDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+  };
+
+  const handleLogoDrop = async (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setLogoDragActive(false);
+    logoDragCounter.current = 0;
+    const file = e.dataTransfer.files?.[0];
+    if (file) await uploadLogoFile(file);
   };
 
   const handleGradientSelect = async (gradientId: string) => {
     if (!isAdmin) return;
 
-    try {
-      const gradient = GRADIENT_PRESETS.find(g => g.id === gradientId);
-      if (!gradient) return;
+    const gradient = GRADIENT_PRESETS.find(g => g.id === gradientId);
+    if (!gradient) return;
 
+    // Optimistic update: apply gradient immediately
+    const previousData = { coverGradient: (agencyData as any).coverGradient, coverImage: agencyData.coverImage };
+    setAgencyData(prev => ({ ...prev, coverGradient: gradient.gradient, coverImage: '' } as any));
+    setShowGradientPicker(false);
+
+    try {
       const response = await fetch(`${API_URL}/agencies/${agencyData._id}`, {
         method: 'PUT',
         headers: {
@@ -1058,16 +1227,29 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
       }
 
       const data = await response.json();
-      setAgencyData(data.agency);
-      setShowGradientPicker(false);
+      setAgencyData(prev => ({ ...prev, ...data.agency }));
       await success(t('messages.gradientUpdatedTitle', 'Gradient Updated'), t('messages.gradientUpdated'));
     } catch (err) {
+      // Revert on failure
+      setAgencyData(prev => ({ ...prev, ...previousData } as any));
       await error(t('messages.errorTitle', 'Error'), err instanceof Error ? err.message : t('messages.updateFailed', 'Failed to update gradient'));
     }
   };
 
   // --- Image Repositioning Handlers ---
+  // Use refs to always have the latest position values (avoids stale closures)
+  const coverPosRef = useRef(coverPos);
+  coverPosRef.current = coverPos;
+  const logoPosRef = useRef(logoPos);
+  logoPosRef.current = logoPos;
+
   const saveImagePosition = async (type: 'cover' | 'logo', pos: { x: number; y: number }) => {
+    // Optimistic: position is already visually applied via coverPos/logoPos state
+    // Also update agencyData so it persists across re-renders
+    const posKey = type === 'cover' ? 'coverPosition' : 'logoPosition';
+    const previousPos = agencyData[posKey as keyof typeof agencyData] as { x: number; y: number } | undefined;
+    setAgencyData(prev => ({ ...prev, [posKey]: pos }));
+
     try {
       const body = type === 'cover' ? { coverPosition: pos } : { logoPosition: pos };
       const response = await fetch(`${API_URL}/agencies/${agencyData._id}`, {
@@ -1079,24 +1261,29 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
         body: JSON.stringify(body),
       });
       if (!response.ok) throw new Error('Failed to save position');
-      const data = await response.json();
-      setAgencyData(data.agency);
     } catch (err) {
+      // Revert position on failure
+      setAgencyData(prev => ({ ...prev, [posKey]: previousPos }));
+      if (type === 'cover') setCoverPos({ x: previousPos?.x ?? 50, y: previousPos?.y ?? 50 });
+      else setLogoPos({ x: previousPos?.x ?? 50, y: previousPos?.y ?? 50 });
       await error('Error', 'Failed to save image position');
     }
   };
 
   const handleRepositionMouseDown = (e: React.MouseEvent | React.TouchEvent, type: 'cover' | 'logo') => {
     e.preventDefault();
+    e.stopPropagation();
     const clientX = 'touches' in e ? e.touches[0].clientX : e.clientX;
     const clientY = 'touches' in e ? e.touches[0].clientY : e.clientY;
-    const pos = type === 'cover' ? coverPos : logoPos;
+    // Use refs to get latest position (avoids stale closure from React batching)
+    const pos = type === 'cover' ? coverPosRef.current : logoPosRef.current;
     dragStartRef.current = { x: clientX, y: clientY, posX: pos.x, posY: pos.y };
 
     const containerRef = type === 'cover' ? coverRef : logoRef;
 
     const handleMove = (ev: MouseEvent | TouchEvent) => {
       if (!dragStartRef.current || !containerRef.current) return;
+      ev.preventDefault();
       const cx = 'touches' in ev ? ev.touches[0].clientX : ev.clientX;
       const cy = 'touches' in ev ? ev.touches[0].clientY : ev.clientY;
       const rect = containerRef.current.getBoundingClientRect();
@@ -1119,16 +1306,20 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
 
     document.addEventListener('mousemove', handleMove);
     document.addEventListener('mouseup', handleUp);
-    document.addEventListener('touchmove', handleMove);
+    document.addEventListener('touchmove', handleMove, { passive: false });
     document.addEventListener('touchend', handleUp);
   };
 
-  const handleFinishRepositioning = async (type: 'cover' | 'logo') => {
-    const pos = type === 'cover' ? coverPos : logoPos;
-    await saveImagePosition(type, pos);
+  const handleFinishRepositioning = (type: 'cover' | 'logo') => {
+    // Use refs to get the latest position (avoids stale closure issues)
+    const pos = type === 'cover' ? { ...coverPosRef.current } : { ...logoPosRef.current };
+    // Close reposition mode immediately
     if (type === 'cover') setIsRepositioningCover(false);
     else setIsRepositioningLogo(false);
-    await success('Position Saved', `${type === 'cover' ? 'Cover' : 'Logo'} position updated successfully`);
+    // Save in background — no await so UI doesn't block
+    saveImagePosition(type, pos).then(() => {
+      success('Position Saved', `${type === 'cover' ? 'Cover' : 'Logo'} position updated successfully`);
+    });
   };
 
   const handleCancelRepositioning = (type: 'cover' | 'logo') => {
@@ -1160,11 +1351,14 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
     window.scrollTo(0, 0);
   }, [propertyView]);
 
-  // Sync positions when agencyData changes (e.g., after re-fetch)
+  // Sync positions when agencyData changes (e.g., after re-fetch) — skip during active repositioning
   useEffect(() => {
     if (!isRepositioningCover) setCoverPos({ x: agencyData.coverPosition?.x ?? 50, y: agencyData.coverPosition?.y ?? 50 });
+  }, [agencyData.coverPosition?.x, agencyData.coverPosition?.y, isRepositioningCover]);
+
+  useEffect(() => {
     if (!isRepositioningLogo) setLogoPos({ x: agencyData.logoPosition?.x ?? 50, y: agencyData.logoPosition?.y ?? 50 });
-  }, [agencyData.coverPosition?.x, agencyData.coverPosition?.y, agencyData.logoPosition?.x, agencyData.logoPosition?.y]);
+  }, [agencyData.logoPosition?.x, agencyData.logoPosition?.y, isRepositioningLogo]);
 
   // Close share dropdown on outside click
   useEffect(() => {
@@ -1202,15 +1396,46 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
       />
 
       {/* Hero Banner - Professional Design */}
-      <div ref={coverRef} className="relative h-[28rem] md:h-[32rem] overflow-hidden flex-shrink-0">
+      <div
+        ref={coverRef}
+        className={`relative h-[28rem] md:h-[32rem] overflow-hidden flex-shrink-0 ${isRepositioningCover || isRepositioningLogo ? 'select-none' : ''}`}
+        style={(isRepositioningCover || isRepositioningLogo) ? { touchAction: 'none' } : undefined}
+        onDragEnter={isAdmin ? handleCoverDragEnter : undefined}
+        onDragLeave={isAdmin ? handleCoverDragLeave : undefined}
+        onDragOver={isAdmin ? handleCoverDragOver : undefined}
+        onDrop={isAdmin ? handleCoverDrop : undefined}
+      >
+        {/* Drag-and-drop overlay for cover image */}
+        {coverDragActive && isAdmin && (
+          <div className="absolute inset-0 z-[60] bg-primary/30 backdrop-blur-sm border-4 border-dashed border-white/70 flex items-center justify-center pointer-events-none">
+            <div className="bg-white/95 backdrop-blur-xl px-8 py-5 rounded-2xl shadow-2xl text-center">
+              <svg className="w-10 h-10 mx-auto mb-2 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+              </svg>
+              <p className="text-sm font-semibold text-slate-800">{t('banner.dropCoverImage', 'Drop to upload cover image')}</p>
+              <p className="text-xs text-slate-500 mt-1">{t('banner.maxSize', 'Max 5MB, images only')}</p>
+            </div>
+          </div>
+        )}
+        {/* Upload progress overlay for cover */}
+        {isUploadingCover && (
+          <div className="absolute bottom-0 left-0 right-0 z-[55] pointer-events-none">
+            <div className="h-1 bg-white/20">
+              <div className="h-full bg-primary animate-pulse rounded-full" style={{ width: '70%' }} />
+            </div>
+          </div>
+        )}
         {/* Background Layer */}
         {agencyData.coverImage ? (
           <>
             <img
               src={agencyData.coverImage}
               alt={`${agencyData.name} - Real Estate Agency${agencyData.city ? ` in ${agencyData.city}` : ''}${agencyData.country ? `, ${agencyData.country}` : ''}`}
-              className={`absolute inset-0 w-full h-full object-cover ${isRepositioningCover ? 'cursor-grab active:cursor-grabbing' : ''}`}
-              style={{ objectPosition: `${coverPos.x}% ${coverPos.y}%` }}
+              className={`absolute inset-0 w-full h-full object-cover ${isRepositioningCover ? 'cursor-grab active:cursor-grabbing z-30 select-none' : ''}`}
+              style={{
+                objectPosition: `${coverPos.x}% ${coverPos.y}%`,
+                ...(isRepositioningCover ? { touchAction: 'none' } : {}),
+              }}
               draggable={false}
               onMouseDown={isRepositioningCover ? (e) => handleRepositionMouseDown(e, 'cover') : undefined}
               onTouchStart={isRepositioningCover ? (e) => handleRepositionMouseDown(e, 'cover') : undefined}
@@ -1251,7 +1476,7 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
         )}
 
         {/* Subtle Pattern Overlay */}
-        <div className="absolute inset-0 opacity-5" style={{ backgroundImage: 'url("data:image/svg+xml,%3Csvg width="60" height="60" viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg"%3E%3Cg fill="none" fill-rule="evenodd"%3E%3Cg fill="%23ffffff" fill-opacity="1"%3E%3Cpath d="M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z"/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")' }} />
+        <div className="absolute inset-0 opacity-5 pointer-events-none" style={{ backgroundImage: 'url("data:image/svg+xml,%3Csvg width="60" height="60" viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg"%3E%3Cg fill="none" fill-rule="evenodd"%3E%3Cg fill="%23ffffff" fill-opacity="1"%3E%3Cpath d="M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z"/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")' }} />
 
           {/* Top Navigation Bar */}
           <div className={`absolute top-0 left-0 right-0 z-20 px-4 md:px-6 py-4 ${isRepositioningCover ? 'pointer-events-none opacity-30' : ''}`}>
@@ -1493,14 +1718,40 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
           {/* Logo Container */}
           <div className="relative group">
             <div className="absolute -inset-1 bg-gradient-to-r from-primary/50 to-blue-500/50 rounded-2xl blur-lg opacity-75 group-hover:opacity-100 transition-opacity duration-500"></div>
-            <div ref={logoRef} className="relative w-28 h-28 md:w-32 md:h-32 rounded-2xl border-2 border-white/30 shadow-2xl overflow-hidden bg-white/10 backdrop-blur-md flex-shrink-0">
+            <div
+              ref={logoRef}
+              className={`relative w-28 h-28 md:w-32 md:h-32 rounded-2xl border-2 shadow-2xl overflow-hidden bg-white/10 backdrop-blur-md flex-shrink-0 ${
+                logoDragActive ? 'border-primary border-dashed' : 'border-white/30'
+              }`}
+              onDragEnter={isOwner ? handleLogoDragEnter : undefined}
+              onDragLeave={isOwner ? handleLogoDragLeave : undefined}
+              onDragOver={isOwner ? handleLogoDragOver : undefined}
+              onDrop={isOwner ? handleLogoDrop : undefined}
+            >
+              {/* Logo drag-and-drop overlay */}
+              {logoDragActive && isOwner && (
+                <div className="absolute inset-0 z-30 bg-primary/40 backdrop-blur-sm flex items-center justify-center pointer-events-none rounded-2xl">
+                  <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                  </svg>
+                </div>
+              )}
+              {/* Logo upload spinner */}
+              {isUploadingLogo && (
+                <div className="absolute inset-0 z-30 bg-black/30 backdrop-blur-[2px] flex items-center justify-center pointer-events-none rounded-2xl">
+                  <div className="animate-spin rounded-full h-8 w-8 border-2 border-white/30 border-t-white" />
+                </div>
+              )}
               {agencyData.logo ? (
                 <>
                   <img
                     src={agencyData.logo}
                     alt={`${agencyData.name} logo - Real Estate Agency`}
-                    className={`w-full h-full object-cover ${isRepositioningLogo ? 'cursor-grab active:cursor-grabbing' : ''}`}
-                    style={{ objectPosition: `${logoPos.x}% ${logoPos.y}%` }}
+                    className={`w-full h-full object-cover ${isRepositioningLogo ? 'cursor-grab active:cursor-grabbing z-20 select-none' : ''}`}
+                    style={{
+                      objectPosition: `${logoPos.x}% ${logoPos.y}%`,
+                      ...(isRepositioningLogo ? { touchAction: 'none' } : {}),
+                    }}
                     draggable={false}
                     onMouseDown={isRepositioningLogo ? (e) => handleRepositionMouseDown(e, 'logo') : undefined}
                     onTouchStart={isRepositioningLogo ? (e) => handleRepositionMouseDown(e, 'logo') : undefined}
@@ -1527,7 +1778,17 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
                 </>
               ) : (
                 <div className="w-full h-full flex items-center justify-center">
-                  <BuildingOfficeIcon className="w-14 h-14 text-white" />
+                  {isOwner ? (
+                    <label htmlFor="logo-upload-drop" className="w-full h-full flex flex-col items-center justify-center cursor-pointer hover:bg-white/10 transition-colors">
+                      <svg className="w-8 h-8 text-white/70 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 4v16m8-8H4" />
+                      </svg>
+                      <span className="text-[10px] text-white/60 font-medium">{t('banner.addLogo', 'Add Logo')}</span>
+                      <input id="logo-upload-drop" type="file" accept="image/*" className="hidden" onChange={handleLogoUpload} />
+                    </label>
+                  ) : (
+                    <BuildingOfficeIcon className="w-14 h-14 text-white" />
+                  )}
                 </div>
               )}
             </div>
