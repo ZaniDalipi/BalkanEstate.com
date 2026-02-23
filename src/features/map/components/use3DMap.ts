@@ -466,8 +466,8 @@ export function use3DMap(props: Map3DBuildingsProps) {
     } else {
       // 2. Try a larger bounding box query
       const bbox: [maplibregl.PointLike, maplibregl.PointLike] = [
-        [point.x - 300, point.y - 300],
-        [point.x + 300, point.y + 300]
+        [point.x - 150, point.y - 150],
+        [point.x + 150, point.y + 150]
       ];
       const nearbyFeatures = mapInstance.queryRenderedFeatures(bbox, {
         layers: ['3d-buildings']
@@ -562,8 +562,8 @@ export function use3DMap(props: Map3DBuildingsProps) {
     // Recalculate floor height based on actual building
     const adjustedFloorHeight = finalBuildingHeight / totalFlrs;
 
-    // Scale up the building coordinates to fully cover the original
-    const scaleFactor = 1.1; // 10% larger to fully cover and render in front of original
+    // Scale up the building coordinates to fully cover the original and prevent z-fighting
+    const scaleFactor = 1.05; // 5% larger to fully cover original building
 
     // Calculate centroid for scaling and label positioning
     const outerRing = buildingCoords[0];
@@ -585,22 +585,33 @@ export function use3DMap(props: Map3DBuildingsProps) {
       ])
     );
 
-    // Hide the original building from the 3d-buildings layer so our custom floors
-    // render cleanly on top without z-fighting. Use filter by feature ID (most reliable).
-    if (buildingFeature && mapInstance.getLayer('3d-buildings')) {
-      if (buildingFeature.id !== undefined) {
-        try {
-          // Exclude this specific building from the 3d-buildings layer by its vector tile ID
-          const existingFilter = mapInstance.getFilter('3d-buildings');
-          if (existingFilter) {
-            mapInstance.setFilter('3d-buildings', ['all', existingFilter, ['!=', ['id'], buildingFeature.id]]);
-          } else {
-            mapInstance.setFilter('3d-buildings', ['!=', ['id'], buildingFeature.id]);
-          }
-        } catch {
-          // Filter by ID not supported - fall through to scale-based covering
-        }
-      }
+    // First, try to hide the original building by setting a filter that excludes buildings at this location
+    // We'll do this by creating a small exclusion zone around the property
+    if (mapInstance.getLayer('3d-buildings')) {
+      // Get the current filter and add exclusion for this building's area
+      const latTolerance = 0.0003; // ~30m tolerance
+      const lngTolerance = 0.0003;
+
+      // Apply filter to exclude the original building (by checking if building is within our area)
+      // This uses a bounding box check
+      mapInstance.setFilter('3d-buildings', [
+        'any',
+        ['<', ['get', 'render_height'], 5], // Keep short buildings
+        ['all',
+          ['any',
+            ['<', ['geometry-type'], 'Polygon'], // Keep non-polygons
+            ['any',
+              // Keep buildings outside our exclusion zone
+              // We can't easily filter by geometry center, so use a workaround
+              // by relying on the custom building to cover the original
+            ]
+          ]
+        ]
+      ]);
+
+      // Alternative: Just let the custom building cover the original
+      // Remove the filter and rely on proper z-ordering
+      mapInstance.setFilter('3d-buildings', null);
     }
 
     // Add source for the custom building using actual geometry
@@ -629,29 +640,12 @@ export function use3DMap(props: Map3DBuildingsProps) {
     }
 
     // Remove existing floor layers if any
-    if (mapInstance.getLayer('custom-building-bg')) {
-      mapInstance.removeLayer('custom-building-bg');
-    }
     for (let floor = 1; floor <= 100; floor++) {
       const layerId = `building-floor-${floor}`;
       if (mapInstance.getLayer(layerId)) {
         mapInstance.removeLayer(layerId);
       }
     }
-
-    // Add a solid full-height background layer to cover any remaining original building
-    // This ensures no z-fighting artifacts show through the gaps between floor slices
-    mapInstance.addLayer({
-      id: 'custom-building-bg',
-      type: 'fill-extrusion',
-      source: 'custom-building',
-      paint: {
-        'fill-extrusion-color': '#374151',
-        'fill-extrusion-height': finalBuildingHeight,
-        'fill-extrusion-base': 0,
-        'fill-extrusion-opacity': 1,
-      },
-    });
 
     // Add floor slice layers - each floor is a separate layer for the striped effect
     // For houses/villas: ALL floors are green (entire building highlighted)
@@ -674,7 +668,7 @@ export function use3DMap(props: Map3DBuildingsProps) {
             : floor % 2 === 0 ? '#4b5563' : '#6b7280', // Alternating grey for other floors
           'fill-extrusion-height': floorTop - 0.15, // Gap between floors for visual separation
           'fill-extrusion-base': floorBase + 0.05,
-          'fill-extrusion-opacity': 1,
+          'fill-extrusion-opacity': isHighlightedFloor ? 1 : 0.92,
         },
       });
     }
