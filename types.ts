@@ -308,6 +308,7 @@ export interface Property {
     floorNumber?: number;
     totalFloors?: number;
     floorplanUrl?: string;
+    orientation?: 'any' | 'north' | 'south' | 'east' | 'west' | 'northEast' | 'northWest' | 'southEast' | 'southWest';
     createdAt?: number;
     lastRenewed?: number;
     views?: number;

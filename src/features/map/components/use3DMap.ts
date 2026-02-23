@@ -857,9 +857,9 @@ export function use3DMap(props: Map3DBuildingsProps) {
       minZoom: 14, // Prevent zooming out too far - keep building visible
       maxZoom: 20,
       maxPitch: 85,
-      antialias: true, // Enable antialiasing for smoother 3D buildings
+      canvasContextAttributes: { antialias: true }, // v5 API for smoother 3D buildings
       attributionControl: false,
-    } as maplibregl.MapOptions);
+    });
 
     map.current = mapInstance;
 
