@@ -862,9 +862,9 @@ export function use3DMap(props: Map3DBuildingsProps) {
       minZoom: 14, // Prevent zooming out too far - keep building visible
       maxZoom: 20,
       maxPitch: 85,
-      canvasContextAttributes: { antialias: true }, // v5 API for smoother 3D buildings
+      antialias: true, // Enable antialiasing for smoother 3D buildings
       attributionControl: false,
-    });
+    } as maplibregl.MapOptions);
 
     map.current = mapInstance;
 
@@ -1019,7 +1019,7 @@ export function use3DMap(props: Map3DBuildingsProps) {
       // Add 360 tour door marker for properties without floor visualization
       // Houses/villas get floor viz with any floor count; apartments need >3 floors
       const isHouseOrVilla = propertyType === 'house' || propertyType === 'villa';
-      const willHaveFloorViz = floorNumber != null && totalFloors != null && (isHouseOrVilla ? totalFloors > 0 : totalFloors > 1);
+      const willHaveFloorViz = floorNumber != null && totalFloors != null && (isHouseOrVilla ? totalFloors > 0 : totalFloors > 3);
       if (!willHaveFloorViz && virtualTour360Url) {
         const doorEl = document.createElement('div');
         doorEl.className = 'apartment-door-marker';
@@ -1073,7 +1073,7 @@ export function use3DMap(props: Map3DBuildingsProps) {
       // Add custom 3D building with floor slices
       // Houses/villas: show with any floor count (entire building green)
       // Apartments: show only for buildings with >3 floors (specific floor green)
-      if (floorNumber != null && totalFloors != null && (isHouseOrVilla ? totalFloors > 0 : totalFloors > 1)) {
+      if (floorNumber != null && totalFloors != null && (isHouseOrVilla ? totalFloors > 0 : totalFloors > 3)) {
         // Retry mechanism to ensure building tiles are loaded
         let retryCount = 0;
         const maxRetries = 5;
