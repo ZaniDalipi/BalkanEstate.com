@@ -164,6 +164,7 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
   const [showAllMembers, setShowAllMembers] = useState(true);
   const [isLeavingAgency, setIsLeavingAgency] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [isSavingAgency, setIsSavingAgency] = useState(false);
   const [propertyView, setPropertyView] = useState<'active' | 'sold' | 'rented'>('active');
   const [propertyTypeView, setPropertyTypeView] = useState<'all' | 'sale' | 'rent'>('all');
   const [subscriptionKey, setSubscriptionKey] = useState(0);
@@ -847,26 +848,32 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
       }
     }
 
+    // Sanitize: filter empty strings from arrays, trim text fields
+    const sanitizedForm = {
+      ...editForm,
+      name: editForm.name.trim(),
+      description: (editForm.description || '').trim(),
+      website: (editForm.website || '').trim(),
+      phone: (editForm.phone || '').trim(),
+      email: (editForm.email || '').trim(),
+      address: (editForm.address || '').trim(),
+      city: (editForm.city || '').trim(),
+      country: (editForm.country || '').trim(),
+      specialties: editForm.specialties.filter(s => s.trim()),
+      specializations: editForm.specializations.filter(s => s.trim()),
+      serviceAreas: editForm.serviceAreas.filter(s => s.trim()),
+      certifications: editForm.certifications.filter(s => s.trim()),
+      languages: editForm.languages.filter(s => s.trim()),
+    };
+
+    // Optimistic update: apply changes immediately, close modal, save in background
+    const previousData = { ...agencyData };
+    setAgencyData(prev => ({ ...prev, ...sanitizedForm }));
+    setIsEditModalOpen(false);
+    setIsSavingAgency(true);
+
     try {
       const token = localStorage.getItem('balkan_estate_token');
-
-      // Sanitize: filter empty strings from arrays, trim text fields
-      const sanitizedForm = {
-        ...editForm,
-        name: editForm.name.trim(),
-        description: (editForm.description || '').trim(),
-        website: (editForm.website || '').trim(),
-        phone: (editForm.phone || '').trim(),
-        email: (editForm.email || '').trim(),
-        address: (editForm.address || '').trim(),
-        city: (editForm.city || '').trim(),
-        country: (editForm.country || '').trim(),
-        specialties: editForm.specialties.filter(s => s.trim()),
-        specializations: editForm.specializations.filter(s => s.trim()),
-        serviceAreas: editForm.serviceAreas.filter(s => s.trim()),
-        certifications: editForm.certifications.filter(s => s.trim()),
-        languages: editForm.languages.filter(s => s.trim()),
-      };
 
       const response = await fetch(`${API_URL}/agencies/${agencyData._id}`, {
         method: 'PUT',
@@ -883,11 +890,15 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
       }
 
       const data = await response.json();
-      setAgencyData(data.agency);
-      setIsEditModalOpen(false);
+      // Apply server response to ensure data consistency
+      setAgencyData(prev => ({ ...prev, ...data.agency }));
       await success(t('messages.agencyUpdatedTitle', 'Agency Updated'), t('messages.agencyUpdated'));
     } catch (err) {
+      // Revert optimistic update on failure
+      setAgencyData(previousData);
       await error(t('messages.errorTitle', 'Error'), err instanceof Error ? err.message : t('messages.updateFailed', 'Failed to update agency'));
+    } finally {
+      setIsSavingAgency(false);
     }
   };
 
@@ -954,6 +965,10 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
       return;
     }
 
+    // Optimistic preview: show the image immediately while uploading
+    const previousLogo = agencyData.logo;
+    const previewUrl = URL.createObjectURL(file);
+    setAgencyData(prev => ({ ...prev, logo: previewUrl }));
     setIsUploadingLogo(true);
     setUploadError('');
 
@@ -975,11 +990,19 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
       }
 
       const data = await response.json();
-      setAgencyData(data.agency);
+      // Apply server URL (Cloudinary optimized) to replace the local preview
+      setAgencyData(prev => ({
+        ...prev,
+        logo: data.logo || data.agency?.logo || prev.logo,
+        logoPublicId: data.agency?.logoPublicId || prev.logoPublicId,
+      }));
       await success(t('messages.logoUpdatedTitle', 'Logo Updated'), t('messages.logoUpdated'));
     } catch (err) {
+      // Revert optimistic preview on failure
+      setAgencyData(prev => ({ ...prev, logo: previousLogo }));
       setUploadError(err instanceof Error ? err.message : t('messages.uploadFailed', 'Upload failed'));
     } finally {
+      URL.revokeObjectURL(previewUrl);
       setIsUploadingLogo(false);
     }
   };
@@ -1003,6 +1026,9 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
       return;
     }
 
+    // Optimistic preview: show the image immediately while uploading
+    const previewUrl = URL.createObjectURL(file);
+    setAgencyData(prev => ({ ...prev, coverImage: previewUrl }));
     setIsUploadingCover(true);
     setUploadError('');
 
@@ -1023,18 +1049,27 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
         throw new Error(errorData?.message || 'Failed to upload cover image');
       }
 
+      const data = await response.json();
+
       // Reset the file input so the same file can be re-selected if needed
       const fileInput = document.getElementById('cover-upload') as HTMLInputElement;
       if (fileInput) fileInput.value = '';
 
-      // Refresh full agency data (populated) instead of using unpopulated upload response
-      await fetchAgencyData();
+      // Apply server URL (Cloudinary optimized) to replace the local preview
+      setAgencyData(prev => ({
+        ...prev,
+        coverImage: data.coverImage || data.agency?.coverImage || prev.coverImage,
+        coverImagePublicId: data.agency?.coverImagePublicId || prev.coverImagePublicId,
+      }));
       await success(t('messages.coverUpdatedTitle', 'Cover Updated'), t('messages.coverUpdated', 'Banner image updated successfully'));
     } catch (err) {
+      // Revert optimistic preview on failure
+      setAgencyData(prev => ({ ...prev, coverImage: agencyData.coverImage }));
       const msg = err instanceof Error ? err.message : t('messages.uploadFailed', 'Upload failed');
       setUploadError(msg);
       await error('Upload Failed', msg);
     } finally {
+      URL.revokeObjectURL(previewUrl);
       setIsUploadingCover(false);
     }
   };
@@ -1114,10 +1149,15 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
   const handleGradientSelect = async (gradientId: string) => {
     if (!isAdmin) return;
 
-    try {
-      const gradient = GRADIENT_PRESETS.find(g => g.id === gradientId);
-      if (!gradient) return;
+    const gradient = GRADIENT_PRESETS.find(g => g.id === gradientId);
+    if (!gradient) return;
 
+    // Optimistic update: apply gradient immediately
+    const previousData = { coverGradient: (agencyData as any).coverGradient, coverImage: agencyData.coverImage };
+    setAgencyData(prev => ({ ...prev, coverGradient: gradient.gradient, coverImage: '' } as any));
+    setShowGradientPicker(false);
+
+    try {
       const response = await fetch(`${API_URL}/agencies/${agencyData._id}`, {
         method: 'PUT',
         headers: {
@@ -1136,16 +1176,23 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
       }
 
       const data = await response.json();
-      setAgencyData(data.agency);
-      setShowGradientPicker(false);
+      setAgencyData(prev => ({ ...prev, ...data.agency }));
       await success(t('messages.gradientUpdatedTitle', 'Gradient Updated'), t('messages.gradientUpdated'));
     } catch (err) {
+      // Revert on failure
+      setAgencyData(prev => ({ ...prev, ...previousData } as any));
       await error(t('messages.errorTitle', 'Error'), err instanceof Error ? err.message : t('messages.updateFailed', 'Failed to update gradient'));
     }
   };
 
   // --- Image Repositioning Handlers ---
   const saveImagePosition = async (type: 'cover' | 'logo', pos: { x: number; y: number }) => {
+    // Optimistic: position is already visually applied via coverPos/logoPos state
+    // Also update agencyData so it persists across re-renders
+    const posKey = type === 'cover' ? 'coverPosition' : 'logoPosition';
+    const previousPos = agencyData[posKey as keyof typeof agencyData] as { x: number; y: number } | undefined;
+    setAgencyData(prev => ({ ...prev, [posKey]: pos }));
+
     try {
       const body = type === 'cover' ? { coverPosition: pos } : { logoPosition: pos };
       const response = await fetch(`${API_URL}/agencies/${agencyData._id}`, {
@@ -1157,9 +1204,11 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
         body: JSON.stringify(body),
       });
       if (!response.ok) throw new Error('Failed to save position');
-      const data = await response.json();
-      setAgencyData(data.agency);
     } catch (err) {
+      // Revert position on failure
+      setAgencyData(prev => ({ ...prev, [posKey]: previousPos }));
+      if (type === 'cover') setCoverPos({ x: previousPos?.x ?? 50, y: previousPos?.y ?? 50 });
+      else setLogoPos({ x: previousPos?.x ?? 50, y: previousPos?.y ?? 50 });
       await error('Error', 'Failed to save image position');
     }
   };
@@ -1203,12 +1252,15 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
     document.addEventListener('touchend', handleUp);
   };
 
-  const handleFinishRepositioning = async (type: 'cover' | 'logo') => {
+  const handleFinishRepositioning = (type: 'cover' | 'logo') => {
     const pos = type === 'cover' ? coverPos : logoPos;
-    await saveImagePosition(type, pos);
+    // Close reposition mode immediately
     if (type === 'cover') setIsRepositioningCover(false);
     else setIsRepositioningLogo(false);
-    await success('Position Saved', `${type === 'cover' ? 'Cover' : 'Logo'} position updated successfully`);
+    // Save in background — no await so UI doesn't block
+    saveImagePosition(type, pos).then(() => {
+      success('Position Saved', `${type === 'cover' ? 'Cover' : 'Logo'} position updated successfully`);
+    });
   };
 
   const handleCancelRepositioning = (type: 'cover' | 'logo') => {
@@ -1299,6 +1351,14 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
               </svg>
               <p className="text-sm font-semibold text-slate-800">{t('banner.dropCoverImage', 'Drop to upload cover image')}</p>
               <p className="text-xs text-slate-500 mt-1">{t('banner.maxSize', 'Max 5MB, images only')}</p>
+            </div>
+          </div>
+        )}
+        {/* Upload progress overlay for cover */}
+        {isUploadingCover && (
+          <div className="absolute bottom-0 left-0 right-0 z-[55] pointer-events-none">
+            <div className="h-1 bg-white/20">
+              <div className="h-full bg-primary animate-pulse rounded-full" style={{ width: '70%' }} />
             </div>
           </div>
         )}
@@ -1608,6 +1668,12 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
                   <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
                   </svg>
+                </div>
+              )}
+              {/* Logo upload spinner */}
+              {isUploadingLogo && (
+                <div className="absolute inset-0 z-30 bg-black/30 backdrop-blur-[2px] flex items-center justify-center pointer-events-none rounded-2xl">
+                  <div className="animate-spin rounded-full h-8 w-8 border-2 border-white/30 border-t-white" />
                 </div>
               )}
               {agencyData.logo ? (
