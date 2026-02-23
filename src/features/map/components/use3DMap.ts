@@ -563,7 +563,7 @@ export function use3DMap(props: Map3DBuildingsProps) {
     const adjustedFloorHeight = finalBuildingHeight / totalFlrs;
 
     // Scale up the building coordinates to fully cover the original
-    const scaleFactor = 1.05; // 5% larger to fully cover original building
+    const scaleFactor = 1.1; // 10% larger to fully cover and render in front of original
 
     // Calculate centroid for scaling and label positioning
     const outerRing = buildingCoords[0];
@@ -585,11 +585,30 @@ export function use3DMap(props: Map3DBuildingsProps) {
       ])
     );
 
-    // Let the custom building cover the original via z-ordering
-    // The 1.05x scaled custom building renders slightly in front of the original
-    // No need to hide the original - the depth buffer handles occlusion naturally
-    if (mapInstance.getLayer('3d-buildings')) {
-      mapInstance.setFilter('3d-buildings', null);
+    // Hide the original building so our custom floor layers render cleanly on top
+    // Use setFeatureState to mark the specific building as hidden
+    if (buildingFeature && mapInstance.getLayer('3d-buildings')) {
+      const style = mapInstance.getStyle();
+      const layerSpec = style.layers?.find(l => l.id === '3d-buildings');
+      const layerSource = (layerSpec as any)?.source;
+
+      if (buildingFeature.id !== undefined && layerSource) {
+        try {
+          mapInstance.setFeatureState(
+            { source: layerSource, sourceLayer: 'building', id: buildingFeature.id },
+            { hidden: true }
+          );
+          // Make hidden buildings fully transparent, keep others at normal opacity
+          mapInstance.setPaintProperty('3d-buildings', 'fill-extrusion-opacity', [
+            'case',
+            ['boolean', ['feature-state', 'hidden'], false],
+            0,
+            0.92
+          ]);
+        } catch {
+          // Feature state not supported for this source - rely on scale covering
+        }
+      }
     }
 
     // Add source for the custom building using actual geometry
@@ -646,7 +665,7 @@ export function use3DMap(props: Map3DBuildingsProps) {
             : floor % 2 === 0 ? '#4b5563' : '#6b7280', // Alternating grey for other floors
           'fill-extrusion-height': floorTop - 0.15, // Gap between floors for visual separation
           'fill-extrusion-base': floorBase + 0.05,
-          'fill-extrusion-opacity': isHighlightedFloor ? 1 : 0.92,
+          'fill-extrusion-opacity': 1,
         },
       });
     }
@@ -1134,9 +1153,12 @@ export function use3DMap(props: Map3DBuildingsProps) {
         30, lighting.buildingHighlight,
         80, '#ffffff',
       ]);
-      map.current.setPaintProperty('3d-buildings', 'fill-extrusion-opacity',
+      map.current.setPaintProperty('3d-buildings', 'fill-extrusion-opacity', [
+        'case',
+        ['boolean', ['feature-state', 'hidden'], false],
+        0,
         0.7 + lighting.ambientIntensity * 0.25
-      );
+      ]);
     }
 
     // Subtle bearing rotation for sun movement
