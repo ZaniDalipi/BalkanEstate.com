@@ -585,28 +585,20 @@ export function use3DMap(props: Map3DBuildingsProps) {
       ])
     );
 
-    // Hide the original building so our custom floor layers render cleanly on top
-    // Use setFeatureState to mark the specific building as hidden
+    // Hide the original building from the 3d-buildings layer so our custom floors
+    // render cleanly on top without z-fighting. Use filter by feature ID (most reliable).
     if (buildingFeature && mapInstance.getLayer('3d-buildings')) {
-      const style = mapInstance.getStyle();
-      const layerSpec = style.layers?.find(l => l.id === '3d-buildings');
-      const layerSource = (layerSpec as any)?.source;
-
-      if (buildingFeature.id !== undefined && layerSource) {
+      if (buildingFeature.id !== undefined) {
         try {
-          mapInstance.setFeatureState(
-            { source: layerSource, sourceLayer: 'building', id: buildingFeature.id },
-            { hidden: true }
-          );
-          // Make hidden buildings fully transparent, keep others at normal opacity
-          mapInstance.setPaintProperty('3d-buildings', 'fill-extrusion-opacity', [
-            'case',
-            ['boolean', ['feature-state', 'hidden'], false],
-            0,
-            0.92
-          ]);
+          // Exclude this specific building from the 3d-buildings layer by its vector tile ID
+          const existingFilter = mapInstance.getFilter('3d-buildings');
+          if (existingFilter) {
+            mapInstance.setFilter('3d-buildings', ['all', existingFilter, ['!=', ['id'], buildingFeature.id]]);
+          } else {
+            mapInstance.setFilter('3d-buildings', ['!=', ['id'], buildingFeature.id]);
+          }
         } catch {
-          // Feature state not supported for this source - rely on scale covering
+          // Filter by ID not supported - fall through to scale-based covering
         }
       }
     }
@@ -637,12 +629,29 @@ export function use3DMap(props: Map3DBuildingsProps) {
     }
 
     // Remove existing floor layers if any
+    if (mapInstance.getLayer('custom-building-bg')) {
+      mapInstance.removeLayer('custom-building-bg');
+    }
     for (let floor = 1; floor <= 100; floor++) {
       const layerId = `building-floor-${floor}`;
       if (mapInstance.getLayer(layerId)) {
         mapInstance.removeLayer(layerId);
       }
     }
+
+    // Add a solid full-height background layer to cover any remaining original building
+    // This ensures no z-fighting artifacts show through the gaps between floor slices
+    mapInstance.addLayer({
+      id: 'custom-building-bg',
+      type: 'fill-extrusion',
+      source: 'custom-building',
+      paint: {
+        'fill-extrusion-color': '#374151',
+        'fill-extrusion-height': finalBuildingHeight,
+        'fill-extrusion-base': 0,
+        'fill-extrusion-opacity': 1,
+      },
+    });
 
     // Add floor slice layers - each floor is a separate layer for the striped effect
     // For houses/villas: ALL floors are green (entire building highlighted)
@@ -1153,12 +1162,9 @@ export function use3DMap(props: Map3DBuildingsProps) {
         30, lighting.buildingHighlight,
         80, '#ffffff',
       ]);
-      map.current.setPaintProperty('3d-buildings', 'fill-extrusion-opacity', [
-        'case',
-        ['boolean', ['feature-state', 'hidden'], false],
-        0,
+      map.current.setPaintProperty('3d-buildings', 'fill-extrusion-opacity',
         0.7 + lighting.ambientIntensity * 0.25
-      ]);
+      );
     }
 
     // Subtle bearing rotation for sun movement
