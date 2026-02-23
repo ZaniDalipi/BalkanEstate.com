@@ -2594,6 +2594,19 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
               {isAdmin && (
                 <>
                   <button
+                    onClick={() => {
+                      dispatch({ type: 'SET_SELECTED_PROPERTY', payload: null });
+                      dispatch({ type: 'SET_SELECTED_AGENCY', payload: null });
+                      dispatch({ type: 'SET_AGENCY_DASHBOARD_SECTION', payload: 'overview' });
+                      dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'agency-dashboard' });
+                      window.history.pushState({}, '', '/agency-dashboard');
+                    }}
+                    className="inline-flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-blue-600 to-indigo-600 text-white text-sm font-semibold rounded-xl hover:from-blue-700 hover:to-indigo-700 transition-all duration-300 shadow-lg shadow-blue-600/25"
+                  >
+                    <ChartBarIcon className="w-4 h-4" />
+                    {t('actions.goToDashboard', 'Go to Dashboard')}
+                  </button>
+                  <button
                     onClick={handleOpenEditModal}
                     className="inline-flex items-center gap-2 px-5 py-2.5 bg-slate-900 text-white text-sm font-semibold rounded-xl hover:bg-slate-800 transition-all duration-300 shadow-lg shadow-slate-900/25"
                   >
@@ -2608,6 +2621,22 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
                     {t('actions.manageJoinRequests', 'Manage Join Requests')}
                   </button>
                 </>
+              )}
+
+              {!isAdmin && isUserInThisAgency && (
+                <button
+                  onClick={() => {
+                    dispatch({ type: 'SET_SELECTED_PROPERTY', payload: null });
+                    dispatch({ type: 'SET_SELECTED_AGENCY', payload: null });
+                    dispatch({ type: 'SET_AGENCY_DASHBOARD_SECTION', payload: 'overview' });
+                    dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'agency-dashboard' });
+                    window.history.pushState({}, '', '/agency-dashboard');
+                  }}
+                  className="inline-flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-blue-600 to-indigo-600 text-white text-sm font-semibold rounded-xl hover:from-blue-700 hover:to-indigo-700 transition-all duration-300 shadow-lg shadow-blue-600/25"
+                >
+                  <ChartBarIcon className="w-4 h-4" />
+                  {t('actions.goToDashboard', 'Go to Dashboard')}
+                </button>
               )}
 
               {canRequestToJoin && (

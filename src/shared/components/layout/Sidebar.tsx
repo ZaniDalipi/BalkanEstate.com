@@ -54,7 +54,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
     }, 0);
 
     const handleNavClick = (view: AppView) => {
-        const needsAuth = ['inbox', 'account', 'saved-searches', 'saved-properties'].includes(view);
+        const needsAuth = ['inbox', 'account', 'saved-searches', 'saved-properties', 'agency-dashboard'].includes(view);
         if (needsAuth && !isAuthenticated) {
             dispatch({ type: 'TOGGLE_AUTH_MODAL', payload: { isOpen: true } });
         } else {
@@ -108,10 +108,18 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
       { view: 'agencies' as AppView, label: t('nav:agencies'), icon: <BuildingOfficeIcon /> },
     ];
 
+    // Add agency dashboard for users who belong to an agency
+    const isAgencyMember = isAuthenticated && currentUser?.agencyId &&
+      (currentUser?.role === 'agent' || currentUser?.role === 'admin' || currentUser?.role === 'super_admin');
+
     // Add admin panel for admin users
-    const navItems = currentUser?.role === 'admin' || currentUser?.role === 'super_admin'
-      ? [...baseNavItems, { view: 'admin' as AppView, label: t('nav:adminPanel'), icon: <ShieldCheckIcon /> }]
-      : baseNavItems;
+    let navItems = [...baseNavItems];
+    if (isAgencyMember) {
+      navItems.push({ view: 'agency-dashboard' as AppView, label: t('nav:agencyDashboard', 'Agency Dashboard'), icon: <ChartBarIcon /> });
+    }
+    if (currentUser?.role === 'admin' || currentUser?.role === 'super_admin') {
+      navItems.push({ view: 'admin' as AppView, label: t('nav:adminPanel'), icon: <ShieldCheckIcon /> });
+    }
 
     return (
         <>
