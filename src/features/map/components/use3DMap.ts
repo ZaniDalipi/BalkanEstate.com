@@ -524,20 +524,23 @@ export function use3DMap(props: Map3DBuildingsProps) {
       }
     }
 
-    // If we still don't have building coords, create a fallback based on the building's floor count
+    // If we still don't have building coords, create a realistic rectangular
+    // apartment footprint proportional to the number of floors.
     if (!buildingCoords) {
-      // Warning removed
       const metersToDegrees = 1 / 111320;
-      // For a tall building, use a larger footprint (proportional to floors)
-      const buildingSize = Math.max(25, totalFlrs * 1.5); // At least 25m, scales with floors
-      const halfSize = buildingSize * metersToDegrees;
-      const lonAdjust = halfSize / Math.cos(latitude * Math.PI / 180);
+      // Typical apartment block: wider (long edge ~40-60m) and narrower (~15-20m)
+      const longEdge = Math.max(40, 20 + totalFlrs * 1.8); // longer side
+      const shortEdge = Math.max(15, 10 + totalFlrs * 0.5); // shorter side
+      const halfLong = (longEdge / 2) * metersToDegrees;
+      const halfShort = (shortEdge / 2) * metersToDegrees;
+      const lonAdjust = halfLong / Math.cos(latitude * Math.PI / 180);
+      const latAdjust = halfShort;
       buildingCoords = [[
-        [longitude - lonAdjust, latitude - halfSize],
-        [longitude + lonAdjust, latitude - halfSize],
-        [longitude + lonAdjust, latitude + halfSize],
-        [longitude - lonAdjust, latitude + halfSize],
-        [longitude - lonAdjust, latitude - halfSize],
+        [longitude - lonAdjust, latitude - latAdjust],
+        [longitude + lonAdjust, latitude - latAdjust],
+        [longitude + lonAdjust, latitude + latAdjust],
+        [longitude - lonAdjust, latitude + latAdjust],
+        [longitude - lonAdjust, latitude - latAdjust],
       ]];
     }
 
@@ -557,7 +560,7 @@ export function use3DMap(props: Map3DBuildingsProps) {
     const adjustedFloorHeight = finalBuildingHeight / totalFlrs;
 
     // Scale up the building coordinates to fully cover the original and prevent z-fighting
-    const scaleFactor = 1.05; // 5% larger to fully cover original building
+    const scaleFactor = 1.08; // 8% larger to fully cover original building
 
     // Calculate centroid for scaling and label positioning
     const outerRing = buildingCoords[0];
@@ -579,34 +582,9 @@ export function use3DMap(props: Map3DBuildingsProps) {
       ])
     );
 
-    // First, try to hide the original building by setting a filter that excludes buildings at this location
-    // We'll do this by creating a small exclusion zone around the property
-    if (mapInstance.getLayer('3d-buildings')) {
-      // Get the current filter and add exclusion for this building's area
-      const latTolerance = 0.0003; // ~30m tolerance
-      const lngTolerance = 0.0003;
-
-      // Apply filter to exclude the original building (by checking if building is within our area)
-      // This uses a bounding box check
-      mapInstance.setFilter('3d-buildings', [
-        'any',
-        ['<', ['get', 'render_height'], 5], // Keep short buildings
-        ['all',
-          ['any',
-            ['<', ['geometry-type'], 'Polygon'], // Keep non-polygons
-            ['any',
-              // Keep buildings outside our exclusion zone
-              // We can't easily filter by geometry center, so use a workaround
-              // by relying on the custom building to cover the original
-            ]
-          ]
-        ]
-      ]);
-
-      // Alternative: Just let the custom building cover the original
-      // Remove the filter and rely on proper z-ordering
-      mapInstance.setFilter('3d-buildings', null);
-    }
+    // Hide the original building under our custom one.
+    // We add a solid opaque base layer that completely covers the original,
+    // so no z-fighting is visible even in the gaps between floor slices.
 
     // Add source for the custom building using actual geometry
     if (!mapInstance.getSource('custom-building')) {
@@ -633,7 +611,13 @@ export function use3DMap(props: Map3DBuildingsProps) {
       });
     }
 
-    // Remove existing floor layers if any
+    // Remove existing floor layers and base layer if any
+    if (mapInstance.getLayer('building-base')) {
+      mapInstance.removeLayer('building-base');
+    }
+    if (mapInstance.getLayer('building-roof')) {
+      mapInstance.removeLayer('building-roof');
+    }
     for (let floor = 1; floor <= 100; floor++) {
       const layerId = `building-floor-${floor}`;
       if (mapInstance.getLayer(layerId)) {
@@ -641,11 +625,28 @@ export function use3DMap(props: Map3DBuildingsProps) {
       }
     }
 
-    // Add floor slice layers - each floor is a separate layer for the striped effect
-    // Add them on top of the 3d-buildings layer
+    // 1. Add solid dark base layer — covers the full building height.
+    //    This hides the original 3d-buildings layer underneath so there is
+    //    no z-fighting visible in the gaps between floor slices.
+    mapInstance.addLayer({
+      id: 'building-base',
+      type: 'fill-extrusion',
+      source: 'custom-building',
+      paint: {
+        'fill-extrusion-color': '#1e293b', // Slate-800 — dark base
+        'fill-extrusion-height': finalBuildingHeight,
+        'fill-extrusion-base': 0,
+        'fill-extrusion-opacity': 1,
+      },
+    });
+
+    // 2. Add floor slice layers on top for the striped apartment effect.
+    //    The gap between slices reveals the dark base (not the original building).
+    const gapFraction = 0.12; // 12% of floor height is gap
     for (let floor = 1; floor <= totalFlrs; floor++) {
       const floorBase = (floor - 1) * adjustedFloorHeight;
       const floorTop = floor * adjustedFloorHeight;
+      const gap = adjustedFloorHeight * gapFraction;
       const isHighlightedFloor = floor === floorNum;
       const layerId = `building-floor-${floor}`;
 
@@ -656,13 +657,26 @@ export function use3DMap(props: Map3DBuildingsProps) {
         paint: {
           'fill-extrusion-color': isHighlightedFloor
             ? '#22c55e' // Bright green for the property's floor
-            : floor % 2 === 0 ? '#4b5563' : '#6b7280', // Alternating grey for other floors
-          'fill-extrusion-height': floorTop - 0.15, // Gap between floors for visual separation
-          'fill-extrusion-base': floorBase + 0.05,
-          'fill-extrusion-opacity': isHighlightedFloor ? 1 : 0.92,
+            : floor % 2 === 0 ? '#4b5563' : '#6b7280', // Alternating grey
+          'fill-extrusion-height': floorTop - gap,
+          'fill-extrusion-base': floorBase + gap * 0.4,
+          'fill-extrusion-opacity': isHighlightedFloor ? 1 : 0.95,
         },
       });
     }
+
+    // 3. Add a thin roof slab on top
+    mapInstance.addLayer({
+      id: 'building-roof',
+      type: 'fill-extrusion',
+      source: 'custom-building',
+      paint: {
+        'fill-extrusion-color': '#334155', // Slate-700
+        'fill-extrusion-height': finalBuildingHeight + 0.5,
+        'fill-extrusion-base': finalBuildingHeight,
+        'fill-extrusion-opacity': 1,
+      },
+    });
 
     // Add door icon directly on the highlighted floor for 360 tour
     if (floorNum > 0 && floorNum <= totalFlrs) {
