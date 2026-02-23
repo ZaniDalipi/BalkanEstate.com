@@ -54,9 +54,6 @@ export function use3DMap(props: Map3DBuildingsProps) {
   // Show floor levels for any property with more than 3 floors (not just apartments)
   const hasFloorInfo = floorNumber != null && totalFloors != null && totalFloors > 0;
   const has360Tour = !!virtualTour360Url;
-  const floorHeightMeters = 3; // Average floor height
-  const buildingHeightMeters = hasFloorInfo ? totalFloors * floorHeightMeters : 0;
-  const floorPositionPercent = hasFloorInfo ? ((floorNumber - 0.5) / totalFloors) * 100 : 0;
 
   // Shadow timelapse hook
   const timelapse = useShadowTimelapse(lat);
@@ -559,8 +556,12 @@ export function use3DMap(props: Map3DBuildingsProps) {
     // Recalculate floor height based on actual building
     const adjustedFloorHeight = finalBuildingHeight / totalFlrs;
 
-    // Scale up the building coordinates to fully cover the original and prevent z-fighting
-    const scaleFactor = 1.08; // 8% larger to fully cover original building
+    // Two-source approach to eliminate z-fighting:
+    // - Base source (102% scale) covers the original building completely
+    // - Floor source (110% scale) renders floor slices in front of the base
+    // In the gaps between floor slices, the dark base is visible (not the original building).
+    const baseScaleFactor = 1.03;
+    const floorScaleFactor = 1.10;
 
     // Calculate centroid for scaling and label positioning
     const outerRing = buildingCoords[0];
@@ -574,79 +575,62 @@ export function use3DMap(props: Map3DBuildingsProps) {
     centroidLng /= numPoints;
     centroidLat /= numPoints;
 
-    // Scale coordinates from centroid to prevent z-fighting with original building
-    const scaledCoords = buildingCoords.map(ring =>
-      ring.map(coord => [
-        centroidLng + (coord[0] - centroidLng) * scaleFactor,
-        centroidLat + (coord[1] - centroidLat) * scaleFactor
-      ])
-    );
+    const scaleCoords = (coords: number[][][], factor: number) =>
+      coords.map(ring =>
+        ring.map(coord => [
+          centroidLng + (coord[0] - centroidLng) * factor,
+          centroidLat + (coord[1] - centroidLat) * factor
+        ])
+      );
 
-    // Hide the original building under our custom one.
-    // We add a solid opaque base layer that completely covers the original,
-    // so no z-fighting is visible even in the gaps between floor slices.
+    const baseCoords = scaleCoords(buildingCoords, baseScaleFactor);
+    const scaledCoords = scaleCoords(buildingCoords, floorScaleFactor);
 
-    // Add source for the custom building using actual geometry
-    if (!mapInstance.getSource('custom-building')) {
-      mapInstance.addSource('custom-building', {
-        type: 'geojson',
-        data: {
-          type: 'Feature',
-          properties: { height: totalHeightM, totalFloors: totalFlrs },
-          geometry: {
-            type: 'Polygon',
-            coordinates: scaledCoords,
-          },
-        },
-      });
-    } else {
-      // Update existing source
-      (mapInstance.getSource('custom-building') as maplibregl.GeoJSONSource).setData({
+    // Helper: set or create a GeoJSON source
+    const upsertSource = (id: string, coords: number[][][]) => {
+      const data: GeoJSON.Feature = {
         type: 'Feature',
         properties: { height: totalHeightM, totalFloors: totalFlrs },
-        geometry: {
-          type: 'Polygon',
-          coordinates: scaledCoords,
-        },
-      });
-    }
-
-    // Remove existing floor layers and base layer if any
-    if (mapInstance.getLayer('building-base')) {
-      mapInstance.removeLayer('building-base');
-    }
-    if (mapInstance.getLayer('building-roof')) {
-      mapInstance.removeLayer('building-roof');
-    }
-    for (let floor = 1; floor <= 100; floor++) {
-      const layerId = `building-floor-${floor}`;
-      if (mapInstance.getLayer(layerId)) {
-        mapInstance.removeLayer(layerId);
+        geometry: { type: 'Polygon', coordinates: coords },
+      };
+      if (mapInstance.getSource(id)) {
+        (mapInstance.getSource(id) as maplibregl.GeoJSONSource).setData(data);
+      } else {
+        mapInstance.addSource(id, { type: 'geojson', data });
       }
+    };
+
+    upsertSource('custom-building-base', baseCoords);
+    upsertSource('custom-building', scaledCoords);
+
+    // Remove existing layers
+    const layersToRemove = ['building-base', 'building-roof'];
+    for (let f = 1; f <= 100; f++) layersToRemove.push(`building-floor-${f}`);
+    for (const id of layersToRemove) {
+      if (mapInstance.getLayer(id)) mapInstance.removeLayer(id);
     }
 
-    // 1. Add solid dark base layer — covers the full building height.
-    //    This hides the original 3d-buildings layer underneath so there is
-    //    no z-fighting visible in the gaps between floor slices.
+    // 1. Solid dark base — slightly larger than the original building.
+    //    Covers the original 3d-buildings layer; visible through the gaps
+    //    between floor slices (since the base is smaller than the floor slices).
     mapInstance.addLayer({
       id: 'building-base',
       type: 'fill-extrusion',
-      source: 'custom-building',
+      source: 'custom-building-base',
       paint: {
-        'fill-extrusion-color': '#1e293b', // Slate-800 — dark base
-        'fill-extrusion-height': finalBuildingHeight,
+        'fill-extrusion-color': '#0f172a',  // Slate-900
+        'fill-extrusion-height': finalBuildingHeight + 0.5,
         'fill-extrusion-base': 0,
         'fill-extrusion-opacity': 1,
       },
     });
 
-    // 2. Add floor slice layers on top for the striped apartment effect.
-    //    The gap between slices reveals the dark base (not the original building).
-    const gapFraction = 0.12; // 12% of floor height is gap
+    // 2. Floor slices — larger geometry so they always render in front of the
+    //    base when viewed from outside. Gaps between slices expose the dark base.
+    const gapSize = Math.max(0.25, adjustedFloorHeight * 0.08);
     for (let floor = 1; floor <= totalFlrs; floor++) {
-      const floorBase = (floor - 1) * adjustedFloorHeight;
-      const floorTop = floor * adjustedFloorHeight;
-      const gap = adjustedFloorHeight * gapFraction;
+      const sliceBase = (floor - 1) * adjustedFloorHeight + gapSize;
+      const sliceTop = floor * adjustedFloorHeight - gapSize * 0.5;
       const isHighlightedFloor = floor === floorNum;
       const layerId = `building-floor-${floor}`;
 
@@ -656,23 +640,23 @@ export function use3DMap(props: Map3DBuildingsProps) {
         source: 'custom-building',
         paint: {
           'fill-extrusion-color': isHighlightedFloor
-            ? '#22c55e' // Bright green for the property's floor
-            : floor % 2 === 0 ? '#4b5563' : '#6b7280', // Alternating grey
-          'fill-extrusion-height': floorTop - gap,
-          'fill-extrusion-base': floorBase + gap * 0.4,
-          'fill-extrusion-opacity': isHighlightedFloor ? 1 : 0.95,
+            ? '#22c55e'  // Green for the property's floor
+            : floor % 2 === 0 ? '#475569' : '#64748b',  // Alternating slate
+          'fill-extrusion-height': sliceTop,
+          'fill-extrusion-base': sliceBase,
+          'fill-extrusion-opacity': 1,
         },
       });
     }
 
-    // 3. Add a thin roof slab on top
+    // 3. Thin roof cap
     mapInstance.addLayer({
       id: 'building-roof',
       type: 'fill-extrusion',
       source: 'custom-building',
       paint: {
-        'fill-extrusion-color': '#334155', // Slate-700
-        'fill-extrusion-height': finalBuildingHeight + 0.5,
+        'fill-extrusion-color': '#334155',
+        'fill-extrusion-height': finalBuildingHeight + 0.8,
         'fill-extrusion-base': finalBuildingHeight,
         'fill-extrusion-opacity': 1,
       },
@@ -1074,48 +1058,40 @@ export function use3DMap(props: Map3DBuildingsProps) {
         doorMarkerRef.current = doorMarker;
       }
 
-      // Add custom 3D building with floor slices for properties with more than 3 floors
-      // Wait for tiles to fully load before querying building geometry
+      // Add custom 3D building with floor slices for apartments with multiple floors.
+      // Zoom in first so building tiles are loaded, then query geometry.
       if (floorNumber != null && totalFloors != null && totalFloors > 3) {
-        // Retry mechanism to ensure building tiles are loaded
-        let retryCount = 0;
-        const maxRetries = 5;
-
-        const tryAddCustomBuilding = () => {
-          // First zoom to the building location to ensure tiles load
-          mapInstance.flyTo({
-            center: [lng, lat],
-            zoom: Math.max(mapInstance.getZoom(), 17),
-            padding: { top: 0, bottom: 120, left: 0, right: 0 },
-            duration: 1500,
-          });
-
-          // Wait for the fly animation and tiles to load
-          setTimeout(() => {
-            addCustomBuilding3D(
-              mapInstance,
-              lat,
-              lng,
-              floorNumber,
-              totalFloors,
-              virtualTour360Url,
-              virtualTour360Url ? handleEnterBuilding : undefined
-            );
-
-            // Check if source was added successfully - if not, retry
-            if (!mapInstance.getSource('custom-building') && retryCount < maxRetries) {
-              retryCount++;
-              setTimeout(tryAddCustomBuilding, 1000);
-            }
-          }, 2000);
+        const doAddBuilding = () => {
+          addCustomBuilding3D(
+            mapInstance,
+            lat,
+            lng,
+            floorNumber,
+            totalFloors,
+            virtualTour360Url,
+            virtualTour360Url ? handleEnterBuilding : undefined
+          );
         };
 
-        // Start the process after initial load
-        const addBuildingOnIdle = () => {
-          tryAddCustomBuilding();
-          mapInstance.off('idle', addBuildingOnIdle);
+        // Fly in to zoom 17 so building vector tiles load
+        mapInstance.flyTo({
+          center: [lng, lat],
+          zoom: Math.max(mapInstance.getZoom(), 17),
+          padding: { top: 0, bottom: 120, left: 0, right: 0 },
+          duration: 1500,
+        });
+
+        // After the fly animation ends, wait for map to be fully idle (tiles loaded)
+        // then add the custom building.
+        const onMoveEnd = () => {
+          mapInstance.off('moveend', onMoveEnd);
+          const onIdle = () => {
+            mapInstance.off('idle', onIdle);
+            doAddBuilding();
+          };
+          mapInstance.on('idle', onIdle);
         };
-        mapInstance.on('idle', addBuildingOnIdle);
+        mapInstance.on('moveend', onMoveEnd);
       }
 
       // Add attribution
