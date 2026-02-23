@@ -12,11 +12,15 @@ interface TeamCommunicationSectionProps {
 const TeamCommunicationSection: React.FC<TeamCommunicationSectionProps> = ({ agencyId }) => {
   const { t } = useTranslation(['agencyDashboard']);
   const { feed, isLoading: isFeedLoading, error: feedError } = useAgencyTeamFeed(agencyId);
-  const createNote = useCreateTeamNote(agencyId);
+  const { createTeamNote, isLoading: isCreatingNote } = useCreateTeamNote(agencyId);
   const [activeTab, setActiveTab] = useState<'feed' | 'notes'>('feed');
 
-  const handleCreateNote = (content: string) => {
-    createNote.mutate({ content, type: 'general' });
+  const handleCreateNote = async (content: string) => {
+    try {
+      await createTeamNote({ content, type: 'general' });
+    } catch {
+      // Error handled by mutation hook
+    }
   };
 
   return (
@@ -58,7 +62,7 @@ const TeamCommunicationSection: React.FC<TeamCommunicationSectionProps> = ({ age
         <TeamNotes
           agencyId={agencyId}
           onCreateNote={handleCreateNote}
-          isCreating={createNote.isPending}
+          isCreating={isCreatingNote}
         />
       )}
     </div>

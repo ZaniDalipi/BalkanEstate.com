@@ -38,12 +38,18 @@ export const getOverview = async (
     const now = new Date();
     const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
 
+    // Date range for trend data (last 14 days)
+    const trendStart = new Date(now.getTime() - 14 * 24 * 60 * 60 * 1000);
+
     // Run aggregations in parallel
     const [
       activeListingsCount,
       totalPropertyViews,
       inquiriesThisMonth,
       totalInquiries,
+      recentInquiriesRaw,
+      topPropertiesRaw,
+      inquiryTrend,
     ] = await Promise.all([
       // Active listings from agency agents
       Property.countDocuments({
@@ -67,6 +73,37 @@ export const getOverview = async (
       Inquiry.countDocuments({
         recipientId: { $in: agentUserIds },
       }),
+
+      // Recent inquiries (last 5)
+      Inquiry.find({ recipientId: { $in: agentUserIds } })
+        .select('propertyTitle buyerName message status recipientName recipientId createdAt readAt repliedAt')
+        .sort({ createdAt: -1 })
+        .limit(5)
+        .lean(),
+
+      // Top 5 properties by views
+      Property.find({ sellerId: { $in: agentUserIds }, status: 'active' })
+        .select('title imageUrl price status views inquiries createdByName listingType createdAt')
+        .sort({ views: -1 })
+        .limit(5)
+        .lean(),
+
+      // Inquiry trend by day (last 14 days)
+      Inquiry.aggregate([
+        {
+          $match: {
+            recipientId: { $in: agentUserIds },
+            createdAt: { $gte: trendStart },
+          },
+        },
+        {
+          $group: {
+            _id: { $dateToString: { format: '%Y-%m-%d', date: '$createdAt' } },
+            count: { $sum: 1 },
+          },
+        },
+        { $sort: { _id: 1 } },
+      ]),
     ]);
 
     const views = totalPropertyViews[0]?.totalViews || 0;
@@ -74,17 +111,61 @@ export const getOverview = async (
       ? parseFloat(((totalInquiries / views) * 100).toFixed(2))
       : 0;
 
+    // Build views trend from property creation dates (approximate)
+    const viewsTrend = inquiryTrend.map((point: { _id: string; count: number }) => ({
+      date: point._id,
+      value: Math.round(point.count * (views / Math.max(totalInquiries, 1))),
+    }));
+
+    // Map recent inquiries to dashboard format
+    const recentInquiries = recentInquiriesRaw.map((i: any) => ({
+      id: String(i._id),
+      propertyTitle: i.propertyTitle || '',
+      buyerName: i.buyerName || '',
+      message: i.message || '',
+      date: i.createdAt,
+      status: i.repliedAt ? 'responded' : i.readAt ? 'in-progress' : 'new',
+      assignedAgentName: i.recipientName || '',
+      agentId: String(i.recipientId || ''),
+    }));
+
+    // Map top properties to dashboard format
+    const topProperties = topPropertiesRaw.map((p: any) => ({
+      id: String(p._id),
+      title: p.title || '',
+      image: p.imageUrl || '',
+      price: p.price || 0,
+      status: p.status || 'draft',
+      assignedAgent: p.createdByName || '',
+      views: p.views || 0,
+      inquiries: p.inquiries || 0,
+      listedAt: p.createdAt,
+      propertyType: p.listingType || 'other',
+    }));
+
+    // Build inquiry trend as TimeSeriesPoint[]
+    const inquiriesTrend = inquiryTrend.map((point: { _id: string; count: number }) => ({
+      date: point._id,
+      value: point.count,
+    }));
+
     res.status(200).json({
       activeListings: activeListingsCount,
       totalAgents: agency.agents.length,
       inquiriesThisMonth,
       totalPropertyViews: views,
+      totalViews: views,
       conversionRate,
+      subscriptionStatus: agency.subscription.status,
       subscription: {
         status: agency.subscription.status,
         expiresAt: agency.subscription.expiresAt,
         autoRenew: agency.subscription.autoRenew,
       },
+      recentInquiries,
+      topProperties,
+      viewsTrend,
+      inquiriesTrend,
       promotionCoupons: {
         available: agency.promotionCoupons.available,
         used: agency.promotionCoupons.used,
@@ -643,6 +724,8 @@ export const getAnalytics = async (
       topProperties,
       statusBreakdown,
       listingTypeBreakdown,
+      agentPropertyStats,
+      viewsByDay,
     ] = await Promise.all([
       // Aggregate property metrics
       Property.aggregate([
@@ -696,7 +779,71 @@ export const getAnalytics = async (
         { $match: { sellerId: { $in: agentUserIds } } },
         { $group: { _id: '$listingType', count: { $sum: 1 } } },
       ]),
+
+      // Per-agent stats for comparison chart
+      Property.aggregate([
+        { $match: { sellerId: { $in: agentUserIds } } },
+        {
+          $group: {
+            _id: '$sellerId',
+            listings: { $sum: 1 },
+            views: { $sum: '$views' },
+            inquiries: { $sum: '$inquiries' },
+          },
+        },
+      ]),
+
+      // Views trend by property creation date (approximate daily activity)
+      Property.aggregate([
+        {
+          $match: {
+            sellerId: { $in: agentUserIds },
+            createdAt: { $gte: startDate },
+          },
+        },
+        {
+          $group: {
+            _id: { $dateToString: { format: '%Y-%m-%d', date: '$createdAt' } },
+            totalViews: { $sum: '$views' },
+          },
+        },
+        { $sort: { _id: 1 } },
+      ]),
     ]);
+
+    // Build agent comparison data
+    const agentComparisonRaw = agentPropertyStats as Array<{
+      _id: mongoose.Types.ObjectId;
+      listings: number;
+      views: number;
+      inquiries: number;
+    }>;
+
+    const agentComparison = await Promise.all(
+      agentComparisonRaw.map(async (stat) => {
+        const agent = await User.findById(stat._id).select('name').lean();
+        const agentInquiries = await Inquiry.countDocuments({
+          recipientId: stat._id,
+          createdAt: { $gte: startDate },
+        });
+        return {
+          agentId: String(stat._id),
+          agentName: agent?.name || 'Unknown',
+          listings: stat.listings,
+          inquiries: agentInquiries,
+          views: stat.views,
+          responseTime: '-',
+        };
+      })
+    );
+
+    // Build viewsOverTime from property daily data
+    const viewsOverTime = (viewsByDay as Array<{ _id: string; totalViews: number }>).map(
+      (point) => ({
+        date: point._id,
+        value: point.totalViews,
+      })
+    );
 
     const stats = propertyStats[0] || {
       totalProperties: 0,
@@ -720,6 +867,8 @@ export const getAnalytics = async (
             : 0,
       },
       inquiryTrend,
+      viewsOverTime,
+      agentComparison,
       topProperties,
       statusBreakdown: statusBreakdown.reduce(
         (acc: Record<string, number>, item) => {
