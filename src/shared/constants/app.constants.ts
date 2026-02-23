@@ -61,6 +61,7 @@ export const ROUTES = {
   CREATE_AGENCY_CONFIRM: '/create-agency/confirm',
   HOW_IT_WORKS: '/how-it-works',
   ADMIN: '/admin',
+  AGENCY_DASHBOARD: '/agency-dashboard',
   ACCOUNT: '/account',
   CREATE_LISTING: '/create-listing',
   CONTACT: '/contact',
@@ -166,6 +167,20 @@ export const ADMIN_SECTIONS = [
 ] as const;
 
 /**
+ * Agency dashboard sections
+ */
+export const AGENCY_DASHBOARD_SECTIONS = [
+  'overview',
+  'agents',
+  'properties',
+  'leads',
+  'analytics',
+  'financial',
+  'profile',
+  'team',
+] as const;
+
+/**
  * How It Works tabs
  */
 export const HOW_IT_WORKS_TABS = [
@@ -189,5 +204,6 @@ export default {
   TIMEOUTS,
   PROMOTION_TIERS,
   ADMIN_SECTIONS,
+  AGENCY_DASHBOARD_SECTIONS,
   HOW_IT_WORKS_TABS,
 };

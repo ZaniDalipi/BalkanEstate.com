@@ -21,6 +21,7 @@ export type AppView =
   | 'agentProfile'
   | 'agencyDetail'
   | 'admin'
+  | 'agency-dashboard'
   | 'analytics'
   | 'reset-password'
   | 'verify-email'

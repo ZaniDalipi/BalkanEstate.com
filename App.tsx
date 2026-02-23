@@ -19,8 +19,8 @@ import { realEstateFAQs } from './src/components/seo';
 
 // Lazy load Analytics (only loads if env vars exist)
 const Analytics = lazy(() => import('./src/components/marketing/Analytics'));
-import { UserRole, HowItWorksTab, AdminSection, Agency } from './types';
-import { API_CONFIG, SUPPORTED_LANGUAGES, DEFAULT_LANGUAGE, ROUTES, HOW_IT_WORKS_TABS, ADMIN_SECTIONS } from './src/shared/constants/app.constants';
+import { UserRole, HowItWorksTab, AdminSection, AgencyDashboardSection, Agency } from './types';
+import { API_CONFIG, SUPPORTED_LANGUAGES, DEFAULT_LANGUAGE, ROUTES, HOW_IT_WORKS_TABS, ADMIN_SECTIONS, AGENCY_DASHBOARD_SECTIONS } from './src/shared/constants/app.constants';
 
 // Inline LogoIcon to avoid importing all icons from constants
 const LogoIcon: React.FC<{ className?: string }> = ({ className }) => (
@@ -68,6 +68,7 @@ const PaymentCancel = lazy(() => import('./src/features/payments/components/Paym
 const ListingLimitWarningModal = lazy(() => import('./components/shared/ListingLimitWarningModal'));
 const DiscountGameModal = lazy(() => import('./components/shared/DiscountGameModal'));
 const AdminDashboard = lazy(() => import('./src/features/admin/components/AdminDashboard'));
+const AgencyDashboardPage = lazy(() => import('./src/features/agency-dashboard/components/AgencyDashboardPage'));
 const NotFoundPage = lazy(() => import('./src/components/ui/not-found-2').then(m => ({ default: m.NotFound })));
 const ResetPasswordPage = lazy(() => import('./src/features/auth/components/ResetPasswordPage'));
 const VerifyEmailPage = lazy(() => import('./src/features/auth/components/VerifyEmailPage'));
@@ -297,6 +298,20 @@ const AppContent: React.FC<{ onToggleSidebar: () => void }> = ({ onToggleSidebar
         dispatch({ type: 'SET_SELECTED_AGENCY', payload: null });
         dispatch({ type: 'SET_ADMIN_SECTION', payload: validSection });
         dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'admin' });
+        return;
+      }
+
+      // Agency dashboard routes with section support: /agency-dashboard/:section
+      const agencyDashboardMatch = path.match(/^\/agency-dashboard(?:\/(.+))?$/);
+      if (agencyDashboardMatch) {
+        const section = agencyDashboardMatch[1] || 'overview';
+        const validSection: AgencyDashboardSection = AGENCY_DASHBOARD_SECTIONS.includes(section as typeof AGENCY_DASHBOARD_SECTIONS[number])
+          ? section as AgencyDashboardSection
+          : 'overview';
+        dispatch({ type: 'SET_SELECTED_PROPERTY', payload: null });
+        dispatch({ type: 'SET_SELECTED_AGENCY', payload: null });
+        dispatch({ type: 'SET_AGENCY_DASHBOARD_SECTION', payload: validSection });
+        dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'agency-dashboard' });
         return;
       }
 
@@ -552,6 +567,12 @@ const AppContent: React.FC<{ onToggleSidebar: () => void }> = ({ onToggleSidebar
         }
         // Redirect non-admins to search
         return <SearchPage onToggleSidebar={onToggleSidebar} />;
+      case 'agency-dashboard':
+        // Only load agency dashboard for authenticated users (component handles owner/admin check)
+        if (state.isAuthenticated) {
+          return <><Helmet><meta name="robots" content="noindex, nofollow" /></Helmet><QueryErrorBoundary><AgencyDashboardPage /></QueryErrorBoundary></>;
+        }
+        return <SearchPage onToggleSidebar={onToggleSidebar} />;
       case 'reset-password':
         return <ResetPasswordPage />;
       case 'verify-email':
@@ -640,7 +661,7 @@ const MainLayout: React.FC = () => {
   // Main tab views show hamburger menu; detail views show back button
   const isMainTabView = !state.selectedAgentId && !state.selectedAgencyId && [
     'agents', 'agencies', 'saved-properties', 'saved-searches', 'explore-cities',
-    'inbox', 'pricing', 'how-it-works', 'valuation', 'mortgage-calculator', 'analytics', 'admin',
+    'inbox', 'pricing', 'how-it-works', 'valuation', 'mortgage-calculator', 'analytics', 'admin', 'agency-dashboard',
   ].includes(state.activeView);
 
   // Map activeView to readable page title
@@ -663,6 +684,7 @@ const MainLayout: React.FC = () => {
       'how-it-works': 'nav:pageTitles.howItWorks',
       analytics: 'nav:pageTitles.analytics',
       admin: 'nav:pageTitles.admin',
+      'agency-dashboard': 'nav:pageTitles.agencyDashboard',
       valuation: 'nav:pageTitles.valuation',
       'mortgage-calculator': 'nav:pageTitles.mortgageCalculator',
     };

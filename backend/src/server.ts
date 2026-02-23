@@ -99,6 +99,7 @@ import promotionPlanRoutes from './routes/promotionPlanRoutes';
 import videoRoutes from './routes/videoRoutes';
 import aiRoutes from './routes/aiRoutes';
 import cadastreRoutes from './routes/cadastreRoutes';
+import agencyDashboardRoutes from './routes/agencyDashboardRoutes';
 
 // Import services
 import { initializeGooglePlayService } from './services/googlePlayService';
@@ -271,6 +272,7 @@ app.use('/api/promotions', promotionRoutes);
 app.use('/api/coupons', couponRoutes);
 app.use('/api', agencyFeaturedSubscriptionRoutes); // Register BEFORE agencyRoutes to prevent conflicts
 app.use('/api/agencies', agencyRoutes);
+app.use('/api/agency-dashboard', agencyDashboardRoutes);
 app.use('/api/agency-favorites', agencyFavoriteRoutes);
 app.use('/api/agency-join-requests', agencyJoinRequestRoutes);
 app.use('/api/agents', agentRoutes);

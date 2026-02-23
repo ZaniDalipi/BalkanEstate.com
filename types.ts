@@ -28,7 +28,7 @@ export type RentPeriod = 'monthly' | 'weekly' | 'daily';
 
 export type PropertyImageTag = 'exterior' | 'living_room' | 'kitchen' | 'bedroom' | 'bathroom' | 'other';
 
-export type AppView = 'search' | 'explore-cities' | 'saved-searches' | 'saved-properties' | 'inbox' | 'account' | 'create-listing' | 'create-rental' | 'rentals' | 'my-listings' | 'agents' | 'agencies' | 'agentProfile' | 'agencyDetail' | 'admin' | 'analytics' | 'reset-password' | 'verify-email' | 'valuation' | 'mortgage-calculator' | 'pricing' | 'how-it-works' | 'privacy' | 'terms' | 'cookies' | 'refund' | 'contact' | 'createAgency' | 'createAgencyPayment' | 'createAgencyConfirm' | 'not-found';
+export type AppView = 'search' | 'explore-cities' | 'saved-searches' | 'saved-properties' | 'inbox' | 'account' | 'create-listing' | 'create-rental' | 'rentals' | 'my-listings' | 'agents' | 'agencies' | 'agentProfile' | 'agencyDetail' | 'admin' | 'agency-dashboard' | 'analytics' | 'reset-password' | 'verify-email' | 'valuation' | 'mortgage-calculator' | 'pricing' | 'how-it-works' | 'privacy' | 'terms' | 'cookies' | 'refund' | 'contact' | 'createAgency' | 'createAgencyPayment' | 'createAgencyConfirm' | 'not-found';
 
 export type HowItWorksTab = 'getting-started' | 'premium-features' | 'agencies' | 'agents' | 'buyers' | 'sellers';
 
@@ -695,11 +695,15 @@ export interface AppState {
     howItWorksTab: HowItWorksTab;
     // Admin panel active section
     adminSection: AdminSection;
+    // Agency dashboard active section
+    agencyDashboardSection: AgencyDashboardSection;
     // Session expired modal
     isSessionExpiredModalOpen: boolean;
 }
 
 export type AdminSection = 'dashboard' | 'users' | 'inquiries' | 'agent-requests' | 'discounts' | 'promotions' | 'promotion-plans' | 'properties' | 'agencies' | 'pricing' | 'activity' | 'settings' | 'how-it-works' | 'email-templates';
+
+export type AgencyDashboardSection = 'overview' | 'agents' | 'properties' | 'leads' | 'analytics' | 'financial' | 'profile' | 'team';
 
 export type AppAction =
     | { type: 'AUTH_CHECK_START' }
@@ -756,6 +760,7 @@ export type AppAction =
     | { type: 'SET_ACCOUNT_TAB', payload: string }
     | { type: 'SET_HOW_IT_WORKS_TAB', payload: HowItWorksTab }
     | { type: 'SET_ADMIN_SECTION', payload: AdminSection }
+    | { type: 'SET_AGENCY_DASHBOARD_SECTION', payload: AgencyDashboardSection }
     | { type: 'CLEAR_ALL_SAVED_SEARCHES' }
     | { type: 'SESSION_EXPIRED' }
     | { type: 'HIDE_SESSION_EXPIRED_MODAL' };
