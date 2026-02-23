@@ -612,40 +612,53 @@ export function use3DMap(props: Map3DBuildingsProps) {
         }
       }
 
-      // Approach 2: Remove and re-add layer with a filter excluding this building
-      if (!originalHidden && layerSource) {
+      // Approach 2: Collapse the original building to 0 height so our custom building is the only one visible
+      // We match by render_height (exact match) which is unique enough to target just this building
+      if (!originalHidden) {
         try {
-          // Save the current layer configuration
-          const currentPaint = {
-            'fill-extrusion-color': mapInstance.getPaintProperty('3d-buildings', 'fill-extrusion-color'),
-            'fill-extrusion-height': mapInstance.getPaintProperty('3d-buildings', 'fill-extrusion-height'),
-            'fill-extrusion-base': mapInstance.getPaintProperty('3d-buildings', 'fill-extrusion-base'),
-            'fill-extrusion-opacity': mapInstance.getPaintProperty('3d-buildings', 'fill-extrusion-opacity'),
-            'fill-extrusion-vertical-gradient': mapInstance.getPaintProperty('3d-buildings', 'fill-extrusion-vertical-gradient'),
-          };
+          const targetHeight = buildingFeature.properties?.render_height;
+          const targetLevels = buildingFeature.properties?.['building:levels'];
 
-          // Use a GeoJSON "mask" approach: add a fill layer below the 3d-buildings
-          // that hides the target building area
-          // Instead, set opacity to 0 for buildings whose height matches our target
-          // and whose centroid falls near our coordinates
-          // Since expressions can't test centroid, we make ALL buildings near our height
-          // slightly transparent and rely on the 1.3x scaled custom building to cover
-          const buildingHeight = buildingFeature.properties?.render_height ?? finalBuildingHeight;
-          const heightTolerance = 2;
+          // Build a condition that precisely identifies THIS building
+          // Using exact render_height match (precise to the building) or exact building:levels match
+          let matchCondition: any;
+          if (targetHeight) {
+            matchCondition = ['==', ['get', 'render_height'], targetHeight];
+          } else if (targetLevels) {
+            matchCondition = ['==', ['get', 'building:levels'], targetLevels];
+          } else {
+            // Fallback: match any building with similar height to our calculated height
+            matchCondition = ['all',
+              ['>=', ['coalesce', ['get', 'render_height'], 10], finalBuildingHeight - 1],
+              ['<=', ['coalesce', ['get', 'render_height'], 10], finalBuildingHeight + 1],
+            ];
+          }
 
-          // Make buildings with matching height transparent (our custom building covers them)
-          mapInstance.setPaintProperty('3d-buildings', 'fill-extrusion-opacity', [
+          // Collapse matching building(s) to 0 height - they disappear completely
+          const originalHeightExpr = [
+            'coalesce',
+            ['get', 'render_height'],
+            ['*', ['coalesce', ['get', 'building:levels'], 3], 3.5],
+            10,
+          ];
+          mapInstance.setPaintProperty('3d-buildings', 'fill-extrusion-height', [
             'case',
-            ['all',
-              ['>=', ['coalesce', ['get', 'render_height'], 10], buildingHeight - heightTolerance],
-              ['<=', ['coalesce', ['get', 'render_height'], 10], buildingHeight + heightTolerance],
-            ],
+            matchCondition,
             0,
-            0.92
-          ]);
+            originalHeightExpr,
+          ] as any);
+
+          // Also collapse the base to 0
+          mapInstance.setPaintProperty('3d-buildings', 'fill-extrusion-base', [
+            'case',
+            matchCondition,
+            0,
+            ['coalesce', ['get', 'render_min_height'], 0],
+          ] as any);
+
           originalHidden = true;
         } catch {
-          // Filter approach failed - rely on scale covering
+          // Expression approach failed - rely on scale covering
         }
       }
     }
