@@ -646,7 +646,10 @@ export function use3DMap(props: Map3DBuildingsProps) {
       });
     }
 
-    // Remove existing floor layers if any
+    // Remove existing floor layers and shell if any
+    if (mapInstance.getLayer('building-shell')) {
+      mapInstance.removeLayer('building-shell');
+    }
     for (let floor = 1; floor <= 100; floor++) {
       const layerId = `building-floor-${floor}`;
       if (mapInstance.getLayer(layerId)) {
@@ -654,7 +657,21 @@ export function use3DMap(props: Map3DBuildingsProps) {
       }
     }
 
-    // Add floor slice layers - each floor is a separate layer for the striped effect
+    // Add a solid shell layer that fully covers the original building.
+    // This prevents the original building from showing through gaps between floors.
+    mapInstance.addLayer({
+      id: 'building-shell',
+      type: 'fill-extrusion',
+      source: 'custom-building',
+      paint: {
+        'fill-extrusion-color': '#374151', // Dark grey shell
+        'fill-extrusion-height': finalBuildingHeight + 0.5,
+        'fill-extrusion-base': 0,
+        'fill-extrusion-opacity': 1,
+      },
+    });
+
+    // Add floor slice layers on top of the shell
     // For houses/villas: ALL floors are green (entire building highlighted)
     // For apartments: only the specific floor is green
     const isWholeBuilding = propType === 'house' || propType === 'villa';
@@ -673,9 +690,9 @@ export function use3DMap(props: Map3DBuildingsProps) {
           'fill-extrusion-color': isHighlightedFloor
             ? '#22c55e' // Bright green for highlighted floor(s)
             : floor % 2 === 0 ? '#4b5563' : '#6b7280', // Alternating grey for other floors
-          'fill-extrusion-height': floorTop - 0.15, // Gap between floors for visual separation
+          'fill-extrusion-height': floorTop - 0.15, // Small gap between floors for visual separation
           'fill-extrusion-base': floorBase + 0.05,
-          'fill-extrusion-opacity': isHighlightedFloor ? 1 : 0.92,
+          'fill-extrusion-opacity': 1,
         },
       });
     }
@@ -1026,7 +1043,7 @@ export function use3DMap(props: Map3DBuildingsProps) {
       // Add 360 tour door marker for properties without floor visualization
       // Houses/villas get floor viz with any floor count; apartments need >3 floors
       const isHouseOrVilla = propertyType === 'house' || propertyType === 'villa';
-      const willHaveFloorViz = floorNumber != null && totalFloors != null && (isHouseOrVilla ? totalFloors > 0 : totalFloors > 3);
+      const willHaveFloorViz = floorNumber != null && totalFloors != null && (isHouseOrVilla ? totalFloors > 0 : totalFloors > 1);
       if (!willHaveFloorViz && virtualTour360Url) {
         const doorEl = document.createElement('div');
         doorEl.className = 'apartment-door-marker';
@@ -1079,46 +1096,47 @@ export function use3DMap(props: Map3DBuildingsProps) {
 
       // Add custom 3D building with floor slices
       // Houses/villas: show with any floor count (entire building green)
-      // Apartments: show only for buildings with >3 floors (specific floor green)
-      if (floorNumber != null && totalFloors != null && (isHouseOrVilla ? totalFloors > 0 : totalFloors > 3)) {
-        // Retry mechanism to ensure building tiles are loaded
+      // Apartments: show for buildings with >1 floor (specific floor green)
+      if (floorNumber != null && totalFloors != null && (isHouseOrVilla ? totalFloors > 0 : totalFloors > 1)) {
         let retryCount = 0;
         const maxRetries = 5;
 
         const tryAddCustomBuilding = () => {
-          // First zoom to the building location to ensure tiles load
-          mapInstance.flyTo({
-            center: [lng, lat],
-            zoom: Math.max(mapInstance.getZoom(), 17),
-            padding: { top: 0, bottom: 120, left: 0, right: 0 },
-            duration: 1500,
-          });
+          addCustomBuilding3D(
+            mapInstance,
+            lat,
+            lng,
+            floorNumber,
+            totalFloors,
+            virtualTour360Url,
+            virtualTour360Url ? handleEnterBuilding : undefined,
+            propertyType
+          );
 
-          // Wait for the fly animation and tiles to load
-          setTimeout(() => {
-            addCustomBuilding3D(
-              mapInstance,
-              lat,
-              lng,
-              floorNumber,
-              totalFloors,
-              virtualTour360Url,
-              virtualTour360Url ? handleEnterBuilding : undefined,
-              propertyType
-            );
-
-            // Check if source was added successfully - if not, retry
-            if (!mapInstance.getSource('custom-building') && retryCount < maxRetries) {
-              retryCount++;
-              setTimeout(tryAddCustomBuilding, 1000);
-            }
-          }, 2000);
+          // Check if actual floor layers were created (not just the source, which always gets created via fallback)
+          const hasFloorLayers = mapInstance.getLayer('building-floor-1');
+          if (!hasFloorLayers && retryCount < maxRetries) {
+            retryCount++;
+            // Wait for tiles to load and retry
+            const onIdle = () => {
+              mapInstance.off('idle', onIdle);
+              tryAddCustomBuilding();
+            };
+            mapInstance.on('idle', onIdle);
+          }
         };
 
-        // Start the process after initial load
+        // Zoom in to ensure building tiles are loaded, then add on idle
+        mapInstance.flyTo({
+          center: [lng, lat],
+          zoom: Math.max(mapInstance.getZoom(), 17),
+          padding: { top: 0, bottom: 120, left: 0, right: 0 },
+          duration: 1500,
+        });
+
         const addBuildingOnIdle = () => {
-          tryAddCustomBuilding();
           mapInstance.off('idle', addBuildingOnIdle);
+          tryAddCustomBuilding();
         };
         mapInstance.on('idle', addBuildingOnIdle);
       }
