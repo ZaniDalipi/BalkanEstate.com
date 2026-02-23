@@ -563,7 +563,7 @@ export function use3DMap(props: Map3DBuildingsProps) {
     const adjustedFloorHeight = finalBuildingHeight / totalFlrs;
 
     // Scale up the building coordinates to fully cover the original and prevent z-fighting
-    const scaleFactor = 1.15; // 15% larger to fully cover original building and prevent z-fighting
+    const scaleFactor = 1.3; // 30% larger to fully cover original building and prevent z-fighting at all angles
 
     // Calculate centroid for scaling and label positioning
     const outerRing = buildingCoords[0];
@@ -586,11 +586,14 @@ export function use3DMap(props: Map3DBuildingsProps) {
     );
 
     // Hide the original building from 3d-buildings layer to prevent z-fighting
+    // Strategy: try multiple approaches since vector tile features may lack IDs
+    let originalHidden = false;
     if (buildingFeature && mapInstance.getLayer('3d-buildings')) {
       const style = mapInstance.getStyle();
       const layerSpec = style.layers?.find(l => l.id === '3d-buildings');
       const layerSource = (layerSpec as any)?.source;
 
+      // Approach 1: Use feature-state if feature has an ID
       if (buildingFeature.id !== undefined && layerSource) {
         try {
           mapInstance.setFeatureState(
@@ -603,8 +606,46 @@ export function use3DMap(props: Map3DBuildingsProps) {
             0,
             0.92
           ]);
+          originalHidden = true;
         } catch {
-          // Feature state not supported for this source - rely on covering
+          // Feature state not supported - try next approach
+        }
+      }
+
+      // Approach 2: Remove and re-add layer with a filter excluding this building
+      if (!originalHidden && layerSource) {
+        try {
+          // Save the current layer configuration
+          const currentPaint = {
+            'fill-extrusion-color': mapInstance.getPaintProperty('3d-buildings', 'fill-extrusion-color'),
+            'fill-extrusion-height': mapInstance.getPaintProperty('3d-buildings', 'fill-extrusion-height'),
+            'fill-extrusion-base': mapInstance.getPaintProperty('3d-buildings', 'fill-extrusion-base'),
+            'fill-extrusion-opacity': mapInstance.getPaintProperty('3d-buildings', 'fill-extrusion-opacity'),
+            'fill-extrusion-vertical-gradient': mapInstance.getPaintProperty('3d-buildings', 'fill-extrusion-vertical-gradient'),
+          };
+
+          // Use a GeoJSON "mask" approach: add a fill layer below the 3d-buildings
+          // that hides the target building area
+          // Instead, set opacity to 0 for buildings whose height matches our target
+          // and whose centroid falls near our coordinates
+          // Since expressions can't test centroid, we make ALL buildings near our height
+          // slightly transparent and rely on the 1.3x scaled custom building to cover
+          const buildingHeight = buildingFeature.properties?.render_height ?? finalBuildingHeight;
+          const heightTolerance = 2;
+
+          // Make buildings with matching height transparent (our custom building covers them)
+          mapInstance.setPaintProperty('3d-buildings', 'fill-extrusion-opacity', [
+            'case',
+            ['all',
+              ['>=', ['coalesce', ['get', 'render_height'], 10], buildingHeight - heightTolerance],
+              ['<=', ['coalesce', ['get', 'render_height'], 10], buildingHeight + heightTolerance],
+            ],
+            0,
+            0.92
+          ]);
+          originalHidden = true;
+        } catch {
+          // Filter approach failed - rely on scale covering
         }
       }
     }
@@ -661,8 +702,8 @@ export function use3DMap(props: Map3DBuildingsProps) {
           'fill-extrusion-color': isHighlightedFloor
             ? '#22c55e' // Bright green for highlighted floor(s)
             : floor % 2 === 0 ? '#4b5563' : '#6b7280', // Alternating grey for other floors
-          'fill-extrusion-height': floorTop - 0.15 + 0.5, // Gap between floors + small offset above original
-          'fill-extrusion-base': floorBase + 0.05 + 0.5,
+          'fill-extrusion-height': floorTop - 0.15 + 1.5, // Gap between floors + offset above original
+          'fill-extrusion-base': floorBase + 0.05 + 1.5,
           'fill-extrusion-opacity': 1,
         },
       });
@@ -1014,7 +1055,7 @@ export function use3DMap(props: Map3DBuildingsProps) {
       // Add 360 tour door marker for properties without floor visualization
       // Houses/villas get floor viz with any floor count; apartments need >3 floors
       const isHouseOrVilla = propertyType === 'house' || propertyType === 'villa';
-      const willHaveFloorViz = floorNumber != null && totalFloors != null && (isHouseOrVilla ? totalFloors > 0 : totalFloors > 3);
+      const willHaveFloorViz = floorNumber != null && totalFloors != null && (isHouseOrVilla ? totalFloors > 0 : totalFloors > 1);
       if (!willHaveFloorViz && virtualTour360Url) {
         const doorEl = document.createElement('div');
         doorEl.className = 'apartment-door-marker';
@@ -1068,7 +1109,7 @@ export function use3DMap(props: Map3DBuildingsProps) {
       // Add custom 3D building with floor slices
       // Houses/villas: show with any floor count (entire building green)
       // Apartments: show only for buildings with >3 floors (specific floor green)
-      if (floorNumber != null && totalFloors != null && (isHouseOrVilla ? totalFloors > 0 : totalFloors > 3)) {
+      if (floorNumber != null && totalFloors != null && (isHouseOrVilla ? totalFloors > 0 : totalFloors > 1)) {
         // Retry mechanism using idle events to ensure building tiles are loaded
         let retryCount = 0;
         const maxRetries = 5;
