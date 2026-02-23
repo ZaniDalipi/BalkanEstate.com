@@ -74,128 +74,214 @@ const Map3DControls: React.FC<Map3DControlsProps> = ({
 }) => {
   const { t } = useTranslation(['property']);
 
+  const isWholeBuilding = propertyType === 'house' || propertyType === 'villa';
+
   return (
     <>
-      {/* Floor Level Indicator - for properties with floor info */}
-      {hasFloorInfo && showFloorIndicator && is3DMode && !show360Tour && (
-        <div className="absolute left-2 sm:left-4 top-1/2 -translate-y-1/2 z-20">
-          <div className="bg-slate-900/95 backdrop-blur-sm rounded-xl shadow-2xl border border-slate-700/50 overflow-hidden w-16 sm:w-20">
-            {/* Header */}
-            <div className="px-2 py-2 bg-gradient-to-r from-blue-600 to-purple-600 text-center">
-              <span className="text-xs font-bold text-white uppercase tracking-wide">
-                {t('property:floorIndicator.title', 'Floor')}
-              </span>
+      {/* Floor Level Indicator - floating overlay on top of the map */}
+      {hasFloorInfo && showFloorIndicator && !show360Tour && (
+        <div className="absolute left-1/2 -translate-x-1/2 top-1/2 -translate-y-1/2 z-20 pointer-events-none">
+          <div className="pointer-events-auto bg-slate-900/80 backdrop-blur-md rounded-2xl shadow-2xl border border-slate-600/40 overflow-hidden"
+               style={{ width: 'clamp(180px, 22vw, 260px)' }}>
+
+            {/* Header - Floor X/Y */}
+            <div className="px-3 py-2.5 sm:py-3 bg-gradient-to-r from-slate-800/90 to-slate-700/90 border-b border-slate-600/30">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <div className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+                  <span className="text-[11px] sm:text-xs font-semibold text-slate-300 uppercase tracking-wider">
+                    {t('property:floorIndicator.title', 'Floor')}
+                  </span>
+                </div>
+                <div className="flex items-baseline gap-0.5">
+                  <span className="text-lg sm:text-xl font-black text-emerald-400">{floorNumber}</span>
+                  <span className="text-xs sm:text-sm font-medium text-slate-400">/{totalFloors}</span>
+                </div>
+              </div>
             </div>
 
             {/* Building visualization */}
-            <div className="relative px-2 sm:px-3 py-3 sm:py-4">
-              {/* Building outline */}
-              <div className="relative mx-auto w-8 sm:w-10 rounded-t-sm overflow-hidden border-2 border-slate-600 bg-slate-800/80" style={{ height: '100px' }}>
-                {/* Floor segments */}
-                {(() => {
-                  const isWholeBuilding = propertyType === 'house' || propertyType === 'villa';
-                  return Array.from({ length: totalFloors! }).map((_, i) => {
+            <div className="relative px-4 sm:px-5 py-4 sm:py-5">
+              <div className="relative mx-auto" style={{ width: '100%', maxWidth: '140px' }}>
+                {/* Building frame */}
+                <div
+                  className="relative w-full rounded-t-md overflow-hidden border border-slate-500/40 bg-slate-800/60"
+                  style={{ height: `clamp(160px, 28vh, 280px)` }}
+                >
+                  {/* Floor segments */}
+                  {Array.from({ length: totalFloors! }).map((_, i) => {
                     const floor = totalFloors! - i;
                     const isHighlighted = isWholeBuilding || floor === floorNumber;
+                    const segmentHeight = 100 / totalFloors!;
+
                     return (
                       <div
                         key={floor}
-                        className={`absolute left-0 right-0 border-b border-slate-600/50 transition-all duration-500 ${
-                          isHighlighted ? 'z-10' : ''
-                        }`}
+                        className="absolute left-0 right-0 transition-all duration-500"
                         style={{
-                          height: `${100 / totalFloors!}%`,
+                          height: `${segmentHeight}%`,
                           top: `${(i / totalFloors!) * 100}%`,
-                          background: isHighlighted
-                            ? isWholeBuilding
-                              ? 'linear-gradient(90deg, rgba(34, 197, 94, 0.9), rgba(22, 163, 74, 0.9))'
-                              : 'linear-gradient(90deg, rgba(59, 130, 246, 0.9), rgba(139, 92, 246, 0.9))'
-                            : 'transparent',
                         }}
                       >
-                        {isHighlighted && !isWholeBuilding && (
-                          <div className="absolute inset-0 animate-pulse bg-gradient-to-r from-blue-400/30 to-purple-400/30" />
+                        {/* Floor fill */}
+                        <div
+                          className={`absolute inset-0 ${isHighlighted ? 'z-10' : ''}`}
+                          style={{
+                            background: isHighlighted
+                              ? 'linear-gradient(90deg, rgba(34, 197, 94, 0.95), rgba(16, 185, 129, 0.85))'
+                              : floor % 2 === 0
+                                ? 'rgba(71, 85, 105, 0.25)'
+                                : 'rgba(51, 65, 85, 0.15)',
+                          }}
+                        >
+                          {isHighlighted && (
+                            <div
+                              className="absolute inset-0"
+                              style={{
+                                background: 'linear-gradient(90deg, rgba(255,255,255,0.15) 0%, rgba(255,255,255,0) 50%, rgba(255,255,255,0.1) 100%)',
+                                animation: 'floorGlow 2s ease-in-out infinite',
+                              }}
+                            />
+                          )}
+                        </div>
+
+                        {/* Floor divider line */}
+                        <div
+                          className="absolute bottom-0 left-0 right-0"
+                          style={{
+                            height: '1px',
+                            background: isHighlighted
+                              ? 'rgba(52, 211, 153, 0.6)'
+                              : 'rgba(100, 116, 139, 0.3)',
+                          }}
+                        />
+
+                        {/* Floor number label on the right (show for every 5th floor, first, last, and highlighted) */}
+                        {(floor === floorNumber || floor === 1 || floor === totalFloors || (totalFloors! <= 15 || floor % 5 === 0)) && (
+                          <div
+                            className="absolute -right-7 sm:-right-8 flex items-center gap-1"
+                            style={{
+                              top: '50%',
+                              transform: 'translateY(-50%)',
+                            }}
+                          >
+                            {isHighlighted && (
+                              <div className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
+                            )}
+                            <span
+                              className={`text-[8px] sm:text-[9px] font-medium tabular-nums ${
+                                isHighlighted
+                                  ? 'text-emerald-400 font-bold'
+                                  : 'text-slate-500'
+                              }`}
+                            >
+                              {floor}
+                            </span>
+                          </div>
+                        )}
+
+                        {/* Highlighted floor label inside */}
+                        {isHighlighted && !isWholeBuilding && segmentHeight > 4 && (
+                          <div className="absolute inset-0 flex items-center justify-center z-20">
+                            <span className="text-[9px] sm:text-[10px] font-bold text-white/90 drop-shadow-sm">
+                              {'\u25C0'} F{floor}
+                            </span>
+                          </div>
                         )}
                       </div>
                     );
-                  });
-                })()}
+                  })}
 
-                {/* Floor number labels on the side */}
-                {totalFloors! <= 10 && Array.from({ length: totalFloors! }).map((_, i) => {
-                  const floor = totalFloors! - i;
-                  const isCurrentFloor = (propertyType === 'house' || propertyType === 'villa') || floor === floorNumber;
-                  return (
-                    <div
-                      key={`label-${floor}`}
-                      className={`absolute -right-5 text-[9px] font-medium transition-all ${
-                        isCurrentFloor ? 'text-blue-400 font-bold' : 'text-slate-500'
-                      }`}
-                      style={{
-                        top: `${((i + 0.5) / totalFloors!) * 100}%`,
-                        transform: 'translateY(-50%)',
-                      }}
-                    >
-                      {floor}
-                    </div>
-                  );
-                })}
-              </div>
+                  {/* Building roof accent */}
+                  <div className="absolute top-0 left-0 right-0 h-0.5 bg-gradient-to-r from-slate-500/50 via-slate-400/50 to-slate-500/50" />
+                </div>
 
-              {/* Ground indicator */}
-              <div className="w-10 sm:w-14 h-1 mx-auto bg-slate-600 rounded-b" />
-            </div>
-
-            {/* Floor info */}
-            <div className="px-1 sm:px-2 py-1.5 sm:py-2 border-t border-slate-700/50 text-center">
-              <div className="text-xl sm:text-2xl font-bold bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
-                {floorNumber}
-              </div>
-              <div className="text-[8px] sm:text-[10px] text-slate-400">
-                {t('property:floorIndicator.ofFloors', 'of {{total}} floors', { total: totalFloors })}
+                {/* Ground / Foundation */}
+                <div className="w-full h-1.5 bg-gradient-to-r from-slate-600 via-slate-500 to-slate-600 rounded-b-sm" />
+                <div className="w-[110%] h-0.5 -ml-[5%] bg-slate-600/50 rounded-full mt-0.5" />
               </div>
             </div>
 
-            {/* Enter Building button - only show if 360 tour available */}
+            {/* Floor info bar */}
+            <div className="px-3 py-2 bg-slate-800/60 border-t border-slate-600/30">
+              <div className="flex items-center justify-between">
+                <div className="text-[10px] sm:text-[11px] text-slate-400">
+                  {isWholeBuilding
+                    ? t('property:floorIndicator.entireBuilding', 'Entire building')
+                    : t('property:floorIndicator.yourFloor', 'Your floor')
+                  }
+                </div>
+                <div className="flex items-center gap-1">
+                  <div className="w-3 h-2 rounded-sm" style={{ background: 'linear-gradient(90deg, #22c55e, #10b981)' }} />
+                  <span className="text-[10px] sm:text-[11px] text-emerald-400 font-semibold">
+                    {isWholeBuilding ? `${totalFloors} floors` : `Floor ${floorNumber}`}
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            {/* 360° Tour button */}
             {virtualTour360Url && (
               <button
                 onClick={handleEnterBuilding}
                 disabled={isEnteringBuilding}
-                className="w-full py-2 sm:py-2.5 bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white text-[10px] sm:text-xs font-bold transition-all border-t border-slate-700/50 flex items-center justify-center gap-1 sm:gap-1.5 disabled:opacity-70"
+                className="w-full py-2.5 sm:py-3 bg-gradient-to-r from-emerald-600 to-green-600 hover:from-emerald-500 hover:to-green-500 text-white text-xs sm:text-sm font-bold transition-all border-t border-emerald-500/30 flex items-center justify-center gap-2 disabled:opacity-70"
               >
                 {isEnteringBuilding ? (
                   <>
-                    <span className="w-2.5 h-2.5 sm:w-3 sm:h-3 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                    <span className="hidden sm:inline">Entering...</span>
+                    <span className="w-3 h-3 sm:w-4 sm:h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                    <span>{t('property:virtualTour.entering', 'Entering...')}</span>
                   </>
                 ) : (
                   <>
-                    <span className="text-sm sm:text-base">{'\u{1F6AA}'}</span>
-                    <span>{t('property:floorIndicator.enterBuilding', 'Enter')}</span>
+                    <svg className="w-3.5 h-3.5 sm:w-4 sm:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                    </svg>
+                    <span>360° Tour</span>
                   </>
                 )}
               </button>
             )}
 
-            {/* Toggle button */}
+            {/* Close button */}
             <button
               onClick={() => setShowFloorIndicator(false)}
-              className="w-full py-1.5 text-[10px] text-slate-500 hover:text-slate-300 hover:bg-slate-800/50 transition-all border-t border-slate-700/50"
+              className="w-full py-1.5 sm:py-2 text-[10px] sm:text-xs text-slate-500 hover:text-slate-300 hover:bg-slate-700/50 transition-all border-t border-slate-700/40 flex items-center justify-center gap-1"
             >
+              <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
               {t('property:floorIndicator.hide', 'Hide')}
             </button>
           </div>
         </div>
       )}
 
-      {/* Collapsed floor indicator button */}
-      {hasFloorInfo && !showFloorIndicator && is3DMode && !show360Tour && (
+      {/* Collapsed floor indicator - "Floors" button */}
+      {hasFloorInfo && !showFloorIndicator && !show360Tour && (
         <button
           onClick={() => setShowFloorIndicator(true)}
-          className="absolute left-2 sm:left-4 top-1/2 -translate-y-1/2 z-20 flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-3 py-1.5 sm:py-2 bg-slate-900/90 hover:bg-slate-800 text-white rounded-lg shadow-lg border border-slate-700/50 transition-all"
+          className="absolute left-2 sm:left-4 top-1/2 -translate-y-1/2 z-20 flex items-center gap-2 px-3 py-2.5 bg-slate-900/90 hover:bg-slate-800 text-white rounded-xl shadow-lg border border-slate-600/50 transition-all group"
         >
-          <span className="text-sm sm:text-lg">{'\u{1F3E2}'}</span>
-          <span className="text-xs sm:text-sm font-medium">{floorNumber}/{totalFloors}</span>
+          <div className="flex flex-col items-center gap-0.5">
+            {/* Mini building icon */}
+            <div className="w-4 h-6 rounded-t-sm border border-slate-500/60 bg-slate-700/50 relative overflow-hidden">
+              {totalFloors && floorNumber && (
+                <div
+                  className="absolute left-0 right-0 bg-emerald-500/80"
+                  style={{
+                    height: `${100 / totalFloors}%`,
+                    bottom: `${((floorNumber - 1) / totalFloors) * 100}%`,
+                  }}
+                />
+              )}
+            </div>
+            <div className="w-5 h-0.5 bg-slate-500 rounded-full" />
+          </div>
+          <div className="flex flex-col">
+            <span className="text-[10px] sm:text-xs font-bold leading-tight">{t('property:floorIndicator.title', 'Floors')}</span>
+            <span className="text-[9px] sm:text-[10px] text-emerald-400 font-semibold leading-tight">{floorNumber}/{totalFloors}</span>
+          </div>
         </button>
       )}
 
@@ -217,7 +303,9 @@ const Map3DControls: React.FC<Map3DControlsProps> = ({
             ) : (
               <>
                 <div className="w-12 h-12 sm:w-14 sm:h-14 flex items-center justify-center bg-gradient-to-br from-green-500 to-emerald-600 rounded-full border-2 border-white shadow-lg group-hover:scale-110 transition-transform">
-                  <span className="text-2xl sm:text-3xl">{'\u{1F6AA}'}</span>
+                  <svg className="w-6 h-6 sm:w-7 sm:h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                  </svg>
                 </div>
                 <span className="text-[10px] sm:text-xs text-white font-bold">360° Tour</span>
               </>
@@ -226,7 +314,7 @@ const Map3DControls: React.FC<Map3DControlsProps> = ({
         </div>
       )}
 
-      {/* 2D/3D Toggle, Floor Labels Toggle, Shadow Toggle, Nearby, and Timelapse - top right */}
+      {/* 2D/3D Toggle, Floor Labels Toggle, Shadow Toggle, Nearby, Floors overlay, and Timelapse - top right */}
       {!show360Tour && (
         <div className="absolute top-[4.25rem] sm:top-[5.25rem] right-1.5 sm:right-4 z-10 flex flex-col items-end gap-1 sm:gap-2 max-h-[calc(100%-120px)] max-w-[calc(100%-1rem)] sm:max-w-none overflow-y-auto">
           <button
@@ -239,6 +327,27 @@ const Map3DControls: React.FC<Map3DControlsProps> = ({
           >
             {is3DMode ? '2D' : '3D'}
           </button>
+
+          {/* Floors overlay toggle - shows the property floor indicator */}
+          {hasFloorInfo && (
+            <button
+              onClick={() => setShowFloorIndicator(!showFloorIndicator)}
+              className={`w-8 h-8 sm:w-auto sm:h-auto sm:px-3 sm:py-2 rounded-lg font-bold text-[10px] sm:text-sm shadow-lg transition-all flex items-center justify-center gap-1 ${
+                showFloorIndicator
+                  ? 'bg-emerald-600 text-white border border-emerald-500'
+                  : 'bg-slate-900/90 text-white border border-slate-600'
+              }`}
+              title={t('property:floorIndicator.title', 'Floors')}
+            >
+              <svg className="w-3.5 h-3.5 sm:w-4 sm:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+              </svg>
+              <span className="hidden sm:inline text-xs">
+                {t('property:floorIndicator.title', 'Floors')}
+              </span>
+            </button>
+          )}
+
           <button
             onClick={() => setShowShadows(!showShadows)}
             className={`w-8 h-8 sm:w-auto sm:h-auto sm:px-3 sm:py-2 rounded-lg font-bold text-[10px] sm:text-sm shadow-lg transition-all flex items-center justify-center gap-1 ${
@@ -264,7 +373,7 @@ const Map3DControls: React.FC<Map3DControlsProps> = ({
           >
             <span className="text-xs sm:text-sm">{'\u{1F3E2}'}</span>
             <span className="hidden sm:inline text-xs">
-              {showFloorLabels ? t('property:map3d.hideFloors', 'Hide') : t('property:map3d.showFloors', 'Floors')}
+              {showFloorLabels ? t('property:map3d.hideFloors', 'Hide') : t('property:map3d.showFloors', 'Labels')}
             </span>
           </button>
           {setShowPOI && (

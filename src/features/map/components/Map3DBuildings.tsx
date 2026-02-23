@@ -204,8 +204,12 @@ const Map3DBuildings: React.FC<Map3DBuildingsProps> = (props) => {
           50% { transform: scale(1.6); opacity: 0; }
         }
         @keyframes floorPulse {
-          0%, 100% { box-shadow: 0 2px 8px rgba(59,130,246,0.6); }
-          50% { box-shadow: 0 2px 16px rgba(59,130,246,0.9), 0 0 20px rgba(139,92,246,0.5); }
+          0%, 100% { box-shadow: 0 2px 8px rgba(34,197,94,0.6); }
+          50% { box-shadow: 0 2px 16px rgba(34,197,94,0.9), 0 0 20px rgba(16,185,129,0.5); }
+        }
+        @keyframes floorGlow {
+          0%, 100% { opacity: 0.5; }
+          50% { opacity: 1; }
         }
         @keyframes doorPulse {
           0%, 100% {

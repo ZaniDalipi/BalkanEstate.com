@@ -657,15 +657,76 @@ export function use3DMap(props: Map3DBuildingsProps) {
           'fill-extrusion-color': isHighlightedFloor
             ? '#22c55e' // Bright green for the property's floor
             : floor % 2 === 0 ? '#4b5563' : '#6b7280', // Alternating grey for other floors
-          'fill-extrusion-height': floorTop - 0.15, // Gap between floors for visual separation
-          'fill-extrusion-base': floorBase + 0.05,
-          'fill-extrusion-opacity': isHighlightedFloor ? 1 : 0.92,
+          'fill-extrusion-height': floorTop - 0.2, // Gap between floors for clear visual separation
+          'fill-extrusion-base': floorBase + 0.08,
+          'fill-extrusion-opacity': isHighlightedFloor ? 1 : 0.88,
         },
       });
     }
 
-    // Add door icon directly on the highlighted floor for 360 tour
+    // Add floating "Floor X/Y" label above the building at the highlighted floor level
     if (floorNum > 0 && floorNum <= totalFlrs) {
+      // Create a floating floor label marker positioned above the building
+      const floorLabelEl = document.createElement('div');
+      floorLabelEl.style.cssText = 'pointer-events: none; z-index: 50;';
+      floorLabelEl.innerHTML = `
+        <div style="
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          gap: 0;
+          filter: drop-shadow(0 4px 12px rgba(0,0,0,0.4));
+        ">
+          <div style="
+            background: linear-gradient(135deg, #059669, #10b981);
+            color: white;
+            padding: 4px 14px;
+            border-radius: 10px;
+            font-size: 13px;
+            font-weight: 800;
+            white-space: nowrap;
+            border: 2px solid rgba(255,255,255,0.9);
+            letter-spacing: 0.5px;
+            font-family: system-ui, -apple-system, sans-serif;
+          ">Floor ${floorNum}/${totalFlrs}</div>
+          <div style="
+            width: 0;
+            height: 0;
+            border-left: 7px solid transparent;
+            border-right: 7px solid transparent;
+            border-top: 7px solid #10b981;
+            margin-top: -1px;
+          "></div>
+        </div>
+      `;
+
+      // Position the label at the building centroid, offset upward based on floor position
+      const calculateFloorLabelOffset = (currentZoom: number) => {
+        const basePixelsPerFloor = 2.8;
+        const zoomFactor = Math.pow(2, currentZoom - 16);
+        const pixelsPerFloor = basePixelsPerFloor * zoomFactor;
+        // Position at the highlighted floor level plus some headroom
+        const floorsFromBottom = floorNum - 0.5;
+        return -(floorsFromBottom * pixelsPerFloor) - 20;
+      };
+
+      const initialLabelOffset = calculateFloorLabelOffset(mapInstance.getZoom());
+      const floorLabelMarker = new maplibregl.Marker({
+        element: floorLabelEl,
+        anchor: 'bottom',
+        offset: [0, initialLabelOffset],
+      })
+        .setLngLat([centroidLng, centroidLat])
+        .addTo(mapInstance);
+
+      // Update label position on zoom/pitch changes
+      const updateLabelOffset = () => {
+        const newOffset = calculateFloorLabelOffset(mapInstance.getZoom());
+        floorLabelMarker.setOffset([0, newOffset]);
+      };
+      mapInstance.on('zoom', updateLabelOffset);
+      mapInstance.on('pitch', updateLabelOffset);
+
       // Show door icon if 360 tour is available
       const hasTour = !!tourUrl;
 
@@ -703,44 +764,28 @@ export function use3DMap(props: Map3DBuildingsProps) {
             display: flex;
             flex-direction: column;
             align-items: center;
-            gap: 2px;
+            gap: 3px;
             cursor: pointer;
           ">
-            <div style="
-              background: rgba(34,197,94,0.95);
-              color: white;
-              padding: 2px 8px;
-              border-radius: 8px 8px 0 0;
-              font-size: 10px;
-              font-weight: bold;
-              white-space: nowrap;
-              border: 2px solid white;
-              border-bottom: none;
-            ">Floor ${floorNum}/${totalFlrs}</div>
             <div style="
               display: flex;
               align-items: center;
               justify-content: center;
-              width: 40px;
-              height: 40px;
-              background: linear-gradient(135deg, #22c55e, #16a34a);
-              border-radius: 8px;
-              border: 3px solid white;
-              box-shadow: 0 4px 12px rgba(0,0,0,0.4), 0 0 15px rgba(34,197,94,0.6);
-              font-size: 20px;
-              animation: doorPulse 2s ease-in-out infinite;
-            ">\u{1F6AA}</div>
-            <div style="
-              background: rgba(0,0,0,0.85);
+              gap: 6px;
+              background: linear-gradient(135deg, #059669, #10b981);
               color: white;
-              padding: 2px 8px;
-              border-radius: 0 0 8px 8px;
-              font-size: 10px;
-              font-weight: bold;
-              white-space: nowrap;
-              border: 2px solid white;
-              border-top: none;
-            ">360\u00B0 Tour</div>
+              padding: 6px 14px;
+              border-radius: 12px;
+              border: 2px solid rgba(255,255,255,0.9);
+              box-shadow: 0 4px 16px rgba(0,0,0,0.4), 0 0 20px rgba(16,185,129,0.4);
+              font-family: system-ui, -apple-system, sans-serif;
+              animation: doorPulse 2s ease-in-out infinite;
+            ">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"/>
+              </svg>
+              <span style="font-size: 12px; font-weight: 800; letter-spacing: 0.3px;">360\u00B0 Tour</span>
+            </div>
           </div>
         `;
 
@@ -1018,32 +1063,28 @@ export function use3DMap(props: Map3DBuildingsProps) {
             display: flex;
             flex-direction: column;
             align-items: center;
-            gap: 2px;
+            gap: 3px;
             cursor: pointer;
           ">
             <div style="
               display: flex;
               align-items: center;
               justify-content: center;
-              width: 44px;
-              height: 44px;
-              background: linear-gradient(135deg, #22c55e, #16a34a);
-              border-radius: 50%;
-              border: 3px solid white;
-              box-shadow: 0 4px 12px rgba(0,0,0,0.4), 0 0 15px rgba(34,197,94,0.6);
-              font-size: 22px;
-              animation: doorPulse 2s ease-in-out infinite;
-            ">\u{1F6AA}</div>
-            <div style="
-              background: rgba(0,0,0,0.85);
+              gap: 6px;
+              background: linear-gradient(135deg, #059669, #10b981);
               color: white;
-              padding: 3px 10px;
-              border-radius: 8px;
-              font-size: 11px;
-              font-weight: bold;
-              white-space: nowrap;
-              border: 2px solid white;
-            ">360\u00B0 Tour</div>
+              padding: 8px 16px;
+              border-radius: 12px;
+              border: 2px solid rgba(255,255,255,0.9);
+              box-shadow: 0 4px 16px rgba(0,0,0,0.4), 0 0 20px rgba(16,185,129,0.4);
+              font-family: system-ui, -apple-system, sans-serif;
+              animation: doorPulse 2s ease-in-out infinite;
+            ">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"/>
+              </svg>
+              <span style="font-size: 13px; font-weight: 800; letter-spacing: 0.3px;">360\u00B0 Tour</span>
+            </div>
           </div>
         `;
 
