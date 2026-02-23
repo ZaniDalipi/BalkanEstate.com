@@ -338,7 +338,7 @@ export function usePromotionSelector({
       if (propertyId) {
         // If using agency allocation (free), use the direct purchase endpoint
         if (useAgencyAllocation) {
-          await api.purchasePromotion({
+          const result = await api.purchasePromotion({
             propertyId,
             promotionTier: selectedTier!,
             duration: selectedDuration,
@@ -346,6 +346,12 @@ export function usePromotionSelector({
             useAgencyAllocation: true,
             couponCode: couponCode || undefined,
           });
+          // Dispatch event so the agency page can update coupon counters immediately
+          if (result?.promotionCoupons) {
+            window.dispatchEvent(new CustomEvent('agency-coupon-used', {
+              detail: { promotionCoupons: result.promotionCoupons },
+            }));
+          }
           setSuccessMessage('Promotion activated successfully!');
           setTimeout(() => onSuccess?.(), 1500);
           return;

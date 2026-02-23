@@ -340,6 +340,57 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
     };
   }, [agency._id]);
 
+  // Listen for coupon usage events to update the promotion coupons card immediately
+  useEffect(() => {
+    const handleCouponUsed = (e: Event) => {
+      const detail = (e as CustomEvent).detail;
+      if (detail?.promotionCoupons) {
+        setAgencyData(prev => ({
+          ...prev,
+          promotionCoupons: {
+            ...prev.promotionCoupons,
+            available: detail.promotionCoupons.available ?? prev.promotionCoupons?.available ?? 0,
+            used: detail.promotionCoupons.used ?? prev.promotionCoupons?.used ?? 0,
+            monthly: detail.promotionCoupons.monthly ?? prev.promotionCoupons?.monthly ?? 0,
+          },
+        }));
+      }
+    };
+    window.addEventListener('agency-coupon-used', handleCouponUsed);
+
+    // Also re-fetch coupon data when the page regains focus (in case coupons were used on another page)
+    const handleVisibility = () => {
+      if (document.visibilityState === 'visible' && agencyData.promotionCoupons) {
+        const agencyId = agencyData._id || agencyData.id;
+        if (!agencyId) return;
+        const token = localStorage.getItem('balkan_estate_token');
+        if (!token) return;
+        fetch(`${API_URL}/agencies/${agencyId}/coupons`, {
+          headers: { 'Authorization': `Bearer ${token}` },
+        }).then(r => r.ok ? r.json() : null).then(data => {
+          if (data?.promotionCoupons) {
+            setAgencyData(prev => ({
+              ...prev,
+              promotionCoupons: {
+                ...prev.promotionCoupons,
+                available: data.promotionCoupons.available ?? prev.promotionCoupons?.available ?? 0,
+                used: data.promotionCoupons.used ?? prev.promotionCoupons?.used ?? 0,
+                monthly: data.promotionCoupons.monthly ?? prev.promotionCoupons?.monthly ?? 0,
+                codes: data.promotionCoupons.codes ?? prev.promotionCoupons?.codes,
+              },
+            }));
+          }
+        }).catch(() => {});
+      }
+    };
+    document.addEventListener('visibilitychange', handleVisibility);
+
+    return () => {
+      window.removeEventListener('agency-coupon-used', handleCouponUsed);
+      document.removeEventListener('visibilitychange', handleVisibility);
+    };
+  }, [agencyData._id, agencyData.id]);
+
   // Geocode when city/country changes in edit form to update marker position
   const geocodeTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   useEffect(() => {
@@ -1186,6 +1237,12 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
   };
 
   // --- Image Repositioning Handlers ---
+  // Use refs to always have the latest position values (avoids stale closures)
+  const coverPosRef = useRef(coverPos);
+  coverPosRef.current = coverPos;
+  const logoPosRef = useRef(logoPos);
+  logoPosRef.current = logoPos;
+
   const saveImagePosition = async (type: 'cover' | 'logo', pos: { x: number; y: number }) => {
     // Optimistic: position is already visually applied via coverPos/logoPos state
     // Also update agencyData so it persists across re-renders
@@ -1218,7 +1275,8 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
     e.stopPropagation();
     const clientX = 'touches' in e ? e.touches[0].clientX : e.clientX;
     const clientY = 'touches' in e ? e.touches[0].clientY : e.clientY;
-    const pos = type === 'cover' ? coverPos : logoPos;
+    // Use refs to get latest position (avoids stale closure from React batching)
+    const pos = type === 'cover' ? coverPosRef.current : logoPosRef.current;
     dragStartRef.current = { x: clientX, y: clientY, posX: pos.x, posY: pos.y };
 
     const containerRef = type === 'cover' ? coverRef : logoRef;
@@ -1253,7 +1311,8 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
   };
 
   const handleFinishRepositioning = (type: 'cover' | 'logo') => {
-    const pos = type === 'cover' ? coverPos : logoPos;
+    // Use refs to get the latest position (avoids stale closure issues)
+    const pos = type === 'cover' ? { ...coverPosRef.current } : { ...logoPosRef.current };
     // Close reposition mode immediately
     if (type === 'cover') setIsRepositioningCover(false);
     else setIsRepositioningLogo(false);
@@ -1292,11 +1351,14 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
     window.scrollTo(0, 0);
   }, [propertyView]);
 
-  // Sync positions when agencyData changes (e.g., after re-fetch)
+  // Sync positions when agencyData changes (e.g., after re-fetch) — skip during active repositioning
   useEffect(() => {
     if (!isRepositioningCover) setCoverPos({ x: agencyData.coverPosition?.x ?? 50, y: agencyData.coverPosition?.y ?? 50 });
+  }, [agencyData.coverPosition?.x, agencyData.coverPosition?.y, isRepositioningCover]);
+
+  useEffect(() => {
     if (!isRepositioningLogo) setLogoPos({ x: agencyData.logoPosition?.x ?? 50, y: agencyData.logoPosition?.y ?? 50 });
-  }, [agencyData.coverPosition?.x, agencyData.coverPosition?.y, agencyData.logoPosition?.x, agencyData.logoPosition?.y]);
+  }, [agencyData.logoPosition?.x, agencyData.logoPosition?.y, isRepositioningLogo]);
 
   // Close share dropdown on outside click
   useEffect(() => {
@@ -1336,7 +1398,8 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
       {/* Hero Banner - Professional Design */}
       <div
         ref={coverRef}
-        className="relative h-[28rem] md:h-[32rem] overflow-hidden flex-shrink-0"
+        className={`relative h-[28rem] md:h-[32rem] overflow-hidden flex-shrink-0 ${isRepositioningCover || isRepositioningLogo ? 'select-none' : ''}`}
+        style={(isRepositioningCover || isRepositioningLogo) ? { touchAction: 'none' } : undefined}
         onDragEnter={isAdmin ? handleCoverDragEnter : undefined}
         onDragLeave={isAdmin ? handleCoverDragLeave : undefined}
         onDragOver={isAdmin ? handleCoverDragOver : undefined}
@@ -1368,8 +1431,11 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
             <img
               src={agencyData.coverImage}
               alt={`${agencyData.name} - Real Estate Agency${agencyData.city ? ` in ${agencyData.city}` : ''}${agencyData.country ? `, ${agencyData.country}` : ''}`}
-              className={`absolute inset-0 w-full h-full object-cover ${isRepositioningCover ? 'cursor-grab active:cursor-grabbing' : ''}`}
-              style={{ objectPosition: `${coverPos.x}% ${coverPos.y}%` }}
+              className={`absolute inset-0 w-full h-full object-cover ${isRepositioningCover ? 'cursor-grab active:cursor-grabbing z-30 select-none' : ''}`}
+              style={{
+                objectPosition: `${coverPos.x}% ${coverPos.y}%`,
+                ...(isRepositioningCover ? { touchAction: 'none' } : {}),
+              }}
               draggable={false}
               onMouseDown={isRepositioningCover ? (e) => handleRepositionMouseDown(e, 'cover') : undefined}
               onTouchStart={isRepositioningCover ? (e) => handleRepositionMouseDown(e, 'cover') : undefined}
@@ -1681,8 +1747,11 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
                   <img
                     src={agencyData.logo}
                     alt={`${agencyData.name} logo - Real Estate Agency`}
-                    className={`w-full h-full object-cover ${isRepositioningLogo ? 'cursor-grab active:cursor-grabbing' : ''}`}
-                    style={{ objectPosition: `${logoPos.x}% ${logoPos.y}%` }}
+                    className={`w-full h-full object-cover ${isRepositioningLogo ? 'cursor-grab active:cursor-grabbing z-20 select-none' : ''}`}
+                    style={{
+                      objectPosition: `${logoPos.x}% ${logoPos.y}%`,
+                      ...(isRepositioningLogo ? { touchAction: 'none' } : {}),
+                    }}
                     draggable={false}
                     onMouseDown={isRepositioningLogo ? (e) => handleRepositionMouseDown(e, 'logo') : undefined}
                     onTouchStart={isRepositioningLogo ? (e) => handleRepositionMouseDown(e, 'logo') : undefined}
