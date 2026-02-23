@@ -444,6 +444,7 @@ const ChangePasswordSection: React.FC = () => {
     const [isLoading, setIsLoading] = useState(false);
 
     const hasPassword = state.user?.hasPassword === true;
+    const isSocialAccount = state.user?.provider && state.user.provider !== 'local';
 
     const validatePasswordStrength = (pw: string): string | null => {
         if (pw.length < 8) return t('security.passwordMinLength', 'Password must be at least 8 characters');
@@ -516,8 +517,8 @@ const ChangePasswordSection: React.FC = () => {
         );
     };
 
-    // User without password: show "Set Password" form
-    if (!hasPassword) {
+    // Social account without password: show "Set Password" form
+    if (isSocialAccount && !hasPassword) {
         return (
             <div className="bg-white/30 backdrop-blur-sm border border-white/40 rounded-2xl p-6">
                 <h3 className="text-lg font-semibold text-neutral-800 mb-2">{t('security.setPassword', 'Set a Password')}</h3>
@@ -660,21 +661,13 @@ const DeleteAgencySection: React.FC = () => {
 
 const DeleteAccountSection: React.FC = () => {
     const { t } = useTranslation(['account']);
-    const { state, dispatch } = useAppContext();
+    const { dispatch } = useAppContext();
     const { confirm } = useConfirmation();
-    const [password, setPassword] = useState('');
-    const [showPassword, setShowPassword] = useState(false);
     const [isDeleting, setIsDeleting] = useState(false);
     const [error, setError] = useState('');
 
-    const isLocalAuth = state.user?.provider === 'local';
-
     const handleDeleteAccount = async () => {
         setError('');
-        if (isLocalAuth && !password.trim()) {
-            setError(t('security.passwordRequiredToDelete', 'Please enter your password to confirm deletion'));
-            return;
-        }
 
         const confirmed = await confirm({
             title: t('security.deleteAccountTitle', 'Delete Account'),
@@ -694,7 +687,6 @@ const DeleteAccountSection: React.FC = () => {
                     'Content-Type': 'application/json',
                     'Authorization': `Bearer ${localStorage.getItem('balkan_estate_token')}`,
                 },
-                body: JSON.stringify({ password: isLocalAuth ? password : undefined }),
             });
 
             const data = await response.json();
@@ -729,26 +721,6 @@ const DeleteAccountSection: React.FC = () => {
                 </div>
             </div>
 
-            {isLocalAuth && (
-                <div className="mb-4">
-                    <label htmlFor="deletePassword" className="block text-sm font-medium text-red-800 mb-1">
-                        {t('security.enterPasswordToConfirm', 'Enter your password to confirm')}
-                    </label>
-                    <div className="relative max-w-sm">
-                        <input
-                            type={showPassword ? "text" : "password"}
-                            id="deletePassword"
-                            value={password}
-                            onChange={(e) => { setPassword(e.target.value); setError(''); }}
-                            placeholder={t('security.password', 'Password')}
-                            className="w-full px-4 py-2 pr-10 border border-red-200 rounded-xl text-sm focus:ring-2 focus:ring-red-300 focus:border-red-300 bg-white/60 backdrop-blur-sm"
-                            disabled={isDeleting}
-                        />
-                        <PasswordToggleButton show={showPassword} onToggle={() => setShowPassword(!showPassword)} />
-                    </div>
-                </div>
-            )}
-
             {error && (
                 <div className="mb-4 p-3 bg-red-100/60 border border-red-300/50 rounded-xl flex items-start gap-2">
                     <svg className="w-4 h-4 text-red-600 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -761,7 +733,7 @@ const DeleteAccountSection: React.FC = () => {
             <button
                 type="button"
                 onClick={handleDeleteAccount}
-                disabled={isDeleting || (isLocalAuth && !password.trim())}
+                disabled={isDeleting}
                 className="px-5 py-2.5 bg-red-600/80 backdrop-blur-sm text-white font-medium rounded-xl hover:bg-red-600 transition-all shadow-lg shadow-red-600/20 border border-red-500/30 text-sm disabled:opacity-50 disabled:cursor-not-allowed"
             >
                 {isDeleting ? t('security.deleting', 'Deleting...') : t('security.deleteAccount', 'Delete Account')}

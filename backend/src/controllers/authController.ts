@@ -2134,26 +2134,12 @@ export const deleteAccount = async (req: Request, res: Response): Promise<void> 
       return;
     }
 
-    const { password } = req.body;
     const userId = String((req.user as IUser)._id);
-    const user = await User.findById(userId).select('+password');
+    const user = await User.findById(userId);
 
     if (!user) {
       res.status(404).json({ message: 'User not found' });
       return;
-    }
-
-    // For non-social accounts, require password confirmation
-    if (user.provider === 'local') {
-      if (!password) {
-        res.status(400).json({ message: 'Password is required to delete your account' });
-        return;
-      }
-      const isMatch = await user.comparePassword(password);
-      if (!isMatch) {
-        res.status(401).json({ message: 'Incorrect password' });
-        return;
-      }
     }
 
     // If user owns an agency, prevent deletion (must delete agency first)
