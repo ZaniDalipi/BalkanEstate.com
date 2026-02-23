@@ -556,14 +556,15 @@ export function use3DMap(props: Map3DBuildingsProps) {
     // Recalculate floor height based on actual building
     const adjustedFloorHeight = finalBuildingHeight / totalFlrs;
 
-    // Two-source approach to eliminate z-fighting:
-    // - Base source (102% scale) covers the original building completely
-    // - Floor source (110% scale) renders floor slices in front of the base
-    // In the gaps between floor slices, the dark base is visible (not the original building).
-    const baseScaleFactor = 1.03;
-    const floorScaleFactor = 1.10;
+    // Single-layer approach following the MapLibre 3D floorplan pattern:
+    // One FeatureCollection with one feature per floor + base + roof,
+    // rendered by a SINGLE fill-extrusion layer using data-driven expressions.
+    // This avoids z-fighting because all features share one depth pass.
+    // See: https://maplibre.org/maplibre-gl-js/docs/examples/3d-extrusion-floorplan/
 
-    // Calculate centroid for scaling and label positioning
+    const scaleFactor = 1.10; // 10% larger to cover the original building
+
+    // Calculate centroid for scaling
     const outerRing = buildingCoords[0];
     let centroidLng = 0;
     let centroidLat = 0;
@@ -575,90 +576,95 @@ export function use3DMap(props: Map3DBuildingsProps) {
     centroidLng /= numPoints;
     centroidLat /= numPoints;
 
-    const scaleCoords = (coords: number[][][], factor: number) =>
-      coords.map(ring =>
-        ring.map(coord => [
-          centroidLng + (coord[0] - centroidLng) * factor,
-          centroidLat + (coord[1] - centroidLat) * factor
-        ])
-      );
+    const scaledCoords = buildingCoords.map(ring =>
+      ring.map(coord => [
+        centroidLng + (coord[0] - centroidLng) * scaleFactor,
+        centroidLat + (coord[1] - centroidLat) * scaleFactor,
+      ])
+    );
 
-    const baseCoords = scaleCoords(buildingCoords, baseScaleFactor);
-    const scaledCoords = scaleCoords(buildingCoords, floorScaleFactor);
+    // Build a FeatureCollection: base slab + floor slices + roof cap.
+    // Each feature carries its own height, base_height, and color.
+    const gapSize = Math.max(0.25, adjustedFloorHeight * 0.08);
+    const features: GeoJSON.Feature[] = [];
 
-    // Helper: set or create a GeoJSON source
-    const upsertSource = (id: string, coords: number[][][]) => {
-      const data: GeoJSON.Feature = {
-        type: 'Feature',
-        properties: { height: totalHeightM, totalFloors: totalFlrs },
-        geometry: { type: 'Polygon', coordinates: coords },
-      };
-      if (mapInstance.getSource(id)) {
-        (mapInstance.getSource(id) as maplibregl.GeoJSONSource).setData(data);
-      } else {
-        mapInstance.addSource(id, { type: 'geojson', data });
-      }
-    };
-
-    upsertSource('custom-building-base', baseCoords);
-    upsertSource('custom-building', scaledCoords);
-
-    // Remove existing layers
-    const layersToRemove = ['building-base', 'building-roof'];
-    for (let f = 1; f <= 100; f++) layersToRemove.push(`building-floor-${f}`);
-    for (const id of layersToRemove) {
-      if (mapInstance.getLayer(id)) mapInstance.removeLayer(id);
-    }
-
-    // 1. Solid dark base — slightly larger than the original building.
-    //    Covers the original 3d-buildings layer; visible through the gaps
-    //    between floor slices (since the base is smaller than the floor slices).
-    mapInstance.addLayer({
-      id: 'building-base',
-      type: 'fill-extrusion',
-      source: 'custom-building-base',
-      paint: {
-        'fill-extrusion-color': '#0f172a',  // Slate-900
-        'fill-extrusion-height': finalBuildingHeight + 0.5,
-        'fill-extrusion-base': 0,
-        'fill-extrusion-opacity': 1,
+    // Base: solid dark slab covering the full building height (hides original)
+    features.push({
+      type: 'Feature',
+      properties: {
+        height: finalBuildingHeight + 0.3,
+        base_height: 0,
+        color: '#0f172a',
       },
+      geometry: { type: 'Polygon', coordinates: scaledCoords },
     });
 
-    // 2. Floor slices — larger geometry so they always render in front of the
-    //    base when viewed from outside. Gaps between slices expose the dark base.
-    const gapSize = Math.max(0.25, adjustedFloorHeight * 0.08);
+    // Floor slices
     for (let floor = 1; floor <= totalFlrs; floor++) {
       const sliceBase = (floor - 1) * adjustedFloorHeight + gapSize;
       const sliceTop = floor * adjustedFloorHeight - gapSize * 0.5;
-      const isHighlightedFloor = floor === floorNum;
-      const layerId = `building-floor-${floor}`;
+      const isHighlighted = floor === floorNum;
 
-      mapInstance.addLayer({
-        id: layerId,
-        type: 'fill-extrusion',
-        source: 'custom-building',
-        paint: {
-          'fill-extrusion-color': isHighlightedFloor
-            ? '#22c55e'  // Green for the property's floor
-            : floor % 2 === 0 ? '#475569' : '#64748b',  // Alternating slate
-          'fill-extrusion-height': sliceTop,
-          'fill-extrusion-base': sliceBase,
-          'fill-extrusion-opacity': 1,
+      features.push({
+        type: 'Feature',
+        properties: {
+          height: sliceTop,
+          base_height: sliceBase,
+          color: isHighlighted
+            ? '#22c55e'
+            : floor % 2 === 0 ? '#475569' : '#64748b',
         },
+        geometry: { type: 'Polygon', coordinates: scaledCoords },
       });
     }
 
-    // 3. Thin roof cap
+    // Roof cap
+    features.push({
+      type: 'Feature',
+      properties: {
+        height: finalBuildingHeight + 0.8,
+        base_height: finalBuildingHeight,
+        color: '#334155',
+      },
+      geometry: { type: 'Polygon', coordinates: scaledCoords },
+    });
+
+    const featureCollection: GeoJSON.FeatureCollection = {
+      type: 'FeatureCollection',
+      features,
+    };
+
+    // Upsert the single source
+    if (mapInstance.getSource('custom-building')) {
+      (mapInstance.getSource('custom-building') as maplibregl.GeoJSONSource).setData(featureCollection);
+    } else {
+      mapInstance.addSource('custom-building', { type: 'geojson', data: featureCollection });
+    }
+
+    // Remove old layers (from previous multi-layer approach or previous render)
+    for (const id of ['building-base', 'building-roof', 'custom-building-floors']) {
+      if (mapInstance.getLayer(id)) mapInstance.removeLayer(id);
+    }
+    for (let f = 1; f <= 100; f++) {
+      const lid = `building-floor-${f}`;
+      if (mapInstance.getLayer(lid)) mapInstance.removeLayer(lid);
+    }
+
+    // Clean up old base source from previous approach
+    if (mapInstance.getSource('custom-building-base')) {
+      mapInstance.removeSource('custom-building-base');
+    }
+
+    // Single fill-extrusion layer with data-driven expressions
     mapInstance.addLayer({
-      id: 'building-roof',
+      id: 'custom-building-floors',
       type: 'fill-extrusion',
       source: 'custom-building',
       paint: {
-        'fill-extrusion-color': '#334155',
-        'fill-extrusion-height': finalBuildingHeight + 0.8,
-        'fill-extrusion-base': finalBuildingHeight,
-        'fill-extrusion-opacity': 1,
+        'fill-extrusion-color': ['get', 'color'],
+        'fill-extrusion-height': ['get', 'height'],
+        'fill-extrusion-base': ['get', 'base_height'],
+        'fill-extrusion-opacity': 0.95,
       },
     });
 

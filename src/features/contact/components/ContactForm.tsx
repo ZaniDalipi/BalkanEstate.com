@@ -16,6 +16,39 @@ interface ContactFormProps {
   onSubmit: (e: React.FormEvent) => void;
 }
 
+const BALKAN_COUNTRY_CODES = [
+  { code: '+383', country: 'XK', label: 'Kosovo', flag: '\u{1F1FD}\u{1F1F0}' },
+  { code: '+355', country: 'AL', label: 'Albania', flag: '\u{1F1E6}\u{1F1F1}' },
+  { code: '+381', country: 'RS', label: 'Serbia', flag: '\u{1F1F7}\u{1F1F8}' },
+  { code: '+389', country: 'MK', label: 'N. Macedonia', flag: '\u{1F1F2}\u{1F1F0}' },
+  { code: '+387', country: 'BA', label: 'Bosnia', flag: '\u{1F1E7}\u{1F1E6}' },
+  { code: '+382', country: 'ME', label: 'Montenegro', flag: '\u{1F1F2}\u{1F1EA}' },
+  { code: '+385', country: 'HR', label: 'Croatia', flag: '\u{1F1ED}\u{1F1F7}' },
+  { code: '+386', country: 'SI', label: 'Slovenia', flag: '\u{1F1F8}\u{1F1EE}' },
+  { code: '+359', country: 'BG', label: 'Bulgaria', flag: '\u{1F1E7}\u{1F1EC}' },
+  { code: '+40',  country: 'RO', label: 'Romania', flag: '\u{1F1F7}\u{1F1F4}' },
+  { code: '+30',  country: 'GR', label: 'Greece', flag: '\u{1F1EC}\u{1F1F7}' },
+] as const;
+
+const PHONE_FORMAT_PATTERNS: Record<string, number[]> = {
+  '+383': [2, 3, 4],
+  '+355': [2, 3, 4],
+  '+381': [2, 3, 4],
+  '+389': [2, 3, 3],
+  '+387': [2, 3, 3],
+  '+382': [2, 3, 3],
+  '+385': [2, 3, 4],
+  '+386': [2, 3, 2, 2],
+  '+359': [2, 3, 4],
+  '+40':  [3, 3, 3],
+  '+30':  [3, 3, 4],
+};
+
+const getPhonePlaceholder = (countryCode: string): string => {
+  const pattern = PHONE_FORMAT_PATTERNS[countryCode] || [3, 3, 4];
+  return pattern.map(n => 'X'.repeat(n)).join(' ');
+};
+
 const SUBJECT_OPTIONS = [
   { value: 'general', labelKey: 'contact:subjects.general' },
   { value: 'buying', labelKey: 'contact:subjects.buying' },
@@ -93,21 +126,36 @@ const ContactForm: React.FC<ContactFormProps> = ({
         )}
       </div>
 
-      {/* Phone (optional) */}
+      {/* Phone (optional) with country code */}
       <div className="relative">
-        <input
-          type="tel"
-          id="contact-phone"
-          name="phone"
-          value={formData.phone}
-          onChange={onChange}
-          className={`${inputClasses} ${errors.phone ? 'border-red-300 focus:ring-red-200' : ''}`}
-          placeholder=" "
-          autoComplete="tel"
-          aria-invalid={!!errors.phone}
-          aria-describedby={errors.phone ? 'phone-error' : undefined}
-        />
-        <label htmlFor="contact-phone" className={labelClasses}>
+        <div className={`flex items-stretch rounded-xl overflow-hidden glass-input focus-within:ring-2 focus-within:ring-primary/30 focus-within:border-primary/50 transition-all duration-300 ${errors.phone ? 'border-red-300 focus-within:ring-red-200' : ''}`}>
+          <select
+            name="countryCode"
+            value={formData.countryCode}
+            onChange={onChange}
+            className="bg-transparent pl-3 pr-1 py-3 text-sm text-neutral-700 border-r border-neutral-200/60 focus:outline-none cursor-pointer appearance-none"
+            aria-label={t('contact:form.countryCode', 'Country code')}
+          >
+            {BALKAN_COUNTRY_CODES.map((c) => (
+              <option key={c.code} value={c.code}>
+                {c.flag} {c.code}
+              </option>
+            ))}
+          </select>
+          <input
+            type="tel"
+            id="contact-phone"
+            name="phone"
+            value={formData.phone}
+            onChange={onChange}
+            className="flex-1 bg-transparent px-3 py-3 text-base text-neutral-900 focus:outline-none placeholder:text-neutral-400"
+            placeholder={getPhonePlaceholder(formData.countryCode)}
+            autoComplete="tel-national"
+            aria-invalid={!!errors.phone}
+            aria-describedby={errors.phone ? 'phone-error' : undefined}
+          />
+        </div>
+        <label className="absolute text-sm text-neutral-500 duration-300 transform -translate-y-4 scale-75 top-0 z-10 origin-[0] bg-white/70 backdrop-blur-sm px-2 start-3 rounded-md">
           {t('contact:form.phone', 'Phone (optional)')}
         </label>
         {errors.phone && (

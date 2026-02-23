@@ -10,10 +10,42 @@ import type { ContactFormData, ContactFormErrors } from '../types';
 const INITIAL_FORM_DATA: ContactFormData = {
   name: '',
   email: '',
+  countryCode: '+383',
   phone: '',
   subject: 'general',
   message: '',
 };
+
+// Phone number format patterns per Balkan country code (digit group sizes)
+const PHONE_FORMAT_PATTERNS: Record<string, number[]> = {
+  '+383': [2, 3, 4],    // Kosovo: 44 123 4567
+  '+355': [2, 3, 4],    // Albania: 69 123 4567
+  '+381': [2, 3, 4],    // Serbia: 63 123 4567
+  '+389': [2, 3, 3],    // N. Macedonia: 70 123 456
+  '+387': [2, 3, 3],    // Bosnia: 61 123 456
+  '+382': [2, 3, 3],    // Montenegro: 67 123 456
+  '+385': [2, 3, 4],    // Croatia: 91 123 4567
+  '+386': [2, 3, 2, 2], // Slovenia: 31 123 45 67
+  '+359': [2, 3, 4],    // Bulgaria: 88 123 4567
+  '+40':  [3, 3, 3],    // Romania: 721 123 456
+  '+30':  [3, 3, 4],    // Greece: 694 123 4567
+};
+
+function formatPhoneNumber(countryCode: string, digits: string): string {
+  const clean = digits.replace(/\D/g, '');
+  const pattern = PHONE_FORMAT_PATTERNS[countryCode] || [3, 3, 4];
+  const parts: string[] = [];
+  let pos = 0;
+  for (const groupSize of pattern) {
+    if (pos >= clean.length) break;
+    parts.push(clean.slice(pos, pos + groupSize));
+    pos += groupSize;
+  }
+  if (pos < clean.length && parts.length > 0) {
+    parts[parts.length - 1] += clean.slice(pos);
+  }
+  return parts.join(' ');
+}
 
 const MESSAGE_MIN_LENGTH = 10;
 const MESSAGE_MAX_LENGTH = 2000;
@@ -28,7 +60,23 @@ export function useContactForm() {
   const handleChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
       const { name, value } = e.target;
-      setFormData((prev) => ({ ...prev, [name]: value }));
+
+      if (name === 'phone') {
+        // Format phone number according to selected country
+        setFormData((prev) => ({
+          ...prev,
+          phone: formatPhoneNumber(prev.countryCode, value),
+        }));
+      } else if (name === 'countryCode') {
+        // When country changes, reformat the existing phone number
+        setFormData((prev) => ({
+          ...prev,
+          countryCode: value,
+          phone: prev.phone ? formatPhoneNumber(value, prev.phone) : '',
+        }));
+      } else {
+        setFormData((prev) => ({ ...prev, [name]: value }));
+      }
       setErrors((prev) => ({ ...prev, [name]: undefined }));
       setSubmitError(null);
     },
@@ -76,7 +124,10 @@ export function useContactForm() {
     (): ContactFormData => ({
       name: sanitizeText(formData.name.trim()),
       email: formData.email.trim().toLowerCase(),
-      phone: formData.phone.trim(),
+      countryCode: formData.countryCode,
+      phone: formData.phone.trim()
+        ? `${formData.countryCode} ${formData.phone.trim()}`
+        : '',
       subject: formData.subject,
       message: sanitizeText(formData.message.trim()),
     }),
