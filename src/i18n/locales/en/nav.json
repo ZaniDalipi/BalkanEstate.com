@@ -23,6 +23,7 @@
   "newListing": "New Listing",
   "myListings": "My Listings",
   "dashboard": "Dashboard",
+  "agencyDashboard": "Agency Dashboard",
   "admin": "Admin",
   "adminPanel": "Admin Panel",
   "login": "Log In",
@@ -100,6 +101,7 @@
     "howItWorks": "How It Works",
     "analytics": "Analytics",
     "admin": "Admin",
+    "agencyDashboard": "Agency Dashboard",
     "valuation": "Valuation",
     "mortgageCalculator": "Calculator",
     "default": "BalkanEstate"
