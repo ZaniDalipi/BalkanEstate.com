@@ -443,8 +443,8 @@ const ChangePasswordSection: React.FC = () => {
     const [success, setSuccess] = useState<string | null>(null);
     const [isLoading, setIsLoading] = useState(false);
 
-    const hasPassword = state.user?.hasPassword === true;
-    const isSocialAccount = state.user?.provider && state.user.provider !== 'local';
+    const hasPassword = state.currentUser?.hasPassword === true;
+    const isSocialAccount = state.currentUser?.provider && state.currentUser.provider !== 'local';
 
     const validatePasswordStrength = (pw: string): string | null => {
         if (pw.length < 8) return t('security.passwordMinLength', 'Password must be at least 8 characters');
@@ -668,7 +668,7 @@ const DeleteAccountSection: React.FC = () => {
     const [isDeleting, setIsDeleting] = useState(false);
     const [error, setError] = useState('');
 
-    const hasPassword = state.user?.hasPassword === true;
+    const hasPassword = state.currentUser?.hasPassword === true;
 
     const handleDeleteAccount = async () => {
         setError('');
