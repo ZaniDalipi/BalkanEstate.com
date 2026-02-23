@@ -409,10 +409,10 @@ export function use3DMap(props: Map3DBuildingsProps) {
     let buildingCoords: number[][][] | null = null;
     let buildingFeature: maplibregl.MapGeoJSONFeature | null = null;
 
-    // Check if 3d-buildings layer exists
-    if (!mapInstance.getLayer('3d-buildings')) {
-      // Warning removed
-    }
+    // Find the actual 3D building layer name (Liberty style uses "building-3d", our fallback uses "3d-buildings")
+    const building3DLayerId = mapInstance.getLayer('building-3d') ? 'building-3d'
+      : mapInstance.getLayer('3d-buildings') ? '3d-buildings'
+      : null;
 
     // Helper function to calculate building centroid
     const getBuildingCentroid = (feature: maplibregl.MapGeoJSONFeature): { lng: number; lat: number } | null => {
@@ -441,10 +441,13 @@ export function use3DMap(props: Map3DBuildingsProps) {
     };
 
     // Try multiple query approaches to find the building
-    // 1. First try exact point query on the 3d-buildings layer
-    const exactFeatures = mapInstance.queryRenderedFeatures(point, {
-      layers: ['3d-buildings']
-    });
+    // Use the detected building layer (building-3d from Liberty, or 3d-buildings from our fallback)
+    const queryLayers = building3DLayerId ? [building3DLayerId] : undefined;
+
+    // 1. First try exact point query
+    const exactFeatures = building3DLayerId
+      ? mapInstance.queryRenderedFeatures(point, { layers: queryLayers })
+      : [];
 
     if (exactFeatures.length > 0) {
       // If we hit multiple buildings at exact point, pick the one closest to our coordinates
@@ -463,14 +466,14 @@ export function use3DMap(props: Map3DBuildingsProps) {
           }
         }
       }
-    } else {
+    } else if (building3DLayerId) {
       // 2. Try a larger bounding box query
       const bbox: [maplibregl.PointLike, maplibregl.PointLike] = [
         [point.x - 150, point.y - 150],
         [point.x + 150, point.y + 150]
       ];
       const nearbyFeatures = mapInstance.queryRenderedFeatures(bbox, {
-        layers: ['3d-buildings']
+        layers: queryLayers
       });
 
       // Find the building CLOSEST to our coordinates that is tall enough
@@ -585,39 +588,55 @@ export function use3DMap(props: Map3DBuildingsProps) {
       ])
     );
 
-    // Hide the original building so custom floor layers render without z-fighting
-    if (mapInstance.getLayer('3d-buildings') && buildingFeature) {
-      const layer3d = mapInstance.getLayer('3d-buildings') as any;
-      const sourceName = layer3d.source || 'openmaptiles';
+    // Hide the original building in ALL building-related layers from the style.
+    // The Liberty style has both "building" (fill) and "building-3d" (fill-extrusion),
+    // plus our own "3d-buildings" layer. We must hide the feature in ALL of them.
+    if (buildingFeature && buildingFeature.id !== undefined && buildingFeature.id !== null) {
+      const allLayers = mapInstance.getStyle().layers || [];
+      let featureStateSet = false;
 
-      if (buildingFeature.id !== undefined && buildingFeature.id !== null) {
-        try {
-          // Mark the original building as hidden via feature-state
-          mapInstance.setFeatureState(
-            { source: sourceName, sourceLayer: 'building', id: buildingFeature.id },
-            { hidden: true }
-          );
+      for (const layer of allLayers) {
+        const sourceLayer = (layer as any)['source-layer'];
+        if (sourceLayer !== 'building') continue;
 
-          // Update 3d-buildings paint so hidden features become fully transparent
-          mapInstance.setPaintProperty('3d-buildings', 'fill-extrusion-opacity', [
-            'case',
-            ['boolean', ['feature-state', 'hidden'], false],
-            0,
-            0.92
-          ]);
-        } catch (_e) {
-          // feature-state failed — fall back to collapsing the building to zero height
-          mapInstance.setPaintProperty('3d-buildings', 'fill-extrusion-height', [
-            'case',
-            ['boolean', ['feature-state', 'hidden'], false],
-            0,
-            ['coalesce',
-              ['get', 'render_height'],
-              ['*', ['coalesce', ['get', 'building:levels'], 3], 3.5],
-              10,
-            ]
-          ]);
+        const sourceName = (layer as any).source || 'openmaptiles';
+
+        // Set feature-state once per source (shared across all layers using same source)
+        if (!featureStateSet) {
+          try {
+            mapInstance.setFeatureState(
+              { source: sourceName, sourceLayer: 'building', id: buildingFeature.id },
+              { hidden: true }
+            );
+            featureStateSet = true;
+          } catch (_e) { /* ignore */ }
         }
+
+        try {
+          if (layer.type === 'fill-extrusion') {
+            // Make hidden buildings fully transparent AND collapse to zero height
+            mapInstance.setPaintProperty(layer.id, 'fill-extrusion-opacity', [
+              'case',
+              ['boolean', ['feature-state', 'hidden'], false],
+              0,
+              (layer.paint as any)?.['fill-extrusion-opacity'] ?? 0.8
+            ]);
+            mapInstance.setPaintProperty(layer.id, 'fill-extrusion-height', [
+              'case',
+              ['boolean', ['feature-state', 'hidden'], false],
+              0,
+              ['coalesce', ['get', 'render_height'], ['*', ['coalesce', ['get', 'building:levels'], 3], 3.5], 10]
+            ]);
+          } else if (layer.type === 'fill') {
+            // Hide the 2D building footprint too
+            mapInstance.setPaintProperty(layer.id, 'fill-opacity', [
+              'case',
+              ['boolean', ['feature-state', 'hidden'], false],
+              0,
+              1
+            ]);
+          }
+        } catch (_e) { /* ignore */ }
       }
     }
 
@@ -913,86 +932,90 @@ export function use3DMap(props: Map3DBuildingsProps) {
     mapInstance.on('load', () => {
       setMapLoaded(true);
 
-      // Add 3D building extrusion layer if not already present
-      if (!mapInstance.getLayer('3d-buildings')) {
-        // Find the first symbol layer for proper ordering
-        const layers = mapInstance.getStyle().layers;
-        let labelLayerId: string | undefined;
-        for (const layer of layers || []) {
-          if (layer.type === 'symbol' && (layer as any).layout?.['text-field']) {
-            labelLayerId = layer.id;
-            break;
+      // Set up 3D buildings — restyle existing layer or add new one
+      {
+        // The Liberty style already has "building-3d" (fill-extrusion) and "building" (fill).
+        // Restyle the existing layer to our dark grey theme instead of adding a duplicate.
+        const existing3DLayer = mapInstance.getLayer('building-3d') || mapInstance.getLayer('3d-buildings');
+        const existing3DLayerId = existing3DLayer ? (existing3DLayer as any).id : null;
+
+        if (existing3DLayerId) {
+          // Restyle the existing building layer to dark grey
+          try {
+            mapInstance.setPaintProperty(existing3DLayerId, 'fill-extrusion-color', [
+              'interpolate', ['linear'],
+              ['coalesce', ['get', 'render_height'], 10],
+              0, '#6b7280', 20, '#4b5563', 50, '#374151', 100, '#1f2937',
+            ]);
+            mapInstance.setPaintProperty(existing3DLayerId, 'fill-extrusion-opacity', 0.92);
+          } catch (_e) { /* ignore */ }
+
+          // Hide the flat 2D building fill layer (it shows through as a lighter footprint)
+          if (mapInstance.getLayer('building')) {
+            try {
+              mapInstance.setLayoutProperty('building', 'visibility', 'none');
+            } catch (_e) { /* ignore */ }
           }
-        }
-
-        // Detect the correct source name from the style
-        // OpenFreeMap uses 'openmaptiles', but we check dynamically to be safe
-        const style = mapInstance.getStyle();
-        const sources = style?.sources || {};
-        let buildingSource = 'openmaptiles'; // Default
-
-        // Look for vector source with building data
-        const sourceNames = Object.keys(sources);
-
-        // Check common source names used by different tile providers
-        const possibleSources = ['openmaptiles', 'composite', 'mapbox', 'osm', 'vectorTiles'];
-        for (const sourceName of possibleSources) {
-          if (sources[sourceName] && (sources[sourceName] as any).type === 'vector') {
-            buildingSource = sourceName;
-            break;
-          }
-        }
-
-        // If no known source found, use the first vector source
-        if (!sources[buildingSource]) {
-          for (const [name, source] of Object.entries(sources)) {
-            if ((source as any).type === 'vector') {
-              buildingSource = name;
+        } else {
+          // No existing 3D building layer — add our own
+          const layers = mapInstance.getStyle().layers;
+          let labelLayerId: string | undefined;
+          for (const layer of layers || []) {
+            if (layer.type === 'symbol' && (layer as any).layout?.['text-field']) {
+              labelLayerId = layer.id;
               break;
             }
           }
-        }
 
-        // Verify the source exists before adding layer
-        if (!mapInstance.getSource(buildingSource)) {
-          // Error removed
-          return;
-        }
+          const style = mapInstance.getStyle();
+          const sources = style?.sources || {};
+          let buildingSource = 'openmaptiles';
 
-        try {
-          // Add 3D buildings layer - OneGeo style dark grey buildings
-          mapInstance.addLayer(
-            {
-              id: '3d-buildings',
-              source: buildingSource,
-              'source-layer': 'building',
-              type: 'fill-extrusion',
-              minzoom: 14,
-              paint: {
-                'fill-extrusion-color': [
-                  'interpolate',
-                  ['linear'],
-                  ['coalesce', ['get', 'render_height'], 10],
-                  0, '#6b7280',  // Shorter buildings - medium grey
-                  20, '#4b5563', // Medium buildings - darker grey
-                  50, '#374151', // Tall buildings - dark grey
-                  100, '#1f2937', // Very tall - very dark
-                ],
-                'fill-extrusion-height': [
-                  'coalesce',
-                  ['get', 'render_height'],
-                  ['*', ['coalesce', ['get', 'building:levels'], 3], 3.5],
-                  10,
-                ],
-                'fill-extrusion-base': ['coalesce', ['get', 'render_min_height'], 0],
-                'fill-extrusion-opacity': 0.92,
-                'fill-extrusion-vertical-gradient': true,
-              },
-            },
-            labelLayerId
-          );
-        } catch (error) {
-          // Error removed
+          const possibleSources = ['openmaptiles', 'composite', 'mapbox', 'osm', 'vectorTiles'];
+          for (const sourceName of possibleSources) {
+            if (sources[sourceName] && (sources[sourceName] as any).type === 'vector') {
+              buildingSource = sourceName;
+              break;
+            }
+          }
+
+          if (!sources[buildingSource]) {
+            for (const [name, source] of Object.entries(sources)) {
+              if ((source as any).type === 'vector') {
+                buildingSource = name;
+                break;
+              }
+            }
+          }
+
+          if (mapInstance.getSource(buildingSource)) {
+            try {
+              mapInstance.addLayer(
+                {
+                  id: '3d-buildings',
+                  source: buildingSource,
+                  'source-layer': 'building',
+                  type: 'fill-extrusion',
+                  minzoom: 14,
+                  paint: {
+                    'fill-extrusion-color': [
+                      'interpolate', ['linear'],
+                      ['coalesce', ['get', 'render_height'], 10],
+                      0, '#6b7280', 20, '#4b5563', 50, '#374151', 100, '#1f2937',
+                    ],
+                    'fill-extrusion-height': [
+                      'coalesce', ['get', 'render_height'],
+                      ['*', ['coalesce', ['get', 'building:levels'], 3], 3.5], 10,
+                    ],
+                    'fill-extrusion-base': ['coalesce', ['get', 'render_min_height'], 0],
+                    'fill-extrusion-opacity': 0.92,
+                    'fill-extrusion-vertical-gradient': true,
+                  },
+                },
+                labelLayerId
+              );
+            } catch (_e) { /* ignore */ }
+          }
         }
       }
 
