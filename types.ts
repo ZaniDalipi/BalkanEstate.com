@@ -71,6 +71,7 @@ export interface User {
     phone: string;
     role: UserRole;
     provider?: 'local' | 'google' | 'facebook' | 'apple';
+    hasPassword?: boolean;
     isEmailVerified?: boolean;
     city?: string;
     country?: string;
