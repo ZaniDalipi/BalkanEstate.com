@@ -557,12 +557,15 @@ export function use3DMap(props: Map3DBuildingsProps) {
     const adjustedFloorHeight = finalBuildingHeight / totalFlrs;
 
     // Single-layer approach following the MapLibre 3D floorplan pattern:
-    // One FeatureCollection with one feature per floor + base + roof,
-    // rendered by a SINGLE fill-extrusion layer using data-driven expressions.
-    // This avoids z-fighting because all features share one depth pass.
+    // One FeatureCollection rendered by ONE fill-extrusion layer with
+    // data-driven expressions — avoids cross-layer depth issues.
     // See: https://maplibre.org/maplibre-gl-js/docs/examples/3d-extrusion-floorplan/
-
-    const scaleFactor = 1.10; // 10% larger to cover the original building
+    //
+    // IMPORTANT: Features that share the SAME polygon coordinates AND
+    // overlap in height will z-fight (coplanar surfaces in the depth buffer).
+    // Fix: the base slab uses a SMALLER polygon (103%) than the floor slices
+    // (110%), so the floor walls are always closer to the camera. In the gaps
+    // between floor slices, only the base is present — no z-fight.
 
     // Calculate centroid for scaling
     const outerRing = buildingCoords[0];
@@ -576,19 +579,23 @@ export function use3DMap(props: Map3DBuildingsProps) {
     centroidLng /= numPoints;
     centroidLat /= numPoints;
 
-    const scaledCoords = buildingCoords.map(ring =>
-      ring.map(coord => [
-        centroidLng + (coord[0] - centroidLng) * scaleFactor,
-        centroidLat + (coord[1] - centroidLat) * scaleFactor,
-      ])
-    );
+    const scaleFrom = (coords: number[][][], factor: number) =>
+      coords.map(ring =>
+        ring.map(coord => [
+          centroidLng + (coord[0] - centroidLng) * factor,
+          centroidLat + (coord[1] - centroidLat) * factor,
+        ])
+      );
 
-    // Build a FeatureCollection: base slab + floor slices + roof cap.
-    // Each feature carries its own height, base_height, and color.
+    // Two different polygon sizes so they never share a coplanar surface:
+    const baseCoords = scaleFrom(buildingCoords, 1.03);  // just covers original
+    const floorCoords = scaleFrom(buildingCoords, 1.10); // always in front of base
+
+    // Build FeatureCollection: base slab + floor slices + roof cap.
     const gapSize = Math.max(0.25, adjustedFloorHeight * 0.08);
     const features: GeoJSON.Feature[] = [];
 
-    // Base: solid dark slab covering the full building height (hides original)
+    // Base: dark slab at 103% scale — hides original building, visible in gaps
     features.push({
       type: 'Feature',
       properties: {
@@ -596,13 +603,15 @@ export function use3DMap(props: Map3DBuildingsProps) {
         base_height: 0,
         color: '#0f172a',
       },
-      geometry: { type: 'Polygon', coordinates: scaledCoords },
+      geometry: { type: 'Polygon', coordinates: baseCoords },
     });
 
-    // Floor slices
+    // Floor slices at 110% scale — always in front of the base
     for (let floor = 1; floor <= totalFlrs; floor++) {
       const sliceBase = (floor - 1) * adjustedFloorHeight + gapSize;
-      const sliceTop = floor * adjustedFloorHeight - gapSize * 0.5;
+      // Tiny overlap (+0.02m) into the next floor's gap to prevent
+      // coplanar z-fighting at the seam (per mapbox/mapbox-gl-js#7766)
+      const sliceTop = floor * adjustedFloorHeight - gapSize * 0.5 + 0.02;
       const isHighlighted = floor === floorNum;
 
       features.push({
@@ -614,19 +623,19 @@ export function use3DMap(props: Map3DBuildingsProps) {
             ? '#22c55e'
             : floor % 2 === 0 ? '#475569' : '#64748b',
         },
-        geometry: { type: 'Polygon', coordinates: scaledCoords },
+        geometry: { type: 'Polygon', coordinates: floorCoords },
       });
     }
 
-    // Roof cap
+    // Roof cap at 110% scale — overlaps last floor top by 0.02m
     features.push({
       type: 'Feature',
       properties: {
         height: finalBuildingHeight + 0.8,
-        base_height: finalBuildingHeight,
+        base_height: finalBuildingHeight - 0.02,
         color: '#334155',
       },
-      geometry: { type: 'Polygon', coordinates: scaledCoords },
+      geometry: { type: 'Polygon', coordinates: floorCoords },
     });
 
     const featureCollection: GeoJSON.FeatureCollection = {
@@ -676,7 +685,7 @@ export function use3DMap(props: Map3DBuildingsProps) {
       if (hasTour) {
         // Find the southwest-facing edge of the building (viewing direction with pitch 60)
         // This edge will appear as the "front" face from the default camera angle
-        const ring = scaledCoords[0];
+        const ring = floorCoords[0];
         let swEdgeStart = 0;
         let minSum = Infinity;
 
