@@ -661,13 +661,21 @@ const DeleteAgencySection: React.FC = () => {
 
 const DeleteAccountSection: React.FC = () => {
     const { t } = useTranslation(['account']);
-    const { dispatch } = useAppContext();
+    const { state, dispatch } = useAppContext();
     const { confirm } = useConfirmation();
+    const [password, setPassword] = useState('');
+    const [showPassword, setShowPassword] = useState(false);
     const [isDeleting, setIsDeleting] = useState(false);
     const [error, setError] = useState('');
 
+    const hasPassword = state.user?.hasPassword === true;
+
     const handleDeleteAccount = async () => {
         setError('');
+        if (hasPassword && !password.trim()) {
+            setError(t('security.passwordRequiredToDelete', 'Please enter your password to confirm deletion'));
+            return;
+        }
 
         const confirmed = await confirm({
             title: t('security.deleteAccountTitle', 'Delete Account'),
@@ -681,12 +689,19 @@ const DeleteAccountSection: React.FC = () => {
 
         setIsDeleting(true);
         try {
+            const { encryptSensitiveFields } = await import('@/src/shared/api/payloadEncryption');
+            let body: Record<string, any> = {};
+            if (hasPassword) {
+                body = await encryptSensitiveFields({ password }, ['password']);
+            }
+
             const response = await fetch(`${API_URL}/auth/delete-account`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                     'Authorization': `Bearer ${localStorage.getItem('balkan_estate_token')}`,
                 },
+                body: JSON.stringify(body),
             });
 
             const data = await response.json();
@@ -721,6 +736,26 @@ const DeleteAccountSection: React.FC = () => {
                 </div>
             </div>
 
+            {hasPassword && (
+                <div className="mb-4">
+                    <label htmlFor="deletePassword" className="block text-sm font-medium text-red-800 mb-1">
+                        {t('security.enterPasswordToConfirm', 'Enter your password to confirm')}
+                    </label>
+                    <div className="relative max-w-sm">
+                        <input
+                            type={showPassword ? "text" : "password"}
+                            id="deletePassword"
+                            value={password}
+                            onChange={(e) => { setPassword(e.target.value); setError(''); }}
+                            placeholder={t('security.password', 'Password')}
+                            className="w-full px-4 py-2 pr-10 border border-red-200 rounded-xl text-sm focus:ring-2 focus:ring-red-300 focus:border-red-300 bg-white/60 backdrop-blur-sm"
+                            disabled={isDeleting}
+                        />
+                        <PasswordToggleButton show={showPassword} onToggle={() => setShowPassword(!showPassword)} />
+                    </div>
+                </div>
+            )}
+
             {error && (
                 <div className="mb-4 p-3 bg-red-100/60 border border-red-300/50 rounded-xl flex items-start gap-2">
                     <svg className="w-4 h-4 text-red-600 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -733,7 +768,7 @@ const DeleteAccountSection: React.FC = () => {
             <button
                 type="button"
                 onClick={handleDeleteAccount}
-                disabled={isDeleting}
+                disabled={isDeleting || (hasPassword && !password.trim())}
                 className="px-5 py-2.5 bg-red-600/80 backdrop-blur-sm text-white font-medium rounded-xl hover:bg-red-600 transition-all shadow-lg shadow-red-600/20 border border-red-500/30 text-sm disabled:opacity-50 disabled:cursor-not-allowed"
             >
                 {isDeleting ? t('security.deleting', 'Deleting...') : t('security.deleteAccount', 'Delete Account')}
