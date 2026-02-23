@@ -176,9 +176,13 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
   const [isRepositioningLogo, setIsRepositioningLogo] = useState(false);
   const [coverPos, setCoverPos] = useState<{ x: number; y: number }>({ x: agency.coverPosition?.x ?? 50, y: agency.coverPosition?.y ?? 50 });
   const [logoPos, setLogoPos] = useState<{ x: number; y: number }>({ x: agency.logoPosition?.x ?? 50, y: agency.logoPosition?.y ?? 50 });
+  const [coverDragActive, setCoverDragActive] = useState(false);
+  const [logoDragActive, setLogoDragActive] = useState(false);
   const coverRef = useRef<HTMLDivElement>(null);
   const logoRef = useRef<HTMLDivElement>(null);
   const dragStartRef = useRef<{ x: number; y: number; posX: number; posY: number } | null>(null);
+  const coverDragCounter = useRef(0);
+  const logoDragCounter = useRef(0);
   const [editForm, setEditForm] = useState({
     name: '',
     description: '',
@@ -937,9 +941,8 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
     }
   };
 
-  const handleLogoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file || !isOwner) return;
+  const uploadLogoFile = async (file: File) => {
+    if (!isOwner) return;
 
     if (!file.type.startsWith('image/')) {
       setUploadError(t('messages.selectImageFile'));
@@ -981,9 +984,14 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
     }
   };
 
-  const handleCoverUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleLogoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (!file || !isAdmin) return;
+    if (!file) return;
+    await uploadLogoFile(file);
+  };
+
+  const uploadCoverFile = async (file: File) => {
+    if (!isAdmin) return;
 
     if (!file.type.startsWith('image/')) {
       setUploadError(t('messages.selectImageFile'));
@@ -1015,8 +1023,6 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
         throw new Error(errorData?.message || 'Failed to upload cover image');
       }
 
-      const data = await response.json();
-
       // Reset the file input so the same file can be re-selected if needed
       const fileInput = document.getElementById('cover-upload') as HTMLInputElement;
       if (fileInput) fileInput.value = '';
@@ -1031,6 +1037,78 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
     } finally {
       setIsUploadingCover(false);
     }
+  };
+
+  const handleCoverUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    await uploadCoverFile(file);
+  };
+
+  // Drag-and-drop handlers for cover image
+  const handleCoverDragEnter = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    coverDragCounter.current++;
+    if (e.dataTransfer.types.includes('Files')) {
+      setCoverDragActive(true);
+    }
+  };
+
+  const handleCoverDragLeave = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    coverDragCounter.current--;
+    if (coverDragCounter.current === 0) {
+      setCoverDragActive(false);
+    }
+  };
+
+  const handleCoverDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+  };
+
+  const handleCoverDrop = async (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setCoverDragActive(false);
+    coverDragCounter.current = 0;
+    const file = e.dataTransfer.files?.[0];
+    if (file) await uploadCoverFile(file);
+  };
+
+  // Drag-and-drop handlers for logo
+  const handleLogoDragEnter = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    logoDragCounter.current++;
+    if (e.dataTransfer.types.includes('Files')) {
+      setLogoDragActive(true);
+    }
+  };
+
+  const handleLogoDragLeave = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    logoDragCounter.current--;
+    if (logoDragCounter.current === 0) {
+      setLogoDragActive(false);
+    }
+  };
+
+  const handleLogoDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+  };
+
+  const handleLogoDrop = async (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setLogoDragActive(false);
+    logoDragCounter.current = 0;
+    const file = e.dataTransfer.files?.[0];
+    if (file) await uploadLogoFile(file);
   };
 
   const handleGradientSelect = async (gradientId: string) => {
@@ -1204,7 +1282,26 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
       />
 
       {/* Hero Banner - Professional Design */}
-      <div ref={coverRef} className="relative h-[28rem] md:h-[32rem] overflow-hidden flex-shrink-0">
+      <div
+        ref={coverRef}
+        className="relative h-[28rem] md:h-[32rem] overflow-hidden flex-shrink-0"
+        onDragEnter={isAdmin ? handleCoverDragEnter : undefined}
+        onDragLeave={isAdmin ? handleCoverDragLeave : undefined}
+        onDragOver={isAdmin ? handleCoverDragOver : undefined}
+        onDrop={isAdmin ? handleCoverDrop : undefined}
+      >
+        {/* Drag-and-drop overlay for cover image */}
+        {coverDragActive && isAdmin && (
+          <div className="absolute inset-0 z-[60] bg-primary/30 backdrop-blur-sm border-4 border-dashed border-white/70 flex items-center justify-center pointer-events-none">
+            <div className="bg-white/95 backdrop-blur-xl px-8 py-5 rounded-2xl shadow-2xl text-center">
+              <svg className="w-10 h-10 mx-auto mb-2 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+              </svg>
+              <p className="text-sm font-semibold text-slate-800">{t('banner.dropCoverImage', 'Drop to upload cover image')}</p>
+              <p className="text-xs text-slate-500 mt-1">{t('banner.maxSize', 'Max 5MB, images only')}</p>
+            </div>
+          </div>
+        )}
         {/* Background Layer */}
         {agencyData.coverImage ? (
           <>
@@ -1495,7 +1592,24 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
           {/* Logo Container */}
           <div className="relative group">
             <div className="absolute -inset-1 bg-gradient-to-r from-primary/50 to-blue-500/50 rounded-2xl blur-lg opacity-75 group-hover:opacity-100 transition-opacity duration-500"></div>
-            <div ref={logoRef} className="relative w-28 h-28 md:w-32 md:h-32 rounded-2xl border-2 border-white/30 shadow-2xl overflow-hidden bg-white/10 backdrop-blur-md flex-shrink-0">
+            <div
+              ref={logoRef}
+              className={`relative w-28 h-28 md:w-32 md:h-32 rounded-2xl border-2 shadow-2xl overflow-hidden bg-white/10 backdrop-blur-md flex-shrink-0 ${
+                logoDragActive ? 'border-primary border-dashed' : 'border-white/30'
+              }`}
+              onDragEnter={isOwner ? handleLogoDragEnter : undefined}
+              onDragLeave={isOwner ? handleLogoDragLeave : undefined}
+              onDragOver={isOwner ? handleLogoDragOver : undefined}
+              onDrop={isOwner ? handleLogoDrop : undefined}
+            >
+              {/* Logo drag-and-drop overlay */}
+              {logoDragActive && isOwner && (
+                <div className="absolute inset-0 z-30 bg-primary/40 backdrop-blur-sm flex items-center justify-center pointer-events-none rounded-2xl">
+                  <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                  </svg>
+                </div>
+              )}
               {agencyData.logo ? (
                 <>
                   <img
@@ -1529,7 +1643,17 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
                 </>
               ) : (
                 <div className="w-full h-full flex items-center justify-center">
-                  <BuildingOfficeIcon className="w-14 h-14 text-white" />
+                  {isOwner ? (
+                    <label htmlFor="logo-upload-drop" className="w-full h-full flex flex-col items-center justify-center cursor-pointer hover:bg-white/10 transition-colors">
+                      <svg className="w-8 h-8 text-white/70 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 4v16m8-8H4" />
+                      </svg>
+                      <span className="text-[10px] text-white/60 font-medium">{t('banner.addLogo', 'Add Logo')}</span>
+                      <input id="logo-upload-drop" type="file" accept="image/*" className="hidden" onChange={handleLogoUpload} />
+                    </label>
+                  ) : (
+                    <BuildingOfficeIcon className="w-14 h-14 text-white" />
+                  )}
                 </div>
               )}
             </div>
