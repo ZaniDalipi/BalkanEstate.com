@@ -169,7 +169,6 @@ export function useGoogleMap(props: GoogleMapComponentProps) {
   const clustererRef = useRef<MarkerClusterer | null>(null);
   const markersRef = useRef<Map<string, google.maps.marker.AdvancedMarkerElement>>(new Map());
   const markerDivsRef = useRef<Map<string, HTMLDivElement>>(new Map());
-  const lastCadastreZoomRef = useRef<number | null>(null);
   const lastMapTypeRef = useRef<string | null>(null);
   const climateLayerRef = useRef<google.maps.ImageMapType | null>(null);
   // Ref to track map instance synchronously (avoids race condition with async setState)
@@ -1211,7 +1210,6 @@ export function useGoogleMap(props: GoogleMapComponentProps) {
     removeClickListener();
 
     if (!showCadastre) {
-      lastCadastreZoomRef.current = null;
       return;
     }
 
@@ -1220,8 +1218,6 @@ export function useGoogleMap(props: GoogleMapComponentProps) {
 
     const cadastreConfig = getCadastreLayerForLocation(mapCenter.lat(), mapCenter.lng());
     if (!cadastreConfig) return;
-
-    lastCadastreZoomRef.current = map.getZoom() || null;
 
     const latLngToMercator = (lat: number, lng: number): { x: number; y: number } => {
       const x = lng * 20037508.34 / 180;
@@ -1435,38 +1431,33 @@ export function useGoogleMap(props: GoogleMapComponentProps) {
 
     cadastreClickListenerRef.current = map.addListener('click', handleCadastreClick);
 
-    // Refresh on zoom changes
-    const handleZoomChange = () => {
-      const newZoom = map.getZoom();
-      if (newZoom !== undefined && lastCadastreZoomRef.current !== newZoom) {
-        lastCadastreZoomRef.current = newZoom;
-        removeCadastreLayer();
-        requestAnimationFrame(() => {
-          if (showCadastre) {
-            const newLayer = createWmsLayer();
-            map.overlayMapTypes.push(newLayer);
-            cadastreLayerRef.current = newLayer;
-          }
-        });
-      }
-    };
+    // Refresh on zoom changes - only update visibility, don't recreate the layer
+    // Google Maps ImageMapType handles tile loading/caching natively per zoom level.
+    // Recreating the layer on every zoom kills performance because it forces all
+    // tiles to be re-fetched from slow government WMS servers.
 
-    // Update when map moves (country changes)
+    // Update when map moves to a different country
+    const cadastreCountryRef = { current: cadastreConfig.countryCode };
     const handleIdle = () => {
       const newCenter = map.getCenter();
       if (!newCenter) return;
       const newConfig = getCadastreLayerForLocation(newCenter.lat(), newCenter.lng());
-      if (newConfig?.countryCode !== cadastreConfig.countryCode) {
-        setShowCadastre(false);
-        setTimeout(() => setShowCadastre(true), 100);
+      if (newConfig?.countryCode !== cadastreCountryRef.current) {
+        cadastreCountryRef.current = newConfig?.countryCode || '';
+        // Country changed - remove old layer and add new one for the new country's WMS
+        removeCadastreLayer();
+        removeClickListener();
+        if (newConfig) {
+          const newLayer = createWmsLayer();
+          map.overlayMapTypes.push(newLayer);
+          cadastreLayerRef.current = newLayer;
+        }
       }
     };
 
-    const zoomListener = map.addListener('zoom_changed', handleZoomChange);
     const idleListener = map.addListener('idle', handleIdle);
 
     return () => {
-      google.maps.event.removeListener(zoomListener);
       google.maps.event.removeListener(idleListener);
       removeClickListener();
       removeCadastreLayer();
