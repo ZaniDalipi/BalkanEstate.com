@@ -222,7 +222,15 @@ export function use3DMap(props: Map3DBuildingsProps) {
   // Determine the facing direction of a building from its footprint
   // Returns the compass bearing (0-360) of the longest edge (building front)
   const getBuildingFacing = useCallback((mapInstance: maplibregl.Map, latitude: number, longitude: number): number | null => {
-    if (!mapInstance.getLayer('3d-buildings')) return null;
+    // Query ALL building extrusion layers (Liberty style + our own)
+    const facingLayers = (mapInstance.getStyle().layers || [])
+      .filter(l =>
+        l.type === 'fill-extrusion' &&
+        (l.id === '3d-buildings' || ('source-layer' in l && (l as any)['source-layer'] === 'building'))
+      )
+      .map(l => l.id)
+      .filter(id => mapInstance.getLayer(id));
+    if (facingLayers.length === 0) return null;
 
     const point = mapInstance.project([longitude, latitude]);
     const buffer = 30;
@@ -231,7 +239,7 @@ export function use3DMap(props: Map3DBuildingsProps) {
         [point.x - buffer, point.y - buffer],
         [point.x + buffer, point.y + buffer]
       ],
-      { layers: ['3d-buildings'] }
+      { layers: facingLayers }
     );
 
     if (features.length === 0) return null;
@@ -417,16 +425,23 @@ export function use3DMap(props: Map3DBuildingsProps) {
     const floorHeightM = 3; // 3m per floor
     const totalHeightM = totalFlrs * floorHeightM;
 
-    // Query the actual building at this location from the map's building layer
+    // Query the actual building at this location from ALL building extrusion layers.
+    // The Liberty style has its own building layer (not named '3d-buildings').
+    // We need to query ALL of them to find the building geometry.
     const point = mapInstance.project([longitude, latitude]);
 
     let buildingCoords: number[][][] | null = null;
     let buildingFeature: maplibregl.MapGeoJSONFeature | null = null;
 
-    // Check if 3d-buildings layer exists
-    if (!mapInstance.getLayer('3d-buildings')) {
-      // Warning removed
-    }
+    // Find all fill-extrusion layers that render buildings
+    const allStyleLayers = mapInstance.getStyle().layers || [];
+    const buildingQueryLayers = allStyleLayers
+      .filter(l =>
+        l.type === 'fill-extrusion' &&
+        (l.id === '3d-buildings' || ('source-layer' in l && (l as any)['source-layer'] === 'building'))
+      )
+      .map(l => l.id)
+      .filter(id => mapInstance.getLayer(id));
 
     // Helper function to calculate building centroid
     const getBuildingCentroid = (feature: maplibregl.MapGeoJSONFeature): { lng: number; lat: number } | null => {
@@ -455,10 +470,10 @@ export function use3DMap(props: Map3DBuildingsProps) {
     };
 
     // Try multiple query approaches to find the building
-    // 1. First try exact point query on the 3d-buildings layer
-    const exactFeatures = mapInstance.queryRenderedFeatures(point, {
-      layers: ['3d-buildings']
-    });
+    // 1. First try exact point query on all building extrusion layers
+    const exactFeatures = buildingQueryLayers.length > 0
+      ? mapInstance.queryRenderedFeatures(point, { layers: buildingQueryLayers })
+      : [];
 
     if (exactFeatures.length > 0) {
       // If we hit multiple buildings at exact point, pick the one closest to our coordinates
@@ -478,14 +493,14 @@ export function use3DMap(props: Map3DBuildingsProps) {
         }
       }
     } else {
-      // 2. Try a larger bounding box query
+      // 2. Try a larger bounding box query on all building extrusion layers
       const bbox: [maplibregl.PointLike, maplibregl.PointLike] = [
         [point.x - 150, point.y - 150],
         [point.x + 150, point.y + 150]
       ];
-      const nearbyFeatures = mapInstance.queryRenderedFeatures(bbox, {
-        layers: ['3d-buildings']
-      });
+      const nearbyFeatures = buildingQueryLayers.length > 0
+        ? mapInstance.queryRenderedFeatures(bbox, { layers: buildingQueryLayers })
+        : [];
 
       // Find the building CLOSEST to our coordinates that is tall enough
       // Filter out small auxiliary structures (garages, sheds, etc.)
@@ -577,7 +592,7 @@ export function use3DMap(props: Map3DBuildingsProps) {
     const adjustedFloorHeight = finalBuildingHeight / totalFlrs;
 
     // Scale up the building coordinates to fully cover the original and prevent z-fighting
-    const scaleFactor = 1.05; // 5% larger to fully cover original building
+    const scaleFactor = 1.08; // 8% larger to fully cover original building and prevent z-fighting
 
     // Calculate centroid for scaling and label positioning
     const outerRing = buildingCoords[0];
@@ -999,22 +1014,18 @@ export function use3DMap(props: Map3DBuildingsProps) {
     mapInstance.on('load', () => {
       setMapLoaded(true);
 
-      // Remove any existing fill-extrusion building layers from the Liberty style.
-      // The Liberty style ships its own 3D building extrusion layer (with an unknown ID).
-      // If we leave it in place, it renders ON TOP of our custom floor slices and hides them.
-      // We replace it with our own '3d-buildings' layer so we have full control.
+      // Detect existing fill-extrusion building layers from the map style (e.g. Liberty).
+      // We keep them — they render all OTHER buildings normally.
+      // When we add floor slices for a specific building, addCustomBuilding3D will
+      // hide that building from ALL building extrusion layers via feature-ID filtering.
       const styleLayers = mapInstance.getStyle().layers || [];
-      for (const layer of styleLayers) {
-        if (
-          layer.type === 'fill-extrusion' &&
-          ('source-layer' in layer && (layer as any)['source-layer'] === 'building')
-        ) {
-          try { mapInstance.removeLayer(layer.id); } catch (_) { /* already removed */ }
-        }
-      }
+      const hasExistingBuildingExtrusion = styleLayers.some(
+        l => l.type === 'fill-extrusion' &&
+          ('source-layer' in l && (l as any)['source-layer'] === 'building')
+      );
 
-      // Add our own 3D building extrusion layer
-      if (!mapInstance.getLayer('3d-buildings')) {
+      // Only add our own 3D building extrusion layer if the style doesn't already have one
+      if (!hasExistingBuildingExtrusion && !mapInstance.getLayer('3d-buildings')) {
         // Find the first symbol layer for proper ordering
         const layers = mapInstance.getStyle().layers;
         let labelLayerId: string | undefined;
@@ -1196,12 +1207,22 @@ export function use3DMap(props: Map3DBuildingsProps) {
         const maxRetries = 4;
 
         const doAddBuilding = () => {
-          // Query the 3d-buildings layer to check if tiles have rendered buildings here
+          // Query ALL building extrusion layers to check if tiles have rendered buildings here
+          const currentLayers = mapInstance.getStyle().layers || [];
+          const bldgLayers = currentLayers
+            .filter(l =>
+              l.type === 'fill-extrusion' &&
+              (l.id === '3d-buildings' || ('source-layer' in l && (l as any)['source-layer'] === 'building'))
+            )
+            .map(l => l.id)
+            .filter(id => mapInstance.getLayer(id));
           const point = mapInstance.project([lng, lat]);
-          const features = mapInstance.queryRenderedFeatures(
-            [[point.x - 150, point.y - 150], [point.x + 150, point.y + 150]],
-            { layers: mapInstance.getLayer('3d-buildings') ? ['3d-buildings'] : undefined }
-          );
+          const features = bldgLayers.length > 0
+            ? mapInstance.queryRenderedFeatures(
+                [[point.x - 150, point.y - 150], [point.x + 150, point.y + 150]],
+                { layers: bldgLayers }
+              )
+            : [];
 
           const foundBuildings = features.some(f =>
             f.geometry.type === 'Polygon' || f.geometry.type === 'MultiPolygon'
