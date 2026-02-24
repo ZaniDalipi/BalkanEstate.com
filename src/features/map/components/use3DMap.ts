@@ -697,21 +697,8 @@ export function use3DMap(props: Map3DBuildingsProps) {
     });
 
     // 2. Add floor slice layers ON TOP of the shell.
-    //    Each floor is a separate slab with generous gaps between them.
-    //    Gaps reveal the dark shell underneath, creating clear floor separation.
-    //    All floors use a green color gradient; the highlighted floor is brightest.
-    const gapSize = Math.max(0.6, adjustedFloorHeight * 0.22); // 22% of floor height as gap
-
-    // Green gradient: darker green at bottom, lighter toward top, brightest for highlighted floor
-    const getFloorGreen = (floor: number, isHighlighted: boolean): string => {
-      if (isHighlighted) return '#22c55e'; // Bright green for the property's floor
-      // Gradient from dark green (floor 1) to lighter green (top floor)
-      const t = totalFlrs > 1 ? (floor - 1) / (totalFlrs - 1) : 0.5;
-      const r = Math.round(20 + t * 60);   // 20 → 80
-      const g = Math.round(100 + t * 80);  // 100 → 180
-      const b = Math.round(60 + t * 40);   // 60 → 100
-      return `rgb(${r}, ${g}, ${b})`;
-    };
+    //    Grey for all floors, green for the apartment's floor.
+    const gapSize = Math.max(0.6, adjustedFloorHeight * 0.22);
 
     for (let floor = 1; floor <= totalFlrs; floor++) {
       const floorBase = (floor - 1) * adjustedFloorHeight;
@@ -724,98 +711,13 @@ export function use3DMap(props: Map3DBuildingsProps) {
         type: 'fill-extrusion',
         source: 'custom-building',
         paint: {
-          'fill-extrusion-color': getFloorGreen(floor, isHighlightedFloor),
+          'fill-extrusion-color': isHighlightedFloor ? '#22c55e' : '#d1d5db',
           'fill-extrusion-height': floorTop - gapSize,
           'fill-extrusion-base': floorBase + (gapSize * 0.3),
-          'fill-extrusion-opacity': isHighlightedFloor ? 1.0 : 0.85,
+          'fill-extrusion-opacity': 1.0,
         },
       });
     }
-
-    // 3. Add a brighter glow layer for the highlighted floor to make it pop
-    const highlightBase = (floorNum - 1) * adjustedFloorHeight;
-    const highlightTop = floorNum * adjustedFloorHeight;
-    const glowLayerId = 'building-floor-highlight-glow';
-    mapInstance.addLayer({
-      id: glowLayerId,
-      type: 'fill-extrusion',
-      source: 'custom-building',
-      paint: {
-        'fill-extrusion-color': '#4ade80', // Lighter green glow
-        'fill-extrusion-height': highlightTop - (gapSize * 0.5),
-        'fill-extrusion-base': highlightBase + (gapSize * 0.5),
-        'fill-extrusion-opacity': 0.35,
-      },
-    });
-
-    // 4. Add level number labels on floor slices.
-    //    For tall buildings (>10 floors), only label key floors to avoid clutter:
-    //    first, last, highlighted, and every 5th floor.
-    const levelLabelMarkers: maplibregl.Marker[] = [];
-    const levelLabelFloors: number[] = []; // track which floor each marker corresponds to
-    const calculateLevelOffset = (floorIndex: number, currentZoom: number) => {
-      const basePixelsPerFloor = 2.8;
-      const zoomFactor = Math.pow(2, currentZoom - 16);
-      const pixelsPerFloor = basePixelsPerFloor * zoomFactor;
-      const floorsFromBottom = floorIndex - 0.5;
-      return -(floorsFromBottom * pixelsPerFloor);
-    };
-
-    // Determine label step: show every floor for <=10 floors, key floors for taller buildings
-    const labelStep = totalFlrs <= 10 ? 1 : 5;
-    const shouldShowLabel = (floor: number) => {
-      if (floor === 1 || floor === totalFlrs || floor === floorNum) return true;
-      if (labelStep > 1 && floor % labelStep === 0) return true;
-      return labelStep === 1;
-    };
-
-    for (let floor = 1; floor <= totalFlrs; floor++) {
-      if (!shouldShowLabel(floor)) continue;
-      const isHighlightedFloor = floor === floorNum;
-      const levelEl = document.createElement('div');
-      levelEl.style.cssText = 'pointer-events: none; z-index: 40;';
-      levelEl.innerHTML = `
-        <div style="
-          background: ${isHighlightedFloor
-            ? 'linear-gradient(135deg, #059669, #10b981)'
-            : 'rgba(6, 78, 59, 0.85)'};
-          color: white;
-          padding: 2px 7px;
-          border-radius: 6px;
-          font-size: 10px;
-          font-weight: 700;
-          white-space: nowrap;
-          border: 1.5px solid ${isHighlightedFloor ? 'rgba(255,255,255,0.9)' : 'rgba(255,255,255,0.5)'};
-          font-family: system-ui, -apple-system, sans-serif;
-          ${isHighlightedFloor ? 'box-shadow: 0 0 8px rgba(16,185,129,0.6);' : ''}
-        ">L${floor}</div>
-      `;
-
-      const initialOffset = calculateLevelOffset(floor, mapInstance.getZoom());
-      const levelMarker = new maplibregl.Marker({
-        element: levelEl,
-        anchor: 'center',
-        offset: [0, initialOffset],
-      })
-        .setLngLat([centroidLng, centroidLat])
-        .addTo(mapInstance);
-      levelLabelMarkers.push(levelMarker);
-      levelLabelFloors.push(floor);
-    }
-
-    // Update all level labels on zoom/pitch changes
-    const updateLevelLabels = () => {
-      const currentZoom = mapInstance.getZoom();
-      for (let i = 0; i < levelLabelMarkers.length; i++) {
-        const newOffset = calculateLevelOffset(levelLabelFloors[i], currentZoom);
-        levelLabelMarkers[i].setOffset([0, newOffset]);
-      }
-    };
-    mapInstance.on('zoom', updateLevelLabels);
-    mapInstance.on('pitch', updateLevelLabels);
-
-    // Store level markers in floorLabelsRef for cleanup
-    floorLabelsRef.current.push(...levelLabelMarkers);
 
     // Add floating "Floor X/Y" label above the building at the highlighted floor level
     if (floorNum > 0 && floorNum <= totalFlrs) {
