@@ -38,6 +38,7 @@ export function use3DMap(props: Map3DBuildingsProps) {
   const map = useRef<maplibregl.Map | null>(null);
   const doorMarkerRef = useRef<maplibregl.Marker | null>(null);
   const floorLabelsRef = useRef<maplibregl.Marker[]>([]);
+  const floorScaleMarkersRef = useRef<maplibregl.Marker[]>([]);
   const facingArrowRef = useRef<HTMLElement | null>(null);
   const facingBearingRef = useRef<number>(0);
 
@@ -707,12 +708,151 @@ export function use3DMap(props: Map3DBuildingsProps) {
       },
     });
 
-    // Add floating "Floor X/Y" label above the building at the highlighted floor level
+    // Add floor scale markers directly on the building edge
+    // These show floor numbers as a vertical ruler alongside the 3D building
     if (floorNum > 0 && floorNum <= totalFlrs) {
-      // Create a floating floor label marker positioned above the building
-      const floorLabelEl = document.createElement('div');
-      floorLabelEl.style.cssText = 'pointer-events: none; z-index: 50;';
-      floorLabelEl.innerHTML = `
+      // Remove any existing floor scale markers
+      floorScaleMarkersRef.current.forEach(m => m.remove());
+      floorScaleMarkersRef.current = [];
+
+      // Find the edge of the building to place the scale on
+      // Use the westernmost edge (left side from typical camera angle)
+      const ring = scaledCoords[0];
+      let westIdx = 0;
+      let minLng = Infinity;
+      for (let i = 0; i < ring.length - 1; i++) {
+        if (ring[i][0] < minLng) {
+          minLng = ring[i][0];
+          westIdx = i;
+        }
+      }
+      // Get midpoint of the western edge for scale placement
+      const nextWestIdx = (westIdx + 1) % (ring.length - 1);
+      const scaleLng = (ring[westIdx][0] + ring[nextWestIdx][0]) / 2;
+      const scaleLat = (ring[westIdx][1] + ring[nextWestIdx][1]) / 2;
+      // Offset slightly outward from building so labels don't clip into it
+      const scaleOutwardOffset = 0.00005; // ~5m outward
+      const markerLng = scaleLng - scaleOutwardOffset;
+      const markerLat = scaleLat;
+
+      // Calculate vertical offset for a given floor at a given zoom
+      const calculateScaleOffset = (floorIndex: number, currentZoom: number) => {
+        const basePixelsPerFloor = 2.8;
+        const zoomFactor = Math.pow(2, currentZoom - 16);
+        const pixelsPerFloor = basePixelsPerFloor * zoomFactor;
+        // Position at the middle of this floor
+        const floorsFromBottom = floorIndex - 0.5;
+        return -(floorsFromBottom * pixelsPerFloor);
+      };
+
+      // Decide which floors to show labels for (avoid clutter on tall buildings)
+      const floorsToLabel: number[] = [];
+      for (let f = 1; f <= totalFlrs; f++) {
+        if (f === floorNum || f === 1 || f === totalFlrs) {
+          floorsToLabel.push(f);
+        } else if (totalFlrs <= 10) {
+          // Show all floors for short buildings
+          floorsToLabel.push(f);
+        } else if (totalFlrs <= 25 && f % 2 === 0) {
+          floorsToLabel.push(f);
+        } else if (totalFlrs <= 50 && f % 5 === 0) {
+          floorsToLabel.push(f);
+        } else if (f % 10 === 0) {
+          floorsToLabel.push(f);
+        }
+      }
+
+      const scaleMarkers: maplibregl.Marker[] = [];
+      const updateOffsetCallbacks: (() => void)[] = [];
+
+      for (const floor of floorsToLabel) {
+        const isHighlighted = floor === floorNum;
+        const el = document.createElement('div');
+        el.style.cssText = 'pointer-events: none; z-index: 40;';
+
+        if (isHighlighted) {
+          // Prominent green badge for the highlighted floor
+          el.innerHTML = `
+            <div style="
+              display: flex;
+              align-items: center;
+              gap: 0;
+              filter: drop-shadow(0 2px 8px rgba(0,0,0,0.5));
+            ">
+              <div style="
+                background: linear-gradient(135deg, #059669, #10b981);
+                color: white;
+                padding: 3px 10px;
+                border-radius: 8px;
+                font-size: 12px;
+                font-weight: 800;
+                white-space: nowrap;
+                border: 2px solid rgba(255,255,255,0.9);
+                font-family: system-ui, -apple-system, sans-serif;
+                letter-spacing: 0.3px;
+              ">F${floor}</div>
+              <div style="
+                width: 0;
+                height: 0;
+                border-top: 5px solid transparent;
+                border-bottom: 5px solid transparent;
+                border-left: 6px solid #10b981;
+                margin-left: -1px;
+              "></div>
+            </div>
+          `;
+        } else {
+          // Subtle tick mark + number for other floors
+          el.innerHTML = `
+            <div style="
+              display: flex;
+              align-items: center;
+              gap: 2px;
+              filter: drop-shadow(0 1px 3px rgba(0,0,0,0.4));
+            ">
+              <div style="
+                background: rgba(15, 23, 42, 0.85);
+                color: #94a3b8;
+                padding: 1px 5px;
+                border-radius: 4px;
+                font-size: 9px;
+                font-weight: 600;
+                white-space: nowrap;
+                border: 1px solid rgba(100, 116, 139, 0.4);
+                font-family: system-ui, -apple-system, sans-serif;
+              ">${floor}</div>
+              <div style="
+                width: 8px;
+                height: 1px;
+                background: rgba(100, 116, 139, 0.5);
+              "></div>
+            </div>
+          `;
+        }
+
+        const initialOffset = calculateScaleOffset(floor, mapInstance.getZoom());
+        const marker = new maplibregl.Marker({
+          element: el,
+          anchor: 'right',
+          offset: [0, initialOffset],
+        })
+          .setLngLat([markerLng, markerLat])
+          .addTo(mapInstance);
+
+        scaleMarkers.push(marker);
+
+        // Create update callback for this marker
+        const updateOffset = () => {
+          const newOffset = calculateScaleOffset(floor, mapInstance.getZoom());
+          marker.setOffset([0, newOffset]);
+        };
+        updateOffsetCallbacks.push(updateOffset);
+      }
+
+      // Also add a "Floor X/Y" summary label at the top of the building
+      const topLabelEl = document.createElement('div');
+      topLabelEl.style.cssText = 'pointer-events: none; z-index: 50;';
+      topLabelEl.innerHTML = `
         <div style="
           display: flex;
           flex-direction: column;
@@ -743,32 +883,33 @@ export function use3DMap(props: Map3DBuildingsProps) {
         </div>
       `;
 
-      // Position the label at the building centroid, offset upward based on floor position
-      const calculateFloorLabelOffset = (currentZoom: number) => {
+      const calculateTopLabelOffset = (currentZoom: number) => {
         const basePixelsPerFloor = 2.8;
         const zoomFactor = Math.pow(2, currentZoom - 16);
         const pixelsPerFloor = basePixelsPerFloor * zoomFactor;
-        // Position at the highlighted floor level plus some headroom
-        const floorsFromBottom = floorNum - 0.5;
-        return -(floorsFromBottom * pixelsPerFloor) - 20;
+        return -(totalFlrs * pixelsPerFloor) - 15;
       };
 
-      const initialLabelOffset = calculateFloorLabelOffset(mapInstance.getZoom());
-      const floorLabelMarker = new maplibregl.Marker({
-        element: floorLabelEl,
+      const topInitialOffset = calculateTopLabelOffset(mapInstance.getZoom());
+      const topLabelMarker = new maplibregl.Marker({
+        element: topLabelEl,
         anchor: 'bottom',
-        offset: [0, initialLabelOffset],
+        offset: [0, topInitialOffset],
       })
         .setLngLat([centroidLng, centroidLat])
         .addTo(mapInstance);
+      scaleMarkers.push(topLabelMarker);
 
-      // Update label position on zoom/pitch changes
-      const updateLabelOffset = () => {
-        const newOffset = calculateFloorLabelOffset(mapInstance.getZoom());
-        floorLabelMarker.setOffset([0, newOffset]);
+      // Update all floor scale markers and top label on zoom/pitch
+      const updateAllOffsets = () => {
+        updateOffsetCallbacks.forEach(fn => fn());
+        const newTopOffset = calculateTopLabelOffset(mapInstance.getZoom());
+        topLabelMarker.setOffset([0, newTopOffset]);
       };
-      mapInstance.on('zoom', updateLabelOffset);
-      mapInstance.on('pitch', updateLabelOffset);
+      mapInstance.on('zoom', updateAllOffsets);
+      mapInstance.on('pitch', updateAllOffsets);
+
+      floorScaleMarkersRef.current = scaleMarkers;
 
       // Show door icon if 360 tour is available
       const hasTour = !!tourUrl;
@@ -883,6 +1024,16 @@ export function use3DMap(props: Map3DBuildingsProps) {
       }
     }
   }, [show360Tour]);
+
+  // Hide/show floor scale markers when floor indicator is toggled
+  useEffect(() => {
+    floorScaleMarkersRef.current.forEach(marker => {
+      const el = marker.getElement();
+      if (el) {
+        el.style.display = showFloorIndicator ? 'block' : 'none';
+      }
+    });
+  }, [showFloorIndicator]);
 
   // Handle entering the building - animate and show 360 tour
   const handleEnterBuilding = useCallback(() => {
