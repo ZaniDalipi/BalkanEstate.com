@@ -640,9 +640,13 @@ export function use3DMap(props: Map3DBuildingsProps) {
         mapInstance.removeLayer(layerId);
       }
     }
+    if (mapInstance.getLayer('building-floor-highlight-glow')) {
+      mapInstance.removeLayer('building-floor-highlight-glow');
+    }
 
-    // Add floor slice layers - each floor is a separate layer for the striped effect
-    // Add them on top of the 3d-buildings layer
+    // Add floor slice layers - each floor is a separate "box" stacked on top of each other
+    // The gap between floors makes each box clearly distinct
+    const gapSize = Math.max(0.3, adjustedFloorHeight * 0.12); // 12% of floor height as gap, minimum 0.3m
     for (let floor = 1; floor <= totalFlrs; floor++) {
       const floorBase = (floor - 1) * adjustedFloorHeight;
       const floorTop = floor * adjustedFloorHeight;
@@ -657,12 +661,31 @@ export function use3DMap(props: Map3DBuildingsProps) {
           'fill-extrusion-color': isHighlightedFloor
             ? '#22c55e' // Bright green for the property's floor
             : floor % 2 === 0 ? '#4b5563' : '#6b7280', // Alternating grey for other floors
-          'fill-extrusion-height': floorTop - 0.2, // Gap between floors for clear visual separation
-          'fill-extrusion-base': floorBase + 0.08,
-          'fill-extrusion-opacity': isHighlightedFloor ? 1 : 0.88,
+          'fill-extrusion-height': floorTop - gapSize, // Gap at top of each floor slab
+          'fill-extrusion-base': floorBase + (gapSize * 0.25), // Small gap at bottom too
+          'fill-extrusion-opacity': isHighlightedFloor ? 1 : 0.75,
         },
       });
     }
+
+    // Add a brighter outline layer for the highlighted floor to make it pop
+    const highlightBase = (floorNum - 1) * adjustedFloorHeight;
+    const highlightTop = floorNum * adjustedFloorHeight;
+    const glowLayerId = 'building-floor-highlight-glow';
+    if (mapInstance.getLayer(glowLayerId)) {
+      mapInstance.removeLayer(glowLayerId);
+    }
+    mapInstance.addLayer({
+      id: glowLayerId,
+      type: 'fill-extrusion',
+      source: 'custom-building',
+      paint: {
+        'fill-extrusion-color': '#4ade80', // Lighter green glow
+        'fill-extrusion-height': highlightTop - (gapSize * 0.5),
+        'fill-extrusion-base': highlightBase + (gapSize * 0.5),
+        'fill-extrusion-opacity': 0.35,
+      },
+    });
 
     // Add floating "Floor X/Y" label above the building at the highlighted floor level
     if (floorNum > 0 && floorNum <= totalFlrs) {
@@ -1053,8 +1076,8 @@ export function use3DMap(props: Map3DBuildingsProps) {
       fetchAndDisplayPOI(mapInstance, lat, lng);
 
       // Add 360 tour door marker for properties without floor visualization
-      // (properties with >3 floors get the door marker via addCustomBuilding3D instead)
-      const willHaveFloorViz = floorNumber != null && totalFloors != null && totalFloors > 3;
+      // (properties with floor data get the door marker via addCustomBuilding3D instead)
+      const willHaveFloorViz = floorNumber != null && totalFloors != null && totalFloors > 0;
       if (!willHaveFloorViz && virtualTour360Url) {
         const doorEl = document.createElement('div');
         doorEl.className = 'apartment-door-marker';
@@ -1101,9 +1124,9 @@ export function use3DMap(props: Map3DBuildingsProps) {
         doorMarkerRef.current = doorMarker;
       }
 
-      // Add custom 3D building with floor slices for properties with more than 3 floors
+      // Add custom 3D building with floor slices for properties with floor data
       // Wait for tiles to fully load before querying building geometry
-      if (floorNumber != null && totalFloors != null && totalFloors > 3) {
+      if (floorNumber != null && totalFloors != null && totalFloors > 0) {
         // Retry mechanism to ensure building tiles are loaded
         let retryCount = 0;
         const maxRetries = 5;
