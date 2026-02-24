@@ -22,7 +22,6 @@ export const useMapLayers = ({ map, isLoaded }: UseMapLayersProps) => {
 
   const cadastreLayerRef = useRef<google.maps.ImageMapType | null>(null);
   const climateLayerRef = useRef<google.maps.ImageMapType | null>(null);
-  const lastCadastreZoomRef = useRef<number | null>(null);
   const cadastreInfoWindowRef = useRef<google.maps.InfoWindow | null>(null);
   const cadastreClickListenerRef = useRef<google.maps.MapsEventListener | null>(null);
 
@@ -56,7 +55,6 @@ export const useMapLayers = ({ map, isLoaded }: UseMapLayersProps) => {
     removeClickListener();
 
     if (!showCadastre) {
-      lastCadastreZoomRef.current = null;
       return;
     }
 
@@ -65,8 +63,6 @@ export const useMapLayers = ({ map, isLoaded }: UseMapLayersProps) => {
 
     const cadastreConfig = getCadastreLayerForLocation(mapCenter.lat(), mapCenter.lng());
     if (!cadastreConfig) return;
-
-    lastCadastreZoomRef.current = map.getZoom() || null;
 
     const latLngToMercator = (lat: number, lng: number): { x: number; y: number } => {
       const x = lng * 20037508.34 / 180;
@@ -262,36 +258,31 @@ export const useMapLayers = ({ map, isLoaded }: UseMapLayersProps) => {
 
     cadastreClickListenerRef.current = map.addListener('click', handleCadastreClick);
 
-    const handleZoomChange = () => {
-      const newZoom = map.getZoom();
-      if (newZoom !== undefined && lastCadastreZoomRef.current !== newZoom) {
-        lastCadastreZoomRef.current = newZoom;
-        removeCadastreLayer();
-        requestAnimationFrame(() => {
-          if (showCadastre) {
-            const newLayer = createWmsLayer();
-            map.overlayMapTypes.push(newLayer);
-            cadastreLayerRef.current = newLayer;
-          }
-        });
-      }
-    };
+    // No need to recreate the WMS layer on zoom changes - Google Maps ImageMapType
+    // handles tile loading/caching natively per zoom level. getTileUrl already
+    // returns empty string for zooms below minZoom.
 
+    // Only recreate when map pans to a different country
+    const cadastreCountryRef = { current: cadastreConfig.countryCode };
     const handleIdle = () => {
       const newCenter = map.getCenter();
       if (!newCenter) return;
       const newConfig = getCadastreLayerForLocation(newCenter.lat(), newCenter.lng());
-      if (newConfig?.countryCode !== cadastreConfig.countryCode) {
-        setShowCadastre(false);
-        setTimeout(() => setShowCadastre(true), 100);
+      if (newConfig?.countryCode !== cadastreCountryRef.current) {
+        cadastreCountryRef.current = newConfig?.countryCode || '';
+        removeCadastreLayer();
+        removeClickListener();
+        if (newConfig) {
+          const newLayer = createWmsLayer();
+          map.overlayMapTypes.push(newLayer);
+          cadastreLayerRef.current = newLayer;
+        }
       }
     };
 
-    const zoomListener = map.addListener('zoom_changed', handleZoomChange);
     const idleListener = map.addListener('idle', handleIdle);
 
     return () => {
-      google.maps.event.removeListener(zoomListener);
       google.maps.event.removeListener(idleListener);
       removeClickListener();
       removeCadastreLayer();

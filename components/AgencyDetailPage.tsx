@@ -1369,7 +1369,7 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
   }, [showShareDropdown]);
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-slate-50 to-white overflow-y-auto">
+    <div className="min-h-screen bg-gradient-to-b from-slate-50 to-white overflow-x-hidden">
       {/* SEO Meta Tags with AggregateRating schema */}
       <SEO
         title={`${agencyData.name} - Real Estate Agency${agencyData.city ? ` in ${agencyData.city}` : ''}${agencyData.country ? `, ${agencyData.country}` : ''}`}
