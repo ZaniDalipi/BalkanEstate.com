@@ -87,47 +87,32 @@ const Map3DControls: React.FC<Map3DControlsProps> = ({
               {t('property:floorIndicator.title', 'Floor')}
             </div>
 
-            {/* Mini building visualization */}
-            <div className="relative w-10 sm:w-12 rounded-t-sm border border-slate-600/60 bg-slate-800/80 overflow-hidden"
-                 style={{ height: `clamp(100px, 20vh, 200px)` }}>
+            {/* Mini building visualization - split floor slabs */}
+            <div className="relative w-10 sm:w-12 flex flex-col-reverse"
+                 style={{ height: `clamp(100px, 20vh, 200px)`, gap: '2px' }}>
               {Array.from({ length: totalFloors! }).map((_, i) => {
-                const floor = totalFloors! - i;
+                const floor = i + 1;
                 const isHighlighted = floor === floorNumber;
-                const segmentHeight = 100 / totalFloors!;
 
                 return (
                   <div
                     key={floor}
-                    className="absolute left-0 right-0"
+                    className="rounded-[2px]"
                     style={{
-                      height: `${segmentHeight}%`,
-                      top: `${(i / totalFloors!) * 100}%`,
+                      flex: 1,
+                      background: isHighlighted
+                        ? 'linear-gradient(90deg, #22c55e, #10b981)'
+                        : floor % 2 === 0 ? '#374151' : '#4b5563',
+                      boxShadow: isHighlighted
+                        ? '0 0 8px rgba(34, 197, 94, 0.6), inset 0 1px 0 rgba(255,255,255,0.2)'
+                        : 'inset 0 1px 0 rgba(255,255,255,0.05)',
                     }}
-                  >
-                    <div
-                      className="absolute inset-0"
-                      style={{
-                        background: isHighlighted
-                          ? 'linear-gradient(90deg, #22c55e, #10b981)'
-                          : 'transparent',
-                      }}
-                    />
-                    {/* Floor divider */}
-                    <div
-                      className="absolute bottom-0 left-0 right-0"
-                      style={{
-                        height: '1px',
-                        background: isHighlighted
-                          ? 'rgba(52, 211, 153, 0.8)'
-                          : 'rgba(100, 116, 139, 0.25)',
-                      }}
-                    />
-                  </div>
+                  />
                 );
               })}
             </div>
             {/* Ground line */}
-            <div className="w-12 sm:w-14 h-0.5 bg-slate-600 rounded-full -mt-2" />
+            <div className="w-12 sm:w-14 h-1 bg-gradient-to-r from-slate-600 via-slate-500 to-slate-600 rounded-sm -mt-1" />
 
             {/* Floor number */}
             <div className="flex flex-col items-center -mt-1">
