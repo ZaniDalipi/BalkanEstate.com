@@ -394,7 +394,7 @@ export function use3DMap(props: Map3DBuildingsProps) {
     tourUrl?: string,
     onEnterTour?: () => void
   ) => {
-    const floorHeightM = 3; // 3m per floor
+    const floorHeightM = 2; // 3m per floor
     const totalHeightM = totalFlrs * floorHeightM;
 
     // Query the actual building at this location from the map's building layer
@@ -405,7 +405,7 @@ export function use3DMap(props: Map3DBuildingsProps) {
 
     // Check if 3d-buildings layer exists
     if (!mapInstance.getLayer('3d-buildings')) {
-      // Warning removed
+      console.warn('3D buildings layer not found in the map style. Custom building will be a simple box.');
     }
 
     // Helper function to calculate building centroid
@@ -655,7 +655,7 @@ export function use3DMap(props: Map3DBuildingsProps) {
         source: 'custom-building',
         paint: {
           'fill-extrusion-color': isHighlightedFloor
-            ? '#22c55e' // Bright green for the property's floor
+            ? '#13e861' // Bright green for the property's floor
             : floor % 2 === 0 ? '#4b5563' : '#6b7280', // Alternating grey for other floors
           'fill-extrusion-height': floorTop - 0.15, // Gap between floors for visual separation
           'fill-extrusion-base': floorBase + 0.05,
