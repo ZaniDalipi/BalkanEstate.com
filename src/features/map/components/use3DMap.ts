@@ -599,33 +599,45 @@ export function use3DMap(props: Map3DBuildingsProps) {
       ])
     );
 
-    // First, try to hide the original building by setting a filter that excludes buildings at this location
-    // We'll do this by creating a small exclusion zone around the property
-    if (mapInstance.getLayer('3d-buildings')) {
-      // Get the current filter and add exclusion for this building's area
-      const latTolerance = 0.0003; // ~30m tolerance
-      const lngTolerance = 0.0003;
+    // Hide the original building by filtering it out of the 3d-buildings layer
+    // We use the feature ID from the vector tile to exclude the specific building
+    if (buildingFeature && mapInstance.getLayer('3d-buildings')) {
+      const featureId = buildingFeature.id;
+      if (featureId !== undefined && featureId !== null) {
+        // Query all building features in the immediate area to hide them all
+        const hidePoint = mapInstance.project([longitude, latitude]);
+        const hideBox: [maplibregl.PointLike, maplibregl.PointLike] = [
+          [hidePoint.x - 80, hidePoint.y - 80],
+          [hidePoint.x + 80, hidePoint.y + 80]
+        ];
+        const hideCandidates = mapInstance.queryRenderedFeatures(hideBox, {
+          layers: ['3d-buildings']
+        });
 
-      // Apply filter to exclude the original building (by checking if building is within our area)
-      // This uses a bounding box check
-      mapInstance.setFilter('3d-buildings', [
-        'any',
-        ['<', ['get', 'render_height'], 5], // Keep short buildings
-        ['all',
-          ['any',
-            ['<', ['geometry-type'], 'Polygon'], // Keep non-polygons
-            ['any',
-              // Keep buildings outside our exclusion zone
-              // We can't easily filter by geometry center, so use a workaround
-              // by relying on the custom building to cover the original
-            ]
-          ]
-        ]
-      ]);
+        const hideIds: (string | number)[] = [];
+        for (const f of hideCandidates) {
+          if (f.id !== undefined && f.id !== null) {
+            const h = f.properties?.render_height || (f.properties?.['building:levels'] || 1) * 3.5;
+            if (h >= floorHeightM * 2) {
+              hideIds.push(f.id);
+            }
+          }
+        }
 
-      // Alternative: Just let the custom building cover the original
-      // Remove the filter and rely on proper z-ordering
-      mapInstance.setFilter('3d-buildings', null);
+        if (hideIds.length > 0) {
+          // Exclude these buildings from the base 3d-buildings layer
+          const existingFilter = mapInstance.getFilter('3d-buildings');
+          const excludeFilter: any[] = hideIds.length === 1
+            ? ['!=', ['id'], hideIds[0]]
+            : ['all', ...hideIds.map(id => ['!=', ['id'], id])];
+
+          if (existingFilter) {
+            mapInstance.setFilter('3d-buildings', ['all', existingFilter, excludeFilter]);
+          } else {
+            mapInstance.setFilter('3d-buildings', excludeFilter);
+          }
+        }
+      }
     }
 
     // Add source for the custom building using actual geometry
@@ -653,7 +665,10 @@ export function use3DMap(props: Map3DBuildingsProps) {
       });
     }
 
-    // Remove existing floor layers if any
+    // Remove existing floor layers and shell if any
+    if (mapInstance.getLayer('building-shell')) {
+      mapInstance.removeLayer('building-shell');
+    }
     for (let floor = 1; floor <= 100; floor++) {
       const layerId = `building-floor-${floor}`;
       if (mapInstance.getLayer(layerId)) {
@@ -664,9 +679,25 @@ export function use3DMap(props: Map3DBuildingsProps) {
       mapInstance.removeLayer('building-floor-highlight-glow');
     }
 
-    // Add floor slice layers - each floor is a separate "box" stacked on top of each other
-    // The gap between floors makes each box clearly distinct
-    const gapSize = Math.max(0.3, adjustedFloorHeight * 0.12); // 12% of floor height as gap, minimum 0.3m
+    // 1. Add a solid dark SHELL layer that completely covers the original building.
+    //    This ensures the original solid extrusion is hidden behind our shell,
+    //    and the dark shell color shows through the gaps between floor slices.
+    mapInstance.addLayer({
+      id: 'building-shell',
+      type: 'fill-extrusion',
+      source: 'custom-building',
+      paint: {
+        'fill-extrusion-color': '#0f172a', // Very dark slate – visible in gaps between floors
+        'fill-extrusion-height': finalBuildingHeight + 0.5,
+        'fill-extrusion-base': 0,
+        'fill-extrusion-opacity': 1.0,
+      },
+    });
+
+    // 2. Add floor slice layers ON TOP of the shell.
+    //    Each floor is a separate slab with generous gaps between them.
+    //    Gaps reveal the dark shell underneath, creating clear floor separation.
+    const gapSize = Math.max(0.6, adjustedFloorHeight * 0.22); // 22% of floor height as gap
     for (let floor = 1; floor <= totalFlrs; floor++) {
       const floorBase = (floor - 1) * adjustedFloorHeight;
       const floorTop = floor * adjustedFloorHeight;
@@ -680,21 +711,18 @@ export function use3DMap(props: Map3DBuildingsProps) {
         paint: {
           'fill-extrusion-color': isHighlightedFloor
             ? '#22c55e' // Bright green for the property's floor
-            : floor % 2 === 0 ? '#4b5563' : '#6b7280', // Alternating grey for other floors
-          'fill-extrusion-height': floorTop - gapSize, // Gap at top of each floor slab
-          'fill-extrusion-base': floorBase + (gapSize * 0.25), // Small gap at bottom too
-          'fill-extrusion-opacity': isHighlightedFloor ? 1 : 0.75,
+            : floor % 2 === 0 ? '#e2e8f0' : '#cbd5e1', // Light grey – contrasts with dark shell gaps
+          'fill-extrusion-height': floorTop - gapSize,
+          'fill-extrusion-base': floorBase + (gapSize * 0.3),
+          'fill-extrusion-opacity': 1.0,
         },
       });
     }
 
-    // Add a brighter outline layer for the highlighted floor to make it pop
+    // 3. Add a brighter glow layer for the highlighted floor to make it pop
     const highlightBase = (floorNum - 1) * adjustedFloorHeight;
     const highlightTop = floorNum * adjustedFloorHeight;
     const glowLayerId = 'building-floor-highlight-glow';
-    if (mapInstance.getLayer(glowLayerId)) {
-      mapInstance.removeLayer(glowLayerId);
-    }
     mapInstance.addLayer({
       id: glowLayerId,
       type: 'fill-extrusion',
