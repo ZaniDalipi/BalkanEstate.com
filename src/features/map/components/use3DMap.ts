@@ -599,9 +599,19 @@ export function use3DMap(props: Map3DBuildingsProps) {
       ])
     );
 
-    // Hide the original building by filtering it out of the 3d-buildings layer
-    // We use the feature ID from the vector tile to exclude the specific building
-    if (buildingFeature && mapInstance.getLayer('3d-buildings')) {
+    // Hide the original building by filtering it out of ALL fill-extrusion building layers.
+    // The Liberty style may have its own building extrusion layer(s) besides our '3d-buildings'.
+    // We need to hide the building from ALL of them to prevent overlap with our floor slices.
+    if (buildingFeature) {
+      // Collect all fill-extrusion layers that render buildings
+      const allLayers = mapInstance.getStyle().layers || [];
+      const buildingExtrusionLayerIds = allLayers
+        .filter(l =>
+          l.type === 'fill-extrusion' &&
+          (l.id === '3d-buildings' || ('source-layer' in l && (l as any)['source-layer'] === 'building'))
+        )
+        .map(l => l.id);
+
       const featureId = buildingFeature.id;
       if (featureId !== undefined && featureId !== null) {
         // Query all building features in the immediate area to hide them all
@@ -610,9 +620,12 @@ export function use3DMap(props: Map3DBuildingsProps) {
           [hidePoint.x - 80, hidePoint.y - 80],
           [hidePoint.x + 80, hidePoint.y + 80]
         ];
-        const hideCandidates = mapInstance.queryRenderedFeatures(hideBox, {
-          layers: ['3d-buildings']
-        });
+
+        // Query from all building extrusion layers
+        const queryLayers = buildingExtrusionLayerIds.filter(id => mapInstance.getLayer(id));
+        const hideCandidates = queryLayers.length > 0
+          ? mapInstance.queryRenderedFeatures(hideBox, { layers: queryLayers })
+          : [];
 
         const hideIds: (string | number)[] = [];
         for (const f of hideCandidates) {
@@ -625,16 +638,20 @@ export function use3DMap(props: Map3DBuildingsProps) {
         }
 
         if (hideIds.length > 0) {
-          // Exclude these buildings from the base 3d-buildings layer
-          const existingFilter = mapInstance.getFilter('3d-buildings');
           const excludeFilter: any[] = hideIds.length === 1
             ? ['!=', ['id'], hideIds[0]]
             : ['all', ...hideIds.map(id => ['!=', ['id'], id])];
 
-          if (existingFilter) {
-            mapInstance.setFilter('3d-buildings', ['all', existingFilter, excludeFilter]);
-          } else {
-            mapInstance.setFilter('3d-buildings', excludeFilter);
+          // Apply the exclude filter to ALL building extrusion layers
+          for (const layerId of queryLayers) {
+            try {
+              const existingFilter = mapInstance.getFilter(layerId);
+              if (existingFilter) {
+                mapInstance.setFilter(layerId, ['all', existingFilter, excludeFilter]);
+              } else {
+                mapInstance.setFilter(layerId, excludeFilter);
+              }
+            } catch (_) { /* layer might have been removed */ }
           }
         }
       }
@@ -982,7 +999,21 @@ export function use3DMap(props: Map3DBuildingsProps) {
     mapInstance.on('load', () => {
       setMapLoaded(true);
 
-      // Add 3D building extrusion layer if not already present
+      // Remove any existing fill-extrusion building layers from the Liberty style.
+      // The Liberty style ships its own 3D building extrusion layer (with an unknown ID).
+      // If we leave it in place, it renders ON TOP of our custom floor slices and hides them.
+      // We replace it with our own '3d-buildings' layer so we have full control.
+      const styleLayers = mapInstance.getStyle().layers || [];
+      for (const layer of styleLayers) {
+        if (
+          layer.type === 'fill-extrusion' &&
+          ('source-layer' in layer && (layer as any)['source-layer'] === 'building')
+        ) {
+          try { mapInstance.removeLayer(layer.id); } catch (_) { /* already removed */ }
+        }
+      }
+
+      // Add our own 3D building extrusion layer
       if (!mapInstance.getLayer('3d-buildings')) {
         // Find the first symbol layer for proper ordering
         const layers = mapInstance.getStyle().layers;
@@ -1161,45 +1192,61 @@ export function use3DMap(props: Map3DBuildingsProps) {
       // Add custom 3D building with floor slices for properties with floor data
       // Wait for tiles to fully load before querying building geometry
       if (floorNumber != null && totalFloors != null && totalFloors > 0) {
-        // Retry mechanism to ensure building tiles are loaded
         let retryCount = 0;
-        const maxRetries = 5;
+        const maxRetries = 4;
 
-        const tryAddCustomBuilding = () => {
-          // First zoom to the building location to ensure tiles load
-          mapInstance.flyTo({
-            center: [lng, lat],
-            zoom: Math.max(mapInstance.getZoom(), 17),
-            padding: { top: 0, bottom: 120, left: 0, right: 0 },
-            duration: 1500,
-          });
+        const doAddBuilding = () => {
+          // Query the 3d-buildings layer to check if tiles have rendered buildings here
+          const point = mapInstance.project([lng, lat]);
+          const features = mapInstance.queryRenderedFeatures(
+            [[point.x - 150, point.y - 150], [point.x + 150, point.y + 150]],
+            { layers: mapInstance.getLayer('3d-buildings') ? ['3d-buildings'] : undefined }
+          );
 
-          // Wait for the fly animation and tiles to load
+          const foundBuildings = features.some(f =>
+            f.geometry.type === 'Polygon' || f.geometry.type === 'MultiPolygon'
+          );
+
+          if (!foundBuildings && retryCount < maxRetries) {
+            // Tiles not loaded yet — wait for next idle and retry
+            retryCount++;
+            mapInstance.once('idle', () => {
+              setTimeout(doAddBuilding, 500);
+            });
+            return;
+          }
+
+          // Either found buildings or exhausted retries — add the custom building
+          // (addCustomBuilding3D has its own fallback rectangle if no geometry found)
+          addCustomBuilding3D(
+            mapInstance,
+            lat,
+            lng,
+            floorNumber,
+            totalFloors,
+            virtualTour360Url,
+            virtualTour360Url ? handleEnterBuilding : undefined
+          );
+        };
+
+        // Fly to zoom 17 to ensure building tiles load, then wait for rendering
+        mapInstance.flyTo({
+          center: [lng, lat],
+          zoom: Math.max(mapInstance.getZoom(), 17),
+          padding: { top: 0, bottom: 120, left: 0, right: 0 },
+          duration: 1500,
+        });
+
+        // After fly animation completes, wait for tiles to render then add building
+        mapInstance.once('moveend', () => {
+          mapInstance.once('idle', doAddBuilding);
+          // Fallback in case idle never fires
           setTimeout(() => {
-            addCustomBuilding3D(
-              mapInstance,
-              lat,
-              lng,
-              floorNumber,
-              totalFloors,
-              virtualTour360Url,
-              virtualTour360Url ? handleEnterBuilding : undefined
-            );
-
-            // Check if source was added successfully - if not, retry
-            if (!mapInstance.getSource('custom-building') && retryCount < maxRetries) {
-              retryCount++;
-              setTimeout(tryAddCustomBuilding, 1000);
+            if (!mapInstance.getSource('custom-building')) {
+              doAddBuilding();
             }
-          }, 2000);
-        };
-
-        // Start the process after initial load
-        const addBuildingOnIdle = () => {
-          tryAddCustomBuilding();
-          mapInstance.off('idle', addBuildingOnIdle);
-        };
-        mapInstance.on('idle', addBuildingOnIdle);
+          }, 4000);
+        });
       }
 
       // Add attribution
