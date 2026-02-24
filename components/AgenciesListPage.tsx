@@ -433,7 +433,7 @@ const AgenciesListPage: React.FC = () => {
   `;
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-gray-50 via-white to-gray-50 relative">
+    <div className="min-h-screen bg-gradient-to-b from-gray-50 via-white to-gray-50 relative overflow-x-hidden">
       {/* Include 3D animation styles */}
       <Decorative3DStyles />
 
