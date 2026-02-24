@@ -38,6 +38,8 @@ export function use3DMap(props: Map3DBuildingsProps) {
   const map = useRef<maplibregl.Map | null>(null);
   const doorMarkerRef = useRef<maplibregl.Marker | null>(null);
   const floorLabelsRef = useRef<maplibregl.Marker[]>([]);
+  const facingArrowRef = useRef<HTMLElement | null>(null);
+  const facingBearingRef = useRef<number>(0);
 
   // State
   const [mapLoaded, setMapLoaded] = useState(false);
@@ -332,9 +334,14 @@ export function use3DMap(props: Map3DBuildingsProps) {
         : getBuildingFacing(mapInstance, latitude, longitude);
       if (facing === null) return;
 
+      // Store the absolute facing bearing for dynamic rotation
+      facingBearingRef.current = facing;
+
       const cardinal = getCardinalShort(facing);
       const cardinalFull = getCardinalLabel(facing);
-      const arrowRotation = facing; // CSS rotation matches compass bearing
+      // Adjust arrow rotation by current map bearing so it always points geographically correct
+      const mapBearing = mapInstance.getBearing();
+      const arrowRotation = facing - mapBearing;
 
       const facingEl = document.createElement('div');
       facingEl.innerHTML = `
@@ -359,10 +366,11 @@ export function use3DMap(props: Map3DBuildingsProps) {
           ">
             <div style="font-size: 10px; color: #94a3b8; font-weight: 500;">Facing</div>
             <div style="display: flex; align-items: center; gap: 4px; justify-content: center;">
-              <div style="
+              <div class="facing-arrow" style="
                 width: 20px; height: 20px;
                 display: flex; align-items: center; justify-content: center;
                 transform: rotate(${arrowRotation}deg);
+                transition: transform 0.15s ease-out;
               ">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#60a5fa" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
                   <path d="M12 19V5M5 12l7-7 7 7"/>
@@ -375,11 +383,23 @@ export function use3DMap(props: Map3DBuildingsProps) {
         </div>
       `;
 
+      // Store ref to the arrow element for dynamic rotation updates
+      facingArrowRef.current = facingEl.querySelector('.facing-arrow') as HTMLElement;
+
       // Position the facing indicator slightly below the property
       const offset = 0.00015; // ~15m south
       new maplibregl.Marker({ element: facingEl, anchor: 'top' })
         .setLngLat([longitude, latitude - offset])
         .addTo(mapInstance);
+
+      // Listen for map rotation and update arrow direction dynamically
+      const updateFacingArrow = () => {
+        if (!facingArrowRef.current) return;
+        const currentMapBearing = mapInstance.getBearing();
+        const adjustedRotation = facingBearingRef.current - currentMapBearing;
+        facingArrowRef.current.style.transform = `rotate(${adjustedRotation}deg)`;
+      };
+      mapInstance.on('rotate', updateFacingArrow);
     }, 1500);
   }, [getBuildingFacing]);
 
