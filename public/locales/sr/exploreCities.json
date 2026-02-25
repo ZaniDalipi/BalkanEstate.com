@@ -1,71 +1,122 @@
 {
-  "title": "Istražite balkanske gradove",
-  "subtitle": "Tržišni uvidi pokretani veštačkom inteligencijom za {count} velikih gradova u 10 zemalja",
   "page": {
-    "title": "Istražite balkanske gradove - Uvidi u tržište nekretnina"
-  },
-  "hero": {
-    "title": "Istražite balkanske gradove",
-    "subtitle": "Tržišni uvidi pokretani veštačkom inteligencijom za {{count}} velikih gradova u 10 zemalja",
-    "discoverSubtitle": "Otkrijte najbolja tržišta nekretnina širom Balkana"
-  },
-  "empty": {
-    "title": "Nema dostupnih podataka o gradovima",
-    "message": "Tržišni podaci će uskoro biti ažurirani. Proverite ponovo kasnije!"
+    "title": "Истражи балканске градове - Увиди у тржиште некретнина",
+    "description": "AI увиди о тржишту за {{count}} главних градова у 10 земаља"
   },
   "cards": {
-    "allCitiesTitle": "Svi gradovi",
-    "countryTitle": "Gradovi u {{country}}",
-    "subtitle": "Otkrijte mogućnosti za nekretnine u {{count}} gradova"
+    "title": "Сви градови",
+    "allCitiesTitle": "Сви градови",
+    "countryTitle": "Градови у {{country}}",
+    "subtitle": "Откријте могућности за некретнине у {{count}} градова"
   },
-  "discoverSubtitle": "Otkrijte najbolja tržišta nekretnina širom Balkana",
-  "noCitiesTitle": "Nema dostupnih podataka o gradovima",
-  "noCitiesMessage": "Tržišni podaci će uskoro biti ažurirani. Proverite ponovo kasnije!",
+  "hero": {
+    "title": "Истражи балканске градове",
+    "subtitle": "AI увиди о тржишту за {{count}} главних градова у 10 земаља",
+    "discoverSubtitle": "Откријте најбоља тржишта некретнина широм Балкана"
+  },
+  "empty": {
+    "title": "Нема доступних података о граду",
+    "message": "Подаци о тржишту ће ускоро бити ажурирани. Проверите поново касније!"
+  },
   "stats": {
-    "totalCities": "Ukupno gradova",
-    "countries": "Zemlje",
-    "avgGrowth": "Prosečan rast",
-    "totalListings": "Ukupno oglasa"
+    "totalCities": "Укупно градова",
+    "countries": "Земље",
+    "avgGrowth": "Просечан раст",
+    "totalListings": "Укупно огласа"
   },
   "filters": {
-    "allCountries": "Sve zemlje"
+    "allCountries": "Све земље"
   },
   "cityCard": {
-    "demand": "Potražnja kupaca",
-    "demandHigh": "Visoka",
-    "demandMedium": "Umerena",
-    "demandLow": "Niska",
-    "investment": "Investicioni potencijal",
-    "investmentExcellent": "Odličan",
-    "investmentGood": "Dobar",
-    "investmentFair": "Prosečan",
-    "avgPricePerSqm": "Prosečna cena po m²",
-    "medianPrice": "Tipična cena nekretnine",
-    "yoyGrowth": "Promena cene (1 godina)",
-    "rentalYield": "Prinos od iznajmljivanja",
-    "rentalYieldHelper": "Godišnji prihod u odnosu na cenu nekretnine",
-    "daysOnMarket": "Prosečno vreme prodaje",
-    "days": "dana",
-    "daysUnit": "dana"
+    "demand": "Потражња купаца",
+    "demandHigh": "Висока",
+    "demandMedium": "Умерена",
+    "demandLow": "Ниска",
+    "investment": "Инвестициони потенцијал",
+    "investmentExcellent": "Одличан",
+    "investmentGood": "Добар",
+    "investmentFair": "Просечан",
+    "avgPricePerSqm": "Просечна цена по m²",
+    "medianPrice": "Типична цена некретнине",
+    "yoyGrowth": "Промена цене (1 година)",
+    "rentalYield": "Принос од издавања",
+    "rentalYieldHelper": "Годишњи приход у односу на цену некретнине",
+    "daysOnMarket": "Просечно време продаје",
+    "days": "дана",
+    "daysUnit": "дана"
   },
   "sections": {
-    "topNeighborhoods": "Najbolji kvartovi",
-    "marketInsights": "Tržišni uvidi"
+    "topNeighborhoods": "Најбоље четврти",
+    "marketInsights": "Увиди у тржиште"
   },
   "footer": {
-    "listings": "oglasa",
-    "soldPerMonth": "prodato/mes.",
-    "viewListings": "Pogledajte oglase na mapi"
+    "listings": "огласи",
+    "soldPerMonth": "продатих/мес.",
+    "viewListings": "Погледајте огласе на мапи"
   },
   "trends": {
-    "rising": "u porastu",
-    "declining": "u padu",
-    "stable": "stabilno"
+    "rising": "у порасту",
+    "declining": "у паду",
+    "stable": "стабилно"
   },
   "aiInsights": {
-    "title": "Tržišna inteligencija pokretana veštačkom inteligencijom",
-    "description": "Naši tržišni podaci su pokretani Gemini veštačkom inteligencijom i ažuriraju se dva puta mesečno (1. i 15.). Analiziramo tržišne trendove u realnom vremenu, cene nekretnina, indikatore potražnje i lokalne uvide u {count} velikih gradova na Balkanu.",
-    "lastUpdated": "Poslednje ažuriranje: {date}",
-    "dataSource": "Izvor podataka: Gemini AI + Lokalne baze nekretnina"
+    "title": "Тржишна интелигенција на бази AI",
+    "description": "Наше податке о тржишту покреће Gemini AI и ажурирају се двапут месечно (1. и 15.). Анализирамо трендове на тржишту у реалном времену, цене некретнина, показатеље потражње и локалне увиде у {{count}} главних градова на Балкану.",
+    "lastUpdated": "Последње ажурирање: {{date}}",
+    "dataSource": "Извор података: Gemini AI + Локалне базе података о некретнинама"
+  },
+  "loading": {
+    "title": "Учитавање градова...",
+    "message": "Преузимање података о тржишту за градове Балкана"
+  },
+  "seo": {
+    "title": "Explore Balkan Cities - Property Markets, Prices & City Guides",
+    "description": "Explore {{cityCount}}+ cities across {{countryCount}} Balkan countries. Compare property prices, rental yields, and market trends in Tirana, Budva, Belgrade, Skopje, and more.",
+    "schemaName": "Balkan Cities Property Guide",
+    "schemaDescription": "Property market data for {{count}} cities across the Balkans"
+  },
+  "dashboard": {
+    "notFound": "Grad nije pronađen",
+    "notFoundMessage": "Nismo pronašli tržišne podatke za ovaj grad.",
+    "backToExplore": "Nazad na Istraži Gradove",
+    "marketIs": "Tržište je",
+    "marketActivity": "Tržišna Aktivnost",
+    "activeListings": "Aktivni Oglasi",
+    "soldLastMonth": "Prodato Prošlog Meseca",
+    "momGrowth": "Mesečna Promena Cene",
+    "investmentOverview": "Pregled Investicija",
+    "investmentSummary": "{{city}} ima tržište sa {{demand}} potražnjom, {{investment}} investicionim potencijalom i {{yield}}% prinosom od zakupa.",
+    "viewListingsInCity": "Pogledaj Oglase u {{city}}",
+    "exploreMoreCities": "Istražite Više Gradova",
+    "seoTitle": "{{city}}, {{country}} - Panel Tržišta Nekretnina",
+    "seoDescription": "Istražite podatke o tržištu nekretnina za {{city}}, {{country}}. Prosečna cena €{{price}}/m², {{trend}} tržište sa {{yield}}% prinosom od zakupa.",
+    "priceEstimator": "Procena Cena",
+    "priceEstimatorDesc": "Procenjene cene na osnovu proseka €{{price}}/m² u {{city}}",
+    "studio": "Garsonjera",
+    "oneBed": "Jednosoban",
+    "twoBed": "Dvosoban",
+    "threeBed": "Trosoban",
+    "whatYouCanBuy": "Šta Vam Budžet Donosi",
+    "whatYouCanBuyDesc": "Približne veličine nekretnina za različite budžete u {{city}}",
+    "budgetStudio": "Kompaktna garsonjera ili mali stan",
+    "budgetOneBed": "Udoban jednosoban stan",
+    "budgetTwoBed": "Prostran dvosoban stan",
+    "budgetThreeBed": "Veliki porodični trosoban stan",
+    "budgetHouse": "Premium nekretnina ili manja kuća",
+    "rentalIncome": "Projekcije Prihoda od Zakupa",
+    "rentalIncomeDesc": "Procenjeni prihod na osnovu {{yield}}% godišnjeg prinosa u {{city}}",
+    "investmentOf": "{{label}} Investicija",
+    "annualIncome": "Godišnje",
+    "monthlyIncome": "Mesečno",
+    "countryComparison": "Poređenje Cena u {{country}}",
+    "countryComparisonDesc": "Prosečna cena po m² u poređenju sa drugim gradovima u {{country}}",
+    "otherCitiesIn": "Drugi Gradovi u {{country}}",
+    "priceLabel": "Cena/m²",
+    "marketHealth": "Ocena Zdravlja Tržišta",
+    "healthExcellent": "Odlično",
+    "healthGood": "Dobro",
+    "healthFair": "Pristojno",
+    "healthPoor": "Loše",
+    "debugTitle": "Debug Info (samo dev)"
   }
 }

@@ -104,6 +104,12 @@
     "countryComparison": "Price Comparison in {{country}}",
     "countryComparisonDesc": "Average price per m² compared to other cities in {{country}}",
     "otherCitiesIn": "Other Cities in {{country}}",
-    "priceLabel": "Price/m²"
+    "priceLabel": "Price/m²",
+    "marketHealth": "Market Health Score",
+    "healthExcellent": "Excellent",
+    "healthGood": "Good",
+    "healthFair": "Fair",
+    "healthPoor": "Poor",
+    "debugTitle": "Debug Info (dev only)"
   }
 }

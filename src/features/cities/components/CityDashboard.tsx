@@ -22,17 +22,45 @@ import {
   CurrencyEuroIcon,
   HomeModernIcon,
   LightBulbIcon,
+  ShieldCheckIcon,
+  InformationCircleIcon,
 } from '@/constants';
+
+const isDev = import.meta.env?.DEV ?? false;
+
+/** Safely returns a finite number, falling back to `fallback` (default 0) for NaN/Infinity/undefined/null */
+function safeNum(val: unknown, fallback = 0): number {
+  if (val == null) return fallback;
+  const n = Number(val);
+  return Number.isFinite(n) ? n : fallback;
+}
+
+/** Clamp a number between min and max */
+function clamp(val: number, min: number, max: number): number {
+  return Math.min(max, Math.max(min, val));
+}
+
+/** Safely format a date string, returning fallback on invalid dates */
+function safeFormatDate(dateStr: string | undefined | null, locale = 'en-US'): string {
+  if (!dateStr) return '—';
+  const d = new Date(dateStr);
+  if (isNaN(d.getTime())) return '—';
+  return d.toLocaleDateString(locale, { year: 'numeric', month: 'long', day: 'numeric' });
+}
 
 /** Extract city & country from the current URL path */
 function parseCityFromUrl(): { city: string; country: string } | null {
   const { path } = parseLanguageFromPath(window.location.pathname);
   const match = path.match(/^\/explore-cities\/([^/]+)\/([^/]+)$/);
   if (!match) return null;
-  return {
-    city: decodeURIComponent(match[1]),
-    country: decodeURIComponent(match[2]),
-  };
+  try {
+    return {
+      city: decodeURIComponent(match[1]),
+      country: decodeURIComponent(match[2]),
+    };
+  } catch {
+    return null;
+  }
 }
 
 const CityDashboard: React.FC = () => {
@@ -191,16 +219,47 @@ const CityDashboard: React.FC = () => {
     );
   }
 
+  // Safe numeric accessors — protects against NaN / undefined / 0 division
+  const avgPrice = safeNum(city.avgPricePerSqm, 1); // min 1 to avoid division by zero
+  const medianPrice = safeNum(city.medianPrice);
+  const yoyGrowth = safeNum(city.priceGrowthYoY);
+  const momGrowth = safeNum(city.priceGrowthMoM);
+  const rentalYield = safeNum(city.rentalYield);
+  const demandScore = clamp(safeNum(city.demandScore), 0, 100);
+  const investmentScore = clamp(safeNum(city.investmentScore), 0, 100);
+  const listingsCount = safeNum(city.listingsCount);
+  const soldLastMonth = safeNum(city.soldLastMonth);
+  const daysOnMarket = safeNum(city.averageDaysOnMarket);
+
+  // Market Health Score: composite 0–100 from demand, investment, rental yield, growth
+  const marketHealthScore = clamp(
+    Math.round(
+      demandScore * 0.3 +
+      investmentScore * 0.3 +
+      clamp(rentalYield * 10, 0, 100) * 0.2 +
+      clamp(50 + yoyGrowth * 5, 0, 100) * 0.2
+    ),
+    0,
+    100
+  );
+  const getHealthLabel = (score: number) => {
+    if (score >= 75) return { label: t('dashboard.healthExcellent', 'Excellent'), color: 'text-green-600', ring: 'stroke-green-500' };
+    if (score >= 50) return { label: t('dashboard.healthGood', 'Good'), color: 'text-blue-600', ring: 'stroke-blue-500' };
+    if (score >= 25) return { label: t('dashboard.healthFair', 'Fair'), color: 'text-amber-600', ring: 'stroke-amber-500' };
+    return { label: t('dashboard.healthPoor', 'Poor'), color: 'text-red-600', ring: 'stroke-red-500' };
+  };
+  const healthInfo = getHealthLabel(marketHealthScore);
+
   const imageUrl = getCityImageUrl(city.city, { country: city.country, width: 1200, height: 500, quality: 'auto:good' });
   const fallbackGradient = getCityFallbackGradient(city.city);
-  const demandInfo = getDemandInfo(city.demandScore);
-  const investmentInfo = getInvestmentInfo(city.investmentScore);
+  const demandInfo = getDemandInfo(demandScore);
+  const investmentInfo = getInvestmentInfo(investmentScore);
 
   return (
     <div className="min-h-screen bg-gray-50">
       <SEO
         title={t('dashboard.seoTitle', '{{city}}, {{country}} - Real Estate Market Dashboard', { city: city.city, country: city.country })}
-        description={t('dashboard.seoDescription', 'Explore real estate market data for {{city}}, {{country}}. Average price €{{price}}/m², {{trend}} market with {{yield}}% rental yield.', { city: city.city, country: city.country, price: city.avgPricePerSqm.toLocaleString(), trend: city.marketTrend, yield: city.rentalYield })}
+        description={t('dashboard.seoDescription', 'Explore real estate market data for {{city}}, {{country}}. Average price €{{price}}/m², {{trend}} market with {{yield}}% rental yield.', { city: city.city, country: city.country, price: avgPrice.toLocaleString(), trend: city.marketTrend, yield: rentalYield })}
         canonical={`${typeof window !== 'undefined' ? window.location.origin : ''}/explore-cities/${encodeURIComponent(city.city)}/${encodeURIComponent(city.country)}`}
         type="website"
       />
@@ -211,6 +270,8 @@ const CityDashboard: React.FC = () => {
           src={imageUrl}
           alt={city.city}
           className="absolute inset-0 w-full h-full object-cover"
+          loading="eager"
+          decoding="async"
           onError={(e) => {
             (e.target as HTMLImageElement).style.display = 'none';
             (e.target as HTMLImageElement).parentElement!.style.background = fallbackGradient;
@@ -222,7 +283,7 @@ const CityDashboard: React.FC = () => {
         <div className="absolute top-4 left-4 z-10">
           <button
             onClick={navigateBack}
-            className="flex items-center gap-2 px-4 py-2 bg-black/30 backdrop-blur-md text-white rounded-xl border border-white/20 hover:bg-black/50 transition-colors text-sm font-medium"
+            className="flex items-center gap-2 px-3 sm:px-4 py-2 bg-black/30 backdrop-blur-md text-white rounded-xl border border-white/20 hover:bg-black/50 active:bg-black/60 transition-colors text-xs sm:text-sm font-medium"
           >
             <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
@@ -237,9 +298,9 @@ const CityDashboard: React.FC = () => {
             <div>
               <div className="flex items-center gap-2 mb-1">
                 <MapPinIcon className="w-6 h-6 text-white/90" />
-                <h1 className="text-3xl sm:text-4xl font-black text-white">{city.city}</h1>
+                <h1 className="text-2xl sm:text-3xl md:text-4xl font-black text-white">{city.city}</h1>
               </div>
-              <p className="text-white/70 text-lg ml-8">{city.country}</p>
+              <p className="text-white/70 text-base sm:text-lg ml-8">{city.country}</p>
             </div>
             <div className={`inline-flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold shadow-lg ${getTrendColor(city.marketTrend)}`}>
               {getTrendIcon(city.marketTrend)}
@@ -252,6 +313,62 @@ const CityDashboard: React.FC = () => {
       {/* Main content */}
       <div className="max-w-6xl mx-auto px-4 sm:px-8 -mt-6 relative z-10 pb-12">
 
+        {/* Market Health Score - composite visual */}
+        <div className="bg-white rounded-xl shadow-md border border-neutral-100 p-5 sm:p-6 mb-8">
+          <div className="flex flex-col sm:flex-row items-center gap-6">
+            {/* Circular score */}
+            <div className="relative w-32 h-32 flex-shrink-0">
+              <svg className="w-full h-full -rotate-90" viewBox="0 0 100 100">
+                <circle cx="50" cy="50" r="42" fill="none" stroke="#e5e7eb" strokeWidth="8" />
+                <circle
+                  cx="50" cy="50" r="42" fill="none"
+                  className={healthInfo.ring}
+                  strokeWidth="8"
+                  strokeLinecap="round"
+                  strokeDasharray={`${(marketHealthScore / 100) * 264} 264`}
+                />
+              </svg>
+              <div className="absolute inset-0 flex flex-col items-center justify-center">
+                <span className="text-3xl font-black text-neutral-900">{marketHealthScore}</span>
+                <span className="text-[10px] font-semibold text-neutral-400 uppercase tracking-wider">/100</span>
+              </div>
+            </div>
+            {/* Breakdown */}
+            <div className="flex-1 w-full">
+              <h3 className="text-lg font-bold text-neutral-900 mb-1 flex items-center gap-2">
+                <ShieldCheckIcon className="w-5 h-5 text-primary" />
+                {t('dashboard.marketHealth', 'Market Health Score')}
+              </h3>
+              <p className={`text-sm font-bold mb-4 ${healthInfo.color}`}>{healthInfo.label}</p>
+              <div className="grid grid-cols-2 gap-x-6 gap-y-2">
+                {[
+                  { label: t('cityCard.demand'), val: demandScore, max: 100 },
+                  { label: t('cityCard.investment'), val: investmentScore, max: 100 },
+                  { label: t('cityCard.rentalYield'), val: rentalYield, max: 10, suffix: '%' },
+                  { label: t('cityCard.yoyGrowth'), val: yoyGrowth, max: 20, suffix: '%', signed: true },
+                ].map(({ label, val, max, suffix, signed }) => (
+                  <div key={label} className="flex items-center gap-2">
+                    <div className="flex-1">
+                      <div className="flex items-center justify-between mb-0.5">
+                        <span className="text-xs text-neutral-500 truncate">{label}</span>
+                        <span className="text-xs font-bold text-neutral-700">
+                          {signed && val > 0 ? '+' : ''}{val}{suffix}
+                        </span>
+                      </div>
+                      <div className="w-full h-1.5 bg-neutral-100 rounded-full overflow-hidden">
+                        <div
+                          className="h-full rounded-full bg-gradient-to-r from-primary to-primary/70"
+                          style={{ width: `${clamp((Math.abs(val) / max) * 100, 0, 100)}%` }}
+                        />
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+
         {/* Primary metrics row */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4 mb-8">
           {/* Avg Price/m² */}
@@ -263,7 +380,7 @@ const CityDashboard: React.FC = () => {
               <span className="text-xs font-medium text-neutral-500">{t('cityCard.avgPricePerSqm')}</span>
             </div>
             <div className="flex items-baseline gap-1">
-              <span className="text-2xl sm:text-3xl font-black text-neutral-900">€{city.avgPricePerSqm.toLocaleString()}</span>
+              <span className="text-2xl sm:text-3xl font-black text-neutral-900">€{avgPrice.toLocaleString()}</span>
               <span className="text-sm text-neutral-400">/m²</span>
             </div>
           </div>
@@ -276,16 +393,16 @@ const CityDashboard: React.FC = () => {
               </div>
               <span className="text-xs font-medium text-neutral-500">{t('cityCard.medianPrice')}</span>
             </div>
-            <span className="text-2xl sm:text-3xl font-black text-primary">{formatPrice(city.medianPrice, city.countryCode)}</span>
+            <span className="text-2xl sm:text-3xl font-black text-primary">{formatPrice(medianPrice, city.countryCode)}</span>
           </div>
 
           {/* YoY Growth */}
           <div className="bg-white rounded-xl shadow-md border border-neutral-100 p-4 sm:p-5">
             <div className="flex items-center gap-2 mb-2">
-              <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${city.priceGrowthYoY > 0 ? 'bg-green-100' : city.priceGrowthYoY < 0 ? 'bg-red-100' : 'bg-neutral-100'}`}>
-                {city.priceGrowthYoY > 0 ? (
+              <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${yoyGrowth > 0 ? 'bg-green-100' : yoyGrowth < 0 ? 'bg-red-100' : 'bg-neutral-100'}`}>
+                {yoyGrowth > 0 ? (
                   <ArrowTrendingUpIcon className="w-4 h-4 text-green-600" />
-                ) : city.priceGrowthYoY < 0 ? (
+                ) : yoyGrowth < 0 ? (
                   <ArrowTrendingDownIcon className="w-4 h-4 text-red-600" />
                 ) : (
                   <ChartBarIcon className="w-4 h-4 text-neutral-500" />
@@ -293,8 +410,8 @@ const CityDashboard: React.FC = () => {
               </div>
               <span className="text-xs font-medium text-neutral-500">{t('cityCard.yoyGrowth')}</span>
             </div>
-            <span className={`text-2xl sm:text-3xl font-black ${city.priceGrowthYoY > 0 ? 'text-green-600' : city.priceGrowthYoY < 0 ? 'text-red-600' : 'text-neutral-700'}`}>
-              {city.priceGrowthYoY > 0 ? '+' : ''}{city.priceGrowthYoY}%
+            <span className={`text-2xl sm:text-3xl font-black ${yoyGrowth > 0 ? 'text-green-600' : yoyGrowth < 0 ? 'text-red-600' : 'text-neutral-700'}`}>
+              {yoyGrowth > 0 ? '+' : ''}{yoyGrowth}%
             </span>
           </div>
 
@@ -306,7 +423,7 @@ const CityDashboard: React.FC = () => {
               </div>
               <span className="text-xs font-medium text-neutral-500">{t('cityCard.rentalYield')}</span>
             </div>
-            <span className="text-2xl sm:text-3xl font-black text-blue-600">{city.rentalYield}%</span>
+            <span className="text-2xl sm:text-3xl font-black text-blue-600">{rentalYield}%</span>
           </div>
         </div>
 
@@ -326,7 +443,7 @@ const CityDashboard: React.FC = () => {
                   <HomeIcon className="w-5 h-5 text-primary" />
                   <span className="text-sm font-medium text-neutral-700">{t('dashboard.activeListings', 'Active Listings')}</span>
                 </div>
-                <span className="text-lg font-bold text-neutral-900">{city.listingsCount}</span>
+                <span className="text-lg font-bold text-neutral-900">{listingsCount.toLocaleString()}</span>
               </div>
               {/* Sold last month */}
               <div className="flex items-center justify-between p-3 bg-neutral-50 rounded-lg">
@@ -334,7 +451,7 @@ const CityDashboard: React.FC = () => {
                   <ChartBarIcon className="w-5 h-5 text-green-500" />
                   <span className="text-sm font-medium text-neutral-700">{t('dashboard.soldLastMonth', 'Sold Last Month')}</span>
                 </div>
-                <span className="text-lg font-bold text-neutral-900">{city.soldLastMonth}</span>
+                <span className="text-lg font-bold text-neutral-900">{soldLastMonth.toLocaleString()}</span>
               </div>
               {/* Average days on market */}
               <div className="flex items-center justify-between p-3 bg-neutral-50 rounded-lg">
@@ -342,22 +459,22 @@ const CityDashboard: React.FC = () => {
                   <CalendarIcon className="w-5 h-5 text-amber-500" />
                   <span className="text-sm font-medium text-neutral-700">{t('cityCard.daysOnMarket')}</span>
                 </div>
-                <span className="text-lg font-bold text-neutral-900">{city.averageDaysOnMarket} {t('cityCard.daysUnit')}</span>
+                <span className="text-lg font-bold text-neutral-900">{daysOnMarket} {t('cityCard.daysUnit')}</span>
               </div>
               {/* MoM Growth */}
               <div className="flex items-center justify-between p-3 bg-neutral-50 rounded-lg">
                 <div className="flex items-center gap-3">
-                  {city.priceGrowthMoM > 0 ? (
+                  {momGrowth > 0 ? (
                     <ArrowTrendingUpIcon className="w-5 h-5 text-green-500" />
-                  ) : city.priceGrowthMoM < 0 ? (
+                  ) : momGrowth < 0 ? (
                     <ArrowTrendingDownIcon className="w-5 h-5 text-red-500" />
                   ) : (
                     <ChartBarIcon className="w-5 h-5 text-neutral-400" />
                   )}
                   <span className="text-sm font-medium text-neutral-700">{t('dashboard.momGrowth', 'Monthly Price Change')}</span>
                 </div>
-                <span className={`text-lg font-bold ${city.priceGrowthMoM > 0 ? 'text-green-600' : city.priceGrowthMoM < 0 ? 'text-red-600' : 'text-neutral-700'}`}>
-                  {city.priceGrowthMoM > 0 ? '+' : ''}{city.priceGrowthMoM}%
+                <span className={`text-lg font-bold ${momGrowth > 0 ? 'text-green-600' : momGrowth < 0 ? 'text-red-600' : 'text-neutral-700'}`}>
+                  {momGrowth > 0 ? '+' : ''}{momGrowth}%
                 </span>
               </div>
             </div>
@@ -384,12 +501,12 @@ const CityDashboard: React.FC = () => {
                 <div className="w-full h-3 bg-neutral-100 rounded-full overflow-hidden">
                   <div
                     className={`h-full rounded-full bg-gradient-to-r ${demandInfo.barColor} transition-all duration-700`}
-                    style={{ width: `${city.demandScore}%` }}
+                    style={{ width: `${demandScore}%` }}
                   />
                 </div>
                 <div className="flex justify-between mt-1">
                   <span className="text-xs text-neutral-400">0</span>
-                  <span className="text-xs font-semibold text-neutral-600">{city.demandScore}/100</span>
+                  <span className="text-xs font-semibold text-neutral-600">{demandScore}/100</span>
                   <span className="text-xs text-neutral-400">100</span>
                 </div>
               </div>
@@ -408,12 +525,12 @@ const CityDashboard: React.FC = () => {
                 <div className="w-full h-3 bg-neutral-100 rounded-full overflow-hidden">
                   <div
                     className={`h-full rounded-full bg-gradient-to-r ${investmentInfo.barColor} transition-all duration-700`}
-                    style={{ width: `${city.investmentScore}%` }}
+                    style={{ width: `${investmentScore}%` }}
                   />
                 </div>
                 <div className="flex justify-between mt-1">
                   <span className="text-xs text-neutral-400">0</span>
-                  <span className="text-xs font-semibold text-neutral-600">{city.investmentScore}/100</span>
+                  <span className="text-xs font-semibold text-neutral-600">{investmentScore}/100</span>
                   <span className="text-xs text-neutral-400">100</span>
                 </div>
               </div>
@@ -425,7 +542,7 @@ const CityDashboard: React.FC = () => {
                   {t('dashboard.investmentSummary', 'has a {{demand}} demand market with {{investment}} investment potential and {{yield}}% rental yield.', {
                     demand: demandInfo.label.toLowerCase(),
                     investment: investmentInfo.label.toLowerCase(),
-                    yield: city.rentalYield,
+                    yield: rentalYield,
                   })}
                 </p>
               </div>
@@ -480,7 +597,7 @@ const CityDashboard: React.FC = () => {
             <CurrencyEuroIcon className="w-5 h-5 text-green-600" />
             {t('dashboard.priceEstimator', 'Price Estimator')}
           </h3>
-          <p className="text-sm text-neutral-500 mb-5">{t('dashboard.priceEstimatorDesc', 'Estimated property prices based on average €{{price}}/m² in {{city}}', { price: city.avgPricePerSqm.toLocaleString(), city: city.city })}</p>
+          <p className="text-sm text-neutral-500 mb-5">{t('dashboard.priceEstimatorDesc', 'Estimated property prices based on average €{{price}}/m² in {{city}}', { price: avgPrice.toLocaleString(), city: city.city })}</p>
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
             {[
               { size: 40, label: t('dashboard.studio', 'Studio'), desc: '~40 m²' },
@@ -491,7 +608,7 @@ const CityDashboard: React.FC = () => {
               <div key={size} className="p-4 bg-gradient-to-b from-neutral-50 to-white rounded-xl border border-neutral-100 text-center">
                 <span className="text-xs font-medium text-neutral-500 block mb-1">{label}</span>
                 <span className="text-lg sm:text-xl font-black text-neutral-900 block">
-                  €{(city.avgPricePerSqm * size).toLocaleString()}
+                  €{Math.round(avgPrice * size).toLocaleString()}
                 </span>
                 <span className="text-xs text-neutral-400">{desc}</span>
               </div>
@@ -513,8 +630,8 @@ const CityDashboard: React.FC = () => {
               { budget: 150000, color: 'from-violet-400 to-violet-500', bg: 'bg-violet-50', text: 'text-violet-700' },
               { budget: 250000, color: 'from-amber-400 to-amber-500', bg: 'bg-amber-50', text: 'text-amber-700' },
             ].map(({ budget, color, bg, text }) => {
-              const sqm = Math.round(budget / city.avgPricePerSqm);
-              const maxBudgetSqm = Math.round(250000 / city.avgPricePerSqm);
+              const sqm = Math.round(budget / avgPrice);
+              const maxBudgetSqm = Math.round(250000 / avgPrice);
               const barWidth = Math.min(100, (sqm / maxBudgetSqm) * 100);
               return (
                 <div key={budget} className={`p-4 ${bg} rounded-xl`}>
@@ -548,14 +665,14 @@ const CityDashboard: React.FC = () => {
             <LightBulbIcon className="w-5 h-5 text-amber-500" />
             {t('dashboard.rentalIncome', 'Rental Income Projections')}
           </h3>
-          <p className="text-sm text-neutral-500 mb-5">{t('dashboard.rentalIncomeDesc', 'Estimated rental income based on {{yield}}% annual yield in {{city}}', { yield: city.rentalYield, city: city.city })}</p>
+          <p className="text-sm text-neutral-500 mb-5">{t('dashboard.rentalIncomeDesc', 'Estimated rental income based on {{yield}}% annual yield in {{city}}', { yield: rentalYield, city: city.city })}</p>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             {[
               { value: 50000, label: '€50K' },
               { value: 100000, label: '€100K' },
               { value: 200000, label: '€200K' },
             ].map(({ value, label }) => {
-              const annualIncome = Math.round(value * (city.rentalYield / 100));
+              const annualIncome = Math.round(value * (rentalYield / 100));
               const monthlyIncome = Math.round(annualIncome / 12);
               return (
                 <div key={value} className="p-4 bg-gradient-to-br from-amber-50 to-orange-50 rounded-xl border border-amber-100">
@@ -594,18 +711,18 @@ const CityDashboard: React.FC = () => {
                   const barWidth = Math.max(8, (c.avgPricePerSqm / maxPrice) * 100);
                   const isCurrentCity = c.city === city.city;
                   return (
-                    <div key={c.city} className={`flex items-center gap-3 p-3 rounded-lg ${isCurrentCity ? 'bg-primary/5 ring-2 ring-primary/20' : 'bg-neutral-50'}`}>
-                      <span className={`text-sm font-semibold w-28 flex-shrink-0 truncate ${isCurrentCity ? 'text-primary' : 'text-neutral-700'}`}>
+                    <div key={c.city} className={`flex items-center gap-2 sm:gap-3 p-2 sm:p-3 rounded-lg ${isCurrentCity ? 'bg-primary/5 ring-2 ring-primary/20' : 'bg-neutral-50'}`}>
+                      <span className={`text-xs sm:text-sm font-semibold w-20 sm:w-28 flex-shrink-0 truncate ${isCurrentCity ? 'text-primary' : 'text-neutral-700'}`}>
                         {c.city} {isCurrentCity && <span className="text-xs">*</span>}
                       </span>
-                      <div className="flex-1 h-6 bg-neutral-100 rounded-full overflow-hidden">
+                      <div className="flex-1 h-5 sm:h-6 bg-neutral-100 rounded-full overflow-hidden">
                         <div
                           className={`h-full rounded-full transition-all duration-700 ${isCurrentCity ? 'bg-gradient-to-r from-primary to-primary/80' : 'bg-gradient-to-r from-neutral-300 to-neutral-400'}`}
                           style={{ width: `${barWidth}%` }}
                         />
                       </div>
-                      <span className={`text-sm font-bold w-24 text-right flex-shrink-0 ${isCurrentCity ? 'text-primary' : 'text-neutral-700'}`}>
-                        €{c.avgPricePerSqm.toLocaleString()}/m²
+                      <span className={`text-xs sm:text-sm font-bold w-20 sm:w-24 text-right flex-shrink-0 ${isCurrentCity ? 'text-primary' : 'text-neutral-700'}`}>
+                        €{safeNum(c.avgPricePerSqm).toLocaleString()}/m²
                       </span>
                     </div>
                   );
@@ -643,6 +760,8 @@ const CityDashboard: React.FC = () => {
                           src={otherImageUrl}
                           alt={otherCity.city}
                           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                          loading="lazy"
+                          decoding="async"
                           onError={(e) => {
                             (e.target as HTMLImageElement).style.display = 'none';
                             (e.target as HTMLImageElement).parentElement!.style.background = otherFallback;
@@ -692,23 +811,37 @@ const CityDashboard: React.FC = () => {
             <div>
               <h4 className="font-bold text-slate-900 text-sm">{t('aiInsights.title')}</h4>
               <p className="text-xs text-slate-500 mt-1">
-                {t('aiInsights.lastUpdated', {
-                  date: new Date(city.lastUpdated).toLocaleDateString('en-US', {
-                    year: 'numeric',
-                    month: 'long',
-                    day: 'numeric',
-                  }),
-                })} &bull; {t('aiInsights.dataSource')}
+                {t('aiInsights.lastUpdated', { date: safeFormatDate(city.lastUpdated) })} &bull; {t('aiInsights.dataSource')}
               </p>
             </div>
           </div>
         </div>
 
+        {/* Debug panel - only visible in development mode */}
+        {isDev && (
+          <div className="mb-8 p-4 bg-neutral-900 rounded-xl border border-neutral-700 text-neutral-300 text-xs font-mono">
+            <div className="flex items-center gap-2 mb-3">
+              <InformationCircleIcon className="w-4 h-4 text-amber-400" />
+              <span className="text-amber-400 font-bold uppercase tracking-wider text-[10px]">{t('dashboard.debugTitle', 'Debug Info (dev only)')}</span>
+            </div>
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+              <div><span className="text-neutral-500">_id:</span> {city._id}</div>
+              <div><span className="text-neutral-500">dataSource:</span> {city.dataSource}</div>
+              <div><span className="text-neutral-500">displayOrder:</span> {city.displayOrder}</div>
+              <div><span className="text-neutral-500">featured:</span> {String(city.featured)}</div>
+              <div><span className="text-neutral-500">countryCode:</span> {city.countryCode}</div>
+              <div><span className="text-neutral-500">marketTrend:</span> {city.marketTrend}</div>
+              <div><span className="text-neutral-500">lastUpdated:</span> {city.lastUpdated}</div>
+              <div><span className="text-neutral-500">healthScore:</span> {marketHealthScore}</div>
+            </div>
+          </div>
+        )}
+
         {/* CTA: View Listings */}
         <div className="flex flex-col sm:flex-row gap-4 items-center justify-center">
           <button
             onClick={handleViewListings}
-            className="w-full sm:w-auto px-8 py-3.5 bg-primary text-white rounded-xl font-bold text-base flex items-center justify-center gap-2 hover:bg-primary-dark transition-colors shadow-lg shadow-primary/25"
+            className="w-full sm:w-auto px-6 sm:px-8 py-3.5 min-h-[48px] bg-primary text-white rounded-xl font-bold text-sm sm:text-base flex items-center justify-center gap-2 hover:bg-primary-dark active:bg-primary-dark/90 transition-colors shadow-lg shadow-primary/25"
           >
             <MapPinIcon className="w-5 h-5" />
             {t('dashboard.viewListingsInCity', 'View All Listings in {{city}}', { city: city.city })}
@@ -718,7 +851,7 @@ const CityDashboard: React.FC = () => {
           </button>
           <button
             onClick={navigateBack}
-            className="w-full sm:w-auto px-8 py-3.5 bg-white text-neutral-700 rounded-xl font-bold text-base flex items-center justify-center gap-2 hover:bg-neutral-50 transition-colors border border-neutral-200 shadow-sm"
+            className="w-full sm:w-auto px-6 sm:px-8 py-3.5 min-h-[48px] bg-white text-neutral-700 rounded-xl font-bold text-sm sm:text-base flex items-center justify-center gap-2 hover:bg-neutral-50 active:bg-neutral-100 transition-colors border border-neutral-200 shadow-sm"
           >
             <GlobeAltIcon className="w-5 h-5" />
             {t('dashboard.exploreMoreCities', 'Explore More Cities')}

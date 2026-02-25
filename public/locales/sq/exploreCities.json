@@ -1,71 +1,122 @@
 {
-  "title": "Eksploroni qytetet ballkanike",
-  "subtitle": "Njohuri tregu të mundësuara nga inteligjenca artificiale për {count} qytete të mëdha në 10 vende",
   "page": {
-    "title": "Eksploroni qytetet ballkanike - Njohuri për tregun e pasurive të paluajtshme"
-  },
-  "hero": {
-    "title": "Eksploroni qytetet ballkanike",
-    "subtitle": "Njohuri tregu të mundësuara nga inteligjenca artificiale për {{count}} qytete të mëdha në 10 vende",
-    "discoverSubtitle": "Zbuloni tregjet më të mira të pasurive të paluajtshme në Ballkan"
-  },
-  "empty": {
-    "title": "Nuk ka të dhëna për qytetet",
-    "message": "Të dhënat e tregut do të përditësohen së shpejti. Kontrolloni përsëri më vonë!"
+    "title": "Eksploroni Qytetet Ballkanike - Njohuri për Tregun e Pasurive",
+    "description": "Njohuri të pasura nga AI për {{count}} qytete kryesore në 10 vende"
   },
   "cards": {
-    "allCitiesTitle": "Të gjitha qytetet",
+    "title": "Të Gjitha Qytetet",
+    "allCitiesTitle": "Të Gjitha Qytetet",
     "countryTitle": "Qytetet në {{country}}",
     "subtitle": "Zbuloni mundësi për pasuri të paluajtshme në {{count}} qytete"
   },
-  "discoverSubtitle": "Zbuloni tregjet më të mira të pasurive të paluajtshme në Ballkan",
-  "noCitiesTitle": "Nuk ka të dhëna për qytetet",
-  "noCitiesMessage": "Të dhënat e tregut do të përditësohen së shpejti. Kontrolloni përsëri më vonë!",
+  "hero": {
+    "title": "Eksploroni Qytetet Ballkanike",
+    "subtitle": "Njohuri të pasura nga AI për {{count}} qytete kryesore në 10 vende",
+    "discoverSubtitle": "Zbuloni tregjet më të mira të pasurive të paluajtshme në të gjithë Ballkanin"
+  },
+  "empty": {
+    "title": "Nuk ka të dhëna për Qytetin",
+    "message": "Të dhënat e tregut do të përditësohen së shpejti. Kontrolloni më vonë!"
+  },
   "stats": {
-    "totalCities": "Qytete gjithsej",
+    "totalCities": "Gjithsej Qytete",
     "countries": "Vende",
-    "avgGrowth": "Rritja mesatare",
-    "totalListings": "Njoftime gjithsej"
+    "avgGrowth": "Rritja Mesatare",
+    "totalListings": "Gjithsej Njoftime"
   },
   "filters": {
-    "allCountries": "Të gjitha vendet"
+    "allCountries": "Të Gjitha Vendet"
   },
   "cityCard": {
-    "demand": "Kërkesa e blerësve",
+    "demand": "Kërkesa e Blerësve",
     "demandHigh": "E lartë",
     "demandMedium": "Mesatare",
     "demandLow": "E ulët",
-    "investment": "Potenciali i investimit",
+    "investment": "Potenciali i Investimit",
     "investmentExcellent": "Shkëlqyer",
     "investmentGood": "Mirë",
     "investmentFair": "Mesatar",
-    "avgPricePerSqm": "Çmimi mesatar për m²",
-    "medianPrice": "Çmimi tipik i pronës",
-    "yoyGrowth": "Ndryshimi i çmimit (1 vit)",
-    "rentalYield": "Kthimi nga qiraja",
+    "avgPricePerSqm": "Çmimi Mesatar për m²",
+    "medianPrice": "Çmimi Tipik i Pronës",
+    "yoyGrowth": "Ndryshimi i Çmimit (1 Vit)",
+    "rentalYield": "Kthimi nga Qiraja",
     "rentalYieldHelper": "Të ardhurat vjetore kundrejt çmimit të pronës",
-    "daysOnMarket": "Koha mesatare e shitjes",
+    "daysOnMarket": "Koha Mesatare e Shitjes",
     "days": "ditë",
     "daysUnit": "ditë"
   },
   "sections": {
-    "topNeighborhoods": "Lagjet kryesore",
-    "marketInsights": "Njohuri tregu"
+    "topNeighborhoods": "Lagjet Më të Mira",
+    "marketInsights": "Njohuri të Tregut"
   },
   "footer": {
     "listings": "njoftime",
     "soldPerMonth": "shitur/muaj",
-    "viewListings": "Shikoni njoftimet në hartë"
+    "viewListings": "Shikoni Njoftimet në Hartë"
   },
   "trends": {
     "rising": "në rritje",
     "declining": "në rënie",
-    "stable": "i qëndrueshëm"
+    "stable": "stabile"
   },
   "aiInsights": {
-    "title": "Inteligjencë tregu e mundësuar nga AI",
-    "description": "Të dhënat tona të tregut mundësohen nga Gemini AI dhe përditësohen dy herë në muaj (1 dhe 15). Analizojmë trendet e tregut në kohë reale, çmimet e pronave, treguesit e kërkesës dhe njohuritë lokale në {count} qytete të mëdha në Ballkan.",
-    "lastUpdated": "Përditësimi i fundit: {date}",
-    "dataSource": "Burimi i të dhënave: Gemini AI + Baza të dhënash lokale të pronave"
+    "title": "Inteligjencë e Tregut e Fuqizuar nga AI",
+    "description": "Të dhënat tona të tregut janë fuqizuar nga Gemini AI dhe përditësohen dy herë në muaj (1 dhe 15). Ne analizojmë trendet në kohë reale të tregut, çmimet e pasurive, treguesit e kërkesës dhe njohuritë lokale në {{count}} qytete kryesore në Ballkan.",
+    "lastUpdated": "Përditësuar së fundmi: {{date}}",
+    "dataSource": "Burimi i të dhënave: Gemini AI + Bazat e të Dhënave Lokale të Pasurive"
+  },
+  "loading": {
+    "title": "Po ngarkohen Qytetet...",
+    "message": "Po merren të dhënat e tregut për qytetet ballkanike"
+  },
+  "seo": {
+    "title": "Explore Balkan Cities - Property Markets, Prices & City Guides",
+    "description": "Explore {{cityCount}}+ cities across {{countryCount}} Balkan countries. Compare property prices, rental yields, and market trends in Tirana, Budva, Belgrade, Skopje, and more.",
+    "schemaName": "Balkan Cities Property Guide",
+    "schemaDescription": "Property market data for {{count}} cities across the Balkans"
+  },
+  "dashboard": {
+    "notFound": "Qyteti nuk u gjet",
+    "notFoundMessage": "Nuk gjetëm të dhëna tregu për këtë qytet.",
+    "backToExplore": "Kthehu te Eksploroni Qytetet",
+    "marketIs": "Tregu është",
+    "marketActivity": "Aktiviteti i Tregut",
+    "activeListings": "Njoftime Aktive",
+    "soldLastMonth": "Shitur Muajin e Kaluar",
+    "momGrowth": "Ndryshimi Mujor i Çmimit",
+    "investmentOverview": "Pasqyrë e Investimit",
+    "investmentSummary": "{{city}} ka një treg me kërkesë {{demand}} me potencial {{investment}} investimi dhe {{yield}}% kthim nga qiraja.",
+    "viewListingsInCity": "Shiko Njoftimet në {{city}}",
+    "exploreMoreCities": "Eksploroni Më Shumë Qytete",
+    "seoTitle": "{{city}}, {{country}} - Paneli i Tregut të Pasurive",
+    "seoDescription": "Eksploroni të dhënat e tregut të pasurive për {{city}}, {{country}}. Çmimi mesatar €{{price}}/m², treg {{trend}} me {{yield}}% kthim nga qiraja.",
+    "priceEstimator": "Vlerësuesi i Çmimit",
+    "priceEstimatorDesc": "Çmime të vlerësuara bazuar në mesataren €{{price}}/m² në {{city}}",
+    "studio": "Garsonjere",
+    "oneBed": "1-Dhomëshe",
+    "twoBed": "2-Dhomëshe",
+    "threeBed": "3-Dhomëshe",
+    "whatYouCanBuy": "Çfarë Merr Buxheti Juaj",
+    "whatYouCanBuyDesc": "Madhësi të përafërta të pronës për buxhete të ndryshme në {{city}}",
+    "budgetStudio": "Garsonjere kompakte ose banesë e vogël",
+    "budgetOneBed": "Apartament komod me 1 dhomë gjumi",
+    "budgetTwoBed": "Apartament i gjerë me 2 dhoma gjumi",
+    "budgetThreeBed": "Apartament i madh familjar me 3 dhoma gjumi",
+    "budgetHouse": "Pronë premium ose shtëpi e vogël",
+    "rentalIncome": "Projeksionet e të Ardhurave nga Qiraja",
+    "rentalIncomeDesc": "Të ardhura të vlerësuara bazuar në {{yield}}% kthim vjetor në {{city}}",
+    "investmentOf": "Investim {{label}}",
+    "annualIncome": "Vjetore",
+    "monthlyIncome": "Mujore",
+    "countryComparison": "Krahasimi i Çmimeve në {{country}}",
+    "countryComparisonDesc": "Çmimi mesatar për m² krahasuar me qytete të tjera në {{country}}",
+    "otherCitiesIn": "Qytete të Tjera në {{country}}",
+    "priceLabel": "Çmimi/m²",
+    "marketHealth": "Rezultati i Shëndetit të Tregut",
+    "healthExcellent": "Shkëlqyer",
+    "healthGood": "Mirë",
+    "healthFair": "Mesatar",
+    "healthPoor": "Dobët",
+    "debugTitle": "Info Debug (vetëm dev)"
   }
 }
