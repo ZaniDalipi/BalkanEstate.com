@@ -1398,7 +1398,7 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
       {/* Hero Banner - Professional Design */}
       <div
         ref={coverRef}
-        className={`relative h-[28rem] md:h-[32rem] overflow-hidden flex-shrink-0 ${isRepositioningCover || isRepositioningLogo ? 'select-none' : ''}`}
+        className={`relative h-[32rem] md:h-[36rem] overflow-hidden flex-shrink-0 ${isRepositioningCover || isRepositioningLogo ? 'select-none' : ''}`}
         style={(isRepositioningCover || isRepositioningLogo) ? { touchAction: 'none' } : undefined}
         onDragEnter={isAdmin ? handleCoverDragEnter : undefined}
         onDragLeave={isAdmin ? handleCoverDragLeave : undefined}
@@ -1714,7 +1714,7 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
         </div>
 
         {/* Agency Identity - Centered Content */}
-        <div className={`absolute inset-0 flex flex-col items-center justify-center px-4 ${isRepositioningCover ? 'pointer-events-none opacity-30 z-10' : ''}`}>
+        <div className={`absolute inset-0 flex flex-col items-center justify-center px-4 pb-20 ${isRepositioningCover ? 'pointer-events-none opacity-30 z-10' : ''}`}>
           {/* Logo Container */}
           <div className="relative group">
             <div className="absolute -inset-1 bg-gradient-to-r from-primary/50 to-blue-500/50 rounded-2xl blur-lg opacity-75 group-hover:opacity-100 transition-opacity duration-500"></div>
