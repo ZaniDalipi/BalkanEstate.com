@@ -116,7 +116,7 @@ const Map3DControls: React.FC<Map3DControlsProps> = ({
 
             {/* Floor number */}
             <div className="flex flex-col items-center -mt-1">
-              <span className="text-xl sm:text-2xl font-black text-white leading-none">{floorNumber}</span>
+              <span className="text-xl sm:text-2xl font-black text-emerald-400 leading-none">{floorNumber}</span>
               <span className="text-[9px] sm:text-[10px] text-slate-400 font-medium mt-0.5">
                 {t('property:floorIndicator.ofFloors', 'of {{total}} floors', { total: totalFloors })}
               </span>

@@ -707,109 +707,51 @@ export function use3DMap(props: Map3DBuildingsProps) {
       },
     });
 
-    // Add floating "Floor X/Y" label above the building at the highlighted floor level
+    // Add floating floor label and/or 360 tour marker above the building
     if (floorNum > 0 && floorNum <= totalFlrs) {
-      // Create a floating floor label marker positioned above the building
-      const floorLabelEl = document.createElement('div');
-      floorLabelEl.style.cssText = 'pointer-events: none; z-index: 50;';
-      floorLabelEl.innerHTML = `
-        <div style="
-          display: flex;
-          flex-direction: column;
-          align-items: center;
-          gap: 0;
-          filter: drop-shadow(0 4px 12px rgba(0,0,0,0.4));
-        ">
-          <div style="
-            background: linear-gradient(135deg, #059669, #10b981);
-            color: white;
-            padding: 4px 14px;
-            border-radius: 10px;
-            font-size: 13px;
-            font-weight: 800;
-            white-space: nowrap;
-            border: 2px solid rgba(255,255,255,0.9);
-            letter-spacing: 0.5px;
-            font-family: system-ui, -apple-system, sans-serif;
-          ">Floor ${floorNum}/${totalFlrs}</div>
-          <div style="
-            width: 0;
-            height: 0;
-            border-left: 7px solid transparent;
-            border-right: 7px solid transparent;
-            border-top: 7px solid #10b981;
-            margin-top: -1px;
-          "></div>
-        </div>
-      `;
+      const hasTour = !!tourUrl;
 
-      // Position the label at the building centroid, offset upward based on floor position
+      // Position the combined/single marker at the building centroid, well above the building
       const calculateFloorLabelOffset = (currentZoom: number) => {
         const basePixelsPerFloor = 2.8;
         const zoomFactor = Math.pow(2, currentZoom - 16);
         const pixelsPerFloor = basePixelsPerFloor * zoomFactor;
-        // Position at the highlighted floor level plus some headroom
-        const floorsFromBottom = floorNum - 0.5;
-        return -(floorsFromBottom * pixelsPerFloor) - 20;
+        // Position above the top of the building with headroom
+        const floorsFromBottom = totalFlrs;
+        return -(floorsFromBottom * pixelsPerFloor) - 30;
       };
-
-      const initialLabelOffset = calculateFloorLabelOffset(mapInstance.getZoom());
-      const floorLabelMarker = new maplibregl.Marker({
-        element: floorLabelEl,
-        anchor: 'bottom',
-        offset: [0, initialLabelOffset],
-      })
-        .setLngLat([centroidLng, centroidLat])
-        .addTo(mapInstance);
-
-      // Update label position on zoom/pitch changes
-      const updateLabelOffset = () => {
-        const newOffset = calculateFloorLabelOffset(mapInstance.getZoom());
-        floorLabelMarker.setOffset([0, newOffset]);
-      };
-      mapInstance.on('zoom', updateLabelOffset);
-      mapInstance.on('pitch', updateLabelOffset);
-
-      // Show door icon if 360 tour is available
-      const hasTour = !!tourUrl;
 
       if (hasTour) {
-        // Find the southwest-facing edge of the building (viewing direction with pitch 60)
-        // This edge will appear as the "front" face from the default camera angle
-        const ring = scaledCoords[0];
-        let swEdgeStart = 0;
-        let minSum = Infinity;
-
-        // Find the vertex that is most southwest (lowest lng + lat sum)
-        for (let i = 0; i < ring.length - 1; i++) {
-          const sum = ring[i][0] + ring[i][1]; // lng + lat
-          if (sum < minSum) {
-            minSum = sum;
-            swEdgeStart = i;
-          }
-        }
-
-        // Get the midpoint of the edge starting from the southwest vertex
-        const nextIdx = (swEdgeStart + 1) % (ring.length - 1);
-        const edgeMidLng = (ring[swEdgeStart][0] + ring[nextIdx][0]) / 2;
-        const edgeMidLat = (ring[swEdgeStart][1] + ring[nextIdx][1]) / 2;
-
-        // Offset slightly outward from the building face so icon is visible
-        const outwardOffset = 0.00003; // ~3m outward
-        const doorLng = edgeMidLng - outwardOffset;
-        const doorLat = edgeMidLat - outwardOffset;
-
-        // Create door marker with 360 indicator and floor label
-        const doorEl = document.createElement('div');
-        doorEl.className = 'apartment-door-marker';
-        doorEl.innerHTML = `
+        // Combined marker: floor level badge + 360° Tour button (stacked vertically)
+        // This prevents the two markers from overlapping
+        const combinedEl = document.createElement('div');
+        combinedEl.className = 'apartment-door-marker';
+        combinedEl.style.cssText = 'z-index: 50;';
+        combinedEl.innerHTML = `
           <div style="
             display: flex;
             flex-direction: column;
             align-items: center;
-            gap: 3px;
+            gap: 4px;
             cursor: pointer;
+            filter: drop-shadow(0 4px 12px rgba(0,0,0,0.4));
           ">
+            <div style="
+              background: linear-gradient(135deg, #059669, #10b981);
+              color: white;
+              padding: 4px 14px;
+              border-radius: 10px;
+              font-size: 13px;
+              font-weight: 800;
+              white-space: nowrap;
+              border: 2px solid rgba(255,255,255,0.9);
+              letter-spacing: 0.5px;
+              font-family: system-ui, -apple-system, sans-serif;
+            ">
+              <span style="color: #bbf7d0;">Level</span>
+              <span style="color: #4ade80; font-size: 15px; margin: 0 2px;">${floorNum}</span>
+              <span style="color: #bbf7d0; font-size: 11px;">/ ${totalFlrs}</span>
+            </div>
             <div style="
               display: flex;
               align-items: center;
@@ -829,47 +771,96 @@ export function use3DMap(props: Map3DBuildingsProps) {
               </svg>
               <span style="font-size: 12px; font-weight: 800; letter-spacing: 0.3px;">360\u00B0 Tour</span>
             </div>
+            <div style="
+              width: 0;
+              height: 0;
+              border-left: 7px solid transparent;
+              border-right: 7px solid transparent;
+              border-top: 7px solid #10b981;
+              margin-top: -1px;
+            "></div>
           </div>
         `;
 
         // Add click handler for 360 tour
         if (onEnterTour) {
-          doorEl.addEventListener('click', onEnterTour);
+          combinedEl.addEventListener('click', onEnterTour);
         }
 
-        // Function to calculate vertical offset based on zoom level
-        // The offset needs to scale with zoom to keep marker at correct floor level
-        const calculateFloorOffset = (currentZoom: number) => {
-          // Base pixels per floor at zoom 16, scales exponentially with zoom
-          const basePixelsPerFloor = 2.5;
-          const zoomFactor = Math.pow(2, currentZoom - 16);
-          const pixelsPerFloor = basePixelsPerFloor * zoomFactor;
-          const floorsFromBottom = floorNum - 1;
-          return -(floorsFromBottom * pixelsPerFloor);
-        };
-
-        // Position door on the southwest building face at the correct floor level
-        const initialOffset = calculateFloorOffset(mapInstance.getZoom());
-        const doorMarker = new maplibregl.Marker({
-          element: doorEl,
+        const initialLabelOffset = calculateFloorLabelOffset(mapInstance.getZoom());
+        const combinedMarker = new maplibregl.Marker({
+          element: combinedEl,
           anchor: 'bottom',
-          offset: [0, initialOffset],
+          offset: [0, initialLabelOffset],
         })
-          .setLngLat([doorLng, doorLat])
+          .setLngLat([centroidLng, centroidLat])
           .addTo(mapInstance);
 
-        // Update marker offset when zoom changes to keep it at correct floor level
-        const updateMarkerOffset = () => {
-          const newOffset = calculateFloorOffset(mapInstance.getZoom());
-          doorMarker.setOffset([0, newOffset]);
+        // Update marker position on zoom/pitch changes
+        const updateCombinedOffset = () => {
+          const newOffset = calculateFloorLabelOffset(mapInstance.getZoom());
+          combinedMarker.setOffset([0, newOffset]);
         };
-
-        // Listen for zoom changes
-        mapInstance.on('zoom', updateMarkerOffset);
-        mapInstance.on('pitch', updateMarkerOffset);
+        mapInstance.on('zoom', updateCombinedOffset);
+        mapInstance.on('pitch', updateCombinedOffset);
 
         // Store marker reference for later removal
-        doorMarkerRef.current = doorMarker;
+        doorMarkerRef.current = combinedMarker;
+      } else {
+        // Floor label only (no 360 tour) — show green level indicator
+        const floorLabelEl = document.createElement('div');
+        floorLabelEl.style.cssText = 'pointer-events: none; z-index: 50;';
+        floorLabelEl.innerHTML = `
+          <div style="
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0;
+            filter: drop-shadow(0 4px 12px rgba(0,0,0,0.4));
+          ">
+            <div style="
+              background: linear-gradient(135deg, #059669, #10b981);
+              color: white;
+              padding: 4px 14px;
+              border-radius: 10px;
+              font-size: 13px;
+              font-weight: 800;
+              white-space: nowrap;
+              border: 2px solid rgba(255,255,255,0.9);
+              letter-spacing: 0.5px;
+              font-family: system-ui, -apple-system, sans-serif;
+            ">
+              <span style="color: #bbf7d0;">Level</span>
+              <span style="color: #4ade80; font-size: 15px; margin: 0 2px;">${floorNum}</span>
+              <span style="color: #bbf7d0; font-size: 11px;">/ ${totalFlrs}</span>
+            </div>
+            <div style="
+              width: 0;
+              height: 0;
+              border-left: 7px solid transparent;
+              border-right: 7px solid transparent;
+              border-top: 7px solid #10b981;
+              margin-top: -1px;
+            "></div>
+          </div>
+        `;
+
+        const initialLabelOffset = calculateFloorLabelOffset(mapInstance.getZoom());
+        const floorLabelMarker = new maplibregl.Marker({
+          element: floorLabelEl,
+          anchor: 'bottom',
+          offset: [0, initialLabelOffset],
+        })
+          .setLngLat([centroidLng, centroidLat])
+          .addTo(mapInstance);
+
+        // Update label position on zoom/pitch changes
+        const updateLabelOffset = () => {
+          const newOffset = calculateFloorLabelOffset(mapInstance.getZoom());
+          floorLabelMarker.setOffset([0, newOffset]);
+        };
+        mapInstance.on('zoom', updateLabelOffset);
+        mapInstance.on('pitch', updateLabelOffset);
       }
     }
   }, []);
