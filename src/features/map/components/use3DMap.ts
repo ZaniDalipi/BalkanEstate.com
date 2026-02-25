@@ -65,6 +65,7 @@ export function use3DMap(props: Map3DBuildingsProps) {
 
   // POI markers reference for cleanup
   const poiMarkersRef = useRef<maplibregl.Marker[]>([]);
+  const customBuildingActiveRef = useRef(false);
   const [showPOI, setShowPOI] = useState(true);
 
   // POI category styling
@@ -700,9 +701,25 @@ export function use3DMap(props: Map3DBuildingsProps) {
       },
     });
 
-    // Dim the base 3d-buildings layer so the custom floor slabs stand out
-    if (mapInstance.getLayer('3d-buildings')) {
-      mapInstance.setPaintProperty('3d-buildings', 'fill-extrusion-opacity', 0.3);
+    // Hide the original OSM building so it doesn't occlude our floor slabs.
+    // Fill-extrusion layers use depth buffer testing, so even a translucent
+    // base building blocks our custom floors from rendering.
+    customBuildingActiveRef.current = true;
+    if (mapInstance.getLayer('3d-buildings') && buildingFeature) {
+      // Try to filter out the specific building by its vector tile feature ID
+      if (buildingFeature.id != null) {
+        const existingFilter = mapInstance.getFilter('3d-buildings');
+        const excludeFilter: maplibregl.ExpressionFilterSpecification = ['!=', ['id'], buildingFeature.id as number];
+        if (existingFilter) {
+          mapInstance.setFilter('3d-buildings', ['all', existingFilter, excludeFilter] as maplibregl.FilterSpecification);
+        } else {
+          mapInstance.setFilter('3d-buildings', excludeFilter);
+        }
+      } else {
+        // Fallback: hide ALL base buildings and rely on our custom layer.
+        // This only affects the zoomed-in property view, so it's acceptable.
+        mapInstance.setPaintProperty('3d-buildings', 'fill-extrusion-opacity', 0);
+      }
     }
 
     // Add 360 tour marker above the building if a tour URL is available
@@ -1137,9 +1154,13 @@ export function use3DMap(props: Map3DBuildingsProps) {
         30, lighting.buildingHighlight,
         80, '#ffffff',
       ]);
-      map.current.setPaintProperty('3d-buildings', 'fill-extrusion-opacity',
-        0.7 + lighting.ambientIntensity * 0.25
-      );
+      // Don't override opacity when custom building floors are active —
+      // the base building is hidden via filter so our floor slabs can render.
+      if (!customBuildingActiveRef.current) {
+        map.current.setPaintProperty('3d-buildings', 'fill-extrusion-opacity',
+          0.7 + lighting.ambientIntensity * 0.25
+        );
+      }
     }
 
     // Subtle bearing rotation for sun movement
