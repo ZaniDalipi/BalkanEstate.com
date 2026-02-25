@@ -430,14 +430,14 @@ export function use3DMap(props: Map3DBuildingsProps) {
       buildingQueryLayers.push('3d-buildings');
     }
     // Also check for any style-provided fill-extrusion layers (e.g., liberty style buildings)
-    // Also check for any style-provided fill-extrusion layers (e.g., liberty style buildings)
     // but exclude our own custom overlay layers
-    const customLayerPrefixes = ['building-floor-', 'building-dark-shell'];
+    const customLayerIds = ['building-floors', 'building-dark-shell', 'building-floor-highlight', 'building-floor-highlight-glow'];
     for (const sl of styleLayers) {
       if (
         sl.type === 'fill-extrusion' &&
         sl.id !== '3d-buildings' &&
-        !customLayerPrefixes.some(prefix => sl.id.startsWith(prefix)) &&
+        !sl.id.startsWith('building-floor-') &&
+        !customLayerIds.includes(sl.id) &&
         !buildingQueryLayers.includes(sl.id)
       ) {
         buildingQueryLayers.push(sl.id);
@@ -596,7 +596,7 @@ export function use3DMap(props: Map3DBuildingsProps) {
     // Recalculate floor height based on actual building
     const adjustedFloorHeight = finalBuildingHeight / totalFlrs;
 
-    // Slightly larger than original so overlays render on top without z-fighting
+    // Scale building coords slightly larger so our overlay sits on top of original
     const scaleFactor = 1.04;
 
     // Calculate centroid for scaling and label positioning
@@ -618,39 +618,59 @@ export function use3DMap(props: Map3DBuildingsProps) {
       ])
     );
 
-    // GeoJSON source for the building overlay
-    if (!mapInstance.getSource('custom-building')) {
-      mapInstance.addSource('custom-building', {
-        type: 'geojson',
-        data: {
-          type: 'Feature',
-          properties: { height: finalBuildingHeight, totalFloors: totalFlrs },
-          geometry: {
-            type: 'Polygon',
-            coordinates: scaledCoords,
-          },
-        },
-      });
-    } else {
-      (mapInstance.getSource('custom-building') as maplibregl.GeoJSONSource).setData({
+    // NEW APPROACH: Build a FeatureCollection with one feature per floor slab.
+    // Each feature has its own polygon (slightly inset per floor for visual depth)
+    // and carries its own height/base/color properties.
+    // This lets us use a SINGLE fill-extrusion layer with data-driven paint,
+    // completely avoiding z-fighting from overlapping layers.
+    const gapSize = Math.max(0.12, adjustedFloorHeight * 0.03);
+    const floorFeatures: GeoJSON.Feature[] = [];
+
+    for (let floor = 1; floor <= totalFlrs; floor++) {
+      const floorBase = (floor - 1) * adjustedFloorHeight + gapSize;
+      const floorTop = floor * adjustedFloorHeight - gapSize;
+      const isHighlighted = floor === floorNum;
+
+      // Slightly inset each floor's polygon from the one below to give 3D depth
+      const insetFactor = 1 - (floor - 1) * 0.002;
+      const floorCoords = scaledCoords.map(ring =>
+        ring.map(coord => [
+          centroidLng + (coord[0] - centroidLng) * insetFactor,
+          centroidLat + (coord[1] - centroidLat) * insetFactor
+        ])
+      );
+
+      floorFeatures.push({
         type: 'Feature',
-        properties: { height: finalBuildingHeight, totalFloors: totalFlrs },
+        properties: {
+          floorBase,
+          floorTop,
+          color: isHighlighted ? '#22c55e' : '#2a2f3a',
+          opacity: isHighlighted ? 1.0 : 0.92,
+        },
         geometry: {
           type: 'Polygon',
-          coordinates: scaledCoords,
+          coordinates: floorCoords,
         },
       });
     }
 
-    // Clean up existing overlay layers
+    const featureCollection: GeoJSON.FeatureCollection = {
+      type: 'FeatureCollection',
+      features: floorFeatures,
+    };
+
+    // Clean up existing layers and source
+    if (mapInstance.getLayer('building-floors')) {
+      mapInstance.removeLayer('building-floors');
+    }
+    // Also clean up any leftover layers from previous approaches
     if (mapInstance.getLayer('building-dark-shell')) {
       mapInstance.removeLayer('building-dark-shell');
     }
-    for (let floor = 1; floor <= 100; floor++) {
-      const layerId = `building-floor-${floor}`;
-      if (mapInstance.getLayer(layerId)) {
-        mapInstance.removeLayer(layerId);
-      }
+    for (let f = 1; f <= 100; f++) {
+      const lid = `building-floor-${f}`;
+      if (mapInstance.getLayer(lid)) mapInstance.removeLayer(lid);
     }
     if (mapInstance.getLayer('building-floor-highlight')) {
       mapInstance.removeLayer('building-floor-highlight');
@@ -659,31 +679,28 @@ export function use3DMap(props: Map3DBuildingsProps) {
       mapInstance.removeLayer('building-floor-highlight-glow');
     }
 
-    // Build the floor visualization:
-    // - Each floor is a solid slab with a thin gap between them
-    // - Non-highlighted floors are dark (#2a2f3a)
-    // - The highlighted floor is bright green (#22c55e)
-    // Gap between floors — just enough to see separation lines
-    const gapSize = Math.max(0.15, adjustedFloorHeight * 0.04);
-
-    for (let floor = 1; floor <= totalFlrs; floor++) {
-      const floorBase = (floor - 1) * adjustedFloorHeight + gapSize;
-      const floorTop = floor * adjustedFloorHeight - gapSize;
-      const isHighlighted = floor === floorNum;
-      const layerId = `building-floor-${floor}`;
-
-      mapInstance.addLayer({
-        id: layerId,
-        type: 'fill-extrusion',
-        source: 'custom-building',
-        paint: {
-          'fill-extrusion-color': isHighlighted ? '#22c55e' : '#2a2f3a',
-          'fill-extrusion-height': floorTop,
-          'fill-extrusion-base': floorBase,
-          'fill-extrusion-opacity': isHighlighted ? 1.0 : 0.92,
-        },
+    // Set up source
+    if (!mapInstance.getSource('custom-building')) {
+      mapInstance.addSource('custom-building', {
+        type: 'geojson',
+        data: featureCollection,
       });
+    } else {
+      (mapInstance.getSource('custom-building') as maplibregl.GeoJSONSource).setData(featureCollection);
     }
+
+    // Single fill-extrusion layer — data-driven paint reads per-feature properties
+    mapInstance.addLayer({
+      id: 'building-floors',
+      type: 'fill-extrusion',
+      source: 'custom-building',
+      paint: {
+        'fill-extrusion-color': ['get', 'color'],
+        'fill-extrusion-height': ['get', 'floorTop'],
+        'fill-extrusion-base': ['get', 'floorBase'],
+        'fill-extrusion-opacity': 0.95,
+      },
+    });
 
     // Add floating floor label and/or 360 tour marker above the building
     if (floorNum > 0 && floorNum <= totalFlrs) {
