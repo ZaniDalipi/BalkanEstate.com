@@ -1398,7 +1398,7 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
       {/* Hero Banner - Professional Design */}
       <div
         ref={coverRef}
-        className={`relative h-[32rem] md:h-[36rem] overflow-hidden flex-shrink-0 ${isRepositioningCover || isRepositioningLogo ? 'select-none' : ''}`}
+        className={`relative flex-shrink-0 ${isRepositioningCover || isRepositioningLogo ? 'select-none' : ''}`}
         style={(isRepositioningCover || isRepositioningLogo) ? { touchAction: 'none' } : undefined}
         onDragEnter={isAdmin ? handleCoverDragEnter : undefined}
         onDragLeave={isAdmin ? handleCoverDragLeave : undefined}
@@ -1425,7 +1425,8 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
             </div>
           </div>
         )}
-        {/* Background Layer */}
+        {/* Background Layer - overflow-hidden wrapper keeps cover image clipped */}
+        <div className="absolute inset-0 overflow-hidden">
         {agencyData.coverImage ? (
           <>
             <img
@@ -1477,6 +1478,7 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
 
         {/* Subtle Pattern Overlay */}
         <div className="absolute inset-0 opacity-5 pointer-events-none" style={{ backgroundImage: 'url("data:image/svg+xml,%3Csvg width="60" height="60" viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg"%3E%3Cg fill="none" fill-rule="evenodd"%3E%3Cg fill="%23ffffff" fill-opacity="1"%3E%3Cpath d="M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z"/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")' }} />
+        </div>
 
           {/* Top Navigation Bar */}
           <div className={`absolute top-0 left-0 right-0 z-20 px-4 md:px-6 py-4 ${isRepositioningCover ? 'pointer-events-none opacity-30' : ''}`}>
@@ -1713,8 +1715,8 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
           </div>
         </div>
 
-        {/* Agency Identity - Centered Content */}
-        <div className={`absolute inset-0 flex flex-col items-center justify-center px-4 pb-20 ${isRepositioningCover ? 'pointer-events-none opacity-30 z-10' : ''}`}>
+        {/* Agency Identity - Centered Content (relative so hero grows with content) */}
+        <div className={`relative z-10 flex flex-col items-center justify-center min-h-[28rem] md:min-h-[32rem] px-4 pt-24 pb-20 ${isRepositioningCover ? 'pointer-events-none opacity-30' : ''}`}>
           {/* Logo Container */}
           <div className="relative group">
             <div className="absolute -inset-1 bg-gradient-to-r from-primary/50 to-blue-500/50 rounded-2xl blur-lg opacity-75 group-hover:opacity-100 transition-opacity duration-500"></div>
