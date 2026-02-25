@@ -27,6 +27,12 @@ export interface Map3DControlsProps {
   virtualTour360Url?: string;
   propertyType?: string;
 
+  // Interactive floor selection
+  selectedFloor: number;
+  setSelectedFloor: (floor: number) => void;
+  hoveredFloor: number | null;
+  setHoveredFloor: (floor: number | null) => void;
+
   // POI
   showPOI?: boolean;
 
@@ -60,6 +66,10 @@ const Map3DControls: React.FC<Map3DControlsProps> = ({
   totalFloors,
   virtualTour360Url,
   propertyType,
+  selectedFloor,
+  setSelectedFloor,
+  hoveredFloor,
+  setHoveredFloor,
   showPOI,
   toggle3DMode,
   setShowShadows,
@@ -76,50 +86,113 @@ const Map3DControls: React.FC<Map3DControlsProps> = ({
 
   return (
     <>
-      {/* Floor Level Panel - left side of map */}
+      {/* Floor Level Panel - left side of map (interactive) */}
       {hasFloorInfo && showFloorIndicator && !show360Tour && (
         <div className="absolute left-2 sm:left-4 top-1/2 -translate-y-1/2 z-20">
-          <div className="flex flex-col items-center gap-2 bg-slate-900/90 backdrop-blur-sm rounded-2xl shadow-2xl border border-slate-700/50 px-3 sm:px-4 py-3 sm:py-4"
-               style={{ minWidth: '72px' }}>
+          <div className="flex flex-col items-center gap-2 bg-slate-900/90 backdrop-blur-sm rounded-2xl shadow-2xl border border-slate-700/50 px-2.5 sm:px-3 py-3 sm:py-4"
+               style={{ minWidth: '80px' }}>
 
             {/* FLOOR badge */}
             <div className="bg-gradient-to-r from-violet-600 to-purple-500 text-white text-[9px] sm:text-[10px] font-bold uppercase tracking-widest px-3 py-1 rounded-full shadow-md">
               {t('property:floorIndicator.title', 'Floor')}
             </div>
 
-            {/* Mini building visualization - split floor slabs */}
-            <div className="relative w-10 sm:w-12 flex flex-col-reverse"
-                 style={{ height: `clamp(100px, 20vh, 200px)`, gap: '2px' }}>
+            {/* Interactive building visualization - clickable floor slabs */}
+            <div
+              className="relative w-14 sm:w-16 flex flex-col-reverse overflow-y-auto scrollbar-thin scrollbar-thumb-slate-600"
+              style={{
+                height: totalFloors! > 15
+                  ? `clamp(160px, 30vh, 280px)`
+                  : `clamp(100px, 20vh, 200px)`,
+                gap: '2px',
+              }}
+            >
               {Array.from({ length: totalFloors! }).map((_, i) => {
                 const floor = i + 1;
-                const isHighlighted = floor === floorNumber;
+                const isPropertyFloor = floor === floorNumber;
+                const isSelected = floor === selectedFloor;
+                const isHovered = floor === hoveredFloor;
+                const displayFloor = hoveredFloor ?? selectedFloor;
+                const isActive = floor === displayFloor;
+
+                // Show floor numbers for first, last, every 5th, property floor, and active floor
+                const showLabel = floor === 1 || floor === totalFloors! || floor % 5 === 0
+                  || isPropertyFloor || isActive;
 
                 return (
                   <div
                     key={floor}
-                    className="rounded-[2px]"
+                    className="relative rounded-[3px] cursor-pointer transition-all duration-150 group/floor"
+                    onClick={() => setSelectedFloor(floor)}
+                    onMouseEnter={() => setHoveredFloor(floor)}
+                    onMouseLeave={() => setHoveredFloor(null)}
                     style={{
                       flex: 1,
-                      background: isHighlighted
+                      minHeight: '6px',
+                      background: isActive
                         ? 'linear-gradient(90deg, #22c55e, #10b981)'
-                        : floor % 2 === 0 ? '#374151' : '#4b5563',
-                      boxShadow: isHighlighted
-                        ? '0 0 8px rgba(34, 197, 94, 0.6), inset 0 1px 0 rgba(255,255,255,0.2)'
-                        : 'inset 0 1px 0 rgba(255,255,255,0.05)',
+                        : isPropertyFloor
+                          ? 'linear-gradient(90deg, rgba(34,197,94,0.35), rgba(16,185,129,0.35))'
+                          : isHovered
+                            ? '#525e6f'
+                            : floor % 2 === 0 ? '#374151' : '#4b5563',
+                      boxShadow: isActive
+                        ? '0 0 10px rgba(34, 197, 94, 0.7), inset 0 1px 0 rgba(255,255,255,0.25)'
+                        : isPropertyFloor
+                          ? '0 0 6px rgba(34, 197, 94, 0.3), inset 0 1px 0 rgba(255,255,255,0.1)'
+                          : isHovered
+                            ? 'inset 0 1px 0 rgba(255,255,255,0.15)'
+                            : 'inset 0 1px 0 rgba(255,255,255,0.05)',
+                      transform: isActive ? 'scaleX(1.08)' : isHovered ? 'scaleX(1.04)' : 'scaleX(1)',
+                      border: isPropertyFloor && !isActive ? '1px solid rgba(34,197,94,0.4)' : 'none',
                     }}
-                  />
+                  >
+                    {/* Floor number label */}
+                    {showLabel && (
+                      <span
+                        className="absolute right-full mr-1 top-1/2 -translate-y-1/2 text-[8px] sm:text-[9px] font-bold whitespace-nowrap pointer-events-none select-none"
+                        style={{
+                          color: isActive ? '#4ade80' : isPropertyFloor ? '#86efac' : '#94a3b8',
+                        }}
+                      >
+                        {floor}
+                      </span>
+                    )}
+                    {/* Hover tooltip - shows on right side */}
+                    {isHovered && !isActive && (
+                      <div className="absolute left-full ml-1.5 top-1/2 -translate-y-1/2 bg-slate-800 text-white text-[9px] font-semibold px-2 py-0.5 rounded shadow-lg whitespace-nowrap pointer-events-none z-30 border border-slate-600/50">
+                        {t('property:floorIndicator.floorN', 'Floor {{n}}', { n: floor })}
+                      </div>
+                    )}
+                    {/* Property floor marker (small dot) */}
+                    {isPropertyFloor && !isActive && (
+                      <div className="absolute right-0.5 top-1/2 -translate-y-1/2 w-1.5 h-1.5 rounded-full bg-emerald-400 shadow-sm" />
+                    )}
+                  </div>
                 );
               })}
             </div>
-            {/* Ground line */}
-            <div className="w-12 sm:w-14 h-1 bg-gradient-to-r from-slate-600 via-slate-500 to-slate-600 rounded-sm -mt-1" />
 
-            {/* Floor number */}
+            {/* Ground line */}
+            <div className="w-14 sm:w-16 h-1 bg-gradient-to-r from-slate-600 via-slate-500 to-slate-600 rounded-sm -mt-1" />
+
+            {/* Selected floor number */}
             <div className="flex flex-col items-center -mt-1">
-              <span className="text-xl sm:text-2xl font-black text-white leading-none">{floorNumber}</span>
+              <span className="text-xl sm:text-2xl font-black text-white leading-none">
+                {hoveredFloor ?? selectedFloor}
+              </span>
               <span className="text-[9px] sm:text-[10px] text-slate-400 font-medium mt-0.5">
                 {t('property:floorIndicator.ofFloors', 'of {{total}} floors', { total: totalFloors })}
               </span>
+              {/* Show property floor indicator if different from selected */}
+              {selectedFloor !== floorNumber && (
+                <button
+                  onClick={() => setSelectedFloor(floorNumber!)}
+                  className="text-[8px] sm:text-[9px] text-emerald-400 hover:text-emerald-300 font-semibold mt-1 transition-colors"
+                >
+                  {t('property:floorIndicator.resetToProperty', 'Go to Floor {{n}}', { n: floorNumber })}
+                </button>
+              )}
             </div>
 
             {/* Enter button (360 tour) */}
@@ -161,12 +234,12 @@ const Map3DControls: React.FC<Map3DControlsProps> = ({
         >
           <div className="flex flex-col items-center gap-0.5">
             <div className="w-4 h-6 rounded-t-sm border border-slate-500/60 bg-slate-700/50 relative overflow-hidden">
-              {totalFloors && floorNumber && (
+              {totalFloors && (
                 <div
                   className="absolute left-0 right-0 bg-emerald-500/80"
                   style={{
                     height: `${100 / totalFloors}%`,
-                    bottom: `${((floorNumber - 1) / totalFloors) * 100}%`,
+                    bottom: `${((selectedFloor - 1) / totalFloors) * 100}%`,
                   }}
                 />
               )}
@@ -175,7 +248,7 @@ const Map3DControls: React.FC<Map3DControlsProps> = ({
           </div>
           <div className="flex flex-col">
             <span className="text-[10px] sm:text-xs font-bold leading-tight">{t('property:floorIndicator.title', 'Floors')}</span>
-            <span className="text-[9px] sm:text-[10px] text-emerald-400 font-semibold leading-tight">{floorNumber}/{totalFloors}</span>
+            <span className="text-[9px] sm:text-[10px] text-emerald-400 font-semibold leading-tight">{selectedFloor}/{totalFloors}</span>
           </div>
         </button>
       )}

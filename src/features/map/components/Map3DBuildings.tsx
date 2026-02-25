@@ -58,6 +58,10 @@ const Map3DBuildings: React.FC<Map3DBuildingsProps> = (props) => {
     timelapse,
     showPOI,
     setShowPOI,
+    selectedFloor,
+    setSelectedFloor,
+    hoveredFloor,
+    setHoveredFloor,
     // Handlers
     handleEnterBuilding,
     handleClose360Tour,
@@ -165,6 +169,10 @@ const Map3DBuildings: React.FC<Map3DBuildingsProps> = (props) => {
         totalFloors={totalFloors}
         virtualTour360Url={virtualTour360Url}
         propertyType={props.propertyType}
+        selectedFloor={selectedFloor}
+        setSelectedFloor={setSelectedFloor}
+        hoveredFloor={hoveredFloor}
+        setHoveredFloor={setHoveredFloor}
         showPOI={showPOI}
         toggle3DMode={toggle3DMode}
         setShowShadows={setShowShadows}

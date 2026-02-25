@@ -40,6 +40,7 @@ export function use3DMap(props: Map3DBuildingsProps) {
   const floorLabelsRef = useRef<maplibregl.Marker[]>([]);
   const facingArrowRef = useRef<HTMLElement | null>(null);
   const facingBearingRef = useRef<number>(0);
+  const adjustedFloorHeightRef = useRef<number>(2); // Stored after building creation
 
   // State
   const [mapLoaded, setMapLoaded] = useState(false);
@@ -51,6 +52,8 @@ export function use3DMap(props: Map3DBuildingsProps) {
   const [showShadows, setShowShadows] = useState(true);
   const [show360Tour, setShow360Tour] = useState(false);
   const [isEnteringBuilding, setIsEnteringBuilding] = useState(false);
+  const [selectedFloor, setSelectedFloorState] = useState<number>(floorNumber ?? 1);
+  const [hoveredFloor, setHoveredFloor] = useState<number | null>(null);
 
   // Calculate floor visualization data
   // Show floor levels for any property with more than 3 floors (not just apartments)
@@ -59,6 +62,54 @@ export function use3DMap(props: Map3DBuildingsProps) {
   const floorHeightMeters = 3; // Average floor height
   const buildingHeightMeters = hasFloorInfo ? totalFloors * floorHeightMeters : 0;
   const floorPositionPercent = hasFloorInfo ? ((floorNumber - 0.5) / totalFloors) * 100 : 0;
+
+  // Update highlighted floor on the 3D map when user selects a different floor
+  const updateHighlightedFloor = useCallback((newFloor: number) => {
+    if (!map.current || !hasFloorInfo || !totalFloors) return;
+    const mapInstance = map.current;
+
+    const source = mapInstance.getSource('custom-building') as maplibregl.GeoJSONSource;
+    if (!source) return;
+
+    const adjustedFloorHeight = adjustedFloorHeightRef.current;
+    const gapSize = Math.max(0.3, adjustedFloorHeight * 0.12);
+
+    for (let floor = 1; floor <= totalFloors; floor++) {
+      const layerId = `building-floor-${floor}`;
+      if (!mapInstance.getLayer(layerId)) continue;
+
+      const isHighlighted = floor === newFloor;
+      mapInstance.setPaintProperty(layerId, 'fill-extrusion-color',
+        isHighlighted ? '#13e861' : (floor % 2 === 0 ? '#4b5563' : '#6b7280')
+      );
+      mapInstance.setPaintProperty(layerId, 'fill-extrusion-opacity',
+        isHighlighted ? 1 : 0.75
+      );
+    }
+
+    // Update glow layer position
+    const glowLayerId = 'building-floor-highlight-glow';
+    if (mapInstance.getLayer(glowLayerId)) {
+      const highlightBase = (newFloor - 1) * adjustedFloorHeight;
+      const highlightTop = newFloor * adjustedFloorHeight;
+      mapInstance.setPaintProperty(glowLayerId, 'fill-extrusion-base', highlightBase + (gapSize * 0.5));
+      mapInstance.setPaintProperty(glowLayerId, 'fill-extrusion-height', highlightTop - (gapSize * 0.5));
+    }
+  }, [hasFloorInfo, totalFloors]);
+
+  // Wrapper to set selected floor and update map
+  const setSelectedFloor = useCallback((floor: number) => {
+    setSelectedFloorState(floor);
+    updateHighlightedFloor(floor);
+  }, [updateHighlightedFloor]);
+
+  // When hovering over a floor in the panel, temporarily highlight it on the 3D map
+  // When hover ends (null), revert to selectedFloor
+  useEffect(() => {
+    if (!map.current || !hasFloorInfo) return;
+    const displayFloor = hoveredFloor ?? selectedFloor;
+    updateHighlightedFloor(displayFloor);
+  }, [hoveredFloor, selectedFloor, hasFloorInfo, updateHighlightedFloor]);
 
   // Shadow timelapse hook
   const timelapse = useShadowTimelapse(lat);
@@ -575,6 +626,8 @@ export function use3DMap(props: Map3DBuildingsProps) {
     const finalBuildingHeight = Math.max(totalHeightM, actualBuildingHeight);
     // Recalculate floor height based on actual building
     const adjustedFloorHeight = finalBuildingHeight / totalFlrs;
+    // Store for interactive floor updates
+    adjustedFloorHeightRef.current = adjustedFloorHeight;
 
     // Scale up the building coordinates to fully cover the original and prevent z-fighting
     const scaleFactor = 1.05; // 5% larger to fully cover original building
@@ -1681,6 +1734,10 @@ export function use3DMap(props: Map3DBuildingsProps) {
     isEnteringBuilding,
     showPOI,
     setShowPOI,
+    selectedFloor,
+    setSelectedFloor,
+    hoveredFloor,
+    setHoveredFloor,
     // Computed
     hasFloorInfo,
     has360Tour,
