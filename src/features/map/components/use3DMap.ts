@@ -481,6 +481,7 @@ export function use3DMap(props: Map3DBuildingsProps) {
     tourUrl?: string,
     onEnterTour?: () => void
   ) => {
+    console.log('[Map3D] addCustomBuilding3D called:', { latitude, longitude, floorNum, totalFlrs });
     const floorHeightM = 3; // 3m per floor
     const totalHeightM = totalFlrs * floorHeightM;
 
@@ -610,6 +611,7 @@ export function use3DMap(props: Map3DBuildingsProps) {
 
     // Extract coordinates from the building feature
     if (buildingFeature) {
+      console.log('[Map3D] Found building feature, id:', buildingFeature.id, 'type:', buildingFeature.geometry.type);
       if (buildingFeature.geometry.type === 'Polygon') {
         buildingCoords = (buildingFeature.geometry as GeoJSON.Polygon).coordinates;
       } else if (buildingFeature.geometry.type === 'MultiPolygon') {
@@ -620,7 +622,7 @@ export function use3DMap(props: Map3DBuildingsProps) {
 
     // If we still don't have building coords, create a fallback based on the building's floor count
     if (!buildingCoords) {
-      // Warning removed
+      console.log('[Map3D] No building geometry found, using fallback rectangle');
       const metersToDegrees = 1 / 111320;
       // For a tall building, use a larger footprint (proportional to floors)
       const buildingSize = Math.max(35, totalFlrs * 3); // At least 35m, scales with floors
@@ -653,7 +655,7 @@ export function use3DMap(props: Map3DBuildingsProps) {
     adjustedFloorHeightRef.current = adjustedFloorHeight;
 
     // Scale up the building coordinates to fully cover the original and prevent z-fighting
-    const scaleFactor = 1.08; // 8% larger to fully cover original building and prevent z-fighting
+    const scaleFactor = 1.20; // 20% larger to fully cover original building and prevent z-fighting
 
     // Calculate centroid for scaling and label positioning
     const outerRing = buildingCoords[0];
@@ -678,56 +680,68 @@ export function use3DMap(props: Map3DBuildingsProps) {
     // Hide the original building by filtering it out of ALL fill-extrusion building layers.
     // The Liberty style may have its own building extrusion layer(s) besides our '3d-buildings'.
     // We need to hide the building from ALL of them to prevent overlap with our floor slices.
+    const buildingExtrusionLayerIds = allStyleLayers
+      .filter(l =>
+        l.type === 'fill-extrusion' &&
+        l.id !== 'building-floors' && // Don't hide our own floor slices
+        (l.id === '3d-buildings' || ('source-layer' in l && (l as any)['source-layer'] === 'building'))
+      )
+      .map(l => l.id)
+      .filter(id => mapInstance.getLayer(id));
+
+    let hiddenOriginal = false;
+
     if (buildingFeature) {
-      const buildingExtrusionLayerIds = allStyleLayers
-        .filter(l =>
-          l.type === 'fill-extrusion' &&
-          (l.id === '3d-buildings' || ('source-layer' in l && (l as any)['source-layer'] === 'building'))
-        )
-        .map(l => l.id);
+      // Try to hide by feature ID filtering (preferred approach - hides only the specific building)
+      const hidePoint = mapInstance.project([longitude, latitude]);
+      const hideBox: [maplibregl.PointLike, maplibregl.PointLike] = [
+        [hidePoint.x - 80, hidePoint.y - 80],
+        [hidePoint.x + 80, hidePoint.y + 80]
+      ];
 
-      const featureId = buildingFeature.id;
-      if (featureId !== undefined && featureId !== null) {
-        // Query all building features in the immediate area to hide them all
-        const hidePoint = mapInstance.project([longitude, latitude]);
-        const hideBox: [maplibregl.PointLike, maplibregl.PointLike] = [
-          [hidePoint.x - 80, hidePoint.y - 80],
-          [hidePoint.x + 80, hidePoint.y + 80]
-        ];
+      const hideCandidates = buildingExtrusionLayerIds.length > 0
+        ? mapInstance.queryRenderedFeatures(hideBox, { layers: buildingExtrusionLayerIds })
+        : [];
 
-        const queryLayers = buildingExtrusionLayerIds.filter(id => mapInstance.getLayer(id));
-        const hideCandidates = queryLayers.length > 0
-          ? mapInstance.queryRenderedFeatures(hideBox, { layers: queryLayers })
-          : [];
+      const hideIds: (string | number)[] = [];
+      for (const f of hideCandidates) {
+        if (f.id !== undefined && f.id !== null) {
+          const h = f.properties?.render_height || (f.properties?.['building:levels'] || 1) * 3.5;
+          if (h >= floorHeightM * 2) {
+            hideIds.push(f.id);
+          }
+        }
+      }
 
-        const hideIds: (string | number)[] = [];
-        for (const f of hideCandidates) {
-          if (f.id !== undefined && f.id !== null) {
-            const h = f.properties?.render_height || (f.properties?.['building:levels'] || 1) * 3.5;
-            if (h >= floorHeightM * 2) {
-              hideIds.push(f.id);
+      if (hideIds.length > 0) {
+        // Build filter to exclude building features by ID
+        const excludeFilter: maplibregl.FilterSpecification = hideIds.length === 1
+          ? ['!=', ['id'], hideIds[0]] as maplibregl.FilterSpecification
+          : ['all', ...hideIds.map(id => ['!=', ['id'], id])] as maplibregl.FilterSpecification;
+
+        for (const layerId of buildingExtrusionLayerIds) {
+          try {
+            const existingFilter = mapInstance.getFilter(layerId);
+            if (existingFilter) {
+              mapInstance.setFilter(layerId, ['all', existingFilter, excludeFilter] as maplibregl.FilterSpecification);
+            } else {
+              mapInstance.setFilter(layerId, excludeFilter);
             }
-          }
+          } catch (_) { /* layer might have been removed */ }
         }
+        hiddenOriginal = true;
+        console.log('[Map3D] Hidden original building by feature ID filter, IDs:', hideIds);
+      }
+    }
 
-        if (hideIds.length > 0) {
-          // Build filter to exclude building features by ID
-          const excludeFilter: maplibregl.FilterSpecification = hideIds.length === 1
-            ? ['!=', ['id'], hideIds[0]] as maplibregl.FilterSpecification
-            : ['all', ...hideIds.map(id => ['!=', ['id'], id])] as maplibregl.FilterSpecification;
-
-          // Apply the exclude filter to ALL building extrusion layers
-          for (const layerId of queryLayers) {
-            try {
-              const existingFilter = mapInstance.getFilter(layerId);
-              if (existingFilter) {
-                mapInstance.setFilter(layerId, ['all', existingFilter, excludeFilter] as maplibregl.FilterSpecification);
-              } else {
-                mapInstance.setFilter(layerId, excludeFilter);
-              }
-            } catch (_) { /* layer might have been removed */ }
-          }
-        }
+    // Fallback: if we couldn't hide by ID, make all building extrusion layers semi-transparent
+    // so our fully-opaque floor slices clearly stand out
+    if (!hiddenOriginal && buildingExtrusionLayerIds.length > 0) {
+      console.log('[Map3D] Could not filter by ID, reducing building layer opacity');
+      for (const layerId of buildingExtrusionLayerIds) {
+        try {
+          mapInstance.setPaintProperty(layerId, 'fill-extrusion-opacity', 0.35);
+        } catch (_) { /* ignore */ }
       }
     }
 
@@ -796,9 +810,11 @@ export function use3DMap(props: Map3DBuildingsProps) {
         'fill-extrusion-color': ['get', 'color'] as maplibregl.ExpressionSpecification,
         'fill-extrusion-height': ['get', 'height'] as maplibregl.ExpressionSpecification,
         'fill-extrusion-base': ['get', 'base'] as maplibregl.ExpressionSpecification,
-        'fill-extrusion-opacity': 0.92,
+        'fill-extrusion-opacity': 1.0,
       },
     });
+
+    console.log('[Map3D] Floor slices added:', totalFlrs, 'floors, source features:', floorFeatures.length);
 
     // Force a repaint to ensure the new layer renders immediately
     mapInstance.triggerRepaint();
@@ -1111,45 +1127,46 @@ export function use3DMap(props: Map3DBuildingsProps) {
         }
 
         // Verify the source exists before adding layer
-        if (!mapInstance.getSource(buildingSource)) {
-          // Error removed
-          return;
-        }
-
-        try {
-          // Add 3D buildings layer - OneGeo style dark grey buildings
-          mapInstance.addLayer(
-            {
-              id: '3d-buildings',
-              source: buildingSource,
-              'source-layer': 'building',
-              type: 'fill-extrusion',
-              minzoom: 14,
-              paint: {
-                'fill-extrusion-color': [
-                  'interpolate',
-                  ['linear'],
-                  ['coalesce', ['get', 'render_height'], 10],
-                  0, '#6b7280',  // Shorter buildings - medium grey
-                  20, '#4b5563', // Medium buildings - darker grey
-                  50, '#374151', // Tall buildings - dark grey
-                  100, '#1f2937', // Very tall - very dark
-                ],
-                'fill-extrusion-height': [
-                  'coalesce',
-                  ['get', 'render_height'],
-                  ['*', ['coalesce', ['get', 'building:levels'], 3], 3.5],
-                  10,
-                ],
-                'fill-extrusion-base': ['coalesce', ['get', 'render_min_height'], 0],
-                'fill-extrusion-opacity': 0.92,
-                'fill-extrusion-vertical-gradient': true,
+        // NOTE: Do NOT return here - it would exit the entire load callback
+        // and prevent markers, POIs, and floor slices from being added.
+        if (mapInstance.getSource(buildingSource)) {
+          try {
+            // Add 3D buildings layer - OneGeo style dark grey buildings
+            mapInstance.addLayer(
+              {
+                id: '3d-buildings',
+                source: buildingSource,
+                'source-layer': 'building',
+                type: 'fill-extrusion',
+                minzoom: 14,
+                paint: {
+                  'fill-extrusion-color': [
+                    'interpolate',
+                    ['linear'],
+                    ['coalesce', ['get', 'render_height'], 10],
+                    0, '#6b7280',  // Shorter buildings - medium grey
+                    20, '#4b5563', // Medium buildings - darker grey
+                    50, '#374151', // Tall buildings - dark grey
+                    100, '#1f2937', // Very tall - very dark
+                  ],
+                  'fill-extrusion-height': [
+                    'coalesce',
+                    ['get', 'render_height'],
+                    ['*', ['coalesce', ['get', 'building:levels'], 3], 3.5],
+                    10,
+                  ],
+                  'fill-extrusion-base': ['coalesce', ['get', 'render_min_height'], 0],
+                  'fill-extrusion-opacity': 0.92,
+                  'fill-extrusion-vertical-gradient': true,
+                },
               },
-            },
-            labelLayerId
-          );
-        } catch (error) {
-          // Error removed
+              labelLayerId
+            );
+          } catch (error) {
+            console.warn('[Map3D] Failed to add 3d-buildings layer:', error);
+          }
+        } else {
+          console.warn('[Map3D] Vector source not found, skipping 3d-buildings layer. Available sources:', Object.keys(mapInstance.getStyle().sources || {}));
         }
       }
 
@@ -1248,6 +1265,7 @@ export function use3DMap(props: Map3DBuildingsProps) {
 
       // Add custom 3D building with floor slices for properties with floor data
       // Wait for tiles to fully load before querying building geometry
+      console.log('[Map3D] Floor data check:', { floorNumber, totalFloors, willHaveFloorViz });
       if (floorNumber != null && totalFloors != null && totalFloors > 0) {
         let retryCount = 0;
         const maxRetries = 4;
@@ -1273,6 +1291,8 @@ export function use3DMap(props: Map3DBuildingsProps) {
           const foundBuildings = features.some(f =>
             f.geometry.type === 'Polygon' || f.geometry.type === 'MultiPolygon'
           );
+
+          console.log('[Map3D] doAddBuilding attempt', retryCount, '- bldgLayers:', bldgLayers, 'features:', features.length, 'foundBuildings:', foundBuildings);
 
           if (!foundBuildings && retryCount < maxRetries) {
             // Tiles not loaded yet — wait for next idle and retry
@@ -1313,6 +1333,81 @@ export function use3DMap(props: Map3DBuildingsProps) {
             }
           }, 4000);
         });
+      } else if (!willHaveFloorViz) {
+        // For properties WITHOUT floor data, highlight the building at the property location
+        // by tinting it green so users can identify which building is the property
+        console.log('[Map3D] No floor data, adding highlight for property building');
+        const highlightBuilding = () => {
+          const currentLayers = mapInstance.getStyle().layers || [];
+          const bldgLayers = currentLayers
+            .filter(l =>
+              l.type === 'fill-extrusion' &&
+              (l.id === '3d-buildings' || ('source-layer' in l && (l as any)['source-layer'] === 'building'))
+            )
+            .map(l => l.id)
+            .filter(id => mapInstance.getLayer(id));
+
+          if (bldgLayers.length === 0) return;
+
+          const pt = mapInstance.project([lng, lat]);
+          const features = mapInstance.queryRenderedFeatures(
+            [[pt.x - 60, pt.y - 60], [pt.x + 60, pt.y + 60]],
+            { layers: bldgLayers }
+          );
+
+          if (features.length > 0 && features[0].id != null) {
+            // Use feature state to highlight (if supported)
+            // For now, just add a colored overlay building
+            const feat = features[0];
+            let coords: number[][][] | null = null;
+            if (feat.geometry.type === 'Polygon') {
+              coords = (feat.geometry as GeoJSON.Polygon).coordinates;
+            } else if (feat.geometry.type === 'MultiPolygon') {
+              coords = (feat.geometry as GeoJSON.MultiPolygon).coordinates[0];
+            }
+            if (coords) {
+              const height = feat.properties?.render_height || (feat.properties?.['building:levels'] || 3) * 3.5;
+              // Scale slightly to cover original
+              const outerRing = coords[0];
+              let cLng = 0, cLat = 0;
+              const n = outerRing.length - 1;
+              for (let i = 0; i < n; i++) { cLng += outerRing[i][0]; cLat += outerRing[i][1]; }
+              cLng /= n; cLat /= n;
+              const scaled = coords.map(ring => ring.map(c => [
+                cLng + (c[0] - cLng) * 1.15,
+                cLat + (c[1] - cLat) * 1.15,
+              ]));
+
+              if (!mapInstance.getSource('custom-building')) {
+                mapInstance.addSource('custom-building', {
+                  type: 'geojson',
+                  data: {
+                    type: 'FeatureCollection',
+                    features: [{
+                      type: 'Feature',
+                      properties: { color: '#22c55e', height, base: 0 },
+                      geometry: { type: 'Polygon', coordinates: scaled },
+                    }],
+                  },
+                });
+                mapInstance.addLayer({
+                  id: 'building-floors',
+                  type: 'fill-extrusion',
+                  source: 'custom-building',
+                  paint: {
+                    'fill-extrusion-color': ['get', 'color'] as maplibregl.ExpressionSpecification,
+                    'fill-extrusion-height': ['get', 'height'] as maplibregl.ExpressionSpecification,
+                    'fill-extrusion-base': ['get', 'base'] as maplibregl.ExpressionSpecification,
+                    'fill-extrusion-opacity': 0.7,
+                  },
+                });
+              }
+            }
+          }
+        };
+
+        // Wait for tiles to load then highlight
+        mapInstance.once('idle', () => setTimeout(highlightBuilding, 500));
       }
 
       // Add attribution
