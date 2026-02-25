@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useCityMarketData } from '../hooks/useCityQueries';
+import { useCityMarketData, useCitiesByCountry } from '../hooks/useCityQueries';
 import { formatPrice } from '@/utils/currency';
 import { parseLanguageFromPath, buildLocalizedPath } from '@/src/utils/languageRouting';
 import { getCityImageUrl, getCityFallbackGradient } from '@/config/cloudinaryConfig';
@@ -19,6 +19,9 @@ import {
   StarIcon,
   BuildingOfficeIcon,
   GlobeAltIcon,
+  CurrencyEuroIcon,
+  HomeModernIcon,
+  LightBulbIcon,
 } from '@/constants';
 
 /** Extract city & country from the current URL path */
@@ -38,6 +41,7 @@ const CityDashboard: React.FC = () => {
 
   const params = useMemo(parseCityFromUrl, []);
   const { data: city, isLoading, error } = useCityMarketData(params?.city, params?.country);
+  const { data: countryCities } = useCitiesByCountry(params?.country);
 
   // Scroll to top on mount
   useEffect(() => {
@@ -469,6 +473,215 @@ const CityDashboard: React.FC = () => {
             </div>
           )}
         </div>
+
+        {/* Price Estimator - What different apartment sizes cost */}
+        <div className="bg-white rounded-xl shadow-md border border-neutral-100 p-5 sm:p-6 mb-8">
+          <h3 className="text-lg font-bold text-neutral-900 mb-2 flex items-center gap-2">
+            <CurrencyEuroIcon className="w-5 h-5 text-green-600" />
+            {t('dashboard.priceEstimator', 'Price Estimator')}
+          </h3>
+          <p className="text-sm text-neutral-500 mb-5">{t('dashboard.priceEstimatorDesc', 'Estimated property prices based on average €{{price}}/m² in {{city}}', { price: city.avgPricePerSqm.toLocaleString(), city: city.city })}</p>
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+            {[
+              { size: 40, label: t('dashboard.studio', 'Studio'), desc: '~40 m²' },
+              { size: 60, label: t('dashboard.oneBed', '1-Bedroom'), desc: '~60 m²' },
+              { size: 85, label: t('dashboard.twoBed', '2-Bedroom'), desc: '~85 m²' },
+              { size: 120, label: t('dashboard.threeBed', '3-Bedroom'), desc: '~120 m²' },
+            ].map(({ size, label, desc }) => (
+              <div key={size} className="p-4 bg-gradient-to-b from-neutral-50 to-white rounded-xl border border-neutral-100 text-center">
+                <span className="text-xs font-medium text-neutral-500 block mb-1">{label}</span>
+                <span className="text-lg sm:text-xl font-black text-neutral-900 block">
+                  €{(city.avgPricePerSqm * size).toLocaleString()}
+                </span>
+                <span className="text-xs text-neutral-400">{desc}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* What You Can Buy - Budget tiers */}
+        <div className="bg-white rounded-xl shadow-md border border-neutral-100 p-5 sm:p-6 mb-8">
+          <h3 className="text-lg font-bold text-neutral-900 mb-2 flex items-center gap-2">
+            <HomeModernIcon className="w-5 h-5 text-primary" />
+            {t('dashboard.whatYouCanBuy', 'What Your Budget Gets You')}
+          </h3>
+          <p className="text-sm text-neutral-500 mb-5">{t('dashboard.whatYouCanBuyDesc', 'Approximate property sizes for different budgets in {{city}}', { city: city.city })}</p>
+          <div className="space-y-3">
+            {[
+              { budget: 50000, color: 'from-emerald-400 to-emerald-500', bg: 'bg-emerald-50', text: 'text-emerald-700' },
+              { budget: 100000, color: 'from-blue-400 to-blue-500', bg: 'bg-blue-50', text: 'text-blue-700' },
+              { budget: 150000, color: 'from-violet-400 to-violet-500', bg: 'bg-violet-50', text: 'text-violet-700' },
+              { budget: 250000, color: 'from-amber-400 to-amber-500', bg: 'bg-amber-50', text: 'text-amber-700' },
+            ].map(({ budget, color, bg, text }) => {
+              const sqm = Math.round(budget / city.avgPricePerSqm);
+              const maxBudgetSqm = Math.round(250000 / city.avgPricePerSqm);
+              const barWidth = Math.min(100, (sqm / maxBudgetSqm) * 100);
+              return (
+                <div key={budget} className={`p-4 ${bg} rounded-xl`}>
+                  <div className="flex items-center justify-between mb-2">
+                    <span className={`text-sm font-bold ${text}`}>€{budget.toLocaleString()}</span>
+                    <span className="text-sm font-bold text-neutral-800">{sqm} m²</span>
+                  </div>
+                  <div className="w-full h-2 bg-white/60 rounded-full overflow-hidden">
+                    <div className={`h-full rounded-full bg-gradient-to-r ${color}`} style={{ width: `${barWidth}%` }} />
+                  </div>
+                  <p className="text-xs text-neutral-500 mt-1.5">
+                    {sqm < 35
+                      ? t('dashboard.budgetStudio', 'Compact studio or small flat')
+                      : sqm < 55
+                      ? t('dashboard.budgetOneBed', 'Comfortable 1-bedroom apartment')
+                      : sqm < 80
+                      ? t('dashboard.budgetTwoBed', 'Spacious 2-bedroom apartment')
+                      : sqm < 110
+                      ? t('dashboard.budgetThreeBed', 'Large 3-bedroom family apartment')
+                      : t('dashboard.budgetHouse', 'Premium property or small house')}
+                  </p>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* Rental Income Calculator */}
+        <div className="bg-white rounded-xl shadow-md border border-neutral-100 p-5 sm:p-6 mb-8">
+          <h3 className="text-lg font-bold text-neutral-900 mb-2 flex items-center gap-2">
+            <LightBulbIcon className="w-5 h-5 text-amber-500" />
+            {t('dashboard.rentalIncome', 'Rental Income Projections')}
+          </h3>
+          <p className="text-sm text-neutral-500 mb-5">{t('dashboard.rentalIncomeDesc', 'Estimated rental income based on {{yield}}% annual yield in {{city}}', { yield: city.rentalYield, city: city.city })}</p>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            {[
+              { value: 50000, label: '€50K' },
+              { value: 100000, label: '€100K' },
+              { value: 200000, label: '€200K' },
+            ].map(({ value, label }) => {
+              const annualIncome = Math.round(value * (city.rentalYield / 100));
+              const monthlyIncome = Math.round(annualIncome / 12);
+              return (
+                <div key={value} className="p-4 bg-gradient-to-br from-amber-50 to-orange-50 rounded-xl border border-amber-100">
+                  <span className="text-xs font-semibold text-amber-600 uppercase tracking-wide block mb-3">
+                    {t('dashboard.investmentOf', '{{label}} Investment', { label })}
+                  </span>
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs text-neutral-500">{t('dashboard.annualIncome', 'Annual')}</span>
+                      <span className="text-base font-black text-neutral-900">€{annualIncome.toLocaleString()}</span>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs text-neutral-500">{t('dashboard.monthlyIncome', 'Monthly')}</span>
+                      <span className="text-base font-black text-green-600">€{monthlyIncome.toLocaleString()}</span>
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* Country Comparison - Bar chart */}
+        {countryCities && countryCities.length > 1 && (
+          <div className="bg-white rounded-xl shadow-md border border-neutral-100 p-5 sm:p-6 mb-8">
+            <h3 className="text-lg font-bold text-neutral-900 mb-2 flex items-center gap-2">
+              <ChartBarIcon className="w-5 h-5 text-blue-500" />
+              {t('dashboard.countryComparison', 'Price Comparison in {{country}}', { country: city.country })}
+            </h3>
+            <p className="text-sm text-neutral-500 mb-5">{t('dashboard.countryComparisonDesc', 'Average price per m² compared to other cities in {{country}}', { country: city.country })}</p>
+            <div className="space-y-3">
+              {[...countryCities]
+                .sort((a, b) => b.avgPricePerSqm - a.avgPricePerSqm)
+                .map((c) => {
+                  const maxPrice = Math.max(...countryCities.map(cc => cc.avgPricePerSqm));
+                  const barWidth = Math.max(8, (c.avgPricePerSqm / maxPrice) * 100);
+                  const isCurrentCity = c.city === city.city;
+                  return (
+                    <div key={c.city} className={`flex items-center gap-3 p-3 rounded-lg ${isCurrentCity ? 'bg-primary/5 ring-2 ring-primary/20' : 'bg-neutral-50'}`}>
+                      <span className={`text-sm font-semibold w-28 flex-shrink-0 truncate ${isCurrentCity ? 'text-primary' : 'text-neutral-700'}`}>
+                        {c.city} {isCurrentCity && <span className="text-xs">*</span>}
+                      </span>
+                      <div className="flex-1 h-6 bg-neutral-100 rounded-full overflow-hidden">
+                        <div
+                          className={`h-full rounded-full transition-all duration-700 ${isCurrentCity ? 'bg-gradient-to-r from-primary to-primary/80' : 'bg-gradient-to-r from-neutral-300 to-neutral-400'}`}
+                          style={{ width: `${barWidth}%` }}
+                        />
+                      </div>
+                      <span className={`text-sm font-bold w-24 text-right flex-shrink-0 ${isCurrentCity ? 'text-primary' : 'text-neutral-700'}`}>
+                        €{c.avgPricePerSqm.toLocaleString()}/m²
+                      </span>
+                    </div>
+                  );
+                })}
+            </div>
+          </div>
+        )}
+
+        {/* Similar Cities in the same country */}
+        {countryCities && countryCities.filter(c => c.city !== city.city).length > 0 && (
+          <div className="mb-8">
+            <h3 className="text-lg font-bold text-neutral-900 mb-4 flex items-center gap-2">
+              <GlobeAltIcon className="w-5 h-5 text-fuchsia-500" />
+              {t('dashboard.otherCitiesIn', 'Other Cities in {{country}}', { country: city.country })}
+            </h3>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+              {countryCities
+                .filter(c => c.city !== city.city)
+                .map((otherCity) => {
+                  const otherImageUrl = getCityImageUrl(otherCity.city, { country: otherCity.country, width: 400, height: 200, quality: 'auto:good' });
+                  const otherFallback = getCityFallbackGradient(otherCity.city);
+                  const handleNavigate = () => {
+                    const path = `/explore-cities/${encodeURIComponent(otherCity.city)}/${encodeURIComponent(otherCity.country)}`;
+                    window.history.pushState({}, '', buildLocalizedPath(path));
+                    window.dispatchEvent(new PopStateEvent('popstate'));
+                  };
+                  return (
+                    <button
+                      key={otherCity.city}
+                      onClick={handleNavigate}
+                      className="group text-left bg-white rounded-xl shadow-md border border-neutral-100 overflow-hidden hover:shadow-lg hover:border-primary/20 transition-all"
+                    >
+                      <div className="relative h-28 overflow-hidden">
+                        <img
+                          src={otherImageUrl}
+                          alt={otherCity.city}
+                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                          onError={(e) => {
+                            (e.target as HTMLImageElement).style.display = 'none';
+                            (e.target as HTMLImageElement).parentElement!.style.background = otherFallback;
+                          }}
+                        />
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
+                        <span className="absolute bottom-2 left-3 text-white font-bold text-base">{otherCity.city}</span>
+                        <span className={`absolute top-2 right-2 text-xs font-bold px-2 py-0.5 rounded-full ${
+                          otherCity.marketTrend === 'rising' ? 'bg-green-500/90 text-white'
+                          : otherCity.marketTrend === 'declining' ? 'bg-red-500/90 text-white'
+                          : 'bg-neutral-500/90 text-white'
+                        }`}>
+                          {otherCity.marketTrend === 'rising' ? '+' : ''}{otherCity.priceGrowthYoY}% YoY
+                        </span>
+                      </div>
+                      <div className="p-3">
+                        <div className="grid grid-cols-3 gap-2 text-center">
+                          <div>
+                            <span className="text-xs text-neutral-500 block">{t('dashboard.priceLabel', 'Price/m²')}</span>
+                            <span className="text-sm font-bold text-neutral-900">€{otherCity.avgPricePerSqm.toLocaleString()}</span>
+                          </div>
+                          <div>
+                            <span className="text-xs text-neutral-500 block">{t('cityCard.rentalYield')}</span>
+                            <span className="text-sm font-bold text-blue-600">{otherCity.rentalYield}%</span>
+                          </div>
+                          <div>
+                            <span className="text-xs text-neutral-500 block">{t('cityCard.demand')}</span>
+                            <span className={`text-sm font-bold ${otherCity.demandScore >= 70 ? 'text-green-600' : otherCity.demandScore >= 40 ? 'text-amber-600' : 'text-red-500'}`}>
+                              {otherCity.demandScore}/100
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                    </button>
+                  );
+                })}
+            </div>
+          </div>
+        )}
 
         {/* Data freshness info */}
         <div className="mb-8 p-4 bg-gradient-to-r from-violet-50 to-fuchsia-50 rounded-xl border border-violet-200">
