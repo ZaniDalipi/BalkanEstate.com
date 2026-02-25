@@ -120,6 +120,11 @@
     "livingRoom": "дневна соба",
     "livingRoomPlural": "дневни соби",
     "petsAllowed": "Дозволени миленици",
+    "floorPosition": "Позиција на кат",
+    "floorPositionSubtitle": "Кат {{floor}} од {{total}}",
+    "floorPositionAria": "Зграда која го прикажува кат {{floor}} од {{total}} означен",
+    "yourFloor": "Вашиот кат",
+    "elevatorAvailable": "Лифт",
     "visitAvailability": {
       "title": "Достапност за Посети",
       "subtitle": "Закажете посета во достапните термини",

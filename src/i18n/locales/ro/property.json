@@ -120,6 +120,11 @@
     "livingRoom": "cameră de zi",
     "livingRoomPlural": "camere de zi",
     "petsAllowed": "Animale Permise",
+    "floorPosition": "Poziția etajului",
+    "floorPositionSubtitle": "Etaj {{floor}} din {{total}}",
+    "floorPositionAria": "Clădire care arată etajul {{floor}} din {{total}} evidențiat",
+    "yourFloor": "Etajul tău",
+    "elevatorAvailable": "Lift",
     "visitAvailability": {
       "title": "Disponibilitate Vizite",
       "subtitle": "Programați o vizită în orele disponibile",

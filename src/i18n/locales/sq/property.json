@@ -120,6 +120,11 @@
     "livingRoom": "dhomë ndenjeje",
     "livingRoomPlural": "dhoma ndenjeje",
     "petsAllowed": "Lejohen Kafshët",
+    "floorPosition": "Pozicioni i katit",
+    "floorPositionSubtitle": "Kati {{floor}} nga {{total}}",
+    "floorPositionAria": "Ndërtesë që tregon katin {{floor}} nga {{total}} të theksuar",
+    "yourFloor": "Kati juaj",
+    "elevatorAvailable": "Ashensor",
     "visitAvailability": {
       "title": "Disponueshmëria e Vizitës",
       "subtitle": "Planifikoni një vizitë gjatë orëve të disponueshme",

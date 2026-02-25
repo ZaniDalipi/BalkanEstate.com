@@ -120,6 +120,11 @@
     "livingRoom": "dnevna soba",
     "livingRoomPlural": "dnevne sobe",
     "petsAllowed": "Kućni Ljubimci Dozvoljeni",
+    "floorPosition": "Pozicija kata",
+    "floorPositionSubtitle": "Kat {{floor}} od {{total}}",
+    "floorPositionAria": "Zgrada koja prikazuje kat {{floor}} od {{total}} označen",
+    "yourFloor": "Vaš kat",
+    "elevatorAvailable": "Dizalo",
     "visitAvailability": {
       "title": "Dostupnost za Posjete",
       "subtitle": "Zakažite obilazak u dostupnim terminima",

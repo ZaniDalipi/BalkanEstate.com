@@ -107,6 +107,11 @@
     "livingRoom": "living room",
     "livingRoomPlural": "living rooms",
     "petsAllowed": "Pets Allowed",
+    "floorPosition": "Floor Position",
+    "floorPositionSubtitle": "Floor {{floor}} of {{total}}",
+    "floorPositionAria": "Building showing floor {{floor}} of {{total}} highlighted",
+    "yourFloor": "Your floor",
+    "elevatorAvailable": "Elevator",
     "visitAvailability": {
       "title": "Visit Availability",
       "subtitle": "Schedule a viewing during available hours",

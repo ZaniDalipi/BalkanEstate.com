@@ -120,6 +120,11 @@
     "livingRoom": "хол",
     "livingRoomPlural": "холове",
     "petsAllowed": "Позволени домашни любимци",
+    "floorPosition": "Позиция на етажа",
+    "floorPositionSubtitle": "Етаж {{floor}} от {{total}}",
+    "floorPositionAria": "Сграда, показваща етаж {{floor}} от {{total}} маркиран",
+    "yourFloor": "Вашият етаж",
+    "elevatorAvailable": "Асансьор",
     "visitAvailability": {
       "title": "Наличност за Посещения",
       "subtitle": "Запишете се за оглед в наличните часове",

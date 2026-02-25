@@ -120,6 +120,11 @@
     "livingRoom": "дневна соба",
     "livingRoomPlural": "дневне собе",
     "petsAllowed": "Дозвољени Кућни Љубимци",
+    "floorPosition": "Позиција спрата",
+    "floorPositionSubtitle": "Спрат {{floor}} од {{total}}",
+    "floorPositionAria": "Зграда која приказује спрат {{floor}} од {{total}} означен",
+    "yourFloor": "Ваш спрат",
+    "elevatorAvailable": "Лифт",
     "visitAvailability": {
       "title": "Dostupnost za Posete",
       "subtitle": "Zakazite obilazak u dostupnim terminima",

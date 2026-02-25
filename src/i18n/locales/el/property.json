@@ -120,6 +120,11 @@
     "livingRoom": "σαλόνι",
     "livingRoomPlural": "σαλόνια",
     "petsAllowed": "Επιτρέπονται Κατοικίδια",
+    "floorPosition": "Θέση ορόφου",
+    "floorPositionSubtitle": "Όροφος {{floor}} από {{total}}",
+    "floorPositionAria": "Κτίριο που δείχνει τον όροφο {{floor}} από {{total}} επισημασμένο",
+    "yourFloor": "Ο όροφός σας",
+    "elevatorAvailable": "Ασανσέρ",
     "visitAvailability": {
       "title": "Διαθεσιμότητα Επίσκεψης",
       "subtitle": "Προγραμματίστε μια επίσκεψη στις διαθέσιμες ώρες",

@@ -21,6 +21,7 @@ import {
   CheckCircleIcon,
 } from '../../../constants';
 import { DetailItem } from './PropertyCommon';
+import { BuildingFloorVisualizer } from './BuildingFloorVisualizer';
 import { useAppContext } from '../../../context/AppContext';
 import { BALKAN_COUNTRIES } from '../../../constants/countries';
 
@@ -383,6 +384,19 @@ export const PropertyInfo: React.FC<PropertyInfoProps> = ({ property, onOpenFloo
           </div>
         )}
       </div>
+
+      {/* Building Floor Position Visualizer (apartments only) */}
+      {property.propertyType === 'apartment' &&
+        property.floorNumber != null &&
+        property.floorNumber > 0 &&
+        property.totalFloors != null &&
+        property.totalFloors > 0 && (
+          <BuildingFloorVisualizer
+            floorNumber={property.floorNumber}
+            totalFloors={property.totalFloors}
+            hasElevator={property.hasElevator}
+          />
+        )}
 
       {/* Amenities & Features Section */}
       {((property.amenities && property.amenities.length > 0) ||
