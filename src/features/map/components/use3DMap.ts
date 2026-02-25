@@ -593,8 +593,8 @@ export function use3DMap(props: Map3DBuildingsProps) {
     // Recalculate floor height based on actual building
     const adjustedFloorHeight = finalBuildingHeight / totalFlrs;
 
-    // Scale the building coordinates larger so the floor slabs fully cover the original building
-    const scaleFactor = 1.08;
+    // Slightly larger than original so overlays render on top without z-fighting
+    const scaleFactor = 1.04;
 
     // Calculate centroid for scaling and label positioning
     const outerRing = buildingCoords[0];
@@ -608,7 +608,6 @@ export function use3DMap(props: Map3DBuildingsProps) {
     centroidLng /= numPoints;
     centroidLat /= numPoints;
 
-    // Slightly larger than original so overlays render on top
     const scaledCoords = buildingCoords.map(ring =>
       ring.map(coord => [
         centroidLng + (coord[0] - centroidLng) * scaleFactor,
@@ -616,7 +615,7 @@ export function use3DMap(props: Map3DBuildingsProps) {
       ])
     );
 
-    // Add GeoJSON source for the stacked floor slabs (uses the building footprint)
+    // GeoJSON source for the building overlay
     if (!mapInstance.getSource('custom-building')) {
       mapInstance.addSource('custom-building', {
         type: 'geojson',
@@ -640,58 +639,79 @@ export function use3DMap(props: Map3DBuildingsProps) {
       });
     }
 
-    // Remove existing floor slab layers if any
+    // Clean up existing overlay layers
+    if (mapInstance.getLayer('building-dark-shell')) {
+      mapInstance.removeLayer('building-dark-shell');
+    }
     for (let floor = 1; floor <= 100; floor++) {
       const layerId = `building-floor-${floor}`;
       if (mapInstance.getLayer(layerId)) {
         mapInstance.removeLayer(layerId);
       }
     }
+    if (mapInstance.getLayer('building-floor-highlight')) {
+      mapInstance.removeLayer('building-floor-highlight');
+    }
     if (mapInstance.getLayer('building-floor-highlight-glow')) {
       mapInstance.removeLayer('building-floor-highlight-glow');
     }
 
-    // Gap between floor slabs — 12% of floor height, minimum 0.3m
-    const gapSize = Math.max(0.3, adjustedFloorHeight * 0.12);
+    // 1) Solid dark shell covering the entire building height
+    mapInstance.addLayer({
+      id: 'building-dark-shell',
+      type: 'fill-extrusion',
+      source: 'custom-building',
+      paint: {
+        'fill-extrusion-color': '#1e2330',
+        'fill-extrusion-height': finalBuildingHeight,
+        'fill-extrusion-base': 0,
+        'fill-extrusion-opacity': 0.95,
+      },
+    });
 
-    // Add stacked floor slabs with visible gaps between each floor
+    // 2) Thin dark separator lines at each floor boundary
+    const lineThickness = 0.3;
     for (let floor = 1; floor <= totalFlrs; floor++) {
-      const floorBase = (floor - 1) * adjustedFloorHeight;
       const floorTop = floor * adjustedFloorHeight;
-      const isHighlighted = floor === floorNum;
       const layerId = `building-floor-${floor}`;
-
       mapInstance.addLayer({
         id: layerId,
         type: 'fill-extrusion',
         source: 'custom-building',
         paint: {
-          'fill-extrusion-color': isHighlighted
-            ? '#13e861'
-            : floor % 2 === 0 ? '#3a3f4b' : '#4b5563',
-          'fill-extrusion-height': floorTop - gapSize,
-          'fill-extrusion-base': floorBase + gapSize * 0.25,
-          'fill-extrusion-opacity': isHighlighted ? 1.0 : 0.92,
+          'fill-extrusion-color': '#0d1017',
+          'fill-extrusion-height': floorTop,
+          'fill-extrusion-base': floorTop - lineThickness,
+          'fill-extrusion-opacity': 0.7,
         },
       });
     }
 
-    // Subtle glow behind the highlighted floor slab
+    // 3) Bright green band for the highlighted (property) floor
     const highlightBase = (floorNum - 1) * adjustedFloorHeight;
-    const highlightTop = floorNum * adjustedFloorHeight;
-    const glowLayerId = 'building-floor-highlight-glow';
-    if (mapInstance.getLayer(glowLayerId)) {
-      mapInstance.removeLayer(glowLayerId);
-    }
+    const highlightPadding = adjustedFloorHeight * 0.08;
     mapInstance.addLayer({
-      id: glowLayerId,
+      id: 'building-floor-highlight',
+      type: 'fill-extrusion',
+      source: 'custom-building',
+      paint: {
+        'fill-extrusion-color': '#22c55e',
+        'fill-extrusion-height': floorNum * adjustedFloorHeight - highlightPadding,
+        'fill-extrusion-base': highlightBase + highlightPadding,
+        'fill-extrusion-opacity': 0.95,
+      },
+    });
+
+    // 4) Soft glow behind the green band for depth
+    mapInstance.addLayer({
+      id: 'building-floor-highlight-glow',
       type: 'fill-extrusion',
       source: 'custom-building',
       paint: {
         'fill-extrusion-color': '#4ade80',
-        'fill-extrusion-height': highlightTop - gapSize * 0.5,
-        'fill-extrusion-base': highlightBase + gapSize * 0.5,
-        'fill-extrusion-opacity': 0.35,
+        'fill-extrusion-height': floorNum * adjustedFloorHeight,
+        'fill-extrusion-base': highlightBase,
+        'fill-extrusion-opacity': 0.3,
       },
     });
 
