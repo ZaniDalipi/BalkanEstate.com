@@ -34,6 +34,7 @@ import MapLocationPicker from '../src/features/seller/components/MapLocationPick
 import { searchLocation } from '../services/osmService';
 import { toggleAgencyFavorite, checkAgencyFavorite } from '../src/features/saved/api/savedApi';
 import { SocialShare } from '../src/components/marketing/SocialShare';
+import { BALKAN_LOCATIONS } from '../utils/balkanLocations';
 
 // Map icon SVG for section headers
 const MapIcon: React.FC<{ className?: string }> = ({ className }) => (
@@ -552,6 +553,25 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
 
   // Destructure for easier access
   const { salesLast12Months, totalSales, minPrice, maxPrice, averagePrice } = salesStats;
+
+  // Resolve lat/lng with fallback to BALKAN_LOCATIONS city coordinates
+  const resolvedCoords = useMemo(() => {
+    const lat = agencyData.lat;
+    const lng = agencyData.lng;
+    // Valid if non-null, non-NaN, and not both zero (0,0 is in the Gulf of Guinea)
+    if (lat != null && lng != null && !isNaN(lat) && !isNaN(lng) && !(lat === 0 && lng === 0)) {
+      return { lat, lng };
+    }
+    // Fallback: look up from BALKAN_LOCATIONS
+    if (agencyData.country && agencyData.city) {
+      const countryData = BALKAN_LOCATIONS.find(c => c.name === agencyData.country);
+      const cityData = countryData?.cities.find(c => c.name === agencyData.city);
+      if (cityData) {
+        return { lat: cityData.lat, lng: cityData.lng };
+      }
+    }
+    return null;
+  }, [agencyData.lat, agencyData.lng, agencyData.city, agencyData.country]);
 
   const handleBack = () => {
     dispatch({ type: 'SET_SELECTED_AGENCY', payload: null });
@@ -1714,7 +1734,7 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
         </div>
 
         {/* Agency Identity - Centered Content */}
-        <div className={`absolute inset-0 flex flex-col items-center justify-center px-4 ${isRepositioningCover ? 'pointer-events-none opacity-30 z-10' : ''}`}>
+        <div className={`absolute inset-0 flex flex-col items-center justify-center px-4 pb-20 ${isRepositioningCover ? 'pointer-events-none opacity-30 z-10' : ''}`}>
           {/* Logo Container */}
           <div className="relative group">
             <div className="absolute -inset-1 bg-gradient-to-r from-primary/50 to-blue-500/50 rounded-2xl blur-lg opacity-75 group-hover:opacity-100 transition-opacity duration-500"></div>
@@ -3011,7 +3031,7 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
         )}
 
         {/* Service Area Location Map */}
-        {agencyData.lat != null && agencyData.lng != null && !isNaN(agencyData.lat) && !isNaN(agencyData.lng) && (
+        {resolvedCoords && (
           <div className="bg-white rounded-2xl shadow-xl shadow-slate-200/50 p-6 md:p-8 mb-8 border border-slate-100">
             <div className="flex items-center gap-3 mb-6">
               <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-sky-500 to-cyan-600 flex items-center justify-center shadow-lg shadow-sky-500/25">
@@ -3024,7 +3044,7 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
             </div>
             <div className="rounded-xl overflow-hidden shadow-lg border border-slate-200">
               <MapContainer
-                center={[agencyData.lat, agencyData.lng]}
+                center={[resolvedCoords.lat, resolvedCoords.lng]}
                 zoom={13}
                 scrollWheelZoom={true}
                 className="w-full h-80"
@@ -3038,7 +3058,7 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
                 />
                 <MapInvalidator />
                 <Marker
-                  position={[agencyData.lat, agencyData.lng]}
+                  position={[resolvedCoords.lat, resolvedCoords.lng]}
                   icon={L.icon({
                     iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-blue.png',
                     shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',

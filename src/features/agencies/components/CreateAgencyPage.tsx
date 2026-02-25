@@ -250,9 +250,22 @@ const CreateAgencyPage: React.FC = () => {
 
     if (!validateStep(currentStep)) return;
 
+    // Look up lat/lng from BALKAN_LOCATIONS based on selected city
+    let lat: number | undefined;
+    let lng: number | undefined;
+    if (formData.country && formData.city) {
+      const countryData = BALKAN_LOCATIONS.find(c => c.name === formData.country);
+      const cityData = countryData?.cities.find(c => c.name === formData.city);
+      if (cityData) {
+        lat = cityData.lat;
+        lng = cityData.lng;
+      }
+    }
+
     const agencyData = {
       ...formData,
       yearsInBusiness: formData.yearsInBusiness ? parseInt(formData.yearsInBusiness) : undefined,
+      ...(lat != null && lng != null ? { lat, lng } : {}),
     };
 
     // Save to context and navigate to payment
