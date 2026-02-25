@@ -74,5 +74,21 @@
   "loading": {
     "title": "Loading Cities...",
     "message": "Fetching market data for Balkan cities"
+  },
+  "dashboard": {
+    "notFound": "City not found",
+    "notFoundMessage": "We couldn't find market data for this city.",
+    "backToExplore": "Back to Explore Cities",
+    "marketIs": "Market is",
+    "marketActivity": "Market Activity",
+    "activeListings": "Active Listings",
+    "soldLastMonth": "Sold Last Month",
+    "momGrowth": "Monthly Price Change",
+    "investmentOverview": "Investment Overview",
+    "investmentSummary": "{{city}} has a {{demand}} demand market with {{investment}} investment potential and {{yield}}% rental yield.",
+    "viewListingsInCity": "View All Listings in {{city}}",
+    "exploreMoreCities": "Explore More Cities",
+    "seoTitle": "{{city}}, {{country}} - Real Estate Market Dashboard",
+    "seoDescription": "Explore real estate market data for {{city}}, {{country}}. Average price €{{price}}/m², {{trend}} market with {{yield}}% rental yield."
   }
 }

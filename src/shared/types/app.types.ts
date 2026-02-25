@@ -10,6 +10,7 @@ import { Agency } from './agency.types';
 export type AppView =
   | 'search'
   | 'explore-cities'
+  | 'city-dashboard'
   | 'saved-searches'
   | 'saved-properties'
   | 'inbox'

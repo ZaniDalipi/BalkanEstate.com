@@ -19,7 +19,7 @@ import { realEstateFAQs } from './src/components/seo';
 
 // Lazy load Analytics (only loads if env vars exist)
 const Analytics = lazy(() => import('./src/components/marketing/Analytics'));
-import { UserRole, HowItWorksTab, AdminSection, AgencyDashboardSection, Agency } from './types';
+import { UserRole, HowItWorksTab, AdminSection, AgencyDashboardSection, Agency, AppView } from './types';
 import { API_CONFIG, SUPPORTED_LANGUAGES, DEFAULT_LANGUAGE, ROUTES, HOW_IT_WORKS_TABS, ADMIN_SECTIONS, AGENCY_DASHBOARD_SECTIONS } from './src/shared/constants/app.constants';
 
 // Inline LogoIcon to avoid importing all icons from constants
@@ -52,6 +52,7 @@ const SessionExpiredModal = lazy(() => import('./src/features/auth/components/Se
 // Lazy loaded components (loaded on demand)
 // All these components use default exports
 const CityRecommendations = lazy(() => import('./src/features/cities/components/CityRecommendations'));
+const CityDashboard = lazy(() => import('./src/features/cities/components/CityDashboard'));
 const CreateListingPage = lazy(() => import('./src/features/seller/components/SellerDashboard'));
 const RentalSearchPage = lazy(() => import('./src/features/rental/components/RentalSearchPage'));
 const SavedSearchesPage = lazy(() => import('./src/features/saved/components/SavedSearchesPage'));
@@ -315,6 +316,15 @@ const AppContent: React.FC<{ onToggleSidebar: () => void }> = ({ onToggleSidebar
         return;
       }
 
+      // City dashboard route: /explore-cities/:city/:country
+      const cityDashboardMatch = path.match(/^\/explore-cities\/([^/]+)\/([^/]+)$/);
+      if (cityDashboardMatch) {
+        dispatch({ type: 'SET_SELECTED_PROPERTY', payload: null });
+        dispatch({ type: 'SET_SELECTED_AGENCY', payload: null });
+        dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'city-dashboard' });
+        return;
+      }
+
       // Main navigation routes
       const routeMap: Record<string, AppView> = {
         '/': 'search',
@@ -542,6 +552,8 @@ const AppContent: React.FC<{ onToggleSidebar: () => void }> = ({ onToggleSidebar
     switch (state.activeView) {
       case 'explore-cities':
         return <CityRecommendations />;
+      case 'city-dashboard':
+        return <CityDashboard />;
       case 'saved-searches':
         return <><Helmet><meta name="robots" content="noindex, nofollow" /></Helmet><SavedSearchesPage /></>;
       case 'saved-properties':
@@ -660,7 +672,7 @@ const MainLayout: React.FC = () => {
 
   // Main tab views show hamburger menu; detail views show back button
   const isMainTabView = !state.selectedAgentId && !state.selectedAgencyId && [
-    'agents', 'agencies', 'saved-properties', 'saved-searches', 'explore-cities',
+    'agents', 'agencies', 'saved-properties', 'saved-searches', 'explore-cities', 'city-dashboard',
     'inbox', 'pricing', 'how-it-works', 'valuation', 'mortgage-calculator', 'analytics', 'admin', 'agency-dashboard',
   ].includes(state.activeView);
 
@@ -681,6 +693,7 @@ const MainLayout: React.FC = () => {
       'create-listing': 'nav:pageTitles.createListing',
       'edit-listing': 'nav:pageTitles.editListing',
       'explore-cities': 'nav:pageTitles.exploreCities',
+      'city-dashboard': 'nav:pageTitles.cityDashboard',
       'how-it-works': 'nav:pageTitles.howItWorks',
       analytics: 'nav:pageTitles.analytics',
       admin: 'nav:pageTitles.admin',

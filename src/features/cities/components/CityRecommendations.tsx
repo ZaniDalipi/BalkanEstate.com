@@ -8,10 +8,9 @@ import Footer from '@/components/shared/Footer';
 import { SEO } from '@/src/components/seo';
 import { Helmet } from 'react-helmet-async';
 import { getCityImageUrl, getCityFallbackGradient } from '@/config/cloudinaryConfig';
-import { BALKAN_LOCATIONS } from '@/utils/balkanLocations';
 import ExploreCitiesHeroBanner from '@/components/shared/ExploreCitiesHeroBanner';
 import { RandomCityBubbles, FloatingSphere, Decorative3DStyles } from '@/components/shared/Decorative3D';
-import { searchLocation } from '@/services/osmService';
+import { buildLocalizedPath } from '@/src/utils/languageRouting';
 
 const CityRecommendations: React.FC = () => {
   const { t } = useTranslation(['exploreCities']);
@@ -23,7 +22,7 @@ const CityRecommendations: React.FC = () => {
     return params.get('country') || 'all';
   });
   const [failedImages, setFailedImages] = useState<Set<string>>(new Set());
-  const { dispatch, updateSearchPageState } = useAppContext();
+  const { dispatch } = useAppContext();
 
   // Listen for country filter changes from footer (when component is already mounted)
   useEffect(() => {
@@ -38,18 +37,6 @@ const CityRecommendations: React.FC = () => {
   // Handle image load error - fallback to gradient
   const handleImageError = (cityName: string) => {
     setFailedImages(prev => new Set(prev).add(cityName));
-  };
-
-  // Find city coordinates from BALKAN_LOCATIONS
-  const getCityCoordinates = (cityName: string, countryName: string): { lat: number; lng: number } | null => {
-    const country = BALKAN_LOCATIONS.find(c => c.name === countryName);
-    if (country) {
-      const city = country.cities.find(c => c.name.toLowerCase() === cityName.toLowerCase());
-      if (city) {
-        return { lat: city.lat, lng: city.lng };
-      }
-    }
-    return null;
   };
 
   useEffect(() => {
@@ -74,137 +61,11 @@ const CityRecommendations: React.FC = () => {
 
   const countries = Array.from(new Set(cities.map(c => c.country))).sort();
 
-  const handleCityClick = async (city: CityMarketData) => {
-    // Get fallback coordinates from BALKAN_LOCATIONS
-    const fallbackCoords = getCityCoordinates(city.city, city.country);
-
-    // Search OSM for the city to get proper coordinates and bounding box
-    const searchQuery = `${city.city}, ${city.country}`;
-    const results = await searchLocation(searchQuery);
-
-    // Use the first result from OSM - it's typically the best match for the whole city
-    const bestResult = results[0];
-
-    // Get coordinates from OSM result or fallback
-    const lat = bestResult ? Number(bestResult.lat) : fallbackCoords?.lat ?? 0;
-    const lng = bestResult ? Number(bestResult.lon) : fallbackCoords?.lng ?? 0;
-
-    // Get the bounding box from OSM to define the city area
-    // This ensures we show ALL properties within the city boundaries
-    let drawnBoundsJSON: string | null = null;
-    if (bestResult?.boundingbox) {
-      const [south, north, west, east] = bestResult.boundingbox.map(Number);
-      drawnBoundsJSON = JSON.stringify({
-        _southWest: { lat: south, lng: west },
-        _northEast: { lat: north, lng: east }
-      });
-    }
-
-    // Get the display name for the search field
-    const displayName = `${city.city}, ${city.country}`;
-
-    // Set filters - use geographic bounds for filtering properties
-    // But show the city name in the search field for user context
-    updateSearchPageState({
-      filters: {
-        country: 'any',
-        query: displayName, // Show city name in search field for context
-        listingType: 'sale',
-        minPrice: null,
-        maxPrice: null,
-        beds: null,
-        baths: null,
-        livingRooms: null,
-        minSqft: null,
-        maxSqft: null,
-        sortBy: 'newest',
-        sellerType: 'any',
-        propertyType: 'any',
-        minYearBuilt: null,
-        maxYearBuilt: null,
-        minParking: null,
-        furnishing: 'any',
-        heatingType: 'any',
-        condition: 'any',
-        viewType: 'any',
-        energyRating: 'any',
-        hasBalcony: null,
-        hasGarden: null,
-        hasElevator: null,
-        hasSecurity: null,
-        hasAirConditioning: null,
-        hasPool: null,
-        petsAllowed: null,
-        minFloorNumber: null,
-        maxFloorNumber: null,
-        maxDistanceToCenter: null,
-        maxDistanceToSea: null,
-        maxDistanceToSchool: null,
-        maxDistanceToHospital: null,
-        amenities: [],
-        has360Tour: null,
-        hasDiscount: null,
-        hasPriceIncrease: null,
-        minPricePerSqm: null,
-        maxPricePerSqm: null,
-        maxDaysListed: null,
-      },
-      activeFilters: {
-        country: 'any',
-        query: '', // Empty for filtering - use geographic bounds instead
-        listingType: 'sale',
-        minPrice: null,
-        maxPrice: null,
-        beds: null,
-        baths: null,
-        livingRooms: null,
-        minSqft: null,
-        maxSqft: null,
-        sortBy: 'newest',
-        sellerType: 'any',
-        propertyType: 'any',
-        minYearBuilt: null,
-        maxYearBuilt: null,
-        minParking: null,
-        furnishing: 'any',
-        heatingType: 'any',
-        condition: 'any',
-        viewType: 'any',
-        energyRating: 'any',
-        hasBalcony: null,
-        hasGarden: null,
-        hasElevator: null,
-        hasSecurity: null,
-        hasAirConditioning: null,
-        hasPool: null,
-        petsAllowed: null,
-        minFloorNumber: null,
-        maxFloorNumber: null,
-        maxDistanceToCenter: null,
-        maxDistanceToSea: null,
-        maxDistanceToSchool: null,
-        maxDistanceToHospital: null,
-        amenities: [],
-        has360Tour: null,
-        hasDiscount: null,
-        hasPriceIncrease: null,
-        minPricePerSqm: null,
-        maxPricePerSqm: null,
-        maxDaysListed: null,
-      },
-      // Set city bounding box as the search area
-      drawnBoundsJSON: drawnBoundsJSON,
-      // Set map focus to city coordinates
-      focusMapOnProperty: {
-        lat,
-        lng,
-        address: `${city.city}, ${city.country}`,
-        zoom: 12, // City-level zoom to show all listings
-      },
-      // Switch to map view on mobile
-      mobileView: 'map',
-    });
-    dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'search' });
+  const handleCityClick = (city: CityMarketData) => {
+    // Navigate to the city dashboard page
+    const path = `/explore-cities/${encodeURIComponent(city.city)}/${encodeURIComponent(city.country)}`;
+    window.history.pushState({}, '', buildLocalizedPath(path));
+    dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'city-dashboard' });
   };
 
   const getTrendIcon = (trend: string) => {

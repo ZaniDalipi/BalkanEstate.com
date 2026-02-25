@@ -67,5 +67,21 @@
     "description": "Our market data is powered by Gemini AI and updated twice monthly (1st and 15th). We analyze real-time market trends, property prices, demand indicators, and local insights across {count} major cities in the Balkans.",
     "lastUpdated": "Last updated: {date}",
     "dataSource": "Data source: Gemini AI + Local Property Databases"
+  },
+  "dashboard": {
+    "notFound": "City not found",
+    "notFoundMessage": "We couldn't find market data for this city.",
+    "backToExplore": "Back to Explore Cities",
+    "marketIs": "Market is",
+    "marketActivity": "Market Activity",
+    "activeListings": "Active Listings",
+    "soldLastMonth": "Sold Last Month",
+    "momGrowth": "Monthly Price Change",
+    "investmentOverview": "Investment Overview",
+    "investmentSummary": "{{city}} has a {{demand}} demand market with {{investment}} investment potential and {{yield}}% rental yield.",
+    "viewListingsInCity": "View All Listings in {{city}}",
+    "exploreMoreCities": "Explore More Cities",
+    "seoTitle": "{{city}}, {{country}} - Real Estate Market Dashboard",
+    "seoDescription": "Explore real estate market data for {{city}}, {{country}}. Average price €{{price}}/m², {{trend}} market with {{yield}}% rental yield."
   }
 }
