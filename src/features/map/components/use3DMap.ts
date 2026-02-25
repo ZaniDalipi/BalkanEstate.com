@@ -707,25 +707,19 @@ export function use3DMap(props: Map3DBuildingsProps) {
       const hasTour = !!tourUrl;
 
       // Position the combined/single marker at the building centroid, well above the building.
-      // Uses map.project() to convert the rooftop's 3D position to screen pixels,
-      // which naturally accounts for pitch, bearing, and zoom — fixing text overlap.
-      const roofHeightMeters = totalFlrs * adjustedFloorHeight;
-      const calculateFloorLabelOffset = () => {
-        // Project the building centroid at ground level to screen coordinates
-        const groundPx = mapInstance.project([centroidLng, centroidLat]);
-        // MapLibre's project doesn't take altitude, so we estimate the rooftop's
-        // screen position using the meters-to-pixels conversion at the current zoom.
-        // At zoom 0, 1 meter ≈ 1/111320 degrees. project() handles the rest.
-        // We use a small latitude offset that corresponds to the building height
-        // as seen on screen at the current pitch.
-        const metersPerDegree = 111320;
-        const heightInDegrees = roofHeightMeters / metersPerDegree;
-        // Project a point offset north by the building height (as a proxy for vertical extent)
-        const roofProxyPx = mapInstance.project([centroidLng, centroidLat + heightInDegrees]);
-        // The vertical difference gives us how tall the building appears on screen
-        const buildingScreenHeight = groundPx.y - roofProxyPx.y;
-        // Position marker above the rooftop with a fixed headroom of 18px
-        return -buildingScreenHeight - 18;
+      // The base formula is calibrated for pitch=60°. We scale by sin(pitch)/sin(60°)
+      // so the offset tracks the building's apparent screen height at any pitch.
+      const calculateFloorLabelOffset = (currentZoom: number) => {
+        const pitch = mapInstance.getPitch();
+        const basePixelsPerFloor = 2.8;
+        const zoomFactor = Math.pow(2, currentZoom - 16);
+        // At pitch 0 buildings are flat (no extrusion visible), at pitch 60 they're tall
+        const pitchRad = pitch * Math.PI / 180;
+        const pitchFactor = Math.max(Math.sin(pitchRad) / Math.sin(60 * Math.PI / 180), 0.25);
+        const pixelsPerFloor = basePixelsPerFloor * zoomFactor * pitchFactor;
+        // Position above the top of the building with headroom
+        const floorsFromBottom = totalFlrs;
+        return -(floorsFromBottom * pixelsPerFloor) - 30;
       };
 
       if (hasTour) {
@@ -794,7 +788,7 @@ export function use3DMap(props: Map3DBuildingsProps) {
           combinedEl.addEventListener('click', onEnterTour);
         }
 
-        const initialLabelOffset = calculateFloorLabelOffset();
+        const initialLabelOffset = calculateFloorLabelOffset(mapInstance.getZoom());
         const combinedMarker = new maplibregl.Marker({
           element: combinedEl,
           anchor: 'bottom',
@@ -805,7 +799,7 @@ export function use3DMap(props: Map3DBuildingsProps) {
 
         // Update marker position on zoom/pitch/bearing changes
         const updateCombinedOffset = () => {
-          const newOffset = calculateFloorLabelOffset();
+          const newOffset = calculateFloorLabelOffset(mapInstance.getZoom());
           combinedMarker.setOffset([0, newOffset]);
         };
         mapInstance.on('zoom', updateCombinedOffset);
@@ -853,7 +847,7 @@ export function use3DMap(props: Map3DBuildingsProps) {
           </div>
         `;
 
-        const initialLabelOffset = calculateFloorLabelOffset();
+        const initialLabelOffset = calculateFloorLabelOffset(mapInstance.getZoom());
         const floorLabelMarker = new maplibregl.Marker({
           element: floorLabelEl,
           anchor: 'bottom',
@@ -864,7 +858,7 @@ export function use3DMap(props: Map3DBuildingsProps) {
 
         // Update label position on zoom/pitch/bearing changes
         const updateLabelOffset = () => {
-          const newOffset = calculateFloorLabelOffset();
+          const newOffset = calculateFloorLabelOffset(mapInstance.getZoom());
           floorLabelMarker.setOffset([0, newOffset]);
         };
         mapInstance.on('zoom', updateLabelOffset);
