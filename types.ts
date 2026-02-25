@@ -332,7 +332,7 @@ export interface Property {
     floorNumber?: number;
     totalFloors?: number;
     floorplanUrl?: string;
-    orientation?: 'any' | 'north' | 'south' | 'east' | 'west' | 'northEast' | 'northWest' | 'southEast' | 'southWest';
+    orientation?: Orientation;
     createdAt?: number;
     lastRenewed?: number;
     views?: number;
@@ -346,7 +346,6 @@ export interface Property {
     condition?: PropertyCondition;
     viewType?: ViewType;
     energyRating?: EnergyRating;
-    orientation?: Orientation;
     hasBalcony?: boolean;
     hasGarden?: boolean;
     hasElevator?: boolean;
