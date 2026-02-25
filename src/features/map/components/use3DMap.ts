@@ -1064,18 +1064,12 @@ export function use3DMap(props: Map3DBuildingsProps) {
     mapInstance.on('load', () => {
       setMapLoaded(true);
 
-      // Detect existing fill-extrusion building layers from the map style (e.g. Liberty).
-      // We keep them — they render all OTHER buildings normally.
-      // When we add floor slices for a specific building, addCustomBuilding3D will
-      // hide that building from ALL building extrusion layers via feature-ID filtering.
-      const styleLayers = mapInstance.getStyle().layers || [];
-      const hasExistingBuildingExtrusion = styleLayers.some(
-        l => l.type === 'fill-extrusion' &&
-          ('source-layer' in l && (l as any)['source-layer'] === 'building')
-      );
-
-      // Only add our own 3D building extrusion layer if the style doesn't already have one
-      if (!hasExistingBuildingExtrusion && !mapInstance.getLayer('3d-buildings')) {
+      // Always add our 3D building extrusion layer so we can query building geometry
+      // and render all buildings in 3D. The Liberty style may or may not have its own
+      // building extrusion layers — either way, we need ours for reliable querying.
+      // addCustomBuilding3D will hide the specific property building from ALL layers
+      // (ours + Liberty's) via feature-ID filtering before adding floor slices.
+      if (!mapInstance.getLayer('3d-buildings')) {
         // Find the first symbol layer for proper ordering
         const layers = mapInstance.getStyle().layers;
         let labelLayerId: string | undefined;
