@@ -423,10 +423,24 @@ export function use3DMap(props: Map3DBuildingsProps) {
     let buildingCoords: number[][][] | null = null;
     let buildingFeature: maplibregl.MapGeoJSONFeature | null = null;
 
-    // Check if 3d-buildings layer exists
-    if (!mapInstance.getLayer('3d-buildings')) {
-      console.warn('3D buildings layer not found in the map style. Custom building will be a simple box.');
+    // Find all fill-extrusion layers that might contain building geometry
+    const styleLayers = mapInstance.getStyle()?.layers || [];
+    const buildingQueryLayers: string[] = [];
+    if (mapInstance.getLayer('3d-buildings')) {
+      buildingQueryLayers.push('3d-buildings');
     }
+    // Also check for any style-provided fill-extrusion layers (e.g., liberty style buildings)
+    for (const sl of styleLayers) {
+      if (
+        sl.type === 'fill-extrusion' &&
+        sl.id !== '3d-buildings' &&
+        !sl.id.startsWith('building-floor-') &&
+        !buildingQueryLayers.includes(sl.id)
+      ) {
+        buildingQueryLayers.push(sl.id);
+      }
+    }
+    const has3DLayer = buildingQueryLayers.length > 0;
 
     // Helper function to calculate building centroid
     const getBuildingCentroid = (feature: maplibregl.MapGeoJSONFeature): { lng: number; lat: number } | null => {
@@ -455,9 +469,11 @@ export function use3DMap(props: Map3DBuildingsProps) {
     };
 
     // Try multiple query approaches to find the building
-    // 1. First try exact point query on the 3d-buildings layer
+    // Only query if the 3d-buildings layer exists, otherwise fall through to fallback geometry
+    if (has3DLayer) {
+    // 1. First try exact point query on available building layers
     const exactFeatures = mapInstance.queryRenderedFeatures(point, {
-      layers: ['3d-buildings']
+      layers: buildingQueryLayers
     });
 
     if (exactFeatures.length > 0) {
@@ -484,7 +500,7 @@ export function use3DMap(props: Map3DBuildingsProps) {
         [point.x + 150, point.y + 150]
       ];
       const nearbyFeatures = mapInstance.queryRenderedFeatures(bbox, {
-        layers: ['3d-buildings']
+        layers: buildingQueryLayers
       });
 
       // Find the building CLOSEST to our coordinates that is tall enough
@@ -543,6 +559,7 @@ export function use3DMap(props: Map3DBuildingsProps) {
         buildingCoords = (buildingFeature.geometry as GeoJSON.MultiPolygon).coordinates[0];
       }
     }
+    } // end if (has3DLayer)
 
     // If we still don't have building coords, create a fallback based on the building's floor count
     if (!buildingCoords) {
@@ -599,33 +616,20 @@ export function use3DMap(props: Map3DBuildingsProps) {
       ])
     );
 
-    // First, try to hide the original building by setting a filter that excludes buildings at this location
-    // We'll do this by creating a small exclusion zone around the property
-    if (mapInstance.getLayer('3d-buildings')) {
-      // Get the current filter and add exclusion for this building's area
-      const latTolerance = 0.0003; // ~30m tolerance
-      const lngTolerance = 0.0003;
-
-      // Apply filter to exclude the original building (by checking if building is within our area)
-      // This uses a bounding box check
-      mapInstance.setFilter('3d-buildings', [
-        'any',
-        ['<', ['get', 'render_height'], 5], // Keep short buildings
-        ['all',
-          ['any',
-            ['<', ['geometry-type'], 'Polygon'], // Keep non-polygons
-            ['any',
-              // Keep buildings outside our exclusion zone
-              // We can't easily filter by geometry center, so use a workaround
-              // by relying on the custom building to cover the original
-            ]
-          ]
-        ]
-      ]);
-
-      // Alternative: Just let the custom building cover the original
-      // Remove the filter and rely on proper z-ordering
-      mapInstance.setFilter('3d-buildings', null);
+    // Hide the original building from ALL fill-extrusion layers to prevent z-fighting
+    // with our custom floor-slice building
+    for (const queryLayerId of buildingQueryLayers) {
+      if (!mapInstance.getLayer(queryLayerId)) continue;
+      try {
+        if (buildingFeature && buildingFeature.id != null) {
+          mapInstance.setFilter(queryLayerId, ['!=', ['id'], buildingFeature.id]);
+        } else {
+          // No feature ID — reduce opacity so custom building shows through
+          mapInstance.setPaintProperty(queryLayerId, 'fill-extrusion-opacity', 0.3);
+        }
+      } catch (_) {
+        // Ignore if filter/paint can't be set on this layer
+      }
     }
 
     // Add source for the custom building using actual geometry
@@ -1003,9 +1007,9 @@ export function use3DMap(props: Map3DBuildingsProps) {
 
         // Verify the source exists before adding layer
         if (!mapInstance.getSource(buildingSource)) {
-          // Error removed
-          return;
-        }
+          // Source not found — skip base 3D buildings layer but continue
+          // with the rest of init (property marker, floor visualization, etc.)
+        } else {
 
         try {
           // Add 3D buildings layer - OneGeo style dark grey buildings
@@ -1042,6 +1046,7 @@ export function use3DMap(props: Map3DBuildingsProps) {
         } catch (error) {
           // Error removed
         }
+        } // end else (source exists)
       }
 
       // Always add the blue dot property marker
