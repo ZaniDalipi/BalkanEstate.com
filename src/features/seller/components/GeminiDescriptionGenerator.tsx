@@ -13,6 +13,7 @@ import ListingFormFields from './ListingFormFields';
 import ListingPropertyFeatures from './ListingPropertyFeatures';
 import ListingImageUpload from './ListingImageUpload';
 import ListingPreview from './ListingPreview';
+import ListingProgressModal from './ListingProgressModal';
 import NumberInputWithSteppers from '@/components/shared/NumberInputWithSteppers';
 import { LiquidGlassControl } from '@/components/ui/liquid-glass-control';
 import { Button } from '@/components/ui/liquid-glass-button';
@@ -776,6 +777,15 @@ const GeminiDescriptionGenerator: React.FC<{ propertyToEdit: Property | null }> 
                  </div>
             )}
         </form>
+
+        {/* Full-screen animated progress modal (form-level submit) */}
+        <ListingProgressModal
+            isOpen={isSubmitting || isCompressing || isUploading}
+            isCompressing={isCompressing}
+            isUploading={isUploading}
+            isSubmitting={isSubmitting}
+            uploadProgress={uploadProgress}
+        />
 
         {/* Promotion Selector Modal - shown when step is 'payment' */}
         <Modal

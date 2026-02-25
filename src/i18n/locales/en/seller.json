@@ -251,7 +251,10 @@
       "uploading": "Uploading to cloud...",
       "uploadingHint": "Securely uploading your photos...",
       "creating": "Creating listing...",
-      "creatingHint": "Almost there! Saving your listing..."
+      "creatingHint": "Almost there! Saving your listing...",
+      "distances": "Calculating distances...",
+      "publishing": "Publishing listing...",
+      "cookingMsg": "We're cooking up something great for you!"
     },
     "promotion": {
       "title": "Promote Your Listing",
