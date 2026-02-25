@@ -15,7 +15,7 @@ import {
     WhatsappIcon,
     InstagramIcon,
     TikTokIcon,
-    InboxIcon,
+    ChatBubbleLeftRightIcon,
     BellIcon,
     UserCircleIcon,
     SparklesIcon,
@@ -80,7 +80,7 @@ const Footer: React.FC<FooterProps> = ({ className = '', contained = false }) =>
     const sellerLinks = [
         { icon: BuildingOfficeIcon, labelKey: 'links.listProperty', view: 'create-listing' },
         { icon: ChartBarIcon, labelKey: 'links.analytics', view: 'account' },
-        { icon: InboxIcon, labelKey: 'links.messages', view: 'inbox' },
+        { icon: ChatBubbleLeftRightIcon, labelKey: 'links.messages', view: 'inbox' },
         { icon: UserCircleIcon, labelKey: 'links.myAccount', view: 'account' }
     ];
 

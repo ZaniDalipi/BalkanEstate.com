@@ -11,7 +11,7 @@ import {
   Heart,
   Users,
   Library,
-  Inbox,
+  MessageCircle,
   Bell,
   UserCircle,
 } from 'lucide-react';
@@ -69,7 +69,7 @@ const Footer: React.FC<FooterProps> = ({ className = '' }) => {
 
   const sellerLinks = [
     { icon: Building2, labelKey: 'links.listProperty', view: 'create-listing' as const },
-    { icon: Inbox, labelKey: 'links.messages', view: 'inbox' as const },
+    { icon: MessageCircle, labelKey: 'links.messages', view: 'inbox' as const },
     { icon: UserCircle, labelKey: 'links.myAccount', view: 'account' as const },
   ];
 
