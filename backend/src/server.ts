@@ -100,6 +100,8 @@ import videoRoutes from './routes/videoRoutes';
 import aiRoutes from './routes/aiRoutes';
 import cadastreRoutes from './routes/cadastreRoutes';
 import agencyDashboardRoutes from './routes/agencyDashboardRoutes';
+import propertyRequestRoutes from './routes/propertyRequestRoutes';
+import telegramRoutes from './routes/telegramRoutes';
 
 // Import services
 import { initializeGooglePlayService } from './services/googlePlayService';
@@ -298,6 +300,8 @@ app.use('/api/achievements', achievementRoutes); // User and agency achievements
 app.use('/api/promotion-plans', promotionPlanRoutes); // Listing promotion and agency feature plans
 app.use('/api/videos', videoRoutes); // Property video generation (FFmpeg-based)
 app.use('/api/cadastre', cadastreRoutes); // Cadastre WMS proxy (GetFeatureInfo)
+app.use('/api/property-requests', propertyRequestRoutes); // Community property requests
+app.use('/api/telegram', telegramRoutes); // Telegram bot webhook & community info
 
 // 404 handler
 app.use((_req: Request, res: Response) => {

@@ -37,6 +37,7 @@
   "menu": "Menu",
   "notifications": "Notifications",
   "help": "Help",
+  "community": "Community",
   "extras": "Tools",
   "valuation": "Property Valuation",
   "mortgageCalculator": "Mortgage Calculator",
@@ -104,6 +105,7 @@
     "agencyDashboard": "Agency Dashboard",
     "valuation": "Valuation",
     "mortgageCalculator": "Calculator",
+    "community": "Community",
     "default": "BalkanEstate"
   }
 }

@@ -1,0 +1,81 @@
+{
+  "backToSearch": "Back to search",
+  "badge": "Community",
+  "title": "Property Requests & Community",
+  "subtitle": "Tell us what you're looking for and let agents and sellers find the perfect property for you. Join our Telegram community for instant updates.",
+  "stats": {
+    "active": "Active Requests",
+    "thisWeek": "This Week",
+    "topCountry": "Top Country",
+    "categories": "Categories"
+  },
+  "telegram": {
+    "title": "Join Our Telegram Community",
+    "description": "Get instant notifications about new listings, submit property requests via our bot, and connect with other buyers and sellers in the Balkans.",
+    "joinGroup": "Join Group",
+    "openBot": "Open Bot"
+  },
+  "tabs": {
+    "browse": "Browse Requests",
+    "submit": "Submit a Request"
+  },
+  "filter": {
+    "allTypes": "All - Buy & Rent",
+    "buy": "Buy",
+    "rent": "Rent",
+    "anyProperty": "Any Property",
+    "apartment": "Apartment",
+    "house": "House",
+    "villa": "Villa",
+    "land": "Land"
+  },
+  "empty": {
+    "title": "No property requests yet",
+    "subtitle": "Be the first to submit a property request!",
+    "cta": "Submit a Request"
+  },
+  "request": {
+    "buy": "Buy",
+    "rent": "Rent",
+    "beds": "beds",
+    "by": "By"
+  },
+  "agentCta": {
+    "title": "Are you an agent or seller?",
+    "description": "Browse what buyers are looking for and reach out to them with matching properties. List your properties on BalkanEstate to get discovered.",
+    "button": "List a Property"
+  },
+  "form": {
+    "title": "What are you looking for?",
+    "subtitle": "Describe your ideal property and agents will suggest matching listings.",
+    "name": "Your Name",
+    "email": "Email",
+    "telegram": "Telegram Username",
+    "listingType": "Looking to",
+    "buy": "Buy",
+    "rent": "Rent",
+    "propertyType": "Property Type",
+    "anyType": "Any Type",
+    "apartment": "Apartment",
+    "house": "House",
+    "villa": "Villa",
+    "land": "Land",
+    "other": "Other",
+    "country": "Country",
+    "anyCountry": "Any Country",
+    "city": "City",
+    "minBudget": "Min Budget (EUR)",
+    "maxBudget": "Max Budget (EUR)",
+    "minBeds": "Min Bedrooms",
+    "notes": "Additional Details",
+    "submitting": "Submitting...",
+    "submit": "Submit Request",
+    "telegramHint": "You can also submit requests via our"
+  },
+  "success": {
+    "title": "Request Submitted!",
+    "description": "Your property request is now visible to agents and sellers. They can contact you with matching properties.",
+    "newRequest": "Submit Another Request",
+    "browseRequests": "Browse Requests"
+  }
+}

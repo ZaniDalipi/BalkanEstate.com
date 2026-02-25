@@ -172,6 +172,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
       { view: 'saved-properties' as AppView, label: t('nav:savedProperties'), icon: <HeartIcon /> },
       { view: 'agents' as AppView, label: t('nav:topAgents'), icon: <AgentsIcon /> },
       { view: 'agencies' as AppView, label: t('nav:agencies'), icon: <BuildingOfficeIcon /> },
+      { view: 'community' as AppView, label: t('nav:community'), icon: <UsersIcon /> },
       { view: 'how-it-works' as AppView, label: t('nav:howItWorks'), icon: <InformationCircleIcon /> },
     ];
 
