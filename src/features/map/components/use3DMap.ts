@@ -64,45 +64,23 @@ export function use3DMap(props: Map3DBuildingsProps) {
   const floorPositionPercent = hasFloorInfo ? ((floorNumber - 0.5) / totalFloors) * 100 : 0;
 
   // Update highlighted floor on the 3D map when user selects a different floor.
-  // Rebuilds the FeatureCollection with updated color per floor.
+  // Updates per-floor layer paint properties.
   const updateHighlightedFloor = useCallback((newFloor: number) => {
     if (!map.current || !hasFloorInfo || !totalFloors) return;
     const mapInstance = map.current;
 
-    const source = mapInstance.getSource('custom-building') as maplibregl.GeoJSONSource;
-    if (!source) return;
-
-    // Read current features from the source to get the geometry
-    const adjustedFloorHeight = adjustedFloorHeightRef.current;
-    const gapSize = Math.max(0.3, adjustedFloorHeight * 0.12);
-
-    // Query the layer to get the current polygon geometry
-    const existingFeatures = mapInstance.querySourceFeatures('custom-building');
-    if (existingFeatures.length === 0) return;
-
-    // Use the geometry from the first feature (all features share the same polygon)
-    const geom = existingFeatures[0].geometry as GeoJSON.Polygon;
-    const coords = geom.coordinates;
-
-    const updatedFeatures: GeoJSON.Feature<GeoJSON.Polygon>[] = [];
     for (let floor = 1; floor <= totalFloors; floor++) {
-      const floorBase = (floor - 1) * adjustedFloorHeight;
-      const floorTop = floor * adjustedFloorHeight;
-      const isHighlighted = floor === newFloor;
-      updatedFeatures.push({
-        type: 'Feature',
-        properties: {
-          floor,
-          base: floorBase + (gapSize * 0.25),
-          height: floorTop - gapSize,
-          color: isHighlighted ? '#13e861' : (floor % 2 === 0 ? '#4b5563' : '#6b7280'),
-          highlighted: isHighlighted ? 1 : 0,
-        },
-        geometry: { type: 'Polygon', coordinates: coords },
-      });
-    }
+      const layerId = `building-floor-${floor}`;
+      if (!mapInstance.getLayer(layerId)) continue;
 
-    source.setData({ type: 'FeatureCollection', features: updatedFeatures });
+      const isHighlighted = floor === newFloor;
+      mapInstance.setPaintProperty(layerId, 'fill-extrusion-color',
+        isHighlighted ? '#22c55e' : (floor % 2 === 0 ? '#4b5563' : '#6b7280')
+      );
+      mapInstance.setPaintProperty(layerId, 'fill-extrusion-opacity',
+        isHighlighted ? 1 : 0.88
+      );
+    }
   }, [hasFloorInfo, totalFloors]);
 
   // Wrapper to set selected floor and update map
@@ -655,7 +633,7 @@ export function use3DMap(props: Map3DBuildingsProps) {
     adjustedFloorHeightRef.current = adjustedFloorHeight;
 
     // Scale up the building coordinates to fully cover the original and prevent z-fighting
-    const scaleFactor = 1.20; // 20% larger to fully cover original building and prevent z-fighting
+    const scaleFactor = 1.05; // 5% larger to cover original building and prevent z-fighting
 
     // Calculate centroid for scaling and label positioning
     const outerRing = buildingCoords[0];
@@ -683,13 +661,11 @@ export function use3DMap(props: Map3DBuildingsProps) {
     const buildingExtrusionLayerIds = allStyleLayers
       .filter(l =>
         l.type === 'fill-extrusion' &&
-        l.id !== 'building-floors' && // Don't hide our own floor slices
+        !l.id.startsWith('building-floor') && // Don't hide our own floor slices
         (l.id === '3d-buildings' || ('source-layer' in l && (l as any)['source-layer'] === 'building'))
       )
       .map(l => l.id)
       .filter(id => mapInstance.getLayer(id));
-
-    let hiddenOriginal = false;
 
     if (buildingFeature) {
       // Try to hide by feature ID filtering (preferred approach - hides only the specific building)
@@ -729,56 +705,17 @@ export function use3DMap(props: Map3DBuildingsProps) {
             }
           } catch (_) { /* layer might have been removed */ }
         }
-        hiddenOriginal = true;
         console.log('[Map3D] Hidden original building by feature ID filter, IDs:', hideIds);
       }
     }
 
-    // Fallback: if we couldn't hide by ID, make all building extrusion layers semi-transparent
-    // so our fully-opaque floor slices clearly stand out
-    if (!hiddenOriginal && buildingExtrusionLayerIds.length > 0) {
-      console.log('[Map3D] Could not filter by ID, reducing building layer opacity');
-      for (const layerId of buildingExtrusionLayerIds) {
-        try {
-          mapInstance.setPaintProperty(layerId, 'fill-extrusion-opacity', 0.35);
-        } catch (_) { /* ignore */ }
-      }
-    }
-
-    // Build a FeatureCollection with one feature per floor slab.
-    // Using per-feature properties + a single data-driven fill-extrusion layer
-    // avoids MapLibre rendering issues with multiple layers from a single GeoJSON source.
-    // NOTE: fill-extrusion-opacity does NOT support data-driven expressions in MapLibre,
-    // so we use a constant opacity and differentiate floors only by color.
-    const gapSize = Math.max(0.3, adjustedFloorHeight * 0.12); // 12% gap between floors
-    const floorFeatures: GeoJSON.Feature<GeoJSON.Polygon>[] = [];
-    for (let floor = 1; floor <= totalFlrs; floor++) {
-      const floorBase = (floor - 1) * adjustedFloorHeight;
-      const floorTop = floor * adjustedFloorHeight;
-      const isHighlighted = floor === floorNum;
-      floorFeatures.push({
-        type: 'Feature',
-        properties: {
-          floor,
-          base: floorBase + (gapSize * 0.25),
-          height: floorTop - gapSize,
-          color: isHighlighted ? '#13e861' : (floor % 2 === 0 ? '#4b5563' : '#6b7280'),
-          highlighted: isHighlighted ? 1 : 0,
-        },
-        geometry: { type: 'Polygon', coordinates: scaledCoords },
-      });
-    }
-
-    const featureCollection: GeoJSON.FeatureCollection<GeoJSON.Polygon> = {
-      type: 'FeatureCollection',
-      features: floorFeatures,
-    };
+    // Per-floor individual layers approach — each floor gets its own fill-extrusion layer
+    // with constant paint properties. This is more reliable than data-driven FeatureCollection.
 
     // Remove old layers first (before touching source)
     if (mapInstance.getLayer('building-floors')) {
       mapInstance.removeLayer('building-floors');
     }
-    // Also clean up legacy per-floor layers from previous implementation
     for (let floor = 1; floor <= 100; floor++) {
       const layerId = `building-floor-${floor}`;
       if (mapInstance.getLayer(layerId)) {
@@ -789,32 +726,44 @@ export function use3DMap(props: Map3DBuildingsProps) {
       mapInstance.removeLayer('building-floor-highlight-glow');
     }
 
-    // Add or update source
+    // Add or update source (single Feature, not FeatureCollection)
     if (!mapInstance.getSource('custom-building')) {
       mapInstance.addSource('custom-building', {
         type: 'geojson',
-        data: featureCollection,
+        data: {
+          type: 'Feature',
+          properties: { height: totalHeightM, totalFloors: totalFlrs },
+          geometry: { type: 'Polygon', coordinates: scaledCoords },
+        },
       });
     } else {
-      (mapInstance.getSource('custom-building') as maplibregl.GeoJSONSource).setData(featureCollection);
+      (mapInstance.getSource('custom-building') as maplibregl.GeoJSONSource).setData({
+        type: 'Feature',
+        properties: { height: totalHeightM, totalFloors: totalFlrs },
+        geometry: { type: 'Polygon', coordinates: scaledCoords },
+      });
     }
 
-    // Single fill-extrusion layer with data-driven color/height/base.
-    // fill-extrusion-opacity MUST be a constant (not data-driven) - using
-    // ['get', 'opacity'] silently breaks the entire layer in MapLibre.
-    mapInstance.addLayer({
-      id: 'building-floors',
-      type: 'fill-extrusion',
-      source: 'custom-building',
-      paint: {
-        'fill-extrusion-color': ['get', 'color'] as maplibregl.ExpressionSpecification,
-        'fill-extrusion-height': ['get', 'height'] as maplibregl.ExpressionSpecification,
-        'fill-extrusion-base': ['get', 'base'] as maplibregl.ExpressionSpecification,
-        'fill-extrusion-opacity': 1.0,
-      },
-    });
+    // Add individual layer per floor with constant paint properties
+    for (let floor = 1; floor <= totalFlrs; floor++) {
+      const floorBase = (floor - 1) * adjustedFloorHeight;
+      const floorTop = floor * adjustedFloorHeight;
+      const isHighlightedFloor = floor === floorNum;
 
-    console.log('[Map3D] Floor slices added:', totalFlrs, 'floors, source features:', floorFeatures.length);
+      mapInstance.addLayer({
+        id: `building-floor-${floor}`,
+        type: 'fill-extrusion',
+        source: 'custom-building',
+        paint: {
+          'fill-extrusion-color': isHighlightedFloor ? '#22c55e' : (floor % 2 === 0 ? '#4b5563' : '#6b7280'),
+          'fill-extrusion-height': floorTop - 0.2,
+          'fill-extrusion-base': floorBase + 0.08,
+          'fill-extrusion-opacity': isHighlightedFloor ? 1 : 0.88,
+        },
+      });
+    }
+
+    console.log('[Map3D] Floor slices added:', totalFlrs, 'per-floor layers');
 
     // Force a repaint to ensure the new layer renders immediately
     mapInstance.triggerRepaint();
