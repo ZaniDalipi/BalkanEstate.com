@@ -5,7 +5,6 @@ export { ImageEditorModal } from './ImageEditorModal';
 export { NeighborhoodInsights } from './NeighborhoodInsights';
 export { PropertyGallery } from './PropertyGallery';
 export { PropertyInfo } from './PropertyInfo';
-export { BuildingFloorVisualizer } from './BuildingFloorVisualizer';
 export { PropertyContact } from './PropertyContact';
 export { PropertyPhotos } from './PropertyPhotos';
 export { PropertyMapLink } from './PropertyMapLink';
