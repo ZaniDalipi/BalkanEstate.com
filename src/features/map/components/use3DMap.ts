@@ -616,21 +616,8 @@ export function use3DMap(props: Map3DBuildingsProps) {
       ])
     );
 
-    // Hide the original building from ALL fill-extrusion layers to prevent z-fighting
-    // with our custom floor-slice building
-    for (const queryLayerId of buildingQueryLayers) {
-      if (!mapInstance.getLayer(queryLayerId)) continue;
-      try {
-        if (buildingFeature && buildingFeature.id != null) {
-          mapInstance.setFilter(queryLayerId, ['!=', ['id'], buildingFeature.id]);
-        } else {
-          // No feature ID — reduce opacity so custom building shows through
-          mapInstance.setPaintProperty(queryLayerId, 'fill-extrusion-opacity', 0.3);
-        }
-      } catch (_) {
-        // Ignore if filter/paint can't be set on this layer
-      }
-    }
+    // Don't filter out the original building — let the custom floor-slice building
+    // cover it via z-ordering (scaleFactor 1.05 makes it slightly larger)
 
     // Add source for the custom building using actual geometry
     if (!mapInstance.getSource('custom-building')) {
