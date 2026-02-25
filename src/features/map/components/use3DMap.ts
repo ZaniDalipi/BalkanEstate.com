@@ -593,8 +593,9 @@ export function use3DMap(props: Map3DBuildingsProps) {
     // Recalculate floor height based on actual building
     const adjustedFloorHeight = finalBuildingHeight / totalFlrs;
 
-    // Scale up the building coordinates to fully cover the original and prevent z-fighting
-    const scaleFactor = 1.05; // 5% larger to fully cover original building
+    // Scale the building coordinates just slightly larger so the thin overlay lines
+    // sit on top of the original building without z-fighting
+    const scaleFactor = 1.02;
 
     // Calculate centroid for scaling and label positioning
     const outerRing = buildingCoords[0];
@@ -608,7 +609,7 @@ export function use3DMap(props: Map3DBuildingsProps) {
     centroidLng /= numPoints;
     centroidLat /= numPoints;
 
-    // Scale coordinates from centroid to prevent z-fighting with original building
+    // Slightly larger than original so overlays render on top
     const scaledCoords = buildingCoords.map(ring =>
       ring.map(coord => [
         centroidLng + (coord[0] - centroidLng) * scaleFactor,
@@ -616,16 +617,13 @@ export function use3DMap(props: Map3DBuildingsProps) {
       ])
     );
 
-    // Don't filter out the original building — let the custom floor-slice building
-    // cover it via z-ordering (scaleFactor 1.05 makes it slightly larger)
-
-    // Add source for the custom building using actual geometry
+    // Add GeoJSON source for the overlay lines (uses the building footprint)
     if (!mapInstance.getSource('custom-building')) {
       mapInstance.addSource('custom-building', {
         type: 'geojson',
         data: {
           type: 'Feature',
-          properties: { height: totalHeightM, totalFloors: totalFlrs },
+          properties: { height: finalBuildingHeight, totalFloors: totalFlrs },
           geometry: {
             type: 'Polygon',
             coordinates: scaledCoords,
@@ -633,10 +631,9 @@ export function use3DMap(props: Map3DBuildingsProps) {
         },
       });
     } else {
-      // Update existing source
       (mapInstance.getSource('custom-building') as maplibregl.GeoJSONSource).setData({
         type: 'Feature',
-        properties: { height: totalHeightM, totalFloors: totalFlrs },
+        properties: { height: finalBuildingHeight, totalFloors: totalFlrs },
         geometry: {
           type: 'Polygon',
           coordinates: scaledCoords,
@@ -644,7 +641,7 @@ export function use3DMap(props: Map3DBuildingsProps) {
       });
     }
 
-    // Remove existing floor layers if any
+    // Remove existing floor overlay layers if any
     for (let floor = 1; floor <= 100; floor++) {
       const layerId = `building-floor-${floor}`;
       if (mapInstance.getLayer(layerId)) {
@@ -655,33 +652,49 @@ export function use3DMap(props: Map3DBuildingsProps) {
       mapInstance.removeLayer('building-floor-highlight-glow');
     }
 
-    // Add floor slice layers - each floor is a separate "box" stacked on top of each other
-    // The gap between floors makes each box clearly distinct
-    const gapSize = Math.max(0.3, adjustedFloorHeight * 0.12); // 12% of floor height as gap, minimum 0.3m
+    // Thin line thickness for floor separators (in meters)
+    const lineThickness = 0.35;
+    // Thicker band for the highlighted (property) floor
+    const highlightThickness = adjustedFloorHeight * 0.85;
+
+    // Add thin separator lines at each floor boundary + green band for property floor
     for (let floor = 1; floor <= totalFlrs; floor++) {
-      const floorBase = (floor - 1) * adjustedFloorHeight;
       const floorTop = floor * adjustedFloorHeight;
       const isHighlightedFloor = floor === floorNum;
       const layerId = `building-floor-${floor}`;
 
-      mapInstance.addLayer({
-        id: layerId,
-        type: 'fill-extrusion',
-        source: 'custom-building',
-        paint: {
-          'fill-extrusion-color': isHighlightedFloor
-            ? '#13e861' // Bright green for the property's floor
-            : floor % 2 === 0 ? '#4b5563' : '#6b7280', // Alternating grey for other floors
-          'fill-extrusion-height': floorTop - gapSize, // Gap at top of each floor slab
-          'fill-extrusion-base': floorBase + (gapSize * 0.25), // Small gap at bottom too
-          'fill-extrusion-opacity': isHighlightedFloor ? 1 : 0.75,
-        },
-      });
+      if (isHighlightedFloor) {
+        // Green band covering most of this floor's height
+        const bandBase = (floor - 1) * adjustedFloorHeight + (adjustedFloorHeight - highlightThickness) / 2;
+        mapInstance.addLayer({
+          id: layerId,
+          type: 'fill-extrusion',
+          source: 'custom-building',
+          paint: {
+            'fill-extrusion-color': '#13e861',
+            'fill-extrusion-height': bandBase + highlightThickness,
+            'fill-extrusion-base': bandBase,
+            'fill-extrusion-opacity': 0.9,
+          },
+        });
+      } else {
+        // Thin separator line at the top of each floor
+        mapInstance.addLayer({
+          id: layerId,
+          type: 'fill-extrusion',
+          source: 'custom-building',
+          paint: {
+            'fill-extrusion-color': '#1a1a2e',
+            'fill-extrusion-height': floorTop,
+            'fill-extrusion-base': floorTop - lineThickness,
+            'fill-extrusion-opacity': 0.5,
+          },
+        });
+      }
     }
 
-    // Add a brighter outline layer for the highlighted floor to make it pop
+    // Subtle glow behind the green band
     const highlightBase = (floorNum - 1) * adjustedFloorHeight;
-    const highlightTop = floorNum * adjustedFloorHeight;
     const glowLayerId = 'building-floor-highlight-glow';
     if (mapInstance.getLayer(glowLayerId)) {
       mapInstance.removeLayer(glowLayerId);
@@ -691,10 +704,10 @@ export function use3DMap(props: Map3DBuildingsProps) {
       type: 'fill-extrusion',
       source: 'custom-building',
       paint: {
-        'fill-extrusion-color': '#4ade80', // Lighter green glow
-        'fill-extrusion-height': highlightTop - (gapSize * 0.5),
-        'fill-extrusion-base': highlightBase + (gapSize * 0.5),
-        'fill-extrusion-opacity': 0.35,
+        'fill-extrusion-color': '#4ade80',
+        'fill-extrusion-height': highlightBase + adjustedFloorHeight,
+        'fill-extrusion-base': highlightBase,
+        'fill-extrusion-opacity': 0.25,
       },
     });
 
