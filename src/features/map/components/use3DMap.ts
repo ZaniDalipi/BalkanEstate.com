@@ -430,11 +430,14 @@ export function use3DMap(props: Map3DBuildingsProps) {
       buildingQueryLayers.push('3d-buildings');
     }
     // Also check for any style-provided fill-extrusion layers (e.g., liberty style buildings)
+    // Also check for any style-provided fill-extrusion layers (e.g., liberty style buildings)
+    // but exclude our own custom overlay layers
+    const customLayerPrefixes = ['building-floor-', 'building-dark-shell'];
     for (const sl of styleLayers) {
       if (
         sl.type === 'fill-extrusion' &&
         sl.id !== '3d-buildings' &&
-        !sl.id.startsWith('building-floor-') &&
+        !customLayerPrefixes.some(prefix => sl.id.startsWith(prefix)) &&
         !buildingQueryLayers.includes(sl.id)
       ) {
         buildingQueryLayers.push(sl.id);
@@ -656,64 +659,31 @@ export function use3DMap(props: Map3DBuildingsProps) {
       mapInstance.removeLayer('building-floor-highlight-glow');
     }
 
-    // 1) Solid dark shell covering the entire building height
-    mapInstance.addLayer({
-      id: 'building-dark-shell',
-      type: 'fill-extrusion',
-      source: 'custom-building',
-      paint: {
-        'fill-extrusion-color': '#1e2330',
-        'fill-extrusion-height': finalBuildingHeight,
-        'fill-extrusion-base': 0,
-        'fill-extrusion-opacity': 0.95,
-      },
-    });
+    // Build the floor visualization:
+    // - Each floor is a solid slab with a thin gap between them
+    // - Non-highlighted floors are dark (#2a2f3a)
+    // - The highlighted floor is bright green (#22c55e)
+    // Gap between floors — just enough to see separation lines
+    const gapSize = Math.max(0.15, adjustedFloorHeight * 0.04);
 
-    // 2) Thin dark separator lines at each floor boundary
-    const lineThickness = 0.3;
     for (let floor = 1; floor <= totalFlrs; floor++) {
-      const floorTop = floor * adjustedFloorHeight;
+      const floorBase = (floor - 1) * adjustedFloorHeight + gapSize;
+      const floorTop = floor * adjustedFloorHeight - gapSize;
+      const isHighlighted = floor === floorNum;
       const layerId = `building-floor-${floor}`;
+
       mapInstance.addLayer({
         id: layerId,
         type: 'fill-extrusion',
         source: 'custom-building',
         paint: {
-          'fill-extrusion-color': '#0d1017',
+          'fill-extrusion-color': isHighlighted ? '#22c55e' : '#2a2f3a',
           'fill-extrusion-height': floorTop,
-          'fill-extrusion-base': floorTop - lineThickness,
-          'fill-extrusion-opacity': 0.7,
+          'fill-extrusion-base': floorBase,
+          'fill-extrusion-opacity': isHighlighted ? 1.0 : 0.92,
         },
       });
     }
-
-    // 3) Bright green band for the highlighted (property) floor
-    const highlightBase = (floorNum - 1) * adjustedFloorHeight;
-    const highlightPadding = adjustedFloorHeight * 0.08;
-    mapInstance.addLayer({
-      id: 'building-floor-highlight',
-      type: 'fill-extrusion',
-      source: 'custom-building',
-      paint: {
-        'fill-extrusion-color': '#22c55e',
-        'fill-extrusion-height': floorNum * adjustedFloorHeight - highlightPadding,
-        'fill-extrusion-base': highlightBase + highlightPadding,
-        'fill-extrusion-opacity': 0.95,
-      },
-    });
-
-    // 4) Soft glow behind the green band for depth
-    mapInstance.addLayer({
-      id: 'building-floor-highlight-glow',
-      type: 'fill-extrusion',
-      source: 'custom-building',
-      paint: {
-        'fill-extrusion-color': '#4ade80',
-        'fill-extrusion-height': floorNum * adjustedFloorHeight,
-        'fill-extrusion-base': highlightBase,
-        'fill-extrusion-opacity': 0.3,
-      },
-    });
 
     // Add floating floor label and/or 360 tour marker above the building
     if (floorNum > 0 && floorNum <= totalFlrs) {
