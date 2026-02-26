@@ -290,7 +290,7 @@ const SavedSearchAccordion: React.FC<SavedSearchAccordionProps> = ({ search, onO
   };
 
   return (
-    <div className="bg-white rounded-xl shadow-md border border-neutral-200 overflow-hidden">
+    <div className="bg-white rounded-xl shadow-md border border-neutral-200">
       {/* Header - Mobile Responsive */}
       <div className="w-full p-4">
         <div className="flex items-start sm:items-center gap-3">
@@ -459,7 +459,7 @@ const SavedSearchAccordion: React.FC<SavedSearchAccordionProps> = ({ search, onO
 
       {/* Expanded Content */}
       {isOpen && (
-        <div className="p-4 bg-neutral-50/70 border-t border-neutral-200 animate-fade-in">
+        <div className="p-4 bg-neutral-50/70 border-t border-neutral-200 animate-fade-in rounded-b-xl overflow-hidden">
           {/* Map display for saved search area */}
           {leafletDrawnBounds && (
             <div className="mb-4 rounded-lg overflow-hidden border border-neutral-300 shadow-sm" style={{ height: '400px' }}>
