@@ -290,7 +290,7 @@ const SavedSearchAccordion: React.FC<SavedSearchAccordionProps> = ({ search, onO
   };
 
   return (
-    <div className="bg-white rounded-xl shadow-md border border-neutral-200">
+    <div className={`bg-white rounded-xl shadow-md border border-neutral-200 ${showAlertSettings ? 'relative z-10' : ''}`}>
       {/* Header - Mobile Responsive */}
       <div className="w-full p-4">
         <div className="flex items-start sm:items-center gap-3">
