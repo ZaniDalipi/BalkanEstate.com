@@ -73,6 +73,8 @@ const AgencyDashboardPage = lazy(() => import('./src/features/agency-dashboard/c
 const NotFoundPage = lazy(() => import('./src/components/ui/not-found-2').then(m => ({ default: m.NotFound })));
 const ResetPasswordPage = lazy(() => import('./src/features/auth/components/ResetPasswordPage'));
 const VerifyEmailPage = lazy(() => import('./src/features/auth/components/VerifyEmailPage'));
+const LoginPage = lazy(() => import('./src/features/auth/components/LoginPage'));
+const RegisterPage = lazy(() => import('./src/features/auth/components/RegisterPage'));
 const AnalyticsPage = lazy(() => import('./src/features/analytics/components/AnalyticsPage'));
 const HowItWorksPage = lazy(() => import('./components/shared/HowItWorksPage'));
 const ValuationPage = lazy(() => import('./src/features/valuation/components/ValuationPage'));
@@ -355,6 +357,8 @@ const AppContent: React.FC<{ onToggleSidebar: () => void }> = ({ onToggleSidebar
         '/create-agency': 'createAgency',
         '/create-agency/payment': 'createAgencyPayment',
         '/create-agency/confirm': 'createAgencyConfirm',
+        '/login': 'login',
+        '/register': 'register',
       };
 
       // Redirect /pricing to /subscribe
@@ -609,6 +613,10 @@ const AppContent: React.FC<{ onToggleSidebar: () => void }> = ({ onToggleSidebar
         return <RefundPolicyPage />;
       case 'contact':
         return <ContactUsPage />;
+      case 'login':
+        return <><Helmet><meta name="robots" content="index, follow" /></Helmet><LoginPage /></>;
+      case 'register':
+        return <><Helmet><meta name="robots" content="index, follow" /></Helmet><RegisterPage /></>;
       case 'createAgency':
         return <CreateAgencyPage />;
       case 'createAgencyPayment':

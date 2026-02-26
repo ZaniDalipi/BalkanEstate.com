@@ -67,6 +67,8 @@ export const ROUTES = {
   CONTACT: '/contact',
   PAYMENT_SUCCESS: '/payment/success',
   PAYMENT_CANCEL: '/payment/cancel',
+  LOGIN: '/login',
+  REGISTER: '/register',
 } as const;
 
 /**
