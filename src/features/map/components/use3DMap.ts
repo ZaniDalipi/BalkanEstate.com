@@ -729,33 +729,40 @@ export function use3DMap(props: Map3DBuildingsProps) {
     // Fill-extrusion layers use depth buffer testing, so even a translucent
     // base building blocks our custom floors from rendering.
     customBuildingActiveRef.current = true;
-    const has3dBuildingsLayer = !!mapInstance.getLayer('3d-buildings');
-    console.log('[3D-FLOORS] 3d-buildings layer exists:', has3dBuildingsLayer, 'buildingFeature:', !!buildingFeature, 'buildingFeature.id:', buildingFeature?.id);
 
-    if (has3dBuildingsLayer && buildingFeature) {
-      // Try to filter out the specific building by its vector tile feature ID
-      if (buildingFeature.id != null) {
-        const existingFilter = mapInstance.getFilter('3d-buildings');
-        const excludeFilter: maplibregl.ExpressionFilterSpecification = ['!=', ['id'], buildingFeature.id as number];
-        console.log('[3D-FLOORS] Filtering out building id=%s from 3d-buildings. Existing filter:', buildingFeature.id, existingFilter);
-        if (existingFilter) {
-          mapInstance.setFilter('3d-buildings', ['all', existingFilter, excludeFilter] as maplibregl.FilterSpecification);
-        } else {
-          mapInstance.setFilter('3d-buildings', excludeFilter);
-        }
-        console.log('[3D-FLOORS] Filter applied successfully');
-      } else {
-        // Fallback: hide ALL base buildings and rely on our custom layer.
-        console.log('[3D-FLOORS] No feature ID — hiding ALL 3d-buildings (opacity=0)');
-        mapInstance.setPaintProperty('3d-buildings', 'fill-extrusion-opacity', 0);
+    // We must hide ALL fill-extrusion building layers, not just '3d-buildings'.
+    // The Liberty style (and other styles) have their own building layers that
+    // also write to the depth buffer and occlude our custom floor slabs.
+    const allBuildingLayers = [...buildingQueryLayers]; // includes 3d-buildings + any style layers
+
+    console.log('[3D-FLOORS] All building layers to hide:', allBuildingLayers, 'buildingFeature:', !!buildingFeature, 'buildingFeature.id:', buildingFeature?.id);
+
+    for (const layerId of allBuildingLayers) {
+      if (!mapInstance.getLayer(layerId)) {
+        console.log('[3D-FLOORS] Layer "%s" not found, skipping', layerId);
+        continue;
       }
-    } else if (has3dBuildingsLayer && !buildingFeature) {
-      // We have a 3d-buildings layer but couldn't find the specific building.
-      // Hide all base buildings so our custom floor slabs show.
-      console.log('[3D-FLOORS] No buildingFeature found — hiding ALL 3d-buildings (opacity=0)');
-      mapInstance.setPaintProperty('3d-buildings', 'fill-extrusion-opacity', 0);
-    } else {
-      console.log('[3D-FLOORS] No 3d-buildings layer to hide — custom floors should render freely');
+
+      if (buildingFeature && buildingFeature.id != null && layerId === '3d-buildings') {
+        // For our own 3d-buildings layer, try to filter out just the specific building
+        const existingFilter = mapInstance.getFilter(layerId);
+        const excludeFilter: maplibregl.ExpressionFilterSpecification = ['!=', ['id'], buildingFeature.id as number];
+        console.log('[3D-FLOORS] Filtering out building id=%s from "%s". Existing filter:', buildingFeature.id, layerId, existingFilter);
+        if (existingFilter) {
+          mapInstance.setFilter(layerId, ['all', existingFilter, excludeFilter] as maplibregl.FilterSpecification);
+        } else {
+          mapInstance.setFilter(layerId, excludeFilter);
+        }
+      } else {
+        // For style-provided layers (or when we can't filter by ID), hide entirely
+        console.log('[3D-FLOORS] Hiding layer "%s" (opacity=0)', layerId);
+        mapInstance.setPaintProperty(layerId, 'fill-extrusion-opacity', 0);
+      }
+    }
+
+    // If no building layers were found at all, log it
+    if (allBuildingLayers.length === 0) {
+      console.log('[3D-FLOORS] No fill-extrusion building layers found — custom floors should render freely');
     }
 
     // Verify the layer was added
