@@ -122,11 +122,15 @@ const ToggleSwitch: React.FC<{
   </div>
 );
 
+// Max floor limit based on typical Balkan buildings (highest reasonable floor)
+const MAX_FLOOR_LIMIT = 30;
+
 const FilterControls: React.FC<Omit<PropertyListProps, 'properties' | 'showList' | 'aiChatHistory' | 'onAiChatHistoryChange'>> = ({
     filters, onFilterChange, onSearchClick, onResetFilters, onSaveSearch, isSaving, isMobile, isAreaDrawn, onDrawStart, isDrawing, isSearchingLocation, suggestions = [], onSuggestionClick, isQueryInputFocused, onQueryInputFocusChange
 }) => {
     const { t } = useTranslation(['search', 'common']);
     const [isAdvancedOpen, setIsAdvancedOpen] = useState(false);
+    const maxFloorLimit = MAX_FLOOR_LIMIT;
 
     const handleNumericInputChange = (field: keyof Filters, value: string) => {
         const num = parseInt(value.replace(/\D/g, ''), 10);
@@ -510,19 +514,30 @@ const FilterControls: React.FC<Omit<PropertyListProps, 'properties' | 'showList'
                                 <input
                                     type="number"
                                     placeholder={t('search:filters.min')}
+                                    min={0}
+                                    max={maxFloorLimit}
                                     value={filters.minFloorNumber !== null ? filters.minFloorNumber : ''}
-                                    onChange={(e) => onFilterChange('minFloorNumber', e.target.value ? parseInt(e.target.value) : null)}
+                                    onChange={(e) => {
+                                        const val = e.target.value ? Math.min(parseInt(e.target.value), maxFloorLimit) : null;
+                                        onFilterChange('minFloorNumber', val);
+                                    }}
                                     className={inputBaseClasses}
                                 />
                                 <span className="text-neutral-400">-</span>
                                 <input
                                     type="number"
                                     placeholder={t('search:filters.max')}
+                                    min={0}
+                                    max={maxFloorLimit}
                                     value={filters.maxFloorNumber !== null ? filters.maxFloorNumber : ''}
-                                    onChange={(e) => onFilterChange('maxFloorNumber', e.target.value ? parseInt(e.target.value) : null)}
+                                    onChange={(e) => {
+                                        const val = e.target.value ? Math.min(parseInt(e.target.value), maxFloorLimit) : null;
+                                        onFilterChange('maxFloorNumber', val);
+                                    }}
                                     className={inputBaseClasses}
                                 />
                             </div>
+                            <p className="text-[10px] text-neutral-400 mt-0.5">{t('search:filters.floorLimit', 'Max: {{max}} floors', { max: maxFloorLimit })}</p>
                         </div>
 
                         {/* Amenities Toggle Switches */}

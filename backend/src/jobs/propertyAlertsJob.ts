@@ -21,6 +21,29 @@ const ALERT_ELIGIBLE_TIERS = ['buyer', 'pro', 'agency_owner', 'agency_agent'];
 const ALERT_ELIGIBLE_STATUSES = ['active', 'trial', 'grace', 'pending_cancellation'];
 
 /**
+ * Check if a user is eligible for property alerts.
+ * Checks both user.subscription.tier and user.proSubscription.isActive as fallback.
+ */
+function isUserEligibleForAlerts(user: any): boolean {
+  if (!user) return false;
+
+  // Primary check: subscription subdocument
+  if (user.subscription) {
+    const { tier, status } = user.subscription;
+    if (ALERT_ELIGIBLE_TIERS.includes(tier) && ALERT_ELIGIBLE_STATUSES.includes(status)) {
+      return true;
+    }
+  }
+
+  // Fallback: proSubscription.isActive (covers buyer pro and legacy pro users)
+  if (user.proSubscription?.isActive) {
+    return true;
+  }
+
+  return false;
+}
+
+/**
  * Check if a property matches saved search filters
  */
 function propertyMatchesFilters(property: IProperty, filters: IFilters): boolean {
@@ -154,7 +177,7 @@ export async function processNewListingAlerts(frequency: 'instant' | 'daily' | '
     const savedSearches = await SavedSearch.find({
       alertsEnabled: true,
       alertFrequency: frequency,
-    }).populate('userId', 'email name subscription');
+    }).populate('userId', 'email name subscription proSubscription');
 
     if (savedSearches.length === 0) {
       cronLogger.info('   No saved searches with alerts enabled');
@@ -164,13 +187,7 @@ export async function processNewListingAlerts(frequency: 'instant' | 'daily' | '
     // Filter to only users with active subscriptions (buyer or pro tier)
     const eligibleSearches = savedSearches.filter(search => {
       const user = search.userId as any;
-      if (!user || !user.subscription) return false;
-
-      const { tier, status } = user.subscription;
-      const isEligibleTier = ALERT_ELIGIBLE_TIERS.includes(tier);
-      const isActiveStatus = ALERT_ELIGIBLE_STATUSES.includes(status);
-
-      return isEligibleTier && isActiveStatus;
+      return isUserEligibleForAlerts(user);
     });
 
     cronLogger.info(`   ${savedSearches.length} saved searches, ${eligibleSearches.length} with eligible subscriptions`);
@@ -324,7 +341,7 @@ export async function processPriceDropAlerts(): Promise<void> {
     // Get all favorites with price alerts enabled
     const favorites = await Favorite.find({
       priceAlertEnabled: true,
-    }).populate('userId', 'email name subscription').populate('propertyId', 'title address city price beds baths sqft imageUrl');
+    }).populate('userId', 'email name subscription proSubscription').populate('propertyId', 'title address city price beds baths sqft imageUrl');
 
     if (favorites.length === 0) {
       cronLogger.info('   No favorites with price alerts enabled');
@@ -334,13 +351,7 @@ export async function processPriceDropAlerts(): Promise<void> {
     // Filter to only users with active subscriptions
     const eligibleFavorites = favorites.filter(fav => {
       const user = fav.userId as any;
-      if (!user || !user.subscription) return false;
-
-      const { tier, status } = user.subscription;
-      const isEligibleTier = ALERT_ELIGIBLE_TIERS.includes(tier);
-      const isActiveStatus = ALERT_ELIGIBLE_STATUSES.includes(status);
-
-      return isEligibleTier && isActiveStatus;
+      return isUserEligibleForAlerts(user);
     });
 
     cronLogger.info(`   ${favorites.length} favorites with alerts, ${eligibleFavorites.length} with eligible subscriptions`);
@@ -465,14 +476,12 @@ async function processSavedSearchPriceDropAlerts(): Promise<void> {
     // Get all saved searches with alerts enabled
     const savedSearches = await SavedSearch.find({
       alertsEnabled: { $ne: false },
-    }).populate('userId', 'email name subscription');
+    }).populate('userId', 'email name subscription proSubscription');
 
     // Filter to eligible users
     const eligibleSearches = savedSearches.filter(search => {
       const user = search.userId as any;
-      if (!user || !user.subscription) return false;
-      const { tier, status } = user.subscription;
-      return ALERT_ELIGIBLE_TIERS.includes(tier) && ALERT_ELIGIBLE_STATUSES.includes(status);
+      return isUserEligibleForAlerts(user);
     });
 
     if (eligibleSearches.length === 0) {
@@ -635,7 +644,7 @@ export async function processInstantAlertsForProperty(propertyId: string): Promi
         { alertFrequency: 'instant' },
         { alertFrequency: { $exists: false } }, // Default to instant for records without alertFrequency
       ],
-    }).populate('userId', 'email name subscription');
+    }).populate('userId', 'email name subscription proSubscription');
 
     cronLogger.info(`   📋 Found ${savedSearches.length} saved searches with instant alerts enabled`);
 
@@ -647,28 +656,20 @@ export async function processInstantAlertsForProperty(propertyId: string): Promi
     // Log all saved searches for debugging
     savedSearches.forEach((search, i) => {
       const user = search.userId as any;
-      cronLogger.info(`   [${i + 1}] Search "${search.name}" by ${user?.email || 'unknown'} - subscription: ${user?.subscription?.tier || 'none'} (${user?.subscription?.status || 'none'})`);
+      cronLogger.info(`   [${i + 1}] Search "${search.name}" by ${user?.email || 'unknown'} - subscription: ${user?.subscription?.tier || 'none'} (${user?.subscription?.status || 'none'}), proSubscription: ${user?.proSubscription?.isActive ? 'active' : 'inactive'}`);
     });
 
     // Filter to only users with active subscriptions
     const eligibleSearches = savedSearches.filter(search => {
       const user = search.userId as any;
-      if (!user || !user.subscription) {
-        cronLogger.info(`   ❌ Search "${search.name}" - no user or subscription`);
-        return false;
+      const eligible = isUserEligibleForAlerts(user);
+
+      if (!eligible) {
+        cronLogger.info(`   ❌ Search "${search.name}" - user ${user?.email || 'unknown'} not eligible (tier: ${user?.subscription?.tier || 'none'}, status: ${user?.subscription?.status || 'none'})`);
+      } else {
+        cronLogger.info(`   ✓ Search "${search.name}" - user ${user?.email} is eligible`);
       }
-
-      const { tier, status } = user.subscription;
-      const isEligibleTier = ALERT_ELIGIBLE_TIERS.includes(tier);
-      const isActiveStatus = ALERT_ELIGIBLE_STATUSES.includes(status);
-
-      if (!isEligibleTier || !isActiveStatus) {
-        cronLogger.info(`   ❌ Search "${search.name}" - user ${user.email} not eligible (tier: ${tier}, status: ${status})`);
-        return false;
-      }
-
-      cronLogger.info(`   ✓ Search "${search.name}" - user ${user.email} is eligible`);
-      return true;
+      return eligible;
     });
 
     cronLogger.info(`   👥 ${eligibleSearches.length} eligible saved searches (users with Pro subscription)`);
@@ -806,14 +807,12 @@ export async function processInstantPriceDropForProperty(
     const favorites = await Favorite.find({
       propertyId,
       priceAlertEnabled: true,
-    }).populate('userId', 'email name subscription');
+    }).populate('userId', 'email name subscription proSubscription');
 
     for (const favorite of favorites) {
       const user = favorite.userId as any;
-      if (!user?.email || !user?.subscription) continue;
-
-      const { tier, status } = user.subscription;
-      if (!ALERT_ELIGIBLE_TIERS.includes(tier) || !ALERT_ELIGIBLE_STATUSES.includes(status)) continue;
+      if (!user?.email) continue;
+      if (!isUserEligibleForAlerts(user)) continue;
 
       // Skip if already alerted for this exact price
       if (favorite.lastAlertedPrice && favorite.lastAlertedPrice === newPrice) continue;
@@ -860,7 +859,7 @@ export async function processInstantPriceDropForProperty(
     // 2. Alert users whose saved searches match this property
     const savedSearches = await SavedSearch.find({
       alertsEnabled: { $ne: false },
-    }).populate('userId', 'email name subscription');
+    }).populate('userId', 'email name subscription proSubscription');
 
     // Track which users already got an alert from favorites to avoid duplicates
     const alertedUserIds = new Set(
@@ -871,13 +870,12 @@ export async function processInstantPriceDropForProperty(
 
     for (const search of savedSearches) {
       const user = search.userId as any;
-      if (!user?.email || !user?.subscription) continue;
+      if (!user?.email) continue;
 
       // Skip users already alerted via favorites
       if (alertedUserIds.has(String(user._id))) continue;
 
-      const { tier, status } = user.subscription;
-      if (!ALERT_ELIGIBLE_TIERS.includes(tier) || !ALERT_ELIGIBLE_STATUSES.includes(status)) continue;
+      if (!isUserEligibleForAlerts(user)) continue;
 
       // Check if property matches this saved search filters and bounds
       if (!propertyMatchesFilters(property, search.filters)) continue;

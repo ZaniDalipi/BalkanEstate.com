@@ -60,6 +60,7 @@
     "sellerType": "Seller Type",
     "parkingSpaces": "Parking Spaces",
     "floorNumber": "Floor Number",
+    "floorLimit": "Max: {{max}} floors",
     "advancedFilters": "Advanced Filters",
     "moreFilters": "More Filters",
     "lessFilters": "Less Filters"

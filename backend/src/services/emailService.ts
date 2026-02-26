@@ -2472,6 +2472,11 @@ Questions? Contact us at support@balkanestateai.com
       throw new Error('sendMonthlyCouponEmail: totalCoupons must be a non-negative number');
     }
     const breakdown = params.breakdown ?? { highlighted: 0, premium: 0, featured: 0 };
+    // Skip sending email if all coupon values are 0 (e.g., buyer pro plans)
+    if (params.totalCoupons === 0 && breakdown.highlighted === 0 && breakdown.premium === 0 && breakdown.featured === 0) {
+      emailLogger.info(`sendMonthlyCouponEmail: skipping email to ${params.email} — all coupon values are 0`);
+      return;
+    }
     const computedTotal = breakdown.highlighted + breakdown.premium + breakdown.featured;
     // newCoupons should equal the tier sum; warn if mismatched but don't reject
     if (params.newCoupons !== computedTotal) {
@@ -2588,21 +2593,25 @@ Questions? Contact us at support@balkanestateai.com
         </div>
         ` : ''}
 
-        <!-- Coupon Breakdown -->
+        <!-- Coupon Breakdown — only show items with value > 0 -->
         <div style="background: rgba(255,255,255,0.5); border-radius: 8px; padding: 12px;">
           <div style="font-size: 12px; color: #78350f; font-weight: 600; margin-bottom: 8px; text-align: center;">Coupon Breakdown:</div>
           <div style="display: table; width: 100%;">
-            <div style="display: table-cell; text-align: center; ${params.breakdown.highlighted > 0 ? '' : 'opacity: 0.5;'}">
-              <div style="font-size: 18px; font-weight: 700; color: #059669;">${params.breakdown.highlighted}</div>
+            ${breakdown.highlighted > 0 ? `
+            <div style="display: table-cell; text-align: center;">
+              <div style="font-size: 18px; font-weight: 700; color: #059669;">${breakdown.highlighted}</div>
               <div style="font-size: 10px; color: #78350f;">Highlighted</div>
             </div>
-            <div style="display: table-cell; text-align: center; ${params.breakdown.premium > 0 ? '' : 'opacity: 0.5;'}">
-              <div style="font-size: 18px; font-weight: 700; color: #7c3aed;">${params.breakdown.premium}</div>
+            ` : ''}
+            ${breakdown.premium > 0 ? `
+            <div style="display: table-cell; text-align: center;">
+              <div style="font-size: 18px; font-weight: 700; color: #7c3aed;">${breakdown.premium}</div>
               <div style="font-size: 10px; color: #78350f;">Premium</div>
             </div>
-            ${params.breakdown.featured > 0 ? `
+            ` : ''}
+            ${breakdown.featured > 0 ? `
             <div style="display: table-cell; text-align: center;">
-              <div style="font-size: 18px; font-weight: 700; color: #dc2626;">${params.breakdown.featured}</div>
+              <div style="font-size: 18px; font-weight: 700; color: #dc2626;">${breakdown.featured}</div>
               <div style="font-size: 10px; color: #78350f;">Featured</div>
             </div>
             ` : ''}

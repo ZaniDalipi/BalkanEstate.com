@@ -109,24 +109,50 @@ export const createSubscription = async (req: Request, res: Response): Promise<v
     user.subscriptionPlan = product.productId;
     user.subscriptionExpiresAt = expirationDate;
 
-    // Initialize unified Pro subscription (20 active listings shared)
+    // Initialize unified Pro subscription
+    const isBuyerPlan = product.productId.toLowerCase().includes('buyer');
     user.proSubscription = {
       isActive: true,
       plan: product.billingPeriod === 'monthly' ? 'pro_monthly' : 'pro_yearly',
       expiresAt: expirationDate,
       startedAt: startDate,
-      totalListingsLimit: product.listingsLimit || 20, // 20 active listings for Pro
+      totalListingsLimit: product.listingsLimit ?? (isBuyerPlan ? 0 : 20),
       activeListingsCount: 0,
       privateSellerCount: 0,
       agentCount: 0,
       promotionCoupons: {
-        monthly: product.promotionCoupons || 3,
-        available: product.promotionCoupons || 3,
+        monthly: product.promotionCoupons ?? (isBuyerPlan ? 0 : 3),
+        available: product.promotionCoupons ?? (isBuyerPlan ? 0 : 3),
         used: 0,
-        highlightCoupons: product.highlightedCoupons || 2, // All Pro users get 2 coupons
+        highlightCoupons: product.highlightedCoupons ?? (isBuyerPlan ? 0 : 2),
         usedHighlightCoupons: 0,
       },
     };
+
+    // Set subscription tier based on product type
+    const subscriptionTier = isBuyerPlan ? 'buyer' as const
+      : product.productId.includes('agency') || product.productId.includes('enterprise') ? 'agency_owner' as const
+      : 'pro' as const;
+    if (!user.subscription) {
+      user.subscription = {
+        tier: subscriptionTier,
+        status: 'active',
+        listingsLimit: product.listingsLimit ?? (isBuyerPlan ? 0 : 20),
+        activeListingsCount: 0,
+        privateSellerCount: 0,
+        agentCount: 0,
+        promotionCoupons: { monthly: product.promotionCoupons ?? 0, available: product.promotionCoupons ?? 0, used: 0, rollover: 0, lastRefresh: new Date() },
+        savedSearchesLimit: product.savedSearchesLimit ?? (isBuyerPlan ? -1 : 3),
+        totalPaid: product.price || 0,
+        startDate,
+        expiresAt: expirationDate,
+      };
+    } else {
+      user.subscription.tier = subscriptionTier;
+      user.subscription.status = 'active';
+      user.subscription.expiresAt = expirationDate;
+      user.subscription.startDate = startDate;
+    }
 
     await user.save();
 
@@ -228,8 +254,33 @@ export const getCurrentSubscription = async (req: Request, res: Response): Promi
       const user = await User.findById(userId);
 
       // Check for agency agent subscription (tier set in database via coupon redemption or getMe sync)
-      if (user?.subscription?.tier === 'agency_agent' && user.subscription.status === 'active') {
-        const expiresAt = user.subscription.expiresAt || new Date(Date.now() + 365 * 24 * 60 * 60 * 1000);
+      // Also check if user has agencyId as fallback (joined an agency but tier not yet synced)
+      const isAgencyAgent = (user?.subscription?.tier === 'agency_agent' && user.subscription.status === 'active')
+        || (user?.agencyId && user?.subscription?.tier !== 'agency_owner');
+      if (isAgencyAgent && user?.agencyId) {
+        const expiresAt = user.subscription?.expiresAt || new Date(Date.now() + 365 * 24 * 60 * 60 * 1000);
+
+        // Ensure tier is synced for future requests
+        if (user.subscription && user.subscription.tier !== 'agency_agent') {
+          user.subscription.tier = 'agency_agent';
+          user.subscription.status = 'active';
+          await user.save();
+        } else if (!user.subscription) {
+          user.subscription = {
+            tier: 'agency_agent',
+            status: 'active',
+            listingsLimit: 25,
+            activeListingsCount: 0,
+            privateSellerCount: 0,
+            agentCount: 0,
+            promotionCoupons: { monthly: 0, available: 0, used: 0, rollover: 0, lastRefresh: new Date() },
+            savedSearchesLimit: -1,
+            totalPaid: 0,
+            startDate: user.agency?.joinedAt || user.createdAt,
+            expiresAt,
+          };
+          await user.save();
+        }
 
         res.status(200).json({
           subscription: {
@@ -250,7 +301,7 @@ export const getCurrentSubscription = async (req: Request, res: Response): Promi
             isAgencyAgent: true,
             agencyId: user.agencyId,
             agencyName: user.agencyName,
-            listingsLimit: user.subscription.listingsLimit || 25,
+            listingsLimit: user.subscription?.listingsLimit || 25,
           },
         });
         return;

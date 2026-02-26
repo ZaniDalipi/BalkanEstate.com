@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo } from 'react';
+import React, { useEffect, useMemo, useState, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useCityMarketData, useCitiesByCountry } from '../hooks/useCityQueries';
 import { formatPrice } from '@/utils/currency';
@@ -67,14 +67,23 @@ const CityDashboard: React.FC = () => {
   const { t } = useTranslation(['exploreCities']);
   const { dispatch, updateSearchPageState } = useAppContext();
 
-  const params = useMemo(parseCityFromUrl, []);
+  // Track URL changes so we can re-parse the city when navigating between "Other Cities"
+  const [urlPath, setUrlPath] = useState(window.location.pathname);
+
+  useEffect(() => {
+    const handlePopState = () => setUrlPath(window.location.pathname);
+    window.addEventListener('popstate', handlePopState);
+    return () => window.removeEventListener('popstate', handlePopState);
+  }, []);
+
+  const params = useMemo(parseCityFromUrl, [urlPath]);
   const { data: city, isLoading, error } = useCityMarketData(params?.city, params?.country);
   const { data: countryCities } = useCitiesByCountry(params?.country);
 
-  // Scroll to top on mount
+  // Scroll to top on mount and when navigating to a different city
   useEffect(() => {
     window.scrollTo(0, 0);
-  }, []);
+  }, [urlPath]);
 
   const navigateBack = () => {
     dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'explore-cities' });
@@ -746,14 +755,15 @@ const CityDashboard: React.FC = () => {
                   const otherFallback = getCityFallbackGradient(otherCity.city);
                   const handleNavigate = () => {
                     const path = `/explore-cities/${encodeURIComponent(otherCity.city)}/${encodeURIComponent(otherCity.country)}`;
-                    window.history.pushState({}, '', buildLocalizedPath(path));
-                    window.dispatchEvent(new PopStateEvent('popstate'));
+                    const fullPath = buildLocalizedPath(path);
+                    window.history.pushState({}, '', fullPath);
+                    setUrlPath(fullPath);
                   };
                   return (
                     <button
                       key={otherCity.city}
                       onClick={handleNavigate}
-                      className="group text-left bg-white rounded-xl shadow-md border border-neutral-100 overflow-hidden hover:shadow-lg hover:border-primary/20 transition-all"
+                      className="group text-left bg-white rounded-xl shadow-md border border-neutral-100 overflow-hidden hover:shadow-lg hover:border-primary/20 hover:scale-[1.02] transition-all cursor-pointer"
                     >
                       <div className="relative h-28 overflow-hidden">
                         <img

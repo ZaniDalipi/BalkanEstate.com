@@ -760,8 +760,16 @@ export const getMe = async (req: Request, res: Response): Promise<void> => {
       // Look up product limits from DB - single source of truth
       const dbProduct = productId ? await Product.findOne({ productId }).lean() : null;
 
-      // Check if it's a Pro subscription
-      if (productId?.includes('pro') || productId === 'pro_monthly' || productId === 'pro_yearly') {
+      // Check if it's a Buyer subscription (must check before pro since buyer_pro includes 'pro')
+      const isBuyerProduct = productId?.toLowerCase().includes('buyer');
+      if (isBuyerProduct) {
+        tier = 'buyer';
+        listingsLimit = dbProduct?.listingsLimit ?? 0; // Buyers don't create listings
+        promotionCoupons = { monthly: dbProduct?.promotionCoupons ?? 0, available: dbProduct?.promotionCoupons ?? 0, used: 0, rollover: 0, lastRefresh: new Date() };
+        savedSearchesLimit = dbProduct?.savedSearchesLimit ?? -1; // Unlimited saved searches for buyer pro
+        subscriptionExpiresAt = dbSubscription.expirationDate;
+      } else if (productId?.includes('pro') || productId === 'pro_monthly' || productId === 'pro_yearly') {
+        // Check if it's a Pro (seller) subscription
         tier = 'pro';
         // Use DB product listingsLimit if available, fallback to constants
         if (productId === 'pro_monthly' || productId === 'seller_pro_monthly') {

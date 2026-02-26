@@ -9,6 +9,9 @@ interface FloorInputCombinedProps {
     onTotalFloorsChange: (value: number) => void;
 }
 
+// Maximum number of floors for any building (practical cap for the Balkans)
+const MAX_BUILDING_FLOORS = 30;
+
 /**
  * Combined floor input showing "Floor X / Y" format
  * For apartments - shows floor number and total building floors
@@ -26,7 +29,7 @@ const FloorInputCombined: React.FC<FloorInputCombinedProps> = ({
     const handleFloorChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const val = parseInt(e.target.value, 10);
         if (!isNaN(val) && val >= 0) {
-            const maxFloor = totalFloors > 0 ? totalFloors : 999;
+            const maxFloor = totalFloors > 0 ? Math.min(totalFloors, MAX_BUILDING_FLOORS) : MAX_BUILDING_FLOORS;
             onFloorNumberChange(Math.min(val, maxFloor));
         } else if (e.target.value === '') {
             onFloorNumberChange(0);
@@ -36,9 +39,10 @@ const FloorInputCombined: React.FC<FloorInputCombinedProps> = ({
     const handleTotalFloorsChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const val = parseInt(e.target.value, 10);
         if (!isNaN(val) && val >= 1) {
-            onTotalFloorsChange(val);
-            if (floorNumber > val) {
-                onFloorNumberChange(val);
+            const capped = Math.min(val, MAX_BUILDING_FLOORS);
+            onTotalFloorsChange(capped);
+            if (floorNumber > capped) {
+                onFloorNumberChange(capped);
             }
         } else if (e.target.value === '') {
             onTotalFloorsChange(1);
@@ -86,6 +90,7 @@ const FloorInputCombined: React.FC<FloorInputCombinedProps> = ({
                         onKeyDown={handleKeyDown}
                         className={inputClasses}
                         min={1}
+                        max={MAX_BUILDING_FLOORS}
                         placeholder="14"
                         aria-label="Total floors in building"
                     />
@@ -102,7 +107,7 @@ const FloorInputCombined: React.FC<FloorInputCombinedProps> = ({
                         onKeyDown={handleKeyDown}
                         className={inputClasses}
                         min={0}
-                        max={totalFloors || 999}
+                        max={totalFloors > 0 ? Math.min(totalFloors, MAX_BUILDING_FLOORS) : MAX_BUILDING_FLOORS}
                         placeholder="8"
                         aria-label="Floor number"
                     />

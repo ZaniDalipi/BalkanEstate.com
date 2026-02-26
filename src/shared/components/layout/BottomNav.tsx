@@ -1,8 +1,9 @@
-import React, { useMemo, useCallback } from 'react';
+import React, { useMemo, useCallback, useState, useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useAppContext } from '@/context/AppContext';
 import { AppView } from '@/types';
-import { SearchIcon, HeartIcon, EnvelopeIcon, UserCircleIcon, PencilIcon } from '@/constants';
+import { SearchIcon, HeartIcon, EnvelopeIcon, UserCircleIcon, PencilIcon, BellIcon } from '@/constants';
+import { API_URL } from '@/src/shared/api/config';
 
 const BottomNav: React.FC = () => {
     const { t } = useTranslation(['nav']);
@@ -16,6 +17,40 @@ const BottomNav: React.FC = () => {
             return total + unreadCount;
         }, 0);
     }, [conversations, currentUser?.id]);
+
+    // Notification unread count
+    const [notificationCount, setNotificationCount] = useState(0);
+    const isAuthenticatedRef = useRef(isAuthenticated);
+    isAuthenticatedRef.current = isAuthenticated;
+
+    const fetchNotificationCount = useCallback(async () => {
+        if (!isAuthenticatedRef.current) return;
+        if (document.hidden) return;
+        try {
+            const token = localStorage.getItem('balkan_estate_token');
+            if (!token) return;
+            const res = await fetch(`${API_URL}/notifications/unread-count`, {
+                headers: { Authorization: `Bearer ${token}` },
+            });
+            if (res.ok) {
+                const data = await res.json();
+                setNotificationCount(data.count || 0);
+            }
+        } catch {
+            // Silently handle error
+        }
+    }, []);
+
+    useEffect(() => {
+        fetchNotificationCount();
+        const interval = setInterval(fetchNotificationCount, 300000); // 5 minutes
+        const handleVisibility = () => { if (!document.hidden) fetchNotificationCount(); };
+        document.addEventListener('visibilitychange', handleVisibility);
+        return () => {
+            clearInterval(interval);
+            document.removeEventListener('visibilitychange', handleVisibility);
+        };
+    }, [fetchNotificationCount]);
 
     const handleNavClick = useCallback((view: AppView) => {
         const needsAuth = ['inbox', 'account', 'saved-properties'].includes(view);
@@ -45,8 +80,8 @@ const BottomNav: React.FC = () => {
         { view: 'saved-properties' as AppView, label: t('nav:saved'), icon: HeartIcon },
         { view: 'create-listing' as AppView, label: t('nav:sell'), icon: PencilIcon, isSpecial: true },
         { view: 'inbox' as AppView, label: t('nav:inbox'), icon: EnvelopeIcon, badge: totalUnreadCount },
-        { view: 'account' as AppView, label: t('nav:account'), icon: UserCircleIcon },
-    ], [t, totalUnreadCount]);
+        { view: 'account' as AppView, label: t('nav:account'), icon: BellIcon, badge: notificationCount },
+    ], [t, totalUnreadCount, notificationCount]);
 
     return (
         <nav
@@ -96,7 +131,7 @@ const BottomNav: React.FC = () => {
                                     className={`w-5 h-5 landscape:w-[18px] landscape:h-[18px] transition-colors ${isActive ? 'text-primary' : 'text-neutral-600'}`}
                                     aria-hidden="true"
                                 />
-                                {item.badge && item.badge > 0 && (
+                                {item.badge != null && item.badge > 0 && (
                                     <span
                                         className="absolute -top-1.5 -right-1.5 bg-red-600 text-white text-[10px] font-bold rounded-full min-w-[18px] h-[18px] flex items-center justify-center px-1"
                                         aria-hidden="true"

@@ -82,6 +82,12 @@ export async function refreshProUserCoupons(): Promise<{ refreshed: number; emai
       const featuredAmount    = product.featuredCoupons    ?? 0;
       const planName          = product.name               ?? 'Pro';
 
+      // Skip if all coupon values are 0 (e.g., buyer pro plans)
+      const totalBreakdown = highlightedAmount + premiumAmount + featuredAmount;
+      if (monthlyAmount === 0 && totalBreakdown === 0) {
+        continue;
+      }
+
       const now = new Date();
       const currentAvailable = user.proSubscription?.promotionCoupons?.available ?? 0;
       const rollover = Math.min(currentAvailable, 6);
