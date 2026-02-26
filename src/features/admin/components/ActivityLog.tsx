@@ -1,4 +1,5 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import {
   ChartBarIcon,
   CursorArrowRaysIcon,
@@ -9,6 +10,7 @@ import { useActivityLog, filterOptions, dateRangeOptions } from './useActivityLo
 import { AnalyticsDashboard, HeatmapPanel, ActivityList } from './ActivityLogContent';
 
 const ActivityLog: React.FC = () => {
+  const { t } = useTranslation(['admin', 'common']);
   const {
     activeTab,
     setActiveTab,
@@ -28,9 +30,9 @@ const ActivityLog: React.FC = () => {
   } = useActivityLog();
 
   const tabs = [
-    { key: 'analytics' as const, label: 'Analytics Dashboard', icon: ChartBarIcon },
-    { key: 'heatmap' as const, label: 'Interaction Heatmap', icon: CursorArrowRaysIcon },
-    { key: 'activity' as const, label: 'Activity Log', icon: ClockIcon },
+    { key: 'analytics' as const, label: t('admin:activityLog.analyticsDashboard'), icon: ChartBarIcon },
+    { key: 'heatmap' as const, label: t('admin:activityLog.interactionHeatmap'), icon: CursorArrowRaysIcon },
+    { key: 'activity' as const, label: t('admin:activityLog.activityLog'), icon: ClockIcon },
   ];
 
   return (
@@ -41,9 +43,9 @@ const ActivityLog: React.FC = () => {
           <div>
             <h1 className="text-2xl font-bold flex items-center gap-3">
               <ChartBarIcon className="w-7 h-7" />
-              Analytics & Activity
+              {t('admin:activityLog.title')}
             </h1>
-            <p className="text-blue-200 mt-1">Monitor platform activity, user behavior, and subscription metrics</p>
+            <p className="text-blue-200 mt-1">{t('admin:activityLog.subtitle')}</p>
           </div>
           <div className="flex items-center gap-3">
             {/* Date Range */}
@@ -102,7 +104,7 @@ const ActivityLog: React.FC = () => {
         <div className="flex items-center justify-center py-12">
           <div className="flex items-center gap-3">
             <ArrowPathIcon className="w-6 h-6 text-blue-600 animate-spin" />
-            <span className="text-gray-600">Loading data...</span>
+            <span className="text-gray-600">{t('admin:activityLog.loadingData')}</span>
           </div>
         </div>
       ) : (

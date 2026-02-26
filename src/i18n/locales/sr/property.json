@@ -519,5 +519,96 @@
     "skipVideo": "Skip Video",
     "videoTour": "Video Tour",
     "enter3DTour": "Enter 3D Tour"
+  },
+  "viewings": {
+    "title": "Захтеви за Разгледање",
+    "subtitle": "Управљајте захтевима за разгледање некретнина од потенцијалних купаца. Одобрите или одбијте да их обавестите путем е-поште.",
+    "status": {
+      "pending": "На чекању",
+      "approved": "Одобрено",
+      "declined": "Одбијено",
+      "completed": "Завршено"
+    },
+    "empty": {
+      "title": "Нема захтева за разгледање",
+      "description": "Када неко закаже разгледање ваше некретнине, појавиће се овде.",
+      "filtered": "Нема {{status}} захтева за разгледање."
+    },
+    "relative": {
+      "past": "Прошло",
+      "inDays": "За {{count}} дана"
+    },
+    "reason": "Разлог:",
+    "declineReason": "Разлог одбијања (опционо)",
+    "declineReasonPlaceholder": "нпр., Термин више није доступан...",
+    "declining": "Одбијање...",
+    "confirmDecline": "Потврди Одбијање",
+    "approving": "Одобравање...",
+    "approve": "Одобри",
+    "decline": "Одбиј",
+    "markCompleted": "Означи као Завршено",
+    "updating": "Ажурирање...",
+    "cancelViewing": "Откажи Разгледање",
+    "requested": "Затражено"
+  },
+  "floorPlan": {
+    "viewer": {
+      "ariaLabel": "Прегледач плана спрата",
+      "panMode": "Режим померања",
+      "panTitle": "Помери и Увећај (превуци за померање, скролуј за увећање)",
+      "pan": "Помери",
+      "annotateMode": "Режим означавања",
+      "annotateTitle": "Кликните на план спрата да додате ознаке соба",
+      "label": "Ознака",
+      "clearLabels": "Обриши све ознаке",
+      "zoomOut": "Умањи",
+      "zoomIn": "Увећај",
+      "fitToScreen": "Прилагоди екрану",
+      "fitToScreenShortcut": "Прилагоди екрану (0)",
+      "close": "Затвори прегледач плана спрата",
+      "closeShortcut": "Затвори (Esc)",
+      "clickToAddLabel": "Кликните било где на плану спрата да додате ознаку собе",
+      "loading": "Учитавање плана спрата...",
+      "loadFailed": "Неуспешно Учитавање Плана Спрата",
+      "loadFailedDesc": "Слика плана спрата није могла бити учитана. Можда је премештена или обрисана.",
+      "floorPlanAlt": "План Спрата",
+      "roomNamePlaceholder": "Име собе...",
+      "closeDetails": "Затвори детаље",
+      "roomType": "Тип Собе",
+      "rooms": {
+        "bedroom": "Спаваћа соба",
+        "bathroom": "Купатило",
+        "kitchen": "Кухиња",
+        "living": "Дневна соба",
+        "dining": "Трпезарија",
+        "office": "Канцеларија",
+        "garage": "Гаража",
+        "storage": "Остава",
+        "balcony": "Балкон",
+        "hallway": "Ходник",
+        "other": "Остало"
+      },
+      "area": "Површина (m²)",
+      "areaPlaceholder": "нпр. 25",
+      "notes": "Белешке",
+      "notesPlaceholder": "Прозор на југ, уграђени плакар...",
+      "rename": "Преименуј",
+      "removeLabel": "Уклони ознаку",
+      "zoomLevel": "Ниво увећања",
+      "roomLabels": "Ознаке Соба",
+      "shortcuts": {
+        "scroll": "Скролуј: Увећај | Превуци: Помери | Двоклик: Брзо увећање",
+        "keys": "+/-: Увећај | 0: Ресетуј | Esc: Затвори",
+        "annotate": "Клик: Додај ознаку | Esc: Изађи из режима означавања"
+      }
+    }
+  },
+  "imageViewer": {
+    "ariaLabel": "Прегледач слика: {{current}} од {{total}}",
+    "close": "Затвори прегледач слика",
+    "previous": "Претходна слика ({{current}} од {{total}})",
+    "next": "Следећа слика ({{current}} од {{total}})",
+    "loadError": "Слика није могла бити учитана",
+    "imageAlt": "Слика некретнине {{current}} од {{total}}"
   }
 }

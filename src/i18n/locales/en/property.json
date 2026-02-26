@@ -521,5 +521,96 @@
     "highlighted": "Featured Properties",
     "highlightedCount": "premium listings",
     "moreListings": "More Listings"
+  },
+  "viewings": {
+    "title": "Viewing Requests",
+    "subtitle": "Manage property viewing requests from potential buyers. Approve or decline to notify them by email.",
+    "status": {
+      "pending": "Pending",
+      "approved": "Approved",
+      "declined": "Declined",
+      "completed": "Completed"
+    },
+    "empty": {
+      "title": "No viewing requests",
+      "description": "When someone schedules a viewing for your property, it will appear here.",
+      "filtered": "No {{status}} viewing requests found."
+    },
+    "relative": {
+      "past": "Past",
+      "inDays": "In {{count}} days"
+    },
+    "reason": "Reason:",
+    "declineReason": "Reason for declining (optional)",
+    "declineReasonPlaceholder": "e.g., The time slot is no longer available...",
+    "declining": "Declining...",
+    "confirmDecline": "Confirm Decline",
+    "approving": "Approving...",
+    "approve": "Approve",
+    "decline": "Decline",
+    "markCompleted": "Mark Completed",
+    "updating": "Updating...",
+    "cancelViewing": "Cancel Viewing",
+    "requested": "Requested"
+  },
+  "floorPlan": {
+    "viewer": {
+      "ariaLabel": "Floor plan viewer",
+      "panMode": "Pan mode",
+      "panTitle": "Pan & Zoom (drag to move, scroll to zoom)",
+      "pan": "Pan",
+      "annotateMode": "Annotate mode",
+      "annotateTitle": "Click on the floor plan to add room labels",
+      "label": "Label",
+      "clearLabels": "Clear all labels",
+      "zoomOut": "Zoom out",
+      "zoomIn": "Zoom in",
+      "fitToScreen": "Fit to screen",
+      "fitToScreenShortcut": "Fit to screen (0)",
+      "close": "Close floor plan viewer",
+      "closeShortcut": "Close (Esc)",
+      "clickToAddLabel": "Click anywhere on the floor plan to add a room label",
+      "loading": "Loading floor plan...",
+      "loadFailed": "Failed to Load Floor Plan",
+      "loadFailedDesc": "The floor plan image could not be loaded. It may have been moved or deleted.",
+      "floorPlanAlt": "Floor Plan",
+      "roomNamePlaceholder": "Room name...",
+      "closeDetails": "Close details",
+      "roomType": "Room Type",
+      "rooms": {
+        "bedroom": "Bedroom",
+        "bathroom": "Bathroom",
+        "kitchen": "Kitchen",
+        "living": "Living Room",
+        "dining": "Dining Room",
+        "office": "Office",
+        "garage": "Garage",
+        "storage": "Storage",
+        "balcony": "Balcony",
+        "hallway": "Hallway",
+        "other": "Other"
+      },
+      "area": "Area (m²)",
+      "areaPlaceholder": "e.g. 25",
+      "notes": "Notes",
+      "notesPlaceholder": "Window facing south, built-in closet...",
+      "rename": "Rename",
+      "removeLabel": "Remove label",
+      "zoomLevel": "Zoom level",
+      "roomLabels": "Room Labels",
+      "shortcuts": {
+        "scroll": "Scroll: Zoom | Drag: Pan | Double-click: Quick zoom",
+        "keys": "+/-: Zoom | 0: Reset | Esc: Close",
+        "annotate": "Click: Add label | Esc: Exit label mode"
+      }
+    }
+  },
+  "imageViewer": {
+    "ariaLabel": "Image viewer: {{current}} of {{total}}",
+    "close": "Close image viewer",
+    "previous": "Previous image ({{current}} of {{total}})",
+    "next": "Next image ({{current}} of {{total}})",
+    "loadError": "Image could not be loaded",
+    "imageAlt": "Property image {{current}} of {{total}}"
   }
 }

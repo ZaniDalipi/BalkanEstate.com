@@ -1,4 +1,5 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import {
   XMarkIcon,
   EnvelopeIcon,
@@ -36,12 +37,13 @@ const InquiryManagerDetail: React.FC<InquiryDetailProps> = ({
   getStatusBadgeColor,
   getTypeBadgeColor,
 }) => {
+  const { t } = useTranslation(['admin', 'common']);
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
       <div className="bg-white rounded-lg max-w-3xl w-full max-h-[90vh] flex flex-col">
         <div className="p-6 border-b border-gray-200 flex items-center justify-between flex-shrink-0">
           <div className="flex items-center gap-3">
-            <h3 className="text-xl font-bold">Inquiry Details</h3>
+            <h3 className="text-xl font-bold">{t('admin:inquiries.inquiryDetails')}</h3>
             <span className={`px-2 py-1 text-xs font-medium rounded-full ${getTypeBadgeColor(inquiry.type)}`}>
               {inquiry.type.replace('_', ' ')}
             </span>
@@ -59,15 +61,15 @@ const InquiryManagerDetail: React.FC<InquiryDetailProps> = ({
           <div className="bg-gray-50 rounded-lg p-4">
             <h4 className="font-semibold text-gray-700 mb-3 flex items-center gap-2">
               <UserIcon className="w-5 h-5" />
-              Sender (Buyer) Information
+              {t('admin:inquiries.senderBuyerInfo')}
             </h4>
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="text-xs text-gray-500">Name</label>
+                <label className="text-xs text-gray-500">{t('admin:inquiries.name')}</label>
                 <p className="font-medium">{inquiry.buyerName}</p>
               </div>
               <div>
-                <label className="text-xs text-gray-500">Email</label>
+                <label className="text-xs text-gray-500">{t('admin:inquiries.email')}</label>
                 <p className="font-medium flex items-center gap-2">
                   <EnvelopeIcon className="w-4 h-4 text-gray-400" />
                   <a href={`mailto:${inquiry.buyerEmail}`} className="text-blue-600 hover:underline">
@@ -77,7 +79,7 @@ const InquiryManagerDetail: React.FC<InquiryDetailProps> = ({
               </div>
               {inquiry.buyerPhone && (
                 <div>
-                  <label className="text-xs text-gray-500">Phone</label>
+                  <label className="text-xs text-gray-500">{t('admin:inquiries.phone')}</label>
                   <p className="font-medium flex items-center gap-2">
                     <PhoneIcon className="w-4 h-4 text-gray-400" />
                     <a href={`tel:${inquiry.buyerPhone}`} className="text-blue-600 hover:underline">
@@ -91,7 +93,7 @@ const InquiryManagerDetail: React.FC<InquiryDetailProps> = ({
 
           {/* Recipient Info */}
           <div className="bg-blue-50 rounded-lg p-4">
-            <h4 className="font-semibold text-gray-700 mb-3">Recipient (Agent/Seller)</h4>
+            <h4 className="font-semibold text-gray-700 mb-3">{t('admin:inquiries.recipientAgentSeller')}</h4>
             <div className="flex items-center gap-3">
               {inquiry.recipientId?.avatarUrl ? (
                 <img src={inquiry.recipientId.avatarUrl} alt="" loading="lazy" decoding="async" className="w-12 h-12 rounded-full" referrerPolicy="no-referrer" />
@@ -112,7 +114,7 @@ const InquiryManagerDetail: React.FC<InquiryDetailProps> = ({
             <div className="bg-purple-50 rounded-lg p-4">
               <h4 className="font-semibold text-gray-700 mb-3 flex items-center gap-2">
                 <HomeIcon className="w-5 h-5" />
-                Property
+                {t('admin:inquiries.property')}
               </h4>
               <div className="flex items-center gap-4">
                 {inquiry.propertyId.images?.[0] && (
@@ -140,21 +142,21 @@ const InquiryManagerDetail: React.FC<InquiryDetailProps> = ({
           {/* Location for area search */}
           {inquiry.type === 'area_search' && inquiry.location && (
             <div className="bg-teal-50 rounded-lg p-4">
-              <h4 className="font-semibold text-gray-700 mb-2">Search Preferences</h4>
+              <h4 className="font-semibold text-gray-700 mb-2">{t('admin:inquiries.searchPreferences')}</h4>
               <div className="grid grid-cols-3 gap-4">
                 <div>
-                  <label className="text-xs text-gray-500">Location</label>
+                  <label className="text-xs text-gray-500">{t('admin:inquiries.location')}</label>
                   <p className="font-medium">{inquiry.location}</p>
                 </div>
                 {inquiry.propertyType && (
                   <div>
-                    <label className="text-xs text-gray-500">Property Type</label>
+                    <label className="text-xs text-gray-500">{t('admin:inquiries.propertyType')}</label>
                     <p className="font-medium">{inquiry.propertyType}</p>
                   </div>
                 )}
                 {inquiry.budget && (
                   <div>
-                    <label className="text-xs text-gray-500">Budget</label>
+                    <label className="text-xs text-gray-500">{t('admin:inquiries.budget')}</label>
                     <p className="font-medium">{inquiry.budget.toLocaleString()}</p>
                   </div>
                 )}
@@ -164,7 +166,7 @@ const InquiryManagerDetail: React.FC<InquiryDetailProps> = ({
 
           {/* Message */}
           <div>
-            <h4 className="font-semibold text-gray-700 mb-2">Message</h4>
+            <h4 className="font-semibold text-gray-700 mb-2">{t('admin:inquiries.message')}</h4>
             <div className="bg-gray-100 rounded-lg p-4 whitespace-pre-wrap">
               {inquiry.message}
             </div>
@@ -173,18 +175,18 @@ const InquiryManagerDetail: React.FC<InquiryDetailProps> = ({
           {/* Timestamps */}
           <div className="grid grid-cols-3 gap-4 text-sm">
             <div>
-              <label className="text-xs text-gray-500">Created</label>
+              <label className="text-xs text-gray-500">{t('admin:inquiries.created')}</label>
               <p>{formatDate(inquiry.createdAt)}</p>
             </div>
             {inquiry.readAt && (
               <div>
-                <label className="text-xs text-gray-500">Read</label>
+                <label className="text-xs text-gray-500">{t('admin:inquiries.read')}</label>
                 <p>{formatDate(inquiry.readAt)}</p>
               </div>
             )}
             {inquiry.repliedAt && (
               <div>
-                <label className="text-xs text-gray-500">Replied</label>
+                <label className="text-xs text-gray-500">{t('admin:inquiries.replied')}</label>
                 <p>{formatDate(inquiry.repliedAt)}</p>
               </div>
             )}
@@ -192,7 +194,7 @@ const InquiryManagerDetail: React.FC<InquiryDetailProps> = ({
 
           {/* Admin Notes */}
           <div>
-            <h4 className="font-semibold text-gray-700 mb-2">Admin Notes</h4>
+            <h4 className="font-semibold text-gray-700 mb-2">{t('admin:inquiries.adminNotes')}</h4>
             <textarea
               value={adminNotes}
               onChange={(e) => setAdminNotes(e.target.value)}
@@ -204,7 +206,7 @@ const InquiryManagerDetail: React.FC<InquiryDetailProps> = ({
               onClick={onSaveNotes}
               className="mt-2 px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 text-sm"
             >
-              Save Notes
+              {t('admin:inquiries.saveNotes')}
             </button>
           </div>
         </div>
@@ -216,21 +218,21 @@ const InquiryManagerDetail: React.FC<InquiryDetailProps> = ({
             className="flex-1 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 flex items-center justify-center gap-2"
           >
             <CheckIcon className="w-5 h-5" />
-            Mark as Replied
+            {t('admin:inquiries.markAsReplied')}
           </button>
           <button
             onClick={() => onUpdateStatus(inquiry._id, 'archived')}
             className="flex-1 px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 flex items-center justify-center gap-2"
           >
             <ArchiveBoxIcon className="w-5 h-5" />
-            Archive
+            {t('admin:inquiries.archive')}
           </button>
           <button
             onClick={() => onDelete(inquiry._id)}
             className="px-4 py-2 bg-red-100 text-red-700 rounded-lg hover:bg-red-200 flex items-center justify-center gap-2"
           >
             <TrashIcon className="w-5 h-5" />
-            Delete
+            {t('admin:inquiries.delete')}
           </button>
         </div>
       </div>

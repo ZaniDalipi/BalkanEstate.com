@@ -101,6 +101,34 @@
     "empty": {
       "title": "Asnjë agjenci e veçantë nuk është e disponueshme për momentin",
       "message": "Kontrolloni sërish së shpejti për partnerët tanë të veçantë!"
+    },
+    "subscription": {
+      "currentlyFeatured": "Agjencia Aktualisht e Veçuar ✨",
+      "receivingVisibility": "Agjencia juaj është aktualisht e veçuar dhe po merr dukshmëri të zgjeruar.",
+      "timeRemaining": "Koha e Mbetur",
+      "expires": "Skadon:",
+      "featureYourAgency": "Veço Agjencisë Tënde",
+      "getVisibility": "Merr më shumë dukshmëri me një listim të veçuar. Agjencia juaj do të shfaqet në krye të rezultateve të kërkimit.",
+      "getFeaturedFrom": "Bëhu i Veçuar nga €{{price}}/javë",
+      "getFeaturedNow": "Bëhu i Veçuar Tani",
+      "featuredAgency": "Agjenci e Veçuar",
+      "boostVisibility": "Rrit Dukshmërinë",
+      "freeTrialProgress": "🎉 Progresi i Provës Falas",
+      "subscriptionPeriod": "📅 Periudha e Abonimit",
+      "daysLeft": "{{count}} ditë të mbetura",
+      "freeTrialActive": "🎉 Prova Falas Aktive",
+      "trialEndsOn": "Prova juaj falas përfundon më {{date}}",
+      "interval": "Intervali",
+      "price": "Çmimi",
+      "startDate": "Data e Fillimit",
+      "renewsOn": "Rinovohet Më",
+      "endedOn": "Përfundoi Më",
+      "couponApplied": "✓ Kuponi {{code}} u aplikua",
+      "cancelAtPeriodEnd": "⚠️ Abonimi do të anulohet në fund të periudhës aktuale",
+      "renewStatus": "🔄 Rinovo Statusin e Veçuar",
+      "continueVisibility": "Vazhdo të gëzosh dukshmëri të zgjeruar dhe vendosje në krye të rezultateve.",
+      "renewNow": "Rinovo Tani",
+      "proTip": "💡 Këshillë Pro: Agjencitë e veçuara marrin deri në 5x më shumë dukshmëri!"
     }
   },
   "create": {
@@ -208,5 +236,61 @@
     "processing": "Processing...",
     "stripeSecure": "Payments are securely processed by Stripe",
     "error": "Failed to initiate payment. Please try again."
+  },
+  "coupon": {
+    "title": "Aktivizo Kuponin e Agjencisë",
+    "description": "Vendos kodin e kuponit që keni marrë për t'u bashkuar me një agjenci dhe për të marrë një abonim Pro.",
+    "codeLabel": "Kodi i Kuponit",
+    "codePlaceholder": "Vendos kodin e kuponit (p.sh., AGENCY-XXXXXXXX)",
+    "codeFormat": "Kodi duhet të jetë në formatin: AGENCY-XXXXXXXX",
+    "redeeming": "Duke aktivizuar...",
+    "redeemButton": "Aktivizo Kuponin",
+    "note": "Shënim:",
+    "alreadyInAgency": "Ju jeni tashmë anëtar i {{name}}. Aktivizimi i një kuponi të ri do t'ju transferojë në agjencisë e re.",
+    "anAgency": "një agjenci",
+    "confirmMove": "Ju jeni tashmë anëtar i një agjencie. Aktivizimi i këtij kuponi do t'ju transferojë në agjencisë e re. Vazhdoni?",
+    "agentRequired": {
+      "title": "Kërkohet Regjistrimi si Agjent",
+      "description": "Për të aktivizuar një kupon agjencie dhe për t'u bashkuar me një agjenci, duhet së pari të regjistroheni si agjent. Kjo kërkon numrin e licencës dhe detajet profesionale.",
+      "goToProfile": "Shko te Cilësimet e Profilit"
+    },
+    "errors": {
+      "enterCode": "Ju lutem vendosni një kod kuponi",
+      "loginRequired": "Duhet të jeni i kyçur për të aktivizuar një kupon",
+      "agentRequired": "Vetëm agjentët e regjistruar mund të aktivizojnë kuponat e agjencisë. Ju lutem regjistrohuni si agjent së pari në cilësimet e profilit.",
+      "invalidCoupon": "Kod kuponi i pavlefshëm. Ju lutem kontrolloni kodin dhe provoni përsëri.",
+      "alreadyUsed": "Ky kupon është përdorur tashmë nga një agjent tjetër.",
+      "expired": "Ky kupon ka skaduar dhe nuk mund të aktivizohet më.",
+      "notFound": "Kuponi nuk u gjet. Ju lutem verifikoni që kodi është i saktë.",
+      "subscriptionInactive": "Abonimi i agjencisë nuk është më aktiv. Ky kupon nuk mund të aktivizohet.",
+      "missingCode": "Ju lutem vendosni një kod kuponi.",
+      "redeemFailed": "Dështoi aktivizimi i kuponit. Ju lutem provoni përsëri.",
+      "redemptionFailed": "Aktivizimi Dështoi"
+    },
+    "success": {
+      "title": "Kuponi u Aktivizua!",
+      "message": "Ju u bashkuat me sukses me {{name}} me një abonim Pro!",
+      "welcome": "Mirë se erdhët te {{name}}!",
+      "joined": "Ju u bashkuat me sukses me agjencisë me një abonim Pro.",
+      "benefits": "Përfitimet Tuaja:",
+      "listingsLimit": "Deri në {{limit}} lista aktive",
+      "branding": "Branding i agjencisë në listat tuaja",
+      "promotionAccess": "Akses në kuponat e promovimit të agjencisë",
+      "validUntil": "Abonimi i vlefshëm deri më {{date}}",
+      "viewAgency": "Shiko Agjencisë"
+    },
+    "whatHappens": {
+      "title": "Çfarë ndodh kur aktivizoni?",
+      "addedToTeam": "Do të shtoheni në agjenci si anëtar ekipi",
+      "proSubscription": "Do të merrni një abonim Pro (i vlefshëm për 1 vit)",
+      "agencyBranding": "Listat tuaja do të shfaqin brendin e agjencisë",
+      "promotionCoupons": "Akses në kuponat e promovimit të agjencisë për listat tuaja"
+    }
+  },
+  "badge": {
+    "independent": "I Pavarur",
+    "independentShort": "Pav",
+    "agency": "Agjenci",
+    "independentAgent": "Agjent i Pavarur"
   }
 }

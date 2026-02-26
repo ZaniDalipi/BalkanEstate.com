@@ -1,4 +1,5 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import {
   MagnifyingGlassIcon,
   EnvelopeIcon,
@@ -74,6 +75,7 @@ const EmailManager: React.FC = () => {
     handleOpenTestModal,
     handleSendTest,
   } = useEmailManager();
+  const { t } = useTranslation(['admin', 'common']);
 
   if (isLoading) {
     return (
@@ -86,7 +88,7 @@ const EmailManager: React.FC = () => {
   if (error) {
     return (
       <div className="bg-red-50 border border-red-200 rounded-lg p-4 text-red-700">
-        Failed to load email configurations. Please try again.
+        {t('admin:emailManager.failedToLoad')}
       </div>
     );
   }
@@ -96,9 +98,9 @@ const EmailManager: React.FC = () => {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Email Management</h1>
+          <h1 className="text-2xl font-bold text-gray-900">{t('admin:emailManager.title')}</h1>
           <p className="text-gray-600 mt-1">
-            Configure and manage all system emails
+            {t('admin:emailManager.subtitle')}
           </p>
         </div>
         <div className="flex items-center gap-2">
@@ -108,7 +110,7 @@ const EmailManager: React.FC = () => {
             className="px-3 py-2 bg-gray-100 hover:bg-gray-200 rounded-lg text-gray-700 flex items-center gap-2 transition-colors"
           >
             <ArrowPathIcon className={`w-4 h-4 ${isRefetching ? 'animate-spin' : ''}`} />
-            Refresh
+            {t('admin:emailManager.refresh')}
           </button>
           <button
             onClick={handleResetAll}
@@ -116,7 +118,7 @@ const EmailManager: React.FC = () => {
             className="px-3 py-2 bg-red-100 hover:bg-red-200 rounded-lg text-red-700 flex items-center gap-2 transition-colors"
           >
             <ArrowPathIcon className="w-4 h-4" />
-            Reset All
+            {t('admin:emailManager.resetAll')}
           </button>
         </div>
       </div>
@@ -129,7 +131,7 @@ const EmailManager: React.FC = () => {
             <MagnifyingGlassIcon className="w-5 h-5 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
             <input
               type="text"
-              placeholder="Search emails..."
+              placeholder={t('admin:emailManager.searchEmails')}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
@@ -143,12 +145,12 @@ const EmailManager: React.FC = () => {
               onChange={(e) => setSelectedCategory(e.target.value)}
               className="appearance-none pl-4 pr-10 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white min-w-[160px]"
             >
-              <option value="all">All Categories</option>
-              <option value="transactional">Transactional</option>
-              <option value="marketing">Marketing</option>
-              <option value="alerts">Alerts</option>
-              <option value="notifications">Notifications</option>
-              <option value="reports">Reports</option>
+              <option value="all">{t('admin:emailManager.allCategories')}</option>
+              <option value="transactional">{t('admin:emailManager.transactional')}</option>
+              <option value="marketing">{t('admin:emailManager.marketing')}</option>
+              <option value="alerts">{t('admin:emailManager.alerts')}</option>
+              <option value="notifications">{t('admin:emailManager.notifications')}</option>
+              <option value="reports">{t('admin:emailManager.reports')}</option>
             </select>
             <ChevronDownIcon className="w-4 h-4 absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
           </div>
@@ -160,9 +162,9 @@ const EmailManager: React.FC = () => {
               onChange={(e) => setSelectedStatus(e.target.value)}
               className="appearance-none pl-4 pr-10 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white min-w-[140px]"
             >
-              <option value="all">All Status</option>
-              <option value="true">Active</option>
-              <option value="false">Inactive</option>
+              <option value="all">{t('admin:emailManager.allStatus')}</option>
+              <option value="true">{t('admin:emailManager.active')}</option>
+              <option value="false">{t('admin:emailManager.inactive')}</option>
             </select>
             <ChevronDownIcon className="w-4 h-4 absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
           </div>
@@ -211,12 +213,12 @@ const EmailManager: React.FC = () => {
                         {email.isActive ? (
                           <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-700">
                             <CheckCircleIcon className="w-3 h-3 mr-1" />
-                            Active
+                            {t('admin:emailManager.active')}
                           </span>
                         ) : (
                           <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-red-100 text-red-700">
                             <XCircleIcon className="w-3 h-3 mr-1" />
-                            Inactive
+                            {t('admin:emailManager.inactive')}
                           </span>
                         )}
                       </div>
@@ -287,7 +289,7 @@ const EmailManager: React.FC = () => {
       {filteredEmails.length === 0 && (
         <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-12 text-center">
           <EnvelopeIcon className="w-12 h-12 mx-auto text-gray-400 mb-4" />
-          <p className="text-gray-500">No emails found matching your criteria.</p>
+          <p className="text-gray-500">{t('admin:emailManager.noEmailsFound')}</p>
         </div>
       )}
 
