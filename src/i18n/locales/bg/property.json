@@ -222,7 +222,12 @@
     "description": "Разгледайте този имот в завладяващ 360°",
     "openInNewTab": "Отворете в нов раздел за пълно преживяване",
     "failedToLoad": "Failed to load virtual tour",
-    "loading": "Loading virtual tour..."
+    "loading": "Loading virtual tour...",
+    "exit": "Изход от турнето",
+    "floor": "Етаж {{floor}}",
+    "hint": "Плъзнете за разглеждане \u2022 Скролвайте за мащабиране",
+    "entering": "Влизане в сградата...",
+    "tourButton": "360° Тур"
   },
   "featuredAgencies": "Препоръчани агенции",
   "status": {
@@ -397,7 +402,9 @@
       "play": "Лет до имота",
       "skip": "Пропусни",
       "replay": "Повтори",
-      "exploreMap": "Разгледай картата"
+      "exploreMap": "Разгледай картата",
+      "flyShort": "Лети",
+      "mapShort": "Карта"
     },
     "errors": {
       "noLocation": "Данните за местоположение не са налични"
@@ -430,7 +437,44 @@
     "floorLevel": "Етаж {{floor}} от {{total}}",
     "groundFloor": "Партер",
     "topFloor": "Последен етаж",
-    "middleFloor": "Среден етаж"
+    "middleFloor": "Среден етаж",
+    "enter": "Влез"
+  },
+  "map3d": {
+    "shadows": "Покажи сенки на сградите",
+    "shadowsOn": "Сенки",
+    "shadowsOff": "Сенки",
+    "floorLabels": "Покажи нива на етажите",
+    "showFloors": "Етикети",
+    "hideFloors": "Скрий",
+    "nearbyPlaces": "Наблизо",
+    "nearbyPOI": "Близо",
+    "loading": "Зареждане на 3D карта...",
+    "facing": "Ориентация",
+    "facingDirection": "Към {{direction}}",
+    "sunrise": "Изгрев",
+    "noon": "Обяд",
+    "sunset": "Залез",
+    "reset": "Нулиране",
+    "sunAndShadows": "Слънце и сенки",
+    "cardinalDirections": {
+      "N": "С",
+      "NE": "СИ",
+      "E": "И",
+      "SE": "ЮИ",
+      "S": "Ю",
+      "SW": "ЮЗ",
+      "W": "З",
+      "NW": "СЗ",
+      "North": "Север",
+      "Northeast": "Североизток",
+      "East": "Изток",
+      "Southeast": "Югоизток",
+      "South": "Юг",
+      "Southwest": "Югозапад",
+      "West": "Запад",
+      "Northwest": "Северозапад"
+    }
   },
   "guide": {
     "messages": {

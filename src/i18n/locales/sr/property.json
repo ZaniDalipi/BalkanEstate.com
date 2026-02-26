@@ -222,7 +222,12 @@
     "description": "Истражите ову некретнину у имерзивном 360°",
     "openInNewTab": "Отвори у новом табу за потпуно искуство",
     "failedToLoad": "Failed to load virtual tour",
-    "loading": "Loading virtual tour..."
+    "loading": "Loading virtual tour...",
+    "exit": "Изађи из туре",
+    "floor": "Спрат {{floor}}",
+    "hint": "Превуците за гледање \u2022 Скролујте за зум",
+    "entering": "Улазим у зграду...",
+    "tourButton": "360° Тура"
   },
   "featuredAgencies": "Истакнуте Агенције",
   "status": {
@@ -397,7 +402,9 @@
       "play": "Лет до некретнине",
       "skip": "Прескочи",
       "replay": "Понови",
-      "exploreMap": "Истражи мапу"
+      "exploreMap": "Истражи мапу",
+      "flyShort": "Лети",
+      "mapShort": "Мапа"
     },
     "errors": {
       "noLocation": "Подаци о локацији нису доступни"
@@ -430,7 +437,44 @@
     "floorLevel": "Спрат {{floor}} од {{total}}",
     "groundFloor": "Приземље",
     "topFloor": "Последњи спрат",
-    "middleFloor": "Средњи спрат"
+    "middleFloor": "Средњи спрат",
+    "enter": "Уђи"
+  },
+  "map3d": {
+    "shadows": "Прикажи сенке зграда",
+    "shadowsOn": "Сенке",
+    "shadowsOff": "Сенке",
+    "floorLabels": "Прикажи нивое спратова",
+    "showFloors": "Ознаке",
+    "hideFloors": "Сакриј",
+    "nearbyPlaces": "Оближња места",
+    "nearbyPOI": "Близу",
+    "loading": "Учитавање 3Д мапе...",
+    "facing": "Окренуто",
+    "facingDirection": "Окренуто ка {{direction}}",
+    "sunrise": "Излазак сунца",
+    "noon": "Подне",
+    "sunset": "Залазак сунца",
+    "reset": "Ресетуј",
+    "sunAndShadows": "Сунце и сенке",
+    "cardinalDirections": {
+      "N": "С",
+      "NE": "СИ",
+      "E": "И",
+      "SE": "ЈИ",
+      "S": "Ј",
+      "SW": "ЈЗ",
+      "W": "З",
+      "NW": "СЗ",
+      "North": "Север",
+      "Northeast": "Североисток",
+      "East": "Исток",
+      "Southeast": "Југоисток",
+      "South": "Југ",
+      "Southwest": "Југозапад",
+      "West": "Запад",
+      "Northwest": "Северозапад"
+    }
   },
   "guide": {
     "messages": {

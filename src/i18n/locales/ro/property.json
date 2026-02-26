@@ -222,7 +222,12 @@
     "description": "Explorează această proprietate în 360° imersiv",
     "openInNewTab": "Deschide într-o fereastră nouă pentru experiența completă",
     "failedToLoad": "Failed to load virtual tour",
-    "loading": "Loading virtual tour..."
+    "loading": "Loading virtual tour...",
+    "exit": "Ieșire din tur",
+    "floor": "Etaj {{floor}}",
+    "hint": "Trageți pentru a privi \u2022 Derulați pentru zoom",
+    "entering": "Se intră în clădire...",
+    "tourButton": "Tur 360°"
   },
   "featuredAgencies": "Agenții Recomandate",
   "status": {
@@ -397,7 +402,9 @@
       "play": "Zbor spre proprietate",
       "skip": "Sari",
       "replay": "Reia",
-      "exploreMap": "Explorează harta"
+      "exploreMap": "Explorează harta",
+      "flyShort": "Zboară",
+      "mapShort": "Hartă"
     },
     "errors": {
       "noLocation": "Datele de locație nu sunt disponibile"
@@ -430,7 +437,44 @@
     "floorLevel": "Etajul {{floor}} din {{total}}",
     "groundFloor": "Parter",
     "topFloor": "Ultimul etaj",
-    "middleFloor": "Etaj mijlociu"
+    "middleFloor": "Etaj mijlociu",
+    "enter": "Intră"
+  },
+  "map3d": {
+    "shadows": "Arată umbrele clădirilor",
+    "shadowsOn": "Umbre",
+    "shadowsOff": "Umbre",
+    "floorLabels": "Arată nivelurile etajelor",
+    "showFloors": "Etichete",
+    "hideFloors": "Ascunde",
+    "nearbyPlaces": "Locuri apropiate",
+    "nearbyPOI": "Apropiate",
+    "loading": "Se încarcă harta 3D...",
+    "facing": "Orientare",
+    "facingDirection": "Spre {{direction}}",
+    "sunrise": "Răsărit",
+    "noon": "Amiază",
+    "sunset": "Apus",
+    "reset": "Resetare",
+    "sunAndShadows": "Soare și umbre",
+    "cardinalDirections": {
+      "N": "N",
+      "NE": "NE",
+      "E": "E",
+      "SE": "SE",
+      "S": "S",
+      "SW": "SV",
+      "W": "V",
+      "NW": "NV",
+      "North": "Nord",
+      "Northeast": "Nord-est",
+      "East": "Est",
+      "Southeast": "Sud-est",
+      "South": "Sud",
+      "Southwest": "Sud-vest",
+      "West": "Vest",
+      "Northwest": "Nord-vest"
+    }
   },
   "guide": {
     "messages": {

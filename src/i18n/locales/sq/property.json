@@ -222,7 +222,12 @@
     "description": "Eksploroni këtë pronë në 360° imersive",
     "openInNewTab": "Hap në skedë të re për përvojë të plotë",
     "failedToLoad": "Failed to load virtual tour",
-    "loading": "Loading virtual tour..."
+    "loading": "Loading virtual tour...",
+    "exit": "Dil nga Turi",
+    "floor": "Kati {{floor}}",
+    "hint": "Tërhiq për të parë përreth \u2022 Rrotulloj për zmadhim",
+    "entering": "Duke hyrë në ndërtesë...",
+    "tourButton": "Tur 360°"
   },
   "featuredAgencies": "Agjenci të Zgjedhura",
   "status": {
@@ -397,7 +402,9 @@
       "play": "Fluturim drejt pronës",
       "skip": "Kapërce",
       "replay": "Riprodho",
-      "exploreMap": "Eksploro hartën"
+      "exploreMap": "Eksploro hartën",
+      "flyShort": "Fluturoj",
+      "mapShort": "Hartë"
     },
     "errors": {
       "noLocation": "Të dhënat e vendndodhjes nuk janë të disponueshme"
@@ -430,7 +437,44 @@
     "floorLevel": "Kati {{floor}} nga {{total}}",
     "groundFloor": "Kati përdhe",
     "topFloor": "Kati i fundit",
-    "middleFloor": "Kati i mesëm"
+    "middleFloor": "Kati i mesëm",
+    "enter": "Hyr"
+  },
+  "map3d": {
+    "shadows": "Shfaq Hijet e Ndërtesave",
+    "shadowsOn": "Hijet",
+    "shadowsOff": "Hijet",
+    "floorLabels": "Shfaq Nivelet e Kateve",
+    "showFloors": "Etiketat",
+    "hideFloors": "Fshih",
+    "nearbyPlaces": "Vendet Afër",
+    "nearbyPOI": "Afër",
+    "loading": "Duke ngarkuar hartën 3D...",
+    "facing": "Drejtimi",
+    "facingDirection": "Drejt {{direction}}",
+    "sunrise": "Lindja e diellit",
+    "noon": "Mesditë",
+    "sunset": "Perëndimi",
+    "reset": "Rivendos",
+    "sunAndShadows": "Dielli & Hijet",
+    "cardinalDirections": {
+      "N": "V",
+      "NE": "VL",
+      "E": "L",
+      "SE": "JL",
+      "S": "J",
+      "SW": "JP",
+      "W": "P",
+      "NW": "VP",
+      "North": "Veri",
+      "Northeast": "Verilindje",
+      "East": "Lindje",
+      "Southeast": "Juglindje",
+      "South": "Jug",
+      "Southwest": "Jugperëndim",
+      "West": "Perëndim",
+      "Northwest": "Veriperëndim"
+    }
   },
   "guide": {
     "messages": {

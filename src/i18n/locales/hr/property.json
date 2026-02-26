@@ -222,7 +222,12 @@
     "description": "Istražite ovu nekretninu u impresivnom 360°",
     "openInNewTab": "Otvori u novoj kartici za potpuno iskustvo",
     "failedToLoad": "Failed to load virtual tour",
-    "loading": "Loading virtual tour..."
+    "loading": "Loading virtual tour...",
+    "exit": "Izađi iz ture",
+    "floor": "Kat {{floor}}",
+    "hint": "Povucite za gledanje \u2022 Skrolajte za zum",
+    "entering": "Ulazim u zgradu...",
+    "tourButton": "360° Tura"
   },
   "featuredAgencies": "Istaknute Agencije",
   "status": {
@@ -397,7 +402,9 @@
       "play": "Let do nekretnine",
       "skip": "Preskoči",
       "replay": "Ponovi",
-      "exploreMap": "Istraži kartu"
+      "exploreMap": "Istraži kartu",
+      "flyShort": "Leti",
+      "mapShort": "Karta"
     },
     "errors": {
       "noLocation": "Podaci o lokaciji nisu dostupni"
@@ -430,7 +437,44 @@
     "floorLevel": "Kat {{floor}} od {{total}}",
     "groundFloor": "Prizemlje",
     "topFloor": "Zadnji kat",
-    "middleFloor": "Srednji kat"
+    "middleFloor": "Srednji kat",
+    "enter": "Uđi"
+  },
+  "map3d": {
+    "shadows": "Prikaži sjene zgrada",
+    "shadowsOn": "Sjene",
+    "shadowsOff": "Sjene",
+    "floorLabels": "Prikaži razine katova",
+    "showFloors": "Oznake",
+    "hideFloors": "Sakrij",
+    "nearbyPlaces": "Obližnja mjesta",
+    "nearbyPOI": "Blizu",
+    "loading": "Učitavanje 3D karte...",
+    "facing": "Okrenuto",
+    "facingDirection": "Okrenuto prema {{direction}}",
+    "sunrise": "Izlazak sunca",
+    "noon": "Podne",
+    "sunset": "Zalazak sunca",
+    "reset": "Resetiraj",
+    "sunAndShadows": "Sunce i sjene",
+    "cardinalDirections": {
+      "N": "S",
+      "NE": "SI",
+      "E": "I",
+      "SE": "JI",
+      "S": "J",
+      "SW": "JZ",
+      "W": "Z",
+      "NW": "SZ",
+      "North": "Sjever",
+      "Northeast": "Sjeveroistok",
+      "East": "Istok",
+      "Southeast": "Jugoistok",
+      "South": "Jug",
+      "Southwest": "Jugozapad",
+      "West": "Zapad",
+      "Northwest": "Sjeverozapad"
+    }
   },
   "guide": {
     "messages": {

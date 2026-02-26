@@ -74,14 +74,14 @@ const calculateSunAzimuth = (hour: number, latitude: number = 42, dayOfYear?: nu
   return azimuth;
 };
 
-// Get cardinal direction name from azimuth
+// Get cardinal direction name from azimuth (short form - used as keys for translation)
 const getCardinalDirection = (azimuth: number): string => {
   const directions = ['N', 'NE', 'E', 'SE', 'S', 'SW', 'W', 'NW'];
   const index = Math.round(azimuth / 45) % 8;
   return directions[index];
 };
 
-// Get full cardinal direction name
+// Get full cardinal direction name (used as keys for translation)
 const getCardinalDirectionFull = (azimuth: number): string => {
   const directions = ['North', 'Northeast', 'East', 'Southeast', 'South', 'Southwest', 'West', 'Northwest'];
   const index = Math.round(azimuth / 45) % 8;
