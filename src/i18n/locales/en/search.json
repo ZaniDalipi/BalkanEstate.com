@@ -230,6 +230,38 @@
       "satellite": "Satellite",
       "streetView": "Street view"
     },
+    "sunDirection": "Sun Direction",
+    "orientationTip": "Tip",
+    "eastWindows": "East-facing windows get morning sun",
+    "southWindows": "South-facing windows get the most sunlight",
+    "westWindows": "West-facing windows get afternoon/evening sun",
+    "sunrise": "Sunrise",
+    "noon": "Noon",
+    "sunset": "Sunset",
+    "dawn": "Dawn",
+    "morning": "Morning",
+    "afternoon": "Afternoon",
+    "dusk": "Dusk",
+    "night": "Night",
+    "pauseAnimation": "Pause",
+    "playAnimation": "Play",
+    "season": "Season",
+    "seasons": {
+      "spring": "Spring",
+      "summer": "Summer",
+      "autumn": "Autumn",
+      "winter": "Winter"
+    },
+    "cardinalDirections": {
+      "north": "North",
+      "northeast": "Northeast",
+      "east": "East",
+      "southeast": "Southeast",
+      "south": "South",
+      "southwest": "Southwest",
+      "west": "West",
+      "northwest": "Northwest"
+    },
     "climateRisks": {
       "title": "Climate Risks",
       "none": "None selected",

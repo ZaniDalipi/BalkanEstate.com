@@ -25,12 +25,12 @@ const formatDecimalHour = (decimalHour: number): string => {
   return `${hour12}:${minutes.toString().padStart(2, '0')} ${period}`;
 };
 
-// Season icons and labels
-const SEASONS: { id: Season; icon: string; label: string }[] = [
-  { id: 'spring', icon: '🌸', label: 'Spring' },
-  { id: 'summer', icon: '☀️', label: 'Summer' },
-  { id: 'autumn', icon: '🍂', label: 'Autumn' },
-  { id: 'winter', icon: '❄️', label: 'Winter' },
+// Season icons and translation keys
+const SEASONS: { id: Season; icon: string; labelKey: string }[] = [
+  { id: 'spring', icon: '🌸', labelKey: 'spring' },
+  { id: 'summer', icon: '☀️', labelKey: 'summer' },
+  { id: 'autumn', icon: '🍂', labelKey: 'autumn' },
+  { id: 'winter', icon: '❄️', labelKey: 'winter' },
 ];
 
 // Calculate sun azimuth and altitude based on time, latitude, and day of year
@@ -81,11 +81,11 @@ const getCardinalDirection = (azimuth: number): string => {
   return directions[index];
 };
 
-// Get full cardinal direction name
-const getCardinalDirectionFull = (azimuth: number): string => {
-  const directions = ['North', 'Northeast', 'East', 'Southeast', 'South', 'Southwest', 'West', 'Northwest'];
+// Get cardinal direction key for translation
+const CARDINAL_KEYS = ['north', 'northeast', 'east', 'southeast', 'south', 'southwest', 'west', 'northwest'] as const;
+const getCardinalDirectionKey = (azimuth: number): string => {
   const index = Math.round(azimuth / 45) % 8;
-  return directions[index];
+  return CARDINAL_KEYS[index];
 };
 
 // Sun icons for different times
@@ -246,7 +246,7 @@ const SunPositionControl: React.FC<SunPositionControlProps> = ({
   const dayOfYear = useMemo(() => getSeasonDayOfYear(selectedSeason), [selectedSeason]);
   const sunAzimuth = useMemo(() => calculateSunAzimuth(hour, latitude, dayOfYear), [hour, latitude, dayOfYear]);
   const cardinalDirection = useMemo(() => getCardinalDirection(sunAzimuth), [sunAzimuth]);
-  const cardinalDirectionFull = useMemo(() => getCardinalDirectionFull(sunAzimuth), [sunAzimuth]);
+  const cardinalDirectionKey = useMemo(() => getCardinalDirectionKey(sunAzimuth), [sunAzimuth]);
   const timePeriod = useMemo(() => getTimePeriod(hour), [hour]);
 
   // Calculate sunrise/sunset for selected season
@@ -514,7 +514,7 @@ const SunPositionControl: React.FC<SunPositionControlProps> = ({
               {t('search:map.sunDirection', 'Sun Direction')}
             </p>
             <p className={`text-sm font-bold ${isNightMode ? 'text-cyan-400' : 'text-primary'}`}>
-              {cardinalDirectionFull} ({Math.round(sunAzimuth)}°)
+              {t(`search:map.cardinalDirections.${cardinalDirectionKey}`, cardinalDirectionKey)} ({Math.round(sunAzimuth)}°)
             </p>
             <p className={`text-[10px] ${isNightMode ? 'text-slate-500' : 'text-neutral-400'}`}>
               {getTimePeriodName()}
@@ -670,7 +670,7 @@ const SunPositionControl: React.FC<SunPositionControlProps> = ({
                         : 'bg-neutral-100 text-neutral-600 hover:bg-neutral-200'
                     }
                   `}
-                  title={season.label}
+                  title={t(`search:map.seasons.${season.labelKey}`, season.labelKey)}
                 >
                   {season.icon}
                 </button>

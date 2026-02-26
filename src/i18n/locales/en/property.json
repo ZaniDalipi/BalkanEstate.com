@@ -224,7 +224,8 @@
     "description": "Explore this property in immersive 360°",
     "openInNewTab": "Open in new tab for full experience",
     "failedToLoad": "Failed to load virtual tour",
-    "loading": "Loading virtual tour..."
+    "loading": "Loading virtual tour...",
+    "entering": "Entering..."
   },
   "gallery": {
     "mute": "Mute",
@@ -410,7 +411,9 @@
       "play": "Fly to Property",
       "skip": "Skip",
       "replay": "Replay",
-      "exploreMap": "Explore Map"
+      "exploreMap": "Explore Map",
+      "flyShort": "Fly",
+      "mapShort": "Map"
     },
     "errors": {
       "noLocation": "Location data unavailable"
@@ -443,7 +446,8 @@
     "floorLevel": "Floor {{floor}} of {{total}}",
     "groundFloor": "Ground Floor",
     "topFloor": "Top Floor",
-    "middleFloor": "Middle Floor"
+    "middleFloor": "Middle Floor",
+    "enter": "Enter"
   },
   "guide": {
     "messages": {
@@ -471,6 +475,52 @@
       "minimize": "Click to minimize",
       "tips": "Click for tips!",
       "rightClick": "Right-click for actions"
+    }
+  },
+  "map3d": {
+    "shadows": "Show Building Shadows",
+    "shadowsOn": "Shadows",
+    "shadowsOff": "Shadows",
+    "floorLabels": "Show Floor Levels",
+    "hideFloors": "Hide",
+    "showFloors": "Labels",
+    "nearbyPlaces": "Nearby Places",
+    "nearbyPOI": "Nearby"
+  },
+  "floorPlanViewer": {
+    "title": "Floor Plan",
+    "panMode": "Pan",
+    "labelMode": "Label",
+    "panTitle": "Pan & Zoom (drag to move, scroll to zoom)",
+    "labelTitle": "Click on the floor plan to add room labels",
+    "clearAllLabels": "Clear all labels",
+    "fitToScreen": "Fit to screen",
+    "close": "Close",
+    "clickToAddLabel": "Click anywhere on the floor plan to add a room label",
+    "loading": "Loading floor plan...",
+    "errorTitle": "Failed to Load Floor Plan",
+    "errorDescription": "The floor plan image could not be loaded. It may have been moved or deleted.",
+    "retry": "Retry",
+    "roomNamePlaceholder": "Room name...",
+    "roomType": "Room Type",
+    "area": "Area (m²)",
+    "notes": "Notes",
+    "notesPlaceholder": "Window facing south, built-in closet...",
+    "rename": "Rename",
+    "delete": "Delete",
+    "roomLabels": "Room Labels",
+    "roomTypes": {
+      "bedroom": "Bedroom",
+      "bathroom": "Bathroom",
+      "kitchen": "Kitchen",
+      "living": "Living Room",
+      "dining": "Dining Room",
+      "office": "Office",
+      "garage": "Garage",
+      "storage": "Storage",
+      "balcony": "Balcony",
+      "hallway": "Hallway",
+      "other": "Other"
     }
   },
   "sections": {

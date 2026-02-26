@@ -221,8 +221,9 @@
     "title": "Tur Virtual 360°",
     "description": "Eksploroni këtë pronë në 360° imersive",
     "openInNewTab": "Hap në skedë të re për përvojë të plotë",
-    "failedToLoad": "Failed to load virtual tour",
-    "loading": "Loading virtual tour..."
+    "failedToLoad": "Nuk u arrit të ngarkohej turi virtual",
+    "loading": "Duke ngarkuar turin virtual...",
+    "entering": "Duke hyrë..."
   },
   "featuredAgencies": "Agjenci të Zgjedhura",
   "status": {
@@ -319,8 +320,8 @@
         "featured": "TË VEÇUAR",
         "standard": "PROMOVUAR"
       },
-      "promotedCount_one": "{{count}} promoted listing",
-      "promotedCount_other": "{{count}} promoted listings"
+      "promotedCount_one": "{{count}} listim i promovuar",
+      "promotedCount_other": "{{count}} listime të promovuara"
     },
     "agentRecommendations": {
       "premium": {
@@ -397,7 +398,9 @@
       "play": "Fluturim drejt pronës",
       "skip": "Kapërce",
       "replay": "Riprodho",
-      "exploreMap": "Eksploro hartën"
+      "exploreMap": "Eksploro hartën",
+      "flyShort": "Fluturim",
+      "mapShort": "Hartë"
     },
     "errors": {
       "noLocation": "Të dhënat e vendndodhjes nuk janë të disponueshme"
@@ -430,7 +433,8 @@
     "floorLevel": "Kati {{floor}} nga {{total}}",
     "groundFloor": "Kati përdhe",
     "topFloor": "Kati i fundit",
-    "middleFloor": "Kati i mesëm"
+    "middleFloor": "Kati i mesëm",
+    "enter": "Hyr"
   },
   "guide": {
     "messages": {
@@ -466,14 +470,60 @@
     "moreListings": "Më Shumë Listime"
   },
   "gallery": {
-    "mute": "Mute",
-    "unmute": "Unmute",
-    "fullscreen": "Fullscreen",
-    "exitFullscreen": "Exit fullscreen",
-    "enterFullscreen": "Enter fullscreen",
-    "propertyShowcase": "Property Showcase",
-    "skipVideo": "Skip Video",
-    "videoTour": "Video Tour",
-    "enter3DTour": "Enter 3D Tour"
+    "mute": "Pa zë",
+    "unmute": "Me zë",
+    "fullscreen": "Ekran i plotë",
+    "exitFullscreen": "Dil nga ekrani i plotë",
+    "enterFullscreen": "Ekran i plotë",
+    "propertyShowcase": "Prezantimi i Pronës",
+    "skipVideo": "Kapërce Videon",
+    "videoTour": "Tur me Video",
+    "enter3DTour": "Hyr në Tur 3D"
+  },
+  "map3d": {
+    "shadows": "Shfaq Hijet e Ndërtesës",
+    "shadowsOn": "Hijet",
+    "shadowsOff": "Hijet",
+    "floorLabels": "Shfaq Nivelet e Kateve",
+    "hideFloors": "Fshih",
+    "showFloors": "Etiketat",
+    "nearbyPlaces": "Vendet Përreth",
+    "nearbyPOI": "Përreth"
+  },
+  "floorPlanViewer": {
+    "title": "Planimetria",
+    "panMode": "Lëviz",
+    "labelMode": "Etiketë",
+    "panTitle": "Lëviz & Zmadho (tërhiq për lëvizje, rrotullohu për zmadhim)",
+    "labelTitle": "Kliko mbi planimetrinë për të shtuar etiketë dhome",
+    "clearAllLabels": "Pastro të gjitha etiketat",
+    "fitToScreen": "Përshtat në ekran",
+    "close": "Mbyll",
+    "clickToAddLabel": "Kliko kudo mbi planimetrinë për të shtuar etiketë dhome",
+    "loading": "Duke ngarkuar planimetrinë...",
+    "errorTitle": "Nuk u arrit të ngarkohej Planimetria",
+    "errorDescription": "Imazhi i planimetrisë nuk mund të ngarkohej. Mund të jetë zhvendosur ose fshirë.",
+    "retry": "Provo përsëri",
+    "roomNamePlaceholder": "Emri i dhomës...",
+    "roomType": "Lloji i Dhomës",
+    "area": "Sipërfaqja (m²)",
+    "notes": "Shënime",
+    "notesPlaceholder": "Dritare nga jugu, dollapë të integruar...",
+    "rename": "Riemërto",
+    "delete": "Fshi",
+    "roomLabels": "Etiketat e Dhomave",
+    "roomTypes": {
+      "bedroom": "Dhomë Gjumi",
+      "bathroom": "Banjë",
+      "kitchen": "Kuzhinë",
+      "living": "Dhomë Ndenjeje",
+      "dining": "Dhomë Ngrënieje",
+      "office": "Zyrë",
+      "garage": "Garazh",
+      "storage": "Depo",
+      "balcony": "Ballkon",
+      "hallway": "Korridor",
+      "other": "Tjetër"
+    }
   }
 }

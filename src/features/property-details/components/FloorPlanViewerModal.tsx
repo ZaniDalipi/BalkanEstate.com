@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 import { XMarkIcon, MagnifyingGlassPlusIcon, MagnifyingGlassMinusIcon, ArrowPathIcon } from '@/constants';
 
 interface FloorPlanViewerModalProps {
@@ -84,6 +85,7 @@ const saveAnnotations = (propertyId: string | undefined, annotations: Annotation
 };
 
 const FloorPlanViewerModal: React.FC<FloorPlanViewerModalProps> = ({ imageUrl, propertyId, onClose }) => {
+    const { t } = useTranslation(['property']);
     // Transform state
     const [transform, setTransform] = useState({ scale: 1, x: 0, y: 0 });
     const [isPanning, setIsPanning] = useState(false);
@@ -488,7 +490,7 @@ const FloorPlanViewerModal: React.FC<FloorPlanViewerModalProps> = ({ imageUrl, p
             onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}
             role="dialog"
             aria-modal="true"
-            aria-label="Floor plan viewer"
+            aria-label={t('property:floorPlanViewer.title', 'Floor plan viewer')}
         >
             {/* Top toolbar */}
             <div className="absolute top-0 left-0 right-0 z-30 flex items-center justify-between px-3 py-2 sm:px-4 sm:py-3 bg-gradient-to-b from-black/70 to-transparent pointer-events-none">
@@ -503,12 +505,12 @@ const FloorPlanViewerModal: React.FC<FloorPlanViewerModalProps> = ({ imageUrl, p
                                     : 'text-white/60 hover:text-white hover:bg-white/10'
                             }`}
                             aria-label="Pan mode"
-                            title="Pan & Zoom (drag to move, scroll to zoom)"
+                            title={t('property:floorPlanViewer.panTitle', 'Pan & Zoom (drag to move, scroll to zoom)')}
                         >
                             <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                                 <path strokeLinecap="round" strokeLinejoin="round" d="M7 11.5V14m0-2.5v-6a1.5 1.5 0 113 0m-3 6a1.5 1.5 0 00-3 0v2a7.5 7.5 0 0015 0v-5a1.5 1.5 0 00-3 0m-6-3V11m0-5.5v-1a1.5 1.5 0 013 0v1m0 0V11m0-5.5a1.5 1.5 0 013 0v3m0 0V11" />
                             </svg>
-                            <span className="hidden sm:inline">Pan</span>
+                            <span className="hidden sm:inline">{t('property:floorPlanViewer.panMode', 'Pan')}</span>
                         </button>
                         <button
                             onClick={() => setMode('annotate')}
@@ -518,13 +520,13 @@ const FloorPlanViewerModal: React.FC<FloorPlanViewerModalProps> = ({ imageUrl, p
                                     : 'text-white/60 hover:text-white hover:bg-white/10'
                             }`}
                             aria-label="Annotate mode"
-                            title="Click on the floor plan to add room labels"
+                            title={t('property:floorPlanViewer.labelTitle', 'Click on the floor plan to add room labels')}
                         >
                             <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                                 <path strokeLinecap="round" strokeLinejoin="round" d="M15 10.5a3 3 0 11-6 0 3 3 0 016 0z" />
                                 <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1115 0z" />
                             </svg>
-                            <span className="hidden sm:inline">Label</span>
+                            <span className="hidden sm:inline">{t('property:floorPlanViewer.labelMode', 'Label')}</span>
                         </button>
                     </div>
 
@@ -533,7 +535,7 @@ const FloorPlanViewerModal: React.FC<FloorPlanViewerModalProps> = ({ imageUrl, p
                         <button
                             onClick={() => { setAnnotations([]); setEditingAnnotation(null); setDetailAnnotation(null); }}
                             className="flex items-center gap-1 px-2.5 py-1.5 bg-red-500/20 text-red-300 hover:bg-red-500/30 rounded-lg backdrop-blur-md text-xs font-medium transition-colors border border-red-500/20"
-                            title="Clear all labels"
+                            title={t('property:floorPlanViewer.clearAllLabels', 'Clear all labels')}
                         >
                             <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                                 <path strokeLinecap="round" strokeLinejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" />
@@ -577,7 +579,7 @@ const FloorPlanViewerModal: React.FC<FloorPlanViewerModalProps> = ({ imageUrl, p
                         onClick={resetTransform}
                         className="p-1.5 sm:p-2 bg-neutral-800/80 text-white/70 hover:text-white hover:bg-white/10 rounded-lg backdrop-blur-md transition-colors border border-white/10"
                         aria-label="Fit to screen"
-                        title="Fit to screen (0)"
+                        title={t('property:floorPlanViewer.fitToScreen', 'Fit to screen')}
                     >
                         <ArrowPathIcon className="w-5 h-5" />
                     </button>
@@ -587,7 +589,7 @@ const FloorPlanViewerModal: React.FC<FloorPlanViewerModalProps> = ({ imageUrl, p
                         onClick={onClose}
                         className="p-1.5 sm:p-2 bg-neutral-800/80 text-white/70 hover:text-white hover:bg-red-500/40 rounded-lg backdrop-blur-md transition-colors border border-white/10"
                         aria-label="Close floor plan viewer"
-                        title="Close (Esc)"
+                        title={t('property:floorPlanViewer.close', 'Close')}
                     >
                         <XMarkIcon className="w-5 h-5" />
                     </button>
@@ -601,7 +603,7 @@ const FloorPlanViewerModal: React.FC<FloorPlanViewerModalProps> = ({ imageUrl, p
                         <svg className="w-4 h-4 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                             <path strokeLinecap="round" strokeLinejoin="round" d="M15.042 21.672L13.684 16.6m0 0l-2.51 2.225.569-9.47 5.227 7.917-3.286-.672zM12 2.25V4.5m5.834.166l-1.591 1.591M20.25 10.5H18M7.757 14.743l-1.59 1.59M6 10.5H3.75m4.007-4.243l-1.59-1.59" />
                         </svg>
-                        Click anywhere on the floor plan to add a room label
+                        {t('property:floorPlanViewer.clickToAddLabel', 'Click anywhere on the floor plan to add a room label')}
                     </div>
                 </div>
             )}
@@ -611,7 +613,7 @@ const FloorPlanViewerModal: React.FC<FloorPlanViewerModalProps> = ({ imageUrl, p
                 <div className="absolute inset-0 z-20 flex items-center justify-center">
                     <div className="flex flex-col items-center gap-4">
                         <div className="w-12 h-12 border-3 border-white/20 border-t-white rounded-full animate-spin" />
-                        <span className="text-white/70 text-sm">Loading floor plan...</span>
+                        <span className="text-white/70 text-sm">{t('property:floorPlanViewer.loading', 'Loading floor plan...')}</span>
                     </div>
                 </div>
             )}
@@ -624,21 +626,21 @@ const FloorPlanViewerModal: React.FC<FloorPlanViewerModalProps> = ({ imageUrl, p
                             <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z" />
                         </svg>
                         <div className="text-center">
-                            <h3 className="text-white font-semibold text-lg mb-1">Failed to Load Floor Plan</h3>
-                            <p className="text-white/60 text-sm">The floor plan image could not be loaded. It may have been moved or deleted.</p>
+                            <h3 className="text-white font-semibold text-lg mb-1">{t('property:floorPlanViewer.errorTitle', 'Failed to Load Floor Plan')}</h3>
+                            <p className="text-white/60 text-sm">{t('property:floorPlanViewer.errorDescription', 'The floor plan image could not be loaded. It may have been moved or deleted.')}</p>
                         </div>
                         <div className="flex gap-3">
                             <button
                                 onClick={() => { setHasError(false); setIsLoading(true); }}
                                 className="px-4 py-2 bg-white/10 text-white text-sm rounded-lg hover:bg-white/20 transition-colors"
                             >
-                                Retry
+                                {t('property:floorPlanViewer.retry', 'Retry')}
                             </button>
                             <button
                                 onClick={onClose}
                                 className="px-4 py-2 bg-red-500/20 text-red-300 text-sm rounded-lg hover:bg-red-500/30 transition-colors"
                             >
-                                Close
+                                {t('property:floorPlanViewer.close', 'Close')}
                             </button>
                         </div>
                     </div>
@@ -748,7 +750,7 @@ const FloorPlanViewerModal: React.FC<FloorPlanViewerModalProps> = ({ imageUrl, p
                                                 onBlur={() => {
                                                     handleAnnotationLabelSubmit(ann.id, false);
                                                 }}
-                                                placeholder="Room name..."
+                                                placeholder={t('property:floorPlanViewer.roomNamePlaceholder', 'Room name...')}
                                                 maxLength={LABEL_MAX_LENGTH}
                                                 className={`px-2 py-1 text-xs bg-white text-neutral-800 rounded-md border-2 outline-none shadow-lg min-w-[100px]`}
                                                 style={{ borderColor: `var(--pin-color, #f59e0b)` }}
@@ -794,7 +796,7 @@ const FloorPlanViewerModal: React.FC<FloorPlanViewerModalProps> = ({ imageUrl, p
                                                 <div className="p-3 space-y-2.5">
                                                     {/* Room type selector */}
                                                     <div>
-                                                        <label className="block text-[10px] font-semibold text-neutral-500 uppercase tracking-wide mb-1">Room Type</label>
+                                                        <label className="block text-[10px] font-semibold text-neutral-500 uppercase tracking-wide mb-1">{t('property:floorPlanViewer.roomType', 'Room Type')}</label>
                                                         <select
                                                             value={ann.roomType}
                                                             onChange={(e) => handleRoomTypeChange(ann.id, e.target.value as RoomType)}
@@ -802,7 +804,7 @@ const FloorPlanViewerModal: React.FC<FloorPlanViewerModalProps> = ({ imageUrl, p
                                                         >
                                                             {(Object.keys(ROOM_TYPE_CONFIG) as RoomType[]).map(type => (
                                                                 <option key={type} value={type}>
-                                                                    {ROOM_TYPE_CONFIG[type].label}
+                                                                    {t(`property:floorPlanViewer.roomTypes.${type}`, ROOM_TYPE_CONFIG[type].label)}
                                                                 </option>
                                                             ))}
                                                         </select>
@@ -810,7 +812,7 @@ const FloorPlanViewerModal: React.FC<FloorPlanViewerModalProps> = ({ imageUrl, p
 
                                                     {/* Area input */}
                                                     <div>
-                                                        <label className="block text-[10px] font-semibold text-neutral-500 uppercase tracking-wide mb-1">Area (m²)</label>
+                                                        <label className="block text-[10px] font-semibold text-neutral-500 uppercase tracking-wide mb-1">{t('property:floorPlanViewer.area', 'Area (m²)')}</label>
                                                         <input
                                                             type="text"
                                                             inputMode="decimal"
@@ -824,13 +826,13 @@ const FloorPlanViewerModal: React.FC<FloorPlanViewerModalProps> = ({ imageUrl, p
                                                     {/* Notes */}
                                                     <div>
                                                         <label className="block text-[10px] font-semibold text-neutral-500 uppercase tracking-wide mb-1">
-                                                            Notes
+                                                            {t('property:floorPlanViewer.notes', 'Notes')}
                                                             <span className="text-neutral-400 ml-1 normal-case">({ann.notes.length}/{NOTES_MAX_LENGTH})</span>
                                                         </label>
                                                         <textarea
                                                             value={ann.notes}
                                                             onChange={(e) => handleNotesChange(ann.id, e.target.value)}
-                                                            placeholder="Window facing south, built-in closet..."
+                                                            placeholder={t('property:floorPlanViewer.notesPlaceholder', 'Window facing south, built-in closet...')}
                                                             rows={2}
                                                             maxLength={NOTES_MAX_LENGTH}
                                                             className="w-full text-xs px-2 py-1.5 border border-neutral-200 rounded-md resize-none focus:outline-none focus:ring-1 focus:ring-neutral-300"
@@ -847,14 +849,14 @@ const FloorPlanViewerModal: React.FC<FloorPlanViewerModalProps> = ({ imageUrl, p
                                                             }}
                                                             className="flex-1 text-[11px] text-neutral-600 hover:text-neutral-800 font-medium py-1 rounded hover:bg-neutral-50 transition-colors"
                                                         >
-                                                            Rename
+                                                            {t('property:floorPlanViewer.rename', 'Rename')}
                                                         </button>
                                                         <div className="w-px h-4 bg-neutral-200" />
                                                         <button
                                                             onClick={(e) => { e.stopPropagation(); removeAnnotation(ann.id); }}
                                                             className="flex-1 text-[11px] text-red-500 hover:text-red-700 font-medium py-1 rounded hover:bg-red-50 transition-colors"
                                                         >
-                                                            Delete
+                                                            {t('property:floorPlanViewer.delete', 'Delete')}
                                                         </button>
                                                     </div>
                                                 </div>
@@ -917,7 +919,7 @@ const FloorPlanViewerModal: React.FC<FloorPlanViewerModalProps> = ({ imageUrl, p
                 <div className="absolute top-16 sm:top-20 left-3 z-30 pointer-events-auto hidden sm:block">
                     <div className="bg-neutral-900/80 backdrop-blur-md rounded-xl border border-white/10 w-48 max-h-[50vh] overflow-y-auto">
                         <div className="px-3 py-2 border-b border-white/10">
-                            <span className="text-white/70 text-[10px] font-semibold uppercase tracking-wider">Room Labels</span>
+                            <span className="text-white/70 text-[10px] font-semibold uppercase tracking-wider">{t('property:floorPlanViewer.roomLabels', 'Room Labels')}</span>
                         </div>
                         <div className="p-1.5 space-y-0.5">
                             {annotations.filter(a => a.label.trim()).map(ann => {
