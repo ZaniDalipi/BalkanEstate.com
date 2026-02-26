@@ -61,6 +61,7 @@ const EmailManager: React.FC = () => {
     toggleMutation,
     resetMutation,
     resetAllMutation,
+    syncMissingMutation,
     sendTestMutation,
     previewMutation,
     filteredEmails,
@@ -71,6 +72,7 @@ const EmailManager: React.FC = () => {
     handleToggleStatus,
     handleReset,
     handleResetAll,
+    handleSyncMissing,
     handlePreview,
     handleOpenTestModal,
     handleSendTest,
@@ -111,6 +113,14 @@ const EmailManager: React.FC = () => {
           >
             <ArrowPathIcon className={`w-4 h-4 ${isRefetching ? 'animate-spin' : ''}`} />
             {t('admin:emailManager.refresh')}
+          </button>
+          <button
+            onClick={handleSyncMissing}
+            disabled={syncMissingMutation.isPending}
+            className="px-3 py-2 bg-green-100 hover:bg-green-200 rounded-lg text-green-700 flex items-center gap-2 transition-colors"
+          >
+            <ArrowPathIcon className={`w-4 h-4 ${syncMissingMutation.isPending ? 'animate-spin' : ''}`} />
+            {syncMissingMutation.isPending ? 'Syncing...' : 'Sync Missing'}
           </button>
           <button
             onClick={handleResetAll}

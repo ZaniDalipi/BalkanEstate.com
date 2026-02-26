@@ -291,6 +291,24 @@ export function useResetAllEmailConfigs() {
 }
 
 /**
+ * useSyncMissingEmailConfigs - Mutation to add any missing email templates
+ */
+export function useSyncMissingEmailConfigs() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: () =>
+      apiRequest<{ message: string; added: number; addedKeys?: string[]; total: number }>(
+        '/admin/email-configs/sync-missing',
+        { method: 'POST', requiresAuth: true }
+      ),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: emailConfigKeys.all });
+    },
+  });
+}
+
+/**
  * useSendTestEmail - Mutation to send a test email
  */
 export function useSendTestEmail() {
