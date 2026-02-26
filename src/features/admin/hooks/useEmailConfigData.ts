@@ -31,6 +31,7 @@ export interface EmailConfig {
   headerSubtitle?: string;
   headerGradient?: string;
   headerEmoji?: string;
+  headerImageUrl?: string;
   bodyTemplate: string;
   showUnsubscribe: boolean;
   unsubscribeType?: string;
@@ -283,6 +284,24 @@ export function useResetAllEmailConfigs() {
 
   return useMutation({
     mutationFn: resetAllEmailConfigs,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: emailConfigKeys.all });
+    },
+  });
+}
+
+/**
+ * useSyncMissingEmailConfigs - Mutation to add any missing email templates
+ */
+export function useSyncMissingEmailConfigs() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: () =>
+      apiRequest<{ message: string; added: number; addedKeys?: string[]; total: number }>(
+        '/admin/email-configs/sync-missing',
+        { method: 'POST', requiresAuth: true }
+      ),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: emailConfigKeys.all });
     },

@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { getFeaturedSubscription } from '../../services/apiService';
 import { SparklesIcon, CheckCircleIcon, XCircleIcon, ClockIcon } from '../../constants';
 import { API_URL } from '../../src/shared/api/config';
+import { useTranslation } from 'react-i18next';
 
 // Add shimmer animation styles
 const shimmerStyles = `
@@ -27,6 +28,7 @@ const FeaturedSubscriptionCard: React.FC<FeaturedSubscriptionCardProps> = React.
   agencyId,
   onUpgrade,
 }) => {
+  const { t } = useTranslation(['agencies', 'common']);
   const [subscription, setSubscription] = useState<any>(null);
   const [agencyStatus, setAgencyStatus] = useState<any>(null);
   const [loading, setLoading] = useState(true);
@@ -162,25 +164,25 @@ const FeaturedSubscriptionCard: React.FC<FeaturedSubscriptionCardProps> = React.
               </div>
               <div className="flex-1">
                 <h3 className="text-lg font-bold text-neutral-800 mb-2">
-                  Agency Currently Featured ✨
+                  {t('agencies:featured.subscription.currentlyFeatured', 'Agency Currently Featured ✨')}
                 </h3>
                 <p className="text-sm text-neutral-600 mb-3">
-                  Your agency is currently featured and receiving enhanced visibility.
+                  {t('agencies:featured.subscription.receivingVisibility', 'Your agency is currently featured and receiving enhanced visibility.')}
                 </p>
                 <div className="bg-white border border-purple-200 rounded-lg p-4">
                   <div className="flex items-center justify-between mb-2">
-                    <span className="text-sm font-semibold text-neutral-700">Time Remaining</span>
+                    <span className="text-sm font-semibold text-neutral-700">{t('agencies:featured.subscription.timeRemaining', 'Time Remaining')}</span>
                     <span className={`text-lg font-bold ${
                       agencyStatus.daysRemaining <= 3 ? 'text-red-600 animate-pulse' :
                       agencyStatus.daysRemaining <= 7 ? 'text-yellow-600' :
                       'text-green-600'
                     }`}>
-                      {agencyStatus.daysRemaining} {agencyStatus.daysRemaining === 1 ? 'day' : 'days'}
+                      {agencyStatus.daysRemaining} {agencyStatus.daysRemaining === 1 ? t('common:day', 'day') : t('common:days', 'days')}
                     </span>
                   </div>
                   {agencyStatus.featuredEndDate && (
                     <p className="text-xs text-neutral-500">
-                      Expires: {formatDate(agencyStatus.featuredEndDate)}
+                      {t('agencies:featured.subscription.expires', 'Expires:')} {formatDate(agencyStatus.featuredEndDate)}
                     </p>
                   )}
                 </div>
@@ -202,17 +204,16 @@ const FeaturedSubscriptionCard: React.FC<FeaturedSubscriptionCardProps> = React.
           </div>
           <div className="flex-1">
             <h3 className="text-lg font-bold text-neutral-800 mb-2">
-              Feature Your Agency
+              {t('agencies:featured.subscription.featureYourAgency', 'Feature Your Agency')}
             </h3>
             <p className="text-sm text-neutral-600 mb-4">
-              Get more visibility with a featured listing. Your agency will appear at the
-              top of search results and in the featured agencies carousel.
+              {t('agencies:featured.subscription.getVisibility', 'Get more visibility with a featured listing. Your agency will appear at the top of search results and in the featured agencies carousel.')}
             </p>
             <button
               onClick={onUpgrade}
               className="px-6 py-2 bg-gradient-to-r from-purple-600 to-primary text-white font-semibold rounded-lg hover:shadow-lg transition-all duration-300"
             >
-              {startingPrice ? `Get Featured from €${startingPrice}/week` : 'Get Featured Now'}
+              {startingPrice ? t('agencies:featured.subscription.getFeaturedFrom', 'Get Featured from €{{price}}/week', { price: startingPrice }) : t('agencies:featured.subscription.getFeaturedNow', 'Get Featured Now')}
             </button>
           </div>
         </div>
@@ -245,7 +246,7 @@ const FeaturedSubscriptionCard: React.FC<FeaturedSubscriptionCardProps> = React.
             <SparklesIcon className="w-6 h-6 text-white" />
           </div>
           <div>
-            <h3 className="text-lg font-bold text-neutral-800">Featured Agency</h3>
+            <h3 className="text-lg font-bold text-neutral-800">{t('agencies:featured.subscription.featuredAgency', 'Featured Agency')}</h3>
             <div
               className={`inline-flex items-center gap-2 px-3 py-1 rounded-full border text-sm font-semibold ${getStatusColor(
                 subscription.status
@@ -262,7 +263,7 @@ const FeaturedSubscriptionCard: React.FC<FeaturedSubscriptionCardProps> = React.
             onClick={onUpgrade}
             className="text-sm text-primary hover:text-primary-dark font-medium hover:underline transition-colors"
           >
-            Boost Your Visibility
+            {t('agencies:featured.subscription.boostVisibility', 'Boost Your Visibility')}
           </button>
         )}
       </div>
@@ -273,10 +274,10 @@ const FeaturedSubscriptionCard: React.FC<FeaturedSubscriptionCardProps> = React.
           <div className="space-y-2">
             <div className="flex items-center justify-between text-sm">
               <span className="font-semibold text-neutral-700">
-                {subscription.isTrial ? '🎉 Free Trial Progress' : '📅 Subscription Period'}
+                {subscription.isTrial ? t('agencies:featured.subscription.freeTrialProgress', '🎉 Free Trial Progress') : t('agencies:featured.subscription.subscriptionPeriod', '📅 Subscription Period')}
               </span>
               <span className={`font-bold ${daysRemaining <= 3 ? 'text-red-600 animate-pulse' : daysRemaining <= 7 ? 'text-yellow-600' : 'text-green-600'}`}>
-                {daysRemaining} {daysRemaining === 1 ? 'day' : 'days'} left
+                {t('agencies:featured.subscription.daysLeft', '{{count}} days left', { count: daysRemaining })}
               </span>
             </div>
 
@@ -310,23 +311,23 @@ const FeaturedSubscriptionCard: React.FC<FeaturedSubscriptionCardProps> = React.
         {subscription.isTrial && (
           <div className="bg-blue-100 border border-blue-200 rounded-lg p-3">
             <p className="text-sm font-semibold text-blue-800">
-              🎉 Free Trial Active
+              {t('agencies:featured.subscription.freeTrialActive', '🎉 Free Trial Active')}
             </p>
             <p className="text-xs text-blue-600 mt-1">
-              Your free trial ends on {formatDate(subscription.currentPeriodEnd)}
+              {t('agencies:featured.subscription.trialEndsOn', 'Your free trial ends on {{date}}', { date: formatDate(subscription.currentPeriodEnd) })}
             </p>
           </div>
         )}
 
         <div className="grid grid-cols-2 gap-4">
           <div>
-            <p className="text-sm text-neutral-500">Interval</p>
+            <p className="text-sm text-neutral-500">{t('agencies:featured.subscription.interval', 'Interval')}</p>
             <p className="font-semibold text-neutral-800 capitalize">
               {subscription.interval}
             </p>
           </div>
           <div>
-            <p className="text-sm text-neutral-500">Price</p>
+            <p className="text-sm text-neutral-500">{t('agencies:featured.subscription.price', 'Price')}</p>
             <p className="font-semibold text-neutral-800">
               €{subscription.price}
               {subscription.discountApplied > 0 && (
@@ -337,14 +338,14 @@ const FeaturedSubscriptionCard: React.FC<FeaturedSubscriptionCardProps> = React.
             </p>
           </div>
           <div>
-            <p className="text-sm text-neutral-500">Start Date</p>
+            <p className="text-sm text-neutral-500">{t('agencies:featured.subscription.startDate', 'Start Date')}</p>
             <p className="font-semibold text-neutral-800">
               {formatDate(subscription.startDate)}
             </p>
           </div>
           <div>
             <p className="text-sm text-neutral-500">
-              {isActive ? 'Renews On' : 'Ended On'}
+              {isActive ? t('agencies:featured.subscription.renewsOn', 'Renews On') : t('agencies:featured.subscription.endedOn', 'Ended On')}
             </p>
             <p className="font-semibold text-neutral-800">
               {formatDate(subscription.currentPeriodEnd)}
@@ -355,7 +356,7 @@ const FeaturedSubscriptionCard: React.FC<FeaturedSubscriptionCardProps> = React.
         {subscription.appliedCouponCode && (
           <div className="bg-green-50 border border-green-200 rounded-lg p-3">
             <p className="text-sm text-green-800">
-              ✓ Coupon <strong>{subscription.appliedCouponCode}</strong> applied
+              {t('agencies:featured.subscription.couponApplied', '✓ Coupon {{code}} applied', { code: subscription.appliedCouponCode })}
             </p>
           </div>
         )}
@@ -363,7 +364,7 @@ const FeaturedSubscriptionCard: React.FC<FeaturedSubscriptionCardProps> = React.
         {subscription.cancelAtPeriodEnd && (
           <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3">
             <p className="text-sm text-yellow-800">
-              ⚠️ Subscription will be canceled at the end of the current period
+              {t('agencies:featured.subscription.cancelAtPeriodEnd', '⚠️ Subscription will be canceled at the end of the current period')}
             </p>
           </div>
         )}
@@ -375,10 +376,10 @@ const FeaturedSubscriptionCard: React.FC<FeaturedSubscriptionCardProps> = React.
               <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
                 <div>
                   <p className="text-sm font-semibold text-neutral-800">
-                    🔄 Renew Your Featured Status
+                    {t('agencies:featured.subscription.renewStatus', '🔄 Renew Your Featured Status')}
                   </p>
                   <p className="text-xs text-neutral-600 mt-1">
-                    Continue enjoying enhanced visibility and top placement in search results.
+                    {t('agencies:featured.subscription.continueVisibility', 'Continue enjoying enhanced visibility and top placement in search results.')}
                   </p>
                 </div>
                 <button
@@ -386,7 +387,7 @@ const FeaturedSubscriptionCard: React.FC<FeaturedSubscriptionCardProps> = React.
                   className="w-full sm:w-auto px-5 py-2.5 bg-gradient-to-r from-purple-600 to-primary text-white font-semibold rounded-lg hover:shadow-lg hover:scale-105 transition-all duration-300 flex items-center justify-center gap-2"
                 >
                   <SparklesIcon className="w-4 h-4" />
-                  Renew Now
+                  {t('agencies:featured.subscription.renewNow', 'Renew Now')}
                 </button>
               </div>
             </div>
@@ -394,7 +395,7 @@ const FeaturedSubscriptionCard: React.FC<FeaturedSubscriptionCardProps> = React.
             {/* Pro Tip for expired subscriptions */}
             <div className="mt-3 bg-amber-50 border border-amber-200 rounded-lg p-3">
               <p className="text-sm text-amber-800">
-                <span className="font-semibold">💡 Pro Tip:</span> Featured agencies get up to 5x more visibility and appear at the top of search results!
+                {t('agencies:featured.subscription.proTip', '💡 Pro Tip: Featured agencies get up to 5x more visibility and appear at the top of search results!')}
               </p>
             </div>
           </div>

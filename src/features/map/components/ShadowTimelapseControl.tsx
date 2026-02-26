@@ -161,17 +161,17 @@ const TimelineScrubber: React.FC<{
         <div
           className="absolute top-0 w-0.5 h-full bg-orange-400/60"
           style={{ left: `${sunrisePosition}%` }}
-          title={`Sunrise ${formatTime(sunInfo.sunrise)}`}
+          title={`${t('property:map3d.sunrise', 'Sunrise')} ${formatTime(sunInfo.sunrise)}`}
         />
         <div
           className="absolute top-0 w-0.5 h-full bg-yellow-400/60"
           style={{ left: `${noonPosition}%` }}
-          title="Noon"
+          title={t('property:map3d.noon', 'Noon')}
         />
         <div
           className="absolute top-0 w-0.5 h-full bg-purple-400/60"
           style={{ left: `${sunsetPosition}%` }}
-          title={`Sunset ${formatTime(sunInfo.sunset)}`}
+          title={`${t('property:map3d.sunset', 'Sunset')} ${formatTime(sunInfo.sunset)}`}
         />
       </div>
 

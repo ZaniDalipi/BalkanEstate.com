@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
 import EmailConfig, { IEmailConfig } from '../models/EmailConfig';
-import { seedEmailConfigs } from '../seeds/emailConfigSeed';
+import { seedEmailConfigs, defaultEmailConfigs } from '../seeds/emailConfigSeed';
 import emailService from '../services/emailService';
 import { apiLogger } from '../utils/logger';
 import { replaceVariables, renderEmailConfig } from '../utils/emailTemplateRenderer';
@@ -194,6 +194,35 @@ export const resetAllEmailConfigs = async (_req: Request, res: Response): Promis
   } catch (error) {
     apiLogger.error('Error resetting all email configs:', error);
     res.status(500).json({ message: 'Failed to reset email configurations' });
+  }
+};
+
+// Sync missing email configurations (only adds new ones, doesn't overwrite existing)
+export const syncMissingEmailConfigs = async (_req: Request, res: Response): Promise<void> => {
+  try {
+    const existingKeys = await EmailConfig.distinct('key');
+    const existingSet = new Set(existingKeys);
+    const missing = defaultEmailConfigs.filter(c => !existingSet.has(c.key));
+
+    if (missing.length === 0) {
+      res.json({ message: 'All email configurations are up to date', added: 0, total: existingKeys.length });
+      return;
+    }
+
+    for (const config of missing) {
+      await EmailConfig.create(config);
+    }
+
+    const newTotal = await EmailConfig.countDocuments();
+    res.json({
+      message: `Added ${missing.length} missing email configuration(s)`,
+      added: missing.length,
+      addedKeys: missing.map(c => c.key),
+      total: newTotal,
+    });
+  } catch (error) {
+    apiLogger.error('Error syncing missing email configs:', error);
+    res.status(500).json({ message: 'Failed to sync email configurations' });
   }
 };
 

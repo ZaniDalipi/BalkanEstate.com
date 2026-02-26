@@ -1,8 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useAppContext } from '@/context/AppContext';
 import { AppleIcon, EnvelopeIcon, GoogleIcon, LogoIcon, XMarkIcon, EyeIcon } from '@/constants';
 import SocialLoginPopup from './SocialLoginPopup';
+import { buildLocalizedPath } from '@/src/utils/languageRouting';
 
 type SocialProvider = 'google' | 'apple';
 
@@ -326,7 +327,32 @@ const AuthPage: React.FC = () => {
         setTouched({});
     }, [state.isAuthModalOpen, state.authModalView]);
 
+    // Keep the browser URL in sync with the auth modal state
+    const prevPathRef = useRef<string | null>(null);
+
+    useEffect(() => {
+        if (state.isAuthModalOpen) {
+            const authPath = state.authModalView === 'signup' ? '/register' : '/login';
+            const currentPath = window.location.pathname.replace(/^\/[a-z]{2}(?=\/)/, '');
+            // Save the path we came from so we can restore it on close
+            if (currentPath !== '/login' && currentPath !== '/register') {
+                prevPathRef.current = window.location.pathname;
+            }
+            // Only push if URL doesn't already match
+            if (currentPath !== authPath) {
+                window.history.pushState({}, '', buildLocalizedPath(authPath));
+            }
+        }
+    }, [state.isAuthModalOpen, state.authModalView]);
+
     const handleClose = () => {
+        // Restore the previous URL when closing the modal
+        if (prevPathRef.current) {
+            window.history.pushState({}, '', prevPathRef.current);
+            prevPathRef.current = null;
+        } else {
+            window.history.pushState({}, '', buildLocalizedPath('/search'));
+        }
         dispatch({ type: 'TOGGLE_AUTH_MODAL', payload: { isOpen: false } });
     };
 

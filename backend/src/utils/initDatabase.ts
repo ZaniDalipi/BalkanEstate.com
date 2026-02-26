@@ -143,13 +143,21 @@ export const initializeDatabase = async (): Promise<void> => {
     // Ensure all property documents have the same attributes across environments
     await ensurePropertySchemaSync();
 
-    // Initialize email configurations if empty
+    // Initialize email configurations - seed missing configs on every startup
     try {
+      const { defaultEmailConfigs } = await import('../seeds/emailConfigSeed');
       const emailConfigCount = await EmailConfig.countDocuments();
+      const expectedCount = defaultEmailConfigs.length;
+
       if (emailConfigCount === 0) {
-        dbLogger.info('🌱 No email configurations found. Seeding defaults...');
+        dbLogger.info('🌱 No email configurations found. Seeding all defaults...');
         await seedEmailConfigs();
         dbLogger.info('✅ Email configurations seeded successfully!');
+      } else if (emailConfigCount < expectedCount) {
+        dbLogger.info(`🔄 Found ${emailConfigCount}/${expectedCount} email configs. Seeding missing ones...`);
+        await seedEmailConfigs();
+        const newCount = await EmailConfig.countDocuments();
+        dbLogger.info(`✅ Email configurations synced (${newCount} templates)`);
       } else {
         dbLogger.info(`✅ Email configurations loaded (${emailConfigCount} templates)`);
       }

@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 import { ChevronLeftIcon, ChevronRightIcon, XMarkIcon, BuildingOfficeIcon } from '@/constants';
 import { optimizeCloudinaryUrl, cloudinarySrcSet } from '@/config/cloudinaryConfig';
 
@@ -9,6 +10,7 @@ interface ImageViewerModalProps {
 }
 
 const ImageViewerModal: React.FC<ImageViewerModalProps> = ({ images, startIndex, onClose }) => {
+    const { t } = useTranslation(['property', 'common']);
     const [currentIndex, setCurrentIndex] = useState(startIndex);
     const [imageError, setImageError] = useState(false);
     const [touchStart, setTouchStart] = useState<{ x: number; y: number } | null>(null);
@@ -93,7 +95,7 @@ const ImageViewerModal: React.FC<ImageViewerModalProps> = ({ images, startIndex,
             onClick={handleBackdropClick}
             role="dialog"
             aria-modal="true"
-            aria-label={`Image viewer: ${currentIndex + 1} of ${images.length}`}
+            aria-label={t('property:imageViewer.ariaLabel', 'Image viewer: {{current}} of {{total}}', { current: currentIndex + 1, total: images.length })}
             style={{ paddingTop: 'env(safe-area-inset-top, 1rem)', paddingBottom: 'env(safe-area-inset-bottom, 1rem)', paddingLeft: 'env(safe-area-inset-left, 1rem)', paddingRight: 'env(safe-area-inset-right, 1rem)' }}
         >
             {/* Close button - 44px min touch target */}
@@ -102,7 +104,7 @@ const ImageViewerModal: React.FC<ImageViewerModalProps> = ({ images, startIndex,
                 onClick={onClose}
                 className="absolute top-2 right-2 text-white/80 hover:text-white z-20 p-2.5 min-w-[44px] min-h-[44px] flex items-center justify-center rounded-full bg-black/30 backdrop-blur-sm hover:bg-black/50 transition-colors"
                 style={{ top: 'calc(env(safe-area-inset-top, 0px) + 0.5rem)', right: 'calc(env(safe-area-inset-right, 0px) + 0.5rem)' }}
-                aria-label="Close image viewer"
+                aria-label={t('property:imageViewer.close', 'Close image viewer')}
             >
                 <XMarkIcon className="w-6 h-6 sm:w-7 sm:h-7" />
             </button>
@@ -118,7 +120,7 @@ const ImageViewerModal: React.FC<ImageViewerModalProps> = ({ images, startIndex,
                     type="button"
                     onClick={handlePrev}
                     className="absolute left-1 sm:left-3 top-1/2 -translate-y-1/2 bg-white/20 backdrop-blur-sm p-2.5 sm:p-3 rounded-full hover:bg-white/40 active:bg-white/50 transition-colors z-10 min-w-[44px] min-h-[44px] flex items-center justify-center"
-                    aria-label={`Previous image (${((currentIndex - 1 + images.length) % images.length) + 1} of ${images.length})`}
+                    aria-label={t('property:imageViewer.previous', 'Previous image ({{current}} of {{total}})', { current: ((currentIndex - 1 + images.length) % images.length) + 1, total: images.length })}
                 >
                     <ChevronLeftIcon className="w-6 h-6 sm:w-7 sm:h-7 text-white"/>
                 </button>
@@ -127,7 +129,7 @@ const ImageViewerModal: React.FC<ImageViewerModalProps> = ({ images, startIndex,
                     {imageError ? (
                         <div className="max-w-full max-h-full w-full h-full bg-gradient-to-br from-neutral-600 to-neutral-700 flex flex-col items-center justify-center text-white p-4 sm:p-6 md:p-8 rounded-lg">
                             <BuildingOfficeIcon className="w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24 text-neutral-400" />
-                            <p className="mt-3 sm:mt-4 font-semibold text-sm sm:text-base">Image could not be loaded</p>
+                            <p className="mt-3 sm:mt-4 font-semibold text-sm sm:text-base">{t('property:imageViewer.loadError', 'Image could not be loaded')}</p>
                         </div>
                     ) : (
                         <img
@@ -135,7 +137,7 @@ const ImageViewerModal: React.FC<ImageViewerModalProps> = ({ images, startIndex,
                             src={optimizeCloudinaryUrl(images[currentIndex].url, { width: 1920, quality: 'auto' })}
                             srcSet={cloudinarySrcSet(images[currentIndex].url, [640, 1024, 1440, 1920])}
                             sizes="100vw"
-                            alt={`Property image ${currentIndex + 1} of ${images.length}`}
+                            alt={t('property:imageViewer.imageAlt', 'Property image {{current}} of {{total}}', { current: currentIndex + 1, total: images.length })}
                             width={1920}
                             height={1280}
                             className="max-w-full max-h-full object-contain animate-fade-in select-none"
@@ -150,7 +152,7 @@ const ImageViewerModal: React.FC<ImageViewerModalProps> = ({ images, startIndex,
                     type="button"
                     onClick={handleNext}
                     className="absolute right-1 sm:right-3 top-1/2 -translate-y-1/2 bg-white/20 backdrop-blur-sm p-2.5 sm:p-3 rounded-full hover:bg-white/40 active:bg-white/50 transition-colors z-10 min-w-[44px] min-h-[44px] flex items-center justify-center"
-                    aria-label={`Next image (${(currentIndex + 1) % images.length + 1} of ${images.length})`}
+                    aria-label={t('property:imageViewer.next', 'Next image ({{current}} of {{total}})', { current: (currentIndex + 1) % images.length + 1, total: images.length })}
                 >
                     <ChevronRightIcon className="w-6 h-6 sm:w-7 sm:h-7 text-white"/>
                 </button>

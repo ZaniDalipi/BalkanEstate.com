@@ -3,7 +3,7 @@ import { Resend } from 'resend';
 import User from '../models/User';
 import { getPromoTemplate, BRAND_COLORS } from '../templates/emailTemplates';
 import { emailLogger } from '../utils/logger';
-import { getActiveEmailConfig, renderEmailConfig, buildCouponCodesHtml } from '../utils/emailTemplateRenderer';
+import { getActiveEmailConfig, renderEmailWithSiteSettings, buildCouponCodesHtml } from '../utils/emailTemplateRenderer';
 
 // =============================================================================
 // Security Utilities
@@ -398,6 +398,77 @@ class EmailService {
       return;
     }
 
+    const frontendUrl = process.env.FRONTEND_URL || 'https://balkanestate.com';
+
+    // Try admin-editable template first
+    const config = await getActiveEmailConfig('weekly-stats');
+    if (config) {
+      // Build the stats section HTML
+      const statsSection = `
+      <div style="display: table; width: 100%; border-collapse: separate; border-spacing: 8px;">
+        <div style="display: table-row;">
+          <div style="display: table-cell; width: 50%; background: #f0f9ff; border-radius: 12px; padding: 16px; text-align: center;">
+            <div style="font-size: 32px; font-weight: 700; color: #0369a1;">${data.totalViews.toLocaleString()}</div>
+            <div style="font-size: 12px; color: #6b7280; margin: 4px 0;">Total Views</div>
+            <div style="font-size: 12px;">${this.formatChange(data.viewsChange)} vs last week</div>
+          </div>
+          <div style="display: table-cell; width: 50%; background: #f0fdf4; border-radius: 12px; padding: 16px; text-align: center;">
+            <div style="font-size: 32px; font-weight: 700; color: #16a34a;">${data.totalInquiries}</div>
+            <div style="font-size: 12px; color: #6b7280; margin: 4px 0;">Inquiries</div>
+            <div style="font-size: 12px;">${this.formatChange(data.inquiriesChange)} vs last week</div>
+          </div>
+        </div>
+      </div>
+      <div style="display: table; width: 100%; border-collapse: separate; border-spacing: 8px; margin-top: 8px;">
+        <div style="display: table-row;">
+          <div style="display: table-cell; width: 50%; background: #fef3c7; border-radius: 12px; padding: 16px; text-align: center;">
+            <div style="font-size: 32px; font-weight: 700; color: #d97706;">${data.totalSaves}</div>
+            <div style="font-size: 12px; color: #6b7280; margin: 4px 0;">Saves</div>
+            <div style="font-size: 12px;">${this.formatChange(data.savesChange)} vs last week</div>
+          </div>
+          <div style="display: table-cell; width: 50%; background: #faf5ff; border-radius: 12px; padding: 16px; text-align: center;">
+            <div style="font-size: 32px; font-weight: 700; color: #7c3aed;">${data.activeListings}</div>
+            <div style="font-size: 12px; color: #6b7280; margin: 4px 0;">Active Listings</div>
+          </div>
+        </div>
+      </div>`;
+
+      // Build top property section HTML
+      const topPropertySection = data.topPerformingProperty ? `
+      <div style="margin-top: 24px; background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%); border-radius: 12px; padding: 16px;">
+        <div style="display: flex; align-items: center; margin-bottom: 8px;">
+          <span style="font-size: 18px; margin-right: 8px;">🏆</span>
+          <span style="font-weight: 600; color: #92400e;">Top Performing Property</span>
+        </div>
+        <div style="color: #374151; font-weight: 600; font-size: 14px;">${escapeHtml(data.topPerformingProperty.title)}</div>
+        <div style="color: #6b7280; font-size: 12px; margin-top: 2px;">${escapeHtml(data.topPerformingProperty.address)}</div>
+        <div style="display: flex; gap: 16px; margin-top: 8px;">
+          <span style="font-size: 12px; color: #6b7280;">👁 ${data.topPerformingProperty.views} views</span>
+          <span style="font-size: 12px; color: #6b7280;">💬 ${data.topPerformingProperty.inquiries} inquiries</span>
+        </div>
+      </div>` : '';
+
+      const variables: Record<string, string> = {
+        userName:        escapeHtml(data.userName) || 'there',
+        period:          escapeHtml(data.period),
+        totalViews:      data.totalViews.toLocaleString(),
+        viewsChange:     this.formatChange(data.viewsChange),
+        totalInquiries:  String(data.totalInquiries),
+        inquiriesChange: this.formatChange(data.inquiriesChange),
+        totalSaves:      String(data.totalSaves),
+        savesChange:     this.formatChange(data.savesChange),
+        activeListings:  String(data.activeListings),
+        statsSection,
+        topPropertySection,
+        frontendUrl,
+      };
+
+      const { html, subject } = await renderEmailWithSiteSettings(config, variables);
+      await this.sendEmail({ to: data.email, subject, html, category: config.fromCategory as any });
+      return;
+    }
+
+    // ── Fallback: inline HTML (used if template is missing or disabled) ──
     // Sanitize user inputs
     const safeUserName = escapeHtml(data.userName);
     const safePeriod = escapeHtml(data.period);
@@ -542,6 +613,87 @@ class EmailService {
       return;
     }
 
+    const frontendUrl = process.env.FRONTEND_URL || 'https://balkanestate.com';
+
+    // Try admin-editable template first
+    const agencyConfig = await getActiveEmailConfig('agency-weekly-stats');
+    if (agencyConfig) {
+      const statsSection = `
+      <div style="background: linear-gradient(135deg, #f5f3ff 0%, #ede9fe 100%); border-radius: 12px; padding: 16px; margin-bottom: 16px;">
+        <div style="font-weight: 600; color: #5b21b6; margin-bottom: 12px;">📍 Agency Profile Performance</div>
+        <div style="display: table; width: 100%;">
+          <div style="display: table-row;">
+            <div style="display: table-cell; width: 50%; text-align: center; padding: 8px;">
+              <div style="font-size: 28px; font-weight: 700; color: #7c3aed;">${data.profileViews.toLocaleString()}</div>
+              <div style="font-size: 11px; color: #6b7280;">Profile Views</div>
+              <div style="font-size: 11px;">${this.formatChange(data.profileViewsChange)}</div>
+            </div>
+            <div style="display: table-cell; width: 50%; text-align: center; padding: 8px;">
+              <div style="font-size: 28px; font-weight: 700; color: #7c3aed;">${data.uniqueProfileViews.toLocaleString()}</div>
+              <div style="font-size: 11px; color: #6b7280;">Unique Visitors</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div style="display: table; width: 100%; border-collapse: separate; border-spacing: 8px;">
+        <div style="display: table-row;">
+          <div style="display: table-cell; width: 33%; background: #f0f9ff; border-radius: 12px; padding: 12px; text-align: center;">
+            <div style="font-size: 24px; font-weight: 700; color: #0369a1;">${data.totalAgents}</div>
+            <div style="font-size: 11px; color: #6b7280;">Agents</div>
+          </div>
+          <div style="display: table-cell; width: 33%; background: #f0fdf4; border-radius: 12px; padding: 12px; text-align: center;">
+            <div style="font-size: 24px; font-weight: 700; color: #16a34a;">${data.activeListings}</div>
+            <div style="font-size: 11px; color: #6b7280;">Active Listings</div>
+          </div>
+          <div style="display: table-cell; width: 33%; background: #fef3c7; border-radius: 12px; padding: 12px; text-align: center;">
+            <div style="font-size: 24px; font-weight: 700; color: #d97706;">${data.totalInquiries}</div>
+            <div style="font-size: 11px; color: #6b7280;">Inquiries</div>
+            <div style="font-size: 10px;">${this.formatChange(data.inquiriesChange)}</div>
+          </div>
+        </div>
+      </div>`;
+      const topAgentSection = data.topAgent ? `
+      <div style="margin-top: 16px; background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%); border-radius: 12px; padding: 16px;">
+        <div style="display: flex; align-items: center; margin-bottom: 8px;">
+          <span style="font-size: 18px; margin-right: 8px;">⭐</span>
+          <span style="font-weight: 600; color: #92400e;">Top Performing Agent</span>
+        </div>
+        <div style="color: #374151; font-weight: 600; font-size: 14px;">${escapeHtml(data.topAgent.name)}</div>
+        <div style="display: flex; gap: 16px; margin-top: 8px;">
+          <span style="font-size: 12px; color: #6b7280;">👁 ${data.topAgent.views} views</span>
+          <span style="font-size: 12px; color: #6b7280;">💬 ${data.topAgent.inquiries} inquiries</span>
+        </div>
+      </div>` : '';
+      const topPropertySection = data.topProperty ? `
+      <div style="margin-top: 16px; background: linear-gradient(135deg, #dcfce7 0%, #bbf7d0 100%); border-radius: 12px; padding: 16px;">
+        <div style="display: flex; align-items: center; margin-bottom: 8px;">
+          <span style="font-size: 18px; margin-right: 8px;">🏠</span>
+          <span style="font-weight: 600; color: #166534;">Top Property</span>
+        </div>
+        <div style="color: #374151; font-weight: 600; font-size: 14px;">${escapeHtml(data.topProperty.title)}</div>
+        <div style="font-size: 12px; color: #6b7280; margin-top: 4px;">👁 ${data.topProperty.views} views this week</div>
+      </div>` : '';
+      const variables: Record<string, string> = {
+        agencyName:         escapeHtml(data.agencyName) || 'there',
+        period:             escapeHtml(data.period),
+        profileViews:       data.profileViews.toLocaleString(),
+        profileViewsChange: this.formatChange(data.profileViewsChange),
+        totalAgents:        String(data.totalAgents),
+        totalListings:      String(data.totalListings),
+        activeListings:     String(data.activeListings),
+        totalInquiries:     String(data.totalInquiries),
+        inquiriesChange:    this.formatChange(data.inquiriesChange),
+        statsSection,
+        topAgentSection,
+        topPropertySection,
+        frontendUrl,
+      };
+      const { html, subject } = await renderEmailWithSiteSettings(agencyConfig, variables);
+      await this.sendEmail({ to: data.email, subject, html, category: agencyConfig.fromCategory as any });
+      return;
+    }
+
+    // ── Fallback: inline HTML (used if template is missing or disabled) ──
     // Sanitize user inputs
     const safeAgencyName = escapeHtml(data.agencyName);
     const safePeriod = escapeHtml(data.period);
@@ -673,6 +825,26 @@ class EmailService {
       return;
     }
 
+    const frontendUrl = process.env.FRONTEND_URL || 'https://balkanestate.com';
+
+    // Try admin-editable template first
+    const msgConfig = await getActiveEmailConfig('new-message');
+    if (msgConfig) {
+      const variables: Record<string, string> = {
+        recipientName:   escapeHtml(params.recipientName) || 'there',
+        senderName:      escapeHtml(params.senderName),
+        messagePreview:  escapeHtml(params.messagePreview),
+        propertyTitle:   escapeHtml(params.propertyTitle),
+        propertyAddress: escapeHtml(params.propertyAddress),
+        conversationUrl: sanitizeUrlForHtml(params.conversationUrl),
+        frontendUrl,
+      };
+      const { html, subject } = await renderEmailWithSiteSettings(msgConfig, variables);
+      await this.sendEmail({ to: params.recipientEmail, subject, html, category: msgConfig.fromCategory as any });
+      return;
+    }
+
+    // ── Fallback: inline HTML (used if template is missing or disabled) ──
     // Sanitize all user inputs
     const safeSenderName = escapeHtml(params.senderName);
     const safeMessagePreview = escapeHtml(params.messagePreview);
@@ -749,10 +921,26 @@ class EmailService {
   }
 
   async sendWelcomeCoupon(email: string, agencyName: string, couponCode: string, expiryDate: Date): Promise<void> {
-    const safeAgencyName = escapeHtml(agencyName);
-    const safeCouponCode = escapeHtml(couponCode);
     const expiryDateStr = expiryDate.toLocaleDateString();
     const frontendUrl = process.env.FRONTEND_URL || 'https://balkanestate.com';
+
+    // Try admin-editable template first
+    const config = await getActiveEmailConfig('welcome-coupon');
+    if (config) {
+      const variables: Record<string, string> = {
+        agencyName:  escapeHtml(agencyName),
+        couponCode:  escapeHtml(couponCode),
+        expiryDate:  expiryDateStr,
+        frontendUrl,
+      };
+      const { html, subject } = await renderEmailWithSiteSettings(config, variables);
+      await this.sendEmail({ to: email, subject, html, category: config.fromCategory as any });
+      return;
+    }
+
+    // ── Fallback: inline HTML (used if template is missing or disabled) ──
+    const safeAgencyName = escapeHtml(agencyName);
+    const safeCouponCode = escapeHtml(couponCode);
 
     const html = getPromoTemplate({
       title: '1 Week FREE Featured Listing',
@@ -778,10 +966,27 @@ class EmailService {
   }
 
   async sendExpiryReminder(email: string, agencyName: string, expiryDate: Date, couponCode: string, discount: number): Promise<void> {
-    const safeAgencyName = escapeHtml(agencyName);
-    const safeCouponCode = escapeHtml(couponCode);
     const expiryDateStr = expiryDate.toLocaleDateString();
     const frontendUrl = process.env.FRONTEND_URL || 'https://balkanestate.com';
+
+    // Try admin-editable template first
+    const config = await getActiveEmailConfig('expiry-reminder');
+    if (config) {
+      const variables: Record<string, string> = {
+        agencyName:  escapeHtml(agencyName),
+        expiryDate:  expiryDateStr,
+        couponCode:  escapeHtml(couponCode),
+        discount:    String(discount),
+        frontendUrl,
+      };
+      const { html, subject } = await renderEmailWithSiteSettings(config, variables);
+      await this.sendEmail({ to: email, subject, html, category: config.fromCategory as any });
+      return;
+    }
+
+    // ── Fallback: inline HTML (used if template is missing or disabled) ──
+    const safeAgencyName = escapeHtml(agencyName);
+    const safeCouponCode = escapeHtml(couponCode);
 
     const html = getPromoTemplate({
       title: `${discount}% OFF Renewal`,
@@ -808,10 +1013,27 @@ class EmailService {
   }
 
   async sendSubscriptionConfirmation(email: string, agencyName: string, details: { interval: string; price: number; endDate: Date }): Promise<void> {
-    const safeAgencyName = escapeHtml(agencyName);
-    const safeInterval = escapeHtml(details.interval);
     const renewsDate = details.endDate.toLocaleDateString();
     const frontendUrl = process.env.FRONTEND_URL || 'https://balkanestate.com';
+
+    // Try admin-editable template first
+    const config = await getActiveEmailConfig('subscription-confirmation');
+    if (config) {
+      const variables: Record<string, string> = {
+        agencyName:  escapeHtml(agencyName),
+        interval:    escapeHtml(details.interval),
+        price:       String(details.price),
+        renewsDate,
+        frontendUrl,
+      };
+      const { html, subject } = await renderEmailWithSiteSettings(config, variables);
+      await this.sendEmail({ to: email, subject, html, category: config.fromCategory as any });
+      return;
+    }
+
+    // ── Fallback: inline HTML (used if template is missing or disabled) ──
+    const safeAgencyName = escapeHtml(agencyName);
+    const safeInterval = escapeHtml(details.interval);
 
     const html = getPromoTemplate({
       title: 'Featured Listing Activated!',
@@ -865,6 +1087,59 @@ class EmailService {
 
     const frontendUrl = process.env.FRONTEND_URL || 'https://balkanestate.com';
 
+    // Try admin-editable template first
+    const alertConfig = await getActiveEmailConfig('property-alert');
+    if (alertConfig) {
+      const safeImgUrl = sanitizeUrlForHtml(params.property.imageUrl);
+      const safePropId = encodeURIComponent(params.property.id);
+      // Build the property card HTML
+      const propertyCard = `
+      <div style="border: 1px solid #e5e7eb; border-radius: 12px; overflow: hidden; margin-bottom: 20px; box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);">
+        ${safeImgUrl ? `<img src="${safeImgUrl}" alt="${escapeHtml(params.property.title)}" style="width: 100%; height: 180px; object-fit: cover;">` : '<div style="width: 100%; height: 120px; background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%); display: flex; align-items: center; justify-content: center;"><span style="font-size: 48px;">🏠</span></div>'}
+        <div style="padding: 16px;">
+          <div style="font-weight: 700; color: #1f2937; font-size: 17px; margin-bottom: 6px;">${escapeHtml(params.property.title)}</div>
+          <div style="font-size: 13px; color: #6b7280; margin-bottom: 12px;">📍 ${escapeHtml(params.property.address)}, ${escapeHtml(params.property.city)}</div>
+          <div style="font-size: 28px; font-weight: 700; color: #059669; margin-bottom: 14px;">€${params.property.price.toLocaleString()}</div>
+          <div style="display: table; width: 100%; background: #f9fafb; border-radius: 8px; padding: 10px;">
+            <div style="display: table-row;">
+              <div style="display: table-cell; text-align: center; padding: 4px;">
+                <div style="font-size: 16px; font-weight: 600; color: #374151;">${params.property.beds}</div>
+                <div style="font-size: 11px; color: #6b7280;">Beds</div>
+              </div>
+              <div style="display: table-cell; text-align: center; padding: 4px; border-left: 1px solid #e5e7eb; border-right: 1px solid #e5e7eb;">
+                <div style="font-size: 16px; font-weight: 600; color: #374151;">${params.property.baths}</div>
+                <div style="font-size: 11px; color: #6b7280;">Baths</div>
+              </div>
+              <div style="display: table-cell; text-align: center; padding: 4px;">
+                <div style="font-size: 16px; font-weight: 600; color: #374151;">${params.property.sqft.toLocaleString()}</div>
+                <div style="font-size: 11px; color: #6b7280;">Sqft</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>`;
+
+      const variables: Record<string, string> = {
+        recipientName: escapeHtml(params.recipientName) || 'there',
+        searchName:    escapeHtml(params.searchName),
+        propertyTitle: escapeHtml(params.property.title),
+        propertyAddress: escapeHtml(params.property.address),
+        propertyCity:  escapeHtml(params.property.city),
+        propertyPrice: `€${params.property.price.toLocaleString()}`,
+        propertyBeds:  String(params.property.beds),
+        propertyBaths: String(params.property.baths),
+        propertySqft:  params.property.sqft.toLocaleString(),
+        propertyCard,
+        propertyId:    safePropId,
+        frontendUrl,
+      };
+
+      const { html, subject } = await renderEmailWithSiteSettings(alertConfig, variables);
+      await this.sendEmail({ to: params.recipientEmail, subject, html, category: alertConfig.fromCategory as any });
+      return;
+    }
+
+    // ── Fallback: inline HTML (used if template is missing or disabled) ──
     // Sanitize all user inputs
     const safeRecipientName = escapeHtml(params.recipientName);
     const safeSearchName = escapeHtml(params.searchName);
@@ -1013,6 +1288,29 @@ class EmailService {
     `;
     }).join('');
 
+    // Try DB-driven template first
+    const config = await getActiveEmailConfig('new-listings-digest');
+    if (config) {
+      const variables: Record<string, string> = {
+        recipientName: escapeHtml(params.recipientName),
+        searchName: escapeHtml(params.searchName),
+        propertyCount: String(params.properties.length),
+        frequencyLabel,
+        propertyCards,
+        frontendUrl,
+      };
+      const { html: renderedHtml, subject: renderedSubject } = await renderEmailWithSiteSettings(config, variables);
+      await this.sendEmail({
+        to: params.recipientEmail,
+        subject: renderedSubject,
+        html: renderedHtml,
+        text: `${params.properties.length} new properties match your saved search "${params.searchName}"`,
+        category: config.fromCategory as any,
+      });
+      return;
+    }
+
+    // ── Fallback: inline HTML (used if template is missing or disabled) ──
     const html = `
 <!DOCTYPE html>
 <html>
@@ -1124,6 +1422,87 @@ class EmailService {
       ? '0 4px 14px rgba(245, 158, 11, 0.4)'
       : '0 4px 14px rgba(239, 68, 68, 0.4)';
 
+    // Build property card HTML for DB template
+    const safePropertyTitle = escapeHtml(params.property.title);
+    const safePropertyAddress = escapeHtml(params.property.address);
+    const safePropertyCity = escapeHtml(params.property.city);
+    const safePropertyImageUrl = sanitizeUrlForHtml(params.property.imageUrl);
+    const propertyCard = `
+      <div style="border: 1px solid #e5e7eb; border-radius: 12px; overflow: hidden; margin-bottom: 20px; box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);">
+        ${safePropertyImageUrl ? `<img src="${safePropertyImageUrl}" alt="${safePropertyTitle}" style="width: 100%; height: 180px; object-fit: cover;">` : '<div style="width: 100%; height: 120px; background: linear-gradient(135deg, #fef2f2 0%, #fecaca 100%); display: flex; align-items: center; justify-content: center;"><span style="font-size: 48px;">🏠</span></div>'}
+        <div style="padding: 16px;">
+          <div style="font-weight: 700; color: #1f2937; font-size: 17px; margin-bottom: 6px;">${safePropertyTitle}</div>
+          <div style="font-size: 13px; color: #6b7280; margin-bottom: 16px;">📍 ${safePropertyAddress}, ${safePropertyCity}</div>
+          <div style="background: ${priceBoxBg}; border-radius: 10px; padding: 16px; margin-bottom: 16px;">
+            <div style="display: table; width: 100%;">
+              <div style="display: table-cell; text-align: center; width: 40%;">
+                <div style="font-size: 11px; color: #9ca3af; text-transform: uppercase; margin-bottom: 4px;">Was</div>
+                <div style="font-size: 18px; color: #9ca3af; text-decoration: line-through;">€${params.property.previousPrice.toLocaleString()}</div>
+              </div>
+              <div style="display: table-cell; text-align: center; width: 20%; vertical-align: middle;">
+                <div style="font-size: 24px; color: ${arrowColor};">→</div>
+              </div>
+              <div style="display: table-cell; text-align: center; width: 40%;">
+                <div style="font-size: 11px; color: ${nowColor}; text-transform: uppercase; margin-bottom: 4px; font-weight: 600;">Now</div>
+                <div style="font-size: 24px; font-weight: 700; color: ${nowColor};">€${params.property.newPrice.toLocaleString()}</div>
+              </div>
+            </div>
+          </div>
+          <div style="display: table; width: 100%; background: #f9fafb; border-radius: 8px; padding: 10px;">
+            <div style="display: table-row;">
+              <div style="display: table-cell; text-align: center; padding: 4px;">
+                <div style="font-size: 16px; font-weight: 600; color: #374151;">${params.property.beds}</div>
+                <div style="font-size: 11px; color: #6b7280;">Beds</div>
+              </div>
+              <div style="display: table-cell; text-align: center; padding: 4px; border-left: 1px solid #e5e7eb; border-right: 1px solid #e5e7eb;">
+                <div style="font-size: 16px; font-weight: 600; color: #374151;">${params.property.baths}</div>
+                <div style="font-size: 11px; color: #6b7280;">Baths</div>
+              </div>
+              <div style="display: table-cell; text-align: center; padding: 4px;">
+                <div style="font-size: 16px; font-weight: 600; color: #374151;">${params.property.sqft.toLocaleString()}</div>
+                <div style="font-size: 11px; color: #6b7280;">Sqft</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>`;
+
+    // Try DB-driven template first
+    const config = await getActiveEmailConfig('price-drop-alert');
+    if (config) {
+      const variables: Record<string, string> = {
+        recipientName: escapeHtml(params.recipientName),
+        propertyTitle: safePropertyTitle,
+        propertyAddress: safePropertyAddress,
+        propertyCity: safePropertyCity,
+        previousPrice: `€${params.property.previousPrice.toLocaleString()}`,
+        newPrice: `€${params.property.newPrice.toLocaleString()}`,
+        priceDiff: `€${priceDiff.toLocaleString()}`,
+        percentageDrop: String(params.property.percentageDrop),
+        isIncrease: isIncrease ? 'true' : 'false',
+        badgeText,
+        headlineText,
+        subHeadline,
+        propertyCard,
+        propertyId: params.property.id,
+        frontendUrl,
+        urgencyText,
+        ctaText,
+      };
+      const { html: renderedHtml, subject: renderedSubject } = await renderEmailWithSiteSettings(config, variables);
+      await this.sendEmail({
+        to: params.recipientEmail,
+        subject: renderedSubject,
+        html: renderedHtml,
+        text: isIncrease
+          ? `Price increased ${params.property.percentageDrop}% on ${params.property.title}`
+          : `Price dropped ${params.property.percentageDrop}%! Save €${priceDiff.toLocaleString()} on ${params.property.title}`,
+        category: config.fromCategory as any,
+      });
+      return;
+    }
+
+    // ── Fallback: inline HTML (used if template is missing or disabled) ──
     const html = `
 <!DOCTYPE html>
 <html>
@@ -1310,6 +1689,84 @@ class EmailService {
       ? '0 4px 14px rgba(245, 158, 11, 0.4)'
       : '0 4px 14px rgba(239, 68, 68, 0.4)';
 
+    // Build property card HTML for DB template
+    const propertyCard = `
+      <div style="border: 1px solid #e5e7eb; border-radius: 12px; overflow: hidden; margin-bottom: 20px; box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);">
+        ${safeImageUrl ? `<img src="${safeImageUrl}" alt="${safeTitle}" style="width: 100%; height: 180px; object-fit: cover;">` : '<div style="width: 100%; height: 120px; background: linear-gradient(135deg, #fef2f2 0%, #fecaca 100%); display: flex; align-items: center; justify-content: center;"><span style="font-size: 48px;">🏠</span></div>'}
+        <div style="padding: 16px;">
+          <div style="font-weight: 700; color: #1f2937; font-size: 17px; margin-bottom: 6px;">${safeTitle}</div>
+          <div style="font-size: 13px; color: #6b7280; margin-bottom: 16px;">📍 ${safeAddress}, ${safeCity}</div>
+          <div style="background: ${priceBoxBg}; border-radius: 10px; padding: 16px; margin-bottom: 16px;">
+            <div style="display: table; width: 100%;">
+              <div style="display: table-cell; text-align: center; width: 40%;">
+                <div style="font-size: 11px; color: #9ca3af; text-transform: uppercase; margin-bottom: 4px;">Was</div>
+                <div style="font-size: 18px; color: #9ca3af; text-decoration: line-through;">€${params.property.previousPrice.toLocaleString()}</div>
+              </div>
+              <div style="display: table-cell; text-align: center; width: 20%; vertical-align: middle;">
+                <div style="font-size: 24px; color: ${arrowColor};">→</div>
+              </div>
+              <div style="display: table-cell; text-align: center; width: 40%;">
+                <div style="font-size: 11px; color: ${nowColor}; text-transform: uppercase; margin-bottom: 4px; font-weight: 600;">Now</div>
+                <div style="font-size: 24px; font-weight: 700; color: ${nowColor};">€${params.property.newPrice.toLocaleString()}</div>
+              </div>
+            </div>
+          </div>
+          <div style="display: table; width: 100%; background: #f9fafb; border-radius: 8px; padding: 10px;">
+            <div style="display: table-row;">
+              <div style="display: table-cell; text-align: center; padding: 4px;">
+                <div style="font-size: 16px; font-weight: 600; color: #374151;">${params.property.beds}</div>
+                <div style="font-size: 11px; color: #6b7280;">Beds</div>
+              </div>
+              <div style="display: table-cell; text-align: center; padding: 4px; border-left: 1px solid #e5e7eb; border-right: 1px solid #e5e7eb;">
+                <div style="font-size: 16px; font-weight: 600; color: #374151;">${params.property.baths}</div>
+                <div style="font-size: 11px; color: #6b7280;">Baths</div>
+              </div>
+              <div style="display: table-cell; text-align: center; padding: 4px;">
+                <div style="font-size: 16px; font-weight: 600; color: #374151;">${params.property.sqft.toLocaleString()}</div>
+                <div style="font-size: 11px; color: #6b7280;">Sqft</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>`;
+
+    // Try DB-driven template first
+    const config = await getActiveEmailConfig('saved-search-price-drop');
+    if (config) {
+      const variables: Record<string, string> = {
+        recipientName: safeRecipientName,
+        searchName: safeSearchName,
+        propertyTitle: safeTitle,
+        propertyAddress: safeAddress,
+        propertyCity: safeCity,
+        previousPrice: `€${params.property.previousPrice.toLocaleString()}`,
+        newPrice: `€${params.property.newPrice.toLocaleString()}`,
+        priceDiff: `€${priceDiff.toLocaleString()}`,
+        percentageDrop: String(params.property.percentageDrop),
+        isIncrease: isIncrease ? 'true' : 'false',
+        badgeText,
+        headlineText,
+        subHeadline,
+        propertyCard,
+        propertyId: params.property.id,
+        frontendUrl,
+        urgencyText,
+        ctaText,
+      };
+      const { html: renderedHtml, subject: renderedSubject } = await renderEmailWithSiteSettings(config, variables);
+      await this.sendEmail({
+        to: params.recipientEmail,
+        subject: renderedSubject,
+        html: renderedHtml,
+        text: isIncrease
+          ? `Price up ${params.property.percentageDrop}% on ${params.property.title} (from "${params.searchName}")`
+          : `Price dropped ${params.property.percentageDrop}%! Save €${priceDiff.toLocaleString()} on ${params.property.title}`,
+        category: config.fromCategory as any,
+      });
+      return;
+    }
+
+    // ── Fallback: inline HTML (used if template is missing or disabled) ──
     const html = `
 <!DOCTYPE html>
 <html>
@@ -1434,6 +1891,22 @@ class EmailService {
    */
   async sendSubscriptionRenewalReminder(email: string, userName: string, expiryDate: Date, planName: string): Promise<void> {
     const frontendUrl = process.env.FRONTEND_URL || 'https://balkanestate.com';
+
+    // Try admin-editable template first
+    const config = await getActiveEmailConfig('subscription-renewal-reminder');
+    if (config) {
+      const variables: Record<string, string> = {
+        userName:    escapeHtml(userName) || 'there',
+        planName:    escapeHtml(planName),
+        expiryDate:  expiryDate.toLocaleDateString(),
+        frontendUrl,
+      };
+      const { html, subject } = await renderEmailWithSiteSettings(config, variables);
+      await this.sendEmail({ to: email, subject, html, category: config.fromCategory as any });
+      return;
+    }
+
+    // Fallback: inline HTML
     const html = `
       <html>
         <body style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
@@ -1471,6 +1944,21 @@ class EmailService {
     const frontendUrl = process.env.FRONTEND_URL || 'https://balkanestate.com';
     const formattedDate = renewalDate.toLocaleDateString();
 
+    // Try admin-editable template first
+    const config = await getActiveEmailConfig('auto-renewal-reminder');
+    if (config) {
+      const variables: Record<string, string> = {
+        userName:    escapeHtml(userName) || 'there',
+        planName:    escapeHtml(planName),
+        renewalDate: formattedDate,
+        frontendUrl,
+      };
+      const { html, subject } = await renderEmailWithSiteSettings(config, variables);
+      await this.sendEmail({ to: email, subject, html, category: config.fromCategory as any });
+      return;
+    }
+
+    // Fallback: inline HTML
     const html = `
       <html>
         <body style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background-color: #f9fafb;">
@@ -1542,6 +2030,24 @@ class EmailService {
     transactionId?: string;
   }): Promise<void> {
     const frontendUrl = process.env.FRONTEND_URL || 'https://balkanestate.com';
+
+    // Try admin-editable template first
+    const config = await getActiveEmailConfig('payment-confirmation');
+    if (config) {
+      const variables: Record<string, string> = {
+        userName:      escapeHtml(userName) || 'there',
+        planName:      escapeHtml(details.planName),
+        amount:        `${details.currency}${details.amount.toFixed(2)}`,
+        expiresAt:     details.expiresAt.toLocaleDateString(),
+        transactionId: escapeHtml(details.transactionId) || '',
+        frontendUrl,
+      };
+      const { html, subject } = await renderEmailWithSiteSettings(config, variables);
+      await this.sendEmail({ to: email, subject, html, category: config.fromCategory as any });
+      return;
+    }
+
+    // Fallback: inline HTML
     const html = `
       <html>
         <body style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
@@ -1578,6 +2084,22 @@ class EmailService {
     expiresAt: Date;
   }): Promise<void> {
     const frontendUrl = process.env.FRONTEND_URL || 'https://balkanestate.com';
+
+    // Try admin-editable template first
+    const config = await getActiveEmailConfig('subscription-cancelled');
+    if (config) {
+      const variables: Record<string, string> = {
+        userName:  escapeHtml(userName) || 'there',
+        planName:  escapeHtml(details.planName),
+        expiresAt: details.expiresAt.toLocaleDateString(),
+        frontendUrl,
+      };
+      const { html, subject } = await renderEmailWithSiteSettings(config, variables);
+      await this.sendEmail({ to: email, subject, html, category: config.fromCategory as any });
+      return;
+    }
+
+    // Fallback: inline HTML
     const html = `
       <html>
         <body style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
@@ -1624,6 +2146,26 @@ class EmailService {
     const billingText = details.billingPeriod === 'yearly' ? 'year' : 'month';
     const renewalDate = new Date(details.nextBillingDate);
 
+    // Try admin-editable template first
+    const config = await getActiveEmailConfig('subscription-invoice');
+    if (config) {
+      const variables: Record<string, string> = {
+        userName:        escapeHtml(userName) || 'there',
+        planName:        escapeHtml(details.planName),
+        amount:          `${currencySymbol}${details.amount.toFixed(2)}`,
+        billingPeriod:   billingText,
+        orderId:         escapeHtml(details.orderId),
+        startDate:       details.subscriptionStartDate.toLocaleDateString(),
+        nextBillingDate: renewalDate.toLocaleDateString(),
+        autoRenewStatus: details.autoRenewing ? 'On' : 'Off',
+        frontendUrl,
+      };
+      const { html, subject } = await renderEmailWithSiteSettings(config, variables);
+      await this.sendEmail({ to: email, subject, html, category: config.fromCategory as any });
+      return;
+    }
+
+    // Fallback: inline HTML
     const html = `
       <html>
         <body style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background-color: #f9fafb;">
@@ -1734,6 +2276,24 @@ class EmailService {
     reason?: string;
     transactionId?: string;
   }): Promise<void> {
+    const frontendUrl = process.env.FRONTEND_URL || 'https://balkanestate.com';
+
+    // Try admin-editable template first
+    const config = await getActiveEmailConfig('refund-notification');
+    if (config) {
+      const variables: Record<string, string> = {
+        userName:      escapeHtml(userName) || 'there',
+        amount:        `${details.currency}${details.amount.toFixed(2)}`,
+        reason:        escapeHtml(details.reason) || '',
+        transactionId: escapeHtml(details.transactionId) || '',
+        frontendUrl,
+      };
+      const { html, subject } = await renderEmailWithSiteSettings(config, variables);
+      await this.sendEmail({ to: email, subject, html, category: config.fromCategory as any });
+      return;
+    }
+
+    // Fallback: inline HTML
     const html = `
       <html>
         <body style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
@@ -1776,6 +2336,27 @@ class EmailService {
   }): Promise<void> {
     const frontendUrl = process.env.FRONTEND_URL || 'https://balkanestateai.com';
 
+    // Try admin-editable template first
+    const inquiryConfig = await getActiveEmailConfig('agent-inquiry');
+    if (inquiryConfig) {
+      const safePropertyIdEnc = params.propertyId ? encodeURIComponent(params.propertyId) : '';
+      const inquiryUrl = safePropertyIdEnc ? `${frontendUrl}/property/${safePropertyIdEnc}` : '';
+      const variables: Record<string, string> = {
+        agentName:       escapeHtml(params.agentName) || 'there',
+        buyerName:       escapeHtml(params.buyerName),
+        buyerEmail:      escapeHtml(params.buyerEmail),
+        propertyTitle:   escapeHtml(params.propertyTitle) || '',
+        propertyAddress: escapeHtml(params.location) || '',
+        inquiryMessage:  escapeHtml(params.message),
+        inquiryUrl,
+        frontendUrl,
+      };
+      const { html, subject } = await renderEmailWithSiteSettings(inquiryConfig, variables);
+      await this.sendEmail({ to: params.agentEmail, subject, html, category: inquiryConfig.fromCategory as any });
+      return;
+    }
+
+    // ── Fallback: inline HTML (used if template is missing or disabled) ──
     // Sanitize all user inputs - critical for preventing XSS attacks
     const safeAgentName = escapeHtml(params.agentName);
     const safeBuyerName = escapeHtml(params.buyerName);
@@ -1882,6 +2463,22 @@ class EmailService {
     userName: string;
     resetUrl: string;
   }): Promise<void> {
+    const frontendUrl = process.env.FRONTEND_URL || 'https://balkanestateai.com';
+
+    // Try admin-editable template first
+    const config = await getActiveEmailConfig('password-reset');
+    if (config) {
+      const variables: Record<string, string> = {
+        userName:    escapeHtml(params.userName) || 'there',
+        resetUrl:    sanitizeUrlForHtml(params.resetUrl),
+        frontendUrl,
+      };
+      const { html, subject } = await renderEmailWithSiteSettings(config, variables);
+      await this.sendEmail({ to: params.email, subject, html, category: config.fromCategory as any });
+      return;
+    }
+
+    // ── Fallback: inline HTML (used if template is missing or disabled) ──
     // Sanitize user inputs
     const safeUserName = escapeHtml(params.userName);
     const safeResetUrl = sanitizeUrlForHtml(params.resetUrl);
@@ -1989,6 +2586,22 @@ class EmailService {
     userName: string;
     verificationUrl: string;
   }): Promise<void> {
+    const frontendUrl = process.env.FRONTEND_URL || 'https://balkanestateai.com';
+
+    // Try admin-editable template first
+    const config = await getActiveEmailConfig('email-verification');
+    if (config) {
+      const variables: Record<string, string> = {
+        userName:        escapeHtml(params.userName) || 'there',
+        verificationUrl: sanitizeUrlForHtml(params.verificationUrl),
+        frontendUrl,
+      };
+      const { html, subject } = await renderEmailWithSiteSettings(config, variables);
+      await this.sendEmail({ to: params.email, subject, html, category: config.fromCategory as any });
+      return;
+    }
+
+    // ── Fallback: inline HTML (used if template is missing or disabled) ──
     // Sanitize user inputs
     const safeUserName = escapeHtml(params.userName);
     const safeVerificationUrl = sanitizeUrlForHtml(params.verificationUrl);
@@ -2122,6 +2735,20 @@ class EmailService {
     userName: string;
   }): Promise<void> {
     const frontendUrl = process.env.FRONTEND_URL || 'https://balkanestateai.com';
+
+    // Try admin-editable template first
+    const config = await getActiveEmailConfig('welcome-email');
+    if (config) {
+      const variables: Record<string, string> = {
+        userName:    escapeHtml(params.userName) || 'there',
+        frontendUrl,
+      };
+      const { html, subject } = await renderEmailWithSiteSettings(config, variables);
+      await this.sendEmail({ to: params.email, subject, html, category: config.fromCategory as any });
+      return;
+    }
+
+    // ── Fallback: inline HTML (used if template is missing or disabled) ──
     const html = `
 <!DOCTYPE html>
 <html>
@@ -2517,7 +3144,7 @@ Questions? Contact us at support@balkanestateai.com
         frontendUrl,
       };
 
-      let { html, subject } = renderEmailConfig(config, variables);
+      let { html, subject } = await renderEmailWithSiteSettings(config, variables);
 
       // Safety net: if the DB template is missing {{couponCodesList}} and there
       // are codes to show, inject them just before the body closing tag.
@@ -2693,6 +3320,40 @@ Questions? Contact us at support@balkanestateai.com
   }): Promise<void> {
     const frontendUrl = process.env.FRONTEND_URL || 'https://balkanestateai.com';
 
+    // Try admin-editable template first
+    const regConfig = await getActiveEmailConfig('agent-registration-coupons');
+    if (regConfig) {
+      const agentLimit = params.agentListingsLimit ?? 25;
+      // Build coupon rows HTML for the template
+      const couponRowsHtml = params.coupons.map((coupon, index) => `
+      <tr>
+        <td style="padding: 12px 16px; border-bottom: 1px solid #e5e7eb;">
+          <span style="display: inline-block; background: #f3f4f6; padding: 8px 16px; border-radius: 6px; font-family: 'Courier New', monospace; font-weight: 600; font-size: 14px; color: #1f2937; letter-spacing: 1px;">
+            ${escapeHtml(coupon.code)}
+          </span>
+        </td>
+        <td style="padding: 12px 16px; border-bottom: 1px solid #e5e7eb; color: #6b7280; font-size: 13px;">
+          Agent ${index + 1}
+        </td>
+        <td style="padding: 12px 16px; border-bottom: 1px solid #e5e7eb; color: #6b7280; font-size: 13px;">
+          ${coupon.expiresAt.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })}
+        </td>
+      </tr>`).join('');
+
+      const variables: Record<string, string> = {
+        ownerName:          escapeHtml(params.ownerName) || 'there',
+        agencyName:         escapeHtml(params.agencyName),
+        couponCount:        String(params.coupons.length),
+        couponRows:         couponRowsHtml,
+        agentListingsLimit: String(agentLimit),
+        frontendUrl,
+      };
+      const { html, subject } = await renderEmailWithSiteSettings(regConfig, variables);
+      await this.sendEmail({ to: params.email, subject, html, category: regConfig.fromCategory as any });
+      return;
+    }
+
+    // ── Fallback: inline HTML (used if template is missing or disabled) ──
     // Sanitize user inputs
     const safeOwnerName = escapeHtml(params.ownerName);
     const safeAgencyName = escapeHtml(params.agencyName);
@@ -2846,12 +3507,6 @@ Questions? Contact us at support@balkanestateai.com
   }): Promise<void> {
     const frontendUrl = process.env.FRONTEND_URL || 'https://balkanestateai.com';
 
-    // Sanitize user inputs
-    const safeOwnerName = escapeHtml(params.ownerName);
-    const safeAgencyName = escapeHtml(params.agencyName);
-
-    const currentYear = new Date().getFullYear();
-
     // Default values if not provided
     const listingsLimit = params.listingsLimit || 750;
     const teamMembersLimit = params.teamMembersLimit || 5;
@@ -2862,9 +3517,41 @@ Questions? Contact us at support@balkanestateai.com
       highlighted: 2,
       featured: 1,
     };
-
-    // Create promotion coupons breakdown string
     const couponBreakdown = `${promotionCoupons.premium} Premium + ${promotionCoupons.highlighted} Highlighted + ${promotionCoupons.featured} Featured`;
+
+    // Try admin-editable template first
+    const config = await getActiveEmailConfig('enterprise-welcome');
+    if (config) {
+      const checkRow = (label: string) =>
+        `<tr><td style="padding:8px 0;"><span style="display:inline-block;width:28px;height:28px;background:#059669;border-radius:50%;text-align:center;line-height:28px;font-size:14px;color:white;">&#10003;</span><span style="color:#e2e8f0;font-size:14px;margin-left:12px;">${label}</span></td></tr>`;
+      const benefitsSection = [
+        checkRow(`<strong>${listingsLimit} Listings</strong> - Expandable as you grow`),
+        checkRow(`<strong>${agentCoupons} Agent Coupons</strong> - Each with yearly Pro subscription`),
+        checkRow(`<strong>${promotionCoupons.total} Monthly Promotion Coupons</strong>`),
+        `<tr><td style="padding:8px 0;padding-left:40px;"><span style="color:#cbd5e1;font-size:13px;">${couponBreakdown}</span></td></tr>`,
+        checkRow(`<strong>Up to ${teamMembersLimit} Team Members</strong>`),
+        checkRow(`<strong>Priority Support</strong> - We're here when you need us`),
+        checkRow(`<strong>Agency Branding</strong> - Your brand, front and center`),
+      ].join('');
+
+      const couponCodesList = buildCouponCodesHtml([]);
+
+      const variables: Record<string, string> = {
+        ownerName:       escapeHtml(params.ownerName),
+        agencyName:      escapeHtml(params.agencyName),
+        benefitsSection,
+        couponCodesList,
+        frontendUrl,
+      };
+      const { html, subject } = await renderEmailWithSiteSettings(config, variables);
+      await this.sendEmail({ to: params.email, subject, html, category: config.fromCategory as any });
+      return;
+    }
+
+    // ── Fallback: inline HTML (used if template is missing or disabled) ──
+    const safeOwnerName = escapeHtml(params.ownerName);
+    const safeAgencyName = escapeHtml(params.agencyName);
+    const currentYear = new Date().getFullYear();
 
     const html = `
 <!DOCTYPE html>
@@ -3033,6 +3720,30 @@ Questions? Contact us at support@balkanestateai.com
     const currentYear = new Date().getFullYear();
     const expiryDate = params.expiresAt.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
 
+    // Try DB-driven template first
+    const config = await getActiveEmailConfig('agent-joined-agency');
+    if (config) {
+      const variables: Record<string, string> = {
+        agentName: safeAgentName,
+        agencyName: safeAgencyName,
+        agencyId: params.agencyId,
+        subscriptionTier: escapeHtml(params.subscriptionTier),
+        listingsLimit: String(params.listingsLimit),
+        expiryDate,
+        frontendUrl,
+      };
+      const { html: renderedHtml, subject: renderedSubject } = await renderEmailWithSiteSettings(config, variables);
+      await this.sendEmail({
+        to: params.agentEmail,
+        subject: renderedSubject,
+        html: renderedHtml,
+        text: `Hello ${params.agentName}! You've successfully joined ${params.agencyName} and your Pro subscription is now active.`,
+        category: config.fromCategory as any,
+      });
+      return;
+    }
+
+    // ── Fallback: inline HTML (used if template is missing or disabled) ──
     const html = `
 <!DOCTYPE html>
 <html>
@@ -3175,6 +3886,31 @@ Questions? Contact us at support@balkanestateai.com
 
     const currentYear = new Date().getFullYear();
 
+    // Try DB-driven template first
+    const config = await getActiveEmailConfig('agency-new-member');
+    if (config) {
+      const variables: Record<string, string> = {
+        ownerName: safeOwnerName,
+        agencyName: safeAgencyName,
+        agencyId: params.agencyId,
+        newAgentName: safeNewAgentName,
+        newAgentEmail: safeNewAgentEmail,
+        couponCode: safeCouponCode,
+        totalAgents: String(params.totalAgents),
+        frontendUrl,
+      };
+      const { html: renderedHtml, subject: renderedSubject } = await renderEmailWithSiteSettings(config, variables);
+      await this.sendEmail({
+        to: params.ownerEmail,
+        subject: renderedSubject,
+        html: renderedHtml,
+        text: `Hello ${params.ownerName}! A new agent (${params.newAgentName}) has joined your agency ${params.agencyName}.`,
+        category: config.fromCategory as any,
+      });
+      return;
+    }
+
+    // ── Fallback: inline HTML (used if template is missing or disabled) ──
     const html = `
 <!DOCTYPE html>
 <html>
@@ -3303,13 +4039,33 @@ Questions? Contact us at support@balkanestateai.com
     sellerName: string;
     propertyId: string;
   }): Promise<void> {
+    const frontendUrl = process.env.FRONTEND_URL || 'https://balkanestate.com';
+
+    // Try admin-editable template first
+    const config = await getActiveEmailConfig('viewing-confirmation');
+    if (config) {
+      const variables: Record<string, string> = {
+        visitorName:     escapeHtml(params.visitorName),
+        propertyTitle:   escapeHtml(params.propertyTitle),
+        propertyAddress: escapeHtml(params.propertyAddress),
+        date:            escapeHtml(params.date),
+        timeSlot:        escapeHtml(params.timeSlot),
+        sellerName:      escapeHtml(params.sellerName),
+        propertyId:      params.propertyId,
+        frontendUrl,
+      };
+      const { html, subject } = await renderEmailWithSiteSettings(config, variables);
+      await this.sendEmail({ to: params.visitorEmail, subject, html, category: config.fromCategory as any });
+      return;
+    }
+
+    // ── Fallback: inline HTML (used if template is missing or disabled) ──
     const safeName = escapeHtml(params.visitorName);
     const safeTitle = escapeHtml(params.propertyTitle);
     const safeAddress = escapeHtml(params.propertyAddress);
     const safeDate = escapeHtml(params.date);
     const safeTime = escapeHtml(params.timeSlot);
     const safeSellerName = escapeHtml(params.sellerName);
-    const frontendUrl = process.env.FRONTEND_URL || 'https://balkanestate.com';
     const currentYear = new Date().getFullYear();
 
     const html = `
@@ -3412,6 +4168,38 @@ Questions? Contact us at support@balkanestateai.com
     timeSlot: string;
     propertyId: string;
   }): Promise<void> {
+    const frontendUrl = process.env.FRONTEND_URL || 'https://balkanestate.com';
+
+    // Try admin-editable template first
+    const config = await getActiveEmailConfig('viewing-notification');
+    if (config) {
+      const safePhone = escapeHtml(params.visitorPhone);
+      const safeMsg   = escapeHtml(params.visitorMessage);
+      const visitorPhoneRow = safePhone
+        ? `<tr><td style="padding:8px 0;color:#6b7280;font-size:14px;">Phone:</td><td style="padding:8px 0;color:#111827;font-size:14px;"><a href="tel:${safePhone}" style="color:#0252CD;text-decoration:none;">${safePhone}</a></td></tr>`
+        : '';
+      const visitorMessageRow = safeMsg
+        ? `<tr><td style="padding:8px 0;color:#6b7280;font-size:14px;vertical-align:top;">Message:</td><td style="padding:8px 0;color:#111827;font-size:14px;font-style:italic;">"${safeMsg}"</td></tr>`
+        : '';
+      const variables: Record<string, string> = {
+        sellerName:        escapeHtml(params.sellerName),
+        visitorName:       escapeHtml(params.visitorName),
+        visitorEmail:      escapeHtml(params.visitorEmail),
+        visitorPhoneRow,
+        visitorMessageRow,
+        propertyTitle:     escapeHtml(params.propertyTitle),
+        propertyAddress:   escapeHtml(params.propertyAddress),
+        date:              escapeHtml(params.date),
+        timeSlot:          escapeHtml(params.timeSlot),
+        propertyId:        params.propertyId,
+        frontendUrl,
+      };
+      const { html, subject } = await renderEmailWithSiteSettings(config, variables);
+      await this.sendEmail({ to: params.sellerEmail, subject, html, category: config.fromCategory as any });
+      return;
+    }
+
+    // ── Fallback: inline HTML (used if template is missing or disabled) ──
     const safeSellerName = escapeHtml(params.sellerName);
     const safeVisitorName = escapeHtml(params.visitorName);
     const safeVisitorEmail = escapeHtml(params.visitorEmail);
@@ -3421,7 +4209,6 @@ Questions? Contact us at support@balkanestateai.com
     const safeAddress = escapeHtml(params.propertyAddress);
     const safeDate = escapeHtml(params.date);
     const safeTime = escapeHtml(params.timeSlot);
-    const frontendUrl = process.env.FRONTEND_URL || 'https://balkanestate.com';
     const currentYear = new Date().getFullYear();
 
     const html = `
@@ -3541,6 +4328,32 @@ Questions? Contact us at support@balkanestateai.com
     sellerPhone?: string;
     propertyId: string;
   }): Promise<void> {
+    const frontendUrl = process.env.FRONTEND_URL || 'https://balkanestate.com';
+
+    // Try admin-editable template first
+    const config = await getActiveEmailConfig('viewing-approved');
+    if (config) {
+      const safePhone = escapeHtml(params.sellerPhone);
+      const sellerPhoneHtml = safePhone
+        ? ` &mdash; <a href="tel:${safePhone}" style="color:#0252CD;text-decoration:none;">${safePhone}</a>`
+        : '';
+      const variables: Record<string, string> = {
+        visitorName:     escapeHtml(params.visitorName),
+        propertyTitle:   escapeHtml(params.propertyTitle),
+        propertyAddress: escapeHtml(params.propertyAddress),
+        date:            escapeHtml(params.date),
+        timeSlot:        escapeHtml(params.timeSlot),
+        sellerName:      escapeHtml(params.sellerName),
+        sellerPhoneHtml,
+        propertyId:      params.propertyId,
+        frontendUrl,
+      };
+      const { html, subject } = await renderEmailWithSiteSettings(config, variables);
+      await this.sendEmail({ to: params.visitorEmail, subject, html, category: config.fromCategory as any });
+      return;
+    }
+
+    // ── Fallback: inline HTML (used if template is missing or disabled) ──
     const safeName = escapeHtml(params.visitorName);
     const safeTitle = escapeHtml(params.propertyTitle);
     const safeAddress = escapeHtml(params.propertyAddress);
@@ -3548,7 +4361,6 @@ Questions? Contact us at support@balkanestateai.com
     const safeTime = escapeHtml(params.timeSlot);
     const safeSellerName = escapeHtml(params.sellerName);
     const safeSellerPhone = escapeHtml(params.sellerPhone);
-    const frontendUrl = process.env.FRONTEND_URL || 'https://balkanestate.com';
     const currentYear = new Date().getFullYear();
 
     const html = `
@@ -3649,12 +4461,35 @@ Questions? Contact us at support@balkanestateai.com
     cancelReason?: string;
     propertyId: string;
   }): Promise<void> {
+    const frontendUrl = process.env.FRONTEND_URL || 'https://balkanestate.com';
+
+    // Try admin-editable template first
+    const config = await getActiveEmailConfig('viewing-rejected');
+    if (config) {
+      const safeReason = escapeHtml(params.cancelReason);
+      const cancelReasonRow = safeReason
+        ? `<tr><td style="padding:8px 0;color:#6b7280;font-size:14px;vertical-align:top;">Reason:</td><td style="padding:8px 0;color:#111827;font-size:14px;font-style:italic;">"${safeReason}"</td></tr>`
+        : '';
+      const variables: Record<string, string> = {
+        visitorName:     escapeHtml(params.visitorName),
+        propertyTitle:   escapeHtml(params.propertyTitle),
+        propertyAddress: escapeHtml(params.propertyAddress),
+        date:            escapeHtml(params.date),
+        timeSlot:        escapeHtml(params.timeSlot),
+        cancelReasonRow,
+        frontendUrl,
+      };
+      const { html, subject } = await renderEmailWithSiteSettings(config, variables);
+      await this.sendEmail({ to: params.visitorEmail, subject, html, category: config.fromCategory as any });
+      return;
+    }
+
+    // ── Fallback: inline HTML (used if template is missing or disabled) ──
     const safeName = escapeHtml(params.visitorName);
     const safeTitle = escapeHtml(params.propertyTitle);
     const safeDate = escapeHtml(params.date);
     const safeTime = escapeHtml(params.timeSlot);
     const safeCancelReason = escapeHtml(params.cancelReason);
-    const frontendUrl = process.env.FRONTEND_URL || 'https://balkanestate.com';
     const currentYear = new Date().getFullYear();
 
     const html = `
@@ -3749,10 +4584,30 @@ Questions? Contact us at support@balkanestateai.com
     couponCodes?: Array<{ tier: 'highlight' | 'premium' | 'featured'; code: string }>;
   }): Promise<void> {
     const frontendUrl = process.env.FRONTEND_URL || 'https://balkanestateai.com';
+    const { monthly, available, used } = params.promotionCoupons;
+
+    // Try admin-editable template first
+    const config = await getActiveEmailConfig('promotion-coupons');
+    if (config) {
+      const couponCodesList = buildCouponCodesHtml(params.couponCodes ?? []);
+      const variables: Record<string, string> = {
+        ownerName:        escapeHtml(params.ownerName),
+        agencyName:       escapeHtml(params.agencyName),
+        monthlyCoupons:   String(monthly),
+        availableCoupons: String(available),
+        usedCoupons:      String(used),
+        couponCodesList,
+        frontendUrl,
+      };
+      const { html, subject } = await renderEmailWithSiteSettings(config, variables);
+      await this.sendEmail({ to: params.email, subject, html, category: config.fromCategory as any });
+      return;
+    }
+
+    // ── Fallback: inline HTML (used if template is missing or disabled) ──
     const safeOwnerName = escapeHtml(params.ownerName);
     const safeAgencyName = escapeHtml(params.agencyName);
     const currentYear = new Date().getFullYear();
-    const { monthly, available, used } = params.promotionCoupons;
 
     // Build coupon codes HTML section
     const couponCodesHtml = params.couponCodes && params.couponCodes.length > 0 ? `
@@ -3918,7 +4773,7 @@ Questions? Contact us at support@balkanestateai.com
         couponCodesList:    couponCodesHtml,
         frontendUrl,
       };
-      const { html: cfgHtml, subject: cfgSubject } = renderEmailConfig(config, variables);
+      const { html: cfgHtml, subject: cfgSubject } = await renderEmailWithSiteSettings(config, variables);
       await this.sendEmail({ to: params.email, subject: cfgSubject, html: cfgHtml, category: config.fromCategory as any });
       return;
     }

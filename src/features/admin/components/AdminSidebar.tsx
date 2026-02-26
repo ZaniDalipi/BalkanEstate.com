@@ -166,6 +166,11 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({
           icon: <EnvelopeIcon className="w-5 h-5" />
         },
         {
+          id: 'siteSettings',
+          label: t('admin:sidebar.siteSettings', 'Site Settings'),
+          icon: <Cog6ToothIcon className="w-5 h-5" />
+        },
+        {
           id: 'settings',
           label: t('admin:sidebar.settings', 'Settings'),
           icon: <Cog6ToothIcon className="w-5 h-5" />

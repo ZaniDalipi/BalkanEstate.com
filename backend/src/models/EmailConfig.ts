@@ -25,6 +25,7 @@ export interface IEmailConfig extends Document {
   headerSubtitle?: string; // Subtitle shown below header title
   headerGradient?: string; // CSS gradient for header, e.g., "linear-gradient(135deg, #0252CD 0%, #0369a1 100%)"
   headerEmoji?: string; // Emoji for header, e.g., "📊"
+  headerImageUrl?: string; // Optional image URL for header (replaces emoji when set)
 
   // Body content - can use HTML with variables
   bodyTemplate: string; // Main email body template with HTML and {{variables}}
@@ -108,6 +109,9 @@ const emailConfigSchema = new Schema<IEmailConfig>(
       default: 'linear-gradient(135deg, #0252CD 0%, #0369a1 100%)',
     },
     headerEmoji: {
+      type: String,
+    },
+    headerImageUrl: {
       type: String,
     },
     bodyTemplate: {

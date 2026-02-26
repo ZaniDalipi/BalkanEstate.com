@@ -54,7 +54,7 @@ const Map3DTourViewer: React.FC<Map3DTourViewerProps> = ({
             className="w-full h-full border-0"
             allowFullScreen
             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; xr-spatial-tracking"
-            title="360 Virtual Tour"
+            title={t('property:virtualTour.title', '360° Virtual Tour')}
           />
 
           {/* Instructions hint */}

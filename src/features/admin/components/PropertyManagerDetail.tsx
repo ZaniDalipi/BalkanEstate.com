@@ -1,4 +1,5 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { XMarkIcon } from '@/constants';
 import { type Property, type PropertyEditForm, getAllPropertyImages } from './usePropertyManager';
 
@@ -19,12 +20,13 @@ export const PropertyViewModal: React.FC<PropertyViewModalProps> = ({
   getStatusBadgeColor,
   getPropertyTypeLabel,
 }) => {
+  const { t } = useTranslation(['admin', 'common']);
   return (
     <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4">
       <div className="bg-white rounded-2xl max-w-4xl w-full max-h-[90vh] overflow-hidden">
         <div className="p-6 border-b border-gray-200 flex items-center justify-between sticky top-0 bg-white z-10">
           <div>
-            <h3 className="text-xl font-bold text-gray-900">Property Details</h3>
+            <h3 className="text-xl font-bold text-gray-900">{t('admin:propertyManager.propertyDetails')}</h3>
             <p className="text-sm text-gray-500">ID: {property._id}</p>
           </div>
           <button
@@ -71,15 +73,15 @@ export const PropertyViewModal: React.FC<PropertyViewModalProps> = ({
 
           {/* Specifications */}
           <div>
-            <h5 className="text-sm font-semibold text-gray-700 mb-3 uppercase tracking-wider">Specifications</h5>
+            <h5 className="text-sm font-semibold text-gray-700 mb-3 uppercase tracking-wider">{t('admin:propertyManager.specifications')}</h5>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
               <div className="bg-gray-50 rounded-lg p-3">
-                <div className="text-gray-500 text-xs">Type</div>
+                <div className="text-gray-500 text-xs">{t('admin:propertyManager.type')}</div>
                 <div className="font-medium text-gray-900">{getPropertyTypeLabel(property.propertyType)}</div>
               </div>
               {property.bedrooms && (
                 <div className="bg-gray-50 rounded-lg p-3">
-                  <div className="text-gray-500 text-xs">Bedrooms</div>
+                  <div className="text-gray-500 text-xs">{t('admin:propertyManager.bedrooms')}</div>
                   <div className="font-medium text-gray-900">{property.bedrooms}</div>
                 </div>
               )}

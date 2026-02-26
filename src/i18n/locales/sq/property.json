@@ -222,7 +222,12 @@
     "description": "Eksploroni këtë pronë në 360° imersive",
     "openInNewTab": "Hap në skedë të re për përvojë të plotë",
     "failedToLoad": "Failed to load virtual tour",
-    "loading": "Loading virtual tour..."
+    "loading": "Loading virtual tour...",
+    "exit": "Dil nga Turi",
+    "floor": "Kati {{floor}}",
+    "hint": "Tërhiq për të parë përreth \u2022 Rrotulloj për zmadhim",
+    "entering": "Duke hyrë në ndërtesë...",
+    "tourButton": "Tur 360°"
   },
   "featuredAgencies": "Agjenci të Zgjedhura",
   "status": {
@@ -397,7 +402,9 @@
       "play": "Fluturim drejt pronës",
       "skip": "Kapërce",
       "replay": "Riprodho",
-      "exploreMap": "Eksploro hartën"
+      "exploreMap": "Eksploro hartën",
+      "flyShort": "Fluturoj",
+      "mapShort": "Hartë"
     },
     "errors": {
       "noLocation": "Të dhënat e vendndodhjes nuk janë të disponueshme"
@@ -430,7 +437,44 @@
     "floorLevel": "Kati {{floor}} nga {{total}}",
     "groundFloor": "Kati përdhe",
     "topFloor": "Kati i fundit",
-    "middleFloor": "Kati i mesëm"
+    "middleFloor": "Kati i mesëm",
+    "enter": "Hyr"
+  },
+  "map3d": {
+    "shadows": "Shfaq Hijet e Ndërtesave",
+    "shadowsOn": "Hijet",
+    "shadowsOff": "Hijet",
+    "floorLabels": "Shfaq Nivelet e Kateve",
+    "showFloors": "Etiketat",
+    "hideFloors": "Fshih",
+    "nearbyPlaces": "Vendet Afër",
+    "nearbyPOI": "Afër",
+    "loading": "Duke ngarkuar hartën 3D...",
+    "facing": "Drejtimi",
+    "facingDirection": "Drejt {{direction}}",
+    "sunrise": "Lindja e diellit",
+    "noon": "Mesditë",
+    "sunset": "Perëndimi",
+    "reset": "Rivendos",
+    "sunAndShadows": "Dielli & Hijet",
+    "cardinalDirections": {
+      "N": "V",
+      "NE": "VL",
+      "E": "L",
+      "SE": "JL",
+      "S": "J",
+      "SW": "JP",
+      "W": "P",
+      "NW": "VP",
+      "North": "Veri",
+      "Northeast": "Verilindje",
+      "East": "Lindje",
+      "Southeast": "Juglindje",
+      "South": "Jug",
+      "Southwest": "Jugperëndim",
+      "West": "Perëndim",
+      "Northwest": "Veriperëndim"
+    }
   },
   "guide": {
     "messages": {
@@ -475,5 +519,96 @@
     "skipVideo": "Skip Video",
     "videoTour": "Video Tour",
     "enter3DTour": "Enter 3D Tour"
+  },
+  "viewings": {
+    "title": "Kërkesat për Vizitë",
+    "subtitle": "Menaxhoni kërkesat për vizitë të pronës nga blerësit potencialë. Aprovoni ose refuzoni për t'i njoftuar me email.",
+    "status": {
+      "pending": "Në Pritje",
+      "approved": "Aprovuar",
+      "declined": "Refuzuar",
+      "completed": "Përfunduar"
+    },
+    "empty": {
+      "title": "Nuk ka kërkesa për vizitë",
+      "description": "Kur dikush planifikon një vizitë për pronën tuaj, do të shfaqet këtu.",
+      "filtered": "Nuk u gjetën kërkesa vizite {{status}}."
+    },
+    "relative": {
+      "past": "E kaluar",
+      "inDays": "Pas {{count}} ditësh"
+    },
+    "reason": "Arsyeja:",
+    "declineReason": "Arsyeja e refuzimit (opsionale)",
+    "declineReasonPlaceholder": "p.sh., Ora nuk është më e disponueshme...",
+    "declining": "Duke refuzuar...",
+    "confirmDecline": "Konfirmo Refuzimin",
+    "approving": "Duke aprovuar...",
+    "approve": "Aprovo",
+    "decline": "Refuzo",
+    "markCompleted": "Shëno si të Përfunduar",
+    "updating": "Duke përditësuar...",
+    "cancelViewing": "Anulo Vizitën",
+    "requested": "Kërkuar"
+  },
+  "floorPlan": {
+    "viewer": {
+      "ariaLabel": "Shikuesi i planimetrisë",
+      "panMode": "Modaliteti lëvizje",
+      "panTitle": "Lëviz & Zmadho (tërhiq për të lëvizur, rrotulloj për të zmadhuar)",
+      "pan": "Lëviz",
+      "annotateMode": "Modaliteti shënim",
+      "annotateTitle": "Kliko mbi planimetri për të shtuar etiketa dhomash",
+      "label": "Etiketë",
+      "clearLabels": "Pastro të gjitha etiketat",
+      "zoomOut": "Zvogëlo",
+      "zoomIn": "Zmadho",
+      "fitToScreen": "Përshtat në ekran",
+      "fitToScreenShortcut": "Përshtat në ekran (0)",
+      "close": "Mbyll shikuesin e planimetrisë",
+      "closeShortcut": "Mbyll (Esc)",
+      "clickToAddLabel": "Kliko kudo në planimetri për të shtuar një etiketë dhome",
+      "loading": "Duke ngarkuar planimetrinë...",
+      "loadFailed": "Dështoi Ngarkimi i Planimetrisë",
+      "loadFailedDesc": "Imazhi i planimetrisë nuk mund të ngarkohej. Mund të jetë lëvizur ose fshirë.",
+      "floorPlanAlt": "Planimetri",
+      "roomNamePlaceholder": "Emri i dhomës...",
+      "closeDetails": "Mbyll detajet",
+      "roomType": "Lloji i Dhomës",
+      "rooms": {
+        "bedroom": "Dhomë Gjumi",
+        "bathroom": "Banjo",
+        "kitchen": "Kuzhinë",
+        "living": "Dhomë Ndenjeje",
+        "dining": "Dhomë Ngrënieje",
+        "office": "Zyrë",
+        "garage": "Garazh",
+        "storage": "Depo",
+        "balcony": "Ballkon",
+        "hallway": "Korridor",
+        "other": "Tjetër"
+      },
+      "area": "Sipërfaqja (m²)",
+      "areaPlaceholder": "p.sh. 25",
+      "notes": "Shënime",
+      "notesPlaceholder": "Dritare nga jugu, dollap i integruar...",
+      "rename": "Riemërto",
+      "removeLabel": "Hiq etiketën",
+      "zoomLevel": "Niveli i zmadhimit",
+      "roomLabels": "Etiketat e Dhomave",
+      "shortcuts": {
+        "scroll": "Rrotulloj: Zmadho | Tërhiq: Lëviz | Dopjo-klikim: Zmadhim i shpejtë",
+        "keys": "+/-: Zmadho | 0: Rivendos | Esc: Mbyll",
+        "annotate": "Kliko: Shto etiketë | Esc: Dil nga modaliteti i etiketave"
+      }
+    }
+  },
+  "imageViewer": {
+    "ariaLabel": "Shikuesi i imazheve: {{current}} nga {{total}}",
+    "close": "Mbyll shikuesin e imazheve",
+    "previous": "Imazhi i mëparshëm ({{current}} nga {{total}})",
+    "next": "Imazhi tjetër ({{current}} nga {{total}})",
+    "loadError": "Imazhi nuk mund të ngarkohej",
+    "imageAlt": "Imazhi i pronës {{current}} nga {{total}}"
   }
 }
