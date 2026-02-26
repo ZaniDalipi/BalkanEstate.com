@@ -192,7 +192,7 @@ const Map3DBuildings: React.FC<Map3DBuildingsProps> = (props) => {
         <div className="absolute inset-0 flex items-center justify-center bg-slate-900">
           <div className="text-center">
             <div className="w-12 h-12 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto mb-3" />
-            <p className="text-sm text-slate-400">Loading 3D Map...</p>
+            <p className="text-sm text-slate-400">{t('property:map3d.loading', 'Loading 3D Map...')}</p>
           </div>
         </div>
       )}

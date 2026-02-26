@@ -1,4 +1,5 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { PlusIcon, ArrowPathIcon } from '@/constants';
 import { useDiscountCodeManager } from './useDiscountCodeManager';
 import { CreateCodeModal, BulkGenerateModal } from './DiscountCodeManagerForm';
@@ -32,12 +33,13 @@ const DiscountCodeManager: React.FC = () => {
     openListingPromoCreate,
     formatDate,
   } = useDiscountCodeManager();
+  const { t } = useTranslation(['admin', 'common']);
 
   if (isLoading) {
     return (
       <div className="bg-white rounded-lg shadow-lg p-8 text-center">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
-        <p className="mt-4 text-gray-600">Loading discount codes...</p>
+        <p className="mt-4 text-gray-600">{t('admin:discountCodes.loading')}</p>
       </div>
     );
   }
@@ -48,11 +50,11 @@ const DiscountCodeManager: React.FC = () => {
       <div className="border-b border-gray-200 p-6">
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-4">
-            <h2 className="text-2xl font-bold text-gray-900">Discount Code Management</h2>
+            <h2 className="text-2xl font-bold text-gray-900">{t('admin:discountCodes.title')}</h2>
             {/* Sync Status */}
             <div className="flex items-center gap-2 text-sm">
               <span className={`w-2 h-2 rounded-full ${isRefetching ? 'bg-yellow-500 animate-pulse' : 'bg-green-500'}`}></span>
-              <span className="text-gray-600">{isRefetching ? 'Syncing...' : 'Live'}</span>
+              <span className="text-gray-600">{isRefetching ? t('admin:discountCodes.syncing') : t('admin:discountCodes.live')}</span>
             </div>
           </div>
           <div className="flex gap-2">
@@ -71,20 +73,20 @@ const DiscountCodeManager: React.FC = () => {
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
               </svg>
-              Listing Promo
+              {t('admin:discountCodes.listingPromo')}
             </button>
             <button
               onClick={() => setIsBulkModalOpen(true)}
               className="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 font-medium"
             >
-              Bulk Generate
+              {t('admin:discountCodes.bulkGenerate')}
             </button>
             <button
               onClick={() => setIsCreateModalOpen(true)}
               className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium flex items-center gap-2"
             >
               <PlusIcon className="w-5 h-5" />
-              Create Code
+              {t('admin:discountCodes.createCode')}
             </button>
           </div>
         </div>
@@ -96,19 +98,19 @@ const DiscountCodeManager: React.FC = () => {
             onChange={(e) => setFilterStatus(e.target.value as any)}
             className="px-4 py-2 border border-gray-300 rounded-lg"
           >
-            <option value="all">All Status</option>
-            <option value="active">Active</option>
-            <option value="inactive">Inactive</option>
+            <option value="all">{t('admin:discountCodes.allStatus')}</option>
+            <option value="active">{t('admin:discountCodes.active')}</option>
+            <option value="inactive">{t('admin:discountCodes.inactive')}</option>
           </select>
           <select
             value={filterSource}
             onChange={(e) => setFilterSource(e.target.value)}
             className="px-4 py-2 border border-gray-300 rounded-lg"
           >
-            <option value="all">All Sources</option>
-            <option value="admin">Admin</option>
-            <option value="gamification">Gamification</option>
-            <option value="promotion">Promotion</option>
+            <option value="all">{t('admin:discountCodes.allSources')}</option>
+            <option value="admin">{t('admin:discountCodes.adminSource')}</option>
+            <option value="gamification">{t('admin:discountCodes.gamification')}</option>
+            <option value="promotion">{t('admin:discountCodes.promotion')}</option>
           </select>
         </div>
       </div>
@@ -130,13 +132,13 @@ const DiscountCodeManager: React.FC = () => {
         <table className="w-full">
           <thead className="bg-gray-50">
             <tr>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Code</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Discount</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Usage</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Valid Until</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Source</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t('admin:discountCodes.code')}</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t('admin:discountCodes.discount')}</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t('admin:discountCodes.usage')}</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t('admin:discountCodes.validUntil')}</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t('admin:discountCodes.source')}</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t('admin:discountCodes.status')}</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t('admin:discountCodes.actions')}</th>
             </tr>
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
@@ -173,7 +175,7 @@ const DiscountCodeManager: React.FC = () => {
                   <span className={`px-2 py-1 text-xs font-medium rounded-full ${
                     code.isActive ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'
                   }`}>
-                    {code.isActive ? 'Active' : 'Inactive'}
+                    {code.isActive ? t('admin:discountCodes.active') : t('admin:discountCodes.inactive')}
                   </span>
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
@@ -183,14 +185,14 @@ const DiscountCodeManager: React.FC = () => {
                         onClick={() => handleDeactivate(code.id)}
                         className="text-yellow-600 hover:text-yellow-900"
                       >
-                        Deactivate
+                        {t('admin:discountCodes.deactivate')}
                       </button>
                     )}
                     <button
                       onClick={() => handleDelete(code.id)}
                       className="text-red-600 hover:text-red-900"
                     >
-                      Delete
+                      {t('admin:discountCodes.delete')}
                     </button>
                   </div>
                 </td>
@@ -201,7 +203,7 @@ const DiscountCodeManager: React.FC = () => {
 
         {filteredCodes.length === 0 && (
           <div className="text-center py-12 text-gray-500">
-            No discount codes found. Create your first one!
+            {t('admin:discountCodes.noCodesFound')}
           </div>
         )}
       </div>

@@ -222,7 +222,12 @@
     "description": "Explorează această proprietate în 360° imersiv",
     "openInNewTab": "Deschide într-o fereastră nouă pentru experiența completă",
     "failedToLoad": "Failed to load virtual tour",
-    "loading": "Loading virtual tour..."
+    "loading": "Loading virtual tour...",
+    "exit": "Ieșire din tur",
+    "floor": "Etaj {{floor}}",
+    "hint": "Trageți pentru a privi \u2022 Derulați pentru zoom",
+    "entering": "Se intră în clădire...",
+    "tourButton": "Tur 360°"
   },
   "featuredAgencies": "Agenții Recomandate",
   "status": {
@@ -397,7 +402,9 @@
       "play": "Zbor spre proprietate",
       "skip": "Sari",
       "replay": "Reia",
-      "exploreMap": "Explorează harta"
+      "exploreMap": "Explorează harta",
+      "flyShort": "Zboară",
+      "mapShort": "Hartă"
     },
     "errors": {
       "noLocation": "Datele de locație nu sunt disponibile"
@@ -430,7 +437,44 @@
     "floorLevel": "Etajul {{floor}} din {{total}}",
     "groundFloor": "Parter",
     "topFloor": "Ultimul etaj",
-    "middleFloor": "Etaj mijlociu"
+    "middleFloor": "Etaj mijlociu",
+    "enter": "Intră"
+  },
+  "map3d": {
+    "shadows": "Arată umbrele clădirilor",
+    "shadowsOn": "Umbre",
+    "shadowsOff": "Umbre",
+    "floorLabels": "Arată nivelurile etajelor",
+    "showFloors": "Etichete",
+    "hideFloors": "Ascunde",
+    "nearbyPlaces": "Locuri apropiate",
+    "nearbyPOI": "Apropiate",
+    "loading": "Se încarcă harta 3D...",
+    "facing": "Orientare",
+    "facingDirection": "Spre {{direction}}",
+    "sunrise": "Răsărit",
+    "noon": "Amiază",
+    "sunset": "Apus",
+    "reset": "Resetare",
+    "sunAndShadows": "Soare și umbre",
+    "cardinalDirections": {
+      "N": "N",
+      "NE": "NE",
+      "E": "E",
+      "SE": "SE",
+      "S": "S",
+      "SW": "SV",
+      "W": "V",
+      "NW": "NV",
+      "North": "Nord",
+      "Northeast": "Nord-est",
+      "East": "Est",
+      "Southeast": "Sud-est",
+      "South": "Sud",
+      "Southwest": "Sud-vest",
+      "West": "Vest",
+      "Northwest": "Nord-vest"
+    }
   },
   "guide": {
     "messages": {
@@ -475,5 +519,36 @@
     "skipVideo": "Skip Video",
     "videoTour": "Video Tour",
     "enter3DTour": "Enter 3D Tour"
+  },
+  "viewings": {
+    "title": "Cereri de Vizionare",
+    "subtitle": "Gestionați cererile de vizionare a proprietăților de la potențialii cumpărători. Aprobați sau refuzați pentru a-i notifica prin e-mail.",
+    "status": { "pending": "În așteptare", "approved": "Aprobat", "declined": "Refuzat", "completed": "Finalizat" },
+    "empty": { "title": "Nicio cerere de vizionare", "description": "Când cineva programează o vizionare a proprietății dvs., va apărea aici.", "filtered": "Nicio cerere de vizionare {{status}} găsită." },
+    "relative": { "past": "Trecut", "inDays": "În {{count}} zile" },
+    "reason": "Motiv:", "declineReason": "Motivul refuzului (opțional)", "declineReasonPlaceholder": "ex., Intervalul orar nu mai este disponibil...",
+    "declining": "Se refuză...", "confirmDecline": "Confirmă Refuzul", "approving": "Se aprobă...", "approve": "Aprobă",
+    "decline": "Refuză", "markCompleted": "Marchează ca Finalizat", "updating": "Se actualizează...", "cancelViewing": "Anulează Vizionarea", "requested": "Solicitat"
+  },
+  "floorPlan": {
+    "viewer": {
+      "ariaLabel": "Vizualizator plan de etaj", "panMode": "Mod deplasare", "panTitle": "Deplasare și Zoom (trageți pentru deplasare, derulați pentru zoom)",
+      "pan": "Deplasare", "annotateMode": "Mod adnotare", "annotateTitle": "Faceți clic pe planul de etaj pentru a adăuga etichete camerelor",
+      "label": "Etichetă", "clearLabels": "Șterge toate etichetele", "zoomOut": "Micșorează", "zoomIn": "Mărește",
+      "fitToScreen": "Potrivire pe ecran", "fitToScreenShortcut": "Potrivire pe ecran (0)", "close": "Închide vizualizatorul planului de etaj",
+      "closeShortcut": "Închide (Esc)", "clickToAddLabel": "Faceți clic oriunde pe planul de etaj pentru a adăuga o etichetă de cameră",
+      "loading": "Se încarcă planul de etaj...", "loadFailed": "Încărcarea Planului de Etaj a Eșuat",
+      "loadFailedDesc": "Imaginea planului de etaj nu a putut fi încărcată. Este posibil să fi fost mutată sau ștearsă.",
+      "floorPlanAlt": "Plan de Etaj", "roomNamePlaceholder": "Numele camerei...", "closeDetails": "Închide detaliile", "roomType": "Tip Cameră",
+      "rooms": { "bedroom": "Dormitor", "bathroom": "Baie", "kitchen": "Bucătărie", "living": "Living", "dining": "Sufragerie", "office": "Birou", "garage": "Garaj", "storage": "Depozit", "balcony": "Balcon", "hallway": "Hol", "other": "Altele" },
+      "area": "Suprafață (m²)", "areaPlaceholder": "ex. 25", "notes": "Note", "notesPlaceholder": "Fereastră spre sud, dulap încorporat...",
+      "rename": "Redenumește", "removeLabel": "Elimină eticheta", "zoomLevel": "Nivel de zoom", "roomLabels": "Etichete Camere",
+      "shortcuts": { "scroll": "Derulare: Zoom | Tragere: Deplasare | Dublu-clic: Zoom rapid", "keys": "+/-: Zoom | 0: Resetare | Esc: Închide", "annotate": "Clic: Adaugă etichetă | Esc: Ieși din modul adnotare" }
+    }
+  },
+  "imageViewer": {
+    "ariaLabel": "Vizualizator imagini: {{current}} din {{total}}", "close": "Închide vizualizatorul de imagini",
+    "previous": "Imaginea anterioară ({{current}} din {{total}})", "next": "Imaginea următoare ({{current}} din {{total}})",
+    "loadError": "Imaginea nu a putut fi încărcată", "imageAlt": "Imagine proprietate {{current}} din {{total}}"
   }
 }

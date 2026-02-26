@@ -101,6 +101,34 @@
     "empty": {
       "title": "No featured agencies available at the moment",
       "message": "Check back soon for our featured partners!"
+    },
+    "subscription": {
+      "currentlyFeatured": "Agency Currently Featured ✨",
+      "receivingVisibility": "Your agency is currently featured and receiving enhanced visibility.",
+      "timeRemaining": "Time Remaining",
+      "expires": "Expires:",
+      "featureYourAgency": "Feature Your Agency",
+      "getVisibility": "Get more visibility with a featured listing. Your agency will appear at the top of search results and in the featured agencies carousel.",
+      "getFeaturedFrom": "Get Featured from €{{price}}/week",
+      "getFeaturedNow": "Get Featured Now",
+      "featuredAgency": "Featured Agency",
+      "boostVisibility": "Boost Your Visibility",
+      "freeTrialProgress": "🎉 Free Trial Progress",
+      "subscriptionPeriod": "📅 Subscription Period",
+      "daysLeft": "{{count}} days left",
+      "freeTrialActive": "🎉 Free Trial Active",
+      "trialEndsOn": "Your free trial ends on {{date}}",
+      "interval": "Interval",
+      "price": "Price",
+      "startDate": "Start Date",
+      "renewsOn": "Renews On",
+      "endedOn": "Ended On",
+      "couponApplied": "✓ Coupon {{code}} applied",
+      "cancelAtPeriodEnd": "⚠️ Subscription will be canceled at the end of the current period",
+      "renewStatus": "🔄 Renew Your Featured Status",
+      "continueVisibility": "Continue enjoying enhanced visibility and top placement in search results.",
+      "renewNow": "Renew Now",
+      "proTip": "💡 Pro Tip: Featured agencies get up to 5x more visibility and appear at the top of search results!"
     }
   },
   "create": {
@@ -208,5 +236,61 @@
     "processing": "Processing...",
     "stripeSecure": "Payments are securely processed by Stripe",
     "error": "Failed to initiate payment. Please try again."
+  },
+  "coupon": {
+    "title": "Redeem Agency Coupon",
+    "description": "Enter the coupon code you received to join an agency and get a Pro subscription.",
+    "codeLabel": "Coupon Code",
+    "codePlaceholder": "Enter your coupon code (e.g., AGENCY-XXXXXXXX)",
+    "codeFormat": "The code should be in the format: AGENCY-XXXXXXXX",
+    "redeeming": "Redeeming...",
+    "redeemButton": "Redeem Coupon",
+    "note": "Note:",
+    "alreadyInAgency": "You're already a member of {{name}}. Redeeming a new coupon will move you to the new agency.",
+    "anAgency": "an agency",
+    "confirmMove": "You are already a member of an agency. Redeeming this coupon will move you to the new agency. Continue?",
+    "agentRequired": {
+      "title": "Agent Registration Required",
+      "description": "To redeem an agency coupon and join an agency, you must first register as an agent. This requires providing your license number and professional details.",
+      "goToProfile": "Go to Profile Settings"
+    },
+    "errors": {
+      "enterCode": "Please enter a coupon code",
+      "loginRequired": "You must be logged in to redeem a coupon",
+      "agentRequired": "Only registered agents can redeem agency coupons. Please register as an agent first in your profile settings.",
+      "invalidCoupon": "Invalid coupon code. Please check the code and try again.",
+      "alreadyUsed": "This coupon has already been used by another agent.",
+      "expired": "This coupon has expired and can no longer be redeemed.",
+      "notFound": "Coupon not found. Please verify the code is correct.",
+      "subscriptionInactive": "The agency subscription is no longer active. This coupon cannot be redeemed.",
+      "missingCode": "Please enter a coupon code.",
+      "redeemFailed": "Failed to redeem coupon. Please try again.",
+      "redemptionFailed": "Redemption Failed"
+    },
+    "success": {
+      "title": "Coupon Redeemed!",
+      "message": "You've successfully joined {{name}} with a Pro subscription!",
+      "welcome": "Welcome to {{name}}!",
+      "joined": "You've successfully joined the agency with a Pro subscription.",
+      "benefits": "Your Benefits:",
+      "listingsLimit": "Up to {{limit}} active listings",
+      "branding": "Agency branding on your listings",
+      "promotionAccess": "Access to agency promotion coupons",
+      "validUntil": "Subscription valid until {{date}}",
+      "viewAgency": "View Agency"
+    },
+    "whatHappens": {
+      "title": "What happens when you redeem?",
+      "addedToTeam": "You'll be added to the agency as a team member",
+      "proSubscription": "You'll receive a Pro subscription (valid for 1 year)",
+      "agencyBranding": "Your listings will display the agency branding",
+      "promotionCoupons": "Access to agency promotion coupons for your listings"
+    }
+  },
+  "badge": {
+    "independent": "Independent",
+    "independentShort": "Ind",
+    "agency": "Agency",
+    "independentAgent": "Independent Agent"
   }
 }

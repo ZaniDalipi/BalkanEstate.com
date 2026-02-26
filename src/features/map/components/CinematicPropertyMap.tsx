@@ -209,10 +209,10 @@ const ShadowTimelapsePanel: React.FC<{
               ))}
             </div>
             <div className="flex items-center gap-1">
-              <button onClick={goToSunrise} className="p-1.5 rounded hover:bg-neutral-100 text-sm" title="Sunrise">🌅</button>
-              <button onClick={goToNoon} className="p-1.5 rounded hover:bg-neutral-100 text-sm" title="Noon">☀️</button>
-              <button onClick={goToSunset} className="p-1.5 rounded hover:bg-neutral-100 text-sm" title="Sunset">🌇</button>
-              <button onClick={reset} className="p-1.5 rounded hover:bg-neutral-100 text-neutral-500" title="Reset">
+              <button onClick={goToSunrise} className="p-1.5 rounded hover:bg-neutral-100 text-sm" title={t('property:map3d.sunrise', 'Sunrise')}>🌅</button>
+              <button onClick={goToNoon} className="p-1.5 rounded hover:bg-neutral-100 text-sm" title={t('property:map3d.noon', 'Noon')}>☀️</button>
+              <button onClick={goToSunset} className="p-1.5 rounded hover:bg-neutral-100 text-sm" title={t('property:map3d.sunset', 'Sunset')}>🌇</button>
+              <button onClick={reset} className="p-1.5 rounded hover:bg-neutral-100 text-neutral-500" title={t('property:map3d.reset', 'Reset')}>
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
                 </svg>
