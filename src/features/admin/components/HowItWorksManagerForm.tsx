@@ -1,4 +1,5 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import {
   PlayCircleIcon,
   PlusIcon,
@@ -76,12 +77,13 @@ const HowItWorksManagerForm: React.FC<HowItWorksManagerFormProps> = ({
   updateFeature,
   removeFeature,
 }) => {
+  const { t } = useTranslation(['admin', 'common']);
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
       <div className="bg-white rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
         <div className="px-6 py-4 border-b border-gray-200 sticky top-0 bg-white z-10">
           <h2 className="text-xl font-semibold">
-            {editingItem ? 'Edit Content' : 'Add New Content'}
+            {editingItem ? t('admin:howItWorks.editContent') : t('admin:howItWorks.addNewContent')}
           </h2>
         </div>
 
@@ -89,7 +91,7 @@ const HowItWorksManagerForm: React.FC<HowItWorksManagerFormProps> = ({
           {/* Content Type Selection */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              Content Type
+              {t('admin:howItWorks.contentType')}
             </label>
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
               {CONTENT_TYPES.map((type) => {
@@ -116,7 +118,7 @@ const HowItWorksManagerForm: React.FC<HowItWorksManagerFormProps> = ({
           {/* Key */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              Key (unique identifier)
+              {t('admin:howItWorks.key')}
             </label>
             <input
               type="text"
@@ -133,7 +135,7 @@ const HowItWorksManagerForm: React.FC<HowItWorksManagerFormProps> = ({
           {/* Title */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              Title
+              {t('admin:howItWorks.titleLabel')}
             </label>
             <input
               type="text"
@@ -150,7 +152,7 @@ const HowItWorksManagerForm: React.FC<HowItWorksManagerFormProps> = ({
           {/* Description */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              Description
+              {t('admin:howItWorks.description')}
             </label>
             <textarea
               value={formData.description}
@@ -167,7 +169,7 @@ const HowItWorksManagerForm: React.FC<HowItWorksManagerFormProps> = ({
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Section
+                {t('admin:howItWorks.section')}
               </label>
               <select
                 value={formData.subsection}
@@ -185,7 +187,7 @@ const HowItWorksManagerForm: React.FC<HowItWorksManagerFormProps> = ({
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Category
+                {t('admin:howItWorks.category')}
               </label>
               <select
                 value={formData.category}
@@ -207,7 +209,7 @@ const HowItWorksManagerForm: React.FC<HowItWorksManagerFormProps> = ({
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Estimated Time
+                {t('admin:howItWorks.estimatedTime')}
               </label>
               <input
                 type="text"
@@ -221,7 +223,7 @@ const HowItWorksManagerForm: React.FC<HowItWorksManagerFormProps> = ({
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Difficulty
+                {t('admin:howItWorks.difficulty')}
               </label>
               <select
                 value={formData.difficulty}
@@ -240,7 +242,7 @@ const HowItWorksManagerForm: React.FC<HowItWorksManagerFormProps> = ({
           {/* Order */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              Display Order
+              {t('admin:howItWorks.displayOrder')}
             </label>
             <input
               type="number"
@@ -258,7 +260,7 @@ const HowItWorksManagerForm: React.FC<HowItWorksManagerFormProps> = ({
             <>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Video
+                  {t('admin:howItWorks.video')}
                 </label>
                 <input
                   type="file"
@@ -279,7 +281,7 @@ const HowItWorksManagerForm: React.FC<HowItWorksManagerFormProps> = ({
                       onClick={() => fileInputRef.current?.click()}
                       className="text-sm text-blue-600 hover:text-blue-700"
                     >
-                      Replace video
+                      {t('admin:howItWorks.replaceVideo')}
                     </button>
                   </div>
                 ) : (
@@ -298,14 +300,14 @@ const HowItWorksManagerForm: React.FC<HowItWorksManagerFormProps> = ({
                           />
                         </div>
                         <span className="text-sm text-gray-600">
-                          Uploading... {uploadProgress}%
+                          {t('admin:howItWorks.uploading', { progress: uploadProgress })}
                         </span>
                       </div>
                     ) : (
                       <div className="text-center">
                         <CloudArrowUpIcon className="w-10 h-10 text-gray-400 mx-auto mb-2" />
                         <span className="text-sm text-gray-600">
-                          Click to upload a video
+                          {t('admin:howItWorks.clickToUpload')}
                         </span>
                       </div>
                     )}
@@ -315,7 +317,7 @@ const HowItWorksManagerForm: React.FC<HowItWorksManagerFormProps> = ({
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Or paste video URL
+                  {t('admin:howItWorks.orPasteVideoUrl')}
                 </label>
                 <input
                   type="url"
@@ -343,7 +345,7 @@ const HowItWorksManagerForm: React.FC<HowItWorksManagerFormProps> = ({
                   className="flex items-center gap-1 text-sm text-blue-600 hover:text-blue-700"
                 >
                   <PlusIcon className="w-4 h-4" />
-                  Add Step
+                  {t('admin:howItWorks.addStep')}
                 </button>
               </div>
 
@@ -429,7 +431,7 @@ const HowItWorksManagerForm: React.FC<HowItWorksManagerFormProps> = ({
                 {formData.steps.length === 0 && (
                   <div className="text-center py-8 text-gray-500 bg-gray-50 rounded-xl border-2 border-dashed border-gray-200">
                     <BookOpenIcon className="w-8 h-8 mx-auto mb-2 text-gray-300" />
-                    <p className="text-sm">No steps added yet. Click "Add Step" to begin.</p>
+                    <p className="text-sm">{t('admin:howItWorks.noStepsAdded')}</p>
                   </div>
                 )}
               </div>
@@ -449,7 +451,7 @@ const HowItWorksManagerForm: React.FC<HowItWorksManagerFormProps> = ({
                   className="flex items-center gap-1 text-sm text-blue-600 hover:text-blue-700"
                 >
                   <PlusIcon className="w-4 h-4" />
-                  Add FAQ
+                  {t('admin:howItWorks.addFaq')}
                 </button>
               </div>
 
@@ -492,7 +494,7 @@ const HowItWorksManagerForm: React.FC<HowItWorksManagerFormProps> = ({
                 {formData.faqs.length === 0 && (
                   <div className="text-center py-8 text-gray-500 bg-gray-50 rounded-xl border-2 border-dashed border-gray-200">
                     <QuestionMarkCircleIcon className="w-8 h-8 mx-auto mb-2 text-gray-300" />
-                    <p className="text-sm">No FAQs added yet. Click "Add FAQ" to begin.</p>
+                    <p className="text-sm">{t('admin:howItWorks.noFaqsAdded')}</p>
                   </div>
                 )}
               </div>
@@ -512,7 +514,7 @@ const HowItWorksManagerForm: React.FC<HowItWorksManagerFormProps> = ({
                   className="flex items-center gap-1 text-sm text-blue-600 hover:text-blue-700"
                 >
                   <PlusIcon className="w-4 h-4" />
-                  Add Feature
+                  {t('admin:howItWorks.addFeature')}
                 </button>
               </div>
 
@@ -539,7 +541,7 @@ const HowItWorksManagerForm: React.FC<HowItWorksManagerFormProps> = ({
                 {formData.features.length === 0 && (
                   <div className="text-center py-8 text-gray-500 bg-gray-50 rounded-xl border-2 border-dashed border-gray-200">
                     <SparklesIcon className="w-8 h-8 mx-auto mb-2 text-gray-300" />
-                    <p className="text-sm">No features added yet. Click "Add Feature" to begin.</p>
+                    <p className="text-sm">{t('admin:howItWorks.noFeaturesAdded')}</p>
                   </div>
                 )}
               </div>
@@ -553,7 +555,7 @@ const HowItWorksManagerForm: React.FC<HowItWorksManagerFormProps> = ({
               onClick={onClose}
               className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50"
             >
-              Cancel
+              {t('common:cancel')}
             </button>
             <button
               type="submit"
@@ -566,7 +568,7 @@ const HowItWorksManagerForm: React.FC<HowItWorksManagerFormProps> = ({
               }
               className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {editingItem ? 'Save Changes' : 'Add Content'}
+              {editingItem ? t('common:saveChanges') : t('admin:howItWorks.addContent')}
             </button>
           </div>
         </form>

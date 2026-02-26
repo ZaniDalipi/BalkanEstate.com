@@ -1,4 +1,5 @@
 import React, { lazy, Suspense } from 'react';
+import { useTranslation } from 'react-i18next';
 import { XMarkIcon, BuildingOfficeIcon } from '@/constants';
 import { Agency } from '@/types';
 import { AgencyEditForm } from './useAgencyManager';
@@ -32,6 +33,7 @@ const AgencyManagerDetail: React.FC<AgencyManagerDetailProps> = ({
   handleUpdateAgency,
   formatDate,
 }) => {
+  const { t } = useTranslation(['admin', 'common']);
   return (
     <>
       {/* View Modal */}
@@ -39,7 +41,7 @@ const AgencyManagerDetail: React.FC<AgencyManagerDetailProps> = ({
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-lg max-w-3xl w-full max-h-[90vh] overflow-y-auto">
             <div className="p-6 border-b border-gray-200 flex items-center justify-between sticky top-0 bg-white">
-              <h3 className="text-xl font-bold">Agency Details</h3>
+              <h3 className="text-xl font-bold">{t('admin:agencyManager.agencyDetails')}</h3>
               <button onClick={() => setIsViewModalOpen(false)}>
                 <XMarkIcon className="w-6 h-6 text-gray-500 hover:text-gray-700" />
               </button>
@@ -72,18 +74,18 @@ const AgencyManagerDetail: React.FC<AgencyManagerDetailProps> = ({
 
               {/* Contact Information */}
               <div className="border-t pt-4">
-                <h5 className="font-semibold text-gray-900 mb-3">Contact Information</h5>
+                <h5 className="font-semibold text-gray-900 mb-3">{t('admin:agencyManager.contactInformation')}</h5>
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">{t('admin:agencyManager.email')}</label>
                     <div className="text-gray-900">{viewingAgency.email || '-'}</div>
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Phone</label>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">{t('admin:agencyManager.phone')}</label>
                     <div className="text-gray-900">{viewingAgency.phone || '-'}</div>
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Website</label>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">{t('admin:agencyManager.website')}</label>
                     <div className="text-gray-900">
                       {viewingAgency.website ? (
                         <a href={viewingAgency.website} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">
@@ -97,18 +99,18 @@ const AgencyManagerDetail: React.FC<AgencyManagerDetailProps> = ({
 
               {/* Location */}
               <div className="border-t pt-4">
-                <h5 className="font-semibold text-gray-900 mb-3">Location</h5>
+                <h5 className="font-semibold text-gray-900 mb-3">{t('admin:agencyManager.location')}</h5>
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Address</label>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">{t('admin:agencyManager.address')}</label>
                     <div className="text-gray-900">{viewingAgency.address || '-'}</div>
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">City</label>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">{t('admin:agencyManager.city')}</label>
                     <div className="text-gray-900">{viewingAgency.city || '-'}</div>
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Country</label>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">{t('admin:agencyManager.country')}</label>
                     <div className="text-gray-900">{viewingAgency.country || '-'}</div>
                   </div>
                 </div>
@@ -117,12 +119,12 @@ const AgencyManagerDetail: React.FC<AgencyManagerDetailProps> = ({
               {/* Owner Info */}
               {viewingAgency.ownerId && typeof viewingAgency.ownerId === 'object' && (
                 <div className="border-t pt-4">
-                  <h5 className="font-semibold text-gray-900 mb-3">Owner</h5>
+                  <h5 className="font-semibold text-gray-900 mb-3">{t('admin:agencyManager.owner')}</h5>
                   <div className="bg-gray-50 p-4 rounded-lg">
                     <div className="font-medium text-gray-900">{viewingAgency.ownerId.name}</div>
                     <div className="text-sm text-gray-600">{viewingAgency.ownerId.email}</div>
                     {viewingAgency.ownerId.role && (
-                      <div className="text-xs text-gray-500 mt-1">Role: {viewingAgency.ownerId.role}</div>
+                      <div className="text-xs text-gray-500 mt-1">{t('admin:agencyManager.role')}: {viewingAgency.ownerId.role}</div>
                     )}
                   </div>
                 </div>
@@ -132,11 +134,11 @@ const AgencyManagerDetail: React.FC<AgencyManagerDetailProps> = ({
               {(viewingAgency.specialties && viewingAgency.specialties.length > 0) ||
                (viewingAgency.certifications && viewingAgency.certifications.length > 0) ? (
                 <div className="border-t pt-4">
-                  <h5 className="font-semibold text-gray-900 mb-3">Specialties & Certifications</h5>
+                  <h5 className="font-semibold text-gray-900 mb-3">{t('admin:agencyManager.specialtiesAndCertifications')}</h5>
                   <div className="grid grid-cols-2 gap-4">
                     {viewingAgency.specialties && viewingAgency.specialties.length > 0 && (
                       <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">Specialties</label>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">{t('admin:agencyManager.specialties')}</label>
                         <div className="flex flex-wrap gap-2">
                           {viewingAgency.specialties.map((specialty, idx) => (
                             <span key={idx} className="px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm">
@@ -148,7 +150,7 @@ const AgencyManagerDetail: React.FC<AgencyManagerDetailProps> = ({
                     )}
                     {viewingAgency.certifications && viewingAgency.certifications.length > 0 && (
                       <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">Certifications</label>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">{t('admin:agencyManager.certifications')}</label>
                         <div className="flex flex-wrap gap-2">
                           {viewingAgency.certifications.map((cert, idx) => (
                             <span key={idx} className="px-3 py-1 bg-green-100 text-green-800 rounded-full text-sm">
@@ -167,9 +169,9 @@ const AgencyManagerDetail: React.FC<AgencyManagerDetailProps> = ({
                 <div className="border-t pt-4">
                   <div className="flex items-center gap-2">
                     <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-green-100 text-green-800">
-                      ⭐ Featured Agency
+                      {t('admin:agencyManager.featuredAgency')}
                     </span>
-                    <span className="text-sm text-gray-500">Appears in featured section on homepage</span>
+                    <span className="text-sm text-gray-500">{t('admin:agencyManager.featuredAgencyDesc')}</span>
                   </div>
                 </div>
               )}
@@ -177,7 +179,7 @@ const AgencyManagerDetail: React.FC<AgencyManagerDetailProps> = ({
               {/* Business Hours */}
               {viewingAgency.businessHours && Object.values(viewingAgency.businessHours).some(h => h) && (
                 <div className="border-t pt-4">
-                  <h5 className="font-semibold text-gray-900 mb-3">Business Hours</h5>
+                  <h5 className="font-semibold text-gray-900 mb-3">{t('admin:agencyManager.businessHours')}</h5>
                   <div className="grid grid-cols-2 gap-2">
                     {Object.entries(viewingAgency.businessHours).map(([day, hours]) => (
                       hours && (
@@ -193,7 +195,7 @@ const AgencyManagerDetail: React.FC<AgencyManagerDetailProps> = ({
 
               {/* Agents List */}
               <div className="border-t pt-4">
-                <h5 className="font-semibold text-gray-900 mb-3">Agents ({viewingAgency.totalAgents})</h5>
+                <h5 className="font-semibold text-gray-900 mb-3">{t('admin:agencyManager.agents')} ({viewingAgency.totalAgents})</h5>
                 {viewingAgency.agents && viewingAgency.agents.length > 0 ? (
                   <div className="space-y-2">
                     {viewingAgency.agents.map((agent) => (
@@ -209,18 +211,18 @@ const AgencyManagerDetail: React.FC<AgencyManagerDetailProps> = ({
                     ))}
                   </div>
                 ) : (
-                  <p className="text-gray-500 text-sm">No agents assigned</p>
+                  <p className="text-gray-500 text-sm">{t('admin:agencyManager.noAgentsAssigned')}</p>
                 )}
               </div>
 
               {/* Timestamps */}
               <div className="border-t pt-4 grid grid-cols-2 gap-4 text-sm">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Created</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">{t('admin:agencyManager.created')}</label>
                   <div className="text-gray-600">{formatDate(viewingAgency.createdAt)}</div>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Last Updated</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">{t('admin:agencyManager.lastUpdated')}</label>
                   <div className="text-gray-600">{formatDate(viewingAgency.updatedAt)}</div>
                 </div>
               </div>
@@ -234,7 +236,7 @@ const AgencyManagerDetail: React.FC<AgencyManagerDetailProps> = ({
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-lg max-w-3xl w-full max-h-[90vh] overflow-y-auto">
             <div className="p-6 border-b border-gray-200 flex items-center justify-between sticky top-0 bg-white z-10">
-              <h3 className="text-xl font-bold">Edit Agency</h3>
+              <h3 className="text-xl font-bold">{t('admin:agencyManager.editAgency')}</h3>
               <button onClick={() => setIsEditModalOpen(false)}>
                 <XMarkIcon className="w-6 h-6 text-gray-500 hover:text-gray-700" />
               </button>
@@ -243,7 +245,7 @@ const AgencyManagerDetail: React.FC<AgencyManagerDetailProps> = ({
             <form onSubmit={handleUpdateAgency} className="p-6 space-y-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Agency Name
+                  {t('admin:agencyManager.agencyName')}
                 </label>
                 <input
                   type="text"
@@ -256,7 +258,7 @@ const AgencyManagerDetail: React.FC<AgencyManagerDetailProps> = ({
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Description
+                  {t('admin:agencyManager.description')}
                 </label>
                 <textarea
                   value={editForm.description}
@@ -269,7 +271,7 @@ const AgencyManagerDetail: React.FC<AgencyManagerDetailProps> = ({
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Email
+                    {t('admin:agencyManager.email')}
                   </label>
                   <input
                     type="email"
@@ -280,7 +282,7 @@ const AgencyManagerDetail: React.FC<AgencyManagerDetailProps> = ({
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Phone
+                    {t('admin:agencyManager.phone')}
                   </label>
                   <input
                     type="tel"
@@ -293,7 +295,7 @@ const AgencyManagerDetail: React.FC<AgencyManagerDetailProps> = ({
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Website
+                  {t('admin:agencyManager.website')}
                 </label>
                 <input
                   type="url"
@@ -306,7 +308,7 @@ const AgencyManagerDetail: React.FC<AgencyManagerDetailProps> = ({
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Address
+                  {t('admin:agencyManager.address')}
                 </label>
                 <input
                   type="text"
@@ -319,7 +321,7 @@ const AgencyManagerDetail: React.FC<AgencyManagerDetailProps> = ({
               <div className="grid grid-cols-3 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
-                    City
+                    {t('admin:agencyManager.city')}
                   </label>
                   <input
                     type="text"
@@ -330,7 +332,7 @@ const AgencyManagerDetail: React.FC<AgencyManagerDetailProps> = ({
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Country
+                    {t('admin:agencyManager.country')}
                   </label>
                   <input
                     type="text"
@@ -341,7 +343,7 @@ const AgencyManagerDetail: React.FC<AgencyManagerDetailProps> = ({
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Zip Code
+                    {t('admin:agencyManager.zipCode')}
                   </label>
                   <input
                     type="text"
@@ -373,11 +375,11 @@ const AgencyManagerDetail: React.FC<AgencyManagerDetailProps> = ({
               </div>
 
               <div className="border-t pt-4">
-                <h4 className="text-sm font-semibold text-gray-700 mb-3">Social Media Links</h4>
+                <h4 className="text-sm font-semibold text-gray-700 mb-3">{t('admin:agencyManager.socialMediaLinks')}</h4>
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Facebook URL
+                      {t('admin:agencyManager.facebookUrl')}
                     </label>
                     <input
                       type="url"
@@ -389,7 +391,7 @@ const AgencyManagerDetail: React.FC<AgencyManagerDetailProps> = ({
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Instagram URL
+                      {t('admin:agencyManager.instagramUrl')}
                     </label>
                     <input
                       type="url"
@@ -401,7 +403,7 @@ const AgencyManagerDetail: React.FC<AgencyManagerDetailProps> = ({
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
-                      LinkedIn URL
+                      {t('admin:agencyManager.linkedinUrl')}
                     </label>
                     <input
                       type="url"
@@ -413,7 +415,7 @@ const AgencyManagerDetail: React.FC<AgencyManagerDetailProps> = ({
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Twitter URL
+                      {t('admin:agencyManager.twitterUrl')}
                     </label>
                     <input
                       type="url"
@@ -429,7 +431,7 @@ const AgencyManagerDetail: React.FC<AgencyManagerDetailProps> = ({
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Years in Business
+                    {t('admin:agencyManager.yearsInBusiness')}
                   </label>
                   <input
                     type="number"
@@ -448,11 +450,11 @@ const AgencyManagerDetail: React.FC<AgencyManagerDetailProps> = ({
                     className="w-4 h-4 text-blue-600 border-gray-300 rounded"
                   />
                   <label htmlFor="isFeatured" className="ml-2 text-sm text-gray-700">
-                    Featured Agency
+                    {t('admin:agencyManager.featuredAgency')}
                   </label>
                   {editForm.isFeatured && (
                     <span className="ml-2 text-xs text-green-600 bg-green-50 px-2 py-0.5 rounded-full">
-                      Will appear in featured section
+                      {t('admin:agencyManager.willAppearInFeatured')}
                     </span>
                   )}
                 </div>
@@ -461,7 +463,7 @@ const AgencyManagerDetail: React.FC<AgencyManagerDetailProps> = ({
               {/* Specialties */}
               <div className="border-t pt-4">
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Specialties (comma-separated)
+                  {t('admin:agencyManager.specialtiesCommaSeparated')}
                 </label>
                 <input
                   type="text"
@@ -478,7 +480,7 @@ const AgencyManagerDetail: React.FC<AgencyManagerDetailProps> = ({
               {/* Certifications */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Certifications (comma-separated)
+                  {t('admin:agencyManager.certificationsCommaSeparated')}
                 </label>
                 <input
                   type="text"
@@ -494,7 +496,7 @@ const AgencyManagerDetail: React.FC<AgencyManagerDetailProps> = ({
 
               {/* Business Hours */}
               <div className="border-t pt-4">
-                <h4 className="text-sm font-semibold text-gray-700 mb-3">Business Hours</h4>
+                <h4 className="text-sm font-semibold text-gray-700 mb-3">{t('admin:agencyManager.businessHours')}</h4>
                 <div className="grid grid-cols-2 gap-4">
                   {['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'].map((day) => (
                     <div key={day}>
@@ -518,7 +520,7 @@ const AgencyManagerDetail: React.FC<AgencyManagerDetailProps> = ({
 
               <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
                 <p className="text-xs text-yellow-800">
-                  <strong>Note:</strong> Changing agency details will update the information displayed to all users.
+                  <strong>{t('common:note')}:</strong> {t('admin:agencyManager.editNote')}
                 </p>
               </div>
 
@@ -528,13 +530,13 @@ const AgencyManagerDetail: React.FC<AgencyManagerDetailProps> = ({
                   onClick={() => setIsEditModalOpen(false)}
                   className="flex-1 px-6 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 font-medium"
                 >
-                  Cancel
+                  {t('common:cancel')}
                 </button>
                 <button
                   type="submit"
                   className="flex-1 px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium"
                 >
-                  Save Changes
+                  {t('common:saveChanges')}
                 </button>
               </div>
             </form>

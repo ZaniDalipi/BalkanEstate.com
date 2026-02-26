@@ -3,6 +3,7 @@
 // Contains all state, refs, callbacks, and effects for the 3D map
 
 import { useRef, useEffect, useState, useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 import * as maplibregl from 'maplibre-gl';
 import { useShadowTimelapse } from '../hooks/useShadowTimelapse';
 import type { Map3DBuildingsProps } from './Map3DConstants';
@@ -22,6 +23,8 @@ export function use3DMap(props: Map3DBuildingsProps) {
     virtualTour360Url,
     orientation,
   } = props;
+
+  const { t } = useTranslation(['property']);
 
   // Calculate effective bearing from orientation
   // Camera should face TOWARD the building's oriented face (opposite direction)
@@ -265,13 +268,15 @@ export function use3DMap(props: Map3DBuildingsProps) {
 
   // Get cardinal direction label from bearing
   const getCardinalLabel = (bearing: number): string => {
-    const dirs = ['North', 'NE', 'East', 'SE', 'South', 'SW', 'West', 'NW'];
-    return dirs[Math.round(bearing / 45) % 8];
+    const keys = ['North', 'Northeast', 'East', 'Southeast', 'South', 'Southwest', 'West', 'Northwest'];
+    const key = keys[Math.round(bearing / 45) % 8];
+    return t(`property:map3d.cardinalDirections.${key}`, key);
   };
 
   const getCardinalShort = (bearing: number): string => {
-    const dirs = ['N', 'NE', 'E', 'SE', 'S', 'SW', 'W', 'NW'];
-    return dirs[Math.round(bearing / 45) % 8];
+    const keys = ['N', 'NE', 'E', 'SE', 'S', 'SW', 'W', 'NW'];
+    const key = keys[Math.round(bearing / 45) % 8];
+    return t(`property:map3d.cardinalDirections.${key}`, key);
   };
 
   // Convert orientation key to compass bearing (degrees)
@@ -364,7 +369,7 @@ export function use3DMap(props: Map3DBuildingsProps) {
             text-align: center;
             white-space: nowrap;
           ">
-            <div style="font-size: 10px; color: #94a3b8; font-weight: 500;">Facing</div>
+            <div style="font-size: 10px; color: #94a3b8; font-weight: 500;">${t('property:map3d.facing', 'Facing')}</div>
             <div style="display: flex; align-items: center; gap: 4px; justify-content: center;">
               <div class="facing-arrow" style="
                 width: 20px; height: 20px;
@@ -378,7 +383,7 @@ export function use3DMap(props: Map3DBuildingsProps) {
               </div>
               <span style="font-size: 14px; font-weight: 700; color: #60a5fa;">${cardinal}</span>
             </div>
-            <div style="font-size: 9px; color: #64748b;">${cardinalFull}-facing</div>
+            <div style="font-size: 9px; color: #64748b;">${t('property:map3d.facingDirection', '{{direction}}-facing', { direction: cardinalFull })}</div>
           </div>
         </div>
       `;

@@ -222,7 +222,12 @@
     "description": "Istražite ovu nekretninu u imerzivnom 360°",
     "openInNewTab": "Otvori u novom tabu za potpuno iskustvo",
     "failedToLoad": "Failed to load virtual tour",
-    "loading": "Loading virtual tour..."
+    "loading": "Loading virtual tour...",
+    "exit": "Izađi iz ture",
+    "floor": "Sprat {{floor}}",
+    "hint": "Povucite za gledanje \u2022 Skrolajte za zum",
+    "entering": "Ulazim u zgradu...",
+    "tourButton": "360° Tura"
   },
   "featuredAgencies": "Istaknute agencije",
   "status": {
@@ -397,7 +402,9 @@
       "play": "Let do nekretnine",
       "skip": "Preskoči",
       "replay": "Ponovi",
-      "exploreMap": "Istraži kartu"
+      "exploreMap": "Istraži kartu",
+      "flyShort": "Leti",
+      "mapShort": "Mapa"
     },
     "errors": {
       "noLocation": "Podaci o lokaciji nisu dostupni"
@@ -430,7 +437,44 @@
     "floorLevel": "Sprat {{floor}} od {{total}}",
     "groundFloor": "Prizemlje",
     "topFloor": "Posljednji sprat",
-    "middleFloor": "Srednji sprat"
+    "middleFloor": "Srednji sprat",
+    "enter": "Uđi"
+  },
+  "map3d": {
+    "shadows": "Prikaži sjene zgrada",
+    "shadowsOn": "Sjene",
+    "shadowsOff": "Sjene",
+    "floorLabels": "Prikaži nivoe spratova",
+    "showFloors": "Oznake",
+    "hideFloors": "Sakrij",
+    "nearbyPlaces": "Obližnja mjesta",
+    "nearbyPOI": "Blizu",
+    "loading": "Učitavanje 3D mape...",
+    "facing": "Okrenuto",
+    "facingDirection": "Okrenuto prema {{direction}}",
+    "sunrise": "Izlazak sunca",
+    "noon": "Podne",
+    "sunset": "Zalazak sunca",
+    "reset": "Resetuj",
+    "sunAndShadows": "Sunce i sjene",
+    "cardinalDirections": {
+      "N": "S",
+      "NE": "SI",
+      "E": "I",
+      "SE": "JI",
+      "S": "J",
+      "SW": "JZ",
+      "W": "Z",
+      "NW": "SZ",
+      "North": "Sjever",
+      "Northeast": "Sjeveroistok",
+      "East": "Istok",
+      "Southeast": "Jugoistok",
+      "South": "Jug",
+      "Southwest": "Jugozapad",
+      "West": "Zapad",
+      "Northwest": "Sjeverozapad"
+    }
   },
   "guide": {
     "messages": {
@@ -475,5 +519,36 @@
     "skipVideo": "Skip Video",
     "videoTour": "Video Tour",
     "enter3DTour": "Enter 3D Tour"
+  },
+  "viewings": {
+    "title": "Zahtjevi za Razgledanje",
+    "subtitle": "Upravljajte zahtjevima za razgledanje nekretnina od potencijalnih kupaca. Odobrite ili odbijte da ih obavijestite e-poštom.",
+    "status": { "pending": "Na čekanju", "approved": "Odobreno", "declined": "Odbijeno", "completed": "Završeno" },
+    "empty": { "title": "Nema zahtjeva za razgledanje", "description": "Kada neko zakaže razgledanje vaše nekretnine, pojavit će se ovdje.", "filtered": "Nema {{status}} zahtjeva za razgledanje." },
+    "relative": { "past": "Prošlo", "inDays": "Za {{count}} dana" },
+    "reason": "Razlog:", "declineReason": "Razlog odbijanja (opcionalno)", "declineReasonPlaceholder": "npr., Termin više nije dostupan...",
+    "declining": "Odbijanje...", "confirmDecline": "Potvrdi Odbijanje", "approving": "Odobravanje...", "approve": "Odobri",
+    "decline": "Odbij", "markCompleted": "Označi kao Završeno", "updating": "Ažuriranje...", "cancelViewing": "Otkaži Razgledanje", "requested": "Zatraženo"
+  },
+  "floorPlan": {
+    "viewer": {
+      "ariaLabel": "Preglednik plana sprata", "panMode": "Način pomicanja", "panTitle": "Pomakni i Uvećaj (povuci za pomicanje, skrolaj za uvećanje)",
+      "pan": "Pomakni", "annotateMode": "Način označavanja", "annotateTitle": "Kliknite na plan sprata da dodate oznake soba",
+      "label": "Oznaka", "clearLabels": "Obriši sve oznake", "zoomOut": "Umanji", "zoomIn": "Uvećaj",
+      "fitToScreen": "Prilagodi ekranu", "fitToScreenShortcut": "Prilagodi ekranu (0)", "close": "Zatvori preglednik plana sprata",
+      "closeShortcut": "Zatvori (Esc)", "clickToAddLabel": "Kliknite bilo gdje na planu sprata da dodate oznaku sobe",
+      "loading": "Učitavanje plana sprata...", "loadFailed": "Neuspješno Učitavanje Plana Sprata",
+      "loadFailedDesc": "Slika plana sprata nije se mogla učitati. Možda je premještena ili obrisana.",
+      "floorPlanAlt": "Plan Sprata", "roomNamePlaceholder": "Naziv sobe...", "closeDetails": "Zatvori detalje", "roomType": "Vrsta Sobe",
+      "rooms": { "bedroom": "Spavaća soba", "bathroom": "Kupatilo", "kitchen": "Kuhinja", "living": "Dnevna soba", "dining": "Trpezarija", "office": "Kancelarija", "garage": "Garaža", "storage": "Ostava", "balcony": "Balkon", "hallway": "Hodnik", "other": "Ostalo" },
+      "area": "Površina (m²)", "areaPlaceholder": "npr. 25", "notes": "Bilješke", "notesPlaceholder": "Prozor na jug, ugrađeni ormar...",
+      "rename": "Preimenuj", "removeLabel": "Ukloni oznaku", "zoomLevel": "Nivo uvećanja", "roomLabels": "Oznake Soba",
+      "shortcuts": { "scroll": "Skrolaj: Uvećaj | Povuci: Pomakni | Dvostruki klik: Brzo uvećanje", "keys": "+/-: Uvećaj | 0: Resetuj | Esc: Zatvori", "annotate": "Klik: Dodaj oznaku | Esc: Izađi iz načina označavanja" }
+    }
+  },
+  "imageViewer": {
+    "ariaLabel": "Preglednik slika: {{current}} od {{total}}", "close": "Zatvori preglednik slika",
+    "previous": "Prethodna slika ({{current}} od {{total}})", "next": "Sljedeća slika ({{current}} od {{total}})",
+    "loadError": "Slika se nije mogla učitati", "imageAlt": "Slika nekretnine {{current}} od {{total}}"
   }
 }

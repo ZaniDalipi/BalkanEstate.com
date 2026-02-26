@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useAppContext } from '../../context/AppContext';
 import { API_URL } from '../../src/shared/api/config';
 
@@ -40,14 +41,15 @@ interface ViewingCounts {
   total: number;
 }
 
-const statusConfig: Record<ViewingStatus, { label: string; bg: string; text: string; dot: string }> = {
-  pending: { label: 'Pending', bg: 'bg-amber-50/60', text: 'text-amber-700', dot: 'bg-amber-400' },
-  confirmed: { label: 'Approved', bg: 'bg-green-50/60', text: 'text-green-700', dot: 'bg-green-400' },
-  cancelled: { label: 'Declined', bg: 'bg-red-50/60', text: 'text-red-700', dot: 'bg-red-400' },
-  completed: { label: 'Completed', bg: 'bg-blue-50/60', text: 'text-blue-700', dot: 'bg-blue-400' },
+const statusConfig: Record<ViewingStatus, { labelKey: string; defaultLabel: string; bg: string; text: string; dot: string }> = {
+  pending: { labelKey: 'property:viewings.status.pending', defaultLabel: 'Pending', bg: 'bg-amber-50/60', text: 'text-amber-700', dot: 'bg-amber-400' },
+  confirmed: { labelKey: 'property:viewings.status.approved', defaultLabel: 'Approved', bg: 'bg-green-50/60', text: 'text-green-700', dot: 'bg-green-400' },
+  cancelled: { labelKey: 'property:viewings.status.declined', defaultLabel: 'Declined', bg: 'bg-red-50/60', text: 'text-red-700', dot: 'bg-red-400' },
+  completed: { labelKey: 'property:viewings.status.completed', defaultLabel: 'Completed', bg: 'bg-blue-50/60', text: 'text-blue-700', dot: 'bg-blue-400' },
 };
 
 const ViewingRequestsTab: React.FC = () => {
+  const { t } = useTranslation(['common', 'property']);
   const { dispatch } = useAppContext();
   const [viewings, setViewings] = useState<ViewingRequest[]>([]);
   const [counts, setCounts] = useState<ViewingCounts>({ pending: 0, confirmed: 0, cancelled: 0, completed: 0, total: 0 });
@@ -134,10 +136,10 @@ const ViewingRequestsTab: React.FC = () => {
     const diffMs = date.getTime() - now.getTime();
     const diffDays = Math.ceil(diffMs / (1000 * 60 * 60 * 24));
 
-    if (diffDays < 0) return 'Past';
-    if (diffDays === 0) return 'Today';
-    if (diffDays === 1) return 'Tomorrow';
-    if (diffDays <= 7) return `In ${diffDays} days`;
+    if (diffDays < 0) return t('property:viewings.relative.past', 'Past');
+    if (diffDays === 0) return t('common:today', 'Today');
+    if (diffDays === 1) return t('common:tomorrow', 'Tomorrow');
+    if (diffDays <= 7) return t('property:viewings.relative.inDays', 'In {{count}} days', { count: diffDays });
     return '';
   };
 
@@ -152,20 +154,20 @@ const ViewingRequestsTab: React.FC = () => {
   };
 
   const filterTabs: { key: StatusFilter; label: string; count?: number }[] = [
-    { key: 'all', label: 'All', count: counts.total },
-    { key: 'pending', label: 'Pending', count: counts.pending },
-    { key: 'confirmed', label: 'Approved', count: counts.confirmed },
-    { key: 'cancelled', label: 'Declined', count: counts.cancelled },
-    { key: 'completed', label: 'Completed', count: counts.completed },
+    { key: 'all', label: t('common:all', 'All'), count: counts.total },
+    { key: 'pending', label: t('property:viewings.status.pending', 'Pending'), count: counts.pending },
+    { key: 'confirmed', label: t('property:viewings.status.approved', 'Approved'), count: counts.confirmed },
+    { key: 'cancelled', label: t('property:viewings.status.declined', 'Declined'), count: counts.cancelled },
+    { key: 'completed', label: t('property:viewings.status.completed', 'Completed'), count: counts.completed },
   ];
 
   return (
     <div className="space-y-6">
       {/* Header */}
       <div>
-        <h2 className="text-2xl font-bold text-neutral-800">Viewing Requests</h2>
+        <h2 className="text-2xl font-bold text-neutral-800">{t('property:viewings.title', 'Viewing Requests')}</h2>
         <p className="text-neutral-500 text-sm mt-1">
-          Manage property viewing requests from potential buyers. Approve or decline to notify them by email.
+          {t('property:viewings.subtitle', 'Manage property viewing requests from potential buyers. Approve or decline to notify them by email.')}
         </p>
       </div>
 
@@ -197,7 +199,7 @@ const ViewingRequestsTab: React.FC = () => {
       {error && (
         <div className="p-4 bg-red-50/60 backdrop-blur-sm border border-red-200/50 rounded-2xl">
           <p className="text-red-700 text-sm">{error}</p>
-          <button onClick={fetchViewings} className="text-sm text-red-600 underline mt-1">Try again</button>
+          <button onClick={fetchViewings} className="text-sm text-red-600 underline mt-1">{t('common:tryAgain', 'Try again')}</button>
         </div>
       )}
 
@@ -227,11 +229,11 @@ const ViewingRequestsTab: React.FC = () => {
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
             </svg>
           </div>
-          <h3 className="text-lg font-semibold text-neutral-700 mb-1">No viewing requests</h3>
+          <h3 className="text-lg font-semibold text-neutral-700 mb-1">{t('property:viewings.empty.title', 'No viewing requests')}</h3>
           <p className="text-neutral-500 text-sm">
             {statusFilter === 'all'
-              ? 'When someone schedules a viewing for your property, it will appear here.'
-              : `No ${statusFilter} viewing requests found.`}
+              ? t('property:viewings.empty.description', 'When someone schedules a viewing for your property, it will appear here.')
+              : t('property:viewings.empty.filtered', 'No {{status}} viewing requests found.', { status: statusFilter })}
           </p>
         </div>
       )}
@@ -284,7 +286,7 @@ const ViewingRequestsTab: React.FC = () => {
                       {/* Status badge */}
                       <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium ${config.bg} ${config.text} border border-current/10 self-start flex-shrink-0`}>
                         <span className={`w-1.5 h-1.5 rounded-full ${config.dot}`} />
-                        {config.label}
+                        {t(config.labelKey, config.defaultLabel)}
                       </span>
                     </div>
 
@@ -341,7 +343,7 @@ const ViewingRequestsTab: React.FC = () => {
                     {/* Cancel reason */}
                     {viewing.status === 'cancelled' && viewing.cancelReason && (
                       <div className="bg-red-50/40 border border-red-200/30 rounded-xl p-3 mb-3">
-                        <p className="text-sm text-red-600"><strong>Reason:</strong> {viewing.cancelReason}</p>
+                        <p className="text-sm text-red-600"><strong>{t('property:viewings.reason', 'Reason:')}</strong> {viewing.cancelReason}</p>
                       </div>
                     )}
 
@@ -349,12 +351,12 @@ const ViewingRequestsTab: React.FC = () => {
                     {declineViewingId === viewing.id && (
                       <div className="bg-white/40 backdrop-blur-sm border border-white/40 rounded-xl p-4 mb-3 space-y-3">
                         <label className="block text-sm font-medium text-neutral-700">
-                          Reason for declining (optional)
+                          {t('property:viewings.declineReason', 'Reason for declining (optional)')}
                         </label>
                         <textarea
                           value={declineReason}
                           onChange={e => setDeclineReason(e.target.value)}
-                          placeholder="e.g., The time slot is no longer available..."
+                          placeholder={t('property:viewings.declineReasonPlaceholder', 'e.g., The time slot is no longer available...')}
                           className="w-full px-3 py-2 bg-white/40 backdrop-blur-sm border border-white/50 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/20 text-sm"
                           rows={2}
                         />
@@ -364,13 +366,13 @@ const ViewingRequestsTab: React.FC = () => {
                             disabled={actionLoading === viewing.id}
                             className="px-4 py-2 bg-red-500/80 text-white text-sm font-medium rounded-xl hover:bg-red-600 transition-all disabled:opacity-50"
                           >
-                            {actionLoading === viewing.id ? 'Declining...' : 'Confirm Decline'}
+                            {actionLoading === viewing.id ? t('property:viewings.declining', 'Declining...') : t('property:viewings.confirmDecline', 'Confirm Decline')}
                           </button>
                           <button
                             onClick={() => { setDeclineViewingId(null); setDeclineReason(''); }}
                             className="px-4 py-2 bg-white/50 text-neutral-600 text-sm font-medium rounded-xl hover:bg-white/70 transition-all border border-white/50"
                           >
-                            Cancel
+                            {t('common:cancel', 'Cancel')}
                           </button>
                         </div>
                       </div>
@@ -387,14 +389,14 @@ const ViewingRequestsTab: React.FC = () => {
                           {actionLoading === viewing.id ? (
                             <span className="flex items-center gap-2">
                               <span className="animate-spin rounded-full h-3.5 w-3.5 border-b-2 border-white" />
-                              Approving...
+                              {t('property:viewings.approving', 'Approving...')}
                             </span>
                           ) : (
                             <span className="flex items-center gap-1.5">
                               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                               </svg>
-                              Approve
+                              {t('property:viewings.approve', 'Approve')}
                             </span>
                           )}
                         </button>
@@ -407,7 +409,7 @@ const ViewingRequestsTab: React.FC = () => {
                             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                             </svg>
-                            Decline
+                            {t('property:viewings.decline', 'Decline')}
                           </span>
                         </button>
                         {!past && (
@@ -416,7 +418,7 @@ const ViewingRequestsTab: React.FC = () => {
                             disabled={actionLoading === viewing.id}
                             className="px-5 py-2 bg-white/50 backdrop-blur-sm text-blue-600 text-sm font-semibold rounded-xl hover:bg-blue-50/60 transition-all border border-blue-200/40 disabled:opacity-50"
                           >
-                            Mark Completed
+                            {t('property:viewings.markCompleted', 'Mark Completed')}
                           </button>
                         )}
                       </div>
@@ -430,21 +432,21 @@ const ViewingRequestsTab: React.FC = () => {
                           disabled={actionLoading === viewing.id}
                           className="px-5 py-2 bg-blue-500/80 backdrop-blur-sm text-white text-sm font-semibold rounded-xl hover:bg-blue-600 transition-all shadow-md shadow-blue-500/20 border border-blue-400/30 disabled:opacity-50"
                         >
-                          {actionLoading === viewing.id ? 'Updating...' : 'Mark Completed'}
+                          {actionLoading === viewing.id ? t('property:viewings.updating', 'Updating...') : t('property:viewings.markCompleted', 'Mark Completed')}
                         </button>
                         <button
                           onClick={() => setDeclineViewingId(viewing.id)}
                           disabled={actionLoading === viewing.id}
                           className="px-5 py-2 bg-white/50 backdrop-blur-sm text-red-600 text-sm font-semibold rounded-xl hover:bg-red-50/60 transition-all border border-red-200/40 disabled:opacity-50"
                         >
-                          Cancel Viewing
+                          {t('property:viewings.cancelViewing', 'Cancel Viewing')}
                         </button>
                       </div>
                     )}
 
                     {/* Timestamp */}
                     <p className="text-xs text-neutral-400 mt-2">
-                      Requested {new Date(viewing.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit' })}
+                      {t('property:viewings.requested', 'Requested')} {new Date(viewing.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit' })}
                     </p>
                   </div>
                 </div>
