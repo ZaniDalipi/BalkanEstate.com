@@ -1,4 +1,5 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import {
   ClockIcon,
   UsersIcon,
@@ -77,33 +78,35 @@ export const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({
   dashboardStats,
   recentSubscriptions,
   formatTimestamp,
-}) => (
+}) => {
+  const { t } = useTranslation(['admin', 'common']);
+  return (
   <div className="space-y-6">
     {/* Stats Grid */}
     <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
       <StatCard
-        title="Subscribe Clicks"
+        title={t('admin:activityLog.subscribeClicks')}
         value={dashboardStats?.subscriptionClicks.value || 0}
         change={dashboardStats?.subscriptionClicks.change}
         icon={<CursorArrowRaysIcon className="w-5 h-5" />}
         color="blue"
       />
       <StatCard
-        title="New Subscriptions"
+        title={t('admin:activityLog.newSubscriptions')}
         value={dashboardStats?.subscriptionCompletions.value || 0}
         change={dashboardStats?.subscriptionCompletions.change}
         icon={<CreditCardIcon className="w-5 h-5" />}
         color="emerald"
       />
       <StatCard
-        title="Conversion Rate"
+        title={t('admin:activityLog.conversionRate')}
         value={`${dashboardStats?.conversionRate.value || 0}%`}
         change={dashboardStats?.conversionRate.change}
         icon={<ChartBarIcon className="w-5 h-5" />}
         color="purple"
       />
       <StatCard
-        title="Page Views"
+        title={t('admin:activityLog.pageViews')}
         value={dashboardStats?.pageViews.value || 0}
         change={dashboardStats?.pageViews.change}
         icon={<GlobeAltIcon className="w-5 h-5" />}
@@ -115,20 +118,20 @@ export const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({
     <div className="grid grid-cols-3 gap-4">
       <div className="bg-white rounded-xl shadow-sm p-4 border border-gray-100 text-center">
         <div className="text-3xl font-bold text-blue-600">{dashboardStats?.newUsers.value || 0}</div>
-        <div className="text-sm text-gray-500">New Users</div>
+        <div className="text-sm text-gray-500">{t('admin:activityLog.newUsers')}</div>
         {dashboardStats?.newUsers.change && (
           <div className={`text-xs mt-1 ${parseFloat(dashboardStats.newUsers.change) >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-            {parseFloat(dashboardStats.newUsers.change) >= 0 ? '+' : ''}{dashboardStats.newUsers.change}% vs prev
+            {parseFloat(dashboardStats.newUsers.change) >= 0 ? '+' : ''}{dashboardStats.newUsers.change}% {t('admin:activityLog.vsPrev')}
           </div>
         )}
       </div>
       <div className="bg-white rounded-xl shadow-sm p-4 border border-gray-100 text-center">
         <div className="text-3xl font-bold text-green-600">{dashboardStats?.newProperties || 0}</div>
-        <div className="text-sm text-gray-500">New Listings</div>
+        <div className="text-sm text-gray-500">{t('admin:activityLog.newListings')}</div>
       </div>
       <div className="bg-white rounded-xl shadow-sm p-4 border border-gray-100 text-center">
         <div className="text-3xl font-bold text-purple-600">{dashboardStats?.newInquiries || 0}</div>
-        <div className="text-sm text-gray-500">New Inquiries</div>
+        <div className="text-sm text-gray-500">{t('admin:activityLog.newInquiries')}</div>
       </div>
     </div>
 
@@ -136,10 +139,10 @@ export const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({
     <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
       <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
         <CreditCardIcon className="w-5 h-5 text-emerald-600" />
-        Recent Subscription Events
+        {t('admin:activityLog.recentSubscriptionEvents')}
       </h3>
       {recentSubscriptions.length === 0 ? (
-        <p className="text-gray-500 text-center py-4">No subscription events yet</p>
+        <p className="text-gray-500 text-center py-4">{t('admin:activityLog.noSubscriptionEvents')}</p>
       ) : (
         <div className="space-y-3">
           {recentSubscriptions.map((event) => (
@@ -157,7 +160,7 @@ export const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({
                     {event.eventType.replace(/_/g, ' ').replace(/subscription /i, '')}
                   </p>
                   <p className="text-sm text-gray-500">
-                    {event.userId?.email || 'Unknown user'}
+                    {event.userId?.email || t('admin:activityLog.unknownUser')}
                   </p>
                 </div>
               </div>
@@ -175,7 +178,8 @@ export const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({
       )}
     </div>
   </div>
-);
+  );
+};
 
 // ============================================================================
 // Heatmap Panel
@@ -185,21 +189,23 @@ interface HeatmapPanelProps {
   heatmapData: HeatmapData | null;
 }
 
-export const HeatmapPanel: React.FC<HeatmapPanelProps> = ({ heatmapData }) => (
+export const HeatmapPanel: React.FC<HeatmapPanelProps> = ({ heatmapData }) => {
+  const { t } = useTranslation(['admin', 'common']);
+  return (
   <div className="space-y-6">
     {/* Subscription Funnel */}
     <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
       <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
         <ChartBarIcon className="w-5 h-5 text-purple-600" />
-        Subscription Funnel
+        {t('admin:activityLog.subscriptionFunnel')}
       </h3>
       <div className="space-y-3">
         {[
-          { label: 'Pricing Page Views', value: heatmapData?.subscriptionFunnel?.pricingPageViews || 0, color: 'bg-blue-500' },
-          { label: 'Subscribe Button Clicks', value: heatmapData?.subscriptionFunnel?.subscribeButtonClicks || 0, color: 'bg-indigo-500' },
-          { label: 'Modal Opened', value: heatmapData?.subscriptionFunnel?.modalOpened || 0, color: 'bg-purple-500' },
-          { label: 'Checkout Started', value: heatmapData?.subscriptionFunnel?.checkoutStarted || 0, color: 'bg-violet-500' },
-          { label: 'Completed', value: heatmapData?.subscriptionFunnel?.completed || 0, color: 'bg-emerald-500' },
+          { label: t('admin:activityLog.pricingPageViews'), value: heatmapData?.subscriptionFunnel?.pricingPageViews || 0, color: 'bg-blue-500' },
+          { label: t('admin:activityLog.subscribeButtonClicks'), value: heatmapData?.subscriptionFunnel?.subscribeButtonClicks || 0, color: 'bg-indigo-500' },
+          { label: t('admin:activityLog.modalOpened'), value: heatmapData?.subscriptionFunnel?.modalOpened || 0, color: 'bg-purple-500' },
+          { label: t('admin:activityLog.checkoutStarted'), value: heatmapData?.subscriptionFunnel?.checkoutStarted || 0, color: 'bg-violet-500' },
+          { label: t('admin:activityLog.completed'), value: heatmapData?.subscriptionFunnel?.completed || 0, color: 'bg-emerald-500' },
         ].map((step, index) => {
           const maxValue = heatmapData?.subscriptionFunnel?.pricingPageViews || 1;
           const percentage = Math.round((step.value / maxValue) * 100);
@@ -232,10 +238,10 @@ export const HeatmapPanel: React.FC<HeatmapPanelProps> = ({ heatmapData }) => (
       <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
         <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
           <GlobeAltIcon className="w-5 h-5 text-blue-600" />
-          Top Pages
+          {t('admin:activityLog.topPages')}
         </h3>
         {!heatmapData?.pageViews?.length ? (
-          <p className="text-gray-500 text-center py-4">No page view data yet</p>
+          <p className="text-gray-500 text-center py-4">{t('admin:activityLog.noPageViewData')}</p>
         ) : (
           <div className="space-y-2">
             {heatmapData.pageViews.slice(0, 8).map((page, index) => (
@@ -247,8 +253,8 @@ export const HeatmapPanel: React.FC<HeatmapPanelProps> = ({ heatmapData }) => (
                   </span>
                 </div>
                 <div className="flex items-center gap-4">
-                  <span className="text-sm text-gray-500">{page.uniqueVisitors} users</span>
-                  <span className="text-sm font-bold text-gray-900">{page.views} views</span>
+                  <span className="text-sm text-gray-500">{page.uniqueVisitors} {t('admin:activityLog.users')}</span>
+                  <span className="text-sm font-bold text-gray-900">{page.views} {t('admin:activityLog.views')}</span>
                 </div>
               </div>
             ))}
@@ -259,10 +265,10 @@ export const HeatmapPanel: React.FC<HeatmapPanelProps> = ({ heatmapData }) => (
       <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
         <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
           <CursorArrowRaysIcon className="w-5 h-5 text-amber-600" />
-          Top Button Clicks
+          {t('admin:activityLog.topButtonClicks')}
         </h3>
         {!heatmapData?.buttonClicks?.length ? (
-          <p className="text-gray-500 text-center py-4">No button click data yet</p>
+          <p className="text-gray-500 text-center py-4">{t('admin:activityLog.noButtonClickData')}</p>
         ) : (
           <div className="space-y-2">
             {heatmapData.buttonClicks.slice(0, 8).map((click, index) => (
@@ -287,10 +293,10 @@ export const HeatmapPanel: React.FC<HeatmapPanelProps> = ({ heatmapData }) => (
       <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
         <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
           <DevicePhoneMobileIcon className="w-5 h-5 text-indigo-600" />
-          Device Breakdown
+          {t('admin:activityLog.deviceBreakdown')}
         </h3>
         {!heatmapData?.deviceBreakdown || Object.keys(heatmapData.deviceBreakdown).length === 0 ? (
-          <p className="text-gray-500 text-center py-4">No device data yet</p>
+          <p className="text-gray-500 text-center py-4">{t('admin:activityLog.noDeviceData')}</p>
         ) : (
           <div className="space-y-4">
             {Object.entries(heatmapData.deviceBreakdown).map(([device, count]) => {
@@ -329,17 +335,17 @@ export const HeatmapPanel: React.FC<HeatmapPanelProps> = ({ heatmapData }) => (
       <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
         <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
           <ArrowTrendingUpIcon className="w-5 h-5 text-green-600" />
-          Common User Flows
+          {t('admin:activityLog.commonUserFlows')}
         </h3>
         {!heatmapData?.userFlows?.length ? (
-          <p className="text-gray-500 text-center py-4">No user flow data yet</p>
+          <p className="text-gray-500 text-center py-4">{t('admin:activityLog.noUserFlowData')}</p>
         ) : (
           <div className="space-y-2">
             {heatmapData.userFlows.slice(0, 5).map((flow, index) => (
               <div key={flow.flow} className="p-3 bg-gray-50 rounded-lg">
                 <div className="flex justify-between items-start mb-1">
                   <span className="text-xs font-medium text-gray-500">Flow #{index + 1}</span>
-                  <span className="text-sm font-bold text-gray-900">{flow.count} sessions</span>
+                  <span className="text-sm font-bold text-gray-900">{flow.count} {t('admin:activityLog.sessions')}</span>
                 </div>
                 <p className="text-xs text-gray-600 font-mono">{flow.flow}</p>
               </div>
@@ -353,7 +359,7 @@ export const HeatmapPanel: React.FC<HeatmapPanelProps> = ({ heatmapData }) => (
     <div className="bg-gradient-to-br from-indigo-50 to-purple-50 rounded-xl shadow-sm p-6 border border-indigo-100">
       <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
         <span className="text-xl">💡</span>
-        Suggestions for Improvement
+        {t('admin:activityLog.suggestionsForImprovement')}
       </h3>
       <div className="grid md:grid-cols-2 gap-4">
         {heatmapData?.subscriptionFunnel && (
@@ -361,19 +367,18 @@ export const HeatmapPanel: React.FC<HeatmapPanelProps> = ({ heatmapData }) => (
             {heatmapData.subscriptionFunnel.pricingPageViews > 0 &&
              heatmapData.subscriptionFunnel.subscribeButtonClicks < heatmapData.subscriptionFunnel.pricingPageViews * 0.1 && (
               <div className="bg-white/80 rounded-lg p-4">
-                <h4 className="font-medium text-gray-900 mb-1">Low Button Click Rate</h4>
+                <h4 className="font-medium text-gray-900 mb-1">{t('admin:activityLog.lowButtonClickRate')}</h4>
                 <p className="text-sm text-gray-600">
-                  Only {Math.round((heatmapData.subscriptionFunnel.subscribeButtonClicks / heatmapData.subscriptionFunnel.pricingPageViews) * 100)}%
-                  of pricing page visitors click subscribe. Consider making CTAs more prominent.
+                  {t('admin:activityLog.lowButtonClickRateDesc', { percentage: Math.round((heatmapData.subscriptionFunnel.subscribeButtonClicks / heatmapData.subscriptionFunnel.pricingPageViews) * 100) })}
                 </p>
               </div>
             )}
             {heatmapData.subscriptionFunnel.modalOpened > 0 &&
              heatmapData.subscriptionFunnel.completed < heatmapData.subscriptionFunnel.modalOpened * 0.2 && (
               <div className="bg-white/80 rounded-lg p-4">
-                <h4 className="font-medium text-gray-900 mb-1">Checkout Drop-off</h4>
+                <h4 className="font-medium text-gray-900 mb-1">{t('admin:activityLog.checkoutDropOff')}</h4>
                 <p className="text-sm text-gray-600">
-                  Users are dropping off during checkout. Consider simplifying the payment flow or adding trust signals.
+                  {t('admin:activityLog.checkoutDropOffDesc')}
                 </p>
               </div>
             )}
@@ -381,22 +386,23 @@ export const HeatmapPanel: React.FC<HeatmapPanelProps> = ({ heatmapData }) => (
         )}
         {heatmapData?.deviceBreakdown?.mobile && heatmapData.deviceBreakdown.mobile > (heatmapData.deviceBreakdown.desktop || 0) && (
           <div className="bg-white/80 rounded-lg p-4">
-            <h4 className="font-medium text-gray-900 mb-1">Mobile-First Users</h4>
+            <h4 className="font-medium text-gray-900 mb-1">{t('admin:activityLog.mobileFirstUsers')}</h4>
             <p className="text-sm text-gray-600">
-              Most users are on mobile. Ensure mobile experience is optimized for conversions.
+              {t('admin:activityLog.mobileFirstUsersDesc')}
             </p>
           </div>
         )}
         <div className="bg-white/80 rounded-lg p-4">
-          <h4 className="font-medium text-gray-900 mb-1">A/B Testing</h4>
+          <h4 className="font-medium text-gray-900 mb-1">{t('admin:activityLog.abTesting')}</h4>
           <p className="text-sm text-gray-600">
-            Consider A/B testing pricing page layouts, CTA copy, and subscription modal designs.
+            {t('admin:activityLog.abTestingDesc')}
           </p>
         </div>
       </div>
     </div>
   </div>
-);
+  );
+};
 
 // ============================================================================
 // Activity List
@@ -448,18 +454,20 @@ export const ActivityList: React.FC<ActivityListProps> = ({
   totalPages,
   setCurrentPage,
   formatTimestamp,
-}) => (
+}) => {
+  const { t } = useTranslation(['admin', 'common']);
+  return (
   <div className="bg-white rounded-xl shadow-sm overflow-hidden">
     {isLoading ? (
       <div className="p-8 text-center">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
-        <p className="mt-4 text-gray-600">Loading activity log...</p>
+        <p className="mt-4 text-gray-600">{t('admin:activityLog.loadingActivityLog')}</p>
       </div>
     ) : activities.length === 0 ? (
       <div className="p-8 text-center">
         <ClockIcon className="w-12 h-12 text-gray-300 mx-auto mb-4" />
-        <p className="text-gray-500">No activities found</p>
-        <p className="text-sm text-gray-400 mt-2">Activities will appear here as users interact with the platform</p>
+        <p className="text-gray-500">{t('admin:activityLog.noActivitiesFound')}</p>
+        <p className="text-sm text-gray-400 mt-2">{t('admin:activityLog.activitiesWillAppear')}</p>
       </div>
     ) : (
       <div className="divide-y divide-gray-100">
@@ -528,7 +536,7 @@ export const ActivityList: React.FC<ActivityListProps> = ({
     {totalPages > 1 && (
       <div className="px-4 py-3 border-t border-gray-200 flex items-center justify-between">
         <div className="text-sm text-gray-500">
-          Page {currentPage} of {totalPages}
+          {t('admin:activityLog.pageOf', { current: currentPage, total: totalPages })}
         </div>
         <div className="flex gap-2">
           <button
@@ -549,4 +557,5 @@ export const ActivityList: React.FC<ActivityListProps> = ({
       </div>
     )}
   </div>
-);
+  );
+};

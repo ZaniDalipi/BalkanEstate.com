@@ -862,8 +862,8 @@ const ProfileSettings: React.FC<{ user: User }> = ({ user }) => {
         city: user.city || '',
         country: user.country || '',
         streetAddress: user.address || '',
-        lat: user.lat || 0,
-        lng: user.lng || 0,
+        lat: user.lat ?? 0,
+        lng: user.lng ?? 0,
     });
 
     const handleAgencyClick = async () => {
@@ -883,7 +883,8 @@ const ProfileSettings: React.FC<{ user: User }> = ({ user }) => {
 
     useEffect(() => {
         setFormData(user);
-        setAgentData({
+        setAgentData(prev => ({
+            ...prev,
             languages: user.languages || ['English'],
             specializations: user.specializations?.join(', ') || '',
             serviceAreas: user.serviceAreas || [],
@@ -891,9 +892,10 @@ const ProfileSettings: React.FC<{ user: User }> = ({ user }) => {
             city: user.city || '',
             country: user.country || '',
             streetAddress: user.address || '',
-            lat: user.lat || 0,
-            lng: user.lng || 0,
-        });
+            // Preserve agent lat/lng if already set (user object may not have agent coordinates)
+            lat: user.lat ?? prev.lat,
+            lng: user.lng ?? prev.lng,
+        }));
 
         // Fetch latest agent data if user is an agent
         if (user.role === UserRole.AGENT && user.id) {
@@ -927,8 +929,8 @@ const ProfileSettings: React.FC<{ user: User }> = ({ user }) => {
                     specializations: agent.specializations?.join(', ') || '',
                     serviceAreas: agent.serviceAreas || [],
                     yearsOfExperience: agent.yearsOfExperience || 0,
-                    lat: agent.lat || prev.lat,
-                    lng: agent.lng || prev.lng,
+                    lat: agent.lat ?? prev.lat,
+                    lng: agent.lng ?? prev.lng,
                 }));
                 setFormData(prevUser => ({
                     ...prevUser,
@@ -936,8 +938,8 @@ const ProfileSettings: React.FC<{ user: User }> = ({ user }) => {
                     specializations: agent.specializations || prevUser.specializations,
                     serviceAreas: agent.serviceAreas || prevUser.serviceAreas,
                     yearsOfExperience: agent.yearsOfExperience || prevUser.yearsOfExperience,
-                    lat: agent.lat || prevUser.lat,
-                    lng: agent.lng || prevUser.lng,
+                    lat: agent.lat ?? prevUser.lat,
+                    lng: agent.lng ?? prevUser.lng,
                 }));
             }
         } catch (error) {
@@ -1218,8 +1220,8 @@ const ProfileSettings: React.FC<{ user: User }> = ({ user }) => {
                 yearsOfExperience: finalUser.yearsOfExperience || 0,
                 city: finalUser.city || '',
                 country: finalUser.country || '',
-                lat: finalUser.lat || prev.lat,
-                lng: finalUser.lng || prev.lng,
+                lat: finalUser.lat ?? prev.lat,
+                lng: finalUser.lng ?? prev.lng,
             }));
 
             setIsSaved(true);
@@ -1235,8 +1237,8 @@ const ProfileSettings: React.FC<{ user: User }> = ({ user }) => {
                 city: user.city || '',
                 country: user.country || '',
                 streetAddress: '',
-                lat: user.lat || 0,
-                lng: user.lng || 0,
+                lat: user.lat ?? 0,
+                lng: user.lng ?? 0,
             });
             setError('Failed to save changes. Please try again.');
         } finally {
@@ -1687,13 +1689,13 @@ const ProfileSettings: React.FC<{ user: User }> = ({ user }) => {
 
                     {/* Main Location with Map Picker */}
                     <MapLocationPicker
-                        lat={agentData.lat || 42.0}
-                        lng={agentData.lng || 21.0}
+                        lat={agentData.lat ?? 42.0}
+                        lng={agentData.lng ?? 21.0}
                         address={agentData.streetAddress || agentData.city || 'Select location'}
                         country={agentData.country || 'Serbia'}
                         city={agentData.city || ''}
-                        cityLat={agentData.lat || 42.0}
-                        cityLng={agentData.lng || 21.0}
+                        cityLat={agentData.lat ?? 42.0}
+                        cityLng={agentData.lng ?? 21.0}
                         onLocationChange={handleLocationChange}
                         onAddressChange={handleAddressChange}
                         zoom={10}

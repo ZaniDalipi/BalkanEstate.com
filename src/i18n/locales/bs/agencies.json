@@ -101,6 +101,18 @@
     "empty": {
       "title": "Trenutno nema dostupnih istaknutih agencija",
       "message": "Provjerite uskoro za naše istaknute partnere!"
+    },
+    "subscription": {
+      "currentlyFeatured": "Agencija Trenutno Istaknuta ✨", "receivingVisibility": "Vaša agencija je trenutno istaknuta i dobija poboljšanu vidljivost.",
+      "timeRemaining": "Preostalo Vrijeme", "expires": "Ističe:", "featureYourAgency": "Istakni Svoju Agenciju",
+      "getVisibility": "Dobijte više vidljivosti sa istaknutim oglasom.", "getFeaturedFrom": "Istakni se od €{{price}}/sedmično", "getFeaturedNow": "Istakni se Sada",
+      "featuredAgency": "Istaknuta Agencija", "boostVisibility": "Povećaj Vidljivost", "freeTrialProgress": "🎉 Napredak Besplatnog Probnog Perioda",
+      "subscriptionPeriod": "📅 Period Pretplate", "daysLeft": "{{count}} dana preostalo", "freeTrialActive": "🎉 Besplatni Probni Period Aktivan",
+      "trialEndsOn": "Vaš besplatni probni period ističe {{date}}", "interval": "Interval", "price": "Cijena", "startDate": "Datum Početka",
+      "renewsOn": "Obnavlja se", "endedOn": "Završeno", "couponApplied": "✓ Kupon {{code}} primijenjen",
+      "cancelAtPeriodEnd": "⚠️ Pretplata će biti otkazana na kraju trenutnog perioda", "renewStatus": "🔄 Obnovi Istaknuti Status",
+      "continueVisibility": "Nastavite uživati u poboljšanoj vidljivosti.", "renewNow": "Obnovi Sada",
+      "proTip": "💡 Pro Savjet: Istaknute agencije dobijaju do 5x više vidljivosti!"
     }
   },
   "create": {
@@ -208,5 +220,18 @@
     "processing": "Processing...",
     "stripeSecure": "Payments are securely processed by Stripe",
     "error": "Failed to initiate payment. Please try again."
-  }
+  },
+  "coupon": {
+    "title": "Iskoristi Kupon Agencije",
+    "description": "Unesite kod kupona koji ste dobili da biste se pridružili agenciji i dobili Pro pretplatu.",
+    "codeLabel": "Kod Kupona", "codePlaceholder": "Unesite kod kupona (npr., AGENCY-XXXXXXXX)", "codeFormat": "Kod treba biti u formatu: AGENCY-XXXXXXXX",
+    "redeeming": "Iskorištavanje...", "redeemButton": "Iskoristi Kupon", "note": "Napomena:",
+    "alreadyInAgency": "Već ste član {{name}}. Iskorištavanje novog kupona prebacit će vas u novu agenciju.", "anAgency": "agencija",
+    "confirmMove": "Već ste član agencije. Iskorištavanje ovog kupona prebacit će vas u novu agenciju. Nastaviti?",
+    "agentRequired": { "title": "Potrebna Registracija Agenta", "description": "Za iskorištavanje kupona agencije morate se prvo registrovati kao agent.", "goToProfile": "Idi na Postavke Profila" },
+    "errors": { "enterCode": "Molimo unesite kod kupona", "loginRequired": "Morate biti prijavljeni za iskorištavanje kupona", "agentRequired": "Samo registrovani agenti mogu iskoristiti kupone agencije.", "invalidCoupon": "Nevažeći kod kupona.", "alreadyUsed": "Ovaj kupon je već iskorišten.", "expired": "Ovaj kupon je istekao.", "notFound": "Kupon nije pronađen.", "subscriptionInactive": "Pretplata agencije više nije aktivna.", "missingCode": "Molimo unesite kod kupona.", "redeemFailed": "Iskorištavanje kupona nije uspjelo.", "redemptionFailed": "Iskorištavanje Neuspjelo" },
+    "success": { "title": "Kupon Iskorišten!", "message": "Uspješno ste se pridružili {{name}} sa Pro pretplatom!", "welcome": "Dobrodošli u {{name}}!", "joined": "Uspješno ste se pridružili agenciji sa Pro pretplatom.", "benefits": "Vaše Pogodnosti:", "listingsLimit": "Do {{limit}} aktivnih oglasa", "branding": "Brendiranje agencije na vašim oglasima", "promotionAccess": "Pristup promotivnim kuponima agencije", "validUntil": "Pretplata vrijedi do {{date}}", "viewAgency": "Pregledaj Agenciju" },
+    "whatHappens": { "title": "Šta se dešava kada iskoristite?", "addedToTeam": "Bit ćete dodani u agenciju kao član tima", "proSubscription": "Dobit ćete Pro pretplatu (vrijedi 1 godinu)", "agencyBranding": "Vaši oglasi će prikazivati brend agencije", "promotionCoupons": "Pristup promotivnim kuponima za vaše oglase" }
+  },
+  "badge": { "independent": "Nezavisan", "independentShort": "Nez", "agency": "Agencija", "independentAgent": "Nezavisni Agent" }
 }

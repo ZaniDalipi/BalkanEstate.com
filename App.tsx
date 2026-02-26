@@ -73,6 +73,8 @@ const AgencyDashboardPage = lazy(() => import('./src/features/agency-dashboard/c
 const NotFoundPage = lazy(() => import('./src/components/ui/not-found-2').then(m => ({ default: m.NotFound })));
 const ResetPasswordPage = lazy(() => import('./src/features/auth/components/ResetPasswordPage'));
 const VerifyEmailPage = lazy(() => import('./src/features/auth/components/VerifyEmailPage'));
+// LoginPage and RegisterPage are no longer used as standalone pages.
+// The /login and /register routes now open the AuthModal over the search page.
 const AnalyticsPage = lazy(() => import('./src/features/analytics/components/AnalyticsPage'));
 const HowItWorksPage = lazy(() => import('./components/shared/HowItWorksPage'));
 const ValuationPage = lazy(() => import('./src/features/valuation/components/ValuationPage'));
@@ -356,6 +358,15 @@ const AppContent: React.FC<{ onToggleSidebar: () => void }> = ({ onToggleSidebar
         '/create-agency/payment': 'createAgencyPayment',
         '/create-agency/confirm': 'createAgencyConfirm',
       };
+
+      // /login and /register open the AuthModal over the search page
+      if (path === '/login' || path === '/register') {
+        dispatch({ type: 'SET_SELECTED_PROPERTY', payload: null });
+        dispatch({ type: 'SET_SELECTED_AGENCY', payload: null });
+        dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'search' });
+        dispatch({ type: 'TOGGLE_AUTH_MODAL', payload: { isOpen: true, view: path === '/register' ? 'signup' : 'login' } });
+        return;
+      }
 
       // Redirect /pricing to /subscribe
       if (path === '/pricing') {

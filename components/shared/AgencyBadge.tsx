@@ -1,5 +1,6 @@
 // components/shared/AgencyBadge.tsx
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { Agency } from '../../types';
 import { 
   BuildingOfficeIcon, 
@@ -54,6 +55,8 @@ const AgencyBadge: React.FC<AgencyBadgeProps> = ({
   asLink = false,
   href
 }) => {
+  const { t } = useTranslation(['agencies', 'common']);
+
   // Size configuration
   const sizeConfig = {
     xs: { 
@@ -99,7 +102,7 @@ const AgencyBadge: React.FC<AgencyBadgeProps> = ({
         <div className={`${sizeConfig[size].icon} flex-shrink-0 rounded overflow-hidden bg-white/10`}>
           <img
             src={agencyLogo}
-            alt={agencyName || 'Agency'}
+            alt={agencyName || t('agencies:badge.agency', 'Agency')}
             className="w-full h-full object-cover"
             onError={(e) => {
               // Fallback to default icon if image fails to load
@@ -133,7 +136,7 @@ const AgencyBadge: React.FC<AgencyBadgeProps> = ({
     if (!showText) return null;
     
     if (!agencyName || type === 'independent') {
-      return isCompact ? 'Ind' : 'Independent';
+      return isCompact ? t('agencies:badge.independentShort', 'Ind') : t('agencies:badge.independent', 'Independent');
     }
     
     if (isCompact && agencyName.length > 12) {
@@ -173,7 +176,7 @@ const AgencyBadge: React.FC<AgencyBadgeProps> = ({
         href={href}
         className={baseClasses}
         onClick={onClick}
-        title={agencyName || 'Independent Agent'}
+        title={agencyName || t('agencies:badge.independentAgent', 'Independent Agent')}
       >
         {content}
       </a>
@@ -187,7 +190,7 @@ const AgencyBadge: React.FC<AgencyBadgeProps> = ({
         type="button"
         className={baseClasses}
         onClick={onClick}
-        title={agencyName || 'Independent Agent'}
+        title={agencyName || t('agencies:badge.independentAgent', 'Independent Agent')}
       >
         {content}
       </button>
@@ -198,7 +201,7 @@ const AgencyBadge: React.FC<AgencyBadgeProps> = ({
   return (
     <div 
       className={baseClasses}
-      title={agencyName || 'Independent Agent'}
+      title={agencyName || t('agencies:badge.independentAgent', 'Independent Agent')}
     >
       {content}
     </div>

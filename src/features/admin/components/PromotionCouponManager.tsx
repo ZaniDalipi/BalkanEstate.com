@@ -8,6 +8,7 @@
  */
 
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { PlusIcon } from '@/constants';
 import { type PromotionCoupon } from '../hooks/usePromotionCouponData';
 import { usePromotionCouponManager } from './usePromotionCouponManager';
@@ -40,12 +41,13 @@ const PromotionCouponManager: React.FC = () => {
     getStatusColor,
     getTierBadgeColor,
   } = usePromotionCouponManager();
+  const { t } = useTranslation(['admin', 'common']);
 
   if (isLoading) {
     return (
       <div className="bg-white rounded-lg shadow-lg p-8 text-center">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600 mx-auto"></div>
-        <p className="mt-4 text-gray-600">Loading promotion coupons...</p>
+        <p className="mt-4 text-gray-600">{t('admin:promotionCoupons.loading')}</p>
       </div>
     );
   }
@@ -56,10 +58,9 @@ const PromotionCouponManager: React.FC = () => {
       <div className="border-b border-gray-200 p-6">
         <div className="flex items-center justify-between mb-4">
           <div>
-            <h2 className="text-2xl font-bold text-gray-900">Promotion Coupons</h2>
+            <h2 className="text-2xl font-bold text-gray-900">{t('admin:promotionCoupons.title')}</h2>
             <p className="text-sm text-gray-500 mt-1">
-              Manage discount coupons for property listing promotions (Featured, Highlight, Premium
-              tiers)
+              {t('admin:promotionCoupons.subtitle')}
             </p>
           </div>
           <div className="flex items-center gap-4">
@@ -74,14 +75,14 @@ const PromotionCouponManager: React.FC = () => {
               onClick={refreshCoupons}
               className="px-3 py-1.5 text-sm border border-gray-300 rounded-lg hover:bg-gray-50"
             >
-              Refresh
+              {t('admin:promotionCoupons.refresh')}
             </button>
             <button
               onClick={() => setIsCreateModalOpen(true)}
               className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 font-medium flex items-center gap-2"
             >
               <PlusIcon className="w-5 h-5" />
-              Create Coupon
+              {t('admin:promotionCoupons.createCoupon')}
             </button>
           </div>
         </div>
@@ -93,10 +94,10 @@ const PromotionCouponManager: React.FC = () => {
             onChange={(e) => setFilterStatus(e.target.value as any)}
             className="px-4 py-2 border border-gray-300 rounded-lg"
           >
-            <option value="all">All Status</option>
-            <option value="active">Active</option>
-            <option value="expired">Expired</option>
-            <option value="disabled">Disabled</option>
+            <option value="all">{t('admin:promotionCoupons.allStatus')}</option>
+            <option value="active">{t('admin:promotionCoupons.active')}</option>
+            <option value="expired">{t('admin:promotionCoupons.expired')}</option>
+            <option value="disabled">{t('admin:promotionCoupons.disabled')}</option>
           </select>
         </div>
       </div>
@@ -119,25 +120,25 @@ const PromotionCouponManager: React.FC = () => {
           <thead className="bg-gray-50">
             <tr>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Code
+                {t('admin:promotionCoupons.code')}
               </th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Discount
+                {t('admin:promotionCoupons.discount')}
               </th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Usage
+                {t('admin:promotionCoupons.usage')}
               </th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Valid Period
+                {t('admin:promotionCoupons.validPeriod')}
               </th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Tiers
+                {t('admin:promotionCoupons.tiers')}
               </th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Status
+                {t('admin:promotionCoupons.status')}
               </th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Actions
+                {t('admin:promotionCoupons.actions')}
               </th>
             </tr>
           </thead>
@@ -199,7 +200,7 @@ const PromotionCouponManager: React.FC = () => {
                       ))}
                     </div>
                   ) : (
-                    <span className="text-xs text-gray-500">All tiers</span>
+                    <span className="text-xs text-gray-500">{t('admin:promotionCoupons.allTiers')}</span>
                   )}
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">
@@ -216,7 +217,7 @@ const PromotionCouponManager: React.FC = () => {
                       disabled={disableMutation.isPending}
                       className="text-red-600 hover:text-red-900 disabled:opacity-50"
                     >
-                      {disableMutation.isPending ? 'Disabling...' : 'Disable'}
+                      {disableMutation.isPending ? t('admin:promotionCoupons.disabling') : t('admin:promotionCoupons.disable')}
                     </button>
                   )}
                 </td>
@@ -228,8 +229,8 @@ const PromotionCouponManager: React.FC = () => {
         {filteredCoupons.length === 0 && (
           <div className="text-center py-12 text-gray-500">
             <div className="text-4xl mb-4">🎟️</div>
-            <p>No promotion coupons found.</p>
-            <p className="text-sm mt-1">Create your first coupon to get started!</p>
+            <p>{t('admin:promotionCoupons.noCouponsFound')}</p>
+            <p className="text-sm mt-1">{t('admin:promotionCoupons.createFirstCoupon')}</p>
           </div>
         )}
       </div>

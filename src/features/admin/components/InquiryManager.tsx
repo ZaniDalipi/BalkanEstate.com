@@ -1,4 +1,5 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import {
   MagnifyingGlassIcon,
   EyeIcon,
@@ -42,12 +43,13 @@ const InquiryManager: React.FC = () => {
     getTypeBadgeColor,
     toggleSelectAll,
   } = useInquiryManager();
+  const { t } = useTranslation(['admin', 'common']);
 
   if (isLoading && inquiries.length === 0) {
     return (
       <div className="bg-white rounded-lg shadow-lg p-8 text-center">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
-        <p className="mt-4 text-gray-600">Loading inquiries...</p>
+        <p className="mt-4 text-gray-600">{t('admin:inquiries.loading')}</p>
       </div>
     );
   }
@@ -60,7 +62,7 @@ const InquiryManager: React.FC = () => {
           <div className="bg-white rounded-lg shadow p-4">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-gray-500">Total Inquiries</p>
+                <p className="text-sm text-gray-500">{t('admin:inquiries.totalInquiries')}</p>
                 <p className="text-2xl font-bold text-gray-900">{stats.overview.totalInquiries}</p>
               </div>
               <EnvelopeIcon className="w-10 h-10 text-blue-500 opacity-20" />
@@ -69,7 +71,7 @@ const InquiryManager: React.FC = () => {
           <div className="bg-white rounded-lg shadow p-4">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-gray-500">New (Unread)</p>
+                <p className="text-sm text-gray-500">{t('admin:inquiries.newUnread')}</p>
                 <p className="text-2xl font-bold text-blue-600">{stats.overview.newInquiries}</p>
               </div>
               <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
@@ -80,7 +82,7 @@ const InquiryManager: React.FC = () => {
           <div className="bg-white rounded-lg shadow p-4">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-gray-500">Today</p>
+                <p className="text-sm text-gray-500">{t('admin:inquiries.today')}</p>
                 <p className="text-2xl font-bold text-green-600">{stats.overview.todayInquiries}</p>
               </div>
               <div className="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center">
@@ -91,7 +93,7 @@ const InquiryManager: React.FC = () => {
           <div className="bg-white rounded-lg shadow p-4">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-gray-500">This Week</p>
+                <p className="text-sm text-gray-500">{t('admin:inquiries.thisWeek')}</p>
                 <p className="text-2xl font-bold text-purple-600">{stats.overview.weekInquiries}</p>
               </div>
               <div className="w-10 h-10 bg-purple-100 rounded-full flex items-center justify-center">
@@ -107,8 +109,8 @@ const InquiryManager: React.FC = () => {
         <div className="border-b border-gray-200 p-6">
           <div className="flex items-center justify-between mb-4">
             <div>
-              <h2 className="text-2xl font-bold text-gray-900">Inquiries</h2>
-              <p className="text-sm text-gray-600 mt-1">Total: {totalInquiries} inquiries</p>
+              <h2 className="text-2xl font-bold text-gray-900">{t('admin:inquiries.title')}</h2>
+              <p className="text-sm text-gray-600 mt-1">{t('admin:inquiries.total', { count: totalInquiries })}</p>
             </div>
           </div>
 
@@ -120,7 +122,7 @@ const InquiryManager: React.FC = () => {
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Search inquiries..."
+                placeholder={t('admin:inquiries.searchPlaceholder')}
                 className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg"
               />
             </div>
@@ -130,10 +132,10 @@ const InquiryManager: React.FC = () => {
               onChange={(e) => setFilterType(e.target.value)}
               className="px-4 py-2 border border-gray-300 rounded-lg"
             >
-              <option value="all">All Types</option>
-              <option value="property">Property Inquiry</option>
-              <option value="agent">Agent Inquiry</option>
-              <option value="area_search">Area Search</option>
+              <option value="all">{t('admin:inquiries.allTypes')}</option>
+              <option value="property">{t('admin:inquiries.propertyInquiry')}</option>
+              <option value="agent">{t('admin:inquiries.agentInquiry')}</option>
+              <option value="area_search">{t('admin:inquiries.areaSearch')}</option>
             </select>
 
             <select
@@ -141,11 +143,11 @@ const InquiryManager: React.FC = () => {
               onChange={(e) => setFilterStatus(e.target.value)}
               className="px-4 py-2 border border-gray-300 rounded-lg"
             >
-              <option value="all">All Status</option>
-              <option value="new">New</option>
-              <option value="read">Read</option>
-              <option value="replied">Replied</option>
-              <option value="archived">Archived</option>
+              <option value="all">{t('admin:inquiries.allStatus')}</option>
+              <option value="new">{t('admin:inquiries.new')}</option>
+              <option value="read">{t('admin:inquiries.read')}</option>
+              <option value="replied">{t('admin:inquiries.replied')}</option>
+              <option value="archived">{t('admin:inquiries.archived')}</option>
             </select>
 
             {selectedIds.length > 0 && (
@@ -154,13 +156,13 @@ const InquiryManager: React.FC = () => {
                   onClick={() => handleBulkStatusUpdate('read')}
                   className="px-3 py-2 bg-yellow-100 text-yellow-800 rounded-lg text-sm hover:bg-yellow-200"
                 >
-                  Mark Read ({selectedIds.length})
+                  {t('admin:inquiries.markRead')} ({selectedIds.length})
                 </button>
                 <button
                   onClick={() => handleBulkStatusUpdate('archived')}
                   className="px-3 py-2 bg-gray-100 text-gray-800 rounded-lg text-sm hover:bg-gray-200"
                 >
-                  Archive
+                  {t('admin:inquiries.archive')}
                 </button>
               </div>
             )}
@@ -192,13 +194,13 @@ const InquiryManager: React.FC = () => {
                     className="w-4 h-4 text-blue-600 border-gray-300 rounded"
                   />
                 </th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Sender</th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Recipient</th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Type</th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Property/Location</th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t('admin:inquiries.sender')}</th>
+                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t('admin:inquiries.recipient')}</th>
+                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t('admin:inquiries.type')}</th>
+                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t('admin:inquiries.status')}</th>
+                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t('admin:inquiries.propertyLocation')}</th>
+                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t('admin:inquiries.date')}</th>
+                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t('admin:inquiries.actions')}</th>
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
@@ -291,7 +293,7 @@ const InquiryManager: React.FC = () => {
 
           {inquiries.length === 0 && (
             <div className="text-center py-12 text-gray-500">
-              No inquiries found matching your filters.
+              {t('admin:inquiries.noInquiriesFound')}
             </div>
           )}
         </div>
@@ -300,7 +302,7 @@ const InquiryManager: React.FC = () => {
         {totalPages > 1 && (
           <div className="border-t border-gray-200 px-6 py-4 flex items-center justify-between">
             <div className="text-sm text-gray-700">
-              Page {currentPage} of {totalPages}
+              {t('admin:inquiries.pageOf', { current: currentPage, total: totalPages })}
             </div>
             <div className="flex gap-2">
               <button
@@ -308,14 +310,14 @@ const InquiryManager: React.FC = () => {
                 disabled={currentPage === 1}
                 className="px-4 py-2 border border-gray-300 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
               >
-                Previous
+                {t('common:previous')}
               </button>
               <button
                 onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
                 disabled={currentPage === totalPages}
                 className="px-4 py-2 border border-gray-300 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
               >
-                Next
+                {t('common:next')}
               </button>
             </div>
           </div>

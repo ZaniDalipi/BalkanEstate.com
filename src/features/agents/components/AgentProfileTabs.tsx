@@ -391,7 +391,7 @@ const AgentProfileTabs: React.FC<AgentProfileTabsProps> = ({
                                 </h3>
                                 <div className="rounded-xl overflow-hidden shadow-lg border border-gray-200">
                                     <MapContainer
-                                        center={allAgentProperties.filter(p => p.lat && p.lng)[0] ? [allAgentProperties.filter(p => p.lat && p.lng)[0].lat!, allAgentProperties.filter(p => p.lat && p.lng)[0].lng!] : [agent.lat || 42.0, agent.lng || 21.0]}
+                                        center={allAgentProperties.filter(p => p.lat && p.lng)[0] ? [allAgentProperties.filter(p => p.lat && p.lng)[0].lat!, allAgentProperties.filter(p => p.lat && p.lng)[0].lng!] : [agent.lat ?? 42.0, agent.lng ?? 21.0]}
                                         zoom={12}
                                         scrollWheelZoom={true}
                                         className="w-full h-[400px] sm:h-[500px]"

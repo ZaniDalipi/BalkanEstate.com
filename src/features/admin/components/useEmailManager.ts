@@ -7,6 +7,7 @@ import {
   useToggleEmailStatus,
   useResetEmailConfig,
   useResetAllEmailConfigs,
+  useSyncMissingEmailConfigs,
   useSendTestEmail,
   usePreviewEmail,
   EmailConfig,
@@ -52,6 +53,7 @@ export function useEmailManager() {
   const toggleMutation = useToggleEmailStatus();
   const resetMutation = useResetEmailConfig();
   const resetAllMutation = useResetAllEmailConfigs();
+  const syncMissingMutation = useSyncMissingEmailConfigs();
   const sendTestMutation = useSendTestEmail();
   const previewMutation = usePreviewEmail();
 
@@ -195,6 +197,23 @@ export function useEmailManager() {
     }
   };
 
+  const handleSyncMissing = async () => {
+    try {
+      const result = await syncMissingMutation.mutateAsync();
+      showNotification({
+        type: 'success',
+        message: result.added > 0
+          ? `Added ${result.added} missing template(s). Total: ${result.total}`
+          : `All ${result.total} email templates are already loaded.`,
+      });
+    } catch (err: any) {
+      showNotification({
+        type: 'error',
+        message: err.message || 'Failed to sync email templates',
+      });
+    }
+  };
+
   const handlePreview = async (email: EmailConfig) => {
     setSelectedEmail(email);
     try {
@@ -270,6 +289,7 @@ export function useEmailManager() {
     toggleMutation,
     resetMutation,
     resetAllMutation,
+    syncMissingMutation,
     sendTestMutation,
     previewMutation,
     filteredEmails,
@@ -280,6 +300,7 @@ export function useEmailManager() {
     handleToggleStatus,
     handleReset,
     handleResetAll,
+    handleSyncMissing,
     handlePreview,
     handleOpenTestModal,
     handleSendTest,

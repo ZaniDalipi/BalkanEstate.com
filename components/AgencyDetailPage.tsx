@@ -2940,7 +2940,7 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
             </div>
             <div className="rounded-xl overflow-hidden shadow-lg border border-slate-200">
               <MapContainer
-                center={propertiesWithCoords[0] ? [propertiesWithCoords[0].lat!, propertiesWithCoords[0].lng!] : [agencyData.lat || 42.0, agencyData.lng || 21.0]}
+                center={propertiesWithCoords[0] ? [propertiesWithCoords[0].lat!, propertiesWithCoords[0].lng!] : [agencyData.lat ?? 42.0, agencyData.lng ?? 21.0]}
                 zoom={12}
                 scrollWheelZoom={true}
                 className="w-full h-[400px] md:h-[500px]"
@@ -3422,8 +3422,8 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
 
                 {/* Map Location Picker - Same as listing creation */}
                 <MapLocationPicker
-                  lat={editForm.lat || 42.0}
-                  lng={editForm.lng || 21.0}
+                  lat={editForm.lat ?? 42.0}
+                  lng={editForm.lng ?? 21.0}
                   address={editForm.address}
                   country={editForm.country}
                   city={editForm.city}

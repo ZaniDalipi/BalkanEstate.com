@@ -222,7 +222,12 @@
     "description": "Εξερευνήστε αυτό το ακίνητο σε immersive 360°",
     "openInNewTab": "Ανοίξτε σε νέα καρτέλα για πλήρη εμπειρία",
     "failedToLoad": "Failed to load virtual tour",
-    "loading": "Loading virtual tour..."
+    "loading": "Loading virtual tour...",
+    "exit": "Έξοδος από την περιήγηση",
+    "floor": "Όροφος {{floor}}",
+    "hint": "Σύρετε για να κοιτάξετε \u2022 Κυλήστε για ζουμ",
+    "entering": "Είσοδος στο κτίριο...",
+    "tourButton": "Περιήγηση 360°"
   },
   "featuredAgencies": "Προτεινόμενα Μεσιτικά Γραφεία",
   "status": {
@@ -397,7 +402,9 @@
       "play": "Πτήση στο ακίνητο",
       "skip": "Παράλειψη",
       "replay": "Επανάληψη",
-      "exploreMap": "Εξερεύνηση χάρτη"
+      "exploreMap": "Εξερεύνηση χάρτη",
+      "flyShort": "Πτήση",
+      "mapShort": "Χάρτης"
     },
     "errors": {
       "noLocation": "Τα δεδομένα τοποθεσίας δεν είναι διαθέσιμα"
@@ -430,7 +437,44 @@
     "floorLevel": "Όροφος {{floor}} από {{total}}",
     "groundFloor": "Ισόγειο",
     "topFloor": "Τελευταίος όροφος",
-    "middleFloor": "Μεσαίος όροφος"
+    "middleFloor": "Μεσαίος όροφος",
+    "enter": "Είσοδος"
+  },
+  "map3d": {
+    "shadows": "Εμφάνιση σκιών κτιρίων",
+    "shadowsOn": "Σκιές",
+    "shadowsOff": "Σκιές",
+    "floorLabels": "Εμφάνιση ορόφων",
+    "showFloors": "Ετικέτες",
+    "hideFloors": "Απόκρυψη",
+    "nearbyPlaces": "Κοντινά μέρη",
+    "nearbyPOI": "Κοντά",
+    "loading": "Φόρτωση 3D χάρτη...",
+    "facing": "Προσανατολισμός",
+    "facingDirection": "Προς {{direction}}",
+    "sunrise": "Ανατολή",
+    "noon": "Μεσημέρι",
+    "sunset": "Δύση",
+    "reset": "Επαναφορά",
+    "sunAndShadows": "Ήλιος και σκιές",
+    "cardinalDirections": {
+      "N": "Β",
+      "NE": "ΒΑ",
+      "E": "Α",
+      "SE": "ΝΑ",
+      "S": "Ν",
+      "SW": "ΝΔ",
+      "W": "Δ",
+      "NW": "ΒΔ",
+      "North": "Βόρεια",
+      "Northeast": "Βορειοανατολικά",
+      "East": "Ανατολικά",
+      "Southeast": "Νοτιοανατολικά",
+      "South": "Νότια",
+      "Southwest": "Νοτιοδυτικά",
+      "West": "Δυτικά",
+      "Northwest": "Βορειοδυτικά"
+    }
   },
   "guide": {
     "messages": {

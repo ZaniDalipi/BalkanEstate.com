@@ -67,12 +67,18 @@ import {
   uploadVideo,
 } from '../controllers/siteContentController';
 import {
+  getSiteSettings,
+  updateSiteSettings,
+  resetSiteSettings,
+} from '../controllers/siteSettingsController';
+import {
   getAllEmailConfigs,
   getEmailConfigByKey,
   updateEmailConfig,
   toggleEmailStatus,
   resetEmailConfig,
   resetAllEmailConfigs,
+  syncMissingEmailConfigs,
   sendTestEmail,
   previewEmail,
   previewMinimalisticTemplate,
@@ -320,11 +326,17 @@ router.patch('/site-content/:id', logAdminAction('UPDATE_SITE_CONTENT'), updateC
 router.delete('/site-content/:id', logAdminAction('DELETE_SITE_CONTENT'), deleteContent);
 router.post('/site-content/upload-video', logAdminAction('UPLOAD_VIDEO'), videoUpload.single('video'), uploadVideo);
 
+// ===== Site Settings Management =====
+router.get('/site-settings', logAdminAction('VIEW_SITE_SETTINGS'), getSiteSettings);
+router.patch('/site-settings', logAdminAction('UPDATE_SITE_SETTINGS'), updateSiteSettings);
+router.post('/site-settings/reset', logAdminAction('RESET_SITE_SETTINGS'), resetSiteSettings);
+
 // ===== Email Configuration Management =====
 router.get('/email-configs', logAdminAction('VIEW_EMAIL_CONFIGS'), getAllEmailConfigs);
 router.get('/email-configs/categories', logAdminAction('VIEW_EMAIL_CATEGORIES'), getEmailCategories);
 router.post('/email-configs', logAdminAction('CREATE_EMAIL_CONFIG'), createEmailConfig);
 router.post('/email-configs/reset-all', logAdminAction('RESET_ALL_EMAIL_CONFIGS'), resetAllEmailConfigs);
+router.post('/email-configs/sync-missing', logAdminAction('SYNC_MISSING_EMAIL_CONFIGS'), syncMissingEmailConfigs);
 router.get('/email-configs/:key', logAdminAction('VIEW_EMAIL_CONFIG'), getEmailConfigByKey);
 router.patch('/email-configs/:key', logAdminAction('UPDATE_EMAIL_CONFIG'), updateEmailConfig);
 router.delete('/email-configs/:key', logAdminAction('DELETE_EMAIL_CONFIG'), deleteEmailConfig);

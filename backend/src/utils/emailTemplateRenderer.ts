@@ -2,8 +2,77 @@
  * Shared email template renderer.
  * Used by emailConfigController (admin preview/test) and emailService (actual sending)
  * so both render identically from the same EmailConfig document.
+ *
+ * Integrates with SiteSettings for global branding (company name, logo, support email, etc.)
+ * so changes in admin are reflected across all emails.
  */
 import EmailConfig, { IEmailConfig } from '../models/EmailConfig';
+import SiteSettings, { ISiteSettings } from '../models/SiteSettings';
+
+// Cache site settings for 5 minutes to avoid DB calls on every email
+let _cachedSettings: ISiteSettings | null = null;
+let _cacheExpiry = 0;
+const CACHE_TTL_MS = 5 * 60 * 1000; // 5 minutes
+
+/**
+ * Get site settings with caching. Falls back to hardcoded defaults if DB is unavailable.
+ */
+export async function getSiteSettingsForEmail(): Promise<ISiteSettings | null> {
+  const now = Date.now();
+  if (_cachedSettings && now < _cacheExpiry) {
+    return _cachedSettings;
+  }
+  try {
+    _cachedSettings = await SiteSettings.getSettings();
+    _cacheExpiry = now + CACHE_TTL_MS;
+    return _cachedSettings;
+  } catch {
+    return _cachedSettings; // return stale cache if DB fails
+  }
+}
+
+/** Force-clear the cached settings (e.g. after admin updates). */
+export function clearSiteSettingsCache(): void {
+  _cachedSettings = null;
+  _cacheExpiry = 0;
+}
+
+/**
+ * Build a variables record from SiteSettings so templates can use
+ * {{companyName}}, {{supportEmail}}, {{logoUrl}}, etc.
+ */
+export async function getSiteSettingsVariables(): Promise<Record<string, string>> {
+  const s = await getSiteSettingsForEmail();
+  if (!s) {
+    // Hardcoded fallback
+    return {
+      companyName: 'BalkanEstate',
+      companyNameFormatted: 'BalkanEstate<sup>AI</sup>',
+      logoUrl: '',
+      emailLogoUrl: '',
+      supportEmail: 'support@balkanestateai.com',
+      contactPhone: '',
+      frontendUrl: process.env.FRONTEND_URL || 'https://balkanestate.com',
+      backendUrl: process.env.BACKEND_URL || 'https://api.balkanestate.com',
+    };
+  }
+  return {
+    companyName: s.companyName,
+    companyNameFormatted: s.companyNameFormatted,
+    logoUrl: s.logoUrl,
+    emailLogoUrl: s.emailLogoUrl,
+    supportEmail: s.supportEmail,
+    contactPhone: s.contactPhone || '',
+    frontendUrl: s.frontendUrl || process.env.FRONTEND_URL || 'https://balkanestate.com',
+    backendUrl: s.backendUrl || process.env.BACKEND_URL || 'https://api.balkanestate.com',
+    emailFooterText: s.emailFooterText || 'All rights reserved.',
+    facebookUrl: s.socialLinks?.facebook || '',
+    instagramUrl: s.socialLinks?.instagram || '',
+    twitterUrl: s.socialLinks?.twitter || '',
+    linkedinUrl: s.socialLinks?.linkedin || '',
+    youtubeUrl: s.socialLinks?.youtube || '',
+  };
+}
 
 /**
  * Replace {{variable}} placeholders in a template string.
@@ -23,6 +92,9 @@ export function replaceVariables(template: string, variables: Record<string, str
 /**
  * Build the full email HTML document from an EmailConfig and resolved variables.
  * Returns both html and subject so the caller can send immediately.
+ *
+ * Automatically injects SiteSettings variables (companyName, supportEmail, etc.)
+ * so they are available in every template without callers needing to pass them.
  */
 export function renderEmailConfig(
   config: IEmailConfig,
@@ -30,6 +102,12 @@ export function renderEmailConfig(
 ): { html: string; subject: string } {
   const frontendUrl = variables.frontendUrl || process.env.FRONTEND_URL || 'https://balkanestate.com';
   const year = new Date().getFullYear();
+  const companyNameFormatted = variables.companyNameFormatted || 'BalkanEstate<sup>AI</sup>';
+  const supportEmail = variables.supportEmail || 'support@balkanestateai.com';
+  const emailFooterText = variables.emailFooterText || 'All rights reserved.';
+  const emailLogoUrl = variables.emailLogoUrl || '';
+  // Use config-level headerImageUrl if set, otherwise fall back to global email logo
+  const headerImageUrl = (config as any).headerImageUrl || emailLogoUrl;
 
   const headerTitle    = replaceVariables(config.headerTitle, variables);
   const headerSubtitle = config.headerSubtitle ? replaceVariables(config.headerSubtitle, variables) : '';
@@ -55,8 +133,12 @@ export function renderEmailConfig(
   <div style="max-width:600px;margin:0 auto;background-color:#ffffff;border-radius:12px;overflow:hidden;box-shadow:0 4px 6px rgba(0,0,0,0.05);">
 
     <!-- Header -->
-    <div style="background:${config.headerGradient || 'linear-gradient(135deg,#0252CD 0%,#0369a1 100%)'};padding:32px 24px;text-align:center;">
-      ${config.headerEmoji ? `
+    <div style="background:${replaceVariables(config.headerGradient || 'linear-gradient(135deg,#0252CD 0%,#0369a1 100%)', variables)};padding:32px 24px;text-align:center;">
+      ${headerImageUrl ? `
+      <div style="margin-bottom:16px;">
+        <img src="${headerImageUrl}" alt="" style="max-height:48px;max-width:200px;" />
+      </div>` : ''}
+      ${config.headerEmoji && !headerImageUrl ? `
       <div style="margin-bottom:12px;">
         <span style="display:inline-block;width:60px;height:60px;background:rgba(255,255,255,0.2);border-radius:50%;line-height:60px;font-size:28px;">${config.headerEmoji}</span>
       </div>` : ''}
@@ -71,7 +153,7 @@ export function renderEmailConfig(
       ${config.ctaEnabled && ctaText && ctaUrl ? `
       <div style="margin-top:28px;text-align:center;">
         <a href="${ctaUrl}"
-           style="display:inline-block;background:${config.headerGradient || 'linear-gradient(135deg,#0252CD 0%,#0369a1 100%)'};color:#ffffff;text-decoration:none;padding:16px 32px;border-radius:10px;font-weight:600;font-size:15px;box-shadow:0 4px 14px rgba(0,0,0,0.15);">
+           style="display:inline-block;background:${replaceVariables(config.headerGradient || 'linear-gradient(135deg,#0252CD 0%,#0369a1 100%)', variables)};color:#ffffff;text-decoration:none;padding:16px 32px;border-radius:10px;font-weight:600;font-size:15px;box-shadow:0 4px 14px rgba(0,0,0,0.15);">
           ${ctaText}
         </a>
       </div>` : ''}
@@ -84,8 +166,11 @@ export function renderEmailConfig(
       <p style="color:#9ca3af;font-size:11px;margin:0 0 6px 0;">
         <a href="${frontendUrl}/settings/notifications" style="color:#9ca3af;text-decoration:underline;">Manage email preferences</a>
       </p>` : ''}
+      <p style="color:#6b7280;font-size:12px;margin:4px 0 4px 0;">
+        Need help? <a href="mailto:${supportEmail}" style="color:#0252CD;text-decoration:none;">${supportEmail}</a>
+      </p>
       <p style="color:#9ca3af;font-size:11px;margin:4px 0 0 0;">
-        &copy; ${year} BalkanEstate<sup>AI</sup>. All rights reserved.
+        &copy; ${year} ${companyNameFormatted}. ${emailFooterText}
       </p>
     </div>
   </div>
@@ -93,6 +178,24 @@ export function renderEmailConfig(
 </html>`;
 
   return { html, subject };
+}
+
+/**
+ * Async wrapper that automatically merges SiteSettings variables into the
+ * local variables before rendering. Callers don't need to manually fetch
+ * site settings — this function handles it.
+ *
+ * Usage:
+ *   const { html, subject } = await renderEmailWithSiteSettings(config, localVars);
+ */
+export async function renderEmailWithSiteSettings(
+  config: IEmailConfig,
+  localVariables: Record<string, string>,
+): Promise<{ html: string; subject: string }> {
+  const siteVars = await getSiteSettingsVariables();
+  // Local variables take priority over site settings
+  const merged = { ...siteVars, ...localVariables };
+  return renderEmailConfig(config, merged);
 }
 
 /**

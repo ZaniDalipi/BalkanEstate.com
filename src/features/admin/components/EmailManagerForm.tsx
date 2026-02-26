@@ -1,4 +1,5 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import {
   PaperAirplaneIcon,
   XMarkIcon,
@@ -26,12 +27,13 @@ export const EditEmailModal: React.FC<EditEmailModalProps> = ({
   onClose,
   isSaving,
 }) => {
+  const { t } = useTranslation(['admin', 'common']);
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
       <div className="bg-white rounded-2xl shadow-xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
         <div className="sticky top-0 bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between">
           <div>
-            <h2 className="text-xl font-bold text-gray-900">Edit Email Template</h2>
+            <h2 className="text-xl font-bold text-gray-900">{t('admin:emailManager.editEmailTemplate')}</h2>
             <p className="text-sm text-gray-500">{selectedEmail.name}</p>
           </div>
           <button
@@ -46,7 +48,7 @@ export const EditEmailModal: React.FC<EditEmailModalProps> = ({
           {/* Subject */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              Subject Line
+              {t('admin:emailManager.subjectLine')}
             </label>
             <input
               type="text"
@@ -62,7 +64,7 @@ export const EditEmailModal: React.FC<EditEmailModalProps> = ({
           {/* Preheader */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              Preheader Text
+              {t('admin:emailManager.preheaderText')}
             </label>
             <input
               type="text"
@@ -77,7 +79,7 @@ export const EditEmailModal: React.FC<EditEmailModalProps> = ({
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Header Title
+                {t('admin:emailManager.headerTitle')}
               </label>
               <input
                 type="text"
@@ -88,7 +90,7 @@ export const EditEmailModal: React.FC<EditEmailModalProps> = ({
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Header Emoji
+                {t('admin:emailManager.headerEmoji')}
               </label>
               <input
                 type="text"
@@ -99,7 +101,7 @@ export const EditEmailModal: React.FC<EditEmailModalProps> = ({
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Header Subtitle
+                {t('admin:emailManager.headerSubtitle')}
               </label>
               <input
                 type="text"
@@ -110,10 +112,29 @@ export const EditEmailModal: React.FC<EditEmailModalProps> = ({
             </div>
           </div>
 
+          {/* Header Image URL */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Header Image URL (optional, replaces emoji)
+            </label>
+            <input
+              type="text"
+              value={editForm.headerImageUrl || ''}
+              onChange={(e) => setEditForm({ ...editForm, headerImageUrl: e.target.value })}
+              placeholder="https://... (leave empty to use emoji)"
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            />
+            {editForm.headerImageUrl && (
+              <div className="mt-2 bg-gray-100 rounded-lg p-3 inline-block">
+                <img src={editForm.headerImageUrl} alt="Header" className="max-h-12 max-w-40" />
+              </div>
+            )}
+          </div>
+
           {/* Body Template */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              Body Template (HTML)
+              {t('admin:emailManager.bodyTemplate')}
             </label>
             <textarea
               value={editForm.bodyTemplate || ''}
@@ -134,7 +155,7 @@ export const EditEmailModal: React.FC<EditEmailModalProps> = ({
                 className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
               />
               <label htmlFor="ctaEnabled" className="text-sm font-medium text-gray-700">
-                Enable Call-to-Action Button
+                {t('admin:emailManager.enableCta')}
               </label>
             </div>
 
@@ -142,7 +163,7 @@ export const EditEmailModal: React.FC<EditEmailModalProps> = ({
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pl-6">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Button Text
+                    {t('admin:emailManager.buttonText')}
                   </label>
                   <input
                     type="text"
@@ -153,7 +174,7 @@ export const EditEmailModal: React.FC<EditEmailModalProps> = ({
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Button URL
+                    {t('admin:emailManager.buttonUrl')}
                   </label>
                   <input
                     type="text"
@@ -177,13 +198,13 @@ export const EditEmailModal: React.FC<EditEmailModalProps> = ({
                 className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
               />
               <label htmlFor="showUnsubscribe" className="text-sm font-medium text-gray-700">
-                Show Unsubscribe Link
+                {t('admin:emailManager.showUnsubscribe')}
               </label>
             </div>
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Footer Reason Text
+                {t('admin:emailManager.footerReasonText')}
               </label>
               <input
                 type="text"
@@ -197,7 +218,7 @@ export const EditEmailModal: React.FC<EditEmailModalProps> = ({
 
           {/* Available Variables */}
           <div className="bg-gray-50 rounded-lg p-4">
-            <h4 className="font-medium text-gray-700 mb-2">Available Variables</h4>
+            <h4 className="font-medium text-gray-700 mb-2">{t('admin:emailManager.availableVariables')}</h4>
             <div className="flex flex-wrap gap-2">
               {selectedEmail.variables.map((v) => (
                 <span
@@ -217,7 +238,7 @@ export const EditEmailModal: React.FC<EditEmailModalProps> = ({
             onClick={onClose}
             className="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50"
           >
-            Cancel
+            {t('common:cancel')}
           </button>
           <button
             onClick={onSave}
@@ -227,10 +248,10 @@ export const EditEmailModal: React.FC<EditEmailModalProps> = ({
             {isSaving ? (
               <>
                 <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                Saving...
+                {t('common:saving')}
               </>
             ) : (
-              'Save Changes'
+              t('common:saveChanges')
             )}
           </button>
         </div>
@@ -254,12 +275,13 @@ export const PreviewEmailModal: React.FC<PreviewEmailModalProps> = ({
   previewHtml,
   onClose,
 }) => {
+  const { t } = useTranslation(['admin', 'common']);
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
       <div className="bg-white rounded-2xl shadow-xl max-w-3xl w-full max-h-[90vh] overflow-hidden flex flex-col">
         <div className="border-b border-gray-200 px-6 py-4 flex items-center justify-between">
           <div>
-            <h2 className="text-xl font-bold text-gray-900">Email Preview</h2>
+            <h2 className="text-xl font-bold text-gray-900">{t('admin:emailManager.emailPreview')}</h2>
             <p className="text-sm text-gray-500">Subject: {previewSubject}</p>
           </div>
           <button
@@ -303,12 +325,13 @@ export const TestEmailModal: React.FC<TestEmailModalProps> = ({
   onClose,
   isSending,
 }) => {
+  const { t } = useTranslation(['admin', 'common']);
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
       <div className="bg-white rounded-2xl shadow-xl max-w-md w-full">
         <div className="border-b border-gray-200 px-6 py-4 flex items-center justify-between">
           <div>
-            <h2 className="text-xl font-bold text-gray-900">Send Test Email</h2>
+            <h2 className="text-xl font-bold text-gray-900">{t('admin:emailManager.sendTestEmail')}</h2>
             <p className="text-sm text-gray-500">{selectedEmail.name}</p>
           </div>
           <button
@@ -322,7 +345,7 @@ export const TestEmailModal: React.FC<TestEmailModalProps> = ({
         <div className="p-6 space-y-4">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              Recipient Email
+              {t('admin:emailManager.recipientEmail')}
             </label>
             <input
               type="email"
@@ -334,8 +357,7 @@ export const TestEmailModal: React.FC<TestEmailModalProps> = ({
           </div>
 
           <p className="text-sm text-gray-500">
-            A test email will be sent using example values for all variables.
-            The subject will be prefixed with "[TEST]".
+            {t('admin:emailManager.testEmailDesc')}
           </p>
         </div>
 
@@ -344,7 +366,7 @@ export const TestEmailModal: React.FC<TestEmailModalProps> = ({
             onClick={onClose}
             className="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50"
           >
-            Cancel
+            {t('common:cancel')}
           </button>
           <button
             onClick={onSend}
@@ -354,12 +376,12 @@ export const TestEmailModal: React.FC<TestEmailModalProps> = ({
             {isSending ? (
               <>
                 <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                Sending...
+                {t('admin:emailManager.sending')}
               </>
             ) : (
               <>
                 <PaperAirplaneIcon className="w-4 h-4" />
-                Send Test
+                {t('admin:emailManager.sendTest')}
               </>
             )}
           </button>
