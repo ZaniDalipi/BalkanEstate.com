@@ -13,9 +13,14 @@ const getJwtSecret = (): string => {
   return secret;
 };
 
-// Check if fingerprint verification is enabled
+// Token fingerprinting is enabled by default in production for security.
+// Can be explicitly disabled via ENABLE_TOKEN_FINGERPRINT=false if needed.
 const isFingerprintEnabled = (): boolean => {
-  return process.env.ENABLE_TOKEN_FINGERPRINT === 'true';
+  const envValue = process.env.ENABLE_TOKEN_FINGERPRINT;
+  if (envValue === 'false') return false;
+  if (envValue === 'true') return true;
+  // Default: enabled in production, disabled in development
+  return process.env.NODE_ENV === 'production';
 };
 
 export const protect = async (

@@ -7,6 +7,7 @@ import helmet from 'helmet';
 import hpp from 'hpp';
 import rateLimit from 'express-rate-limit';
 import { Request, Response, NextFunction, Application } from 'express';
+import { IncomingMessage, ServerResponse } from 'http';
 import cors from 'cors';
 import crypto from 'crypto';
 import { apiLogger } from '../utils/logger';
@@ -111,13 +112,23 @@ export const validateEnvironment = (): void => {
 };
 
 /**
- * Configure Helmet security headers
+ * Generate a per-request CSP nonce.
+ * The nonce is attached to res.locals.cspNonce so it can be injected into
+ * script/style tags by the HTML template (e.g., index.html).
+ */
+export const cspNonceMiddleware = (_req: Request, res: Response, next: NextFunction): void => {
+  res.locals.cspNonce = crypto.randomBytes(16).toString('base64');
+  next();
+};
+
+/**
+ * Configure Helmet security headers with per-request nonce-based CSP.
  *
  * CSP Notes:
- * - 'unsafe-inline' is required for Tailwind CSS and React's style injection
- * - 'unsafe-eval' is required for some mapping libraries (MapLibre, Leaflet)
- * - TODO: Implement nonce-based CSP for better security when feasible
- * - Report-only mode can be used to test stricter policies
+ * - Nonce-based CSP for scripts replaces 'unsafe-inline'
+ * - 'unsafe-eval' is still required for MapLibre GL JS
+ *   See: https://github.com/maplibre/maplibre-gl-js/issues/1035
+ * - Styles still use 'unsafe-inline' because Tailwind injects styles dynamically
  */
 export const helmetConfig = helmet({
   // Content Security Policy
@@ -126,10 +137,9 @@ export const helmetConfig = helmet({
       defaultSrc: ["'self'"],
       scriptSrc: [
         "'self'",
-        // Note: 'unsafe-inline' needed for React hydration, Tailwind
-        // TODO: Migrate to nonce-based CSP for scripts
-        "'unsafe-inline'",
-        // Note: 'unsafe-eval' needed for MapLibre GL JS
+        // Nonce-based CSP for inline scripts (replaces 'unsafe-inline')
+        (_req: IncomingMessage, res: ServerResponse) => `'nonce-${(res as any).locals?.cspNonce || ''}'`,
+        // 'unsafe-eval' still needed for MapLibre GL JS
         // See: https://github.com/maplibre/maplibre-gl-js/issues/1035
         "'unsafe-eval'",
         'https://unpkg.com',
@@ -138,7 +148,7 @@ export const helmetConfig = helmet({
       ],
       styleSrc: [
         "'self'",
-        // Note: 'unsafe-inline' needed for Tailwind CSS and component styles
+        // Styles still need 'unsafe-inline' for Tailwind CSS dynamic injection
         "'unsafe-inline'",
         'https://fonts.googleapis.com',
         'https://unpkg.com',
@@ -612,7 +622,10 @@ export const applySecurityMiddleware = (app: Application): void => {
   // 2. Request ID (for tracking)
   app.use(requestId);
 
-  // 3. Helmet security headers
+  // 3. CSP nonce generation (must come before Helmet)
+  app.use(cspNonceMiddleware);
+
+  // 4. Helmet security headers (uses nonce from res.locals.cspNonce)
   app.use(helmetConfig);
 
   // 4. HPP protection
@@ -658,6 +671,7 @@ export default {
   applySecurityMiddleware,
   enforceHttps,
   helmetConfig,
+  cspNonceMiddleware,
   getCorsConfig,
   generalRateLimiter,
   sensitiveRateLimiter,

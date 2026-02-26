@@ -1,5 +1,4 @@
 import express from 'express';
-import multer from 'multer';
 import {
   signup,
   login,
@@ -39,22 +38,7 @@ import {
 } from '../middleware/rateLimiter';
 import { decryptPayload } from '../middleware/decryptPayload';
 import { getPublicKeyBase64 } from '../utils/payloadEncryption';
-
-// Configure multer for avatar uploads
-const upload = multer({
-  storage: multer.memoryStorage(),
-  limits: {
-    fileSize: 5 * 1024 * 1024, // 5MB limit
-  },
-  fileFilter: (req, file, cb) => {
-    // Accept images only
-    if (!file.mimetype.startsWith('image/')) {
-      cb(new Error('Only image files are allowed'));
-      return;
-    }
-    cb(null, true);
-  },
-});
+import { upload } from '../utils/upload';
 
 
 const router = express.Router();
@@ -206,7 +190,7 @@ router.post('/logout-all', protect, logoutAllDevices);
  *         $ref: '#/components/responses/Unauthorized'
  */
 router.get('/me', protect, getMe);
-router.put('/profile', protect, updateProfile);
+router.put('/profile', protect, decryptPayload, updateProfile);
 router.post('/set-public-key', protect, setPublicKey);
 router.post('/switch-role', protect, switchRole);
 router.get('/my-stats', protect, getUserStats);

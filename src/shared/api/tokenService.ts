@@ -224,18 +224,15 @@ const getTimeUntilExpiry = (token: string): number => {
 const refreshTokenProactively = async (): Promise<boolean> => {
   if (isRefreshing) return false;
 
-  const refreshToken = secureStorage.getItem(REFRESH_TOKEN_KEY);
-  if (!refreshToken) {
-    return false;
-  }
-
   isRefreshing = true;
 
   try {
+    // Refresh token is sent via httpOnly cookie automatically
     const response = await fetch(`${API_URL}/auth/refresh-token`, {
       method: 'POST',
+      credentials: 'include',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ refreshToken }),
+      body: JSON.stringify({}),
     });
 
     if (!response.ok) {

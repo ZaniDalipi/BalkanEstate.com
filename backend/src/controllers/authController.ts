@@ -14,6 +14,7 @@ import { loginRateLimiterAccount, resetLoginRateLimit } from '../middleware/rate
 import { activityLogger } from '../services/activityLogger';
 import { authLogger } from '../utils/logger';
 import { generateSecureAgentId } from '../utils/secureRandom';
+import { setRefreshTokenCookie, clearRefreshTokenCookie, getRefreshTokenFromRequest } from '../utils/cookieUtils';
 import { FREE_TIER_LIMITS, PRO_TIER_LIMITS, ENTERPRISE_TIER_LIMITS } from '../config/subscriptionConstants';
 
 /**
@@ -349,9 +350,12 @@ export const signup = async (req: Request, res: Response): Promise<void> => {
     // Log successful signup
     activityLogger.logSignup(String(user._id), user.email, role || 'buyer', req);
 
+    // Set refresh token as httpOnly cookie (not accessible to JS)
+    setRefreshTokenCookie(res, tokens.refreshToken);
+
     res.status(201).json({
       accessToken: tokens.accessToken,
-      refreshToken: tokens.refreshToken,
+      refreshToken: tokens.refreshToken, // Also in body for backward compat / mobile apps
       user: {
         ...buildSafeUserResponse(user),
         availableRoles: user.availableRoles,
@@ -533,9 +537,12 @@ export const login = async (req: Request, res: Response): Promise<void> => {
     };
     const tokens = await generateTokenPair(user, deviceInfo);
 
+    // Set refresh token as httpOnly cookie (not accessible to JS)
+    setRefreshTokenCookie(res, tokens.refreshToken);
+
     res.json({
       accessToken: tokens.accessToken,
-      refreshToken: tokens.refreshToken,
+      refreshToken: tokens.refreshToken, // Also in body for backward compat / mobile apps
       user: buildSafeUserResponse(user),
     });
   } catch (error: any) {
@@ -1515,10 +1522,13 @@ export const resetPassword = async (
     };
     const tokens = await generateTokenPair(user, deviceInfo);
 
+    // Set refresh token as httpOnly cookie
+    setRefreshTokenCookie(res, tokens.refreshToken);
+
     res.json({
       message: 'Password reset successful',
       accessToken: tokens.accessToken,
-      refreshToken: tokens.refreshToken,
+      refreshToken: tokens.refreshToken, // Also in body for backward compat / mobile apps
       user: {
         id: String(user._id),
         email: user.email,
@@ -1711,7 +1721,8 @@ export const saveAvatarOptions = async (req: Request, res: Response): Promise<vo
 // @access  Public
 export const refreshToken = async (req: Request, res: Response): Promise<void> => {
   try {
-    const { refreshToken: token } = req.body;
+    // Read refresh token from httpOnly cookie first, fall back to body
+    const token = getRefreshTokenFromRequest(req);
 
     if (!token) {
       res.status(400).json({ message: 'Refresh token is required' });
@@ -1727,13 +1738,19 @@ export const refreshToken = async (req: Request, res: Response): Promise<void> =
     const result = await refreshAccessToken(token, deviceInfo);
 
     if (!result.success) {
+      clearRefreshTokenCookie(res);
       res.status(401).json({ message: result.error || 'Invalid refresh token' });
       return;
     }
 
+    // Set new refresh token as httpOnly cookie
+    if (result.refreshToken) {
+      setRefreshTokenCookie(res, result.refreshToken);
+    }
+
     res.json({
       accessToken: result.accessToken,
-      refreshToken: result.refreshToken,
+      refreshToken: result.refreshToken, // Also in body for backward compat / mobile apps
     });
   } catch (error: any) {
     res.status(500).json({ message: 'Error refreshing token' });
@@ -1811,7 +1828,8 @@ export const resendVerificationEmail = async (req: Request, res: Response): Prom
 // @access  Private
 export const enhancedLogout = async (req: Request, res: Response): Promise<void> => {
   try {
-    const { refreshToken: token } = req.body;
+    // Read refresh token from httpOnly cookie first, fall back to body
+    const token = getRefreshTokenFromRequest(req);
 
     if (!req.user) {
       res.status(401).json({ message: 'Not authorized' });
@@ -1825,6 +1843,9 @@ export const enhancedLogout = async (req: Request, res: Response): Promise<void>
       const { revokeRefreshToken } = await import('../services/refreshTokenService');
       await revokeRefreshToken(userId, token);
     }
+
+    // Clear the httpOnly refresh token cookie
+    clearRefreshTokenCookie(res);
 
     res.json({ message: 'Logged out successfully' });
   } catch (error: any) {
@@ -1846,6 +1867,9 @@ export const logoutAllDevices = async (req: Request, res: Response): Promise<voi
 
     const { revokeAllRefreshTokens } = await import('../services/refreshTokenService');
     await revokeAllRefreshTokens(userId);
+
+    // Clear the httpOnly refresh token cookie
+    clearRefreshTokenCookie(res);
 
     res.json({ message: 'Logged out from all devices successfully' });
   } catch (error: any) {

@@ -3,6 +3,7 @@ import { createServer } from 'http';
 import { Server } from 'socket.io';
 import dotenv from 'dotenv';
 import compression from 'compression';
+import cookieParser from 'cookie-parser';
 import morgan from 'morgan';
 import connectDB from './config/database';
 import { setupChatSocket } from './sockets/chatSocket';
@@ -205,9 +206,10 @@ serverLogger.info('✅ Monthly coupon refresh job started (1st of each month)');
 // ============================================================================
 applySecurityMiddleware(app);
 
-// Body parser
+// Body parser & cookie parser
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
+app.use(cookieParser());
 
 // Logging (in development)
 if (process.env.NODE_ENV === 'development') {
