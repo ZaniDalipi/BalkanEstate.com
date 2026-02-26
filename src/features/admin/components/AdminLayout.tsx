@@ -30,6 +30,7 @@ export type AdminView =
   | 'inquiries'
   | 'agentRequests'
   | 'settings'
+  | 'siteSettings'
   | 'activity'
   | 'howItWorks'
   | 'emailTemplates';

@@ -67,6 +67,11 @@ import {
   uploadVideo,
 } from '../controllers/siteContentController';
 import {
+  getSiteSettings,
+  updateSiteSettings,
+  resetSiteSettings,
+} from '../controllers/siteSettingsController';
+import {
   getAllEmailConfigs,
   getEmailConfigByKey,
   updateEmailConfig,
@@ -319,6 +324,11 @@ router.post('/site-content', logAdminAction('CREATE_SITE_CONTENT'), createConten
 router.patch('/site-content/:id', logAdminAction('UPDATE_SITE_CONTENT'), updateContent);
 router.delete('/site-content/:id', logAdminAction('DELETE_SITE_CONTENT'), deleteContent);
 router.post('/site-content/upload-video', logAdminAction('UPLOAD_VIDEO'), videoUpload.single('video'), uploadVideo);
+
+// ===== Site Settings Management =====
+router.get('/site-settings', logAdminAction('VIEW_SITE_SETTINGS'), getSiteSettings);
+router.patch('/site-settings', logAdminAction('UPDATE_SITE_SETTINGS'), updateSiteSettings);
+router.post('/site-settings/reset', logAdminAction('RESET_SITE_SETTINGS'), resetSiteSettings);
 
 // ===== Email Configuration Management =====
 router.get('/email-configs', logAdminAction('VIEW_EMAIL_CONFIGS'), getAllEmailConfigs);

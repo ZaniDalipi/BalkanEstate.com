@@ -110,6 +110,25 @@ export const EditEmailModal: React.FC<EditEmailModalProps> = ({
             </div>
           </div>
 
+          {/* Header Image URL */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Header Image URL (optional, replaces emoji)
+            </label>
+            <input
+              type="text"
+              value={editForm.headerImageUrl || ''}
+              onChange={(e) => setEditForm({ ...editForm, headerImageUrl: e.target.value })}
+              placeholder="https://... (leave empty to use emoji)"
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            />
+            {editForm.headerImageUrl && (
+              <div className="mt-2 bg-gray-100 rounded-lg p-3 inline-block">
+                <img src={editForm.headerImageUrl} alt="Header" className="max-h-12 max-w-40" />
+              </div>
+            )}
+          </div>
+
           {/* Body Template */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">

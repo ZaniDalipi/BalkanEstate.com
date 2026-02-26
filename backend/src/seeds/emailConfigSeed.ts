@@ -1092,6 +1092,512 @@ export const defaultEmailConfigs = [
     isActive: true,
   },
 
+  // ===== EXPIRY & RENEWAL EMAILS =====
+  {
+    key: 'expiry-reminder',
+    name: 'Expiry Reminder',
+    description: 'Sent when a featured listing subscription is about to expire, includes a discount coupon',
+    category: 'alerts',
+    fromCategory: 'alerts',
+    subject: 'Your Featured Listing Expires Tomorrow - Save {{discount}}%',
+    preheaderText: 'Renew now and save {{discount}}% on your featured listing',
+    headerTitle: '{{discount}}% OFF Renewal',
+    headerSubtitle: 'Your featured listing expires tomorrow - renew now and save!',
+    headerEmoji: '⏰',
+    headerGradient: 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)',
+    bodyTemplate: `
+      <p style="color: #374151; font-size: 16px; margin: 0 0 16px 0;">
+        Hi <strong>{{agencyName}}</strong>,
+      </p>
+      <p style="color: #6b7280; font-size: 14px; margin: 0 0 16px 0;">
+        Your featured listing subscription expires on <strong>{{expiryDate}}</strong>.
+      </p>
+      <p style="color: #6b7280; font-size: 14px; margin: 0 0 16px 0;">
+        Don't lose your premium visibility! Properties with featured status get <strong>5x more views</strong> on average.
+      </p>
+      <p style="color: #6b7280; font-size: 14px; margin: 0 0 24px 0;">
+        Renew now with code <strong style="font-family: monospace; background: #f3f4f6; padding: 4px 8px; border-radius: 4px; color: #0252CD;">{{couponCode}}</strong> to get {{discount}}% off your renewal.
+      </p>
+    `,
+    ctaEnabled: true,
+    ctaText: 'Renew & Save {{discount}}%',
+    ctaUrl: '{{frontendUrl}}/dashboard/promotions?coupon={{couponCode}}',
+    showUnsubscribe: false,
+    variables: [
+      { name: 'agencyName', description: 'Agency or user name', required: true, example: 'Balkan Properties' },
+      { name: 'expiryDate', description: 'Subscription expiry date', required: true, example: 'January 15, 2026' },
+      { name: 'couponCode', description: 'Discount coupon code', required: true, example: 'RENEW25' },
+      { name: 'discount', description: 'Discount percentage', required: true, example: '25' },
+      { name: 'frontendUrl', description: 'Frontend base URL', required: true, example: 'https://balkanestate.com' },
+    ],
+    isActive: true,
+  },
+  {
+    key: 'auto-renewal-reminder',
+    name: 'Auto-Renewal Reminder',
+    description: 'Sent 7 days before a subscription auto-renews',
+    category: 'notifications',
+    fromCategory: 'noreply',
+    subject: 'Upcoming renewal: Your {{planName}} subscription renews on {{renewalDate}}',
+    preheaderText: '7 days until your subscription renewal',
+    headerTitle: 'Subscription Renewal Notice',
+    headerSubtitle: '7 days until your renewal',
+    headerEmoji: '🔔',
+    headerGradient: 'linear-gradient(135deg, #2563eb 0%, #1e40af 100%)',
+    bodyTemplate: `
+      <p style="color: #374151; font-size: 16px; margin: 0 0 16px 0;">
+        Hi <strong>{{userName}}</strong>,
+      </p>
+      <p style="color: #6b7280; font-size: 14px; margin: 0 0 16px 0;">
+        This is a friendly reminder that your <strong>{{planName}}</strong> subscription will automatically renew on <strong>{{renewalDate}}</strong>.
+      </p>
+      <div style="background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 8px; padding: 16px; margin: 0 0 16px 0;">
+        <p style="color: #1e40af; font-size: 14px; font-weight: 600; margin: 0 0 8px 0;">What happens next?</p>
+        <ul style="color: #1e3a8a; margin: 0; padding-left: 20px; line-height: 1.8; font-size: 13px;">
+          <li>Your payment method will be charged on {{renewalDate}}</li>
+          <li>Your subscription will continue uninterrupted</li>
+          <li>You'll receive an invoice/receipt via email</li>
+        </ul>
+      </div>
+      <div style="background: #fef3c7; border: 1px solid #fcd34d; border-radius: 8px; padding: 16px; margin: 0 0 16px 0;">
+        <p style="color: #92400e; font-size: 13px; margin: 0;">
+          <strong>Don't want to renew?</strong> You can cancel your subscription anytime from your account settings. Your access will continue until the end of the current billing period.
+        </p>
+      </div>
+    `,
+    ctaEnabled: true,
+    ctaText: 'Manage Subscription',
+    ctaUrl: '{{frontendUrl}}/account',
+    showUnsubscribe: false,
+    variables: [
+      { name: 'userName', description: 'User name', required: true, example: 'John Doe' },
+      { name: 'planName', description: 'Subscription plan name', required: true, example: 'Pro' },
+      { name: 'renewalDate', description: 'Auto-renewal date', required: true, example: 'February 1, 2026' },
+      { name: 'frontendUrl', description: 'Frontend base URL', required: true, example: 'https://balkanestate.com' },
+    ],
+    isActive: true,
+  },
+  {
+    key: 'subscription-invoice',
+    name: 'Subscription Invoice',
+    description: 'Sent after a subscription payment as an invoice/receipt',
+    category: 'transactional',
+    fromCategory: 'noreply',
+    subject: 'Invoice & Receipt - {{planName}} Subscription',
+    preheaderText: 'Your subscription invoice for {{planName}}',
+    headerTitle: 'Invoice & Receipt',
+    headerSubtitle: 'Thank you for subscribing to BalkanEstate',
+    headerEmoji: '🧾',
+    headerGradient: 'linear-gradient(135deg, #16a34a 0%, #15803d 100%)',
+    bodyTemplate: `
+      <p style="color: #374151; font-size: 16px; margin: 0 0 16px 0;">
+        Hi <strong>{{userName}}</strong>,
+      </p>
+      <p style="color: #6b7280; font-size: 14px; margin: 0 0 24px 0;">
+        Thank you for your subscription. Here are your invoice details:
+      </p>
+      <div style="background: #f3f4f6; border-radius: 8px; padding: 20px; margin: 0 0 24px 0;">
+        <table style="width: 100%; border-collapse: collapse;">
+          <tr><td style="padding: 8px 0; color: #6b7280; font-size: 14px;">Plan:</td><td style="padding: 8px 0; color: #111827; font-size: 14px; font-weight: 600;">{{planName}}</td></tr>
+          <tr><td style="padding: 8px 0; color: #6b7280; font-size: 14px;">Amount:</td><td style="padding: 8px 0; color: #111827; font-size: 14px; font-weight: 600;">{{amount}}</td></tr>
+          <tr><td style="padding: 8px 0; color: #6b7280; font-size: 14px;">Billing Period:</td><td style="padding: 8px 0; color: #111827; font-size: 14px;">{{billingPeriod}}</td></tr>
+          <tr><td style="padding: 8px 0; color: #6b7280; font-size: 14px;">Order ID:</td><td style="padding: 8px 0; color: #111827; font-size: 14px; font-family: monospace;">{{orderId}}</td></tr>
+          <tr><td style="padding: 8px 0; color: #6b7280; font-size: 14px;">Start Date:</td><td style="padding: 8px 0; color: #111827; font-size: 14px;">{{startDate}}</td></tr>
+          <tr><td style="padding: 8px 0; color: #6b7280; font-size: 14px;">Next Billing:</td><td style="padding: 8px 0; color: #111827; font-size: 14px;">{{nextBillingDate}}</td></tr>
+          <tr><td style="padding: 8px 0; color: #6b7280; font-size: 14px;">Auto-Renew:</td><td style="padding: 8px 0; color: #111827; font-size: 14px;">{{autoRenewStatus}}</td></tr>
+        </table>
+      </div>
+    `,
+    ctaEnabled: true,
+    ctaText: 'Manage Subscription',
+    ctaUrl: '{{frontendUrl}}/account',
+    showUnsubscribe: false,
+    variables: [
+      { name: 'userName', description: 'User name', required: true, example: 'John Doe' },
+      { name: 'planName', description: 'Subscription plan name', required: true, example: 'Pro' },
+      { name: 'amount', description: 'Formatted payment amount', required: true, example: '€29.99' },
+      { name: 'billingPeriod', description: 'Billing period text', required: true, example: 'Monthly' },
+      { name: 'orderId', description: 'Order/transaction ID', required: true, example: 'ORD-12345' },
+      { name: 'startDate', description: 'Subscription start date', required: true, example: 'January 1, 2026' },
+      { name: 'nextBillingDate', description: 'Next billing date', required: true, example: 'February 1, 2026' },
+      { name: 'autoRenewStatus', description: 'Auto-renew status text', required: true, example: 'Enabled' },
+      { name: 'frontendUrl', description: 'Frontend base URL', required: true, example: 'https://balkanestate.com' },
+    ],
+    isActive: true,
+  },
+
+  // ===== LISTING DIGEST & ALERTS =====
+  {
+    key: 'new-listings-digest',
+    name: 'New Listings Digest',
+    description: 'Sent as a digest of multiple new properties matching a saved search',
+    category: 'alerts',
+    fromCategory: 'alerts',
+    subject: '🏠 {{propertyCount}} new properties match "{{searchName}}"',
+    preheaderText: '{{propertyCount}} new properties found for your saved search',
+    headerTitle: '🏠 {{propertyCount}} New Properties!',
+    headerSubtitle: '{{frequencyLabel}} update for "{{searchName}}"',
+    headerEmoji: '🏠',
+    headerGradient: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
+    bodyTemplate: `
+      <p style="color: #374151; font-size: 14px; margin: 0 0 16px 0;">
+        Hi <strong>{{recipientName}}</strong>, we found {{propertyCount}} new properties matching your search!
+      </p>
+      {{propertyCards}}
+    `,
+    ctaEnabled: true,
+    ctaText: 'View All Properties →',
+    ctaUrl: '{{frontendUrl}}/search',
+    showUnsubscribe: true,
+    unsubscribeType: 'propertyAlerts',
+    footerReason: 'You\'re receiving this because you have alerts enabled for "{{searchName}}"',
+    variables: [
+      { name: 'recipientName', description: 'Recipient name', required: true, example: 'John' },
+      { name: 'searchName', description: 'Saved search name', required: true, example: 'Apartments in Skopje' },
+      { name: 'propertyCount', description: 'Number of properties', required: true, example: '5' },
+      { name: 'frequencyLabel', description: 'Frequency label (Daily/Weekly)', required: false, example: 'Daily' },
+      { name: 'propertyCards', description: 'HTML property cards', required: true, example: '<div>...</div>' },
+      { name: 'frontendUrl', description: 'Frontend base URL', required: true, example: 'https://balkanestate.com' },
+    ],
+    isActive: true,
+  },
+  {
+    key: 'saved-search-price-drop',
+    name: 'Saved Search Price Drop',
+    description: 'Sent when a property in a saved search has a price change',
+    category: 'alerts',
+    fromCategory: 'alerts',
+    subject: '{{subjectText}}',
+    preheaderText: '{{previewText}}',
+    headerTitle: '{{headlineText}}',
+    headerSubtitle: '{{subHeadline}}',
+    headerEmoji: '💰',
+    headerGradient: '{{headerGradient}}',
+    bodyTemplate: `
+      <p style="color: #374151; font-size: 15px; margin: 0 0 16px 0;">
+        {{introText}}
+      </p>
+      <p style="color: #6b7280; font-size: 13px; margin: 0 0 20px 0;">
+        From your saved search: "<strong>{{searchName}}</strong>"
+      </p>
+      {{propertyCard}}
+    `,
+    ctaEnabled: true,
+    ctaText: '{{ctaText}}',
+    ctaUrl: '{{frontendUrl}}/property/{{propertyId}}',
+    showUnsubscribe: true,
+    unsubscribeType: 'priceDrops',
+    footerReason: 'Alert from your saved search: "{{searchName}}"',
+    variables: [
+      { name: 'recipientName', description: 'Recipient name', required: true, example: 'John' },
+      { name: 'searchName', description: 'Saved search name', required: true, example: 'Apartments in Skopje' },
+      { name: 'headlineText', description: 'Dynamic headline', required: true, example: 'Price Just Dropped!' },
+      { name: 'subHeadline', description: 'Price change summary', required: true, example: 'Save €10,000' },
+      { name: 'headerGradient', description: 'Header gradient CSS', required: true, example: 'linear-gradient(135deg, #ef4444 0%, #dc2626 100%)' },
+      { name: 'introText', description: 'Intro paragraph HTML', required: true, example: 'Great news!' },
+      { name: 'propertyCard', description: 'HTML property card', required: true, example: '<div>...</div>' },
+      { name: 'subjectText', description: 'Email subject', required: true, example: 'Price dropped 15%!' },
+      { name: 'previewText', description: 'Preview text', required: true, example: 'Save €10,000' },
+      { name: 'ctaText', description: 'CTA button text', required: true, example: 'View Property' },
+      { name: 'propertyId', description: 'Property ID', required: true, example: '123abc' },
+      { name: 'frontendUrl', description: 'Frontend base URL', required: true, example: 'https://balkanestate.com' },
+    ],
+    isActive: true,
+  },
+
+  // ===== ENTERPRISE =====
+  {
+    key: 'enterprise-welcome',
+    name: 'Enterprise Welcome',
+    description: 'Sent when an agency activates an Enterprise subscription',
+    category: 'transactional',
+    fromCategory: 'noreply',
+    subject: '🏢 Welcome to Enterprise, {{agencyName}}!',
+    preheaderText: 'Your Enterprise subscription is now active',
+    headerTitle: 'Welcome to Enterprise!',
+    headerSubtitle: 'Your agency is now powered by BalkanEstate Enterprise',
+    headerEmoji: '🏢',
+    headerGradient: 'linear-gradient(135deg, #0f172a 0%, #1e293b 100%)',
+    bodyTemplate: `
+      <p style="color: #374151; font-size: 16px; margin: 0 0 16px 0;">
+        Hi <strong>{{ownerName}}</strong>,
+      </p>
+      <p style="color: #6b7280; font-size: 14px; margin: 0 0 24px 0;">
+        Congratulations! <strong>{{agencyName}}</strong> is now on the Enterprise plan. Here's what's included:
+      </p>
+      {{benefitsSection}}
+      {{couponCodesList}}
+    `,
+    ctaEnabled: true,
+    ctaText: 'Go to Agency Dashboard',
+    ctaUrl: '{{frontendUrl}}/agency/dashboard',
+    showUnsubscribe: false,
+    variables: [
+      { name: 'ownerName', description: 'Agency owner name', required: true, example: 'John Doe' },
+      { name: 'agencyName', description: 'Agency name', required: true, example: 'Balkan Properties' },
+      { name: 'benefitsSection', description: 'HTML benefits/features section', required: true, example: '<div>...</div>' },
+      { name: 'couponCodesList', description: 'HTML coupon codes list', required: false, example: '' },
+      { name: 'frontendUrl', description: 'Frontend base URL', required: true, example: 'https://balkanestate.com' },
+    ],
+    isActive: true,
+  },
+
+  // ===== VIEWING EMAILS =====
+  {
+    key: 'viewing-confirmation',
+    name: 'Viewing Confirmation',
+    description: 'Sent to the visitor when they request a property viewing',
+    category: 'transactional',
+    fromCategory: 'inquiries',
+    subject: '📅 Viewing Scheduled: {{propertyTitle}} on {{date}}',
+    preheaderText: 'Your viewing has been scheduled for {{date}} at {{timeSlot}}',
+    headerTitle: 'Viewing Confirmed!',
+    headerSubtitle: 'Your property viewing has been scheduled',
+    headerEmoji: '📅',
+    headerGradient: 'linear-gradient(135deg, #0252CD 0%, #0369a1 100%)',
+    bodyTemplate: `
+      <p style="color: #374151; font-size: 16px; margin: 0 0 16px 0;">
+        Hello <strong>{{visitorName}}</strong>,
+      </p>
+      <p style="color: #6b7280; font-size: 14px; margin: 0 0 24px 0;">
+        Your viewing request has been submitted. The property owner will review and confirm your appointment.
+      </p>
+      <div style="background: #f0f9ff; border: 1px solid #bae6fd; border-radius: 12px; padding: 24px; margin: 0 0 24px 0;">
+        <h2 style="color: #0369a1; font-size: 16px; margin: 0 0 16px 0;">Viewing Details</h2>
+        <table style="width: 100%; border-collapse: collapse;">
+          <tr><td style="padding: 8px 0; color: #6b7280; font-size: 14px; width: 120px;">Property:</td><td style="padding: 8px 0; color: #111827; font-size: 14px; font-weight: 600;">{{propertyTitle}}</td></tr>
+          <tr><td style="padding: 8px 0; color: #6b7280; font-size: 14px;">Address:</td><td style="padding: 8px 0; color: #111827; font-size: 14px;">{{propertyAddress}}</td></tr>
+          <tr><td style="padding: 8px 0; color: #6b7280; font-size: 14px;">Date:</td><td style="padding: 8px 0; color: #111827; font-size: 14px; font-weight: 600;">{{date}}</td></tr>
+          <tr><td style="padding: 8px 0; color: #6b7280; font-size: 14px;">Time:</td><td style="padding: 8px 0; color: #111827; font-size: 14px; font-weight: 600;">{{timeSlot}}</td></tr>
+          <tr><td style="padding: 8px 0; color: #6b7280; font-size: 14px;">Contact:</td><td style="padding: 8px 0; color: #111827; font-size: 14px;">{{sellerName}}</td></tr>
+        </table>
+      </div>
+      <div style="background: #fef3c7; border-radius: 8px; padding: 16px; margin: 0 0 16px 0;">
+        <p style="color: #92400e; font-size: 13px; margin: 0;">
+          <strong>Note:</strong> The property owner will confirm your viewing. You'll receive another email once confirmed. Please arrive on time and bring a valid ID.
+        </p>
+      </div>
+    `,
+    ctaEnabled: true,
+    ctaText: 'View Property',
+    ctaUrl: '{{frontendUrl}}/property/{{propertyId}}',
+    showUnsubscribe: false,
+    variables: [
+      { name: 'visitorName', description: 'Visitor name', required: true, example: 'John Doe' },
+      { name: 'propertyTitle', description: 'Property title', required: true, example: 'Modern 2BR Apartment' },
+      { name: 'propertyAddress', description: 'Property address', required: true, example: 'City Center, Skopje' },
+      { name: 'date', description: 'Viewing date', required: true, example: 'January 15, 2026' },
+      { name: 'timeSlot', description: 'Viewing time', required: true, example: '10:00 AM' },
+      { name: 'sellerName', description: 'Seller/agent name', required: true, example: 'Jane Smith' },
+      { name: 'propertyId', description: 'Property ID', required: true, example: '123abc' },
+      { name: 'frontendUrl', description: 'Frontend base URL', required: true, example: 'https://balkanestate.com' },
+    ],
+    isActive: true,
+  },
+  {
+    key: 'viewing-notification',
+    name: 'Viewing Notification (Seller)',
+    description: 'Sent to seller/agent when someone requests a property viewing',
+    category: 'notifications',
+    fromCategory: 'inquiries',
+    subject: '🏠 New Viewing Request: {{propertyTitle}} on {{date}}',
+    preheaderText: 'New viewing request from {{visitorName}} for {{date}} at {{timeSlot}}',
+    headerTitle: 'New Viewing Request!',
+    headerSubtitle: '{{propertyTitle}}',
+    headerEmoji: '🏠',
+    headerGradient: 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)',
+    bodyTemplate: `
+      <p style="color: #374151; font-size: 16px; margin: 0 0 16px 0;">
+        Hello <strong>{{sellerName}}</strong>,
+      </p>
+      <p style="color: #6b7280; font-size: 14px; margin: 0 0 24px 0;">
+        You have a new viewing request for your property. Please review and respond.
+      </p>
+      <div style="background: #fffbeb; border: 1px solid #fde68a; border-radius: 12px; padding: 24px; margin: 0 0 24px 0;">
+        <h2 style="color: #92400e; font-size: 16px; margin: 0 0 16px 0;">Viewing Details</h2>
+        <table style="width: 100%; border-collapse: collapse;">
+          <tr><td style="padding: 8px 0; color: #6b7280; font-size: 14px; width: 120px;">Property:</td><td style="padding: 8px 0; color: #111827; font-size: 14px; font-weight: 600;">{{propertyTitle}}</td></tr>
+          <tr><td style="padding: 8px 0; color: #6b7280; font-size: 14px;">Address:</td><td style="padding: 8px 0; color: #111827; font-size: 14px;">{{propertyAddress}}</td></tr>
+          <tr><td style="padding: 8px 0; color: #6b7280; font-size: 14px;">Date:</td><td style="padding: 8px 0; color: #111827; font-size: 14px; font-weight: 600;">{{date}}</td></tr>
+          <tr><td style="padding: 8px 0; color: #6b7280; font-size: 14px;">Time:</td><td style="padding: 8px 0; color: #111827; font-size: 14px; font-weight: 600;">{{timeSlot}}</td></tr>
+          <tr><td style="padding: 8px 0; color: #6b7280; font-size: 14px;">Visitor:</td><td style="padding: 8px 0; color: #111827; font-size: 14px;">{{visitorName}} ({{visitorEmail}})</td></tr>
+          {{visitorPhoneRow}}
+          {{visitorMessageRow}}
+        </table>
+      </div>
+    `,
+    ctaEnabled: true,
+    ctaText: 'Manage Viewings',
+    ctaUrl: '{{frontendUrl}}/property/{{propertyId}}',
+    showUnsubscribe: false,
+    variables: [
+      { name: 'sellerName', description: 'Seller/agent name', required: true, example: 'Jane Smith' },
+      { name: 'visitorName', description: 'Visitor name', required: true, example: 'John Doe' },
+      { name: 'visitorEmail', description: 'Visitor email', required: true, example: 'john@example.com' },
+      { name: 'visitorPhoneRow', description: 'HTML row for phone if provided', required: false, example: '' },
+      { name: 'visitorMessageRow', description: 'HTML row for message if provided', required: false, example: '' },
+      { name: 'propertyTitle', description: 'Property title', required: true, example: 'Modern 2BR Apartment' },
+      { name: 'propertyAddress', description: 'Property address', required: true, example: 'City Center, Skopje' },
+      { name: 'date', description: 'Viewing date', required: true, example: 'January 15, 2026' },
+      { name: 'timeSlot', description: 'Viewing time', required: true, example: '10:00 AM' },
+      { name: 'propertyId', description: 'Property ID', required: true, example: '123abc' },
+      { name: 'frontendUrl', description: 'Frontend base URL', required: true, example: 'https://balkanestate.com' },
+    ],
+    isActive: true,
+  },
+  {
+    key: 'viewing-approved',
+    name: 'Viewing Approved',
+    description: 'Sent to visitor when their viewing request is approved by the seller',
+    category: 'transactional',
+    fromCategory: 'inquiries',
+    subject: '✅ Viewing Confirmed: {{propertyTitle}} on {{date}}',
+    preheaderText: 'Great news! Your viewing has been confirmed for {{date}} at {{timeSlot}}',
+    headerTitle: 'Viewing Confirmed!',
+    headerSubtitle: 'The property owner has approved your visit',
+    headerEmoji: '✅',
+    headerGradient: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
+    bodyTemplate: `
+      <p style="color: #374151; font-size: 16px; margin: 0 0 16px 0;">
+        Hello <strong>{{visitorName}}</strong>,
+      </p>
+      <p style="color: #6b7280; font-size: 14px; margin: 0 0 24px 0;">
+        Great news! Your viewing request has been <strong style="color: #059669;">approved</strong>. You're all set to visit the property.
+      </p>
+      <div style="background: #ecfdf5; border: 1px solid #a7f3d0; border-radius: 12px; padding: 24px; margin: 0 0 24px 0;">
+        <h2 style="color: #065f46; font-size: 16px; margin: 0 0 16px 0;">Confirmed Viewing Details</h2>
+        <table style="width: 100%; border-collapse: collapse;">
+          <tr><td style="padding: 8px 0; color: #6b7280; font-size: 14px; width: 120px;">Property:</td><td style="padding: 8px 0; color: #111827; font-size: 14px; font-weight: 600;">{{propertyTitle}}</td></tr>
+          <tr><td style="padding: 8px 0; color: #6b7280; font-size: 14px;">Address:</td><td style="padding: 8px 0; color: #111827; font-size: 14px;">{{propertyAddress}}</td></tr>
+          <tr><td style="padding: 8px 0; color: #6b7280; font-size: 14px;">Date:</td><td style="padding: 8px 0; color: #111827; font-size: 14px; font-weight: 600;">{{date}}</td></tr>
+          <tr><td style="padding: 8px 0; color: #6b7280; font-size: 14px;">Time:</td><td style="padding: 8px 0; color: #111827; font-size: 14px; font-weight: 600;">{{timeSlot}}</td></tr>
+          <tr><td style="padding: 8px 0; color: #6b7280; font-size: 14px;">Contact:</td><td style="padding: 8px 0; color: #111827; font-size: 14px;">{{sellerName}}{{sellerPhoneHtml}}</td></tr>
+        </table>
+      </div>
+      <div style="background: #fef3c7; border-radius: 8px; padding: 16px; margin: 0 0 16px 0;">
+        <p style="color: #92400e; font-size: 13px; margin: 0;">
+          <strong>Reminder:</strong> Please arrive on time and bring a valid ID. If you need to cancel, please let the owner know in advance.
+        </p>
+      </div>
+    `,
+    ctaEnabled: true,
+    ctaText: 'View Property Details',
+    ctaUrl: '{{frontendUrl}}/property/{{propertyId}}',
+    showUnsubscribe: false,
+    variables: [
+      { name: 'visitorName', description: 'Visitor name', required: true, example: 'John Doe' },
+      { name: 'propertyTitle', description: 'Property title', required: true, example: 'Modern 2BR Apartment' },
+      { name: 'propertyAddress', description: 'Property address', required: true, example: 'City Center, Skopje' },
+      { name: 'date', description: 'Viewing date', required: true, example: 'January 15, 2026' },
+      { name: 'timeSlot', description: 'Viewing time', required: true, example: '10:00 AM' },
+      { name: 'sellerName', description: 'Seller/agent name', required: true, example: 'Jane Smith' },
+      { name: 'sellerPhoneHtml', description: 'HTML for seller phone if available', required: false, example: '' },
+      { name: 'propertyId', description: 'Property ID', required: true, example: '123abc' },
+      { name: 'frontendUrl', description: 'Frontend base URL', required: true, example: 'https://balkanestate.com' },
+    ],
+    isActive: true,
+  },
+  {
+    key: 'viewing-rejected',
+    name: 'Viewing Rejected',
+    description: 'Sent to visitor when their viewing request is declined',
+    category: 'transactional',
+    fromCategory: 'inquiries',
+    subject: 'Viewing Update: {{propertyTitle}}',
+    preheaderText: 'Your viewing request for {{propertyTitle}} could not be confirmed',
+    headerTitle: 'Viewing Not Available',
+    headerSubtitle: 'Unfortunately, this viewing time is not available',
+    headerEmoji: '📋',
+    headerGradient: 'linear-gradient(135deg, #6b7280 0%, #4b5563 100%)',
+    bodyTemplate: `
+      <p style="color: #374151; font-size: 16px; margin: 0 0 16px 0;">
+        Hello <strong>{{visitorName}}</strong>,
+      </p>
+      <p style="color: #6b7280; font-size: 14px; margin: 0 0 24px 0;">
+        Unfortunately, your viewing request could not be confirmed at this time.
+      </p>
+      <div style="background: #f3f4f6; border: 1px solid #e5e7eb; border-radius: 12px; padding: 24px; margin: 0 0 24px 0;">
+        <table style="width: 100%; border-collapse: collapse;">
+          <tr><td style="padding: 8px 0; color: #6b7280; font-size: 14px; width: 120px;">Property:</td><td style="padding: 8px 0; color: #111827; font-size: 14px; font-weight: 600;">{{propertyTitle}}</td></tr>
+          <tr><td style="padding: 8px 0; color: #6b7280; font-size: 14px;">Address:</td><td style="padding: 8px 0; color: #111827; font-size: 14px;">{{propertyAddress}}</td></tr>
+          <tr><td style="padding: 8px 0; color: #6b7280; font-size: 14px;">Requested Date:</td><td style="padding: 8px 0; color: #111827; font-size: 14px;">{{date}}</td></tr>
+          <tr><td style="padding: 8px 0; color: #6b7280; font-size: 14px;">Requested Time:</td><td style="padding: 8px 0; color: #111827; font-size: 14px;">{{timeSlot}}</td></tr>
+          {{cancelReasonRow}}
+        </table>
+      </div>
+      <p style="color: #6b7280; font-size: 14px; margin: 0 0 16px 0;">
+        Don't worry! You can try requesting a different time or explore other properties.
+      </p>
+    `,
+    ctaEnabled: true,
+    ctaText: 'Browse Properties',
+    ctaUrl: '{{frontendUrl}}/search',
+    showUnsubscribe: false,
+    variables: [
+      { name: 'visitorName', description: 'Visitor name', required: true, example: 'John Doe' },
+      { name: 'propertyTitle', description: 'Property title', required: true, example: 'Modern 2BR Apartment' },
+      { name: 'propertyAddress', description: 'Property address', required: true, example: 'City Center, Skopje' },
+      { name: 'date', description: 'Requested viewing date', required: true, example: 'January 15, 2026' },
+      { name: 'timeSlot', description: 'Requested viewing time', required: true, example: '10:00 AM' },
+      { name: 'cancelReasonRow', description: 'HTML row for cancel reason if provided', required: false, example: '' },
+      { name: 'frontendUrl', description: 'Frontend base URL', required: true, example: 'https://balkanestate.com' },
+    ],
+    isActive: true,
+  },
+
+  // ===== PROMOTION =====
+  {
+    key: 'promotion-coupons',
+    name: 'Promotion Coupons Summary',
+    description: 'Sent to agency owners with their promotion coupons summary',
+    category: 'notifications',
+    fromCategory: 'alerts',
+    subject: '🎁 Promotion Coupons Summary — {{agencyName}}',
+    preheaderText: 'Your promotion coupons summary for {{agencyName}}',
+    headerTitle: 'Promotion Coupons',
+    headerSubtitle: '{{agencyName}} • Monthly Summary',
+    headerEmoji: '🎁',
+    headerGradient: 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)',
+    bodyTemplate: `
+      <p style="color: #374151; font-size: 16px; margin: 0 0 20px 0;">
+        Hello <strong>{{ownerName}}</strong>! 👋
+      </p>
+      <p style="color: #4b5563; font-size: 15px; line-height: 1.6; margin: 0 0 24px 0;">
+        Here's your current promotion coupons summary for <strong>{{agencyName}}</strong>.
+        Use these coupons to highlight, feature, or boost your agency's property listings!
+      </p>
+      <div style="display: flex; gap: 12px; margin-bottom: 24px;">
+        <div style="flex: 1; background: #fffbeb; border: 1px solid #fde68a; border-radius: 12px; padding: 16px; text-align: center;">
+          <p style="color: #d97706; font-size: 28px; font-weight: 700; margin: 0;">{{monthlyCoupons}}</p>
+          <p style="color: #92400e; font-size: 12px; margin: 4px 0 0 0; text-transform: uppercase; font-weight: 600;">Monthly</p>
+        </div>
+        <div style="flex: 1; background: #ecfdf5; border: 1px solid #a7f3d0; border-radius: 12px; padding: 16px; text-align: center;">
+          <p style="color: #059669; font-size: 28px; font-weight: 700; margin: 0;">{{availableCoupons}}</p>
+          <p style="color: #065f46; font-size: 12px; margin: 4px 0 0 0; text-transform: uppercase; font-weight: 600;">Available</p>
+        </div>
+        <div style="flex: 1; background: #f3f4f6; border: 1px solid #e5e7eb; border-radius: 12px; padding: 16px; text-align: center;">
+          <p style="color: #374151; font-size: 28px; font-weight: 700; margin: 0;">{{usedCoupons}}</p>
+          <p style="color: #6b7280; font-size: 12px; margin: 4px 0 0 0; text-transform: uppercase; font-weight: 600;">Used</p>
+        </div>
+      </div>
+      {{couponCodesList}}
+    `,
+    ctaEnabled: true,
+    ctaText: 'Go to Dashboard →',
+    ctaUrl: '{{frontendUrl}}/agency/dashboard',
+    showUnsubscribe: false,
+    variables: [
+      { name: 'ownerName', description: 'Agency owner name', required: true, example: 'John Doe' },
+      { name: 'agencyName', description: 'Agency name', required: true, example: 'Balkan Properties' },
+      { name: 'monthlyCoupons', description: 'Monthly coupon count', required: true, example: '15' },
+      { name: 'availableCoupons', description: 'Available coupon count', required: true, example: '12' },
+      { name: 'usedCoupons', description: 'Used coupon count', required: true, example: '3' },
+      { name: 'couponCodesList', description: 'HTML coupon codes list', required: false, example: '' },
+      { name: 'frontendUrl', description: 'Frontend base URL', required: true, example: 'https://balkanestate.com' },
+    ],
+    isActive: true,
+  },
+
   // ===== ADMIN EMAILS =====
   {
     key: 'daily-activity-report',

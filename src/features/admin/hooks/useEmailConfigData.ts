@@ -31,6 +31,7 @@ export interface EmailConfig {
   headerSubtitle?: string;
   headerGradient?: string;
   headerEmoji?: string;
+  headerImageUrl?: string;
   bodyTemplate: string;
   showUnsubscribe: boolean;
   unsubscribeType?: string;
