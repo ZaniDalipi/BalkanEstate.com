@@ -543,19 +543,22 @@ export const requestId = (req: Request, res: Response, next: NextFunction): void
  */
 export const securityLogger = (req: Request, _res: Response, next: NextFunction): void => {
   // Log suspicious patterns
-  const suspiciousPatterns = [
-    /(\.\.|\/\.)/,  // Path traversal
-    /<script/i,     // XSS attempt
-    /javascript:/i, // XSS attempt
-    /\$where/i,     // NoSQL injection
-    /\$gt/i,        // NoSQL injection
-    /\$lt/i,        // NoSQL injection
+  const suspiciousPatterns: Array<{ pattern: RegExp; label: string }> = [
+    { pattern: /(\.\.|\/\.)/, label: 'Path traversal' },
+    { pattern: /<script/i, label: 'XSS attempt' },
+    { pattern: /javascript:/i, label: 'XSS attempt' },
+    { pattern: /\$where/i, label: 'NoSQL injection' },
+    { pattern: /\$gt/i, label: 'NoSQL injection' },
+    { pattern: /\$lt/i, label: 'NoSQL injection' },
   ];
 
   const requestData = JSON.stringify({ body: req.body, query: req.query, params: req.params });
 
-  for (const pattern of suspiciousPatterns) {
+  for (const { pattern, label } of suspiciousPatterns) {
     if (pattern.test(requestData) || pattern.test(req.path)) {
+      apiLogger.warn(
+        `[SECURITY] Suspicious request detected: ${label} | IP: ${req.ip} | Path: ${req.path} | Method: ${req.method}`
+      );
       break;
     }
   }

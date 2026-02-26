@@ -231,8 +231,6 @@ app.get('/health', (_req: Request, res: Response) => {
   res.status(200).json({
     status: 'ok',
     timestamp: new Date().toISOString(),
-    port: process.env.PORT || 5001,
-    cors: 'enabled'
   });
 });
 
