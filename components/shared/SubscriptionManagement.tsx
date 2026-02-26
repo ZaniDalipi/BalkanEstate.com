@@ -371,17 +371,27 @@ const SubscriptionManagement: React.FC<SubscriptionManagementProps> = ({ userId 
     };
   }, []);
 
-  // Build plans object from products
+  // Build plans object from products — DB products override hardcoded fallbacks
   const plans = useMemo(() => {
     const plansMap: Record<string, Plan> = {
       free: FREE_PLAN,
-      agency_agent_yearly: AGENCY_AGENT_PLAN,  // Non-purchasable, obtained via coupon
+      agency_agent_yearly: AGENCY_AGENT_PLAN,  // Fallback only — overridden by DB product below
     };
     products.forEach(product => {
       plansMap[product.productId] = productToPlan(product);
     });
     return plansMap;
   }, [products, productToPlan]);
+
+  // Get the agency agent product from DB for dynamic limit display
+  const agentProductFromDB = useMemo(() => {
+    return products.find(p => p.productId === 'agency_agent_yearly') || null;
+  }, [products]);
+
+  // Get the agency owner (enterprise) product from DB for dynamic limit display
+  const agencyOwnerProductFromDB = useMemo(() => {
+    return products.find(p => p.productId === 'agency_yearly' || p.productId === 'seller_enterprise_yearly') || null;
+  }, [products]);
 
   // Initial fetch
   useEffect(() => {
@@ -1198,7 +1208,7 @@ const SubscriptionManagement: React.FC<SubscriptionManagementProps> = ({ userId 
                   : subscriptionDetails.currentPlan.period === 'month' ? t('management.perMonthLabel', 'Per month') : t('management.totalAvailable', 'Total available')}
               </p>
               {(subscriptionDetails.currentPlan.tier === 2 || user.subscription?.tier === 'agency_agent' || user.subscription?.tier === 'agency_owner') && (
-                <p className="text-xs text-neutral-400 mt-0.5">{t('management.agencyPoolDesc', '750 listing pool / year across the agency')}</p>
+                <p className="text-xs text-neutral-400 mt-0.5">{t('management.agencyPoolDesc', '{{count}} listing pool / year across the agency', { count: agencyOwnerProductFromDB?.listingsLimit ?? 750 })}</p>
               )}
             </div>
           </div>
@@ -1575,7 +1585,7 @@ const SubscriptionManagement: React.FC<SubscriptionManagementProps> = ({ userId 
           <div className="mt-4 pt-4 border-t border-neutral-100">
             <div className="bg-purple-50 rounded-lg p-3">
               <p className="text-xs text-purple-700">
-                <strong>{t('management.agentBenefits', 'Agent Benefits:')}</strong> {t('management.agentBenefitsDesc', 'Each agent gets 25 active listings per year with their subscription coupon. Agents can use the agency promotion pool for featured listings.')}
+                <strong>{t('management.agentBenefits', 'Agent Benefits:')}</strong> {t('management.agentBenefitsDesc', 'Each agent gets {{count}} active listings per year with their subscription coupon. Agents can use the agency promotion pool for featured listings.', { count: agentProductFromDB?.listingsLimit ?? 25 })}
               </p>
             </div>
           </div>
@@ -1770,14 +1780,15 @@ const SubscriptionManagement: React.FC<SubscriptionManagementProps> = ({ userId 
             {upgradeOptions.map(({ key, plan, pricing }) => {
               // Enhanced features for Enterprise plan
               const isEnterprise = key.includes('enterprise') || key.includes('agency_yearly');
+              const enterpriseProduct = products.find(p => p.productId === key);
               const displayFeatures = isEnterprise ? [
-                t('management.enterpriseFeatures.listings750', '750 Active Listings'),
+                t('management.enterpriseFeatures.listingsCount', '{{count}} Active Listings', { count: enterpriseProduct?.listingsLimit ?? agencyOwnerProductFromDB?.listingsLimit ?? 750 }),
                 t('management.enterpriseFeatures.createAgency', 'Create Your Own Agency'),
-                t('management.enterpriseFeatures.agentCoupons5', '5 Agent Invitation Coupons'),
+                t('management.enterpriseFeatures.agentCouponsCount', '{{count}} Agent Invitation Coupons', { count: enterpriseProduct?.agentCoupons ?? agencyOwnerProductFromDB?.agentCoupons ?? 5 }),
                 t('management.enterpriseFeatures.unlimitedSearches', 'Unlimited Saved Searches'),
                 t('management.enterpriseFeatures.fullAnalytics', 'Full Analytics Dashboard'),
                 t('management.enterpriseFeatures.prioritySupport', 'Priority Support'),
-                t('management.enterpriseFeatures.promoCoupons10', '10 Monthly Promotion Coupons'),
+                t('management.enterpriseFeatures.promoCouponsCount', '{{count}} Monthly Promotion Coupons', { count: enterpriseProduct?.promotionCoupons ?? agencyOwnerProductFromDB?.promotionCoupons ?? 10 }),
                 t('management.enterpriseFeatures.teamTools', 'Team Management Tools'),
               ] : plan.features;
 

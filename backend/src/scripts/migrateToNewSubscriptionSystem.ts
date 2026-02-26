@@ -2,6 +2,7 @@ import mongoose from 'mongoose';
 import dotenv from 'dotenv';
 import User from '../models/User';
 import Agency from '../models/Agency';
+import Product from '../models/Product';
 
 dotenv.config();
 
@@ -59,6 +60,10 @@ async function migrateToNewSubscriptionSystem() {
     console.log('✅ Connected to MongoDB');
     console.log('🚀 Starting migration to new subscription system...\n');
 
+    // Get agent listings limit from DB product (configurable in admin)
+    const agentProduct = await Product.findOne({ productId: 'agency_agent_yearly' }).lean();
+    const agentListingsLimit = agentProduct?.listingsLimit ?? 25;
+
     // Get all users
     const users = await User.find({});
     stats.total = users.length;
@@ -88,7 +93,7 @@ async function migrateToNewSubscriptionSystem() {
         // Check if user has active Pro subscription
         if (user.proSubscription && user.proSubscription.isActive) {
           tier = 'pro';
-          listingsLimit = 25;
+          listingsLimit = agentListingsLimit;
           promotionCouponsMonthly = 3;
           activeListingsCount = user.proSubscription.activeListingsCount || 0;
           privateSellerCount = user.proSubscription.privateSellerCount || 0;
@@ -111,7 +116,7 @@ async function migrateToNewSubscriptionSystem() {
             const agentAgency = await Agency.findById(user.agencyId);
             if (agentAgency) {
               tier = 'agency_agent';
-              listingsLimit = 25; // Agents get Pro benefits
+              listingsLimit = agentListingsLimit; // Agents get Pro benefits
               promotionCouponsMonthly = 0; // Share agency pool
               console.log(`   → Agency agent detected in: ${agentAgency.name}`);
             }

@@ -35,6 +35,7 @@ const AgencyManagementSection: React.FC<AgencyManagementSectionProps> = ({ curre
   const [error, setError] = useState('');
   const [showForm, setShowForm] = useState(false);
   const [pendingRequests, setPendingRequests] = useState<any[]>([]);
+  const [agentListingsLimit, setAgentListingsLimit] = useState<number>(25);
 
   // Coupon redemption state
   const [joinMethod, setJoinMethod] = useState<'invitation' | 'coupon'>('invitation');
@@ -57,6 +58,25 @@ const AgencyManagementSection: React.FC<AgencyManagementSectionProps> = ({ curre
       !!currentUser.licenseNumber
     );
   };
+
+  // Fetch agent product limit from DB on mount (configurable in admin)
+  useEffect(() => {
+    const fetchAgentProductLimit = async () => {
+      try {
+        const res = await fetch(`${API_URL}/products?role=agent`);
+        if (res.ok) {
+          const data = await res.json();
+          const agentProduct = data.products?.find((p: any) => p.productId === 'agency_agent_yearly');
+          if (agentProduct?.listingsLimit) {
+            setAgentListingsLimit(agentProduct.listingsLimit);
+          }
+        }
+      } catch {
+        // Keep default fallback
+      }
+    };
+    fetchAgentProductLimit();
+  }, []);
 
   // Fetch pending join requests on mount and when showing the form
   useEffect(() => {
@@ -602,7 +622,7 @@ const AgencyManagementSection: React.FC<AgencyManagementSectionProps> = ({ curre
                         <ul className="text-sm text-amber-700 mt-1 space-y-1">
                           <li>• Instantly join the agency (no approval needed)</li>
                           <li>• Get a Pro subscription for 1 year</li>
-                          <li>• Up to 25 active listings</li>
+                          <li>• Up to {agentListingsLimit} active listings</li>
                           <li>• Agency branding on your listings</li>
                         </ul>
                       </div>
