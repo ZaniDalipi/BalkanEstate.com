@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
   CheckCircleIcon,
   ExclamationTriangleIcon,
@@ -16,16 +17,8 @@ import {
 
 type TabId = 'branding' | 'contact' | 'urls' | 'social' | 'email' | 'seo';
 
-const tabs: { id: TabId; label: string }[] = [
-  { id: 'branding', label: 'Branding' },
-  { id: 'contact', label: 'Contact' },
-  { id: 'urls', label: 'URLs' },
-  { id: 'social', label: 'Social Media' },
-  { id: 'email', label: 'Email Branding' },
-  { id: 'seo', label: 'SEO / Meta' },
-];
-
 const SiteSettingsManager: React.FC = () => {
+  const { t } = useTranslation(['admin']);
   const { data, isLoading, error, refetch } = useSiteSettings();
   const updateMutation = useUpdateSiteSettings();
   const resetMutation = useResetSiteSettings();
@@ -34,6 +27,15 @@ const SiteSettingsManager: React.FC = () => {
   const [form, setForm] = useState<Partial<SiteSettings>>({});
   const [isDirty, setIsDirty] = useState(false);
   const [saveMessage, setSaveMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
+
+  const tabs: { id: TabId; label: string }[] = [
+    { id: 'branding', label: t('admin:siteSettings.tabs.branding') },
+    { id: 'contact', label: t('admin:siteSettings.tabs.contact') },
+    { id: 'urls', label: t('admin:siteSettings.tabs.urls') },
+    { id: 'social', label: t('admin:siteSettings.tabs.social') },
+    { id: 'email', label: t('admin:siteSettings.tabs.email') },
+    { id: 'seo', label: t('admin:siteSettings.tabs.seo') },
+  ];
 
   // Populate form when data loads
   useEffect(() => {
@@ -86,21 +88,21 @@ const SiteSettingsManager: React.FC = () => {
   const handleSave = async () => {
     try {
       await updateMutation.mutateAsync(form);
-      setSaveMessage({ type: 'success', text: 'Settings saved successfully!' });
+      setSaveMessage({ type: 'success', text: t('admin:siteSettings.savedSuccess') });
       setIsDirty(false);
     } catch {
-      setSaveMessage({ type: 'error', text: 'Failed to save settings.' });
+      setSaveMessage({ type: 'error', text: t('admin:siteSettings.saveFailed') });
     }
   };
 
   const handleReset = async () => {
-    if (!window.confirm('Are you sure you want to reset all site settings to defaults? This cannot be undone.')) return;
+    if (!window.confirm(t('admin:siteSettings.resetConfirm'))) return;
     try {
       await resetMutation.mutateAsync();
-      setSaveMessage({ type: 'success', text: 'Settings reset to defaults.' });
+      setSaveMessage({ type: 'success', text: t('admin:siteSettings.resetSuccess') });
       setIsDirty(false);
     } catch {
-      setSaveMessage({ type: 'error', text: 'Failed to reset settings.' });
+      setSaveMessage({ type: 'error', text: t('admin:siteSettings.resetFailed') });
     }
   };
 
@@ -115,7 +117,7 @@ const SiteSettingsManager: React.FC = () => {
   if (error) {
     return (
       <div className="bg-red-50 border border-red-200 rounded-lg p-4 text-red-700">
-        Failed to load site settings. Please try again.
+        {t('admin:siteSettings.loadFailed')}
       </div>
     );
   }
@@ -170,9 +172,9 @@ const SiteSettingsManager: React.FC = () => {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Site Settings</h1>
+          <h1 className="text-2xl font-bold text-gray-900">{t('admin:siteSettings.title')}</h1>
           <p className="text-gray-600 mt-1">
-            Global settings that apply across the entire application and all emails
+            {t('admin:siteSettings.subtitle')}
           </p>
         </div>
         <div className="flex items-center gap-3">
@@ -182,14 +184,14 @@ const SiteSettingsManager: React.FC = () => {
             className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50"
           >
             <ArrowPathIcon className="w-4 h-4 inline mr-1" />
-            Reset to Defaults
+            {t('admin:siteSettings.resetToDefaults')}
           </button>
           <button
             onClick={handleSave}
             disabled={!isDirty || updateMutation.isPending}
             className="px-6 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            {updateMutation.isPending ? 'Saving...' : 'Save Changes'}
+            {updateMutation.isPending ? t('admin:siteSettings.saving') : t('admin:siteSettings.saveChanges')}
           </button>
         </div>
       </div>
@@ -229,16 +231,16 @@ const SiteSettingsManager: React.FC = () => {
       <div className="bg-white rounded-xl border border-gray-200 p-6">
         {activeTab === 'branding' && (
           <div className="space-y-6">
-            <h2 className="text-lg font-semibold text-gray-900">Branding</h2>
+            <h2 className="text-lg font-semibold text-gray-900">{t('admin:siteSettings.branding.title')}</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {renderField('Company Name', 'companyName', 'BalkanEstate')}
-              {renderField('Company Name (Formatted HTML)', 'companyNameFormatted', 'BalkanEstate<sup>AI</sup>')}
-              {renderField('Logo URL', 'logoUrl', 'https://...')}
-              {renderField('Favicon URL', 'faviconUrl', '/icons/favicon.png')}
+              {renderField(t('admin:siteSettings.branding.companyName'), 'companyName', 'BalkanEstate')}
+              {renderField(t('admin:siteSettings.branding.companyNameFormatted'), 'companyNameFormatted', 'BalkanEstate<sup>AI</sup>')}
+              {renderField(t('admin:siteSettings.branding.logoUrl'), 'logoUrl', 'https://...')}
+              {renderField(t('admin:siteSettings.branding.faviconUrl'), 'faviconUrl', '/icons/favicon.png')}
             </div>
             {form.logoUrl && (
               <div className="mt-4">
-                <p className="text-sm text-gray-600 mb-2">Logo Preview:</p>
+                <p className="text-sm text-gray-600 mb-2">{t('admin:siteSettings.logoPreview')}</p>
                 <div className="bg-gray-100 rounded-lg p-4 inline-block">
                   <img src={form.logoUrl} alt="Logo" className="max-h-16 max-w-48" />
                 </div>
@@ -249,27 +251,27 @@ const SiteSettingsManager: React.FC = () => {
 
         {activeTab === 'contact' && (
           <div className="space-y-6">
-            <h2 className="text-lg font-semibold text-gray-900">Contact Information</h2>
+            <h2 className="text-lg font-semibold text-gray-900">{t('admin:siteSettings.contact.title')}</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {renderField('Support Email', 'supportEmail', 'support@example.com', 'email')}
-              {renderField('No-Reply Email', 'noReplyEmail', 'noreply@example.com', 'email')}
-              {renderField('Alerts Email', 'alertsEmail', 'alerts@example.com', 'email')}
-              {renderField('Inquiries Email', 'inquiriesEmail', 'inquiries@example.com', 'email')}
-              {renderField('Contact Phone', 'contactPhone', '+1 234 567 890', 'tel')}
+              {renderField(t('admin:siteSettings.contact.supportEmail'), 'supportEmail', 'support@example.com', 'email')}
+              {renderField(t('admin:siteSettings.contact.noReplyEmail'), 'noReplyEmail', 'noreply@example.com', 'email')}
+              {renderField(t('admin:siteSettings.contact.alertsEmail'), 'alertsEmail', 'alerts@example.com', 'email')}
+              {renderField(t('admin:siteSettings.contact.inquiriesEmail'), 'inquiriesEmail', 'inquiries@example.com', 'email')}
+              {renderField(t('admin:siteSettings.contact.contactPhone'), 'contactPhone', '+1 234 567 890', 'tel')}
             </div>
           </div>
         )}
 
         {activeTab === 'urls' && (
           <div className="space-y-6">
-            <h2 className="text-lg font-semibold text-gray-900">Application URLs</h2>
+            <h2 className="text-lg font-semibold text-gray-900">{t('admin:siteSettings.urls.title')}</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {renderField('Frontend URL', 'frontendUrl', 'https://balkanestate.com')}
-              {renderField('Backend URL', 'backendUrl', 'https://api.balkanestate.com')}
+              {renderField(t('admin:siteSettings.urls.frontendUrl'), 'frontendUrl', 'https://balkanestate.com')}
+              {renderField(t('admin:siteSettings.urls.backendUrl'), 'backendUrl', 'https://api.balkanestate.com')}
             </div>
             <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
               <p className="text-sm text-blue-700">
-                These URLs are used in email links and throughout the application. Make sure they match your deployment.
+                {t('admin:siteSettings.urls.urlsNote')}
               </p>
             </div>
           </div>
@@ -277,10 +279,10 @@ const SiteSettingsManager: React.FC = () => {
 
         {activeTab === 'social' && (
           <div className="space-y-6">
-            <h2 className="text-lg font-semibold text-gray-900">Social Media Links</h2>
+            <h2 className="text-lg font-semibold text-gray-900">{t('admin:siteSettings.social.title')}</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Facebook</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">{t('admin:siteSettings.social.facebook')}</label>
                 <input
                   type="url"
                   value={form.socialLinks?.facebook || ''}
@@ -290,7 +292,7 @@ const SiteSettingsManager: React.FC = () => {
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Instagram</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">{t('admin:siteSettings.social.instagram')}</label>
                 <input
                   type="url"
                   value={form.socialLinks?.instagram || ''}
@@ -300,7 +302,7 @@ const SiteSettingsManager: React.FC = () => {
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Twitter / X</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">{t('admin:siteSettings.social.twitter')}</label>
                 <input
                   type="url"
                   value={form.socialLinks?.twitter || ''}
@@ -310,7 +312,7 @@ const SiteSettingsManager: React.FC = () => {
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">LinkedIn</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">{t('admin:siteSettings.social.linkedin')}</label>
                 <input
                   type="url"
                   value={form.socialLinks?.linkedin || ''}
@@ -320,7 +322,7 @@ const SiteSettingsManager: React.FC = () => {
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">YouTube</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">{t('admin:siteSettings.social.youtube')}</label>
                 <input
                   type="url"
                   value={form.socialLinks?.youtube || ''}
@@ -335,12 +337,12 @@ const SiteSettingsManager: React.FC = () => {
 
         {activeTab === 'email' && (
           <div className="space-y-6">
-            <h2 className="text-lg font-semibold text-gray-900">Email Branding</h2>
+            <h2 className="text-lg font-semibold text-gray-900">{t('admin:siteSettings.email.title')}</h2>
 
-            {renderField('Email Logo URL', 'emailLogoUrl', 'https://...')}
+            {renderField(t('admin:siteSettings.email.emailLogoUrl'), 'emailLogoUrl', 'https://...')}
             {form.emailLogoUrl && (
               <div>
-                <p className="text-sm text-gray-600 mb-2">Email Logo Preview:</p>
+                <p className="text-sm text-gray-600 mb-2">{t('admin:siteSettings.emailLogoPreview')}</p>
                 <div className="bg-gray-700 rounded-lg p-4 inline-block">
                   <img src={form.emailLogoUrl} alt="Email Logo" className="max-h-12 max-w-40" />
                 </div>
@@ -348,28 +350,28 @@ const SiteSettingsManager: React.FC = () => {
             )}
 
             <div>
-              <h3 className="text-sm font-semibold text-gray-800 mb-3">Brand Colors</h3>
+              <h3 className="text-sm font-semibold text-gray-800 mb-3">{t('admin:siteSettings.email.brandColors')}</h3>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                {renderColorField('Primary', 'emailBrandColors', 'primary')}
-                {renderColorField('Primary Dark', 'emailBrandColors', 'primaryDark')}
-                {renderColorField('Accent', 'emailBrandColors', 'accent')}
-                {renderColorField('Text', 'emailBrandColors', 'text')}
-                {renderColorField('Text Muted', 'emailBrandColors', 'textMuted')}
-                {renderColorField('Background', 'emailBrandColors', 'background')}
-                {renderColorField('Background Alt', 'emailBrandColors', 'backgroundAlt')}
+                {renderColorField(t('admin:siteSettings.email.colorPrimary'), 'emailBrandColors', 'primary')}
+                {renderColorField(t('admin:siteSettings.email.colorPrimaryDark'), 'emailBrandColors', 'primaryDark')}
+                {renderColorField(t('admin:siteSettings.email.colorAccent'), 'emailBrandColors', 'accent')}
+                {renderColorField(t('admin:siteSettings.email.colorText'), 'emailBrandColors', 'text')}
+                {renderColorField(t('admin:siteSettings.email.colorTextMuted'), 'emailBrandColors', 'textMuted')}
+                {renderColorField(t('admin:siteSettings.email.colorBackground'), 'emailBrandColors', 'background')}
+                {renderColorField(t('admin:siteSettings.email.colorBackgroundAlt'), 'emailBrandColors', 'backgroundAlt')}
               </div>
             </div>
 
-            {renderField('Email Footer Text', 'emailFooterText', 'All rights reserved.')}
+            {renderField(t('admin:siteSettings.email.emailFooterText'), 'emailFooterText', 'All rights reserved.')}
 
             <div>
               <div className="flex items-center justify-between mb-3">
-                <h3 className="text-sm font-semibold text-gray-800">Footer Links</h3>
+                <h3 className="text-sm font-semibold text-gray-800">{t('admin:siteSettings.email.footerLinks')}</h3>
                 <button
                   onClick={addFooterLink}
                   className="text-sm text-blue-600 hover:text-blue-700 font-medium"
                 >
-                  + Add Link
+                  {t('admin:siteSettings.email.addLink')}
                 </button>
               </div>
               <div className="space-y-3">
@@ -379,7 +381,7 @@ const SiteSettingsManager: React.FC = () => {
                       type="text"
                       value={link.label}
                       onChange={e => updateFooterLink(idx, 'label', e.target.value)}
-                      placeholder="Label"
+                      placeholder={t('admin:siteSettings.email.labelPlaceholder')}
                       className="w-40 px-3 py-2 border border-gray-300 rounded-lg text-sm"
                     />
                     <input
@@ -393,7 +395,7 @@ const SiteSettingsManager: React.FC = () => {
                       onClick={() => removeFooterLink(idx)}
                       className="text-red-500 hover:text-red-700 text-sm"
                     >
-                      Remove
+                      {t('admin:siteSettings.email.remove')}
                     </button>
                   </div>
                 ))}
@@ -404,18 +406,18 @@ const SiteSettingsManager: React.FC = () => {
 
         {activeTab === 'seo' && (
           <div className="space-y-6">
-            <h2 className="text-lg font-semibold text-gray-900">SEO / Meta</h2>
-            {renderField('Site Title', 'siteTitle', 'BalkanEstate - Find Your Dream Property')}
-            {renderTextarea('Site Description', 'siteDescription', 3)}
+            <h2 className="text-lg font-semibold text-gray-900">{t('admin:siteSettings.seo.title')}</h2>
+            {renderField(t('admin:siteSettings.seo.siteTitle'), 'siteTitle', 'BalkanEstate - Find Your Dream Property')}
+            {renderTextarea(t('admin:siteSettings.seo.siteDescription'), 'siteDescription', 3)}
           </div>
         )}
       </div>
 
       {/* Available Variables Info */}
       <div className="bg-gray-50 rounded-xl border border-gray-200 p-6">
-        <h3 className="text-sm font-semibold text-gray-800 mb-3">Available in Email Templates</h3>
+        <h3 className="text-sm font-semibold text-gray-800 mb-3">{t('admin:siteSettings.emailVars.title')}</h3>
         <p className="text-sm text-gray-600 mb-3">
-          These site settings are automatically available as variables in all email templates:
+          {t('admin:siteSettings.emailVars.description')}
         </p>
         <div className="flex flex-wrap gap-2">
           {['companyName', 'companyNameFormatted', 'supportEmail', 'contactPhone', 'frontendUrl', 'backendUrl', 'emailLogoUrl', 'emailFooterText'].map(v => (

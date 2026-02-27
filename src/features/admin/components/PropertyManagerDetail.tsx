@@ -87,37 +87,37 @@ export const PropertyViewModal: React.FC<PropertyViewModalProps> = ({
               )}
               {property.bathrooms && (
                 <div className="bg-gray-50 rounded-lg p-3">
-                  <div className="text-gray-500 text-xs">Bathrooms</div>
+                  <div className="text-gray-500 text-xs">{t('admin:properties.bathrooms')}</div>
                   <div className="font-medium text-gray-900">{property.bathrooms}</div>
                 </div>
               )}
               {property.area && (
                 <div className="bg-gray-50 rounded-lg p-3">
-                  <div className="text-gray-500 text-xs">Area</div>
+                  <div className="text-gray-500 text-xs">{t('admin:properties.area')}</div>
                   <div className="font-medium text-gray-900">{property.area} m²</div>
                 </div>
               )}
               {property.yearBuilt && (
                 <div className="bg-gray-50 rounded-lg p-3">
-                  <div className="text-gray-500 text-xs">Year Built</div>
+                  <div className="text-gray-500 text-xs">{t('admin:properties.yearBuilt')}</div>
                   <div className="font-medium text-gray-900">{property.yearBuilt}</div>
                 </div>
               )}
               {property.parking !== undefined && (
                 <div className="bg-gray-50 rounded-lg p-3">
-                  <div className="text-gray-500 text-xs">Parking</div>
-                  <div className="font-medium text-gray-900">{property.parking} spots</div>
+                  <div className="text-gray-500 text-xs">{t('admin:properties.parking')}</div>
+                  <div className="font-medium text-gray-900">{t('admin:properties.parkingSpots', { count: property.parking })}</div>
                 </div>
               )}
               <div className="bg-gray-50 rounded-lg p-3">
-                <div className="text-gray-500 text-xs">Promoted</div>
+                <div className="text-gray-500 text-xs">{t('admin:properties.promoted')}</div>
                 <div className={`font-medium ${property.isPromoted ? 'text-purple-600' : 'text-gray-900'}`}>
-                  {property.isPromoted ? 'Yes' : 'No'}
+                  {property.isPromoted ? t('admin:userDetail.yes') : t('admin:userDetail.no')}
                 </div>
               </div>
               {property.views !== undefined && (
                 <div className="bg-gray-50 rounded-lg p-3">
-                  <div className="text-gray-500 text-xs">Views</div>
+                  <div className="text-gray-500 text-xs">{t('admin:properties.views')}</div>
                   <div className="font-medium text-gray-900">{property.views}</div>
                 </div>
               )}
@@ -127,14 +127,14 @@ export const PropertyViewModal: React.FC<PropertyViewModalProps> = ({
           {/* Description */}
           {property.description && (
             <div>
-              <h5 className="text-sm font-semibold text-gray-700 mb-2 uppercase tracking-wider">Description</h5>
+              <h5 className="text-sm font-semibold text-gray-700 mb-2 uppercase tracking-wider">{t('admin:properties.description')}</h5>
               <p className="text-gray-600 text-sm leading-relaxed">{property.description}</p>
             </div>
           )}
 
           {/* Owner Info */}
           <div>
-            <h5 className="text-sm font-semibold text-gray-700 mb-3 uppercase tracking-wider">Property Owner</h5>
+            <h5 className="text-sm font-semibold text-gray-700 mb-3 uppercase tracking-wider">{t('admin:properties.owner')}</h5>
             <div className="bg-gray-50 rounded-xl p-4">
               <div className="flex items-center gap-4">
                 <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
@@ -143,7 +143,7 @@ export const PropertyViewModal: React.FC<PropertyViewModalProps> = ({
                   </span>
                 </div>
                 <div>
-                  <div className="font-medium text-gray-900">{property.sellerId?.name || 'Unknown'}</div>
+                  <div className="font-medium text-gray-900">{property.sellerId?.name || t('admin:properties.unknown')}</div>
                   <div className="text-sm text-gray-500">{property.sellerId?.email || ''}</div>
                   <div className="text-xs text-gray-400 capitalize mt-0.5">
                     {property.sellerId?.role || 'N/A'}
@@ -156,11 +156,11 @@ export const PropertyViewModal: React.FC<PropertyViewModalProps> = ({
           {/* Timestamps */}
           <div className="grid grid-cols-2 gap-4 text-sm border-t border-gray-200 pt-4">
             <div>
-              <span className="text-gray-500">Created:</span>
+              <span className="text-gray-500">{t('admin:properties.created')}:</span>
               <span className="ml-2 text-gray-900">{formatDate(property.createdAt)}</span>
             </div>
             <div>
-              <span className="text-gray-500">Last Updated:</span>
+              <span className="text-gray-500">{t('admin:properties.lastUpdated')}:</span>
               <span className="ml-2 text-gray-900">{formatDate(property.updatedAt)}</span>
             </div>
           </div>
@@ -185,12 +185,13 @@ export const PropertyEditModal: React.FC<PropertyEditModalProps> = ({
   onClose,
   onSubmit,
 }) => {
+  const { t } = useTranslation(['admin']);
   return (
     <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4">
       <div className="bg-white rounded-2xl max-w-3xl w-full max-h-[90vh] flex flex-col">
         <div className="p-6 border-b border-gray-200 flex items-center justify-between flex-shrink-0">
           <div>
-            <h3 className="text-xl font-bold text-gray-900">Edit Property</h3>
+            <h3 className="text-xl font-bold text-gray-900">{t('admin:properties.edit')}</h3>
             <p className="text-sm text-gray-500">{property.title}</p>
           </div>
           <button
@@ -204,7 +205,7 @@ export const PropertyEditModal: React.FC<PropertyEditModalProps> = ({
         <form onSubmit={onSubmit} className="flex flex-col flex-1 overflow-hidden">
           <div className="p-6 space-y-4 overflow-y-auto flex-1">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Title</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">{t('admin:table.title')}</label>
               <input
                 type="text"
                 value={editForm.title}
@@ -216,7 +217,7 @@ export const PropertyEditModal: React.FC<PropertyEditModalProps> = ({
 
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Price (EUR)</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">{t('admin:properties.priceEUR')}</label>
                 <input
                   type="number"
                   value={editForm.price}
@@ -226,21 +227,21 @@ export const PropertyEditModal: React.FC<PropertyEditModalProps> = ({
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Status</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">{t('admin:table.status')}</label>
                 <select
                   value={editForm.status}
                   onChange={(e) => setEditForm({ ...editForm, status: e.target.value as any })}
                   className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 >
-                  <option value="active">Active</option>
-                  <option value="pending">Pending</option>
-                  <option value="sold">Sold</option>
+                  <option value="active">{t('admin:properties.status.active')}</option>
+                  <option value="pending">{t('admin:properties.status.pending')}</option>
+                  <option value="sold">{t('admin:properties.status.sold')}</option>
                 </select>
               </div>
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Address</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">{t('admin:properties.address')}</label>
               <input
                 type="text"
                 value={editForm.address}
@@ -252,7 +253,7 @@ export const PropertyEditModal: React.FC<PropertyEditModalProps> = ({
 
             <div className="grid grid-cols-3 gap-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">City</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">{t('admin:userDetail.city')}</label>
                 <input
                   type="text"
                   value={editForm.city}
@@ -262,7 +263,7 @@ export const PropertyEditModal: React.FC<PropertyEditModalProps> = ({
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Country</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">{t('admin:userDetail.country')}</label>
                 <input
                   type="text"
                   value={editForm.country}
@@ -272,25 +273,25 @@ export const PropertyEditModal: React.FC<PropertyEditModalProps> = ({
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Property Type</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">{t('admin:properties.propertyType')}</label>
                 <select
                   value={editForm.propertyType}
                   onChange={(e) => setEditForm({ ...editForm, propertyType: e.target.value })}
                   className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 >
-                  <option value="house">House</option>
-                  <option value="apartment">Apartment</option>
-                  <option value="villa">Villa</option>
-                  <option value="land">Land</option>
-                  <option value="commercial">Commercial</option>
-                  <option value="other">Other</option>
+                  <option value="house">{t('admin:properties.types.house')}</option>
+                  <option value="apartment">{t('admin:properties.types.apartment')}</option>
+                  <option value="villa">{t('admin:properties.types.villa')}</option>
+                  <option value="land">{t('admin:properties.types.land')}</option>
+                  <option value="commercial">{t('admin:properties.types.commercial')}</option>
+                  <option value="other">{t('admin:properties.types.other')}</option>
                 </select>
               </div>
             </div>
 
             <div className="grid grid-cols-4 gap-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Bedrooms</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">{t('admin:properties.bedrooms')}</label>
                 <input
                   type="number"
                   min="0"
@@ -300,7 +301,7 @@ export const PropertyEditModal: React.FC<PropertyEditModalProps> = ({
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Bathrooms</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">{t('admin:properties.bathrooms')}</label>
                 <input
                   type="number"
                   min="0"
@@ -310,7 +311,7 @@ export const PropertyEditModal: React.FC<PropertyEditModalProps> = ({
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Area (m²)</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">{t('admin:properties.areaM2')}</label>
                 <input
                   type="number"
                   min="0"
@@ -320,7 +321,7 @@ export const PropertyEditModal: React.FC<PropertyEditModalProps> = ({
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Year Built</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">{t('admin:properties.yearBuilt')}</label>
                 <input
                   type="number"
                   min="1800"
@@ -333,7 +334,7 @@ export const PropertyEditModal: React.FC<PropertyEditModalProps> = ({
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">{t('admin:properties.description')}</label>
               <textarea
                 value={editForm.description}
                 onChange={(e) => setEditForm({ ...editForm, description: e.target.value })}
@@ -353,9 +354,9 @@ export const PropertyEditModal: React.FC<PropertyEditModalProps> = ({
               />
               <div>
                 <label htmlFor="isPromoted" className="text-sm font-medium text-gray-900">
-                  Promote this property
+                  {t('admin:properties.promoteProperty')}
                 </label>
-                <p className="text-xs text-gray-500">Promoted properties appear at the top of search results</p>
+                <p className="text-xs text-gray-500">{t('admin:properties.promotePropertyDesc')}</p>
               </div>
             </div>
           </div>
@@ -366,13 +367,13 @@ export const PropertyEditModal: React.FC<PropertyEditModalProps> = ({
               onClick={onClose}
               className="flex-1 px-6 py-3 border border-gray-300 text-gray-700 rounded-xl hover:bg-gray-100 font-medium transition-colors"
             >
-              Cancel
+              {t('admin:confirmations.cancel')}
             </button>
             <button
               type="submit"
               className="flex-1 px-6 py-3 bg-blue-600 text-white rounded-xl hover:bg-blue-700 font-medium transition-colors"
             >
-              Save Changes
+              {t('admin:properties.saveChanges')}
             </button>
           </div>
         </form>

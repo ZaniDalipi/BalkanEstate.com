@@ -267,8 +267,8 @@ const SystemSettings: React.FC = () => {
       <div className="space-y-4">
         <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
           <div>
-            <p className="font-medium text-gray-900">Require Email Verification</p>
-            <p className="text-sm text-gray-500">Users must verify their email before accessing the platform</p>
+            <p className="font-medium text-gray-900">{t('admin:settings.requireEmailVerification')}</p>
+            <p className="text-sm text-gray-500">{t('admin:settings.requireEmailVerificationDesc')}</p>
           </div>
           <label className="relative inline-flex items-center cursor-pointer">
             <input
@@ -283,8 +283,8 @@ const SystemSettings: React.FC = () => {
 
         <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
           <div>
-            <p className="font-medium text-gray-900">Require Agent License Verification</p>
-            <p className="text-sm text-gray-500">Agents must have their license verified by admin</p>
+            <p className="font-medium text-gray-900">{t('admin:settings.requireAgentVerification')}</p>
+            <p className="text-sm text-gray-500">{t('admin:settings.requireAgentVerificationDesc')}</p>
           </div>
           <label className="relative inline-flex items-center cursor-pointer">
             <input
@@ -299,8 +299,8 @@ const SystemSettings: React.FC = () => {
 
         <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
           <div>
-            <p className="font-medium text-gray-900">Admin VPN Required</p>
-            <p className="text-sm text-gray-500">Require VPN connection for admin panel access</p>
+            <p className="font-medium text-gray-900">{t('admin:settings.adminVPNRequired')}</p>
+            <p className="text-sm text-gray-500">{t('admin:settings.adminVPNRequiredDesc')}</p>
           </div>
           <label className="relative inline-flex items-center cursor-pointer">
             <input
@@ -315,8 +315,8 @@ const SystemSettings: React.FC = () => {
 
         <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
           <div>
-            <p className="font-medium text-gray-900">Two-Factor Authentication</p>
-            <p className="text-sm text-gray-500">Enable 2FA for enhanced security</p>
+            <p className="font-medium text-gray-900">{t('admin:settings.twoFactorAuth')}</p>
+            <p className="text-sm text-gray-500">{t('admin:settings.twoFactorAuthDesc')}</p>
           </div>
           <label className="relative inline-flex items-center cursor-pointer">
             <input
@@ -332,7 +332,7 @@ const SystemSettings: React.FC = () => {
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">Session Timeout (minutes)</label>
+          <label className="block text-sm font-medium text-gray-700 mb-2">{t('admin:settings.sessionTimeout')}</label>
           <input
             type="number"
             value={settings.sessionTimeout}
@@ -343,7 +343,7 @@ const SystemSettings: React.FC = () => {
           />
         </div>
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">Max Login Attempts</label>
+          <label className="block text-sm font-medium text-gray-700 mb-2">{t('admin:settings.maxLoginAttempts')}</label>
           <input
             type="number"
             value={settings.maxLoginAttempts}
@@ -361,12 +361,12 @@ const SystemSettings: React.FC = () => {
     <div className="space-y-6">
       <div className="space-y-4">
         {[
-          { key: 'notifyNewUser', label: 'New User Registration', desc: 'Get notified when a new user registers' },
-          { key: 'notifyNewProperty', label: 'New Property Listed', desc: 'Get notified when a new property is listed' },
-          { key: 'notifyNewInquiry', label: 'New Inquiry', desc: 'Get notified when a new inquiry is received' },
-          { key: 'notifyAgentVerification', label: 'Agent Verification Request', desc: 'Get notified when an agent requests verification' },
-          { key: 'dailyDigest', label: 'Daily Digest', desc: 'Receive a daily summary of platform activity' },
-          { key: 'weeklyReport', label: 'Weekly Report', desc: 'Receive a weekly analytics report' },
+          { key: 'notifyNewUser', label: t('admin:settings.notifyNewUser'), desc: t('admin:settings.notifyNewUserDesc') },
+          { key: 'notifyNewProperty', label: t('admin:settings.notifyNewProperty'), desc: t('admin:settings.notifyNewPropertyDesc') },
+          { key: 'notifyNewInquiry', label: t('admin:settings.notifyNewInquiry'), desc: t('admin:settings.notifyNewInquiryDesc') },
+          { key: 'notifyAgentVerification', label: t('admin:settings.notifyAgentVerification'), desc: t('admin:settings.notifyAgentVerificationDesc') },
+          { key: 'dailyDigest', label: t('admin:settings.dailyDigest'), desc: t('admin:settings.dailyDigestDesc') },
+          { key: 'weeklyReport', label: t('admin:settings.weeklyReport'), desc: t('admin:settings.weeklyReportDesc') },
         ].map(item => (
           <div key={item.key} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
             <div>
@@ -393,8 +393,8 @@ const SystemSettings: React.FC = () => {
       <div className="space-y-4">
         <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
           <div>
-            <p className="font-medium text-gray-900">Enable Discount Codes</p>
-            <p className="text-sm text-gray-500">Allow discount codes to be applied</p>
+            <p className="font-medium text-gray-900">{t('admin:settings.enableDiscountCodes')}</p>
+            <p className="text-sm text-gray-500">{t('admin:settings.enableDiscountCodesDesc')}</p>
           </div>
           <label className="relative inline-flex items-center cursor-pointer">
             <input
@@ -409,8 +409,8 @@ const SystemSettings: React.FC = () => {
 
         <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
           <div>
-            <p className="font-medium text-gray-900">Enable Promotions</p>
-            <p className="text-sm text-gray-500">Allow promotional campaigns</p>
+            <p className="font-medium text-gray-900">{t('admin:settings.enablePromotions')}</p>
+            <p className="text-sm text-gray-500">{t('admin:settings.enablePromotionsDesc')}</p>
           </div>
           <label className="relative inline-flex items-center cursor-pointer">
             <input
@@ -426,7 +426,7 @@ const SystemSettings: React.FC = () => {
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">Max Discount Percentage</label>
+          <label className="block text-sm font-medium text-gray-700 mb-2">{t('admin:settings.maxDiscountPercent')}</label>
           <div className="relative">
             <input
               type="number"
@@ -440,7 +440,7 @@ const SystemSettings: React.FC = () => {
           </div>
         </div>
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">Minimum Listing Price</label>
+          <label className="block text-sm font-medium text-gray-700 mb-2">{t('admin:settings.minListingPrice')}</label>
           <div className="relative">
             <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500">€</span>
             <input
@@ -471,13 +471,12 @@ const SystemSettings: React.FC = () => {
     <div className="space-y-6">
       {/* Header */}
       <div className="bg-white rounded-xl shadow-sm p-6">
-        <h2 className="text-2xl font-bold text-gray-900 mb-2">System Settings</h2>
-        <p className="text-gray-500">Configure your platform settings and preferences</p>
+        <h2 className="text-2xl font-bold text-gray-900 mb-2">{t('admin:settings.title')}</h2>
+        <p className="text-gray-500">{t('admin:settings.subtitle')}</p>
         {/* Info banner about settings persistence */}
         <div className="mt-4 p-3 bg-amber-50 border border-amber-200 rounded-lg">
           <p className="text-sm text-amber-800">
-            <strong>Note:</strong> Settings are currently managed via environment variables.
-            Changes made here are for preview only and will reset on page reload.
+            <strong>Note:</strong> {t('admin:settings.envVarsNote')}
           </p>
         </div>
       </div>
@@ -535,7 +534,7 @@ const SystemSettings: React.FC = () => {
                 onClick={() => window.location.reload()}
                 className="px-6 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
               >
-                Reset
+                {t('admin:settings.reset')}
               </button>
               <button
                 onClick={handleSave}
@@ -545,10 +544,10 @@ const SystemSettings: React.FC = () => {
                 {isSaving ? (
                   <>
                     <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
-                    Applying...
+                    {t('admin:settings.applyingChanges')}
                   </>
                 ) : (
-                  'Preview Changes'
+                  t('admin:settings.previewChanges')
                 )}
               </button>
             </div>
