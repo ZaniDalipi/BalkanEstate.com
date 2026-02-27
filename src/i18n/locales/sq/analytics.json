@@ -36,7 +36,10 @@
     "premiumAccess": "Akses i plotë në të gjitha veçoritë",
     "freeAccess": "Përmirësohuni për analitikë të avancuar",
     "proActive": "Pro Aktiv",
-    "freePlan": "Plan Falas"
+    "freePlan": "Plan Falas",
+    "bannerDescription": "Merrni njohuri, burimet e trafikut, statistikat e pajisjeve dhe eksportin CSV",
+    "comingSoon": "Së Shpejti",
+    "contactSales": "Kontakto Shitjet"
   },
   "insights": {
     "title": "Njohuri të Zgjuara",

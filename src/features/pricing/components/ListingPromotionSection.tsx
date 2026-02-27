@@ -77,7 +77,7 @@ const ListingPromotionSection: React.FC<ListingPromotionSectionProps> = ({
         <div className="mb-8 bg-white rounded-2xl border border-gray-200 p-6 shadow-lg">
           <div className="flex items-center justify-between mb-4">
             <h4 className="text-lg font-bold text-gray-900">
-              Select a listing to promote with {selectedPromoTier.charAt(0).toUpperCase() + selectedPromoTier.slice(1)}
+              {t('pricing:listing.selectToPromoteWith', 'Select a listing to promote with {{tier}}', { tier: selectedPromoTier.charAt(0).toUpperCase() + selectedPromoTier.slice(1) })}
             </h4>
             <button
               onClick={() => { setSelectedPromoTier(null); setSelectedListing(null); }}
@@ -118,7 +118,7 @@ const ListingPromotionSection: React.FC<ListingPromotionSectionProps> = ({
             <>
               {/* Duration selector */}
               <div className="mb-4 flex items-center gap-2 justify-center">
-                <span className="text-sm text-gray-600">Duration:</span>
+                <span className="text-sm text-gray-600">{t('pricing:listing.durationLabel', 'Duration:')}</span>
                 {[7, 30, 90].map((days) => (
                   <button
                     key={days}
@@ -129,7 +129,7 @@ const ListingPromotionSection: React.FC<ListingPromotionSectionProps> = ({
                         : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                     }`}
                   >
-                    {days} days
+                    {t('pricing:listing.daysCount', '{{count}} days', { count: days })}
                   </button>
                 ))}
               </div>
@@ -168,9 +168,9 @@ const ListingPromotionSection: React.FC<ListingPromotionSectionProps> = ({
               {selectedListing && (
                 <div className="mt-6 flex items-center justify-between p-4 bg-gradient-to-r from-purple-50 to-pink-50 rounded-xl border border-purple-200">
                   <div>
-                    <p className="text-sm text-gray-600">Promoting: <span className="font-medium text-gray-900">{selectedListing.address}</span></p>
+                    <p className="text-sm text-gray-600">{t('pricing:listing.promotingLabel', 'Promoting:')} <span className="font-medium text-gray-900">{selectedListing.address}</span></p>
                     <p className="text-lg font-bold text-gray-900">
-                      €{getPromotionPrice(selectedPromoTier, selectedDuration)} for {selectedDuration} days
+                      €{getPromotionPrice(selectedPromoTier, selectedDuration)} {t('pricing:listing.forDaysCount', 'for {{count}} days', { count: selectedDuration })}
                     </p>
                   </div>
                   <button

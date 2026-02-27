@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { User, UserRole } from '../../types';
 import { getAgencies, verifyInvitationCode, createJoinRequest, leaveAgency } from '../../services/apiService';
 import { useAppContext } from '../../context/AppContext';
@@ -24,6 +25,7 @@ interface AgencyManagementSectionProps {
 }
 
 const AgencyManagementSection: React.FC<AgencyManagementSectionProps> = ({ currentUser, onAgencyChange }) => {
+  const { t } = useTranslation(['agencies', 'common']);
   const { dispatch } = useAppContext();
   const { confirm } = useConfirmation();
   const { success } = useNotification();
@@ -94,7 +96,7 @@ const AgencyManagementSection: React.FC<AgencyManagementSectionProps> = ({ curre
       const response = await getAgencies({ limit: 100 });
       setAgencies(response.agencies || []);
     } catch {
-      setError('Failed to load agencies. Please try again.');
+      setError(t('agencies:management.loadingAgencies', 'Failed to load agencies. Please try again.'));
     } finally {
       setLoadingAgencies(false);
     }
@@ -155,8 +157,8 @@ const AgencyManagementSection: React.FC<AgencyManagementSectionProps> = ({ curre
 
       // Show success message with better formatting
       await success(
-        'Request Sent!',
-        `Your join request has been sent to ${agencyName}.\n\nYou will be notified when the agency responds.`
+        t('agencies:management.requestSentTitle', 'Request Sent!'),
+        t('agencies:management.requestSentMessage', 'Your join request has been sent to {{name}}.\n\nYou will be notified when the agency responds.', { name: agencyName })
       );
 
       // Fetch updated pending requests from server (to get real IDs)
@@ -295,8 +297,8 @@ const AgencyManagementSection: React.FC<AgencyManagementSectionProps> = ({ curre
         });
 
         await success(
-          'Coupon Redeemed!',
-          `You've joined ${data.agency.name} with a Pro subscription!`
+          t('agencies:management.couponRedeemedTitle', 'Coupon Redeemed!'),
+          t('agencies:management.couponRedeemedMessage', "You've joined {{name}} with a Pro subscription!", { name: data.agency.name })
         );
 
         // Refresh user data from server
@@ -312,10 +314,10 @@ const AgencyManagementSection: React.FC<AgencyManagementSectionProps> = ({ curre
 
   const handleLeaveAgency = async () => {
     const confirmed = await confirm({
-      title: 'Leave Agency',
-      message: `Are you sure you want to leave ${currentUser.agencyName}? You will become an Independent Agent.`,
-      confirmLabel: 'Leave Agency',
-      cancelLabel: 'Cancel',
+      title: t('agencies:management.leaveAgencyTitle', 'Leave Agency'),
+      message: t('agencies:management.leaveAgencyMessage', 'Are you sure you want to leave {{name}}? You will become an Independent Agent.', { name: currentUser.agencyName }),
+      confirmLabel: t('agencies:management.leaveAgency', 'Leave Agency'),
+      cancelLabel: t('common:cancel', 'Cancel'),
       type: 'warning',
     });
 
@@ -332,12 +334,12 @@ const AgencyManagementSection: React.FC<AgencyManagementSectionProps> = ({ curre
       dispatch({
         type: 'UPDATE_USER',
         payload: {
-          agencyName: 'Independent Agent',
+          agencyName: t('agencies:badge.independentAgent', 'Independent Agent'),
           agencyId: null,
         }
       });
 
-      await success('Left Agency', 'You have successfully left the agency.\n\nYou are now an Independent Agent.');
+      await success(t('agencies:management.leaveAgencyTitle', 'Left Agency'), t('agencies:management.leaveAgencyDone', 'You have successfully left the agency.\n\nYou are now an Independent Agent.'));
 
       // Trigger refresh callback
       onAgencyChange();
@@ -350,10 +352,12 @@ const AgencyManagementSection: React.FC<AgencyManagementSectionProps> = ({ curre
   };
 
   // Use newly joined agency for immediate display, fallback to props
+  const independentLabel = t('agencies:badge.independentAgent', 'Independent Agent');
+
   const currentAgencyInfo = newlyJoinedAgency?.name
     || (currentUser.agencyName && currentUser.agencyName !== 'Independent Agent'
       ? currentUser.agencyName
-      : 'Independent Agent');
+      : independentLabel);
 
   const isIndependent = !newlyJoinedAgency && (!currentUser.agencyName || currentUser.agencyName === 'Independent Agent');
 
@@ -363,7 +367,7 @@ const AgencyManagementSection: React.FC<AgencyManagementSectionProps> = ({ curre
       <div className="p-4 bg-gray-50 border border-gray-200 rounded-lg">
         <div className="flex items-center justify-between">
           <div>
-            <h4 className="text-sm font-semibold text-gray-900">Current Agency</h4>
+            <h4 className="text-sm font-semibold text-gray-900">{t('agencies:management.currentAgency', 'Current Agency')}</h4>
             <p className="text-lg font-bold text-blue-600 mt-1">{currentAgencyInfo}</p>
           </div>
           {!showForm && (
@@ -373,7 +377,7 @@ const AgencyManagementSection: React.FC<AgencyManagementSectionProps> = ({ curre
                 onClick={() => setShowForm(true)}
                 className="px-4 py-2 bg-blue-600 text-white text-sm font-semibold rounded-lg hover:bg-blue-700 transition-colors"
               >
-                {isIndependent ? 'Join an Agency' : 'Switch Agency'}
+                {isIndependent ? t('agencies:management.joinAnAgency', 'Join an Agency') : t('agencies:management.switchAgency', 'Switch Agency')}
               </button>
               {!isIndependent && (
                 <button
@@ -382,7 +386,7 @@ const AgencyManagementSection: React.FC<AgencyManagementSectionProps> = ({ curre
                   disabled={loading}
                   className="px-4 py-2 bg-red-600 text-white text-sm font-semibold rounded-lg hover:bg-red-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  Leave Agency
+                  {t('agencies:management.leaveAgency', 'Leave Agency')}
                 </button>
               )}
             </div>
@@ -393,16 +397,16 @@ const AgencyManagementSection: React.FC<AgencyManagementSectionProps> = ({ curre
       {/* Pending Join Requests */}
       {pendingRequests.length > 0 && (
         <div className="p-4 bg-yellow-50 border-2 border-yellow-200 rounded-lg">
-          <h4 className="text-sm font-semibold text-yellow-900 mb-2">Pending Join Requests</h4>
+          <h4 className="text-sm font-semibold text-yellow-900 mb-2">{t('agencies:management.pendingJoinRequests', 'Pending Join Requests')}</h4>
           <div className="space-y-2">
             {pendingRequests.map((request) => (
               <div key={request._id} className="flex items-center justify-between p-3 bg-white rounded-lg border border-yellow-200">
                 <div>
                   <p className="font-medium text-gray-900">{request.agencyId?.name || 'Unknown Agency'}</p>
-                  <p className="text-xs text-gray-600">Sent: {new Date(request.createdAt).toLocaleDateString()}</p>
+                  <p className="text-xs text-gray-600">{t('agencies:management.sent', 'Sent:')} {new Date(request.createdAt).toLocaleDateString()}</p>
                 </div>
                 <span className="px-3 py-1 bg-yellow-100 text-yellow-800 text-xs font-semibold rounded-full">
-                  Pending Approval
+                  {t('agencies:management.pendingApproval', 'Pending Approval')}
                 </span>
               </div>
             ))}
@@ -414,15 +418,14 @@ const AgencyManagementSection: React.FC<AgencyManagementSectionProps> = ({ curre
       {showForm && (
         <div className="p-6 bg-blue-50 border-2 border-blue-200 rounded-lg animate-fade-in">
           <h4 className="text-lg font-semibold text-blue-900 mb-4">
-            {isIndependent ? 'Join an Agency' : 'Switch to a Different Agency'}
+            {isIndependent ? t('agencies:management.joinAnAgency', 'Join an Agency') : t('agencies:management.switchToDifferent', 'Switch to a Different Agency')}
           </h4>
 
           {!isIndependent && (
             <div className="mb-4 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
               <p className="text-sm text-yellow-800">
                 <ExclamationTriangleIcon className="w-4 h-4 inline mr-1" />
-                You are currently with <strong>{currentUser.agencyName}</strong>.
-                Switching will remove you from your current agency.
+                {t('agencies:management.currentlyWith', 'You are currently with {{name}}. Switching will remove you from your current agency.', { name: currentUser.agencyName })}
               </p>
             </div>
           )}
@@ -433,10 +436,9 @@ const AgencyManagementSection: React.FC<AgencyManagementSectionProps> = ({ curre
               <div className="flex items-start gap-3">
                 <CheckCircleIcon className="w-6 h-6 text-green-600 flex-shrink-0" />
                 <div className="flex-1">
-                  <h5 className="font-semibold text-green-800">Welcome to {couponRedemptionSuccess.agencyName}!</h5>
+                  <h5 className="font-semibold text-green-800">{t('agencies:management.welcomeToAgency', 'Welcome to {{name}}!', { name: couponRedemptionSuccess.agencyName })}</h5>
                   <p className="text-sm text-green-700 mt-1">
-                    You now have a Pro subscription with {couponRedemptionSuccess.subscription.listingsLimit} listings,
-                    valid until {new Date(couponRedemptionSuccess.subscription.expiresAt).toLocaleDateString()}.
+                    {t('agencies:management.proSubscriptionInfo', 'You now have a Pro subscription with {{listings}} listings, valid until {{date}}.', { listings: couponRedemptionSuccess.subscription.listingsLimit, date: new Date(couponRedemptionSuccess.subscription.expiresAt).toLocaleDateString() })}
                   </p>
                   <div className="mt-4 flex gap-3">
                     <button
@@ -450,14 +452,14 @@ const AgencyManagementSection: React.FC<AgencyManagementSectionProps> = ({ curre
                       }}
                       className="px-4 py-2 bg-green-600 text-white text-sm font-semibold rounded-lg hover:bg-green-700 transition-colors"
                     >
-                      View Agency
+                      {t('agencies:management.viewAgency', 'View Agency')}
                     </button>
                     <button
                       type="button"
                       onClick={handleCancel}
                       className="px-4 py-2 border border-green-600 text-green-700 text-sm font-semibold rounded-lg hover:bg-green-50 transition-colors"
                     >
-                      Done
+                      {t('agencies:management.done', 'Done')}
                     </button>
                   </div>
                 </div>
@@ -478,7 +480,7 @@ const AgencyManagementSection: React.FC<AgencyManagementSectionProps> = ({ curre
                       : 'text-gray-600 hover:text-gray-900'
                   }`}
                 >
-                  Invitation Code
+                  {t('agencies:management.invitationCode', 'Invitation Code')}
                 </button>
                 <button
                   type="button"
@@ -490,7 +492,7 @@ const AgencyManagementSection: React.FC<AgencyManagementSectionProps> = ({ curre
                   }`}
                 >
                   <TicketIcon className="w-4 h-4" />
-                  Agent Coupon
+                  {t('agencies:management.agentCoupon', 'Agent Coupon')}
                 </button>
               </div>
 
@@ -500,11 +502,11 @@ const AgencyManagementSection: React.FC<AgencyManagementSectionProps> = ({ curre
                   {/* Agency Selection Dropdown */}
                   <div>
                     <label htmlFor="agency-select" className="block text-sm font-medium text-gray-700 mb-2">
-                      Select Agency <span className="text-red-500">*</span>
+                      {t('agencies:management.selectAgency', 'Select Agency')} <span className="text-red-500">*</span>
                     </label>
                     {loadingAgencies ? (
                       <div className="px-4 py-3 border border-gray-300 rounded-lg bg-white text-gray-500 text-sm">
-                        Loading agencies...
+                        {t('agencies:management.loadingAgencies', 'Loading agencies...')}
                       </div>
                     ) : (
                       <select
@@ -517,7 +519,7 @@ const AgencyManagementSection: React.FC<AgencyManagementSectionProps> = ({ curre
                         disabled={loading}
                         className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-gray-100 disabled:cursor-not-allowed text-sm"
                       >
-                        <option value="">-- Choose an agency --</option>
+                        <option value="">{t('agencies:management.chooseAgency', '-- Choose an agency --')}</option>
                         {agencies.map((agency) => (
                           <option key={agency._id} value={agency._id}>
                             {agency.name} {agency.city ? `(${agency.city}${agency.country ? ', ' + agency.country : ''})` : ''}
@@ -530,7 +532,7 @@ const AgencyManagementSection: React.FC<AgencyManagementSectionProps> = ({ curre
                   {/* Invitation Code Input */}
                   <div>
                     <label htmlFor="invitation-code" className="block text-sm font-medium text-gray-700 mb-2">
-                      Agency Invitation Code <span className="text-red-500">*</span>
+                      {t('agencies:management.agencyInvitationCode', 'Agency Invitation Code')} <span className="text-red-500">*</span>
                     </label>
                     <input
                       type="text"
@@ -541,11 +543,11 @@ const AgencyManagementSection: React.FC<AgencyManagementSectionProps> = ({ curre
                         setError('');
                       }}
                       disabled={loading}
-                      placeholder="e.g., AGY-BELGRAD-A1B2C3"
+                      placeholder={t('agencies:management.invitationCodePlaceholder', 'e.g., AGY-BELGRAD-A1B2C3')}
                       className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-gray-100 disabled:cursor-not-allowed font-mono text-sm"
                     />
                     <p className="text-xs text-gray-600 mt-1">
-                      Enter the invitation code for the selected agency
+                      {t('agencies:management.enterInvitationCode', 'Enter the invitation code for the selected agency')}
                     </p>
                   </div>
 
@@ -565,7 +567,7 @@ const AgencyManagementSection: React.FC<AgencyManagementSectionProps> = ({ curre
                       disabled={loading}
                       className="flex-1 px-4 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed font-medium"
                     >
-                      Cancel
+                      {t('common:cancel', 'Cancel')}
                     </button>
                     <button
                       type="button"
@@ -573,7 +575,7 @@ const AgencyManagementSection: React.FC<AgencyManagementSectionProps> = ({ curre
                       disabled={loading || !selectedAgencyId || !invitationCode.trim()}
                       className="flex-1 px-4 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed font-medium"
                     >
-                      {loading ? 'Verifying & Sending...' : 'Send Join Request'}
+                      {loading ? t('agencies:management.verifyingSending', 'Verifying & Sending...') : t('agencies:management.sendJoinRequest', 'Send Join Request')}
                     </button>
                   </div>
                 </div>
@@ -585,9 +587,9 @@ const AgencyManagementSection: React.FC<AgencyManagementSectionProps> = ({ curre
                       <div className="flex items-start gap-3">
                         <ExclamationTriangleIcon className="w-5 h-5 text-amber-600 flex-shrink-0" />
                         <div>
-                          <h5 className="font-semibold text-amber-800">Agent Registration Required</h5>
+                          <h5 className="font-semibold text-amber-800">{t('agencies:management.agentRegistrationRequired', 'Agent Registration Required')}</h5>
                           <p className="text-sm text-amber-700 mt-1">
-                            Only registered agents can redeem agency coupons. Please register as an agent first.
+                            {t('agencies:management.onlyAgentsCanRedeem', 'Only registered agents can redeem agency coupons. Please register as an agent first.')}
                           </p>
                         </div>
                       </div>
@@ -598,12 +600,12 @@ const AgencyManagementSection: React.FC<AgencyManagementSectionProps> = ({ curre
                     <div className="flex items-start gap-3">
                       <TicketIcon className="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5" />
                       <div>
-                        <h5 className="font-semibold text-amber-800">Agent Coupon Benefits</h5>
+                        <h5 className="font-semibold text-amber-800">{t('agencies:management.agentCouponBenefits', 'Agent Coupon Benefits')}</h5>
                         <ul className="text-sm text-amber-700 mt-1 space-y-1">
-                          <li>• Instantly join the agency (no approval needed)</li>
-                          <li>• Get a Pro subscription for 1 year</li>
-                          <li>• Up to 25 active listings</li>
-                          <li>• Agency branding on your listings</li>
+                          <li>• {t('agencies:management.benefitInstantJoin', 'Instantly join the agency (no approval needed)')}</li>
+                          <li>• {t('agencies:management.benefitProSubscription', 'Get a Pro subscription for 1 year')}</li>
+                          <li>• {t('agencies:management.benefitListings', 'Up to 25 active listings')}</li>
+                          <li>• {t('agencies:management.benefitBranding', 'Agency branding on your listings')}</li>
                         </ul>
                       </div>
                     </div>
@@ -611,7 +613,7 @@ const AgencyManagementSection: React.FC<AgencyManagementSectionProps> = ({ curre
 
                   <div>
                     <label htmlFor="agent-coupon-code" className="block text-sm font-medium text-gray-700 mb-2">
-                      Agent Coupon Code <span className="text-red-500">*</span>
+                      {t('agencies:management.agentCouponCode', 'Agent Coupon Code')} <span className="text-red-500">*</span>
                     </label>
                     <input
                       type="text"
@@ -622,11 +624,11 @@ const AgencyManagementSection: React.FC<AgencyManagementSectionProps> = ({ curre
                         setError('');
                       }}
                       disabled={loading || !isUserAgent()}
-                      placeholder="e.g., ABC-XXXXXXXX"
+                      placeholder={t('agencies:management.agentCouponCodePlaceholder', 'e.g., ABC-XXXXXXXX')}
                       className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent disabled:bg-gray-100 disabled:cursor-not-allowed font-mono text-sm uppercase"
                     />
                     <p className="text-xs text-gray-600 mt-1">
-                      Enter the coupon code you received from the agency owner via email
+                      {t('agencies:management.enterCouponFromEmail', 'Enter the coupon code you received from the agency owner via email')}
                     </p>
                   </div>
 
@@ -646,7 +648,7 @@ const AgencyManagementSection: React.FC<AgencyManagementSectionProps> = ({ curre
                       disabled={loading}
                       className="flex-1 px-4 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed font-medium"
                     >
-                      Cancel
+                      {t('common:cancel', 'Cancel')}
                     </button>
                     <button
                       type="button"
@@ -657,12 +659,12 @@ const AgencyManagementSection: React.FC<AgencyManagementSectionProps> = ({ curre
                       {loading ? (
                         <>
                           <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
-                          Redeeming...
+                          {t('agencies:coupon.redeeming', 'Redeeming...')}
                         </>
                       ) : (
                         <>
                           <TicketIcon className="w-4 h-4" />
-                          Redeem Coupon
+                          {t('agencies:management.redeemCoupon', 'Redeem Coupon')}
                         </>
                       )}
                     </button>

@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Agency, Property } from '../types';
 import { getAgency } from '../src/features/agencies/api';
 import PropertyCard from '@/features/property-details/components/PropertyCard';
@@ -10,6 +11,7 @@ interface AgencyPageProps {
 }
 
 const AgencyPage: React.FC<AgencyPageProps> = ({ agencyId }) => {
+  const { t } = useTranslation('agencies');
   const [agency, setAgency] = useState<Agency | null>(null);
   const [properties, setProperties] = useState<Property[]>([]);
   const [loading, setLoading] = useState(true);
@@ -46,8 +48,8 @@ const AgencyPage: React.FC<AgencyPageProps> = ({ agencyId }) => {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <div className="text-center">
-          <h2 className="text-2xl font-bold text-neutral-800 mb-2">Agency Not Found</h2>
-          <p className="text-neutral-600">{error || 'The agency you are looking for does not exist.'}</p>
+          <h2 className="text-2xl font-bold text-neutral-800 mb-2">{t('page.notFound', 'Agency Not Found')}</h2>
+          <p className="text-neutral-600">{error || t('page.doesNotExist', 'The agency you are looking for does not exist.')}</p>
         </div>
       </div>
     );
@@ -98,7 +100,7 @@ const AgencyPage: React.FC<AgencyPageProps> = ({ agencyId }) => {
                 {agency.website && (
                   <a href={agency.website} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-neutral-700 hover:text-primary">
                     <GlobeAltIcon className="w-5 h-5" />
-                    <span>Visit Website</span>
+                    <span>{t('page.visitWebsite', 'Visit Website')}</span>
                   </a>
                 )}
               </div>
@@ -107,16 +109,16 @@ const AgencyPage: React.FC<AgencyPageProps> = ({ agencyId }) => {
               <div className="flex gap-6 mt-6 justify-center md:justify-start">
                 <div className="text-center">
                   <p className="text-2xl font-bold text-primary">{agency.totalProperties || 0}</p>
-                  <p className="text-sm text-neutral-600">Properties</p>
+                  <p className="text-sm text-neutral-600">{t('page.propertiesCount', 'Properties')}</p>
                 </div>
                 <div className="text-center">
                   <p className="text-2xl font-bold text-primary">{agency.totalAgents || 0}</p>
-                  <p className="text-sm text-neutral-600">Agents</p>
+                  <p className="text-sm text-neutral-600">{t('page.agentsCount', 'Agents')}</p>
                 </div>
                 {agency.yearsInBusiness && (
                   <div className="text-center">
                     <p className="text-2xl font-bold text-primary">{agency.yearsInBusiness}</p>
-                    <p className="text-sm text-neutral-600">Years in Business</p>
+                    <p className="text-sm text-neutral-600">{t('page.yearsInBusiness', 'Years in Business')}</p>
                   </div>
                 )}
               </div>
@@ -127,7 +129,7 @@ const AgencyPage: React.FC<AgencyPageProps> = ({ agencyId }) => {
         {/* Agents Section */}
         {agency.agents && agency.agents.length > 0 && (
           <div className="mt-8">
-            <h2 className="text-2xl font-bold text-neutral-800 mb-4">Our Agents</h2>
+            <h2 className="text-2xl font-bold text-neutral-800 mb-4">{t('page.ourAgents', 'Our Agents')}</h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
               {agency.agents.map((agent) => (
                 <div key={agent._id} className="bg-white rounded-lg shadow p-6 hover:shadow-lg transition-shadow">
@@ -153,7 +155,7 @@ const AgencyPage: React.FC<AgencyPageProps> = ({ agencyId }) => {
 
         {/* Properties Section */}
         <div className="mt-8">
-          <h2 className="text-2xl font-bold text-neutral-800 mb-4">Our Properties</h2>
+          <h2 className="text-2xl font-bold text-neutral-800 mb-4">{t('page.ourProperties', 'Our Properties')}</h2>
           {properties.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {properties.map((property) => (
@@ -162,7 +164,7 @@ const AgencyPage: React.FC<AgencyPageProps> = ({ agencyId }) => {
             </div>
           ) : (
             <div className="bg-white rounded-lg shadow p-8 text-center">
-              <p className="text-neutral-600">No properties currently listed</p>
+              <p className="text-neutral-600">{t('page.noPropertiesListed', 'No properties currently listed')}</p>
             </div>
           )}
         </div>

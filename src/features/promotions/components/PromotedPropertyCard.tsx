@@ -4,6 +4,7 @@
  */
 
 import React, { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Property } from '@/types';
 import { formatPrice } from '@/utils/currency';
 import { ClockIcon, BuildingOfficeIcon, MapPinIcon, ChartBarIcon, StarIconSolid, FireIcon } from '@/constants';
@@ -40,6 +41,7 @@ const calculateTimeRemaining = (endDate: number): TimeRemaining => {
 };
 
 const CountdownTimer: React.FC<{ endDate: number }> = ({ endDate }) => {
+  const { t } = useTranslation('seller');
   const [timeRemaining, setTimeRemaining] = useState<TimeRemaining>(calculateTimeRemaining(endDate));
 
   useEffect(() => {
@@ -51,7 +53,7 @@ const CountdownTimer: React.FC<{ endDate: number }> = ({ endDate }) => {
   }, [endDate]);
 
   if (timeRemaining.total <= 0) {
-    return <span className="text-red-600 font-semibold">Expired</span>;
+    return <span className="text-red-600 font-semibold">{t('promotionCard.expired', 'Expired')}</span>;
   }
 
   return (
@@ -59,22 +61,22 @@ const CountdownTimer: React.FC<{ endDate: number }> = ({ endDate }) => {
       {timeRemaining.days > 0 && (
         <div className="flex flex-col items-center bg-neutral-100 px-2 py-1 rounded">
           <span className="text-lg font-bold text-neutral-800">{timeRemaining.days}</span>
-          <span className="text-[10px] text-neutral-500">days</span>
+          <span className="text-[10px] text-neutral-500">{t('promotionCard.days', 'days')}</span>
         </div>
       )}
       <div className="flex flex-col items-center bg-neutral-100 px-2 py-1 rounded">
         <span className="text-lg font-bold text-neutral-800">{String(timeRemaining.hours).padStart(2, '0')}</span>
-        <span className="text-[10px] text-neutral-500">hrs</span>
+        <span className="text-[10px] text-neutral-500">{t('promotionCard.hrs', 'hrs')}</span>
       </div>
       <span className="text-neutral-400 font-bold">:</span>
       <div className="flex flex-col items-center bg-neutral-100 px-2 py-1 rounded">
         <span className="text-lg font-bold text-neutral-800">{String(timeRemaining.minutes).padStart(2, '0')}</span>
-        <span className="text-[10px] text-neutral-500">min</span>
+        <span className="text-[10px] text-neutral-500">{t('promotionCard.min', 'min')}</span>
       </div>
       <span className="text-neutral-400 font-bold">:</span>
       <div className="flex flex-col items-center bg-neutral-100 px-2 py-1 rounded">
         <span className="text-lg font-bold text-neutral-800">{String(timeRemaining.seconds).padStart(2, '0')}</span>
-        <span className="text-[10px] text-neutral-500">sec</span>
+        <span className="text-[10px] text-neutral-500">{t('promotionCard.sec', 'sec')}</span>
       </div>
     </div>
   );
@@ -103,6 +105,7 @@ const PromotedPropertyCard: React.FC<PromotedPropertyCardProps> = ({
   onViewHistory,
   isAddingUrgent = false,
 }) => {
+  const { t } = useTranslation('seller');
   const tier = property.promotionTier || 'standard';
   const tierConfig = TIER_CONFIG[tier] || TIER_CONFIG.standard;
   const endDate = property.promotionEndDate || 0;
@@ -140,13 +143,13 @@ const PromotedPropertyCard: React.FC<PromotedPropertyCardProps> = ({
         <div className="bg-gradient-to-r from-blue-500 to-indigo-500 text-white px-4 py-2 flex items-center justify-between">
           <div className="flex items-center gap-2">
             <span className="text-lg">🔄</span>
-            <span className="text-sm font-semibold">Auto-extend ready! Complete payment to extend.</span>
+            <span className="text-sm font-semibold">{t('promotionCard.autoExtendReady', 'Auto-extend ready! Complete payment to extend.')}</span>
           </div>
           <button
             onClick={() => onCompleteAutoExtend(promotion._id)}
             className="bg-white text-blue-600 text-xs font-bold px-3 py-1.5 rounded-full hover:bg-blue-50 transition-colors shadow-sm"
           >
-            Complete Payment
+            {t('promotionCard.completePayment', 'Complete Payment')}
           </button>
         </div>
       )}
@@ -156,13 +159,17 @@ const PromotedPropertyCard: React.FC<PromotedPropertyCardProps> = ({
         <div className="bg-gradient-to-r from-orange-500 to-red-500 text-white px-4 py-2 flex items-center justify-between">
           <div className="flex items-center gap-2">
             <span className="text-lg">⚠️</span>
-            <span className="text-sm font-semibold">Expiring in {daysRemaining} day{daysRemaining !== 1 ? 's' : ''}!</span>
+            <span className="text-sm font-semibold">
+              {daysRemaining === 1
+                ? t('promotionCard.expiringIn_one', 'Expiring in {{count}} day!', { count: daysRemaining })
+                : t('promotionCard.expiringIn_other', 'Expiring in {{count}} days!', { count: daysRemaining })}
+            </span>
           </div>
           <button
             onClick={() => onExtend(property)}
             className="bg-white/20 hover:bg-white/30 text-white text-xs font-semibold px-3 py-1 rounded-full transition-colors"
           >
-            Extend Now
+            {t('promotionCard.extendNow', 'Extend Now')}
           </button>
         </div>
       )}
@@ -177,7 +184,7 @@ const PromotedPropertyCard: React.FC<PromotedPropertyCardProps> = ({
           <div className="flex items-center gap-2">
             {property.hasUrgentBadge ? (
               <span className="bg-red-100 text-red-700 text-xs font-semibold px-2 py-1 rounded-full flex items-center gap-1">
-                <FireIcon className="w-3 h-3" /> Urgent
+                <FireIcon className="w-3 h-3" /> {t('promotionCard.urgentBadge', 'Urgent')}
               </span>
             ) : !isExpired && promotion?._id && (
               <button
@@ -187,10 +194,10 @@ const PromotedPropertyCard: React.FC<PromotedPropertyCardProps> = ({
               >
                 {isAddingUrgent ? (
                   <>
-                    <span className="animate-spin w-3 h-3 border-2 border-red-300 border-t-red-600 rounded-full inline-block" /> Processing...
+                    <span className="animate-spin w-3 h-3 border-2 border-red-300 border-t-red-600 rounded-full inline-block" /> {t('promotionCard.processing', 'Processing...')}
                   </>
                 ) : (
-                  <><FireIcon className="w-3 h-3" /> +Urgent €0.99</>
+                  <><FireIcon className="w-3 h-3" /> {t('promotionCard.addUrgent', '+Urgent €0.99')}</>
                 )}
               </button>
             )}
@@ -223,7 +230,7 @@ const PromotedPropertyCard: React.FC<PromotedPropertyCardProps> = ({
           <div className="flex items-center justify-between mb-2">
             <div className="flex items-center gap-2 text-sm text-neutral-600">
               <ClockIcon className="w-4 h-4" />
-              <span>Time Remaining</span>
+              <span>{t('promotionCard.timeRemaining', 'Time Remaining')}</span>
             </div>
             <CountdownTimer endDate={endDate} />
           </div>
@@ -231,8 +238,8 @@ const PromotedPropertyCard: React.FC<PromotedPropertyCardProps> = ({
             <div className={`h-full rounded-full transition-all duration-300 ${progressBarClass}`} style={{ width: `${100 - progressPercent}%` }} />
           </div>
           <div className="flex justify-between text-xs text-neutral-400 mt-1">
-            <span>Started: {new Date(startDate).toLocaleDateString()}</span>
-            <span>Ends: {new Date(endDate).toLocaleDateString()}</span>
+            <span>{t('promotionCard.started', 'Started:')} {new Date(startDate).toLocaleDateString()}</span>
+            <span>{t('promotionCard.ends', 'Ends:')} {new Date(endDate).toLocaleDateString()}</span>
           </div>
         </div>
 
@@ -241,8 +248,8 @@ const PromotedPropertyCard: React.FC<PromotedPropertyCardProps> = ({
           <div className="mt-4 pt-4 border-t border-neutral-100">
             <label className={`flex items-center justify-between ${isExpired ? 'opacity-50' : 'cursor-pointer'}`}>
               <div className="flex items-center gap-2">
-                <span className="text-sm font-medium text-neutral-700">Auto-Extend</span>
-                <span className="text-xs text-neutral-400">(renew automatically)</span>
+                <span className="text-sm font-medium text-neutral-700">{t('promotionCard.autoExtend', 'Auto-Extend')}</span>
+                <span className="text-xs text-neutral-400">{t('promotionCard.renewAutomatically', '(renew automatically)')}</span>
               </div>
               <div className="relative">
                 <input
@@ -256,10 +263,10 @@ const PromotedPropertyCard: React.FC<PromotedPropertyCardProps> = ({
               </div>
             </label>
             {isExpired && (
-              <p className="text-xs text-neutral-400 mt-1">Extend your promotion to enable auto-extend</p>
+              <p className="text-xs text-neutral-400 mt-1">{t('promotionCard.enableAutoExtend', 'Extend your promotion to enable auto-extend')}</p>
             )}
             {!isExpired && promotion?.autoExtend && (
-              <p className="text-xs text-green-600 mt-1">Your promotion will automatically renew when it expires</p>
+              <p className="text-xs text-green-600 mt-1">{t('promotionCard.autoRenewMessage', 'Your promotion will automatically renew when it expires')}</p>
             )}
           </div>
         )}
@@ -270,7 +277,7 @@ const PromotedPropertyCard: React.FC<PromotedPropertyCardProps> = ({
             onClick={() => onViewProperty(property.id)}
             className="flex-1 bg-primary/10 text-primary hover:bg-primary hover:text-white font-semibold py-2 px-4 rounded-lg transition-colors text-sm"
           >
-            View Listing
+            {t('promotionCard.viewListing', 'View Listing')}
           </button>
           <button
             onClick={() => onViewHistory(property)}
@@ -284,7 +291,7 @@ const PromotedPropertyCard: React.FC<PromotedPropertyCardProps> = ({
             className="px-4 py-2 bg-gradient-to-r from-amber-500 to-orange-500 text-white rounded-lg hover:from-amber-600 hover:to-orange-600 shadow-md hover:shadow-lg transition-all text-sm font-bold flex items-center gap-1.5"
           >
             <ClockIcon className="w-4 h-4" />
-            Extend
+            {t('promotionCard.extend', 'Extend')}
           </button>
         </div>
       </div>

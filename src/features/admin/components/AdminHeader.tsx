@@ -59,25 +59,25 @@ const AdminHeader: React.FC<AdminHeaderProps> = ({
 
   const quickStats = [
     {
-      label: 'Users',
+      label: t('admin:sidebar.users'),
       value: stats?.totalUsers || 0,
       icon: <UsersIcon className="w-4 h-4" />,
       color: 'text-blue-600'
     },
     {
-      label: 'Properties',
+      label: t('admin:sidebar.properties'),
       value: stats?.totalProperties || 0,
       icon: <HomeIcon className="w-4 h-4" />,
       color: 'text-green-600'
     },
     {
-      label: 'Agencies',
+      label: t('admin:sidebar.agencies'),
       value: stats?.totalAgencies || 0,
       icon: <BuildingOfficeIcon className="w-4 h-4" />,
       color: 'text-purple-600'
     },
     {
-      label: 'Inquiries',
+      label: t('admin:sidebar.inquiries'),
       value: stats?.newInquiries || 0,
       icon: <EnvelopeIcon className="w-4 h-4" />,
       color: 'text-red-600',
@@ -142,7 +142,7 @@ const AdminHeader: React.FC<AdminHeaderProps> = ({
               {notificationsOpen && (
                 <div className="absolute right-0 mt-2 w-80 bg-white rounded-xl shadow-xl border border-gray-200 overflow-hidden">
                   <div className="px-4 py-3 border-b border-gray-100 bg-gray-50">
-                    <h3 className="font-semibold text-gray-900">Notifications</h3>
+                    <h3 className="font-semibold text-gray-900">{t('admin:header.notifications')}</h3>
                   </div>
                   <div className="max-h-96 overflow-y-auto">
                     {(stats?.newInquiries || 0) > 0 ? (
@@ -153,10 +153,10 @@ const AdminHeader: React.FC<AdminHeaderProps> = ({
                           </div>
                           <div className="flex-1">
                             <p className="text-sm font-medium text-gray-900">
-                              {stats?.newInquiries} new {stats?.newInquiries === 1 ? 'inquiry' : 'inquiries'}
+                              {t('admin:header.newInquiries', { count: stats?.newInquiries })}
                             </p>
                             <p className="text-xs text-gray-500 mt-1">
-                              Pending review in Inquiries section
+                              {t('admin:header.inquiriesPending')}
                             </p>
                           </div>
                         </div>
@@ -170,10 +170,10 @@ const AdminHeader: React.FC<AdminHeaderProps> = ({
                           </div>
                           <div className="flex-1">
                             <p className="text-sm font-medium text-gray-900">
-                              {stats?.unverifiedUsers} unverified users
+                              {t('admin:header.unverifiedUsers', { count: stats?.unverifiedUsers })}
                             </p>
                             <p className="text-xs text-gray-500 mt-1">
-                              Review in Users section
+                              {t('admin:header.usersReview')}
                             </p>
                           </div>
                         </div>
@@ -182,7 +182,7 @@ const AdminHeader: React.FC<AdminHeaderProps> = ({
                     {(!stats?.newInquiries && !stats?.unverifiedUsers) && (
                       <div className="p-8 text-center">
                         <BellIcon className="w-12 h-12 text-gray-300 mx-auto mb-3" />
-                        <p className="text-sm text-gray-500">No new notifications</p>
+                        <p className="text-sm text-gray-500">{t('admin:header.noNotifications')}</p>
                       </div>
                     )}
                   </div>
@@ -220,7 +220,7 @@ const AdminHeader: React.FC<AdminHeaderProps> = ({
                       className="w-full flex items-center gap-3 px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
                     >
                       <Cog6ToothIcon className="w-5 h-5 text-gray-400" />
-                      Settings
+                      {t('admin:header.settings')}
                     </button>
                     <button
                       onClick={() => {
@@ -230,7 +230,7 @@ const AdminHeader: React.FC<AdminHeaderProps> = ({
                       className="w-full flex items-center gap-3 px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
                     >
                       <HomeIcon className="w-5 h-5 text-gray-400" />
-                      Back to Site
+                      {t('admin:header.backToSite')}
                     </button>
                     <hr className="my-2" />
                     <button
@@ -241,7 +241,7 @@ const AdminHeader: React.FC<AdminHeaderProps> = ({
                       className="w-full flex items-center gap-3 px-4 py-2 text-sm text-red-600 hover:bg-red-50"
                     >
                       <ArrowRightOnRectangleIcon className="w-5 h-5" />
-                      Logout
+                      {t('admin:header.logout')}
                     </button>
                   </div>
                 </div>
