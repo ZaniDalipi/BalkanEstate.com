@@ -124,7 +124,7 @@
     "mongodb-memory-server": "^10.4.2",
     "nodemon": "^3.1.11",
     "supertest": "^7.1.4",
-    "swagger-jsdoc": "^1.10.3",
+    "swagger-jsdoc": "^6.2.8",
     "ts-jest": "^29.0.0",
     "ts-node": "^10.9.2",
     "typescript": "^5.9.3"
