@@ -472,9 +472,16 @@ const sanitizeNoSQLInjection = (obj: any, path = ''): any => {
 };
 
 export const mongoSanitization = (req: Request, _res: Response, next: NextFunction): void => {
-  // Only sanitize body - query and params are read-only in newer Express
+  // Sanitize request body
   if (req.body && typeof req.body === 'object') {
     req.body = sanitizeNoSQLInjection(req.body, 'body');
+  }
+  // Sanitize query parameters to prevent operator injection via ?key[$gt]=
+  if (req.query && typeof req.query === 'object') {
+    const sanitizedQuery = sanitizeNoSQLInjection({ ...req.query }, 'query');
+    for (const key of Object.keys(req.query)) {
+      (req.query as any)[key] = sanitizedQuery[key];
+    }
   }
   next();
 };

@@ -205,13 +205,13 @@ router.post('/refresh-token', refreshTokenRateLimiterIP, refreshToken);
 router.get('/sessions', protect, getActiveSessions);
 router.get('/login-history', protect, getLoginHistory);
 
-// Email verification routes
-router.post('/verify-email', verifyEmail);
-router.post('/resend-verification', resendVerificationEmail);
+// Email verification routes (rate limited to prevent brute-force and email flooding)
+router.post('/verify-email', passwordResetRateLimiterIP, verifyEmail);
+router.post('/resend-verification', passwordResetRateLimiterIP, resendVerificationEmail);
 
 // Password reset routes with rate limiting
 router.post('/forgot-password', passwordResetRateLimiterIP, decryptPayload, requestPasswordReset);
-router.post('/reset-password', decryptPayload, resetPassword);
+router.post('/reset-password', passwordResetRateLimiterIP, decryptPayload, resetPassword);
 router.post('/change-password', protect, decryptPayload, changePassword);
 router.post('/set-password', protect, decryptPayload, setPassword);
 router.post('/delete-account', protect, decryptPayload, deleteAccount);

@@ -1430,7 +1430,7 @@ export const requestPasswordReset = async (
 
     // Set token and expiration (1 hour)
     user.resetPasswordToken = hashedToken;
-    user.resetPasswordExpires = new Date(Date.now() + 3600000); // 1 hour from now
+    user.resetPasswordExpires = new Date(Date.now() + 1800000); // 30 minutes from now
 
     await user.save();
 

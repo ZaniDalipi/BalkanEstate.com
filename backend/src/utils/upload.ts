@@ -24,13 +24,13 @@ const fileFilter = (_req: any, file: Express.Multer.File, cb: any) => {
 
   // Check MIME type
   if (!ALLOWED_MIME_TYPES.has(file.mimetype)) {
-    cb(new Error('Not an image! Please upload only images (JPEG, PNG, GIF, WebP, SVG).'), false);
+    cb(new Error('Not an image! Please upload only images (JPEG, PNG, GIF, WebP, BMP, TIFF).'), false);
     return;
   }
 
   // Check file extension (prevents MIME type spoofing)
   if (ext && !ALLOWED_EXTENSIONS.has(ext)) {
-    cb(new Error('Invalid file extension. Allowed: jpg, jpeg, png, gif, webp, svg, bmp, tiff.'), false);
+    cb(new Error('Invalid file extension. Allowed: jpg, jpeg, png, gif, webp, bmp, tiff.'), false);
     return;
   }
 

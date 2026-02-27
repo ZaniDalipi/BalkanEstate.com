@@ -47,8 +47,15 @@ export const protect = async (
     // Verify token
     const decoded = jwt.verify(token, getJwtSecret()) as {
       id: string;
+      type?: string;
       fingerprint?: string;
     };
+
+    // Reject refresh tokens used as access tokens
+    if (decoded.type === 'refresh') {
+      res.status(401).json({ message: 'Invalid token type', code: 'INVALID_TOKEN_TYPE' });
+      return;
+    }
 
     // Verify fingerprint if enabled and present in token
     if (isFingerprintEnabled() && decoded.fingerprint) {
