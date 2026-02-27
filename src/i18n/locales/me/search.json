@@ -237,6 +237,28 @@
       "wind": "Vjetar",
       "air": "Zrak",
       "heat": "Vrućina"
+    },
+    "dawn": "Zora",
+    "morning": "Jutro",
+    "noon": "Podne",
+    "afternoon": "Poslijepodne",
+    "sunset": "Zalazak",
+    "dusk": "Sumrak",
+    "night": "Noć",
+    "sunrise": "Izlazak sunca",
+    "sunDirection": "Pravac sunca",
+    "orientationTip": "Savjet",
+    "eastWindows": "Prozori okrenuti prema istoku dobijaju jutarnje sunce",
+    "southWindows": "Prozori okrenuti prema jugu dobijaju najviše sunčeve svjetlosti",
+    "westWindows": "Prozori okrenuti prema zapadu dobijaju poslijepodnevno/večernje sunce",
+    "playAnimation": "Reprodukuj",
+    "pauseAnimation": "Pauza",
+    "season": "Sezona",
+    "seasons": {
+      "spring": "Proljeće",
+      "summer": "Ljeto",
+      "autumn": "Jesen",
+      "winter": "Zima"
     }
   },
   "newsletter": {
