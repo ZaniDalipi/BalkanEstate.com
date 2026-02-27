@@ -694,7 +694,8 @@
       "all": "Сите",
       "forSale": "За продажба",
       "forRent": "За изнајмување",
-      "noListings": "Нема достапни огласи"
+      "noListings": "Нема достапни огласи",
+      "allTypes": "Сите типови"
     },
     "reviewsTab": {
       "verifiedReviews": "верифицирани рецензии",

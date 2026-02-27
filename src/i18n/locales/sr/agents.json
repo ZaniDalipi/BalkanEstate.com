@@ -694,7 +694,8 @@
       "all": "Све",
       "forSale": "На продају",
       "forRent": "За изнајмљивање",
-      "noListings": "Нема доступних огласа"
+      "noListings": "Нема доступних огласа",
+      "allTypes": "Sви типови"
     },
     "reviewsTab": {
       "verifiedReviews": "верификоване рецензије",

@@ -557,7 +557,8 @@
       "all": "Të gjitha",
       "forSale": "Për Shitje",
       "forRent": "Për Qira",
-      "noListings": "Nuk ka listime të disponueshme"
+      "noListings": "Nuk ka listime të disponueshme",
+      "allTypes": "Të gjitha llojet"
     },
     "marketInsights": {
       "title": "Local Market Insights",

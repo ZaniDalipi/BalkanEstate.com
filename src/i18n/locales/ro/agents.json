@@ -694,7 +694,8 @@
       "all": "Toate",
       "forSale": "De vânzare",
       "forRent": "De închiriat",
-      "noListings": "Nu sunt anunțuri disponibile"
+      "noListings": "Nu sunt anunțuri disponibile",
+      "allTypes": "Toate tipurile"
     },
     "reviewsTab": {
       "verifiedReviews": "verified reviews",

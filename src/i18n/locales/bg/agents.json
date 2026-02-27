@@ -694,7 +694,8 @@
       "all": "Всички",
       "forSale": "За продажба",
       "forRent": "Под наем",
-      "noListings": "Няма налични обяви"
+      "noListings": "Няма налични обяви",
+      "allTypes": "Всички типове"
     },
     "reviewsTab": {
       "verifiedReviews": "верифицирани отзиви",
