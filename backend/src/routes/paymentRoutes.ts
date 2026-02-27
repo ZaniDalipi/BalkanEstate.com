@@ -11,6 +11,7 @@ import {
   getAvailablePaymentMethods,
 } from '../controllers/paymentController';
 import { handlePayseraWebhook, verifyPayseraPayment } from '../controllers/payseraWebhookController';
+import { verifyStripePayment } from '../controllers/stripeWebhookController';
 import { protect } from '../middleware/auth';
 import { decryptPayload } from '../middleware/decryptPayload';
 import {
@@ -75,6 +76,13 @@ router.post('/paysera/webhook', handlePayseraWebhook);
 
 /** Verify Paysera payment by order ID */
 router.get('/paysera/verify/:orderId', protect, verifyPayseraPayment);
+
+// ============================================================
+// STRIPE ENDPOINTS (webhook verification)
+// ============================================================
+
+/** Verify Stripe payment by session ID */
+router.get('/stripe/verify/:sessionId', protect, verifyStripePayment);
 
 // ============================================================
 // LEGACY ENDPOINTS (backward compatibility)

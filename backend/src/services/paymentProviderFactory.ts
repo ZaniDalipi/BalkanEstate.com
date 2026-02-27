@@ -9,9 +9,10 @@
  */
 
 import { payseraService, type PayseraPaymentMethod } from './payseraService';
+import { stripeService } from './stripeService';
 
 // Payment provider types
-export type PaymentProvider = 'paysera' | 'web';
+export type PaymentProvider = 'paysera' | 'stripe' | 'web';
 
 // Country to provider mapping
 export interface CountryProviderMapping {
@@ -125,12 +126,16 @@ class PaymentProviderFactory {
       case 'paysera':
         return this.createPayseraPayment(params);
 
+      case 'stripe':
+        return this.createStripePayment(params);
+
       default:
         if (payseraService.isConfigured()) return this.createPayseraPayment(params);
+        if (stripeService.isConfigured()) return this.createStripePayment(params);
         return {
           success: false,
           provider: 'web',
-          error: 'No payment provider is configured. Please set up Paysera environment variables.',
+          error: 'No payment provider is configured. Please set up Paysera or Stripe environment variables.',
         };
     }
   }
@@ -183,6 +188,47 @@ class PaymentProviderFactory {
   }
 
   /**
+   * Create a Stripe Checkout payment session
+   */
+  private async createStripePayment(params: CreatePaymentParams): Promise<PaymentResult> {
+    if (!stripeService.isConfigured()) {
+      return {
+        success: false,
+        provider: 'stripe',
+        error: 'Stripe is not configured',
+      };
+    }
+
+    const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
+
+    const result = await stripeService.createCheckoutSession({
+      userId: params.userId,
+      userEmail: params.userEmail,
+      productId: params.productId,
+      stripePriceId: params.productId, // Product should have Stripe price ID configured
+      planName: params.planName,
+      planInterval: params.planInterval,
+      successUrl: `${frontendUrl}/payment/success?session_id={CHECKOUT_SESSION_ID}`,
+      cancelUrl: `${frontendUrl}/payment/cancel`,
+    });
+
+    if (result.success) {
+      return {
+        success: true,
+        provider: 'stripe',
+        paymentUrl: result.paymentUrl,
+        sessionId: result.sessionId,
+      };
+    }
+
+    return {
+      success: false,
+      provider: 'stripe',
+      error: result.error || 'Failed to create Stripe payment',
+    };
+  }
+
+  /**
    * Create a promotion payment session
    */
   public async createPromotionPayment(params: {
@@ -224,6 +270,12 @@ class PaymentProviderFactory {
           description: 'Secure payments with card, Google Pay, Apple Pay, and bank transfer',
           fees: '~1.5-2.5% for card/wallet, lower for bank transfers',
         };
+      case 'stripe':
+        return {
+          name: 'Stripe',
+          description: 'Secure card payments powered by Stripe',
+          fees: '~2.9% + 30¢ per successful charge',
+        };
       default:
         return {
           name: 'Web Payment',
@@ -239,6 +291,10 @@ class PaymentProviderFactory {
   public getAvailablePaymentMethods(countryCode: string): string[] {
     const mapping = this.getCountryMapping(countryCode);
     const methods: string[] = [];
+
+    if (stripeService.isConfigured()) {
+      methods.push('card');
+    }
 
     if (payseraService.isConfigured()) {
       methods.push('card', 'google_pay', 'apple_pay');
