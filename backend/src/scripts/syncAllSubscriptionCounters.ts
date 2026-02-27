@@ -13,6 +13,7 @@ import dotenv from 'dotenv';
 import path from 'path';
 import User from '../models/User';
 import Property from '../models/Property';
+import Product from '../models/Product';
 
 // Load environment variables
 dotenv.config({ path: path.resolve(__dirname, '../../.env') });
@@ -23,6 +24,10 @@ const syncAllSubscriptionCounters = async () => {
     const mongoUri = process.env.MONGO_URI || 'mongodb://localhost:27017/balkan-estate';
     await mongoose.connect(mongoUri);
     console.log('✅ Connected to MongoDB');
+
+    // Get agent listings limit from DB product (configurable in admin)
+    const agentProduct = await Product.findOne({ productId: 'agency_agent_yearly' }).lean();
+    const agentListingsLimit = agentProduct?.listingsLimit ?? 25;
 
     // Get all users
     const users = await User.find({});
@@ -42,7 +47,7 @@ const syncAllSubscriptionCounters = async () => {
 
         if (user.proSubscription?.isActive) {
           tier = 'pro';
-          listingsLimit = user.proSubscription.totalListingsLimit || 25;
+          listingsLimit = user.proSubscription.totalListingsLimit || agentListingsLimit;
         }
 
         // Count existing properties for this user
@@ -89,10 +94,10 @@ const syncAllSubscriptionCounters = async () => {
           user.subscription.privateSellerCount = privateSellerCount;
           user.subscription.agentCount = agentCount;
 
-          // Ensure listingsLimit is correct
-          if (user.subscription.tier === 'pro' && user.subscription.listingsLimit !== 25) {
-            user.subscription.listingsLimit = 25;
-            console.log(`   🔧 Fixed listingsLimit: ${user.subscription.listingsLimit} -> 25`);
+          // Ensure listingsLimit is correct for agency agents
+          if (user.subscription.tier === 'agency_agent' && user.subscription.listingsLimit !== agentListingsLimit) {
+            console.log(`   🔧 Fixed listingsLimit: ${user.subscription.listingsLimit} -> ${agentListingsLimit}`);
+            user.subscription.listingsLimit = agentListingsLimit;
           }
 
           console.log(`   ✅ Updated subscription counters`);
