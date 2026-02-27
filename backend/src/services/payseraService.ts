@@ -14,6 +14,7 @@
 
 import crypto from 'crypto';
 import { paymentLogger } from '../utils/logger';
+import { buildFrontendRedirectUrl } from '../utils/redirectValidation';
 
 // PaySera API endpoints
 const PAYSERA_API_URL = process.env.NODE_ENV === 'production'
@@ -95,8 +96,8 @@ class PayseraService {
     this.config = {
       projectId: process.env.PAYSERA_PROJECT_ID || '',
       signPassword: process.env.PAYSERA_SIGN_PASSWORD || '',
-      acceptUrl: `${process.env.FRONTEND_URL || 'http://localhost:5173'}/payment/success`,
-      cancelUrl: `${process.env.FRONTEND_URL || 'http://localhost:5173'}/payment/cancel`,
+      acceptUrl: buildFrontendRedirectUrl('/payment/success'),
+      cancelUrl: buildFrontendRedirectUrl('/payment/cancel'),
       callbackUrl: `${process.env.BACKEND_URL || 'http://localhost:5001'}/api/payments/paysera/webhook`,
     };
   }

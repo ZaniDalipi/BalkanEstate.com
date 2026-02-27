@@ -39,6 +39,7 @@ import {
 } from '../middleware/rateLimiter';
 import { decryptPayload } from '../middleware/decryptPayload';
 import { getPublicKeyBase64 } from '../utils/payloadEncryption';
+import { buildFrontendRedirectUrl } from '../utils/redirectValidation';
 
 // Configure multer for avatar uploads
 const upload = multer({
@@ -259,7 +260,7 @@ if (oauthStrategies.google) {
   );
   router.get(
     '/google/callback',
-    passport.authenticate('google', { session: false, failureRedirect: `${process.env.FRONTEND_URL || 'http://localhost:5173'}/auth/callback?error=google_auth_failed` }),
+    passport.authenticate('google', { session: false, failureRedirect: buildFrontendRedirectUrl('/auth/callback', { error: 'google_auth_failed' }) }),
     oauthCallback
   );
 }
@@ -272,7 +273,7 @@ if (oauthStrategies.apple) {
   );
   router.get(
     '/apple/callback',
-    passport.authenticate('apple', { session: false, failureRedirect: `${process.env.FRONTEND_URL || 'http://localhost:5173'}/auth/callback?error=apple_auth_failed` }),
+    passport.authenticate('apple', { session: false, failureRedirect: buildFrontendRedirectUrl('/auth/callback', { error: 'apple_auth_failed' }) }),
     oauthCallback
   );
 }

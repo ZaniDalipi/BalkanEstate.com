@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import * as api from '@/services/apiService';
 import { Property } from '@/types';
+import { validatePaymentRedirectUrl } from '@/src/utils/security';
 
 // === Shared Types ===
 
@@ -306,9 +307,14 @@ export function usePromotionSelector({
           return;
         }
 
-        // Payment required — redirect to Paysera checkout
+        // Payment required — redirect to Paysera checkout (validated)
         if (result.url) {
-          window.location.href = result.url;
+          const validatedUrl = validatePaymentRedirectUrl(result.url);
+          if (validatedUrl) {
+            window.location.href = validatedUrl;
+          } else {
+            setError('Payment redirect blocked: untrusted URL');
+          }
           return;
         }
 
@@ -367,9 +373,14 @@ export function usePromotionSelector({
           return;
         }
 
-        // Payment required — redirect to Paysera checkout
+        // Payment required — redirect to Paysera checkout (validated)
         if (result.url) {
-          window.location.href = result.url;
+          const validatedUrl = validatePaymentRedirectUrl(result.url);
+          if (validatedUrl) {
+            window.location.href = validatedUrl;
+          } else {
+            setError('Payment redirect blocked: untrusted URL');
+          }
           return;
         }
 

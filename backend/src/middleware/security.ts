@@ -10,6 +10,7 @@ import { Request, Response, NextFunction, Application } from 'express';
 import cors from 'cors';
 import crypto from 'crypto';
 import { apiLogger } from '../utils/logger';
+import { buildSafeHttpsRedirect } from '../utils/redirectValidation';
 
 // Environment detection
 const isProduction = process.env.NODE_ENV === 'production';
@@ -588,8 +589,13 @@ export const enforceHttps = (req: Request, res: Response, next: NextFunction): v
       res.status(403).json({ message: 'HTTPS is required' });
       return;
     }
-    // For other requests, redirect to HTTPS
-    res.redirect(301, `https://${req.hostname}${req.originalUrl}`);
+    // For other requests, redirect to HTTPS (validated against allowlist)
+    const httpsUrl = buildSafeHttpsRedirect(req);
+    if (!httpsUrl) {
+      res.status(400).json({ message: 'Invalid host' });
+      return;
+    }
+    res.redirect(301, httpsUrl);
     return;
   }
   next();

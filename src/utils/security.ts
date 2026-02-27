@@ -57,18 +57,41 @@ export const sanitizeInput = (input: string): string => {
   return div.innerHTML;
 };
 
+// Allowlist of trusted domains for redirect validation
+const TRUSTED_REDIRECT_DOMAINS: string[] = [
+  'balkanestateai.com',
+  'www.balkanestateai.com',
+  'api.balkanestateai.com',
+  'balkanestate.com',
+  'www.balkanestate.com',
+  'accounts.google.com',
+  'bank.paysera.com',
+  'sandbox.paysera.com',
+];
+
+/**
+ * Check if a hostname is in the trusted domains allowlist.
+ * Matches exact domain or subdomains of allowed entries.
+ */
+const isAllowedDomain = (hostname: string): boolean => {
+  const currentHostname = typeof window !== 'undefined' ? window.location.hostname : '';
+  const allDomains = [...TRUSTED_REDIRECT_DOMAINS, currentHostname];
+  return allDomains.some(domain =>
+    domain && (hostname === domain || hostname.endsWith(`.${domain}`))
+  );
+};
+
 // Validate and sanitize URLs to prevent open redirect attacks
 export const sanitizeUrl = (url: string): string => {
   try {
     const parsed = new URL(url, window.location.origin);
-    // Only allow same-origin URLs or specific trusted domains
-    const trustedDomains = [
-      window.location.hostname,
-      'balkanestateai.com',
-      'accounts.google.com',
-    ];
 
-    if (trustedDomains.some(domain => parsed.hostname.endsWith(domain))) {
+    // Only allow http and https protocols
+    if (parsed.protocol !== 'http:' && parsed.protocol !== 'https:') {
+      return '/';
+    }
+
+    if (isAllowedDomain(parsed.hostname)) {
       return parsed.href;
     }
 
@@ -76,6 +99,29 @@ export const sanitizeUrl = (url: string): string => {
     return '/';
   } catch {
     return '/';
+  }
+};
+
+/**
+ * Validate a payment redirect URL from the backend.
+ * Only allows redirects to trusted payment providers and our own domains.
+ */
+export const validatePaymentRedirectUrl = (url: string): string | null => {
+  try {
+    const parsed = new URL(url);
+
+    // Only allow https in production (allow http for localhost in dev)
+    if (parsed.protocol !== 'https:' && parsed.protocol !== 'http:') {
+      return null;
+    }
+
+    if (isAllowedDomain(parsed.hostname)) {
+      return parsed.href;
+    }
+
+    return null;
+  } catch {
+    return null;
   }
 };
 
@@ -127,6 +173,7 @@ export default {
   disableDevToolsShortcuts,
   sanitizeInput,
   sanitizeUrl,
+  validatePaymentRedirectUrl,
   detectMaliciousInput,
   checkRateLimit,
   initSecurity,

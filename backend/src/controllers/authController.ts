@@ -15,6 +15,7 @@ import { activityLogger } from '../services/activityLogger';
 import { authLogger } from '../utils/logger';
 import { generateSecureAgentId } from '../utils/secureRandom';
 import { FREE_TIER_LIMITS, PRO_TIER_LIMITS, ENTERPRISE_TIER_LIMITS } from '../config/subscriptionConstants';
+import { buildFrontendRedirectUrl } from '../utils/redirectValidation';
 
 /**
  * Build a sanitized user response object for public-facing auth endpoints (login/signup).
@@ -1077,9 +1078,9 @@ export const oauthCallback = async (req: Request, res: Response): Promise<void> 
     const user = req.user as IUser;
 
     if (!user) {
-      // Redirect to frontend with error
-      const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
-      res.redirect(`${frontendUrl}/auth/callback?error=authentication_failed`);
+      // Redirect to frontend with error using validated URL
+      const redirectUrl = buildFrontendRedirectUrl('/auth/callback', { error: 'authentication_failed' });
+      res.redirect(redirectUrl);
       return;
     }
 
@@ -1097,11 +1098,11 @@ export const oauthCallback = async (req: Request, res: Response): Promise<void> 
     // User data will be fetched securely via /api/auth/me endpoint
     // This prevents sensitive data from being logged in browser history,
     // server logs, or leaked via Referer headers
-    const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
-    res.redirect(`${frontendUrl}/auth/callback?token=${token}&refresh=${refreshToken}`);
+    const redirectUrl = buildFrontendRedirectUrl('/auth/callback', { token, refresh: refreshToken });
+    res.redirect(redirectUrl);
   } catch (error: any) {
-    const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
-    res.redirect(`${frontendUrl}/auth/callback?error=server_error`);
+    const redirectUrl = buildFrontendRedirectUrl('/auth/callback', { error: 'server_error' });
+    res.redirect(redirectUrl);
   }
 };
 

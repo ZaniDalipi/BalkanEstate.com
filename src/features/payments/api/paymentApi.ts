@@ -13,6 +13,7 @@ import {
   getCountryPaymentInfo,
   COUNTRY_PAYMENT_MAP,
 } from '@/config/paymentConfig';
+import { validatePaymentRedirectUrl } from '@/src/utils/security';
 
 // ====== TYPES ======
 
@@ -328,11 +329,16 @@ export async function getCustomerPortal(): Promise<CustomerPortalResponse> {
 }
 
 /**
- * Redirect to payment page
+ * Redirect to payment page (validated against trusted domain allowlist)
  */
 export function redirectToPayment(paymentUrl: string): void {
   if (paymentUrl) {
-    window.location.href = paymentUrl;
+    const validatedUrl = validatePaymentRedirectUrl(paymentUrl);
+    if (validatedUrl) {
+      window.location.href = validatedUrl;
+    } else {
+      console.error('Payment redirect blocked: untrusted URL');
+    }
   }
 }
 
