@@ -17,8 +17,8 @@
     "id": "Listing ID"
   },
   "listings": "Listings",
-  "forSale": "For Sale",
-  "forRent": "For Rent",
+  "forSale": "Na prodaju",
+  "forRent": "Za iznajmljivanje",
   "sold": "Sold",
   "rented": "Rented",
   "available": "Available",
@@ -225,7 +225,7 @@
     "loading": "Loading virtual tour...",
     "exit": "Izađi iz ture",
     "floor": "Sprat {{floor}}",
-    "hint": "Povucite za gledanje \u2022 Skrolujte za zum",
+    "hint": "Povucite za gledanje • Skrolujte za zum",
     "entering": "Ulazim u zgradu...",
     "tourButton": "360° Tura"
   },
