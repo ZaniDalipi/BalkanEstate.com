@@ -753,7 +753,7 @@ const CityDashboard: React.FC = () => {
                     <button
                       key={otherCity.city}
                       onClick={handleNavigate}
-                      className="group text-left bg-white rounded-xl shadow-md border border-neutral-100 overflow-hidden hover:shadow-lg hover:border-primary/20 transition-all"
+                      className="group text-left bg-white rounded-xl shadow-md border border-neutral-100 overflow-hidden hover:shadow-lg hover:border-primary/20 transition-all cursor-pointer"
                     >
                       <div className="relative h-28 overflow-hidden">
                         <img
