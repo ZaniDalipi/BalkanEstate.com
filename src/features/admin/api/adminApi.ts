@@ -17,6 +17,7 @@ export const getAllFeaturedSubscriptions = async (params?: {
 
   return apiRequest(`/admin/featured-subscriptions?${queryParams.toString()}`, {
     requiresAuth: true,
+    encryptResponse: true,
   });
 };
 
@@ -24,6 +25,7 @@ export const checkExpiredSubscriptions = async (): Promise<any> => {
   return apiRequest('/admin/featured-subscriptions/check-expired', {
     method: 'POST',
     requiresAuth: true,
+    encryptResponse: true,
   });
 };
 
@@ -43,6 +45,7 @@ export const getUsers = async (params?: {
 
   return apiRequest(`/admin/users?${queryParams.toString()}`, {
     requiresAuth: true,
+    encryptResponse: true,
   });
 };
 
@@ -54,6 +57,7 @@ export const updateUserRole = async (
     method: 'PUT',
     body: { role },
     requiresAuth: true,
+    encryptResponse: true,
   });
 };
 
@@ -82,6 +86,7 @@ export const updateUser = async (
     method: 'PATCH',
     body: data,
     requiresAuth: true,
+    encryptResponse: true,
   });
 };
 
@@ -89,6 +94,7 @@ export const deleteUser = async (userId: string): Promise<any> => {
   return apiRequest(`/admin/users/${userId}`, {
     method: 'DELETE',
     requiresAuth: true,
+    encryptResponse: true,
   });
 };
 
@@ -106,6 +112,7 @@ export const getAdminProperties = async (params?: {
 
   return apiRequest(`/admin/properties?${queryParams.toString()}`, {
     requiresAuth: true,
+    encryptResponse: true,
   });
 };
 
@@ -113,6 +120,7 @@ export const approveProperty = async (propertyId: string): Promise<any> => {
   return apiRequest(`/admin/properties/${propertyId}/approve`, {
     method: 'PUT',
     requiresAuth: true,
+    encryptResponse: true,
   });
 };
 
@@ -121,6 +129,7 @@ export const rejectProperty = async (propertyId: string, reason?: string): Promi
     method: 'PUT',
     body: { reason },
     requiresAuth: true,
+    encryptResponse: true,
   });
 };
 
@@ -129,6 +138,7 @@ export const rejectProperty = async (propertyId: string, reason?: string): Promi
 export const getAdminAnalytics = async (): Promise<any> => {
   return apiRequest('/admin/analytics', {
     requiresAuth: true,
+    encryptResponse: true,
   });
 };
 
@@ -137,6 +147,7 @@ export const getAdminAnalytics = async (): Promise<any> => {
 export const getDiscountCodes = async (): Promise<any> => {
   return apiRequest('/admin/discount-codes', {
     requiresAuth: true,
+    encryptResponse: true,
   });
 };
 
@@ -150,6 +161,7 @@ export const createDiscountCode = async (data: {
     method: 'POST',
     body: data,
     requiresAuth: true,
+    encryptResponse: true,
   });
 };
 
@@ -157,6 +169,7 @@ export const deleteDiscountCode = async (codeId: string): Promise<any> => {
   return apiRequest(`/admin/discount-codes/${codeId}`, {
     method: 'DELETE',
     requiresAuth: true,
+    encryptResponse: true,
   });
 };
 
@@ -164,6 +177,7 @@ export const deactivateDiscountCode = async (codeId: string): Promise<any> => {
   return apiRequest(`/admin/discount-codes/${codeId}/deactivate`, {
     method: 'PATCH',
     requiresAuth: true,
+    encryptResponse: true,
   });
 };
 
@@ -185,6 +199,7 @@ export const createFullDiscountCode = async (data: CreateDiscountCodeData): Prom
     method: 'POST',
     body: data,
     requiresAuth: true,
+    encryptResponse: true,
   });
 };
 
@@ -203,6 +218,7 @@ export const generateBulkDiscountCodes = async (data: BulkDiscountCodeData): Pro
     method: 'POST',
     body: data,
     requiresAuth: true,
+    encryptResponse: true,
   });
 };
 
@@ -256,6 +272,7 @@ export interface Product {
 export const getProducts = async (): Promise<{ products: Product[] }> => {
   return apiRequest('/products/admin/all', {
     requiresAuth: true,
+    encryptResponse: true,
   });
 };
 
@@ -267,6 +284,7 @@ export const updateProduct = async (
     method: 'PUT',
     body: data,
     requiresAuth: true,
+    encryptResponse: true,
   });
 };
 
@@ -274,6 +292,7 @@ export const toggleProductStatus = async (productId: string): Promise<{ product:
   return apiRequest(`/products/admin/${productId}/status`, {
     method: 'PATCH',
     requiresAuth: true,
+    encryptResponse: true,
   });
 };
 
@@ -281,6 +300,7 @@ export const toggleProductVisibility = async (productId: string): Promise<{ prod
   return apiRequest(`/products/admin/${productId}/visibility`, {
     method: 'PATCH',
     requiresAuth: true,
+    encryptResponse: true,
   });
 };
 
@@ -325,6 +345,7 @@ export interface PromotionPlan {
 export const getPromotionPlans = async (): Promise<{ plans: PromotionPlan[] }> => {
   return apiRequest('/promotion-plans/admin', {
     requiresAuth: true,
+    encryptResponse: true,
   });
 };
 
@@ -342,6 +363,7 @@ export const createPromotionPlan = async (
     method: 'POST',
     body: data,
     requiresAuth: true,
+    encryptResponse: true,
   });
 };
 
@@ -353,6 +375,7 @@ export const updatePromotionPlan = async (
     method: 'PUT',
     body: data,
     requiresAuth: true,
+    encryptResponse: true,
   });
 };
 
@@ -360,6 +383,7 @@ export const deletePromotionPlan = async (planId: string): Promise<{ message: st
   return apiRequest(`/promotion-plans/${planId}`, {
     method: 'DELETE',
     requiresAuth: true,
+    encryptResponse: true,
   });
 };
 
@@ -367,6 +391,7 @@ export const togglePromotionPlanStatus = async (planId: string): Promise<{ plan:
   return apiRequest(`/promotion-plans/${planId}/toggle-status`, {
     method: 'POST',
     requiresAuth: true,
+    encryptResponse: true,
   });
 };
 
@@ -375,5 +400,6 @@ export const seedPromotionPlans = async (options?: { force?: boolean }): Promise
   return apiRequest(`/promotion-plans/seed${queryParams}`, {
     method: 'POST',
     requiresAuth: true,
+    encryptResponse: true,
   });
 };

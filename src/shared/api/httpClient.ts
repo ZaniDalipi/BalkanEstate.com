@@ -150,7 +150,8 @@ export const apiRequest = async <T>(
 export const uploadRequest = async <T>(
   endpoint: string,
   formData: FormData,
-  retryCount = 0
+  retryCount = 0,
+  method: 'POST' | 'PUT' = 'POST'
 ): Promise<T> => {
   let token = tokenService.getAccessToken();
   if (!token) {
@@ -166,7 +167,7 @@ export const uploadRequest = async <T>(
   }
 
   const response = await fetch(`${API_URL}${endpoint}`, {
-    method: 'POST',
+    method,
     credentials: 'include',
     headers: {
       Authorization: `Bearer ${token}`,
@@ -179,7 +180,7 @@ export const uploadRequest = async <T>(
     const newAccessToken = await refreshAccessToken();
 
     if (newAccessToken) {
-      return uploadRequest<T>(endpoint, formData, 1);
+      return uploadRequest<T>(endpoint, formData, 1, method);
     } else {
       tokenService.clearTokens();
       // Emit custom event for session expiration
