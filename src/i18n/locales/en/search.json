@@ -259,7 +259,8 @@
       "summer": "Summer",
       "autumn": "Autumn",
       "winter": "Winter"
-    }
+    },
+    "promoted": "Premium"
   },
   "newsletter": {
     "title": "Stay Updated with New Properties",
