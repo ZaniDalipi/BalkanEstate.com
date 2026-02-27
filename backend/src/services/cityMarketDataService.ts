@@ -1,4 +1,5 @@
 import { GoogleGenerativeAI } from '@google/generative-ai';
+import { escapeRegex } from '../utils/escapeRegex';
 import CityMarketData, { ICityMarketData } from '../models/CityMarketData';
 import Property from '../models/Property';
 import { FlattenMaps } from 'mongoose';
@@ -373,15 +374,15 @@ async function getLiveListingCounts(city: string, country: string): Promise<{ li
 
     // Count active listings
     const listingsCount = await Property.countDocuments({
-      city: { $regex: new RegExp(`^${city}$`, 'i') },
-      country: { $regex: new RegExp(`^${country}$`, 'i') },
+      city: { $regex: new RegExp(`^${escapeRegex(city)}$`, 'i') },
+      country: { $regex: new RegExp(`^${escapeRegex(country)}$`, 'i') },
       status: 'active',
     });
 
     // Count properties sold in the last 30 days
     const soldLastMonth = await Property.countDocuments({
-      city: { $regex: new RegExp(`^${city}$`, 'i') },
-      country: { $regex: new RegExp(`^${country}$`, 'i') },
+      city: { $regex: new RegExp(`^${escapeRegex(city)}$`, 'i') },
+      country: { $regex: new RegExp(`^${escapeRegex(country)}$`, 'i') },
       status: 'sold',
       updatedAt: { $gte: thirtyDaysAgo },
     });

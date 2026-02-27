@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useConfirmation } from '@/src/shared/hooks/useConfirmation';
-import { API_URL } from '@/src/shared/api/config';
+import { apiRequest } from '@/src/shared/api';
 
 export interface PropertyImage {
   url: string;
@@ -142,7 +142,6 @@ export function usePropertyManager() {
   const fetchProperties = async () => {
     try {
       setIsLoading(true);
-      const token = localStorage.getItem('balkan_estate_token');
 
       const params = new URLSearchParams({
         page: currentPage.toString(),
@@ -153,15 +152,10 @@ export function usePropertyManager() {
         ...(searchQuery && { search: searchQuery }),
       });
 
-      const response = await fetch(`${API_URL}/admin/properties?${params}`, {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-        },
+      const data = await apiRequest<any>(`/admin/properties?${params}`, {
+        requiresAuth: true,
+        encryptResponse: true,
       });
-
-      if (!response.ok) throw new Error('Failed to fetch properties');
-
-      const data = await response.json();
       setProperties(data.properties || []);
       setTotalPages(data.pagination?.totalPages || 1);
       setTotalProperties(data.pagination?.totalItems || 0);
@@ -204,18 +198,12 @@ export function usePropertyManager() {
     if (!editingProperty) return;
 
     try {
-      const token = localStorage.getItem('balkan_estate_token');
-
-      const response = await fetch(`${API_URL}/admin/properties/${editingProperty._id}`, {
+      await apiRequest(`/admin/properties/${editingProperty._id}`, {
         method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,
-        },
-        body: JSON.stringify(editForm),
+        body: editForm,
+        requiresAuth: true,
+        encryptResponse: true,
       });
-
-      if (!response.ok) throw new Error('Failed to update property');
 
       await fetchProperties();
       setIsEditModalOpen(false);
@@ -230,18 +218,12 @@ export function usePropertyManager() {
 
   const handleTogglePromoted = async (property: Property) => {
     try {
-      const token = localStorage.getItem('balkan_estate_token');
-
-      const response = await fetch(`${API_URL}/admin/properties/${property._id}`, {
+      await apiRequest(`/admin/properties/${property._id}`, {
         method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,
-        },
-        body: JSON.stringify({ isPromoted: !property.isPromoted }),
+        body: { isPromoted: !property.isPromoted },
+        requiresAuth: true,
+        encryptResponse: true,
       });
-
-      if (!response.ok) throw new Error('Failed to update property');
 
       await fetchProperties();
       setSuccessMessage(`Property ${property.isPromoted ? 'unpromoted' : 'promoted'} successfully`);
@@ -263,16 +245,11 @@ export function usePropertyManager() {
     if (!confirmed) return;
 
     try {
-      const token = localStorage.getItem('balkan_estate_token');
-
-      const response = await fetch(`${API_URL}/admin/properties/${propertyId}`, {
+      await apiRequest(`/admin/properties/${propertyId}`, {
         method: 'DELETE',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-        },
+        requiresAuth: true,
+        encryptResponse: true,
       });
-
-      if (!response.ok) throw new Error('Failed to delete property');
 
       await fetchProperties();
       setSuccessMessage('Property deleted successfully');

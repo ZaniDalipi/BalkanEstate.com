@@ -2,7 +2,8 @@ import multer from 'multer';
 import path from 'path';
 
 // Allowed image extensions (whitelist)
-const ALLOWED_EXTENSIONS = new Set(['.jpg', '.jpeg', '.png', '.gif', '.webp', '.svg', '.bmp', '.tiff']);
+// SVG removed: SVGs can contain embedded JavaScript causing stored XSS
+const ALLOWED_EXTENSIONS = new Set(['.jpg', '.jpeg', '.png', '.gif', '.webp', '.bmp', '.tiff']);
 
 // Allowed MIME types (whitelist)
 const ALLOWED_MIME_TYPES = new Set([
@@ -10,7 +11,6 @@ const ALLOWED_MIME_TYPES = new Set([
   'image/png',
   'image/gif',
   'image/webp',
-  'image/svg+xml',
   'image/bmp',
   'image/tiff',
 ]);
