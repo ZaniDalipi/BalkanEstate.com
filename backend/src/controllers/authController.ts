@@ -66,6 +66,13 @@ export const signup = async (req: Request, res: Response): Promise<void> => {
     const { email, password, confirmPassword, name, phone, role, licenseNumber, agencyInvitationCode, languages } = req.body;
 
     // ============================================
+    // STEP 0: Enforce allowed registration roles
+    // CRITICAL: Never allow self-registration as admin/super_admin
+    // ============================================
+    const ALLOWED_SIGNUP_ROLES = ['buyer', 'private_seller', 'agent'];
+    const sanitizedRole = ALLOWED_SIGNUP_ROLES.includes(role) ? role : 'buyer';
+
+    // ============================================
     // STEP 1: Validate ALL inputs BEFORE any database writes
     // ============================================
 
@@ -157,7 +164,7 @@ export const signup = async (req: Request, res: Response): Promise<void> => {
     let generatedAgentId: string | undefined = undefined;
     let verifiedAgency: any = null;
 
-    if (role === 'agent') {
+    if (sanitizedRole === 'agent') {
       // License number is required for agents
       if (!licenseNumber) {
         res.status(400).json({
@@ -234,7 +241,7 @@ export const signup = async (req: Request, res: Response): Promise<void> => {
 
     // Determine listing limit based on role
     let activeListingsLimit = FREE_TIER_LIMITS.LISTINGS; // Default for buyers and private sellers
-    if (role === 'agent') {
+    if (sanitizedRole === 'agent') {
       activeListingsLimit = 0; // Agents need Pro subscription to post
     }
 
@@ -244,8 +251,8 @@ export const signup = async (req: Request, res: Response): Promise<void> => {
       password,
       name,
       phone: cleanPhone,
-      role: role || 'buyer',
-      licenseNumber: role === 'agent' ? licenseNumber : undefined,
+      role: sanitizedRole,
+      licenseNumber: sanitizedRole === 'agent' ? licenseNumber : undefined,
       agencyName: agencyName,
       agencyId: agencyId,
       agentId: generatedAgentId,
@@ -262,7 +269,7 @@ export const signup = async (req: Request, res: Response): Promise<void> => {
     });
 
     // If agent, create Agent record and add to agency
-    if (role === 'agent' && licenseNumber) {
+    if (sanitizedRole === 'agent' && licenseNumber) {
       try {
         const agentLanguages = languages && languages.length > 0 ? languages : ['English'];
 
@@ -348,7 +355,7 @@ export const signup = async (req: Request, res: Response): Promise<void> => {
     const tokens = await generateTokenPair(user, deviceInfo);
 
     // Log successful signup
-    activityLogger.logSignup(String(user._id), user.email, role || 'buyer', req);
+    activityLogger.logSignup(String(user._id), user.email, sanitizedRole, req);
 
     // Set refresh token as httpOnly cookie (not accessible to JS)
     setRefreshTokenCookie(res, tokens.refreshToken);
@@ -360,7 +367,7 @@ export const signup = async (req: Request, res: Response): Promise<void> => {
         ...buildSafeUserResponse(user),
         availableRoles: user.availableRoles,
         activeRole: user.activeRole,
-        requiresSubscription: role === 'agent' && !user.isSubscribed,
+        requiresSubscription: sanitizedRole === 'agent' && !user.isSubscribed,
       },
     });
   } catch (error: any) {
