@@ -69,32 +69,32 @@ const SystemSettings: React.FC = () => {
   const sections: SettingsSection[] = [
     {
       id: 'general',
-      title: 'General',
-      description: 'Basic site configuration',
+      title: t('admin:settings.generalTab'),
+      description: t('admin:settings.generalDesc'),
       icon: <Cog6ToothIcon className="w-5 h-5" />
     },
     {
       id: 'email',
-      title: 'Email',
-      description: 'Email server settings',
+      title: t('admin:settings.emailTab'),
+      description: t('admin:settings.emailDesc'),
       icon: <EnvelopeIcon className="w-5 h-5" />
     },
     {
       id: 'security',
-      title: 'Security',
-      description: 'Security and authentication',
+      title: t('admin:settings.securityTab'),
+      description: t('admin:settings.securityDesc'),
       icon: <ShieldCheckIcon className="w-5 h-5" />
     },
     {
       id: 'notifications',
-      title: 'Notifications',
-      description: 'Alert preferences',
+      title: t('admin:settings.notificationsTab'),
+      description: t('admin:settings.notificationsDesc'),
       icon: <BellIcon className="w-5 h-5" />
     },
     {
       id: 'pricing',
-      title: 'Pricing',
-      description: 'Pricing and discounts',
+      title: t('admin:settings.pricingTab'),
+      description: t('admin:settings.pricingDesc'),
       icon: <CurrencyEuroIcon className="w-5 h-5" />
     },
   ];
@@ -109,10 +109,10 @@ const SystemSettings: React.FC = () => {
       await new Promise(resolve => setTimeout(resolve, 500));
       setSaveMessage({
         type: 'success',
-        text: 'Settings preview applied. To persist changes, update environment variables on the server.'
+        text: t('admin:settings.previewApplied')
       });
     } catch (err) {
-      setSaveMessage({ type: 'error', text: 'Failed to apply settings preview.' });
+      setSaveMessage({ type: 'error', text: t('admin:settings.previewFailed') });
     } finally {
       setIsSaving(false);
     }
@@ -126,7 +126,7 @@ const SystemSettings: React.FC = () => {
     <div className="space-y-6">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">Site Name</label>
+          <label className="block text-sm font-medium text-gray-700 mb-2">{t('admin:settings.siteName')}</label>
           <input
             type="text"
             value={settings.siteName}
@@ -135,7 +135,7 @@ const SystemSettings: React.FC = () => {
           />
         </div>
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">Contact Email</label>
+          <label className="block text-sm font-medium text-gray-700 mb-2">{t('admin:settings.contactEmail')}</label>
           <input
             type="email"
             value={settings.contactEmail}
@@ -144,7 +144,7 @@ const SystemSettings: React.FC = () => {
           />
         </div>
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">Support Email</label>
+          <label className="block text-sm font-medium text-gray-700 mb-2">{t('admin:settings.supportEmail')}</label>
           <input
             type="email"
             value={settings.supportEmail}
@@ -153,7 +153,7 @@ const SystemSettings: React.FC = () => {
           />
         </div>
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">Timezone</label>
+          <label className="block text-sm font-medium text-gray-700 mb-2">{t('admin:settings.timezone')}</label>
           <select
             value={settings.timezone}
             onChange={(e) => handleInputChange('timezone', e.target.value)}
@@ -166,7 +166,7 @@ const SystemSettings: React.FC = () => {
           </select>
         </div>
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">Date Format</label>
+          <label className="block text-sm font-medium text-gray-700 mb-2">{t('admin:settings.dateFormat')}</label>
           <select
             value={settings.dateFormat}
             onChange={(e) => handleInputChange('dateFormat', e.target.value)}
@@ -178,7 +178,7 @@ const SystemSettings: React.FC = () => {
           </select>
         </div>
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">Default Currency</label>
+          <label className="block text-sm font-medium text-gray-700 mb-2">{t('admin:settings.defaultCurrency')}</label>
           <select
             value={settings.currency}
             onChange={(e) => handleInputChange('currency', e.target.value)}
@@ -193,7 +193,7 @@ const SystemSettings: React.FC = () => {
         </div>
       </div>
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-2">Site Description</label>
+        <label className="block text-sm font-medium text-gray-700 mb-2">{t('admin:settings.siteDescription')}</label>
         <textarea
           value={settings.siteDescription}
           onChange={(e) => handleInputChange('siteDescription', e.target.value)}
@@ -208,7 +208,7 @@ const SystemSettings: React.FC = () => {
     <div className="space-y-6">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">SMTP Host</label>
+          <label className="block text-sm font-medium text-gray-700 mb-2">{t('admin:settings.smtpHost')}</label>
           <input
             type="text"
             value={settings.smtpHost}
@@ -217,7 +217,7 @@ const SystemSettings: React.FC = () => {
           />
         </div>
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">SMTP Port</label>
+          <label className="block text-sm font-medium text-gray-700 mb-2">{t('admin:settings.smtpPort')}</label>
           <input
             type="text"
             value={settings.smtpPort}
@@ -226,7 +226,7 @@ const SystemSettings: React.FC = () => {
           />
         </div>
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">From Name</label>
+          <label className="block text-sm font-medium text-gray-700 mb-2">{t('admin:settings.fromName')}</label>
           <input
             type="text"
             value={settings.emailFromName}
@@ -235,7 +235,7 @@ const SystemSettings: React.FC = () => {
           />
         </div>
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">From Address</label>
+          <label className="block text-sm font-medium text-gray-700 mb-2">{t('admin:settings.fromAddress')}</label>
           <input
             type="email"
             value={settings.emailFromAddress}
@@ -252,11 +252,11 @@ const SystemSettings: React.FC = () => {
           onChange={(e) => handleInputChange('smtpSecure', e.target.checked)}
           className="w-4 h-4 text-blue-600 rounded focus:ring-blue-500"
         />
-        <label htmlFor="smtpSecure" className="text-sm text-gray-700">Use TLS/SSL encryption</label>
+        <label htmlFor="smtpSecure" className="text-sm text-gray-700">{t('admin:settings.smtpTLS')}</label>
       </div>
       <div className="p-4 bg-blue-50 rounded-lg">
         <p className="text-sm text-blue-800">
-          <strong>Note:</strong> Email credentials are stored securely in environment variables and cannot be changed here for security reasons.
+          <strong>Note:</strong> {t('admin:settings.emailCredentialsNote')}
         </p>
       </div>
     </div>
