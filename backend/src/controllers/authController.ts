@@ -147,11 +147,13 @@ export const signup = async (req: Request, res: Response): Promise<void> => {
     }
 
     // Check if user already exists (case-insensitive)
+    // Return a generic message to prevent email enumeration attacks.
+    // An attacker should not be able to discover which emails are registered.
     const userExists = await User.findOne({ email: email.toLowerCase() });
     if (userExists) {
       res.status(400).json({
-        message: 'An account with this email already exists',
-        code: 'EMAIL_EXISTS'
+        message: 'Unable to create account. Please check your information and try again.',
+        code: 'SIGNUP_FAILED'
       });
       return;
     }
@@ -194,22 +196,14 @@ export const signup = async (req: Request, res: Response): Promise<void> => {
         return;
       }
 
-      // Check if license number already exists in User collection
+      // Check if license number already exists in User or Agent collection
+      // Use a generic error message to prevent license enumeration
       const existingUserWithLicense = await User.findOne({ licenseNumber: licenseNumber });
-      if (existingUserWithLicense) {
-        res.status(400).json({
-          message: 'This license number is already registered',
-          code: 'LICENSE_EXISTS'
-        });
-        return;
-      }
-
-      // Check if license number already exists in Agent collection
       const existingAgentWithLicense = await Agent.findOne({ licenseNumber: licenseNumber });
-      if (existingAgentWithLicense) {
+      if (existingUserWithLicense || existingAgentWithLicense) {
         res.status(400).json({
-          message: 'This license number is already registered',
-          code: 'LICENSE_EXISTS'
+          message: 'Unable to create account. Please check your information and try again.',
+          code: 'SIGNUP_FAILED'
         });
         return;
       }
@@ -373,26 +367,12 @@ export const signup = async (req: Request, res: Response): Promise<void> => {
     });
   } catch (error: any) {
 
-    // Handle MongoDB duplicate key errors
+    // Handle MongoDB duplicate key errors with generic messages
+    // to prevent enumeration of existing emails/licenses
     if (error.code === 11000) {
-      const field = Object.keys(error.keyPattern || {})[0];
-      if (field === 'email') {
-        res.status(400).json({
-          message: 'An account with this email already exists',
-          code: 'EMAIL_EXISTS'
-        });
-        return;
-      }
-      if (field === 'licenseNumber') {
-        res.status(400).json({
-          message: 'This license number is already registered',
-          code: 'LICENSE_EXISTS'
-        });
-        return;
-      }
       res.status(400).json({
-        message: 'A record with this information already exists',
-        code: 'DUPLICATE_ENTRY'
+        message: 'Unable to create account. Please check your information and try again.',
+        code: 'SIGNUP_FAILED'
       });
       return;
     }
