@@ -610,33 +610,25 @@ export function use3DMap(props: Map3DBuildingsProps) {
       ])
     );
 
-    // First, try to hide the original building by setting a filter that excludes buildings at this location
-    // We'll do this by creating a small exclusion zone around the property
+    // Hide the original building at this location so our colored floor slices are clearly visible
     if (mapInstance.getLayer('3d-buildings')) {
-      // Get the current filter and add exclusion for this building's area
-      const latTolerance = 0.0003; // ~30m tolerance
-      const lngTolerance = 0.0003;
-
-      // Apply filter to exclude the original building (by checking if building is within our area)
-      // This uses a bounding box check
-      mapInstance.setFilter('3d-buildings', [
-        'any',
-        ['<', ['get', 'render_height'], 5], // Keep short buildings
-        ['all',
-          ['any',
-            ['<', ['geometry-type'], 'Polygon'], // Keep non-polygons
-            ['any',
-              // Keep buildings outside our exclusion zone
-              // We can't easily filter by geometry center, so use a workaround
-              // by relying on the custom building to cover the original
-            ]
-          ]
-        ]
-      ]);
-
-      // Alternative: Just let the custom building cover the original
-      // Remove the filter and rely on proper z-ordering
-      mapInstance.setFilter('3d-buildings', null);
+      if (buildingFeature && buildingFeature.id !== undefined) {
+        // Exclude this specific building by its feature ID - most precise approach
+        mapInstance.setFilter('3d-buildings', ['!=', ['id'], buildingFeature.id]);
+      } else {
+        // Fallback: exclude buildings within a bounding box around the property
+        const bboxPad = 0.0004; // ~40m padding
+        mapInstance.setFilter('3d-buildings', ['!', ['within', {
+          type: 'Polygon',
+          coordinates: [[
+            [longitude - bboxPad, latitude - bboxPad],
+            [longitude + bboxPad, latitude - bboxPad],
+            [longitude + bboxPad, latitude + bboxPad],
+            [longitude - bboxPad, latitude + bboxPad],
+            [longitude - bboxPad, latitude - bboxPad],
+          ]]
+        }]]);
+      }
     }
 
     // Add source for the custom building using actual geometry
@@ -718,73 +710,8 @@ export function use3DMap(props: Map3DBuildingsProps) {
       },
     });
 
-    // Add floating "Floor X/Y" label above the building at the highlighted floor level
-    if (floorNum > 0 && floorNum <= totalFlrs) {
-      // Create a floating floor label marker positioned above the building
-      const floorLabelEl = document.createElement('div');
-      floorLabelEl.style.cssText = 'pointer-events: none; z-index: 50;';
-      floorLabelEl.innerHTML = `
-        <div style="
-          display: flex;
-          flex-direction: column;
-          align-items: center;
-          gap: 0;
-          filter: drop-shadow(0 4px 12px rgba(0,0,0,0.4));
-        ">
-          <div style="
-            background: linear-gradient(135deg, #059669, #10b981);
-            color: white;
-            padding: 4px 14px;
-            border-radius: 10px;
-            font-size: 13px;
-            font-weight: 800;
-            white-space: nowrap;
-            border: 2px solid rgba(255,255,255,0.9);
-            letter-spacing: 0.5px;
-            font-family: system-ui, -apple-system, sans-serif;
-          ">Floor ${floorNum}/${totalFlrs}</div>
-          <div style="
-            width: 0;
-            height: 0;
-            border-left: 7px solid transparent;
-            border-right: 7px solid transparent;
-            border-top: 7px solid #10b981;
-            margin-top: -1px;
-          "></div>
-        </div>
-      `;
-
-      // Position the label at the building centroid, offset upward based on floor position
-      const calculateFloorLabelOffset = (currentZoom: number) => {
-        const basePixelsPerFloor = 2.8;
-        const zoomFactor = Math.pow(2, currentZoom - 16);
-        const pixelsPerFloor = basePixelsPerFloor * zoomFactor;
-        // Position at the highlighted floor level plus some headroom
-        const floorsFromBottom = floorNum - 0.5;
-        return -(floorsFromBottom * pixelsPerFloor) - 20;
-      };
-
-      const initialLabelOffset = calculateFloorLabelOffset(mapInstance.getZoom());
-      const floorLabelMarker = new maplibregl.Marker({
-        element: floorLabelEl,
-        anchor: 'bottom',
-        offset: [0, initialLabelOffset],
-      })
-        .setLngLat([centroidLng, centroidLat])
-        .addTo(mapInstance);
-
-      // Update label position on zoom/pitch changes
-      const updateLabelOffset = () => {
-        const newOffset = calculateFloorLabelOffset(mapInstance.getZoom());
-        floorLabelMarker.setOffset([0, newOffset]);
-      };
-      mapInstance.on('zoom', updateLabelOffset);
-      mapInstance.on('pitch', updateLabelOffset);
-
-      // Show door icon if 360 tour is available
-      const hasTour = !!tourUrl;
-
-      if (hasTour) {
+    // Show door marker at the highlighted floor level if 360 tour is available
+    if (tourUrl && floorNum > 0 && floorNum <= totalFlrs) {
         // Find the southwest-facing edge of the building (viewing direction with pitch 60)
         // This edge will appear as the "front" face from the default camera angle
         const ring = scaledCoords[0];
@@ -899,7 +826,6 @@ export function use3DMap(props: Map3DBuildingsProps) {
 
         // Store marker reference for later removal
         doorMarkerRef.current = doorMarker;
-      }
     }
   }, []);
 
