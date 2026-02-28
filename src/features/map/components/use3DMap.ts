@@ -596,16 +596,21 @@ export function use3DMap(props: Map3DBuildingsProps) {
     // Use exact building coords — no scaling needed because we hide the original building below
     const scaledCoords = buildingCoords;
 
-    // Hide buildings to prevent depth-buffer conflicts with floor slices.
-    // Try to filter only the target building by feature ID; if that's not possible,
-    // hide the entire layer — floor slices must always win the depth buffer.
-    if (mapInstance.getLayer('building-3d')) {
-      const featureId = buildingFeature?.id;
+    // Hide only the target building to prevent depth-buffer conflicts with floor slices.
+    // Never hide the entire layer — that wipes all buildings off the map.
+    if (mapInstance.getLayer('building-3d') && buildingFeature) {
+      const featureId = buildingFeature.id;
       if (featureId !== undefined && featureId !== null) {
-        mapInstance.setFilter('building-3d', ['!=', ['id'], featureId]);
-      } else {
-        mapInstance.setLayoutProperty('building-3d', 'visibility', 'none');
+        // Combine with any existing filter so we don't break the style's own conditions
+        const existingFilter = mapInstance.getFilter('building-3d');
+        const hideFilter = ['!=', ['id'], featureId];
+        mapInstance.setFilter(
+          'building-3d',
+          existingFilter ? ['all', existingFilter, hideFilter] : hideFilter
+        );
       }
+      // No featureId → can't target just this building; floor slices are inserted at
+      // the top of the layer stack so they win the depth buffer without hiding anything.
     }
 
     // Add source for the custom building using actual geometry
