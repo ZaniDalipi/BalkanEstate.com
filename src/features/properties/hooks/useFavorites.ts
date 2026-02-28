@@ -79,45 +79,37 @@ export function useToggleFavorite() {
 
   const mutation = useMutation({
     mutationFn: async (property: Property): Promise<void> => {
-      // Toggle favorite via API
-      const isFavorite = (await getFavorites()).some((p) => p.id === property.id);
+      // Use cache to determine current state instead of making an extra API call
+      const current = queryClient.getQueryData<Property[]>(propertyKeys.favorites()) ?? [];
+      const isFavorite = current.some((p) => p.id === property.id);
       await toggleSavedHome(property.id, isFavorite);
     },
     onMutate: async (property) => {
-      // Cancel outgoing refetches
+      // Cancel outgoing refetches so they don't overwrite our optimistic update
       await queryClient.cancelQueries({ queryKey: propertyKeys.favorites() });
 
-      // Snapshot previous value
+      // Snapshot previous value for rollback
       const previousFavorites = queryClient.getQueryData(propertyKeys.favorites());
 
-      // Optimistically update
+      // Optimistically update the cache without triggering a re-fetch
       queryClient.setQueryData(propertyKeys.favorites(), (old: Property[] = []) => {
         const isFavorite = old.some(p => p.id === property.id);
         if (isFavorite) {
-          // Remove from favorites
           return old.filter(p => p.id !== property.id);
         } else {
-          // Add to favorites
           return [property, ...old];
         }
       });
 
       return { previousFavorites };
     },
-    onError: (err, property, context) => {
+    onError: (_err, _property, context) => {
       // Rollback on error
       if (context?.previousFavorites) {
         queryClient.setQueryData(propertyKeys.favorites(), context.previousFavorites);
       }
-      // Error removed
     },
-    onSuccess: () => {
-      // Invalidate and immediately refetch to ensure server state is correct
-      queryClient.invalidateQueries({
-        queryKey: propertyKeys.favorites(),
-        refetchType: 'active',
-      });
-    },
+    // No invalidateQueries — optimistic update keeps cache correct
   });
 
   return {

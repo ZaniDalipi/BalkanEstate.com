@@ -53,39 +53,34 @@ export function useToggleSavedHome() {
   const queryClient = useQueryClient();
 
   const mutation = useMutation({
-    mutationFn: ({ propertyId, isSaved }: { propertyId: string; isSaved: boolean }) =>
+    mutationFn: ({ propertyId, isSaved }: { propertyId: string; isSaved: boolean; property?: Property }) =>
       toggleSavedHome(propertyId, isSaved),
-    onMutate: async ({ propertyId, isSaved }) => {
-      // Cancel outgoing refetches
+    onMutate: async ({ propertyId, isSaved, property }) => {
+      // Cancel outgoing refetches so they don't overwrite our optimistic update
       await queryClient.cancelQueries({ queryKey: savedKeys.homes() });
 
-      // Snapshot previous value
+      // Snapshot previous value for rollback
       const previousHomes = queryClient.getQueryData(savedKeys.homes());
 
-      // Optimistically update
+      // Optimistically update the cache without triggering a re-fetch
       queryClient.setQueryData(savedKeys.homes(), (old: Property[] = []) => {
         if (isSaved) {
-          // Remove from saved
           return old.filter(p => p.id !== propertyId);
-        } else {
-          // This case is handled by fetching the property first
-          return old;
+        } else if (property) {
+          return [property, ...old];
         }
+        return old;
       });
 
       return { previousHomes };
     },
-    onError: (err, variables, context) => {
+    onError: (_err, _variables, context) => {
       // Rollback on error
       if (context?.previousHomes) {
         queryClient.setQueryData(savedKeys.homes(), context.previousHomes);
       }
-      // Error removed
     },
-    onSuccess: () => {
-      // Invalidate to ensure server state is correct
-      queryClient.invalidateQueries({ queryKey: savedKeys.homes() });
-    },
+    // No invalidateQueries — the optimistic update keeps the cache correct
   });
 
   return {
