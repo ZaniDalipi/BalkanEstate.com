@@ -165,6 +165,27 @@ export const initializeDatabase = async (): Promise<void> => {
       dbLogger.error('❌ Error initializing email configurations:', error);
     }
 
+    // Run pending database migrations (opt-in via AUTO_MIGRATE=true)
+    if (process.env.AUTO_MIGRATE === 'true') {
+      try {
+        const { runPending } = await import('../migrations/MigrationRunner');
+        const { migrationLogger } = await import('./logger');
+        migrationLogger.info('AUTO_MIGRATE enabled — checking for pending migrations...');
+        const results = await runPending();
+        const succeeded = results.filter((r) => r.success).length;
+        const failed = results.filter((r) => !r.success).length;
+        if (results.length === 0) {
+          migrationLogger.info('No pending migrations');
+        } else if (failed === 0) {
+          migrationLogger.info(`${succeeded} migration(s) applied successfully`);
+        } else {
+          migrationLogger.error(`Migration run: ${succeeded} succeeded, ${failed} failed`);
+        }
+      } catch (error) {
+        dbLogger.error('Error running auto-migrations:', error);
+      }
+    }
+
     // Initialize city market data if empty
     try {
       const cityCount = await CityMarketData.countDocuments();

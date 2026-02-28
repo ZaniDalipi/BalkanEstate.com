@@ -261,5 +261,6 @@ export const geocodingLogger = createLogger('Geocoding');
 export const mediaLogger = createLogger('Media');
 export const serverLogger = createLogger('Server');
 export const scriptLogger = createLogger('Script');
+export const migrationLogger = createLogger('Migration');
 
 export default logger;

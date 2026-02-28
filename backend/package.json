@@ -54,7 +54,18 @@
     "test:payments:unit": "jest --testPathPattern=payment-services --detectOpenHandles --forceExit",
     "test:payments:integration": "jest --testPathPattern=payment-integration --detectOpenHandles --forceExit",
     "test:payments:api": "./test-payments.sh",
-    "test:staging": "./scripts/test-staging-payments.sh"
+    "test:staging": "./scripts/test-staging-payments.sh",
+    "migrate:run": "ts-node src/migrations/cli.ts up",
+    "migrate:run:staging": "NODE_ENV=staging ts-node src/migrations/cli.ts up",
+    "migrate:run:production": "NODE_ENV=production ts-node src/migrations/cli.ts up",
+    "migrate:rollback": "ts-node src/migrations/cli.ts down",
+    "migrate:rollback:staging": "NODE_ENV=staging ts-node src/migrations/cli.ts down",
+    "migrate:rollback:production": "NODE_ENV=production ts-node src/migrations/cli.ts down",
+    "migrate:status": "ts-node src/migrations/cli.ts status",
+    "migrate:status:staging": "NODE_ENV=staging ts-node src/migrations/cli.ts status",
+    "migrate:status:production": "NODE_ENV=production ts-node src/migrations/cli.ts status",
+    "migrate:dry-run": "ts-node src/migrations/cli.ts up --dry-run",
+    "migrate:create": "ts-node src/migrations/cli.ts create"
   },
   "keywords": [
     "real-estate",
