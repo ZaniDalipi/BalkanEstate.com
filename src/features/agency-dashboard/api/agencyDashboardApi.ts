@@ -27,6 +27,7 @@ const BASE = '/agency-dashboard';
 export const getAgencyOverview = async (agencyId: string): Promise<OverviewData> => {
   const raw = await apiRequest<Record<string, unknown>>(`${BASE}/${agencyId}/overview`, {
     requiresAuth: true,
+    encryptResponse: true,
   });
 
   return {
@@ -48,6 +49,7 @@ export const getAgencyOverview = async (agencyId: string): Promise<OverviewData>
 export const getDashboardAgents = async (agencyId: string): Promise<DashboardAgent[]> => {
   const raw = await apiRequest<Record<string, unknown>>(`${BASE}/${agencyId}/agents`, {
     requiresAuth: true,
+    encryptResponse: true,
   });
 
   // Backend returns { agents: [...], total, page, limit }
@@ -161,7 +163,7 @@ export const getDashboardInquiries = async (
   const query = params.toString();
   const raw = await apiRequest<Record<string, unknown>>(
     `${BASE}/${agencyId}/inquiries${query ? `?${query}` : ''}`,
-    { requiresAuth: true }
+    { requiresAuth: true, encryptResponse: true }
   );
 
   // Backend returns { inquiries: [...], total, page, limit }
@@ -275,7 +277,7 @@ export const exportAnalyticsCsv = async (agencyId: string, range: string): Promi
 export const getDashboardFinancial = async (agencyId: string): Promise<FinancialData> => {
   const raw = await apiRequest<Record<string, unknown>>(
     `${BASE}/${agencyId}/financial`,
-    { requiresAuth: true }
+    { requiresAuth: true, encryptResponse: true }
   );
 
   const sub = (raw.subscription ?? {}) as Record<string, unknown>;

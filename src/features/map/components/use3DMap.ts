@@ -6,8 +6,13 @@ import { useRef, useEffect, useState, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import * as maplibregl from 'maplibre-gl';
 import { useShadowTimelapse } from '../hooks/useShadowTimelapse';
+import { mapLogger } from '@/src/shared/utils/logger';
 import type { Map3DBuildingsProps } from './Map3DConstants';
 import { TIME_LIGHTING, calculateBuildingShadow, calculateSunPosition, getCurrentDayOfYear } from './Map3DConstants';
+
+/** Escape HTML special characters to prevent XSS in innerHTML templates */
+const escapeHtml = (str: string): string =>
+  str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
 
 export function use3DMap(props: Map3DBuildingsProps) {
   const {
@@ -138,7 +143,7 @@ export function use3DMap(props: Map3DBuildingsProps) {
         const elLng = el.lon || el.center?.lon;
         if (!elLat || !elLng) continue;
 
-        const name = el.tags?.name;
+        const name = el.tags?.name ? escapeHtml(String(el.tags.name)) : '';
         if (!name) continue; // Skip unnamed POIs
 
         // Deduplicate by name+approximate location
@@ -436,7 +441,7 @@ export function use3DMap(props: Map3DBuildingsProps) {
 
     // Check if 3d-buildings layer exists
     if (!mapInstance.getLayer('3d-buildings')) {
-      console.warn('3D buildings layer not found in the map style. Custom building will be a simple box.');
+      mapLogger.warn('3D buildings layer not found in the map style. Custom building will be a simple box.');
     }
 
     // Helper function to calculate building centroid

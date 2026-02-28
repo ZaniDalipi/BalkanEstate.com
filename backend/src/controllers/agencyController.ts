@@ -1,5 +1,6 @@
 import { Request, Response } from 'express';
 import mongoose from 'mongoose';
+import { escapeRegex } from '../utils/escapeRegex';
 import Agency from '../models/Agency';
 import User, { IUser } from '../models/User';
 import Agent from '../models/Agent';
@@ -378,7 +379,7 @@ export const getAgencies = async (
 
     // Universal search - searches across multiple fields
     if (search && typeof search === 'string' && search.trim()) {
-      const searchRegex = new RegExp(search.trim(), 'i');
+      const searchRegex = new RegExp(escapeRegex(search.trim()), 'i');
       filter.$or = [
         { name: searchRegex },
         { city: searchRegex },
@@ -392,17 +393,17 @@ export const getAgencies = async (
     } else {
       // Legacy individual field filters (for backward compatibility)
       if (city) {
-        filter.city = new RegExp(city as string, 'i');
+        filter.city = new RegExp(escapeRegex(city as string), 'i');
         agencyLogger.info(`🔍 Filtering agencies by city: ${city}`);
       }
 
       if (country) {
-        filter.country = new RegExp(country as string, 'i');
+        filter.country = new RegExp(escapeRegex(country as string), 'i');
         agencyLogger.info(`🔍 Filtering agencies by country: ${country}`);
       }
 
       if (name) {
-        filter.name = new RegExp(name as string, 'i');
+        filter.name = new RegExp(escapeRegex(name as string), 'i');
         agencyLogger.info(`🔍 Filtering agencies by name: ${name}`);
       }
     }

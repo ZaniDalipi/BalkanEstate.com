@@ -2,6 +2,9 @@ import mongoose from 'mongoose';
 import dotenv from 'dotenv';
 import Agency from '../models/Agency';
 import User from '../models/User';
+import { scriptLogger } from '../utils/logger';
+
+const log = scriptLogger.child('SeedAgencies');
 
 dotenv.config();
 
@@ -196,19 +199,19 @@ const sampleAgencies = [
 
 async function seedAgencies() {
   try {
-    console.log('Connecting to MongoDB...');
+    log.info('Connecting to MongoDB...');
     await mongoose.connect(MONGO_URI);
-    console.log('Connected to MongoDB');
+    log.info('Connected to MongoDB');
 
     // Only clear sample/seeded agencies (not user-created ones)
     // We identify seeded agencies by checking if they match our sample slugs
     const sampleSlugs = sampleAgencies.map(a => a.slug);
-    console.log('Clearing previously seeded agencies...');
+    log.info('Clearing previously seeded agencies...');
     const deleteResult = await Agency.deleteMany({ slug: { $in: sampleSlugs } });
-    console.log(`Removed ${deleteResult.deletedCount} previously seeded agencies`);
+    log.info(`Removed ${deleteResult.deletedCount} previously seeded agencies`);
 
     // Find or create owner users for each agency
-    console.log('Creating agency owners...');
+    log.info('Creating agency owners...');
     const agenciesWithOwners = await Promise.all(
       sampleAgencies.map(async (agencyData, index) => {
         // Create or find an enterprise user for each agency
@@ -248,12 +251,12 @@ async function seedAgencies() {
     );
 
     // Insert agencies
-    console.log('Inserting sample agencies...');
+    log.info('Inserting sample agencies...');
     const insertedAgencies = await Agency.insertMany(agenciesWithOwners);
-    console.log(`✓ ${insertedAgencies.length} agencies inserted`);
+    log.info(`✓ ${insertedAgencies.length} agencies inserted`);
 
     // Update owners with agency references
-    console.log('Updating owner users with agency references...');
+    log.info('Updating owner users with agency references...');
     for (let i = 0; i < insertedAgencies.length; i++) {
       const agency = insertedAgencies[i];
       await User.findByIdAndUpdate(agency.ownerId, {
@@ -261,31 +264,31 @@ async function seedAgencies() {
         agencyName: agency.name,
       });
     }
-    console.log('✓ Owner users updated');
+    log.info('✓ Owner users updated');
 
-    console.log('\n=== Newly Seeded Agencies ===');
+    log.info('\n=== Newly Seeded Agencies ===');
     insertedAgencies.forEach((agency: any) => {
-      console.log(`✓ ${agency.name} (${agency.city}, ${agency.country})`);
-      console.log(`  Invitation Code: ${agency.invitationCode}`);
-      console.log(`  URL: /agency-${agency.slug}`);
-      console.log(`  Featured: ${agency.isFeatured ? 'Yes' : 'No'}`);
-      console.log('');
+      log.info(`✓ ${agency.name} (${agency.city}, ${agency.country})`);
+      log.info(`  Invitation Code: ${agency.invitationCode}`);
+      log.info(`  URL: /agency-${agency.slug}`);
+      log.info(`  Featured: ${agency.isFeatured ? 'Yes' : 'No'}`);
+      log.info('');
     });
 
     // Show ALL agencies in database (including user-created ones)
-    console.log('\n=== ALL Agencies in Database ===');
+    log.info('\n=== ALL Agencies in Database ===');
     const allAgencies = await Agency.find({}).select('name invitationCode city country slug');
     allAgencies.forEach((agency: any, index: number) => {
-      console.log(`${index + 1}. ${agency.name} (${agency.city}, ${agency.country})`);
-      console.log(`   Code: ${agency.invitationCode || 'NO CODE'}`);
-      console.log(`   Slug: ${agency.slug || 'NO SLUG'}`);
-      console.log('');
+      log.info(`${index + 1}. ${agency.name} (${agency.city}, ${agency.country})`);
+      log.info(`   Code: ${agency.invitationCode || 'NO CODE'}`);
+      log.info(`   Slug: ${agency.slug || 'NO SLUG'}`);
+      log.info('');
     });
 
-    console.log(`✅ Seeding completed! Total agencies: ${allAgencies.length}`);
+    log.info(`✅ Seeding completed! Total agencies: ${allAgencies.length}`);
     process.exit(0);
   } catch (error) {
-    console.error('Seeding failed:', error);
+    log.error('Seeding failed:', error);
     process.exit(1);
   }
 }

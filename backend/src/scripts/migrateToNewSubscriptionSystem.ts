@@ -3,6 +3,9 @@ import dotenv from 'dotenv';
 import User from '../models/User';
 import Agency from '../models/Agency';
 import Product from '../models/Product';
+import { scriptLogger } from '../utils/logger';
+
+const log = scriptLogger.child('MigrateSubscriptions');
 
 dotenv.config();
 
@@ -57,8 +60,8 @@ async function migrateToNewSubscriptionSystem() {
     // Connect to MongoDB
     const mongoUri = process.env.MONGO_URI || 'mongodb://localhost:27017/balkan-estate';
     await mongoose.connect(mongoUri);
-    console.log('✅ Connected to MongoDB');
-    console.log('🚀 Starting migration to new subscription system...\n');
+    log.info('✅ Connected to MongoDB');
+    log.info('🚀 Starting migration to new subscription system...\n');
 
     // Get agent listings limit from DB product (configurable in admin)
     const agentProduct = await Product.findOne({ productId: 'agency_agent_yearly' }).lean();
@@ -67,18 +70,18 @@ async function migrateToNewSubscriptionSystem() {
     // Get all users
     const users = await User.find({});
     stats.total = users.length;
-    console.log(`📊 Found ${stats.total} users to migrate\n`);
+    log.info(`📊 Found ${stats.total} users to migrate\n`);
 
     for (const user of users) {
       try {
         // Skip if already has new subscription structure
         if (user.subscription && user.subscription.tier) {
-          console.log(`⏭️  Skipping ${user.email} - already migrated`);
+          log.info(`⏭️  Skipping ${user.email} - already migrated`);
           stats.skipped++;
           continue;
         }
 
-        console.log(`\n🔄 Migrating user: ${user.email} (${user.role})`);
+        log.info(`\n🔄 Migrating user: ${user.email} (${user.role})`);
 
         // Determine tier based on current state
         let tier: 'free' | 'pro' | 'agency_owner' | 'agency_agent' | 'buyer' = 'free';
@@ -100,7 +103,7 @@ async function migrateToNewSubscriptionSystem() {
           agentCount = user.proSubscription.agentCount || 0;
           expiresAt = user.proSubscription.expiresAt;
 
-          console.log(`   → Pro subscription detected (expires: ${expiresAt})`);
+          log.info(`   → Pro subscription detected (expires: ${expiresAt})`);
         }
 
         // Check if user is agency owner
@@ -110,7 +113,7 @@ async function migrateToNewSubscriptionSystem() {
             tier = 'agency_owner';
             listingsLimit = 0; // Agency owners distribute coupons, don't get listings
             promotionCouponsMonthly = 0; // They manage agency-wide pool
-            console.log(`   → Agency owner detected: ${agency.name}`);
+            log.info(`   → Agency owner detected: ${agency.name}`);
           } else {
             // Check if they're an agent in an agency
             const agentAgency = await Agency.findById(user.agencyId);
@@ -118,7 +121,7 @@ async function migrateToNewSubscriptionSystem() {
               tier = 'agency_agent';
               listingsLimit = agentListingsLimit; // Agents get Pro benefits
               promotionCouponsMonthly = 0; // Share agency pool
-              console.log(`   → Agency agent detected in: ${agentAgency.name}`);
+              log.info(`   → Agency agent detected in: ${agentAgency.name}`);
             }
           }
         }
@@ -128,7 +131,7 @@ async function migrateToNewSubscriptionSystem() {
           tier = 'buyer';
           listingsLimit = 0; // Buyers don't create listings
           promotionCouponsMonthly = 0;
-          console.log(`   → Buyer account detected`);
+          log.info(`   → Buyer account detected`);
         }
 
         // Create new subscription object
@@ -165,50 +168,50 @@ async function migrateToNewSubscriptionSystem() {
 
         stats.migrated++;
         stats.tierBreakdown[tier]++;
-        console.log(`   ✅ Migrated to tier: ${tier} (${listingsLimit} listings, ${promotionCouponsMonthly} coupons/month)`);
+        log.info(`   ✅ Migrated to tier: ${tier} (${listingsLimit} listings, ${promotionCouponsMonthly} coupons/month)`);
 
       } catch (error: any) {
-        console.error(`   ❌ Error migrating ${user.email}:`, error.message);
+        log.error(`   ❌ Error migrating ${user.email}:`, error.message);
         stats.errors++;
       }
     }
 
-    console.log('\n' + '='.repeat(60));
-    console.log('🎉 Migration Complete!');
-    console.log('='.repeat(60));
-    console.log(`\n📊 Migration Statistics:`);
-    console.log(`   Total users: ${stats.total}`);
-    console.log(`   Migrated: ${stats.migrated}`);
-    console.log(`   Skipped (already migrated): ${stats.skipped}`);
-    console.log(`   Errors: ${stats.errors}`);
-    console.log(`\n📈 Tier Breakdown:`);
-    console.log(`   Free: ${stats.tierBreakdown.free}`);
-    console.log(`   Pro: ${stats.tierBreakdown.pro}`);
-    console.log(`   Agency Owner: ${stats.tierBreakdown.agency_owner}`);
-    console.log(`   Agency Agent: ${stats.tierBreakdown.agency_agent}`);
-    console.log(`   Buyer: ${stats.tierBreakdown.buyer}`);
-    console.log('\n✅ All users successfully migrated to new subscription system!');
-    console.log('🔒 Legacy fields (proSubscription, freeSubscription) preserved for rollback');
+    log.info('\n' + '='.repeat(60));
+    log.info('🎉 Migration Complete!');
+    log.info('='.repeat(60));
+    log.info(`\n📊 Migration Statistics:`);
+    log.info(`   Total users: ${stats.total}`);
+    log.info(`   Migrated: ${stats.migrated}`);
+    log.info(`   Skipped (already migrated): ${stats.skipped}`);
+    log.info(`   Errors: ${stats.errors}`);
+    log.info(`\n📈 Tier Breakdown:`);
+    log.info(`   Free: ${stats.tierBreakdown.free}`);
+    log.info(`   Pro: ${stats.tierBreakdown.pro}`);
+    log.info(`   Agency Owner: ${stats.tierBreakdown.agency_owner}`);
+    log.info(`   Agency Agent: ${stats.tierBreakdown.agency_agent}`);
+    log.info(`   Buyer: ${stats.tierBreakdown.buyer}`);
+    log.info('\n✅ All users successfully migrated to new subscription system!');
+    log.info('🔒 Legacy fields (proSubscription, freeSubscription) preserved for rollback');
 
   } catch (error) {
-    console.error('\n❌ Migration failed:', error);
+    log.error('\n❌ Migration failed:', error);
     process.exit(1);
   } finally {
     await mongoose.disconnect();
-    console.log('\n👋 Disconnected from MongoDB');
+    log.info('\n👋 Disconnected from MongoDB');
   }
 }
 
 async function rollbackMigration() {
-  console.log('🔄 Starting rollback...\n');
+  log.info('🔄 Starting rollback...\n');
 
   try {
     const mongoUri = process.env.MONGO_URI || 'mongodb://localhost:27017/balkan-estate';
     await mongoose.connect(mongoUri);
-    console.log('✅ Connected to MongoDB');
+    log.info('✅ Connected to MongoDB');
 
     const users = await User.find({ 'subscription.tier': { $exists: true } });
-    console.log(`📊 Found ${users.length} users to rollback\n`);
+    log.info(`📊 Found ${users.length} users to rollback\n`);
 
     let rollbackCount = 0;
     for (const user of users) {
@@ -219,21 +222,21 @@ async function rollbackMigration() {
 
         await user.save();
         rollbackCount++;
-        console.log(`✅ Rolled back ${user.email}`);
+        log.info(`✅ Rolled back ${user.email}`);
       } catch (error: any) {
-        console.error(`❌ Error rolling back ${user.email}:`, error.message);
+        log.error(`❌ Error rolling back ${user.email}:`, error.message);
       }
     }
 
-    console.log(`\n🎉 Rollback complete! ${rollbackCount} users restored to old system.`);
-    console.log('⚠️  Note: Legacy proSubscription and freeSubscription fields still intact.');
+    log.info(`\n🎉 Rollback complete! ${rollbackCount} users restored to old system.`);
+    log.info('⚠️  Note: Legacy proSubscription and freeSubscription fields still intact.');
 
   } catch (error) {
-    console.error('\n❌ Rollback failed:', error);
+    log.error('\n❌ Rollback failed:', error);
     process.exit(1);
   } finally {
     await mongoose.disconnect();
-    console.log('\n👋 Disconnected from MongoDB');
+    log.info('\n👋 Disconnected from MongoDB');
   }
 }
 
@@ -242,18 +245,18 @@ const args = process.argv.slice(2);
 const command = args[0];
 
 if (command === 'rollback') {
-  console.log('⚠️  ROLLBACK MODE\n');
-  console.log('This will remove the new subscription structure and revert to legacy fields.');
-  console.log('Press Ctrl+C to cancel, or wait 5 seconds to proceed...\n');
+  log.info('⚠️  ROLLBACK MODE\n');
+  log.info('This will remove the new subscription structure and revert to legacy fields.');
+  log.info('Press Ctrl+C to cancel, or wait 5 seconds to proceed...\n');
 
   setTimeout(() => {
     rollbackMigration();
   }, 5000);
 } else {
-  console.log('📝 MIGRATION MODE\n');
-  console.log('⚠️  WARNING: This will migrate all users to the new subscription system.');
-  console.log('⚠️  Make sure you have a database backup before proceeding!');
-  console.log('\nPress Ctrl+C to cancel, or wait 5 seconds to proceed...\n');
+  log.info('📝 MIGRATION MODE\n');
+  log.info('⚠️  WARNING: This will migrate all users to the new subscription system.');
+  log.info('⚠️  Make sure you have a database backup before proceeding!');
+  log.info('\nPress Ctrl+C to cancel, or wait 5 seconds to proceed...\n');
 
   setTimeout(() => {
     migrateToNewSubscriptionSystem();

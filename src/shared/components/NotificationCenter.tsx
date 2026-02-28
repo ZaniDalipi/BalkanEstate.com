@@ -5,7 +5,7 @@ import {
   Building2, UserPlus, UserMinus, Ticket, Star, TrendingUp,
 } from 'lucide-react';
 import { useAppContext } from '@/context/AppContext';
-import { API_URL } from '@/src/shared/api/config';
+import { apiRequest } from '@/src/shared/api';
 
 interface NotificationData {
   propertyId?: string;
@@ -52,15 +52,11 @@ const NotificationCenter: React.FC = () => {
     if (document.hidden) return; // Skip when tab is not visible
 
     try {
-      const token = localStorage.getItem('balkan_estate_token');
-      if (!token) return; // Skip if no token - prevents 401 requests
-      const res = await fetch(`${API_URL}/notifications/unread-count`, {
-        headers: { Authorization: `Bearer ${token}` },
+      const data = await apiRequest<{ count: number }>('/notifications/unread-count', {
+        requiresAuth: true,
+        encryptResponse: true,
       });
-      if (res.ok) {
-        const data = await res.json();
-        setUnreadCount(data.count || 0);
-      }
+      setUnreadCount(data.count || 0);
     } catch (error) {
       // Silently handle error - unread count will remain unchanged
     }
@@ -72,15 +68,11 @@ const NotificationCenter: React.FC = () => {
 
     setLoading(true);
     try {
-      const token = localStorage.getItem('balkan_estate_token');
-      if (!token) return;
-      const res = await fetch(`${API_URL}/notifications?limit=20`, {
-        headers: { Authorization: `Bearer ${token}` },
+      const data = await apiRequest<{ notifications: Notification[] }>('/notifications?limit=20', {
+        requiresAuth: true,
+        encryptResponse: true,
       });
-      if (res.ok) {
-        const data = await res.json();
-        setNotifications(data.notifications || []);
-      }
+      setNotifications(data.notifications || []);
     } catch (error) {
       // Silently handle error
     } finally {
@@ -91,10 +83,9 @@ const NotificationCenter: React.FC = () => {
   // Mark single notification as read
   const markAsRead = async (notificationId: string) => {
     try {
-      const token = localStorage.getItem('balkan_estate_token');
-      await fetch(`${API_URL}/notifications/${notificationId}/read`, {
+      await apiRequest(`/notifications/${notificationId}/read`, {
         method: 'PATCH',
-        headers: { Authorization: `Bearer ${token}` },
+        requiresAuth: true,
       });
 
       setNotifications(prev =>
@@ -109,10 +100,9 @@ const NotificationCenter: React.FC = () => {
   // Mark all as read
   const markAllAsRead = async () => {
     try {
-      const token = localStorage.getItem('balkan_estate_token');
-      await fetch(`${API_URL}/notifications/read-all`, {
+      await apiRequest('/notifications/read-all', {
         method: 'PATCH',
-        headers: { Authorization: `Bearer ${token}` },
+        requiresAuth: true,
       });
 
       setNotifications(prev => prev.map(n => ({ ...n, isRead: true })));

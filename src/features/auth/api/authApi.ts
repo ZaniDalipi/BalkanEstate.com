@@ -106,13 +106,12 @@ export const signup = async (
 };
 
 export const logout = async (): Promise<void> => {
-  const refreshToken = tokenService.getRefreshToken();
-
   try {
+    // Refresh token is sent via httpOnly cookie automatically
     await apiRequest('/auth/logout', {
       method: 'POST',
       requiresAuth: true,
-      body: { refreshToken },
+      body: {},
     });
   } catch {
     // Silently handle logout errors - tokens will be cleared regardless

@@ -2,8 +2,6 @@
 // Handles all messaging/conversation-related API calls
 
 import { apiRequest, uploadRequest } from '@/src/shared/api';
-import { API_URL } from '@/src/shared/api/config';
-import { tokenService } from '@/src/shared/api/tokenService';
 import type { Conversation, Message, Property } from '@/src/shared/types';
 import { transformBackendProperty } from '@/src/features/properties/api/propertyApi';
 
@@ -69,6 +67,7 @@ export const getConversations = async (): Promise<Conversation[]> => {
   try {
     const response = await apiRequest<{ conversations: any[] }>('/conversations', {
       requiresAuth: true,
+      encryptResponse: true,
     });
 
     const validConversations = response.conversations?.filter(
@@ -87,7 +86,7 @@ export const getConversation = async (
 ): Promise<{ conversation: Conversation; messages: Message[] }> => {
   const response = await apiRequest<{ conversation: any; messages: any[] }>(
     `/conversations/${conversationId}`,
-    { requiresAuth: true }
+    { requiresAuth: true, encryptResponse: true }
   );
 
   return {
@@ -131,6 +130,7 @@ export const sendMessage = async (
       method: 'POST',
       body,
       requiresAuth: true,
+      encryptResponse: true,
     }
   );
 
@@ -147,20 +147,10 @@ export const uploadMessageImage = async (
   const formData = new FormData();
   formData.append('image', imageFile);
 
-  const token = tokenService.getAccessToken();
-  const response = await fetch(`${API_URL}/conversations/${conversationId}/upload-image`, {
-    method: 'POST',
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
-    body: formData,
-  });
-
-  if (!response.ok) {
-    throw new Error('Failed to upload image');
-  }
-
-  const data = await response.json();
+  const data = await uploadRequest<{ imageUrl: string }>(
+    `/conversations/${conversationId}/upload-image`,
+    formData
+  );
   return data.imageUrl;
 };
 
@@ -174,7 +164,7 @@ export const getConversationPublicKeys = async (
 ): Promise<Record<string, string | null>> => {
   const response = await apiRequest<{ publicKeys: Record<string, string | null> }>(
     `/conversations/${conversationId}/public-keys`,
-    { requiresAuth: true }
+    { requiresAuth: true, encryptResponse: true }
   );
   return response.publicKeys;
 };

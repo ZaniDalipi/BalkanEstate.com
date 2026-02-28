@@ -256,7 +256,7 @@ const CityRecommendations: React.FC = () => {
               <button
                 key={city._id}
                 onClick={() => handleCityClick(city)}
-                className="bg-white rounded-xl border border-neutral-200 overflow-hidden hover:shadow-2xl hover:border-primary hover:scale-[1.02] transition-all duration-300 text-left group shadow-md"
+                className="bg-white rounded-xl border border-neutral-200 overflow-hidden hover:shadow-2xl hover:border-primary hover:scale-[1.02] transition-all duration-300 text-left group shadow-md cursor-pointer"
               >
                 {/* City Image Header */}
                 <div className="relative h-36 overflow-hidden">

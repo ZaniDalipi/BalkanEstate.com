@@ -7,19 +7,22 @@ import dotenv from 'dotenv';
 dotenv.config();
 
 import { sendNewMessageNotification } from '../src/services/emailService';
+import { scriptLogger } from '../src/utils/logger';
 
 const testEmail = process.argv[2];
 
+const log = scriptLogger.child('TestEmail');
+
 if (!testEmail) {
-  console.error('Usage: npx ts-node scripts/test-email.ts your@email.com');
+  log.error('Usage: npx ts-node scripts/test-email.ts your@email.com');
   process.exit(1);
 }
 
 async function main() {
-  console.log('📧 Testing email configuration...\n');
-  console.log('Provider:', process.env.RESEND_API_KEY ? 'Resend' : process.env.SMTP_USER ? 'SMTP' : 'None');
-  console.log('Sending to:', testEmail);
-  console.log('');
+  log.info('📧 Testing email configuration...\n');
+  log.info('Provider:', process.env.RESEND_API_KEY ? 'Resend' : process.env.SMTP_USER ? 'SMTP' : 'None');
+  log.info('Sending to:', testEmail);
+  log.info('');
 
   try {
     await sendNewMessageNotification({
@@ -33,10 +36,10 @@ async function main() {
       conversationUrl: 'https://balkanestate.com/inbox',
     });
 
-    console.log('\n✅ Test email sent successfully!');
-    console.log('Check your inbox (and spam folder) for the test email.');
+    log.info('\n✅ Test email sent successfully!');
+    log.info('Check your inbox (and spam folder) for the test email.');
   } catch (error) {
-    console.error('\n❌ Failed to send test email:', error);
+    log.error('\n❌ Failed to send test email:', error);
   }
 }
 

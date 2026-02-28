@@ -1,4 +1,5 @@
 import { Request, Response } from 'express';
+import { escapeRegex } from '../utils/escapeRegex';
 import Agent from '../models/Agent';
 import User, { IUser } from '../models/User';
 import Agency from '../models/Agency';
@@ -22,7 +23,7 @@ export const getAgents = async (req: Request, res: Response): Promise<void> => {
 
     // Universal search - searches across multiple fields
     if (search && typeof search === 'string' && search.trim()) {
-      const searchRegex = new RegExp(search.trim(), 'i');
+      const searchRegex = new RegExp(escapeRegex(search.trim()), 'i');
       filter.$or = [
         { agencyName: searchRegex },
         { bio: searchRegex },
@@ -636,7 +637,7 @@ export const getAgentMarketInsights = async (req: Request, res: Response): Promi
 
     // Get market data for the service area
     const marketData = await CityMarketData.findOne({
-      city: { $regex: new RegExp(`^${primaryCity}$`, 'i') },
+      city: { $regex: new RegExp(`^${escapeRegex(primaryCity)}$`, 'i') },
     }).lean();
 
     // Calculate agent-specific metrics from their properties
@@ -662,7 +663,7 @@ export const getAgentMarketInsights = async (req: Request, res: Response): Promi
 
     // Get total listings in the area for comparison
     const areaListingsCount = await Property.countDocuments({
-      city: { $regex: new RegExp(`^${primaryCity}$`, 'i') },
+      city: { $regex: new RegExp(`^${escapeRegex(primaryCity)}$`, 'i') },
       status: 'active',
     });
 

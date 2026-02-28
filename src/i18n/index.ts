@@ -1,3 +1,5 @@
+import { i18nLogger } from '../shared/utils/logger';
+
 /**
  * i18n Configuration
  * Multi-language support for BalkanEstate
@@ -156,9 +158,7 @@ export async function loadLanguageResources(lang: string): Promise<void> {
     })
     .catch((err) => {
       // Log but don't crash - English fallback will be used
-      if (typeof console !== 'undefined') {
-        console.warn(`Failed to load language bundle for "${lang}":`, err);
-      }
+      i18nLogger.warn(`Failed to load language bundle for "${lang}":`, err);
     })
     .finally(() => {
       loadingPromises.delete(lang);

@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { API_URL } from '@/src/shared/api/config';
+import { apiRequest, uploadRequest } from '@/src/shared/api';
 
 export interface Step {
   stepNumber: number;
@@ -134,12 +134,10 @@ export function useHowItWorksManager() {
 
   const fetchContent = async () => {
     try {
-      const token = localStorage.getItem('balkan_estate_token');
-      const response = await fetch(`${API_URL}/admin/site-content`, {
-        headers: { Authorization: `Bearer ${token}` },
+      const data = await apiRequest<SiteContent[]>('/admin/site-content', {
+        requiresAuth: true,
+        encryptResponse: true,
       });
-      if (!response.ok) throw new Error('Failed to fetch content');
-      const data = await response.json();
       setContent(data.filter((item: SiteContent) => item.section === 'how-it-works'));
     } catch (err: any) {
       setError(err.message);
@@ -160,31 +158,11 @@ export function useHowItWorksManager() {
     setUploadProgress(0);
 
     try {
-      const token = localStorage.getItem('balkan_estate_token');
       const formDataUpload = new FormData();
       formDataUpload.append('video', file);
 
-      const xhr = new XMLHttpRequest();
-      xhr.upload.addEventListener('progress', (e) => {
-        if (e.lengthComputable) {
-          setUploadProgress(Math.round((e.loaded / e.total) * 100));
-        }
-      });
-
-      const response = await new Promise<any>((resolve, reject) => {
-        xhr.onload = () => {
-          if (xhr.status >= 200 && xhr.status < 300) {
-            resolve(JSON.parse(xhr.responseText));
-          } else {
-            reject(new Error('Upload failed'));
-          }
-        };
-        xhr.onerror = () => reject(new Error('Upload failed'));
-        xhr.open('POST', `${API_URL}/admin/site-content/upload-video`);
-        xhr.setRequestHeader('Authorization', `Bearer ${token}`);
-        xhr.send(formDataUpload);
-      });
-
+      // Use uploadRequest for proper auth + credentials
+      const response = await uploadRequest<{ url: string }>('/admin/site-content/upload-video', formDataUpload);
       setFormData((prev) => ({ ...prev, url: response.url }));
     } catch (err: any) {
       setError(err.message);
@@ -197,10 +175,9 @@ export function useHowItWorksManager() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      const token = localStorage.getItem('balkan_estate_token');
-      const url = editingItem
-        ? `${API_URL}/admin/site-content/${editingItem._id}`
-        : `${API_URL}/admin/site-content`;
+      const endpoint = editingItem
+        ? `/admin/site-content/${editingItem._id}`
+        : '/admin/site-content';
 
       // For guides, we don't need URL; set a placeholder
       const submitData = {
@@ -211,16 +188,12 @@ export function useHowItWorksManager() {
           : formData.url,
       };
 
-      const response = await fetch(url, {
+      await apiRequest(endpoint, {
         method: editingItem ? 'PATCH' : 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify(submitData),
+        body: submitData,
+        requiresAuth: true,
+        encryptResponse: true,
       });
-
-      if (!response.ok) throw new Error('Failed to save content');
 
       setShowModal(false);
       setEditingItem(null);
@@ -255,13 +228,11 @@ export function useHowItWorksManager() {
     if (!confirm('Are you sure you want to delete this content?')) return;
 
     try {
-      const token = localStorage.getItem('balkan_estate_token');
-      const response = await fetch(`${API_URL}/admin/site-content/${id}`, {
+      await apiRequest(`/admin/site-content/${id}`, {
         method: 'DELETE',
-        headers: { Authorization: `Bearer ${token}` },
+        requiresAuth: true,
+        encryptResponse: true,
       });
-
-      if (!response.ok) throw new Error('Failed to delete content');
       fetchContent();
     } catch (err: any) {
       setError(err.message);
@@ -270,17 +241,12 @@ export function useHowItWorksManager() {
 
   const handleToggleActive = async (item: SiteContent) => {
     try {
-      const token = localStorage.getItem('balkan_estate_token');
-      const response = await fetch(`${API_URL}/admin/site-content/${item._id}`, {
+      await apiRequest(`/admin/site-content/${item._id}`, {
         method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({ isActive: !item.isActive }),
+        body: { isActive: !item.isActive },
+        requiresAuth: true,
+        encryptResponse: true,
       });
-
-      if (!response.ok) throw new Error('Failed to update content');
       fetchContent();
     } catch (err: any) {
       setError(err.message);

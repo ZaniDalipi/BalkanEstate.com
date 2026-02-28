@@ -4,6 +4,9 @@ import {
   cleanupExpiredConversations,
   getExpirationStats,
 } from '../services/conversationCleanupService';
+import { scriptLogger } from '../utils/logger';
+
+const log = scriptLogger.child('CleanupConversations');
 
 // Load environment variables
 dotenv.config();
@@ -21,79 +24,79 @@ const MONGODB_URI = process.env.MONGODB_URI || '';
  *   0 2 * * * cd /path/to/backend && npm run cleanup:conversations
  */
 const main = async () => {
-  console.log('='.repeat(60));
-  console.log('🧹 Conversation Cleanup Script');
-  console.log('='.repeat(60));
-  console.log('');
+  log.info('='.repeat(60));
+  log.info('🧹 Conversation Cleanup Script');
+  log.info('='.repeat(60));
+  log.info('');
 
   if (!MONGODB_URI) {
-    console.error('❌ MONGODB_URI not found in environment variables');
+    log.error('❌ MONGODB_URI not found in environment variables');
     process.exit(1);
   }
 
   try {
     // Connect to MongoDB
-    console.log('🔌 Connecting to MongoDB...');
+    log.info('🔌 Connecting to MongoDB...');
     await mongoose.connect(MONGODB_URI);
-    console.log('✅ Connected to MongoDB');
-    console.log('');
+    log.info('✅ Connected to MongoDB');
+    log.info('');
 
     // Get stats before cleanup
-    console.log('📊 Getting conversation stats...');
+    log.info('📊 Getting conversation stats...');
     const statsBefore = await getExpirationStats();
-    console.log('  Current state:');
-    console.log(`    - Total conversations: ${statsBefore.totalCount}`);
-    console.log(`    - Expired conversations: ${statsBefore.expiredCount}`);
-    console.log(`    - Expiring soon (7 days): ${statsBefore.expiringSoonCount}`);
-    console.log('');
+    log.info('  Current state:');
+    log.info(`    - Total conversations: ${statsBefore.totalCount}`);
+    log.info(`    - Expired conversations: ${statsBefore.expiredCount}`);
+    log.info(`    - Expiring soon (7 days): ${statsBefore.expiringSoonCount}`);
+    log.info('');
 
     if (statsBefore.expiredCount === 0) {
-      console.log('✨ No conversations to clean up. Everything is good!');
-      console.log('');
+      log.info('✨ No conversations to clean up. Everything is good!');
+      log.info('');
       await mongoose.connection.close();
       process.exit(0);
     }
 
     // Run cleanup
-    console.log('🧹 Starting cleanup...');
-    console.log('');
+    log.info('🧹 Starting cleanup...');
+    log.info('');
     const result = await cleanupExpiredConversations();
-    console.log('');
+    log.info('');
 
     // Get stats after cleanup
-    console.log('📊 Getting updated stats...');
+    log.info('📊 Getting updated stats...');
     const statsAfter = await getExpirationStats();
-    console.log('  After cleanup:');
-    console.log(`    - Total conversations: ${statsAfter.totalCount}`);
-    console.log(`    - Expired conversations: ${statsAfter.expiredCount}`);
-    console.log(`    - Expiring soon (7 days): ${statsAfter.expiringSoonCount}`);
-    console.log('');
+    log.info('  After cleanup:');
+    log.info(`    - Total conversations: ${statsAfter.totalCount}`);
+    log.info(`    - Expired conversations: ${statsAfter.expiredCount}`);
+    log.info(`    - Expiring soon (7 days): ${statsAfter.expiringSoonCount}`);
+    log.info('');
 
     // Summary
-    console.log('='.repeat(60));
-    console.log('✅ Cleanup Complete');
-    console.log('='.repeat(60));
-    console.log(`  📈 Results:`);
-    console.log(`    - Conversations deleted: ${result.deletedConversations}`);
-    console.log(`    - Messages deleted: ${result.deletedMessages}`);
-    console.log(`    - Images deleted: ${result.deletedImages}`);
-    console.log('');
+    log.info('='.repeat(60));
+    log.info('✅ Cleanup Complete');
+    log.info('='.repeat(60));
+    log.info(`  📈 Results:`);
+    log.info(`    - Conversations deleted: ${result.deletedConversations}`);
+    log.info(`    - Messages deleted: ${result.deletedMessages}`);
+    log.info(`    - Images deleted: ${result.deletedImages}`);
+    log.info('');
 
     if (statsAfter.expiringSoonCount > 0) {
-      console.log(`⚠️  Note: ${statsAfter.expiringSoonCount} conversations will expire in the next 7 days`);
-      console.log('');
+      log.warn(`⚠️  Note: ${statsAfter.expiringSoonCount} conversations will expire in the next 7 days`);
+      log.warn('');
     }
 
     // Close connection
     await mongoose.connection.close();
-    console.log('✅ Database connection closed');
-    console.log('');
+    log.info('✅ Database connection closed');
+    log.info('');
 
     process.exit(0);
   } catch (error) {
-    console.error('');
-    console.error('❌ Error during cleanup:', error);
-    console.error('');
+    log.error('');
+    log.error('❌ Error during cleanup:', error);
+    log.error('');
 
     // Attempt to close connection
     try {

@@ -2,13 +2,16 @@ import mongoose from 'mongoose';
 import dotenv from 'dotenv';
 import path from 'path';
 import PromotionPlan from '../models/PromotionPlan';
+import { scriptLogger } from '../utils/logger';
+
+const log = scriptLogger.child('SeedPromoPlans');
 
 // Load environment-specific config
 const env = process.env.NODE_ENV || 'development';
 const envFile = env === 'development' ? '.env' : `.env.${env}`;
 dotenv.config({ path: path.resolve(__dirname, '../../', envFile) });
 
-console.log(`🌍 Environment: ${env.toUpperCase()}`);
+log.info(`🌍 Environment: ${env.toUpperCase()}`);
 
 const PROMOTION_PLANS = [
   // ============================================================================
@@ -121,7 +124,7 @@ async function seedPromotionPlans() {
     // Connect to MongoDB
     const mongoUri = process.env.MONGO_URI || 'mongodb://localhost:27017/balkan-estate';
     await mongoose.connect(mongoUri);
-    console.log('✅ Connected to MongoDB');
+    log.info('✅ Connected to MongoDB');
 
     // Check for --force flag to override existing data
     const forceUpdate = process.argv.includes('--force');
@@ -130,8 +133,8 @@ async function seedPromotionPlans() {
       // Check if plans already exist
       const existingCount = await PromotionPlan.countDocuments();
       if (existingCount > 0) {
-        console.log(`⚠️  Promotion plans already exist (${existingCount} plans)`);
-        console.log('   Use --force flag to update existing plans');
+        log.info(`⚠️  Promotion plans already exist (${existingCount} plans)`);
+        log.info('   Use --force flag to update existing plans');
         await mongoose.disconnect();
         return;
       }
@@ -144,25 +147,25 @@ async function seedPromotionPlans() {
         planData,
         { upsert: true, new: true }
       );
-      console.log(`✅ Seeded: ${planData.name} (${planData.category}) - €${planData.pricing.duration7 || planData.pricing.duration30}/7days`);
+      log.info(`✅ Seeded: ${planData.name} (${planData.category}) - €${planData.pricing.duration7 || planData.pricing.duration30}/7days`);
     }
 
-    console.log('\n🎉 Successfully seeded all promotion plans!');
-    console.log(`📊 Total plans: ${PROMOTION_PLANS.length}`);
-    console.log('\n💰 Promotion Plans Summary:');
-    console.log('   LISTING PROMOTIONS:');
-    console.log('     Featured: €9/7d, €29/30d, €69/90d (2x visibility)');
-    console.log('     Highlight: €19/7d, €49/30d, €119/90d (3x visibility)');
-    console.log('     Premium: €39/7d, €99/30d, €229/90d (5x visibility)');
-    console.log('   AGENCY PROMOTIONS:');
-    console.log('     Featured Agency: €6.99/7d, €11.99/14d, €24.99/28d, €49.99/90d (3x visibility)');
+    log.info('\n🎉 Successfully seeded all promotion plans!');
+    log.info(`📊 Total plans: ${PROMOTION_PLANS.length}`);
+    log.info('\n💰 Promotion Plans Summary:');
+    log.info('   LISTING PROMOTIONS:');
+    log.info('     Featured: €9/7d, €29/30d, €69/90d (2x visibility)');
+    log.info('     Highlight: €19/7d, €49/30d, €119/90d (3x visibility)');
+    log.info('     Premium: €39/7d, €99/30d, €229/90d (5x visibility)');
+    log.info('   AGENCY PROMOTIONS:');
+    log.info('     Featured Agency: €6.99/7d, €11.99/14d, €24.99/28d, €49.99/90d (3x visibility)');
 
   } catch (error) {
-    console.error('❌ Error seeding promotion plans:', error);
+    log.error('❌ Error seeding promotion plans:', error);
     process.exit(1);
   } finally {
     await mongoose.disconnect();
-    console.log('\n👋 Disconnected from MongoDB');
+    log.info('\n👋 Disconnected from MongoDB');
   }
 }
 

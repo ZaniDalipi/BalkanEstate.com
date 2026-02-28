@@ -91,10 +91,60 @@ const BRAND_COLORS = {
 };
 
 /**
+ * Validate URL is not targeting internal/private networks (SSRF protection)
+ */
+const isUrlSafe = (urlStr: string): boolean => {
+  try {
+    const parsed = new URL(urlStr);
+    const hostname = parsed.hostname.toLowerCase();
+
+    // Block private/internal hostnames
+    if (hostname === 'localhost' || hostname === '127.0.0.1' || hostname === '::1' ||
+        hostname === '0.0.0.0' || hostname.endsWith('.local') || hostname.endsWith('.internal')) {
+      return false;
+    }
+
+    // Block AWS/GCP/Azure metadata endpoints
+    if (hostname === '169.254.169.254' || hostname === 'metadata.google.internal') {
+      return false;
+    }
+
+    // Block private IP ranges (10.x, 172.16-31.x, 192.168.x)
+    const ipParts = hostname.split('.').map(Number);
+    if (ipParts.length === 4 && ipParts.every(p => !isNaN(p))) {
+      if (ipParts[0] === 10) return false;
+      if (ipParts[0] === 172 && ipParts[1] >= 16 && ipParts[1] <= 31) return false;
+      if (ipParts[0] === 192 && ipParts[1] === 168) return false;
+      if (ipParts[0] === 127) return false;
+      if (ipParts[0] === 0) return false;
+    }
+
+    // Only allow HTTPS (block http:// for security)
+    if (parsed.protocol !== 'https:') return false;
+
+    return true;
+  } catch {
+    return false;
+  }
+};
+
+/**
  * Download a file from URL to a local temp path
  */
-const downloadFile = (url: string, destPath: string): Promise<void> => {
+const downloadFile = (url: string, destPath: string, redirectCount = 0): Promise<void> => {
   return new Promise((resolve, reject) => {
+    // SSRF protection: validate URL before fetching
+    if (!isUrlSafe(url)) {
+      reject(new Error('URL blocked by security policy'));
+      return;
+    }
+
+    // Limit redirect depth to prevent redirect loops
+    if (redirectCount > 3) {
+      reject(new Error('Too many redirects'));
+      return;
+    }
+
     const protocol = url.startsWith('https') ? https : http;
     const file = fs.createWriteStream(destPath);
 
@@ -104,7 +154,7 @@ const downloadFile = (url: string, destPath: string): Promise<void> => {
         if (redirectUrl) {
           file.close();
           try { fs.unlinkSync(destPath); } catch {}
-          downloadFile(redirectUrl, destPath).then(resolve).catch(reject);
+          downloadFile(redirectUrl, destPath, redirectCount + 1).then(resolve).catch(reject);
           return;
         }
       }

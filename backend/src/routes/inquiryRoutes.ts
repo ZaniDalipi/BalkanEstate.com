@@ -6,6 +6,7 @@ import {
   sendAreaSearchInquiry,
   sendContactInquiry,
 } from '../controllers/inquiryController';
+import { decryptPayload } from '../middleware/decryptPayload';
 
 const router = express.Router();
 
@@ -22,15 +23,15 @@ const inquiryRateLimiter = rateLimit({
 // but rate-limited to prevent abuse
 
 // Send inquiry about a specific property
-router.post('/property', inquiryRateLimiter, sendPropertyInquiry);
+router.post('/property', inquiryRateLimiter, decryptPayload, sendPropertyInquiry);
 
 // Send general inquiry to an agent
-router.post('/agent', inquiryRateLimiter, sendAgentGeneralInquiry);
+router.post('/agent', inquiryRateLimiter, decryptPayload, sendAgentGeneralInquiry);
 
 // Send area search inquiry (sent to multiple agents in an area)
-router.post('/area-search', inquiryRateLimiter, sendAreaSearchInquiry);
+router.post('/area-search', inquiryRateLimiter, decryptPayload, sendAreaSearchInquiry);
 
 // Send contact form inquiry to platform team
-router.post('/contact', inquiryRateLimiter, sendContactInquiry);
+router.post('/contact', inquiryRateLimiter, decryptPayload, sendContactInquiry);
 
 export default router;

@@ -1,6 +1,9 @@
 import mongoose from 'mongoose';
 import dotenv from 'dotenv';
 import { syncAllSellerStats } from '../utils/statsUpdater';
+import { scriptLogger } from '../utils/logger';
+
+const log = scriptLogger.child('SyncSellerStats');
 
 // Load environment variables
 dotenv.config();
@@ -17,28 +20,28 @@ async function main() {
     // Connect to MongoDB
     const mongoUri = process.env.MONGO_URI || process.env.MONGODB_URI || 'mongodb://localhost:27017/balkan-estate';
     await mongoose.connect(mongoUri);
-    console.log('✅ Connected to MongoDB');
+    log.info('✅ Connected to MongoDB');
 
     // Sync all seller stats
     await syncAllSellerStats();
 
-    console.log('\n🎉 Successfully synced all seller statistics!');
-    console.log('Stats now include:');
-    console.log('  - Total Views');
-    console.log('  - Total Saves');
-    console.log('  - Total Inquiries');
-    console.log('  - Properties Sold');
-    console.log('  - Total Sales Value');
-    console.log('  - Active Listings');
-    console.log('  - Rating (placeholder)');
+    log.info('\n🎉 Successfully synced all seller statistics!');
+    log.info('Stats now include:');
+    log.info('  - Total Views');
+    log.info('  - Total Saves');
+    log.info('  - Total Inquiries');
+    log.info('  - Properties Sold');
+    log.info('  - Total Sales Value');
+    log.info('  - Active Listings');
+    log.info('  - Rating (placeholder)');
 
     // Disconnect from MongoDB
     await mongoose.disconnect();
-    console.log('\n👋 Disconnected from MongoDB');
+    log.info('\n👋 Disconnected from MongoDB');
 
     process.exit(0);
   } catch (error) {
-    console.error('❌ Error syncing seller stats:', error);
+    log.error('❌ Error syncing seller stats:', error);
     process.exit(1);
   }
 }

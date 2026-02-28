@@ -198,5 +198,6 @@ export const apiLogger = createLogger('API');
 export const mapLogger = createLogger('Map');
 export const paymentLogger = createLogger('Payment');
 export const propertyLogger = createLogger('Property');
+export const i18nLogger = createLogger('i18n');
 
 export default logger;

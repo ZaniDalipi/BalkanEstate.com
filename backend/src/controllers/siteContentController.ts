@@ -17,7 +17,7 @@ export const getContentBySection = async (req: Request, res: Response) => {
 
     res.json(content);
   } catch (error: any) {
-    res.status(500).json({ message: error.message });
+    res.status(500).json({ message: 'Internal server error' });
   }
 };
 
@@ -41,7 +41,7 @@ export const getHowItWorksContent = async (_req: Request, res: Response) => {
 
     res.json(grouped);
   } catch (error: any) {
-    res.status(500).json({ message: error.message });
+    res.status(500).json({ message: 'Internal server error' });
   }
 };
 
@@ -54,7 +54,7 @@ export const getAllContent = async (_req: Request, res: Response) => {
 
     res.json(content);
   } catch (error: any) {
-    res.status(500).json({ message: error.message });
+    res.status(500).json({ message: 'Internal server error' });
   }
 };
 
@@ -86,7 +86,7 @@ export const createContent = async (req: Request, res: Response): Promise<void> 
 
     res.status(201).json(content);
   } catch (error: any) {
-    res.status(500).json({ message: error.message });
+    res.status(500).json({ message: 'Internal server error' });
   }
 };
 
@@ -110,7 +110,7 @@ export const updateContent = async (req: Request, res: Response): Promise<void> 
 
     res.json(content);
   } catch (error: any) {
-    res.status(500).json({ message: error.message });
+    res.status(500).json({ message: 'Internal server error' });
   }
 };
 
@@ -140,7 +140,7 @@ export const deleteContent = async (req: Request, res: Response): Promise<void> 
     await SiteContent.findByIdAndDelete(id);
     res.json({ message: 'Content deleted successfully' });
   } catch (error: any) {
-    res.status(500).json({ message: error.message });
+    res.status(500).json({ message: 'Internal server error' });
   }
 };
 
@@ -178,6 +178,6 @@ export const uploadVideo = async (req: Request, res: Response): Promise<void> =>
       publicId: result.public_id,
     });
   } catch (error: any) {
-    res.status(500).json({ message: error.message });
+    res.status(500).json({ message: 'Internal server error' });
   }
 };

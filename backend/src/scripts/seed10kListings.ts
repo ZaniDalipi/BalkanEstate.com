@@ -2,6 +2,9 @@ import mongoose from 'mongoose';
 import dotenv from 'dotenv';
 import Property from '../models/Property';
 import User from '../models/User';
+import { scriptLogger } from '../utils/logger';
+
+const log = scriptLogger.child('Seed10k');
 
 dotenv.config();
 
@@ -263,13 +266,13 @@ async function seed10kListings() {
   try {
     const mongoUri = process.env.MONGO_URI || 'mongodb://localhost:27017/balkan-estate';
     await mongoose.connect(mongoUri);
-    console.log('✅ Connected to MongoDB');
+    log.info('✅ Connected to MongoDB');
 
     // Find or create a demo user
     let demoUser = await User.findOne({ email: 'demo@balkanestate.com' });
 
     if (!demoUser) {
-      console.log('📝 Creating demo user...');
+      log.info('📝 Creating demo user...');
       demoUser = await User.create({
         name: 'Demo Agent',
         email: 'demo@balkanestate.com',
@@ -278,16 +281,16 @@ async function seed10kListings() {
         isEmailVerified: true,
         agencyName: 'BalkanEstate Demo Agency',
       });
-      console.log('✅ Demo user created');
+      log.info('✅ Demo user created');
     }
 
     // Check current count
     const existingCount = await Property.countDocuments();
-    console.log(`📊 Current properties in database: ${existingCount}`);
+    log.info(`📊 Current properties in database: ${existingCount}`);
 
-    console.log(`\n🚀 Starting to seed ${TOTAL_LISTINGS} properties...`);
-    console.log(`📦 Batch size: ${BATCH_SIZE}`);
-    console.log(`📍 Locations: ${BALKAN_LOCATIONS.length} cities across 11 countries\n`);
+    log.info(`\n🚀 Starting to seed ${TOTAL_LISTINGS} properties...`);
+    log.info(`📦 Batch size: ${BATCH_SIZE}`);
+    log.info(`📍 Locations: ${BALKAN_LOCATIONS.length} cities across 11 countries\n`);
 
     const startTime = Date.now();
     let totalCreated = 0;
@@ -304,29 +307,29 @@ async function seed10kListings() {
         const result = await Property.insertMany(properties, { ordered: false });
         totalCreated += result.length;
       } catch (insertError: any) {
-        console.error(`\n  ❌ Batch ${batch + 1} FAILED:`);
-        console.error(`     Error name: ${insertError.name}`);
-        console.error(`     Error message: ${insertError.message}`);
+        log.error(`\n  ❌ Batch ${batch + 1} FAILED:`);
+        log.error(`     Error name: ${insertError.name}`);
+        log.error(`     Error message: ${insertError.message}`);
 
         // Log validation errors from Mongoose
         if (insertError.errors) {
           Object.keys(insertError.errors).forEach(key => {
-            console.error(`     Field "${key}": ${insertError.errors[key].message}`);
+            log.error(`     Field "${key}": ${insertError.errors[key].message}`);
           });
         }
 
         // Log write errors from MongoDB
         if (insertError.writeErrors) {
-          console.error(`     Write errors: ${insertError.writeErrors.length}`);
+          log.error(`     Write errors: ${insertError.writeErrors.length}`);
           insertError.writeErrors.slice(0, 3).forEach((we: any, i: number) => {
-            console.error(`     [${i}]: ${we.errmsg}`);
+            log.error(`     [${i}]: ${we.errmsg}`);
           });
         }
 
         // Log the first property to debug
         if (batch === 0) {
-          console.error(`\n     Sample property being inserted:`);
-          console.error(JSON.stringify(properties[0], null, 2).split('\n').slice(0, 20).join('\n'));
+          log.error(`\n     Sample property being inserted:`);
+          log.error(JSON.stringify(properties[0], null, 2).split('\n').slice(0, 20).join('\n'));
         }
 
         // Count what was inserted despite errors
@@ -339,17 +342,17 @@ async function seed10kListings() {
       const elapsed = ((Date.now() - startTime) / 1000).toFixed(1);
       const rate = (totalCreated / parseFloat(elapsed)).toFixed(0);
 
-      console.log(`  ✅ Batch ${batch + 1}/${TOTAL_LISTINGS / BATCH_SIZE} complete | ${totalCreated}/${TOTAL_LISTINGS} (${progress}%) | ${rate} props/sec`);
+      log.info(`  ✅ Batch ${batch + 1}/${TOTAL_LISTINGS / BATCH_SIZE} complete | ${totalCreated}/${TOTAL_LISTINGS} (${progress}%) | ${rate} props/sec`);
     }
 
     const totalTime = ((Date.now() - startTime) / 1000).toFixed(2);
     const finalCount = await Property.countDocuments();
 
-    console.log(`\n${'='.repeat(60)}`);
-    console.log(`🎉 SUCCESS! Seeded ${totalCreated} properties in ${totalTime}s`);
-    console.log(`📊 Total properties in database: ${finalCount}`);
-    console.log(`⚡ Average rate: ${(totalCreated / parseFloat(totalTime)).toFixed(0)} properties/second`);
-    console.log(`${'='.repeat(60)}\n`);
+    log.info(`\n${'='.repeat(60)}`);
+    log.info(`🎉 SUCCESS! Seeded ${totalCreated} properties in ${totalTime}s`);
+    log.info(`📊 Total properties in database: ${finalCount}`);
+    log.info(`⚡ Average rate: ${(totalCreated / parseFloat(totalTime)).toFixed(0)} properties/second`);
+    log.info(`${'='.repeat(60)}\n`);
 
     // Show distribution
     const countryStats = await Property.aggregate([
@@ -357,17 +360,17 @@ async function seed10kListings() {
       { $sort: { count: -1 } }
     ]);
 
-    console.log('📍 Properties by country:');
+    log.info('📍 Properties by country:');
     countryStats.forEach(stat => {
-      console.log(`   ${stat._id}: ${stat.count.toLocaleString()}`);
+      log.info(`   ${stat._id}: ${stat.count.toLocaleString()}`);
     });
 
   } catch (error) {
-    console.error('❌ Error seeding properties:', error);
+    log.error('❌ Error seeding properties:', error);
     process.exit(1);
   } finally {
     await mongoose.disconnect();
-    console.log('\n👋 Disconnected from MongoDB');
+    log.info('\n👋 Disconnected from MongoDB');
   }
 }
 

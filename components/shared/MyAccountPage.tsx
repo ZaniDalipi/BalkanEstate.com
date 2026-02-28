@@ -23,6 +23,7 @@ import { useConfirmation } from '../../src/shared/hooks/useConfirmation';
 import { useNotification } from '../../src/shared/hooks/useNotification';
 import { buildLocalizedPath } from '../../src/utils/languageRouting';
 import { API_URL } from '../../src/shared/api/config';
+import { apiLogger } from '../../src/shared/utils/logger';
 
 // Common languages spoken in the Balkan region
 const BALKAN_LANGUAGES = [
@@ -916,7 +917,7 @@ const ProfileSettings: React.FC<{ user: User }> = ({ user }) => {
             });
 
             if (!response.ok) {
-                console.warn(`Failed to fetch agent data: HTTP ${response.status}`);
+                apiLogger.warn(`Failed to fetch agent data: HTTP ${response.status}`);
                 return;
             }
 
