@@ -610,37 +610,55 @@ export function use3DMap(props: Map3DBuildingsProps) {
       ])
     );
 
-    // Make the original building at this location transparent so floor slices are clearly visible.
-    // We use setPaintProperty with a data-driven opacity expression rather than setFilter,
-    // because filter-based exclusion is unreliable with tile feature IDs (type mismatches, etc.)
+    // ── Floor-slice visibility fix ───────────────────────────────────────────
+    // Problem: MapLibre's WebGL depth buffer means the first-drawn fill-extrusion
+    // wins at equal depth.  '3d-buildings' is added first, so it always occludes
+    // any custom layers at the same coordinates, regardless of layer order in the
+    // style.  `within` filter expressions also do NOT work on Polygon features
+    // (only Point / LineString), so bbox exclusion attempts were silently no-ops.
+    //
+    // Solution:
+    //   1. Hide '3d-buildings' entirely so it cannot occlude anything.
+    //   2. Add '3d-buildings-bg' — same style, but with the property building
+    //      filtered out via `to-string` ID comparison (handles string vs number
+    //      type mismatches between tile data and JS values).
+    //   3. Floor slices are then the only fill-extrusion at this location and
+    //      render unobstructed.
+    // ─────────────────────────────────────────────────────────────────────────
     if (mapInstance.getLayer('3d-buildings')) {
-      if (buildingFeature && buildingFeature.id != null) {
-        // Make this exact building transparent by matching its numeric feature ID.
-        // All other buildings remain fully opaque.
-        mapInstance.setPaintProperty('3d-buildings', 'fill-extrusion-opacity', [
-          'case',
-          ['==', ['id'], typeof buildingFeature.id === 'string'
-            ? parseInt(buildingFeature.id, 10)
-            : buildingFeature.id], 0,
-          0.92
-        ]);
-      } else {
-        // Fallback: make all buildings within a ~40 m bounding box transparent.
-        const bboxPad = 0.0004;
-        mapInstance.setPaintProperty('3d-buildings', 'fill-extrusion-opacity', [
-          'case',
-          ['within', {
-            type: 'Polygon' as const,
-            coordinates: [[
-              [longitude - bboxPad, latitude - bboxPad],
-              [longitude + bboxPad, latitude - bboxPad],
-              [longitude + bboxPad, latitude + bboxPad],
-              [longitude - bboxPad, latitude + bboxPad],
-              [longitude - bboxPad, latitude - bboxPad],
-            ]]
-          }], 0,
-          0.92
-        ]);
+      mapInstance.setLayoutProperty('3d-buildings', 'visibility', 'none');
+    }
+
+    if (buildingFeature && buildingFeature.id != null && !mapInstance.getLayer('3d-buildings-bg')) {
+      const style = mapInstance.getStyle();
+      const origLayer = style.layers.find(l => l.id === '3d-buildings') as any;
+      const layerSource = origLayer?.source as string | undefined;
+      const layerSourceLayer = origLayer?.['source-layer'] as string | undefined;
+
+      if (layerSource && layerSourceLayer) {
+        mapInstance.addLayer({
+          id: '3d-buildings-bg',
+          source: layerSource,
+          'source-layer': layerSourceLayer,
+          type: 'fill-extrusion',
+          minzoom: 14,
+          // Convert both sides to string so number/string tile ID mismatches don't matter
+          filter: ['!=', ['to-string', ['id']], String(buildingFeature.id)],
+          paint: {
+            'fill-extrusion-color': [
+              'interpolate', ['linear'],
+              ['coalesce', ['get', 'render_height'], 10],
+              0, '#6b7280', 20, '#4b5563', 50, '#374151', 100, '#1f2937',
+            ] as any,
+            'fill-extrusion-height': [
+              'coalesce', ['get', 'render_height'],
+              ['*', ['coalesce', ['get', 'building:levels'], 3], 3.5], 10,
+            ] as any,
+            'fill-extrusion-base': ['coalesce', ['get', 'render_min_height'], 0] as any,
+            'fill-extrusion-opacity': 0.92,
+            'fill-extrusion-vertical-gradient': true,
+          },
+        } as maplibregl.LayerSpecification);
       }
     }
 
