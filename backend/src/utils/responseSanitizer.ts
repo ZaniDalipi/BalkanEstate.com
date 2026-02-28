@@ -2,8 +2,11 @@
  * Response Sanitizer
  *
  * Strips sensitive fields from API responses to prevent PII leakage.
+ * Obfuscates MongoDB ObjectIds so raw database IDs never reach the client.
  * Used across controllers to ensure consistent data minimization.
  */
+
+import { encodeId } from './idObfuscation';
 
 /** Fields that should NEVER appear in any public-facing API response */
 const ALWAYS_STRIP_FIELDS = ['__v', 'password', 'resetPasswordToken', 'resetPasswordExpires',
@@ -33,6 +36,24 @@ const roundCoordinate = (value: number, decimals = 5): number => {
 };
 
 /**
+ * Convert raw MongoDB `_id` to an obfuscated `id` field.
+ * Handles ObjectId instances and plain hex strings.
+ */
+const obfuscateId = (obj: any): any => {
+  if (!obj || typeof obj !== 'object') return obj;
+
+  const rawId = obj._id;
+  if (rawId) {
+    // Convert ObjectId or string to encoded form
+    const hex = typeof rawId === 'string' ? rawId : String(rawId);
+    obj.id = encodeId(hex);
+    delete obj._id;
+  }
+
+  return obj;
+};
+
+/**
  * Strip internal MongoDB fields from any object.
  */
 const stripInternalFields = (obj: any): any => {
@@ -57,6 +78,9 @@ const sanitizeSeller = (seller: any, context: 'list' | 'detail'): any => {
 
   const cleaned = { ...seller };
 
+  // Obfuscate seller ID
+  obfuscateId(cleaned);
+
   // Always strip email and licenseNumber — frontend never uses these
   delete cleaned.email;
   delete cleaned.licenseNumber;
@@ -79,6 +103,9 @@ export const sanitizeProperty = (property: any, context: 'list' | 'detail' = 'li
   if (!property || typeof property !== 'object') return property;
 
   const cleaned = { ...property };
+
+  // Obfuscate property ID
+  obfuscateId(cleaned);
 
   // Strip creator PII snapshot fields (frontend never uses these)
   for (const field of PROPERTY_CREATOR_PII_FIELDS) {
@@ -117,6 +144,9 @@ export const sanitizeParticipant = (participant: any): any => {
 
   const cleaned = { ...participant };
 
+  // Obfuscate participant ID
+  obfuscateId(cleaned);
+
   // Strip PII — frontend conversation transformer only extracts name, avatarUrl, role, agencyName
   delete cleaned.email;
   delete cleaned.phone;
@@ -132,6 +162,9 @@ export const sanitizeConversation = (conversation: any): any => {
 
   const cleaned = { ...conversation };
 
+  // Obfuscate conversation ID
+  obfuscateId(cleaned);
+
   // Sanitize buyer and seller participants
   if (cleaned.buyerId && typeof cleaned.buyerId === 'object') {
     cleaned.buyerId = sanitizeParticipant(cleaned.buyerId);
@@ -142,6 +175,7 @@ export const sanitizeConversation = (conversation: any): any => {
 
   // Sanitize the nested property's seller if populated
   if (cleaned.propertyId && typeof cleaned.propertyId === 'object') {
+    obfuscateId(cleaned.propertyId);
     if (cleaned.propertyId.sellerId && typeof cleaned.propertyId.sellerId === 'object') {
       cleaned.propertyId.sellerId = sanitizeParticipant(cleaned.propertyId.sellerId);
     }

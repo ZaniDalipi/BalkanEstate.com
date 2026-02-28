@@ -17,9 +17,11 @@ export function slugify(text: string): string {
 
 /**
  * Generate an SEO-friendly slug for a property listing.
- * Format: "3-bed-apartment-for-sale-in-budva-montenegro-{id}"
- * The MongoDB ID is appended for uniqueness, while the descriptive
- * prefix provides keyword-rich URLs that search engines prefer.
+ * Format: "3-bed-apartment-for-sale-in-budva-montenegro_EncodedId"
+ *
+ * The descriptive prefix provides keyword-rich URLs for SEO.
+ * The encoded ID after the underscore is used by the backend for lookup.
+ * Raw MongoDB ObjectIds are never exposed in the URL.
  */
 export function generatePropertySlug(property: {
   id: string;
@@ -52,9 +54,9 @@ export function generatePropertySlug(property: {
     parts.push(property.country);
   }
 
-  // Append short ID for uniqueness (last 6 chars of MongoDB ObjectId)
-  const shortId = property.id.length > 6 ? property.id.slice(-6) : property.id;
-  parts.push(shortId);
+  const slug = slugify(parts.join(' '));
 
-  return slugify(parts.join(' '));
+  // Append the full encoded ID after underscore (not slugified, preserves case)
+  // The backend extracts the ID by splitting on the last underscore
+  return `${slug}_${property.id}`;
 }

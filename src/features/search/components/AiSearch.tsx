@@ -3,6 +3,7 @@ import { createPortal } from 'react-dom';
 import { useTranslation } from 'react-i18next';
 import { motion, AnimatePresence, PanInfo } from 'framer-motion';
 import { ChatMessage, AiSearchQuery, Property } from '@/types';
+import { generatePropertySlug } from '@/utils/slug';
 import { getAiChatResponse } from '@/services/geminiService';
 import { PaperAirplaneIcon, MicrophoneIcon, StopCircleIcon, SparklesIcon, MapPinIcon, SpeakerWaveIcon, SpeakerXMarkIcon, HeartIcon, XMarkIcon, EyeIcon } from '@/constants';
 import { formatPrice } from '@/utils/currency';
@@ -360,7 +361,7 @@ const SwipeModal: React.FC<{
         if (!property) return;
         onClose();
         dispatch({ type: 'SET_SELECTED_PROPERTY_OBJECT', payload: property });
-        window.history.pushState({ propertyId: property.id }, '', `/property/${property.id}`);
+        window.history.pushState({}, '', `/property/${generatePropertySlug(property)}`);
     }, [currentIndex, properties, onClose, dispatch]);
 
     // Close on Escape

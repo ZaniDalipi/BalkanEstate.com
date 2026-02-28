@@ -3009,7 +3009,7 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
                           onClick={() => {
                             const propertyId = property.id || property._id;
                             dispatch({ type: 'SET_SELECTED_PROPERTY', payload: propertyId });
-                            window.history.pushState({ propertyId }, '', `/property/${propertyId}`);
+                            window.history.pushState({}, '', `/property/${propertyId}`);
                           }}
                           className={`w-full text-white px-3 py-2 rounded-lg font-semibold text-sm ${property.status === 'sold' ? 'bg-red-600 hover:bg-red-700' : 'bg-emerald-600 hover:bg-emerald-700'}`}
                         >

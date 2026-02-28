@@ -84,7 +84,7 @@ const ListingCard: React.FC<{
     const handleCardClick = () => {
         dispatch({ type: 'SET_SELECTED_PROPERTY', payload: property.id });
         dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'property-details' });
-        window.history.pushState({ propertyId: property.id }, '', `/property/${property.id}`);
+        window.history.pushState({}, '', `/property/${property.id}`);
         window.dispatchEvent(new PopStateEvent('popstate'));
     };
 
