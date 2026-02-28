@@ -2,13 +2,16 @@ import mongoose from 'mongoose';
 import dotenv from 'dotenv';
 import path from 'path';
 import Product from '../models/Product';
+import { scriptLogger } from '../utils/logger';
+
+const log = scriptLogger.child('MigrateProductCoupons');
 
 // Load environment-specific config
 const env = process.env.NODE_ENV || 'development';
 const envFile = env === 'development' ? '.env' : `.env.${env}`;
 dotenv.config({ path: path.resolve(__dirname, '../../', envFile) });
 
-console.log(`🌍 Environment: ${env.toUpperCase()}`);
+log.info(`🌍 Environment: ${env.toUpperCase()}`);
 
 /**
  * Coupon values for each product type
@@ -84,10 +87,10 @@ async function migrateProductCoupons() {
     // Connect to MongoDB
     const mongoUri = process.env.MONGO_URI || 'mongodb://localhost:27017/balkan-estate';
     await mongoose.connect(mongoUri);
-    console.log('✅ Connected to MongoDB');
+    log.info('✅ Connected to MongoDB');
 
     // First, check for any duplicate productIds
-    console.log('\n📊 Checking for duplicates...');
+    log.info('\n📊 Checking for duplicates...');
     const allProducts = await Product.find({}).lean();
     const productIdCounts = new Map<string, number>();
 
@@ -98,30 +101,30 @@ async function migrateProductCoupons() {
 
     const duplicates = Array.from(productIdCounts.entries()).filter(([_, count]) => count > 1);
     if (duplicates.length > 0) {
-      console.log('⚠️  Found duplicate productIds:');
+      log.warn('⚠️  Found duplicate productIds:');
       duplicates.forEach(([id, count]) => {
-        console.log(`   - ${id}: ${count} entries`);
+        log.warn(`   - ${id}: ${count} entries`);
       });
     } else {
-      console.log('✅ No duplicates found');
+      log.info('✅ No duplicates found');
     }
 
     // Show current values
-    console.log('\n📋 Current product coupon values:');
+    log.info('\n📋 Current product coupon values:');
     for (const product of allProducts) {
       if (COUPON_VALUES[product.productId]) {
-        console.log(`\n   ${product.name} (${product.productId}):`);
-        console.log(`     promotionCoupons: ${product.promotionCoupons ?? 'undefined'}`);
-        console.log(`     premiumCoupons: ${product.premiumCoupons ?? 'undefined'}`);
-        console.log(`     highlightedCoupons: ${product.highlightedCoupons ?? 'undefined'}`);
-        console.log(`     featuredCoupons: ${product.featuredCoupons ?? 'undefined'}`);
-        console.log(`     agentCoupons: ${product.agentCoupons ?? 'undefined'}`);
-        console.log(`     teamMembersLimit: ${product.teamMembersLimit ?? 'undefined'}`);
+        log.info(`\n   ${product.name} (${product.productId}):`);
+        log.info(`     promotionCoupons: ${product.promotionCoupons ?? 'undefined'}`);
+        log.info(`     premiumCoupons: ${product.premiumCoupons ?? 'undefined'}`);
+        log.info(`     highlightedCoupons: ${product.highlightedCoupons ?? 'undefined'}`);
+        log.info(`     featuredCoupons: ${product.featuredCoupons ?? 'undefined'}`);
+        log.info(`     agentCoupons: ${product.agentCoupons ?? 'undefined'}`);
+        log.info(`     teamMembersLimit: ${product.teamMembersLimit ?? 'undefined'}`);
       }
     }
 
     // Update products with correct coupon values
-    console.log('\n🔄 Updating products with correct coupon values...');
+    log.info('\n🔄 Updating products with correct coupon values...');
 
     for (const [productId, values] of Object.entries(COUPON_VALUES)) {
       const result = await Product.findOneAndUpdate(
@@ -140,25 +143,25 @@ async function migrateProductCoupons() {
       );
 
       if (result) {
-        console.log(`   ✅ Updated ${productId}:`);
-        console.log(`      promotionCoupons: ${result.promotionCoupons}`);
-        console.log(`      premiumCoupons: ${result.premiumCoupons}`);
-        console.log(`      highlightedCoupons: ${result.highlightedCoupons}`);
-        console.log(`      featuredCoupons: ${result.featuredCoupons}`);
-        console.log(`      agentCoupons: ${result.agentCoupons}`);
+        log.info(`   ✅ Updated ${productId}:`);
+        log.info(`      promotionCoupons: ${result.promotionCoupons}`);
+        log.info(`      premiumCoupons: ${result.premiumCoupons}`);
+        log.info(`      highlightedCoupons: ${result.highlightedCoupons}`);
+        log.info(`      featuredCoupons: ${result.featuredCoupons}`);
+        log.info(`      agentCoupons: ${result.agentCoupons}`);
       } else {
-        console.log(`   ⚠️  Product not found: ${productId}`);
+        log.warn(`   ⚠️  Product not found: ${productId}`);
       }
     }
 
-    console.log('\n🎉 Migration completed successfully!');
+    log.info('\n🎉 Migration completed successfully!');
 
   } catch (error) {
-    console.error('❌ Migration error:', error);
+    log.error('❌ Migration error:', error);
     process.exit(1);
   } finally {
     await mongoose.disconnect();
-    console.log('\n👋 Disconnected from MongoDB');
+    log.info('\n👋 Disconnected from MongoDB');
   }
 }
 

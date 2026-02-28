@@ -18,6 +18,9 @@
 import mongoose from 'mongoose';
 import dotenv from 'dotenv';
 import path from 'path';
+import { scriptLogger } from '../utils/logger';
+
+const log = scriptLogger.child('SetupDatabase');
 
 // Load environment-specific config
 const env = process.env.NODE_ENV || 'development';
@@ -81,20 +84,20 @@ const models = [
 ];
 
 async function setupDatabase() {
-  console.log('╔════════════════════════════════════════════════════════════╗');
-  console.log('║           BALKAN ESTATE - DATABASE SETUP                   ║');
-  console.log('╠════════════════════════════════════════════════════════════╣');
-  console.log(`║  Environment: ${env.toUpperCase().padEnd(44)}║`);
-  console.log('╚════════════════════════════════════════════════════════════╝');
-  console.log('');
+  log.info('╔════════════════════════════════════════════════════════════╗');
+  log.info('║           BALKAN ESTATE - DATABASE SETUP                   ║');
+  log.info('╠════════════════════════════════════════════════════════════╣');
+  log.info(`║  Environment: ${env.toUpperCase().padEnd(44)}║`);
+  log.info('╚════════════════════════════════════════════════════════════╝');
+  log.info('');
 
   try {
     // Connect to MongoDB
-    console.log('📡 Connecting to MongoDB...');
-    console.log(`   URI: ${MONGODB_URI.replace(/:[^:@]+@/, ':****@')}`);
+    log.info('📡 Connecting to MongoDB...');
+    log.info(`   URI: ${MONGODB_URI.replace(/:[^:@]+@/, ':****@')}`);
 
     await mongoose.connect(MONGODB_URI);
-    console.log('✅ Connected to MongoDB successfully!\n');
+    log.info('✅ Connected to MongoDB successfully!\n');
 
     const db = mongoose.connection.db;
     if (!db) {
@@ -105,7 +108,7 @@ async function setupDatabase() {
     const existingCollections = await db.listCollections().toArray();
     const existingNames = existingCollections.map(c => c.name);
 
-    console.log('📦 Setting up collections and indexes...\n');
+    log.info('📦 Setting up collections and indexes...\n');
 
     let created = 0;
     let existing = 0;
@@ -116,12 +119,12 @@ async function setupDatabase() {
       const exists = existingNames.includes(collectionName);
 
       if (exists) {
-        console.log(`   ✓ ${name} (${collectionName}) - exists`);
+        log.info(`   ✓ ${name} (${collectionName}) - exists`);
         existing++;
       } else {
         // Create collection by ensuring indexes
         await model.createCollection();
-        console.log(`   + ${name} (${collectionName}) - created`);
+        log.info(`   + ${name} (${collectionName}) - created`);
         created++;
       }
 
@@ -131,70 +134,70 @@ async function setupDatabase() {
         const indexes = await model.collection.indexes();
         indexesCreated += indexes.length;
       } catch (err: any) {
-        console.log(`     ⚠️  Index sync warning for ${name}: ${err.message}`);
+        log.info(`     ⚠️  Index sync warning for ${name}: ${err.message}`);
       }
     }
 
-    console.log('\n────────────────────────────────────────────────────────────');
-    console.log(`📊 Summary:`);
-    console.log(`   • Collections created: ${created}`);
-    console.log(`   • Collections existing: ${existing}`);
-    console.log(`   • Total indexes: ${indexesCreated}`);
-    console.log('────────────────────────────────────────────────────────────\n');
+    log.info('\n────────────────────────────────────────────────────────────');
+    log.info(`📊 Summary:`);
+    log.info(`   • Collections created: ${created}`);
+    log.info(`   • Collections existing: ${existing}`);
+    log.info(`   • Total indexes: ${indexesCreated}`);
+    log.info('────────────────────────────────────────────────────────────\n');
 
     // Check for required seed data
-    console.log('🌱 Checking required seed data...\n');
+    log.info('🌱 Checking required seed data...\n');
 
     // Check products
     const productCount = await Product.countDocuments();
     if (productCount === 0) {
-      console.log('   ⚠️  No products found. Run: npm run seed:products');
+      log.info('   ⚠️  No products found. Run: npm run seed:products');
     } else {
-      console.log(`   ✓ Products: ${productCount} items`);
+      log.info(`   ✓ Products: ${productCount} items`);
     }
 
     // Check city market data
     const cityCount = await CityMarketData.countDocuments();
     if (cityCount === 0) {
-      console.log('   ⚠️  No city data found. Run: npm run seed:cities');
+      log.info('   ⚠️  No city data found. Run: npm run seed:cities');
     } else {
-      console.log(`   ✓ City Market Data: ${cityCount} cities`);
+      log.info(`   ✓ City Market Data: ${cityCount} cities`);
     }
 
     // Check promotion coupons
     const couponCount = await PromotionCoupon.countDocuments();
-    console.log(`   ✓ Promotion Coupons: ${couponCount} coupons`);
+    log.info(`   ✓ Promotion Coupons: ${couponCount} coupons`);
 
-    console.log('\n════════════════════════════════════════════════════════════');
-    console.log('✅ DATABASE SETUP COMPLETE!');
-    console.log('════════════════════════════════════════════════════════════\n');
+    log.info('\n════════════════════════════════════════════════════════════');
+    log.info('✅ DATABASE SETUP COMPLETE!');
+    log.info('════════════════════════════════════════════════════════════\n');
 
     if (productCount === 0 || cityCount === 0) {
-      console.log('📝 Next steps:');
+      log.info('📝 Next steps:');
       if (productCount === 0) {
-        console.log('   1. Run: npm run seed:products');
+        log.info('   1. Run: npm run seed:products');
       }
       if (cityCount === 0) {
-        console.log('   2. Run: npm run seed:cities');
+        log.info('   2. Run: npm run seed:cities');
       }
-      console.log('');
+      log.info('');
     }
 
   } catch (error: any) {
-    console.error('\n❌ DATABASE SETUP FAILED!');
-    console.error('   Error:', error.message);
+    log.error('\n❌ DATABASE SETUP FAILED!');
+    log.error('   Error:', error.message);
 
     if (error.message.includes('ECONNREFUSED') || error.message.includes('ENOTFOUND')) {
-      console.error('\n💡 Troubleshooting:');
-      console.error('   • Check if MongoDB is running');
-      console.error('   • Verify MONGODB_URI in your .env file');
-      console.error('   • For cloud MongoDB, check network access settings');
+      log.error('\n💡 Troubleshooting:');
+      log.error('   • Check if MongoDB is running');
+      log.error('   • Verify MONGODB_URI in your .env file');
+      log.error('   • For cloud MongoDB, check network access settings');
     }
 
     process.exit(1);
   } finally {
     await mongoose.disconnect();
-    console.log('📴 Disconnected from MongoDB');
+    log.info('📴 Disconnected from MongoDB');
   }
 }
 

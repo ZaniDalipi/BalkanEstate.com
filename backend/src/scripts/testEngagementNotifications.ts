@@ -20,6 +20,9 @@ dotenv.config();
 import Property from '../models/Property';
 import Notification from '../models/Notification';
 import { checkViewMilestone } from '../services/engagementService';
+import { scriptLogger } from '../utils/logger';
+
+const log = scriptLogger.child('TestEngagement');
 
 const MONGO_URI = process.env.MONGO_URI || 'mongodb://localhost:27017/balkanestate';
 
@@ -31,7 +34,7 @@ interface TestResult {
 
 const results: TestResult[] = [];
 
-function log(message: string, type: 'info' | 'success' | 'error' | 'header' = 'info') {
+function colorLog(message: string, type: 'info' | 'success' | 'error' | 'header' = 'info') {
   const colors = {
     info: '\x1b[36m',    // Cyan
     success: '\x1b[32m', // Green
@@ -41,16 +44,16 @@ function log(message: string, type: 'info' | 'success' | 'error' | 'header' = 'i
   const reset = '\x1b[0m';
   const prefix = type === 'header' ? '\n========================================\n' : '';
   const suffix = type === 'header' ? '\n========================================' : '';
-  console.log(`${prefix}${colors[type]}${message}${reset}${suffix}`);
+  log.info(`${prefix}${colors[type]}${message}${reset}${suffix}`);
 }
 
 async function connectDB() {
   try {
     await mongoose.connect(MONGO_URI);
-    log('Connected to MongoDB', 'success');
+    colorLog('Connected to MongoDB', 'success');
     return true;
   } catch (error) {
-    log(`Failed to connect to MongoDB: ${error}`, 'error');
+    colorLog(`Failed to connect to MongoDB: ${error}`, 'error');
     return false;
   }
 }
@@ -63,18 +66,18 @@ async function cleanupTestData(testPropertyId: string, testUserId: string) {
   await Notification.deleteMany({
     userId: new mongoose.Types.ObjectId(testUserId)
   });
-  log('Cleaned up previous test data', 'info');
+  colorLog('Cleaned up previous test data', 'info');
 }
 
 async function testMilestoneDetection() {
-  log('TEST 1: Milestone Detection Logic', 'header');
+  colorLog('TEST 1: Milestone Detection Logic', 'header');
 
   // Test promoted milestones
   const promotedMilestones = [50, 100, 250, 500, 1000];
   const nonPromotedMilestones = [25, 50, 100, 250, 500];
 
-  log('Promoted milestones should trigger at: ' + promotedMilestones.join(', '));
-  log('Non-promoted milestones should trigger at: ' + nonPromotedMilestones.join(', '));
+  colorLog('Promoted milestones should trigger at: ' + promotedMilestones.join(', '));
+  colorLog('Non-promoted milestones should trigger at: ' + nonPromotedMilestones.join(', '));
 
   results.push({
     test: 'Milestone arrays defined',
@@ -84,13 +87,13 @@ async function testMilestoneDetection() {
 }
 
 async function testNotificationCreation() {
-  log('TEST 2: Notification Creation', 'header');
+  colorLog('TEST 2: Notification Creation', 'header');
 
   // Find a real property to test with, or create a mock scenario
   const property = await Property.findOne({ sellerId: { $exists: true } });
 
   if (!property) {
-    log('No property found with sellerId. Skipping live test.', 'error');
+    colorLog('No property found with sellerId. Skipping live test.', 'error');
     results.push({
       test: 'Notification creation',
       passed: false,
@@ -102,10 +105,10 @@ async function testNotificationCreation() {
   const propertyId = String(property._id);
   const userId = String(property.sellerId);
 
-  log(`Testing with property: ${property.title || propertyId}`, 'info');
-  log(`Property owner (sellerId): ${userId}`, 'info');
-  log(`Current views: ${property.views || 0}`, 'info');
-  log(`Is promoted: ${property.isPromoted || false}`, 'info');
+  colorLog(`Testing with property: ${property.title || propertyId}`, 'info');
+  colorLog(`Property owner (sellerId): ${userId}`, 'info');
+  colorLog(`Current views: ${property.views || 0}`, 'info');
+  colorLog(`Is promoted: ${property.isPromoted || false}`, 'info');
 
   // Clean up any previous test notifications
   await cleanupTestData(propertyId, userId);
@@ -113,7 +116,7 @@ async function testNotificationCreation() {
   // Simulate hitting a milestone
   const testViews = property.isPromoted ? 50 : 25; // First milestone for each type
 
-  log(`\nSimulating ${testViews} views (first milestone)...`, 'info');
+  colorLog(`\nSimulating ${testViews} views (first milestone)...`, 'info');
 
   try {
     await checkViewMilestone(propertyId, testViews, property.isPromoted || false);
@@ -129,12 +132,12 @@ async function testNotificationCreation() {
     }).sort({ createdAt: -1 });
 
     if (notification) {
-      log(`\nNotification created successfully!`, 'success');
-      log(`  Type: ${notification.type}`, 'info');
-      log(`  Title: ${notification.title}`, 'info');
-      log(`  Message: ${notification.message}`, 'info');
-      log(`  Priority: ${notification.priority}`, 'info');
-      log(`  Icon: ${notification.icon}`, 'info');
+      colorLog(`\nNotification created successfully!`, 'success');
+      colorLog(`  Type: ${notification.type}`, 'info');
+      colorLog(`  Title: ${notification.title}`, 'info');
+      colorLog(`  Message: ${notification.message}`, 'info');
+      colorLog(`  Priority: ${notification.priority}`, 'info');
+      colorLog(`  Icon: ${notification.icon}`, 'info');
 
       results.push({
         test: 'Notification creation',
@@ -142,7 +145,7 @@ async function testNotificationCreation() {
         message: `Created notification: "${notification.title}"`
       });
     } else {
-      log('\nNo notification created (may be in cooldown period)', 'info');
+      colorLog('\nNo notification created (may be in cooldown period)', 'info');
       results.push({
         test: 'Notification creation',
         passed: true,
@@ -150,7 +153,7 @@ async function testNotificationCreation() {
       });
     }
   } catch (error) {
-    log(`Error during milestone check: ${error}`, 'error');
+    colorLog(`Error during milestone check: ${error}`, 'error');
     results.push({
       test: 'Notification creation',
       passed: false,
@@ -160,12 +163,12 @@ async function testNotificationCreation() {
 }
 
 async function testHigherMilestones() {
-  log('TEST 3: Higher Milestone Messages', 'header');
+  colorLog('TEST 3: Higher Milestone Messages', 'header');
 
   const property = await Property.findOne({ sellerId: { $exists: true } });
 
   if (!property) {
-    log('No property found. Skipping.', 'error');
+    colorLog('No property found. Skipping.', 'error');
     return;
   }
 
@@ -186,7 +189,7 @@ async function testHigherMilestones() {
   ];
 
   for (const testCase of testCases) {
-    log(`\nTesting ${testCase.views} views (promoted: ${testCase.promoted})...`, 'info');
+    colorLog(`\nTesting ${testCase.views} views (promoted: ${testCase.promoted})...`, 'info');
 
     // Clear previous
     await Notification.deleteMany({
@@ -203,8 +206,8 @@ async function testHigherMilestones() {
     }).sort({ createdAt: -1 });
 
     if (notification) {
-      log(`  Created: "${notification.title}"`, 'success');
-      log(`  Message: "${notification.message}"`, 'info');
+      colorLog(`  Created: "${notification.title}"`, 'success');
+      colorLog(`  Message: "${notification.message}"`, 'info');
     }
   }
 
@@ -216,12 +219,12 @@ async function testHigherMilestones() {
 }
 
 async function testCooldownPrevention() {
-  log('TEST 4: Cooldown Prevention', 'header');
+  colorLog('TEST 4: Cooldown Prevention', 'header');
 
   const property = await Property.findOne({ sellerId: { $exists: true } });
 
   if (!property) {
-    log('No property found. Skipping.', 'error');
+    colorLog('No property found. Skipping.', 'error');
     return;
   }
 
@@ -234,7 +237,7 @@ async function testCooldownPrevention() {
     'data.propertyId': propertyId
   });
 
-  log('Creating initial notification...', 'info');
+  colorLog('Creating initial notification...', 'info');
   await checkViewMilestone(propertyId, 50, true);
   await new Promise(resolve => setTimeout(resolve, 500));
 
@@ -243,10 +246,10 @@ async function testCooldownPrevention() {
     'data.propertyId': propertyId
   });
 
-  log(`Notifications after first call: ${countBefore}`, 'info');
+  colorLog(`Notifications after first call: ${countBefore}`, 'info');
 
   // Try to trigger the same milestone again
-  log('Attempting to trigger same milestone again...', 'info');
+  colorLog('Attempting to trigger same milestone again...', 'info');
   await checkViewMilestone(propertyId, 52, true); // Still in same milestone range
   await new Promise(resolve => setTimeout(resolve, 500));
 
@@ -255,17 +258,17 @@ async function testCooldownPrevention() {
     'data.propertyId': propertyId
   });
 
-  log(`Notifications after second call: ${countAfter}`, 'info');
+  colorLog(`Notifications after second call: ${countAfter}`, 'info');
 
   if (countAfter === countBefore) {
-    log('Cooldown working correctly - no duplicate notification!', 'success');
+    colorLog('Cooldown working correctly - no duplicate notification!', 'success');
     results.push({
       test: 'Cooldown prevention',
       passed: true,
       message: 'Duplicate notifications prevented'
     });
   } else {
-    log('Warning: Duplicate notification may have been created', 'error');
+    colorLog('Warning: Duplicate notification may have been created', 'error');
     results.push({
       test: 'Cooldown prevention',
       passed: false,
@@ -275,14 +278,14 @@ async function testCooldownPrevention() {
 }
 
 async function testNotificationAPI() {
-  log('TEST 5: Notification API Endpoints', 'header');
+  colorLog('TEST 5: Notification API Endpoints', 'header');
 
-  log('API endpoints available:', 'info');
-  log('  GET  /api/notifications          - Get paginated notifications', 'info');
-  log('  GET  /api/notifications/unread   - Get unread notifications', 'info');
-  log('  GET  /api/notifications/unread-count - Get unread count', 'info');
-  log('  PATCH /api/notifications/:id/read - Mark as read', 'info');
-  log('  PATCH /api/notifications/read-all - Mark all as read', 'info');
+  colorLog('API endpoints available:', 'info');
+  colorLog('  GET  /api/notifications          - Get paginated notifications', 'info');
+  colorLog('  GET  /api/notifications/unread   - Get unread notifications', 'info');
+  colorLog('  GET  /api/notifications/unread-count - Get unread count', 'info');
+  colorLog('  PATCH /api/notifications/:id/read - Mark as read', 'info');
+  colorLog('  PATCH /api/notifications/read-all - Mark all as read', 'info');
 
   results.push({
     test: 'API endpoints',
@@ -292,7 +295,7 @@ async function testNotificationAPI() {
 }
 
 async function printSummary() {
-  log('TEST SUMMARY', 'header');
+  colorLog('TEST SUMMARY', 'header');
 
   const passed = results.filter(r => r.passed).length;
   const failed = results.filter(r => !r.passed).length;
@@ -300,15 +303,15 @@ async function printSummary() {
   for (const result of results) {
     const icon = result.passed ? '✅' : '❌';
     const color = result.passed ? 'success' : 'error';
-    log(`${icon} ${result.test}: ${result.message}`, color as 'success' | 'error');
+    colorLog(`${icon} ${result.test}: ${result.message}`, color as 'success' | 'error');
   }
 
-  log(`\nTotal: ${passed} passed, ${failed} failed`, passed === results.length ? 'success' : 'error');
+  colorLog(`\nTotal: ${passed} passed, ${failed} failed`, passed === results.length ? 'success' : 'error');
 }
 
 async function main() {
-  log('ENGAGEMENT NOTIFICATION SYSTEM TEST', 'header');
-  log(`MongoDB URI: ${MONGO_URI.replace(/\/\/.*@/, '//*****@')}`, 'info');
+  colorLog('ENGAGEMENT NOTIFICATION SYSTEM TEST', 'header');
+  colorLog(`MongoDB URI: ${MONGO_URI.replace(/\/\/.*@/, '//*****@')}`, 'info');
 
   const connected = await connectDB();
   if (!connected) {
@@ -323,10 +326,10 @@ async function main() {
     await testNotificationAPI();
     await printSummary();
   } catch (error) {
-    log(`Test error: ${error}`, 'error');
+    colorLog(`Test error: ${error}`, 'error');
   } finally {
     await mongoose.disconnect();
-    log('\nDisconnected from MongoDB', 'info');
+    colorLog('\nDisconnected from MongoDB', 'info');
   }
 }
 

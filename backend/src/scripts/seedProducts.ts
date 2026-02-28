@@ -2,13 +2,16 @@ import mongoose from 'mongoose';
 import dotenv from 'dotenv';
 import path from 'path';
 import Product from '../models/Product';
+import { scriptLogger } from '../utils/logger';
+
+const log = scriptLogger.child('SeedProducts');
 
 // Load environment-specific config
 const env = process.env.NODE_ENV || 'development';
 const envFile = env === 'development' ? '.env' : `.env.${env}`;
 dotenv.config({ path: path.resolve(__dirname, '../../', envFile) });
 
-console.log(`🌍 Environment: ${env.toUpperCase()}`);
+log.info(`🌍 Environment: ${env.toUpperCase()}`);
 
 const PRODUCTS = [
   // ============================================================================
@@ -975,7 +978,7 @@ async function seedProducts() {
     // Connect to MongoDB
     const mongoUri = process.env.MONGO_URI || 'mongodb://localhost:27017/balkan-estate';
     await mongoose.connect(mongoUri);
-    console.log('✅ Connected to MongoDB');
+    log.info('✅ Connected to MongoDB');
 
     // Insert/update products
     for (const productData of PRODUCTS) {
@@ -984,25 +987,25 @@ async function seedProducts() {
         productData,
         { upsert: true, new: true }
       );
-      console.log(`✅ Seeded product: ${productData.name} (${productData.productId}) - €${productData.price}/${productData.billingPeriod}`);
+      log.info(`✅ Seeded product: ${productData.name} (${productData.productId}) - €${productData.price}/${productData.billingPeriod}`);
     }
 
-    console.log('\n🎉 Successfully seeded all products!');
-    console.log(`📊 Total products: ${PRODUCTS.length}`);
-    console.log('\n💰 Pricing Summary:');
-    console.log('   Free: €0 (3 listings, 3 saved searches, 3 AI messages, 3 insights)');
-    console.log('   Pro Monthly: €25 (20 listings/mo, 3 promo coupons/mo, 20 insights/mo, unlimited AI & searches)');
-    console.log('   Pro Yearly: €200 (250 listings/year, 3 promo coupons/mo, 20 insights/mo, unlimited AI & searches)');
-    console.log('   Enterprise: €1000/year (750 listings, 5 team members, 5 promo coupons, unlimited everything)');
-    console.log('   Agency Agent: €0 (granted via agent registration code, 25 listings/year, unlimited AI & searches)');
-    console.log('   Buyer Pro: €3/month (unlimited searches, instant alerts, early access, market insights)');
+    log.info('\n🎉 Successfully seeded all products!');
+    log.info(`📊 Total products: ${PRODUCTS.length}`);
+    log.info('\n💰 Pricing Summary:');
+    log.info('   Free: €0 (3 listings, 3 saved searches, 3 AI messages, 3 insights)');
+    log.info('   Pro Monthly: €25 (20 listings/mo, 3 promo coupons/mo, 20 insights/mo, unlimited AI & searches)');
+    log.info('   Pro Yearly: €200 (250 listings/year, 3 promo coupons/mo, 20 insights/mo, unlimited AI & searches)');
+    log.info('   Enterprise: €1000/year (750 listings, 5 team members, 5 promo coupons, unlimited everything)');
+    log.info('   Agency Agent: €0 (granted via agent registration code, 25 listings/year, unlimited AI & searches)');
+    log.info('   Buyer Pro: €3/month (unlimited searches, instant alerts, early access, market insights)');
 
   } catch (error) {
-    console.error('❌ Error seeding products:', error);
+    log.error('❌ Error seeding products:', error);
     process.exit(1);
   } finally {
     await mongoose.disconnect();
-    console.log('\n👋 Disconnected from MongoDB');
+    log.info('\n👋 Disconnected from MongoDB');
   }
 }
 

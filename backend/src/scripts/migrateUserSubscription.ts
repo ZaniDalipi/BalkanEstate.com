@@ -9,6 +9,9 @@ import mongoose from 'mongoose';
 import dotenv from 'dotenv';
 import User from '../models/User';
 import Property from '../models/Property';
+import { scriptLogger } from '../utils/logger';
+
+const log = scriptLogger.child('MigrateUserSub');
 
 dotenv.config();
 
@@ -17,16 +20,16 @@ async function migrateUserSubscription(userEmail?: string) {
     // Connect to MongoDB
     const mongoUri = process.env.MONGO_URI || 'mongodb://localhost:27017/balkan_estate';
     await mongoose.connect(mongoUri);
-    console.log('✅ Connected to MongoDB');
+    log.info('✅ Connected to MongoDB');
 
     // Find users to migrate
     const query = userEmail ? { email: userEmail } : { subscription: { $exists: false } };
     const users = await User.find(query);
 
-    console.log(`\n📊 Found ${users.length} user(s) to migrate\n`);
+    log.info(`\n📊 Found ${users.length} user(s) to migrate\n`);
 
     for (const user of users) {
-      console.log(`\n🔄 Migrating user: ${user.email} (${user._id})`);
+      log.info(`\n🔄 Migrating user: ${user.email} (${user._id})`);
 
       // Check if user has an active Pro subscription (legacy or new system)
       let tier: 'free' | 'pro' | 'agency_owner' | 'agency_agent' | 'buyer' = 'free';
@@ -48,7 +51,7 @@ async function migrateUserSubscription(userEmail?: string) {
           };
         }
         savedSearchesLimit = 10;
-        console.log(`   ✅ Detected Pro subscription: ${listingsLimit} listings limit`);
+        log.info(`   ✅ Detected Pro subscription: ${listingsLimit} listings limit`);
       }
 
       // Count existing active properties to initialize counters correctly
@@ -61,7 +64,7 @@ async function migrateUserSubscription(userEmail?: string) {
       const privateSellerCount = existingProperties.filter((p: any) => p.createdAsRole === 'private_seller').length;
       const agentCount = existingProperties.filter((p: any) => p.createdAsRole === 'agent').length;
 
-      console.log(`   📊 Found ${activeListingsCount} existing properties: ${privateSellerCount} private, ${agentCount} agent`);
+      log.info(`   📊 Found ${activeListingsCount} existing properties: ${privateSellerCount} private, ${agentCount} agent`);
 
       // Create subscription object
       user.subscription = {
@@ -80,15 +83,15 @@ async function migrateUserSubscription(userEmail?: string) {
 
       await user.save();
 
-      console.log(`   ✅ Subscription initialized: ${tier} tier with ${listingsLimit} listings (${activeListingsCount}/${listingsLimit} used)`);
+      log.info(`   ✅ Subscription initialized: ${tier} tier with ${listingsLimit} listings (${activeListingsCount}/${listingsLimit} used)`);
     }
 
-    console.log(`\n✅ Migration complete! Migrated ${users.length} user(s)\n`);
+    log.info(`\n✅ Migration complete! Migrated ${users.length} user(s)\n`);
 
     await mongoose.disconnect();
     process.exit(0);
   } catch (error) {
-    console.error('❌ Migration error:', error);
+    log.error('❌ Migration error:', error);
     await mongoose.disconnect();
     process.exit(1);
   }
@@ -98,9 +101,9 @@ async function migrateUserSubscription(userEmail?: string) {
 const userEmail = process.argv[2];
 
 if (userEmail) {
-  console.log(`\n🎯 Migrating specific user: ${userEmail}\n`);
+  log.info(`\n🎯 Migrating specific user: ${userEmail}\n`);
 } else {
-  console.log(`\n🎯 Migrating all users without subscription object\n`);
+  log.info(`\n🎯 Migrating all users without subscription object\n`);
 }
 
 migrateUserSubscription(userEmail);

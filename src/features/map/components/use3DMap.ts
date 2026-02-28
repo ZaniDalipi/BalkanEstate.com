@@ -6,6 +6,7 @@ import { useRef, useEffect, useState, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import * as maplibregl from 'maplibre-gl';
 import { useShadowTimelapse } from '../hooks/useShadowTimelapse';
+import { mapLogger } from '@/src/shared/utils/logger';
 import type { Map3DBuildingsProps } from './Map3DConstants';
 import { TIME_LIGHTING, calculateBuildingShadow, calculateSunPosition, getCurrentDayOfYear } from './Map3DConstants';
 
@@ -436,7 +437,7 @@ export function use3DMap(props: Map3DBuildingsProps) {
 
     // Check if 3d-buildings layer exists
     if (!mapInstance.getLayer('3d-buildings')) {
-      console.warn('3D buildings layer not found in the map style. Custom building will be a simple box.');
+      mapLogger.warn('3D buildings layer not found in the map style. Custom building will be a simple box.');
     }
 
     // Helper function to calculate building centroid

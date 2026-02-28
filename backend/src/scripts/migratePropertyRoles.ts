@@ -2,6 +2,9 @@ import mongoose from 'mongoose';
 import Property from '../models/Property';
 import User from '../models/User';
 import dotenv from 'dotenv';
+import { scriptLogger } from '../utils/logger';
+
+const log = scriptLogger.child('MigratePropertyRoles');
 
 // Load environment variables
 dotenv.config();
@@ -22,9 +25,9 @@ const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/balkan
 
 async function migratePropertyRoles() {
     try {
-        console.log('🔌 Connecting to MongoDB...');
+        log.info('🔌 Connecting to MongoDB...');
         await mongoose.connect(MONGODB_URI);
-        console.log('✅ Connected to MongoDB');
+        log.info('✅ Connected to MongoDB');
 
         // Find all properties without createdAsRole
         const properties = await Property.find({
@@ -34,10 +37,10 @@ async function migratePropertyRoles() {
             ]
         });
 
-        console.log(`\n📊 Found ${properties.length} properties to migrate`);
+        log.info(`\n📊 Found ${properties.length} properties to migrate`);
 
         if (properties.length === 0) {
-            console.log('✨ No properties to migrate. All properties have createdAsRole set.');
+            log.info('✨ No properties to migrate. All properties have createdAsRole set.');
             await mongoose.disconnect();
             return;
         }
@@ -51,7 +54,7 @@ async function migratePropertyRoles() {
                 const seller = await User.findById(property.sellerId);
 
                 if (!seller) {
-                    console.log(`⚠️  Property ${property._id}: Seller not found (${property.sellerId})`);
+                    log.warn(`⚠️  Property ${property._id}: Seller not found (${property.sellerId})`);
                     errorCount++;
                     continue;
                 }
@@ -85,24 +88,24 @@ async function migratePropertyRoles() {
                 await property.save();
                 migratedCount++;
 
-                console.log(`✅ Property ${property._id}: Set createdAsRole to "${roleToUse}" (Seller: ${seller.name})`);
+                log.info(`✅ Property ${property._id}: Set createdAsRole to "${roleToUse}" (Seller: ${seller.name})`);
             } catch (error) {
-                console.error(`❌ Error migrating property ${property._id}:`, error);
+                log.error(`❌ Error migrating property ${property._id}:`, error);
                 errorCount++;
             }
         }
 
-        console.log('\n' + '='.repeat(60));
-        console.log(`✨ Migration complete!`);
-        console.log(`   - Total properties processed: ${properties.length}`);
-        console.log(`   - Successfully migrated: ${migratedCount}`);
-        console.log(`   - Errors: ${errorCount}`);
-        console.log('='.repeat(60));
+        log.info('\n' + '='.repeat(60));
+        log.info(`✨ Migration complete!`);
+        log.info(`   - Total properties processed: ${properties.length}`);
+        log.info(`   - Successfully migrated: ${migratedCount}`);
+        log.info(`   - Errors: ${errorCount}`);
+        log.info('='.repeat(60));
 
         await mongoose.disconnect();
-        console.log('🔌 Disconnected from MongoDB');
+        log.info('🔌 Disconnected from MongoDB');
     } catch (error) {
-        console.error('💥 Migration failed:', error);
+        log.error('💥 Migration failed:', error);
         process.exit(1);
     }
 }
@@ -110,10 +113,10 @@ async function migratePropertyRoles() {
 // Run the migration
 migratePropertyRoles()
     .then(() => {
-        console.log('\n✅ Migration script finished successfully');
+        log.info('\n✅ Migration script finished successfully');
         process.exit(0);
     })
     .catch((error) => {
-        console.error('\n❌ Migration script failed:', error);
+        log.error('\n❌ Migration script failed:', error);
         process.exit(1);
     });

@@ -2,6 +2,9 @@ import mongoose from 'mongoose';
 import dotenv from 'dotenv';
 import Agent from '../models/Agent';
 import User from '../models/User';
+import { scriptLogger } from '../utils/logger';
+
+const log = scriptLogger.child('RemoveAgents');
 
 // Load environment variables
 dotenv.config();
@@ -10,16 +13,16 @@ const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017/balkan
 
 async function removeAllAgents() {
   try {
-    console.log('🔌 Connecting to database...');
+    log.info('🔌 Connecting to database...');
     await mongoose.connect(MONGODB_URI);
-    console.log('✅ Connected to database');
+    log.info('✅ Connected to database');
 
     // Count agents before deletion
     const agentCount = await Agent.countDocuments();
-    console.log(`\n📊 Found ${agentCount} agents in database`);
+    log.info(`\n📊 Found ${agentCount} agents in database`);
 
     if (agentCount === 0) {
-      console.log('✅ No agents to remove');
+      log.info('✅ No agents to remove');
       await mongoose.disconnect();
       return;
     }
@@ -30,7 +33,7 @@ async function removeAllAgents() {
 
     // Delete all agents
     const agentResult = await Agent.deleteMany({});
-    console.log(`\n✅ Deleted ${agentResult.deletedCount} agents`);
+    log.info(`\n✅ Deleted ${agentResult.deletedCount} agents`);
 
     // Update users who were agents back to buyer role
     if (userIds.length > 0) {
@@ -46,15 +49,15 @@ async function removeAllAgents() {
           }
         }
       );
-      console.log(`✅ Updated ${userResult.modifiedCount} users (changed role from agent to buyer)`);
+      log.info(`✅ Updated ${userResult.modifiedCount} users (changed role from agent to buyer)`);
     }
 
-    console.log('\n✨ All agents removed successfully!');
+    log.info('\n✨ All agents removed successfully!');
 
     await mongoose.disconnect();
-    console.log('🔌 Disconnected from database');
+    log.info('🔌 Disconnected from database');
   } catch (error) {
-    console.error('❌ Error removing agents:', error);
+    log.error('❌ Error removing agents:', error);
     process.exit(1);
   }
 }

@@ -13,18 +13,21 @@ dotenv.config({ path: '.env.development' });
 dotenv.config();
 
 import emailService from '../src/services/emailService';
+import { scriptLogger } from '../src/utils/logger';
 
 const testEmail = process.argv[2];
 const specificType = process.argv[3];
 
+const log = scriptLogger.child('TestAllEmails');
+
 if (!testEmail) {
-  console.error('❌ Please provide an email address as argument');
-  console.log('Usage: npx ts-node scripts/test-all-emails.ts your@email.com [type]');
-  console.log('Types: verification, password-reset, welcome, alert, price-drop, inquiry, weekly-stats, message');
+  log.error('❌ Please provide an email address as argument');
+  log.info('Usage: npx ts-node scripts/test-all-emails.ts your@email.com [type]');
+  log.info('Types: verification, password-reset, welcome, alert, price-drop, inquiry, weekly-stats, message');
   process.exit(1);
 }
 
-console.log(`\n📧 Testing emails to: ${testEmail}\n`);
+log.info(`\n📧 Testing emails to: ${testEmail}\n`);
 
 async function sendTestEmails() {
   const results: { type: string; success: boolean; error?: string }[] = [];
@@ -32,57 +35,57 @@ async function sendTestEmails() {
   // 1. Email Verification (noreply@)
   if (!specificType || specificType === 'verification') {
     try {
-      console.log('📨 Sending: Email Verification (noreply@)...');
+      log.info('📨 Sending: Email Verification (noreply@)...');
       await emailService.sendEmailVerification({
         email: testEmail,
         userName: 'Test User',
         verificationUrl: 'https://balkanestateai.com/verify-email?token=test-token-123',
       });
       results.push({ type: 'Email Verification', success: true });
-      console.log('   ✅ Sent!\n');
+      log.info('   ✅ Sent!\n');
     } catch (error: any) {
       results.push({ type: 'Email Verification', success: false, error: error.message });
-      console.log(`   ❌ Failed: ${error.message}\n`);
+      log.info(`   ❌ Failed: ${error.message}\n`);
     }
   }
 
   // 2. Password Reset (noreply@)
   if (!specificType || specificType === 'password-reset') {
     try {
-      console.log('📨 Sending: Password Reset (noreply@)...');
+      log.info('📨 Sending: Password Reset (noreply@)...');
       await emailService.sendPasswordResetEmail({
         email: testEmail,
         userName: 'Test User',
         resetUrl: 'https://balkanestateai.com/reset-password?token=test-token-456',
       });
       results.push({ type: 'Password Reset', success: true });
-      console.log('   ✅ Sent!\n');
+      log.info('   ✅ Sent!\n');
     } catch (error: any) {
       results.push({ type: 'Password Reset', success: false, error: error.message });
-      console.log(`   ❌ Failed: ${error.message}\n`);
+      log.info(`   ❌ Failed: ${error.message}\n`);
     }
   }
 
   // 3. Welcome Email (support@)
   if (!specificType || specificType === 'welcome') {
     try {
-      console.log('📨 Sending: Welcome Email (support@)...');
+      log.info('📨 Sending: Welcome Email (support@)...');
       await emailService.sendWelcomeEmail({
         email: testEmail,
         userName: 'Test User',
       });
       results.push({ type: 'Welcome Email', success: true });
-      console.log('   ✅ Sent!\n');
+      log.info('   ✅ Sent!\n');
     } catch (error: any) {
       results.push({ type: 'Welcome Email', success: false, error: error.message });
-      console.log(`   ❌ Failed: ${error.message}\n`);
+      log.info(`   ❌ Failed: ${error.message}\n`);
     }
   }
 
   // 4. Property Alert (alerts@)
   if (!specificType || specificType === 'alert') {
     try {
-      console.log('📨 Sending: Property Alert (alerts@)...');
+      log.info('📨 Sending: Property Alert (alerts@)...');
       await emailService.sendPropertyAlert({
         recipientEmail: testEmail,
         recipientName: 'Test User',
@@ -100,17 +103,17 @@ async function sendTestEmails() {
         },
       });
       results.push({ type: 'Property Alert', success: true });
-      console.log('   ✅ Sent!\n');
+      log.info('   ✅ Sent!\n');
     } catch (error: any) {
       results.push({ type: 'Property Alert', success: false, error: error.message });
-      console.log(`   ❌ Failed: ${error.message}\n`);
+      log.info(`   ❌ Failed: ${error.message}\n`);
     }
   }
 
   // 5. Price Drop Alert (alerts@)
   if (!specificType || specificType === 'price-drop') {
     try {
-      console.log('📨 Sending: Price Drop Alert (alerts@)...');
+      log.info('📨 Sending: Price Drop Alert (alerts@)...');
       await emailService.sendPriceDropAlert({
         recipientEmail: testEmail,
         recipientName: 'Test User',
@@ -129,17 +132,17 @@ async function sendTestEmails() {
         },
       });
       results.push({ type: 'Price Drop Alert', success: true });
-      console.log('   ✅ Sent!\n');
+      log.info('   ✅ Sent!\n');
     } catch (error: any) {
       results.push({ type: 'Price Drop Alert', success: false, error: error.message });
-      console.log(`   ❌ Failed: ${error.message}\n`);
+      log.info(`   ❌ Failed: ${error.message}\n`);
     }
   }
 
   // 6. Agent Inquiry (inquiries@)
   if (!specificType || specificType === 'inquiry') {
     try {
-      console.log('📨 Sending: Agent Inquiry (inquiries@)...');
+      log.info('📨 Sending: Agent Inquiry (inquiries@)...');
       await emailService.sendAgentInquiry({
         agentEmail: testEmail,
         agentName: 'Test Agent',
@@ -153,17 +156,17 @@ async function sendTestEmails() {
         inquiryType: 'property',
       });
       results.push({ type: 'Agent Inquiry (Property)', success: true });
-      console.log('   ✅ Sent!\n');
+      log.info('   ✅ Sent!\n');
     } catch (error: any) {
       results.push({ type: 'Agent Inquiry (Property)', success: false, error: error.message });
-      console.log(`   ❌ Failed: ${error.message}\n`);
+      log.info(`   ❌ Failed: ${error.message}\n`);
     }
   }
 
   // 7. New Message Notification (inquiries@)
   if (!specificType || specificType === 'message') {
     try {
-      console.log('📨 Sending: New Message Notification (inquiries@)...');
+      log.info('📨 Sending: New Message Notification (inquiries@)...');
       await emailService.sendNewMessageNotification({
         recipientEmail: testEmail,
         recipientName: 'Test User',
@@ -175,17 +178,17 @@ async function sendTestEmails() {
         conversationUrl: 'https://balkanestateai.com/messages/test-conversation',
       });
       results.push({ type: 'New Message Notification', success: true });
-      console.log('   ✅ Sent!\n');
+      log.info('   ✅ Sent!\n');
     } catch (error: any) {
       results.push({ type: 'New Message Notification', success: false, error: error.message });
-      console.log(`   ❌ Failed: ${error.message}\n`);
+      log.info(`   ❌ Failed: ${error.message}\n`);
     }
   }
 
   // 8. Weekly Stats (support@)
   if (!specificType || specificType === 'weekly-stats') {
     try {
-      console.log('📨 Sending: Weekly Stats (support@)...');
+      log.info('📨 Sending: Weekly Stats (support@)...');
       await emailService.sendWeeklyStats({
         userName: 'Test User',
         email: testEmail,
@@ -207,44 +210,44 @@ async function sendTestEmails() {
         },
       });
       results.push({ type: 'Weekly Stats', success: true });
-      console.log('   ✅ Sent!\n');
+      log.info('   ✅ Sent!\n');
     } catch (error: any) {
       results.push({ type: 'Weekly Stats', success: false, error: error.message });
-      console.log(`   ❌ Failed: ${error.message}\n`);
+      log.info(`   ❌ Failed: ${error.message}\n`);
     }
   }
 
   // Print summary
-  console.log('═══════════════════════════════════════════');
-  console.log('                  SUMMARY                  ');
-  console.log('═══════════════════════════════════════════\n');
+  log.info('═══════════════════════════════════════════');
+  log.info('                  SUMMARY                  ');
+  log.info('═══════════════════════════════════════════\n');
 
   const successful = results.filter(r => r.success);
   const failed = results.filter(r => !r.success);
 
   if (successful.length > 0) {
-    console.log(`✅ Sent successfully (${successful.length}):`);
-    successful.forEach(r => console.log(`   - ${r.type}`));
-    console.log('');
+    log.info(`✅ Sent successfully (${successful.length}):`);
+    successful.forEach(r => log.info(`   - ${r.type}`));
+    log.info('');
   }
 
   if (failed.length > 0) {
-    console.log(`❌ Failed (${failed.length}):`);
-    failed.forEach(r => console.log(`   - ${r.type}: ${r.error}`));
-    console.log('');
+    log.info(`❌ Failed (${failed.length}):`);
+    failed.forEach(r => log.info(`   - ${r.type}: ${r.error}`));
+    log.info('');
   }
 
-  console.log(`📊 Total: ${successful.length}/${results.length} emails sent successfully\n`);
+  log.info(`📊 Total: ${successful.length}/${results.length} emails sent successfully\n`);
 
   if (failed.length > 0) {
-    console.log('💡 Tip: Make sure RESEND_API_KEY is set in your .env.development file');
-    console.log('   Get a free API key at: https://resend.com\n');
+    log.info('💡 Tip: Make sure RESEND_API_KEY is set in your .env.development file');
+    log.info('   Get a free API key at: https://resend.com\n');
   }
 }
 
 sendTestEmails()
   .then(() => process.exit(0))
   .catch(error => {
-    console.error('Fatal error:', error);
+    log.error('Fatal error:', error);
     process.exit(1);
   });
