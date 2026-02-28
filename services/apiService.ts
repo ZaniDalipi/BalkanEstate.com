@@ -72,6 +72,15 @@ const removeToken = () => {
 
 // --- HTTP CLIENT ---
 
+/** Read the CSRF token from the __csrf cookie (double-submit cookie pattern) */
+const getCsrfToken = (): string | undefined => {
+  const match = document.cookie.match(/(?:^|;\s*)__csrf=([^;]*)/);
+  return match ? match[1] : undefined;
+};
+
+/** HTTP methods that mutate state and require a CSRF token */
+const MUTATION_METHODS = new Set(['POST', 'PUT', 'PATCH', 'DELETE']);
+
 interface RequestOptions {
   method?: string;
   body?: any;
@@ -124,11 +133,22 @@ const apiRequest = async <T>(endpoint: string, options: RequestOptions = {}, ret
     keyInfo = await generateResponseKey();
   }
 
+  // Include CSRF token on mutation requests (double-submit cookie pattern)
+  const csrfHeaders: Record<string, string> = {};
+  if (MUTATION_METHODS.has(method)) {
+    const csrfToken = getCsrfToken();
+    if (csrfToken) {
+      csrfHeaders['X-CSRF-Token'] = csrfToken;
+    }
+  }
+
   const config: RequestInit = {
     method,
+    credentials: 'include',
     headers: {
       'Content-Type': 'application/json',
       ...headers,
+      ...csrfHeaders,
       ...(keyInfo ? { 'X-Response-Key': keyInfo.encryptedKeyBase64 } : {}),
     },
   };
@@ -748,10 +768,13 @@ export const uploadPropertyImages = async (
     ? `${API_URL}/properties/${propertyId}/upload-images`
     : `${API_URL}/properties/upload-images`;
 
+  const csrfToken = getCsrfToken();
   const response = await fetch(endpoint, {
     method: 'POST',
+    credentials: 'include',
     headers: {
       Authorization: `Bearer ${token}`,
+      ...(csrfToken ? { 'X-CSRF-Token': csrfToken } : {}),
     },
     body: formData,
   });
@@ -950,10 +973,13 @@ export const uploadMessageImage = async (conversationId: string, imageFile: File
   formData.append('image', imageFile);
 
   const token = getToken();
+  const csrfTokenValue = getCsrfToken();
   const response = await fetch(`${API_URL}/conversations/${conversationId}/upload-image`, {
     method: 'POST',
+    credentials: 'include',
     headers: {
       Authorization: `Bearer ${token}`,
+      ...(csrfTokenValue ? { 'X-CSRF-Token': csrfTokenValue } : {}),
     },
     body: formData,
   });

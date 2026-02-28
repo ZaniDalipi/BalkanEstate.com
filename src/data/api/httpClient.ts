@@ -24,6 +24,15 @@ export interface RequestConfig {
   encryptFields?: string[];
 }
 
+/** Read the CSRF token from the __csrf cookie (double-submit cookie pattern) */
+const getCsrfToken = (): string | undefined => {
+  const match = document.cookie.match(/(?:^|;\s*)__csrf=([^;]*)/);
+  return match ? match[1] : undefined;
+};
+
+/** HTTP methods that mutate state and require a CSRF token */
+const CSRF_METHODS = new Set(['POST', 'PUT', 'PATCH', 'DELETE']);
+
 export class HttpClient {
   private static instance: HttpClient;
 
@@ -72,12 +81,22 @@ export class HttpClient {
       processedBody = await encryptSensitiveFields(body, encryptFields);
     }
 
+    // Include CSRF token on mutation requests (double-submit cookie pattern)
+    const csrfHeaders: Record<string, string> = {};
+    if (CSRF_METHODS.has(method)) {
+      const csrfToken = getCsrfToken();
+      if (csrfToken) {
+        csrfHeaders['X-CSRF-Token'] = csrfToken;
+      }
+    }
+
     const requestConfig: RequestInit = {
       method,
       credentials: 'include', // Send httpOnly cookies
       headers: {
         'Content-Type': 'application/json',
         ...headers,
+        ...csrfHeaders,
         ...(keyInfo ? { 'X-Response-Key': keyInfo.encryptedKeyBase64 } : {}),
       },
     };
@@ -160,6 +179,12 @@ export class HttpClient {
 
     if (requiresAuth && token) {
       headers.Authorization = `Bearer ${token}`;
+    }
+
+    // Include CSRF token for upload mutations (double-submit cookie pattern)
+    const csrfToken = getCsrfToken();
+    if (csrfToken) {
+      headers['X-CSRF-Token'] = csrfToken;
     }
 
     try {
