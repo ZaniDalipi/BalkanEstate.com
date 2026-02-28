@@ -48,8 +48,8 @@ const parseCookie = (req: Request, name: string): string | undefined => {
  * - GET/HEAD/OPTIONS: safe methods that don't modify state
  */
 const EXEMPT_PATHS = [
-  '/api/auth/',
-  '/api/webhooks/',
+  '/auth/',
+  '/webhooks/',
   '/health',
 ];
 
