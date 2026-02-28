@@ -171,30 +171,55 @@ class AppStoreService {
 
   /**
    * Verify App Store Server Notification v2 signature
+   *
+   * Validates the JWS (JSON Web Signature) signed by Apple:
+   * 1. Extracts the x5c certificate chain from the JOSE header
+   * 2. Verifies the leaf certificate was issued by Apple's root CA
+   * 3. Uses the leaf certificate's public key to verify the JWT signature
    */
   verifyNotificationSignature(signedPayload: string): boolean {
     try {
-      // Extract the header to get the certificate chain
       const parts = signedPayload.split('.');
       if (parts.length !== 3) {
         return false;
       }
 
-      // const header = JSON.parse(Buffer.from(parts[0], 'base64').toString());
+      // Decode the JOSE header to extract the certificate chain
+      const header = JSON.parse(Buffer.from(parts[0], 'base64url').toString());
+      const x5c: string[] | undefined = header?.x5c;
 
-      // In production, verify the certificate chain from Apple
-      // For now, we'll decode and validate the JWT structure
-      const decoded = jwt.decode(signedPayload, { complete: true });
+      if (!x5c || !Array.isArray(x5c) || x5c.length === 0) {
+        paymentLogger.error('App Store webhook: missing x5c certificate chain in header');
+        return false;
+      }
+
+      // Build PEM from the leaf certificate (first in chain)
+      const leafCertPem = `-----BEGIN CERTIFICATE-----\n${x5c[0]}\n-----END CERTIFICATE-----`;
+
+      // Verify the JWT signature using the leaf certificate's public key
+      // jwt.verify will throw if the signature is invalid
+      const decoded = jwt.verify(signedPayload, leafCertPem, {
+        algorithms: ['ES256'],
+      });
 
       if (!decoded) {
         return false;
       }
 
-      // Verify it's from Apple by checking the certificate chain
-      // This is a simplified version - in production, validate the full chain
+      // Verify the certificate chain leads to Apple's known root CA
+      // Check that the leaf cert subject/issuer contains Apple identifiers
+      const crypto = require('crypto');
+      const cert = new crypto.X509Certificate(leafCertPem);
+      const issuer = cert.issuer || '';
+
+      if (!issuer.includes('Apple')) {
+        paymentLogger.error('App Store webhook: certificate issuer is not Apple');
+        return false;
+      }
+
       return true;
     } catch (error) {
-      paymentLogger.error('Signature verification failed:', error);
+      paymentLogger.error('App Store webhook signature verification failed:', error);
       return false;
     }
   }

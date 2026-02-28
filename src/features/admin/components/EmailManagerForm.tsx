@@ -5,6 +5,7 @@ import {
   XMarkIcon,
 } from '@/constants';
 import { EmailConfig } from '../hooks/useEmailConfigData';
+import { sanitizeHtml } from '@/src/shared/utils/sanitize';
 
 // ============================================================================
 // Edit Email Modal
@@ -296,7 +297,7 @@ export const PreviewEmailModal: React.FC<PreviewEmailModalProps> = ({
           <div
             className="bg-white mx-auto shadow-lg"
             style={{ maxWidth: '600px' }}
-            dangerouslySetInnerHTML={{ __html: previewHtml }}
+            dangerouslySetInnerHTML={{ __html: sanitizeHtml(previewHtml) }}
           />
         </div>
       </div>

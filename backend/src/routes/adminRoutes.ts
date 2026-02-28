@@ -91,7 +91,7 @@ import multer from 'multer';
 
 const router = express.Router();
 
-// All admin routes require authentication + admin role (VPN check removed for accessibility)
+// All admin routes require: authentication + admin role
 router.use(protect);
 router.use(checkAdminRole);
 

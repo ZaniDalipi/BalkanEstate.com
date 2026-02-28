@@ -1,4 +1,5 @@
 import { GoogleGenAI } from '@google/genai';
+import { escapeRegex } from '../utils/escapeRegex';
 import { propertyLogger } from '../utils/logger';
 import PropertyValuation, {
   IPropertyValuation,
@@ -96,8 +97,8 @@ async function getComparableProperties(
   const bedsRange = 1;
 
   const comparables = await Property.find({
-    city: { $regex: new RegExp(`^${city}$`, 'i') },
-    country: { $regex: new RegExp(`^${country}$`, 'i') },
+    city: { $regex: new RegExp(`^${escapeRegex(city)}$`, 'i') },
+    country: { $regex: new RegExp(`^${escapeRegex(country)}$`, 'i') },
     propertyType,
     status: { $in: ['active', 'sold'] },
     sqft: { $gte: sqft - sqftRange, $lte: sqft + sqftRange },
@@ -125,8 +126,8 @@ async function getComparableProperties(
  */
 async function getMarketData(city: string, country: string) {
   const marketData = await CityMarketData.findOne({
-    city: { $regex: new RegExp(`^${city}$`, 'i') },
-    country: { $regex: new RegExp(`^${country}$`, 'i') },
+    city: { $regex: new RegExp(`^${escapeRegex(city)}$`, 'i') },
+    country: { $regex: new RegExp(`^${escapeRegex(country)}$`, 'i') },
   }).lean();
 
   return marketData;
@@ -500,8 +501,8 @@ export async function getCityValuationStats(city: string, country: string) {
   const stats = await PropertyValuation.aggregate([
     {
       $match: {
-        city: { $regex: new RegExp(`^${city}$`, 'i') },
-        country: { $regex: new RegExp(`^${country}$`, 'i') },
+        city: { $regex: new RegExp(`^${escapeRegex(city)}$`, 'i') },
+        country: { $regex: new RegExp(`^${escapeRegex(country)}$`, 'i') },
         createdAt: { $gte: thirtyDaysAgo },
       },
     },

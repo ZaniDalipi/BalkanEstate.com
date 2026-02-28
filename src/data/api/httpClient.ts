@@ -1,15 +1,27 @@
 // Base HTTP Client
 // Handles all HTTP requests with authentication
+// Now delegates token management to the shared tokenService and
+// supports httpOnly cookie credentials and response encryption.
 
 import { API_URL } from '@/src/shared/api/config';
-
-const TOKEN_KEY = 'balkan_estate_token';
+import { tokenService } from '@/src/shared/api/tokenService';
+import {
+  generateResponseKey,
+  decryptResponse,
+  invalidatePublicKey,
+  encryptSensitiveFields,
+  type ResponseKeyInfo,
+} from '@/src/shared/api/payloadEncryption';
 
 export interface RequestConfig {
   method?: 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE';
   body?: any;
   headers?: Record<string, string>;
   requiresAuth?: boolean;
+  /** Encrypt the server response (for sensitive endpoints) */
+  encryptResponse?: boolean;
+  /** Fields in body to encrypt with RSA before sending */
+  encryptFields?: string[];
 }
 
 export class HttpClient {
@@ -24,28 +36,49 @@ export class HttpClient {
     return HttpClient.instance;
   }
 
-  // Token management
+  // Token management - delegates to shared tokenService
   getToken(): string | null {
-    return localStorage.getItem(TOKEN_KEY);
+    return tokenService.getAccessToken();
   }
 
   setToken(token: string): void {
-    localStorage.setItem(TOKEN_KEY, token);
+    tokenService.setAccessToken(token);
   }
 
   removeToken(): void {
-    localStorage.removeItem(TOKEN_KEY);
+    tokenService.clearTokens();
   }
 
   // HTTP request method
   async request<T>(endpoint: string, config: RequestConfig = {}): Promise<T> {
-    const { method = 'GET', body, headers = {}, requiresAuth = false } = config;
+    const {
+      method = 'GET',
+      body,
+      headers = {},
+      requiresAuth = false,
+      encryptResponse: shouldEncrypt = false,
+      encryptFields,
+    } = config;
+
+    // Generate response encryption key if requested
+    let keyInfo: ResponseKeyInfo | null = null;
+    if (shouldEncrypt) {
+      keyInfo = await generateResponseKey();
+    }
+
+    // Encrypt sensitive request fields if specified
+    let processedBody = body;
+    if (encryptFields && body && typeof body === 'object') {
+      processedBody = await encryptSensitiveFields(body, encryptFields);
+    }
 
     const requestConfig: RequestInit = {
       method,
+      credentials: 'include', // Send httpOnly cookies
       headers: {
         'Content-Type': 'application/json',
         ...headers,
+        ...(keyInfo ? { 'X-Response-Key': keyInfo.encryptedKeyBase64 } : {}),
       },
     };
 
@@ -61,8 +94,8 @@ export class HttpClient {
     }
 
     // Add body if present
-    if (body) {
-      requestConfig.body = JSON.stringify(body);
+    if (processedBody) {
+      requestConfig.body = JSON.stringify(processedBody);
     }
 
     try {
@@ -73,31 +106,47 @@ export class HttpClient {
       const isJson = contentType && contentType.includes('application/json');
 
       if (!response.ok) {
-        const error = isJson ? await response.json() : { message: response.statusText };
+        const rawError = isJson ? await response.json() : { message: response.statusText };
+        let error = rawError;
+        if (keyInfo && rawError?.__encrypted) {
+          try { error = await decryptResponse(rawError, keyInfo.rawKey); } catch { /* use raw */ }
+        }
         throw new Error(error.message || 'An error occurred');
       }
 
-      return isJson ? await response.json() : ({} as T);
+      const rawData = isJson ? await response.json() : ({} as any);
+
+      // Decrypt response if encrypted
+      if (keyInfo && rawData?.__encrypted) {
+        try {
+          return await decryptResponse(rawData, keyInfo.rawKey) as T;
+        } catch {
+          invalidatePublicKey();
+          return rawData as T;
+        }
+      }
+
+      return rawData as T;
     } catch (error) {
       throw error;
     }
   }
 
   // Convenience methods
-  async get<T>(endpoint: string, requiresAuth = false): Promise<T> {
-    return this.request<T>(endpoint, { method: 'GET', requiresAuth });
+  async get<T>(endpoint: string, requiresAuth = false, encryptResponse = false): Promise<T> {
+    return this.request<T>(endpoint, { method: 'GET', requiresAuth, encryptResponse });
   }
 
-  async post<T>(endpoint: string, body?: any, requiresAuth = false): Promise<T> {
-    return this.request<T>(endpoint, { method: 'POST', body, requiresAuth });
+  async post<T>(endpoint: string, body?: any, requiresAuth = false, encryptResponse = false): Promise<T> {
+    return this.request<T>(endpoint, { method: 'POST', body, requiresAuth, encryptResponse });
   }
 
-  async put<T>(endpoint: string, body?: any, requiresAuth = false): Promise<T> {
-    return this.request<T>(endpoint, { method: 'PUT', body, requiresAuth });
+  async put<T>(endpoint: string, body?: any, requiresAuth = false, encryptResponse = false): Promise<T> {
+    return this.request<T>(endpoint, { method: 'PUT', body, requiresAuth, encryptResponse });
   }
 
-  async patch<T>(endpoint: string, body?: any, requiresAuth = false): Promise<T> {
-    return this.request<T>(endpoint, { method: 'PATCH', body, requiresAuth });
+  async patch<T>(endpoint: string, body?: any, requiresAuth = false, encryptResponse = false): Promise<T> {
+    return this.request<T>(endpoint, { method: 'PATCH', body, requiresAuth, encryptResponse });
   }
 
   async delete<T>(endpoint: string, requiresAuth = false): Promise<T> {
@@ -116,6 +165,7 @@ export class HttpClient {
     try {
       const response = await fetch(`${API_URL}${endpoint}`, {
         method: 'POST',
+        credentials: 'include',
         headers,
         body: formData,
       });

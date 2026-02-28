@@ -3,13 +3,16 @@ import dotenv from 'dotenv';
 import path from 'path';
 import crypto from 'crypto';
 import User from '../models/User';
+import { scriptLogger } from '../utils/logger';
+
+const log = scriptLogger.child('SeedDevAdmin');
 
 // Load environment-specific config
 const env = process.env.NODE_ENV || 'development';
 const envFile = env === 'development' ? '.env' : `.env.${env}`;
 dotenv.config({ path: path.resolve(__dirname, '../../', envFile) });
 
-console.log(`🌍 Environment: ${env.toUpperCase()}`);
+log.info(`🌍 Environment: ${env.toUpperCase()}`);
 
 // ═══════════════════════════════════════════════════════════════════════════════
 // SECURITY VALIDATIONS
@@ -23,23 +26,23 @@ const confirmProduction = process.env.CONFIRM_PRODUCTION;
 
 // Require explicit email - no defaults
 if (!adminEmail) {
-  console.error('❌ Error: DEV_ADMIN_EMAIL environment variable is required');
-  console.error('   Usage: DEV_ADMIN_EMAIL=your@email.com DEV_ADMIN_PASSWORD=yourpassword npm run seed:dev-admin');
+  log.error('❌ Error: DEV_ADMIN_EMAIL environment variable is required');
+  log.error('   Usage: DEV_ADMIN_EMAIL=your@email.com DEV_ADMIN_PASSWORD=yourpassword npm run seed:dev-admin');
   process.exit(1);
 }
 
 // Validate email format
 const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 if (!emailRegex.test(adminEmail)) {
-  console.error('❌ Error: Invalid email format');
+  log.error('❌ Error: Invalid email format');
   process.exit(1);
 }
 
 // Require password
 if (!adminPassword) {
-  console.error('❌ Error: DEV_ADMIN_PASSWORD environment variable is required');
-  console.error('   Usage: DEV_ADMIN_EMAIL=your@email.com DEV_ADMIN_PASSWORD=yourpassword npm run seed:dev-admin');
-  console.error('   For super_admin: Add DEV_ADMIN_ROLE=super_admin');
+  log.error('❌ Error: DEV_ADMIN_PASSWORD environment variable is required');
+  log.error('   Usage: DEV_ADMIN_EMAIL=your@email.com DEV_ADMIN_PASSWORD=yourpassword npm run seed:dev-admin');
+  log.error('   For super_admin: Add DEV_ADMIN_ROLE=super_admin');
   process.exit(1);
 }
 
@@ -62,16 +65,16 @@ if (!/[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(adminPassword)) {
 }
 
 if (passwordErrors.length > 0) {
-  console.error('❌ Error: Password does not meet security requirements:');
-  passwordErrors.forEach(err => console.error(`   - ${err}`));
+  log.error('❌ Error: Password does not meet security requirements:');
+  passwordErrors.forEach(err => log.error(`   - ${err}`));
   process.exit(1);
 }
 
 // Production safety check
 if (env === 'production' && confirmProduction !== 'yes') {
-  console.error('❌ Error: Production environment requires explicit confirmation');
-  console.error('   Add CONFIRM_PRODUCTION=yes to proceed');
-  console.error('   ⚠️  This will modify the production database!');
+  log.error('❌ Error: Production environment requires explicit confirmation');
+  log.error('   Add CONFIRM_PRODUCTION=yes to proceed');
+  log.error('   ⚠️  This will modify the production database!');
   process.exit(1);
 }
 
@@ -127,7 +130,7 @@ async function logAuditEvent(action: string, email: string, role: string) {
     checksum,
   });
 
-  console.log(`📋 Audit log created: ${action}`);
+  log.info(`📋 Audit log created: ${action}`);
 }
 
 // ═══════════════════════════════════════════════════════════════════════════════
@@ -169,12 +172,12 @@ async function seedDevAdmin() {
     // Connect to MongoDB
     const mongoUri = process.env.MONGO_URI || process.env.MONGODB_URI;
     if (!mongoUri) {
-      console.error('❌ Error: MONGO_URI or MONGODB_URI environment variable is required');
+      log.error('❌ Error: MONGO_URI or MONGODB_URI environment variable is required');
       process.exit(1);
     }
 
     await mongoose.connect(mongoUri);
-    console.log('✅ Connected to MongoDB');
+    log.info('✅ Connected to MongoDB');
 
     // Rate limiting: Check if admin was created/modified in last 5 minutes
     const recentAudit = await AuditLog.findOne({
@@ -183,9 +186,9 @@ async function seedDevAdmin() {
     });
 
     if (recentAudit) {
-      console.error('❌ Error: Rate limit exceeded');
-      console.error('   An admin action was performed for this email in the last 5 minutes');
-      console.error('   Please wait before trying again');
+      log.error('❌ Error: Rate limit exceeded');
+      log.error('   An admin action was performed for this email in the last 5 minutes');
+      log.error('   Please wait before trying again');
       process.exit(1);
     }
 
@@ -193,8 +196,8 @@ async function seedDevAdmin() {
     let user = await User.findOne({ email: DEV_ADMIN.email });
 
     if (user) {
-      console.log(`\n📝 Found existing user: ${user.email}`);
-      console.log(`   Current role: ${user.role}`);
+      log.info(`\n📝 Found existing user: ${user.email}`);
+      log.info(`   Current role: ${user.role}`);
 
       // Update role
       if (user.role !== adminRole) {
@@ -204,39 +207,39 @@ async function seedDevAdmin() {
         user.primaryRole = adminRole;
         await user.save();
         await logAuditEvent('ROLE_UPDATED', user.email, adminRole);
-        console.log(`✅ Updated user role to: ${adminRole}`);
+        log.info(`✅ Updated user role to: ${adminRole}`);
       } else {
-        console.log(`✓ User already has ${adminRole} role`);
+        log.info(`✓ User already has ${adminRole} role`);
       }
 
       // Update password
       user.password = DEV_ADMIN.password;
       await user.save();
       await logAuditEvent('PASSWORD_UPDATED', user.email, adminRole);
-      console.log(`✅ Password updated`);
+      log.info(`✅ Password updated`);
     } else {
       // Create new admin user
       user = await User.create(DEV_ADMIN);
       await logAuditEvent('ADMIN_CREATED', DEV_ADMIN.email, adminRole);
-      console.log(`\n✅ Created new admin user`);
+      log.info(`\n✅ Created new admin user`);
     }
 
-    console.log('\n═══════════════════════════════════════════');
-    console.log(adminRole === 'super_admin' ? '       👑 SUPER ADMIN READY' : '       🔐 ADMIN READY');
-    console.log('═══════════════════════════════════════════');
-    console.log(`   Email:    ${DEV_ADMIN.email}`);
-    console.log(`   Password: ********** (secured)`);
-    console.log(`   Role:     ${user.role}`);
-    console.log('═══════════════════════════════════════════');
-    console.log('\n🌐 Admin panel: /admin');
-    console.log('');
+    log.info('\n═══════════════════════════════════════════');
+    log.info(adminRole === 'super_admin' ? '       👑 SUPER ADMIN READY' : '       🔐 ADMIN READY');
+    log.info('═══════════════════════════════════════════');
+    log.info(`   Email:    ${DEV_ADMIN.email}`);
+    log.info(`   Password: ********** (secured)`);
+    log.info(`   Role:     ${user.role}`);
+    log.info('═══════════════════════════════════════════');
+    log.info('\n🌐 Admin panel: /admin');
+    log.info('');
 
   } catch (error) {
-    console.error('❌ Error seeding admin:', error);
+    log.error('❌ Error seeding admin:', error);
     process.exit(1);
   } finally {
     await mongoose.disconnect();
-    console.log('👋 Disconnected from MongoDB');
+    log.info('👋 Disconnected from MongoDB');
   }
 }
 

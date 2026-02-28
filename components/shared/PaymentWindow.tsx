@@ -13,6 +13,7 @@ import { useAppContext } from '../../context/AppContext';
 import { API_URL } from '../../src/shared/api/config';
 import { trackEcommerce, trackEvent } from '../../src/components/marketing/Analytics';
 import { encryptSensitiveFields } from '../../src/shared/api/payloadEncryption';
+import { validatePaymentRedirectUrl } from '../../src/utils/security';
 
 // ====== Encrypted Session Storage ======
 // AES-256-GCM encryption for payment data stored in sessionStorage.
@@ -639,9 +640,15 @@ const PaymentWindow: React.FC<PaymentWindowProps> = ({
           payment_provider: data.provider,
         });
 
+        // Validate payment URL against trusted domain allowlist
+        const validatedPaymentUrl = validatePaymentRedirectUrl(data.paymentUrl);
+        if (!validatedPaymentUrl) {
+          throw new Error(t('payment:errors.redirectBlocked'));
+        }
+
         // Open payment provider checkout in a new window
         const checkoutWindow = window.open(
-          data.paymentUrl,
+          validatedPaymentUrl,
           'PaymentWindow',
           'width=600,height=800,scrollbars=yes,resizable=yes,toolbar=no,menubar=no,location=no,status=no'
         );
@@ -662,7 +669,7 @@ const PaymentWindow: React.FC<PaymentWindowProps> = ({
           }, 1000);
         } else {
           // Popup blocked - fall back to redirect
-          window.location.href = data.paymentUrl;
+          window.location.href = validatedPaymentUrl;
         }
       } else {
         throw new Error(t('payment:errors.noPaymentUrl'));

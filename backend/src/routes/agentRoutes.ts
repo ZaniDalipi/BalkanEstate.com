@@ -10,6 +10,7 @@ import {
   getAgentMarketInsights,
 } from '../controllers/agentController';
 import { protect } from '../middleware/auth';
+import { decryptPayload } from '../middleware/decryptPayload';
 
 const router = express.Router();
 
@@ -20,7 +21,7 @@ router.get('/:id', getAgent);
 router.get('/:id/market-insights', getAgentMarketInsights);
 
 // Protected routes
-router.put('/profile', protect, updateAgentProfile);
+router.put('/profile', protect, decryptPayload, updateAgentProfile);
 router.post('/:id/reviews', protect, addReview);
 router.post('/:id/testimonials', protect, addTestimonial); // Deprecated - use /reviews instead
 router.post('/leave-agency', protect, leaveAgency);

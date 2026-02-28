@@ -1,4 +1,5 @@
 import { Request, Response } from 'express';
+import { escapeRegex } from '../utils/escapeRegex';
 import Promotion from '../models/Promotion';
 import Property from '../models/Property';
 import User, { IUser } from '../models/User';
@@ -568,7 +569,7 @@ export const getFeaturedProperties = async (
       .populate({
         path: 'propertyId',
         match: city
-          ? { city: new RegExp(city as string, 'i'), status: 'active' }
+          ? { city: new RegExp(escapeRegex(city as string), 'i'), status: 'active' }
           : { status: 'active' },
         populate: {
           path: 'sellerId',

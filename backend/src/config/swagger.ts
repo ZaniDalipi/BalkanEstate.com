@@ -8,7 +8,7 @@ import { Application } from 'express';
 import swaggerUi from 'swagger-ui-express';
 
 const options: swaggerJsdoc.Options = {
-  swaggerDefinition: {
+  definition: {
     openapi: '3.0.0',
     info: {
       title: 'BalkanEstate API',

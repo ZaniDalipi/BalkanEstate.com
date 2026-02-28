@@ -16,6 +16,7 @@ import {
   ExclamationTriangleIcon,
 } from '@/constants';
 import { API_URL } from '@/src/shared/api/config';
+import { validatePaymentRedirectUrl } from '@/src/utils/security';
 
 interface EnterprisePlan {
   name: string;
@@ -190,8 +191,13 @@ const AgencyPaymentPage: React.FC = () => {
       const data = await response.json();
 
       if (response.ok && data.url) {
-        // Redirect to payment checkout
-        window.location.href = data.url;
+        // Redirect to payment checkout (validated against allowlist)
+        const validatedUrl = validatePaymentRedirectUrl(data.url);
+        if (validatedUrl) {
+          window.location.href = validatedUrl;
+        } else {
+          setError(t('payment:errors.redirectBlocked', 'Payment redirect was blocked for security reasons. Please try again.'));
+        }
       } else {
         setError(data.message || t('payment.error', 'Failed to initiate payment'));
       }

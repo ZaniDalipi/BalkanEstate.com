@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Agency } from '@/types';
 import { useConfirmation } from '@/src/shared/hooks/useConfirmation';
-import { API_URL } from '@/src/shared/api/config';
+import { apiRequest } from '@/src/shared/api';
 
 export interface AgencyEditForm {
   name: string;
@@ -101,22 +101,16 @@ export function useAgencyManager() {
   const fetchAgencies = async () => {
     try {
       setIsLoading(true);
-      const token = localStorage.getItem('balkan_estate_token');
 
       const params = new URLSearchParams({
         page: currentPage.toString(),
         limit: '20',
       });
 
-      const response = await fetch(`${API_URL}/admin/agencies?${params}`, {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-        },
+      const data = await apiRequest<any>(`/admin/agencies?${params}`, {
+        requiresAuth: true,
+        encryptResponse: true,
       });
-
-      if (!response.ok) throw new Error('Failed to fetch agencies');
-
-      const data = await response.json();
       setAgencies(data.agencies || []);
       setTotalPages(data.pagination?.totalPages || 1);
       setTotalAgencies(data.pagination?.totalItems || 0);
@@ -175,24 +169,18 @@ export function useAgencyManager() {
     if (!editingAgency) return;
 
     try {
-      const token = localStorage.getItem('balkan_estate_token');
-
       const sanitizedForm = {
         ...editForm,
         specialties: editForm.specialties.filter(s => s),
         certifications: editForm.certifications.filter(s => s),
       };
 
-      const response = await fetch(`${API_URL}/admin/agencies/${editingAgency._id}`, {
+      await apiRequest(`/admin/agencies/${editingAgency._id}`, {
         method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,
-        },
-        body: JSON.stringify(sanitizedForm),
+        body: sanitizedForm,
+        requiresAuth: true,
+        encryptResponse: true,
       });
-
-      if (!response.ok) throw new Error('Failed to update agency');
 
       await fetchAgencies();
       setIsEditModalOpen(false);
@@ -216,16 +204,11 @@ export function useAgencyManager() {
     if (!confirmed) return;
 
     try {
-      const token = localStorage.getItem('balkan_estate_token');
-
-      const response = await fetch(`${API_URL}/admin/agencies/${agencyId}`, {
+      await apiRequest(`/admin/agencies/${agencyId}`, {
         method: 'DELETE',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-        },
+        requiresAuth: true,
+        encryptResponse: true,
       });
-
-      if (!response.ok) throw new Error('Failed to delete agency');
 
       await fetchAgencies();
       setSuccessMessage('Agency deleted successfully');

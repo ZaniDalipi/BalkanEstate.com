@@ -1,6 +1,9 @@
 import mongoose from 'mongoose';
 import dotenv from 'dotenv';
 import Agency from '../models/Agency';
+import { scriptLogger } from '../utils/logger';
+
+const log = scriptLogger.child('AddOwners');
 
 // Load environment variables
 dotenv.config();
@@ -10,11 +13,11 @@ const addOwnersToAgencyMembers = async () => {
     // Connect to MongoDB
     const mongoUri = process.env.MONGO_URI || 'mongodb://localhost:27017/balkan-estate';
     await mongoose.connect(mongoUri);
-    console.log('Connected to MongoDB');
+    log.info('Connected to MongoDB');
 
     // Find all agencies
     const agencies = await Agency.find({});
-    console.log(`Found ${agencies.length} agencies to process`);
+    log.info(`Found ${agencies.length} agencies to process`);
 
     let updatedCount = 0;
     let skippedCount = 0;
@@ -27,27 +30,27 @@ const addOwnersToAgencyMembers = async () => {
       );
 
       if (!isOwnerInAgents) {
-        console.log(`➕ Adding owner to agency: ${agency.name}`);
+        log.info(`➕ Adding owner to agency: ${agency.name}`);
         // Add owner to agents array
         agency.agents.unshift(agency.ownerId); // Add at the beginning
         agency.totalAgents = agency.agents.length;
         await agency.save();
         updatedCount++;
       } else {
-        console.log(`✓ Owner already in agency: ${agency.name}`);
+        log.info(`✓ Owner already in agency: ${agency.name}`);
         skippedCount++;
       }
     }
 
-    console.log('\n=== Migration Summary ===');
-    console.log(`Total agencies: ${agencies.length}`);
-    console.log(`Updated: ${updatedCount}`);
-    console.log(`Skipped (already correct): ${skippedCount}`);
-    console.log('✅ Migration completed successfully!');
+    log.info('\n=== Migration Summary ===');
+    log.info(`Total agencies: ${agencies.length}`);
+    log.info(`Updated: ${updatedCount}`);
+    log.info(`Skipped (already correct): ${skippedCount}`);
+    log.info('✅ Migration completed successfully!');
 
     process.exit(0);
   } catch (error) {
-    console.error('❌ Error during migration:', error);
+    log.error('❌ Error during migration:', error);
     process.exit(1);
   }
 };

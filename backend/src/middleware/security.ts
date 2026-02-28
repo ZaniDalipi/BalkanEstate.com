@@ -7,9 +7,11 @@ import helmet from 'helmet';
 import hpp from 'hpp';
 import rateLimit from 'express-rate-limit';
 import { Request, Response, NextFunction, Application } from 'express';
+import { IncomingMessage, ServerResponse } from 'http';
 import cors from 'cors';
 import crypto from 'crypto';
 import { apiLogger } from '../utils/logger';
+import { buildSafeHttpsRedirect } from '../utils/redirectValidation';
 
 // Environment detection
 const isProduction = process.env.NODE_ENV === 'production';
@@ -111,13 +113,23 @@ export const validateEnvironment = (): void => {
 };
 
 /**
- * Configure Helmet security headers
+ * Generate a per-request CSP nonce.
+ * The nonce is attached to res.locals.cspNonce so it can be injected into
+ * script/style tags by the HTML template (e.g., index.html).
+ */
+export const cspNonceMiddleware = (_req: Request, res: Response, next: NextFunction): void => {
+  res.locals.cspNonce = crypto.randomBytes(16).toString('base64');
+  next();
+};
+
+/**
+ * Configure Helmet security headers with per-request nonce-based CSP.
  *
  * CSP Notes:
- * - 'unsafe-inline' is required for Tailwind CSS and React's style injection
- * - 'unsafe-eval' is required for some mapping libraries (MapLibre, Leaflet)
- * - TODO: Implement nonce-based CSP for better security when feasible
- * - Report-only mode can be used to test stricter policies
+ * - Nonce-based CSP for scripts replaces 'unsafe-inline'
+ * - 'unsafe-eval' is still required for MapLibre GL JS
+ *   See: https://github.com/maplibre/maplibre-gl-js/issues/1035
+ * - Styles still use 'unsafe-inline' because Tailwind injects styles dynamically
  */
 export const helmetConfig = helmet({
   // Content Security Policy
@@ -126,10 +138,9 @@ export const helmetConfig = helmet({
       defaultSrc: ["'self'"],
       scriptSrc: [
         "'self'",
-        // Note: 'unsafe-inline' needed for React hydration, Tailwind
-        // TODO: Migrate to nonce-based CSP for scripts
-        "'unsafe-inline'",
-        // Note: 'unsafe-eval' needed for MapLibre GL JS
+        // Nonce-based CSP for inline scripts (replaces 'unsafe-inline')
+        (_req: IncomingMessage, res: ServerResponse) => `'nonce-${(res as any).locals?.cspNonce || ''}'`,
+        // 'unsafe-eval' still needed for MapLibre GL JS
         // See: https://github.com/maplibre/maplibre-gl-js/issues/1035
         "'unsafe-eval'",
         'https://unpkg.com',
@@ -138,7 +149,7 @@ export const helmetConfig = helmet({
       ],
       styleSrc: [
         "'self'",
-        // Note: 'unsafe-inline' needed for Tailwind CSS and component styles
+        // Styles still need 'unsafe-inline' for Tailwind CSS dynamic injection
         "'unsafe-inline'",
         'https://fonts.googleapis.com',
         'https://unpkg.com',
@@ -254,9 +265,6 @@ export const getCorsConfig = () => {
         'http://127.0.0.1:3000',
       ]
     : [
-        'https://balkanestate.com',
-        'https://www.balkanestate.com',
-        'https://app.balkanestate.com',
         'https://balkanestateai.com',
         'https://www.balkanestateai.com',
       ];
@@ -462,9 +470,16 @@ const sanitizeNoSQLInjection = (obj: any, path = ''): any => {
 };
 
 export const mongoSanitization = (req: Request, _res: Response, next: NextFunction): void => {
-  // Only sanitize body - query and params are read-only in newer Express
+  // Sanitize request body
   if (req.body && typeof req.body === 'object') {
     req.body = sanitizeNoSQLInjection(req.body, 'body');
+  }
+  // Sanitize query parameters to prevent operator injection via ?key[$gt]=
+  if (req.query && typeof req.query === 'object') {
+    const sanitizedQuery = sanitizeNoSQLInjection({ ...req.query }, 'query');
+    for (const key of Object.keys(req.query)) {
+      (req.query as any)[key] = sanitizedQuery[key];
+    }
   }
   next();
 };
@@ -543,19 +558,22 @@ export const requestId = (req: Request, res: Response, next: NextFunction): void
  */
 export const securityLogger = (req: Request, _res: Response, next: NextFunction): void => {
   // Log suspicious patterns
-  const suspiciousPatterns = [
-    /(\.\.|\/\.)/,  // Path traversal
-    /<script/i,     // XSS attempt
-    /javascript:/i, // XSS attempt
-    /\$where/i,     // NoSQL injection
-    /\$gt/i,        // NoSQL injection
-    /\$lt/i,        // NoSQL injection
+  const suspiciousPatterns: Array<{ pattern: RegExp; label: string }> = [
+    { pattern: /(\.\.|\/\.)/, label: 'Path traversal' },
+    { pattern: /<script/i, label: 'XSS attempt' },
+    { pattern: /javascript:/i, label: 'XSS attempt' },
+    { pattern: /\$where/i, label: 'NoSQL injection' },
+    { pattern: /\$gt/i, label: 'NoSQL injection' },
+    { pattern: /\$lt/i, label: 'NoSQL injection' },
   ];
 
   const requestData = JSON.stringify({ body: req.body, query: req.query, params: req.params });
 
-  for (const pattern of suspiciousPatterns) {
+  for (const { pattern, label } of suspiciousPatterns) {
     if (pattern.test(requestData) || pattern.test(req.path)) {
+      apiLogger.warn(
+        `[SECURITY] Suspicious request detected: ${label} | IP: ${req.ip} | Path: ${req.path} | Method: ${req.method}`
+      );
       break;
     }
   }
@@ -588,8 +606,13 @@ export const enforceHttps = (req: Request, res: Response, next: NextFunction): v
       res.status(403).json({ message: 'HTTPS is required' });
       return;
     }
-    // For other requests, redirect to HTTPS
-    res.redirect(301, `https://${req.hostname}${req.originalUrl}`);
+    // For other requests, redirect to HTTPS (validated against allowlist)
+    const httpsUrl = buildSafeHttpsRedirect(req);
+    if (!httpsUrl) {
+      res.status(400).json({ message: 'Invalid host' });
+      return;
+    }
+    res.redirect(301, httpsUrl);
     return;
   }
   next();
@@ -609,7 +632,10 @@ export const applySecurityMiddleware = (app: Application): void => {
   // 2. Request ID (for tracking)
   app.use(requestId);
 
-  // 3. Helmet security headers
+  // 3. CSP nonce generation (must come before Helmet)
+  app.use(cspNonceMiddleware);
+
+  // 4. Helmet security headers (uses nonce from res.locals.cspNonce)
   app.use(helmetConfig);
 
   // 4. HPP protection
@@ -641,7 +667,7 @@ export const getSocketCorsConfig = () => {
 
   const defaultOrigins = isDevelopment
     ? ['http://localhost:5173', 'http://localhost:3000']
-    : ['https://balkanestate.com', 'https://www.balkanestate.com', 'https://balkanestateai.com', 'https://www.balkanestateai.com'];
+    : ['https://balkanestateai.com', 'https://www.balkanestateai.com'];
 
   return {
     origin: [...new Set([...defaultOrigins, ...allowedOrigins])],
@@ -655,6 +681,7 @@ export default {
   applySecurityMiddleware,
   enforceHttps,
   helmetConfig,
+  cspNonceMiddleware,
   getCorsConfig,
   generalRateLimiter,
   sensitiveRateLimiter,

@@ -49,6 +49,7 @@
     "tryAgain": "Обидете се повторно по неколку моменти",
     "contactSupport": "Контактирајте поддршка ако проблемот продолжи",
     "noPaymentUrl": "Не е примена URL за плаќање",
+    "redirectBlocked": "Пренасочувањето за плаќање беше блокирано од безбедносни причини. Ве молиме обидете се повторно.",
     "sessionCreationFailed": "Не успеа креирање на сесија за плаќање",
     "invalidDiscountCode": "Невалиден код за попуст",
     "freeSubscriptionFailed": "Failed to apply free subscription",

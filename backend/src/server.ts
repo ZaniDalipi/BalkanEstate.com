@@ -3,6 +3,7 @@ import { createServer } from 'http';
 import { Server } from 'socket.io';
 import dotenv from 'dotenv';
 import compression from 'compression';
+import cookieParser from 'cookie-parser';
 import morgan from 'morgan';
 import connectDB from './config/database';
 import { setupChatSocket } from './sockets/chatSocket';
@@ -25,6 +26,9 @@ import {
   xssSanitizer,
   getSocketCorsConfig,
 } from './middleware/security';
+
+// CSRF protection (double-submit cookie pattern)
+import { csrfCookie, csrfValidation } from './middleware/csrf';
 
 // Import cache middleware
 import { apiCache } from './middleware/cache';
@@ -206,9 +210,10 @@ serverLogger.info('✅ Monthly coupon refresh job started (1st of each month)');
 // ============================================================================
 applySecurityMiddleware(app);
 
-// Body parser
+// Body parser & cookie parser
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
+app.use(cookieParser());
 
 // Logging (in development)
 if (process.env.NODE_ENV === 'development') {
@@ -222,8 +227,9 @@ app.use(compression());
 import { encryptResponse } from './middleware/encryptResponse';
 app.use(encryptResponse);
 
-// Setup Swagger API documentation (only in development or if explicitly enabled)
-if (process.env.NODE_ENV !== 'production' || process.env.ENABLE_SWAGGER === 'true') {
+// Setup Swagger API documentation (development only — never in production)
+// API docs expose endpoint schemas and could aid attackers
+if (process.env.NODE_ENV !== 'production') {
   setupSwagger(app);
 }
 
@@ -232,8 +238,6 @@ app.get('/health', (_req: Request, res: Response) => {
   res.status(200).json({
     status: 'ok',
     timestamp: new Date().toISOString(),
-    port: process.env.PORT || 5001,
-    cors: 'enabled'
   });
 });
 
@@ -241,11 +245,17 @@ app.get('/health', (_req: Request, res: Response) => {
 app.use('/', sitemapRoutes);
 
 // ============================================================================
-// API ROUTES with Rate Limiting
+// API ROUTES with Rate Limiting & CSRF Protection
 // ============================================================================
 
 // Apply general rate limiting to all API routes
 app.use('/api', generalRateLimiter);
+
+// CSRF protection: set token cookie on every response, validate on mutations
+// This prevents cross-origin forged requests (e.g., malicious sites tricking
+// users into making API calls). Combined with JWT auth, provides defense-in-depth.
+app.use('/api', csrfCookie);
+app.use('/api', csrfValidation);
 
 // Apply XSS sanitization to all API routes
 app.use('/api', xssSanitizer);
@@ -340,6 +350,7 @@ httpServer.listen(PORT, () => {
   serverLogger.info('🔒 Security Features:');
   serverLogger.info('   - Helmet security headers: Enabled');
   serverLogger.info('   - CORS: ' + (isProd ? 'Production whitelist' : 'Development (permissive)'));
+  serverLogger.info('   - CSRF protection: Enabled (double-submit cookie)');
   serverLogger.info('   - Rate limiting: Enabled (general + sensitive + payment)');
   serverLogger.info('   - XSS protection: Enabled');
   serverLogger.info('   - HPP protection: Enabled');

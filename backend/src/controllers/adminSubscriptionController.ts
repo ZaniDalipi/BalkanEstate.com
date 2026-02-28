@@ -14,6 +14,7 @@ import User from '../models/User';
 import { adminLogger } from '../utils/logger';
 import { invalidateCache } from '../middleware/cache';
 import { getObjectIdParam } from '../utils/validateParams';
+import { escapeRegex } from '../utils/escapeRegex';
 
 /**
  * @desc    Get all subscriptions with pagination and filters
@@ -39,10 +40,11 @@ export const getAllSubscriptions = async (req: Request, res: Response): Promise<
     // If search provided, find users first then filter by user IDs
     let userIds: any[] = [];
     if (search) {
+      const safeSearch = escapeRegex(String(search));
       const users = await User.find({
         $or: [
-          { email: { $regex: search, $options: 'i' } },
-          { name: { $regex: search, $options: 'i' } },
+          { email: { $regex: safeSearch, $options: 'i' } },
+          { name: { $regex: safeSearch, $options: 'i' } },
         ],
       }).select('_id');
       userIds = users.map(u => u._id);
@@ -147,10 +149,11 @@ export const getAllPayments = async (req: Request, res: Response): Promise<void>
 
     // Search by email or transaction ID
     if (search) {
+      const safeSearch = escapeRegex(String(search));
       query.$or = [
-        { userEmail: { $regex: search, $options: 'i' } },
-        { userName: { $regex: search, $options: 'i' } },
-        { storeTransactionId: { $regex: search, $options: 'i' } },
+        { userEmail: { $regex: safeSearch, $options: 'i' } },
+        { userName: { $regex: safeSearch, $options: 'i' } },
+        { storeTransactionId: { $regex: safeSearch, $options: 'i' } },
       ];
     }
 

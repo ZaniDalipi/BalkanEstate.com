@@ -18,7 +18,7 @@ export const getAgencies = async (filters?: AgencyFilters): Promise<any> => {
 };
 
 export const getAgency = async (agencyId: string): Promise<any> => {
-  return apiRequest(`/agencies/${agencyId}`, { requiresAuth: true });
+  return apiRequest(`/agencies/${agencyId}`, { requiresAuth: true, encryptResponse: true });
 };
 
 export const getFeaturedAgencies = async (limit?: number): Promise<any> => {
@@ -31,6 +31,7 @@ export const createAgency = async (agencyData: Partial<Agency>): Promise<any> =>
     method: 'POST',
     body: agencyData,
     requiresAuth: true,
+    encryptResponse: true,
   });
 };
 
@@ -39,6 +40,7 @@ export const updateAgency = async (agencyId: string, agencyData: Partial<Agency>
     method: 'PUT',
     body: agencyData,
     requiresAuth: true,
+    encryptResponse: true,
   });
 };
 
@@ -73,6 +75,7 @@ export const addAgentToAgency = async (agencyId: string, agentUserId: string): P
     method: 'POST',
     body: { agentUserId },
     requiresAuth: true,
+    encryptResponse: true,
   });
 };
 
@@ -80,6 +83,7 @@ export const removeAgentFromAgency = async (agencyId: string, agentId: string): 
   return apiRequest(`/agencies/${agencyId}/agents/${agentId}`, {
     method: 'DELETE',
     requiresAuth: true,
+    encryptResponse: true,
   });
 };
 
@@ -93,6 +97,7 @@ export const joinAgencyByInvitationCode = async (
     method: 'POST',
     body: { invitationCode, agencyId },
     requiresAuth: true,
+    encryptResponse: true,
   });
 };
 
@@ -101,21 +106,23 @@ export const createJoinRequest = async (agencyId: string, message?: string): Pro
     method: 'POST',
     body: { agencyId, message },
     requiresAuth: true,
+    encryptResponse: true,
   });
 };
 
 export const getAgentJoinRequests = async (): Promise<any> => {
-  return apiRequest('/agency-join-requests/my-requests', { requiresAuth: true });
+  return apiRequest('/agency-join-requests/my-requests', { requiresAuth: true, encryptResponse: true });
 };
 
 export const getAgencyJoinRequests = async (agencyId: string): Promise<any> => {
-  return apiRequest(`/agency-join-requests/agency/${agencyId}`, { requiresAuth: true });
+  return apiRequest(`/agency-join-requests/agency/${agencyId}`, { requiresAuth: true, encryptResponse: true });
 };
 
 export const approveJoinRequest = async (requestId: string): Promise<any> => {
   return apiRequest(`/agency-join-requests/${requestId}/approve`, {
     method: 'PUT',
     requiresAuth: true,
+    encryptResponse: true,
   });
 };
 
@@ -123,6 +130,7 @@ export const rejectJoinRequest = async (requestId: string): Promise<any> => {
   return apiRequest(`/agency-join-requests/${requestId}/reject`, {
     method: 'PUT',
     requiresAuth: true,
+    encryptResponse: true,
   });
 };
 
@@ -130,6 +138,7 @@ export const cancelJoinRequest = async (requestId: string): Promise<any> => {
   return apiRequest(`/agency-join-requests/${requestId}`, {
     method: 'DELETE',
     requiresAuth: true,
+    encryptResponse: true,
   });
 };
 
@@ -140,6 +149,7 @@ export const addAgencyAdmin = async (agencyId: string, userId: string): Promise<
     method: 'POST',
     body: { userId },
     requiresAuth: true,
+    encryptResponse: true,
   });
 };
 
@@ -147,6 +157,7 @@ export const removeAgencyAdmin = async (agencyId: string, userId: string): Promi
   return apiRequest(`/agencies/${agencyId}/admins/${userId}`, {
     method: 'DELETE',
     requiresAuth: true,
+    encryptResponse: true,
   });
 };
 
@@ -158,6 +169,7 @@ export const verifyInvitationCode = async (
     method: 'POST',
     body: { code },
     requiresAuth: true,
+    encryptResponse: true,
   });
 };
 
@@ -168,6 +180,7 @@ export const findAgencyByInvitationCode = async (
     method: 'POST',
     body: { code },
     requiresAuth: true,
+    encryptResponse: true,
   });
 };
 
@@ -181,6 +194,7 @@ export const createFeaturedSubscription = async (
     method: 'POST',
     body: data,
     requiresAuth: true,
+    encryptResponse: true,
   });
 };
 
@@ -196,6 +210,7 @@ export const cancelFeaturedSubscription = async (
     method: 'DELETE',
     body: { immediately },
     requiresAuth: true,
+    encryptResponse: true,
   });
 };
 
@@ -207,6 +222,7 @@ export const confirmFeaturedPayment = async (
     method: 'POST',
     body: data,
     requiresAuth: true,
+    encryptResponse: true,
   });
 };
 
@@ -215,6 +231,7 @@ export const applyFeaturedCoupon = async (agencyId: string, couponCode: string):
     method: 'POST',
     body: { couponCode },
     requiresAuth: true,
+    encryptResponse: true,
   });
 };
 
@@ -224,5 +241,6 @@ export const leaveAgency = async (): Promise<{ message: string; user: { id: stri
   return apiRequest('/agents/leave-agency', {
     method: 'POST',
     requiresAuth: true,
+    encryptResponse: true,
   });
 };

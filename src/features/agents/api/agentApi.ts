@@ -110,6 +110,7 @@ export const updateAgentProfile = async (agentData: Partial<Agent>): Promise<Age
     method: 'PUT',
     body: agentData,
     requiresAuth: true,
+    encryptResponse: true,
   });
   return transformBackendAgent(response.agent);
 };

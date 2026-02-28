@@ -57,18 +57,39 @@ export const sanitizeInput = (input: string): string => {
   return div.innerHTML;
 };
 
+// Allowlist of trusted domains for redirect validation
+const TRUSTED_REDIRECT_DOMAINS: string[] = [
+  'balkanestateai.com',
+  'www.balkanestateai.com',
+  'api.balkanestateai.com',
+  'accounts.google.com',
+  'bank.paysera.com',
+  'sandbox.paysera.com',
+];
+
+/**
+ * Check if a hostname is in the trusted domains allowlist.
+ * Matches exact domain or subdomains of allowed entries.
+ */
+const isAllowedDomain = (hostname: string): boolean => {
+  const currentHostname = typeof window !== 'undefined' ? window.location.hostname : '';
+  const allDomains = [...TRUSTED_REDIRECT_DOMAINS, currentHostname];
+  return allDomains.some(domain =>
+    domain && (hostname === domain || hostname.endsWith(`.${domain}`))
+  );
+};
+
 // Validate and sanitize URLs to prevent open redirect attacks
 export const sanitizeUrl = (url: string): string => {
   try {
     const parsed = new URL(url, window.location.origin);
-    // Only allow same-origin URLs or specific trusted domains
-    const trustedDomains = [
-      window.location.hostname,
-      'balkanestateai.com',
-      'accounts.google.com',
-    ];
 
-    if (trustedDomains.some(domain => parsed.hostname.endsWith(domain))) {
+    // Only allow http and https protocols
+    if (parsed.protocol !== 'http:' && parsed.protocol !== 'https:') {
+      return '/';
+    }
+
+    if (isAllowedDomain(parsed.hostname)) {
       return parsed.href;
     }
 
@@ -76,6 +97,29 @@ export const sanitizeUrl = (url: string): string => {
     return '/';
   } catch {
     return '/';
+  }
+};
+
+/**
+ * Validate a payment redirect URL from the backend.
+ * Only allows redirects to trusted payment providers and our own domains.
+ */
+export const validatePaymentRedirectUrl = (url: string): string | null => {
+  try {
+    const parsed = new URL(url);
+
+    // Only allow https in production (allow http for localhost in dev)
+    if (parsed.protocol !== 'https:' && parsed.protocol !== 'http:') {
+      return null;
+    }
+
+    if (isAllowedDomain(parsed.hostname)) {
+      return parsed.href;
+    }
+
+    return null;
+  } catch {
+    return null;
   }
 };
 
@@ -113,12 +157,33 @@ export const checkRateLimit = (key: string, maxRequests: number = 10, windowMs: 
   return true;
 };
 
+/**
+ * Display a console warning to prevent self-XSS attacks.
+ * Similar to Facebook/Instagram's approach: if someone is tricked into
+ * pasting malicious code into the console, this warning stops them.
+ */
+const showConsoleWarning = () => {
+  if (typeof window === 'undefined' || !import.meta.env.PROD) return;
+
+  const warningStyle = 'color: red; font-size: 32px; font-weight: bold;';
+  const textStyle = 'color: #333; font-size: 16px;';
+
+  // eslint-disable-next-line no-console
+  console.log('%cStop!', warningStyle);
+  // eslint-disable-next-line no-console
+  console.log(
+    '%cThis browser feature is intended for developers. ' +
+    'If someone told you to copy-paste something here to enable a feature ' +
+    'or "hack" someone\'s account, it is a scam and will give them access to your account.',
+    textStyle,
+  );
+};
+
 // Initialize all security measures
 export const initSecurity = () => {
   preventClickjacking();
-  // Uncomment if you want to disable dev tools (can be annoying for power users)
-  // disableDevToolsShortcuts();
-  // disableContextMenu();
+  showConsoleWarning();
+  disableDevToolsShortcuts();
 };
 
 export default {
@@ -127,6 +192,7 @@ export default {
   disableDevToolsShortcuts,
   sanitizeInput,
   sanitizeUrl,
+  validatePaymentRedirectUrl,
   detectMaliciousInput,
   checkRateLimit,
   initSecurity,

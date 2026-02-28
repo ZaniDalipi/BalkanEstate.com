@@ -260,5 +260,6 @@ export const webhookLogger = createLogger('Webhook');
 export const geocodingLogger = createLogger('Geocoding');
 export const mediaLogger = createLogger('Media');
 export const serverLogger = createLogger('Server');
+export const scriptLogger = createLogger('Script');
 
 export default logger;

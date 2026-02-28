@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import * as api from '@/services/apiService';
 import { Property } from '@/types';
+import { validatePaymentRedirectUrl } from '@/src/utils/security';
 
 // === Shared Types ===
 
@@ -97,6 +99,7 @@ export function usePromotionSelector({
   focusUrgent = false,
   hasUrgentBadge: alreadyHasUrgent = false,
 }: PromotionSelectorProps) {
+  const { t } = useTranslation(['payment']);
   const [tiersData, setTiersData] = useState<api.PromotionTiersResponse | null>(null);
   const [agencyAllocation, setAgencyAllocation] = useState<api.AgencyAllocation | null>(null);
   const [loading, setLoading] = useState(true);
@@ -306,9 +309,14 @@ export function usePromotionSelector({
           return;
         }
 
-        // Payment required — redirect to Paysera checkout
+        // Payment required — redirect to Paysera checkout (validated)
         if (result.url) {
-          window.location.href = result.url;
+          const validatedUrl = validatePaymentRedirectUrl(result.url);
+          if (validatedUrl) {
+            window.location.href = validatedUrl;
+          } else {
+            setError(t('payment:errors.redirectBlocked', 'Payment redirect was blocked for security reasons. Please try again.'));
+          }
           return;
         }
 
@@ -367,9 +375,14 @@ export function usePromotionSelector({
           return;
         }
 
-        // Payment required — redirect to Paysera checkout
+        // Payment required — redirect to Paysera checkout (validated)
         if (result.url) {
-          window.location.href = result.url;
+          const validatedUrl = validatePaymentRedirectUrl(result.url);
+          if (validatedUrl) {
+            window.location.href = validatedUrl;
+          } else {
+            setError(t('payment:errors.redirectBlocked', 'Payment redirect was blocked for security reasons. Please try again.'));
+          }
           return;
         }
 

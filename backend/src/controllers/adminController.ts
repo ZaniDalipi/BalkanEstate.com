@@ -11,6 +11,7 @@ import { adminLogger } from '../utils/logger';
 import { invalidateCache } from '../middleware/cache';
 import { migratePropertySchema } from '../utils/migratePropertySchema';
 import { getObjectIdParam } from '../utils/validateParams';
+import { escapeRegex } from '../utils/escapeRegex';
 
 
 // @desc    Get admin dashboard statistics
@@ -96,10 +97,11 @@ export const getAllUsers = async (req: Request, res: Response): Promise<void> =>
     if (role) query.role = role;
     if (isSubscribed !== undefined) query.isSubscribed = isSubscribed === 'true';
     if (search) {
+      const safeSearch = escapeRegex(String(search));
       query.$or = [
-        { name: { $regex: search, $options: 'i' } },
-        { email: { $regex: search, $options: 'i' } },
-        { phone: { $regex: search, $options: 'i' } },
+        { name: { $regex: safeSearch, $options: 'i' } },
+        { email: { $regex: safeSearch, $options: 'i' } },
+        { phone: { $regex: safeSearch, $options: 'i' } },
       ];
     }
 
@@ -137,17 +139,27 @@ export const updateUserAdmin = async (req: Request, res: Response): Promise<void
   try {
     const id = getObjectIdParam(req, res, 'id');
     if (!id) return;
-    const updates = req.body;
 
-    // Prevent updating password through this endpoint
-    delete updates.password;
+    // SECURITY: Whitelist allowed fields to prevent mass assignment.
+    // Fields like password, refreshTokens, loginHistory, etc. can never be set here.
+    const ALLOWED_ADMIN_UPDATE_FIELDS = [
+      'name', 'email', 'phone', 'role', 'activeRole', 'primaryRole',
+      'availableRoles', 'status', 'isEmailVerified', 'licenseVerified',
+      'licenseNumber', 'bio', 'languages', 'specializations',
+      'serviceAreas', 'avatarUrl', 'avatarOptions',
+    ];
 
-    // Remove empty string values that might cause validation issues
-    Object.keys(updates).forEach(key => {
-      if (updates[key] === '') {
-        delete updates[key];
+    const updates: Record<string, any> = {};
+    for (const field of ALLOWED_ADMIN_UPDATE_FIELDS) {
+      if (req.body[field] !== undefined && req.body[field] !== '') {
+        updates[field] = req.body[field];
       }
-    });
+    }
+
+    if (Object.keys(updates).length === 0) {
+      res.status(400).json({ message: 'No valid fields to update' });
+      return;
+    }
 
     const user = await User.findByIdAndUpdate(id, updates, {
       new: true,
@@ -475,10 +487,11 @@ export const getAllPropertiesAdmin = async (req: Request, res: Response): Promis
     const query: any = {};
     if (status) query.status = status;
     if (search) {
+      const safeSearch = escapeRegex(String(search));
       query.$or = [
-        { title: { $regex: search, $options: 'i' } },
-        { address: { $regex: search, $options: 'i' } },
-        { city: { $regex: search, $options: 'i' } },
+        { title: { $regex: safeSearch, $options: 'i' } },
+        { address: { $regex: safeSearch, $options: 'i' } },
+        { city: { $regex: safeSearch, $options: 'i' } },
       ];
     }
 
@@ -788,12 +801,13 @@ export const getAllInquiries = async (req: Request, res: Response): Promise<void
     if (type && type !== 'all') query.type = type;
     if (status && status !== 'all') query.status = status;
     if (search) {
+      const safeSearch = escapeRegex(String(search));
       query.$or = [
-        { buyerName: { $regex: search, $options: 'i' } },
-        { buyerEmail: { $regex: search, $options: 'i' } },
-        { recipientName: { $regex: search, $options: 'i' } },
-        { propertyTitle: { $regex: search, $options: 'i' } },
-        { message: { $regex: search, $options: 'i' } },
+        { buyerName: { $regex: safeSearch, $options: 'i' } },
+        { buyerEmail: { $regex: safeSearch, $options: 'i' } },
+        { recipientName: { $regex: safeSearch, $options: 'i' } },
+        { propertyTitle: { $regex: safeSearch, $options: 'i' } },
+        { message: { $regex: safeSearch, $options: 'i' } },
       ];
     }
 

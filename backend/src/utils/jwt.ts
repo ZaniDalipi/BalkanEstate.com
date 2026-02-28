@@ -71,13 +71,18 @@ export const generateToken = (userId: string): string => {
 };
 
 // Legacy function for backward compatibility
+// Accepts tokens without a type field (old tokens) but rejects refresh tokens
 export const verifyToken = (token: string): any => {
   try {
     return verifyAccessToken(token);
   } catch {
-    // Fallback for old tokens without type field
+    // Fallback for old tokens without type field - but reject refresh tokens
     const secret: string = getJwtSecret();
-    return jwt.verify(token, secret);
+    const decoded = jwt.verify(token, secret);
+    if (typeof decoded === 'object' && decoded.type === 'refresh') {
+      throw new Error('Refresh tokens cannot be used as access tokens');
+    }
+    return decoded;
   }
 };
 

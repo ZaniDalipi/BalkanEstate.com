@@ -20,6 +20,9 @@
 
 import dotenv from 'dotenv';
 import path from 'path';
+import { scriptLogger } from '../utils/logger';
+
+const log = scriptLogger.child('SendTestEmails');
 
 // Load environment-specific config
 const env = process.env.NODE_ENV || 'development';
@@ -68,11 +71,11 @@ const testProUser = {
 // =============================================================================
 
 async function sendAgentCouponsEmail() {
-  console.log('\n📤 Sending Enterprise Agent Coupons Email...');
-  console.log(`   To: ${TEST_EMAIL}`);
-  console.log('   Contains 5 agent registration codes:');
+  log.info('\n📤 Sending Enterprise Agent Coupons Email...');
+  log.info(`   To: ${TEST_EMAIL}`);
+  log.info('   Contains 5 agent registration codes:');
   testAgentCoupons.forEach((coupon, i) => {
-    console.log(`   ${i + 1}. ${coupon.code} (expires: ${coupon.expiresAt.toLocaleDateString()})`);
+    log.info(`   ${i + 1}. ${coupon.code} (expires: ${coupon.expiresAt.toLocaleDateString()})`);
   });
 
   await sendAgentRegistrationCouponsEmail({
@@ -81,31 +84,31 @@ async function sendAgentCouponsEmail() {
     agencyName: testAgencyOwner.agencyName,
     coupons: testAgentCoupons,
   });
-  console.log('   ✅ Agent Registration Coupons email sent!');
+  log.info('   ✅ Agent Registration Coupons email sent!');
 }
 
 async function sendWelcomeEmail() {
-  console.log('\n📤 Sending Enterprise Welcome Email...');
-  console.log(`   To: ${TEST_EMAIL}`);
-  console.log(`   Agency: ${testAgencyOwner.agencyName}`);
+  log.info('\n📤 Sending Enterprise Welcome Email...');
+  log.info(`   To: ${TEST_EMAIL}`);
+  log.info(`   Agency: ${testAgencyOwner.agencyName}`);
 
   await sendEnterpriseWelcomeEmail({
     email: testAgencyOwner.email,
     ownerName: testAgencyOwner.name,
     agencyName: testAgencyOwner.agencyName,
   });
-  console.log('   ✅ Enterprise Welcome email sent!');
+  log.info('   ✅ Enterprise Welcome email sent!');
 }
 
 async function sendPromoCouponsEmail() {
-  console.log('\n📤 Sending Monthly Promotion Coupons Email...');
-  console.log(`   To: ${TEST_EMAIL}`);
-  console.log(`   Plan: ${testProUser.planName}`);
-  console.log('   Coupon breakdown:');
-  console.log('   - 2 Highlighted coupons');
-  console.log('   - 1 Premium coupon');
-  console.log('   - 0 Featured coupons');
-  console.log('   Total: 3 coupons available');
+  log.info('\n📤 Sending Monthly Promotion Coupons Email...');
+  log.info(`   To: ${TEST_EMAIL}`);
+  log.info(`   Plan: ${testProUser.planName}`);
+  log.info('   Coupon breakdown:');
+  log.info('   - 2 Highlighted coupons');
+  log.info('   - 1 Premium coupon');
+  log.info('   - 0 Featured coupons');
+  log.info('   Total: 3 coupons available');
 
   await sendMonthlyCouponEmail({
     email: testProUser.email,
@@ -120,7 +123,7 @@ async function sendPromoCouponsEmail() {
       featured: 0,
     },
   });
-  console.log('   ✅ Monthly Promotion Coupons email sent!');
+  log.info('   ✅ Monthly Promotion Coupons email sent!');
 }
 
 // =============================================================================
@@ -128,7 +131,7 @@ async function sendPromoCouponsEmail() {
 // =============================================================================
 
 function showHelp() {
-  console.log(`
+  log.info(`
 📧 Test Email Sender
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
@@ -151,9 +154,9 @@ Examples:
 async function main() {
   const arg = process.argv[2]?.toLowerCase() || 'all';
 
-  console.log('📧 Test Email Sender');
-  console.log(`📬 Target Email: ${TEST_EMAIL}`);
-  console.log('─'.repeat(50));
+  log.info('📧 Test Email Sender');
+  log.info(`📬 Target Email: ${TEST_EMAIL}`);
+  log.info('─'.repeat(50));
 
   try {
     switch (arg) {
@@ -187,21 +190,21 @@ async function main() {
         return;
 
       default:
-        console.log(`❌ Unknown option: ${arg}`);
+        log.info(`❌ Unknown option: ${arg}`);
         showHelp();
         return;
     }
 
-    console.log('\n' + '═'.repeat(50));
-    console.log('🎉 Email(s) sent successfully!');
-    console.log(`📬 Check inbox at: ${TEST_EMAIL}`);
-    console.log('═'.repeat(50));
+    log.info('\n' + '═'.repeat(50));
+    log.info('🎉 Email(s) sent successfully!');
+    log.info(`📬 Check inbox at: ${TEST_EMAIL}`);
+    log.info('═'.repeat(50));
 
   } catch (error) {
-    console.error('\n❌ Error sending emails:', error);
+    log.error('\n❌ Error sending emails:', error);
     process.exit(1);
   }
 }
 
 // Run the script
-main().catch(console.error);
+main().catch((err) => log.error(err));

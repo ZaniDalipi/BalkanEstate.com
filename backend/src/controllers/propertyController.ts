@@ -1,4 +1,5 @@
 import { Request, Response } from 'express';
+import { escapeRegex } from '../utils/escapeRegex';
 import Property from '../models/Property';
 import User, { IUser } from '../models/User';
 import Agent from '../models/Agent';
@@ -130,11 +131,11 @@ export const getProperties = async (
     }
 
     if (city) {
-      filter.city = new RegExp(city as string, 'i');
+      filter.city = new RegExp(escapeRegex(city as string), 'i');
     }
 
     if (country) {
-      filter.country = new RegExp(country as string, 'i');
+      filter.country = new RegExp(escapeRegex(country as string), 'i');
     }
 
     // Filter by listing type (sale vs rent)
@@ -200,7 +201,7 @@ export const getProperties = async (
     // Handle query search - search only in address and city, NOT description
     // Use $and to preserve other filters like status
     if (query) {
-      const queryRegex = new RegExp(query as string, 'i');
+      const queryRegex = new RegExp(escapeRegex(query as string), 'i');
       const queryConditions = [
         { address: queryRegex },
         { city: queryRegex },

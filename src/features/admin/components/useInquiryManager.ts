@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useConfirmation } from '@/src/shared/hooks/useConfirmation';
-import { API_URL } from '@/src/shared/api/config';
+import { apiRequest } from '@/src/shared/api';
 
 export interface Inquiry {
   _id: string;
@@ -89,7 +89,6 @@ export function useInquiryManager() {
   const fetchInquiries = async () => {
     try {
       setIsLoading(true);
-      const token = localStorage.getItem('balkan_estate_token');
 
       const params = new URLSearchParams({
         page: currentPage.toString(),
@@ -99,15 +98,10 @@ export function useInquiryManager() {
         ...(searchQuery && { search: searchQuery }),
       });
 
-      const response = await fetch(`${API_URL}/admin/inquiries?${params}`, {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-        },
+      const data = await apiRequest<any>(`/admin/inquiries?${params}`, {
+        requiresAuth: true,
+        encryptResponse: true,
       });
-
-      if (!response.ok) throw new Error('Failed to fetch inquiries');
-
-      const data = await response.json();
       setInquiries(data.inquiries || []);
       setTotalPages(data.pagination?.totalPages || 1);
       setTotalInquiries(data.pagination?.totalItems || 0);
@@ -120,17 +114,11 @@ export function useInquiryManager() {
 
   const fetchStats = async () => {
     try {
-      const token = localStorage.getItem('balkan_estate_token');
-      const response = await fetch(`${API_URL}/admin/inquiries/stats`, {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-        },
+      const data = await apiRequest<InquiryStats>(`/admin/inquiries/stats`, {
+        requiresAuth: true,
+        encryptResponse: true,
       });
-
-      if (response.ok) {
-        const data = await response.json();
-        setStats(data);
-      }
+      setStats(data);
     } catch (err) {
       // Stats are optional
     }
@@ -148,17 +136,12 @@ export function useInquiryManager() {
 
   const updateInquiryStatus = async (id: string, status: string) => {
     try {
-      const token = localStorage.getItem('balkan_estate_token');
-      const response = await fetch(`${API_URL}/admin/inquiries/${id}`, {
+      await apiRequest(`/admin/inquiries/${id}`, {
         method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,
-        },
-        body: JSON.stringify({ status }),
+        body: { status },
+        requiresAuth: true,
+        encryptResponse: true,
       });
-
-      if (!response.ok) throw new Error('Failed to update inquiry');
 
       await fetchInquiries();
       await fetchStats();
@@ -174,17 +157,12 @@ export function useInquiryManager() {
     if (!selectedInquiry) return;
 
     try {
-      const token = localStorage.getItem('balkan_estate_token');
-      const response = await fetch(`${API_URL}/admin/inquiries/${selectedInquiry._id}`, {
+      await apiRequest(`/admin/inquiries/${selectedInquiry._id}`, {
         method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,
-        },
-        body: JSON.stringify({ adminNotes }),
+        body: { adminNotes },
+        requiresAuth: true,
+        encryptResponse: true,
       });
-
-      if (!response.ok) throw new Error('Failed to save notes');
 
       await fetchInquiries();
       setSuccessMessage('Notes saved successfully');
@@ -206,15 +184,11 @@ export function useInquiryManager() {
     if (!confirmed) return;
 
     try {
-      const token = localStorage.getItem('balkan_estate_token');
-      const response = await fetch(`${API_URL}/admin/inquiries/${id}`, {
+      await apiRequest(`/admin/inquiries/${id}`, {
         method: 'DELETE',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-        },
+        requiresAuth: true,
+        encryptResponse: true,
       });
-
-      if (!response.ok) throw new Error('Failed to delete inquiry');
 
       await fetchInquiries();
       await fetchStats();
@@ -231,19 +205,13 @@ export function useInquiryManager() {
     if (selectedIds.length === 0) return;
 
     try {
-      const token = localStorage.getItem('balkan_estate_token');
-      const response = await fetch(`${API_URL}/admin/inquiries/bulk-status`, {
+      const data = await apiRequest<any>(`/admin/inquiries/bulk-status`, {
         method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,
-        },
-        body: JSON.stringify({ inquiryIds: selectedIds, status }),
+        body: { inquiryIds: selectedIds, status },
+        requiresAuth: true,
+        encryptResponse: true,
       });
 
-      if (!response.ok) throw new Error('Failed to update inquiries');
-
-      const data = await response.json();
       await fetchInquiries();
       await fetchStats();
       setSelectedIds([]);
