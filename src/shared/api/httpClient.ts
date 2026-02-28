@@ -217,6 +217,9 @@ export const uploadRequest = async <T>(
     }
   }
 
+  // Ensure the CSRF cookie is present before upload mutations
+  await ensureCsrfToken();
+
   // Include CSRF token for upload mutations (double-submit cookie pattern)
   const csrfToken = getCsrfToken();
 

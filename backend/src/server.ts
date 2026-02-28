@@ -234,12 +234,16 @@ if (process.env.NODE_ENV !== 'production') {
 }
 
 // Health check route
-app.get('/health', (_req: Request, res: Response) => {
+// Served at both /health (for infrastructure probes / Docker healthchecks)
+// and /api/health (for the frontend CSRF bootstrap, which prefixes API_URL)
+const healthHandler = (_req: Request, res: Response) => {
   res.status(200).json({
     status: 'ok',
     timestamp: new Date().toISOString(),
   });
-});
+};
+app.get('/health', healthHandler);
+app.get('/api/health', healthHandler);
 
 // SEO routes (sitemap.xml, robots.txt) - at root level, not under /api
 app.use('/', sitemapRoutes);
