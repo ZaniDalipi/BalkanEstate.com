@@ -23,6 +23,7 @@ import { useConfirmation } from '../../src/shared/hooks/useConfirmation';
 import { useNotification } from '../../src/shared/hooks/useNotification';
 import { buildLocalizedPath } from '../../src/utils/languageRouting';
 import { API_URL } from '../../src/shared/api/config';
+import { csrfHeaders, ensureCsrfToken } from '../../src/shared/api/httpClient';
 import { apiLogger } from '../../src/shared/utils/logger';
 
 // Common languages spoken in the Balkan region
@@ -616,10 +617,13 @@ const DeleteAgencySection: React.FC = () => {
 
         setIsDeleting(true);
         try {
+            await ensureCsrfToken();
             const response = await fetch(`${API_URL}/agencies/${agencyId}`, {
                 method: 'DELETE',
+                credentials: 'include',
                 headers: {
                     'Authorization': `Bearer ${localStorage.getItem('balkan_estate_token')}`,
+                    ...csrfHeaders(),
                 },
             });
             const data = await response.json();
@@ -696,11 +700,14 @@ const DeleteAccountSection: React.FC = () => {
                 body = await encryptSensitiveFields({ password }, ['password']);
             }
 
+            await ensureCsrfToken();
             const response = await fetch(`${API_URL}/auth/delete-account`, {
                 method: 'POST',
+                credentials: 'include',
                 headers: {
                     'Content-Type': 'application/json',
                     'Authorization': `Bearer ${localStorage.getItem('balkan_estate_token')}`,
+                    ...csrfHeaders(),
                 },
                 body: JSON.stringify(body),
             });
@@ -1256,11 +1263,14 @@ const ProfileSettings: React.FC<{ user: User }> = ({ user }) => {
         setIsJoiningAgency(true);
         setError('');
         try {
+            await ensureCsrfToken();
             const response = await fetch(`${API_URL}/agencies/join-by-code`, {
                 method: 'POST',
+                credentials: 'include',
                 headers: {
                     'Content-Type': 'application/json',
                     'Authorization': `Bearer ${localStorage.getItem('balkan_estate_token')}`,
+                    ...csrfHeaders(),
                 },
                 body: JSON.stringify({ invitationCode }),
             });
@@ -1321,10 +1331,13 @@ const ProfileSettings: React.FC<{ user: User }> = ({ user }) => {
             const formData = new FormData();
             formData.append('avatar', file);
 
+            await ensureCsrfToken();
             const response = await fetch(`${API_URL}/auth/upload-avatar`, {
                 method: 'POST',
+                credentials: 'include',
                 headers: {
                     'Authorization': `Bearer ${localStorage.getItem('balkan_estate_token')}`,
+                    ...csrfHeaders(),
                 },
                 body: formData,
             });
@@ -1377,11 +1390,14 @@ const ProfileSettings: React.FC<{ user: User }> = ({ user }) => {
     const handleSaveAvatarOptions = async (options: AvatarOptions) => {
         setError('');
         try {
+            await ensureCsrfToken();
             const response = await fetch(`${API_URL}/auth/save-avatar-options`, {
                 method: 'POST',
+                credentials: 'include',
                 headers: {
                     'Authorization': `Bearer ${localStorage.getItem('balkan_estate_token')}`,
                     'Content-Type': 'application/json',
+                    ...csrfHeaders(),
                 },
                 body: JSON.stringify({ avatarOptions: options }),
             });
@@ -1411,10 +1427,13 @@ const ProfileSettings: React.FC<{ user: User }> = ({ user }) => {
             const formDataUpload = new FormData();
             formDataUpload.append('avatar', file);
 
+            await ensureCsrfToken();
             const response = await fetch(`${API_URL}/auth/upload-avatar`, {
                 method: 'POST',
+                credentials: 'include',
                 headers: {
                     'Authorization': `Bearer ${localStorage.getItem('balkan_estate_token')}`,
+                    ...csrfHeaders(),
                 },
                 body: formDataUpload,
             });

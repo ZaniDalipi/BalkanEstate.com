@@ -4,6 +4,7 @@ import { User, UserRole } from '../../types';
 import { ChartBarIcon, HomeIcon, EyeIcon, HeartIcon, EnvelopeIcon, CalendarIcon, MapPinIcon, BuildingOfficeIcon, BedIcon, BathIcon, SqftIcon } from '../../constants';
 import { formatPrice } from '../../utils/currency';
 import { API_URL } from '../../src/shared/api/config';
+import { csrfHeaders, ensureCsrfToken } from '../../src/shared/api/httpClient';
 
 interface ProfileStatisticsProps {
   user: User & { subscriptionPlan?: string };
@@ -364,11 +365,14 @@ const ProfileStatistics: React.FC<ProfileStatisticsProps> = ({ user }) => {
       let statsData: UserStats | null = null;
 
       try {
+        await ensureCsrfToken();
         const syncResponse = await fetch(`${API_URL}/auth/sync-stats`, {
           method: 'POST',
+          credentials: 'include',
           headers: {
             'Authorization': `Bearer ${token}`,
             'Content-Type': 'application/json',
+            ...csrfHeaders(),
           },
         });
 
@@ -421,11 +425,14 @@ const ProfileStatistics: React.FC<ProfileStatisticsProps> = ({ user }) => {
       setSyncing(true);
       const token = getAuthToken();
 
+      await ensureCsrfToken();
       const syncResponse = await fetch(`${API_URL}/auth/sync-stats`, {
         method: 'POST',
+        credentials: 'include',
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json',
+          ...csrfHeaders(),
         },
       });
 

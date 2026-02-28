@@ -15,9 +15,15 @@ import {
  * Used for double-submit cookie CSRF protection: the value must be
  * included in the X-CSRF-Token header on every mutation request.
  */
-const getCsrfToken = (): string | undefined => {
+export const getCsrfToken = (): string | undefined => {
   const match = document.cookie.match(/(?:^|;\s*)__csrf=([^;]*)/);
   return match ? match[1] : undefined;
+};
+
+/** Return the X-CSRF-Token header object (empty if cookie not set). */
+export const csrfHeaders = (): Record<string, string> => {
+  const t = getCsrfToken();
+  return t ? { 'X-CSRF-Token': t } : {};
 };
 
 /** HTTP methods that mutate state and require a CSRF token */
@@ -30,7 +36,7 @@ const MUTATION_METHODS = new Set(['POST', 'PUT', 'PATCH', 'DELETE']);
  * bootstraps it so subsequent POSTs pass CSRF validation.
  */
 let _csrfBootstrap: Promise<void> | null = null;
-const ensureCsrfToken = (): Promise<void> => {
+export const ensureCsrfToken = (): Promise<void> => {
   if (getCsrfToken()) return Promise.resolve();
   if (!_csrfBootstrap) {
     _csrfBootstrap = fetch(`${API_URL}/health`, { credentials: 'include' })

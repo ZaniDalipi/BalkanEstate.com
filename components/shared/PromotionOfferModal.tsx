@@ -7,6 +7,7 @@ import { useAppContext } from '../../context/AppContext';
 import { Property } from '../../types';
 import { useSellerProducts, Product } from '@/src/shared/query';
 import { API_URL } from '../../src/shared/api/config';
+import { csrfHeaders, ensureCsrfToken } from '../../src/shared/api/httpClient';
 
 interface PromotionOfferModalProps {
     isOpen: boolean;
@@ -76,11 +77,14 @@ const PromotionOfferModal: React.FC<PromotionOfferModalProps> = ({
             try {
                 const token = localStorage.getItem('balkan_estate_token');
 
+                await ensureCsrfToken();
                 const response = await fetch(`${API_URL}/promotions`, {
                     method: 'POST',
+                    credentials: 'include',
                     headers: {
                         'Content-Type': 'application/json',
                         'Authorization': `Bearer ${token}`,
+                        ...csrfHeaders(),
                     },
                     body: JSON.stringify({ propertyId: property.id }),
                 });

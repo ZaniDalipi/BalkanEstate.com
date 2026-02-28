@@ -11,6 +11,7 @@ import {
 } from '../../constants';
 import { useAppContext } from '../../context/AppContext';
 import { API_URL } from '../../src/shared/api/config';
+import { csrfHeaders, ensureCsrfToken } from '../../src/shared/api/httpClient';
 import { trackEcommerce, trackEvent } from '../../src/components/marketing/Analytics';
 import { encryptSensitiveFields } from '../../src/shared/api/payloadEncryption';
 import { validatePaymentRedirectUrl } from '../../src/utils/security';
@@ -470,10 +471,13 @@ const PaymentWindow: React.FC<PaymentWindowProps> = ({
       };
       const encryptedBody = await encryptSensitiveFields(rawBody, ['code']);
 
+      await ensureCsrfToken();
       const response = await fetch(`${API_URL}/discount-codes/validate`, {
         method: 'POST',
+        credentials: 'include',
         headers: {
           'Content-Type': 'application/json',
+          ...csrfHeaders(),
         },
         body: JSON.stringify(encryptedBody),
       });
@@ -533,11 +537,14 @@ const PaymentWindow: React.FC<PaymentWindowProps> = ({
           discountCode: appliedDiscountCode ? sanitizeDiscountCode(appliedDiscountCode) : undefined,
         }, ['discountCode']);
 
+        await ensureCsrfToken();
         const response = await fetch(`${API_URL}/payments/apply-free-subscription`, {
           method: 'POST',
+          credentials: 'include',
           headers: {
             'Content-Type': 'application/json',
             'Authorization': `Bearer ${token}`,
+            ...csrfHeaders(),
           },
           body: JSON.stringify(freeBody),
         });
@@ -598,11 +605,14 @@ const PaymentWindow: React.FC<PaymentWindowProps> = ({
         ...(appliedDiscountCode ? { discountCode: sanitizeDiscountCode(appliedDiscountCode) } : {}),
       }, ['discountCode']);
 
+      await ensureCsrfToken();
       const response = await fetch(`${API_URL}/payments/create-payment`, {
         method: 'POST',
+        credentials: 'include',
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`,
+          ...csrfHeaders(),
         },
         body: JSON.stringify(paymentBody),
       });

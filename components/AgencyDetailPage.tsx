@@ -30,6 +30,7 @@ import {
   deleteAgencyAchievement
 } from '../src/features/achievements/api/achievementApi';
 import { API_URL } from '../src/shared/api/config';
+import { csrfHeaders as _csrfHeaders, ensureCsrfToken as _ensureCsrf } from '../src/shared/api/httpClient';
 import MapLocationPicker from '../src/features/seller/components/MapLocationPicker';
 import { searchLocation } from '../services/osmService';
 import { toggleAgencyFavorite, checkAgencyFavorite } from '../src/features/saved/api/savedApi';
@@ -595,11 +596,14 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
         if (!token) {
           throw new Error('You are not logged in. Please log in and try again.');
         }
+        await _ensureCsrf();
         const response = await fetch(`${API_URL}/agencies/coupons/redeem`, {
           method: 'POST',
+          credentials: 'include',
           headers: {
             'Content-Type': 'application/json',
             'Authorization': `Bearer ${token}`,
+            ..._csrfHeaders(),
           },
           body: JSON.stringify({ couponCode: trimmedCode }),
         });
@@ -926,11 +930,14 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
     try {
       const token = localStorage.getItem('balkan_estate_token');
 
+      await _ensureCsrf();
       const response = await fetch(`${API_URL}/agencies/${agencyData._id}`, {
         method: 'PUT',
+        credentials: 'include',
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`,
+          ..._csrfHeaders(),
         },
         body: JSON.stringify(sanitizedForm),
       });
@@ -1027,10 +1034,13 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
       const formData = new FormData();
       formData.append('logo', file);
 
+      await _ensureCsrf();
       const response = await fetch(`${API_URL}/agencies/${agencyData._id}/upload-logo`, {
         method: 'POST',
+        credentials: 'include',
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('balkan_estate_token')}`,
+          ..._csrfHeaders(),
         },
         body: formData,
       });
@@ -1087,10 +1097,13 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
       const formData = new FormData();
       formData.append('cover', file);
 
+      await _ensureCsrf();
       const response = await fetch(`${API_URL}/agencies/${agencyData._id}/upload-cover`, {
         method: 'POST',
+        credentials: 'include',
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('balkan_estate_token')}`,
+          ..._csrfHeaders(),
         },
         body: formData,
       });
@@ -1209,11 +1222,14 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
     setShowGradientPicker(false);
 
     try {
+      await _ensureCsrf();
       const response = await fetch(`${API_URL}/agencies/${agencyData._id}`, {
         method: 'PUT',
+        credentials: 'include',
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${localStorage.getItem('balkan_estate_token')}`,
+          ..._csrfHeaders(),
         },
         body: JSON.stringify({
           coverGradient: gradient.gradient,
@@ -1252,11 +1268,14 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
 
     try {
       const body = type === 'cover' ? { coverPosition: pos } : { logoPosition: pos };
+      await _ensureCsrf();
       const response = await fetch(`${API_URL}/agencies/${agencyData._id}`, {
         method: 'PUT',
+        credentials: 'include',
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${localStorage.getItem('balkan_estate_token')}`,
+          ..._csrfHeaders(),
         },
         body: JSON.stringify(body),
       });
@@ -2563,11 +2582,14 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
                         onClick={async () => {
                           try {
                             const token = localStorage.getItem('balkan_estate_token');
+                            await _ensureCsrf();
                             const response = await fetch(`${API_URL}/agencies/${agencyData._id || agencyData.id}`, {
                               method: 'PUT',
+                              credentials: 'include',
                               headers: {
                                 'Content-Type': 'application/json',
                                 'Authorization': `Bearer ${token}`,
+                                ..._csrfHeaders(),
                               },
                               body: JSON.stringify({ generateInvitationCode: true }),
                             });

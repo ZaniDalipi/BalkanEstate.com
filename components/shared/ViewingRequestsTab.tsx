@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useAppContext } from '../../context/AppContext';
 import { API_URL } from '../../src/shared/api/config';
+import { csrfHeaders, ensureCsrfToken } from '../../src/shared/api/httpClient';
 
 type ViewingStatus = 'pending' | 'confirmed' | 'cancelled' | 'completed';
 type StatusFilter = ViewingStatus | 'all';
@@ -95,11 +96,14 @@ const ViewingRequestsTab: React.FC = () => {
   const updateStatus = async (viewingId: string, status: 'confirmed' | 'cancelled' | 'completed', cancelReason?: string) => {
     setActionLoading(viewingId);
     try {
+      await ensureCsrfToken();
       const res = await fetch(`${API_URL}/viewings/${viewingId}/status`, {
         method: 'PATCH',
+        credentials: 'include',
         headers: {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${token}`,
+          ...csrfHeaders(),
         },
         body: JSON.stringify({ status, cancelReason }),
       });

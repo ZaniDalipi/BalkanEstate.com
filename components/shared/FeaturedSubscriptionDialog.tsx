@@ -4,6 +4,7 @@ import Modal from './Modal';
 import { createFeaturedSubscription } from '../../services/apiService';
 import { SparklesIcon, CheckCircleIcon, XMarkIcon } from '../../constants';
 import { API_URL } from '../../src/shared/api/config';
+import { csrfHeaders, ensureCsrfToken } from '../../src/shared/api/httpClient';
 
 interface FeaturedProduct {
   productId: string;
@@ -115,11 +116,14 @@ const FeaturedSubscriptionDialog: React.FC<FeaturedSubscriptionDialogProps> = ({
       setValidatingCoupon(true);
       setError(null);
 
+      await ensureCsrfToken();
       const response = await fetch(`${API_URL}/coupons/validate`, {
         method: 'POST',
+        credentials: 'include',
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${localStorage.getItem('balkan_estate_token')}`,
+          ...csrfHeaders(),
         },
         body: JSON.stringify({
           couponCode: couponCode.toUpperCase(),

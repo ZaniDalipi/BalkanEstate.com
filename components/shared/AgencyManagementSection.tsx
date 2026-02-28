@@ -7,6 +7,7 @@ import { useConfirmation } from '../../src/shared/hooks/useConfirmation';
 import { useNotification } from '../../src/shared/hooks/useNotification';
 import { TicketIcon, CheckCircleIcon, ExclamationTriangleIcon } from '../../constants';
 import { API_URL } from '../../src/shared/api/config';
+import { csrfHeaders, ensureCsrfToken } from '../../src/shared/api/httpClient';
 
 interface Agency {
   _id: string;
@@ -245,11 +246,14 @@ const AgencyManagementSection: React.FC<AgencyManagementSectionProps> = ({ curre
         return;
       }
 
+      await ensureCsrfToken();
       const response = await fetch(`${API_URL}/agencies/coupons/redeem`, {
         method: 'POST',
+        credentials: 'include',
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`,
+          ...csrfHeaders(),
         },
         body: JSON.stringify({ couponCode: trimmedCode }),
       });

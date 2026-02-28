@@ -10,6 +10,7 @@ import {
   XMarkIcon,
 } from '../../constants';
 import { API_URL } from '../../src/shared/api/config';
+import { csrfHeaders, ensureCsrfToken } from '../../src/shared/api/httpClient';
 
 interface RedemptionResult {
   message: string;
@@ -104,11 +105,14 @@ const AgencyCouponRedemption: React.FC<AgencyCouponRedemptionProps> = ({
     setIsRedeeming(true);
 
     try {
+      await ensureCsrfToken();
       const response = await fetch(`${API_URL}/agencies/coupons/redeem`, {
         method: 'POST',
+        credentials: 'include',
         headers: {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${localStorage.getItem('token')}`,
+          ...csrfHeaders(),
         },
         body: JSON.stringify({ couponCode: trimmedCode }),
       });

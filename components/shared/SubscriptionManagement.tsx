@@ -6,6 +6,7 @@ import { User } from '../../types';
 import PaymentWindow from './PaymentWindow';
 import { replacePlaceholders, ProductValues } from '../../src/shared/utils/featurePlaceholders';
 import { API_URL } from '../../src/shared/api/config';
+import { csrfHeaders, ensureCsrfToken } from '../../src/shared/api/httpClient';
 
 interface SubscriptionManagementProps {
   userId: string;
@@ -501,11 +502,14 @@ const SubscriptionManagement: React.FC<SubscriptionManagementProps> = ({ userId 
     setGeneratingCoupons(true);
     try {
       const token = localStorage.getItem('balkan_estate_token');
+      await ensureCsrfToken();
       const response = await fetch(`${API_URL}/agencies/${agencyTeamData.agencyId}/coupons/generate`, {
         method: 'POST',
+        credentials: 'include',
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json',
+          ...csrfHeaders(),
         },
       });
 
@@ -531,11 +535,14 @@ const SubscriptionManagement: React.FC<SubscriptionManagementProps> = ({ userId 
     setPromotionEmailSent(false);
     try {
       const token = localStorage.getItem('balkan_estate_token');
+      await ensureCsrfToken();
       const response = await fetch(`${API_URL}/agencies/${agencyTeamData.agencyId}/coupons/send-promotion-email`, {
         method: 'POST',
+        credentials: 'include',
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json',
+          ...csrfHeaders(),
         },
       });
 
@@ -761,11 +768,14 @@ const SubscriptionManagement: React.FC<SubscriptionManagementProps> = ({ userId 
     try {
       // Call backend sync endpoint to recount properties
       const token = localStorage.getItem('balkan_estate_token');
+      await ensureCsrfToken();
       const syncResponse = await fetch(`${API_URL}/auth/sync-stats`, {
         method: 'POST',
+        credentials: 'include',
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json',
+          ...csrfHeaders(),
         },
       });
 
@@ -817,11 +827,14 @@ const SubscriptionManagement: React.FC<SubscriptionManagementProps> = ({ userId 
       setActionError(null);
 
       const token = localStorage.getItem('balkan_estate_token');
+      await ensureCsrfToken();
       const response = await fetch(`${API_URL}/subscriptions/${subscription._id}/cancel`, {
         method: 'POST',
+        credentials: 'include',
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json',
+          ...csrfHeaders(),
         },
       });
 
@@ -857,11 +870,14 @@ const SubscriptionManagement: React.FC<SubscriptionManagementProps> = ({ userId 
       setActionError(null);
 
       const token = localStorage.getItem('balkan_estate_token');
+      await ensureCsrfToken();
       const response = await fetch(`${API_URL}/subscriptions/${subscription._id}/restore`, {
         method: 'POST',
+        credentials: 'include',
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json',
+          ...csrfHeaders(),
         },
       });
 
@@ -908,11 +924,14 @@ const SubscriptionManagement: React.FC<SubscriptionManagementProps> = ({ userId 
         ? `${API_URL}/subscriptions/${subscription._id}/cancel`
         : `${API_URL}/subscriptions/${subscription._id}/restore`;
 
+      await ensureCsrfToken();
       const response = await fetch(endpoint, {
         method: 'POST',
+        credentials: 'include',
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json',
+          ...csrfHeaders(),
         },
       });
 

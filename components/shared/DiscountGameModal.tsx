@@ -2,6 +2,7 @@ import React from 'react';
 import Modal from './Modal';
 import WhackAnIconAnimation from '@/features/seller/components/WhackAnIconAnimation';
 import { API_URL } from '../../src/shared/api/config';
+import { csrfHeaders, ensureCsrfToken } from '../../src/shared/api/httpClient';
 
 interface DiscountGameModalProps {
     isOpen: boolean;
@@ -28,11 +29,14 @@ const DiscountGameModal: React.FC<DiscountGameModalProps> = ({ isOpen, onGameCom
                 // Use the highest discount as the code value
                 const maxDiscount = Math.max(discounts.proYearly, discounts.proMonthly, discounts.enterprise);
 
+                await ensureCsrfToken();
                 await fetch(`${API_URL}/discount-codes`, {
                     method: 'POST',
+                    credentials: 'include',
                     headers: {
                         'Content-Type': 'application/json',
                         'Authorization': `Bearer ${token}`,
+                        ...csrfHeaders(),
                     },
                     body: JSON.stringify({
                         code: `GAME${maxDiscount}-${Date.now().toString(36).toUpperCase().slice(-6)}`,
