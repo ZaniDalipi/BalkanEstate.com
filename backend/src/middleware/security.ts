@@ -5,7 +5,7 @@
 
 import helmet from 'helmet';
 import hpp from 'hpp';
-import rateLimit from 'express-rate-limit';
+import rateLimit, { ipKeyGenerator } from 'express-rate-limit';
 import { Request, Response, NextFunction, Application } from 'express';
 import { IncomingMessage, ServerResponse } from 'http';
 import cors from 'cors';
@@ -426,7 +426,7 @@ export const messagingRateLimiter = rateLimit({
   legacyHeaders: false,
   keyGenerator: (req: Request) => {
     const userId = (req as any).user?.id || (req as any).user?._id;
-    return userId ? `msg_user_${userId}` : req.ip || 'unknown';
+    return userId ? `msg_user_${userId}` : ipKeyGenerator(req);
   },
   validate: { xForwardedForHeader: false },
 });
@@ -447,7 +447,7 @@ export const uploadRateLimiter = rateLimit({
   legacyHeaders: false,
   keyGenerator: (req: Request) => {
     const userId = (req as any).user?.id || (req as any).user?._id;
-    return userId ? `upload_user_${userId}` : req.ip || 'unknown';
+    return userId ? `upload_user_${userId}` : ipKeyGenerator(req);
   },
   validate: { xForwardedForHeader: false },
 });
