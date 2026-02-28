@@ -39,8 +39,10 @@ jest.mock('../config/cloudinary', () => ({
   __esModule: true,
   default: {
     url: jest.fn(
-      (publicId: string, options: any) =>
-        `https://res.cloudinary.com/test/${options?.resource_type || 'image'}/authenticated/s--fakesig--/${publicId}`
+      (publicId: string, options: any) => {
+        const deliveryType = options?.type === 'authenticated' ? 'authenticated' : 'upload';
+        return `https://res.cloudinary.com/test/${options?.resource_type || 'image'}/${deliveryType}/s--fakesig--/${publicId}`;
+      }
     ),
     uploader: {
       destroy: jest.fn().mockResolvedValue({ result: 'ok' }),
@@ -369,7 +371,7 @@ describe('Storage Access Policy', () => {
 
       expect(res.status).toBe(200);
       expect(res.body).toHaveProperty('url');
-      expect(res.body.url).toContain('authenticated');
+      expect(res.body.url).toContain('upload'); // avatar is a public asset
       expect(res.body.fileType).toBe('avatar');
       expect(res.body.expiresIn).toBe(3600);
     });

@@ -110,22 +110,26 @@ export const checkFileAccess = async (
 };
 
 /**
- * Generate a signed URL for an authenticated Cloudinary resource.
+ * Sensitive file types that use Cloudinary authenticated delivery.
+ * Must be kept in sync with SENSITIVE_TYPES in cloudinaryService.ts.
+ */
+const SENSITIVE_FILE_TYPES = new Set(['license', 'credential']);
+
+/**
+ * Generate a URL for a Cloudinary resource.
  *
- * Note: Cloudinary's sign_url signs the transformation + public_id with HMAC
- * to prevent URL tampering, but the signature alone does not enforce time-based
- * expiration. The _exp param is for client-side cache management only.
- * For actual time-limited tokens, enable Cloudinary Token-based Authentication.
+ * For sensitive files (license, credential): generates a signed authenticated URL.
+ * For public files (property, avatar, etc.): generates a standard optimized URL.
  */
 export const generateSignedUrl = (
   publicId: string,
-  resourceType: 'image' | 'video' | 'raw' = 'image'
+  resourceType: 'image' | 'video' | 'raw' = 'image',
+  fileType?: string
 ): string => {
-  const expiresAt = Math.floor(Date.now() / 1000) + SIGNED_URL_EXPIRY_SECONDS;
+  const isSensitive = fileType ? SENSITIVE_FILE_TYPES.has(fileType) : false;
 
   const url = cloudinary.url(publicId, {
-    type: 'authenticated',
-    sign_url: true,
+    ...(isSensitive ? { type: 'authenticated', sign_url: true } : {}),
     secure: true,
     resource_type: resourceType,
     transformation: [
@@ -134,8 +138,12 @@ export const generateSignedUrl = (
     ],
   });
 
-  // Client-side cache guidance — not enforced by Cloudinary itself
-  return `${url}${url.includes('?') ? '&' : '?'}_exp=${expiresAt}`;
+  if (isSensitive) {
+    const expiresAt = Math.floor(Date.now() / 1000) + SIGNED_URL_EXPIRY_SECONDS;
+    return `${url}${url.includes('?') ? '&' : '?'}_exp=${expiresAt}`;
+  }
+
+  return url;
 };
 
 /**
@@ -154,7 +162,7 @@ export const getSignedUrlIfAuthorized = async (
     return null;
   }
 
-  const url = generateSignedUrl(publicId, resourceType);
+  const url = generateSignedUrl(publicId, resourceType, fileRecord.fileType);
   return { url, fileRecord };
 };
 
@@ -232,7 +240,7 @@ export const batchGetSignedUrls = async (
     const isAdmin = userRole === 'admin';
 
     if (isOwner || isAdmin) {
-      signedUrls[record.publicId] = generateSignedUrl(record.publicId);
+      signedUrls[record.publicId] = generateSignedUrl(record.publicId, 'image', record.fileType);
     }
   }
 

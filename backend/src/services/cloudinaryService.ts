@@ -120,6 +120,14 @@ const buildFolderPath = (options: UploadOptions): string => {
 };
 
 /**
+ * Sensitive file types that require authenticated (signed URL) delivery.
+ * These are private documents that should NOT be publicly accessible.
+ * All other types (property, avatar, agency-logo, etc.) stay public
+ * because they're rendered in <img> tags by unauthenticated visitors.
+ */
+const SENSITIVE_TYPES: ReadonlySet<UploadType> = new Set(['license', 'credential']);
+
+/**
  * Upload image to Cloudinary with optimization
  *
  * Organized folder structure - see buildFolderPath() for details
@@ -176,13 +184,17 @@ export const uploadImage = async (
     // Step 2: Build organized folder path using centralized function
     const folder = buildFolderPath(options);
 
-    // Step 3: Upload to Cloudinary with authenticated delivery + optimizations
+    // Step 3: Upload to Cloudinary with optimizations
+    // Sensitive documents (license, credential) use authenticated delivery (requires signed URL).
+    // Public assets (property photos, avatars, logos) use standard upload so they render
+    // in <img> tags without authentication — buyers browse listings without logging in.
+    const deliveryType = SENSITIVE_TYPES.has(type) ? 'authenticated' : 'upload';
     const result = await new Promise<any>((resolve, reject) => {
       const uploadStream = cloudinary.uploader.upload_stream(
         {
           folder,
           resource_type: 'image',
-          type: 'authenticated', // Requires signed URL to access — enforces storage access policy
+          type: deliveryType,
           // Cloudinary transformations for automatic optimization
           transformation: [
             { quality: 'auto:good' }, // Auto quality adjustment
@@ -281,11 +293,18 @@ export const uploadPropertyImages = async (
 };
 
 /**
- * Delete image from Cloudinary and remove its file record
+ * Delete image from Cloudinary and remove its file record.
+ * Tries authenticated first, then falls back to upload type,
+ * since the file may be either delivery type.
  */
 export const deleteImage = async (publicId: string): Promise<void> => {
   try {
-    await cloudinary.uploader.destroy(publicId, { type: 'authenticated' });
+    // Try the standard upload type first (most files are public)
+    const result = await cloudinary.uploader.destroy(publicId);
+    if (result.result === 'not found') {
+      // May be an authenticated resource (license/credential)
+      await cloudinary.uploader.destroy(publicId, { type: 'authenticated' });
+    }
     await removeFileRecord(publicId);
     mediaLogger.info(`🗑️  Deleted image from Cloudinary: ${publicId}`);
   } catch (error: any) {
@@ -305,11 +324,17 @@ export const deleteImages = async (publicIds: string[]): Promise<void> => {
   mediaLogger.info(`🗑️  Deleting ${publicIds.length} images from Cloudinary...`);
 
   try {
-    // Cloudinary allows batch deletion
-    const result = await cloudinary.api.delete_resources(publicIds, { type: 'authenticated' });
+    // Cloudinary allows batch deletion — try both delivery types
+    const uploadResult = await cloudinary.api.delete_resources(publicIds);
+    const notDeleted = Object.entries(uploadResult.deleted)
+      .filter(([, status]) => status === 'not_found')
+      .map(([id]) => id);
+    if (notDeleted.length > 0) {
+      await cloudinary.api.delete_resources(notDeleted, { type: 'authenticated' });
+    }
     // Clean up file records for all deleted resources
     await Promise.all(publicIds.map(id => removeFileRecord(id)));
-    mediaLogger.info(`✅ Deleted ${Object.keys(result.deleted).length} images from Cloudinary`);
+    mediaLogger.info(`✅ Deleted ${publicIds.length} images from Cloudinary`);
   } catch (error: any) {
     mediaLogger.error(`❌ Batch delete error:`, error.message);
     // Fallback to individual deletion
@@ -381,11 +406,10 @@ export const moveImagesToProperty = async (
       // New path with property ID using the new folder structure
       const newPublicId = `balkan-estate/users/${userId}/listings/${propertyId}/${subfolder}/${filename}`;
 
-      // Rename/move the resource
+      // Rename/move the resource (property images are public type)
       const result = await cloudinary.uploader.rename(publicId, newPublicId, {
         overwrite: false,
         invalidate: true,
-        type: 'authenticated',
       });
 
       // Update the file record with new publicId
@@ -411,8 +435,9 @@ export const moveImagesToProperty = async (
 };
 
 /**
- * Get optimized image URL with transformations (signed for authenticated delivery)
- * This doesn't require a new request to Cloudinary - just builds the URL
+ * Get optimized image URL with transformations.
+ * Uses signed URL for sensitive file types, standard URL for public assets.
+ * This doesn't require a new request to Cloudinary - just builds the URL.
  */
 export const getOptimizedUrl = (
   publicId: string,
@@ -421,13 +446,13 @@ export const getOptimizedUrl = (
     height?: number;
     crop?: string;
     quality?: string;
+    sensitive?: boolean;
   } = {}
 ): string => {
-  const { width, height, crop = 'fill', quality = 'auto:good' } = options;
+  const { width, height, crop = 'fill', quality = 'auto:good', sensitive = false } = options;
 
   return cloudinary.url(publicId, {
-    type: 'authenticated',
-    sign_url: true,
+    ...(sensitive ? { type: 'authenticated', sign_url: true } : {}),
     transformation: [
       ...(width && height ? [{ width, height, crop }] : []),
       { quality },
