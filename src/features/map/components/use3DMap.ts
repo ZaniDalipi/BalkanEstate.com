@@ -225,7 +225,7 @@ export function use3DMap(props: Map3DBuildingsProps) {
   // Determine the facing direction of a building from its footprint
   // Returns the compass bearing (0-360) of the longest edge (building front)
   const getBuildingFacing = useCallback((mapInstance: maplibregl.Map, latitude: number, longitude: number): number | null => {
-    if (!mapInstance.getLayer('3d-buildings')) return null;
+    if (!mapInstance.getLayer('building-3d')) return null;
 
     const point = mapInstance.project([longitude, latitude]);
     const buffer = 30;
@@ -234,7 +234,7 @@ export function use3DMap(props: Map3DBuildingsProps) {
         [point.x - buffer, point.y - buffer],
         [point.x + buffer, point.y + buffer]
       ],
-      { layers: ['3d-buildings'] }
+      { layers: ['building-3d'] }
     );
 
     if (features.length === 0) return null;
@@ -429,7 +429,7 @@ export function use3DMap(props: Map3DBuildingsProps) {
     let buildingFeature: maplibregl.MapGeoJSONFeature | null = null;
 
     // Check if 3d-buildings layer exists
-    if (!mapInstance.getLayer('3d-buildings')) {
+    if (!mapInstance.getLayer('building-3d')) {
       console.warn('3D buildings layer not found in the map style. Custom building will be a simple box.');
     }
 
@@ -462,7 +462,7 @@ export function use3DMap(props: Map3DBuildingsProps) {
     // Try multiple query approaches to find the building
     // 1. First try exact point query on the 3d-buildings layer
     const exactFeatures = mapInstance.queryRenderedFeatures(point, {
-      layers: ['3d-buildings']
+      layers: ['building-3d']
     });
 
     if (exactFeatures.length > 0) {
@@ -489,7 +489,7 @@ export function use3DMap(props: Map3DBuildingsProps) {
         [point.x + 150, point.y + 150]
       ];
       const nearbyFeatures = mapInstance.queryRenderedFeatures(bbox, {
-        layers: ['3d-buildings']
+        layers: ['building-3d']
       });
 
       // Find the building CLOSEST to our coordinates that is tall enough
@@ -599,12 +599,12 @@ export function use3DMap(props: Map3DBuildingsProps) {
     // Hide buildings to prevent depth-buffer conflicts with floor slices.
     // Try to filter only the target building by feature ID; if that's not possible,
     // hide the entire layer — floor slices must always win the depth buffer.
-    if (mapInstance.getLayer('3d-buildings')) {
+    if (mapInstance.getLayer('building-3d')) {
       const featureId = buildingFeature?.id;
       if (featureId !== undefined && featureId !== null) {
-        mapInstance.setFilter('3d-buildings', ['!=', ['id'], featureId]);
+        mapInstance.setFilter('building-3d', ['!=', ['id'], featureId]);
       } else {
-        mapInstance.setLayoutProperty('3d-buildings', 'visibility', 'none');
+        mapInstance.setLayoutProperty('building-3d', 'visibility', 'none');
       }
     }
 
@@ -954,7 +954,7 @@ export function use3DMap(props: Map3DBuildingsProps) {
       setMapLoaded(true);
 
       // Add 3D building extrusion layer if not already present
-      if (!mapInstance.getLayer('3d-buildings')) {
+      if (!mapInstance.getLayer('building-3d')) {
         // Find the first symbol layer for proper ordering
         const layers = mapInstance.getStyle().layers;
         let labelLayerId: string | undefined;
@@ -1003,7 +1003,7 @@ export function use3DMap(props: Map3DBuildingsProps) {
           // Add 3D buildings layer - OneGeo style dark grey buildings
           mapInstance.addLayer(
             {
-              id: '3d-buildings',
+              id: 'building-3d',
               source: buildingSource,
               'source-layer': 'building',
               type: 'fill-extrusion',
@@ -1193,8 +1193,8 @@ export function use3DMap(props: Map3DBuildingsProps) {
 
     const lighting = TIME_LIGHTING[timelapse.timePeriod];
 
-    if (map.current.getLayer('3d-buildings')) {
-      map.current.setPaintProperty('3d-buildings', 'fill-extrusion-color', [
+    if (map.current.getLayer('building-3d')) {
+      map.current.setPaintProperty('building-3d', 'fill-extrusion-color', [
         'interpolate',
         ['linear'],
         ['coalesce', ['get', 'render_height'], 10],
@@ -1202,7 +1202,7 @@ export function use3DMap(props: Map3DBuildingsProps) {
         30, lighting.buildingHighlight,
         80, '#ffffff',
       ]);
-      map.current.setPaintProperty('3d-buildings', 'fill-extrusion-opacity',
+      map.current.setPaintProperty('building-3d', 'fill-extrusion-opacity',
         0.7 + lighting.ambientIntensity * 0.25
       );
     }
@@ -1250,7 +1250,7 @@ export function use3DMap(props: Map3DBuildingsProps) {
 
     // Query all rendered buildings
     const features = map.current.queryRenderedFeatures(undefined, {
-      layers: ['3d-buildings']
+      layers: ['building-3d']
     });
 
     // Track building centroids to avoid duplicate labels
@@ -1400,7 +1400,7 @@ export function use3DMap(props: Map3DBuildingsProps) {
 
     // Query visible buildings - limit to improve performance
     const features = mapInstance.queryRenderedFeatures(undefined, {
-      layers: ['3d-buildings']
+      layers: ['building-3d']
     }).slice(0, 100); // Limit to 100 buildings for performance
 
     const shadowFeatures: GeoJSON.Feature[] = [];
@@ -1530,7 +1530,7 @@ export function use3DMap(props: Map3DBuildingsProps) {
           id: layerId,
           source: sourceId,
           ...layerConfig
-        } as maplibregl.LayerSpecification, '3d-buildings');
+        } as maplibregl.LayerSpecification, 'building-3d');
       }
     };
 
