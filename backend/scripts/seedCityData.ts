@@ -9,40 +9,43 @@ import mongoose from 'mongoose';
 import dotenv from 'dotenv';
 import path from 'path';
 import { updateAllCityMarketData } from '../src/services/cityMarketDataService';
+import { scriptLogger } from '../src/utils/logger';
 
 // Load environment-specific config
 const env = process.env.NODE_ENV || 'development';
 const envFile = env === 'development' ? '.env' : `.env.${env}`;
 dotenv.config({ path: path.join(__dirname, '..', envFile) });
 
-console.log(`🌍 Environment: ${env.toUpperCase()}`);
+const log = scriptLogger.child('SeedCities');
+
+log.info(`🌍 Environment: ${env.toUpperCase()}`);
 
 async function seedCityData() {
   try {
-    console.log('🌱 Starting city market data seeder...');
+    log.info('🌱 Starting city market data seeder...');
 
     // Connect to MongoDB
     const mongoUri = process.env.MONGODB_URI || 'mongodb://localhost:27017/balkan-estate';
     await mongoose.connect(mongoUri);
-    console.log('✅ Connected to MongoDB');
+    log.info('✅ Connected to MongoDB');
 
     // Check if Gemini API key is available
     if (!process.env.GEMINI_API_KEY && !process.env.GOOGLE_AI_API_KEY) {
-      console.warn('⚠️ Warning: No Gemini API key found!');
-      console.warn('   Set GEMINI_API_KEY or GOOGLE_AI_API_KEY in .env file');
-      console.warn('   The seeder will create placeholder data for now.\n');
+      log.warn('⚠️ Warning: No Gemini API key found!');
+      log.warn('   Set GEMINI_API_KEY or GOOGLE_AI_API_KEY in .env file');
+      log.warn('   The seeder will create placeholder data for now.\n');
     }
 
     // Run the update function (same as biweekly cron job)
     await updateAllCityMarketData();
 
-    console.log('\n✅ City market data seeded successfully!');
-    console.log('   You can now view cities at /explore-cities');
-    console.log('   Data will be refreshed automatically on 1st and 15th of each month');
+    log.info('\n✅ City market data seeded successfully!');
+    log.info('   You can now view cities at /explore-cities');
+    log.info('   Data will be refreshed automatically on 1st and 15th of each month');
 
     process.exit(0);
   } catch (error) {
-    console.error('❌ Seeding failed:', error);
+    log.error('❌ Seeding failed:', error);
     process.exit(1);
   }
 }

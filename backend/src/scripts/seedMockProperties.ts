@@ -2,6 +2,9 @@ import mongoose from 'mongoose';
 import dotenv from 'dotenv';
 import Property from '../models/Property';
 import User from '../models/User';
+import { scriptLogger } from '../utils/logger';
+
+const log = scriptLogger.child('SeedMockProperties');
 
 dotenv.config();
 
@@ -134,26 +137,26 @@ async function seedMockProperties() {
     // Connect to MongoDB
     const mongoUri = process.env.MONGO_URI || 'mongodb://localhost:27017/balkan-estate';
     await mongoose.connect(mongoUri);
-    console.log('✅ Connected to MongoDB');
+    log.info('✅ Connected to MongoDB');
 
     // Find all agent users
     const agents = await User.find({ role: 'agent' });
-    console.log(`📊 Found ${agents.length} agents`);
+    log.info(`📊 Found ${agents.length} agents`);
 
     if (agents.length === 0) {
-      console.log('⚠️  No agents found. Please create some agent users first.');
+      log.info('⚠️  No agents found. Please create some agent users first.');
       return;
     }
 
     // Optional: Clear existing properties (comment out if you want to keep existing)
     // await Property.deleteMany({});
-    // console.log('🗑️  Cleared existing properties');
+    // log.info('🗑️  Cleared existing properties');
 
     let totalCreated = 0;
     const propertiesPerAgent = 100;
 
     for (const agent of agents) {
-      console.log(`\n👤 Creating properties for agent: ${agent.name}`);
+      log.info(`\n👤 Creating properties for agent: ${agent.name}`);
 
       // Generate 70% active and 30% sold properties
       const activePropCount = Math.floor(propertiesPerAgent * 0.7); // 70 active
@@ -175,19 +178,19 @@ async function seedMockProperties() {
       const result = await Property.insertMany(properties);
       totalCreated += result.length;
 
-      console.log(`  ✅ Created ${result.length} properties (${activePropCount} active, ${soldPropCount} sold)`);
+      log.info(`  ✅ Created ${result.length} properties (${activePropCount} active, ${soldPropCount} sold)`);
     }
 
-    console.log(`\n🎉 Successfully seeded ${totalCreated} mock properties!`);
-    console.log(`📊 Properties per agent: ${propertiesPerAgent}`);
-    console.log(`📊 Total agents: ${agents.length}`);
+    log.info(`\n🎉 Successfully seeded ${totalCreated} mock properties!`);
+    log.info(`📊 Properties per agent: ${propertiesPerAgent}`);
+    log.info(`📊 Total agents: ${agents.length}`);
 
   } catch (error) {
-    console.error('❌ Error seeding mock properties:', error);
+    log.error('❌ Error seeding mock properties:', error);
     process.exit(1);
   } finally {
     await mongoose.disconnect();
-    console.log('👋 Disconnected from MongoDB');
+    log.info('👋 Disconnected from MongoDB');
   }
 }
 

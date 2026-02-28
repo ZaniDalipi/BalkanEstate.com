@@ -1,6 +1,9 @@
 import mongoose from 'mongoose';
 import dotenv from 'dotenv';
 import PromotionCoupon from '../models/PromotionCoupon';
+import { scriptLogger } from '../utils/logger';
+
+const log = scriptLogger.child('SeedPromoCoupons');
 
 dotenv.config();
 
@@ -164,47 +167,47 @@ const promotionCoupons = [
 
 async function seedPromotionCoupons() {
   try {
-    console.log('🔌 Connecting to MongoDB...');
+    log.info('🔌 Connecting to MongoDB...');
     await mongoose.connect(MONGODB_URI);
-    console.log('✅ Connected to MongoDB');
+    log.info('✅ Connected to MongoDB');
 
     // Check existing coupons
     const existingCount = await PromotionCoupon.countDocuments();
-    console.log(`📊 Found ${existingCount} existing promotion coupons`);
+    log.info(`📊 Found ${existingCount} existing promotion coupons`);
 
     // Delete existing coupons (optional - comment out if you want to keep existing ones)
     if (existingCount > 0) {
-      console.log('🗑️ Removing existing promotion coupons...');
+      log.info('🗑️ Removing existing promotion coupons...');
       await PromotionCoupon.deleteMany({});
     }
 
     // Insert new coupons
-    console.log(`📝 Creating ${promotionCoupons.length} promotion coupons...`);
+    log.info(`📝 Creating ${promotionCoupons.length} promotion coupons...`);
 
     for (const couponData of promotionCoupons) {
       const coupon = await PromotionCoupon.create(couponData);
-      console.log(`  ✅ Created coupon: ${coupon.code} (${coupon.description})`);
+      log.info(`  ✅ Created coupon: ${coupon.code} (${coupon.description})`);
     }
 
-    console.log('\n🎉 Promotion coupons seeded successfully!');
-    console.log('\n📋 Available test coupons:');
-    console.log('   TEST100   - 100% off (for testing)');
-    console.log('   FREEPROMO - 100% off (for testing)');
-    console.log('   SUMMER25  - 25% off all tiers');
-    console.log('   FIRST50   - 50% off featured tier (first use only)');
-    console.log('   PREMIUM20 - 20% off premium tier');
-    console.log('   SAVE5     - €5 off (min €10)');
-    console.log('   SAVE10    - €10 off highlight/premium (min €20)');
-    console.log('   AGENCY30  - 30% off (agency partners)');
-    console.log('   WELCOME15 - 15% off first promotion');
-    console.log('   BULK40    - 40% off (min €50 purchase)');
+    log.info('\n🎉 Promotion coupons seeded successfully!');
+    log.info('\n📋 Available test coupons:');
+    log.info('   TEST100   - 100% off (for testing)');
+    log.info('   FREEPROMO - 100% off (for testing)');
+    log.info('   SUMMER25  - 25% off all tiers');
+    log.info('   FIRST50   - 50% off featured tier (first use only)');
+    log.info('   PREMIUM20 - 20% off premium tier');
+    log.info('   SAVE5     - €5 off (min €10)');
+    log.info('   SAVE10    - €10 off highlight/premium (min €20)');
+    log.info('   AGENCY30  - 30% off (agency partners)');
+    log.info('   WELCOME15 - 15% off first promotion');
+    log.info('   BULK40    - 40% off (min €50 purchase)');
 
   } catch (error) {
-    console.error('❌ Error seeding promotion coupons:', error);
+    log.error('❌ Error seeding promotion coupons:', error);
     process.exit(1);
   } finally {
     await mongoose.connection.close();
-    console.log('\n🔌 MongoDB connection closed');
+    log.info('\n🔌 MongoDB connection closed');
     process.exit(0);
   }
 }

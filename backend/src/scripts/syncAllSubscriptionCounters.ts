@@ -14,6 +14,9 @@ import path from 'path';
 import User from '../models/User';
 import Property from '../models/Property';
 import Product from '../models/Product';
+import { scriptLogger } from '../utils/logger';
+
+const log = scriptLogger.child('SyncSubCounters');
 
 // Load environment variables
 dotenv.config({ path: path.resolve(__dirname, '../../.env') });
@@ -23,7 +26,7 @@ const syncAllSubscriptionCounters = async () => {
     // Connect to MongoDB
     const mongoUri = process.env.MONGO_URI || 'mongodb://localhost:27017/balkan-estate';
     await mongoose.connect(mongoUri);
-    console.log('✅ Connected to MongoDB');
+    log.info('✅ Connected to MongoDB');
 
     // Get agent listings limit from DB product (configurable in admin)
     const agentProduct = await Product.findOne({ productId: 'agency_agent_yearly' }).lean();
@@ -31,7 +34,7 @@ const syncAllSubscriptionCounters = async () => {
 
     // Get all users
     const users = await User.find({});
-    console.log(`\n📊 Found ${users.length} users to sync\n`);
+    log.info(`\n📊 Found ${users.length} users to sync\n`);
 
     let syncedCount = 0;
     let skippedCount = 0;
@@ -39,7 +42,7 @@ const syncAllSubscriptionCounters = async () => {
 
     for (const user of users) {
       try {
-        console.log(`\n🔄 Processing user: ${user.email}`);
+        log.info(`\n🔄 Processing user: ${user.email}`);
 
         // Determine tier and limit from proSubscription or default to free
         let tier: 'free' | 'pro' | 'agency_owner' | 'agency_agent' | 'buyer' = 'free';
@@ -60,7 +63,7 @@ const syncAllSubscriptionCounters = async () => {
         const privateSellerCount = existingProperties.filter((p: any) => p.createdAsRole === 'private_seller').length;
         const agentCount = existingProperties.filter((p: any) => p.createdAsRole === 'agent').length;
 
-        console.log(`   📈 Found ${activeListingsCount} properties: ${privateSellerCount} private seller, ${agentCount} agent`);
+        log.info(`   📈 Found ${activeListingsCount} properties: ${privateSellerCount} private seller, ${agentCount} agent`);
 
         // Initialize or update subscription object
         if (!user.subscription) {
@@ -87,7 +90,7 @@ const syncAllSubscriptionCounters = async () => {
             startDate: user.proSubscription?.startedAt || new Date(),
             expiresAt: user.proSubscription?.expiresAt,
           };
-          console.log(`   ✨ Created new subscription: ${tier} tier with ${listingsLimit} limit`);
+          log.info(`   ✨ Created new subscription: ${tier} tier with ${listingsLimit} limit`);
         } else {
           // Update existing subscription counters
           user.subscription.activeListingsCount = activeListingsCount;
@@ -96,37 +99,37 @@ const syncAllSubscriptionCounters = async () => {
 
           // Ensure listingsLimit is correct for agency agents
           if (user.subscription.tier === 'agency_agent' && user.subscription.listingsLimit !== agentListingsLimit) {
-            console.log(`   🔧 Fixed listingsLimit: ${user.subscription.listingsLimit} -> ${agentListingsLimit}`);
+            log.info(`   🔧 Fixed listingsLimit: ${user.subscription.listingsLimit} -> ${agentListingsLimit}`);
             user.subscription.listingsLimit = agentListingsLimit;
           }
 
-          console.log(`   ✅ Updated subscription counters`);
+          log.info(`   ✅ Updated subscription counters`);
         }
 
         await user.save();
-        console.log(`   💾 Saved to database: ${activeListingsCount}/${listingsLimit} listings used`);
+        log.info(`   💾 Saved to database: ${activeListingsCount}/${listingsLimit} listings used`);
 
         syncedCount++;
       } catch (error) {
-        console.error(`   ❌ Error processing ${user.email}:`, error);
+        log.error(`   ❌ Error processing ${user.email}:`, error);
         errorCount++;
       }
     }
 
-    console.log('\n' + '='.repeat(60));
-    console.log('📊 SYNC COMPLETE');
-    console.log('='.repeat(60));
-    console.log(`✅ Successfully synced: ${syncedCount} users`);
-    console.log(`⏭️  Skipped: ${skippedCount} users`);
-    console.log(`❌ Errors: ${errorCount} users`);
-    console.log('='.repeat(60) + '\n');
+    log.info('\n' + '='.repeat(60));
+    log.info('📊 SYNC COMPLETE');
+    log.info('='.repeat(60));
+    log.info(`✅ Successfully synced: ${syncedCount} users`);
+    log.info(`⏭️  Skipped: ${skippedCount} users`);
+    log.info(`❌ Errors: ${errorCount} users`);
+    log.info('='.repeat(60) + '\n');
 
   } catch (error) {
-    console.error('❌ Migration failed:', error);
+    log.error('❌ Migration failed:', error);
     process.exit(1);
   } finally {
     await mongoose.disconnect();
-    console.log('✅ Disconnected from MongoDB');
+    log.info('✅ Disconnected from MongoDB');
     process.exit(0);
   }
 };

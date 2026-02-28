@@ -2,6 +2,9 @@ import mongoose from 'mongoose';
 import dotenv from 'dotenv';
 import path from 'path';
 import Property from '../models/Property';
+import { scriptLogger } from '../utils/logger';
+
+const log = scriptLogger.child('ArchiveProperties');
 
 // Load environment variables from backend root
 dotenv.config({ path: path.resolve(__dirname, '../../.env') });
@@ -14,15 +17,15 @@ const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/balkan
  */
 const archiveSoldProperties = async () => {
   try {
-    console.log('\n🔄 Starting sold properties cleanup...');
-    console.log(`MongoDB URI: ${MONGODB_URI}`);
+    log.info('\n🔄 Starting sold properties cleanup...');
+    log.info(`MongoDB URI: ${MONGODB_URI}`);
 
     // Connect to MongoDB
     await mongoose.connect(MONGODB_URI, {
       serverSelectionTimeoutMS: 5000,
       connectTimeoutMS: 5000,
     });
-    console.log('✓ Connected to MongoDB\n');
+    log.info('✓ Connected to MongoDB\n');
 
     // Find properties that were sold more than 24 hours ago
     const twentyFourHoursAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
@@ -32,12 +35,12 @@ const archiveSoldProperties = async () => {
       soldAt: { $lt: twentyFourHoursAgo }
     });
 
-    console.log(`Found ${oldSoldProperties.length} properties sold more than 24 hours ago`);
+    log.info(`Found ${oldSoldProperties.length} properties sold more than 24 hours ago`);
 
     if (oldSoldProperties.length === 0) {
-      console.log('✓ No properties to archive\n');
+      log.info('✓ No properties to archive\n');
       await mongoose.disconnect();
-      console.log('Disconnected from MongoDB');
+      log.info('Disconnected from MongoDB');
       return;
     }
 
@@ -58,19 +61,19 @@ const archiveSoldProperties = async () => {
       soldAt: { $lt: twentyFourHoursAgo }
     });
 
-    console.log(`✓ Processed ${deleteResult.deletedCount} properties:`);
+    log.info(`✓ Processed ${deleteResult.deletedCount} properties:`);
     oldSoldProperties.forEach(prop => {
-      console.log(`  - ${prop.address}, ${prop.city} (Sold: ${prop.soldAt?.toISOString()})`);
+      log.info(`  - ${prop.address}, ${prop.city} (Sold: ${prop.soldAt?.toISOString()})`);
     });
 
-    console.log('\n✓ Cleanup completed successfully');
+    log.info('\n✓ Cleanup completed successfully');
 
     // Disconnect from MongoDB
     await mongoose.disconnect();
-    console.log('Disconnected from MongoDB\n');
+    log.info('Disconnected from MongoDB\n');
 
   } catch (error: any) {
-    console.error('\n❌ Cleanup error:', error.message);
+    log.error('\n❌ Cleanup error:', error.message);
     await mongoose.disconnect();
     process.exit(1);
   }

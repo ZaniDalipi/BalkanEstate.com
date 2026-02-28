@@ -10,6 +10,9 @@
 
 import fs from 'fs';
 import path from 'path';
+import { scriptLogger } from '../utils/logger';
+
+const log = scriptLogger.child('TestEmails');
 
 // =============================================================================
 // Helper Functions
@@ -459,7 +462,7 @@ async function main() {
     fs.mkdirSync(outputDir, { recursive: true });
   }
 
-  console.log('🎨 Generating email previews...\n');
+  log.info('🎨 Generating email previews...\n');
 
   // 1. Enterprise Agent Registration Coupons Email
   const agentCouponsHtml = generateAgentCouponsEmail({
@@ -469,7 +472,7 @@ async function main() {
   });
   const agentCouponsPath = path.join(outputDir, '1-enterprise-agent-coupons.html');
   fs.writeFileSync(agentCouponsPath, agentCouponsHtml);
-  console.log(`✅ Enterprise Agent Coupons Email: ${agentCouponsPath}`);
+  log.info(`✅ Enterprise Agent Coupons Email: ${agentCouponsPath}`);
 
   // 2. Enterprise Welcome/Thank You Email
   const welcomeHtml = generateEnterpriseWelcomeEmail({
@@ -478,7 +481,7 @@ async function main() {
   });
   const welcomePath = path.join(outputDir, '2-enterprise-welcome-thankyou.html');
   fs.writeFileSync(welcomePath, welcomeHtml);
-  console.log(`✅ Enterprise Welcome Email: ${welcomePath}`);
+  log.info(`✅ Enterprise Welcome Email: ${welcomePath}`);
 
   // 3. Pro Monthly Promotion Coupons Email
   const proMonthlyHtml = generateProMonthlyCouponsEmail({
@@ -495,15 +498,15 @@ async function main() {
   });
   const proMonthlyPath = path.join(outputDir, '3-pro-monthly-coupons.html');
   fs.writeFileSync(proMonthlyPath, proMonthlyHtml);
-  console.log(`✅ Pro Monthly Coupons Email: ${proMonthlyPath}`);
+  log.info(`✅ Pro Monthly Coupons Email: ${proMonthlyPath}`);
 
-  console.log('\n📧 Email previews generated successfully!');
-  console.log(`\n📂 Open in browser:`);
-  console.log(`   file://${agentCouponsPath}`);
-  console.log(`   file://${welcomePath}`);
-  console.log(`   file://${proMonthlyPath}`);
+  log.info('\n📧 Email previews generated successfully!');
+  log.info(`\n📂 Open in browser:`);
+  log.info(`   file://${agentCouponsPath}`);
+  log.info(`   file://${welcomePath}`);
+  log.info(`   file://${proMonthlyPath}`);
 
-  console.log('\n💡 Or run: open /tmp/email-previews/*.html');
+  log.info('\n💡 Or run: open /tmp/email-previews/*.html');
 }
 
-main().catch(console.error);
+main().catch((err) => log.error(err));

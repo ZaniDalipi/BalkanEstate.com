@@ -1,6 +1,9 @@
 import mongoose from 'mongoose';
 import User from '../models/User';
 import dotenv from 'dotenv';
+import { scriptLogger } from '../utils/logger';
+
+const log = scriptLogger.child('InitUserStats');
 
 // Load environment variables
 dotenv.config();
@@ -17,7 +20,7 @@ async function initializeAllUserStats() {
     // Connect to MongoDB
     const mongoUri = process.env.MONGODB_URI || 'mongodb://localhost:27017/balkanestate';
     await mongoose.connect(mongoUri);
-    console.log('Connected to MongoDB');
+    log.info('Connected to MongoDB');
 
     // Find all users without stats or with incomplete stats
     const users = await User.find({
@@ -31,7 +34,7 @@ async function initializeAllUserStats() {
       ]
     });
 
-    console.log(`Found ${users.length} users without properly initialized stats`);
+    log.info(`Found ${users.length} users without properly initialized stats`);
 
     let updatedCount = 0;
 
@@ -56,20 +59,20 @@ async function initializeAllUserStats() {
       updatedCount++;
 
       if (updatedCount % 100 === 0) {
-        console.log(`Processed ${updatedCount}/${users.length} users...`);
+        log.info(`Processed ${updatedCount}/${users.length} users...`);
       }
     }
 
-    console.log(`\n✅ Successfully initialized stats for ${updatedCount} users`);
-    console.log('\nStats initialization complete!');
+    log.info(`\n✅ Successfully initialized stats for ${updatedCount} users`);
+    log.info('\nStats initialization complete!');
 
     // Disconnect from MongoDB
     await mongoose.disconnect();
-    console.log('Disconnected from MongoDB');
+    log.info('Disconnected from MongoDB');
 
     process.exit(0);
   } catch (error) {
-    console.error('Error initializing user stats:', error);
+    log.error('Error initializing user stats:', error);
     process.exit(1);
   }
 }

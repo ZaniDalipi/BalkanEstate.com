@@ -1,5 +1,8 @@
 import mongoose from 'mongoose';
 import dotenv from 'dotenv';
+import { scriptLogger } from '../utils/logger';
+
+const log = scriptLogger.child('FixUserIndex');
 
 // Load environment variables
 dotenv.config();
@@ -9,7 +12,7 @@ const fixUserIndex = async () => {
     // Connect to MongoDB
     const mongoUri = process.env.MONGO_URI || 'mongodb://localhost:27017/balkan-estate';
     await mongoose.connect(mongoUri);
-    console.log('Connected to MongoDB');
+    log.info('Connected to MongoDB');
 
     // Get the User collection
     const db = mongoose.connection.db;
@@ -21,10 +24,10 @@ const fixUserIndex = async () => {
     // Drop the old compound index
     try {
       await usersCollection.dropIndex('provider_1_providerId_1');
-      console.log('✅ Dropped old provider_providerId index');
+      log.info('✅ Dropped old provider_providerId index');
     } catch (error: any) {
       if (error.code === 27) {
-        console.log('ℹ️  Index does not exist, skipping drop');
+        log.info('ℹ️  Index does not exist, skipping drop');
       } else {
         throw error;
       }
@@ -39,22 +42,22 @@ const fixUserIndex = async () => {
         name: 'provider_1_providerId_1'
       }
     );
-    console.log('✅ Created new partial index for OAuth users');
+    log.info('✅ Created new partial index for OAuth users');
 
     // Verify the indexes
     const indexes = await usersCollection.indexes();
-    console.log('\nCurrent indexes:');
+    log.info('\nCurrent indexes:');
     indexes.forEach((index) => {
-      console.log(`  - ${index.name}:`, JSON.stringify(index.key));
+      log.info(`  - ${index.name}:`, JSON.stringify(index.key));
       if (index.partialFilterExpression) {
-        console.log(`    Partial filter: ${JSON.stringify(index.partialFilterExpression)}`);
+        log.info(`    Partial filter: ${JSON.stringify(index.partialFilterExpression)}`);
       }
     });
 
-    console.log('\n✅ Index fix completed successfully!');
+    log.info('\n✅ Index fix completed successfully!');
     process.exit(0);
   } catch (error) {
-    console.error('❌ Error fixing index:', error);
+    log.error('❌ Error fixing index:', error);
     process.exit(1);
   }
 };
