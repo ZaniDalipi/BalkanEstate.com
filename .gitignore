@@ -69,3 +69,6 @@ coverage/
 # Playwright artifacts
 playwright-report/
 test-results/
+
+# Vite dev build artifacts
+dev-dist/
