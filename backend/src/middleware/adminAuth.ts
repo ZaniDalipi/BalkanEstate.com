@@ -30,8 +30,9 @@ const getAllowedDomains = (): string[] => {
   return [];
 };
 
-// Check if VPN/IP check should be skipped (for development)
+// Check if VPN/IP check should be skipped (development only — never in production)
 const isVPNCheckDisabled = (): boolean => {
+  if (process.env.NODE_ENV === 'production') return false;
   return process.env.DISABLE_ADMIN_VPN_CHECK === 'true';
 };
 

@@ -26,6 +26,9 @@ import {
   getSocketCorsConfig,
 } from './middleware/security';
 
+// CSRF protection (double-submit cookie pattern)
+import { csrfCookie, csrfValidation } from './middleware/csrf';
+
 // Import cache middleware
 import { apiCache } from './middleware/cache';
 
@@ -240,11 +243,17 @@ app.get('/health', (_req: Request, res: Response) => {
 app.use('/', sitemapRoutes);
 
 // ============================================================================
-// API ROUTES with Rate Limiting
+// API ROUTES with Rate Limiting & CSRF Protection
 // ============================================================================
 
 // Apply general rate limiting to all API routes
 app.use('/api', generalRateLimiter);
+
+// CSRF protection: set token cookie on every response, validate on mutations
+// This prevents cross-origin forged requests (e.g., malicious sites tricking
+// users into making API calls). Combined with JWT auth, provides defense-in-depth.
+app.use('/api', csrfCookie);
+app.use('/api', csrfValidation);
 
 // Apply XSS sanitization to all API routes
 app.use('/api', xssSanitizer);
@@ -338,6 +347,7 @@ httpServer.listen(PORT, () => {
   serverLogger.info('🔒 Security Features:');
   serverLogger.info('   - Helmet security headers: Enabled');
   serverLogger.info('   - CORS: ' + (isProd ? 'Production whitelist' : 'Development (permissive)'));
+  serverLogger.info('   - CSRF protection: Enabled (double-submit cookie)');
   serverLogger.info('   - Rate limiting: Enabled (general + sensitive + payment)');
   serverLogger.info('   - XSS protection: Enabled');
   serverLogger.info('   - HPP protection: Enabled');

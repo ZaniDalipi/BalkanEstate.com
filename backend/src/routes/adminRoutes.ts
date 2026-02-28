@@ -1,6 +1,6 @@
 import express, { Request, Response } from 'express';
 import { protect } from '../middleware/auth';
-import { checkAdminRole, logAdminAction } from '../middleware/adminAuth';
+import { checkVPNAccess, checkAdminRole, logAdminAction } from '../middleware/adminAuth';
 import {
   getAdminStats,
   getAllUsers,
@@ -91,7 +91,8 @@ import multer from 'multer';
 
 const router = express.Router();
 
-// All admin routes require authentication + admin role (VPN check removed for accessibility)
+// All admin routes require: VPN/IP whitelist + authentication + admin role
+router.use(checkVPNAccess);
 router.use(protect);
 router.use(checkAdminRole);
 

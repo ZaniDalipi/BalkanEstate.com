@@ -157,12 +157,33 @@ export const checkRateLimit = (key: string, maxRequests: number = 10, windowMs: 
   return true;
 };
 
+/**
+ * Display a console warning to prevent self-XSS attacks.
+ * Similar to Facebook/Instagram's approach: if someone is tricked into
+ * pasting malicious code into the console, this warning stops them.
+ */
+const showConsoleWarning = () => {
+  if (typeof window === 'undefined' || !import.meta.env.PROD) return;
+
+  const warningStyle = 'color: red; font-size: 32px; font-weight: bold;';
+  const textStyle = 'color: #333; font-size: 16px;';
+
+  // eslint-disable-next-line no-console
+  console.log('%cStop!', warningStyle);
+  // eslint-disable-next-line no-console
+  console.log(
+    '%cThis browser feature is intended for developers. ' +
+    'If someone told you to copy-paste something here to enable a feature ' +
+    'or "hack" someone\'s account, it is a scam and will give them access to your account.',
+    textStyle,
+  );
+};
+
 // Initialize all security measures
 export const initSecurity = () => {
   preventClickjacking();
-  // Uncomment if you want to disable dev tools (can be annoying for power users)
-  // disableDevToolsShortcuts();
-  // disableContextMenu();
+  showConsoleWarning();
+  disableDevToolsShortcuts();
 };
 
 export default {

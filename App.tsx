@@ -35,6 +35,10 @@ const LogoIcon: React.FC<{ className?: string }> = ({ className }) => (
 // Initialize i18n
 import './src/i18n';
 
+// Initialize security measures (clickjacking protection, console warning, dev tools)
+import { initSecurity } from './src/utils/security';
+initSecurity();
+
 // Language routing utilities
 import { parseLanguageFromPath, initializeLanguageFromUrl, buildLocalizedPath } from './src/utils/languageRouting';
 

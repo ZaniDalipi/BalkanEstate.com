@@ -10,6 +10,19 @@ import {
   type ResponseKeyInfo,
 } from './payloadEncryption';
 
+/**
+ * Read the CSRF token from the __csrf cookie set by the backend.
+ * Used for double-submit cookie CSRF protection: the value must be
+ * included in the X-CSRF-Token header on every mutation request.
+ */
+const getCsrfToken = (): string | undefined => {
+  const match = document.cookie.match(/(?:^|;\s*)__csrf=([^;]*)/);
+  return match ? match[1] : undefined;
+};
+
+/** HTTP methods that mutate state and require a CSRF token */
+const MUTATION_METHODS = new Set(['POST', 'PUT', 'PATCH', 'DELETE']);
+
 export interface RequestOptions {
   method?: string;
   body?: any;
@@ -29,6 +42,7 @@ const refreshAccessToken = async (): Promise<string | null> => {
 
     const response = await fetch(`${API_URL}/auth/refresh-token`, {
       method: 'POST',
+      credentials: 'include',
       headers: {
         'Content-Type': 'application/json',
       },
@@ -68,10 +82,21 @@ export const apiRequest = async <T>(
     keyInfo = await generateResponseKey();
   }
 
+  // Include CSRF token on mutation requests (double-submit cookie pattern)
+  const csrfHeaders: Record<string, string> = {};
+  if (MUTATION_METHODS.has(method)) {
+    const csrfToken = getCsrfToken();
+    if (csrfToken) {
+      csrfHeaders['X-CSRF-Token'] = csrfToken;
+    }
+  }
+
   const config: RequestInit = {
     method,
+    credentials: 'include', // Send cookies (including __csrf) with every request
     headers: {
       'Content-Type': 'application/json',
+      ...csrfHeaders,
       ...headers,
       ...(keyInfo ? { 'X-Response-Key': keyInfo.encryptedKeyBase64 } : {}),
     },
@@ -168,10 +193,15 @@ export const uploadRequest = async <T>(
     }
   }
 
+  // Include CSRF token for upload mutations (double-submit cookie pattern)
+  const csrfToken = getCsrfToken();
+
   const response = await fetch(`${API_URL}${endpoint}`, {
     method: 'POST',
+    credentials: 'include',
     headers: {
       Authorization: `Bearer ${token}`,
+      ...(csrfToken ? { 'X-CSRF-Token': csrfToken } : {}),
     },
     body: formData,
   });
