@@ -74,8 +74,7 @@ router.get('/customer-portal', protect, getCustomerPortal);
 /**
  * Verify payment by session ID for any registered provider
  * GET /api/payments/:provider/verify/:sessionId
- * e.g. /api/payments/stripe/verify/cs_test_123
- *      /api/payments/paysera/verify/BE_abc123_1234567890
+ * e.g. /api/payments/paysera/verify/BE_abc123_1234567890
  */
 router.get('/:provider/verify/:sessionId', protect, verifyProviderPayment);
 

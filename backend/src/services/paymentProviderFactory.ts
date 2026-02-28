@@ -7,7 +7,7 @@
  * Provider Strategy:
  * - Paysera (Primary): Handles card, Google Pay, Apple Pay, bank transfers,
  *   SEPA, and e-wallet payments for all Balkan countries.
- * - Additional providers (Stripe, Paddle, etc.) can be used via preferredProvider
+ * - Additional providers (Paddle, etc.) can be added via preferredProvider
  *   or as fallbacks when the primary provider is not configured.
  */
 

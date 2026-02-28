@@ -14,7 +14,6 @@
  */
 
 import { IPaymentProvider } from '../../interfaces/IPaymentProvider';
-import { stripeAdapter } from './stripeAdapter';
 import { payseraAdapter } from './payseraAdapter';
 import { webhookLogger } from '../../utils/logger';
 
@@ -87,11 +86,10 @@ class ProviderRegistry {
 export const providerRegistry = new ProviderRegistry();
 
 // Register all available providers
-providerRegistry.register(stripeAdapter);
 providerRegistry.register(payseraAdapter);
 
 // To add a new provider, simply:
-// import { paddleAdapter } from './paddleAdapter';
-// providerRegistry.register(paddleAdapter);
+// import { newAdapter } from './newAdapter';
+// providerRegistry.register(newAdapter);
 
 export default providerRegistry;

@@ -210,7 +210,6 @@ serverLogger.info('✅ Monthly coupon refresh job started (1st of each month)');
 applySecurityMiddleware(app);
 
 // Body parser — skip JSON parsing for webhook routes that require raw body
-// (e.g. Stripe needs raw body for signature verification)
 const rawBodyWebhookPaths = providerRegistry
   .getProvidersRequiringRawBody()
   .map(p => `/api/webhooks/${p.name}`);

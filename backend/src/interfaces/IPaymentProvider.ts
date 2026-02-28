@@ -2,7 +2,7 @@
  * Payment Provider Interface
  *
  * Universal contract that ALL payment providers must implement.
- * This abstraction allows adding new providers (Stripe, Paddle, Monri, etc.)
+ * This abstraction allows adding new providers (Paddle, Monri, etc.)
  * without modifying any webhook handling, routing, or business logic.
  *
  * SOLID Principles Applied:
@@ -197,10 +197,10 @@ export interface VerifyPaymentResult {
  * That's it — no other files need modification.
  */
 export interface IPaymentProvider {
-  /** Unique provider identifier (e.g. 'stripe', 'paysera', 'paddle') */
+  /** Unique provider identifier (e.g. 'paysera', 'paddle') */
   readonly name: string;
 
-  /** Human-readable display name (e.g. 'Stripe', 'Paysera') */
+  /** Human-readable display name (e.g. 'Paysera') */
   readonly displayName: string;
 
   /** Brief description for UI */
@@ -218,7 +218,7 @@ export interface IPaymentProvider {
 
   /**
    * The HTTP header name that contains the webhook signature.
-   * e.g. 'stripe-signature', 'x-paddle-signature'
+   * e.g. 'x-paysera-signature', 'x-paddle-signature'
    */
   getSignatureHeaderName(): string;
 

@@ -14,7 +14,7 @@ router.post('/google-play', handleGooglePlayNotification);
 // App Store — iOS app subscriptions (JWT)
 router.post('/app-store', handleAppStoreNotification);
 
-// Universal payment provider webhooks (Stripe, Paysera, Paddle, etc.)
+// Universal payment provider webhooks (Paysera, etc.)
 // Providers that need raw body get express.raw() middleware automatically
 router.post('/:provider', (req, res, next) => {
   const provider = providerRegistry.get(req.params.provider as string);
