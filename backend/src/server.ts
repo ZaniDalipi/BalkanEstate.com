@@ -100,6 +100,7 @@ import videoRoutes from './routes/videoRoutes';
 import aiRoutes from './routes/aiRoutes';
 import cadastreRoutes from './routes/cadastreRoutes';
 import agencyDashboardRoutes from './routes/agencyDashboardRoutes';
+import fileRoutes from './routes/fileRoutes';
 
 // Import services
 import { initializeGooglePlayService } from './services/googlePlayService';
@@ -298,6 +299,7 @@ app.use('/api/achievements', achievementRoutes); // User and agency achievements
 app.use('/api/promotion-plans', promotionPlanRoutes); // Listing promotion and agency feature plans
 app.use('/api/videos', videoRoutes); // Property video generation (FFmpeg-based)
 app.use('/api/cadastre', cadastreRoutes); // Cadastre WMS proxy (GetFeatureInfo)
+app.use('/api/files', fileRoutes); // File access with storage access policy (ownership-based)
 
 // 404 handler
 app.use((_req: Request, res: Response) => {

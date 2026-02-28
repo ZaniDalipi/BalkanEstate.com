@@ -2,6 +2,7 @@ import { Readable } from 'stream';
 import sharp from 'sharp';
 import cloudinary from '../config/cloudinary';
 import { mediaLogger } from '../utils/logger';
+import { registerFileUpload, removeFileRecord, removeAllUserFileRecords } from './storageAccessPolicy';
 
 /**
  * Cloudinary Service - Efficient image upload and management
@@ -175,12 +176,13 @@ export const uploadImage = async (
     // Step 2: Build organized folder path using centralized function
     const folder = buildFolderPath(options);
 
-    // Step 3: Upload to Cloudinary with optimizations
+    // Step 3: Upload to Cloudinary with authenticated delivery + optimizations
     const result = await new Promise<any>((resolve, reject) => {
       const uploadStream = cloudinary.uploader.upload_stream(
         {
           folder,
           resource_type: 'image',
+          type: 'authenticated', // Requires signed URL to access — enforces storage access policy
           // Cloudinary transformations for automatic optimization
           transformation: [
             { quality: 'auto:good' }, // Auto quality adjustment
@@ -213,6 +215,17 @@ export const uploadImage = async (
     });
 
     mediaLogger.info(`✅ Uploaded image to Cloudinary: ${result.public_id} (${Math.round(result.bytes / 1024)}KB)`);
+
+    // Step 4: Register file in storage access policy (ownership tracking)
+    await registerFileUpload({
+      publicId: result.public_id,
+      url: result.secure_url,
+      userId,
+      fileType: type,
+      resourceId: propertyId,
+      mimeType: `image/${result.format}`,
+      bytes: result.bytes,
+    });
 
     return {
       url: result.secure_url,
@@ -268,11 +281,12 @@ export const uploadPropertyImages = async (
 };
 
 /**
- * Delete image from Cloudinary
+ * Delete image from Cloudinary and remove its file record
  */
 export const deleteImage = async (publicId: string): Promise<void> => {
   try {
-    await cloudinary.uploader.destroy(publicId);
+    await cloudinary.uploader.destroy(publicId, { type: 'authenticated' });
+    await removeFileRecord(publicId);
     mediaLogger.info(`🗑️  Deleted image from Cloudinary: ${publicId}`);
   } catch (error: any) {
     mediaLogger.error(`❌ Failed to delete image ${publicId}:`, error.message);
@@ -281,7 +295,7 @@ export const deleteImage = async (publicId: string): Promise<void> => {
 };
 
 /**
- * Delete multiple images from Cloudinary
+ * Delete multiple images from Cloudinary and remove their file records
  */
 export const deleteImages = async (publicIds: string[]): Promise<void> => {
   if (!publicIds || publicIds.length === 0) {
@@ -292,7 +306,9 @@ export const deleteImages = async (publicIds: string[]): Promise<void> => {
 
   try {
     // Cloudinary allows batch deletion
-    const result = await cloudinary.api.delete_resources(publicIds);
+    const result = await cloudinary.api.delete_resources(publicIds, { type: 'authenticated' });
+    // Clean up file records for all deleted resources
+    await Promise.all(publicIds.map(id => removeFileRecord(id)));
     mediaLogger.info(`✅ Deleted ${Object.keys(result.deleted).length} images from Cloudinary`);
   } catch (error: any) {
     mediaLogger.error(`❌ Batch delete error:`, error.message);
@@ -303,21 +319,36 @@ export const deleteImages = async (publicIds: string[]): Promise<void> => {
 
 /**
  * Delete all images in a folder (e.g., when deleting a property)
+ * Checks both authenticated and public upload types for backwards compatibility.
  */
 export const deleteFolder = async (folderPath: string): Promise<void> => {
   try {
     mediaLogger.info(`🗑️  Deleting folder: ${folderPath}`);
 
-    // Get all resources in the folder
-    const result = await cloudinary.api.resources({
+    // Check authenticated resources first (new policy)
+    const authResult = await cloudinary.api.resources({
+      type: 'authenticated',
+      prefix: folderPath,
+      max_results: 500,
+    }).catch(() => ({ resources: [] }));
+
+    // Also check legacy public uploads for backwards compatibility
+    const uploadResult = await cloudinary.api.resources({
       type: 'upload',
       prefix: folderPath,
       max_results: 500,
-    });
+    }).catch(() => ({ resources: [] }));
 
-    if (result.resources.length > 0) {
-      const publicIds = result.resources.map((r: any) => r.public_id);
-      await deleteImages(publicIds);
+    const allPublicIds = [
+      ...authResult.resources.map((r: any) => r.public_id),
+      ...uploadResult.resources.map((r: any) => r.public_id),
+    ];
+
+    // Deduplicate
+    const uniqueIds = [...new Set(allPublicIds)];
+
+    if (uniqueIds.length > 0) {
+      await deleteImages(uniqueIds);
     }
 
     mediaLogger.info(`✅ Deleted folder: ${folderPath}`);
@@ -354,6 +385,17 @@ export const moveImagesToProperty = async (
       const result = await cloudinary.uploader.rename(publicId, newPublicId, {
         overwrite: false,
         invalidate: true,
+        type: 'authenticated',
+      });
+
+      // Update the file record with new publicId
+      await removeFileRecord(publicId);
+      await registerFileUpload({
+        publicId: result.public_id,
+        url: result.secure_url,
+        userId,
+        fileType: isFloorplan ? 'floorplan' : 'property',
+        resourceId: propertyId,
       });
 
       newPublicIds.push(result.public_id);
@@ -369,7 +411,7 @@ export const moveImagesToProperty = async (
 };
 
 /**
- * Get optimized image URL with transformations
+ * Get optimized image URL with transformations (signed for authenticated delivery)
  * This doesn't require a new request to Cloudinary - just builds the URL
  */
 export const getOptimizedUrl = (
@@ -384,6 +426,8 @@ export const getOptimizedUrl = (
   const { width, height, crop = 'fill', quality = 'auto:good' } = options;
 
   return cloudinary.url(publicId, {
+    type: 'authenticated',
+    sign_url: true,
     transformation: [
       ...(width && height ? [{ width, height, crop }] : []),
       { quality },
@@ -417,10 +461,12 @@ export const deleteUserAvatar = async (userId: string): Promise<void> => {
 /**
  * Delete all images for a user (used when deleting user account)
  * Path: balkan-estate/users/{userId}/
+ * Also removes all file records for the user from the access policy system.
  */
 export const deleteAllUserImages = async (userId: string): Promise<void> => {
   const folderPath = `balkan-estate/users/${userId}`;
   await deleteFolder(folderPath);
+  await removeAllUserFileRecords(userId);
 };
 
 /**
