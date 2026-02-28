@@ -5,11 +5,10 @@
 
 import React from 'react';
 import { useTranslation } from 'react-i18next';
+import { useMapServices } from '../../hooks/useMapServices';
 
 // Climate risk types
 export type ClimateRiskType = 'none' | 'flood' | 'fire' | 'wind' | 'air' | 'heat';
-
-const OWM_API_KEY = import.meta.env.VITE_OWM_API_KEY || '';
 
 interface ClimateRiskLegendProps {
   riskType: ClimateRiskType;
@@ -24,6 +23,7 @@ interface RiskConfig {
 
 const ClimateRiskLegend: React.FC<ClimateRiskLegendProps> = ({ riskType }) => {
   const { t } = useTranslation(['search']);
+  const services = useMapServices();
 
   if (riskType === 'none') return null;
 
@@ -39,13 +39,13 @@ const ClimateRiskLegend: React.FC<ClimateRiskLegendProps> = ({ riskType }) => {
       label: t('search:map.climateRisks.fire', 'Fire Danger Index'),
       colors: ['#008000', '#ffff00', '#ff8c00', '#ff0000', '#800000'],
       labels: ['Low', 'Mod', 'High', 'V.High', 'Extreme'],
-      source: import.meta.env.VITE_FIRMS_MAP_KEY ? 'NASA FIRMS' : 'EFFIS Copernicus FWI',
+      source: services.firms ? 'NASA FIRMS' : 'EFFIS Copernicus FWI',
     },
     wind: {
       label: t('search:map.climateRisks.wind', 'Wind Speed'),
       colors: ['#e8f4f8', '#a6d9e8', '#5ab4cf', '#1a8ab7'],
       labels: ['Calm', 'Light', 'Mod', 'Strong'],
-      source: OWM_API_KEY ? 'OpenWeatherMap' : 'Open-Meteo',
+      source: services.owm ? 'OpenWeatherMap' : 'Open-Meteo',
     },
     air: {
       label: t('search:map.climateRisks.air', 'Air Quality (EPA AQI)'),
@@ -57,7 +57,7 @@ const ClimateRiskLegend: React.FC<ClimateRiskLegendProps> = ({ riskType }) => {
       label: t('search:map.climateRisks.heat', 'Temperature'),
       colors: ['#313695', '#74add1', '#fee090', '#f46d43', '#a50026'],
       labels: ['Cold', 'Cool', 'Warm', 'Hot', 'Extreme'],
-      source: OWM_API_KEY ? 'OpenWeatherMap' : 'Open-Meteo',
+      source: services.owm ? 'OpenWeatherMap' : 'Open-Meteo',
     },
   };
 

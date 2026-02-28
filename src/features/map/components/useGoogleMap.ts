@@ -34,6 +34,7 @@ import {
 } from '../hooks';
 import { useRainViewer } from '../hooks/useRainViewer';
 import { useOpenMeteoGrid, type MapBounds } from '../hooks/useOpenMeteoGrid';
+import { useMapServices, weatherTileProxyUrl, firmsWmsProxyUrl } from '../hooks/useMapServices';
 import {
   MapStyleType,
   ClimateRiskType,
@@ -207,10 +208,12 @@ export function useGoogleMap(props: GoogleMapComponentProps) {
   const [gmapBounds, setGmapBounds] = useState<MapBounds | null>(null);
   // Ref removed – openMeteoMarkersRef declared below handles cleanup
 
-  // Open-Meteo: free weather data fallback when no OWM API key
-  const owmKeyAvailable = !!(import.meta.env.VITE_OWM_API_KEY);
-  const needsOpenMeteoWind = selectedClimateRisk === 'wind' && !owmKeyAvailable;
-  const needsOpenMeteoHeat = selectedClimateRisk === 'heat' && !owmKeyAvailable;
+  // Map proxy services availability (OWM, FIRMS keys on backend)
+  const mapServices = useMapServices();
+
+  // Open-Meteo: free weather data fallback when no OWM proxy available
+  const needsOpenMeteoWind = selectedClimateRisk === 'wind' && !mapServices.owm;
+  const needsOpenMeteoHeat = selectedClimateRisk === 'heat' && !mapServices.owm;
   const openMeteoDataType = needsOpenMeteoWind ? 'wind' as const : needsOpenMeteoHeat ? 'temperature' as const : null;
   const { data: openMeteoData } = useOpenMeteoGrid(
     openMeteoDataType ? gmapBounds : null,
@@ -1486,8 +1489,6 @@ export function useGoogleMap(props: GoogleMapComponentProps) {
 
     if (selectedClimateRisk === 'none') return;
 
-    const owmKey = import.meta.env.VITE_OWM_API_KEY || '';
-
     // Resolve tile URL and layer config based on risk type
     let tileUrl: string | null = null;
     let layerOpacity = 0.6;
@@ -1507,8 +1508,8 @@ export function useGoogleMap(props: GoogleMapComponentProps) {
         layerName = 'Fire Danger (EFFIS Copernicus)';
         break;
       case 'wind':
-        if (owmKey) {
-          tileUrl = `https://tile.openweathermap.org/map/wind_new/{z}/{x}/{y}.png?appid=${owmKey}`;
+        if (mapServices.owm) {
+          tileUrl = weatherTileProxyUrl('wind_new');
         }
         layerOpacity = 0.5;
         layerName = 'Wind Speed';
@@ -1519,21 +1520,21 @@ export function useGoogleMap(props: GoogleMapComponentProps) {
         layerName = 'Air Quality (AQICN)';
         break;
       case 'heat':
-        if (owmKey) {
-          tileUrl = `https://tile.openweathermap.org/map/temp_new/{z}/{x}/{y}.png?appid=${owmKey}`;
+        if (mapServices.owm) {
+          tileUrl = weatherTileProxyUrl('temp_new');
         }
         layerOpacity = 0.5;
         layerName = 'Temperature';
         break;
     }
 
-    // Skip if no tile URL available (missing API key or RainViewer not loaded yet)
+    // Skip if no tile URL available (missing proxy service or RainViewer not loaded yet)
     if (!tileUrl && !isWms) return;
 
     let climateLayer: google.maps.ImageMapType;
 
     if (isWms) {
-      // EFFIS Copernicus WMS - compute bounding box per tile
+      // Fire WMS - compute bounding box per tile
       climateLayer = new google.maps.ImageMapType({
         getTileUrl: (coord, zoom) => {
           const proj = map.getProjection();
@@ -1555,9 +1556,8 @@ export function useGoogleMap(props: GoogleMapComponentProps) {
           const neMerc = latLngToWebMercator(ne.lat(), ne.lng());
           const bbox = `${swMerc.x},${swMerc.y},${neMerc.x},${neMerc.y}`;
 
-          const firmsKey = import.meta.env.VITE_FIRMS_MAP_KEY || '';
-          if (firmsKey) {
-            return `https://firms.modaps.eosdis.nasa.gov/mapserver/wms/fires/${firmsKey}/?SERVICE=WMS&VERSION=1.1.1&REQUEST=GetMap&LAYERS=fires_viirs_24&STYLES=&FORMAT=image/png&TRANSPARENT=true&SRS=EPSG:3857&BBOX=${bbox}&WIDTH=256&HEIGHT=256`;
+          if (mapServices.firms) {
+            return firmsWmsProxyUrl(bbox);
           }
           const today = new Date().toISOString().split('T')[0];
           return `https://maps.effis.emergency.copernicus.eu/effis?SERVICE=WMS&VERSION=1.1.1&REQUEST=GetMap&LAYERS=ecmwf007.fwi&STYLES=&FORMAT=image/png&TRANSPARENT=true&SRS=EPSG:3857&BBOX=${bbox}&WIDTH=256&HEIGHT=256&TIME=${today}`;
@@ -1595,7 +1595,7 @@ export function useGoogleMap(props: GoogleMapComponentProps) {
         climateLayerRef.current = null;
       }
     };
-  }, [map, isLoaded, selectedClimateRisk, rainViewerTileUrl]);
+  }, [map, isLoaded, selectedClimateRisk, rainViewerTileUrl, mapServices]);
 
   // Track Google Maps bounds for Open-Meteo grid data fetching
   useEffect(() => {

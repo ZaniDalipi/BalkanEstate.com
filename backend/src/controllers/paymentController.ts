@@ -400,9 +400,9 @@ export const cancelSubscription = async (req: Request, res: Response): Promise<v
       return;
     }
 
-    // SECURITY: Mark subscription as pending_cancellation instead of immediately deactivating.
-    // User retains access until the current billing period ends (subscriptionExpiresAt).
-    user.subscriptionStatus = 'pending_cancellation';
+    // SECURITY: Mark subscription as canceled but retain access until the current
+    // billing period ends (subscriptionExpiresAt).
+    user.subscriptionStatus = 'canceled';
 
     // Also update the Subscription document for consistency
     const activeSub = await Subscription.findOne({
@@ -410,12 +410,12 @@ export const cancelSubscription = async (req: Request, res: Response): Promise<v
       status: { $in: ['active', 'grace'] },
     });
     if (activeSub) {
-      activeSub.status = 'pending_cancellation';
-      activeSub.cancelledAt = new Date();
+      activeSub.status = 'canceled';
+      activeSub.canceledAt = new Date();
       await activeSub.save();
     }
 
-    // If there's no expiration date (shouldn't happen), deactivate immediately
+    // If there's no expiration date or it has already passed, deactivate immediately
     if (!user.subscriptionExpiresAt || new Date(user.subscriptionExpiresAt) <= new Date()) {
       user.isSubscribed = false;
       user.subscriptionPlan = 'free';
