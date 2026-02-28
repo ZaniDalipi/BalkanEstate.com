@@ -81,7 +81,7 @@ const SavedPropertiesPage: React.FC = () => {
   // New nested grouping type for Country -> City -> Properties
   type GroupedHomes = Record<string, Record<string, Property[]>>;
 
-  const groupedHomes = savedHomes.reduce((acc: GroupedHomes, property) => {
+  const groupedHomes = useMemo(() => savedHomes.reduce((acc: GroupedHomes, property) => {
     const { country, city } = property;
     if (!acc[country]) {
       acc[country] = {};
@@ -91,7 +91,7 @@ const SavedPropertiesPage: React.FC = () => {
     }
     acc[country][city].push(property);
     return acc;
-  }, {});
+  }, {}), [savedHomes]);
 
   const selectedForComparison = useMemo(() => {
     return comparisonList.map(id => properties.find(p => p.id === id)).filter((p): p is Property => p !== undefined);

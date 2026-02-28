@@ -81,6 +81,22 @@ const getCsrfToken = (): string | undefined => {
 /** HTTP methods that mutate state and require a CSRF token */
 const MUTATION_METHODS = new Set(['POST', 'PUT', 'PATCH', 'DELETE']);
 
+/**
+ * Ensure the __csrf cookie is set before sending a mutation.
+ * If absent (first visit, expired, cleared), one GET to /health
+ * bootstraps it so subsequent POSTs pass CSRF validation.
+ */
+let _csrfBootstrap: Promise<void> | null = null;
+const ensureCsrfToken = (): Promise<void> => {
+  if (getCsrfToken()) return Promise.resolve();
+  if (!_csrfBootstrap) {
+    _csrfBootstrap = fetch(`${API_URL}/health`, { credentials: 'include' })
+      .catch(() => {/* ignore — worst case CSRF header is absent */})
+      .finally(() => { _csrfBootstrap = null; }) as Promise<void>;
+  }
+  return _csrfBootstrap;
+};
+
 interface RequestOptions {
   method?: string;
   body?: any;
@@ -131,6 +147,11 @@ const apiRequest = async <T>(endpoint: string, options: RequestOptions = {}, ret
   let keyInfo: ResponseKeyInfo | null = null;
   if (shouldEncrypt) {
     keyInfo = await generateResponseKey();
+  }
+
+  // Ensure the CSRF cookie is present before any mutation
+  if (MUTATION_METHODS.has(method)) {
+    await ensureCsrfToken();
   }
 
   // Include CSRF token on mutation requests (double-submit cookie pattern)
