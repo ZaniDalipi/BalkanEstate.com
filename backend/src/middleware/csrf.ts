@@ -24,6 +24,16 @@ const TOKEN_LENGTH = 32; // 256 bits of entropy
 const isProduction = process.env.NODE_ENV === 'production';
 
 /**
+ * Cookie domain for production.
+ * The API lives on api.balkanestateai.com while the frontend is on
+ * balkanestateai.com. Without an explicit domain, the __csrf cookie is scoped
+ * to the API subdomain only and JavaScript on the frontend cannot read it,
+ * breaking the double-submit pattern. Setting domain to the parent domain
+ * makes the cookie accessible across both subdomains.
+ */
+const CSRF_COOKIE_DOMAIN = process.env.CSRF_COOKIE_DOMAIN || (isProduction ? '.balkanestateai.com' : undefined);
+
+/**
  * Parse a specific cookie value from the raw Cookie header.
  * Avoids requiring the cookie-parser package.
  */
@@ -78,9 +88,12 @@ export const csrfCookie = (req: Request, res: Response, next: NextFunction): voi
     res.cookie(CSRF_COOKIE_NAME, token, {
       httpOnly: false,      // Client JS must read this for double-submit
       secure: isProduction, // HTTPS only in production
-      sameSite: 'strict',   // Prevents cross-origin cookie sending
+      sameSite: 'lax',      // 'lax' allows the cookie to be sent on same-site navigations
+                            // while still protecting against cross-site attacks. 'strict'
+                            // is too restrictive for cross-subdomain setups (api.* → www).
       path: '/',
       maxAge: 24 * 60 * 60 * 1000, // 24 hours
+      ...(CSRF_COOKIE_DOMAIN ? { domain: CSRF_COOKIE_DOMAIN } : {}),
     });
   }
 
