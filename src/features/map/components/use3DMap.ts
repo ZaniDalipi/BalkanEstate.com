@@ -610,24 +610,37 @@ export function use3DMap(props: Map3DBuildingsProps) {
       ])
     );
 
-    // Hide the original building at this location so our colored floor slices are clearly visible
+    // Make the original building at this location transparent so floor slices are clearly visible.
+    // We use setPaintProperty with a data-driven opacity expression rather than setFilter,
+    // because filter-based exclusion is unreliable with tile feature IDs (type mismatches, etc.)
     if (mapInstance.getLayer('3d-buildings')) {
-      if (buildingFeature && buildingFeature.id !== undefined) {
-        // Exclude this specific building by its feature ID - most precise approach
-        mapInstance.setFilter('3d-buildings', ['!=', ['id'], buildingFeature.id]);
+      if (buildingFeature && buildingFeature.id != null) {
+        // Make this exact building transparent by matching its numeric feature ID.
+        // All other buildings remain fully opaque.
+        mapInstance.setPaintProperty('3d-buildings', 'fill-extrusion-opacity', [
+          'case',
+          ['==', ['id'], typeof buildingFeature.id === 'string'
+            ? parseInt(buildingFeature.id, 10)
+            : buildingFeature.id], 0,
+          0.92
+        ]);
       } else {
-        // Fallback: exclude buildings within a bounding box around the property
-        const bboxPad = 0.0004; // ~40m padding
-        mapInstance.setFilter('3d-buildings', ['!', ['within', {
-          type: 'Polygon',
-          coordinates: [[
-            [longitude - bboxPad, latitude - bboxPad],
-            [longitude + bboxPad, latitude - bboxPad],
-            [longitude + bboxPad, latitude + bboxPad],
-            [longitude - bboxPad, latitude + bboxPad],
-            [longitude - bboxPad, latitude - bboxPad],
-          ]]
-        }]]);
+        // Fallback: make all buildings within a ~40 m bounding box transparent.
+        const bboxPad = 0.0004;
+        mapInstance.setPaintProperty('3d-buildings', 'fill-extrusion-opacity', [
+          'case',
+          ['within', {
+            type: 'Polygon' as const,
+            coordinates: [[
+              [longitude - bboxPad, latitude - bboxPad],
+              [longitude + bboxPad, latitude - bboxPad],
+              [longitude + bboxPad, latitude + bboxPad],
+              [longitude - bboxPad, latitude + bboxPad],
+              [longitude - bboxPad, latitude - bboxPad],
+            ]]
+          }], 0,
+          0.92
+        ]);
       }
     }
 
