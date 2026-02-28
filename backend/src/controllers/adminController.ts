@@ -6,7 +6,6 @@ import Property from '../models/Property';
 import DiscountCode from '../models/DiscountCode';
 import Inquiry from '../models/Inquiry';
 import { geocodeAddressWithRateLimit } from '../services/geocodingService';
-import { getWhitelistConfig } from '../middleware/adminAuth';
 import { adminLogger } from '../utils/logger';
 import { invalidateCache } from '../middleware/cache';
 import { migratePropertySchema } from '../utils/migratePropertySchema';
@@ -16,7 +15,7 @@ import { escapeRegex } from '../utils/escapeRegex';
 
 // @desc    Get admin dashboard statistics
 // @route   GET /api/admin/stats
-// @access  Private/Admin + VPN
+// @access  Private/Admin
 export const getAdminStats = async (req: Request, res: Response): Promise<void> => {
   try {
     const [
@@ -88,7 +87,7 @@ export const getAdminStats = async (req: Request, res: Response): Promise<void> 
 
 // @desc    Get all users with filters
 // @route   GET /api/admin/users
-// @access  Private/Admin + VPN
+// @access  Private/Admin
 export const getAllUsers = async (req: Request, res: Response): Promise<void> => {
   try {
     const { role, isSubscribed, search, page = 1, limit = 50, sortBy = 'createdAt', order = 'desc' } = req.query;
@@ -134,7 +133,7 @@ export const getAllUsers = async (req: Request, res: Response): Promise<void> =>
 
 // @desc    Update user details or role
 // @route   PATCH /api/admin/users/:id
-// @access  Private/Admin + VPN
+// @access  Private/Admin
 export const updateUserAdmin = async (req: Request, res: Response): Promise<void> => {
   try {
     const id = getObjectIdParam(req, res, 'id');
@@ -197,7 +196,7 @@ export const updateUserAdmin = async (req: Request, res: Response): Promise<void
 
 // @desc    Delete user
 // @route   DELETE /api/admin/users/:id
-// @access  Private/Admin + VPN
+// @access  Private/Admin
 export const deleteUser = async (req: Request, res: Response): Promise<void> => {
   try {
     const id = getObjectIdParam(req, res, 'id');
@@ -231,7 +230,7 @@ export const deleteUser = async (req: Request, res: Response): Promise<void> => 
 
 // @desc    Get all agencies with details
 // @route   GET /api/admin/agencies
-// @access  Private/Admin + VPN
+// @access  Private/Admin
 export const getAllAgenciesAdmin = async (req: Request, res: Response): Promise<void> => {
   try {
     const { page = 1, limit = 50 } = req.query;
@@ -301,7 +300,7 @@ export const getAllAgenciesAdmin = async (req: Request, res: Response): Promise<
 
 // @desc    Get single agency with full agent details
 // @route   GET /api/admin/agencies/:id
-// @access  Private/Admin + VPN
+// @access  Private/Admin
 export const getAgencyDetailAdmin = async (req: Request, res: Response): Promise<void> => {
   try {
     const id = getObjectIdParam(req, res, 'id');
@@ -479,7 +478,7 @@ export const deleteAgency = async (req: Request, res: Response): Promise<void> =
 
 // @desc    Get all properties with filters
 // @route   GET /api/admin/properties
-// @access  Private/Admin + VPN
+// @access  Private/Admin
 export const getAllPropertiesAdmin = async (req: Request, res: Response): Promise<void> => {
   try {
     const { status, search, page = 1, limit = 50 } = req.query;
@@ -567,7 +566,7 @@ export const updateProperty = async (req: Request, res: Response): Promise<void>
 
 // @desc    Delete property
 // @route   DELETE /api/admin/properties/:id
-// @access  Private/Admin + VPN
+// @access  Private/Admin
 export const deleteProperty = async (req: Request, res: Response): Promise<void> => {
   try {
     const id = getObjectIdParam(req, res, 'id');
@@ -588,7 +587,7 @@ export const deleteProperty = async (req: Request, res: Response): Promise<void>
 
 // @desc    Get system configuration
 // @route   GET /api/admin/config
-// @access  Private/Admin + VPN
+// @access  Private/Admin
 export const getSystemConfig = async (req: Request, res: Response): Promise<void> => {
   try {
     res.json({
@@ -596,7 +595,6 @@ export const getSystemConfig = async (req: Request, res: Response): Promise<void
       nodeVersion: process.version,
       uptime: process.uptime(),
       memory: process.memoryUsage(),
-      vpnWhitelistCount: getWhitelistConfig().ips.length,
       features: {
         discountCodes: true,
         gamification: true,
