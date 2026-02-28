@@ -15,7 +15,7 @@ import emailService from '../services/emailService';
 // Keeping Stripe initialization for legacy webhook handling only
 const STRIPE_SECRET_KEY = process.env.STRIPE_SECRET_KEY;
 const stripe = new Stripe(STRIPE_SECRET_KEY || 'sk_not_configured', {
-  apiVersion: '2025-10-29.clover',
+  apiVersion: '2026-02-25.clover',
 });
 
 /**
@@ -723,7 +723,7 @@ async function handlePaymentFailed(invoice: Stripe.Invoice) {
  */
 export const verifySession = async (req: Request, res: Response): Promise<void> => {
   try {
-    const { sessionId } = req.params;
+    const sessionId = req.params.sessionId as string;
     const userId = (req as any).user?._id;
 
     if (!userId) {
