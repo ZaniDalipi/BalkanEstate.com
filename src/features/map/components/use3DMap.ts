@@ -24,7 +24,7 @@ export function use3DMap(props: Map3DBuildingsProps) {
     orientation,
   } = props;
 
-  const { t, i18n } = useTranslation(['property']);
+  const { t } = useTranslation(['property']);
 
   // Calculate effective bearing from orientation
   // Camera should face TOWARD the building's oriented face (opposite direction)
@@ -43,9 +43,6 @@ export function use3DMap(props: Map3DBuildingsProps) {
   const floorLabelsRef = useRef<maplibregl.Marker[]>([]);
   const facingArrowRef = useRef<HTMLElement | null>(null);
   const facingBearingRef = useRef<number>(0);
-  const facingLabelRef = useRef<HTMLElement | null>(null);
-  const facingCardinalRef = useRef<HTMLElement | null>(null);
-  const facingDirectionLabelRef = useRef<HTMLElement | null>(null);
 
   // State
   const [mapLoaded, setMapLoaded] = useState(false);
@@ -372,7 +369,7 @@ export function use3DMap(props: Map3DBuildingsProps) {
             text-align: center;
             white-space: nowrap;
           ">
-            <div class="facing-label" style="font-size: 10px; color: #94a3b8; font-weight: 500;">${t('property:map3d.facing', 'Facing')}</div>
+            <div style="font-size: 10px; color: #94a3b8; font-weight: 500;">${t('property:map3d.facing', 'Facing')}</div>
             <div style="display: flex; align-items: center; gap: 4px; justify-content: center;">
               <div class="facing-arrow" style="
                 width: 20px; height: 20px;
@@ -384,18 +381,15 @@ export function use3DMap(props: Map3DBuildingsProps) {
                   <path d="M12 19V5M5 12l7-7 7 7"/>
                 </svg>
               </div>
-              <span class="facing-cardinal" style="font-size: 14px; font-weight: 700; color: #60a5fa;">${cardinal}</span>
+              <span style="font-size: 14px; font-weight: 700; color: #60a5fa;">${cardinal}</span>
             </div>
-            <div class="facing-direction-label" style="font-size: 9px; color: #64748b;">${t('property:map3d.facingDirection', '{{direction}}-facing', { direction: cardinalFull })}</div>
+            <div style="font-size: 9px; color: #64748b;">${t('property:map3d.facingDirection', '{{direction}}-facing', { direction: cardinalFull })}</div>
           </div>
         </div>
       `;
 
-      // Store refs to text elements for language updates
+      // Store ref to the arrow element for dynamic rotation updates
       facingArrowRef.current = facingEl.querySelector('.facing-arrow') as HTMLElement;
-      facingLabelRef.current = facingEl.querySelector('.facing-label') as HTMLElement;
-      facingCardinalRef.current = facingEl.querySelector('.facing-cardinal') as HTMLElement;
-      facingDirectionLabelRef.current = facingEl.querySelector('.facing-direction-label') as HTMLElement;
 
       // Position the facing indicator slightly below the property
       const offset = 0.00015; // ~15m south
@@ -425,7 +419,7 @@ export function use3DMap(props: Map3DBuildingsProps) {
     tourUrl?: string,
     onEnterTour?: () => void
   ) => {
-    const floorHeightM = 3; // 3m per floor
+    const floorHeightM = 2; // 3m per floor
     const totalHeightM = totalFlrs * floorHeightM;
 
     // Query the actual building at this location from the map's building layer
@@ -587,7 +581,10 @@ export function use3DMap(props: Map3DBuildingsProps) {
     // Recalculate floor height based on actual building
     const adjustedFloorHeight = finalBuildingHeight / totalFlrs;
 
-    // Calculate centroid for expansion and label positioning
+    // Scale up the building coordinates to fully cover the original and prevent z-fighting
+    const scaleFactor = 1.05; // 5% larger to fully cover original building
+
+    // Calculate centroid for scaling and label positioning
     const outerRing = buildingCoords[0];
     let centroidLng = 0;
     let centroidLat = 0;
@@ -599,35 +596,41 @@ export function use3DMap(props: Map3DBuildingsProps) {
     centroidLng /= numPoints;
     centroidLat /= numPoints;
 
-    // Expand footprint by ~1 screen pixel (~1.5 m) on every side.
-    // A fixed metric offset guarantees the floor-slice faces sit slightly in
-    // front of the original building faces so the WebGL depth test always passes,
-    // regardless of building size (unlike a %-based scale which shrinks the gap
-    // for small buildings).
-    const expandMeters = 1.5;
-    const latExpand = expandMeters / 111320;
-    const lngExpand = expandMeters / (111320 * Math.cos(centroidLat * Math.PI / 180));
-
+    // Scale coordinates from centroid to prevent z-fighting with original building
     const scaledCoords = buildingCoords.map(ring =>
-      ring.map(coord => {
-        const dLng = coord[0] - centroidLng;
-        const dLat = coord[1] - centroidLat;
-        const dist = Math.sqrt(dLng * dLng + dLat * dLat);
-        if (dist < 1e-10) return [coord[0], coord[1]];
-        // Push each vertex outward from the centroid by the fixed pixel offset
-        return [
-          coord[0] + (dLng / dist) * lngExpand,
-          coord[1] + (dLat / dist) * latExpand,
-        ];
-      })
+      ring.map(coord => [
+        centroidLng + (coord[0] - centroidLng) * scaleFactor,
+        centroidLat + (coord[1] - centroidLat) * scaleFactor
+      ])
     );
 
-    // Restore 3d-buildings if a previous run hid it, and clean up any leftover bg layer
+    // First, try to hide the original building by setting a filter that excludes buildings at this location
+    // We'll do this by creating a small exclusion zone around the property
     if (mapInstance.getLayer('3d-buildings')) {
-      mapInstance.setLayoutProperty('3d-buildings', 'visibility', 'visible');
-    }
-    if (mapInstance.getLayer('3d-buildings-bg')) {
-      mapInstance.removeLayer('3d-buildings-bg');
+      // Get the current filter and add exclusion for this building's area
+      const latTolerance = 0.0003; // ~30m tolerance
+      const lngTolerance = 0.0003;
+
+      // Apply filter to exclude the original building (by checking if building is within our area)
+      // This uses a bounding box check
+      mapInstance.setFilter('3d-buildings', [
+        'any',
+        ['<', ['get', 'render_height'], 5], // Keep short buildings
+        ['all',
+          ['any',
+            ['<', ['geometry-type'], 'Polygon'], // Keep non-polygons
+            ['any',
+              // Keep buildings outside our exclusion zone
+              // We can't easily filter by geometry center, so use a workaround
+              // by relying on the custom building to cover the original
+            ]
+          ]
+        ]
+      ]);
+
+      // Alternative: Just let the custom building cover the original
+      // Remove the filter and rely on proper z-ordering
+      mapInstance.setFilter('3d-buildings', null);
     }
 
     // Add source for the custom building using actual geometry
@@ -655,32 +658,127 @@ export function use3DMap(props: Map3DBuildingsProps) {
       });
     }
 
-    // Remove any leftover layers from previous runs
+    // Remove existing floor layers if any
     for (let floor = 1; floor <= 100; floor++) {
-      if (mapInstance.getLayer(`building-floor-${floor}`)) mapInstance.removeLayer(`building-floor-${floor}`);
+      const layerId = `building-floor-${floor}`;
+      if (mapInstance.getLayer(layerId)) {
+        mapInstance.removeLayer(layerId);
+      }
     }
-    if (mapInstance.getLayer('building-floor-highlight-glow')) mapInstance.removeLayer('building-floor-highlight-glow');
-    if (mapInstance.getLayer('building-floor-highlight')) mapInstance.removeLayer('building-floor-highlight');
+    if (mapInstance.getLayer('building-floor-highlight-glow')) {
+      mapInstance.removeLayer('building-floor-highlight-glow');
+    }
 
-    // Add a single green fill-extrusion for the selected floor only.
-    // The footprint is already expanded 1.5 m on every side (scaledCoords) so its
-    // walls sit slightly in front of the grey building's walls and pass the depth test.
-    const floorBase = (floorNum - 1) * adjustedFloorHeight;
-    const floorTop = floorNum * adjustedFloorHeight;
+    // Add floor slice layers - each floor is a separate "box" stacked on top of each other
+    // The gap between floors makes each box clearly distinct
+    const gapSize = Math.max(0.3, adjustedFloorHeight * 0.12); // 12% of floor height as gap, minimum 0.3m
+    for (let floor = 1; floor <= totalFlrs; floor++) {
+      const floorBase = (floor - 1) * adjustedFloorHeight;
+      const floorTop = floor * adjustedFloorHeight;
+      const isHighlightedFloor = floor === floorNum;
+      const layerId = `building-floor-${floor}`;
+
+      mapInstance.addLayer({
+        id: layerId,
+        type: 'fill-extrusion',
+        source: 'custom-building',
+        paint: {
+          'fill-extrusion-color': isHighlightedFloor
+            ? '#13e861' // Bright green for the property's floor
+            : floor % 2 === 0 ? '#4b5563' : '#6b7280', // Alternating grey for other floors
+          'fill-extrusion-height': floorTop - gapSize, // Gap at top of each floor slab
+          'fill-extrusion-base': floorBase + (gapSize * 0.25), // Small gap at bottom too
+          'fill-extrusion-opacity': isHighlightedFloor ? 1 : 0.75,
+        },
+      });
+    }
+
+    // Add a brighter outline layer for the highlighted floor to make it pop
+    const highlightBase = (floorNum - 1) * adjustedFloorHeight;
+    const highlightTop = floorNum * adjustedFloorHeight;
+    const glowLayerId = 'building-floor-highlight-glow';
+    if (mapInstance.getLayer(glowLayerId)) {
+      mapInstance.removeLayer(glowLayerId);
+    }
     mapInstance.addLayer({
-      id: 'building-floor-highlight',
+      id: glowLayerId,
       type: 'fill-extrusion',
       source: 'custom-building',
       paint: {
-        'fill-extrusion-color': '#13e861',
-        'fill-extrusion-base': floorBase,
-        'fill-extrusion-height': floorTop,
-        'fill-extrusion-opacity': 0.9,
+        'fill-extrusion-color': '#4ade80', // Lighter green glow
+        'fill-extrusion-height': highlightTop - (gapSize * 0.5),
+        'fill-extrusion-base': highlightBase + (gapSize * 0.5),
+        'fill-extrusion-opacity': 0.35,
       },
     });
 
-    // Show door marker at the highlighted floor level if 360 tour is available
-    if (tourUrl && floorNum > 0 && floorNum <= totalFlrs) {
+    // Add floating "Floor X/Y" label above the building at the highlighted floor level
+    if (floorNum > 0 && floorNum <= totalFlrs) {
+      // Create a floating floor label marker positioned above the building
+      const floorLabelEl = document.createElement('div');
+      floorLabelEl.style.cssText = 'pointer-events: none; z-index: 50;';
+      floorLabelEl.innerHTML = `
+        <div style="
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          gap: 0;
+          filter: drop-shadow(0 4px 12px rgba(0,0,0,0.4));
+        ">
+          <div style="
+            background: linear-gradient(135deg, #059669, #10b981);
+            color: white;
+            padding: 4px 14px;
+            border-radius: 10px;
+            font-size: 13px;
+            font-weight: 800;
+            white-space: nowrap;
+            border: 2px solid rgba(255,255,255,0.9);
+            letter-spacing: 0.5px;
+            font-family: system-ui, -apple-system, sans-serif;
+          ">Floor ${floorNum}/${totalFlrs}</div>
+          <div style="
+            width: 0;
+            height: 0;
+            border-left: 7px solid transparent;
+            border-right: 7px solid transparent;
+            border-top: 7px solid #10b981;
+            margin-top: -1px;
+          "></div>
+        </div>
+      `;
+
+      // Position the label at the building centroid, offset upward based on floor position
+      const calculateFloorLabelOffset = (currentZoom: number) => {
+        const basePixelsPerFloor = 2.8;
+        const zoomFactor = Math.pow(2, currentZoom - 16);
+        const pixelsPerFloor = basePixelsPerFloor * zoomFactor;
+        // Position at the highlighted floor level plus some headroom
+        const floorsFromBottom = floorNum - 0.5;
+        return -(floorsFromBottom * pixelsPerFloor) - 20;
+      };
+
+      const initialLabelOffset = calculateFloorLabelOffset(mapInstance.getZoom());
+      const floorLabelMarker = new maplibregl.Marker({
+        element: floorLabelEl,
+        anchor: 'bottom',
+        offset: [0, initialLabelOffset],
+      })
+        .setLngLat([centroidLng, centroidLat])
+        .addTo(mapInstance);
+
+      // Update label position on zoom/pitch changes
+      const updateLabelOffset = () => {
+        const newOffset = calculateFloorLabelOffset(mapInstance.getZoom());
+        floorLabelMarker.setOffset([0, newOffset]);
+      };
+      mapInstance.on('zoom', updateLabelOffset);
+      mapInstance.on('pitch', updateLabelOffset);
+
+      // Show door icon if 360 tour is available
+      const hasTour = !!tourUrl;
+
+      if (hasTour) {
         // Find the southwest-facing edge of the building (viewing direction with pitch 60)
         // This edge will appear as the "front" face from the default camera angle
         const ring = scaledCoords[0];
@@ -706,7 +804,7 @@ export function use3DMap(props: Map3DBuildingsProps) {
         const doorLng = edgeMidLng - outwardOffset;
         const doorLat = edgeMidLat - outwardOffset;
 
-        // Create door marker with floor label + door icon + 360° Tour (3-part design)
+        // Create door marker with 360 indicator and floor label
         const doorEl = document.createElement('div');
         doorEl.className = 'apartment-door-marker';
         doorEl.innerHTML = `
@@ -714,46 +812,28 @@ export function use3DMap(props: Map3DBuildingsProps) {
             display: flex;
             flex-direction: column;
             align-items: center;
-            gap: 2px;
+            gap: 3px;
             cursor: pointer;
           ">
-            <div style="
-              background: rgba(34,197,94,0.95);
-              color: white;
-              padding: 2px 8px;
-              border-radius: 8px 8px 0 0;
-              font-size: 10px;
-              font-weight: bold;
-              white-space: nowrap;
-              border: 2px solid white;
-              border-bottom: none;
-              font-family: system-ui, -apple-system, sans-serif;
-            ">Floor ${floorNum}/${totalFlrs}</div>
             <div style="
               display: flex;
               align-items: center;
               justify-content: center;
-              width: 40px;
-              height: 40px;
-              background: linear-gradient(135deg, #22c55e, #16a34a);
-              border-radius: 8px;
-              border: 3px solid white;
-              box-shadow: 0 4px 12px rgba(0,0,0,0.4), 0 0 15px rgba(34,197,94,0.6);
-              font-size: 20px;
-              animation: doorPulse 2s ease-in-out infinite;
-            ">\uD83D\uDEAA</div>
-            <div style="
-              background: rgba(0,0,0,0.85);
+              gap: 6px;
+              background: linear-gradient(135deg, #059669, #10b981);
               color: white;
-              padding: 2px 8px;
-              border-radius: 0 0 8px 8px;
-              font-size: 10px;
-              font-weight: bold;
-              white-space: nowrap;
-              border: 2px solid white;
-              border-top: none;
+              padding: 6px 14px;
+              border-radius: 12px;
+              border: 2px solid rgba(255,255,255,0.9);
+              box-shadow: 0 4px 16px rgba(0,0,0,0.4), 0 0 20px rgba(16,185,129,0.4);
               font-family: system-ui, -apple-system, sans-serif;
-            ">360\u00B0 Tour</div>
+              animation: doorPulse 2s ease-in-out infinite;
+            ">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"/>
+              </svg>
+              <span style="font-size: 12px; font-weight: 800; letter-spacing: 0.3px;">360\u00B0 Tour</span>
+            </div>
           </div>
         `;
 
@@ -795,6 +875,7 @@ export function use3DMap(props: Map3DBuildingsProps) {
 
         // Store marker reference for later removal
         doorMarkerRef.current = doorMarker;
+      }
     }
   }, []);
 
@@ -807,17 +888,6 @@ export function use3DMap(props: Map3DBuildingsProps) {
       }
     }
   }, [show360Tour]);
-
-  // Update facing indicator text when language changes
-  useEffect(() => {
-    if (facingBearingRef.current === 0 && !facingLabelRef.current) return;
-    const cardinal = getCardinalShort(facingBearingRef.current);
-    const cardinalFull = getCardinalLabel(facingBearingRef.current);
-    if (facingLabelRef.current) facingLabelRef.current.textContent = t('property:map3d.facing', 'Facing');
-    if (facingCardinalRef.current) facingCardinalRef.current.textContent = cardinal;
-    if (facingDirectionLabelRef.current) facingDirectionLabelRef.current.textContent = t('property:map3d.facingDirection', '{{direction}}-facing', { direction: cardinalFull });
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [i18n.language]);
 
 
 
