@@ -127,8 +127,7 @@ export const cspNonceMiddleware = (_req: Request, res: Response, next: NextFunct
  *
  * CSP Notes:
  * - Nonce-based CSP for scripts replaces 'unsafe-inline'
- * - 'unsafe-eval' is still required for MapLibre GL JS
- *   See: https://github.com/maplibre/maplibre-gl-js/issues/1035
+ * - MapLibre GL JS v5+ no longer requires 'unsafe-eval' (no new Function() usage)
  * - Styles still use 'unsafe-inline' because Tailwind injects styles dynamically
  */
 export const helmetConfig = helmet({
@@ -140,9 +139,6 @@ export const helmetConfig = helmet({
         "'self'",
         // Nonce-based CSP for inline scripts (replaces 'unsafe-inline')
         (_req: IncomingMessage, res: ServerResponse) => `'nonce-${(res as any).locals?.cspNonce || ''}'`,
-        // 'unsafe-eval' still needed for MapLibre GL JS
-        // See: https://github.com/maplibre/maplibre-gl-js/issues/1035
-        "'unsafe-eval'",
         'https://unpkg.com',
         'https://www.googletagmanager.com',
         'https://connect.facebook.net',
@@ -411,6 +407,48 @@ export const aiRateLimiter = rateLimit({
     return 'unknown';
   },
   // Disable IPv6 validation since we use user ID primarily
+  validate: { xForwardedForHeader: false },
+});
+
+/**
+ * Rate limiter for message sending and image uploads in conversations.
+ * Prevents spam and resource abuse. Keyed by authenticated user ID.
+ */
+export const messagingRateLimiter = rateLimit({
+  windowMs: 60 * 60 * 1000, // 1 hour
+  max: isProduction ? 60 : 300, // 60 messages/hour in production
+  message: {
+    error: 'Too many messages',
+    message: 'You are sending messages too fast. Please slow down.',
+    retryAfter: 60,
+  },
+  standardHeaders: !isProduction,
+  legacyHeaders: false,
+  keyGenerator: (req: Request) => {
+    const userId = (req as any).user?.id || (req as any).user?._id;
+    return userId ? `msg_user_${userId}` : req.ip || 'unknown';
+  },
+  validate: { xForwardedForHeader: false },
+});
+
+/**
+ * Rate limiter for image uploads (tighter than messaging).
+ * Uploads are more expensive (storage, bandwidth) so limit separately.
+ */
+export const uploadRateLimiter = rateLimit({
+  windowMs: 60 * 60 * 1000, // 1 hour
+  max: isProduction ? 30 : 200, // 30 uploads/hour in production
+  message: {
+    error: 'Too many uploads',
+    message: 'You have uploaded too many images. Please try again later.',
+    retryAfter: 60,
+  },
+  standardHeaders: !isProduction,
+  legacyHeaders: false,
+  keyGenerator: (req: Request) => {
+    const userId = (req as any).user?.id || (req as any).user?._id;
+    return userId ? `upload_user_${userId}` : req.ip || 'unknown';
+  },
   validate: { xForwardedForHeader: false },
 });
 
@@ -688,6 +726,8 @@ export default {
   mutationRateLimiter,
   paymentRateLimiter,
   aiRateLimiter,
+  messagingRateLimiter,
+  uploadRateLimiter,
   hppProtection,
   mongoSanitization,
   xssSanitizer,

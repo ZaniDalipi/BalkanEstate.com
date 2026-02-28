@@ -13,6 +13,7 @@ import {
 import { protect } from '../middleware/auth';
 import { upload } from '../utils/upload';
 import { decryptPayload } from '../middleware/decryptPayload';
+import { messagingRateLimiter, uploadRateLimiter } from '../middleware/security';
 
 const router = express.Router();
 
@@ -26,8 +27,8 @@ router.post('/', createConversation);
 router.get('/:id', getConversation);
 router.delete('/:id', deleteConversation);
 router.get('/:id/public-keys', getConversationPublicKeys);
-router.post('/:id/messages', decryptPayload, sendMessage);
-router.post('/:id/upload-image', upload.single('image'), uploadMessageImage);
+router.post('/:id/messages', messagingRateLimiter, decryptPayload, sendMessage);
+router.post('/:id/upload-image', uploadRateLimiter, upload.single('image'), uploadMessageImage);
 router.patch('/:id/read', markAsRead);
 
 export default router;
