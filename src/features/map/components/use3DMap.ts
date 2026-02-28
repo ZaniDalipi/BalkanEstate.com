@@ -581,10 +581,7 @@ export function use3DMap(props: Map3DBuildingsProps) {
     // Recalculate floor height based on actual building
     const adjustedFloorHeight = finalBuildingHeight / totalFlrs;
 
-    // Scale up the building coordinates to fully cover the original and prevent z-fighting
-    const scaleFactor = 1.05; // 5% larger to fully cover original building
-
-    // Calculate centroid for scaling and label positioning
+    // Calculate centroid for label positioning
     const outerRing = buildingCoords[0];
     let centroidLng = 0;
     let centroidLat = 0;
@@ -596,41 +593,19 @@ export function use3DMap(props: Map3DBuildingsProps) {
     centroidLng /= numPoints;
     centroidLat /= numPoints;
 
-    // Scale coordinates from centroid to prevent z-fighting with original building
-    const scaledCoords = buildingCoords.map(ring =>
-      ring.map(coord => [
-        centroidLng + (coord[0] - centroidLng) * scaleFactor,
-        centroidLat + (coord[1] - centroidLat) * scaleFactor
-      ])
-    );
+    // Use exact building coords — no scaling needed because we hide the original building below
+    const scaledCoords = buildingCoords;
 
-    // First, try to hide the original building by setting a filter that excludes buildings at this location
-    // We'll do this by creating a small exclusion zone around the property
-    if (mapInstance.getLayer('3d-buildings')) {
-      // Get the current filter and add exclusion for this building's area
-      const latTolerance = 0.0003; // ~30m tolerance
-      const lngTolerance = 0.0003;
-
-      // Apply filter to exclude the original building (by checking if building is within our area)
-      // This uses a bounding box check
-      mapInstance.setFilter('3d-buildings', [
-        'any',
-        ['<', ['get', 'render_height'], 5], // Keep short buildings
-        ['all',
-          ['any',
-            ['<', ['geometry-type'], 'Polygon'], // Keep non-polygons
-            ['any',
-              // Keep buildings outside our exclusion zone
-              // We can't easily filter by geometry center, so use a workaround
-              // by relying on the custom building to cover the original
-            ]
-          ]
-        ]
-      ]);
-
-      // Alternative: Just let the custom building cover the original
-      // Remove the filter and rely on proper z-ordering
-      mapInstance.setFilter('3d-buildings', null);
+    // Hide the target building from 3d-buildings using its vector-tile feature ID.
+    // This removes the depth-buffer conflict that was blocking the floor slices.
+    if (mapInstance.getLayer('3d-buildings') && buildingFeature) {
+      const featureId = buildingFeature.id;
+      if (featureId !== undefined && featureId !== null) {
+        mapInstance.setFilter('3d-buildings', ['!=', ['id'], featureId]);
+      } else {
+        // No feature ID available — fall back to hiding the entire layer
+        mapInstance.setLayoutProperty('3d-buildings', 'visibility', 'none');
+      }
     }
 
     // Add source for the custom building using actual geometry
