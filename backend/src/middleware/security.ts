@@ -426,9 +426,9 @@ export const messagingRateLimiter = rateLimit({
   legacyHeaders: false,
   keyGenerator: (req: Request) => {
     const userId = (req as any).user?.id || (req as any).user?._id;
-    return userId ? `msg_user_${userId}` : ipKeyGenerator(req);
+    return userId ? `msg_user_${userId}` : ipKeyGenerator(req.ip || 'unknown');
   },
-  validate: { xForwardedForHeader: false },
+  validate: { xForwardedForHeader: false, keyGeneratorIpFallback: false },
 });
 
 /**
@@ -447,9 +447,9 @@ export const uploadRateLimiter = rateLimit({
   legacyHeaders: false,
   keyGenerator: (req: Request) => {
     const userId = (req as any).user?.id || (req as any).user?._id;
-    return userId ? `upload_user_${userId}` : ipKeyGenerator(req);
+    return userId ? `upload_user_${userId}` : ipKeyGenerator(req.ip || 'unknown');
   },
-  validate: { xForwardedForHeader: false },
+  validate: { xForwardedForHeader: false, keyGeneratorIpFallback: false },
 });
 
 /**
