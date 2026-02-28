@@ -26,6 +26,7 @@ import {
   invalidatePublicKey,
   type ResponseKeyInfo,
 } from '@/src/shared/api/payloadEncryption';
+import { tokenService } from '@/src/shared/api/tokenService';
 
 // Get API URL from environment variables
 // Production detection: if running on balkanestateai.com, use production API
@@ -50,24 +51,23 @@ const API_URL = getApiUrl();
 // --- TOKEN MANAGEMENT ---
 
 const getToken = (): string | null => {
-  return localStorage.getItem('balkan_estate_token');
+  return tokenService.getAccessToken();
 };
 
 const setToken = (token: string) => {
-  localStorage.setItem('balkan_estate_token', token);
+  tokenService.setAccessToken(token);
 };
 
 const getRefreshToken = (): string | null => {
-  return localStorage.getItem('balkan_estate_refresh_token');
+  return tokenService.getRefreshToken();
 };
 
 const setRefreshToken = (token: string) => {
-  localStorage.setItem('balkan_estate_refresh_token', token);
+  tokenService.setRefreshToken(token);
 };
 
 const removeToken = () => {
-  localStorage.removeItem('balkan_estate_token');
-  localStorage.removeItem('balkan_estate_refresh_token');
+  tokenService.clearTokens();
 };
 
 // --- HTTP CLIENT ---

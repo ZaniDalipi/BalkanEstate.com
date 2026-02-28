@@ -393,6 +393,13 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   const checkAuthStatus = useCallback(async () => {
     dispatch({ type: 'AUTH_CHECK_START' });
+
+    // On page load, there's no in-memory token yet. Attempt a silent refresh
+    // via the httpOnly cookie BEFORE checking auth, so the token is available.
+    if (!tokenService.getAccessToken()) {
+      await tokenService.forceRefresh();
+    }
+
     const user = await apiCheckAuth();
     dispatch({ type: 'AUTH_CHECK_COMPLETE', payload: { isAuthenticated: !!user, user } });
     if (user) {
@@ -401,7 +408,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         dispatch({ type: 'USER_DATA_SUCCESS', payload: userData });
 
         // Connect to WebSocket with user ID
-        const token = localStorage.getItem('balkan_estate_token');
+        const token = tokenService.getAccessToken();
         if (token) {
           socketService.connect(token, user.id);
         }
@@ -420,7 +427,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     dispatch({ type: 'USER_DATA_SUCCESS', payload: userData });
 
     // Connect to WebSocket for real-time chat
-    const token = localStorage.getItem('balkan_estate_token');
+    const token = tokenService.getAccessToken();
     if (token) {
       socketService.connect(token, user.id);
     }
@@ -480,7 +487,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     dispatch({ type: 'USER_DATA_SUCCESS', payload: { savedHomes: [], savedSearches: [], conversations: [] } });
 
     // Connect to WebSocket for real-time chat
-    const token = localStorage.getItem('balkan_estate_token');
+    const token = tokenService.getAccessToken();
     if (token) {
       socketService.connect(token, user.id);
     }
@@ -557,12 +564,12 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   }, []);
 
   const handleOAuthCallback = useCallback(async (token: string, refreshToken?: string) => {
-    // SECURITY: Store tokens securely, then fetch user data via API
+    // SECURITY: Store tokens in memory only, then fetch user data via API
     // User data is NOT passed in URL to prevent logging in browser history/server logs
     sessionStorage.setItem('balkanestate_just_authed', 'true');
-    localStorage.setItem('balkan_estate_token', token);
+    tokenService.setAccessToken(token);
     if (refreshToken) {
-      localStorage.setItem('balkan_estate_refresh_token', refreshToken);
+      tokenService.setRefreshToken(refreshToken);
     }
 
     dispatch({ type: 'USER_DATA_LOADING' });
@@ -596,8 +603,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       }
     } catch (_error) {
       // Clear tokens on failure
-      localStorage.removeItem('balkan_estate_token');
-      localStorage.removeItem('balkan_estate_refresh_token');
+      tokenService.clearTokens();
       dispatch({ type: 'SET_AUTH_STATE', payload: { isAuthenticated: false, user: null } });
       dispatch({ type: 'AUTH_CHECK_COMPLETE', payload: { isAuthenticated: false, user: null } });
       dispatch({ type: 'USER_DATA_SUCCESS', payload: { savedHomes: [], savedSearches: [], conversations: [] } });
