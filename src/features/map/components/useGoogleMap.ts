@@ -1674,12 +1674,15 @@ export function useGoogleMap(props: GoogleMapComponentProps) {
         else color = '#003366';
 
         const size = Math.min(28, Math.max(14, 12 + speed * 0.35));
+        // Sanitize color to prevent injection via CSS/HTML
+        const safeColor = /^(#[0-9a-f]{3,8}|rgba?\(\d+,\s*\d+,\s*\d+(,\s*[\d.]+)?\))$/i.test(color) ? color : '#3b82f6';
+        const safeDir = Number(dir) || 0;
         const el = document.createElement('div');
         el.innerHTML = `<svg width="${size}" height="${size}" viewBox="0 0 24 24"
-          style="transform:rotate(${dir}deg);filter:drop-shadow(0 1px 2px rgba(0,0,0,0.3))"
+          style="transform:rotate(${safeDir}deg);filter:drop-shadow(0 1px 2px rgba(0,0,0,0.3))"
           xmlns="http://www.w3.org/2000/svg">
           <path d="M12 2 L8 14 L12 11 L16 14 Z"
-            fill="${color}" stroke="rgba(255,255,255,0.7)" stroke-width="1"/>
+            fill="${safeColor}" stroke="rgba(255,255,255,0.7)" stroke-width="1"/>
         </svg>`;
         el.style.pointerEvents = 'none';
 

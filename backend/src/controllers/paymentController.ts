@@ -10,6 +10,7 @@ import SubscriptionEvent from '../models/SubscriptionEvent';
 import { processSubscriptionPayment } from '../services/subscriptionPaymentService';
 import { paymentProviderFactory } from '../services/paymentProviderFactory';
 import emailService from '../services/emailService';
+import { paymentLogger } from '../utils/logger';
 
 // Stripe is not used - Paddle and PaySera are the active payment providers
 // Keeping Stripe initialization for legacy webhook handling only
@@ -43,6 +44,16 @@ export const createCheckoutSession = async (req: Request, res: Response): Promis
     if (!amount || amount <= 0) {
       res.status(400).json({ message: 'Invalid amount' });
       return;
+    }
+
+    // SECURITY: Validate amount against product price to prevent client-side manipulation
+    if (productId) {
+      const product = await Product.findOne({ productId });
+      if (product && Math.abs(amount - product.price) > 0.50) {
+        paymentLogger.warn(`Price mismatch: client sent ${amount}, product price is ${product.price} (user ${userId})`);
+        res.status(400).json({ message: 'Amount does not match product price' });
+        return;
+      }
     }
 
     // Get the base URL from environment or request
@@ -88,8 +99,8 @@ export const createCheckoutSession = async (req: Request, res: Response): Promis
       url: session.url, // This is the Stripe-hosted payment page URL
     });
   } catch (error: any) {
-    console.error('Error creating checkout session:', error);
-    res.status(500).json({ message: 'Error creating checkout session', error: error.message });
+    paymentLogger.error('Error creating checkout session:', error);
+    res.status(500).json({ message: 'Error creating checkout session' });
   }
 };
 
@@ -128,6 +139,16 @@ export const createUnifiedPayment = async (req: Request, res: Response): Promise
     if (!planName) {
       res.status(400).json({ message: 'Plan name is required' });
       return;
+    }
+
+    // SECURITY: Validate amount against product price to prevent client-side manipulation
+    if (productId) {
+      const product = await Product.findOne({ productId });
+      if (product && Math.abs(amount - product.price) > 0.50) {
+        paymentLogger.warn(`Price mismatch: client sent ${amount}, product price is ${product.price} (user ${userId})`);
+        res.status(400).json({ message: 'Amount does not match product price' });
+        return;
+      }
     }
 
     // Use provided country code or try to detect from user profile
@@ -173,8 +194,8 @@ export const createUnifiedPayment = async (req: Request, res: Response): Promise
       providerInfo: paymentProviderFactory.getProviderInfo(result.provider),
     });
   } catch (error: any) {
-    console.error('Error creating unified payment:', error);
-    res.status(500).json({ message: 'Error creating payment', error: error.message });
+    paymentLogger.error('Error creating unified payment:', error);
+    res.status(500).json({ message: 'Error creating payment' });
   }
 };
 
@@ -212,7 +233,7 @@ export const getPaymentProviders = async (req: Request, res: Response): Promise<
     });
   } catch (error: any) {
     console.error('Error getting payment providers:', error);
-    res.status(500).json({ message: 'Error getting providers', error: error.message });
+    res.status(500).json({ message: 'Error getting providers' });
   }
 };
 
@@ -236,7 +257,7 @@ export const getSupportedCountries = async (_req: Request, res: Response): Promi
     });
   } catch (error: any) {
     console.error('Error getting supported countries:', error);
-    res.status(500).json({ message: 'Error getting countries', error: error.message });
+    res.status(500).json({ message: 'Error getting countries' });
   }
 };
 
@@ -319,7 +340,7 @@ export const processPayment = async (req: Request, res: Response): Promise<void>
     });
   } catch (error: any) {
     console.error('Error processing payment:', error);
-    res.status(500).json({ message: 'Error processing payment', error: error.message });
+    res.status(500).json({ message: 'Error processing payment' });
   }
 };
 
@@ -354,8 +375,8 @@ export const getSubscriptionStatus = async (req: Request, res: Response): Promis
       canAccessPremium: user.canAccessPremiumFeatures(),
     });
   } catch (error: any) {
-    console.error('Error getting subscription status:', error);
-    res.status(500).json({ message: 'Error getting subscription status', error: error.message });
+    paymentLogger.error('Error getting subscription status:', error);
+    res.status(500).json({ message: 'Error getting subscription status' });
   }
 };
 
@@ -379,25 +400,43 @@ export const cancelSubscription = async (req: Request, res: Response): Promise<v
       return;
     }
 
-    // Update user subscription status
-    user.isSubscribed = false;
-    user.subscriptionPlan = 'free';
-    // Keep expiration date for reference
+    // SECURITY: Mark subscription as pending_cancellation instead of immediately deactivating.
+    // User retains access until the current billing period ends (subscriptionExpiresAt).
+    user.subscriptionStatus = 'pending_cancellation';
+
+    // Also update the Subscription document for consistency
+    const activeSub = await Subscription.findOne({
+      userId,
+      status: { $in: ['active', 'grace'] },
+    });
+    if (activeSub) {
+      activeSub.status = 'pending_cancellation';
+      activeSub.cancelledAt = new Date();
+      await activeSub.save();
+    }
+
+    // If there's no expiration date (shouldn't happen), deactivate immediately
+    if (!user.subscriptionExpiresAt || new Date(user.subscriptionExpiresAt) <= new Date()) {
+      user.isSubscribed = false;
+      user.subscriptionPlan = 'free';
+    }
+
     await user.save();
 
-    // Subscription cancelled successfully
+    paymentLogger.info(`Subscription cancellation requested for user ${userId}`);
 
     res.status(200).json({
-      message: 'Subscription cancelled successfully',
+      message: 'Subscription will be cancelled at the end of the current billing period',
       user: {
         isSubscribed: user.isSubscribed,
         subscriptionPlan: user.subscriptionPlan,
         subscriptionExpiresAt: user.subscriptionExpiresAt,
+        subscriptionStatus: user.subscriptionStatus,
       },
     });
   } catch (error: any) {
-    console.error('Error cancelling subscription:', error);
-    res.status(500).json({ message: 'Error cancelling subscription', error: error.message });
+    paymentLogger.error('Error cancelling subscription:', error);
+    res.status(500).json({ message: 'Error cancelling subscription' });
   }
 };
 
@@ -748,7 +787,7 @@ export const verifySession = async (req: Request, res: Response): Promise<void> 
     });
   } catch (error: any) {
     console.error('Error verifying session:', error);
-    res.status(500).json({ message: 'Error verifying session', error: error.message });
+    res.status(500).json({ message: 'Error verifying session' });
   }
 };
 
@@ -778,6 +817,16 @@ export const applyFreeSubscription = async (req: Request, res: Response): Promis
     }
 
     // User found
+
+    // SECURITY: Check if user already has an active subscription (prevent stacking)
+    const existingActiveSub = await Subscription.findOne({
+      userId,
+      status: { $in: ['active', 'grace'] },
+    });
+    if (existingActiveSub) {
+      res.status(400).json({ message: 'You already have an active subscription' });
+      return;
+    }
 
     // Verify discount code is valid and provides 100% off
     if (!discountCode) {
@@ -873,7 +922,7 @@ export const applyFreeSubscription = async (req: Request, res: Response): Promis
   } catch (error: any) {
     console.error('❌ Error applying free subscription:', error);
     console.error('Stack trace:', error.stack);
-    res.status(500).json({ message: 'Error applying free subscription', error: error.message });
+    res.status(500).json({ message: 'Error applying free subscription' });
   }
 };
 

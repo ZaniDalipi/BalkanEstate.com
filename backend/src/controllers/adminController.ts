@@ -105,14 +105,19 @@ export const getAllUsers = async (req: Request, res: Response): Promise<void> =>
       ];
     }
 
-    const skip = (Number(page) - 1) * Number(limit);
+    // SECURITY: Whitelist sortBy to prevent sorting by internal/sensitive fields
+    const ALLOWED_SORT_FIELDS = ['createdAt', 'updatedAt', 'name', 'email', 'role', 'isSubscribed', 'phone', 'city', 'country'];
+    const safeSortBy = ALLOWED_SORT_FIELDS.includes(String(sortBy)) ? String(sortBy) : 'createdAt';
+    const pageNum = Math.max(1, Number(page) || 1);
+    const limitNum = Math.min(100, Math.max(1, Number(limit) || 20));
+    const skip = (pageNum - 1) * limitNum;
     const sortOrder = order === 'asc' ? 1 : -1;
 
     const users = await User.find(query)
       .select('-password -refreshTokens -resetPasswordToken -resetPasswordExpires -emailVerificationToken -emailVerificationExpires -loginHistory -publicKey -__v')
-      .sort({ [String(sortBy)]: sortOrder })
+      .sort({ [safeSortBy]: sortOrder })
       .skip(skip)
-      .limit(Number(limit))
+      .limit(limitNum)
       .lean();
 
     const total = await User.countDocuments(query);

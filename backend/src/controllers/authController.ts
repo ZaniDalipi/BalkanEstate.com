@@ -1492,11 +1492,19 @@ export const resetPassword = async (
       .update(token)
       .digest('hex');
 
-    // Find user with valid reset token
-    const user = await User.findOne({
-      resetPasswordToken: hashedToken,
-      resetPasswordExpires: { $gt: Date.now() },
-    });
+    // SECURITY: Atomically find AND claim the reset token to prevent race conditions.
+    // Without this, two concurrent requests with the same token could both pass
+    // the findOne check and reset the password.
+    const user = await User.findOneAndUpdate(
+      {
+        resetPasswordToken: hashedToken,
+        resetPasswordExpires: { $gt: Date.now() },
+      },
+      {
+        $unset: { resetPasswordToken: 1, resetPasswordExpires: 1 },
+      },
+      { new: true }
+    );
 
     if (!user) {
       res.status(400).json({ message: 'Invalid or expired reset token' });
@@ -1523,9 +1531,8 @@ export const resetPassword = async (
     }
 
     // Set new password (will be hashed by pre-save hook)
+    // Token was already cleared atomically above to prevent race conditions
     user.password = newPassword;
-    user.resetPasswordToken = undefined;
-    user.resetPasswordExpires = undefined;
 
     await user.save();
 
@@ -2372,6 +2379,24 @@ export const addRole = async (req: Request, res: Response): Promise<void> => {
     if (newRole === 'agent') {
       if (!licenseNumber) {
         res.status(400).json({ message: 'License number is required for agent role' });
+        return;
+      }
+
+      // SECURITY: Validate license number format (same rules as signup)
+      const licenseRegex = /^[A-Z0-9-]+$/i;
+      if (!licenseRegex.test(licenseNumber)) {
+        res.status(400).json({ message: 'Invalid license number format. Only letters, numbers, and hyphens are allowed.' });
+        return;
+      }
+      if (licenseNumber.length < 5 || licenseNumber.length > 30) {
+        res.status(400).json({ message: 'License number must be between 5 and 30 characters' });
+        return;
+      }
+
+      // SECURITY: Check license uniqueness (prevents duplicate registrations)
+      const existingUserWithLicense = await User.findOne({ licenseNumber });
+      if (existingUserWithLicense && String(existingUserWithLicense._id) !== String(user._id)) {
+        res.status(400).json({ message: 'This license number is already registered to another user' });
         return;
       }
 
