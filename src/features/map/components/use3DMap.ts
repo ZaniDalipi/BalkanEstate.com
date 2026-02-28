@@ -596,14 +596,14 @@ export function use3DMap(props: Map3DBuildingsProps) {
     // Use exact building coords — no scaling needed because we hide the original building below
     const scaledCoords = buildingCoords;
 
-    // Hide the target building from 3d-buildings using its vector-tile feature ID.
-    // This removes the depth-buffer conflict that was blocking the floor slices.
-    if (mapInstance.getLayer('3d-buildings') && buildingFeature) {
-      const featureId = buildingFeature.id;
+    // Hide buildings to prevent depth-buffer conflicts with floor slices.
+    // Try to filter only the target building by feature ID; if that's not possible,
+    // hide the entire layer — floor slices must always win the depth buffer.
+    if (mapInstance.getLayer('3d-buildings')) {
+      const featureId = buildingFeature?.id;
       if (featureId !== undefined && featureId !== null) {
         mapInstance.setFilter('3d-buildings', ['!=', ['id'], featureId]);
       } else {
-        // No feature ID available — fall back to hiding the entire layer
         mapInstance.setLayoutProperty('3d-buildings', 'visibility', 'none');
       }
     }
@@ -1132,12 +1132,11 @@ export function use3DMap(props: Map3DBuildingsProps) {
       // Add custom 3D building with floor slices for properties with floor data
       // Wait for tiles to fully load before querying building geometry
       if (floorNumber != null && totalFloors != null && totalFloors > 0) {
-        // Retry mechanism to ensure building tiles are loaded
-        let retryCount = 0;
-        const maxRetries = 5;
+        // Fly to the building at zoom 17 so vector tiles for the buildings layer load,
+        // then wait for the map to reach idle (tiles fully rendered) before querying.
+        const addBuildingOnIdle = () => {
+          mapInstance.off('idle', addBuildingOnIdle);
 
-        const tryAddCustomBuilding = () => {
-          // First zoom to the building location to ensure tiles load
           mapInstance.flyTo({
             center: [lng, lat],
             zoom: Math.max(mapInstance.getZoom(), 17),
@@ -1145,8 +1144,9 @@ export function use3DMap(props: Map3DBuildingsProps) {
             duration: 1500,
           });
 
-          // Wait for the fly animation and tiles to load
-          setTimeout(() => {
+          // Wait for idle AFTER flyTo — guarantees tiles are loaded before query
+          const addBuildingAfterFly = () => {
+            mapInstance.off('idle', addBuildingAfterFly);
             addCustomBuilding3D(
               mapInstance,
               lat,
@@ -1156,19 +1156,8 @@ export function use3DMap(props: Map3DBuildingsProps) {
               virtualTour360Url,
               virtualTour360Url ? handleEnterBuilding : undefined
             );
-
-            // Check if source was added successfully - if not, retry
-            if (!mapInstance.getSource('custom-building') && retryCount < maxRetries) {
-              retryCount++;
-              setTimeout(tryAddCustomBuilding, 1000);
-            }
-          }, 2000);
-        };
-
-        // Start the process after initial load
-        const addBuildingOnIdle = () => {
-          tryAddCustomBuilding();
-          mapInstance.off('idle', addBuildingOnIdle);
+          };
+          mapInstance.on('idle', addBuildingAfterFly);
         };
         mapInstance.on('idle', addBuildingOnIdle);
       }
