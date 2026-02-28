@@ -30,6 +30,16 @@ const sanitizePublicId = (raw: string): string | null => {
 };
 
 /**
+ * Extract publicId from route params.
+ * path-to-regexp v8 wildcards ({*publicId}) return an array of path segments.
+ */
+const extractPublicId = (params: Record<string, any>): string => {
+  const raw = params.publicId ?? params[0] ?? '';
+  if (Array.isArray(raw)) return raw.join('/');
+  return String(raw);
+};
+
+/**
  * Validate resourceType query param against whitelist.
  */
 const parseResourceType = (raw: unknown): ResourceType => {
@@ -54,8 +64,8 @@ export const getSignedUrl = async (
       return;
     }
 
-    // publicId comes from wildcard route (e.g. /signed-url/balkan-estate/users/123/avatar/img)
-    const rawPublicId = req.params[0];
+    // publicId comes from named wildcard route param (e.g. /signed-url/balkan-estate/users/123/avatar/img)
+    const rawPublicId = extractPublicId(req.params);
     const publicId = sanitizePublicId(rawPublicId);
     if (!publicId) {
       res.status(400).json({ message: 'Invalid or missing publicId' });
@@ -196,8 +206,8 @@ export const deleteFile = async (
       return;
     }
 
-    // publicId comes from wildcard route (e.g. /balkan-estate/users/123/avatar/img)
-    const rawPublicId = req.params[0];
+    // publicId comes from named wildcard route param (e.g. /balkan-estate/users/123/avatar/img)
+    const rawPublicId = extractPublicId(req.params);
     const publicId = sanitizePublicId(rawPublicId);
     if (!publicId) {
       res.status(400).json({ message: 'Invalid or missing publicId' });

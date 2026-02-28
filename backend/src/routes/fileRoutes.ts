@@ -108,7 +108,7 @@ router.post('/signed-urls', generalRateLimiter, getBatchSignedUrls);
  *       401:
  *         $ref: '#/components/responses/Unauthorized'
  */
-router.get('/signed-url/*', generalRateLimiter, getSignedUrl);
+router.get('/signed-url/{*publicId}', generalRateLimiter, getSignedUrl);
 
 /**
  * @swagger
@@ -133,6 +133,6 @@ router.get('/signed-url/*', generalRateLimiter, getSignedUrl);
  *       401:
  *         $ref: '#/components/responses/Unauthorized'
  */
-router.delete('/*', mutationRateLimiter, deleteFile);
+router.delete('/{*publicId}', mutationRateLimiter, deleteFile);
 
 export default router;
