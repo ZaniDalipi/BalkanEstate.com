@@ -694,7 +694,8 @@
       "all": "Sve",
       "forSale": "Na prodaju",
       "forRent": "Za iznajmljivanje",
-      "noListings": "Nema dostupnih oglasa"
+      "noListings": "Nema dostupnih oglasa",
+      "allTypes": "Svi tipovi"
     },
     "reviewsTab": {
       "verifiedReviews": "verified reviews",

@@ -81,25 +81,25 @@ const HowItWorksManager: React.FC = () => {
       {/* Header */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">How It Works Content</h1>
-          <p className="text-gray-600 mt-1">Manage tutorials, guides, and FAQs for the How It Works page</p>
+          <h1 className="text-2xl font-bold text-gray-900">{t('admin:howItWorks.title')}</h1>
+          <p className="text-gray-600 mt-1">{t('admin:howItWorks.subtitle')}</p>
         </div>
         <button
           onClick={openAddModal}
           className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
         >
           <PlusIcon className="w-5 h-5" />
-          Add Content
+          {t('admin:howItWorks.addContent')}
         </button>
       </div>
 
       {/* Content Type Tabs */}
       <div className="flex gap-2 flex-wrap">
         {[
-          { id: 'all', label: 'All', count: content.length },
-          { id: 'video', label: 'Videos', count: content.filter(c => c.contentType === 'video' || !c.contentType).length },
-          { id: 'guide', label: 'Guides', count: content.filter(c => c.contentType === 'guide').length },
-          { id: 'faq', label: 'FAQs', count: content.filter(c => c.contentType === 'faq').length },
+          { id: 'all', label: t('admin:howItWorks.tabs.all'), count: content.length },
+          { id: 'video', label: t('admin:howItWorks.tabs.videos'), count: content.filter(c => c.contentType === 'video' || !c.contentType).length },
+          { id: 'guide', label: t('admin:howItWorks.tabs.guides'), count: content.filter(c => c.contentType === 'guide').length },
+          { id: 'faq', label: t('admin:howItWorks.tabs.faqs'), count: content.filter(c => c.contentType === 'faq').length },
         ].map((tab) => (
           <button
             key={tab.id}
@@ -160,10 +160,10 @@ const HowItWorksManager: React.FC = () => {
                             {item.contentType}
                           </span>
                           {item.contentType === 'guide' && item.steps && (
-                            <span className="text-xs text-gray-500">{item.steps.length} steps</span>
+                            <span className="text-xs text-gray-500">{t('admin:howItWorks.steps', { count: item.steps.length })}</span>
                           )}
                           {item.contentType === 'faq' && item.faqs && (
-                            <span className="text-xs text-gray-500">{item.faqs.length} questions</span>
+                            <span className="text-xs text-gray-500">{t('admin:howItWorks.questions', { count: item.faqs.length })}</span>
                           )}
                         </div>
                       )}
@@ -175,7 +175,7 @@ const HowItWorksManager: React.FC = () => {
 
                       {!item.isActive && (
                         <div className="absolute top-2 left-2 px-2 py-1 bg-red-500 text-white text-xs rounded">
-                          Inactive
+                          {t('admin:howItWorks.inactive')}
                         </div>
                       )}
                     </div>
@@ -199,7 +199,7 @@ const HowItWorksManager: React.FC = () => {
                               ? 'text-green-600 hover:bg-green-50'
                               : 'text-gray-400 hover:bg-gray-100'
                           }`}
-                          title={item.isActive ? 'Deactivate' : 'Activate'}
+                          title={item.isActive ? t('admin:howItWorks.deactivate') : t('admin:howItWorks.activate')}
                         >
                           {item.isActive ? (
                             <CheckCircleIcon className="w-5 h-5" />
@@ -232,14 +232,14 @@ const HowItWorksManager: React.FC = () => {
       {filteredContent.length === 0 && (
         <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-12 text-center">
           <BookOpenIcon className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-          <h3 className="text-lg font-medium text-gray-900 mb-2">No content yet</h3>
-          <p className="text-gray-500 mb-4">Add tutorials, guides, or FAQs to show on the How It Works page</p>
+          <h3 className="text-lg font-medium text-gray-900 mb-2">{t('admin:howItWorks.noContent')}</h3>
+          <p className="text-gray-500 mb-4">{t('admin:howItWorks.noContentDesc')}</p>
           <button
             onClick={openAddModal}
             className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
           >
             <PlusIcon className="w-5 h-5" />
-            Add First Content
+            {t('admin:howItWorks.addFirstContent')}
           </button>
         </div>
       )}

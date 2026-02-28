@@ -28,7 +28,7 @@ export function use3DMap(props: Map3DBuildingsProps) {
     orientation,
   } = props;
 
-  const { t } = useTranslation(['property']);
+  const { t, i18n } = useTranslation(['property']);
 
   // Calculate effective bearing from orientation
   // Camera should face TOWARD the building's oriented face (opposite direction)
@@ -47,6 +47,9 @@ export function use3DMap(props: Map3DBuildingsProps) {
   const floorLabelsRef = useRef<maplibregl.Marker[]>([]);
   const facingArrowRef = useRef<HTMLElement | null>(null);
   const facingBearingRef = useRef<number>(0);
+  const facingLabelRef = useRef<HTMLElement | null>(null);
+  const facingCardinalRef = useRef<HTMLElement | null>(null);
+  const facingDirectionLabelRef = useRef<HTMLElement | null>(null);
 
   // State
   const [mapLoaded, setMapLoaded] = useState(false);
@@ -373,7 +376,7 @@ export function use3DMap(props: Map3DBuildingsProps) {
             text-align: center;
             white-space: nowrap;
           ">
-            <div style="font-size: 10px; color: #94a3b8; font-weight: 500;">${t('property:map3d.facing', 'Facing')}</div>
+            <div class="facing-label" style="font-size: 10px; color: #94a3b8; font-weight: 500;">${t('property:map3d.facing', 'Facing')}</div>
             <div style="display: flex; align-items: center; gap: 4px; justify-content: center;">
               <div class="facing-arrow" style="
                 width: 20px; height: 20px;
@@ -385,15 +388,18 @@ export function use3DMap(props: Map3DBuildingsProps) {
                   <path d="M12 19V5M5 12l7-7 7 7"/>
                 </svg>
               </div>
-              <span style="font-size: 14px; font-weight: 700; color: #60a5fa;">${cardinal}</span>
+              <span class="facing-cardinal" style="font-size: 14px; font-weight: 700; color: #60a5fa;">${cardinal}</span>
             </div>
-            <div style="font-size: 9px; color: #64748b;">${t('property:map3d.facingDirection', '{{direction}}-facing', { direction: cardinalFull })}</div>
+            <div class="facing-direction-label" style="font-size: 9px; color: #64748b;">${t('property:map3d.facingDirection', '{{direction}}-facing', { direction: cardinalFull })}</div>
           </div>
         </div>
       `;
 
-      // Store ref to the arrow element for dynamic rotation updates
+      // Store refs to text elements for language updates
       facingArrowRef.current = facingEl.querySelector('.facing-arrow') as HTMLElement;
+      facingLabelRef.current = facingEl.querySelector('.facing-label') as HTMLElement;
+      facingCardinalRef.current = facingEl.querySelector('.facing-cardinal') as HTMLElement;
+      facingDirectionLabelRef.current = facingEl.querySelector('.facing-direction-label') as HTMLElement;
 
       // Position the facing indicator slightly below the property
       const offset = 0.00015; // ~15m south
@@ -892,6 +898,17 @@ export function use3DMap(props: Map3DBuildingsProps) {
       }
     }
   }, [show360Tour]);
+
+  // Update facing indicator text when language changes
+  useEffect(() => {
+    if (facingBearingRef.current === 0 && !facingLabelRef.current) return;
+    const cardinal = getCardinalShort(facingBearingRef.current);
+    const cardinalFull = getCardinalLabel(facingBearingRef.current);
+    if (facingLabelRef.current) facingLabelRef.current.textContent = t('property:map3d.facing', 'Facing');
+    if (facingCardinalRef.current) facingCardinalRef.current.textContent = cardinal;
+    if (facingDirectionLabelRef.current) facingDirectionLabelRef.current.textContent = t('property:map3d.facingDirection', '{{direction}}-facing', { direction: cardinalFull });
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [i18n.language]);
 
 
 

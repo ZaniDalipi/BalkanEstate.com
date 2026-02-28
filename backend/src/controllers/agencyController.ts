@@ -2902,6 +2902,10 @@ export const migrateAgentSubscriptions = async (
     let totalCreated = 0;
     const results: any[] = [];
 
+    // Get agent listings limit from DB product (configurable in admin)
+    const agentProduct = await Product.findOne({ productId: 'agency_agent_yearly' }).lean();
+    const agentListingsLimit = agentProduct?.listingsLimit ?? 25;
+
     for (const agency of agencies) {
       const agencyExpiresAt = agency.subscription?.expiresAt ||
                              new Date(Date.now() + 365 * 24 * 60 * 60 * 1000);
@@ -2922,7 +2926,7 @@ export const migrateAgentSubscriptions = async (
           user.subscription = {
             tier: 'agency_agent',
             status: 'active',
-            listingsLimit: 25,
+            listingsLimit: agentListingsLimit,
             activeListingsCount: user.subscription?.activeListingsCount || 0,
             privateSellerCount: user.subscription?.privateSellerCount || 0,
             agentCount: user.subscription?.agentCount || 0,
@@ -2935,7 +2939,7 @@ export const migrateAgentSubscriptions = async (
         } else if (user.subscription.tier !== 'agency_agent' && user.subscription.tier !== 'agency_owner') {
           // User has a subscription but not agency_agent - update tier
           user.subscription.tier = 'agency_agent';
-          user.subscription.listingsLimit = 25;
+          user.subscription.listingsLimit = agentListingsLimit;
           user.subscription.expiresAt = agencyExpiresAt;
           userUpdated = true;
         }

@@ -699,7 +699,8 @@
       "all": "All",
       "forSale": "For Sale",
       "forRent": "For Rent",
-      "noListings": "No listings available"
+      "noListings": "No listings available",
+      "allTypes": "All Types"
     },
     "reviewsTab": {
       "verifiedReviews": "verified reviews",

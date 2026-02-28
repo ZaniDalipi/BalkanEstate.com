@@ -694,7 +694,8 @@
       "all": "Όλα",
       "forSale": "Προς Πώληση",
       "forRent": "Προς Ενοικίαση",
-      "noListings": "Δεν βρέθηκαν καταχωρήσεις"
+      "noListings": "Δεν βρέθηκαν καταχωρήσεις",
+      "allTypes": "Όλοι οι τύποι"
     },
     "reviewsTab": {
       "verifiedReviews": "verified reviews",

@@ -36,7 +36,10 @@
     "premiumAccess": "Full access to all features",
     "freeAccess": "Upgrade for advanced analytics",
     "proActive": "Pro Active",
-    "freePlan": "Free Plan"
+    "freePlan": "Free Plan",
+    "bannerDescription": "Dobijte uvide, izvore saobraćaja, statistike uređaja i CSV izvoz",
+    "comingSoon": "Uskoro",
+    "contactSales": "Kontaktiraj Prodaju"
   },
   "insights": {
     "title": "Insights",

@@ -143,13 +143,13 @@ const AgentRequestManager: React.FC = () => {
 
       if (!response.ok) throw new Error('Failed to update request');
 
-      setSuccessMessage('Request updated successfully');
+      setSuccessMessage(t('notifications.updated'));
       setTimeout(() => setSuccessMessage(null), 3000);
       fetchRequests();
       fetchStats();
       setIsDetailModalOpen(false);
     } catch (err) {
-      setError('Failed to update request');
+      setError(t('errors.updateFailed'));
       // Error removed
     }
   };
@@ -197,8 +197,8 @@ const AgentRequestManager: React.FC = () => {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Agent Connection Requests</h1>
-          <p className="text-gray-500 mt-1">Manage requests from users looking for agents</p>
+          <h1 className="text-2xl font-bold text-gray-900">{t('agentConnections.title')}</h1>
+          <p className="text-gray-500 mt-1">{t('agentConnections.subtitle')}</p>
         </div>
       </div>
 
@@ -223,7 +223,7 @@ const AgentRequestManager: React.FC = () => {
                 <UserGroupIcon className="w-6 h-6 text-blue-600" />
               </div>
               <div>
-                <p className="text-sm text-gray-500">Total Requests</p>
+                <p className="text-sm text-gray-500">{t('agentConnections.totalRequests')}</p>
                 <p className="text-2xl font-bold text-gray-900">{stats.total}</p>
               </div>
             </div>
@@ -235,7 +235,7 @@ const AgentRequestManager: React.FC = () => {
                 <CheckCircleIcon className="w-6 h-6 text-green-600" />
               </div>
               <div>
-                <p className="text-sm text-gray-500">Success Rate</p>
+                <p className="text-sm text-gray-500">{t('agentConnections.successRate')}</p>
                 <p className="text-2xl font-bold text-gray-900">{stats.successRate}%</p>
               </div>
             </div>
@@ -247,7 +247,7 @@ const AgentRequestManager: React.FC = () => {
                 <EnvelopeIcon className="w-6 h-6 text-purple-600" />
               </div>
               <div>
-                <p className="text-sm text-gray-500">Emails Sent</p>
+                <p className="text-sm text-gray-500">{t('agentConnections.emailsSent')}</p>
                 <p className="text-2xl font-bold text-gray-900">{stats.totalEmailsSent}</p>
               </div>
             </div>
@@ -259,7 +259,7 @@ const AgentRequestManager: React.FC = () => {
                 <ClockIcon className="w-6 h-6 text-yellow-600" />
               </div>
               <div>
-                <p className="text-sm text-gray-500">Pending</p>
+                <p className="text-sm text-gray-500">{t('filters.pending')}</p>
                 <p className="text-2xl font-bold text-gray-900">{stats.byStatus?.pending || 0}</p>
               </div>
             </div>
@@ -270,7 +270,7 @@ const AgentRequestManager: React.FC = () => {
       {/* Status Distribution */}
       {stats && (
         <div className="bg-white rounded-xl p-6 shadow-sm border">
-          <h3 className="text-lg font-semibold mb-4">Request Status Distribution</h3>
+          <h3 className="text-lg font-semibold mb-4">{t('agentConnections.statusDistribution')}</h3>
           <div className="flex flex-wrap gap-4">
             {Object.entries(stats.byStatus || {}).map(([status, count]) => (
               <div key={status} className={`px-4 py-2 rounded-lg ${getStatusColor(status)}`}>
@@ -284,7 +284,7 @@ const AgentRequestManager: React.FC = () => {
       {/* Top Locations */}
       {stats && stats.topLocations && stats.topLocations.length > 0 && (
         <div className="bg-white rounded-xl p-6 shadow-sm border">
-          <h3 className="text-lg font-semibold mb-4">Top Requested Locations</h3>
+          <h3 className="text-lg font-semibold mb-4">{t('agentConnections.topLocations')}</h3>
           <div className="flex flex-wrap gap-2">
             {stats.topLocations.map((loc, idx) => (
               <span key={idx} className="px-3 py-1 bg-gray-100 rounded-full text-sm">
@@ -302,7 +302,7 @@ const AgentRequestManager: React.FC = () => {
             <MagnifyingGlassIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
             <input
               type="text"
-              placeholder="Search by email, phone, or location..."
+              placeholder={t('agentConnections.searchPlaceholder')}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="w-full pl-10 pr-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
@@ -313,12 +313,12 @@ const AgentRequestManager: React.FC = () => {
             onChange={(e) => setFilterStatus(e.target.value)}
             className="px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
           >
-            <option value="all">All Status</option>
-            <option value="pending">Pending</option>
-            <option value="assigned">Assigned</option>
-            <option value="contacted">Contacted</option>
-            <option value="completed">Completed</option>
-            <option value="cancelled">Cancelled</option>
+            <option value="all">{t('agentConnections.allStatus')}</option>
+            <option value="pending">{t('filters.pending')}</option>
+            <option value="assigned">{t('agentConnections.assigned')}</option>
+            <option value="contacted">{t('agentConnections.contacted')}</option>
+            <option value="completed">{t('agentConnections.completed')}</option>
+            <option value="cancelled">{t('agentConnections.cancelled')}</option>
           </select>
         </div>
       </div>
@@ -329,14 +329,14 @@ const AgentRequestManager: React.FC = () => {
           <table className="w-full">
             <thead className="bg-gray-50">
               <tr>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Client</th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Location</th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Outcome</th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Agents</th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Emails</th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Date</th>
-                <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">Actions</th>
+                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">{t('agentConnections.client')}</th>
+                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">{t('table.location')}</th>
+                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">{t('table.status')}</th>
+                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">{t('agentConnections.outcome')}</th>
+                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">{t('agentConnections.agents')}</th>
+                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">{t('agentConnections.emailsSent')}</th>
+                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">{t('table.date')}</th>
+                <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">{t('table.actions')}</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-200">
@@ -351,7 +351,7 @@ const AgentRequestManager: React.FC = () => {
               ) : filteredRequests.length === 0 ? (
                 <tr>
                   <td colSpan={8} className="px-4 py-8 text-center text-gray-500">
-                    No agent requests found
+                    {t('agentConnections.noRequests')}
                   </td>
                 </tr>
               ) : (
@@ -412,17 +412,17 @@ const AgentRequestManager: React.FC = () => {
               disabled={currentPage === 1}
               className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border rounded-lg hover:bg-gray-50 disabled:opacity-50"
             >
-              Previous
+              {t('table.previous')}
             </button>
             <span className="text-sm text-gray-500">
-              Page {currentPage} of {totalPages}
+              {t('agentConnections.pageOf', { current: currentPage, total: totalPages })}
             </span>
             <button
               onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
               disabled={currentPage === totalPages}
               className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border rounded-lg hover:bg-gray-50 disabled:opacity-50"
             >
-              Next
+              {t('table.next')}
             </button>
           </div>
         )}
@@ -433,7 +433,7 @@ const AgentRequestManager: React.FC = () => {
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between p-6 border-b">
-              <h2 className="text-xl font-bold">Agent Request Details</h2>
+              <h2 className="text-xl font-bold">{t('agentConnections.requestDetails')}</h2>
               <button
                 onClick={() => setIsDetailModalOpen(false)}
                 className="p-2 hover:bg-gray-100 rounded-lg"
@@ -445,7 +445,7 @@ const AgentRequestManager: React.FC = () => {
             <div className="p-6 space-y-6">
               {/* Client Info */}
               <div className="bg-gray-50 rounded-xl p-4">
-                <h3 className="font-semibold text-gray-900 mb-3">Client Information</h3>
+                <h3 className="font-semibold text-gray-900 mb-3">{t('agentConnections.clientInfo')}</h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="flex items-center gap-2">
                     <EnvelopeIcon className="w-4 h-4 text-gray-400" />
@@ -468,18 +468,18 @@ const AgentRequestManager: React.FC = () => {
 
               {/* Property Description */}
               <div>
-                <h3 className="font-semibold text-gray-900 mb-2">Property Requirements</h3>
+                <h3 className="font-semibold text-gray-900 mb-2">{t('agentConnections.propertyRequirements')}</h3>
                 <p className="text-gray-700 bg-gray-50 p-4 rounded-lg">{selectedRequest.propertyDescription}</p>
               </div>
 
               {/* Assigned Agents */}
               {selectedRequest.assignedAgents && selectedRequest.assignedAgents.length > 0 && (
                 <div>
-                  <h3 className="font-semibold text-gray-900 mb-2">Assigned Agents ({selectedRequest.assignedAgents.length})</h3>
+                  <h3 className="font-semibold text-gray-900 mb-2">{t('agentConnections.assignedAgents', { count: selectedRequest.assignedAgents.length })}</h3>
                   <div className="flex flex-wrap gap-2">
                     {selectedRequest.assignedAgents.map((agent) => (
                       <span key={agent._id} className="px-3 py-1 bg-blue-50 text-blue-700 rounded-full text-sm">
-                        {agent.userId?.name || agent.agentId || 'Unknown'}
+                        {agent.userId?.name || agent.agentId || t('agentConnections.unknown')}
                       </span>
                     ))}
                   </div>
@@ -489,52 +489,52 @@ const AgentRequestManager: React.FC = () => {
               {/* Status & Outcome */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Status</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">{t('table.status')}</label>
                   <select
                     value={selectedRequest.status}
                     onChange={(e) => updateRequest(selectedRequest._id, { status: e.target.value })}
                     className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500"
                   >
-                    <option value="pending">Pending</option>
-                    <option value="assigned">Assigned</option>
-                    <option value="contacted">Contacted</option>
-                    <option value="completed">Completed</option>
-                    <option value="cancelled">Cancelled</option>
+                    <option value="pending">{t('filters.pending')}</option>
+                    <option value="assigned">{t('agentConnections.assigned')}</option>
+                    <option value="contacted">{t('agentConnections.contacted')}</option>
+                    <option value="completed">{t('agentConnections.completed')}</option>
+                    <option value="cancelled">{t('agentConnections.cancelled')}</option>
                   </select>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Outcome</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">{t('agentConnections.outcome')}</label>
                   <select
                     value={selectedOutcome}
                     onChange={(e) => setSelectedOutcome(e.target.value)}
                     className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500"
                   >
-                    <option value="pending">Pending</option>
-                    <option value="success">Success (Deal Closed)</option>
-                    <option value="no_response">No Response</option>
-                    <option value="not_interested">Not Interested</option>
+                    <option value="pending">{t('agentConnections.outcomePending')}</option>
+                    <option value="success">{t('agentConnections.outcomeSuccess')}</option>
+                    <option value="no_response">{t('agentConnections.outcomeNoResponse')}</option>
+                    <option value="not_interested">{t('agentConnections.outcomeNotInterested')}</option>
                   </select>
                 </div>
               </div>
 
               {/* Admin Notes */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Admin Notes</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">{t('agentConnections.adminNotes')}</label>
                 <textarea
                   value={adminNotes}
                   onChange={(e) => setAdminNotes(e.target.value)}
                   rows={3}
                   className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500"
-                  placeholder="Add notes about this request..."
+                  placeholder={t('agentConnections.addNotesPlaceholder')}
                 />
               </div>
 
               {/* Metadata */}
               <div className="flex flex-wrap gap-4 text-sm text-gray-500">
-                <span>Created: {new Date(selectedRequest.createdAt).toLocaleString()}</span>
-                <span>Emails Sent: {selectedRequest.emailsSent}</span>
+                <span>{t('agentConnections.created')} {new Date(selectedRequest.createdAt).toLocaleString()}</span>
+                <span>{t('agentConnections.emailsSent')}: {selectedRequest.emailsSent}</span>
                 {selectedRequest.completedAt && (
-                  <span>Completed: {new Date(selectedRequest.completedAt).toLocaleString()}</span>
+                  <span>{t('agentConnections.completedAt')} {new Date(selectedRequest.completedAt).toLocaleString()}</span>
                 )}
               </div>
 
@@ -544,13 +544,13 @@ const AgentRequestManager: React.FC = () => {
                   onClick={() => setIsDetailModalOpen(false)}
                   className="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50"
                 >
-                  Cancel
+                  {t('confirmations.cancel')}
                 </button>
                 <button
                   onClick={() => updateRequest(selectedRequest._id, { outcome: selectedOutcome, notes: adminNotes })}
                   className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
                 >
-                  Save Changes
+                  {t('form.save')}
                 </button>
               </div>
             </div>

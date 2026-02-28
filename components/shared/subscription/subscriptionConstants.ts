@@ -42,7 +42,9 @@ export const FREE_PLAN: Plan = {
   supportType: 'email',
 };
 
-// Agency agent plan (obtained via coupon redemption, not purchasable)
+// Agency agent plan fallback (obtained via coupon redemption, not purchasable)
+// NOTE: These are fallback values only — real values come from the DB Product record
+// (productId: 'agency_agent_yearly'). Admin can change limits via PricingManager.
 export const AGENCY_AGENT_PLAN: Plan = {
   id: 'agency_agent_yearly',
   name: 'Agency Pro',
@@ -50,7 +52,7 @@ export const AGENCY_AGENT_PLAN: Plan = {
   period: 'year',
   periodMonths: 12,
   features: ['25 active listings', 'Unlimited saved searches', 'Unlimited AI chat', 'Full analytics', 'Agency team support'],
-  listingLimit: 25,
+  listingLimit: 25, // Fallback — overridden by DB Product.listingsLimit when available
   color: 'from-emerald-500 to-teal-600',
   tier: 2,
   badge: 'Agency Member',
@@ -71,7 +73,7 @@ export const PERIOD_TO_MONTHS: Record<string, number> = {
   one_time: 0,
 };
 
-// Map product IDs to listing limits
+// Map product IDs to listing limits (fallbacks — real values come from DB Product records)
 export const LISTING_LIMITS: Record<string, number> = {
   free: 3,
   seller_pro_monthly: 20,
@@ -82,7 +84,7 @@ export const LISTING_LIMITS: Record<string, number> = {
   pro_yearly: 250,
   enterprise_yearly: 500,
   agency_yearly: 100,
-  agency_agent_yearly: 25,
+  agency_agent_yearly: 25, // Fallback — overridden by DB Product.listingsLimit when available
 };
 
 // Tier determination by product ID

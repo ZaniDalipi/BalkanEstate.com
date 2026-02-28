@@ -237,7 +237,30 @@
       "wind": "Vjetar",
       "air": "Zrak",
       "heat": "Vrućina"
-    }
+    },
+    "dawn": "Zora",
+    "morning": "Jutro",
+    "noon": "Podne",
+    "afternoon": "Poslijepodne",
+    "sunset": "Zalazak",
+    "dusk": "Sumrak",
+    "night": "Noć",
+    "sunrise": "Izlazak sunca",
+    "sunDirection": "Smjer sunca",
+    "orientationTip": "Savjet",
+    "eastWindows": "Prozori okrenuti prema istoku dobivaju jutarnje sunce",
+    "southWindows": "Prozori okrenuti prema jugu dobivaju najviše sunčeve svjetlosti",
+    "westWindows": "Prozori okrenuti prema zapadu dobivaju poslijepodnevno/večernje sunce",
+    "playAnimation": "Reproduciraj",
+    "pauseAnimation": "Pauza",
+    "season": "Sezona",
+    "seasons": {
+      "spring": "Proljeće",
+      "summer": "Ljeto",
+      "autumn": "Jesen",
+      "winter": "Zima"
+    },
+    "promoted": "Promovirani"
   },
   "newsletter": {
     "title": "Ostanite Ažurirani s Novim Nekretninama",

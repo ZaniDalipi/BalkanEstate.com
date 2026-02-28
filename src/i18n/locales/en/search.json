@@ -198,7 +198,6 @@
     "landParcels": "Land Parcels",
     "centerOnLocation": "Center on my location",
     "cadastralParcels": "Cadastral Parcels",
-    "parcels": "Parcels",
     "mapLegend": "Map Legend",
     "propertyLocation": "Property Location",
     "searchNavigatePin": "Search, navigate, and pin your location",
@@ -238,7 +237,30 @@
       "wind": "Wind",
       "air": "Air",
       "heat": "Heat"
-    }
+    },
+    "dawn": "Dawn",
+    "morning": "Morning",
+    "noon": "Noon",
+    "afternoon": "Afternoon",
+    "sunset": "Sunset",
+    "dusk": "Dusk",
+    "night": "Night",
+    "sunrise": "Sunrise",
+    "sunDirection": "Sun Direction",
+    "orientationTip": "Tip",
+    "eastWindows": "East-facing windows get morning sun",
+    "southWindows": "South-facing windows get the most sunlight",
+    "westWindows": "West-facing windows get afternoon/evening sun",
+    "playAnimation": "Play",
+    "pauseAnimation": "Pause",
+    "season": "Season",
+    "seasons": {
+      "spring": "Spring",
+      "summer": "Summer",
+      "autumn": "Autumn",
+      "winter": "Winter"
+    },
+    "promoted": "Premium"
   },
   "newsletter": {
     "title": "Stay Updated with New Properties",
@@ -292,7 +314,6 @@
     "muteAssistant": "Mute voice",
     "unmuteAssistant": "Unmute voice",
     "ready": "Ready to help",
-    "speakNow": "Speak now...",
     "swipeDone": "{{count}} properties saved!",
     "swipeNoneSaved": "No properties saved",
     "swipeCheckFavorites": "Check your favorites to compare them",

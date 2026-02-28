@@ -1,4 +1,5 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { LockClosedIcon } from '@/constants';
 
 interface PremiumUpgradeBannerProps {
@@ -9,39 +10,43 @@ interface PremiumUpgradeBannerProps {
  * Premium upgrade banner component
  * Displays a call-to-action for users to upgrade their subscription
  */
-const PremiumUpgradeBanner: React.FC<PremiumUpgradeBannerProps> = ({ onUpgradeClick }) => (
-  <div className="bg-gradient-to-r from-purple-600 via-blue-600 to-indigo-600 rounded-xl p-5 text-white relative overflow-hidden">
-    {/* Background pattern */}
-    <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIHZpZXdCb3g9IjAgMCA0MCA0MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxjaXJjbGUgY3g9IjIwIiBjeT0iMjAiIHI9IjIiIGZpbGw9IiNmZmYiIGZpbGwtb3BhY2l0eT0iMC4xIi8+PC9nPjwvc3ZnPg==')] opacity-30" />
+const PremiumUpgradeBanner: React.FC<PremiumUpgradeBannerProps> = ({ onUpgradeClick }) => {
+  const { t } = useTranslation('analytics');
 
-    <div className="relative flex flex-col sm:flex-row sm:items-center gap-4">
-      {/* Icon */}
-      <div className="p-3 bg-white/20 rounded-xl backdrop-blur-sm w-fit">
-        <LockClosedIcon className="h-6 w-6" />
-      </div>
+  return (
+    <div className="bg-gradient-to-r from-purple-600 via-blue-600 to-indigo-600 rounded-xl p-5 text-white relative overflow-hidden">
+      {/* Background pattern */}
+      <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIHZpZXdCb3g9IjAgMCA0MCA0MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxjaXJjbGUgY3g9IjIwIiBjeT0iMjAiIHI9IjIiIGZpbGw9IiNmZmYiIGZpbGwtb3BhY2l0eT0iMC4xIi8+PC9nPjwvc3ZnPg==')] opacity-30" />
 
-      {/* Content */}
-      <div className="flex-1">
-        <h3 className="font-bold">Unlock Premium Analytics</h3>
-        <p className="text-white/80 text-sm mt-0.5">
-          Get insights, traffic sources, device stats & CSV exports
-        </p>
-      </div>
+      <div className="relative flex flex-col sm:flex-row sm:items-center gap-4">
+        {/* Icon */}
+        <div className="p-3 bg-white/20 rounded-xl backdrop-blur-sm w-fit">
+          <LockClosedIcon className="h-6 w-6" />
+        </div>
 
-      {/* CTA Button with Coming Soon badge */}
-      <div className="relative">
-        <span className="absolute -top-2 -right-2 bg-amber-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full shadow z-10">
-          Coming Soon
-        </span>
-        <a
-          href="mailto:sales@balkanestateai.com?subject=Premium%20Analytics%20Upgrade"
-          className="inline-block px-5 py-2.5 bg-white text-purple-600 font-semibold rounded-lg hover:bg-neutral-100 transition-colors text-sm"
-        >
-          Contact Sales
-        </a>
+        {/* Content */}
+        <div className="flex-1">
+          <h3 className="font-bold">{t('premium.unlockTitle', 'Unlock Premium Analytics')}</h3>
+          <p className="text-white/80 text-sm mt-0.5">
+            {t('premium.bannerDescription', 'Get insights, traffic sources, device stats & CSV exports')}
+          </p>
+        </div>
+
+        {/* CTA Button with Coming Soon badge */}
+        <div className="relative">
+          <span className="absolute -top-2 -right-2 bg-amber-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full shadow z-10">
+            {t('premium.comingSoon', 'Coming Soon')}
+          </span>
+          <a
+            href="mailto:sales@balkanestateai.com?subject=Premium%20Analytics%20Upgrade"
+            className="inline-block px-5 py-2.5 bg-white text-purple-600 font-semibold rounded-lg hover:bg-neutral-100 transition-colors text-sm"
+          >
+            {t('premium.contactSales', 'Contact Sales')}
+          </a>
+        </div>
       </div>
     </div>
-  </div>
-);
+  );
+};
 
 export default PremiumUpgradeBanner;

@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import Modal from './Modal';
 import { createFeaturedSubscription } from '../../services/apiService';
 import { SparklesIcon, CheckCircleIcon, XMarkIcon } from '../../constants';
@@ -27,6 +28,7 @@ const FeaturedSubscriptionDialog: React.FC<FeaturedSubscriptionDialogProps> = ({
   agencyId,
   onSuccess,
 }) => {
+  const { t } = useTranslation(['agencies', 'common']);
   const [selectedDuration, setSelectedDuration] = useState<7 | 14 | 28 | 90>(28);
   const [couponCode, setCouponCode] = useState('');
   const [loading, setLoading] = useState(false);
@@ -66,10 +68,10 @@ const FeaturedSubscriptionDialog: React.FC<FeaturedSubscriptionDialogProps> = ({
   // Build duration-based pricing from DB products or use fallback
   const durationOptions = useMemo(() => {
     const defaults: Record<number, { price: number; label: string; productId: string; badge?: string; highlighted?: boolean; features: string[] }> = {
-      7: { price: 6.99, label: '1 Week', productId: 'featured_agency_7days', features: [] },
-      14: { price: 11.99, label: '2 Weeks', productId: 'featured_agency_14days', features: [] },
-      28: { price: 24.99, label: '4 Weeks', productId: 'featured_agency_28days', badge: 'POPULAR', highlighted: true, features: [] },
-      90: { price: 49.99, label: '90 Days', productId: 'featured_agency_90days', badge: 'BEST VALUE', features: [] },
+      7: { price: 6.99, label: t('agencies:featuredDialog.duration1week', '1 Week'), productId: 'featured_agency_7days', features: [] },
+      14: { price: 11.99, label: t('agencies:featuredDialog.duration2weeks', '2 Weeks'), productId: 'featured_agency_14days', features: [] },
+      28: { price: 24.99, label: t('agencies:featuredDialog.duration4weeks', '4 Weeks'), productId: 'featured_agency_28days', badge: t('agencies:featuredDialog.badgePopular', 'POPULAR'), highlighted: true, features: [] },
+      90: { price: 49.99, label: t('agencies:featuredDialog.duration90days', '90 Days'), productId: 'featured_agency_90days', badge: t('agencies:featuredDialog.badgeBestValue', 'BEST VALUE'), features: [] },
     };
 
     for (const product of featuredProducts) {
@@ -86,7 +88,7 @@ const FeaturedSubscriptionDialog: React.FC<FeaturedSubscriptionDialogProps> = ({
     }
 
     return defaults;
-  }, [featuredProducts]);
+  }, [featuredProducts, t]);
 
   // Get features for selected plan from DB or default
   const selectedFeatures = useMemo(() => {
@@ -95,17 +97,17 @@ const FeaturedSubscriptionDialog: React.FC<FeaturedSubscriptionDialogProps> = ({
       return planFeatures;
     }
     return [
-      'Featured in agency directory',
-      'Priority in search results',
-      'Homepage agency carousel',
-      'Featured badge on profile',
-      'Boosted visibility everywhere',
+      t('agencies:featured.subscription.featuredInDirectory', 'Featured in agency directory'),
+      t('agencies:featured.subscription.priorityInSearch', 'Priority in search results'),
+      t('agencies:featured.subscription.homepageCarousel', 'Homepage agency carousel'),
+      t('agencies:featured.subscription.featuredBadge', 'Featured badge on profile'),
+      t('agencies:featured.subscription.boostedVisibility', 'Boosted visibility everywhere'),
     ];
-  }, [selectedDuration, durationOptions]);
+  }, [selectedDuration, durationOptions, t]);
 
   const handleApplyCoupon = async () => {
     if (!couponCode.trim()) {
-      setError('Please enter a coupon code');
+      setError(t('agencies:payment.invalidCoupon', 'Please enter a coupon code'));
       return;
     }
 
@@ -128,7 +130,7 @@ const FeaturedSubscriptionDialog: React.FC<FeaturedSubscriptionDialogProps> = ({
 
       if (!response.ok) {
         const errorData = await response.json().catch(() => null);
-        throw new Error(errorData?.error || 'Invalid coupon');
+        throw new Error(errorData?.error || t('agencies:coupon.errors.invalidCoupon', 'Invalid coupon'));
       }
 
       const data = await response.json();
@@ -137,7 +139,7 @@ const FeaturedSubscriptionDialog: React.FC<FeaturedSubscriptionDialogProps> = ({
       setCouponApplied(true);
       setError(null);
     } catch (err: any) {
-      setError(err.message || 'Failed to apply coupon');
+      setError(err.message || t('agencies:payment.couponError', 'Failed to apply coupon'));
       setCouponApplied(false);
       setFinalPrice(null);
       setDiscountAmount(0);
@@ -171,7 +173,7 @@ const FeaturedSubscriptionDialog: React.FC<FeaturedSubscriptionDialogProps> = ({
         }, 1500);
       }
     } catch (err: any) {
-      setError(err.message || 'Failed to create subscription');
+      setError(err.message || t('agencies:payment.error', 'Failed to create subscription'));
     } finally {
       setLoading(false);
     }
@@ -181,7 +183,7 @@ const FeaturedSubscriptionDialog: React.FC<FeaturedSubscriptionDialogProps> = ({
     <Modal
       isOpen={isOpen}
       onClose={onClose}
-      title="Featured Agency Subscription"
+      title={t('agencies:featuredDialog.title', 'Featured Agency Subscription')}
       maxWidth="max-w-2xl"
     >
       <div className="p-6">
@@ -191,10 +193,10 @@ const FeaturedSubscriptionDialog: React.FC<FeaturedSubscriptionDialogProps> = ({
               <CheckCircleIcon className="w-10 h-10 text-green-600" />
             </div>
             <h3 className="text-xl font-bold text-neutral-800 mb-2">
-              Subscription Created!
+              {t('agencies:featuredDialog.subscriptionCreated', 'Subscription Created!')}
             </h3>
             <p className="text-neutral-600">
-              Your agency is now featured. Redirecting...
+              {t('agencies:featuredDialog.agencyNowFeatured', 'Your agency is now featured. Redirecting...')}
             </p>
           </div>
         ) : (
@@ -203,10 +205,10 @@ const FeaturedSubscriptionDialog: React.FC<FeaturedSubscriptionDialogProps> = ({
             <div className="bg-gradient-to-r from-purple-500 to-primary rounded-lg p-6 text-white mb-6">
               <div className="flex items-center gap-3 mb-3">
                 <SparklesIcon className="w-8 h-8" />
-                <h3 className="text-2xl font-bold">Get Featured!</h3>
+                <h3 className="text-2xl font-bold">{t('agencies:featuredDialog.getFeatured', 'Get Featured!')}</h3>
               </div>
               <p className="text-purple-100">
-                Boost your agency's visibility and get more leads with a featured listing
+                {t('agencies:featuredDialog.boostVisibility', "Boost your agency's visibility and get more leads with a featured listing")}
               </p>
             </div>
 
@@ -214,13 +216,13 @@ const FeaturedSubscriptionDialog: React.FC<FeaturedSubscriptionDialogProps> = ({
             {loadingProducts ? (
               <div className="flex items-center justify-center py-8">
                 <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-                <span className="ml-3 text-neutral-600">Loading pricing...</span>
+                <span className="ml-3 text-neutral-600">{t('agencies:featuredDialog.loadingPricing', 'Loading pricing...')}</span>
               </div>
             ) : (
               <>
                 {/* Duration-based Pricing Options */}
                 <div className="mb-6">
-                  <h4 className="font-semibold text-neutral-800 mb-3">Choose Duration</h4>
+                  <h4 className="font-semibold text-neutral-800 mb-3">{t('agencies:featuredDialog.chooseDuration', 'Choose Duration')}</h4>
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                     {([7, 14, 28, 90] as const).map((days) => {
                       const opt = durationOptions[days];
@@ -257,7 +259,7 @@ const FeaturedSubscriptionDialog: React.FC<FeaturedSubscriptionDialogProps> = ({
                 {/* Features - Dynamic from DB */}
                 <div className="bg-gray-50 rounded-lg p-4 mb-6">
                   <h4 className="font-semibold text-neutral-800 mb-3">
-                    What's Included:
+                    {t('agencies:featuredDialog.whatsIncluded', "What's Included:")}
                   </h4>
                   <ul className="space-y-2">
                     {selectedFeatures.map((feature, index) => (
@@ -274,7 +276,7 @@ const FeaturedSubscriptionDialog: React.FC<FeaturedSubscriptionDialogProps> = ({
             {/* Coupon Code */}
             <div className="mb-6">
               <label className="block text-sm font-medium text-neutral-700 mb-2">
-                Have a coupon code?
+                {t('agencies:featuredDialog.haveCouponCode', 'Have a coupon code?')}
               </label>
               <div className="flex gap-2">
                 <input
@@ -285,7 +287,7 @@ const FeaturedSubscriptionDialog: React.FC<FeaturedSubscriptionDialogProps> = ({
                     setCouponApplied(false);
                     setFinalPrice(null);
                   }}
-                  placeholder="Enter coupon code"
+                  placeholder={t('agencies:payment.enterCoupon', 'Enter coupon code')}
                   className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
                 />
                 <button
@@ -293,7 +295,7 @@ const FeaturedSubscriptionDialog: React.FC<FeaturedSubscriptionDialogProps> = ({
                   disabled={!couponCode.trim() || validatingCoupon || loadingProducts}
                   className="px-6 py-2 bg-gradient-to-r from-green-600 to-green-700 text-white font-semibold rounded-lg hover:shadow-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  {validatingCoupon ? 'Validating...' : 'Apply'}
+                  {validatingCoupon ? t('agencies:featuredDialog.validating', 'Validating...') : t('agencies:payment.apply', 'Apply')}
                 </button>
               </div>
             </div>
@@ -303,14 +305,14 @@ const FeaturedSubscriptionDialog: React.FC<FeaturedSubscriptionDialogProps> = ({
               <div className="bg-green-50 border border-green-200 rounded-lg p-4 mb-4">
                 <div className="flex items-center gap-2 mb-2">
                   <CheckCircleIcon className="w-5 h-5 text-green-600" />
-                  <p className="text-sm font-semibold text-green-800">Coupon Applied Successfully!</p>
+                  <p className="text-sm font-semibold text-green-800">{t('agencies:featuredDialog.couponAppliedSuccess', 'Coupon Applied Successfully!')}</p>
                 </div>
                 <div className="text-sm text-green-700">
-                  <p>Original Price: <span className="line-through">€{durationOptions[selectedDuration].price}</span></p>
-                  <p>Discount: <span className="font-bold">-€{discountAmount}</span></p>
+                  <p>{t('agencies:featuredDialog.originalPrice', 'Original Price:')} <span className="line-through">€{durationOptions[selectedDuration].price}</span></p>
+                  <p>{t('agencies:featuredDialog.discount', 'Discount:')} <span className="font-bold">-€{discountAmount}</span></p>
                   <p className="text-lg font-bold mt-1">
-                    Final Price: {finalPrice === 0 ? (
-                      <span className="text-green-600">FREE!</span>
+                    {t('agencies:featuredDialog.finalPriceLabel', 'Final Price:')} {finalPrice === 0 ? (
+                      <span className="text-green-600">{t('common:free', 'FREE')}!</span>
                     ) : (
                       <span>€{finalPrice}</span>
                     )}
@@ -333,31 +335,31 @@ const FeaturedSubscriptionDialog: React.FC<FeaturedSubscriptionDialogProps> = ({
                 onClick={onClose}
                 className="flex-1 px-6 py-3 border border-gray-300 text-neutral-700 font-semibold rounded-lg hover:bg-gray-50 transition-colors"
               >
-                Cancel
+                {t('common:cancel', 'Cancel')}
               </button>
               <button
                 onClick={handleSubscribe}
                 disabled={loading || loadingProducts}
                 className="flex-1 px-6 py-3 bg-gradient-to-r from-purple-600 to-primary text-white font-semibold rounded-lg hover:shadow-lg transition-all duration-300 disabled:opacity-50"
               >
-                {loading ? 'Processing...' : couponApplied && finalPrice !== null
+                {loading ? t('agencies:featuredDialog.processing', 'Processing...') : couponApplied && finalPrice !== null
                   ? finalPrice === 0
-                    ? 'Activate for FREE'
-                    : `Subscribe - €${finalPrice}`
-                  : `Subscribe - €${durationOptions[selectedDuration].price}`}
+                    ? t('agencies:featuredDialog.activateForFree', 'Activate for FREE')
+                    : t('agencies:featuredDialog.subscribePrice', 'Subscribe - €{{price}}', { price: finalPrice })
+                  : t('agencies:featuredDialog.subscribePrice', 'Subscribe - €{{price}}', { price: durationOptions[selectedDuration].price })}
               </button>
             </div>
 
             <p className="text-xs text-neutral-500 text-center mt-4">
-              By subscribing, you agree to our terms and conditions.
+              {t('agencies:featuredDialog.bySubscribing', 'By subscribing, you agree to our terms and conditions.')}
               {couponApplied && finalPrice !== null ? (
                 finalPrice === 0 ? (
-                  <span className="font-semibold text-green-600"> No payment required - 100% discount applied!</span>
+                  <span className="font-semibold text-green-600"> {t('agencies:featuredDialog.noPaymentRequired', 'No payment required - 100% discount applied!')}</span>
                 ) : (
-                  <span> You will be charged €{finalPrice} per {durationOptions[selectedDuration].label}.</span>
+                  <span> {t('agencies:featuredDialog.chargedPerPeriod', 'You will be charged €{{price}} per {{period}}.', { price: finalPrice, period: durationOptions[selectedDuration].label })}</span>
                 )
               ) : (
-                <span> You will be charged €{durationOptions[selectedDuration].price} per {durationOptions[selectedDuration].label}.</span>
+                <span> {t('agencies:featuredDialog.chargedPerPeriod', 'You will be charged €{{price}} per {{period}}.', { price: durationOptions[selectedDuration].price, period: durationOptions[selectedDuration].label })}</span>
               )}
             </p>
           </>

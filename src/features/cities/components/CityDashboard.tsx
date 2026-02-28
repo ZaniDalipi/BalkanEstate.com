@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useCityMarketData, useCitiesByCountry } from '../hooks/useCityQueries';
 import { formatPrice } from '@/utils/currency';
@@ -67,14 +67,24 @@ const CityDashboard: React.FC = () => {
   const { t } = useTranslation(['exploreCities']);
   const { dispatch, updateSearchPageState } = useAppContext();
 
-  const params = useMemo(parseCityFromUrl, []);
+  const [params, setParams] = useState(parseCityFromUrl);
+
+  // Re-parse URL when navigating between cities (popstate or pushState)
+  useEffect(() => {
+    const handleUrlChange = () => {
+      setParams(parseCityFromUrl());
+    };
+    window.addEventListener('popstate', handleUrlChange);
+    return () => window.removeEventListener('popstate', handleUrlChange);
+  }, []);
+
   const { data: city, isLoading, error } = useCityMarketData(params?.city, params?.country);
   const { data: countryCities } = useCitiesByCountry(params?.country);
 
-  // Scroll to top on mount
+  // Scroll to top when city changes
   useEffect(() => {
     window.scrollTo(0, 0);
-  }, []);
+  }, [params?.city, params?.country]);
 
   const navigateBack = () => {
     dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'explore-cities' });
@@ -753,7 +763,7 @@ const CityDashboard: React.FC = () => {
                     <button
                       key={otherCity.city}
                       onClick={handleNavigate}
-                      className="group text-left bg-white rounded-xl shadow-md border border-neutral-100 overflow-hidden hover:shadow-lg hover:border-primary/20 transition-all"
+                      className="group text-left bg-white rounded-xl shadow-md border border-neutral-100 overflow-hidden hover:shadow-lg hover:border-primary/20 transition-all cursor-pointer"
                     >
                       <div className="relative h-28 overflow-hidden">
                         <img

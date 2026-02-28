@@ -81,7 +81,7 @@ const AnalyticsDashboard: React.FC = () => {
     return (
       <div className="bg-white rounded-xl shadow-sm p-8 text-center">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
-        <p className="mt-4 text-gray-600">Loading dashboard...</p>
+        <p className="mt-4 text-gray-600">{t('analyticsDashboard.loadingDashboard')}</p>
       </div>
     );
   }
@@ -91,13 +91,13 @@ const AnalyticsDashboard: React.FC = () => {
       <div className="bg-white rounded-xl shadow-sm p-8">
         <div className="text-center text-red-600">
           <ExclamationTriangleIcon className="w-12 h-12 mx-auto mb-4" />
-          <p className="font-semibold">Error loading dashboard</p>
+          <p className="font-semibold">{t('analyticsDashboard.errorLoadingDashboard')}</p>
           <p className="text-sm mt-2">{error}</p>
           <button
             onClick={fetchStats}
             className="mt-4 px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
           >
-            Retry
+            {t('common.refresh')}
           </button>
         </div>
       </div>
@@ -106,7 +106,7 @@ const AnalyticsDashboard: React.FC = () => {
 
   const mainStats = [
     {
-      title: 'Total Users',
+      title: t('dashboard.totalUsers'),
       value: stats?.overview.totalUsers || 0,
       icon: <UsersIcon className="w-6 h-6" />,
       color: 'bg-blue-500',
@@ -115,7 +115,7 @@ const AnalyticsDashboard: React.FC = () => {
       trend: stats?.trends?.users,
     },
     {
-      title: 'Properties',
+      title: t('dashboard.totalProperties'),
       value: stats?.overview.totalProperties || 0,
       icon: <HomeIcon className="w-6 h-6" />,
       color: 'bg-green-500',
@@ -124,7 +124,7 @@ const AnalyticsDashboard: React.FC = () => {
       trend: stats?.trends?.properties,
     },
     {
-      title: 'Agents',
+      title: t('analyticsDashboard.totalAgents'),
       value: stats?.overview.totalAgents || 0,
       icon: <UserGroupIcon className="w-6 h-6" />,
       color: 'bg-purple-500',
@@ -132,7 +132,7 @@ const AnalyticsDashboard: React.FC = () => {
       textColor: 'text-purple-600',
     },
     {
-      title: 'Agencies',
+      title: t('sidebar.agencies'),
       value: stats?.overview.totalAgencies || 0,
       icon: <BuildingOfficeIcon className="w-6 h-6" />,
       color: 'bg-amber-500',
@@ -143,7 +143,7 @@ const AnalyticsDashboard: React.FC = () => {
 
   const alertStats = [
     {
-      title: 'New Inquiries',
+      title: t('analyticsDashboard.newInquiries'),
       value: stats?.overview.newInquiries || 0,
       icon: <EnvelopeIcon className="w-5 h-5" />,
       color: 'text-red-600',
@@ -151,7 +151,7 @@ const AnalyticsDashboard: React.FC = () => {
       isAlert: (stats?.overview.newInquiries || 0) > 0,
     },
     {
-      title: 'Unverified Users',
+      title: t('analyticsDashboard.unverifiedUsers'),
       value: stats?.overview.unverifiedUsers || 0,
       icon: <ShieldCheckIcon className="w-5 h-5" />,
       color: 'text-yellow-600',
@@ -159,7 +159,7 @@ const AnalyticsDashboard: React.FC = () => {
       isAlert: (stats?.overview.unverifiedUsers || 0) > 0,
     },
     {
-      title: 'Active Discounts',
+      title: t('analyticsDashboard.activeDiscounts'),
       value: stats?.overview.activeDiscountCodes || 0,
       icon: <TicketIcon className="w-5 h-5" />,
       color: 'text-pink-600',
@@ -198,9 +198,9 @@ const AnalyticsDashboard: React.FC = () => {
       <div className="bg-gradient-to-r from-blue-600 via-blue-700 to-indigo-700 rounded-2xl shadow-lg p-6 text-white">
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
           <div>
-            <h2 className="text-2xl font-bold mb-2">Welcome to Admin Dashboard</h2>
+            <h2 className="text-2xl font-bold mb-2">{t('analyticsDashboard.welcomeTitle')}</h2>
             <p className="text-blue-100">
-              Here's what's happening with your platform today.
+              {t('analyticsDashboard.todayDescription')}
             </p>
           </div>
           <div className="flex items-center gap-3">
@@ -209,7 +209,7 @@ const AnalyticsDashboard: React.FC = () => {
               className="flex items-center gap-2 px-4 py-2 bg-white/20 hover:bg-white/30 rounded-lg transition-colors"
             >
               <ChartBarIcon className="w-5 h-5" />
-              <span>Refresh</span>
+              <span>{t('common.refresh')}</span>
             </button>
           </div>
         </div>
@@ -249,7 +249,7 @@ const AnalyticsDashboard: React.FC = () => {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Alert Stats */}
         <div className="bg-white rounded-xl shadow-sm p-6">
-          <h3 className="text-lg font-semibold text-gray-900 mb-4">Requires Attention</h3>
+          <h3 className="text-lg font-semibold text-gray-900 mb-4">{t('analyticsDashboard.requiresAttention')}</h3>
           <div className="space-y-4">
             {alertStats.map((stat, index) => (
               <div
@@ -271,9 +271,9 @@ const AnalyticsDashboard: React.FC = () => {
         {/* Recent Activity */}
         <div className="lg:col-span-2 bg-white rounded-xl shadow-sm p-6">
           <div className="flex items-center justify-between mb-4">
-            <h3 className="text-lg font-semibold text-gray-900">Recent Activity</h3>
+            <h3 className="text-lg font-semibold text-gray-900">{t('dashboard.recentActivity')}</h3>
             <button className="text-sm text-blue-600 hover:text-blue-700 font-medium">
-              View All
+              {t('dashboard.viewAll')}
             </button>
           </div>
           <div className="space-y-3">
@@ -302,7 +302,7 @@ const AnalyticsDashboard: React.FC = () => {
             ) : (
               <div className="text-center py-8 text-gray-500">
                 <ClockIcon className="w-8 h-8 mx-auto mb-2 text-gray-300" />
-                <p className="text-sm">No recent activity</p>
+                <p className="text-sm">{t('analyticsDashboard.noRecentActivity')}</p>
               </div>
             )}
           </div>
@@ -311,7 +311,7 @@ const AnalyticsDashboard: React.FC = () => {
 
       {/* Quick Actions */}
       <div className="bg-white rounded-xl shadow-sm p-6">
-        <h3 className="text-lg font-semibold text-gray-900 mb-4">Quick Actions</h3>
+        <h3 className="text-lg font-semibold text-gray-900 mb-4">{t('analyticsDashboard.quickActions')}</h3>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           <button
             onClick={fetchStats}
@@ -321,8 +321,8 @@ const AnalyticsDashboard: React.FC = () => {
               <ChartBarIcon className="w-5 h-5" />
             </div>
             <div>
-              <div className="font-semibold text-gray-900">Refresh Data</div>
-              <div className="text-xs text-gray-500">Update statistics</div>
+              <div className="font-semibold text-gray-900">{t('analyticsDashboard.refreshData')}</div>
+              <div className="text-xs text-gray-500">{t('analyticsDashboard.updateStatistics')}</div>
             </div>
           </button>
 
@@ -333,8 +333,8 @@ const AnalyticsDashboard: React.FC = () => {
               <HomeIcon className="w-5 h-5" />
             </div>
             <div>
-              <div className="font-semibold text-gray-900">Review Properties</div>
-              <div className="text-xs text-gray-500">Pending approval</div>
+              <div className="font-semibold text-gray-900">{t('analyticsDashboard.reviewProperties')}</div>
+              <div className="text-xs text-gray-500">{t('analyticsDashboard.pendingApprovalDesc')}</div>
             </div>
           </button>
 
@@ -345,8 +345,8 @@ const AnalyticsDashboard: React.FC = () => {
               <UsersIcon className="w-5 h-5" />
             </div>
             <div>
-              <div className="font-semibold text-gray-900">Verify Users</div>
-              <div className="text-xs text-gray-500">Pending verification</div>
+              <div className="font-semibold text-gray-900">{t('analyticsDashboard.verifyUsers')}</div>
+              <div className="text-xs text-gray-500">{t('analyticsDashboard.pendingVerificationDesc')}</div>
             </div>
           </button>
 
@@ -357,8 +357,8 @@ const AnalyticsDashboard: React.FC = () => {
               <TicketIcon className="w-5 h-5" />
             </div>
             <div>
-              <div className="font-semibold text-gray-900">Create Discount</div>
-              <div className="text-xs text-gray-500">New promo code</div>
+              <div className="font-semibold text-gray-900">{t('analyticsDashboard.createDiscount')}</div>
+              <div className="text-xs text-gray-500">{t('analyticsDashboard.newPromoCode')}</div>
             </div>
           </button>
         </div>
@@ -367,31 +367,31 @@ const AnalyticsDashboard: React.FC = () => {
       {/* System Status */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <div className="bg-white rounded-xl shadow-sm p-6">
-          <h3 className="text-lg font-semibold text-gray-900 mb-4">System Status</h3>
+          <h3 className="text-lg font-semibold text-gray-900 mb-4">{t('analyticsDashboard.systemStatus')}</h3>
           <div className="space-y-3">
             <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-              <span className="text-gray-600">Database</span>
+              <span className="text-gray-600">{t('analyticsDashboard.database')}</span>
               <span className="flex items-center gap-2">
                 <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
-                <span className="font-semibold text-green-600">Connected</span>
+                <span className="font-semibold text-green-600">{t('analyticsDashboard.connected')}</span>
               </span>
             </div>
             <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-              <span className="text-gray-600">API Server</span>
+              <span className="text-gray-600">{t('analyticsDashboard.apiServer')}</span>
               <span className="flex items-center gap-2">
                 <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
-                <span className="font-semibold text-green-600">Running</span>
+                <span className="font-semibold text-green-600">{t('analyticsDashboard.running')}</span>
               </span>
             </div>
             <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-              <span className="text-gray-600">Email Service</span>
+              <span className="text-gray-600">{t('analyticsDashboard.emailService')}</span>
               <span className="flex items-center gap-2">
                 <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
-                <span className="font-semibold text-green-600">Active</span>
+                <span className="font-semibold text-green-600">{t('common.active')}</span>
               </span>
             </div>
             <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-              <span className="text-gray-600">Last Updated</span>
+              <span className="text-gray-600">{t('analyticsDashboard.lastUpdated')}</span>
               <span className="font-semibold text-gray-900">
                 {new Date().toLocaleTimeString()}
               </span>
@@ -400,32 +400,32 @@ const AnalyticsDashboard: React.FC = () => {
         </div>
 
         <div className="bg-white rounded-xl shadow-sm p-6">
-          <h3 className="text-lg font-semibold text-gray-900 mb-4">Platform Info</h3>
+          <h3 className="text-lg font-semibold text-gray-900 mb-4">{t('analyticsDashboard.platformInfo')}</h3>
           <div className="space-y-3">
             <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-              <span className="text-gray-600">Version</span>
+              <span className="text-gray-600">{t('analyticsDashboard.version')}</span>
               <span className="font-semibold text-gray-900">2.0.0</span>
             </div>
             <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-              <span className="text-gray-600">Environment</span>
+              <span className="text-gray-600">{t('analyticsDashboard.environment')}</span>
               <span className={`px-2 py-1 text-xs font-semibold rounded-full ${
                 import.meta.env.MODE === 'production'
                   ? 'bg-green-100 text-green-600'
                   : 'bg-blue-100 text-blue-600'
               }`}>
-                {import.meta.env.MODE === 'production' ? 'Production' : 'Development'}
+                {import.meta.env.MODE === 'production' ? t('analyticsDashboard.production') : t('analyticsDashboard.development')}
               </span>
             </div>
             <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-              <span className="text-gray-600">Total Inquiries</span>
+              <span className="text-gray-600">{t('analyticsDashboard.totalInquiries')}</span>
               <span className="font-semibold text-gray-900">
                 {stats?.overview.totalInquiries?.toLocaleString() || 0}
               </span>
             </div>
             <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-              <span className="text-gray-600">Admin Panel</span>
+              <span className="text-gray-600">{t('analyticsDashboard.adminPanel')}</span>
               <span className="px-2 py-1 bg-green-100 text-green-600 text-xs font-semibold rounded-full">
-                Active
+                {t('common.active')}
               </span>
             </div>
           </div>

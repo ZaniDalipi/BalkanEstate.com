@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { XMarkIcon, UserCircleIcon, CheckCircleIcon, XCircleIcon, ClockIcon } from '../constants';
 import { getAgencyJoinRequests, approveJoinRequest, rejectJoinRequest } from '../src/features/agencies/api';
 import { formatPrice } from '../utils/currency';
@@ -35,6 +36,7 @@ const AgencyJoinRequestsModal: React.FC<AgencyJoinRequestsModalProps> = ({
   agencyId,
   agencyName
 }) => {
+  const { t } = useTranslation(['agencies', 'common']);
   const { error } = useNotification();
   const [requests, setRequests] = useState<JoinRequest[]>([]);
   const [loading, setLoading] = useState(true);
@@ -91,7 +93,7 @@ const AgencyJoinRequestsModal: React.FC<AgencyJoinRequestsModalProps> = ({
         {/* Header */}
         <div className="bg-gradient-to-r from-primary to-primary-dark text-white p-6 flex items-center justify-between">
           <div>
-            <h2 className="text-2xl font-bold">Join Requests</h2>
+            <h2 className="text-2xl font-bold">{t('agencies:joinRequests.title', 'Join Requests')}</h2>
             <p className="text-sm opacity-90 mt-1">{agencyName}</p>
           </div>
           <button
@@ -113,7 +115,7 @@ const AgencyJoinRequestsModal: React.FC<AgencyJoinRequestsModalProps> = ({
                 : 'bg-white text-gray-700 hover:bg-gray-100'
             }`}
           >
-            Pending {pendingCount > 0 && <span className="ml-1 bg-white text-primary px-2 py-0.5 rounded-full text-xs font-bold">{pendingCount}</span>}
+            {t('agencies:joinRequests.pending', 'Pending')} {pendingCount > 0 && <span className="ml-1 bg-white text-primary px-2 py-0.5 rounded-full text-xs font-bold">{pendingCount}</span>}
           </button>
           <button
             onClick={() => setFilter('approved')}
@@ -123,7 +125,7 @@ const AgencyJoinRequestsModal: React.FC<AgencyJoinRequestsModalProps> = ({
                 : 'bg-white text-gray-700 hover:bg-gray-100'
             }`}
           >
-            Approved
+            {t('agencies:joinRequests.approved', 'Approved')}
           </button>
           <button
             onClick={() => setFilter('rejected')}
@@ -133,7 +135,7 @@ const AgencyJoinRequestsModal: React.FC<AgencyJoinRequestsModalProps> = ({
                 : 'bg-white text-gray-700 hover:bg-gray-100'
             }`}
           >
-            Rejected
+            {t('agencies:joinRequests.rejected', 'Rejected')}
           </button>
           <button
             onClick={() => setFilter('all')}
@@ -143,7 +145,7 @@ const AgencyJoinRequestsModal: React.FC<AgencyJoinRequestsModalProps> = ({
                 : 'bg-white text-gray-700 hover:bg-gray-100'
             }`}
           >
-            All
+            {t('agencies:joinRequests.all', 'All')}
           </button>
         </div>
 
@@ -157,7 +159,7 @@ const AgencyJoinRequestsModal: React.FC<AgencyJoinRequestsModalProps> = ({
             <div className="text-center py-12">
               <ClockIcon className="w-16 h-16 text-gray-300 mx-auto mb-4" />
               <p className="text-gray-500 font-medium">
-                {filter === 'pending' ? 'No pending requests' : `No ${filter} requests`}
+                {filter === 'pending' ? t('agencies:joinRequests.noPendingRequests', 'No pending requests') : t('agencies:joinRequests.noFilteredRequests', 'No {{filter}} requests', { filter })}
               </p>
             </div>
           ) : (
@@ -188,7 +190,7 @@ const AgencyJoinRequestsModal: React.FC<AgencyJoinRequestsModalProps> = ({
                           {request.agentId.licenseNumber && (
                             <div className="flex items-center gap-1 text-green-700 text-sm mt-1">
                               <CheckCircleIcon className="w-4 h-4" />
-                              <span className="font-semibold">Licensed Agent</span>
+                              <span className="font-semibold">{t('agencies:joinRequests.licensedAgent', 'Licensed Agent')}</span>
                             </div>
                           )}
                         </div>
@@ -196,24 +198,24 @@ const AgencyJoinRequestsModal: React.FC<AgencyJoinRequestsModalProps> = ({
                         {/* Status badge */}
                         {request.status === 'approved' && (
                           <span className="px-3 py-1 bg-green-100 text-green-800 text-sm font-semibold rounded-full">
-                            Approved
+                            {t('agencies:joinRequests.approvedStatus', 'Approved')}
                           </span>
                         )}
                         {request.status === 'rejected' && (
                           <span className="px-3 py-1 bg-red-100 text-red-800 text-sm font-semibold rounded-full">
-                            Rejected
+                            {t('agencies:joinRequests.rejectedStatus', 'Rejected')}
                           </span>
                         )}
                         {request.status === 'pending' && (
                           <span className="px-3 py-1 bg-yellow-100 text-yellow-800 text-sm font-semibold rounded-full">
-                            Pending
+                            {t('agencies:joinRequests.pendingStatus', 'Pending')}
                           </span>
                         )}
                       </div>
 
                       <div className="mt-2 text-sm text-gray-600 space-y-1">
-                        <p>Email: {request.agentId.email}</p>
-                        <p>Phone: {request.agentId.phone}</p>
+                        <p>{t('agencies:joinRequests.emailLabel', 'Email:')} {request.agentId.email}</p>
+                        <p>{t('agencies:joinRequests.phoneLabel', 'Phone:')} {request.agentId.phone}</p>
                       </div>
 
                       {/* Stats */}
@@ -221,7 +223,7 @@ const AgencyJoinRequestsModal: React.FC<AgencyJoinRequestsModalProps> = ({
                         <div className="mt-3 flex gap-4 text-sm">
                           {request.agentId.totalSalesValue && (
                             <div>
-                              <span className="text-gray-500">Sales Value:</span>
+                              <span className="text-gray-500">{t('agencies:joinRequests.salesValue', 'Sales Value:')}</span>
                               <span className="ml-1 font-bold text-primary">
                                 {formatPrice(request.agentId.totalSalesValue, 'Serbia')}
                               </span>
@@ -229,7 +231,7 @@ const AgencyJoinRequestsModal: React.FC<AgencyJoinRequestsModalProps> = ({
                           )}
                           {request.agentId.propertiesSold && (
                             <div>
-                              <span className="text-gray-500">Properties Sold:</span>
+                              <span className="text-gray-500">{t('agencies:joinRequests.propertiesSold', 'Properties Sold:')}</span>
                               <span className="ml-1 font-bold text-primary">
                                 {request.agentId.propertiesSold}
                               </span>
@@ -247,9 +249,9 @@ const AgencyJoinRequestsModal: React.FC<AgencyJoinRequestsModalProps> = ({
 
                       {/* Dates */}
                       <div className="mt-3 text-xs text-gray-500">
-                        <p>Requested: {new Date(request.requestedAt).toLocaleDateString()}</p>
+                        <p>{t('agencies:joinRequests.requestedLabel', 'Requested:')} {new Date(request.requestedAt).toLocaleDateString()}</p>
                         {request.respondedAt && (
-                          <p>Responded: {new Date(request.respondedAt).toLocaleDateString()}</p>
+                          <p>{t('agencies:joinRequests.respondedLabel', 'Responded:')} {new Date(request.respondedAt).toLocaleDateString()}</p>
                         )}
                       </div>
 
@@ -261,14 +263,14 @@ const AgencyJoinRequestsModal: React.FC<AgencyJoinRequestsModalProps> = ({
                             className="flex-1 flex items-center justify-center gap-2 px-4 py-2 bg-green-600 text-white font-semibold rounded-lg hover:bg-green-700 transition-colors"
                           >
                             <CheckCircleIcon className="w-5 h-5" />
-                            Approve
+                            {t('agencies:joinRequests.approve', 'Approve')}
                           </button>
                           <button
                             onClick={() => handleReject(request._id)}
                             className="flex-1 flex items-center justify-center gap-2 px-4 py-2 bg-red-600 text-white font-semibold rounded-lg hover:bg-red-700 transition-colors"
                           >
                             <XCircleIcon className="w-5 h-5" />
-                            Reject
+                            {t('agencies:joinRequests.reject', 'Reject')}
                           </button>
                         </div>
                       )}

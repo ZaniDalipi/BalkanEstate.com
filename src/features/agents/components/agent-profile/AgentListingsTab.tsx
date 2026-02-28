@@ -86,7 +86,7 @@ const AgentListingsTab: React.FC<AgentListingsTabProps> = ({
               listingTypeFilter === 'all' ? 'bg-gray-800 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
             }`}
           >
-            All Types ({listingTypeCounts.all})
+            {t('agents:profilePage.listingsTab.allTypes')} ({listingTypeCounts.all})
           </button>
           <button
             onClick={() => setListingTypeFilter('sale')}
@@ -94,7 +94,7 @@ const AgentListingsTab: React.FC<AgentListingsTabProps> = ({
               listingTypeFilter === 'sale' ? 'bg-emerald-600 text-white' : 'bg-emerald-50 text-emerald-700 hover:bg-emerald-100'
             }`}
           >
-            For Sale ({listingTypeCounts.sale})
+            {t('agents:profilePage.listingsTab.forSale')} ({listingTypeCounts.sale})
           </button>
           <button
             onClick={() => setListingTypeFilter('rent')}
@@ -102,7 +102,7 @@ const AgentListingsTab: React.FC<AgentListingsTabProps> = ({
               listingTypeFilter === 'rent' ? 'bg-blue-600 text-white' : 'bg-blue-50 text-blue-700 hover:bg-blue-100'
             }`}
           >
-            For Rent ({listingTypeCounts.rent})
+            {t('agents:profilePage.listingsTab.forRent')} ({listingTypeCounts.rent})
           </button>
         </div>
       )}

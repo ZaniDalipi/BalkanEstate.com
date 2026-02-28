@@ -20,11 +20,11 @@ interface AgencyFeatureSectionProps {
   onSetActiveTab: (tab: 'seller' | 'buyer' | 'listing' | 'agency') => void;
 }
 
-const DURATION_OPTIONS: { value: 7 | 14 | 28 | 90; label: string }[] = [
-  { value: 7, label: '1 Week' },
-  { value: 14, label: '2 Weeks' },
-  { value: 28, label: '4 Weeks' },
-  { value: 90, label: '90 Days' },
+const getDurationOptions = (t: any): { value: 7 | 14 | 28 | 90; label: string }[] => [
+  { value: 7, label: t('pricing:agencyDuration.1week', '1 Week') },
+  { value: 14, label: t('pricing:agencyDuration.2weeks', '2 Weeks') },
+  { value: 28, label: t('pricing:agencyDuration.4weeks', '4 Weeks') },
+  { value: 90, label: t('pricing:agencyDuration.90days', '90 Days') },
 ];
 
 // Color presets mapped from cardStyle.gradientFrom
@@ -131,6 +131,8 @@ const AgencyFeatureSection: React.FC<AgencyFeatureSectionProps> = ({
   onAgencyFeature,
   onSetActiveTab,
 }) => {
+  const DURATION_OPTIONS = getDurationOptions(t);
+
   // Determine grid columns based on number of plans
   const gridCols = agencyFeaturePlans.length === 1
     ? 'max-w-2xl mx-auto'
@@ -254,7 +256,7 @@ const AgencyFeatureSection: React.FC<AgencyFeatureSectionProps> = ({
                           >
                             {isBestValue && (
                               <span className={`absolute -top-2.5 left-1/2 -translate-x-1/2 text-[10px] font-bold bg-gradient-to-r ${colors.badge} text-white px-2 py-0.5 rounded-full whitespace-nowrap`}>
-                                BEST VALUE
+                                {t('pricing:agencyDuration.bestValue', 'BEST VALUE')}
                               </span>
                             )}
                             <span className={`text-xs font-medium ${isSelected ? colors.selectedText : 'text-gray-500'}`}>

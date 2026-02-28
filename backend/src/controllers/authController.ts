@@ -628,10 +628,15 @@ export const getMe = async (req: Request, res: Response): Promise<void> => {
                           memberAgency.featuredSubscription?.expiresAt ||
                           new Date(Date.now() + 365 * 24 * 60 * 60 * 1000);
 
+        // Get agent listings limit from DB product (configurable in admin)
+        const Product = (await import('../models/Product')).default;
+        const agentProduct = await Product.findOne({ productId: 'agency_agent_yearly' }).lean();
+        const agentListingsLimit = agentProduct?.listingsLimit ?? 25;
+
         user.subscription = {
           tier: 'agency_agent',
           status: 'active',
-          listingsLimit: 25,
+          listingsLimit: agentListingsLimit,
           activeListingsCount: user.subscription?.activeListingsCount || 0,
           privateSellerCount: user.subscription?.privateSellerCount || 0,
           agentCount: user.subscription?.agentCount || 0,

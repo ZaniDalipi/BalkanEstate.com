@@ -237,7 +237,30 @@
     "locationPermissionDenied": "Location permission denied. Please enable location access in your browser settings.",
     "locationUnavailable": "Location information is unavailable. Please try again.",
     "locationTimeout": "Location request timed out. Please try again.",
-    "locationError": "An error occurred while getting your location. Please try again."
+    "locationError": "An error occurred while getting your location. Please try again.",
+    "dawn": "Zori",
+    "morning": "Dimineață",
+    "noon": "Amiază",
+    "afternoon": "După-amiază",
+    "sunset": "Apus",
+    "dusk": "Amurg",
+    "night": "Noapte",
+    "sunrise": "Răsărit",
+    "sunDirection": "Direcția soarelui",
+    "orientationTip": "Sfat",
+    "eastWindows": "Ferestrele orientate spre est primesc soare dimineața",
+    "southWindows": "Ferestrele orientate spre sud primesc cea mai multă lumină solară",
+    "westWindows": "Ferestrele orientate spre vest primesc soare după-amiaza/seara",
+    "playAnimation": "Redare",
+    "pauseAnimation": "Pauză",
+    "season": "Sezon",
+    "seasons": {
+      "spring": "Primăvară",
+      "summer": "Vară",
+      "autumn": "Toamnă",
+      "winter": "Iarnă"
+    },
+    "promoted": "Promovate"
   },
   "newsletter": {
     "title": "Fiți la Curent cu Proprietăți Noi",

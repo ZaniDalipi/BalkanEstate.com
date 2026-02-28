@@ -36,7 +36,10 @@
     "premiumAccess": "Pun pristup svim funkcijama",
     "freeAccess": "Nadogradite za naprednu analitiku",
     "proActive": "Pro Aktivan",
-    "freePlan": "Besplatan Plan"
+    "freePlan": "Besplatan Plan",
+    "bannerDescription": "Dobijte uvide, izvore prometa, statistike uređaja i CSV izvoz",
+    "comingSoon": "Uskoro",
+    "contactSales": "Kontaktiraj Prodaju"
   },
   "insights": {
     "title": "Pametni Uvidi",

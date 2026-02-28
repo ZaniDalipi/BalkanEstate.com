@@ -264,9 +264,6 @@ export const getCorsConfig = () => {
         'http://127.0.0.1:3000',
       ]
     : [
-        'https://balkanestate.com',
-        'https://www.balkanestate.com',
-        'https://app.balkanestate.com',
         'https://balkanestateai.com',
         'https://www.balkanestateai.com',
       ];
@@ -664,7 +661,7 @@ export const getSocketCorsConfig = () => {
 
   const defaultOrigins = isDevelopment
     ? ['http://localhost:5173', 'http://localhost:3000']
-    : ['https://balkanestate.com', 'https://www.balkanestate.com', 'https://balkanestateai.com', 'https://www.balkanestateai.com'];
+    : ['https://balkanestateai.com', 'https://www.balkanestateai.com'];
 
   return {
     origin: [...new Set([...defaultOrigins, ...allowedOrigins])],

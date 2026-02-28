@@ -69,32 +69,32 @@ const SystemSettings: React.FC = () => {
   const sections: SettingsSection[] = [
     {
       id: 'general',
-      title: 'General',
-      description: 'Basic site configuration',
+      title: t('admin:settings.generalTab'),
+      description: t('admin:settings.generalDesc'),
       icon: <Cog6ToothIcon className="w-5 h-5" />
     },
     {
       id: 'email',
-      title: 'Email',
-      description: 'Email server settings',
+      title: t('admin:settings.emailTab'),
+      description: t('admin:settings.emailDesc'),
       icon: <EnvelopeIcon className="w-5 h-5" />
     },
     {
       id: 'security',
-      title: 'Security',
-      description: 'Security and authentication',
+      title: t('admin:settings.securityTab'),
+      description: t('admin:settings.securityDesc'),
       icon: <ShieldCheckIcon className="w-5 h-5" />
     },
     {
       id: 'notifications',
-      title: 'Notifications',
-      description: 'Alert preferences',
+      title: t('admin:settings.notificationsTab'),
+      description: t('admin:settings.notificationsDesc'),
       icon: <BellIcon className="w-5 h-5" />
     },
     {
       id: 'pricing',
-      title: 'Pricing',
-      description: 'Pricing and discounts',
+      title: t('admin:settings.pricingTab'),
+      description: t('admin:settings.pricingDesc'),
       icon: <CurrencyEuroIcon className="w-5 h-5" />
     },
   ];
@@ -109,10 +109,10 @@ const SystemSettings: React.FC = () => {
       await new Promise(resolve => setTimeout(resolve, 500));
       setSaveMessage({
         type: 'success',
-        text: 'Settings preview applied. To persist changes, update environment variables on the server.'
+        text: t('admin:settings.previewApplied')
       });
     } catch (err) {
-      setSaveMessage({ type: 'error', text: 'Failed to apply settings preview.' });
+      setSaveMessage({ type: 'error', text: t('admin:settings.previewFailed') });
     } finally {
       setIsSaving(false);
     }
@@ -126,7 +126,7 @@ const SystemSettings: React.FC = () => {
     <div className="space-y-6">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">Site Name</label>
+          <label className="block text-sm font-medium text-gray-700 mb-2">{t('admin:settings.siteName')}</label>
           <input
             type="text"
             value={settings.siteName}
@@ -135,7 +135,7 @@ const SystemSettings: React.FC = () => {
           />
         </div>
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">Contact Email</label>
+          <label className="block text-sm font-medium text-gray-700 mb-2">{t('admin:settings.contactEmail')}</label>
           <input
             type="email"
             value={settings.contactEmail}
@@ -144,7 +144,7 @@ const SystemSettings: React.FC = () => {
           />
         </div>
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">Support Email</label>
+          <label className="block text-sm font-medium text-gray-700 mb-2">{t('admin:settings.supportEmail')}</label>
           <input
             type="email"
             value={settings.supportEmail}
@@ -153,7 +153,7 @@ const SystemSettings: React.FC = () => {
           />
         </div>
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">Timezone</label>
+          <label className="block text-sm font-medium text-gray-700 mb-2">{t('admin:settings.timezone')}</label>
           <select
             value={settings.timezone}
             onChange={(e) => handleInputChange('timezone', e.target.value)}
@@ -166,7 +166,7 @@ const SystemSettings: React.FC = () => {
           </select>
         </div>
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">Date Format</label>
+          <label className="block text-sm font-medium text-gray-700 mb-2">{t('admin:settings.dateFormat')}</label>
           <select
             value={settings.dateFormat}
             onChange={(e) => handleInputChange('dateFormat', e.target.value)}
@@ -178,7 +178,7 @@ const SystemSettings: React.FC = () => {
           </select>
         </div>
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">Default Currency</label>
+          <label className="block text-sm font-medium text-gray-700 mb-2">{t('admin:settings.defaultCurrency')}</label>
           <select
             value={settings.currency}
             onChange={(e) => handleInputChange('currency', e.target.value)}
@@ -193,7 +193,7 @@ const SystemSettings: React.FC = () => {
         </div>
       </div>
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-2">Site Description</label>
+        <label className="block text-sm font-medium text-gray-700 mb-2">{t('admin:settings.siteDescription')}</label>
         <textarea
           value={settings.siteDescription}
           onChange={(e) => handleInputChange('siteDescription', e.target.value)}
@@ -208,7 +208,7 @@ const SystemSettings: React.FC = () => {
     <div className="space-y-6">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">SMTP Host</label>
+          <label className="block text-sm font-medium text-gray-700 mb-2">{t('admin:settings.smtpHost')}</label>
           <input
             type="text"
             value={settings.smtpHost}
@@ -217,7 +217,7 @@ const SystemSettings: React.FC = () => {
           />
         </div>
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">SMTP Port</label>
+          <label className="block text-sm font-medium text-gray-700 mb-2">{t('admin:settings.smtpPort')}</label>
           <input
             type="text"
             value={settings.smtpPort}
@@ -226,7 +226,7 @@ const SystemSettings: React.FC = () => {
           />
         </div>
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">From Name</label>
+          <label className="block text-sm font-medium text-gray-700 mb-2">{t('admin:settings.fromName')}</label>
           <input
             type="text"
             value={settings.emailFromName}
@@ -235,7 +235,7 @@ const SystemSettings: React.FC = () => {
           />
         </div>
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">From Address</label>
+          <label className="block text-sm font-medium text-gray-700 mb-2">{t('admin:settings.fromAddress')}</label>
           <input
             type="email"
             value={settings.emailFromAddress}
@@ -252,11 +252,11 @@ const SystemSettings: React.FC = () => {
           onChange={(e) => handleInputChange('smtpSecure', e.target.checked)}
           className="w-4 h-4 text-blue-600 rounded focus:ring-blue-500"
         />
-        <label htmlFor="smtpSecure" className="text-sm text-gray-700">Use TLS/SSL encryption</label>
+        <label htmlFor="smtpSecure" className="text-sm text-gray-700">{t('admin:settings.smtpTLS')}</label>
       </div>
       <div className="p-4 bg-blue-50 rounded-lg">
         <p className="text-sm text-blue-800">
-          <strong>Note:</strong> Email credentials are stored securely in environment variables and cannot be changed here for security reasons.
+          <strong>Note:</strong> {t('admin:settings.emailCredentialsNote')}
         </p>
       </div>
     </div>
@@ -267,8 +267,8 @@ const SystemSettings: React.FC = () => {
       <div className="space-y-4">
         <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
           <div>
-            <p className="font-medium text-gray-900">Require Email Verification</p>
-            <p className="text-sm text-gray-500">Users must verify their email before accessing the platform</p>
+            <p className="font-medium text-gray-900">{t('admin:settings.requireEmailVerification')}</p>
+            <p className="text-sm text-gray-500">{t('admin:settings.requireEmailVerificationDesc')}</p>
           </div>
           <label className="relative inline-flex items-center cursor-pointer">
             <input
@@ -283,8 +283,8 @@ const SystemSettings: React.FC = () => {
 
         <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
           <div>
-            <p className="font-medium text-gray-900">Require Agent License Verification</p>
-            <p className="text-sm text-gray-500">Agents must have their license verified by admin</p>
+            <p className="font-medium text-gray-900">{t('admin:settings.requireAgentVerification')}</p>
+            <p className="text-sm text-gray-500">{t('admin:settings.requireAgentVerificationDesc')}</p>
           </div>
           <label className="relative inline-flex items-center cursor-pointer">
             <input
@@ -299,8 +299,8 @@ const SystemSettings: React.FC = () => {
 
         <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
           <div>
-            <p className="font-medium text-gray-900">Admin VPN Required</p>
-            <p className="text-sm text-gray-500">Require VPN connection for admin panel access</p>
+            <p className="font-medium text-gray-900">{t('admin:settings.adminVPNRequired')}</p>
+            <p className="text-sm text-gray-500">{t('admin:settings.adminVPNRequiredDesc')}</p>
           </div>
           <label className="relative inline-flex items-center cursor-pointer">
             <input
@@ -315,8 +315,8 @@ const SystemSettings: React.FC = () => {
 
         <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
           <div>
-            <p className="font-medium text-gray-900">Two-Factor Authentication</p>
-            <p className="text-sm text-gray-500">Enable 2FA for enhanced security</p>
+            <p className="font-medium text-gray-900">{t('admin:settings.twoFactorAuth')}</p>
+            <p className="text-sm text-gray-500">{t('admin:settings.twoFactorAuthDesc')}</p>
           </div>
           <label className="relative inline-flex items-center cursor-pointer">
             <input
@@ -332,7 +332,7 @@ const SystemSettings: React.FC = () => {
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">Session Timeout (minutes)</label>
+          <label className="block text-sm font-medium text-gray-700 mb-2">{t('admin:settings.sessionTimeout')}</label>
           <input
             type="number"
             value={settings.sessionTimeout}
@@ -343,7 +343,7 @@ const SystemSettings: React.FC = () => {
           />
         </div>
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">Max Login Attempts</label>
+          <label className="block text-sm font-medium text-gray-700 mb-2">{t('admin:settings.maxLoginAttempts')}</label>
           <input
             type="number"
             value={settings.maxLoginAttempts}
@@ -361,12 +361,12 @@ const SystemSettings: React.FC = () => {
     <div className="space-y-6">
       <div className="space-y-4">
         {[
-          { key: 'notifyNewUser', label: 'New User Registration', desc: 'Get notified when a new user registers' },
-          { key: 'notifyNewProperty', label: 'New Property Listed', desc: 'Get notified when a new property is listed' },
-          { key: 'notifyNewInquiry', label: 'New Inquiry', desc: 'Get notified when a new inquiry is received' },
-          { key: 'notifyAgentVerification', label: 'Agent Verification Request', desc: 'Get notified when an agent requests verification' },
-          { key: 'dailyDigest', label: 'Daily Digest', desc: 'Receive a daily summary of platform activity' },
-          { key: 'weeklyReport', label: 'Weekly Report', desc: 'Receive a weekly analytics report' },
+          { key: 'notifyNewUser', label: t('admin:settings.notifyNewUser'), desc: t('admin:settings.notifyNewUserDesc') },
+          { key: 'notifyNewProperty', label: t('admin:settings.notifyNewProperty'), desc: t('admin:settings.notifyNewPropertyDesc') },
+          { key: 'notifyNewInquiry', label: t('admin:settings.notifyNewInquiry'), desc: t('admin:settings.notifyNewInquiryDesc') },
+          { key: 'notifyAgentVerification', label: t('admin:settings.notifyAgentVerification'), desc: t('admin:settings.notifyAgentVerificationDesc') },
+          { key: 'dailyDigest', label: t('admin:settings.dailyDigest'), desc: t('admin:settings.dailyDigestDesc') },
+          { key: 'weeklyReport', label: t('admin:settings.weeklyReport'), desc: t('admin:settings.weeklyReportDesc') },
         ].map(item => (
           <div key={item.key} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
             <div>
@@ -393,8 +393,8 @@ const SystemSettings: React.FC = () => {
       <div className="space-y-4">
         <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
           <div>
-            <p className="font-medium text-gray-900">Enable Discount Codes</p>
-            <p className="text-sm text-gray-500">Allow discount codes to be applied</p>
+            <p className="font-medium text-gray-900">{t('admin:settings.enableDiscountCodes')}</p>
+            <p className="text-sm text-gray-500">{t('admin:settings.enableDiscountCodesDesc')}</p>
           </div>
           <label className="relative inline-flex items-center cursor-pointer">
             <input
@@ -409,8 +409,8 @@ const SystemSettings: React.FC = () => {
 
         <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
           <div>
-            <p className="font-medium text-gray-900">Enable Promotions</p>
-            <p className="text-sm text-gray-500">Allow promotional campaigns</p>
+            <p className="font-medium text-gray-900">{t('admin:settings.enablePromotions')}</p>
+            <p className="text-sm text-gray-500">{t('admin:settings.enablePromotionsDesc')}</p>
           </div>
           <label className="relative inline-flex items-center cursor-pointer">
             <input
@@ -426,7 +426,7 @@ const SystemSettings: React.FC = () => {
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">Max Discount Percentage</label>
+          <label className="block text-sm font-medium text-gray-700 mb-2">{t('admin:settings.maxDiscountPercent')}</label>
           <div className="relative">
             <input
               type="number"
@@ -440,7 +440,7 @@ const SystemSettings: React.FC = () => {
           </div>
         </div>
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">Minimum Listing Price</label>
+          <label className="block text-sm font-medium text-gray-700 mb-2">{t('admin:settings.minListingPrice')}</label>
           <div className="relative">
             <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500">€</span>
             <input
@@ -471,13 +471,12 @@ const SystemSettings: React.FC = () => {
     <div className="space-y-6">
       {/* Header */}
       <div className="bg-white rounded-xl shadow-sm p-6">
-        <h2 className="text-2xl font-bold text-gray-900 mb-2">System Settings</h2>
-        <p className="text-gray-500">Configure your platform settings and preferences</p>
+        <h2 className="text-2xl font-bold text-gray-900 mb-2">{t('admin:settings.title')}</h2>
+        <p className="text-gray-500">{t('admin:settings.subtitle')}</p>
         {/* Info banner about settings persistence */}
         <div className="mt-4 p-3 bg-amber-50 border border-amber-200 rounded-lg">
           <p className="text-sm text-amber-800">
-            <strong>Note:</strong> Settings are currently managed via environment variables.
-            Changes made here are for preview only and will reset on page reload.
+            <strong>Note:</strong> {t('admin:settings.envVarsNote')}
           </p>
         </div>
       </div>
@@ -535,7 +534,7 @@ const SystemSettings: React.FC = () => {
                 onClick={() => window.location.reload()}
                 className="px-6 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
               >
-                Reset
+                {t('admin:settings.reset')}
               </button>
               <button
                 onClick={handleSave}
@@ -545,10 +544,10 @@ const SystemSettings: React.FC = () => {
                 {isSaving ? (
                   <>
                     <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
-                    Applying...
+                    {t('admin:settings.applyingChanges')}
                   </>
                 ) : (
-                  'Preview Changes'
+                  t('admin:settings.previewChanges')
                 )}
               </button>
             </div>

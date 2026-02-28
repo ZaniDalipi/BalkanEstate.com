@@ -237,7 +237,30 @@
     "locationPermissionDenied": "Location permission denied. Please enable location access in your browser settings.",
     "locationUnavailable": "Location information is unavailable. Please try again.",
     "locationTimeout": "Location request timed out. Please try again.",
-    "locationError": "An error occurred while getting your location. Please try again."
+    "locationError": "An error occurred while getting your location. Please try again.",
+    "dawn": "Αυγή",
+    "morning": "Πρωί",
+    "noon": "Μεσημέρι",
+    "afternoon": "Απόγευμα",
+    "sunset": "Ηλιοβασίλεμα",
+    "dusk": "Σούρουπο",
+    "night": "Νύχτα",
+    "sunrise": "Ανατολή",
+    "sunDirection": "Κατεύθυνση ήλιου",
+    "orientationTip": "Συμβουλή",
+    "eastWindows": "Τα παράθυρα με ανατολικό προσανατολισμό δέχονται πρωινό ήλιο",
+    "southWindows": "Τα παράθυρα με νότιο προσανατολισμό δέχονται τον περισσότερο ήλιο",
+    "westWindows": "Τα παράθυρα με δυτικό προσανατολισμό δέχονται απογευματινό/βραδινό ήλιο",
+    "playAnimation": "Αναπαραγωγή",
+    "pauseAnimation": "Παύση",
+    "season": "Εποχή",
+    "seasons": {
+      "spring": "Άνοιξη",
+      "summer": "Καλοκαίρι",
+      "autumn": "Φθινόπωρο",
+      "winter": "Χειμώνας"
+    },
+    "promoted": "Προτεινόμενα"
   },
   "newsletter": {
     "title": "Μείνετε Ενημερωμένοι για Νέα Ακίνητα",

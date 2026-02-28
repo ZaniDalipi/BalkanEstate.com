@@ -237,7 +237,30 @@
     "locationPermissionDenied": "Location permission denied. Please enable location access in your browser settings.",
     "locationUnavailable": "Location information is unavailable. Please try again.",
     "locationTimeout": "Location request timed out. Please try again.",
-    "locationError": "An error occurred while getting your location. Please try again."
+    "locationError": "An error occurred while getting your location. Please try again.",
+    "dawn": "Разсъмване",
+    "morning": "Сутрин",
+    "noon": "Обед",
+    "afternoon": "Следобед",
+    "sunset": "Залез",
+    "dusk": "Здрач",
+    "night": "Нощ",
+    "sunrise": "Изгрев",
+    "sunDirection": "Посока на слънцето",
+    "orientationTip": "Съвет",
+    "eastWindows": "Прозорците на изток получават сутрешно слънце",
+    "southWindows": "Прозорците на юг получават най-много слънчева светлина",
+    "westWindows": "Прозорците на запад получават следобедно/вечерно слънце",
+    "playAnimation": "Пусни",
+    "pauseAnimation": "Пауза",
+    "season": "Сезон",
+    "seasons": {
+      "spring": "Пролет",
+      "summer": "Лято",
+      "autumn": "Есен",
+      "winter": "Зима"
+    },
+    "promoted": "Промотирани"
   },
   "newsletter": {
     "title": "Бъдете в течение с нови имоти",

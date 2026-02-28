@@ -237,7 +237,30 @@
       "wind": "Erë",
       "air": "Ajër",
       "heat": "Nxehtësi"
-    }
+    },
+    "dawn": "Agim",
+    "morning": "Mëngjes",
+    "noon": "Mesditë",
+    "afternoon": "Pasdite",
+    "sunset": "Perëndim",
+    "dusk": "Muzg",
+    "night": "Natë",
+    "sunrise": "Lindja e diellit",
+    "sunDirection": "Drejtimi i diellit",
+    "orientationTip": "Këshillë",
+    "eastWindows": "Dritaret me orientim lindor marrin diell në mëngjes",
+    "southWindows": "Dritaret me orientim jugor marrin më shumë dritë dielli",
+    "westWindows": "Dritaret me orientim perëndimor marrin diell pasdite/mbrëmje",
+    "playAnimation": "Luaj",
+    "pauseAnimation": "Pauzë",
+    "season": "Stinë",
+    "seasons": {
+      "spring": "Pranverë",
+      "summer": "Verë",
+      "autumn": "Vjeshtë",
+      "winter": "Dimër"
+    },
+    "promoted": "Të promovuara"
   },
   "newsletter": {
     "title": "Qëndro i Përditësuar me Prona të Reja",

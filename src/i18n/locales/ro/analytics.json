@@ -36,7 +36,10 @@
     "premiumAccess": "Acces complet la toate funcțiile",
     "freeAccess": "Upgrade pentru analize avansate",
     "proActive": "Pro Activ",
-    "freePlan": "Plan Gratuit"
+    "freePlan": "Plan Gratuit",
+    "bannerDescription": "Obțineți informații, surse de trafic, statistici dispozitive și exporturi CSV",
+    "comingSoon": "În Curând",
+    "contactSales": "Contactați Vânzările"
   },
   "insights": {
     "title": "Informații Inteligente",

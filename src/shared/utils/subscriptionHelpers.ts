@@ -22,11 +22,12 @@ import {
  * Note: pro_monthly gets 20/month, pro_yearly gets 250/year
  * For 'pro' tier, we use the yearly limit as the default
  */
+// Fallback listing limits by tier — real values come from DB Product records (configurable in admin)
 export const LISTING_LIMITS: Record<SubscriptionTier, number> = {
   free: 3,
   pro: 250, // Pro yearly gets 250 listings/year (pro_monthly handled separately at 20/month)
   agency_owner: 750, // Enterprise: 750 listings
-  agency_agent: 25,
+  agency_agent: 25, // Fallback — overridden by DB Product.listingsLimit for 'agency_agent_yearly'
   buyer: 3,
 };
 

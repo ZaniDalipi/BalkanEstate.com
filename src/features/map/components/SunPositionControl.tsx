@@ -228,7 +228,7 @@ const SunPositionControl: React.FC<SunPositionControlProps> = ({
   latitude = 42, // Default to Balkans latitude
   compact = false, // Compact mode for mobile
 }) => {
-  const { t } = useTranslation(['search']);
+  const { t } = useTranslation(['search', 'property']);
   const [hour, setHour] = useState(12); // 0-23
   const [isPlaying, setIsPlaying] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);
@@ -487,7 +487,7 @@ const SunPositionControl: React.FC<SunPositionControlProps> = ({
             {formatHour(hour)}
           </span>
           <span className={`text-[10px] truncate ${isNightMode ? 'text-cyan-400' : 'text-primary'}`}>
-            ☀️ {cardinalDirection} ({Math.round(sunAzimuth)}°)
+            ☀️ {t(`property:map3d.cardinalDirections.${cardinalDirection}`, cardinalDirection)} ({Math.round(sunAzimuth)}°)
           </span>
         </div>
         <svg
@@ -514,7 +514,7 @@ const SunPositionControl: React.FC<SunPositionControlProps> = ({
               {t('search:map.sunDirection', 'Sun Direction')}
             </p>
             <p className={`text-sm font-bold ${isNightMode ? 'text-cyan-400' : 'text-primary'}`}>
-              {cardinalDirectionFull} ({Math.round(sunAzimuth)}°)
+              {t(`property:map3d.cardinalDirections.${cardinalDirectionFull}`, cardinalDirectionFull)} ({Math.round(sunAzimuth)}°)
             </p>
             <p className={`text-[10px] ${isNightMode ? 'text-slate-500' : 'text-neutral-400'}`}>
               {getTimePeriodName()}
@@ -670,7 +670,7 @@ const SunPositionControl: React.FC<SunPositionControlProps> = ({
                         : 'bg-neutral-100 text-neutral-600 hover:bg-neutral-200'
                     }
                   `}
-                  title={season.label}
+                  title={t(`search:map.seasons.${season.id}`, season.label)}
                 >
                   {season.icon}
                 </button>
