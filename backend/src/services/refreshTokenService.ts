@@ -39,8 +39,8 @@ export const generateTokenPair = async (
   user: IUser,
   deviceInfo?: DeviceInfo
 ): Promise<TokenPair> => {
-  const accessToken = generateAccessToken(user._id);
-  const refreshToken = generateRefreshToken(user._id);
+  const accessToken = generateAccessToken(user._id.toString());
+  const refreshToken = generateRefreshToken(user._id.toString());
 
   // Calculate expiration date
   const expiresAt = getTokenExpirationDate(REFRESH_TOKEN_EXPIRY);
