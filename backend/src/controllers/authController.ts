@@ -1528,6 +1528,16 @@ export const resetPassword = async (
 
     await user.save();
 
+    // SECURITY: Revoke all existing refresh tokens so old sessions can't
+    // access the account after a password reset. This is critical because
+    // the reset may have been triggered due to a compromised account.
+    try {
+      const { revokeAllRefreshTokens } = await import('../services/refreshTokenService');
+      await revokeAllRefreshTokens(String(user._id));
+    } catch {
+      // Continue even if revocation fails — new tokens still work
+    }
+
     // Generate new token pair (access + refresh)
     const deviceInfo = {
       userAgent: req.headers['user-agent'],

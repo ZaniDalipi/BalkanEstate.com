@@ -226,8 +226,9 @@ app.use(compression());
 import { encryptResponse } from './middleware/encryptResponse';
 app.use(encryptResponse);
 
-// Setup Swagger API documentation (only in development or if explicitly enabled)
-if (process.env.NODE_ENV !== 'production' || process.env.ENABLE_SWAGGER === 'true') {
+// Setup Swagger API documentation (development only — never in production)
+// API docs expose endpoint schemas and could aid attackers
+if (process.env.NODE_ENV !== 'production') {
   setupSwagger(app);
 }
 

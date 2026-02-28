@@ -25,6 +25,31 @@ const userSockets = new Map<string, string>();
 // Store conversation room memberships (conversationId -> Set of userIds)
 const conversationRooms = new Map<string, Set<string>>();
 
+/**
+ * Per-socket rate limiter to prevent message/event spam.
+ * Returns true if the event should be allowed, false if rate-limited.
+ */
+const socketRateLimits = new Map<string, { count: number; resetAt: number }>();
+const SOCKET_RATE_WINDOW_MS = 10_000; // 10-second window
+const SOCKET_RATE_MAX_EVENTS = 30;    // Max 30 events per window (3/sec avg)
+
+function checkSocketRateLimit(socketId: string): boolean {
+  const now = Date.now();
+  const entry = socketRateLimits.get(socketId);
+
+  if (!entry || now > entry.resetAt) {
+    socketRateLimits.set(socketId, { count: 1, resetAt: now + SOCKET_RATE_WINDOW_MS });
+    return true;
+  }
+
+  if (entry.count >= SOCKET_RATE_MAX_EVENTS) {
+    return false;
+  }
+
+  entry.count++;
+  return true;
+}
+
 export const setupChatSocket = (io: Server) => {
   // Transport security middleware — reject unencrypted connections in production
   io.use((socket: AuthenticatedSocket, next) => {
@@ -116,6 +141,12 @@ export const setupChatSocket = (io: Server) => {
 
     // Handle new message - only broadcast if sender is authorized
     socket.on('new-message', (data: { conversationId: string; message: any }) => {
+      // Rate limit: prevent message spam / DoS
+      if (!checkSocketRateLimit(socket.id)) {
+        socket.emit('error', { message: 'Too many messages. Please slow down.' });
+        return;
+      }
+
       // Verify the sender is authorized for this conversation
       if (!socket.authorizedConversations?.has(data.conversationId)) {
         socket.emit('error', { message: 'Not authorized to send messages in this conversation' });
@@ -138,6 +169,7 @@ export const setupChatSocket = (io: Server) => {
 
     // Handle typing indicator - only if authorized
     socket.on('typing', (data: { conversationId: string; isTyping: boolean }) => {
+      if (!checkSocketRateLimit(socket.id)) return;
       if (!socket.authorizedConversations?.has(data.conversationId)) {
         return; // Silently ignore if not authorized
       }
@@ -164,6 +196,8 @@ export const setupChatSocket = (io: Server) => {
 
     // Handle disconnection
     socket.on('disconnect', () => {
+      // Clean up rate limit entry
+      socketRateLimits.delete(socket.id);
 
       // Remove user from all conversation rooms
       conversationRooms.forEach((users, conversationId) => {

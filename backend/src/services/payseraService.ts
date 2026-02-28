@@ -135,7 +135,14 @@ class PayseraService {
    */
   public verifySignature(data: string, ss1: string): boolean {
     const expectedSignature = this.generateSignature(data);
-    return expectedSignature === ss1;
+    // Use constant-time comparison to prevent timing attacks.
+    // Simple === leaks information about how many bytes match,
+    // allowing attackers to brute-force the signature byte by byte.
+    if (expectedSignature.length !== ss1.length) return false;
+    return crypto.timingSafeEqual(
+      Buffer.from(expectedSignature, 'hex'),
+      Buffer.from(ss1, 'hex'),
+    );
   }
 
   /**

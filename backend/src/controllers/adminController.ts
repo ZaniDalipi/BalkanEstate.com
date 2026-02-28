@@ -139,17 +139,27 @@ export const updateUserAdmin = async (req: Request, res: Response): Promise<void
   try {
     const id = getObjectIdParam(req, res, 'id');
     if (!id) return;
-    const updates = req.body;
 
-    // Prevent updating password through this endpoint
-    delete updates.password;
+    // SECURITY: Whitelist allowed fields to prevent mass assignment.
+    // Fields like password, refreshTokens, loginHistory, etc. can never be set here.
+    const ALLOWED_ADMIN_UPDATE_FIELDS = [
+      'name', 'email', 'phone', 'role', 'activeRole', 'primaryRole',
+      'availableRoles', 'status', 'isEmailVerified', 'licenseVerified',
+      'licenseNumber', 'bio', 'languages', 'specializations',
+      'serviceAreas', 'avatarUrl', 'avatarOptions',
+    ];
 
-    // Remove empty string values that might cause validation issues
-    Object.keys(updates).forEach(key => {
-      if (updates[key] === '') {
-        delete updates[key];
+    const updates: Record<string, any> = {};
+    for (const field of ALLOWED_ADMIN_UPDATE_FIELDS) {
+      if (req.body[field] !== undefined && req.body[field] !== '') {
+        updates[field] = req.body[field];
       }
-    });
+    }
+
+    if (Object.keys(updates).length === 0) {
+      res.status(400).json({ message: 'No valid fields to update' });
+      return;
+    }
 
     const user = await User.findByIdAndUpdate(id, updates, {
       new: true,
