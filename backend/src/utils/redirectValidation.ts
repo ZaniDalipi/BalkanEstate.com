@@ -9,8 +9,6 @@ const ALLOWED_REDIRECT_DOMAINS: string[] = [
   'balkanestateai.com',
   'www.balkanestateai.com',
   'api.balkanestateai.com',
-  'balkanestate.com',
-  'www.balkanestate.com',
 ];
 
 /**
