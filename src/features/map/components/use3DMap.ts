@@ -419,7 +419,7 @@ export function use3DMap(props: Map3DBuildingsProps) {
     tourUrl?: string,
     onEnterTour?: () => void
   ) => {
-    const floorHeightM = 2; // 3m per floor
+    const floorHeightM = 3.5; // standard floor height in metres
     const totalHeightM = totalFlrs * floorHeightM;
 
     // Query the actual building at this location from the map's building layer
@@ -596,21 +596,32 @@ export function use3DMap(props: Map3DBuildingsProps) {
     // Use exact building coords — no scaling needed because we hide the original building below
     const scaledCoords = buildingCoords;
 
-    // Hide only the target building to prevent depth-buffer conflicts with floor slices.
-    // Never hide the entire layer — that wipes all buildings off the map.
-    if (mapInstance.getLayer('building-3d') && buildingFeature) {
-      const featureId = buildingFeature.id;
+    // The floor slices MUST be the only 3D extrusion at this location, otherwise the
+    // original building-3d face sits at the exact same depth and wins the depth test.
+    // Strategy: hide only the target building when we have its feature ID; if not, hide
+    // the whole layer so the floor slices are always unobstructed.
+    if (mapInstance.getLayer('building-3d')) {
+      const featureId = buildingFeature?.id;
       if (featureId !== undefined && featureId !== null) {
-        // Combine with any existing filter so we don't break the style's own conditions
-        const existingFilter = mapInstance.getFilter('building-3d');
-        const hideFilter = ['!=', ['id'], featureId];
-        mapInstance.setFilter(
-          'building-3d',
-          existingFilter ? ['all', existingFilter, hideFilter] : hideFilter
-        );
+        // Precise: filter out only this building, neighbours stay visible.
+        try {
+          // Cast needed: the expression array is a valid FilterSpecification at runtime
+          // but the complex union type doesn't infer cleanly from a literal array.
+          const existingFilter = mapInstance.getFilter('building-3d');
+          const hideFilter = ['!=', ['id'], featureId] as unknown as maplibregl.FilterSpecification;
+          const combined = (existingFilter
+            ? ['all', existingFilter, hideFilter]
+            : hideFilter) as unknown as maplibregl.FilterSpecification;
+          mapInstance.setFilter('building-3d', combined);
+        } catch {
+          // Filter failed — fall back to hiding the whole layer so slices are visible.
+          mapInstance.setLayoutProperty('building-3d', 'visibility', 'none');
+        }
+      } else {
+        // No feature ID: can't target precisely, so hide the entire layer.
+        // At zoom 17 this only affects the immediate block; floor slices fill the gap.
+        mapInstance.setLayoutProperty('building-3d', 'visibility', 'none');
       }
-      // No featureId → can't target just this building; floor slices are inserted at
-      // the top of the layer stack so they win the depth buffer without hiding anything.
     }
 
     // Add source for the custom building using actual geometry
