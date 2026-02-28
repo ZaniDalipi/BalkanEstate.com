@@ -3,6 +3,7 @@
 
 import { httpClient } from './httpClient';
 import { API_URL } from '@/src/shared/api/config';
+import { tokenService } from '@/src/shared/api/tokenService';
 
 export type EntityType = 'property' | 'agent' | 'agency';
 export type Period = '7d' | '30d' | '90d' | 'all';
@@ -338,7 +339,7 @@ export class ViewStatsApiClient {
         `${API_URL}/view-stats/report?period=${period}&format=csv`,
         {
           headers: {
-            Authorization: `Bearer ${localStorage.getItem('balkan_estate_token')}`,
+            Authorization: `Bearer ${tokenService.getAccessToken()}`,
           },
         }
       );

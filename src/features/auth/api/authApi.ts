@@ -48,9 +48,7 @@ export const login = async (emailOrPhone: string, password: string): Promise<Use
   if (accessToken) {
     tokenService.setAccessToken(accessToken);
   }
-  if (refreshToken) {
-    tokenService.setRefreshToken(refreshToken);
-  }
+  // Refresh token is handled via httpOnly cookie set by the backend.
 
   return response.user;
 };
@@ -93,14 +91,11 @@ export const signup = async (
   });
 
   const accessToken = response.accessToken || response.token;
-  const refreshToken = response.refreshToken;
 
   if (accessToken) {
     tokenService.setAccessToken(accessToken);
   }
-  if (refreshToken) {
-    tokenService.setRefreshToken(refreshToken);
-  }
+  // Refresh token is handled via httpOnly cookie set by the backend.
 
   return response.user;
 };
@@ -166,14 +161,11 @@ export const resetPassword = async (token: string, newPassword: string): Promise
   });
 
   const accessToken = response.accessToken || response.token;
-  const refreshToken = response.refreshToken;
 
   if (accessToken) {
     tokenService.setAccessToken(accessToken);
   }
-  if (refreshToken) {
-    tokenService.setRefreshToken(refreshToken);
-  }
+  // Refresh token is handled via httpOnly cookie set by the backend.
 
   return response.user;
 };

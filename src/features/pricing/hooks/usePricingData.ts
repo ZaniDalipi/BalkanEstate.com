@@ -1,6 +1,7 @@
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useEffect } from 'react';
 import { API_URL } from '@/src/shared/api/config';
+import { tokenService } from '@/src/shared/api/tokenService';
 
 // Types
 export interface Product {
@@ -134,7 +135,7 @@ export function usePromotionPlans() {
  * Hook to fetch user listings
  */
 export function useUserListings(enabled: boolean) {
-  const token = typeof window !== 'undefined' ? localStorage.getItem('balkan_estate_token') : null;
+  const token = typeof window !== 'undefined' ? tokenService.getAccessToken() : null;
 
   return useQuery({
     queryKey: ['userListings'],

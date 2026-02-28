@@ -16,6 +16,7 @@ import {
   ShieldCheckIcon,
 } from '@/constants';
 import { API_URL } from '@/src/shared/api/config';
+import { tokenService } from '@/src/shared/api/tokenService';
 
 interface AdminStats {
   overview: {
@@ -57,7 +58,7 @@ const AnalyticsDashboard: React.FC = () => {
   const fetchStats = async () => {
     try {
       setIsLoading(true);
-      const token = localStorage.getItem('balkan_estate_token');
+      const token = tokenService.getAccessToken();
       const response = await fetch(`${API_URL}/admin/stats`, {
         headers: {
           'Authorization': `Bearer ${token}`,

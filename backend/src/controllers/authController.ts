@@ -363,7 +363,7 @@ export const signup = async (req: Request, res: Response): Promise<void> => {
 
     res.status(201).json({
       accessToken: tokens.accessToken,
-      refreshToken: tokens.refreshToken, // Also in body for backward compat / mobile apps
+      // refreshToken is set as httpOnly cookie only - never exposed in response body
       user: {
         ...buildSafeUserResponse(user),
         availableRoles: user.availableRoles,
@@ -550,7 +550,7 @@ export const login = async (req: Request, res: Response): Promise<void> => {
 
     res.json({
       accessToken: tokens.accessToken,
-      refreshToken: tokens.refreshToken, // Also in body for backward compat / mobile apps
+      // refreshToken is set as httpOnly cookie only - never exposed in response body
       user: buildSafeUserResponse(user),
     });
   } catch (error: any) {
@@ -1106,13 +1106,14 @@ export const oauthCallback = async (req: Request, res: Response): Promise<void> 
     const tokens = await generateTokenPair(user, deviceInfo);
 
     const token = tokens.accessToken;
-    const refreshToken = tokens.refreshToken;
 
-    // SECURITY: Only pass tokens in URL, NOT user data
-    // User data will be fetched securely via /api/auth/me endpoint
-    // This prevents sensitive data from being logged in browser history,
-    // server logs, or leaked via Referer headers
-    const redirectUrl = buildFrontendRedirectUrl('/auth/callback', { token, refresh: refreshToken });
+    // Set refresh token as httpOnly cookie (same as login/signup)
+    setRefreshTokenCookie(res, tokens.refreshToken);
+
+    // SECURITY: Only pass access token in URL, NOT refresh token or user data
+    // The refresh token is in the httpOnly cookie (not visible to JS or URL logs).
+    // User data will be fetched securely via /api/auth/me endpoint.
+    const redirectUrl = buildFrontendRedirectUrl('/auth/callback', { token });
     res.redirect(redirectUrl);
   } catch (error: any) {
     const redirectUrl = buildFrontendRedirectUrl('/auth/callback', { error: 'server_error' });
@@ -1551,7 +1552,7 @@ export const resetPassword = async (
     res.json({
       message: 'Password reset successful',
       accessToken: tokens.accessToken,
-      refreshToken: tokens.refreshToken, // Also in body for backward compat / mobile apps
+      // refreshToken is set as httpOnly cookie only - never exposed in response body
       user: {
         id: String(user._id),
         email: user.email,
@@ -1773,7 +1774,7 @@ export const refreshToken = async (req: Request, res: Response): Promise<void> =
 
     res.json({
       accessToken: result.accessToken,
-      refreshToken: result.refreshToken, // Also in body for backward compat / mobile apps
+      // refreshToken is set as httpOnly cookie only - never exposed in response body
     });
   } catch (error: any) {
     res.status(500).json({ message: 'Error refreshing token' });

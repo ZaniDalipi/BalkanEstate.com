@@ -9,6 +9,7 @@ import { createAgency } from '@/features/agencies/api/agencyApi';
 import { authApiClient } from '@/src/data/api/AuthApiClient';
 import { trackEcommerce, trackEvent } from '@/src/components/marketing/Analytics';
 import { propertyKeys } from '@/src/features/properties/api';
+import { tokenService } from '@/src/shared/api/tokenService';
 
 interface PaymentDetails {
   paymentStatus?: string;
@@ -121,7 +122,7 @@ const PaymentSuccess: React.FC = () => {
 
   const verifyPayment = async (params: URLSearchParams) => {
     try {
-      const token = localStorage.getItem('balkan_estate_token');
+      const token = tokenService.getAccessToken();
 
       if (!token) {
         throw new Error(t('success.loginToVerify'));
