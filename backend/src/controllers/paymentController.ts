@@ -1,4 +1,5 @@
 import { Request, Response } from 'express';
+// @ts-ignore - stripe types included in package
 import Stripe from 'stripe';
 import User from '../models/User';
 import Product from '../models/Product';
@@ -191,13 +192,14 @@ export const getPaymentProviders = async (req: Request, res: Response): Promise<
       return;
     }
 
-    const mapping = paymentProviderFactory.getCountryMapping(countryCode.toUpperCase());
-    const provider = paymentProviderFactory.getProviderForCountry(countryCode);
+    const code = countryCode as string;
+    const mapping = paymentProviderFactory.getCountryMapping(code.toUpperCase());
+    const provider = paymentProviderFactory.getProviderForCountry(code);
     const providerInfo = paymentProviderFactory.getProviderInfo(provider);
 
     res.status(200).json({
       success: true,
-      countryCode: countryCode.toUpperCase(),
+      countryCode: code.toUpperCase(),
       countryName: mapping?.countryName || 'Unknown',
       provider,
       providerInfo,
