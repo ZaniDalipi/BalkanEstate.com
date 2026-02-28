@@ -128,7 +128,7 @@ export async function createPayment(request: CreatePaymentRequest): Promise<Crea
   try {
     const response = await apiRequest<CreatePaymentResponse>(
       '/payments/create-payment',
-      { method: 'POST', body: request, requiresAuth: true }
+      { method: 'POST', body: request, requiresAuth: true, encryptResponse: true }
     );
     return response;
   } catch (error: any) {
@@ -230,7 +230,7 @@ export async function verifyPayment(params: URLSearchParams): Promise<VerifyPaym
         : `/payments/verify-order/${orderId}`;
       const response = await apiRequest<VerifyPaymentResponse>(
         endpoint,
-        { method: 'GET', requiresAuth: true }
+        { method: 'GET', requiresAuth: true, encryptResponse: true }
       );
       return { ...response, provider: provider || 'paysera' };
     } catch (error: any) {
@@ -257,7 +257,7 @@ export async function getSubscriptionStatus(): Promise<SubscriptionStatusRespons
   try {
     const response = await apiRequest<SubscriptionStatusResponse>(
       '/payments/subscription-status',
-      { method: 'GET', requiresAuth: true }
+      { method: 'GET', requiresAuth: true, encryptResponse: true }
     );
     return response;
   } catch (error: any) {
@@ -272,7 +272,7 @@ export async function cancelSubscription(): Promise<{ success: boolean; message?
   try {
     const response = await apiRequest<{ message: string }>(
       '/payments/cancel-subscription',
-      { method: 'POST', requiresAuth: true }
+      { method: 'POST', requiresAuth: true, encryptResponse: true }
     );
     return { success: true, message: response.message };
   } catch (error: any) {
@@ -295,7 +295,7 @@ export async function applyFreeSubscription(params: {
   try {
     const response = await apiRequest<{ subscription: any; message: string }>(
       '/payments/apply-free-subscription',
-      { method: 'POST', body: params, requiresAuth: true }
+      { method: 'POST', body: params, requiresAuth: true, encryptResponse: true }
     );
     return {
       success: true,
@@ -317,7 +317,7 @@ export async function getCustomerPortal(): Promise<CustomerPortalResponse> {
   try {
     return await apiRequest<CustomerPortalResponse>(
       '/payments/customer-portal',
-      { method: 'GET', requiresAuth: true }
+      { method: 'GET', requiresAuth: true, encryptResponse: true }
     );
   } catch (error: any) {
     return {

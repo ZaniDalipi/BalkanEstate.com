@@ -19,20 +19,16 @@ export interface RequestOptions {
   encryptResponse?: boolean;
 }
 
-// Refresh the access token using the refresh token
+// Refresh the access token using the refresh token (sent via httpOnly cookie)
 const refreshAccessToken = async (): Promise<string | null> => {
   try {
-    const refreshToken = tokenService.getRefreshToken();
-    if (!refreshToken) {
-      return null;
-    }
-
     const response = await fetch(`${API_URL}/auth/refresh-token`, {
       method: 'POST',
+      credentials: 'include', // Sends httpOnly cookie automatically
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ refreshToken }),
+      body: JSON.stringify({}),
     });
 
     if (!response.ok) {
@@ -70,6 +66,7 @@ export const apiRequest = async <T>(
 
   const config: RequestInit = {
     method,
+    credentials: 'include', // Send httpOnly cookies (refresh token)
     headers: {
       'Content-Type': 'application/json',
       ...headers,
@@ -153,7 +150,8 @@ export const apiRequest = async <T>(
 export const uploadRequest = async <T>(
   endpoint: string,
   formData: FormData,
-  retryCount = 0
+  retryCount = 0,
+  method: 'POST' | 'PUT' = 'POST'
 ): Promise<T> => {
   let token = tokenService.getAccessToken();
   if (!token) {
@@ -169,7 +167,8 @@ export const uploadRequest = async <T>(
   }
 
   const response = await fetch(`${API_URL}${endpoint}`, {
-    method: 'POST',
+    method,
+    credentials: 'include',
     headers: {
       Authorization: `Bearer ${token}`,
     },
@@ -181,7 +180,7 @@ export const uploadRequest = async <T>(
     const newAccessToken = await refreshAccessToken();
 
     if (newAccessToken) {
-      return uploadRequest<T>(endpoint, formData, 1);
+      return uploadRequest<T>(endpoint, formData, 1, method);
     } else {
       tokenService.clearTokens();
       // Emit custom event for session expiration

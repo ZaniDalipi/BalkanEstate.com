@@ -1,5 +1,4 @@
 import express from 'express';
-import multer from 'multer';
 import {
   signup,
   login,
@@ -39,22 +38,7 @@ import {
 } from '../middleware/rateLimiter';
 import { decryptPayload } from '../middleware/decryptPayload';
 import { getPublicKeyBase64 } from '../utils/payloadEncryption';
-
-// Configure multer for avatar uploads
-const upload = multer({
-  storage: multer.memoryStorage(),
-  limits: {
-    fileSize: 5 * 1024 * 1024, // 5MB limit
-  },
-  fileFilter: (req, file, cb) => {
-    // Accept images only
-    if (!file.mimetype.startsWith('image/')) {
-      cb(new Error('Only image files are allowed'));
-      return;
-    }
-    cb(null, true);
-  },
-});
+import { upload } from '../utils/upload';
 
 
 const router = express.Router();
@@ -206,7 +190,7 @@ router.post('/logout-all', protect, logoutAllDevices);
  *         $ref: '#/components/responses/Unauthorized'
  */
 router.get('/me', protect, getMe);
-router.put('/profile', protect, updateProfile);
+router.put('/profile', protect, decryptPayload, updateProfile);
 router.post('/set-public-key', protect, setPublicKey);
 router.post('/switch-role', protect, switchRole);
 router.get('/my-stats', protect, getUserStats);
@@ -221,13 +205,13 @@ router.post('/refresh-token', refreshTokenRateLimiterIP, refreshToken);
 router.get('/sessions', protect, getActiveSessions);
 router.get('/login-history', protect, getLoginHistory);
 
-// Email verification routes
-router.post('/verify-email', verifyEmail);
-router.post('/resend-verification', resendVerificationEmail);
+// Email verification routes (rate limited to prevent brute-force and email flooding)
+router.post('/verify-email', passwordResetRateLimiterIP, verifyEmail);
+router.post('/resend-verification', passwordResetRateLimiterIP, resendVerificationEmail);
 
 // Password reset routes with rate limiting
 router.post('/forgot-password', passwordResetRateLimiterIP, decryptPayload, requestPasswordReset);
-router.post('/reset-password', decryptPayload, resetPassword);
+router.post('/reset-password', passwordResetRateLimiterIP, decryptPayload, resetPassword);
 router.post('/change-password', protect, decryptPayload, changePassword);
 router.post('/set-password', protect, decryptPayload, setPassword);
 router.post('/delete-account', protect, decryptPayload, deleteAccount);

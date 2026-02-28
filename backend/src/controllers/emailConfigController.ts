@@ -5,6 +5,7 @@ import emailService from '../services/emailService';
 import { apiLogger } from '../utils/logger';
 import { replaceVariables, renderEmailConfig } from '../utils/emailTemplateRenderer';
 import { getParam } from '../utils/validateParams';
+import { escapeRegex } from '../utils/escapeRegex';
 
 // Get all email configurations
 export const getAllEmailConfigs = async (req: Request, res: Response): Promise<void> => {
@@ -23,10 +24,11 @@ export const getAllEmailConfigs = async (req: Request, res: Response): Promise<v
     }
 
     if (search) {
+      const safeSearch = escapeRegex(String(search));
       query.$or = [
-        { name: { $regex: search, $options: 'i' } },
-        { key: { $regex: search, $options: 'i' } },
-        { description: { $regex: search, $options: 'i' } },
+        { name: { $regex: safeSearch, $options: 'i' } },
+        { key: { $regex: safeSearch, $options: 'i' } },
+        { description: { $regex: safeSearch, $options: 'i' } },
       ];
     }
 

@@ -22,7 +22,7 @@ export const getAgencyAllocation = async (): Promise<{
   allocation: AgencyAllocation;
   agency: any;
 }> => {
-  return apiRequest('/promotions/agency/allocation', { requiresAuth: true });
+  return apiRequest('/promotions/agency/allocation', { requiresAuth: true, encryptResponse: true });
 };
 
 export const purchasePromotion = async (params: PurchasePromotionParams): Promise<any> => {
@@ -30,6 +30,7 @@ export const purchasePromotion = async (params: PurchasePromotionParams): Promis
     method: 'POST',
     body: params,
     requiresAuth: true,
+    encryptResponse: true,
   });
 };
 
@@ -40,6 +41,7 @@ export const createPromotionCheckout = async (
     method: 'POST',
     body: params,
     requiresAuth: true,
+    encryptResponse: true,
   });
 };
 
@@ -54,6 +56,7 @@ export const confirmPromotionPayment = async (
     method: 'POST',
     body: { sessionId },
     requiresAuth: true,
+    encryptResponse: true,
   });
 };
 
@@ -99,13 +102,14 @@ export const validateCoupon = async (
 };
 
 export const getMyPromotions = async (): Promise<any> => {
-  return apiRequest('/promotions', { requiresAuth: true });
+  return apiRequest('/promotions', { requiresAuth: true, encryptResponse: true });
 };
 
 export const cancelPromotion = async (promotionId: string): Promise<any> => {
   return apiRequest(`/promotions/${promotionId}`, {
     method: 'DELETE',
     requiresAuth: true,
+    encryptResponse: true,
   });
 };
 
@@ -134,6 +138,7 @@ export const extendPromotion = async (params: {
     method: 'POST',
     body: { duration: params.duration, couponCode: params.couponCode },
     requiresAuth: true,
+    encryptResponse: true,
   });
 };
 
@@ -149,6 +154,7 @@ export const confirmExtensionPayment = async (
     method: 'POST',
     body: { sessionId },
     requiresAuth: true,
+    encryptResponse: true,
   });
 };
 
@@ -166,6 +172,7 @@ export const addUrgentBadge = async (
   return apiRequest(`/promotions/${promotionId}/add-urgent`, {
     method: 'POST',
     requiresAuth: true,
+    encryptResponse: true,
   });
 };
 
@@ -180,13 +187,14 @@ export const confirmUrgentBadgePayment = async (
     method: 'POST',
     body: { sessionId },
     requiresAuth: true,
+    encryptResponse: true,
   });
 };
 
 export const getPromotionHistory = async (
   propertyId: string
 ): Promise<PromotionHistoryResponse> => {
-  return apiRequest(`/promotions/property/${propertyId}/history`, { requiresAuth: true });
+  return apiRequest(`/promotions/property/${propertyId}/history`, { requiresAuth: true, encryptResponse: true });
 };
 
 export const updateAutoExtend = async (
@@ -205,6 +213,7 @@ export const updateAutoExtend = async (
     method: 'PUT',
     body: settings,
     requiresAuth: true,
+    encryptResponse: true,
   });
 };
 
@@ -220,6 +229,7 @@ export const confirmAutoExtendPayment = async (
     method: 'POST',
     body: { sessionId },
     requiresAuth: true,
+    encryptResponse: true,
   });
 };
 
@@ -236,7 +246,7 @@ export const getAutoExtendCheckout = async (
     endDate: string;
   };
 }> => {
-  return apiRequest(`/promotions/${promotionId}/auto-extend-checkout`, { requiresAuth: true });
+  return apiRequest(`/promotions/${promotionId}/auto-extend-checkout`, { requiresAuth: true, encryptResponse: true });
 };
 
 export const getFeaturedProperties = async (filters?: {
@@ -253,5 +263,5 @@ export const getFeaturedProperties = async (filters?: {
 };
 
 export const getPromotionStats = async (promotionId: string): Promise<any> => {
-  return apiRequest(`/promotions/${promotionId}/stats`, { requiresAuth: true });
+  return apiRequest(`/promotions/${promotionId}/stats`, { requiresAuth: true, encryptResponse: true });
 };

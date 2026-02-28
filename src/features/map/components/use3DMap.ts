@@ -10,6 +10,10 @@ import { mapLogger } from '@/src/shared/utils/logger';
 import type { Map3DBuildingsProps } from './Map3DConstants';
 import { TIME_LIGHTING, calculateBuildingShadow, calculateSunPosition, getCurrentDayOfYear } from './Map3DConstants';
 
+/** Escape HTML special characters to prevent XSS in innerHTML templates */
+const escapeHtml = (str: string): string =>
+  str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+
 export function use3DMap(props: Map3DBuildingsProps) {
   const {
     lat,
@@ -139,7 +143,7 @@ export function use3DMap(props: Map3DBuildingsProps) {
         const elLng = el.lon || el.center?.lon;
         if (!elLat || !elLng) continue;
 
-        const name = el.tags?.name;
+        const name = el.tags?.name ? escapeHtml(String(el.tags.name)) : '';
         if (!name) continue; // Skip unnamed POIs
 
         // Deduplicate by name+approximate location
