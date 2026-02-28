@@ -39,6 +39,7 @@ import {
 import { decryptPayload } from '../middleware/decryptPayload';
 import { getPublicKeyBase64 } from '../utils/payloadEncryption';
 import { upload } from '../utils/upload';
+import { buildFrontendRedirectUrl } from '../utils/redirectValidation';
 
 
 const router = express.Router();
