@@ -67,19 +67,22 @@ const generateToken = (): string => {
  * Middleware that sets a CSRF cookie on every response (if not already set).
  * Must be applied before csrfValidation in the middleware chain.
  */
-export const csrfCookie = (_req: Request, res: Response, next: NextFunction): void => {
-  // Always set a fresh CSRF cookie so the client can read it.
-  // We do NOT use httpOnly because the client JS needs to read the cookie
-  // to include the value in the X-CSRF-Token header (double-submit pattern).
-  const token = generateToken();
-
-  res.cookie(CSRF_COOKIE_NAME, token, {
-    httpOnly: false,      // Client JS must read this for double-submit
-    secure: isProduction, // HTTPS only in production
-    sameSite: 'strict',   // Prevents cross-origin cookie sending
-    path: '/',
-    maxAge: 24 * 60 * 60 * 1000, // 24 hours
-  });
+export const csrfCookie = (req: Request, res: Response, next: NextFunction): void => {
+  // Only set a CSRF cookie if one doesn't already exist on the request.
+  // Rotating on every response causes race conditions when the client fires
+  // concurrent requests: the second request still carries the old cookie while
+  // the first response has already overwritten it with a new value.
+  const existing = parseCookie(req, CSRF_COOKIE_NAME);
+  if (!existing) {
+    const token = generateToken();
+    res.cookie(CSRF_COOKIE_NAME, token, {
+      httpOnly: false,      // Client JS must read this for double-submit
+      secure: isProduction, // HTTPS only in production
+      sameSite: 'strict',   // Prevents cross-origin cookie sending
+      path: '/',
+      maxAge: 24 * 60 * 60 * 1000, // 24 hours
+    });
+  }
 
   next();
 };
