@@ -4,15 +4,44 @@ import {
   getSignedUrlIfAuthorized,
   getUserFiles,
   batchGetSignedUrls,
-  removeFileRecord,
   isFileOwner,
 } from '../services/storageAccessPolicy';
 import { deleteImage } from '../services/cloudinaryService';
 import { mediaLogger } from '../utils/logger';
 
+// Matches valid Cloudinary public IDs: alphanumeric, hyphens, underscores, slashes, dots
+const PUBLIC_ID_PATTERN = /^[a-zA-Z0-9_\-/.]+$/;
+const MAX_PUBLIC_ID_LENGTH = 512;
+
+const ALLOWED_RESOURCE_TYPES = ['image', 'video', 'raw'] as const;
+type ResourceType = (typeof ALLOWED_RESOURCE_TYPES)[number];
+
+/**
+ * Sanitize a publicId for safe use in queries and logs.
+ * Returns null if the input is invalid.
+ */
+const sanitizePublicId = (raw: string): string | null => {
+  if (!raw || typeof raw !== 'string') return null;
+  if (raw.length > MAX_PUBLIC_ID_LENGTH) return null;
+  if (!PUBLIC_ID_PATTERN.test(raw)) return null;
+  // Block path traversal
+  if (raw.includes('..')) return null;
+  return raw;
+};
+
+/**
+ * Validate resourceType query param against whitelist.
+ */
+const parseResourceType = (raw: unknown): ResourceType => {
+  if (typeof raw === 'string' && ALLOWED_RESOURCE_TYPES.includes(raw as ResourceType)) {
+    return raw as ResourceType;
+  }
+  return 'image';
+};
+
 /**
  * @desc    Get a signed URL for a file (ownership check)
- * @route   GET /api/files/signed-url/:publicId
+ * @route   GET /api/files/signed-url/*
  * @access  Private
  */
 export const getSignedUrl = async (
@@ -26,19 +55,19 @@ export const getSignedUrl = async (
     }
 
     // publicId comes from wildcard route (e.g. /signed-url/balkan-estate/users/123/avatar/img)
-    const publicId = req.params[0];
+    const rawPublicId = req.params[0];
+    const publicId = sanitizePublicId(rawPublicId);
     if (!publicId) {
-      res.status(400).json({ message: 'publicId is required' });
+      res.status(400).json({ message: 'Invalid or missing publicId' });
       return;
     }
 
-    const decodedPublicId = decodeURIComponent(publicId);
     const user = req.user as IUser;
-    const resourceType = (req.query.resourceType as 'image' | 'video' | 'raw') || 'image';
+    const resourceType = parseResourceType(req.query.resourceType);
 
     const result = await getSignedUrlIfAuthorized(
       String(user._id),
-      decodedPublicId,
+      publicId,
       user.role,
       resourceType
     );
@@ -85,10 +114,21 @@ export const getBatchSignedUrls = async (
       return;
     }
 
+    // Validate every item is a safe string (prevents NoSQL injection with {$gt:""} objects)
+    const sanitized: string[] = [];
+    for (const id of publicIds) {
+      const clean = sanitizePublicId(id);
+      if (!clean) {
+        res.status(400).json({ message: 'Invalid publicId in array' });
+        return;
+      }
+      sanitized.push(clean);
+    }
+
     const user = req.user as IUser;
     const signedUrls = await batchGetSignedUrls(
       String(user._id),
-      publicIds,
+      sanitized,
       user.role
     );
 
@@ -143,7 +183,7 @@ export const getMyFiles = async (
 
 /**
  * @desc    Delete a file (ownership check)
- * @route   DELETE /api/files/:publicId
+ * @route   DELETE /api/files/*
  * @access  Private
  */
 export const deleteFile = async (
@@ -157,25 +197,24 @@ export const deleteFile = async (
     }
 
     // publicId comes from wildcard route (e.g. /balkan-estate/users/123/avatar/img)
-    const publicId = req.params[0];
+    const rawPublicId = req.params[0];
+    const publicId = sanitizePublicId(rawPublicId);
     if (!publicId) {
-      res.status(400).json({ message: 'publicId is required' });
+      res.status(400).json({ message: 'Invalid or missing publicId' });
       return;
     }
 
-    const decodedPublicId = decodeURIComponent(publicId);
     const user = req.user as IUser;
 
     // Check ownership (admins can also delete)
-    const ownerOrAdmin = await isFileOwner(String(user._id), decodedPublicId) || user.role === 'admin';
+    const ownerOrAdmin = await isFileOwner(String(user._id), publicId) || user.role === 'admin';
     if (!ownerOrAdmin) {
       res.status(403).json({ message: 'You do not have permission to delete this file' });
       return;
     }
 
-    // Delete from Cloudinary and remove the record
-    await deleteImage(decodedPublicId);
-    await removeFileRecord(decodedPublicId);
+    // deleteImage already removes the FileRecord internally — no double call
+    await deleteImage(publicId);
 
     res.json({ message: 'File deleted successfully' });
   } catch (error: any) {

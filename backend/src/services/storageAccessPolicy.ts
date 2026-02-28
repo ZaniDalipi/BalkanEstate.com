@@ -14,9 +14,23 @@ import { mediaLogger } from '../utils/logger';
  * 3. When a client needs to display/download a file, it calls GET /api/files/signed-url
  * 4. This service checks ownership, then generates a short-lived signed URL
  * 5. The client uses the signed URL (valid for a limited time) to access the file
+ *
+ * Security notes:
+ * - Cloudinary signed URLs with type: 'authenticated' prevent access without a valid
+ *   HMAC signature, but the signature itself does not expire. Actual time-based
+ *   expiration requires Cloudinary's Token-based Authentication (paid feature).
+ * - The _exp query param is for client-side cache invalidation only.
+ * - All publicIds that reach this service should already be sanitized by the controller.
  */
 
-const SIGNED_URL_EXPIRY_SECONDS = 3600; // 1 hour
+const SIGNED_URL_EXPIRY_SECONDS = 3600; // 1 hour (client-side cache guidance)
+
+/**
+ * Strip control characters from a string before logging.
+ * Prevents log injection via newlines, carriage returns, etc.
+ */
+const safeLog = (s: string): string =>
+  s.replace(/[\x00-\x1f\x7f]/g, '');
 
 /**
  * Register a file upload in the access policy system.
@@ -48,7 +62,7 @@ export const registerFileUpload = async (params: {
     { upsert: true, new: true, setDefaultsOnInsert: true }
   );
 
-  mediaLogger.info(`📋 Registered file record: ${publicId} (owner: ${userId}, type: ${fileType})`);
+  mediaLogger.info(`Registered file record: ${safeLog(publicId)} (owner: ${safeLog(userId)}, type: ${fileType})`);
 
   return fileRecord;
 };
@@ -77,7 +91,7 @@ export const checkFileAccess = async (
   const record = await FileRecord.findOne({ publicId });
 
   if (!record) {
-    mediaLogger.warn(`🚫 File access denied: no record found for ${publicId}`);
+    mediaLogger.warn(`File access denied: no record found for ${safeLog(publicId)}`);
     return null;
   }
 
@@ -91,13 +105,17 @@ export const checkFileAccess = async (
     return record;
   }
 
-  mediaLogger.warn(`🚫 File access denied: user ${userId} is not the owner of ${publicId}`);
+  mediaLogger.warn(`File access denied: user ${safeLog(userId)} is not the owner of ${safeLog(publicId)}`);
   return null;
 };
 
 /**
- * Generate a time-limited signed URL for an authenticated Cloudinary resource.
- * The URL expires after SIGNED_URL_EXPIRY_SECONDS.
+ * Generate a signed URL for an authenticated Cloudinary resource.
+ *
+ * Note: Cloudinary's sign_url signs the transformation + public_id with HMAC
+ * to prevent URL tampering, but the signature alone does not enforce time-based
+ * expiration. The _exp param is for client-side cache management only.
+ * For actual time-limited tokens, enable Cloudinary Token-based Authentication.
  */
 export const generateSignedUrl = (
   publicId: string,
@@ -116,7 +134,7 @@ export const generateSignedUrl = (
     ],
   });
 
-  // Append expiration as a query param for cache-busting on the client
+  // Client-side cache guidance — not enforced by Cloudinary itself
   return `${url}${url.includes('?') ? '&' : '?'}_exp=${expiresAt}`;
 };
 
@@ -171,7 +189,7 @@ export const getUserFiles = async (
  */
 export const removeFileRecord = async (publicId: string): Promise<void> => {
   await FileRecord.deleteOne({ publicId });
-  mediaLogger.info(`🗑️ Removed file record: ${publicId}`);
+  mediaLogger.info(`Removed file record: ${safeLog(publicId)}`);
 };
 
 /**
@@ -179,7 +197,7 @@ export const removeFileRecord = async (publicId: string): Promise<void> => {
  */
 export const removeAllUserFileRecords = async (userId: string): Promise<void> => {
   const result = await FileRecord.deleteMany({ userId });
-  mediaLogger.info(`🗑️ Removed ${result.deletedCount} file records for user ${userId}`);
+  mediaLogger.info(`Removed ${result.deletedCount} file records for user ${safeLog(userId)}`);
 };
 
 /**
@@ -190,7 +208,7 @@ export const transferFileOwnership = async (
   newOwnerId: string
 ): Promise<void> => {
   await FileRecord.updateOne({ publicId }, { userId: newOwnerId });
-  mediaLogger.info(`🔄 Transferred file ownership: ${publicId} -> ${newOwnerId}`);
+  mediaLogger.info(`Transferred file ownership: ${safeLog(publicId)} -> ${safeLog(newOwnerId)}`);
 };
 
 /**

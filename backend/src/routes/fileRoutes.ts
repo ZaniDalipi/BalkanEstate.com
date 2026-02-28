@@ -6,11 +6,15 @@ import {
   deleteFile,
 } from '../controllers/fileController';
 import { protect } from '../middleware/auth';
+import { generalRateLimiter, mutationRateLimiter } from '../middleware/security';
 
 const router = express.Router();
 
 // All file access routes require authentication
 router.use(protect);
+
+// Read operations: general rate limit (500 req / 15 min in prod)
+// Write/delete operations: mutation rate limit (100 req / 15 min in prod)
 
 /**
  * @swagger
@@ -43,7 +47,7 @@ router.use(protect);
  *       401:
  *         $ref: '#/components/responses/Unauthorized'
  */
-router.get('/my', getMyFiles);
+router.get('/my', generalRateLimiter, getMyFiles);
 
 /**
  * @swagger
@@ -73,7 +77,7 @@ router.get('/my', getMyFiles);
  *       401:
  *         $ref: '#/components/responses/Unauthorized'
  */
-router.post('/signed-urls', getBatchSignedUrls);
+router.post('/signed-urls', generalRateLimiter, getBatchSignedUrls);
 
 /**
  * @swagger
@@ -104,7 +108,7 @@ router.post('/signed-urls', getBatchSignedUrls);
  *       401:
  *         $ref: '#/components/responses/Unauthorized'
  */
-router.get('/signed-url/*', getSignedUrl);
+router.get('/signed-url/*', generalRateLimiter, getSignedUrl);
 
 /**
  * @swagger
@@ -129,6 +133,6 @@ router.get('/signed-url/*', getSignedUrl);
  *       401:
  *         $ref: '#/components/responses/Unauthorized'
  */
-router.delete('/*', deleteFile);
+router.delete('/*', mutationRateLimiter, deleteFile);
 
 export default router;
