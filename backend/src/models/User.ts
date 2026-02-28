@@ -55,7 +55,7 @@ export interface IUser extends Document {
   isSubscribed: boolean;
   subscriptionPlan?: string; // Product ID (e.g., 'buyer_monthly')
   subscriptionProductName?: string; // Human-readable name (e.g., 'Buyer Pro Monthly')
-  subscriptionSource?: 'google' | 'apple' | 'web'; // Where subscription came from
+  subscriptionSource?: 'google' | 'apple' | 'web' | 'stripe' | 'paddle'; // Where subscription came from
   subscriptionExternalId?: string; // External subscription ID from payment provider
   subscriptionExpiresAt?: Date;
   subscriptionStartedAt?: Date;
@@ -437,7 +437,7 @@ const UserSchema: Schema = new Schema(
     },
     subscriptionSource: {
       type: String,
-      enum: ['google', 'apple', 'web'],
+      enum: ['google', 'apple', 'web', 'stripe', 'paddle'],
       index: true, // Index for querying by subscription source
     },
     subscriptionExternalId: {
