@@ -622,56 +622,12 @@ export function use3DMap(props: Map3DBuildingsProps) {
       })
     );
 
-    // ── Floor-slice visibility fix ───────────────────────────────────────────
-    // Problem: MapLibre's WebGL depth buffer means the first-drawn fill-extrusion
-    // wins at equal depth.  '3d-buildings' is added first, so it always occludes
-    // any custom layers at the same coordinates, regardless of layer order in the
-    // style.  `within` filter expressions also do NOT work on Polygon features
-    // (only Point / LineString), so bbox exclusion attempts were silently no-ops.
-    //
-    // Solution:
-    //   1. Hide '3d-buildings' entirely so it cannot occlude anything.
-    //   2. Add '3d-buildings-bg' — same style, but with the property building
-    //      filtered out via `to-string` ID comparison (handles string vs number
-    //      type mismatches between tile data and JS values).
-    //   3. Floor slices are then the only fill-extrusion at this location and
-    //      render unobstructed.
-    // ─────────────────────────────────────────────────────────────────────────
+    // Restore 3d-buildings if a previous run hid it, and clean up any leftover bg layer
     if (mapInstance.getLayer('3d-buildings')) {
-      mapInstance.setLayoutProperty('3d-buildings', 'visibility', 'none');
+      mapInstance.setLayoutProperty('3d-buildings', 'visibility', 'visible');
     }
-
-    if (buildingFeature && buildingFeature.id != null && !mapInstance.getLayer('3d-buildings-bg')) {
-      const style = mapInstance.getStyle();
-      const origLayer = style.layers.find(l => l.id === '3d-buildings') as any;
-      const layerSource = origLayer?.source as string | undefined;
-      const layerSourceLayer = origLayer?.['source-layer'] as string | undefined;
-
-      if (layerSource && layerSourceLayer) {
-        mapInstance.addLayer({
-          id: '3d-buildings-bg',
-          source: layerSource,
-          'source-layer': layerSourceLayer,
-          type: 'fill-extrusion',
-          minzoom: 14,
-          // Convert both sides to string so number/string tile ID mismatches don't matter
-          filter: ['!=', ['to-string', ['id']], String(buildingFeature.id)],
-          paint: {
-            'fill-extrusion-color': [
-              'interpolate', ['linear'],
-              ['coalesce', ['get', 'render_height'], 10],
-              0, '#6b7280', 20, '#4b5563', 50, '#374151', 100, '#1f2937',
-            ] as any,
-            'fill-extrusion-height': [
-              'coalesce', ['get', 'render_height'],
-              ['*', ['coalesce', ['get', 'building:levels'], 3], 3.5], 10,
-            ] as any,
-            'fill-extrusion-base': ['coalesce', ['get', 'render_min_height'], 0] as any,
-            'fill-extrusion-opacity': 0.92,
-            'fill-extrusion-vertical-gradient': true,
-          },
-        } as maplibregl.LayerSpecification);
-      }
+    if (mapInstance.getLayer('3d-buildings-bg')) {
+      mapInstance.removeLayer('3d-buildings-bg');
     }
 
     // Add source for the custom building using actual geometry
@@ -699,57 +655,27 @@ export function use3DMap(props: Map3DBuildingsProps) {
       });
     }
 
-    // Remove existing floor layers if any
+    // Remove any leftover layers from previous runs
     for (let floor = 1; floor <= 100; floor++) {
-      const layerId = `building-floor-${floor}`;
-      if (mapInstance.getLayer(layerId)) {
-        mapInstance.removeLayer(layerId);
-      }
+      if (mapInstance.getLayer(`building-floor-${floor}`)) mapInstance.removeLayer(`building-floor-${floor}`);
     }
-    if (mapInstance.getLayer('building-floor-highlight-glow')) {
-      mapInstance.removeLayer('building-floor-highlight-glow');
-    }
+    if (mapInstance.getLayer('building-floor-highlight-glow')) mapInstance.removeLayer('building-floor-highlight-glow');
+    if (mapInstance.getLayer('building-floor-highlight')) mapInstance.removeLayer('building-floor-highlight');
 
-    // Add floor slice layers - each floor is a separate "box" stacked on top of each other
-    // The gap between floors makes each box clearly distinct
-    const gapSize = Math.max(0.3, adjustedFloorHeight * 0.12); // 12% of floor height as gap, minimum 0.3m
-    for (let floor = 1; floor <= totalFlrs; floor++) {
-      const floorBase = (floor - 1) * adjustedFloorHeight;
-      const floorTop = floor * adjustedFloorHeight;
-      const isHighlightedFloor = floor === floorNum;
-      const layerId = `building-floor-${floor}`;
-
-      mapInstance.addLayer({
-        id: layerId,
-        type: 'fill-extrusion',
-        source: 'custom-building',
-        paint: {
-          'fill-extrusion-color': isHighlightedFloor
-            ? '#13e861' // Bright green for the property's floor
-            : floor % 2 === 0 ? '#4b5563' : '#6b7280', // Alternating grey for other floors
-          'fill-extrusion-height': floorTop - gapSize, // Gap at top of each floor slab
-          'fill-extrusion-base': floorBase + (gapSize * 0.25), // Small gap at bottom too
-          'fill-extrusion-opacity': isHighlightedFloor ? 1 : 0.75,
-        },
-      });
-    }
-
-    // Add a brighter outline layer for the highlighted floor to make it pop
-    const highlightBase = (floorNum - 1) * adjustedFloorHeight;
-    const highlightTop = floorNum * adjustedFloorHeight;
-    const glowLayerId = 'building-floor-highlight-glow';
-    if (mapInstance.getLayer(glowLayerId)) {
-      mapInstance.removeLayer(glowLayerId);
-    }
+    // Add a single green fill-extrusion for the selected floor only.
+    // The footprint is already expanded 1.5 m on every side (scaledCoords) so its
+    // walls sit slightly in front of the grey building's walls and pass the depth test.
+    const floorBase = (floorNum - 1) * adjustedFloorHeight;
+    const floorTop = floorNum * adjustedFloorHeight;
     mapInstance.addLayer({
-      id: glowLayerId,
+      id: 'building-floor-highlight',
       type: 'fill-extrusion',
       source: 'custom-building',
       paint: {
-        'fill-extrusion-color': '#4ade80', // Lighter green glow
-        'fill-extrusion-height': highlightTop - (gapSize * 0.5),
-        'fill-extrusion-base': highlightBase + (gapSize * 0.5),
-        'fill-extrusion-opacity': 0.35,
+        'fill-extrusion-color': '#13e861',
+        'fill-extrusion-base': floorBase,
+        'fill-extrusion-height': floorTop,
+        'fill-extrusion-opacity': 0.9,
       },
     });
 
