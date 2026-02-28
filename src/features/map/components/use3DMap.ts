@@ -644,13 +644,14 @@ export function use3DMap(props: Map3DBuildingsProps) {
       mapInstance.removeLayer('building-floor-highlight-glow');
     }
 
-    // Add floor slice layers - each floor is a separate "box" stacked on top of each other
-    // The gap between floors makes each box clearly distinct
+    // Add floor slice layers — stacked concrete slab effect
+    // Dark grey above the target floor, lighter grey below, bright green for target
     const gapSize = Math.max(0.3, adjustedFloorHeight * 0.12); // 12% of floor height as gap, minimum 0.3m
     for (let floor = 1; floor <= totalFlrs; floor++) {
       const floorBase = (floor - 1) * adjustedFloorHeight;
       const floorTop = floor * adjustedFloorHeight;
       const isHighlightedFloor = floor === floorNum;
+      const isAbove = floor > floorNum;
       const layerId = `building-floor-${floor}`;
 
       mapInstance.addLayer({
@@ -659,16 +660,18 @@ export function use3DMap(props: Map3DBuildingsProps) {
         source: 'custom-building',
         paint: {
           'fill-extrusion-color': isHighlightedFloor
-            ? '#13e861' // Bright green for the property's floor
-            : floor % 2 === 0 ? '#4b5563' : '#6b7280', // Alternating grey for other floors
-          'fill-extrusion-height': floorTop - gapSize, // Gap at top of each floor slab
-          'fill-extrusion-base': floorBase + (gapSize * 0.25), // Small gap at bottom too
-          'fill-extrusion-opacity': isHighlightedFloor ? 1 : 0.75,
+            ? '#22c55e'       // Emerald green — the property floor
+            : isAbove
+              ? '#374151'     // Dark slate — heavier weight above
+              : '#6b7280',    // Medium grey — lighter feel below
+          'fill-extrusion-height': floorTop - gapSize,
+          'fill-extrusion-base': floorBase + (gapSize * 0.25),
+          'fill-extrusion-opacity': isHighlightedFloor ? 1 : isAbove ? 0.85 : 0.75,
         },
       });
     }
 
-    // Add a brighter outline layer for the highlighted floor to make it pop
+    // Glow layer — same footprint but taller, low-opacity green to simulate light emission
     const highlightBase = (floorNum - 1) * adjustedFloorHeight;
     const highlightTop = floorNum * adjustedFloorHeight;
     const glowLayerId = 'building-floor-highlight-glow';
@@ -680,10 +683,10 @@ export function use3DMap(props: Map3DBuildingsProps) {
       type: 'fill-extrusion',
       source: 'custom-building',
       paint: {
-        'fill-extrusion-color': '#4ade80', // Lighter green glow
-        'fill-extrusion-height': highlightTop - (gapSize * 0.5),
-        'fill-extrusion-base': highlightBase + (gapSize * 0.5),
-        'fill-extrusion-opacity': 0.35,
+        'fill-extrusion-color': '#86efac', // Green-300 — soft ambient glow
+        'fill-extrusion-height': highlightTop + (gapSize * 0.8),
+        'fill-extrusion-base': Math.max(0, highlightBase - (gapSize * 0.8)),
+        'fill-extrusion-opacity': 0.4,
       },
     });
 
@@ -698,26 +701,26 @@ export function use3DMap(props: Map3DBuildingsProps) {
           flex-direction: column;
           align-items: center;
           gap: 0;
-          filter: drop-shadow(0 4px 12px rgba(0,0,0,0.4));
+          filter: drop-shadow(0 4px 16px rgba(0,0,0,0.55));
         ">
-          <div style="
-            background: linear-gradient(135deg, #059669, #10b981);
+          <div class="floor-badge" style="
+            background: linear-gradient(135deg, #16a34a, #22c55e);
             color: white;
-            padding: 4px 14px;
-            border-radius: 10px;
+            padding: 5px 16px;
+            border-radius: 20px;
             font-size: 13px;
-            font-weight: 800;
+            font-weight: 700;
             white-space: nowrap;
-            border: 2px solid rgba(255,255,255,0.9);
-            letter-spacing: 0.5px;
+            border: 2px solid rgba(255,255,255,0.95);
+            letter-spacing: 0.3px;
             font-family: system-ui, -apple-system, sans-serif;
-          ">Floor ${floorNum}/${totalFlrs}</div>
+          ">Floor ${floorNum} / ${totalFlrs}</div>
           <div style="
             width: 0;
             height: 0;
             border-left: 7px solid transparent;
             border-right: 7px solid transparent;
-            border-top: 7px solid #10b981;
+            border-top: 8px solid #16a34a;
             margin-top: -1px;
           "></div>
         </div>

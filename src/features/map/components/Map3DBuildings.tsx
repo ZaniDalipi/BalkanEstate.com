@@ -207,6 +207,13 @@ const Map3DBuildings: React.FC<Map3DBuildingsProps> = (props) => {
           0%, 100% { box-shadow: 0 2px 8px rgba(34,197,94,0.6); }
           50% { box-shadow: 0 2px 16px rgba(34,197,94,0.9), 0 0 20px rgba(16,185,129,0.5); }
         }
+        @keyframes badgePulse {
+          0%, 100% { box-shadow: 0 0 12px rgba(34,197,94,0.5); }
+          50% { box-shadow: 0 0 20px rgba(34,197,94,0.9), 0 0 32px rgba(134,239,172,0.4); }
+        }
+        .floor-badge {
+          animation: badgePulse 2s ease-in-out infinite;
+        }
         @keyframes floorGlow {
           0%, 100% { opacity: 0.5; }
           50% { opacity: 1; }
