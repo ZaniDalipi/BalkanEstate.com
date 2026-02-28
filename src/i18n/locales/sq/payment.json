@@ -49,6 +49,7 @@
     "tryAgain": "Provoni përsëri pas disa momenteve",
     "contactSupport": "Kontaktoni mbështetjen nëse problemi vazhdon",
     "noPaymentUrl": "Nuk u mor URL-ja e pagesës",
+    "redirectBlocked": "Ridrejtimi i pagesës u bllokua për arsye sigurie. Ju lutemi provoni përsëri.",
     "sessionCreationFailed": "Dështoi krijimi i sesionit të pagesës",
     "invalidDiscountCode": "Kodi i zbritjes i pavlefshëm",
     "freeSubscriptionFailed": "Failed to apply free subscription",

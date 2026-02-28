@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import * as api from '@/services/apiService';
 import { Property } from '@/types';
 import { validatePaymentRedirectUrl } from '@/src/utils/security';
@@ -98,6 +99,7 @@ export function usePromotionSelector({
   focusUrgent = false,
   hasUrgentBadge: alreadyHasUrgent = false,
 }: PromotionSelectorProps) {
+  const { t } = useTranslation(['payment']);
   const [tiersData, setTiersData] = useState<api.PromotionTiersResponse | null>(null);
   const [agencyAllocation, setAgencyAllocation] = useState<api.AgencyAllocation | null>(null);
   const [loading, setLoading] = useState(true);
@@ -313,7 +315,7 @@ export function usePromotionSelector({
           if (validatedUrl) {
             window.location.href = validatedUrl;
           } else {
-            setError('Payment redirect blocked: untrusted URL');
+            setError(t('payment:errors.redirectBlocked', 'Payment redirect was blocked for security reasons. Please try again.'));
           }
           return;
         }
@@ -379,7 +381,7 @@ export function usePromotionSelector({
           if (validatedUrl) {
             window.location.href = validatedUrl;
           } else {
-            setError('Payment redirect blocked: untrusted URL');
+            setError(t('payment:errors.redirectBlocked', 'Payment redirect was blocked for security reasons. Please try again.'));
           }
           return;
         }

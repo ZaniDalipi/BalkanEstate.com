@@ -49,6 +49,7 @@
     "tryAgain": "Pokušajte ponovo za nekoliko trenutaka",
     "contactSupport": "Kontaktirajte podršku ako problem i dalje postoji",
     "noPaymentUrl": "Nije primljen URL za plaćanje",
+    "redirectBlocked": "Preusmjeravanje plaćanja je blokirano iz sigurnosnih razloga. Molimo pokušajte ponovo.",
     "sessionCreationFailed": "Neuspješno kreiranje sesije plaćanja",
     "invalidDiscountCode": "Nevažeći kod za popust",
     "freeSubscriptionFailed": "Failed to apply free subscription",

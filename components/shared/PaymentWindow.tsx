@@ -643,7 +643,7 @@ const PaymentWindow: React.FC<PaymentWindowProps> = ({
         // Validate payment URL against trusted domain allowlist
         const validatedPaymentUrl = validatePaymentRedirectUrl(data.paymentUrl);
         if (!validatedPaymentUrl) {
-          throw new Error('Payment redirect blocked: untrusted URL');
+          throw new Error(t('payment:errors.redirectBlocked'));
         }
 
         // Open payment provider checkout in a new window

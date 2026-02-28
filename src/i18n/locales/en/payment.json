@@ -49,6 +49,7 @@
     "tryAgain": "Try again in a few moments",
     "contactSupport": "Contact support if the issue persists",
     "noPaymentUrl": "No payment URL received",
+    "redirectBlocked": "Payment redirect was blocked for security reasons. Please try again.",
     "sessionCreationFailed": "Failed to create payment session",
     "invalidDiscountCode": "Invalid discount code",
     "invalidCodeFormat": "Invalid code format. Use only letters, numbers, hyphens and underscores.",

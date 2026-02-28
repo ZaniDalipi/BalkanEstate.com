@@ -330,15 +330,16 @@ export async function getCustomerPortal(): Promise<CustomerPortalResponse> {
 
 /**
  * Redirect to payment page (validated against trusted domain allowlist)
+ * Throws if the URL is not on the trusted domain allowlist.
  */
 export function redirectToPayment(paymentUrl: string): void {
-  if (paymentUrl) {
-    const validatedUrl = validatePaymentRedirectUrl(paymentUrl);
-    if (validatedUrl) {
-      window.location.href = validatedUrl;
-    } else {
-      console.error('Payment redirect blocked: untrusted URL');
-    }
+  if (!paymentUrl) return;
+
+  const validatedUrl = validatePaymentRedirectUrl(paymentUrl);
+  if (validatedUrl) {
+    window.location.href = validatedUrl;
+  } else {
+    throw new Error('REDIRECT_BLOCKED');
   }
 }
 
@@ -353,8 +354,12 @@ export async function initiatePayment(request: CreatePaymentRequest): Promise<{
   const result = await createPayment(request);
 
   if (result.success && result.paymentUrl) {
-    redirectToPayment(result.paymentUrl);
-    return { success: true };
+    try {
+      redirectToPayment(result.paymentUrl);
+      return { success: true };
+    } catch {
+      return { success: false, error: 'REDIRECT_BLOCKED' };
+    }
   }
 
   return {

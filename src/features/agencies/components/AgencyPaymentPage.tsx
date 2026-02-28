@@ -196,7 +196,7 @@ const AgencyPaymentPage: React.FC = () => {
         if (validatedUrl) {
           window.location.href = validatedUrl;
         } else {
-          setError('Payment redirect blocked: untrusted URL');
+          setError(t('payment:errors.redirectBlocked', 'Payment redirect was blocked for security reasons. Please try again.'));
         }
       } else {
         setError(data.message || t('payment.error', 'Failed to initiate payment'));
