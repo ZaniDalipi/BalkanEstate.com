@@ -425,7 +425,7 @@ export function use3DMap(props: Map3DBuildingsProps) {
     tourUrl?: string,
     onEnterTour?: () => void
   ) => {
-    const floorHeightM = 2; // 3m per floor
+    const floorHeightM = 3; // 3m per floor
     const totalHeightM = totalFlrs * floorHeightM;
 
     // Query the actual building at this location from the map's building layer
@@ -588,7 +588,7 @@ export function use3DMap(props: Map3DBuildingsProps) {
     const adjustedFloorHeight = finalBuildingHeight / totalFlrs;
 
     // Scale up the building coordinates to fully cover the original and prevent z-fighting
-    const scaleFactor = 1.05; // 5% larger to fully cover original building
+    const scaleFactor = 1.02; // 2% larger - reverted from 1.05 to prevent z-fighting/flickering
 
     // Calculate centroid for scaling and label positioning
     const outerRing = buildingCoords[0];
@@ -810,7 +810,7 @@ export function use3DMap(props: Map3DBuildingsProps) {
         const doorLng = edgeMidLng - outwardOffset;
         const doorLat = edgeMidLat - outwardOffset;
 
-        // Create door marker with 360 indicator and floor label
+        // Create door marker with floor label + door icon + 360° Tour (3-part design)
         const doorEl = document.createElement('div');
         doorEl.className = 'apartment-door-marker';
         doorEl.innerHTML = `
@@ -818,28 +818,46 @@ export function use3DMap(props: Map3DBuildingsProps) {
             display: flex;
             flex-direction: column;
             align-items: center;
-            gap: 3px;
+            gap: 2px;
             cursor: pointer;
           ">
+            <div style="
+              background: rgba(34,197,94,0.95);
+              color: white;
+              padding: 2px 8px;
+              border-radius: 8px 8px 0 0;
+              font-size: 10px;
+              font-weight: bold;
+              white-space: nowrap;
+              border: 2px solid white;
+              border-bottom: none;
+              font-family: system-ui, -apple-system, sans-serif;
+            ">Floor ${floorNum}/${totalFlrs}</div>
             <div style="
               display: flex;
               align-items: center;
               justify-content: center;
-              gap: 6px;
-              background: linear-gradient(135deg, #059669, #10b981);
-              color: white;
-              padding: 6px 14px;
-              border-radius: 12px;
-              border: 2px solid rgba(255,255,255,0.9);
-              box-shadow: 0 4px 16px rgba(0,0,0,0.4), 0 0 20px rgba(16,185,129,0.4);
-              font-family: system-ui, -apple-system, sans-serif;
+              width: 40px;
+              height: 40px;
+              background: linear-gradient(135deg, #22c55e, #16a34a);
+              border-radius: 8px;
+              border: 3px solid white;
+              box-shadow: 0 4px 12px rgba(0,0,0,0.4), 0 0 15px rgba(34,197,94,0.6);
+              font-size: 20px;
               animation: doorPulse 2s ease-in-out infinite;
-            ">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"/>
-              </svg>
-              <span style="font-size: 12px; font-weight: 800; letter-spacing: 0.3px;">360\u00B0 Tour</span>
-            </div>
+            ">\uD83D\uDEAA</div>
+            <div style="
+              background: rgba(0,0,0,0.85);
+              color: white;
+              padding: 2px 8px;
+              border-radius: 0 0 8px 8px;
+              font-size: 10px;
+              font-weight: bold;
+              white-space: nowrap;
+              border: 2px solid white;
+              border-top: none;
+              font-family: system-ui, -apple-system, sans-serif;
+            ">360\u00B0 Tour</div>
           </div>
         `;
 
