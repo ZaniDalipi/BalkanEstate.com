@@ -21,7 +21,7 @@ const isProduction = process.env.NODE_ENV === 'production';
 interface ProcessPaymentParams {
   userId: mongoose.Types.ObjectId | string;
   productId: string;
-  store: 'google' | 'apple' | 'web';
+  store: 'google' | 'apple' | 'web' | 'stripe' | 'paddle';
   amount: number;
   currency: string;
   purchaseToken?: string;

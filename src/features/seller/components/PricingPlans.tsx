@@ -5,7 +5,8 @@ import PaymentWindow from '@/components/shared/PaymentWindow';
 import { BuildingOfficeIcon, ChartBarIcon, CurrencyDollarIcon, BoltIcon } from '@/constants';
 import { useAppContext } from '@/context/AppContext';
 import { useSellerProducts, Product } from '@/src/shared/query';
-import { API_URL } from '@/src/shared/api/config';
+import { apiRequest } from '@/src/shared/api';
+import { createAgency } from '@/src/features/agencies/api/agencyApi';
 
 interface PricingPlansProps {
   isOpen: boolean;
@@ -192,41 +193,15 @@ const PricingPlans: React.FC<PricingPlansProps> = ({ isOpen, onClose, onSubscrib
     // If Enterprise plan and there's pending agency data, create the agency
     if (selectedPlan && selectedPlan.name.toLowerCase().includes('enterprise') && state.pendingAgencyData) {
       try {
-        const token = localStorage.getItem('balkan_estate_token');
-        if (!token) {
-          throw new Error('Please log in to create an agency');
-        }
-
-        const response = await fetch(`${API_URL}/agencies`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`,
-          },
-          body: JSON.stringify(state.pendingAgencyData),
-        });
-
-        if (!response.ok) {
-          const errorData = await response.json().catch(() => null);
-          throw new Error(errorData?.message || 'Failed to create agency');
-        }
-
-        const data = await response.json();
+        await createAgency(state.pendingAgencyData);
 
         // Clear pending agency data
         dispatch({ type: 'SET_PENDING_AGENCY_DATA', payload: null });
 
         // Refresh user data to get updated role and agency info
         try {
-          const userResponse = await fetch(`${API_URL}/auth/me`, {
-            headers: {
-              'Authorization': `Bearer ${token}`,
-            },
-          });
-          if (userResponse.ok) {
-            const userData = await userResponse.json();
-            dispatch({ type: 'SET_AUTH_STATE', payload: { isAuthenticated: true, user: userData.user } });
-          }
+          const userData = await apiRequest<any>('/auth/me', { requiresAuth: true });
+          dispatch({ type: 'SET_AUTH_STATE', payload: { isAuthenticated: true, user: userData.user } });
         } catch (error) {
           // Error removed
         }

@@ -11,7 +11,7 @@
 import { payseraService, type PayseraPaymentMethod } from './payseraService';
 
 // Payment provider types
-export type PaymentProvider = 'paysera' | 'web';
+export type PaymentProvider = 'paysera' | 'stripe' | 'paddle' | 'web';
 
 // Country to provider mapping
 export interface CountryProviderMapping {

@@ -15,7 +15,7 @@ import { BALKAN_COUNTRIES } from '@/constants/countries';
 import { FloatingSphere, GlossyPill, AbstractBlob, RealEstateOrb, Decorative3DStyles } from '@/components/shared/Decorative3D';
 import AgentsHeroBanner from '@/components/shared/AgentsHeroBanner';
 import { HERO_IMAGES } from '@/config/cloudinaryConfig';
-import { API_URL } from '@/src/shared/api/config';
+import { apiRequest } from '@/src/shared/api';
 
 type SortOption = 'rating' | 'experience' | 'sales' | 'recent' | 'name';
 type SearchTab = 'all' | 'name' | 'location' | 'specialization';
@@ -157,37 +157,23 @@ const AgentsPage: React.FC = () => {
     setIsSubmittingContact(true);
 
     try {
-      const response = await fetch(`${API_URL}/agent-requests`, {
+      await apiRequest('/agent-requests', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(contactForm),
+        body: contactForm,
       });
 
-      if (response.ok) {
-        setContactSubmitSuccess(true);
-        setContactForm({
-          email: '',
-          phone: '',
-          location: '',
-          propertyDescription: ''
-        });
-        // Clear any existing timer before setting a new one
-        if (contactSuccessTimerRef.current) {
-          clearTimeout(contactSuccessTimerRef.current);
-        }
-        contactSuccessTimerRef.current = setTimeout(() => setContactSubmitSuccess(false), 5000);
-      } else {
-        dispatch({
-          type: 'SHOW_ALERT',
-          payload: {
-            type: 'error',
-            title: t('common:error', 'Error'),
-            message: t('common:errors.submitFailed', 'Failed to submit request. Please try again.'),
-          },
-        });
+      setContactSubmitSuccess(true);
+      setContactForm({
+        email: '',
+        phone: '',
+        location: '',
+        propertyDescription: ''
+      });
+      // Clear any existing timer before setting a new one
+      if (contactSuccessTimerRef.current) {
+        clearTimeout(contactSuccessTimerRef.current);
       }
+      contactSuccessTimerRef.current = setTimeout(() => setContactSubmitSuccess(false), 5000);
     } catch (error) {
       // Error removed
       dispatch({
@@ -807,9 +793,8 @@ const AgentsPage: React.FC = () => {
                     asLink={false}
                     onClick={async () => {
                       try {
-                        const response = await fetch(`${API_URL}/agencies/${agency._id}`);
-                        if (response.ok) {
-                          const data = await response.json();
+                        const data = await apiRequest<any>(`/agencies/${agency._id}`);
+                        if (data) {
                           dispatch({ type: 'SET_SELECTED_AGENCY', payload: data.agency });
                           dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'agencyDetail' });
                           const urlSlug = data.agency.slug || data.agency._id;

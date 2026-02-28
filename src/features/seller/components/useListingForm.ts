@@ -9,7 +9,7 @@ import * as api from '@/services/apiService';
 import imageCompression from 'browser-image-compression';
 import { PLAN_LISTING_LIMITS } from '@/shared/utils/subscriptionHelpers';
 import { SubscriptionPlan } from '@/shared/types/user.types';
-import { API_URL } from '@/src/shared/api/config';
+import { apiRequest } from '@/src/shared/api';
 import { ListingData, ImageData, Step, Mode, initialListingData, ALL_VALID_TAGS } from './ListingFormHelpers';
 
 /** Builds a preview Property object from form state (no API calls, no uploads). */
@@ -1146,26 +1146,17 @@ export const useListingForm = (propertyToEdit: Property | null) => {
             }
 
             // Now apply promotion to the created property
-            const token = localStorage.getItem('balkan_estate_token');
-
-            const response = await fetch(`${API_URL}/promotions`, {
+            await apiRequest('/promotions', {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`,
-                },
-                body: JSON.stringify({
+                body: {
                     propertyId: createdProperty.id,
                     promotionTier: promotionData.tier,
                     duration: promotionData.duration,
                     hasUrgentBadge: promotionData.hasUrgent,
                     couponCode: promotionData.couponCode,
-                }),
+                },
+                requiresAuth: true,
             });
-
-            if (!response.ok) {
-                // Error removed
-            }
 
             setPendingPropertyData(null);
             setStep('success');

@@ -8,7 +8,7 @@ import { useAppContext } from '../../../context/AppContext';
 import { MapPinIcon } from '../../../constants';
 import { parseMarkdown } from '../../utils/markdown';
 import { createSanitizedMarkup } from '../../shared/utils/sanitize';
-import { API_URL } from '../../shared/api/config';
+import { apiRequest } from '../../shared/api';
 
 // Map language codes to full language names for AI prompt
 const LANGUAGE_NAMES: Record<string, string> = {
@@ -82,38 +82,27 @@ export const NeighborhoodInsights: React.FC<NeighborhoodInsightsProps> = ({
     setError(null);
 
     try {
-      const token = localStorage.getItem('balkan_estate_token');
-
       // Get current language for AI response
       const currentLang = i18n.language?.split('-')[0] || 'en';
       const languageName = LANGUAGE_NAMES[currentLang] || 'English';
 
-      const response = await fetch(`${API_URL}/neighborhood-insights`, {
+      const data = await apiRequest<any>('/neighborhood-insights', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({ lat, lng, address, city, country, language: languageName }),
+        body: { lat, lng, address, city, country, language: languageName },
+        requiresAuth: true,
       });
 
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => null);
-        if (response.status === 429) {
-          setError(errorData?.message || 'Rate limit exceeded');
-          setUsage({ used: errorData?.used ?? 0, limit: errorData?.limit ?? 0, remaining: 0 });
-        } else {
-          setError(errorData?.message || 'Failed to fetch neighborhood insights');
-        }
-        return;
-      }
-
-      const data = await response.json();
       setInsights(data.insights);
       setUsage(data.usage);
-    } catch (err) {
-      if (err instanceof Error) setError(err.message);
-      else setError('An unknown error occurred.');
+    } catch (err: any) {
+      if (err.statusCode === 429) {
+        setError(err.message || 'Rate limit exceeded');
+        setUsage({ used: err.details?.used ?? 0, limit: err.details?.limit ?? 0, remaining: 0 });
+      } else if (err instanceof Error) {
+        setError(err.message);
+      } else {
+        setError('An unknown error occurred.');
+      }
     } finally {
       setLoading(false);
     }

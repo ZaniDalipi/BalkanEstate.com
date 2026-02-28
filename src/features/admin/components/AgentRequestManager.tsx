@@ -12,7 +12,7 @@ import {
   ClockIcon,
   UserGroupIcon,
 } from '@/constants';
-import { API_URL } from '@/src/shared/api/config';
+import { apiRequest } from '@/src/shared/api';
 
 interface AgentRequest {
   _id: string;
@@ -84,7 +84,6 @@ const AgentRequestManager: React.FC = () => {
   const fetchRequests = async () => {
     try {
       setIsLoading(true);
-      const token = localStorage.getItem('balkan_estate_token');
 
       const params = new URLSearchParams({
         page: currentPage.toString(),
@@ -92,20 +91,11 @@ const AgentRequestManager: React.FC = () => {
         ...(filterStatus !== 'all' && { status: filterStatus }),
       });
 
-      const response = await fetch(`${API_URL}/agent-requests?${params}`, {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-        },
-      });
-
-      if (!response.ok) throw new Error('Failed to fetch agent requests');
-
-      const data = await response.json();
+      const data = await apiRequest<any>(`/agent-requests?${params}`, { requiresAuth: true });
       setRequests(data.agentRequests || []);
       setTotalPages(data.pagination?.pages || 1);
     } catch (err) {
       setError('Failed to load agent requests');
-      // Error removed
     } finally {
       setIsLoading(false);
     }
@@ -113,17 +103,8 @@ const AgentRequestManager: React.FC = () => {
 
   const fetchStats = async () => {
     try {
-      const token = localStorage.getItem('balkan_estate_token');
-      const response = await fetch(`${API_URL}/agent-requests/stats`, {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-        },
-      });
-
-      if (response.ok) {
-        const data = await response.json();
-        setStats(data.stats);
-      }
+      const data = await apiRequest<any>('/agent-requests/stats', { requiresAuth: true });
+      setStats(data.stats);
     } catch (err) {
       // Error removed
     }
@@ -131,17 +112,11 @@ const AgentRequestManager: React.FC = () => {
 
   const updateRequest = async (requestId: string, updates: { status?: string; outcome?: string; notes?: string }) => {
     try {
-      const token = localStorage.getItem('balkan_estate_token');
-      const response = await fetch(`${API_URL}/agent-requests/${requestId}/status`, {
+      await apiRequest(`/agent-requests/${requestId}/status`, {
         method: 'PATCH',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(updates),
+        body: updates,
+        requiresAuth: true,
       });
-
-      if (!response.ok) throw new Error('Failed to update request');
 
       setSuccessMessage(t('notifications.updated'));
       setTimeout(() => setSuccessMessage(null), 3000);

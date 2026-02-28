@@ -1,6 +1,6 @@
 import mongoose, { Document, Schema } from 'mongoose';
 
-export type SubscriptionStore = 'google' | 'apple' | 'web' | 'agency_coupon';
+export type SubscriptionStore = 'google' | 'apple' | 'web' | 'stripe' | 'paddle' | 'agency_coupon';
 export type SubscriptionStatus =
   | 'active'
   | 'expired'
@@ -23,6 +23,8 @@ export interface ISubscription extends Document {
   purchaseToken?: string; // Google Play
   transactionId?: string; // Apple
   receiptData?: string; // Apple receipt
+  stripeSubscriptionId?: string; // Stripe
+  paddleSubscriptionId?: string; // Paddle
 
   // Dates
   startDate: Date;
@@ -86,7 +88,7 @@ const SubscriptionSchema: Schema = new Schema(
     },
     store: {
       type: String,
-      enum: ['google', 'apple', 'web', 'agency_coupon'],
+      enum: ['google', 'apple', 'web', 'stripe', 'paddle', 'agency_coupon'],
       required: true,
       index: true,
     },
@@ -103,6 +105,8 @@ const SubscriptionSchema: Schema = new Schema(
     appStoreProductId: {
       type: String,
     },
+    stripeSubscriptionId: { type: String, index: true, sparse: true },
+    paddleSubscriptionId: { type: String, index: true, sparse: true },
     // Store-specific identifiers
     purchaseToken: {
       type: String,

@@ -15,7 +15,7 @@ import {
   ChartBarIcon,
   ExclamationTriangleIcon,
 } from '@/constants';
-import { API_URL } from '@/src/shared/api/config';
+import { apiRequest } from '@/src/shared/api';
 import { validatePaymentRedirectUrl } from '@/src/utils/security';
 
 interface EnterprisePlan {
@@ -121,22 +121,13 @@ const AgencyPaymentPage: React.FC = () => {
     setError('');
 
     try {
-      const token = localStorage.getItem('balkan_estate_token');
-      const response = await fetch(`${API_URL}/coupons/validate`, {
+      const data = await apiRequest<any>('/coupons/validate', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,
-        },
-        body: JSON.stringify({
-          code: couponCode,
-          productId: enterprisePlan.productId,
-        }),
+        body: { code: couponCode, productId: enterprisePlan.productId },
+        requiresAuth: true,
       });
 
-      const data = await response.json();
-
-      if (response.ok && data.valid) {
+      if (data.valid) {
         setAppliedCoupon({
           code: couponCode,
           discount: data.discountPercent || data.discountAmount || 0,
@@ -144,8 +135,8 @@ const AgencyPaymentPage: React.FC = () => {
       } else {
         setError(data.message || t('payment.invalidCoupon', 'Invalid coupon code'));
       }
-    } catch (err) {
-      setError(t('payment.couponError', 'Failed to validate coupon'));
+    } catch (err: any) {
+      setError(err.message || t('payment.couponError', 'Failed to validate coupon'));
     } finally {
       setApplyingCoupon(false);
     }
@@ -167,16 +158,9 @@ const AgencyPaymentPage: React.FC = () => {
     setError('');
 
     try {
-      const token = localStorage.getItem('balkan_estate_token');
-
-      // Create payment checkout session
-      const response = await fetch(`${API_URL}/payments/create-checkout-session`, {
+      const data = await apiRequest<any>('/payments/create-checkout-session', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,
-        },
-        body: JSON.stringify({
+        body: {
           productId: enterprisePlan.productId,
           couponCode: appliedCoupon?.code,
           successUrl: `${window.location.origin}/create-agency/confirm`,
@@ -185,12 +169,11 @@ const AgencyPaymentPage: React.FC = () => {
             agencyCreation: true,
             agencyData: JSON.stringify(pendingAgencyData),
           },
-        }),
+        },
+        requiresAuth: true,
       });
 
-      const data = await response.json();
-
-      if (response.ok && data.url) {
+      if (data.url) {
         // Redirect to payment checkout (validated against allowlist)
         const validatedUrl = validatePaymentRedirectUrl(data.url);
         if (validatedUrl) {
@@ -201,9 +184,8 @@ const AgencyPaymentPage: React.FC = () => {
       } else {
         setError(data.message || t('payment.error', 'Failed to initiate payment'));
       }
-    } catch (err) {
-      // Error removed
-      setError(t('payment.error', 'Failed to initiate payment. Please try again.'));
+    } catch (err: any) {
+      setError(err.message || t('payment.error', 'Failed to initiate payment. Please try again.'));
     } finally {
       setIsLoading(false);
     }
@@ -218,9 +200,6 @@ const AgencyPaymentPage: React.FC = () => {
     setSuccessMessage('');
 
     try {
-      const token = localStorage.getItem('balkan_estate_token');
-      if (!token) throw new Error('Please log in to create your agency');
-
       const agencyData = {
         ...pendingAgencyData,
         yearsInBusiness: pendingAgencyData.yearsInBusiness
@@ -228,21 +207,7 @@ const AgencyPaymentPage: React.FC = () => {
           : undefined,
       };
 
-      const response = await fetch(`${API_URL}/agencies`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,
-        },
-        body: JSON.stringify(agencyData),
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => null);
-        throw new Error(errorData?.message || 'Failed to create agency. Please try again.');
-      }
-
-      const data = await response.json();
+      const data = await createAgency(agencyData);
 
       // Clear pending data and show success
       dispatch({ type: 'SET_PENDING_AGENCY_DATA', payload: null });
@@ -261,13 +226,8 @@ const AgencyPaymentPage: React.FC = () => {
       // Refresh user data
       setTimeout(async () => {
         try {
-          const userResponse = await fetch(`${API_URL}/auth/me`, {
-            headers: { 'Authorization': `Bearer ${token}` },
-          });
-          if (userResponse.ok) {
-            const userData = await userResponse.json();
-            dispatch({ type: 'SET_CURRENT_USER', payload: userData });
-          }
+          const userData = await apiRequest<any>('/auth/me', { requiresAuth: true });
+          dispatch({ type: 'SET_CURRENT_USER', payload: userData });
         } catch {
           // Non-critical
         }

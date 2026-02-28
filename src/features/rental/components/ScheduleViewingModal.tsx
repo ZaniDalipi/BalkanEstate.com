@@ -3,6 +3,7 @@ import { createPortal } from 'react-dom';
 import { useTranslation } from 'react-i18next';
 import { Property } from '@/types';
 import { API_CONFIG } from '@/src/shared/constants/app.constants';
+import { apiRequest } from '@/src/shared/api';
 
 interface ScheduleViewingModalProps {
     property: Property;
@@ -241,10 +242,9 @@ const ScheduleViewingModal: React.FC<ScheduleViewingModalProps> = ({ property, i
         setIsSubmitting(true);
 
         try {
-            const response = await fetch(`${API_CONFIG.BASE_URL}/viewings`, {
+            await apiRequest('/viewings', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
+                body: {
                     propertyId: property.id,
                     date: selectedDate,
                     timeSlot: selectedTime,
@@ -252,27 +252,20 @@ const ScheduleViewingModal: React.FC<ScheduleViewingModalProps> = ({ property, i
                     visitorEmail: email.trim(),
                     visitorPhone: phone.trim() || undefined,
                     visitorMessage: message.trim() || undefined,
-                }),
+                },
             });
 
-            if (!response.ok) {
-                const errorData = await response.json().catch(() => null);
-                // Handle specific backend errors
-                if (response.status === 409) {
-                    // Slot was booked by someone else — refresh booked slots
-                    setAvailability(prev => prev ? {
-                        ...prev,
-                        bookedSlots: [...prev.bookedSlots, bookedKey],
-                    } : prev);
-                    setSelectedTime('');
-                    setStep('datetime');
-                }
-                throw new Error(errorData?.message || 'Failed to schedule viewing');
-            }
-
-            const data = await response.json();
             setIsSubmitted(true);
         } catch (err: unknown) {
+            // Handle slot conflict (409) by refreshing booked slots
+            if (typeof err === 'object' && err !== null && (err as any).statusCode === 409) {
+                setAvailability(prev => prev ? {
+                    ...prev,
+                    bookedSlots: [...prev.bookedSlots, bookedKey],
+                } : prev);
+                setSelectedTime('');
+                setStep('datetime');
+            }
             const message = err instanceof Error ? err.message : String(err);
             setError(message || t('rental:viewing.errors.submitFailed', 'Failed to schedule viewing. Please try again.'));
         } finally {

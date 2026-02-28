@@ -7,7 +7,7 @@ import {
   ShieldCheckIcon,
 } from '@/constants';
 import { User, UserEditForm } from './useUserManager';
-import { API_URL } from '@/src/shared/api/config';
+import { apiRequest } from '@/src/shared/api';
 
 interface UserManagerDetailProps {
   // Detail modal
@@ -433,13 +433,11 @@ function SubscriptionPanel({ viewingUser }: { viewingUser: User }) {
     if (isNaN(val) || val < 0) { setErr(t('userDetail.invalidNumber')); return; }
     setSaving(true); setErr('');
     try {
-      const token = localStorage.getItem('balkan_estate_token');
-      const res = await fetch(`${API_URL}/admin/subscriptions/listing-limit/${viewingUser._id}`, {
+      await apiRequest(`/admin/subscriptions/listing-limit/${viewingUser._id}`, {
         method: 'PATCH',
-        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-        body: JSON.stringify({ listingsLimit: val, reason: 'Admin manual override' }),
+        body: { listingsLimit: val, reason: 'Admin manual override' },
+        requiresAuth: true,
       });
-      if (!res.ok) throw new Error((await res.json()).message || 'Failed');
       setSaved(true);
       setTimeout(() => setSaved(false), 3000);
     } catch (e: any) {
