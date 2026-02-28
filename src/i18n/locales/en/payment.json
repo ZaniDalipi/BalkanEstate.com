@@ -140,13 +140,13 @@
     "title": "Taxes May Apply",
     "description": "The final price at checkout may include applicable VAT/taxes based on your location. Paysera handles all tax compliance automatically."
   },
-  "stripe": {
-    "securePayment": "Secure payment powered by Stripe",
-    "redirecting": "Redirecting to Stripe checkout...",
-    "verifying": "Verifying Stripe payment...",
-    "paymentSuccessful": "Stripe payment confirmed",
-    "paymentFailed": "Stripe payment failed",
-    "paymentPending": "Stripe payment is being processed",
+  "webhook": {
+    "securePayment": "Secure payment powered by {{provider}}",
+    "redirecting": "Redirecting to secure checkout...",
+    "verifying": "Verifying your payment...",
+    "paymentSuccessful": "Payment confirmed",
+    "paymentFailed": "Payment failed",
+    "paymentPending": "Payment is being processed",
     "webhookError": "Payment notification processing error",
     "signatureInvalid": "Invalid payment notification signature",
     "subscriptionRenewed": "Your subscription has been renewed",

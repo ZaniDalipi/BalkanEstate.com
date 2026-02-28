@@ -174,12 +174,9 @@ if (process.env.APP_STORE_ISSUER_ID && process.env.APP_STORE_KEY_ID && process.e
   }
 }
 
-// Log Stripe service availability (lazy-initialized on first use)
-if (process.env.STRIPE_SECRET_KEY && process.env.STRIPE_WEBHOOK_SECRET) {
-  serverLogger.info('✅ Stripe Service configured (webhook signature verification enabled)');
-} else {
-  serverLogger.info('ℹ️  Stripe Service not configured (set STRIPE_SECRET_KEY and STRIPE_WEBHOOK_SECRET to enable)');
-}
+// Log payment provider status from the universal registry
+import { providerRegistry } from './services/providers/providerRegistry';
+providerRegistry.logStatus();
 
 // Start reconciliation worker (if enabled)
 if (process.env.ENABLE_RECONCILIATION === 'true') {
@@ -212,9 +209,14 @@ serverLogger.info('✅ Monthly coupon refresh job started (1st of each month)');
 // ============================================================================
 applySecurityMiddleware(app);
 
-// Body parser — skip JSON parsing for Stripe webhook (requires raw body for signature verification)
+// Body parser — skip JSON parsing for webhook routes that require raw body
+// (e.g. Stripe needs raw body for signature verification)
+const rawBodyWebhookPaths = providerRegistry
+  .getProvidersRequiringRawBody()
+  .map(p => `/api/webhooks/${p.name}`);
+
 app.use((req: Request, res: Response, next: NextFunction) => {
-  if (req.originalUrl === '/api/webhooks/stripe') {
+  if (rawBodyWebhookPaths.some(path => req.originalUrl === path)) {
     next();
   } else {
     express.json({ limit: '10mb' })(req, res, next);

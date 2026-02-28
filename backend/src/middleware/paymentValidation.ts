@@ -32,9 +32,13 @@ const SUPPORTED_PLAN_NAMES = [
 const SUPPORTED_INTERVALS = ['month', 'year', 'one_time'];
 
 /**
- * Supported payment providers
+ * Supported payment providers — dynamically populated from the provider registry.
+ * Lazy-loaded to avoid circular dependency at module load time.
  */
-const SUPPORTED_PROVIDERS = ['paysera', 'stripe', 'web'];
+function getSupportedProviders(): string[] {
+  const { paymentProviderFactory } = require('../services/paymentProviderFactory');
+  return paymentProviderFactory.getRegisteredProviderNames();
+}
 
 /**
  * Run validations and return 400 on failure
@@ -93,7 +97,12 @@ export const validateCreatePayment: (ValidationChain | typeof handleValidationEr
   body('preferredProvider')
     .optional()
     .trim()
-    .isIn(SUPPORTED_PROVIDERS).withMessage('Invalid payment provider'),
+    .custom((value: string) => {
+      if (!getSupportedProviders().includes(value)) {
+        throw new Error('Invalid payment provider');
+      }
+      return true;
+    }),
 
   handleValidationErrors,
 ];

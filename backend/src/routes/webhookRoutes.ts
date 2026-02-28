@@ -1,19 +1,28 @@
 import express from 'express';
 import { handleGooglePlayNotification } from '../controllers/googlePlayWebhookController';
 import { handleAppStoreNotification } from '../controllers/appStoreWebhookController';
-import { handleStripeWebhook } from '../controllers/stripeWebhookController';
+import { handleProviderWebhook } from '../controllers/webhookController';
+import { providerRegistry } from '../services/providers/providerRegistry';
 
 const router = express.Router();
 
-// Webhook endpoints (no authentication - verified via cryptographic signature)
+// Webhook endpoints (no authentication - verified via provider-specific signature)
 
-// Google Play — Mobile app subscriptions
+// Google Play — Mobile app subscriptions (Pub/Sub)
 router.post('/google-play', handleGooglePlayNotification);
 
-// App Store — iOS app subscriptions
+// App Store — iOS app subscriptions (JWT)
 router.post('/app-store', handleAppStoreNotification);
 
-// Stripe — Web subscriptions (requires raw body for signature verification)
-router.post('/stripe', express.raw({ type: 'application/json' }), handleStripeWebhook);
+// Universal payment provider webhooks (Stripe, Paysera, Paddle, etc.)
+// Providers that need raw body get express.raw() middleware automatically
+router.post('/:provider', (req, res, next) => {
+  const provider = providerRegistry.get(req.params.provider as string);
+  if (provider?.requiresRawBody()) {
+    express.raw({ type: 'application/json' })(req, res, next);
+  } else {
+    next();
+  }
+}, handleProviderWebhook);
 
 export default router;

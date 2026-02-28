@@ -2,23 +2,26 @@
  * Payment Provider Factory
  *
  * Unified payment routing system for all 11 Balkan countries.
+ * Uses the provider registry to discover available providers dynamically.
  *
  * Provider Strategy:
  * - Paysera (Primary): Handles card, Google Pay, Apple Pay, bank transfers,
  *   SEPA, and e-wallet payments for all Balkan countries.
+ * - Additional providers (Stripe, Paddle, etc.) can be used via preferredProvider
+ *   or as fallbacks when the primary provider is not configured.
  */
 
-import { payseraService, type PayseraPaymentMethod } from './payseraService';
-import { stripeService } from './stripeService';
+import { providerRegistry } from './providers/providerRegistry';
+import type { IPaymentProvider } from '../interfaces/IPaymentProvider';
 
-// Payment provider types
-export type PaymentProvider = 'paysera' | 'stripe' | 'web';
+// Payment provider types — dynamically extended by registered providers
+export type PaymentProvider = string;
 
 // Country to provider mapping
 export interface CountryProviderMapping {
   countryCode: string;
   countryName: string;
-  provider: PaymentProvider;
+  provider: string;
   currency: string;
   isEU: boolean;
   isSEPA: boolean;
@@ -73,19 +76,31 @@ export interface PaymentResult {
 /**
  * Payment Provider Factory Class
  *
- * Routes payment creation to Paysera based on country and configuration.
+ * Routes payment creation through the provider registry.
+ * All provider-specific logic lives in the adapter implementations.
  */
 class PaymentProviderFactory {
   /**
    * Get the appropriate payment provider for a country.
+   * Checks the country mapping first, then falls back to any configured provider.
    */
   public getProviderForCountry(countryCode: string): PaymentProvider {
-    if (payseraService.isConfigured()) {
-      return 'paysera';
+    const mapping = COUNTRY_PROVIDER_MAP[countryCode.toUpperCase()];
+    const preferredName = mapping?.provider || 'paysera';
+
+    // Check if the mapped provider is configured
+    const preferred = providerRegistry.get(preferredName);
+    if (preferred?.isConfigured()) {
+      return preferredName;
     }
 
-    const mapping = COUNTRY_PROVIDER_MAP[countryCode.toUpperCase()];
-    return mapping?.provider || 'paysera';
+    // Fall back to any configured provider
+    const configured = providerRegistry.getConfigured();
+    if (configured.length > 0) {
+      return configured[0].name;
+    }
+
+    return 'web';
   }
 
   /**
@@ -117,97 +132,52 @@ class PaymentProviderFactory {
   }
 
   /**
-   * Create a payment session using the appropriate provider
+   * Create a payment session using the appropriate provider.
+   * Delegates entirely to the provider adapter via the registry.
    */
   public async createPayment(params: CreatePaymentParams): Promise<PaymentResult> {
-    const provider = params.preferredProvider || this.getProviderForCountry(params.countryCode);
+    const providerName = params.preferredProvider || this.getProviderForCountry(params.countryCode);
+    const provider = providerRegistry.get(providerName);
 
-    switch (provider) {
-      case 'paysera':
-        return this.createPayseraPayment(params);
-
-      case 'stripe':
-        return this.createStripePayment(params);
-
-      default:
-        if (payseraService.isConfigured()) return this.createPayseraPayment(params);
-        if (stripeService.isConfigured()) return this.createStripePayment(params);
-        return {
-          success: false,
-          provider: 'web',
-          error: 'No payment provider is configured. Please set up Paysera or Stripe environment variables.',
-        };
-    }
-  }
-
-  /**
-   * Create a Paysera payment session (card, Google Pay, Apple Pay, bank transfers)
-   */
-  private async createPayseraPayment(params: CreatePaymentParams): Promise<PaymentResult> {
-    if (!payseraService.isConfigured()) {
-      return {
-        success: false,
-        provider: 'paysera',
-        error: 'Paysera is not configured',
-      };
+    if (provider?.isConfigured()) {
+      return this.createSessionViaProvider(provider, params);
     }
 
-    const orderId = `BE_${params.userId.slice(-8)}_${Date.now()}`;
-
-    const result = await payseraService.createPayment({
-      orderId,
-      amount: Math.round(params.amount * 100), // Convert to cents
-      currency: 'EUR',
-      country: params.countryCode,
-      description: `BalkanEstate ${params.planName} subscription`,
-      email: params.userEmail,
-      userId: params.userId,
-      productId: params.productId,
-      planName: params.planName,
-      planInterval: params.planInterval,
-      firstName: params.firstName,
-      lastName: params.lastName,
-      language: params.language,
-      paymentMethod: params.paymentMethod as PayseraPaymentMethod,
-    });
-
-    if (result.success) {
-      return {
-        success: true,
-        provider: 'paysera',
-        paymentUrl: result.paymentUrl,
-        orderId: result.orderId,
-      };
+    // Fall back to any configured provider
+    const configured = providerRegistry.getConfigured();
+    if (configured.length > 0) {
+      return this.createSessionViaProvider(configured[0], params);
     }
 
     return {
       success: false,
-      provider: 'paysera',
-      error: result.error || 'Failed to create Paysera payment',
+      provider: 'web',
+      error: 'No payment provider is configured. Please set up payment environment variables.',
     };
   }
 
   /**
-   * Create a Stripe Checkout payment session
+   * Create a session through a specific provider adapter.
    */
-  private async createStripePayment(params: CreatePaymentParams): Promise<PaymentResult> {
-    if (!stripeService.isConfigured()) {
-      return {
-        success: false,
-        provider: 'stripe',
-        error: 'Stripe is not configured',
-      };
-    }
-
+  private async createSessionViaProvider(
+    provider: IPaymentProvider,
+    params: CreatePaymentParams
+  ): Promise<PaymentResult> {
     const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
 
-    const result = await stripeService.createCheckoutSession({
+    const result = await provider.createSession({
       userId: params.userId,
       userEmail: params.userEmail,
       productId: params.productId,
-      stripePriceId: params.productId, // Product should have Stripe price ID configured
       planName: params.planName,
       planInterval: params.planInterval,
+      amount: params.amount,
+      currency: 'EUR',
+      countryCode: params.countryCode,
+      language: params.language,
+      firstName: params.firstName,
+      lastName: params.lastName,
+      paymentMethod: params.paymentMethod,
       successUrl: `${frontendUrl}/payment/success?session_id={CHECKOUT_SESSION_ID}`,
       cancelUrl: `${frontendUrl}/payment/cancel`,
     });
@@ -215,16 +185,17 @@ class PaymentProviderFactory {
     if (result.success) {
       return {
         success: true,
-        provider: 'stripe',
+        provider: provider.name,
         paymentUrl: result.paymentUrl,
         sessionId: result.sessionId,
+        orderId: result.sessionId,
       };
     }
 
     return {
       success: false,
-      provider: 'stripe',
-      error: result.error || 'Failed to create Stripe payment',
+      provider: provider.name,
+      error: result.error || `Failed to create ${provider.displayName} payment`,
     };
   }
 
@@ -250,7 +221,7 @@ class PaymentProviderFactory {
     lastName?: string;
   }): Promise<PaymentResult> {
     const promoType = params.promotionType || params.promotionTier || 'standard';
-    return this.createPayseraPayment({
+    return this.createPayment({
       ...params,
       countryCode: params.countryCode || 'GR',
       productId: `promotion_${promoType}`,
@@ -260,29 +231,24 @@ class PaymentProviderFactory {
   }
 
   /**
-   * Get provider info for display purposes
+   * Get provider info for display purposes.
+   * Reads from the provider adapter if available, otherwise generic fallback.
    */
   public getProviderInfo(provider: PaymentProvider): { name: string; description: string; fees: string } {
-    switch (provider) {
-      case 'paysera':
-        return {
-          name: 'Paysera',
-          description: 'Secure payments with card, Google Pay, Apple Pay, and bank transfer',
-          fees: '~1.5-2.5% for card/wallet, lower for bank transfers',
-        };
-      case 'stripe':
-        return {
-          name: 'Stripe',
-          description: 'Secure card payments powered by Stripe',
-          fees: '~2.9% + 30¢ per successful charge',
-        };
-      default:
-        return {
-          name: 'Web Payment',
-          description: 'Secure online payment',
-          fees: 'Standard processing fees',
-        };
+    const adapter = providerRegistry.get(provider);
+    if (adapter) {
+      return {
+        name: adapter.displayName,
+        description: adapter.description,
+        fees: adapter.getFeeDescription(),
+      };
     }
+
+    return {
+      name: 'Web Payment',
+      description: 'Secure online payment',
+      fees: 'Standard processing fees',
+    };
   }
 
   /**
@@ -292,19 +258,24 @@ class PaymentProviderFactory {
     const mapping = this.getCountryMapping(countryCode);
     const methods: string[] = [];
 
-    if (stripeService.isConfigured()) {
-      methods.push('card');
+    for (const provider of providerRegistry.getConfigured()) {
+      methods.push(...provider.getSupportedPaymentMethods());
     }
 
-    if (payseraService.isConfigured()) {
-      methods.push('card', 'google_pay', 'apple_pay');
-      methods.push('bank_transfer');
-      if (mapping?.isSEPA) methods.push('sepa_debit');
-      methods.push('wallet');
+    // Add SEPA for supported countries
+    if (mapping?.isSEPA && methods.includes('card')) {
+      methods.push('sepa_debit');
     }
 
     // Deduplicate
     return [...new Set(methods)];
+  }
+
+  /**
+   * Get all registered provider names (for validation).
+   */
+  public getRegisteredProviderNames(): string[] {
+    return [...providerRegistry.getNames(), 'web'];
   }
 }
 

@@ -1,254 +1,251 @@
 /**
- * Stripe Webhook Verification Tests
+ * Universal Payment Provider Tests
  *
- * Tests for Stripe webhook signature verification and event processing.
+ * Tests for the IPaymentProvider interface, provider registry,
+ * Stripe adapter, Paysera adapter, and universal webhook controller.
+ *
  * Run: npm test -- --testPathPattern=stripe-webhook
  */
 
 import Stripe from 'stripe';
-import { stripeService } from '../services/stripeService';
 
 // ============================================================
-// STRIPE SERVICE TESTS
+// PROVIDER REGISTRY TESTS
 // ============================================================
 
-describe('StripeService', () => {
-  describe('isConfigured', () => {
-    const originalEnv = process.env;
-
-    beforeEach(() => {
-      process.env = { ...originalEnv };
-    });
-
-    afterAll(() => {
-      process.env = originalEnv;
-    });
-
-    test('returns false when STRIPE_SECRET_KEY is not set', () => {
-      delete process.env.STRIPE_SECRET_KEY;
-      delete process.env.STRIPE_WEBHOOK_SECRET;
-      expect(stripeService.isConfigured()).toBe(false);
-    });
-
-    test('returns false when STRIPE_WEBHOOK_SECRET is not set', () => {
-      process.env.STRIPE_SECRET_KEY = 'sk_test_123';
-      delete process.env.STRIPE_WEBHOOK_SECRET;
-      expect(stripeService.isConfigured()).toBe(false);
-    });
-
-    test('returns true when both keys are set', () => {
-      process.env.STRIPE_SECRET_KEY = 'sk_test_123';
-      process.env.STRIPE_WEBHOOK_SECRET = 'whsec_test_123';
-      expect(stripeService.isConfigured()).toBe(true);
-    });
+describe('ProviderRegistry', () => {
+  test('registers and retrieves Stripe adapter', () => {
+    const { providerRegistry } = require('../services/providers/providerRegistry');
+    const stripe = providerRegistry.get('stripe');
+    expect(stripe).not.toBeNull();
+    expect(stripe!.name).toBe('stripe');
+    expect(stripe!.displayName).toBe('Stripe');
   });
 
-  describe('verifyWebhookSignature', () => {
-    const originalEnv = process.env;
-
-    beforeEach(() => {
-      process.env = { ...originalEnv };
-    });
-
-    afterAll(() => {
-      process.env = originalEnv;
-    });
-
-    test('returns invalid when webhook secret is not configured', () => {
-      process.env.STRIPE_SECRET_KEY = 'sk_test_123';
-      delete process.env.STRIPE_WEBHOOK_SECRET;
-
-      // Force re-initialization by creating a fresh service
-      const { StripeService } = jest.requireActual('../services/stripeService') as any;
-
-      const result = stripeService.verifyWebhookSignature(
-        Buffer.from('{}'),
-        'invalid_sig'
-      );
-
-      expect(result.valid).toBe(false);
-      expect(result.event).toBeNull();
-    });
-
-    test('returns invalid for tampered payload', () => {
-      process.env.STRIPE_SECRET_KEY = 'sk_test_51ABC123';
-      process.env.STRIPE_WEBHOOK_SECRET = 'whsec_test_secret';
-
-      const result = stripeService.verifyWebhookSignature(
-        Buffer.from('{"tampered": true}'),
-        't=1234567890,v1=invalid_signature_hash'
-      );
-
-      expect(result.valid).toBe(false);
-      expect(result.event).toBeNull();
-      expect(result.error).toBeDefined();
-    });
-
-    test('returns invalid for empty signature', () => {
-      process.env.STRIPE_SECRET_KEY = 'sk_test_51ABC123';
-      process.env.STRIPE_WEBHOOK_SECRET = 'whsec_test_secret';
-
-      const result = stripeService.verifyWebhookSignature(
-        Buffer.from('{"id": "evt_test"}'),
-        ''
-      );
-
-      expect(result.valid).toBe(false);
-      expect(result.event).toBeNull();
-    });
-
-    test('returns invalid for missing timestamp in signature', () => {
-      process.env.STRIPE_SECRET_KEY = 'sk_test_51ABC123';
-      process.env.STRIPE_WEBHOOK_SECRET = 'whsec_test_secret';
-
-      const result = stripeService.verifyWebhookSignature(
-        Buffer.from('{"id": "evt_test"}'),
-        'v1=abc123'
-      );
-
-      expect(result.valid).toBe(false);
-      expect(result.event).toBeNull();
-    });
+  test('registers and retrieves Paysera adapter', () => {
+    const { providerRegistry } = require('../services/providers/providerRegistry');
+    const paysera = providerRegistry.get('paysera');
+    expect(paysera).not.toBeNull();
+    expect(paysera!.name).toBe('paysera');
+    expect(paysera!.displayName).toBe('Paysera');
   });
 
-  describe('extractSessionMetadata', () => {
-    test('returns metadata when all required fields present', () => {
-      const mockSession = {
-        id: 'cs_test_123',
-        metadata: {
-          userId: 'user_abc',
-          productId: 'pro_monthly',
-          planName: 'Pro Monthly',
-          planInterval: 'month',
-        },
-      } as unknown as Stripe.Checkout.Session;
-
-      const result = stripeService.extractSessionMetadata(mockSession);
-
-      expect(result).not.toBeNull();
-      expect(result!.userId).toBe('user_abc');
-      expect(result!.productId).toBe('pro_monthly');
-      expect(result!.planName).toBe('Pro Monthly');
-      expect(result!.planInterval).toBe('month');
-    });
-
-    test('returns null when userId is missing', () => {
-      const mockSession = {
-        id: 'cs_test_123',
-        metadata: {
-          productId: 'pro_monthly',
-        },
-      } as unknown as Stripe.Checkout.Session;
-
-      const result = stripeService.extractSessionMetadata(mockSession);
-      expect(result).toBeNull();
-    });
-
-    test('returns null when productId is missing', () => {
-      const mockSession = {
-        id: 'cs_test_123',
-        metadata: {
-          userId: 'user_abc',
-        },
-      } as unknown as Stripe.Checkout.Session;
-
-      const result = stripeService.extractSessionMetadata(mockSession);
-      expect(result).toBeNull();
-    });
-
-    test('returns null when metadata is null', () => {
-      const mockSession = {
-        id: 'cs_test_123',
-        metadata: null,
-      } as unknown as Stripe.Checkout.Session;
-
-      const result = stripeService.extractSessionMetadata(mockSession);
-      expect(result).toBeNull();
-    });
-
-    test('uses defaults for optional fields', () => {
-      const mockSession = {
-        id: 'cs_test_123',
-        metadata: {
-          userId: 'user_abc',
-          productId: 'pro_monthly',
-        },
-      } as unknown as Stripe.Checkout.Session;
-
-      const result = stripeService.extractSessionMetadata(mockSession);
-
-      expect(result).not.toBeNull();
-      expect(result!.planName).toBe('Stripe Subscription');
-      expect(result!.planInterval).toBe('month');
-    });
+  test('returns null for unknown provider', () => {
+    const { providerRegistry } = require('../services/providers/providerRegistry');
+    expect(providerRegistry.get('nonexistent')).toBeNull();
   });
 
-  describe('extractSubscriptionDetails', () => {
-    test('extracts details from subscription with string customer', () => {
-      const mockSubscription = {
-        id: 'sub_test_123',
-        customer: 'cus_test_456',
-        status: 'active',
-        current_period_end: 1700000000,
-        cancel_at_period_end: false,
-        metadata: { userId: 'user_abc' },
-      } as unknown as Stripe.Subscription;
+  test('getAll returns at least 2 providers', () => {
+    const { providerRegistry } = require('../services/providers/providerRegistry');
+    expect(providerRegistry.getAll().length).toBeGreaterThanOrEqual(2);
+  });
 
-      const details = stripeService.extractSubscriptionDetails(mockSubscription);
-
-      expect(details.stripeSubscriptionId).toBe('sub_test_123');
-      expect(details.stripeCustomerId).toBe('cus_test_456');
-      expect(details.status).toBe('active');
-      expect(details.currentPeriodEnd).toEqual(new Date(1700000000 * 1000));
-      expect(details.cancelAtPeriodEnd).toBe(false);
-      expect(details.metadata.userId).toBe('user_abc');
-    });
-
-    test('extracts customer ID from customer object', () => {
-      const mockSubscription = {
-        id: 'sub_test_123',
-        customer: { id: 'cus_test_789' },
-        status: 'canceled',
-        current_period_end: 1700000000,
-        cancel_at_period_end: true,
-        metadata: {},
-      } as unknown as Stripe.Subscription;
-
-      const details = stripeService.extractSubscriptionDetails(mockSubscription);
-
-      expect(details.stripeCustomerId).toBe('cus_test_789');
-      expect(details.cancelAtPeriodEnd).toBe(true);
-    });
+  test('getNames includes stripe and paysera', () => {
+    const { providerRegistry } = require('../services/providers/providerRegistry');
+    const names = providerRegistry.getNames();
+    expect(names).toContain('stripe');
+    expect(names).toContain('paysera');
   });
 });
 
 // ============================================================
-// WEBHOOK CONTROLLER TESTS (unit-level, no HTTP)
+// STRIPE ADAPTER TESTS
 // ============================================================
 
-describe('Stripe Webhook Controller', () => {
-  test('module exports handleStripeWebhook and verifyStripePayment', () => {
-    const controller = require('../controllers/stripeWebhookController');
-    expect(typeof controller.handleStripeWebhook).toBe('function');
-    expect(typeof controller.verifyStripePayment).toBe('function');
+describe('StripeAdapter', () => {
+  const originalEnv = process.env;
+
+  beforeEach(() => {
+    process.env = { ...originalEnv };
+  });
+
+  afterAll(() => {
+    process.env = originalEnv;
+  });
+
+  test('implements IPaymentProvider interface', () => {
+    const { stripeAdapter } = require('../services/providers/stripeAdapter');
+    expect(stripeAdapter.name).toBe('stripe');
+    expect(stripeAdapter.displayName).toBe('Stripe');
+    expect(typeof stripeAdapter.isConfigured).toBe('function');
+    expect(typeof stripeAdapter.requiresRawBody).toBe('function');
+    expect(typeof stripeAdapter.getSignatureHeaderName).toBe('function');
+    expect(typeof stripeAdapter.verifyAndParseWebhook).toBe('function');
+    expect(typeof stripeAdapter.createSession).toBe('function');
+    expect(typeof stripeAdapter.verifyPayment).toBe('function');
+    expect(typeof stripeAdapter.getSupportedPaymentMethods).toBe('function');
+    expect(typeof stripeAdapter.getFeeDescription).toBe('function');
+  });
+
+  test('requiresRawBody returns true', () => {
+    const { stripeAdapter } = require('../services/providers/stripeAdapter');
+    expect(stripeAdapter.requiresRawBody()).toBe(true);
+  });
+
+  test('getSignatureHeaderName returns stripe-signature', () => {
+    const { stripeAdapter } = require('../services/providers/stripeAdapter');
+    expect(stripeAdapter.getSignatureHeaderName()).toBe('stripe-signature');
+  });
+
+  test('isConfigured returns false without env vars', () => {
+    delete process.env.STRIPE_SECRET_KEY;
+    delete process.env.STRIPE_WEBHOOK_SECRET;
+    const { stripeAdapter } = require('../services/providers/stripeAdapter');
+    expect(stripeAdapter.isConfigured()).toBe(false);
+  });
+
+  test('isConfigured returns true with both env vars', () => {
+    process.env.STRIPE_SECRET_KEY = 'sk_test_123';
+    process.env.STRIPE_WEBHOOK_SECRET = 'whsec_test_123';
+    const { stripeAdapter } = require('../services/providers/stripeAdapter');
+    expect(stripeAdapter.isConfigured()).toBe(true);
+  });
+
+  test('getSupportedPaymentMethods includes card', () => {
+    const { stripeAdapter } = require('../services/providers/stripeAdapter');
+    expect(stripeAdapter.getSupportedPaymentMethods()).toContain('card');
+  });
+
+  test('verifyAndParseWebhook fails with tampered signature', () => {
+    process.env.STRIPE_SECRET_KEY = 'sk_test_51ABC123';
+    process.env.STRIPE_WEBHOOK_SECRET = 'whsec_test_secret';
+
+    const { stripeAdapter } = require('../services/providers/stripeAdapter');
+
+    const mockReq = {
+      body: Buffer.from('{"tampered": true}'),
+      headers: { 'stripe-signature': 't=1234567890,v1=invalid_signature_hash' },
+    };
+
+    const result = stripeAdapter.verifyAndParseWebhook(mockReq);
+    expect(result.valid).toBe(false);
+    expect(result.event).toBeNull();
+    expect(result.error).toBeDefined();
+  });
+
+  test('verifyAndParseWebhook fails with missing signature header', () => {
+    process.env.STRIPE_SECRET_KEY = 'sk_test_51ABC123';
+    process.env.STRIPE_WEBHOOK_SECRET = 'whsec_test_secret';
+
+    const { stripeAdapter } = require('../services/providers/stripeAdapter');
+
+    const mockReq = {
+      body: Buffer.from('{}'),
+      headers: {},
+    };
+
+    const result = stripeAdapter.verifyAndParseWebhook(mockReq);
+    expect(result.valid).toBe(false);
+    expect(result.error).toContain('Missing stripe-signature');
   });
 });
 
 // ============================================================
-// PAYMENT PROVIDER FACTORY — STRIPE INTEGRATION
+// PAYSERA ADAPTER TESTS
 // ============================================================
 
-describe('PaymentProviderFactory - Stripe', () => {
-  test('includes stripe in provider type', () => {
-    const { paymentProviderFactory } = require('../services/paymentProviderFactory');
-    const info = paymentProviderFactory.getProviderInfo('stripe');
-    expect(info.name).toBe('Stripe');
-    expect(info.description).toContain('Stripe');
+describe('PayseraAdapter', () => {
+  test('implements IPaymentProvider interface', () => {
+    const { payseraAdapter } = require('../services/providers/payseraAdapter');
+    expect(payseraAdapter.name).toBe('paysera');
+    expect(payseraAdapter.displayName).toBe('Paysera');
+    expect(typeof payseraAdapter.isConfigured).toBe('function');
+    expect(typeof payseraAdapter.requiresRawBody).toBe('function');
+    expect(typeof payseraAdapter.verifyAndParseWebhook).toBe('function');
+    expect(typeof payseraAdapter.createSession).toBe('function');
+    expect(typeof payseraAdapter.verifyPayment).toBe('function');
   });
 
-  test('returns generic info for unknown provider', () => {
+  test('requiresRawBody returns false', () => {
+    const { payseraAdapter } = require('../services/providers/payseraAdapter');
+    expect(payseraAdapter.requiresRawBody()).toBe(false);
+  });
+
+  test('getSupportedPaymentMethods includes card and wallet', () => {
+    const { payseraAdapter } = require('../services/providers/payseraAdapter');
+    const methods = payseraAdapter.getSupportedPaymentMethods();
+    expect(methods).toContain('card');
+    expect(methods).toContain('wallet');
+  });
+
+  test('verifyAndParseWebhook fails with missing query params', () => {
+    const { payseraAdapter } = require('../services/providers/payseraAdapter');
+
+    const mockReq = { query: {} };
+    const result = payseraAdapter.verifyAndParseWebhook(mockReq);
+    expect(result.valid).toBe(false);
+    expect(result.error).toContain('Missing data or signature');
+  });
+});
+
+// ============================================================
+// UNIVERSAL PAYMENT PROVIDER FACTORY TESTS
+// ============================================================
+
+describe('PaymentProviderFactory (universal)', () => {
+  test('getProviderInfo returns adapter info for registered providers', () => {
     const { paymentProviderFactory } = require('../services/paymentProviderFactory');
-    const info = paymentProviderFactory.getProviderInfo('unknown');
+
+    const stripeInfo = paymentProviderFactory.getProviderInfo('stripe');
+    expect(stripeInfo.name).toBe('Stripe');
+
+    const payseraInfo = paymentProviderFactory.getProviderInfo('paysera');
+    expect(payseraInfo.name).toBe('Paysera');
+  });
+
+  test('getProviderInfo returns fallback for unknown provider', () => {
+    const { paymentProviderFactory } = require('../services/paymentProviderFactory');
+    const info = paymentProviderFactory.getProviderInfo('unknown_provider');
     expect(info.name).toBe('Web Payment');
+  });
+
+  test('getRegisteredProviderNames includes stripe, paysera, and web', () => {
+    const { paymentProviderFactory } = require('../services/paymentProviderFactory');
+    const names = paymentProviderFactory.getRegisteredProviderNames();
+    expect(names).toContain('stripe');
+    expect(names).toContain('paysera');
+    expect(names).toContain('web');
+  });
+
+  test('getSupportedCountries returns all 11 Balkan countries', () => {
+    const { paymentProviderFactory } = require('../services/paymentProviderFactory');
+    expect(paymentProviderFactory.getSupportedCountries().length).toBe(11);
+  });
+});
+
+// ============================================================
+// UNIVERSAL WEBHOOK CONTROLLER TESTS
+// ============================================================
+
+describe('Universal Webhook Controller', () => {
+  test('exports handleProviderWebhook and verifyProviderPayment', () => {
+    const controller = require('../controllers/webhookController');
+    expect(typeof controller.handleProviderWebhook).toBe('function');
+    expect(typeof controller.verifyProviderPayment).toBe('function');
+  });
+});
+
+// ============================================================
+// IPAYMENT PROVIDER INTERFACE CONTRACT TESTS
+// ============================================================
+
+describe('IPaymentProvider contract', () => {
+  test('all registered providers have required properties', () => {
+    const { providerRegistry } = require('../services/providers/providerRegistry');
+
+    for (const provider of providerRegistry.getAll()) {
+      // Required readonly properties
+      expect(typeof provider.name).toBe('string');
+      expect(provider.name.length).toBeGreaterThan(0);
+      expect(typeof provider.displayName).toBe('string');
+      expect(typeof provider.description).toBe('string');
+
+      // Required methods
+      expect(typeof provider.isConfigured()).toBe('boolean');
+      expect(typeof provider.requiresRawBody()).toBe('boolean');
+      expect(typeof provider.getSignatureHeaderName()).toBe('string');
+      expect(Array.isArray(provider.getSupportedPaymentMethods())).toBe(true);
+      expect(typeof provider.getFeeDescription()).toBe('string');
+    }
   });
 });

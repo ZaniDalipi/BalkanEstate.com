@@ -11,7 +11,7 @@ import {
   getAvailablePaymentMethods,
 } from '../controllers/paymentController';
 import { handlePayseraWebhook, verifyPayseraPayment } from '../controllers/payseraWebhookController';
-import { verifyStripePayment } from '../controllers/stripeWebhookController';
+import { verifyProviderPayment } from '../controllers/webhookController';
 import { protect } from '../middleware/auth';
 import { decryptPayload } from '../middleware/decryptPayload';
 import {
@@ -68,25 +68,26 @@ router.post('/cancel-subscription', protect, cancelSubscription);
 router.get('/customer-portal', protect, getCustomerPortal);
 
 // ============================================================
-// PAYSERA ENDPOINTS (bank transfer webhook + verification)
+// UNIVERSAL PAYMENT VERIFICATION (works with any provider)
 // ============================================================
 
-/** Paysera payment callback (signature-verified, no auth) */
-router.post('/paysera/webhook', handlePayseraWebhook);
-
-/** Verify Paysera payment by order ID */
-router.get('/paysera/verify/:orderId', protect, verifyPayseraPayment);
-
-// ============================================================
-// STRIPE ENDPOINTS (webhook verification)
-// ============================================================
-
-/** Verify Stripe payment by session ID */
-router.get('/stripe/verify/:sessionId', protect, verifyStripePayment);
+/**
+ * Verify payment by session ID for any registered provider
+ * GET /api/payments/:provider/verify/:sessionId
+ * e.g. /api/payments/stripe/verify/cs_test_123
+ *      /api/payments/paysera/verify/BE_abc123_1234567890
+ */
+router.get('/:provider/verify/:sessionId', protect, verifyProviderPayment);
 
 // ============================================================
 // LEGACY ENDPOINTS (backward compatibility)
 // ============================================================
+
+/** Legacy Paysera webhook (kept for backward compatibility with existing integrations) */
+router.post('/paysera/webhook', handlePayseraWebhook);
+
+/** Legacy Paysera verification */
+router.get('/paysera/verify/:orderId', protect, verifyPayseraPayment);
 
 router.post('/process', protect, processPayment);
 
