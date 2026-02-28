@@ -587,10 +587,7 @@ export function use3DMap(props: Map3DBuildingsProps) {
     // Recalculate floor height based on actual building
     const adjustedFloorHeight = finalBuildingHeight / totalFlrs;
 
-    // Scale up the building coordinates to fully cover the original and prevent z-fighting
-    const scaleFactor = 1.02; // 2% larger - reverted from 1.05 to prevent z-fighting/flickering
-
-    // Calculate centroid for scaling and label positioning
+    // Calculate centroid for expansion and label positioning
     const outerRing = buildingCoords[0];
     let centroidLng = 0;
     let centroidLat = 0;
@@ -602,12 +599,27 @@ export function use3DMap(props: Map3DBuildingsProps) {
     centroidLng /= numPoints;
     centroidLat /= numPoints;
 
-    // Scale coordinates from centroid to prevent z-fighting with original building
+    // Expand footprint by ~1 screen pixel (~1.5 m) on every side.
+    // A fixed metric offset guarantees the floor-slice faces sit slightly in
+    // front of the original building faces so the WebGL depth test always passes,
+    // regardless of building size (unlike a %-based scale which shrinks the gap
+    // for small buildings).
+    const expandMeters = 1.5;
+    const latExpand = expandMeters / 111320;
+    const lngExpand = expandMeters / (111320 * Math.cos(centroidLat * Math.PI / 180));
+
     const scaledCoords = buildingCoords.map(ring =>
-      ring.map(coord => [
-        centroidLng + (coord[0] - centroidLng) * scaleFactor,
-        centroidLat + (coord[1] - centroidLat) * scaleFactor
-      ])
+      ring.map(coord => {
+        const dLng = coord[0] - centroidLng;
+        const dLat = coord[1] - centroidLat;
+        const dist = Math.sqrt(dLng * dLng + dLat * dLat);
+        if (dist < 1e-10) return [coord[0], coord[1]];
+        // Push each vertex outward from the centroid by the fixed pixel offset
+        return [
+          coord[0] + (dLng / dist) * lngExpand,
+          coord[1] + (dLat / dist) * latExpand,
+        ];
+      })
     );
 
     // ── Floor-slice visibility fix ───────────────────────────────────────────
