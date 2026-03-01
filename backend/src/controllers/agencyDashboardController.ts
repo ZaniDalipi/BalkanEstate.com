@@ -811,7 +811,7 @@ export const getAnalytics = async (
       ]),
     ]);
 
-    // Build agent comparison data
+    // Build agent comparison data (batched to avoid N+1 queries)
     const agentComparisonRaw = agentPropertyStats as Array<{
       _id: mongoose.Types.ObjectId;
       listings: number;
@@ -819,23 +819,33 @@ export const getAnalytics = async (
       inquiries: number;
     }>;
 
-    const agentComparison = await Promise.all(
-      agentComparisonRaw.map(async (stat) => {
-        const agent = await User.findById(stat._id).select('name').lean();
-        const agentInquiries = await Inquiry.countDocuments({
-          recipientId: stat._id,
-          createdAt: { $gte: startDate },
-        });
-        return {
-          agentId: String(stat._id),
-          agentName: agent?.name || 'Unknown',
-          listings: stat.listings,
-          inquiries: agentInquiries,
-          views: stat.views,
-          responseTime: '-',
-        };
-      })
+    const agentIds = agentComparisonRaw.map((stat) => stat._id);
+    const [agentNames, agentInquiryCounts] = await Promise.all([
+      User.find({ _id: { $in: agentIds } }).select('name').lean(),
+      Inquiry.aggregate([
+        {
+          $match: {
+            recipientId: { $in: agentIds },
+            createdAt: { $gte: startDate },
+          },
+        },
+        { $group: { _id: '$recipientId', count: { $sum: 1 } } },
+      ]),
+    ]);
+
+    const nameMap = new Map(agentNames.map((a) => [String(a._id), a.name]));
+    const inquiryCountMap = new Map(
+      agentInquiryCounts.map((i: { _id: mongoose.Types.ObjectId; count: number }) => [String(i._id), i.count])
     );
+
+    const agentComparison = agentComparisonRaw.map((stat) => ({
+      agentId: String(stat._id),
+      agentName: nameMap.get(String(stat._id)) || 'Unknown',
+      listings: stat.listings,
+      inquiries: inquiryCountMap.get(String(stat._id)) || 0,
+      views: stat.views,
+      responseTime: '-',
+    }));
 
     // Build viewsOverTime from property daily data
     const viewsOverTime = (viewsByDay as Array<{ _id: string; totalViews: number }>).map(
@@ -947,30 +957,31 @@ export const exportAnalytics = async (
         .lean(),
     ]);
 
-    // Per-agent summary
-    const agentSummary = await Promise.all(
-      agency.agents.map(async (agentUserId) => {
-        const agentObjId = new mongoose.Types.ObjectId(String(agentUserId));
-        const agent = await User.findById(agentObjId).select('name email').lean();
+    // Per-agent summary (batched user lookup)
+    const agentUsers = await User.find({ _id: { $in: agentUserIds } })
+      .select('name email')
+      .lean();
+    const agentUserMap = new Map(agentUsers.map((u) => [String(u._id), u]));
 
-        const agentProperties = properties.filter(
-          (p) => String(p.sellerId) === String(agentUserId)
-        );
-        const agentInquiries = inquiries.filter(
-          (i) => String(i.recipientId) === String(agentUserId)
-        );
+    const agentSummary = agency.agents.map((agentUserId) => {
+      const agent = agentUserMap.get(String(agentUserId));
+      const agentProperties = properties.filter(
+        (p) => String(p.sellerId) === String(agentUserId)
+      );
+      const agentInquiries = inquiries.filter(
+        (i) => String(i.recipientId) === String(agentUserId)
+      );
 
-        return {
-          agentId: String(agentUserId),
-          name: agent?.name || 'Unknown',
-          email: agent?.email || '',
-          totalProperties: agentProperties.length,
-          activeListings: agentProperties.filter((p) => p.status === 'active').length,
-          totalViews: agentProperties.reduce((sum, p) => sum + (p.views || 0), 0),
-          totalInquiries: agentInquiries.length,
-        };
-      })
-    );
+      return {
+        agentId: String(agentUserId),
+        name: agent?.name || 'Unknown',
+        email: agent?.email || '',
+        totalProperties: agentProperties.length,
+        activeListings: agentProperties.filter((p) => p.status === 'active').length,
+        totalViews: agentProperties.reduce((sum, p) => sum + (p.views || 0), 0),
+        totalInquiries: agentInquiries.length,
+      };
+    });
 
     res.status(200).json({
       exportDate: now.toISOString(),

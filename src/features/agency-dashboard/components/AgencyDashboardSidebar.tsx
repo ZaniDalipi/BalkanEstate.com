@@ -13,6 +13,7 @@ import {
   ChevronRightIcon,
   ChevronDownIcon,
   XMarkIcon,
+  ArrowLeftIcon,
 } from '@/constants';
 import type { AgencyDashboardSection } from '@/types';
 import type { OverviewData } from '../types';
@@ -24,6 +25,7 @@ interface AgencyDashboardSidebarProps {
   onCollapsedChange: (collapsed: boolean) => void;
   mobileOpen: boolean;
   onMobileClose: () => void;
+  onBackToSite: () => void;
   overview: OverviewData | null;
 }
 
@@ -48,6 +50,7 @@ const AgencyDashboardSidebar: React.FC<AgencyDashboardSidebarProps> = ({
   onCollapsedChange,
   mobileOpen,
   onMobileClose,
+  onBackToSite,
   overview,
 }) => {
   const { t } = useTranslation(['agencyDashboard']);
@@ -209,10 +212,20 @@ const AgencyDashboardSidebar: React.FC<AgencyDashboardSidebarProps> = ({
         ))}
       </nav>
 
-      <div className="hidden lg:block border-t border-gray-800 p-3">
+      <div className="border-t border-gray-800 p-3 space-y-1">
+        <button
+          onClick={onBackToSite}
+          title={collapsed ? t('agencyDashboard:sidebar.backToApp', 'Back to App') : undefined}
+          className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg font-medium text-gray-300 hover:bg-indigo-600/20 hover:text-white transition-colors ${collapsed ? 'justify-center' : ''}`}
+        >
+          <ArrowLeftIcon className="w-5 h-5" />
+          {!collapsed && (
+            <span className="text-sm">{t('agencyDashboard:sidebar.backToApp', 'Back to App')}</span>
+          )}
+        </button>
         <button
           onClick={() => onCollapsedChange(!collapsed)}
-          className="w-full flex items-center justify-center gap-2 px-3 py-2 text-gray-400 hover:text-white hover:bg-gray-800 rounded-lg transition-colors"
+          className="hidden lg:flex w-full items-center justify-center gap-2 px-3 py-2 text-gray-400 hover:text-white hover:bg-gray-800 rounded-lg transition-colors"
           aria-label={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
         >
           {collapsed ? (

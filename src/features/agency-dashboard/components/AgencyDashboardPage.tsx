@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, Suspense } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useAppContext } from '@/context/AppContext';
 import { buildLocalizedPath } from '../../../utils/languageRouting';
@@ -6,15 +6,15 @@ import AgencyDashboardLayout from './AgencyDashboardLayout';
 import type { AgencyDashboardSection } from '@/types';
 import { AGENCY_DASHBOARD_SECTIONS } from '@/src/shared/constants/app.constants';
 
-// Section components (lazy-loaded within this feature)
-import OverviewSection from './overview/OverviewSection';
-import AgentManagementSection from './agents/AgentManagementSection';
-import PropertyManagementSection from './properties/PropertyManagementSection';
-import LeadsInquiriesSection from './leads/LeadsInquiriesSection';
-import AnalyticsReportsSection from './analytics/AnalyticsReportsSection';
-import FinancialBillingSection from './financial/FinancialBillingSection';
-import AgencyProfileSection from './profile/AgencyProfileSection';
-import TeamCommunicationSection from './team/TeamCommunicationSection';
+// Lazy-loaded section components for code splitting
+const OverviewSection = React.lazy(() => import('./overview/OverviewSection'));
+const AgentManagementSection = React.lazy(() => import('./agents/AgentManagementSection'));
+const PropertyManagementSection = React.lazy(() => import('./properties/PropertyManagementSection'));
+const LeadsInquiriesSection = React.lazy(() => import('./leads/LeadsInquiriesSection'));
+const AnalyticsReportsSection = React.lazy(() => import('./analytics/AnalyticsReportsSection'));
+const FinancialBillingSection = React.lazy(() => import('./financial/FinancialBillingSection'));
+const AgencyProfileSection = React.lazy(() => import('./profile/AgencyProfileSection'));
+const TeamCommunicationSection = React.lazy(() => import('./team/TeamCommunicationSection'));
 
 const AgencyDashboardPage: React.FC = () => {
   const { t } = useTranslation(['agencyDashboard', 'common']);
@@ -146,7 +146,18 @@ const AgencyDashboardPage: React.FC = () => {
       activeSection={activeSection}
       onSectionChange={handleSectionChange}
     >
-      {renderContent()}
+      <Suspense
+        fallback={
+          <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
+            <div className="animate-pulse space-y-4">
+              <div className="h-5 bg-gray-200 rounded w-1/4" />
+              <div className="h-40 bg-gray-100 rounded-lg" />
+            </div>
+          </div>
+        }
+      >
+        {renderContent()}
+      </Suspense>
     </AgencyDashboardLayout>
   );
 };

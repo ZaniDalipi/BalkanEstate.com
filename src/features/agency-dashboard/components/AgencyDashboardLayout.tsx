@@ -48,6 +48,7 @@ const AgencyDashboardLayout: React.FC<AgencyDashboardLayoutProps> = ({
         onCollapsedChange={setSidebarCollapsed}
         mobileOpen={sidebarMobileOpen}
         onMobileClose={() => setSidebarMobileOpen(false)}
+        onBackToSite={handleBackToSite}
         overview={overview}
       />
 
