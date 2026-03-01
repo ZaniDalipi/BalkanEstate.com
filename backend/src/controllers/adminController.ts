@@ -1095,3 +1095,137 @@ export const syncPropertySchema = async (req: Request, res: Response): Promise<v
     res.status(500).json({ message: 'Error syncing property schema' });
   }
 };
+
+// ===== License Verification Management =====
+
+// @desc    Get agents with pending license verification
+// @route   GET /api/admin/pending-licenses
+// @access  Private/Admin
+export const getPendingLicenses = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const pendingAgents = await Agent.find({ licenseStatus: 'pending' })
+      .populate('userId', 'name email phone avatarUrl country city')
+      .sort({ updatedAt: -1 });
+
+    res.json({
+      count: pendingAgents.length,
+      agents: pendingAgents.map((agent) => ({
+        agentId: agent.agentId,
+        userId: agent.userId,
+        licenseNumber: agent.licenseNumber,
+        licenseCountry: agent.licenseCountry,
+        licenseStatus: agent.licenseStatus,
+        agencyName: agent.agencyName,
+        createdAt: agent.createdAt,
+        updatedAt: agent.updatedAt,
+      })),
+    });
+  } catch (error: any) {
+    adminLogger.error('Get pending licenses error:', error);
+    res.status(500).json({ message: 'Error fetching pending licenses' });
+  }
+};
+
+// @desc    Approve an agent's license
+// @route   POST /api/admin/approve-license/:userId
+// @access  Private/Admin
+export const approveLicense = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const userId = getObjectIdParam(req, res, 'userId');
+    if (!userId) return;
+
+    const [user, agentRecord] = await Promise.all([
+      User.findById(userId),
+      Agent.findOne({ userId }),
+    ]);
+
+    if (!user) {
+      res.status(404).json({ message: 'User not found' });
+      return;
+    }
+
+    if (!agentRecord) {
+      res.status(404).json({ message: 'Agent record not found' });
+      return;
+    }
+
+    if (!agentRecord.licenseNumber) {
+      res.status(400).json({ message: 'Agent has no license number to approve' });
+      return;
+    }
+
+    // Update Agent record
+    agentRecord.licenseVerified = true;
+    agentRecord.licenseVerificationDate = new Date();
+    agentRecord.licenseStatus = 'verified';
+    await agentRecord.save();
+
+    // Update User record
+    user.licenseVerified = true;
+    user.licenseVerificationDate = new Date();
+    await user.save();
+
+    adminLogger.info(`License approved for user ${userId} (license: ${agentRecord.licenseNumber})`);
+
+    res.json({
+      message: 'License approved successfully',
+      userId: String(user._id),
+      licenseNumber: agentRecord.licenseNumber,
+      licenseStatus: 'verified',
+    });
+  } catch (error: any) {
+    adminLogger.error('Approve license error:', error);
+    res.status(500).json({ message: 'Error approving license' });
+  }
+};
+
+// @desc    Reject an agent's license
+// @route   POST /api/admin/reject-license/:userId
+// @access  Private/Admin
+export const rejectLicense = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const userId = getObjectIdParam(req, res, 'userId');
+    if (!userId) return;
+
+    const { reason } = req.body;
+
+    const [user, agentRecord] = await Promise.all([
+      User.findById(userId),
+      Agent.findOne({ userId }),
+    ]);
+
+    if (!user) {
+      res.status(404).json({ message: 'User not found' });
+      return;
+    }
+
+    if (!agentRecord) {
+      res.status(404).json({ message: 'Agent record not found' });
+      return;
+    }
+
+    // Update Agent record
+    agentRecord.licenseVerified = false;
+    agentRecord.licenseVerificationDate = undefined;
+    agentRecord.licenseStatus = 'rejected';
+    await agentRecord.save();
+
+    // Update User record
+    user.licenseVerified = false;
+    user.licenseVerificationDate = undefined;
+    await user.save();
+
+    adminLogger.info(`License rejected for user ${userId} (reason: ${reason || 'none provided'})`);
+
+    res.json({
+      message: 'License rejected',
+      userId: String(user._id),
+      licenseNumber: agentRecord.licenseNumber,
+      licenseStatus: 'rejected',
+      reason: reason || undefined,
+    });
+  } catch (error: any) {
+    adminLogger.error('Reject license error:', error);
+    res.status(500).json({ message: 'Error rejecting license' });
+  }
+};

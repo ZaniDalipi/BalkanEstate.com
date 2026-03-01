@@ -618,6 +618,25 @@
       "empty": {
         "title": "No credentials added yet",
         "description": "Add your professional licenses, certifications, and awards to build trust with potential clients."
+      },
+      "license": {
+        "verified": "License Verified",
+        "pending": "License Pending Review",
+        "pendingDesc": "Your license is being reviewed by an admin. You will receive the verified badge once approved.",
+        "rejected": "License Rejected",
+        "rejectedDesc": "Your license was not approved. You can resubmit with correct details.",
+        "resubmit": "Resubmit License",
+        "getVerified": "Get Verified",
+        "getVerifiedDesc": "Submit your real estate license number to get the verified badge on your profile.",
+        "submitLicense": "Submit License",
+        "country": "Country",
+        "selectCountry": "Select country...",
+        "licenseNumber": "License Number",
+        "enterLicense": "Enter your license number",
+        "formatHint": "Expected format",
+        "cancel": "Cancel",
+        "submit": "Submit for Review",
+        "submitted": "License submitted! It will be reviewed by an admin shortly."
       }
     },
     "marketInsights": {

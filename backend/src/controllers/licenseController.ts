@@ -1,7 +1,9 @@
 import { Request, Response } from 'express';
 import User, { IUser } from '../models/User';
+import Agent from '../models/Agent';
 import { uploadImage, deleteImages } from '../services/cloudinaryService';
 import { apiLogger } from '../utils/logger';
+import { validateLicenseNumber, getLicenseFormatHint, SUPPORTED_LICENSE_COUNTRIES } from '../utils/licenseValidation';
 
 // @desc    Upload agent license document (optional)
 // @route   POST /api/license/upload
@@ -175,4 +177,113 @@ export const deleteLicense = async (
       message: 'Error deleting license',
     });
   }
+};
+
+// @desc    Submit license number for verification (for agents who registered without one)
+// @route   POST /api/license/submit
+// @access  Private (agents only)
+export const submitLicense = async (
+  req: Request,
+  res: Response
+): Promise<void> => {
+  try {
+    if (!req.user) {
+      res.status(401).json({ message: 'Not authorized' });
+      return;
+    }
+
+    const currentUser = req.user as IUser;
+    const { licenseNumber, country } = req.body;
+
+    if (!licenseNumber || !country) {
+      res.status(400).json({
+        message: 'License number and country are required',
+        code: 'MISSING_FIELDS',
+      });
+      return;
+    }
+
+    const user = await User.findById(currentUser._id);
+    if (!user) {
+      res.status(404).json({ message: 'User not found' });
+      return;
+    }
+
+    if (user.role !== 'agent') {
+      res.status(403).json({
+        message: 'Only agents can submit a license for verification',
+        code: 'NOT_AGENT',
+      });
+      return;
+    }
+
+    // Validate the license format for the given country
+    const validation = validateLicenseNumber(licenseNumber, country);
+    if (!validation.valid) {
+      res.status(400).json({
+        message: 'Invalid license number format for the selected country',
+        code: 'INVALID_LICENSE_FORMAT',
+        formatHint: validation.formatHint,
+      });
+      return;
+    }
+
+    // Check if license is already in use by another agent
+    const existingAgent = await Agent.findOne({
+      licenseNumber,
+      userId: { $ne: user._id },
+    });
+
+    if (existingAgent) {
+      res.status(400).json({
+        message: 'This license number is already registered to another agent',
+      });
+      return;
+    }
+
+    // Update User model
+    user.licenseNumber = licenseNumber;
+    user.licenseVerified = false;
+    user.licenseVerificationDate = undefined;
+    await user.save();
+
+    // Update Agent model
+    const agentRecord = await Agent.findOne({ userId: user._id });
+    if (agentRecord) {
+      agentRecord.licenseNumber = licenseNumber;
+      agentRecord.licenseCountry = country;
+      agentRecord.licenseVerified = false;
+      agentRecord.licenseVerificationDate = undefined;
+      agentRecord.licenseStatus = 'pending';
+      await agentRecord.save();
+    }
+
+    res.status(200).json({
+      message: 'License submitted for verification. An admin will review it shortly.',
+      licenseStatus: 'pending',
+      licenseNumber,
+      country,
+    });
+  } catch (error: any) {
+    apiLogger.error('Submit license error:', error);
+    res.status(500).json({
+      message: 'Error submitting license',
+    });
+  }
+};
+
+// @desc    Get format hint for a country's license number
+// @route   GET /api/license/format-hint/:countryCode
+// @access  Public
+export const getFormatHint = async (
+  req: Request,
+  res: Response
+): Promise<void> => {
+  const countryCode = req.params.countryCode as string;
+  const hint = getLicenseFormatHint(countryCode);
+  res.json({
+    countryCode: countryCode.toUpperCase(),
+    formatHint: hint,
+    supportedCountries: SUPPORTED_LICENSE_COUNTRIES,
+  });
 };

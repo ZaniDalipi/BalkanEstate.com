@@ -24,6 +24,9 @@ import {
   bulkUpdateInquiryStatus,
   getInquiryStats,
   syncPropertySchema,
+  getPendingLicenses,
+  approveLicense,
+  rejectLicense,
 } from '../controllers/adminController';
 import {
   getAllDiscountCodes,
@@ -316,6 +319,11 @@ router.post('/test-emails/daily-activity-report', logAdminAction('TRIGGER_DAILY_
     res.status(500).json({ message: 'Failed to send daily report', error: String(error) });
   }
 });
+
+// ===== License Verification Management =====
+router.get('/pending-licenses', logAdminAction('VIEW_PENDING_LICENSES'), getPendingLicenses);
+router.post('/approve-license/:userId', logAdminAction('APPROVE_LICENSE'), approveLicense);
+router.post('/reject-license/:userId', logAdminAction('REJECT_LICENSE'), rejectLicense);
 
 // ===== Site Content Management (How It Works videos, etc.) =====
 const videoUpload = multer({

@@ -8,3 +8,4 @@ export { default as DiscountCodeManager } from './DiscountCodeManager';
 export { default as PromotionCouponManager } from './PromotionCouponManager';
 export { default as PropertyManager } from './PropertyManager';
 export { default as UserManager } from './UserManager';
+export { default as PendingLicenses } from './PendingLicenses';

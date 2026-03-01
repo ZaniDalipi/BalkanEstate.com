@@ -20,7 +20,9 @@ export interface User {
   agencyName?: string;
   agencyId?: string;
   licenseNumber?: string;
+  licenseCountry?: string;
   licenseVerified?: boolean;
+  licenseStatus?: 'none' | 'pending' | 'verified' | 'rejected';
   isEnterpriseTier?: boolean;
   createdAt: string;
   lastLogin?: string;

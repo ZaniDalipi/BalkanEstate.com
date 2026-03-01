@@ -267,6 +267,9 @@ const AgentProfilePage: React.FC<AgentProfilePageProps> = ({ agent }) => {
                 onDeleteAchievement={profile.handleDeleteAchievement}
                 agentCredentials={profile.agentCredentials}
                 onCredentialsChange={profile.setAgentCredentials}
+                licenseStatus={profile.agentData.licenseStatus || (profile.agentData.licenseVerified ? 'verified' : profile.agentData.licenseNumber ? 'pending' : 'none')}
+                licenseNumber={profile.agentData.licenseNumber}
+                licenseCountry={profile.agentData.licenseCountry}
             />
         </div>
     );
