@@ -156,6 +156,8 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
   const [agencyAchievements, setAgencyAchievements] = useState<Achievement[]>([]);
   const [loading, setLoading] = useState(true);
   const [isJoinRequestsModalOpen, setIsJoinRequestsModalOpen] = useState(false);
+  const [joinRequestsRefreshKey, setJoinRequestsRefreshKey] = useState(0);
+  const [pendingJoinRequestCount, setPendingJoinRequestCount] = useState(0);
   const [isInvitationCodeModalOpen, setIsInvitationCodeModalOpen] = useState(false);
   const [isFeaturedSubscriptionDialogOpen, setIsFeaturedSubscriptionDialogOpen] = useState(false);
   const [isRequesting, setIsRequesting] = useState(false);
@@ -247,9 +249,11 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
     currentUser.agencyId && String(currentUser.agencyId) === String(agencyData._id)
   );
 
-  // Can only request to join if: authenticated, is agent, not already in ANY agency, and not already a member of THIS agency
+  // Can only request to join if: authenticated, is agent, not owner/admin, not already in ANY agency, and not already a member of THIS agency
   const canRequestToJoin = isAuthenticated &&
     currentUser?.role === 'agent' &&
+    !isOwner &&
+    !isAdmin &&
     !currentUser?.agencyId &&
     !isAlreadyMember &&
     !isUserInThisAgency;
@@ -328,12 +332,20 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
     fetchPromotionCouponCodes();
   }, [agencyData._id, isAuthenticated, isAlreadyMember, isUserInThisAgency, isAdmin, isPlatformAdmin]);
 
-  // Listen for real-time agency updates (new members, etc.)
+  // Listen for real-time agency updates (new members, join requests, etc.)
   useEffect(() => {
     const handleAgencyUpdate = (data: any) => {
       if (data.type === 'member-added' || data.type === 'member-removed') {
         // Refetch agency data to get the updated member list
         fetchAgencyData();
+      }
+      if (data.type === 'join-request-new') {
+        // New join request received — update badge count and refresh modal data
+        setPendingJoinRequestCount(prev => prev + 1);
+        setJoinRequestsRefreshKey(prev => prev + 1);
+        if (isOwner || isAdmin) {
+          setIsJoinRequestsModalOpen(true);
+        }
       }
     };
 
@@ -342,7 +354,7 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
     return () => {
       unsubscribe();
     };
-  }, [agency._id]);
+  }, [agency._id, isOwner, isAdmin]);
 
   // Listen for coupon usage events to update the promotion coupons card immediately
   useEffect(() => {
@@ -2639,11 +2651,19 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
                     {t('actions.editAgency', 'Edit Agency')}
                   </button>
                   <button
-                    onClick={() => setIsJoinRequestsModalOpen(true)}
-                    className="inline-flex items-center gap-2 px-5 py-2.5 bg-primary text-white text-sm font-semibold rounded-xl hover:bg-primary/90 transition-all duration-300 shadow-lg shadow-primary/25"
+                    onClick={() => {
+                      setIsJoinRequestsModalOpen(true);
+                      setPendingJoinRequestCount(0);
+                    }}
+                    className="relative inline-flex items-center gap-2 px-5 py-2.5 bg-primary text-white text-sm font-semibold rounded-xl hover:bg-primary/90 transition-all duration-300 shadow-lg shadow-primary/25"
                   >
                     <BellIcon className="w-4 h-4" />
                     {t('actions.manageJoinRequests', 'Manage Join Requests')}
+                    {pendingJoinRequestCount > 0 && (
+                      <span className="absolute -top-2 -right-2 inline-flex items-center justify-center w-5 h-5 text-xs font-bold text-white bg-red-500 rounded-full animate-pulse">
+                        {pendingJoinRequestCount}
+                      </span>
+                    )}
                   </button>
                 </>
               )}
@@ -3233,9 +3253,13 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
       {/* Join Requests Modal */}
       <AgencyJoinRequestsModal
         isOpen={isJoinRequestsModalOpen}
-        onClose={() => setIsJoinRequestsModalOpen(false)}
+        onClose={() => {
+          setIsJoinRequestsModalOpen(false);
+          setPendingJoinRequestCount(0);
+        }}
         agencyId={agency._id}
         agencyName={agency.name}
+        refreshKey={joinRequestsRefreshKey}
       />
 
       {/* Invitation Code Modal */}

@@ -75,6 +75,24 @@ export const createJoinRequest = async (req: Request, res: Response): Promise<vo
 
     await joinRequest.save();
 
+    // Emit socket event to notify agency owner/admins in real-time
+    const io = getSocketInstance();
+    if (io) {
+      io.emit(`agency-update-${String(agencyId)}`, {
+        type: 'join-request-new',
+        agencyId: String(agencyId),
+        joinRequest: {
+          _id: String(joinRequest._id),
+          agentId: String(agentId),
+          requesterName: user.name,
+          requesterEmail: user.email,
+          message,
+          status: 'pending',
+          requestedAt: joinRequest.requestedAt,
+        },
+      });
+    }
+
     res.status(201).json({
       message: 'Join request sent successfully',
       joinRequest,
