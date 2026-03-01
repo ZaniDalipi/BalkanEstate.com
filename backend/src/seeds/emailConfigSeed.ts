@@ -413,7 +413,7 @@ export const defaultEmailConfigs = [
         </div>
 
         <!-- New + Rollover -->
-        <div style="background:rgba(255,255,255,0.6);border-radius:8px;padding:12px;margin-bottom:12px;">
+        <div style="background:#ffffff;border-radius:8px;padding:12px;margin-bottom:12px;">
           <table style="width:100%;border-collapse:collapse;">
             <tr>
               <td style="text-align:center;width:50%;border-right:1px solid #f59e0b;padding:4px 0;">
@@ -429,21 +429,21 @@ export const defaultEmailConfigs = [
         </div>
 
         <!-- Tier Breakdown -->
-        <div style="background:rgba(255,255,255,0.6);border-radius:8px;padding:12px;">
+        <div style="background:#ffffff;border-radius:8px;padding:12px;">
           <div style="font-size:11px;color:#78350f;font-weight:700;text-align:center;margin-bottom:8px;text-transform:uppercase;letter-spacing:0.5px;">Coupon Types</div>
           <table style="width:100%;border-collapse:collapse;">
             <tr>
               <td style="text-align:center;padding:4px 2px;">
-                <div style="font-size:20px;font-weight:700;color:#059669;">{{highlightedCoupons}}</div>
-                <div style="font-size:10px;color:#78350f;font-weight:600;">✨ Highlighted</div>
+                <div style="font-size:20px;font-weight:700;color:#047857;">{{highlightedCoupons}}</div>
+                <div style="font-size:10px;color:#1f2937;font-weight:600;">✨ Highlighted</div>
               </td>
               <td style="text-align:center;padding:4px 2px;">
-                <div style="font-size:20px;font-weight:700;color:#7c3aed;">{{premiumCoupons}}</div>
-                <div style="font-size:10px;color:#78350f;font-weight:600;">💎 Premium</div>
+                <div style="font-size:20px;font-weight:700;color:#6d28d9;">{{premiumCoupons}}</div>
+                <div style="font-size:10px;color:#1f2937;font-weight:600;">💎 Premium</div>
               </td>
               <td style="text-align:center;padding:4px 2px;">
-                <div style="font-size:20px;font-weight:700;color:#dc2626;">{{featuredCoupons}}</div>
-                <div style="font-size:10px;color:#78350f;font-weight:600;">🔥 Featured</div>
+                <div style="font-size:20px;font-weight:700;color:#b91c1c;">{{featuredCoupons}}</div>
+                <div style="font-size:10px;color:#1f2937;font-weight:600;">🔥 Featured</div>
               </td>
             </tr>
           </table>
@@ -507,26 +507,26 @@ export const defaultEmailConfigs = [
       <div style="background:linear-gradient(135deg,#dbeafe 0%,#bfdbfe 100%);border-radius:12px;padding:20px;margin-bottom:20px;border:2px solid #3b82f6;">
         <div style="text-align:center;margin-bottom:16px;">
           <div style="font-size:52px;font-weight:800;color:#1e3a8a;line-height:1;">{{totalCoupons}}</div>
-          <div style="font-size:13px;color:#1e40af;font-weight:700;margin-top:4px;">Total Coupons This Month</div>
-          <div style="font-size:11px;color:#3b82f6;margin-top:4px;">Shared across your agency team • Resets monthly</div>
+          <div style="font-size:13px;color:#1e3a8a;font-weight:700;margin-top:4px;">Total Coupons This Month</div>
+          <div style="font-size:11px;color:#1e40af;margin-top:4px;">Shared across your agency team • Resets monthly</div>
         </div>
 
         <!-- Tier Breakdown -->
-        <div style="background:rgba(255,255,255,0.7);border-radius:8px;padding:12px;">
+        <div style="background:#ffffff;border-radius:8px;padding:12px;">
           <div style="font-size:11px;color:#1e3a8a;font-weight:700;text-align:center;margin-bottom:8px;text-transform:uppercase;letter-spacing:0.5px;">Coupon Types</div>
           <table style="width:100%;border-collapse:collapse;">
             <tr>
               <td style="text-align:center;padding:4px 2px;">
-                <div style="font-size:20px;font-weight:700;color:#059669;">{{highlightedCoupons}}</div>
-                <div style="font-size:10px;color:#1e3a8a;font-weight:600;">✨ Highlighted</div>
+                <div style="font-size:20px;font-weight:700;color:#047857;">{{highlightedCoupons}}</div>
+                <div style="font-size:10px;color:#1f2937;font-weight:600;">✨ Highlighted</div>
               </td>
               <td style="text-align:center;padding:4px 2px;">
-                <div style="font-size:20px;font-weight:700;color:#7c3aed;">{{premiumCoupons}}</div>
-                <div style="font-size:10px;color:#1e3a8a;font-weight:600;">💎 Premium</div>
+                <div style="font-size:20px;font-weight:700;color:#6d28d9;">{{premiumCoupons}}</div>
+                <div style="font-size:10px;color:#1f2937;font-weight:600;">💎 Premium</div>
               </td>
               <td style="text-align:center;padding:4px 2px;">
-                <div style="font-size:20px;font-weight:700;color:#dc2626;">{{featuredCoupons}}</div>
-                <div style="font-size:10px;color:#1e3a8a;font-weight:600;">🔥 Featured</div>
+                <div style="font-size:20px;font-weight:700;color:#b91c1c;">{{featuredCoupons}}</div>
+                <div style="font-size:10px;color:#1f2937;font-weight:600;">🔥 Featured</div>
               </td>
             </tr>
           </table>

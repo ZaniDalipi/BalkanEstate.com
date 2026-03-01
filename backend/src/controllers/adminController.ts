@@ -143,15 +143,18 @@ export const updateUserAdmin = async (req: Request, res: Response): Promise<void
     // SECURITY: Whitelist allowed fields to prevent mass assignment.
     // Fields like password, refreshTokens, loginHistory, etc. can never be set here.
     const ALLOWED_ADMIN_UPDATE_FIELDS = [
-      'name', 'email', 'phone', 'role', 'activeRole', 'primaryRole',
+      'name', 'email', 'phone', 'city', 'country',
+      'role', 'activeRole', 'primaryRole',
       'availableRoles', 'status', 'isEmailVerified', 'licenseVerified',
       'licenseNumber', 'bio', 'languages', 'specializations',
       'serviceAreas', 'avatarUrl', 'avatarOptions',
+      'agencyName', 'isSubscribed', 'subscriptionPlan',
+      'subscriptionStatus', 'isEnterpriseTier',
     ];
 
     const updates: Record<string, any> = {};
     for (const field of ALLOWED_ADMIN_UPDATE_FIELDS) {
-      if (req.body[field] !== undefined && req.body[field] !== '') {
+      if (req.body[field] !== undefined) {
         updates[field] = req.body[field];
       }
     }

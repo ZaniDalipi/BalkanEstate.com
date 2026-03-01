@@ -3236,21 +3236,21 @@ Questions? Contact us at support@balkanestateai.com
         ` : ''}
 
         <!-- Coupon Breakdown -->
-        <div style="background: rgba(255,255,255,0.5); border-radius: 8px; padding: 12px;">
+        <div style="background: #ffffff; border-radius: 8px; padding: 12px;">
           <div style="font-size: 12px; color: #78350f; font-weight: 600; margin-bottom: 8px; text-align: center;">Coupon Breakdown:</div>
           <div style="display: table; width: 100%;">
             <div style="display: table-cell; text-align: center; ${params.breakdown.highlighted > 0 ? '' : 'opacity: 0.5;'}">
-              <div style="font-size: 18px; font-weight: 700; color: #059669;">${params.breakdown.highlighted}</div>
-              <div style="font-size: 10px; color: #78350f;">Highlighted</div>
+              <div style="font-size: 18px; font-weight: 700; color: #047857;">${params.breakdown.highlighted}</div>
+              <div style="font-size: 10px; color: #1f2937;">Highlighted</div>
             </div>
             <div style="display: table-cell; text-align: center; ${params.breakdown.premium > 0 ? '' : 'opacity: 0.5;'}">
-              <div style="font-size: 18px; font-weight: 700; color: #7c3aed;">${params.breakdown.premium}</div>
-              <div style="font-size: 10px; color: #78350f;">Premium</div>
+              <div style="font-size: 18px; font-weight: 700; color: #6d28d9;">${params.breakdown.premium}</div>
+              <div style="font-size: 10px; color: #1f2937;">Premium</div>
             </div>
             ${params.breakdown.featured > 0 ? `
             <div style="display: table-cell; text-align: center;">
-              <div style="font-size: 18px; font-weight: 700; color: #dc2626;">${params.breakdown.featured}</div>
-              <div style="font-size: 10px; color: #78350f;">Featured</div>
+              <div style="font-size: 18px; font-weight: 700; color: #b91c1c;">${params.breakdown.featured}</div>
+              <div style="font-size: 10px; color: #1f2937;">Featured</div>
             </div>
             ` : ''}
           </div>
@@ -3351,11 +3351,15 @@ Questions? Contact us at support@balkanestateai.com
         </td>
       </tr>`).join('');
 
+      const couponCodesList = couponRowsHtml
+        ? `<table style="width:100%;border-collapse:collapse;"><thead><tr><th style="text-align:left;padding:8px 16px;color:#6b7280;font-size:12px;border-bottom:2px solid #e5e7eb;">Code</th><th style="text-align:left;padding:8px 16px;color:#6b7280;font-size:12px;border-bottom:2px solid #e5e7eb;">Assigned To</th><th style="text-align:left;padding:8px 16px;color:#6b7280;font-size:12px;border-bottom:2px solid #e5e7eb;">Expires</th></tr></thead><tbody>${couponRowsHtml}</tbody></table>`
+        : '';
       const variables: Record<string, string> = {
         ownerName:          escapeHtml(params.ownerName) || 'there',
         agencyName:         escapeHtml(params.agencyName),
         couponCount:        String(params.coupons.length),
         couponRows:         couponRowsHtml,
+        couponCodesList,
         agentListingsLimit: String(agentLimit),
         frontendUrl,
       };
@@ -3535,7 +3539,7 @@ Questions? Contact us at support@balkanestateai.com
     if (config) {
       const checkRow = (label: string) =>
         `<tr><td style="padding:8px 0;"><span style="display:inline-block;width:28px;height:28px;background:#059669;border-radius:50%;text-align:center;line-height:28px;font-size:14px;color:white;">&#10003;</span><span style="color:#e2e8f0;font-size:14px;margin-left:12px;">${label}</span></td></tr>`;
-      const benefitsSection = [
+      const benefitsRows = [
         checkRow(`<strong>${listingsLimit} Listings</strong> - Expandable as you grow`),
         checkRow(`<strong>${agentCoupons} Agent Coupons</strong> - Each with yearly Pro subscription`),
         checkRow(`<strong>${promotionCoupons.total} Monthly Promotion Coupons</strong>`),
@@ -3544,6 +3548,7 @@ Questions? Contact us at support@balkanestateai.com
         checkRow(`<strong>Priority Support</strong> - We're here when you need us`),
         checkRow(`<strong>Agency Branding</strong> - Your brand, front and center`),
       ].join('');
+      const benefitsSection = `<div style="background:#0f172a;border-radius:12px;padding:20px;margin:0 0 24px 0;"><table style="width:100%;border-collapse:collapse;">${benefitsRows}</table></div>`;
 
       const couponCodesList = buildCouponCodesHtml([]);
 
