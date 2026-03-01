@@ -521,8 +521,9 @@ export const adjustListingLimit = async (req: Request, res: Response): Promise<v
 
     await user.save();
 
-    // Audit trail
+    // Audit trail (use userId as subscriptionId — no separate subscription doc for individual users)
     await SubscriptionEvent.create({
+      subscriptionId: userId,
       userId,
       eventType: 'subscription_updated',
       store: 'web',
