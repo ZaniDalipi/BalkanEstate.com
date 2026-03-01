@@ -592,41 +592,68 @@ export const getMe = async (req: Request, res: Response): Promise<void> => {
         needsSync = true;
       }
 
+      // Determine if this user is the agency owner
+      const isAgencyOwner = String(memberAgency.ownerId) === String(user._id);
+
       // Sync agency object
       if (!user.agency) {
-        user.agency = { role: 'agent' };
+        user.agency = { role: isAgencyOwner ? 'owner' : 'agent' };
         needsSync = true;
       }
       if (!user.agency.agencyId || String(user.agency.agencyId) !== String(memberAgency._id)) {
         user.agency.agencyId = memberAgency._id as any;
-        user.agency.role = 'agent';
+        user.agency.role = isAgencyOwner ? 'owner' : 'agent';
         needsSync = true;
       }
 
-      // Sync subscription for agency agents (should be agency_agent tier, not free)
+      // Sync subscription based on role (owner = enterprise, agent = agency_agent)
       if (!user.subscription || user.subscription.tier === 'free') {
         // Get expiration from agency or use 1 year from now
         const expiresAt = memberAgency.subscription?.expiresAt ||
                           memberAgency.featuredSubscription?.expiresAt ||
                           new Date(Date.now() + 365 * 24 * 60 * 60 * 1000);
 
-        // Get agent listings limit from DB product (configurable in admin)
         const Product = (await import('../models/Product')).default;
-        const agentProduct = await Product.findOne({ productId: 'agency_agent_yearly' }).lean();
-        const agentListingsLimit = agentProduct?.listingsLimit ?? 25;
 
-        user.subscription = {
-          tier: 'agency_agent',
-          status: 'active',
-          listingsLimit: agentListingsLimit,
-          activeListingsCount: user.subscription?.activeListingsCount || 0,
-          privateSellerCount: user.subscription?.privateSellerCount || 0,
-          agentCount: user.subscription?.agentCount || 0,
-          promotionCoupons: { monthly: 0, available: 0, used: 0, rollover: 0, lastRefresh: new Date() },
-          savedSearchesLimit: -1,
-          totalPaid: user.subscription?.totalPaid || 0,
-          expiresAt: expiresAt,
-        };
+        if (isAgencyOwner) {
+          // Agency owner gets enterprise tier
+          const agencyProduct = await Product.findOne({ productId: 'agency_yearly' }).lean();
+          const enterpriseListingsLimit = agencyProduct?.listingsLimit ?? ENTERPRISE_TIER_LIMITS.LISTINGS;
+          const enterprisePromoCoupons = agencyProduct?.promotionCoupons ?? ENTERPRISE_TIER_LIMITS.PROMOTION_COUPONS;
+
+          user.subscription = {
+            tier: 'agency_owner',
+            status: 'active',
+            listingsLimit: enterpriseListingsLimit,
+            activeListingsCount: user.subscription?.activeListingsCount || 0,
+            privateSellerCount: user.subscription?.privateSellerCount || 0,
+            agentCount: user.subscription?.agentCount || 0,
+            promotionCoupons: { monthly: enterprisePromoCoupons, available: enterprisePromoCoupons, used: 0, rollover: 0, lastRefresh: new Date() },
+            savedSearchesLimit: -1,
+            totalPaid: user.subscription?.totalPaid || 0,
+            expiresAt: expiresAt,
+          };
+          user.isEnterpriseTier = true;
+          user.isSubscribed = true;
+          user.subscriptionPlan = 'agency_yearly';
+        } else {
+          // Regular agency agent
+          const agentProduct = await Product.findOne({ productId: 'agency_agent_yearly' }).lean();
+          const agentListingsLimit = agentProduct?.listingsLimit ?? 25;
+
+          user.subscription = {
+            tier: 'agency_agent',
+            status: 'active',
+            listingsLimit: agentListingsLimit,
+            activeListingsCount: user.subscription?.activeListingsCount || 0,
+            privateSellerCount: user.subscription?.privateSellerCount || 0,
+            agentCount: user.subscription?.agentCount || 0,
+            promotionCoupons: { monthly: 0, available: 0, used: 0, rollover: 0, lastRefresh: new Date() },
+            savedSearchesLimit: -1,
+            totalPaid: user.subscription?.totalPaid || 0,
+            expiresAt: expiresAt,
+          };
+        }
         needsSync = true;
       }
 
@@ -639,7 +666,7 @@ export const getMe = async (req: Request, res: Response): Promise<void> => {
         authLogger.info(`🔄 Auto-synced Agent record for user ${user._id}: ${memberAgency.name}`);
       }
 
-      // **AUTO-CREATE SUBSCRIPTION DOCUMENT**: Ensure agency agents have a Subscription document
+      // **AUTO-CREATE SUBSCRIPTION DOCUMENT**: Ensure agency members have a Subscription document
       // This is needed because getCurrentSubscription checks the Subscription collection first
       const Subscription = (await import('../models/Subscription')).default;
 
@@ -651,53 +678,82 @@ export const getMe = async (req: Request, res: Response): Promise<void> => {
           ? `${user.agency.couponCode}_${user._id}`
           : `agent_${user._id}`;
 
-        if (!existingAgentSubscription && user.subscription?.tier === 'agency_agent') {
-          const subExpiresAt = user.subscription.expiresAt ||
-                              memberAgency.subscription?.expiresAt ||
-                              new Date(Date.now() + 365 * 24 * 60 * 60 * 1000);
+        const subExpiresAt = user.subscription?.expiresAt ||
+                            memberAgency.subscription?.expiresAt ||
+                            new Date(Date.now() + 365 * 24 * 60 * 60 * 1000);
 
-          await Subscription.create({
-            userId: user._id,
-            productId: 'agency_agent_yearly',
-            store: 'agency_coupon',
-            purchaseToken: agentCouponId,
-            transactionId: agentCouponId,
-            status: 'active',
-            startDate: user.agency?.joinedAt || new Date(),
-            renewalDate: subExpiresAt,
-            expirationDate: subExpiresAt,
-            autoRenewing: true,
-            price: 0,
-            currency: 'EUR',
-            isAcknowledged: true,
-          });
-          authLogger.info(`✅ Auto-created Subscription document for agency agent ${user._id}`);
-        } else if (existingAgentSubscription &&
-                   user.subscription?.tier === 'agency_agent' &&
-                   existingAgentSubscription.productId !== 'agency_agent_yearly') {
-          existingAgentSubscription.productId = 'agency_agent_yearly';
-          existingAgentSubscription.store = 'agency_coupon';
-          existingAgentSubscription.purchaseToken = agentCouponId;
-          existingAgentSubscription.transactionId = agentCouponId;
-          existingAgentSubscription.status = 'active';
-          existingAgentSubscription.price = 0;
-          existingAgentSubscription.autoRenewing = true;
-          const subExpiresAt = user.subscription.expiresAt ||
-                              memberAgency.subscription?.expiresAt ||
-                              new Date(Date.now() + 365 * 24 * 60 * 60 * 1000);
-          existingAgentSubscription.expirationDate = subExpiresAt;
-          existingAgentSubscription.renewalDate = subExpiresAt;
-          existingAgentSubscription.expiryReminderSent = false;
-          await existingAgentSubscription.save();
-          authLogger.info(`✅ Auto-updated Subscription document for agency agent ${user._id}`);
+        if (isAgencyOwner && user.subscription?.tier === 'agency_owner') {
+          // Agency owner: ensure they have an enterprise Subscription document
+          if (!existingAgentSubscription) {
+            await Subscription.create({
+              userId: user._id,
+              productId: 'agency_yearly',
+              store: 'agency_creation',
+              purchaseToken: `agency_owner_${user._id}`,
+              transactionId: `agency_owner_${user._id}`,
+              status: 'active',
+              startDate: new Date(),
+              renewalDate: subExpiresAt,
+              expirationDate: subExpiresAt,
+              autoRenewing: true,
+              price: 0,
+              currency: 'EUR',
+              isAcknowledged: true,
+            });
+            authLogger.info(`✅ Auto-created Enterprise Subscription document for agency owner ${user._id}`);
+          } else if (existingAgentSubscription.productId !== 'agency_yearly') {
+            existingAgentSubscription.productId = 'agency_yearly';
+            existingAgentSubscription.store = 'agency_creation';
+            existingAgentSubscription.purchaseToken = `agency_owner_${user._id}`;
+            existingAgentSubscription.transactionId = `agency_owner_${user._id}`;
+            existingAgentSubscription.status = 'active';
+            existingAgentSubscription.expirationDate = subExpiresAt;
+            existingAgentSubscription.renewalDate = subExpiresAt;
+            existingAgentSubscription.expiryReminderSent = false;
+            await existingAgentSubscription.save();
+            authLogger.info(`✅ Auto-updated Subscription to Enterprise for agency owner ${user._id}`);
+          }
+        } else if (!isAgencyOwner && user.subscription?.tier === 'agency_agent') {
+          // Regular agency agent
+          if (!existingAgentSubscription) {
+            await Subscription.create({
+              userId: user._id,
+              productId: 'agency_agent_yearly',
+              store: 'agency_coupon',
+              purchaseToken: agentCouponId,
+              transactionId: agentCouponId,
+              status: 'active',
+              startDate: user.agency?.joinedAt || new Date(),
+              renewalDate: subExpiresAt,
+              expirationDate: subExpiresAt,
+              autoRenewing: true,
+              price: 0,
+              currency: 'EUR',
+              isAcknowledged: true,
+            });
+            authLogger.info(`✅ Auto-created Subscription document for agency agent ${user._id}`);
+          } else if (existingAgentSubscription.productId !== 'agency_agent_yearly') {
+            existingAgentSubscription.productId = 'agency_agent_yearly';
+            existingAgentSubscription.store = 'agency_coupon';
+            existingAgentSubscription.purchaseToken = agentCouponId;
+            existingAgentSubscription.transactionId = agentCouponId;
+            existingAgentSubscription.status = 'active';
+            existingAgentSubscription.price = 0;
+            existingAgentSubscription.autoRenewing = true;
+            existingAgentSubscription.expirationDate = subExpiresAt;
+            existingAgentSubscription.renewalDate = subExpiresAt;
+            existingAgentSubscription.expiryReminderSent = false;
+            await existingAgentSubscription.save();
+            authLogger.info(`✅ Auto-updated Subscription document for agency agent ${user._id}`);
+          }
         }
       } catch (subError: any) {
         // Don't let subscription sync errors break the /me endpoint —
         // the next request will retry automatically
         if (subError.code === 11000) {
-          authLogger.warn(`Auto-sync: duplicate subscription key for agent ${user._id}, skipping`);
+          authLogger.warn(`Auto-sync: duplicate subscription key for ${user._id}, skipping`);
         } else {
-          authLogger.error(`Auto-sync: subscription error for agent ${user._id}:`, subError);
+          authLogger.error(`Auto-sync: subscription error for ${user._id}:`, subError);
         }
       }
 

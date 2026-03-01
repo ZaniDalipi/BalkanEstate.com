@@ -1,6 +1,6 @@
 import mongoose, { Document, Schema } from 'mongoose';
 
-export type SubscriptionStore = 'google' | 'apple' | 'web' | 'stripe' | 'paddle' | 'agency_coupon';
+export type SubscriptionStore = 'google' | 'apple' | 'web' | 'stripe' | 'paddle' | 'agency_coupon' | 'agency_creation';
 export type SubscriptionStatus =
   | 'active'
   | 'expired'

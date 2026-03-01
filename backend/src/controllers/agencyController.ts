@@ -104,7 +104,50 @@ export const createAgency = async (
     // Update user with agency reference
     user.agencyId = agency._id as unknown as mongoose.Types.ObjectId;
     user.isEnterpriseTier = true;
+    user.isSubscribed = true;
     user.agencyName = agency.name;
+    user.subscriptionPlan = 'agency_yearly';
+    user.subscriptionStatus = 'active';
+
+    // Set subscription expiry to 1 year from now
+    const subscriptionExpiresAt = new Date(Date.now() + 365 * 24 * 60 * 60 * 1000);
+    user.subscriptionExpiresAt = subscriptionExpiresAt;
+
+    // Get enterprise product limits from DB (configurable in admin)
+    const agencyProduct = await Product.findOne({ productId: 'agency_yearly' }).lean();
+    const enterpriseListingsLimit = agencyProduct?.listingsLimit ?? ENTERPRISE_TIER_LIMITS.LISTINGS;
+    const enterprisePromoCoupons = agencyProduct?.promotionCoupons ?? ENTERPRISE_TIER_LIMITS.PROMOTION_COUPONS;
+
+    // Set the owner's subscription to agency_owner tier with enterprise limits
+    if (!user.subscription) {
+      user.subscription = {
+        tier: 'free',
+        status: 'active',
+        listingsLimit: 3,
+        activeListingsCount: 0,
+        privateSellerCount: 0,
+        agentCount: 0,
+        totalPaid: 0,
+      } as any;
+    }
+    user.subscription.tier = 'agency_owner';
+    user.subscription.status = 'active';
+    user.subscription.listingsLimit = enterpriseListingsLimit;
+    user.subscription.expiresAt = subscriptionExpiresAt;
+    user.subscription.promotionCoupons = {
+      monthly: enterprisePromoCoupons,
+      available: enterprisePromoCoupons,
+      used: 0,
+      rollover: 0,
+      lastRefresh: new Date(),
+    };
+    user.subscription.savedSearchesLimit = -1; // Unlimited
+
+    // Set agency.role to 'owner' for proper detection in getMe
+    user.agency = {
+      agencyId: agency._id as any,
+      role: 'owner',
+    };
 
     // If user is not already an agent, change their role to agent
     if (user.role !== 'agent') {
@@ -112,6 +155,50 @@ export const createAgency = async (
     }
 
     await user.save();
+
+    // Create Subscription document for the owner (source of truth for frontend)
+    try {
+      const existingSubscription = await Subscription.findOne({ userId: user._id });
+      if (existingSubscription) {
+        existingSubscription.productId = 'agency_yearly';
+        existingSubscription.store = 'agency_creation';
+        existingSubscription.purchaseToken = `agency_owner_${user._id}`;
+        existingSubscription.transactionId = `agency_owner_${user._id}`;
+        existingSubscription.status = 'active';
+        existingSubscription.startDate = new Date();
+        existingSubscription.renewalDate = subscriptionExpiresAt;
+        existingSubscription.expirationDate = subscriptionExpiresAt;
+        existingSubscription.autoRenewing = true;
+        existingSubscription.price = 0;
+        existingSubscription.currency = 'EUR';
+        existingSubscription.isAcknowledged = true;
+        existingSubscription.expiryReminderSent = false;
+        await existingSubscription.save();
+      } else {
+        await Subscription.create({
+          userId: user._id,
+          productId: 'agency_yearly',
+          store: 'agency_creation',
+          purchaseToken: `agency_owner_${user._id}`,
+          transactionId: `agency_owner_${user._id}`,
+          status: 'active',
+          startDate: new Date(),
+          renewalDate: subscriptionExpiresAt,
+          expirationDate: subscriptionExpiresAt,
+          autoRenewing: true,
+          price: 0,
+          currency: 'EUR',
+          isAcknowledged: true,
+        });
+      }
+      agencyLogger.info(`✅ Created Enterprise Subscription document for agency owner ${user._id}`);
+    } catch (subError: any) {
+      if (subError.code === 11000) {
+        agencyLogger.warn(`Duplicate subscription key for agency owner ${user._id}, skipping`);
+      } else {
+        agencyLogger.error(`Error creating owner subscription: ${subError.message}`);
+      }
+    }
 
     // Create or update Agent profile for the agency owner
     const licenseNumber = req.body.licenseNumber || `LIC-${Date.now()}`;
