@@ -101,7 +101,8 @@ const HighlightedPropertiesContext = createContext<HighlightedPropertiesContextT
  * Get a deterministic rotation slot based on property ID and hour
  * This ensures fair rotation of properties within the same tier
  */
-const getRotationSlot = (propertyId: string, hour: number, tier: string): number => {
+const getRotationSlot = (propertyId: string | undefined, hour: number, tier: string): number => {
+  if (!propertyId) return 0;
   // Create a hash from property ID for consistent ordering
   let hash = 0;
   for (let i = 0; i < propertyId.length; i++) {
@@ -134,8 +135,9 @@ const isPromotionActive = (property: Property): boolean => {
 /**
  * Get random recommendation for a tier
  */
-const getRandomRecommendation = (tier: 'premium' | 'highlight' | 'featured', seed: string): string => {
+const getRandomRecommendation = (tier: 'premium' | 'highlight' | 'featured', seed: string | undefined): string | undefined => {
   const messages = AGENT_RECOMMENDATIONS[tier];
+  if (!messages || !seed) return undefined;
   // Use property ID as seed for consistent recommendations
   let hash = 0;
   for (let i = 0; i < seed.length; i++) {

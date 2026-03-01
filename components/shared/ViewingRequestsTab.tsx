@@ -71,6 +71,7 @@ const ViewingRequestsTab: React.FC = () => {
       if (statusFilter !== 'all') params.set('status', statusFilter);
 
       const res = await fetch(`${API_URL}/viewings/seller?${params}`, {
+        credentials: 'include',
         headers: { Authorization: `Bearer ${token}` },
       });
 

@@ -64,7 +64,7 @@ const FeaturedSubscriptionCard: React.FC<FeaturedSubscriptionCardProps> = React.
 
   const fetchStartingPrice = async () => {
     try {
-      const response = await fetch(`${API_URL}/products`);
+      const response = await fetch(`${API_URL}/products`, { credentials: 'include' });
       if (response.ok) {
         const data = await response.json();
         const cheapestProduct = (data.products || []).find(

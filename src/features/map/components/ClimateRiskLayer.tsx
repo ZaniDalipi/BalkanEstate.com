@@ -15,6 +15,7 @@ import L from 'leaflet';
 import 'leaflet.heat';
 import { useRainViewer } from '../hooks/useRainViewer';
 import { useOpenMeteoGrid, type MapBounds } from '../hooks/useOpenMeteoGrid';
+import { useMapServices, weatherTileProxyUrl, FIRMS_WMS_PROXY_BASE } from '../hooks/useMapServices';
 
 export type ClimateRiskType = 'none' | 'flood' | 'fire' | 'wind' | 'air' | 'heat';
 
@@ -22,9 +23,6 @@ interface ClimateRiskLayerProps {
   riskType: ClimateRiskType;
   opacity?: number;
 }
-
-// OpenWeatherMap API key from environment
-const OWM_API_KEY = import.meta.env.VITE_OWM_API_KEY || '';
 
 // EFFIS Copernicus WMS endpoint (free, no API key needed, global fire data)
 const EFFIS_WMS_URL = 'https://maps.effis.emergency.copernicus.eu/effis';
@@ -40,8 +38,8 @@ interface LayerLegendConfig {
   source: string;
 }
 
-// Legend configurations for each layer type
-const LEGEND_CONFIGS: Record<Exclude<ClimateRiskType, 'none'>, LayerLegendConfig> = {
+// Legend configurations for each layer type (source is resolved dynamically via useMapServices)
+const getLegendConfigs = (services: { owm: boolean; firms: boolean }): Record<Exclude<ClimateRiskType, 'none'>, LayerLegendConfig> => ({
   flood: {
     legendTitle: 'Precipitation Radar',
     source: 'RainViewer',
@@ -54,7 +52,7 @@ const LEGEND_CONFIGS: Record<Exclude<ClimateRiskType, 'none'>, LayerLegendConfig
   },
   fire: {
     legendTitle: 'Fire Danger Index',
-    source: import.meta.env.VITE_FIRMS_MAP_KEY ? 'NASA FIRMS' : 'EFFIS Copernicus FWI',
+    source: services.firms ? 'NASA FIRMS' : 'EFFIS Copernicus FWI',
     legendColors: [
       { color: '#008000', label: 'Low' },
       { color: '#ffff00', label: 'Moderate' },
@@ -65,7 +63,7 @@ const LEGEND_CONFIGS: Record<Exclude<ClimateRiskType, 'none'>, LayerLegendConfig
   },
   wind: {
     legendTitle: 'Wind Speed',
-    source: OWM_API_KEY ? 'OpenWeatherMap' : 'Open-Meteo',
+    source: services.owm ? 'OpenWeatherMap' : 'Open-Meteo',
     legendColors: [
       { color: '#e8f4f8', label: 'Calm' },
       { color: '#a6d9e8', label: 'Light' },
@@ -86,7 +84,7 @@ const LEGEND_CONFIGS: Record<Exclude<ClimateRiskType, 'none'>, LayerLegendConfig
   },
   heat: {
     legendTitle: 'Temperature',
-    source: OWM_API_KEY ? 'OpenWeatherMap' : 'Open-Meteo',
+    source: services.owm ? 'OpenWeatherMap' : 'Open-Meteo',
     legendColors: [
       { color: '#313695', label: 'Cold' },
       { color: '#74add1', label: 'Cool' },
@@ -95,7 +93,7 @@ const LEGEND_CONFIGS: Record<Exclude<ClimateRiskType, 'none'>, LayerLegendConfig
       { color: '#a50026', label: 'Extreme' },
     ],
   },
-};
+});
 
 /**
  * Climate Risk Legend Component
@@ -103,7 +101,8 @@ const LEGEND_CONFIGS: Record<Exclude<ClimateRiskType, 'none'>, LayerLegendConfig
 export const ClimateRiskLegend: React.FC<{
   riskType: Exclude<ClimateRiskType, 'none'>;
 }> = ({ riskType }) => {
-  const config = LEGEND_CONFIGS[riskType];
+  const services = useMapServices();
+  const config = getLegendConfigs(services)[riskType];
   if (!config) return null;
 
   return (
@@ -169,22 +168,22 @@ function useMapBounds(): MapBounds | null {
 /**
  * WMS layer for EFFIS Copernicus Fire Weather Index.
  * Uses ecmwf007.fwi (today's fire danger forecast) - always has data globally.
- * If VITE_FIRMS_MAP_KEY is set, shows active fire hotspots from NASA FIRMS instead.
+ * If FIRMS proxy is available, shows active fire hotspots from NASA FIRMS instead.
  */
 const WMSFireLayer: React.FC<{ opacity: number }> = ({ opacity }) => {
   const map = useMap();
   const layerRef = useRef<L.TileLayer.WMS | null>(null);
+  const { firms } = useMapServices();
 
   useEffect(() => {
-    const firmsKey = import.meta.env.VITE_FIRMS_MAP_KEY || '';
     const today = new Date().toISOString().split('T')[0];
 
     let wmsLayer: L.TileLayer.WMS;
 
-    if (firmsKey) {
-      // NASA FIRMS active fire hotspots (requires free MAP_KEY)
+    if (firms) {
+      // NASA FIRMS active fire hotspots via backend proxy (API key stays server-side)
       wmsLayer = L.tileLayer.wms(
-        `https://firms.modaps.eosdis.nasa.gov/mapserver/wms/fires/${firmsKey}/`,
+        FIRMS_WMS_PROXY_BASE,
         {
           layers: 'fires_viirs_24',
           format: 'image/png',
@@ -249,9 +248,7 @@ const OWMTileLayer: React.FC<{
   layer: 'wind_new' | 'temp_new';
   opacity: number;
 }> = ({ layer, opacity }) => {
-  if (!OWM_API_KEY) return null;
-
-  const url = `https://tile.openweathermap.org/map/${layer}/{z}/{x}/{y}.png?appid=${OWM_API_KEY}`;
+  const url = weatherTileProxyUrl(layer);
 
   return (
     <TileLayer
@@ -413,12 +410,14 @@ const OpenMeteoWindLayer: React.FC<{ opacity: number }> = ({ opacity }) => {
 // ---------------------------------------------------------------------------
 
 const WindLayer: React.FC<{ opacity: number }> = ({ opacity }) => {
-  if (OWM_API_KEY) return <OWMTileLayer layer="wind_new" opacity={opacity} />;
+  const { owm } = useMapServices();
+  if (owm) return <OWMTileLayer layer="wind_new" opacity={opacity} />;
   return <OpenMeteoWindLayer opacity={opacity} />;
 };
 
 const HeatLayer: React.FC<{ opacity: number }> = ({ opacity }) => {
-  if (OWM_API_KEY) return <OWMTileLayer layer="temp_new" opacity={opacity} />;
+  const { owm } = useMapServices();
+  if (owm) return <OWMTileLayer layer="temp_new" opacity={opacity} />;
   return <OpenMeteoHeatLayer opacity={opacity} />;
 };
 

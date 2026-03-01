@@ -26,6 +26,7 @@ import {
   invalidatePublicKey,
   type ResponseKeyInfo,
 } from '@/src/shared/api/payloadEncryption';
+import { tokenService } from '@/src/shared/api/tokenService';
 
 // Get API URL from environment variables
 // Production detection: if running on balkanestateai.com, use production API
@@ -50,24 +51,23 @@ const API_URL = getApiUrl();
 // --- TOKEN MANAGEMENT ---
 
 const getToken = (): string | null => {
-  return localStorage.getItem('balkan_estate_token');
+  return tokenService.getAccessToken();
 };
 
 const setToken = (token: string) => {
-  localStorage.setItem('balkan_estate_token', token);
+  tokenService.setAccessToken(token);
 };
 
 const getRefreshToken = (): string | null => {
-  return localStorage.getItem('balkan_estate_refresh_token');
+  return tokenService.getRefreshToken();
 };
 
 const setRefreshToken = (token: string) => {
-  localStorage.setItem('balkan_estate_refresh_token', token);
+  tokenService.setRefreshToken(token);
 };
 
 const removeToken = () => {
-  localStorage.removeItem('balkan_estate_token');
-  localStorage.removeItem('balkan_estate_refresh_token');
+  tokenService.clearTokens();
 };
 
 // --- HTTP CLIENT ---
@@ -115,6 +115,7 @@ const refreshAccessToken = async (): Promise<string | null> => {
 
     const response = await fetch(`${API_URL}/auth/refresh-token`, {
       method: 'POST',
+      credentials: 'include',
       headers: {
         'Content-Type': 'application/json',
       },
@@ -1070,8 +1071,8 @@ function transformBackendProperty(backendProp: any): Property {
   const seller = backendProp.sellerId;
 
   return {
-    id: backendProp._id,
-    sellerId: seller._id || seller,
+    id: backendProp.id || backendProp._id,
+    sellerId: seller.id || seller._id || seller,
     listingType: backendProp.listingType || 'sale',
     status: backendProp.status,
     title: backendProp.title,
@@ -1275,7 +1276,7 @@ function transformToBackendProperty(frontendProp: Property): any {
 // Transform backend saved search to frontend SavedSearch type
 function transformBackendSavedSearch(backendSearch: any): SavedSearch {
   return {
-    id: backendSearch._id,
+    id: backendSearch.id || backendSearch._id,
     name: backendSearch.name,
     filters: backendSearch.filters,
     drawnBoundsJSON: backendSearch.drawnBoundsJSON,
@@ -1295,18 +1296,18 @@ function transformBackendConversation(backendConv: any): Conversation {
   const seller = backendConv.sellerId || null;
 
   return {
-    id: backendConv._id,
-    propertyId: property ? (property._id || property) : null,
-    property: property && property._id ? transformBackendProperty(property) : undefined,
-    buyerId: buyer ? (buyer._id || buyer) : null,
-    sellerId: seller ? (seller._id || seller) : null,
-    buyer: buyer && buyer._id ? {
-      id: buyer._id,
+    id: backendConv.id || backendConv._id,
+    propertyId: property ? (property.id || property._id || property) : null,
+    property: property && (property.id || property._id) ? transformBackendProperty(property) : undefined,
+    buyerId: buyer ? (buyer.id || buyer._id || buyer) : null,
+    sellerId: seller ? (seller.id || seller._id || seller) : null,
+    buyer: buyer && (buyer.id || buyer._id) ? {
+      id: buyer.id || buyer._id,
       name: buyer.name,
       avatarUrl: buyer.avatarUrl,
     } : undefined,
-    seller: seller && seller._id ? {
-      id: seller._id,
+    seller: seller && (seller.id || seller._id) ? {
+      id: seller.id || seller._id,
       name: seller.name,
       avatarUrl: seller.avatarUrl,
       role: seller.role,
@@ -1326,8 +1327,8 @@ function transformBackendMessage(backendMsg: any): Message {
   const sender = backendMsg.senderId || null;
   
   return {
-    id: backendMsg._id,
-    senderId: sender ? (sender._id || sender) : null,
+    id: backendMsg.id || backendMsg._id,
+    senderId: sender ? (sender.id || sender._id || sender) : null,
     text: backendMsg.text,
     imageUrl: backendMsg.imageUrl,
     encryptedMessage: backendMsg.encryptedMessage,

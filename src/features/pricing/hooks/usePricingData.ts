@@ -1,6 +1,7 @@
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useEffect } from 'react';
 import { API_URL } from '@/src/shared/api/config';
+import { tokenService } from '@/src/shared/api/tokenService';
 
 // Types
 export interface Product {
@@ -91,7 +92,7 @@ async function fetchUserListings(token: string): Promise<any[]> {
   if (!response.ok) throw new Error('Failed to fetch listings');
   const data = await response.json();
   return (data.properties || []).map((p: any) => ({
-    id: p._id || p.id,
+    id: p.id || p._id,
     address: p.address || p.title || 'No address',
     price: p.price || 0,
     imageUrl: p.imageUrl || p.images?.[0] || '',
@@ -134,7 +135,7 @@ export function usePromotionPlans() {
  * Hook to fetch user listings
  */
 export function useUserListings(enabled: boolean) {
-  const token = typeof window !== 'undefined' ? localStorage.getItem('balkan_estate_token') : null;
+  const token = typeof window !== 'undefined' ? tokenService.getAccessToken() : null;
 
   return useQuery({
     queryKey: ['userListings'],

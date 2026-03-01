@@ -173,10 +173,11 @@ const AppContent: React.FC<{ onToggleSidebar: () => void }> = ({ onToggleSidebar
           .then(data => {
             if (data.property) {
               // Transform backend property to frontend format
+              // Backend now returns obfuscated `id` (not raw `_id`)
               const property = {
                 ...data.property,
-                id: data.property._id || data.property.id,
-                sellerId: data.property.sellerId?._id || data.property.sellerId,
+                id: data.property.id || data.property._id,
+                sellerId: data.property.sellerId?.id || data.property.sellerId?._id || data.property.sellerId,
               };
               dispatch({ type: 'SET_SELECTED_PROPERTY_OBJECT', payload: property });
             } else {

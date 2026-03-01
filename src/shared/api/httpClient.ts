@@ -74,9 +74,7 @@ const refreshAccessToken = async (): Promise<string | null> => {
     const data = await response.json();
     if (data.accessToken) {
       tokenService.setAccessToken(data.accessToken);
-      if (data.refreshToken) {
-        tokenService.setRefreshToken(data.refreshToken);
-      }
+      // Refresh token is handled via httpOnly cookie set by the backend.
       return data.accessToken;
     }
 

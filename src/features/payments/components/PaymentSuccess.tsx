@@ -9,6 +9,7 @@ import { createAgency } from '@/features/agencies/api/agencyApi';
 import { authApiClient } from '@/src/data/api/AuthApiClient';
 import { trackEcommerce, trackEvent } from '@/src/components/marketing/Analytics';
 import { propertyKeys } from '@/src/features/properties/api';
+import { tokenService } from '@/src/shared/api/tokenService';
 
 interface PaymentDetails {
   paymentStatus?: string;
@@ -25,7 +26,8 @@ interface PaymentDetails {
 
 interface AgencyResult {
   agency?: {
-    _id: string;
+    id?: string;
+    _id?: string;
     slug: string;
     name: string;
   };
@@ -121,7 +123,7 @@ const PaymentSuccess: React.FC = () => {
 
   const verifyPayment = async (params: URLSearchParams) => {
     try {
-      const token = localStorage.getItem('balkan_estate_token');
+      const token = tokenService.getAccessToken();
 
       if (!token) {
         throw new Error(t('success.loginToVerify'));
@@ -265,10 +267,11 @@ const PaymentSuccess: React.FC = () => {
       dispatch({ type: 'SET_SELECTED_AGENCY', payload: agencyResult.agency.slug });
       dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'agencies' });
       window.history.pushState({}, '', `/agencies/${agencyResult.agency.slug}`);
-    } else if (agencyResult?.agency?._id) {
-      dispatch({ type: 'SET_SELECTED_AGENCY', payload: agencyResult.agency._id });
+    } else if (agencyResult?.agency?.id || agencyResult?.agency?._id) {
+      const agencyId = agencyResult.agency.id || agencyResult.agency._id;
+      dispatch({ type: 'SET_SELECTED_AGENCY', payload: agencyId });
       dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'agencies' });
-      window.history.pushState({}, '', `/agencies/${agencyResult.agency._id}`);
+      window.history.pushState({}, '', `/agencies/${agencyId}`);
     }
   };
 

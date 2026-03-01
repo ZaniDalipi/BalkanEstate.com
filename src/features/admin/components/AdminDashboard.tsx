@@ -20,6 +20,7 @@ import HowItWorksManager from './HowItWorksManager';
 import EmailManager from './EmailManager';
 import SiteSettingsManager from './SiteSettingsManager';
 import type { AdminSection } from '@/types';
+import { tokenService } from '@/src/shared/api/tokenService';
 
 // Map URL sections to AdminView types
 const urlToAdminView: Record<AdminSection, AdminView> = {
@@ -80,7 +81,7 @@ const AdminDashboard: React.FC = () => {
   // Check if user has admin access
   useEffect(() => {
     const checkAdminAccess = async () => {
-      const token = localStorage.getItem('balkan_estate_token');
+      const token = tokenService.getAccessToken();
       if (!token) {
         setError(t('admin:errors.notAuthenticated', 'Not authenticated'));
         return;

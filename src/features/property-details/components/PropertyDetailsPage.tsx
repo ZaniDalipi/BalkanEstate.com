@@ -378,7 +378,7 @@ const PropertyDetailsPage: React.FC<{ property: Property }> = ({ property: cache
   }, [property.status]);
 
   const handleShare = async () => {
-    const url = `${window.location.origin}/property/${property.id}`;
+    const url = `${window.location.origin}/property/${propertySlug}`;
     try {
       if (navigator.share) {
         await navigator.share({
@@ -434,7 +434,7 @@ const PropertyDetailsPage: React.FC<{ property: Property }> = ({ property: cache
       <SEO
         title={seoTitle}
         description={seoDescription}
-        canonical={`${window.location.origin}/property/${property.id}/${propertySlug}`}
+        canonical={`${window.location.origin}/property/${propertySlug}`}
         image={property.imageUrl}
         type="product"
         property={{
