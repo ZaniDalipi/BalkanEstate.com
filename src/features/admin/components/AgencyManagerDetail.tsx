@@ -6,6 +6,13 @@ import { AgencyEditForm } from './useAgencyManager';
 
 const MapLocationPicker = lazy(() => import('@/src/features/seller/components/MapLocationPicker'));
 
+const subscriptionStatusStyles: Record<string, string> = {
+  active: 'bg-green-100 text-green-800',
+  trial: 'bg-blue-100 text-blue-800',
+  expired: 'bg-red-100 text-red-800',
+  canceled: 'bg-gray-100 text-gray-800',
+};
+
 interface AgencyManagerDetailProps {
   // View modal
   isViewModalOpen: boolean;
@@ -18,6 +25,10 @@ interface AgencyManagerDetailProps {
   editForm: AgencyEditForm;
   setEditForm: (form: AgencyEditForm) => void;
   handleUpdateAgency: (e: React.FormEvent) => void;
+  // Subscription actions
+  handleActivateSubscription: (agencyId: string, agencyName: string) => void;
+  handleDeactivateSubscription: (agencyId: string, agencyName: string) => void;
+  subscriptionLoading: string | null;
   formatDate: (dateString: string) => string;
 }
 
@@ -31,6 +42,9 @@ const AgencyManagerDetail: React.FC<AgencyManagerDetailProps> = ({
   editForm,
   setEditForm,
   handleUpdateAgency,
+  handleActivateSubscription,
+  handleDeactivateSubscription,
+  subscriptionLoading,
   formatDate,
 }) => {
   const { t } = useTranslation(['admin', 'common']);
@@ -129,6 +143,68 @@ const AgencyManagerDetail: React.FC<AgencyManagerDetailProps> = ({
                   </div>
                 </div>
               )}
+
+              {/* Subscription */}
+              <div className="border-t pt-4">
+                <h5 className="font-semibold text-gray-900 mb-3">{t('admin:agencies.subscription', 'Subscription')}</h5>
+                <div className="bg-gray-50 p-4 rounded-lg space-y-3">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <span className={`inline-flex px-3 py-1 text-sm font-semibold rounded-full ${subscriptionStatusStyles[viewingAgency.subscription?.status || 'expired'] || 'bg-gray-100 text-gray-800'}`}>
+                        {t(`admin:agencies.status.${viewingAgency.subscription?.status || 'expired'}`, viewingAgency.subscription?.status || 'expired')}
+                      </span>
+                      {viewingAgency.subscription?.autoRenew && (
+                        <span className="text-xs text-gray-500">{t('admin:agencies.autoRenew', 'Auto-renew')}</span>
+                      )}
+                    </div>
+                    <div className="flex gap-2">
+                      {viewingAgency.subscription?.status === 'active' || viewingAgency.subscription?.status === 'trial' ? (
+                        <button
+                          onClick={() => handleDeactivateSubscription(viewingAgency._id, viewingAgency.name)}
+                          disabled={subscriptionLoading === viewingAgency._id}
+                          className="px-3 py-1.5 text-sm font-medium text-red-700 bg-red-100 rounded-lg hover:bg-red-200 disabled:opacity-50"
+                        >
+                          {t('admin:agencies.deactivateSubscription', 'Deactivate')}
+                        </button>
+                      ) : (
+                        <button
+                          onClick={() => handleActivateSubscription(viewingAgency._id, viewingAgency.name)}
+                          disabled={subscriptionLoading === viewingAgency._id}
+                          className="px-3 py-1.5 text-sm font-medium text-green-700 bg-green-100 rounded-lg hover:bg-green-200 disabled:opacity-50"
+                        >
+                          {t('admin:agencies.activateSubscription', 'Activate')}
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-2 gap-4 text-sm">
+                    <div>
+                      <span className="text-gray-500">{t('admin:agencies.startDate', 'Start Date')}:</span>
+                      <span className="ml-2 text-gray-900">
+                        {viewingAgency.subscription?.startDate ? formatDate(viewingAgency.subscription.startDate) : '-'}
+                      </span>
+                    </div>
+                    <div>
+                      <span className="text-gray-500">{t('admin:agencies.expiresAt', 'Expires At')}:</span>
+                      <span className="ml-2 text-gray-900">
+                        {viewingAgency.subscription?.expiresAt ? formatDate(viewingAgency.subscription.expiresAt) : '-'}
+                      </span>
+                    </div>
+                    <div>
+                      <span className="text-gray-500">{t('admin:agencies.amount', 'Amount')}:</span>
+                      <span className="ml-2 text-gray-900">
+                        {viewingAgency.subscription?.amount ? `${viewingAgency.subscription.currency || 'EUR'} ${viewingAgency.subscription.amount}` : '-'}
+                      </span>
+                    </div>
+                    <div>
+                      <span className="text-gray-500">{t('admin:agencies.autoRenew', 'Auto Renew')}:</span>
+                      <span className="ml-2 text-gray-900">
+                        {viewingAgency.subscription?.autoRenew ? t('admin:userDetail.yes', 'Yes') : t('admin:userDetail.no', 'No')}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
 
               {/* Specialties & Certifications */}
               {(viewingAgency.specialties && viewingAgency.specialties.length > 0) ||

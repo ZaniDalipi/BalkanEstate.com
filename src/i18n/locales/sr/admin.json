@@ -123,11 +123,30 @@
     "deleteConfirm": "Да ли сте сигурни да желите да обришете ову агенцију? Ова акција се не може поништити.",
     "approve": "Одобри",
     "reject": "Одбиј",
+    "viewDetails": "Погледај детаље",
     "status": {
       "active": "Активна",
       "pending": "Одобрење на Чекању",
-      "suspended": "Суспендована"
-    }
+      "suspended": "Суспендована",
+      "trial": "Пробна",
+      "expired": "Истекла",
+      "canceled": "Отказана"
+    },
+    "subscription": "Претплата",
+    "startDate": "Датум почетка",
+    "expiresAt": "Истиче",
+    "amount": "Износ",
+    "autoRenew": "Аутоматско обнављање",
+    "activateSubscription": "Активирај претплату",
+    "deactivateSubscription": "Деактивирај претплату",
+    "activateConfirmTitle": "Активирај претплату агенције",
+    "activateConfirmMessage": "Ово ће активирати једногодишњу претплату за \"{{name}}\". Агенција и њени агенти ће поново добити пун приступ.",
+    "deactivateConfirmTitle": "Деактивирај претплату агенције",
+    "deactivateConfirmMessage": "Ово ће одмах деактивирати претплату за \"{{name}}\". Агенција ће изгубити приступ премиум функцијама.",
+    "subscriptionActivated": "Претплата је успешно активирана",
+    "subscriptionDeactivated": "Претплата је успешно деактивирана",
+    "subscriptionActivateError": "Неуспешно активирање претплате",
+    "subscriptionDeactivateError": "Неуспешно деактивирање претплате"
   },
   "discountCodes": {
     "title": "Управљање Кодовима за Попуст",

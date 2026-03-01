@@ -123,11 +123,30 @@
     "deleteConfirm": "A jeni i sigurt që dëshironi të fshini këtë agjenci? Ky veprim nuk mund të zhbëhet.",
     "approve": "Aprovo",
     "reject": "Refuzo",
+    "viewDetails": "Shiko detajet",
     "status": {
       "active": "Aktive",
       "pending": "Në Pritje të Aprovimit",
-      "suspended": "Pezulluar"
-    }
+      "suspended": "Pezulluar",
+      "trial": "Provë",
+      "expired": "Skaduar",
+      "canceled": "Anuluar"
+    },
+    "subscription": "Abonimi",
+    "startDate": "Data e fillimit",
+    "expiresAt": "Skadon më",
+    "amount": "Shuma",
+    "autoRenew": "Rinovim automatik",
+    "activateSubscription": "Aktivo Abonimin",
+    "deactivateSubscription": "Çaktivizo Abonimin",
+    "activateConfirmTitle": "Aktivo Abonimin e Agjencisë",
+    "activateConfirmMessage": "Kjo do të aktivizojë një abonim 1-vjeçar për \"{{name}}\". Agjencia dhe agjentët e saj do të rifitojnë aksesin e plotë.",
+    "deactivateConfirmTitle": "Çaktivizo Abonimin e Agjencisë",
+    "deactivateConfirmMessage": "Kjo do të çaktivizojë menjëherë abonimin për \"{{name}}\". Agjencia do të humbasë aksesin në veçoritë premium.",
+    "subscriptionActivated": "Abonimi u aktivizua me sukses",
+    "subscriptionDeactivated": "Abonimi u çaktivizua me sukses",
+    "subscriptionActivateError": "Dështoi aktivizimi i abonimit",
+    "subscriptionDeactivateError": "Dështoi çaktivizimi i abonimit"
   },
   "discountCodes": {
     "title": "Menaxheri i Kodeve të Zbritjes",

@@ -123,11 +123,30 @@
     "deleteConfirm": "Сигурни ли сте, че искате да изтриете тази агенция? Това действие не може да бъде отменено.",
     "approve": "Одобри",
     "reject": "Откажи",
+    "viewDetails": "Виж детайли",
     "status": {
       "active": "Активна",
       "pending": "Чака Одобрение",
-      "suspended": "Спряна"
-    }
+      "suspended": "Спряна",
+      "trial": "Пробна",
+      "expired": "Изтекъл",
+      "canceled": "Отменен"
+    },
+    "subscription": "Абонамент",
+    "startDate": "Начална дата",
+    "expiresAt": "Изтича на",
+    "amount": "Сума",
+    "autoRenew": "Автоматично подновяване",
+    "activateSubscription": "Активирай абонамент",
+    "deactivateSubscription": "Деактивирай абонамент",
+    "activateConfirmTitle": "Активирай абонамент на агенция",
+    "activateConfirmMessage": "Това ще активира 1-годишен абонамент за \"{{name}}\". Агенцията и нейните агенти ще възвърнат пълен достъп.",
+    "deactivateConfirmTitle": "Деактивирай абонамент на агенция",
+    "deactivateConfirmMessage": "Това незабавно ще деактивира абонамента за \"{{name}}\". Агенцията ще загуби достъп до премиум функциите.",
+    "subscriptionActivated": "Абонаментът е успешно активиран",
+    "subscriptionDeactivated": "Абонаментът е успешно деактивиран",
+    "subscriptionActivateError": "Неуспешно активиране на абонамент",
+    "subscriptionDeactivateError": "Неуспешно деактивиране на абонамент"
   },
   "discountCodes": {
     "title": "Управление на Кодове за Отстъпка",

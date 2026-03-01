@@ -11,6 +11,7 @@ import Subscription from '../models/Subscription';
 import PaymentRecord from '../models/PaymentRecord';
 import SubscriptionEvent from '../models/SubscriptionEvent';
 import User from '../models/User';
+import Agency from '../models/Agency';
 import { adminLogger } from '../utils/logger';
 import { invalidateCache } from '../middleware/cache';
 import { getObjectIdParam } from '../utils/validateParams';
@@ -538,6 +539,296 @@ export const adjustListingLimit = async (req: Request, res: Response): Promise<v
   }
 };
 
+/**
+ * @desc    Deactivate a user's subscription immediately (admin action)
+ * @route   POST /api/admin/subscriptions/:id/deactivate
+ * @access  Admin
+ */
+export const deactivateUserSubscription = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const id = getObjectIdParam(req, res, 'id');
+    if (!id) return;
+    const { reason } = req.body;
+
+    if (reason && (typeof reason !== 'string' || reason.length > 500)) {
+      res.status(400).json({ message: 'Reason must be a string with max 500 characters' });
+      return;
+    }
+
+    const subscription = await Subscription.findById(id);
+    if (!subscription) {
+      res.status(404).json({ message: 'Subscription not found' });
+      return;
+    }
+
+    if (subscription.status !== 'active' && subscription.status !== 'trial' && subscription.status !== 'grace') {
+      res.status(400).json({ message: `Cannot deactivate subscription with status '${subscription.status}'` });
+      return;
+    }
+
+    const previousStatus = subscription.status;
+    subscription.status = 'canceled';
+    subscription.canceledAt = new Date();
+    subscription.autoRenewing = false;
+    subscription.cancellationReason = reason || 'Admin deactivation';
+    await subscription.save();
+
+    const user = await User.findById(subscription.userId);
+    if (user) {
+      user.isSubscribed = false;
+      user.subscriptionStatus = 'canceled';
+      await user.save();
+    }
+
+    await SubscriptionEvent.create({
+      subscriptionId: subscription._id,
+      userId: subscription.userId,
+      eventType: 'subscription_canceled',
+      store: subscription.store,
+      previousStatus,
+      newStatus: 'canceled',
+      metadata: {
+        deactivatedByAdmin: true,
+        adminUserId: (req as any).user?._id,
+        reason: reason || 'Admin deactivation',
+      },
+    });
+
+    adminLogger.info(`[Admin] Subscription ${id} deactivated for user ${user?._id} by admin ${(req as any).user?._id}`);
+
+    invalidateCache('/api/agents');
+    invalidateCache('/api/properties');
+
+    res.json({
+      success: true,
+      message: `Subscription deactivated for ${user?.email || 'unknown user'}`,
+    });
+  } catch (error: unknown) {
+    adminLogger.error('[Admin] Error deactivating subscription:', error);
+    res.status(500).json({ message: 'Error deactivating subscription' });
+  }
+};
+
+// ===== Agency Subscription Management =====
+
+/**
+ * @desc    Activate an agency's subscription (admin override)
+ * @route   POST /api/admin/agencies/:agencyId/subscription/activate
+ * @access  Admin
+ */
+export const activateAgencySubscription = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const agencyId = getObjectIdParam(req, res, 'agencyId');
+    if (!agencyId) return;
+
+    const { durationDays, reason } = req.body;
+
+    // Validate durationDays
+    const duration = parseInt(durationDays, 10);
+    if (!duration || duration < 1 || duration > 730) {
+      res.status(400).json({ message: 'durationDays must be a number between 1 and 730' });
+      return;
+    }
+
+    if (reason && (typeof reason !== 'string' || reason.length > 500)) {
+      res.status(400).json({ message: 'Reason must be a string with max 500 characters' });
+      return;
+    }
+
+    const agency = await Agency.findById(agencyId);
+    if (!agency) {
+      res.status(404).json({ message: 'Agency not found' });
+      return;
+    }
+
+    const previousStatus = agency.subscription?.status || 'expired';
+    const now = new Date();
+    const expiresAt = new Date(now);
+    expiresAt.setDate(expiresAt.getDate() + duration);
+
+    // Update agency subscription
+    agency.subscription.status = 'active';
+    agency.subscription.startDate = now;
+    agency.subscription.expiresAt = expiresAt;
+    agency.subscription.autoRenew = false;
+    agency.markModified('subscription');
+    await agency.save();
+
+    // Update the agency owner's user record
+    const owner = await User.findById(agency.ownerId);
+    if (owner) {
+      owner.isSubscribed = true;
+      owner.subscriptionStatus = 'active';
+      owner.subscriptionPlan = 'agency';
+      owner.subscriptionExpiresAt = expiresAt;
+      await owner.save();
+    }
+
+    // Audit trail — use agency._id as subscriptionId since agency subscriptions are embedded
+    await SubscriptionEvent.create({
+      subscriptionId: agency._id,
+      userId: agency.ownerId,
+      eventType: 'subscription_reactivated',
+      store: 'web',
+      previousStatus,
+      newStatus: 'active',
+      metadata: {
+        activatedByAdmin: true,
+        adminUserId: (req as any).user?._id,
+        reason: reason || 'Admin activation',
+        agencyId: String(agency._id),
+        agencyName: agency.name,
+        durationDays: duration,
+      },
+    });
+
+    adminLogger.info(`[Admin] Agency subscription activated for ${agency.name} (${agencyId}) - Duration: ${duration} days`);
+
+    invalidateCache('/api/agents');
+    invalidateCache('/api/properties');
+
+    res.json({
+      success: true,
+      message: `Subscription activated for agency "${agency.name}"`,
+      subscription: {
+        status: 'active',
+        startDate: now,
+        expiresAt,
+        agencyId: agency._id,
+        agencyName: agency.name,
+      },
+    });
+  } catch (error: unknown) {
+    adminLogger.error('[Admin] Error activating agency subscription:', error);
+    res.status(500).json({ message: 'Error activating agency subscription' });
+  }
+};
+
+/**
+ * @desc    Deactivate an agency's subscription (admin action)
+ * @route   POST /api/admin/agencies/:agencyId/subscription/deactivate
+ * @access  Admin
+ */
+export const deactivateAgencySubscription = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const agencyId = getObjectIdParam(req, res, 'agencyId');
+    if (!agencyId) return;
+
+    const { reason, immediate } = req.body;
+
+    if (reason && (typeof reason !== 'string' || reason.length > 500)) {
+      res.status(400).json({ message: 'Reason must be a string with max 500 characters' });
+      return;
+    }
+
+    const agency = await Agency.findById(agencyId);
+    if (!agency) {
+      res.status(404).json({ message: 'Agency not found' });
+      return;
+    }
+
+    const currentStatus = agency.subscription?.status;
+    if (currentStatus !== 'active' && currentStatus !== 'trial') {
+      res.status(400).json({ message: `Cannot deactivate subscription with status '${currentStatus}'` });
+      return;
+    }
+
+    const shouldDeactivateNow = immediate !== false; // Default to immediate
+    const previousStatus = currentStatus;
+
+    if (shouldDeactivateNow) {
+      agency.subscription.status = 'canceled';
+      agency.markModified('subscription');
+      await agency.save();
+
+      // Update owner user record
+      const owner = await User.findById(agency.ownerId);
+      if (owner) {
+        owner.isSubscribed = false;
+        owner.subscriptionStatus = 'canceled';
+        await owner.save();
+      }
+    } else {
+      // Let it expire naturally — just disable auto-renew
+      agency.subscription.autoRenew = false;
+      agency.markModified('subscription');
+      await agency.save();
+    }
+
+    await SubscriptionEvent.create({
+      subscriptionId: agency._id,
+      userId: agency.ownerId,
+      eventType: 'subscription_canceled',
+      store: 'web',
+      previousStatus,
+      newStatus: shouldDeactivateNow ? 'canceled' : previousStatus,
+      metadata: {
+        deactivatedByAdmin: true,
+        adminUserId: (req as any).user?._id,
+        reason: reason || 'Admin deactivation',
+        agencyId: String(agency._id),
+        agencyName: agency.name,
+        immediate: shouldDeactivateNow,
+      },
+    });
+
+    adminLogger.info(`[Admin] Agency subscription ${shouldDeactivateNow ? 'deactivated' : 'set to expire'} for ${agency.name} (${agencyId})`);
+
+    invalidateCache('/api/agents');
+    invalidateCache('/api/properties');
+
+    res.json({
+      success: true,
+      message: shouldDeactivateNow
+        ? `Subscription deactivated for agency "${agency.name}"`
+        : `Subscription for agency "${agency.name}" will expire at end of period`,
+    });
+  } catch (error: unknown) {
+    adminLogger.error('[Admin] Error deactivating agency subscription:', error);
+    res.status(500).json({ message: 'Error deactivating agency subscription' });
+  }
+};
+
+/**
+ * @desc    Get agency subscription details and history
+ * @route   GET /api/admin/agencies/:agencyId/subscription
+ * @access  Admin
+ */
+export const getAgencySubscriptionHistory = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const agencyId = getObjectIdParam(req, res, 'agencyId');
+    if (!agencyId) return;
+
+    const agency = await Agency.findById(agencyId)
+      .populate('ownerId', 'name email')
+      .lean();
+
+    if (!agency) {
+      res.status(404).json({ message: 'Agency not found' });
+      return;
+    }
+
+    // Fetch subscription events where metadata.agencyId matches
+    const events = await SubscriptionEvent.find({
+      subscriptionId: new mongoose.Types.ObjectId(agencyId),
+    })
+      .sort({ createdAt: -1 })
+      .limit(50)
+      .lean();
+
+    res.json({
+      success: true,
+      subscription: agency.subscription,
+      owner: agency.ownerId,
+      agencyName: agency.name,
+      events,
+    });
+  } catch (error: unknown) {
+    adminLogger.error('[Admin] Error getting agency subscription history:', error);
+    res.status(500).json({ message: 'Error getting agency subscription history' });
+  }
+};
+
 export default {
   getAllSubscriptions,
   getSubscriptionById,
@@ -546,5 +837,9 @@ export default {
   getPaymentStats,
   activateUserSubscription,
   cancelSubscription,
+  deactivateUserSubscription,
   adjustListingLimit,
+  activateAgencySubscription,
+  deactivateAgencySubscription,
+  getAgencySubscriptionHistory,
 };

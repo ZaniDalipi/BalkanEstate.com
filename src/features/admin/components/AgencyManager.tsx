@@ -1,8 +1,15 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { PencilIcon, TrashIcon, EyeIcon, BuildingOfficeIcon } from '@/constants';
+import { PencilIcon, TrashIcon, EyeIcon, BuildingOfficeIcon, CheckCircleIcon, XCircleIcon } from '@/constants';
 import { useAgencyManager } from './useAgencyManager';
 import AgencyManagerDetail from './AgencyManagerDetail';
+
+const subscriptionStatusStyles: Record<string, string> = {
+  active: 'bg-green-100 text-green-800',
+  trial: 'bg-blue-100 text-blue-800',
+  expired: 'bg-red-100 text-red-800',
+  canceled: 'bg-gray-100 text-gray-800',
+};
 
 const AgencyManager: React.FC = () => {
   const { t } = useTranslation(['admin']);
@@ -27,6 +34,9 @@ const AgencyManager: React.FC = () => {
     handleEditAgency,
     handleUpdateAgency,
     handleDeleteAgency,
+    handleActivateSubscription,
+    handleDeactivateSubscription,
+    subscriptionLoading,
     formatDate,
   } = useAgencyManager();
 
@@ -73,111 +83,149 @@ const AgencyManager: React.FC = () => {
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Contact</th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Location</th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Agents</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t('admin:agencies.subscription', 'Subscription')}</th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Created</th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
             </tr>
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
-            {agencies.map((agency) => (
-              <tr key={agency._id} className="hover:bg-gray-50">
-                <td className="px-6 py-4">
-                  <div className="flex items-center">
-                    {agency.logo ? (
-                      <img
-                        src={agency.logo}
-                        alt={agency.name}
-                        loading="lazy"
-                        decoding="async"
-                        className="w-12 h-12 rounded object-cover mr-3"
-                      />
+            {agencies.map((agency) => {
+              const subStatus = agency.subscription?.status || 'expired';
+              const isSubActive = subStatus === 'active' || subStatus === 'trial';
+              const isSubLoading = subscriptionLoading === agency._id;
+
+              return (
+                <tr key={agency._id} className="hover:bg-gray-50">
+                  <td className="px-6 py-4">
+                    <div className="flex items-center">
+                      {agency.logo ? (
+                        <img
+                          src={agency.logo}
+                          alt={agency.name}
+                          loading="lazy"
+                          decoding="async"
+                          className="w-12 h-12 rounded object-cover mr-3"
+                        />
+                      ) : (
+                        <div className="w-12 h-12 rounded bg-blue-100 flex items-center justify-center mr-3">
+                          <BuildingOfficeIcon className="w-6 h-6 text-blue-600" />
+                        </div>
+                      )}
+                      <div>
+                        <div className="font-medium text-gray-900">{agency.name}</div>
+                        <div className="text-xs text-gray-500">{agency.slug}</div>
+                      </div>
+                    </div>
+                  </td>
+                  <td className="px-6 py-4">
+                    {agency.ownerId ? (
+                      <div>
+                        <div className="text-sm text-gray-900">
+                          {typeof agency.ownerId === 'object' ? agency.ownerId.name : 'Owner'}
+                        </div>
+                        <div className="text-xs text-gray-500">
+                          {typeof agency.ownerId === 'object' ? agency.ownerId.email : agency.ownerId}
+                        </div>
+                      </div>
                     ) : (
-                      <div className="w-12 h-12 rounded bg-blue-100 flex items-center justify-center mr-3">
-                        <BuildingOfficeIcon className="w-6 h-6 text-blue-600" />
-                      </div>
+                      <span className="text-gray-400 text-sm">-</span>
                     )}
-                    <div>
-                      <div className="font-medium text-gray-900">{agency.name}</div>
-                      <div className="text-xs text-gray-500">{agency.slug}</div>
-                    </div>
-                  </div>
-                </td>
-                <td className="px-6 py-4">
-                  {agency.ownerId ? (
-                    <div>
-                      <div className="text-sm text-gray-900">
-                        {typeof agency.ownerId === 'object' ? agency.ownerId.name : 'Owner'}
+                  </td>
+                  <td className="px-6 py-4">
+                    {agency.email || agency.phone ? (
+                      <div>
+                        {agency.email && <div className="text-sm text-gray-900">{agency.email}</div>}
+                        {agency.phone && <div className="text-xs text-gray-500">{agency.phone}</div>}
                       </div>
-                      <div className="text-xs text-gray-500">
-                        {typeof agency.ownerId === 'object' ? agency.ownerId.email : agency.ownerId}
+                    ) : (
+                      <span className="text-gray-400 text-sm">-</span>
+                    )}
+                  </td>
+                  <td className="px-6 py-4">
+                    {agency.city || agency.country ? (
+                      <div>
+                        <div className="text-sm text-gray-900">{agency.city}</div>
+                        <div className="text-xs text-gray-500">{agency.country}</div>
                       </div>
+                    ) : (
+                      <span className="text-gray-400 text-sm">-</span>
+                    )}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <div className="flex items-center gap-2">
+                      <span className="px-3 py-1 text-sm font-semibold bg-purple-100 text-purple-800 rounded-full">
+                        {agency.totalAgents || 0}
+                      </span>
                     </div>
-                  ) : (
-                    <span className="text-gray-400 text-sm">-</span>
-                  )}
-                </td>
-                <td className="px-6 py-4">
-                  {agency.email || agency.phone ? (
-                    <div>
-                      {agency.email && <div className="text-sm text-gray-900">{agency.email}</div>}
-                      {agency.phone && <div className="text-xs text-gray-500">{agency.phone}</div>}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <div className="flex flex-col gap-1">
+                      <span className={`inline-flex px-2 py-0.5 text-xs font-semibold rounded-full ${subscriptionStatusStyles[subStatus] || 'bg-gray-100 text-gray-800'}`}>
+                        {t(`admin:agencies.status.${subStatus}`, subStatus)}
+                      </span>
+                      {agency.subscription?.expiresAt && (
+                        <span className="text-xs text-gray-500">
+                          {formatDate(agency.subscription.expiresAt)}
+                        </span>
+                      )}
                     </div>
-                  ) : (
-                    <span className="text-gray-400 text-sm">-</span>
-                  )}
-                </td>
-                <td className="px-6 py-4">
-                  {agency.city || agency.country ? (
-                    <div>
-                      <div className="text-sm text-gray-900">{agency.city}</div>
-                      <div className="text-xs text-gray-500">{agency.country}</div>
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    {formatDate(agency.createdAt)}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                    <div className="flex gap-2">
+                      <button
+                        onClick={() => handleViewAgency(agency)}
+                        className="text-blue-600 hover:text-blue-900"
+                        title={t('admin:agencies.viewDetails', 'View details')}
+                      >
+                        <EyeIcon className="w-5 h-5" />
+                      </button>
+                      <button
+                        onClick={() => handleEditAgency(agency)}
+                        className="text-amber-500 hover:text-amber-700"
+                        title={t('admin:agencies.edit', 'Edit agency')}
+                      >
+                        <PencilIcon className="w-5 h-5" />
+                      </button>
+                      {isSubActive ? (
+                        <button
+                          onClick={() => handleDeactivateSubscription(agency._id, agency.name)}
+                          disabled={isSubLoading}
+                          className="text-orange-500 hover:text-orange-700 disabled:opacity-50"
+                          title={t('admin:agencies.deactivateSubscription', 'Deactivate subscription')}
+                        >
+                          <XCircleIcon className="w-5 h-5" />
+                        </button>
+                      ) : (
+                        <button
+                          onClick={() => handleActivateSubscription(agency._id, agency.name)}
+                          disabled={isSubLoading}
+                          className="text-green-600 hover:text-green-800 disabled:opacity-50"
+                          title={t('admin:agencies.activateSubscription', 'Activate subscription')}
+                        >
+                          <CheckCircleIcon className="w-5 h-5" />
+                        </button>
+                      )}
+                      <button
+                        onClick={() => handleDeleteAgency(agency._id, agency.name)}
+                        className="text-red-600 hover:text-red-900"
+                        title={t('admin:agencies.delete', 'Delete agency')}
+                      >
+                        <TrashIcon className="w-5 h-5" />
+                      </button>
                     </div>
-                  ) : (
-                    <span className="text-gray-400 text-sm">-</span>
-                  )}
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap">
-                  <div className="flex items-center gap-2">
-                    <span className="px-3 py-1 text-sm font-semibold bg-purple-100 text-purple-800 rounded-full">
-                      {agency.totalAgents || 0}
-                    </span>
-                  </div>
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                  {formatDate(agency.createdAt)}
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                  <div className="flex gap-2">
-                    <button
-                      onClick={() => handleViewAgency(agency)}
-                      className="text-blue-600 hover:text-blue-900"
-                      title="View details"
-                    >
-                      <EyeIcon className="w-5 h-5" />
-                    </button>
-                    <button
-                      onClick={() => handleEditAgency(agency)}
-                      className="text-amber-500 hover:text-amber-700"
-                      title="Edit agency"
-                    >
-                      <PencilIcon className="w-5 h-5" />
-                    </button>
-                    <button
-                      onClick={() => handleDeleteAgency(agency._id, agency.name)}
-                      className="text-red-600 hover:text-red-900"
-                      title="Delete agency"
-                    >
-                      <TrashIcon className="w-5 h-5" />
-                    </button>
-                  </div>
-                </td>
-              </tr>
-            ))}
+                  </td>
+                </tr>
+              );
+            })}
           </tbody>
         </table>
 
         {agencies.length === 0 && (
           <div className="text-center py-12 text-gray-500">
-            No agencies found.
+            {t('admin:agencies.noAgencies', 'No agencies found.')}
           </div>
         )}
       </div>
@@ -217,6 +265,9 @@ const AgencyManager: React.FC = () => {
         editForm={editForm}
         setEditForm={setEditForm}
         handleUpdateAgency={handleUpdateAgency}
+        handleActivateSubscription={handleActivateSubscription}
+        handleDeactivateSubscription={handleDeactivateSubscription}
+        subscriptionLoading={subscriptionLoading}
         formatDate={formatDate}
       />
     </div>

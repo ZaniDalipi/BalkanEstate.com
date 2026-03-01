@@ -123,11 +123,30 @@
     "deleteConfirm": "Are you sure you want to delete this agency? This action cannot be undone.",
     "approve": "Approve",
     "reject": "Reject",
+    "viewDetails": "Vezi detalii",
     "status": {
       "active": "Active",
       "pending": "Pending Approval",
-      "suspended": "Suspended"
-    }
+      "suspended": "Suspended",
+      "trial": "Probă",
+      "expired": "Expirată",
+      "canceled": "Anulată"
+    },
+    "subscription": "Abonament",
+    "startDate": "Data de început",
+    "expiresAt": "Expiră la",
+    "amount": "Sumă",
+    "autoRenew": "Reînnoire automată",
+    "activateSubscription": "Activează abonamentul",
+    "deactivateSubscription": "Dezactivează abonamentul",
+    "activateConfirmTitle": "Activează abonamentul agenției",
+    "activateConfirmMessage": "Aceasta va activa un abonament de 1 an pentru \"{{name}}\". Agenția și agenții săi vor recăpăta acces complet.",
+    "deactivateConfirmTitle": "Dezactivează abonamentul agenției",
+    "deactivateConfirmMessage": "Aceasta va dezactiva imediat abonamentul pentru \"{{name}}\". Agenția va pierde accesul la funcțiile premium.",
+    "subscriptionActivated": "Abonamentul a fost activat cu succes",
+    "subscriptionDeactivated": "Abonamentul a fost dezactivat cu succes",
+    "subscriptionActivateError": "Activarea abonamentului a eșuat",
+    "subscriptionDeactivateError": "Dezactivarea abonamentului a eșuat"
   },
   "discountCodes": {
     "title": "Discount Code Manager",

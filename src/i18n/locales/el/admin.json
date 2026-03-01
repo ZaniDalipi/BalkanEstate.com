@@ -123,11 +123,30 @@
     "deleteConfirm": "Are you sure you want to delete this agency? This action cannot be undone.",
     "approve": "Approve",
     "reject": "Reject",
+    "viewDetails": "Προβολή λεπτομερειών",
     "status": {
       "active": "Active",
       "pending": "Pending Approval",
-      "suspended": "Suspended"
-    }
+      "suspended": "Suspended",
+      "trial": "Δοκιμαστική",
+      "expired": "Ληγμένη",
+      "canceled": "Ακυρωμένη"
+    },
+    "subscription": "Συνδρομή",
+    "startDate": "Ημερομηνία έναρξης",
+    "expiresAt": "Λήγει στις",
+    "amount": "Ποσό",
+    "autoRenew": "Αυτόματη ανανέωση",
+    "activateSubscription": "Ενεργοποίηση συνδρομής",
+    "deactivateSubscription": "Απενεργοποίηση συνδρομής",
+    "activateConfirmTitle": "Ενεργοποίηση συνδρομής πρακτορείου",
+    "activateConfirmMessage": "Αυτό θα ενεργοποιήσει μια ετήσια συνδρομή για \"{{name}}\". Το πρακτορείο και οι πράκτορές του θα αποκτήσουν ξανά πλήρη πρόσβαση.",
+    "deactivateConfirmTitle": "Απενεργοποίηση συνδρομής πρακτορείου",
+    "deactivateConfirmMessage": "Αυτό θα απενεργοποιήσει αμέσως τη συνδρομή για \"{{name}}\". Το πρακτορείο θα χάσει την πρόσβαση στις premium λειτουργίες.",
+    "subscriptionActivated": "Η συνδρομή ενεργοποιήθηκε επιτυχώς",
+    "subscriptionDeactivated": "Η συνδρομή απενεργοποιήθηκε επιτυχώς",
+    "subscriptionActivateError": "Αποτυχία ενεργοποίησης συνδρομής",
+    "subscriptionDeactivateError": "Αποτυχία απενεργοποίησης συνδρομής"
   },
   "discountCodes": {
     "title": "Discount Code Manager",

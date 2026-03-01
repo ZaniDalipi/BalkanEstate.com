@@ -123,11 +123,30 @@
     "deleteConfirm": "Are you sure you want to delete this agency? This action cannot be undone.",
     "approve": "Approve",
     "reject": "Reject",
+    "viewDetails": "View details",
     "status": {
       "active": "Active",
+      "trial": "Trial",
+      "expired": "Expired",
+      "canceled": "Canceled",
       "pending": "Pending Approval",
       "suspended": "Suspended"
-    }
+    },
+    "subscription": "Subscription",
+    "startDate": "Start Date",
+    "expiresAt": "Expires At",
+    "amount": "Amount",
+    "autoRenew": "Auto Renew",
+    "activateSubscription": "Activate Subscription",
+    "deactivateSubscription": "Deactivate Subscription",
+    "activateConfirmTitle": "Activate Agency Subscription",
+    "activateConfirmMessage": "This will activate a 1-year subscription for \"{{name}}\". The agency and its agents will regain full access.",
+    "deactivateConfirmTitle": "Deactivate Agency Subscription",
+    "deactivateConfirmMessage": "This will immediately deactivate the subscription for \"{{name}}\". The agency will lose access to premium features.",
+    "subscriptionActivated": "Subscription activated successfully",
+    "subscriptionDeactivated": "Subscription deactivated successfully",
+    "subscriptionActivateError": "Failed to activate subscription",
+    "subscriptionDeactivateError": "Failed to deactivate subscription"
   },
   "discountCodes": {
     "title": "Discount Code Manager",
