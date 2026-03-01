@@ -100,12 +100,12 @@ const RentalPropertyCard: React.FC<RentalPropertyCardProps> = ({ property, onHov
                             </span>
                             <span className="text-sm text-gray-400">{rentPeriodLabel}</span>
                             {priceInfo.hasReduction && (
-                                <span className="bg-red-100 text-red-600 text-[10px] font-semibold px-1.5 py-[1px] rounded-full">
+                                <span className="bg-red-100 text-red-600 text-xs font-semibold px-2 py-0.5 rounded-full whitespace-nowrap">
                                     -{priceInfo.discountPercentage}%
                                 </span>
                             )}
                             {priceInfo.hasIncrease && (
-                                <span className="bg-amber-100 text-amber-700 text-[10px] font-semibold px-1.5 py-[1px] rounded-full">
+                                <span className="bg-amber-100 text-amber-700 text-xs font-semibold px-2 py-0.5 rounded-full whitespace-nowrap">
                                     +{priceInfo.increasePercentage}%
                                 </span>
                             )}

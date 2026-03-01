@@ -281,6 +281,8 @@ const RentalSearchPage: React.FC<RentalSearchPageProps> = ({ onToggleSidebar }) 
                             onFilterChange={handleFilterChange}
                             onSearch={handleSearch}
                             onReset={handleResetFilters}
+                            onSaveSearch={handleSaveSearchArea}
+                            isSaving={isSaving}
                             compact
                         />
                     </div>
@@ -530,6 +532,8 @@ const RentalSearchPage: React.FC<RentalSearchPageProps> = ({ onToggleSidebar }) 
                                 onFilterChange={handleFilterChange}
                                 onSearch={() => { handleSearch(); setIsFiltersOpen(false); }}
                                 onReset={handleResetFilters}
+                                onSaveSearch={handleSaveSearchArea}
+                                isSaving={isSaving}
                             />
                         </div>
                     </div>

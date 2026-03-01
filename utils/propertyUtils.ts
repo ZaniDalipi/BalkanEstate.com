@@ -30,12 +30,17 @@ export const filterProperties = (properties: Property[], filters: Filters): Prop
             );
         }
 
-        // Country filter
+        // Country filter — handles both key ("kosovo") and name ("Kosovo") formats
         let countryMatch = true;
         if (filters.country && filters.country !== 'any') {
-            const selectedCountry = BALKAN_COUNTRIES[filters.country];
+            const filterVal = filters.country.toLowerCase();
+            const selectedCountry = BALKAN_COUNTRIES[filterVal]
+                || Object.values(BALKAN_COUNTRIES).find(c => c.name.toLowerCase() === filterVal);
             if (selectedCountry) {
                 countryMatch = p.country.toLowerCase() === selectedCountry.name.toLowerCase();
+            } else {
+                // Direct string comparison fallback
+                countryMatch = p.country.toLowerCase() === filterVal;
             }
         }
 
