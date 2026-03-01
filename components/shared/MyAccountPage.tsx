@@ -1038,7 +1038,7 @@ const ProfileSettings: React.FC<{ user: User }> = ({ user }) => {
         }
     };
 
-    const handleLicenseSubmit = async (licenseData: { licenseNumber: string; phone?: string; agencyInvitationCode?: string; agentId?: string; selectedAgencyId?: string; languages?: string[] }) => {
+    const handleLicenseSubmit = async (licenseData: { licenseNumber: string; licenseCountry?: string; phone?: string; agencyInvitationCode?: string; agentId?: string; selectedAgencyId?: string; languages?: string[] }) => {
         setIsSaving(true);
         setError('');
         try {

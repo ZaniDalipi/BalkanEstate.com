@@ -1,7 +1,22 @@
 import React, { useState, useEffect } from 'react';
-import { X, ShieldCheck, Building2, KeyRound, Globe, ChevronDown, BadgeCheck, AlertCircle, Phone } from 'lucide-react';
+import { X, ShieldCheck, Building2, KeyRound, Globe, ChevronDown, BadgeCheck, AlertCircle, Phone, MapPin } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { getAgencies } from '../../services/apiService';
+
+// Countries that have license validation rules on the backend
+const LICENSE_COUNTRIES = [
+  { code: 'XK', label: 'Kosovo', flag: '🇽🇰' },
+  { code: 'AL', label: 'Albania', flag: '🇦🇱' },
+  { code: 'RS', label: 'Serbia', flag: '🇷🇸' },
+  { code: 'MK', label: 'N. Macedonia', flag: '🇲🇰' },
+  { code: 'BA', label: 'Bosnia & Herzegovina', flag: '🇧🇦' },
+  { code: 'ME', label: 'Montenegro', flag: '🇲🇪' },
+  { code: 'HR', label: 'Croatia', flag: '🇭🇷' },
+  { code: 'SI', label: 'Slovenia', flag: '🇸🇮' },
+  { code: 'BG', label: 'Bulgaria', flag: '🇧🇬' },
+  { code: 'RO', label: 'Romania', flag: '🇷🇴' },
+  { code: 'GR', label: 'Greece', flag: '🇬🇷' },
+] as const;
 
 const BALKAN_LANGUAGE_KEYS = [
   'English', 'Serbian', 'Croatian', 'Slovenian', 'Bosnian', 'Macedonian',
@@ -64,6 +79,7 @@ interface AgentLicenseModalProps {
   onClose: () => void;
   onSubmit: (licenseData: {
     licenseNumber: string;
+    licenseCountry?: string;
     phone?: string;
     agencyInvitationCode?: string;
     agentId?: string;
@@ -105,6 +121,7 @@ const AgentLicenseModal: React.FC<AgentLicenseModalProps> = ({
 }) => {
   const { t } = useTranslation(['agents', 'modals', 'common']);
   const [licenseNumber, setLicenseNumber] = useState(currentLicenseNumber || '');
+  const [licenseCountry, setLicenseCountry] = useState('');
   // Parse existing phone into country code + local number
   const [phoneCountryCode, setPhoneCountryCode] = useState(() => {
     if (currentPhone) {
@@ -212,6 +229,10 @@ const AgentLicenseModal: React.FC<AgentLicenseModalProps> = ({
       setError(t('modals:agentLicense.licenseRequired'));
       return;
     }
+    if (!licenseCountry) {
+      setError(t('modals:agentLicense.countryRequired', 'Please select the country where your license was issued'));
+      return;
+    }
     // Validate phone — required if user has no phone on record
     if (phoneRequired && !phone.trim()) {
       setError(t('modals:agentLicense.phoneRequired', 'Phone number is required'));
@@ -237,13 +258,14 @@ const AgentLicenseModal: React.FC<AgentLicenseModalProps> = ({
     try {
       await onSubmit({
         licenseNumber: licenseNumber.trim(),
+        licenseCountry: licenseCountry || undefined,
         phone: getFullPhone() || undefined,
         agencyInvitationCode: agencyInvitationCode.trim() || undefined,
         agentId: agentId.trim() || undefined,
         selectedAgencyId: selectedAgency || undefined,
         languages: languages.length > 0 ? languages : undefined,
       });
-      if (!isJoiningAgency) { setLicenseNumber(''); setAgentId(''); }
+      if (!isJoiningAgency) { setLicenseNumber(''); setLicenseCountry(''); setAgentId(''); }
       setAgencyInvitationCode('');
       setSelectedAgency('');
       setError('');
@@ -259,7 +281,7 @@ const AgentLicenseModal: React.FC<AgentLicenseModalProps> = ({
 
   const handleClose = () => {
     if (!isSubmitting) {
-      if (!isJoiningAgency) { setLicenseNumber(''); setAgentId(''); }
+      if (!isJoiningAgency) { setLicenseNumber(''); setLicenseCountry(''); setAgentId(''); }
       setAgencyInvitationCode('');
       setSelectedAgency('');
       setError('');
@@ -439,6 +461,38 @@ const AgentLicenseModal: React.FC<AgentLicenseModalProps> = ({
                     </div>
                   </Field>
                 </div>
+
+                {/* License Country — required when license number is provided */}
+                {!isJoiningAgency && (
+                  <Field
+                    id="licenseCountry"
+                    label={t('modals:agentLicense.licenseCountry', 'License Country')}
+                    icon={<MapPin className="w-3 h-3" />}
+                    required
+                    hint={t('modals:agentLicense.licenseCountryHint', 'Select the country where your license was issued')}
+                  >
+                    <div className="relative">
+                      <select
+                        id="licenseCountry"
+                        value={licenseCountry}
+                        onChange={e => { setLicenseCountry(e.target.value); setError(''); }}
+                        disabled={isSubmitting}
+                        required
+                        className={`${inputCls} appearance-none pr-8`}
+                      >
+                        <option value="">
+                          {t('modals:agentLicense.selectCountry', '-- Select Country --')}
+                        </option>
+                        {LICENSE_COUNTRIES.map(c => (
+                          <option key={c.code} value={c.code}>
+                            {c.flag} {c.label}
+                          </option>
+                        ))}
+                      </select>
+                      <ChevronDown className="absolute right-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-gray-300 pointer-events-none" />
+                    </div>
+                  </Field>
+                )}
 
                 {/* Phone number — required if user has none on file */}
                 {phoneRequired && (
