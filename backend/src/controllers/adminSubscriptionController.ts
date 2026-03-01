@@ -500,10 +500,23 @@ export const adjustListingLimit = async (req: Request, res: Response): Promise<v
 
     const newLimit = Number(listingsLimit);
 
-    // Update unified subscription object
-    if (user.subscription) {
+    // Update unified subscription object — initialize if missing
+    if (!user.subscription) {
+      user.subscription = {
+        tier: 'free',
+        status: 'active',
+        listingsLimit: newLimit,
+        activeListingsCount: 0,
+      } as any;
+    } else {
       user.subscription.listingsLimit = newLimit;
-      user.markModified('subscription');
+    }
+    user.markModified('subscription');
+
+    // Also update legacy freeSubscription field if it exists
+    if (user.freeSubscription) {
+      user.freeSubscription.listingsLimit = newLimit;
+      user.markModified('freeSubscription');
     }
 
     await user.save();
@@ -829,6 +842,103 @@ export const getAgencySubscriptionHistory = async (req: Request, res: Response):
   }
 };
 
+/**
+ * @desc    Adjust listing limit for an agency and propagate to all its agents
+ * @route   PATCH /api/admin/agencies/:agencyId/listing-limit
+ * @access  Admin
+ */
+export const adjustAgencyListingLimit = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const agencyId = getObjectIdParam(req, res, 'agencyId');
+    if (!agencyId) return;
+    const { listingsLimit, reason } = req.body;
+
+    if (listingsLimit === undefined || listingsLimit === null || Number(listingsLimit) < 0) {
+      res.status(400).json({ message: 'listingsLimit must be a non-negative number' });
+      return;
+    }
+
+    const agency = await Agency.findById(agencyId);
+    if (!agency) {
+      res.status(404).json({ message: 'Agency not found' });
+      return;
+    }
+
+    const newLimit = Number(listingsLimit);
+
+    // Update agency subscription listingsLimit
+    (agency.subscription as any).listingsLimit = newLimit;
+    agency.markModified('subscription');
+    await agency.save();
+
+    // Propagate to the agency owner
+    const owner = await User.findById(agency.ownerId);
+    let ownerUpdated = false;
+    if (owner) {
+      if (!owner.subscription) {
+        owner.subscription = {
+          tier: 'agency_owner',
+          status: 'active',
+          listingsLimit: newLimit,
+          activeListingsCount: 0,
+        } as any;
+      } else {
+        owner.subscription.listingsLimit = newLimit;
+      }
+      owner.markModified('subscription');
+      await owner.save();
+      ownerUpdated = true;
+    }
+
+    // Propagate to all agents in the agency
+    const agentIds = agency.agents || [];
+    let agentsUpdated = 0;
+    if (agentIds.length > 0) {
+      const result = await User.updateMany(
+        { _id: { $in: agentIds } },
+        { $set: { 'subscription.listingsLimit': newLimit } }
+      );
+      agentsUpdated = result.modifiedCount;
+    }
+
+    // Audit trail
+    await SubscriptionEvent.create({
+      subscriptionId: agency._id,
+      userId: agency.ownerId,
+      eventType: 'subscription_updated',
+      store: 'web',
+      metadata: {
+        action: 'admin_agency_listing_limit_override',
+        newListingsLimit: newLimit,
+        adminUserId: (req as any).user?._id,
+        reason: reason || 'Admin manual override',
+        agencyId: String(agency._id),
+        agencyName: agency.name,
+        ownerUpdated,
+        agentsUpdated,
+      },
+    });
+
+    invalidateCache('/api/agents');
+    invalidateCache('/api/properties');
+
+    adminLogger.info(`[Admin] Agency listing limit for ${agency.name} (${agencyId}) set to ${newLimit} by admin ${(req as any).user?._id} — owner: ${ownerUpdated}, agents: ${agentsUpdated}`);
+
+    res.json({
+      success: true,
+      message: `Listing limit updated to ${newLimit} for agency "${agency.name}" (owner + ${agentsUpdated} agents updated)`,
+      listingsLimit: newLimit,
+      agencyId: agency._id,
+      agencyName: agency.name,
+      ownerUpdated,
+      agentsUpdated,
+    });
+  } catch (error: any) {
+    adminLogger.error('[Admin] Error adjusting agency listing limit:', error);
+    res.status(500).json({ message: 'Error adjusting agency listing limit' });
+  }
+};
+
 export default {
   getAllSubscriptions,
   getSubscriptionById,
@@ -839,6 +949,7 @@ export default {
   cancelSubscription,
   deactivateUserSubscription,
   adjustListingLimit,
+  adjustAgencyListingLimit,
   activateAgencySubscription,
   deactivateAgencySubscription,
   getAgencySubscriptionHistory,

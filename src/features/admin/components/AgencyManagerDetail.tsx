@@ -1,8 +1,9 @@
-import React, { lazy, Suspense } from 'react';
+import React, { lazy, Suspense, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { XMarkIcon, BuildingOfficeIcon } from '@/constants';
 import { Agency } from '@/types';
 import { AgencyEditForm } from './useAgencyManager';
+import { apiRequest } from '@/src/shared/api';
 
 const MapLocationPicker = lazy(() => import('@/src/features/seller/components/MapLocationPicker'));
 
@@ -203,6 +204,8 @@ const AgencyManagerDetail: React.FC<AgencyManagerDetailProps> = ({
                       </span>
                     </div>
                   </div>
+                  {/* Listing Limit Override */}
+                  <AgencyListingLimitOverride agency={viewingAgency} />
                 </div>
               </div>
 
@@ -622,5 +625,74 @@ const AgencyManagerDetail: React.FC<AgencyManagerDetailProps> = ({
     </>
   );
 };
+
+// ============================================================================
+// Agency Listing Limit Override (inline component)
+// ============================================================================
+
+function AgencyListingLimitOverride({ agency }: { agency: Agency }) {
+  const { t } = useTranslation(['admin']);
+  const currentLimit = (agency.subscription as any)?.listingsLimit ?? 0;
+  const [inputLimit, setInputLimit] = useState(String(currentLimit));
+  const [saving, setSaving] = useState(false);
+  const [saved, setSaved] = useState(false);
+  const [err, setErr] = useState('');
+  const [result, setResult] = useState('');
+
+  const handleSave = async () => {
+    const val = Number(inputLimit);
+    if (isNaN(val) || val < 0) {
+      setErr(t('admin:userDetail.invalidNumber', 'Invalid number'));
+      return;
+    }
+    setSaving(true);
+    setErr('');
+    setResult('');
+    try {
+      const res = await apiRequest(`/admin/agencies/${agency._id}/listing-limit`, {
+        method: 'PATCH',
+        body: { listingsLimit: val, reason: 'Admin manual override' },
+        requiresAuth: true,
+      });
+      setSaved(true);
+      setResult(res.message || '');
+      setTimeout(() => { setSaved(false); setResult(''); }, 4000);
+    } catch (e: any) {
+      setErr(e.message || 'Error saving');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  return (
+    <div className="border-t border-gray-200 pt-3 mt-3">
+      <label className="text-xs font-semibold text-gray-600 block mb-1">
+        {t('admin:agencies.listingLimitOverride', 'Listing Limit Override')}
+        <span className="font-normal text-gray-400 ml-1">
+          ({t('admin:agencies.listingLimitDesc', 'currently {{current}} — applies to owner + all agents', { current: currentLimit })})
+        </span>
+      </label>
+      <div className="flex items-center gap-2">
+        <input
+          type="number"
+          min={0}
+          value={inputLimit}
+          onChange={e => { setInputLimit(e.target.value); setSaved(false); }}
+          className="w-24 px-3 py-1.5 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+        />
+        <button
+          onClick={handleSave}
+          disabled={saving || String(currentLimit) === inputLimit}
+          className="px-4 py-1.5 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-700 disabled:opacity-40 disabled:cursor-not-allowed font-medium transition-colors"
+        >
+          {saving ? t('admin:userDetail.saving', 'Saving...') : saved ? t('admin:userDetail.saved', 'Saved!') : t('admin:userDetail.apply', 'Apply')}
+        </button>
+        <span className="text-xs text-gray-400">{t('admin:userDetail.listingsPerMonth', 'listings / month')}</span>
+      </div>
+      {err && <p className="text-xs text-red-500 mt-1">{err}</p>}
+      {result && <p className="text-xs text-green-600 mt-1">{result}</p>}
+    </div>
+  );
+}
 
 export default AgencyManagerDetail;

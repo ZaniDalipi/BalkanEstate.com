@@ -59,6 +59,7 @@ import {
   cancelSubscription,
   deactivateUserSubscription,
   adjustListingLimit,
+  adjustAgencyListingLimit,
   activateAgencySubscription,
   deactivateAgencySubscription,
   getAgencySubscriptionHistory,
@@ -118,6 +119,7 @@ router.get('/agencies', logAdminAction('VIEW_AGENCIES'), getAllAgenciesAdmin);
 router.get('/agencies/:agencyId/subscription', logAdminAction('VIEW_AGENCY_SUBSCRIPTION'), getAgencySubscriptionHistory);
 router.post('/agencies/:agencyId/subscription/activate', logAdminAction('ACTIVATE_AGENCY_SUBSCRIPTION'), activateAgencySubscription);
 router.post('/agencies/:agencyId/subscription/deactivate', logAdminAction('DEACTIVATE_AGENCY_SUBSCRIPTION'), deactivateAgencySubscription);
+router.patch('/agencies/:agencyId/listing-limit', logAdminAction('ADJUST_AGENCY_LISTING_LIMIT'), adjustAgencyListingLimit);
 router.get('/agencies/:id', logAdminAction('VIEW_AGENCY_DETAIL'), getAgencyDetailAdmin);
 router.patch('/agencies/:id', logAdminAction('UPDATE_AGENCY'), updateAgency);
 router.delete('/agencies/:id', logAdminAction('DELETE_AGENCY'), deleteAgency);

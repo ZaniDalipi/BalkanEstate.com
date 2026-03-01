@@ -273,6 +273,7 @@ export interface Agency {
         amount?: number;
         currency?: string;
         autoRenew?: boolean;
+        listingsLimit?: number;
     };
 }
 
