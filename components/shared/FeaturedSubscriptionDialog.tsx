@@ -52,7 +52,7 @@ const FeaturedSubscriptionDialog: React.FC<FeaturedSubscriptionDialogProps> = ({
   const fetchFeaturedProducts = async () => {
     try {
       setLoadingProducts(true);
-      const response = await fetch(`${API_URL}/products`);
+      const response = await fetch(`${API_URL}/products`, { credentials: 'include' });
       if (response.ok) {
         const data = await response.json();
         const featured = (data.products || []).filter((p: any) =>

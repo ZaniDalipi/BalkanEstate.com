@@ -66,7 +66,7 @@ const AgencyManagementSection: React.FC<AgencyManagementSectionProps> = ({ curre
   useEffect(() => {
     const fetchAgentProductLimit = async () => {
       try {
-        const res = await fetch(`${API_URL}/products?role=agent`);
+        const res = await fetch(`${API_URL}/products?role=agent`, { credentials: 'include' });
         if (res.ok) {
           const data = await res.json();
           const agentProduct = data.products?.find((p: any) => p.productId === 'agency_agent_yearly');
@@ -96,6 +96,7 @@ const AgencyManagementSection: React.FC<AgencyManagementSectionProps> = ({ curre
   const fetchPendingRequests = async () => {
     try {
       const response = await fetch(`${API_URL}/agency-join-requests/my-requests`, {
+        credentials: 'include',
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('balkan_estate_token')}`,
         },

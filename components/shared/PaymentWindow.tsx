@@ -351,6 +351,7 @@ const PaymentWindow: React.FC<PaymentWindowProps> = ({
           : `${API_URL}/payments/subscription-status`;
         const response = await fetch(verifyUrl, {
           method: 'GET',
+          credentials: 'include',
           headers: {
             'Content-Type': 'application/json',
             'Authorization': `Bearer ${token}`,

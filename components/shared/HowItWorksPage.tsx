@@ -206,7 +206,7 @@ const HowItWorksPage: React.FC = () => {
   useEffect(() => {
     const fetchVideos = async () => {
       try {
-        const response = await fetch(`${API_URL}/site-content/how-it-works`);
+        const response = await fetch(`${API_URL}/site-content/how-it-works`, { credentials: 'include' });
         if (response.ok) {
           const data = await response.json();
           setVideos(data);
