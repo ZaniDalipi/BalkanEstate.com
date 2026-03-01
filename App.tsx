@@ -204,11 +204,11 @@ const AppContent: React.FC<{ onToggleSidebar: () => void }> = ({ onToggleSidebar
           })
           .then(data => {
             if (data.property) {
-              // Transform backend property to frontend format (backend uses _id, frontend uses id)
+              // Transform backend property to frontend format (backend now uses obfuscated id)
               const property = {
                 ...data.property,
-                id: data.property._id || data.property.id,
-                sellerId: data.property.sellerId?._id || data.property.sellerId,
+                id: data.property.id || data.property._id,
+                sellerId: data.property.sellerId?.id || data.property.sellerId?._id || data.property.sellerId,
               };
               dispatch({ type: 'SET_PROPERTY_TO_EDIT', payload: property });
               dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'create-listing' });
