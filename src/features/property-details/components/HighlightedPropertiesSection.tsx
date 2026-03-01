@@ -89,7 +89,7 @@ const HighlightedPropertiesSection: React.FC<HighlightedPropertiesSectionProps> 
       <div className="space-y-4">
         {highlightedProperties.map((property) => (
           <HighlightedPropertyCard
-            key={property.id}
+            key={property.id || (property as any)._id}
             property={property}
             showToast={showToast}
           />
