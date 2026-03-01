@@ -17,6 +17,7 @@ import { generateSecureAgentId } from '../utils/secureRandom';
 import { setRefreshTokenCookie, clearRefreshTokenCookie, getRefreshTokenFromRequest } from '../utils/cookieUtils';
 import { FREE_TIER_LIMITS, PRO_TIER_LIMITS, ENTERPRISE_TIER_LIMITS } from '../config/subscriptionConstants';
 import { buildFrontendRedirectUrl } from '../utils/redirectValidation';
+import { validateLicenseNumber } from '../utils/licenseValidation';
 
 /**
  * Build a sanitized user response object for public-facing auth endpoints (login/signup).
@@ -1130,7 +1131,7 @@ export const switchRole = async (req: Request, res: Response): Promise<void> => 
       return;
     }
 
-    const { role, licenseNumber, agencyInvitationCode, agentId, languages, phone } = req.body;
+    const { role, licenseNumber, licenseCountry, agencyInvitationCode, agentId, languages, phone } = req.body;
 
     // Validate role
     const validRoles = ['buyer', 'private_seller', 'agent'];
@@ -1222,32 +1223,40 @@ export const switchRole = async (req: Request, res: Response): Promise<void> => 
         return;
       }
 
-      // New agent or updating license
-      if (!licenseNumber) {
-        res.status(400).json({
-          message: 'License number is required to become an agent'
-        });
-        return;
-      }
-      // Validate license format (basic validation - you can enhance this)
-      if (licenseNumber.length < 5) {
-        res.status(400).json({
-          message: 'License number must be at least 5 characters'
-        });
-        return;
-      }
+      // License is optional — validate format if provided
+      let licenseValid = false;
+      if (licenseNumber) {
+        if (!licenseCountry) {
+          res.status(400).json({
+            message: 'Country is required when providing a license number',
+            code: 'LICENSE_COUNTRY_REQUIRED',
+          });
+          return;
+        }
 
-      // Check if license number is already in use by another agent
-      const existingAgent = await Agent.findOne({
-        licenseNumber,
-        userId: { $ne: user._id },
-      });
+        const validation = validateLicenseNumber(licenseNumber, licenseCountry);
+        if (!validation.valid) {
+          res.status(400).json({
+            message: 'Invalid license number format for the selected country',
+            code: 'INVALID_LICENSE_FORMAT',
+            formatHint: validation.formatHint,
+          });
+          return;
+        }
+        licenseValid = true;
 
-      if (existingAgent) {
-        res.status(400).json({
-          message: 'This license number is already registered to another agent'
+        // Check if license number is already in use by another agent
+        const existingAgent = await Agent.findOne({
+          licenseNumber,
+          userId: { $ne: user._id },
         });
-        return;
+
+        if (existingAgent) {
+          res.status(400).json({
+            message: 'This license number is already registered to another agent',
+          });
+          return;
+        }
       }
 
       let agency = null;
@@ -1276,11 +1285,12 @@ export const switchRole = async (req: Request, res: Response): Promise<void> => 
 
       try {
         // Update agent-specific fields in User model
-        user.licenseNumber = licenseNumber;
+        user.licenseNumber = licenseNumber || undefined;
         user.agencyName = agencyName;
         user.agentId = generatedAgentId;
-        user.licenseVerified = true;
-        user.licenseVerificationDate = new Date();
+        // License is pending admin review if provided, otherwise unverified
+        user.licenseVerified = false;
+        user.licenseVerificationDate = undefined;
 
         // Link to agency if one was provided
         if (agency) {
@@ -1302,9 +1312,11 @@ export const switchRole = async (req: Request, res: Response): Promise<void> => 
           existingAgentRecord.agencyName = agencyName;
           existingAgentRecord.agencyId = agency ? (agency._id as mongoose.Types.ObjectId) : undefined;
           existingAgentRecord.agentId = generatedAgentId;
-          existingAgentRecord.licenseNumber = licenseNumber;
-          existingAgentRecord.licenseVerified = true;
-          existingAgentRecord.licenseVerificationDate = new Date();
+          existingAgentRecord.licenseNumber = licenseNumber || undefined;
+          existingAgentRecord.licenseCountry = licenseCountry || undefined;
+          existingAgentRecord.licenseVerified = false;
+          existingAgentRecord.licenseVerificationDate = undefined;
+          existingAgentRecord.licenseStatus = licenseValid ? 'pending' : 'none';
           existingAgentRecord.languages = agentLanguages;
           existingAgentRecord.isActive = true;
           await existingAgentRecord.save({ session });
@@ -1315,9 +1327,10 @@ export const switchRole = async (req: Request, res: Response): Promise<void> => 
             agencyName: agencyName,
             agencyId: agency ? agency._id : undefined,
             agentId: generatedAgentId,
-            licenseNumber,
-            licenseVerified: true,
-            licenseVerificationDate: new Date(),
+            licenseNumber: licenseNumber || undefined,
+            licenseCountry: licenseCountry || undefined,
+            licenseVerified: false,
+            licenseStatus: licenseValid ? 'pending' : 'none',
             languages: agentLanguages,
             isActive: true,
           }], { session });
@@ -2340,7 +2353,7 @@ export const addRole = async (req: Request, res: Response): Promise<void> => {
       return;
     }
 
-    const { newRole, licenseNumber, agencyName } = req.body;
+    const { newRole, licenseNumber, licenseCountry, agencyName } = req.body;
 
     if (!newRole) {
       res.status(400).json({ message: 'New role is required' });
@@ -2367,19 +2380,29 @@ export const addRole = async (req: Request, res: Response): Promise<void> => {
       return;
     }
 
-    // Validate agent role requirements
+    // Validate agent role requirements (license is optional)
     if (newRole === 'agent') {
-      if (!licenseNumber) {
-        res.status(400).json({ message: 'License number is required for agent role' });
-        return;
+      if (licenseNumber) {
+        if (!licenseCountry) {
+          res.status(400).json({
+            message: 'Country is required when providing a license number',
+            code: 'LICENSE_COUNTRY_REQUIRED',
+          });
+          return;
+        }
+        const validation = validateLicenseNumber(licenseNumber, licenseCountry);
+        if (!validation.valid) {
+          res.status(400).json({
+            message: 'Invalid license number format for the selected country',
+            code: 'INVALID_LICENSE_FORMAT',
+            formatHint: validation.formatHint,
+          });
+          return;
+        }
+        user.licenseNumber = licenseNumber;
+        user.licenseVerified = false; // Pending admin review
       }
-
-      // Set agent fields
-      user.licenseNumber = licenseNumber;
       user.agencyName = agencyName;
-
-      // Agents require Pro subscription - no free trial
-      // agentSubscription will remain undefined until they subscribe
     }
 
     // Add role to availableRoles

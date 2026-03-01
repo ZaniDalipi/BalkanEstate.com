@@ -403,3 +403,62 @@ export const seedPromotionPlans = async (options?: { force?: boolean }): Promise
     encryptResponse: true,
   });
 };
+
+// --- License Verification Management ---
+
+export interface PendingLicenseAgent {
+  agentId: string;
+  userId: {
+    _id: string;
+    name: string;
+    email: string;
+    phone?: string;
+    avatarUrl?: string;
+    country?: string;
+    city?: string;
+  };
+  licenseNumber: string;
+  licenseCountry: string;
+  licenseStatus: string;
+  agencyName: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export const getPendingLicenses = async (): Promise<{
+  count: number;
+  agents: PendingLicenseAgent[];
+}> => {
+  return apiRequest('/admin/pending-licenses', {
+    requiresAuth: true,
+    encryptResponse: true,
+  });
+};
+
+export const approveLicense = async (userId: string): Promise<{
+  message: string;
+  userId: string;
+  licenseNumber: string;
+  licenseStatus: string;
+}> => {
+  return apiRequest(`/admin/approve-license/${userId}`, {
+    method: 'POST',
+    requiresAuth: true,
+    encryptResponse: true,
+  });
+};
+
+export const rejectLicense = async (userId: string, reason?: string): Promise<{
+  message: string;
+  userId: string;
+  licenseNumber: string;
+  licenseStatus: string;
+  reason?: string;
+}> => {
+  return apiRequest(`/admin/reject-license/${userId}`, {
+    method: 'POST',
+    body: { reason },
+    requiresAuth: true,
+    encryptResponse: true,
+  });
+};

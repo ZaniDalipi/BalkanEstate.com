@@ -19,6 +19,7 @@ import ActivityLog from './ActivityLog';
 import HowItWorksManager from './HowItWorksManager';
 import EmailManager from './EmailManager';
 import SiteSettingsManager from './SiteSettingsManager';
+import PendingLicenses from './PendingLicenses';
 import type { AdminSection } from '@/types';
 
 // Map URL sections to AdminView types
@@ -194,7 +195,14 @@ const AdminDashboard: React.FC = () => {
       case 'promotionCoupons':
         return <PromotionCouponManager />;
       case 'users':
-        return <UserManager />;
+        return (
+          <>
+            <PendingLicenses />
+            <div className="mt-6">
+              <UserManager />
+            </div>
+          </>
+        );
       case 'properties':
         return <PropertyManager />;
       case 'agencies':

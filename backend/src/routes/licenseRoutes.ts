@@ -4,6 +4,8 @@ import {
   uploadLicense,
   getLicense,
   deleteLicense,
+  submitLicense,
+  getFormatHint,
 } from '../controllers/licenseController';
 import { protect } from '../middleware/auth';
 
@@ -30,6 +32,8 @@ const upload = multer({
 
 // License routes - Optional upload, no verification needed
 router.post('/upload', protect, upload.single('document'), uploadLicense);
+router.post('/submit', protect, submitLicense);
+router.get('/format-hint/:countryCode', getFormatHint);
 router.get('/', protect, getLicense);
 router.delete('/', protect, deleteLicense);
 

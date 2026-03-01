@@ -42,9 +42,11 @@ export interface IAgent extends Document {
   agencyName: string;
   agencyId?: mongoose.Types.ObjectId;
   agentId: string;
-  licenseNumber: string;
+  licenseNumber?: string;
+  licenseCountry?: string;
   licenseVerified: boolean;
-  licenseVerificationDate: Date;
+  licenseVerificationDate?: Date;
+  licenseStatus: 'none' | 'pending' | 'verified' | 'rejected';
   bio?: string;
   specializations: string[]; // e.g., ['residential', 'commercial', 'luxury']
   yearsOfExperience?: number;
@@ -186,9 +188,11 @@ const AgentSchema: Schema = new Schema(
     },
     licenseNumber: {
       type: String,
-      required: true,
-      unique: true,
+      sparse: true,
       index: true,
+    },
+    licenseCountry: {
+      type: String,
     },
     licenseVerified: {
       type: Boolean,
@@ -196,7 +200,11 @@ const AgentSchema: Schema = new Schema(
     },
     licenseVerificationDate: {
       type: Date,
-      default: Date.now,
+    },
+    licenseStatus: {
+      type: String,
+      enum: ['none', 'pending', 'verified', 'rejected'],
+      default: 'none',
     },
     bio: {
       type: String,

@@ -614,6 +614,11 @@
     "emailNotVerified": "Email Not Verified",
     "licenseVerified": "License Verified",
     "licensePending": "License Pending",
+    "licenseRejected": "License Rejected",
+    "noLicense": "No License",
+    "licenseCountry": "License Country",
+    "approveLicense": "Approve License",
+    "rejectLicense": "Reject License",
     "phoneVerified": "Phone Verified",
     "idVerified": "ID Verified",
     "verified": "Verified",
@@ -844,5 +849,16 @@
     "adminPanel": "Admin Panel",
     "loadingDashboard": "Loading dashboard...",
     "errorLoadingDashboard": "Error loading dashboard"
+  },
+  "pendingLicenses": {
+    "title": "Pending License Verifications",
+    "subtitle": "{{count}} agents awaiting license review",
+    "empty": "No pending license verifications",
+    "approve": "Approve",
+    "reject": "Reject",
+    "rejectReason": "Enter rejection reason (optional):",
+    "license": "License",
+    "country": "Country",
+    "pending": "Pending"
   }
 }
