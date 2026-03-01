@@ -85,6 +85,7 @@ export interface IAgency extends Document {
     externalSubscriptionId?: string;
     autoRenew: boolean;
     trialEndsAt?: Date;
+    listingsLimit?: number; // Override for total listings across all agents
   };
 
   // Agent Coupon System (5 yearly Pro subscriptions)
@@ -445,6 +446,10 @@ const AgencySchema: Schema = new Schema(
         default: true,
       },
       trialEndsAt: Date,
+      listingsLimit: {
+        type: Number,
+        default: undefined, // No override by default — uses product limits
+      },
     },
 
     // Agent Coupon System (5 codes for yearly Pro subscriptions)

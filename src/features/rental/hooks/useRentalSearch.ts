@@ -68,8 +68,8 @@ export function useRentalSearch() {
 
             const transformed = (data.properties || []).map((p: any) => ({
                 ...p,
-                id: p._id || p.id,
-                sellerId: p.sellerId?._id || p.sellerId,
+                id: p.id || p._id,
+                sellerId: p.sellerId?.id || p.sellerId?._id || p.sellerId,
                 listingType: p.listingType || 'rent',
                 rentedAt: p.rentedAt ? new Date(p.rentedAt).getTime() : undefined,
                 rentedUntil: p.rentedUntil ? new Date(p.rentedUntil).getTime() : undefined,

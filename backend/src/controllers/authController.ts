@@ -17,13 +17,15 @@ import { generateSecureAgentId } from '../utils/secureRandom';
 import { setRefreshTokenCookie, clearRefreshTokenCookie, getRefreshTokenFromRequest } from '../utils/cookieUtils';
 import { FREE_TIER_LIMITS, PRO_TIER_LIMITS, ENTERPRISE_TIER_LIMITS } from '../config/subscriptionConstants';
 import { buildFrontendRedirectUrl } from '../utils/redirectValidation';
+import { encodeId } from '../utils/idObfuscation';
 
 /**
  * Build a sanitized user response object for public-facing auth endpoints (login/signup).
  * Only includes fields the frontend needs; strips internal/sensitive details.
+ * All MongoDB ObjectIds are obfuscated so raw IDs never reach the client.
  */
 const buildSafeUserResponse = (user: IUser) => ({
-  id: String(user._id),
+  id: encodeId(String(user._id)),
   email: user.email,
   name: user.name,
   phone: user.phone,
@@ -40,7 +42,7 @@ const buildSafeUserResponse = (user: IUser) => ({
   activeListingsLimit: user.getActiveListingsLimit(),
   // Only include agent/agency fields if user is an agent
   ...(user.role === 'agent' ? {
-    agencyId: user.agencyId ? String(user.agencyId) : undefined,
+    agencyId: user.agencyId ? encodeId(String(user.agencyId)) : undefined,
     agencyName: user.agencyName,
     agentId: user.agentId,
     licenseNumber: user.licenseNumber,
@@ -147,11 +149,13 @@ export const signup = async (req: Request, res: Response): Promise<void> => {
     }
 
     // Check if user already exists (case-insensitive)
+    // Return a generic message to prevent email enumeration attacks.
+    // An attacker should not be able to discover which emails are registered.
     const userExists = await User.findOne({ email: email.toLowerCase() });
     if (userExists) {
       res.status(400).json({
-        message: 'An account with this email already exists',
-        code: 'EMAIL_EXISTS'
+        message: 'Unable to create account. Please check your information and try again.',
+        code: 'SIGNUP_FAILED'
       });
       return;
     }
@@ -194,22 +198,14 @@ export const signup = async (req: Request, res: Response): Promise<void> => {
         return;
       }
 
-      // Check if license number already exists in User collection
+      // Check if license number already exists in User or Agent collection
+      // Use a generic error message to prevent license enumeration
       const existingUserWithLicense = await User.findOne({ licenseNumber: licenseNumber });
-      if (existingUserWithLicense) {
-        res.status(400).json({
-          message: 'This license number is already registered',
-          code: 'LICENSE_EXISTS'
-        });
-        return;
-      }
-
-      // Check if license number already exists in Agent collection
       const existingAgentWithLicense = await Agent.findOne({ licenseNumber: licenseNumber });
-      if (existingAgentWithLicense) {
+      if (existingUserWithLicense || existingAgentWithLicense) {
         res.status(400).json({
-          message: 'This license number is already registered',
-          code: 'LICENSE_EXISTS'
+          message: 'Unable to create account. Please check your information and try again.',
+          code: 'SIGNUP_FAILED'
         });
         return;
       }
@@ -363,7 +359,7 @@ export const signup = async (req: Request, res: Response): Promise<void> => {
 
     res.status(201).json({
       accessToken: tokens.accessToken,
-      refreshToken: tokens.refreshToken, // Also in body for backward compat / mobile apps
+      // refreshToken is set as httpOnly cookie only - never exposed in response body
       user: {
         ...buildSafeUserResponse(user),
         availableRoles: user.availableRoles,
@@ -373,26 +369,12 @@ export const signup = async (req: Request, res: Response): Promise<void> => {
     });
   } catch (error: any) {
 
-    // Handle MongoDB duplicate key errors
+    // Handle MongoDB duplicate key errors with generic messages
+    // to prevent enumeration of existing emails/licenses
     if (error.code === 11000) {
-      const field = Object.keys(error.keyPattern || {})[0];
-      if (field === 'email') {
-        res.status(400).json({
-          message: 'An account with this email already exists',
-          code: 'EMAIL_EXISTS'
-        });
-        return;
-      }
-      if (field === 'licenseNumber') {
-        res.status(400).json({
-          message: 'This license number is already registered',
-          code: 'LICENSE_EXISTS'
-        });
-        return;
-      }
       res.status(400).json({
-        message: 'A record with this information already exists',
-        code: 'DUPLICATE_ENTRY'
+        message: 'Unable to create account. Please check your information and try again.',
+        code: 'SIGNUP_FAILED'
       });
       return;
     }
@@ -550,7 +532,7 @@ export const login = async (req: Request, res: Response): Promise<void> => {
 
     res.json({
       accessToken: tokens.accessToken,
-      refreshToken: tokens.refreshToken, // Also in body for backward compat / mobile apps
+      // refreshToken is set as httpOnly cookie only - never exposed in response body
       user: buildSafeUserResponse(user),
     });
   } catch (error: any) {
@@ -1106,13 +1088,14 @@ export const oauthCallback = async (req: Request, res: Response): Promise<void> 
     const tokens = await generateTokenPair(user, deviceInfo);
 
     const token = tokens.accessToken;
-    const refreshToken = tokens.refreshToken;
 
-    // SECURITY: Only pass tokens in URL, NOT user data
-    // User data will be fetched securely via /api/auth/me endpoint
-    // This prevents sensitive data from being logged in browser history,
-    // server logs, or leaked via Referer headers
-    const redirectUrl = buildFrontendRedirectUrl('/auth/callback', { token, refresh: refreshToken });
+    // Set refresh token as httpOnly cookie (same as login/signup)
+    setRefreshTokenCookie(res, tokens.refreshToken);
+
+    // SECURITY: Only pass access token in URL, NOT refresh token or user data
+    // The refresh token is in the httpOnly cookie (not visible to JS or URL logs).
+    // User data will be fetched securely via /api/auth/me endpoint.
+    const redirectUrl = buildFrontendRedirectUrl('/auth/callback', { token });
     res.redirect(redirectUrl);
   } catch (error: any) {
     const redirectUrl = buildFrontendRedirectUrl('/auth/callback', { error: 'server_error' });
@@ -1491,11 +1474,19 @@ export const resetPassword = async (
       .update(token)
       .digest('hex');
 
-    // Find user with valid reset token
-    const user = await User.findOne({
-      resetPasswordToken: hashedToken,
-      resetPasswordExpires: { $gt: Date.now() },
-    });
+    // SECURITY: Atomically find AND claim the reset token to prevent race conditions.
+    // Without this, two concurrent requests with the same token could both pass
+    // the findOne check and reset the password.
+    const user = await User.findOneAndUpdate(
+      {
+        resetPasswordToken: hashedToken,
+        resetPasswordExpires: { $gt: Date.now() },
+      },
+      {
+        $unset: { resetPasswordToken: 1, resetPasswordExpires: 1 },
+      },
+      { new: true }
+    );
 
     if (!user) {
       res.status(400).json({ message: 'Invalid or expired reset token' });
@@ -1522,9 +1513,8 @@ export const resetPassword = async (
     }
 
     // Set new password (will be hashed by pre-save hook)
+    // Token was already cleared atomically above to prevent race conditions
     user.password = newPassword;
-    user.resetPasswordToken = undefined;
-    user.resetPasswordExpires = undefined;
 
     await user.save();
 
@@ -1551,7 +1541,7 @@ export const resetPassword = async (
     res.json({
       message: 'Password reset successful',
       accessToken: tokens.accessToken,
-      refreshToken: tokens.refreshToken, // Also in body for backward compat / mobile apps
+      // refreshToken is set as httpOnly cookie only - never exposed in response body
       user: {
         id: String(user._id),
         email: user.email,
@@ -1773,7 +1763,7 @@ export const refreshToken = async (req: Request, res: Response): Promise<void> =
 
     res.json({
       accessToken: result.accessToken,
-      refreshToken: result.refreshToken, // Also in body for backward compat / mobile apps
+      // refreshToken is set as httpOnly cookie only - never exposed in response body
     });
   } catch (error: any) {
     res.status(500).json({ message: 'Error refreshing token' });
@@ -2371,6 +2361,24 @@ export const addRole = async (req: Request, res: Response): Promise<void> => {
     if (newRole === 'agent') {
       if (!licenseNumber) {
         res.status(400).json({ message: 'License number is required for agent role' });
+        return;
+      }
+
+      // SECURITY: Validate license number format (same rules as signup)
+      const licenseRegex = /^[A-Z0-9-]+$/i;
+      if (!licenseRegex.test(licenseNumber)) {
+        res.status(400).json({ message: 'Invalid license number format. Only letters, numbers, and hyphens are allowed.' });
+        return;
+      }
+      if (licenseNumber.length < 5 || licenseNumber.length > 30) {
+        res.status(400).json({ message: 'License number must be between 5 and 30 characters' });
+        return;
+      }
+
+      // SECURITY: Check license uniqueness (prevents duplicate registrations)
+      const existingUserWithLicense = await User.findOne({ licenseNumber });
+      if (existingUserWithLicense && String(existingUserWithLicense._id) !== String(user._id)) {
+        res.status(400).json({ message: 'This license number is already registered to another user' });
         return;
       }
 

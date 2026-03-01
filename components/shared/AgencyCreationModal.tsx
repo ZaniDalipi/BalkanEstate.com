@@ -173,7 +173,7 @@ const AgencyCreationModal: React.FC<AgencyCreationModalProps> = ({
     if (!isOpen) return;
     (async () => {
       try {
-        const res = await fetch(`${API_URL}/products?role=seller`);
+        const res = await fetch(`${API_URL}/products?role=seller`, { credentials: 'include' });
         if (res.ok) {
           const data = await res.json();
           const enterprise = (data.products || []).find((p: any) =>

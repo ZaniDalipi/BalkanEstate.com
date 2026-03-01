@@ -12,6 +12,7 @@ import {
   EnvelopeIcon,
   BuildingOfficeIcon,
 } from '@/constants';
+import { tokenService } from '@/src/shared/api/tokenService';
 
 interface AdminHeaderProps {
   stats?: {
@@ -235,7 +236,7 @@ const AdminHeader: React.FC<AdminHeaderProps> = ({
                     <hr className="my-2" />
                     <button
                       onClick={() => {
-                        localStorage.removeItem('balkan_estate_token');
+                        tokenService.clearTokens();
                         window.location.reload();
                       }}
                       className="w-full flex items-center gap-3 px-4 py-2 text-sm text-red-600 hover:bg-red-50"

@@ -4,6 +4,7 @@
 import { useEffect, useRef, useCallback, useState } from 'react';
 import { getCadastreLayerForLocation, CADASTRE_MIN_ZOOM } from '@/config/cadastreLayers';
 import { useRainViewer } from './useRainViewer';
+import { useMapServices, weatherTileProxyUrl, firmsWmsProxyUrl } from './useMapServices';
 import { latLngToWebMercator } from '../components/googleMapConstants';
 
 type ClimateRiskType = 'none' | 'flood' | 'fire' | 'wind' | 'air' | 'heat';
@@ -19,6 +20,7 @@ export const useMapLayers = ({ map, isLoaded }: UseMapLayersProps) => {
 
   // RainViewer precipitation radar (free, no API key) - for flood layer
   const { tileUrl: rainViewerTileUrl } = useRainViewer(selectedClimateRisk === 'flood');
+  const mapServices = useMapServices();
 
   const cadastreLayerRef = useRef<google.maps.ImageMapType | null>(null);
   const climateLayerRef = useRef<google.maps.ImageMapType | null>(null);
@@ -305,7 +307,6 @@ export const useMapLayers = ({ map, isLoaded }: UseMapLayersProps) => {
 
     if (selectedClimateRisk === 'none') return;
 
-    const owmKey = import.meta.env.VITE_OWM_API_KEY || '';
     let tileUrl: string | null = null;
     let layerOpacity = 0.6;
     let layerName = '';
@@ -323,7 +324,7 @@ export const useMapLayers = ({ map, isLoaded }: UseMapLayersProps) => {
         layerName = 'Fire Danger (EFFIS Copernicus)';
         break;
       case 'wind':
-        if (owmKey) tileUrl = `https://tile.openweathermap.org/map/wind_new/{z}/{x}/{y}.png?appid=${owmKey}`;
+        if (mapServices.owm) tileUrl = weatherTileProxyUrl('wind_new');
         layerOpacity = 0.5;
         layerName = 'Wind Speed (OWM)';
         break;
@@ -333,7 +334,7 @@ export const useMapLayers = ({ map, isLoaded }: UseMapLayersProps) => {
         layerName = 'Air Quality (AQICN)';
         break;
       case 'heat':
-        if (owmKey) tileUrl = `https://tile.openweathermap.org/map/temp_new/{z}/{x}/{y}.png?appid=${owmKey}`;
+        if (mapServices.owm) tileUrl = weatherTileProxyUrl('temp_new');
         layerOpacity = 0.5;
         layerName = 'Temperature (OWM)';
         break;
@@ -365,9 +366,8 @@ export const useMapLayers = ({ map, isLoaded }: UseMapLayersProps) => {
           const neMerc = latLngToWebMercator(ne.lat(), ne.lng());
           const bbox = `${swMerc.x},${swMerc.y},${neMerc.x},${neMerc.y}`;
 
-          const firmsKey = import.meta.env.VITE_FIRMS_MAP_KEY || '';
-          if (firmsKey) {
-            return `https://firms.modaps.eosdis.nasa.gov/mapserver/wms/fires/${firmsKey}/?SERVICE=WMS&VERSION=1.1.1&REQUEST=GetMap&LAYERS=fires_viirs_24&STYLES=&FORMAT=image/png&TRANSPARENT=true&SRS=EPSG:3857&BBOX=${bbox}&WIDTH=256&HEIGHT=256`;
+          if (mapServices.firms) {
+            return firmsWmsProxyUrl(bbox);
           }
           const today = new Date().toISOString().split('T')[0];
           return `https://maps.effis.emergency.copernicus.eu/effis?SERVICE=WMS&VERSION=1.1.1&REQUEST=GetMap&LAYERS=ecmwf007.fwi&STYLES=&FORMAT=image/png&TRANSPARENT=true&SRS=EPSG:3857&BBOX=${bbox}&WIDTH=256&HEIGHT=256&TIME=${today}`;
@@ -404,7 +404,7 @@ export const useMapLayers = ({ map, isLoaded }: UseMapLayersProps) => {
         climateLayerRef.current = null;
       }
     };
-  }, [map, isLoaded, selectedClimateRisk, rainViewerTileUrl]);
+  }, [map, isLoaded, selectedClimateRisk, rainViewerTileUrl, mapServices]);
 
   const toggleCadastre = useCallback(() => {
     setShowCadastre(prev => !prev);

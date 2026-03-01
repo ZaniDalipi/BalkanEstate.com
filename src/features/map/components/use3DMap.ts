@@ -209,9 +209,9 @@ export function use3DMap(props: Map3DBuildingsProps) {
             <span style="font-size: 14px;">${cat.icon}</span>
             <div style="overflow: hidden;">
               <div style="font-weight: 600; color: #1e293b; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 120px; font-size: 10px;">
-                ${name}
+                ${escapeHtml(name)}
               </div>
-              <div style="font-size: 9px; color: #94a3b8;">${dist}m</div>
+              <div style="font-size: 9px; color: #94a3b8;">${escapeHtml(String(dist))}m</div>
             </div>
           </div>
         `;

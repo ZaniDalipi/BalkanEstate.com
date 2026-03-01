@@ -9,7 +9,7 @@ import { transformBackendProperty } from '@/src/features/properties/api/property
 
 function transformBackendSavedSearch(backendSearch: any): SavedSearch {
   return {
-    id: backendSearch._id,
+    id: backendSearch.id || backendSearch._id,
     name: backendSearch.name,
     filters: backendSearch.filters,
     drawnBoundsJSON: backendSearch.drawnBoundsJSON,
@@ -76,7 +76,7 @@ export const getAgencyFavorites = async (): Promise<any[]> => {
   return response.favorites
     .filter((fav) => fav.agencyId)
     .map((fav) => ({
-      _id: fav.agencyId._id,
+      _id: fav.agencyId.id || fav.agencyId._id,
       name: fav.agencyId.name,
       slug: fav.agencyId.slug,
       logo: fav.agencyId.logo,

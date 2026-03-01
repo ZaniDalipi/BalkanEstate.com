@@ -7,6 +7,7 @@ import { useAppContext } from '@/context/AppContext';
 import { useSellerProducts, Product } from '@/src/shared/query';
 import { apiRequest } from '@/src/shared/api';
 import { createAgency } from '@/src/features/agencies/api/agencyApi';
+import { replacePlaceholders } from '@/src/shared/utils/featurePlaceholders';
 
 interface PricingPlansProps {
   isOpen: boolean;
@@ -357,7 +358,7 @@ const PricingPlans: React.FC<PricingPlansProps> = ({ isOpen, onClose, onSubscrib
                     <ul className="mt-8 space-y-4 text-neutral-700 font-medium flex-grow text-sm sm:text-base">
                         {proYearlyProduct?.features && proYearlyProduct.features.length > 0 ? (
                             proYearlyProduct.features.map((feature, index) => (
-                                <li key={index} className="flex items-center"><TickIcon /> {feature}</li>
+                                <li key={index} className="flex items-center"><TickIcon /> {replacePlaceholders(feature, proYearlyProduct)}</li>
                             ))
                         ) : (
                             <>
@@ -412,7 +413,7 @@ const PricingPlans: React.FC<PricingPlansProps> = ({ isOpen, onClose, onSubscrib
                         {proMonthlyProduct?.features && proMonthlyProduct.features.length > 0 ? (
                             proMonthlyProduct.features.map((feature, index) => (
                                 <div key={index} className="bg-neutral-50 p-3 rounded-lg border border-neutral-200">
-                                    <p className="font-semibold text-neutral-800 text-sm">{feature}</p>
+                                    <p className="font-semibold text-neutral-800 text-sm">{replacePlaceholders(feature, proMonthlyProduct)}</p>
                                 </div>
                             ))
                         ) : (
@@ -484,7 +485,7 @@ const PricingPlans: React.FC<PricingPlansProps> = ({ isOpen, onClose, onSubscrib
                         {enterpriseProduct?.features && enterpriseProduct.features.length > 0 ? (
                             enterpriseProduct.features.map((feature, index) => (
                                 <div key={index} className="bg-neutral-700/50 p-4 rounded-lg">
-                                    <p className="font-bold text-base sm:text-lg">{feature}</p>
+                                    <p className="font-bold text-base sm:text-lg">{replacePlaceholders(feature, enterpriseProduct)}</p>
                                 </div>
                             ))
                         ) : (

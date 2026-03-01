@@ -276,9 +276,9 @@ const SubscriptionManagement: React.FC<SubscriptionManagementProps> = ({ userId 
     try {
       // Fetch seller, buyer, and agent products so we can display any plan correctly
       const [sellerRes, buyerRes, agentRes] = await Promise.all([
-        fetch(`${API_URL}/products?role=seller`),
-        fetch(`${API_URL}/products?role=buyer`),
-        fetch(`${API_URL}/products?role=agent`),
+        fetch(`${API_URL}/products?role=seller`, { credentials: 'include' }),
+        fetch(`${API_URL}/products?role=buyer`, { credentials: 'include' }),
+        fetch(`${API_URL}/products?role=agent`, { credentials: 'include' }),
       ]);
       const allProducts: ProductData[] = [];
       if (sellerRes.ok) {
@@ -320,6 +320,7 @@ const SubscriptionManagement: React.FC<SubscriptionManagementProps> = ({ userId 
       }
 
       const response = await fetch(`${API_URL}/subscriptions/current`, {
+        credentials: 'include',
         headers: {
           'Authorization': `Bearer ${token}`,
         },
@@ -444,6 +445,7 @@ const SubscriptionManagement: React.FC<SubscriptionManagementProps> = ({ userId 
 
         // Fetch agency details first to get invitation code
         const agencyResponse = await fetch(`${API_URL}/agencies/${user.agencyId}`, {
+          credentials: 'include',
           headers: {
             'Authorization': `Bearer ${token}`,
           },
@@ -455,6 +457,7 @@ const SubscriptionManagement: React.FC<SubscriptionManagementProps> = ({ userId 
 
         // Fetch agency coupons
         const couponsResponse = await fetch(`${API_URL}/agencies/${user.agencyId}/coupons`, {
+          credentials: 'include',
           headers: {
             'Authorization': `Bearer ${token}`,
           },
@@ -784,6 +787,7 @@ const SubscriptionManagement: React.FC<SubscriptionManagementProps> = ({ userId 
 
       // Re-fetch current user to get updated subscription data
       const meResponse = await fetch(`${API_URL}/auth/me`, {
+        credentials: 'include',
         headers: {
           'Authorization': `Bearer ${token}`,
         },
@@ -808,6 +812,7 @@ const SubscriptionManagement: React.FC<SubscriptionManagementProps> = ({ userId 
   const refreshUserContext = async (token: string) => {
     try {
       const meResponse = await fetch(`${API_URL}/auth/me`, {
+        credentials: 'include',
         headers: { 'Authorization': `Bearer ${token}` },
       });
       if (meResponse.ok) {
@@ -1799,17 +1804,19 @@ const SubscriptionManagement: React.FC<SubscriptionManagementProps> = ({ userId 
             {upgradeOptions.map(({ key, plan, pricing }) => {
               // Enhanced features for Enterprise plan
               const isEnterprise = key.includes('enterprise') || key.includes('agency_yearly');
-              const enterpriseProduct = products.find(p => p.productId === key);
+              const matchedProduct = products.find(p => p.productId === key);
               const displayFeatures = isEnterprise ? [
-                t('management.enterpriseFeatures.listingsCount', '{{count}} Active Listings', { count: enterpriseProduct?.listingsLimit ?? agencyOwnerProductFromDB?.listingsLimit ?? 750 }),
+                t('management.enterpriseFeatures.listingsCount', '{{count}} Active Listings', { count: matchedProduct?.listingsLimit ?? agencyOwnerProductFromDB?.listingsLimit ?? 750 }),
                 t('management.enterpriseFeatures.createAgency', 'Create Your Own Agency'),
-                t('management.enterpriseFeatures.agentCouponsCount', '{{count}} Agent Invitation Coupons', { count: enterpriseProduct?.agentCoupons ?? agencyOwnerProductFromDB?.agentCoupons ?? 5 }),
+                t('management.enterpriseFeatures.agentCouponsCount', '{{count}} Agent Invitation Coupons', { count: matchedProduct?.agentCoupons ?? agencyOwnerProductFromDB?.agentCoupons ?? 5 }),
                 t('management.enterpriseFeatures.unlimitedSearches', 'Unlimited Saved Searches'),
                 t('management.enterpriseFeatures.fullAnalytics', 'Full Analytics Dashboard'),
                 t('management.enterpriseFeatures.prioritySupport', 'Priority Support'),
-                t('management.enterpriseFeatures.promoCouponsCount', '{{count}} Monthly Promotion Coupons', { count: enterpriseProduct?.promotionCoupons ?? agencyOwnerProductFromDB?.promotionCoupons ?? 10 }),
+                t('management.enterpriseFeatures.promoCouponsCount', '{{count}} Monthly Promotion Coupons', { count: matchedProduct?.promotionCoupons ?? agencyOwnerProductFromDB?.promotionCoupons ?? 10 }),
                 t('management.enterpriseFeatures.teamTools', 'Team Management Tools'),
-              ] : plan.features;
+              ] : matchedProduct
+                ? plan.features.map(f => replacePlaceholders(f, matchedProduct))
+                : plan.features;
 
               return (
                 <div

@@ -57,7 +57,12 @@ import {
   getPaymentStats,
   activateUserSubscription,
   cancelSubscription,
+  deactivateUserSubscription,
   adjustListingLimit,
+  adjustAgencyListingLimit,
+  activateAgencySubscription,
+  deactivateAgencySubscription,
+  getAgencySubscriptionHistory,
 } from '../controllers/adminSubscriptionController';
 import {
   getAllContent,
@@ -111,6 +116,10 @@ router.delete('/users/:id', logAdminAction('DELETE_USER'), deleteUser);
 
 // ===== Agency Management =====
 router.get('/agencies', logAdminAction('VIEW_AGENCIES'), getAllAgenciesAdmin);
+router.get('/agencies/:agencyId/subscription', logAdminAction('VIEW_AGENCY_SUBSCRIPTION'), getAgencySubscriptionHistory);
+router.post('/agencies/:agencyId/subscription/activate', logAdminAction('ACTIVATE_AGENCY_SUBSCRIPTION'), activateAgencySubscription);
+router.post('/agencies/:agencyId/subscription/deactivate', logAdminAction('DEACTIVATE_AGENCY_SUBSCRIPTION'), deactivateAgencySubscription);
+router.patch('/agencies/:agencyId/listing-limit', logAdminAction('ADJUST_AGENCY_LISTING_LIMIT'), adjustAgencyListingLimit);
 router.get('/agencies/:id', logAdminAction('VIEW_AGENCY_DETAIL'), getAgencyDetailAdmin);
 router.patch('/agencies/:id', logAdminAction('UPDATE_AGENCY'), updateAgency);
 router.delete('/agencies/:id', logAdminAction('DELETE_AGENCY'), deleteAgency);
@@ -144,6 +153,7 @@ router.get('/subscriptions', logAdminAction('VIEW_SUBSCRIPTIONS'), getAllSubscri
 router.get('/subscriptions/:id', logAdminAction('VIEW_SUBSCRIPTION'), getSubscriptionById);
 router.post('/subscriptions/activate', logAdminAction('ACTIVATE_SUBSCRIPTION'), activateUserSubscription);
 router.post('/subscriptions/:id/cancel', logAdminAction('CANCEL_SUBSCRIPTION'), cancelSubscription);
+router.post('/subscriptions/:id/deactivate', logAdminAction('DEACTIVATE_SUBSCRIPTION'), deactivateUserSubscription);
 router.patch('/subscriptions/listing-limit/:userId', logAdminAction('ADJUST_LISTING_LIMIT'), adjustListingLimit);
 router.get('/payments/stats', logAdminAction('VIEW_PAYMENT_STATS'), getPaymentStats);
 router.get('/payments', logAdminAction('VIEW_PAYMENTS'), getAllPayments);

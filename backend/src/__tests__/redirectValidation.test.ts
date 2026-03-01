@@ -101,9 +101,8 @@ describe('Redirect URL Validation', () => {
       process.env.FRONTEND_URL = 'https://balkanestateai.com';
       const result = buildFrontendRedirectUrl('/auth/callback', {
         token: 'abc123',
-        refresh: 'def456',
       });
-      expect(result).toBe('https://balkanestateai.com/auth/callback?token=abc123&refresh=def456');
+      expect(result).toBe('https://balkanestateai.com/auth/callback?token=abc123');
     });
 
     it('should handle path without leading slash', () => {

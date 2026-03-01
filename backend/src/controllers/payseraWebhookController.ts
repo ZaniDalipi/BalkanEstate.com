@@ -10,6 +10,7 @@ import { payseraService } from '../services/payseraService';
 import { processSubscriptionPayment } from '../services/subscriptionPaymentService';
 import User from '../models/User';
 import Product from '../models/Product';
+import Subscription from '../models/Subscription';
 import { paymentLogger } from '../utils/logger';
 import { getParam } from '../utils/validateParams';
 
@@ -100,6 +101,18 @@ async function handleSuccessfulPayment(
 
     if (!userId) {
       paymentLogger.error('❌ PaySera webhook: No userId found in callback');
+      return;
+    }
+
+    // Idempotency check: skip if this order was already processed.
+    // The Subscription model has a unique index on (store, transactionId),
+    // but checking upfront avoids side effects like duplicate product creation.
+    const existingSub = await Subscription.findOne({
+      store: 'web',
+      transactionId: callbackData.orderid,
+    });
+    if (existingSub) {
+      paymentLogger.info(`⏭️ PaySera webhook: order ${callbackData.orderid} already processed (subscription ${existingSub._id}), skipping`);
       return;
     }
 

@@ -8,6 +8,7 @@ import { authRepository } from '../../../../data/repositories/AuthRepository';
 import { User } from '../../../../domain/entities/User';
 import { socketService } from '../../../../../services/socketService';
 import { notificationService } from '../../../../../services/notificationService';
+import { tokenService } from '@/src/shared/api/tokenService';
 
 // Initialize use cases
 const loginUseCase = new LoginUseCase(authRepository);
@@ -25,7 +26,7 @@ export function useAuth() {
 
       if (user) {
         // Connect to WebSocket
-        const token = localStorage.getItem('balkan_estate_token');
+        const token = tokenService.getAccessToken();
         if (token) {
           socketService.connect(token, user.id);
         }

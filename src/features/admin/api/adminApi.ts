@@ -222,6 +222,73 @@ export const generateBulkDiscountCodes = async (data: BulkDiscountCodeData): Pro
   });
 };
 
+// --- Agency Subscription Management ---
+
+export const getAgencySubscription = async (agencyId: string): Promise<{
+  success: boolean;
+  subscription: {
+    status: string;
+    startDate: string;
+    expiresAt: string;
+    amount: number;
+    currency: string;
+    autoRenew: boolean;
+  };
+  owner: { name: string; email: string };
+  agencyName: string;
+  events: Array<{
+    _id: string;
+    eventType: string;
+    previousStatus?: string;
+    newStatus?: string;
+    metadata?: Record<string, unknown>;
+    createdAt: string;
+  }>;
+}> => {
+  return apiRequest(`/admin/agencies/${agencyId}/subscription`, {
+    requiresAuth: true,
+    encryptResponse: true,
+  });
+};
+
+export const activateAgencySubscription = async (
+  agencyId: string,
+  data: { durationDays: number; reason?: string }
+): Promise<{ success: boolean; message: string }> => {
+  return apiRequest(`/admin/agencies/${agencyId}/subscription/activate`, {
+    method: 'POST',
+    body: data,
+    requiresAuth: true,
+    encryptResponse: true,
+  });
+};
+
+export const deactivateAgencySubscription = async (
+  agencyId: string,
+  data: { reason?: string; immediate?: boolean }
+): Promise<{ success: boolean; message: string }> => {
+  return apiRequest(`/admin/agencies/${agencyId}/subscription/deactivate`, {
+    method: 'POST',
+    body: data,
+    requiresAuth: true,
+    encryptResponse: true,
+  });
+};
+
+// --- User Subscription Management ---
+
+export const deactivateUserSubscription = async (
+  subscriptionId: string,
+  data: { reason?: string }
+): Promise<{ success: boolean; message: string }> => {
+  return apiRequest(`/admin/subscriptions/${subscriptionId}/deactivate`, {
+    method: 'POST',
+    body: data,
+    requiresAuth: true,
+    encryptResponse: true,
+  });
+};
+
 // --- Admin Products/Pricing ---
 
 export interface Product {

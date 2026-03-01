@@ -74,9 +74,7 @@ const refreshAccessToken = async (): Promise<string | null> => {
     const data = await response.json();
     if (data.accessToken) {
       tokenService.setAccessToken(data.accessToken);
-      if (data.refreshToken) {
-        tokenService.setRefreshToken(data.refreshToken);
-      }
+      // Refresh token is handled via httpOnly cookie set by the backend.
       return data.accessToken;
     }
 
@@ -187,7 +185,7 @@ export const apiRequest = async <T>(
         if (retryCount === 0) {
           return apiRequest<T>(endpoint, options, 1);
         }
-        return rawData as T;
+        throw new Error('Failed to decrypt server response');
       }
     }
 

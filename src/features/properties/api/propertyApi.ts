@@ -10,8 +10,8 @@ export function transformBackendProperty(backendProp: any): Property {
   const seller = backendProp.sellerId;
 
   return {
-    id: backendProp._id,
-    sellerId: seller._id || seller,
+    id: backendProp.id || backendProp._id,
+    sellerId: seller.id || seller._id || seller,
     status: backendProp.status,
     title: backendProp.title,
     soldAt: backendProp.soldAt ? new Date(backendProp.soldAt).getTime() : undefined,

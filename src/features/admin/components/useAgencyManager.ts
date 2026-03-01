@@ -3,6 +3,10 @@ import { useTranslation } from 'react-i18next';
 import { Agency } from '@/types';
 import { useConfirmation } from '@/src/shared/hooks/useConfirmation';
 import { apiRequest } from '@/src/shared/api';
+import {
+  activateAgencySubscription,
+  deactivateAgencySubscription,
+} from '../api/adminApi';
 
 export interface AgencyEditForm {
   name: string;
@@ -88,6 +92,9 @@ export function useAgencyManager() {
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [editingAgency, setEditingAgency] = useState<Agency | null>(null);
   const [editForm, setEditForm] = useState<AgencyEditForm>(defaultEditForm);
+
+  // Subscription action loading
+  const [subscriptionLoading, setSubscriptionLoading] = useState<string | null>(null);
 
   // Pagination
   const [currentPage, setCurrentPage] = useState(1);
@@ -219,6 +226,60 @@ export function useAgencyManager() {
     }
   };
 
+  const handleActivateSubscription = async (agencyId: string, agencyName: string) => {
+    const confirmed = await confirm({
+      title: t('admin:agencies.activateConfirmTitle', 'Activate Agency Subscription'),
+      message: t('admin:agencies.activateConfirmMessage', {
+        name: agencyName,
+        defaultValue: `This will activate a 1-year subscription for "${agencyName}". The agency and its agents will regain full access.`,
+      }),
+      confirmLabel: t('admin:agencies.activateSubscription', 'Activate'),
+      cancelLabel: t('admin:common.cancel', 'Cancel'),
+      type: 'info',
+    });
+    if (!confirmed) return;
+
+    try {
+      setSubscriptionLoading(agencyId);
+      await activateAgencySubscription(agencyId, { durationDays: 365 });
+      await fetchAgencies();
+      setSuccessMessage(t('admin:agencies.subscriptionActivated', 'Subscription activated successfully'));
+      setTimeout(() => setSuccessMessage(null), 3000);
+    } catch (err) {
+      setError(t('admin:agencies.subscriptionActivateError', 'Failed to activate subscription'));
+      setTimeout(() => setError(null), 5000);
+    } finally {
+      setSubscriptionLoading(null);
+    }
+  };
+
+  const handleDeactivateSubscription = async (agencyId: string, agencyName: string) => {
+    const confirmed = await confirm({
+      title: t('admin:agencies.deactivateConfirmTitle', 'Deactivate Agency Subscription'),
+      message: t('admin:agencies.deactivateConfirmMessage', {
+        name: agencyName,
+        defaultValue: `This will immediately deactivate the subscription for "${agencyName}". The agency will lose access to premium features.`,
+      }),
+      confirmLabel: t('admin:agencies.deactivateSubscription', 'Deactivate'),
+      cancelLabel: t('admin:common.cancel', 'Cancel'),
+      type: 'danger',
+    });
+    if (!confirmed) return;
+
+    try {
+      setSubscriptionLoading(agencyId);
+      await deactivateAgencySubscription(agencyId, { immediate: true });
+      await fetchAgencies();
+      setSuccessMessage(t('admin:agencies.subscriptionDeactivated', 'Subscription deactivated successfully'));
+      setTimeout(() => setSuccessMessage(null), 3000);
+    } catch (err) {
+      setError(t('admin:agencies.subscriptionDeactivateError', 'Failed to deactivate subscription'));
+      setTimeout(() => setError(null), 5000);
+    } finally {
+      setSubscriptionLoading(null);
+    }
+  };
+
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('en-US', {
       year: 'numeric',
@@ -248,6 +309,9 @@ export function useAgencyManager() {
     handleEditAgency,
     handleUpdateAgency,
     handleDeleteAgency,
+    handleActivateSubscription,
+    handleDeactivateSubscription,
+    subscriptionLoading,
     formatDate,
   };
 }

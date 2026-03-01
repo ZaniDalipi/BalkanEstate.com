@@ -94,7 +94,7 @@ const MyPromotions: React.FC = () => {
     const currentLang = window.location.pathname.split('/')[1] || 'en';
     const validLangs = ['en', 'sq', 'sr', 'de', 'mk', 'hr', 'bs', 'sl', 'bg', 'ro', 'el', 'tr', 'it', 'fr'];
     const lang = validLangs.includes(currentLang) ? currentLang : 'en';
-    window.history.pushState({ propertyId }, '', `/${lang}/property/${propertyId}`);
+    window.history.pushState({}, '', `/${lang}/property/${propertyId}`);
   };
 
   const handleExtend = (property: Property) => {

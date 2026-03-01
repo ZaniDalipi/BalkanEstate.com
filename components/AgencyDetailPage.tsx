@@ -301,6 +301,7 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
         const token = localStorage.getItem('balkan_estate_token');
         if (!token) return;
         const response = await fetch(`${API_URL}/agencies/${agencyId}/coupons`, {
+          credentials: 'include',
           headers: { 'Authorization': `Bearer ${token}` },
         });
         if (response.ok) {
@@ -367,6 +368,7 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
         const token = localStorage.getItem('balkan_estate_token');
         if (!token) return;
         fetch(`${API_URL}/agencies/${agencyId}/coupons`, {
+          credentials: 'include',
           headers: { 'Authorization': `Bearer ${token}` },
         }).then(r => r.ok ? r.json() : null).then(data => {
           if (data?.promotionCoupons) {
@@ -475,7 +477,7 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
         headers['Authorization'] = `Bearer ${token}`;
       }
 
-      const response = await fetch(`${API_URL}/agencies/${agency._id}`, { headers });
+      const response = await fetch(`${API_URL}/agencies/${agency._id}`, { credentials: 'include', headers });
       if (response.ok) {
         const data = await response.json();
         setAgencyData(data.agency);
@@ -660,6 +662,7 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
           // Refresh user data from server to ensure full sync
           try {
             const meResponse = await fetch(`${API_URL}/auth/me`, {
+              credentials: 'include',
               headers: { 'Authorization': `Bearer ${token}` },
             });
             if (meResponse.ok) {
@@ -3009,7 +3012,7 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
                           onClick={() => {
                             const propertyId = property.id || property._id;
                             dispatch({ type: 'SET_SELECTED_PROPERTY', payload: propertyId });
-                            window.history.pushState({ propertyId }, '', `/property/${propertyId}`);
+                            window.history.pushState({}, '', `/property/${propertyId}`);
                           }}
                           className={`w-full text-white px-3 py-2 rounded-lg font-semibold text-sm ${property.status === 'sold' ? 'bg-red-600 hover:bg-red-700' : 'bg-emerald-600 hover:bg-emerald-700'}`}
                         >

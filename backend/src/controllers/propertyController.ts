@@ -607,21 +607,44 @@ export const createProperty = async (
     }
 
     // Check listing limits based on subscription tier
-    const currentCount = user.subscription.activeListingsCount || 0;
     const limit = user.subscription.listingsLimit || FREE_TIER_LIMITS.LISTINGS;
     const tier = user.subscription.tier || 'free';
 
-    // Creating listing
+    // ATOMIC check-and-increment: Use findOneAndUpdate to prevent race conditions.
+    // Without this, concurrent requests could all read the same count (e.g. 2),
+    // all pass the limit check, and all create listings - bypassing the limit.
+    const roleCountField = createdAsRole === 'agent'
+      ? 'subscription.agentCount'
+      : 'subscription.privateSellerCount';
 
-    if (currentCount >= limit) {
+    const atomicResult = await User.findOneAndUpdate(
+      {
+        _id: user._id,
+        'subscription.activeListingsCount': { $lt: limit },
+      },
+      {
+        $inc: {
+          'subscription.activeListingsCount': 1,
+          [roleCountField]: 1,
+          listingsCount: 1,
+          totalListingsCreated: 1,
+        },
+      },
+      { new: true }
+    );
+
+    if (!atomicResult) {
+      // Re-read to get current count for the error response
+      const freshUser = await User.findById(user._id);
+      const currentCount = freshUser?.subscription?.activeListingsCount || 0;
       res.status(403).json({
         message: `You have reached your ${tier} tier limit of ${limit} active listings. ${tier === 'free' ? 'Upgrade to Pro for up to 250 active listings!' : 'Please delete some listings to create new ones.'}`,
         code: 'LISTING_LIMIT_REACHED',
         tier,
         limit,
         current: currentCount,
-        privateSellerCount: user.subscription.privateSellerCount || 0,
-        agentCount: user.subscription.agentCount || 0,
+        privateSellerCount: freshUser?.subscription?.privateSellerCount || 0,
+        agentCount: freshUser?.subscription?.agentCount || 0,
         upgradeAvailable: tier === 'free',
       });
       return;
@@ -685,21 +708,25 @@ export const createProperty = async (
 
     // Property created with coordinates
 
-    const property = await Property.create(propertyData);
-
-    // Update subscription counters
-    user.subscription.activeListingsCount = (user.subscription.activeListingsCount || 0) + 1;
-
-    if (createdAsRole === 'private_seller') {
-      user.subscription.privateSellerCount = (user.subscription.privateSellerCount || 0) + 1;
-    } else if (createdAsRole === 'agent') {
-      user.subscription.agentCount = (user.subscription.agentCount || 0) + 1;
+    let property;
+    try {
+      property = await Property.create(propertyData);
+    } catch (createError) {
+      // Property creation failed — roll back the atomic counter increment
+      await User.findByIdAndUpdate(user._id, {
+        $inc: {
+          'subscription.activeListingsCount': -1,
+          [roleCountField]: -1,
+          listingsCount: -1,
+          totalListingsCreated: -1,
+        },
+      });
+      throw createError;
     }
 
-    // Update user listing counts (legacy fields)
-    user.listingsCount += 1;
-    user.totalListingsCreated += 1;
-    await user.save();
+    // Counters were already incremented atomically above (the findOneAndUpdate).
+    // Use atomicResult for accurate counts in the response.
+    const updatedUser = atomicResult;
 
     // Update stats for active listings
     if (sanitizedBody.status === 'active') {
@@ -734,11 +761,11 @@ export const createProperty = async (
     res.status(201).json({
       property,
       updatedSubscription: {
-        activeListingsCount: user.subscription.activeListingsCount,
-        privateSellerCount: user.subscription.privateSellerCount,
-        agentCount: user.subscription.agentCount,
-        listingsLimit: user.subscription.listingsLimit,
-        tier: user.subscription.tier,
+        activeListingsCount: updatedUser.subscription?.activeListingsCount,
+        privateSellerCount: updatedUser.subscription?.privateSellerCount,
+        agentCount: updatedUser.subscription?.agentCount,
+        listingsLimit: updatedUser.subscription?.listingsLimit,
+        tier: updatedUser.subscription?.tier,
       },
     });
   } catch (error: any) {

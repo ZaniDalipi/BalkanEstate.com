@@ -6,6 +6,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { authApiClient } from '@/src/data/api/AuthApiClient';
 import { apiRequest } from '@/src/shared/api';
+import { tokenService } from '@/src/shared/api/tokenService';
 
 // ============================================================================
 // QUERY KEYS
@@ -223,7 +224,7 @@ export function usePrefetchCurrentUser() {
   const queryClient = useQueryClient();
 
   return () => {
-    const token = localStorage.getItem('balkan_estate_token');
+    const token = tokenService.getAccessToken();
     if (token) {
       queryClient.prefetchQuery({
         queryKey: authKeys.currentUser(),

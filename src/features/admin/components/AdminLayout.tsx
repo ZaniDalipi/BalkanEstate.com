@@ -4,6 +4,7 @@ import { useAppContext } from '@/context/AppContext';
 import AdminSidebar from './AdminSidebar';
 import AdminHeader from './AdminHeader';
 import { API_URL } from '@/src/shared/api/config';
+import { tokenService } from '@/src/shared/api/tokenService';
 
 interface AdminStats {
   overview: {
@@ -56,7 +57,7 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({
   // Fetch admin stats for header - only if user is admin
   useEffect(() => {
     // Only fetch if user is authenticated and is admin
-    const token = localStorage.getItem('balkan_estate_token');
+    const token = tokenService.getAccessToken();
     const isAdmin = state.user?.role === 'admin';
 
     if (!token || !isAdmin) {

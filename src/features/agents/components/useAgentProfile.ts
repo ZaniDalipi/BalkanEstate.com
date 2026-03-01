@@ -768,7 +768,7 @@ export function useAgentProfile({ agent }: { agent: Agent }) {
     // Handler for viewing a property from the map popup
     const handleViewProperty = useCallback((propertyId: string) => {
         dispatch({ type: 'SET_SELECTED_PROPERTY', payload: propertyId });
-        window.history.pushState({ propertyId }, '', `/property/${propertyId}`);
+        window.history.pushState({}, '', `/property/${propertyId}`);
     }, [dispatch]);
 
     // ─── Return ──────────────────────────────────────────────────────────────

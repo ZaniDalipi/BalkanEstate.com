@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { Property } from '@/types';
 import { MapPinIcon, BedIcon, BathIcon, SqftIcon, UserCircleIcon, ScaleIcon, LivingRoomIcon, BuildingOfficeIcon, StarIconSolid, FireIcon } from '@/constants';
 import { useAppContext } from '@/context/AppContext';
+import { generatePropertySlug } from '@/utils/slug';
 import { formatPrice } from '@/utils/currency';
 import { getPriceReductionInfo } from '@/utils/priceUtils';
 import { BALKAN_COUNTRIES } from '@/constants/countries';
@@ -544,7 +545,7 @@ const PropertyCard: React.FC<PropertyCardProps> = ({ property, showToast, showCo
   const handleCardClick = useCallback((e: React.MouseEvent) => {
     e.stopPropagation();
     dispatch({ type: 'SET_SELECTED_PROPERTY_OBJECT', payload: property });
-    window.history.pushState({ propertyId: property.id }, '', `/property/${property.id}`);
+    window.history.pushState({}, '', `/property/${generatePropertySlug(property)}`);
   }, [dispatch, property]);
 
   const handleFavoriteClick = useCallback(async (e: React.MouseEvent) => {

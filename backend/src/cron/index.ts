@@ -6,6 +6,7 @@ import Agency from '../models/Agency';
 import User from '../models/User';
 import Subscription from '../models/Subscription';
 import PromotionCoupon from '../models/PromotionCoupon';
+import SubscriptionEvent from '../models/SubscriptionEvent';
 import emailService from '../services/emailService';
 import { updateExpiredSubscriptions } from '../services/subscriptionPaymentService';
 import { runWeeklyStatsJobs } from '../jobs/weeklyStatsJob';
@@ -31,6 +32,7 @@ let checkExpiringTask: cron.ScheduledTask | null = null;
 let monthlyCouponTask: cron.ScheduledTask | null = null;
 let updateExpiredTask: cron.ScheduledTask | null = null;
 let userSubscriptionTask: cron.ScheduledTask | null = null;
+let agencySubscriptionExpiryTask: cron.ScheduledTask | null = null;
 let subscriptionReminderTask: cron.ScheduledTask | null = null;
 let weeklyStatsTask: cron.ScheduledTask | null = null;
 let instantAlertsTask: cron.ScheduledTask | null = null;
@@ -127,6 +129,64 @@ export const startCronJobs = () => {
         cronLogger.info(`✅ Processed ${count} expired user subscriptions`);
       } catch (error) {
         cronLogger.error('User subscription expiry cron error:', error);
+      }
+    });
+  });
+
+  // Auto-expire agency subscriptions - runs every 6 hours (offset by 3 hours from user subscription check)
+  agencySubscriptionExpiryTask = cron.schedule('0 3,9,15,21 * * *', async () => {
+    await withDbConnection('agency subscription expiry', async () => {
+      try {
+        cronLogger.info('🏢 Checking and updating expired agency subscriptions...');
+        const now = new Date();
+
+        const expiredAgencies = await Agency.find({
+          'subscription.status': { $in: ['active', 'trial'] },
+          'subscription.expiresAt': { $lt: now },
+        });
+
+        let processed = 0;
+        for (const agency of expiredAgencies) {
+          agency.subscription.status = 'expired';
+          agency.markModified('subscription');
+          await agency.save();
+
+          // Update owner user record
+          const owner = await User.findById(agency.ownerId);
+          if (owner) {
+            owner.isSubscribed = false;
+            owner.subscriptionStatus = 'expired';
+            await owner.save();
+          }
+
+          // Audit trail
+          try {
+            await SubscriptionEvent.create({
+              subscriptionId: agency._id,
+              userId: agency.ownerId,
+              eventType: 'subscription_expired',
+              store: 'web',
+              previousStatus: 'active',
+              newStatus: 'expired',
+              metadata: {
+                agencyId: String(agency._id),
+                agencyName: agency.name,
+                expiredAt: now,
+                autoExpired: true,
+              },
+            });
+          } catch (eventErr) {
+            cronLogger.error(`Failed to create event for agency ${agency._id}:`, eventErr);
+          }
+
+          processed++;
+        }
+
+        if (processed > 0) {
+          cronLogger.info(`✅ Auto-expired ${processed} agency subscriptions`);
+        }
+      } catch (error) {
+        cronLogger.error('Agency subscription expiry cron error:', error);
       }
     });
   });
@@ -329,6 +389,7 @@ export const stopCronJobs = () => {
   if (checkExpiringTask) checkExpiringTask.stop();
   if (updateExpiredTask) updateExpiredTask.stop();
   if (userSubscriptionTask) userSubscriptionTask.stop();
+  if (agencySubscriptionExpiryTask) agencySubscriptionExpiryTask.stop();
   if (subscriptionReminderTask) subscriptionReminderTask.stop();
   if (weeklyStatsTask) weeklyStatsTask.stop();
   if (instantAlertsTask) instantAlertsTask.stop();

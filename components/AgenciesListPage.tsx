@@ -105,6 +105,7 @@ const AgenciesListPage: React.FC = () => {
 
       if (filter === 'myAgency' && currentUser?.agencyId) {
         const response = await fetch(`${API_URL}/agencies/${currentUser.agencyId}`, {
+          credentials: 'include',
           headers: {
             'Authorization': `Bearer ${localStorage.getItem('balkan_estate_token')}`,
           },
