@@ -205,7 +205,10 @@ export function usePropertyManager() {
         encryptResponse: true,
       });
 
-      await fetchProperties();
+      // Update local state instead of refetching entire list
+      setProperties(prev => prev.map(p =>
+        p._id === editingProperty._id ? { ...p, ...editForm } : p
+      ));
       setIsEditModalOpen(false);
       setEditingProperty(null);
       setSuccessMessage('Property updated successfully');
@@ -225,7 +228,10 @@ export function usePropertyManager() {
         encryptResponse: true,
       });
 
-      await fetchProperties();
+      // Update local state instead of refetching entire list
+      setProperties(prev => prev.map(p =>
+        p._id === property._id ? { ...p, isPromoted: !p.isPromoted } : p
+      ));
       setSuccessMessage(`Property ${property.isPromoted ? 'unpromoted' : 'promoted'} successfully`);
       setTimeout(() => setSuccessMessage(null), 3000);
     } catch (err) {
@@ -251,7 +257,9 @@ export function usePropertyManager() {
         encryptResponse: true,
       });
 
-      await fetchProperties();
+      // Update local state instead of refetching entire list
+      setProperties(prev => prev.filter(p => p._id !== propertyId));
+      setTotalProperties(prev => prev - 1);
       setSuccessMessage('Property deleted successfully');
       setTimeout(() => setSuccessMessage(null), 3000);
     } catch (err) {

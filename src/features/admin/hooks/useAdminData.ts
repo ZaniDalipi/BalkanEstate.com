@@ -84,25 +84,18 @@ export function useProducts() {
       const response = await getProducts();
       return response.products ?? [];
     },
-    staleTime: 0, // Always consider stale - ensures immediate refetch after mutations
-    gcTime: 5 * 60 * 1000, // Keep in cache for 5 minutes (garbage collection time)
-    refetchOnWindowFocus: true, // Refetch when tab becomes active
-    refetchOnMount: true, // Always refetch when component mounts
-    refetchInterval: 30 * 1000, // Poll every 30 seconds for real-time updates
+    staleTime: 2 * 60 * 1000, // 2 minutes - pricing data rarely changes
+    gcTime: 10 * 60 * 1000, // 10 minutes
+    refetchOnWindowFocus: true,
   });
 }
 
 /**
  * Helper function to invalidate all product-related caches across the app
- * Forces immediate refetch by setting refetchType to 'all'
  */
 function invalidateAllProductCaches(queryClient: ReturnType<typeof useQueryClient>) {
-  // Invalidate all product-related keys (admin + public) and force refetch
   getProductInvalidationKeys().forEach((key) => {
-    queryClient.invalidateQueries({
-      queryKey: key,
-      refetchType: 'all', // Force refetch even if query is not active
-    });
+    queryClient.invalidateQueries({ queryKey: key });
   });
 }
 
@@ -123,69 +116,36 @@ export function useUpdateProduct() {
       // Error removed
     },
 
-    // Force immediate refetch after mutation completes (success or error)
-    onSettled: async () => {
-      // First invalidate all caches
+    onSettled: () => {
       invalidateAllProductCaches(queryClient);
-      // Then force an immediate refetch of the admin products list
-      await queryClient.refetchQueries({
-        queryKey: adminKeys.products(),
-        type: 'active',
-      });
     },
   });
 }
 
 /**
  * useToggleProductStatus - Toggle product active/inactive
- * Forces immediate refetch after mutation for guaranteed UI sync
  */
 export function useToggleProductStatus() {
   const queryClient = useQueryClient();
 
   return useMutation({
     mutationFn: (productId: string) => toggleProductStatus(productId),
-
-    onError: (error) => {
-      // Error removed
-    },
-
-    // Force immediate refetch after mutation completes (success or error)
-    onSettled: async () => {
-      // First invalidate all caches
+    onSettled: () => {
       invalidateAllProductCaches(queryClient);
-      // Then force an immediate refetch of the admin products list
-      await queryClient.refetchQueries({
-        queryKey: adminKeys.products(),
-        type: 'active',
-      });
     },
   });
 }
 
 /**
  * useToggleProductVisibility - Toggle product visibility
- * Forces immediate refetch after mutation for guaranteed UI sync
  */
 export function useToggleProductVisibility() {
   const queryClient = useQueryClient();
 
   return useMutation({
     mutationFn: (productId: string) => toggleProductVisibility(productId),
-
-    onError: (error) => {
-      // Error removed
-    },
-
-    // Force immediate refetch after mutation completes (success or error)
-    onSettled: async () => {
-      // First invalidate all caches
+    onSettled: () => {
       invalidateAllProductCaches(queryClient);
-      // Then force an immediate refetch of the admin products list
-      await queryClient.refetchQueries({
-        queryKey: adminKeys.products(),
-        type: 'active',
-      });
     },
   });
 }
@@ -372,16 +332,12 @@ export function useBulkGenerateDiscountCodes() {
  */
 function invalidateAllPromotionPlanCaches(queryClient: ReturnType<typeof useQueryClient>) {
   getPromotionPlanInvalidationKeys().forEach((key) => {
-    queryClient.invalidateQueries({
-      queryKey: key,
-      refetchType: 'all',
-    });
+    queryClient.invalidateQueries({ queryKey: key });
   });
 }
 
 /**
  * usePromotionPlans - Fetches and subscribes to promotion plans data (admin view - all plans)
- * Automatically refetches on window focus and at intervals for real-time updates
  */
 export function usePromotionPlans() {
   return useQuery({
@@ -390,11 +346,9 @@ export function usePromotionPlans() {
       const response = await getPromotionPlans();
       return response.plans ?? [];
     },
-    staleTime: 0, // Always consider stale for real-time updates
-    gcTime: 5 * 60 * 1000, // Keep in cache for 5 minutes
+    staleTime: 2 * 60 * 1000, // 2 minutes - plans rarely change
+    gcTime: 10 * 60 * 1000, // 10 minutes
     refetchOnWindowFocus: true,
-    refetchOnMount: true,
-    refetchInterval: 30 * 1000, // Poll every 30 seconds for real-time updates
   });
 }
 
@@ -407,17 +361,8 @@ export function useCreatePromotionPlan() {
   return useMutation({
     mutationFn: (data: Omit<PromotionPlan, '_id' | 'createdAt' | 'updatedAt'>) =>
       createPromotionPlan(data),
-
-    onError: (error) => {
-      // Error removed
-    },
-
-    onSettled: async () => {
+    onSettled: () => {
       invalidateAllPromotionPlanCaches(queryClient);
-      await queryClient.refetchQueries({
-        queryKey: adminKeys.promotionPlans(),
-        type: 'active',
-      });
     },
   });
 }
@@ -431,17 +376,8 @@ export function useUpdatePromotionPlan() {
   return useMutation({
     mutationFn: ({ planId, data }: { planId: string; data: Partial<PromotionPlan> }) =>
       updatePromotionPlan(planId, data),
-
-    onError: (error) => {
-      // Error removed
-    },
-
-    onSettled: async () => {
+    onSettled: () => {
       invalidateAllPromotionPlanCaches(queryClient);
-      await queryClient.refetchQueries({
-        queryKey: adminKeys.promotionPlans(),
-        type: 'active',
-      });
     },
   });
 }
@@ -473,12 +409,8 @@ export function useDeletePromotionPlan() {
       }
     },
 
-    onSettled: async () => {
+    onSettled: () => {
       invalidateAllPromotionPlanCaches(queryClient);
-      await queryClient.refetchQueries({
-        queryKey: adminKeys.promotionPlans(),
-        type: 'active',
-      });
     },
   });
 }
@@ -513,12 +445,8 @@ export function useTogglePromotionPlanStatus() {
       }
     },
 
-    onSettled: async () => {
+    onSettled: () => {
       invalidateAllPromotionPlanCaches(queryClient);
-      await queryClient.refetchQueries({
-        queryKey: adminKeys.promotionPlans(),
-        type: 'active',
-      });
     },
   });
 }
@@ -531,13 +459,8 @@ export function useSeedPromotionPlans() {
 
   return useMutation({
     mutationFn: (options?: { force?: boolean }) => seedPromotionPlans(options),
-
-    onSettled: async () => {
+    onSettled: () => {
       invalidateAllPromotionPlanCaches(queryClient);
-      await queryClient.refetchQueries({
-        queryKey: adminKeys.promotionPlans(),
-        type: 'active',
-      });
     },
   });
 }

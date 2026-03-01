@@ -85,9 +85,6 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({
     };
 
     fetchStats();
-    // Refresh every 60 seconds
-    const interval = setInterval(fetchStats, 60000);
-    return () => clearInterval(interval);
   }, [state.user?.role]);
 
   const handleBackToSite = () => {

@@ -51,8 +51,6 @@ const AnalyticsDashboard: React.FC = () => {
 
   useEffect(() => {
     fetchStats();
-    const interval = setInterval(fetchStats, 30000);
-    return () => clearInterval(interval);
   }, []);
 
   const fetchStats = async () => {
