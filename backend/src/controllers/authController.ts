@@ -2552,7 +2552,7 @@ export const unsubscribeFromEmails = async (req: Request, res: Response): Promis
     await user.save();
 
     // Return a nice HTML page for browser access
-    const frontendUrl = process.env.FRONTEND_URL || 'https://balkanestate.com';
+    const frontendUrl = process.env.FRONTEND_URL || 'https://balkanestateai.com';
     res.send(`
       <!DOCTYPE html>
       <html>
