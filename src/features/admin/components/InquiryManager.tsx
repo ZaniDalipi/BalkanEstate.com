@@ -235,18 +235,18 @@ const InquiryManager: React.FC = () => {
                         <img src={inquiry.recipientId.avatarUrl} alt="" loading="lazy" decoding="async" className="w-8 h-8 rounded-full mr-2" referrerPolicy="no-referrer" />
                       ) : (
                         <div className="w-8 h-8 rounded-full bg-blue-600 text-white flex items-center justify-center mr-2 text-sm">
-                          {inquiry.recipientName.charAt(0).toUpperCase()}
+                          {(inquiry.recipientName || '?').charAt(0).toUpperCase()}
                         </div>
                       )}
                       <div>
-                        <div className="font-medium text-gray-900 text-sm">{inquiry.recipientName}</div>
-                        <div className="text-xs text-gray-500">{inquiry.recipientEmail}</div>
+                        <div className="font-medium text-gray-900 text-sm">{inquiry.recipientName || '-'}</div>
+                        <div className="text-xs text-gray-500">{inquiry.recipientEmail || '-'}</div>
                       </div>
                     </div>
                   </td>
                   <td className="px-4 py-4">
                     <span className={`px-2 py-1 text-xs font-medium rounded-full ${getTypeBadgeColor(inquiry.type)}`}>
-                      {inquiry.type.replace('_', ' ')}
+                      {(inquiry.type || '').replace('_', ' ')}
                     </span>
                   </td>
                   <td className="px-4 py-4">

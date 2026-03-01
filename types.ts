@@ -266,6 +266,15 @@ export interface Agency {
         maxPrice: number;
         averagePrice: number;
     };
+    subscription?: {
+        status: 'active' | 'trial' | 'expired' | 'canceled';
+        startDate?: string;
+        expiresAt?: string;
+        amount?: number;
+        currency?: string;
+        autoRenew?: boolean;
+        listingsLimit?: number;
+    };
 }
 
 export interface PropertyImage {

@@ -82,7 +82,7 @@ export function useProducts() {
     queryKey: adminKeys.products(),
     queryFn: async () => {
       const response = await getProducts();
-      return response.products;
+      return response.products ?? [];
     },
     staleTime: 0, // Always consider stale - ensures immediate refetch after mutations
     gcTime: 5 * 60 * 1000, // Keep in cache for 5 minutes (garbage collection time)
@@ -388,7 +388,7 @@ export function usePromotionPlans() {
     queryKey: adminKeys.promotionPlans(),
     queryFn: async () => {
       const response = await getPromotionPlans();
-      return response.plans;
+      return response.plans ?? [];
     },
     staleTime: 0, // Always consider stale for real-time updates
     gcTime: 5 * 60 * 1000, // Keep in cache for 5 minutes

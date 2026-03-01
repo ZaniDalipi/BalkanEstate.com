@@ -1,10 +1,18 @@
-import React, { lazy, Suspense } from 'react';
+import React, { lazy, Suspense, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { XMarkIcon, BuildingOfficeIcon } from '@/constants';
 import { Agency } from '@/types';
 import { AgencyEditForm } from './useAgencyManager';
+import { apiRequest } from '@/src/shared/api';
 
 const MapLocationPicker = lazy(() => import('@/src/features/seller/components/MapLocationPicker'));
+
+const subscriptionStatusStyles: Record<string, string> = {
+  active: 'bg-green-100 text-green-800',
+  trial: 'bg-blue-100 text-blue-800',
+  expired: 'bg-red-100 text-red-800',
+  canceled: 'bg-gray-100 text-gray-800',
+};
 
 interface AgencyManagerDetailProps {
   // View modal
@@ -18,6 +26,10 @@ interface AgencyManagerDetailProps {
   editForm: AgencyEditForm;
   setEditForm: (form: AgencyEditForm) => void;
   handleUpdateAgency: (e: React.FormEvent) => void;
+  // Subscription actions
+  handleActivateSubscription: (agencyId: string, agencyName: string) => void;
+  handleDeactivateSubscription: (agencyId: string, agencyName: string) => void;
+  subscriptionLoading: string | null;
   formatDate: (dateString: string) => string;
 }
 
@@ -31,6 +43,9 @@ const AgencyManagerDetail: React.FC<AgencyManagerDetailProps> = ({
   editForm,
   setEditForm,
   handleUpdateAgency,
+  handleActivateSubscription,
+  handleDeactivateSubscription,
+  subscriptionLoading,
   formatDate,
 }) => {
   const { t } = useTranslation(['admin', 'common']);
@@ -129,6 +144,70 @@ const AgencyManagerDetail: React.FC<AgencyManagerDetailProps> = ({
                   </div>
                 </div>
               )}
+
+              {/* Subscription */}
+              <div className="border-t pt-4">
+                <h5 className="font-semibold text-gray-900 mb-3">{t('admin:agencies.subscription', 'Subscription')}</h5>
+                <div className="bg-gray-50 p-4 rounded-lg space-y-3">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <span className={`inline-flex px-3 py-1 text-sm font-semibold rounded-full ${subscriptionStatusStyles[viewingAgency.subscription?.status || 'expired'] || 'bg-gray-100 text-gray-800'}`}>
+                        {t(`admin:agencies.status.${viewingAgency.subscription?.status || 'expired'}`, viewingAgency.subscription?.status || 'expired')}
+                      </span>
+                      {viewingAgency.subscription?.autoRenew && (
+                        <span className="text-xs text-gray-500">{t('admin:agencies.autoRenew', 'Auto-renew')}</span>
+                      )}
+                    </div>
+                    <div className="flex gap-2">
+                      {viewingAgency.subscription?.status === 'active' || viewingAgency.subscription?.status === 'trial' ? (
+                        <button
+                          onClick={() => handleDeactivateSubscription(viewingAgency._id, viewingAgency.name)}
+                          disabled={subscriptionLoading === viewingAgency._id}
+                          className="px-3 py-1.5 text-sm font-medium text-red-700 bg-red-100 rounded-lg hover:bg-red-200 disabled:opacity-50"
+                        >
+                          {t('admin:agencies.deactivateSubscription', 'Deactivate')}
+                        </button>
+                      ) : (
+                        <button
+                          onClick={() => handleActivateSubscription(viewingAgency._id, viewingAgency.name)}
+                          disabled={subscriptionLoading === viewingAgency._id}
+                          className="px-3 py-1.5 text-sm font-medium text-green-700 bg-green-100 rounded-lg hover:bg-green-200 disabled:opacity-50"
+                        >
+                          {t('admin:agencies.activateSubscription', 'Activate')}
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-2 gap-4 text-sm">
+                    <div>
+                      <span className="text-gray-500">{t('admin:agencies.startDate', 'Start Date')}:</span>
+                      <span className="ml-2 text-gray-900">
+                        {viewingAgency.subscription?.startDate ? formatDate(viewingAgency.subscription.startDate) : '-'}
+                      </span>
+                    </div>
+                    <div>
+                      <span className="text-gray-500">{t('admin:agencies.expiresAt', 'Expires At')}:</span>
+                      <span className="ml-2 text-gray-900">
+                        {viewingAgency.subscription?.expiresAt ? formatDate(viewingAgency.subscription.expiresAt) : '-'}
+                      </span>
+                    </div>
+                    <div>
+                      <span className="text-gray-500">{t('admin:agencies.amount', 'Amount')}:</span>
+                      <span className="ml-2 text-gray-900">
+                        {viewingAgency.subscription?.amount ? `${viewingAgency.subscription.currency || 'EUR'} ${viewingAgency.subscription.amount}` : '-'}
+                      </span>
+                    </div>
+                    <div>
+                      <span className="text-gray-500">{t('admin:agencies.autoRenew', 'Auto Renew')}:</span>
+                      <span className="ml-2 text-gray-900">
+                        {viewingAgency.subscription?.autoRenew ? t('admin:userDetail.yes', 'Yes') : t('admin:userDetail.no', 'No')}
+                      </span>
+                    </div>
+                  </div>
+                  {/* Listing Limit Override */}
+                  <AgencyListingLimitOverride agency={viewingAgency} />
+                </div>
+              </div>
 
               {/* Specialties & Certifications */}
               {(viewingAgency.specialties && viewingAgency.specialties.length > 0) ||
@@ -546,5 +625,74 @@ const AgencyManagerDetail: React.FC<AgencyManagerDetailProps> = ({
     </>
   );
 };
+
+// ============================================================================
+// Agency Listing Limit Override (inline component)
+// ============================================================================
+
+function AgencyListingLimitOverride({ agency }: { agency: Agency }) {
+  const { t } = useTranslation(['admin']);
+  const currentLimit = (agency.subscription as any)?.listingsLimit ?? 0;
+  const [inputLimit, setInputLimit] = useState(String(currentLimit));
+  const [saving, setSaving] = useState(false);
+  const [saved, setSaved] = useState(false);
+  const [err, setErr] = useState('');
+  const [result, setResult] = useState('');
+
+  const handleSave = async () => {
+    const val = Number(inputLimit);
+    if (isNaN(val) || val < 0) {
+      setErr(t('admin:userDetail.invalidNumber', 'Invalid number'));
+      return;
+    }
+    setSaving(true);
+    setErr('');
+    setResult('');
+    try {
+      const res = await apiRequest(`/admin/agencies/${agency._id}/listing-limit`, {
+        method: 'PATCH',
+        body: { listingsLimit: val, reason: 'Admin manual override' },
+        requiresAuth: true,
+      });
+      setSaved(true);
+      setResult(res.message || '');
+      setTimeout(() => { setSaved(false); setResult(''); }, 4000);
+    } catch (e: any) {
+      setErr(e.message || 'Error saving');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  return (
+    <div className="border-t border-gray-200 pt-3 mt-3">
+      <label className="text-xs font-semibold text-gray-600 block mb-1">
+        {t('admin:agencies.listingLimitOverride', 'Listing Limit Override')}
+        <span className="font-normal text-gray-400 ml-1">
+          ({t('admin:agencies.listingLimitDesc', 'currently {{current}} — applies to owner + all agents', { current: currentLimit })})
+        </span>
+      </label>
+      <div className="flex items-center gap-2">
+        <input
+          type="number"
+          min={0}
+          value={inputLimit}
+          onChange={e => { setInputLimit(e.target.value); setSaved(false); }}
+          className="w-24 px-3 py-1.5 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+        />
+        <button
+          onClick={handleSave}
+          disabled={saving || String(currentLimit) === inputLimit}
+          className="px-4 py-1.5 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-700 disabled:opacity-40 disabled:cursor-not-allowed font-medium transition-colors"
+        >
+          {saving ? t('admin:userDetail.saving', 'Saving...') : saved ? t('admin:userDetail.saved', 'Saved!') : t('admin:userDetail.apply', 'Apply')}
+        </button>
+        <span className="text-xs text-gray-400">{t('admin:userDetail.listingsPerMonth', 'listings / month')}</span>
+      </div>
+      {err && <p className="text-xs text-red-500 mt-1">{err}</p>}
+      {result && <p className="text-xs text-green-600 mt-1">{result}</p>}
+    </div>
+  );
+}
 
 export default AgencyManagerDetail;
