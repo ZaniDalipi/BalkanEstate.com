@@ -5,6 +5,7 @@ import Agent from '../models/Agent';
 import Property from '../models/Property';
 import Inquiry from '../models/Inquiry';
 import { apiLogger } from '../utils/logger';
+import { resolveId } from '../utils/idObfuscation';
 
 const CONTACT_EMAIL = process.env.CONTACT_EMAIL || 'contact@balkanestateai.com';
 const VALID_SUBJECTS = ['general', 'buying', 'selling', 'agency', 'support', 'partnership'];
@@ -19,15 +20,18 @@ export const sendPropertyInquiry = async (
   res: Response
 ): Promise<void> => {
   try {
-    const { propertyId, message, buyerName, buyerEmail, buyerPhone } = req.body;
+    const { propertyId: rawPropertyId, message, buyerName, buyerEmail, buyerPhone } = req.body;
 
     // Validate required fields
-    if (!propertyId || !message || !buyerName || !buyerEmail) {
+    if (!rawPropertyId || !message || !buyerName || !buyerEmail) {
       res.status(400).json({
         message: 'Property ID, message, name, and email are required',
       });
       return;
     }
+
+    // Resolve obfuscated or raw ID
+    const propertyId = resolveId(rawPropertyId) || rawPropertyId;
 
     // Validate email format
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -122,15 +126,18 @@ export const sendAgentGeneralInquiry = async (
   res: Response
 ): Promise<void> => {
   try {
-    const { agentId, message, buyerName, buyerEmail, buyerPhone } = req.body;
+    const { agentId: rawAgentId, message, buyerName, buyerEmail, buyerPhone } = req.body;
 
     // Validate required fields
-    if (!agentId || !message || !buyerName || !buyerEmail) {
+    if (!rawAgentId || !message || !buyerName || !buyerEmail) {
       res.status(400).json({
         message: 'Agent ID, message, name, and email are required',
       });
       return;
     }
+
+    // Resolve obfuscated or raw ID
+    const agentId = resolveId(rawAgentId) || rawAgentId;
 
     // Validate email format
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;

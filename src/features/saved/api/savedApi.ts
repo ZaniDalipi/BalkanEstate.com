@@ -76,6 +76,7 @@ export const getAgencyFavorites = async (): Promise<any[]> => {
   return response.favorites
     .filter((fav) => fav.agencyId)
     .map((fav) => ({
+      id: fav.agencyId.id || fav.agencyId._id,
       _id: fav.agencyId.id || fav.agencyId._id,
       name: fav.agencyId.name,
       slug: fav.agencyId.slug,

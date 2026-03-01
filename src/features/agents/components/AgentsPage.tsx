@@ -781,7 +781,7 @@ const AgentsPage: React.FC = () => {
               <div className="flex flex-wrap gap-3 sm:gap-4">
                 {agencies.slice(0, 8).map((agency) => (
                   <AgencyBadge
-                    key={agency._id}
+                    key={agency.id || agency._id}
                     agencyName={agency.name}
                     agencyLogo={agency.logo}
                     type={agency.type as any || 'standard'}
@@ -793,11 +793,12 @@ const AgentsPage: React.FC = () => {
                     asLink={false}
                     onClick={async () => {
                       try {
-                        const data = await apiRequest<any>(`/agencies/${agency._id}`);
+                        const agencyId = agency.id || agency._id;
+                        const data = await apiRequest<any>(`/agencies/${agencyId}`);
                         if (data) {
                           dispatch({ type: 'SET_SELECTED_AGENCY', payload: data.agency });
                           dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'agencyDetail' });
-                          const urlSlug = data.agency.slug || data.agency._id;
+                          const urlSlug = data.agency.slug || data.agency.id || data.agency._id;
                           window.history.pushState({}, '', getLocalizedPath(`/agencies/${urlSlug}`));
                         }
                       } catch (error) {

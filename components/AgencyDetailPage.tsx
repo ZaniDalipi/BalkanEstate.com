@@ -13,10 +13,12 @@ import InvitationCodeModal from './InvitationCodeModal';
 import FeaturedSubscriptionCard from './shared/FeaturedSubscriptionCard';
 import FeaturedSubscriptionDialog from './shared/FeaturedSubscriptionDialog';
 import DefaultAvatar from './shared/DefaultAvatar';
+import UserAvatar from './shared/UserAvatar';
 import { formatPrice } from '../utils/currency';
 import { createJoinRequest, removeAgentFromAgency, addAgencyAdmin, removeAgencyAdmin, verifyInvitationCode, leaveAgency } from '../src/features/agencies/api';
 import { Agency } from '../types';
 import { socketService } from '../services/socketService';
+import { tokenService } from '../src/shared/api/tokenService';
 import { SEO, Breadcrumbs, generateAgencyBreadcrumbs } from '../src/components/seo';
 import { useTrackView } from '../src/features/view-stats/hooks';
 import { useConfirmation } from '../src/shared/hooks/useConfirmation';
@@ -298,7 +300,7 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
       const agencyId = agencyData._id || agencyData.id;
       if (!agencyId) return;
       try {
-        const token = localStorage.getItem('balkan_estate_token');
+        const token = tokenService.getAccessToken();
         if (!token) return;
         const response = await fetch(`${API_URL}/agencies/${agencyId}/coupons`, {
           credentials: 'include',
@@ -365,7 +367,7 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
       if (document.visibilityState === 'visible' && agencyData.promotionCoupons) {
         const agencyId = agencyData._id || agencyData.id;
         if (!agencyId) return;
-        const token = localStorage.getItem('balkan_estate_token');
+        const token = tokenService.getAccessToken();
         if (!token) return;
         fetch(`${API_URL}/agencies/${agencyId}/coupons`, {
           credentials: 'include',
@@ -469,7 +471,7 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
     try {
       // Fetch fresh agency data from the backend to get updated agents list and properties
       // Include auth token so backend can identify current user and auto-add owner as member
-      const token = localStorage.getItem('balkan_estate_token');
+      const token = tokenService.getAccessToken();
       const headers: Record<string, string> = {
         'Content-Type': 'application/json',
       };
@@ -594,7 +596,7 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
 
       if (isAgentCoupon) {
         // Redeem agent coupon for Pro subscription
-        const token = localStorage.getItem('balkan_estate_token')?.trim();
+        const token = tokenService.getAccessToken()?.trim();
         if (!token) {
           throw new Error('You are not logged in. Please log in and try again.');
         }
@@ -931,7 +933,7 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
     setIsSavingAgency(true);
 
     try {
-      const token = localStorage.getItem('balkan_estate_token');
+      const token = tokenService.getAccessToken();
 
       await _ensureCsrf();
       const response = await fetch(`${API_URL}/agencies/${agencyData._id}`, {
@@ -1042,7 +1044,7 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
         method: 'POST',
         credentials: 'include',
         headers: {
-          'Authorization': `Bearer ${localStorage.getItem('balkan_estate_token')}`,
+          'Authorization': `Bearer ${tokenService.getAccessToken()}`,
           ..._csrfHeaders(),
         },
         body: formData,
@@ -1105,7 +1107,7 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
         method: 'POST',
         credentials: 'include',
         headers: {
-          'Authorization': `Bearer ${localStorage.getItem('balkan_estate_token')}`,
+          'Authorization': `Bearer ${tokenService.getAccessToken()}`,
           ..._csrfHeaders(),
         },
         body: formData,
@@ -1231,7 +1233,7 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
         credentials: 'include',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('balkan_estate_token')}`,
+          'Authorization': `Bearer ${tokenService.getAccessToken()}`,
           ..._csrfHeaders(),
         },
         body: JSON.stringify({
@@ -1277,7 +1279,7 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
         credentials: 'include',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('balkan_estate_token')}`,
+          'Authorization': `Bearer ${tokenService.getAccessToken()}`,
           ..._csrfHeaders(),
         },
         body: JSON.stringify(body),
@@ -1714,11 +1716,7 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
                     aria-label={t('nav:myAccount')}
                   >
                     <div className="w-6 h-6 rounded-full overflow-hidden flex-shrink-0">
-                      {currentUser.avatarUrl ? (
-                        <img src={currentUser.avatarUrl} alt="" className="w-full h-full object-cover" aria-hidden="true" />
-                      ) : (
-                        <DefaultAvatar gender={currentUser.gender} seed={currentUser.id || currentUser.name} avatarOptions={currentUser.avatarOptions} />
-                      )}
+                      <UserAvatar src={currentUser.avatarUrl} gender={currentUser.gender} seed={currentUser.id || currentUser.name} avatarOptions={currentUser.avatarOptions} />
                     </div>
                     <span className="hidden lg:inline">{t('nav:myAccount')}</span>
                   </button>
@@ -2584,7 +2582,7 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
                       <button
                         onClick={async () => {
                           try {
-                            const token = localStorage.getItem('balkan_estate_token');
+                            const token = tokenService.getAccessToken();
                             await _ensureCsrf();
                             const response = await fetch(`${API_URL}/agencies/${agencyData._id || agencyData.id}`, {
                               method: 'PUT',
@@ -2768,15 +2766,7 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
                         {/* Agent Photo with Rank */}
                         <div className="relative flex-shrink-0">
                           <div className="w-16 h-16 rounded-xl overflow-hidden border-2 border-white shadow-md group-hover:shadow-lg transition-shadow">
-                            {agent.avatarUrl ? (
-                              <img
-                                src={agent.avatarUrl}
-                                alt={agent.name}
-                                className="w-full h-full object-cover"
-                              />
-                            ) : (
-                              <DefaultAvatar gender={agent.gender} seed={agent.agentId || agent._id || agent.name} avatarOptions={agent.avatarOptions} show3d />
-                            )}
+                            <UserAvatar src={agent.avatarUrl} alt={agent.name} gender={agent.gender} seed={agent.agentId || agent._id || agent.name} avatarOptions={agent.avatarOptions} className="w-full h-full object-cover" />
                           </div>
                           {/* Rank badge on avatar */}
                           <div className={`absolute -top-2 -left-2 px-2 py-0.5 bg-gradient-to-r ${rank.color} text-white text-[10px] font-bold rounded-lg shadow-md flex items-center gap-1`}>

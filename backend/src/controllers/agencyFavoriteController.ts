@@ -4,6 +4,7 @@ import Agency from '../models/Agency';
 import { IUser } from '../models/User';
 import { apiLogger } from '../utils/logger';
 import { getObjectIdParam } from '../utils/validateParams';
+import { resolveId } from '../utils/idObfuscation';
 
 // @desc    Get user's favourite agencies
 // @route   GET /api/agency-favorites
@@ -48,12 +49,15 @@ export const toggleAgencyFavorite = async (
       return;
     }
 
-    const { agencyId } = req.body;
+    const rawAgencyId = req.body.agencyId;
 
-    if (!agencyId) {
+    if (!rawAgencyId) {
       res.status(400).json({ message: 'Agency ID is required' });
       return;
     }
+
+    // Resolve obfuscated or raw ID
+    const agencyId = resolveId(rawAgencyId) || rawAgencyId;
 
     const agency = await Agency.findById(agencyId);
     if (!agency) {

@@ -52,7 +52,7 @@ export const usePromotions = (): UsePromotionsReturn => {
       const promoMap: Record<string, any> = {};
       if (promotionsData?.promotions) {
         promotionsData.promotions.forEach((promo: any) => {
-          const propId = promo.propertyId?._id || promo.propertyId;
+          const propId = promo.propertyId?.id || promo.propertyId?._id || promo.propertyId;
           if (propId) {
             promoMap[propId] = promo;
           }

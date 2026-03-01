@@ -7,6 +7,7 @@ import PaymentWindow from './PaymentWindow';
 import { replacePlaceholders, ProductValues } from '../../src/shared/utils/featurePlaceholders';
 import { API_URL } from '../../src/shared/api/config';
 import { csrfHeaders, ensureCsrfToken } from '../../src/shared/api/httpClient';
+import { tokenService } from '../../src/shared/api/tokenService';
 
 interface SubscriptionManagementProps {
   userId: string;
@@ -313,7 +314,7 @@ const SubscriptionManagement: React.FC<SubscriptionManagementProps> = ({ userId 
   // Fetch subscription data from backend
   const fetchSubscription = useCallback(async () => {
     try {
-      const token = localStorage.getItem('balkan_estate_token');
+      const token = tokenService.getAccessToken();
       if (!token) {
         setLoading(false);
         return;
@@ -440,7 +441,7 @@ const SubscriptionManagement: React.FC<SubscriptionManagementProps> = ({ userId 
 
       setLoadingAgencyData(true);
       try {
-        const token = localStorage.getItem('balkan_estate_token');
+        const token = tokenService.getAccessToken();
         if (!token) return;
 
         // Fetch agency details first to get invitation code
@@ -504,7 +505,7 @@ const SubscriptionManagement: React.FC<SubscriptionManagementProps> = ({ userId 
 
     setGeneratingCoupons(true);
     try {
-      const token = localStorage.getItem('balkan_estate_token');
+      const token = tokenService.getAccessToken();
       await ensureCsrfToken();
       const response = await fetch(`${API_URL}/agencies/${agencyTeamData.agencyId}/coupons/generate`, {
         method: 'POST',
@@ -537,7 +538,7 @@ const SubscriptionManagement: React.FC<SubscriptionManagementProps> = ({ userId 
     setSendingPromotionEmail(true);
     setPromotionEmailSent(false);
     try {
-      const token = localStorage.getItem('balkan_estate_token');
+      const token = tokenService.getAccessToken();
       await ensureCsrfToken();
       const response = await fetch(`${API_URL}/agencies/${agencyTeamData.agencyId}/coupons/send-promotion-email`, {
         method: 'POST',
@@ -770,7 +771,7 @@ const SubscriptionManagement: React.FC<SubscriptionManagementProps> = ({ userId 
     setLoading(true);
     try {
       // Call backend sync endpoint to recount properties
-      const token = localStorage.getItem('balkan_estate_token');
+      const token = tokenService.getAccessToken();
       await ensureCsrfToken();
       const syncResponse = await fetch(`${API_URL}/auth/sync-stats`, {
         method: 'POST',
@@ -831,7 +832,7 @@ const SubscriptionManagement: React.FC<SubscriptionManagementProps> = ({ userId 
       setCancelling(true);
       setActionError(null);
 
-      const token = localStorage.getItem('balkan_estate_token');
+      const token = tokenService.getAccessToken();
       await ensureCsrfToken();
       const response = await fetch(`${API_URL}/subscriptions/${subscription._id}/cancel`, {
         method: 'POST',
@@ -874,7 +875,7 @@ const SubscriptionManagement: React.FC<SubscriptionManagementProps> = ({ userId 
       setRestoring(true);
       setActionError(null);
 
-      const token = localStorage.getItem('balkan_estate_token');
+      const token = tokenService.getAccessToken();
       await ensureCsrfToken();
       const response = await fetch(`${API_URL}/subscriptions/${subscription._id}/restore`, {
         method: 'POST',
@@ -921,7 +922,7 @@ const SubscriptionManagement: React.FC<SubscriptionManagementProps> = ({ userId 
       setTogglingAutoRenew(true);
       setActionError(null);
 
-      const token = localStorage.getItem('balkan_estate_token');
+      const token = tokenService.getAccessToken();
 
       // If auto-renewing is ON, we want to turn it OFF (cancel)
       // If auto-renewing is OFF, we want to turn it ON (restore)

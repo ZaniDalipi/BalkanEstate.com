@@ -3,6 +3,7 @@ import Modal from './Modal';
 import WhackAnIconAnimation from '@/features/seller/components/WhackAnIconAnimation';
 import { API_URL } from '../../src/shared/api/config';
 import { csrfHeaders, ensureCsrfToken } from '../../src/shared/api/httpClient';
+import { tokenService } from '../../src/shared/api/tokenService';
 
 interface DiscountGameModalProps {
     isOpen: boolean;
@@ -24,7 +25,7 @@ const DiscountGameModal: React.FC<DiscountGameModalProps> = ({ isOpen, onGameCom
 
         // Generate discount code on backend
         try {
-            const token = localStorage.getItem('balkan_estate_token');
+            const token = tokenService.getAccessToken();
             if (token) {
                 // Use the highest discount as the code value
                 const maxDiscount = Math.max(discounts.proYearly, discounts.proMonthly, discounts.enterprise);

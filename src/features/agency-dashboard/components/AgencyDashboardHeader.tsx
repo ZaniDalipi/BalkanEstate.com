@@ -6,6 +6,7 @@ import {
   UsersIcon,
   EnvelopeIcon,
   ChartBarIcon,
+  ArrowLeftIcon,
 } from '@/constants';
 import type { OverviewData } from '../types';
 
@@ -14,6 +15,7 @@ interface AgencyDashboardHeaderProps {
   isLoadingOverview: boolean;
   onMenuClick: () => void;
   onBackToSite: () => void;
+  onBackToAgency?: () => void;
   userName: string;
 }
 
@@ -22,6 +24,7 @@ const AgencyDashboardHeader: React.FC<AgencyDashboardHeaderProps> = ({
   isLoadingOverview,
   onMenuClick,
   onBackToSite,
+  onBackToAgency,
   userName,
 }) => {
   const { t } = useTranslation(['agencyDashboard']);
@@ -83,6 +86,18 @@ const AgencyDashboardHeader: React.FC<AgencyDashboardHeaderProps> = ({
           </div>
 
           <div className="flex items-center gap-2">
+            {onBackToAgency && (
+              <button
+                onClick={onBackToAgency}
+                className="flex items-center gap-2 px-3 py-2 text-sm text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors"
+                aria-label="Back to agency"
+              >
+                <ArrowLeftIcon className="w-4 h-4" />
+                <span className="hidden sm:inline">
+                  {t('agencyDashboard:header.backToAgency', 'Back to Agency')}
+                </span>
+              </button>
+            )}
             <button
               onClick={onBackToSite}
               className="flex items-center gap-2 px-3 py-2 text-sm text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors"

@@ -15,6 +15,7 @@ import { csrfHeaders, ensureCsrfToken } from '../../src/shared/api/httpClient';
 import { trackEcommerce, trackEvent } from '../../src/components/marketing/Analytics';
 import { encryptSensitiveFields } from '../../src/shared/api/payloadEncryption';
 import { validatePaymentRedirectUrl } from '../../src/utils/security';
+import { tokenService } from '../../src/shared/api/tokenService';
 
 // ====== Encrypted Session Storage ======
 // AES-256-GCM encryption for payment data stored in sessionStorage.
@@ -278,7 +279,7 @@ const PaymentWindow: React.FC<PaymentWindowProps> = ({
   useEffect(() => {
     if (isOpen) {
       // Validate user is authenticated when opening payment modal
-      const token = localStorage.getItem('balkan_estate_token');
+      const token = tokenService.getAccessToken();
       if (!state.isAuthenticated || !token) {
         onError(t('payment:errors.loginRequired'));
         onClose();
@@ -344,7 +345,7 @@ const PaymentWindow: React.FC<PaymentWindowProps> = ({
       }
 
       try {
-        const token = localStorage.getItem('balkan_estate_token');
+        const token = tokenService.getAccessToken();
         // Verify payment status — use provider-specific endpoint
         const verifyUrl = provider === 'paysera'
           ? `${API_URL}/payments/paysera/verify/${sessionId}`
@@ -520,7 +521,7 @@ const PaymentWindow: React.FC<PaymentWindowProps> = ({
 
     try {
       // Get auth token from localStorage
-      const token = localStorage.getItem('balkan_estate_token');
+      const token = tokenService.getAccessToken();
 
       if (!token) {
         throw new Error(t('payment:errors.loginRequired'));

@@ -113,7 +113,7 @@ const SavedPropertiesPage: React.FC = () => {
 
   const handleAgencyClick = async (agency: any) => {
     try {
-      const response = await fetch(`${import.meta.env.VITE_API_URL || ''}/api/agencies/${agency._id}`);
+      const response = await fetch(`${import.meta.env.VITE_API_URL || ''}/api/agencies/${agency.id || agency._id}`);
       if (response.ok) {
         const data = await response.json();
         dispatch({ type: 'SET_SELECTED_AGENCY', payload: data.agency });
@@ -325,7 +325,7 @@ const SavedPropertiesPage: React.FC = () => {
 
   const renderAgencyCard = (agency: any) => (
     <div
-      key={agency._id}
+      key={agency.id || agency._id}
       onClick={() => handleAgencyClick(agency)}
       className="bg-white rounded-xl shadow-md hover:shadow-lg transition-all duration-300 cursor-pointer overflow-hidden border border-gray-100 group"
     >

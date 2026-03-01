@@ -904,6 +904,7 @@ export const getMe = async (req: Request, res: Response): Promise<void> => {
         licenseNumber: user.licenseNumber,
         licenseVerified: user.licenseVerified,
         isSubscribed: user.isSubscribed,
+        isEnterpriseTier: user.isEnterpriseTier || false,
         subscriptionPlan: user.subscriptionPlan,
         subscriptionExpiresAt: user.subscriptionExpiresAt,
         // SECURITY: Only expose sanitized subscription info, not raw internal objects
@@ -1135,6 +1136,18 @@ export const switchRole = async (req: Request, res: Response): Promise<void> => 
 
     if (!user) {
       res.status(404).json({ message: 'User not found' });
+      return;
+    }
+
+    // Prevent agency members from switching profile to private_seller
+    // They can still POST listings as private_seller, but their profile role stays as agent
+    if (role === 'private_seller' && user.agencyId) {
+      res.status(403).json({
+        message: 'You are currently part of an agency. To switch your profile to Private Seller, you must leave your agency first. You can still post individual listings as a private seller without switching.',
+        code: 'AGENCY_MEMBER_CANNOT_SWITCH',
+        agencyId: String(user.agencyId),
+        agencyName: user.agencyName,
+      });
       return;
     }
 
@@ -2297,6 +2310,17 @@ export const setActiveRole = async (req: Request, res: Response): Promise<void> 
       res.status(403).json({
         message: 'You do not have access to this role',
         availableRoles: user.availableRoles
+      });
+      return;
+    }
+
+    // Prevent agency members from switching active role to private_seller
+    if (activeRole === 'private_seller' && user.agencyId) {
+      res.status(403).json({
+        message: 'You are currently part of an agency. To switch your profile to Private Seller, you must leave your agency first. You can still post individual listings as a private seller without switching.',
+        code: 'AGENCY_MEMBER_CANNOT_SWITCH',
+        agencyId: String(user.agencyId),
+        agencyName: user.agencyName,
       });
       return;
     }

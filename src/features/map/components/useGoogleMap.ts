@@ -676,16 +676,19 @@ export function useGoogleMap(props: GoogleMapComponentProps) {
   }, [map, mapStyle, isLoaded, getMapTypeId]);
 
   // Apply map styles + street view control when mapStyle changes
+  // Note: When mapId is set, styles are controlled via Cloud Console — skip client-side styles
   useEffect(() => {
     if (!map || !isLoaded) return;
     const isSatellite = mapStyle === 'satellite' || mapStyle === 'hybrid';
     const isStreet = mapStyle === 'street';
 
-    map.setOptions({
-      styles: isSatellite ? [] : getMapStyles(),
-      // Enable StreetView pegman in Street mode so users can see neighborhoods
+    const opts: google.maps.MapOptions = {
       streetViewControl: isStreet,
-    });
+    };
+    if (!GOOGLE_MAPS_MAP_ID) {
+      opts.styles = isSatellite ? [] : getMapStyles();
+    }
+    map.setOptions(opts);
   }, [map, mapStyle, isLoaded, getMapStyles, showLandmarks]);
 
   // Handle 3D buildings toggle - tilt the map for 3D view

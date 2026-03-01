@@ -25,6 +25,7 @@ import { buildLocalizedPath } from '../../src/utils/languageRouting';
 import { API_URL } from '../../src/shared/api/config';
 import { csrfHeaders, ensureCsrfToken } from '../../src/shared/api/httpClient';
 import { apiLogger } from '../../src/shared/utils/logger';
+import { tokenService } from '../../src/shared/api/tokenService';
 
 // Common languages spoken in the Balkan region
 const BALKAN_LANGUAGES = [
@@ -164,8 +165,10 @@ const ROLE_HINT_DEFAULTS: Record<UserRole, { title: string; description: string;
 const RoleSelector: React.FC<{
     selectedRole: UserRole;
     originalRole: UserRole;
+    agencyId?: string;
+    agencyName?: string;
     onChange: (role: UserRole) => void;
-}> = ({ selectedRole, originalRole, onChange }) => {
+}> = ({ selectedRole, originalRole, agencyId, agencyName, onChange }) => {
     const { t } = useTranslation(['account']);
     const [pendingRole, setPendingRole] = useState<UserRole | null>(null);
 
@@ -174,6 +177,8 @@ const RoleSelector: React.FC<{
         { id: UserRole.PRIVATE_SELLER, labelKey: 'roles.privateSeller', icon: '🏠' },
         { id: UserRole.AGENT, labelKey: 'roles.agent', icon: '🏢' },
     ];
+
+    const isAgencyMember = !!agencyId;
 
     const isDisabled = (role: UserRole) =>
         originalRole === UserRole.AGENT && role === UserRole.BUYER;
@@ -257,8 +262,34 @@ const RoleSelector: React.FC<{
                 })}
             </div>
 
-            {/* Role Hint Card */}
-            {hintRole && hint && hintConfig && (
+            {/* Agency member warning when trying to switch to Private Seller */}
+            {hintRole === UserRole.PRIVATE_SELLER && isAgencyMember && (
+                <div className="rounded-2xl border p-4 backdrop-blur-sm transition-all duration-200 animate-in fade-in slide-in-from-top-2 bg-amber-50/80 border-amber-200/60 text-amber-800">
+                    <div className="flex items-start gap-3">
+                        <span className="text-2xl flex-shrink-0 mt-0.5">&#x26A0;&#xFE0F;</span>
+                        <div className="flex-1 min-w-0">
+                            <p className="font-bold text-sm leading-tight">
+                                {t('roles.agencyMemberWarning.title', 'You are part of an agency')}
+                            </p>
+                            <p className="text-xs mt-0.5 opacity-80">
+                                {t('roles.agencyMemberWarning.description', 'To switch your profile to Private Seller, you must leave {{agencyName}} first. Note: You can still post individual listings as a private seller without switching your profile role.', { agencyName: agencyName || 'your agency' })}
+                            </p>
+                        </div>
+                    </div>
+                    <div className="flex gap-2 mt-3">
+                        <button
+                            type="button"
+                            onClick={handleCancel}
+                            className="flex-1 px-3 py-2 text-xs font-semibold rounded-xl border border-current/20 bg-white/40 hover:bg-white/60 transition-colors"
+                        >
+                            {t('roles.hints.cancel', 'Cancel')}
+                        </button>
+                    </div>
+                </div>
+            )}
+
+            {/* Role Hint Card (normal, non-agency-blocked) */}
+            {hintRole && hint && hintConfig && !(hintRole === UserRole.PRIVATE_SELLER && isAgencyMember) && (
                 <div className={`rounded-2xl border p-4 backdrop-blur-sm transition-all duration-200 animate-in fade-in slide-in-from-top-2 ${colorMap[hintConfig.color]}`}>
                     <div className="flex items-start gap-3">
                         <span className="text-2xl flex-shrink-0 mt-0.5">{hintConfig.icon}</span>
@@ -622,7 +653,7 @@ const DeleteAgencySection: React.FC = () => {
                 method: 'DELETE',
                 credentials: 'include',
                 headers: {
-                    'Authorization': `Bearer ${localStorage.getItem('balkan_estate_token')}`,
+                    'Authorization': `Bearer ${tokenService.getAccessToken()}`,
                     ...csrfHeaders(),
                 },
             });
@@ -706,7 +737,7 @@ const DeleteAccountSection: React.FC = () => {
                 credentials: 'include',
                 headers: {
                     'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${localStorage.getItem('balkan_estate_token')}`,
+                    'Authorization': `Bearer ${tokenService.getAccessToken()}`,
                     ...csrfHeaders(),
                 },
                 body: JSON.stringify(body),
@@ -914,7 +945,7 @@ const ProfileSettings: React.FC<{ user: User }> = ({ user }) => {
     // Fetch latest agent data from backend
     const fetchLatestAgentData = async (userId: string) => {
         try {
-            const token = localStorage.getItem('balkan_estate_token');
+            const token = tokenService.getAccessToken();
             if (!token) return;
 
             const response = await fetch(`${API_URL}/agents/user/${userId}`, {
@@ -1270,7 +1301,7 @@ const ProfileSettings: React.FC<{ user: User }> = ({ user }) => {
                 credentials: 'include',
                 headers: {
                     'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${localStorage.getItem('balkan_estate_token')}`,
+                    'Authorization': `Bearer ${tokenService.getAccessToken()}`,
                     ...csrfHeaders(),
                 },
                 body: JSON.stringify({ invitationCode }),
@@ -1337,7 +1368,7 @@ const ProfileSettings: React.FC<{ user: User }> = ({ user }) => {
                 method: 'POST',
                 credentials: 'include',
                 headers: {
-                    'Authorization': `Bearer ${localStorage.getItem('balkan_estate_token')}`,
+                    'Authorization': `Bearer ${tokenService.getAccessToken()}`,
                     ...csrfHeaders(),
                 },
                 body: formData,
@@ -1396,7 +1427,7 @@ const ProfileSettings: React.FC<{ user: User }> = ({ user }) => {
                 method: 'POST',
                 credentials: 'include',
                 headers: {
-                    'Authorization': `Bearer ${localStorage.getItem('balkan_estate_token')}`,
+                    'Authorization': `Bearer ${tokenService.getAccessToken()}`,
                     'Content-Type': 'application/json',
                     ...csrfHeaders(),
                 },
@@ -1433,7 +1464,7 @@ const ProfileSettings: React.FC<{ user: User }> = ({ user }) => {
                 method: 'POST',
                 credentials: 'include',
                 headers: {
-                    'Authorization': `Bearer ${localStorage.getItem('balkan_estate_token')}`,
+                    'Authorization': `Bearer ${tokenService.getAccessToken()}`,
                     ...csrfHeaders(),
                 },
                 body: formDataUpload,
@@ -1465,7 +1496,7 @@ const ProfileSettings: React.FC<{ user: User }> = ({ user }) => {
                 {!['admin', 'super_admin'].includes(user.role) && (
                 <fieldset>
                     <legend className="block text-sm font-medium text-neutral-700 mb-2">{t('roles.yourRole')}</legend>
-                    <RoleSelector selectedRole={formData.role} originalRole={user.role} onChange={handleRoleChange} />
+                    <RoleSelector selectedRole={formData.role} originalRole={user.role} agencyId={user.agencyId} agencyName={user.agencyName} onChange={handleRoleChange} />
                     {error && (
                         <div className="mt-3 p-3 bg-red-50/60 backdrop-blur-sm border border-red-200/50 rounded-xl text-sm text-red-600">
                             {error}
@@ -1593,7 +1624,7 @@ const ProfileSettings: React.FC<{ user: User }> = ({ user }) => {
                               const response = await fetch(`${API_URL}/auth/me`, {
                                  credentials: 'include',
                                  headers: {
-                                    'Authorization': `Bearer ${localStorage.getItem('balkan_estate_token')}`,
+                                    'Authorization': `Bearer ${tokenService.getAccessToken()}`,
                                  },
                               });
                               if (response.ok) {

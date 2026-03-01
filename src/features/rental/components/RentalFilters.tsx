@@ -10,10 +10,12 @@ interface RentalFiltersProps {
     onFilterChange: (key: keyof Filters, value: any) => void;
     onSearch: () => void;
     onReset: () => void;
+    onSaveSearch?: () => void;
+    isSaving?: boolean;
     compact?: boolean;
 }
 
-const RentalFilters: React.FC<RentalFiltersProps> = ({ filters, onFilterChange, onSearch, onReset, compact }) => {
+const RentalFilters: React.FC<RentalFiltersProps> = ({ filters, onFilterChange, onSearch, onReset, onSaveSearch, isSaving, compact }) => {
     const { t } = useTranslation(['rental', 'seller', 'common']);
     const currencySymbol = getCurrencySymbol(filters.country !== 'any' ? filters.country : '');
 
@@ -124,6 +126,15 @@ const RentalFilters: React.FC<RentalFiltersProps> = ({ filters, onFilterChange, 
                         <button onClick={onReset} className="text-[11px] text-gray-400 hover:text-gray-600 py-1.5 transition-colors whitespace-nowrap">
                             {t('rental:filters.reset')}
                         </button>
+                        {onSaveSearch && (
+                            <button
+                                onClick={onSaveSearch}
+                                disabled={isSaving}
+                                className="text-[11px] text-primary hover:text-primary-dark py-1.5 px-2 border border-primary/30 rounded-lg transition-colors whitespace-nowrap disabled:opacity-50"
+                            >
+                                {isSaving ? t('search:saving', 'Saving...') : t('search:saveSearch', 'Save Search')}
+                            </button>
+                        )}
                         <Button variant="cool" size="sm" onClick={onSearch} className="text-xs font-semibold whitespace-nowrap rounded-xl">
                             {t('rental:filters.search')}
                         </Button>
@@ -240,6 +251,15 @@ const RentalFilters: React.FC<RentalFiltersProps> = ({ filters, onFilterChange, 
                 <Button variant="cool" onClick={onSearch} className="flex-1 text-sm font-semibold rounded-xl">
                     {t('rental:filters.search')}
                 </Button>
+                {onSaveSearch && (
+                    <button
+                        onClick={onSaveSearch}
+                        disabled={isSaving}
+                        className="flex-1 py-2.5 px-4 border border-primary text-primary rounded-xl text-sm font-semibold bg-white hover:bg-primary/5 transition-colors disabled:opacity-50"
+                    >
+                        {isSaving ? t('search:saving', 'Saving...') : t('search:saveSearch', 'Save Search')}
+                    </button>
+                )}
                 <button onClick={onReset} className="text-sm text-gray-400 hover:text-gray-600 py-2 px-3 transition-colors">
                     {t('rental:filters.reset')}
                 </button>

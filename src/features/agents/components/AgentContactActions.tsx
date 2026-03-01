@@ -16,6 +16,7 @@ import {
 } from '@/constants';
 import StarRating from '@/components/shared/StarRating';
 import DefaultAvatar from '@/components/shared/DefaultAvatar';
+import UserAvatar from '@/components/shared/UserAvatar';
 import AgentInquiryModal from '@/src/features/inquiries/components/AgentInquiryModal';
 import { AppraisalFormData, ConsultationFormData, MarketInsights } from './useAgentProfile';
 
@@ -179,17 +180,7 @@ const AgentContactActions: React.FC<AgentContactActionsProps> = ({
                                 style={{ animationDelay: `${index * 80}ms` }}
                             >
                                 <div className="w-12 h-12 rounded-full overflow-hidden border-2 border-white shadow-sm transition-shadow duration-300 group-hover:shadow-md group-hover:border-blue-200">
-                                    {similarAgent.avatarUrl ? (
-                                        <img
-                                            src={similarAgent.avatarUrl}
-                                            alt={similarAgent.name}
-                                            loading="lazy"
-                                            decoding="async"
-                                            className="w-full h-full object-cover"
-                                        />
-                                    ) : (
-                                        <DefaultAvatar gender={similarAgent.gender} seed={similarAgent.agentId || similarAgent.id || similarAgent.name} avatarOptions={similarAgent.avatarOptions} show3d />
-                                    )}
+                                    <UserAvatar src={similarAgent.avatarUrl} alt={similarAgent.name} gender={similarAgent.gender} seed={similarAgent.agentId || similarAgent.id || similarAgent.name} avatarOptions={similarAgent.avatarOptions} className="w-full h-full object-cover" />
                                 </div>
                                 <div className="flex-1 min-w-0">
                                     <p className="font-semibold text-gray-900 truncate">{similarAgent.name}</p>

@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 // Page transitions use lightweight CSS instead of framer-motion to reduce initial bundle
 import { HelmetProvider, Helmet } from 'react-helmet-async';
 import { AppProvider, useAppContext } from './context/AppContext';
+import { tokenService } from './src/shared/api/tokenService';
 import { AlertProvider } from './context/AlertContext';
 import { ConfirmationProvider } from './src/shared/hooks/useConfirmation';
 import { NotificationProvider } from './src/shared/hooks/useNotification';
@@ -204,11 +205,11 @@ const AppContent: React.FC<{ onToggleSidebar: () => void }> = ({ onToggleSidebar
           })
           .then(data => {
             if (data.property) {
-              // Transform backend property to frontend format (backend uses _id, frontend uses id)
+              // Transform backend property to frontend format (backend now uses obfuscated id)
               const property = {
                 ...data.property,
-                id: data.property._id || data.property.id,
-                sellerId: data.property.sellerId?._id || data.property.sellerId,
+                id: data.property.id || data.property._id,
+                sellerId: data.property.sellerId?.id || data.property.sellerId?._id || data.property.sellerId,
               };
               dispatch({ type: 'SET_PROPERTY_TO_EDIT', payload: property });
               dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'create-listing' });
@@ -432,7 +433,7 @@ const AppContent: React.FC<{ onToggleSidebar: () => void }> = ({ onToggleSidebar
           const agencyIdentifier = state.selectedAgencyId;
 
           // Include auth token so backend can identify current user and auto-add owner as member
-          const token = localStorage.getItem('balkan_estate_token');
+          const token = tokenService.getAccessToken();
           const headers: Record<string, string> = {
             'Content-Type': 'application/json',
           };

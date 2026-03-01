@@ -5,6 +5,7 @@ import { ChartBarIcon, HomeIcon, EyeIcon, HeartIcon, EnvelopeIcon, CalendarIcon,
 import { formatPrice } from '../../utils/currency';
 import { API_URL } from '../../src/shared/api/config';
 import { csrfHeaders, ensureCsrfToken } from '../../src/shared/api/httpClient';
+import { tokenService } from '../../src/shared/api/tokenService';
 
 interface ProfileStatisticsProps {
   user: User & { subscriptionPlan?: string };
@@ -213,7 +214,7 @@ const ProfileStatistics: React.FC<ProfileStatisticsProps> = ({ user }) => {
 
   // Get auth token helper
   const getAuthToken = useCallback(() => {
-    return localStorage.getItem('balkan_estate_token');
+    return tokenService.getAccessToken();
   }, []);
 
   // Fetch subscription data

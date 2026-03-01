@@ -5,6 +5,7 @@ import { createFeaturedSubscription } from '../../services/apiService';
 import { SparklesIcon, CheckCircleIcon, XMarkIcon } from '../../constants';
 import { API_URL } from '../../src/shared/api/config';
 import { csrfHeaders, ensureCsrfToken } from '../../src/shared/api/httpClient';
+import { tokenService } from '../../src/shared/api/tokenService';
 
 interface FeaturedProduct {
   productId: string;
@@ -122,7 +123,7 @@ const FeaturedSubscriptionDialog: React.FC<FeaturedSubscriptionDialogProps> = ({
         credentials: 'include',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('balkan_estate_token')}`,
+          'Authorization': `Bearer ${tokenService.getAccessToken()}`,
           ...csrfHeaders(),
         },
         body: JSON.stringify({

@@ -593,18 +593,9 @@ export const createProperty = async (
       return;
     }
 
-    // **CRITICAL: Agency agents can ONLY post as agents**
-    // They work under an agency and all their listings go to the agency portfolio
-    if (user.subscription?.tier === 'agency_agent' && createdAsRole === 'private_seller') {
-      res.status(403).json({
-        message: 'As an agency agent, you can only post listings as an agent. Your listings appear on both your profile and your agency\'s page.',
-        code: 'AGENCY_AGENT_ONLY',
-        tier: 'agency_agent',
-        allowedRole: 'agent',
-        requestedRole: createdAsRole,
-      });
-      return;
-    }
+    // Agency agents can post as either agent or private_seller.
+    // When posting as private_seller, the listing won't appear on the agency page.
+    // Their profile role remains "agent" - only the listing's createdAsRole changes.
 
     // Check listing limits based on subscription tier
     const limit = user.subscription.listingsLimit || FREE_TIER_LIMITS.LISTINGS;

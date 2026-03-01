@@ -8,6 +8,7 @@ import { useNotification } from '../../src/shared/hooks/useNotification';
 import { TicketIcon, CheckCircleIcon, ExclamationTriangleIcon } from '../../constants';
 import { API_URL } from '../../src/shared/api/config';
 import { csrfHeaders, ensureCsrfToken } from '../../src/shared/api/httpClient';
+import { tokenService } from '../../src/shared/api/tokenService';
 
 interface Agency {
   _id: string;
@@ -98,7 +99,7 @@ const AgencyManagementSection: React.FC<AgencyManagementSectionProps> = ({ curre
       const response = await fetch(`${API_URL}/agency-join-requests/my-requests`, {
         credentials: 'include',
         headers: {
-          'Authorization': `Bearer ${localStorage.getItem('balkan_estate_token')}`,
+          'Authorization': `Bearer ${tokenService.getAccessToken()}`,
         },
       });
       if (response.ok) {
@@ -241,7 +242,7 @@ const AgencyManagementSection: React.FC<AgencyManagementSectionProps> = ({ curre
     try {
       setLoading(true);
 
-      const token = localStorage.getItem('balkan_estate_token')?.trim();
+      const token = tokenService.getAccessToken()?.trim();
       if (!token) {
         setError('You are not logged in. Please log in and try again.');
         return;

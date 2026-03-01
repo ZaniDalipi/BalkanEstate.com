@@ -4,7 +4,7 @@ import { Agency, Property } from '../types';
 import { getAgency } from '../src/features/agencies/api';
 import PropertyCard from '@/features/property-details/components/PropertyCard';
 import { BuildingOfficeIcon, PhoneIcon, EnvelopeIcon, GlobeAltIcon } from '../constants';
-import DefaultAvatar from './shared/DefaultAvatar';
+import UserAvatar from './shared/UserAvatar';
 
 interface AgencyPageProps {
   agencyId: string;
@@ -135,11 +135,7 @@ const AgencyPage: React.FC<AgencyPageProps> = ({ agencyId }) => {
                 <div key={agent._id} className="bg-white rounded-lg shadow p-6 hover:shadow-lg transition-shadow">
                   <div className="flex items-center gap-4">
                     <div className="w-16 h-16 rounded-full overflow-hidden">
-                      {agent.avatarUrl ? (
-                        <img src={agent.avatarUrl} alt={`${agent.name}'s avatar`} className="w-full h-full object-cover" />
-                      ) : (
-                        <DefaultAvatar gender={agent.gender} seed={agent.agentId || agent._id || agent.name} avatarOptions={agent.avatarOptions} show3d />
-                      )}
+                      <UserAvatar src={agent.avatarUrl} alt={`${agent.name}'s avatar`} gender={agent.gender} seed={agent.agentId || agent._id || agent.name} avatarOptions={agent.avatarOptions} className="w-full h-full object-cover" />
                     </div>
                     <div>
                       <h3 className="font-bold text-neutral-800">{agent.name}</h3>

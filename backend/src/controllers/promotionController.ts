@@ -19,6 +19,7 @@ import {
 import { paymentProviderFactory } from '../services/paymentProviderFactory';
 import { promotionLogger } from '../utils/logger';
 import { getObjectIdParam } from '../utils/validateParams';
+import { resolveId } from '../utils/idObfuscation';
 
 /**
  * @desc    Get available promotion tiers and pricing
@@ -892,12 +893,15 @@ export const confirmPromotionPayment = async (
   res: Response
 ): Promise<void> => {
   try {
-    const { sessionId, propertyId } = req.body;
+    const { sessionId, propertyId: rawPropertyId } = req.body;
 
-    if (!propertyId && !sessionId) {
+    if (!rawPropertyId && !sessionId) {
       res.status(400).json({ message: 'Property ID or Session ID is required' });
       return;
     }
+
+    // Resolve obfuscated or raw ID
+    const propertyId = rawPropertyId ? (resolveId(rawPropertyId) || rawPropertyId) : undefined;
 
     // Check if promotion was already created by webhook
     const searchCriteria: any = {
@@ -1113,12 +1117,16 @@ export const confirmExtensionPayment = async (
   res: Response
 ): Promise<void> => {
   try {
-    const { promotionId, propertyId } = req.body;
+    const { promotionId: rawPromotionId, propertyId: rawPropId } = req.body;
 
-    if (!promotionId && !propertyId) {
+    if (!rawPromotionId && !rawPropId) {
       res.status(400).json({ message: 'Promotion ID or Property ID is required' });
       return;
     }
+
+    // Resolve obfuscated or raw IDs
+    const promotionId = rawPromotionId ? (resolveId(rawPromotionId) || rawPromotionId) : undefined;
+    const propertyId = rawPropId ? (resolveId(rawPropId) || rawPropId) : undefined;
 
     // Find the promotion
     let promotion;
