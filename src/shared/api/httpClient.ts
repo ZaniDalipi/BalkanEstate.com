@@ -187,7 +187,7 @@ export const apiRequest = async <T>(
         if (retryCount === 0) {
           return apiRequest<T>(endpoint, options, 1);
         }
-        return rawData as T;
+        throw new Error('Failed to decrypt server response');
       }
     }
 
