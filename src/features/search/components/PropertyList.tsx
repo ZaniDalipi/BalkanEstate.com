@@ -921,7 +921,7 @@ const PropertyList = memo<PropertyListProps>((props) => {
                                     <div className="grid grid-cols-1 xl:grid-cols-2 gap-4 xl:gap-6 property-grid-transition">
                                         {properties.slice(0, visibleCount).map((prop, index) => (
                                             <AnimatedPropertyCard
-                                                key={prop.id}
+                                                key={prop.id || prop._id || index}
                                                 property={prop}
                                                 index={index}
                                                 onHover={onPropertyHover}

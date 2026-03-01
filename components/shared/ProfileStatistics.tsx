@@ -223,6 +223,7 @@ const ProfileStatistics: React.FC<ProfileStatisticsProps> = ({ user }) => {
       if (!token) return;
 
       const response = await fetch(`${API_URL}/subscriptions/current`, {
+        credentials: 'include',
         headers: {
           'Authorization': `Bearer ${token}`,
         },
@@ -385,6 +386,7 @@ const ProfileStatistics: React.FC<ProfileStatisticsProps> = ({ user }) => {
 
       if (!statsData) {
         const response = await fetch(`${API_URL}/auth/my-stats`, {
+          credentials: 'include',
           headers: {
             'Authorization': `Bearer ${token}`,
           },
@@ -463,6 +465,7 @@ const ProfileStatistics: React.FC<ProfileStatisticsProps> = ({ user }) => {
       setLoadingHistory(true);
       const token = getAuthToken();
       const response = await fetch(`${API_URL}/sales-history/my-sales?limit=50`, {
+        credentials: 'include',
         headers: {
           'Authorization': `Bearer ${token}`,
         },

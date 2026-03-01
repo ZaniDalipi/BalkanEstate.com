@@ -877,7 +877,7 @@ const ProfileSettings: React.FC<{ user: User }> = ({ user }) => {
     const handleAgencyClick = async () => {
         if (formData?.agencyId) {
             try {
-                const response = await fetch(`${API_URL}/agencies/${formData.agencyId}`);
+                const response = await fetch(`${API_URL}/agencies/${formData.agencyId}`, { credentials: 'include' });
                 if (response.ok) {
                     const data = await response.json();
                     dispatch({ type: 'SET_SELECTED_AGENCY', payload: data.agency });
@@ -918,6 +918,7 @@ const ProfileSettings: React.FC<{ user: User }> = ({ user }) => {
             if (!token) return;
 
             const response = await fetch(`${API_URL}/agents/user/${userId}`, {
+                credentials: 'include',
                 headers: {
                     'Authorization': `Bearer ${token}`,
                 }
@@ -1590,6 +1591,7 @@ const ProfileSettings: React.FC<{ user: User }> = ({ user }) => {
                            // Fetch updated user data instead of reloading the page
                            try {
                               const response = await fetch(`${API_URL}/auth/me`, {
+                                 credentials: 'include',
                                  headers: {
                                     'Authorization': `Bearer ${localStorage.getItem('balkan_estate_token')}`,
                                  },
@@ -1858,7 +1860,7 @@ const MyAccountPage: React.FC = () => {
         if (state.currentUser?.agencyId) {
             try {
                 // Fetch the agency details
-                const response = await fetch(`${API_URL}/agencies/${state.currentUser.agencyId}`);
+                const response = await fetch(`${API_URL}/agencies/${state.currentUser.agencyId}`, { credentials: 'include' });
                 if (response.ok) {
                     const data = await response.json();
                     dispatch({ type: 'SET_SELECTED_AGENCY', payload: data.agency });

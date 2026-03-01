@@ -234,9 +234,7 @@ if (process.env.NODE_ENV !== 'production') {
   setupSwagger(app);
 }
 
-// Health check route
-// Served at both /health (for infrastructure probes / Docker healthchecks)
-// and /api/health (for the frontend CSRF bootstrap, which prefixes API_URL)
+// Health check route (non-API, for Docker/infrastructure probes)
 const healthHandler = (_req: Request, res: Response) => {
   res.status(200).json({
     status: 'ok',
@@ -244,7 +242,6 @@ const healthHandler = (_req: Request, res: Response) => {
   });
 };
 app.get('/health', healthHandler);
-app.get('/api/health', healthHandler);
 
 // SEO routes (sitemap.xml, robots.txt) - at root level, not under /api
 app.use('/', sitemapRoutes);
@@ -259,8 +256,16 @@ app.use('/api', generalRateLimiter);
 // CSRF protection: set token cookie on every response, validate on mutations
 // This prevents cross-origin forged requests (e.g., malicious sites tricking
 // users into making API calls). Combined with JWT auth, provides defense-in-depth.
+// IMPORTANT: csrfCookie must run BEFORE any /api route handlers (including
+// /api/health) so that the frontend CSRF bootstrap via GET /api/health actually
+// receives the Set-Cookie header.
 app.use('/api', csrfCookie);
 app.use('/api', csrfValidation);
+
+// /api/health — for the frontend CSRF bootstrap (ensureCsrfToken).
+// Registered AFTER csrfCookie so the response includes Set-Cookie: __csrf=...
+// GET is a safe method, so csrfValidation skips it.
+app.get('/api/health', healthHandler);
 
 // Apply XSS sanitization to all API routes
 app.use('/api', xssSanitizer);
