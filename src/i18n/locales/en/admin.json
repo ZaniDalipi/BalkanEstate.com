@@ -237,7 +237,14 @@
     "noResults": "No results found",
     "confirmDelete": "Confirm Delete",
     "yes": "Yes",
-    "no": "No"
+    "no": "No",
+    "featured": "Featured",
+    "active": "Active",
+    "inactive": "Inactive",
+    "visible": "Visible",
+    "hidden": "Hidden",
+    "days": "days",
+    "preview": "Preview"
   },
   "errors": {
     "notAuthenticated": "Not authenticated",
@@ -642,17 +649,6 @@
     "highlighted": "Highlighted",
     "visible": "Visible",
     "colorPreset": "Color Preset"
-  },
-  "common": {
-    "featured": "Featured",
-    "active": "Active",
-    "inactive": "Inactive",
-    "visible": "Visible",
-    "hidden": "Hidden",
-    "days": "days",
-    "edit": "Edit",
-    "delete": "Delete",
-    "preview": "Preview"
   },
   "header": {
     "notifications": "Notifications",
