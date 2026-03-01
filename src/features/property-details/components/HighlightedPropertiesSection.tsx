@@ -87,9 +87,9 @@ const HighlightedPropertiesSection: React.FC<HighlightedPropertiesSectionProps> 
 
       {/* Highlighted Properties Grid */}
       <div className="space-y-4">
-        {highlightedProperties.map((property) => (
+        {highlightedProperties.map((property, index) => (
           <HighlightedPropertyCard
-            key={property.id || (property as any)._id}
+            key={property.id || (property as any)._id || `highlighted-${index}`}
             property={property}
             showToast={showToast}
           />
