@@ -8,6 +8,7 @@ import { Property } from '../../types';
 import { useSellerProducts, Product } from '@/src/shared/query';
 import { API_URL } from '../../src/shared/api/config';
 import { csrfHeaders, ensureCsrfToken } from '../../src/shared/api/httpClient';
+import { tokenService } from '../../src/shared/api/tokenService';
 
 interface PromotionOfferModalProps {
     isOpen: boolean;
@@ -75,7 +76,7 @@ const PromotionOfferModal: React.FC<PromotionOfferModalProps> = ({
         // Promote the property via API
         if (property) {
             try {
-                const token = localStorage.getItem('balkan_estate_token');
+                const token = tokenService.getAccessToken();
 
                 await ensureCsrfToken();
                 const response = await fetch(`${API_URL}/promotions`, {

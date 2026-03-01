@@ -904,6 +904,7 @@ export const getMe = async (req: Request, res: Response): Promise<void> => {
         licenseNumber: user.licenseNumber,
         licenseVerified: user.licenseVerified,
         isSubscribed: user.isSubscribed,
+        isEnterpriseTier: user.isEnterpriseTier || false,
         subscriptionPlan: user.subscriptionPlan,
         subscriptionExpiresAt: user.subscriptionExpiresAt,
         // SECURITY: Only expose sanitized subscription info, not raw internal objects

@@ -28,6 +28,10 @@ const AgencyDashboardLayout: React.FC<AgencyDashboardLayoutProps> = ({
     dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'search' });
   };
 
+  const handleBackToAgency = () => {
+    dispatch({ type: 'SET_SELECTED_AGENCY', payload: agencyId });
+  };
+
   return (
     <div className="min-h-screen bg-gray-100">
       {sidebarMobileOpen && (
@@ -61,6 +65,7 @@ const AgencyDashboardLayout: React.FC<AgencyDashboardLayoutProps> = ({
           isLoadingOverview={isLoadingOverview}
           onMenuClick={() => setSidebarMobileOpen(true)}
           onBackToSite={handleBackToSite}
+          onBackToAgency={handleBackToAgency}
           userName={state.currentUser?.name || 'Agency Owner'}
         />
 

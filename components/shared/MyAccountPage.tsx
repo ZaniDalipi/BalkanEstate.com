@@ -25,6 +25,7 @@ import { buildLocalizedPath } from '../../src/utils/languageRouting';
 import { API_URL } from '../../src/shared/api/config';
 import { csrfHeaders, ensureCsrfToken } from '../../src/shared/api/httpClient';
 import { apiLogger } from '../../src/shared/utils/logger';
+import { tokenService } from '../../src/shared/api/tokenService';
 
 // Common languages spoken in the Balkan region
 const BALKAN_LANGUAGES = [
@@ -622,7 +623,7 @@ const DeleteAgencySection: React.FC = () => {
                 method: 'DELETE',
                 credentials: 'include',
                 headers: {
-                    'Authorization': `Bearer ${localStorage.getItem('balkan_estate_token')}`,
+                    'Authorization': `Bearer ${tokenService.getAccessToken()}`,
                     ...csrfHeaders(),
                 },
             });
@@ -706,7 +707,7 @@ const DeleteAccountSection: React.FC = () => {
                 credentials: 'include',
                 headers: {
                     'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${localStorage.getItem('balkan_estate_token')}`,
+                    'Authorization': `Bearer ${tokenService.getAccessToken()}`,
                     ...csrfHeaders(),
                 },
                 body: JSON.stringify(body),
@@ -914,7 +915,7 @@ const ProfileSettings: React.FC<{ user: User }> = ({ user }) => {
     // Fetch latest agent data from backend
     const fetchLatestAgentData = async (userId: string) => {
         try {
-            const token = localStorage.getItem('balkan_estate_token');
+            const token = tokenService.getAccessToken();
             if (!token) return;
 
             const response = await fetch(`${API_URL}/agents/user/${userId}`, {
@@ -1270,7 +1271,7 @@ const ProfileSettings: React.FC<{ user: User }> = ({ user }) => {
                 credentials: 'include',
                 headers: {
                     'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${localStorage.getItem('balkan_estate_token')}`,
+                    'Authorization': `Bearer ${tokenService.getAccessToken()}`,
                     ...csrfHeaders(),
                 },
                 body: JSON.stringify({ invitationCode }),
@@ -1337,7 +1338,7 @@ const ProfileSettings: React.FC<{ user: User }> = ({ user }) => {
                 method: 'POST',
                 credentials: 'include',
                 headers: {
-                    'Authorization': `Bearer ${localStorage.getItem('balkan_estate_token')}`,
+                    'Authorization': `Bearer ${tokenService.getAccessToken()}`,
                     ...csrfHeaders(),
                 },
                 body: formData,
@@ -1396,7 +1397,7 @@ const ProfileSettings: React.FC<{ user: User }> = ({ user }) => {
                 method: 'POST',
                 credentials: 'include',
                 headers: {
-                    'Authorization': `Bearer ${localStorage.getItem('balkan_estate_token')}`,
+                    'Authorization': `Bearer ${tokenService.getAccessToken()}`,
                     'Content-Type': 'application/json',
                     ...csrfHeaders(),
                 },
@@ -1433,7 +1434,7 @@ const ProfileSettings: React.FC<{ user: User }> = ({ user }) => {
                 method: 'POST',
                 credentials: 'include',
                 headers: {
-                    'Authorization': `Bearer ${localStorage.getItem('balkan_estate_token')}`,
+                    'Authorization': `Bearer ${tokenService.getAccessToken()}`,
                     ...csrfHeaders(),
                 },
                 body: formDataUpload,
@@ -1593,7 +1594,7 @@ const ProfileSettings: React.FC<{ user: User }> = ({ user }) => {
                               const response = await fetch(`${API_URL}/auth/me`, {
                                  credentials: 'include',
                                  headers: {
-                                    'Authorization': `Bearer ${localStorage.getItem('balkan_estate_token')}`,
+                                    'Authorization': `Bearer ${tokenService.getAccessToken()}`,
                                  },
                               });
                               if (response.ok) {

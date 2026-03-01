@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 // Page transitions use lightweight CSS instead of framer-motion to reduce initial bundle
 import { HelmetProvider, Helmet } from 'react-helmet-async';
 import { AppProvider, useAppContext } from './context/AppContext';
+import { tokenService } from './src/shared/api/tokenService';
 import { AlertProvider } from './context/AlertContext';
 import { ConfirmationProvider } from './src/shared/hooks/useConfirmation';
 import { NotificationProvider } from './src/shared/hooks/useNotification';
@@ -432,7 +433,7 @@ const AppContent: React.FC<{ onToggleSidebar: () => void }> = ({ onToggleSidebar
           const agencyIdentifier = state.selectedAgencyId;
 
           // Include auth token so backend can identify current user and auto-add owner as member
-          const token = localStorage.getItem('balkan_estate_token');
+          const token = tokenService.getAccessToken();
           const headers: Record<string, string> = {
             'Content-Type': 'application/json',
           };

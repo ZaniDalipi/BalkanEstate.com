@@ -856,6 +856,14 @@ export const updateAgency = async (
       (agency as any).coverPosition = { x: cx, y: cy };
     }
 
+    // Handle invitation code regeneration
+    if (req.body.generateInvitationCode) {
+      const { generateSecureRandomString } = await import('../utils/secureRandom');
+      const randomCode = generateSecureRandomString(6);
+      const nameCode = agency.name.replace(/[^a-zA-Z0-9]/g, '').substring(0, 6).toUpperCase();
+      agency.invitationCode = `AGY-${nameCode}-${randomCode}`;
+    }
+
     // Handle encrypted fields - force mark as modified so the encryption
     // pre-save hook re-encrypts them (after post-findOne decryption,
     // isModified() may return false for unchanged values)

@@ -18,6 +18,7 @@ import { formatPrice } from '../utils/currency';
 import { createJoinRequest, removeAgentFromAgency, addAgencyAdmin, removeAgencyAdmin, verifyInvitationCode, leaveAgency } from '../src/features/agencies/api';
 import { Agency } from '../types';
 import { socketService } from '../services/socketService';
+import { tokenService } from '../src/shared/api/tokenService';
 import { SEO, Breadcrumbs, generateAgencyBreadcrumbs } from '../src/components/seo';
 import { useTrackView } from '../src/features/view-stats/hooks';
 import { useConfirmation } from '../src/shared/hooks/useConfirmation';
@@ -299,7 +300,7 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
       const agencyId = agencyData._id || agencyData.id;
       if (!agencyId) return;
       try {
-        const token = localStorage.getItem('balkan_estate_token');
+        const token = tokenService.getAccessToken();
         if (!token) return;
         const response = await fetch(`${API_URL}/agencies/${agencyId}/coupons`, {
           credentials: 'include',
@@ -366,7 +367,7 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
       if (document.visibilityState === 'visible' && agencyData.promotionCoupons) {
         const agencyId = agencyData._id || agencyData.id;
         if (!agencyId) return;
-        const token = localStorage.getItem('balkan_estate_token');
+        const token = tokenService.getAccessToken();
         if (!token) return;
         fetch(`${API_URL}/agencies/${agencyId}/coupons`, {
           credentials: 'include',
@@ -470,7 +471,7 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
     try {
       // Fetch fresh agency data from the backend to get updated agents list and properties
       // Include auth token so backend can identify current user and auto-add owner as member
-      const token = localStorage.getItem('balkan_estate_token');
+      const token = tokenService.getAccessToken();
       const headers: Record<string, string> = {
         'Content-Type': 'application/json',
       };
@@ -595,7 +596,7 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
 
       if (isAgentCoupon) {
         // Redeem agent coupon for Pro subscription
-        const token = localStorage.getItem('balkan_estate_token')?.trim();
+        const token = tokenService.getAccessToken()?.trim();
         if (!token) {
           throw new Error('You are not logged in. Please log in and try again.');
         }
@@ -932,7 +933,7 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
     setIsSavingAgency(true);
 
     try {
-      const token = localStorage.getItem('balkan_estate_token');
+      const token = tokenService.getAccessToken();
 
       await _ensureCsrf();
       const response = await fetch(`${API_URL}/agencies/${agencyData._id}`, {
@@ -1043,7 +1044,7 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
         method: 'POST',
         credentials: 'include',
         headers: {
-          'Authorization': `Bearer ${localStorage.getItem('balkan_estate_token')}`,
+          'Authorization': `Bearer ${tokenService.getAccessToken()}`,
           ..._csrfHeaders(),
         },
         body: formData,
@@ -1106,7 +1107,7 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
         method: 'POST',
         credentials: 'include',
         headers: {
-          'Authorization': `Bearer ${localStorage.getItem('balkan_estate_token')}`,
+          'Authorization': `Bearer ${tokenService.getAccessToken()}`,
           ..._csrfHeaders(),
         },
         body: formData,
@@ -1232,7 +1233,7 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
         credentials: 'include',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('balkan_estate_token')}`,
+          'Authorization': `Bearer ${tokenService.getAccessToken()}`,
           ..._csrfHeaders(),
         },
         body: JSON.stringify({
@@ -1278,7 +1279,7 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
         credentials: 'include',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('balkan_estate_token')}`,
+          'Authorization': `Bearer ${tokenService.getAccessToken()}`,
           ..._csrfHeaders(),
         },
         body: JSON.stringify(body),
@@ -2581,7 +2582,7 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
                       <button
                         onClick={async () => {
                           try {
-                            const token = localStorage.getItem('balkan_estate_token');
+                            const token = tokenService.getAccessToken();
                             await _ensureCsrf();
                             const response = await fetch(`${API_URL}/agencies/${agencyData._id || agencyData.id}`, {
                               method: 'PUT',

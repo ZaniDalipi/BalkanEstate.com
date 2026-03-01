@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { useAppContext } from '../../context/AppContext';
 import { API_URL } from '../../src/shared/api/config';
 import { csrfHeaders, ensureCsrfToken } from '../../src/shared/api/httpClient';
+import { tokenService } from '../../src/shared/api/tokenService';
 
 type ViewingStatus = 'pending' | 'confirmed' | 'cancelled' | 'completed';
 type StatusFilter = ViewingStatus | 'all';
@@ -61,7 +62,7 @@ const ViewingRequestsTab: React.FC = () => {
   const [declineViewingId, setDeclineViewingId] = useState<string | null>(null);
   const [declineReason, setDeclineReason] = useState('');
 
-  const token = localStorage.getItem('balkan_estate_token');
+  const token = tokenService.getAccessToken();
 
   const fetchViewings = useCallback(async () => {
     setIsLoading(true);

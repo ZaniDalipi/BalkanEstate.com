@@ -34,6 +34,7 @@ import { SEO } from '../src/components/seo';
 import AgenciesHeroBanner from './shared/AgenciesHeroBanner';
 import { FloatingSphere, GlossyPill, AbstractBlob, RealEstateOrb, Decorative3DStyles } from './shared/Decorative3D';
 import { API_URL } from '../src/shared/api/config';
+import { tokenService } from '../src/shared/api/tokenService';
 
 // Gradient presets for agency banners (same as AgencyDetailPage)
 const GRADIENT_PRESETS = [
@@ -107,7 +108,7 @@ const AgenciesListPage: React.FC = () => {
         const response = await fetch(`${API_URL}/agencies/${currentUser.agencyId}`, {
           credentials: 'include',
           headers: {
-            'Authorization': `Bearer ${localStorage.getItem('balkan_estate_token')}`,
+            'Authorization': `Bearer ${tokenService.getAccessToken()}`,
           },
         });
         if (response.ok) {
