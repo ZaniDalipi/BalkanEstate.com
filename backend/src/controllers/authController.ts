@@ -22,10 +22,9 @@ import { validateLicenseNumber } from '../utils/licenseValidation';
 /**
  * Build a sanitized user response object for public-facing auth endpoints (login/signup).
  * Only includes fields the frontend needs; strips internal/sensitive details.
- * All MongoDB ObjectIds are obfuscated so raw IDs never reach the client.
  */
 const buildSafeUserResponse = (user: IUser) => ({
-  id: encodeId(String(user._id)),
+  id: String(user._id),
   email: user.email,
   name: user.name,
   phone: user.phone,
@@ -42,7 +41,7 @@ const buildSafeUserResponse = (user: IUser) => ({
   activeListingsLimit: user.getActiveListingsLimit(),
   // Only include agent/agency fields if user is an agent
   ...(user.role === 'agent' ? {
-    agencyId: user.agencyId ? encodeId(String(user.agencyId)) : undefined,
+    agencyId: user.agencyId ? String(user.agencyId) : undefined,
     agencyName: user.agencyName,
     agentId: user.agentId,
     licenseNumber: user.licenseNumber,
