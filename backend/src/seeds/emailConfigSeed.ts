@@ -1566,20 +1566,22 @@ export const defaultEmailConfigs = [
         Here's your current promotion coupons summary for <strong>{{agencyName}}</strong>.
         Use these coupons to highlight, feature, or boost your agency's property listings!
       </p>
-      <div style="display: flex; gap: 12px; margin-bottom: 24px;">
-        <div style="flex: 1; background: #fffbeb; border: 1px solid #fde68a; border-radius: 12px; padding: 16px; text-align: center;">
-          <p style="color: #d97706; font-size: 28px; font-weight: 700; margin: 0;">{{monthlyCoupons}}</p>
-          <p style="color: #92400e; font-size: 12px; margin: 4px 0 0 0; text-transform: uppercase; font-weight: 600;">Monthly</p>
-        </div>
-        <div style="flex: 1; background: #ecfdf5; border: 1px solid #a7f3d0; border-radius: 12px; padding: 16px; text-align: center;">
-          <p style="color: #059669; font-size: 28px; font-weight: 700; margin: 0;">{{availableCoupons}}</p>
-          <p style="color: #065f46; font-size: 12px; margin: 4px 0 0 0; text-transform: uppercase; font-weight: 600;">Available</p>
-        </div>
-        <div style="flex: 1; background: #f3f4f6; border: 1px solid #e5e7eb; border-radius: 12px; padding: 16px; text-align: center;">
-          <p style="color: #374151; font-size: 28px; font-weight: 700; margin: 0;">{{usedCoupons}}</p>
-          <p style="color: #6b7280; font-size: 12px; margin: 4px 0 0 0; text-transform: uppercase; font-weight: 600;">Used</p>
-        </div>
-      </div>
+      <table style="width: 100%; border-collapse: separate; border-spacing: 8px; margin-bottom: 24px;">
+        <tr>
+          <td style="width: 33%; background: #fffbeb; border: 1px solid #fde68a; border-radius: 12px; padding: 16px; text-align: center;">
+            <p style="color: #d97706; font-size: 28px; font-weight: 700; margin: 0;">{{monthlyCoupons}}</p>
+            <p style="color: #92400e; font-size: 12px; margin: 4px 0 0 0; text-transform: uppercase; font-weight: 600;">Monthly</p>
+          </td>
+          <td style="width: 33%; background: #ecfdf5; border: 1px solid #a7f3d0; border-radius: 12px; padding: 16px; text-align: center;">
+            <p style="color: #059669; font-size: 28px; font-weight: 700; margin: 0;">{{availableCoupons}}</p>
+            <p style="color: #065f46; font-size: 12px; margin: 4px 0 0 0; text-transform: uppercase; font-weight: 600;">Available</p>
+          </td>
+          <td style="width: 33%; background: #f3f4f6; border: 1px solid #e5e7eb; border-radius: 12px; padding: 16px; text-align: center;">
+            <p style="color: #374151; font-size: 28px; font-weight: 700; margin: 0;">{{usedCoupons}}</p>
+            <p style="color: #6b7280; font-size: 12px; margin: 4px 0 0 0; text-transform: uppercase; font-weight: 600;">Used</p>
+          </td>
+        </tr>
+      </table>
       {{couponCodesList}}
     `,
     ctaEnabled: true,
