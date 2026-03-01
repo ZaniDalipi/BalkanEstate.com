@@ -105,6 +105,10 @@ interface AgentEditModalProps {
     onDeleteAchievement: (id: string) => Promise<void>;
     agentCredentials: Credential[];
     onCredentialsChange: (credentials: Credential[]) => void;
+    licenseStatus?: 'none' | 'pending' | 'verified' | 'rejected';
+    licenseNumber?: string;
+    licenseCountry?: string;
+    onLicenseSubmitted?: () => void;
 }
 
 const AgentEditModal: React.FC<AgentEditModalProps> = ({
@@ -122,6 +126,10 @@ const AgentEditModal: React.FC<AgentEditModalProps> = ({
     onDeleteAchievement,
     agentCredentials,
     onCredentialsChange,
+    licenseStatus,
+    licenseNumber,
+    licenseCountry,
+    onLicenseSubmitted,
 }) => {
     const { t } = useTranslation(['agents']);
 
@@ -328,6 +336,10 @@ const AgentEditModal: React.FC<AgentEditModalProps> = ({
                             isOwner={true}
                             onCredentialsChange={onCredentialsChange}
                             className=""
+                            licenseStatus={licenseStatus}
+                            licenseNumber={licenseNumber}
+                            licenseCountry={licenseCountry}
+                            onLicenseSubmitted={onLicenseSubmitted}
                         />
                     </section>
 

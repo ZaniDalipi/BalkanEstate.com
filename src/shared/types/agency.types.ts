@@ -82,6 +82,8 @@ export interface Agency {
 
 export interface Agent extends User {
   userId?: string;
+  licenseCountry?: string;
+  licenseStatus?: 'none' | 'pending' | 'verified' | 'rejected';
   totalSalesValue: number;
   propertiesSold: number;
   activeListings: number;

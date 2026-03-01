@@ -16,12 +16,18 @@ import {
   StarIcon,
 } from '@/constants';
 import { Credential, addCredential, updateCredential, deleteCredential } from '../api/credentialApi';
+import { submitLicense, getLicenseFormatHint } from '../api/licenseApi';
 
 interface CredentialsSectionProps {
   credentials: Credential[];
   isOwner: boolean;
   onCredentialsChange: (credentials: Credential[]) => void;
   className?: string;
+  /** License verification status — pass to show license banner for agents */
+  licenseStatus?: 'none' | 'pending' | 'verified' | 'rejected';
+  licenseNumber?: string;
+  licenseCountry?: string;
+  onLicenseSubmitted?: () => void;
 }
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
@@ -152,14 +158,73 @@ const validate = (
 
 // ─── Component ────────────────────────────────────────────────────────────────
 
+const BALKAN_COUNTRIES = [
+  { code: 'RS', name: 'Serbia' },
+  { code: 'HR', name: 'Croatia' },
+  { code: 'BA', name: 'Bosnia & Herzegovina' },
+  { code: 'ME', name: 'Montenegro' },
+  { code: 'MK', name: 'North Macedonia' },
+  { code: 'AL', name: 'Albania' },
+  { code: 'BG', name: 'Bulgaria' },
+  { code: 'GR', name: 'Greece' },
+  { code: 'RO', name: 'Romania' },
+  { code: 'XK', name: 'Kosovo' },
+  { code: 'SI', name: 'Slovenia' },
+];
+
 const CredentialsSection: React.FC<CredentialsSectionProps> = ({
   credentials,
   isOwner,
   onCredentialsChange,
   className = '',
+  licenseStatus,
+  licenseNumber: existingLicenseNumber,
+  licenseCountry: existingLicenseCountry,
+  onLicenseSubmitted,
 }) => {
   const { t, i18n } = useTranslation(['agents']);
   const locale = i18n.language || 'en';
+
+  // License verification state
+  const [showLicenseForm, setShowLicenseForm] = useState(false);
+  const [licenseInput, setLicenseInput] = useState('');
+  const [licenseCountryInput, setLicenseCountryInput] = useState('');
+  const [licenseFormatHint, setLicenseFormatHint] = useState('');
+  const [licenseSubmitting, setLicenseSubmitting] = useState(false);
+  const [licenseError, setLicenseError] = useState<string | null>(null);
+  const [licenseSuccess, setLicenseSuccess] = useState(false);
+
+  // Fetch format hint when country changes
+  React.useEffect(() => {
+    if (!licenseCountryInput) {
+      setLicenseFormatHint('');
+      return;
+    }
+    let cancelled = false;
+    getLicenseFormatHint(licenseCountryInput)
+      .then((res) => { if (!cancelled) setLicenseFormatHint(res.formatHint); })
+      .catch(() => { if (!cancelled) setLicenseFormatHint(''); });
+    return () => { cancelled = true; };
+  }, [licenseCountryInput]);
+
+  const handleLicenseSubmit = async () => {
+    if (!licenseInput.trim() || !licenseCountryInput) return;
+    setLicenseSubmitting(true);
+    setLicenseError(null);
+    try {
+      await submitLicense({ licenseNumber: licenseInput.trim(), country: licenseCountryInput });
+      setLicenseSuccess(true);
+      setShowLicenseForm(false);
+      onLicenseSubmitted?.();
+    } catch (err: any) {
+      const msg = err?.formatHint
+        ? `Invalid format. Expected: ${err.formatHint}`
+        : err?.message || 'Failed to submit license';
+      setLicenseError(msg);
+    } finally {
+      setLicenseSubmitting(false);
+    }
+  };
 
   // Modal state
   const [showModal, setShowModal] = useState(false);
@@ -335,6 +400,169 @@ const CredentialsSection: React.FC<CredentialsSectionProps> = ({
           </button>
         )}
       </div>
+
+      {/* License Verification Banner */}
+      {isOwner && licenseStatus !== undefined && (
+        <div className="mb-4">
+          {licenseStatus === 'verified' && (
+            <div className="flex items-center gap-3 p-4 bg-green-50 border border-green-200 rounded-xl">
+              <div className="w-10 h-10 rounded-xl bg-green-100 flex items-center justify-center flex-shrink-0">
+                <CheckCircleIcon className="w-5 h-5 text-green-600" />
+              </div>
+              <div>
+                <p className="text-sm font-bold text-green-800">
+                  {t('profilePage.credentials.license.verified', 'License Verified')}
+                </p>
+                <p className="text-xs text-green-600 mt-0.5">
+                  {existingLicenseNumber && `#${existingLicenseNumber}`}
+                  {existingLicenseCountry && ` · ${BALKAN_COUNTRIES.find(c => c.code === existingLicenseCountry)?.name || existingLicenseCountry}`}
+                </p>
+              </div>
+            </div>
+          )}
+
+          {licenseStatus === 'pending' && (
+            <div className="flex items-center gap-3 p-4 bg-amber-50 border border-amber-200 rounded-xl">
+              <div className="w-10 h-10 rounded-xl bg-amber-100 flex items-center justify-center flex-shrink-0">
+                <ClockIcon className="w-5 h-5 text-amber-600" />
+              </div>
+              <div>
+                <p className="text-sm font-bold text-amber-800">
+                  {t('profilePage.credentials.license.pending', 'License Pending Review')}
+                </p>
+                <p className="text-xs text-amber-600 mt-0.5">
+                  {t('profilePage.credentials.license.pendingDesc', 'Your license is being reviewed by an admin. You will receive the verified badge once approved.')}
+                </p>
+                {existingLicenseNumber && (
+                  <p className="text-xs text-amber-700 font-mono mt-1">#{existingLicenseNumber}</p>
+                )}
+              </div>
+            </div>
+          )}
+
+          {licenseStatus === 'rejected' && (
+            <div className="flex items-start gap-3 p-4 bg-red-50 border border-red-200 rounded-xl">
+              <div className="w-10 h-10 rounded-xl bg-red-100 flex items-center justify-center flex-shrink-0">
+                <ExclamationTriangleIcon className="w-5 h-5 text-red-600" />
+              </div>
+              <div className="flex-1">
+                <p className="text-sm font-bold text-red-800">
+                  {t('profilePage.credentials.license.rejected', 'License Rejected')}
+                </p>
+                <p className="text-xs text-red-600 mt-0.5">
+                  {t('profilePage.credentials.license.rejectedDesc', 'Your license was not approved. You can resubmit with correct details.')}
+                </p>
+                <button
+                  type="button"
+                  onClick={() => { setShowLicenseForm(true); setLicenseError(null); setLicenseSuccess(false); }}
+                  className="mt-2 text-xs font-semibold text-red-700 hover:text-red-800 underline"
+                >
+                  {t('profilePage.credentials.license.resubmit', 'Resubmit License')}
+                </button>
+              </div>
+            </div>
+          )}
+
+          {licenseStatus === 'none' && !licenseSuccess && (
+            <div className="p-4 bg-blue-50 border border-blue-200 rounded-xl">
+              <div className="flex items-start gap-3">
+                <div className="w-10 h-10 rounded-xl bg-blue-100 flex items-center justify-center flex-shrink-0">
+                  <ShieldCheckIcon className="w-5 h-5 text-blue-600" />
+                </div>
+                <div className="flex-1">
+                  <p className="text-sm font-bold text-blue-800">
+                    {t('profilePage.credentials.license.getVerified', 'Get Verified')}
+                  </p>
+                  <p className="text-xs text-blue-600 mt-0.5">
+                    {t('profilePage.credentials.license.getVerifiedDesc', 'Submit your real estate license number to get the verified badge on your profile.')}
+                  </p>
+                  {!showLicenseForm && (
+                    <button
+                      type="button"
+                      onClick={() => setShowLicenseForm(true)}
+                      className="mt-2 inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-white bg-blue-600 hover:bg-blue-700 rounded-lg transition-colors"
+                    >
+                      <ShieldCheckIcon className="w-3.5 h-3.5" />
+                      {t('profilePage.credentials.license.submitLicense', 'Submit License')}
+                    </button>
+                  )}
+                </div>
+              </div>
+
+              {/* License Submit Form */}
+              {showLicenseForm && (
+                <div className="mt-4 pt-4 border-t border-blue-200 space-y-3">
+                  <div>
+                    <label className="block text-xs font-semibold text-blue-800 mb-1">
+                      {t('profilePage.credentials.license.country', 'Country')}
+                    </label>
+                    <select
+                      value={licenseCountryInput}
+                      onChange={(e) => setLicenseCountryInput(e.target.value)}
+                      className="w-full px-3 py-2 border border-blue-200 rounded-lg text-sm bg-white focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
+                    >
+                      <option value="">{t('profilePage.credentials.license.selectCountry', 'Select country...')}</option>
+                      {BALKAN_COUNTRIES.map((c) => (
+                        <option key={c.code} value={c.code}>{c.name}</option>
+                      ))}
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-xs font-semibold text-blue-800 mb-1">
+                      {t('profilePage.credentials.license.licenseNumber', 'License Number')}
+                    </label>
+                    <input
+                      type="text"
+                      value={licenseInput}
+                      onChange={(e) => { setLicenseInput(e.target.value); setLicenseError(null); }}
+                      className="w-full px-3 py-2 border border-blue-200 rounded-lg text-sm font-mono focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
+                      placeholder={licenseFormatHint || t('profilePage.credentials.license.enterLicense', 'Enter your license number')}
+                    />
+                    {licenseFormatHint && (
+                      <p className="mt-1 text-[11px] text-blue-500">
+                        {t('profilePage.credentials.license.formatHint', 'Expected format')}: {licenseFormatHint}
+                      </p>
+                    )}
+                  </div>
+                  {licenseError && (
+                    <div className="flex items-center gap-1.5 text-xs text-red-600 font-medium">
+                      <ExclamationTriangleIcon className="w-3.5 h-3.5" />
+                      {licenseError}
+                    </div>
+                  )}
+                  <div className="flex gap-2">
+                    <button
+                      type="button"
+                      onClick={() => { setShowLicenseForm(false); setLicenseError(null); }}
+                      className="px-3 py-1.5 text-xs font-semibold text-blue-700 border border-blue-200 rounded-lg hover:bg-blue-100 transition-colors"
+                    >
+                      {t('profilePage.credentials.license.cancel', 'Cancel')}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={handleLicenseSubmit}
+                      disabled={licenseSubmitting || !licenseInput.trim() || !licenseCountryInput}
+                      className="px-3 py-1.5 text-xs font-semibold text-white bg-blue-600 hover:bg-blue-700 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1.5"
+                    >
+                      {licenseSubmitting && <div className="w-3 h-3 border-2 border-white/30 border-t-white rounded-full animate-spin" />}
+                      {t('profilePage.credentials.license.submit', 'Submit for Review')}
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+
+          {licenseSuccess && licenseStatus === 'none' && (
+            <div className="flex items-center gap-3 p-4 bg-green-50 border border-green-200 rounded-xl">
+              <CheckCircleIcon className="w-5 h-5 text-green-600 flex-shrink-0" />
+              <p className="text-sm font-medium text-green-800">
+                {t('profilePage.credentials.license.submitted', 'License submitted! It will be reviewed by an admin shortly.')}
+              </p>
+            </div>
+          )}
+        </div>
+      )}
 
       {/* Success Toast */}
       {successMessage && (

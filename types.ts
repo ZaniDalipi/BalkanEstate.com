@@ -170,6 +170,8 @@ export interface User {
 
 export interface Agent extends User {
     userId?: string; // The user ID that properties are linked to (different from agent document id)
+    licenseCountry?: string;
+    licenseStatus?: 'none' | 'pending' | 'verified' | 'rejected';
     totalSalesValue: number;
     propertiesSold: number;
     activeListings: number;

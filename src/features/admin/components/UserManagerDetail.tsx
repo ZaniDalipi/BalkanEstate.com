@@ -8,6 +8,7 @@ import {
 } from '@/constants';
 import { User, UserEditForm } from './useUserManager';
 import { apiRequest } from '@/src/shared/api';
+import { approveLicense, rejectLicense } from '../api/adminApi';
 
 interface UserManagerDetailProps {
   // Detail modal
@@ -118,9 +119,17 @@ const UserManagerDetail: React.FC<UserManagerDetailProps> = ({
                         <span className="flex items-center gap-1 px-2 py-1 text-xs font-medium rounded-full bg-purple-100 text-purple-800">
                           <ShieldCheckIcon className="w-3 h-3" /> {t('userDetail.licenseVerified')}
                         </span>
+                      ) : viewingUser.licenseStatus === 'pending' ? (
+                        <span className="flex items-center gap-1 px-2 py-1 text-xs font-medium rounded-full bg-amber-100 text-amber-800">
+                          <ShieldCheckIcon className="w-3 h-3" /> {t('userDetail.licensePending', 'License Pending')}
+                        </span>
+                      ) : viewingUser.licenseStatus === 'rejected' ? (
+                        <span className="flex items-center gap-1 px-2 py-1 text-xs font-medium rounded-full bg-red-100 text-red-800">
+                          <ShieldCheckIcon className="w-3 h-3" /> {t('userDetail.licenseRejected', 'License Rejected')}
+                        </span>
                       ) : (
-                        <span className="flex items-center gap-1 px-2 py-1 text-xs font-medium rounded-full bg-orange-100 text-orange-800">
-                          <ShieldCheckIcon className="w-3 h-3" /> {t('userDetail.licensePending')}
+                        <span className="flex items-center gap-1 px-2 py-1 text-xs font-medium rounded-full bg-gray-100 text-gray-600">
+                          <ShieldCheckIcon className="w-3 h-3" /> {t('userDetail.noLicense', 'No License')}
                         </span>
                       )}
                     </div>
@@ -130,6 +139,41 @@ const UserManagerDetail: React.FC<UserManagerDetailProps> = ({
                   <div className="mt-3">
                     <label className="text-xs text-gray-500">{t('userDetail.licenseNumber')}</label>
                     <p className="font-medium">{viewingUser.licenseNumber}</p>
+                    {viewingUser.licenseCountry && (
+                      <p className="text-xs text-gray-400 mt-0.5">{t('userDetail.licenseCountry', 'Country')}: {viewingUser.licenseCountry}</p>
+                    )}
+                  </div>
+                )}
+                {viewingUser.role === 'agent' && viewingUser.licenseStatus === 'pending' && viewingUser.licenseNumber && (
+                  <div className="mt-3 flex gap-2">
+                    <button
+                      onClick={async () => {
+                        try {
+                          await approveLicense(viewingUser._id);
+                          viewingUser.licenseVerified = true;
+                          viewingUser.licenseStatus = 'verified';
+                          setIsDetailModalOpen(false);
+                          setTimeout(() => setIsDetailModalOpen(true), 100);
+                        } catch {}
+                      }}
+                      className="px-3 py-1.5 text-xs font-medium text-white bg-green-600 hover:bg-green-700 rounded-lg transition-colors"
+                    >
+                      {t('userDetail.approveLicense', 'Approve License')}
+                    </button>
+                    <button
+                      onClick={async () => {
+                        try {
+                          await rejectLicense(viewingUser._id);
+                          viewingUser.licenseVerified = false;
+                          viewingUser.licenseStatus = 'rejected';
+                          setIsDetailModalOpen(false);
+                          setTimeout(() => setIsDetailModalOpen(true), 100);
+                        } catch {}
+                      }}
+                      className="px-3 py-1.5 text-xs font-medium text-white bg-red-600 hover:bg-red-700 rounded-lg transition-colors"
+                    >
+                      {t('userDetail.rejectLicense', 'Reject License')}
+                    </button>
                   </div>
                 )}
               </div>
