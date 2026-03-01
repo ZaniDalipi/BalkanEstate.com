@@ -77,12 +77,12 @@ export const promotionKeys = {
  */
 function promotionToProperty(promo: any): Property {
   const prop = promo.propertyId || {};
-  const propId = typeof prop === 'object' ? (prop._id || '') : prop;
+  const propId = typeof prop === 'object' ? (prop.id || prop._id || '') : prop;
   const seller = prop.sellerId || {};
 
   return {
     id: propId,
-    sellerId: typeof seller === 'object' ? (seller._id || '') : (seller || ''),
+    sellerId: typeof seller === 'object' ? (seller.id || seller._id || '') : (seller || ''),
     status: prop.status || 'active',
     title: prop.title || '',
     price: prop.price || 0,
@@ -126,7 +126,7 @@ async function fetchPromotionsData(): Promise<PromotionsResponse> {
 
   promotions.forEach((promo: any) => {
     const prop = promo.propertyId;
-    const propId = typeof prop === 'object' ? (prop._id || '') : (prop || '');
+    const propId = typeof prop === 'object' ? (prop.id || prop._id || '') : (prop || '');
     if (!propId) return;
 
     promoMap[propId] = promo;

@@ -8,12 +8,12 @@ import type { Agent, User } from '@/src/shared/types';
 
 export function transformBackendAgent(backendAgent: any): Agent {
   const user = backendAgent.userId || {};
-  const userId = typeof user === 'object' && user._id ? user._id : user;
+  const userId = typeof user === 'object' && (user.id || user._id) ? (user.id || user._id) : user;
   const agency = backendAgent.agencyId || {};
-  const agencyId = typeof agency === 'object' && agency._id ? agency._id : agency;
+  const agencyId = typeof agency === 'object' && (agency.id || agency._id) ? (agency.id || agency._id) : agency;
 
   return {
-    id: backendAgent._id || backendAgent.id,
+    id: backendAgent.id || backendAgent._id,
     userId: String(userId),
     name: user.name || '',
     email: user.email || '',

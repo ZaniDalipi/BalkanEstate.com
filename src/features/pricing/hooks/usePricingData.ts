@@ -92,7 +92,7 @@ async function fetchUserListings(token: string): Promise<any[]> {
   if (!response.ok) throw new Error('Failed to fetch listings');
   const data = await response.json();
   return (data.properties || []).map((p: any) => ({
-    id: p._id || p.id,
+    id: p.id || p._id,
     address: p.address || p.title || 'No address',
     price: p.price || 0,
     imageUrl: p.imageUrl || p.images?.[0] || '',

@@ -11,8 +11,8 @@ function transformBackendMessage(backendMsg: any): Message {
   const sender = backendMsg.senderId || null;
 
   return {
-    id: backendMsg._id,
-    senderId: sender ? (sender._id || sender) : null,
+    id: backendMsg.id || backendMsg._id,
+    senderId: sender ? (sender.id || sender._id || sender) : null,
     text: backendMsg.text,
     imageUrl: backendMsg.imageUrl,
     encryptedMessage: backendMsg.encryptedMessage,
@@ -29,21 +29,21 @@ function transformBackendConversation(backendConv: any): Conversation {
   const seller = backendConv.sellerId || null;
 
   return {
-    id: backendConv._id,
-    propertyId: property ? (property._id || property) : null,
-    property: property && property._id ? transformBackendProperty(property) : undefined,
-    buyerId: buyer ? (buyer._id || buyer) : null,
-    sellerId: seller ? (seller._id || seller) : null,
-    buyer: buyer && buyer._id
+    id: backendConv.id || backendConv._id,
+    propertyId: property ? (property.id || property._id || property) : null,
+    property: property && (property.id || property._id) ? transformBackendProperty(property) : undefined,
+    buyerId: buyer ? (buyer.id || buyer._id || buyer) : null,
+    sellerId: seller ? (seller.id || seller._id || seller) : null,
+    buyer: buyer && (buyer.id || buyer._id)
       ? {
-          id: buyer._id,
+          id: buyer.id || buyer._id,
           name: buyer.name,
           avatarUrl: buyer.avatarUrl,
         }
       : undefined,
-    seller: seller && seller._id
+    seller: seller && (seller.id || seller._id)
       ? {
-          id: seller._id,
+          id: seller.id || seller._id,
           name: seller.name,
           avatarUrl: seller.avatarUrl,
           role: seller.role,
@@ -71,7 +71,7 @@ export const getConversations = async (): Promise<Conversation[]> => {
     });
 
     const validConversations = response.conversations?.filter(
-      (conv: any) => conv && conv._id
+      (conv: any) => conv && (conv.id || conv._id)
     ) || [];
 
     return validConversations.map(transformBackendConversation);
