@@ -4,7 +4,7 @@ import { useAppContext } from '@/context/AppContext';
 import { AppView, UserRole, Conversation } from '@/types';
 import { LogoIcon, AgentsIcon, SearchIcon, MagnifyingGlassPlusIcon, HeartIcon, EnvelopeIcon, UserCircleIcon, UsersIcon, ArrowLeftOnRectangleIcon, XMarkIcon, PencilIcon, StarIconSolid, BuildingOfficeIcon, ShieldCheckIcon, GlobeAltIcon, ChartBarIcon } from '@/constants';
 import LanguageSwitcher from '@/src/components/LanguageSwitcher';
-import DefaultAvatar from '@/components/shared/DefaultAvatar';
+import UserAvatar from '@/components/shared/UserAvatar';
 
 const NavItem: React.FC<{
   view: AppView;
@@ -224,7 +224,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
                                 }`}
                             >
                                 <div className="w-5 h-5 flex-shrink-0">
-                                {currentUser.avatarUrl ? <img src={currentUser.avatarUrl} alt="avatar" className="w-full h-full rounded-full object-cover" referrerPolicy="no-referrer" /> : <DefaultAvatar gender={currentUser.gender} seed={currentUser.id || currentUser.name} avatarOptions={currentUser.avatarOptions} />}
+                                <UserAvatar src={currentUser.avatarUrl} gender={currentUser.gender} seed={currentUser.id || currentUser.name} avatarOptions={currentUser.avatarOptions} className="w-full h-full rounded-full object-cover" />
                                 </div>
                                 <span className="md:hidden group-hover:md:inline whitespace-nowrap text-sm">{t('nav:myAccount')}</span>
                             </button>

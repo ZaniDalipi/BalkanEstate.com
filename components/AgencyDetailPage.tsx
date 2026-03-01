@@ -13,6 +13,7 @@ import InvitationCodeModal from './InvitationCodeModal';
 import FeaturedSubscriptionCard from './shared/FeaturedSubscriptionCard';
 import FeaturedSubscriptionDialog from './shared/FeaturedSubscriptionDialog';
 import DefaultAvatar from './shared/DefaultAvatar';
+import UserAvatar from './shared/UserAvatar';
 import { formatPrice } from '../utils/currency';
 import { createJoinRequest, removeAgentFromAgency, addAgencyAdmin, removeAgencyAdmin, verifyInvitationCode, leaveAgency } from '../src/features/agencies/api';
 import { Agency } from '../types';
@@ -1714,11 +1715,7 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
                     aria-label={t('nav:myAccount')}
                   >
                     <div className="w-6 h-6 rounded-full overflow-hidden flex-shrink-0">
-                      {currentUser.avatarUrl ? (
-                        <img src={currentUser.avatarUrl} alt="" className="w-full h-full object-cover" aria-hidden="true" />
-                      ) : (
-                        <DefaultAvatar gender={currentUser.gender} seed={currentUser.id || currentUser.name} avatarOptions={currentUser.avatarOptions} />
-                      )}
+                      <UserAvatar src={currentUser.avatarUrl} gender={currentUser.gender} seed={currentUser.id || currentUser.name} avatarOptions={currentUser.avatarOptions} />
                     </div>
                     <span className="hidden lg:inline">{t('nav:myAccount')}</span>
                   </button>
@@ -2768,15 +2765,7 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
                         {/* Agent Photo with Rank */}
                         <div className="relative flex-shrink-0">
                           <div className="w-16 h-16 rounded-xl overflow-hidden border-2 border-white shadow-md group-hover:shadow-lg transition-shadow">
-                            {agent.avatarUrl ? (
-                              <img
-                                src={agent.avatarUrl}
-                                alt={agent.name}
-                                className="w-full h-full object-cover"
-                              />
-                            ) : (
-                              <DefaultAvatar gender={agent.gender} seed={agent.agentId || agent._id || agent.name} avatarOptions={agent.avatarOptions} show3d />
-                            )}
+                            <UserAvatar src={agent.avatarUrl} alt={agent.name} gender={agent.gender} seed={agent.agentId || agent._id || agent.name} avatarOptions={agent.avatarOptions} className="w-full h-full object-cover" />
                           </div>
                           {/* Rank badge on avatar */}
                           <div className={`absolute -top-2 -left-2 px-2 py-0.5 bg-gradient-to-r ${rank.color} text-white text-[10px] font-bold rounded-lg shadow-md flex items-center gap-1`}>

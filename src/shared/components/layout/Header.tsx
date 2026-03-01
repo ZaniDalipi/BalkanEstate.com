@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { Menu, User } from 'lucide-react';
 import { useAppContext } from '@/context/AppContext';
 import NotificationCenter from '../NotificationCenter';
-import DefaultAvatar from '@/components/shared/DefaultAvatar';
+import UserAvatar from '@/components/shared/UserAvatar';
 
 interface HeaderProps {
   onToggleSidebar: () => void;
@@ -73,16 +73,7 @@ const Header: React.FC<HeaderProps> = ({ onToggleSidebar, isFloating }) => {
           aria-label={t('nav:myAccount')}
         >
           <div className="w-7 h-7 rounded-full overflow-hidden flex-shrink-0">
-            {currentUser.avatarUrl ? (
-              <img
-                src={currentUser.avatarUrl}
-                alt=""
-                className="w-full h-full object-cover"
-                aria-hidden="true"
-              />
-            ) : (
-              <DefaultAvatar gender={currentUser.gender} seed={currentUser.id || currentUser.name} avatarOptions={currentUser.avatarOptions} />
-            )}
+            <UserAvatar src={currentUser.avatarUrl} gender={currentUser.gender} seed={currentUser.id || currentUser.name} avatarOptions={currentUser.avatarOptions} />
           </div>
           <span className="relative z-10 hidden sm:inline text-sm">{t('nav:myAccount')}</span>
         </button>

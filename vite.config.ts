@@ -59,6 +59,7 @@ export default defineConfig(({ mode }) => {
         tailwindcss(),
         react(),
         VitePWA({
+          devOptions: { enabled: false },
           registerType: 'autoUpdate',
           includeAssets: ['icons/*.svg', 'icons/*.png', 'og-image.png', 'og-image.svg', 'robots.txt'],
           manifest: {

@@ -4,6 +4,7 @@ import { useAppContext } from '../../context/AppContext';
 import { useLocalizedNavigation } from '@/src/hooks/useLocalizedNavigation';
 import { AppView } from '../../types';
 import { SearchIcon, HeartIcon, EnvelopeIcon, UserCircleIcon, PencilIcon } from '../../constants';
+import UserAvatar from './UserAvatar';
 
 const BottomNav: React.FC = () => {
     const { t } = useTranslation(['nav']);
@@ -84,7 +85,7 @@ const BottomNav: React.FC = () => {
                             <div className="relative">
                                 {showAvatar ? (
                                     <div className={`w-5 h-5 rounded-full overflow-hidden ring-2 ${isActive ? 'ring-primary/50' : 'ring-white/60'} shadow-sm`}>
-                                        <img src={currentUser.avatarUrl} alt="" className="w-full h-full object-cover" />
+                                        <UserAvatar src={currentUser.avatarUrl} gender={currentUser.gender} seed={currentUser.id || currentUser.name} avatarOptions={currentUser.avatarOptions} className="w-full h-full object-cover" />
                                     </div>
                                 ) : (
                                     <Icon className={`w-5 h-5 ${isActive ? 'text-primary' : 'text-neutral-600'}`} />

@@ -11,6 +11,7 @@ import { incrementInquiryCount } from '../utils/statsUpdater';
 import { apiLogger } from '../utils/logger';
 import { sanitizeConversation } from '../utils/responseSanitizer';
 import { getObjectIdParam } from '../utils/validateParams';
+import { resolveId } from '../utils/idObfuscation';
 
 // @desc    Get user's conversations
 // @route   GET /api/conversations
@@ -139,12 +140,15 @@ export const createConversation = async (
       return;
     }
 
-    const { propertyId } = req.body;
+    const rawPropertyId = req.body.propertyId;
 
-    if (!propertyId) {
+    if (!rawPropertyId) {
       res.status(400).json({ message: 'Property ID is required' });
       return;
     }
+
+    // Resolve obfuscated or raw ID
+    const propertyId = resolveId(rawPropertyId) || rawPropertyId;
 
     // Get property
     const property = await Property.findById(propertyId);

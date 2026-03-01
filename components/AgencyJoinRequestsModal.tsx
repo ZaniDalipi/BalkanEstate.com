@@ -177,6 +177,9 @@ const AgencyJoinRequestsModal: React.FC<AgencyJoinRequestsModalProps> = ({
                         alt={request.agentId.name}
                         className="w-16 h-16 rounded-full object-cover ring-2 ring-white/60 shadow-md"
                         style={{ boxShadow: '0 4px 12px rgba(0,0,0,0.1), inset 1px 1px 1px 0 rgba(255,255,255,0.4)' }}
+                        loading="lazy"
+                        referrerPolicy="no-referrer"
+                        onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
                       />
                     ) : (
                       <UserCircleIcon className="w-16 h-16 text-gray-300" />
