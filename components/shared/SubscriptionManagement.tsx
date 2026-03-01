@@ -1799,17 +1799,19 @@ const SubscriptionManagement: React.FC<SubscriptionManagementProps> = ({ userId 
             {upgradeOptions.map(({ key, plan, pricing }) => {
               // Enhanced features for Enterprise plan
               const isEnterprise = key.includes('enterprise') || key.includes('agency_yearly');
-              const enterpriseProduct = products.find(p => p.productId === key);
+              const matchedProduct = products.find(p => p.productId === key);
               const displayFeatures = isEnterprise ? [
-                t('management.enterpriseFeatures.listingsCount', '{{count}} Active Listings', { count: enterpriseProduct?.listingsLimit ?? agencyOwnerProductFromDB?.listingsLimit ?? 750 }),
+                t('management.enterpriseFeatures.listingsCount', '{{count}} Active Listings', { count: matchedProduct?.listingsLimit ?? agencyOwnerProductFromDB?.listingsLimit ?? 750 }),
                 t('management.enterpriseFeatures.createAgency', 'Create Your Own Agency'),
-                t('management.enterpriseFeatures.agentCouponsCount', '{{count}} Agent Invitation Coupons', { count: enterpriseProduct?.agentCoupons ?? agencyOwnerProductFromDB?.agentCoupons ?? 5 }),
+                t('management.enterpriseFeatures.agentCouponsCount', '{{count}} Agent Invitation Coupons', { count: matchedProduct?.agentCoupons ?? agencyOwnerProductFromDB?.agentCoupons ?? 5 }),
                 t('management.enterpriseFeatures.unlimitedSearches', 'Unlimited Saved Searches'),
                 t('management.enterpriseFeatures.fullAnalytics', 'Full Analytics Dashboard'),
                 t('management.enterpriseFeatures.prioritySupport', 'Priority Support'),
-                t('management.enterpriseFeatures.promoCouponsCount', '{{count}} Monthly Promotion Coupons', { count: enterpriseProduct?.promotionCoupons ?? agencyOwnerProductFromDB?.promotionCoupons ?? 10 }),
+                t('management.enterpriseFeatures.promoCouponsCount', '{{count}} Monthly Promotion Coupons', { count: matchedProduct?.promotionCoupons ?? agencyOwnerProductFromDB?.promotionCoupons ?? 10 }),
                 t('management.enterpriseFeatures.teamTools', 'Team Management Tools'),
-              ] : plan.features;
+              ] : matchedProduct
+                ? plan.features.map(f => replacePlaceholders(f, matchedProduct))
+                : plan.features;
 
               return (
                 <div

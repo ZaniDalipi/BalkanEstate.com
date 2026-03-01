@@ -17,6 +17,7 @@ import {
 } from '@/constants';
 import { apiRequest } from '@/src/shared/api';
 import { validatePaymentRedirectUrl } from '@/src/utils/security';
+import { replacePlaceholders } from '@/src/shared/utils/featurePlaceholders';
 
 interface EnterprisePlan {
   name: string;
@@ -95,12 +96,13 @@ const AgencyPaymentPage: React.FC = () => {
           );
 
           if (enterprise) {
+            const rawFeatures: string[] = enterprise.features || DEFAULT_ENTERPRISE_PLAN.features;
             setEnterprisePlan({
               name: enterprise.name || 'Enterprise',
               price: enterprise.price || 999,
               interval: enterprise.billingPeriod === 'monthly' ? 'month' : 'year',
               productId: enterprise.productId || 'seller_enterprise_yearly',
-              features: enterprise.features || DEFAULT_ENTERPRISE_PLAN.features,
+              features: rawFeatures.map((f: string) => replacePlaceholders(f, enterprise)),
             });
           }
         }
