@@ -135,8 +135,9 @@ const isPromotionActive = (property: Property): boolean => {
 /**
  * Get random recommendation for a tier
  */
-const getRandomRecommendation = (tier: 'premium' | 'highlight' | 'featured', seed: string): string => {
+const getRandomRecommendation = (tier: 'premium' | 'highlight' | 'featured', seed: string | undefined): string | undefined => {
   const messages = AGENT_RECOMMENDATIONS[tier];
+  if (!messages || !seed) return undefined;
   // Use property ID as seed for consistent recommendations
   let hash = 0;
   for (let i = 0; i < seed.length; i++) {
