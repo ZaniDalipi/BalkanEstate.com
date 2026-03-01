@@ -28,13 +28,15 @@ interface AgencyJoinRequestsModalProps {
   onClose: () => void;
   agencyId: string;
   agencyName: string;
+  refreshKey?: number;
 }
 
 const AgencyJoinRequestsModal: React.FC<AgencyJoinRequestsModalProps> = ({
   isOpen,
   onClose,
   agencyId,
-  agencyName
+  agencyName,
+  refreshKey = 0,
 }) => {
   const { t } = useTranslation(['agencies', 'common']);
   const { error } = useNotification();
@@ -46,7 +48,7 @@ const AgencyJoinRequestsModal: React.FC<AgencyJoinRequestsModalProps> = ({
     if (isOpen && agencyId) {
       fetchRequests();
     }
-  }, [isOpen, agencyId]);
+  }, [isOpen, agencyId, refreshKey]);
 
   const fetchRequests = async () => {
     setLoading(true);
