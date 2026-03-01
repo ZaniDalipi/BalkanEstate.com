@@ -1139,6 +1139,18 @@ export const switchRole = async (req: Request, res: Response): Promise<void> => 
       return;
     }
 
+    // Prevent agency members from switching profile to private_seller
+    // They can still POST listings as private_seller, but their profile role stays as agent
+    if (role === 'private_seller' && user.agencyId) {
+      res.status(403).json({
+        message: 'You are currently part of an agency. To switch your profile to Private Seller, you must leave your agency first. You can still post individual listings as a private seller without switching.',
+        code: 'AGENCY_MEMBER_CANNOT_SWITCH',
+        agencyId: String(user.agencyId),
+        agencyName: user.agencyName,
+      });
+      return;
+    }
+
     // Phone number is required for agent and private_seller roles.
     // Accept it from the request body OR check if the user already has one on file.
     if (role === 'agent' || role === 'private_seller') {
@@ -2286,6 +2298,17 @@ export const setActiveRole = async (req: Request, res: Response): Promise<void> 
       res.status(403).json({
         message: 'You do not have access to this role',
         availableRoles: user.availableRoles
+      });
+      return;
+    }
+
+    // Prevent agency members from switching active role to private_seller
+    if (activeRole === 'private_seller' && user.agencyId) {
+      res.status(403).json({
+        message: 'You are currently part of an agency. To switch your profile to Private Seller, you must leave your agency first. You can still post individual listings as a private seller without switching.',
+        code: 'AGENCY_MEMBER_CANNOT_SWITCH',
+        agencyId: String(user.agencyId),
+        agencyName: user.agencyName,
       });
       return;
     }

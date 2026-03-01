@@ -5,8 +5,6 @@ import { useAppContext } from '@/context/AppContext';
 import {
     LISTING_LIMITS,
     PLAN_LISTING_LIMITS,
-    PROMOTION_CONFIGS,
-    canPostAsRole,
 } from '@/shared/utils/subscriptionHelpers';
 
 interface RoleSelectorProps {
@@ -21,9 +19,8 @@ const RoleSelector: React.FC<RoleSelectorProps> = ({ currentUser, selectedRole, 
     const subscription = currentUser.subscription;
 
     // Determine which roles to show based on user registration and subscription
-    // Agency agents can ONLY post as agent (not as private seller)
-    const isAgencyAgent = subscription?.tier === 'agency_agent';
-    const hasPrivateSeller = !isAgencyAgent; // Hide private seller for agency agents
+    // Agency agents CAN post as private seller (individual listings outside agency)
+    const hasPrivateSeller = true;
 
     // Only show agent option if user is registered as an agent
     // User is an agent if they have:
