@@ -458,8 +458,9 @@ class EmailService {
         totalSaves:      String(data.totalSaves),
         savesChange:     this.formatChange(data.savesChange),
         activeListings:  String(data.activeListings),
-        statsSection,
-        topPropertySection,
+        statsGrid:       statsSection,
+        topPerformingProperty: topPropertySection,
+        salesSummary:    '',
         frontendUrl,
       };
 
@@ -683,9 +684,9 @@ class EmailService {
         activeListings:     String(data.activeListings),
         totalInquiries:     String(data.totalInquiries),
         inquiriesChange:    this.formatChange(data.inquiriesChange),
-        statsSection,
-        topAgentSection,
-        topPropertySection,
+        statsGrid:    statsSection,
+        topAgent:     topAgentSection,
+        topProperty:  topPropertySection,
         frontendUrl,
       };
       const { html, subject } = await renderEmailWithSiteSettings(agencyConfig, variables);
@@ -923,13 +924,17 @@ class EmailService {
   async sendWelcomeCoupon(email: string, agencyName: string, couponCode: string, expiryDate: Date): Promise<void> {
     const expiryDateStr = expiryDate.toLocaleDateString();
     const frontendUrl = process.env.FRONTEND_URL || 'https://balkanestate.com';
+    const daysUntilExpiry = Math.max(1, Math.ceil((expiryDate.getTime() - Date.now()) / (1000 * 60 * 60 * 24)));
 
     // Try admin-editable template first
     const config = await getActiveEmailConfig('welcome-coupon');
     if (config) {
       const variables: Record<string, string> = {
+        userName:    escapeHtml(agencyName),
         agencyName:  escapeHtml(agencyName),
         couponCode:  escapeHtml(couponCode),
+        discount:    '20',
+        validDays:   String(daysUntilExpiry),
         expiryDate:  expiryDateStr,
         frontendUrl,
       };
@@ -1020,9 +1025,13 @@ class EmailService {
     const config = await getActiveEmailConfig('subscription-confirmation');
     if (config) {
       const variables: Record<string, string> = {
-        agencyName:  escapeHtml(agencyName),
-        interval:    escapeHtml(details.interval),
-        price:       String(details.price),
+        userName:        escapeHtml(agencyName),
+        agencyName:      escapeHtml(agencyName),
+        planName:        escapeHtml(details.interval),
+        interval:        escapeHtml(details.interval),
+        price:           `€${details.price}`,
+        billingPeriod:   escapeHtml(details.interval),
+        nextBillingDate: renewsDate,
         renewsDate,
         frontendUrl,
       };
@@ -1120,8 +1129,11 @@ class EmailService {
       </div>`;
 
       const variables: Record<string, string> = {
+        userName:      escapeHtml(params.recipientName) || 'there',
         recipientName: escapeHtml(params.recipientName) || 'there',
         searchName:    escapeHtml(params.searchName),
+        count:         '1',
+        location:      escapeHtml(params.property.city),
         propertyTitle: escapeHtml(params.property.title),
         propertyAddress: escapeHtml(params.property.address),
         propertyCity:  escapeHtml(params.property.city),
@@ -1129,8 +1141,10 @@ class EmailService {
         propertyBeds:  String(params.property.beds),
         propertyBaths: String(params.property.baths),
         propertySqft:  params.property.sqft.toLocaleString(),
+        propertyCards: propertyCard,
         propertyCard,
         propertyId:    safePropId,
+        searchUrl:     `${frontendUrl}/search`,
         frontendUrl,
       };
 
@@ -1915,10 +1929,14 @@ class EmailService {
     // Try admin-editable template first
     const config = await getActiveEmailConfig('subscription-renewal-reminder');
     if (config) {
+      const daysUntil = Math.max(0, Math.ceil((expiryDate.getTime() - Date.now()) / (1000 * 60 * 60 * 24)));
       const variables: Record<string, string> = {
-        userName:    escapeHtml(userName) || 'there',
-        planName:    escapeHtml(planName),
-        expiryDate:  expiryDate.toLocaleDateString(),
+        userName:      escapeHtml(userName) || 'there',
+        planName:      escapeHtml(planName),
+        daysUntil:     String(daysUntil),
+        renewalDate:   expiryDate.toLocaleDateString(),
+        amount:        '',
+        expiryDate:    expiryDate.toLocaleDateString(),
         frontendUrl,
       };
       const { html, subject } = await renderEmailWithSiteSettings(config, variables);
@@ -2057,7 +2075,9 @@ class EmailService {
       const variables: Record<string, string> = {
         userName:      escapeHtml(userName) || 'there',
         planName:      escapeHtml(details.planName),
+        description:   `${escapeHtml(details.planName)} Subscription`,
         amount:        `${details.currency}${details.amount.toFixed(2)}`,
+        paymentDate:   new Date().toLocaleDateString(),
         expiresAt:     details.expiresAt.toLocaleDateString(),
         transactionId: escapeHtml(details.transactionId) || '',
         frontendUrl,
@@ -2111,6 +2131,7 @@ class EmailService {
       const variables: Record<string, string> = {
         userName:  escapeHtml(userName) || 'there',
         planName:  escapeHtml(details.planName),
+        endDate:   details.expiresAt.toLocaleDateString(),
         expiresAt: details.expiresAt.toLocaleDateString(),
         frontendUrl,
       };
@@ -2302,10 +2323,11 @@ class EmailService {
     const config = await getActiveEmailConfig('refund-notification');
     if (config) {
       const variables: Record<string, string> = {
-        userName:      escapeHtml(userName) || 'there',
-        amount:        `${details.currency}${details.amount.toFixed(2)}`,
-        reason:        escapeHtml(details.reason) || '',
-        transactionId: escapeHtml(details.transactionId) || '',
+        userName:               escapeHtml(userName) || 'there',
+        amount:                 `${details.currency}${details.amount.toFixed(2)}`,
+        reason:                 escapeHtml(details.reason) || '',
+        originalTransactionId:  escapeHtml(details.transactionId) || '',
+        transactionId:          escapeHtml(details.transactionId) || '',
         frontendUrl,
       };
       const { html, subject } = await renderEmailWithSiteSettings(config, variables);
@@ -2365,6 +2387,7 @@ class EmailService {
         agentName:       escapeHtml(params.agentName) || 'there',
         buyerName:       escapeHtml(params.buyerName),
         buyerEmail:      escapeHtml(params.buyerEmail),
+        buyerPhone:      escapeHtml(params.buyerPhone) || '',
         propertyTitle:   escapeHtml(params.propertyTitle) || '',
         propertyAddress: escapeHtml(params.location) || '',
         inquiryMessage:  escapeHtml(params.message),
@@ -3909,6 +3932,8 @@ Questions? Contact us at support@balkanestateai.com
         ownerName: safeOwnerName,
         agencyName: safeAgencyName,
         agencyId: params.agencyId,
+        agentName: safeNewAgentName,
+        agentEmail: safeNewAgentEmail,
         newAgentName: safeNewAgentName,
         newAgentEmail: safeNewAgentEmail,
         couponCode: safeCouponCode,
