@@ -34,6 +34,9 @@ const SOCKET_RATE_WINDOW_MS = 10_000; // 10-second window
 const SOCKET_RATE_MAX_EVENTS = 30;    // Max 30 events per window (3/sec avg)
 
 function checkSocketRateLimit(socketId: string): boolean {
+  // Skip rate limiting in development for easier testing
+  if (!isProduction) return true;
+
   const now = Date.now();
   const entry = socketRateLimits.get(socketId);
 
