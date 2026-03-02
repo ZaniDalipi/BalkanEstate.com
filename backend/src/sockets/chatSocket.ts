@@ -31,7 +31,7 @@ const conversationRooms = new Map<string, Set<string>>();
  */
 const socketRateLimits = new Map<string, { count: number; resetAt: number }>();
 const SOCKET_RATE_WINDOW_MS = 10_000; // 10-second window
-const SOCKET_RATE_MAX_EVENTS = 30;    // Max 30 events per window (3/sec avg)
+const SOCKET_RATE_MAX_EVENTS = 60;    // Max 60 events per window (6/sec avg)
 
 function checkSocketRateLimit(socketId: string): boolean {
   // Skip rate limiting in development for easier testing

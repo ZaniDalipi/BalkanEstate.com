@@ -15,7 +15,7 @@ const isDevelopment = process.env.NODE_ENV === 'development' || !process.env.NOD
 // Rate limit inquiries to prevent spam (10 inquiries per hour per IP)
 const inquiryRateLimiter = rateLimit({
   windowMs: 60 * 60 * 1000, // 1 hour
-  max: 10,
+  max: 30,
   message: { message: 'Too many inquiries sent. Please try again later.' },
   standardHeaders: true,
   legacyHeaders: false,
