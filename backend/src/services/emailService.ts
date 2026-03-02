@@ -1436,8 +1436,8 @@ class EmailService {
           <div style="background: ${priceBoxBg}; border-radius: 10px; padding: 16px; margin-bottom: 16px;">
             <div style="display: table; width: 100%;">
               <div style="display: table-cell; text-align: center; width: 40%;">
-                <div style="font-size: 11px; color: #9ca3af; text-transform: uppercase; margin-bottom: 4px;">Was</div>
-                <div style="font-size: 18px; color: #9ca3af; text-decoration: line-through;">€${params.property.previousPrice.toLocaleString()}</div>
+                <div style="font-size: 11px; color: #6b7280; text-transform: uppercase; margin-bottom: 4px;">Was</div>
+                <div style="font-size: 18px; color: #6b7280; text-decoration: line-through;">€${params.property.previousPrice.toLocaleString()}</div>
               </div>
               <div style="display: table-cell; text-align: center; width: 20%; vertical-align: middle;">
                 <div style="font-size: 24px; color: ${arrowColor};">→</div>
@@ -1547,8 +1547,8 @@ class EmailService {
           <div style="background: ${priceBoxBg}; border-radius: 10px; padding: 16px; margin-bottom: 16px;">
             <div style="display: table; width: 100%;">
               <div style="display: table-cell; text-align: center; width: 40%;">
-                <div style="font-size: 11px; color: #9ca3af; text-transform: uppercase; margin-bottom: 4px;">Was</div>
-                <div style="font-size: 18px; color: #9ca3af; text-decoration: line-through;">€${params.property.previousPrice.toLocaleString()}</div>
+                <div style="font-size: 11px; color: #6b7280; text-transform: uppercase; margin-bottom: 4px;">Was</div>
+                <div style="font-size: 18px; color: #6b7280; text-decoration: line-through;">€${params.property.previousPrice.toLocaleString()}</div>
               </div>
               <div style="display: table-cell; text-align: center; width: 20%; vertical-align: middle;">
                 <div style="font-size: 24px; color: ${arrowColor};">→</div>
@@ -1704,8 +1704,8 @@ class EmailService {
           <div style="background: ${priceBoxBg}; border-radius: 10px; padding: 16px; margin-bottom: 16px;">
             <div style="display: table; width: 100%;">
               <div style="display: table-cell; text-align: center; width: 40%;">
-                <div style="font-size: 11px; color: #9ca3af; text-transform: uppercase; margin-bottom: 4px;">Was</div>
-                <div style="font-size: 18px; color: #9ca3af; text-decoration: line-through;">€${params.property.previousPrice.toLocaleString()}</div>
+                <div style="font-size: 11px; color: #6b7280; text-transform: uppercase; margin-bottom: 4px;">Was</div>
+                <div style="font-size: 18px; color: #6b7280; text-decoration: line-through;">€${params.property.previousPrice.toLocaleString()}</div>
               </div>
               <div style="display: table-cell; text-align: center; width: 20%; vertical-align: middle;">
                 <div style="font-size: 24px; color: ${arrowColor};">→</div>
@@ -1834,8 +1834,8 @@ class EmailService {
           <div style="background: ${priceBoxBg}; border-radius: 10px; padding: 16px; margin-bottom: 16px;">
             <div style="display: table; width: 100%;">
               <div style="display: table-cell; text-align: center; width: 40%;">
-                <div style="font-size: 11px; color: #9ca3af; text-transform: uppercase; margin-bottom: 4px;">Was</div>
-                <div style="font-size: 18px; color: #9ca3af; text-decoration: line-through;">€${params.property.previousPrice.toLocaleString()}</div>
+                <div style="font-size: 11px; color: #6b7280; text-transform: uppercase; margin-bottom: 4px;">Was</div>
+                <div style="font-size: 18px; color: #6b7280; text-decoration: line-through;">€${params.property.previousPrice.toLocaleString()}</div>
               </div>
               <div style="display: table-cell; text-align: center; width: 20%; vertical-align: middle;">
                 <div style="font-size: 24px; color: ${arrowColor};">→</div>
@@ -3216,20 +3216,20 @@ Questions? Contact us at support@balkanestateai.com
       <!-- Coupon Summary Card -->
       <div style="background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%); border-radius: 12px; padding: 20px; margin-bottom: 24px; border: 2px solid #f59e0b;">
         <div style="text-align: center; margin-bottom: 16px;">
-          <div style="font-size: 48px; font-weight: 700; color: #92400e;">${params.totalCoupons}</div>
-          <div style="font-size: 14px; color: #78350f; font-weight: 600;">Total Coupons Available</div>
+          <div style="font-size: 48px; font-weight: 700; color: #111827;">${params.totalCoupons}</div>
+          <div style="font-size: 14px; color: #111827; font-weight: 600;">Total Coupons Available</div>
         </div>
 
         ${params.rolledOver > 0 ? `
-        <div style="background: rgba(255,255,255,0.5); border-radius: 8px; padding: 12px; margin-bottom: 12px;">
+        <div style="background: #ffffff; border-radius: 8px; padding: 12px; margin-bottom: 12px;">
           <div style="display: table; width: 100%;">
             <div style="display: table-cell; text-align: center; width: 50%; border-right: 1px solid #f59e0b;">
-              <div style="font-size: 20px; font-weight: 700; color: #92400e;">+${params.newCoupons}</div>
-              <div style="font-size: 11px; color: #78350f;">New This Month</div>
+              <div style="font-size: 20px; font-weight: 700; color: #111827;">+${params.newCoupons}</div>
+              <div style="font-size: 11px; color: #374151;">New This Month</div>
             </div>
             <div style="display: table-cell; text-align: center; width: 50%;">
-              <div style="font-size: 20px; font-weight: 700; color: #92400e;">+${params.rolledOver}</div>
-              <div style="font-size: 11px; color: #78350f;">Rolled Over</div>
+              <div style="font-size: 20px; font-weight: 700; color: #111827;">+${params.rolledOver}</div>
+              <div style="font-size: 11px; color: #374151;">Rolled Over</div>
             </div>
           </div>
         </div>
@@ -3237,7 +3237,7 @@ Questions? Contact us at support@balkanestateai.com
 
         <!-- Coupon Breakdown -->
         <div style="background: #ffffff; border-radius: 8px; padding: 12px;">
-          <div style="font-size: 12px; color: #78350f; font-weight: 600; margin-bottom: 8px; text-align: center;">Coupon Breakdown:</div>
+          <div style="font-size: 12px; color: #111827; font-weight: 600; margin-bottom: 8px; text-align: center;">Coupon Breakdown:</div>
           <div style="display: table; width: 100%;">
             <div style="display: table-cell; text-align: center; ${params.breakdown.highlighted > 0 ? '' : 'opacity: 0.5;'}">
               <div style="font-size: 18px; font-weight: 700; color: #047857;">${params.breakdown.highlighted}</div>
@@ -3528,9 +3528,9 @@ Questions? Contact us at support@balkanestateai.com
     const agentCoupons = params.agentCoupons || 5;
     const promotionCoupons = params.promotionCoupons || {
       total: 5,
-      premium: 2,
+      premium: 1,
       highlighted: 2,
-      featured: 1,
+      featured: 2,
     };
     const couponBreakdown = `${promotionCoupons.premium} Premium + ${promotionCoupons.highlighted} Highlighted + ${promotionCoupons.featured} Featured`;
 

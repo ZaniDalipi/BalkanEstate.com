@@ -264,13 +264,13 @@ export const defaultEmailConfigs = [
         Great news! A property you saved has dropped in price:
       </p>
       <div style="background: #fef2f2; border-radius: 12px; padding: 20px; margin: 0 0 24px 0; text-align: center;">
-        <p style="color: #374151; font-size: 18px; font-weight: 600; margin: 0 0 8px 0;">{{propertyTitle}}</p>
-        <p style="color: #6b7280; font-size: 14px; margin: 0 0 16px 0;">{{propertyAddress}}</p>
+        <p style="color: #1f2937; font-size: 18px; font-weight: 600; margin: 0 0 8px 0;">{{propertyTitle}}</p>
+        <p style="color: #374151; font-size: 14px; margin: 0 0 16px 0;">{{propertyAddress}}</p>
         <div style="display: inline-block; margin-bottom: 8px;">
-          <span style="color: #9ca3af; font-size: 16px; text-decoration: line-through;">{{oldPrice}}</span>
-          <span style="color: #dc2626; font-size: 24px; font-weight: 700; margin-left: 12px;">{{newPrice}}</span>
+          <span style="color: #6b7280; font-size: 16px; text-decoration: line-through;">{{oldPrice}}</span>
+          <span style="color: #b91c1c; font-size: 24px; font-weight: 700; margin-left: 12px;">{{newPrice}}</span>
         </div>
-        <p style="color: #dc2626; font-size: 14px; font-weight: 600; margin: 0;">Save {{savings}} ({{percentDrop}}% off)</p>
+        <p style="color: #b91c1c; font-size: 14px; font-weight: 600; margin: 0;">Save {{savings}} ({{percentDrop}}% off)</p>
       </div>
     `,
     ctaEnabled: true,
@@ -408,8 +408,8 @@ export const defaultEmailConfigs = [
       <!-- Coupon Summary Card -->
       <div style="background:linear-gradient(135deg,#fef3c7 0%,#fde68a 100%);border-radius:12px;padding:20px;margin-bottom:20px;border:2px solid #f59e0b;">
         <div style="text-align:center;margin-bottom:16px;">
-          <div style="font-size:52px;font-weight:800;color:#92400e;line-height:1;">{{totalCoupons}}</div>
-          <div style="font-size:13px;color:#78350f;font-weight:700;margin-top:4px;">Total Coupons Available</div>
+          <div style="font-size:52px;font-weight:800;color:#111827;line-height:1;">{{totalCoupons}}</div>
+          <div style="font-size:13px;color:#111827;font-weight:700;margin-top:4px;">Total Coupons Available</div>
         </div>
 
         <!-- New + Rollover -->
@@ -417,12 +417,12 @@ export const defaultEmailConfigs = [
           <table style="width:100%;border-collapse:collapse;">
             <tr>
               <td style="text-align:center;width:50%;border-right:1px solid #f59e0b;padding:4px 0;">
-                <div style="font-size:22px;font-weight:700;color:#92400e;">+{{newCoupons}}</div>
-                <div style="font-size:11px;color:#78350f;">New This Month</div>
+                <div style="font-size:22px;font-weight:700;color:#111827;">+{{newCoupons}}</div>
+                <div style="font-size:11px;color:#374151;">New This Month</div>
               </td>
               <td style="text-align:center;width:50%;padding:4px 0;">
-                <div style="font-size:22px;font-weight:700;color:#92400e;">+{{rolledOver}}</div>
-                <div style="font-size:11px;color:#78350f;">Rolled Over</div>
+                <div style="font-size:22px;font-weight:700;color:#111827;">+{{rolledOver}}</div>
+                <div style="font-size:11px;color:#374151;">Rolled Over</div>
               </td>
             </tr>
           </table>
@@ -430,7 +430,7 @@ export const defaultEmailConfigs = [
 
         <!-- Tier Breakdown -->
         <div style="background:#ffffff;border-radius:8px;padding:12px;">
-          <div style="font-size:11px;color:#78350f;font-weight:700;text-align:center;margin-bottom:8px;text-transform:uppercase;letter-spacing:0.5px;">Coupon Types</div>
+          <div style="font-size:11px;color:#111827;font-weight:700;text-align:center;margin-bottom:8px;text-transform:uppercase;letter-spacing:0.5px;">Coupon Types</div>
           <table style="width:100%;border-collapse:collapse;">
             <tr>
               <td style="text-align:center;padding:4px 2px;">
@@ -506,14 +506,14 @@ export const defaultEmailConfigs = [
       <!-- Coupon Summary Card -->
       <div style="background:linear-gradient(135deg,#dbeafe 0%,#bfdbfe 100%);border-radius:12px;padding:20px;margin-bottom:20px;border:2px solid #3b82f6;">
         <div style="text-align:center;margin-bottom:16px;">
-          <div style="font-size:52px;font-weight:800;color:#1e3a8a;line-height:1;">{{totalCoupons}}</div>
-          <div style="font-size:13px;color:#1e3a8a;font-weight:700;margin-top:4px;">Total Coupons This Month</div>
-          <div style="font-size:11px;color:#1e40af;margin-top:4px;">Shared across your agency team • Resets monthly</div>
+          <div style="font-size:52px;font-weight:800;color:#111827;line-height:1;">{{totalCoupons}}</div>
+          <div style="font-size:13px;color:#111827;font-weight:700;margin-top:4px;">Total Coupons This Month</div>
+          <div style="font-size:11px;color:#374151;margin-top:4px;">Shared across your agency team • Resets monthly</div>
         </div>
 
         <!-- Tier Breakdown -->
         <div style="background:#ffffff;border-radius:8px;padding:12px;">
-          <div style="font-size:11px;color:#1e3a8a;font-weight:700;text-align:center;margin-bottom:8px;text-transform:uppercase;letter-spacing:0.5px;">Coupon Types</div>
+          <div style="font-size:11px;color:#111827;font-weight:700;text-align:center;margin-bottom:8px;text-transform:uppercase;letter-spacing:0.5px;">Coupon Types</div>
           <table style="width:100%;border-collapse:collapse;">
             <tr>
               <td style="text-align:center;padding:4px 2px;">
@@ -637,8 +637,8 @@ export const defaultEmailConfigs = [
 
       <!-- First Coupons -->
       <div style="background:linear-gradient(135deg,#fef3c7 0%,#fde68a 100%);border-radius:10px;padding:18px;margin-bottom:20px;border:2px solid #f59e0b;">
-        <p style="color:#92400e;font-size:14px;font-weight:700;margin:0 0 6px 0;">🎟️ Your first {{totalCoupons}} promotion coupons are ready! ({{couponBreakdown}})</p>
-        <p style="color:#78350f;font-size:13px;margin:0;line-height:1.5;">
+        <p style="color:#111827;font-size:14px;font-weight:700;margin:0 0 6px 0;">🎟️ Your first {{totalCoupons}} promotion coupons are ready! ({{couponBreakdown}})</p>
+        <p style="color:#374151;font-size:13px;margin:0;line-height:1.5;">
           Use them to highlight or feature your listings and get more views. New coupons refresh on the 1st of each month.
         </p>
       </div>
@@ -648,8 +648,8 @@ export const defaultEmailConfigs = [
 
       <!-- Subscription Details -->
       <div style="background:#f8fafc;border-radius:8px;padding:14px;margin-bottom:24px;border:1px solid #e2e8f0;">
-        <p style="color:#64748b;font-size:13px;margin:0;"><strong>Plan:</strong> {{planName}}</p>
-        <p style="color:#64748b;font-size:13px;margin:6px 0 0 0;"><strong>Active until:</strong> {{expiresAt}}</p>
+        <p style="color:#374151;font-size:13px;margin:0;"><strong>Plan:</strong> {{planName}}</p>
+        <p style="color:#374151;font-size:13px;margin:6px 0 0 0;"><strong>Active until:</strong> {{expiresAt}}</p>
       </div>
     `,
     ctaEnabled: true,
@@ -1319,10 +1319,10 @@ export const defaultEmailConfigs = [
     headerEmoji: '🏢',
     headerGradient: 'linear-gradient(135deg, #0f172a 0%, #1e293b 100%)',
     bodyTemplate: `
-      <p style="color: #374151; font-size: 16px; margin: 0 0 16px 0;">
+      <p style="color: #1f2937; font-size: 16px; margin: 0 0 16px 0;">
         Hi <strong>{{ownerName}}</strong>,
       </p>
-      <p style="color: #6b7280; font-size: 14px; margin: 0 0 24px 0;">
+      <p style="color: #374151; font-size: 14px; margin: 0 0 24px 0;">
         Congratulations! <strong>{{agencyName}}</strong> is now on the Enterprise plan. Here's what's included:
       </p>
       {{benefitsSection}}
@@ -1569,12 +1569,12 @@ export const defaultEmailConfigs = [
       <table style="width: 100%; border-collapse: separate; border-spacing: 8px; margin-bottom: 24px;">
         <tr>
           <td style="width: 33%; background: #fffbeb; border: 1px solid #fde68a; border-radius: 12px; padding: 16px; text-align: center;">
-            <p style="color: #d97706; font-size: 28px; font-weight: 700; margin: 0;">{{monthlyCoupons}}</p>
-            <p style="color: #92400e; font-size: 12px; margin: 4px 0 0 0; text-transform: uppercase; font-weight: 600;">Monthly</p>
+            <p style="color: #111827; font-size: 28px; font-weight: 700; margin: 0;">{{monthlyCoupons}}</p>
+            <p style="color: #374151; font-size: 12px; margin: 4px 0 0 0; text-transform: uppercase; font-weight: 600;">Monthly</p>
           </td>
           <td style="width: 33%; background: #ecfdf5; border: 1px solid #a7f3d0; border-radius: 12px; padding: 16px; text-align: center;">
-            <p style="color: #059669; font-size: 28px; font-weight: 700; margin: 0;">{{availableCoupons}}</p>
-            <p style="color: #065f46; font-size: 12px; margin: 4px 0 0 0; text-transform: uppercase; font-weight: 600;">Available</p>
+            <p style="color: #111827; font-size: 28px; font-weight: 700; margin: 0;">{{availableCoupons}}</p>
+            <p style="color: #374151; font-size: 12px; margin: 4px 0 0 0; text-transform: uppercase; font-weight: 600;">Available</p>
           </td>
           <td style="width: 33%; background: #f3f4f6; border: 1px solid #e5e7eb; border-radius: 12px; padding: 16px; text-align: center;">
             <p style="color: #374151; font-size: 28px; font-weight: 700; margin: 0;">{{usedCoupons}}</p>
