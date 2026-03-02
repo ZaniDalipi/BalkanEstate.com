@@ -30,43 +30,43 @@ const isProduction = process.env.NODE_ENV === 'production';
 const RATE_LIMIT_CONFIG = {
   // Login endpoint: per-IP limits
   LOGIN_IP: {
-    maxAttempts: isProduction ? 100 : 200,
+    maxAttempts: isProduction ? 200 : 200,
     windowMs: 15 * 60 * 1000, // 15 minutes
     blockDurationMs: isProduction ? 2 * 60 * 1000 : 30 * 1000, // 2min prod, 30s dev
   },
   // Login endpoint: per-account limits
   LOGIN_ACCOUNT: {
-    maxAttempts: isProduction ? 75 : 100,
+    maxAttempts: isProduction ? 150 : 100,
     windowMs: 15 * 60 * 1000,
     blockDurationMs: isProduction ? 3 * 60 * 1000 : 60 * 1000, // 3min prod, 1min dev
   },
   // Signup endpoint: per-IP limits
   SIGNUP_IP: {
-    maxAttempts: isProduction ? 30 : 50,
+    maxAttempts: isProduction ? 60 : 50,
     windowMs: 60 * 60 * 1000, // 1 hour
     blockDurationMs: isProduction ? 10 * 60 * 1000 : 2 * 60 * 1000,
   },
   // Password reset: per-IP limits
   PASSWORD_RESET_IP: {
-    maxAttempts: isProduction ? 25 : 50,
+    maxAttempts: isProduction ? 50 : 50,
     windowMs: 60 * 60 * 1000,
     blockDurationMs: isProduction ? 10 * 60 * 1000 : 2 * 60 * 1000,
   },
   // Password reset: per-account limits
   PASSWORD_RESET_ACCOUNT: {
-    maxAttempts: isProduction ? 25 : 50,
+    maxAttempts: isProduction ? 50 : 50,
     windowMs: 60 * 60 * 1000,
     blockDurationMs: isProduction ? 10 * 60 * 1000 : 2 * 60 * 1000,
   },
   // Refresh token endpoint: per-IP limits
   REFRESH_TOKEN_IP: {
-    maxAttempts: isProduction ? 300 : 500,
+    maxAttempts: isProduction ? 600 : 500,
     windowMs: 15 * 60 * 1000,
     blockDurationMs: isProduction ? 2 * 60 * 1000 : 30 * 1000,
   },
   // Discount/coupon code validation: per-IP limits (prevent brute-force enumeration)
   COUPON_VALIDATION_IP: {
-    maxAttempts: isProduction ? 100 : 200,
+    maxAttempts: isProduction ? 200 : 200,
     windowMs: 15 * 60 * 1000, // 15 minutes
     blockDurationMs: isProduction ? 5 * 60 * 1000 : 60 * 1000, // 5min prod, 1min dev
   },
