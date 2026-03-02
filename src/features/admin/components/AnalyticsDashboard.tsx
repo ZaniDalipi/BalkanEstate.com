@@ -42,14 +42,24 @@ interface AdminStats {
   };
 }
 
+interface PendingLicenseAgent {
+  _id: string;
+  name: string;
+  email: string;
+  createdAt: string;
+}
+
 const AnalyticsDashboard: React.FC = () => {
   const { t } = useTranslation(['admin']);
   const [stats, setStats] = useState<AdminStats | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [pendingLicenseAgents, setPendingLicenseAgents] = useState<PendingLicenseAgent[]>([]);
+  const [pendingLicenseError, setPendingLicenseError] = useState<string | null>(null);
 
   useEffect(() => {
     fetchStats();
+    fetchPendingLicenses();
     const interval = setInterval(fetchStats, 30000);
     return () => clearInterval(interval);
   }, []);
@@ -74,6 +84,25 @@ const AnalyticsDashboard: React.FC = () => {
       // Error removed
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const fetchPendingLicenses = async () => {
+    try {
+      const token = localStorage.getItem('balkan_estate_token');
+      const response = await fetch(`${API_URL}/admin/users?role=agent&licenseVerified=false&limit=10&sortBy=createdAt&order=desc`, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        },
+      });
+
+      if (!response.ok) throw new Error('Failed to fetch');
+
+      const data = await response.json();
+      setPendingLicenseAgents(data.users || []);
+      setPendingLicenseError(null);
+    } catch {
+      setPendingLicenseError(t('analyticsDashboard.failedToLoadLicenses', 'Failed to load pending licenses'));
     }
   };
 
@@ -362,6 +391,58 @@ const AnalyticsDashboard: React.FC = () => {
             </div>
           </button>
         </div>
+      </div>
+
+      {/* Pending License Verifications */}
+      <div className="bg-white rounded-xl shadow-sm p-6">
+        <div className="flex items-center justify-between mb-4">
+          <div>
+            <h3 className="text-lg font-semibold text-gray-900">{t('analyticsDashboard.pendingLicenseVerifications', 'Pending License Verifications')}</h3>
+            <p className="text-sm text-gray-500">
+              {t('analyticsDashboard.agentsAwaitingReview', '{{count}} agents awaiting license review', { count: pendingLicenseAgents.length })}
+            </p>
+          </div>
+          <ShieldCheckIcon className="w-6 h-6 text-purple-500" />
+        </div>
+        {pendingLicenseError ? (
+          <div className="text-center py-6 text-red-500">
+            <ExclamationTriangleIcon className="w-8 h-8 mx-auto mb-2" />
+            <p className="text-sm">{pendingLicenseError}</p>
+            <button
+              onClick={fetchPendingLicenses}
+              className="mt-3 px-4 py-1.5 text-sm bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+            >
+              {t('common.retry', 'Retry')}
+            </button>
+          </div>
+        ) : pendingLicenseAgents.length > 0 ? (
+          <div className="space-y-3">
+            {pendingLicenseAgents.map((agent) => (
+              <div
+                key={agent._id}
+                className="flex items-center justify-between p-3 bg-purple-50 rounded-lg"
+              >
+                <div className="flex items-center gap-3">
+                  <div className="w-8 h-8 bg-purple-200 text-purple-700 rounded-full flex items-center justify-center text-sm font-semibold">
+                    {(agent.name || agent.email)?.[0]?.toUpperCase() || '?'}
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium text-gray-900">{agent.name || agent.email}</p>
+                    <p className="text-xs text-gray-500">{agent.email}</p>
+                  </div>
+                </div>
+                <span className="px-2 py-1 text-xs font-medium rounded-full bg-yellow-100 text-yellow-800">
+                  {t('analyticsDashboard.pendingReview', 'Pending Review')}
+                </span>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div className="text-center py-6 text-gray-400">
+            <ShieldCheckIcon className="w-8 h-8 mx-auto mb-2" />
+            <p className="text-sm">{t('analyticsDashboard.noPendingLicenses', 'No pending license verifications')}</p>
+          </div>
+        )}
       </div>
 
       {/* System Status */}

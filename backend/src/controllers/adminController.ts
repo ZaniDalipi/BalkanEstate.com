@@ -91,11 +91,12 @@ export const getAdminStats = async (req: Request, res: Response): Promise<void> 
 // @access  Private/Admin + VPN
 export const getAllUsers = async (req: Request, res: Response): Promise<void> => {
   try {
-    const { role, isSubscribed, search, page = 1, limit = 50, sortBy = 'createdAt', order = 'desc' } = req.query;
+    const { role, isSubscribed, licenseVerified, search, page = 1, limit = 50, sortBy = 'createdAt', order = 'desc' } = req.query;
 
     const query: any = {};
     if (role) query.role = role;
     if (isSubscribed !== undefined) query.isSubscribed = isSubscribed === 'true';
+    if (licenseVerified !== undefined) query.licenseVerified = licenseVerified === 'true';
     if (search) {
       const safeSearch = escapeRegex(String(search));
       query.$or = [

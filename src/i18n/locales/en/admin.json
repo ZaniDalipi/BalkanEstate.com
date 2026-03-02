@@ -843,6 +843,11 @@
     "totalInquiries": "Total Inquiries",
     "adminPanel": "Admin Panel",
     "loadingDashboard": "Loading dashboard...",
-    "errorLoadingDashboard": "Error loading dashboard"
+    "errorLoadingDashboard": "Error loading dashboard",
+    "pendingLicenseVerifications": "Pending License Verifications",
+    "agentsAwaitingReview": "{{count}} agents awaiting license review",
+    "failedToLoadLicenses": "Failed to load pending licenses",
+    "pendingReview": "Pending Review",
+    "noPendingLicenses": "No pending license verifications"
   }
 }
