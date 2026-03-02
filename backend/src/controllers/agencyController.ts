@@ -350,33 +350,8 @@ export const createAgency = async (
             listingsLimit: enterpriseProduct?.listingsLimit || ENTERPRISE_TIER_LIMITS.LISTINGS,
           });
 
-          // Generate promotion coupon codes and send summary email with codes
-          const { sendPromotionCouponsEmail } = await import('../services/emailService');
-          const { generateProSubscriptionCoupons } = await import('../services/subscriptionPaymentService');
-          const subscriptionEnd = user.subscriptionExpiresAt || new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
-          let promotionCouponCodes: Array<{ tier: 'highlight' | 'premium' | 'featured'; code: string }> = [];
-          try {
-            promotionCouponCodes = await generateProSubscriptionCoupons(
-              String(user._id),
-              enterpriseProduct?.highlightedCoupons || ENTERPRISE_TIER_LIMITS.HIGHLIGHTED_COUPONS,
-              enterpriseProduct?.premiumCoupons || ENTERPRISE_TIER_LIMITS.PREMIUM_COUPONS,
-              enterpriseProduct?.featuredCoupons || ENTERPRISE_TIER_LIMITS.FEATURED_COUPONS,
-              subscriptionEnd,
-            );
-          } catch (codeErr) {
-            agencyLogger.error('⚠️ Failed to generate promotion coupon codes:', codeErr);
-          }
-          await sendPromotionCouponsEmail({
-            email: user.email,
-            ownerName: user.name || 'Agency Owner',
-            agencyName: agency.name,
-            promotionCoupons: {
-              monthly: monthlyPromotionAmount,
-              available: monthlyPromotionAmount,
-              used: 0,
-            },
-            couponCodes: promotionCouponCodes,
-          });
+          // Promotion coupon codes are generated and emailed by subscriptionPaymentService
+          // when the Enterprise payment is processed (monthly coupons email).
 
           agentCouponsEmailSent = true;
           agencyLogger.info(`📧 Enterprise welcome emails sent to ${user.email}`);
