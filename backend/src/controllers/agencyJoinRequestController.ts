@@ -416,8 +416,8 @@ export const joinByInvitationCode = async (req: Request, res: Response): Promise
       return;
     }
 
-    // Find agency by invitation code
-    const agency = await Agency.findOne({ invitationCode });
+    // Find agency by invitation code (case-insensitive)
+    const agency = await Agency.findOne({ invitationCode: invitationCode.toUpperCase() });
     if (!agency) {
       res.status(404).json({ message: 'Invalid invitation code' });
       return;
