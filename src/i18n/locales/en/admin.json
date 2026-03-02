@@ -909,17 +909,11 @@
     "totalInquiries": "Total Inquiries",
     "adminPanel": "Admin Panel",
     "loadingDashboard": "Loading dashboard...",
-    "errorLoadingDashboard": "Error loading dashboard"
-  },
-  "pendingLicenses": {
-    "title": "Pending License Verifications",
-    "subtitle": "{{count}} agents awaiting license review",
-    "empty": "No pending license verifications",
-    "approve": "Approve",
-    "reject": "Reject",
-    "rejectReason": "Enter rejection reason (optional):",
-    "license": "License",
-    "country": "Country",
-    "pending": "Pending"
+    "errorLoadingDashboard": "Error loading dashboard",
+    "pendingLicenseVerifications": "Pending License Verifications",
+    "agentsAwaitingReview": "{{count}} agents awaiting license review",
+    "failedToLoadLicenses": "Failed to load pending licenses",
+    "pendingReview": "Pending Review",
+    "noPendingLicenses": "No pending license verifications"
   }
 }
