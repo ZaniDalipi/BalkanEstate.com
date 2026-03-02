@@ -126,11 +126,18 @@ const Footer: React.FC<FooterProps> = ({ className = '', contained = false }) =>
                             {t('footer:tagline', 'Your AI-powered real estate platform for the Balkans. Find your dream property across 10 countries with intelligent search and personalized recommendations.')}
                         </p>
 
-                        {/* AI Badge */}
-                        <div className="inline-flex items-center gap-1.5 sm:gap-2 bg-gradient-to-r from-primary/20 to-purple-500/20 border border-primary/30 rounded-full px-3 sm:px-4 py-1.5 sm:py-2">
-                            <SparklesIcon className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-primary animate-pulse" />
-                            <span className="text-xs sm:text-sm font-medium text-slate-300">{t('footer:ai.poweredBy', 'Powered by AI')}</span>
-                        </div>
+                        {/* Product Hunt Badge */}
+                        <a
+                            href="https://www.producthunt.com/@balkanestateai"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-flex items-center gap-1.5 sm:gap-2 bg-gradient-to-r from-orange-500/20 to-red-500/20 border border-orange-500/30 rounded-full px-3 sm:px-4 py-1.5 sm:py-2 hover:from-orange-500/30 hover:to-red-500/30 transition-all duration-300 group"
+                        >
+                            <svg className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-orange-400 group-hover:text-orange-300 transition-colors" viewBox="0 0 40 40" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M20 0C8.954 0 0 8.954 0 20s8.954 20 20 20 20-8.954 20-20S31.046 0 20 0zm0 36.8C10.728 36.8 3.2 29.272 3.2 20S10.728 3.2 20 3.2 36.8 10.728 36.8 20 29.272 36.8 20 36.8zm3.2-22.4h-8v11.2h4.8v-3.2h3.2c2.648 0 4.8-2.152 4.8-4.8s-2.152-4.8-4.8-4.8zm0 6.4H20v-3.2h3.2c.884 0 1.6.716 1.6 1.6s-.716 1.6-1.6 1.6z"/>
+                            </svg>
+                            <span className="text-xs sm:text-sm font-medium text-slate-300 group-hover:text-white transition-colors">Find us on Product Hunt</span>
+                        </a>
 
                         {/* Social Media Links */}
                         <div className="flex gap-2 sm:gap-3 pt-1 sm:pt-2">
