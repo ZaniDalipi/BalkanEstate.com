@@ -316,7 +316,7 @@ export const getCorsConfig = () => {
  */
 export const generalRateLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
-  max: isProduction ? 500 : 1000, // Generous for normal browsing/searching
+  max: 500, // Generous for normal browsing/searching
   message: {
     error: 'Too many requests',
     message: 'You have exceeded the rate limit. Please try again later.',
@@ -340,7 +340,7 @@ export const generalRateLimiter = rateLimit({
  */
 export const sensitiveRateLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
-  max: isProduction ? 30 : 60, // Strict for auth endpoints
+  max: 30, // Strict for auth endpoints
   message: {
     error: 'Too many requests',
     message: 'Too many login attempts. Please try again later.',
@@ -357,7 +357,7 @@ export const sensitiveRateLimiter = rateLimit({
  */
 export const mutationRateLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
-  max: isProduction ? 100 : 300, // Reasonable for property management workflows
+  max: 100, // Reasonable for property management workflows
   message: {
     error: 'Too many requests',
     message: 'Too many write requests. Please slow down and try again shortly.',
@@ -420,7 +420,7 @@ export const aiRateLimiter = rateLimit({
  */
 export const messagingRateLimiter = rateLimit({
   windowMs: 60 * 60 * 1000, // 1 hour
-  max: isProduction ? 60 : 300, // 60 messages/hour in production
+  max: 60, // 60 messages/hour in production
   message: {
     error: 'Too many messages',
     message: 'You are sending messages too fast. Please slow down.',
@@ -442,7 +442,7 @@ export const messagingRateLimiter = rateLimit({
  */
 export const uploadRateLimiter = rateLimit({
   windowMs: 60 * 60 * 1000, // 1 hour
-  max: isProduction ? 30 : 200, // 30 uploads/hour in production
+  max: 30, // 30 uploads/hour in production
   message: {
     error: 'Too many uploads',
     message: 'You have uploaded too many images. Please try again later.',
