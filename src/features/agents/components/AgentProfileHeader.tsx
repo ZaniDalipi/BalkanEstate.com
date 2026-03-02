@@ -1,4 +1,4 @@
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback, useMemo, useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { User } from 'lucide-react';
 import { Agent, Agency } from '@/types';
@@ -134,6 +134,13 @@ const AgentProfileHeader: React.FC<AgentProfileHeaderProps> = ({
     const resolvedAvatarUrl = isCurrentUser && state.currentUser?.avatarUrl
         ? state.currentUser.avatarUrl
         : agent.avatarUrl;
+
+    // Track image load errors so we can fall back to DefaultAvatar
+    const [imgError, setImgError] = useState(false);
+    // Reset error whenever the resolved URL changes (i.e. navigating to a different agent)
+    useEffect(() => {
+        setImgError(false);
+    }, [resolvedAvatarUrl]);
 
     return (
         <>
@@ -348,11 +355,13 @@ const AgentProfileHeader: React.FC<AgentProfileHeaderProps> = ({
                         {/* Agent Photo */}
                         <div className="relative flex-shrink-0">
                             <div className="w-28 h-28 sm:w-36 sm:h-36 lg:w-44 lg:h-44 rounded-xl sm:rounded-2xl overflow-hidden shadow-lg sm:shadow-xl border-2 sm:border-4 border-white/50" style={{ boxShadow: '0 10px 25px rgba(0,0,0,0.12), inset 2px 2px 2px 0 rgba(255,255,255,0.5), inset -1px -1px 1px 1px rgba(255,255,255,0.3)' }}>
-                                {resolvedAvatarUrl ? (
+                                {resolvedAvatarUrl && !imgError ? (
                                     <img
+                                        key={resolvedAvatarUrl}
                                         src={resolvedAvatarUrl}
                                         alt={agent.name}
                                         className="w-full h-full object-cover"
+                                        onError={() => setImgError(true)}
                                     />
                                 ) : (
                                     <DefaultAvatar gender={agent.gender} seed={agent.agentId || agent.id || agent.name} avatarOptions={agent.avatarOptions} show3d />
