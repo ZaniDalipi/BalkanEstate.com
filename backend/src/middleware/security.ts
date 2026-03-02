@@ -325,6 +325,8 @@ export const generalRateLimiter = rateLimit({
   standardHeaders: !isProduction, // Hide rate limit config from production responses
   legacyHeaders: false,
   skip: (req: Request) => {
+    // Skip rate limiting entirely in development for easier testing
+    if (isDevelopment) return true;
     // Skip rate limiting for health checks only
     return req.path === '/health';
   },
@@ -346,6 +348,7 @@ export const sensitiveRateLimiter = rateLimit({
   },
   standardHeaders: !isProduction, // Hide rate limit config from production responses
   legacyHeaders: false,
+  skip: () => isDevelopment, // Skip rate limiting in development
 });
 
 /**
@@ -362,6 +365,7 @@ export const mutationRateLimiter = rateLimit({
   },
   standardHeaders: !isProduction, // Hide rate limit config from production responses
   legacyHeaders: false,
+  skip: () => isDevelopment, // Skip rate limiting in development
 });
 
 /**
@@ -424,6 +428,7 @@ export const messagingRateLimiter = rateLimit({
   },
   standardHeaders: !isProduction,
   legacyHeaders: false,
+  skip: () => isDevelopment, // Skip rate limiting in development
   keyGenerator: (req: Request) => {
     const userId = (req as any).user?.id || (req as any).user?._id;
     return userId ? `msg_user_${userId}` : ipKeyGenerator(req.ip || 'unknown');
@@ -445,6 +450,7 @@ export const uploadRateLimiter = rateLimit({
   },
   standardHeaders: !isProduction,
   legacyHeaders: false,
+  skip: () => isDevelopment, // Skip rate limiting in development
   keyGenerator: (req: Request) => {
     const userId = (req as any).user?.id || (req as any).user?._id;
     return userId ? `upload_user_${userId}` : ipKeyGenerator(req.ip || 'unknown');
