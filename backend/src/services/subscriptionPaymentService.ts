@@ -739,6 +739,7 @@ async function generateProSubscriptionCoupons(
         maxTotalUses: 1,   // single-use only
         maxUsesPerUser: 1, // single-use only
         applicableTiers: [tier],
+        applicableDurations: [7, 15, 30], // Pro coupons only apply to promotions of 30 days or less
         isPublic: false,
         generatedForUserId: new mongoose.Types.ObjectId(userId),
         notes: `Auto-generated for userId:${userId}`,

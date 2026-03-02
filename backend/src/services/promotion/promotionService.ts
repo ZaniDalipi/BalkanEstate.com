@@ -7,6 +7,7 @@ import Promotion, { IPromotion } from '../../models/Promotion';
 import Property from '../../models/Property';
 import Agency from '../../models/Agency';
 import PromotionCoupon from '../../models/PromotionCoupon';
+import { resolveId } from '../../utils/idObfuscation';
 import {
   PROMOTION_TIERS,
   PROMOTION_PRICING,
@@ -51,7 +52,8 @@ export const verifyPropertyOwnership = async (
   propertyId: string,
   userId: string
 ): Promise<{ property: any; error?: string }> => {
-  const property = await Property.findById(propertyId);
+  const resolvedPropertyId = resolveId(propertyId) || propertyId;
+  const property = await Property.findById(resolvedPropertyId);
 
   if (!property) {
     return { property: null, error: 'Property not found' };
@@ -68,8 +70,9 @@ export const verifyPropertyOwnership = async (
  * Check if property already has active promotion
  */
 export const hasActivePromotion = async (propertyId: string): Promise<IPromotion | null> => {
+  const resolvedPropertyId = resolveId(propertyId) || propertyId;
   return Promotion.findOne({
-    propertyId,
+    propertyId: resolvedPropertyId,
     isActive: true,
     endDate: { $gt: new Date() },
   });
@@ -109,7 +112,8 @@ export const applyCoupon = async (
   couponCode: string,
   basePrice: number,
   userId: string,
-  promotionTier: PromotionTierType
+  promotionTier: PromotionTierType,
+  duration?: PromotionDuration
 ): Promise<{
   finalPrice: number;
   couponDiscount: number;
@@ -138,6 +142,17 @@ export const applyCoupon = async (
       couponDiscount: 0,
       coupon: null,
       error: `This coupon is only valid for: ${coupon.applicableTiers.join(', ')}`
+    };
+  }
+
+  // Check duration applicability
+  if (duration && coupon.applicableDurations?.length > 0 && !coupon.applicableDurations.includes(duration)) {
+    const allowedDurations = coupon.applicableDurations.map((d: number) => `${d} days`).join(', ');
+    return {
+      finalPrice: basePrice,
+      couponDiscount: 0,
+      coupon: null,
+      error: `This coupon is only valid for ${allowedDurations} promotion durations`
     };
   }
 
@@ -181,7 +196,8 @@ export const updatePropertyPromotion = async (
     hasUrgentBadge?: boolean;
   }
 ): Promise<void> => {
-  const property = await Property.findById(propertyId);
+  const resolvedPropertyId = resolveId(propertyId) || propertyId;
+  const property = await Property.findById(resolvedPropertyId);
   if (!property) return;
 
   Object.assign(property, data);

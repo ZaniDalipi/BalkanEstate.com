@@ -76,7 +76,7 @@ export const extendPromotion = async (
     let appliedCouponCode: string | undefined;
 
     if (couponCode && extensionPrice > 0) {
-      const couponResult = await applyCoupon(couponCode, extensionPrice, String(currentUser._id), promotionTier);
+      const couponResult = await applyCoupon(couponCode, extensionPrice, String(currentUser._id), promotionTier, duration);
       if (!couponResult.error && couponResult.coupon) {
         extensionPrice = couponResult.finalPrice;
         couponDiscount = couponResult.couponDiscount;

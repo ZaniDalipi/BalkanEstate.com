@@ -121,7 +121,7 @@ export const purchasePromotion = async (
     }
 
     const {
-      propertyId,
+      propertyId: rawPropertyId,
       promotionTier,
       duration,
       hasUrgentBadge = false,
@@ -130,13 +130,16 @@ export const purchasePromotion = async (
     } = req.body;
 
     // Validation
-    if (!propertyId || !promotionTier || !duration) {
+    if (!rawPropertyId || !promotionTier || !duration) {
       res.status(400).json({
         message: 'Property ID, promotion tier, and duration are required',
         code: 'MISSING_REQUIRED_FIELDS',
       });
       return;
     }
+
+    // Resolve obfuscated or raw property ID to MongoDB ObjectId
+    const propertyId = resolveId(rawPropertyId) || rawPropertyId;
 
     const validTiers: PromotionTierType[] = ['featured', 'highlight', 'premium'];
     if (!validTiers.includes(promotionTier)) {
@@ -304,6 +307,18 @@ export const purchasePromotion = async (
             message: `This coupon is only valid for: ${coupon.applicableTiers.join(', ')}`,
             code: 'INVALID_TIER_FOR_COUPON',
             applicableTiers: coupon.applicableTiers,
+          });
+          return;
+        }
+      }
+
+      // Check if applicable to duration
+      if (coupon.applicableDurations && coupon.applicableDurations.length > 0) {
+        if (!coupon.applicableDurations.includes(duration)) {
+          const allowedDurations = coupon.applicableDurations.map((d: number) => `${d} days`).join(', ');
+          res.status(403).json({
+            message: `This coupon is only valid for ${allowedDurations} promotion durations`,
+            code: 'INVALID_DURATION_FOR_COUPON',
           });
           return;
         }
@@ -701,7 +716,7 @@ export const createPromotionCheckout = async (
     }
 
     const {
-      propertyId,
+      propertyId: rawCheckoutPropertyId,
       promotionTier,
       duration,
       hasUrgentBadge = false,
@@ -709,13 +724,16 @@ export const createPromotionCheckout = async (
     } = req.body;
 
     // Validation
-    if (!propertyId || !promotionTier || !duration) {
+    if (!rawCheckoutPropertyId || !promotionTier || !duration) {
       res.status(400).json({
         message: 'Property ID, promotion tier, and duration are required',
         code: 'MISSING_REQUIRED_FIELDS',
       });
       return;
     }
+
+    // Resolve obfuscated or raw property ID to MongoDB ObjectId
+    const propertyId = resolveId(rawCheckoutPropertyId) || rawCheckoutPropertyId;
 
     const validTiers: PromotionTierType[] = ['featured', 'highlight', 'premium'];
     if (!validTiers.includes(promotionTier)) {
@@ -785,7 +803,9 @@ export const createPromotionCheckout = async (
       if (coupon) {
         const canUse = await coupon.canBeUsedBy(user._id);
         if (canUse) {
-          if (!coupon.applicableTiers || coupon.applicableTiers.length === 0 || coupon.applicableTiers.includes(promotionTier)) {
+          const tierOk = !coupon.applicableTiers || coupon.applicableTiers.length === 0 || coupon.applicableTiers.includes(promotionTier);
+          const durationOk = !coupon.applicableDurations || coupon.applicableDurations.length === 0 || coupon.applicableDurations.includes(duration);
+          if (tierOk && durationOk) {
             if (!coupon.minimumPurchaseAmount || finalPrice >= coupon.minimumPurchaseAmount) {
               couponDiscount = coupon.calculateDiscount(finalPrice);
               finalPrice = Math.max(0, finalPrice - couponDiscount);
@@ -1013,7 +1033,9 @@ export const extendPromotion = async (
       if (coupon) {
         const canUse = await coupon.canBeUsedBy(currentUser._id);
         if (canUse) {
-          if (!coupon.applicableTiers || coupon.applicableTiers.length === 0 || coupon.applicableTiers.includes(promotionTier)) {
+          const tierOk = !coupon.applicableTiers || coupon.applicableTiers.length === 0 || coupon.applicableTiers.includes(promotionTier);
+          const durationOk = !coupon.applicableDurations || coupon.applicableDurations.length === 0 || coupon.applicableDurations.includes(duration);
+          if (tierOk && durationOk) {
             couponDiscount = coupon.calculateDiscount(extensionPrice);
             extensionPrice = Math.max(0, extensionPrice - couponDiscount);
             appliedCouponCode = couponCode;
