@@ -49,6 +49,7 @@ export const getViewingAvailability = async (req: Request, res: Response): Promi
         timeSlots: generateTimeSlots('09:00', '18:00', 30),
         slotDurationMinutes: 30,
         notes: '',
+        bookedSlots: [],
       });
       return;
     }
@@ -103,10 +104,10 @@ export const scheduleViewing = async (req: Request, res: Response): Promise<void
       return;
     }
 
-    // Validate date is in the future
+    // Validate date is in the future (use UTC to match date storage format)
     const viewingDate = new Date(date);
     const now = new Date();
-    now.setHours(0, 0, 0, 0);
+    now.setUTCHours(0, 0, 0, 0);
     if (viewingDate < now) {
       res.status(400).json({ message: 'Viewing date must be in the future' });
       return;
@@ -127,7 +128,7 @@ export const scheduleViewing = async (req: Request, res: Response): Promise<void
     // Check if the slot is available (day of week)
     const va = property.visitAvailability;
     if (va && va.enabled) {
-      const dayOfWeek = viewingDate.getDay();
+      const dayOfWeek = viewingDate.getUTCDay();
       if (!va.days.includes(dayOfWeek)) {
         res.status(400).json({ message: 'The selected day is not available for viewings' });
         return;
@@ -188,6 +189,7 @@ export const scheduleViewing = async (req: Request, res: Response): Promise<void
       month: 'long',
       day: 'numeric',
       year: 'numeric',
+      timeZone: 'UTC',
     });
 
     // Send confirmation email to visitor
@@ -380,6 +382,7 @@ export const updateViewingStatus = async (req: Request, res: Response): Promise<
       month: 'long',
       day: 'numeric',
       year: 'numeric',
+      timeZone: 'UTC',
     });
 
     const sellerName = req.user?.name || 'Property Owner';
