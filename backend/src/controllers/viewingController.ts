@@ -4,7 +4,19 @@ import User from '../models/User';
 import Viewing from '../models/Viewing';
 import { sendViewingConfirmation, sendViewingNotification, sendViewingApproved, sendViewingRejected } from '../services/emailService';
 import { apiLogger } from '../utils/logger';
-import { getObjectIdParam } from '../utils/validateParams';
+import { getObjectIdParam, isValidObjectId } from '../utils/validateParams';
+
+/** Validate HH:MM time slot format */
+const TIME_SLOT_REGEX = /^([01]\d|2[0-3]):[0-5]\d$/;
+
+/** Validate YYYY-MM-DD date format */
+const DATE_REGEX = /^\d{4}-(?:0[1-9]|1[0-2])-(?:0[1-9]|[12]\d|3[01])$/;
+
+/** Maximum allowed string lengths for visitor fields */
+const MAX_NAME_LENGTH = 200;
+const MAX_EMAIL_LENGTH = 254;
+const MAX_PHONE_LENGTH = 30;
+const MAX_MESSAGE_LENGTH = 2000;
 
 /**
  * Generate time slots based on property's visit availability
@@ -91,21 +103,53 @@ export const scheduleViewing = async (req: Request, res: Response): Promise<void
   try {
     const { propertyId, date, timeSlot, visitorName, visitorEmail, visitorPhone, visitorMessage } = req.body;
 
-    // Validate required fields
+    // ── Validate required fields ──
     if (!propertyId || !date || !timeSlot || !visitorName || !visitorEmail) {
       res.status(400).json({ message: 'Property ID, date, time slot, name, and email are required' });
       return;
     }
 
-    // Validate email format
+    // ── Validate propertyId is a valid MongoDB ObjectId ──
+    if (typeof propertyId !== 'string' || !isValidObjectId(propertyId)) {
+      res.status(400).json({ message: 'Invalid property ID format' });
+      return;
+    }
+
+    // ── Validate and sanitize string field lengths ──
+    if (typeof visitorName !== 'string' || visitorName.trim().length === 0 || visitorName.length > MAX_NAME_LENGTH) {
+      res.status(400).json({ message: `Name must be between 1 and ${MAX_NAME_LENGTH} characters` });
+      return;
+    }
+    if (typeof visitorEmail !== 'string' || visitorEmail.length > MAX_EMAIL_LENGTH) {
+      res.status(400).json({ message: 'Invalid email' });
+      return;
+    }
+    if (visitorPhone != null && (typeof visitorPhone !== 'string' || visitorPhone.length > MAX_PHONE_LENGTH)) {
+      res.status(400).json({ message: `Phone must be at most ${MAX_PHONE_LENGTH} characters` });
+      return;
+    }
+    if (visitorMessage != null && (typeof visitorMessage !== 'string' || visitorMessage.length > MAX_MESSAGE_LENGTH)) {
+      res.status(400).json({ message: `Message must be at most ${MAX_MESSAGE_LENGTH} characters` });
+      return;
+    }
+
+    // ── Validate email format ──
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(visitorEmail)) {
       res.status(400).json({ message: 'Invalid email format' });
       return;
     }
 
-    // Validate date is in the future (use UTC to match date storage format)
-    const viewingDate = new Date(date);
+    // ── Validate date format and value ──
+    if (typeof date !== 'string' || !DATE_REGEX.test(date)) {
+      res.status(400).json({ message: 'Invalid date format. Expected YYYY-MM-DD' });
+      return;
+    }
+    const viewingDate = new Date(`${date}T00:00:00.000Z`);
+    if (isNaN(viewingDate.getTime())) {
+      res.status(400).json({ message: 'Invalid date value' });
+      return;
+    }
     const now = new Date();
     now.setUTCHours(0, 0, 0, 0);
     if (viewingDate < now) {
@@ -113,7 +157,13 @@ export const scheduleViewing = async (req: Request, res: Response): Promise<void
       return;
     }
 
-    // Find the property
+    // ── Validate time slot format ──
+    if (typeof timeSlot !== 'string' || !TIME_SLOT_REGEX.test(timeSlot)) {
+      res.status(400).json({ message: 'Invalid time slot format. Expected HH:MM' });
+      return;
+    }
+
+    // ── Find the property ──
     const property = await Property.findById(propertyId);
     if (!property) {
       res.status(404).json({ message: 'Property not found' });
@@ -125,7 +175,7 @@ export const scheduleViewing = async (req: Request, res: Response): Promise<void
       return;
     }
 
-    // Check if the slot is available (day of week)
+    // ── Check day-of-week and time slot against visit availability ──
     const va = property.visitAvailability;
     if (va && va.enabled) {
       const dayOfWeek = viewingDate.getUTCDay();
@@ -134,7 +184,6 @@ export const scheduleViewing = async (req: Request, res: Response): Promise<void
         return;
       }
 
-      // Validate time slot is within range
       const slots = generateTimeSlots(va.startTime, va.endTime, va.slotDurationMinutes);
       if (!slots.includes(timeSlot)) {
         res.status(400).json({ message: 'The selected time slot is not available' });
@@ -142,8 +191,8 @@ export const scheduleViewing = async (req: Request, res: Response): Promise<void
       }
     }
 
-    // Check for duplicate booking (same property, date, time)
-    const dateStr = viewingDate.toISOString().split('T')[0];
+    // ── Check for duplicate booking (same property, date, time) ──
+    const dateStr = date; // Already validated as YYYY-MM-DD
     const existingViewing = await Viewing.findOne({
       propertyId,
       date: {
@@ -159,31 +208,39 @@ export const scheduleViewing = async (req: Request, res: Response): Promise<void
       return;
     }
 
-    // Find the seller
+    // ── Find the seller ──
     const seller = await User.findById(property.sellerId);
     if (!seller) {
       res.status(404).json({ message: 'Property owner not found' });
       return;
     }
 
-    // Create the viewing
+    // ── Create the viewing ──
+    const trimmedName = visitorName.trim();
+    const trimmedEmail = visitorEmail.trim().toLowerCase();
+    const trimmedPhone = visitorPhone?.trim() || undefined;
+    const trimmedMessage = visitorMessage?.trim() || undefined;
+
     const viewing = await Viewing.create({
       propertyId: property._id,
       sellerId: property.sellerId,
-      visitorName: visitorName.trim(),
-      visitorEmail: visitorEmail.trim().toLowerCase(),
-      visitorPhone: visitorPhone?.trim(),
-      visitorMessage: visitorMessage?.trim(),
+      visitorName: trimmedName,
+      visitorEmail: trimmedEmail,
+      visitorPhone: trimmedPhone,
+      visitorMessage: trimmedMessage,
       date: new Date(`${dateStr}T00:00:00.000Z`),
       timeSlot,
       status: 'pending',
     });
 
-    // Increment inquiries count on property
-    await Property.findByIdAndUpdate(propertyId, { $inc: { inquiries: 1 } });
+    // Increment inquiries count (fire-and-forget — don't fail the request if this errors)
+    Property.findByIdAndUpdate(propertyId, { $inc: { inquiries: 1 } }).catch(err =>
+      apiLogger.error(`Failed to increment inquiries for property ${propertyId}:`, err)
+    );
 
-    // Build location string
+    // ── Send notification emails (non-blocking) ──
     const location = [property.address, property.city, property.country].filter(Boolean).join(', ');
+    const propertyTitle = property.title || `${property.propertyType} in ${property.city}`;
     const formattedDate = viewingDate.toLocaleDateString('en-US', {
       weekday: 'long',
       month: 'long',
@@ -192,42 +249,40 @@ export const scheduleViewing = async (req: Request, res: Response): Promise<void
       timeZone: 'UTC',
     });
 
-    // Send confirmation email to visitor
-    try {
-      await sendViewingConfirmation({
-        visitorEmail: visitorEmail.trim().toLowerCase(),
-        visitorName: visitorName.trim(),
-        propertyTitle: property.title || `${property.propertyType} in ${property.city}`,
+    // Send emails in parallel without blocking the response
+    Promise.allSettled([
+      sendViewingConfirmation({
+        visitorEmail: trimmedEmail,
+        visitorName: trimmedName,
+        propertyTitle,
         propertyAddress: location,
         date: formattedDate,
         timeSlot,
         sellerName: seller.name,
         propertyId: String(property._id),
-      });
-    } catch (emailError) {
-      apiLogger.error('Failed to send viewing confirmation email to visitor:', emailError);
-    }
-
-    // Send notification email to seller
-    try {
-      await sendViewingNotification({
+      }),
+      sendViewingNotification({
         sellerEmail: seller.email,
         sellerName: seller.name,
-        visitorName: visitorName.trim(),
-        visitorEmail: visitorEmail.trim().toLowerCase(),
-        visitorPhone: visitorPhone?.trim(),
-        visitorMessage: visitorMessage?.trim(),
-        propertyTitle: property.title || `${property.propertyType} in ${property.city}`,
+        visitorName: trimmedName,
+        visitorEmail: trimmedEmail,
+        visitorPhone: trimmedPhone,
+        visitorMessage: trimmedMessage,
+        propertyTitle,
         propertyAddress: location,
         date: formattedDate,
         timeSlot,
         propertyId: String(property._id),
+      }),
+    ]).then(results => {
+      results.forEach((result, i) => {
+        if (result.status === 'rejected') {
+          apiLogger.error(`Failed to send viewing ${i === 0 ? 'confirmation' : 'notification'} email:`, result.reason);
+        }
       });
-    } catch (emailError) {
-      apiLogger.error('Failed to send viewing notification email to seller:', emailError);
-    }
+    });
 
-    apiLogger.info(`[viewingController] Viewing scheduled: ${visitorEmail} for ${property.title || property._id} on ${formattedDate} at ${timeSlot} (ID: ${viewing._id})`);
+    apiLogger.info(`[viewingController] Viewing scheduled: ${trimmedEmail} for ${propertyTitle} on ${formattedDate} at ${timeSlot} (ID: ${viewing._id})`);
 
     res.status(201).json({
       message: 'Viewing scheduled successfully',
@@ -239,8 +294,8 @@ export const scheduleViewing = async (req: Request, res: Response): Promise<void
       },
     });
   } catch (error: any) {
-    apiLogger.error('Schedule viewing error:', error);
-    res.status(500).json({ message: 'Error scheduling viewing' });
+    apiLogger.error('Schedule viewing error:', { message: error.message, stack: error.stack, name: error.name });
+    res.status(500).json({ message: 'Error scheduling viewing. Please try again later.' });
   }
 };
 
