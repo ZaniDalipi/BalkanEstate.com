@@ -115,8 +115,23 @@ const ViewingRequestsTab: React.FC = () => {
         throw new Error(data.message || 'Failed to update viewing status');
       }
 
-      // Refresh the list
-      await fetchViewings();
+      // Update local state immediately instead of re-fetching
+      setViewings(prev => prev.map(v =>
+        v.id === viewingId
+          ? { ...v, status, ...(status === 'cancelled' ? { cancelledBy: 'seller', cancelReason: cancelReason?.trim() } : {}) }
+          : v
+      ));
+      setCounts(prev => {
+        const viewing = viewings.find(v => v.id === viewingId);
+        if (!viewing) return prev;
+        const oldStatus = viewing.status as keyof Omit<ViewingCounts, 'total'>;
+        const newStatus = status as keyof Omit<ViewingCounts, 'total'>;
+        return {
+          ...prev,
+          [oldStatus]: Math.max(0, prev[oldStatus] - 1),
+          [newStatus]: prev[newStatus] + 1,
+        };
+      });
       setDeclineViewingId(null);
       setDeclineReason('');
     } catch (err) {

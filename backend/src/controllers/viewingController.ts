@@ -3,6 +3,7 @@ import Property from '../models/Property';
 import User from '../models/User';
 import Viewing from '../models/Viewing';
 import { sendViewingConfirmation, sendViewingNotification, sendViewingApproved, sendViewingRejected } from '../services/emailService';
+import Notification from '../models/Notification';
 import { apiLogger } from '../utils/logger';
 import { getObjectIdParam, isValidObjectId } from '../utils/validateParams';
 import { resolveId } from '../utils/idObfuscation';
@@ -243,6 +244,24 @@ export const scheduleViewing = async (req: Request, res: Response): Promise<void
     // ── Send notification emails (non-blocking) ──
     const location = [property.address, property.city, property.country].filter(Boolean).join(', ');
     const propertyTitle = property.title || `${property.propertyType} in ${property.city}`;
+
+    // ── Create in-app notification for the seller ──
+    Notification.create({
+      userId: property.sellerId,
+      type: 'new_viewing',
+      title: 'New Viewing Request',
+      message: `${trimmedName} requested a viewing for ${propertyTitle}.`,
+      icon: 'calendar',
+      priority: 'high',
+      data: {
+        propertyId: String(property._id),
+        propertyTitle,
+        viewingId: String(viewing._id),
+        visitorName: trimmedName,
+        actionUrl: '/seller?tab=viewings',
+        actionLabel: 'View Requests',
+      },
+    }).catch(err => apiLogger.error('Failed to create new viewing notification:', err));
     const formattedDate = viewingDate.toLocaleDateString('en-US', {
       weekday: 'long',
       month: 'long',
@@ -444,39 +463,53 @@ export const updateViewingStatus = async (req: Request, res: Response): Promise<
 
     const sellerName = req.user?.name || 'Property Owner';
 
-    // Send status notification emails
+    // ── Create in-app notification for the seller ──
+    if (status === 'confirmed' || status === 'cancelled') {
+      Notification.create({
+        userId: sellerId,
+        type: status === 'confirmed' ? 'viewing_approved' : 'viewing_declined',
+        title: status === 'confirmed' ? 'Viewing Approved' : 'Viewing Declined',
+        message: status === 'confirmed'
+          ? `You approved ${viewing.visitorName}'s viewing for ${propertyTitle} on ${formattedDate} at ${viewing.timeSlot}.`
+          : `You declined ${viewing.visitorName}'s viewing for ${propertyTitle} on ${formattedDate}.`,
+        icon: status === 'confirmed' ? 'check-circle' : 'x-circle',
+        priority: 'normal',
+        data: {
+          propertyId: String(viewing.propertyId),
+          propertyTitle,
+          viewingId: String(viewing._id),
+          visitorName: viewing.visitorName,
+          date: formattedDate,
+          timeSlot: viewing.timeSlot,
+        },
+      }).catch(err => apiLogger.error('Failed to create viewing notification:', err));
+    }
+
+    // ── Send email notifications (non-blocking — don't delay the response) ──
     if (status === 'confirmed' && oldStatus === 'pending') {
-      try {
-        await sendViewingApproved({
-          visitorEmail: viewing.visitorEmail,
-          visitorName: viewing.visitorName,
-          propertyTitle,
-          propertyAddress: location,
-          date: formattedDate,
-          timeSlot: viewing.timeSlot,
-          sellerName,
-          sellerPhone: req.user?.phone,
-          propertyId: String(viewing.propertyId),
-        });
-      } catch (emailError) {
-        apiLogger.error('Failed to send viewing approved email:', emailError);
-      }
+      sendViewingApproved({
+        visitorEmail: viewing.visitorEmail,
+        visitorName: viewing.visitorName,
+        propertyTitle,
+        propertyAddress: location,
+        date: formattedDate,
+        timeSlot: viewing.timeSlot,
+        sellerName,
+        sellerPhone: req.user?.phone,
+        propertyId: String(viewing.propertyId),
+      }).catch(err => apiLogger.error('Failed to send viewing approved email:', err));
     } else if (status === 'cancelled') {
-      try {
-        await sendViewingRejected({
-          visitorEmail: viewing.visitorEmail,
-          visitorName: viewing.visitorName,
-          propertyTitle,
-          propertyAddress: location,
-          date: formattedDate,
-          timeSlot: viewing.timeSlot,
-          sellerName,
-          cancelReason: cancelReason?.trim(),
-          propertyId: String(viewing.propertyId),
-        });
-      } catch (emailError) {
-        apiLogger.error('Failed to send viewing rejected email:', emailError);
-      }
+      sendViewingRejected({
+        visitorEmail: viewing.visitorEmail,
+        visitorName: viewing.visitorName,
+        propertyTitle,
+        propertyAddress: location,
+        date: formattedDate,
+        timeSlot: viewing.timeSlot,
+        sellerName,
+        cancelReason: cancelReason?.trim(),
+        propertyId: String(viewing.propertyId),
+      }).catch(err => apiLogger.error('Failed to send viewing rejected email:', err));
     }
 
     apiLogger.info(`[viewingController] Viewing ${viewingId} status updated: ${oldStatus} → ${status} by seller ${sellerId}`);
