@@ -5,6 +5,7 @@ import Viewing from '../models/Viewing';
 import { sendViewingConfirmation, sendViewingNotification, sendViewingApproved, sendViewingRejected } from '../services/emailService';
 import { apiLogger } from '../utils/logger';
 import { getObjectIdParam, isValidObjectId } from '../utils/validateParams';
+import { resolveId } from '../utils/idObfuscation';
 
 /** Validate HH:MM time slot format */
 const TIME_SLOT_REGEX = /^([01]\d|2[0-3]):[0-5]\d$/;
@@ -109,8 +110,9 @@ export const scheduleViewing = async (req: Request, res: Response): Promise<void
       return;
     }
 
-    // ── Validate propertyId is a valid MongoDB ObjectId ──
-    if (typeof propertyId !== 'string' || !isValidObjectId(propertyId)) {
+    // ── Resolve propertyId (supports raw hex ObjectIds and obfuscated encoded IDs) ──
+    const resolvedPropertyId = typeof propertyId === 'string' ? resolveId(propertyId) : null;
+    if (!resolvedPropertyId || !isValidObjectId(resolvedPropertyId)) {
       res.status(400).json({ message: 'Invalid property ID format' });
       return;
     }
@@ -164,7 +166,7 @@ export const scheduleViewing = async (req: Request, res: Response): Promise<void
     }
 
     // ── Find the property ──
-    const property = await Property.findById(propertyId);
+    const property = await Property.findById(resolvedPropertyId);
     if (!property) {
       res.status(404).json({ message: 'Property not found' });
       return;
@@ -194,7 +196,7 @@ export const scheduleViewing = async (req: Request, res: Response): Promise<void
     // ── Check for duplicate booking (same property, date, time) ──
     const dateStr = date; // Already validated as YYYY-MM-DD
     const existingViewing = await Viewing.findOne({
-      propertyId,
+      propertyId: resolvedPropertyId,
       date: {
         $gte: new Date(`${dateStr}T00:00:00.000Z`),
         $lt: new Date(`${dateStr}T23:59:59.999Z`),
@@ -234,8 +236,8 @@ export const scheduleViewing = async (req: Request, res: Response): Promise<void
     });
 
     // Increment inquiries count (fire-and-forget — don't fail the request if this errors)
-    Property.findByIdAndUpdate(propertyId, { $inc: { inquiries: 1 } }).catch(err =>
-      apiLogger.error(`Failed to increment inquiries for property ${propertyId}:`, err)
+    Property.findByIdAndUpdate(resolvedPropertyId, { $inc: { inquiries: 1 } }).catch(err =>
+      apiLogger.error(`Failed to increment inquiries for property ${resolvedPropertyId}:`, err)
     );
 
     // ── Send notification emails (non-blocking) ──
