@@ -27,6 +27,20 @@ export const createJoinRequest = async (req: Request, res: Response): Promise<vo
       return;
     }
 
+    // Check if user has an active Pro subscription
+    const userTier = user.subscription?.tier;
+    const userSubStatus = user.subscription?.status;
+    const hasProSubscription =
+      (userTier === 'pro' || userTier === 'agency_owner') &&
+      (userSubStatus === 'active' || userSubStatus === 'trial');
+
+    if (!hasProSubscription) {
+      res.status(403).json({
+        message: 'Pro subscription required to join an agency. Please upgrade your plan.',
+      });
+      return;
+    }
+
     // Check if agent already belongs to an agency
     if (user.agencyId) {
       res.status(400).json({ message: 'You already belong to an agency' });
@@ -201,6 +215,20 @@ export const approveJoinRequest = async (req: Request, res: Response): Promise<v
     const agent = await User.findById(joinRequest.agentId);
     if (!agent) {
       res.status(404).json({ message: 'Agent not found' });
+      return;
+    }
+
+    // Re-validate that agent still has an active Pro subscription
+    const agentTier = agent.subscription?.tier;
+    const agentSubStatus = agent.subscription?.status;
+    const agentHasPro =
+      (agentTier === 'pro' || agentTier === 'agency_owner') &&
+      (agentSubStatus === 'active' || agentSubStatus === 'trial');
+
+    if (!agentHasPro) {
+      res.status(403).json({
+        message: 'This agent no longer has an active Pro subscription and cannot join the agency.',
+      });
       return;
     }
 
@@ -407,6 +435,20 @@ export const joinByInvitationCode = async (req: Request, res: Response): Promise
     const user = await User.findById(agentId);
     if (!user || user.role !== 'agent') {
       res.status(403).json({ message: 'Only agents can join agencies' });
+      return;
+    }
+
+    // Check if user has an active Pro subscription
+    const userTier = user.subscription?.tier;
+    const userSubStatus = user.subscription?.status;
+    const hasProSubscription =
+      (userTier === 'pro' || userTier === 'agency_owner') &&
+      (userSubStatus === 'active' || userSubStatus === 'trial');
+
+    if (!hasProSubscription) {
+      res.status(403).json({
+        message: 'Pro subscription required to join an agency. Please upgrade your plan.',
+      });
       return;
     }
 
