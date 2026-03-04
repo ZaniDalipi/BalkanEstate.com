@@ -1076,6 +1076,29 @@ export const getFinancial = async (
         available: agency.agentCoupons.filter((c) => c.status === 'available').length,
         used: agency.agentCoupons.filter((c) => c.status === 'used').length,
         expired: agency.agentCoupons.filter((c) => c.status === 'expired').length,
+        coupons: await Promise.all(
+          agency.agentCoupons.map(async (c) => {
+            let usedByInfo = null;
+            if (c.usedBy) {
+              try {
+                const user = await mongoose.model('User').findById(c.usedBy, 'name email').lean();
+                if (user) {
+                  usedByInfo = { id: String((user as any)._id), name: (user as any).name, email: (user as any).email };
+                }
+              } catch {
+                // user may have been deleted
+              }
+            }
+            return {
+              code: c.code,
+              status: c.status,
+              generatedAt: c.generatedAt,
+              expiresAt: c.expiresAt,
+              usedBy: usedByInfo,
+              usedAt: c.usedAt || null,
+            };
+          })
+        ),
       },
     });
   } catch (error: any) {

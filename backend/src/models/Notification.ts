@@ -7,6 +7,9 @@ export type NotificationType =
   | 'promotion_success'      // Promoted listing doing well
   | 'new_message'           // New conversation message
   | 'new_inquiry'           // New property inquiry
+  | 'new_viewing'           // New viewing request received
+  | 'viewing_approved'      // Viewing request approved by seller
+  | 'viewing_declined'      // Viewing request declined by seller
   | 'subscription_expiring' // Subscription about to expire
   | 'agent_joined_agency'   // Agent joined your agency
   | 'agent_left_agency'     // Agent left your agency
@@ -58,6 +61,9 @@ const NotificationSchema: Schema = new Schema(
         'promotion_success',
         'new_message',
         'new_inquiry',
+        'new_viewing',
+        'viewing_approved',
+        'viewing_declined',
         'subscription_expiring',
         'agent_joined_agency',
         'agent_left_agency',

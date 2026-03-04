@@ -397,6 +397,38 @@ export function canCreateAgency(
 }
 
 /**
+ * Check if user can join an agency
+ * Requires an active Pro (or higher) subscription
+ */
+export function canJoinAgency(subscription: UserSubscription | undefined): {
+  allowed: boolean;
+  reason?: string;
+} {
+  if (!subscription) {
+    return { allowed: false, reason: 'No subscription found' };
+  }
+
+  // Must have an active subscription
+  if (subscription.status !== 'active' && subscription.status !== 'trial') {
+    return {
+      allowed: false,
+      reason: 'Active Pro subscription required to join an agency',
+    };
+  }
+
+  // Must have at least Pro tier
+  const allowedTiers: SubscriptionTier[] = ['pro', 'agency_owner'];
+  if (!allowedTiers.includes(subscription.tier)) {
+    return {
+      allowed: false,
+      reason: 'Pro subscription required to join an agency. Please upgrade your plan.',
+    };
+  }
+
+  return { allowed: true };
+}
+
+/**
  * Check if user can use promotion coupons
  */
 export function canUsePromotionCoupon(

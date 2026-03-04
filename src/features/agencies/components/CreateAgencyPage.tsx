@@ -16,8 +16,23 @@ import {
   UsersIcon,
   ArrowRightIcon,
   ArrowLeftIcon,
+  ShieldCheckIcon,
 } from '@/constants';
 import { API_URL } from '@/src/shared/api/config';
+
+const AGENCY_TYPES = [
+  { value: 'standard', label: 'Standard' },
+  { value: 'luxury', label: 'Luxury' },
+  { value: 'commercial', label: 'Commercial' },
+  { value: 'boutique', label: 'Boutique' },
+  { value: 'team', label: 'Team' },
+] as const;
+
+const SPECIALIZATION_OPTIONS = [
+  'Residential Sales', 'Residential Rentals', 'Commercial Sales', 'Commercial Leasing',
+  'Luxury Properties', 'New Developments', 'Land & Plots', 'Vacation Homes',
+  'Property Management', 'Investment Properties', 'Relocation Services', 'Appraisals & Valuations',
+];
 
 // Common languages spoken in the Balkan region
 const BALKAN_LANGUAGES = [
@@ -29,7 +44,9 @@ const BALKAN_LANGUAGES = [
 interface AgencyFormData {
   name: string;
   description: string;
+  type: string;
   address: string;
+  zipCode: string;
   city: string;
   country: string;
   phone: string;
@@ -38,6 +55,8 @@ interface AgencyFormData {
   licenseNumber: string;
   yearsInBusiness: string;
   languages: string[];
+  specializations: string[];
+  serviceAreas: string;
   facebookUrl: string;
   instagramUrl: string;
   linkedinUrl: string;
@@ -73,7 +92,9 @@ const CreateAgencyPage: React.FC = () => {
   const [formData, setFormData] = useState<AgencyFormData>({
     name: '',
     description: '',
+    type: 'standard',
     address: '',
+    zipCode: '',
     city: '',
     country: '',
     phone: '',
@@ -82,6 +103,8 @@ const CreateAgencyPage: React.FC = () => {
     licenseNumber: '',
     yearsInBusiness: '',
     languages: [],
+    specializations: [],
+    serviceAreas: '',
     facebookUrl: '',
     instagramUrl: '',
     linkedinUrl: '',
@@ -125,7 +148,9 @@ const CreateAgencyPage: React.FC = () => {
       setFormData({
         name: pendingData.name || '',
         description: pendingData.description || '',
+        type: pendingData.type || 'standard',
         address: pendingData.address || '',
+        zipCode: pendingData.zipCode || '',
         city: pendingData.city || '',
         country: pendingData.country || '',
         phone: pendingData.phone || '',
@@ -134,6 +159,8 @@ const CreateAgencyPage: React.FC = () => {
         licenseNumber: pendingData.licenseNumber || '',
         yearsInBusiness: pendingData.yearsInBusiness?.toString() || '',
         languages: pendingData.languages || [],
+        specializations: pendingData.specializations || [],
+        serviceAreas: Array.isArray(pendingData.serviceAreas) ? pendingData.serviceAreas.join(', ') : pendingData.serviceAreas || '',
         facebookUrl: pendingData.facebookUrl || '',
         instagramUrl: pendingData.instagramUrl || '',
         linkedinUrl: pendingData.linkedinUrl || '',
@@ -202,6 +229,15 @@ const CreateAgencyPage: React.FC = () => {
     }));
   }, []);
 
+  const handleSpecializationToggle = useCallback((spec: string) => {
+    setFormData(prev => ({
+      ...prev,
+      specializations: prev.specializations.includes(spec)
+        ? prev.specializations.filter(s => s !== spec)
+        : [...prev.specializations, spec],
+    }));
+  }, []);
+
   const validateStep = (step: number): boolean => {
     setError('');
 
@@ -253,6 +289,9 @@ const CreateAgencyPage: React.FC = () => {
     const agencyData = {
       ...formData,
       yearsInBusiness: formData.yearsInBusiness ? parseInt(formData.yearsInBusiness) : undefined,
+      serviceAreas: formData.serviceAreas
+        ? formData.serviceAreas.split(',').map(s => s.trim()).filter(Boolean)
+        : [],
     };
 
     // Save to context and navigate to payment
@@ -464,6 +503,32 @@ const CreateAgencyPage: React.FC = () => {
                     {t('create.hints.description', 'A compelling description helps clients understand your value')}
                   </p>
                 </div>
+
+                <div>
+                  <label htmlFor="type" className={labelClasses}>
+                    {t('create.fields.agencyType', 'Agency Type')}
+                  </label>
+                  <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
+                    {AGENCY_TYPES.map((agencyType) => (
+                      <button
+                        key={agencyType.value}
+                        type="button"
+                        onClick={() => setFormData(prev => ({ ...prev, type: agencyType.value }))}
+                        className={`flex items-center justify-center gap-2 px-3 py-2.5 rounded-xl border-2 text-sm font-medium transition-all ${
+                          formData.type === agencyType.value
+                            ? 'border-amber-500 bg-amber-50 text-amber-700'
+                            : 'border-neutral-200 bg-white text-neutral-600 hover:border-amber-300'
+                        }`}
+                      >
+                        <ShieldCheckIcon className="w-4 h-4" />
+                        {t(`create.agencyTypes.${agencyType.value}`, agencyType.label)}
+                      </button>
+                    ))}
+                  </div>
+                  <p className="text-xs text-neutral-500 mt-2">
+                    {t('create.hints.agencyType', 'Select the type that best describes your agency')}
+                  </p>
+                </div>
               </div>
             </div>
           )}
@@ -526,22 +591,35 @@ const CreateAgencyPage: React.FC = () => {
                   </div>
                 </div>
 
-                <div>
-                  <label htmlFor="address" className={labelClasses}>
-                    {t('create.fields.address', 'Street Address')}
-                  </label>
-                  <input
-                    type="text"
-                    id="address"
-                    name="address"
-                    value={formData.address}
-                    onChange={handleInputChange}
-                    placeholder={t('create.placeholders.address', 'e.g., 123 Main Street, Building A')}
-                    className={inputClasses}
-                  />
-                  <p className="text-xs text-neutral-500 mt-2">
-                    {t('create.hints.address', 'Optional: Full street address for office location')}
-                  </p>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                  <div className="md:col-span-2">
+                    <label htmlFor="address" className={labelClasses}>
+                      {t('create.fields.address', 'Street Address')}
+                    </label>
+                    <input
+                      type="text"
+                      id="address"
+                      name="address"
+                      value={formData.address}
+                      onChange={handleInputChange}
+                      placeholder={t('create.placeholders.address', 'e.g., 123 Main Street, Building A')}
+                      className={inputClasses}
+                    />
+                  </div>
+                  <div>
+                    <label htmlFor="zipCode" className={labelClasses}>
+                      {t('create.fields.zipCode', 'Zip / Postal Code')}
+                    </label>
+                    <input
+                      type="text"
+                      id="zipCode"
+                      name="zipCode"
+                      value={formData.zipCode}
+                      onChange={handleInputChange}
+                      placeholder={t('create.placeholders.zipCode', 'e.g., 11000')}
+                      className={inputClasses}
+                    />
+                  </div>
                 </div>
               </div>
             </div>
@@ -714,6 +792,49 @@ const CreateAgencyPage: React.FC = () => {
                         </button>
                       ))}
                     </div>
+                  </div>
+
+                  <div>
+                    <label className={labelClasses}>
+                      {t('create.fields.specializations', 'Specializations')}
+                    </label>
+                    <div className="flex flex-wrap gap-2">
+                      {SPECIALIZATION_OPTIONS.map((spec) => (
+                        <button
+                          key={spec}
+                          type="button"
+                          onClick={() => handleSpecializationToggle(spec)}
+                          className={`px-3 py-1.5 text-sm rounded-full border transition-all ${
+                            formData.specializations.includes(spec)
+                              ? 'bg-amber-500 text-white border-amber-500'
+                              : 'bg-white text-neutral-600 border-neutral-300 hover:border-amber-400'
+                          }`}
+                        >
+                          {t(`create.specializations.${spec.replace(/\s+/g, '_').toLowerCase()}`, spec)}
+                        </button>
+                      ))}
+                    </div>
+                    <p className="text-xs text-neutral-500 mt-2">
+                      {t('create.hints.specializations', 'Select all areas your agency specializes in')}
+                    </p>
+                  </div>
+
+                  <div>
+                    <label htmlFor="serviceAreas" className={labelClasses}>
+                      {t('create.fields.serviceAreas', 'Service Areas / Regions')}
+                    </label>
+                    <input
+                      type="text"
+                      id="serviceAreas"
+                      name="serviceAreas"
+                      value={formData.serviceAreas}
+                      onChange={handleInputChange}
+                      placeholder={t('create.placeholders.serviceAreas', 'e.g., Belgrade, Novi Sad, Nis (comma-separated)')}
+                      className={inputClasses}
+                    />
+                    <p className="text-xs text-neutral-500 mt-2">
+                      {t('create.hints.serviceAreas', 'List the cities or regions where your agency operates')}
+                    </p>
                   </div>
                 </div>
               </div>

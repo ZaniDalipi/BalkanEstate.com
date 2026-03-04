@@ -1,6 +1,6 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { UsersIcon } from '@/constants';
+import { UsersIcon, TicketIcon } from '@/constants';
 import type { DashboardAgent } from '../../types';
 
 interface AgentTableProps {
@@ -15,6 +15,7 @@ const SkeletonRow: React.FC = () => (
     <td className="px-4 py-3"><div className="flex items-center gap-3"><div className="w-9 h-9 bg-gray-200 rounded-full" /><div className="h-4 bg-gray-200 rounded w-24" /></div></td>
     <td className="px-4 py-3 hidden sm:table-cell"><div className="h-4 bg-gray-200 rounded w-10 mx-auto" /></td>
     <td className="px-4 py-3 hidden md:table-cell"><div className="h-4 bg-gray-200 rounded w-10 mx-auto" /></td>
+    <td className="px-4 py-3 hidden md:table-cell"><div className="h-4 bg-gray-200 rounded w-20 mx-auto" /></td>
     <td className="px-4 py-3 hidden lg:table-cell"><div className="h-4 bg-gray-200 rounded w-16 mx-auto" /></td>
     <td className="px-4 py-3 hidden lg:table-cell"><div className="h-4 bg-gray-200 rounded w-20 mx-auto" /></td>
     <td className="px-4 py-3"><div className="h-5 bg-gray-200 rounded-full w-16" /></td>
@@ -78,6 +79,7 @@ const AgentTable: React.FC<AgentTableProps> = ({
               <th className="px-4 py-3 text-left font-semibold">{t('agencyDashboard:agents.name', 'Agent')}</th>
               <th className="px-4 py-3 text-center font-semibold hidden sm:table-cell">{t('agencyDashboard:agents.listings', 'Listings')}</th>
               <th className="px-4 py-3 text-center font-semibold hidden md:table-cell">{t('agencyDashboard:agents.inquiries', 'Inquiries')}</th>
+              <th className="px-4 py-3 text-center font-semibold hidden md:table-cell">{t('agencyDashboard:agents.couponCode', 'Code Used')}</th>
               <th className="px-4 py-3 text-center font-semibold hidden lg:table-cell">{t('agencyDashboard:agents.responseTime', 'Avg Response')}</th>
               <th className="px-4 py-3 text-center font-semibold hidden lg:table-cell">{t('agencyDashboard:agents.joined', 'Joined')}</th>
               <th className="px-4 py-3 text-center font-semibold">{t('agencyDashboard:agents.status', 'Status')}</th>
@@ -109,6 +111,16 @@ const AgentTable: React.FC<AgentTableProps> = ({
                   </td>
                   <td className="px-4 py-3 text-center text-gray-700 hidden sm:table-cell">{agent.activeListings}</td>
                   <td className="px-4 py-3 text-center text-gray-700 hidden md:table-cell">{agent.inquiriesHandled}</td>
+                  <td className="px-4 py-3 text-center hidden md:table-cell">
+                    {agent.couponCode ? (
+                      <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-violet-50 text-violet-700 rounded-md font-mono text-[11px]">
+                        <TicketIcon className="w-3 h-3" />
+                        {agent.couponCode}
+                      </span>
+                    ) : (
+                      <span className="text-gray-300 text-xs">-</span>
+                    )}
+                  </td>
                   <td className="px-4 py-3 text-center text-gray-500 hidden lg:table-cell">{agent.avgResponseTime}</td>
                   <td className="px-4 py-3 text-center text-gray-500 hidden lg:table-cell">{formatDate(agent.joinedAt)}</td>
                   <td className="px-4 py-3 text-center">

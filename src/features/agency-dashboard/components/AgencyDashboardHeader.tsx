@@ -7,6 +7,7 @@ import {
   EnvelopeIcon,
   ChartBarIcon,
   ArrowLeftIcon,
+  MagnifyingGlassIcon,
 } from '@/constants';
 import type { OverviewData } from '../types';
 
@@ -16,6 +17,7 @@ interface AgencyDashboardHeaderProps {
   onMenuClick: () => void;
   onBackToSite: () => void;
   onBackToAgency?: () => void;
+  onBrowseProperties?: () => void;
   userName: string;
 }
 
@@ -25,6 +27,7 @@ const AgencyDashboardHeader: React.FC<AgencyDashboardHeaderProps> = ({
   onMenuClick,
   onBackToSite,
   onBackToAgency,
+  onBrowseProperties,
   userName,
 }) => {
   const { t } = useTranslation(['agencyDashboard']);
@@ -86,6 +89,18 @@ const AgencyDashboardHeader: React.FC<AgencyDashboardHeaderProps> = ({
           </div>
 
           <div className="flex items-center gap-2">
+            {onBrowseProperties && (
+              <button
+                onClick={onBrowseProperties}
+                className="flex items-center gap-2 px-3 py-2 text-sm text-white bg-emerald-600 hover:bg-emerald-700 rounded-lg transition-colors font-medium shadow-sm"
+                aria-label="Browse Properties"
+              >
+                <MagnifyingGlassIcon className="w-4 h-4" />
+                <span className="hidden sm:inline">
+                  {t('agencyDashboard:header.browseProperties', 'Browse Properties')}
+                </span>
+              </button>
+            )}
             {onBackToAgency && (
               <button
                 onClick={onBackToAgency}

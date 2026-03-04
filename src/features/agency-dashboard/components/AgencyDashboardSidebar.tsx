@@ -13,6 +13,8 @@ import {
   ChevronRightIcon,
   ChevronDownIcon,
   XMarkIcon,
+  MagnifyingGlassIcon,
+  ArrowTopRightOnSquareIcon,
 } from '@/constants';
 import type { AgencyDashboardSection } from '@/types';
 import type { OverviewData } from '../types';
@@ -25,6 +27,8 @@ interface AgencyDashboardSidebarProps {
   mobileOpen: boolean;
   onMobileClose: () => void;
   overview: OverviewData | null;
+  onBrowseProperties?: () => void;
+  onBackToAgency?: () => void;
 }
 
 interface NavGroup {
@@ -49,6 +53,8 @@ const AgencyDashboardSidebar: React.FC<AgencyDashboardSidebarProps> = ({
   mobileOpen,
   onMobileClose,
   overview,
+  onBrowseProperties,
+  onBackToAgency,
 }) => {
   const { t } = useTranslation(['agencyDashboard']);
   const [expandedGroups, setExpandedGroups] = useState<string[]>(['main', 'management', 'settings']);
@@ -209,21 +215,55 @@ const AgencyDashboardSidebar: React.FC<AgencyDashboardSidebarProps> = ({
         ))}
       </nav>
 
-      <div className="hidden lg:block border-t border-gray-800 p-3">
-        <button
-          onClick={() => onCollapsedChange(!collapsed)}
-          className="w-full flex items-center justify-center gap-2 px-3 py-2 text-gray-400 hover:text-white hover:bg-gray-800 rounded-lg transition-colors"
-          aria-label={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
-        >
-          {collapsed ? (
-            <ChevronRightIcon className="w-5 h-5" />
-          ) : (
-            <>
-              <ChevronLeftIcon className="w-5 h-5" />
-              <span className="text-sm">{t('agencyDashboard:sidebar.collapse', 'Collapse')}</span>
-            </>
-          )}
-        </button>
+      <div className="border-t border-gray-800 p-3 space-y-1">
+        {onBrowseProperties && (
+          <button
+            onClick={onBrowseProperties}
+            title={collapsed ? t('agencyDashboard:sidebar.browseProperties', 'Browse Properties') : undefined}
+            className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-emerald-400 hover:bg-emerald-900/30 hover:text-emerald-300 transition-colors ${
+              collapsed ? 'justify-center' : ''
+            }`}
+          >
+            <MagnifyingGlassIcon className="w-5 h-5" />
+            {!collapsed && (
+              <span className="text-sm font-medium">
+                {t('agencyDashboard:sidebar.browseProperties', 'Browse Properties')}
+              </span>
+            )}
+          </button>
+        )}
+        {onBackToAgency && (
+          <button
+            onClick={onBackToAgency}
+            title={collapsed ? t('agencyDashboard:sidebar.viewAgencyPage', 'View Agency Page') : undefined}
+            className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-gray-400 hover:bg-gray-800 hover:text-white transition-colors ${
+              collapsed ? 'justify-center' : ''
+            }`}
+          >
+            <ArrowTopRightOnSquareIcon className="w-5 h-5" />
+            {!collapsed && (
+              <span className="text-sm font-medium">
+                {t('agencyDashboard:sidebar.viewAgencyPage', 'View Agency Page')}
+              </span>
+            )}
+          </button>
+        )}
+        <div className="hidden lg:block">
+          <button
+            onClick={() => onCollapsedChange(!collapsed)}
+            className="w-full flex items-center justify-center gap-2 px-3 py-2 text-gray-400 hover:text-white hover:bg-gray-800 rounded-lg transition-colors"
+            aria-label={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+          >
+            {collapsed ? (
+              <ChevronRightIcon className="w-5 h-5" />
+            ) : (
+              <>
+                <ChevronLeftIcon className="w-5 h-5" />
+                <span className="text-sm">{t('agencyDashboard:sidebar.collapse', 'Collapse')}</span>
+              </>
+            )}
+          </button>
+        </div>
       </div>
     </>
   );

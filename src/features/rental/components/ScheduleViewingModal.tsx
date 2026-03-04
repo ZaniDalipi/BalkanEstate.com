@@ -132,6 +132,7 @@ const ScheduleViewingModal: React.FC<ScheduleViewingModalProps> = ({ property, i
 
         fetch(`${API_CONFIG.BASE_URL}/viewings/availability/${property.id}`, {
             signal: controller.signal,
+            credentials: 'include', // Ensure CSRF cookie is set for subsequent POST
         })
             .then(res => {
                 if (!res.ok) throw new Error(`HTTP ${res.status}`);
@@ -266,8 +267,8 @@ const ScheduleViewingModal: React.FC<ScheduleViewingModalProps> = ({ property, i
                 setSelectedTime('');
                 setStep('datetime');
             }
-            const message = err instanceof Error ? err.message : String(err);
-            setError(message || t('rental:viewing.errors.submitFailed', 'Failed to schedule viewing. Please try again.'));
+            const errMessage = err instanceof Error ? err.message : String(err);
+            setError(errMessage || t('rental:viewing.errors.submitFailed', 'Failed to schedule viewing. Please try again.'));
         } finally {
             setIsSubmitting(false);
         }

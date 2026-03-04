@@ -8,7 +8,8 @@ import { IUser } from '../models/User';
 import { incrementViewCount } from '../utils/statsUpdater';
 import { checkViewMilestone } from '../services/engagementService';
 import { apiLogger } from '../utils/logger';
-import { getParam, getObjectIdParam } from '../utils/validateParams';
+import { isValidObjectId, getParam, getObjectIdParam } from '../utils/validateParams';
+import { resolveId } from '../utils/idObfuscation';
 
 /**
  * Helper function to hash IP address for privacy
@@ -150,6 +151,12 @@ export const trackView = async (req: Request, res: Response): Promise<void> => {
       return;
     }
 
+    const resolvedEntityId = typeof entityId === 'string' ? resolveId(entityId) : null;
+    if (!resolvedEntityId || !isValidObjectId(resolvedEntityId)) {
+      res.status(400).json({ message: 'Invalid entityId format' });
+      return;
+    }
+
     const viewerId = req.user ? String((req.user as IUser)._id) : undefined;
     const ip = req.headers['x-forwarded-for']?.toString().split(',')[0] || req.ip || '';
     const ipHash = hashIP(ip);
@@ -157,11 +164,11 @@ export const trackView = async (req: Request, res: Response): Promise<void> => {
     const deviceType = detectDeviceType(userAgent);
     const referrerType = detectReferrerType(referrer);
 
-    const isUnique = await isUniqueView(entityType, entityId, viewerId, ipHash, sessionId);
+    const isUnique = await isUniqueView(entityType, resolvedEntityId, viewerId, ipHash, sessionId);
 
     const pageView = await PageView.create({
       entityType,
-      entityId,
+      entityId: resolvedEntityId,
       viewerId,
       sessionId,
       ipHash,
@@ -189,19 +196,19 @@ export const trackView = async (req: Request, res: Response): Promise<void> => {
     let updatedEntity: any;
     if (entityType === 'property') {
       updatedEntity = await Property.findByIdAndUpdate(
-        entityId,
+        resolvedEntityId,
         updateData,
         { new: true, runValidators: false }
       );
     } else if (entityType === 'agent') {
       updatedEntity = await Agent.findByIdAndUpdate(
-        entityId,
+        resolvedEntityId,
         updateData,
         { new: true, runValidators: false }
       );
     } else {
       updatedEntity = await Agency.findByIdAndUpdate(
-        entityId,
+        resolvedEntityId,
         updateData,
         { new: true, runValidators: false }
       );
@@ -213,7 +220,7 @@ export const trackView = async (req: Request, res: Response): Promise<void> => {
       // Check for view milestones and send engagement notifications
       // This runs async in the background to not block the response
       checkViewMilestone(
-        entityId,
+        resolvedEntityId,
         updatedEntity.views || 0,
         updatedEntity.isPromoted || false
       ).catch((err) => apiLogger.error('Milestone check error:', err));

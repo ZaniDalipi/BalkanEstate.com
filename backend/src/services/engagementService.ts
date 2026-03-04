@@ -404,6 +404,24 @@ export async function markAllAsRead(userId: string): Promise<number> {
 }
 
 /**
+ * Mark all notifications of specific types as read for a user
+ */
+export async function markAsReadByTypes(userId: string, types: string[]): Promise<number> {
+  const result = await Notification.updateMany(
+    { userId, isRead: false, type: { $in: types } },
+    { isRead: true, readAt: new Date() }
+  );
+  return result.modifiedCount;
+}
+
+/**
+ * Get unread notification count for specific types
+ */
+export async function getUnreadCountByTypes(userId: string, types: string[]): Promise<number> {
+  return Notification.countDocuments({ userId, isRead: false, type: { $in: types } });
+}
+
+/**
  * Get unread notification count
  */
 export async function getUnreadCount(userId: string): Promise<number> {
@@ -416,5 +434,7 @@ export default {
   getNotifications,
   markAsRead,
   markAllAsRead,
+  markAsReadByTypes,
   getUnreadCount,
+  getUnreadCountByTypes,
 };

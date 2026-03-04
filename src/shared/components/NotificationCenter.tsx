@@ -2,7 +2,8 @@ import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   Bell, X, CheckCheck, Home, TrendingDown, MessageSquare, AlertCircle,
-  Building2, UserPlus, UserMinus, Ticket, Star, TrendingUp,
+  Building2, UserPlus, UserMinus, Ticket, Star, TrendingUp, Calendar,
+  CheckCircle, XCircle,
 } from 'lucide-react';
 import { useAppContext } from '@/context/AppContext';
 import { apiRequest } from '@/src/shared/api';
@@ -134,6 +135,18 @@ const NotificationCenter: React.FC = () => {
       return;
     }
 
+    // Navigate to viewing requests tab for viewing-related notifications
+    if (
+      notification.type === 'new_viewing' ||
+      notification.type === 'viewing_approved' ||
+      notification.type === 'viewing_declined'
+    ) {
+      setIsOpen(false);
+      dispatch({ type: 'SET_ACCOUNT_TAB', payload: 'viewings' });
+      dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'account' });
+      return;
+    }
+
     // Navigate to property detail
     if (data.propertyId) {
       setIsOpen(false);
@@ -212,6 +225,12 @@ const NotificationCenter: React.FC = () => {
         return <UserMinus className="w-4 h-4 text-red-500" />;
       case 'agency_coupon_redeemed':
         return <Ticket className="w-4 h-4 text-indigo-500" />;
+      case 'new_viewing':
+        return <Calendar className="w-4 h-4 text-amber-500" />;
+      case 'viewing_approved':
+        return <CheckCircle className="w-4 h-4 text-green-500" />;
+      case 'viewing_declined':
+        return <XCircle className="w-4 h-4 text-red-500" />;
       default:
         return <AlertCircle className="w-4 h-4 text-gray-500" />;
     }
@@ -219,6 +238,11 @@ const NotificationCenter: React.FC = () => {
 
   // Check if notification is clickable (has a navigation target)
   const isClickable = (notification: Notification): boolean => {
+    if (
+      notification.type === 'new_viewing' ||
+      notification.type === 'viewing_approved' ||
+      notification.type === 'viewing_declined'
+    ) return true;
     const data = notification.data;
     if (!data) return false;
     return !!(data.agencyId || data.propertyId || data.conversationId);
