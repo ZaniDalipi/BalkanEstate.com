@@ -9,6 +9,8 @@ import CityMarketData from '../models/CityMarketData';
 import { getSocketInstance } from '../utils/socketInstance';
 import { apiLogger } from '../utils/logger';
 import { getParam, getObjectIdParam, isValidObjectId } from '../utils/validateParams';
+import { revokeAgencyCouponSubscription } from '../services/subscriptionPaymentService';
+import { FREE_TIER_LIMITS } from '../config/subscriptionConstants';
 
 
 
@@ -528,6 +530,18 @@ export const leaveAgency = async (req: Request, res: Response): Promise<void> =>
       await agentProfile.save();
     }
 
+    // Revoke agency coupon subscription (immediate cancel + downgrade to free)
+    let subscriptionRevoked = false;
+    try {
+      const revokeResult = await revokeAgencyCouponSubscription(currentUser._id, agencyId);
+      subscriptionRevoked = revokeResult.revoked;
+      if (subscriptionRevoked) {
+        apiLogger.info(`✅ Agency coupon subscription revoked for agent ${currentUser._id}`);
+      }
+    } catch (revokeError: any) {
+      apiLogger.error(`Failed to revoke agency coupon subscription for agent ${currentUser._id}:`, revokeError);
+    }
+
     // Remove agent from agency's agents array and mark as inactive in agentDetails
     const agency = await Agency.findById(agencyId);
     if (agency) {
@@ -561,7 +575,7 @@ export const leaveAgency = async (req: Request, res: Response): Promise<void> =>
       // Emit socket event to notify agency members
       const io = getSocketInstance();
       if (io) {
-        // Notify the agent who left
+        // Notify the agent who left (include subscription downgrade for real-time UI update)
         io.emit(`user-update-${String(currentUser._id)}`, {
           type: 'agency-left',
           message: `You have left ${agencyName}`,
@@ -570,6 +584,21 @@ export const leaveAgency = async (req: Request, res: Response): Promise<void> =>
             agencyId: null,
             agencyName: 'Independent Agent',
           },
+          subscriptionRevoked,
+          ...(subscriptionRevoked ? {
+            subscription: {
+              tier: 'free',
+              status: 'expired',
+              listingsLimit: FREE_TIER_LIMITS.LISTINGS,
+              savedSearchesLimit: FREE_TIER_LIMITS.SAVED_SEARCHES,
+              promotionCoupons: {
+                monthly: FREE_TIER_LIMITS.PROMOTION_COUPONS,
+                available: FREE_TIER_LIMITS.PROMOTION_COUPONS,
+                used: 0,
+                rollover: 0,
+              },
+            },
+          } : {}),
         });
         apiLogger.info(`✅ Socket event emitted to agent ${currentUser._id} for leaving agency`);
 
@@ -586,11 +615,26 @@ export const leaveAgency = async (req: Request, res: Response): Promise<void> =>
 
     res.json({
       message: 'Successfully left the agency',
+      subscriptionRevoked,
       user: {
         id: String(user._id),
         agencyId: null,
         agencyName: 'Independent Agent',
       },
+      ...(subscriptionRevoked ? {
+        subscription: {
+          tier: 'free',
+          status: 'expired',
+          listingsLimit: FREE_TIER_LIMITS.LISTINGS,
+          savedSearchesLimit: FREE_TIER_LIMITS.SAVED_SEARCHES,
+          promotionCoupons: {
+            monthly: FREE_TIER_LIMITS.PROMOTION_COUPONS,
+            available: FREE_TIER_LIMITS.PROMOTION_COUPONS,
+            used: 0,
+            rollover: 0,
+          },
+        },
+      } : {}),
     });
   } catch (error: any) {
     apiLogger.error('Leave agency error:', error);

@@ -13,7 +13,8 @@ import { generateSecureAgentId } from '../utils/secureRandom';
 import { getParam, getObjectIdParam, isValidObjectId } from '../utils/validateParams';
 
 import PromotionCoupon from '../models/PromotionCoupon';
-import { ENTERPRISE_TIER_LIMITS } from '../config/subscriptionConstants';
+import { ENTERPRISE_TIER_LIMITS, FREE_TIER_LIMITS } from '../config/subscriptionConstants';
+import { revokeAgencyCouponSubscription } from '../services/subscriptionPaymentService';
 import { getSocketInstance } from '../utils/socketInstance';
 import { agencyLogger } from '../utils/logger';
 import Notification from '../models/Notification';
@@ -1083,23 +1084,65 @@ export const removeAgentFromAgency = async (
       await agentRecord.save();
     }
 
+    // Revoke agency coupon subscription (immediate cancel + downgrade to free)
+    let subscriptionRevoked = false;
+    try {
+      const revokeResult = await revokeAgencyCouponSubscription(agentId, id);
+      subscriptionRevoked = revokeResult.revoked;
+      if (subscriptionRevoked) {
+        agencyLogger.info(`✅ Agency coupon subscription revoked for removed agent ${agentId}`);
+      }
+    } catch (revokeError: any) {
+      agencyLogger.error(`Failed to revoke agency coupon subscription for removed agent ${agentId}:`, revokeError);
+    }
+
+    // Emit real-time update to the removed agent's frontend
+    const io = getSocketInstance();
+    if (io) {
+      io.emit(`user-update-${String(agentId)}`, {
+        type: 'agency-left',
+        message: `You have been removed from ${agency.name}.`,
+        user: {
+          id: String(agentId),
+          agencyId: null,
+          agencyName: 'Independent Agent',
+        },
+        subscriptionRevoked,
+        ...(subscriptionRevoked ? {
+          subscription: {
+            tier: 'free',
+            status: 'expired',
+            listingsLimit: FREE_TIER_LIMITS.LISTINGS,
+            savedSearchesLimit: FREE_TIER_LIMITS.SAVED_SEARCHES,
+            promotionCoupons: {
+              monthly: FREE_TIER_LIMITS.PROMOTION_COUPONS,
+              available: FREE_TIER_LIMITS.PROMOTION_COUPONS,
+              used: 0,
+              rollover: 0,
+            },
+          },
+        } : {}),
+      });
+    }
+
     // Notify the removed agent
     if (agentUser) {
       Notification.create({
         userId: agentUser._id,
         type: 'agent_left_agency',
         title: 'Removed from Agency',
-        message: `You have been removed from ${agency.name}.`,
+        message: `You have been removed from ${agency.name}.${subscriptionRevoked ? ' Your agency-provided Pro plan has been canceled.' : ''}`,
         icon: 'user-minus',
         priority: 'high',
         data: {
           agencyId: String(agency._id),
           agencyName: agency.name,
+          subscriptionRevoked,
         },
       }).catch(err => agencyLogger.error('Failed to create removal notification:', err));
     }
 
-    res.json({ message: 'Agent removed from agency successfully' });
+    res.json({ message: 'Agent removed from agency successfully', subscriptionRevoked });
   } catch (error: any) {
     agencyLogger.error('Remove agent error:', error);
     res.status(500).json({ message: 'Error removing agent from agency' });
@@ -1907,6 +1950,18 @@ export const leaveAgency = async (
       agencyLogger.info(`✅ Updated agent profile to Independent Agent`);
     }
 
+    // Revoke agency coupon subscription (immediate cancel + downgrade to free)
+    let subscriptionRevoked = false;
+    try {
+      const revokeResult = await revokeAgencyCouponSubscription(user._id, agency._id);
+      subscriptionRevoked = revokeResult.revoked;
+      if (subscriptionRevoked) {
+        agencyLogger.info(`✅ Agency coupon subscription revoked for agent ${user._id} leaving ${agencyName}`);
+      }
+    } catch (revokeError: any) {
+      agencyLogger.error(`Failed to revoke agency coupon subscription for agent ${user._id}:`, revokeError);
+    }
+
     agencyLogger.info(`✅ User ${user._id} left agency: ${agencyName}`);
 
     // Notify agency owner that an agent left
@@ -1914,7 +1969,7 @@ export const leaveAgency = async (
       userId: agency.ownerId,
       type: 'agent_left_agency',
       title: 'Agent Left Agency',
-      message: `${user.name || 'An agent'} has left ${agencyName}.`,
+      message: `${user.name || 'An agent'} has left ${agencyName}.${subscriptionRevoked ? ' Their agency-provided Pro plan has been revoked.' : ''}`,
       icon: 'user-minus',
       priority: 'normal',
       data: {
@@ -1924,6 +1979,7 @@ export const leaveAgency = async (
         agentName: user.name || 'Agent',
         agentEmail: user.email,
         totalAgents: agency.agents.length,
+        subscriptionRevoked,
         actionUrl: `/agency/${agency.slug || agency._id}`,
         actionLabel: 'View Agency',
       },
@@ -1931,6 +1987,7 @@ export const leaveAgency = async (
 
     res.json({
       message: `Successfully left ${agencyName}`,
+      subscriptionRevoked,
       user: {
         _id: user._id,
         name: user.name,
@@ -1938,7 +1995,21 @@ export const leaveAgency = async (
         role: user.role,
         agencyId: user.agencyId,
         agencyName: user.agencyName,
-      }
+      },
+      ...(subscriptionRevoked ? {
+        subscription: {
+          tier: 'free',
+          status: 'expired',
+          listingsLimit: FREE_TIER_LIMITS.LISTINGS,
+          savedSearchesLimit: FREE_TIER_LIMITS.SAVED_SEARCHES,
+          promotionCoupons: {
+            monthly: FREE_TIER_LIMITS.PROMOTION_COUPONS,
+            available: FREE_TIER_LIMITS.PROMOTION_COUPONS,
+            used: 0,
+            rollover: 0,
+          },
+        },
+      } : {}),
     });
   } catch (error: any) {
     agencyLogger.error('Leave agency error:', error);

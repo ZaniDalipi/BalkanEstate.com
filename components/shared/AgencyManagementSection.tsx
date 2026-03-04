@@ -341,7 +341,7 @@ const AgencyManagementSection: React.FC<AgencyManagementSectionProps> = ({ curre
   const handleLeaveAgency = async () => {
     const confirmed = await confirm({
       title: t('agencies:management.leaveAgencyTitle', 'Leave Agency'),
-      message: t('agencies:management.leaveAgencyMessage', 'Are you sure you want to leave {{name}}? You will become an Independent Agent.', { name: currentUser.agencyName }),
+      message: t('agencies:management.leaveAgencyMessage', 'Are you sure you want to leave {{name}}? Your agency-provided Pro plan will be canceled immediately and you will be downgraded to the Free tier.', { name: currentUser.agencyName }),
       confirmLabel: t('agencies:management.leaveAgency', 'Leave Agency'),
       cancelLabel: t('common:cancel', 'Cancel'),
       type: 'warning',
@@ -354,18 +354,23 @@ const AgencyManagementSection: React.FC<AgencyManagementSectionProps> = ({ curre
     try {
       setLoading(true);
 
-      await leaveAgency();
+      const result = await leaveAgency();
 
-      // Update user context immediately
+      // Update user context immediately (including subscription downgrade if applicable)
       dispatch({
         type: 'UPDATE_USER',
         payload: {
           agencyName: t('agencies:badge.independentAgent', 'Independent Agent'),
           agencyId: null,
+          ...(result.subscription ? { subscription: result.subscription } : {}),
         }
       });
 
-      await success(t('agencies:management.leaveAgencyTitle', 'Left Agency'), t('agencies:management.leaveAgencyDone', 'You have successfully left the agency.\n\nYou are now an Independent Agent.'));
+      const successMessage = result.subscriptionRevoked
+        ? t('agencies:management.leaveAgencyDoneWithDowngrade', 'You have successfully left the agency.\n\nYour agency-provided Pro plan has been canceled. You are now on the Free tier.')
+        : t('agencies:management.leaveAgencyDone', 'You have successfully left the agency.\n\nYou are now an Independent Agent.');
+
+      await success(t('agencies:management.leaveAgencyTitle', 'Left Agency'), successMessage);
 
       // Trigger refresh callback
       onAgencyChange();
