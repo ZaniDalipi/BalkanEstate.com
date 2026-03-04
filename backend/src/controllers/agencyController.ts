@@ -1122,7 +1122,7 @@ export const removeAgentFromAgency = async (
       await agentRecord.save();
     }
 
-    // Revoke agency coupon subscription (immediate cancel + downgrade to free)
+    // Revoke agency coupon subscription (immediate cancel + downgrade to free + free coupon)
     let subscriptionRevoked = false;
     try {
       const revokeResult = await revokeAgencyCouponSubscription(agentId, id);
@@ -1132,6 +1132,24 @@ export const removeAgentFromAgency = async (
       }
     } catch (revokeError: any) {
       agencyLogger.error(`Failed to revoke agency coupon subscription for removed agent ${agentId}:`, revokeError);
+      // Fallback: directly free the coupon even if subscription revocation failed
+      try {
+        const freshAgency = await Agency.findById(id);
+        if (freshAgency?.agentCoupons) {
+          const coupon = freshAgency.agentCoupons.find(
+            (c: any) => c.usedBy && String(c.usedBy) === String(agentId) && c.status === 'used'
+          );
+          if (coupon) {
+            coupon.status = 'available';
+            coupon.usedBy = undefined;
+            coupon.usedAt = undefined;
+            await freshAgency.save();
+            agencyLogger.info(`✅ Fallback: freed coupon ${coupon.code} for removed agent ${agentId}`);
+          }
+        }
+      } catch (fallbackError: any) {
+        agencyLogger.error(`Fallback coupon freeing also failed for agent ${agentId}:`, fallbackError);
+      }
     }
 
     // Emit real-time update to the removed agent's frontend

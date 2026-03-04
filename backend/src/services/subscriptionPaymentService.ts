@@ -482,20 +482,35 @@ export async function revokeAgencyCouponSubscription(
       status: { $in: ['active', 'pending_cancellation', 'grace'] },
     }).session(session);
 
-    if (!subscription) {
-      await session.abortTransaction();
-      session.endSession();
-      return { revoked: false, message: 'No agency coupon subscription found' };
+    let subscriptionCanceled = false;
+
+    if (subscription) {
+      // Cancel the subscription immediately (not pending_cancellation)
+      subscription.status = 'canceled';
+      subscription.autoRenewing = false;
+      subscription.canceledAt = new Date();
+      subscription.cancellationReason = 'Agent left/removed from agency';
+      await subscription.save({ session });
+      subscriptionCanceled = true;
+
+      // Create audit event
+      await SubscriptionEvent.create(
+        [{
+          subscriptionId: subscription._id,
+          userId,
+          eventType: 'subscription_canceled',
+          store: 'agency_coupon',
+          metadata: {
+            reason: 'Agent left/removed from agency',
+            agencyId: String(agencyId),
+            immediateRevocation: true,
+          },
+        }],
+        { session }
+      );
     }
 
-    // Cancel the subscription immediately (not pending_cancellation)
-    subscription.status = 'canceled';
-    subscription.autoRenewing = false;
-    subscription.canceledAt = new Date();
-    subscription.cancellationReason = 'Agent left/removed from agency';
-    await subscription.save({ session });
-
-    // Downgrade user to free tier
+    // Downgrade user to free tier (always, even if no subscription found)
     const user = await User.findById(userId).session(session);
     if (user) {
       user.subscription = {
@@ -517,7 +532,7 @@ export async function revokeAgencyCouponSubscription(
       await user.save({ session });
     }
 
-    // Free up the agency coupon for reassignment
+    // Free up the agency coupon for reassignment (always, regardless of subscription)
     const agency = await Agency.findById(agencyId).session(session);
     if (agency?.agentCoupons) {
       const coupon = agency.agentCoupons.find(
@@ -528,28 +543,13 @@ export async function revokeAgencyCouponSubscription(
         coupon.usedBy = undefined;
         coupon.usedAt = undefined;
         await agency.save({ session });
+        paymentLogger.info(`Agency coupon ${coupon.code} freed for reassignment (user ${userId})`);
       }
     }
 
-    // Create audit event
-    await SubscriptionEvent.create(
-      [{
-        subscriptionId: subscription._id,
-        userId,
-        eventType: 'subscription_canceled',
-        store: 'agency_coupon',
-        metadata: {
-          reason: 'Agent left/removed from agency',
-          agencyId: String(agencyId),
-          immediateRevocation: true,
-        },
-      }],
-      { session }
-    );
-
     await session.commitTransaction();
 
-    paymentLogger.info(`Agency coupon subscription revoked for user ${userId} (agency ${agencyId})`);
+    paymentLogger.info(`Agency coupon subscription revoked for user ${userId} (agency ${agencyId}), subscription canceled: ${subscriptionCanceled}`);
     return { revoked: true, message: 'Agency coupon subscription revoked and user downgraded to free tier' };
   } catch (error: any) {
     await session.abortTransaction();

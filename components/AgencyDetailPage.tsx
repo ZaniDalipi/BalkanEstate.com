@@ -776,22 +776,20 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
     try {
       await removeAgentFromAgency(agencyData._id, agentId);
 
-      // Update local state to remove the agent immediately
+      // Optimistically remove agent from local state for instant UI update
       const removedId = String(agentId);
       setAgents(prevAgents => prevAgents.filter(agent =>
         String(agent.id || agent._id) !== removedId
       ));
-
-      // Update agency data counts
       setAgencyData(prev => ({
         ...prev,
         totalAgents: Math.max(0, (prev.totalAgents || 0) - 1),
-        agents: Array.isArray(prev.agents)
-          ? prev.agents.filter((a: any) => String(a.id || a._id || a) !== removedId)
-          : prev.agents,
       }));
 
       await success(t('messages.agentRemovedTitle', 'Agent Removed'), t('messages.agentRemoved', { name: agentName }));
+
+      // Re-fetch full agency data to get updated coupon status and agent list
+      fetchAgencyData();
     } catch (err: any) {
       await error(t('messages.errorTitle', 'Error'), err.message || t('messages.onlyAdminCanRemove'));
     } finally {

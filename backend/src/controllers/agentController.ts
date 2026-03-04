@@ -530,7 +530,7 @@ export const leaveAgency = async (req: Request, res: Response): Promise<void> =>
       await agentProfile.save();
     }
 
-    // Revoke agency coupon subscription (immediate cancel + downgrade to free)
+    // Revoke agency coupon subscription (immediate cancel + downgrade to free + free coupon)
     let subscriptionRevoked = false;
     try {
       const revokeResult = await revokeAgencyCouponSubscription(currentUser._id, agencyId);
@@ -540,6 +540,24 @@ export const leaveAgency = async (req: Request, res: Response): Promise<void> =>
       }
     } catch (revokeError: any) {
       apiLogger.error(`Failed to revoke agency coupon subscription for agent ${currentUser._id}:`, revokeError);
+      // Fallback: directly free the coupon even if subscription revocation failed
+      try {
+        const fallbackAgency = await Agency.findById(agencyId);
+        if (fallbackAgency?.agentCoupons) {
+          const coupon = fallbackAgency.agentCoupons.find(
+            (c: any) => c.usedBy && String(c.usedBy) === String(currentUser._id) && c.status === 'used'
+          );
+          if (coupon) {
+            coupon.status = 'available';
+            coupon.usedBy = undefined;
+            coupon.usedAt = undefined;
+            await fallbackAgency.save();
+            apiLogger.info(`✅ Fallback: freed coupon ${coupon.code} for leaving agent ${currentUser._id}`);
+          }
+        }
+      } catch (fallbackError: any) {
+        apiLogger.error(`Fallback coupon freeing also failed for agent ${currentUser._id}:`, fallbackError);
+      }
     }
 
     // Remove agent from agency's agents array and mark as inactive in agentDetails
