@@ -781,10 +781,25 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
       setAgents(prevAgents => prevAgents.filter(agent =>
         String(agent.id || agent._id) !== removedId
       ));
-      setAgencyData(prev => ({
-        ...prev,
-        totalAgents: Math.max(0, (prev.totalAgents || 0) - 1),
-      }));
+      setAgencyData(prev => {
+        // Also optimistically free the agent's coupon
+        const updatedCoupons = prev.agentCoupons ? {
+          ...prev.agentCoupons,
+          available: (prev.agentCoupons.available || 0) + 1,
+          used: Math.max(0, (prev.agentCoupons.used || 0) - 1),
+          coupons: prev.agentCoupons.coupons?.map((c: any) =>
+            c.usedBy && (String(c.usedBy._id || c.usedBy) === removedId) && c.status === 'used'
+              ? { ...c, status: 'available', usedBy: null, usedAt: null }
+              : c
+          ) || [],
+        } : prev.agentCoupons;
+
+        return {
+          ...prev,
+          totalAgents: Math.max(0, (prev.totalAgents || 0) - 1),
+          agentCoupons: updatedCoupons,
+        };
+      });
 
       await success(t('messages.agentRemovedTitle', 'Agent Removed'), t('messages.agentRemoved', { name: agentName }));
 
@@ -822,6 +837,11 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
             ...(response.subscription ? { subscription: response.subscription } : {}),
           },
         });
+      }
+
+      // Notify SubscriptionManagement to clear stale agency subscription
+      if (response.subscriptionRevoked) {
+        window.dispatchEvent(new Event('subscriptionRevoked'));
       }
 
       await success(t('messages.leftAgencyTitle', 'Left Agency'), response.message || t('messages.leftAgency', { agency: agencyData.name }));

@@ -489,6 +489,7 @@ export async function revokeAgencyCouponSubscription(
       subscription.status = 'canceled';
       subscription.autoRenewing = false;
       subscription.canceledAt = new Date();
+      subscription.expirationDate = new Date(); // Expire immediately so /subscriptions/current won't return it
       subscription.cancellationReason = 'Agent left/removed from agency';
       await subscription.save({ session });
       subscriptionCanceled = true;

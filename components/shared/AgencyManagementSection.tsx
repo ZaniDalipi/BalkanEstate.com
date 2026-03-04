@@ -366,6 +366,11 @@ const AgencyManagementSection: React.FC<AgencyManagementSectionProps> = ({ curre
         }
       });
 
+      // Notify SubscriptionManagement and other components to clear stale agency subscription data
+      if (result.subscriptionRevoked) {
+        window.dispatchEvent(new Event('subscriptionRevoked'));
+      }
+
       const successMessage = result.subscriptionRevoked
         ? t('agencies:management.leaveAgencyDoneWithDowngrade', 'You have successfully left the agency.\n\nYour agency-provided Pro plan has been canceled. You are now on the Free tier.')
         : t('agencies:management.leaveAgencyDone', 'You have successfully left the agency.\n\nYou are now an Independent Agent.');

@@ -747,6 +747,11 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           ...(data.subscription ? { subscription: data.subscription } : {}),
         }});
 
+        // Notify SubscriptionManagement to clear stale agency subscription
+        if (data.subscriptionRevoked) {
+          window.dispatchEvent(new Event('subscriptionRevoked'));
+        }
+
         // Show notification to user
         notificationService.showNotification(
           'Agency Left',

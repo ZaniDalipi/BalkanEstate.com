@@ -407,7 +407,7 @@ const SubscriptionManagement: React.FC<SubscriptionManagementProps> = ({ userId 
     return () => clearInterval(interval);
   }, [fetchProducts, fetchSubscription, refreshKey]);
 
-  // Listen for payment success events
+  // Listen for payment success events and subscription changes (e.g. leaving agency)
   useEffect(() => {
     const handlePaymentSuccess = () => {
       // Refresh subscription data after successful payment
@@ -415,14 +415,36 @@ const SubscriptionManagement: React.FC<SubscriptionManagementProps> = ({ userId 
       fetchSubscription();
     };
 
+    const handleSubscriptionRevoked = () => {
+      // Agency coupon revoked — clear stale subscription and re-fetch
+      setSubscription(null);
+      setAgencyTeamData(null);
+      setRefreshKey(prev => prev + 1);
+      fetchSubscription();
+    };
+
     window.addEventListener('paymentSuccess', handlePaymentSuccess);
     window.addEventListener('subscriptionUpdated', handlePaymentSuccess);
+    window.addEventListener('subscriptionRevoked', handleSubscriptionRevoked);
 
     return () => {
       window.removeEventListener('paymentSuccess', handlePaymentSuccess);
       window.removeEventListener('subscriptionUpdated', handlePaymentSuccess);
+      window.removeEventListener('subscriptionRevoked', handleSubscriptionRevoked);
     };
   }, [fetchSubscription]);
+
+  // Re-fetch subscription when user's agency affiliation changes (e.g. after leaving agency)
+  const userAgencyId = user?.agencyId;
+  const userSubTier = user?.subscription?.tier;
+  useEffect(() => {
+    // When agencyId or subscription tier changes in context, clear stale data and re-fetch
+    setSubscription(null);
+    if (!userAgencyId) {
+      setAgencyTeamData(null);
+    }
+    fetchSubscription();
+  }, [userAgencyId, userSubTier, fetchSubscription]);
 
   // Derive max team members from the enterprise product in DB (owner + agents)
   const enterpriseMaxAgents = useMemo(() => {
