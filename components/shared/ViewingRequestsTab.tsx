@@ -115,8 +115,23 @@ const ViewingRequestsTab: React.FC = () => {
         throw new Error(data.message || 'Failed to update viewing status');
       }
 
-      // Refresh the list
-      await fetchViewings();
+      // Update local state immediately instead of re-fetching
+      setViewings(prev => prev.map(v =>
+        v.id === viewingId
+          ? { ...v, status, ...(status === 'cancelled' ? { cancelledBy: 'seller', cancelReason: cancelReason?.trim() } : {}) }
+          : v
+      ));
+      setCounts(prev => {
+        const viewing = viewings.find(v => v.id === viewingId);
+        if (!viewing) return prev;
+        const oldStatus = viewing.status as keyof Omit<ViewingCounts, 'total'>;
+        const newStatus = status as keyof Omit<ViewingCounts, 'total'>;
+        return {
+          ...prev,
+          [oldStatus]: Math.max(0, prev[oldStatus] - 1),
+          [newStatus]: prev[newStatus] + 1,
+        };
+      });
       setDeclineViewingId(null);
       setDeclineReason('');
     } catch (err) {
@@ -133,14 +148,16 @@ const ViewingRequestsTab: React.FC = () => {
       month: 'short',
       day: 'numeric',
       year: 'numeric',
+      timeZone: 'UTC',
     });
   };
 
   const formatRelativeDate = (dateStr: string) => {
     const now = new Date();
-    const date = new Date(dateStr);
-    const diffMs = date.getTime() - now.getTime();
-    const diffDays = Math.ceil(diffMs / (1000 * 60 * 60 * 24));
+    // Compare using UTC dates to match how viewing dates are stored (UTC midnight)
+    const todayUTC = Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate());
+    const dateUTC = new Date(dateStr).getTime();
+    const diffDays = Math.round((dateUTC - todayUTC) / (1000 * 60 * 60 * 24));
 
     if (diffDays < 0) return t('property:viewings.relative.past', 'Past');
     if (diffDays === 0) return t('common:today', 'Today');
@@ -150,7 +167,9 @@ const ViewingRequestsTab: React.FC = () => {
   };
 
   const isPast = (dateStr: string) => {
-    return new Date(dateStr) < new Date(new Date().toDateString());
+    const now = new Date();
+    const todayUTC = Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate());
+    return new Date(dateStr).getTime() < todayUTC;
   };
 
   const navigateToProperty = (propertyId: string) => {
