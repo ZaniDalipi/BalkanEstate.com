@@ -1106,12 +1106,42 @@ export const removeAgentFromAgency = async (
     agency.totalAgents = agency.agents.length;
     await agency.save();
 
-    // Clear agent's agency info in User model
+    // Clear ALL agent's agency info and downgrade subscription in User model
+    // This must happen directly (not rely on transaction) to guarantee cleanup
     const agentUser = await User.findById(agentId);
     if (agentUser) {
+      // Clear top-level agency fields
       agentUser.agencyName = undefined;
       agentUser.agencyId = undefined;
+      agentUser.isSubscribed = false;
+      agentUser.subscriptionPlan = undefined;
+
+      // Clear nested agency object
+      if (agentUser.agency) {
+        agentUser.agency.agencyId = undefined;
+        agentUser.agency.role = 'none';
+        agentUser.agency.joinedAt = undefined;
+        agentUser.agency.couponCode = undefined;
+      }
+
+      // Downgrade subscription to free tier
+      if (agentUser.subscription) {
+        agentUser.subscription.tier = 'free' as any;
+        agentUser.subscription.status = 'expired' as any;
+        agentUser.subscription.listingsLimit = FREE_TIER_LIMITS.LISTINGS;
+        agentUser.subscription.savedSearchesLimit = FREE_TIER_LIMITS.SAVED_SEARCHES;
+        agentUser.subscription.expiresAt = undefined;
+        if (agentUser.subscription.promotionCoupons) {
+          agentUser.subscription.promotionCoupons.monthly = FREE_TIER_LIMITS.PROMOTION_COUPONS;
+          agentUser.subscription.promotionCoupons.available = FREE_TIER_LIMITS.PROMOTION_COUPONS;
+          agentUser.subscription.promotionCoupons.used = 0;
+          agentUser.subscription.promotionCoupons.rollover = 0;
+        }
+      }
+      agentUser.subscriptionStatus = 'expired';
+
       await agentUser.save();
+      agencyLogger.info(`✅ Cleared all agency + subscription fields for removed agent ${agentId}`);
     }
 
     // Clear agent's agency info in Agent model
@@ -1122,17 +1152,17 @@ export const removeAgentFromAgency = async (
       await agentRecord.save();
     }
 
-    // Revoke agency coupon subscription (immediate cancel + downgrade to free + free coupon)
+    // Revoke Subscription document and free coupon (best-effort — user is already cleaned up above)
     let subscriptionRevoked = false;
     try {
       const revokeResult = await revokeAgencyCouponSubscription(agentId, id);
       subscriptionRevoked = revokeResult.revoked;
       if (subscriptionRevoked) {
-        agencyLogger.info(`✅ Agency coupon subscription revoked for removed agent ${agentId}`);
+        agencyLogger.info(`✅ Subscription doc + coupon revoked for removed agent ${agentId}`);
       }
     } catch (revokeError: any) {
-      agencyLogger.error(`Failed to revoke agency coupon subscription for removed agent ${agentId}:`, revokeError);
-      // Fallback: directly free the coupon even if subscription revocation failed
+      agencyLogger.error(`Failed to revoke subscription doc for removed agent ${agentId}:`, revokeError);
+      // Fallback: directly free the coupon even if Subscription doc revocation failed
       try {
         const freshAgency = await Agency.findById(id);
         if (freshAgency?.agentCoupons) {
@@ -1151,6 +1181,8 @@ export const removeAgentFromAgency = async (
         agencyLogger.error(`Fallback coupon freeing also failed for agent ${agentId}:`, fallbackError);
       }
     }
+    // User cleanup already done above, so mark as revoked for socket event
+    subscriptionRevoked = true;
 
     // Emit real-time update to the removed agent's frontend
     const io = getSocketInstance();
@@ -2018,10 +2050,39 @@ export const leaveAgency = async (
 
     await agency.save();
 
-    // Clear agent's agency info in User model
+    // Clear ALL agent's agency info and downgrade subscription in User model
+    // This must happen directly (not rely on transaction) to guarantee cleanup
     user.agencyName = undefined;
     user.agencyId = undefined;
+    user.isSubscribed = false;
+    user.subscriptionPlan = undefined;
+
+    // Clear nested agency object
+    if (user.agency) {
+      user.agency.agencyId = undefined;
+      user.agency.role = 'none';
+      user.agency.joinedAt = undefined;
+      user.agency.couponCode = undefined;
+    }
+
+    // Downgrade subscription to free tier
+    if (user.subscription) {
+      user.subscription.tier = 'free' as any;
+      user.subscription.status = 'expired' as any;
+      user.subscription.listingsLimit = FREE_TIER_LIMITS.LISTINGS;
+      user.subscription.savedSearchesLimit = FREE_TIER_LIMITS.SAVED_SEARCHES;
+      user.subscription.expiresAt = undefined;
+      if (user.subscription.promotionCoupons) {
+        user.subscription.promotionCoupons.monthly = FREE_TIER_LIMITS.PROMOTION_COUPONS;
+        user.subscription.promotionCoupons.available = FREE_TIER_LIMITS.PROMOTION_COUPONS;
+        user.subscription.promotionCoupons.used = 0;
+        user.subscription.promotionCoupons.rollover = 0;
+      }
+    }
+    user.subscriptionStatus = 'expired';
+
     await user.save();
+    agencyLogger.info(`✅ Cleared all agency + subscription fields for leaving agent ${user._id}`);
 
     // Clear agent's agency info in Agent model
     const agentRecord = await Agent.findOne({ userId: user._id });
@@ -2032,17 +2093,14 @@ export const leaveAgency = async (
       agencyLogger.info(`✅ Updated agent profile to Independent Agent`);
     }
 
-    // Revoke agency coupon subscription (immediate cancel + downgrade to free + free coupon)
-    let subscriptionRevoked = false;
+    // Revoke Subscription document and free coupon (best-effort — user is already cleaned up above)
+    let subscriptionRevoked = true;
     try {
-      const revokeResult = await revokeAgencyCouponSubscription(user._id, agency._id);
-      subscriptionRevoked = revokeResult.revoked;
-      if (subscriptionRevoked) {
-        agencyLogger.info(`✅ Agency coupon subscription revoked for agent ${user._id} leaving ${agencyName}`);
-      }
+      await revokeAgencyCouponSubscription(user._id, agency._id);
+      agencyLogger.info(`✅ Subscription doc + coupon revoked for agent ${user._id} leaving ${agencyName}`);
     } catch (revokeError: any) {
-      agencyLogger.error(`Failed to revoke agency coupon subscription for agent ${user._id}:`, revokeError);
-      // Fallback: directly free the coupon even if subscription revocation failed
+      agencyLogger.error(`Failed to revoke subscription doc for agent ${user._id}:`, revokeError);
+      // Fallback: directly free the coupon even if Subscription doc revocation failed
       try {
         const freshAgency = await Agency.findById(agency._id);
         if (freshAgency?.agentCoupons) {

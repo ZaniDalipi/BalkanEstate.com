@@ -517,10 +517,39 @@ export const leaveAgency = async (req: Request, res: Response): Promise<void> =>
     const agencyId = user.agencyId;
     const agencyName = user.agencyName;
 
-    // Update User model
-    user.agencyName = 'Independent Agent';
+    // Clear ALL agent's agency info and downgrade subscription in User model
+    // This must happen directly (not rely on transaction) to guarantee cleanup
+    user.agencyName = undefined;
     user.agencyId = undefined;
+    user.isSubscribed = false;
+    user.subscriptionPlan = undefined;
+
+    // Clear nested agency object
+    if (user.agency) {
+      user.agency.agencyId = undefined;
+      user.agency.role = 'none';
+      user.agency.joinedAt = undefined;
+      user.agency.couponCode = undefined;
+    }
+
+    // Downgrade subscription to free tier
+    if (user.subscription) {
+      user.subscription.tier = 'free' as any;
+      user.subscription.status = 'expired' as any;
+      user.subscription.listingsLimit = FREE_TIER_LIMITS.LISTINGS;
+      user.subscription.savedSearchesLimit = FREE_TIER_LIMITS.SAVED_SEARCHES;
+      user.subscription.expiresAt = undefined;
+      if (user.subscription.promotionCoupons) {
+        user.subscription.promotionCoupons.monthly = FREE_TIER_LIMITS.PROMOTION_COUPONS;
+        user.subscription.promotionCoupons.available = FREE_TIER_LIMITS.PROMOTION_COUPONS;
+        user.subscription.promotionCoupons.used = 0;
+        user.subscription.promotionCoupons.rollover = 0;
+      }
+    }
+    user.subscriptionStatus = 'expired';
+
     await user.save();
+    apiLogger.info(`✅ Cleared all agency + subscription fields for leaving agent ${currentUser._id}`);
 
     // Update Agent model
     const agentProfile = await Agent.findOne({ userId: String(currentUser._id) });
@@ -530,17 +559,14 @@ export const leaveAgency = async (req: Request, res: Response): Promise<void> =>
       await agentProfile.save();
     }
 
-    // Revoke agency coupon subscription (immediate cancel + downgrade to free + free coupon)
-    let subscriptionRevoked = false;
+    // Revoke Subscription document and free coupon (best-effort — user is already cleaned up above)
+    let subscriptionRevoked = true;
     try {
-      const revokeResult = await revokeAgencyCouponSubscription(currentUser._id, agencyId);
-      subscriptionRevoked = revokeResult.revoked;
-      if (subscriptionRevoked) {
-        apiLogger.info(`✅ Agency coupon subscription revoked for agent ${currentUser._id}`);
-      }
+      await revokeAgencyCouponSubscription(currentUser._id, agencyId);
+      apiLogger.info(`✅ Subscription doc + coupon revoked for agent ${currentUser._id}`);
     } catch (revokeError: any) {
-      apiLogger.error(`Failed to revoke agency coupon subscription for agent ${currentUser._id}:`, revokeError);
-      // Fallback: directly free the coupon even if subscription revocation failed
+      apiLogger.error(`Failed to revoke subscription doc for agent ${currentUser._id}:`, revokeError);
+      // Fallback: directly free the coupon even if Subscription doc revocation failed
       try {
         const fallbackAgency = await Agency.findById(agencyId);
         if (fallbackAgency?.agentCoupons) {
