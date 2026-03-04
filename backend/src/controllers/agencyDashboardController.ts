@@ -5,6 +5,7 @@ import Property from '../models/Property';
 import User, { IUser } from '../models/User';
 import Inquiry from '../models/Inquiry';
 import Notification from '../models/Notification';
+import PromotionCoupon from '../models/PromotionCoupon';
 import { getObjectIdParam } from '../utils/validateParams';
 import { agencyLogger } from '../utils/logger';
 
@@ -1066,11 +1067,53 @@ export const getFinancial = async (
         avgPrice: parseFloat((rented.avgPrice || 0).toFixed(2)),
       },
       promotedListings: promotedCount,
-      promotionCoupons: {
-        available: agency.promotionCoupons.available,
-        used: agency.promotionCoupons.used,
-        monthly: agency.promotionCoupons.monthly,
-      },
+      promotionCoupons: await (async () => {
+        // Fetch real promotion coupon codes from PromotionCoupon model
+        const ownerIdStr = String(agency.ownerId);
+        const allAgencyUserIds = [ownerIdStr, ...agency.agents.map((id) => String(id))];
+        const promoCoupons = await PromotionCoupon.find({
+          generatedForUserId: { $in: allAgencyUserIds.map((id) => new mongoose.Types.ObjectId(id)) },
+        })
+          .sort({ createdAt: -1 })
+          .limit(30)
+          .lean();
+
+        const coupons = await Promise.all(
+          promoCoupons.map(async (pc) => {
+            let usedByInfo = null;
+            if (pc.usageHistory && pc.usageHistory.length > 0) {
+              const lastUsage = pc.usageHistory[pc.usageHistory.length - 1];
+              try {
+                const user = await User.findById(lastUsage.userId, 'name email').lean();
+                if (user) {
+                  usedByInfo = { id: String((user as any)._id), name: (user as any).name, email: (user as any).email };
+                }
+              } catch {
+                // user may have been deleted
+              }
+            }
+            const isUsed = pc.currentTotalUses > 0;
+            const isExpired = pc.status === 'expired' || pc.status === 'disabled' || new Date(pc.validUntil) < new Date();
+            return {
+              code: pc.code,
+              status: isUsed ? 'used' as const : isExpired ? 'expired' as const : 'available' as const,
+              generatedAt: pc.createdAt,
+              expiresAt: pc.validUntil,
+              usedBy: usedByInfo,
+              usedAt: pc.usageHistory && pc.usageHistory.length > 0
+                ? pc.usageHistory[pc.usageHistory.length - 1].usedAt
+                : null,
+            };
+          })
+        );
+
+        return {
+          available: agency.promotionCoupons.available,
+          used: agency.promotionCoupons.used,
+          monthly: agency.promotionCoupons.monthly,
+          coupons,
+        };
+      })(),
       agentCoupons: {
         total: agency.agentCoupons.length,
         available: agency.agentCoupons.filter((c) => c.status === 'available').length,
