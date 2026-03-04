@@ -341,8 +341,8 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
   useEffect(() => {
     const handleAgencyUpdate = (data: any) => {
       if (data.type === 'member-added' || data.type === 'member-removed') {
-        // Refetch agency data to get the updated member list
-        fetchAgencyData();
+        // Silently refetch agency data to get the updated member list (no loading spinner)
+        fetchAgencyData(true);
       }
       if (data.type === 'join-request-new') {
         // New join request received — update badge count and refresh modal data
@@ -483,8 +483,8 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
     }
   }, [agency._id, isAuthenticated, isTogglingFavourite, dispatch]);
 
-  const fetchAgencyData = async () => {
-    setLoading(true);
+  const fetchAgencyData = async (silent = false) => {
+    if (!silent) setLoading(true);
     try {
       // Fetch fresh agency data from the backend to get updated agents list and properties
       // Include auth token so backend can identify current user and auto-add owner as member
@@ -526,7 +526,7 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
       setAgents(agency.agents || []);
       setAgencyProperties([]);
     } finally {
-      setLoading(false);
+      if (!silent) setLoading(false);
     }
   };
 
@@ -698,8 +698,8 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
         setIsInvitationCodeModalOpen(false);
         await success('Coupon Redeemed!', `You've joined ${data.agency?.name || agency.name} with a Pro subscription!`);
 
-        // Refetch agency data so the new agent appears in the list immediately
-        await fetchAgencyData();
+        // Silently refetch agency data so the new agent appears in the list immediately
+        await fetchAgencyData(true);
       } else {
         // Handle invitation code (AGY-XXXXXX-XXXXXX format)
         const verification = await verifyInvitationCode(agency._id, trimmedCode);
@@ -788,8 +788,8 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
 
       await success(t('messages.agentRemovedTitle', 'Agent Removed'), t('messages.agentRemoved', { name: agentName }));
 
-      // Re-fetch full agency data to get updated coupon status and agent list
-      fetchAgencyData();
+      // Silently re-fetch full agency data to get updated coupon status and agent list
+      fetchAgencyData(true);
     } catch (err: any) {
       await error(t('messages.errorTitle', 'Error'), err.message || t('messages.onlyAdminCanRemove'));
     } finally {
@@ -1381,8 +1381,8 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
   };
 
   const handleSubscriptionSuccess = () => {
-    // Refresh agency data to get updated featured status
-    fetchAgencyData();
+    // Silently refresh agency data to get updated featured status
+    fetchAgencyData(true);
     // Force re-render of subscription card
     setSubscriptionKey((prev) => prev + 1);
   };
