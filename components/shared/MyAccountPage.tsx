@@ -1907,6 +1907,25 @@ const MyAccountPage: React.FC = () => {
         dispatch({ type: 'SET_ACCOUNT_TAB', payload: tab });
     }, [dispatch]);
 
+    const isSellerProfile = state.currentUser?.role === UserRole.AGENT || state.currentUser?.role === UserRole.PRIVATE_SELLER;
+    // Buyer Pro users (listingsLimit > 0) get the same account tabs as sellers
+    const isBuyerPro = state.currentUser?.role === UserRole.BUYER && (state.currentUser?.subscription?.listingsLimit ?? 0) > 0;
+    const hasSellerTabs = isSellerProfile || isBuyerPro;
+
+    // Redirect users without seller tabs to profile if they land on a seller-only tab
+    useEffect(() => {
+        if (!state.currentUser) return;
+        if (!hasSellerTabs && (activeTab === 'listings' || activeTab === 'performance' || activeTab === 'subscription' || activeTab === 'promotions' || activeTab === 'viewings')) {
+            setActiveTab('profile');
+        }
+    }, [hasSellerTabs, activeTab, setActiveTab, state.currentUser]);
+
+    useEffect(() => {
+        if (activeTab === 'performance') {
+            setPerformanceRefreshKey(prev => prev + 1);
+        }
+    }, [activeTab]);
+
     if (!state.currentUser) {
         return (
             <div className="p-8 text-center">
@@ -1914,24 +1933,6 @@ const MyAccountPage: React.FC = () => {
             </div>
         );
     }
-
-    const isSellerProfile = state.currentUser.role === UserRole.AGENT || state.currentUser.role === UserRole.PRIVATE_SELLER;
-    // Buyer Pro users (listingsLimit > 0) get the same account tabs as sellers
-    const isBuyerPro = state.currentUser.role === UserRole.BUYER && (state.currentUser.subscription?.listingsLimit ?? 0) > 0;
-    const hasSellerTabs = isSellerProfile || isBuyerPro;
-
-    // Redirect users without seller tabs to profile if they land on a seller-only tab
-    useEffect(() => {
-        if (!hasSellerTabs && (activeTab === 'listings' || activeTab === 'performance' || activeTab === 'subscription' || activeTab === 'promotions' || activeTab === 'viewings')) {
-            setActiveTab('profile');
-        }
-    }, [hasSellerTabs, activeTab, setActiveTab]);
-
-    useEffect(() => {
-        if (activeTab === 'performance') {
-            setPerformanceRefreshKey(prev => prev + 1);
-        }
-    }, [activeTab]);
 
     const handleLogout = () => {
         logout();
