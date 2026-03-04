@@ -73,6 +73,8 @@ const FinancialBillingSection: React.FC<FinancialBillingSectionProps> = ({ agenc
         <CouponUsagePanel
           agentCoupons={agentCoupons}
           promotionCoupons={promotionCoupons}
+          agentCouponDetails={financial?.agentCoupons}
+          promotionCouponDetails={financial?.promotionCoupons}
           isLoading={isLoading}
         />
       </div>

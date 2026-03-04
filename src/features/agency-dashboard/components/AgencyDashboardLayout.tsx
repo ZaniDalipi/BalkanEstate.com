@@ -28,6 +28,11 @@ const AgencyDashboardLayout: React.FC<AgencyDashboardLayoutProps> = ({
     dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'search' });
   };
 
+  const handleBrowseProperties = () => {
+    dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'search' });
+    window.history.pushState({}, '', '/search');
+  };
+
   const handleBackToAgency = () => {
     dispatch({ type: 'SET_SELECTED_AGENCY', payload: agencyId });
   };
@@ -53,6 +58,8 @@ const AgencyDashboardLayout: React.FC<AgencyDashboardLayoutProps> = ({
         mobileOpen={sidebarMobileOpen}
         onMobileClose={() => setSidebarMobileOpen(false)}
         overview={overview}
+        onBrowseProperties={handleBrowseProperties}
+        onBackToAgency={handleBackToAgency}
       />
 
       <div
@@ -66,6 +73,7 @@ const AgencyDashboardLayout: React.FC<AgencyDashboardLayoutProps> = ({
           onMenuClick={() => setSidebarMobileOpen(true)}
           onBackToSite={handleBackToSite}
           onBackToAgency={handleBackToAgency}
+          onBrowseProperties={handleBrowseProperties}
           userName={state.currentUser?.name || 'Agency Owner'}
         />
 

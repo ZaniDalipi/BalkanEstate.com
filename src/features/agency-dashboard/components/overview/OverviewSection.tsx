@@ -10,6 +10,7 @@ import {
 } from '@/constants';
 import KpiCard from './KpiCard';
 import OverviewCharts from './OverviewCharts';
+import AgencyInfoCard from './AgencyInfoCard';
 
 interface OverviewSectionProps {
   agencyId: string;
@@ -99,21 +100,29 @@ const OverviewSection: React.FC<OverviewSectionProps> = ({ agencyId }) => {
         ))}
       </div>
 
-      {!isLoading && overview && (
-        <OverviewCharts
-          viewsTrend={overview.viewsTrend}
-          inquiriesTrend={overview.inquiriesTrend}
-        />
-      )}
+      <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
+        <div className="xl:col-span-2">
+          {!isLoading && overview && (
+            <OverviewCharts
+              viewsTrend={overview.viewsTrend}
+              inquiriesTrend={overview.inquiriesTrend}
+            />
+          )}
 
-      {isLoading && (
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
-          <div className="animate-pulse space-y-4">
-            <div className="h-5 bg-gray-200 rounded w-1/4" />
-            <div className="h-40 bg-gray-100 rounded-lg" />
-          </div>
+          {isLoading && (
+            <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
+              <div className="animate-pulse space-y-4">
+                <div className="h-5 bg-gray-200 rounded w-1/4" />
+                <div className="h-40 bg-gray-100 rounded-lg" />
+              </div>
+            </div>
+          )}
         </div>
-      )}
+
+        <div className="xl:col-span-1">
+          <AgencyInfoCard agencyId={agencyId} />
+        </div>
+      </div>
     </div>
   );
 };

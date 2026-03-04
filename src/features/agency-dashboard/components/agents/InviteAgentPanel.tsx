@@ -1,6 +1,6 @@
 import React, { useState, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
-import { ClipboardDocumentIcon, UsersIcon } from '@/constants';
+import { ClipboardDocumentIcon, UsersIcon, TicketIcon, CheckBadgeIcon } from '@/constants';
 import { useAgency } from '@/src/features/agencies/hooks/useAgency';
 
 interface InviteAgentPanelProps {
@@ -106,7 +106,7 @@ const InviteAgentPanel: React.FC<InviteAgentPanelProps> = ({ agencyId }) => {
           <h4 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">
             {t('agencyDashboard:agents.invite.couponStats', 'Agent Coupon Usage')}
           </h4>
-          <div className="grid grid-cols-3 gap-2 text-center">
+          <div className="grid grid-cols-3 gap-2 text-center mb-3">
             <div className="bg-green-50 rounded-xl py-2.5 px-2">
               <div className="text-lg font-bold text-green-700">{couponStats.available}</div>
               <div className="text-[10px] font-medium text-green-600 uppercase">
@@ -126,6 +126,41 @@ const InviteAgentPanel: React.FC<InviteAgentPanelProps> = ({ agencyId }) => {
               </div>
             </div>
           </div>
+
+          {agency?.agentCoupons?.coupons && agency.agentCoupons.coupons.length > 0 && (
+            <div className="space-y-1.5 max-h-48 overflow-y-auto">
+              {agency.agentCoupons.coupons
+                .filter((c) => c.status === 'used')
+                .map((coupon, idx) => (
+                  <div
+                    key={coupon.code || idx}
+                    className="flex items-center justify-between gap-2 px-2.5 py-2 bg-blue-50/50 rounded-lg"
+                  >
+                    <div className="flex items-center gap-2 min-w-0">
+                      <CheckBadgeIcon className="w-3.5 h-3.5 text-blue-500 flex-shrink-0" />
+                      <span className="font-mono text-[11px] text-gray-600 truncate">{coupon.code}</span>
+                    </div>
+                    <div className="flex items-center gap-1.5 flex-shrink-0 text-[11px]">
+                      {coupon.usedBy && (
+                        <span className="text-gray-700 font-medium truncate max-w-[80px]" title={coupon.usedBy.name}>
+                          {coupon.usedBy.name}
+                        </span>
+                      )}
+                      {coupon.usedAt && (
+                        <span className="text-gray-400">
+                          {new Date(coupon.usedAt).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              {agency.agentCoupons.coupons.filter((c) => c.status === 'used').length === 0 && (
+                <p className="text-xs text-gray-400 text-center py-2">
+                  {t('agencyDashboard:agents.invite.noCouponsUsed', 'No coupons used yet')}
+                </p>
+              )}
+            </div>
+          )}
         </div>
       )}
     </div>
