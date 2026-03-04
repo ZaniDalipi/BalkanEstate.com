@@ -774,10 +774,48 @@ export const getAgency = async (
       agentIds.includes(requestUserId)
     );
 
-    const { invitationCode, __v, ...publicAgencyFields } = agency.toObject();
+    const { invitationCode, __v, agentCoupons: rawAgentCoupons, ...publicAgencyFields } = agency.toObject();
+
+    // Transform agentCoupons from raw array to structured object for frontend
+    let agentCouponsData: Record<string, unknown> | undefined;
+    if (isMemberOrAdmin && rawAgentCoupons && Array.isArray(rawAgentCoupons)) {
+      const populatedCoupons = await Promise.all(
+        rawAgentCoupons.map(async (c: any) => {
+          let usedByInfo = null;
+          if (c.usedBy) {
+            try {
+              const user = await User.findById(c.usedBy, 'name email').lean();
+              if (user) {
+                usedByInfo = { _id: String((user as any)._id), name: (user as any).name, email: (user as any).email };
+              }
+            } catch {
+              // user may have been deleted
+            }
+          }
+          return {
+            code: c.code,
+            status: c.status,
+            generatedAt: c.generatedAt,
+            expiresAt: c.expiresAt,
+            usedBy: usedByInfo,
+            usedAt: c.usedAt || null,
+          };
+        })
+      );
+
+      agentCouponsData = {
+        coupons: populatedCoupons,
+        available: populatedCoupons.filter((c) => c.status === 'available').length,
+        used: populatedCoupons.filter((c) => c.status === 'used').length,
+        expired: populatedCoupons.filter((c) => c.status === 'expired').length,
+        canGenerateMore: populatedCoupons.filter((c) => c.status === 'available').length < 5,
+      };
+    }
+
     const agencyWithStats = {
       ...publicAgencyFields,
       ...(isMemberOrAdmin ? { invitationCode } : {}),
+      ...(agentCouponsData ? { agentCoupons: agentCouponsData } : {}),
       salesStats,
       totalProperties: activeProperties.length,
       totalAgents: agency.agents?.length || 0,
