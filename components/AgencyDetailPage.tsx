@@ -253,10 +253,10 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
   const hasProSubscription = currentUser?.subscription?.tier === 'pro' &&
     (currentUser?.subscription?.status === 'active' || currentUser?.subscription?.status === 'trial');
 
-  // Can only request to join if: authenticated, is agent, has Pro, not owner/admin, not already in ANY agency, and not already a member of THIS agency
+  // Can request to join if: authenticated, is agent, not owner/admin, not already in ANY agency, and not already a member of THIS agency
+  // Non-Pro agents can still join via coupon codes (which grant Pro), so we don't require Pro here
   const canRequestToJoin = isAuthenticated &&
     currentUser?.role === 'agent' &&
-    hasProSubscription &&
     !isOwner &&
     !isAdmin &&
     !currentUser?.agencyId &&
@@ -2701,11 +2701,11 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
                 </button>
               )}
 
-              {/* Show upgrade prompt for agents without Pro subscription */}
-              {isAuthenticated && currentUser?.role === 'agent' && !hasProSubscription && !isOwner && !isAdmin && !currentUser?.agencyId && !isAlreadyMember && !isUserInThisAgency && (
-                <div className="inline-flex items-center gap-2 px-5 py-2.5 bg-amber-50 text-amber-800 text-sm font-medium rounded-xl border border-amber-200">
-                  <SparklesIcon className="w-4 h-4 text-amber-500" />
-                  {t('actions.proRequiredToJoin', 'Pro subscription required to join an agency')}
+              {/* Show upgrade prompt for agents without Pro subscription who want to use invitation codes */}
+              {canRequestToJoin && !hasProSubscription && (
+                <div className="inline-flex items-center gap-2 px-4 py-2 bg-amber-50 text-amber-700 text-xs font-medium rounded-lg border border-amber-200">
+                  <SparklesIcon className="w-3.5 h-3.5 text-amber-500" />
+                  {t('actions.proRequiredForInviteCode', 'Pro subscription required for invitation codes. Use a coupon code to join.')}
                 </div>
               )}
             </div>
@@ -3281,6 +3281,7 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
         onClose={() => setIsInvitationCodeModalOpen(false)}
         onSubmit={handleSubmitInvitationCode}
         agencyName={agency.name}
+        hasProSubscription={hasProSubscription}
       />
 
       {/* Featured Subscription Dialog */}

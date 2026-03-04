@@ -7,6 +7,7 @@ interface InvitationCodeModalProps {
   onClose: () => void;
   onSubmit: (code: string) => Promise<void>;
   agencyName: string;
+  hasProSubscription?: boolean;
 }
 
 type CodeType = 'invitation' | 'coupon';
@@ -24,6 +25,7 @@ const InvitationCodeModal: React.FC<InvitationCodeModalProps> = ({
   onClose,
   onSubmit,
   agencyName,
+  hasProSubscription = true,
 }) => {
   const { t } = useTranslation(['modals', 'common']);
   const [code, setCode] = useState('');
@@ -185,18 +187,33 @@ const InvitationCodeModal: React.FC<InvitationCodeModalProps> = ({
           </button>
           <button
             type="button"
-            onClick={() => handleTypeChange('invitation')}
+            onClick={() => hasProSubscription && handleTypeChange('invitation')}
             className={`flex-1 py-2 sm:py-2.5 px-2 sm:px-4 text-xs sm:text-sm font-medium rounded-md transition-all duration-200 ${
-              codeType === 'invitation'
-                ? 'bg-white text-gray-900 shadow-sm'
-                : 'text-gray-600 hover:text-gray-900'
+              !hasProSubscription
+                ? 'text-gray-400 cursor-not-allowed'
+                : codeType === 'invitation'
+                  ? 'bg-white text-gray-900 shadow-sm'
+                  : 'text-gray-600 hover:text-gray-900'
             }`}
-            disabled={isSubmitting}
+            disabled={isSubmitting || !hasProSubscription}
+            title={!hasProSubscription ? 'Pro subscription required to use invitation codes' : undefined}
           >
             <span className="hidden sm:inline">{t('invitationCode.invitationCode')}</span>
             <span className="sm:hidden">{t('invitationCode.inviteShort')}</span>
           </button>
         </div>
+
+        {/* Pro required notice for invitation codes */}
+        {!hasProSubscription && (
+          <div className="flex items-start gap-2 p-3 bg-amber-50 border border-amber-200 rounded-lg mb-4 sm:mb-6">
+            <svg className="w-4 h-4 text-amber-500 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            <p className="text-xs text-amber-700">
+              {t('invitationCode.proRequiredForInvite', 'Invitation codes require a Pro subscription. Use a coupon code provided by the agency to join and get Pro automatically.')}
+            </p>
+          </div>
+        )}
 
         {/* Content */}
         <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6">

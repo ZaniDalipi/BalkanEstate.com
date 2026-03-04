@@ -2032,7 +2032,7 @@ export const leaveAgency = async (
       agencyLogger.info(`✅ Updated agent profile to Independent Agent`);
     }
 
-    // Revoke agency coupon subscription (immediate cancel + downgrade to free)
+    // Revoke agency coupon subscription (immediate cancel + downgrade to free + free coupon)
     let subscriptionRevoked = false;
     try {
       const revokeResult = await revokeAgencyCouponSubscription(user._id, agency._id);
@@ -2042,6 +2042,24 @@ export const leaveAgency = async (
       }
     } catch (revokeError: any) {
       agencyLogger.error(`Failed to revoke agency coupon subscription for agent ${user._id}:`, revokeError);
+      // Fallback: directly free the coupon even if subscription revocation failed
+      try {
+        const freshAgency = await Agency.findById(agency._id);
+        if (freshAgency?.agentCoupons) {
+          const coupon = freshAgency.agentCoupons.find(
+            (c: any) => c.usedBy && String(c.usedBy) === String(user._id) && c.status === 'used'
+          );
+          if (coupon) {
+            coupon.status = 'available';
+            coupon.usedBy = undefined;
+            coupon.usedAt = undefined;
+            await freshAgency.save();
+            agencyLogger.info(`✅ Fallback: freed coupon ${coupon.code} for leaving agent ${user._id}`);
+          }
+        }
+      } catch (fallbackError: any) {
+        agencyLogger.error(`Fallback coupon freeing also failed for agent ${user._id}:`, fallbackError);
+      }
     }
 
     agencyLogger.info(`✅ User ${user._id} left agency: ${agencyName}`);
