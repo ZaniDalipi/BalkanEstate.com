@@ -74,7 +74,8 @@ const TabButton: React.FC<{
     isActive: boolean;
     onClick: () => void;
     tabKey: AccountTab;
-}> = ({ label, icon, isActive, onClick, tabKey }) => {
+    hasUnread?: boolean;
+}> = ({ label, icon, isActive, onClick, tabKey, hasUnread }) => {
     const handleClick = (e: React.MouseEvent) => {
         e.preventDefault();
         onClick();
@@ -91,7 +92,10 @@ const TabButton: React.FC<{
             }`}
         >
             {icon}
-            <span>{label}</span>
+            <span className="flex-1">{label}</span>
+            {hasUnread && (
+                <span className="w-2.5 h-2.5 bg-red-500 rounded-full flex-shrink-0 animate-pulse" />
+            )}
         </a>
     );
 };
@@ -1839,15 +1843,62 @@ const ProfileSettings: React.FC<{ user: User }> = ({ user }) => {
     );
 };
 
+const VIEWING_NOTIFICATION_TYPES = ['new_viewing', 'viewing_approved', 'viewing_declined'];
+
 const MyAccountPage: React.FC = () => {
     const { t } = useTranslation(['account']);
     const { state, dispatch, logout, logoutAllDevices } = useAppContext();
     const { success } = useNotification();
     const [performanceRefreshKey, setPerformanceRefreshKey] = useState(0);
+    const [unreadViewingCount, setUnreadViewingCount] = useState(0);
 
     // Get active tab from state (set by URL routing)
     const urlTab = state.accountTab || 'listings';
     const activeTab: AccountTab = tabRouteMap[urlTab] || 'listings';
+
+    const token = tokenService.getAccessToken();
+
+    // Fetch unread viewing notification count
+    useEffect(() => {
+        if (!token) return;
+        const fetchCount = async () => {
+            try {
+                const res = await fetch(`${API_URL}/notifications/unread-count-by-types?types=${VIEWING_NOTIFICATION_TYPES.join(',')}`, {
+                    credentials: 'include',
+                    headers: { Authorization: `Bearer ${token}` },
+                });
+                if (res.ok) {
+                    const data = await res.json();
+                    setUnreadViewingCount(data.count || 0);
+                }
+            } catch { /* silently ignore */ }
+        };
+        fetchCount();
+    }, [token]);
+
+    // Mark viewing notifications as read when the viewings tab is opened
+    useEffect(() => {
+        if (activeTab !== 'viewings' || unreadViewingCount === 0 || !token) return;
+        const markRead = async () => {
+            try {
+                await ensureCsrfToken();
+                const res = await fetch(`${API_URL}/notifications/read-by-types`, {
+                    method: 'PATCH',
+                    credentials: 'include',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        Authorization: `Bearer ${token}`,
+                        ...csrfHeaders(),
+                    },
+                    body: JSON.stringify({ types: VIEWING_NOTIFICATION_TYPES }),
+                });
+                if (res.ok) {
+                    setUnreadViewingCount(0);
+                }
+            } catch { /* silently ignore */ }
+        };
+        markRead();
+    }, [activeTab, unreadViewingCount, token]);
 
     // Function to change tab and update URL
     const setActiveTab = useCallback((tab: AccountTab) => {
@@ -2002,7 +2053,7 @@ const MyAccountPage: React.FC = () => {
                                         <TabButton label={t('account:tabs.myListings', 'My Listings')} icon={<HomeIcon className="w-6 h-6"/>} isActive={activeTab === 'listings'} onClick={() => setActiveTab('listings')} tabKey="listings" />
                                         <TabButton label={t('account:tabs.promotions', 'My Promotions')} icon={<SparklesIcon className="w-6 h-6"/>} isActive={activeTab === 'promotions'} onClick={() => setActiveTab('promotions')} tabKey="promotions" />
                                         <TabButton label={t('account:tabs.performance')} icon={<ChartBarIcon className="w-6 h-6"/>} isActive={activeTab === 'performance'} onClick={() => setActiveTab('performance')} tabKey="performance" />
-                                        <TabButton label={t('account:tabs.viewings', 'Viewing Requests')} icon={<CalendarIcon className="w-6 h-6"/>} isActive={activeTab === 'viewings'} onClick={() => setActiveTab('viewings')} tabKey="viewings" />
+                                        <TabButton label={t('account:tabs.viewings', 'Viewing Requests')} icon={<CalendarIcon className="w-6 h-6"/>} isActive={activeTab === 'viewings'} onClick={() => setActiveTab('viewings')} tabKey="viewings" hasUnread={unreadViewingCount > 0} />
                                     </>
                                 )}
                                 <TabButton label={t('account:tabs.profileSettings')} icon={<UserCircleIcon className="w-6 h-6"/>} isActive={activeTab === 'profile'} onClick={() => setActiveTab('profile')} tabKey="profile" />

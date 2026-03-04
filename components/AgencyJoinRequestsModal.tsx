@@ -6,9 +6,9 @@ import { formatPrice } from '../utils/currency';
 import { useNotification } from '../src/shared/hooks/useNotification';
 
 interface JoinRequest {
-  _id: string;
+  id: string;
   agentId: {
-    _id: string;
+    id: string;
     name: string;
     email: string;
     phone: string;
@@ -168,7 +168,7 @@ const AgencyJoinRequestsModal: React.FC<AgencyJoinRequestsModalProps> = ({
             <div className="space-y-4">
               {filteredRequests.map((request) => (
                 <div
-                  key={request._id}
+                  key={request.id}
                   className="bg-white border border-gray-200 rounded-xl p-4 hover:shadow-md transition-shadow"
                 >
                   <div className="flex items-start gap-4">
@@ -264,14 +264,14 @@ const AgencyJoinRequestsModal: React.FC<AgencyJoinRequestsModalProps> = ({
                       {request.status === 'pending' && (
                         <div className="mt-4 flex gap-2">
                           <button
-                            onClick={() => handleApprove(request._id)}
+                            onClick={() => handleApprove(request.id)}
                             className="flex-1 flex items-center justify-center gap-2 px-4 py-2 bg-green-600 text-white font-semibold rounded-lg hover:bg-green-700 transition-colors"
                           >
                             <CheckCircleIcon className="w-5 h-5" />
                             {t('agencies:joinRequests.approve', 'Approve')}
                           </button>
                           <button
-                            onClick={() => handleReject(request._id)}
+                            onClick={() => handleReject(request.id)}
                             className="flex-1 flex items-center justify-center gap-2 px-4 py-2 bg-red-600 text-white font-semibold rounded-lg hover:bg-red-700 transition-colors"
                           >
                             <XCircleIcon className="w-5 h-5" />

@@ -249,9 +249,14 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
     currentUser.agencyId && String(currentUser.agencyId) === String(agencyData._id)
   );
 
-  // Can only request to join if: authenticated, is agent, not owner/admin, not already in ANY agency, and not already a member of THIS agency
+  // Check if agent has an active Pro subscription (required to join an agency)
+  const hasProSubscription = currentUser?.subscription?.tier === 'pro' &&
+    (currentUser?.subscription?.status === 'active' || currentUser?.subscription?.status === 'trial');
+
+  // Can only request to join if: authenticated, is agent, has Pro, not owner/admin, not already in ANY agency, and not already a member of THIS agency
   const canRequestToJoin = isAuthenticated &&
     currentUser?.role === 'agent' &&
+    hasProSubscription &&
     !isOwner &&
     !isAdmin &&
     !currentUser?.agencyId &&
@@ -2694,6 +2699,14 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
                   </svg>
                   {t('actions.requestToJoin', 'Request to Join Agency')}
                 </button>
+              )}
+
+              {/* Show upgrade prompt for agents without Pro subscription */}
+              {isAuthenticated && currentUser?.role === 'agent' && !hasProSubscription && !isOwner && !isAdmin && !currentUser?.agencyId && !isAlreadyMember && !isUserInThisAgency && (
+                <div className="inline-flex items-center gap-2 px-5 py-2.5 bg-amber-50 text-amber-800 text-sm font-medium rounded-xl border border-amber-200">
+                  <SparklesIcon className="w-4 h-4 text-amber-500" />
+                  {t('actions.proRequiredToJoin', 'Pro subscription required to join an agency')}
+                </div>
               )}
             </div>
           </div>

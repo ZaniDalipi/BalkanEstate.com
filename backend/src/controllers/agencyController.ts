@@ -1363,6 +1363,20 @@ export const joinAgencyByInvitationCode = async (
       return;
     }
 
+    // Check if user has an active Pro subscription
+    const userTier = user.subscription?.tier;
+    const userSubStatus = user.subscription?.status;
+    const hasProSubscription =
+      (userTier === 'pro' || userTier === 'agency_owner') &&
+      (userSubStatus === 'active' || userSubStatus === 'trial');
+
+    if (!hasProSubscription) {
+      res.status(403).json({
+        message: 'Pro subscription required to join an agency. Please upgrade your plan.',
+      });
+      return;
+    }
+
     // Find agency by invitation code
     const agency = await Agency.findOne({ invitationCode: invitationCode.toUpperCase() });
 

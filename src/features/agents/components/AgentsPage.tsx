@@ -127,6 +127,8 @@ const AgentsPage: React.FC = () => {
       }
 
       // Agent not in list, fetch it directly
+      // Clear stale data immediately so the previous agent's image isn't shown
+      setFetchedAgent(null);
       setFetchingAgent(true);
       try {
         const agent = await getAgent(selectedAgentId);

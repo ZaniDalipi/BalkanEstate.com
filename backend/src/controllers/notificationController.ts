@@ -111,6 +111,63 @@ export const markAllAsRead = async (req: Request, res: Response): Promise<void> 
 };
 
 /**
+ * @desc    Mark all notifications of specific types as read
+ * @route   PATCH /api/notifications/read-by-types
+ * @access  Private
+ */
+export const markAsReadByTypes = async (req: Request, res: Response): Promise<void> => {
+  try {
+    if (!req.user) {
+      res.status(401).json({ message: 'Not authorized' });
+      return;
+    }
+
+    const userId = String((req.user as IUser)._id);
+    const { types } = req.body;
+
+    if (!Array.isArray(types) || types.length === 0) {
+      res.status(400).json({ message: 'types must be a non-empty array' });
+      return;
+    }
+
+    const count = await engagementService.markAsReadByTypes(userId, types);
+    res.json({ success: true, markedCount: count });
+  } catch (error: any) {
+    apiLogger.error('Mark as read by types error:', error);
+    res.status(500).json({ message: 'Error marking notifications as read' });
+  }
+};
+
+/**
+ * @desc    Get unread notification count for specific types
+ * @route   GET /api/notifications/unread-count-by-types
+ * @access  Private
+ */
+export const getUnreadCountByTypes = async (req: Request, res: Response): Promise<void> => {
+  try {
+    if (!req.user) {
+      res.status(401).json({ message: 'Not authorized' });
+      return;
+    }
+
+    const userId = String((req.user as IUser)._id);
+    const typesParam = req.query.types as string;
+
+    if (!typesParam) {
+      res.status(400).json({ message: 'types query parameter is required' });
+      return;
+    }
+
+    const types = typesParam.split(',');
+    const count = await engagementService.getUnreadCountByTypes(userId, types);
+    res.json({ count });
+  } catch (error: any) {
+    apiLogger.error('Get unread count by types error:', error);
+    res.status(500).json({ message: 'Error fetching unread count' });
+  }
+};
+
+/**
  * @desc    Get unread notifications (quick fetch)
  * @route   GET /api/notifications/unread
  * @access  Private
