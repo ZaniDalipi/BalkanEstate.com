@@ -154,9 +154,9 @@
   },
   "confirmations": {
     "removeAgent": "Are you sure you want to remove {name} from {agency}?",
-    "removeAgentDetails": "This will:\n- Remove them from your agency\n- Clear their agency affiliation\n- Keep their properties and reviews intact",
+    "removeAgentDetails": "This will:\n- Remove them from your agency\n- Cancel their agency-provided Pro plan immediately\n- Free up the agency coupon for reassignment\n- Keep their properties and reviews intact",
     "leaveAgency": "Are you sure you want to leave {agency}?",
-    "leaveAgencyDetails": "This will:\n- Remove you from this agency\n- Clear your agency affiliation\n- Keep your properties and reviews intact\n- Change your status to Independent Agent",
+    "leaveAgencyDetails": "This will:\n- Remove you from this agency\n- Cancel your agency-provided Pro plan immediately\n- Change your status to Independent Agent\n- Keep your properties and reviews intact",
     "toggleAdmin": "Are you sure you want to {action} {name}?",
     "removeAdminRights": "remove admin rights from",
     "makeAdminRights": "make admin"

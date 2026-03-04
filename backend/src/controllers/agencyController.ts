@@ -1125,6 +1125,18 @@ export const removeAgentFromAgency = async (
       });
     }
 
+    // Notify the agency dashboard in real-time (coupon freed, agent list changed)
+    if (io) {
+      io.emit(`agency-update-${String(agency._id)}`, {
+        type: 'member-removed',
+        agencyId: String(agency._id),
+        agentId: String(agentId),
+        agentName: agentUser?.name || 'Agent',
+        subscriptionRevoked,
+        totalAgents: agency.agents.length,
+      });
+    }
+
     // Notify the removed agent
     if (agentUser) {
       Notification.create({
@@ -1977,6 +1989,19 @@ export const leaveAgency = async (
     }
 
     agencyLogger.info(`✅ User ${user._id} left agency: ${agencyName}`);
+
+    // Notify agency dashboard in real-time (agent list + coupon status changed)
+    const io = getSocketInstance();
+    if (io) {
+      io.emit(`agency-update-${String(agency._id)}`, {
+        type: 'member-removed',
+        agencyId: String(agency._id),
+        agentId: String(user._id),
+        agentName: user.name || 'Agent',
+        subscriptionRevoked,
+        totalAgents: agency.agents.length,
+      });
+    }
 
     // Notify agency owner that an agent left
     Notification.create({

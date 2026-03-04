@@ -1,9 +1,12 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useQueryClient } from '@tanstack/react-query';
 import { useAppContext } from '@/context/AppContext';
 import AgencyDashboardSidebar from './AgencyDashboardSidebar';
 import AgencyDashboardHeader from './AgencyDashboardHeader';
 import { useAgencyOverview } from '../hooks/useAgencyOverview';
+import { agencyDashboardKeys } from '../api/agencyDashboardKeys';
+import { socketService } from '@/services/socketService';
 import type { AgencyDashboardSection } from '@/types';
 
 interface AgencyDashboardLayoutProps {
@@ -20,9 +23,27 @@ const AgencyDashboardLayout: React.FC<AgencyDashboardLayoutProps> = ({
   onSectionChange,
 }) => {
   const { state, dispatch } = useAppContext();
+  const queryClient = useQueryClient();
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [sidebarMobileOpen, setSidebarMobileOpen] = useState(false);
   const { overview, isLoading: isLoadingOverview } = useAgencyOverview(agencyId);
+
+  // Listen for real-time agency updates (agent removed/left, coupon freed, etc.)
+  useEffect(() => {
+    if (!agencyId) return;
+
+    const unsubscribe = socketService.onAgencyUpdate(agencyId, (data) => {
+      if (data.type === 'member-removed' || data.type === 'member-joined') {
+        queryClient.invalidateQueries({ queryKey: agencyDashboardKeys.agents(agencyId) });
+        queryClient.invalidateQueries({ queryKey: agencyDashboardKeys.financial(agencyId) });
+        queryClient.invalidateQueries({ queryKey: agencyDashboardKeys.overview(agencyId) });
+      }
+    });
+
+    return () => {
+      unsubscribe();
+    };
+  }, [agencyId, queryClient]);
 
   const handleBackToSite = () => {
     dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'search' });
