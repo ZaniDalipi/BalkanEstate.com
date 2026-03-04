@@ -776,15 +776,19 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
     try {
       await removeAgentFromAgency(agencyData._id, agentId);
 
-      // Update local state to remove the agent
+      // Update local state to remove the agent immediately
+      const removedId = String(agentId);
       setAgents(prevAgents => prevAgents.filter(agent =>
-        (agent.id || agent._id) !== agentId
+        String(agent.id || agent._id) !== removedId
       ));
 
-      // Update agency data
+      // Update agency data counts
       setAgencyData(prev => ({
         ...prev,
-        totalAgents: prev.totalAgents - 1
+        totalAgents: Math.max(0, (prev.totalAgents || 0) - 1),
+        agents: Array.isArray(prev.agents)
+          ? prev.agents.filter((a: any) => String(a.id || a._id || a) !== removedId)
+          : prev.agents,
       }));
 
       await success(t('messages.agentRemovedTitle', 'Agent Removed'), t('messages.agentRemoved', { name: agentName }));
@@ -810,18 +814,16 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
     try {
       const response = await leaveAgency();
 
-      // Update current user in app context
+      // Update current user in app context — clear agency affiliation
       if (dispatch && currentUser) {
-        // Cast to any to avoid TypeScript error when the action type is not declared in the reducer's Action union.
-        // Prefer updating the reducer's Action type to include 'SET_USER' if you want a stricter fix.
         dispatch({
-          type: 'SET_USER',
+          type: 'UPDATE_USER',
           payload: {
-            ...currentUser,
-            agencyId: undefined,
-            agencyName: undefined,
-          }
-        } as any);
+            agencyId: null,
+            agencyName: 'Independent Agent',
+            ...(response.subscription ? { subscription: response.subscription } : {}),
+          },
+        });
       }
 
       await success(t('messages.leftAgencyTitle', 'Left Agency'), response.message || t('messages.leftAgency', { agency: agencyData.name }));
