@@ -1,5 +1,6 @@
 import React from 'react';
 import { Helmet } from 'react-helmet-async';
+import { useTranslation } from 'react-i18next';
 
 interface SEOProps {
   title?: string;
@@ -76,6 +77,13 @@ const BASE_URL = typeof window !== 'undefined' ? window.location.origin : 'https
 // All supported languages for hreflang tags
 const HREFLANG_LANGUAGES = ['en', 'sq', 'sr', 'bg', 'hr', 'bs', 'mk', 'me', 'ro', 'el'] as const;
 
+// Map language codes to og:locale format
+const OG_LOCALE_MAP: Record<string, string> = {
+  en: 'en_US', sq: 'sq_AL', sr: 'sr_RS', bg: 'bg_BG',
+  hr: 'hr_HR', bs: 'bs_BA', mk: 'mk_MK', me: 'sr_ME',
+  ro: 'ro_RO', el: 'el_GR',
+};
+
 /**
  * Get the current page path without language prefix,
  * so we can generate hreflang alternates for all languages.
@@ -102,6 +110,10 @@ export const SEO: React.FC<SEOProps> = ({
   agency,
   agent,
 }) => {
+  const { i18n } = useTranslation();
+  const currentLang = (i18n.language || 'en').split('-')[0];
+  const ogLocale = OG_LOCALE_MAP[currentLang] || 'en_US';
+
   const fullTitle = title ? `${title} | ${SITE_NAME}` : SITE_NAME;
   const fullImage = image.startsWith('http') ? image : `${BASE_URL}${image}`;
   const canonicalUrl = canonical || (typeof window !== 'undefined' ? window.location.href : BASE_URL);
@@ -121,7 +133,11 @@ export const SEO: React.FC<SEOProps> = ({
       <meta property="og:description" content={description} />
       <meta property="og:image" content={fullImage} />
       <meta property="og:url" content={canonicalUrl} />
-      <meta property="og:locale" content="en_US" />
+      <meta property="og:locale" content={ogLocale} />
+      {/* Alternate locales for Facebook to discover other language versions */}
+      {HREFLANG_LANGUAGES.filter(lang => lang !== currentLang).map(lang => (
+        <meta key={`og-alt-${lang}`} property="og:locale:alternate" content={OG_LOCALE_MAP[lang] || 'en_US'} />
+      ))}
 
       {/* Twitter Card */}
       <meta name="twitter:card" content="summary_large_image" />
@@ -164,35 +180,35 @@ export const SEO: React.FC<SEOProps> = ({
       {/* Property-specific JSON-LD */}
       {property && (
         <script type="application/ld+json">
-          {JSON.stringify(generatePropertySchema(property, fullTitle, description, fullImage, canonicalUrl))}
+          {JSON.stringify(generatePropertySchema(property, fullTitle, description, fullImage, canonicalUrl, currentLang))}
         </script>
       )}
 
       {/* VideoObject schema for properties with video/virtual tours */}
       {property && (property.videoUrl || property.virtualTour360Url) && (
         <script type="application/ld+json">
-          {JSON.stringify(generateVideoSchema(property, fullTitle, description, fullImage, canonicalUrl))}
+          {JSON.stringify(generateVideoSchema(property, fullTitle, description, fullImage, canonicalUrl, currentLang))}
         </script>
       )}
 
       {/* Agency-specific JSON-LD with AggregateRating */}
       {agency && (
         <script type="application/ld+json">
-          {JSON.stringify(generateAgencySchema(agency))}
+          {JSON.stringify(generateAgencySchema(agency, currentLang))}
         </script>
       )}
 
       {/* Agent-specific JSON-LD with AggregateRating */}
       {agent && (
         <script type="application/ld+json">
-          {JSON.stringify(generateAgentSchema(agent))}
+          {JSON.stringify(generateAgentSchema(agent, currentLang))}
         </script>
       )}
 
       {/* Website-level JSON-LD */}
       {!property && !agency && !agent && (
         <script type="application/ld+json">
-          {JSON.stringify(generateWebsiteSchema())}
+          {JSON.stringify(generateWebsiteSchema(currentLang))}
         </script>
       )}
     </Helmet>
@@ -205,7 +221,8 @@ function generatePropertySchema(
   title: string,
   description: string,
   image: string,
-  url: string
+  url: string,
+  lang: string
 ) {
   if (!property) return {};
 
@@ -215,6 +232,7 @@ function generatePropertySchema(
     name: title,
     description: description,
     url: url,
+    inLanguage: lang,
     image: property.images?.length ? property.images : [image],
     datePosted: property.datePosted
       ? new Date(typeof property.datePosted === 'number' ? property.datePosted : property.datePosted).toISOString()
@@ -282,7 +300,7 @@ function generatePropertySchema(
 }
 
 // Generate JSON-LD Schema for Real Estate Agencies (with AggregateRating)
-function generateAgencySchema(agency: SEOProps['agency']) {
+function generateAgencySchema(agency: SEOProps['agency'], lang: string) {
   if (!agency) return {};
 
   const schema: any = {
@@ -290,6 +308,7 @@ function generateAgencySchema(agency: SEOProps['agency']) {
     '@type': 'RealEstateAgent',
     name: agency.name,
     description: agency.description,
+    inLanguage: lang,
     logo: agency.logo,
     image: agency.logo,
     ...(agency.address && {
@@ -331,13 +350,14 @@ function generateAgencySchema(agency: SEOProps['agency']) {
 }
 
 // Generate JSON-LD Schema for Real Estate Agents (Person + AggregateRating)
-function generateAgentSchema(agent: SEOProps['agent']) {
+function generateAgentSchema(agent: SEOProps['agent'], lang: string) {
   if (!agent) return {};
 
   const schema: any = {
     '@context': 'https://schema.org',
     '@type': 'RealEstateAgent',
     name: agent.name,
+    inLanguage: lang,
     ...(agent.image && { image: agent.image }),
     ...(agent.description && { description: agent.description }),
     ...(agent.phone && { telephone: agent.phone }),
@@ -395,7 +415,8 @@ function generateVideoSchema(
   title: string,
   description: string,
   thumbnail: string,
-  url: string
+  url: string,
+  lang: string
 ) {
   if (!property) return {};
 
@@ -405,6 +426,7 @@ function generateVideoSchema(
   return {
     '@context': 'https://schema.org',
     '@type': 'VideoObject',
+    inLanguage: lang,
     name: `${title} - Property Tour`,
     description: `Virtual tour of ${description}`,
     thumbnailUrl: thumbnail,
@@ -421,13 +443,14 @@ function generateVideoSchema(
 }
 
 // Generate Website-level JSON-LD Schema
-function generateWebsiteSchema() {
+function generateWebsiteSchema(lang: string) {
   return {
     '@context': 'https://schema.org',
     '@type': 'WebSite',
     name: SITE_NAME,
     description: DEFAULT_DESCRIPTION,
     url: BASE_URL,
+    inLanguage: lang,
     potentialAction: {
       '@type': 'SearchAction',
       target: {

@@ -1,4 +1,8 @@
 {
+  "seo": {
+    "agentTitle": "{{name}} - Real Estate Agent in {{location}}",
+    "agentDescription": "{{name}} is a verified real estate agent in {{location}} on BalkanEstateAI. {{sales}} properties sold, {{listings}} active listings. Contact today."
+  },
   "page": {
     "title": "Find Real Estate Agents in the Balkans",
     "description": "Browse {{count}}+ verified real estate agents across Serbia, Montenegro, Croatia, and the Balkans. Find trusted professionals to help you buy or sell property."

@@ -17,6 +17,7 @@ interface OrganizationSchemaProps {
   };
   socialProfiles?: string[];
   foundingDate?: string;
+  language?: string;
 }
 
 /**
@@ -34,6 +35,7 @@ export const OrganizationSchema: React.FC<OrganizationSchemaProps> = ({
   address,
   socialProfiles = [],
   foundingDate = '2024',
+  language = 'en',
 }) => {
   const schema: any = {
     '@context': 'https://schema.org',
@@ -63,6 +65,7 @@ export const OrganizationSchema: React.FC<OrganizationSchemaProps> = ({
       { '@type': 'Country', name: 'Greece' },
     ],
     knowsLanguage: ['en', 'sq', 'sr', 'bg', 'hr', 'bs', 'mk', 'me', 'ro', 'el'],
+    inLanguage: language,
     slogan: 'Find Your Dream Property in the Balkans',
     priceRange: '€€-€€€€',
   };

@@ -61,10 +61,20 @@ const AgentProfilePage: React.FC<AgentProfilePageProps> = ({ agent }) => {
     const agentCity = profile.agentData.city || '';
     const agentCountry = profile.agentData.country || '';
     const locationStr = [agentCity, agentCountry].filter(Boolean).join(', ');
-    const seoTitle = `${agentName} - Real Estate Agent${locationStr ? ` in ${locationStr}` : ''}`;
+    const seoTitle = t('agents:seo.agentTitle', {
+        name: agentName,
+        location: locationStr || 'the Balkans',
+        defaultValue: `${agentName} - Real Estate Agent in ${locationStr || 'the Balkans'}`,
+    });
     const seoDescription = profile.agentData.bio
-        ? `${agentName} is a real estate agent${locationStr ? ` in ${locationStr}` : ''}. ${profile.agentData.bio.slice(0, 140)}`
-        : `${agentName} is a verified real estate agent${locationStr ? ` in ${locationStr}` : ''} on BalkanEstateAI. ${profile.stats.totalSales} properties sold, ${profile.activeListings.length} active listings. Contact today.`;
+        ? `${agentName} - ${profile.agentData.bio.slice(0, 140)}`
+        : t('agents:seo.agentDescription', {
+            name: agentName,
+            location: locationStr || 'the Balkans',
+            sales: profile.stats.totalSales,
+            listings: profile.activeListings.length,
+            defaultValue: `${agentName} is a verified real estate agent in ${locationStr || 'the Balkans'} on BalkanEstateAI. ${profile.stats.totalSales} properties sold, ${profile.activeListings.length} active listings. Contact today.`,
+        });
 
     return (
         <div className="min-h-screen bg-gray-50">

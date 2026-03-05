@@ -662,7 +662,8 @@ const AppContent: React.FC<{ onToggleSidebar: () => void }> = ({ onToggleSidebar
 
 const MainLayout: React.FC = () => {
   const { state, dispatch, updateUser, createListing } = useAppContext();
-  const { t } = useTranslation(['nav', 'common']);
+  const { t, i18n } = useTranslation(['nav', 'common']);
+  const currentLang = (i18n.language || 'en').split('-')[0];
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
 
@@ -1063,8 +1064,8 @@ const App: React.FC = () => {
                     {/* Lazy loaded SEO & Analytics components (don't block initial render) */}
                     <Suspense fallback={null}>
                       <SEO />
-                      <OrganizationSchema />
-                      <FAQSchema faqs={realEstateFAQs} />
+                      <OrganizationSchema language={currentLang} />
+                      <FAQSchema faqs={realEstateFAQs} language={currentLang} />
                       {/* Analytics - only loaded if IDs are provided */}
                       {(googleAnalyticsId || facebookPixelId) && (
                         <Analytics

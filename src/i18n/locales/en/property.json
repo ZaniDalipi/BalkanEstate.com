@@ -1,4 +1,11 @@
 {
+  "seo": {
+    "title": "{{beds}}-Bed {{type}} for {{listingAction}} in {{city}}, {{country}} - €{{price}}",
+    "description": "{{beds}} bedroom, {{baths}} bathroom {{type}} for {{listingAction}} in {{city}}, {{country}}. {{sqft}}m² for €{{price}}.",
+    "forSale": "Sale",
+    "forRent": "Rent",
+    "perMonth": "/mo"
+  },
   "property": "Property",
   "properties": "Properties",
   "listing": "Listing",

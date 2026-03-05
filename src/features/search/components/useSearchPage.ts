@@ -949,8 +949,8 @@ export function useSearchPage() {
             city: filters.query || undefined,
             propertyType: filters.propertyType && filters.propertyType !== 'any' ? filters.propertyType : undefined,
             query: filters.query || undefined,
-        });
-    }, [filters.country, filters.query, filters.propertyType]);
+        }, t);
+    }, [filters.country, filters.query, filters.propertyType, t]);
 
     const seoDescription = useMemo(() => {
         return generateSearchSEODescription({
@@ -961,8 +961,8 @@ export function useSearchPage() {
             minPrice: filters.minPrice || undefined,
             maxPrice: filters.maxPrice || undefined,
             beds: filters.beds || undefined,
-        });
-    }, [filters]);
+        }, t);
+    }, [filters, t]);
 
     return {
         // Translation
