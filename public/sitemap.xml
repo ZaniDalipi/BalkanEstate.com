@@ -28,6 +28,17 @@
        ═══════════════════════════════════════════════════════════════ -->
   <url>
     <loc>https://balkanestateai.com/search</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://balkanestateai.com/en/search"/>
+    <xhtml:link rel="alternate" hreflang="sq" href="https://balkanestateai.com/sq/search"/>
+    <xhtml:link rel="alternate" hreflang="sr" href="https://balkanestateai.com/sr/search"/>
+    <xhtml:link rel="alternate" hreflang="bg" href="https://balkanestateai.com/bg/search"/>
+    <xhtml:link rel="alternate" hreflang="hr" href="https://balkanestateai.com/hr/search"/>
+    <xhtml:link rel="alternate" hreflang="bs" href="https://balkanestateai.com/bs/search"/>
+    <xhtml:link rel="alternate" hreflang="mk" href="https://balkanestateai.com/mk/search"/>
+    <xhtml:link rel="alternate" hreflang="me" href="https://balkanestateai.com/me/search"/>
+    <xhtml:link rel="alternate" hreflang="ro" href="https://balkanestateai.com/ro/search"/>
+    <xhtml:link rel="alternate" hreflang="el" href="https://balkanestateai.com/el/search"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://balkanestateai.com/search"/>
     <changefreq>daily</changefreq>
     <priority>0.9</priority>
   </url>
@@ -37,11 +48,33 @@
        ═══════════════════════════════════════════════════════════════ -->
   <url>
     <loc>https://balkanestateai.com/agents</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://balkanestateai.com/en/agents"/>
+    <xhtml:link rel="alternate" hreflang="sq" href="https://balkanestateai.com/sq/agents"/>
+    <xhtml:link rel="alternate" hreflang="sr" href="https://balkanestateai.com/sr/agents"/>
+    <xhtml:link rel="alternate" hreflang="bg" href="https://balkanestateai.com/bg/agents"/>
+    <xhtml:link rel="alternate" hreflang="hr" href="https://balkanestateai.com/hr/agents"/>
+    <xhtml:link rel="alternate" hreflang="bs" href="https://balkanestateai.com/bs/agents"/>
+    <xhtml:link rel="alternate" hreflang="mk" href="https://balkanestateai.com/mk/agents"/>
+    <xhtml:link rel="alternate" hreflang="me" href="https://balkanestateai.com/me/agents"/>
+    <xhtml:link rel="alternate" hreflang="ro" href="https://balkanestateai.com/ro/agents"/>
+    <xhtml:link rel="alternate" hreflang="el" href="https://balkanestateai.com/el/agents"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://balkanestateai.com/agents"/>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://balkanestateai.com/agencies</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://balkanestateai.com/en/agencies"/>
+    <xhtml:link rel="alternate" hreflang="sq" href="https://balkanestateai.com/sq/agencies"/>
+    <xhtml:link rel="alternate" hreflang="sr" href="https://balkanestateai.com/sr/agencies"/>
+    <xhtml:link rel="alternate" hreflang="bg" href="https://balkanestateai.com/bg/agencies"/>
+    <xhtml:link rel="alternate" hreflang="hr" href="https://balkanestateai.com/hr/agencies"/>
+    <xhtml:link rel="alternate" hreflang="bs" href="https://balkanestateai.com/bs/agencies"/>
+    <xhtml:link rel="alternate" hreflang="mk" href="https://balkanestateai.com/mk/agencies"/>
+    <xhtml:link rel="alternate" hreflang="me" href="https://balkanestateai.com/me/agencies"/>
+    <xhtml:link rel="alternate" hreflang="ro" href="https://balkanestateai.com/ro/agencies"/>
+    <xhtml:link rel="alternate" hreflang="el" href="https://balkanestateai.com/el/agencies"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://balkanestateai.com/agencies"/>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
@@ -49,270 +82,861 @@
   <!-- ═══════════════════════════════════════════════════════════════
        TIER 1 COUNTRIES — HIGHEST PRIORITY (Kosovo, N. Macedonia, Albania)
        ═══════════════════════════════════════════════════════════════ -->
-
-  <!-- Kosovo (Opportunity: 96 — no dominant portal) -->
   <url>
     <loc>https://balkanestateai.com/search?country=Kosovo</loc>
     <xhtml:link rel="alternate" hreflang="en" href="https://balkanestateai.com/en/search?country=Kosovo"/>
     <xhtml:link rel="alternate" hreflang="sq" href="https://balkanestateai.com/sq/search?country=Kosovo"/>
+    <xhtml:link rel="alternate" hreflang="sr" href="https://balkanestateai.com/sr/search?country=Kosovo"/>
+    <xhtml:link rel="alternate" hreflang="bg" href="https://balkanestateai.com/bg/search?country=Kosovo"/>
+    <xhtml:link rel="alternate" hreflang="hr" href="https://balkanestateai.com/hr/search?country=Kosovo"/>
+    <xhtml:link rel="alternate" hreflang="bs" href="https://balkanestateai.com/bs/search?country=Kosovo"/>
+    <xhtml:link rel="alternate" hreflang="mk" href="https://balkanestateai.com/mk/search?country=Kosovo"/>
+    <xhtml:link rel="alternate" hreflang="me" href="https://balkanestateai.com/me/search?country=Kosovo"/>
+    <xhtml:link rel="alternate" hreflang="ro" href="https://balkanestateai.com/ro/search?country=Kosovo"/>
+    <xhtml:link rel="alternate" hreflang="el" href="https://balkanestateai.com/el/search?country=Kosovo"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://balkanestateai.com/search?country=Kosovo"/>
     <changefreq>daily</changefreq>
     <priority>0.95</priority>
   </url>
   <url>
     <loc>https://balkanestateai.com/search?country=Kosovo&amp;city=Pristina</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://balkanestateai.com/en/search?country=Kosovo&amp;city=Pristina"/>
+    <xhtml:link rel="alternate" hreflang="sq" href="https://balkanestateai.com/sq/search?country=Kosovo&amp;city=Pristina"/>
+    <xhtml:link rel="alternate" hreflang="sr" href="https://balkanestateai.com/sr/search?country=Kosovo&amp;city=Pristina"/>
+    <xhtml:link rel="alternate" hreflang="bg" href="https://balkanestateai.com/bg/search?country=Kosovo&amp;city=Pristina"/>
+    <xhtml:link rel="alternate" hreflang="hr" href="https://balkanestateai.com/hr/search?country=Kosovo&amp;city=Pristina"/>
+    <xhtml:link rel="alternate" hreflang="bs" href="https://balkanestateai.com/bs/search?country=Kosovo&amp;city=Pristina"/>
+    <xhtml:link rel="alternate" hreflang="mk" href="https://balkanestateai.com/mk/search?country=Kosovo&amp;city=Pristina"/>
+    <xhtml:link rel="alternate" hreflang="me" href="https://balkanestateai.com/me/search?country=Kosovo&amp;city=Pristina"/>
+    <xhtml:link rel="alternate" hreflang="ro" href="https://balkanestateai.com/ro/search?country=Kosovo&amp;city=Pristina"/>
+    <xhtml:link rel="alternate" hreflang="el" href="https://balkanestateai.com/el/search?country=Kosovo&amp;city=Pristina"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://balkanestateai.com/search?country=Kosovo&amp;city=Pristina"/>
     <changefreq>daily</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
     <loc>https://balkanestateai.com/search?country=Kosovo&amp;city=Prizren</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://balkanestateai.com/en/search?country=Kosovo&amp;city=Prizren"/>
+    <xhtml:link rel="alternate" hreflang="sq" href="https://balkanestateai.com/sq/search?country=Kosovo&amp;city=Prizren"/>
+    <xhtml:link rel="alternate" hreflang="sr" href="https://balkanestateai.com/sr/search?country=Kosovo&amp;city=Prizren"/>
+    <xhtml:link rel="alternate" hreflang="bg" href="https://balkanestateai.com/bg/search?country=Kosovo&amp;city=Prizren"/>
+    <xhtml:link rel="alternate" hreflang="hr" href="https://balkanestateai.com/hr/search?country=Kosovo&amp;city=Prizren"/>
+    <xhtml:link rel="alternate" hreflang="bs" href="https://balkanestateai.com/bs/search?country=Kosovo&amp;city=Prizren"/>
+    <xhtml:link rel="alternate" hreflang="mk" href="https://balkanestateai.com/mk/search?country=Kosovo&amp;city=Prizren"/>
+    <xhtml:link rel="alternate" hreflang="me" href="https://balkanestateai.com/me/search?country=Kosovo&amp;city=Prizren"/>
+    <xhtml:link rel="alternate" hreflang="ro" href="https://balkanestateai.com/ro/search?country=Kosovo&amp;city=Prizren"/>
+    <xhtml:link rel="alternate" hreflang="el" href="https://balkanestateai.com/el/search?country=Kosovo&amp;city=Prizren"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://balkanestateai.com/search?country=Kosovo&amp;city=Prizren"/>
     <changefreq>daily</changefreq>
     <priority>0.85</priority>
   </url>
-
-  <!-- North Macedonia (Opportunity: 95-96 — only 47K competitor traffic) -->
   <url>
     <loc>https://balkanestateai.com/search?country=North+Macedonia</loc>
     <xhtml:link rel="alternate" hreflang="en" href="https://balkanestateai.com/en/search?country=North+Macedonia"/>
+    <xhtml:link rel="alternate" hreflang="sq" href="https://balkanestateai.com/sq/search?country=North+Macedonia"/>
+    <xhtml:link rel="alternate" hreflang="sr" href="https://balkanestateai.com/sr/search?country=North+Macedonia"/>
+    <xhtml:link rel="alternate" hreflang="bg" href="https://balkanestateai.com/bg/search?country=North+Macedonia"/>
+    <xhtml:link rel="alternate" hreflang="hr" href="https://balkanestateai.com/hr/search?country=North+Macedonia"/>
+    <xhtml:link rel="alternate" hreflang="bs" href="https://balkanestateai.com/bs/search?country=North+Macedonia"/>
     <xhtml:link rel="alternate" hreflang="mk" href="https://balkanestateai.com/mk/search?country=North+Macedonia"/>
+    <xhtml:link rel="alternate" hreflang="me" href="https://balkanestateai.com/me/search?country=North+Macedonia"/>
+    <xhtml:link rel="alternate" hreflang="ro" href="https://balkanestateai.com/ro/search?country=North+Macedonia"/>
+    <xhtml:link rel="alternate" hreflang="el" href="https://balkanestateai.com/el/search?country=North+Macedonia"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://balkanestateai.com/search?country=North+Macedonia"/>
     <changefreq>daily</changefreq>
     <priority>0.95</priority>
   </url>
   <url>
     <loc>https://balkanestateai.com/search?country=North+Macedonia&amp;city=Skopje</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://balkanestateai.com/en/search?country=North+Macedonia&amp;city=Skopje"/>
+    <xhtml:link rel="alternate" hreflang="sq" href="https://balkanestateai.com/sq/search?country=North+Macedonia&amp;city=Skopje"/>
+    <xhtml:link rel="alternate" hreflang="sr" href="https://balkanestateai.com/sr/search?country=North+Macedonia&amp;city=Skopje"/>
+    <xhtml:link rel="alternate" hreflang="bg" href="https://balkanestateai.com/bg/search?country=North+Macedonia&amp;city=Skopje"/>
+    <xhtml:link rel="alternate" hreflang="hr" href="https://balkanestateai.com/hr/search?country=North+Macedonia&amp;city=Skopje"/>
+    <xhtml:link rel="alternate" hreflang="bs" href="https://balkanestateai.com/bs/search?country=North+Macedonia&amp;city=Skopje"/>
+    <xhtml:link rel="alternate" hreflang="mk" href="https://balkanestateai.com/mk/search?country=North+Macedonia&amp;city=Skopje"/>
+    <xhtml:link rel="alternate" hreflang="me" href="https://balkanestateai.com/me/search?country=North+Macedonia&amp;city=Skopje"/>
+    <xhtml:link rel="alternate" hreflang="ro" href="https://balkanestateai.com/ro/search?country=North+Macedonia&amp;city=Skopje"/>
+    <xhtml:link rel="alternate" hreflang="el" href="https://balkanestateai.com/el/search?country=North+Macedonia&amp;city=Skopje"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://balkanestateai.com/search?country=North+Macedonia&amp;city=Skopje"/>
     <changefreq>daily</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
     <loc>https://balkanestateai.com/search?country=North+Macedonia&amp;city=Ohrid</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://balkanestateai.com/en/search?country=North+Macedonia&amp;city=Ohrid"/>
+    <xhtml:link rel="alternate" hreflang="sq" href="https://balkanestateai.com/sq/search?country=North+Macedonia&amp;city=Ohrid"/>
+    <xhtml:link rel="alternate" hreflang="sr" href="https://balkanestateai.com/sr/search?country=North+Macedonia&amp;city=Ohrid"/>
+    <xhtml:link rel="alternate" hreflang="bg" href="https://balkanestateai.com/bg/search?country=North+Macedonia&amp;city=Ohrid"/>
+    <xhtml:link rel="alternate" hreflang="hr" href="https://balkanestateai.com/hr/search?country=North+Macedonia&amp;city=Ohrid"/>
+    <xhtml:link rel="alternate" hreflang="bs" href="https://balkanestateai.com/bs/search?country=North+Macedonia&amp;city=Ohrid"/>
+    <xhtml:link rel="alternate" hreflang="mk" href="https://balkanestateai.com/mk/search?country=North+Macedonia&amp;city=Ohrid"/>
+    <xhtml:link rel="alternate" hreflang="me" href="https://balkanestateai.com/me/search?country=North+Macedonia&amp;city=Ohrid"/>
+    <xhtml:link rel="alternate" hreflang="ro" href="https://balkanestateai.com/ro/search?country=North+Macedonia&amp;city=Ohrid"/>
+    <xhtml:link rel="alternate" hreflang="el" href="https://balkanestateai.com/el/search?country=North+Macedonia&amp;city=Ohrid"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://balkanestateai.com/search?country=North+Macedonia&amp;city=Ohrid"/>
     <changefreq>daily</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
     <loc>https://balkanestateai.com/search?country=North+Macedonia&amp;city=Bitola</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://balkanestateai.com/en/search?country=North+Macedonia&amp;city=Bitola"/>
+    <xhtml:link rel="alternate" hreflang="sq" href="https://balkanestateai.com/sq/search?country=North+Macedonia&amp;city=Bitola"/>
+    <xhtml:link rel="alternate" hreflang="sr" href="https://balkanestateai.com/sr/search?country=North+Macedonia&amp;city=Bitola"/>
+    <xhtml:link rel="alternate" hreflang="bg" href="https://balkanestateai.com/bg/search?country=North+Macedonia&amp;city=Bitola"/>
+    <xhtml:link rel="alternate" hreflang="hr" href="https://balkanestateai.com/hr/search?country=North+Macedonia&amp;city=Bitola"/>
+    <xhtml:link rel="alternate" hreflang="bs" href="https://balkanestateai.com/bs/search?country=North+Macedonia&amp;city=Bitola"/>
+    <xhtml:link rel="alternate" hreflang="mk" href="https://balkanestateai.com/mk/search?country=North+Macedonia&amp;city=Bitola"/>
+    <xhtml:link rel="alternate" hreflang="me" href="https://balkanestateai.com/me/search?country=North+Macedonia&amp;city=Bitola"/>
+    <xhtml:link rel="alternate" hreflang="ro" href="https://balkanestateai.com/ro/search?country=North+Macedonia&amp;city=Bitola"/>
+    <xhtml:link rel="alternate" hreflang="el" href="https://balkanestateai.com/el/search?country=North+Macedonia&amp;city=Bitola"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://balkanestateai.com/search?country=North+Macedonia&amp;city=Bitola"/>
     <changefreq>daily</changefreq>
     <priority>0.85</priority>
   </url>
-
-  <!-- Albania (Opportunity: 90-96 — fragmented market) -->
   <url>
     <loc>https://balkanestateai.com/search?country=Albania</loc>
     <xhtml:link rel="alternate" hreflang="en" href="https://balkanestateai.com/en/search?country=Albania"/>
     <xhtml:link rel="alternate" hreflang="sq" href="https://balkanestateai.com/sq/search?country=Albania"/>
+    <xhtml:link rel="alternate" hreflang="sr" href="https://balkanestateai.com/sr/search?country=Albania"/>
+    <xhtml:link rel="alternate" hreflang="bg" href="https://balkanestateai.com/bg/search?country=Albania"/>
+    <xhtml:link rel="alternate" hreflang="hr" href="https://balkanestateai.com/hr/search?country=Albania"/>
+    <xhtml:link rel="alternate" hreflang="bs" href="https://balkanestateai.com/bs/search?country=Albania"/>
+    <xhtml:link rel="alternate" hreflang="mk" href="https://balkanestateai.com/mk/search?country=Albania"/>
+    <xhtml:link rel="alternate" hreflang="me" href="https://balkanestateai.com/me/search?country=Albania"/>
+    <xhtml:link rel="alternate" hreflang="ro" href="https://balkanestateai.com/ro/search?country=Albania"/>
+    <xhtml:link rel="alternate" hreflang="el" href="https://balkanestateai.com/el/search?country=Albania"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://balkanestateai.com/search?country=Albania"/>
     <changefreq>daily</changefreq>
     <priority>0.95</priority>
   </url>
   <url>
     <loc>https://balkanestateai.com/search?country=Albania&amp;city=Tirana</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://balkanestateai.com/en/search?country=Albania&amp;city=Tirana"/>
+    <xhtml:link rel="alternate" hreflang="sq" href="https://balkanestateai.com/sq/search?country=Albania&amp;city=Tirana"/>
+    <xhtml:link rel="alternate" hreflang="sr" href="https://balkanestateai.com/sr/search?country=Albania&amp;city=Tirana"/>
+    <xhtml:link rel="alternate" hreflang="bg" href="https://balkanestateai.com/bg/search?country=Albania&amp;city=Tirana"/>
+    <xhtml:link rel="alternate" hreflang="hr" href="https://balkanestateai.com/hr/search?country=Albania&amp;city=Tirana"/>
+    <xhtml:link rel="alternate" hreflang="bs" href="https://balkanestateai.com/bs/search?country=Albania&amp;city=Tirana"/>
+    <xhtml:link rel="alternate" hreflang="mk" href="https://balkanestateai.com/mk/search?country=Albania&amp;city=Tirana"/>
+    <xhtml:link rel="alternate" hreflang="me" href="https://balkanestateai.com/me/search?country=Albania&amp;city=Tirana"/>
+    <xhtml:link rel="alternate" hreflang="ro" href="https://balkanestateai.com/ro/search?country=Albania&amp;city=Tirana"/>
+    <xhtml:link rel="alternate" hreflang="el" href="https://balkanestateai.com/el/search?country=Albania&amp;city=Tirana"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://balkanestateai.com/search?country=Albania&amp;city=Tirana"/>
     <changefreq>daily</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
     <loc>https://balkanestateai.com/search?country=Albania&amp;city=Saranda</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://balkanestateai.com/en/search?country=Albania&amp;city=Saranda"/>
+    <xhtml:link rel="alternate" hreflang="sq" href="https://balkanestateai.com/sq/search?country=Albania&amp;city=Saranda"/>
+    <xhtml:link rel="alternate" hreflang="sr" href="https://balkanestateai.com/sr/search?country=Albania&amp;city=Saranda"/>
+    <xhtml:link rel="alternate" hreflang="bg" href="https://balkanestateai.com/bg/search?country=Albania&amp;city=Saranda"/>
+    <xhtml:link rel="alternate" hreflang="hr" href="https://balkanestateai.com/hr/search?country=Albania&amp;city=Saranda"/>
+    <xhtml:link rel="alternate" hreflang="bs" href="https://balkanestateai.com/bs/search?country=Albania&amp;city=Saranda"/>
+    <xhtml:link rel="alternate" hreflang="mk" href="https://balkanestateai.com/mk/search?country=Albania&amp;city=Saranda"/>
+    <xhtml:link rel="alternate" hreflang="me" href="https://balkanestateai.com/me/search?country=Albania&amp;city=Saranda"/>
+    <xhtml:link rel="alternate" hreflang="ro" href="https://balkanestateai.com/ro/search?country=Albania&amp;city=Saranda"/>
+    <xhtml:link rel="alternate" hreflang="el" href="https://balkanestateai.com/el/search?country=Albania&amp;city=Saranda"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://balkanestateai.com/search?country=Albania&amp;city=Saranda"/>
     <changefreq>daily</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
     <loc>https://balkanestateai.com/search?country=Albania&amp;city=Durres</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://balkanestateai.com/en/search?country=Albania&amp;city=Durres"/>
+    <xhtml:link rel="alternate" hreflang="sq" href="https://balkanestateai.com/sq/search?country=Albania&amp;city=Durres"/>
+    <xhtml:link rel="alternate" hreflang="sr" href="https://balkanestateai.com/sr/search?country=Albania&amp;city=Durres"/>
+    <xhtml:link rel="alternate" hreflang="bg" href="https://balkanestateai.com/bg/search?country=Albania&amp;city=Durres"/>
+    <xhtml:link rel="alternate" hreflang="hr" href="https://balkanestateai.com/hr/search?country=Albania&amp;city=Durres"/>
+    <xhtml:link rel="alternate" hreflang="bs" href="https://balkanestateai.com/bs/search?country=Albania&amp;city=Durres"/>
+    <xhtml:link rel="alternate" hreflang="mk" href="https://balkanestateai.com/mk/search?country=Albania&amp;city=Durres"/>
+    <xhtml:link rel="alternate" hreflang="me" href="https://balkanestateai.com/me/search?country=Albania&amp;city=Durres"/>
+    <xhtml:link rel="alternate" hreflang="ro" href="https://balkanestateai.com/ro/search?country=Albania&amp;city=Durres"/>
+    <xhtml:link rel="alternate" hreflang="el" href="https://balkanestateai.com/el/search?country=Albania&amp;city=Durres"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://balkanestateai.com/search?country=Albania&amp;city=Durres"/>
     <changefreq>daily</changefreq>
     <priority>0.85</priority>
   </url>
   <url>
     <loc>https://balkanestateai.com/search?country=Albania&amp;city=Vlora</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://balkanestateai.com/en/search?country=Albania&amp;city=Vlora"/>
+    <xhtml:link rel="alternate" hreflang="sq" href="https://balkanestateai.com/sq/search?country=Albania&amp;city=Vlora"/>
+    <xhtml:link rel="alternate" hreflang="sr" href="https://balkanestateai.com/sr/search?country=Albania&amp;city=Vlora"/>
+    <xhtml:link rel="alternate" hreflang="bg" href="https://balkanestateai.com/bg/search?country=Albania&amp;city=Vlora"/>
+    <xhtml:link rel="alternate" hreflang="hr" href="https://balkanestateai.com/hr/search?country=Albania&amp;city=Vlora"/>
+    <xhtml:link rel="alternate" hreflang="bs" href="https://balkanestateai.com/bs/search?country=Albania&amp;city=Vlora"/>
+    <xhtml:link rel="alternate" hreflang="mk" href="https://balkanestateai.com/mk/search?country=Albania&amp;city=Vlora"/>
+    <xhtml:link rel="alternate" hreflang="me" href="https://balkanestateai.com/me/search?country=Albania&amp;city=Vlora"/>
+    <xhtml:link rel="alternate" hreflang="ro" href="https://balkanestateai.com/ro/search?country=Albania&amp;city=Vlora"/>
+    <xhtml:link rel="alternate" hreflang="el" href="https://balkanestateai.com/el/search?country=Albania&amp;city=Vlora"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://balkanestateai.com/search?country=Albania&amp;city=Vlora"/>
     <changefreq>daily</changefreq>
     <priority>0.85</priority>
+  </url>
+  <url>
+    <loc>https://balkanestateai.com/rentals?country=Albania</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://balkanestateai.com/en/rentals?country=Albania"/>
+    <xhtml:link rel="alternate" hreflang="sq" href="https://balkanestateai.com/sq/rentals?country=Albania"/>
+    <xhtml:link rel="alternate" hreflang="sr" href="https://balkanestateai.com/sr/rentals?country=Albania"/>
+    <xhtml:link rel="alternate" hreflang="bg" href="https://balkanestateai.com/bg/rentals?country=Albania"/>
+    <xhtml:link rel="alternate" hreflang="hr" href="https://balkanestateai.com/hr/rentals?country=Albania"/>
+    <xhtml:link rel="alternate" hreflang="bs" href="https://balkanestateai.com/bs/rentals?country=Albania"/>
+    <xhtml:link rel="alternate" hreflang="mk" href="https://balkanestateai.com/mk/rentals?country=Albania"/>
+    <xhtml:link rel="alternate" hreflang="me" href="https://balkanestateai.com/me/rentals?country=Albania"/>
+    <xhtml:link rel="alternate" hreflang="ro" href="https://balkanestateai.com/ro/rentals?country=Albania"/>
+    <xhtml:link rel="alternate" hreflang="el" href="https://balkanestateai.com/el/rentals?country=Albania"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://balkanestateai.com/rentals?country=Albania"/>
+    <changefreq>daily</changefreq>
+    <priority>0.75</priority>
+  </url>
+  <url>
+    <loc>https://balkanestateai.com/rentals?country=Kosovo</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://balkanestateai.com/en/rentals?country=Kosovo"/>
+    <xhtml:link rel="alternate" hreflang="sq" href="https://balkanestateai.com/sq/rentals?country=Kosovo"/>
+    <xhtml:link rel="alternate" hreflang="sr" href="https://balkanestateai.com/sr/rentals?country=Kosovo"/>
+    <xhtml:link rel="alternate" hreflang="bg" href="https://balkanestateai.com/bg/rentals?country=Kosovo"/>
+    <xhtml:link rel="alternate" hreflang="hr" href="https://balkanestateai.com/hr/rentals?country=Kosovo"/>
+    <xhtml:link rel="alternate" hreflang="bs" href="https://balkanestateai.com/bs/rentals?country=Kosovo"/>
+    <xhtml:link rel="alternate" hreflang="mk" href="https://balkanestateai.com/mk/rentals?country=Kosovo"/>
+    <xhtml:link rel="alternate" hreflang="me" href="https://balkanestateai.com/me/rentals?country=Kosovo"/>
+    <xhtml:link rel="alternate" hreflang="ro" href="https://balkanestateai.com/ro/rentals?country=Kosovo"/>
+    <xhtml:link rel="alternate" hreflang="el" href="https://balkanestateai.com/el/rentals?country=Kosovo"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://balkanestateai.com/rentals?country=Kosovo"/>
+    <changefreq>daily</changefreq>
+    <priority>0.75</priority>
+  </url>
+  <url>
+    <loc>https://balkanestateai.com/rentals?country=North+Macedonia</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://balkanestateai.com/en/rentals?country=North+Macedonia"/>
+    <xhtml:link rel="alternate" hreflang="sq" href="https://balkanestateai.com/sq/rentals?country=North+Macedonia"/>
+    <xhtml:link rel="alternate" hreflang="sr" href="https://balkanestateai.com/sr/rentals?country=North+Macedonia"/>
+    <xhtml:link rel="alternate" hreflang="bg" href="https://balkanestateai.com/bg/rentals?country=North+Macedonia"/>
+    <xhtml:link rel="alternate" hreflang="hr" href="https://balkanestateai.com/hr/rentals?country=North+Macedonia"/>
+    <xhtml:link rel="alternate" hreflang="bs" href="https://balkanestateai.com/bs/rentals?country=North+Macedonia"/>
+    <xhtml:link rel="alternate" hreflang="mk" href="https://balkanestateai.com/mk/rentals?country=North+Macedonia"/>
+    <xhtml:link rel="alternate" hreflang="me" href="https://balkanestateai.com/me/rentals?country=North+Macedonia"/>
+    <xhtml:link rel="alternate" hreflang="ro" href="https://balkanestateai.com/ro/rentals?country=North+Macedonia"/>
+    <xhtml:link rel="alternate" hreflang="el" href="https://balkanestateai.com/el/rentals?country=North+Macedonia"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://balkanestateai.com/rentals?country=North+Macedonia"/>
+    <changefreq>daily</changefreq>
+    <priority>0.75</priority>
   </url>
 
   <!-- ═══════════════════════════════════════════════════════════════
        TIER 2 COUNTRIES — GROWTH PRIORITY (Montenegro, Bosnia)
        ═══════════════════════════════════════════════════════════════ -->
-
-  <!-- Montenegro (Opportunity: 82-92 — Realitica declining -8%) -->
   <url>
     <loc>https://balkanestateai.com/search?country=Montenegro</loc>
     <xhtml:link rel="alternate" hreflang="en" href="https://balkanestateai.com/en/search?country=Montenegro"/>
-    <xhtml:link rel="alternate" hreflang="me" href="https://balkanestateai.com/me/search?country=Montenegro"/>
+    <xhtml:link rel="alternate" hreflang="sq" href="https://balkanestateai.com/sq/search?country=Montenegro"/>
     <xhtml:link rel="alternate" hreflang="sr" href="https://balkanestateai.com/sr/search?country=Montenegro"/>
+    <xhtml:link rel="alternate" hreflang="bg" href="https://balkanestateai.com/bg/search?country=Montenegro"/>
+    <xhtml:link rel="alternate" hreflang="hr" href="https://balkanestateai.com/hr/search?country=Montenegro"/>
+    <xhtml:link rel="alternate" hreflang="bs" href="https://balkanestateai.com/bs/search?country=Montenegro"/>
+    <xhtml:link rel="alternate" hreflang="mk" href="https://balkanestateai.com/mk/search?country=Montenegro"/>
+    <xhtml:link rel="alternate" hreflang="me" href="https://balkanestateai.com/me/search?country=Montenegro"/>
+    <xhtml:link rel="alternate" hreflang="ro" href="https://balkanestateai.com/ro/search?country=Montenegro"/>
+    <xhtml:link rel="alternate" hreflang="el" href="https://balkanestateai.com/el/search?country=Montenegro"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://balkanestateai.com/search?country=Montenegro"/>
     <changefreq>daily</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
     <loc>https://balkanestateai.com/search?country=Montenegro&amp;city=Budva</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://balkanestateai.com/en/search?country=Montenegro&amp;city=Budva"/>
+    <xhtml:link rel="alternate" hreflang="sq" href="https://balkanestateai.com/sq/search?country=Montenegro&amp;city=Budva"/>
+    <xhtml:link rel="alternate" hreflang="sr" href="https://balkanestateai.com/sr/search?country=Montenegro&amp;city=Budva"/>
+    <xhtml:link rel="alternate" hreflang="bg" href="https://balkanestateai.com/bg/search?country=Montenegro&amp;city=Budva"/>
+    <xhtml:link rel="alternate" hreflang="hr" href="https://balkanestateai.com/hr/search?country=Montenegro&amp;city=Budva"/>
+    <xhtml:link rel="alternate" hreflang="bs" href="https://balkanestateai.com/bs/search?country=Montenegro&amp;city=Budva"/>
+    <xhtml:link rel="alternate" hreflang="mk" href="https://balkanestateai.com/mk/search?country=Montenegro&amp;city=Budva"/>
+    <xhtml:link rel="alternate" hreflang="me" href="https://balkanestateai.com/me/search?country=Montenegro&amp;city=Budva"/>
+    <xhtml:link rel="alternate" hreflang="ro" href="https://balkanestateai.com/ro/search?country=Montenegro&amp;city=Budva"/>
+    <xhtml:link rel="alternate" hreflang="el" href="https://balkanestateai.com/el/search?country=Montenegro&amp;city=Budva"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://balkanestateai.com/search?country=Montenegro&amp;city=Budva"/>
     <changefreq>daily</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
     <loc>https://balkanestateai.com/search?country=Montenegro&amp;city=Kotor</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://balkanestateai.com/en/search?country=Montenegro&amp;city=Kotor"/>
+    <xhtml:link rel="alternate" hreflang="sq" href="https://balkanestateai.com/sq/search?country=Montenegro&amp;city=Kotor"/>
+    <xhtml:link rel="alternate" hreflang="sr" href="https://balkanestateai.com/sr/search?country=Montenegro&amp;city=Kotor"/>
+    <xhtml:link rel="alternate" hreflang="bg" href="https://balkanestateai.com/bg/search?country=Montenegro&amp;city=Kotor"/>
+    <xhtml:link rel="alternate" hreflang="hr" href="https://balkanestateai.com/hr/search?country=Montenegro&amp;city=Kotor"/>
+    <xhtml:link rel="alternate" hreflang="bs" href="https://balkanestateai.com/bs/search?country=Montenegro&amp;city=Kotor"/>
+    <xhtml:link rel="alternate" hreflang="mk" href="https://balkanestateai.com/mk/search?country=Montenegro&amp;city=Kotor"/>
+    <xhtml:link rel="alternate" hreflang="me" href="https://balkanestateai.com/me/search?country=Montenegro&amp;city=Kotor"/>
+    <xhtml:link rel="alternate" hreflang="ro" href="https://balkanestateai.com/ro/search?country=Montenegro&amp;city=Kotor"/>
+    <xhtml:link rel="alternate" hreflang="el" href="https://balkanestateai.com/el/search?country=Montenegro&amp;city=Kotor"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://balkanestateai.com/search?country=Montenegro&amp;city=Kotor"/>
     <changefreq>daily</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
     <loc>https://balkanestateai.com/search?country=Montenegro&amp;city=Tivat</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://balkanestateai.com/en/search?country=Montenegro&amp;city=Tivat"/>
+    <xhtml:link rel="alternate" hreflang="sq" href="https://balkanestateai.com/sq/search?country=Montenegro&amp;city=Tivat"/>
+    <xhtml:link rel="alternate" hreflang="sr" href="https://balkanestateai.com/sr/search?country=Montenegro&amp;city=Tivat"/>
+    <xhtml:link rel="alternate" hreflang="bg" href="https://balkanestateai.com/bg/search?country=Montenegro&amp;city=Tivat"/>
+    <xhtml:link rel="alternate" hreflang="hr" href="https://balkanestateai.com/hr/search?country=Montenegro&amp;city=Tivat"/>
+    <xhtml:link rel="alternate" hreflang="bs" href="https://balkanestateai.com/bs/search?country=Montenegro&amp;city=Tivat"/>
+    <xhtml:link rel="alternate" hreflang="mk" href="https://balkanestateai.com/mk/search?country=Montenegro&amp;city=Tivat"/>
+    <xhtml:link rel="alternate" hreflang="me" href="https://balkanestateai.com/me/search?country=Montenegro&amp;city=Tivat"/>
+    <xhtml:link rel="alternate" hreflang="ro" href="https://balkanestateai.com/ro/search?country=Montenegro&amp;city=Tivat"/>
+    <xhtml:link rel="alternate" hreflang="el" href="https://balkanestateai.com/el/search?country=Montenegro&amp;city=Tivat"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://balkanestateai.com/search?country=Montenegro&amp;city=Tivat"/>
     <changefreq>daily</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
     <loc>https://balkanestateai.com/search?country=Montenegro&amp;city=Podgorica</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://balkanestateai.com/en/search?country=Montenegro&amp;city=Podgorica"/>
+    <xhtml:link rel="alternate" hreflang="sq" href="https://balkanestateai.com/sq/search?country=Montenegro&amp;city=Podgorica"/>
+    <xhtml:link rel="alternate" hreflang="sr" href="https://balkanestateai.com/sr/search?country=Montenegro&amp;city=Podgorica"/>
+    <xhtml:link rel="alternate" hreflang="bg" href="https://balkanestateai.com/bg/search?country=Montenegro&amp;city=Podgorica"/>
+    <xhtml:link rel="alternate" hreflang="hr" href="https://balkanestateai.com/hr/search?country=Montenegro&amp;city=Podgorica"/>
+    <xhtml:link rel="alternate" hreflang="bs" href="https://balkanestateai.com/bs/search?country=Montenegro&amp;city=Podgorica"/>
+    <xhtml:link rel="alternate" hreflang="mk" href="https://balkanestateai.com/mk/search?country=Montenegro&amp;city=Podgorica"/>
+    <xhtml:link rel="alternate" hreflang="me" href="https://balkanestateai.com/me/search?country=Montenegro&amp;city=Podgorica"/>
+    <xhtml:link rel="alternate" hreflang="ro" href="https://balkanestateai.com/ro/search?country=Montenegro&amp;city=Podgorica"/>
+    <xhtml:link rel="alternate" hreflang="el" href="https://balkanestateai.com/el/search?country=Montenegro&amp;city=Podgorica"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://balkanestateai.com/search?country=Montenegro&amp;city=Podgorica"/>
     <changefreq>daily</changefreq>
     <priority>0.85</priority>
   </url>
   <url>
     <loc>https://balkanestateai.com/search?country=Montenegro&amp;city=Herceg+Novi</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://balkanestateai.com/en/search?country=Montenegro&amp;city=Herceg+Novi"/>
+    <xhtml:link rel="alternate" hreflang="sq" href="https://balkanestateai.com/sq/search?country=Montenegro&amp;city=Herceg+Novi"/>
+    <xhtml:link rel="alternate" hreflang="sr" href="https://balkanestateai.com/sr/search?country=Montenegro&amp;city=Herceg+Novi"/>
+    <xhtml:link rel="alternate" hreflang="bg" href="https://balkanestateai.com/bg/search?country=Montenegro&amp;city=Herceg+Novi"/>
+    <xhtml:link rel="alternate" hreflang="hr" href="https://balkanestateai.com/hr/search?country=Montenegro&amp;city=Herceg+Novi"/>
+    <xhtml:link rel="alternate" hreflang="bs" href="https://balkanestateai.com/bs/search?country=Montenegro&amp;city=Herceg+Novi"/>
+    <xhtml:link rel="alternate" hreflang="mk" href="https://balkanestateai.com/mk/search?country=Montenegro&amp;city=Herceg+Novi"/>
+    <xhtml:link rel="alternate" hreflang="me" href="https://balkanestateai.com/me/search?country=Montenegro&amp;city=Herceg+Novi"/>
+    <xhtml:link rel="alternate" hreflang="ro" href="https://balkanestateai.com/ro/search?country=Montenegro&amp;city=Herceg+Novi"/>
+    <xhtml:link rel="alternate" hreflang="el" href="https://balkanestateai.com/el/search?country=Montenegro&amp;city=Herceg+Novi"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://balkanestateai.com/search?country=Montenegro&amp;city=Herceg+Novi"/>
     <changefreq>daily</changefreq>
     <priority>0.85</priority>
   </url>
   <url>
     <loc>https://balkanestateai.com/search?country=Montenegro&amp;city=Bar</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://balkanestateai.com/en/search?country=Montenegro&amp;city=Bar"/>
+    <xhtml:link rel="alternate" hreflang="sq" href="https://balkanestateai.com/sq/search?country=Montenegro&amp;city=Bar"/>
+    <xhtml:link rel="alternate" hreflang="sr" href="https://balkanestateai.com/sr/search?country=Montenegro&amp;city=Bar"/>
+    <xhtml:link rel="alternate" hreflang="bg" href="https://balkanestateai.com/bg/search?country=Montenegro&amp;city=Bar"/>
+    <xhtml:link rel="alternate" hreflang="hr" href="https://balkanestateai.com/hr/search?country=Montenegro&amp;city=Bar"/>
+    <xhtml:link rel="alternate" hreflang="bs" href="https://balkanestateai.com/bs/search?country=Montenegro&amp;city=Bar"/>
+    <xhtml:link rel="alternate" hreflang="mk" href="https://balkanestateai.com/mk/search?country=Montenegro&amp;city=Bar"/>
+    <xhtml:link rel="alternate" hreflang="me" href="https://balkanestateai.com/me/search?country=Montenegro&amp;city=Bar"/>
+    <xhtml:link rel="alternate" hreflang="ro" href="https://balkanestateai.com/ro/search?country=Montenegro&amp;city=Bar"/>
+    <xhtml:link rel="alternate" hreflang="el" href="https://balkanestateai.com/el/search?country=Montenegro&amp;city=Bar"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://balkanestateai.com/search?country=Montenegro&amp;city=Bar"/>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://balkanestateai.com/search?country=Montenegro&amp;city=Kolasin</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://balkanestateai.com/en/search?country=Montenegro&amp;city=Kolasin"/>
+    <xhtml:link rel="alternate" hreflang="sq" href="https://balkanestateai.com/sq/search?country=Montenegro&amp;city=Kolasin"/>
+    <xhtml:link rel="alternate" hreflang="sr" href="https://balkanestateai.com/sr/search?country=Montenegro&amp;city=Kolasin"/>
+    <xhtml:link rel="alternate" hreflang="bg" href="https://balkanestateai.com/bg/search?country=Montenegro&amp;city=Kolasin"/>
+    <xhtml:link rel="alternate" hreflang="hr" href="https://balkanestateai.com/hr/search?country=Montenegro&amp;city=Kolasin"/>
+    <xhtml:link rel="alternate" hreflang="bs" href="https://balkanestateai.com/bs/search?country=Montenegro&amp;city=Kolasin"/>
+    <xhtml:link rel="alternate" hreflang="mk" href="https://balkanestateai.com/mk/search?country=Montenegro&amp;city=Kolasin"/>
+    <xhtml:link rel="alternate" hreflang="me" href="https://balkanestateai.com/me/search?country=Montenegro&amp;city=Kolasin"/>
+    <xhtml:link rel="alternate" hreflang="ro" href="https://balkanestateai.com/ro/search?country=Montenegro&amp;city=Kolasin"/>
+    <xhtml:link rel="alternate" hreflang="el" href="https://balkanestateai.com/el/search?country=Montenegro&amp;city=Kolasin"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://balkanestateai.com/search?country=Montenegro&amp;city=Kolasin"/>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
-  <!-- Montenegro property type combos (high-value keywords) -->
   <url>
     <loc>https://balkanestateai.com/search?country=Montenegro&amp;propertyType=villa</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://balkanestateai.com/en/search?country=Montenegro&amp;propertyType=villa"/>
+    <xhtml:link rel="alternate" hreflang="sq" href="https://balkanestateai.com/sq/search?country=Montenegro&amp;propertyType=villa"/>
+    <xhtml:link rel="alternate" hreflang="sr" href="https://balkanestateai.com/sr/search?country=Montenegro&amp;propertyType=villa"/>
+    <xhtml:link rel="alternate" hreflang="bg" href="https://balkanestateai.com/bg/search?country=Montenegro&amp;propertyType=villa"/>
+    <xhtml:link rel="alternate" hreflang="hr" href="https://balkanestateai.com/hr/search?country=Montenegro&amp;propertyType=villa"/>
+    <xhtml:link rel="alternate" hreflang="bs" href="https://balkanestateai.com/bs/search?country=Montenegro&amp;propertyType=villa"/>
+    <xhtml:link rel="alternate" hreflang="mk" href="https://balkanestateai.com/mk/search?country=Montenegro&amp;propertyType=villa"/>
+    <xhtml:link rel="alternate" hreflang="me" href="https://balkanestateai.com/me/search?country=Montenegro&amp;propertyType=villa"/>
+    <xhtml:link rel="alternate" hreflang="ro" href="https://balkanestateai.com/ro/search?country=Montenegro&amp;propertyType=villa"/>
+    <xhtml:link rel="alternate" hreflang="el" href="https://balkanestateai.com/el/search?country=Montenegro&amp;propertyType=villa"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://balkanestateai.com/search?country=Montenegro&amp;propertyType=villa"/>
     <changefreq>daily</changefreq>
     <priority>0.85</priority>
   </url>
   <url>
     <loc>https://balkanestateai.com/search?country=Montenegro&amp;propertyType=land</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://balkanestateai.com/en/search?country=Montenegro&amp;propertyType=land"/>
+    <xhtml:link rel="alternate" hreflang="sq" href="https://balkanestateai.com/sq/search?country=Montenegro&amp;propertyType=land"/>
+    <xhtml:link rel="alternate" hreflang="sr" href="https://balkanestateai.com/sr/search?country=Montenegro&amp;propertyType=land"/>
+    <xhtml:link rel="alternate" hreflang="bg" href="https://balkanestateai.com/bg/search?country=Montenegro&amp;propertyType=land"/>
+    <xhtml:link rel="alternate" hreflang="hr" href="https://balkanestateai.com/hr/search?country=Montenegro&amp;propertyType=land"/>
+    <xhtml:link rel="alternate" hreflang="bs" href="https://balkanestateai.com/bs/search?country=Montenegro&amp;propertyType=land"/>
+    <xhtml:link rel="alternate" hreflang="mk" href="https://balkanestateai.com/mk/search?country=Montenegro&amp;propertyType=land"/>
+    <xhtml:link rel="alternate" hreflang="me" href="https://balkanestateai.com/me/search?country=Montenegro&amp;propertyType=land"/>
+    <xhtml:link rel="alternate" hreflang="ro" href="https://balkanestateai.com/ro/search?country=Montenegro&amp;propertyType=land"/>
+    <xhtml:link rel="alternate" hreflang="el" href="https://balkanestateai.com/el/search?country=Montenegro&amp;propertyType=land"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://balkanestateai.com/search?country=Montenegro&amp;propertyType=land"/>
     <changefreq>daily</changefreq>
     <priority>0.85</priority>
   </url>
   <url>
     <loc>https://balkanestateai.com/search?country=Montenegro&amp;propertyType=apartment</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://balkanestateai.com/en/search?country=Montenegro&amp;propertyType=apartment"/>
+    <xhtml:link rel="alternate" hreflang="sq" href="https://balkanestateai.com/sq/search?country=Montenegro&amp;propertyType=apartment"/>
+    <xhtml:link rel="alternate" hreflang="sr" href="https://balkanestateai.com/sr/search?country=Montenegro&amp;propertyType=apartment"/>
+    <xhtml:link rel="alternate" hreflang="bg" href="https://balkanestateai.com/bg/search?country=Montenegro&amp;propertyType=apartment"/>
+    <xhtml:link rel="alternate" hreflang="hr" href="https://balkanestateai.com/hr/search?country=Montenegro&amp;propertyType=apartment"/>
+    <xhtml:link rel="alternate" hreflang="bs" href="https://balkanestateai.com/bs/search?country=Montenegro&amp;propertyType=apartment"/>
+    <xhtml:link rel="alternate" hreflang="mk" href="https://balkanestateai.com/mk/search?country=Montenegro&amp;propertyType=apartment"/>
+    <xhtml:link rel="alternate" hreflang="me" href="https://balkanestateai.com/me/search?country=Montenegro&amp;propertyType=apartment"/>
+    <xhtml:link rel="alternate" hreflang="ro" href="https://balkanestateai.com/ro/search?country=Montenegro&amp;propertyType=apartment"/>
+    <xhtml:link rel="alternate" hreflang="el" href="https://balkanestateai.com/el/search?country=Montenegro&amp;propertyType=apartment"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://balkanestateai.com/search?country=Montenegro&amp;propertyType=apartment"/>
     <changefreq>daily</changefreq>
     <priority>0.85</priority>
   </url>
-
-  <!-- Bosnia and Herzegovina -->
   <url>
     <loc>https://balkanestateai.com/search?country=Bosnia</loc>
     <xhtml:link rel="alternate" hreflang="en" href="https://balkanestateai.com/en/search?country=Bosnia"/>
+    <xhtml:link rel="alternate" hreflang="sq" href="https://balkanestateai.com/sq/search?country=Bosnia"/>
+    <xhtml:link rel="alternate" hreflang="sr" href="https://balkanestateai.com/sr/search?country=Bosnia"/>
+    <xhtml:link rel="alternate" hreflang="bg" href="https://balkanestateai.com/bg/search?country=Bosnia"/>
+    <xhtml:link rel="alternate" hreflang="hr" href="https://balkanestateai.com/hr/search?country=Bosnia"/>
     <xhtml:link rel="alternate" hreflang="bs" href="https://balkanestateai.com/bs/search?country=Bosnia"/>
+    <xhtml:link rel="alternate" hreflang="mk" href="https://balkanestateai.com/mk/search?country=Bosnia"/>
+    <xhtml:link rel="alternate" hreflang="me" href="https://balkanestateai.com/me/search?country=Bosnia"/>
+    <xhtml:link rel="alternate" hreflang="ro" href="https://balkanestateai.com/ro/search?country=Bosnia"/>
+    <xhtml:link rel="alternate" hreflang="el" href="https://balkanestateai.com/el/search?country=Bosnia"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://balkanestateai.com/search?country=Bosnia"/>
     <changefreq>daily</changefreq>
     <priority>0.85</priority>
   </url>
   <url>
     <loc>https://balkanestateai.com/search?country=Bosnia&amp;city=Sarajevo</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://balkanestateai.com/en/search?country=Bosnia&amp;city=Sarajevo"/>
+    <xhtml:link rel="alternate" hreflang="sq" href="https://balkanestateai.com/sq/search?country=Bosnia&amp;city=Sarajevo"/>
+    <xhtml:link rel="alternate" hreflang="sr" href="https://balkanestateai.com/sr/search?country=Bosnia&amp;city=Sarajevo"/>
+    <xhtml:link rel="alternate" hreflang="bg" href="https://balkanestateai.com/bg/search?country=Bosnia&amp;city=Sarajevo"/>
+    <xhtml:link rel="alternate" hreflang="hr" href="https://balkanestateai.com/hr/search?country=Bosnia&amp;city=Sarajevo"/>
+    <xhtml:link rel="alternate" hreflang="bs" href="https://balkanestateai.com/bs/search?country=Bosnia&amp;city=Sarajevo"/>
+    <xhtml:link rel="alternate" hreflang="mk" href="https://balkanestateai.com/mk/search?country=Bosnia&amp;city=Sarajevo"/>
+    <xhtml:link rel="alternate" hreflang="me" href="https://balkanestateai.com/me/search?country=Bosnia&amp;city=Sarajevo"/>
+    <xhtml:link rel="alternate" hreflang="ro" href="https://balkanestateai.com/ro/search?country=Bosnia&amp;city=Sarajevo"/>
+    <xhtml:link rel="alternate" hreflang="el" href="https://balkanestateai.com/el/search?country=Bosnia&amp;city=Sarajevo"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://balkanestateai.com/search?country=Bosnia&amp;city=Sarajevo"/>
     <changefreq>daily</changefreq>
     <priority>0.85</priority>
   </url>
   <url>
     <loc>https://balkanestateai.com/search?country=Bosnia&amp;city=Mostar</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://balkanestateai.com/en/search?country=Bosnia&amp;city=Mostar"/>
+    <xhtml:link rel="alternate" hreflang="sq" href="https://balkanestateai.com/sq/search?country=Bosnia&amp;city=Mostar"/>
+    <xhtml:link rel="alternate" hreflang="sr" href="https://balkanestateai.com/sr/search?country=Bosnia&amp;city=Mostar"/>
+    <xhtml:link rel="alternate" hreflang="bg" href="https://balkanestateai.com/bg/search?country=Bosnia&amp;city=Mostar"/>
+    <xhtml:link rel="alternate" hreflang="hr" href="https://balkanestateai.com/hr/search?country=Bosnia&amp;city=Mostar"/>
+    <xhtml:link rel="alternate" hreflang="bs" href="https://balkanestateai.com/bs/search?country=Bosnia&amp;city=Mostar"/>
+    <xhtml:link rel="alternate" hreflang="mk" href="https://balkanestateai.com/mk/search?country=Bosnia&amp;city=Mostar"/>
+    <xhtml:link rel="alternate" hreflang="me" href="https://balkanestateai.com/me/search?country=Bosnia&amp;city=Mostar"/>
+    <xhtml:link rel="alternate" hreflang="ro" href="https://balkanestateai.com/ro/search?country=Bosnia&amp;city=Mostar"/>
+    <xhtml:link rel="alternate" hreflang="el" href="https://balkanestateai.com/el/search?country=Bosnia&amp;city=Mostar"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://balkanestateai.com/search?country=Bosnia&amp;city=Mostar"/>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://balkanestateai.com/rentals?country=Montenegro</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://balkanestateai.com/en/rentals?country=Montenegro"/>
+    <xhtml:link rel="alternate" hreflang="sq" href="https://balkanestateai.com/sq/rentals?country=Montenegro"/>
+    <xhtml:link rel="alternate" hreflang="sr" href="https://balkanestateai.com/sr/rentals?country=Montenegro"/>
+    <xhtml:link rel="alternate" hreflang="bg" href="https://balkanestateai.com/bg/rentals?country=Montenegro"/>
+    <xhtml:link rel="alternate" hreflang="hr" href="https://balkanestateai.com/hr/rentals?country=Montenegro"/>
+    <xhtml:link rel="alternate" hreflang="bs" href="https://balkanestateai.com/bs/rentals?country=Montenegro"/>
+    <xhtml:link rel="alternate" hreflang="mk" href="https://balkanestateai.com/mk/rentals?country=Montenegro"/>
+    <xhtml:link rel="alternate" hreflang="me" href="https://balkanestateai.com/me/rentals?country=Montenegro"/>
+    <xhtml:link rel="alternate" hreflang="ro" href="https://balkanestateai.com/ro/rentals?country=Montenegro"/>
+    <xhtml:link rel="alternate" hreflang="el" href="https://balkanestateai.com/el/rentals?country=Montenegro"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://balkanestateai.com/rentals?country=Montenegro"/>
+    <changefreq>daily</changefreq>
+    <priority>0.75</priority>
+  </url>
+  <url>
+    <loc>https://balkanestateai.com/rentals?country=Bosnia</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://balkanestateai.com/en/rentals?country=Bosnia"/>
+    <xhtml:link rel="alternate" hreflang="sq" href="https://balkanestateai.com/sq/rentals?country=Bosnia"/>
+    <xhtml:link rel="alternate" hreflang="sr" href="https://balkanestateai.com/sr/rentals?country=Bosnia"/>
+    <xhtml:link rel="alternate" hreflang="bg" href="https://balkanestateai.com/bg/rentals?country=Bosnia"/>
+    <xhtml:link rel="alternate" hreflang="hr" href="https://balkanestateai.com/hr/rentals?country=Bosnia"/>
+    <xhtml:link rel="alternate" hreflang="bs" href="https://balkanestateai.com/bs/rentals?country=Bosnia"/>
+    <xhtml:link rel="alternate" hreflang="mk" href="https://balkanestateai.com/mk/rentals?country=Bosnia"/>
+    <xhtml:link rel="alternate" hreflang="me" href="https://balkanestateai.com/me/rentals?country=Bosnia"/>
+    <xhtml:link rel="alternate" hreflang="ro" href="https://balkanestateai.com/ro/rentals?country=Bosnia"/>
+    <xhtml:link rel="alternate" hreflang="el" href="https://balkanestateai.com/el/rentals?country=Bosnia"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://balkanestateai.com/rentals?country=Bosnia"/>
+    <changefreq>daily</changefreq>
+    <priority>0.7</priority>
   </url>
 
   <!-- ═══════════════════════════════════════════════════════════════
        TIER 3 COUNTRIES — COMPETITIVE MARKETS
        ═══════════════════════════════════════════════════════════════ -->
-
-  <!-- Serbia -->
   <url>
     <loc>https://balkanestateai.com/search?country=Serbia</loc>
     <xhtml:link rel="alternate" hreflang="en" href="https://balkanestateai.com/en/search?country=Serbia"/>
+    <xhtml:link rel="alternate" hreflang="sq" href="https://balkanestateai.com/sq/search?country=Serbia"/>
     <xhtml:link rel="alternate" hreflang="sr" href="https://balkanestateai.com/sr/search?country=Serbia"/>
+    <xhtml:link rel="alternate" hreflang="bg" href="https://balkanestateai.com/bg/search?country=Serbia"/>
+    <xhtml:link rel="alternate" hreflang="hr" href="https://balkanestateai.com/hr/search?country=Serbia"/>
+    <xhtml:link rel="alternate" hreflang="bs" href="https://balkanestateai.com/bs/search?country=Serbia"/>
+    <xhtml:link rel="alternate" hreflang="mk" href="https://balkanestateai.com/mk/search?country=Serbia"/>
+    <xhtml:link rel="alternate" hreflang="me" href="https://balkanestateai.com/me/search?country=Serbia"/>
+    <xhtml:link rel="alternate" hreflang="ro" href="https://balkanestateai.com/ro/search?country=Serbia"/>
+    <xhtml:link rel="alternate" hreflang="el" href="https://balkanestateai.com/el/search?country=Serbia"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://balkanestateai.com/search?country=Serbia"/>
     <changefreq>daily</changefreq>
     <priority>0.85</priority>
   </url>
   <url>
     <loc>https://balkanestateai.com/search?country=Serbia&amp;city=Belgrade</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://balkanestateai.com/en/search?country=Serbia&amp;city=Belgrade"/>
+    <xhtml:link rel="alternate" hreflang="sq" href="https://balkanestateai.com/sq/search?country=Serbia&amp;city=Belgrade"/>
+    <xhtml:link rel="alternate" hreflang="sr" href="https://balkanestateai.com/sr/search?country=Serbia&amp;city=Belgrade"/>
+    <xhtml:link rel="alternate" hreflang="bg" href="https://balkanestateai.com/bg/search?country=Serbia&amp;city=Belgrade"/>
+    <xhtml:link rel="alternate" hreflang="hr" href="https://balkanestateai.com/hr/search?country=Serbia&amp;city=Belgrade"/>
+    <xhtml:link rel="alternate" hreflang="bs" href="https://balkanestateai.com/bs/search?country=Serbia&amp;city=Belgrade"/>
+    <xhtml:link rel="alternate" hreflang="mk" href="https://balkanestateai.com/mk/search?country=Serbia&amp;city=Belgrade"/>
+    <xhtml:link rel="alternate" hreflang="me" href="https://balkanestateai.com/me/search?country=Serbia&amp;city=Belgrade"/>
+    <xhtml:link rel="alternate" hreflang="ro" href="https://balkanestateai.com/ro/search?country=Serbia&amp;city=Belgrade"/>
+    <xhtml:link rel="alternate" hreflang="el" href="https://balkanestateai.com/el/search?country=Serbia&amp;city=Belgrade"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://balkanestateai.com/search?country=Serbia&amp;city=Belgrade"/>
     <changefreq>daily</changefreq>
     <priority>0.85</priority>
   </url>
   <url>
     <loc>https://balkanestateai.com/search?country=Serbia&amp;city=Novi+Sad</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://balkanestateai.com/en/search?country=Serbia&amp;city=Novi+Sad"/>
+    <xhtml:link rel="alternate" hreflang="sq" href="https://balkanestateai.com/sq/search?country=Serbia&amp;city=Novi+Sad"/>
+    <xhtml:link rel="alternate" hreflang="sr" href="https://balkanestateai.com/sr/search?country=Serbia&amp;city=Novi+Sad"/>
+    <xhtml:link rel="alternate" hreflang="bg" href="https://balkanestateai.com/bg/search?country=Serbia&amp;city=Novi+Sad"/>
+    <xhtml:link rel="alternate" hreflang="hr" href="https://balkanestateai.com/hr/search?country=Serbia&amp;city=Novi+Sad"/>
+    <xhtml:link rel="alternate" hreflang="bs" href="https://balkanestateai.com/bs/search?country=Serbia&amp;city=Novi+Sad"/>
+    <xhtml:link rel="alternate" hreflang="mk" href="https://balkanestateai.com/mk/search?country=Serbia&amp;city=Novi+Sad"/>
+    <xhtml:link rel="alternate" hreflang="me" href="https://balkanestateai.com/me/search?country=Serbia&amp;city=Novi+Sad"/>
+    <xhtml:link rel="alternate" hreflang="ro" href="https://balkanestateai.com/ro/search?country=Serbia&amp;city=Novi+Sad"/>
+    <xhtml:link rel="alternate" hreflang="el" href="https://balkanestateai.com/el/search?country=Serbia&amp;city=Novi+Sad"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://balkanestateai.com/search?country=Serbia&amp;city=Novi+Sad"/>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://balkanestateai.com/search?country=Serbia&amp;city=Nis</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://balkanestateai.com/en/search?country=Serbia&amp;city=Nis"/>
+    <xhtml:link rel="alternate" hreflang="sq" href="https://balkanestateai.com/sq/search?country=Serbia&amp;city=Nis"/>
+    <xhtml:link rel="alternate" hreflang="sr" href="https://balkanestateai.com/sr/search?country=Serbia&amp;city=Nis"/>
+    <xhtml:link rel="alternate" hreflang="bg" href="https://balkanestateai.com/bg/search?country=Serbia&amp;city=Nis"/>
+    <xhtml:link rel="alternate" hreflang="hr" href="https://balkanestateai.com/hr/search?country=Serbia&amp;city=Nis"/>
+    <xhtml:link rel="alternate" hreflang="bs" href="https://balkanestateai.com/bs/search?country=Serbia&amp;city=Nis"/>
+    <xhtml:link rel="alternate" hreflang="mk" href="https://balkanestateai.com/mk/search?country=Serbia&amp;city=Nis"/>
+    <xhtml:link rel="alternate" hreflang="me" href="https://balkanestateai.com/me/search?country=Serbia&amp;city=Nis"/>
+    <xhtml:link rel="alternate" hreflang="ro" href="https://balkanestateai.com/ro/search?country=Serbia&amp;city=Nis"/>
+    <xhtml:link rel="alternate" hreflang="el" href="https://balkanestateai.com/el/search?country=Serbia&amp;city=Nis"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://balkanestateai.com/search?country=Serbia&amp;city=Nis"/>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
-
-  <!-- Croatia -->
   <url>
     <loc>https://balkanestateai.com/search?country=Croatia</loc>
     <xhtml:link rel="alternate" hreflang="en" href="https://balkanestateai.com/en/search?country=Croatia"/>
+    <xhtml:link rel="alternate" hreflang="sq" href="https://balkanestateai.com/sq/search?country=Croatia"/>
+    <xhtml:link rel="alternate" hreflang="sr" href="https://balkanestateai.com/sr/search?country=Croatia"/>
+    <xhtml:link rel="alternate" hreflang="bg" href="https://balkanestateai.com/bg/search?country=Croatia"/>
     <xhtml:link rel="alternate" hreflang="hr" href="https://balkanestateai.com/hr/search?country=Croatia"/>
+    <xhtml:link rel="alternate" hreflang="bs" href="https://balkanestateai.com/bs/search?country=Croatia"/>
+    <xhtml:link rel="alternate" hreflang="mk" href="https://balkanestateai.com/mk/search?country=Croatia"/>
+    <xhtml:link rel="alternate" hreflang="me" href="https://balkanestateai.com/me/search?country=Croatia"/>
+    <xhtml:link rel="alternate" hreflang="ro" href="https://balkanestateai.com/ro/search?country=Croatia"/>
+    <xhtml:link rel="alternate" hreflang="el" href="https://balkanestateai.com/el/search?country=Croatia"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://balkanestateai.com/search?country=Croatia"/>
     <changefreq>daily</changefreq>
     <priority>0.85</priority>
   </url>
   <url>
     <loc>https://balkanestateai.com/search?country=Croatia&amp;city=Split</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://balkanestateai.com/en/search?country=Croatia&amp;city=Split"/>
+    <xhtml:link rel="alternate" hreflang="sq" href="https://balkanestateai.com/sq/search?country=Croatia&amp;city=Split"/>
+    <xhtml:link rel="alternate" hreflang="sr" href="https://balkanestateai.com/sr/search?country=Croatia&amp;city=Split"/>
+    <xhtml:link rel="alternate" hreflang="bg" href="https://balkanestateai.com/bg/search?country=Croatia&amp;city=Split"/>
+    <xhtml:link rel="alternate" hreflang="hr" href="https://balkanestateai.com/hr/search?country=Croatia&amp;city=Split"/>
+    <xhtml:link rel="alternate" hreflang="bs" href="https://balkanestateai.com/bs/search?country=Croatia&amp;city=Split"/>
+    <xhtml:link rel="alternate" hreflang="mk" href="https://balkanestateai.com/mk/search?country=Croatia&amp;city=Split"/>
+    <xhtml:link rel="alternate" hreflang="me" href="https://balkanestateai.com/me/search?country=Croatia&amp;city=Split"/>
+    <xhtml:link rel="alternate" hreflang="ro" href="https://balkanestateai.com/ro/search?country=Croatia&amp;city=Split"/>
+    <xhtml:link rel="alternate" hreflang="el" href="https://balkanestateai.com/el/search?country=Croatia&amp;city=Split"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://balkanestateai.com/search?country=Croatia&amp;city=Split"/>
     <changefreq>daily</changefreq>
     <priority>0.85</priority>
   </url>
   <url>
     <loc>https://balkanestateai.com/search?country=Croatia&amp;city=Dubrovnik</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://balkanestateai.com/en/search?country=Croatia&amp;city=Dubrovnik"/>
+    <xhtml:link rel="alternate" hreflang="sq" href="https://balkanestateai.com/sq/search?country=Croatia&amp;city=Dubrovnik"/>
+    <xhtml:link rel="alternate" hreflang="sr" href="https://balkanestateai.com/sr/search?country=Croatia&amp;city=Dubrovnik"/>
+    <xhtml:link rel="alternate" hreflang="bg" href="https://balkanestateai.com/bg/search?country=Croatia&amp;city=Dubrovnik"/>
+    <xhtml:link rel="alternate" hreflang="hr" href="https://balkanestateai.com/hr/search?country=Croatia&amp;city=Dubrovnik"/>
+    <xhtml:link rel="alternate" hreflang="bs" href="https://balkanestateai.com/bs/search?country=Croatia&amp;city=Dubrovnik"/>
+    <xhtml:link rel="alternate" hreflang="mk" href="https://balkanestateai.com/mk/search?country=Croatia&amp;city=Dubrovnik"/>
+    <xhtml:link rel="alternate" hreflang="me" href="https://balkanestateai.com/me/search?country=Croatia&amp;city=Dubrovnik"/>
+    <xhtml:link rel="alternate" hreflang="ro" href="https://balkanestateai.com/ro/search?country=Croatia&amp;city=Dubrovnik"/>
+    <xhtml:link rel="alternate" hreflang="el" href="https://balkanestateai.com/el/search?country=Croatia&amp;city=Dubrovnik"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://balkanestateai.com/search?country=Croatia&amp;city=Dubrovnik"/>
     <changefreq>daily</changefreq>
     <priority>0.85</priority>
   </url>
   <url>
     <loc>https://balkanestateai.com/search?country=Croatia&amp;city=Zagreb</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://balkanestateai.com/en/search?country=Croatia&amp;city=Zagreb"/>
+    <xhtml:link rel="alternate" hreflang="sq" href="https://balkanestateai.com/sq/search?country=Croatia&amp;city=Zagreb"/>
+    <xhtml:link rel="alternate" hreflang="sr" href="https://balkanestateai.com/sr/search?country=Croatia&amp;city=Zagreb"/>
+    <xhtml:link rel="alternate" hreflang="bg" href="https://balkanestateai.com/bg/search?country=Croatia&amp;city=Zagreb"/>
+    <xhtml:link rel="alternate" hreflang="hr" href="https://balkanestateai.com/hr/search?country=Croatia&amp;city=Zagreb"/>
+    <xhtml:link rel="alternate" hreflang="bs" href="https://balkanestateai.com/bs/search?country=Croatia&amp;city=Zagreb"/>
+    <xhtml:link rel="alternate" hreflang="mk" href="https://balkanestateai.com/mk/search?country=Croatia&amp;city=Zagreb"/>
+    <xhtml:link rel="alternate" hreflang="me" href="https://balkanestateai.com/me/search?country=Croatia&amp;city=Zagreb"/>
+    <xhtml:link rel="alternate" hreflang="ro" href="https://balkanestateai.com/ro/search?country=Croatia&amp;city=Zagreb"/>
+    <xhtml:link rel="alternate" hreflang="el" href="https://balkanestateai.com/el/search?country=Croatia&amp;city=Zagreb"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://balkanestateai.com/search?country=Croatia&amp;city=Zagreb"/>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
-
-  <!-- Bulgaria -->
   <url>
     <loc>https://balkanestateai.com/search?country=Bulgaria</loc>
     <xhtml:link rel="alternate" hreflang="en" href="https://balkanestateai.com/en/search?country=Bulgaria"/>
+    <xhtml:link rel="alternate" hreflang="sq" href="https://balkanestateai.com/sq/search?country=Bulgaria"/>
+    <xhtml:link rel="alternate" hreflang="sr" href="https://balkanestateai.com/sr/search?country=Bulgaria"/>
     <xhtml:link rel="alternate" hreflang="bg" href="https://balkanestateai.com/bg/search?country=Bulgaria"/>
+    <xhtml:link rel="alternate" hreflang="hr" href="https://balkanestateai.com/hr/search?country=Bulgaria"/>
+    <xhtml:link rel="alternate" hreflang="bs" href="https://balkanestateai.com/bs/search?country=Bulgaria"/>
+    <xhtml:link rel="alternate" hreflang="mk" href="https://balkanestateai.com/mk/search?country=Bulgaria"/>
+    <xhtml:link rel="alternate" hreflang="me" href="https://balkanestateai.com/me/search?country=Bulgaria"/>
+    <xhtml:link rel="alternate" hreflang="ro" href="https://balkanestateai.com/ro/search?country=Bulgaria"/>
+    <xhtml:link rel="alternate" hreflang="el" href="https://balkanestateai.com/el/search?country=Bulgaria"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://balkanestateai.com/search?country=Bulgaria"/>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://balkanestateai.com/search?country=Bulgaria&amp;city=Sofia</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://balkanestateai.com/en/search?country=Bulgaria&amp;city=Sofia"/>
+    <xhtml:link rel="alternate" hreflang="sq" href="https://balkanestateai.com/sq/search?country=Bulgaria&amp;city=Sofia"/>
+    <xhtml:link rel="alternate" hreflang="sr" href="https://balkanestateai.com/sr/search?country=Bulgaria&amp;city=Sofia"/>
+    <xhtml:link rel="alternate" hreflang="bg" href="https://balkanestateai.com/bg/search?country=Bulgaria&amp;city=Sofia"/>
+    <xhtml:link rel="alternate" hreflang="hr" href="https://balkanestateai.com/hr/search?country=Bulgaria&amp;city=Sofia"/>
+    <xhtml:link rel="alternate" hreflang="bs" href="https://balkanestateai.com/bs/search?country=Bulgaria&amp;city=Sofia"/>
+    <xhtml:link rel="alternate" hreflang="mk" href="https://balkanestateai.com/mk/search?country=Bulgaria&amp;city=Sofia"/>
+    <xhtml:link rel="alternate" hreflang="me" href="https://balkanestateai.com/me/search?country=Bulgaria&amp;city=Sofia"/>
+    <xhtml:link rel="alternate" hreflang="ro" href="https://balkanestateai.com/ro/search?country=Bulgaria&amp;city=Sofia"/>
+    <xhtml:link rel="alternate" hreflang="el" href="https://balkanestateai.com/el/search?country=Bulgaria&amp;city=Sofia"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://balkanestateai.com/search?country=Bulgaria&amp;city=Sofia"/>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://balkanestateai.com/search?country=Bulgaria&amp;city=Burgas</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://balkanestateai.com/en/search?country=Bulgaria&amp;city=Burgas"/>
+    <xhtml:link rel="alternate" hreflang="sq" href="https://balkanestateai.com/sq/search?country=Bulgaria&amp;city=Burgas"/>
+    <xhtml:link rel="alternate" hreflang="sr" href="https://balkanestateai.com/sr/search?country=Bulgaria&amp;city=Burgas"/>
+    <xhtml:link rel="alternate" hreflang="bg" href="https://balkanestateai.com/bg/search?country=Bulgaria&amp;city=Burgas"/>
+    <xhtml:link rel="alternate" hreflang="hr" href="https://balkanestateai.com/hr/search?country=Bulgaria&amp;city=Burgas"/>
+    <xhtml:link rel="alternate" hreflang="bs" href="https://balkanestateai.com/bs/search?country=Bulgaria&amp;city=Burgas"/>
+    <xhtml:link rel="alternate" hreflang="mk" href="https://balkanestateai.com/mk/search?country=Bulgaria&amp;city=Burgas"/>
+    <xhtml:link rel="alternate" hreflang="me" href="https://balkanestateai.com/me/search?country=Bulgaria&amp;city=Burgas"/>
+    <xhtml:link rel="alternate" hreflang="ro" href="https://balkanestateai.com/ro/search?country=Bulgaria&amp;city=Burgas"/>
+    <xhtml:link rel="alternate" hreflang="el" href="https://balkanestateai.com/el/search?country=Bulgaria&amp;city=Burgas"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://balkanestateai.com/search?country=Bulgaria&amp;city=Burgas"/>
     <changefreq>daily</changefreq>
     <priority>0.75</priority>
   </url>
-
-  <!-- Romania -->
   <url>
     <loc>https://balkanestateai.com/search?country=Romania</loc>
     <xhtml:link rel="alternate" hreflang="en" href="https://balkanestateai.com/en/search?country=Romania"/>
+    <xhtml:link rel="alternate" hreflang="sq" href="https://balkanestateai.com/sq/search?country=Romania"/>
+    <xhtml:link rel="alternate" hreflang="sr" href="https://balkanestateai.com/sr/search?country=Romania"/>
+    <xhtml:link rel="alternate" hreflang="bg" href="https://balkanestateai.com/bg/search?country=Romania"/>
+    <xhtml:link rel="alternate" hreflang="hr" href="https://balkanestateai.com/hr/search?country=Romania"/>
+    <xhtml:link rel="alternate" hreflang="bs" href="https://balkanestateai.com/bs/search?country=Romania"/>
+    <xhtml:link rel="alternate" hreflang="mk" href="https://balkanestateai.com/mk/search?country=Romania"/>
+    <xhtml:link rel="alternate" hreflang="me" href="https://balkanestateai.com/me/search?country=Romania"/>
     <xhtml:link rel="alternate" hreflang="ro" href="https://balkanestateai.com/ro/search?country=Romania"/>
+    <xhtml:link rel="alternate" hreflang="el" href="https://balkanestateai.com/el/search?country=Romania"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://balkanestateai.com/search?country=Romania"/>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://balkanestateai.com/search?country=Romania&amp;city=Bucharest</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://balkanestateai.com/en/search?country=Romania&amp;city=Bucharest"/>
+    <xhtml:link rel="alternate" hreflang="sq" href="https://balkanestateai.com/sq/search?country=Romania&amp;city=Bucharest"/>
+    <xhtml:link rel="alternate" hreflang="sr" href="https://balkanestateai.com/sr/search?country=Romania&amp;city=Bucharest"/>
+    <xhtml:link rel="alternate" hreflang="bg" href="https://balkanestateai.com/bg/search?country=Romania&amp;city=Bucharest"/>
+    <xhtml:link rel="alternate" hreflang="hr" href="https://balkanestateai.com/hr/search?country=Romania&amp;city=Bucharest"/>
+    <xhtml:link rel="alternate" hreflang="bs" href="https://balkanestateai.com/bs/search?country=Romania&amp;city=Bucharest"/>
+    <xhtml:link rel="alternate" hreflang="mk" href="https://balkanestateai.com/mk/search?country=Romania&amp;city=Bucharest"/>
+    <xhtml:link rel="alternate" hreflang="me" href="https://balkanestateai.com/me/search?country=Romania&amp;city=Bucharest"/>
+    <xhtml:link rel="alternate" hreflang="ro" href="https://balkanestateai.com/ro/search?country=Romania&amp;city=Bucharest"/>
+    <xhtml:link rel="alternate" hreflang="el" href="https://balkanestateai.com/el/search?country=Romania&amp;city=Bucharest"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://balkanestateai.com/search?country=Romania&amp;city=Bucharest"/>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://balkanestateai.com/search?country=Romania&amp;city=Cluj-Napoca</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://balkanestateai.com/en/search?country=Romania&amp;city=Cluj-Napoca"/>
+    <xhtml:link rel="alternate" hreflang="sq" href="https://balkanestateai.com/sq/search?country=Romania&amp;city=Cluj-Napoca"/>
+    <xhtml:link rel="alternate" hreflang="sr" href="https://balkanestateai.com/sr/search?country=Romania&amp;city=Cluj-Napoca"/>
+    <xhtml:link rel="alternate" hreflang="bg" href="https://balkanestateai.com/bg/search?country=Romania&amp;city=Cluj-Napoca"/>
+    <xhtml:link rel="alternate" hreflang="hr" href="https://balkanestateai.com/hr/search?country=Romania&amp;city=Cluj-Napoca"/>
+    <xhtml:link rel="alternate" hreflang="bs" href="https://balkanestateai.com/bs/search?country=Romania&amp;city=Cluj-Napoca"/>
+    <xhtml:link rel="alternate" hreflang="mk" href="https://balkanestateai.com/mk/search?country=Romania&amp;city=Cluj-Napoca"/>
+    <xhtml:link rel="alternate" hreflang="me" href="https://balkanestateai.com/me/search?country=Romania&amp;city=Cluj-Napoca"/>
+    <xhtml:link rel="alternate" hreflang="ro" href="https://balkanestateai.com/ro/search?country=Romania&amp;city=Cluj-Napoca"/>
+    <xhtml:link rel="alternate" hreflang="el" href="https://balkanestateai.com/el/search?country=Romania&amp;city=Cluj-Napoca"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://balkanestateai.com/search?country=Romania&amp;city=Cluj-Napoca"/>
     <changefreq>daily</changefreq>
     <priority>0.75</priority>
   </url>
-
-  <!-- Greece -->
   <url>
     <loc>https://balkanestateai.com/search?country=Greece</loc>
     <xhtml:link rel="alternate" hreflang="en" href="https://balkanestateai.com/en/search?country=Greece"/>
+    <xhtml:link rel="alternate" hreflang="sq" href="https://balkanestateai.com/sq/search?country=Greece"/>
+    <xhtml:link rel="alternate" hreflang="sr" href="https://balkanestateai.com/sr/search?country=Greece"/>
+    <xhtml:link rel="alternate" hreflang="bg" href="https://balkanestateai.com/bg/search?country=Greece"/>
+    <xhtml:link rel="alternate" hreflang="hr" href="https://balkanestateai.com/hr/search?country=Greece"/>
+    <xhtml:link rel="alternate" hreflang="bs" href="https://balkanestateai.com/bs/search?country=Greece"/>
+    <xhtml:link rel="alternate" hreflang="mk" href="https://balkanestateai.com/mk/search?country=Greece"/>
+    <xhtml:link rel="alternate" hreflang="me" href="https://balkanestateai.com/me/search?country=Greece"/>
+    <xhtml:link rel="alternate" hreflang="ro" href="https://balkanestateai.com/ro/search?country=Greece"/>
     <xhtml:link rel="alternate" hreflang="el" href="https://balkanestateai.com/el/search?country=Greece"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://balkanestateai.com/search?country=Greece"/>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://balkanestateai.com/search?country=Greece&amp;city=Athens</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://balkanestateai.com/en/search?country=Greece&amp;city=Athens"/>
+    <xhtml:link rel="alternate" hreflang="sq" href="https://balkanestateai.com/sq/search?country=Greece&amp;city=Athens"/>
+    <xhtml:link rel="alternate" hreflang="sr" href="https://balkanestateai.com/sr/search?country=Greece&amp;city=Athens"/>
+    <xhtml:link rel="alternate" hreflang="bg" href="https://balkanestateai.com/bg/search?country=Greece&amp;city=Athens"/>
+    <xhtml:link rel="alternate" hreflang="hr" href="https://balkanestateai.com/hr/search?country=Greece&amp;city=Athens"/>
+    <xhtml:link rel="alternate" hreflang="bs" href="https://balkanestateai.com/bs/search?country=Greece&amp;city=Athens"/>
+    <xhtml:link rel="alternate" hreflang="mk" href="https://balkanestateai.com/mk/search?country=Greece&amp;city=Athens"/>
+    <xhtml:link rel="alternate" hreflang="me" href="https://balkanestateai.com/me/search?country=Greece&amp;city=Athens"/>
+    <xhtml:link rel="alternate" hreflang="ro" href="https://balkanestateai.com/ro/search?country=Greece&amp;city=Athens"/>
+    <xhtml:link rel="alternate" hreflang="el" href="https://balkanestateai.com/el/search?country=Greece&amp;city=Athens"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://balkanestateai.com/search?country=Greece&amp;city=Athens"/>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://balkanestateai.com/search?country=Greece&amp;city=Thessaloniki</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://balkanestateai.com/en/search?country=Greece&amp;city=Thessaloniki"/>
+    <xhtml:link rel="alternate" hreflang="sq" href="https://balkanestateai.com/sq/search?country=Greece&amp;city=Thessaloniki"/>
+    <xhtml:link rel="alternate" hreflang="sr" href="https://balkanestateai.com/sr/search?country=Greece&amp;city=Thessaloniki"/>
+    <xhtml:link rel="alternate" hreflang="bg" href="https://balkanestateai.com/bg/search?country=Greece&amp;city=Thessaloniki"/>
+    <xhtml:link rel="alternate" hreflang="hr" href="https://balkanestateai.com/hr/search?country=Greece&amp;city=Thessaloniki"/>
+    <xhtml:link rel="alternate" hreflang="bs" href="https://balkanestateai.com/bs/search?country=Greece&amp;city=Thessaloniki"/>
+    <xhtml:link rel="alternate" hreflang="mk" href="https://balkanestateai.com/mk/search?country=Greece&amp;city=Thessaloniki"/>
+    <xhtml:link rel="alternate" hreflang="me" href="https://balkanestateai.com/me/search?country=Greece&amp;city=Thessaloniki"/>
+    <xhtml:link rel="alternate" hreflang="ro" href="https://balkanestateai.com/ro/search?country=Greece&amp;city=Thessaloniki"/>
+    <xhtml:link rel="alternate" hreflang="el" href="https://balkanestateai.com/el/search?country=Greece&amp;city=Thessaloniki"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://balkanestateai.com/search?country=Greece&amp;city=Thessaloniki"/>
     <changefreq>daily</changefreq>
     <priority>0.75</priority>
+  </url>
+  <url>
+    <loc>https://balkanestateai.com/rentals?country=Serbia</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://balkanestateai.com/en/rentals?country=Serbia"/>
+    <xhtml:link rel="alternate" hreflang="sq" href="https://balkanestateai.com/sq/rentals?country=Serbia"/>
+    <xhtml:link rel="alternate" hreflang="sr" href="https://balkanestateai.com/sr/rentals?country=Serbia"/>
+    <xhtml:link rel="alternate" hreflang="bg" href="https://balkanestateai.com/bg/rentals?country=Serbia"/>
+    <xhtml:link rel="alternate" hreflang="hr" href="https://balkanestateai.com/hr/rentals?country=Serbia"/>
+    <xhtml:link rel="alternate" hreflang="bs" href="https://balkanestateai.com/bs/rentals?country=Serbia"/>
+    <xhtml:link rel="alternate" hreflang="mk" href="https://balkanestateai.com/mk/rentals?country=Serbia"/>
+    <xhtml:link rel="alternate" hreflang="me" href="https://balkanestateai.com/me/rentals?country=Serbia"/>
+    <xhtml:link rel="alternate" hreflang="ro" href="https://balkanestateai.com/ro/rentals?country=Serbia"/>
+    <xhtml:link rel="alternate" hreflang="el" href="https://balkanestateai.com/el/rentals?country=Serbia"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://balkanestateai.com/rentals?country=Serbia"/>
+    <changefreq>daily</changefreq>
+    <priority>0.75</priority>
+  </url>
+  <url>
+    <loc>https://balkanestateai.com/rentals?country=Croatia</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://balkanestateai.com/en/rentals?country=Croatia"/>
+    <xhtml:link rel="alternate" hreflang="sq" href="https://balkanestateai.com/sq/rentals?country=Croatia"/>
+    <xhtml:link rel="alternate" hreflang="sr" href="https://balkanestateai.com/sr/rentals?country=Croatia"/>
+    <xhtml:link rel="alternate" hreflang="bg" href="https://balkanestateai.com/bg/rentals?country=Croatia"/>
+    <xhtml:link rel="alternate" hreflang="hr" href="https://balkanestateai.com/hr/rentals?country=Croatia"/>
+    <xhtml:link rel="alternate" hreflang="bs" href="https://balkanestateai.com/bs/rentals?country=Croatia"/>
+    <xhtml:link rel="alternate" hreflang="mk" href="https://balkanestateai.com/mk/rentals?country=Croatia"/>
+    <xhtml:link rel="alternate" hreflang="me" href="https://balkanestateai.com/me/rentals?country=Croatia"/>
+    <xhtml:link rel="alternate" hreflang="ro" href="https://balkanestateai.com/ro/rentals?country=Croatia"/>
+    <xhtml:link rel="alternate" hreflang="el" href="https://balkanestateai.com/el/rentals?country=Croatia"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://balkanestateai.com/rentals?country=Croatia"/>
+    <changefreq>daily</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://balkanestateai.com/rentals?country=Bulgaria</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://balkanestateai.com/en/rentals?country=Bulgaria"/>
+    <xhtml:link rel="alternate" hreflang="sq" href="https://balkanestateai.com/sq/rentals?country=Bulgaria"/>
+    <xhtml:link rel="alternate" hreflang="sr" href="https://balkanestateai.com/sr/rentals?country=Bulgaria"/>
+    <xhtml:link rel="alternate" hreflang="bg" href="https://balkanestateai.com/bg/rentals?country=Bulgaria"/>
+    <xhtml:link rel="alternate" hreflang="hr" href="https://balkanestateai.com/hr/rentals?country=Bulgaria"/>
+    <xhtml:link rel="alternate" hreflang="bs" href="https://balkanestateai.com/bs/rentals?country=Bulgaria"/>
+    <xhtml:link rel="alternate" hreflang="mk" href="https://balkanestateai.com/mk/rentals?country=Bulgaria"/>
+    <xhtml:link rel="alternate" hreflang="me" href="https://balkanestateai.com/me/rentals?country=Bulgaria"/>
+    <xhtml:link rel="alternate" hreflang="ro" href="https://balkanestateai.com/ro/rentals?country=Bulgaria"/>
+    <xhtml:link rel="alternate" hreflang="el" href="https://balkanestateai.com/el/rentals?country=Bulgaria"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://balkanestateai.com/rentals?country=Bulgaria"/>
+    <changefreq>daily</changefreq>
+    <priority>0.65</priority>
+  </url>
+  <url>
+    <loc>https://balkanestateai.com/rentals?country=Romania</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://balkanestateai.com/en/rentals?country=Romania"/>
+    <xhtml:link rel="alternate" hreflang="sq" href="https://balkanestateai.com/sq/rentals?country=Romania"/>
+    <xhtml:link rel="alternate" hreflang="sr" href="https://balkanestateai.com/sr/rentals?country=Romania"/>
+    <xhtml:link rel="alternate" hreflang="bg" href="https://balkanestateai.com/bg/rentals?country=Romania"/>
+    <xhtml:link rel="alternate" hreflang="hr" href="https://balkanestateai.com/hr/rentals?country=Romania"/>
+    <xhtml:link rel="alternate" hreflang="bs" href="https://balkanestateai.com/bs/rentals?country=Romania"/>
+    <xhtml:link rel="alternate" hreflang="mk" href="https://balkanestateai.com/mk/rentals?country=Romania"/>
+    <xhtml:link rel="alternate" hreflang="me" href="https://balkanestateai.com/me/rentals?country=Romania"/>
+    <xhtml:link rel="alternate" hreflang="ro" href="https://balkanestateai.com/ro/rentals?country=Romania"/>
+    <xhtml:link rel="alternate" hreflang="el" href="https://balkanestateai.com/el/rentals?country=Romania"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://balkanestateai.com/rentals?country=Romania"/>
+    <changefreq>daily</changefreq>
+    <priority>0.65</priority>
+  </url>
+  <url>
+    <loc>https://balkanestateai.com/rentals?country=Greece</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://balkanestateai.com/en/rentals?country=Greece"/>
+    <xhtml:link rel="alternate" hreflang="sq" href="https://balkanestateai.com/sq/rentals?country=Greece"/>
+    <xhtml:link rel="alternate" hreflang="sr" href="https://balkanestateai.com/sr/rentals?country=Greece"/>
+    <xhtml:link rel="alternate" hreflang="bg" href="https://balkanestateai.com/bg/rentals?country=Greece"/>
+    <xhtml:link rel="alternate" hreflang="hr" href="https://balkanestateai.com/hr/rentals?country=Greece"/>
+    <xhtml:link rel="alternate" hreflang="bs" href="https://balkanestateai.com/bs/rentals?country=Greece"/>
+    <xhtml:link rel="alternate" hreflang="mk" href="https://balkanestateai.com/mk/rentals?country=Greece"/>
+    <xhtml:link rel="alternate" hreflang="me" href="https://balkanestateai.com/me/rentals?country=Greece"/>
+    <xhtml:link rel="alternate" hreflang="ro" href="https://balkanestateai.com/ro/rentals?country=Greece"/>
+    <xhtml:link rel="alternate" hreflang="el" href="https://balkanestateai.com/el/rentals?country=Greece"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://balkanestateai.com/rentals?country=Greece"/>
+    <changefreq>daily</changefreq>
+    <priority>0.65</priority>
   </url>
 
   <!-- ═══════════════════════════════════════════════════════════════
@@ -320,26 +944,81 @@
        ═══════════════════════════════════════════════════════════════ -->
   <url>
     <loc>https://balkanestateai.com/search?propertyType=apartment</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://balkanestateai.com/en/search?propertyType=apartment"/>
+    <xhtml:link rel="alternate" hreflang="sq" href="https://balkanestateai.com/sq/search?propertyType=apartment"/>
+    <xhtml:link rel="alternate" hreflang="sr" href="https://balkanestateai.com/sr/search?propertyType=apartment"/>
+    <xhtml:link rel="alternate" hreflang="bg" href="https://balkanestateai.com/bg/search?propertyType=apartment"/>
+    <xhtml:link rel="alternate" hreflang="hr" href="https://balkanestateai.com/hr/search?propertyType=apartment"/>
+    <xhtml:link rel="alternate" hreflang="bs" href="https://balkanestateai.com/bs/search?propertyType=apartment"/>
+    <xhtml:link rel="alternate" hreflang="mk" href="https://balkanestateai.com/mk/search?propertyType=apartment"/>
+    <xhtml:link rel="alternate" hreflang="me" href="https://balkanestateai.com/me/search?propertyType=apartment"/>
+    <xhtml:link rel="alternate" hreflang="ro" href="https://balkanestateai.com/ro/search?propertyType=apartment"/>
+    <xhtml:link rel="alternate" hreflang="el" href="https://balkanestateai.com/el/search?propertyType=apartment"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://balkanestateai.com/search?propertyType=apartment"/>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://balkanestateai.com/search?propertyType=house</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://balkanestateai.com/en/search?propertyType=house"/>
+    <xhtml:link rel="alternate" hreflang="sq" href="https://balkanestateai.com/sq/search?propertyType=house"/>
+    <xhtml:link rel="alternate" hreflang="sr" href="https://balkanestateai.com/sr/search?propertyType=house"/>
+    <xhtml:link rel="alternate" hreflang="bg" href="https://balkanestateai.com/bg/search?propertyType=house"/>
+    <xhtml:link rel="alternate" hreflang="hr" href="https://balkanestateai.com/hr/search?propertyType=house"/>
+    <xhtml:link rel="alternate" hreflang="bs" href="https://balkanestateai.com/bs/search?propertyType=house"/>
+    <xhtml:link rel="alternate" hreflang="mk" href="https://balkanestateai.com/mk/search?propertyType=house"/>
+    <xhtml:link rel="alternate" hreflang="me" href="https://balkanestateai.com/me/search?propertyType=house"/>
+    <xhtml:link rel="alternate" hreflang="ro" href="https://balkanestateai.com/ro/search?propertyType=house"/>
+    <xhtml:link rel="alternate" hreflang="el" href="https://balkanestateai.com/el/search?propertyType=house"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://balkanestateai.com/search?propertyType=house"/>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://balkanestateai.com/search?propertyType=villa</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://balkanestateai.com/en/search?propertyType=villa"/>
+    <xhtml:link rel="alternate" hreflang="sq" href="https://balkanestateai.com/sq/search?propertyType=villa"/>
+    <xhtml:link rel="alternate" hreflang="sr" href="https://balkanestateai.com/sr/search?propertyType=villa"/>
+    <xhtml:link rel="alternate" hreflang="bg" href="https://balkanestateai.com/bg/search?propertyType=villa"/>
+    <xhtml:link rel="alternate" hreflang="hr" href="https://balkanestateai.com/hr/search?propertyType=villa"/>
+    <xhtml:link rel="alternate" hreflang="bs" href="https://balkanestateai.com/bs/search?propertyType=villa"/>
+    <xhtml:link rel="alternate" hreflang="mk" href="https://balkanestateai.com/mk/search?propertyType=villa"/>
+    <xhtml:link rel="alternate" hreflang="me" href="https://balkanestateai.com/me/search?propertyType=villa"/>
+    <xhtml:link rel="alternate" hreflang="ro" href="https://balkanestateai.com/ro/search?propertyType=villa"/>
+    <xhtml:link rel="alternate" hreflang="el" href="https://balkanestateai.com/el/search?propertyType=villa"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://balkanestateai.com/search?propertyType=villa"/>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://balkanestateai.com/search?propertyType=land</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://balkanestateai.com/en/search?propertyType=land"/>
+    <xhtml:link rel="alternate" hreflang="sq" href="https://balkanestateai.com/sq/search?propertyType=land"/>
+    <xhtml:link rel="alternate" hreflang="sr" href="https://balkanestateai.com/sr/search?propertyType=land"/>
+    <xhtml:link rel="alternate" hreflang="bg" href="https://balkanestateai.com/bg/search?propertyType=land"/>
+    <xhtml:link rel="alternate" hreflang="hr" href="https://balkanestateai.com/hr/search?propertyType=land"/>
+    <xhtml:link rel="alternate" hreflang="bs" href="https://balkanestateai.com/bs/search?propertyType=land"/>
+    <xhtml:link rel="alternate" hreflang="mk" href="https://balkanestateai.com/mk/search?propertyType=land"/>
+    <xhtml:link rel="alternate" hreflang="me" href="https://balkanestateai.com/me/search?propertyType=land"/>
+    <xhtml:link rel="alternate" hreflang="ro" href="https://balkanestateai.com/ro/search?propertyType=land"/>
+    <xhtml:link rel="alternate" hreflang="el" href="https://balkanestateai.com/el/search?propertyType=land"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://balkanestateai.com/search?propertyType=land"/>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://balkanestateai.com/search?propertyType=commercial</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://balkanestateai.com/en/search?propertyType=commercial"/>
+    <xhtml:link rel="alternate" hreflang="sq" href="https://balkanestateai.com/sq/search?propertyType=commercial"/>
+    <xhtml:link rel="alternate" hreflang="sr" href="https://balkanestateai.com/sr/search?propertyType=commercial"/>
+    <xhtml:link rel="alternate" hreflang="bg" href="https://balkanestateai.com/bg/search?propertyType=commercial"/>
+    <xhtml:link rel="alternate" hreflang="hr" href="https://balkanestateai.com/hr/search?propertyType=commercial"/>
+    <xhtml:link rel="alternate" hreflang="bs" href="https://balkanestateai.com/bs/search?propertyType=commercial"/>
+    <xhtml:link rel="alternate" hreflang="mk" href="https://balkanestateai.com/mk/search?propertyType=commercial"/>
+    <xhtml:link rel="alternate" hreflang="me" href="https://balkanestateai.com/me/search?propertyType=commercial"/>
+    <xhtml:link rel="alternate" hreflang="ro" href="https://balkanestateai.com/ro/search?propertyType=commercial"/>
+    <xhtml:link rel="alternate" hreflang="el" href="https://balkanestateai.com/el/search?propertyType=commercial"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://balkanestateai.com/search?propertyType=commercial"/>
     <changefreq>daily</changefreq>
     <priority>0.7</priority>
   </url>
@@ -349,58 +1028,39 @@
        ═══════════════════════════════════════════════════════════════ -->
   <url>
     <loc>https://balkanestateai.com/rentals</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://balkanestateai.com/en/rentals"/>
+    <xhtml:link rel="alternate" hreflang="sq" href="https://balkanestateai.com/sq/rentals"/>
+    <xhtml:link rel="alternate" hreflang="sr" href="https://balkanestateai.com/sr/rentals"/>
+    <xhtml:link rel="alternate" hreflang="bg" href="https://balkanestateai.com/bg/rentals"/>
+    <xhtml:link rel="alternate" hreflang="hr" href="https://balkanestateai.com/hr/rentals"/>
+    <xhtml:link rel="alternate" hreflang="bs" href="https://balkanestateai.com/bs/rentals"/>
+    <xhtml:link rel="alternate" hreflang="mk" href="https://balkanestateai.com/mk/rentals"/>
+    <xhtml:link rel="alternate" hreflang="me" href="https://balkanestateai.com/me/rentals"/>
+    <xhtml:link rel="alternate" hreflang="ro" href="https://balkanestateai.com/ro/rentals"/>
+    <xhtml:link rel="alternate" hreflang="el" href="https://balkanestateai.com/el/rentals"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://balkanestateai.com/rentals"/>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
+
+  <!-- ═══════════════════════════════════════════════════════════════
+       BUYING GUIDES
+       ═══════════════════════════════════════════════════════════════ -->
   <url>
-    <loc>https://balkanestateai.com/rentals?country=Montenegro</loc>
-    <changefreq>daily</changefreq>
-    <priority>0.75</priority>
-  </url>
-  <url>
-    <loc>https://balkanestateai.com/rentals?country=Albania</loc>
-    <changefreq>daily</changefreq>
-    <priority>0.75</priority>
-  </url>
-  <url>
-    <loc>https://balkanestateai.com/rentals?country=Serbia</loc>
-    <changefreq>daily</changefreq>
-    <priority>0.75</priority>
-  </url>
-  <url>
-    <loc>https://balkanestateai.com/rentals?country=Kosovo</loc>
-    <changefreq>daily</changefreq>
-    <priority>0.75</priority>
-  </url>
-  <url>
-    <loc>https://balkanestateai.com/rentals?country=North+Macedonia</loc>
-    <changefreq>daily</changefreq>
-    <priority>0.75</priority>
-  </url>
-  <url>
-    <loc>https://balkanestateai.com/rentals?country=Croatia</loc>
-    <changefreq>daily</changefreq>
-    <priority>0.7</priority>
-  </url>
-  <url>
-    <loc>https://balkanestateai.com/rentals?country=Bosnia</loc>
-    <changefreq>daily</changefreq>
-    <priority>0.7</priority>
-  </url>
-  <url>
-    <loc>https://balkanestateai.com/rentals?country=Bulgaria</loc>
-    <changefreq>daily</changefreq>
-    <priority>0.65</priority>
-  </url>
-  <url>
-    <loc>https://balkanestateai.com/rentals?country=Romania</loc>
-    <changefreq>daily</changefreq>
-    <priority>0.65</priority>
-  </url>
-  <url>
-    <loc>https://balkanestateai.com/rentals?country=Greece</loc>
-    <changefreq>daily</changefreq>
-    <priority>0.65</priority>
+    <loc>https://balkanestateai.com/guides</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://balkanestateai.com/en/guides"/>
+    <xhtml:link rel="alternate" hreflang="sq" href="https://balkanestateai.com/sq/guides"/>
+    <xhtml:link rel="alternate" hreflang="sr" href="https://balkanestateai.com/sr/guides"/>
+    <xhtml:link rel="alternate" hreflang="bg" href="https://balkanestateai.com/bg/guides"/>
+    <xhtml:link rel="alternate" hreflang="hr" href="https://balkanestateai.com/hr/guides"/>
+    <xhtml:link rel="alternate" hreflang="bs" href="https://balkanestateai.com/bs/guides"/>
+    <xhtml:link rel="alternate" hreflang="mk" href="https://balkanestateai.com/mk/guides"/>
+    <xhtml:link rel="alternate" hreflang="me" href="https://balkanestateai.com/me/guides"/>
+    <xhtml:link rel="alternate" hreflang="ro" href="https://balkanestateai.com/ro/guides"/>
+    <xhtml:link rel="alternate" hreflang="el" href="https://balkanestateai.com/el/guides"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://balkanestateai.com/guides"/>
+    <changefreq>weekly</changefreq>
+    <priority>0.85</priority>
   </url>
 
   <!-- ═══════════════════════════════════════════════════════════════
@@ -408,31 +1068,97 @@
        ═══════════════════════════════════════════════════════════════ -->
   <url>
     <loc>https://balkanestateai.com/explore-cities</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://balkanestateai.com/en/explore-cities"/>
+    <xhtml:link rel="alternate" hreflang="sq" href="https://balkanestateai.com/sq/explore-cities"/>
+    <xhtml:link rel="alternate" hreflang="sr" href="https://balkanestateai.com/sr/explore-cities"/>
+    <xhtml:link rel="alternate" hreflang="bg" href="https://balkanestateai.com/bg/explore-cities"/>
+    <xhtml:link rel="alternate" hreflang="hr" href="https://balkanestateai.com/hr/explore-cities"/>
+    <xhtml:link rel="alternate" hreflang="bs" href="https://balkanestateai.com/bs/explore-cities"/>
+    <xhtml:link rel="alternate" hreflang="mk" href="https://balkanestateai.com/mk/explore-cities"/>
+    <xhtml:link rel="alternate" hreflang="me" href="https://balkanestateai.com/me/explore-cities"/>
+    <xhtml:link rel="alternate" hreflang="ro" href="https://balkanestateai.com/ro/explore-cities"/>
+    <xhtml:link rel="alternate" hreflang="el" href="https://balkanestateai.com/el/explore-cities"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://balkanestateai.com/explore-cities"/>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
     <loc>https://balkanestateai.com/valuation</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://balkanestateai.com/en/valuation"/>
+    <xhtml:link rel="alternate" hreflang="sq" href="https://balkanestateai.com/sq/valuation"/>
+    <xhtml:link rel="alternate" hreflang="sr" href="https://balkanestateai.com/sr/valuation"/>
+    <xhtml:link rel="alternate" hreflang="bg" href="https://balkanestateai.com/bg/valuation"/>
+    <xhtml:link rel="alternate" hreflang="hr" href="https://balkanestateai.com/hr/valuation"/>
+    <xhtml:link rel="alternate" hreflang="bs" href="https://balkanestateai.com/bs/valuation"/>
+    <xhtml:link rel="alternate" hreflang="mk" href="https://balkanestateai.com/mk/valuation"/>
+    <xhtml:link rel="alternate" hreflang="me" href="https://balkanestateai.com/me/valuation"/>
+    <xhtml:link rel="alternate" hreflang="ro" href="https://balkanestateai.com/ro/valuation"/>
+    <xhtml:link rel="alternate" hreflang="el" href="https://balkanestateai.com/el/valuation"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://balkanestateai.com/valuation"/>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
     <loc>https://balkanestateai.com/mortgage-calculator</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://balkanestateai.com/en/mortgage-calculator"/>
+    <xhtml:link rel="alternate" hreflang="sq" href="https://balkanestateai.com/sq/mortgage-calculator"/>
+    <xhtml:link rel="alternate" hreflang="sr" href="https://balkanestateai.com/sr/mortgage-calculator"/>
+    <xhtml:link rel="alternate" hreflang="bg" href="https://balkanestateai.com/bg/mortgage-calculator"/>
+    <xhtml:link rel="alternate" hreflang="hr" href="https://balkanestateai.com/hr/mortgage-calculator"/>
+    <xhtml:link rel="alternate" hreflang="bs" href="https://balkanestateai.com/bs/mortgage-calculator"/>
+    <xhtml:link rel="alternate" hreflang="mk" href="https://balkanestateai.com/mk/mortgage-calculator"/>
+    <xhtml:link rel="alternate" hreflang="me" href="https://balkanestateai.com/me/mortgage-calculator"/>
+    <xhtml:link rel="alternate" hreflang="ro" href="https://balkanestateai.com/ro/mortgage-calculator"/>
+    <xhtml:link rel="alternate" hreflang="el" href="https://balkanestateai.com/el/mortgage-calculator"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://balkanestateai.com/mortgage-calculator"/>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
     <loc>https://balkanestateai.com/pricing</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://balkanestateai.com/en/pricing"/>
+    <xhtml:link rel="alternate" hreflang="sq" href="https://balkanestateai.com/sq/pricing"/>
+    <xhtml:link rel="alternate" hreflang="sr" href="https://balkanestateai.com/sr/pricing"/>
+    <xhtml:link rel="alternate" hreflang="bg" href="https://balkanestateai.com/bg/pricing"/>
+    <xhtml:link rel="alternate" hreflang="hr" href="https://balkanestateai.com/hr/pricing"/>
+    <xhtml:link rel="alternate" hreflang="bs" href="https://balkanestateai.com/bs/pricing"/>
+    <xhtml:link rel="alternate" hreflang="mk" href="https://balkanestateai.com/mk/pricing"/>
+    <xhtml:link rel="alternate" hreflang="me" href="https://balkanestateai.com/me/pricing"/>
+    <xhtml:link rel="alternate" hreflang="ro" href="https://balkanestateai.com/ro/pricing"/>
+    <xhtml:link rel="alternate" hreflang="el" href="https://balkanestateai.com/el/pricing"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://balkanestateai.com/pricing"/>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
     <loc>https://balkanestateai.com/how-it-works</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://balkanestateai.com/en/how-it-works"/>
+    <xhtml:link rel="alternate" hreflang="sq" href="https://balkanestateai.com/sq/how-it-works"/>
+    <xhtml:link rel="alternate" hreflang="sr" href="https://balkanestateai.com/sr/how-it-works"/>
+    <xhtml:link rel="alternate" hreflang="bg" href="https://balkanestateai.com/bg/how-it-works"/>
+    <xhtml:link rel="alternate" hreflang="hr" href="https://balkanestateai.com/hr/how-it-works"/>
+    <xhtml:link rel="alternate" hreflang="bs" href="https://balkanestateai.com/bs/how-it-works"/>
+    <xhtml:link rel="alternate" hreflang="mk" href="https://balkanestateai.com/mk/how-it-works"/>
+    <xhtml:link rel="alternate" hreflang="me" href="https://balkanestateai.com/me/how-it-works"/>
+    <xhtml:link rel="alternate" hreflang="ro" href="https://balkanestateai.com/ro/how-it-works"/>
+    <xhtml:link rel="alternate" hreflang="el" href="https://balkanestateai.com/el/how-it-works"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://balkanestateai.com/how-it-works"/>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
     <loc>https://balkanestateai.com/contact</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://balkanestateai.com/en/contact"/>
+    <xhtml:link rel="alternate" hreflang="sq" href="https://balkanestateai.com/sq/contact"/>
+    <xhtml:link rel="alternate" hreflang="sr" href="https://balkanestateai.com/sr/contact"/>
+    <xhtml:link rel="alternate" hreflang="bg" href="https://balkanestateai.com/bg/contact"/>
+    <xhtml:link rel="alternate" hreflang="hr" href="https://balkanestateai.com/hr/contact"/>
+    <xhtml:link rel="alternate" hreflang="bs" href="https://balkanestateai.com/bs/contact"/>
+    <xhtml:link rel="alternate" hreflang="mk" href="https://balkanestateai.com/mk/contact"/>
+    <xhtml:link rel="alternate" hreflang="me" href="https://balkanestateai.com/me/contact"/>
+    <xhtml:link rel="alternate" hreflang="ro" href="https://balkanestateai.com/ro/contact"/>
+    <xhtml:link rel="alternate" hreflang="el" href="https://balkanestateai.com/el/contact"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://balkanestateai.com/contact"/>
     <changefreq>monthly</changefreq>
     <priority>0.5</priority>
   </url>
@@ -442,16 +1168,49 @@
        ═══════════════════════════════════════════════════════════════ -->
   <url>
     <loc>https://balkanestateai.com/privacy-policy</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://balkanestateai.com/en/privacy-policy"/>
+    <xhtml:link rel="alternate" hreflang="sq" href="https://balkanestateai.com/sq/privacy-policy"/>
+    <xhtml:link rel="alternate" hreflang="sr" href="https://balkanestateai.com/sr/privacy-policy"/>
+    <xhtml:link rel="alternate" hreflang="bg" href="https://balkanestateai.com/bg/privacy-policy"/>
+    <xhtml:link rel="alternate" hreflang="hr" href="https://balkanestateai.com/hr/privacy-policy"/>
+    <xhtml:link rel="alternate" hreflang="bs" href="https://balkanestateai.com/bs/privacy-policy"/>
+    <xhtml:link rel="alternate" hreflang="mk" href="https://balkanestateai.com/mk/privacy-policy"/>
+    <xhtml:link rel="alternate" hreflang="me" href="https://balkanestateai.com/me/privacy-policy"/>
+    <xhtml:link rel="alternate" hreflang="ro" href="https://balkanestateai.com/ro/privacy-policy"/>
+    <xhtml:link rel="alternate" hreflang="el" href="https://balkanestateai.com/el/privacy-policy"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://balkanestateai.com/privacy-policy"/>
     <changefreq>yearly</changefreq>
     <priority>0.3</priority>
   </url>
   <url>
     <loc>https://balkanestateai.com/terms-of-service</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://balkanestateai.com/en/terms-of-service"/>
+    <xhtml:link rel="alternate" hreflang="sq" href="https://balkanestateai.com/sq/terms-of-service"/>
+    <xhtml:link rel="alternate" hreflang="sr" href="https://balkanestateai.com/sr/terms-of-service"/>
+    <xhtml:link rel="alternate" hreflang="bg" href="https://balkanestateai.com/bg/terms-of-service"/>
+    <xhtml:link rel="alternate" hreflang="hr" href="https://balkanestateai.com/hr/terms-of-service"/>
+    <xhtml:link rel="alternate" hreflang="bs" href="https://balkanestateai.com/bs/terms-of-service"/>
+    <xhtml:link rel="alternate" hreflang="mk" href="https://balkanestateai.com/mk/terms-of-service"/>
+    <xhtml:link rel="alternate" hreflang="me" href="https://balkanestateai.com/me/terms-of-service"/>
+    <xhtml:link rel="alternate" hreflang="ro" href="https://balkanestateai.com/ro/terms-of-service"/>
+    <xhtml:link rel="alternate" hreflang="el" href="https://balkanestateai.com/el/terms-of-service"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://balkanestateai.com/terms-of-service"/>
     <changefreq>yearly</changefreq>
     <priority>0.3</priority>
   </url>
   <url>
     <loc>https://balkanestateai.com/cookie-policy</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://balkanestateai.com/en/cookie-policy"/>
+    <xhtml:link rel="alternate" hreflang="sq" href="https://balkanestateai.com/sq/cookie-policy"/>
+    <xhtml:link rel="alternate" hreflang="sr" href="https://balkanestateai.com/sr/cookie-policy"/>
+    <xhtml:link rel="alternate" hreflang="bg" href="https://balkanestateai.com/bg/cookie-policy"/>
+    <xhtml:link rel="alternate" hreflang="hr" href="https://balkanestateai.com/hr/cookie-policy"/>
+    <xhtml:link rel="alternate" hreflang="bs" href="https://balkanestateai.com/bs/cookie-policy"/>
+    <xhtml:link rel="alternate" hreflang="mk" href="https://balkanestateai.com/mk/cookie-policy"/>
+    <xhtml:link rel="alternate" hreflang="me" href="https://balkanestateai.com/me/cookie-policy"/>
+    <xhtml:link rel="alternate" hreflang="ro" href="https://balkanestateai.com/ro/cookie-policy"/>
+    <xhtml:link rel="alternate" hreflang="el" href="https://balkanestateai.com/el/cookie-policy"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://balkanestateai.com/cookie-policy"/>
     <changefreq>yearly</changefreq>
     <priority>0.3</priority>
   </url>

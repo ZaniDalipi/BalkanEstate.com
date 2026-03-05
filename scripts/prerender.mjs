@@ -10,6 +10,9 @@
  * For each route, it injects the correct <title>, <meta description>,
  * canonical URL, Open Graph tags, and JSON-LD structured data directly
  * into the HTML template. The React app then hydrates on top.
+ *
+ * Generates language variants for all 10 supported languages,
+ * with correct og:locale, html lang, and hreflang tags per language.
  */
 
 import { readFileSync, writeFileSync, mkdirSync, existsSync } from 'fs';
@@ -18,6 +21,14 @@ import { dirname, join } from 'path';
 const DIST_DIR = process.argv[2] || 'dist';
 const BASE_URL = 'https://balkanestateai.com';
 const SITE_NAME = 'BalkanEstateAI';
+
+// ─── Multi-language configuration ────────────────────────────────────────────
+const LANGUAGES = ['en', 'sq', 'sr', 'bg', 'hr', 'bs', 'mk', 'me', 'ro', 'el'];
+const OG_LOCALE_MAP = {
+  en: 'en_US', sq: 'sq_AL', sr: 'sr_RS', bg: 'bg_BG',
+  hr: 'hr_HR', bs: 'bs_BA', mk: 'mk_MK', me: 'sr_ME',
+  ro: 'ro_RO', el: 'el_GR',
+};
 
 // Read the built index.html as template
 const templatePath = join(DIST_DIR, 'index.html');
@@ -182,6 +193,11 @@ const routes = [
     title: `Mortgage Calculator - Calculate Property Payments | ${SITE_NAME}`,
     description: 'Calculate your mortgage payments for Balkan properties. Free mortgage calculator with interest rates for Montenegro, Serbia, Albania, and more.',
   },
+  {
+    path: '/guides',
+    title: `Property Buying Guides - How to Buy Real Estate in the Balkans | ${SITE_NAME}`,
+    description: 'Complete guides to buying property in 10 Balkan countries. Legal process, foreign ownership rules, taxes, and investment insights for Montenegro, Albania, Serbia, Greece, and more.',
+  },
 
   // ── Rental pages ──────────────────────────────────────────────────
   {
@@ -235,13 +251,34 @@ const routes = [
 
 // ─── Generate prerendered HTML ───────────────────────────────────────────────
 
-let generated = 0;
+/**
+ * Build hreflang link tags for a given page path across all languages.
+ */
+function buildHreflangTags(pagePath) {
+  const tags = LANGUAGES.map(lang => {
+    const href = pagePath === '/'
+      ? (lang === 'en' ? BASE_URL : `${BASE_URL}/${lang}`)
+      : `${BASE_URL}/${lang}${pagePath}`;
+    return `    <link rel="alternate" hreflang="${lang}" href="${href}" />`;
+  });
+  const xDefault = pagePath === '/' ? BASE_URL : `${BASE_URL}${pagePath}`;
+  tags.push(`    <link rel="alternate" hreflang="x-default" href="${xDefault}" />`);
+  return tags.join('\n');
+}
 
-for (const route of routes) {
-  const canonicalUrl = `${BASE_URL}${route.path}`;
+/**
+ * Generate a prerendered HTML file for a given route and language.
+ */
+function prerenderPage(route, lang) {
+  const isDefaultLang = lang === 'en';
+  const langPrefix = isDefaultLang ? '' : `/${lang}`;
+  const canonicalUrl = `${BASE_URL}${langPrefix}${route.path}`;
+  const ogLocale = OG_LOCALE_MAP[lang] || 'en_US';
 
-  // Inject SEO meta tags into the template
   let html = template;
+
+  // Set html lang attribute
+  html = html.replace(/<html lang="[^"]*"/, `<html lang="${lang}"`);
 
   // Replace title
   html = html.replace(
@@ -259,6 +296,12 @@ for (const route of routes) {
   html = html.replace(
     /<meta name="title" content="[^"]*"/,
     `<meta name="title" content="${escapeHtml(route.title)}"`
+  );
+
+  // Replace meta language
+  html = html.replace(
+    /<meta name="language" content="[^"]*"/,
+    `<meta name="language" content="${lang}"`
   );
 
   // Replace canonical
@@ -280,6 +323,10 @@ for (const route of routes) {
     /<meta property="og:url" content="[^"]*"/,
     `<meta property="og:url" content="${escapeHtml(canonicalUrl)}"`
   );
+  html = html.replace(
+    /<meta property="og:locale" content="[^"]*"/,
+    `<meta property="og:locale" content="${ogLocale}"`
+  );
 
   // Replace Twitter tags
   html = html.replace(
@@ -291,6 +338,12 @@ for (const route of routes) {
     `<meta name="twitter:description" content="${escapeHtml(route.description)}"`
   );
 
+  // Replace hreflang tags with page-specific ones
+  html = html.replace(
+    /\s*<!-- Hreflang for Multi-Region SEO -->[\s\S]*?<link rel="alternate" hreflang="x-default"[^>]*>/,
+    `\n    <!-- Hreflang for Multi-Region SEO -->\n${buildHreflangTags(route.path)}`
+  );
+
   // Add prerender status indicator before </head>
   html = html.replace(
     '</head>',
@@ -299,20 +352,25 @@ for (const route of routes) {
 
   // Determine output path
   let outputPath;
+  const langDir = isDefaultLang ? '' : lang;
+
   if (route.path === '/') {
-    outputPath = join(DIST_DIR, 'index.html');
+    outputPath = isDefaultLang
+      ? join(DIST_DIR, 'index.html')
+      : join(DIST_DIR, lang, 'index.html');
   } else if (route.path.includes('?')) {
-    // For query-param routes, create a directory structure
-    // /search?country=Montenegro → /search/country/Montenegro/index.html
     const [base, query] = route.path.split('?');
     const params = new URLSearchParams(query);
-    const parts = [base.replace(/^\//, '')];
+    const parts = langDir ? [langDir] : [];
+    parts.push(base.replace(/^\//, ''));
     for (const [key, value] of params) {
       parts.push(key, value.replace(/\+/g, ' '));
     }
     outputPath = join(DIST_DIR, ...parts, 'index.html');
   } else {
-    outputPath = join(DIST_DIR, route.path.replace(/^\//, ''), 'index.html');
+    const parts = langDir ? [langDir] : [];
+    parts.push(route.path.replace(/^\//, ''));
+    outputPath = join(DIST_DIR, ...parts, 'index.html');
   }
 
   // Create directory and write file
@@ -321,10 +379,20 @@ for (const route of routes) {
     mkdirSync(dir, { recursive: true });
   }
   writeFileSync(outputPath, html, 'utf-8');
-  generated++;
+  return outputPath;
 }
 
-console.log(`✅ Prerendered ${generated} pages to ${DIST_DIR}/`);
+let generated = 0;
+
+// Generate English (default) pages first, then all other languages
+for (const route of routes) {
+  for (const lang of LANGUAGES) {
+    prerenderPage(route, lang);
+    generated++;
+  }
+}
+
+console.log(`✅ Prerendered ${generated} pages (${routes.length} routes × ${LANGUAGES.length} languages) to ${DIST_DIR}/`);
 
 function escapeHtml(str) {
   return str

@@ -38,6 +38,7 @@ export type AppView =
   | 'createAgency'
   | 'createAgencyPayment'
   | 'createAgencyConfirm'
+  | 'guides'
   | 'not-found';
 
 export type AuthModalView =

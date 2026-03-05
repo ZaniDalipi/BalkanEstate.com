@@ -603,29 +603,30 @@ export function generateSearchSEOTitle(filters: {
   city?: string;
   propertyType?: string;
   query?: string;
-}): string {
+}, t?: (key: string, defaultValue: string, options?: Record<string, unknown>) => string): string {
   const { country, city, propertyType, query } = filters;
+  const translate = t || ((_k: string, d: string) => d);
 
   // City + country specific (most specific, highest intent)
   if (city && city !== 'all') {
     const citySeo = getCitySEO(city, country);
     if (citySeo) return citySeo.title;
 
-    const typeLabel = propertyType && propertyType !== 'all' ? getTypeLabel(propertyType) : 'Property';
-    return `${typeLabel} for Sale in ${city} - Real Estate Listings`;
+    const typeLabel = propertyType && propertyType !== 'all' ? getTypeLabel(propertyType) : translate('search:seo.property', 'Property');
+    return translate('search:seo.cityTitle', `${typeLabel} for Sale in ${city} - Real Estate Listings`, { type: typeLabel, city } as any);
   }
 
   // Country specific with property type
   if (country && country !== 'all' && propertyType && propertyType !== 'all') {
     const typeLabel = getTypeLabel(propertyType);
-    return `${typeLabel} for Sale in ${country} - Browse ${typeLabel} Listings`;
+    return translate('search:seo.countryTypeTitle', `${typeLabel} for Sale in ${country} - Browse ${typeLabel} Listings`, { type: typeLabel, country } as any);
   }
 
   // Country specific
   if (country && country !== 'all') {
     const countrySeo = getCountrySEO(country);
     if (countrySeo) return countrySeo.title;
-    return `Property for Sale in ${country} - Real Estate Listings`;
+    return translate('search:seo.countryTitle', `Property for Sale in ${country} - Real Estate Listings`, { country } as any);
   }
 
   // Property type only
@@ -636,11 +637,11 @@ export function generateSearchSEOTitle(filters: {
 
   // Free text query
   if (query) {
-    return `Property for Sale in ${query} - Real Estate Listings`;
+    return translate('search:seo.queryTitle', `Property for Sale in ${query} - Real Estate Listings`, { query } as any);
   }
 
   // Default
-  return 'Property for Sale in the Balkans - Houses, Apartments & Villas';
+  return translate('search:seo.defaultTitle', 'Property for Sale in the Balkans - Houses, Apartments & Villas');
 }
 
 /**
@@ -654,8 +655,9 @@ export function generateSearchSEODescription(filters: {
   minPrice?: number;
   maxPrice?: number;
   beds?: number;
-}): string {
+}, t?: (key: string, defaultValue: string, options?: Record<string, unknown>) => string): string {
   const { country, city, propertyType, query, minPrice, maxPrice, beds } = filters;
+  const translate = t || ((_k: string, d: string) => d);
 
   // City specific
   if (city && city !== 'all') {
@@ -676,21 +678,21 @@ export function generateSearchSEODescription(filters: {
   }
 
   // Build dynamic description
-  let desc = 'Browse ';
-  if (beds) desc += `${beds}+ bedroom `;
-  desc += 'houses, apartments, and villas for sale';
+  let desc = translate('search:seo.browse', 'Browse ');
+  if (beds) desc += `${beds}+ ${translate('search:seo.bedroom', 'bedroom ')}`;
+  desc += translate('search:seo.typesForSale', 'houses, apartments, and villas for sale');
   if (query) {
-    desc += ` in ${query}`;
+    desc += ` ${translate('search:seo.in', 'in')} ${query}`;
   } else {
-    desc += ' across the Balkans';
+    desc += ` ${translate('search:seo.acrossBalkans', 'across the Balkans')}`;
   }
   if (minPrice || maxPrice) {
-    desc += '. Price range: ';
+    desc += `. ${translate('search:seo.priceRange', 'Price range')}: `;
     if (minPrice) desc += `€${minPrice.toLocaleString()}`;
     if (minPrice && maxPrice) desc += ' – ';
     if (maxPrice) desc += `€${maxPrice.toLocaleString()}`;
   }
-  desc += '. AI-powered property search on BalkanEstateAI — 11 countries, 10 languages.';
+  desc += `. ${translate('search:seo.tagline', 'AI-powered property search on BalkanEstateAI — 11 countries, 10 languages.')}`;
   return desc;
 }
 

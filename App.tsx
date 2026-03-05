@@ -90,6 +90,7 @@ const TermsOfServicePage = lazy(() => import('./src/features/legal/components/Te
 const CookiePolicyPage = lazy(() => import('./src/features/legal/components/CookiePolicyPage'));
 const RefundPolicyPage = lazy(() => import('./src/features/legal/components/RefundPolicyPage'));
 const ContactUsPage = lazy(() => import('./src/features/contact/components/ContactUsPage'));
+const BuyingGuidesPage = lazy(() => import('./src/features/guides/components/BuyingGuidesPage'));
 
 // Agency creation pages
 const CreateAgencyPage = lazy(() => import('./src/features/agencies/components/CreateAgencyPage'));
@@ -358,6 +359,7 @@ const AppContent: React.FC<{ onToggleSidebar: () => void }> = ({ onToggleSidebar
         '/refund': 'refund',
         '/refund-policy': 'refund',
         '/contact': 'contact',
+        '/guides': 'guides',
         '/rent': 'rentals',
         '/rentals': 'rentals',
         '/create-agency': 'createAgency',
@@ -626,6 +628,8 @@ const AppContent: React.FC<{ onToggleSidebar: () => void }> = ({ onToggleSidebar
         return <RefundPolicyPage />;
       case 'contact':
         return <ContactUsPage />;
+      case 'guides':
+        return <BuyingGuidesPage />;
       case 'createAgency':
         return <CreateAgencyPage />;
       case 'createAgencyPayment':
@@ -662,7 +666,8 @@ const AppContent: React.FC<{ onToggleSidebar: () => void }> = ({ onToggleSidebar
 
 const MainLayout: React.FC = () => {
   const { state, dispatch, updateUser, createListing } = useAppContext();
-  const { t } = useTranslation(['nav', 'common']);
+  const { t, i18n } = useTranslation(['nav', 'common']);
+  const currentLang = (i18n.language || 'en').split('-')[0];
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
 
@@ -1045,6 +1050,9 @@ const App: React.FC = () => {
   // Compensate for browser zoom so UI remains usable at 125%+
   useZoomCompensation();
 
+  const { i18n } = useTranslation();
+  const currentLang = (i18n.language || 'en').split('-')[0];
+
   // Get analytics IDs from environment variables
   const googleAnalyticsId = import.meta.env.VITE_GA_ID;
   const facebookPixelId = import.meta.env.VITE_FB_PIXEL_ID;
@@ -1063,8 +1071,8 @@ const App: React.FC = () => {
                     {/* Lazy loaded SEO & Analytics components (don't block initial render) */}
                     <Suspense fallback={null}>
                       <SEO />
-                      <OrganizationSchema />
-                      <FAQSchema faqs={realEstateFAQs} />
+                      <OrganizationSchema language={currentLang} />
+                      <FAQSchema faqs={realEstateFAQs} language={currentLang} />
                       {/* Analytics - only loaded if IDs are provided */}
                       {(googleAnalyticsId || facebookPixelId) && (
                         <Analytics

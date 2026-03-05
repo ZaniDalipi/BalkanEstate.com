@@ -417,10 +417,30 @@ const PropertyDetailsPage: React.FC<{ property: Property }> = ({ property: cache
     ? property.propertyType.charAt(0).toUpperCase() + property.propertyType.slice(1)
     : 'Property';
   const isRentalProperty = property.listingType === 'rent';
-  const seoTitle = `${property.beds}-Bed ${propertyTypeLabel} for ${isRentalProperty ? 'Rent' : 'Sale'} in ${property.city}, ${property.country} - €${property.price?.toLocaleString()}${isRentalProperty ? '/mo' : ''}`;
+  const listingAction = isRentalProperty ? t('property:seo.forRent', 'Rent') : t('property:seo.forSale', 'Sale');
+  const priceStr = `€${property.price?.toLocaleString()}${isRentalProperty ? t('property:seo.perMonth', '/mo') : ''}`;
+  const seoTitle = t('property:seo.title', {
+    beds: property.beds,
+    type: propertyTypeLabel,
+    listingAction,
+    city: property.city,
+    country: property.country,
+    price: property.price?.toLocaleString(),
+    defaultValue: `${property.beds}-Bed ${propertyTypeLabel} for ${listingAction} in ${property.city}, ${property.country} - ${priceStr}`,
+  });
 
   // Generate SEO description
-  const seoDescription = `${property.beds} bedroom, ${property.baths} bathroom ${property.propertyType || 'property'} for ${isRentalProperty ? 'rent' : 'sale'} in ${property.city}, ${property.country}. ${property.sqft}m² for €${property.price?.toLocaleString()}${isRentalProperty ? '/month' : ''}. ${property.description?.slice(0, 120) || ''}`;
+  const seoDescription = t('property:seo.description', {
+    beds: property.beds,
+    baths: property.baths,
+    type: property.propertyType || 'property',
+    listingAction,
+    city: property.city,
+    country: property.country,
+    sqft: property.sqft,
+    price: property.price?.toLocaleString(),
+    defaultValue: `${property.beds} bedroom, ${property.baths} bathroom ${property.propertyType || 'property'} for ${listingAction} in ${property.city}, ${property.country}. ${property.sqft}m² for ${priceStr}.`,
+  }) + (property.description ? ` ${property.description.slice(0, 120)}` : '');
 
   // Get all images for SEO
   const seoImages = allImages.map(img => img.url).filter(Boolean);

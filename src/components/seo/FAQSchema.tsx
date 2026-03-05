@@ -10,6 +10,7 @@ interface FAQSchemaProps {
   faqs: FAQItem[];
   showUI?: boolean;
   className?: string;
+  language?: string;
 }
 
 /**
@@ -21,12 +22,14 @@ export const FAQSchema: React.FC<FAQSchemaProps> = ({
   faqs,
   showUI = false,
   className = '',
+  language = 'en',
 }) => {
   const [openIndex, setOpenIndex] = React.useState<number | null>(null);
 
   const schema = {
     '@context': 'https://schema.org',
     '@type': 'FAQPage',
+    inLanguage: language,
     mainEntity: faqs.map((faq) => ({
       '@type': 'Question',
       name: faq.question,

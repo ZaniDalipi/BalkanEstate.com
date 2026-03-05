@@ -1457,8 +1457,17 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
     <div className="min-h-screen bg-gradient-to-b from-slate-50 to-white overflow-x-hidden">
       {/* SEO Meta Tags with AggregateRating schema */}
       <SEO
-        title={`${agencyData.name} - Real Estate Agency${agencyData.city ? ` in ${agencyData.city}` : ''}${agencyData.country ? `, ${agencyData.country}` : ''}`}
-        description={agencyData.description || `${agencyData.name} is a trusted real estate agency in ${agencyData.city || 'the Balkans'}. Browse ${agencyData.totalProperties || 0} property listings and connect with ${agencyData.totalAgents || 0} professional agents.`}
+        title={t('agencyDetails:seo.title', {
+          name: agencyData.name,
+          defaultValue: `${agencyData.name} - Real Estate Agency`,
+        }) + (agencyData.city ? ` - ${agencyData.city}` : '') + (agencyData.country ? `, ${agencyData.country}` : '')}
+        description={agencyData.description || t('agencyDetails:seo.description', {
+          name: agencyData.name,
+          city: agencyData.city || 'the Balkans',
+          properties: agencyData.totalProperties || 0,
+          agents: agencyData.totalAgents || 0,
+          defaultValue: `${agencyData.name} is a trusted real estate agency in ${agencyData.city || 'the Balkans'}. Browse ${agencyData.totalProperties || 0} listings and connect with ${agencyData.totalAgents || 0} professional agents.`,
+        })}
         canonical={`${typeof window !== 'undefined' ? window.location.origin : ''}/agencies/${agency.slug}`}
         image={agencyData.logo || agencyData.coverImage}
         type="website"

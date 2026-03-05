@@ -36,8 +36,8 @@ const ValuationPage: React.FC = () => {
     <div className="min-h-screen bg-gradient-to-b from-neutral-50 via-white to-neutral-50">
       {/* SEO Meta Tags */}
       <SEO
-        title="Free AI Property Valuation - Instant Balkan Property Estimate"
-        description="Get a free AI-powered property valuation for any Balkan property. Instant price estimates for apartments, houses, and villas in Montenegro, Albania, Serbia, and 8 more countries."
+        title={t('valuation:seo.title', 'Free AI Property Valuation - Instant Balkan Property Estimate')}
+        description={t('valuation:seo.description', 'Get a free AI-powered property valuation for any Balkan property. Instant price estimates for apartments, houses, and villas in Montenegro, Albania, Serbia, and 8 more countries.')}
         canonical={`${typeof window !== 'undefined' ? window.location.origin : ''}/valuation`}
         type="website"
       />
