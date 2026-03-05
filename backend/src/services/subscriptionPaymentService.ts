@@ -476,8 +476,17 @@ export async function revokeAgencyCouponSubscription(
   session.startTransaction();
 
   try {
+    // Handle both ObjectId and string userId formats for compatibility
+    // (getCurrentSubscription uses the same pattern — without this, the query
+    // may silently miss the document when called with a plain string from
+    // req.params, leaving an orphaned active Subscription behind.)
+    const userIdVariants = [userId, String(userId)];
+    try {
+      userIdVariants.push(new mongoose.Types.ObjectId(String(userId)));
+    } catch { /* invalid ObjectId string — ignore */ }
+
     const subscription = await Subscription.findOne({
-      userId,
+      userId: { $in: userIdVariants },
       store: 'agency_coupon',
       status: { $in: ['active', 'pending_cancellation', 'grace'] },
     }).session(session);
