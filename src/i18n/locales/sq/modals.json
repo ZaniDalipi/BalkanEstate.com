@@ -151,7 +151,9 @@
     "invitationCodeInfo": "The invitation code lets you request to join the agency. The admin will review your request.",
     "couponCodeInfo": "The agent coupon gives you instant Pro subscription (25 listings/year) as part of this agency.",
     "submitRequest": "Submit Request",
-    "redeemCoupon": "Redeem Coupon"
+    "redeemCoupon": "Redeem Coupon",
+    "proRequiredForInvite": "Kodet e ftesës kërkojnë abonim Pro. Përdorni një kod kuponi të ofruar nga agjencia për t'u bashkuar dhe për të marrë Pro automatikisht.",
+    "viewPlans": "Shiko Planet & Përmirëso"
   },
   "imageEditor": {
     "download": "Shkarko",

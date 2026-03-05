@@ -55,7 +55,9 @@
   "actions": {
     "editAgency": "Uredite Agenciju",
     "manageJoinRequests": "Upravljajte Zahtjevima za Pridruživanje",
-    "requestToJoin": "Zatražite Pridruživanje Agenciji"
+    "requestToJoin": "Zatražite Pridruživanje Agenciji",
+    "proRequiredForInviteCode": "Pro pretplata je potrebna za kodove pozivnice. Koristite kod kupona da se pridružite.",
+    "viewPlans": "Pogledaj Planove"
   },
   "featuredSubscription": {
     "title": "Istaknuta Pretplata",

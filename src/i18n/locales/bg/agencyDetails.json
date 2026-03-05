@@ -86,7 +86,9 @@
     "email": "Изпрати Имейл",
     "editAgency": "Edit Agency",
     "manageJoinRequests": "Manage Join Requests",
-    "requestToJoin": "Request to Join Agency"
+    "requestToJoin": "Request to Join Agency",
+    "proRequiredForInviteCode": "Необходим е Pro абонамент за кодове за покана. Използвайте код за купон, за да се присъедините.",
+    "viewPlans": "Виж Плановете"
   },
   "teamMembers": {
     "title": "Членове на Екипа",

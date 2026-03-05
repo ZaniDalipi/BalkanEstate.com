@@ -299,7 +299,10 @@
     "attributesSynced": "Profil agencije je ažuriran vašim jezicima, područjima usluga i specijalizacijama.",
     "attributesSyncedDetails": "Dodano: {{languages}} jezika, {{serviceAreas}} područja usluga, {{specializations}} specijalizacija, {{certifications}} certifikata.",
     "attributesRecalculated": "Atributi profila agencije su ponovo izračunati.",
-    "agentLeftAttributesUpdated": "Atributi agencije su ažurirani nakon odlaska agenta."
+    "agentLeftAttributesUpdated": "Atributi agencije su ažurirani nakon odlaska agenta.",
+    "viewPlans": "Pogledaj Planove i Nadogradi",
+    "leaveAgencyDoneWithDowngrade": "Uspješno ste napustili agenciju.\n\nVaš Pro plan obezbijeđen od agencije je otkazan. Sada ste na Besplatnom nivou.",
+    "leaveAgencyDone": "Uspješno ste napustili agenciju.\n\nSada ste Nezavisni Agent."
   },
   "joinRequests": {
     "title": "Zahtjevi za Pridruživanje",

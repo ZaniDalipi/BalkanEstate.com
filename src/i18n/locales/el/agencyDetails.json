@@ -86,7 +86,9 @@
     "email": "Αποστολή Email",
     "editAgency": "Edit Agency",
     "manageJoinRequests": "Manage Join Requests",
-    "requestToJoin": "Request to Join Agency"
+    "requestToJoin": "Request to Join Agency",
+    "proRequiredForInviteCode": "Απαιτείται συνδρομή Pro για κωδικούς πρόσκλησης. Χρησιμοποιήστε κωδικό κουπονιού για να εγγραφείτε.",
+    "viewPlans": "Δείτε Πλάνα"
   },
   "teamMembers": {
     "title": "Μέλη Ομάδας",

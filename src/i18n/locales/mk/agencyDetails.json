@@ -55,7 +55,9 @@
   "actions": {
     "editAgency": "Уреди агенција",
     "manageJoinRequests": "Барања за приклучување",
-    "requestToJoin": "Побарај приклучување"
+    "requestToJoin": "Побарај приклучување",
+    "proRequiredForInviteCode": "Потребен е Pro претплата за кодови за покана. Користете код за купон за да се приклучите.",
+    "viewPlans": "Погледни Планови"
   },
   "featuredSubscription": {
     "title": "Истакната претплата",

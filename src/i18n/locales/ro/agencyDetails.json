@@ -86,7 +86,9 @@
     "email": "Trimite Email",
     "editAgency": "Edit Agency",
     "manageJoinRequests": "Manage Join Requests",
-    "requestToJoin": "Request to Join Agency"
+    "requestToJoin": "Request to Join Agency",
+    "proRequiredForInviteCode": "Abonament Pro necesar pentru codurile de invitație. Folosiți un cod de cupon pentru a vă alătura.",
+    "viewPlans": "Vezi Planuri"
   },
   "teamMembers": {
     "title": "Membri Echipă",

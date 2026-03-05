@@ -86,7 +86,9 @@
     "email": "Pošalji Email",
     "editAgency": "Edit Agency",
     "manageJoinRequests": "Manage Join Requests",
-    "requestToJoin": "Request to Join Agency"
+    "requestToJoin": "Request to Join Agency",
+    "proRequiredForInviteCode": "Pro pretplata je potrebna za pozivne kodove. Koristite kupon kod za pridruživanje.",
+    "viewPlans": "Pogledaj Planove"
   },
   "teamMembers": {
     "title": "Članovi Tima",

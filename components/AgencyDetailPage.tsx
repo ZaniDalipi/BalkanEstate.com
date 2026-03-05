@@ -2747,9 +2747,20 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
 
               {/* Show upgrade prompt for agents without Pro subscription who want to use invitation codes */}
               {canRequestToJoin && !hasProSubscription && (
-                <div className="inline-flex items-center gap-2 px-4 py-2 bg-amber-50 text-amber-700 text-xs font-medium rounded-lg border border-amber-200">
-                  <SparklesIcon className="w-3.5 h-3.5 text-amber-500" />
-                  {t('actions.proRequiredForInviteCode', 'Pro subscription required for invitation codes. Use a coupon code to join.')}
+                <div className="inline-flex flex-wrap items-center gap-2 px-4 py-2 bg-amber-50 text-amber-700 text-xs font-medium rounded-lg border border-amber-200">
+                  <SparklesIcon className="w-3.5 h-3.5 text-amber-500 flex-shrink-0" />
+                  <span>{t('actions.proRequiredForInviteCode', 'Pro subscription required for invitation codes. Use a coupon code to join.')}</span>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'pricing' });
+                      window.history.pushState({}, '', '/pricing');
+                    }}
+                    className="inline-flex items-center gap-1 text-blue-600 hover:text-blue-800 font-semibold transition-colors"
+                  >
+                    {t('actions.viewPlans', 'View Plans')}
+                    <ChevronRightIcon className="w-3.5 h-3.5" />
+                  </button>
                 </div>
               )}
             </div>

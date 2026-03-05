@@ -151,7 +151,9 @@
     "invitationCodeInfo": "The invitation code lets you request to join the agency. The admin will review your request.",
     "couponCodeInfo": "The agent coupon gives you instant Pro subscription (25 listings/year) as part of this agency.",
     "submitRequest": "Submit Request",
-    "redeemCoupon": "Redeem Coupon"
+    "redeemCoupon": "Redeem Coupon",
+    "proRequiredForInvite": "Οι κωδικοί πρόσκλησης απαιτούν συνδρομή Pro. Χρησιμοποιήστε κωδικό κουπονιού από το γραφείο για να εγγραφείτε και να λάβετε Pro αυτόματα.",
+    "viewPlans": "Δείτε Πλάνα & Αναβάθμιση"
   },
   "imageEditor": {
     "download": "Λήψη",

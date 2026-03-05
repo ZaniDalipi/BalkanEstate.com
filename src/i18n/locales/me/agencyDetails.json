@@ -55,7 +55,9 @@
   "actions": {
     "editAgency": "Edit Agency",
     "manageJoinRequests": "Manage Join Requests",
-    "requestToJoin": "Request to Join Agency"
+    "requestToJoin": "Request to Join Agency",
+    "proRequiredForInviteCode": "Pro pretplata je potrebna za kodove pozivnice. Koristite kod kupona da se pridružite.",
+    "viewPlans": "Pogledaj Planove"
   },
   "featuredSubscription": {
     "title": "Featured Subscription",

@@ -358,7 +358,10 @@
     "attributesSynced": "Profili i agjencisë u përditësua me gjuhët, zonat e shërbimit dhe specializimet tuaja.",
     "attributesSyncedDetails": "U shtuan: {{languages}} gjuhë, {{serviceAreas}} zona shërbimi, {{specializations}} specializime, {{certifications}} certifikata.",
     "attributesRecalculated": "Atributet e profilit të agjencisë u rillogaritën.",
-    "agentLeftAttributesUpdated": "Atributet e agjencisë u përditësuan pas largimit të agjentit."
+    "agentLeftAttributesUpdated": "Atributet e agjencisë u përditësuan pas largimit të agjentit.",
+    "viewPlans": "Shiko Planet & Përmirëso",
+    "leaveAgencyDoneWithDowngrade": "Keni lënë me sukses agjencinë.\n\nPlani Pro i ofruar nga agjencia është anuluar. Tani jeni në nivelin Falas.",
+    "leaveAgencyDone": "Keni lënë me sukses agjencinë.\n\nTani jeni Agjent i Pavarur."
   },
   "joinRequests": {
     "title": "Kërkesa për t'u Bashkuar",

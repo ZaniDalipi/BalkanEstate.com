@@ -55,7 +55,9 @@
   "actions": {
     "editAgency": "Redakto Agjencin",
     "manageJoinRequests": "Menaxho Kërkesat për Bashkim",
-    "requestToJoin": "Kërko të Bashkohesh me Agjencin"
+    "requestToJoin": "Kërko të Bashkohesh me Agjencin",
+    "proRequiredForInviteCode": "Kërkohet abonim Pro për kodet e ftesës. Përdorni një kod kuponi për t'u bashkuar.",
+    "viewPlans": "Shiko Planet"
   },
   "featuredSubscription": {
     "title": "Abonimi i Veçantë",

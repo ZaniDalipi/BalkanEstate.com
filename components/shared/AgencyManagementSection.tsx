@@ -5,10 +5,14 @@ import { getAgencies, verifyInvitationCode, createJoinRequest, leaveAgency } fro
 import { useAppContext } from '../../context/AppContext';
 import { useConfirmation } from '../../src/shared/hooks/useConfirmation';
 import { useNotification } from '../../src/shared/hooks/useNotification';
-import { TicketIcon, CheckCircleIcon, ExclamationTriangleIcon } from '../../constants';
+import { TicketIcon, CheckCircleIcon, ExclamationTriangleIcon, ArrowRightIcon } from '../../constants';
 import { API_URL } from '../../src/shared/api/config';
 import { csrfHeaders, ensureCsrfToken } from '../../src/shared/api/httpClient';
 import { tokenService } from '../../src/shared/api/tokenService';
+
+/** Check if an error message is subscription-related */
+const isSubscriptionError = (msg: string): boolean =>
+  /subscription|upgrade|plan required|pro required/i.test(msg);
 
 interface Agency {
   _id: string;
@@ -591,7 +595,22 @@ const AgencyManagementSection: React.FC<AgencyManagementSectionProps> = ({ curre
                   {error && (
                     <div className="p-3 bg-red-50 border border-red-200 rounded-lg flex items-start gap-2">
                       <ExclamationTriangleIcon className="w-5 h-5 text-red-500 flex-shrink-0" />
-                      <p className="text-sm text-red-700">{error}</p>
+                      <div className="flex-1">
+                        <p className="text-sm text-red-700">{error}</p>
+                        {isSubscriptionError(error) && (
+                          <button
+                            type="button"
+                            onClick={() => {
+                              dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'pricing' });
+                              window.history.pushState({}, '', '/pricing');
+                            }}
+                            className="mt-2 inline-flex items-center gap-1 text-sm font-semibold text-blue-600 hover:text-blue-800 transition-colors"
+                          >
+                            {t('agencies:management.viewPlans', 'View Plans & Upgrade')}
+                            <ArrowRightIcon className="w-4 h-4" />
+                          </button>
+                        )}
+                      </div>
                     </div>
                   )}
 
@@ -672,7 +691,22 @@ const AgencyManagementSection: React.FC<AgencyManagementSectionProps> = ({ curre
                   {error && (
                     <div className="p-3 bg-red-50 border border-red-200 rounded-lg flex items-start gap-2">
                       <ExclamationTriangleIcon className="w-5 h-5 text-red-500 flex-shrink-0" />
-                      <p className="text-sm text-red-700">{error}</p>
+                      <div className="flex-1">
+                        <p className="text-sm text-red-700">{error}</p>
+                        {isSubscriptionError(error) && (
+                          <button
+                            type="button"
+                            onClick={() => {
+                              dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'pricing' });
+                              window.history.pushState({}, '', '/pricing');
+                            }}
+                            className="mt-2 inline-flex items-center gap-1 text-sm font-semibold text-blue-600 hover:text-blue-800 transition-colors"
+                          >
+                            {t('agencies:management.viewPlans', 'View Plans & Upgrade')}
+                            <ArrowRightIcon className="w-4 h-4" />
+                          </button>
+                        )}
+                      </div>
                     </div>
                   )}
 

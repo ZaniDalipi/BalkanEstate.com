@@ -358,7 +358,10 @@
     "attributesSynced": "Agency profile updated with your languages, service areas, and specializations.",
     "attributesSyncedDetails": "Added: {{languages}} languages, {{serviceAreas}} service areas, {{specializations}} specializations, {{certifications}} certifications.",
     "attributesRecalculated": "Agency profile attributes have been recalculated.",
-    "agentLeftAttributesUpdated": "Agency attributes updated after agent departure."
+    "agentLeftAttributesUpdated": "Agency attributes updated after agent departure.",
+    "viewPlans": "View Plans & Upgrade",
+    "leaveAgencyDoneWithDowngrade": "You have successfully left the agency.\n\nYour agency-provided Pro plan has been canceled. You are now on the Free tier.",
+    "leaveAgencyDone": "You have successfully left the agency.\n\nYou are now an Independent Agent."
   },
   "joinRequests": {
     "title": "Join Requests",

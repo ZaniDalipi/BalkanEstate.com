@@ -332,7 +332,10 @@
     "attributesSynced": "Profilul agenției a fost actualizat cu limbile, zonele de servicii și specializările tale.",
     "attributesSyncedDetails": "Adăugate: {{languages}} limbi, {{serviceAreas}} zone de servicii, {{specializations}} specializări, {{certifications}} certificări.",
     "attributesRecalculated": "Atributele profilului agenției au fost recalculate.",
-    "agentLeftAttributesUpdated": "Atributele agenției au fost actualizate după plecarea agentului."
+    "agentLeftAttributesUpdated": "Atributele agenției au fost actualizate după plecarea agentului.",
+    "viewPlans": "Vezi Planuri și Upgrade",
+    "leaveAgencyDoneWithDowngrade": "Ați părăsit cu succes agenția.\n\nPlanul Pro oferit de agenție a fost anulat. Acum sunteți pe nivelul Gratuit.",
+    "leaveAgencyDone": "Ați părăsit cu succes agenția.\n\nAcum sunteți Agent Independent."
   },
   "joinRequests": {
     "title": "Cereri de Alăturare",

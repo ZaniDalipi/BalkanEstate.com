@@ -151,7 +151,9 @@
     "invitationCodeInfo": "The invitation code lets you request to join the agency. The admin will review your request.",
     "couponCodeInfo": "The agent coupon gives you instant Pro subscription (25 listings/year) as part of this agency.",
     "submitRequest": "Submit Request",
-    "redeemCoupon": "Redeem Coupon"
+    "redeemCoupon": "Redeem Coupon",
+    "proRequiredForInvite": "Кодовите за покана бараат Pro претплата. Користете код за купон обезбеден од агенцијата за да се приклучите и добиете Pro автоматски.",
+    "viewPlans": "Погледни Планови и Надгради"
   },
   "imageEditor": {
     "download": "Преземи",

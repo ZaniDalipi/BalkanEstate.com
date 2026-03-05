@@ -1,6 +1,7 @@
 import React, { useState, useCallback, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import Modal from './shared/Modal';
+import { useAppContext } from '../context/AppContext';
 
 interface InvitationCodeModalProps {
   isOpen: boolean;
@@ -28,6 +29,7 @@ const InvitationCodeModal: React.FC<InvitationCodeModalProps> = ({
   hasProSubscription = true,
 }) => {
   const { t } = useTranslation(['modals', 'common']);
+  const { dispatch } = useAppContext();
   const [code, setCode] = useState('');
   const [codeType, setCodeType] = useState<CodeType>('coupon');
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -209,9 +211,23 @@ const InvitationCodeModal: React.FC<InvitationCodeModalProps> = ({
             <svg className="w-4 h-4 text-amber-500 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
-            <p className="text-xs text-amber-700">
-              {t('invitationCode.proRequiredForInvite', 'Invitation codes require a Pro subscription. Use a coupon code provided by the agency to join and get Pro automatically.')}
-            </p>
+            <div className="flex-1">
+              <p className="text-xs text-amber-700">
+                {t('invitationCode.proRequiredForInvite', 'Invitation codes require a Pro subscription. Use a coupon code provided by the agency to join and get Pro automatically.')}
+              </p>
+              <button
+                type="button"
+                onClick={() => {
+                  onClose();
+                  dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'pricing' });
+                  window.history.pushState({}, '', '/pricing');
+                }}
+                className="mt-1.5 inline-flex items-center gap-1 text-xs font-semibold text-blue-600 hover:text-blue-800 transition-colors"
+              >
+                {t('invitationCode.viewPlans', 'View Plans & Upgrade')}
+                <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
+              </button>
+            </div>
           </div>
         )}
 

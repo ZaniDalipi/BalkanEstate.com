@@ -59,7 +59,9 @@
   "actions": {
     "editAgency": "Edit Agency",
     "manageJoinRequests": "Manage Join Requests",
-    "requestToJoin": "Request to Join Agency"
+    "requestToJoin": "Request to Join Agency",
+    "proRequiredForInviteCode": "Pro subscription required for invitation codes. Use a coupon code to join.",
+    "viewPlans": "View Plans"
   },
   "featuredSubscription": {
     "title": "Featured Subscription",
