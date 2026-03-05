@@ -21,6 +21,7 @@ import {
   calculateNextRefreshDate,
 } from '../../services/promotion/promotionService';
 import { promotionLogger } from '../../utils/logger';
+import { resolveId } from '../../utils/idObfuscation';
 
 /**
  * @desc    Purchase/Create a property promotion (direct, for agency allocations)
@@ -38,7 +39,7 @@ export const purchasePromotion = async (
     }
 
     const {
-      propertyId,
+      propertyId: rawPropertyId,
       promotionTier,
       duration,
       hasUrgentBadge = false,
@@ -46,7 +47,7 @@ export const purchasePromotion = async (
       couponCode,
     } = req.body;
 
-    if (!propertyId || !promotionTier || !duration) {
+    if (!rawPropertyId || !promotionTier || !duration) {
       res.status(400).json({
         message: 'Property ID, promotion tier, and duration are required',
         code: 'MISSING_REQUIRED_FIELDS',
@@ -66,6 +67,9 @@ export const purchasePromotion = async (
       res.status(400).json({ message: 'Invalid duration', code: 'INVALID_DURATION' });
       return;
     }
+
+    // Resolve obfuscated property ID to raw MongoDB ObjectId
+    const propertyId = resolveId(rawPropertyId) || rawPropertyId;
 
     const currentUser = req.user as IUser;
     const user = await User.findById(String(currentUser._id));
@@ -240,9 +244,9 @@ export const createPromotionCheckout = async (
       return;
     }
 
-    const { propertyId, promotionTier, duration, hasUrgentBadge = false, couponCode } = req.body;
+    const { propertyId: rawCheckoutPropertyId, promotionTier, duration, hasUrgentBadge = false, couponCode } = req.body;
 
-    if (!propertyId || !promotionTier || !duration) {
+    if (!rawCheckoutPropertyId || !promotionTier || !duration) {
       res.status(400).json({ message: 'Property ID, promotion tier, and duration are required', code: 'MISSING_REQUIRED_FIELDS' });
       return;
     }
@@ -256,6 +260,9 @@ export const createPromotionCheckout = async (
       res.status(400).json({ message: 'Invalid duration', code: 'INVALID_DURATION' });
       return;
     }
+
+    // Resolve obfuscated property ID to raw MongoDB ObjectId
+    const propertyId = resolveId(rawCheckoutPropertyId) || rawCheckoutPropertyId;
 
     const currentUser = req.user as IUser;
     const user = await User.findById(String(currentUser._id));
