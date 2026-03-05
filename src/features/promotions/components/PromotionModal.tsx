@@ -47,6 +47,7 @@ const PromotionModal: React.FC<PromotionModalProps> = ({
       isOpen={isOpen}
       onClose={onClose}
       size="5xl"
+      fullScreenBreakpoint="lg"
     >
       <PromotionSelector
         propertyId={propertyId}
