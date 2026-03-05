@@ -328,7 +328,11 @@
     "requestSentTitle": "Заявката е Изпратена!",
     "requestSentMessage": "Вашата заявка за присъединяване е изпратена до {{name}}.\n\nЩе бъдете уведомени, когато агенцията отговори.",
     "couponRedeemedTitle": "Купонът е Използван!",
-    "couponRedeemedMessage": "Присъединихте се към {{name}} с Про абонамент!"
+    "couponRedeemedMessage": "Присъединихте се към {{name}} с Про абонамент!",
+    "attributesSynced": "Профилът на агенцията е актуализиран с вашите езици, области на обслужване и специализации.",
+    "attributesSyncedDetails": "Добавени: {{languages}} езика, {{serviceAreas}} области на обслужване, {{specializations}} специализации, {{certifications}} сертификата.",
+    "attributesRecalculated": "Атрибутите на профила на агенцията са преизчислени.",
+    "agentLeftAttributesUpdated": "Атрибутите на агенцията са актуализирани след напускането на агента."
   },
   "joinRequests": {
     "title": "Заявки за Присъединяване",

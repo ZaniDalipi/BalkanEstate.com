@@ -18,6 +18,7 @@ import { revokeAgencyCouponSubscription } from '../services/subscriptionPaymentS
 import { getSocketInstance } from '../utils/socketInstance';
 import { agencyLogger } from '../utils/logger';
 import Notification from '../models/Notification';
+import { syncAgentAttributesToAgency, recalculateAgencyAttributes } from '../services/agencyAttributeSyncService';
 
 // Helper function to generate unique Agent ID using secure random
 function generateAgentId(): string {
@@ -1059,6 +1060,9 @@ export const addAgentToAgency = async (
     agentUser.agencyId = agency._id as mongoose.Types.ObjectId;
     await agentUser.save();
 
+    // Sync agent's attributes (languages, service areas, specializations, certifications) to agency
+    await syncAgentAttributesToAgency(agency, agentUserId);
+
     await agency.populate('agents', 'name email phone avatarUrl role agencyName');
 
     res.json({ agency });
@@ -1183,6 +1187,9 @@ export const removeAgentFromAgency = async (
     }
     // User cleanup already done above, so mark as revoked for socket event
     subscriptionRevoked = true;
+
+    // Recalculate agency attributes after agent removal
+    await recalculateAgencyAttributes(id);
 
     // Emit real-time update to the removed agent's frontend
     const io = getSocketInstance();
@@ -1693,6 +1700,12 @@ export const joinAgencyByInvitationCode = async (
 
     agencyLogger.info(`✅ User ${user._id} joined agency ${agency.name} via invitation code with agency_agent subscription`);
 
+    // Sync agent's attributes (languages, service areas, specializations, certifications) to agency
+    const syncResult = await syncAgentAttributesToAgency(agency, user._id);
+    if (syncResult.synced) {
+      agencyLogger.info(`✅ Agent attributes synced to agency on invitation code join`);
+    }
+
     // Send in-app notifications (non-blocking)
     try {
       // Notify agency owner: new agent joined
@@ -2121,6 +2134,9 @@ export const leaveAgency = async (
     }
 
     agencyLogger.info(`✅ User ${user._id} left agency: ${agencyName}`);
+
+    // Recalculate agency attributes after agent departure
+    await recalculateAgencyAttributes(agency._id);
 
     // Notify agency dashboard in real-time (agent list + coupon status changed)
     const io = getSocketInstance();

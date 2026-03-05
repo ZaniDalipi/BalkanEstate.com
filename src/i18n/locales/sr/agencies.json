@@ -354,7 +354,11 @@
     "requestSentTitle": "Захтев Послат!",
     "requestSentMessage": "Ваш захтев за придруживање је послат {{name}}.\n\nБићете обавештени када агенција одговори.",
     "couponRedeemedTitle": "Купон Искоришћен!",
-    "couponRedeemedMessage": "Придружили сте се {{name}} са Про претплатом!"
+    "couponRedeemedMessage": "Придружили сте се {{name}} са Про претплатом!",
+    "attributesSynced": "Профил агенције је ажуриран вашим језицима, подручјима услуга и специјализацијама.",
+    "attributesSyncedDetails": "Додато: {{languages}} језика, {{serviceAreas}} подручја услуга, {{specializations}} специјализација, {{certifications}} сертификата.",
+    "attributesRecalculated": "Атрибути профила агенције су поново израчунати.",
+    "agentLeftAttributesUpdated": "Атрибути агенције су ажурирани након одласка агента."
   },
   "joinRequests": {
     "title": "Захтеви за Придруживање",

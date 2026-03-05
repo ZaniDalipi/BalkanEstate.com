@@ -354,7 +354,11 @@
     "requestSentTitle": "Request Sent!",
     "requestSentMessage": "Your join request has been sent to {{name}}.\n\nYou will be notified when the agency responds.",
     "couponRedeemedTitle": "Coupon Redeemed!",
-    "couponRedeemedMessage": "You've joined {{name}} with a Pro subscription!"
+    "couponRedeemedMessage": "You've joined {{name}} with a Pro subscription!",
+    "attributesSynced": "Agency profile updated with your languages, service areas, and specializations.",
+    "attributesSyncedDetails": "Added: {{languages}} languages, {{serviceAreas}} service areas, {{specializations}} specializations, {{certifications}} certifications.",
+    "attributesRecalculated": "Agency profile attributes have been recalculated.",
+    "agentLeftAttributesUpdated": "Agency attributes updated after agent departure."
   },
   "joinRequests": {
     "title": "Join Requests",

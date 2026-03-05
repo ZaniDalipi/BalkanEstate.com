@@ -11,6 +11,7 @@ import { apiLogger } from '../utils/logger';
 import { getParam, getObjectIdParam, isValidObjectId } from '../utils/validateParams';
 import { revokeAgencyCouponSubscription } from '../services/subscriptionPaymentService';
 import { FREE_TIER_LIMITS } from '../config/subscriptionConstants';
+import { recalculateAgencyAttributes } from '../services/agencyAttributeSyncService';
 
 
 
@@ -605,16 +606,10 @@ export const leaveAgency = async (req: Request, res: Response): Promise<void> =>
         }
       }
 
-      // Recalculate agency languages from remaining active agents
-      if (agency.agents.length > 0) {
-        const remainingAgents = await Agent.find({ userId: { $in: agency.agents } });
-        const allLanguages = remainingAgents.flatMap(a => a.languages || []);
-        agency.languages = [...new Set(allLanguages)];
-      } else {
-        agency.languages = [];
-      }
-
       await agency.save();
+
+      // Recalculate agency attributes (languages, serviceAreas, specializations, certifications)
+      await recalculateAgencyAttributes(agency._id);
 
       // Emit socket event to notify agency members
       const io = getSocketInstance();

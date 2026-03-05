@@ -7,6 +7,7 @@ import Agent from '../models/Agent';
 import { getSocketInstance } from '../utils/socketInstance';
 import { agencyLogger } from '../utils/logger';
 import { getObjectIdParam } from '../utils/validateParams';
+import { syncAgentAttributesToAgency } from '../services/agencyAttributeSyncService';
 
 // Create a join request
 export const createJoinRequest = async (req: Request, res: Response): Promise<void> => {
@@ -273,6 +274,9 @@ export const approveJoinRequest = async (req: Request, res: Response): Promise<v
     joinRequest.respondedAt = new Date();
     joinRequest.respondedBy = new mongoose.Types.ObjectId(userId);
     await joinRequest.save();
+
+    // Sync agent's attributes (languages, service areas, specializations, certifications) to agency
+    await syncAgentAttributesToAgency(agency, joinRequest.agentId);
 
     // Auto-reject all other pending requests from this agent
     await AgencyJoinRequest.updateMany(

@@ -328,7 +328,11 @@
     "requestSentTitle": "Cerere Trimisă!",
     "requestSentMessage": "Cererea ta de alăturare a fost trimisă la {{name}}.\n\nVei fi notificat când agenția răspunde.",
     "couponRedeemedTitle": "Cupon Folosit!",
-    "couponRedeemedMessage": "Te-ai alăturat {{name}} cu un abonament Pro!"
+    "couponRedeemedMessage": "Te-ai alăturat {{name}} cu un abonament Pro!",
+    "attributesSynced": "Profilul agenției a fost actualizat cu limbile, zonele de servicii și specializările tale.",
+    "attributesSyncedDetails": "Adăugate: {{languages}} limbi, {{serviceAreas}} zone de servicii, {{specializations}} specializări, {{certifications}} certificări.",
+    "attributesRecalculated": "Atributele profilului agenției au fost recalculate.",
+    "agentLeftAttributesUpdated": "Atributele agenției au fost actualizate după plecarea agentului."
   },
   "joinRequests": {
     "title": "Cereri de Alăturare",
