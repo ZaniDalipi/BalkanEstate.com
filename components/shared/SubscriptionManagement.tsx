@@ -329,9 +329,8 @@ const SubscriptionManagement: React.FC<SubscriptionManagementProps> = ({ userId 
 
       if (response.ok) {
         const data = await response.json();
-        if (data.subscription) {
-          setSubscription(data.subscription);
-        }
+        // Always sync state: set subscription if present, clear it if null/absent
+        setSubscription(data.subscription || null);
       }
     } catch (error) {
     } finally {

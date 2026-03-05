@@ -340,7 +340,31 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
   // Listen for real-time agency updates (new members, join requests, etc.)
   useEffect(() => {
     const handleAgencyUpdate = (data: any) => {
-      if (data.type === 'member-added' || data.type === 'member-removed') {
+      if (data.type === 'member-removed' && data.agentId) {
+        // Optimistically remove the agent from local state for instant UI update
+        const removedId = String(data.agentId);
+        setAgents(prev => prev.filter(a => String(a.id || a._id) !== removedId));
+        setAgencyData(prev => {
+          const updatedCoupons = prev.agentCoupons ? {
+            ...prev.agentCoupons,
+            available: (prev.agentCoupons.available || 0) + 1,
+            used: Math.max(0, (prev.agentCoupons.used || 0) - 1),
+            coupons: prev.agentCoupons.coupons?.map((c: any) =>
+              c.usedBy && (String(c.usedBy._id || c.usedBy) === removedId) && c.status === 'used'
+                ? { ...c, status: 'available', usedBy: null, usedAt: null }
+                : c
+            ) || [],
+          } : prev.agentCoupons;
+          return {
+            ...prev,
+            totalAgents: data.totalAgents ?? Math.max(0, (prev.totalAgents || 0) - 1),
+            agentCoupons: updatedCoupons,
+          };
+        });
+        // Also refetch for full accuracy
+        fetchAgencyData(true);
+      }
+      if (data.type === 'member-added') {
         // Silently refetch agency data to get the updated member list (no loading spinner)
         fetchAgencyData(true);
       }
