@@ -12,6 +12,7 @@ import { invalidateCache } from '../middleware/cache';
 import { migratePropertySchema } from '../utils/migratePropertySchema';
 import { getObjectIdParam } from '../utils/validateParams';
 import { escapeRegex } from '../utils/escapeRegex';
+import { sendLicenseRejectionEmail } from '../services/emailService';
 
 
 // @desc    Get admin dashboard statistics
@@ -1214,12 +1215,32 @@ export const rejectLicense = async (req: Request, res: Response): Promise<void> 
     agentRecord.licenseStatus = 'rejected';
     await agentRecord.save();
 
-    // Update User record
+    // Update User record — also sync agentLicense sub-document status
     user.licenseVerified = false;
     user.licenseVerificationDate = undefined;
+    if (user.agentLicense) {
+      user.agentLicense.status = 'rejected';
+      user.agentLicense.isVerified = false;
+      if (reason) {
+        user.agentLicense.rejectionReason = reason;
+      }
+    }
     await user.save();
 
     adminLogger.info(`License rejected for user ${userId} (reason: ${reason || 'none provided'})`);
+
+    // Send rejection email notification to the user
+    try {
+      await sendLicenseRejectionEmail({
+        email: user.email,
+        userName: user.name || 'Agent',
+        licenseNumber: agentRecord.licenseNumber || '',
+        reason: reason || undefined,
+      });
+    } catch (emailError) {
+      adminLogger.error('Failed to send license rejection email:', emailError);
+      // Don't fail the rejection if email fails
+    }
 
     res.json({
       message: 'License rejected',
