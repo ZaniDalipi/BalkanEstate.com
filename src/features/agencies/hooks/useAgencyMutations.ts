@@ -10,6 +10,7 @@ import {
   getAgencyJoinRequests,
 } from '../api';
 import { leaveAgency } from '@/src/features/agents/api';
+import { agencyDashboardKeys } from '@/src/features/agency-dashboard/api/agencyDashboardKeys';
 
 export function useCreateAgency() {
   const queryClient = useQueryClient();
@@ -74,6 +75,10 @@ export function useRemoveAgentFromAgency() {
       removeAgentFromAgency(agencyId, agentId),
     onSuccess: (_, { agencyId }) => {
       queryClient.invalidateQueries({ queryKey: agencyKeys.detail(agencyId) });
+      // Invalidate dashboard queries so agent list + coupon panel update instantly
+      queryClient.invalidateQueries({ queryKey: agencyDashboardKeys.agents(agencyId) });
+      queryClient.invalidateQueries({ queryKey: agencyDashboardKeys.financial(agencyId) });
+      queryClient.invalidateQueries({ queryKey: agencyDashboardKeys.overview(agencyId) });
     },
   });
 

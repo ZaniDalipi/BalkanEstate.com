@@ -9,6 +9,7 @@ import PromotionCoupon from '../models/PromotionCoupon';
 import { sendAgentRegistrationCouponsEmail, sendEnterpriseWelcomeEmail, sendSubscriptionInvoice, sendProSubscriptionWelcomeEmail, sendMonthlyCouponEmail } from './emailService';
 import { generateSecureRandomString } from '../utils/secureRandom';
 import { paymentLogger } from '../utils/logger';
+import { FREE_TIER_LIMITS } from '../config/subscriptionConstants';
 
 const isProduction = process.env.NODE_ENV === 'production';
 
@@ -456,6 +457,114 @@ export async function cancelSubscriptionSecurely(
   } catch (error: any) {
     await session.abortTransaction();
     throw new Error(`Cancellation failed: ${error.message}`);
+  } finally {
+    session.endSession();
+  }
+}
+
+/**
+ * Revoke an agency-coupon subscription when an agent leaves or is removed from an agency.
+ * Immediately cancels the subscription, downgrades to free tier, and frees the coupon.
+ * Only affects store='agency_coupon' subscriptions — self-paid subscriptions are untouched.
+ * All operations are atomic within a MongoDB transaction.
+ */
+export async function revokeAgencyCouponSubscription(
+  userId: string | mongoose.Types.ObjectId,
+  agencyId: string | mongoose.Types.ObjectId
+): Promise<{ revoked: boolean; message: string }> {
+  const session = await mongoose.startSession();
+  session.startTransaction();
+
+  try {
+    // Handle both ObjectId and string userId formats for compatibility
+    // (getCurrentSubscription uses the same pattern — without this, the query
+    // may silently miss the document when called with a plain string from
+    // req.params, leaving an orphaned active Subscription behind.)
+    const userIdVariants = [userId, String(userId)];
+    try {
+      userIdVariants.push(new mongoose.Types.ObjectId(String(userId)));
+    } catch { /* invalid ObjectId string — ignore */ }
+
+    const subscription = await Subscription.findOne({
+      userId: { $in: userIdVariants },
+      store: 'agency_coupon',
+      status: { $in: ['active', 'pending_cancellation', 'grace'] },
+    }).session(session);
+
+    let subscriptionCanceled = false;
+
+    if (subscription) {
+      // Cancel the subscription immediately (not pending_cancellation)
+      subscription.status = 'canceled';
+      subscription.autoRenewing = false;
+      subscription.canceledAt = new Date();
+      subscription.expirationDate = new Date(); // Expire immediately so /subscriptions/current won't return it
+      subscription.cancellationReason = 'Agent left/removed from agency';
+      await subscription.save({ session });
+      subscriptionCanceled = true;
+
+      // Create audit event
+      await SubscriptionEvent.create(
+        [{
+          subscriptionId: subscription._id,
+          userId,
+          eventType: 'subscription_canceled',
+          store: 'agency_coupon',
+          metadata: {
+            reason: 'Agent left/removed from agency',
+            agencyId: String(agencyId),
+            immediateRevocation: true,
+          },
+        }],
+        { session }
+      );
+    }
+
+    // Downgrade user to free tier (always, even if no subscription found)
+    const user = await User.findById(userId).session(session);
+    if (user) {
+      user.subscription = {
+        ...user.subscription,
+        tier: 'free' as any,
+        status: 'expired' as any,
+        listingsLimit: FREE_TIER_LIMITS.LISTINGS,
+        savedSearchesLimit: FREE_TIER_LIMITS.SAVED_SEARCHES,
+        promotionCoupons: {
+          monthly: FREE_TIER_LIMITS.PROMOTION_COUPONS,
+          available: FREE_TIER_LIMITS.PROMOTION_COUPONS,
+          used: 0,
+          rollover: 0,
+          lastRefresh: new Date(),
+        },
+        expiresAt: undefined,
+      };
+      user.subscriptionStatus = 'expired';
+      await user.save({ session });
+    }
+
+    // Free up the agency coupon for reassignment (always, regardless of subscription)
+    const agency = await Agency.findById(agencyId).session(session);
+    if (agency?.agentCoupons) {
+      const coupon = agency.agentCoupons.find(
+        (c: any) => c.usedBy && String(c.usedBy) === String(userId) && c.status === 'used'
+      );
+      if (coupon) {
+        coupon.status = 'available';
+        coupon.usedBy = undefined;
+        coupon.usedAt = undefined;
+        await agency.save({ session });
+        paymentLogger.info(`Agency coupon ${coupon.code} freed for reassignment (user ${userId})`);
+      }
+    }
+
+    await session.commitTransaction();
+
+    paymentLogger.info(`Agency coupon subscription revoked for user ${userId} (agency ${agencyId}), subscription canceled: ${subscriptionCanceled}`);
+    return { revoked: true, message: 'Agency coupon subscription revoked and user downgraded to free tier' };
+  } catch (error: any) {
+    await session.abortTransaction();
+    paymentLogger.error(`Failed to revoke agency coupon subscription for user ${userId}:`, error);
+    throw new Error(`Agency coupon revocation failed: ${error.message}`);
   } finally {
     session.endSession();
   }

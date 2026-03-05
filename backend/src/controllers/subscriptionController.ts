@@ -223,12 +223,30 @@ export const getCurrentSubscription = async (req: Request, res: Response): Promi
       }).sort({ createdAt: -1 });
     }
 
+    // Safety net: if an agency_coupon subscription doc is still active but the user
+    // is no longer part of an agency, auto-cancel the orphaned doc so the UI
+    // immediately reflects the free tier (prevents stale "Agency Pro" display).
+    if (subscription && subscription.store === 'agency_coupon') {
+      const subUser = await User.findById(userId).select('agencyId subscription').lean();
+      if (!subUser?.agencyId) {
+        // User left/was removed from agency but the Subscription doc wasn't cleaned up
+        subscription.status = 'canceled' as any;
+        subscription.canceledAt = new Date();
+        subscription.expirationDate = new Date();
+        subscription.cancellationReason = 'Agent no longer part of agency (auto-cleanup)';
+        await subscription.save();
+        subscriptionLogger.info(`Auto-canceled orphaned agency_coupon subscription ${subscription._id} for user ${userId} (no agencyId)`);
+        subscription = null;
+      }
+    }
+
     if (!subscription) {
       // No Subscription document found - check user's subscription field (database is source of truth)
       const user = await User.findById(userId);
 
       // Check for agency agent subscription (tier set in database via coupon redemption or getMe sync)
-      if (user?.subscription?.tier === 'agency_agent' && user.subscription.status === 'active') {
+      // Also verify user still belongs to an agency — if agencyId is cleared, they left/were removed
+      if (user?.subscription?.tier === 'agency_agent' && user.subscription.status === 'active' && user.agencyId) {
         const expiresAt = user.subscription.expiresAt || new Date(Date.now() + 365 * 24 * 60 * 60 * 1000);
 
         res.status(200).json({

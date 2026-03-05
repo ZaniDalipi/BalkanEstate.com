@@ -10,6 +10,7 @@ import type {
   DashboardInquiry,
   AnalyticsData,
   FinancialData,
+  CouponInfo,
   TeamFeedItem,
   TeamNote,
   PropertyFilters,
@@ -65,6 +66,7 @@ export const getDashboardAgents = async (agencyId: string): Promise<DashboardAge
     avgResponseTime: (a.avgResponseTime as string) ?? '-',
     joinedAt: (a.joinedAt as string) ?? '',
     status: mapAgentStatus(a.isActive, a.status as string),
+    couponCode: (a.couponCode as string) ?? undefined,
   }));
 };
 
@@ -300,8 +302,25 @@ export const getDashboardFinancial = async (agencyId: string): Promise<Financial
 };
 
 function buildCouponList(raw: Record<string, unknown>): FinancialData['agentCoupons'] {
-  // Backend returns summary: { total, available, used, expired? }
-  // Frontend expects CouponInfo[] but we create virtual entries from summary
+  // If backend returns a `coupons` array with real coupon data, use it directly
+  const rawCoupons = raw.coupons as Record<string, unknown>[] | undefined;
+  if (Array.isArray(rawCoupons) && rawCoupons.length > 0) {
+    return rawCoupons.map((c) => {
+      const usedByRaw = c.usedBy as Record<string, unknown> | null;
+      return {
+        code: (c.code as string) ?? '',
+        status: (c.status as CouponInfo['status']) ?? 'available',
+        generatedAt: (c.generatedAt as string) ?? '',
+        expiresAt: (c.expiresAt as string) ?? '',
+        usedBy: usedByRaw
+          ? { id: String(usedByRaw.id ?? usedByRaw._id ?? ''), name: (usedByRaw.name as string) ?? '' }
+          : null,
+        usedAt: (c.usedAt as string) ?? null,
+      };
+    });
+  }
+
+  // Fallback: create virtual entries from summary counts (for promotion coupons etc.)
   const total = (raw.total as number) ?? 0;
   const available = (raw.available as number) ?? 0;
   const used = (raw.used as number) ?? 0;
@@ -327,7 +346,6 @@ function buildCouponList(raw: Record<string, unknown>): FinancialData['agentCoup
       usedAt: null,
     });
   }
-  // Fill remaining as expired
   for (let i = 0; i < total - available - used; i++) {
     coupons.push({
       code: `EXP-${i + 1}`,

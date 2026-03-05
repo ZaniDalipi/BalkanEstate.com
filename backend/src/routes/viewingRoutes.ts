@@ -5,13 +5,16 @@ import { protect } from '../middleware/auth';
 
 const router = express.Router();
 
+const isDevelopment = process.env.NODE_ENV === 'development' || !process.env.NODE_ENV;
+
 // Rate limit viewing requests (10 per hour per IP)
 const viewingRateLimiter = rateLimit({
   windowMs: 60 * 60 * 1000, // 1 hour
-  max: 10,
+  max: 30,
   message: { message: 'Too many viewing requests. Please try again later.' },
   standardHeaders: true,
   legacyHeaders: false,
+  skip: () => isDevelopment, // Skip rate limiting in development
 });
 
 // Get available viewing slots for a property (public)

@@ -316,7 +316,7 @@ export const getCorsConfig = () => {
  */
 export const generalRateLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
-  max: isProduction ? 500 : 1000, // Generous for normal browsing/searching
+  max: 1000, // Generous for normal browsing/searching
   message: {
     error: 'Too many requests',
     message: 'You have exceeded the rate limit. Please try again later.',
@@ -325,6 +325,8 @@ export const generalRateLimiter = rateLimit({
   standardHeaders: !isProduction, // Hide rate limit config from production responses
   legacyHeaders: false,
   skip: (req: Request) => {
+    // Skip rate limiting entirely in development for easier testing
+    if (isDevelopment) return true;
     // Skip rate limiting for health checks only
     return req.path === '/health';
   },
@@ -338,7 +340,7 @@ export const generalRateLimiter = rateLimit({
  */
 export const sensitiveRateLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
-  max: isProduction ? 30 : 60, // Strict for auth endpoints
+  max: 100, // Strict for auth endpoints
   message: {
     error: 'Too many requests',
     message: 'Too many login attempts. Please try again later.',
@@ -346,6 +348,7 @@ export const sensitiveRateLimiter = rateLimit({
   },
   standardHeaders: !isProduction, // Hide rate limit config from production responses
   legacyHeaders: false,
+  skip: () => isDevelopment, // Skip rate limiting in development
 });
 
 /**
@@ -354,7 +357,7 @@ export const sensitiveRateLimiter = rateLimit({
  */
 export const mutationRateLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
-  max: isProduction ? 100 : 300, // Reasonable for property management workflows
+  max: 300, // Reasonable for property management workflows
   message: {
     error: 'Too many requests',
     message: 'Too many write requests. Please slow down and try again shortly.',
@@ -362,6 +365,7 @@ export const mutationRateLimiter = rateLimit({
   },
   standardHeaders: !isProduction, // Hide rate limit config from production responses
   legacyHeaders: false,
+  skip: () => isDevelopment, // Skip rate limiting in development
 });
 
 /**
@@ -370,7 +374,7 @@ export const mutationRateLimiter = rateLimit({
  */
 export const paymentRateLimiter = rateLimit({
   windowMs: 60 * 60 * 1000, // 1 hour
-  max: isProduction ? 10 : 0, // 0 = unlimited in development
+  max: isProduction ? 30 : 0, // 0 = unlimited in development
   message: {
     error: 'Too many payment attempts',
     message: 'Too many payment attempts. Please try again later.',
@@ -388,7 +392,7 @@ export const paymentRateLimiter = rateLimit({
  */
 export const aiRateLimiter = rateLimit({
   windowMs: 60 * 60 * 1000, // 1 hour window
-  max: isProduction ? 20 : 100, // 20 requests per hour in production
+  max: isProduction ? 60 : 100, // 60 requests per hour in production
   message: {
     error: 'AI rate limit exceeded',
     message: 'You have made too many AI requests. Please try again later.',
@@ -416,7 +420,7 @@ export const aiRateLimiter = rateLimit({
  */
 export const messagingRateLimiter = rateLimit({
   windowMs: 60 * 60 * 1000, // 1 hour
-  max: isProduction ? 60 : 300, // 60 messages/hour in production
+  max: 200, // 200 messages/hour in production
   message: {
     error: 'Too many messages',
     message: 'You are sending messages too fast. Please slow down.',
@@ -424,6 +428,7 @@ export const messagingRateLimiter = rateLimit({
   },
   standardHeaders: !isProduction,
   legacyHeaders: false,
+  skip: () => isDevelopment, // Skip rate limiting in development
   keyGenerator: (req: Request) => {
     const userId = (req as any).user?.id || (req as any).user?._id;
     return userId ? `msg_user_${userId}` : ipKeyGenerator(req.ip || 'unknown');
@@ -437,7 +442,7 @@ export const messagingRateLimiter = rateLimit({
  */
 export const uploadRateLimiter = rateLimit({
   windowMs: 60 * 60 * 1000, // 1 hour
-  max: isProduction ? 30 : 200, // 30 uploads/hour in production
+  max: 100, // 100 uploads/hour in production
   message: {
     error: 'Too many uploads',
     message: 'You have uploaded too many images. Please try again later.',
@@ -445,6 +450,7 @@ export const uploadRateLimiter = rateLimit({
   },
   standardHeaders: !isProduction,
   legacyHeaders: false,
+  skip: () => isDevelopment, // Skip rate limiting in development
   keyGenerator: (req: Request) => {
     const userId = (req as any).user?.id || (req as any).user?._id;
     return userId ? `upload_user_${userId}` : ipKeyGenerator(req.ip || 'unknown');

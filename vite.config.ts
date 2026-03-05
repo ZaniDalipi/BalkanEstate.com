@@ -430,6 +430,11 @@ export default defineConfig(({ mode }) => {
       // Optimize dependencies for faster dev startup
       optimizeDeps: {
         include: ['maplibre-gl'],
+        esbuildOptions: {
+          // Use esnext so class fields stay native and the __publicField helper
+          // is never injected — fixes "not defined" errors in MapLibre GL workers
+          target: 'esnext',
+        },
       },
     };
 });

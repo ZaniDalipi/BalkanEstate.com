@@ -7,6 +7,7 @@ import Agent from '../models/Agent';
 import { getSocketInstance } from '../utils/socketInstance';
 import { agencyLogger } from '../utils/logger';
 import { getObjectIdParam } from '../utils/validateParams';
+import { syncAgentAttributesToAgency } from '../services/agencyAttributeSyncService';
 
 // Create a join request
 export const createJoinRequest = async (req: Request, res: Response): Promise<void> => {
@@ -24,6 +25,20 @@ export const createJoinRequest = async (req: Request, res: Response): Promise<vo
     const user = await User.findById(agentId);
     if (!user || user.role !== 'agent') {
       res.status(403).json({ message: 'Only agents can request to join agencies' });
+      return;
+    }
+
+    // Check if user has an active Pro subscription
+    const userTier = user.subscription?.tier;
+    const userSubStatus = user.subscription?.status;
+    const hasProSubscription =
+      (userTier === 'pro' || userTier === 'agency_owner') &&
+      (userSubStatus === 'active' || userSubStatus === 'trial');
+
+    if (!hasProSubscription) {
+      res.status(403).json({
+        message: 'Pro subscription required to join an agency. Please upgrade your plan.',
+      });
       return;
     }
 
@@ -204,6 +219,20 @@ export const approveJoinRequest = async (req: Request, res: Response): Promise<v
       return;
     }
 
+    // Re-validate that agent still has an active Pro subscription
+    const agentTier = agent.subscription?.tier;
+    const agentSubStatus = agent.subscription?.status;
+    const agentHasPro =
+      (agentTier === 'pro' || agentTier === 'agency_owner') &&
+      (agentSubStatus === 'active' || agentSubStatus === 'trial');
+
+    if (!agentHasPro) {
+      res.status(403).json({
+        message: 'This agent no longer has an active Pro subscription and cannot join the agency.',
+      });
+      return;
+    }
+
     // Check if agent already joined another agency
     if (agent.agencyId) {
       res.status(400).json({ message: 'Agent has already joined another agency' });
@@ -245,6 +274,9 @@ export const approveJoinRequest = async (req: Request, res: Response): Promise<v
     joinRequest.respondedAt = new Date();
     joinRequest.respondedBy = new mongoose.Types.ObjectId(userId);
     await joinRequest.save();
+
+    // Sync agent's attributes (languages, service areas, specializations, certifications) to agency
+    await syncAgentAttributesToAgency(agency, joinRequest.agentId);
 
     // Auto-reject all other pending requests from this agent
     await AgencyJoinRequest.updateMany(
@@ -410,14 +442,28 @@ export const joinByInvitationCode = async (req: Request, res: Response): Promise
       return;
     }
 
+    // Check if user has an active Pro subscription
+    const userTier = user.subscription?.tier;
+    const userSubStatus = user.subscription?.status;
+    const hasProSubscription =
+      (userTier === 'pro' || userTier === 'agency_owner') &&
+      (userSubStatus === 'active' || userSubStatus === 'trial');
+
+    if (!hasProSubscription) {
+      res.status(403).json({
+        message: 'Pro subscription required to join an agency. Please upgrade your plan.',
+      });
+      return;
+    }
+
     // Check if agent already belongs to an agency
     if (user.agencyId) {
       res.status(400).json({ message: 'You already belong to an agency' });
       return;
     }
 
-    // Find agency by invitation code
-    const agency = await Agency.findOne({ invitationCode });
+    // Find agency by invitation code (case-insensitive)
+    const agency = await Agency.findOne({ invitationCode: invitationCode.toUpperCase() });
     if (!agency) {
       res.status(404).json({ message: 'Invalid invitation code' });
       return;

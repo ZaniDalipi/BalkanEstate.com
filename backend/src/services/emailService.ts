@@ -4971,6 +4971,108 @@ Questions? Contact us at support@balkanestateai.com
       category: 'alerts',
     });
   }
+  /**
+   * Send license rejection notification email to agent
+   */
+  async sendLicenseRejectionEmail(params: {
+    email: string;
+    userName: string;
+    licenseNumber: string;
+    reason?: string;
+  }): Promise<void> {
+    if (!params.email || !isValidEmail(params.email)) {
+      throw new Error(`sendLicenseRejectionEmail: invalid recipient email "${params.email}"`);
+    }
+
+    const frontendUrl = process.env.FRONTEND_URL || 'https://balkanestateai.com';
+    const safeUserName = escapeHtml(params.userName);
+    const safeLicenseNumber = escapeHtml(params.licenseNumber);
+    const safeReason = escapeHtml(params.reason);
+    const currentYear = new Date().getFullYear();
+
+    const reasonBlock = safeReason
+      ? `
+      <div style="background: #fef2f2; border-left: 4px solid #ef4444; padding: 16px; border-radius: 0 8px 8px 0; margin-bottom: 24px;">
+        <p style="color: #991b1b; font-size: 13px; font-weight: 600; margin: 0 0 4px 0;">Reason for rejection:</p>
+        <p style="color: #b91c1c; font-size: 14px; margin: 0;">${safeReason}</p>
+      </div>`
+      : '';
+
+    const html = `
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body style="margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f3f4f6; -webkit-font-smoothing: antialiased;">
+  <div style="display: none; max-height: 0; overflow: hidden;">
+    Your license verification was not approved. You can resubmit with correct details.
+  </div>
+
+  <div style="max-width: 600px; margin: 0 auto; background-color: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);">
+    <!-- Header -->
+    <div style="background: linear-gradient(135deg, #dc2626 0%, #991b1b 100%); padding: 40px 24px; text-align: center;">
+      <div style="margin-bottom: 16px;">
+        <span style="display: inline-block; width: 80px; height: 80px; background: rgba(255,255,255,0.2); border-radius: 50%; line-height: 80px; font-size: 40px;">&#9888;</span>
+      </div>
+      <h1 style="color: #ffffff; margin: 0; font-size: 24px; font-weight: 700;">License Verification Update</h1>
+      <p style="color: #fecaca; margin: 12px 0 0 0; font-size: 15px;">Your license was not approved</p>
+    </div>
+
+    <div style="padding: 32px 24px;">
+      <p style="color: #374151; font-size: 17px; margin: 0 0 20px 0;">
+        Hi ${safeUserName},
+      </p>
+
+      <p style="color: #4b5563; font-size: 15px; line-height: 1.7; margin: 0 0 24px 0;">
+        We have reviewed your license submission${safeLicenseNumber ? ` (<strong style="font-family: monospace;">${safeLicenseNumber}</strong>)` : ''} and unfortunately it could not be verified at this time.
+      </p>
+
+      ${reasonBlock}
+
+      <p style="color: #4b5563; font-size: 15px; line-height: 1.7; margin: 0 0 24px 0;">
+        Don't worry — you can resubmit your license with the correct details. Please ensure the license number and country match your official real estate license.
+      </p>
+
+      <!-- CTA Button -->
+      <div style="text-align: center; margin: 32px 0;">
+        <a href="${sanitizeUrlForHtml(frontendUrl)}/profile" style="display: inline-block; padding: 14px 32px; background: linear-gradient(135deg, ${BRAND_COLORS.primary} 0%, ${BRAND_COLORS.primaryDark} 100%); color: #ffffff; text-decoration: none; border-radius: 8px; font-size: 15px; font-weight: 600;">
+          Resubmit Your License
+        </a>
+      </div>
+
+      <div style="background: #f0f9ff; border-radius: 8px; padding: 16px; margin-bottom: 24px;">
+        <p style="color: #1e40af; font-size: 13px; font-weight: 600; margin: 0 0 8px 0;">Tips for resubmission:</p>
+        <ul style="color: #1e3a5f; font-size: 13px; line-height: 1.8; margin: 0; padding-left: 20px;">
+          <li>Double-check that your license number is typed correctly</li>
+          <li>Ensure the country matches where your license was issued</li>
+          <li>Make sure your license is current and has not expired</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <div style="background: #f9fafb; padding: 24px; text-align: center; border-top: 1px solid #e5e7eb;">
+      <p style="color: #6b7280; font-size: 12px; margin: 0 0 8px 0;">
+        Need help? Contact us at <a href="mailto:support@balkanestateai.com" style="color: #0252CD; text-decoration: none;">support@balkanestateai.com</a>
+      </p>
+      <p style="color: #9ca3af; font-size: 11px; margin: 0;">
+        &copy; ${currentYear} BalkanEstate<sup>AI</sup>
+      </p>
+    </div>
+  </div>
+</body>
+</html>`;
+
+    await this.sendEmail({
+      to: params.email,
+      subject: 'License Verification Update — Action Required',
+      html,
+      text: `Hi ${params.userName},\n\nYour license submission${params.licenseNumber ? ` (${params.licenseNumber})` : ''} was not approved.${params.reason ? `\n\nReason: ${params.reason}` : ''}\n\nYou can resubmit your license with correct details at: ${frontendUrl}/profile\n\nTips:\n- Double-check your license number\n- Ensure the country matches your license\n- Make sure your license hasn't expired\n\nNeed help? Contact support@balkanestateai.com\n\n© ${currentYear} BalkanEstateᴬᴵ`,
+      category: 'noreply',
+    });
+  }
 }
 
 const emailServiceInstance = new EmailService();
@@ -5003,3 +5105,4 @@ export const sendSubscriptionInvoice = emailServiceInstance.sendSubscriptionInvo
 export const sendPaymentConfirmation = emailServiceInstance.sendPaymentConfirmation.bind(emailServiceInstance);
 export const sendPromotionCouponsEmail = emailServiceInstance.sendPromotionCouponsEmail.bind(emailServiceInstance);
 export const sendProSubscriptionWelcomeEmail = emailServiceInstance.sendProSubscriptionWelcomeEmail.bind(emailServiceInstance);
+export const sendLicenseRejectionEmail = emailServiceInstance.sendLicenseRejectionEmail.bind(emailServiceInstance);

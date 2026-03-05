@@ -18,7 +18,10 @@ export const getAgencies = async (filters?: AgencyFilters): Promise<any> => {
 };
 
 export const getAgency = async (agencyId: string): Promise<any> => {
-  return apiRequest(`/agencies/${agencyId}`, { requiresAuth: true, encryptResponse: true });
+  const response = await apiRequest<{ agency: any; properties?: any[] }>(`/agencies/${agencyId}`, { requiresAuth: true, encryptResponse: true });
+  // Backend wraps agency data in { agency: {...}, properties: [...] }
+  // Unwrap so consumers get the agency object directly
+  return response.agency ?? response;
 };
 
 export const getFeaturedAgencies = async (limit?: number): Promise<any> => {

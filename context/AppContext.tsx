@@ -739,12 +739,18 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         );
       }
 
-      // Handle agency-left event
+      // Handle agency-left event (includes subscription downgrade if agency coupon was revoked)
       if (data.type === 'agency-left' && data.user) {
         dispatch({ type: 'UPDATE_USER', payload: {
           agencyId: null,
           agencyName: 'Independent Agent',
+          ...(data.subscription ? { subscription: data.subscription } : {}),
         }});
+
+        // Notify SubscriptionManagement to clear stale agency subscription
+        if (data.subscriptionRevoked) {
+          window.dispatchEvent(new Event('subscriptionRevoked'));
+        }
 
         // Show notification to user
         notificationService.showNotification(

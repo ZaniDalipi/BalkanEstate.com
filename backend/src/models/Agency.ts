@@ -47,6 +47,8 @@ export interface IAgency extends Document {
 
   // Agency info
   specialties?: string[];
+  specializations?: string[];
+  serviceAreas?: string[];
   certifications?: string[];
   languages?: string[]; // Languages spoken by agency staff
 

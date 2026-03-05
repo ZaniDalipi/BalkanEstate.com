@@ -106,7 +106,7 @@ export function use3DMap(props: Map3DBuildingsProps) {
   const fetchAndDisplayPOI = useCallback(async (mapInstance: maplibregl.Map, latitude: number, longitude: number) => {
     const radius = 800; // 800m radius
     const query = `
-      [out:json][timeout:10];
+      [out:json][timeout:25];
       (
         node["amenity"~"university|school|hospital|clinic|pharmacy|restaurant|cafe|bank|place_of_worship|kindergarten|police"](around:${radius},${latitude},${longitude});
         node["shop"~"supermarket|mall|marketplace"](around:${radius},${latitude},${longitude});
@@ -123,11 +123,15 @@ export function use3DMap(props: Map3DBuildingsProps) {
     `;
 
     try {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 30000);
       const response = await fetch('https://overpass-api.de/api/interpreter', {
         method: 'POST',
         body: `data=${encodeURIComponent(query)}`,
         headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        signal: controller.signal,
       });
+      clearTimeout(timeoutId);
       if (!response.ok) return;
       const data = await response.json();
 

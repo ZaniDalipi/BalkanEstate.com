@@ -9,6 +9,9 @@ import CityMarketData from '../models/CityMarketData';
 import { getSocketInstance } from '../utils/socketInstance';
 import { apiLogger } from '../utils/logger';
 import { getParam, getObjectIdParam, isValidObjectId } from '../utils/validateParams';
+import { revokeAgencyCouponSubscription } from '../services/subscriptionPaymentService';
+import { FREE_TIER_LIMITS } from '../config/subscriptionConstants';
+import { recalculateAgencyAttributes } from '../services/agencyAttributeSyncService';
 
 
 
@@ -515,10 +518,39 @@ export const leaveAgency = async (req: Request, res: Response): Promise<void> =>
     const agencyId = user.agencyId;
     const agencyName = user.agencyName;
 
-    // Update User model
-    user.agencyName = 'Independent Agent';
+    // Clear ALL agent's agency info and downgrade subscription in User model
+    // This must happen directly (not rely on transaction) to guarantee cleanup
+    user.agencyName = undefined;
     user.agencyId = undefined;
+    user.isSubscribed = false;
+    user.subscriptionPlan = undefined;
+
+    // Clear nested agency object
+    if (user.agency) {
+      user.agency.agencyId = undefined;
+      user.agency.role = 'none';
+      user.agency.joinedAt = undefined;
+      user.agency.couponCode = undefined;
+    }
+
+    // Downgrade subscription to free tier
+    if (user.subscription) {
+      user.subscription.tier = 'free' as any;
+      user.subscription.status = 'expired' as any;
+      user.subscription.listingsLimit = FREE_TIER_LIMITS.LISTINGS;
+      user.subscription.savedSearchesLimit = FREE_TIER_LIMITS.SAVED_SEARCHES;
+      user.subscription.expiresAt = undefined;
+      if (user.subscription.promotionCoupons) {
+        user.subscription.promotionCoupons.monthly = FREE_TIER_LIMITS.PROMOTION_COUPONS;
+        user.subscription.promotionCoupons.available = FREE_TIER_LIMITS.PROMOTION_COUPONS;
+        user.subscription.promotionCoupons.used = 0;
+        user.subscription.promotionCoupons.rollover = 0;
+      }
+    }
+    user.subscriptionStatus = 'expired';
+
     await user.save();
+    apiLogger.info(`✅ Cleared all agency + subscription fields for leaving agent ${currentUser._id}`);
 
     // Update Agent model
     const agentProfile = await Agent.findOne({ userId: String(currentUser._id) });
@@ -526,6 +558,33 @@ export const leaveAgency = async (req: Request, res: Response): Promise<void> =>
       agentProfile.agencyName = 'Independent Agent';
       agentProfile.agencyId = undefined;
       await agentProfile.save();
+    }
+
+    // Revoke Subscription document and free coupon (best-effort — user is already cleaned up above)
+    let subscriptionRevoked = true;
+    try {
+      await revokeAgencyCouponSubscription(currentUser._id, agencyId);
+      apiLogger.info(`✅ Subscription doc + coupon revoked for agent ${currentUser._id}`);
+    } catch (revokeError: any) {
+      apiLogger.error(`Failed to revoke subscription doc for agent ${currentUser._id}:`, revokeError);
+      // Fallback: directly free the coupon even if Subscription doc revocation failed
+      try {
+        const fallbackAgency = await Agency.findById(agencyId);
+        if (fallbackAgency?.agentCoupons) {
+          const coupon = fallbackAgency.agentCoupons.find(
+            (c: any) => c.usedBy && String(c.usedBy) === String(currentUser._id) && c.status === 'used'
+          );
+          if (coupon) {
+            coupon.status = 'available';
+            coupon.usedBy = undefined;
+            coupon.usedAt = undefined;
+            await fallbackAgency.save();
+            apiLogger.info(`✅ Fallback: freed coupon ${coupon.code} for leaving agent ${currentUser._id}`);
+          }
+        }
+      } catch (fallbackError: any) {
+        apiLogger.error(`Fallback coupon freeing also failed for agent ${currentUser._id}:`, fallbackError);
+      }
     }
 
     // Remove agent from agency's agents array and mark as inactive in agentDetails
@@ -547,21 +606,15 @@ export const leaveAgency = async (req: Request, res: Response): Promise<void> =>
         }
       }
 
-      // Recalculate agency languages from remaining active agents
-      if (agency.agents.length > 0) {
-        const remainingAgents = await Agent.find({ userId: { $in: agency.agents } });
-        const allLanguages = remainingAgents.flatMap(a => a.languages || []);
-        agency.languages = [...new Set(allLanguages)];
-      } else {
-        agency.languages = [];
-      }
-
       await agency.save();
+
+      // Recalculate agency attributes (languages, serviceAreas, specializations, certifications)
+      await recalculateAgencyAttributes(agency._id);
 
       // Emit socket event to notify agency members
       const io = getSocketInstance();
       if (io) {
-        // Notify the agent who left
+        // Notify the agent who left (include subscription downgrade for real-time UI update)
         io.emit(`user-update-${String(currentUser._id)}`, {
           type: 'agency-left',
           message: `You have left ${agencyName}`,
@@ -570,6 +623,21 @@ export const leaveAgency = async (req: Request, res: Response): Promise<void> =>
             agencyId: null,
             agencyName: 'Independent Agent',
           },
+          subscriptionRevoked,
+          ...(subscriptionRevoked ? {
+            subscription: {
+              tier: 'free',
+              status: 'expired',
+              listingsLimit: FREE_TIER_LIMITS.LISTINGS,
+              savedSearchesLimit: FREE_TIER_LIMITS.SAVED_SEARCHES,
+              promotionCoupons: {
+                monthly: FREE_TIER_LIMITS.PROMOTION_COUPONS,
+                available: FREE_TIER_LIMITS.PROMOTION_COUPONS,
+                used: 0,
+                rollover: 0,
+              },
+            },
+          } : {}),
         });
         apiLogger.info(`✅ Socket event emitted to agent ${currentUser._id} for leaving agency`);
 
@@ -586,11 +654,26 @@ export const leaveAgency = async (req: Request, res: Response): Promise<void> =>
 
     res.json({
       message: 'Successfully left the agency',
+      subscriptionRevoked,
       user: {
         id: String(user._id),
         agencyId: null,
         agencyName: 'Independent Agent',
       },
+      ...(subscriptionRevoked ? {
+        subscription: {
+          tier: 'free',
+          status: 'expired',
+          listingsLimit: FREE_TIER_LIMITS.LISTINGS,
+          savedSearchesLimit: FREE_TIER_LIMITS.SAVED_SEARCHES,
+          promotionCoupons: {
+            monthly: FREE_TIER_LIMITS.PROMOTION_COUPONS,
+            available: FREE_TIER_LIMITS.PROMOTION_COUPONS,
+            used: 0,
+            rollover: 0,
+          },
+        },
+      } : {}),
     });
   } catch (error: any) {
     apiLogger.error('Leave agency error:', error);

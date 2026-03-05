@@ -39,6 +39,7 @@ export interface DashboardAgent {
   avgResponseTime: string;
   joinedAt: string;
   status: 'active' | 'inactive' | 'pending';
+  couponCode?: string;
 }
 
 // --- Properties ---

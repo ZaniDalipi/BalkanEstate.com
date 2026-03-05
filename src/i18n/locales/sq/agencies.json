@@ -354,7 +354,11 @@
     "requestSentTitle": "Kërkesa u Dërgua!",
     "requestSentMessage": "Kërkesa juaj për t'u bashkuar u dërgua te {{name}}.\n\nDo të njoftoheni kur agjencia të përgjigjet.",
     "couponRedeemedTitle": "Kuponi u Aktivizua!",
-    "couponRedeemedMessage": "Ju u bashkuat me {{name}} me një abonim Pro!"
+    "couponRedeemedMessage": "Ju u bashkuat me {{name}} me një abonim Pro!",
+    "attributesSynced": "Profili i agjencisë u përditësua me gjuhët, zonat e shërbimit dhe specializimet tuaja.",
+    "attributesSyncedDetails": "U shtuan: {{languages}} gjuhë, {{serviceAreas}} zona shërbimi, {{specializations}} specializime, {{certifications}} certifikata.",
+    "attributesRecalculated": "Atributet e profilit të agjencisë u rillogaritën.",
+    "agentLeftAttributesUpdated": "Atributet e agjencisë u përditësuan pas largimit të agjentit."
   },
   "joinRequests": {
     "title": "Kërkesa për t'u Bashkuar",

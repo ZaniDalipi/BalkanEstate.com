@@ -295,7 +295,11 @@
     "requestSentTitle": "Zahtjev Poslan!",
     "requestSentMessage": "Vaš zahtjev za pridruživanje je poslan {{name}}.\n\nBit ćete obaviješteni kada agencija odgovori.",
     "couponRedeemedTitle": "Kupon Iskorišten!",
-    "couponRedeemedMessage": "Pridružili ste se {{name}} sa Pro pretplatom!"
+    "couponRedeemedMessage": "Pridružili ste se {{name}} sa Pro pretplatom!",
+    "attributesSynced": "Profil agencije je ažuriran vašim jezicima, područjima usluga i specijalizacijama.",
+    "attributesSyncedDetails": "Dodano: {{languages}} jezika, {{serviceAreas}} područja usluga, {{specializations}} specijalizacija, {{certifications}} certifikata.",
+    "attributesRecalculated": "Atributi profila agencije su ponovo izračunati.",
+    "agentLeftAttributesUpdated": "Atributi agencije su ažurirani nakon odlaska agenta."
   },
   "joinRequests": {
     "title": "Zahtjevi za Pridruživanje",

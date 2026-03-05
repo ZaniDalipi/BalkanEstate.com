@@ -5,6 +5,7 @@ import Property from '../models/Property';
 import User, { IUser } from '../models/User';
 import Inquiry from '../models/Inquiry';
 import Notification from '../models/Notification';
+import PromotionCoupon from '../models/PromotionCoupon';
 import { getObjectIdParam } from '../utils/validateParams';
 import { agencyLogger } from '../utils/logger';
 
@@ -1066,16 +1067,81 @@ export const getFinancial = async (
         avgPrice: parseFloat((rented.avgPrice || 0).toFixed(2)),
       },
       promotedListings: promotedCount,
-      promotionCoupons: {
-        available: agency.promotionCoupons.available,
-        used: agency.promotionCoupons.used,
-        monthly: agency.promotionCoupons.monthly,
-      },
+      promotionCoupons: await (async () => {
+        // Fetch real promotion coupon codes from PromotionCoupon model
+        const ownerIdStr = String(agency.ownerId);
+        const allAgencyUserIds = [ownerIdStr, ...agency.agents.map((id) => String(id))];
+        const promoCoupons = await PromotionCoupon.find({
+          generatedForUserId: { $in: allAgencyUserIds.map((id) => new mongoose.Types.ObjectId(id)) },
+        })
+          .sort({ createdAt: -1 })
+          .limit(30)
+          .lean();
+
+        const coupons = await Promise.all(
+          promoCoupons.map(async (pc) => {
+            let usedByInfo = null;
+            if (pc.usageHistory && pc.usageHistory.length > 0) {
+              const lastUsage = pc.usageHistory[pc.usageHistory.length - 1];
+              try {
+                const user = await User.findById(lastUsage.userId, 'name email').lean();
+                if (user) {
+                  usedByInfo = { id: String((user as any)._id), name: (user as any).name, email: (user as any).email };
+                }
+              } catch {
+                // user may have been deleted
+              }
+            }
+            const isUsed = pc.currentTotalUses > 0;
+            const isExpired = pc.status === 'expired' || pc.status === 'disabled' || new Date(pc.validUntil) < new Date();
+            return {
+              code: pc.code,
+              status: isUsed ? 'used' as const : isExpired ? 'expired' as const : 'available' as const,
+              generatedAt: pc.createdAt,
+              expiresAt: pc.validUntil,
+              usedBy: usedByInfo,
+              usedAt: pc.usageHistory && pc.usageHistory.length > 0
+                ? pc.usageHistory[pc.usageHistory.length - 1].usedAt
+                : null,
+            };
+          })
+        );
+
+        return {
+          available: agency.promotionCoupons.available,
+          used: agency.promotionCoupons.used,
+          monthly: agency.promotionCoupons.monthly,
+          coupons,
+        };
+      })(),
       agentCoupons: {
         total: agency.agentCoupons.length,
         available: agency.agentCoupons.filter((c) => c.status === 'available').length,
         used: agency.agentCoupons.filter((c) => c.status === 'used').length,
         expired: agency.agentCoupons.filter((c) => c.status === 'expired').length,
+        coupons: await Promise.all(
+          agency.agentCoupons.map(async (c) => {
+            let usedByInfo = null;
+            if (c.usedBy) {
+              try {
+                const user = await mongoose.model('User').findById(c.usedBy, 'name email').lean();
+                if (user) {
+                  usedByInfo = { id: String((user as any)._id), name: (user as any).name, email: (user as any).email };
+                }
+              } catch {
+                // user may have been deleted
+              }
+            }
+            return {
+              code: c.code,
+              status: c.status,
+              generatedAt: c.generatedAt,
+              expiresAt: c.expiresAt,
+              usedBy: usedByInfo,
+              usedAt: c.usedAt || null,
+            };
+          })
+        ),
       },
     });
   } catch (error: any) {

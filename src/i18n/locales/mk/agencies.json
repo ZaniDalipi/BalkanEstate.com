@@ -270,7 +270,11 @@
     "requestSentTitle": "Барањето е Испратено!",
     "requestSentMessage": "Вашето барање за приклучување е испратено до {{name}}.\n\nЌе бидете известени кога агенцијата ќе одговори.",
     "couponRedeemedTitle": "Купонот е Искористен!",
-    "couponRedeemedMessage": "Се приклучивте на {{name}} со Про претплата!"
+    "couponRedeemedMessage": "Се приклучивте на {{name}} со Про претплата!",
+    "attributesSynced": "Профилот на агенцијата е ажуриран со вашите јазици, области на услуги и специјализации.",
+    "attributesSyncedDetails": "Додадени: {{languages}} јазици, {{serviceAreas}} области на услуги, {{specializations}} специјализации, {{certifications}} сертификати.",
+    "attributesRecalculated": "Атрибутите на профилот на агенцијата се прересметани.",
+    "agentLeftAttributesUpdated": "Атрибутите на агенцијата се ажурирани по заминувањето на агентот."
   },
   "joinRequests": {
     "title": "Барања за Приклучување",

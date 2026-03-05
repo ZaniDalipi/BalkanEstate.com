@@ -245,6 +245,15 @@ export const submitLicense = async (
     user.licenseNumber = licenseNumber;
     user.licenseVerified = false;
     user.licenseVerificationDate = undefined;
+    // Sync agentLicense sub-document (clear any prior rejection)
+    if (user.agentLicense) {
+      user.agentLicense.number = licenseNumber;
+      user.agentLicense.country = country;
+      user.agentLicense.status = 'pending';
+      user.agentLicense.isVerified = false;
+      user.agentLicense.rejectionReason = undefined;
+      user.agentLicense.submittedAt = new Date();
+    }
     await user.save();
 
     // Update Agent model

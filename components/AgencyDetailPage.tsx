@@ -249,7 +249,12 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
     currentUser.agencyId && String(currentUser.agencyId) === String(agencyData._id)
   );
 
-  // Can only request to join if: authenticated, is agent, not owner/admin, not already in ANY agency, and not already a member of THIS agency
+  // Check if agent has an active Pro subscription (required to join an agency)
+  const hasProSubscription = currentUser?.subscription?.tier === 'pro' &&
+    (currentUser?.subscription?.status === 'active' || currentUser?.subscription?.status === 'trial');
+
+  // Can request to join if: authenticated, is agent, not owner/admin, not already in ANY agency, and not already a member of THIS agency
+  // Non-Pro agents can still join via coupon codes (which grant Pro), so we don't require Pro here
   const canRequestToJoin = isAuthenticated &&
     currentUser?.role === 'agent' &&
     !isOwner &&
@@ -335,9 +340,33 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
   // Listen for real-time agency updates (new members, join requests, etc.)
   useEffect(() => {
     const handleAgencyUpdate = (data: any) => {
-      if (data.type === 'member-added' || data.type === 'member-removed') {
-        // Refetch agency data to get the updated member list
-        fetchAgencyData();
+      if (data.type === 'member-removed' && data.agentId) {
+        // Optimistically remove the agent from local state for instant UI update
+        const removedId = String(data.agentId);
+        setAgents(prev => prev.filter(a => String(a.id || a._id) !== removedId));
+        setAgencyData(prev => {
+          const updatedCoupons = prev.agentCoupons ? {
+            ...prev.agentCoupons,
+            available: (prev.agentCoupons.available || 0) + 1,
+            used: Math.max(0, (prev.agentCoupons.used || 0) - 1),
+            coupons: prev.agentCoupons.coupons?.map((c: any) =>
+              c.usedBy && (String(c.usedBy._id || c.usedBy) === removedId) && c.status === 'used'
+                ? { ...c, status: 'available', usedBy: null, usedAt: null }
+                : c
+            ) || [],
+          } : prev.agentCoupons;
+          return {
+            ...prev,
+            totalAgents: data.totalAgents ?? Math.max(0, (prev.totalAgents || 0) - 1),
+            agentCoupons: updatedCoupons,
+          };
+        });
+        // Also refetch for full accuracy
+        fetchAgencyData(true);
+      }
+      if (data.type === 'member-added') {
+        // Silently refetch agency data to get the updated member list (no loading spinner)
+        fetchAgencyData(true);
       }
       if (data.type === 'join-request-new') {
         // New join request received — update badge count and refresh modal data
@@ -478,8 +507,8 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
     }
   }, [agency._id, isAuthenticated, isTogglingFavourite, dispatch]);
 
-  const fetchAgencyData = async () => {
-    setLoading(true);
+  const fetchAgencyData = async (silent = false) => {
+    if (!silent) setLoading(true);
     try {
       // Fetch fresh agency data from the backend to get updated agents list and properties
       // Include auth token so backend can identify current user and auto-add owner as member
@@ -521,7 +550,7 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
       setAgents(agency.agents || []);
       setAgencyProperties([]);
     } finally {
-      setLoading(false);
+      if (!silent) setLoading(false);
     }
   };
 
@@ -693,8 +722,8 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
         setIsInvitationCodeModalOpen(false);
         await success('Coupon Redeemed!', `You've joined ${data.agency?.name || agency.name} with a Pro subscription!`);
 
-        // Refetch agency data so the new agent appears in the list immediately
-        await fetchAgencyData();
+        // Silently refetch agency data so the new agent appears in the list immediately
+        await fetchAgencyData(true);
       } else {
         // Handle invitation code (AGY-XXXXXX-XXXXXX format)
         const verification = await verifyInvitationCode(agency._id, trimmedCode);
@@ -771,18 +800,35 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
     try {
       await removeAgentFromAgency(agencyData._id, agentId);
 
-      // Update local state to remove the agent
+      // Optimistically remove agent from local state for instant UI update
+      const removedId = String(agentId);
       setAgents(prevAgents => prevAgents.filter(agent =>
-        (agent.id || agent._id) !== agentId
+        String(agent.id || agent._id) !== removedId
       ));
+      setAgencyData(prev => {
+        // Also optimistically free the agent's coupon
+        const updatedCoupons = prev.agentCoupons ? {
+          ...prev.agentCoupons,
+          available: (prev.agentCoupons.available || 0) + 1,
+          used: Math.max(0, (prev.agentCoupons.used || 0) - 1),
+          coupons: prev.agentCoupons.coupons?.map((c: any) =>
+            c.usedBy && (String(c.usedBy._id || c.usedBy) === removedId) && c.status === 'used'
+              ? { ...c, status: 'available', usedBy: null, usedAt: null }
+              : c
+          ) || [],
+        } : prev.agentCoupons;
 
-      // Update agency data
-      setAgencyData(prev => ({
-        ...prev,
-        totalAgents: prev.totalAgents - 1
-      }));
+        return {
+          ...prev,
+          totalAgents: Math.max(0, (prev.totalAgents || 0) - 1),
+          agentCoupons: updatedCoupons,
+        };
+      });
 
       await success(t('messages.agentRemovedTitle', 'Agent Removed'), t('messages.agentRemoved', { name: agentName }));
+
+      // Silently re-fetch full agency data to get updated coupon status and agent list
+      fetchAgencyData(true);
     } catch (err: any) {
       await error(t('messages.errorTitle', 'Error'), err.message || t('messages.onlyAdminCanRemove'));
     } finally {
@@ -805,18 +851,21 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
     try {
       const response = await leaveAgency();
 
-      // Update current user in app context
+      // Update current user in app context — clear agency affiliation
       if (dispatch && currentUser) {
-        // Cast to any to avoid TypeScript error when the action type is not declared in the reducer's Action union.
-        // Prefer updating the reducer's Action type to include 'SET_USER' if you want a stricter fix.
         dispatch({
-          type: 'SET_USER',
+          type: 'UPDATE_USER',
           payload: {
-            ...currentUser,
-            agencyId: undefined,
-            agencyName: undefined,
-          }
-        } as any);
+            agencyId: null,
+            agencyName: 'Independent Agent',
+            ...(response.subscription ? { subscription: response.subscription } : {}),
+          },
+        });
+      }
+
+      // Notify SubscriptionManagement to clear stale agency subscription
+      if (response.subscriptionRevoked) {
+        window.dispatchEvent(new Event('subscriptionRevoked'));
       }
 
       await success(t('messages.leftAgencyTitle', 'Left Agency'), response.message || t('messages.leftAgency', { agency: agencyData.name }));
@@ -1376,8 +1425,8 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
   };
 
   const handleSubscriptionSuccess = () => {
-    // Refresh agency data to get updated featured status
-    fetchAgencyData();
+    // Silently refresh agency data to get updated featured status
+    fetchAgencyData(true);
     // Force re-render of subscription card
     setSubscriptionKey((prev) => prev + 1);
   };
@@ -2704,6 +2753,14 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
                   {t('actions.requestToJoin', 'Request to Join Agency')}
                 </button>
               )}
+
+              {/* Show upgrade prompt for agents without Pro subscription who want to use invitation codes */}
+              {canRequestToJoin && !hasProSubscription && (
+                <div className="inline-flex items-center gap-2 px-4 py-2 bg-amber-50 text-amber-700 text-xs font-medium rounded-lg border border-amber-200">
+                  <SparklesIcon className="w-3.5 h-3.5 text-amber-500" />
+                  {t('actions.proRequiredForInviteCode', 'Pro subscription required for invitation codes. Use a coupon code to join.')}
+                </div>
+              )}
             </div>
           </div>
         </div>
@@ -3277,6 +3334,7 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
         onClose={() => setIsInvitationCodeModalOpen(false)}
         onSubmit={handleSubmitInvitationCode}
         agencyName={agency.name}
+        hasProSubscription={hasProSubscription}
       />
 
       {/* Featured Subscription Dialog */}

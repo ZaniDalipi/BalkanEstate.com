@@ -303,7 +303,11 @@
     "requestSentTitle": "Η Αίτηση Εστάλη!",
     "requestSentMessage": "Η αίτηση εγγραφής σας εστάλη στο {{name}}.\n\nΘα ειδοποιηθείτε όταν το γραφείο απαντήσει.",
     "couponRedeemedTitle": "Κουπόνι Εξαργυρώθηκε!",
-    "couponRedeemedMessage": "Εγγραφήκατε στο {{name}} με συνδρομή Pro!"
+    "couponRedeemedMessage": "Εγγραφήκατε στο {{name}} με συνδρομή Pro!",
+    "attributesSynced": "Το προφίλ του γραφείου ενημερώθηκε με τις γλώσσες, τις περιοχές εξυπηρέτησης και τις εξειδικεύσεις σας.",
+    "attributesSyncedDetails": "Προστέθηκαν: {{languages}} γλώσσες, {{serviceAreas}} περιοχές εξυπηρέτησης, {{specializations}} εξειδικεύσεις, {{certifications}} πιστοποιήσεις.",
+    "attributesRecalculated": "Τα χαρακτηριστικά του προφίλ του γραφείου επανυπολογίστηκαν.",
+    "agentLeftAttributesUpdated": "Τα χαρακτηριστικά του γραφείου ενημερώθηκαν μετά την αποχώρηση του πράκτορα."
   },
   "joinRequests": {
     "title": "Αιτήσεις Εγγραφής",

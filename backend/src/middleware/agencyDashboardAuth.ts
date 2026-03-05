@@ -19,7 +19,7 @@ declare global {
  *
  * 1. Validates the `agencyId` route parameter as a valid ObjectId.
  * 2. Loads the agency document from the database.
- * 3. Verifies the authenticated user is the agency owner OR an admin.
+ * 3. Verifies the authenticated user is the agency owner, an admin, or a member agent.
  * 4. Verifies the agency subscription is active or in trial.
  * 5. Attaches the agency document to `req.agency` for downstream handlers.
  */
@@ -46,15 +46,18 @@ export const agencyDashboardAuth = async (
       return;
     }
 
-    // 3. Check user is owner or admin
+    // 3. Check user is owner, admin, or member agent
     const currentUser = req.user as IUser;
     const userId = String(currentUser._id);
     const isOwner = String(agency.ownerId) === userId;
     const isAdmin = agency.admins?.some(
       (adminId) => String(adminId) === userId
     );
+    const isAgent = agency.agents?.some(
+      (agentId) => String(agentId) === userId
+    );
 
-    if (!isOwner && !isAdmin) {
+    if (!isOwner && !isAdmin && !isAgent) {
       agencyLogger.warn(
         `Unauthorized dashboard access attempt by user ${userId} for agency ${agencyId}`
       );

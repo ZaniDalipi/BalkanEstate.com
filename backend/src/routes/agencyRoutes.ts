@@ -47,8 +47,6 @@ const upload = multer({
 // Public routes
 router.get('/', getAgencies);
 router.get('/featured/rotation', getFeaturedAgencies);
-router.get('/:country/:name', optionalAuth, getAgency); // Format: /agencies/:country/:name (e.g., /agencies/albania/zano-real-estate)
-router.get('/:idOrSlug', optionalAuth, getAgency); // Fallback for ID or single-segment slug lookups
 
 // Protected routes
 router.post('/', protect, createAgency);
@@ -78,5 +76,9 @@ router.get('/:id/agents', protect, getAgencyAgents); // Get agent list with deta
 
 // Migration route (run once to fix existing agents)
 router.post('/migrate-agent-subscriptions', protect, migrateAgentSubscriptions);
+
+// Catch-all public lookup routes (must be LAST — /:country/:name matches any two-segment path)
+router.get('/:country/:name', optionalAuth, getAgency); // Format: /agencies/:country/:name (e.g., /agencies/albania/zano-real-estate)
+router.get('/:idOrSlug', optionalAuth, getAgency); // Fallback for ID or single-segment slug lookups
 
 export default router;
