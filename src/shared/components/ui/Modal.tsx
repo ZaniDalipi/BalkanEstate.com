@@ -8,6 +8,11 @@ interface ModalProps {
   children: React.ReactNode;
   size?: 'sm' | 'md' | 'lg' | 'xl' | '2xl' | '3xl' | '4xl' | '5xl' | '6xl' | '7xl';
   maxWidth?: string;
+  /** Breakpoint at which the modal switches from full-screen to centered modal.
+   *  'sm' (default): full-screen on mobile only
+   *  'md': full-screen on mobile + small tablets
+   *  'lg': full-screen on mobile + tablets, modal on desktop */
+  fullScreenBreakpoint?: 'sm' | 'md' | 'lg';
   'aria-describedby'?: string;
 }
 
@@ -18,6 +23,7 @@ const Modal: React.FC<ModalProps> = ({
   children,
   size = 'lg',
   maxWidth,
+  fullScreenBreakpoint = 'sm',
   'aria-describedby': ariaDescribedBy,
 }) => {
   const modalRef = useRef<HTMLDivElement>(null);
@@ -96,9 +102,34 @@ const Modal: React.FC<ModalProps> = ({
     sizeClass = sizeMap[size || 'lg'] || 'max-w-lg';
   }
 
+  // Responsive classes based on fullScreenBreakpoint
+  // These control when the modal switches from full-screen to centered modal
+  const breakpointClasses = {
+    sm: {
+      backdrop: 'fixed inset-0 bg-black/40 backdrop-blur-sm z-[5000] flex items-stretch sm:items-center justify-center p-0 sm:p-3 md:p-4 overflow-x-hidden overflow-y-auto',
+      content: `bg-white/95 backdrop-blur-xl shadow-2xl shadow-black/10 p-4 sm:p-4 md:p-6 w-full ${sizeClass} relative overflow-y-auto border border-white/50 h-full sm:h-auto rounded-none sm:rounded-2xl max-h-full sm:max-h-[95vh] md:max-h-[90vh]`,
+      closeBtn: 'absolute top-2 right-2 sm:top-3 sm:right-3 md:top-4 md:right-4 text-neutral-600 hover:text-neutral-800 z-20 min-h-[44px] min-w-[44px] flex items-center justify-center rounded-full bg-neutral-100 hover:bg-neutral-200 active:bg-neutral-300 transition-colors touch-manipulation shadow-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/50',
+      closeIcon: 'w-5 h-5 sm:w-6 sm:h-6',
+    },
+    md: {
+      backdrop: 'fixed inset-0 bg-black/40 backdrop-blur-sm z-[5000] flex items-stretch md:items-center justify-center p-0 md:p-4 overflow-x-hidden overflow-y-auto',
+      content: `bg-white/95 backdrop-blur-xl shadow-2xl shadow-black/10 p-4 md:p-6 w-full ${sizeClass} relative overflow-y-auto border border-white/50 h-full md:h-auto rounded-none md:rounded-2xl max-h-full md:max-h-[90vh]`,
+      closeBtn: 'absolute top-2 right-2 md:top-4 md:right-4 text-neutral-600 hover:text-neutral-800 z-20 min-h-[44px] min-w-[44px] flex items-center justify-center rounded-full bg-neutral-100 hover:bg-neutral-200 active:bg-neutral-300 transition-colors touch-manipulation shadow-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/50',
+      closeIcon: 'w-5 h-5 md:w-6 md:h-6',
+    },
+    lg: {
+      backdrop: 'fixed inset-0 bg-black/40 backdrop-blur-sm z-[5000] flex items-stretch lg:items-center justify-center p-0 lg:p-4 overflow-x-hidden overflow-y-auto',
+      content: `bg-white backdrop-blur-xl shadow-2xl shadow-black/10 p-4 lg:p-6 w-full ${sizeClass} overflow-y-auto border border-white/50 h-full lg:h-auto rounded-none lg:rounded-2xl max-h-full lg:max-h-[90vh] lg:relative`,
+      closeBtn: 'fixed top-3 right-3 lg:absolute lg:top-4 lg:right-4 text-neutral-600 hover:text-neutral-800 z-[5001] min-h-[44px] min-w-[44px] flex items-center justify-center rounded-full bg-white/90 hover:bg-neutral-200 active:bg-neutral-300 transition-colors touch-manipulation shadow-md lg:shadow-sm lg:bg-neutral-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/50',
+      closeIcon: 'w-5 h-5 lg:w-6 lg:h-6',
+    },
+  };
+
+  const bp = breakpointClasses[fullScreenBreakpoint];
+
   return (
     <div
-      className="fixed inset-0 bg-black/40 backdrop-blur-sm z-[5000] flex items-stretch sm:items-center justify-center p-0 sm:p-3 md:p-4 overflow-x-hidden overflow-y-auto"
+      className={bp.backdrop}
       onClick={handleBackdropClick}
       role="presentation"
     >
@@ -108,29 +139,16 @@ const Modal: React.FC<ModalProps> = ({
         aria-modal="true"
         aria-labelledby={titleId}
         aria-describedby={ariaDescribedBy}
-        className={`
-          bg-white/95 backdrop-blur-xl shadow-2xl shadow-black/10
-          p-4 sm:p-4 md:p-6 w-full ${sizeClass} relative
-          overflow-y-auto border border-white/50
-          h-full sm:h-auto rounded-none sm:rounded-2xl
-          max-h-full sm:max-h-[95vh] md:max-h-[90vh]
-        `}
+        className={bp.content}
         onClick={handleContentClick}
       >
         <button
           ref={closeButtonRef}
           onClick={onClose}
-          className="
-            absolute top-2 right-2 sm:top-3 sm:right-3 md:top-4 md:right-4
-            text-neutral-600 hover:text-neutral-800 z-20
-            min-h-[44px] min-w-[44px] flex items-center justify-center
-            rounded-full bg-neutral-100 hover:bg-neutral-200 active:bg-neutral-300
-            transition-colors touch-manipulation shadow-sm
-            focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/50
-          "
+          className={bp.closeBtn}
           aria-label="Close modal"
         >
-          <XMarkIcon className="w-5 h-5 sm:w-6 sm:h-6" />
+          <XMarkIcon className={bp.closeIcon} />
         </button>
         {title && (
           <h2
