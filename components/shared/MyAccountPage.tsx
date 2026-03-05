@@ -14,7 +14,7 @@ import DefaultAvatar from './DefaultAvatar';
 import AvatarCustomizer, { type AvatarOptions, parseAvatarOptions, getDefaultAvatarOptions } from './AvatarCustomizer';
 import AgentLicenseModal from './AgentLicenseModal';
 import AgencyManagementSection from './AgencyManagementSection';
-import { switchRole, joinAgencyByInvitationCode, getAgencies, updateAgentProfile } from '../../services/apiService';
+import { switchRole, joinAgencyByInvitationCode, getAgencies, updateAgentProfile, changeEmail } from '../../services/apiService';
 import Footer from './Footer';
 import { BALKAN_LOCATIONS } from '../../utils/balkanLocations';
 import MapLocationPicker from '../../src/features/seller/components/MapLocationPicker';
@@ -1227,23 +1227,7 @@ const ProfileSettings: React.FC<{ user: User; onLogout: () => void }> = ({ user,
 
             setIsSaving(true);
             try {
-                await ensureCsrfToken();
-                const response = await fetch(`${API_URL}/auth/change-email`, {
-                    method: 'POST',
-                    credentials: 'include',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${tokenService.getAccessToken()}`,
-                        ...csrfHeaders(),
-                    },
-                    body: JSON.stringify({ newEmail: formData.email }),
-                });
-
-                if (!response.ok) {
-                    const errorData = await response.json().catch(() => null);
-                    throw new Error(errorData?.message || 'Failed to change email');
-                }
-
+                await changeEmail(formData.email);
                 // Logout the user after successful email change
                 onLogout();
                 return;

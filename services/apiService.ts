@@ -457,6 +457,20 @@ export const changePassword = async (currentPassword: string, newPassword: strin
   return response;
 };
 
+export const changeEmail = async (newEmail: string): Promise<{ message: string; requiresVerification: boolean }> => {
+  const response = await secureAuthRequest<{ message: string; requiresVerification: boolean }>('/auth/change-email', {
+    method: 'POST',
+    requiresAuth: true,
+    body: { newEmail },
+    sensitiveFields: ['newEmail'],
+  });
+
+  // Email change logs out the user, so remove local tokens
+  removeToken();
+
+  return response;
+};
+
 export const setPasswordForSocialUser = async (newPassword: string): Promise<{ message: string }> => {
   return secureAuthRequest<{ message: string }>('/auth/set-password', {
     method: 'POST',
