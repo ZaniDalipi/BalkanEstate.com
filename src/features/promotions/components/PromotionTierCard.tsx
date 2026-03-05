@@ -149,7 +149,7 @@ const PromotionTierCard: React.FC<PromotionTierCardProps> = ({
   return (
     <button
       onClick={() => onSelect(tierId)}
-      className={`relative p-5 rounded-2xl border-2 text-left transition-all duration-300 bg-gradient-to-br ${style.gradient} ${border} ${shadow} hover:scale-[1.02] ${isSelected ? 'scale-[1.02]' : ''}`}
+      className={`relative p-5 rounded-2xl border-2 text-left transition-all duration-300 bg-gradient-to-br ${style.gradient} ${border} ${shadow} hover:scale-[1.02] ${isSelected ? 'scale-[1.02]' : ''} flex flex-col h-full`}
     >
       {tier.highlight && (
         <div className={`absolute -top-3 left-1/2 -translate-x-1/2 ${style.badge} text-white text-xs font-bold px-4 py-1.5 rounded-full shadow-lg`}>
@@ -170,12 +170,12 @@ const PromotionTierCard: React.FC<PromotionTierCardProps> = ({
         </div>
       </div>
 
-      <p className="text-sm text-gray-600 mb-4 text-center min-h-[40px]">{tier.description}</p>
+      <p className="text-sm text-gray-600 mb-4 text-center">{tier.description}</p>
 
-      <ul className="space-y-2">
-        {tier.features?.slice(0, 5).map((feature, idx) => (
+      <ul className="space-y-2 flex-grow">
+        {tier.features?.map((feature, idx) => (
           <li key={idx} className="text-sm text-gray-700 flex items-start gap-2">
-            <span className={`${style.checkmark} font-bold mt-0.5`}>{'\u2713'}</span>
+            <span className={`${style.checkmark} font-bold mt-0.5 flex-shrink-0`}>{'\u2713'}</span>
             <span>{typeof feature === 'string' ? feature : feature.name}</span>
           </li>
         ))}

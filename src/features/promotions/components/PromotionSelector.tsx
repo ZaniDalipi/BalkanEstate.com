@@ -378,7 +378,7 @@ const PromotionSelector: React.FC<PromotionSelectorProps> = (props) => {
       {!isExtension && !focusUrgent && (
         <div className={inModal ? 'mb-5' : 'mb-8'}>
           <h3 className={`${inModal ? 'text-base' : 'text-xl'} font-bold text-neutral-900 mb-4`}>{t('common:promotions.chooseYourPlan')}</h3>
-          <div className={`grid grid-cols-1 sm:grid-cols-3 ${inModal ? 'gap-3' : 'gap-5'}`}>
+          <div className={`grid grid-cols-1 sm:grid-cols-3 items-stretch ${inModal ? 'gap-3' : 'gap-5'}`}>
             {(['featured', 'highlight', 'premium'] as PromotionTier[]).map((tierId) => {
               const tier = tiers[tierId];
               const pricing = tiersData.pricing.find(
