@@ -23,6 +23,10 @@ const REFRESH_BUFFER_MS = 5 * 60 * 1000; // Refresh 5 minutes before expiry
 let refreshTimer: ReturnType<typeof setTimeout> | null = null;
 let isRefreshing = false;
 let onSessionExpired: (() => void) | null = null;
+// Tracks whether the user ever had a valid access token in this page session.
+// Used to suppress the "Session Expired" modal on first visit when no
+// refresh cookie exists (the refresh call fails, but there was no session).
+let hadActiveSession = false;
 
 /**
  * In-memory token storage.
@@ -98,7 +102,12 @@ const refreshTokenProactively = async (): Promise<boolean> => {
 
     if (!response.ok) {
       tokenService.clearTokens();
-      onSessionExpired?.();
+      // Only show "Session Expired" if the user actually had a session.
+      // On first visit there's no refresh cookie, so the call fails —
+      // but there was never a session to expire.
+      if (hadActiveSession) {
+        onSessionExpired?.();
+      }
       return false;
     }
 
@@ -153,6 +162,7 @@ export const tokenService = {
    */
   setAccessToken: (token: string): void => {
     inMemoryAccessToken = token;
+    hadActiveSession = true;
     scheduleRefresh(token);
   },
 
