@@ -90,6 +90,7 @@ const TermsOfServicePage = lazy(() => import('./src/features/legal/components/Te
 const CookiePolicyPage = lazy(() => import('./src/features/legal/components/CookiePolicyPage'));
 const RefundPolicyPage = lazy(() => import('./src/features/legal/components/RefundPolicyPage'));
 const ContactUsPage = lazy(() => import('./src/features/contact/components/ContactUsPage'));
+const BuyingGuidesPage = lazy(() => import('./src/features/guides/components/BuyingGuidesPage'));
 
 // Agency creation pages
 const CreateAgencyPage = lazy(() => import('./src/features/agencies/components/CreateAgencyPage'));
@@ -358,6 +359,7 @@ const AppContent: React.FC<{ onToggleSidebar: () => void }> = ({ onToggleSidebar
         '/refund': 'refund',
         '/refund-policy': 'refund',
         '/contact': 'contact',
+        '/guides': 'guides',
         '/rent': 'rentals',
         '/rentals': 'rentals',
         '/create-agency': 'createAgency',
@@ -626,6 +628,8 @@ const AppContent: React.FC<{ onToggleSidebar: () => void }> = ({ onToggleSidebar
         return <RefundPolicyPage />;
       case 'contact':
         return <ContactUsPage />;
+      case 'guides':
+        return <BuyingGuidesPage />;
       case 'createAgency':
         return <CreateAgencyPage />;
       case 'createAgencyPayment':
