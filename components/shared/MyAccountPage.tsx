@@ -881,10 +881,11 @@ const SecuritySettings: React.FC<{ logoutAllDevices: () => Promise<void> }> = ({
     );
 };
 
-const ProfileSettings: React.FC<{ user: User }> = ({ user }) => {
+const ProfileSettings: React.FC<{ user: User; onLogout: () => void }> = ({ user, onLogout }) => {
     const { t } = useTranslation(['account']);
     const { updateUser, dispatch } = useAppContext();
     const { success } = useNotification();
+    const { confirm } = useConfirmation();
     const [formData, setFormData] = useState<User>(user);
     const [isSaving, setIsSaving] = useState(false);
     const [isSaved, setIsSaved] = useState(false);
@@ -1005,9 +1006,43 @@ const ProfileSettings: React.FC<{ user: User }> = ({ user }) => {
         fetchAgencies();
     }, [formData.role]);
 
+    // Format phone number for display: +38971967915 → +389 71 967 915
+    const formatPhoneDisplay = (phone: string): string => {
+        if (!phone) return '';
+        // Remove all non-digit characters except leading +
+        const hasPlus = phone.startsWith('+');
+        const digits = phone.replace(/\D/g, '');
+        if (digits.length === 0) return hasPlus ? '+' : '';
+
+        // Format: +XXX XX XXX XXX (country code + groups)
+        let formatted = '';
+        if (digits.length <= 3) {
+            formatted = digits;
+        } else if (digits.length <= 5) {
+            formatted = `${digits.slice(0, 3)} ${digits.slice(3)}`;
+        } else if (digits.length <= 8) {
+            formatted = `${digits.slice(0, 3)} ${digits.slice(3, 5)} ${digits.slice(5)}`;
+        } else {
+            formatted = `${digits.slice(0, 3)} ${digits.slice(3, 5)} ${digits.slice(5, 8)} ${digits.slice(8, 11)}`;
+        }
+        return hasPlus ? `+${formatted}` : formatted;
+    };
+
+    // Strip formatting from phone for storage
+    const stripPhoneFormatting = (phone: string): string => {
+        const hasPlus = phone.startsWith('+');
+        const digits = phone.replace(/\D/g, '');
+        return hasPlus ? `+${digits}` : digits;
+    };
+
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const { id, value } = e.target;
-        setFormData(prev => ({ ...prev, [id]: value }));
+        if (id === 'phone') {
+            // Store raw phone number (strip formatting)
+            setFormData(prev => ({ ...prev, phone: stripPhoneFormatting(value) }));
+        } else {
+            setFormData(prev => ({ ...prev, [id]: value }));
+        }
     };
 
     const handleRoleChange = async (role: UserRole) => {
@@ -1178,6 +1213,47 @@ const ProfileSettings: React.FC<{ user: User }> = ({ user }) => {
 
     const handleSaveChanges = async (e: React.FormEvent) => {
         e.preventDefault();
+
+        // If email has changed, confirm and handle separately
+        if (formData.email !== user.email) {
+            const confirmed = await confirm({
+                title: t('profile.emailChangeTitle', 'Change Email Address?'),
+                message: t('profile.emailChangeConfirm', 'Changing your email to "{{email}}" will require you to verify the new address. You will be logged out and need to verify before logging back in.').replace('{{email}}', formData.email),
+                confirmLabel: t('profile.emailChangeButton', 'Change Email & Logout'),
+                variant: 'warning',
+            });
+
+            if (!confirmed) return;
+
+            setIsSaving(true);
+            try {
+                await ensureCsrfToken();
+                const response = await fetch(`${API_URL}/auth/change-email`, {
+                    method: 'POST',
+                    credentials: 'include',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${tokenService.getAccessToken()}`,
+                        ...csrfHeaders(),
+                    },
+                    body: JSON.stringify({ newEmail: formData.email }),
+                });
+
+                if (!response.ok) {
+                    const errorData = await response.json().catch(() => null);
+                    throw new Error(errorData?.message || 'Failed to change email');
+                }
+
+                // Logout the user after successful email change
+                onLogout();
+                return;
+            } catch (err) {
+                setError(err instanceof Error ? err.message : 'Failed to change email');
+                setIsSaving(false);
+                return;
+            }
+        }
+
         setIsSaving(true);
 
         try {
@@ -1601,9 +1677,14 @@ const ProfileSettings: React.FC<{ user: User }> = ({ user }) => {
                 <div className="relative">
                     <input type="email" id="email" value={formData.email} onChange={handleInputChange} className={floatingInputClasses} placeholder=" " />
                     <label htmlFor="email" className={floatingLabelClasses}>{t('profile.email')}</label>
+                    {formData.email !== user.email && (
+                        <p className="mt-1 text-xs text-amber-600 font-medium">
+                            {t('profile.emailChangeWarning', 'Changing your email will require re-verification and you will be logged out.')}
+                        </p>
+                    )}
                 </div>
                 <div className="relative md:col-span-2">
-                    <input type="tel" id="phone" value={formData.phone} onChange={handleInputChange} className={floatingInputClasses} placeholder=" " />
+                    <input type="tel" id="phone" value={formatPhoneDisplay(formData.phone || '')} onChange={handleInputChange} className={floatingInputClasses} placeholder=" " />
                     <label htmlFor="phone" className={floatingLabelClasses}>{t('profile.phone')}</label>
                 </div>
             </fieldset>
@@ -1970,7 +2051,7 @@ const MyAccountPage: React.FC = () => {
             case 'promotions':
                 return hasSellerTabs ? <MyPromotions /> : null;
             case 'profile':
-                return <ProfileSettings user={state.currentUser!} />;
+                return <ProfileSettings user={state.currentUser!} onLogout={handleLogout} />;
             case 'performance':
                  return <ProfileStatistics key={performanceRefreshKey} user={state.currentUser!} />;
             case 'subscription':

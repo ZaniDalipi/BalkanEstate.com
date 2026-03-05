@@ -26,6 +26,7 @@ import {
   getEmailPreferences,
   updateEmailPreferences,
   unsubscribeFromEmails,
+  changeEmail,
 } from '../controllers/authController';
 import { getUserStats, getAllAgents, syncStats, syncAllSubscriptionCounters } from '../controllers/userController';
 import { protect } from '../middleware/auth';
@@ -214,6 +215,7 @@ router.post('/resend-verification', passwordResetRateLimiterIP, resendVerificati
 router.post('/forgot-password', passwordResetRateLimiterIP, decryptPayload, requestPasswordReset);
 router.post('/reset-password', passwordResetRateLimiterIP, decryptPayload, resetPassword);
 router.post('/change-password', protect, decryptPayload, changePassword);
+router.post('/change-email', protect, decryptPayload, changeEmail);
 router.post('/set-password', protect, decryptPayload, setPassword);
 router.post('/delete-account', protect, decryptPayload, deleteAccount);
 

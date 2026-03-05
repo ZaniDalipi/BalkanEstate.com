@@ -56,7 +56,11 @@
     "saveChanges": "Save Changes",
     "saving": "Saving...",
     "saved": "Saved!",
-    "failedToSave": "Failed to save changes. Please try again."
+    "failedToSave": "Failed to save changes. Please try again.",
+    "emailChangeWarning": "Changing your email will require re-verification and you will be logged out.",
+    "emailChangeTitle": "Change Email Address?",
+    "emailChangeConfirm": "Changing your email to \"{{email}}\" will require you to verify the new address. You will be logged out and need to verify before logging back in.",
+    "emailChangeButton": "Change Email & Logout"
   },
   "agent": {
     "agentInformation": "Agent Information",

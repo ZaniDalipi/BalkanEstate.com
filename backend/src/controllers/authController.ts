@@ -2697,3 +2697,76 @@ export const unsubscribeFromEmails = async (req: Request, res: Response): Promis
     res.status(500).json({ message: 'Error processing unsubscribe request' });
   }
 };
+
+// @desc    Change user email (requires re-verification)
+// @route   POST /api/auth/change-email
+// @access  Private
+export const changeEmail = async (req: Request, res: Response): Promise<void> => {
+  try {
+    if (!req.user) {
+      res.status(401).json({ message: 'Not authorized' });
+      return;
+    }
+
+    const { newEmail } = req.body;
+
+    if (!newEmail || typeof newEmail !== 'string') {
+      res.status(400).json({ message: 'New email is required' });
+      return;
+    }
+
+    const trimmedEmail = newEmail.trim().toLowerCase();
+
+    // Basic email validation
+    const emailRegex = /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$/;
+    if (!emailRegex.test(trimmedEmail)) {
+      res.status(400).json({ message: 'Invalid email format' });
+      return;
+    }
+
+    const currentUser = req.user as IUser;
+    const user = await User.findById(String(currentUser._id));
+
+    if (!user) {
+      res.status(404).json({ message: 'User not found' });
+      return;
+    }
+
+    // Check if new email is the same as current
+    if (user.email === trimmedEmail) {
+      res.status(400).json({ message: 'New email is the same as your current email' });
+      return;
+    }
+
+    // Check if email is already taken by another user
+    const existingUser = await User.findOne({ email: trimmedEmail });
+    if (existingUser) {
+      res.status(409).json({ message: 'This email is already in use by another account' });
+      return;
+    }
+
+    // Update email and mark as unverified
+    user.email = trimmedEmail;
+    user.isEmailVerified = false;
+    await user.save();
+
+    // Send verification email to the new address
+    await sendVerificationEmail(user);
+
+    // Clear refresh token cookie to force logout
+    clearRefreshTokenCookie(res);
+
+    // Invalidate all refresh tokens for this user
+    await User.findByIdAndUpdate(user._id, {
+      $set: { refreshTokens: [] },
+    });
+
+    res.json({
+      message: 'Email changed successfully. Please verify your new email address to continue.',
+      requiresVerification: true,
+    });
+  } catch (error: any) {
+    authLogger.error('Change email error:', error);
+    res.status(500).json({ message: 'Failed to change email' });
+  }
+};
