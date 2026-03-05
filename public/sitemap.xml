@@ -1044,6 +1044,26 @@
   </url>
 
   <!-- ═══════════════════════════════════════════════════════════════
+       BUYING GUIDES
+       ═══════════════════════════════════════════════════════════════ -->
+  <url>
+    <loc>https://balkanestateai.com/guides</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://balkanestateai.com/en/guides"/>
+    <xhtml:link rel="alternate" hreflang="sq" href="https://balkanestateai.com/sq/guides"/>
+    <xhtml:link rel="alternate" hreflang="sr" href="https://balkanestateai.com/sr/guides"/>
+    <xhtml:link rel="alternate" hreflang="bg" href="https://balkanestateai.com/bg/guides"/>
+    <xhtml:link rel="alternate" hreflang="hr" href="https://balkanestateai.com/hr/guides"/>
+    <xhtml:link rel="alternate" hreflang="bs" href="https://balkanestateai.com/bs/guides"/>
+    <xhtml:link rel="alternate" hreflang="mk" href="https://balkanestateai.com/mk/guides"/>
+    <xhtml:link rel="alternate" hreflang="me" href="https://balkanestateai.com/me/guides"/>
+    <xhtml:link rel="alternate" hreflang="ro" href="https://balkanestateai.com/ro/guides"/>
+    <xhtml:link rel="alternate" hreflang="el" href="https://balkanestateai.com/el/guides"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://balkanestateai.com/guides"/>
+    <changefreq>weekly</changefreq>
+    <priority>0.85</priority>
+  </url>
+
+  <!-- ═══════════════════════════════════════════════════════════════
        TOOLS & RESOURCES
        ═══════════════════════════════════════════════════════════════ -->
   <url>
