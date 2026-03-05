@@ -1,6 +1,6 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { RocketLaunchIcon, EyeIcon, ChatBubbleLeftRightIcon, BoltIcon, StarIconSolid, FireIcon } from '@/constants';
+import { RocketLaunchIcon, EyeIconSolid, ChatBubbleLeftRightIconSolid, BoltIconSolid, StarIconSolid, FireIcon } from '@/constants';
 import { usePromotionSelector, extensionTierStyles } from './usePromotionSelector';
 import type { PromotionSelectorProps, PromotionTier } from './usePromotionSelector';
 import PromotionTierCard from './PromotionTierCard';
@@ -263,21 +263,21 @@ const PromotionSelector: React.FC<PromotionSelectorProps> = (props) => {
         <div className={`flex justify-center ${inModal ? 'gap-8' : 'gap-12 md:gap-16'}`}>
           <div className="flex flex-col items-center text-center">
             <div className={`${inModal ? 'w-12 h-12 mb-2' : 'w-14 h-14 mb-3'} ${isExtension ? extStyle.iconBg : 'bg-gradient-to-br from-amber-400 to-orange-500'} rounded-2xl flex items-center justify-center shadow-lg`}>
-              <EyeIcon className={`${inModal ? 'w-5 h-5' : 'w-7 h-7'} text-white`} />
+              <EyeIconSolid className={`${inModal ? 'w-5 h-5' : 'w-7 h-7'} text-white`} />
             </div>
             <h3 className={`font-semibold text-gray-900 ${inModal ? 'text-xs' : 'text-sm'}`}>{t('common:promotions.higherVisibility')}</h3>
             {!inModal && <p className="text-xs text-gray-500 mt-0.5">{t('common:promotions.topOfSearchResults')}</p>}
           </div>
           <div className="flex flex-col items-center text-center">
             <div className={`${inModal ? 'w-12 h-12 mb-2' : 'w-14 h-14 mb-3'} ${isExtension ? extStyle.iconBg : 'bg-gradient-to-br from-blue-400 to-indigo-500'} rounded-2xl flex items-center justify-center shadow-lg`}>
-              <ChatBubbleLeftRightIcon className={`${inModal ? 'w-5 h-5' : 'w-7 h-7'} text-white`} />
+              <ChatBubbleLeftRightIconSolid className={`${inModal ? 'w-5 h-5' : 'w-7 h-7'} text-white`} />
             </div>
             <h3 className={`font-semibold text-gray-900 ${inModal ? 'text-xs' : 'text-sm'}`}>{t('common:promotions.moreInquiries')}</h3>
             {!inModal && <p className="text-xs text-gray-500 mt-0.5">{t('common:promotions.seriousBuyerContacts')}</p>}
           </div>
           <div className="flex flex-col items-center text-center">
             <div className={`${inModal ? 'w-12 h-12 mb-2' : 'w-14 h-14 mb-3'} ${isExtension ? extStyle.iconBg : 'bg-gradient-to-br from-emerald-400 to-teal-500'} rounded-2xl flex items-center justify-center shadow-lg`}>
-              <BoltIcon className={`${inModal ? 'w-5 h-5' : 'w-7 h-7'} text-white`} />
+              <BoltIconSolid className={`${inModal ? 'w-5 h-5' : 'w-7 h-7'} text-white`} />
             </div>
             <h3 className={`font-semibold text-gray-900 ${inModal ? 'text-xs' : 'text-sm'}`}>{t('common:promotions.sellFaster')}</h3>
             {!inModal && <p className="text-xs text-gray-500 mt-0.5">{t('common:promotions.fasterResults')}</p>}

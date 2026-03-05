@@ -983,3 +983,23 @@ export const SpeakerXMarkIcon: React.FC<{ className?: string }> = ({ className }
     )
 );
 
+export const EyeIconSolid: React.FC<{ className?: string }> = ({ className }) => (
+    React.createElement(SolidIcon, { className: className },
+        React.createElement('path', { d: "M12 15a3 3 0 100-6 3 3 0 000 6z" }),
+        React.createElement('path', { fillRule: "evenodd", clipRule: "evenodd", d: "M1.323 11.447C2.811 6.976 7.028 3.75 12.001 3.75c4.97 0 9.185 3.223 10.675 7.69.12.362.12.752 0 1.113-1.487 4.471-5.705 7.697-10.677 7.697-4.97 0-9.186-3.223-10.675-7.69a1.762 1.762 0 010-1.113zM17.25 12a5.25 5.25 0 11-10.5 0 5.25 5.25 0 0110.5 0z" })
+    )
+);
+
+export const ChatBubbleLeftRightIconSolid: React.FC<{ className?: string }> = ({ className }) => (
+    React.createElement(SolidIcon, { className: className },
+        React.createElement('path', { d: "M4.913 2.658c2.075-.27 4.19-.408 6.337-.408 2.147 0 4.262.139 6.337.408 1.922.25 3.291 1.861 3.405 3.727a4.403 4.403 0 00-1.032-.211 50.89 50.89 0 00-8.42 0c-2.358.196-4.04 2.19-4.04 4.434v4.286a4.47 4.47 0 002.433 3.984L7.28 21.53A.75.75 0 016 21v-4.03a48.527 48.527 0 01-1.087-.128C2.905 16.58 1.5 14.833 1.5 12.862V6.638c0-1.97 1.405-3.718 3.413-3.979z" }),
+        React.createElement('path', { d: "M15.75 7.5c-1.376 0-2.739.057-4.086.169C10.124 7.797 9 9.103 9 10.609v4.285c0 1.507 1.128 2.814 2.67 2.94 1.243.102 2.5.157 3.768.165l2.782 2.781a.75.75 0 001.28-.53v-2.39l.33-.026c1.542-.125 2.67-1.433 2.67-2.94v-4.286c0-1.505-1.125-2.811-2.664-2.94A49.392 49.392 0 0015.75 7.5z" })
+    )
+);
+
+export const BoltIconSolid: React.FC<{ className?: string }> = ({ className }) => (
+    React.createElement(SolidIcon, { className: className },
+        React.createElement('path', { fillRule: "evenodd", clipRule: "evenodd", d: "M14.615 1.595a.75.75 0 01.359.852L12.982 9.75h7.268a.75.75 0 01.548 1.262l-10.5 11.25a.75.75 0 01-1.272-.71l1.992-7.302H3.75a.75.75 0 01-.548-1.262l10.5-11.25a.75.75 0 01.913-.143z" })
+    )
+);
+
