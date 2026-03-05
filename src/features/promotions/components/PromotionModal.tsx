@@ -47,13 +47,13 @@ const PromotionModal: React.FC<PromotionModalProps> = ({
       isOpen={isOpen}
       onClose={onClose}
       size="5xl"
-      fullScreenBreakpoint="lg"
+      fullScreenBreakpoint="always"
     >
       <PromotionSelector
         propertyId={propertyId}
         onSuccess={handleSuccess}
         onSkip={handleSkip}
-        inModal={true}
+        inModal={false}
         isExtension={isExtension}
         promotionId={promotionId}
         currentTier={currentTier}

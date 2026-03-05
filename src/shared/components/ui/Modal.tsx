@@ -11,8 +11,9 @@ interface ModalProps {
   /** Breakpoint at which the modal switches from full-screen to centered modal.
    *  'sm' (default): full-screen on mobile only
    *  'md': full-screen on mobile + small tablets
-   *  'lg': full-screen on mobile + tablets, modal on desktop */
-  fullScreenBreakpoint?: 'sm' | 'md' | 'lg';
+   *  'lg': full-screen on mobile + tablets, modal on desktop
+   *  'always': full-screen on all screen sizes */
+  fullScreenBreakpoint?: 'sm' | 'md' | 'lg' | 'always';
   'aria-describedby'?: string;
 }
 
@@ -122,6 +123,12 @@ const Modal: React.FC<ModalProps> = ({
       content: `bg-white backdrop-blur-xl shadow-2xl shadow-black/10 p-4 lg:p-6 w-full ${sizeClass} overflow-y-auto border border-white/50 h-full lg:h-auto rounded-none lg:rounded-2xl max-h-full lg:max-h-[90vh] lg:relative`,
       closeBtn: 'fixed top-3 right-3 lg:absolute lg:top-4 lg:right-4 text-neutral-600 hover:text-neutral-800 z-[5001] min-h-[44px] min-w-[44px] flex items-center justify-center rounded-full bg-white/90 hover:bg-neutral-200 active:bg-neutral-300 transition-colors touch-manipulation shadow-md lg:shadow-sm lg:bg-neutral-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/50',
       closeIcon: 'w-5 h-5 lg:w-6 lg:h-6',
+    },
+    always: {
+      backdrop: 'fixed inset-0 bg-white z-[5000] flex items-stretch justify-center overflow-x-hidden overflow-y-auto',
+      content: 'bg-white w-full max-w-none relative overflow-y-auto h-full',
+      closeBtn: 'fixed top-3 right-3 text-neutral-600 hover:text-neutral-800 z-[5001] min-h-[44px] min-w-[44px] flex items-center justify-center rounded-full bg-neutral-100 hover:bg-neutral-200 active:bg-neutral-300 transition-colors touch-manipulation shadow-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/50',
+      closeIcon: 'w-5 h-5 sm:w-6 sm:h-6',
     },
   };
 

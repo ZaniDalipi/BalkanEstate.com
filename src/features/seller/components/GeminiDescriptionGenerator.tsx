@@ -782,6 +782,7 @@ const GeminiDescriptionGenerator: React.FC<{ propertyToEdit: Property | null }> 
             isOpen={step === 'payment' && !!pendingPropertyData}
             onClose={handlePostWithoutPromotion}
             size="5xl"
+            fullScreenBreakpoint="always"
         >
             <PromotionSelector
                 pendingPropertyData={pendingPropertyData!}
@@ -789,7 +790,7 @@ const GeminiDescriptionGenerator: React.FC<{ propertyToEdit: Property | null }> 
                 onSkip={handlePostWithoutPromotion}
                 onBack={() => setStep('form')}
                 isSubmitting={isSubmitting}
-                inModal={true}
+                inModal={false}
             />
         </Modal>
         </>
