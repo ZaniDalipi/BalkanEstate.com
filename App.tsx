@@ -1050,6 +1050,9 @@ const App: React.FC = () => {
   // Compensate for browser zoom so UI remains usable at 125%+
   useZoomCompensation();
 
+  const { i18n } = useTranslation();
+  const currentLang = (i18n.language || 'en').split('-')[0];
+
   // Get analytics IDs from environment variables
   const googleAnalyticsId = import.meta.env.VITE_GA_ID;
   const facebookPixelId = import.meta.env.VITE_FB_PIXEL_ID;
