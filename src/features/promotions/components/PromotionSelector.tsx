@@ -78,7 +78,7 @@ const PromotionSelector: React.FC<PromotionSelectorProps> = (props) => {
   const tiers = tiersData.tiers;
 
   return (
-    <div className={inModal ? "w-full px-4 sm:px-6 pt-8 pb-4" : "max-w-7xl mx-auto px-4 sm:px-6 py-8"}>
+    <div className={inModal ? "w-full px-4 sm:px-6 pt-4 sm:pt-6 lg:pt-8 pb-4" : "max-w-7xl mx-auto px-4 sm:px-6 py-8"}>
       {/* Header Section - Enhanced for Extension Mode and Urgent Badge Mode */}
       {focusUrgent ? (
         <div className={`text-center ${inModal ? 'mb-6' : 'mb-10'}`}>
@@ -158,9 +158,9 @@ const PromotionSelector: React.FC<PromotionSelectorProps> = (props) => {
           </div>
         </div>
       ) : (
-        <div className={`text-center ${inModal ? 'mb-6' : 'mb-10'}`}>
-          <div className={`inline-flex items-center justify-center ${inModal ? 'w-12 h-12' : 'w-16 h-16'} bg-gradient-to-br from-primary to-primary-dark rounded-full mb-3 shadow-lg`}>
-            <RocketLaunchIcon className={`${inModal ? 'w-6 h-6' : 'w-8 h-8'} text-white`} />
+        <div className={`text-center ${inModal ? 'mb-3 sm:mb-6' : 'mb-10'}`}>
+          <div className={`inline-flex items-center justify-center ${inModal ? 'w-10 h-10 sm:w-12 sm:h-12' : 'w-16 h-16'} bg-gradient-to-br from-primary to-primary-dark rounded-full mb-2 sm:mb-3 shadow-lg`}>
+            <RocketLaunchIcon className={`${inModal ? 'w-5 h-5 sm:w-6 sm:h-6' : 'w-8 h-8'} text-white`} />
           </div>
           <h2 className={`${inModal ? 'text-xl md:text-2xl' : 'text-3xl md:text-4xl'} font-bold bg-gradient-to-r from-neutral-900 via-neutral-800 to-neutral-900 bg-clip-text text-transparent mb-2`}>
             {t('common:promotions.promoteYourListing')}
@@ -259,7 +259,7 @@ const PromotionSelector: React.FC<PromotionSelectorProps> = (props) => {
       <div className={`${isExtension
         ? `bg-gradient-to-r ${extStyle.lightBg} border ${extStyle.border}`
         : 'bg-gradient-to-br from-slate-50 via-blue-50/30 to-indigo-50/50 border border-slate-200/60'
-      } rounded-2xl ${inModal ? 'px-6 py-5 mb-6' : 'px-8 py-7 mb-10'} shadow-sm`}>
+      } rounded-2xl ${inModal ? 'px-4 py-3 sm:px-6 sm:py-5 mb-4 sm:mb-6' : 'px-8 py-7 mb-10'} shadow-sm`}>
         <div className={`flex justify-center ${inModal ? 'gap-8' : 'gap-12 md:gap-16'}`}>
           <div className="flex flex-col items-center text-center">
             <div className={`${inModal ? 'w-12 h-12 mb-2' : 'w-14 h-14 mb-3'} ${isExtension ? extStyle.iconBg : 'bg-gradient-to-br from-amber-400 to-orange-500'} rounded-2xl flex items-center justify-center shadow-lg`}>
@@ -378,7 +378,7 @@ const PromotionSelector: React.FC<PromotionSelectorProps> = (props) => {
       {!isExtension && !focusUrgent && (
         <div className={inModal ? 'mb-5' : 'mb-8'}>
           <h3 className={`${inModal ? 'text-base' : 'text-xl'} font-bold text-neutral-900 mb-4`}>{t('common:promotions.chooseYourPlan')}</h3>
-          <div className={`grid grid-cols-1 md:grid-cols-3 ${inModal ? 'gap-3' : 'gap-5'}`}>
+          <div className={`grid grid-cols-1 sm:grid-cols-3 ${inModal ? 'gap-3' : 'gap-5'}`}>
             {(['featured', 'highlight', 'premium'] as PromotionTier[]).map((tierId) => {
               const tier = tiers[tierId];
               const pricing = tiersData.pricing.find(

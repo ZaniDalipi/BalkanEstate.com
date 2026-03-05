@@ -119,8 +119,8 @@ const Modal: React.FC<ModalProps> = ({
     },
     lg: {
       backdrop: 'fixed inset-0 bg-black/40 backdrop-blur-sm z-[5000] flex items-stretch lg:items-center justify-center p-0 lg:p-4 overflow-x-hidden overflow-y-auto',
-      content: `bg-white/95 backdrop-blur-xl shadow-2xl shadow-black/10 p-4 lg:p-6 w-full ${sizeClass} relative overflow-y-auto border border-white/50 h-full lg:h-auto rounded-none lg:rounded-2xl max-h-full lg:max-h-[90vh]`,
-      closeBtn: 'absolute top-2 right-2 lg:top-4 lg:right-4 text-neutral-600 hover:text-neutral-800 z-20 min-h-[44px] min-w-[44px] flex items-center justify-center rounded-full bg-neutral-100 hover:bg-neutral-200 active:bg-neutral-300 transition-colors touch-manipulation shadow-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/50',
+      content: `bg-white backdrop-blur-xl shadow-2xl shadow-black/10 p-4 lg:p-6 w-full ${sizeClass} overflow-y-auto border border-white/50 h-full lg:h-auto rounded-none lg:rounded-2xl max-h-full lg:max-h-[90vh] lg:relative`,
+      closeBtn: 'fixed top-3 right-3 lg:absolute lg:top-4 lg:right-4 text-neutral-600 hover:text-neutral-800 z-[5001] min-h-[44px] min-w-[44px] flex items-center justify-center rounded-full bg-white/90 hover:bg-neutral-200 active:bg-neutral-300 transition-colors touch-manipulation shadow-md lg:shadow-sm lg:bg-neutral-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/50',
       closeIcon: 'w-5 h-5 lg:w-6 lg:h-6',
     },
   };
