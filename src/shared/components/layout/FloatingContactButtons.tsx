@@ -16,7 +16,7 @@ const FloatingContactButtons: React.FC = () => {
     t('floatingContact.whatsappMessage', 'Hi, I have a question about a property on BalkanEstate.')
   )}`;
 
-  const viberUrl = `viber://chat/?number=%2B${CONTACT_CONFIG.social.whatsappNumber}`;
+  const viberUrl = `viber://chat?number=${CONTACT_CONFIG.social.whatsappNumber}`;
 
   return (
     <div className="fixed bottom-6 right-6 z-40 flex flex-col items-end gap-3">
