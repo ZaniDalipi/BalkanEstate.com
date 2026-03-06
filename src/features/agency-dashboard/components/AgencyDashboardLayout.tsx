@@ -1,12 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useQueryClient } from '@tanstack/react-query';
+import { useQueryClient, useQuery } from '@tanstack/react-query';
 import { useAppContext } from '@/context/AppContext';
 import AgencyDashboardSidebar from './AgencyDashboardSidebar';
 import AgencyDashboardHeader from './AgencyDashboardHeader';
 import { useAgencyOverview } from '../hooks/useAgencyOverview';
 import { agencyDashboardKeys } from '../api/agencyDashboardKeys';
 import { socketService } from '@/services/socketService';
+import { getAgencyJoinRequests } from '@/src/features/agencies/api/agencyApi';
 import type { AgencyDashboardSection } from '@/types';
 
 interface AgencyDashboardLayoutProps {
@@ -28,6 +29,17 @@ const AgencyDashboardLayout: React.FC<AgencyDashboardLayoutProps> = ({
   const [sidebarMobileOpen, setSidebarMobileOpen] = useState(false);
   const { overview, isLoading: isLoadingOverview } = useAgencyOverview(agencyId);
 
+  // Fetch pending join requests count
+  const { data: joinRequestsData } = useQuery({
+    queryKey: ['agencyJoinRequests', agencyId],
+    queryFn: () => getAgencyJoinRequests(agencyId),
+    staleTime: 60_000,
+    enabled: !!agencyId,
+  });
+
+  const pendingJoinRequestCount = (joinRequestsData?.joinRequests || [])
+    .filter((r: { status: string }) => r.status === 'pending').length;
+
   // Listen for real-time agency updates (agent removed/left, coupon freed, etc.)
   useEffect(() => {
     if (!agencyId) return;
@@ -37,6 +49,9 @@ const AgencyDashboardLayout: React.FC<AgencyDashboardLayoutProps> = ({
         queryClient.invalidateQueries({ queryKey: agencyDashboardKeys.agents(agencyId) });
         queryClient.invalidateQueries({ queryKey: agencyDashboardKeys.financial(agencyId) });
         queryClient.invalidateQueries({ queryKey: agencyDashboardKeys.overview(agencyId) });
+      }
+      if (data.type === 'join-request-new') {
+        queryClient.invalidateQueries({ queryKey: ['agencyJoinRequests', agencyId] });
       }
     });
 
@@ -79,6 +94,7 @@ const AgencyDashboardLayout: React.FC<AgencyDashboardLayoutProps> = ({
         mobileOpen={sidebarMobileOpen}
         onMobileClose={() => setSidebarMobileOpen(false)}
         overview={overview}
+        pendingJoinRequests={pendingJoinRequestCount}
         onBrowseProperties={handleBrowseProperties}
         onBackToAgency={handleBackToAgency}
       />

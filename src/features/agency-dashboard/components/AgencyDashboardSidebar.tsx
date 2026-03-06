@@ -27,6 +27,7 @@ interface AgencyDashboardSidebarProps {
   mobileOpen: boolean;
   onMobileClose: () => void;
   overview: OverviewData | null;
+  pendingJoinRequests?: number;
   onBrowseProperties?: () => void;
   onBackToAgency?: () => void;
 }
@@ -53,6 +54,7 @@ const AgencyDashboardSidebar: React.FC<AgencyDashboardSidebarProps> = ({
   mobileOpen,
   onMobileClose,
   overview,
+  pendingJoinRequests = 0,
   onBrowseProperties,
   onBackToAgency,
 }) => {
@@ -81,7 +83,8 @@ const AgencyDashboardSidebar: React.FC<AgencyDashboardSidebarProps> = ({
           id: 'agents',
           label: t('agencyDashboard:sidebar.agents', 'Agents'),
           icon: <UsersIcon className="w-5 h-5" />,
-          badge: overview?.totalAgents,
+          badge: pendingJoinRequests > 0 ? pendingJoinRequests : overview?.totalAgents,
+          badgeColor: pendingJoinRequests > 0 ? 'bg-red-500 animate-pulse' : undefined,
         },
         {
           id: 'leads',

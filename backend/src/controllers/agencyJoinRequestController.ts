@@ -8,6 +8,7 @@ import { getSocketInstance } from '../utils/socketInstance';
 import { agencyLogger } from '../utils/logger';
 import { getObjectIdParam } from '../utils/validateParams';
 import { syncAgentAttributesToAgency } from '../services/agencyAttributeSyncService';
+import Notification from '../models/Notification';
 
 // Create a join request
 export const createJoinRequest = async (req: Request, res: Response): Promise<void> => {
@@ -106,6 +107,30 @@ export const createJoinRequest = async (req: Request, res: Response): Promise<vo
           requestedAt: joinRequest.requestedAt,
         },
       });
+    }
+
+    // Create notification for agency owner
+    try {
+      const codeInfo = invitationCode ? ` with invitation code: ${invitationCode}` : '';
+      await Notification.create({
+        userId: agency.ownerId,
+        type: 'agency_join_request',
+        title: 'New Join Request',
+        message: `${user.name} has requested to join ${agency.name}${codeInfo}`,
+        priority: 'high',
+        data: {
+          agencyId: String(agencyId),
+          agencyName: agency.name,
+          agencySlug: agency.slug,
+          agentId: String(agentId),
+          agentName: user.name,
+          agentEmail: user.email,
+          joinRequestId: String(joinRequest._id),
+          actionLabel: 'Review Request',
+        },
+      });
+    } catch (notifErr) {
+      agencyLogger.error('Error creating join request notification:', notifErr);
     }
 
     res.status(201).json({
@@ -495,6 +520,47 @@ export const joinByInvitationCode = async (req: Request, res: Response): Promise
     });
 
     await joinRequest.save();
+
+    // Emit socket event to notify agency owner
+    const io = getSocketInstance();
+    if (io) {
+      io.emit(`agency-update-${String(agency._id)}`, {
+        type: 'join-request-new',
+        agencyId: String(agency._id),
+        joinRequest: {
+          _id: String(joinRequest._id),
+          agentId: String(agentId),
+          requesterName: user.name,
+          requesterEmail: user.email,
+          message,
+          status: 'pending',
+          requestedAt: joinRequest.requestedAt,
+        },
+      });
+    }
+
+    // Create notification for agency owner
+    try {
+      await Notification.create({
+        userId: agency.ownerId,
+        type: 'agency_join_request',
+        title: 'New Join Request',
+        message: `${user.name} has requested to join ${agency.name} with invitation code: ${invitationCode}`,
+        priority: 'high',
+        data: {
+          agencyId: String(agency._id),
+          agencyName: agency.name,
+          agencySlug: agency.slug,
+          agentId: String(agentId),
+          agentName: user.name,
+          agentEmail: user.email,
+          joinRequestId: String(joinRequest._id),
+          actionLabel: 'Review Request',
+        },
+      });
+    } catch (notifErr) {
+      agencyLogger.error('Error creating join request notification:', notifErr);
+    }
 
     res.status(201).json({
       message: 'Join request sent successfully',

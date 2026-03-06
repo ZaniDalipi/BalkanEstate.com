@@ -15,6 +15,7 @@ export type NotificationType =
   | 'agent_left_agency'     // Agent left your agency
   | 'agency_join_welcome'   // Welcome notification for agent joining agency
   | 'agency_coupon_redeemed' // Agent redeemed a coupon for your agency
+  | 'agency_join_request'   // New join request from an agent
   | 'system';               // System notifications
 
 export type NotificationPriority = 'low' | 'normal' | 'high' | 'urgent';
@@ -69,6 +70,7 @@ const NotificationSchema: Schema = new Schema(
         'agent_left_agency',
         'agency_join_welcome',
         'agency_coupon_redeemed',
+        'agency_join_request',
         'system',
       ],
       required: true,

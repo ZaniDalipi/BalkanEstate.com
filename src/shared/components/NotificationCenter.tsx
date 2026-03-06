@@ -122,6 +122,14 @@ const NotificationCenter: React.FC = () => {
     const data = notification.data;
     if (!data) return;
 
+    // Navigate to agency detail page for join request (opens join requests view)
+    if (data.agencyId && notification.type === 'agency_join_request') {
+      setIsOpen(false);
+      dispatch({ type: 'SET_SELECTED_AGENCY', payload: data.agencySlug || data.agencyId });
+      dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'agencyDetail' });
+      return;
+    }
+
     // Navigate to agency detail page
     if (data.agencyId && (
       notification.type === 'agent_joined_agency' ||
@@ -218,6 +226,8 @@ const NotificationCenter: React.FC = () => {
       case 'promotion_suggestion':
       case 'promotion_success':
         return <Star className="w-4 h-4 text-yellow-500" />;
+      case 'agency_join_request':
+        return <UserPlus className="w-4 h-4 text-blue-600" />;
       case 'agent_joined_agency':
       case 'agency_join_welcome':
         return <UserPlus className="w-4 h-4 text-green-600" />;
