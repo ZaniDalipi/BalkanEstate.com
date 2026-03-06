@@ -22,15 +22,9 @@ const PropertyCard: React.FC<{
   };
 
   return (
-    <motion.button
-      initial={{ opacity: 0, y: 20 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true, margin: '-50px' }}
-      transition={{ delay: index * 0.08, type: 'spring', stiffness: 300, damping: 30 }}
-      whileHover={{ y: -4 }}
-      whileTap={{ scale: 0.98 }}
+    <button
       onClick={onClick}
-      className="group text-left bg-white rounded-xl border border-neutral-200 overflow-hidden hover:shadow-lg hover:border-neutral-300 transition-all duration-300 w-full"
+      className="group text-left bg-white rounded-xl border border-neutral-200 overflow-hidden hover:shadow-lg hover:border-neutral-300 hover:-translate-y-1 active:scale-[0.98] transition-all duration-200 w-full"
     >
       {/* Image */}
       <div className="relative aspect-[4/3] overflow-hidden bg-neutral-100">
@@ -97,7 +91,7 @@ const PropertyCard: React.FC<{
           </span>
         </div>
       </div>
-    </motion.button>
+    </button>
   );
 };
 

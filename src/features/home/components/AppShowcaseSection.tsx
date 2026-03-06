@@ -213,21 +213,16 @@ const PhoneMapContent: React.FC = () => {
 
         {/* Property pins */}
         {MAP_PINS.map((pin, i) => (
-          <motion.div
+          <div
             key={pin.city}
             className="absolute cursor-pointer z-10"
             style={{ left: `${pin.x}%`, top: `${pin.y}%`, transform: 'translate(-50%, -100%)' }}
-            initial={{ scale: 0, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            transition={{ delay: 0.1 + i * 0.08, type: 'spring', stiffness: 260, damping: 20 }}
             onClick={() => setActivePin(activePin === i ? null : i)}
           >
-            {/* Pulse ring */}
-            <motion.div
-              className="absolute -inset-1.5 rounded-full"
-              style={{ backgroundColor: pin.color }}
-              animate={{ scale: [1, 1.8, 1], opacity: [0.3, 0, 0.3] }}
-              transition={{ duration: 2, repeat: Infinity, delay: i * 0.15 }}
+            {/* Pulse ring — CSS animation instead of framer-motion for perf */}
+            <div
+              className="absolute -inset-1.5 rounded-full animate-ping opacity-20"
+              style={{ backgroundColor: pin.color, animationDuration: '2s' }}
             />
             {/* Pin */}
             <div
@@ -253,7 +248,7 @@ const PhoneMapContent: React.FC = () => {
                 </motion.div>
               )}
             </AnimatePresence>
-          </motion.div>
+          </div>
         ))}
       </div>
 
@@ -539,20 +534,16 @@ const AppShowcaseSection: React.FC<AppShowcaseSectionProps> = ({ onNavigate }) =
               </div>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-2 md:gap-3">
                 {STATIC_FEATURES.map((feature, i) => (
-                  <motion.div
+                  <div
                     key={i}
-                    whileHover={{ y: -3, boxShadow: '0 8px 25px rgba(0,0,0,0.08)' }}
-                    whileTap={{ scale: 0.97 }}
-                    transition={{ type: 'spring', stiffness: 400, damping: 25 }}
                     onClick={() => handleFeatureClick(feature.route)}
-                    className="rounded-xl p-3 border border-neutral-100/50 bg-white cursor-pointer group"
+                    className="rounded-xl p-3 border border-neutral-100/50 bg-white cursor-pointer group hover:-translate-y-0.5 hover:shadow-md transition-all duration-200"
                   >
-                    <motion.div
-                      whileHover={{ scale: 1.1, rotate: 5 }}
-                      className={`w-9 h-9 rounded-lg ${feature.iconBg} flex items-center justify-center mb-2`}
+                    <div
+                      className={`w-9 h-9 rounded-lg ${feature.iconBg} flex items-center justify-center mb-2 group-hover:scale-110 transition-transform`}
                     >
                       {feature.icon}
-                    </motion.div>
+                    </div>
                     <h4 className="text-[10px] md:text-xs font-semibold text-slate-800 leading-tight">
                       {feature.title}
                     </h4>
@@ -562,7 +553,7 @@ const AppShowcaseSection: React.FC<AppShowcaseSectionProps> = ({ onNavigate }) =
                     <span className="text-[8px] md:text-[9px] text-slate-500 font-medium mt-1.5 inline-flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity">
                       Explore <span className="text-[10px]">&rarr;</span>
                     </span>
-                  </motion.div>
+                  </div>
                 ))}
               </div>
             </div>

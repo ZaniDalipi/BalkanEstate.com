@@ -224,7 +224,8 @@ export function useSearchPage() {
     // Parse URL query parameters on mount and apply as filters
     useEffect(() => {
         const searchParams = new URLSearchParams(window.location.search);
-        const cityParam = searchParams.get('city');
+        const qParam = searchParams.get('q');
+        const cityParam = searchParams.get('city') || qParam;
         const countryParamRaw = searchParams.get('country');
         const propertyTypeParam = searchParams.get('propertyType');
         const latParam = searchParams.get('lat');

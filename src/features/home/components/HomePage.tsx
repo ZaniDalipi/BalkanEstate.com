@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useMemo } from 'react';
+import React, { useState, useCallback, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Helmet } from 'react-helmet-async';
 import { useAppContext } from '@/context/AppContext';
@@ -22,6 +22,7 @@ const HomePage: React.FC = () => {
   const { state, dispatch } = useAppContext();
   const { navigate } = useLocalizedNavigation();
   const [searchQuery, setSearchQuery] = useState('');
+  const searchQueryRef = useRef(searchQuery);
 
   const { data: featuredProperties = [] } = useQuery<Property[]>({
     queryKey: ['featuredProperties'],
@@ -34,17 +35,27 @@ const HomePage: React.FC = () => {
     staleTime: 5 * 60 * 1000,
   });
 
+  const handleSearchChange = useCallback((value: string) => {
+    setSearchQuery(value);
+    searchQueryRef.current = value;
+  }, []);
+
   const handleSearch = useCallback(() => {
+    const query = searchQueryRef.current.trim();
+    const updatedFilters = {
+      ...state.searchPageState.filters,
+      query,
+    };
     dispatch({
       type: 'UPDATE_SEARCH_PAGE_STATE',
       payload: {
-        filters: { ...state.searchPageState.filters, query: searchQuery },
-        activeFilters: { ...state.searchPageState.activeFilters, query: searchQuery },
+        filters: updatedFilters,
+        activeFilters: updatedFilters,
       },
     });
     dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'search' });
-    navigate('/search');
-  }, [searchQuery, dispatch, state.searchPageState, navigate]);
+    navigate(query ? `/search?q=${encodeURIComponent(query)}` : '/search');
+  }, [dispatch, state.searchPageState.filters, navigate]);
 
   const handleNavigate = useCallback((view: string, path: string) => {
     dispatch({ type: 'SET_ACTIVE_VIEW', payload: view as any });
@@ -84,7 +95,7 @@ const HomePage: React.FC = () => {
 
       <HeroSection
         searchQuery={searchQuery}
-        onSearchChange={setSearchQuery}
+        onSearchChange={handleSearchChange}
         onSearch={handleSearch}
         onNavigate={handleNavigate}
       />
