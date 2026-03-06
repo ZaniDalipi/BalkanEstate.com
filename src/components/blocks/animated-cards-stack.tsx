@@ -60,8 +60,31 @@ export const ContainerScroll: React.FC<
   React.HTMLAttributes<HTMLDivElement>
 > = ({ children, style, className, ...props }) => {
   const scrollRef = React.useRef<HTMLDivElement>(null);
+  const containerRef = React.useRef<HTMLElement>(null);
+  const [, forceUpdate] = React.useState(0);
+
+  // Find the nearest scrollable ancestor so useScroll tracks the correct
+  // container (e.g. when the page scrolls inside a <main> with overflow-y-auto
+  // rather than the window).
+  React.useLayoutEffect(() => {
+    let el = scrollRef.current?.parentElement ?? null;
+    while (el) {
+      const { overflowY } = window.getComputedStyle(el);
+      if (overflowY === 'auto' || overflowY === 'scroll') {
+        (containerRef as React.MutableRefObject<HTMLElement | null>).current =
+          el;
+        forceUpdate((n) => n + 1);
+        return;
+      }
+      el = el.parentElement;
+    }
+  }, []);
+
   const { scrollYProgress } = useScroll({
     target: scrollRef,
+    ...(containerRef.current
+      ? { container: containerRef as React.RefObject<HTMLElement> }
+      : {}),
     offset: ['start center', 'end end'],
   });
 
