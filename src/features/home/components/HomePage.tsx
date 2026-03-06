@@ -14,6 +14,8 @@ import PopularCitiesSection from './PopularCitiesSection';
 import HowItWorksSection from './HowItWorksSection';
 import CTASection from './CTASection';
 import AppShowcaseSection from './AppShowcaseSection';
+import NewsSection from './NewsSection';
+import TestimonialsSection from './TestimonialsSection';
 
 const HomePage: React.FC = () => {
   const { t } = useTranslation(['home', 'common']);
@@ -112,7 +114,11 @@ const HomePage: React.FC = () => {
 
       <PopularCitiesSection onNavigate={handleNavigate} />
 
+      <NewsSection />
+
       <HowItWorksSection onLearnMore={() => handleNavigate('how-it-works', '/how-it-works')} />
+
+      <TestimonialsSection />
 
       {!isAuthenticated && (
         <CTASection

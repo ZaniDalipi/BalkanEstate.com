@@ -85,6 +85,12 @@
     "agentSubtitle": "Join our network of verified agents. Get leads, manage listings, and grow your business.",
     "agentButton": "Join as Agent"
   },
+  "news": {
+    "badge": "Real Estate News",
+    "title": "Latest from the",
+    "titleHighlight": "Balkan Market",
+    "subtitle": "AI-curated real estate news from across the region. Click any article to read the full story from the original source."
+  },
   "showcase": {
     "badge": "How It Works",
     "title": "Everything You Need,",
