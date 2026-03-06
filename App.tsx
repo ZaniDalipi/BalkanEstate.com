@@ -46,7 +46,7 @@ import { parseLanguageFromPath, initializeLanguageFromUrl, buildLocalizedPath } 
 // Core layout components (lazy loaded - can render after initial paint)
 const Sidebar = lazy(() => import('./components/shared/Sidebar'));
 const Header = lazy(() => import('./components/shared/Header'));
-const FloatingContactButtons = lazy(() => import('./src/shared/components/layout/FloatingContactButtons'));
+
 
 // Lazy load all pages and conditional components to reduce initial bundle
 const SearchPage = lazy(() => import('./src/features/search/components').then(m => ({ default: m.SearchPage })));
@@ -887,11 +887,6 @@ const MainLayout: React.FC = () => {
         {/* Session Expired Modal */}
         <Suspense fallback={null}>
           {state.isSessionExpiredModalOpen && <SessionExpiredModal />}
-        </Suspense>
-
-        {/* Floating WhatsApp & Viber Contact Buttons */}
-        <Suspense fallback={null}>
-          <FloatingContactButtons />
         </Suspense>
     </div>
   );
