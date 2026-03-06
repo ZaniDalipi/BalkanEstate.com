@@ -16,6 +16,7 @@ import CTASection from './CTASection';
 import AppShowcaseSection from './AppShowcaseSection';
 import NewsSection from './NewsSection';
 import TestimonialsSection from './TestimonialsSection';
+import { StackedCards } from '@/src/components/ui/glass-cards';
 
 const HomePage: React.FC = () => {
   const { t } = useTranslation(['home', 'common']);
@@ -122,6 +123,8 @@ const HomePage: React.FC = () => {
       />
 
       <CategoriesSection onCategoryClick={handleCategoryClick} />
+
+      <StackedCards />
 
       <PopularCitiesSection onNavigate={handleNavigate} />
 
