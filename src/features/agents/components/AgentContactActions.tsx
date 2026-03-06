@@ -133,7 +133,7 @@ const AgentContactActions: React.FC<AgentContactActionsProps> = ({
                 {/* Viber Contact */}
                 {agent.phone && (
                     <a
-                        href={`viber://chat?number=${agent.phone.replace(/[\s\-\(\)]/g, '')}`}
+                        href={`viber://chat/?number=%2B${agent.phone.replace(/[\s\-\(\)\+]/g, '')}`}
                         className="flex items-center gap-3 bg-[#7360F2]/20 hover:bg-[#7360F2]/30 p-4 rounded-xl mb-3 transition-colors"
                     >
                         <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
