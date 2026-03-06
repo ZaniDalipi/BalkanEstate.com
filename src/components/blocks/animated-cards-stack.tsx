@@ -15,7 +15,7 @@ const cardVariants = cva('absolute will-change-transform', {
     variant: {
       dark: 'flex size-full flex-col items-center justify-center gap-6 rounded-2xl border border-stone-700/50 bg-accent-foreground/80 p-6 backdrop-blur-md',
       light:
-        'flex size-full flex-col items-center justify-center gap-6 rounded-2xl border bg-white/80 p-6 backdrop-blur-md',
+        'flex size-full flex-col items-center justify-center gap-6 rounded-2xl bg-white/80 p-6 backdrop-blur-md',
     },
   },
   defaultVariants: {
@@ -146,19 +146,19 @@ export const CardTransformed = React.forwardRef<
     const rotateRange = [range[0] - 1.5, range[1] / 1.5];
 
     const y = useTransform(scrollYProgress, range, ['0%', '-180%']);
-    const rotate = useTransform(scrollYProgress, rotateRange, [
-      incrementRotation,
+    const rotate = useTransform(scrollYProgress, range, [
       0,
+      incrementRotation,
     ]);
 
     const transform = useMotionTemplate`translateZ(${
       index * incrementZ
     }px) translateY(${y}) rotate(${rotate}deg)`;
 
-    const dx = useTransform(scrollYProgress, rotateRange, [4, 0]);
-    const dy = useTransform(scrollYProgress, rotateRange, [4, 12]);
-    const blur = useTransform(scrollYProgress, rotateRange, [2, 24]);
-    const alpha = useTransform(scrollYProgress, rotateRange, [0.15, 0.2]);
+    const dx = useTransform(scrollYProgress, range, [0, 4]);
+    const dy = useTransform(scrollYProgress, range, [12, 4]);
+    const blur = useTransform(scrollYProgress, range, [24, 2]);
+    const alpha = useTransform(scrollYProgress, range, [0.12, 0.05]);
 
     const filter =
       variant === 'light'
