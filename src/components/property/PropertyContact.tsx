@@ -307,9 +307,9 @@ export const PropertyContact: React.FC<PropertyContactProps> = ({
             </a>
           )}
 
-          {/* WhatsApp & Viber side by side on mobile for quick access */}
+          {/* WhatsApp & Viber side by side - hidden on mobile where sticky bar shows them */}
           {property.status !== 'sold' && property.seller?.phone && (
-            <div className="grid grid-cols-2 gap-2">
+            <div className="hidden lg:grid grid-cols-2 gap-2">
               {/* WhatsApp Contact Button */}
               <a
                 href={`https://wa.me/${property.seller.phone.replace(/[\s\-\(\)]/g, '')}?text=${encodeURIComponent(
