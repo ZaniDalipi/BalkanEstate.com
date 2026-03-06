@@ -91,6 +91,7 @@ const CookiePolicyPage = lazy(() => import('./src/features/legal/components/Cook
 const RefundPolicyPage = lazy(() => import('./src/features/legal/components/RefundPolicyPage'));
 const ContactUsPage = lazy(() => import('./src/features/contact/components/ContactUsPage'));
 const BuyingGuidesPage = lazy(() => import('./src/features/guides/components/BuyingGuidesPage'));
+const HomePage = lazy(() => import('./src/features/home/components/HomePage'));
 
 // Agency creation pages
 const CreateAgencyPage = lazy(() => import('./src/features/agencies/components/CreateAgencyPage'));
@@ -336,7 +337,8 @@ const AppContent: React.FC<{ onToggleSidebar: () => void }> = ({ onToggleSidebar
 
       // Main navigation routes
       const routeMap: Record<string, AppView> = {
-        '/': 'search',
+        '/': 'home',
+        '/home': 'home',
         '/search': 'search',
         '/explore-cities': 'explore-cities',
         '/saved-searches': 'saved-searches',
@@ -393,10 +395,6 @@ const AppContent: React.FC<{ onToggleSidebar: () => void }> = ({ onToggleSidebar
           dispatch({ type: 'SET_SELECTED_AGENT', payload: null });
         }
         dispatch({ type: 'SET_ACTIVE_VIEW', payload: view });
-        // Redirect root to /search for cleaner URL
-        if (path === '/') {
-          window.history.replaceState({}, '', buildLocalizedPath('/search'));
-        }
       } else {
         // Unknown route - show 404 page
         dispatch({ type: 'SET_SELECTED_PROPERTY', payload: null });
@@ -569,6 +567,8 @@ const AppContent: React.FC<{ onToggleSidebar: () => void }> = ({ onToggleSidebar
   // Wrap lazy loaded views in Suspense
   const renderView = () => {
     switch (state.activeView) {
+      case 'home':
+        return <HomePage />;
       case 'explore-cities':
         return <CityRecommendations />;
       case 'city-dashboard':
@@ -689,7 +689,8 @@ const MainLayout: React.FC = () => {
 
   // PWA top bar: shown on mobile for internal pages only
   // NOT shown on: search/rental (have their own search headers), property details (has its own header)
-  const isHomePage = isSearchPage || isRentalPage;
+  const isHomeView = state.activeView === 'home';
+  const isHomePage = isSearchPage || isRentalPage || isHomeView;
   const showPWATopBar = isMobile && !state.selectedProperty && !isHomePage;
 
   // Main tab views show hamburger menu; detail views show back button
@@ -703,6 +704,7 @@ const MainLayout: React.FC = () => {
     if (state.selectedAgencyId) return t('nav:pageTitles.agency');
     if (state.selectedAgentId) return t('nav:pageTitles.agent');
     const titleKeys: Record<string, string> = {
+      home: 'nav:pageTitles.home',
       search: 'nav:pageTitles.search',
       rentals: 'nav:pageTitles.rentals',
       inbox: 'nav:pageTitles.inbox',
@@ -825,8 +827,8 @@ const MainLayout: React.FC = () => {
                     onClick={() => {
                       dispatch({ type: 'SET_SELECTED_AGENCY', payload: null });
                       dispatch({ type: 'SET_SELECTED_AGENT', payload: null });
-                      dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'search' });
-                      window.history.pushState({}, '', buildLocalizedPath('/search'));
+                      dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'home' });
+                      window.history.pushState({}, '', buildLocalizedPath('/'));
                     }}
                     className="min-w-[44px] min-h-[44px] flex items-center justify-center text-neutral-500 active:text-primary active:opacity-70 transition-opacity pr-2"
                     aria-label={t('common:aria.goHome', 'Go to home')}

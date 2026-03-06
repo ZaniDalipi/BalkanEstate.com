@@ -1,0 +1,128 @@
+import React, { useState, useCallback, useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
+import { Helmet } from 'react-helmet-async';
+import { useAppContext } from '@/context/AppContext';
+import { useLocalizedNavigation } from '@/src/hooks/useLocalizedNavigation';
+import { Property } from '@/types';
+import { API_CONFIG } from '@/src/shared/constants/app.constants';
+import { useQuery } from '@tanstack/react-query';
+import HeroSection from './HeroSection';
+import QuickAccessSection from './QuickAccessSection';
+import FeaturedPropertiesSection from './FeaturedPropertiesSection';
+import CategoriesSection from './CategoriesSection';
+import PopularCitiesSection from './PopularCitiesSection';
+import HowItWorksSection from './HowItWorksSection';
+import CTASection from './CTASection';
+
+const HomePage: React.FC = () => {
+  const { t } = useTranslation(['home', 'common']);
+  const { state, dispatch } = useAppContext();
+  const { navigate } = useLocalizedNavigation();
+  const [searchQuery, setSearchQuery] = useState('');
+
+  const { data: featuredProperties = [] } = useQuery<Property[]>({
+    queryKey: ['featuredProperties'],
+    queryFn: async () => {
+      const res = await fetch(`${API_CONFIG.BASE_URL}/properties?sortBy=newest&limit=6&status=active`);
+      if (!res.ok) return [];
+      const data = await res.json();
+      return data.properties || [];
+    },
+    staleTime: 5 * 60 * 1000,
+  });
+
+  const handleSearch = useCallback(() => {
+    dispatch({
+      type: 'UPDATE_SEARCH_PAGE_STATE',
+      payload: {
+        filters: { ...state.searchPageState.filters, query: searchQuery },
+        activeFilters: { ...state.searchPageState.activeFilters, query: searchQuery },
+      },
+    });
+    dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'search' });
+    navigate('/search');
+  }, [searchQuery, dispatch, state.searchPageState, navigate]);
+
+  const handleNavigate = useCallback((view: string, path: string) => {
+    dispatch({ type: 'SET_ACTIVE_VIEW', payload: view as any });
+    navigate(path);
+  }, [dispatch, navigate]);
+
+  const handlePropertyClick = useCallback((property: Property) => {
+    dispatch({ type: 'SET_SELECTED_PROPERTY_OBJECT', payload: property });
+    navigate(`/property/${property.id}`);
+  }, [dispatch, navigate]);
+
+  const handleCategoryClick = useCallback((propertyType: string, listingType?: string) => {
+    const filters = { ...state.searchPageState.filters };
+    if (propertyType !== 'any') {
+      filters.propertyType = propertyType as any;
+    }
+    if (listingType) {
+      filters.listingType = listingType as any;
+    }
+    dispatch({
+      type: 'UPDATE_SEARCH_PAGE_STATE',
+      payload: { filters, activeFilters: filters },
+    });
+    dispatch({ type: 'SET_ACTIVE_VIEW', payload: listingType === 'rent' ? 'rentals' : 'search' });
+    navigate(listingType === 'rent' ? '/rent' : '/search');
+  }, [dispatch, state.searchPageState, navigate]);
+
+  const isAuthenticated = state.isAuthenticated;
+  const currentUser = state.currentUser;
+
+  return (
+    <div className="flex flex-col min-h-screen overflow-y-auto bg-neutral-50">
+      <Helmet>
+        <title>{t('home:seo.title')}</title>
+        <meta name="description" content={t('home:seo.description')} />
+      </Helmet>
+
+      <HeroSection
+        searchQuery={searchQuery}
+        onSearchChange={setSearchQuery}
+        onSearch={handleSearch}
+        onNavigate={handleNavigate}
+      />
+
+      {isAuthenticated && currentUser && (
+        <QuickAccessSection
+          user={currentUser}
+          onNavigate={handleNavigate}
+          savedSearchesCount={state.savedSearches.length}
+          savedHomesCount={state.savedHomes.length}
+          unreadMessagesCount={state.conversations.reduce(
+            (acc, c) => acc + (c.buyerUnreadCount || 0) + (c.sellerUnreadCount || 0),
+            0
+          )}
+        />
+      )}
+
+      <FeaturedPropertiesSection
+        properties={featuredProperties}
+        onPropertyClick={handlePropertyClick}
+        onViewAll={() => handleNavigate('search', '/search')}
+      />
+
+      <CategoriesSection onCategoryClick={handleCategoryClick} />
+
+      <PopularCitiesSection onNavigate={handleNavigate} />
+
+      <HowItWorksSection onLearnMore={() => handleNavigate('how-it-works', '/how-it-works')} />
+
+      {!isAuthenticated && (
+        <CTASection
+          onListProperty={() => {
+            dispatch({ type: 'TOGGLE_AUTH_MODAL', payload: { isOpen: true, view: 'signup' } });
+          }}
+          onJoinAsAgent={() => {
+            dispatch({ type: 'TOGGLE_AUTH_MODAL', payload: { isOpen: true, view: 'signup' } });
+          }}
+        />
+      )}
+    </div>
+  );
+};
+
+export default HomePage;

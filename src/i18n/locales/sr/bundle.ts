@@ -28,9 +28,10 @@ import valuation from './valuation.json';
 import howItWorks from './howItWorks.json';
 import rental from './rental.json';
 
+import home from './home.json';
 export default {
   common, nav, property, auth, search, messages, footer, newsletter,
   calculators, pricing, validation, admin, account, seller, agents, modals,
   payment, saved, exploreCities, analytics, subscription, agencies,
-  agencyDetails, agentProfile, newListing, valuation, howItWorks, rental,
+  agencyDetails, agentProfile, newListing, valuation, howItWorks, rental, home,
 };

@@ -1,0 +1,98 @@
+{
+  "seo": {
+    "title": "BalkanEstate - Gjeni Pronën Tuaj të Ëndrrave në Ballkan",
+    "description": "Zbuloni prona për shitje dhe qira në 11 vende të Ballkanit. Kërkim i fuqizuar nga AI, agjentë të verifikuar dhe lista në 10 gjuhë."
+  },
+  "hero": {
+    "badge": "Platforma #1 e Pasurive të Patundshme në Ballkan",
+    "title": "Gjeni",
+    "titleHighlight": "Shtëpinë e Ëndrrave",
+    "titleEnd": "në Ballkan",
+    "subtitle": "Zbuloni mijëra prona në 11 vende. Kërkim i fuqizuar nga AI, agjentë të verifikuar dhe lista në 10 gjuhë.",
+    "searchPlaceholder": "Kërko sipas qytetit, lagjes ose adresës...",
+    "searchButton": "Kërko",
+    "popularSearches": "Popullar:",
+    "ctaBuy": "Bli Pronë",
+    "ctaRent": "Qiraje",
+    "ctaSell": "Listo Pronën Tënde"
+  },
+  "stats": {
+    "properties": "Lista Aktive",
+    "countries": "Vende",
+    "agents": "Agjentë të Verifikuar",
+    "languages": "Gjuhë"
+  },
+  "quickAccess": {
+    "title": "Qasje e Shpejtë",
+    "subtitle": "Kthehuni menjëherë atje ku ishit",
+    "savedSearches": "Kërkimet e Ruajtura",
+    "savedProperties": "Pronat e Ruajtura",
+    "messages": "Mesazhet",
+    "myListings": "Listat e Mia",
+    "recentlyViewed": "Të Parë Së Fundmi",
+    "analytics": "Analitika",
+    "myAccount": "Llogaria Ime",
+    "createListing": "Krijo Listë"
+  },
+  "featured": {
+    "title": "Prona të Veçanta",
+    "subtitle": "Prona të zgjedhura nga agjentët më të mirë në Ballkan",
+    "viewAll": "Shiko Të Gjitha Pronat",
+    "price": "Çmimi",
+    "beds": "{{count}} dhomë",
+    "beds_plural": "{{count}} dhoma",
+    "baths": "{{count}} banjo",
+    "baths_plural": "{{count}} banjo",
+    "sqm": "{{count}} m²",
+    "promoted": "E Promovuar",
+    "new": "E Re",
+    "priceReduced": "Çmim i Ulur"
+  },
+  "categories": {
+    "title": "Shfleto sipas Kategorisë",
+    "subtitle": "Gjeni pikërisht atë që po kërkoni",
+    "apartments": "Apartamente",
+    "houses": "Shtëpi",
+    "villas": "Vila",
+    "land": "Tokë",
+    "forRent": "Për Qira",
+    "luxury": "Luksoz",
+    "newBuilds": "Ndërtime të Reja",
+    "withPool": "Me Pishinë"
+  },
+  "cities": {
+    "title": "Eksploroni Qytete Popullar",
+    "subtitle": "Zbuloni mundësi në qytetet më të kërkuara të Ballkanit",
+    "viewAll": "Eksploroni Të Gjitha Qytetet",
+    "propertiesCount": "{{count}} prona"
+  },
+  "howItWorks": {
+    "title": "Si Funksionon",
+    "subtitle": "Të fillosh është e thjeshtë — pavarësisht nëse blini, shisni ose jepni me qira",
+    "step1Title": "Kërko & Zbulo",
+    "step1Desc": "Përdorni kërkimin tonë me AI ose filtrat për të gjetur prona në 11 vende të Ballkanit.",
+    "step2Title": "Lidhuni me Agjentë",
+    "step2Desc": "Dërgoni mesazhe direkt agjentëve, planifikoni vizita dhe merrni udhëzime lokale.",
+    "step3Title": "Mbyllni Marrëveshjen",
+    "step3Desc": "Përdorni mjetet tona — kalkulatorin e hipotekës, vlerësimin e pronës dhe udhëzuesit.",
+    "learnMore": "Mëso Më Shumë"
+  },
+  "cta": {
+    "sellerTitle": "Gati të Shisni Pronën Tuaj?",
+    "sellerSubtitle": "Listoni pronën tuaj dhe arrini mijëra blerës potencialë në Ballkan.",
+    "sellerButton": "Listo Pronën Tënde",
+    "agentTitle": "Jeni Agjent i Pasurive?",
+    "agentSubtitle": "Bashkohuni me rrjetin tonë të agjentëve. Merrni kontakte dhe rritni biznesin.",
+    "agentButton": "Bashkohu si Agjent"
+  },
+  "testimonials": {
+    "title": "Çfarë Thonë Përdoruesit Tanë",
+    "subtitle": "I besuar nga mijëra blerës, shitës dhe agjentë në Ballkan"
+  },
+  "newsletter": {
+    "title": "Qëndroni të Përditësuar",
+    "subtitle": "Merrni njoftime pronash dhe njohuri tregu në emailin tuaj.",
+    "placeholder": "Shkruani emailin tuaj",
+    "button": "Abonohu"
+  }
+}

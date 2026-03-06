@@ -1,0 +1,98 @@
+{
+  "seo": {
+    "title": "BalkanEstate - Find Your Dream Property Across the Balkans",
+    "description": "Discover properties for sale and rent across 11 Balkan countries. AI-powered search, verified agents, and real-time listings in 10 languages."
+  },
+  "hero": {
+    "badge": "The #1 Balkan Real Estate Platform",
+    "title": "Find Your",
+    "titleHighlight": "Dream Home",
+    "titleEnd": "in the Balkans",
+    "subtitle": "Discover thousands of properties across 11 countries. AI-powered search, verified agents, and listings in 10 languages.",
+    "searchPlaceholder": "Search by city, neighborhood, or address...",
+    "searchButton": "Search",
+    "popularSearches": "Popular:",
+    "ctaBuy": "Buy Property",
+    "ctaRent": "Rent Property",
+    "ctaSell": "List Your Property"
+  },
+  "stats": {
+    "properties": "Active Listings",
+    "countries": "Countries",
+    "agents": "Verified Agents",
+    "languages": "Languages"
+  },
+  "quickAccess": {
+    "title": "Quick Access",
+    "subtitle": "Jump right back to where you were",
+    "savedSearches": "Saved Searches",
+    "savedProperties": "Saved Properties",
+    "messages": "Messages",
+    "myListings": "My Listings",
+    "recentlyViewed": "Recently Viewed",
+    "analytics": "Analytics",
+    "myAccount": "My Account",
+    "createListing": "Create Listing"
+  },
+  "featured": {
+    "title": "Featured Properties",
+    "subtitle": "Handpicked properties from top agents across the Balkans",
+    "viewAll": "View All Properties",
+    "price": "Price",
+    "beds": "{{count}} bed",
+    "beds_plural": "{{count}} beds",
+    "baths": "{{count}} bath",
+    "baths_plural": "{{count}} baths",
+    "sqm": "{{count}} m²",
+    "promoted": "Promoted",
+    "new": "New",
+    "priceReduced": "Price Reduced"
+  },
+  "categories": {
+    "title": "Browse by Category",
+    "subtitle": "Find exactly what you're looking for",
+    "apartments": "Apartments",
+    "houses": "Houses",
+    "villas": "Villas",
+    "land": "Land",
+    "forRent": "For Rent",
+    "luxury": "Luxury",
+    "newBuilds": "New Builds",
+    "withPool": "With Pool"
+  },
+  "cities": {
+    "title": "Explore Popular Cities",
+    "subtitle": "Discover real estate opportunities in the most sought-after Balkan cities",
+    "viewAll": "Explore All Cities",
+    "propertiesCount": "{{count}} properties"
+  },
+  "howItWorks": {
+    "title": "How It Works",
+    "subtitle": "Getting started is simple — whether you're buying, selling, or renting",
+    "step1Title": "Search & Discover",
+    "step1Desc": "Use our AI-powered search or filters to find properties that match your criteria across 11 Balkan countries.",
+    "step2Title": "Connect with Agents",
+    "step2Desc": "Message verified agents directly, schedule viewings, and get expert local guidance.",
+    "step3Title": "Close the Deal",
+    "step3Desc": "Use our tools — mortgage calculator, property valuation, and guides — to make informed decisions.",
+    "learnMore": "Learn More"
+  },
+  "cta": {
+    "sellerTitle": "Ready to Sell Your Property?",
+    "sellerSubtitle": "List your property and reach thousands of potential buyers across the Balkans. Get started in minutes.",
+    "sellerButton": "List Your Property",
+    "agentTitle": "Are You a Real Estate Agent?",
+    "agentSubtitle": "Join our network of verified agents. Get leads, manage listings, and grow your business.",
+    "agentButton": "Join as Agent"
+  },
+  "testimonials": {
+    "title": "What Our Users Say",
+    "subtitle": "Trusted by thousands of buyers, sellers, and agents across the Balkans"
+  },
+  "newsletter": {
+    "title": "Stay Updated",
+    "subtitle": "Get the latest property alerts and market insights delivered to your inbox.",
+    "placeholder": "Enter your email",
+    "button": "Subscribe"
+  }
+}

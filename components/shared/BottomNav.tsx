@@ -26,7 +26,7 @@ const BottomNav: React.FC = () => {
             dispatch({ type: 'SET_SELECTED_AGENCY', payload: null });
             dispatch({ type: 'SET_ACTIVE_VIEW', payload: view });
 
-            const route = view === 'search' ? '/' : `/${view}`;
+            const route = view === 'home' ? '/' : view === 'search' ? '/search' : `/${view}`;
             window.history.pushState({}, '', getLocalizedPath(route));
         }
     };
