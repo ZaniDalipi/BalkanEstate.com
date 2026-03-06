@@ -1,12 +1,7 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { motion } from 'framer-motion';
-import {
-  CardTransformed,
-  CardsContainer,
-  ContainerScroll,
-  ReviewStars,
-} from '@/src/components/blocks/animated-cards-stack';
+import { AnimatedCardsStack, CardItem } from '@/src/components/ui/animated-cards-stack';
 import {
   Avatar,
   AvatarFallback,
@@ -82,12 +77,74 @@ const TESTIMONIALS = [
   },
 ];
 
+const StarRating: React.FC<{ rating: number }> = ({ rating }) => {
+  const filled = Math.floor(rating);
+  const hasFraction = rating - filled > 0;
+
+  return (
+    <div className="flex items-center gap-0.5">
+      {Array.from({ length: filled }).map((_, i) => (
+        <svg key={i} className="w-4 h-4 text-amber-500" fill="currentColor" viewBox="0 0 20 20">
+          <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.286 3.957a1 1 0 00.95.69h4.162c.969 0 1.371 1.24.588 1.81l-3.37 2.448a1 1 0 00-.364 1.118l1.287 3.957c.3.921-.755 1.688-1.54 1.118l-3.37-2.448a1 1 0 00-1.175 0l-3.37 2.448c-.784.57-1.838-.197-1.54-1.118l1.287-3.957a1 1 0 00-.364-1.118L2.05 9.384c-.783-.57-.38-1.81.588-1.81h4.162a1 1 0 00.95-.69l1.286-3.957z" />
+        </svg>
+      ))}
+      {hasFraction && (
+        <svg className="w-4 h-4 text-amber-500" fill="currentColor" viewBox="0 0 20 20">
+          <defs>
+            <linearGradient id="half-star">
+              <stop offset="50%" stopColor="currentColor" />
+              <stop offset="50%" stopColor="rgb(209 213 219)" />
+            </linearGradient>
+          </defs>
+          <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.286 3.957a1 1 0 00.95.69h4.162c.969 0 1.371 1.24.588 1.81l-3.37 2.448a1 1 0 00-.364 1.118l1.287 3.957c.3.921-.755 1.688-1.54 1.118l-3.37-2.448a1 1 0 00-1.175 0l-3.37 2.448c-.784.57-1.838-.197-1.54-1.118l1.287-3.957a1 1 0 00-.364-1.118L2.05 9.384c-.783-.57-.38-1.81.588-1.81h4.162a1 1 0 00.95-.69l1.286-3.957z" fill="url(#half-star)" />
+        </svg>
+      )}
+    </div>
+  );
+};
+
 const TestimonialsSection: React.FC = () => {
   const { t } = useTranslation('home');
 
+  const cardItems: CardItem[] = TESTIMONIALS.map((testimonial) => ({
+    id: testimonial.id,
+    content: (
+      <div className="flex flex-col items-center justify-between h-full bg-white rounded-2xl p-6 border border-neutral-100">
+        <div className="flex flex-col items-center space-y-4 text-center flex-1">
+          <StarRating rating={testimonial.rating} />
+          <blockquote className="text-base leading-relaxed text-slate-700 max-w-[280px]">
+            &ldquo;{testimonial.description}&rdquo;
+          </blockquote>
+        </div>
+        <div className="flex items-center gap-3 mt-5">
+          <Avatar className="!size-11 border border-neutral-200">
+            <AvatarImage
+              src={testimonial.avatarUrl}
+              alt={`Portrait of ${testimonial.name}`}
+            />
+            <AvatarFallback>
+              {testimonial.name
+                .split(' ')
+                .map((n) => n[0])
+                .join('')}
+            </AvatarFallback>
+          </Avatar>
+          <div>
+            <span className="block text-sm font-semibold text-slate-900">
+              {testimonial.name}
+            </span>
+            <span className="block text-xs text-slate-500">
+              {testimonial.profession} · {testimonial.country}
+            </span>
+          </div>
+        </div>
+      </div>
+    ),
+  }));
+
   return (
-    <section className="bg-white px-4 sm:px-8 py-12">
-      <div>
+    <section className="py-16 sm:py-20 bg-neutral-50 px-4 sm:px-8">
+      <div className="max-w-6xl mx-auto">
         <motion.h2
           initial={{ opacity: 0, y: 15 }}
           whileInView={{ opacity: 1, y: 0 }}
@@ -101,66 +158,26 @@ const TestimonialsSection: React.FC = () => {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ delay: 0.1 }}
-          className="mx-auto mt-2 max-w-lg text-center text-sm text-slate-500"
+          className="mx-auto mt-2 max-w-lg text-center text-sm text-slate-500 mb-12"
         >
           {t(
             'testimonials.subtitle',
             'Trusted by thousands of buyers, sellers, and agents across the Balkans'
           )}
         </motion.p>
-      </div>
-      <ContainerScroll className="container h-[300vh]">
-        <div className="sticky left-0 top-0 h-svh w-full py-12">
-          <CardsContainer className="mx-auto size-full h-[450px] w-[350px]">
-            {TESTIMONIALS.map((testimonial, index) => (
-              <CardTransformed
-                arrayLength={TESTIMONIALS.length}
-                key={testimonial.id}
-                variant="light"
-                index={index + 2}
-                role="article"
-                aria-labelledby={`card-${testimonial.id}-title`}
-                aria-describedby={`card-${testimonial.id}-content`}
-              >
-                <div className="flex flex-col items-center space-y-4 text-center">
-                  <ReviewStars
-                    className="text-amber-500"
-                    rating={testimonial.rating}
-                  />
-                  <div className="mx-auto w-4/5 text-lg" id={`card-${testimonial.id}-content`}>
-                    <blockquote>&ldquo;{testimonial.description}&rdquo;</blockquote>
-                  </div>
-                </div>
-                <div className="flex items-center gap-4">
-                  <Avatar className="!size-12 border border-stone-300">
-                    <AvatarImage
-                      src={testimonial.avatarUrl}
-                      alt={`Portrait of ${testimonial.name}`}
-                    />
-                    <AvatarFallback>
-                      {testimonial.name
-                        .split(' ')
-                        .map((n) => n[0])
-                        .join('')}
-                    </AvatarFallback>
-                  </Avatar>
-                  <div>
-                    <span
-                      className="block text-lg font-semibold tracking-tight md:text-xl"
-                      id={`card-${testimonial.id}-title`}
-                    >
-                      {testimonial.name}
-                    </span>
-                    <span className="block text-sm text-slate-500">
-                      {testimonial.profession} · {testimonial.country}
-                    </span>
-                  </div>
-                </div>
-              </CardTransformed>
-            ))}
-          </CardsContainer>
+
+        <div className="flex justify-center">
+          <AnimatedCardsStack
+            items={cardItems}
+            width={350}
+            height={380}
+            autoPlayInterval={4000}
+            stackOffset={10}
+            scaleStep={0.05}
+            maxVisibleCards={3}
+          />
         </div>
-      </ContainerScroll>
+      </div>
     </section>
   );
 };

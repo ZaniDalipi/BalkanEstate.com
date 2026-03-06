@@ -28,7 +28,7 @@ const NewsCard: React.FC<{ item: NewsItem; index: number }> = ({ item, index }) 
       exit={{ opacity: 0, y: -10 }}
       transition={{ delay: index * 0.05, type: 'spring', stiffness: 300, damping: 30 }}
       whileHover={{ y: -4 }}
-      className="group block rounded-2xl overflow-hidden border border-white/30 bg-white/65 backdrop-blur-sm hover:shadow-xl transition-shadow"
+      className="group block rounded-2xl overflow-hidden border border-neutral-200 bg-white hover:shadow-xl transition-shadow"
     >
       {/* Gradient image placeholder */}
       <div className={`h-36 bg-gradient-to-br ${item.imageGradient} relative overflow-hidden`}>

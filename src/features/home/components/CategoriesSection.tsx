@@ -101,7 +101,7 @@ const CategoriesSection: React.FC<CategoriesSectionProps> = ({ onCategoryClick }
               whileHover={{ y: -4 }}
               whileTap={{ scale: 0.95 }}
               onClick={() => onCategoryClick(cat.type, cat.listingType)}
-              className="group flex flex-col items-center gap-2.5 p-4 sm:p-5 rounded-xl border border-white/30 hover:border-white/50 hover:shadow-md bg-white/65 backdrop-blur-sm transition-all"
+              className="group flex flex-col items-center gap-2.5 p-4 sm:p-5 rounded-xl border border-neutral-200 hover:border-neutral-300 hover:shadow-md bg-white transition-all"
             >
               <motion.div
                 whileHover={{ scale: 1.1, rotate: 5 }}
