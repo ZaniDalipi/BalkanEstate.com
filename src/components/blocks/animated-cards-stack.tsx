@@ -1,233 +1,230 @@
-import React, { useRef, createContext, useContext } from 'react';
-import { useScroll, useTransform, motion, MotionValue } from 'framer-motion';
-import { cva, type VariantProps } from 'class-variance-authority';
+import * as React from 'react';
+import { VariantProps, cva } from 'class-variance-authority';
+import {
+  HTMLMotionProps,
+  MotionValue,
+  motion,
+  useMotionTemplate,
+  useScroll,
+  useTransform,
+} from 'framer-motion';
+import { cn } from '@/src/lib/utils';
 
-/* ─── Scroll context shared between container and cards ─── */
-interface ScrollCtx {
-  progress: MotionValue<number>;
-  total: number;
+const cardVariants = cva('absolute will-change-transform', {
+  variants: {
+    variant: {
+      dark: 'flex size-full flex-col items-center justify-center gap-6 rounded-2xl border border-stone-700/50 bg-accent-foreground/80 p-6 backdrop-blur-md',
+      light:
+        'flex size-full flex-col items-center justify-center gap-6 rounded-2xl border bg-white/70 p-6 backdrop-blur-md border-white/30',
+    },
+  },
+  defaultVariants: {
+    variant: 'light',
+  },
+});
+
+interface ReviewProps extends React.HTMLAttributes<HTMLDivElement> {
+  rating: number;
+  maxRating?: number;
 }
-const ScrollContext = createContext<ScrollCtx | null>(null);
 
-/* ─── ContainerScroll: wraps the tall scroll area ─── */
-export const ContainerScroll: React.FC<{
-  children: React.ReactNode;
-  className?: string;
-  totalCards?: number;
-}> = ({ children, className = '', totalCards = 1 }) => {
-  const ref = useRef<HTMLDivElement>(null);
+interface CardStickyProps
+  extends HTMLMotionProps<'div'>,
+    VariantProps<typeof cardVariants> {
+  arrayLength: number;
+  index: number;
+  incrementY?: number;
+  incrementZ?: number;
+  incrementRotation?: number;
+}
+
+interface ContainerScrollContextValue {
+  scrollYProgress: MotionValue<number>;
+}
+
+const ContainerScrollContext = React.createContext<
+  ContainerScrollContextValue | undefined
+>(undefined);
+
+function useContainerScrollContext() {
+  const context = React.useContext(ContainerScrollContext);
+  if (context === undefined) {
+    throw new Error(
+      'useContainerScrollContext must be used within a ContainerScrollContextProvider'
+    );
+  }
+  return context;
+}
+
+export const ContainerScroll: React.FC<
+  React.HTMLAttributes<HTMLDivElement>
+> = ({ children, style, className, ...props }) => {
+  const scrollRef = React.useRef<HTMLDivElement>(null);
   const { scrollYProgress } = useScroll({
-    target: ref,
-    offset: ['start start', 'end end'],
+    target: scrollRef,
+    offset: ['start center', 'end end'],
   });
 
   return (
-    <ScrollContext.Provider value={{ progress: scrollYProgress, total: totalCards }}>
-      <div ref={ref} className={className}>
+    <ContainerScrollContext.Provider value={{ scrollYProgress }}>
+      <div
+        ref={scrollRef}
+        className={cn('relative min-h-svh w-full', className)}
+        style={{ perspective: '1000px', ...style }}
+        {...props}
+      >
         {children}
       </div>
-    </ScrollContext.Provider>
+    </ContainerScrollContext.Provider>
   );
 };
+ContainerScroll.displayName = 'ContainerScroll';
 
-/* ─── CardsContainer: center-positioned card stack ─── */
-export const CardsContainer: React.FC<{
-  children: React.ReactNode;
-  className?: string;
-}> = ({ children, className = '' }) => (
-  <div className={`relative ${className}`}>
-    {children}
-  </div>
-);
-
-/* ─── Card style variants ─── */
-const cardVariants = cva(
-  'absolute inset-0 flex flex-col justify-between rounded-2xl p-6 sm:p-8 shadow-xl will-change-transform',
-  {
-    variants: {
-      variant: {
-        light: 'bg-white/70 backdrop-blur-lg border border-white/30 text-slate-800',
-        dark: 'bg-slate-800 border border-slate-700 text-white',
-      },
-    },
-    defaultVariants: { variant: 'light' },
-  }
-);
-
-/* ─── CardTransformed: each card in the animated stack ─── */
-interface CardTransformedProps extends VariantProps<typeof cardVariants> {
-  children: React.ReactNode;
-  index: number;
-  arrayLength: number;
-  className?: string;
-  role?: string;
-  'aria-labelledby'?: string;
-  'aria-describedby'?: string;
-}
-
-export const CardTransformed: React.FC<CardTransformedProps> = ({
+export const CardsContainer: React.FC<React.HTMLAttributes<HTMLDivElement>> = ({
   children,
-  index,
-  arrayLength,
-  variant,
-  className = '',
+  className,
   ...props
 }) => {
-  const ctx = useContext(ScrollContext);
-  if (!ctx) throw new Error('CardTransformed must be wrapped in ContainerScroll');
-
-  const { progress } = ctx;
-  const total = arrayLength;
-
-  // Each card gets a segment of the scroll range
-  // Card 0 is active at scroll 0, card 1 at scroll 1/total, etc.
-  const segmentSize = 1 / total;
-  const start = index * segmentSize;
-  const end = (index + 1) * segmentSize;
-
-  // Card starts flat and visible when it's "active"
-  // When scroll moves past it, the card rotates away upward and fades out
-  // Cards behind (not yet active) sit slightly scaled down and stacked
-
-  // Before this card is active: it sits behind, stacked
-  // During active: it's front and center (rotate=0, scale=1, opacity=1)
-  // After active: it flings away (rotate up, translate up, fade out)
-
-  const rotate = useTransform(
-    progress,
-    [
-      Math.max(0, start - 0.001), // just before active
-      start,                       // active start
-      end - segmentSize * 0.1,     // near end of active
-      Math.min(1, end),            // end of active
-    ],
-    [
-      0,    // waiting behind: no rotation
-      0,    // active: flat
-      0,    // still active
-      -15,  // flung away
-    ]
-  );
-
-  const y = useTransform(
-    progress,
-    [
-      Math.max(0, start - 0.001),
-      start,
-      end - segmentSize * 0.1,
-      Math.min(1, end),
-    ],
-    [
-      0,
-      0,
-      0,
-      -80,  // flies up when dismissed
-    ]
-  );
-
-  const scale = useTransform(
-    progress,
-    [
-      Math.max(0, start - 0.001),
-      start,
-      end - segmentSize * 0.1,
-      Math.min(1, end),
-    ],
-    [
-      // Cards behind are slightly smaller to create depth
-      1 - (total - index) * 0.02,
-      1,      // active: full size
-      1,
-      0.9,    // shrinks as it leaves
-    ]
-  );
-
-  const opacity = useTransform(
-    progress,
-    [
-      Math.max(0, start - 0.001),
-      start,
-      end - segmentSize * 0.2,
-      Math.min(1, end),
-    ],
-    [
-      index === 0 ? 1 : 0.6,  // behind cards are dimmer
-      1,                        // active: fully visible
-      1,
-      0,                        // fades out when dismissed
-    ]
-  );
-
-  // Z-index: active card is on top.
-  // We use a dynamic approach: cards that haven't been scrolled past are stacked
-  // with later cards having lower z-index (they're behind)
-  // Once scrolled past, they drop to lowest z-index
-  const zIndex = useTransform(progress, (p) => {
-    if (p >= end) return 0; // already dismissed
-    return total - index;   // not yet dismissed: stack order
-  });
-
   return (
-    <motion.div
-      style={{
-        rotateX: rotate,
-        y,
-        scale,
-        opacity,
-        zIndex,
-        transformOrigin: 'center bottom',
-      }}
-      className={cardVariants({ variant, className })}
+    <div
+      className={cn('relative', className)}
+      style={{ perspective: '1000px', ...props.style }}
       {...props}
     >
       {children}
-    </motion.div>
-  );
-};
-
-/* ─── ReviewStars component ─── */
-export const ReviewStars: React.FC<{
-  rating: number;
-  className?: string;
-}> = ({ rating, className = '' }) => {
-  const full = Math.floor(rating);
-  const half = rating % 1 >= 0.5;
-
-  return (
-    <div className={`flex gap-0.5 ${className}`}>
-      {Array.from({ length: 5 }).map((_, i) => {
-        const isFull = i < full;
-        const isHalf = i === full && half;
-        return (
-          <svg
-            key={i}
-            className="w-5 h-5"
-            viewBox="0 0 24 24"
-            fill={isFull ? 'currentColor' : 'none'}
-            stroke={isFull ? 'none' : 'currentColor'}
-            strokeWidth={isFull ? 0 : 1.5}
-          >
-            {isHalf ? (
-              <>
-                <defs>
-                  <linearGradient id={`star-half-${i}`}>
-                    <stop offset="50%" stopColor="currentColor" />
-                    <stop offset="50%" stopColor="transparent" />
-                  </linearGradient>
-                </defs>
-                <path
-                  d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"
-                  fill={`url(#star-half-${i})`}
-                  stroke="currentColor"
-                  strokeWidth={1}
-                />
-              </>
-            ) : (
-              <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
-            )}
-          </svg>
-        );
-      })}
     </div>
   );
 };
+CardsContainer.displayName = 'CardsContainer';
+
+export const CardTransformed = React.forwardRef<
+  HTMLDivElement,
+  CardStickyProps
+>(
+  (
+    {
+      arrayLength,
+      index,
+      incrementY = 10,
+      incrementZ = 10,
+      incrementRotation = -index + 90,
+      className,
+      variant,
+      style,
+      ...props
+    },
+    ref
+  ) => {
+    const { scrollYProgress } = useContainerScrollContext();
+
+    const start = index / (arrayLength + 1);
+    const end = (index + 1) / (arrayLength + 1);
+    const range = React.useMemo(() => [start, end], [start, end]);
+    const rotateRange = [range[0] - 1.5, range[1] / 1.5];
+
+    const y = useTransform(scrollYProgress, range, ['0%', '-180%']);
+    const rotate = useTransform(scrollYProgress, rotateRange, [
+      incrementRotation,
+      0,
+    ]);
+
+    const transform = useMotionTemplate`translateZ(${
+      index * incrementZ
+    }px) translateY(${y}) rotate(${rotate}deg)`;
+
+    const dx = useTransform(scrollYProgress, rotateRange, [4, 0]);
+    const dy = useTransform(scrollYProgress, rotateRange, [4, 12]);
+    const blur = useTransform(scrollYProgress, rotateRange, [2, 24]);
+    const alpha = useTransform(scrollYProgress, rotateRange, [0.15, 0.2]);
+
+    const filter =
+      variant === 'light'
+        ? useMotionTemplate`drop-shadow(${dx}px ${dy}px ${blur}px rgba(0,0,0,${alpha}))`
+        : 'none';
+
+    const cardStyle = {
+      top: index * incrementY,
+      transform,
+      backfaceVisibility: 'hidden' as const,
+      zIndex: (arrayLength - index) * incrementZ,
+      filter,
+      ...style,
+    };
+
+    return (
+      <motion.div
+        layout="position"
+        ref={ref}
+        style={cardStyle}
+        className={cn(cardVariants({ variant, className }))}
+        {...props}
+      />
+    );
+  }
+);
+CardTransformed.displayName = 'CardTransformed';
+
+export const ReviewStars = React.forwardRef<HTMLDivElement, ReviewProps>(
+  ({ rating, maxRating = 5, className, ...props }, ref) => {
+    const filledStars = Math.floor(rating);
+    const fractionalPart = rating - filledStars;
+    const emptyStars = maxRating - filledStars - (fractionalPart > 0 ? 1 : 0);
+
+    return (
+      <div
+        className={cn('flex items-center gap-2', className)}
+        ref={ref}
+        {...props}
+      >
+        <div className="flex items-center">
+          {[...Array(filledStars)].map((_, index) => (
+            <svg
+              key={`filled-${index}`}
+              className="size-4 text-inherit"
+              fill="currentColor"
+              viewBox="0 0 20 20"
+            >
+              <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.286 3.957a1 1 0 00.95.69h4.162c.969 0 1.371 1.24.588 1.81l-3.37 2.448a1 1 0 00-.364 1.118l1.287 3.957c.3.921-.755 1.688-1.54 1.118l-3.37-2.448a1 1 0 00-1.175 0l-3.37 2.448c-.784.57-1.838-.197-1.54-1.118l1.287-3.957a1 1 0 00-.364-1.118L2.05 9.384c-.783-.57-.38-1.81.588-1.81h4.162a1 1 0 00.95-.69l1.286-3.957z" />
+            </svg>
+          ))}
+          {fractionalPart > 0 && (
+            <svg
+              className="size-4 text-inherit"
+              fill="currentColor"
+              viewBox="0 0 20 20"
+            >
+              <defs>
+                <linearGradient id="half">
+                  <stop
+                    offset={`${fractionalPart * 100}%`}
+                    stopColor="currentColor"
+                  />
+                  <stop
+                    offset={`${fractionalPart * 100}%`}
+                    stopColor="rgb(209 213 219)"
+                  />
+                </linearGradient>
+              </defs>
+              <path
+                d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.286 3.957a1 1 0 00.95.69h4.162c.969 0 1.371 1.24.588 1.81l-3.37 2.448a1 1 0 00-.364 1.118l1.287 3.957c.3.921-.755 1.688-1.54 1.118l-3.37-2.448a1 1 0 00-1.175 0l-3.37 2.448c-.784.57-1.838-.197-1.54-1.118l1.287-3.957a1 1 0 00-.364-1.118L2.05 9.384c-.783-.57-.38-1.81.588-1.81h4.162a1 1 0 00.95-.69l1.286-3.957z"
+                fill="url(#half)"
+              />
+            </svg>
+          )}
+          {[...Array(emptyStars)].map((_, index) => (
+            <svg
+              key={`empty-${index}`}
+              className="size-4 text-gray-300"
+              fill="currentColor"
+              viewBox="0 0 20 20"
+            >
+              <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.286 3.957a1 1 0 00.95.69h4.162c.969 0 1.371 1.24.588 1.81l-3.37 2.448a1 1 0 00-.364 1.118l1.287 3.957c.3.921-.755 1.688-1.54 1.118l-3.37-2.448a1 1 0 00-1.175 0l-3.37 2.448c-.784.57-1.838-.197-1.54-1.118l1.287-3.957a1 1 0 00-.364-1.118L2.05 9.384c-.783-.57-.38-1.81.588-1.81h4.162a1 1 0 00.95-.69l1.286-3.957z" />
+            </svg>
+          ))}
+        </div>
+        <p className="sr-only">{rating}</p>
+      </div>
+    );
+  }
+);
+ReviewStars.displayName = 'ReviewStars';

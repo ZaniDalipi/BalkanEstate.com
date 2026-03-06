@@ -117,16 +117,16 @@ const TestimonialsSection: React.FC = () => {
         </motion.p>
       </div>
 
-      {/* Animated cards stack — scroll-driven */}
-      <ContainerScroll className="h-[350vh]" totalCards={TESTIMONIALS.length}>
-        <div className="sticky top-0 left-0 h-screen w-full flex items-center justify-center">
-          <CardsContainer className="h-[420px] w-[340px] sm:h-[460px] sm:w-[380px]">
+      {/* Animated cards stack — exact 21st.dev pattern */}
+      <ContainerScroll className="container h-[300vh]">
+        <div className="sticky left-0 top-0 h-svh w-full py-12">
+          <CardsContainer className="mx-auto size-full h-[450px] w-[350px]">
             {TESTIMONIALS.map((testimonial, index) => (
               <CardTransformed
                 key={testimonial.id}
                 arrayLength={TESTIMONIALS.length}
                 variant="light"
-                index={index}
+                index={index + 2}
                 role="article"
                 aria-labelledby={`card-${testimonial.id}-title`}
                 aria-describedby={`card-${testimonial.id}-content`}
