@@ -332,6 +332,16 @@ export const PropertyContact: React.FC<PropertyContactProps> = ({
           {property.status !== 'sold' && property.seller?.phone && (
             <a
               href={`viber://chat?number=${property.seller.phone.replace(/[\s\-\(\)\+]/g, '')}`}
+              onClick={(e) => {
+                const phone = property.seller!.phone!.replace(/[\s\-\(\)\+]/g, '');
+                const deepLink = `viber://chat?number=${phone}`;
+                const fallback = 'https://www.viber.com/';
+                e.preventDefault();
+                window.location.href = deepLink;
+                setTimeout(() => {
+                  if (!document.hidden) window.open(fallback, '_blank');
+                }, 1500);
+              }}
               className="w-full flex justify-center items-center gap-2 py-2.5 px-4 border border-transparent rounded-xl shadow-sm text-sm font-semibold text-white bg-[#7360F2] hover:bg-[#6050E0] transition-colors"
             >
               <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">

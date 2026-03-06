@@ -134,6 +134,16 @@ const AgentContactActions: React.FC<AgentContactActionsProps> = ({
                 {agent.phone && (
                     <a
                         href={`viber://chat?number=${agent.phone.replace(/[\s\-\(\)\+]/g, '')}`}
+                        onClick={(e) => {
+                            const phone = agent.phone!.replace(/[\s\-\(\)\+]/g, '');
+                            const deepLink = `viber://chat?number=${phone}`;
+                            const fallback = 'https://www.viber.com/';
+                            e.preventDefault();
+                            window.location.href = deepLink;
+                            setTimeout(() => {
+                                if (!document.hidden) window.open(fallback, '_blank');
+                            }, 1500);
+                        }}
                         className="flex items-center gap-3 bg-[#7360F2]/20 hover:bg-[#7360F2]/30 p-4 rounded-xl mb-3 transition-colors"
                     >
                         <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">

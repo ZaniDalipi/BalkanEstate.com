@@ -16,7 +16,17 @@ const FloatingContactButtons: React.FC = () => {
     t('floatingContact.whatsappMessage', 'Hi, I have a question about a property on BalkanEstate.')
   )}`;
 
-  const viberUrl = `viber://chat?number=${CONTACT_CONFIG.social.whatsappNumber}`;
+  const viberNumber = CONTACT_CONFIG.social.whatsappNumber;
+
+  const handleViberClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    const deepLink = `viber://chat?number=${viberNumber}`;
+    const fallback = 'https://www.viber.com/';
+    window.location.href = deepLink;
+    setTimeout(() => {
+      if (!document.hidden) window.open(fallback, '_blank');
+    }, 1500);
+  };
 
   return (
     <div className="fixed bottom-6 right-6 z-40 flex flex-col items-end gap-3">
@@ -38,7 +48,8 @@ const FloatingContactButtons: React.FC = () => {
 
           {/* Viber */}
           <a
-            href={viberUrl}
+            href={`viber://chat?number=${viberNumber}`}
+            onClick={handleViberClick}
             className="flex items-center gap-2 bg-[#7360F2] text-white pl-4 pr-3 py-2.5 rounded-full shadow-lg hover:bg-[#6050E0] transition-all hover:scale-105"
           >
             <span className="text-sm font-semibold whitespace-nowrap">Viber</span>
