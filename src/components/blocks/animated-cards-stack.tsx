@@ -15,7 +15,7 @@ const cardVariants = cva('absolute will-change-transform', {
     variant: {
       dark: 'flex size-full flex-col items-center justify-center gap-6 rounded-2xl border border-stone-700/50 bg-accent-foreground/80 p-6 backdrop-blur-md',
       light:
-        'flex size-full flex-col items-center justify-center gap-6 rounded-2xl bg-white/80 p-6 backdrop-blur-md',
+        'flex size-full flex-col items-center justify-center gap-6 rounded-2xl bg-white p-6 shadow-[0_4px_24px_rgba(0,0,0,0.08)]',
     },
   },
   defaultVariants: {
@@ -151,7 +151,7 @@ export const CardTransformed = React.forwardRef<
     const initialRotation = index * incrementRotation;
     const flyAwayRotation = incrementRotation === 0 ? 0 : initialRotation + 25;
 
-    // Cards start big (1.08) and scale down to 0.7 as they fly away
+    // Cards start bigger (1.08) and scale down to 0.7 as they fly away
     const scale = useTransform(scrollYProgress, range, [1.08, 0.7]);
 
     // Cards move UP aggressively
