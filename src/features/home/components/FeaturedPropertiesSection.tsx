@@ -30,7 +30,7 @@ const PropertyCard: React.FC<{
       whileHover={{ y: -4 }}
       whileTap={{ scale: 0.98 }}
       onClick={onClick}
-      className="group text-left bg-white rounded-xl border border-neutral-100 overflow-hidden hover:shadow-lg hover:border-neutral-200 transition-all duration-300 w-full"
+      className="group text-left bg-white/70 backdrop-blur-sm rounded-xl border border-white/30 overflow-hidden hover:shadow-lg hover:border-white/50 transition-all duration-300 w-full"
     >
       {/* Image */}
       <div className="relative aspect-[4/3] overflow-hidden bg-neutral-100">
@@ -111,7 +111,7 @@ const FeaturedPropertiesSection: React.FC<FeaturedPropertiesSectionProps> = ({
   if (properties.length === 0) return null;
 
   return (
-    <section className="py-12 sm:py-16 bg-white">
+    <section className="py-12 sm:py-16 bg-white/60 backdrop-blur-sm">
       <div className="max-w-6xl mx-auto px-4">
         {/* Header */}
         <motion.div

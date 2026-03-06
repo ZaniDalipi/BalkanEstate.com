@@ -28,7 +28,7 @@ const NewsCard: React.FC<{ item: NewsItem; index: number }> = ({ item, index }) 
       exit={{ opacity: 0, y: -10 }}
       transition={{ delay: index * 0.05, type: 'spring', stiffness: 300, damping: 30 }}
       whileHover={{ y: -4 }}
-      className="group block rounded-2xl overflow-hidden border border-neutral-100 bg-white hover:shadow-xl transition-shadow"
+      className="group block rounded-2xl overflow-hidden border border-white/30 bg-white/65 backdrop-blur-sm hover:shadow-xl transition-shadow"
     >
       {/* Gradient image placeholder */}
       <div className={`h-36 bg-gradient-to-br ${item.imageGradient} relative overflow-hidden`}>
@@ -86,7 +86,7 @@ const NewsSection: React.FC = () => {
   const { news, countries, selectedCountry, setSelectedCountry } = useRealEstateNews();
 
   return (
-    <section className="py-16 md:py-24 bg-white">
+    <section className="py-16 md:py-24 bg-white/60 backdrop-blur-sm">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
         <motion.div

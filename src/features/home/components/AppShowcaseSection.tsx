@@ -177,13 +177,13 @@ const PhoneMapContent: React.FC = () => {
             key={f}
             onClick={() => setFilter(f)}
             className={`px-2.5 py-0.5 rounded-full text-[7px] font-semibold transition-colors ${
-              filter === f ? 'bg-blue-600 text-white' : 'bg-white text-slate-600 border border-neutral-200'
+              filter === f ? 'bg-slate-800 text-white' : 'bg-white text-slate-600 border border-neutral-200'
             }`}
           >
             {f === 'buy' ? 'Buy' : 'Rent'}
           </button>
         ))}
-        <div className="ml-auto flex items-center gap-0.5 text-[7px] text-blue-600 font-medium">
+        <div className="ml-auto flex items-center gap-0.5 text-[7px] text-slate-600 font-medium">
           <svg className="w-2.5 h-2.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5}>
             <path d="M3 7l6-3 6 3 6-3v14l-6 3-6-3-6 3V7z" />
           </svg>
@@ -192,13 +192,13 @@ const PhoneMapContent: React.FC = () => {
       </div>
 
       {/* Map area */}
-      <div className="flex-1 relative bg-gradient-to-br from-blue-50 via-emerald-50/30 to-amber-50/20 mx-2 rounded-xl overflow-hidden border border-neutral-200/40">
+      <div className="flex-1 relative bg-gradient-to-br from-neutral-50 via-neutral-100/30 to-neutral-50/20 mx-2 rounded-xl overflow-hidden border border-neutral-200/40">
         {/* Simplified terrain/water */}
         <svg className="absolute inset-0 w-full h-full" viewBox="0 0 100 100" preserveAspectRatio="none">
           <defs>
             <linearGradient id="sea" x1="0" y1="0" x2="1" y2="1">
-              <stop offset="0%" stopColor="#bfdbfe" stopOpacity="0.3" />
-              <stop offset="100%" stopColor="#93c5fd" stopOpacity="0.15" />
+              <stop offset="0%" stopColor="#cbd5e1" stopOpacity="0.3" />
+              <stop offset="100%" stopColor="#94a3b8" stopOpacity="0.15" />
             </linearGradient>
           </defs>
           {/* Adriatic Sea */}
@@ -267,10 +267,10 @@ const PhoneMapContent: React.FC = () => {
           { label: 'Profile', icon: 'M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z' },
         ].map((tab) => (
           <div key={tab.label} className="flex flex-col items-center gap-0.5">
-            <svg className={`w-3.5 h-3.5 ${tab.active ? 'text-blue-600' : 'text-slate-400'}`} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round">
+            <svg className={`w-3.5 h-3.5 ${tab.active ? 'text-slate-800' : 'text-slate-400'}`} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round">
               <path d={tab.icon} />
             </svg>
-            <span className={`text-[6px] ${tab.active ? 'text-blue-600 font-semibold' : 'text-slate-400'}`}>{tab.label}</span>
+            <span className={`text-[6px] ${tab.active ? 'text-slate-800 font-semibold' : 'text-slate-400'}`}>{tab.label}</span>
           </div>
         ))}
       </div>
@@ -348,7 +348,7 @@ const GuideCard: React.FC<{ item: HowItWorksContent; onClick: () => void }> = ({
         <h4 className="text-xs md:text-sm font-semibold text-slate-800 line-clamp-1">{item.title}</h4>
         {item.description && <p className="text-[10px] md:text-xs text-slate-500 mt-0.5 line-clamp-2">{item.description}</p>}
         {item.steps && item.steps.length > 0 && (
-          <span className="text-[9px] md:text-[10px] text-blue-600 font-medium mt-1 inline-block">{item.steps.length} steps</span>
+          <span className="text-[9px] md:text-[10px] text-slate-600 font-medium mt-1 inline-block">{item.steps.length} steps</span>
         )}
       </div>
     </div>
@@ -415,10 +415,10 @@ const AppShowcaseSection: React.FC<AppShowcaseSectionProps> = ({ onNavigate }) =
   }, [onNavigate]);
 
   return (
-    <section className="bg-white overflow-hidden">
+    <section className="bg-white/60 backdrop-blur-sm overflow-hidden">
       <ContainerScroll
         titleComponent={
-          <div className="mb-8">
+          <div className="mb-16">
             <motion.span
               initial={{ opacity: 0, y: 10 }}
               whileInView={{ opacity: 1, y: 0 }}
@@ -457,7 +457,7 @@ const AppShowcaseSection: React.FC<AppShowcaseSectionProps> = ({ onNavigate }) =
           {/* App header bar */}
           <div className="sticky top-0 z-10 bg-white/90 backdrop-blur-sm border-b border-neutral-100 px-4 md:px-6 py-3 flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-blue-600 to-blue-700 flex items-center justify-center">
+              <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-slate-700 to-slate-800 flex items-center justify-center">
                 <span className="text-white text-xs font-bold">BE</span>
               </div>
               <span className="text-sm font-semibold text-slate-800">BalkanEstate</span>
@@ -465,7 +465,7 @@ const AppShowcaseSection: React.FC<AppShowcaseSectionProps> = ({ onNavigate }) =
             <motion.button
               whileHover={{ x: 3 }}
               onClick={() => onNavigate('how-it-works', '/how-it-works')}
-              className="text-[10px] md:text-xs text-blue-600 font-medium hover:text-blue-700 transition-colors"
+              className="text-[10px] md:text-xs text-slate-600 font-medium hover:text-slate-800 transition-colors"
             >
               View Full Guide &rarr;
             </motion.button>
@@ -486,7 +486,7 @@ const AppShowcaseSection: React.FC<AppShowcaseSectionProps> = ({ onNavigate }) =
                       onClick={() => setActiveTab(tab.id)}
                       className={`px-3 py-1.5 rounded-lg text-[10px] md:text-xs font-medium whitespace-nowrap transition-colors ${
                         activeTab === tab.id
-                          ? 'bg-blue-600 text-white'
+                          ? 'bg-slate-800 text-white'
                           : 'bg-neutral-100 text-slate-600 hover:bg-neutral-200'
                       }`}
                     >
@@ -559,7 +559,7 @@ const AppShowcaseSection: React.FC<AppShowcaseSectionProps> = ({ onNavigate }) =
                     <p className="text-[9px] md:text-[10px] text-slate-400 mt-0.5 leading-relaxed line-clamp-2">
                       {feature.desc}
                     </p>
-                    <span className="text-[8px] md:text-[9px] text-blue-500 font-medium mt-1.5 inline-flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <span className="text-[8px] md:text-[9px] text-slate-500 font-medium mt-1.5 inline-flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity">
                       Explore <span className="text-[10px]">&rarr;</span>
                     </span>
                   </motion.div>
@@ -572,7 +572,7 @@ const AppShowcaseSection: React.FC<AppShowcaseSectionProps> = ({ onNavigate }) =
               <h3 className="text-xs md:text-sm font-semibold text-slate-800 mb-3">How It Works</h3>
               <div className="flex items-start gap-3 md:gap-4">
                 {[
-                  { step: '1', title: t('home:howItWorks.step1Title'), desc: t('home:howItWorks.step1Desc'), color: 'bg-blue-600' },
+                  { step: '1', title: t('home:howItWorks.step1Title'), desc: t('home:howItWorks.step1Desc'), color: 'bg-slate-800' },
                   { step: '2', title: t('home:howItWorks.step2Title'), desc: t('home:howItWorks.step2Desc'), color: 'bg-emerald-600' },
                   { step: '3', title: t('home:howItWorks.step3Title'), desc: t('home:howItWorks.step3Desc'), color: 'bg-violet-600' },
                 ].map((item, i) => (
@@ -601,7 +601,7 @@ const AppShowcaseSection: React.FC<AppShowcaseSectionProps> = ({ onNavigate }) =
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.97 }}
                   onClick={() => onNavigate('how-it-works', '/how-it-works')}
-                  className="px-4 py-2 rounded-lg bg-blue-600 text-white text-[10px] md:text-xs font-semibold hover:bg-blue-700 transition-colors"
+                  className="px-4 py-2 rounded-lg bg-slate-800 text-white text-[10px] md:text-xs font-semibold hover:bg-slate-900 transition-colors"
                 >
                   Explore Full Guide
                 </motion.button>

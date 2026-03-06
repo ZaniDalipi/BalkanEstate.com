@@ -44,7 +44,7 @@ const cardVariants = cva(
   {
     variants: {
       variant: {
-        light: 'bg-white border border-neutral-200/60 text-slate-800',
+        light: 'bg-white/70 backdrop-blur-lg border border-white/30 text-slate-800',
         dark: 'bg-slate-800 border border-slate-700 text-white',
       },
     },

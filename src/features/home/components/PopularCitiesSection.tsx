@@ -19,7 +19,7 @@ const PopularCitiesSection: React.FC<PopularCitiesSectionProps> = ({ onNavigate 
   const { t } = useTranslation(['home']);
 
   return (
-    <section className="py-12 sm:py-16 bg-white">
+    <section className="py-12 sm:py-16 bg-white/60 backdrop-blur-sm">
       <div className="max-w-6xl mx-auto px-4">
         <motion.div
           initial={{ opacity: 0, y: 15 }}

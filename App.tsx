@@ -778,7 +778,7 @@ const MainLayout: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-neutral-50 font-sans overflow-x-hidden max-w-full" style={{ height: '100dvh' }}>
+    <div className="min-h-screen bg-white font-sans overflow-x-hidden max-w-full" style={{ height: '100dvh' }}>
         <Suspense fallback={null}>
           <Sidebar isOpen={isSidebarOpen} onClose={() => setIsSidebarOpen(false)} />
         </Suspense>

@@ -86,7 +86,7 @@ const TestimonialsSection: React.FC = () => {
   const { t } = useTranslation('home');
 
   return (
-    <section className="bg-white px-4 sm:px-8 py-12">
+    <section className="bg-white/60 backdrop-blur-sm px-4 sm:px-8 py-12">
       {/* Header */}
       <div className="text-center">
         <motion.span

@@ -102,7 +102,7 @@ const QuickAccessSection: React.FC<QuickAccessSectionProps> = ({
   ];
 
   return (
-    <section className="py-8 sm:py-10 bg-white border-b border-neutral-100">
+    <section className="py-8 sm:py-10 bg-white/60 backdrop-blur-sm border-b border-white/30">
       <div className="max-w-6xl mx-auto px-4">
         <motion.div
           initial={{ opacity: 0, y: 10 }}
@@ -134,7 +134,7 @@ const QuickAccessSection: React.FC<QuickAccessSectionProps> = ({
               whileHover={{ y: -3 }}
               whileTap={{ scale: 0.95 }}
               onClick={() => onNavigate(link.view, link.path)}
-              className="relative flex flex-col items-center gap-2 p-3.5 rounded-xl border border-neutral-100 hover:border-neutral-200 hover:shadow-sm bg-white transition-all group"
+              className="relative flex flex-col items-center gap-2 p-3.5 rounded-xl border border-white/30 hover:border-white/50 hover:shadow-sm bg-white/65 backdrop-blur-sm transition-all group"
             >
               <motion.div
                 whileHover={{ scale: 1.1 }}
