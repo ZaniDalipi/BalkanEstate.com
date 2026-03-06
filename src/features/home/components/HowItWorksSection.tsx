@@ -1,89 +1,106 @@
 import React, { useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { motion, MotionValue, useScroll, useTransform } from 'framer-motion';
-import { CharacterV1 } from '@/src/components/ui/text-scroll-animation';
+import { CharacterV1, CharacterV2 } from '@/src/components/ui/text-scroll-animation';
 
 interface HowItWorksSectionProps {
   onLearnMore: () => void;
 }
 
-/* ─── Animated step card that scatters from the center ─── */
-interface AnimatedStepProps {
-  index: number;
-  totalSteps: number;
+/* ─── Step card with glass styling ─── */
+interface StepCardProps {
   number: string;
   title: string;
   description: string;
   icon: React.ReactNode;
   gradient: string;
-  iconBg: string;
-  scrollYProgress: MotionValue<number>;
+  accentColor: string;
+  participants: string[];
 }
 
-const AnimatedStep: React.FC<AnimatedStepProps> = ({
-  index,
-  totalSteps,
+const StepCard: React.FC<StepCardProps> = ({
   number,
   title,
   description,
   icon,
   gradient,
-  iconBg,
-  scrollYProgress,
-}) => {
-  const centerIndex = Math.floor(totalSteps / 2);
-  const distanceFromCenter = index - centerIndex;
+  accentColor,
+  participants,
+}) => (
+  <div className="relative group w-[280px] sm:w-[300px]">
+    {/* Glass card */}
+    <div className="relative rounded-2xl bg-white/80 backdrop-blur-xl border border-white/60 shadow-[0_8px_32px_rgba(0,0,0,0.08)] p-6 sm:p-7 overflow-hidden transition-transform duration-300 group-hover:-translate-y-1 group-hover:shadow-[0_12px_40px_rgba(0,0,0,0.12)]">
+      {/* Top accent line */}
+      <div
+        className={`absolute top-0 left-6 right-6 h-[2px] rounded-full ${gradient}`}
+      />
 
-  const x = useTransform(scrollYProgress, [0, 0.5], [distanceFromCenter * 120, 0]);
-  const y = useTransform(scrollYProgress, [0, 0.5], [Math.abs(distanceFromCenter) * 80, 0]);
-  const scale = useTransform(scrollYProgress, [0, 0.5], [0.6, 1]);
-  const opacity = useTransform(scrollYProgress, [0, 0.3], [0, 1]);
-  const rotate = useTransform(scrollYProgress, [0, 0.5], [distanceFromCenter * 15, 0]);
-
-  return (
-    <motion.div
-      className="flex flex-col items-center text-center px-4 will-change-transform"
-      style={{ x, y, scale, opacity, rotate, transformOrigin: 'center' }}
-    >
-      {/* Icon container */}
-      <div className={`w-16 h-16 sm:w-20 sm:h-20 rounded-2xl ${iconBg} flex items-center justify-center shadow-md`}>
-        <div className={`w-10 h-10 sm:w-12 sm:h-12 rounded-xl ${gradient} flex items-center justify-center text-white`}>
-          {icon}
-        </div>
-      </div>
+      {/* Glass refraction overlay */}
+      <div className="absolute top-0 right-0 w-1/2 h-1/3 bg-gradient-to-bl from-white/40 to-transparent pointer-events-none rounded-tr-2xl" />
 
       {/* Step number */}
-      <span className="text-[11px] font-bold text-slate-300 mt-4 sm:mt-5 uppercase tracking-[0.2em]">
-        {number}
+      <span className="text-[11px] font-bold uppercase tracking-[0.25em] text-slate-300">
+        Step {number}
       </span>
 
+      {/* Icon */}
+      <div className={`mt-4 w-12 h-12 rounded-xl ${gradient} flex items-center justify-center text-white shadow-md`}>
+        {icon}
+      </div>
+
       {/* Title */}
-      <h3 className="text-lg sm:text-xl font-bold text-slate-900 mt-1.5">
+      <h3 className="mt-4 text-lg font-bold text-slate-900 leading-tight">
         {title}
       </h3>
 
       {/* Description */}
-      <p className="text-sm text-slate-500 mt-2 leading-relaxed max-w-[280px]">
+      <p className="mt-2.5 text-sm text-slate-500 leading-relaxed">
         {description}
       </p>
-    </motion.div>
-  );
-};
 
-/* ─── Connector line with scroll-driven reveal ─── */
-const ConnectorLine: React.FC<{ scrollYProgress: MotionValue<number> }> = ({
+      {/* Participants pills */}
+      <div className="mt-4 flex flex-wrap gap-1.5">
+        {participants.map((p) => (
+          <span
+            key={p}
+            className="text-[10px] font-semibold px-2.5 py-1 rounded-full border"
+            style={{
+              color: accentColor,
+              borderColor: `${accentColor}30`,
+              backgroundColor: `${accentColor}08`,
+            }}
+          >
+            {p}
+          </span>
+        ))}
+      </div>
+    </div>
+  </div>
+);
+
+/* ─── Arrow connector between cards ─── */
+const ArrowConnector: React.FC<{ scrollYProgress: MotionValue<number>; progressRange: [number, number] }> = ({
   scrollYProgress,
+  progressRange,
 }) => {
-  const scaleX = useTransform(scrollYProgress, [0.2, 0.55], [0, 1]);
-  const opacity = useTransform(scrollYProgress, [0.15, 0.35], [0, 1]);
+  const opacity = useTransform(scrollYProgress, progressRange, [0, 1]);
+  const scaleX = useTransform(scrollYProgress, progressRange, [0, 1]);
 
   return (
-    <div className="hidden sm:block absolute top-10 left-[calc(16.67%+40px)] right-[calc(16.67%+40px)] h-[2px]">
+    <motion.div
+      className="hidden sm:flex items-center mx-2"
+      style={{ opacity }}
+    >
       <motion.div
-        className="h-full bg-gradient-to-r from-blue-300 via-emerald-300 to-violet-300 rounded-full origin-left"
-        style={{ scaleX, opacity }}
+        className="w-12 md:w-16 h-[2px] bg-gradient-to-r from-slate-200 to-slate-300 origin-left rounded-full"
+        style={{ scaleX }}
       />
-    </div>
+      <motion.div style={{ opacity }}>
+        <svg className="w-3 h-3 text-slate-300 -ml-0.5" fill="currentColor" viewBox="0 0 24 24">
+          <path d="M13.172 12l-4.95-4.95 1.414-1.414L16 12l-6.364 6.364-1.414-1.414z" />
+        </svg>
+      </motion.div>
+    </motion.div>
   );
 };
 
@@ -93,36 +110,39 @@ const STEPS = [
     titleKey: 'step1Title',
     descKey: 'step1Desc',
     icon: (
-      <svg className="w-5 h-5 sm:w-6 sm:h-6" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
+      <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
         <path strokeLinecap="round" strokeLinejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" />
       </svg>
     ),
     gradient: 'bg-gradient-to-br from-blue-500 to-blue-700',
-    iconBg: 'bg-blue-50',
+    accentColor: '#3b82f6',
+    participants: ['Buyer', 'Renter', 'Investor'],
   },
   {
     number: '02',
     titleKey: 'step2Title',
     descKey: 'step2Desc',
     icon: (
-      <svg className="w-5 h-5 sm:w-6 sm:h-6" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
-        <path strokeLinecap="round" strokeLinejoin="round" d="M15 19.128a9.38 9.38 0 0 0 2.625.372 9.337 9.337 0 0 0 4.121-.952 4.125 4.125 0 0 0-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 0 1 8.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0 1 11.964-3.07M12 6.375a3.375 3.375 0 1 1-6.75 0 3.375 3.375 0 0 1 6.75 0Zm8.25 2.25a2.625 2.625 0 1 1-5.25 0 2.625 2.625 0 0 1 5.25 0Z" />
+      <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
+        <path strokeLinecap="round" strokeLinejoin="round" d="M20.25 8.511c.884.284 1.5 1.128 1.5 2.097v4.286c0 1.136-.847 2.1-1.98 2.193-.34.027-.68.052-1.02.072v3.091l-3-3c-1.354 0-2.694-.055-4.02-.163a2.115 2.115 0 0 1-.825-.242m9.345-8.334a2.126 2.126 0 0 0-.476-.095 48.64 48.64 0 0 0-8.048 0c-1.131.094-1.976 1.057-1.976 2.192v4.286c0 .837.46 1.58 1.155 1.951m9.345-8.334V6.637c0-1.621-1.152-3.026-2.76-3.235A48.455 48.455 0 0 0 11.25 3c-2.115 0-4.198.137-6.24.402-1.608.209-2.76 1.614-2.76 3.235v6.226c0 1.621 1.152 3.026 2.76 3.235.577.075 1.157.14 1.74.194V21l4.155-4.155" />
       </svg>
     ),
     gradient: 'bg-gradient-to-br from-emerald-500 to-emerald-700',
-    iconBg: 'bg-emerald-50',
+    accentColor: '#10b981',
+    participants: ['Agent', 'Seller', 'Negotiation'],
   },
   {
     number: '03',
     titleKey: 'step3Title',
     descKey: 'step3Desc',
     icon: (
-      <svg className="w-5 h-5 sm:w-6 sm:h-6" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
-        <path strokeLinecap="round" strokeLinejoin="round" d="M11.48 3.499a.562.562 0 0 1 1.04 0l2.125 5.111a.563.563 0 0 0 .475.345l5.518.442c.499.04.701.663.321.988l-4.204 3.602a.563.563 0 0 0-.182.557l1.285 5.385a.562.562 0 0 1-.84.61l-4.725-2.885a.562.562 0 0 0-.586 0L6.982 20.54a.562.562 0 0 1-.84-.61l1.285-5.386a.562.562 0 0 0-.182-.557l-4.204-3.602a.562.562 0 0 1 .321-.988l5.518-.442a.563.563 0 0 0 .475-.345L11.48 3.5Z" />
+      <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
+        <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 5.25a3 3 0 0 1 3 3m3 0a6 6 0 0 1-7.029 5.912c-.563-.097-1.159.026-1.563.43L10.5 17.25H8.25v2.25H6v2.25H2.25v-2.818c0-.597.237-1.17.659-1.591l6.499-6.499c.404-.404.527-1 .43-1.563A6 6 0 1 1 21.75 8.25Z" />
       </svg>
     ),
     gradient: 'bg-gradient-to-br from-violet-500 to-violet-700',
-    iconBg: 'bg-violet-50',
+    accentColor: '#8b5cf6',
+    participants: ['Contract', 'Keys', 'Move In'],
   },
 ] as const;
 
@@ -139,21 +159,27 @@ const HowItWorksSection: React.FC<HowItWorksSectionProps> = ({ onLearnMore }) =>
   const titleChars = titleText.split('');
   const titleCenterIndex = Math.floor(titleChars.length / 2);
 
-  const subtitleOpacity = useTransform(scrollYProgress, [0.15, 0.3], [0, 1]);
-  const subtitleY = useTransform(scrollYProgress, [0.15, 0.3], [30, 0]);
+  const subtitleOpacity = useTransform(scrollYProgress, [0.12, 0.25], [0, 1]);
+  const subtitleY = useTransform(scrollYProgress, [0.12, 0.25], [25, 0]);
 
-  const ctaOpacity = useTransform(scrollYProgress, [0.35, 0.5], [0, 1]);
-  const ctaY = useTransform(scrollYProgress, [0.35, 0.5], [20, 0]);
+  const ctaOpacity = useTransform(scrollYProgress, [0.4, 0.55], [0, 1]);
+  const ctaY = useTransform(scrollYProgress, [0.4, 0.55], [20, 0]);
 
   return (
     <div
       ref={sectionRef}
-      className="relative h-[200vh]"
+      className="relative h-[220vh]"
     >
-      <section className="sticky top-0 h-screen flex items-center justify-center bg-gradient-to-b from-white via-slate-50/30 to-white overflow-hidden">
-        <div className="max-w-5xl mx-auto px-4 sm:px-6 w-full">
+      <section className="sticky top-0 h-screen flex items-center justify-center bg-gradient-to-b from-white via-slate-50/20 to-white overflow-hidden">
+        {/* Subtle background decoration */}
+        <div className="absolute inset-0 overflow-hidden pointer-events-none">
+          <div className="absolute top-1/4 -left-32 w-64 h-64 bg-blue-100/30 rounded-full blur-3xl" />
+          <div className="absolute bottom-1/4 -right-32 w-64 h-64 bg-violet-100/30 rounded-full blur-3xl" />
+        </div>
+
+        <div className="relative max-w-6xl mx-auto px-4 sm:px-6 w-full">
           {/* Title with scatter animation */}
-          <div className="text-center mb-12 sm:mb-16" style={{ perspective: '500px' }}>
+          <div className="text-center mb-10 sm:mb-14" style={{ perspective: '500px' }}>
             <div className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-slate-900 tracking-tight">
               {titleChars.map((char, index) => (
                 <CharacterV1
@@ -166,38 +192,46 @@ const HowItWorksSection: React.FC<HowItWorksSectionProps> = ({ onLearnMore }) =>
               ))}
             </div>
             <motion.p
-              className="text-sm sm:text-base text-slate-500 mt-3 sm:mt-4 max-w-lg mx-auto"
+              className="text-sm sm:text-base text-slate-500 mt-3 max-w-lg mx-auto"
               style={{ opacity: subtitleOpacity, y: subtitleY }}
             >
               {t('home:howItWorks.subtitle', 'Your journey from search to keys in three simple steps')}
             </motion.p>
           </div>
 
-          {/* Steps grid with scatter animation */}
-          <div className="relative">
-            <ConnectorLine scrollYProgress={scrollYProgress} />
-
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-10 sm:gap-6 md:gap-8">
-              {STEPS.map((step, i) => (
-                <AnimatedStep
-                  key={step.number}
+          {/* Cards that scatter in using CharacterV2 */}
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-6 sm:gap-0">
+            {STEPS.map((step, i) => (
+              <React.Fragment key={step.number}>
+                <CharacterV2
                   index={i}
-                  totalSteps={STEPS.length}
-                  number={step.number}
-                  title={t(`home:howItWorks.${step.titleKey}`)}
-                  description={t(`home:howItWorks.${step.descKey}`)}
-                  icon={step.icon}
-                  gradient={step.gradient}
-                  iconBg={step.iconBg}
+                  centerIndex={Math.floor(STEPS.length / 2)}
                   scrollYProgress={scrollYProgress}
-                />
-              ))}
-            </div>
+                  char=""
+                >
+                  <StepCard
+                    number={step.number}
+                    title={t(`home:howItWorks.${step.titleKey}`)}
+                    description={t(`home:howItWorks.${step.descKey}`)}
+                    icon={step.icon}
+                    gradient={step.gradient}
+                    accentColor={step.accentColor}
+                    participants={step.participants}
+                  />
+                </CharacterV2>
+                {i < STEPS.length - 1 && (
+                  <ArrowConnector
+                    scrollYProgress={scrollYProgress}
+                    progressRange={[0.2 + i * 0.1, 0.35 + i * 0.1]}
+                  />
+                )}
+              </React.Fragment>
+            ))}
           </div>
 
           {/* CTA Button */}
           <motion.div
-            className="mt-12 sm:mt-16 text-center"
+            className="mt-10 sm:mt-14 text-center"
             style={{ opacity: ctaOpacity, y: ctaY }}
           >
             <motion.button

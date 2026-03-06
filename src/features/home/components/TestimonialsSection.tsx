@@ -26,31 +26,31 @@ const TestimonialCard: React.FC<{
       index={index}
       arrayLength={total}
       variant="light"
-      incrementY={12}
-      incrementZ={8}
+      incrementY={14}
+      incrementZ={10}
       incrementRotation={0}
     >
       <ReviewStars rating={testimonial.rating} className="text-amber-500" />
 
-      <blockquote className="text-center text-base leading-relaxed text-slate-700 max-w-xs">
+      <blockquote className="text-center text-lg leading-relaxed text-slate-700 max-w-sm">
         &ldquo;{testimonial.quote}&rdquo;
       </blockquote>
 
-      <div className="flex items-center gap-3">
+      <div className="flex items-center gap-3 mt-2">
         {testimonial.avatarUrl ? (
           <img
             src={testimonial.avatarUrl}
             alt={testimonial.name}
-            className="w-10 h-10 rounded-full object-cover border border-neutral-200"
+            className="w-12 h-12 rounded-full object-cover border-2 border-neutral-100 shadow-sm"
             loading="lazy"
           />
         ) : (
-          <div className="w-10 h-10 rounded-full bg-slate-100 border border-neutral-200 flex items-center justify-center text-sm font-semibold text-slate-600">
+          <div className="w-12 h-12 rounded-full bg-gradient-to-br from-slate-100 to-slate-200 border-2 border-neutral-100 shadow-sm flex items-center justify-center text-sm font-bold text-slate-600">
             {initials}
           </div>
         )}
         <div>
-          <span className="block text-sm font-semibold text-slate-900">
+          <span className="block text-sm font-bold text-slate-900">
             {testimonial.name}
           </span>
           <span className="block text-xs text-slate-500">
@@ -59,7 +59,7 @@ const TestimonialCard: React.FC<{
           </span>
         </div>
         {testimonial.source === 'google' && (
-          <span className="ml-auto text-[10px] font-medium text-slate-400 bg-slate-50 px-1.5 py-0.5 rounded">
+          <span className="ml-auto text-[10px] font-medium text-slate-400 bg-slate-50 px-2 py-0.5 rounded-full border border-slate-100">
             Google
           </span>
         )}
@@ -118,11 +118,11 @@ const TestimonialsSection: React.FC = () => {
 
       {/* Scroll-driven card stack — each scroll reveals the next testimonial */}
       <ContainerScroll
-        className="min-h-[200vh]"
-        style={{ minHeight: `${Math.max(testimonials.length * 50, 250)}vh` }}
+        className="min-h-[250vh]"
+        style={{ minHeight: `${Math.max(testimonials.length * 60, 300)}vh` }}
       >
-        <div className="sticky top-[10vh] flex items-start justify-center pt-24">
-          <CardsContainer className="h-[350px] w-[350px] sm:h-[380px] sm:w-[400px]">
+        <div className="sticky top-[8vh] flex items-start justify-center pt-20">
+          <CardsContainer className="h-[420px] w-[420px] sm:h-[460px] sm:w-[480px]">
             {testimonials.map((testimonial, i) => (
               <TestimonialCard
                 key={testimonial.id}
