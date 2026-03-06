@@ -415,7 +415,7 @@ const AppShowcaseSection: React.FC<AppShowcaseSectionProps> = ({ onNavigate }) =
   }, [onNavigate]);
 
   return (
-    <section className="bg-white/60 backdrop-blur-sm overflow-hidden">
+    <section className="bg-white overflow-hidden">
       <ContainerScroll
         titleComponent={
           <div className="mb-16">

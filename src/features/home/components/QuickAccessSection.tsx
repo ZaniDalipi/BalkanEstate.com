@@ -102,7 +102,7 @@ const QuickAccessSection: React.FC<QuickAccessSectionProps> = ({
   ];
 
   return (
-    <section className="py-8 sm:py-10 bg-white/60 backdrop-blur-sm border-b border-white/30">
+    <section className="py-8 sm:py-10 bg-white border-b border-slate-100">
       <div className="max-w-6xl mx-auto px-4">
         <motion.div
           initial={{ opacity: 0, y: 10 }}

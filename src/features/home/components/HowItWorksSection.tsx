@@ -46,7 +46,7 @@ const HowItWorksSection: React.FC<HowItWorksSectionProps> = ({ onLearnMore }) =>
   ];
 
   return (
-    <section className="py-12 sm:py-16 bg-white/60 backdrop-blur-sm">
+    <section className="py-12 sm:py-16 bg-white">
       <div className="max-w-6xl mx-auto px-4">
         <motion.div
           initial={{ opacity: 0, y: 15 }}

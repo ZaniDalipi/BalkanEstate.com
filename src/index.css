@@ -86,26 +86,9 @@ fieldset {
 
 /* Animated gradient background for liquid glass pages — Apple iOS light theme */
 .liquid-glass-bg {
-  background: linear-gradient(135deg, #fafafa 0%, #f5f5f5 25%, #f8f8f8 50%, #f3f3f3 75%, #fafafa 100%);
-  background-size: 400% 400%;
-  animation: liquidBgShift 20s ease infinite;
+  background: #ffffff;
   min-height: 100vh;
   position: relative;
-}
-
-.liquid-glass-bg::before {
-  content: '';
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background:
-    radial-gradient(ellipse at 20% 50%, rgba(120, 120, 120, 0.03) 0%, transparent 50%),
-    radial-gradient(ellipse at 80% 20%, rgba(100, 100, 100, 0.02) 0%, transparent 50%),
-    radial-gradient(ellipse at 50% 80%, rgba(140, 140, 140, 0.02) 0%, transparent 50%);
-  pointer-events: none;
-  z-index: 0;
 }
 
 .liquid-glass-bg > * {

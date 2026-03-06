@@ -111,7 +111,7 @@ const FeaturedPropertiesSection: React.FC<FeaturedPropertiesSectionProps> = ({
   if (properties.length === 0) return null;
 
   return (
-    <section className="py-12 sm:py-16 bg-white/60 backdrop-blur-sm">
+    <section className="py-12 sm:py-16 bg-white">
       <div className="max-w-6xl mx-auto px-4">
         {/* Header */}
         <motion.div
