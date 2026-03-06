@@ -319,7 +319,12 @@
     "whatsapp": "WhatsApp",
     "telegram": "Telegram",
     "email": "Email",
-    "shareOn": "Share on {{platform}}"
+    "shareOn": "Share on {{platform}}",
+    "viber": "Viber"
+  },
+  "floatingContact": {
+    "toggleLabel": "Contact us via messaging apps",
+    "whatsappMessage": "Hi, I have a question about a property on BalkanEstate."
   },
   "errors": {
     "somethingWentWrong": "Something went wrong",
