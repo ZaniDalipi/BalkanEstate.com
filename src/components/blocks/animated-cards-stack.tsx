@@ -5,6 +5,7 @@ import { cva, type VariantProps } from 'class-variance-authority';
 /* ─── Scroll context shared between container and cards ─── */
 interface ScrollCtx {
   progress: MotionValue<number>;
+  total: number;
 }
 const ScrollContext = createContext<ScrollCtx | null>(null);
 
@@ -12,7 +13,8 @@ const ScrollContext = createContext<ScrollCtx | null>(null);
 export const ContainerScroll: React.FC<{
   children: React.ReactNode;
   className?: string;
-}> = ({ children, className = '' }) => {
+  totalCards?: number;
+}> = ({ children, className = '', totalCards = 1 }) => {
   const ref = useRef<HTMLDivElement>(null);
   const { scrollYProgress } = useScroll({
     target: ref,
@@ -20,7 +22,7 @@ export const ContainerScroll: React.FC<{
   });
 
   return (
-    <ScrollContext.Provider value={{ progress: scrollYProgress }}>
+    <ScrollContext.Provider value={{ progress: scrollYProgress, total: totalCards }}>
       <div ref={ref} className={className}>
         {children}
       </div>
@@ -40,7 +42,7 @@ export const CardsContainer: React.FC<{
 
 /* ─── Card style variants ─── */
 const cardVariants = cva(
-  'absolute inset-0 flex flex-col justify-between rounded-2xl p-6 sm:p-8 shadow-xl',
+  'absolute inset-0 flex flex-col justify-between rounded-2xl p-6 sm:p-8 shadow-xl will-change-transform',
   {
     variants: {
       variant: {
@@ -75,97 +77,105 @@ export const CardTransformed: React.FC<CardTransformedProps> = ({
   if (!ctx) throw new Error('CardTransformed must be wrapped in ContainerScroll');
 
   const { progress } = ctx;
-
-  // Reverse order: last item in array appears first (on top initially)
-  // Each card "activates" during its scroll segment
   const total = arrayLength;
+
+  // Each card gets a segment of the scroll range
+  // Card 0 is active at scroll 0, card 1 at scroll 1/total, etc.
   const segmentSize = 1 / total;
+  const start = index * segmentSize;
+  const end = (index + 1) * segmentSize;
 
-  // The card at index 0 is the top card (first shown)
-  // As scroll progresses, card 0 animates away, card 1 becomes active, etc.
-  const reverseIdx = index - 2; // offset to match the caller's index pattern (starts at 2)
-  const cardIdx = Math.max(0, reverseIdx);
+  // Card starts flat and visible when it's "active"
+  // When scroll moves past it, the card rotates away upward and fades out
+  // Cards behind (not yet active) sit slightly scaled down and stacked
 
-  // Scroll range for when this card is "active" (front of stack)
-  const activeStart = cardIdx * segmentSize;
-  const activeEnd = (cardIdx + 1) * segmentSize;
-
-  // Before active: card is behind in the stack with initial rotation
-  // During active: card rotates to front (0 deg) and is fully visible
-  // After active: card rotates away and fades out
+  // Before this card is active: it sits behind, stacked
+  // During active: it's front and center (rotate=0, scale=1, opacity=1)
+  // After active: it flings away (rotate up, translate up, fade out)
 
   const rotate = useTransform(
     progress,
     [
-      Math.max(0, activeStart - segmentSize * 0.5),
-      activeStart,
-      activeEnd,
-      Math.min(1, activeEnd + segmentSize * 0.3),
+      Math.max(0, start - 0.001), // just before active
+      start,                       // active start
+      end - segmentSize * 0.1,     // near end of active
+      Math.min(1, end),            // end of active
     ],
     [
-      8 + cardIdx * 3,  // stacked behind with rotation
-      0,                 // active: no rotation
-      0,                 // still active
-      -8,               // rotating away
+      0,    // waiting behind: no rotation
+      0,    // active: flat
+      0,    // still active
+      -15,  // flung away
     ]
   );
 
   const y = useTransform(
     progress,
     [
-      Math.max(0, activeStart - segmentSize * 0.5),
-      activeStart,
-      activeEnd,
-      Math.min(1, activeEnd + segmentSize * 0.3),
+      Math.max(0, start - 0.001),
+      start,
+      end - segmentSize * 0.1,
+      Math.min(1, end),
     ],
     [
-      20 + cardIdx * 6,
       0,
       0,
-      -30,
+      0,
+      -80,  // flies up when dismissed
     ]
   );
 
   const scale = useTransform(
     progress,
     [
-      Math.max(0, activeStart - segmentSize * 0.5),
-      activeStart,
-      activeEnd,
-      Math.min(1, activeEnd + segmentSize * 0.3),
+      Math.max(0, start - 0.001),
+      start,
+      end - segmentSize * 0.1,
+      Math.min(1, end),
     ],
     [
-      0.92 - cardIdx * 0.02,
+      // Cards behind are slightly smaller to create depth
+      1 - (total - index) * 0.02,
+      1,      // active: full size
       1,
-      1,
-      0.95,
+      0.9,    // shrinks as it leaves
     ]
   );
 
   const opacity = useTransform(
     progress,
     [
-      Math.max(0, activeStart - segmentSize * 0.3),
-      activeStart,
-      activeEnd,
-      Math.min(1, activeEnd + segmentSize * 0.2),
+      Math.max(0, start - 0.001),
+      start,
+      end - segmentSize * 0.2,
+      Math.min(1, end),
     ],
     [
-      cardIdx === 0 ? 1 : 0.4,
+      index === 0 ? 1 : 0.6,  // behind cards are dimmer
+      1,                        // active: fully visible
       1,
-      1,
-      cardIdx === total - 1 ? 1 : 0,
+      0,                        // fades out when dismissed
     ]
   );
+
+  // Z-index: active card is on top.
+  // We use a dynamic approach: cards that haven't been scrolled past are stacked
+  // with later cards having lower z-index (they're behind)
+  // Once scrolled past, they drop to lowest z-index
+  const zIndex = useTransform(progress, (p) => {
+    if (p >= end) return 0; // already dismissed
+    return total - index;   // not yet dismissed: stack order
+  });
 
   return (
     <motion.div
       style={{
-        rotate,
+        rotateX: rotate,
         y,
         scale,
         opacity,
-        zIndex: total - cardIdx,
+        zIndex,
+        transformOrigin: 'center bottom',
       }}
       className={cardVariants({ variant, className })}
       {...props}
