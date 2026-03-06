@@ -842,7 +842,8 @@ export const getMe = async (req: Request, res: Response): Promise<void> => {
       }
     } else {
       // **NO VALID SUBSCRIPTION FOUND** - check if user.subscription thinks they have Pro and downgrade
-      if (user.subscription && user.subscription.tier !== 'free' && user.subscription.tier !== 'buyer') {
+      // Skip agency tiers — agency_owner and agency_agent get subscriptions via the agency system, not the Subscription collection
+      if (user.subscription && user.subscription.tier !== 'free' && user.subscription.tier !== 'buyer' && user.subscription.tier !== 'agency_agent' && user.subscription.tier !== 'agency_owner') {
         subscriptionStatus = 'expired';
       }
     }
@@ -910,7 +911,8 @@ export const getMe = async (req: Request, res: Response): Promise<void> => {
       }
 
       // **AUTO-DOWNGRADE: If NO valid subscription in DB, downgrade to free**
-      if (subscriptionStatus === 'expired' && user.subscription.tier !== 'free' && user.subscription.tier !== 'buyer') {
+      // Skip agency tiers — agency_owner and agency_agent get subscriptions via the agency system, not the Subscription collection
+      if (subscriptionStatus === 'expired' && user.subscription.tier !== 'free' && user.subscription.tier !== 'buyer' && user.subscription.tier !== 'agency_agent' && user.subscription.tier !== 'agency_owner') {
         user.subscription.tier = 'free';
         user.subscription.status = 'expired';
         user.subscription.listingsLimit = FREE_TIER_LIMITS.LISTINGS;

@@ -52,15 +52,16 @@ export const getOverview = async (
       topPropertiesRaw,
       inquiryTrend,
     ] = await Promise.all([
-      // Active listings from agency agents
+      // Active listings from agency agents (only those posted as agent role)
       Property.countDocuments({
         sellerId: { $in: agentUserIds },
         status: 'active',
+        createdAsRole: 'agent',
       }),
 
-      // Total views across all agency properties
+      // Total views across all agency properties (only agent-posted)
       Property.aggregate([
-        { $match: { sellerId: { $in: agentUserIds } } },
+        { $match: { sellerId: { $in: agentUserIds }, createdAsRole: 'agent' } },
         { $group: { _id: null, totalViews: { $sum: '$views' } } },
       ]),
 
@@ -82,8 +83,8 @@ export const getOverview = async (
         .limit(5)
         .lean(),
 
-      // Top 5 properties by views
-      Property.find({ sellerId: { $in: agentUserIds }, status: 'active' })
+      // Top 5 properties by views (only agent-posted)
+      Property.find({ sellerId: { $in: agentUserIds }, status: 'active', createdAsRole: 'agent' })
         .select('title imageUrl price status views inquiries createdByName listingType createdAt')
         .sort({ views: -1 })
         .limit(5)
@@ -376,6 +377,7 @@ export const getProperties = async (
 
     const filter: any = {
       sellerId: { $in: agentUserIds },
+      createdAsRole: 'agent', // Only show listings posted as agent in the agency dashboard
     };
 
     if (status && typeof status === 'string') {

@@ -428,7 +428,8 @@ export const createProperty = async (
     }
 
     // **AUTO-DOWNGRADE: If NO valid subscription in DB but user thinks they have Pro, downgrade to free**
-    if (!validSubscription && user.subscription && user.subscription.tier !== 'free' && user.subscription.tier !== 'buyer') {
+    // Skip agency tiers — agency_owner and agency_agent get subscriptions via the agency system, not the Subscription collection
+    if (!validSubscription && user.subscription && user.subscription.tier !== 'free' && user.subscription.tier !== 'buyer' && user.subscription.tier !== 'agency_agent' && user.subscription.tier !== 'agency_owner') {
       // User has no active subscription, downgrading to free
       user.subscription.tier = 'free';
       user.subscription.status = 'expired';

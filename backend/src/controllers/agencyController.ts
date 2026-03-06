@@ -706,6 +706,7 @@ export const getAgency = async (
       const rawProperties = await Property.find({
         sellerId: { $in: sellerIds },
         status: { $in: ['active', 'sold'] }, // Include both active and sold properties
+        createdAsRole: 'agent', // Only show listings posted as agent on the agency page
       })
         .populate('sellerId', 'name email phone avatarUrl role agencyName')
         .sort({ createdAt: -1 })
