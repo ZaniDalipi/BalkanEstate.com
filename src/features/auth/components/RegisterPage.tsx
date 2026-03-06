@@ -5,6 +5,7 @@ import { useAppContext } from '@/context/AppContext';
 import { AppleIcon, EnvelopeIcon, GoogleIcon, LogoIcon, EyeIcon } from '@/constants';
 import SocialLoginPopup from './SocialLoginPopup';
 import { buildLocalizedPath } from '@/src/utils/languageRouting';
+import { ALL_PHONE_COUNTRY_CODES, PHONE_FORMAT_PATTERNS, formatPhoneNumber, getPhonePlaceholder, BALKAN_PHONE_CODES } from '@/constants/phoneCountryCodes';
 
 type SocialProvider = 'google' | 'apple';
 
@@ -37,57 +38,6 @@ interface FieldErrors {
     phone?: string;
 }
 
-// Balkan country codes for phone number input
-const BALKAN_COUNTRY_CODES = [
-    { code: '+383', country: 'XK', label: 'Kosovo', flag: '🇽🇰' },
-    { code: '+355', country: 'AL', label: 'Albania', flag: '🇦🇱' },
-    { code: '+381', country: 'RS', label: 'Serbia', flag: '🇷🇸' },
-    { code: '+389', country: 'MK', label: 'N. Macedonia', flag: '🇲🇰' },
-    { code: '+387', country: 'BA', label: 'Bosnia', flag: '🇧🇦' },
-    { code: '+382', country: 'ME', label: 'Montenegro', flag: '🇲🇪' },
-    { code: '+385', country: 'HR', label: 'Croatia', flag: '🇭🇷' },
-    { code: '+386', country: 'SI', label: 'Slovenia', flag: '🇸🇮' },
-    { code: '+359', country: 'BG', label: 'Bulgaria', flag: '🇧🇬' },
-    { code: '+40', country: 'RO', label: 'Romania', flag: '🇷🇴' },
-    { code: '+30', country: 'GR', label: 'Greece', flag: '🇬🇷' },
-] as const;
-
-const PHONE_FORMAT_PATTERNS: Record<string, number[]> = {
-    '+383': [2, 3, 4],
-    '+355': [2, 3, 4],
-    '+381': [2, 3, 4],
-    '+389': [2, 3, 3],
-    '+387': [2, 3, 3],
-    '+382': [2, 3, 3],
-    '+385': [2, 3, 4],
-    '+386': [2, 3, 2, 2],
-    '+359': [2, 3, 4],
-    '+40': [3, 3, 3],
-    '+30': [3, 3, 4],
-};
-
-const formatPhoneNumber = (countryCode: string, digits: string): string => {
-    const clean = digits.replace(/\D/g, '');
-    const pattern = PHONE_FORMAT_PATTERNS[countryCode] || [3, 3, 4];
-    const parts: string[] = [];
-    let pos = 0;
-    for (const groupSize of pattern) {
-        if (pos >= clean.length) break;
-        parts.push(clean.slice(pos, pos + groupSize));
-        pos += groupSize;
-    }
-    if (pos < clean.length && parts.length > 0) {
-        parts[parts.length - 1] += clean.slice(pos);
-    } else if (pos < clean.length) {
-        parts.push(clean.slice(pos));
-    }
-    return parts.join(' ');
-};
-
-const getPhonePlaceholder = (countryCode: string): string => {
-    const pattern = PHONE_FORMAT_PATTERNS[countryCode] || [3, 3, 4];
-    return pattern.map(n => 'X'.repeat(n)).join(' ');
-};
 
 const COMMON_PASSWORDS = [
     'password', 'Password1', 'Password123', '12345678', 'qwerty',
@@ -240,7 +190,7 @@ const RegisterPage: React.FC = () => {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
-    const [phoneCountryCode, setPhoneCountryCode] = useState<string>(BALKAN_COUNTRY_CODES[0].code);
+    const [phoneCountryCode, setPhoneCountryCode] = useState<string>(ALL_PHONE_COUNTRY_CODES[0].code);
     const [phoneNumber, setPhoneNumber] = useState('');
 
     const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
@@ -484,10 +434,15 @@ const RegisterPage: React.FC = () => {
                                                    border border-white/40 focus:border-primary/40 focus:ring-2 focus:ring-primary/10
                                                    outline-none transition-all duration-300 text-neutral-800 text-sm"
                                     >
-                                        {BALKAN_COUNTRY_CODES.map(c => (
-                                            <option key={c.code} value={c.code}>
-                                                {c.flag} {c.code}
-                                            </option>
+                                        {ALL_PHONE_COUNTRY_CODES.map((c, i) => (
+                                            <React.Fragment key={`${c.country}-${c.code}`}>
+                                                {i === BALKAN_PHONE_CODES.length && (
+                                                    <option disabled>──────────</option>
+                                                )}
+                                                <option value={c.code}>
+                                                    {c.flag} {c.code}
+                                                </option>
+                                            </React.Fragment>
                                         ))}
                                     </select>
                                     <input
