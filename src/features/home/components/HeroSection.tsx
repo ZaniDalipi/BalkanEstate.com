@@ -1,6 +1,7 @@
-import React, { useCallback, useRef, useState } from 'react';
+import React, { useCallback, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { motion, useInView } from 'framer-motion';
+import { Typewriter } from '@/src/components/ui/typewriter';
 
 interface HeroSectionProps {
   searchQuery: string;
@@ -61,6 +62,16 @@ const HeroSection: React.FC<HeroSectionProps> = ({
   const { t } = useTranslation(['home']);
   const [isFocused, setIsFocused] = useState(false);
 
+  const typewriterWords = useMemo(
+    () => [
+      t('home:hero.titleHighlight', 'Dream Home'),
+      t('home:hero.typewriterWord2', 'Perfect Villa'),
+      t('home:hero.typewriterWord3', 'Ideal Apartment'),
+      t('home:hero.typewriterWord4', 'New Beginning'),
+    ],
+    [t]
+  );
+
   const handleKeyDown = useCallback(
     (e: React.KeyboardEvent) => {
       if (e.key === 'Enter') {
@@ -108,7 +119,13 @@ const HeroSection: React.FC<HeroSectionProps> = ({
         >
           {t('home:hero.title')}{' '}
           <span className="bg-clip-text text-transparent bg-gradient-to-r from-blue-600 via-cyan-600 to-indigo-600">
-            {t('home:hero.titleHighlight')}
+            <Typewriter
+              words={typewriterWords}
+              speed={80}
+              delayBetweenWords={2000}
+              cursor={true}
+              cursorChar="|"
+            />
           </span>
           <br className="hidden sm:block" />
           <span className="text-slate-600 text-2xl sm:text-4xl lg:text-5xl font-semibold">
