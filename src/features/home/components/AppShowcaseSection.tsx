@@ -294,9 +294,11 @@ const AppShowcaseSection: React.FC<AppShowcaseSectionProps> = ({ onNavigate }) =
             </p>
           </div>
         }
-        tabletContent={<TabletContent t={t} />}
         phoneContent={<PhoneContent t={t} />}
-      />
+      >
+        {/* Simulated app UI inside the tablet */}
+        <TabletContent t={t} />
+      </ContainerScroll>
     </section>
   );
 };
