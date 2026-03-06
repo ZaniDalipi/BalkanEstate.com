@@ -124,7 +124,7 @@ const ContactUsPage: React.FC = () => {
           {/* Back Button */}
           <button
             onClick={handleBack}
-            className="flex items-center gap-2 text-neutral-600 hover:text-primary transition-colors mb-6"
+            className="flex items-center gap-2 text-neutral-600 hover:text-primary active:text-primary/80 transition-colors mb-6 py-2 -ml-2 pl-2 pr-3 rounded-lg min-h-[44px]"
           >
             <ArrowLeftIcon className="w-5 h-5" />
             <span className="font-medium">{t('common:back', 'Back')}</span>
@@ -253,30 +253,63 @@ const ContactUsPage: React.FC = () => {
                 </ul>
               </div>
 
-              {/* WhatsApp Card */}
-              <a
-                href={`https://wa.me/${CONTACT_CONFIG.social.whatsappNumber}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="block glass-panel-light p-5 hover:shadow-md transition-shadow group"
-              >
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-xl bg-green-500/10 flex items-center justify-center group-hover:bg-green-500/20 transition-colors">
-                    <svg className="w-5 h-5 text-green-600" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-                      <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z" />
-                      <path d="M12 0C5.373 0 0 5.373 0 12c0 2.625.846 5.059 2.284 7.034L.789 23.492a.75.75 0 00.917.918l4.458-1.495A11.945 11.945 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 22c-2.324 0-4.47-.757-6.21-2.037l-.435-.327-2.648.888.888-2.648-.327-.435A9.96 9.96 0 012 12C2 6.477 6.477 2 12 2s10 4.477 10 10-4.477 10-10 10z" />
-                    </svg>
+              {/* Messaging Apps Cards */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-1 gap-3">
+                {/* WhatsApp Card */}
+                <a
+                  href={`https://wa.me/${CONTACT_CONFIG.social.whatsappNumber}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="block glass-panel-light p-5 hover:shadow-md active:shadow-sm transition-shadow group min-h-[64px]"
+                >
+                  <div className="flex items-center gap-3">
+                    <div className="w-11 h-11 sm:w-10 sm:h-10 rounded-xl bg-green-500/10 flex items-center justify-center group-hover:bg-green-500/20 transition-colors flex-shrink-0">
+                      <svg className="w-6 h-6 sm:w-5 sm:h-5 text-green-600" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                        <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z" />
+                        <path d="M12 0C5.373 0 0 5.373 0 12c0 2.625.846 5.059 2.284 7.034L.789 23.492a.75.75 0 00.917.918l4.458-1.495A11.945 11.945 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 22c-2.324 0-4.47-.757-6.21-2.037l-.435-.327-2.648.888.888-2.648-.327-.435A9.96 9.96 0 012 12C2 6.477 6.477 2 12 2s10 4.477 10 10-4.477 10-10 10z" />
+                      </svg>
+                    </div>
+                    <div>
+                      <p className="text-sm font-semibold text-neutral-900">
+                        {t('contact:whatsapp.title', 'Chat on WhatsApp')}
+                      </p>
+                      <p className="text-xs text-neutral-500">
+                        {t('contact:whatsapp.subtitle', 'Quick response during business hours')}
+                      </p>
+                    </div>
                   </div>
-                  <div>
-                    <p className="text-sm font-semibold text-neutral-900">
-                      {t('contact:whatsapp.title', 'Chat on WhatsApp')}
-                    </p>
-                    <p className="text-xs text-neutral-500">
-                      {t('contact:whatsapp.subtitle', 'Quick response during business hours')}
-                    </p>
+                </a>
+
+                {/* Viber Card */}
+                <a
+                  href={`viber://chat?number=${CONTACT_CONFIG.social.whatsappNumber}`}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    const deepLink = `viber://chat?number=${CONTACT_CONFIG.social.whatsappNumber}`;
+                    window.location.href = deepLink;
+                    setTimeout(() => {
+                      if (!document.hidden) window.open('https://www.viber.com/', '_blank');
+                    }, 1500);
+                  }}
+                  className="block glass-panel-light p-5 hover:shadow-md active:shadow-sm transition-shadow group min-h-[64px]"
+                >
+                  <div className="flex items-center gap-3">
+                    <div className="w-11 h-11 sm:w-10 sm:h-10 rounded-xl bg-purple-500/10 flex items-center justify-center group-hover:bg-purple-500/20 transition-colors flex-shrink-0">
+                      <svg className="w-6 h-6 sm:w-5 sm:h-5 text-purple-600" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                        <path d="M12 1C6.477 1 2 5.477 2 11c0 2.136.67 4.116 1.81 5.74L2 22l5.26-1.81A9.94 9.94 0 0012 21c5.523 0 10-4.477 10-10S17.523 1 12 1zm-1.5 4.5c.3 0 .55.12.7.4l.9 1.7c.15.3.08.6-.15.8l-.5.6c-.12.15-.08.35.08.52.35.45.75.87 1.2 1.25.5.42 1.05.78 1.65 1.05.2.1.4.06.55-.1l.45-.55c.18-.22.42-.25.68-.12l1.7.9c.28.15.38.4.3.7-.12.48-.38.9-.75 1.2-.33.27-.72.45-1.15.5-.35.04-.7.02-.95-.05-.82-.22-1.6-.6-2.35-1.12-1.2-.83-2.25-1.88-3.1-3.1-.55-.75-.95-1.55-1.15-2.4-.12-.5-.08-1 .12-1.45.18-.4.45-.72.78-1 .3-.25.62-.43.95-.43z" />
+                      </svg>
+                    </div>
+                    <div>
+                      <p className="text-sm font-semibold text-neutral-900">
+                        {t('contact:viber.title', 'Chat on Viber')}
+                      </p>
+                      <p className="text-xs text-neutral-500">
+                        {t('contact:viber.subtitle', 'Popular in the Balkans region')}
+                      </p>
+                    </div>
                   </div>
-                </div>
-              </a>
+                </a>
+              </div>
             </div>
           </div>
         </div>

@@ -84,12 +84,12 @@ const AgentContactActions: React.FC<AgentContactActionsProps> = ({
                 {agent.phone && (
                     <a
                         href={`tel:${agent.phone}`}
-                        className="flex items-center gap-3 bg-white/10 hover:bg-white/20 p-4 rounded-xl mb-3 transition-colors"
+                        className="flex items-center gap-3 bg-white/10 hover:bg-white/20 active:bg-white/25 p-4 rounded-xl mb-3 transition-colors min-h-[56px]"
                     >
-                        <PhoneIcon className="w-6 h-6" />
-                        <div>
+                        <PhoneIcon className="w-6 h-6 flex-shrink-0" />
+                        <div className="min-w-0">
                             <div className="font-semibold">{t('profilePage.contact.callDirect')}</div>
-                            <div className="text-lg font-bold">{agent.phone}</div>
+                            <div className="text-lg font-bold truncate">{agent.phone}</div>
                         </div>
                     </a>
                 )}
@@ -97,20 +97,68 @@ const AgentContactActions: React.FC<AgentContactActionsProps> = ({
                 {agent.email && (
                     <a
                         href={`mailto:${agent.email}`}
-                        className="flex items-center gap-3 bg-white/10 hover:bg-white/20 p-4 rounded-xl mb-3 transition-colors"
+                        className="flex items-center gap-3 bg-white/10 hover:bg-white/20 active:bg-white/25 p-4 rounded-xl mb-3 transition-colors min-h-[56px]"
                     >
-                        <EnvelopeIcon className="w-6 h-6" />
-                        <div>
+                        <EnvelopeIcon className="w-6 h-6 flex-shrink-0" />
+                        <div className="min-w-0">
                             <div className="font-semibold">{t('profilePage.contact.sendEmail')}</div>
                             <div className="text-sm truncate">{agent.email}</div>
                         </div>
                     </a>
                 )}
 
+                {/* WhatsApp & Viber side by side on mobile */}
+                {agent.phone && (
+                  <div className="grid grid-cols-2 gap-2 mb-3">
+                    <a
+                        href={`https://wa.me/${agent.phone.replace(/[\s\-\(\)]/g, '')}?text=${encodeURIComponent(
+                            t('profilePage.contact.whatsappMessage', {
+                                name: agent.name,
+                                defaultValue: `Hi ${agent.name}, I found your profile on BalkanEstate and would like to discuss real estate opportunities.`
+                            })
+                        )}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex items-center gap-2 bg-[#25D366]/20 hover:bg-[#25D366]/30 active:bg-[#25D366]/40 p-3.5 rounded-xl transition-colors min-h-[56px]"
+                    >
+                        <svg className="w-6 h-6 flex-shrink-0" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z" />
+                        </svg>
+                        <div className="min-w-0">
+                            <div className="font-semibold text-sm">{t('profilePage.contact.whatsapp', 'WhatsApp')}</div>
+                            <div className="text-xs opacity-80 truncate">{t('profilePage.contact.whatsappDesc', 'Chat or call via WhatsApp')}</div>
+                        </div>
+                    </a>
+
+                    <a
+                        href={`viber://chat?number=${agent.phone.replace(/[\s\-\(\)\+]/g, '')}`}
+                        onClick={(e) => {
+                            const phone = agent.phone!.replace(/[\s\-\(\)\+]/g, '');
+                            const deepLink = `viber://chat?number=${phone}`;
+                            const fallback = 'https://www.viber.com/';
+                            e.preventDefault();
+                            window.location.href = deepLink;
+                            setTimeout(() => {
+                                if (!document.hidden) window.open(fallback, '_blank');
+                            }, 1500);
+                        }}
+                        className="flex items-center gap-2 bg-[#7360F2]/20 hover:bg-[#7360F2]/30 active:bg-[#7360F2]/40 p-3.5 rounded-xl transition-colors min-h-[56px]"
+                    >
+                        <svg className="w-6 h-6 flex-shrink-0" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M12 1C6.477 1 2 5.477 2 11c0 2.136.67 4.116 1.81 5.74L2 22l5.26-1.81A9.94 9.94 0 0012 21c5.523 0 10-4.477 10-10S17.523 1 12 1zm-1.5 4.5c.3 0 .55.12.7.4l.9 1.7c.15.3.08.6-.15.8l-.5.6c-.12.15-.08.35.08.52.35.45.75.87 1.2 1.25.5.42 1.05.78 1.65 1.05.2.1.4.06.55-.1l.45-.55c.18-.22.42-.25.68-.12l1.7.9c.28.15.38.4.3.7-.12.48-.38.9-.75 1.2-.33.27-.72.45-1.15.5-.35.04-.7.02-.95-.05-.82-.22-1.6-.6-2.35-1.12-1.2-.83-2.25-1.88-3.1-3.1-.55-.75-.95-1.55-1.15-2.4-.12-.5-.08-1 .12-1.45.18-.4.45-.72.78-1 .3-.25.62-.43.95-.43z" />
+                        </svg>
+                        <div className="min-w-0">
+                            <div className="font-semibold text-sm">{t('profilePage.contact.viber', 'Viber')}</div>
+                            <div className="text-xs opacity-80 truncate">{t('profilePage.contact.viberDesc', 'Chat or call via Viber')}</div>
+                        </div>
+                    </a>
+                  </div>
+                )}
+
                 {/* Send Inquiry Button */}
                 <button
                     onClick={() => setShowInquiryModal(true)}
-                    className="w-full flex items-center justify-center gap-3 bg-white text-blue-700 font-bold p-4 rounded-xl hover:bg-blue-50 transition-colors shadow-md"
+                    className="w-full flex items-center justify-center gap-3 bg-white text-blue-700 font-bold p-4 rounded-xl hover:bg-blue-50 active:bg-blue-100 transition-colors shadow-md min-h-[56px]"
                 >
                     <ChatBubbleBottomCenterTextIcon className="w-6 h-6" />
                     <span>{t('profilePage.contact.sendInquiry', 'Send Inquiry')}</span>
@@ -373,7 +421,7 @@ const AgentContactActions: React.FC<AgentContactActionsProps> = ({
                             </button>
                         </div>
                         <form onSubmit={onSubmitConsultation} className="p-6 space-y-4">
-                            <div className="grid grid-cols-2 gap-4">
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                 <div>
                                     <label className="block text-sm font-semibold text-gray-700 mb-2">
                                         {t('profilePage.consultationModal.preferredDate')}
@@ -384,7 +432,7 @@ const AgentContactActions: React.FC<AgentContactActionsProps> = ({
                                         value={consultationForm.date}
                                         onChange={(e) => setConsultationForm({ ...consultationForm, date: e.target.value })}
                                         min={new Date().toISOString().split('T')[0]}
-                                        className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                        className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent min-h-[48px]"
                                     />
                                 </div>
                                 <div>
@@ -395,7 +443,7 @@ const AgentContactActions: React.FC<AgentContactActionsProps> = ({
                                         required
                                         value={consultationForm.time}
                                         onChange={(e) => setConsultationForm({ ...consultationForm, time: e.target.value })}
-                                        className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                        className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent min-h-[48px]"
                                     >
                                         <option value="">{t('profilePage.consultationModal.selectTime')}</option>
                                         <option value="09:00">09:00 AM</option>

@@ -316,7 +316,12 @@
     "whatsapp": "WhatsApp",
     "telegram": "Telegram",
     "email": "Email",
-    "shareOn": "Shpërndaj në {{platform}}"
+    "shareOn": "Shpërndaj në {{platform}}",
+    "viber": "Viber"
+  },
+  "floatingContact": {
+    "toggleLabel": "Na kontaktoni përmes aplikacioneve të mesazheve",
+    "whatsappMessage": "Përshëndetje, kam një pyetje për një pronë në BalkanEstate."
   },
   "errors": {
     "somethingWentWrong": "Diçka shkoi keq",

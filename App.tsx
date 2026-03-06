@@ -47,6 +47,7 @@ import { parseLanguageFromPath, initializeLanguageFromUrl, buildLocalizedPath } 
 const Sidebar = lazy(() => import('./components/shared/Sidebar'));
 const Header = lazy(() => import('./components/shared/Header'));
 
+
 // Lazy load all pages and conditional components to reduce initial bundle
 const SearchPage = lazy(() => import('./src/features/search/components').then(m => ({ default: m.SearchPage })));
 const AuthPage = lazy(() => import('./src/features/auth/components/AuthModal'));

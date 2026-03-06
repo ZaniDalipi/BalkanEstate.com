@@ -189,6 +189,9 @@
     "video": "Видео",
     "all": "Све",
     "sendInquiry": "Пошаљи упит путем е-поште",
+    "whatsappSeller": "WhatsApp",
+    "whatsappMessage": "Здраво, интересује ме ова некретнина: {{title}}\n{{url}}",
+    "viberSeller": "Viber",
     "promote": "Промовиши",
     "extendPromotion": "Продужи"
   },

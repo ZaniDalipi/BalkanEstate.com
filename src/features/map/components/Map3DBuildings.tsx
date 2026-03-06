@@ -66,9 +66,9 @@ const Map3DBuildings: React.FC<Map3DBuildingsProps> = (props) => {
   } = use3DMap(props);
 
   return (
-    <div className="relative rounded-xl overflow-hidden shadow-xl" style={{ height }}>
-      {/* Map container */}
-      <div ref={mapContainer} className="w-full h-full" />
+    <div className="relative isolate rounded-xl overflow-hidden shadow-xl" style={{ height }}>
+      {/* Map container - z-0 ensures WebGL canvas stays below overlay controls on mobile */}
+      <div ref={mapContainer} className="relative z-0 w-full h-full" />
 
       {/* Time-based lighting overlay */}
       {showTimelapse && (
@@ -189,7 +189,7 @@ const Map3DBuildings: React.FC<Map3DBuildingsProps> = (props) => {
 
       {/* Loading indicator */}
       {!mapLoaded && (
-        <div className="absolute inset-0 flex items-center justify-center bg-slate-900">
+        <div className="absolute inset-0 z-30 flex items-center justify-center bg-slate-900">
           <div className="text-center">
             <div className="w-12 h-12 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto mb-3" />
             <p className="text-sm text-slate-400">{t('property:map3d.loading', 'Loading 3D Map...')}</p>

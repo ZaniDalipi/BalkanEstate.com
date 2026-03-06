@@ -183,6 +183,9 @@
     "video": "Video",
     "all": "All",
     "sendInquiry": "Send Email Inquiry",
+    "whatsappSeller": "WhatsApp",
+    "whatsappMessage": "Hi, I'm interested in this property: {{title}}\n{{url}}",
+    "viberSeller": "Viber",
     "promote": "Promote",
     "extendPromotion": "Extend"
   },

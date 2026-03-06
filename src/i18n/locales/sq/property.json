@@ -189,6 +189,9 @@
     "video": "Video",
     "all": "Të Gjitha",
     "sendInquiry": "Dërgo Pyetje me Email",
+    "whatsappSeller": "WhatsApp",
+    "whatsappMessage": "Përshëndetje, jam i/e interesuar për këtë pronë: {{title}}\n{{url}}",
+    "viberSeller": "Viber",
     "promote": "Promovo",
     "extendPromotion": "Zgjat"
   },
