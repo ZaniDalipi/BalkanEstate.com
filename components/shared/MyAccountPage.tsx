@@ -1903,6 +1903,16 @@ const ProfileSettings: React.FC<{ user: User; onLogout: () => void }> = ({ user,
             currentAgentId={user.agentId}
             currentPhone={user.phone}
             phoneOnly={pendingRole === UserRole.PRIVATE_SELLER && !user.phone}
+            hasProSubscription={
+                (user.subscription?.tier === 'pro' || user.subscription?.tier === 'agency_owner') &&
+                (user.subscription?.status === 'active' || user.subscription?.status === 'trial')
+            }
+            onNavigateToPricing={() => {
+                setIsLicenseModalOpen(false);
+                setPendingRole(null);
+                dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'pricing' });
+                window.history.pushState({}, '', '/pricing');
+            }}
         />
         </>
     );
