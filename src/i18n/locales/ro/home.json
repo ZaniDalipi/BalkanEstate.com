@@ -86,26 +86,10 @@
     "agentButton": "Join as Agent"
   },
   "showcase": {
-    "badge": "Funcțiile Platformei",
+    "badge": "Cum Funcționează",
     "title": "Tot Ce Aveți Nevoie,",
     "titleHighlight": "Într-un Singur Loc",
-    "subtitle": "De la căutarea cu AI la mesaje în timp real — explorați instrumentele care fac găsirea proprietății dvs. următoare fără efort.",
-    "trendingTitle": "Proprietăți în Tendințe",
-    "viewAll": "Vezi Toate",
-    "features": {
-      "aiSearch": "Căutare cu AI",
-      "aiSearchDesc": "Găsiți proprietăți folosind limbaj natural — doar descrieți ce doriți.",
-      "interactiveMap": "Hartă Interactivă",
-      "interactiveMapDesc": "Explorați anunțuri pe o hartă 3D cu filtre și desenare pentru căutare.",
-      "messaging": "Mesaje în Timp Real",
-      "messagingDesc": "Discutați direct cu agenți și vânzători fără a părăsi aplicația.",
-      "analytics": "Analitică de Piață",
-      "analyticsDesc": "Urmăriți tendințele prețurilor, datele de piață și performanța proprietăților.",
-      "valuation": "Evaluare Proprietate",
-      "valuationDesc": "Obțineți evaluări instantanee cu AI pentru orice proprietate.",
-      "multilingual": "10 Limbi",
-      "multilingualDesc": "Navigați în limba dvs. maternă în 11 țări balcanice."
-    }
+    "subtitle": "Căutare bazată pe inteligență artificială, hărți interactive 3D, mesaje în timp real, calculatoare financiare și promovarea anunțurilor — vedeți cum funcționează platforma pentru cumpărători, vânzători, agenți și agenții."
   },
   "testimonials": {
     "title": "What Our Users Say",

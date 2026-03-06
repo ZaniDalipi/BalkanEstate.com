@@ -196,9 +196,9 @@ const HeroSection: React.FC<HeroSectionProps> = ({
           >
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-6 sm:gap-8">
               {[
-                { value: '12,500+', label: t('home:stats.properties') },
+                { value: '10,000+', label: t('home:stats.properties') },
                 { value: '11', label: t('home:stats.countries') },
-                { value: '1,200+', label: t('home:stats.agents') },
+                { value: '500+', label: t('home:stats.agents') },
                 { value: '10', label: t('home:stats.languages') },
               ].map((stat, i) => (
                 <div key={i} className="text-center">
