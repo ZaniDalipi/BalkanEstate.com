@@ -28,7 +28,7 @@ const TestimonialCard: React.FC<{
       variant="light"
       incrementY={12}
       incrementZ={8}
-      incrementRotation={5}
+      incrementRotation={4}
     >
       <ReviewStars rating={testimonial.rating} className="text-amber-500" />
 
@@ -119,9 +119,9 @@ const TestimonialsSection: React.FC = () => {
       {/* Scroll-driven card stack — each scroll reveals the next testimonial */}
       <ContainerScroll
         className="min-h-[200vh]"
-        style={{ minHeight: `${Math.max(testimonials.length * 40, 200)}vh` }}
+        style={{ minHeight: `${Math.max(testimonials.length * 50, 250)}vh` }}
       >
-        <div className="sticky top-[15vh] flex items-start justify-center pt-8">
+        <div className="sticky top-[10vh] flex items-start justify-center pt-24">
           <CardsContainer className="h-[350px] w-[350px] sm:h-[380px] sm:w-[400px]">
             {testimonials.map((testimonial, i) => (
               <TestimonialCard

@@ -85,7 +85,7 @@ export const ContainerScroll: React.FC<
     ...(containerRef.current
       ? { container: containerRef as React.RefObject<HTMLElement> }
       : {}),
-    offset: ['start center', 'end end'],
+    offset: ['start start', 'end end'],
   });
 
   return (
@@ -130,7 +130,7 @@ export const CardTransformed = React.forwardRef<
       index,
       incrementY = 10,
       incrementZ = 10,
-      incrementRotation = -index + 90,
+      incrementRotation = 5,
       className,
       variant,
       style,
@@ -143,13 +143,17 @@ export const CardTransformed = React.forwardRef<
     const start = index / (arrayLength + 1);
     const end = (index + 1) / (arrayLength + 1);
     const range = React.useMemo(() => [start, end], [start, end]);
-    const rotateRange = [range[0] - 1.5, range[1] / 1.5];
+
+    // Each card starts with a fan rotation (index * step) and flies away with extra tilt
+    const initialRotation = index * incrementRotation;
+    const flyAwayRotation = initialRotation + 25;
 
     const y = useTransform(scrollYProgress, range, ['0%', '-180%']);
     const rotate = useTransform(scrollYProgress, range, [
-      0,
-      incrementRotation,
+      initialRotation,
+      flyAwayRotation,
     ]);
+    const opacity = useTransform(scrollYProgress, range, [1, 0]);
 
     const transform = useMotionTemplate`translateZ(${
       index * incrementZ
@@ -168,6 +172,7 @@ export const CardTransformed = React.forwardRef<
     const cardStyle = {
       top: index * incrementY,
       transform,
+      opacity,
       backfaceVisibility: 'hidden' as const,
       zIndex: (arrayLength - index) * incrementZ,
       filter,
