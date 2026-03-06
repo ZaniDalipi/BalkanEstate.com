@@ -1,22 +1,52 @@
 import React, { useEffect, useRef } from 'react';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
-import { cardData } from '../../lib/utils';
 
 gsap.registerPlugin(ScrollTrigger);
 
-interface CardProps {
-    id: number;
-    title: string;
-    description: string;
+interface PropertyCardData {
+    id: string;
+    title?: string;
+    address: string;
+    city: string;
+    country: string;
+    price: number;
+    currency?: string;
+    beds: number;
+    baths: number;
+    sqft: number;
+    imageUrl: string;
+    isPromoted?: boolean;
+    promotionTier?: string;
+    hasDiscount?: boolean;
+    createdAt?: number;
+}
+
+interface StackedPropertyCardProps {
+    property: PropertyCardData;
     index: number;
     totalCards: number;
     color: string;
+    onClick: () => void;
 }
 
-const Card: React.FC<CardProps> = ({ title, description, index, totalCards, color }) => {
+const CARD_COLORS = [
+    'rgba(2, 82, 205, 0.8)',
+    'rgba(139, 92, 246, 0.8)',
+    'rgba(14, 165, 233, 0.8)',
+    'rgba(16, 185, 129, 0.8)',
+    'rgba(245, 158, 11, 0.8)',
+    'rgba(239, 68, 68, 0.8)',
+];
+
+const StackedPropertyCard: React.FC<StackedPropertyCardProps> = ({ property, index, totalCards, color, onClick }) => {
     const cardRef = useRef<HTMLDivElement>(null);
     const containerRef = useRef<HTMLDivElement>(null);
+
+    const formatPrice = (price: number, currency?: string) => {
+        const symbol = currency === 'USD' ? '$' : '€';
+        return `${symbol}${price.toLocaleString()}`;
+    };
 
     useEffect(() => {
         const card = cardRef.current;
@@ -25,13 +55,11 @@ const Card: React.FC<CardProps> = ({ title, description, index, totalCards, colo
 
         const targetScale = 1 - (totalCards - index) * 0.05;
 
-        // Set initial state
         gsap.set(card, {
             scale: 1,
             transformOrigin: "center top"
         });
 
-        // Create scroll trigger for stacking effect
         const trigger = ScrollTrigger.create({
             trigger: container,
             start: "top center",
@@ -66,16 +94,18 @@ const Card: React.FC<CardProps> = ({ title, description, index, totalCards, colo
         >
             <div
                 ref={cardRef}
+                onClick={onClick}
                 style={{
                     position: 'relative',
                     width: '70%',
+                    maxWidth: '900px',
                     height: '450px',
                     borderRadius: '24px',
                     isolation: 'isolate',
                     top: `calc(-5vh + ${index * 25}px)`,
-                    transformOrigin: 'top'
+                    transformOrigin: 'top',
+                    cursor: 'pointer'
                 }}
-                className="card-content"
             >
                 {/* Electric Border Effect */}
                 <div
@@ -103,59 +133,184 @@ const Card: React.FC<CardProps> = ({ title, description, index, totalCards, colo
                     width: '100%',
                     height: '100%',
                     display: 'flex',
-                    flexDirection: 'column',
-                    justifyContent: 'center',
                     borderRadius: '24px',
-                    background: `
-                        linear-gradient(145deg,
-                            rgba(255, 255, 255, 0.1),
-                            rgba(255, 255, 255, 0.05)
-                        )
-                    `,
+                    background: 'linear-gradient(145deg, rgba(255, 255, 255, 0.95), rgba(245, 247, 250, 0.9))',
                     backdropFilter: 'blur(25px) saturate(180%)',
-                    border: '1px solid rgba(255, 255, 255, 0.2)',
+                    border: '1px solid rgba(0, 0, 0, 0.08)',
                     boxShadow: `
-                        0 8px 32px rgba(0, 0, 0, 0.3),
-                        0 2px 8px rgba(0, 0, 0, 0.2),
-                        inset 0 1px 0 rgba(255, 255, 255, 0.3),
-                        inset 0 -1px 0 rgba(255, 255, 255, 0.1)
+                        0 8px 32px rgba(0, 0, 0, 0.08),
+                        0 2px 8px rgba(0, 0, 0, 0.04),
+                        inset 0 1px 0 rgba(255, 255, 255, 0.8)
                     `,
-                    overflow: 'hidden',
-                    padding: '3rem'
+                    overflow: 'hidden'
                 }}>
-                    {/* Card text content */}
-                    <h2 style={{
-                        fontSize: 'clamp(1.5rem, 3vw, 2.5rem)',
-                        fontWeight: 600,
-                        color: '#ffffff',
-                        marginBottom: '1rem',
-                        position: 'relative',
-                        zIndex: 2
-                    }}>
-                        {title}
-                    </h2>
-                    <p style={{
-                        fontSize: 'clamp(0.9rem, 1.5vw, 1.1rem)',
-                        color: 'rgba(255, 255, 255, 0.7)',
-                        lineHeight: 1.6,
-                        maxWidth: '600px',
-                        position: 'relative',
-                        zIndex: 2
-                    }}>
-                        {description}
-                    </p>
-
-                    {/* Enhanced Glass reflection overlay */}
+                    {/* Property Image */}
                     <div style={{
-                        position: 'absolute',
-                        top: 0,
-                        left: 0,
-                        right: 0,
-                        height: '60%',
-                        background: 'linear-gradient(135deg, rgba(255, 255, 255, 0.25) 0%, rgba(255, 255, 255, 0.1) 50%, transparent 100%)',
-                        pointerEvents: 'none',
-                        borderRadius: '24px 24px 0 0'
-                    }} />
+                        width: '45%',
+                        height: '100%',
+                        position: 'relative',
+                        overflow: 'hidden'
+                    }}>
+                        <img
+                            src={property.imageUrl}
+                            alt={property.title || property.address}
+                            style={{
+                                width: '100%',
+                                height: '100%',
+                                objectFit: 'cover'
+                            }}
+                            loading="lazy"
+                        />
+                        {/* Image overlay gradient */}
+                        <div style={{
+                            position: 'absolute',
+                            bottom: 0,
+                            left: 0,
+                            right: 0,
+                            height: '40%',
+                            background: 'linear-gradient(to top, rgba(0,0,0,0.4), transparent)',
+                            pointerEvents: 'none'
+                        }} />
+                        {/* Badges */}
+                        <div style={{
+                            position: 'absolute',
+                            top: '12px',
+                            left: '12px',
+                            display: 'flex',
+                            gap: '6px'
+                        }}>
+                            {property.isPromoted && property.promotionTier && property.promotionTier !== 'standard' && (
+                                <span style={{
+                                    padding: '2px 8px',
+                                    borderRadius: '6px',
+                                    fontSize: '10px',
+                                    fontWeight: 700,
+                                    textTransform: 'uppercase',
+                                    background: '#f59e0b',
+                                    color: '#fff'
+                                }}>
+                                    Promoted
+                                </span>
+                            )}
+                            {property.createdAt && Date.now() - property.createdAt < 7 * 24 * 60 * 60 * 1000 && (
+                                <span style={{
+                                    padding: '2px 8px',
+                                    borderRadius: '6px',
+                                    fontSize: '10px',
+                                    fontWeight: 700,
+                                    textTransform: 'uppercase',
+                                    background: '#10b981',
+                                    color: '#fff'
+                                }}>
+                                    New
+                                </span>
+                            )}
+                        </div>
+                        {/* Price on image */}
+                        <div style={{
+                            position: 'absolute',
+                            bottom: '12px',
+                            left: '12px',
+                            fontSize: '1.5rem',
+                            fontWeight: 700,
+                            color: '#fff',
+                            textShadow: '0 2px 8px rgba(0,0,0,0.3)'
+                        }}>
+                            {formatPrice(property.price, property.currency)}
+                        </div>
+                    </div>
+
+                    {/* Property Details */}
+                    <div style={{
+                        width: '55%',
+                        padding: '2.5rem',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        justifyContent: 'center',
+                        position: 'relative',
+                        zIndex: 2
+                    }}>
+                        <h2 style={{
+                            fontSize: 'clamp(1.25rem, 2.5vw, 1.75rem)',
+                            fontWeight: 700,
+                            color: '#0f172a',
+                            marginBottom: '0.5rem',
+                            lineHeight: 1.3
+                        }}>
+                            {property.title || property.address}
+                        </h2>
+                        <p style={{
+                            fontSize: '0.9rem',
+                            color: '#64748b',
+                            marginBottom: '1.5rem'
+                        }}>
+                            {property.city}, {property.country}
+                        </p>
+
+                        {/* Property stats */}
+                        <div style={{
+                            display: 'flex',
+                            gap: '1.5rem',
+                            marginBottom: '1.5rem'
+                        }}>
+                            <div style={{
+                                display: 'flex',
+                                flexDirection: 'column',
+                                alignItems: 'center',
+                                padding: '0.75rem 1rem',
+                                borderRadius: '12px',
+                                background: 'rgba(2, 82, 205, 0.06)',
+                                minWidth: '70px'
+                            }}>
+                                <span style={{ fontSize: '1.25rem', fontWeight: 700, color: '#0f172a' }}>{property.beds}</span>
+                                <span style={{ fontSize: '0.75rem', color: '#64748b', marginTop: '2px' }}>Beds</span>
+                            </div>
+                            <div style={{
+                                display: 'flex',
+                                flexDirection: 'column',
+                                alignItems: 'center',
+                                padding: '0.75rem 1rem',
+                                borderRadius: '12px',
+                                background: 'rgba(2, 82, 205, 0.06)',
+                                minWidth: '70px'
+                            }}>
+                                <span style={{ fontSize: '1.25rem', fontWeight: 700, color: '#0f172a' }}>{property.baths}</span>
+                                <span style={{ fontSize: '0.75rem', color: '#64748b', marginTop: '2px' }}>Baths</span>
+                            </div>
+                            <div style={{
+                                display: 'flex',
+                                flexDirection: 'column',
+                                alignItems: 'center',
+                                padding: '0.75rem 1rem',
+                                borderRadius: '12px',
+                                background: 'rgba(2, 82, 205, 0.06)',
+                                minWidth: '70px'
+                            }}>
+                                <span style={{ fontSize: '1.25rem', fontWeight: 700, color: '#0f172a' }}>{property.sqft}</span>
+                                <span style={{ fontSize: '0.75rem', color: '#64748b', marginTop: '2px' }}>m²</span>
+                            </div>
+                        </div>
+
+                        {/* View button */}
+                        <button
+                            style={{
+                                alignSelf: 'flex-start',
+                                padding: '0.625rem 1.5rem',
+                                borderRadius: '12px',
+                                background: '#0252CD',
+                                color: '#fff',
+                                fontSize: '0.875rem',
+                                fontWeight: 600,
+                                border: 'none',
+                                cursor: 'pointer',
+                                transition: 'background 0.2s'
+                            }}
+                            onMouseOver={(e) => (e.currentTarget.style.background = '#003A96')}
+                            onMouseOut={(e) => (e.currentTarget.style.background = '#0252CD')}
+                        >
+                            View Property
+                        </button>
+                    </div>
 
                     {/* Glass shine effect */}
                     <div style={{
@@ -176,27 +331,9 @@ const Card: React.FC<CardProps> = ({ title, description, index, totalCards, colo
                         left: 0,
                         width: '2px',
                         height: '100%',
-                        background: 'linear-gradient(180deg, rgba(255, 255, 255, 0.3) 0%, transparent 50%)',
+                        background: 'linear-gradient(180deg, rgba(255, 255, 255, 0.5) 0%, transparent 50%)',
                         borderRadius: '24px 0 0 24px',
                         pointerEvents: 'none'
-                    }} />
-
-                    {/* Frosted glass texture */}
-                    <div style={{
-                        position: 'absolute',
-                        top: 0,
-                        left: 0,
-                        right: 0,
-                        bottom: 0,
-                        backgroundImage: `
-                            radial-gradient(circle at 20% 30%, rgba(255,255,255,0.1) 1px, transparent 2px),
-                            radial-gradient(circle at 80% 70%, rgba(255,255,255,0.08) 1px, transparent 2px),
-                            radial-gradient(circle at 40% 80%, rgba(255,255,255,0.06) 1px, transparent 2px)
-                        `,
-                        backgroundSize: '30px 30px, 25px 25px, 35px 35px',
-                        pointerEvents: 'none',
-                        borderRadius: '24px',
-                        opacity: 0.7
                     }} />
                 </div>
             </div>
@@ -204,7 +341,21 @@ const Card: React.FC<CardProps> = ({ title, description, index, totalCards, colo
     );
 };
 
-export const StackedCards: React.FC = () => {
+interface StackedCardsProps {
+    properties: PropertyCardData[];
+    onPropertyClick: (property: PropertyCardData) => void;
+    title?: string;
+    subtitle?: string;
+    onViewAll?: () => void;
+}
+
+export const StackedCards: React.FC<StackedCardsProps> = ({
+    properties,
+    onPropertyClick,
+    title = 'Featured Properties',
+    subtitle = 'Handpicked properties from top agents across the Balkans',
+    onViewAll
+}) => {
     const containerRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
@@ -221,60 +372,68 @@ export const StackedCards: React.FC = () => {
         );
     }, []);
 
-    return (
-        <main ref={containerRef} style={{ background: '#0a0a0a' }}>
-            {/* Hero Section */}
-            <section style={{
-                height: '70vh',
-                width: '100%',
-                display: 'grid',
-                placeContent: 'center',
-                position: 'relative',
-                color: '#ffffff'
-            }}>
-                <div style={{
-                    position: 'absolute',
-                    top: 0,
-                    left: 0,
-                    right: 0,
-                    bottom: 0,
-                    backgroundImage: `
-                        linear-gradient(to right, rgba(79, 79, 79, 0.18) 1px, transparent 1px),
-                        linear-gradient(to bottom, rgba(79, 79, 79, 0.18) 1px, transparent 1px)
-                    `,
-                    backgroundSize: '54px 54px',
-                    maskImage: 'radial-gradient(ellipse 60% 50% at 50% 0%, #000 70%, transparent 100%)'
-                }} />
-                <h1 style={{
-                    fontSize: 'clamp(2rem, 5vw, 4rem)',
-                    fontWeight: '500',
-                    textAlign: 'center',
-                    lineHeight: '1.2',
-                    padding: '0 2rem',
-                    position: 'relative',
-                    zIndex: 1
-                }}>
-                    Explore Property Categories
-                </h1>
-            </section>
+    if (properties.length === 0) return null;
 
-            {/* Cards Section */}
-            <section style={{
-                color: '#ffffff',
-                width: '100%'
+    return (
+        <section ref={containerRef} style={{ background: '#ffffff' }}>
+            {/* Section Header */}
+            <div style={{
+                maxWidth: '72rem',
+                margin: '0 auto',
+                padding: '3rem 1rem 0',
+                display: 'flex',
+                alignItems: 'flex-end',
+                justifyContent: 'space-between'
             }}>
-                {cardData.map((card, index) => (
-                    <Card
-                        key={card.id}
-                        id={card.id}
-                        title={card.title}
-                        description={card.description}
+                <div>
+                    <h2 style={{
+                        fontSize: 'clamp(1.25rem, 3vw, 1.5rem)',
+                        fontWeight: 700,
+                        color: '#0f172a'
+                    }}>
+                        {title}
+                    </h2>
+                    <p style={{
+                        fontSize: '0.875rem',
+                        color: '#64748b',
+                        marginTop: '0.25rem'
+                    }}>
+                        {subtitle}
+                    </p>
+                </div>
+                {onViewAll && (
+                    <button
+                        onClick={onViewAll}
+                        style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '0.375rem',
+                            fontSize: '0.875rem',
+                            fontWeight: 500,
+                            color: '#475569',
+                            background: 'none',
+                            border: 'none',
+                            cursor: 'pointer'
+                        }}
+                    >
+                        View All Properties →
+                    </button>
+                )}
+            </div>
+
+            {/* Stacked Cards */}
+            <div style={{ width: '100%' }}>
+                {properties.slice(0, 6).map((property, index) => (
+                    <StackedPropertyCard
+                        key={property.id}
+                        property={property}
                         index={index}
-                        totalCards={cardData.length}
-                        color={card.color}
+                        totalCards={Math.min(properties.length, 6)}
+                        color={CARD_COLORS[index % CARD_COLORS.length]}
+                        onClick={() => onPropertyClick(property)}
                     />
                 ))}
-            </section>
-        </main>
+            </div>
+        </section>
     );
 };

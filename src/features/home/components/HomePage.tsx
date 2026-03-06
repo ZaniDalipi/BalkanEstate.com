@@ -8,7 +8,6 @@ import { API_CONFIG } from '@/src/shared/constants/app.constants';
 import { useQuery } from '@tanstack/react-query';
 import HeroSection from './HeroSection';
 import QuickAccessSection from './QuickAccessSection';
-import FeaturedPropertiesSection from './FeaturedPropertiesSection';
 import CategoriesSection from './CategoriesSection';
 import PopularCitiesSection from './PopularCitiesSection';
 import HowItWorksSection from './HowItWorksSection';
@@ -116,15 +115,13 @@ const HomePage: React.FC = () => {
         />
       )}
 
-      <FeaturedPropertiesSection
+      <StackedCards
         properties={featuredProperties}
         onPropertyClick={handlePropertyClick}
         onViewAll={() => handleNavigate('search', '/search')}
       />
 
       <CategoriesSection onCategoryClick={handleCategoryClick} />
-
-      <StackedCards />
 
       <PopularCitiesSection onNavigate={handleNavigate} />
 
