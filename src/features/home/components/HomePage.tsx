@@ -76,7 +76,7 @@ const HomePage: React.FC = () => {
   const currentUser = state.currentUser;
 
   return (
-    <div className="flex flex-col min-h-screen overflow-y-auto bg-neutral-50">
+    <div className="flex flex-col min-h-screen overflow-y-auto bg-white">
       <Helmet>
         <title>{t('home:seo.title')}</title>
         <meta name="description" content={t('home:seo.description')} />

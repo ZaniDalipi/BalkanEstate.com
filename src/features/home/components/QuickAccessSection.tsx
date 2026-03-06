@@ -1,5 +1,6 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
+import { motion } from 'framer-motion';
 import { User } from '@/types';
 
 interface QuickAccessSectionProps {
@@ -39,7 +40,7 @@ const QuickAccessSection: React.FC<QuickAccessSectionProps> = ({
       path: '/saved-searches',
       view: 'saved-searches',
       badge: savedSearchesCount || undefined,
-      color: 'bg-blue-50 text-blue-600',
+      color: 'bg-slate-100 text-slate-600',
     },
     {
       key: 'savedProperties',
@@ -103,7 +104,12 @@ const QuickAccessSection: React.FC<QuickAccessSectionProps> = ({
   return (
     <section className="py-8 sm:py-10 bg-white border-b border-neutral-100">
       <div className="max-w-6xl mx-auto px-4">
-        <div className="flex items-center justify-between mb-5">
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          className="flex items-center justify-between mb-5"
+        >
           <div>
             <h2 className="text-lg font-semibold text-slate-900">
               {t('home:quickAccess.title')}
@@ -115,27 +121,36 @@ const QuickAccessSection: React.FC<QuickAccessSectionProps> = ({
           <span className="text-sm text-slate-500 hidden sm:block">
             {user.name}
           </span>
-        </div>
+        </motion.div>
 
         <div className="grid grid-cols-3 sm:grid-cols-6 gap-3">
-          {links.map((link) => (
-            <button
+          {links.map((link, i) => (
+            <motion.button
               key={link.key}
+              initial={{ opacity: 0, y: 10 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: i * 0.05, type: 'spring', stiffness: 300, damping: 30 }}
+              whileHover={{ y: -3 }}
+              whileTap={{ scale: 0.95 }}
               onClick={() => onNavigate(link.view, link.path)}
               className="relative flex flex-col items-center gap-2 p-3.5 rounded-xl border border-neutral-100 hover:border-neutral-200 hover:shadow-sm bg-white transition-all group"
             >
-              <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${link.color} transition-transform group-hover:scale-105`}>
+              <motion.div
+                whileHover={{ scale: 1.1 }}
+                className={`w-10 h-10 rounded-lg flex items-center justify-center ${link.color}`}
+              >
                 {link.icon}
-              </div>
+              </motion.div>
               <span className="text-xs font-medium text-slate-700 text-center leading-tight">
                 {t(`home:quickAccess.${link.key}`)}
               </span>
               {link.badge && link.badge > 0 && (
-                <span className="absolute -top-1 -right-1 min-w-[18px] h-[18px] flex items-center justify-center px-1 rounded-full bg-blue-600 text-white text-[10px] font-bold">
+                <span className="absolute -top-1 -right-1 min-w-[18px] h-[18px] flex items-center justify-center px-1 rounded-full bg-slate-800 text-white text-[10px] font-bold">
                   {link.badge > 99 ? '99+' : link.badge}
                 </span>
               )}
-            </button>
+            </motion.button>
           ))}
         </div>
       </div>

@@ -1,5 +1,6 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
+import { motion } from 'framer-motion';
 
 interface HowItWorksSectionProps {
   onLearnMore: () => void;
@@ -18,7 +19,7 @@ const HowItWorksSection: React.FC<HowItWorksSectionProps> = ({ onLearnMore }) =>
           <path strokeLinecap="round" strokeLinejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" />
         </svg>
       ),
-      color: 'bg-blue-600',
+      color: 'bg-slate-800',
     },
     {
       number: '02',
@@ -47,27 +48,42 @@ const HowItWorksSection: React.FC<HowItWorksSectionProps> = ({ onLearnMore }) =>
   return (
     <section className="py-12 sm:py-16 bg-white">
       <div className="max-w-6xl mx-auto px-4">
-        <div className="text-center mb-10">
+        <motion.div
+          initial={{ opacity: 0, y: 15 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          className="text-center mb-10"
+        >
           <h2 className="text-xl sm:text-2xl font-bold text-slate-900">
             {t('home:howItWorks.title')}
           </h2>
           <p className="text-sm text-slate-500 mt-1 max-w-lg mx-auto">
             {t('home:howItWorks.subtitle')}
           </p>
-        </div>
+        </motion.div>
 
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 sm:gap-8">
           {steps.map((step, i) => (
-            <div key={step.number} className="relative text-center sm:text-left">
+            <motion.div
+              key={step.number}
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: i * 0.12, type: 'spring', stiffness: 300, damping: 30 }}
+              className="relative text-center sm:text-left"
+            >
               {/* Connector line (desktop only) */}
               {i < steps.length - 1 && (
                 <div className="hidden sm:block absolute top-7 left-[calc(50%+28px)] right-[calc(-50%+28px)] h-[2px] bg-neutral-200" />
               )}
 
               <div className="flex flex-col items-center sm:items-start">
-                <div className={`w-14 h-14 rounded-2xl ${step.color} text-white flex items-center justify-center relative z-10`}>
+                <motion.div
+                  whileHover={{ scale: 1.1, rotate: 5 }}
+                  className={`w-14 h-14 rounded-2xl ${step.color} text-white flex items-center justify-center relative z-10`}
+                >
                   {step.icon}
-                </div>
+                </motion.div>
                 <span className="text-xs font-bold text-slate-300 mt-3 uppercase tracking-wider">
                   {step.number}
                 </span>
@@ -78,12 +94,19 @@ const HowItWorksSection: React.FC<HowItWorksSectionProps> = ({ onLearnMore }) =>
                   {t(`home:howItWorks.${step.descKey}`)}
                 </p>
               </div>
-            </div>
+            </motion.div>
           ))}
         </div>
 
-        <div className="mt-10 text-center">
-          <button
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          className="mt-10 text-center"
+        >
+          <motion.button
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
             onClick={onLearnMore}
             className="inline-flex items-center gap-2 px-6 py-2.5 rounded-xl text-sm font-semibold text-slate-700 border border-neutral-200 hover:bg-neutral-50 hover:border-neutral-300 transition-colors"
           >
@@ -91,8 +114,8 @@ const HowItWorksSection: React.FC<HowItWorksSectionProps> = ({ onLearnMore }) =>
             <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3" />
             </svg>
-          </button>
-        </div>
+          </motion.button>
+        </motion.div>
       </div>
     </section>
   );

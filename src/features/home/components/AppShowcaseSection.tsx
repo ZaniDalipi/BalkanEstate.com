@@ -415,7 +415,7 @@ const AppShowcaseSection: React.FC<AppShowcaseSectionProps> = ({ onNavigate }) =
   }, [onNavigate]);
 
   return (
-    <section className="bg-gradient-to-b from-neutral-50 to-white overflow-hidden">
+    <section className="bg-white overflow-hidden">
       <ContainerScroll
         titleComponent={
           <div className="mb-8">
@@ -423,7 +423,7 @@ const AppShowcaseSection: React.FC<AppShowcaseSectionProps> = ({ onNavigate }) =
               initial={{ opacity: 0, y: 10 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
-              className="inline-block px-3 py-1 rounded-full text-xs font-semibold bg-blue-100 text-blue-700 mb-4"
+              className="inline-block px-3 py-1 rounded-full text-xs font-semibold bg-slate-100 text-slate-700 mb-4"
             >
               {t('home:showcase.badge')}
             </motion.span>

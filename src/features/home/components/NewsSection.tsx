@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useRealEstateNews, NewsItem } from '../hooks/useRealEstateNews';
 
 const CATEGORY_COLORS: Record<string, string> = {
-  market: 'bg-blue-100 text-blue-700',
+  market: 'bg-slate-100 text-slate-700',
   investment: 'bg-emerald-100 text-emerald-700',
   regulation: 'bg-amber-100 text-amber-700',
   development: 'bg-violet-100 text-violet-700',
@@ -86,7 +86,7 @@ const NewsSection: React.FC = () => {
   const { news, countries, selectedCountry, setSelectedCountry } = useRealEstateNews();
 
   return (
-    <section className="py-16 md:py-24 bg-gradient-to-b from-white to-neutral-50">
+    <section className="py-16 md:py-24 bg-white">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
         <motion.div

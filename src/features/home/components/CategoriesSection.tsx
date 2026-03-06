@@ -1,5 +1,6 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
+import { motion } from 'framer-motion';
 
 interface CategoriesSectionProps {
   onCategoryClick: (propertyType: string, listingType?: string) => void;
@@ -17,7 +18,7 @@ const CategoriesSection: React.FC<CategoriesSectionProps> = ({ onCategoryClick }
           <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 21h19.5m-18-18v18m10.5-18v18m6-13.5V21M6.75 6.75h.75m-.75 3h.75m-.75 3h.75m3-6h.75m-.75 3h.75m-.75 3h.75M6.75 21v-3.375c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21M3 3h12m-.75 4.5H21m-3.75 3H21m-3.75 3H21" />
         </svg>
       ),
-      gradient: 'from-blue-500 to-indigo-600',
+      gradient: 'from-slate-600 to-slate-800',
     },
     {
       key: 'houses',
@@ -75,29 +76,43 @@ const CategoriesSection: React.FC<CategoriesSectionProps> = ({ onCategoryClick }
   return (
     <section className="py-12 sm:py-16 bg-white">
       <div className="max-w-6xl mx-auto px-4">
-        <div className="text-center mb-8">
+        <motion.div
+          initial={{ opacity: 0, y: 15 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          className="text-center mb-8"
+        >
           <h2 className="text-xl sm:text-2xl font-bold text-slate-900">
             {t('home:categories.title')}
           </h2>
           <p className="text-sm text-slate-500 mt-1">
             {t('home:categories.subtitle')}
           </p>
-        </div>
+        </motion.div>
 
         <div className="grid grid-cols-3 sm:grid-cols-6 gap-3 sm:gap-4">
-          {categories.map((cat) => (
-            <button
+          {categories.map((cat, i) => (
+            <motion.button
               key={cat.key}
+              initial={{ opacity: 0, y: 15 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, margin: '-30px' }}
+              transition={{ delay: i * 0.06, type: 'spring', stiffness: 300, damping: 30 }}
+              whileHover={{ y: -4 }}
+              whileTap={{ scale: 0.95 }}
               onClick={() => onCategoryClick(cat.type, cat.listingType)}
               className="group flex flex-col items-center gap-2.5 p-4 sm:p-5 rounded-xl border border-neutral-100 hover:border-neutral-200 hover:shadow-md bg-white transition-all"
             >
-              <div className={`w-12 h-12 sm:w-14 sm:h-14 rounded-xl bg-gradient-to-br ${cat.gradient} text-white flex items-center justify-center transition-transform group-hover:scale-110`}>
+              <motion.div
+                whileHover={{ scale: 1.1, rotate: 5 }}
+                className={`w-12 h-12 sm:w-14 sm:h-14 rounded-xl bg-gradient-to-br ${cat.gradient} text-white flex items-center justify-center`}
+              >
                 {cat.icon}
-              </div>
+              </motion.div>
               <span className="text-xs sm:text-sm font-medium text-slate-700">
                 {t(`home:categories.${cat.key}`)}
               </span>
-            </button>
+            </motion.button>
           ))}
         </div>
       </div>

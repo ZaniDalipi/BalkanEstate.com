@@ -1,160 +1,99 @@
-import React, { useRef } from 'react';
+import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { motion, useScroll, useTransform } from 'framer-motion';
+import { motion } from 'framer-motion';
+import {
+  CardTransformed,
+  CardsContainer,
+  ContainerScroll,
+  ReviewStars,
+} from '@/src/components/blocks/animated-cards-stack';
 
 interface Testimonial {
+  id: string;
   name: string;
   role: string;
   country: string;
   quote: string;
   avatar: string;
   rating: number;
+  gradient: string;
 }
 
 const TESTIMONIALS: Testimonial[] = [
   {
-    name: 'Elena Petrova',
+    id: 'testimonial-1',
+    name: 'Elena P.',
     role: 'Home Buyer',
     country: 'Bulgaria',
     quote: 'Found our dream villa on the Black Sea coast in just two weeks. The AI search understood exactly what we wanted — even the sea view requirement!',
     avatar: 'EP',
     rating: 5,
+    gradient: 'from-emerald-500 to-teal-400',
   },
   {
-    name: 'Marko Nikolić',
+    id: 'testimonial-2',
+    name: 'Marko N.',
     role: 'Real Estate Agent',
     country: 'Serbia',
     quote: 'BalkanEstate transformed my business. I went from 3 listings a month to over 15. The agency dashboard and analytics are game-changers.',
     avatar: 'MN',
     rating: 5,
+    gradient: 'from-violet-500 to-purple-400',
   },
   {
-    name: 'Ana Kovačević',
+    id: 'testimonial-3',
+    name: 'Ana K.',
     role: 'Property Investor',
     country: 'Croatia',
     quote: 'The financial calculators and market analytics helped me identify undervalued properties in Split. My portfolio has grown 40% in a year.',
     avatar: 'AK',
     rating: 5,
+    gradient: 'from-amber-500 to-orange-400',
   },
   {
-    name: 'Dritan Hoxha',
+    id: 'testimonial-4',
+    name: 'Dritan H.',
     role: 'Agency Owner',
     country: 'Albania',
     quote: 'Managing 50+ agents across three offices was chaos before BalkanEstate. Now everything — listings, leads, commissions — is in one place.',
     avatar: 'DH',
     rating: 5,
+    gradient: 'from-rose-500 to-pink-400',
   },
   {
-    name: 'Ioanna Papadopoulos',
+    id: 'testimonial-5',
+    name: 'Ioanna P.',
     role: 'Expat Buyer',
     country: 'Greece',
     quote: 'As a foreigner buying in Athens, the multilingual support and verified agents made the process feel safe. The 3D map feature is incredible.',
     avatar: 'IP',
-    rating: 5,
+    rating: 4.5,
+    gradient: 'from-sky-500 to-cyan-400',
   },
   {
-    name: 'Stefan Jovanović',
+    id: 'testimonial-6',
+    name: 'Stefan J.',
     role: 'Property Seller',
     country: 'Montenegro',
     quote: 'Listed my apartment in Budva and received 12 inquiries in the first week. The Premium promotion tier was absolutely worth it.',
     avatar: 'SJ',
     rating: 5,
+    gradient: 'from-indigo-500 to-violet-400',
   },
 ];
 
-const GRADIENT_BORDERS = [
-  'from-blue-500 to-cyan-400',
-  'from-emerald-500 to-teal-400',
-  'from-violet-500 to-purple-400',
-  'from-amber-500 to-orange-400',
-  'from-rose-500 to-pink-400',
-  'from-indigo-500 to-blue-400',
-];
-
-const TestimonialCard: React.FC<{
-  testimonial: Testimonial;
-  index: number;
-  progress: any;
-  total: number;
-}> = ({ testimonial, index, progress, total }) => {
-  // Each card has its own scroll range — stacks and unstacks
-  const cardStart = index / total;
-  const cardEnd = (index + 1) / total;
-
-  const scale = useTransform(progress, [cardStart, cardEnd], [1, 0.92]);
-  const y = useTransform(progress, [cardStart, cardEnd], [0, -30]);
-  const opacity = useTransform(progress, [cardStart, Math.min(cardEnd + 0.1, 1)], [1, index === total - 1 ? 1 : 0.6]);
-  const rotateX = useTransform(progress, [cardStart, cardEnd], [0, -3]);
-
-  return (
-    <motion.div
-      style={{
-        scale,
-        y,
-        opacity,
-        rotateX,
-        zIndex: total - index,
-        position: 'sticky',
-        top: `${120 + index * 20}px`,
-      }}
-      className="w-full max-w-2xl mx-auto"
-    >
-      <div className="relative">
-        {/* Gradient border effect */}
-        <div className={`absolute -inset-[1px] rounded-2xl bg-gradient-to-br ${GRADIENT_BORDERS[index % GRADIENT_BORDERS.length]} opacity-20`} />
-        <div className="relative bg-white rounded-2xl p-6 md:p-8 shadow-lg border border-neutral-100/80">
-          {/* Stars */}
-          <div className="flex gap-0.5 mb-4">
-            {Array.from({ length: testimonial.rating }).map((_, i) => (
-              <svg key={i} className="w-4 h-4 text-amber-400" viewBox="0 0 24 24" fill="currentColor">
-                <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
-              </svg>
-            ))}
-          </div>
-
-          {/* Quote */}
-          <p className="text-sm md:text-base text-slate-700 leading-relaxed mb-6">
-            &ldquo;{testimonial.quote}&rdquo;
-          </p>
-
-          {/* Author */}
-          <div className="flex items-center gap-3">
-            <div className={`w-10 h-10 rounded-full bg-gradient-to-br ${GRADIENT_BORDERS[index % GRADIENT_BORDERS.length]} flex items-center justify-center`}>
-              <span className="text-white text-xs font-bold">{testimonial.avatar}</span>
-            </div>
-            <div>
-              <p className="text-sm font-semibold text-slate-900">{testimonial.name}</p>
-              <p className="text-xs text-slate-500">{testimonial.role} &middot; {testimonial.country}</p>
-            </div>
-          </div>
-        </div>
-      </div>
-    </motion.div>
-  );
-};
-
 const TestimonialsSection: React.FC = () => {
   const { t } = useTranslation('home');
-  const containerRef = useRef<HTMLDivElement>(null);
-
-  const { scrollYProgress } = useScroll({
-    target: containerRef,
-    offset: ['start start', 'end end'],
-  });
 
   return (
-    <section
-      ref={containerRef}
-      className="relative bg-gradient-to-b from-neutral-50 to-white"
-      style={{ minHeight: `${100 + TESTIMONIALS.length * 30}vh` }}
-    >
-      {/* Header — sticky at top */}
-      <div className="sticky top-0 z-0 pt-16 md:pt-24 pb-8 text-center bg-gradient-to-b from-neutral-50 via-neutral-50 to-transparent">
+    <section className="bg-white px-4 sm:px-8 py-12">
+      {/* Header */}
+      <div className="text-center">
         <motion.span
           initial={{ opacity: 0, y: 10 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          className="inline-block px-3 py-1 rounded-full text-xs font-semibold bg-violet-100 text-violet-700 mb-4"
+          className="inline-block px-3 py-1 rounded-full text-xs font-semibold bg-slate-100 text-slate-700 mb-4"
         >
           {t('testimonials.badge', 'Testimonials')}
         </motion.span>
@@ -172,26 +111,53 @@ const TestimonialsSection: React.FC = () => {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ delay: 0.2 }}
-          className="mt-3 text-sm sm:text-base text-slate-500 max-w-2xl mx-auto"
+          className="mt-2 max-w-lg mx-auto text-sm text-slate-500"
         >
           {t('testimonials.subtitle', 'Trusted by thousands of buyers, sellers, and agents across the Balkans')}
         </motion.p>
       </div>
 
-      {/* Cards stack */}
-      <div className="relative px-4 sm:px-6 lg:px-8 pb-24">
-        <div className="flex flex-col gap-6">
-          {TESTIMONIALS.map((testimonial, i) => (
-            <TestimonialCard
-              key={testimonial.name}
-              testimonial={testimonial}
-              index={i}
-              progress={scrollYProgress}
-              total={TESTIMONIALS.length}
-            />
-          ))}
+      {/* Animated cards stack */}
+      <ContainerScroll className="h-[300vh]">
+        <div className="sticky left-0 top-0 h-svh w-full py-12">
+          <CardsContainer className="mx-auto size-full h-[450px] w-[350px]">
+            {TESTIMONIALS.map((testimonial, index) => (
+              <CardTransformed
+                key={testimonial.id}
+                arrayLength={TESTIMONIALS.length}
+                variant="light"
+                index={index + 2}
+                role="article"
+                aria-labelledby={`card-${testimonial.id}-title`}
+                aria-describedby={`card-${testimonial.id}-content`}
+              >
+                <div className="flex flex-col items-center space-y-4 text-center">
+                  <ReviewStars
+                    className="text-teal-500"
+                    rating={testimonial.rating}
+                  />
+                  <div className="mx-auto w-4/5 text-lg text-slate-700">
+                    <blockquote>&ldquo;{testimonial.quote}&rdquo;</blockquote>
+                  </div>
+                </div>
+                <div className="flex items-center gap-4">
+                  <div className={`w-12 h-12 rounded-full bg-gradient-to-br ${testimonial.gradient} flex items-center justify-center flex-shrink-0`}>
+                    <span className="text-white text-sm font-bold">{testimonial.avatar}</span>
+                  </div>
+                  <div>
+                    <span className="block text-lg font-semibold tracking-tight text-slate-900">
+                      {testimonial.name}
+                    </span>
+                    <span className="block text-sm text-slate-500">
+                      {testimonial.role} &middot; {testimonial.country}
+                    </span>
+                  </div>
+                </div>
+              </CardTransformed>
+            ))}
+          </CardsContainer>
         </div>
-      </div>
+      </ContainerScroll>
     </section>
   );
 };
