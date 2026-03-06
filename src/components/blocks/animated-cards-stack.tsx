@@ -146,7 +146,7 @@ export const CardTransformed = React.forwardRef<
 
     // Each card starts with a fan rotation (index * step) and flies away with extra tilt
     const initialRotation = index * incrementRotation;
-    const flyAwayRotation = initialRotation + 25;
+    const flyAwayRotation = incrementRotation === 0 ? 0 : initialRotation + 25;
 
     const y = useTransform(scrollYProgress, range, ['0%', '-180%']);
     const rotate = useTransform(scrollYProgress, range, [

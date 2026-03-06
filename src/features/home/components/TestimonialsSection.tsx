@@ -28,7 +28,7 @@ const TestimonialCard: React.FC<{
       variant="light"
       incrementY={12}
       incrementZ={8}
-      incrementRotation={4}
+      incrementRotation={0}
     >
       <ReviewStars rating={testimonial.rating} className="text-amber-500" />
 
