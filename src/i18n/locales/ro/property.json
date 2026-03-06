@@ -189,6 +189,9 @@
     "video": "Video",
     "all": "Toate",
     "sendInquiry": "Trimite cerere prin email",
+    "whatsappSeller": "WhatsApp",
+    "whatsappMessage": "Bună, sunt interesat/ă de această proprietate: {{title}}\n{{url}}",
+    "viberSeller": "Viber",
     "promote": "Promovează",
     "extendPromotion": "Prelungește"
   },

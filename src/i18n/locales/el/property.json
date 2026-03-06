@@ -189,6 +189,9 @@
     "video": "Βίντεο",
     "all": "Όλα",
     "sendInquiry": "Αποστολή ερώτησης μέσω email",
+    "whatsappSeller": "WhatsApp",
+    "whatsappMessage": "Γεια σας, ενδιαφέρομαι για αυτό το ακίνητο: {{title}}\n{{url}}",
+    "viberSeller": "Viber",
     "promote": "Προώθηση",
     "extendPromotion": "Παράταση"
   },

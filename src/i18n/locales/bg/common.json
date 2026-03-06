@@ -316,7 +316,12 @@
     "whatsapp": "WhatsApp",
     "telegram": "Telegram",
     "email": "Имейл",
-    "shareOn": "Сподели в {{platform}}"
+    "shareOn": "Сподели в {{platform}}",
+    "viber": "Viber"
+  },
+  "floatingContact": {
+    "toggleLabel": "Свържете се с нас чрез месинджър приложения",
+    "whatsappMessage": "Здравейте, имам въпрос относно имот в BalkanEstate."
   },
   "errors": {
     "somethingWentWrong": "Нещо се обърка",

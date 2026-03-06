@@ -316,7 +316,12 @@
     "whatsapp": "WhatsApp",
     "telegram": "Telegram",
     "email": "Email",
-    "shareOn": "Κοινοποίηση στο {{platform}}"
+    "shareOn": "Κοινοποίηση στο {{platform}}",
+    "viber": "Viber"
+  },
+  "floatingContact": {
+    "toggleLabel": "Επικοινωνήστε μαζί μας μέσω εφαρμογών μηνυμάτων",
+    "whatsappMessage": "Γεια σας, έχω μια ερώτηση σχετικά με ένα ακίνητο στο BalkanEstate."
   },
   "errors": {
     "somethingWentWrong": "Κάτι πήγε στραβά",

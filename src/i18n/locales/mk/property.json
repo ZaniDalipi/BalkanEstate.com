@@ -189,6 +189,9 @@
     "video": "Видео",
     "all": "Сите",
     "sendInquiry": "Испрати барање по е-пошта",
+    "whatsappSeller": "WhatsApp",
+    "whatsappMessage": "Здраво, ме интересира овој имот: {{title}}\n{{url}}",
+    "viberSeller": "Viber",
     "promote": "Промовирај",
     "extendPromotion": "Продолжи"
   },
