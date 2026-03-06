@@ -15,7 +15,7 @@ const cardVariants = cva('absolute will-change-transform', {
     variant: {
       dark: 'flex size-full flex-col items-center justify-center gap-6 rounded-2xl border border-stone-700/50 bg-accent-foreground/80 p-6 backdrop-blur-md',
       light:
-        'flex size-full flex-col items-center justify-center gap-6 rounded-2xl border bg-white/70 p-6 backdrop-blur-md border-white/30',
+        'flex size-full flex-col items-center justify-center gap-6 rounded-2xl border bg-white/80 p-6 backdrop-blur-md',
     },
   },
   defaultVariants: {
