@@ -85,6 +85,28 @@
     "agentSubtitle": "Join our network of verified agents. Get leads, manage listings, and grow your business.",
     "agentButton": "Join as Agent"
   },
+  "showcase": {
+    "badge": "Platform Features",
+    "title": "Everything You Need,",
+    "titleHighlight": "All in One Place",
+    "subtitle": "From AI-powered search to real-time messaging — explore the tools that make finding your next property effortless.",
+    "trendingTitle": "Trending Properties",
+    "viewAll": "View All",
+    "features": {
+      "aiSearch": "AI-Powered Search",
+      "aiSearchDesc": "Find properties using natural language — just describe what you want.",
+      "interactiveMap": "Interactive Map",
+      "interactiveMapDesc": "Explore listings on a 3D map with filters and draw-to-search.",
+      "messaging": "Real-Time Messaging",
+      "messagingDesc": "Chat directly with agents and sellers without leaving the app.",
+      "analytics": "Market Analytics",
+      "analyticsDesc": "Track price trends, market data, and property performance.",
+      "valuation": "Property Valuation",
+      "valuationDesc": "Get instant AI-powered estimates for any property.",
+      "multilingual": "10 Languages",
+      "multilingualDesc": "Browse in your native language across 11 Balkan countries."
+    }
+  },
   "testimonials": {
     "title": "What Our Users Say",
     "subtitle": "Trusted by thousands of buyers, sellers, and agents across the Balkans"

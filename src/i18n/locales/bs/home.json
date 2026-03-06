@@ -85,6 +85,28 @@
     "agentSubtitle": "Join our network of verified agents. Get leads, manage listings, and grow your business.",
     "agentButton": "Join as Agent"
   },
+  "showcase": {
+    "badge": "Funkcije Platforme",
+    "title": "Sve Što Vam Treba,",
+    "titleHighlight": "Na Jednom Mjestu",
+    "subtitle": "Od AI pretrage do poruka u realnom vremenu — istražite alate koji pronalaženje vašeg sljedećeg imanja čine jednostavnim.",
+    "trendingTitle": "Nekretnine u Trendu",
+    "viewAll": "Pogledaj Sve",
+    "features": {
+      "aiSearch": "AI Pretraga",
+      "aiSearchDesc": "Pronađite nekretnine koristeći prirodni jezik — samo opišite šta želite.",
+      "interactiveMap": "Interaktivna Mapa",
+      "interactiveMapDesc": "Istražite oglase na 3D mapi s filterima i crtanjem za pretragu.",
+      "messaging": "Poruke u Realnom Vremenu",
+      "messagingDesc": "Razgovarajte direktno s agentima i prodavačima bez napuštanja aplikacije.",
+      "analytics": "Tržišna Analitika",
+      "analyticsDesc": "Pratite trendove cijena, tržišne podatke i performanse nekretnina.",
+      "valuation": "Procjena Nekretnine",
+      "valuationDesc": "Dobijte trenutne AI procjene za bilo koju nekretninu.",
+      "multilingual": "10 Jezika",
+      "multilingualDesc": "Pregledajte na svom maternjem jeziku u 11 balkanskih zemalja."
+    }
+  },
   "testimonials": {
     "title": "What Our Users Say",
     "subtitle": "Trusted by thousands of buyers, sellers, and agents across the Balkans"

@@ -85,6 +85,28 @@
     "agentSubtitle": "Bashkohuni me rrjetin tonë të agjentëve. Merrni kontakte dhe rritni biznesin.",
     "agentButton": "Bashkohu si Agjent"
   },
+  "showcase": {
+    "badge": "Veçoritë e Platformës",
+    "title": "Gjithçka që Ju Duhet,",
+    "titleHighlight": "Në Një Vend",
+    "subtitle": "Nga kërkimi me AI deri te mesazhet në kohë reale — zbuloni mjetet që e bëjnë gjetjen e pronës tuaj të ardhshme pa mundim.",
+    "trendingTitle": "Prona në Trend",
+    "viewAll": "Shiko të Gjitha",
+    "features": {
+      "aiSearch": "Kërkim me AI",
+      "aiSearchDesc": "Gjeni prona duke përdorur gjuhën natyrore — thjesht përshkruani çfarë dëshironi.",
+      "interactiveMap": "Hartë Interaktive",
+      "interactiveMapDesc": "Eksploroni listat në hartë 3D me filtra dhe vizatim për kërkim.",
+      "messaging": "Mesazhe në Kohë Reale",
+      "messagingDesc": "Bisedoni drejtpërdrejt me agjentë dhe shitës pa dalë nga aplikacioni.",
+      "analytics": "Analitika e Tregut",
+      "analyticsDesc": "Ndiqni trendet e çmimeve, të dhënat e tregut dhe performancën e pronave.",
+      "valuation": "Vlerësimi i Pronës",
+      "valuationDesc": "Merrni vlerësime të menjëhershme me AI për çdo pronë.",
+      "multilingual": "10 Gjuhë",
+      "multilingualDesc": "Shfletoni në gjuhën tuaj amtare në 11 vende ballkanike."
+    }
+  },
   "testimonials": {
     "title": "Çfarë Thonë Përdoruesit Tanë",
     "subtitle": "I besuar nga mijëra blerës, shitës dhe agjentë në Ballkan"

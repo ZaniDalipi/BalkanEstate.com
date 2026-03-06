@@ -85,6 +85,28 @@
     "agentSubtitle": "Join our network of verified agents. Get leads, manage listings, and grow your business.",
     "agentButton": "Join as Agent"
   },
+  "showcase": {
+    "badge": "Функции на Платформата",
+    "title": "Всичко, от Което Имате Нужда,",
+    "titleHighlight": "На Едно Място",
+    "subtitle": "От AI търсене до съобщения в реално време — разгледайте инструментите, които правят намирането на следващия ви имот лесно.",
+    "trendingTitle": "Популярни Имоти",
+    "viewAll": "Виж Всички",
+    "features": {
+      "aiSearch": "AI Търсене",
+      "aiSearchDesc": "Намерете имоти, използвайки естествен език — просто опишете какво искате.",
+      "interactiveMap": "Интерактивна Карта",
+      "interactiveMapDesc": "Разгледайте обяви на 3D карта с филтри и рисуване за търсене.",
+      "messaging": "Съобщения в Реално Време",
+      "messagingDesc": "Чатете директно с агенти и продавачи, без да напускате приложението.",
+      "analytics": "Пазарна Аналитика",
+      "analyticsDesc": "Следете ценовите тенденции, пазарните данни и представянето на имотите.",
+      "valuation": "Оценка на Имот",
+      "valuationDesc": "Получете мигновени AI оценки за всеки имот.",
+      "multilingual": "10 Езика",
+      "multilingualDesc": "Разглеждайте на родния си език в 11 балкански държави."
+    }
+  },
   "testimonials": {
     "title": "What Our Users Say",
     "subtitle": "Trusted by thousands of buyers, sellers, and agents across the Balkans"

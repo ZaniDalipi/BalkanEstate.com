@@ -13,6 +13,7 @@ import CategoriesSection from './CategoriesSection';
 import PopularCitiesSection from './PopularCitiesSection';
 import HowItWorksSection from './HowItWorksSection';
 import CTASection from './CTASection';
+import AppShowcaseSection from './AppShowcaseSection';
 
 const HomePage: React.FC = () => {
   const { t } = useTranslation(['home', 'common']);
@@ -85,6 +86,8 @@ const HomePage: React.FC = () => {
         onSearch={handleSearch}
         onNavigate={handleNavigate}
       />
+
+      <AppShowcaseSection onNavigate={handleNavigate} />
 
       {isAuthenticated && currentUser && (
         <QuickAccessSection

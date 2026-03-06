@@ -85,6 +85,28 @@
     "agentSubtitle": "Join our network of verified agents. Get leads, manage listings, and grow your business.",
     "agentButton": "Join as Agent"
   },
+  "showcase": {
+    "badge": "Χαρακτηριστικά Πλατφόρμας",
+    "title": "Ό,τι Χρειάζεστε,",
+    "titleHighlight": "Σε Ένα Μέρος",
+    "subtitle": "Από αναζήτηση με AI έως μηνύματα σε πραγματικό χρόνο — εξερευνήστε τα εργαλεία που κάνουν την εύρεση του επόμενου ακινήτου σας εύκολη.",
+    "trendingTitle": "Δημοφιλή Ακίνητα",
+    "viewAll": "Δείτε Όλα",
+    "features": {
+      "aiSearch": "Αναζήτηση με AI",
+      "aiSearchDesc": "Βρείτε ακίνητα χρησιμοποιώντας φυσική γλώσσα — απλά περιγράψτε τι θέλετε.",
+      "interactiveMap": "Διαδραστικός Χάρτης",
+      "interactiveMapDesc": "Εξερευνήστε αγγελίες σε 3D χάρτη με φίλτρα και σχεδίαση για αναζήτηση.",
+      "messaging": "Μηνύματα σε Πραγματικό Χρόνο",
+      "messagingDesc": "Συνομιλήστε απευθείας με πράκτορες και πωλητές χωρίς να φύγετε από την εφαρμογή.",
+      "analytics": "Αναλυτικά Αγοράς",
+      "analyticsDesc": "Παρακολουθήστε τάσεις τιμών, δεδομένα αγοράς και απόδοση ακινήτων.",
+      "valuation": "Εκτίμηση Ακινήτου",
+      "valuationDesc": "Λάβετε άμεσες εκτιμήσεις με AI για οποιοδήποτε ακίνητο.",
+      "multilingual": "10 Γλώσσες",
+      "multilingualDesc": "Περιηγηθείτε στη μητρική σας γλώσσα σε 11 βαλκανικές χώρες."
+    }
+  },
   "testimonials": {
     "title": "What Our Users Say",
     "subtitle": "Trusted by thousands of buyers, sellers, and agents across the Balkans"
