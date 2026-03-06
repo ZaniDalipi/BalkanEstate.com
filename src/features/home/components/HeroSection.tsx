@@ -1,5 +1,6 @@
 import React, { useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
+import { motion } from 'framer-motion';
 
 interface HeroSectionProps {
   searchQuery: string;
@@ -9,6 +10,29 @@ interface HeroSectionProps {
 }
 
 const POPULAR_CITIES = ['Tirana', 'Belgrade', 'Skopje', 'Pristina', 'Sarajevo', 'Zagreb'];
+
+const AnimatedCounter: React.FC<{ value: string; label: string; icon: React.ReactNode; accent: string }> = ({
+  value,
+  label,
+  icon,
+  accent,
+}) => (
+  <motion.div
+    initial={{ opacity: 0, y: 20 }}
+    whileInView={{ opacity: 1, y: 0 }}
+    viewport={{ once: true }}
+    transition={{ duration: 0.5 }}
+    className="flex items-center gap-3 sm:gap-4"
+  >
+    <div className={`w-10 h-10 sm:w-11 sm:h-11 rounded-xl ${accent} flex items-center justify-center flex-shrink-0`}>
+      {icon}
+    </div>
+    <div className="text-left">
+      <div className="text-xl sm:text-2xl font-bold text-white leading-none">{value}</div>
+      <div className="text-[11px] sm:text-xs text-slate-400 mt-0.5 leading-tight">{label}</div>
+    </div>
+  </motion.div>
+);
 
 const HeroSection: React.FC<HeroSectionProps> = ({
   searchQuery,
@@ -24,6 +48,49 @@ const HeroSection: React.FC<HeroSectionProps> = ({
     },
     [onSearch]
   );
+
+  const stats = [
+    {
+      value: '12,500+',
+      label: t('home:stats.properties'),
+      accent: 'bg-blue-500/20',
+      icon: (
+        <svg className="w-5 h-5 text-blue-400" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+          <path strokeLinecap="round" strokeLinejoin="round" d="m2.25 12 8.954-8.955c.44-.439 1.152-.439 1.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25" />
+        </svg>
+      ),
+    },
+    {
+      value: '11',
+      label: t('home:stats.countries'),
+      accent: 'bg-emerald-500/20',
+      icon: (
+        <svg className="w-5 h-5 text-emerald-400" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+          <path strokeLinecap="round" strokeLinejoin="round" d="M12 21a9.004 9.004 0 0 0 8.716-6.747M12 21a9.004 9.004 0 0 1-8.716-6.747M12 21c2.485 0 4.5-4.03 4.5-9S14.485 3 12 3m0 18c-2.485 0-4.5-4.03-4.5-9S9.515 3 12 3m0 0a8.997 8.997 0 0 1 7.843 4.582M12 3a8.997 8.997 0 0 0-7.843 4.582m15.686 0A11.953 11.953 0 0 1 12 10.5c-2.998 0-5.74-1.1-7.843-2.918m15.686 0A8.959 8.959 0 0 1 21 12c0 .778-.099 1.533-.284 2.253m0 0A17.919 17.919 0 0 1 12 16.5a17.92 17.92 0 0 1-8.716-2.247m0 0A9.015 9.015 0 0 1 3 12c0-1.605.42-3.113 1.157-4.418" />
+        </svg>
+      ),
+    },
+    {
+      value: '1,200+',
+      label: t('home:stats.agents'),
+      accent: 'bg-violet-500/20',
+      icon: (
+        <svg className="w-5 h-5 text-violet-400" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+          <path strokeLinecap="round" strokeLinejoin="round" d="M15 19.128a9.38 9.38 0 0 0 2.625.372 9.337 9.337 0 0 0 4.121-.952 4.125 4.125 0 0 0-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 0 1 8.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0 1 11.964-3.07M12 6.375a3.375 3.375 0 1 1-6.75 0 3.375 3.375 0 0 1 6.75 0Zm8.25 2.25a2.625 2.625 0 1 1-5.25 0 2.625 2.625 0 0 1 5.25 0Z" />
+        </svg>
+      ),
+    },
+    {
+      value: '10',
+      label: t('home:stats.languages'),
+      accent: 'bg-amber-500/20',
+      icon: (
+        <svg className="w-5 h-5 text-amber-400" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+          <path strokeLinecap="round" strokeLinejoin="round" d="m10.5 21 5.25-11.25L21 21m-9-3h7.5M3 5.621a48.474 48.474 0 0 1 6-.371m0 0c1.12 0 2.233.038 3.334.114M9 5.25V3m3.334 2.364C11.176 10.658 7.148 15.08 2 17.558m15.849-6.13c-1.588.894-3.296 1.613-5.094 2.128" />
+        </svg>
+      ),
+    },
+  ];
 
   return (
     <section className="relative bg-gradient-to-br from-slate-900 via-blue-950 to-slate-900 overflow-hidden">
@@ -129,19 +196,21 @@ const HeroSection: React.FC<HeroSectionProps> = ({
           </button>
         </div>
 
-        {/* Stats Strip */}
-        <div className="mt-12 grid grid-cols-2 sm:grid-cols-4 gap-4 sm:gap-6 max-w-2xl mx-auto">
-          {[
-            { value: '10,000+', label: t('home:stats.properties') },
-            { value: '11', label: t('home:stats.countries') },
-            { value: '500+', label: t('home:stats.agents') },
-            { value: '10', label: t('home:stats.languages') },
-          ].map((stat) => (
-            <div key={stat.label} className="text-center">
-              <div className="text-2xl sm:text-3xl font-bold text-white">{stat.value}</div>
-              <div className="text-xs sm:text-sm text-slate-400 mt-0.5">{stat.label}</div>
+        {/* Stats Strip - Modern card design */}
+        <div className="mt-14 max-w-3xl mx-auto">
+          <div className="bg-white/[0.06] backdrop-blur-md border border-white/10 rounded-2xl px-6 py-5 sm:px-8 sm:py-6">
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-6 sm:gap-8">
+              {stats.map((stat, i) => (
+                <AnimatedCounter
+                  key={i}
+                  value={stat.value}
+                  label={stat.label}
+                  icon={stat.icon}
+                  accent={stat.accent}
+                />
+              ))}
             </div>
-          ))}
+          </div>
         </div>
       </div>
     </section>
