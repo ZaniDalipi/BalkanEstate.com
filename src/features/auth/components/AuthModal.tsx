@@ -4,6 +4,7 @@ import { useAppContext } from '@/context/AppContext';
 import { AppleIcon, EnvelopeIcon, GoogleIcon, LogoIcon, XMarkIcon, EyeIcon } from '@/constants';
 import SocialLoginPopup from './SocialLoginPopup';
 import { buildLocalizedPath } from '@/src/utils/languageRouting';
+import { ALL_PHONE_COUNTRY_CODES, PHONE_FORMAT_PATTERNS, formatPhoneNumber, getPhonePlaceholder, BALKAN_PHONE_CODES } from '@/constants/phoneCountryCodes';
 
 type SocialProvider = 'google' | 'apple';
 
@@ -37,57 +38,6 @@ interface FieldErrors {
     phone?: string;
 }
 
-// Balkan country codes for phone number input
-const BALKAN_COUNTRY_CODES = [
-    { code: '+383', country: 'XK', label: 'Kosovo', flag: '🇽🇰' },
-    { code: '+355', country: 'AL', label: 'Albania', flag: '🇦🇱' },
-    { code: '+381', country: 'RS', label: 'Serbia', flag: '🇷🇸' },
-    { code: '+389', country: 'MK', label: 'N. Macedonia', flag: '🇲🇰' },
-    { code: '+387', country: 'BA', label: 'Bosnia', flag: '🇧🇦' },
-    { code: '+382', country: 'ME', label: 'Montenegro', flag: '🇲🇪' },
-    { code: '+385', country: 'HR', label: 'Croatia', flag: '🇭🇷' },
-    { code: '+386', country: 'SI', label: 'Slovenia', flag: '🇸🇮' },
-    { code: '+359', country: 'BG', label: 'Bulgaria', flag: '🇧🇬' },
-    { code: '+40', country: 'RO', label: 'Romania', flag: '🇷🇴' },
-    { code: '+30', country: 'GR', label: 'Greece', flag: '🇬🇷' },
-] as const;
-
-// Phone number format patterns per country code (groups of digits)
-const PHONE_FORMAT_PATTERNS: Record<string, number[]> = {
-    '+383': [2, 3, 4],    // Kosovo: 44 123 4567
-    '+355': [2, 3, 4],    // Albania: 69 123 4567
-    '+381': [2, 3, 4],    // Serbia: 63 123 4567
-    '+389': [2, 3, 3],    // N. Macedonia: 70 123 456
-    '+387': [2, 3, 3],    // Bosnia: 61 123 456
-    '+382': [2, 3, 3],    // Montenegro: 67 123 456
-    '+385': [2, 3, 4],    // Croatia: 91 123 4567
-    '+386': [2, 3, 2, 2], // Slovenia: 31 123 45 67
-    '+359': [2, 3, 4],    // Bulgaria: 88 123 4567
-    '+40':  [3, 3, 3],    // Romania: 721 123 456
-    '+30':  [3, 3, 4],    // Greece: 694 123 4567
-};
-
-const formatPhoneNumber = (countryCode: string, digits: string): string => {
-    const clean = digits.replace(/\D/g, '');
-    const pattern = PHONE_FORMAT_PATTERNS[countryCode] || [3, 3, 4];
-    const parts: string[] = [];
-    let pos = 0;
-    for (const groupSize of pattern) {
-        if (pos >= clean.length) break;
-        parts.push(clean.slice(pos, pos + groupSize));
-        pos += groupSize;
-    }
-    // Append any remaining digits to the last group
-    if (pos < clean.length && parts.length > 0) {
-        parts[parts.length - 1] += clean.slice(pos);
-    }
-    return parts.join(' ');
-};
-
-const getPhonePlaceholder = (countryCode: string): string => {
-    const pattern = PHONE_FORMAT_PATTERNS[countryCode] || [3, 3, 4];
-    return pattern.map(n => 'X'.repeat(n)).join(' ');
-};
 
 const validatePhone = (countryCode: string, phoneNumber: string, t?: (key: string, defaultValue?: string) => string): string | null => {
     const tr = t || ((key: string, defaultValue?: string) => defaultValue || key);
@@ -283,7 +233,7 @@ const AuthPage: React.FC = () => {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
-    const [phoneCountryCode, setPhoneCountryCode] = useState<string>(BALKAN_COUNTRY_CODES[0].code);
+    const [phoneCountryCode, setPhoneCountryCode] = useState<string>(ALL_PHONE_COUNTRY_CODES[0].code);
     const [phoneNumber, setPhoneNumber] = useState('');
 
     // Field-level errors for custom validation
@@ -597,10 +547,15 @@ const AuthPage: React.FC = () => {
                                             }}
                                             className="bg-transparent text-sm text-neutral-700 font-medium pl-4 pr-1 py-4 border-none focus:outline-none focus:ring-0 cursor-pointer"
                                         >
-                                            {BALKAN_COUNTRY_CODES.map((cc) => (
-                                                <option key={cc.code} value={cc.code}>
-                                                    {cc.flag} {cc.code} {cc.country}
-                                                </option>
+                                            {ALL_PHONE_COUNTRY_CODES.map((cc, i) => (
+                                                <React.Fragment key={`${cc.country}-${cc.code}`}>
+                                                    {i === BALKAN_PHONE_CODES.length && (
+                                                        <option disabled>──────────</option>
+                                                    )}
+                                                    <option value={cc.code}>
+                                                        {cc.flag} {cc.code} {cc.country}
+                                                    </option>
+                                                </React.Fragment>
                                             ))}
                                         </select>
                                         <div className="w-px h-6 bg-neutral-300/60 flex-shrink-0" />
