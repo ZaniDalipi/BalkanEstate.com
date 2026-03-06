@@ -597,7 +597,7 @@ export function use3DMap(props: Map3DBuildingsProps) {
     const adjustedFloorHeight = finalBuildingHeight / totalFlrs;
 
     // Scale up the building coordinates to fully cover the original and prevent z-fighting
-    const scaleFactor = 1.05; // 5% larger to fully cover original building
+    const scaleFactor = 1.15; // 15% larger to fully cover original building and hide gaps
 
     // Calculate centroid for scaling and label positioning
     const outerRing = buildingCoords[0];
@@ -619,33 +619,26 @@ export function use3DMap(props: Map3DBuildingsProps) {
       ])
     );
 
-    // First, try to hide the original building by setting a filter that excludes buildings at this location
-    // We'll do this by creating a small exclusion zone around the property
-    if (mapInstance.getLayer('3d-buildings')) {
-      // Get the current filter and add exclusion for this building's area
-      const latTolerance = 0.0003; // ~30m tolerance
-      const lngTolerance = 0.0003;
+    // Hide the original building so it doesn't bleed through the floor gaps
+    // We filter it out by its feature ID or render_height at this location
+    if (mapInstance.getLayer('3d-buildings') && buildingFeature) {
+      // Use the building's unique feature id to exclude it from the 3d-buildings layer
+      const featureId = buildingFeature.id;
+      const buildingRenderHeight = buildingFeature.properties?.render_height;
 
-      // Apply filter to exclude the original building (by checking if building is within our area)
-      // This uses a bounding box check
-      mapInstance.setFilter('3d-buildings', [
-        'any',
-        ['<', ['get', 'render_height'], 5], // Keep short buildings
-        ['all',
-          ['any',
-            ['<', ['geometry-type'], 'Polygon'], // Keep non-polygons
-            ['any',
-              // Keep buildings outside our exclusion zone
-              // We can't easily filter by geometry center, so use a workaround
-              // by relying on the custom building to cover the original
-            ]
-          ]
-        ]
-      ]);
-
-      // Alternative: Just let the custom building cover the original
-      // Remove the filter and rely on proper z-ordering
-      mapInstance.setFilter('3d-buildings', null);
+      if (featureId != null) {
+        // Filter out the exact building by feature ID
+        mapInstance.setFilter('3d-buildings', ['!=', ['id'], featureId]);
+      } else if (buildingRenderHeight) {
+        // Fallback: filter out buildings with matching render_height near this location
+        // This is imprecise but better than showing the original solid building
+        mapInstance.setFilter('3d-buildings', [
+          'any',
+          ['!=', ['get', 'render_height'], buildingRenderHeight],
+          ['!', ['has', 'render_height']]
+        ]);
+      }
+      // If neither works, the scaled-up custom building (15% larger) should still cover it
     }
 
     // Add source for the custom building using actual geometry
