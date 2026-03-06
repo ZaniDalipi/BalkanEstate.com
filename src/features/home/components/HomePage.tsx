@@ -16,6 +16,7 @@ import AppShowcaseSection from './AppShowcaseSection';
 import NewsSection from './NewsSection';
 import TestimonialsSection from './TestimonialsSection';
 import { StackedCards } from '@/src/components/ui/glass-cards';
+import Footer from '@/components/shared/Footer';
 
 const HomePage: React.FC = () => {
   const { t } = useTranslation(['home', 'common']);
@@ -141,6 +142,8 @@ const HomePage: React.FC = () => {
           }}
         />
       )}
+
+      <Footer />
     </div>
   );
 };
