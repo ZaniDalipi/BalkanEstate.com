@@ -146,7 +146,7 @@ export const CardTransformed = React.forwardRef<
     const rotateRange = [range[0] - 1.5, range[1] / 1.5];
 
     const y = useTransform(scrollYProgress, range, ['0%', '-180%']);
-    const rotate = useTransform(scrollYProgress, rotateRange, [
+    const rotate = useTransform(scrollYProgress, range, [
       0,
       incrementRotation,
     ]);
@@ -155,10 +155,10 @@ export const CardTransformed = React.forwardRef<
       index * incrementZ
     }px) translateY(${y}) rotate(${rotate}deg)`;
 
-    const dx = useTransform(scrollYProgress, rotateRange, [0, 4]);
-    const dy = useTransform(scrollYProgress, rotateRange, [12, 4]);
-    const blur = useTransform(scrollYProgress, rotateRange, [24, 2]);
-    const alpha = useTransform(scrollYProgress, rotateRange, [0.2, 0.05]);
+    const dx = useTransform(scrollYProgress, range, [0, 4]);
+    const dy = useTransform(scrollYProgress, range, [12, 4]);
+    const blur = useTransform(scrollYProgress, range, [24, 2]);
+    const alpha = useTransform(scrollYProgress, range, [0.2, 0.05]);
 
     const filter =
       variant === 'light'
