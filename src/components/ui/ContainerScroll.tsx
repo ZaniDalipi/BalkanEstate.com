@@ -4,8 +4,7 @@ import { useScroll, useTransform, motion, MotionValue } from 'framer-motion';
 export const ContainerScroll: React.FC<{
   titleComponent: React.ReactNode;
   children: React.ReactNode;
-  phoneContent?: React.ReactNode;
-}> = ({ titleComponent, children, phoneContent }) => {
+}> = ({ titleComponent, children }) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const { scrollYProgress } = useScroll({
     target: containerRef,
@@ -27,16 +26,6 @@ export const ContainerScroll: React.FC<{
   const scale = useTransform(scrollYProgress, [0, 1], scaleDimensions());
   const translate = useTransform(scrollYProgress, [0, 1], [0, -100]);
 
-  // Phone transforms - delayed entrance, slides in from the right
-  const phoneOpacity = useTransform(scrollYProgress, [0.2, 0.5], [0, 1]);
-  const phoneX = useTransform(
-    scrollYProgress,
-    [0.2, 0.6],
-    isMobile ? [60, 0] : [120, 0]
-  );
-  const phoneRotate = useTransform(scrollYProgress, [0.2, 0.6], [15, 0]);
-  const phoneScale = useTransform(scrollYProgress, [0.2, 0.6], [0.8, 1]);
-
   return (
     <div
       className="h-[60rem] md:h-[80rem] flex items-center justify-center relative p-2 md:p-20"
@@ -47,43 +36,9 @@ export const ContainerScroll: React.FC<{
         style={{ perspective: '1000px' }}
       >
         <Header translate={translate} titleComponent={titleComponent} />
-
-        {/* Devices container */}
-        <div className="relative max-w-6xl mx-auto flex items-end justify-center">
-          {/* Tablet - original style */}
-          <Card rotate={rotate} translate={translate} scale={scale}>
-            {children}
-          </Card>
-
-          {/* Phone - slides in from the right */}
-          {phoneContent && (
-            <motion.div
-              style={{
-                opacity: phoneOpacity,
-                x: phoneX,
-                rotateY: phoneRotate,
-                scale: phoneScale,
-              }}
-              className="absolute -right-2 sm:right-4 md:right-8 lg:right-16 bottom-0 md:bottom-4 z-20"
-            >
-              <div
-                className="w-[140px] sm:w-[160px] md:w-[200px] h-[280px] sm:h-[320px] md:h-[400px] bg-neutral-900 rounded-[24px] md:rounded-[32px] border-4 border-neutral-700 p-1 md:p-1.5 shadow-2xl"
-                style={{
-                  boxShadow:
-                    '0 25px 50px rgba(0,0,0,0.4), 0 0 0 1px rgba(255,255,255,0.05) inset',
-                }}
-              >
-                {/* Phone notch */}
-                <div className="absolute top-2 left-1/2 -translate-x-1/2 w-16 md:w-20 h-4 md:h-5 bg-neutral-900 rounded-full z-20 flex items-center justify-center">
-                  <div className="w-2 h-2 md:w-2.5 md:h-2.5 rounded-full bg-neutral-800 border border-neutral-700" />
-                </div>
-                <div className="h-full w-full overflow-hidden rounded-[20px] md:rounded-[26px] bg-gray-50">
-                  {phoneContent}
-                </div>
-              </div>
-            </motion.div>
-          )}
-        </div>
+        <Card rotate={rotate} translate={translate} scale={scale}>
+          {children}
+        </Card>
       </div>
     </div>
   );
