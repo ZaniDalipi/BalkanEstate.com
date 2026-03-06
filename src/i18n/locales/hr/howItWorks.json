@@ -1,7 +1,50 @@
 {
   "hero": {
     "title": "Kako Balkan Estate Funkcionira",
-    "subtitle": "Vodeća platforma za nekretnine koja povezuje kupce, prodavače, agente i agencije širom Balkana"
+    "subtitle": "Pogledajte naše video vodiče za brz početak"
+  },
+  "videoTutorials": {
+    "title": "Pogledajte uživo",
+    "subtitle": "Pogledajte potpuni pregled platforme i saznajte kako sve funkcionira",
+    "comingSoon": "Video dolazi uskoro",
+    "mainVideo": {
+      "embedUrl": "",
+      "title": "Balkan Estate - Kompletan pregled platforme",
+      "description": "Kompletan pregled svih značajki i kako koristiti platformu"
+    },
+    "shortVideos": {
+      "title": "Kratki vodiči",
+      "proMonthly": {
+        "embedUrl": "",
+        "title": "Aktiviraj Pro mjesečni",
+        "description": "Kako se pretplatiti na Pro mjesečni plan i otključati premium značajke"
+      },
+      "proYearly": {
+        "embedUrl": "",
+        "title": "Aktiviraj Pro godišnji",
+        "description": "Kako se pretplatiti na Pro godišnji plan i uštediti 33%"
+      },
+      "createAgency": {
+        "embedUrl": "",
+        "title": "Kreiraj agenciju",
+        "description": "Kako postaviti profil agencije i početi upravljati agentima"
+      },
+      "joinAgency": {
+        "embedUrl": "",
+        "title": "Pridruži se agenciji",
+        "description": "Kako koristiti kupon kod za pridruživanje postojećoj agenciji"
+      },
+      "createListing": {
+        "embedUrl": "",
+        "title": "Kreiraj oglas",
+        "description": "Kako kreirati i objaviti prvi oglas za nekretninu"
+      },
+      "promoteListing": {
+        "embedUrl": "",
+        "title": "Promoviraj oglas",
+        "description": "Kako poboljšati vidljivost oglasa s Istaknuto, Premium ili Naglašeno promocijom"
+      }
+    }
   },
   "tabs": {
     "gettingStarted": "Početak Rada",

@@ -299,6 +299,109 @@ const HowItWorksPage: React.FC = () => {
         </div>
       </div>
 
+      {/* Video Tutorials Section */}
+      <div className="max-w-6xl mx-auto px-4 py-12">
+        {/* Main Overview Video */}
+        <div className="text-center mb-8">
+          <h2 className="text-3xl font-bold text-neutral-800 mb-3">
+            {t('howItWorks:videoTutorials.title')}
+          </h2>
+          <p className="text-lg text-neutral-600 max-w-2xl mx-auto">
+            {t('howItWorks:videoTutorials.subtitle')}
+          </p>
+        </div>
+
+        {/* Main Video Embed */}
+        <div className="max-w-4xl mx-auto mb-12">
+          {(() => {
+            const mainEmbedUrl = t('howItWorks:videoTutorials.mainVideo.embedUrl');
+            const hasMainVideo = mainEmbedUrl && !mainEmbedUrl.includes('videoTutorials.mainVideo');
+            return hasMainVideo ? (
+              <div className="relative w-full rounded-2xl overflow-hidden shadow-xl" style={{ paddingBottom: '56.25%' }}>
+                <iframe
+                  className="absolute top-0 left-0 w-full h-full"
+                  src={mainEmbedUrl}
+                  title={t('howItWorks:videoTutorials.mainVideo.title')}
+                  frameBorder="0"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                  allowFullScreen
+                />
+              </div>
+            ) : (
+              <div className="relative w-full rounded-2xl overflow-hidden shadow-xl bg-gradient-to-br from-primary/5 to-primary/10" style={{ paddingBottom: '56.25%' }}>
+                <div className="absolute inset-0 flex flex-col items-center justify-center text-neutral-400">
+                  <svg className="w-16 h-16 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                  <span className="text-lg font-medium">{t('howItWorks:videoTutorials.comingSoon')}</span>
+                </div>
+              </div>
+            );
+          })()}
+          <p className="text-center text-neutral-500 mt-3 text-sm">
+            {t('howItWorks:videoTutorials.mainVideo.description')}
+          </p>
+        </div>
+
+        {/* Short Tutorial Videos Grid */}
+        <div className="mb-8">
+          <h3 className="text-2xl font-bold text-neutral-800 mb-6 text-center">
+            {t('howItWorks:videoTutorials.shortVideos.title')}
+          </h3>
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {([
+              { key: 'proMonthly', icon: <StarIcon className="w-5 h-5" /> },
+              { key: 'proYearly', icon: <SparklesIcon className="w-5 h-5" /> },
+              { key: 'createAgency', icon: <BuildingIcon className="w-5 h-5" /> },
+              { key: 'joinAgency', icon: <UserGroupIcon className="w-5 h-5" /> },
+              { key: 'createListing', icon: <HomeIcon className="w-5 h-5" /> },
+              { key: 'promoteListing', icon: <FireIcon className="w-5 h-5" /> },
+            ] as const).map((tutorial) => {
+              const embedUrl = t(`howItWorks:videoTutorials.shortVideos.${tutorial.key}.embedUrl`);
+              const hasVideo = embedUrl && !embedUrl.includes('videoTutorials.shortVideos');
+              return (
+                <div key={tutorial.key} className="bg-white rounded-xl shadow-md overflow-hidden border border-neutral-100 hover:shadow-lg transition-shadow">
+                  {hasVideo ? (
+                    <div className="relative w-full" style={{ paddingBottom: '56.25%' }}>
+                      <iframe
+                        className="absolute top-0 left-0 w-full h-full"
+                        src={embedUrl}
+                        title={t(`howItWorks:videoTutorials.shortVideos.${tutorial.key}.title`)}
+                        frameBorder="0"
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                        allowFullScreen
+                      />
+                    </div>
+                  ) : (
+                    <div className="relative w-full bg-gradient-to-br from-neutral-100 to-neutral-50 flex items-center justify-center" style={{ paddingBottom: '56.25%' }}>
+                      <div className="absolute inset-0 flex flex-col items-center justify-center text-neutral-400">
+                        <svg className="w-12 h-12 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        <span className="text-sm">{t('howItWorks:videoTutorials.comingSoon')}</span>
+                      </div>
+                    </div>
+                  )}
+                  <div className="p-4">
+                    <div className="flex items-center gap-2 mb-1">
+                      <span className="text-primary">{tutorial.icon}</span>
+                      <h4 className="font-semibold text-neutral-800">
+                        {t(`howItWorks:videoTutorials.shortVideos.${tutorial.key}.title`)}
+                      </h4>
+                    </div>
+                    <p className="text-sm text-neutral-500">
+                      {t(`howItWorks:videoTutorials.shortVideos.${tutorial.key}.description`)}
+                    </p>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      </div>
+
       {/* Tab Navigation */}
       <div className="max-w-6xl mx-auto px-4 -mt-8 relative z-10">
         <div className="bg-white rounded-2xl shadow-lg p-2 flex flex-wrap gap-2 justify-center">
