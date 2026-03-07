@@ -143,16 +143,27 @@ const HowItWorksManager: React.FC = () => {
                     {/* Content preview */}
                     <div className="aspect-video bg-gray-100 relative">
                       {item.contentType === 'video' || !item.contentType ? (
-                        <>
-                          <video
+                        item.url && (item.url.includes('youtube.com/embed') || item.url.includes('youtu.be')) ? (
+                          <iframe
                             src={item.url}
-                            className="w-full h-full object-cover"
-                            muted
+                            className="w-full h-full"
+                            title={item.title}
+                            frameBorder="0"
+                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                            allowFullScreen
                           />
-                          <div className="absolute inset-0 flex items-center justify-center bg-black/30">
-                            <PlayCircleIcon className="w-12 h-12 text-white" />
-                          </div>
-                        </>
+                        ) : (
+                          <>
+                            <video
+                              src={item.url}
+                              className="w-full h-full object-cover"
+                              muted
+                            />
+                            <div className="absolute inset-0 flex items-center justify-center bg-black/30">
+                              <PlayCircleIcon className="w-12 h-12 text-white" />
+                            </div>
+                          </>
+                        )
                       ) : (
                         <div className="w-full h-full flex flex-col items-center justify-center bg-gradient-to-br from-gray-50 to-gray-100">
                           {getContentTypeIcon(item.contentType)}

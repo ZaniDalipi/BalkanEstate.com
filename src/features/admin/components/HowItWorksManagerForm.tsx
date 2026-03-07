@@ -258,6 +258,50 @@ const HowItWorksManagerForm: React.FC<HowItWorksManagerFormProps> = ({
           {/* Video Upload - Only for video type */}
           {formData.contentType === 'video' && (
             <>
+              {/* Video URL / Embed URL input */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Video URL or YouTube Embed URL
+                </label>
+                <input
+                  type="url"
+                  value={formData.url === 'placeholder' ? '' : formData.url}
+                  onChange={(e) =>
+                    setFormData((prev) => ({ ...prev, url: e.target.value }))
+                  }
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  placeholder="https://www.youtube.com/embed/VIDEO_ID"
+                />
+                <p className="text-xs text-gray-500 mt-1">
+                  Paste a YouTube embed URL (e.g. https://www.youtube.com/embed/abc123) or a direct video URL
+                </p>
+              </div>
+
+              {/* Video preview */}
+              {formData.url && formData.url !== 'placeholder' && (
+                <div className="space-y-2">
+                  {formData.url.includes('youtube.com/embed') || formData.url.includes('youtu.be') ? (
+                    <div className="relative w-full rounded-lg overflow-hidden" style={{ paddingBottom: '56.25%' }}>
+                      <iframe
+                        className="absolute top-0 left-0 w-full h-full"
+                        src={formData.url}
+                        title="Video preview"
+                        frameBorder="0"
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                        allowFullScreen
+                      />
+                    </div>
+                  ) : (
+                    <video
+                      src={formData.url}
+                      className="w-full aspect-video rounded-lg bg-gray-100"
+                      controls
+                    />
+                  )}
+                </div>
+              )}
+
+              {/* Or upload a file */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   {t('admin:howItWorks.video')}
@@ -269,27 +313,20 @@ const HowItWorksManagerForm: React.FC<HowItWorksManagerFormProps> = ({
                   onChange={onFileUpload}
                   className="hidden"
                 />
-                {formData.url && formData.url !== 'placeholder' ? (
-                  <div className="space-y-2">
-                    <video
-                      src={formData.url}
-                      className="w-full aspect-video rounded-lg bg-gray-100"
-                      controls
-                    />
-                    <button
-                      type="button"
-                      onClick={() => fileInputRef.current?.click()}
-                      className="text-sm text-blue-600 hover:text-blue-700"
-                    >
-                      {t('admin:howItWorks.replaceVideo')}
-                    </button>
-                  </div>
+                {formData.url && formData.url !== 'placeholder' && !formData.url.includes('youtube.com') ? (
+                  <button
+                    type="button"
+                    onClick={() => fileInputRef.current?.click()}
+                    className="text-sm text-blue-600 hover:text-blue-700"
+                  >
+                    {t('admin:howItWorks.replaceVideo')}
+                  </button>
                 ) : (
                   <button
                     type="button"
                     onClick={() => fileInputRef.current?.click()}
                     disabled={isUploading}
-                    className="w-full py-8 border-2 border-dashed border-gray-300 rounded-lg hover:border-blue-400 hover:bg-blue-50 transition-colors"
+                    className="w-full py-6 border-2 border-dashed border-gray-300 rounded-lg hover:border-blue-400 hover:bg-blue-50 transition-colors"
                   >
                     {isUploading ? (
                       <div className="text-center">
@@ -305,29 +342,14 @@ const HowItWorksManagerForm: React.FC<HowItWorksManagerFormProps> = ({
                       </div>
                     ) : (
                       <div className="text-center">
-                        <CloudArrowUpIcon className="w-10 h-10 text-gray-400 mx-auto mb-2" />
+                        <CloudArrowUpIcon className="w-8 h-8 text-gray-400 mx-auto mb-1" />
                         <span className="text-sm text-gray-600">
-                          {t('admin:howItWorks.clickToUpload')}
+                          Or upload a video file
                         </span>
                       </div>
                     )}
                   </button>
                 )}
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  {t('admin:howItWorks.orPasteVideoUrl')}
-                </label>
-                <input
-                  type="url"
-                  value={formData.url === 'placeholder' ? '' : formData.url}
-                  onChange={(e) =>
-                    setFormData((prev) => ({ ...prev, url: e.target.value }))
-                  }
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                  placeholder="https://..."
-                />
               </div>
             </>
           )}
