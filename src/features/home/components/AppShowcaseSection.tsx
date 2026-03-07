@@ -403,31 +403,22 @@ const AppShowcaseSection: React.FC<AppShowcaseSectionProps> = ({ onNavigate }) =
   const { content, isLoading } = useHowItWorksContent();
   const [activeTab, setActiveTab] = useState<string>('all');
 
-  // Fetch real properties for map pins
+  // Reuse same query key as HomePage's featured properties to avoid duplicate requests
   const { data: mapProperties = [] } = useQuery({
-    queryKey: ['showcaseMapPins'],
+    queryKey: ['featuredProperties'],
     queryFn: async () => {
-      try {
-        const props = await getProperties({ sortBy: 'newest' } as any, { limit: 11 });
-        return props.filter(p => p.status === 'active' && p.city).slice(0, 11);
-      } catch {
-        return [];
-      }
+      const props = await getProperties({ sortBy: 'newest' } as any, { limit: 11 });
+      return props.filter(p => p.status === 'active').slice(0, 11);
     },
-    staleTime: 15 * 60 * 1000,
-    retry: 1,
+    staleTime: 5 * 60 * 1000,
+    gcTime: 30 * 60 * 1000,
+    retry: 2,
   });
 
   const mapPins: MapPin[] = useMemo(() => {
-    if (mapProperties.length === 0) {
-      // Fallback pins when no data
-      return [
-        { city: 'Tirana', country: 'AL', x: 42, y: 52, price: '—', beds: 0, color: '#3B82F6' },
-        { city: 'Belgrade', country: 'RS', x: 48, y: 22, price: '—', beds: 0, color: '#10B981' },
-        { city: 'Zagreb', country: 'HR', x: 30, y: 15, price: '—', beds: 0, color: '#8B5CF6' },
-      ];
-    }
-    return mapProperties.map((p, i) => {
+    const withCity = mapProperties.filter(p => p.city);
+    if (withCity.length === 0) return [];
+    return withCity.map((p, i) => {
       const cityKey = p.city.toLowerCase();
       const coords = CITY_COORDS[cityKey] || { x: 30 + Math.random() * 40, y: 20 + Math.random() * 50 };
       return {

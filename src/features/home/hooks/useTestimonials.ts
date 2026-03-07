@@ -32,75 +32,6 @@ interface AgentResponse {
   specialties?: string[];
 }
 
-const FALLBACK_TESTIMONIALS: Testimonial[] = [
-  {
-    id: 'fallback-1',
-    name: 'Elena P.',
-    profession: 'Home Buyer',
-    country: 'Bulgaria',
-    rating: 5,
-    quote: 'Found our dream villa on the Black Sea coast in just two weeks. The AI search understood exactly what we wanted — even the sea view requirement!',
-    avatarUrl: 'https://images.unsplash.com/photo-1580489944761-15a19d654956?w=200&auto=format&fit=crop&q=60',
-    source: 'platform',
-    createdAt: '2026-01-15',
-  },
-  {
-    id: 'fallback-2',
-    name: 'Marko N.',
-    profession: 'Real Estate Agent',
-    country: 'Serbia',
-    rating: 5,
-    quote: 'BalkanEstate transformed my business. I went from 3 listings a month to over 15. The agency dashboard and analytics are game-changers.',
-    avatarUrl: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=200&auto=format&fit=crop&q=60',
-    source: 'platform',
-    createdAt: '2026-01-20',
-  },
-  {
-    id: 'fallback-3',
-    name: 'Ana K.',
-    profession: 'Property Investor',
-    country: 'Croatia',
-    rating: 5,
-    quote: 'The financial calculators and market analytics helped me identify undervalued properties in Split. My portfolio has grown 40% in a year.',
-    avatarUrl: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=200&auto=format&fit=crop&q=60',
-    source: 'platform',
-    createdAt: '2026-02-01',
-  },
-  {
-    id: 'fallback-4',
-    name: 'Dritan H.',
-    profession: 'Agency Owner',
-    country: 'Albania',
-    rating: 5,
-    quote: 'Managing 50+ agents across three offices was chaos before BalkanEstate. Now everything — listings, leads, commissions — is in one place.',
-    avatarUrl: 'https://plus.unsplash.com/premium_photo-1690407617542-2f210cf20d7e?w=200&auto=format&fit=crop&q=60',
-    source: 'platform',
-    createdAt: '2026-02-10',
-  },
-  {
-    id: 'fallback-5',
-    name: 'Ioanna P.',
-    profession: 'Expat Buyer',
-    country: 'Greece',
-    rating: 4.5,
-    quote: 'As a foreigner buying in Athens, the multilingual support and verified agents made the process feel safe. The 3D map feature is incredible.',
-    avatarUrl: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=200&auto=format&fit=crop&q=60',
-    source: 'platform',
-    createdAt: '2026-02-15',
-  },
-  {
-    id: 'fallback-6',
-    name: 'Stefan J.',
-    profession: 'Property Seller',
-    country: 'Montenegro',
-    rating: 5,
-    quote: 'Listed my apartment in Budva and received 12 inquiries in the first week. The Premium promotion tier was absolutely worth it.',
-    avatarUrl: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=200&auto=format&fit=crop&q=60',
-    source: 'platform',
-    createdAt: '2026-02-20',
-  },
-];
-
 function transformAgentTestimonials(agents: AgentResponse[]): Testimonial[] {
   const testimonials: Testimonial[] = [];
 
@@ -141,20 +72,17 @@ async function fetchTestimonials(): Promise<Testimonial[]> {
 }
 
 export function useTestimonials() {
-  const { data, isPending, error } = useQuery<Testimonial[]>({
+  const { data = [], isPending, error } = useQuery<Testimonial[]>({
     queryKey: ['testimonials'],
     queryFn: fetchTestimonials,
     staleTime: 10 * 60 * 1000,
+    gcTime: 30 * 60 * 1000,
     retry: 1,
-    placeholderData: FALLBACK_TESTIMONIALS,
   });
 
-  // Use fetched data if available, otherwise fall back to static testimonials
-  const testimonials = data && data.length >= 3 ? data : FALLBACK_TESTIMONIALS;
-
   return {
-    testimonials,
-    isLoading: isPending && !testimonials.length,
+    testimonials: data,
+    isLoading: isPending,
     error: error as Error | null,
   };
 }

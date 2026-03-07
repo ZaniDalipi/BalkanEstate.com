@@ -74,41 +74,32 @@ const HeroSection: React.FC<HeroSectionProps> = ({
   const { data: stats } = useQuery<PlatformStats>({
     queryKey: ['platformStats'],
     queryFn: async () => {
-      try {
-        const [propsRes, agentsRes] = await Promise.all([
-          apiRequest<{ pagination?: { total?: number } }>('/properties?limit=1&status=active', { requiresAuth: false }),
-          apiRequest<{ agents?: unknown[] }>('/agents?limit=1', { requiresAuth: false }),
-        ]);
-        return {
-          properties: propsRes.pagination?.total || 0,
-          countries: 11,
-          agents: Array.isArray(agentsRes.agents) ? agentsRes.agents.length : 0,
-          languages: 10,
-        };
-      } catch {
-        return { properties: 0, countries: 11, agents: 0, languages: 10 };
-      }
+      const [propsRes, agentsRes] = await Promise.all([
+        apiRequest<{ pagination?: { total?: number } }>('/properties?limit=1&status=active', { requiresAuth: false }),
+        apiRequest<{ total?: number; pagination?: { total?: number }; agents?: unknown[] }>('/agents', { requiresAuth: false }),
+      ]);
+      return {
+        properties: propsRes.pagination?.total || 0,
+        countries: 11,
+        agents: agentsRes.total || agentsRes.pagination?.total || (Array.isArray(agentsRes.agents) ? agentsRes.agents.length : 0),
+        languages: 10,
+      };
     },
     staleTime: 15 * 60 * 1000,
+    gcTime: 30 * 60 * 1000,
     retry: 1,
   });
 
-  // Fetch popular cities dynamically
-  const { data: popularCities = [] } = useQuery({
-    queryKey: ['popularCitiesHero'],
-    queryFn: async () => {
-      try {
-        const cities = await getFeaturedCities(6);
-        return cities.map(c => c.city);
-      } catch {
-        return [];
-      }
-    },
-    staleTime: 15 * 60 * 1000,
-    retry: 1,
+  // Reuse same query key as PopularCitiesSection to avoid duplicate requests
+  const { data: featuredCities = [] } = useQuery({
+    queryKey: ['featuredCities'],
+    queryFn: () => getFeaturedCities(6),
+    staleTime: 10 * 60 * 1000,
+    gcTime: 30 * 60 * 1000,
+    retry: 2,
   });
 
-  const displayCities = popularCities.length > 0 ? popularCities : ['Tirana', 'Belgrade', 'Skopje', 'Pristina', 'Sarajevo', 'Zagreb'];
+  const displayCities = useMemo(() => featuredCities.map(c => c.city), [featuredCities]);
 
   const formatStat = (value: number): string => {
     if (value >= 10000) return `${Math.floor(value / 1000)},${String(value % 1000).padStart(3, '0')}+`;
@@ -244,20 +235,22 @@ const HeroSection: React.FC<HeroSectionProps> = ({
           </div>
 
           {/* Popular searches */}
-          <div className="mt-3 sm:mt-4 flex flex-wrap items-center justify-center gap-1.5 sm:gap-2">
-            <span className="text-[10px] sm:text-xs text-slate-400 font-medium">
-              {t('home:hero.popularSearches')}
-            </span>
-            {displayCities.map((city) => (
-              <button
-                key={city}
-                onClick={() => handleCityClick(city)}
-                className="px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-full text-[10px] sm:text-xs font-medium text-slate-500 bg-white border border-neutral-200 hover:border-neutral-300 hover:text-slate-800 active:bg-neutral-50 transition-colors"
-              >
-                {city}
-              </button>
-            ))}
-          </div>
+          {displayCities.length > 0 && (
+            <div className="mt-3 sm:mt-4 flex flex-wrap items-center justify-center gap-1.5 sm:gap-2">
+              <span className="text-[10px] sm:text-xs text-slate-400 font-medium">
+                {t('home:hero.popularSearches')}
+              </span>
+              {displayCities.map((city) => (
+                <button
+                  key={city}
+                  onClick={() => handleCityClick(city)}
+                  className="px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-full text-[10px] sm:text-xs font-medium text-slate-500 bg-white border border-neutral-200 hover:border-neutral-300 hover:text-slate-800 active:bg-neutral-50 transition-colors"
+                >
+                  {city}
+                </button>
+              ))}
+            </div>
+          )}
         </motion.div>
 
         {/* CTA Buttons */}

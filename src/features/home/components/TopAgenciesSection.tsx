@@ -18,26 +18,6 @@ const MEDAL_COLORS = {
 const PODIUM_HEIGHTS = [240, 300, 200]; // 2nd, 1st, 3rd
 const PODIUM_ORDER = [1, 0, 2]; // Data indices shown as: 2nd, 1st, 3rd
 
-const FALLBACK_AGENCIES: Agency[] = [
-  {
-    _id: 'demo-agency-1', name: 'Adriatic Realty Group', email: '', phone: '',
-    city: 'Dubrovnik', country: 'Croatia',
-    totalProperties: 84, totalAgents: 12, isFeatured: true,
-    yearsInBusiness: 8, type: 'luxury',
-  },
-  {
-    _id: 'demo-agency-2', name: 'Balkan Prime Estates', email: '', phone: '',
-    city: 'Belgrade', country: 'Serbia',
-    totalProperties: 156, totalAgents: 24, isFeatured: true,
-    yearsInBusiness: 15, type: 'standard',
-  },
-  {
-    _id: 'demo-agency-3', name: 'Sofia Property Partners', email: '', phone: '',
-    city: 'Sofia', country: 'Bulgaria',
-    totalProperties: 62, totalAgents: 8, isFeatured: true,
-    yearsInBusiness: 5, type: 'boutique',
-  },
-];
 
 /* ─── Single agency podium card ─── */
 const AgencyPodiumCard: React.FC<{
@@ -294,7 +274,7 @@ const TopAgenciesSection: React.FC = () => {
   const { t } = useTranslation('home');
   const sectionRef = useRef<HTMLElement>(null);
 
-  const { data: agencies = [] } = useQuery<Agency[]>({
+  const { data: agencies = [], isLoading } = useQuery<Agency[]>({
     queryKey: ['topAgenciesMonth'],
     queryFn: async () => {
       const data = await getAgencies({ limit: 3 });
@@ -302,10 +282,11 @@ const TopAgenciesSection: React.FC = () => {
       return list.filter((a: Agency) => a.name).slice(0, 3);
     },
     staleTime: 10 * 60 * 1000,
+    gcTime: 30 * 60 * 1000,
     retry: 1,
   });
 
-  const displayAgencies = agencies.length >= 3 ? agencies : FALLBACK_AGENCIES;
+  const displayAgencies = agencies;
 
   // Section entrance
   useEffect(() => {
@@ -370,41 +351,71 @@ const TopAgenciesSection: React.FC = () => {
         </p>
       </div>
 
-      {/* Podium — 2-1-3 layout on desktop, stacked on mobile */}
-      <div
-        className="hidden sm:flex"
-        style={{
-          maxWidth: '860px',
-          margin: '0 auto',
-          alignItems: 'flex-end',
-          justifyContent: 'center',
-          gap: '1rem',
-          padding: '0 1rem',
-        }}
-      >
-        {PODIUM_ORDER.map((dataIndex, visualIndex) => (
-          <AgencyPodiumCard
-            key={displayAgencies[dataIndex]._id}
-            agency={displayAgencies[dataIndex]}
-            rank={dataIndex}
-            podiumHeight={PODIUM_HEIGHTS[visualIndex]}
-          />
-        ))}
-      </div>
-
-      {/* Mobile: horizontal scroll cards */}
-      <div className="sm:hidden overflow-x-auto pb-4 scrollbar-hide -mx-1 px-1">
-        <div style={{ display: 'flex', gap: '0.75rem', padding: '0 1rem', minWidth: 'min-content' }}>
-          {[0, 1, 2].map((dataIndex) => (
-            <AgencyPodiumCard
-              key={displayAgencies[dataIndex]._id}
-              agency={displayAgencies[dataIndex]}
-              rank={dataIndex}
-              podiumHeight={100}
-            />
+      {/* Loading skeleton */}
+      {isLoading && (
+        <div className="flex justify-center gap-4 px-4" style={{ maxWidth: '860px', margin: '0 auto' }}>
+          {[0, 1, 2].map((i) => (
+            <div key={i} className="flex-1 flex flex-col items-center animate-pulse">
+              <div className="w-full max-w-[230px] rounded-3xl bg-white/80 overflow-hidden">
+                <div className="h-16 bg-slate-200" />
+                <div className="p-4 text-center">
+                  <div className="w-12 h-12 rounded-2xl bg-slate-200 mx-auto -mt-8 mb-3" />
+                  <div className="h-4 bg-slate-200 rounded w-28 mx-auto mb-2" />
+                  <div className="h-3 bg-slate-100 rounded w-20 mx-auto" />
+                </div>
+              </div>
+              <div className="w-full max-w-[230px] h-[160px] rounded-t-2xl bg-slate-100/50 mt-[-20px]" />
+            </div>
           ))}
         </div>
-      </div>
+      )}
+
+      {/* Podium — 2-1-3 layout on desktop, stacked on mobile */}
+      {!isLoading && displayAgencies.length >= 3 && (
+        <>
+          <div
+            className="hidden sm:flex"
+            style={{
+              maxWidth: '860px',
+              margin: '0 auto',
+              alignItems: 'flex-end',
+              justifyContent: 'center',
+              gap: '1rem',
+              padding: '0 1rem',
+            }}
+          >
+            {PODIUM_ORDER.map((dataIndex, visualIndex) => (
+              <AgencyPodiumCard
+                key={displayAgencies[dataIndex]._id}
+                agency={displayAgencies[dataIndex]}
+                rank={dataIndex}
+                podiumHeight={PODIUM_HEIGHTS[visualIndex]}
+              />
+            ))}
+          </div>
+
+          {/* Mobile: horizontal scroll cards */}
+          <div className="sm:hidden overflow-x-auto pb-4 scrollbar-hide -mx-1 px-1">
+            <div style={{ display: 'flex', gap: '0.75rem', padding: '0 1rem', minWidth: 'min-content' }}>
+              {[0, 1, 2].map((dataIndex) => (
+                <AgencyPodiumCard
+                  key={displayAgencies[dataIndex]._id}
+                  agency={displayAgencies[dataIndex]}
+                  rank={dataIndex}
+                  podiumHeight={100}
+                />
+              ))}
+            </div>
+          </div>
+        </>
+      )}
+
+      {/* Empty state */}
+      {!isLoading && displayAgencies.length < 3 && (
+        <div style={{ textAlign: 'center', padding: '2rem 1rem', color: '#94a3b8', fontSize: '0.875rem' }}>
+          {t('topAgencies.noData', 'No agencies data available yet.')}
+        </div>
+      )}
     </section>
   );
 };
