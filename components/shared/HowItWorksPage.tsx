@@ -13,7 +13,40 @@ interface SiteVideo {
   title: string;
   description?: string;
   subsection?: string;
+  contentType?: string;
 }
+
+/**
+ * Checks if a URL is any kind of YouTube URL.
+ */
+const isYouTubeUrl = (url: string): boolean => {
+  if (!url) return false;
+  return /(?:youtube\.com|youtu\.be)/.test(url);
+};
+
+/**
+ * Converts any YouTube URL format to an embed URL.
+ */
+const toYouTubeEmbedUrl = (url: string): string => {
+  if (!url) return url;
+  const trimmed = url.trim();
+  if (trimmed.includes('youtube.com/embed/')) return trimmed;
+
+  const patterns = [
+    /(?:youtube\.com\/watch\?.*v=)([a-zA-Z0-9_-]{11})/,
+    /(?:youtu\.be\/)([a-zA-Z0-9_-]{11})/,
+    /(?:youtube\.com\/shorts\/)([a-zA-Z0-9_-]{11})/,
+    /(?:youtube\.com\/live\/)([a-zA-Z0-9_-]{11})/,
+  ];
+
+  for (const pattern of patterns) {
+    const match = trimmed.match(pattern);
+    if (match) {
+      return `https://www.youtube.com/embed/${match[1]}`;
+    }
+  }
+  return trimmed;
+};
 
 // Video placeholder component that shows video if available
 const VideoPlaceholder: React.FC<{
@@ -38,6 +71,25 @@ const VideoPlaceholder: React.FC<{
   const video = sectionVideos.find(v => v.key === videoKey);
 
   if (video) {
+    // Handle YouTube URLs with an iframe embed
+    if (isYouTubeUrl(video.url)) {
+      return (
+        <div className={`relative ${className}`} onClick={onClick}>
+          <div className="relative w-full rounded-lg overflow-hidden" style={{ paddingBottom: '56.25%' }}>
+            <iframe
+              className="absolute top-0 left-0 w-full h-full rounded-lg"
+              src={toYouTubeEmbedUrl(video.url)}
+              title={video.title}
+              frameBorder="0"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+              allowFullScreen
+            />
+          </div>
+        </div>
+      );
+    }
+
+    // Handle direct video file URLs
     return (
       <div className={`relative ${className}`} onClick={onClick}>
         <video
@@ -327,12 +379,13 @@ const HowItWorksPage: React.FC = () => {
             const dbVideo = findVideoByKey('main-video');
             const dbEmbedUrl = dbVideo?.url;
             const i18nEmbedUrl = t('howItWorks:videoTutorials.mainVideo.embedUrl');
-            const embedUrl = dbEmbedUrl || (i18nEmbedUrl && !i18nEmbedUrl.includes('videoTutorials.mainVideo') ? i18nEmbedUrl : '');
-            const isYouTubeEmbed = embedUrl && (embedUrl.includes('youtube.com/embed') || embedUrl.includes('youtu.be'));
-            const isDirectVideo = embedUrl && !isYouTubeEmbed;
+            const rawUrl = dbEmbedUrl || (i18nEmbedUrl && !i18nEmbedUrl.includes('videoTutorials.mainVideo') ? i18nEmbedUrl : '');
+            const embedUrl = isYouTubeUrl(rawUrl) ? toYouTubeEmbedUrl(rawUrl) : rawUrl;
+            const isYouTube = isYouTubeUrl(rawUrl);
+            const isDirectVideo = embedUrl && !isYouTube;
             const videoTitle = dbVideo?.title || t('howItWorks:videoTutorials.mainVideo.title');
 
-            if (isYouTubeEmbed) {
+            if (isYouTube) {
               return (
                 <div className="relative w-full rounded-2xl overflow-hidden shadow-xl" style={{ paddingBottom: '56.25%' }}>
                   <iframe
@@ -393,13 +446,14 @@ const HowItWorksPage: React.FC = () => {
               const dbVideo = findVideoByKey(tutorial.dbKey);
               const dbEmbedUrl = dbVideo?.url;
               const i18nEmbedUrl = t(`howItWorks:videoTutorials.shortVideos.${tutorial.key}.embedUrl`);
-              const embedUrl = dbEmbedUrl || (i18nEmbedUrl && !i18nEmbedUrl.includes('videoTutorials.shortVideos') ? i18nEmbedUrl : '');
-              const isYouTubeEmbed = embedUrl && (embedUrl.includes('youtube.com/embed') || embedUrl.includes('youtu.be'));
-              const isDirectVideo = embedUrl && !isYouTubeEmbed;
+              const rawUrl = dbEmbedUrl || (i18nEmbedUrl && !i18nEmbedUrl.includes('videoTutorials.shortVideos') ? i18nEmbedUrl : '');
+              const embedUrl = isYouTubeUrl(rawUrl) ? toYouTubeEmbedUrl(rawUrl) : rawUrl;
+              const isYouTube = isYouTubeUrl(rawUrl);
+              const isDirectVideo = embedUrl && !isYouTube;
 
               return (
                 <div key={tutorial.key} className="bg-white rounded-xl shadow-md overflow-hidden border border-neutral-100 hover:shadow-lg transition-shadow">
-                  {isYouTubeEmbed ? (
+                  {isYouTube ? (
                     <div className="relative w-full" style={{ paddingBottom: '56.25%' }}>
                       <iframe
                         className="absolute top-0 left-0 w-full h-full"
