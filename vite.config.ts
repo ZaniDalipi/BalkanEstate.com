@@ -175,6 +175,10 @@ export default defineConfig(({ mode }) => {
           workbox: {
             globPatterns: ['**/*.{js,css,html,ico,png,svg,woff,woff2}'],
             maximumFileSizeToCacheInBytes: 5 * 1024 * 1024, // 5 MB limit
+            // Safari Mobile fix: import a script that strips response.redirected
+            // from navigation responses before Safari can reject them with
+            // "Response served by service worker has redirections"
+            importScripts: ['/sw-safari-fix.js'],
             // Exclude API routes from service worker interception
             // API calls (especially payments) should always be live, not cached
             // Exclude OAuth callback: Safari throws "Response served by service worker
