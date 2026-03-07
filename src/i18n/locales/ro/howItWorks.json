@@ -1,7 +1,50 @@
 {
   "hero": {
     "title": "Cum Funcționează Balkan Estate",
-    "subtitle": "Platforma imobiliară de top care conectează cumpărători, vânzători, agenți și agenții în întreaga regiune Balcanică"
+    "subtitle": "Urmăriți ghidurile noastre video pentru a începe rapid"
+  },
+  "videoTutorials": {
+    "title": "Vedeți în Acțiune",
+    "subtitle": "Urmăriți o prezentare completă a platformei și aflați cum funcționează totul",
+    "comingSoon": "Video în curând",
+    "mainVideo": {
+      "embedUrl": "",
+      "title": "Balkan Estate - Prezentare Completă a Platformei",
+      "description": "O prezentare completă a tuturor funcțiilor și cum să utilizați platforma"
+    },
+    "shortVideos": {
+      "title": "Ghiduri Rapide",
+      "proMonthly": {
+        "embedUrl": "",
+        "title": "Activare Pro Lunar",
+        "description": "Cum să vă abonați la planul Pro lunar și să deblocați funcții premium"
+      },
+      "proYearly": {
+        "embedUrl": "",
+        "title": "Activare Pro Anual",
+        "description": "Cum să vă abonați la planul Pro anual și să economisiți 33%"
+      },
+      "createAgency": {
+        "embedUrl": "",
+        "title": "Creați o Agenție",
+        "description": "Cum să configurați profilul agenției și să începeți gestionarea agenților"
+      },
+      "joinAgency": {
+        "embedUrl": "",
+        "title": "Alăturați-vă unei Agenții",
+        "description": "Cum să utilizați un cod de cupon pentru a vă alătura unei agenții existente"
+      },
+      "createListing": {
+        "embedUrl": "",
+        "title": "Creați un Anunț",
+        "description": "Cum să creați și să publicați primul anunț imobiliar"
+      },
+      "promoteListing": {
+        "embedUrl": "",
+        "title": "Promovați un Anunț",
+        "description": "Cum să promovați anunțul cu Recomandat, Premium sau Evidențiat"
+      }
+    }
   },
   "tabs": {
     "gettingStarted": "Început",

@@ -1,7 +1,50 @@
 {
   "hero": {
     "title": "How Balkan Estate Works",
-    "subtitle": "The premier real estate platform connecting buyers, sellers, agents, and agencies across the Balkans"
+    "subtitle": "Watch our video guides to get started quickly"
+  },
+  "videoTutorials": {
+    "title": "See It In Action",
+    "subtitle": "Watch a full walkthrough of the platform and learn how everything works",
+    "comingSoon": "Video coming soon",
+    "mainVideo": {
+      "embedUrl": "",
+      "title": "Balkan Estate - Complete Platform Walkthrough",
+      "description": "A complete walkthrough of all features and how to use the platform"
+    },
+    "shortVideos": {
+      "title": "Quick How-To Guides",
+      "proMonthly": {
+        "embedUrl": "",
+        "title": "Activate Pro Monthly",
+        "description": "How to subscribe to the Pro monthly plan and unlock premium features"
+      },
+      "proYearly": {
+        "embedUrl": "",
+        "title": "Activate Pro Yearly",
+        "description": "How to subscribe to the Pro yearly plan and save 33%"
+      },
+      "createAgency": {
+        "embedUrl": "",
+        "title": "Create an Agency",
+        "description": "How to set up your agency profile and start managing agents"
+      },
+      "joinAgency": {
+        "embedUrl": "",
+        "title": "Join an Agency",
+        "description": "How to use a coupon code to join an existing agency"
+      },
+      "createListing": {
+        "embedUrl": "",
+        "title": "Create a Listing",
+        "description": "How to create and publish your first property listing"
+      },
+      "promoteListing": {
+        "embedUrl": "",
+        "title": "Promote a Listing",
+        "description": "How to boost your listing with Featured, Premium, or Highlight promotions"
+      }
+    }
   },
   "tabs": {
     "gettingStarted": "Getting Started",

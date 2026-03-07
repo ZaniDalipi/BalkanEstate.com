@@ -1,7 +1,50 @@
 {
   "hero": {
     "title": "Si Funksionon Balkan Estate",
-    "subtitle": "Platforma kryesore e pasurive të paluajtshme që lidh blerësit, shitësit, agjentët dhe agjencinë në të gjithë Ballkanin"
+    "subtitle": "Shikoni udhëzuesit tanë video për të filluar shpejt"
+  },
+  "videoTutorials": {
+    "title": "Shikojeni në Veprim",
+    "subtitle": "Shikoni një udhëtim të plotë të platformës dhe mësoni si funksionon gjithçka",
+    "comingSoon": "Video së shpejti",
+    "mainVideo": {
+      "embedUrl": "",
+      "title": "Balkan Estate - Udhëtim i Plotë i Platformës",
+      "description": "Një udhëtim i plotë i të gjitha veçorive dhe si ta përdorni platformën"
+    },
+    "shortVideos": {
+      "title": "Udhëzues të Shpejtë",
+      "proMonthly": {
+        "embedUrl": "",
+        "title": "Aktivizo Pro Mujor",
+        "description": "Si të abonoheni në planin Pro mujor dhe të zhbllokoni veçoritë premium"
+      },
+      "proYearly": {
+        "embedUrl": "",
+        "title": "Aktivizo Pro Vjetor",
+        "description": "Si të abonoheni në planin Pro vjetor dhe të kurseni 33%"
+      },
+      "createAgency": {
+        "embedUrl": "",
+        "title": "Krijo një Agjensi",
+        "description": "Si ta konfiguroni profilin e agjensisë dhe të filloni menaxhimin e agjentëve"
+      },
+      "joinAgency": {
+        "embedUrl": "",
+        "title": "Bashkohu në një Agjensi",
+        "description": "Si të përdorni kodin e kuponit për t'u bashkuar me një agjensi ekzistuese"
+      },
+      "createListing": {
+        "embedUrl": "",
+        "title": "Krijo një Listim",
+        "description": "Si të krijoni dhe publikoni listimin tuaj të parë të pronës"
+      },
+      "promoteListing": {
+        "embedUrl": "",
+        "title": "Promovo një Listim",
+        "description": "Si ta promovoni listimin tuaj me Të rekomanduar, Premium ose Të theksuar"
+      }
+    }
   },
   "tabs": {
     "gettingStarted": "Fillimi",
