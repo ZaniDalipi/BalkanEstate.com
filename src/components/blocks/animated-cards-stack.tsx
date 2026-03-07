@@ -15,7 +15,7 @@ const cardVariants = cva('absolute will-change-transform', {
     variant: {
       dark: 'flex size-full flex-col items-center justify-center gap-6 rounded-2xl border border-stone-700/50 bg-accent-foreground/80 p-6 backdrop-blur-md',
       light:
-        'flex size-full flex-col items-center justify-center gap-6 rounded-2xl bg-white/80 p-6 backdrop-blur-md',
+        'flex size-full flex-col items-center justify-center gap-6 rounded-2xl bg-white p-8 shadow-lg',
     },
   },
   defaultVariants: {
@@ -149,13 +149,13 @@ export const CardTransformed = React.forwardRef<
 
     // Each card starts with a fan rotation (index * step) and flies away with extra tilt
     const initialRotation = index * incrementRotation;
-    const flyAwayRotation = incrementRotation === 0 ? 0 : initialRotation + 25;
+    const flyAwayRotation = incrementRotation === 0 ? 0 : initialRotation + 15;
 
-    // Cards start big (1.08) and scale down to 0.7 as they fly away
-    const scale = useTransform(scrollYProgress, range, [1.08, 0.7]);
+    // Cards start at normal size and scale down slightly as they fly away
+    const scale = useTransform(scrollYProgress, range, [1, 0.85]);
 
-    // Cards move UP aggressively — use numeric values for proper interpolation
-    const y = useTransform(scrollYProgress, range, [0, -250]);
+    // Cards move UP smoothly — numeric values for proper interpolation
+    const y = useTransform(scrollYProgress, range, [0, -180]);
     const rotate = useTransform(scrollYProgress, range, [
       initialRotation,
       flyAwayRotation,
@@ -169,10 +169,10 @@ export const CardTransformed = React.forwardRef<
       index * incrementZ
     }px) translateY(${y}%) scale(${scale}) rotate(${rotate}deg)`;
 
-    const dx = useTransform(scrollYProgress, range, [0, 6]);
-    const dy = useTransform(scrollYProgress, range, [16, 2]);
-    const blur = useTransform(scrollYProgress, range, [32, 4]);
-    const alpha = useTransform(scrollYProgress, range, [0.25, 0.02]);
+    const dx = useTransform(scrollYProgress, range, [0, 4]);
+    const dy = useTransform(scrollYProgress, range, [8, 2]);
+    const blur = useTransform(scrollYProgress, range, [24, 6]);
+    const alpha = useTransform(scrollYProgress, range, [0.15, 0.03]);
 
     const filter =
       variant === 'light'

@@ -26,11 +26,11 @@ const TestimonialCard: React.FC<{
       index={index}
       arrayLength={total}
       variant="light"
-      incrementY={14}
-      incrementZ={10}
-      incrementRotation={0}
+      incrementY={8}
+      incrementZ={8}
+      incrementRotation={3}
     >
-      <ReviewStars rating={testimonial.rating} className="text-amber-500" />
+      <ReviewStars rating={testimonial.rating} className="text-teal-500" />
 
       <blockquote className="text-center text-lg leading-relaxed text-slate-700 max-w-sm">
         &ldquo;{testimonial.quote}&rdquo;
