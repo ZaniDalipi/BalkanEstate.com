@@ -32,7 +32,11 @@ const SectionFallback = () => (
   </div>
 );
 
-const HomePage: React.FC = () => {
+interface HomePageProps {
+  onToggleSidebar?: () => void;
+}
+
+const HomePage: React.FC<HomePageProps> = ({ onToggleSidebar }) => {
   const { t } = useTranslation(['home', 'common']);
   const { state, dispatch } = useAppContext();
   const { navigate } = useLocalizedNavigation();
@@ -186,6 +190,19 @@ const HomePage: React.FC = () => {
         <title>{t('home:seo.title')}</title>
         <meta name="description" content={t('home:seo.description')} />
       </Helmet>
+
+      {/* Mobile hamburger menu button */}
+      {onToggleSidebar && (
+        <button
+          onClick={onToggleSidebar}
+          className="md:hidden fixed top-3 left-3 z-[100] bg-white/90 backdrop-blur-md rounded-full p-2.5 shadow-lg border border-neutral-200/60 active:scale-95 transition-transform"
+          aria-label="Open menu"
+        >
+          <svg className="w-5 h-5 text-neutral-700" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
+          </svg>
+        </button>
+      )}
 
       <HeroSection
         searchQuery={searchQuery}

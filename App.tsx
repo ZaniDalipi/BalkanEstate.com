@@ -569,7 +569,7 @@ const AppContent: React.FC<{ onToggleSidebar: () => void }> = ({ onToggleSidebar
   const renderView = () => {
     switch (state.activeView) {
       case 'home':
-        return <HomePage />;
+        return <HomePage onToggleSidebar={onToggleSidebar} />;
       case 'explore-cities':
         return <CityRecommendations />;
       case 'city-dashboard':

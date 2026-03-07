@@ -387,28 +387,17 @@ const TopAgenciesSection: React.FC = () => {
             ))}
           </div>
 
-          {/* Mobile: horizontal scroll cards */}
-          <div
-            className="sm:hidden scrollbar-hide"
-            style={{
-              overflowX: 'auto',
-              WebkitOverflowScrolling: 'touch',
-              margin: '0 -1rem',
-              padding: '0 1rem 1rem',
-            }}
-          >
-            <div style={{ display: 'flex', gap: '0.75rem', width: 'max-content' }}>
-              {[0, 1, 2].map((dataIndex) => (
-                <div key={podiumAgencies[dataIndex]._id} style={{ width: '260px', flexShrink: 0 }}>
-                  <AgencyPodiumCard
-                    agency={podiumAgencies[dataIndex]}
-                    rank={dataIndex}
-                    podiumHeight={80}
-                    onAgencyClick={handleAgencyClick}
-                  />
-                </div>
-              ))}
-            </div>
+          {/* Mobile: vertical stack */}
+          <div className="sm:hidden flex flex-col items-center gap-5 px-4 pb-6">
+            {[0, 1, 2].map((dataIndex) => (
+              <AgencyPodiumCard
+                key={podiumAgencies[dataIndex]._id}
+                agency={podiumAgencies[dataIndex]}
+                rank={dataIndex}
+                podiumHeight={50}
+                onAgencyClick={handleAgencyClick}
+              />
+            ))}
           </div>
         </>
       )}
