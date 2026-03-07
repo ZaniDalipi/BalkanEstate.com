@@ -25,7 +25,7 @@ const HomePage: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const searchQueryRef = useRef(searchQuery);
 
-  const { data: featuredProperties = [] } = useQuery<Property[]>({
+  const { data: featuredProperties = [], isLoading: propertiesLoading } = useQuery<Property[]>({
     queryKey: ['featuredProperties'],
     queryFn: async () => {
       const res = await fetch(`${API_CONFIG.BASE_URL}/properties?sortBy=newest&limit=6&status=active`);
@@ -34,6 +34,7 @@ const HomePage: React.FC = () => {
       return data.properties || [];
     },
     staleTime: 5 * 60 * 1000,
+    retry: 2,
   });
 
   const handleSearchChange = useCallback((value: string) => {
@@ -116,11 +117,21 @@ const HomePage: React.FC = () => {
         />
       )}
 
-      <StackedCards
-        properties={featuredProperties}
-        onPropertyClick={handlePropertyClick}
-        onViewAll={() => handleNavigate('search', '/search')}
-      />
+      {propertiesLoading ? (
+        <section className="bg-white py-12">
+          <div className="max-w-6xl mx-auto px-4">
+            <div className="h-8 w-48 bg-neutral-100 rounded animate-pulse mb-2" />
+            <div className="h-4 w-72 bg-neutral-100 rounded animate-pulse mb-8" />
+            <div className="h-[400px] bg-neutral-100 rounded-2xl animate-pulse" />
+          </div>
+        </section>
+      ) : (
+        <StackedCards
+          properties={featuredProperties}
+          onPropertyClick={handlePropertyClick}
+          onViewAll={() => handleNavigate('search', '/search')}
+        />
+      )}
 
       <CategoriesSection onCategoryClick={handleCategoryClick} />
 

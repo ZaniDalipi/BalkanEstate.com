@@ -141,11 +141,12 @@ async function fetchTestimonials(): Promise<Testimonial[]> {
 }
 
 export function useTestimonials() {
-  const { data, isLoading, error } = useQuery<Testimonial[]>({
+  const { data, isPending, error } = useQuery<Testimonial[]>({
     queryKey: ['testimonials'],
     queryFn: fetchTestimonials,
     staleTime: 10 * 60 * 1000,
     retry: 1,
+    placeholderData: FALLBACK_TESTIMONIALS,
   });
 
   // Use fetched data if available, otherwise fall back to static testimonials
@@ -153,7 +154,7 @@ export function useTestimonials() {
 
   return {
     testimonials,
-    isLoading,
+    isLoading: isPending && !testimonials.length,
     error: error as Error | null,
   };
 }
