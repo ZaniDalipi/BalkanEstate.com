@@ -1,8 +1,10 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useQuery } from '@tanstack/react-query';
 import { ContainerScroll } from '@/src/components/ui/ContainerScroll';
 import { useHowItWorksContent, HowItWorksContent } from '../hooks/useHowItWorksContent';
+import { getProperties } from '@/src/features/properties/api/propertyApi';
 
 interface AppShowcaseSectionProps {
   onNavigate: (view: string, path: string) => void;
@@ -124,23 +126,29 @@ const STATIC_FEATURES = [
   },
 ];
 
-/* ─── Balkan property pins for phone map ─── */
-const MAP_PINS = [
-  { city: 'Tirana', country: 'AL', x: 42, y: 52, price: '€85,000', beds: 2, color: '#3B82F6' },
-  { city: 'Belgrade', country: 'RS', x: 48, y: 22, price: '€125,000', beds: 3, color: '#10B981' },
-  { city: 'Zagreb', country: 'HR', x: 30, y: 15, price: '€195,000', beds: 2, color: '#8B5CF6' },
-  { city: 'Sarajevo', country: 'BA', x: 38, y: 32, price: '€110,000', beds: 3, color: '#F59E0B' },
-  { city: 'Skopje', country: 'MK', x: 52, y: 48, price: '€75,000', beds: 2, color: '#EF4444' },
-  { city: 'Podgorica', country: 'ME', x: 36, y: 40, price: '€95,000', beds: 2, color: '#EC4899' },
-  { city: 'Prishtina', country: 'XK', x: 48, y: 42, price: '€88,000', beds: 3, color: '#06B6D4' },
-  { city: 'Athens', country: 'GR', x: 55, y: 72, price: '€220,000', beds: 2, color: '#6366F1' },
-  { city: 'Ljubljana', country: 'SI', x: 22, y: 12, price: '€245,000', beds: 3, color: '#14B8A6' },
-  { city: 'Bucharest', country: 'RO', x: 68, y: 20, price: '€130,000', beds: 3, color: '#F97316' },
-  { city: 'Sofia', country: 'BG', x: 62, y: 38, price: '€105,000', beds: 2, color: '#A855F7' },
-];
+/* ─── City coordinates for map positioning ─── */
+const CITY_COORDS: Record<string, { x: number; y: number }> = {
+  tirana: { x: 42, y: 52 }, belgrade: { x: 48, y: 22 }, zagreb: { x: 30, y: 15 },
+  sarajevo: { x: 38, y: 32 }, skopje: { x: 52, y: 48 }, podgorica: { x: 36, y: 40 },
+  prishtina: { x: 48, y: 42 }, athens: { x: 55, y: 72 }, ljubljana: { x: 22, y: 12 },
+  bucharest: { x: 68, y: 20 }, sofia: { x: 62, y: 38 }, thessaloniki: { x: 55, y: 60 },
+  dubrovnik: { x: 33, y: 35 }, split: { x: 28, y: 28 }, durres: { x: 40, y: 50 },
+};
+
+const PIN_COLORS = ['#3B82F6', '#10B981', '#8B5CF6', '#F59E0B', '#EF4444', '#EC4899', '#06B6D4', '#6366F1', '#14B8A6', '#F97316', '#A855F7'];
+
+interface MapPin {
+  city: string;
+  country: string;
+  x: number;
+  y: number;
+  price: string;
+  beds: number;
+  color: string;
+}
 
 /* ─── Phone Map Content ─── */
-const PhoneMapContent: React.FC = () => {
+const PhoneMapContent: React.FC<{ pins: MapPin[] }> = ({ pins: MAP_PINS }) => {
   const [activePin, setActivePin] = useState<number | null>(null);
   const [filter, setFilter] = useState<'buy' | 'rent'>('buy');
 
@@ -395,6 +403,45 @@ const AppShowcaseSection: React.FC<AppShowcaseSectionProps> = ({ onNavigate }) =
   const { content, isLoading } = useHowItWorksContent();
   const [activeTab, setActiveTab] = useState<string>('all');
 
+  // Fetch real properties for map pins
+  const { data: mapProperties = [] } = useQuery({
+    queryKey: ['showcaseMapPins'],
+    queryFn: async () => {
+      try {
+        const props = await getProperties({ sortBy: 'newest' } as any, { limit: 11 });
+        return props.filter(p => p.status === 'active' && p.city).slice(0, 11);
+      } catch {
+        return [];
+      }
+    },
+    staleTime: 15 * 60 * 1000,
+    retry: 1,
+  });
+
+  const mapPins: MapPin[] = useMemo(() => {
+    if (mapProperties.length === 0) {
+      // Fallback pins when no data
+      return [
+        { city: 'Tirana', country: 'AL', x: 42, y: 52, price: '—', beds: 0, color: '#3B82F6' },
+        { city: 'Belgrade', country: 'RS', x: 48, y: 22, price: '—', beds: 0, color: '#10B981' },
+        { city: 'Zagreb', country: 'HR', x: 30, y: 15, price: '—', beds: 0, color: '#8B5CF6' },
+      ];
+    }
+    return mapProperties.map((p, i) => {
+      const cityKey = p.city.toLowerCase();
+      const coords = CITY_COORDS[cityKey] || { x: 30 + Math.random() * 40, y: 20 + Math.random() * 50 };
+      return {
+        city: p.city,
+        country: p.country?.slice(0, 2).toUpperCase() || '',
+        x: coords.x,
+        y: coords.y,
+        price: `€${p.price.toLocaleString()}`,
+        beds: p.beds || 0,
+        color: PIN_COLORS[i % PIN_COLORS.length],
+      };
+    });
+  }, [mapProperties]);
+
   const hasCMSContent = content.length > 0;
 
   const filteredContent = activeTab === 'all'
@@ -445,7 +492,7 @@ const AppShowcaseSection: React.FC<AppShowcaseSectionProps> = ({ onNavigate }) =
             </motion.p>
           </div>
         }
-        phoneContent={<PhoneMapContent />}
+        phoneContent={<PhoneMapContent pins={mapPins} />}
       >
         {/* Simulated app UI inside the tablet */}
         <div className="h-full w-full bg-white overflow-y-auto">
@@ -462,7 +509,7 @@ const AppShowcaseSection: React.FC<AppShowcaseSectionProps> = ({ onNavigate }) =
               onClick={() => onNavigate('how-it-works', '/how-it-works')}
               className="text-[10px] md:text-xs text-slate-600 font-medium hover:text-slate-800 transition-colors"
             >
-              View Full Guide &rarr;
+              {t('home:showcase.viewFullGuide', 'View Full Guide')} &rarr;
             </motion.button>
           </div>
 
@@ -529,7 +576,7 @@ const AppShowcaseSection: React.FC<AppShowcaseSectionProps> = ({ onNavigate }) =
             <div className={hasCMSContent ? 'mt-5 pt-5 border-t border-neutral-100' : ''}>
               <div className="flex items-center justify-between mb-3">
                 <h3 className="text-xs md:text-sm font-semibold text-slate-800">
-                  {hasCMSContent ? 'Platform Features' : t('home:showcase.badge')}
+                  {hasCMSContent ? t('home:showcase.platformFeatures', 'Platform Features') : t('home:showcase.badge')}
                 </h3>
               </div>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-2 md:gap-3">
@@ -560,7 +607,7 @@ const AppShowcaseSection: React.FC<AppShowcaseSectionProps> = ({ onNavigate }) =
 
             {/* How it works steps */}
             <div className="mt-5 pt-5 border-t border-neutral-100">
-              <h3 className="text-xs md:text-sm font-semibold text-slate-800 mb-3">How It Works</h3>
+              <h3 className="text-xs md:text-sm font-semibold text-slate-800 mb-3">{t('home:howItWorks.title')}</h3>
               <div className="flex items-start gap-3 md:gap-4">
                 {[
                   { step: '1', title: t('home:howItWorks.step1Title'), desc: t('home:howItWorks.step1Desc'), color: 'bg-slate-800' },
@@ -594,7 +641,7 @@ const AppShowcaseSection: React.FC<AppShowcaseSectionProps> = ({ onNavigate }) =
                   onClick={() => onNavigate('how-it-works', '/how-it-works')}
                   className="px-4 py-2 rounded-lg bg-slate-800 text-white text-[10px] md:text-xs font-semibold hover:bg-slate-900 transition-colors"
                 >
-                  Explore Full Guide
+                  {t('home:showcase.exploreGuide', 'Explore Full Guide')}
                 </motion.button>
                 <motion.button
                   whileHover={{ scale: 1.05 }}
@@ -602,7 +649,7 @@ const AppShowcaseSection: React.FC<AppShowcaseSectionProps> = ({ onNavigate }) =
                   onClick={() => onNavigate('search', '/search')}
                   className="px-4 py-2 rounded-lg border border-neutral-200 text-slate-700 text-[10px] md:text-xs font-semibold hover:bg-neutral-50 transition-colors"
                 >
-                  Browse Properties
+                  {t('home:showcase.browseProperties', 'Browse Properties')}
                 </motion.button>
               </div>
             </div>

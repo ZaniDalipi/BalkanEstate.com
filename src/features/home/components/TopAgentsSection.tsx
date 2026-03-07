@@ -306,7 +306,7 @@ const TopAgentsSection: React.FC = () => {
       }}
     >
       {/* Header */}
-      <div style={{ maxWidth: '72rem', margin: '0 auto', textAlign: 'center', marginBottom: '3rem' }}>
+      <div style={{ maxWidth: '72rem', margin: '0 auto', textAlign: 'center', marginBottom: '2rem', padding: '0 1rem' }}>
         <div
           style={{
             display: 'inline-flex',
@@ -316,17 +316,17 @@ const TopAgentsSection: React.FC = () => {
             borderRadius: '20px',
             background: 'rgba(255,215,0,0.12)',
             border: '1px solid rgba(255,215,0,0.25)',
-            marginBottom: '1rem',
+            marginBottom: '0.75rem',
           }}
         >
-          <span style={{ fontSize: '16px' }}>🏆</span>
-          <span style={{ fontSize: '0.8rem', fontWeight: 600, color: '#92710A', letterSpacing: '0.05em', textTransform: 'uppercase' }}>
+          <span style={{ fontSize: '14px' }}>🏆</span>
+          <span style={{ fontSize: '0.7rem', fontWeight: 600, color: '#92710A', letterSpacing: '0.05em', textTransform: 'uppercase' }}>
             {t('topAgents.badge', 'Top Agents of the Week')}
           </span>
         </div>
         <h2
           style={{
-            fontSize: 'clamp(1.5rem, 4vw, 2.25rem)',
+            fontSize: 'clamp(1.25rem, 4vw, 2.25rem)',
             fontWeight: 800,
             color: '#0f172a',
             letterSpacing: '-0.02em',
@@ -335,17 +335,17 @@ const TopAgentsSection: React.FC = () => {
         >
           {t('topAgents.title', 'Meet Our Best Performing Agents')}
         </h2>
-        <p style={{ fontSize: '0.95rem', color: '#64748b', maxWidth: '500px', margin: '0 auto' }}>
+        <p style={{ fontSize: 'clamp(0.8rem, 2vw, 0.95rem)', color: '#64748b', maxWidth: '500px', margin: '0 auto' }}>
           {t('topAgents.subtitle', 'Ranked by sales, ratings, and client satisfaction this week')}
         </p>
       </div>
 
-      {/* Podium — 2-1-3 layout */}
+      {/* Podium — 2-1-3 layout on desktop, stacked on mobile */}
       <div
+        className="hidden sm:flex"
         style={{
           maxWidth: '800px',
           margin: '0 auto',
-          display: 'flex',
           alignItems: 'flex-end',
           justifyContent: 'center',
           gap: '1rem',
@@ -360,6 +360,20 @@ const TopAgentsSection: React.FC = () => {
             podiumHeight={PODIUM_HEIGHTS[visualIndex]}
           />
         ))}
+      </div>
+
+      {/* Mobile: horizontal scroll cards */}
+      <div className="sm:hidden overflow-x-auto pb-4 scrollbar-hide -mx-1 px-1">
+        <div style={{ display: 'flex', gap: '0.75rem', padding: '0 1rem', minWidth: 'min-content' }}>
+          {[0, 1, 2].map((dataIndex) => (
+            <AgentPodiumCard
+              key={displayAgents[dataIndex].id}
+              agent={displayAgents[dataIndex]}
+              rank={dataIndex}
+              podiumHeight={120}
+            />
+          ))}
+        </div>
       </div>
     </section>
   );

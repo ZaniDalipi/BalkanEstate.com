@@ -1,22 +1,43 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { motion } from 'framer-motion';
+import { useQuery } from '@tanstack/react-query';
+import { getFeaturedCities } from '@/src/features/cities/api/cityApi';
+import type { CityMarketData } from '@/src/shared/types';
 
 interface PopularCitiesSectionProps {
   onNavigate: (view: string, path: string) => void;
 }
 
-const CITIES = [
-  { name: 'Belgrade', country: 'Serbia', image: 'https://images.unsplash.com/photo-1480714378408-67cf0d13bc1b?w=400&h=300&fit=crop', properties: 1200 },
-  { name: 'Tirana', country: 'Albania', image: 'https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?w=400&h=300&fit=crop', properties: 800 },
-  { name: 'Skopje', country: 'North Macedonia', image: 'https://images.unsplash.com/photo-1580893246395-52aead8960dc?w=400&h=300&fit=crop', properties: 650 },
-  { name: 'Zagreb', country: 'Croatia', image: 'https://images.unsplash.com/photo-1596464716127-f2a82984de30?w=400&h=300&fit=crop', properties: 950 },
-  { name: 'Sarajevo', country: 'Bosnia', image: 'https://images.unsplash.com/photo-1586016413664-864c0dd76f53?w=400&h=300&fit=crop', properties: 500 },
-  { name: 'Thessaloniki', country: 'Greece', image: 'https://images.unsplash.com/photo-1467638992958-cfe2cd6e9a56?w=400&h=300&fit=crop', properties: 1100 },
+const CityCardSkeleton: React.FC<{ large?: boolean }> = ({ large }) => (
+  <div className={`relative overflow-hidden rounded-xl bg-slate-100 animate-pulse ${large ? 'sm:col-span-2 lg:col-span-2 aspect-[16/9]' : 'aspect-[4/3]'}`}>
+    <div className="absolute bottom-0 left-0 right-0 p-3 sm:p-4 space-y-2">
+      <div className="h-4 bg-slate-200 rounded w-24" />
+      <div className="h-3 bg-slate-200 rounded w-16" />
+    </div>
+  </div>
+);
+
+const CITY_GRADIENTS = [
+  'from-blue-700 via-blue-600 to-cyan-600',
+  'from-violet-700 via-purple-600 to-indigo-600',
+  'from-emerald-700 via-teal-600 to-cyan-600',
+  'from-amber-700 via-orange-600 to-rose-600',
+  'from-slate-700 via-slate-600 to-slate-500',
+  'from-indigo-700 via-blue-600 to-sky-600',
 ];
 
 const PopularCitiesSection: React.FC<PopularCitiesSectionProps> = ({ onNavigate }) => {
   const { t } = useTranslation(['home']);
+
+  const { data: cities = [], isLoading, isError } = useQuery<CityMarketData[]>({
+    queryKey: ['featuredCities'],
+    queryFn: () => getFeaturedCities(6),
+    staleTime: 10 * 60 * 1000,
+    retry: 2,
+  });
+
+  if (isError && cities.length === 0) return null;
 
   return (
     <section className="py-12 sm:py-16 bg-white">
@@ -47,37 +68,61 @@ const PopularCitiesSection: React.FC<PopularCitiesSectionProps> = ({ onNavigate 
           </motion.button>
         </motion.div>
 
-        {/* Cities grid - 2 large + 4 small */}
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4">
-          {CITIES.map((city, i) => (
-            <motion.button
-              key={city.name}
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, margin: '-50px' }}
-              transition={{ delay: i * 0.08, type: 'spring', stiffness: 300, damping: 30 }}
-              whileHover={{ y: -4 }}
-              whileTap={{ scale: 0.98 }}
-              onClick={() => onNavigate('explore-cities', `/explore-cities/${city.name.toLowerCase()}/${city.country.toLowerCase()}`)}
-              className={`group relative overflow-hidden rounded-xl ${i < 2 ? 'sm:col-span-2 lg:col-span-2 aspect-[16/9]' : 'aspect-[4/3]'}`}
-            >
-              <img
-                src={city.image}
-                alt={city.name}
-                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                loading="lazy"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
-              <div className="absolute bottom-0 left-0 right-0 p-3 sm:p-4">
-                <h3 className="text-base sm:text-lg font-bold text-white">{city.name}</h3>
-                <p className="text-xs sm:text-sm text-white/70">{city.country}</p>
-                <p className="text-xs text-white/60 mt-0.5">
-                  {t('home:cities.propertiesCount', { count: city.properties })}
-                </p>
-              </div>
-            </motion.button>
-          ))}
-        </div>
+        {/* Loading skeletons */}
+        {isLoading && (
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4">
+            {Array.from({ length: 6 }).map((_, i) => (
+              <CityCardSkeleton key={i} large={i < 2} />
+            ))}
+          </div>
+        )}
+
+        {/* Cities grid */}
+        {!isLoading && cities.length > 0 && (
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4">
+            {cities.slice(0, 6).map((city, i) => (
+              <motion.button
+                key={city._id}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, margin: '-50px' }}
+                transition={{ delay: i * 0.08, type: 'spring', stiffness: 300, damping: 30 }}
+                whileHover={{ y: -4 }}
+                whileTap={{ scale: 0.98 }}
+                onClick={() => onNavigate('explore-cities', `/explore-cities/${city.city.toLowerCase()}/${city.country.toLowerCase()}`)}
+                className={`group relative overflow-hidden rounded-xl ${i < 2 ? 'sm:col-span-2 lg:col-span-2 aspect-[16/9]' : 'aspect-[4/3]'}`}
+              >
+                <div className={`w-full h-full bg-gradient-to-br ${CITY_GRADIENTS[i % CITY_GRADIENTS.length]} group-hover:scale-105 transition-transform duration-500`} />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/10 to-transparent" />
+                <div className="absolute bottom-0 left-0 right-0 p-3 sm:p-4">
+                  <h3 className="text-base sm:text-lg font-bold text-white">{city.city}</h3>
+                  <p className="text-xs sm:text-sm text-white/70">{city.country}</p>
+                  <div className="flex items-center gap-2 mt-0.5">
+                    <p className="text-xs text-white/60">
+                      {t('home:cities.propertiesCount', { count: city.listingsCount || 0 })}
+                    </p>
+                    {city.marketTrend && (
+                      <span className={`inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-full text-[10px] font-semibold ${
+                        city.marketTrend === 'rising' ? 'bg-emerald-500/20 text-emerald-300' :
+                        city.marketTrend === 'declining' ? 'bg-red-500/20 text-red-300' :
+                        'bg-white/15 text-white/70'
+                      }`}>
+                        {city.marketTrend === 'rising' ? '↑' : city.marketTrend === 'declining' ? '↓' : '→'}
+                      </span>
+                    )}
+                  </div>
+                </div>
+              </motion.button>
+            ))}
+          </div>
+        )}
+
+        {/* Empty state */}
+        {!isLoading && cities.length === 0 && !isError && (
+          <div className="text-center py-12 text-slate-400 text-sm">
+            {t('home:cities.noData', 'No featured cities available yet.')}
+          </div>
+        )}
 
         {/* Mobile view all */}
         <div className="mt-6 text-center sm:hidden">

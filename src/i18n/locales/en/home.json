@@ -67,7 +67,11 @@
     "title": "Explore Popular Cities",
     "subtitle": "Discover real estate opportunities in the most sought-after Balkan cities",
     "viewAll": "Explore All Cities",
-    "propertiesCount": "{{count}} properties"
+    "propertiesCount": "{{count}} properties",
+    "noData": "No featured cities available yet.",
+    "trend_rising": "Rising",
+    "trend_stable": "Stable",
+    "trend_declining": "Declining"
   },
   "howItWorks": {
     "title": "How It Works",
@@ -92,13 +96,40 @@
     "badge": "Real Estate News",
     "title": "Latest from the",
     "titleHighlight": "Balkan Market",
-    "subtitle": "AI-curated real estate news from across the region. Click any article to read the full story from the original source."
+    "subtitle": "AI-curated real estate news from across the region. Click any article to read the full story from the original source.",
+    "readOriginal": "Read Original",
+    "filterAll": "All",
+    "noNews": "No news available for this country yet.",
+    "category_market": "Market",
+    "category_investment": "Investment",
+    "category_regulation": "Regulation",
+    "category_development": "Development",
+    "category_tourism": "Tourism"
   },
   "showcase": {
     "badge": "How It Works",
     "title": "Everything You Need,",
     "titleHighlight": "All in One Place",
-    "subtitle": "AI-powered search, 3D interactive maps, real-time messaging, financial calculators, and listing promotions — see how the platform works for buyers, sellers, agents, and agencies."
+    "subtitle": "AI-powered search, 3D interactive maps, real-time messaging, financial calculators, and listing promotions — see how the platform works for buyers, sellers, agents, and agencies.",
+    "platformFeatures": "Platform Features",
+    "exploreGuide": "Explore Full Guide",
+    "browseProperties": "Browse Properties",
+    "viewFullGuide": "View Full Guide"
+  },
+  "topAgents": {
+    "badge": "Top Agents of the Week",
+    "title": "Meet Our Best Performing Agents",
+    "subtitle": "Ranked by sales, ratings, and client satisfaction this week",
+    "sold": "sold",
+    "active": "active"
+  },
+  "topAgencies": {
+    "badge": "Agencies of the Month",
+    "title": "Leading Real Estate Agencies",
+    "subtitle": "Top-performing agencies with the most listings, agents, and client trust",
+    "listings": "listings",
+    "agents": "agents",
+    "years": "yrs"
   },
   "testimonials": {
     "title": "What Our Users Say",

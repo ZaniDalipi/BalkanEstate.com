@@ -336,7 +336,7 @@ const TopAgenciesSection: React.FC = () => {
       }}
     >
       {/* Header */}
-      <div style={{ maxWidth: '72rem', margin: '0 auto', textAlign: 'center', marginBottom: '3rem' }}>
+      <div style={{ maxWidth: '72rem', margin: '0 auto', textAlign: 'center', marginBottom: '2rem', padding: '0 1rem' }}>
         <div
           style={{
             display: 'inline-flex',
@@ -346,17 +346,17 @@ const TopAgenciesSection: React.FC = () => {
             borderRadius: '20px',
             background: 'rgba(2,82,205,0.08)',
             border: '1px solid rgba(2,82,205,0.15)',
-            marginBottom: '1rem',
+            marginBottom: '0.75rem',
           }}
         >
-          <span style={{ fontSize: '16px' }}>🏢</span>
-          <span style={{ fontSize: '0.8rem', fontWeight: 600, color: '#0252CD', letterSpacing: '0.05em', textTransform: 'uppercase' }}>
+          <span style={{ fontSize: '14px' }}>🏢</span>
+          <span style={{ fontSize: '0.7rem', fontWeight: 600, color: '#0252CD', letterSpacing: '0.05em', textTransform: 'uppercase' }}>
             {t('topAgencies.badge', 'Agencies of the Month')}
           </span>
         </div>
         <h2
           style={{
-            fontSize: 'clamp(1.5rem, 4vw, 2.25rem)',
+            fontSize: 'clamp(1.25rem, 4vw, 2.25rem)',
             fontWeight: 800,
             color: '#0f172a',
             letterSpacing: '-0.02em',
@@ -365,17 +365,17 @@ const TopAgenciesSection: React.FC = () => {
         >
           {t('topAgencies.title', 'Leading Real Estate Agencies')}
         </h2>
-        <p style={{ fontSize: '0.95rem', color: '#64748b', maxWidth: '500px', margin: '0 auto' }}>
+        <p style={{ fontSize: 'clamp(0.8rem, 2vw, 0.95rem)', color: '#64748b', maxWidth: '500px', margin: '0 auto' }}>
           {t('topAgencies.subtitle', 'Top-performing agencies with the most listings, agents, and client trust')}
         </p>
       </div>
 
-      {/* Podium — 2-1-3 layout */}
+      {/* Podium — 2-1-3 layout on desktop, stacked on mobile */}
       <div
+        className="hidden sm:flex"
         style={{
           maxWidth: '860px',
           margin: '0 auto',
-          display: 'flex',
           alignItems: 'flex-end',
           justifyContent: 'center',
           gap: '1rem',
@@ -390,6 +390,20 @@ const TopAgenciesSection: React.FC = () => {
             podiumHeight={PODIUM_HEIGHTS[visualIndex]}
           />
         ))}
+      </div>
+
+      {/* Mobile: horizontal scroll cards */}
+      <div className="sm:hidden overflow-x-auto pb-4 scrollbar-hide -mx-1 px-1">
+        <div style={{ display: 'flex', gap: '0.75rem', padding: '0 1rem', minWidth: 'min-content' }}>
+          {[0, 1, 2].map((dataIndex) => (
+            <AgencyPodiumCard
+              key={displayAgencies[dataIndex]._id}
+              agency={displayAgencies[dataIndex]}
+              rank={dataIndex}
+              podiumHeight={100}
+            />
+          ))}
+        </div>
       </div>
     </section>
   );
