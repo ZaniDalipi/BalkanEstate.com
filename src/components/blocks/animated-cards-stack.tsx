@@ -154,20 +154,20 @@ export const CardTransformed = React.forwardRef<
     // Cards start big (1.08) and scale down to 0.7 as they fly away
     const scale = useTransform(scrollYProgress, range, [1.08, 0.7]);
 
-    // Cards move UP aggressively
-    const y = useTransform(scrollYProgress, range, ['0%', '-220%']);
+    // Cards move UP aggressively — use numeric values for proper interpolation
+    const y = useTransform(scrollYProgress, range, [0, -250]);
     const rotate = useTransform(scrollYProgress, range, [
       initialRotation,
       flyAwayRotation,
     ]);
 
-    // Fade starts very late — card stays fully visible for 75% of its range
-    const fadeStart = start + (extendedEnd - start) * 0.75;
+    // Fade starts very late — card stays fully visible for 80% of its range
+    const fadeStart = start + (extendedEnd - start) * 0.8;
     const opacity = useTransform(scrollYProgress, [start, fadeStart, extendedEnd], [1, 1, 0]);
 
     const transform = useMotionTemplate`translateZ(${
       index * incrementZ
-    }px) translateY(${y}) scale(${scale}) rotate(${rotate}deg)`;
+    }px) translateY(${y}%) scale(${scale}) rotate(${rotate}deg)`;
 
     const dx = useTransform(scrollYProgress, range, [0, 6]);
     const dy = useTransform(scrollYProgress, range, [16, 2]);
