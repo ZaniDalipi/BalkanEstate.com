@@ -117,6 +117,27 @@
     "termsOfService": "Terms of Service",
     "copyright": "© {year} BalkanEstate. All rights reserved."
   },
+  "aria": {
+    "mapStyle": "Map Style",
+    "cleanMapStyle": "Clean map style",
+    "colorMapStyle": "Color map style",
+    "streetMapStyle": "Street map style",
+    "satelliteMapStyle": "Satellite map style",
+    "showAllListings": "Show all listings",
+    "showOnlyPremium": "Show only premium",
+    "toggle3DBuildings": "Toggle 3D buildings",
+    "togglePointsOfInterest": "Toggle points of interest",
+    "toggleMeasurementTool": "Toggle measurement tool",
+    "toggleCadastreParcels": "Toggle cadastre parcels",
+    "threeDBuildings": "3D Buildings",
+    "poi": "POI",
+    "cadastre": "Cadastre",
+    "measure": "Measure",
+    "legend": "Legend",
+    "climate": "Climate",
+    "premiumOnly": "Premium Only",
+    "resetView": "Reset view"
+  },
   "errors": {
     "generic": "Something went wrong. Please try again.",
     "notFound": "Not found",
