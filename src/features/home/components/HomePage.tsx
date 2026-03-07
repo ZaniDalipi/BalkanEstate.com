@@ -15,6 +15,8 @@ import CTASection from './CTASection';
 import AppShowcaseSection from './AppShowcaseSection';
 import NewsSection from './NewsSection';
 import TestimonialsSection from './TestimonialsSection';
+import TopAgentsSection from './TopAgentsSection';
+import TopAgenciesSection from './TopAgenciesSection';
 import { StackedCards } from '@/src/components/ui/glass-cards';
 import Footer from '@/components/shared/Footer';
 
@@ -132,6 +134,10 @@ const HomePage: React.FC = () => {
           onViewAll={() => handleNavigate('search', '/search')}
         />
       )}
+
+      <TopAgentsSection />
+
+      <TopAgenciesSection />
 
       <CategoriesSection onCategoryClick={handleCategoryClick} />
 
