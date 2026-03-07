@@ -11,7 +11,7 @@ import {
   QuestionMarkCircleIcon,
   SparklesIcon,
 } from '@/constants';
-import { useHowItWorksManager, SUBSECTIONS, CATEGORIES } from './useHowItWorksManager';
+import { useHowItWorksManager, SUBSECTIONS, CATEGORIES, convertToYouTubeEmbedUrl, isYouTubeUrl } from './useHowItWorksManager';
 import HowItWorksManagerForm from './HowItWorksManagerForm';
 
 const HowItWorksManager: React.FC = () => {
@@ -143,9 +143,9 @@ const HowItWorksManager: React.FC = () => {
                     {/* Content preview */}
                     <div className="aspect-video bg-gray-100 relative">
                       {item.contentType === 'video' || !item.contentType ? (
-                        item.url && (item.url.includes('youtube.com/embed') || item.url.includes('youtu.be')) ? (
+                        item.url && isYouTubeUrl(item.url) ? (
                           <iframe
-                            src={item.url}
+                            src={convertToYouTubeEmbedUrl(item.url)}
                             className="w-full h-full"
                             title={item.title}
                             frameBorder="0"

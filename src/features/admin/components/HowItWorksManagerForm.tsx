@@ -19,6 +19,8 @@ import {
   SUBSECTIONS,
   CATEGORIES,
   ICON_OPTIONS,
+  convertToYouTubeEmbedUrl,
+  isYouTubeUrl,
 } from './useHowItWorksManager';
 
 interface ContentTypeOption {
@@ -261,7 +263,7 @@ const HowItWorksManagerForm: React.FC<HowItWorksManagerFormProps> = ({
               {/* Video URL / Embed URL input */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Video URL or YouTube Embed URL
+                  YouTube URL or Video URL
                 </label>
                 <input
                   type="url"
@@ -269,22 +271,40 @@ const HowItWorksManagerForm: React.FC<HowItWorksManagerFormProps> = ({
                   onChange={(e) =>
                     setFormData((prev) => ({ ...prev, url: e.target.value }))
                   }
+                  onBlur={(e) => {
+                    const converted = convertToYouTubeEmbedUrl(e.target.value);
+                    if (converted !== e.target.value) {
+                      setFormData((prev) => ({ ...prev, url: converted }));
+                    }
+                  }}
+                  onPaste={(e) => {
+                    const pasted = e.clipboardData.getData('text');
+                    if (isYouTubeUrl(pasted)) {
+                      e.preventDefault();
+                      setFormData((prev) => ({ ...prev, url: convertToYouTubeEmbedUrl(pasted) }));
+                    }
+                  }}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                  placeholder="https://www.youtube.com/embed/VIDEO_ID"
+                  placeholder="https://www.youtube.com/watch?v=VIDEO_ID"
                 />
                 <p className="text-xs text-gray-500 mt-1">
-                  Paste a YouTube embed URL (e.g. https://www.youtube.com/embed/abc123) or a direct video URL
+                  Paste any YouTube link — it will be auto-converted to embed format. Also supports direct video URLs.
                 </p>
+                {formData.url && formData.url.includes('youtube.com/embed') && (
+                  <p className="text-xs text-green-600 mt-1 flex items-center gap-1">
+                    YouTube video detected — embed URL ready
+                  </p>
+                )}
               </div>
 
               {/* Video preview */}
               {formData.url && formData.url !== 'placeholder' && (
                 <div className="space-y-2">
-                  {formData.url.includes('youtube.com/embed') || formData.url.includes('youtu.be') ? (
+                  {isYouTubeUrl(formData.url) ? (
                     <div className="relative w-full rounded-lg overflow-hidden" style={{ paddingBottom: '56.25%' }}>
                       <iframe
                         className="absolute top-0 left-0 w-full h-full"
-                        src={formData.url}
+                        src={convertToYouTubeEmbedUrl(formData.url)}
                         title="Video preview"
                         frameBorder="0"
                         allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
@@ -313,7 +333,7 @@ const HowItWorksManagerForm: React.FC<HowItWorksManagerFormProps> = ({
                   onChange={onFileUpload}
                   className="hidden"
                 />
-                {formData.url && formData.url !== 'placeholder' && !formData.url.includes('youtube.com') ? (
+                {formData.url && formData.url !== 'placeholder' && !isYouTubeUrl(formData.url) ? (
                   <button
                     type="button"
                     onClick={() => fileInputRef.current?.click()}
