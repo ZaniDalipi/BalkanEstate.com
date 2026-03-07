@@ -1,8 +1,20 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 
 gsap.registerPlugin(ScrollTrigger);
+
+function useIsMobile(breakpoint = 768) {
+    const [isMobile, setIsMobile] = useState(
+        typeof window !== 'undefined' ? window.innerWidth < breakpoint : false
+    );
+    useEffect(() => {
+        const onResize = () => setIsMobile(window.innerWidth < breakpoint);
+        window.addEventListener('resize', onResize);
+        return () => window.removeEventListener('resize', onResize);
+    }, [breakpoint]);
+    return isMobile;
+}
 
 interface PropertyCardData {
     id: string;
@@ -473,6 +485,89 @@ const StackedPropertyCard: React.FC<StackedPropertyCardProps> = ({ property, ind
     );
 };
 
+/* ─── Compact mobile property card ─── */
+const MobilePropertyCard: React.FC<{ property: PropertyCardData; color: string; onClick: () => void }> = ({ property, color, onClick }) => {
+    const formatPrice = (price: number, currency?: string) => {
+        const symbol = currency === 'USD' ? '$' : '€';
+        return `${symbol}${price.toLocaleString()}`;
+    };
+
+    return (
+        <div
+            onClick={onClick}
+            style={{
+                borderRadius: '20px',
+                overflow: 'hidden',
+                background: 'rgba(255,255,255,0.95)',
+                backdropFilter: 'blur(20px)',
+                border: '1px solid rgba(255,255,255,0.6)',
+                boxShadow: `0 8px 32px -8px ${color.replace('0.7', '0.15')}, 0 2px 8px rgba(0,0,0,0.04)`,
+                cursor: 'pointer',
+            }}
+        >
+            {/* Image */}
+            <div style={{ position: 'relative', aspectRatio: '16/10', overflow: 'hidden' }}>
+                <img
+                    src={property.imageUrl}
+                    alt={property.title || property.address}
+                    style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                    loading="lazy"
+                />
+                <div style={{
+                    position: 'absolute', bottom: 0, left: 0, right: 0, height: '50%',
+                    background: 'linear-gradient(to top, rgba(0,0,0,0.5), transparent)',
+                    pointerEvents: 'none',
+                }} />
+                {/* Badges */}
+                <div style={{ position: 'absolute', top: 10, left: 10, display: 'flex', gap: 4 }}>
+                    {property.listingType && (
+                        <span style={{
+                            padding: '2px 8px', borderRadius: '6px', fontSize: '9px', fontWeight: 700,
+                            textTransform: 'uppercase', letterSpacing: '0.05em',
+                            background: property.listingType === 'rent' ? 'rgba(14,165,233,0.9)' : 'rgba(2,82,205,0.9)',
+                            color: '#fff',
+                        }}>
+                            {property.listingType === 'rent' ? 'Rent' : 'Sale'}
+                        </span>
+                    )}
+                </div>
+                {/* Price */}
+                <div style={{ position: 'absolute', bottom: 10, left: 12 }}>
+                    <span style={{ fontSize: '1.2rem', fontWeight: 800, color: '#fff', textShadow: '0 2px 8px rgba(0,0,0,0.4)' }}>
+                        {formatPrice(property.price, property.currency)}
+                    </span>
+                    {property.listingType === 'rent' && (
+                        <span style={{ fontSize: '0.75rem', color: 'rgba(255,255,255,0.8)', fontWeight: 500 }}>/mo</span>
+                    )}
+                </div>
+            </div>
+            {/* Details */}
+            <div style={{ padding: '0.75rem 1rem' }}>
+                <h3 style={{ fontSize: '0.9rem', fontWeight: 700, color: '#0f172a', marginBottom: 2 }}>
+                    {property.title || property.address}
+                </h3>
+                <p style={{ fontSize: '0.75rem', color: '#64748b', marginBottom: '0.5rem' }}>
+                    {property.city}, {property.country}
+                </p>
+                <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+                    {[
+                        { v: property.beds, l: 'Beds' },
+                        { v: property.baths, l: 'Baths' },
+                        { v: property.sqft, l: 'm²' },
+                    ].map(s => (
+                        <span key={s.l} style={{
+                            padding: '2px 8px', borderRadius: '8px', fontSize: '0.7rem',
+                            background: '#f8fafc', border: '1px solid #e2e8f0', color: '#334155', fontWeight: 600,
+                        }}>
+                            {s.v} {s.l}
+                        </span>
+                    ))}
+                </div>
+            </div>
+        </div>
+    );
+};
+
 interface StackedCardsProps {
     properties: PropertyCardData[];
     onPropertyClick: (property: PropertyCardData) => void;
@@ -489,6 +584,7 @@ export const StackedCards: React.FC<StackedCardsProps> = ({
     onViewAll
 }) => {
     const containerRef = useRef<HTMLDivElement>(null);
+    const isMobile = useIsMobile();
 
     useEffect(() => {
         const container = containerRef.current;
@@ -565,19 +661,40 @@ export const StackedCards: React.FC<StackedCardsProps> = ({
                 )}
             </div>
 
-            {/* Stacked Cards */}
-            <div style={{ width: '100%' }}>
-                {properties.slice(0, 6).map((property, index) => (
-                    <StackedPropertyCard
-                        key={property.id}
-                        property={property}
-                        index={index}
-                        totalCards={Math.min(properties.length, 6)}
-                        color={CARD_COLORS[index % CARD_COLORS.length]}
-                        onClick={() => onPropertyClick(property)}
-                    />
-                ))}
-            </div>
+            {/* Mobile: Grid layout */}
+            {isMobile ? (
+                <div style={{
+                    maxWidth: '72rem',
+                    margin: '0 auto',
+                    padding: '1.5rem 1rem 2rem',
+                    display: 'grid',
+                    gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))',
+                    gap: '1rem',
+                }}>
+                    {properties.slice(0, 6).map((property, index) => (
+                        <MobilePropertyCard
+                            key={property.id}
+                            property={property}
+                            color={CARD_COLORS[index % CARD_COLORS.length]}
+                            onClick={() => onPropertyClick(property)}
+                        />
+                    ))}
+                </div>
+            ) : (
+                /* Desktop: Stacked scroll cards */
+                <div style={{ width: '100%' }}>
+                    {properties.slice(0, 6).map((property, index) => (
+                        <StackedPropertyCard
+                            key={property.id}
+                            property={property}
+                            index={index}
+                            totalCards={Math.min(properties.length, 6)}
+                            color={CARD_COLORS[index % CARD_COLORS.length]}
+                            onClick={() => onPropertyClick(property)}
+                        />
+                    ))}
+                </div>
+            )}
         </section>
     );
 };

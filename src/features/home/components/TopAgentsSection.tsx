@@ -236,7 +236,6 @@ const AgentPodiumCard: React.FC<{
 /* ─── Section ─── */
 const TopAgentsSection: React.FC = () => {
   const { t } = useTranslation('home');
-  const sectionRef = useRef<HTMLElement>(null);
 
   const { data: agents = [], isLoading } = useQuery<Agent[]>({
     queryKey: ['topAgentsWeek'],
@@ -254,28 +253,15 @@ const TopAgentsSection: React.FC = () => {
 
   const displayAgents = agents;
 
-  // Section entrance
-  useEffect(() => {
-    const el = sectionRef.current;
-    if (!el) return;
+  // Don't render section at all if no agents and not loading
+  if (!isLoading && displayAgents.length === 0) return null;
 
-    gsap.set(el, { opacity: 0, y: 50 });
-
-    const trigger = ScrollTrigger.create({
-      trigger: el,
-      start: 'top 85%',
-      once: true,
-      onEnter: () => {
-        gsap.to(el, { opacity: 1, y: 0, duration: 0.8, ease: 'power2.out' });
-      },
-    });
-
-    return () => { trigger.kill(); };
-  }, []);
+  // Pad to 3 for podium layout, only use available agents
+  const podiumAgents = displayAgents.slice(0, 3);
+  const hasPodium = podiumAgents.length === 3;
 
   return (
     <section
-      ref={sectionRef}
       style={{
         background: 'linear-gradient(180deg, #f8fafc 0%, #f1f5f9 100%)',
         padding: '4rem 1rem 0',
@@ -333,8 +319,8 @@ const TopAgentsSection: React.FC = () => {
         </div>
       )}
 
-      {/* Podium — 2-1-3 layout on desktop, stacked on mobile */}
-      {!isLoading && displayAgents.length >= 3 && (
+      {/* 3 agents: Podium 2-1-3 layout */}
+      {!isLoading && hasPodium && (
         <>
           <div
             className="hidden sm:flex"
@@ -349,8 +335,8 @@ const TopAgentsSection: React.FC = () => {
           >
             {PODIUM_ORDER.map((dataIndex, visualIndex) => (
               <AgentPodiumCard
-                key={displayAgents[dataIndex].id}
-                agent={displayAgents[dataIndex]}
+                key={podiumAgents[dataIndex].id}
+                agent={podiumAgents[dataIndex]}
                 rank={dataIndex}
                 podiumHeight={PODIUM_HEIGHTS[visualIndex]}
               />
@@ -362,8 +348,8 @@ const TopAgentsSection: React.FC = () => {
             <div style={{ display: 'flex', gap: '0.75rem', padding: '0 1rem', minWidth: 'min-content' }}>
               {[0, 1, 2].map((dataIndex) => (
                 <AgentPodiumCard
-                  key={displayAgents[dataIndex].id}
-                  agent={displayAgents[dataIndex]}
+                  key={podiumAgents[dataIndex].id}
+                  agent={podiumAgents[dataIndex]}
                   rank={dataIndex}
                   podiumHeight={120}
                 />
@@ -373,10 +359,25 @@ const TopAgentsSection: React.FC = () => {
         </>
       )}
 
-      {/* Empty state */}
-      {!isLoading && displayAgents.length < 3 && (
-        <div style={{ textAlign: 'center', padding: '2rem 1rem', color: '#94a3b8', fontSize: '0.875rem' }}>
-          {t('topAgents.noData', 'No agents data available yet.')}
+      {/* 1-2 agents: simple card row */}
+      {!isLoading && !hasPodium && podiumAgents.length > 0 && (
+        <div style={{
+          maxWidth: '800px',
+          margin: '0 auto',
+          display: 'flex',
+          justifyContent: 'center',
+          gap: '1.5rem',
+          padding: '0 1rem',
+          flexWrap: 'wrap',
+        }}>
+          {podiumAgents.map((agent, i) => (
+            <AgentPodiumCard
+              key={agent.id}
+              agent={agent}
+              rank={i}
+              podiumHeight={200}
+            />
+          ))}
         </div>
       )}
     </section>

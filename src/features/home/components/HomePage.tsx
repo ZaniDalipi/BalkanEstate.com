@@ -27,7 +27,7 @@ const HomePage: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const searchQueryRef = useRef(searchQuery);
 
-  const { data: featuredProperties = [], isLoading: isLoadingProperties } = useQuery<Property[]>({
+  const { data: featuredProperties = [] } = useQuery<Property[]>({
     queryKey: ['featuredProperties'],
     queryFn: async () => {
       const properties = await getProperties({ sortBy: 'newest' } as any, { limit: 6 });
@@ -118,29 +118,11 @@ const HomePage: React.FC = () => {
         />
       )}
 
-      {featuredProperties.length > 0 && (
-        <StackedCards
-          properties={featuredProperties}
-          onPropertyClick={handlePropertyClick}
-          onViewAll={() => handleNavigate('search', '/search')}
-        />
-      )}
-      {isLoadingProperties && (
-        <section className="py-12 sm:py-16 max-w-6xl mx-auto px-4">
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            {Array.from({ length: 3 }).map((_, i) => (
-              <div key={i} className="rounded-2xl overflow-hidden border border-neutral-200 animate-pulse">
-                <div className="aspect-[4/3] bg-slate-100" />
-                <div className="p-4 space-y-3">
-                  <div className="h-5 bg-slate-100 rounded w-3/4" />
-                  <div className="h-4 bg-slate-100 rounded w-1/2" />
-                  <div className="h-3 bg-slate-50 rounded w-full" />
-                </div>
-              </div>
-            ))}
-          </div>
-        </section>
-      )}
+      <StackedCards
+        properties={featuredProperties}
+        onPropertyClick={handlePropertyClick}
+        onViewAll={() => handleNavigate('search', '/search')}
+      />
 
       <TopAgentsSection />
 
