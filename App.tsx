@@ -397,10 +397,11 @@ const AppContent: React.FC<{ onToggleSidebar: () => void }> = ({ onToggleSidebar
         }
         dispatch({ type: 'SET_ACTIVE_VIEW', payload: view });
       } else {
-        // Unknown route - show 404 page
+        // Unknown route - redirect to landing page
         dispatch({ type: 'SET_SELECTED_PROPERTY', payload: null });
         dispatch({ type: 'SET_SELECTED_AGENCY', payload: null });
-        dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'not-found' });
+        dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'home' });
+        window.history.replaceState({}, '', buildLocalizedPath('/'));
       }
     };
 
