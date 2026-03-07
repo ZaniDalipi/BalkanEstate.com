@@ -7,7 +7,7 @@ import Footer from './Footer';
 import { API_URL } from '../../src/shared/api/config';
 
 interface SiteVideo {
-  _id: string;
+  id: string;
   key: string;
   url: string;
   title: string;
@@ -15,6 +15,13 @@ interface SiteVideo {
   subsection?: string;
   contentType?: string;
 }
+
+/**
+ * Convert a string to a slug for flexible key matching.
+ * "How to create account" → "how-to-create-account"
+ */
+const toSlug = (str: string): string =>
+  str.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
 
 /**
  * Checks if a URL is any kind of YouTube URL.
@@ -68,7 +75,10 @@ const VideoPlaceholder: React.FC<{
     }
   }
   const sectionVideos = videos[subsection] || [];
-  const video = sectionVideos.find(v => v.key === videoKey);
+  // Try exact key match first, then flexible slug-based matching
+  const keySuffix = videoKey.startsWith(subsection + '-') ? videoKey.slice(subsection.length + 1) : videoKey;
+  const video = sectionVideos.find(v => v.key === videoKey)
+    || sectionVideos.find(v => toSlug(v.key) === videoKey || toSlug(v.key) === keySuffix || toSlug(v.key).includes(keySuffix) || keySuffix.includes(toSlug(v.key)));
 
   if (video) {
     // Handle YouTube URLs with an iframe embed
@@ -270,10 +280,12 @@ const HowItWorksPage: React.FC = () => {
     fetchVideos();
   }, []);
 
-  // Helper to find a video by key across all subsections
+  // Helper to find a video by key across all subsections (flexible matching)
   const findVideoByKey = (key: string): SiteVideo | undefined => {
+    const keySlug = toSlug(key);
     for (const subsectionVideos of Object.values(videos)) {
-      const found = subsectionVideos.find(v => v.key === key);
+      const found = subsectionVideos.find(v => v.key === key)
+        || subsectionVideos.find(v => toSlug(v.key) === keySlug || toSlug(v.key).includes(keySlug) || keySlug.includes(toSlug(v.key)));
       if (found) return found;
     }
     return undefined;
@@ -375,8 +387,9 @@ const HowItWorksPage: React.FC = () => {
         {/* Main Video Embed */}
         <div className="max-w-4xl mx-auto mb-12">
           {(() => {
-            // Check database first, then fall back to i18n
-            const dbVideo = findVideoByKey('main-video');
+            // Check database first (exact key, then first available), then fall back to i18n
+            const allDbVideos = Object.values(videos).flat();
+            const dbVideo = findVideoByKey('main-video') || allDbVideos[0];
             const dbEmbedUrl = dbVideo?.url;
             const i18nEmbedUrl = t('howItWorks:videoTutorials.mainVideo.embedUrl');
             const rawUrl = dbEmbedUrl || (i18nEmbedUrl && !i18nEmbedUrl.includes('videoTutorials.mainVideo') ? i18nEmbedUrl : '');
@@ -434,68 +447,118 @@ const HowItWorksPage: React.FC = () => {
             {t('howItWorks:videoTutorials.shortVideos.title')}
           </h3>
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {([
-              { key: 'proMonthly', dbKey: 'short-pro-monthly', icon: <StarIcon className="w-5 h-5" /> },
-              { key: 'proYearly', dbKey: 'short-pro-yearly', icon: <SparklesIcon className="w-5 h-5" /> },
-              { key: 'createAgency', dbKey: 'short-create-agency', icon: <BuildingIcon className="w-5 h-5" /> },
-              { key: 'joinAgency', dbKey: 'short-join-agency', icon: <UserGroupIcon className="w-5 h-5" /> },
-              { key: 'createListing', dbKey: 'short-create-listing', icon: <HomeIcon className="w-5 h-5" /> },
-              { key: 'promoteListing', dbKey: 'short-promote-listing', icon: <FireIcon className="w-5 h-5" /> },
-            ] as const).map((tutorial) => {
-              // Check database first, then fall back to i18n
-              const dbVideo = findVideoByKey(tutorial.dbKey);
-              const dbEmbedUrl = dbVideo?.url;
-              const i18nEmbedUrl = t(`howItWorks:videoTutorials.shortVideos.${tutorial.key}.embedUrl`);
-              const rawUrl = dbEmbedUrl || (i18nEmbedUrl && !i18nEmbedUrl.includes('videoTutorials.shortVideos') ? i18nEmbedUrl : '');
-              const embedUrl = isYouTubeUrl(rawUrl) ? toYouTubeEmbedUrl(rawUrl) : rawUrl;
-              const isYouTube = isYouTubeUrl(rawUrl);
-              const isDirectVideo = embedUrl && !isYouTube;
+            {(() => {
+              // Collect all DB videos and track which ones are rendered
+              const allDbVideos = Object.values(videos).flat().filter(v => v.url && v.url !== 'placeholder');
+              const renderedKeys = new Set<string>();
 
-              return (
-                <div key={tutorial.key} className="bg-white rounded-xl shadow-md overflow-hidden border border-neutral-100 hover:shadow-lg transition-shadow">
-                  {isYouTube ? (
-                    <div className="relative w-full" style={{ paddingBottom: '56.25%' }}>
-                      <iframe
-                        className="absolute top-0 left-0 w-full h-full"
+              const hardcodedCards = [
+                { key: 'proMonthly', dbKey: 'short-pro-monthly', icon: <StarIcon className="w-5 h-5" /> },
+                { key: 'proYearly', dbKey: 'short-pro-yearly', icon: <SparklesIcon className="w-5 h-5" /> },
+                { key: 'createAgency', dbKey: 'short-create-agency', icon: <BuildingIcon className="w-5 h-5" /> },
+                { key: 'joinAgency', dbKey: 'short-join-agency', icon: <UserGroupIcon className="w-5 h-5" /> },
+                { key: 'createListing', dbKey: 'short-create-listing', icon: <HomeIcon className="w-5 h-5" /> },
+                { key: 'promoteListing', dbKey: 'short-promote-listing', icon: <FireIcon className="w-5 h-5" /> },
+              ];
+
+              // Render hardcoded cards (with DB video if matched)
+              const cards = hardcodedCards.map((tutorial) => {
+                const dbVideo = findVideoByKey(tutorial.dbKey);
+                if (dbVideo) renderedKeys.add(dbVideo.key);
+                const dbEmbedUrl = dbVideo?.url;
+                const i18nEmbedUrl = t(`howItWorks:videoTutorials.shortVideos.${tutorial.key}.embedUrl`);
+                const rawUrl = dbEmbedUrl || (i18nEmbedUrl && !i18nEmbedUrl.includes('videoTutorials.shortVideos') ? i18nEmbedUrl : '');
+                const embedUrl = isYouTubeUrl(rawUrl) ? toYouTubeEmbedUrl(rawUrl) : rawUrl;
+                const isYouTube = isYouTubeUrl(rawUrl);
+                const isDirectVideo = embedUrl && !isYouTube;
+
+                return (
+                  <div key={tutorial.key} className="bg-white rounded-xl shadow-md overflow-hidden border border-neutral-100 hover:shadow-lg transition-shadow">
+                    {isYouTube ? (
+                      <div className="relative w-full" style={{ paddingBottom: '56.25%' }}>
+                        <iframe
+                          className="absolute top-0 left-0 w-full h-full"
+                          src={embedUrl}
+                          title={dbVideo?.title || t(`howItWorks:videoTutorials.shortVideos.${tutorial.key}.title`)}
+                          frameBorder="0"
+                          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                          allowFullScreen
+                        />
+                      </div>
+                    ) : isDirectVideo ? (
+                      <video
                         src={embedUrl}
-                        title={dbVideo?.title || t(`howItWorks:videoTutorials.shortVideos.${tutorial.key}.title`)}
-                        frameBorder="0"
-                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                        allowFullScreen
+                        className="w-full aspect-video object-cover"
+                        controls
+                        preload="metadata"
                       />
+                    ) : (
+                      <div className="relative w-full bg-gradient-to-br from-neutral-100 to-neutral-50 flex items-center justify-center" style={{ paddingBottom: '56.25%' }}>
+                        <div className="absolute inset-0 flex flex-col items-center justify-center text-neutral-400">
+                          <svg className="w-12 h-12 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                          </svg>
+                          <span className="text-sm">{t('howItWorks:videoTutorials.comingSoon')}</span>
+                        </div>
+                      </div>
+                    )}
+                    <div className="p-4">
+                      <div className="flex items-center gap-2 mb-1">
+                        <span className="text-primary">{tutorial.icon}</span>
+                        <h4 className="font-semibold text-neutral-800">
+                          {dbVideo?.title || t(`howItWorks:videoTutorials.shortVideos.${tutorial.key}.title`)}
+                        </h4>
+                      </div>
+                      <p className="text-sm text-neutral-500">
+                        {dbVideo?.description || t(`howItWorks:videoTutorials.shortVideos.${tutorial.key}.description`)}
+                      </p>
                     </div>
-                  ) : isDirectVideo ? (
-                    <video
-                      src={embedUrl}
-                      className="w-full aspect-video object-cover"
-                      controls
-                      preload="metadata"
-                    />
-                  ) : (
-                    <div className="relative w-full bg-gradient-to-br from-neutral-100 to-neutral-50 flex items-center justify-center" style={{ paddingBottom: '56.25%' }}>
-                      <div className="absolute inset-0 flex flex-col items-center justify-center text-neutral-400">
-                        <svg className="w-12 h-12 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                        </svg>
-                        <span className="text-sm">{t('howItWorks:videoTutorials.comingSoon')}</span>
+                  </div>
+                );
+              });
+
+              // Render any remaining DB videos not matched by hardcoded cards
+              const extraCards = allDbVideos
+                .filter(v => !renderedKeys.has(v.key))
+                .map((video) => {
+                  const rawUrl = video.url;
+                  const embedUrl = isYouTubeUrl(rawUrl) ? toYouTubeEmbedUrl(rawUrl) : rawUrl;
+                  const isYouTube = isYouTubeUrl(rawUrl);
+
+                  return (
+                    <div key={video.id || video.key} className="bg-white rounded-xl shadow-md overflow-hidden border border-neutral-100 hover:shadow-lg transition-shadow">
+                      {isYouTube ? (
+                        <div className="relative w-full" style={{ paddingBottom: '56.25%' }}>
+                          <iframe
+                            className="absolute top-0 left-0 w-full h-full"
+                            src={embedUrl}
+                            title={video.title}
+                            frameBorder="0"
+                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                            allowFullScreen
+                          />
+                        </div>
+                      ) : (
+                        <video
+                          src={embedUrl}
+                          className="w-full aspect-video object-cover"
+                          controls
+                          preload="metadata"
+                        />
+                      )}
+                      <div className="p-4">
+                        <h4 className="font-semibold text-neutral-800 mb-1">{video.title}</h4>
+                        {video.description && (
+                          <p className="text-sm text-neutral-500">{video.description}</p>
+                        )}
                       </div>
                     </div>
-                  )}
-                  <div className="p-4">
-                    <div className="flex items-center gap-2 mb-1">
-                      <span className="text-primary">{tutorial.icon}</span>
-                      <h4 className="font-semibold text-neutral-800">
-                        {dbVideo?.title || t(`howItWorks:videoTutorials.shortVideos.${tutorial.key}.title`)}
-                      </h4>
-                    </div>
-                    <p className="text-sm text-neutral-500">
-                      {dbVideo?.description || t(`howItWorks:videoTutorials.shortVideos.${tutorial.key}.description`)}
-                    </p>
-                  </div>
-                </div>
-              );
-            })}
+                  );
+                });
+
+              return [...cards, ...extraCards];
+            })()}
           </div>
         </div>
       </div>
