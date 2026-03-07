@@ -20,6 +20,53 @@ import TopAgenciesSection from './TopAgenciesSection';
 import { StackedCards } from '@/src/components/ui/glass-cards';
 import Footer from '@/components/shared/Footer';
 
+const FALLBACK_PROPERTIES: Property[] = [
+  {
+    id: 'demo-1',
+    title: 'Luxury Sea-View Villa',
+    sellerId: '', listingType: 'sale' as any, status: 'active' as any,
+    price: 385000, address: 'Coastal Road 12', city: 'Dubrovnik', country: 'Croatia',
+    beds: 4, baths: 3, livingRooms: 2, sqft: 220, yearBuilt: 2021, parking: 2,
+    description: 'Stunning modern villa with panoramic Adriatic views, infinity pool, and private garden.',
+    specialFeatures: [], materials: [], amenities: [],
+    imageUrl: 'https://images.unsplash.com/photo-1613490493576-7fde63acd811?w=800&auto=format&fit=crop&q=80',
+    lat: 42.65, lng: 18.09, seller: {} as any, propertyType: 'villa',
+  },
+  {
+    id: 'demo-2',
+    title: 'Modern City Apartment',
+    sellerId: '', listingType: 'sale' as any, status: 'active' as any,
+    price: 145000, address: 'Knez Mihailova 28', city: 'Belgrade', country: 'Serbia',
+    beds: 2, baths: 1, livingRooms: 1, sqft: 85, yearBuilt: 2023, parking: 1,
+    description: 'Brand new apartment in the heart of Belgrade with smart home features and underground parking.',
+    specialFeatures: [], materials: [], amenities: [],
+    imageUrl: 'https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?w=800&auto=format&fit=crop&q=80',
+    lat: 44.82, lng: 20.46, seller: {} as any, propertyType: 'apartment',
+  },
+  {
+    id: 'demo-3',
+    title: 'Charming Mountain Retreat',
+    sellerId: '', listingType: 'sale' as any, status: 'active' as any,
+    price: 210000, address: 'Alpine Valley 5', city: 'Bansko', country: 'Bulgaria',
+    beds: 3, baths: 2, livingRooms: 1, sqft: 160, yearBuilt: 2019, parking: 1,
+    description: 'Cozy mountain house near ski slopes with stone fireplace and stunning valley views.',
+    specialFeatures: [], materials: [], amenities: [],
+    imageUrl: 'https://images.unsplash.com/photo-1518780664697-55e3ad937233?w=800&auto=format&fit=crop&q=80',
+    lat: 41.84, lng: 23.49, seller: {} as any, propertyType: 'house',
+  },
+  {
+    id: 'demo-4',
+    title: 'Beachfront Penthouse',
+    sellerId: '', listingType: 'rent' as any, status: 'active' as any,
+    price: 2500, address: 'Saranda Bay 3', city: 'Saranda', country: 'Albania',
+    beds: 3, baths: 2, livingRooms: 1, sqft: 140, yearBuilt: 2022, parking: 1,
+    description: 'Premium penthouse with floor-to-ceiling windows, rooftop terrace, and direct beach access.',
+    specialFeatures: [], materials: [], amenities: [],
+    imageUrl: 'https://images.unsplash.com/photo-1512917774080-9991f1c4c750?w=800&auto=format&fit=crop&q=80',
+    lat: 39.87, lng: 20.00, seller: {} as any, propertyType: 'apartment',
+  },
+];
+
 const HomePage: React.FC = () => {
   const { t } = useTranslation(['home', 'common']);
   const { state, dispatch } = useAppContext();
@@ -119,21 +166,11 @@ const HomePage: React.FC = () => {
         />
       )}
 
-      {propertiesLoading ? (
-        <section className="bg-white py-12">
-          <div className="max-w-6xl mx-auto px-4">
-            <div className="h-8 w-48 bg-neutral-100 rounded animate-pulse mb-2" />
-            <div className="h-4 w-72 bg-neutral-100 rounded animate-pulse mb-8" />
-            <div className="h-[400px] bg-neutral-100 rounded-2xl animate-pulse" />
-          </div>
-        </section>
-      ) : (
-        <StackedCards
-          properties={featuredProperties}
-          onPropertyClick={handlePropertyClick}
-          onViewAll={() => handleNavigate('search', '/search')}
-        />
-      )}
+      <StackedCards
+        properties={featuredProperties.length > 0 ? featuredProperties : FALLBACK_PROPERTIES}
+        onPropertyClick={handlePropertyClick}
+        onViewAll={() => handleNavigate('search', '/search')}
+      />
 
       <TopAgentsSection />
 
