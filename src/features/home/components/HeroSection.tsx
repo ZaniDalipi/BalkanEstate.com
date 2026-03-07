@@ -1,10 +1,12 @@
-import React, { useCallback, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { motion, useInView } from 'framer-motion';
 import { useQuery } from '@tanstack/react-query';
 import { Typewriter } from '@/src/components/ui/typewriter';
 import { apiRequest } from '@/src/shared/api';
 import { getFeaturedCities } from '@/src/features/cities/api/cityApi';
+import { searchLocation } from '@/services/osmService';
+import type { NominatimResult } from '@/types';
 
 interface HeroSectionProps {
   searchQuery: string;
@@ -69,6 +71,10 @@ const HeroSection: React.FC<HeroSectionProps> = ({
 }) => {
   const { t } = useTranslation(['home']);
   const [isFocused, setIsFocused] = useState(false);
+  const [suggestions, setSuggestions] = useState<NominatimResult[]>([]);
+  const [isSearching, setIsSearching] = useState(false);
+  const debounceRef = useRef<number>();
+  const wrapperRef = useRef<HTMLDivElement>(null);
 
   // Fetch real stats from backend
   const { data: stats } = useQuery<PlatformStats>({
@@ -101,6 +107,43 @@ const HeroSection: React.FC<HeroSectionProps> = ({
 
   const displayCities = useMemo(() => featuredCities.map(c => c.city), [featuredCities]);
 
+  // Autocomplete: debounced location search
+  useEffect(() => {
+    if (debounceRef.current) clearTimeout(debounceRef.current);
+    if (isFocused && searchQuery.trim().length > 2) {
+      setIsSearching(true);
+      debounceRef.current = window.setTimeout(async () => {
+        const results = await searchLocation(searchQuery);
+        setSuggestions(results);
+        setIsSearching(false);
+      }, 500);
+    } else {
+      setSuggestions([]);
+      setIsSearching(false);
+    }
+    return () => { if (debounceRef.current) clearTimeout(debounceRef.current); };
+  }, [searchQuery, isFocused]);
+
+  // Close suggestions on outside click
+  useEffect(() => {
+    const handleClick = (e: MouseEvent) => {
+      if (wrapperRef.current && !wrapperRef.current.contains(e.target as Node)) {
+        setSuggestions([]);
+      }
+    };
+    document.addEventListener('mousedown', handleClick);
+    return () => document.removeEventListener('mousedown', handleClick);
+  }, []);
+
+  const handleSuggestionClick = useCallback((suggestion: NominatimResult) => {
+    // Extract a short display name (city, country)
+    const parts = suggestion.display_name.split(',');
+    const shortName = parts.slice(0, 2).map(s => s.trim()).join(', ');
+    onSearchChange(shortName);
+    setSuggestions([]);
+    setTimeout(() => onSearch(), 0);
+  }, [onSearchChange, onSearch]);
+
   const formatStat = (value: number): string => {
     if (value >= 10000) return `${Math.floor(value / 1000)},${String(value % 1000).padStart(3, '0')}+`;
     if (value >= 1000) return `${value.toLocaleString()}+`;
@@ -129,6 +172,7 @@ const HeroSection: React.FC<HeroSectionProps> = ({
     (e: React.KeyboardEvent) => {
       if (e.key === 'Enter') {
         e.preventDefault();
+        setSuggestions([]);
         onSearch();
       }
     },
@@ -144,10 +188,31 @@ const HeroSection: React.FC<HeroSectionProps> = ({
   );
 
   return (
-    <section className="relative bg-gradient-to-b from-slate-50 via-white to-white overflow-hidden">
-      {/* Background decoration */}
-      <div className="absolute top-0 right-0 w-[300px] sm:w-[400px] h-[300px] sm:h-[400px] rounded-full blur-[120px] bg-blue-100/50 -translate-y-1/4 translate-x-1/4" />
-      <div className="absolute bottom-0 left-0 w-[200px] sm:w-[300px] h-[200px] sm:h-[300px] rounded-full blur-[100px] bg-indigo-100/30 translate-y-1/4 -translate-x-1/4" />
+    <section className="relative overflow-hidden" style={{
+      background: 'linear-gradient(180deg, #f8fafc 0%, #ffffff 50%, #ffffff 100%)',
+    }}>
+      {/* Liquid glass background orbs */}
+      <div style={{
+        position: 'absolute', top: '-80px', right: '-60px',
+        width: '400px', height: '400px', borderRadius: '50%',
+        background: 'radial-gradient(circle, rgba(59,130,246,0.08) 0%, rgba(59,130,246,0.03) 50%, transparent 70%)',
+        filter: 'blur(40px)',
+        pointerEvents: 'none',
+      }} />
+      <div style={{
+        position: 'absolute', bottom: '-40px', left: '-80px',
+        width: '350px', height: '350px', borderRadius: '50%',
+        background: 'radial-gradient(circle, rgba(139,92,246,0.06) 0%, rgba(139,92,246,0.02) 50%, transparent 70%)',
+        filter: 'blur(40px)',
+        pointerEvents: 'none',
+      }} />
+      <div style={{
+        position: 'absolute', top: '30%', left: '50%', transform: 'translateX(-50%)',
+        width: '600px', height: '200px', borderRadius: '50%',
+        background: 'radial-gradient(ellipse, rgba(14,165,233,0.04) 0%, transparent 70%)',
+        filter: 'blur(60px)',
+        pointerEvents: 'none',
+      }} />
 
       <motion.div
         className="relative z-10 max-w-6xl mx-auto px-4 pt-12 pb-16 sm:pt-24 sm:pb-28"
@@ -155,10 +220,20 @@ const HeroSection: React.FC<HeroSectionProps> = ({
         initial="hidden"
         animate="visible"
       >
-        {/* Badge */}
+        {/* Badge — liquid glass pill */}
         <motion.div className="flex justify-center mb-4 sm:mb-6" variants={fadeUp}>
-          <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[10px] sm:text-xs font-medium text-blue-700 border border-blue-200/60 bg-blue-50/80">
-            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+          <span style={{
+            display: 'inline-flex', alignItems: 'center', gap: '6px',
+            padding: '6px 14px', borderRadius: '9999px',
+            fontSize: '11px', fontWeight: 600,
+            color: '#1d4ed8',
+            background: 'rgba(239,246,255,0.7)',
+            backdropFilter: 'blur(12px)',
+            WebkitBackdropFilter: 'blur(12px)',
+            border: '1px solid rgba(59,130,246,0.15)',
+            boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.8), 0 1px 3px rgba(59,130,246,0.08)',
+          }}>
+            <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#34d399' }} className="animate-pulse" />
             {t('home:hero.badge')}
           </span>
         </motion.div>
@@ -192,49 +267,136 @@ const HeroSection: React.FC<HeroSectionProps> = ({
           {t('home:hero.subtitle')}
         </motion.p>
 
-        {/* Search Bar */}
-        <motion.div className="mt-8 sm:mt-10 max-w-2xl mx-auto" variants={fadeUp}>
-          <div
-            className={`flex items-center rounded-2xl bg-white border transition-shadow duration-200 ${
-              isFocused
-                ? 'border-blue-300 shadow-[0_0_0_2px_rgba(59,130,246,0.2),0_8px_24px_rgba(0,0,0,0.06)]'
-                : 'border-neutral-200 shadow-sm'
-            }`}
-          >
-            <div className="pl-4 sm:pl-6 flex-shrink-0">
-              <svg
-                className={`w-4 h-4 sm:w-[18px] sm:h-[18px] transition-colors ${isFocused ? 'text-blue-500' : 'text-slate-400'}`}
-                fill="none"
-                viewBox="0 0 24 24"
-                strokeWidth={2}
-                stroke="currentColor"
+        {/* Search Bar — liquid glass */}
+        <motion.div className="mt-8 sm:mt-10 max-w-2xl mx-auto" variants={fadeUp} ref={wrapperRef}>
+          <div style={{
+            position: 'relative',
+            borderRadius: '20px',
+            background: isFocused
+              ? 'rgba(255,255,255,0.9)'
+              : 'rgba(255,255,255,0.75)',
+            backdropFilter: 'blur(24px) saturate(180%)',
+            WebkitBackdropFilter: 'blur(24px) saturate(180%)',
+            border: isFocused
+              ? '1px solid rgba(59,130,246,0.3)'
+              : '1px solid rgba(226,232,240,0.8)',
+            boxShadow: isFocused
+              ? '0 0 0 3px rgba(59,130,246,0.1), 0 8px 32px rgba(0,0,0,0.06), inset 0 1px 0 rgba(255,255,255,0.9)'
+              : '0 4px 16px rgba(0,0,0,0.04), inset 0 1px 0 rgba(255,255,255,0.9)',
+            transition: 'all 0.3s ease',
+          }}>
+            {/* Glass shine line */}
+            <div style={{
+              position: 'absolute', top: 0, left: '10%', right: '10%', height: '1px',
+              background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.95) 30%, rgba(255,255,255,0.95) 70%, transparent)',
+              borderRadius: '20px 20px 0 0', pointerEvents: 'none', zIndex: 5,
+            }} />
+
+            <div className="flex items-center">
+              <div className="pl-4 sm:pl-6 flex-shrink-0">
+                {isSearching ? (
+                  <div className="w-4 h-4 sm:w-[18px] sm:h-[18px] border-2 border-blue-200 border-t-blue-500 rounded-full animate-spin" />
+                ) : (
+                  <svg
+                    className={`w-4 h-4 sm:w-[18px] sm:h-[18px] transition-colors ${isFocused ? 'text-blue-500' : 'text-slate-400'}`}
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    strokeWidth={2}
+                    stroke="currentColor"
+                  >
+                    <path strokeLinecap="round" strokeLinejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" />
+                  </svg>
+                )}
+              </div>
+
+              <input
+                type="text"
+                value={searchQuery}
+                onChange={(e) => onSearchChange(e.target.value)}
+                onKeyDown={handleKeyDown}
+                onFocus={() => setIsFocused(true)}
+                onBlur={() => setTimeout(() => setIsFocused(false), 200)}
+                placeholder={t('home:hero.searchPlaceholder')}
+                className="flex-1 py-3.5 sm:py-5 px-3 text-sm sm:text-base text-slate-900 placeholder-slate-400 bg-transparent outline-none min-w-0"
+                aria-label={t('home:hero.searchPlaceholder')}
+              />
+
+              {searchQuery && (
+                <button
+                  onClick={() => { onSearchChange(''); setSuggestions([]); }}
+                  className="mr-1 p-1.5 rounded-full text-slate-400 hover:text-slate-600 hover:bg-slate-100/50 transition-colors"
+                  aria-label="Clear"
+                >
+                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              )}
+
+              <button
+                onClick={() => { setSuggestions([]); onSearch(); }}
+                style={{
+                  margin: '6px 8px',
+                  padding: '8px 20px',
+                  borderRadius: '14px',
+                  fontSize: '13px',
+                  fontWeight: 600,
+                  color: '#fff',
+                  background: 'linear-gradient(135deg, #3b82f6, #2563eb)',
+                  border: 'none',
+                  cursor: 'pointer',
+                  boxShadow: '0 2px 8px rgba(37,99,235,0.3), inset 0 1px 0 rgba(255,255,255,0.15)',
+                  transition: 'all 0.2s ease',
+                  flexShrink: 0,
+                }}
+                onMouseOver={(e) => { e.currentTarget.style.transform = 'translateY(-1px)'; e.currentTarget.style.boxShadow = '0 4px 12px rgba(37,99,235,0.4), inset 0 1px 0 rgba(255,255,255,0.15)'; }}
+                onMouseOut={(e) => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 2px 8px rgba(37,99,235,0.3), inset 0 1px 0 rgba(255,255,255,0.15)'; }}
+                aria-label={t('home:hero.searchButton')}
               >
-                <path strokeLinecap="round" strokeLinejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" />
-              </svg>
+                {t('home:hero.searchButton')}
+              </button>
             </div>
 
-            <input
-              type="text"
-              value={searchQuery}
-              onChange={(e) => onSearchChange(e.target.value)}
-              onKeyDown={handleKeyDown}
-              onFocus={() => setIsFocused(true)}
-              onBlur={() => setIsFocused(false)}
-              placeholder={t('home:hero.searchPlaceholder')}
-              className="flex-1 py-3.5 sm:py-5 px-3 text-sm sm:text-base text-slate-900 placeholder-slate-400 bg-transparent outline-none min-w-0"
-              aria-label={t('home:hero.searchPlaceholder')}
-            />
-
-            <button
-              onClick={onSearch}
-              className="m-1.5 sm:m-2 px-4 sm:px-6 py-2 sm:py-3 rounded-xl text-xs sm:text-sm font-semibold text-white flex-shrink-0 bg-blue-600 hover:bg-blue-700 active:bg-blue-800 transition-colors"
-              aria-label={t('home:hero.searchButton')}
-            >
-              {t('home:hero.searchButton')}
-            </button>
+            {/* Autocomplete suggestions dropdown — liquid glass */}
+            {suggestions.length > 0 && isFocused && (
+              <div style={{
+                position: 'absolute', top: '100%', left: 0, right: 0,
+                marginTop: '6px', borderRadius: '16px', overflow: 'hidden',
+                background: 'rgba(255,255,255,0.92)',
+                backdropFilter: 'blur(24px) saturate(180%)',
+                WebkitBackdropFilter: 'blur(24px) saturate(180%)',
+                border: '1px solid rgba(226,232,240,0.7)',
+                boxShadow: '0 12px 40px rgba(0,0,0,0.1), inset 0 1px 0 rgba(255,255,255,0.9)',
+                zIndex: 50, maxHeight: '280px', overflowY: 'auto',
+              }}>
+                {suggestions.map((s) => (
+                  <button
+                    key={s.place_id}
+                    onMouseDown={() => handleSuggestionClick(s)}
+                    style={{
+                      display: 'flex', alignItems: 'center', gap: '10px',
+                      width: '100%', padding: '10px 16px',
+                      background: 'transparent', border: 'none', cursor: 'pointer',
+                      textAlign: 'left', fontSize: '13px', color: '#334155',
+                      transition: 'background 0.15s',
+                    }}
+                    onMouseOver={(e) => e.currentTarget.style.background = 'rgba(248,250,252,0.8)'}
+                    onMouseOut={(e) => e.currentTarget.style.background = 'transparent'}
+                  >
+                    <svg className="w-4 h-4 text-slate-400 flex-shrink-0" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M15 10.5a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1 1 15 0Z" />
+                    </svg>
+                    <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                      {s.display_name}
+                    </span>
+                  </button>
+                ))}
+              </div>
+            )}
           </div>
 
-          {/* Popular searches */}
+          {/* Popular searches — glass chips */}
           {displayCities.length > 0 && (
             <div className="mt-3 sm:mt-4 flex flex-wrap items-center justify-center gap-1.5 sm:gap-2">
               <span className="text-[10px] sm:text-xs text-slate-400 font-medium">
@@ -244,7 +406,20 @@ const HeroSection: React.FC<HeroSectionProps> = ({
                 <button
                   key={city}
                   onClick={() => handleCityClick(city)}
-                  className="px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-full text-[10px] sm:text-xs font-medium text-slate-500 bg-white border border-neutral-200 hover:border-neutral-300 hover:text-slate-800 active:bg-neutral-50 transition-colors"
+                  style={{
+                    padding: '4px 12px', borderRadius: '9999px',
+                    fontSize: '11px', fontWeight: 500,
+                    color: '#475569',
+                    background: 'rgba(255,255,255,0.7)',
+                    backdropFilter: 'blur(8px)',
+                    WebkitBackdropFilter: 'blur(8px)',
+                    border: '1px solid rgba(226,232,240,0.6)',
+                    boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.8)',
+                    cursor: 'pointer',
+                    transition: 'all 0.2s ease',
+                  }}
+                  onMouseOver={(e) => { e.currentTarget.style.background = 'rgba(255,255,255,0.95)'; e.currentTarget.style.borderColor = 'rgba(203,213,225,0.8)'; e.currentTarget.style.color = '#0f172a'; }}
+                  onMouseOut={(e) => { e.currentTarget.style.background = 'rgba(255,255,255,0.7)'; e.currentTarget.style.borderColor = 'rgba(226,232,240,0.6)'; e.currentTarget.style.color = '#475569'; }}
                 >
                   {city}
                 </button>
@@ -253,11 +428,21 @@ const HeroSection: React.FC<HeroSectionProps> = ({
           )}
         </motion.div>
 
-        {/* CTA Buttons */}
+        {/* CTA Buttons — liquid glass */}
         <motion.div className="mt-6 sm:mt-8 flex flex-wrap justify-center gap-2 sm:gap-3" variants={fadeUp}>
           <button
             onClick={() => onNavigate('search', '/search')}
-            className="px-5 sm:px-6 py-2 sm:py-2.5 rounded-xl text-xs sm:text-sm font-semibold text-white bg-slate-900 hover:bg-slate-800 active:bg-slate-700 transition-colors"
+            style={{
+              padding: '10px 24px', borderRadius: '14px',
+              fontSize: '13px', fontWeight: 600,
+              color: '#fff',
+              background: 'linear-gradient(135deg, #0f172a, #1e293b)',
+              border: 'none', cursor: 'pointer',
+              boxShadow: '0 4px 14px rgba(15,23,42,0.2), inset 0 1px 0 rgba(255,255,255,0.08)',
+              transition: 'all 0.2s ease',
+            }}
+            onMouseOver={(e) => { e.currentTarget.style.transform = 'translateY(-1px)'; e.currentTarget.style.boxShadow = '0 6px 20px rgba(15,23,42,0.3), inset 0 1px 0 rgba(255,255,255,0.08)'; }}
+            onMouseOut={(e) => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 4px 14px rgba(15,23,42,0.2), inset 0 1px 0 rgba(255,255,255,0.08)'; }}
           >
             {t('home:hero.ctaBuy')}
           </button>
@@ -268,16 +453,44 @@ const HeroSection: React.FC<HeroSectionProps> = ({
             <button
               key={i}
               onClick={btn.action}
-              className="px-5 sm:px-6 py-2 sm:py-2.5 rounded-xl text-xs sm:text-sm font-semibold text-slate-700 border border-neutral-200 hover:bg-neutral-50 hover:border-neutral-300 active:bg-neutral-100 transition-colors"
+              style={{
+                padding: '10px 24px', borderRadius: '14px',
+                fontSize: '13px', fontWeight: 600,
+                color: '#475569',
+                background: 'rgba(255,255,255,0.7)',
+                backdropFilter: 'blur(12px)',
+                WebkitBackdropFilter: 'blur(12px)',
+                border: '1px solid rgba(226,232,240,0.7)',
+                boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.9), 0 2px 8px rgba(0,0,0,0.03)',
+                cursor: 'pointer',
+                transition: 'all 0.2s ease',
+              }}
+              onMouseOver={(e) => { e.currentTarget.style.background = 'rgba(255,255,255,0.95)'; e.currentTarget.style.borderColor = 'rgba(203,213,225,0.8)'; e.currentTarget.style.transform = 'translateY(-1px)'; }}
+              onMouseOut={(e) => { e.currentTarget.style.background = 'rgba(255,255,255,0.7)'; e.currentTarget.style.borderColor = 'rgba(226,232,240,0.7)'; e.currentTarget.style.transform = 'translateY(0)'; }}
             >
               {btn.label}
             </button>
           ))}
         </motion.div>
 
-        {/* Stats Strip */}
+        {/* Stats Strip — liquid glass card */}
         <motion.div className="mt-10 sm:mt-14 max-w-3xl mx-auto" variants={fadeUp}>
-          <div className="rounded-2xl px-4 py-4 sm:px-8 sm:py-6 bg-white border border-neutral-200/80 shadow-sm">
+          <div style={{
+            borderRadius: '20px',
+            padding: '1rem 1.5rem',
+            background: 'rgba(255,255,255,0.7)',
+            backdropFilter: 'blur(24px) saturate(180%)',
+            WebkitBackdropFilter: 'blur(24px) saturate(180%)',
+            border: '1px solid rgba(255,255,255,0.6)',
+            boxShadow: '0 8px 32px rgba(0,0,0,0.04), inset 0 1px 0 rgba(255,255,255,0.9), inset 0 -1px 0 rgba(255,255,255,0.3)',
+            position: 'relative', overflow: 'hidden',
+          }}>
+            {/* Glass shine */}
+            <div style={{
+              position: 'absolute', top: 0, left: '5%', right: '5%', height: '1px',
+              background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.95) 30%, rgba(255,255,255,0.95) 70%, transparent)',
+              pointerEvents: 'none',
+            }} />
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 sm:gap-8">
               {statsDisplay.map((stat, i) => (
                 <div key={i} className="text-center">

@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import { optimizeCloudinaryUrl, cloudinarySrcSet } from '@/config/cloudinaryConfig';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -217,7 +218,9 @@ const StackedPropertyCard: React.FC<StackedPropertyCardProps> = ({ property, ind
                         borderRadius: '28px 0 0 28px'
                     }}>
                         <img
-                            src={property.imageUrl}
+                            src={optimizeCloudinaryUrl(property.imageUrl, { width: 800, quality: 'auto', format: 'auto' })}
+                            srcSet={cloudinarySrcSet(property.imageUrl, [480, 800, 1200])}
+                            sizes="(max-width: 768px) 100vw, 45vw"
                             alt={property.title || property.address}
                             style={{
                                 width: '100%',
@@ -226,6 +229,7 @@ const StackedPropertyCard: React.FC<StackedPropertyCardProps> = ({ property, ind
                                 transition: 'transform 0.6s cubic-bezier(0.16, 1, 0.3, 1)'
                             }}
                             loading="lazy"
+                            decoding="async"
                             onMouseOver={(e) => (e.currentTarget.style.transform = 'scale(1.05)')}
                             onMouseOut={(e) => (e.currentTarget.style.transform = 'scale(1)')}
                         />
@@ -508,10 +512,13 @@ const MobilePropertyCard: React.FC<{ property: PropertyCardData; color: string; 
             {/* Image */}
             <div style={{ position: 'relative', aspectRatio: '16/10', overflow: 'hidden' }}>
                 <img
-                    src={property.imageUrl}
+                    src={optimizeCloudinaryUrl(property.imageUrl, { width: 480, quality: 'auto', format: 'auto' })}
+                    srcSet={cloudinarySrcSet(property.imageUrl, [320, 480, 640])}
+                    sizes="(max-width: 480px) 100vw, 50vw"
                     alt={property.title || property.address}
                     style={{ width: '100%', height: '100%', objectFit: 'cover' }}
                     loading="lazy"
+                    decoding="async"
                 />
                 <div style={{
                     position: 'absolute', bottom: 0, left: 0, right: 0, height: '50%',
@@ -589,52 +596,74 @@ export const StackedCards: React.FC<StackedCardsProps> = ({
 
     return (
         <section style={{ background: '#ffffff' }}>
-            {/* Section Header */}
+            {/* Section Header — liquid glass */}
             <div style={{
                 maxWidth: '72rem',
                 margin: '0 auto',
                 padding: '3rem 1rem 0',
-                display: 'flex',
-                alignItems: 'flex-end',
-                justifyContent: 'space-between'
             }}>
-                <div>
-                    <h2 style={{
-                        fontSize: 'clamp(1.25rem, 3vw, 1.5rem)',
-                        fontWeight: 700,
-                        color: '#0f172a'
-                    }}>
-                        {title}
-                    </h2>
-                    <p style={{
-                        fontSize: '0.875rem',
-                        color: '#64748b',
-                        marginTop: '0.25rem'
-                    }}>
-                        {subtitle}
-                    </p>
-                </div>
-                {onViewAll && (
-                    <button
-                        onClick={onViewAll}
-                        style={{
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: '0.375rem',
+                <div style={{
+                    display: 'flex',
+                    alignItems: 'flex-end',
+                    justifyContent: 'space-between',
+                    padding: '1.25rem 1.5rem',
+                    borderRadius: '20px',
+                    background: 'rgba(255,255,255,0.7)',
+                    backdropFilter: 'blur(20px) saturate(180%)',
+                    WebkitBackdropFilter: 'blur(20px) saturate(180%)',
+                    border: '1px solid rgba(255,255,255,0.6)',
+                    boxShadow: '0 4px 20px rgba(0,0,0,0.03), inset 0 1px 0 rgba(255,255,255,0.9)',
+                    position: 'relative',
+                    overflow: 'hidden',
+                }}>
+                    {/* Glass shine */}
+                    <div style={{
+                        position: 'absolute', top: 0, left: '5%', right: '5%', height: '1px',
+                        background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.95) 30%, rgba(255,255,255,0.95) 70%, transparent)',
+                        pointerEvents: 'none',
+                    }} />
+                    <div>
+                        <h2 style={{
+                            fontSize: 'clamp(1.25rem, 3vw, 1.5rem)',
+                            fontWeight: 700,
+                            color: '#0f172a'
+                        }}>
+                            {title}
+                        </h2>
+                        <p style={{
                             fontSize: '0.875rem',
-                            fontWeight: 500,
-                            color: '#475569',
-                            background: 'none',
-                            border: 'none',
-                            cursor: 'pointer',
-                            transition: 'color 0.2s'
-                        }}
-                        onMouseOver={(e) => (e.currentTarget.style.color = '#0f172a')}
-                        onMouseOut={(e) => (e.currentTarget.style.color = '#475569')}
-                    >
-                        View All Properties →
-                    </button>
-                )}
+                            color: '#64748b',
+                            marginTop: '0.25rem'
+                        }}>
+                            {subtitle}
+                        </p>
+                    </div>
+                    {onViewAll && (
+                        <button
+                            onClick={onViewAll}
+                            style={{
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '0.375rem',
+                                padding: '0.5rem 1rem',
+                                borderRadius: '12px',
+                                fontSize: '0.875rem',
+                                fontWeight: 500,
+                                color: '#475569',
+                                background: 'rgba(248,250,252,0.8)',
+                                backdropFilter: 'blur(8px)',
+                                border: '1px solid rgba(226,232,240,0.6)',
+                                boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.8)',
+                                cursor: 'pointer',
+                                transition: 'all 0.2s ease',
+                            }}
+                            onMouseOver={(e) => { e.currentTarget.style.color = '#0f172a'; e.currentTarget.style.background = 'rgba(248,250,252,1)'; }}
+                            onMouseOut={(e) => { e.currentTarget.style.color = '#475569'; e.currentTarget.style.background = 'rgba(248,250,252,0.8)'; }}
+                        >
+                            View All Properties →
+                        </button>
+                    )}
+                </div>
             </div>
 
             {/* Mobile: Grid layout */}

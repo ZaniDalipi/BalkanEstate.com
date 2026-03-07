@@ -1,8 +1,10 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useQuery } from '@tanstack/react-query';
 import { getAgencies } from '@/src/features/agencies/api/agencyApi';
 import { optimizeCloudinaryUrl } from '@/config/cloudinaryConfig';
+import { useAppContext } from '@/context/AppContext';
+import { useLocalizedNavigation } from '@/src/hooks/useLocalizedNavigation';
 import type { Agency } from '@/src/shared/types';
 
 const MEDAL_COLORS = {
@@ -20,7 +22,8 @@ const AgencyPodiumCard: React.FC<{
   agency: Agency;
   rank: number;
   podiumHeight: number;
-}> = ({ agency, rank, podiumHeight }) => {
+  onAgencyClick?: (agency: Agency) => void;
+}> = ({ agency, rank, podiumHeight, onAgencyClick }) => {
   const cardRef = useRef<HTMLDivElement>(null);
   const [isVisible, setIsVisible] = useState(false);
   const medal = MEDAL_COLORS[rank as keyof typeof MEDAL_COLORS];
@@ -57,6 +60,10 @@ const AgencyPodiumCard: React.FC<{
       {/* Agency Card */}
       <div
         ref={cardRef}
+        onClick={() => onAgencyClick?.(agency)}
+        role="button"
+        tabIndex={0}
+        onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onAgencyClick?.(agency); } }}
         style={{
           width: '100%',
           maxWidth: rank === 0 ? '280px' : '230px',
@@ -68,6 +75,7 @@ const AgencyPodiumCard: React.FC<{
           boxShadow: '0 20px 40px -10px rgba(0,0,0,0.12), 0 0 0 1px rgba(255,255,255,0.8)',
           marginBottom: '-30px',
           zIndex: 10,
+          cursor: 'pointer',
           opacity: isVisible ? 1 : 0,
           transform: isVisible ? 'translateY(0) scale(1)' : 'translateY(80px) scale(0.9)',
           transition: `opacity 0.7s cubic-bezier(0.34, 1.56, 0.64, 1) ${rank === 0 ? '0s' : rank === 1 ? '0.15s' : '0.3s'}, transform 0.7s cubic-bezier(0.34, 1.56, 0.64, 1) ${rank === 0 ? '0s' : rank === 1 ? '0.15s' : '0.3s'}`,
@@ -263,6 +271,14 @@ const AgencyPodiumCard: React.FC<{
 /* ─── Section ─── */
 const TopAgenciesSection: React.FC = () => {
   const { t } = useTranslation('home');
+  const { dispatch } = useAppContext();
+  const { navigate } = useLocalizedNavigation();
+
+  const handleAgencyClick = useCallback((agency: Agency) => {
+    const agencyIdentifier = agency.slug || agency._id;
+    dispatch({ type: 'SET_SELECTED_AGENCY', payload: agencyIdentifier });
+    navigate(`/agencies/${agencyIdentifier}`);
+  }, [dispatch, navigate]);
 
   const { data: agencies = [], isLoading } = useQuery<Agency[]>({
     queryKey: ['topAgenciesMonth'],
@@ -366,6 +382,7 @@ const TopAgenciesSection: React.FC = () => {
                 agency={podiumAgencies[dataIndex]}
                 rank={dataIndex}
                 podiumHeight={PODIUM_HEIGHTS[visualIndex]}
+                onAgencyClick={handleAgencyClick}
               />
             ))}
           </div>
@@ -379,6 +396,7 @@ const TopAgenciesSection: React.FC = () => {
                   agency={podiumAgencies[dataIndex]}
                   rank={dataIndex}
                   podiumHeight={100}
+                  onAgencyClick={handleAgencyClick}
                 />
               ))}
             </div>
@@ -403,6 +421,7 @@ const TopAgenciesSection: React.FC = () => {
               agency={agency}
               rank={i}
               podiumHeight={180}
+              onAgencyClick={handleAgencyClick}
             />
           ))}
         </div>

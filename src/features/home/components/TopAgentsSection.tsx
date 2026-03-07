@@ -1,9 +1,11 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useQuery } from '@tanstack/react-query';
 import { getAllAgents } from '@/src/features/agents/api/agentApi';
 import { optimizeCloudinaryUrl } from '@/config/cloudinaryConfig';
 import DefaultAvatar from '@/components/shared/DefaultAvatar';
+import { useAppContext } from '@/context/AppContext';
+import { useLocalizedNavigation } from '@/src/hooks/useLocalizedNavigation';
 import type { Agent } from '@/src/shared/types';
 
 const MEDAL_COLORS = {
@@ -21,7 +23,8 @@ const AgentPodiumCard: React.FC<{
   agent: Agent;
   rank: number; // 0=1st, 1=2nd, 2=3rd
   podiumHeight: number;
-}> = ({ agent, rank, podiumHeight }) => {
+  onAgentClick?: (agent: Agent) => void;
+}> = ({ agent, rank, podiumHeight, onAgentClick }) => {
   const cardRef = useRef<HTMLDivElement>(null);
   const [isVisible, setIsVisible] = useState(false);
   const medal = MEDAL_COLORS[rank as keyof typeof MEDAL_COLORS];
@@ -57,6 +60,10 @@ const AgentPodiumCard: React.FC<{
       {/* Agent Card */}
       <div
         ref={cardRef}
+        onClick={() => onAgentClick?.(agent)}
+        role="button"
+        tabIndex={0}
+        onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onAgentClick?.(agent); } }}
         style={{
           width: '100%',
           maxWidth: rank === 0 ? '260px' : '220px',
@@ -69,6 +76,7 @@ const AgentPodiumCard: React.FC<{
           boxShadow: '0 20px 40px -10px rgba(0,0,0,0.12), 0 0 0 1px rgba(255,255,255,0.8)',
           marginBottom: '-30px',
           zIndex: 10,
+          cursor: 'pointer',
           opacity: isVisible ? 1 : 0,
           transform: isVisible ? 'translateY(0) scale(1)' : 'translateY(80px) scale(0.9)',
           transition: `opacity 0.7s cubic-bezier(0.34, 1.56, 0.64, 1) ${rank === 0 ? '0s' : rank === 1 ? '0.15s' : '0.3s'}, transform 0.7s cubic-bezier(0.34, 1.56, 0.64, 1) ${rank === 0 ? '0s' : rank === 1 ? '0.15s' : '0.3s'}`,
@@ -227,6 +235,14 @@ const AgentPodiumCard: React.FC<{
 /* ─── Section ─── */
 const TopAgentsSection: React.FC = () => {
   const { t } = useTranslation('home');
+  const { dispatch } = useAppContext();
+  const { navigate } = useLocalizedNavigation();
+
+  const handleAgentClick = useCallback((agent: Agent) => {
+    const agentIdentifier = agent.agentId || agent.id;
+    dispatch({ type: 'SET_SELECTED_AGENT', payload: agentIdentifier });
+    navigate(`/agents/${agentIdentifier}`);
+  }, [dispatch, navigate]);
 
   const { data: agents = [], isLoading } = useQuery<Agent[]>({
     queryKey: ['topAgentsWeek'],
@@ -330,6 +346,7 @@ const TopAgentsSection: React.FC = () => {
                 agent={podiumAgents[dataIndex]}
                 rank={dataIndex}
                 podiumHeight={PODIUM_HEIGHTS[visualIndex]}
+                onAgentClick={handleAgentClick}
               />
             ))}
           </div>
@@ -343,6 +360,7 @@ const TopAgentsSection: React.FC = () => {
                   agent={podiumAgents[dataIndex]}
                   rank={dataIndex}
                   podiumHeight={120}
+                  onAgentClick={handleAgentClick}
                 />
               ))}
             </div>
@@ -367,6 +385,7 @@ const TopAgentsSection: React.FC = () => {
               agent={agent}
               rank={i}
               podiumHeight={200}
+              onAgentClick={handleAgentClick}
             />
           ))}
         </div>
