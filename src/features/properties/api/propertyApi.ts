@@ -7,11 +7,12 @@ import type { Property, Filters, UserRole } from '@/src/shared/types';
 // --- Transformers ---
 
 export function transformBackendProperty(backendProp: any): Property {
-  const seller = backendProp.sellerId;
+  const seller = backendProp.sellerId || {};
+  const sellerId = typeof seller === 'object' ? (seller.id || seller._id || '') : seller;
 
   return {
     id: backendProp.id || backendProp._id,
-    sellerId: seller.id || seller._id || seller,
+    sellerId: String(sellerId),
     status: backendProp.status,
     title: backendProp.title,
     soldAt: backendProp.soldAt ? new Date(backendProp.soldAt).getTime() : undefined,
@@ -39,12 +40,12 @@ export function transformBackendProperty(backendProp: any): Property {
     lng: backendProp.lng,
     seller: {
       type: backendProp.createdAsRole === 'agent' ? 'agent' : 'private',
-      name: seller.name,
-      phone: seller.phone,
-      avatarUrl: seller.avatarUrl,
-      agencyName: seller.agencyName,
-      agencyLogo: seller.agencyLogo,
-      agencyId: seller.agencyId,
+      name: typeof seller === 'object' ? seller.name : '',
+      phone: typeof seller === 'object' ? seller.phone : '',
+      avatarUrl: typeof seller === 'object' ? seller.avatarUrl : undefined,
+      agencyName: typeof seller === 'object' ? seller.agencyName : undefined,
+      agencyLogo: typeof seller === 'object' ? seller.agencyLogo : undefined,
+      agencyId: typeof seller === 'object' ? seller.agencyId : undefined,
     },
     propertyType: backendProp.propertyType,
     floorNumber: backendProp.floorNumber,

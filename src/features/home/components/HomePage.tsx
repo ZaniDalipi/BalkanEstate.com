@@ -4,8 +4,8 @@ import { Helmet } from 'react-helmet-async';
 import { useAppContext } from '@/context/AppContext';
 import { useLocalizedNavigation } from '@/src/hooks/useLocalizedNavigation';
 import { Property } from '@/types';
-import { API_CONFIG } from '@/src/shared/constants/app.constants';
 import { useQuery } from '@tanstack/react-query';
+import { getProperties } from '@/src/features/properties/api/propertyApi';
 import HeroSection from './HeroSection';
 import QuickAccessSection from './QuickAccessSection';
 import CategoriesSection from './CategoriesSection';
@@ -74,13 +74,15 @@ const HomePage: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const searchQueryRef = useRef(searchQuery);
 
-  const { data: featuredProperties = [], isLoading: propertiesLoading } = useQuery<Property[]>({
+  const { data: featuredProperties = [] } = useQuery<Property[]>({
     queryKey: ['featuredProperties'],
     queryFn: async () => {
-      const res = await fetch(`${API_CONFIG.BASE_URL}/properties?sortBy=newest&limit=6&status=active`);
-      if (!res.ok) return [];
-      const data = await res.json();
-      return data.properties || [];
+      try {
+        const properties = await getProperties({ sortBy: 'newest' } as any, { limit: 6 });
+        return properties.filter(p => p.status === 'active').slice(0, 6);
+      } catch {
+        return [];
+      }
     },
     staleTime: 5 * 60 * 1000,
     retry: 2,
