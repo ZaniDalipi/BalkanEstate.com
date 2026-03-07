@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { motion } from 'framer-motion';
 import { useQuery } from '@tanstack/react-query';
@@ -49,6 +49,41 @@ const CityCardSkeleton: React.FC<{ large?: boolean }> = ({ large }) => (
   </div>
 );
 
+/** Pick `count` cities with maximum country diversity */
+function pickDiverseCities(allCities: CityMarketData[], count: number): CityMarketData[] {
+  if (allCities.length <= count) return allCities;
+
+  // Shuffle all cities (Fisher-Yates)
+  const shuffled = [...allCities];
+  for (let i = shuffled.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+  }
+
+  const picked: CityMarketData[] = [];
+  const countryCounts: Record<string, number> = {};
+
+  // First pass: pick one city per country until we have enough
+  for (const city of shuffled) {
+    if (picked.length >= count) break;
+    if (!countryCounts[city.country]) {
+      picked.push(city);
+      countryCounts[city.country] = 1;
+    }
+  }
+
+  // Second pass: fill remaining slots from unused cities
+  for (const city of shuffled) {
+    if (picked.length >= count) break;
+    if (!picked.includes(city)) {
+      picked.push(city);
+      countryCounts[city.country] = (countryCounts[city.country] || 0) + 1;
+    }
+  }
+
+  return picked;
+}
+
 const CITY_GRADIENTS = [
   'from-blue-700 via-blue-600 to-cyan-600',
   'from-violet-700 via-purple-600 to-indigo-600',
@@ -61,12 +96,18 @@ const CITY_GRADIENTS = [
 const PopularCitiesSection: React.FC<PopularCitiesSectionProps> = ({ onNavigate }) => {
   const { t } = useTranslation(['home']);
 
-  const { data: cities = [], isLoading, isError } = useQuery<CityMarketData[]>({
+  const { data: allCities = [], isLoading, isError } = useQuery<CityMarketData[]>({
     queryKey: ['featuredCities'],
-    queryFn: () => getFeaturedCities(6),
+    queryFn: () => getFeaturedCities(50),
     staleTime: 10 * 60 * 1000,
     retry: 2,
   });
+
+  // Pick 6 diverse cities once per mount (randomized across countries)
+  const cities = useMemo(
+    () => pickDiverseCities(allCities, 6),
+    [allCities]
+  );
 
   const { data: cityImages = {} } = useCityImages(cities);
 
