@@ -9,7 +9,7 @@ import {
 } from '@/src/components/blocks/animated-cards-stack';
 import { useTestimonials, Testimonial } from '../hooks/useTestimonials';
 
-/* ─── Single testimonial card ─── */
+/* ─── Single testimonial card (dark glass style) ─── */
 const TestimonialCard: React.FC<{
   testimonial: Testimonial;
   index: number;
@@ -25,41 +25,41 @@ const TestimonialCard: React.FC<{
       key={testimonial.id}
       index={index}
       arrayLength={total}
-      variant="light"
-      incrementY={14}
-      incrementZ={10}
-      incrementRotation={0}
+      variant="dark"
+      incrementY={12}
+      incrementZ={8}
+      incrementRotation={3}
     >
-      <ReviewStars rating={testimonial.rating} className="text-amber-500" />
+      <ReviewStars rating={testimonial.rating} className="text-emerald-400" />
 
-      <blockquote className="text-center text-lg leading-relaxed text-slate-700 max-w-sm">
+      <blockquote className="text-center text-base sm:text-lg leading-relaxed text-stone-300 max-w-xs">
         &ldquo;{testimonial.quote}&rdquo;
       </blockquote>
 
-      <div className="flex items-center gap-3 mt-2">
+      <div className="flex items-center gap-3">
         {testimonial.avatarUrl ? (
           <img
             src={testimonial.avatarUrl}
             alt={testimonial.name}
-            className="w-12 h-12 rounded-full object-cover border-2 border-neutral-100 shadow-sm"
+            className="w-11 h-11 rounded-full object-cover border-2 border-stone-600/50 shadow-md"
             loading="lazy"
           />
         ) : (
-          <div className="w-12 h-12 rounded-full bg-gradient-to-br from-slate-100 to-slate-200 border-2 border-neutral-100 shadow-sm flex items-center justify-center text-sm font-bold text-slate-600">
+          <div className="w-11 h-11 rounded-full bg-stone-700/60 border-2 border-stone-600/50 shadow-md flex items-center justify-center text-sm font-bold text-stone-300">
             {initials}
           </div>
         )}
         <div>
-          <span className="block text-sm font-bold text-slate-900">
+          <span className="block text-sm font-bold text-stone-100">
             {testimonial.name}
           </span>
-          <span className="block text-xs text-slate-500">
+          <span className="block text-xs text-stone-400">
             {testimonial.profession}
             {testimonial.country ? ` · ${testimonial.country}` : ''}
           </span>
         </div>
         {testimonial.source === 'google' && (
-          <span className="ml-auto text-[10px] font-medium text-slate-400 bg-slate-50 px-2 py-0.5 rounded-full border border-slate-100">
+          <span className="ml-auto text-[10px] font-medium text-stone-500 bg-stone-800/60 px-2 py-0.5 rounded-full border border-stone-700/50">
             Google
           </span>
         )}
@@ -71,7 +71,7 @@ const TestimonialCard: React.FC<{
 /* ─── Loading skeleton ─── */
 const TestimonialsSkeleton: React.FC = () => (
   <div className="flex justify-center">
-    <div className="w-[350px] h-[300px] rounded-2xl bg-neutral-100 animate-pulse" />
+    <div className="w-[350px] h-[300px] rounded-2xl bg-stone-800/50 animate-pulse" />
   </div>
 );
 
@@ -81,11 +81,11 @@ const TestimonialsSection: React.FC = () => {
 
   if (isLoading) {
     return (
-      <section className="py-16 sm:py-20 bg-neutral-50">
+      <section className="py-16 sm:py-20 bg-stone-950">
         <div className="max-w-6xl mx-auto px-4">
           <div className="text-center mb-12">
-            <div className="h-8 w-64 bg-neutral-100 rounded mx-auto animate-pulse" />
-            <div className="h-4 w-96 bg-neutral-100 rounded mx-auto mt-3 animate-pulse" />
+            <div className="h-8 w-64 bg-stone-800 rounded mx-auto animate-pulse" />
+            <div className="h-4 w-96 bg-stone-800 rounded mx-auto mt-3 animate-pulse" />
           </div>
           <TestimonialsSkeleton />
         </div>
@@ -96,7 +96,7 @@ const TestimonialsSection: React.FC = () => {
   if (!testimonials.length) return null;
 
   return (
-    <section className="bg-neutral-50">
+    <section className="bg-stone-950">
       <div className="max-w-6xl mx-auto px-4">
         <motion.div
           initial={{ opacity: 0, y: 15 }}
@@ -104,10 +104,10 @@ const TestimonialsSection: React.FC = () => {
           viewport={{ once: true }}
           className="text-center pt-16 sm:pt-20"
         >
-          <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-slate-900">
-            {t('testimonials.title', 'What Our Users Say')}
+          <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-stone-100">
+            {t('testimonials.title', 'Testimonials')}
           </h2>
-          <p className="mx-auto mt-2 max-w-lg text-sm text-slate-500">
+          <p className="mx-auto mt-2 max-w-lg text-sm text-stone-400">
             {t(
               'testimonials.subtitle',
               'Trusted by thousands of buyers, sellers, and agents across the Balkans'
@@ -118,11 +118,11 @@ const TestimonialsSection: React.FC = () => {
 
       {/* Scroll-driven card stack — each scroll reveals the next testimonial */}
       <ContainerScroll
-        className="min-h-[250vh]"
-        style={{ minHeight: `${Math.max(testimonials.length * 60, 300)}vh` }}
+        className="min-h-[200vh]"
+        style={{ minHeight: `${Math.max(testimonials.length * 50, 250)}vh` }}
       >
-        <div className="sticky top-[8vh] flex items-start justify-center pt-20">
-          <CardsContainer className="h-[420px] w-[420px] sm:h-[460px] sm:w-[480px]">
+        <div className="sticky top-[10vh] flex items-start justify-center pt-24">
+          <CardsContainer className="h-[380px] w-[350px] sm:h-[420px] sm:w-[400px]">
             {testimonials.map((testimonial, i) => (
               <TestimonialCard
                 key={testimonial.id}

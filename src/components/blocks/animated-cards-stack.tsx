@@ -15,7 +15,7 @@ const cardVariants = cva('absolute will-change-transform', {
     variant: {
       dark: 'flex size-full flex-col items-center justify-center gap-6 rounded-2xl border border-stone-700/50 bg-accent-foreground/80 p-6 backdrop-blur-md',
       light:
-        'flex size-full flex-col items-center justify-center gap-6 rounded-2xl bg-white p-6 shadow-[0_4px_24px_rgba(0,0,0,0.08)]',
+        'flex size-full flex-col items-center justify-center gap-6 rounded-2xl bg-white/80 p-6 backdrop-blur-md',
     },
   },
   defaultVariants: {
@@ -142,37 +142,27 @@ export const CardTransformed = React.forwardRef<
 
     const start = index / (arrayLength + 1);
     const end = (index + 1) / (arrayLength + 1);
-
-    // Extend the active range so each card has more scroll distance
-    const extendedEnd = Math.min(end + (end - start) * 0.4, 1);
-    const range = React.useMemo(() => [start, extendedEnd], [start, extendedEnd]);
+    const range = React.useMemo(() => [start, end], [start, end]);
 
     // Each card starts with a fan rotation (index * step) and flies away with extra tilt
     const initialRotation = index * incrementRotation;
     const flyAwayRotation = incrementRotation === 0 ? 0 : initialRotation + 25;
 
-    // Cards start bigger (1.08) and scale down to 0.7 as they fly away
-    const scale = useTransform(scrollYProgress, range, [1.08, 0.7]);
-
-    // Cards move UP aggressively
-    const y = useTransform(scrollYProgress, range, ['0%', '-220%']);
+    const y = useTransform(scrollYProgress, range, ['0%', '-180%']);
     const rotate = useTransform(scrollYProgress, range, [
       initialRotation,
       flyAwayRotation,
     ]);
-
-    // Fade starts very late — card stays fully visible for 75% of its range
-    const fadeStart = start + (extendedEnd - start) * 0.75;
-    const opacity = useTransform(scrollYProgress, [start, fadeStart, extendedEnd], [1, 1, 0]);
+    const opacity = useTransform(scrollYProgress, range, [1, 0]);
 
     const transform = useMotionTemplate`translateZ(${
       index * incrementZ
-    }px) translateY(${y}) scale(${scale}) rotate(${rotate}deg)`;
+    }px) translateY(${y}) rotate(${rotate}deg)`;
 
-    const dx = useTransform(scrollYProgress, range, [0, 6]);
-    const dy = useTransform(scrollYProgress, range, [16, 2]);
-    const blur = useTransform(scrollYProgress, range, [32, 4]);
-    const alpha = useTransform(scrollYProgress, range, [0.25, 0.02]);
+    const dx = useTransform(scrollYProgress, range, [0, 4]);
+    const dy = useTransform(scrollYProgress, range, [12, 4]);
+    const blur = useTransform(scrollYProgress, range, [24, 2]);
+    const alpha = useTransform(scrollYProgress, range, [0.2, 0.05]);
 
     const filter =
       variant === 'light'

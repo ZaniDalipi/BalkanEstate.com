@@ -1,7 +1,6 @@
-import React, { useRef } from 'react';
+import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { motion, useScroll, useTransform } from 'framer-motion';
-import { CharacterV1 } from '@/src/components/ui/text-scroll-animation';
+import { motion } from 'framer-motion';
 
 interface HowItWorksSectionProps {
   onLearnMore: () => void;
@@ -54,43 +53,25 @@ const STEPS = [
 
 const HowItWorksSection: React.FC<HowItWorksSectionProps> = ({ onLearnMore }) => {
   const { t } = useTranslation(['home']);
-  const titleRef = useRef<HTMLDivElement>(null);
-
-  const { scrollYProgress: titleScrollProgress } = useScroll({
-    target: titleRef,
-    offset: ['start end', 'end center'],
-  });
-
-  const titleText = t('home:howItWorks.title', 'How It Works');
-  const titleChars = titleText.split('');
-  const titleCenterIndex = Math.floor(titleChars.length / 2);
-
-  const subtitleOpacity = useTransform(titleScrollProgress, [0.3, 0.6], [0, 1]);
-  const subtitleY = useTransform(titleScrollProgress, [0.3, 0.6], [15, 0]);
 
   return (
     <section className="py-16 sm:py-20 md:py-28 bg-gradient-to-b from-white via-slate-50/30 to-white overflow-hidden">
       <div className="max-w-5xl mx-auto px-4 sm:px-6">
-        {/* Title with scroll-driven character scatter */}
-        <div ref={titleRef} className="text-center mb-12 sm:mb-16" style={{ perspective: '500px' }}>
-          <div className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-slate-900 tracking-tight">
-            {titleChars.map((char, index) => (
-              <CharacterV1
-                key={index}
-                char={char}
-                index={index}
-                centerIndex={titleCenterIndex}
-                scrollYProgress={titleScrollProgress}
-              />
-            ))}
-          </div>
-          <motion.p
-            className="text-sm sm:text-base text-slate-500 mt-3 max-w-lg mx-auto"
-            style={{ opacity: subtitleOpacity, y: subtitleY }}
-          >
+        {/* Title */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.5 }}
+          className="text-center mb-12 sm:mb-16"
+        >
+          <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-slate-900 tracking-tight">
+            {t('home:howItWorks.title', 'How It Works')}
+          </h2>
+          <p className="text-sm sm:text-base text-slate-500 mt-3 max-w-lg mx-auto">
             {t('home:howItWorks.subtitle', 'Your journey from search to keys in three simple steps')}
-          </motion.p>
-        </div>
+          </p>
+        </motion.div>
 
         {/* Step cards — staggered entrance */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 md:gap-8">
