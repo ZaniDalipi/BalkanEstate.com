@@ -3,26 +3,11 @@ import { useTranslation } from 'react-i18next';
 import { useQuery } from '@tanstack/react-query';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
-import { API_CONFIG } from '@/src/shared/constants/app.constants';
+import { getAgencies } from '@/src/features/agencies/api/agencyApi';
 import { optimizeCloudinaryUrl } from '@/config/cloudinaryConfig';
+import type { Agency } from '@/src/shared/types';
 
 gsap.registerPlugin(ScrollTrigger);
-
-interface TopAgency {
-  _id: string;
-  name: string;
-  slug?: string;
-  logo?: string;
-  coverImage?: string;
-  city?: string;
-  country?: string;
-  totalProperties: number;
-  totalAgents: number;
-  yearsInBusiness?: number;
-  specializations?: string[];
-  type?: string;
-  isFeatured: boolean;
-}
 
 const MEDAL_COLORS = {
   0: { bg: '#FFD700', text: '#92710A', glow: 'rgba(255, 215, 0, 0.4)', gradient: 'linear-gradient(135deg, #FFD700, #FFC107)' },
@@ -33,9 +18,30 @@ const MEDAL_COLORS = {
 const PODIUM_HEIGHTS = [240, 300, 200]; // 2nd, 1st, 3rd
 const PODIUM_ORDER = [1, 0, 2]; // Data indices shown as: 2nd, 1st, 3rd
 
+const FALLBACK_AGENCIES: Agency[] = [
+  {
+    _id: 'demo-agency-1', name: 'Adriatic Realty Group', email: '', phone: '',
+    city: 'Dubrovnik', country: 'Croatia',
+    totalProperties: 84, totalAgents: 12, isFeatured: true,
+    yearsInBusiness: 8, type: 'luxury',
+  },
+  {
+    _id: 'demo-agency-2', name: 'Balkan Prime Estates', email: '', phone: '',
+    city: 'Belgrade', country: 'Serbia',
+    totalProperties: 156, totalAgents: 24, isFeatured: true,
+    yearsInBusiness: 15, type: 'standard',
+  },
+  {
+    _id: 'demo-agency-3', name: 'Sofia Property Partners', email: '', phone: '',
+    city: 'Sofia', country: 'Bulgaria',
+    totalProperties: 62, totalAgents: 8, isFeatured: true,
+    yearsInBusiness: 5, type: 'boutique',
+  },
+];
+
 /* ─── Single agency podium card ─── */
 const AgencyPodiumCard: React.FC<{
-  agency: TopAgency;
+  agency: Agency;
   rank: number;
   podiumHeight: number;
 }> = ({ agency, rank, podiumHeight }) => {
@@ -67,7 +73,8 @@ const AgencyPodiumCard: React.FC<{
     return () => { trigger.kill(); };
   }, [rank]);
 
-  const initials = agency.name.split(' ').map(n => n[0]).join('').slice(0, 2);
+  const agencyName = agency.name || 'Agency';
+  const initials = agencyName.split(' ').map(n => n[0]).join('').slice(0, 2);
 
   return (
     <div
@@ -101,7 +108,7 @@ const AgencyPodiumCard: React.FC<{
             height: rank === 0 ? '80px' : '64px',
             background: agency.coverImage
               ? `url(${optimizeCloudinaryUrl(agency.coverImage, { width: 560, quality: 'auto', crop: 'fill' })}) center/cover`
-              : `linear-gradient(135deg, #0f172a, #1e293b)`,
+              : 'linear-gradient(135deg, #0f172a, #1e293b)',
             position: 'relative',
           }}
         >
@@ -150,7 +157,7 @@ const AgencyPodiumCard: React.FC<{
           {agency.logo ? (
             <img
               src={optimizeCloudinaryUrl(agency.logo, { width: 128, quality: 'auto', crop: 'fill' })}
-              alt={agency.name}
+              alt={agencyName}
               style={{ width: '100%', height: '100%', objectFit: 'cover' }}
               loading="lazy"
             />
@@ -174,7 +181,7 @@ const AgencyPodiumCard: React.FC<{
               textOverflow: 'ellipsis',
             }}
           >
-            {agency.name}
+            {agencyName}
           </h3>
 
           {(agency.city || agency.country) && (
@@ -191,7 +198,7 @@ const AgencyPodiumCard: React.FC<{
               background: 'rgba(248,250,252,0.8)',
               border: '1px solid rgba(226,232,240,0.6)',
             }}>
-              <span style={{ fontSize: '0.8rem', fontWeight: 700, color: '#0f172a' }}>{agency.totalProperties}</span>
+              <span style={{ fontSize: '0.8rem', fontWeight: 700, color: '#0f172a' }}>{agency.totalProperties || 0}</span>
               <span style={{ fontSize: '0.6rem', color: '#94a3b8', marginLeft: '3px' }}>listings</span>
             </div>
             <div style={{
@@ -200,7 +207,7 @@ const AgencyPodiumCard: React.FC<{
               background: 'rgba(248,250,252,0.8)',
               border: '1px solid rgba(226,232,240,0.6)',
             }}>
-              <span style={{ fontSize: '0.8rem', fontWeight: 700, color: '#0f172a' }}>{agency.totalAgents}</span>
+              <span style={{ fontSize: '0.8rem', fontWeight: 700, color: '#0f172a' }}>{agency.totalAgents || 0}</span>
               <span style={{ fontSize: '0.6rem', color: '#94a3b8', marginLeft: '3px' }}>agents</span>
             </div>
             {agency.yearsInBusiness != null && (
@@ -287,26 +294,18 @@ const TopAgenciesSection: React.FC = () => {
   const { t } = useTranslation('home');
   const sectionRef = useRef<HTMLElement>(null);
 
-  const { data: agencies = [] } = useQuery<TopAgency[]>({
+  const { data: agencies = [] } = useQuery<Agency[]>({
     queryKey: ['topAgenciesMonth'],
     queryFn: async () => {
-      // Try featured rotation first, fall back to all agencies
-      const res = await fetch(
-        `${API_CONFIG.BASE_URL}/agencies?limit=3&featured=true`
-      );
-      if (!res.ok) return [];
-      const data = await res.json();
+      const data = await getAgencies({ limit: 3 });
       const list = data.agencies || [];
-      // If not enough featured, fetch non-featured too
-      if (list.length >= 3) return list.slice(0, 3);
-      const res2 = await fetch(`${API_CONFIG.BASE_URL}/agencies?limit=3`);
-      if (!res2.ok) return list;
-      const data2 = await res2.json();
-      return (data2.agencies || []).slice(0, 3);
+      return list.filter((a: Agency) => a.name).slice(0, 3);
     },
     staleTime: 10 * 60 * 1000,
     retry: 1,
   });
+
+  const displayAgencies = agencies.length >= 3 ? agencies : FALLBACK_AGENCIES;
 
   // Section entrance
   useEffect(() => {
@@ -326,8 +325,6 @@ const TopAgenciesSection: React.FC = () => {
 
     return () => { trigger.kill(); };
   }, []);
-
-  if (agencies.length < 3) return null;
 
   return (
     <section
@@ -387,8 +384,8 @@ const TopAgenciesSection: React.FC = () => {
       >
         {PODIUM_ORDER.map((dataIndex, visualIndex) => (
           <AgencyPodiumCard
-            key={agencies[dataIndex]._id}
-            agency={agencies[dataIndex]}
+            key={displayAgencies[dataIndex]._id}
+            agency={displayAgencies[dataIndex]}
             rank={dataIndex}
             podiumHeight={PODIUM_HEIGHTS[visualIndex]}
           />

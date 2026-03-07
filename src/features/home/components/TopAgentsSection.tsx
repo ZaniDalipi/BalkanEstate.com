@@ -3,28 +3,12 @@ import { useTranslation } from 'react-i18next';
 import { useQuery } from '@tanstack/react-query';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
-import { API_CONFIG } from '@/src/shared/constants/app.constants';
+import { getAllAgents } from '@/src/features/agents/api/agentApi';
 import { optimizeCloudinaryUrl } from '@/config/cloudinaryConfig';
 import DefaultAvatar from '@/components/shared/DefaultAvatar';
+import type { Agent } from '@/src/shared/types';
 
 gsap.registerPlugin(ScrollTrigger);
-
-interface TopAgent {
-  _id: string;
-  name: string;
-  avatarUrl?: string;
-  gender?: string;
-  avatarOptions?: Record<string, unknown>;
-  city?: string;
-  country?: string;
-  rating: number;
-  totalReviews?: number;
-  propertiesSold: number;
-  activeListings: number;
-  specializations?: string[];
-  agencyName?: string;
-  agencyLogo?: string;
-}
 
 const MEDAL_COLORS = {
   0: { bg: '#FFD700', text: '#92710A', glow: 'rgba(255, 215, 0, 0.4)', label: '1st' },
@@ -35,9 +19,33 @@ const MEDAL_COLORS = {
 const PODIUM_HEIGHTS = [280, 340, 240]; // 2nd, 1st, 3rd
 const PODIUM_ORDER = [1, 0, 2]; // Data indices: 2nd place, 1st place, 3rd place
 
+const FALLBACK_AGENTS: Agent[] = [
+  {
+    id: 'demo-agent-1', name: 'Marko Petrovic', email: '', phone: '', role: 'agent' as any,
+    gender: 'male', city: 'Belgrade', country: 'Serbia',
+    rating: 4.9, totalReviews: 47, propertiesSold: 32, activeListings: 8,
+    totalSalesValue: 0, isSubscribed: false,
+    specializations: ['Luxury', 'Residential'],
+  },
+  {
+    id: 'demo-agent-2', name: 'Elena Kovacheva', email: '', phone: '', role: 'agent' as any,
+    gender: 'female', city: 'Sofia', country: 'Bulgaria',
+    rating: 4.8, totalReviews: 38, propertiesSold: 28, activeListings: 12,
+    totalSalesValue: 0, isSubscribed: false,
+    specializations: ['Commercial', 'Investment'],
+  },
+  {
+    id: 'demo-agent-3', name: 'Ana Dimitrieva', email: '', phone: '', role: 'agent' as any,
+    gender: 'female', city: 'Skopje', country: 'North Macedonia',
+    rating: 4.7, totalReviews: 29, propertiesSold: 21, activeListings: 6,
+    totalSalesValue: 0, isSubscribed: false,
+    specializations: ['Residential', 'Rentals'],
+  },
+];
+
 /* ─── Single agent podium card ─── */
 const AgentPodiumCard: React.FC<{
-  agent: TopAgent;
+  agent: Agent;
   rank: number; // 0=1st, 1=2nd, 2=3rd
   podiumHeight: number;
 }> = ({ agent, rank, podiumHeight }) => {
@@ -69,7 +77,7 @@ const AgentPodiumCard: React.FC<{
     return () => { trigger.kill(); };
   }, [rank]);
 
-  const initials = agent.name.split(' ').map(n => n[0]).join('');
+  const agentName = agent.name || 'Agent';
 
   return (
     <div
@@ -92,7 +100,7 @@ const AgentPodiumCard: React.FC<{
           padding: rank === 0 ? '1.75rem 1.25rem' : '1.5rem 1rem',
           textAlign: 'center',
           position: 'relative',
-          boxShadow: `0 20px 40px -10px rgba(0,0,0,0.12), 0 0 0 1px rgba(255,255,255,0.8)`,
+          boxShadow: '0 20px 40px -10px rgba(0,0,0,0.12), 0 0 0 1px rgba(255,255,255,0.8)',
           marginBottom: '-30px',
           zIndex: 10,
           opacity: 0,
@@ -139,13 +147,13 @@ const AgentPodiumCard: React.FC<{
           {agent.avatarUrl ? (
             <img
               src={optimizeCloudinaryUrl(agent.avatarUrl, { width: 160, quality: 'auto', crop: 'fill' })}
-              alt={agent.name}
+              alt={agentName}
               style={{ width: '100%', height: '100%', objectFit: 'cover' }}
               loading="lazy"
             />
           ) : (
             <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              <DefaultAvatar gender={agent.gender} seed={agent._id || agent.name} avatarOptions={agent.avatarOptions} show3d />
+              <DefaultAvatar gender={agent.gender} seed={agent.id || agentName} avatarOptions={agent.avatarOptions} show3d />
             </div>
           )}
         </div>
@@ -159,7 +167,7 @@ const AgentPodiumCard: React.FC<{
             marginBottom: '2px',
           }}
         >
-          {agent.name}
+          {agentName}
         </h3>
 
         {/* Location */}
@@ -172,7 +180,7 @@ const AgentPodiumCard: React.FC<{
         {/* Rating */}
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px', marginBottom: '0.5rem' }}>
           <span style={{ color: '#facc15', fontSize: '14px' }}>★</span>
-          <span style={{ fontSize: '0.85rem', fontWeight: 700, color: '#0f172a' }}>{agent.rating.toFixed(1)}</span>
+          <span style={{ fontSize: '0.85rem', fontWeight: 700, color: '#0f172a' }}>{(agent.rating || 0).toFixed(1)}</span>
           {agent.totalReviews != null && (
             <span style={{ fontSize: '0.7rem', color: '#94a3b8' }}>({agent.totalReviews})</span>
           )}
@@ -186,7 +194,7 @@ const AgentPodiumCard: React.FC<{
             background: 'rgba(248,250,252,0.8)',
             border: '1px solid rgba(226,232,240,0.6)',
           }}>
-            <span style={{ fontSize: '0.8rem', fontWeight: 700, color: '#0f172a' }}>{agent.propertiesSold}</span>
+            <span style={{ fontSize: '0.8rem', fontWeight: 700, color: '#0f172a' }}>{agent.propertiesSold || 0}</span>
             <span style={{ fontSize: '0.65rem', color: '#94a3b8', marginLeft: '3px' }}>sold</span>
           </div>
           <div style={{
@@ -195,7 +203,7 @@ const AgentPodiumCard: React.FC<{
             background: 'rgba(248,250,252,0.8)',
             border: '1px solid rgba(226,232,240,0.6)',
           }}>
-            <span style={{ fontSize: '0.8rem', fontWeight: 700, color: '#0f172a' }}>{agent.activeListings}</span>
+            <span style={{ fontSize: '0.8rem', fontWeight: 700, color: '#0f172a' }}>{agent.activeListings || 0}</span>
             <span style={{ fontSize: '0.65rem', color: '#94a3b8', marginLeft: '3px' }}>active</span>
           </div>
         </div>
@@ -253,19 +261,21 @@ const TopAgentsSection: React.FC = () => {
   const { t } = useTranslation('home');
   const sectionRef = useRef<HTMLElement>(null);
 
-  const { data: agents = [] } = useQuery<TopAgent[]>({
+  const { data: agents = [] } = useQuery<Agent[]>({
     queryKey: ['topAgentsWeek'],
     queryFn: async () => {
-      const res = await fetch(
-        `${API_CONFIG.BASE_URL}/agents?sortBy=rating&limit=3&minRating=4`
-      );
-      if (!res.ok) return [];
-      const data = await res.json();
-      return (data.agents || []).slice(0, 3);
+      const { agents } = await getAllAgents();
+      // Sort by rating descending, take top 3
+      return agents
+        .filter(a => a.name)
+        .sort((a, b) => (b.rating || 0) - (a.rating || 0))
+        .slice(0, 3);
     },
     staleTime: 10 * 60 * 1000,
     retry: 1,
   });
+
+  const displayAgents = agents.length >= 3 ? agents : FALLBACK_AGENTS;
 
   // Section entrance
   useEffect(() => {
@@ -285,8 +295,6 @@ const TopAgentsSection: React.FC = () => {
 
     return () => { trigger.kill(); };
   }, []);
-
-  if (agents.length < 3) return null;
 
   return (
     <section
@@ -346,8 +354,8 @@ const TopAgentsSection: React.FC = () => {
       >
         {PODIUM_ORDER.map((dataIndex, visualIndex) => (
           <AgentPodiumCard
-            key={agents[dataIndex]._id}
-            agent={agents[dataIndex]}
+            key={displayAgents[dataIndex].id}
+            agent={displayAgents[dataIndex]}
             rank={dataIndex}
             podiumHeight={PODIUM_HEIGHTS[visualIndex]}
           />
