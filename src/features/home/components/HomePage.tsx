@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useRef, useEffect } from 'react';
+import React, { useState, useCallback, useRef, useEffect, lazy, Suspense } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Helmet } from 'react-helmet-async';
 import { useAppContext } from '@/context/AppContext';
@@ -11,18 +11,26 @@ import { getAgencies } from '@/src/features/agencies/api/agencyApi';
 import { getFeaturedCities } from '@/src/features/cities/api/cityApi';
 import { API_CONFIG } from '@/src/shared/constants/app.constants';
 import HeroSection from './HeroSection';
-import QuickAccessSection from './QuickAccessSection';
-import CategoriesSection from './CategoriesSection';
-import PopularCitiesSection from './PopularCitiesSection';
-import HowItWorksSection from './HowItWorksSection';
-import CTASection from './CTASection';
 import AppShowcaseSection from './AppShowcaseSection';
-import NewsSection from './NewsSection';
-import TestimonialsSection from './TestimonialsSection';
+import QuickAccessSection from './QuickAccessSection';
+import { StackedCards } from '@/src/components/ui/glass-cards';
 import TopAgentsSection from './TopAgentsSection';
 import TopAgenciesSection from './TopAgenciesSection';
-import { StackedCards } from '@/src/components/ui/glass-cards';
 import Footer from '@/components/shared/Footer';
+
+// Lazy-load below-fold sections to reduce initial bundle
+const CategoriesSection = lazy(() => import('./CategoriesSection'));
+const PopularCitiesSection = lazy(() => import('./PopularCitiesSection'));
+const HowItWorksSection = lazy(() => import('./HowItWorksSection'));
+const CTASection = lazy(() => import('./CTASection'));
+const NewsSection = lazy(() => import('./NewsSection'));
+const TestimonialsSection = lazy(() => import('./TestimonialsSection'));
+
+const SectionFallback = () => (
+  <div className="py-16 flex justify-center">
+    <div className="w-8 h-8 border-2 border-slate-200 border-t-slate-500 rounded-full animate-spin" />
+  </div>
+);
 
 const HomePage: React.FC = () => {
   const { t } = useTranslation(['home', 'common']);
@@ -170,25 +178,37 @@ const HomePage: React.FC = () => {
 
       <TopAgenciesSection />
 
-      <CategoriesSection onCategoryClick={handleCategoryClick} />
+      <Suspense fallback={<SectionFallback />}>
+        <CategoriesSection onCategoryClick={handleCategoryClick} />
+      </Suspense>
 
-      <PopularCitiesSection onNavigate={handleNavigate} />
+      <Suspense fallback={<SectionFallback />}>
+        <PopularCitiesSection onNavigate={handleNavigate} />
+      </Suspense>
 
-      <NewsSection />
+      <Suspense fallback={<SectionFallback />}>
+        <NewsSection />
+      </Suspense>
 
-      <HowItWorksSection onLearnMore={() => handleNavigate('how-it-works', '/how-it-works')} />
+      <Suspense fallback={<SectionFallback />}>
+        <HowItWorksSection onLearnMore={() => handleNavigate('how-it-works', '/how-it-works')} />
+      </Suspense>
 
-      <TestimonialsSection />
+      <Suspense fallback={<SectionFallback />}>
+        <TestimonialsSection />
+      </Suspense>
 
       {!isAuthenticated && (
-        <CTASection
-          onListProperty={() => {
-            dispatch({ type: 'TOGGLE_AUTH_MODAL', payload: { isOpen: true, view: 'signup' } });
-          }}
-          onJoinAsAgent={() => {
-            dispatch({ type: 'TOGGLE_AUTH_MODAL', payload: { isOpen: true, view: 'signup' } });
-          }}
-        />
+        <Suspense fallback={<SectionFallback />}>
+          <CTASection
+            onListProperty={() => {
+              dispatch({ type: 'TOGGLE_AUTH_MODAL', payload: { isOpen: true, view: 'signup' } });
+            }}
+            onJoinAsAgent={() => {
+              dispatch({ type: 'TOGGLE_AUTH_MODAL', payload: { isOpen: true, view: 'signup' } });
+            }}
+          />
+        </Suspense>
       )}
 
       <Footer />

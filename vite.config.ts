@@ -388,6 +388,15 @@ export default defineConfig(({ mode }) => {
               if (id.includes('/features/onboarding/')) {
                 return 'onboarding';
               }
+              // Homepage below-fold sections (lazy-loaded)
+              if (id.includes('/features/home/components/CategoriesSection') ||
+                  id.includes('/features/home/components/PopularCitiesSection') ||
+                  id.includes('/features/home/components/NewsSection') ||
+                  id.includes('/features/home/components/HowItWorksSection') ||
+                  id.includes('/features/home/components/TestimonialsSection') ||
+                  id.includes('/features/home/components/CTASection')) {
+                return 'home-below-fold';
+              }
               // i18n language bundles - each language in its own chunk (loaded on demand)
               if (id.includes('/i18n/locales/') && id.includes('/bundle')) {
                 const langMatch = id.match(/\/locales\/([a-z]{2})\/bundle/);

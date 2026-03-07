@@ -1,14 +1,10 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useQuery } from '@tanstack/react-query';
-import { gsap } from 'gsap';
-import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { getAllAgents } from '@/src/features/agents/api/agentApi';
 import { optimizeCloudinaryUrl } from '@/config/cloudinaryConfig';
 import DefaultAvatar from '@/components/shared/DefaultAvatar';
 import type { Agent } from '@/src/shared/types';
-
-gsap.registerPlugin(ScrollTrigger);
 
 const MEDAL_COLORS = {
   0: { bg: '#FFD700', text: '#92710A', glow: 'rgba(255, 215, 0, 0.4)', label: '1st' },
@@ -27,32 +23,25 @@ const AgentPodiumCard: React.FC<{
   podiumHeight: number;
 }> = ({ agent, rank, podiumHeight }) => {
   const cardRef = useRef<HTMLDivElement>(null);
+  const [isVisible, setIsVisible] = useState(false);
   const medal = MEDAL_COLORS[rank as keyof typeof MEDAL_COLORS];
 
   useEffect(() => {
     const card = cardRef.current;
     if (!card) return;
 
-    gsap.set(card, { y: 120, opacity: 0, scale: 0.9 });
-
-    const trigger = ScrollTrigger.create({
-      trigger: card.parentElement,
-      start: 'top 75%',
-      once: true,
-      onEnter: () => {
-        gsap.to(card, {
-          y: 0,
-          opacity: 1,
-          scale: 1,
-          duration: 0.9,
-          delay: rank === 0 ? 0 : rank === 1 ? 0.15 : 0.3,
-          ease: 'back.out(1.4)',
-        });
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setIsVisible(true);
+          observer.disconnect();
+        }
       },
-    });
-
-    return () => { trigger.kill(); };
-  }, [rank]);
+      { threshold: 0.1 }
+    );
+    observer.observe(card);
+    return () => observer.disconnect();
+  }, []);
 
   const agentName = agent.name || 'Agent';
 
@@ -80,7 +69,9 @@ const AgentPodiumCard: React.FC<{
           boxShadow: '0 20px 40px -10px rgba(0,0,0,0.12), 0 0 0 1px rgba(255,255,255,0.8)',
           marginBottom: '-30px',
           zIndex: 10,
-          opacity: 0,
+          opacity: isVisible ? 1 : 0,
+          transform: isVisible ? 'translateY(0) scale(1)' : 'translateY(80px) scale(0.9)',
+          transition: `opacity 0.7s cubic-bezier(0.34, 1.56, 0.64, 1) ${rank === 0 ? '0s' : rank === 1 ? '0.15s' : '0.3s'}, transform 0.7s cubic-bezier(0.34, 1.56, 0.64, 1) ${rank === 0 ? '0s' : rank === 1 ? '0.15s' : '0.3s'}`,
         }}
       >
         {/* Medal badge */}
