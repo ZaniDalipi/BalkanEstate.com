@@ -57,7 +57,7 @@ const CARD_COLORS = [
     'rgba(239, 68, 68, 0.7)',
 ];
 
-const StackedPropertyCard: React.FC<StackedPropertyCardProps> = ({ property, index, totalCards, color, onClick }) => {
+const StackedPropertyCard: React.FC<StackedPropertyCardProps & { isMobile?: boolean }> = ({ property, index, totalCards, color, onClick, isMobile = false }) => {
     const cardRef = useRef<HTMLDivElement>(null);
     const containerRef = useRef<HTMLDivElement>(null);
 
@@ -105,7 +105,7 @@ const StackedPropertyCard: React.FC<StackedPropertyCardProps> = ({ property, ind
         <div
             ref={containerRef}
             style={{
-                height: '100vh',
+                height: isMobile ? '70vh' : '100vh',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
@@ -118,10 +118,10 @@ const StackedPropertyCard: React.FC<StackedPropertyCardProps> = ({ property, ind
                 onClick={onClick}
                 style={{
                     position: 'relative',
-                    width: '75%',
+                    width: isMobile ? '92%' : '75%',
                     maxWidth: '960px',
-                    height: '480px',
-                    borderRadius: '28px',
+                    height: isMobile ? 'auto' : '480px',
+                    borderRadius: isMobile ? '20px' : '28px',
                     isolation: 'isolate',
                     top: `calc(-5vh + ${index * 25}px)`,
                     transformOrigin: 'top',
@@ -133,7 +133,7 @@ const StackedPropertyCard: React.FC<StackedPropertyCardProps> = ({ property, ind
                     style={{
                         position: 'absolute',
                         inset: '-2px',
-                        borderRadius: '30px',
+                        borderRadius: isMobile ? '22px' : '30px',
                         background: `linear-gradient(
                             135deg,
                             ${color} 0%,
@@ -151,7 +151,7 @@ const StackedPropertyCard: React.FC<StackedPropertyCardProps> = ({ property, ind
                     style={{
                         position: 'absolute',
                         inset: '-1px',
-                        borderRadius: '29px',
+                        borderRadius: isMobile ? '21px' : '29px',
                         boxShadow: `
                             0 20px 60px -10px ${color.replace('0.7', '0.15')},
                             0 8px 24px -4px rgba(0, 0, 0, 0.06)
@@ -167,7 +167,8 @@ const StackedPropertyCard: React.FC<StackedPropertyCardProps> = ({ property, ind
                     width: '100%',
                     height: '100%',
                     display: 'flex',
-                    borderRadius: '28px',
+                    flexDirection: isMobile ? 'column' : 'row',
+                    borderRadius: isMobile ? '20px' : '28px',
                     background: `linear-gradient(
                         145deg,
                         rgba(255, 255, 255, 0.85),
@@ -197,6 +198,7 @@ const StackedPropertyCard: React.FC<StackedPropertyCardProps> = ({ property, ind
                     }} />
 
                     {/* ── Glass refraction overlay on right panel ── */}
+                    {!isMobile && (
                     <div style={{
                         position: 'absolute',
                         top: 0,
@@ -208,14 +210,16 @@ const StackedPropertyCard: React.FC<StackedPropertyCardProps> = ({ property, ind
                         zIndex: 5,
                         borderRadius: '0 28px 0 0'
                     }} />
+                    )}
 
                     {/* ── Property Image ── */}
                     <div style={{
-                        width: '45%',
-                        height: '100%',
+                        width: isMobile ? '100%' : '45%',
+                        height: isMobile ? undefined : '100%',
+                        aspectRatio: isMobile ? '16/10' : undefined,
                         position: 'relative',
                         overflow: 'hidden',
-                        borderRadius: '28px 0 0 28px'
+                        borderRadius: isMobile ? '20px 20px 0 0' : '28px 0 0 28px'
                     }}>
                         <img
                             src={optimizeCloudinaryUrl(property.imageUrl, { width: 800, quality: 'auto', format: 'auto' })}
@@ -338,8 +342,8 @@ const StackedPropertyCard: React.FC<StackedPropertyCardProps> = ({ property, ind
 
                     {/* ── Property Details (right panel) ── */}
                     <div style={{
-                        width: '55%',
-                        padding: '2rem 2.5rem',
+                        width: isMobile ? '100%' : '55%',
+                        padding: isMobile ? '1.25rem 1rem 1.5rem' : '2rem 2.5rem',
                         display: 'flex',
                         flexDirection: 'column',
                         justifyContent: 'center',
@@ -466,7 +470,7 @@ const StackedPropertyCard: React.FC<StackedPropertyCardProps> = ({ property, ind
                         `,
                         backgroundSize: '20px 20px, 30px 30px',
                         pointerEvents: 'none',
-                        borderRadius: '28px',
+                        borderRadius: isMobile ? '20px' : '28px',
                         opacity: 0.5,
                         zIndex: 4
                     }} />
@@ -479,7 +483,7 @@ const StackedPropertyCard: React.FC<StackedPropertyCardProps> = ({ property, ind
                         width: '1.5px',
                         height: '100%',
                         background: 'linear-gradient(180deg, rgba(255,255,255,0.7) 0%, rgba(255,255,255,0.2) 40%, transparent 70%)',
-                        borderRadius: '28px 0 0 28px',
+                        borderRadius: isMobile ? '20px 0 0 20px' : '28px 0 0 28px',
                         pointerEvents: 'none',
                         zIndex: 10
                     }} />
@@ -666,40 +670,20 @@ export const StackedCards: React.FC<StackedCardsProps> = ({
                 </div>
             </div>
 
-            {/* Mobile: Grid layout */}
-            {isMobile ? (
-                <div style={{
-                    maxWidth: '72rem',
-                    margin: '0 auto',
-                    padding: '1.5rem 1rem 2rem',
-                    display: 'grid',
-                    gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))',
-                    gap: '1rem',
-                }}>
-                    {properties.slice(0, 6).map((property, index) => (
-                        <MobilePropertyCard
-                            key={property.id}
-                            property={property}
-                            color={CARD_COLORS[index % CARD_COLORS.length]}
-                            onClick={() => onPropertyClick(property)}
-                        />
-                    ))}
-                </div>
-            ) : (
-                /* Desktop: Stacked scroll cards */
-                <div style={{ width: '100%' }}>
-                    {properties.slice(0, 6).map((property, index) => (
-                        <StackedPropertyCard
-                            key={property.id}
-                            property={property}
-                            index={index}
-                            totalCards={Math.min(properties.length, 6)}
-                            color={CARD_COLORS[index % CARD_COLORS.length]}
-                            onClick={() => onPropertyClick(property)}
-                        />
-                    ))}
-                </div>
-            )}
+            {/* Stacked scroll cards — same animation for both mobile and desktop */}
+            <div style={{ width: '100%' }}>
+                {properties.slice(0, 6).map((property, index) => (
+                    <StackedPropertyCard
+                        key={property.id}
+                        property={property}
+                        index={index}
+                        totalCards={Math.min(properties.length, 6)}
+                        color={CARD_COLORS[index % CARD_COLORS.length]}
+                        onClick={() => onPropertyClick(property)}
+                        isMobile={isMobile}
+                    />
+                ))}
+            </div>
         </section>
     );
 };
