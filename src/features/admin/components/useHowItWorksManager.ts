@@ -17,7 +17,7 @@ export interface FAQ {
 }
 
 export interface SiteContent {
-  _id: string;
+  id: string;
   key: string;
   type: 'video' | 'image';
   contentType: 'video' | 'guide' | 'faq' | 'feature';
@@ -214,7 +214,7 @@ export function useHowItWorksManager() {
     e.preventDefault();
     try {
       const endpoint = editingItem
-        ? `/admin/site-content/${editingItem._id}`
+        ? `/admin/site-content/${editingItem.id}`
         : '/admin/site-content';
 
       // For guides, we don't need URL; set a placeholder
@@ -280,7 +280,7 @@ export function useHowItWorksManager() {
 
   const handleToggleActive = async (item: SiteContent) => {
     try {
-      await apiRequest(`/admin/site-content/${item._id}`, {
+      await apiRequest(`/admin/site-content/${item.id}`, {
         method: 'PATCH',
         body: { isActive: !item.isActive },
         requiresAuth: true,

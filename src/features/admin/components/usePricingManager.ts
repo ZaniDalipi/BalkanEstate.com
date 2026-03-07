@@ -214,7 +214,7 @@ export function usePricingManager() {
 
     try {
       await updateProductMutation.mutateAsync({
-        productId: editingProduct._id,
+        productId: editingProduct.id,
         data: updatePayload,
       });
 
@@ -228,9 +228,9 @@ export function usePricingManager() {
   };
 
   const handleToggleStatus = async (product: Product) => {
-    setMutatingProductId(product._id);
+    setMutatingProductId(product.id);
     try {
-      const response = await toggleStatusMutation.mutateAsync(product._id);
+      const response = await toggleStatusMutation.mutateAsync(product.id);
       // Use the response to show accurate message
       const newStatus = response?.product?.isActive;
       setSuccessMessage(`Product ${newStatus ? 'activated' : 'deactivated'} successfully`);
@@ -243,9 +243,9 @@ export function usePricingManager() {
   };
 
   const handleToggleVisibility = async (product: Product) => {
-    setMutatingProductId(product._id);
+    setMutatingProductId(product.id);
     try {
-      const response = await toggleVisibilityMutation.mutateAsync(product._id);
+      const response = await toggleVisibilityMutation.mutateAsync(product.id);
       // Use the response to show accurate message
       const newVisibility = response?.product?.isVisible;
       setSuccessMessage(`Product is now ${newVisibility ? 'visible' : 'hidden'}`);

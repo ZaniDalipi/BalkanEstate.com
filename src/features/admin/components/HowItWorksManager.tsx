@@ -135,7 +135,7 @@ const HowItWorksManager: React.FC = () => {
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 {items.map((item) => (
                   <div
-                    key={item._id}
+                    key={item.id}
                     className={`relative rounded-xl overflow-hidden border ${
                       item.isActive ? 'border-gray-200' : 'border-red-200 bg-red-50'
                     }`}
@@ -229,7 +229,7 @@ const HowItWorksManager: React.FC = () => {
                           <PencilIcon className="w-5 h-5" />
                         </button>
                         <button
-                          onClick={() => handleDelete(item._id)}
+                          onClick={() => handleDelete(item.id)}
                           className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
                         >
                           <TrashIcon className="w-5 h-5" />

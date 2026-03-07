@@ -292,7 +292,7 @@ export const deactivateUserSubscription = async (
 // --- Admin Products/Pricing ---
 
 export interface Product {
-  _id: string;
+  id: string;
   productId: string;
   name: string;
   description?: string;
