@@ -282,6 +282,16 @@ export function useSearchPage() {
                         });
                     }
                 });
+            } else if (cityParam && !countryParam) {
+                // City only (e.g., from hero search) — geocode and fly to it
+                searchLocation(cityParam).then(results => {
+                    if (results.length > 0) {
+                        setFlyToTarget({
+                            center: [Number(results[0].lat), Number(results[0].lon)],
+                            zoom: 13
+                        });
+                    }
+                });
             } else if (countryParam && !cityParam) {
                 // If only country is specified (no city), fly to country center
                 const countryData = BALKAN_COUNTRIES[countryParam];

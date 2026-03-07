@@ -69,7 +69,8 @@ const HeroSection: React.FC<HeroSectionProps> = ({
   onSearch,
   onNavigate,
 }) => {
-  const { t } = useTranslation(['home']);
+  const { t, i18n } = useTranslation(['home']);
+  const currentLang = (i18n.language || 'en').split('-')[0];
   const [isFocused, setIsFocused] = useState(false);
   const [suggestions, setSuggestions] = useState<NominatimResult[]>([]);
   const [isSearching, setIsSearching] = useState(false);
@@ -105,7 +106,32 @@ const HeroSection: React.FC<HeroSectionProps> = ({
     retry: 2,
   });
 
-  const displayCities = useMemo(() => featuredCities.map(c => c.city), [featuredCities]);
+  // Localized city names for Albanian (sq) locale
+  const CITY_NAMES_SQ: Record<string, string> = useMemo(() => ({
+    'Prishtina': 'Prishtinë',
+    'Pristina': 'Prishtinë',
+    'Tirana': 'Tiranë',
+    'Durres': 'Durrës',
+    'Vlore': 'Vlorë',
+    'Shkoder': 'Shkodër',
+    'Elbasan': 'Elbasan',
+    'Prizren': 'Prizren',
+    'Peja': 'Pejë',
+    'Gjilan': 'Gjilan',
+    'Mitrovica': 'Mitrovicë',
+  }), []);
+
+  const localizeCityName = useCallback((city: string) => {
+    if (currentLang === 'sq') {
+      return CITY_NAMES_SQ[city] || city;
+    }
+    return city;
+  }, [currentLang, CITY_NAMES_SQ]);
+
+  const displayCities = useMemo(() => featuredCities.map(c => ({
+    original: c.city,
+    display: localizeCityName(c.city),
+  })), [featuredCities, localizeCityName]);
 
   // Autocomplete: debounced location search
   useEffect(() => {
@@ -404,8 +430,8 @@ const HeroSection: React.FC<HeroSectionProps> = ({
               </span>
               {displayCities.map((city) => (
                 <button
-                  key={city}
-                  onClick={() => handleCityClick(city)}
+                  key={city.original}
+                  onClick={() => handleCityClick(city.original)}
                   style={{
                     padding: '4px 12px', borderRadius: '9999px',
                     fontSize: '11px', fontWeight: 500,
@@ -421,7 +447,7 @@ const HeroSection: React.FC<HeroSectionProps> = ({
                   onMouseOver={(e) => { e.currentTarget.style.background = 'rgba(255,255,255,0.95)'; e.currentTarget.style.borderColor = 'rgba(203,213,225,0.8)'; e.currentTarget.style.color = '#0f172a'; }}
                   onMouseOut={(e) => { e.currentTarget.style.background = 'rgba(255,255,255,0.7)'; e.currentTarget.style.borderColor = 'rgba(226,232,240,0.6)'; e.currentTarget.style.color = '#475569'; }}
                 >
-                  {city}
+                  {city.display}
                 </button>
               ))}
             </div>
