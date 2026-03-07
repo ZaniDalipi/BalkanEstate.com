@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { X, ShieldCheck, Building2, KeyRound, Globe, ChevronDown, BadgeCheck, AlertCircle, Phone, MapPin } from 'lucide-react';
+import { X, ShieldCheck, Building2, KeyRound, Globe, ChevronDown, BadgeCheck, AlertCircle, Phone, MapPin, Sparkles } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { getAgencies } from '../../services/apiService';
 import { ALL_PHONE_COUNTRY_CODES, BALKAN_PHONE_CODES, formatPhoneNumber, getPhonePlaceholder } from '../../constants/phoneCountryCodes';
@@ -43,6 +43,10 @@ interface AgentLicenseModalProps {
   currentPhone?: string;
   /** When true, only show the phone number field (for private seller role switch) */
   phoneOnly?: boolean;
+  /** Whether the user has an active Pro subscription (required to join an agency) */
+  hasProSubscription?: boolean;
+  /** Callback when user wants to navigate to pricing page */
+  onNavigateToPricing?: () => void;
 }
 
 const Field = ({
@@ -70,6 +74,8 @@ const AgentLicenseModal: React.FC<AgentLicenseModalProps> = ({
   currentAgentId,
   currentPhone,
   phoneOnly = false,
+  hasProSubscription = false,
+  onNavigateToPricing,
 }) => {
   const { t } = useTranslation(['agents', 'modals', 'common']);
   const [licenseNumber, setLicenseNumber] = useState(currentLicenseNumber || '');
@@ -197,11 +203,16 @@ const AgentLicenseModal: React.FC<AgentLicenseModalProps> = ({
         return;
       }
     }
-    if (selectedAgency && !agencyInvitationCode.trim()) {
+    // Block agency selection for non-Pro users (unless already in joining flow)
+    const canJoinAgency = hasProSubscription || isJoiningAgency;
+    const effectiveAgency = canJoinAgency ? selectedAgency : '';
+    const effectiveInvitationCode = canJoinAgency ? agencyInvitationCode.trim() : '';
+
+    if (effectiveAgency && !effectiveInvitationCode) {
       setError(t('modals:agentLicense.invitationCodeRequired'));
       return;
     }
-    if (agencyInvitationCode.trim() && !selectedAgency) {
+    if (effectiveInvitationCode && !effectiveAgency) {
       setError(t('modals:agentLicense.selectAgencyRequired'));
       return;
     }
@@ -212,9 +223,9 @@ const AgentLicenseModal: React.FC<AgentLicenseModalProps> = ({
         licenseNumber: licenseNumber.trim(),
         licenseCountry: licenseCountry || undefined,
         phone: getFullPhone() || undefined,
-        agencyInvitationCode: agencyInvitationCode.trim() || undefined,
+        agencyInvitationCode: effectiveInvitationCode || undefined,
         agentId: agentId.trim() || undefined,
-        selectedAgencyId: selectedAgency || undefined,
+        selectedAgencyId: effectiveAgency || undefined,
         languages: languages.length > 0 ? languages : undefined,
       });
       if (!isJoiningAgency) { setLicenseNumber(''); setLicenseCountry(''); setAgentId(''); }
@@ -537,8 +548,26 @@ const AgentLicenseModal: React.FC<AgentLicenseModalProps> = ({
                 {/* Divider */}
                 <div className="border-t border-gray-100" />
 
+                {/* Pro subscription required notice for agency fields */}
+                {!hasProSubscription && !isJoiningAgency && (
+                  <div className="flex flex-wrap items-center gap-2 px-3.5 py-3 bg-amber-50 border border-amber-200 rounded-xl text-xs text-amber-700 font-medium">
+                    <Sparkles className="w-3.5 h-3.5 text-amber-500 flex-shrink-0" />
+                    <span>{t('modals:agentLicense.proRequiredForAgency', 'Pro subscription required to join an agency. Upgrade to Pro first, or register as an independent agent.')}</span>
+                    {onNavigateToPricing && (
+                      <button
+                        type="button"
+                        onClick={onNavigateToPricing}
+                        className="inline-flex items-center gap-0.5 text-blue-600 hover:text-blue-800 font-semibold transition-colors"
+                      >
+                        {t('modals:agentLicense.viewPlans', 'View Plans')}
+                        <ChevronDown className="w-3 h-3 -rotate-90" />
+                      </button>
+                    )}
+                  </div>
+                )}
+
                 {/* Agency + Invitation Code — side by side on desktop */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className={`grid grid-cols-1 sm:grid-cols-2 gap-4 ${!hasProSubscription && !isJoiningAgency ? 'opacity-40 pointer-events-none' : ''}`}>
                   <Field
                     id="agencySelect"
                     label={t('modals:agentLicense.selectAgency')}
@@ -559,7 +588,7 @@ const AgentLicenseModal: React.FC<AgentLicenseModalProps> = ({
                           id="agencySelect"
                           value={selectedAgency}
                           onChange={e => { setSelectedAgency(e.target.value); setError(''); }}
-                          disabled={isSubmitting}
+                          disabled={isSubmitting || (!hasProSubscription && !isJoiningAgency)}
                           required={isJoiningAgency}
                           className={`${inputCls} appearance-none pr-8`}
                         >
@@ -594,7 +623,7 @@ const AgentLicenseModal: React.FC<AgentLicenseModalProps> = ({
                         id="agencyInvitationCode"
                         value={agencyInvitationCode}
                         onChange={e => setAgencyInvitationCode(e.target.value.toUpperCase())}
-                        disabled={isSubmitting}
+                        disabled={isSubmitting || (!hasProSubscription && !isJoiningAgency)}
                         placeholder={t('modals:agentLicense.invitationCodePlaceholder')}
                         className={`${inputCls} font-mono tracking-widest`}
                         required={isJoiningAgency}

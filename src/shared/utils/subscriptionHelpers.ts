@@ -416,12 +416,19 @@ export function canJoinAgency(subscription: UserSubscription | undefined): {
     };
   }
 
-  // Must have at least Pro tier
-  const allowedTiers: SubscriptionTier[] = ['pro', 'agency_owner'];
-  if (!allowedTiers.includes(subscription.tier)) {
+  // Must have Pro tier (not buyer, not agency_owner who already owns an agency)
+  if (subscription.tier !== 'pro') {
     return {
       allowed: false,
       reason: 'Pro subscription required to join an agency. Please upgrade your plan.',
+    };
+  }
+
+  // Must be on a pro_monthly or pro_yearly plan (excludes buyer pro)
+  if (subscription.plan !== 'pro_monthly' && subscription.plan !== 'pro_yearly') {
+    return {
+      allowed: false,
+      reason: 'Pro Monthly or Pro Yearly subscription required to join an agency.',
     };
   }
 
