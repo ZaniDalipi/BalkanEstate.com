@@ -1904,7 +1904,8 @@ const ProfileSettings: React.FC<{ user: User; onLogout: () => void }> = ({ user,
             currentPhone={user.phone}
             phoneOnly={pendingRole === UserRole.PRIVATE_SELLER && !user.phone}
             hasProSubscription={
-                (user.subscription?.tier === 'pro' || user.subscription?.tier === 'agency_owner') &&
+                user.subscription?.tier === 'pro' &&
+                (user.subscription?.plan === 'pro_monthly' || user.subscription?.plan === 'pro_yearly') &&
                 (user.subscription?.status === 'active' || user.subscription?.status === 'trial')
             }
             onNavigateToPricing={() => {

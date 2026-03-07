@@ -28,11 +28,11 @@ export const createJoinRequest = async (req: Request, res: Response): Promise<vo
       return;
     }
 
-    // Check if user has an active Pro subscription
+    // Check if user has an active Pro subscription (only 'pro' tier qualifies, not 'buyer' or others)
     const userTier = user.subscription?.tier;
     const userSubStatus = user.subscription?.status;
     const hasProSubscription =
-      (userTier === 'pro' || userTier === 'agency_owner') &&
+      userTier === 'pro' &&
       (userSubStatus === 'active' || userSubStatus === 'trial');
 
     if (!hasProSubscription) {
@@ -219,11 +219,11 @@ export const approveJoinRequest = async (req: Request, res: Response): Promise<v
       return;
     }
 
-    // Re-validate that agent still has an active Pro subscription
+    // Re-validate that agent still has an active Pro subscription (only 'pro' tier, not 'buyer')
     const agentTier = agent.subscription?.tier;
     const agentSubStatus = agent.subscription?.status;
     const agentHasPro =
-      (agentTier === 'pro' || agentTier === 'agency_owner') &&
+      agentTier === 'pro' &&
       (agentSubStatus === 'active' || agentSubStatus === 'trial');
 
     if (!agentHasPro) {
@@ -442,11 +442,11 @@ export const joinByInvitationCode = async (req: Request, res: Response): Promise
       return;
     }
 
-    // Check if user has an active Pro subscription
+    // Check if user has an active Pro subscription (only 'pro' tier qualifies, not 'buyer' or others)
     const userTier = user.subscription?.tier;
     const userSubStatus = user.subscription?.status;
     const hasProSubscription =
-      (userTier === 'pro' || userTier === 'agency_owner') &&
+      userTier === 'pro' &&
       (userSubStatus === 'active' || userSubStatus === 'trial');
 
     if (!hasProSubscription) {
