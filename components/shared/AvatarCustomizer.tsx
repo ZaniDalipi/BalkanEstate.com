@@ -2,6 +2,8 @@ import React, { useState, useMemo, useCallback, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { useTranslation } from 'react-i18next';
 import { XMarkIcon } from '../../constants';
+import { createAvatar } from '@dicebear/core';
+import { avataaars } from '@dicebear/collection';
 
 // ─── DiceBear Avataaars customization options ────────────────────────────────
 
@@ -148,24 +150,23 @@ export interface AvatarOptions {
 }
 
 export function buildAvatarUrl(options: AvatarOptions): string {
-  const params = new URLSearchParams();
-  params.set('skinColor', options.skinColor);
-  params.set('hairColor', options.hairColor);
-  params.set('top', options.top);
-  params.set('clothing', options.clothing);
-  params.set('clothesColor', options.clothesColor);
-  if (options.accessories) params.set('accessories', options.accessories);
-  params.set('accessoriesProbability', options.accessories ? '100' : '0');
-  if (options.facialHair) {
-    params.set('facialHair', options.facialHair);
-    if (options.facialHairColor) params.set('facialHairColor', options.facialHairColor);
-  }
-  params.set('facialHairProbability', options.facialHair ? '100' : '0');
-  params.set('eyes', options.eyes);
-  params.set('mouth', options.mouth);
-  params.set('eyebrows', options.eyebrows);
-  params.set('backgroundColor', 'b6e3f4');
-  return `https://api.dicebear.com/9.x/avataaars/svg?${params.toString()}`;
+  const avatar = createAvatar(avataaars, {
+    skinColor: [options.skinColor],
+    hairColor: [options.hairColor],
+    top: [options.top as any],
+    clothing: [options.clothing as any],
+    clothesColor: [options.clothesColor],
+    accessories: options.accessories ? [options.accessories as any] : [],
+    accessoriesProbability: options.accessories ? 100 : 0,
+    facialHair: options.facialHair ? [options.facialHair as any] : [],
+    facialHairProbability: options.facialHair ? 100 : 0,
+    facialHairColor: options.facialHairColor ? [options.facialHairColor] : [],
+    eyes: [options.eyes as any],
+    mouth: [options.mouth as any],
+    eyebrows: [options.eyebrows as any],
+    backgroundColor: ['b6e3f4'],
+  });
+  return avatar.toDataUri();
 }
 
 export function getDefaultAvatarOptions(gender?: 'male' | 'female' | 'other'): AvatarOptions {

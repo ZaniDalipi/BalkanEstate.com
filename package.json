@@ -27,6 +27,8 @@
     "test:all": "vitest run && npx playwright test"
   },
   "dependencies": {
+    "@dicebear/collection": "^9.4.0",
+    "@dicebear/core": "^9.4.0",
     "@google/genai": "^1.27.0",
     "@google/generative-ai": "^0.24.1",
     "@googlemaps/markerclusterer": "^2.6.2",

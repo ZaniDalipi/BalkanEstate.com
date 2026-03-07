@@ -5,6 +5,37 @@ import { useQuery } from '@tanstack/react-query';
 import { getFeaturedCities } from '@/src/features/cities/api/cityApi';
 import type { CityMarketData } from '@/src/shared/types';
 
+// Fetch city thumbnail from Wikipedia REST API (CORS-enabled)
+async function fetchCityImage(cityName: string): Promise<string | null> {
+  try {
+    const res = await fetch(`https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(cityName)}`);
+    if (!res.ok) return null;
+    const data = await res.json();
+    // Use original image for better quality, fall back to thumbnail
+    return data.originalimage?.source || data.thumbnail?.source || null;
+  } catch {
+    return null;
+  }
+}
+
+function useCityImages(cities: CityMarketData[]) {
+  return useQuery({
+    queryKey: ['cityImages', cities.map(c => c.city).join(',')],
+    queryFn: async () => {
+      const entries = await Promise.all(
+        cities.map(async (c) => {
+          const url = await fetchCityImage(c.city);
+          return [c.city, url] as const;
+        })
+      );
+      return Object.fromEntries(entries) as Record<string, string | null>;
+    },
+    enabled: cities.length > 0,
+    staleTime: 24 * 60 * 60 * 1000, // Cache for 24h
+    gcTime: 48 * 60 * 60 * 1000,
+  });
+}
+
 interface PopularCitiesSectionProps {
   onNavigate: (view: string, path: string) => void;
 }
@@ -36,6 +67,8 @@ const PopularCitiesSection: React.FC<PopularCitiesSectionProps> = ({ onNavigate 
     staleTime: 10 * 60 * 1000,
     retry: 2,
   });
+
+  const { data: cityImages = {} } = useCityImages(cities);
 
   if (isError && cities.length === 0) return null;
 
@@ -92,7 +125,16 @@ const PopularCitiesSection: React.FC<PopularCitiesSectionProps> = ({ onNavigate 
                 onClick={() => onNavigate('explore-cities', `/explore-cities/${encodeURIComponent(city.city)}/${encodeURIComponent(city.country)}`)}
                 className={`group relative overflow-hidden rounded-xl ${i < 2 ? 'sm:col-span-2 lg:col-span-2 aspect-[16/9]' : 'aspect-[4/3]'}`}
               >
-                <div className={`w-full h-full bg-gradient-to-br ${CITY_GRADIENTS[i % CITY_GRADIENTS.length]} group-hover:scale-105 transition-transform duration-500`} />
+                {cityImages[city.city] ? (
+                  <img
+                    src={cityImages[city.city]!}
+                    alt={city.city}
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                    loading="lazy"
+                  />
+                ) : (
+                  <div className={`w-full h-full bg-gradient-to-br ${CITY_GRADIENTS[i % CITY_GRADIENTS.length]} group-hover:scale-105 transition-transform duration-500`} />
+                )}
                 <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/10 to-transparent" />
                 <div className="absolute bottom-0 left-0 right-0 p-3 sm:p-4">
                   <h3 className="text-base sm:text-lg font-bold text-white">{city.city}</h3>
