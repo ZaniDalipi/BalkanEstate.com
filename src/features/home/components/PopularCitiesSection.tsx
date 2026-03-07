@@ -7,12 +7,12 @@ interface PopularCitiesSectionProps {
 }
 
 const CITIES = [
-  { name: 'Belgrade', country: 'Serbia', image: 'https://images.unsplash.com/photo-1590090533726-434cf2b4bca4?w=400&h=300&fit=crop', properties: 1200 },
-  { name: 'Tirana', country: 'Albania', image: 'https://images.unsplash.com/photo-1597933536893-7cd98dbd3675?w=400&h=300&fit=crop', properties: 800 },
+  { name: 'Belgrade', country: 'Serbia', image: 'https://images.unsplash.com/photo-1480714378408-67cf0d13bc1b?w=400&h=300&fit=crop', properties: 1200 },
+  { name: 'Tirana', country: 'Albania', image: 'https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?w=400&h=300&fit=crop', properties: 800 },
   { name: 'Skopje', country: 'North Macedonia', image: 'https://images.unsplash.com/photo-1580893246395-52aead8960dc?w=400&h=300&fit=crop', properties: 650 },
   { name: 'Zagreb', country: 'Croatia', image: 'https://images.unsplash.com/photo-1596464716127-f2a82984de30?w=400&h=300&fit=crop', properties: 950 },
   { name: 'Sarajevo', country: 'Bosnia', image: 'https://images.unsplash.com/photo-1586016413664-864c0dd76f53?w=400&h=300&fit=crop', properties: 500 },
-  { name: 'Thessaloniki', country: 'Greece', image: 'https://images.unsplash.com/photo-1558618666-fcd25c85f82e?w=400&h=300&fit=crop', properties: 1100 },
+  { name: 'Thessaloniki', country: 'Greece', image: 'https://images.unsplash.com/photo-1467638992958-cfe2cd6e9a56?w=400&h=300&fit=crop', properties: 1100 },
 ];
 
 const PopularCitiesSection: React.FC<PopularCitiesSectionProps> = ({ onNavigate }) => {
