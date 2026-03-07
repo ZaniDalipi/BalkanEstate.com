@@ -282,7 +282,7 @@ const HeroSection: React.FC<HeroSectionProps> = ({
               />
             </span>
           </span>
-          <span className="text-slate-600 text-xl sm:text-3xl md:text-4xl lg:text-5xl font-semibold">
+          <span className="block text-slate-600 text-xl sm:text-3xl md:text-4xl lg:text-5xl font-semibold">
             {t('home:hero.titleEnd')}
           </span>
         </motion.h1>
