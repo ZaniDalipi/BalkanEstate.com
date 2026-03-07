@@ -10,7 +10,7 @@ import { Helmet } from 'react-helmet-async';
 import { getCityImageUrl, getCityFallbackGradient } from '@/config/cloudinaryConfig';
 import ExploreCitiesHeroBanner from '@/components/shared/ExploreCitiesHeroBanner';
 import { RandomCityBubbles, FloatingSphere, Decorative3DStyles } from '@/components/shared/Decorative3D';
-import { buildLocalizedPath } from '@/src/utils/languageRouting';
+import { navigateWithLanguage } from '@/src/utils/languageRouting';
 
 const CityRecommendations: React.FC = () => {
   const { t } = useTranslation(['exploreCities']);
@@ -62,10 +62,8 @@ const CityRecommendations: React.FC = () => {
   const countries = Array.from(new Set(cities.map(c => c.country))).sort();
 
   const handleCityClick = (city: CityMarketData) => {
-    // Navigate to the city dashboard page
     const path = `/explore-cities/${encodeURIComponent(city.city)}/${encodeURIComponent(city.country)}`;
-    window.history.pushState({}, '', buildLocalizedPath(path));
-    dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'city-dashboard' });
+    navigateWithLanguage(path);
   };
 
   const getTrendIcon = (trend: string) => {
