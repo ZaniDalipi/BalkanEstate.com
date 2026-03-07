@@ -89,7 +89,7 @@ const PopularCitiesSection: React.FC<PopularCitiesSectionProps> = ({ onNavigate 
                 transition={{ delay: i * 0.08, type: 'spring', stiffness: 300, damping: 30 }}
                 whileHover={{ y: -4 }}
                 whileTap={{ scale: 0.98 }}
-                onClick={() => onNavigate('explore-cities', `/explore-cities/${city.city.toLowerCase()}/${city.country.toLowerCase()}`)}
+                onClick={() => onNavigate('explore-cities', `/explore-cities/${encodeURIComponent(city.city)}/${encodeURIComponent(city.country)}`)}
                 className={`group relative overflow-hidden rounded-xl ${i < 2 ? 'sm:col-span-2 lg:col-span-2 aspect-[16/9]' : 'aspect-[4/3]'}`}
               >
                 <div className={`w-full h-full bg-gradient-to-br ${CITY_GRADIENTS[i % CITY_GRADIENTS.length]} group-hover:scale-105 transition-transform duration-500`} />
