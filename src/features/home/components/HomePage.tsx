@@ -44,8 +44,35 @@ const HomePage: React.FC = () => {
   const { data: featuredProperties = [] } = useQuery<Property[]>({
     queryKey: ['featuredProperties'],
     queryFn: async () => {
-      const properties = await getProperties({ sortBy: 'newest' } as any, { limit: 6 });
-      return properties.filter(p => p.status === 'active').slice(0, 6);
+      // Fetch more to have a good pool for sorting
+      const properties = await getProperties({ sortBy: 'newest' } as any, { limit: 50 });
+      const active = properties.filter(p => p.status === 'active');
+
+      // Score each property: premium first, then ones with good images
+      const TIER_SCORE: Record<string, number> = {
+        premium: 100,
+        highlight: 80,
+        featured: 60,
+        standard: 0,
+      };
+
+      const scored = active.map(p => {
+        let score = 0;
+        // Promotion tier is the primary sort
+        if (p.isPromoted && p.promotionTier) {
+          score += TIER_SCORE[p.promotionTier] || 0;
+        }
+        if (p.hasUrgentBadge) score += 10;
+        // Favor properties with multiple images (good visuals)
+        const imgCount = p.images?.length || 0;
+        if (imgCount >= 5) score += 30;
+        else if (imgCount >= 3) score += 20;
+        else if (imgCount >= 1) score += 10;
+        return { property: p, score };
+      });
+
+      scored.sort((a, b) => b.score - a.score);
+      return scored.slice(0, 6).map(s => s.property);
     },
     staleTime: 5 * 60 * 1000,
     gcTime: 30 * 60 * 1000,

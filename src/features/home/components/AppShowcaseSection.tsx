@@ -222,7 +222,7 @@ const PhoneMapContent: React.FC<{ pins: MapPin[] }> = ({ pins: MAP_PINS }) => {
         {/* Property pins */}
         {MAP_PINS.map((pin, i) => (
           <div
-            key={pin.city}
+            key={`${pin.city}-${i}`}
             className="absolute cursor-pointer z-10"
             style={{ left: `${pin.x}%`, top: `${pin.y}%`, transform: 'translate(-50%, -100%)' }}
             onClick={() => setActivePin(activePin === i ? null : i)}
