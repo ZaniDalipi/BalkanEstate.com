@@ -88,6 +88,44 @@ export const CONTENT_TYPES = [
   { id: 'feature', label: 'Feature Highlight', iconId: 'SparklesIcon' },
 ];
 
+/**
+ * Converts any YouTube URL format to an embed URL.
+ * Supports: watch?v=, youtu.be/, shorts/, embed/, and live/ URLs.
+ * Returns the original URL if it's not a recognized YouTube URL.
+ */
+export function convertToYouTubeEmbedUrl(url: string): string {
+  if (!url) return url;
+  const trimmed = url.trim();
+
+  // Already an embed URL
+  if (trimmed.includes('youtube.com/embed/')) return trimmed;
+
+  // Extract video ID from various YouTube URL formats
+  const patterns = [
+    /(?:youtube\.com\/watch\?.*v=)([a-zA-Z0-9_-]{11})/,
+    /(?:youtu\.be\/)([a-zA-Z0-9_-]{11})/,
+    /(?:youtube\.com\/shorts\/)([a-zA-Z0-9_-]{11})/,
+    /(?:youtube\.com\/live\/)([a-zA-Z0-9_-]{11})/,
+  ];
+
+  for (const pattern of patterns) {
+    const match = trimmed.match(pattern);
+    if (match) {
+      return `https://www.youtube.com/embed/${match[1]}`;
+    }
+  }
+
+  return trimmed;
+}
+
+/**
+ * Checks if a URL is any kind of YouTube URL (not just embed).
+ */
+export function isYouTubeUrl(url: string): boolean {
+  if (!url) return false;
+  return /(?:youtube\.com|youtu\.be)/.test(url);
+}
+
 export const ICON_OPTIONS = [
   { id: 'user', label: 'User' },
   { id: 'building', label: 'Building' },
@@ -180,12 +218,13 @@ export function useHowItWorksManager() {
         : '/admin/site-content';
 
       // For guides, we don't need URL; set a placeholder
+      // For videos, auto-convert YouTube URLs to embed format
       const submitData = {
         ...formData,
         section: 'how-it-works',
         url: formData.contentType === 'guide' || formData.contentType === 'faq'
           ? 'placeholder'
-          : formData.url,
+          : convertToYouTubeEmbedUrl(formData.url),
       };
 
       await apiRequest(endpoint, {
