@@ -294,7 +294,7 @@ const HeroSection: React.FC<HeroSectionProps> = ({
         </motion.p>
 
         {/* Search Bar — liquid glass */}
-        <motion.div className="mt-8 sm:mt-10 max-w-2xl mx-auto" variants={fadeUp} ref={wrapperRef}>
+        <motion.div className="mt-8 sm:mt-10 max-w-2xl mx-auto relative z-20" variants={fadeUp} ref={wrapperRef}>
           <div style={{
             position: 'relative',
             borderRadius: '20px',
