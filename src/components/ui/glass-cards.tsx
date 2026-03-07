@@ -583,36 +583,12 @@ export const StackedCards: React.FC<StackedCardsProps> = ({
     subtitle = 'Handpicked properties from top agents across the Balkans',
     onViewAll
 }) => {
-    const containerRef = useRef<HTMLDivElement>(null);
     const isMobile = useIsMobile();
-
-    useEffect(() => {
-        const container = containerRef.current;
-        if (!container) return;
-
-        gsap.set(container, { opacity: 0, y: 60 });
-
-        const trigger = ScrollTrigger.create({
-            trigger: container,
-            start: 'top 85%',
-            once: true,
-            onEnter: () => {
-                gsap.to(container, {
-                    opacity: 1,
-                    y: 0,
-                    duration: 0.8,
-                    ease: 'power2.out'
-                });
-            }
-        });
-
-        return () => { trigger.kill(); };
-    }, []);
 
     if (properties.length === 0) return null;
 
     return (
-        <section ref={containerRef} style={{ background: '#ffffff' }}>
+        <section style={{ background: '#ffffff' }}>
             {/* Section Header */}
             <div style={{
                 maxWidth: '72rem',

@@ -213,13 +213,13 @@ export const getProperties = async (filters?: Filters, options?: { limit?: numbe
 
   if (filters) {
     if (filters.query) params.append('query', filters.query);
-    if (filters.minPrice !== null) params.append('minPrice', filters.minPrice.toString());
-    if (filters.maxPrice !== null) params.append('maxPrice', filters.maxPrice.toString());
-    if (filters.beds !== null) params.append('beds', filters.beds.toString());
-    if (filters.baths !== null) params.append('baths', filters.baths.toString());
-    if (filters.livingRooms !== null) params.append('livingRooms', filters.livingRooms.toString());
-    if (filters.minSqft !== null) params.append('minSqft', filters.minSqft.toString());
-    if (filters.maxSqft !== null) params.append('maxSqft', filters.maxSqft.toString());
+    if (filters.minPrice != null) params.append('minPrice', filters.minPrice.toString());
+    if (filters.maxPrice != null) params.append('maxPrice', filters.maxPrice.toString());
+    if (filters.beds != null) params.append('beds', filters.beds.toString());
+    if (filters.baths != null) params.append('baths', filters.baths.toString());
+    if (filters.livingRooms != null) params.append('livingRooms', filters.livingRooms.toString());
+    if (filters.minSqft != null) params.append('minSqft', filters.minSqft.toString());
+    if (filters.maxSqft != null) params.append('maxSqft', filters.maxSqft.toString());
     if (filters.sortBy) params.append('sortBy', filters.sortBy);
     if (filters.sellerType && filters.sellerType !== 'any')
       params.append('sellerType', filters.sellerType);

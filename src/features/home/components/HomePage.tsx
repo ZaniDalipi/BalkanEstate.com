@@ -1,11 +1,15 @@
-import React, { useState, useCallback, useRef } from 'react';
+import React, { useState, useCallback, useRef, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Helmet } from 'react-helmet-async';
 import { useAppContext } from '@/context/AppContext';
 import { useLocalizedNavigation } from '@/src/hooks/useLocalizedNavigation';
 import { Property } from '@/types';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { getProperties } from '@/src/features/properties/api/propertyApi';
+import { getAllAgents } from '@/src/features/agents/api/agentApi';
+import { getAgencies } from '@/src/features/agencies/api/agencyApi';
+import { getFeaturedCities } from '@/src/features/cities/api/cityApi';
+import { API_CONFIG } from '@/src/shared/constants/app.constants';
 import HeroSection from './HeroSection';
 import QuickAccessSection from './QuickAccessSection';
 import CategoriesSection from './CategoriesSection';
@@ -27,6 +31,8 @@ const HomePage: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const searchQueryRef = useRef(searchQuery);
 
+  const queryClient = useQueryClient();
+
   const { data: featuredProperties = [] } = useQuery<Property[]>({
     queryKey: ['featuredProperties'],
     queryFn: async () => {
@@ -37,6 +43,42 @@ const HomePage: React.FC = () => {
     gcTime: 30 * 60 * 1000,
     retry: 2,
   });
+
+  // Prefetch all section data in parallel on mount so nothing waits for scroll
+  useEffect(() => {
+    const opts = { staleTime: 10 * 60 * 1000, gcTime: 30 * 60 * 1000 };
+    queryClient.prefetchQuery({
+      queryKey: ['topAgentsWeek'],
+      queryFn: async () => {
+        const { agents } = await getAllAgents();
+        return agents.filter(a => a.name).sort((a, b) => (b.rating || 0) - (a.rating || 0)).slice(0, 3);
+      },
+      ...opts,
+    });
+    queryClient.prefetchQuery({
+      queryKey: ['topAgenciesMonth'],
+      queryFn: async () => {
+        const data = await getAgencies({ limit: 3 });
+        return (data.agencies || []).filter((a: any) => a.name).slice(0, 3);
+      },
+      ...opts,
+    });
+    queryClient.prefetchQuery({
+      queryKey: ['featuredCities'],
+      queryFn: () => getFeaturedCities(6),
+      ...opts,
+    });
+    queryClient.prefetchQuery({
+      queryKey: ['testimonials'],
+      queryFn: async () => {
+        const res = await fetch(`${API_CONFIG.BASE_URL}/agents?sortBy=rating&limit=20&minRating=4`);
+        if (!res.ok) return [];
+        const d = await res.json();
+        return d.agents || [];
+      },
+      ...opts,
+    });
+  }, [queryClient]);
 
   const handleSearchChange = useCallback((value: string) => {
     setSearchQuery(value);

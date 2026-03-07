@@ -93,8 +93,6 @@ const TestimonialsSection: React.FC = () => {
     );
   }
 
-  if (!testimonials.length) return null;
-
   return (
     <section className="bg-neutral-50">
       <div className="max-w-6xl mx-auto px-4">
@@ -116,24 +114,57 @@ const TestimonialsSection: React.FC = () => {
         </motion.div>
       </div>
 
-      {/* Scroll-driven card stack — each scroll reveals the next testimonial */}
-      <ContainerScroll
-        className="min-h-[250vh]"
-        style={{ minHeight: `${Math.max(testimonials.length * 60, 300)}vh` }}
-      >
-        <div className="sticky top-[8vh] flex items-start justify-center pt-20">
-          <CardsContainer className="h-[420px] w-[420px] sm:h-[460px] sm:w-[480px]">
-            {testimonials.map((testimonial, i) => (
-              <TestimonialCard
-                key={testimonial.id}
-                testimonial={testimonial}
-                index={i}
-                total={testimonials.length}
-              />
+      {testimonials.length > 0 ? (
+        /* Scroll-driven card stack — each scroll reveals the next testimonial */
+        <ContainerScroll
+          className="min-h-[250vh]"
+          style={{ minHeight: `${Math.max(testimonials.length * 60, 300)}vh` }}
+        >
+          <div className="sticky top-[8vh] flex items-start justify-center pt-20">
+            <CardsContainer className="h-[420px] w-[420px] sm:h-[460px] sm:w-[480px]">
+              {testimonials.map((testimonial, i) => (
+                <TestimonialCard
+                  key={testimonial.id}
+                  testimonial={testimonial}
+                  index={i}
+                  total={testimonials.length}
+                />
+              ))}
+            </CardsContainer>
+          </div>
+        </ContainerScroll>
+      ) : (
+        /* Empty placeholder cards */
+        <div className="max-w-4xl mx-auto px-4 py-12 sm:py-16">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            {Array.from({ length: 3 }).map((_, i) => (
+              <div
+                key={i}
+                className="rounded-2xl border border-dashed border-neutral-200 bg-white/60 p-6 flex flex-col items-center text-center"
+              >
+                <div className="w-14 h-14 rounded-full bg-neutral-100 mb-4" />
+                <div className="flex gap-0.5 mb-3">
+                  {Array.from({ length: 5 }).map((_, s) => (
+                    <div key={s} className="w-4 h-4 rounded-sm bg-neutral-100" />
+                  ))}
+                </div>
+                <div className="space-y-2 w-full">
+                  <div className="h-3 bg-neutral-100 rounded w-full" />
+                  <div className="h-3 bg-neutral-100 rounded w-4/5 mx-auto" />
+                  <div className="h-3 bg-neutral-100 rounded w-3/5 mx-auto" />
+                </div>
+                <div className="mt-4 space-y-1">
+                  <div className="h-3 bg-neutral-100 rounded w-20 mx-auto" />
+                  <div className="h-2 bg-neutral-50 rounded w-16 mx-auto" />
+                </div>
+              </div>
             ))}
-          </CardsContainer>
+          </div>
+          <p className="text-center text-sm text-slate-400 mt-6">
+            {t('testimonials.emptyState', 'Testimonials will appear here as users share their experiences.')}
+          </p>
         </div>
-      </ContainerScroll>
+      )}
     </section>
   );
 };
