@@ -13,6 +13,7 @@ import { runWeeklyStatsJobs } from '../jobs/weeklyStatsJob';
 import { processNewListingAlerts, processPriceDropAlerts } from '../jobs/propertyAlertsJob';
 import { sendHotHourRecommendations, cleanupOldPatterns } from '../services/proBuyerEmailService';
 import { processMonthlyCouponRefresh } from '../services/monthlyCouponService';
+import { fetchAndStoreNews, cleanupOldNews } from '../services/newsService';
 
 // Helper to check if MongoDB is connected before running a job
 const isMongoConnected = (): boolean => {
@@ -41,6 +42,8 @@ let weeklyAlertsTask: cron.ScheduledTask | null = null;
 let priceDropAlertsTask: cron.ScheduledTask | null = null;
 let proBuyerHotHoursTask: cron.ScheduledTask | null = null;
 let activityCleanupTask: cron.ScheduledTask | null = null;
+let newsFetchTask: cron.ScheduledTask | null = null;
+let newsCleanupTask: cron.ScheduledTask | null = null;
 
 export const startCronJobs = () => {
   // Check for subscriptions expiring in 1 day - runs daily at 10 AM
@@ -382,7 +385,31 @@ export const startCronJobs = () => {
     }
   });
 
-  cronLogger.info('🕐 All cron jobs started (subscription checks, weekly stats, property alerts, pro buyer emails, monthly coupons)');
+  // Fetch real estate news every 4 hours (at minute 20)
+  newsFetchTask = cron.schedule('20 */4 * * *', async () => {
+    await withDbConnection('news fetch', async () => {
+      try {
+        const count = await fetchAndStoreNews();
+        cronLogger.info(`📰 News fetch cron completed: ${count} new articles`);
+      } catch (error) {
+        cronLogger.error('News fetch cron error:', error);
+      }
+    });
+  });
+
+  // Cleanup old news articles daily at 3 AM (older than 3 months)
+  newsCleanupTask = cron.schedule('0 3 * * *', async () => {
+    await withDbConnection('news cleanup', async () => {
+      try {
+        const count = await cleanupOldNews(3);
+        cronLogger.info(`🗑️ News cleanup cron completed: ${count} old articles removed`);
+      } catch (error) {
+        cronLogger.error('News cleanup cron error:', error);
+      }
+    });
+  });
+
+  cronLogger.info('🕐 All cron jobs started (subscription checks, weekly stats, property alerts, pro buyer emails, monthly coupons, news fetch)');
 };
 
 export const stopCronJobs = () => {
@@ -399,5 +426,7 @@ export const stopCronJobs = () => {
   if (proBuyerHotHoursTask) proBuyerHotHoursTask.stop();
   if (activityCleanupTask) activityCleanupTask.stop();
   if (monthlyCouponTask) monthlyCouponTask.stop();
+  if (newsFetchTask) newsFetchTask.stop();
+  if (newsCleanupTask) newsCleanupTask.stop();
   cronLogger.info('🛑 All cron jobs stopped');
 };

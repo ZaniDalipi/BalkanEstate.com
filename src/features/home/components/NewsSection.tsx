@@ -30,19 +30,30 @@ const NewsCard: React.FC<{ item: NewsItem; index: number; t: (key: string, fallb
       whileHover={{ y: -4 }}
       className="group block rounded-2xl overflow-hidden border border-neutral-200 bg-white hover:shadow-xl transition-shadow"
     >
-      {/* Gradient image placeholder */}
-      <div className={`h-28 sm:h-36 bg-gradient-to-br ${item.imageGradient} relative overflow-hidden`}>
-        <div className="absolute inset-0 bg-black/10" />
-        <div className="absolute inset-0 opacity-10">
-          <svg className="w-full h-full" viewBox="0 0 200 100">
-            <defs>
-              <pattern id={`grid-${item.id}`} width="20" height="20" patternUnits="userSpaceOnUse">
-                <path d="M 20 0 L 0 0 0 20" fill="none" stroke="white" strokeWidth="0.5" />
-              </pattern>
-            </defs>
-            <rect width="200" height="100" fill={`url(#grid-${item.id})`} />
-          </svg>
-        </div>
+      {/* Cover image or gradient fallback */}
+      <div className={`h-28 sm:h-36 relative overflow-hidden ${item.coverImageUrl ? '' : `bg-gradient-to-br ${item.imageGradient}`}`}>
+        {item.coverImageUrl ? (
+          <img
+            src={item.coverImageUrl}
+            alt={item.title}
+            className="w-full h-full object-cover"
+            loading="lazy"
+          />
+        ) : (
+          <>
+            <div className="absolute inset-0 bg-black/10" />
+            <div className="absolute inset-0 opacity-10">
+              <svg className="w-full h-full" viewBox="0 0 200 100">
+                <defs>
+                  <pattern id={`grid-${item.id}`} width="20" height="20" patternUnits="userSpaceOnUse">
+                    <path d="M 20 0 L 0 0 0 20" fill="none" stroke="white" strokeWidth="0.5" />
+                  </pattern>
+                </defs>
+                <rect width="200" height="100" fill={`url(#grid-${item.id})`} />
+              </svg>
+            </div>
+          </>
+        )}
         {/* Country badge */}
         <div className="absolute top-2 sm:top-3 left-2 sm:left-3 flex items-center gap-1.5 bg-white/90 backdrop-blur-sm rounded-full px-2 sm:px-2.5 py-0.5 sm:py-1">
           <span className="text-[10px] sm:text-xs font-semibold text-slate-800">{item.countryCode}</span>
@@ -82,7 +93,7 @@ const NewsCard: React.FC<{ item: NewsItem; index: number; t: (key: string, fallb
 
 const NewsSection: React.FC = () => {
   const { t } = useTranslation('home');
-  const { news, countries, selectedCountry, setSelectedCountry } = useRealEstateNews();
+  const { news, countries, selectedCountry, setSelectedCountry, isLoading } = useRealEstateNews();
 
   return (
     <section className="py-12 sm:py-16 md:py-24 bg-white">

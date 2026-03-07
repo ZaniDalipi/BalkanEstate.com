@@ -368,4 +368,137 @@ router.post('/email-configs/:key/preview', logAdminAction('PREVIEW_EMAIL'), prev
 router.get('/email-templates/preview/:templateType', logAdminAction('PREVIEW_TEMPLATE'), previewMinimalisticTemplate);
 router.post('/email-templates/preview/:templateType', logAdminAction('PREVIEW_TEMPLATE'), previewMinimalisticTemplate);
 
+// ===== Testimonial Admin Routes =====
+import Testimonial from '../models/Testimonial';
+
+// GET /api/admin/testimonials - List all testimonials (any status)
+router.get('/testimonials', logAdminAction('VIEW_TESTIMONIALS'), async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { status, page = '1', limit = '20' } = req.query;
+    const filter: Record<string, any> = {};
+    if (status) filter.status = status;
+
+    const pageNum = Math.max(1, parseInt(page as string, 10) || 1);
+    const limitNum = Math.min(100, parseInt(limit as string, 10) || 20);
+    const skip = (pageNum - 1) * limitNum;
+
+    const [testimonials, total] = await Promise.all([
+      Testimonial.find(filter).sort({ createdAt: -1 }).skip(skip).limit(limitNum).lean(),
+      Testimonial.countDocuments(filter),
+    ]);
+
+    res.json({ testimonials, pagination: { page: pageNum, limit: limitNum, total, totalPages: Math.ceil(total / limitNum) } });
+  } catch (err) {
+    res.status(500).json({ message: 'Failed to fetch testimonials' });
+  }
+});
+
+// PATCH /api/admin/testimonials/:id - Approve or reject
+router.patch('/testimonials/:id', logAdminAction('UPDATE_TESTIMONIAL'), async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { status, adminNotes } = req.body;
+    if (status && !['pending', 'approved', 'rejected'].includes(status)) {
+      res.status(400).json({ message: 'Invalid status' });
+      return;
+    }
+
+    const update: Record<string, any> = {};
+    if (status) update.status = status;
+    if (adminNotes !== undefined) update.adminNotes = adminNotes;
+
+    const testimonial = await Testimonial.findByIdAndUpdate(req.params.id, update, { new: true }).lean();
+    if (!testimonial) {
+      res.status(404).json({ message: 'Testimonial not found' });
+      return;
+    }
+
+    res.json({ testimonial });
+  } catch (err) {
+    res.status(500).json({ message: 'Failed to update testimonial' });
+  }
+});
+
+// DELETE /api/admin/testimonials/:id
+router.delete('/testimonials/:id', logAdminAction('DELETE_TESTIMONIAL'), async (req: Request, res: Response): Promise<void> => {
+  try {
+    const result = await Testimonial.findByIdAndDelete(req.params.id);
+    if (!result) {
+      res.status(404).json({ message: 'Testimonial not found' });
+      return;
+    }
+    res.json({ message: 'Testimonial deleted' });
+  } catch (err) {
+    res.status(500).json({ message: 'Failed to delete testimonial' });
+  }
+});
+
+// ===== News Admin Routes =====
+import News from '../models/News';
+import { fetchAndStoreNews, cleanupOldNews } from '../services/newsService';
+
+// GET /api/admin/news - List all news with admin controls
+router.get('/news', logAdminAction('VIEW_NEWS'), async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { page = '1', limit = '20', country } = req.query;
+    const filter: Record<string, any> = {};
+    if (country) filter.country = country;
+
+    const pageNum = Math.max(1, parseInt(page as string, 10) || 1);
+    const limitNum = Math.min(100, parseInt(limit as string, 10) || 20);
+    const skip = (pageNum - 1) * limitNum;
+
+    const [articles, total] = await Promise.all([
+      News.find(filter).sort({ publishedAt: -1 }).skip(skip).limit(limitNum).lean(),
+      News.countDocuments(filter),
+    ]);
+
+    res.json({ articles, pagination: { page: pageNum, limit: limitNum, total, totalPages: Math.ceil(total / limitNum) } });
+  } catch (err) {
+    res.status(500).json({ message: 'Failed to fetch news' });
+  }
+});
+
+// POST /api/admin/news/fetch - Manually trigger news fetch
+router.post('/news/fetch', logAdminAction('TRIGGER_NEWS_FETCH'), async (_req: Request, res: Response): Promise<void> => {
+  try {
+    const count = await fetchAndStoreNews();
+    res.json({ message: `Fetched ${count} new articles` });
+  } catch (err) {
+    res.status(500).json({ message: 'Failed to fetch news' });
+  }
+});
+
+// POST /api/admin/news/cleanup - Manually trigger old news cleanup
+router.post('/news/cleanup', logAdminAction('TRIGGER_NEWS_CLEANUP'), async (req: Request, res: Response): Promise<void> => {
+  try {
+    const months = parseInt(req.body.months, 10) || 3;
+    const count = await cleanupOldNews(months);
+    res.json({ message: `Cleaned up ${count} old articles` });
+  } catch (err) {
+    res.status(500).json({ message: 'Failed to cleanup news' });
+  }
+});
+
+// DELETE /api/admin/news/:id
+router.delete('/news/:id', logAdminAction('DELETE_NEWS'), async (req: Request, res: Response): Promise<void> => {
+  try {
+    const article = await News.findById(req.params.id);
+    if (!article) {
+      res.status(404).json({ message: 'News article not found' });
+      return;
+    }
+    // Cleanup Cloudinary cover
+    if (article.coverImagePublicId) {
+      try {
+        const cloudinary = (await import('../config/cloudinary')).default;
+        await cloudinary.uploader.destroy(article.coverImagePublicId);
+      } catch { /* ignore cleanup errors */ }
+    }
+    await article.deleteOne();
+    res.json({ message: 'News article deleted' });
+  } catch (err) {
+    res.status(500).json({ message: 'Failed to delete news article' });
+  }
+});
+
 export default router;

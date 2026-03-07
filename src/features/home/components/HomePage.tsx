@@ -79,10 +79,24 @@ const HomePage: React.FC = () => {
     queryClient.prefetchQuery({
       queryKey: ['testimonials'],
       queryFn: async () => {
-        const res = await fetch(`${API_CONFIG.BASE_URL}/agents?sortBy=rating&limit=20&minRating=4`);
+        const res = await fetch(`${API_CONFIG.BASE_URL}/testimonials?limit=10`);
         if (!res.ok) return [];
         const d = await res.json();
-        return d.agents || [];
+        return (d.testimonials || []).map((t: any) => ({
+          id: t._id, name: t.name, avatarUrl: t.avatarUrl,
+          profession: t.profession || 'User', country: t.country || '',
+          rating: t.rating, quote: t.quote, source: t.source, createdAt: t.createdAt,
+        }));
+      },
+      ...opts,
+    });
+    queryClient.prefetchQuery({
+      queryKey: ['realEstateNews'],
+      queryFn: async () => {
+        const res = await fetch(`${API_CONFIG.BASE_URL}/news?limit=12`);
+        if (!res.ok) return [];
+        const d = await res.json();
+        return d.articles || [];
       },
       ...opts,
     });

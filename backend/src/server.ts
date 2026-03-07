@@ -106,6 +106,8 @@ import cadastreRoutes from './routes/cadastreRoutes';
 import agencyDashboardRoutes from './routes/agencyDashboardRoutes';
 import fileRoutes from './routes/fileRoutes';
 import mapProxyRoutes from './routes/mapProxyRoutes';
+import newsRoutes from './routes/newsRoutes';
+import testimonialRoutes from './routes/testimonialRoutes';
 
 // Import services
 import { initializeGooglePlayService } from './services/googlePlayService';
@@ -321,6 +323,8 @@ app.use('/api/videos', videoRoutes); // Property video generation (FFmpeg-based)
 app.use('/api/cadastre', cadastreRoutes); // Cadastre WMS proxy (GetFeatureInfo)
 app.use('/api/map', mapProxyRoutes); // Weather tile & FIRMS WMS proxy (API keys server-side)
 app.use('/api/files', fileRoutes); // File access with storage access policy (ownership-based)
+app.use('/api/news', newsRoutes); // Public real estate news
+app.use('/api/testimonials', testimonialRoutes); // User testimonials (submit + public list)
 
 // 404 handler
 app.use((_req: Request, res: Response) => {
