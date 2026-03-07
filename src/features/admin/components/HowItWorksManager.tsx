@@ -152,7 +152,7 @@ const HowItWorksManager: React.FC = () => {
                             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                             allowFullScreen
                           />
-                        ) : (
+                        ) : item.url && item.url !== 'placeholder' ? (
                           <>
                             <video
                               src={item.url}
@@ -163,6 +163,10 @@ const HowItWorksManager: React.FC = () => {
                               <PlayCircleIcon className="w-12 h-12 text-white" />
                             </div>
                           </>
+                        ) : (
+                          <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-gray-50 to-gray-100">
+                            <PlayCircleIcon className="w-12 h-12 text-gray-300" />
+                          </div>
                         )
                       ) : (
                         <div className="w-full h-full flex flex-col items-center justify-center bg-gradient-to-br from-gray-50 to-gray-100">
