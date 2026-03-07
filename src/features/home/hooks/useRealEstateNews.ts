@@ -56,6 +56,34 @@ function transformApiNews(articles: ApiNewsArticle[]): NewsItem[] {
   }));
 }
 
+// Wikipedia search terms per country for representative cover images
+const COUNTRY_IMAGE_TOPICS: Record<string, string> = {
+  'Albania': 'Albanian Riviera',
+  'Serbia': 'Belgrade',
+  'Croatia': 'Dubrovnik',
+  'Greece': 'Athens',
+  'Montenegro': 'Kotor',
+  'North Macedonia': 'Skopje',
+  'Bulgaria': 'Sunny Beach',
+  'Kosovo': 'Pristina',
+  'Slovenia': 'Ljubljana',
+  'Bosnia & Herzegovina': 'Sarajevo',
+  'Romania': 'Bucharest',
+};
+
+/** Fetch a representative image for a country via Wikipedia REST API */
+async function fetchCountryImage(country: string): Promise<string | null> {
+  const topic = COUNTRY_IMAGE_TOPICS[country] || country;
+  try {
+    const res = await fetch(`https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(topic)}`);
+    if (!res.ok) return null;
+    const data = await res.json();
+    return data.originalimage?.source || data.thumbnail?.source || null;
+  } catch {
+    return null;
+  }
+}
+
 // Fallback news shown until the first cron run populates the database
 const FALLBACK_NEWS: NewsItem[] = [
   { id: 'f1', title: 'Albania Sees Record Foreign Investment in Coastal Properties', excerpt: 'International buyers are flocking to the Albanian Riviera, with property transactions up 45% year-over-year as infrastructure improvements continue along the coast.', country: 'Albania', countryCode: 'AL', source: 'Balkan Insight', sourceUrl: 'https://balkaninsight.com', date: '2026-03-04', category: 'investment', imageGradient: 'from-blue-600 to-cyan-500' },
@@ -66,17 +94,40 @@ const FALLBACK_NEWS: NewsItem[] = [
   { id: 'f6', title: 'Bulgarian Black Sea Resorts See 30% Price Increase', excerpt: 'Property values along the Bulgarian Black Sea coast have surged, driven by both domestic demand and interest from Northern European retirees.', country: 'Bulgaria', countryCode: 'BG', source: 'Novinite', sourceUrl: 'https://www.novinite.com', date: '2026-02-26', category: 'market', imageGradient: 'from-violet-500 to-purple-400' },
 ];
 
+/** Enrich news items that lack a cover image with Wikipedia photos */
+async function enrichWithCoverImages(items: NewsItem[]): Promise<NewsItem[]> {
+  // Fetch one image per unique country (deduplicate requests)
+  const countriesNeeded = [...new Set(
+    items.filter(i => !i.coverImageUrl).map(i => i.country)
+  )];
+  const imageMap: Record<string, string | null> = {};
+  await Promise.all(
+    countriesNeeded.map(async (country) => {
+      imageMap[country] = await fetchCountryImage(country);
+    })
+  );
+  return items.map(item => ({
+    ...item,
+    coverImageUrl: item.coverImageUrl || imageMap[item.country] || undefined,
+  }));
+}
+
 async function fetchNews(): Promise<NewsItem[]> {
+  let items: NewsItem[];
   try {
     const res = await fetch(`${API_CONFIG.BASE_URL}/news?limit=12`);
-    if (!res.ok) return FALLBACK_NEWS;
-    const data = await res.json();
-    const articles = transformApiNews(data.articles || []);
-    // If DB is empty (cron hasn't run yet), show fallback
-    return articles.length > 0 ? articles : FALLBACK_NEWS;
+    if (!res.ok) {
+      items = FALLBACK_NEWS;
+    } else {
+      const data = await res.json();
+      const articles = transformApiNews(data.articles || []);
+      items = articles.length > 0 ? articles : FALLBACK_NEWS;
+    }
   } catch {
-    return FALLBACK_NEWS;
+    items = FALLBACK_NEWS;
   }
+  // Fill in missing cover images from Wikipedia
+  return enrichWithCoverImages(items);
 }
 
 export function useRealEstateNews() {
