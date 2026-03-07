@@ -268,20 +268,22 @@ const HeroSection: React.FC<HeroSectionProps> = ({
         <motion.h1
           className="text-center text-2xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-slate-900 tracking-tight leading-tight max-w-3xl mx-auto"
           variants={fadeUp}
+          style={{ minHeight: '2.6em' }}
         >
-          {t('home:hero.title')}{' '}
-          <span className="bg-clip-text text-transparent bg-gradient-to-r from-blue-600 via-cyan-600 to-indigo-600">
-            <Typewriter
-              words={typewriterWords}
-              speed={80}
-              delayBetweenWords={2000}
-              cursor={true}
-              cursorChar="|"
-            />
+          <span className="block">
+            {t('home:hero.title')}{' '}
+            <span className="bg-clip-text text-transparent bg-gradient-to-r from-blue-600 via-cyan-600 to-indigo-600 inline-block min-w-[6ch]">
+              <Typewriter
+                words={typewriterWords}
+                speed={80}
+                delayBetweenWords={2000}
+                cursor={true}
+                cursorChar="|"
+              />
+            </span>
           </span>
-          <br className="hidden sm:block" />
           <span className="text-slate-600 text-xl sm:text-3xl md:text-4xl lg:text-5xl font-semibold">
-            {' '}{t('home:hero.titleEnd')}
+            {t('home:hero.titleEnd')}
           </span>
         </motion.h1>
 

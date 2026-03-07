@@ -336,7 +336,7 @@ const TopAgentsSection: React.FC = () => {
               margin: '0 auto',
               alignItems: 'flex-end',
               justifyContent: 'center',
-              gap: '1rem',
+              gap: '2rem',
               padding: '0 1rem',
             }}
           >
@@ -352,7 +352,7 @@ const TopAgentsSection: React.FC = () => {
           </div>
 
           {/* Mobile: vertical stack */}
-          <div className="sm:hidden flex flex-col items-center gap-5 px-4 pb-6">
+          <div className="sm:hidden flex flex-col items-center gap-16 px-4 pb-6">
             {[0, 1, 2].map((dataIndex) => (
               <AgentPodiumCard
                 key={podiumAgents[dataIndex].id}

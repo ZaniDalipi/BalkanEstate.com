@@ -3,6 +3,21 @@ import { useTranslation } from 'react-i18next';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useRealEstateNews, NewsItem } from '../hooks/useRealEstateNews';
 
+const COUNTRY_FLAGS: Record<string, string> = {
+  'All': '🌍',
+  'Albania': '🇦🇱',
+  'Serbia': '🇷🇸',
+  'Croatia': '🇭🇷',
+  'Greece': '🇬🇷',
+  'Montenegro': '🇲🇪',
+  'North Macedonia': '🇲🇰',
+  'Bulgaria': '🇧🇬',
+  'Kosovo': '🇽🇰',
+  'Slovenia': '🇸🇮',
+  'Bosnia & Herzegovina': '🇧🇦',
+  'Romania': '🇷🇴',
+};
+
 const CATEGORY_COLORS: Record<string, string> = {
   market: 'bg-slate-100 text-slate-700',
   investment: 'bg-emerald-100 text-emerald-700',
@@ -56,6 +71,7 @@ const NewsCard: React.FC<{ item: NewsItem; index: number; t: (key: string, fallb
         )}
         {/* Country badge */}
         <div className="absolute top-2 sm:top-3 left-2 sm:left-3 flex items-center gap-1.5 bg-white/90 backdrop-blur-sm rounded-full px-2 sm:px-2.5 py-0.5 sm:py-1">
+          {COUNTRY_FLAGS[item.country] && <span className="text-xs">{COUNTRY_FLAGS[item.country]}</span>}
           <span className="text-[10px] sm:text-xs font-semibold text-slate-800">{item.countryCode}</span>
           <span className="text-[9px] sm:text-[10px] text-slate-500 hidden sm:inline">{item.country}</span>
         </div>
@@ -127,12 +143,13 @@ const NewsSection: React.FC = () => {
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
               onClick={() => setSelectedCountry(country)}
-              className={`px-3 sm:px-3.5 py-1 sm:py-1.5 rounded-full text-[10px] sm:text-xs font-medium whitespace-nowrap transition-all flex-shrink-0 ${
+              className={`px-3 sm:px-3.5 py-1 sm:py-1.5 rounded-full text-[10px] sm:text-xs font-medium whitespace-nowrap transition-all flex-shrink-0 inline-flex items-center gap-1.5 ${
                 selectedCountry === country
                   ? 'bg-slate-900 text-white shadow-md'
                   : 'bg-white text-slate-600 border border-neutral-200 hover:bg-neutral-50'
               }`}
             >
+              {COUNTRY_FLAGS[country] && <span className="text-sm">{COUNTRY_FLAGS[country]}</span>}
               {country === 'All' ? t('home:news.filterAll', 'All') : country}
             </motion.button>
           ))}
