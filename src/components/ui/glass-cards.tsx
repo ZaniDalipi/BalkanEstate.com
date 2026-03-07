@@ -494,14 +494,23 @@ export const StackedCards: React.FC<StackedCardsProps> = ({
         const container = containerRef.current;
         if (!container) return;
 
-        gsap.fromTo(container,
-            { opacity: 0 },
-            {
-                opacity: 1,
-                duration: 1.2,
-                ease: "power2.out"
+        gsap.set(container, { opacity: 0, y: 60 });
+
+        const trigger = ScrollTrigger.create({
+            trigger: container,
+            start: 'top 85%',
+            once: true,
+            onEnter: () => {
+                gsap.to(container, {
+                    opacity: 1,
+                    y: 0,
+                    duration: 0.8,
+                    ease: 'power2.out'
+                });
             }
-        );
+        });
+
+        return () => { trigger.kill(); };
     }, []);
 
     if (properties.length === 0) return null;

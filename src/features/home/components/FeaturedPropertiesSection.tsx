@@ -137,12 +137,19 @@ const FeaturedPropertiesSection: React.FC<FeaturedPropertiesSectionProps> = ({
         {/* Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5">
           {properties.slice(0, 6).map((property, i) => (
-            <PropertyCard
+            <motion.div
               key={property.id}
-              property={property}
-              onClick={() => onPropertyClick(property)}
-              index={i}
-            />
+              initial={{ opacity: 0, y: 40 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, margin: '-60px' }}
+              transition={{ duration: 0.45, delay: i * 0.1, ease: [0.25, 0.46, 0.45, 0.94] }}
+            >
+              <PropertyCard
+                property={property}
+                onClick={() => onPropertyClick(property)}
+                index={i}
+              />
+            </motion.div>
           ))}
         </div>
 

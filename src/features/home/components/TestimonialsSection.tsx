@@ -9,7 +9,7 @@ import {
 } from '@/src/components/blocks/animated-cards-stack';
 import { useTestimonials, Testimonial } from '../hooks/useTestimonials';
 
-/* ─── Single testimonial card (dark glass style) ─── */
+/* ─── Single testimonial card ─── */
 const TestimonialCard: React.FC<{
   testimonial: Testimonial;
   index: number;
@@ -25,14 +25,14 @@ const TestimonialCard: React.FC<{
       key={testimonial.id}
       index={index}
       arrayLength={total}
-      variant="dark"
+      variant="light"
       incrementY={12}
       incrementZ={8}
-      incrementRotation={3}
+      incrementRotation={0}
     >
-      <ReviewStars rating={testimonial.rating} className="text-emerald-400" />
+      <ReviewStars rating={testimonial.rating} className="text-amber-500" />
 
-      <blockquote className="text-center text-base sm:text-lg leading-relaxed text-stone-300 max-w-xs">
+      <blockquote className="text-center text-base leading-relaxed text-slate-700 max-w-xs">
         &ldquo;{testimonial.quote}&rdquo;
       </blockquote>
 
@@ -41,25 +41,25 @@ const TestimonialCard: React.FC<{
           <img
             src={testimonial.avatarUrl}
             alt={testimonial.name}
-            className="w-11 h-11 rounded-full object-cover border-2 border-stone-600/50 shadow-md"
+            className="w-10 h-10 rounded-full object-cover border border-neutral-200"
             loading="lazy"
           />
         ) : (
-          <div className="w-11 h-11 rounded-full bg-stone-700/60 border-2 border-stone-600/50 shadow-md flex items-center justify-center text-sm font-bold text-stone-300">
+          <div className="w-10 h-10 rounded-full bg-slate-100 border border-neutral-200 flex items-center justify-center text-sm font-semibold text-slate-600">
             {initials}
           </div>
         )}
         <div>
-          <span className="block text-sm font-bold text-stone-100">
+          <span className="block text-sm font-semibold text-slate-900">
             {testimonial.name}
           </span>
-          <span className="block text-xs text-stone-400">
+          <span className="block text-xs text-slate-500">
             {testimonial.profession}
             {testimonial.country ? ` · ${testimonial.country}` : ''}
           </span>
         </div>
         {testimonial.source === 'google' && (
-          <span className="ml-auto text-[10px] font-medium text-stone-500 bg-stone-800/60 px-2 py-0.5 rounded-full border border-stone-700/50">
+          <span className="ml-auto text-[10px] font-medium text-slate-400 bg-slate-50 px-1.5 py-0.5 rounded">
             Google
           </span>
         )}
@@ -71,7 +71,7 @@ const TestimonialCard: React.FC<{
 /* ─── Loading skeleton ─── */
 const TestimonialsSkeleton: React.FC = () => (
   <div className="flex justify-center">
-    <div className="w-[350px] h-[300px] rounded-2xl bg-stone-800/50 animate-pulse" />
+    <div className="w-[350px] h-[300px] rounded-2xl bg-neutral-100 animate-pulse" />
   </div>
 );
 
@@ -81,11 +81,11 @@ const TestimonialsSection: React.FC = () => {
 
   if (isLoading) {
     return (
-      <section className="py-16 sm:py-20 bg-stone-950">
+      <section className="py-16 sm:py-20 bg-neutral-50">
         <div className="max-w-6xl mx-auto px-4">
           <div className="text-center mb-12">
-            <div className="h-8 w-64 bg-stone-800 rounded mx-auto animate-pulse" />
-            <div className="h-4 w-96 bg-stone-800 rounded mx-auto mt-3 animate-pulse" />
+            <div className="h-8 w-64 bg-neutral-100 rounded mx-auto animate-pulse" />
+            <div className="h-4 w-96 bg-neutral-100 rounded mx-auto mt-3 animate-pulse" />
           </div>
           <TestimonialsSkeleton />
         </div>
@@ -96,7 +96,7 @@ const TestimonialsSection: React.FC = () => {
   if (!testimonials.length) return null;
 
   return (
-    <section className="bg-stone-950">
+    <section className="bg-neutral-50">
       <div className="max-w-6xl mx-auto px-4">
         <motion.div
           initial={{ opacity: 0, y: 15 }}
@@ -104,10 +104,10 @@ const TestimonialsSection: React.FC = () => {
           viewport={{ once: true }}
           className="text-center pt-16 sm:pt-20"
         >
-          <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-stone-100">
-            {t('testimonials.title', 'Testimonials')}
+          <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-slate-900">
+            {t('testimonials.title', 'What Our Users Say')}
           </h2>
-          <p className="mx-auto mt-2 max-w-lg text-sm text-stone-400">
+          <p className="mx-auto mt-2 max-w-lg text-sm text-slate-500">
             {t(
               'testimonials.subtitle',
               'Trusted by thousands of buyers, sellers, and agents across the Balkans'
@@ -122,7 +122,7 @@ const TestimonialsSection: React.FC = () => {
         style={{ minHeight: `${Math.max(testimonials.length * 50, 250)}vh` }}
       >
         <div className="sticky top-[10vh] flex items-start justify-center pt-24">
-          <CardsContainer className="h-[380px] w-[350px] sm:h-[420px] sm:w-[400px]">
+          <CardsContainer className="h-[350px] w-[350px] sm:h-[380px] sm:w-[400px]">
             {testimonials.map((testimonial, i) => (
               <TestimonialCard
                 key={testimonial.id}
