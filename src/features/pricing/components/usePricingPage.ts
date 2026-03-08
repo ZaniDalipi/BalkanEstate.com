@@ -163,6 +163,9 @@ export function usePricingPage() {
     const plan = ((user.subscription as any)?.plan || user.subscriptionPlan || '').toLowerCase();
     const tier = user.subscription?.tier || '';
 
+    // Buyer plans should not count as seller plans
+    if (plan.includes('buyer') || tier === 'buyer') return 0;
+
     if (plan.includes('enterprise') || tier === 'agency_owner') return 3;
     if (plan.includes('pro_yearly') || plan.includes('yearly')) return 2;
     if (plan.includes('pro_monthly') || plan.includes('monthly')) return 1;
