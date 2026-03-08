@@ -225,7 +225,7 @@ export const PropertyContact: React.FC<PropertyContactProps> = ({
               dispatch({ type: 'SET_SELECTED_PROPERTY', payload: null });
               dispatch({ type: 'SET_SELECTED_AGENCY', payload: null });
               dispatch({ type: 'SET_SELECTED_AGENT', payload: property.sellerId });
-              dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'agents' });
+              dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'agentProfile' });
               window.history.pushState({}, '', `/agents/${property.sellerId}`);
               window.dispatchEvent(new PopStateEvent('popstate'));
             }}
@@ -303,7 +303,7 @@ export const PropertyContact: React.FC<PropertyContactProps> = ({
               className="w-full flex justify-center items-center gap-2 py-3 sm:py-2.5 px-4 border border-transparent rounded-xl shadow-sm text-sm font-semibold text-white bg-primary hover:bg-primary-dark active:opacity-90 transition-colors min-h-[48px]"
             >
               <PhoneIcon className="w-5 h-5 sm:w-4 sm:h-4" />
-              {t('property:actions.callSeller')}
+              {property.seller?.phone || t('property:actions.callSeller')}
             </a>
           )}
 
