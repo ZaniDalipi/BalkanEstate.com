@@ -246,24 +246,6 @@ const HeroSection: React.FC<HeroSectionProps> = ({
         initial="hidden"
         animate="visible"
       >
-        {/* Badge — liquid glass pill */}
-        <motion.div className="flex justify-center mb-4 sm:mb-6" variants={fadeUp}>
-          <span style={{
-            display: 'inline-flex', alignItems: 'center', gap: '6px',
-            padding: '6px 14px', borderRadius: '9999px',
-            fontSize: '11px', fontWeight: 600,
-            color: '#1d4ed8',
-            background: 'rgba(239,246,255,0.7)',
-            backdropFilter: 'blur(12px)',
-            WebkitBackdropFilter: 'blur(12px)',
-            border: '1px solid rgba(59,130,246,0.15)',
-            boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.8), 0 1px 3px rgba(59,130,246,0.08)',
-          }}>
-            <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#34d399' }} className="animate-pulse" />
-            {t('home:hero.badge')}
-          </span>
-        </motion.div>
-
         {/* Title */}
         <motion.h1
           className="text-center text-2xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-slate-900 tracking-tight leading-tight max-w-3xl mx-auto"
