@@ -23,7 +23,8 @@ const AgencyPodiumCard: React.FC<{
   rank: number;
   podiumHeight: number;
   onAgencyClick?: (agency: Agency) => void;
-}> = ({ agency, rank, podiumHeight, onAgencyClick }) => {
+  t: (key: string, fallback?: string) => string;
+}> = ({ agency, rank, podiumHeight, onAgencyClick, t }) => {
   const cardRef = useRef<HTMLDivElement>(null);
   const [isVisible, setIsVisible] = useState(false);
   const medal = MEDAL_COLORS[rank as keyof typeof MEDAL_COLORS];
@@ -179,7 +180,7 @@ const AgencyPodiumCard: React.FC<{
               border: '1px solid rgba(226,232,240,0.6)',
             }}>
               <span style={{ fontSize: '0.8rem', fontWeight: 700, color: '#0f172a' }}>{agency.totalProperties || 0}</span>
-              <span style={{ fontSize: '0.6rem', color: '#94a3b8', marginLeft: '3px' }}>listings</span>
+              <span style={{ fontSize: '0.6rem', color: '#94a3b8', marginLeft: '3px' }}>{t('topAgencies.listings', 'listings')}</span>
             </div>
             <div style={{
               padding: '0.25rem 0.5rem',
@@ -188,7 +189,7 @@ const AgencyPodiumCard: React.FC<{
               border: '1px solid rgba(226,232,240,0.6)',
             }}>
               <span style={{ fontSize: '0.8rem', fontWeight: 700, color: '#0f172a' }}>{agency.totalAgents || 0}</span>
-              <span style={{ fontSize: '0.6rem', color: '#94a3b8', marginLeft: '3px' }}>agents</span>
+              <span style={{ fontSize: '0.6rem', color: '#94a3b8', marginLeft: '3px' }}>{t('topAgencies.agents', 'agents')}</span>
             </div>
             {agency.yearsInBusiness != null && (
               <div style={{
@@ -198,7 +199,7 @@ const AgencyPodiumCard: React.FC<{
                 border: '1px solid rgba(226,232,240,0.6)',
               }}>
                 <span style={{ fontSize: '0.8rem', fontWeight: 700, color: '#0f172a' }}>{agency.yearsInBusiness}</span>
-                <span style={{ fontSize: '0.6rem', color: '#94a3b8', marginLeft: '3px' }}>yrs</span>
+                <span style={{ fontSize: '0.6rem', color: '#94a3b8', marginLeft: '3px' }}>{t('topAgencies.years', 'yrs')}</span>
               </div>
             )}
           </div>
@@ -383,6 +384,7 @@ const TopAgenciesSection: React.FC = () => {
                 rank={dataIndex}
                 podiumHeight={PODIUM_HEIGHTS[visualIndex]}
                 onAgencyClick={handleAgencyClick}
+                t={t}
               />
             ))}
           </div>
@@ -396,6 +398,7 @@ const TopAgenciesSection: React.FC = () => {
                 rank={dataIndex}
                 podiumHeight={50}
                 onAgencyClick={handleAgencyClick}
+                t={t}
               />
             ))}
           </div>
