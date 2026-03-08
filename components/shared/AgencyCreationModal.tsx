@@ -11,9 +11,10 @@ import { BALKAN_LOCATIONS, CityData } from '../../utils/balkanLocations';
 import { canCreateAgency } from '../../src/shared/utils/subscriptionHelpers';
 import { UserRole } from '../../types';
 import { createAgency } from '../../src/features/agencies/api/agencyApi';
+import { uploadRequest } from '../../src/shared/api/httpClient';
 import { API_URL } from '../../src/shared/api/config';
 import MapLocationPicker from '../../src/features/seller/components/MapLocationPicker';
-import { ChevronLeft, ChevronRight, X } from 'lucide-react';
+import { ChevronLeft, ChevronRight, X, Upload, ImageIcon } from 'lucide-react';
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 
@@ -87,7 +88,7 @@ const AgencyCreationModal: React.FC<AgencyCreationModalProps> = ({
   onAgencyCreated,
 }) => {
   const { t } = useTranslation(['agents', 'common']);
-  const { state, dispatch } = useAppContext();
+  const { state, dispatch, checkAuthStatus } = useAppContext();
   const [step, setStep] = useState(1);
   const [isCreating, setIsCreating] = useState(false);
   const [globalError, setGlobalError] = useState('');
@@ -97,6 +98,9 @@ const AgencyCreationModal: React.FC<AgencyCreationModalProps> = ({
   const [showPaymentWindow, setShowPaymentWindow] = useState(false);
   const [pendingAgencyData, setPendingAgencyData] = useState<any>(null);
   const [enterprisePlan, setEnterprisePlan] = useState<EnterprisePlan>(DEFAULT_ENTERPRISE_PLAN);
+
+  const [logoFile, setLogoFile] = useState<File | null>(null);
+  const [logoPreview, setLogoPreview] = useState<string | null>(null);
 
   const [formData, setFormData] = useState({
     name: '',
@@ -110,6 +114,7 @@ const AgencyCreationModal: React.FC<AgencyCreationModalProps> = ({
     email: '',
     website: '',
     licenseNumber: '',
+    registrationNumber: '',
     yearsInBusiness: '',
     languages: [] as string[],
     facebookUrl: '',
@@ -297,6 +302,34 @@ const AgencyCreationModal: React.FC<AgencyCreationModalProps> = ({
         : [...prev.languages, lang],
     }));
 
+  const MAX_LOGO_SIZE = 5 * 1024 * 1024; // 5MB
+  const ACCEPTED_IMAGE_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/svg+xml'];
+
+  const handleLogoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (!ACCEPTED_IMAGE_TYPES.includes(file.type)) {
+      setFieldErrors(prev => ({ ...prev, logo: t('agents:agencyCreation.validation.logoInvalidType', 'Please upload a JPEG, PNG, WebP, or SVG image') }));
+      return;
+    }
+    if (file.size > MAX_LOGO_SIZE) {
+      setFieldErrors(prev => ({ ...prev, logo: t('agents:agencyCreation.validation.logoTooLarge', 'Logo must be under 5MB') }));
+      return;
+    }
+
+    setLogoFile(file);
+    setFieldErrors(prev => ({ ...prev, logo: '' }));
+    const reader = new FileReader();
+    reader.onloadend = () => setLogoPreview(reader.result as string);
+    reader.readAsDataURL(file);
+  };
+
+  const removeLogo = () => {
+    setLogoFile(null);
+    setLogoPreview(null);
+  };
+
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
   // Per-step validation — returns error map (empty = all good)
@@ -352,16 +385,33 @@ const AgencyCreationModal: React.FC<AgencyCreationModalProps> = ({
     try {
       const result = await createAgency(pendingAgencyData);
       if (result && (result.agency || result._id || result.id)) {
+        const agencyId = result.agency?._id || result._id;
+        // Upload logo if one was selected
+        if (logoFile) {
+          try {
+            const logoFormData = new FormData();
+            logoFormData.append('logo', logoFile);
+            await uploadRequest(`/agencies/${agencyId}/upload-logo`, logoFormData);
+          } catch (logoErr) {
+            console.warn('Agency logo upload failed:', logoErr);
+          }
+        }
+        // Refresh user data immediately so the creator has dashboard access right away
+        await checkAuthStatus();
         dispatch({ type: 'SHOW_ALERT', payload: { type: 'success', title: t('agents:agencyCreation.alerts.createdTitle', 'Agency Created!'), message: t('agents:agencyCreation.alerts.createdMessage', { name: pendingAgencyData.name, defaultValue: `Your agency "${pendingAgencyData.name}" has been created.` }) } });
         dispatch({ type: 'SET_PENDING_AGENCY_DATA', payload: null });
         onClose();
-        const slug = result.agency?.slug || result.agency?._id || result._id;
-        if (slug) {
-          dispatch({ type: 'SET_SELECTED_AGENCY', payload: slug });
+        // Navigate to agency details page for immediate access
+        const agencySlug = result.agency?.slug;
+        if (agencySlug) {
+          dispatch({ type: 'SET_SELECTED_AGENCY', payload: agencySlug });
           dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'agencies' });
-          window.history.pushState({}, '', `/agencies/${slug}`);
+          window.history.pushState({}, '', `/agencies/${agencySlug}`);
+        } else {
+          dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'agency-dashboard' });
+          window.history.pushState({}, '', '/agency-dashboard');
         }
-        onAgencyCreated(result.agency?._id || result._id);
+        onAgencyCreated(agencyId);
       } else {
         setGlobalError(t('agents:agencyCreation.alerts.paymentSucceededButFailed', 'Payment succeeded but agency creation failed. Please contact support.'));
       }
@@ -395,20 +445,40 @@ const AgencyCreationModal: React.FC<AgencyCreationModalProps> = ({
       yearsInBusiness: formData.yearsInBusiness ? parseInt(formData.yearsInBusiness) : undefined,
     };
 
+    // Upload logo to agency after creation
+    const uploadLogoToAgency = async (agencyId: string) => {
+      if (!logoFile) return;
+      try {
+        const logoFormData = new FormData();
+        logoFormData.append('logo', logoFile);
+        await uploadRequest(`/agencies/${agencyId}/upload-logo`, logoFormData);
+      } catch (logoErr) {
+        console.warn('Agency logo upload failed:', logoErr);
+      }
+    };
+
     if (canSkipPayment) {
       setIsCreating(true);
       try {
         const result = await createAgency(agencyData);
         if (result && (result.agency || result._id || result.id)) {
+          const agencyId = result.agency?._id || result._id;
+          await uploadLogoToAgency(agencyId);
+          // Refresh user data immediately so the creator has dashboard access right away
+          await checkAuthStatus();
           dispatch({ type: 'SHOW_ALERT', payload: { type: 'success', title: t('agents:agencyCreation.alerts.createdTitle', 'Agency Created!'), message: t('agents:agencyCreation.alerts.createdMessage', { name: agencyData.name, defaultValue: `Your agency "${agencyData.name}" has been created successfully.` }) } });
           onClose();
-          const slug = result.agency?.slug || result.agency?._id || result._id;
-          if (slug) {
-            dispatch({ type: 'SET_SELECTED_AGENCY', payload: slug });
+          // Navigate to agency details page for immediate access
+          const agencySlug = result.agency?.slug;
+          if (agencySlug) {
+            dispatch({ type: 'SET_SELECTED_AGENCY', payload: agencySlug });
             dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'agencies' });
-            window.history.pushState({}, '', `/agencies/${slug}`);
+            window.history.pushState({}, '', `/agencies/${agencySlug}`);
+          } else {
+            dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'agency-dashboard' });
+            window.history.pushState({}, '', '/agency-dashboard');
           }
-          onAgencyCreated(result.agency?._id || result._id);
+          onAgencyCreated(agencyId);
         } else {
           setGlobalError(t('agents:agencyCreation.alerts.createFailed', 'Failed to create agency. Please try again.'));
         }
@@ -475,6 +545,66 @@ const AgencyCreationModal: React.FC<AgencyCreationModalProps> = ({
                 disabled={isCreating}
               />
               <p className="text-xs text-gray-400 mt-1">{t('agents:agencyCreation.hints.description', 'A compelling description helps clients understand your value')}</p>
+            </div>
+
+            {/* Logo Upload */}
+            <div>
+              <label className={labelCls}>{t('agents:agencyCreation.fields.logo', 'Agency Logo')}</label>
+              <div className="flex items-center gap-4">
+                {logoPreview ? (
+                  <div className="relative group">
+                    <img
+                      src={logoPreview}
+                      alt={t('agents:agencyCreation.fields.logoPreview', 'Logo preview')}
+                      className="w-16 h-16 rounded-xl object-cover border border-gray-200 shadow-sm"
+                    />
+                    <button
+                      type="button"
+                      onClick={removeLogo}
+                      disabled={isCreating}
+                      className="absolute -top-2 -right-2 w-5 h-5 bg-red-500 text-white rounded-full flex items-center justify-center text-xs opacity-0 group-hover:opacity-100 transition-opacity"
+                      aria-label={t('agents:agencyCreation.buttons.removeLogo', 'Remove logo')}
+                    >
+                      <X className="w-3 h-3" />
+                    </button>
+                  </div>
+                ) : (
+                  <div className="w-16 h-16 rounded-xl border-2 border-dashed border-gray-300 flex items-center justify-center bg-gray-50">
+                    <ImageIcon className="w-6 h-6 text-gray-400" />
+                  </div>
+                )}
+                <div className="flex-1">
+                  <label
+                    className={`inline-flex items-center gap-2 px-4 py-2 border border-gray-200 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors cursor-pointer ${isCreating ? 'opacity-50 pointer-events-none' : ''}`}
+                  >
+                    <Upload className="w-4 h-4" />
+                    {logoFile ? t('agents:agencyCreation.buttons.changeLogo', 'Change Logo') : t('agents:agencyCreation.buttons.uploadLogo', 'Upload Logo')}
+                    <input
+                      type="file"
+                      accept="image/jpeg,image/png,image/webp,image/svg+xml"
+                      onChange={handleLogoChange}
+                      className="hidden"
+                      disabled={isCreating}
+                    />
+                  </label>
+                  <p className="text-xs text-gray-400 mt-1">{t('agents:agencyCreation.hints.logo', 'JPEG, PNG, WebP or SVG. Max 5MB.')}</p>
+                </div>
+              </div>
+              <FieldError field="logo" fieldErrors={fieldErrors} />
+            </div>
+
+            {/* Registration Number */}
+            <div>
+              <label className={labelCls}>{t('agents:agencyCreation.fields.registrationNumber', 'Business Registration / Tax ID')}</label>
+              <input
+                type="text"
+                value={formData.registrationNumber}
+                onChange={e => set('registrationNumber', e.target.value)}
+                placeholder={t('agents:agencyCreation.placeholders.registrationNumber', 'e.g., PIB 123456789, OIB 12345678901')}
+                className={inputCls('registrationNumber')}
+                disabled={isCreating}
+              />
+              <p className="text-xs text-gray-400 mt-1">{t('agents:agencyCreation.hints.registrationNumber', 'Your official business registration or tax identification number')}</p>
             </div>
           </div>
         );

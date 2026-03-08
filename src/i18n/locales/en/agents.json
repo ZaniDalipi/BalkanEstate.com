@@ -874,7 +874,10 @@
       "languages": "Languages Spoken",
       "socialMedia": "Social Media",
       "businessHours": "Business Hours",
-      "optional": "(optional)"
+      "optional": "(optional)",
+      "logo": "Agency Logo",
+      "logoPreview": "Logo preview",
+      "registrationNumber": "Business Registration / Tax ID"
     },
     "placeholders": {
       "agencyName": "e.g., Premier Real Estate Agency",
@@ -882,7 +885,8 @@
       "selectCountry": "Select a country",
       "selectCity": "Select a city",
       "selectCountryFirst": "Select country first",
-      "streetAddress": "e.g., 123 Main Street, Building A"
+      "streetAddress": "e.g., 123 Main Street, Building A",
+      "registrationNumber": "e.g., PIB 123456789, OIB 12345678901"
     },
     "hints": {
       "agencyName": "Choose a professional name that represents your brand",
@@ -894,7 +898,9 @@
       "website": "Optional: Your agency's website",
       "licenseNumber": "Your official real estate license",
       "yearsInBusiness": "How long you've been in real estate",
-      "languages": "Select all languages your team can communicate in"
+      "languages": "Select all languages your team can communicate in",
+      "logo": "JPEG, PNG, WebP or SVG. Max 5MB.",
+      "registrationNumber": "Your official business registration or tax identification number"
     },
     "validation": {
       "nameRequired": "Agency name is required",
@@ -904,7 +910,9 @@
       "emailInvalid": "Please enter a valid email address",
       "phoneRequired": "Phone number is required",
       "phoneInvalid": "Please enter a valid phone number (e.g. +381 11 123 4567)",
-      "websiteInvalid": "Website must start with http:// or https://"
+      "websiteInvalid": "Website must start with http:// or https://",
+      "logoInvalidType": "Please upload a JPEG, PNG, WebP, or SVG image",
+      "logoTooLarge": "Logo must be under 5MB"
     },
     "alerts": {
       "createdTitle": "Agency Created!",
@@ -925,7 +933,10 @@
     "buttons": {
       "creating": "Creating Agency…",
       "create": "Create Agency",
-      "continueToPayment": "Continue to Payment →"
+      "continueToPayment": "Continue to Payment →",
+      "removeLogo": "Remove logo",
+      "uploadLogo": "Upload Logo",
+      "changeLogo": "Change Logo"
     }
   }
 }

@@ -38,6 +38,7 @@ export interface Agency {
   lat?: number;
   lng?: number;
   website?: string;
+  registrationNumber?: string; // Official business registration / tax ID
   totalProperties: number;
   totalAgents: number;
   yearsInBusiness?: number;

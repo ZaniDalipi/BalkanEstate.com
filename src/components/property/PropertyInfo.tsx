@@ -49,7 +49,7 @@ interface PropertyInfoProps {
  * ```
  */
 export const PropertyInfo: React.FC<PropertyInfoProps> = ({ property, onOpenFloorPlan }) => {
-  const { t } = useTranslation(['property']);
+  const { t } = useTranslation(['property', 'agents']);
   const { state, dispatch, updateSearchPageState } = useAppContext();
 
   // Handle location click to navigate to search with city/country filter

@@ -45,6 +45,9 @@ export interface IAgency extends Document {
   lng?: number; // Longitude for map display
   website?: string;
 
+  // Official registration
+  registrationNumber?: string; // Official business registration / tax ID (e.g. PIB in Serbia, OIB in Croatia)
+
   // Agency info
   specialties?: string[];
   specializations?: string[];
@@ -273,6 +276,11 @@ const AgencySchema: Schema = new Schema(
     website: {
       type: String,
       trim: true,
+    },
+    registrationNumber: {
+      type: String,
+      trim: true,
+      index: true,
     },
     specialties: [{
       type: String,

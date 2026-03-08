@@ -39,6 +39,7 @@ export interface IProperty extends Document {
   createdByEmail: string; // Email of the user who created this listing
   createdAsRole: 'private_seller' | 'agent'; // Which role context was used to create this listing
   createdByAgencyName?: string; // If created as agent, store agency name
+  createdByAgencyId?: mongoose.Types.ObjectId; // If created as agent, direct reference to Agency document
   createdByLicenseNumber?: string; // If created as agent, store license number
   listingType: 'sale' | 'rent'; // Whether this property is for sale or rent
   title?: string; // Optional title/headline for the property listing
@@ -161,6 +162,12 @@ const PropertySchema: Schema = new Schema(
       type: String,
       required: false,
       index: true, // Index for agency listings
+    },
+    createdByAgencyId: {
+      type: Schema.Types.ObjectId,
+      ref: 'Agency',
+      required: false,
+      index: true, // Index for querying all properties of an agency
     },
     createdByLicenseNumber: {
       type: String,

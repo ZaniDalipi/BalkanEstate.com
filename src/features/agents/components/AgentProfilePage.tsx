@@ -179,6 +179,9 @@ const AgentProfilePage: React.FC<AgentProfilePageProps> = ({ agent }) => {
                             agent={profile.agentData}
                             firstName={profile.firstName}
                             isAgencyAgent={profile.isAgencyAgent}
+                            agencyData={profile.agencyData}
+                            agencyGradient={profile.agencyGradient}
+                            onVisitAgency={profile.handleVisitAgency}
                             similarAgents={profile.similarAgents}
                             loadingSimilarAgents={profile.loadingSimilarAgents}
                             showAppraisalModal={profile.showAppraisalModal}
