@@ -1191,9 +1191,25 @@ export const uploadImages = async (
       }
     }
 
-    // Upload images using the centralized service
+    // Look up user's agency for watermarking
+    let watermarkOptions: { agencyLogoUrl?: string } | undefined;
+    const agent = await Agent.findOne({ userId });
+    if (agent?.agencyId) {
+      const agency = await Agency.findById(agent.agencyId).select('logo');
+      if (agency?.logo) {
+        watermarkOptions = { agencyLogoUrl: agency.logo };
+      } else {
+        // Still apply BalkanEstate watermark even without agency logo
+        watermarkOptions = {};
+      }
+    } else {
+      // Non-agency users still get BalkanEstate watermark
+      watermarkOptions = {};
+    }
+
+    // Upload images using the centralized service (with watermarking)
     // Images will be organized in: balkan-estate/properties/user-{userId}/listing-{propertyId}/
-    const uploadedImages = await uploadPropertyImages(files, userId, propertyId);
+    const uploadedImages = await uploadPropertyImages(files, userId, propertyId, watermarkOptions);
 
     res.json({
       images: uploadedImages,
