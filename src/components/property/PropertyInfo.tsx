@@ -1,9 +1,9 @@
 // PropertyInfo Component
 // Displays property details, description, and amenities
 
-import React, { useCallback, useState, useEffect } from 'react';
+import React, { useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Property, Agency } from '../../../types';
+import { Property } from '../../../types';
 import { formatPrice } from '../../../utils/currency';
 import { getPriceReductionInfo } from '../../../utils/priceUtils';
 import {
@@ -19,14 +19,10 @@ import {
   CubeTransparentIcon,
   LivingRoomIcon,
   CheckCircleIcon,
-  UsersIcon,
-  HomeIcon,
-  ChevronRightIcon,
 } from '../../../constants';
 import { DetailItem } from './PropertyCommon';
 import { useAppContext } from '../../../context/AppContext';
 import { BALKAN_COUNTRIES } from '../../../constants/countries';
-import * as api from '../../../services/apiService';
 
 interface PropertyInfoProps {
   property: Property;
@@ -55,31 +51,6 @@ interface PropertyInfoProps {
 export const PropertyInfo: React.FC<PropertyInfoProps> = ({ property, onOpenFloorPlan }) => {
   const { t } = useTranslation(['property', 'agents']);
   const { state, dispatch, updateSearchPageState } = useAppContext();
-
-  // Fetch agency data for sale properties that belong to an agency
-  const [agencyData, setAgencyData] = useState<Agency | null>(null);
-  const agencyId = property.seller?.agencyId;
-  const isSaleWithAgency = property.listingType === 'sale' && !!agencyId;
-
-  useEffect(() => {
-    if (!isSaleWithAgency || !agencyId) return;
-    let cancelled = false;
-    api.getAgency(agencyId).then((res: any) => {
-      if (!cancelled) {
-        setAgencyData(res.agency || res);
-      }
-    }).catch(() => {});
-    return () => { cancelled = true; };
-  }, [isSaleWithAgency, agencyId]);
-
-  const handleVisitAgency = useCallback(() => {
-    if (!agencyData) return;
-    dispatch({ type: 'SET_SELECTED_PROPERTY', payload: null });
-    dispatch({ type: 'SET_SELECTED_AGENCY', payload: agencyData._id });
-    dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'agencyDetail' });
-    const urlSlug = (agencyData.slug || agencyData._id).replace(',', '/');
-    window.history.pushState({}, '', `/agencies/${urlSlug}`);
-  }, [agencyData, dispatch]);
 
   // Handle location click to navigate to search with city/country filter
   const handleLocationClick = useCallback((e: React.MouseEvent, type: 'city' | 'country') => {
@@ -676,75 +647,6 @@ export const PropertyInfo: React.FC<PropertyInfoProps> = ({ property, onOpenFloo
               </div>
             </div>
           )}
-        </div>
-      )}
-
-      {/* Agency Card - For sale properties listed by an agency */}
-      {isSaleWithAgency && agencyData && (
-        <div className="relative bg-white/70 backdrop-blur-xl rounded-2xl shadow-[0_8px_32px_rgba(0,0,0,0.08)] border border-white/60 overflow-hidden">
-          {/* Agency Header with Gradient */}
-          <div className="bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 p-4 sm:p-6 text-white relative overflow-hidden">
-            <div className="absolute inset-0 bg-black/10" />
-            <div className="relative z-10">
-              <div className="flex items-center gap-2.5 sm:gap-3 mb-2 sm:mb-3">
-                <div className="w-10 h-10 sm:w-14 sm:h-14 bg-white rounded-lg sm:rounded-xl flex items-center justify-center flex-shrink-0 shadow-lg">
-                  {agencyData.logo ? (
-                    <img
-                      src={agencyData.logo}
-                      alt={agencyData.name}
-                      loading="lazy"
-                      decoding="async"
-                      className="w-8 h-8 sm:w-12 sm:h-12 object-cover rounded-md sm:rounded-lg"
-                    />
-                  ) : (
-                    <BuildingOfficeIcon className="w-6 h-6 sm:w-8 sm:h-8 text-blue-600" />
-                  )}
-                </div>
-                <div className="flex-1 min-w-0">
-                  <p className="text-[10px] sm:text-xs font-medium text-white/80 mb-0.5 sm:mb-1">{t('agents:profilePage.agencyCard.memberOf', 'Member of')}</p>
-                  <h3 className="text-sm sm:text-lg font-bold text-white truncate">{agencyData.name}</h3>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Agency Stats */}
-          <div className="p-3 sm:p-5 bg-gradient-to-b from-gray-50 to-white">
-            <div className="grid grid-cols-2 gap-2 sm:gap-3 mb-3 sm:mb-4">
-              <div className="bg-white rounded-lg sm:rounded-xl p-2 sm:p-3 border border-gray-200 shadow-sm">
-                <div className="flex items-center gap-1.5 sm:gap-2 mb-0.5 sm:mb-1">
-                  <UsersIcon className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-blue-600" />
-                  <span className="text-[10px] sm:text-xs text-gray-600 font-medium">{t('agents:profilePage.agencyCard.agents', 'Agents')}</span>
-                </div>
-                <p className="text-xl sm:text-2xl font-bold text-gray-900">{agencyData.totalAgents || 0}</p>
-              </div>
-              <div className="bg-white rounded-lg sm:rounded-xl p-2 sm:p-3 border border-gray-200 shadow-sm">
-                <div className="flex items-center gap-1.5 sm:gap-2 mb-0.5 sm:mb-1">
-                  <HomeIcon className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-green-600" />
-                  <span className="text-[10px] sm:text-xs text-gray-600 font-medium">{t('agents:profilePage.agencyCard.properties', 'Properties')}</span>
-                </div>
-                <p className="text-xl sm:text-2xl font-bold text-gray-900">{agencyData.totalProperties || 0}</p>
-              </div>
-            </div>
-
-            {/* Location */}
-            {agencyData.city && (
-              <div className="flex items-center gap-1.5 sm:gap-2 mb-3 sm:mb-4 text-gray-600 bg-white rounded-lg p-2 sm:p-3 border border-gray-200">
-                <MapPinIcon className="w-3.5 h-3.5 sm:w-4 sm:h-4 flex-shrink-0 text-gray-500" />
-                <span className="text-xs sm:text-sm truncate">{agencyData.city}, {agencyData.country}</span>
-              </div>
-            )}
-
-            {/* Visit Agency Button */}
-            <button
-              onClick={handleVisitAgency}
-              className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-bold py-2.5 sm:py-3.5 px-3 sm:px-4 rounded-lg sm:rounded-xl transition-all duration-300 shadow-md hover:shadow-lg flex items-center justify-center gap-1.5 sm:gap-2 group text-sm sm:text-base"
-            >
-              <BuildingOfficeIcon className="w-4 h-4 sm:w-5 sm:h-5" />
-              <span>{t('agents:profilePage.agencyCard.visitAgency', 'Visit Agency')}</span>
-              <ChevronRightIcon className="w-3.5 h-3.5 sm:w-4 sm:h-4 group-hover:translate-x-1 transition-transform" />
-            </button>
-          </div>
         </div>
       )}
 
