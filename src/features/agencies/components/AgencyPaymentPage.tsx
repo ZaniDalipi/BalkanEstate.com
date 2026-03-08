@@ -233,10 +233,17 @@ const AgencyPaymentPage: React.FC = () => {
       }
       setSuccessMessage(msg);
 
-      // Navigate to agency dashboard after a brief moment to show success message
+      // Navigate to agency details after a brief moment to show success message
+      const agencySlug = data.agency?.slug;
       setTimeout(() => {
-        dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'agency-dashboard' });
-        window.history.pushState({}, '', '/agency-dashboard');
+        if (agencySlug) {
+          dispatch({ type: 'SET_SELECTED_AGENCY', payload: agencySlug });
+          dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'agencies' });
+          window.history.pushState({}, '', `/agencies/${agencySlug}`);
+        } else {
+          dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'agency-dashboard' });
+          window.history.pushState({}, '', '/agency-dashboard');
+        }
       }, 2000);
     } catch (err: any) {
       setError(err.message || 'Failed to create agency. Please try again.');

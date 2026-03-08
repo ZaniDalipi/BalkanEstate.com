@@ -401,9 +401,16 @@ const AgencyCreationModal: React.FC<AgencyCreationModalProps> = ({
         dispatch({ type: 'SHOW_ALERT', payload: { type: 'success', title: t('agents:agencyCreation.alerts.createdTitle', 'Agency Created!'), message: t('agents:agencyCreation.alerts.createdMessage', { name: pendingAgencyData.name, defaultValue: `Your agency "${pendingAgencyData.name}" has been created.` }) } });
         dispatch({ type: 'SET_PENDING_AGENCY_DATA', payload: null });
         onClose();
-        // Navigate to agency dashboard for immediate access
-        dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'agency-dashboard' });
-        window.history.pushState({}, '', '/agency-dashboard');
+        // Navigate to agency details page for immediate access
+        const agencySlug = result.agency?.slug;
+        if (agencySlug) {
+          dispatch({ type: 'SET_SELECTED_AGENCY', payload: agencySlug });
+          dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'agencies' });
+          window.history.pushState({}, '', `/agencies/${agencySlug}`);
+        } else {
+          dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'agency-dashboard' });
+          window.history.pushState({}, '', '/agency-dashboard');
+        }
         onAgencyCreated(agencyId);
       } else {
         setGlobalError(t('agents:agencyCreation.alerts.paymentSucceededButFailed', 'Payment succeeded but agency creation failed. Please contact support.'));
@@ -461,9 +468,16 @@ const AgencyCreationModal: React.FC<AgencyCreationModalProps> = ({
           await checkAuthStatus();
           dispatch({ type: 'SHOW_ALERT', payload: { type: 'success', title: t('agents:agencyCreation.alerts.createdTitle', 'Agency Created!'), message: t('agents:agencyCreation.alerts.createdMessage', { name: agencyData.name, defaultValue: `Your agency "${agencyData.name}" has been created successfully.` }) } });
           onClose();
-          // Navigate to agency dashboard for immediate access
-          dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'agency-dashboard' });
-          window.history.pushState({}, '', '/agency-dashboard');
+          // Navigate to agency details page for immediate access
+          const agencySlug = result.agency?.slug;
+          if (agencySlug) {
+            dispatch({ type: 'SET_SELECTED_AGENCY', payload: agencySlug });
+            dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'agencies' });
+            window.history.pushState({}, '', `/agencies/${agencySlug}`);
+          } else {
+            dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'agency-dashboard' });
+            window.history.pushState({}, '', '/agency-dashboard');
+          }
           onAgencyCreated(agencyId);
         } else {
           setGlobalError(t('agents:agencyCreation.alerts.createFailed', 'Failed to create agency. Please try again.'));
