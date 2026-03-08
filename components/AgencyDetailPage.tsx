@@ -3081,9 +3081,18 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
                     })}
                   >
                     <Popup>
-                      <div className="min-w-[250px]">
+                      <div
+                        className="w-[220px] cursor-pointer"
+                        onClick={() => {
+                          const propertyId = property.id || property._id;
+                          dispatch({ type: 'SET_SELECTED_PROPERTY', payload: propertyId });
+                          window.history.pushState({}, '', `/property/${propertyId}`);
+                        }}
+                      >
                         {property.imageUrl && (
-                          <img src={property.imageUrl} alt={`Property for sale in ${property.city}, ${property.country} - ${property.address}`} className="w-full h-32 object-cover rounded-lg mb-2" loading="lazy" />
+                          <div className="w-full h-[130px] rounded-lg overflow-hidden mb-2">
+                            <img src={property.imageUrl} alt={`Property for sale in ${property.city}, ${property.country} - ${property.address}`} className="w-full h-full object-cover" loading="lazy" />
+                          </div>
                         )}
                         <p className="font-semibold text-sm mb-1 text-slate-900 line-clamp-2">{property.address}</p>
                         <p className="text-xs text-slate-500 mb-2">{property.city}, {property.country}</p>
@@ -3096,11 +3105,7 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
                           <span>{property.sqft} m²</span>
                         </div>
                         <button
-                          onClick={() => {
-                            const propertyId = property.id || property._id;
-                            dispatch({ type: 'SET_SELECTED_PROPERTY', payload: propertyId });
-                            window.history.pushState({}, '', `/property/${propertyId}`);
-                          }}
+                          type="button"
                           className={`w-full text-white px-3 py-2 rounded-lg font-semibold text-sm ${property.status === 'sold' ? 'bg-red-600 hover:bg-red-700' : 'bg-emerald-600 hover:bg-emerald-700'}`}
                         >
                           {t('agencyDetails:properties.viewDetails', 'View Details')}

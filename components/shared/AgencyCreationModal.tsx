@@ -11,6 +11,7 @@ import { BALKAN_LOCATIONS, CityData } from '../../utils/balkanLocations';
 import { canCreateAgency } from '../../src/shared/utils/subscriptionHelpers';
 import { UserRole } from '../../types';
 import { createAgency } from '../../src/features/agencies/api/agencyApi';
+import { uploadRequest } from '../../src/shared/api/httpClient';
 import { API_URL } from '../../src/shared/api/config';
 import MapLocationPicker from '../../src/features/seller/components/MapLocationPicker';
 import { ChevronLeft, ChevronRight, X, Upload, ImageIcon } from 'lucide-react';
@@ -385,18 +386,14 @@ const AgencyCreationModal: React.FC<AgencyCreationModalProps> = ({
       const result = await createAgency(pendingAgencyData);
       if (result && (result.agency || result._id || result.id)) {
         const agencyId = result.agency?._id || result._id;
-        // Upload logo if one was selected (non-blocking)
+        // Upload logo if one was selected
         if (logoFile) {
           try {
             const logoFormData = new FormData();
             logoFormData.append('logo', logoFile);
-            await fetch(`${API_URL}/agencies/${agencyId}/upload-logo`, {
-              method: 'POST',
-              credentials: 'include',
-              body: logoFormData,
-            });
-          } catch {
-            // Logo upload failure should not block agency creation success
+            await uploadRequest(`/agencies/${agencyId}/upload-logo`, logoFormData);
+          } catch (logoErr) {
+            console.warn('Agency logo upload failed:', logoErr);
           }
         }
         dispatch({ type: 'SHOW_ALERT', payload: { type: 'success', title: t('agents:agencyCreation.alerts.createdTitle', 'Agency Created!'), message: t('agents:agencyCreation.alerts.createdMessage', { name: pendingAgencyData.name, defaultValue: `Your agency "${pendingAgencyData.name}" has been created.` }) } });
@@ -442,19 +439,15 @@ const AgencyCreationModal: React.FC<AgencyCreationModalProps> = ({
       yearsInBusiness: formData.yearsInBusiness ? parseInt(formData.yearsInBusiness) : undefined,
     };
 
-    // Upload logo to agency after creation (non-blocking for agency creation itself)
+    // Upload logo to agency after creation
     const uploadLogoToAgency = async (agencyId: string) => {
       if (!logoFile) return;
       try {
         const logoFormData = new FormData();
         logoFormData.append('logo', logoFile);
-        await fetch(`${API_URL}/agencies/${agencyId}/upload-logo`, {
-          method: 'POST',
-          credentials: 'include',
-          body: logoFormData,
-        });
-      } catch {
-        // Logo upload failure should not block agency creation success
+        await uploadRequest(`/agencies/${agencyId}/upload-logo`, logoFormData);
+      } catch (logoErr) {
+        console.warn('Agency logo upload failed:', logoErr);
       }
     };
 
