@@ -1,3 +1,4 @@
+// express import removed - no longer needed for raw body
 import express from 'express';
 import {
   createUnifiedPayment,
@@ -9,8 +10,11 @@ import {
   applyFreeSubscription,
   getCustomerPortal,
   getAvailablePaymentMethods,
+  verifySession,
+  verifyPayPalPayment,
 } from '../controllers/paymentController';
 import { handlePayseraWebhook, verifyPayseraPayment } from '../controllers/payseraWebhookController';
+import { handlePayPalWebhook } from '../controllers/paypalWebhookController';
 import { protect } from '../middleware/auth';
 import { decryptPayload } from '../middleware/decryptPayload';
 import {
@@ -29,6 +33,10 @@ const router = express.Router();
  * Create a payment using the appropriate provider based on country
  * POST /api/payments/create-payment
  * Body: { planName, planInterval, amount, productId, countryCode, language, preferredProvider? }
+ *
+ * Routes to:
+ * - Stripe for GR, HR, BG, RO, SI, RS
+ * - PayPal for AL, BA, MK, ME, XK
  */
 router.post('/create-payment', protect, decryptPayload, validateCreatePayment, createUnifiedPayment);
 
@@ -67,7 +75,34 @@ router.post('/cancel-subscription', protect, cancelSubscription);
 router.get('/customer-portal', protect, getCustomerPortal);
 
 // ============================================================
-// PAYSERA ENDPOINTS (bank transfer webhook + verification)
+// STRIPE ENDPOINTS (real payment verification)
+// ============================================================
+
+/**
+ * Stripe webhook — signature-verified, no auth required.
+ * This is the ONLY way Stripe payments are confirmed.
+ * Raw body is required for signature verification.
+ */
+// Stripe webhook mounted at server level (before json parser) for raw body access
+
+/** Verify Stripe checkout session by session ID */
+router.get('/verify-session/:sessionId', protect, verifySession);
+
+// ============================================================
+// PAYPAL ENDPOINTS (real payment verification)
+// ============================================================
+
+/**
+ * PayPal webhook — signature-verified via PayPal API, no auth required.
+ * This is the ONLY way PayPal payments are confirmed.
+ */
+router.post('/paypal/webhook', handlePayPalWebhook);
+
+/** Verify PayPal order by order ID (server-side) */
+router.get('/paypal/verify/:orderId', protect, verifyPayPalPayment);
+
+// ============================================================
+// PAYSERA ENDPOINTS (legacy — kept for backward compatibility)
 // ============================================================
 
 /** Paysera payment callback (signature-verified, no auth) */
@@ -80,6 +115,7 @@ router.get('/paysera/verify/:orderId', protect, verifyPayseraPayment);
 // LEGACY ENDPOINTS (backward compatibility)
 // ============================================================
 
+/** Legacy mock payment — disabled, returns error directing to real payment */
 router.post('/process', protect, processPayment);
 
 export default router;

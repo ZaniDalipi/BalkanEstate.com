@@ -2,22 +2,23 @@
  * Payment Configuration
  *
  * This file contains all payment-related configuration including:
- * - Supported payment providers (Paysera as primary)
+ * - Supported payment providers (Stripe + PayPal)
  * - Supported payment methods per provider
  * - Payment method priorities for different user types
  * - Country to provider routing
  *
  * Provider Selection Strategy:
- * - Paysera: Primary provider for all 11 Balkan countries.
- *   Supports card, Google Pay, Apple Pay, bank transfers, SEPA, and e-wallet.
- *   Fees: ~1.5-2.5% for card/wallet, lower for bank transfers.
+ * - Stripe: GR, HR, BG, RO, SI, RS (6 countries)
+ *   Supports card, Apple Pay, Google Pay, SEPA.
+ * - PayPal: AL, BA, MK, ME, XK (5 countries)
+ *   Supports PayPal account and card payments.
  *
- * Easy to modify and maintain as payment options change over time
+ * All payments are verified server-side before activating subscriptions.
  */
 
 // ====== PAYMENT PROVIDERS ======
 
-export type PaymentProvider = 'paysera' | 'web';
+export type PaymentProvider = 'stripe' | 'paypal' | 'web';
 
 export interface PaymentProviderInfo {
   id: PaymentProvider;
@@ -30,14 +31,23 @@ export interface PaymentProviderInfo {
 }
 
 export const PAYMENT_PROVIDERS: Record<PaymentProvider, PaymentProviderInfo> = {
-  paysera: {
-    id: 'paysera',
-    name: 'Paysera',
-    description: 'Secure payments with card, Google Pay, Apple Pay, and bank transfer',
-    fees: '~1.5-2.5% for card/wallet, lower for bank transfers',
-    logo: 'paysera',
-    supportedCountries: ['GR', 'HR', 'BG', 'RO', 'SI', 'RS', 'AL', 'BA', 'MK', 'ME', 'XK'],
-    supportedMethods: ['card', 'google_pay', 'apple_pay', 'bank_transfer', 'wallet', 'sepa_debit'],
+  stripe: {
+    id: 'stripe',
+    name: 'Stripe',
+    description: 'Secure payments with card, Apple Pay, and Google Pay',
+    fees: '~1.5-3% for card payments',
+    logo: 'stripe',
+    supportedCountries: ['GR', 'HR', 'BG', 'RO', 'SI', 'RS'],
+    supportedMethods: ['card', 'apple_pay', 'google_pay', 'sepa_debit'],
+  },
+  paypal: {
+    id: 'paypal',
+    name: 'PayPal',
+    description: 'Secure payments with PayPal account or card',
+    fees: '~2.9% + €0.35 per transaction',
+    logo: 'paypal',
+    supportedCountries: ['AL', 'BA', 'MK', 'ME', 'XK'],
+    supportedMethods: ['paypal', 'card'],
   },
   web: {
     id: 'web',
@@ -62,21 +72,21 @@ export interface CountryPaymentInfo {
   flag: string;
 }
 
-// Paysera as primary provider for all countries
+// Stripe for EU + Serbia, PayPal for remaining Balkans
 export const COUNTRY_PAYMENT_MAP: Record<string, CountryPaymentInfo> = {
-  // EU Countries
-  GR: { countryCode: 'GR', countryName: 'Greece', provider: 'paysera', currency: 'EUR', isEU: true, isSEPA: true, flag: '🇬🇷' },
-  HR: { countryCode: 'HR', countryName: 'Croatia', provider: 'paysera', currency: 'EUR', isEU: true, isSEPA: true, flag: '🇭🇷' },
-  BG: { countryCode: 'BG', countryName: 'Bulgaria', provider: 'paysera', currency: 'EUR', isEU: true, isSEPA: true, flag: '🇧🇬' },
-  RO: { countryCode: 'RO', countryName: 'Romania', provider: 'paysera', currency: 'EUR', isEU: true, isSEPA: true, flag: '🇷🇴' },
-  SI: { countryCode: 'SI', countryName: 'Slovenia', provider: 'paysera', currency: 'EUR', isEU: true, isSEPA: true, flag: '🇸🇮' },
-  // Non-EU Balkans
-  RS: { countryCode: 'RS', countryName: 'Serbia', provider: 'paysera', currency: 'EUR', isEU: false, isSEPA: true, flag: '🇷🇸' },
-  AL: { countryCode: 'AL', countryName: 'Albania', provider: 'paysera', currency: 'EUR', isEU: false, isSEPA: true, flag: '🇦🇱' },
-  BA: { countryCode: 'BA', countryName: 'Bosnia and Herzegovina', provider: 'paysera', currency: 'EUR', isEU: false, isSEPA: false, flag: '🇧🇦' },
-  MK: { countryCode: 'MK', countryName: 'North Macedonia', provider: 'paysera', currency: 'EUR', isEU: false, isSEPA: true, flag: '🇲🇰' },
-  ME: { countryCode: 'ME', countryName: 'Montenegro', provider: 'paysera', currency: 'EUR', isEU: false, isSEPA: true, flag: '🇲🇪' },
-  XK: { countryCode: 'XK', countryName: 'Kosovo', provider: 'paysera', currency: 'EUR', isEU: false, isSEPA: false, flag: '🇽🇰' },
+  // Stripe countries (EU + Serbia)
+  GR: { countryCode: 'GR', countryName: 'Greece', provider: 'stripe', currency: 'EUR', isEU: true, isSEPA: true, flag: '🇬🇷' },
+  HR: { countryCode: 'HR', countryName: 'Croatia', provider: 'stripe', currency: 'EUR', isEU: true, isSEPA: true, flag: '🇭🇷' },
+  BG: { countryCode: 'BG', countryName: 'Bulgaria', provider: 'stripe', currency: 'EUR', isEU: true, isSEPA: true, flag: '🇧🇬' },
+  RO: { countryCode: 'RO', countryName: 'Romania', provider: 'stripe', currency: 'EUR', isEU: true, isSEPA: true, flag: '🇷🇴' },
+  SI: { countryCode: 'SI', countryName: 'Slovenia', provider: 'stripe', currency: 'EUR', isEU: true, isSEPA: true, flag: '🇸🇮' },
+  RS: { countryCode: 'RS', countryName: 'Serbia', provider: 'stripe', currency: 'EUR', isEU: false, isSEPA: true, flag: '🇷🇸' },
+  // PayPal countries (non-Stripe Balkans)
+  AL: { countryCode: 'AL', countryName: 'Albania', provider: 'paypal', currency: 'EUR', isEU: false, isSEPA: true, flag: '🇦🇱' },
+  BA: { countryCode: 'BA', countryName: 'Bosnia and Herzegovina', provider: 'paypal', currency: 'EUR', isEU: false, isSEPA: false, flag: '🇧🇦' },
+  MK: { countryCode: 'MK', countryName: 'North Macedonia', provider: 'paypal', currency: 'EUR', isEU: false, isSEPA: true, flag: '🇲🇰' },
+  ME: { countryCode: 'ME', countryName: 'Montenegro', provider: 'paypal', currency: 'EUR', isEU: false, isSEPA: true, flag: '🇲🇪' },
+  XK: { countryCode: 'XK', countryName: 'Kosovo', provider: 'paypal', currency: 'EUR', isEU: false, isSEPA: false, flag: '🇽🇰' },
 };
 
 /**
@@ -84,7 +94,7 @@ export const COUNTRY_PAYMENT_MAP: Record<string, CountryPaymentInfo> = {
  */
 export function getProviderForCountry(countryCode: string): PaymentProvider {
   const info = COUNTRY_PAYMENT_MAP[countryCode.toUpperCase()];
-  return info?.provider || 'paysera';
+  return info?.provider || 'stripe';
 }
 
 /**

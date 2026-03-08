@@ -63,6 +63,11 @@ const TRUSTED_REDIRECT_DOMAINS: string[] = [
   'www.balkanestateai.com',
   'api.balkanestateai.com',
   'accounts.google.com',
+  'checkout.stripe.com',
+  'paypal.com',
+  'www.paypal.com',
+  'sandbox.paypal.com',
+  'www.sandbox.paypal.com',
   'bank.paysera.com',
   'sandbox.paysera.com',
 ];

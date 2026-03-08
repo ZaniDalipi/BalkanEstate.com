@@ -156,20 +156,24 @@ export async function getPaymentProvider(countryCode: string): Promise<PaymentPr
   } catch (error: any) {
     const info = getCountryPaymentInfo(countryCode);
     if (info) {
+      const providerName = info.provider === 'stripe' ? 'Stripe' : info.provider === 'paypal' ? 'PayPal' : 'Online Payment';
+      const methods = info.provider === 'stripe'
+        ? ['card', 'apple_pay', 'google_pay', 'sepa_debit']
+        : ['paypal', 'card'];
       return {
         success: true,
         countryCode: info.countryCode,
         countryName: info.countryName,
         provider: info.provider,
         providerInfo: {
-          name: 'Paysera',
+          name: providerName,
           description: 'Secure online payments',
-          fees: '~1.5-2.5%',
+          fees: info.provider === 'stripe' ? '~1.5-3%' : '~2.9% + €0.35',
         },
         isEU: info.isEU,
         isSEPA: info.isSEPA,
         currency: info.currency,
-        supportedMethods: ['card', 'google_pay', 'apple_pay', 'bank_transfer'],
+        supportedMethods: methods,
       };
     }
     return null;
@@ -193,9 +197,9 @@ export async function getSupportedCountries(): Promise<SupportedCountriesRespons
       countries: countries.map(c => ({
         ...c,
         providerInfo: {
-          name: 'Paysera',
+          name: c.provider === 'stripe' ? 'Stripe' : c.provider === 'paypal' ? 'PayPal' : 'Online Payment',
           description: 'Secure online payments',
-          fees: '~1.5-2.5%',
+          fees: c.provider === 'stripe' ? '~1.5-3%' : '~2.9% + €0.35',
         },
       })),
     };
@@ -217,28 +221,88 @@ export async function getPaymentMethods(countryCode: string): Promise<PaymentMet
 }
 
 /**
- * Verify a payment (auto-detects provider from URL params)
+ * Verify a payment (auto-detects provider from URL params).
+ * Routes to the correct verification endpoint based on provider:
+ * - Stripe: /payments/verify-session/:sessionId
+ * - PayPal: /payments/paypal/verify/:orderId
+ * - Paysera (legacy): /payments/paysera/verify/:orderId
  */
 export async function verifyPayment(params: URLSearchParams): Promise<VerifyPaymentResponse> {
   const sessionId = params.get('session_id');
   const orderId = params.get('order_id');
+  const token = params.get('token'); // PayPal token param
   const provider = params.get('provider') as PaymentProvider | null;
 
-  if (sessionId || orderId) {
+  // Stripe verification — uses session_id
+  if (provider === 'stripe' && sessionId) {
     try {
-      const endpoint = sessionId
-        ? `/payments/verify-session/${sessionId}`
-        : `/payments/verify-order/${orderId}`;
       const response = await apiRequest<VerifyPaymentResponse>(
-        endpoint,
+        `/payments/verify-session/${sessionId}`,
         { method: 'GET', requiresAuth: true, encryptResponse: true }
       );
-      return { ...response, provider: provider || 'paysera' };
-    } catch (error: any) {
+      return { ...response, provider: 'stripe' };
+    } catch {
       return {
         success: true,
         paymentStatus: 'pending_confirmation',
-        provider: provider || 'paysera',
+        provider: 'stripe',
+        message: 'Payment received! Your subscription will be activated shortly.',
+      };
+    }
+  }
+
+  // PayPal verification — uses order_id or token
+  if (provider === 'paypal') {
+    const paypalOrderId = orderId || token;
+    if (paypalOrderId) {
+      try {
+        const response = await apiRequest<VerifyPaymentResponse>(
+          `/payments/paypal/verify/${paypalOrderId}`,
+          { method: 'GET', requiresAuth: true, encryptResponse: true }
+        );
+        return { ...response, provider: 'paypal' };
+      } catch {
+        return {
+          success: true,
+          paymentStatus: 'pending_confirmation',
+          provider: 'paypal',
+          message: 'Payment received! Your subscription will be activated shortly.',
+        };
+      }
+    }
+  }
+
+  // Legacy Paysera verification or fallback
+  if (orderId) {
+    try {
+      const response = await apiRequest<VerifyPaymentResponse>(
+        `/payments/paysera/verify/${orderId}`,
+        { method: 'GET', requiresAuth: true, encryptResponse: true }
+      );
+      return { ...response, provider: provider || 'web' };
+    } catch {
+      return {
+        success: true,
+        paymentStatus: 'pending_confirmation',
+        provider: provider || 'web',
+        message: 'Payment received! Your subscription will be activated shortly.',
+      };
+    }
+  }
+
+  // Stripe fallback — session_id without explicit provider
+  if (sessionId) {
+    try {
+      const response = await apiRequest<VerifyPaymentResponse>(
+        `/payments/verify-session/${sessionId}`,
+        { method: 'GET', requiresAuth: true, encryptResponse: true }
+      );
+      return { ...response, provider: 'stripe' };
+    } catch {
+      return {
+        success: true,
+        paymentStatus: 'pending_confirmation',
+        provider: 'stripe',
         message: 'Payment received! Your subscription will be activated shortly.',
       };
     }
@@ -345,7 +409,7 @@ export function redirectToPayment(paymentUrl: string): void {
 
 /**
  * Initiate payment flow
- * Creates payment session and redirects to Paysera checkout
+ * Creates payment session and redirects to Stripe/PayPal checkout
  */
 export async function initiatePayment(request: CreatePaymentRequest): Promise<{
   success: boolean;

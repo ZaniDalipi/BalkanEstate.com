@@ -319,7 +319,7 @@ const PaymentWindow: React.FC<PaymentWindowProps> = ({
   // Start polling for payment verification
   // In development: skip polling entirely to avoid rate limiting
   // In production: poll every 6 seconds with max 30 attempts
-  const startPaymentPolling = (sessionId: string, maxAttempts = IS_DEVELOPMENT ? 3 : 30, provider = 'paysera') => {
+  const startPaymentPolling = (sessionId: string, maxAttempts = IS_DEVELOPMENT ? 3 : 30, provider = 'stripe') => {
     // In development, don't poll aggressively - just show success message
     if (IS_DEVELOPMENT) {
       setIsPolling(true);
@@ -347,8 +347,10 @@ const PaymentWindow: React.FC<PaymentWindowProps> = ({
       try {
         const token = tokenService.getAccessToken();
         // Verify payment status — use provider-specific endpoint
-        const verifyUrl = provider === 'paysera'
-          ? `${API_URL}/payments/paysera/verify/${sessionId}`
+        const verifyUrl = provider === 'stripe'
+          ? `${API_URL}/payments/verify-session/${sessionId}`
+          : provider === 'paypal'
+          ? `${API_URL}/payments/paypal/verify/${sessionId}`
           : `${API_URL}/payments/subscription-status`;
         const response = await fetch(verifyUrl, {
           method: 'GET',

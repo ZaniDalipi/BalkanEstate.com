@@ -1,5 +1,4 @@
 import { Request, Response } from 'express';
-// @ts-ignore - stripe types included in package
 import Stripe from 'stripe';
 import User from '../models/User';
 import Product from '../models/Product';
@@ -9,15 +8,13 @@ import PaymentRecord from '../models/PaymentRecord';
 import SubscriptionEvent from '../models/SubscriptionEvent';
 import { processSubscriptionPayment } from '../services/subscriptionPaymentService';
 import { paymentProviderFactory } from '../services/paymentProviderFactory';
+import { stripeService } from '../services/stripeService';
+import { paypalService } from '../services/paypalService';
 import emailService from '../services/emailService';
 import { paymentLogger } from '../utils/logger';
 
-// Stripe is not used - Paddle and PaySera are the active payment providers
-// Keeping Stripe initialization for legacy webhook handling only
-const STRIPE_SECRET_KEY = process.env.STRIPE_SECRET_KEY;
-const stripe = new Stripe(STRIPE_SECRET_KEY || 'sk_not_configured', {
-  apiVersion: '2026-02-25.clover',
-});
+// Get Stripe instance from the service for webhook handling
+const stripe = stripeService.getStripeInstance();
 
 /**
  * @desc    Create a Stripe Checkout Session for external payment
@@ -26,7 +23,7 @@ const stripe = new Stripe(STRIPE_SECRET_KEY || 'sk_not_configured', {
  */
 export const createCheckoutSession = async (req: Request, res: Response): Promise<void> => {
   try {
-    const { planName, planInterval, amount, productId } = req.body;
+    const { planName, planInterval, amount, productId, countryCode } = req.body;
     const userId = (req as any).user?._id;
 
     if (!userId) {
@@ -40,7 +37,6 @@ export const createCheckoutSession = async (req: Request, res: Response): Promis
       return;
     }
 
-    // Validate amount
     if (!amount || amount <= 0) {
       res.status(400).json({ message: 'Invalid amount' });
       return;
@@ -56,47 +52,29 @@ export const createCheckoutSession = async (req: Request, res: Response): Promis
       }
     }
 
-    // Get the base URL from environment or request
-    const baseUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
-
-    // Create Stripe Checkout Session
-    const session = await stripe.checkout.sessions.create({
-      payment_method_types: ['card'],
-      line_items: [
-        {
-          price_data: {
-            currency: 'eur',
-            product_data: {
-              name: planName,
-              description: `${planName} - ${planInterval} subscription`,
-            },
-            unit_amount: Math.round(amount * 100), // Convert to cents
-            recurring: planInterval === 'month' || planInterval === 'year'
-              ? { interval: planInterval === 'year' ? 'year' : 'month' }
-              : undefined,
-          },
-          quantity: 1,
-        },
-      ],
-      mode: planInterval === 'month' || planInterval === 'year' ? 'subscription' : 'payment',
-      success_url: `${baseUrl}/payment/success?session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${baseUrl}/payment/cancel`,
-      client_reference_id: userId.toString(),
-      metadata: {
-        userId: userId.toString(),
-        planName,
-        planInterval,
-        productId: productId || 'default',
-        userEmail: user.email,
-      },
+    // Use Stripe service for real checkout session
+    const result = await stripeService.createCheckoutSession({
+      userId: userId.toString(),
+      userEmail: user.email,
+      amount,
+      currency: 'EUR',
+      productId: productId || 'default',
+      planName,
+      planInterval: planInterval || 'month',
+      countryCode: countryCode || user.country || 'GR',
+      firstName: user.name?.split(' ')[0],
+      lastName: user.name?.split(' ').slice(1).join(' '),
     });
 
-    // Session created successfully
+    if (!result.success) {
+      res.status(500).json({ message: result.error || 'Failed to create checkout session' });
+      return;
+    }
 
     res.status(200).json({
       success: true,
-      sessionId: session.id,
-      url: session.url, // This is the Stripe-hosted payment page URL
+      sessionId: result.sessionId,
+      url: result.paymentUrl,
     });
   } catch (error: any) {
     paymentLogger.error('Error creating checkout session:', error);
@@ -253,7 +231,7 @@ export const getSupportedCountries = async (_req: Request, res: Response): Promi
         providerInfo: paymentProviderFactory.getProviderInfo(c.provider),
       })),
       stripeCountries: paymentProviderFactory.getCountriesByProvider('stripe'),
-      paddleCountries: paymentProviderFactory.getCountriesByProvider('paddle'),
+      paypalCountries: paymentProviderFactory.getCountriesByProvider('paypal'),
     });
   } catch (error: any) {
     console.error('Error getting supported countries:', error);
@@ -262,86 +240,14 @@ export const getSupportedCountries = async (_req: Request, res: Response): Promi
 };
 
 /**
- * @desc    Process a mock payment (simulate payment success)
+ * @desc    Legacy payment endpoint (disabled — all payments go through real providers)
  * @route   POST /api/payments/process
  * @access  Private
  */
-export const processPayment = async (req: Request, res: Response): Promise<void> => {
-  try {
-    const { planName, planInterval, amount = 1.50 } = req.body;
-    const userId = (req as any).user?._id;
-
-    if (!userId) {
-      res.status(401).json({ message: 'User not authenticated' });
-      return;
-    }
-
-    const user = await User.findById(userId);
-    if (!user) {
-      res.status(404).json({ message: 'User not found' });
-      return;
-    }
-
-    // Determine product ID based on plan name and interval
-    let productId = 'buyer_pro_monthly';
-    if (planName.toLowerCase().includes('buyer') && planInterval === 'month') {
-      productId = 'buyer_pro_monthly';
-    } else if (planName.toLowerCase().includes('buyer') && planInterval === 'year') {
-      productId = 'buyer_pro_yearly';
-    } else if (planName.toLowerCase().includes('seller') && planInterval === 'month') {
-      productId = 'seller_premium_monthly';
-    } else if (planName.toLowerCase().includes('seller') && planInterval === 'year') {
-      productId = 'seller_premium_yearly';
-    }
-
-    // Try to find the product, or create a default one
-    let product = await Product.findOne({ productId });
-
-    if (!product) {
-      // Create a default product for testing
-      product = await Product.create({
-        productId,
-        name: planName,
-        description: `${planName} subscription`,
-        price: amount,
-        currency: 'EUR',
-        billingPeriod: planInterval === 'year' ? 'yearly' : 'monthly',
-        isActive: true,
-      });
-    }
-
-    // Use the secure payment processing service (ATOMIC TRANSACTION)
-    const result = await processSubscriptionPayment({
-      userId,
-      productId,
-      store: 'web',
-      amount: product.price,
-      currency: product.currency,
-    });
-
-    // Payment processed successfully
-
-    res.status(200).json({
-      success: true,
-      message: 'Payment processed successfully',
-      subscription: {
-        id: result.subscription._id,
-        plan: productId,
-        productName: product.name,
-        source: 'web',
-        expiresAt: result.subscription.expirationDate,
-        status: result.subscription.status,
-      },
-      payment: {
-        id: result.paymentRecord._id,
-        amount: result.paymentRecord.amount,
-        currency: result.paymentRecord.currency,
-      },
-    });
-  } catch (error: any) {
-    console.error('Error processing payment:', error);
-    res.status(500).json({ message: 'Error processing payment' });
-  }
+export const processPayment = async (_req: Request, res: Response): Promise<void> => {
+  res.status(400).json({
+    message: 'Direct payment processing is disabled. Please use /api/payments/create-payment to create a real payment session via Stripe or PayPal.',
+  });
 };
 
 /**
@@ -444,13 +350,15 @@ export const cancelSubscription = async (req: Request, res: Response): Promise<v
  * @desc    Handle Stripe webhook events
  * @route   POST /api/payment/webhook
  * @access  Public (but verified with Stripe signature)
+ *
+ * Stripe webhooks are the ONLY way we confirm payments.
+ * Subscriptions are NEVER activated from client-side data.
  */
 export const handleWebhook = async (req: Request, res: Response): Promise<void> => {
   const sig = req.headers['stripe-signature'] as string;
-  const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
 
-  if (!webhookSecret) {
-    console.error('⚠️ Webhook secret not configured');
+  if (!stripeService.getWebhookSecret()) {
+    paymentLogger.error('Stripe webhook secret not configured');
     res.status(400).send('Webhook secret not configured');
     return;
   }
@@ -458,10 +366,10 @@ export const handleWebhook = async (req: Request, res: Response): Promise<void> 
   let event: Stripe.Event;
 
   try {
-    // Verify webhook signature
-    event = stripe.webhooks.constructEvent(req.body, sig, webhookSecret);
+    // Verify webhook signature — rejects forged webhooks
+    event = stripeService.constructWebhookEvent(req.body, sig);
   } catch (err: any) {
-    console.error('⚠️ Webhook signature verification failed:', err.message);
+    paymentLogger.error('Stripe webhook signature verification failed:', err.message);
     res.status(400).send(`Webhook Error: ${err.message}`);
     return;
   }
@@ -673,8 +581,8 @@ async function handleRecurringPaymentSucceeded(invoice: Stripe.Invoice) {
       return;
     }
 
-    // Get the full subscription object
-    const stripeSubscription = await stripe.subscriptions.retrieve(subscription);
+    // Get the full subscription object (server-side verification)
+    const stripeSubscription = await stripeService.retrieveSubscription(subscription);
     const userId = stripeSubscription.metadata?.userId;
     const productId = stripeSubscription.metadata?.productId;
 
@@ -770,8 +678,8 @@ export const verifySession = async (req: Request, res: Response): Promise<void> 
       return;
     }
 
-    // Retrieve the session from Stripe
-    const session = await stripe.checkout.sessions.retrieve(sessionId);
+    // Retrieve the session from Stripe (server-side verification)
+    const session = await stripeService.retrieveSession(sessionId);
 
     // Verify this session belongs to the current user
     if (session.client_reference_id !== userId.toString()) {
@@ -1061,6 +969,104 @@ async function handleDisputeCreated(dispute: Stripe.Dispute) {
 }
 
 /**
+ * @desc    Verify a PayPal order by checking its status server-side
+ * @route   GET /api/payments/paypal/verify/:orderId
+ * @access  Private
+ *
+ * Checks the actual order status with PayPal's API — never trusts client data.
+ * If the order is APPROVED but not yet captured, it captures the payment.
+ */
+export const verifyPayPalPayment = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const orderId = req.params.orderId as string;
+    const userId = (req as any).user?._id;
+
+    if (!userId) {
+      res.status(401).json({ message: 'User not authenticated' });
+      return;
+    }
+
+    // Get order details from PayPal (server-side verification)
+    const orderDetails = await paypalService.getOrderDetails(orderId);
+
+    if (!orderDetails.success) {
+      res.status(400).json({
+        success: false,
+        paymentStatus: 'error',
+        message: orderDetails.error || 'Failed to verify PayPal order',
+      });
+      return;
+    }
+
+    // If order is APPROVED but not captured, capture it now
+    if (orderDetails.status === 'APPROVED') {
+      const captureResult = await paypalService.captureOrder(orderId);
+
+      if (captureResult.success) {
+        // Payment captured — webhook will handle subscription activation
+        res.status(200).json({
+          success: true,
+          paymentStatus: 'paid',
+          provider: 'paypal',
+          orderId,
+          message: 'Payment captured successfully. Subscription will be activated shortly.',
+        });
+        return;
+      }
+
+      res.status(400).json({
+        success: false,
+        paymentStatus: 'failed',
+        message: captureResult.error || 'Failed to capture PayPal payment',
+      });
+      return;
+    }
+
+    // If order is COMPLETED, payment is done
+    if (orderDetails.status === 'COMPLETED') {
+      // Check if user's subscription is active (webhook may have already processed it)
+      const user = await User.findById(userId);
+      if (user?.isSubscribed && user?.subscriptionStatus === 'active') {
+        res.status(200).json({
+          success: true,
+          paymentStatus: 'paid',
+          provider: 'paypal',
+          orderId,
+          subscription: {
+            plan: user.subscriptionPlan,
+            expiresAt: user.subscriptionExpiresAt,
+            status: user.subscriptionStatus,
+          },
+        });
+        return;
+      }
+
+      // Webhook hasn't processed yet
+      res.status(200).json({
+        success: true,
+        paymentStatus: 'pending_confirmation',
+        provider: 'paypal',
+        orderId,
+        message: 'Payment received. Your subscription will be activated shortly.',
+      });
+      return;
+    }
+
+    // Order is still pending
+    res.status(200).json({
+      success: false,
+      paymentStatus: 'pending',
+      provider: 'paypal',
+      orderId,
+      message: 'Payment is being processed. Please check back in a few minutes.',
+    });
+  } catch (error: any) {
+    paymentLogger.error('Error verifying PayPal payment:', error);
+    res.status(500).json({ message: 'Error verifying payment' });
+  }
+};
+
+/**
  * @desc    Get customer portal URL for managing subscription
  * @route   GET /api/payments/customer-portal
  * @access  Private
@@ -1107,7 +1113,7 @@ export const getAvailablePaymentMethods = async (req: Request, res: Response): P
       success: true,
       countryCode: code,
       methods,
-      provider: mapping?.provider || 'paysera',
+      provider: mapping?.provider || 'stripe',
       isEU: mapping?.isEU || false,
       isSEPA: mapping?.isSEPA || false,
     });
