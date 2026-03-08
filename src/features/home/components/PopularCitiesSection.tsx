@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { motion } from 'framer-motion';
 import { useQuery } from '@tanstack/react-query';
@@ -103,10 +103,14 @@ const PopularCitiesSection: React.FC<PopularCitiesSectionProps> = ({ onNavigate 
     retry: 2,
   });
 
-  // Pick 6 diverse cities once per mount (randomized across countries)
+  // Unique id per mount so cities re-shuffle every time the section appears
+  const mountId = useRef(Math.random());
+
+  // Pick 6 diverse cities, re-shuffled on every mount
   const cities = useMemo(
     () => pickDiverseCities(allCities, 6),
-    [allCities]
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [allCities, mountId.current]
   );
 
   const { data: cityImages = {} } = useCityImages(cities);
