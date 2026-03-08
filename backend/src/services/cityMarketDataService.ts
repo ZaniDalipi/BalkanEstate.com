@@ -509,6 +509,8 @@ export async function ensureAllFeaturedCitiesExist(): Promise<void> {
     apiLogger.info(`🌱 Seeded ${seeded} missing featured cities with fallback data`);
   }
 }
+
+/**
  * Get featured city recommendations with live listing counts
  */
 export async function getFeaturedCities(limit: number = 12): Promise<CityMarketDataLean[]> {
