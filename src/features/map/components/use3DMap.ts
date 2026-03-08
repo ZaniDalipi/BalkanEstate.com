@@ -619,33 +619,16 @@ export function use3DMap(props: Map3DBuildingsProps) {
       ])
     );
 
-    // First, try to hide the original building by setting a filter that excludes buildings at this location
-    // We'll do this by creating a small exclusion zone around the property
-    if (mapInstance.getLayer('3d-buildings')) {
-      // Get the current filter and add exclusion for this building's area
-      const latTolerance = 0.0003; // ~30m tolerance
-      const lngTolerance = 0.0003;
-
-      // Apply filter to exclude the original building (by checking if building is within our area)
-      // This uses a bounding box check
-      mapInstance.setFilter('3d-buildings', [
-        'any',
-        ['<', ['get', 'render_height'], 5], // Keep short buildings
-        ['all',
-          ['any',
-            ['<', ['geometry-type'], 'Polygon'], // Keep non-polygons
-            ['any',
-              // Keep buildings outside our exclusion zone
-              // We can't easily filter by geometry center, so use a workaround
-              // by relying on the custom building to cover the original
-            ]
-          ]
-        ]
-      ]);
-
-      // Alternative: Just let the custom building cover the original
-      // Remove the filter and rely on proper z-ordering
-      mapInstance.setFilter('3d-buildings', null);
+    // Hide the original building from the 3d-buildings layer so our custom floor slabs
+    // (with gaps between them) don't show the original solid building underneath.
+    // Without this, the gaps between floor slabs are invisible in production because
+    // the original building renders as a solid block behind them.
+    if (mapInstance.getLayer('3d-buildings') && buildingFeature) {
+      // Use the feature's vector tile ID to exclude it from the 3d-buildings layer
+      const featureId = buildingFeature.id;
+      if (featureId != null) {
+        mapInstance.setFilter('3d-buildings', ['!=', ['id'], featureId]);
+      }
     }
 
     // Add source for the custom building using actual geometry
