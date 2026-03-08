@@ -235,6 +235,16 @@ const PaymentSuccess: React.FC = () => {
         // Clear pending agency data from context
         dispatch({ type: 'SET_PENDING_AGENCY_DATA', payload: null });
 
+        // Immediately refresh user data so the creator has dashboard access right away
+        try {
+          const response = await authApiClient.getCurrentUser();
+          if (response && response.user) {
+            dispatch({ type: 'SET_CURRENT_USER', payload: response.user });
+          }
+        } catch {
+          // Non-critical - user can refresh manually
+        }
+
         // Show success notification
         dispatch({
           type: 'SHOW_ALERT',

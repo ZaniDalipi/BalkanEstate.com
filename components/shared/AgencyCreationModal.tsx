@@ -88,7 +88,7 @@ const AgencyCreationModal: React.FC<AgencyCreationModalProps> = ({
   onAgencyCreated,
 }) => {
   const { t } = useTranslation(['agents', 'common']);
-  const { state, dispatch } = useAppContext();
+  const { state, dispatch, checkAuthStatus } = useAppContext();
   const [step, setStep] = useState(1);
   const [isCreating, setIsCreating] = useState(false);
   const [globalError, setGlobalError] = useState('');
@@ -396,15 +396,14 @@ const AgencyCreationModal: React.FC<AgencyCreationModalProps> = ({
             console.warn('Agency logo upload failed:', logoErr);
           }
         }
+        // Refresh user data immediately so the creator has dashboard access right away
+        await checkAuthStatus();
         dispatch({ type: 'SHOW_ALERT', payload: { type: 'success', title: t('agents:agencyCreation.alerts.createdTitle', 'Agency Created!'), message: t('agents:agencyCreation.alerts.createdMessage', { name: pendingAgencyData.name, defaultValue: `Your agency "${pendingAgencyData.name}" has been created.` }) } });
         dispatch({ type: 'SET_PENDING_AGENCY_DATA', payload: null });
         onClose();
-        const slug = result.agency?.slug || agencyId;
-        if (slug) {
-          dispatch({ type: 'SET_SELECTED_AGENCY', payload: slug });
-          dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'agencies' });
-          window.history.pushState({}, '', `/agencies/${slug}`);
-        }
+        // Navigate to agency dashboard for immediate access
+        dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'agency-dashboard' });
+        window.history.pushState({}, '', '/agency-dashboard');
         onAgencyCreated(agencyId);
       } else {
         setGlobalError(t('agents:agencyCreation.alerts.paymentSucceededButFailed', 'Payment succeeded but agency creation failed. Please contact support.'));
@@ -458,14 +457,13 @@ const AgencyCreationModal: React.FC<AgencyCreationModalProps> = ({
         if (result && (result.agency || result._id || result.id)) {
           const agencyId = result.agency?._id || result._id;
           await uploadLogoToAgency(agencyId);
+          // Refresh user data immediately so the creator has dashboard access right away
+          await checkAuthStatus();
           dispatch({ type: 'SHOW_ALERT', payload: { type: 'success', title: t('agents:agencyCreation.alerts.createdTitle', 'Agency Created!'), message: t('agents:agencyCreation.alerts.createdMessage', { name: agencyData.name, defaultValue: `Your agency "${agencyData.name}" has been created successfully.` }) } });
           onClose();
-          const slug = result.agency?.slug || agencyId;
-          if (slug) {
-            dispatch({ type: 'SET_SELECTED_AGENCY', payload: slug });
-            dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'agencies' });
-            window.history.pushState({}, '', `/agencies/${slug}`);
-          }
+          // Navigate to agency dashboard for immediate access
+          dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'agency-dashboard' });
+          window.history.pushState({}, '', '/agency-dashboard');
           onAgencyCreated(agencyId);
         } else {
           setGlobalError(t('agents:agencyCreation.alerts.createFailed', 'Failed to create agency. Please try again.'));
