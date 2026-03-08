@@ -113,6 +113,8 @@ import { startPromotionRefreshWorker } from './workers/promotionRefreshWorker';
 import { startTrialManagementJob } from './jobs/trialManagementJob';
 import { startCityMarketDataUpdateJob } from './jobs/updateCityMarketData';
 import { startMonthlyCouponJob } from './jobs/monthlyCouponJob';
+import { initializeTelegramBot } from './services/telegramBotService';
+import { startTelegramDigestJob } from './jobs/telegramDigestJob';
 
 // Create Express app
 const app: Application = express();
@@ -354,6 +356,15 @@ httpServer.listen(PORT, () => {
 
   // Start subscription cron jobs
   startCronJobs();
+
+  // Initialize Telegram bot (webhook + commands)
+  initializeTelegramBot().catch((err) => {
+    serverLogger.warn('⚠️  Telegram bot initialization failed:', err);
+  });
+
+  // Start Telegram digest job (daily group updates)
+  startTelegramDigestJob();
+  serverLogger.info('✅ Telegram digest job started (daily at 9 AM)');
 });
 
 export default app;

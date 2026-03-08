@@ -16,6 +16,7 @@ import { recordPriceChange, processInstantAlertsForProperty, processInstantPrice
 import { trackUserActivity } from '../services/proBuyerEmailService';
 import { FREE_TIER_LIMITS, PRO_TIER_LIMITS } from '../config/subscriptionConstants';
 import { sanitizeProperty } from '../utils/responseSanitizer';
+import { notifyGroupAboutNewListing, checkAndNotifyMatches } from '../services/telegramBotService';
 import {
   emitPropertyCreated,
   emitPropertyUpdated,
@@ -728,6 +729,15 @@ export const createProperty = async (
 
     // Invalidate properties cache so new listing appears immediately in search
     invalidateCache('/api/properties');
+
+    // Notify Telegram group about the new listing and check for matching requests (non-blocking)
+    const propertyObj = property.toObject();
+    notifyGroupAboutNewListing(propertyObj).catch((err) => {
+      propertyLogger.error('Failed to notify Telegram group about new listing:', err);
+    });
+    checkAndNotifyMatches(propertyObj).catch((err) => {
+      propertyLogger.error('Failed to check Telegram matches for new listing:', err);
+    });
 
     // Return updated subscription info so frontend can update UI immediately
     res.status(201).json({
