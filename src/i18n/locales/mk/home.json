@@ -47,6 +47,13 @@
     "baths": "{{count}} бања",
     "baths_plural": "{{count}} бањи",
     "sqm": "{{count}} м²",
+    "bedsLabel": "Соби",
+    "bathsLabel": "Бањи",
+    "builtLabel": "Изградено",
+    "viewProperty": "Прегледај Имот",
+    "forRent": "За Изнајмување",
+    "forSale": "За Продажба",
+    "perMonth": "/мес",
     "promoted": "Промовиран",
     "new": "Нов",
     "priceReduced": "Намалена Цена"

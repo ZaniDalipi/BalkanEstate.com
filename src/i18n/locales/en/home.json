@@ -47,6 +47,13 @@
     "baths": "{{count}} bath",
     "baths_plural": "{{count}} baths",
     "sqm": "{{count}} m²",
+    "bedsLabel": "Beds",
+    "bathsLabel": "Baths",
+    "builtLabel": "Built",
+    "viewProperty": "View Property",
+    "forRent": "For Rent",
+    "forSale": "For Sale",
+    "perMonth": "/mo",
     "promoted": "Promoted",
     "new": "New",
     "priceReduced": "Price Reduced"

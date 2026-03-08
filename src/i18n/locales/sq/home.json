@@ -47,6 +47,13 @@
     "baths": "{{count}} banjo",
     "baths_plural": "{{count}} banjo",
     "sqm": "{{count}} m²",
+    "bedsLabel": "Dhoma",
+    "bathsLabel": "Banjo",
+    "builtLabel": "Ndërtuar",
+    "viewProperty": "Shiko Pronën",
+    "forRent": "Me Qira",
+    "forSale": "Në Shitje",
+    "perMonth": "/muaj",
     "promoted": "E Promovuar",
     "new": "E Re",
     "priceReduced": "Çmim i Ulur"

@@ -47,6 +47,13 @@
     "baths": "{{count}} μπάνιο",
     "baths_plural": "{{count}} μπάνια",
     "sqm": "{{count}} τ.μ.",
+    "bedsLabel": "Υπνοδωμάτια",
+    "bathsLabel": "Μπάνια",
+    "builtLabel": "Κατασκευή",
+    "viewProperty": "Δείτε Ακίνητο",
+    "forRent": "Ενοικίαση",
+    "forSale": "Πώληση",
+    "perMonth": "/μήνα",
     "promoted": "Προωθημένο",
     "new": "Νέο",
     "priceReduced": "Μειωμένη Τιμή"

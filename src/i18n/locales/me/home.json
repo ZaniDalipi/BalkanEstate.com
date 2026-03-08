@@ -47,6 +47,13 @@
     "baths": "{{count}} kupatilo",
     "baths_plural": "{{count}} kupatila",
     "sqm": "{{count}} m²",
+    "bedsLabel": "Sobe",
+    "bathsLabel": "Kupatila",
+    "builtLabel": "Izgrađeno",
+    "viewProperty": "Pogledajte Nekretninu",
+    "forRent": "Za Najam",
+    "forSale": "Na Prodaju",
+    "perMonth": "/mj",
     "promoted": "Promovisano",
     "new": "Novo",
     "priceReduced": "Snižena Cijena"

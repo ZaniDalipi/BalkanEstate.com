@@ -47,6 +47,13 @@
     "baths": "{{count}} baie",
     "baths_plural": "{{count}} băi",
     "sqm": "{{count}} m²",
+    "bedsLabel": "Dormitoare",
+    "bathsLabel": "Băi",
+    "builtLabel": "Construit",
+    "viewProperty": "Vezi Proprietatea",
+    "forRent": "De Închiriat",
+    "forSale": "De Vânzare",
+    "perMonth": "/lună",
     "promoted": "Promovat",
     "new": "Nou",
     "priceReduced": "Preț Redus"
