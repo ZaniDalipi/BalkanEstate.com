@@ -434,7 +434,7 @@ export function use3DMap(props: Map3DBuildingsProps) {
     tourUrl?: string,
     onEnterTour?: () => void
   ) => {
-    const floorHeightM = 2; // 3m per floor
+    const floorHeightM = 3; // 3m per floor
     const totalHeightM = totalFlrs * floorHeightM;
 
     // Query the actual building at this location from the map's building layer
@@ -686,7 +686,8 @@ export function use3DMap(props: Map3DBuildingsProps) {
 
     // Add floor slice layers - each floor is a separate "box" stacked on top of each other
     // The gap between floors makes each box clearly distinct
-    const gapSize = Math.max(0.3, adjustedFloorHeight * 0.12); // 12% of floor height as gap, minimum 0.3m
+    // Use 25% of floor height as gap (minimum 0.6m) so separators are visible even at distance
+    const gapSize = Math.max(0.6, adjustedFloorHeight * 0.25);
     for (let floor = 1; floor <= totalFlrs; floor++) {
       const floorBase = (floor - 1) * adjustedFloorHeight;
       const floorTop = floor * adjustedFloorHeight;
@@ -700,10 +701,10 @@ export function use3DMap(props: Map3DBuildingsProps) {
         paint: {
           'fill-extrusion-color': isHighlightedFloor
             ? '#13e861' // Bright green for the property's floor
-            : floor % 2 === 0 ? '#4b5563' : '#6b7280', // Alternating grey for other floors
+            : floor % 2 === 0 ? '#374151' : '#6b7280', // Stronger contrast between alternating floors
           'fill-extrusion-height': floorTop - gapSize, // Gap at top of each floor slab
-          'fill-extrusion-base': floorBase + (gapSize * 0.25), // Small gap at bottom too
-          'fill-extrusion-opacity': isHighlightedFloor ? 1 : 0.75,
+          'fill-extrusion-base': floorBase + (gapSize * 0.4), // Visible gap at bottom too
+          'fill-extrusion-opacity': isHighlightedFloor ? 1 : 0.85,
         },
       });
     }
@@ -721,8 +722,8 @@ export function use3DMap(props: Map3DBuildingsProps) {
       source: 'custom-building',
       paint: {
         'fill-extrusion-color': '#4ade80', // Lighter green glow
-        'fill-extrusion-height': highlightTop - (gapSize * 0.5),
-        'fill-extrusion-base': highlightBase + (gapSize * 0.5),
+        'fill-extrusion-height': highlightTop - (gapSize * 0.4),
+        'fill-extrusion-base': highlightBase + (gapSize * 0.4),
         'fill-extrusion-opacity': 0.35,
       },
     });
