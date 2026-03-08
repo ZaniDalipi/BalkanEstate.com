@@ -340,14 +340,18 @@ export function usePricingPage() {
       return;
     }
 
-    // Open payment window - supports coupon activation even while self-service payments are coming soon
-    setSelectedPlan({
-      name: product.name,
-      price: product.price,
-      interval: product.billingPeriod === 'yearly' ? 'year' : 'month',
-      productId: product.productId,
+    // Payment system is being set up — show contact-us message
+    dispatch({
+      type: 'SHOW_ALERT',
+      payload: {
+        type: 'info',
+        title: t('pricing:inProcess.title', 'Payment System In Process'),
+        message: t(
+          'pricing:inProcess.contactUs',
+          'Our payment system is currently being set up. To subscribe to a Pro plan, please contact our sales team at sales@balkanestateai.com or call +389 71 967 915. We will activate your subscription manually.'
+        ),
+      },
     });
-    setShowPaymentWindow(true);
   };
 
   const handlePaymentSuccess = async (paymentIntentId: string) => {
@@ -437,21 +441,18 @@ export function usePricingPage() {
       return;
     }
 
-    // Open PaymentWindow for agency featuring (one-time payment, coupon supported)
-    const plan = agencyFeaturePlans.find(p => p.tier === tier);
-    const planName = plan?.name || 'Featured Agency';
-    const price = getAgencyPrice(tier, selectedAgencyDuration);
-    const durationLabel = selectedAgencyDuration === 7 ? '1 Week'
-      : selectedAgencyDuration === 14 ? '2 Weeks'
-      : selectedAgencyDuration === 28 ? '4 Weeks'
-      : '90 Days';
-    setSelectedPlan({
-      name: `${planName} - ${durationLabel}`,
-      price,
-      interval: 'once' as any,
-      productId: `${tier}_agency_${selectedAgencyDuration}days`,
+    // Payment system is being set up — show contact-us message
+    dispatch({
+      type: 'SHOW_ALERT',
+      payload: {
+        type: 'info',
+        title: t('pricing:inProcess.title', 'Payment System In Process'),
+        message: t(
+          'pricing:inProcess.contactUs',
+          'Our payment system is currently being set up. To subscribe to a Pro plan, please contact our sales team at sales@balkanestateai.com or call +389 71 967 915. We will activate your subscription manually.'
+        ),
+      },
     });
-    setShowPaymentWindow(true);
   };
 
   const getBadgeColor = (color?: string) => {

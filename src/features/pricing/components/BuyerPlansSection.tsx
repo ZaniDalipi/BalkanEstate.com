@@ -61,7 +61,7 @@ const BuyerPlansSection: React.FC<BuyerPlansSectionProps> = ({
           >
             {isActivePlan(buyerProduct.productId)
               ? t('pricing:buttons.currentPlan', 'Current Plan')
-              : <>{t('pricing:buttons.getStarted', 'Get Started')} - €{buyerProduct.price}{t('pricing:billing.perMonth', '/month')}</>
+              : <>{t('pricing:buttons.contactUs', 'Contact Us')} - €{buyerProduct.price}{t('pricing:billing.perMonth', '/month')}</>
             }
           </button>
 

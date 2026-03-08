@@ -410,7 +410,7 @@ const PricingPage: React.FC = () => {
                 </h4>
               </div>
               <p className="text-sm text-gray-600 text-center mb-6">
-                {t('pricing:legal.description', 'All payments are processed securely by Paysera. By subscribing, you agree to our policies:')}
+                {t('pricing:legal.description', 'All payments are processed securely. By subscribing, you agree to our policies:')}
               </p>
               <div className="flex flex-wrap justify-center gap-4 sm:gap-6">
                 <button
@@ -442,7 +442,7 @@ const PricingPage: React.FC = () => {
                 </button>
               </div>
               <p className="text-xs text-gray-500 text-center mt-4">
-                {t('pricing:legal.providerNote', 'Payments handled securely by Paysera. VAT/taxes included where applicable.')}
+                {t('pricing:legal.providerNote', 'Payments handled securely via Stripe and PayPal. VAT/taxes included where applicable.')}
               </p>
             </div>
           </div>

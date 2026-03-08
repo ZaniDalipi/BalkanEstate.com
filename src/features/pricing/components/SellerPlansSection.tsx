@@ -99,7 +99,7 @@ const SellerPlansSection: React.FC<SellerPlansSectionProps> = ({
           >
             {isActivePlan(proYearlyProduct.productId)
               ? t('pricing:buttons.currentPlan', 'Current Plan')
-              : <>{t('pricing:buttons.getStarted', 'Get Started')} - €{proYearlyProduct.price}{t('pricing:billing.perYear', '/year')}</>
+              : <>{t('pricing:buttons.contactUs', 'Contact Us')} - €{proYearlyProduct.price}{t('pricing:billing.perYear', '/year')}</>
             }
           </button>
         </div>
@@ -163,7 +163,7 @@ const SellerPlansSection: React.FC<SellerPlansSectionProps> = ({
           >
             {isActivePlan(proMonthlyProduct.productId)
               ? t('pricing:buttons.currentPlan', 'Current Plan')
-              : <>{t('pricing:buttons.getStarted', 'Get Started')} - €{proMonthlyProduct.price}{t('pricing:billing.perMonth', '/month')}</>
+              : <>{t('pricing:buttons.contactUs', 'Contact Us')} - €{proMonthlyProduct.price}{t('pricing:billing.perMonth', '/month')}</>
             }
           </button>
         </div>
@@ -245,7 +245,7 @@ const SellerPlansSection: React.FC<SellerPlansSectionProps> = ({
           >
             {isActivePlan(enterpriseProduct.productId)
               ? t('pricing:buttons.currentPlan', 'Current Plan')
-              : <>{t('pricing:buttons.getStarted', 'Get Started')} - €{enterpriseProduct.price}{t('pricing:billing.perYear', '/year')}</>
+              : <>{t('pricing:buttons.contactUs', 'Contact Us')} - €{enterpriseProduct.price}{t('pricing:billing.perYear', '/year')}</>
             }
           </button>
         </div>

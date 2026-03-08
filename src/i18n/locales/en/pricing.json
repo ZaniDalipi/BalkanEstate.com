@@ -95,6 +95,7 @@
     "getProMonthly": "Get Pro Monthly",
     "getEnterprise": "Get Enterprise",
     "contactSales": "Contact Sales",
+    "contactUs": "Contact Us",
     "currentPlan": "Current Plan",
     "getFeatured": "Get Featured",
     "getBundle": "Get Bundle",
@@ -236,13 +237,17 @@
     "sendEmail": "Send us an email",
     "giveCall": "Give us a call"
   },
+  "inProcess": {
+    "title": "Payment System In Process",
+    "contactUs": "Our payment system is currently being set up. To subscribe to a Pro plan, please contact our sales team at sales@balkanestateai.com or call +389 71 967 915. We will activate your subscription manually."
+  },
   "legal": {
     "title": "Secure Payments & Policies",
-    "description": "All payments are processed securely by Paysera. By subscribing, you agree to our policies:",
+    "description": "All payments are processed securely. By subscribing, you agree to our policies:",
     "termsOfService": "Terms of Service",
     "privacyPolicy": "Privacy Policy",
     "refundPolicy": "Refund Policy",
-    "providerNote": "Payments handled by Paysera. VAT/taxes included where applicable."
+    "providerNote": "Payments handled securely via Stripe and PayPal. VAT/taxes included where applicable."
   },
   "duration": {
     "7days": "7 days",
