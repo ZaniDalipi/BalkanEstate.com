@@ -689,6 +689,7 @@ export const createProperty = async (
       createdAsRole,
       ...(createdAsRole === 'agent' && {
         createdByAgencyName: user.agencyName,
+        createdByAgencyId: user.agencyId || undefined,
         createdByLicenseNumber: user.licenseNumber,
       }),
       // Override with geocoded coordinates if geocoding succeeded, otherwise keep frontend values
@@ -808,6 +809,7 @@ export const updateProperty = async (
       'createdByName',
       'createdByEmail',
       'createdByAgencyName',
+      'createdByAgencyId',
       'createdByLicenseNumber',
     ];
 

@@ -197,5 +197,15 @@
     "call": "Call",
     "email": "Email",
     "website": "Website"
+  },
+  "propertyCard": {
+    "listedBy": "Listed by",
+    "viewAgency": "View Agency",
+    "registrationNumber": "Reg. No.",
+    "properties": "{{count}} Properties",
+    "agents": "{{count}} Agents",
+    "yearsInBusiness": "{{count}} Years",
+    "contactAgency": "Contact Agency",
+    "verifiedAgency": "Verified Agency"
   }
 }

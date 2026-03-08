@@ -73,6 +73,7 @@ export const createAgency = async (
       country: req.body.country,
       zipCode: req.body.zipCode,
       website: req.body.website,
+      registrationNumber: req.body.registrationNumber,
       specialties: req.body.specialties,
       certifications: req.body.certifications,
       languages: req.body.languages,
@@ -873,7 +874,7 @@ export const updateAgency = async (
       name, description, website, phone, email, address,
       city, country, zipCode, lat, lng,
       facebookUrl, instagramUrl, linkedinUrl, twitterUrl,
-      yearsInBusiness, specialties,
+      yearsInBusiness, specialties, registrationNumber,
       certifications, languages, businessHours,
       coverGradient, coverImage,
       logoPosition, coverPosition,
@@ -942,6 +943,7 @@ export const updateAgency = async (
     if (twitterUrl !== undefined) agency.twitterUrl = twitterUrl;
     if (yearsInBusiness !== undefined) agency.yearsInBusiness = Number(yearsInBusiness);
     if (specialties !== undefined) agency.specialties = specialties;
+    if (registrationNumber !== undefined) (agency as any).registrationNumber = typeof registrationNumber === 'string' ? registrationNumber.trim() : registrationNumber;
     if (certifications !== undefined) agency.certifications = certifications;
     if (languages !== undefined) agency.languages = languages;
     if (businessHours !== undefined) agency.businessHours = businessHours;

@@ -98,6 +98,7 @@ export interface Property {
   saves?: number;
   inquiries?: number;
   createdAsRole?: UserRole;
+  createdByAgencyId?: string; // Direct reference to the Agency that listed this property
   // Advanced property features
   furnishing?: FurnishingStatus;
   heatingType?: HeatingType;
