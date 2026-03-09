@@ -1,3 +1,4 @@
 # Cloudflare Pages SPA redirect
-# Note: Cloudflare Pages automatically serves index.html for SPA routes
-# This file can be used for custom redirects if needed in the future
+# Ensure all non-file routes serve index.html for client-side routing
+# This prevents stale CDN cache from serving old HTML after deployments
+/* /index.html 200
