@@ -20,6 +20,7 @@ import { realEstateFAQs } from './src/components/seo';
 
 // Lazy load Analytics (only loads if env vars exist)
 const Analytics = lazy(() => import('./src/components/marketing/Analytics'));
+const StagingBanner = lazy(() => import('./src/app/components/StagingBanner'));
 import { UserRole, HowItWorksTab, AdminSection, AgencyDashboardSection, Agency, AppView } from './types';
 import { API_CONFIG, SUPPORTED_LANGUAGES, DEFAULT_LANGUAGE, ROUTES, HOW_IT_WORKS_TABS, ADMIN_SECTIONS, AGENCY_DASHBOARD_SECTIONS } from './src/shared/constants/app.constants';
 
@@ -1088,6 +1089,9 @@ const App: React.FC = () => {
                       <ClarityInit />
                     </Suspense>
 
+                    <Suspense fallback={null}>
+                      <StagingBanner />
+                    </Suspense>
                     <AppWrapper />
                   </AnimationProvider>
                 </ConfirmationProvider>

@@ -24,7 +24,13 @@ jobs:
   build:
     name: Build
     runs-on: ubuntu-latest
+    outputs:
+      environment: ${{ steps.set-env.outputs.environment }}
     steps:
+      - name: Determine environment
+        id: set-env
+        run: echo "environment=${{ github.event.inputs.environment || 'staging' }}" >> $GITHUB_OUTPUT
+
       - name: Checkout code
         uses: actions/checkout@v4
 
@@ -41,7 +47,16 @@ jobs:
         working-directory: ./backend
         run: npm ci
 
-      - name: Build frontend
+      - name: Build frontend (staging)
+        if: steps.set-env.outputs.environment == 'staging'
+        run: npm run build:staging
+        env:
+          VITE_API_URL: ${{ secrets.STAGING_VITE_API_URL || secrets.VITE_API_URL }}
+          VITE_ENVIRONMENT: staging
+          VITE_SENTRY_DSN: ${{ secrets.STAGING_SENTRY_DSN }}
+
+      - name: Build frontend (production)
+        if: steps.set-env.outputs.environment == 'production'
         run: npm run build
         env:
           VITE_API_URL: ${{ secrets.VITE_API_URL }}
@@ -53,7 +68,15 @@ jobs:
         working-directory: ./backend
         run: npm run build
 
-      - name: Upload frontend artifacts
+      - name: Upload frontend artifacts (staging)
+        if: steps.set-env.outputs.environment == 'staging'
+        uses: actions/upload-artifact@v4
+        with:
+          name: frontend-dist
+          path: dist-staging/
+
+      - name: Upload frontend artifacts (production)
+        if: steps.set-env.outputs.environment == 'production'
         uses: actions/upload-artifact@v4
         with:
           name: frontend-dist
@@ -72,10 +95,10 @@ jobs:
   # Deploy Frontend to Cloudflare Pages (Preview/Staging)
   # =============================================================================
   deploy-staging:
-    name: Deploy to Cloudflare Pages (Preview)
+    name: Deploy to Cloudflare Pages (Staging)
     runs-on: ubuntu-latest
     needs: build
-    if: github.ref == 'refs/heads/main' || github.event.inputs.environment == 'staging'
+    if: needs.build.outputs.environment == 'staging'
     environment:
       name: staging
       url: https://staging.balkanestateai.com
@@ -91,14 +114,14 @@ jobs:
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          command: pages deploy dist --project-name=balkanestateai --branch=preview
+          command: pages deploy dist --project-name=balkanestateai --branch=staging
 
       - name: Deployment Summary
         run: |
-          echo "Staging Deployment Complete"
-          echo "=============================="
-          echo "Frontend: https://preview.balkanestateai.pages.dev"
-          echo "Note: Backend should be deployed separately to Railway/Render"
+          echo "## Staging Deployment Complete" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "- **Frontend**: https://staging.balkanestateai.pages.dev" >> $GITHUB_STEP_SUMMARY
+          echo "- **Note**: Backend should be deployed separately to Railway/Render" >> $GITHUB_STEP_SUMMARY
 
   # =============================================================================
   # Deploy Frontend to Cloudflare Pages (Production)
@@ -106,8 +129,8 @@ jobs:
   deploy-production:
     name: Deploy to Cloudflare Pages (Production)
     runs-on: ubuntu-latest
-    needs: [build, deploy-staging]
-    if: github.event.inputs.environment == 'production'
+    needs: build
+    if: needs.build.outputs.environment == 'production'
     environment:
       name: production
       url: https://balkanestateai.com
@@ -127,10 +150,10 @@ jobs:
 
       - name: Deployment Summary
         run: |
-          echo "Production Deployment Complete"
-          echo "================================="
-          echo "Frontend: https://balkanestateai.com"
-          echo "Note: Backend should be deployed separately to Railway/Render"
+          echo "## Production Deployment Complete" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "- **Frontend**: https://balkanestateai.com" >> $GITHUB_STEP_SUMMARY
+          echo "- **Note**: Backend should be deployed separately to Railway/Render" >> $GITHUB_STEP_SUMMARY
 
   # =============================================================================
   # Notify on Deployment
@@ -138,8 +161,8 @@ jobs:
   notify:
     name: Notify
     runs-on: ubuntu-latest
-    needs: [deploy-staging]
-    if: always()
+    needs: [deploy-staging, deploy-production]
+    if: always() && (needs.deploy-staging.result == 'success' || needs.deploy-production.result == 'success')
     env:
       SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
     steps:
@@ -149,7 +172,7 @@ jobs:
         with:
           status: ${{ job.status }}
           text: |
-            Deployment to ${{ github.event.inputs.environment || 'staging' }}
+            Deployment to ${{ needs.build.outputs.environment || 'staging' }}
             Branch: ${{ github.ref_name }}
             Commit: ${{ github.sha }}
           webhook_url: ${{ secrets.SLACK_WEBHOOK_URL }}
