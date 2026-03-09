@@ -387,6 +387,7 @@ const TopAgentsSection: React.FC = () => {
               rank={i}
               podiumHeight={200}
               onAgentClick={handleAgentClick}
+              t={t}
             />
           ))}
         </div>
