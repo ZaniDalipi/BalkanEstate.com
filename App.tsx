@@ -338,8 +338,8 @@ const AppContent: React.FC<{ onToggleSidebar: () => void }> = ({ onToggleSidebar
 
       // Main navigation routes
       const routeMap: Record<string, AppView> = {
-        '/': 'home',
-        '/home': 'home',
+        '/': 'search',
+        '/home': 'search',
         '/search': 'search',
         '/explore-cities': 'explore-cities',
         '/saved-searches': 'saved-searches',
@@ -400,7 +400,7 @@ const AppContent: React.FC<{ onToggleSidebar: () => void }> = ({ onToggleSidebar
         // Unknown route - redirect to landing page
         dispatch({ type: 'SET_SELECTED_PROPERTY', payload: null });
         dispatch({ type: 'SET_SELECTED_AGENCY', payload: null });
-        dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'home' });
+        dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'search' });
         window.history.replaceState({}, '', buildLocalizedPath('/'));
       }
     };
@@ -829,7 +829,7 @@ const MainLayout: React.FC = () => {
                     onClick={() => {
                       dispatch({ type: 'SET_SELECTED_AGENCY', payload: null });
                       dispatch({ type: 'SET_SELECTED_AGENT', payload: null });
-                      dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'home' });
+                      dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'search' });
                       window.history.pushState({}, '', buildLocalizedPath('/'));
                     }}
                     className="min-w-[44px] min-h-[44px] flex items-center justify-center text-neutral-500 active:text-primary active:opacity-70 transition-opacity pr-2"

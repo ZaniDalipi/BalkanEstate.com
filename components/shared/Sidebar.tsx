@@ -131,7 +131,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
             dispatch({ type: 'SET_ACTIVE_VIEW', payload: view });
 
             // Update browser URL with language prefix
-            const route = view === 'home' ? '/' : view === 'search' ? '/search' : `/${view}`;
+            const route = view === 'search' ? '/search' : `/${view}`;
             window.history.pushState({}, '', getLocalizedPath(route));
         }
         onClose(); // Close sidebar on mobile after navigation
@@ -165,7 +165,6 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
     };
 
     const baseNavItems = [
-      { view: 'home' as AppView, label: t('nav:home'), icon: <HomeIcon /> },
       { view: 'search' as AppView, label: t('nav:search'), icon: <SearchIcon /> },
       { view: 'rentals' as AppView, label: t('nav:rentals'), icon: <RentIcon /> },
       { view: 'explore-cities' as AppView, label: t('nav:exploreCities'), icon: <SparklesIcon /> },
