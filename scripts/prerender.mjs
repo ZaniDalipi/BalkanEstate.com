@@ -43,7 +43,7 @@ const template = readFileSync(templatePath, 'utf-8');
 // Prioritized by keyword opportunity score.
 
 const routes = [
-  // Homepage (redirects to search)
+  // Homepage
   {
     path: '/',
     title: `${SITE_NAME} - Property for Sale in the Balkans | Houses, Apartments & Villas`,

@@ -58,6 +58,20 @@ export class ErrorBoundary extends Component<Props, State> {
   }
 
   componentDidCatch(error: Error, errorInfo: ErrorInfo) {
+    // Auto-recover from chunk load failures (stale HTML after deployment)
+    // by forcing a full page reload to get fresh HTML with correct chunk hashes
+    if (this.isChunkLoadError(error)) {
+      const reloadKey = 'chunk-reload-' + window.location.pathname;
+      const lastReload = sessionStorage.getItem(reloadKey);
+      const now = Date.now();
+      // Only auto-reload once per path per session (prevent reload loops)
+      if (!lastReload || now - Number(lastReload) > 30000) {
+        sessionStorage.setItem(reloadKey, String(now));
+        window.location.reload();
+        return;
+      }
+    }
+
     // Call optional error handler
     this.props.onError?.(error, errorInfo);
 
@@ -78,6 +92,17 @@ export class ErrorBoundary extends Component<Props, State> {
       level: this.props.level || 'app',
       componentStack: errorInfo.componentStack,
     });
+  }
+
+  private isChunkLoadError(error: Error): boolean {
+    const message = error.message || '';
+    return (
+      error.name === 'ChunkLoadError' ||
+      message.includes('Loading chunk') ||
+      message.includes('Loading CSS chunk') ||
+      message.includes('Failed to fetch dynamically imported module') ||
+      message.includes('Importing a module script failed')
+    );
   }
 
   handleReset = () => {
