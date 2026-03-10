@@ -2045,6 +2045,40 @@ export const getLoginHistory = async (req: Request, res: Response): Promise<void
   }
 };
 
+// @desc    Verify current user's password (for sensitive admin actions)
+// @route   POST /api/auth/verify-password
+// @access  Private
+export const verifyPassword = async (req: Request, res: Response): Promise<void> => {
+  try {
+    if (!req.user) {
+      res.status(401).json({ message: 'Not authorized' });
+      return;
+    }
+
+    const { password } = req.body;
+    if (!password) {
+      res.status(400).json({ message: 'Password is required' });
+      return;
+    }
+
+    const user = await User.findById((req.user as IUser)._id);
+    if (!user || !user.password) {
+      res.status(404).json({ message: 'User not found' });
+      return;
+    }
+
+    const isMatch = await user.comparePassword(password);
+    if (!isMatch) {
+      res.status(401).json({ message: 'Incorrect password' });
+      return;
+    }
+
+    res.json({ verified: true });
+  } catch (error: any) {
+    res.status(500).json({ message: 'Password verification failed' });
+  }
+};
+
 // @desc    Change password for logged-in user
 // @route   POST /api/auth/change-password
 // @access  Private

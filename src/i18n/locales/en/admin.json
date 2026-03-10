@@ -450,7 +450,21 @@
     "previewFailed": "Failed to apply settings preview.",
     "applyingChanges": "Applying...",
     "previewChanges": "Preview Changes",
-    "reset": "Reset"
+    "reset": "Reset to Defaults",
+    "loading": "Loading settings...",
+    "saving": "Saving...",
+    "saveChanges": "Save Changes",
+    "savedSuccess": "Settings saved successfully!",
+    "savedError": "Failed to save settings. Please try again.",
+    "resetSuccess": "Settings reset to defaults.",
+    "resetError": "Failed to reset settings.",
+    "confirmPassword": "Confirm Your Password",
+    "confirmPasswordDesc": "Enter your password to apply changes.",
+    "password": "Password",
+    "enterPassword": "Enter your password...",
+    "passwordRequired": "Password is required.",
+    "incorrectPassword": "Incorrect password. Please try again.",
+    "confirm": "Confirm"
   },
   "reports": {
     "title": "Reports",
