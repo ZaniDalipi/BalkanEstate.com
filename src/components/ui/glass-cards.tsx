@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { optimizeCloudinaryUrl, cloudinarySrcSet } from '@/config/cloudinaryConfig';
@@ -58,6 +59,7 @@ const CARD_COLORS = [
 ];
 
 const StackedPropertyCard: React.FC<StackedPropertyCardProps & { isMobile?: boolean }> = ({ property, index, totalCards, color, onClick, isMobile = false }) => {
+    const { t } = useTranslation(['home']);
     const cardRef = useRef<HTMLDivElement>(null);
     const containerRef = useRef<HTMLDivElement>(null);
 
@@ -272,7 +274,7 @@ const StackedPropertyCard: React.FC<StackedPropertyCardProps & { isMobile?: bool
                                     color: '#fff',
                                     backdropFilter: 'blur(8px)'
                                 }}>
-                                    For {property.listingType === 'rent' ? 'Rent' : 'Sale'}
+                                    {property.listingType === 'rent' ? t('featured.forRent') : t('featured.forSale')}
                                 </span>
                             )}
                             {property.isPromoted && property.promotionTier && property.promotionTier !== 'standard' && (
@@ -335,7 +337,7 @@ const StackedPropertyCard: React.FC<StackedPropertyCardProps & { isMobile?: bool
                                 {formatPrice(property.price, property.currency)}
                             </span>
                             {property.listingType === 'rent' && (
-                                <span style={{ fontSize: '0.85rem', color: 'rgba(255,255,255,0.8)', fontWeight: 500 }}>/mo</span>
+                                <span style={{ fontSize: '0.85rem', color: 'rgba(255,255,255,0.8)', fontWeight: 500 }}>{t('featured.perMonth')}</span>
                             )}
                         </div>
                     </div>
@@ -402,10 +404,10 @@ const StackedPropertyCard: React.FC<StackedPropertyCardProps & { isMobile?: bool
                             flexWrap: 'wrap'
                         }}>
                             {[
-                                { value: property.beds, label: 'Beds', icon: '🛏' },
-                                { value: property.baths, label: 'Baths', icon: '🚿' },
+                                { value: property.beds, label: t('featured.bedsLabel'), icon: '🛏' },
+                                { value: property.baths, label: t('featured.bathsLabel'), icon: '🚿' },
                                 { value: property.sqft, label: 'm²', icon: '📐' },
-                                ...(property.yearBuilt ? [{ value: property.yearBuilt, label: 'Built', icon: '🏗' }] : []),
+                                ...(property.yearBuilt ? [{ value: property.yearBuilt, label: t('featured.builtLabel'), icon: '🏗' }] : []),
                             ].map((stat) => (
                                 <div
                                     key={stat.label}
@@ -453,7 +455,7 @@ const StackedPropertyCard: React.FC<StackedPropertyCardProps & { isMobile?: bool
                                 e.currentTarget.style.boxShadow = '0 4px 14px rgba(2, 82, 205, 0.25)';
                             }}
                         >
-                            View Property →
+                            {t('featured.viewProperty')} →
                         </button>
                     </div>
 
@@ -495,6 +497,7 @@ const StackedPropertyCard: React.FC<StackedPropertyCardProps & { isMobile?: bool
 
 /* ─── Compact mobile property card ─── */
 const MobilePropertyCard: React.FC<{ property: PropertyCardData; color: string; onClick: () => void }> = ({ property, color, onClick }) => {
+    const { t } = useTranslation(['home']);
     const formatPrice = (price: number, currency?: string) => {
         const symbol = currency === 'USD' ? '$' : '€';
         return `${symbol}${price.toLocaleString()}`;
@@ -538,7 +541,7 @@ const MobilePropertyCard: React.FC<{ property: PropertyCardData; color: string; 
                             background: property.listingType === 'rent' ? 'rgba(14,165,233,0.9)' : 'rgba(2,82,205,0.9)',
                             color: '#fff',
                         }}>
-                            {property.listingType === 'rent' ? 'Rent' : 'Sale'}
+                            {property.listingType === 'rent' ? t('featured.forRent') : t('featured.forSale')}
                         </span>
                     )}
                 </div>
@@ -548,7 +551,7 @@ const MobilePropertyCard: React.FC<{ property: PropertyCardData; color: string; 
                         {formatPrice(property.price, property.currency)}
                     </span>
                     {property.listingType === 'rent' && (
-                        <span style={{ fontSize: '0.75rem', color: 'rgba(255,255,255,0.8)', fontWeight: 500 }}>/mo</span>
+                        <span style={{ fontSize: '0.75rem', color: 'rgba(255,255,255,0.8)', fontWeight: 500 }}>{t('featured.perMonth')}</span>
                     )}
                 </div>
             </div>
@@ -562,8 +565,8 @@ const MobilePropertyCard: React.FC<{ property: PropertyCardData; color: string; 
                 </p>
                 <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
                     {[
-                        { v: property.beds, l: 'Beds' },
-                        { v: property.baths, l: 'Baths' },
+                        { v: property.beds, l: t('featured.bedsLabel') },
+                        { v: property.baths, l: t('featured.bathsLabel') },
                         { v: property.sqft, l: 'm²' },
                     ].map(s => (
                         <span key={s.l} style={{
@@ -590,11 +593,14 @@ interface StackedCardsProps {
 export const StackedCards: React.FC<StackedCardsProps> = ({
     properties,
     onPropertyClick,
-    title = 'Featured Properties',
-    subtitle = 'Handpicked properties from top agents across the Balkans',
+    title,
+    subtitle,
     onViewAll
 }) => {
+    const { t } = useTranslation(['home']);
     const isMobile = useIsMobile();
+    const displayTitle = title ?? t('featured.title');
+    const displaySubtitle = subtitle ?? t('featured.subtitle');
 
     if (properties.length === 0) return null;
 
@@ -632,14 +638,14 @@ export const StackedCards: React.FC<StackedCardsProps> = ({
                             fontWeight: 700,
                             color: '#0f172a'
                         }}>
-                            {title}
+                            {displayTitle}
                         </h2>
                         <p style={{
                             fontSize: '0.875rem',
                             color: '#64748b',
                             marginTop: '0.25rem'
                         }}>
-                            {subtitle}
+                            {displaySubtitle}
                         </p>
                     </div>
                     {onViewAll && (
@@ -664,7 +670,7 @@ export const StackedCards: React.FC<StackedCardsProps> = ({
                             onMouseOver={(e) => { e.currentTarget.style.color = '#0f172a'; e.currentTarget.style.background = 'rgba(248,250,252,1)'; }}
                             onMouseOut={(e) => { e.currentTarget.style.color = '#475569'; e.currentTarget.style.background = 'rgba(248,250,252,0.8)'; }}
                         >
-                            View All Properties →
+                            {t('featured.viewAll')} →
                         </button>
                     )}
                 </div>

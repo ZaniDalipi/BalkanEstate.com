@@ -475,6 +475,39 @@ export async function updateAllCityMarketData(): Promise<void> {
   }
 
   apiLogger.info(`✅ Market data update complete: ${updatedCount} updated, ${failedCount} failed`);
+
+  // Ensure all featured cities exist (fill gaps with fallback data)
+  await ensureAllFeaturedCitiesExist();
+}
+
+/**
+ * Ensure every city in FEATURED_CITIES exists in the DB.
+ * Missing ones are seeded with fallback data so the landing page
+ * always shows a diverse mix of countries.
+ */
+export async function ensureAllFeaturedCitiesExist(): Promise<void> {
+  let seeded = 0;
+  for (let i = 0; i < FEATURED_CITIES.length; i++) {
+    const cityInfo = FEATURED_CITIES[i];
+    const exists = await CityMarketData.findOne({ city: cityInfo.city, country: cityInfo.country });
+    if (exists) continue;
+
+    const fallback = generateFallbackCityData(cityInfo);
+    await CityMarketData.create({
+      ...fallback,
+      listingsCount: 0,
+      soldLastMonth: 0,
+      priceGrowthMoM: +(fallback.priceGrowthYoY / 12).toFixed(1),
+      lastUpdated: new Date(),
+      dataSource: 'manual',
+      featured: true,
+      displayOrder: i,
+    });
+    seeded++;
+  }
+  if (seeded > 0) {
+    apiLogger.info(`🌱 Seeded ${seeded} missing featured cities with fallback data`);
+  }
 }
 
 /**

@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useRef } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { API_CONFIG } from '@/src/shared/constants/app.constants';
 
@@ -141,10 +141,20 @@ export function useRealEstateNews() {
     retry: 1,
   });
 
+  // Unique id per mount so news re-shuffles every time the section appears
+  const mountId = useRef(Math.random());
+
   const filteredNews = useMemo(() => {
-    if (selectedCountry === 'All') return allNews;
-    return allNews.filter((item) => item.country === selectedCountry);
-  }, [selectedCountry, allNews]);
+    const items = selectedCountry === 'All' ? allNews : allNews.filter((item) => item.country === selectedCountry);
+    // Fisher-Yates shuffle so different articles appear each visit
+    const shuffled = [...items];
+    for (let i = shuffled.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+    }
+    return shuffled;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedCountry, allNews, mountId.current]);
 
   return {
     news: filteredNews,

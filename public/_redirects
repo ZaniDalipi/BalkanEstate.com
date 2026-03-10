@@ -1,3 +1,5 @@
 # Cloudflare Pages SPA redirect
 # Note: Cloudflare Pages automatically serves index.html for SPA routes
-# This file can be used for custom redirects if needed in the future
+# The catch-all rule /* /index.html 200 causes an infinite loop in
+# Cloudflare Pages and must NOT be used here.
+# Custom redirects can be added below if needed in the future.

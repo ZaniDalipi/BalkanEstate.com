@@ -355,9 +355,23 @@ function prerenderPage(route, lang) {
   const langDir = isDefaultLang ? '' : lang;
 
   if (route.path === '/') {
+    // For the homepage, write to both dist/index.html AND dist/en/index.html
+    // so that /en serves a prerendered file instead of relying on SPA fallback
+    // (which can serve stale cached HTML after deployments)
     outputPath = isDefaultLang
       ? join(DIST_DIR, 'index.html')
       : join(DIST_DIR, lang, 'index.html');
+
+    // Also write dist/{lang}/index.html for the default language
+    if (isDefaultLang) {
+      const langCopyPath = join(DIST_DIR, lang, 'index.html');
+      const langCopyDir = dirname(langCopyPath);
+      if (!existsSync(langCopyDir)) {
+        mkdirSync(langCopyDir, { recursive: true });
+      }
+      writeFileSync(langCopyPath, html, 'utf-8');
+      generated++;
+    }
   } else if (route.path.includes('?')) {
     const [base, query] = route.path.split('?');
     const params = new URLSearchParams(query);
