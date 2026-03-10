@@ -1,6 +1,6 @@
 import cron, { ScheduledTask } from 'node-cron';
 import { updateAllCityMarketData } from '../services/cityMarketDataService';
-import { refreshAllCityImages } from '../services/cityImageService';
+import { refreshAllCityImages, seedMissingCityImages } from '../services/cityImageService';
 import { cronLogger } from '../utils/logger';
 
 /**
@@ -32,6 +32,8 @@ export function startCityMarketDataUpdateJob(): void {
     try {
       await updateAllCityMarketData();
       cronLogger.info('✅ Biweekly market data update completed successfully');
+      // Seed images for any newly added cities
+      await seedMissingCityImages();
     } catch (error) {
       cronLogger.error('❌ Biweekly market data update failed:', error);
     }
@@ -54,6 +56,13 @@ export function startCityMarketDataUpdateJob(): void {
     }, { timezone: 'Europe/Belgrade' });
     cronLogger.info('✅ City image refresh job scheduled (monthly: 1st at 4 AM)');
   }
+
+  // Auto-seed images for any cities that don't have one yet (runs once on startup)
+  setTimeout(() => {
+    seedMissingCityImages().catch(error => {
+      cronLogger.error('❌ Auto-seed city images failed:', error);
+    });
+  }, 10_000); // 10s delay to let DB fully connect
 }
 
 export function stopCityMarketDataUpdateJob(): void {

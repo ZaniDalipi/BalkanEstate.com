@@ -106,3 +106,38 @@ export async function refreshAllCityImages(force = false): Promise<number> {
   apiLogger.info(`Refreshed ${updated}/${cities.length} city images`);
   return updated;
 }
+
+/**
+ * Seed images only for cities that don't have one yet.
+ * Safe to call on every server startup — skips cities that already have images.
+ */
+export async function seedMissingCityImages(): Promise<number> {
+  const citiesWithoutImages = await CityMarketData.find({
+    featured: true,
+    $or: [{ imageUrl: { $exists: false } }, { imageUrl: null }, { imageUrl: '' }],
+  }).lean();
+
+  if (citiesWithoutImages.length === 0) {
+    apiLogger.info('All featured cities already have images — nothing to seed');
+    return 0;
+  }
+
+  apiLogger.info(`Seeding images for ${citiesWithoutImages.length} cities without images...`);
+
+  let seeded = 0;
+  // Process in batches of 5
+  for (let i = 0; i < citiesWithoutImages.length; i += 5) {
+    const batch = citiesWithoutImages.slice(i, i + 5);
+    const results = await Promise.allSettled(
+      batch.map((city) => refreshCityImage(city._id.toString(), true))
+    );
+    seeded += results.filter((r) => r.status === 'fulfilled' && r.value).length;
+
+    if (i + 5 < citiesWithoutImages.length) {
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+    }
+  }
+
+  apiLogger.info(`Seeded ${seeded}/${citiesWithoutImages.length} city images`);
+  return seeded;
+}
