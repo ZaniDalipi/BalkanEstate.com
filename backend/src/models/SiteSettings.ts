@@ -31,6 +31,7 @@ export interface ISiteSettings extends Document {
   companyName: string;
   companyNameFormatted: string;
   logoUrl: string;
+  logoPublicId?: string;
   faviconUrl: string;
 
   // Contact Information
@@ -49,6 +50,7 @@ export interface ISiteSettings extends Document {
 
   // Email Branding
   emailLogoUrl: string;
+  emailLogoPublicId?: string;
   emailBrandColors: IEmailBrandColors;
 
   // Email Footer
@@ -92,7 +94,11 @@ const siteSettingsSchema = new Schema<ISiteSettings, ISiteSettingsModel>(
     },
     logoUrl: {
       type: String,
-      default: 'https://balkanestateai.com/logo.png',
+      default: '',
+    },
+    logoPublicId: {
+      type: String,
+      default: '',
     },
     faviconUrl: {
       type: String,
@@ -165,7 +171,11 @@ const siteSettingsSchema = new Schema<ISiteSettings, ISiteSettingsModel>(
     // Email Branding
     emailLogoUrl: {
       type: String,
-      default: 'https://balkanestateai.com/logo.png',
+      default: '',
+    },
+    emailLogoPublicId: {
+      type: String,
+      default: '',
     },
     emailBrandColors: {
       primary: {

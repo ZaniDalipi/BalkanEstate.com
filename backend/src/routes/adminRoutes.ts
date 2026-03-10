@@ -78,6 +78,8 @@ import {
   getSiteSettings,
   updateSiteSettings,
   resetSiteSettings,
+  uploadSiteLogo,
+  uploadEmailLogo,
 } from '../controllers/siteSettingsController';
 import {
   getAllEmailConfigs,
@@ -348,6 +350,21 @@ router.post('/site-content/upload-video', logAdminAction('UPLOAD_VIDEO'), videoU
 router.get('/site-settings', logAdminAction('VIEW_SITE_SETTINGS'), getSiteSettings);
 router.patch('/site-settings', logAdminAction('UPDATE_SITE_SETTINGS'), updateSiteSettings);
 router.post('/site-settings/reset', logAdminAction('RESET_SITE_SETTINGS'), resetSiteSettings);
+
+// Site Settings Logo Uploads
+const logoUpload = multer({
+  storage: multer.memoryStorage(),
+  limits: { fileSize: 5 * 1024 * 1024 }, // 5MB limit
+  fileFilter: (_req, file, cb) => {
+    if (file.mimetype.startsWith('image/')) {
+      cb(null, true);
+    } else {
+      cb(new Error('Only image files are allowed'));
+    }
+  },
+});
+router.post('/site-settings/upload-logo', logAdminAction('UPLOAD_SITE_LOGO'), logoUpload.single('logo'), uploadSiteLogo);
+router.post('/site-settings/upload-email-logo', logAdminAction('UPLOAD_EMAIL_LOGO'), logoUpload.single('logo'), uploadEmailLogo);
 
 // ===== Email Configuration Management =====
 router.get('/email-configs', logAdminAction('VIEW_EMAIL_CONFIGS'), getAllEmailConfigs);

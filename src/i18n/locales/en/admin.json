@@ -812,6 +812,13 @@
     "loadFailed": "Failed to load site settings. Please try again.",
     "logoPreview": "Logo Preview:",
     "emailLogoPreview": "Email Logo Preview:",
+    "uploading": "Uploading...",
+    "clickOrDragToUpload": "Click or drag an image to upload",
+    "clickOrDragToReplace": "Click or drag to replace",
+    "useUrlInstead": "Use URL instead",
+    "hideUrlInput": "Hide URL input",
+    "logoUploadSuccess": "Logo uploaded successfully!",
+    "logoUploadFailed": "Failed to upload logo. Please try again.",
     "tabs": {
       "branding": "Branding",
       "contact": "Contact",
@@ -822,13 +829,20 @@
     },
     "branding": {
       "title": "Branding",
+      "description": "Configure your company identity and visual branding across the platform.",
+      "siteLogo": "Site Logo",
       "companyName": "Company Name",
+      "companyNameDesc": "The plain text name used throughout the application.",
       "companyNameFormatted": "Company Name (Formatted HTML)",
+      "companyNameFormattedDesc": "HTML-formatted name for rich displays (e.g. with superscript).",
       "logoUrl": "Logo URL",
-      "faviconUrl": "Favicon URL"
+      "faviconUrl": "Favicon URL",
+      "faviconDesc": "Path to your browser tab icon. Supports PNG, ICO, or SVG.",
+      "faviconPreview": "Current favicon"
     },
     "contact": {
       "title": "Contact Information",
+      "description": "Email addresses and phone numbers used for system notifications and user communication.",
       "supportEmail": "Support Email",
       "noReplyEmail": "No-Reply Email",
       "alertsEmail": "Alerts Email",
@@ -837,12 +851,14 @@
     },
     "urls": {
       "title": "Application URLs",
+      "description": "Base URLs for the frontend and backend services.",
       "frontendUrl": "Frontend URL",
       "backendUrl": "Backend URL",
       "urlsNote": "These URLs are used in email links and throughout the application. Make sure they match your deployment."
     },
     "social": {
       "title": "Social Media Links",
+      "description": "Links to your social media profiles displayed across the platform.",
       "facebook": "Facebook",
       "instagram": "Instagram",
       "twitter": "Twitter / X",
@@ -851,8 +867,11 @@
     },
     "email": {
       "title": "Email Branding",
+      "description": "Customize the look and feel of all outgoing emails.",
+      "emailLogo": "Email Logo",
       "emailLogoUrl": "Email Logo URL",
       "brandColors": "Brand Colors",
+      "brandColorsDesc": "These colors are applied to all outgoing email templates.",
       "colorPrimary": "Primary",
       "colorPrimaryDark": "Primary Dark",
       "colorAccent": "Accent",
@@ -864,12 +883,17 @@
       "footerLinks": "Footer Links",
       "addLink": "+ Add Link",
       "labelPlaceholder": "Label",
-      "remove": "Remove"
+      "remove": "Remove",
+      "noLinks": "No footer links added yet."
     },
     "seo": {
       "title": "SEO / Meta",
+      "description": "Search engine optimization settings for better discoverability.",
       "siteTitle": "Site Title",
-      "siteDescription": "Site Description"
+      "siteTitleDesc": "The title shown in browser tabs and search engine results.",
+      "siteDescription": "Site Description",
+      "siteDescriptionDesc": "The meta description shown in search engine results (150-160 characters recommended).",
+      "previewTitle": "Search Engine Preview"
     },
     "emailVars": {
       "title": "Available in Email Templates",
