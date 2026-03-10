@@ -100,7 +100,7 @@ const HeroSection: React.FC<HeroSectionProps> = ({
   // Reuse same query key as PopularCitiesSection to avoid duplicate requests
   const { data: featuredCities = [] } = useQuery({
     queryKey: ['featuredCities'],
-    queryFn: () => getFeaturedCities(6),
+    queryFn: () => getFeaturedCities(50),
     staleTime: 10 * 60 * 1000,
     gcTime: 30 * 60 * 1000,
     retry: 2,
@@ -128,7 +128,7 @@ const HeroSection: React.FC<HeroSectionProps> = ({
     return city;
   }, [currentLang, CITY_NAMES_SQ]);
 
-  const displayCities = useMemo(() => featuredCities.map(c => ({
+  const displayCities = useMemo(() => featuredCities.slice(0, 6).map(c => ({
     original: c.city,
     display: localizeCityName(c.city),
   })), [featuredCities, localizeCityName]);
