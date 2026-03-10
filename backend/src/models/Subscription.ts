@@ -88,7 +88,7 @@ const SubscriptionSchema: Schema = new Schema(
     },
     store: {
       type: String,
-      enum: ['google', 'apple', 'web', 'stripe', 'paddle', 'agency_coupon'],
+      enum: ['google', 'apple', 'web', 'stripe', 'paddle', 'agency_coupon', 'agency_creation'],
       required: true,
       index: true,
     },
