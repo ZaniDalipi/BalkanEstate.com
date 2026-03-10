@@ -710,7 +710,15 @@ const SubscriptionManagement: React.FC<SubscriptionManagementProps> = ({ userId 
         // Hide Enterprise plan if user already owns/manages an agency
         if (key === 'agency_yearly' && user?.agencyId) return false;
         if (key === subscriptionDetails.currentPlanKey) return false;
+        // Allow monthly → yearly upgrade within the same plan family
         if (subscriptionDetails.currentPlanKey === 'seller_pro_monthly' && key === 'seller_pro_yearly') return true;
+        if (subscriptionDetails.currentPlanKey === 'buyer_pro_monthly' && key === 'buyer_pro_yearly') return true;
+        if (subscriptionDetails.currentPlanKey === 'buyer_monthly' && key === 'buyer_pro_yearly') return true;
+        // Allow switching between different plan families at the same or higher tier
+        // (e.g., buyer_pro → seller_pro, buyer_pro → enterprise)
+        const currentFamily = subscriptionDetails.currentPlanKey.startsWith('buyer') ? 'buyer' : 'seller';
+        const targetFamily = key.startsWith('buyer') ? 'buyer' : 'seller';
+        if (currentFamily !== targetFamily && plan.tier >= subscriptionDetails.currentPlan.tier) return true;
         return plan.tier > subscriptionDetails.currentPlan.tier;
       })
       .map(([key, plan]) => ({

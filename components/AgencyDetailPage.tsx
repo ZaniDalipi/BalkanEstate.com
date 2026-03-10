@@ -55,6 +55,16 @@ const MapInvalidator: React.FC = () => {
   return null;
 };
 
+const MapCenterUpdater: React.FC<{ lat: number; lng: number }> = ({ lat, lng }) => {
+  const map = useMap();
+  useEffect(() => {
+    if (lat && lng && !(lat === 0 && lng === 0)) {
+      map.setView([lat, lng], map.getZoom());
+    }
+  }, [map, lat, lng]);
+  return null;
+};
+
 interface Agent {
   agentId: string;
   userId?: string;
@@ -488,6 +498,38 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
       .then(setIsFavourited)
       .catch(() => {});
   }, [agency._id, isAuthenticated]);
+
+  // Geocode agency location on load if lat/lng are missing or at 0,0
+  useEffect(() => {
+    const city = agencyData.city?.trim();
+    const country = agencyData.country?.trim();
+    const hasValidCoords = agencyData.lat && agencyData.lng && !(agencyData.lat === 0 && agencyData.lng === 0);
+
+    if (hasValidCoords || !city || !country) return;
+
+    const countryCodeMap: Record<string, string> = {
+      'Serbia': 'RS', 'Kosovo': 'XK', 'Albania': 'AL', 'North Macedonia': 'MK',
+      'Bosnia and Herzegovina': 'BA', 'Montenegro': 'ME', 'Croatia': 'HR',
+      'Slovenia': 'SI', 'Bulgaria': 'BG', 'Romania': 'RO', 'Greece': 'GR',
+    };
+
+    const query = [city, country].filter(Boolean).join(', ');
+    if (query.length < 3) return;
+
+    const countryCode = country ? countryCodeMap[country] : undefined;
+    searchLocation(query, countryCode).then(results => {
+      if (results.length > 0) {
+        const best = results[0];
+        setAgencyData(prev => ({
+          ...prev,
+          lat: parseFloat(best.lat),
+          lng: parseFloat(best.lon),
+        }));
+      }
+    }).catch(() => {
+      // Geocoding failed silently
+    });
+  }, [agencyData.city, agencyData.country, agencyData.lat, agencyData.lng]);
 
   const handleToggleFavourite = useCallback(async () => {
     if (!isAuthenticated) {
@@ -3130,7 +3172,7 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
         )}
 
         {/* Service Area Location Map */}
-        {agencyData.lat != null && agencyData.lng != null && !isNaN(agencyData.lat) && !isNaN(agencyData.lng) && (
+        {agencyData.lat != null && agencyData.lng != null && !isNaN(agencyData.lat) && !isNaN(agencyData.lng) && !(agencyData.lat === 0 && agencyData.lng === 0) && (
           <div className="bg-white rounded-2xl shadow-xl shadow-slate-200/50 p-6 md:p-8 mb-8 border border-slate-100">
             <div className="flex items-center gap-3 mb-6">
               <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-sky-500 to-cyan-600 flex items-center justify-center shadow-lg shadow-sky-500/25">
@@ -3156,6 +3198,7 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
                   maxZoom={22}
                 />
                 <MapInvalidator />
+                <MapCenterUpdater lat={agencyData.lat} lng={agencyData.lng} />
                 <Marker
                   position={[agencyData.lat, agencyData.lng]}
                   icon={L.icon({
