@@ -154,7 +154,6 @@ export function usePropertyManager() {
 
       const data = await apiRequest<any>(`/admin/properties?${params}`, {
         requiresAuth: true,
-        encryptResponse: true,
       });
       setProperties(data.properties || []);
       setTotalPages(data.pagination?.totalPages || 1);
@@ -204,7 +203,6 @@ export function usePropertyManager() {
         method: 'PATCH',
         body: updateData,
         requiresAuth: true,
-        encryptResponse: true,
       });
 
       // Update local state instead of refetching entire list
@@ -227,7 +225,6 @@ export function usePropertyManager() {
         method: 'PATCH',
         body: { isPromoted: !property.isPromoted },
         requiresAuth: true,
-        encryptResponse: true,
       });
 
       // Update local state instead of refetching entire list
@@ -256,7 +253,6 @@ export function usePropertyManager() {
       await apiRequest(`/admin/properties/${propertyId}`, {
         method: 'DELETE',
         requiresAuth: true,
-        encryptResponse: true,
       });
 
       // Update local state instead of refetching entire list

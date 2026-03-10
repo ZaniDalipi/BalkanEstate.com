@@ -110,7 +110,6 @@ const SystemSettings: React.FC = () => {
     try {
       const data = await apiRequest<{ settings: SystemSettingsData }>('/admin/system-settings', {
         requiresAuth: true,
-        encryptResponse: true,
       });
       if (data.settings) {
         setSettings((prev) => ({ ...prev, ...data.settings }));

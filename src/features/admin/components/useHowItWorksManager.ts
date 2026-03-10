@@ -174,9 +174,9 @@ export function useHowItWorksManager() {
     try {
       const data = await apiRequest<SiteContent[]>('/admin/site-content', {
         requiresAuth: true,
-        encryptResponse: true,
       });
       setContent(data.filter((item: SiteContent) => item.section === 'how-it-works'));
+      setError(null);
     } catch (err: any) {
       setError(err.message);
     } finally {
@@ -231,7 +231,6 @@ export function useHowItWorksManager() {
         method: editingItem ? 'PATCH' : 'POST',
         body: submitData,
         requiresAuth: true,
-        encryptResponse: true,
       });
 
       setShowModal(false);
@@ -270,7 +269,6 @@ export function useHowItWorksManager() {
       await apiRequest(`/admin/site-content/${id}`, {
         method: 'DELETE',
         requiresAuth: true,
-        encryptResponse: true,
       });
       fetchContent();
     } catch (err: any) {
@@ -284,7 +282,6 @@ export function useHowItWorksManager() {
         method: 'PATCH',
         body: { isActive: !item.isActive },
         requiresAuth: true,
-        encryptResponse: true,
       });
       fetchContent();
     } catch (err: any) {

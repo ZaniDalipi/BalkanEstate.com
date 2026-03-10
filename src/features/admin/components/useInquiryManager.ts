@@ -100,7 +100,6 @@ export function useInquiryManager() {
 
       const data = await apiRequest<any>(`/admin/inquiries?${params}`, {
         requiresAuth: true,
-        encryptResponse: true,
       });
       setInquiries(data.inquiries || []);
       setTotalPages(data.pagination?.totalPages || 1);
@@ -116,7 +115,6 @@ export function useInquiryManager() {
     try {
       const data = await apiRequest<InquiryStats>(`/admin/inquiries/stats`, {
         requiresAuth: true,
-        encryptResponse: true,
       });
       setStats(data);
     } catch (err) {
@@ -140,7 +138,6 @@ export function useInquiryManager() {
         method: 'PATCH',
         body: { status },
         requiresAuth: true,
-        encryptResponse: true,
       });
 
       await fetchInquiries();
@@ -161,7 +158,6 @@ export function useInquiryManager() {
         method: 'PATCH',
         body: { adminNotes },
         requiresAuth: true,
-        encryptResponse: true,
       });
 
       await fetchInquiries();
@@ -187,7 +183,6 @@ export function useInquiryManager() {
       await apiRequest(`/admin/inquiries/${id}`, {
         method: 'DELETE',
         requiresAuth: true,
-        encryptResponse: true,
       });
 
       await fetchInquiries();
@@ -209,7 +204,6 @@ export function useInquiryManager() {
         method: 'PATCH',
         body: { inquiryIds: selectedIds, status },
         requiresAuth: true,
-        encryptResponse: true,
       });
 
       await fetchInquiries();
