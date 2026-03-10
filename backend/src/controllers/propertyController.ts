@@ -1,4 +1,5 @@
 import { Request, Response } from 'express';
+import mongoose from 'mongoose';
 import { escapeRegex } from '../utils/escapeRegex';
 import Property from '../models/Property';
 import User, { IUser } from '../models/User';
@@ -84,6 +85,8 @@ export const getProperties = async (
       status,
       page = 1,
       limit = 20,
+      cursor, // Cursor-based pagination: pass last item's _id from previous page
+      cursorCreatedAt, // Companion to cursor: the createdAt of the last item
     } = req.query;
 
     // Build filter object
@@ -198,24 +201,36 @@ export const getProperties = async (
       filter.sellerId = req.query.sellerId;
     }
 
-    // Handle query search - search only in address and city, NOT description
-    // Use $and to preserve other filters like status
+    // Handle query search using MongoDB text index for performance
+    // Falls back to regex for very short queries (single char)
     if (query) {
-      const queryRegex = new RegExp(escapeRegex(query as string), 'i');
-      const queryConditions = [
-        { address: queryRegex },
-        { city: queryRegex },
-      ];
-
-      // If we already have $or (for status), use $and to combine them
-      if (filter.$or) {
-        filter.$and = [
-          { $or: filter.$or },
-          { $or: queryConditions }
-        ];
-        delete filter.$or;
+      const queryStr = query as string;
+      // Use $text search for multi-word or full-word queries (much faster with text index)
+      if (queryStr.trim().length >= 2) {
+        filter.$text = { $search: queryStr };
+        // Combine with existing $or for status conditions
+        if (filter.$or) {
+          filter.$and = filter.$and || [];
+          filter.$and.push({ $or: filter.$or });
+          delete filter.$or;
+        }
       } else {
-        filter.$or = queryConditions;
+        // Short single-char queries: fall back to regex
+        const queryRegex = new RegExp(escapeRegex(queryStr), 'i');
+        const queryConditions = [
+          { address: queryRegex },
+          { city: queryRegex },
+        ];
+
+        if (filter.$or) {
+          filter.$and = [
+            { $or: filter.$or },
+            { $or: queryConditions }
+          ];
+          delete filter.$or;
+        } else {
+          filter.$or = queryConditions;
+        }
       }
     }
 
@@ -245,7 +260,31 @@ export const getProperties = async (
     // Pagination
     const pageNum = Number(page);
     const limitNum = Number(limit);
-    const skip = (pageNum - 1) * limitNum;
+    const useCursor = cursor && cursorCreatedAt;
+
+    // Cursor-based pagination: more efficient for deep pages
+    // Instead of skip(N), we filter by "createdAt < cursorCreatedAt OR (createdAt == cursorCreatedAt AND _id < cursor)"
+    if (useCursor) {
+      const cursorDate = new Date(cursorCreatedAt as string);
+      const cursorId = new (mongoose.Types.ObjectId as any)(cursor as string);
+      const cursorCondition = {
+        $or: [
+          { createdAt: { $lt: cursorDate } },
+          { createdAt: cursorDate, _id: { $lt: cursorId } },
+        ],
+      };
+      // Merge cursor condition with existing filters
+      if (filter.$and) {
+        filter.$and.push(cursorCondition);
+      } else if (filter.$or) {
+        filter.$and = [{ $or: filter.$or }, cursorCondition];
+        delete filter.$or;
+      } else {
+        filter.$and = [cursorCondition];
+      }
+    }
+
+    const skip = useCursor ? 0 : (pageNum - 1) * limitNum;
 
     // Execute query with seller population
     // Fetch more than needed to allow for promoted property sorting
@@ -302,8 +341,8 @@ export const getProperties = async (
 
     const enrichedProperties = plainProperties;
 
-    // Get total count for pagination
-    const total = await Property.countDocuments(filter);
+    // Get total count for pagination (skip for cursor mode — expensive on large datasets)
+    const total = useCursor ? undefined : await Property.countDocuments(filter);
 
     // Track user activity for pro buyer email recommendations
     // Only track if user is authenticated (req.user from auth middleware)
@@ -322,13 +361,19 @@ export const getProperties = async (
     // Sanitize: strip PII (email, phone, license) from list responses
     const sanitizedProperties = enrichedProperties.map((p: any) => sanitizeProperty(p, 'list'));
 
+    // Build cursor for next page (last item in current results)
+    const lastItem = sanitizedProperties[sanitizedProperties.length - 1];
+    const nextCursor = lastItem ? { id: String(lastItem._id), createdAt: lastItem.createdAt } : null;
+
     res.json({
       properties: sanitizedProperties,
       pagination: {
-        page: pageNum,
+        page: useCursor ? undefined : pageNum,
         limit: limitNum,
         total,
-        pages: Math.ceil(total / limitNum),
+        pages: total ? Math.ceil(total / limitNum) : undefined,
+        nextCursor,
+        hasMore: sanitizedProperties.length === limitNum,
       },
     });
   } catch (error: any) {

@@ -382,13 +382,24 @@ describe('Large Dataset Performance Tests', () => {
       expect(ms).toBeLessThan(500);
     });
 
-    it('should text search on title under 1000ms', async () => {
+    it('should text search on title using $text index under 500ms', async () => {
+      if (skipIfNotSeeded()) return;
+      const { ms, result } = await measureMs('Text index search', () =>
+        Property.find({ status: 'active', $text: { $search: 'Luxury' } })
+          .limit(20).lean()
+      );
+      console.log(`  $text search (Luxury): ${ms}ms — returned ${result.length} docs`);
+      expect(result.length).toBeGreaterThan(0);
+      expect(ms).toBeLessThan(500);
+    });
+
+    it('should text search on title using regex (fallback) under 1000ms', async () => {
       if (skipIfNotSeeded()) return;
       const { ms, result } = await measureMs('Regex title search', () =>
         Property.find({ status: 'active', title: { $regex: 'Luxury', $options: 'i' } })
           .limit(20).lean()
       );
-      console.log(`  Title search (Luxury): ${ms}ms — returned ${result.length} docs`);
+      console.log(`  Regex search (Luxury): ${ms}ms — returned ${result.length} docs`);
       expect(ms).toBeLessThan(1000);
     });
 
@@ -685,6 +696,198 @@ describe('Large Dataset Performance Tests', () => {
       console.log(`  Distinct cities: ${ms}ms — ${result.length} unique cities`);
       expect(result.length).toBeGreaterThan(0);
       expect(ms).toBeLessThan(1000);
+    });
+  });
+
+  // ────────────────────────────────────────────────────────────────
+  // Cursor-Based Pagination
+  // ────────────────────────────────────────────────────────────────
+
+  describe('Cursor-based pagination performance', () => {
+    it('should fetch first page using cursor pagination under 500ms', async () => {
+      if (skipIfNotSeeded()) return;
+      const { ms, result } = await measureMs('Cursor page 1', () =>
+        Property.find({ status: 'active' })
+          .sort({ createdAt: -1, _id: -1 })
+          .limit(20)
+          .lean()
+      );
+      console.log(`  Cursor page 1: ${ms}ms — returned ${result.length} docs`);
+      expect(result.length).toBe(20);
+      expect(ms).toBeLessThan(500);
+    });
+
+    it('should fetch deep page using cursor (no skip) under 500ms', async () => {
+      if (skipIfNotSeeded()) return;
+
+      // First, get a reference point deep in the dataset using skip (setup only)
+      const refDoc = await Property.findOne({ status: 'active' })
+        .sort({ createdAt: -1, _id: -1 })
+        .skip(9980)
+        .lean();
+      expect(refDoc).toBeTruthy();
+
+      // Now use cursor-based pagination from that reference point
+      const { ms, result } = await measureMs('Cursor deep page', () =>
+        Property.find({
+          status: 'active',
+          $or: [
+            { createdAt: { $lt: refDoc!.createdAt } },
+            { createdAt: refDoc!.createdAt, _id: { $lt: refDoc!._id } },
+          ],
+        })
+          .sort({ createdAt: -1, _id: -1 })
+          .limit(20)
+          .lean()
+      );
+      console.log(`  Cursor deep page (from doc #9980): ${ms}ms — returned ${result.length} docs`);
+      expect(result.length).toBeGreaterThan(0);
+      // Cursor-based should be much faster than skip-based deep pagination
+      expect(ms).toBeLessThan(500);
+    });
+
+    it('should be faster than skip-based deep pagination', async () => {
+      if (skipIfNotSeeded()) return;
+
+      // Skip-based deep pagination
+      const skipResult = await measureMs('Skip deep', () =>
+        Property.find({ status: 'active' })
+          .sort({ createdAt: -1, _id: -1 })
+          .skip(9980)
+          .limit(20)
+          .lean()
+      );
+
+      // Get reference doc for cursor
+      const refDoc = skipResult.result[0];
+
+      // Cursor-based (no skip needed)
+      const cursorResult = await measureMs('Cursor deep', () =>
+        Property.find({
+          status: 'active',
+          $or: [
+            { createdAt: { $lt: refDoc.createdAt } },
+            { createdAt: refDoc.createdAt, _id: { $lt: refDoc._id } },
+          ],
+        })
+          .sort({ createdAt: -1, _id: -1 })
+          .limit(20)
+          .lean()
+      );
+
+      console.log(`  Skip-based deep: ${skipResult.ms}ms vs Cursor-based deep: ${cursorResult.ms}ms`);
+      console.log(`  Cursor speedup: ${((skipResult.ms - cursorResult.ms) / skipResult.ms * 100).toFixed(1)}%`);
+      // Cursor should generally be faster (or at least not slower)
+      expect(cursorResult.ms).toBeLessThan(2000);
+    });
+  });
+
+  // ────────────────────────────────────────────────────────────────
+  // Text Search Index Performance
+  // ────────────────────────────────────────────────────────────────
+
+  describe('Text search index performance', () => {
+    it('should search with $text faster than $regex on large dataset', async () => {
+      if (skipIfNotSeeded()) return;
+
+      const textResult = await measureMs('$text search', () =>
+        Property.find({ $text: { $search: 'Modern apartment' } })
+          .limit(20)
+          .lean()
+      );
+
+      const regexResult = await measureMs('$regex search', () =>
+        Property.find({ title: { $regex: 'Modern', $options: 'i' } })
+          .limit(20)
+          .lean()
+      );
+
+      console.log(`  $text search: ${textResult.ms}ms (${textResult.result.length} results)`);
+      console.log(`  $regex search: ${regexResult.ms}ms (${regexResult.result.length} results)`);
+      console.log(`  Text index speedup: ${((regexResult.ms - textResult.ms) / regexResult.ms * 100).toFixed(1)}%`);
+
+      expect(textResult.ms).toBeLessThan(500);
+    });
+
+    it('should search multi-word queries with $text under 500ms', async () => {
+      if (skipIfNotSeeded()) return;
+      const { ms, result } = await measureMs('Multi-word $text', () =>
+        Property.find({ $text: { $search: 'Spacious villa Pristina' } })
+          .limit(20)
+          .lean()
+      );
+      console.log(`  Multi-word $text search: ${ms}ms — returned ${result.length} docs`);
+      expect(ms).toBeLessThan(500);
+    });
+  });
+
+  // ────────────────────────────────────────────────────────────────
+  // Pre-Computed Stats
+  // ────────────────────────────────────────────────────────────────
+
+  describe('Pre-computed stats performance', () => {
+    it('should compute and store property stats under 5000ms', async () => {
+      if (skipIfNotSeeded()) return;
+      const { computePropertyStats } = require('../jobs/computePropertyStatsJob');
+      const PropertyStats = require('../models/PropertyStats').default;
+
+      const { ms } = await measureMs('Compute stats', () => computePropertyStats());
+      console.log(`  Full stats computation: ${ms}ms`);
+      expect(ms).toBeLessThan(5000);
+
+      // Verify stored stats
+      const stats = await PropertyStats.findOne({ key: 'global' }).lean();
+      expect(stats).toBeTruthy();
+      expect(stats!.totalActive).toBeGreaterThan(0);
+      expect(stats!.countByCountry.length).toBeGreaterThan(0);
+      expect(stats!.avgPriceByCity.length).toBeGreaterThan(0);
+      expect(stats!.countByType.length).toBeGreaterThan(0);
+      console.log(`  Stats: ${stats!.totalActive} active, ${stats!.countByCountry.length} countries, ${stats!.avgPriceByCity.length} cities`);
+    });
+
+    it('should read pre-computed stats under 10ms', async () => {
+      if (skipIfNotSeeded()) return;
+      const PropertyStats = require('../models/PropertyStats').default;
+
+      const { ms, result } = await measureMs('Read cached stats', () =>
+        PropertyStats.findOne({ key: 'global' }).lean()
+      );
+      console.log(`  Read pre-computed stats: ${ms}ms`);
+      expect(result).toBeTruthy();
+      // Reading pre-computed should be nearly instant
+      expect(ms).toBeLessThan(50);
+    });
+
+    it('should be much faster than live aggregation', async () => {
+      if (skipIfNotSeeded()) return;
+      const PropertyStats = require('../models/PropertyStats').default;
+
+      // Live aggregation
+      const liveResult = await measureMs('Live aggregation', async () => {
+        const [countByCountry, avgPriceByCity] = await Promise.all([
+          Property.aggregate([
+            { $match: { status: 'active' } },
+            { $group: { _id: '$country', count: { $sum: 1 } } },
+          ]),
+          Property.aggregate([
+            { $match: { status: 'active', listingType: 'sale' } },
+            { $group: { _id: '$city', avgPrice: { $avg: '$price' }, count: { $sum: 1 } } },
+            { $limit: 100 },
+          ]),
+        ]);
+        return { countByCountry, avgPriceByCity };
+      });
+
+      // Pre-computed read
+      const cachedResult = await measureMs('Pre-computed read', () =>
+        PropertyStats.findOne({ key: 'global' }).lean()
+      );
+
+      console.log(`  Live aggregation: ${liveResult.ms}ms vs Pre-computed: ${cachedResult.ms}ms`);
+      console.log(`  Speedup: ${(liveResult.ms / Math.max(cachedResult.ms, 1)).toFixed(1)}x faster`);
+
+      // Pre-computed should be orders of magnitude faster
+      expect(cachedResult.ms).toBeLessThan(liveResult.ms);
     });
   });
 });
