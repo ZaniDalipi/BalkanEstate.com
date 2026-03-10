@@ -559,79 +559,204 @@ const SiteSettingsManager: React.FC = () => {
               <p className="text-sm text-gray-500">{t('admin:siteSettings.email.description')}</p>
             </div>
 
-            {/* Email Logo Upload */}
-            <div className="max-w-lg">
-              <LogoUpload
-                currentUrl={form.emailLogoUrl || ''}
-                onUpload={handleEmailLogoUpload}
-                onUrlChange={url => updateField('emailLogoUrl', url)}
-                isUploading={uploadEmailLogoMutation.isPending}
-                label={t('admin:siteSettings.email.emailLogo')}
-                previewBg="dark"
-              />
-            </div>
-
-            <hr className="border-gray-200" />
-
-            {/* Brand Colors */}
-            <div>
-              <h3 className="text-sm font-semibold text-gray-800 mb-1">{t('admin:siteSettings.email.brandColors')}</h3>
-              <p className="text-xs text-gray-500 mb-4">{t('admin:siteSettings.email.brandColorsDesc')}</p>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                {renderColorField(t('admin:siteSettings.email.colorPrimary'), 'emailBrandColors', 'primary')}
-                {renderColorField(t('admin:siteSettings.email.colorPrimaryDark'), 'emailBrandColors', 'primaryDark')}
-                {renderColorField(t('admin:siteSettings.email.colorAccent'), 'emailBrandColors', 'accent')}
-                {renderColorField(t('admin:siteSettings.email.colorText'), 'emailBrandColors', 'text')}
-                {renderColorField(t('admin:siteSettings.email.colorTextMuted'), 'emailBrandColors', 'textMuted')}
-                {renderColorField(t('admin:siteSettings.email.colorBackground'), 'emailBrandColors', 'background')}
-                {renderColorField(t('admin:siteSettings.email.colorBackgroundAlt'), 'emailBrandColors', 'backgroundAlt')}
-              </div>
-            </div>
-
-            <hr className="border-gray-200" />
-
-            {/* Footer */}
-            <div className="space-y-6">
-              {renderField(t('admin:siteSettings.email.emailFooterText'), 'emailFooterText', 'All rights reserved.')}
-
-              <div>
-                <div className="flex items-center justify-between mb-3">
-                  <h3 className="text-sm font-semibold text-gray-800">{t('admin:siteSettings.email.footerLinks')}</h3>
-                  <button
-                    onClick={addFooterLink}
-                    className="text-sm text-blue-600 hover:text-blue-700 font-medium transition-colors"
-                  >
-                    {t('admin:siteSettings.email.addLink')}
-                  </button>
+            <div className="grid grid-cols-1 xl:grid-cols-5 gap-8">
+              {/* Left Column: Settings */}
+              <div className="xl:col-span-3 space-y-8">
+                {/* Email Logo Upload */}
+                <div className="bg-gray-50 rounded-xl border border-gray-200 p-5">
+                  <h3 className="text-sm font-semibold text-gray-800 mb-4 flex items-center gap-2">
+                    <PhotoIcon className="w-4 h-4 text-gray-500" />
+                    {t('admin:siteSettings.email.emailLogo')}
+                  </h3>
+                  <LogoUpload
+                    currentUrl={form.emailLogoUrl || ''}
+                    onUpload={handleEmailLogoUpload}
+                    onUrlChange={url => updateField('emailLogoUrl', url)}
+                    isUploading={uploadEmailLogoMutation.isPending}
+                    label=""
+                    previewBg="dark"
+                  />
                 </div>
-                <div className="space-y-3">
-                  {(form.emailFooterLinks || []).map((link: EmailFooterLink, idx: number) => (
-                    <div key={idx} className="flex items-center gap-3">
-                      <input
-                        type="text"
-                        value={link.label}
-                        onChange={e => updateFooterLink(idx, 'label', e.target.value)}
-                        placeholder={t('admin:siteSettings.email.labelPlaceholder')}
-                        className="w-44 px-3 py-2.5 border border-gray-300 rounded-lg text-sm"
-                      />
-                      <input
-                        type="url"
-                        value={link.url}
-                        onChange={e => updateFooterLink(idx, 'url', e.target.value)}
-                        placeholder="https://..."
-                        className="flex-1 px-3 py-2.5 border border-gray-300 rounded-lg text-sm"
-                      />
+
+                {/* Brand Colors */}
+                <div className="bg-gray-50 rounded-xl border border-gray-200 p-5">
+                  <h3 className="text-sm font-semibold text-gray-800 mb-1">{t('admin:siteSettings.email.brandColors')}</h3>
+                  <p className="text-xs text-gray-500 mb-5">{t('admin:siteSettings.email.brandColorsDesc')}</p>
+
+                  {/* Primary Colors Group */}
+                  <div className="mb-5">
+                    <p className="text-xs font-medium text-gray-500 uppercase tracking-wider mb-3">Primary</p>
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                      {renderColorField(t('admin:siteSettings.email.colorPrimary'), 'emailBrandColors', 'primary')}
+                      {renderColorField(t('admin:siteSettings.email.colorPrimaryDark'), 'emailBrandColors', 'primaryDark')}
+                      {renderColorField(t('admin:siteSettings.email.colorAccent'), 'emailBrandColors', 'accent')}
+                    </div>
+                  </div>
+
+                  {/* Text Colors Group */}
+                  <div className="mb-5">
+                    <p className="text-xs font-medium text-gray-500 uppercase tracking-wider mb-3">Text</p>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                      {renderColorField(t('admin:siteSettings.email.colorText'), 'emailBrandColors', 'text')}
+                      {renderColorField(t('admin:siteSettings.email.colorTextMuted'), 'emailBrandColors', 'textMuted')}
+                    </div>
+                  </div>
+
+                  {/* Background Colors Group */}
+                  <div>
+                    <p className="text-xs font-medium text-gray-500 uppercase tracking-wider mb-3">Background</p>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                      {renderColorField(t('admin:siteSettings.email.colorBackground'), 'emailBrandColors', 'background')}
+                      {renderColorField(t('admin:siteSettings.email.colorBackgroundAlt'), 'emailBrandColors', 'backgroundAlt')}
+                    </div>
+                  </div>
+                </div>
+
+                {/* Footer Settings */}
+                <div className="bg-gray-50 rounded-xl border border-gray-200 p-5 space-y-5">
+                  <h3 className="text-sm font-semibold text-gray-800 flex items-center gap-2">
+                    <svg className="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v12a2 2 0 01-2 2z" />
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 14h18" />
+                    </svg>
+                    Footer
+                  </h3>
+
+                  {renderField(t('admin:siteSettings.email.emailFooterText'), 'emailFooterText', 'All rights reserved.')}
+
+                  <div>
+                    <div className="flex items-center justify-between mb-3">
+                      <label className="block text-sm font-medium text-gray-700">{t('admin:siteSettings.email.footerLinks')}</label>
                       <button
-                        onClick={() => removeFooterLink(idx)}
-                        className="text-red-500 hover:text-red-700 text-sm font-medium transition-colors"
+                        onClick={addFooterLink}
+                        className="inline-flex items-center gap-1.5 text-sm text-blue-600 hover:text-blue-700 font-medium transition-colors"
                       >
-                        {t('admin:siteSettings.email.remove')}
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                        </svg>
+                        {t('admin:siteSettings.email.addLink')}
                       </button>
                     </div>
-                  ))}
-                  {(form.emailFooterLinks || []).length === 0 && (
-                    <p className="text-sm text-gray-400 italic">{t('admin:siteSettings.email.noLinks')}</p>
-                  )}
+                    <div className="space-y-2">
+                      {(form.emailFooterLinks || []).map((link: EmailFooterLink, idx: number) => (
+                        <div key={idx} className="flex items-center gap-2 bg-white rounded-lg border border-gray-200 p-2">
+                          <input
+                            type="text"
+                            value={link.label}
+                            onChange={e => updateFooterLink(idx, 'label', e.target.value)}
+                            placeholder={t('admin:siteSettings.email.labelPlaceholder')}
+                            className="w-36 px-3 py-2 border border-gray-200 rounded-md text-sm bg-gray-50 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                          />
+                          <input
+                            type="url"
+                            value={link.url}
+                            onChange={e => updateFooterLink(idx, 'url', e.target.value)}
+                            placeholder="https://..."
+                            className="flex-1 px-3 py-2 border border-gray-200 rounded-md text-sm bg-gray-50 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                          />
+                          <button
+                            onClick={() => removeFooterLink(idx)}
+                            className="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-md transition-colors"
+                            title={t('admin:siteSettings.email.remove')}
+                          >
+                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                            </svg>
+                          </button>
+                        </div>
+                      ))}
+                      {(form.emailFooterLinks || []).length === 0 && (
+                        <p className="text-sm text-gray-400 italic py-2">{t('admin:siteSettings.email.noLinks')}</p>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Right Column: Live Email Preview */}
+              <div className="xl:col-span-2">
+                <div className="sticky top-6">
+                  <h3 className="text-sm font-semibold text-gray-800 mb-3">Live Preview</h3>
+                  <div className="rounded-xl border border-gray-200 overflow-hidden shadow-sm">
+                    {/* Email Preview */}
+                    <div
+                      className="p-0"
+                      style={{ backgroundColor: (form.emailBrandColors as EmailBrandColors)?.background || '#ffffff' }}
+                    >
+                      {/* Header */}
+                      <div
+                        className="px-6 py-5 text-center"
+                        style={{ backgroundColor: (form.emailBrandColors as EmailBrandColors)?.primary || '#0252CD' }}
+                      >
+                        {form.emailLogoUrl ? (
+                          <img
+                            src={form.emailLogoUrl}
+                            alt="Logo"
+                            className="h-8 mx-auto object-contain"
+                            onError={e => (e.currentTarget.style.display = 'none')}
+                          />
+                        ) : (
+                          <span className="text-white font-bold text-lg">
+                            {form.companyName || 'BalkanEstate'}
+                          </span>
+                        )}
+                      </div>
+
+                      {/* Body */}
+                      <div className="px-6 py-6">
+                        <h4
+                          className="text-base font-semibold mb-2"
+                          style={{ color: (form.emailBrandColors as EmailBrandColors)?.text || '#1f2937' }}
+                        >
+                          Welcome to {form.companyName || 'BalkanEstate'}!
+                        </h4>
+                        <p
+                          className="text-sm leading-relaxed mb-4"
+                          style={{ color: (form.emailBrandColors as EmailBrandColors)?.textMuted || '#6b7280' }}
+                        >
+                          This is a preview of how your emails will look with the current brand settings.
+                        </p>
+                        <div className="text-center">
+                          <span
+                            className="inline-block px-5 py-2 rounded-lg text-white text-sm font-medium"
+                            style={{ backgroundColor: (form.emailBrandColors as EmailBrandColors)?.accent || '#10b981' }}
+                          >
+                            Action Button
+                          </span>
+                        </div>
+                      </div>
+
+                      {/* Footer */}
+                      <div
+                        className="px-6 py-4 text-center border-t"
+                        style={{
+                          backgroundColor: (form.emailBrandColors as EmailBrandColors)?.backgroundAlt || '#f9fafb',
+                          borderColor: (form.emailBrandColors as EmailBrandColors)?.background || '#e5e7eb',
+                        }}
+                      >
+                        {(form.emailFooterLinks || []).length > 0 && (
+                          <div className="flex items-center justify-center gap-3 mb-2 flex-wrap">
+                            {(form.emailFooterLinks || []).map((link: EmailFooterLink, idx: number) => (
+                              <span
+                                key={idx}
+                                className="text-xs font-medium underline"
+                                style={{ color: (form.emailBrandColors as EmailBrandColors)?.primary || '#0252CD' }}
+                              >
+                                {link.label || 'Link'}
+                              </span>
+                            ))}
+                          </div>
+                        )}
+                        <p
+                          className="text-xs"
+                          style={{ color: (form.emailBrandColors as EmailBrandColors)?.textMuted || '#6b7280' }}
+                        >
+                          {form.emailFooterText || 'All rights reserved.'}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                  <p className="text-xs text-gray-400 mt-2 text-center">Updates in real-time as you change settings</p>
                 </div>
               </div>
             </div>
