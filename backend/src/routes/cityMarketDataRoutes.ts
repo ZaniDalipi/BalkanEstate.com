@@ -4,6 +4,7 @@ import {
   getCitiesByCountryController,
   getCityMarketDataController,
   triggerMarketDataUpdateController,
+  refreshCityImagesController,
 } from '../controllers/cityMarketDataController';
 import { protect } from '../middleware/auth';
 
@@ -16,5 +17,6 @@ router.get('/market-data/:city/:country', getCityMarketDataController);
 
 // Admin routes
 router.post('/update-market-data', protect, triggerMarketDataUpdateController);
+router.post('/refresh-images', protect, refreshCityImagesController);
 
 export default router;

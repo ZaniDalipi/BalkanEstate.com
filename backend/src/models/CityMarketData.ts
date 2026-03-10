@@ -30,6 +30,10 @@ export interface ICityMarketData extends Document {
   lastUpdated: Date;
   dataSource: 'gemini' | 'manual' | 'calculated';
 
+  // City image (stored in Cloudinary, fetched from Wikipedia once)
+  imageUrl?: string; // Cloudinary URL for city thumbnail
+  imageUpdatedAt?: Date; // When the image was last fetched/updated
+
   // Display priority
   featured: boolean; // Whether to feature this city prominently
   displayOrder: number; // Sort order for display
@@ -114,6 +118,12 @@ const CityMarketDataSchema = new Schema<ICityMarketData>({
     type: String,
     enum: ['gemini', 'manual', 'calculated'],
     default: 'gemini',
+  },
+  imageUrl: {
+    type: String,
+  },
+  imageUpdatedAt: {
+    type: Date,
   },
   featured: {
     type: Boolean,
