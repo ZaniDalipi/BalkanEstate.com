@@ -52,6 +52,7 @@ export interface SiteSettings {
   emailLogoUrl: string;
   emailLogoPublicId?: string;
   emailBrandColors: EmailBrandColors;
+  emailBrandColorsDark: EmailBrandColors;
   emailFooterText: string;
   emailFooterLinks: EmailFooterLink[];
   siteTitle: string;

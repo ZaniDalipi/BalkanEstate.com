@@ -184,6 +184,8 @@ const SiteSettingsManager: React.FC = () => {
   const [form, setForm] = useState<Partial<SiteSettings>>({});
   const [isDirty, setIsDirty] = useState(false);
   const [saveMessage, setSaveMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
+  const [colorThemeTab, setColorThemeTab] = useState<'light' | 'dark'>('light');
+  const [previewTheme, setPreviewTheme] = useState<'light' | 'dark'>('light');
 
   const tabs: { id: TabId; label: string; icon: string }[] = [
     { id: 'branding', label: t('admin:siteSettings.tabs.branding'), icon: '🎨' },
@@ -456,7 +458,7 @@ const SiteSettingsManager: React.FC = () => {
                 {renderField(
                   t('admin:siteSettings.branding.companyName'),
                   'companyName',
-                  'BalkanEstate',
+                  'BalkanEstateAI',
                   'text',
                   t('admin:siteSettings.branding.companyNameDesc')
                 )}
@@ -523,8 +525,8 @@ const SiteSettingsManager: React.FC = () => {
               <p className="text-sm text-gray-500">{t('admin:siteSettings.urls.description')}</p>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {renderField(t('admin:siteSettings.urls.frontendUrl'), 'frontendUrl', 'https://balkanestate.com')}
-              {renderField(t('admin:siteSettings.urls.backendUrl'), 'backendUrl', 'https://api.balkanestate.com')}
+              {renderField(t('admin:siteSettings.urls.frontendUrl'), 'frontendUrl', 'https://balkanestateai.com')}
+              {renderField(t('admin:siteSettings.urls.backendUrl'), 'backendUrl', 'https://api.balkanestateai.com')}
             </div>
             <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
               <p className="text-sm text-blue-700">
@@ -580,16 +582,48 @@ const SiteSettingsManager: React.FC = () => {
 
                 {/* Brand Colors */}
                 <div className="bg-gray-50 rounded-xl border border-gray-200 p-5">
-                  <h3 className="text-sm font-semibold text-gray-800 mb-1">{t('admin:siteSettings.email.brandColors')}</h3>
+                  <div className="flex items-center justify-between mb-1">
+                    <h3 className="text-sm font-semibold text-gray-800">{t('admin:siteSettings.email.brandColors')}</h3>
+                    <div className="flex items-center bg-gray-200 rounded-lg p-0.5">
+                      <button
+                        type="button"
+                        onClick={() => setColorThemeTab('light')}
+                        className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-md transition-colors ${
+                          colorThemeTab === 'light'
+                            ? 'bg-white text-gray-900 shadow-sm'
+                            : 'text-gray-500 hover:text-gray-700'
+                        }`}
+                      >
+                        <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+                        </svg>
+                        Light
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setColorThemeTab('dark')}
+                        className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-md transition-colors ${
+                          colorThemeTab === 'dark'
+                            ? 'bg-gray-800 text-white shadow-sm'
+                            : 'text-gray-500 hover:text-gray-700'
+                        }`}
+                      >
+                        <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+                        </svg>
+                        Dark
+                      </button>
+                    </div>
+                  </div>
                   <p className="text-xs text-gray-500 mb-5">{t('admin:siteSettings.email.brandColorsDesc')}</p>
 
                   {/* Primary Colors Group */}
                   <div className="mb-5">
                     <p className="text-xs font-medium text-gray-500 uppercase tracking-wider mb-3">Primary</p>
                     <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                      {renderColorField(t('admin:siteSettings.email.colorPrimary'), 'emailBrandColors', 'primary')}
-                      {renderColorField(t('admin:siteSettings.email.colorPrimaryDark'), 'emailBrandColors', 'primaryDark')}
-                      {renderColorField(t('admin:siteSettings.email.colorAccent'), 'emailBrandColors', 'accent')}
+                      {renderColorField(t('admin:siteSettings.email.colorPrimary'), colorThemeTab === 'light' ? 'emailBrandColors' : 'emailBrandColorsDark', 'primary')}
+                      {renderColorField(t('admin:siteSettings.email.colorPrimaryDark'), colorThemeTab === 'light' ? 'emailBrandColors' : 'emailBrandColorsDark', 'primaryDark')}
+                      {renderColorField(t('admin:siteSettings.email.colorAccent'), colorThemeTab === 'light' ? 'emailBrandColors' : 'emailBrandColorsDark', 'accent')}
                     </div>
                   </div>
 
@@ -597,8 +631,8 @@ const SiteSettingsManager: React.FC = () => {
                   <div className="mb-5">
                     <p className="text-xs font-medium text-gray-500 uppercase tracking-wider mb-3">Text</p>
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                      {renderColorField(t('admin:siteSettings.email.colorText'), 'emailBrandColors', 'text')}
-                      {renderColorField(t('admin:siteSettings.email.colorTextMuted'), 'emailBrandColors', 'textMuted')}
+                      {renderColorField(t('admin:siteSettings.email.colorText'), colorThemeTab === 'light' ? 'emailBrandColors' : 'emailBrandColorsDark', 'text')}
+                      {renderColorField(t('admin:siteSettings.email.colorTextMuted'), colorThemeTab === 'light' ? 'emailBrandColors' : 'emailBrandColorsDark', 'textMuted')}
                     </div>
                   </div>
 
@@ -606,8 +640,8 @@ const SiteSettingsManager: React.FC = () => {
                   <div>
                     <p className="text-xs font-medium text-gray-500 uppercase tracking-wider mb-3">Background</p>
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                      {renderColorField(t('admin:siteSettings.email.colorBackground'), 'emailBrandColors', 'background')}
-                      {renderColorField(t('admin:siteSettings.email.colorBackgroundAlt'), 'emailBrandColors', 'backgroundAlt')}
+                      {renderColorField(t('admin:siteSettings.email.colorBackground'), colorThemeTab === 'light' ? 'emailBrandColors' : 'emailBrandColorsDark', 'background')}
+                      {renderColorField(t('admin:siteSettings.email.colorBackgroundAlt'), colorThemeTab === 'light' ? 'emailBrandColors' : 'emailBrandColorsDark', 'backgroundAlt')}
                     </div>
                   </div>
                 </div>
@@ -676,86 +710,128 @@ const SiteSettingsManager: React.FC = () => {
               {/* Right Column: Live Email Preview */}
               <div className="xl:col-span-2">
                 <div className="sticky top-6">
-                  <h3 className="text-sm font-semibold text-gray-800 mb-3">Live Preview</h3>
-                  <div className="rounded-xl border border-gray-200 overflow-hidden shadow-sm">
-                    {/* Email Preview */}
-                    <div
-                      className="p-0"
-                      style={{ backgroundColor: (form.emailBrandColors as EmailBrandColors)?.background || '#ffffff' }}
-                    >
-                      {/* Header */}
-                      <div
-                        className="px-6 py-5 text-center"
-                        style={{ backgroundColor: (form.emailBrandColors as EmailBrandColors)?.primary || '#0252CD' }}
+                  <div className="flex items-center justify-between mb-3">
+                    <h3 className="text-sm font-semibold text-gray-800">Live Preview</h3>
+                    <div className="flex items-center bg-gray-200 rounded-lg p-0.5">
+                      <button
+                        type="button"
+                        onClick={() => setPreviewTheme('light')}
+                        className={`flex items-center gap-1 px-2.5 py-1 text-xs font-medium rounded-md transition-colors ${
+                          previewTheme === 'light'
+                            ? 'bg-white text-gray-900 shadow-sm'
+                            : 'text-gray-500 hover:text-gray-700'
+                        }`}
                       >
-                        {form.emailLogoUrl ? (
-                          <img
-                            src={form.emailLogoUrl}
-                            alt="Logo"
-                            className="h-8 mx-auto object-contain"
-                            onError={e => (e.currentTarget.style.display = 'none')}
-                          />
-                        ) : (
-                          <span className="text-white font-bold text-lg">
-                            {form.companyName || 'BalkanEstate'}
-                          </span>
-                        )}
-                      </div>
-
-                      {/* Body */}
-                      <div className="px-6 py-6">
-                        <h4
-                          className="text-base font-semibold mb-2"
-                          style={{ color: (form.emailBrandColors as EmailBrandColors)?.text || '#1f2937' }}
-                        >
-                          Welcome to {form.companyName || 'BalkanEstate'}!
-                        </h4>
-                        <p
-                          className="text-sm leading-relaxed mb-4"
-                          style={{ color: (form.emailBrandColors as EmailBrandColors)?.textMuted || '#6b7280' }}
-                        >
-                          This is a preview of how your emails will look with the current brand settings.
-                        </p>
-                        <div className="text-center">
-                          <span
-                            className="inline-block px-5 py-2 rounded-lg text-white text-sm font-medium"
-                            style={{ backgroundColor: (form.emailBrandColors as EmailBrandColors)?.accent || '#10b981' }}
-                          >
-                            Action Button
-                          </span>
-                        </div>
-                      </div>
-
-                      {/* Footer */}
-                      <div
-                        className="px-6 py-4 text-center border-t"
-                        style={{
-                          backgroundColor: (form.emailBrandColors as EmailBrandColors)?.backgroundAlt || '#f9fafb',
-                          borderColor: (form.emailBrandColors as EmailBrandColors)?.background || '#e5e7eb',
-                        }}
+                        <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+                        </svg>
+                        Light
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setPreviewTheme('dark')}
+                        className={`flex items-center gap-1 px-2.5 py-1 text-xs font-medium rounded-md transition-colors ${
+                          previewTheme === 'dark'
+                            ? 'bg-gray-800 text-white shadow-sm'
+                            : 'text-gray-500 hover:text-gray-700'
+                        }`}
                       >
-                        {(form.emailFooterLinks || []).length > 0 && (
-                          <div className="flex items-center justify-center gap-3 mb-2 flex-wrap">
-                            {(form.emailFooterLinks || []).map((link: EmailFooterLink, idx: number) => (
-                              <span
-                                key={idx}
-                                className="text-xs font-medium underline"
-                                style={{ color: (form.emailBrandColors as EmailBrandColors)?.primary || '#0252CD' }}
-                              >
-                                {link.label || 'Link'}
-                              </span>
-                            ))}
-                          </div>
-                        )}
-                        <p
-                          className="text-xs"
-                          style={{ color: (form.emailBrandColors as EmailBrandColors)?.textMuted || '#6b7280' }}
-                        >
-                          {form.emailFooterText || 'All rights reserved.'}
-                        </p>
-                      </div>
+                        <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+                        </svg>
+                        Dark
+                      </button>
                     </div>
                   </div>
+                  {(() => {
+                    const previewColors = previewTheme === 'light'
+                      ? (form.emailBrandColors as EmailBrandColors)
+                      : (form.emailBrandColorsDark as EmailBrandColors);
+                    const lightDefaults = { primary: '#0252CD', primaryDark: '#0142a8', accent: '#10b981', text: '#1f2937', textMuted: '#6b7280', background: '#ffffff', backgroundAlt: '#f9fafb' };
+                    const darkDefaults = { primary: '#3b82f6', primaryDark: '#2563eb', accent: '#34d399', text: '#f9fafb', textMuted: '#9ca3af', background: '#111827', backgroundAlt: '#1f2937' };
+                    const defaults = previewTheme === 'light' ? lightDefaults : darkDefaults;
+                    return (
+                      <div className="rounded-xl border border-gray-200 overflow-hidden shadow-sm">
+                        {/* Email Preview */}
+                        <div
+                          className="p-0"
+                          style={{ backgroundColor: previewColors?.background || defaults.background }}
+                        >
+                          {/* Header */}
+                          <div
+                            className="px-6 py-5 text-center"
+                            style={{ backgroundColor: previewColors?.primary || defaults.primary }}
+                          >
+                            {form.emailLogoUrl ? (
+                              <img
+                                src={form.emailLogoUrl}
+                                alt="Logo"
+                                className="h-8 mx-auto object-contain"
+                                onError={e => (e.currentTarget.style.display = 'none')}
+                              />
+                            ) : (
+                              <span className="text-white font-bold text-lg">
+                                {form.companyName || 'BalkanEstateAI'}
+                              </span>
+                            )}
+                          </div>
+
+                          {/* Body */}
+                          <div className="px-6 py-6">
+                            <h4
+                              className="text-base font-semibold mb-2"
+                              style={{ color: previewColors?.text || defaults.text }}
+                            >
+                              Welcome to {form.companyName || 'BalkanEstateAI'}!
+                            </h4>
+                            <p
+                              className="text-sm leading-relaxed mb-4"
+                              style={{ color: previewColors?.textMuted || defaults.textMuted }}
+                            >
+                              This is a preview of how your emails will look with the current brand settings.
+                            </p>
+                            <div className="text-center">
+                              <span
+                                className="inline-block px-5 py-2 rounded-lg text-white text-sm font-medium"
+                                style={{ backgroundColor: previewColors?.accent || defaults.accent }}
+                              >
+                                Action Button
+                              </span>
+                            </div>
+                          </div>
+
+                          {/* Footer */}
+                          <div
+                            className="px-6 py-4 text-center border-t"
+                            style={{
+                              backgroundColor: previewColors?.backgroundAlt || defaults.backgroundAlt,
+                              borderColor: previewColors?.background || defaults.background,
+                            }}
+                          >
+                            {(form.emailFooterLinks || []).length > 0 && (
+                              <div className="flex items-center justify-center gap-3 mb-2 flex-wrap">
+                                {(form.emailFooterLinks || []).map((link: EmailFooterLink, idx: number) => (
+                                  <span
+                                    key={idx}
+                                    className="text-xs font-medium underline"
+                                    style={{ color: previewColors?.primary || defaults.primary }}
+                                  >
+                                    {link.label || 'Link'}
+                                  </span>
+                                ))}
+                              </div>
+                            )}
+                            <p
+                              className="text-xs"
+                              style={{ color: previewColors?.textMuted || defaults.textMuted }}
+                            >
+                              {form.emailFooterText || 'All rights reserved.'}
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })()}
                   <p className="text-xs text-gray-400 mt-2 text-center">Updates in real-time as you change settings</p>
                 </div>
               </div>
@@ -773,7 +849,7 @@ const SiteSettingsManager: React.FC = () => {
             {renderField(
               t('admin:siteSettings.seo.siteTitle'),
               'siteTitle',
-              'BalkanEstate - Find Your Dream Property',
+              'BalkanEstateAI - Find Your Dream Property',
               'text',
               t('admin:siteSettings.seo.siteTitleDesc')
             )}
@@ -793,7 +869,7 @@ const SiteSettingsManager: React.FC = () => {
                     {form.siteTitle || 'Page Title'}
                   </p>
                   <p className="text-green-700 text-sm mt-1 truncate">
-                    {form.frontendUrl || 'https://balkanestate.com'}
+                    {form.frontendUrl || 'https://balkanestateai.com'}
                   </p>
                   <p className="text-gray-600 text-sm mt-1 line-clamp-2">
                     {form.siteDescription || 'Page description will appear here...'}

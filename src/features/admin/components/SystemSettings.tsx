@@ -58,7 +58,7 @@ interface SystemSettingsData {
 }
 
 const DEFAULT_SETTINGS: SystemSettingsData = {
-  siteName: 'BalkanEstate',
+  siteName: 'BalkanEstateAI',
   siteDescription: 'Your trusted real estate platform in the Balkans',
   contactEmail: CONTACT_CONFIG.email.contact,
   supportEmail: CONTACT_CONFIG.email.support,
@@ -68,7 +68,7 @@ const DEFAULT_SETTINGS: SystemSettingsData = {
   smtpHost: 'smtp.gmail.com',
   smtpPort: '587',
   smtpSecure: true,
-  emailFromName: 'BalkanEstate',
+  emailFromName: 'BalkanEstateAI',
   emailFromAddress: 'noreply@balkanestateai.com',
   requireEmailVerification: true,
   requireAgentVerification: true,
