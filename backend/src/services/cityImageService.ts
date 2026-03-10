@@ -1,12 +1,17 @@
+import { Readable } from 'stream';
+import sharp from 'sharp';
 import cloudinary from '../config/cloudinary';
 import CityMarketData from '../models/CityMarketData';
 import { apiLogger } from '../utils/logger';
 
 const CITY_IMAGE_FOLDER = 'balkan-estate/cities';
 const IMAGE_MAX_AGE_DAYS = 30; // Re-fetch images older than 30 days
+const MAX_IMAGE_WIDTH = 1200;
+const MAX_IMAGE_HEIGHT = 800;
 
 /**
- * Fetch a city thumbnail URL from Wikipedia REST API
+ * Fetch a city thumbnail URL from Wikipedia REST API.
+ * Prefers thumbnail over originalimage to reduce download size.
  */
 async function fetchWikipediaImageUrl(cityName: string): Promise<string | null> {
   try {
@@ -15,30 +20,68 @@ async function fetchWikipediaImageUrl(cityName: string): Promise<string | null> 
     );
     if (!res.ok) return null;
     const data = await res.json() as { originalimage?: { source: string }; thumbnail?: { source: string } };
-    return data.originalimage?.source || data.thumbnail?.source || null;
+    // Prefer thumbnail to avoid downloading huge originals; fall back to original
+    return data.thumbnail?.source || data.originalimage?.source || null;
   } catch {
     return null;
   }
 }
 
 /**
- * Upload an image from a URL to Cloudinary
+ * Download image from URL and resize it with sharp to stay under Cloudinary's 10MB limit.
  */
-async function uploadUrlToCloudinary(
-  imageUrl: string,
+async function downloadAndResizeImage(imageUrl: string): Promise<Buffer | null> {
+  try {
+    const res = await fetch(imageUrl);
+    if (!res.ok) return null;
+    const arrayBuffer = await res.arrayBuffer();
+    const buffer = Buffer.from(arrayBuffer);
+
+    // Resize and compress with sharp
+    const resized = await sharp(buffer)
+      .resize(MAX_IMAGE_WIDTH, MAX_IMAGE_HEIGHT, {
+        fit: 'cover',
+        position: 'centre',
+      })
+      .jpeg({ quality: 85, progressive: true })
+      .toBuffer();
+
+    return resized;
+  } catch (error: any) {
+    apiLogger.error(`Failed to download/resize image from ${imageUrl}:`, error.message);
+    return null;
+  }
+}
+
+/**
+ * Upload a resized image buffer to Cloudinary
+ */
+async function uploadBufferToCloudinary(
+  imageBuffer: Buffer,
   cityName: string
 ): Promise<string | null> {
   try {
     const publicId = `${CITY_IMAGE_FOLDER}/${cityName.toLowerCase().replace(/\s+/g, '-')}`;
-    const result = await cloudinary.uploader.upload(imageUrl, {
-      public_id: publicId,
-      overwrite: true,
-      resource_type: 'image',
-      transformation: [
-        { width: 1200, height: 800, crop: 'fill', gravity: 'auto' },
-        { quality: 'auto:good' },
-        { fetch_format: 'auto' },
-      ],
+    const result = await new Promise<any>((resolve, reject) => {
+      const uploadStream = cloudinary.uploader.upload_stream(
+        {
+          public_id: publicId,
+          overwrite: true,
+          resource_type: 'image',
+          transformation: [
+            { quality: 'auto:good' },
+            { fetch_format: 'auto' },
+          ],
+        },
+        (error, result) => {
+          if (error) reject(error);
+          else resolve(result);
+        }
+      );
+      const readable = new Readable();
+      readable.push(imageBuffer);
+      readable.push(null);
+      readable.pipe(uploadStream);
     });
     return result.secure_url;
   } catch (error: any) {
@@ -69,7 +112,11 @@ export async function refreshCityImage(cityId: string, force = false): Promise<s
     return city.imageUrl || null;
   }
 
-  const cloudinaryUrl = await uploadUrlToCloudinary(wikiUrl, city.city);
+  // Download and resize locally before uploading to Cloudinary (avoids 10MB limit)
+  const resizedBuffer = await downloadAndResizeImage(wikiUrl);
+  if (!resizedBuffer) return city.imageUrl || null;
+
+  const cloudinaryUrl = await uploadBufferToCloudinary(resizedBuffer, city.city);
   if (!cloudinaryUrl) return city.imageUrl || null;
 
   await CityMarketData.findByIdAndUpdate(cityId, {
@@ -89,17 +136,17 @@ export async function refreshAllCityImages(force = false): Promise<number> {
   const cities = await CityMarketData.find({ featured: true }).lean();
   let updated = 0;
 
-  // Process in batches of 5
-  for (let i = 0; i < cities.length; i += 5) {
-    const batch = cities.slice(i, i + 5);
+  // Process in batches of 3 with longer delays to avoid Wikipedia 429 rate limits
+  for (let i = 0; i < cities.length; i += 3) {
+    const batch = cities.slice(i, i + 3);
     const results = await Promise.allSettled(
       batch.map((city) => refreshCityImage(city._id.toString(), force))
     );
     updated += results.filter((r) => r.status === 'fulfilled' && r.value).length;
 
-    // Small delay between batches to respect rate limits
-    if (i + 5 < cities.length) {
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+    // Delay between batches to respect Wikipedia rate limits
+    if (i + 3 < cities.length) {
+      await new Promise((resolve) => setTimeout(resolve, 2000));
     }
   }
 
