@@ -259,10 +259,10 @@ const UserManagerDetail: React.FC<UserManagerDetailProps> = ({
                 <input
                   type="email"
                   value={editForm.email}
-                  onChange={(e) => setEditForm({ ...editForm, email: e.target.value })}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg"
-                  required
+                  disabled
+                  className="w-full px-4 py-2 border border-gray-200 rounded-lg bg-gray-100 text-gray-500 cursor-not-allowed"
                 />
+                <p className="text-xs text-gray-400 mt-1">{t('userDetail.emailReadOnly')}</p>
               </div>
 
               <div>
@@ -372,64 +372,30 @@ const UserManagerDetail: React.FC<UserManagerDetailProps> = ({
                       {t('userDetail.emailVerified')}
                     </label>
                   </div>
-                  <div className="flex items-center">
-                    <input
-                      type="checkbox"
-                      id="isSubscribed"
-                      checked={editForm.isSubscribed}
-                      onChange={(e) => setEditForm({ ...editForm, isSubscribed: e.target.checked })}
-                      className="w-4 h-4 text-blue-600 border-gray-300 rounded"
-                    />
-                    <label htmlFor="isSubscribed" className="ml-2 text-sm text-gray-700">
-                      {t('userDetail.subscribed')}
-                    </label>
-                  </div>
-                  <div className="flex items-center">
-                    <input
-                      type="checkbox"
-                      id="isEnterpriseTier"
-                      checked={editForm.isEnterpriseTier}
-                      onChange={(e) => setEditForm({ ...editForm, isEnterpriseTier: e.target.checked })}
-                      className="w-4 h-4 text-blue-600 border-gray-300 rounded"
-                    />
-                    <label htmlFor="isEnterpriseTier" className="ml-2 text-sm text-gray-700">
-                      {t('userDetail.enterpriseTier')}
-                    </label>
-                  </div>
                 </div>
               </div>
 
-              {editForm.isSubscribed && (
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      {t('userDetail.subscriptionPlan')}
-                    </label>
-                    <input
-                      type="text"
-                      value={editForm.subscriptionPlan}
-                      onChange={(e) => setEditForm({ ...editForm, subscriptionPlan: e.target.value })}
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg"
-                      placeholder="e.g., buyer_monthly"
-                    />
+              {/* Subscription info - view only (managed through Subscription Management) */}
+              {editingUser.isSubscribed && (
+                <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
+                  <h4 className="text-sm font-semibold text-gray-600 mb-2">{t('userDetail.subscriptionSection')}</h4>
+                  <div className="grid grid-cols-2 gap-3 text-sm">
+                    <div>
+                      <span className="text-gray-500">{t('userDetail.subscriptionPlan')}:</span>
+                      <span className="ml-1 font-medium text-gray-900">{editingUser.subscriptionPlan || '—'}</span>
+                    </div>
+                    <div>
+                      <span className="text-gray-500">{t('userDetail.subscriptionStatus')}:</span>
+                      <span className="ml-1 font-medium text-gray-900 capitalize">{editingUser.subscriptionStatus || '—'}</span>
+                    </div>
+                    {editingUser.isEnterpriseTier && (
+                      <div>
+                        <span className="text-gray-500">{t('userDetail.enterpriseTier')}:</span>
+                        <span className="ml-1 font-medium text-purple-700">{t('userDetail.yes')}</span>
+                      </div>
+                    )}
                   </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      {t('userDetail.subscriptionStatus')}
-                    </label>
-                    <select
-                      value={editForm.subscriptionStatus}
-                      onChange={(e) => setEditForm({ ...editForm, subscriptionStatus: e.target.value })}
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg"
-                    >
-                      <option value="">{t('form.selectOption')}</option>
-                      <option value="active">{t('filters.active')}</option>
-                      <option value="expired">{t('discountCodes.status.expired')}</option>
-                      <option value="trial">Trial</option>
-                      <option value="grace">Grace</option>
-                      <option value="canceled">Canceled</option>
-                    </select>
-                  </div>
+                  <p className="text-xs text-gray-400 mt-2">{t('userDetail.subscriptionManagedNote')}</p>
                 </div>
               )}
 

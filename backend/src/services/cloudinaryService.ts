@@ -47,13 +47,15 @@ export interface CloudinaryUploadResult {
  *         └── cover/
  */
 type UploadType =
-  | 'property'      // User listing photos
-  | 'floorplan'     // User listing floorplans
-  | 'avatar'        // User profile avatar
-  | 'license'       // Agent license document
-  | 'credential'    // Agent credential document
-  | 'agency-logo'   // Agency logo
-  | 'agency-cover'; // Agency cover image
+  | 'property'          // User listing photos
+  | 'floorplan'         // User listing floorplans
+  | 'avatar'            // User profile avatar
+  | 'license'           // Agent license document
+  | 'credential'        // Agent credential document
+  | 'agency-logo'       // Agency logo
+  | 'agency-cover'      // Agency cover image
+  | 'site-logo'         // Site branding logo
+  | 'site-email-logo';  // Site email branding logo
 
 interface UploadOptions {
   userId: string;
@@ -114,6 +116,14 @@ const buildFolderPath = (options: UploadOptions): string => {
     case 'agency-cover':
       // balkan-estate/agencies/{agencyId}/cover
       return `${ROOT}/agencies/${agencyId || userId}/cover`;
+
+    case 'site-logo':
+      // balkan-estate/site/logo
+      return `${ROOT}/site/logo`;
+
+    case 'site-email-logo':
+      // balkan-estate/site/email-logo
+      return `${ROOT}/site/email-logo`;
 
     default:
       return `${ROOT}/misc/${userId}`;

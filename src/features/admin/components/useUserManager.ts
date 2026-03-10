@@ -162,8 +162,11 @@ export function useUserManager() {
     e.preventDefault();
     if (!editingUser) return;
 
+    // Strip sensitive fields - these are managed through dedicated endpoints
+    const { email, isSubscribed, subscriptionPlan, subscriptionStatus, isEnterpriseTier, ...safeData } = editForm;
+
     updateUserMutation.mutate(
-      { userId: editingUser._id, data: editForm },
+      { userId: editingUser._id, data: safeData },
       {
         onSuccess: () => {
           setIsEditModalOpen(false);

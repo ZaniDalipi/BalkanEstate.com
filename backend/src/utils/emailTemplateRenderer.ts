@@ -46,16 +46,34 @@ export async function getSiteSettingsVariables(): Promise<Record<string, string>
   if (!s) {
     // Hardcoded fallback
     return {
-      companyName: 'BalkanEstate',
+      companyName: 'BalkanEstateAI',
       companyNameFormatted: 'BalkanEstate<sup>AI</sup>',
       logoUrl: '',
       emailLogoUrl: '',
       supportEmail: 'support@balkanestateai.com',
       contactPhone: '',
-      frontendUrl: process.env.FRONTEND_URL || 'https://balkanestate.com',
-      backendUrl: process.env.BACKEND_URL || 'https://api.balkanestate.com',
+      frontendUrl: process.env.FRONTEND_URL || 'https://balkanestateai.com',
+      backendUrl: process.env.BACKEND_URL || 'https://api.balkanestateai.com',
+      // Brand colors (light theme defaults)
+      brandPrimary: '#0252CD',
+      brandPrimaryDark: '#0142a8',
+      brandAccent: '#10b981',
+      brandText: '#1f2937',
+      brandTextMuted: '#6b7280',
+      brandBackground: '#ffffff',
+      brandBackgroundAlt: '#f9fafb',
+      // Brand colors (dark theme defaults)
+      darkBrandPrimary: '#3b82f6',
+      darkBrandPrimaryDark: '#2563eb',
+      darkBrandAccent: '#34d399',
+      darkBrandText: '#f9fafb',
+      darkBrandTextMuted: '#9ca3af',
+      darkBrandBackground: '#111827',
+      darkBrandBackgroundAlt: '#1f2937',
     };
   }
+  const colors = s.emailBrandColors || {} as any;
+  const darkColors = s.emailBrandColorsDark || {} as any;
   return {
     companyName: s.companyName,
     companyNameFormatted: s.companyNameFormatted,
@@ -63,14 +81,30 @@ export async function getSiteSettingsVariables(): Promise<Record<string, string>
     emailLogoUrl: s.emailLogoUrl,
     supportEmail: s.supportEmail,
     contactPhone: s.contactPhone || '',
-    frontendUrl: s.frontendUrl || process.env.FRONTEND_URL || 'https://balkanestate.com',
-    backendUrl: s.backendUrl || process.env.BACKEND_URL || 'https://api.balkanestate.com',
+    frontendUrl: s.frontendUrl || process.env.FRONTEND_URL || 'https://balkanestateai.com',
+    backendUrl: s.backendUrl || process.env.BACKEND_URL || 'https://api.balkanestateai.com',
     emailFooterText: s.emailFooterText || 'All rights reserved.',
     facebookUrl: s.socialLinks?.facebook || '',
     instagramUrl: s.socialLinks?.instagram || '',
     twitterUrl: s.socialLinks?.twitter || '',
     linkedinUrl: s.socialLinks?.linkedin || '',
     youtubeUrl: s.socialLinks?.youtube || '',
+    // Brand colors from SiteSettings (light theme)
+    brandPrimary: colors.primary || '#0252CD',
+    brandPrimaryDark: colors.primaryDark || '#0142a8',
+    brandAccent: colors.accent || '#10b981',
+    brandText: colors.text || '#1f2937',
+    brandTextMuted: colors.textMuted || '#6b7280',
+    brandBackground: colors.background || '#ffffff',
+    brandBackgroundAlt: colors.backgroundAlt || '#f9fafb',
+    // Brand colors from SiteSettings (dark theme)
+    darkBrandPrimary: darkColors.primary || '#3b82f6',
+    darkBrandPrimaryDark: darkColors.primaryDark || '#2563eb',
+    darkBrandAccent: darkColors.accent || '#34d399',
+    darkBrandText: darkColors.text || '#f9fafb',
+    darkBrandTextMuted: darkColors.textMuted || '#9ca3af',
+    darkBrandBackground: darkColors.background || '#111827',
+    darkBrandBackgroundAlt: darkColors.backgroundAlt || '#1f2937',
   };
 }
 
@@ -100,14 +134,34 @@ export function renderEmailConfig(
   config: IEmailConfig,
   variables: Record<string, string>,
 ): { html: string; subject: string } {
-  const frontendUrl = variables.frontendUrl || process.env.FRONTEND_URL || 'https://balkanestate.com';
+  const frontendUrl = variables.frontendUrl || process.env.FRONTEND_URL || 'https://balkanestateai.com';
   const year = new Date().getFullYear();
-  const companyNameFormatted = variables.companyNameFormatted || 'BalkanEstate<sup>AI</sup>';
+  const companyNameFormatted = variables.companyNameFormatted || 'BalkanEstateAI';
   const supportEmail = variables.supportEmail || 'support@balkanestateai.com';
   const emailFooterText = variables.emailFooterText || 'All rights reserved.';
   const emailLogoUrl = variables.emailLogoUrl || '';
   // Use config-level headerImageUrl if set, otherwise fall back to global email logo
   const headerImageUrl = (config as any).headerImageUrl || emailLogoUrl;
+
+  // Brand colors from SiteSettings — light theme (inline styles)
+  const brandPrimary = variables.brandPrimary || '#0252CD';
+  const brandPrimaryDark = variables.brandPrimaryDark || '#0142a8';
+  const brandText = variables.brandText || '#1f2937';
+  const brandTextMuted = variables.brandTextMuted || '#6b7280';
+  const brandBackground = variables.brandBackground || '#ffffff';
+  const brandBackgroundAlt = variables.brandBackgroundAlt || '#f9fafb';
+
+  // Brand colors from SiteSettings — dark theme (CSS media query)
+  const darkPrimary = variables.darkBrandPrimary || '#3b82f6';
+  const darkPrimaryDark = variables.darkBrandPrimaryDark || '#2563eb';
+  const darkText = variables.darkBrandText || '#f9fafb';
+  const darkTextMuted = variables.darkBrandTextMuted || '#9ca3af';
+  const darkBackground = variables.darkBrandBackground || '#111827';
+  const darkBackgroundAlt = variables.darkBrandBackgroundAlt || '#1f2937';
+
+  // Default header gradient uses brand colors if config doesn't override
+  const defaultGradient = `linear-gradient(135deg,${brandPrimary} 0%,${brandPrimaryDark} 100%)`;
+  const darkGradient = `linear-gradient(135deg,${darkPrimary} 0%,${darkPrimaryDark} 100%)`;
 
   const headerTitle    = replaceVariables(config.headerTitle, variables);
   const headerSubtitle = config.headerSubtitle ? replaceVariables(config.headerSubtitle, variables) : '';
@@ -122,18 +176,33 @@ export function renderEmailConfig(
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="color-scheme" content="light dark">
+  <meta name="supported-color-schemes" content="light dark">
   ${config.preheaderText ? '<meta name="x-apple-data-detectors" content="none">' : ''}
+  <style>
+    @media (prefers-color-scheme: dark) {
+      .ec-body { background-color: ${darkBackground} !important; }
+      .ec-card { background-color: ${darkBackgroundAlt} !important; }
+      .ec-header { background: ${darkGradient} !important; }
+      .ec-text { color: ${darkText} !important; }
+      .ec-text-muted { color: ${darkTextMuted} !important; }
+      .ec-footer { background: ${darkBackground} !important; border-color: ${darkBackgroundAlt} !important; }
+      .ec-link { color: ${darkPrimary} !important; }
+      .ec-cta { background: ${darkGradient} !important; }
+      .ec-border { border-color: ${darkBackgroundAlt} !important; }
+    }
+  </style>
 </head>
-<body style="margin:0;padding:0;font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif;background-color:#f3f4f6;-webkit-font-smoothing:antialiased;">
+<body style="margin:0;padding:0;font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif;background-color:#f3f4f6;-webkit-font-smoothing:antialiased;" class="ec-body">
   ${config.preheaderText ? `
   <div style="display:none;max-height:0;overflow:hidden;">
     ${replaceVariables(config.preheaderText, variables)}
   </div>` : ''}
 
-  <div style="max-width:600px;margin:0 auto;background-color:#ffffff;border-radius:12px;overflow:hidden;box-shadow:0 4px 6px rgba(0,0,0,0.05);">
+  <div style="max-width:600px;margin:0 auto;background-color:${brandBackground};border-radius:12px;overflow:hidden;box-shadow:0 4px 6px rgba(0,0,0,0.05);" class="ec-card">
 
     <!-- Header -->
-    <div style="background:${replaceVariables(config.headerGradient || 'linear-gradient(135deg,#0252CD 0%,#0369a1 100%)', variables)};padding:32px 24px;text-align:center;">
+    <div style="background:${replaceVariables(config.headerGradient || defaultGradient, variables)};padding:32px 24px;text-align:center;" class="ec-header">
       ${headerImageUrl ? `
       <div style="margin-bottom:16px;">
         <img src="${headerImageUrl}" alt="" style="max-height:48px;max-width:200px;" />
@@ -147,29 +216,30 @@ export function renderEmailConfig(
     </div>
 
     <!-- Body -->
-    <div style="padding:28px 24px;">
+    <div style="padding:28px 24px;color:${brandText};" class="ec-text">
       ${bodyContent}
 
       ${config.ctaEnabled && ctaText && ctaUrl ? `
       <div style="margin-top:28px;text-align:center;">
         <a href="${ctaUrl}"
-           style="display:inline-block;background:${replaceVariables(config.headerGradient || 'linear-gradient(135deg,#0252CD 0%,#0369a1 100%)', variables)};color:#ffffff;text-decoration:none;padding:16px 32px;border-radius:10px;font-weight:600;font-size:15px;box-shadow:0 4px 14px rgba(0,0,0,0.15);">
+           style="display:inline-block;background:${replaceVariables(config.headerGradient || defaultGradient, variables)};color:#ffffff;text-decoration:none;padding:16px 32px;border-radius:10px;font-weight:600;font-size:15px;box-shadow:0 4px 14px rgba(0,0,0,0.15);"
+           class="ec-cta">
           ${ctaText}
         </a>
       </div>` : ''}
     </div>
 
     <!-- Footer -->
-    <div style="background:#f9fafb;padding:20px;text-align:center;border-top:1px solid #e5e7eb;">
-      ${footerReason ? `<p style="color:#6b7280;font-size:12px;margin:0 0 8px 0;">${footerReason}</p>` : ''}
+    <div style="background:${brandBackgroundAlt};padding:20px;text-align:center;border-top:1px solid #e5e7eb;" class="ec-footer">
+      ${footerReason ? `<p style="color:${brandTextMuted};font-size:12px;margin:0 0 8px 0;" class="ec-text-muted">${footerReason}</p>` : ''}
       ${config.showUnsubscribe ? `
-      <p style="color:#9ca3af;font-size:11px;margin:0 0 6px 0;">
-        <a href="${frontendUrl}/settings/notifications" style="color:#9ca3af;text-decoration:underline;">Manage email preferences</a>
+      <p style="color:${brandTextMuted};font-size:11px;margin:0 0 6px 0;" class="ec-text-muted">
+        <a href="${frontendUrl}/settings/notifications" style="color:${brandTextMuted};text-decoration:underline;" class="ec-text-muted">Manage email preferences</a>
       </p>` : ''}
-      <p style="color:#6b7280;font-size:12px;margin:4px 0 4px 0;">
-        Need help? <a href="mailto:${supportEmail}" style="color:#0252CD;text-decoration:none;">${supportEmail}</a>
+      <p style="color:${brandTextMuted};font-size:12px;margin:4px 0 4px 0;" class="ec-text-muted">
+        Need help? <a href="mailto:${supportEmail}" style="color:${brandPrimary};text-decoration:none;" class="ec-link">${supportEmail}</a>
       </p>
-      <p style="color:#9ca3af;font-size:11px;margin:4px 0 0 0;">
+      <p style="color:${brandTextMuted};font-size:11px;margin:4px 0 0 0;" class="ec-text-muted">
         &copy; ${year} ${companyNameFormatted}. ${emailFooterText}
       </p>
     </div>

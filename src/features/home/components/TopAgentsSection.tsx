@@ -127,7 +127,7 @@ const AgentPodiumCard: React.FC<{
               src={optimizeCloudinaryUrl(agent.avatarUrl, { width: 160, quality: 'auto', crop: 'fill' })}
               alt={agentName}
               style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-              loading="lazy"
+              loading="eager"
             />
           ) : (
             <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
@@ -387,6 +387,7 @@ const TopAgentsSection: React.FC = () => {
               rank={i}
               podiumHeight={200}
               onAgentClick={handleAgentClick}
+              t={t}
             />
           ))}
         </div>

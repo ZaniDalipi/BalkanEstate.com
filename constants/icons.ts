@@ -172,10 +172,7 @@ export const KeyIcon: React.FC<{ className?: string }> = ({ className }) => (
 
 export const RentIcon: React.FC<{ className?: string }> = ({ className }) => (
     React.createElement(Icon, { className },
-        React.createElement('path', { strokeLinecap: "round", strokeLinejoin: "round", d: "M3 10.5L12 3l9 7.5" }),
-        React.createElement('path', { strokeLinecap: "round", strokeLinejoin: "round", d: "M5.25 10.5V21h13.5V10.5" }),
-        React.createElement('path', { strokeLinecap: "round", strokeLinejoin: "round", d: "M10.5 21v-4.5a1.5 1.5 0 013 0V21" }),
-        React.createElement('path', { strokeLinecap: "round", strokeLinejoin: "round", d: "M12 14.25a.75.75 0 100-1.5.75.75 0 000 1.5z" })
+        React.createElement('path', { strokeLinecap: "round", strokeLinejoin: "round", d: "M15.75 5.25a3 3 0 013 3m3 0a6 6 0 01-7.029 5.912c-.563-.097-1.159.026-1.563.43L10.5 17.25H8.25v2.25H6v2.25H2.25v-2.818c0-.597.237-1.17.659-1.591l6.499-6.499c.404-.404.527-1 .43-1.563A6 6 0 1121.75 8.25z" })
     )
 );
 

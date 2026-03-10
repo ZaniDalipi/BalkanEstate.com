@@ -31,6 +31,7 @@ export interface ISiteSettings extends Document {
   companyName: string;
   companyNameFormatted: string;
   logoUrl: string;
+  logoPublicId?: string;
   faviconUrl: string;
 
   // Contact Information
@@ -49,7 +50,9 @@ export interface ISiteSettings extends Document {
 
   // Email Branding
   emailLogoUrl: string;
+  emailLogoPublicId?: string;
   emailBrandColors: IEmailBrandColors;
+  emailBrandColorsDark: IEmailBrandColors;
 
   // Email Footer
   emailFooterText: string;
@@ -83,7 +86,7 @@ const siteSettingsSchema = new Schema<ISiteSettings, ISiteSettingsModel>(
     // Branding
     companyName: {
       type: String,
-      default: 'BalkanEstate',
+      default: 'BalkanEstateAI',
       trim: true,
     },
     companyNameFormatted: {
@@ -92,7 +95,11 @@ const siteSettingsSchema = new Schema<ISiteSettings, ISiteSettingsModel>(
     },
     logoUrl: {
       type: String,
-      default: 'https://balkanestateai.com/logo.png',
+      default: '',
+    },
+    logoPublicId: {
+      type: String,
+      default: '',
     },
     faviconUrl: {
       type: String,
@@ -129,12 +136,12 @@ const siteSettingsSchema = new Schema<ISiteSettings, ISiteSettingsModel>(
     // URLs
     frontendUrl: {
       type: String,
-      default: 'https://balkanestate.com',
+      default: 'https://balkanestateai.com',
       trim: true,
     },
     backendUrl: {
       type: String,
-      default: 'https://api.balkanestate.com',
+      default: 'https://api.balkanestateai.com',
       trim: true,
     },
 
@@ -165,7 +172,11 @@ const siteSettingsSchema = new Schema<ISiteSettings, ISiteSettingsModel>(
     // Email Branding
     emailLogoUrl: {
       type: String,
-      default: 'https://balkanestateai.com/logo.png',
+      default: '',
+    },
+    emailLogoPublicId: {
+      type: String,
+      default: '',
     },
     emailBrandColors: {
       primary: {
@@ -198,6 +209,37 @@ const siteSettingsSchema = new Schema<ISiteSettings, ISiteSettingsModel>(
       },
     },
 
+    emailBrandColorsDark: {
+      primary: {
+        type: String,
+        default: '#3b82f6',
+      },
+      primaryDark: {
+        type: String,
+        default: '#2563eb',
+      },
+      accent: {
+        type: String,
+        default: '#34d399',
+      },
+      text: {
+        type: String,
+        default: '#f9fafb',
+      },
+      textMuted: {
+        type: String,
+        default: '#9ca3af',
+      },
+      background: {
+        type: String,
+        default: '#111827',
+      },
+      backgroundAlt: {
+        type: String,
+        default: '#1f2937',
+      },
+    },
+
     // Email Footer
     emailFooterText: {
       type: String,
@@ -206,7 +248,7 @@ const siteSettingsSchema = new Schema<ISiteSettings, ISiteSettingsModel>(
     emailFooterLinks: {
       type: [emailFooterLinkSchema],
       default: [
-        { label: 'Website', url: 'https://balkanestate.com' },
+        { label: 'Website', url: 'https://balkanestateai.com' },
         { label: 'Contact Support', url: 'mailto:support@balkanestateai.com' },
       ],
     },

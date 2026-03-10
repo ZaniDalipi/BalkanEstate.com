@@ -322,7 +322,7 @@ async function sendMilestoneEmail(
         </div>
 
         <div style="text-align: center; margin-top: 24px; color: #9ca3af; font-size: 12px;">
-          <p>BalkanEstate.com - Find Your Dream Home in the Balkans</p>
+          <p>BalkanEstateAI - Find Your Dream Home in the Balkans</p>
           <p>You're receiving this because your listing reached ${milestone} views.</p>
         </div>
       </body>

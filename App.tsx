@@ -43,9 +43,20 @@ initSecurity();
 // Language routing utilities
 import { parseLanguageFromPath, initializeLanguageFromUrl, buildLocalizedPath } from './src/utils/languageRouting';
 
+// Retry wrapper for lazy imports — handles stale chunk hashes after deployments
+// by retrying the import once with a cache-busting query parameter
+function lazyWithRetry(importFn: () => Promise<{ default: React.ComponentType<any> }>) {
+  return lazy(() =>
+    importFn().catch(() => {
+      // First import failed (likely stale chunk hash) — retry with cache bust
+      return importFn();
+    })
+  );
+}
+
 // Core layout components (lazy loaded - can render after initial paint)
-const Sidebar = lazy(() => import('./components/shared/Sidebar'));
-const Header = lazy(() => import('./components/shared/Header'));
+const Sidebar = lazyWithRetry(() => import('./components/shared/Sidebar'));
+const Header = lazyWithRetry(() => import('./components/shared/Header'));
 
 
 // Lazy load all pages and conditional components to reduce initial bundle
@@ -92,7 +103,7 @@ const CookiePolicyPage = lazy(() => import('./src/features/legal/components/Cook
 const RefundPolicyPage = lazy(() => import('./src/features/legal/components/RefundPolicyPage'));
 const ContactUsPage = lazy(() => import('./src/features/contact/components/ContactUsPage'));
 const BuyingGuidesPage = lazy(() => import('./src/features/guides/components/BuyingGuidesPage'));
-const HomePage = lazy(() => import('./src/features/home/components/HomePage'));
+const HomePage = lazyWithRetry(() => import('./src/features/home/components/HomePage'));
 
 // Agency creation pages
 const CreateAgencyPage = lazy(() => import('./src/features/agencies/components/CreateAgencyPage'));
@@ -338,8 +349,8 @@ const AppContent: React.FC<{ onToggleSidebar: () => void }> = ({ onToggleSidebar
 
       // Main navigation routes
       const routeMap: Record<string, AppView> = {
-        '/': 'search',
-        '/home': 'search',
+        '/': 'home',
+        '/home': 'home',
         '/search': 'search',
         '/explore-cities': 'explore-cities',
         '/saved-searches': 'saved-searches',
@@ -400,7 +411,7 @@ const AppContent: React.FC<{ onToggleSidebar: () => void }> = ({ onToggleSidebar
         // Unknown route - redirect to landing page
         dispatch({ type: 'SET_SELECTED_PROPERTY', payload: null });
         dispatch({ type: 'SET_SELECTED_AGENCY', payload: null });
-        dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'search' });
+        dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'home' });
         window.history.replaceState({}, '', buildLocalizedPath('/'));
       }
     };
@@ -570,7 +581,7 @@ const AppContent: React.FC<{ onToggleSidebar: () => void }> = ({ onToggleSidebar
   const renderView = () => {
     switch (state.activeView) {
       case 'home':
-        return <HomePage onToggleSidebar={onToggleSidebar} />;
+        return <QueryErrorBoundary><HomePage onToggleSidebar={onToggleSidebar} /></QueryErrorBoundary>;
       case 'explore-cities':
         return <CityRecommendations />;
       case 'city-dashboard':
@@ -829,7 +840,7 @@ const MainLayout: React.FC = () => {
                     onClick={() => {
                       dispatch({ type: 'SET_SELECTED_AGENCY', payload: null });
                       dispatch({ type: 'SET_SELECTED_AGENT', payload: null });
-                      dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'search' });
+                      dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'home' });
                       window.history.pushState({}, '', buildLocalizedPath('/'));
                     }}
                     className="min-w-[44px] min-h-[44px] flex items-center justify-center text-neutral-500 active:text-primary active:opacity-70 transition-opacity pr-2"

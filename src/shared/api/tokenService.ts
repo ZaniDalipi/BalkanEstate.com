@@ -18,6 +18,7 @@ import { API_URL } from './config';
 const LEGACY_ACCESS_TOKEN_KEY = 'balkan_estate_token';
 const LEGACY_REFRESH_TOKEN_KEY = 'balkan_estate_refresh_token';
 const LEGACY_SESSION_KEY = 'balkan_estate_session';
+const SESSION_HINT_KEY = 'balkan_estate_has_session';
 const REFRESH_BUFFER_MS = 5 * 60 * 1000; // Refresh 5 minutes before expiry
 
 let refreshTimer: ReturnType<typeof setTimeout> | null = null;
@@ -27,6 +28,36 @@ let onSessionExpired: (() => void) | null = null;
 // Used to suppress the "Session Expired" modal on first visit when no
 // refresh cookie exists (the refresh call fails, but there was no session).
 let hadActiveSession = false;
+
+/**
+ * Check if the user has ever logged in on this browser.
+ * Uses a non-sensitive localStorage flag (not a token) to avoid
+ * making a pointless refresh-token POST that returns 400 for
+ * users who have never authenticated.
+ */
+const hasSessionHint = (): boolean => {
+  try {
+    return localStorage.getItem(SESSION_HINT_KEY) === '1';
+  } catch {
+    return false;
+  }
+};
+
+const setSessionHint = (): void => {
+  try {
+    localStorage.setItem(SESSION_HINT_KEY, '1');
+  } catch {
+    // Ignore storage errors
+  }
+};
+
+const clearSessionHint = (): void => {
+  try {
+    localStorage.removeItem(SESSION_HINT_KEY);
+  } catch {
+    // Ignore storage errors
+  }
+};
 
 /**
  * In-memory token storage.
@@ -163,6 +194,7 @@ export const tokenService = {
   setAccessToken: (token: string): void => {
     inMemoryAccessToken = token;
     hadActiveSession = true;
+    setSessionHint();
     scheduleRefresh(token);
   },
 
@@ -191,6 +223,8 @@ export const tokenService = {
     inMemoryAccessToken = null;
     // Clear any legacy tokens that may still exist from before this migration
     clearLegacyStorage();
+    // Clear session hint so next visit doesn't attempt a pointless refresh
+    clearSessionHint();
   },
 
   hasValidToken: (): boolean => {
@@ -222,8 +256,10 @@ export const tokenService = {
     // Step 2: If we already have a token in memory (e.g. just logged in), schedule refresh
     if (inMemoryAccessToken && !isTokenExpiringSoon(inMemoryAccessToken)) {
       scheduleRefresh(inMemoryAccessToken);
-    } else {
-      // No in-memory token (page refresh/new tab) — try silent refresh via httpOnly cookie
+    } else if (hasSessionHint()) {
+      // Only attempt silent refresh if the user has logged in before on this browser.
+      // This avoids a pointless POST /auth/refresh-token that returns 400 for
+      // users who have never authenticated (e.g. first visit, incognito).
       refreshTokenProactively();
     }
   },

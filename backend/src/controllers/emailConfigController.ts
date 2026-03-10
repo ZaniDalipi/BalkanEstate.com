@@ -3,7 +3,7 @@ import EmailConfig, { IEmailConfig } from '../models/EmailConfig';
 import { seedEmailConfigs, defaultEmailConfigs } from '../seeds/emailConfigSeed';
 import emailService from '../services/emailService';
 import { apiLogger } from '../utils/logger';
-import { replaceVariables, renderEmailConfig } from '../utils/emailTemplateRenderer';
+import { replaceVariables, renderEmailWithSiteSettings } from '../utils/emailTemplateRenderer';
 import { getParam } from '../utils/validateParams';
 import { escapeRegex } from '../utils/escapeRegex';
 
@@ -248,7 +248,7 @@ export const sendTestEmail = async (req: Request, res: Response): Promise<void> 
 
     // Build variables with test data
     const variables: Record<string, string> = {};
-    const frontendUrl = process.env.FRONTEND_URL || 'https://balkanestate.com';
+    const frontendUrl = process.env.FRONTEND_URL || 'https://balkanestateai.com';
 
     // Set default values from variable examples
     for (const variable of config.variables) {
@@ -258,15 +258,14 @@ export const sendTestEmail = async (req: Request, res: Response): Promise<void> 
     // Always include frontendUrl
     variables.frontendUrl = frontendUrl;
 
-    // Generate email HTML from template
-    const html = generateEmailHtml(config, variables);
-    const subject = replaceVariables(config.subject, variables);
+    // Generate email HTML from template (with SiteSettings brand colors)
+    const rendered = await generateEmailHtml(config, variables);
 
     // Send test email
     await emailService.sendEmail({
       to: testEmail,
-      subject: `[TEST] ${subject}`,
-      html,
+      subject: `[TEST] ${rendered.subject}`,
+      html: rendered.html,
       category: config.fromCategory as any,
     });
 
@@ -294,7 +293,7 @@ export const previewEmail = async (req: Request, res: Response): Promise<void> =
 
     // Build variables with test data
     const variables: Record<string, string> = {};
-    const frontendUrl = process.env.FRONTEND_URL || 'https://balkanestate.com';
+    const frontendUrl = process.env.FRONTEND_URL || 'https://balkanestateai.com';
 
     // Set default values from variable examples
     for (const variable of config.variables) {
@@ -304,13 +303,12 @@ export const previewEmail = async (req: Request, res: Response): Promise<void> =
     // Always include frontendUrl
     variables.frontendUrl = frontendUrl;
 
-    // Generate email HTML
-    const html = generateEmailHtml(config, variables);
-    const subject = replaceVariables(config.subject, variables);
+    // Generate email HTML (with SiteSettings brand colors)
+    const rendered = await generateEmailHtml(config, variables);
 
     res.json({
-      subject,
-      html,
+      subject: rendered.subject,
+      html: rendered.html,
       preheaderText: replaceVariables(config.preheaderText || '', variables),
     });
   } catch (error) {
@@ -473,9 +471,10 @@ export const duplicateEmailConfig = async (req: Request, res: Response): Promise
   }
 };
 
-// Delegate to shared utility — keeps admin preview/test rendering identical to actual sending
-function generateEmailHtml(config: IEmailConfig, variables: Record<string, string>): string {
-  return renderEmailConfig(config, variables).html;
+// Delegate to shared utility — keeps admin preview/test rendering identical to actual sending.
+// Uses renderEmailWithSiteSettings to inject SiteSettings brand colors and variables.
+async function generateEmailHtml(config: IEmailConfig, variables: Record<string, string>): Promise<{ html: string; subject: string }> {
+  return renderEmailWithSiteSettings(config, variables);
 }
 
 // =============================================================================
@@ -500,7 +499,7 @@ export const previewMinimalisticTemplate = async (req: Request, res: Response): 
     let html = '';
     let subject = '';
 
-    const frontendUrl = process.env.FRONTEND_URL || 'https://balkanestate.com';
+    const frontendUrl = process.env.FRONTEND_URL || 'https://balkanestateai.com';
 
     switch (templateType) {
       case 'promo':

@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { CONTACT_CONFIG } from '@/src/shared/config/contact';
+import { apiRequest } from '@/src/shared/api';
 import {
   Cog6ToothIcon,
   EnvelopeIcon,
@@ -9,6 +10,7 @@ import {
   BellIcon,
   CheckCircleIcon,
   ExclamationTriangleIcon,
+  ArrowPathIcon,
 } from '@/constants';
 
 interface SettingsSection {
@@ -18,103 +20,185 @@ interface SettingsSection {
   icon: React.ReactNode;
 }
 
+interface SystemSettingsData {
+  // General
+  siteName: string;
+  siteDescription: string;
+  contactEmail: string;
+  supportEmail: string;
+  timezone: string;
+  dateFormat: string;
+  currency: string;
+  // Email
+  smtpHost: string;
+  smtpPort: string;
+  smtpSecure: boolean;
+  emailFromName: string;
+  emailFromAddress: string;
+  // Security
+  requireEmailVerification: boolean;
+  requireAgentVerification: boolean;
+  sessionTimeout: number;
+  maxLoginAttempts: number;
+  enableTwoFactor: boolean;
+  adminVPNRequired: boolean;
+  // Notifications
+  notifyNewUser: boolean;
+  notifyNewProperty: boolean;
+  notifyNewInquiry: boolean;
+  notifyAgentVerification: boolean;
+  dailyDigest: boolean;
+  weeklyReport: boolean;
+  // Pricing
+  defaultCurrency: string;
+  enableDiscounts: boolean;
+  enablePromotions: boolean;
+  maxDiscountPercent: number;
+  minListingPrice: number;
+}
+
+const DEFAULT_SETTINGS: SystemSettingsData = {
+  siteName: 'BalkanEstateAI',
+  siteDescription: 'Your trusted real estate platform in the Balkans',
+  contactEmail: CONTACT_CONFIG.email.contact,
+  supportEmail: CONTACT_CONFIG.email.support,
+  timezone: 'Europe/Belgrade',
+  dateFormat: 'DD/MM/YYYY',
+  currency: 'EUR',
+  smtpHost: 'smtp.gmail.com',
+  smtpPort: '587',
+  smtpSecure: true,
+  emailFromName: 'BalkanEstateAI',
+  emailFromAddress: 'noreply@balkanestateai.com',
+  requireEmailVerification: true,
+  requireAgentVerification: true,
+  sessionTimeout: 30,
+  maxLoginAttempts: 5,
+  enableTwoFactor: false,
+  adminVPNRequired: true,
+  notifyNewUser: true,
+  notifyNewProperty: true,
+  notifyNewInquiry: true,
+  notifyAgentVerification: true,
+  dailyDigest: false,
+  weeklyReport: true,
+  defaultCurrency: 'EUR',
+  enableDiscounts: true,
+  enablePromotions: true,
+  maxDiscountPercent: 50,
+  minListingPrice: 1000,
+};
+
 const SystemSettings: React.FC = () => {
   const { t } = useTranslation(['admin']);
   const [activeTab, setActiveTab] = useState('general');
   const [isSaving, setIsSaving] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const [saveMessage, setSaveMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
+  const [settings, setSettings] = useState<SystemSettingsData>(DEFAULT_SETTINGS);
+  const [showPasswordModal, setShowPasswordModal] = useState(false);
+  const [pendingAction, setPendingAction] = useState<'save' | 'reset' | null>(null);
+  const [password, setPassword] = useState('');
+  const [passwordError, setPasswordError] = useState('');
 
-  // Settings state
-  const [settings, setSettings] = useState({
-    // General
-    siteName: 'BalkanEstate',
-    siteDescription: 'Your trusted real estate platform in the Balkans',
-    contactEmail: CONTACT_CONFIG.email.contact,
-    supportEmail: CONTACT_CONFIG.email.support,
-    timezone: 'Europe/Belgrade',
-    dateFormat: 'DD/MM/YYYY',
-    currency: 'EUR',
+  useEffect(() => {
+    fetchSettings();
+  }, []);
 
-    // Email
-    smtpHost: 'smtp.gmail.com',
-    smtpPort: '587',
-    smtpSecure: true,
-    emailFromName: 'BalkanEstate',
-    emailFromAddress: 'noreply@balkanestateai.com',
-
-    // Security
-    requireEmailVerification: true,
-    requireAgentVerification: true,
-    sessionTimeout: 30,
-    maxLoginAttempts: 5,
-    enableTwoFactor: false,
-    adminVPNRequired: true,
-
-    // Notifications
-    notifyNewUser: true,
-    notifyNewProperty: true,
-    notifyNewInquiry: true,
-    notifyAgentVerification: true,
-    dailyDigest: false,
-    weeklyReport: true,
-
-    // Pricing
-    defaultCurrency: 'EUR',
-    enableDiscounts: true,
-    enablePromotions: true,
-    maxDiscountPercent: 50,
-    minListingPrice: 1000,
-  });
+  const fetchSettings = async () => {
+    setIsLoading(true);
+    try {
+      const data = await apiRequest<{ settings: SystemSettingsData }>('/admin/system-settings', {
+        requiresAuth: true,
+      });
+      if (data.settings) {
+        setSettings((prev) => ({ ...prev, ...data.settings }));
+      }
+    } catch {
+      // Use defaults on error
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const sections: SettingsSection[] = [
-    {
-      id: 'general',
-      title: t('admin:settings.generalTab'),
-      description: t('admin:settings.generalDesc'),
-      icon: <Cog6ToothIcon className="w-5 h-5" />
-    },
-    {
-      id: 'email',
-      title: t('admin:settings.emailTab'),
-      description: t('admin:settings.emailDesc'),
-      icon: <EnvelopeIcon className="w-5 h-5" />
-    },
-    {
-      id: 'security',
-      title: t('admin:settings.securityTab'),
-      description: t('admin:settings.securityDesc'),
-      icon: <ShieldCheckIcon className="w-5 h-5" />
-    },
-    {
-      id: 'notifications',
-      title: t('admin:settings.notificationsTab'),
-      description: t('admin:settings.notificationsDesc'),
-      icon: <BellIcon className="w-5 h-5" />
-    },
-    {
-      id: 'pricing',
-      title: t('admin:settings.pricingTab'),
-      description: t('admin:settings.pricingDesc'),
-      icon: <CurrencyEuroIcon className="w-5 h-5" />
-    },
+    { id: 'general', title: t('admin:settings.generalTab'), description: t('admin:settings.generalDesc'), icon: <Cog6ToothIcon className="w-5 h-5" /> },
+    { id: 'email', title: t('admin:settings.emailTab'), description: t('admin:settings.emailDesc'), icon: <EnvelopeIcon className="w-5 h-5" /> },
+    { id: 'security', title: t('admin:settings.securityTab'), description: t('admin:settings.securityDesc'), icon: <ShieldCheckIcon className="w-5 h-5" /> },
+    { id: 'notifications', title: t('admin:settings.notificationsTab'), description: t('admin:settings.notificationsDesc'), icon: <BellIcon className="w-5 h-5" /> },
+    { id: 'pricing', title: t('admin:settings.pricingTab'), description: t('admin:settings.pricingDesc'), icon: <CurrencyEuroIcon className="w-5 h-5" /> },
   ];
 
-  const handleSave = async () => {
+  const requestPasswordConfirmation = (action: 'save' | 'reset') => {
+    setPendingAction(action);
+    setPassword('');
+    setPasswordError('');
+    setShowPasswordModal(true);
+  };
+
+  const verifyPasswordAndExecute = async () => {
+    if (!password.trim()) {
+      setPasswordError(t('admin:settings.passwordRequired'));
+      return;
+    }
+
+    try {
+      // Verify password with the server
+      await apiRequest('/auth/verify-password', {
+        method: 'POST',
+        body: { password },
+        requiresAuth: true,
+      });
+
+      setShowPasswordModal(false);
+      setPassword('');
+      setPasswordError('');
+
+      if (pendingAction === 'save') {
+        await executeSave();
+      } else if (pendingAction === 'reset') {
+        await executeReset();
+      }
+      setPendingAction(null);
+    } catch {
+      setPasswordError(t('admin:settings.incorrectPassword'));
+    }
+  };
+
+  const executeSave = async () => {
     setIsSaving(true);
     setSaveMessage(null);
 
     try {
-      // Note: Settings persistence requires backend implementation
-      // Currently showing preview only
-      await new Promise(resolve => setTimeout(resolve, 500));
-      setSaveMessage({
-        type: 'success',
-        text: t('admin:settings.previewApplied')
+      await apiRequest('/admin/system-settings', {
+        method: 'PATCH',
+        body: settings,
+        requiresAuth: true,
       });
-    } catch (err) {
-      setSaveMessage({ type: 'error', text: t('admin:settings.previewFailed') });
+      setSaveMessage({ type: 'success', text: t('admin:settings.savedSuccess') });
+      setTimeout(() => setSaveMessage(null), 5000);
+    } catch {
+      setSaveMessage({ type: 'error', text: t('admin:settings.savedError') });
+      setTimeout(() => setSaveMessage(null), 5000);
     } finally {
       setIsSaving(false);
+    }
+  };
+
+  const executeReset = async () => {
+    try {
+      const data = await apiRequest<{ settings: SystemSettingsData }>('/admin/system-settings/reset', {
+        method: 'POST',
+        requiresAuth: true,
+      });
+      if (data.settings) {
+        setSettings((prev) => ({ ...prev, ...data.settings }));
+      }
+      setSaveMessage({ type: 'success', text: t('admin:settings.resetSuccess') });
+      setTimeout(() => setSaveMessage(null), 5000);
+    } catch {
+      setSaveMessage({ type: 'error', text: t('admin:settings.resetError') });
+      setTimeout(() => setSaveMessage(null), 5000);
     }
   };
 
@@ -265,69 +349,28 @@ const SystemSettings: React.FC = () => {
   const renderSecuritySettings = () => (
     <div className="space-y-6">
       <div className="space-y-4">
-        <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
-          <div>
-            <p className="font-medium text-gray-900">{t('admin:settings.requireEmailVerification')}</p>
-            <p className="text-sm text-gray-500">{t('admin:settings.requireEmailVerificationDesc')}</p>
+        {[
+          { key: 'requireEmailVerification', label: t('admin:settings.requireEmailVerification'), desc: t('admin:settings.requireEmailVerificationDesc') },
+          { key: 'requireAgentVerification', label: t('admin:settings.requireAgentVerification'), desc: t('admin:settings.requireAgentVerificationDesc') },
+          { key: 'adminVPNRequired', label: t('admin:settings.adminVPNRequired'), desc: t('admin:settings.adminVPNRequiredDesc') },
+          { key: 'enableTwoFactor', label: t('admin:settings.twoFactorAuth'), desc: t('admin:settings.twoFactorAuthDesc') },
+        ].map(item => (
+          <div key={item.key} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+            <div>
+              <p className="font-medium text-gray-900">{item.label}</p>
+              <p className="text-sm text-gray-500">{item.desc}</p>
+            </div>
+            <label className="relative inline-flex items-center cursor-pointer">
+              <input
+                type="checkbox"
+                checked={settings[item.key as keyof SystemSettingsData] as boolean}
+                onChange={(e) => handleInputChange(item.key, e.target.checked)}
+                className="sr-only peer"
+              />
+              <div className="w-11 h-6 bg-gray-300 peer-focus:ring-2 peer-focus:ring-blue-500 rounded-full peer peer-checked:bg-blue-600 peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all"></div>
+            </label>
           </div>
-          <label className="relative inline-flex items-center cursor-pointer">
-            <input
-              type="checkbox"
-              checked={settings.requireEmailVerification}
-              onChange={(e) => handleInputChange('requireEmailVerification', e.target.checked)}
-              className="sr-only peer"
-            />
-            <div className="w-11 h-6 bg-gray-300 peer-focus:ring-2 peer-focus:ring-blue-500 rounded-full peer peer-checked:bg-blue-600 peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all"></div>
-          </label>
-        </div>
-
-        <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
-          <div>
-            <p className="font-medium text-gray-900">{t('admin:settings.requireAgentVerification')}</p>
-            <p className="text-sm text-gray-500">{t('admin:settings.requireAgentVerificationDesc')}</p>
-          </div>
-          <label className="relative inline-flex items-center cursor-pointer">
-            <input
-              type="checkbox"
-              checked={settings.requireAgentVerification}
-              onChange={(e) => handleInputChange('requireAgentVerification', e.target.checked)}
-              className="sr-only peer"
-            />
-            <div className="w-11 h-6 bg-gray-300 peer-focus:ring-2 peer-focus:ring-blue-500 rounded-full peer peer-checked:bg-blue-600 peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all"></div>
-          </label>
-        </div>
-
-        <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
-          <div>
-            <p className="font-medium text-gray-900">{t('admin:settings.adminVPNRequired')}</p>
-            <p className="text-sm text-gray-500">{t('admin:settings.adminVPNRequiredDesc')}</p>
-          </div>
-          <label className="relative inline-flex items-center cursor-pointer">
-            <input
-              type="checkbox"
-              checked={settings.adminVPNRequired}
-              onChange={(e) => handleInputChange('adminVPNRequired', e.target.checked)}
-              className="sr-only peer"
-            />
-            <div className="w-11 h-6 bg-gray-300 peer-focus:ring-2 peer-focus:ring-blue-500 rounded-full peer peer-checked:bg-blue-600 peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all"></div>
-          </label>
-        </div>
-
-        <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
-          <div>
-            <p className="font-medium text-gray-900">{t('admin:settings.twoFactorAuth')}</p>
-            <p className="text-sm text-gray-500">{t('admin:settings.twoFactorAuthDesc')}</p>
-          </div>
-          <label className="relative inline-flex items-center cursor-pointer">
-            <input
-              type="checkbox"
-              checked={settings.enableTwoFactor}
-              onChange={(e) => handleInputChange('enableTwoFactor', e.target.checked)}
-              className="sr-only peer"
-            />
-            <div className="w-11 h-6 bg-gray-300 peer-focus:ring-2 peer-focus:ring-blue-500 rounded-full peer peer-checked:bg-blue-600 peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all"></div>
-          </label>
-        </div>
+        ))}
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -376,7 +419,7 @@ const SystemSettings: React.FC = () => {
             <label className="relative inline-flex items-center cursor-pointer">
               <input
                 type="checkbox"
-                checked={settings[item.key as keyof typeof settings] as boolean}
+                checked={settings[item.key as keyof SystemSettingsData] as boolean}
                 onChange={(e) => handleInputChange(item.key, e.target.checked)}
                 className="sr-only peer"
               />
@@ -391,37 +434,26 @@ const SystemSettings: React.FC = () => {
   const renderPricingSettings = () => (
     <div className="space-y-6">
       <div className="space-y-4">
-        <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
-          <div>
-            <p className="font-medium text-gray-900">{t('admin:settings.enableDiscountCodes')}</p>
-            <p className="text-sm text-gray-500">{t('admin:settings.enableDiscountCodesDesc')}</p>
+        {[
+          { key: 'enableDiscounts', label: t('admin:settings.enableDiscountCodes'), desc: t('admin:settings.enableDiscountCodesDesc') },
+          { key: 'enablePromotions', label: t('admin:settings.enablePromotions'), desc: t('admin:settings.enablePromotionsDesc') },
+        ].map(item => (
+          <div key={item.key} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+            <div>
+              <p className="font-medium text-gray-900">{item.label}</p>
+              <p className="text-sm text-gray-500">{item.desc}</p>
+            </div>
+            <label className="relative inline-flex items-center cursor-pointer">
+              <input
+                type="checkbox"
+                checked={settings[item.key as keyof SystemSettingsData] as boolean}
+                onChange={(e) => handleInputChange(item.key, e.target.checked)}
+                className="sr-only peer"
+              />
+              <div className="w-11 h-6 bg-gray-300 peer-focus:ring-2 peer-focus:ring-blue-500 rounded-full peer peer-checked:bg-blue-600 peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all"></div>
+            </label>
           </div>
-          <label className="relative inline-flex items-center cursor-pointer">
-            <input
-              type="checkbox"
-              checked={settings.enableDiscounts}
-              onChange={(e) => handleInputChange('enableDiscounts', e.target.checked)}
-              className="sr-only peer"
-            />
-            <div className="w-11 h-6 bg-gray-300 peer-focus:ring-2 peer-focus:ring-blue-500 rounded-full peer peer-checked:bg-blue-600 peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all"></div>
-          </label>
-        </div>
-
-        <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
-          <div>
-            <p className="font-medium text-gray-900">{t('admin:settings.enablePromotions')}</p>
-            <p className="text-sm text-gray-500">{t('admin:settings.enablePromotionsDesc')}</p>
-          </div>
-          <label className="relative inline-flex items-center cursor-pointer">
-            <input
-              type="checkbox"
-              checked={settings.enablePromotions}
-              onChange={(e) => handleInputChange('enablePromotions', e.target.checked)}
-              className="sr-only peer"
-            />
-            <div className="w-11 h-6 bg-gray-300 peer-focus:ring-2 peer-focus:ring-blue-500 rounded-full peer peer-checked:bg-blue-600 peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all"></div>
-          </label>
-        </div>
+        ))}
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -442,7 +474,7 @@ const SystemSettings: React.FC = () => {
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">{t('admin:settings.minListingPrice')}</label>
           <div className="relative">
-            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500">€</span>
+            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500">&euro;</span>
             <input
               type="number"
               value={settings.minListingPrice}
@@ -467,18 +499,23 @@ const SystemSettings: React.FC = () => {
     }
   };
 
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center py-20">
+        <div className="flex items-center gap-3">
+          <ArrowPathIcon className="w-6 h-6 text-blue-600 animate-spin" />
+          <span className="text-gray-600">{t('admin:settings.loading')}</span>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-6">
       {/* Header */}
       <div className="bg-white rounded-xl shadow-sm p-6">
         <h2 className="text-2xl font-bold text-gray-900 mb-2">{t('admin:settings.title')}</h2>
         <p className="text-gray-500">{t('admin:settings.subtitle')}</p>
-        {/* Info banner about settings persistence */}
-        <div className="mt-4 p-3 bg-amber-50 border border-amber-200 rounded-lg">
-          <p className="text-sm text-amber-800">
-            <strong>Note:</strong> {t('admin:settings.envVarsNote')}
-          </p>
-        </div>
       </div>
 
       {/* Settings Content */}
@@ -531,29 +568,79 @@ const SystemSettings: React.FC = () => {
             {/* Save Button */}
             <div className="mt-8 pt-6 border-t border-gray-200 flex justify-end gap-4">
               <button
-                onClick={() => window.location.reload()}
+                onClick={() => requestPasswordConfirmation('reset')}
                 className="px-6 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
               >
                 {t('admin:settings.reset')}
               </button>
               <button
-                onClick={handleSave}
+                onClick={() => requestPasswordConfirmation('save')}
                 disabled={isSaving}
                 className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 transition-colors flex items-center gap-2"
               >
                 {isSaving ? (
                   <>
                     <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
-                    {t('admin:settings.applyingChanges')}
+                    {t('admin:settings.saving')}
                   </>
                 ) : (
-                  t('admin:settings.previewChanges')
+                  t('admin:settings.saveChanges')
                 )}
               </button>
             </div>
           </div>
         </div>
       </div>
+
+      {/* Password Confirmation Modal */}
+      {showPasswordModal && (
+        <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl max-w-md w-full p-6">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="p-2 bg-amber-100 rounded-lg">
+                <ShieldCheckIcon className="w-6 h-6 text-amber-600" />
+              </div>
+              <div>
+                <h3 className="text-lg font-bold text-gray-900">{t('admin:settings.confirmPassword')}</h3>
+                <p className="text-sm text-gray-500">{t('admin:settings.confirmPasswordDesc')}</p>
+              </div>
+            </div>
+
+            <div className="mb-4">
+              <label className="block text-sm font-medium text-gray-700 mb-2">{t('admin:settings.password')}</label>
+              <input
+                type="password"
+                value={password}
+                onChange={(e) => { setPassword(e.target.value); setPasswordError(''); }}
+                onKeyDown={(e) => e.key === 'Enter' && verifyPasswordAndExecute()}
+                className={`w-full px-4 py-2.5 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
+                  passwordError ? 'border-red-300' : 'border-gray-300'
+                }`}
+                placeholder={t('admin:settings.enterPassword')}
+                autoFocus
+              />
+              {passwordError && (
+                <p className="text-sm text-red-600 mt-1">{passwordError}</p>
+              )}
+            </div>
+
+            <div className="flex gap-3">
+              <button
+                onClick={() => { setShowPasswordModal(false); setPendingAction(null); setPassword(''); }}
+                className="flex-1 px-4 py-2.5 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-100 font-medium transition-colors"
+              >
+                {t('admin:confirmations.cancel')}
+              </button>
+              <button
+                onClick={verifyPasswordAndExecute}
+                className="flex-1 px-4 py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium transition-colors"
+              >
+                {t('admin:settings.confirm')}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

@@ -116,7 +116,6 @@ export function useAgencyManager() {
 
       const data = await apiRequest<any>(`/admin/agencies?${params}`, {
         requiresAuth: true,
-        encryptResponse: true,
       });
       setAgencies(data.agencies || []);
       setTotalPages(data.pagination?.totalPages || 1);
@@ -186,7 +185,6 @@ export function useAgencyManager() {
         method: 'PATCH',
         body: sanitizedForm,
         requiresAuth: true,
-        encryptResponse: true,
       });
 
       await fetchAgencies();
@@ -214,7 +212,6 @@ export function useAgencyManager() {
       await apiRequest(`/admin/agencies/${agencyId}`, {
         method: 'DELETE',
         requiresAuth: true,
-        encryptResponse: true,
       });
 
       await fetchAgencies();
