@@ -62,9 +62,18 @@ export async function getSiteSettingsVariables(): Promise<Record<string, string>
       brandTextMuted: '#6b7280',
       brandBackground: '#ffffff',
       brandBackgroundAlt: '#f9fafb',
+      // Brand colors (dark theme defaults)
+      darkBrandPrimary: '#3b82f6',
+      darkBrandPrimaryDark: '#2563eb',
+      darkBrandAccent: '#34d399',
+      darkBrandText: '#f9fafb',
+      darkBrandTextMuted: '#9ca3af',
+      darkBrandBackground: '#111827',
+      darkBrandBackgroundAlt: '#1f2937',
     };
   }
   const colors = s.emailBrandColors || {} as any;
+  const darkColors = s.emailBrandColorsDark || {} as any;
   return {
     companyName: s.companyName,
     companyNameFormatted: s.companyNameFormatted,
@@ -88,6 +97,14 @@ export async function getSiteSettingsVariables(): Promise<Record<string, string>
     brandTextMuted: colors.textMuted || '#6b7280',
     brandBackground: colors.background || '#ffffff',
     brandBackgroundAlt: colors.backgroundAlt || '#f9fafb',
+    // Brand colors from SiteSettings (dark theme)
+    darkBrandPrimary: darkColors.primary || '#3b82f6',
+    darkBrandPrimaryDark: darkColors.primaryDark || '#2563eb',
+    darkBrandAccent: darkColors.accent || '#34d399',
+    darkBrandText: darkColors.text || '#f9fafb',
+    darkBrandTextMuted: darkColors.textMuted || '#9ca3af',
+    darkBrandBackground: darkColors.background || '#111827',
+    darkBrandBackgroundAlt: darkColors.backgroundAlt || '#1f2937',
   };
 }
 
@@ -126,8 +143,7 @@ export function renderEmailConfig(
   // Use config-level headerImageUrl if set, otherwise fall back to global email logo
   const headerImageUrl = (config as any).headerImageUrl || emailLogoUrl;
 
-  // Brand colors from SiteSettings — used in the wrapper template
-  // (brandAccent is available as {{brandAccent}} in templates but not used in the wrapper)
+  // Brand colors from SiteSettings — light theme (inline styles)
   const brandPrimary = variables.brandPrimary || '#0252CD';
   const brandPrimaryDark = variables.brandPrimaryDark || '#0142a8';
   const brandText = variables.brandText || '#1f2937';
@@ -135,8 +151,17 @@ export function renderEmailConfig(
   const brandBackground = variables.brandBackground || '#ffffff';
   const brandBackgroundAlt = variables.brandBackgroundAlt || '#f9fafb';
 
+  // Brand colors from SiteSettings — dark theme (CSS media query)
+  const darkPrimary = variables.darkBrandPrimary || '#3b82f6';
+  const darkPrimaryDark = variables.darkBrandPrimaryDark || '#2563eb';
+  const darkText = variables.darkBrandText || '#f9fafb';
+  const darkTextMuted = variables.darkBrandTextMuted || '#9ca3af';
+  const darkBackground = variables.darkBrandBackground || '#111827';
+  const darkBackgroundAlt = variables.darkBrandBackgroundAlt || '#1f2937';
+
   // Default header gradient uses brand colors if config doesn't override
   const defaultGradient = `linear-gradient(135deg,${brandPrimary} 0%,${brandPrimaryDark} 100%)`;
+  const darkGradient = `linear-gradient(135deg,${darkPrimary} 0%,${darkPrimaryDark} 100%)`;
 
   const headerTitle    = replaceVariables(config.headerTitle, variables);
   const headerSubtitle = config.headerSubtitle ? replaceVariables(config.headerSubtitle, variables) : '';
@@ -151,18 +176,33 @@ export function renderEmailConfig(
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="color-scheme" content="light dark">
+  <meta name="supported-color-schemes" content="light dark">
   ${config.preheaderText ? '<meta name="x-apple-data-detectors" content="none">' : ''}
+  <style>
+    @media (prefers-color-scheme: dark) {
+      .ec-body { background-color: ${darkBackground} !important; }
+      .ec-card { background-color: ${darkBackgroundAlt} !important; }
+      .ec-header { background: ${darkGradient} !important; }
+      .ec-text { color: ${darkText} !important; }
+      .ec-text-muted { color: ${darkTextMuted} !important; }
+      .ec-footer { background: ${darkBackground} !important; border-color: ${darkBackgroundAlt} !important; }
+      .ec-link { color: ${darkPrimary} !important; }
+      .ec-cta { background: ${darkGradient} !important; }
+      .ec-border { border-color: ${darkBackgroundAlt} !important; }
+    }
+  </style>
 </head>
-<body style="margin:0;padding:0;font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif;background-color:#f3f4f6;-webkit-font-smoothing:antialiased;">
+<body style="margin:0;padding:0;font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif;background-color:#f3f4f6;-webkit-font-smoothing:antialiased;" class="ec-body">
   ${config.preheaderText ? `
   <div style="display:none;max-height:0;overflow:hidden;">
     ${replaceVariables(config.preheaderText, variables)}
   </div>` : ''}
 
-  <div style="max-width:600px;margin:0 auto;background-color:${brandBackground};border-radius:12px;overflow:hidden;box-shadow:0 4px 6px rgba(0,0,0,0.05);">
+  <div style="max-width:600px;margin:0 auto;background-color:${brandBackground};border-radius:12px;overflow:hidden;box-shadow:0 4px 6px rgba(0,0,0,0.05);" class="ec-card">
 
     <!-- Header -->
-    <div style="background:${replaceVariables(config.headerGradient || defaultGradient, variables)};padding:32px 24px;text-align:center;">
+    <div style="background:${replaceVariables(config.headerGradient || defaultGradient, variables)};padding:32px 24px;text-align:center;" class="ec-header">
       ${headerImageUrl ? `
       <div style="margin-bottom:16px;">
         <img src="${headerImageUrl}" alt="" style="max-height:48px;max-width:200px;" />
@@ -176,29 +216,30 @@ export function renderEmailConfig(
     </div>
 
     <!-- Body -->
-    <div style="padding:28px 24px;color:${brandText};">
+    <div style="padding:28px 24px;color:${brandText};" class="ec-text">
       ${bodyContent}
 
       ${config.ctaEnabled && ctaText && ctaUrl ? `
       <div style="margin-top:28px;text-align:center;">
         <a href="${ctaUrl}"
-           style="display:inline-block;background:${replaceVariables(config.headerGradient || defaultGradient, variables)};color:#ffffff;text-decoration:none;padding:16px 32px;border-radius:10px;font-weight:600;font-size:15px;box-shadow:0 4px 14px rgba(0,0,0,0.15);">
+           style="display:inline-block;background:${replaceVariables(config.headerGradient || defaultGradient, variables)};color:#ffffff;text-decoration:none;padding:16px 32px;border-radius:10px;font-weight:600;font-size:15px;box-shadow:0 4px 14px rgba(0,0,0,0.15);"
+           class="ec-cta">
           ${ctaText}
         </a>
       </div>` : ''}
     </div>
 
     <!-- Footer -->
-    <div style="background:${brandBackgroundAlt};padding:20px;text-align:center;border-top:1px solid #e5e7eb;">
-      ${footerReason ? `<p style="color:${brandTextMuted};font-size:12px;margin:0 0 8px 0;">${footerReason}</p>` : ''}
+    <div style="background:${brandBackgroundAlt};padding:20px;text-align:center;border-top:1px solid #e5e7eb;" class="ec-footer">
+      ${footerReason ? `<p style="color:${brandTextMuted};font-size:12px;margin:0 0 8px 0;" class="ec-text-muted">${footerReason}</p>` : ''}
       ${config.showUnsubscribe ? `
-      <p style="color:${brandTextMuted};font-size:11px;margin:0 0 6px 0;">
-        <a href="${frontendUrl}/settings/notifications" style="color:${brandTextMuted};text-decoration:underline;">Manage email preferences</a>
+      <p style="color:${brandTextMuted};font-size:11px;margin:0 0 6px 0;" class="ec-text-muted">
+        <a href="${frontendUrl}/settings/notifications" style="color:${brandTextMuted};text-decoration:underline;" class="ec-text-muted">Manage email preferences</a>
       </p>` : ''}
-      <p style="color:${brandTextMuted};font-size:12px;margin:4px 0 4px 0;">
-        Need help? <a href="mailto:${supportEmail}" style="color:${brandPrimary};text-decoration:none;">${supportEmail}</a>
+      <p style="color:${brandTextMuted};font-size:12px;margin:4px 0 4px 0;" class="ec-text-muted">
+        Need help? <a href="mailto:${supportEmail}" style="color:${brandPrimary};text-decoration:none;" class="ec-link">${supportEmail}</a>
       </p>
-      <p style="color:${brandTextMuted};font-size:11px;margin:4px 0 0 0;">
+      <p style="color:${brandTextMuted};font-size:11px;margin:4px 0 0 0;" class="ec-text-muted">
         &copy; ${year} ${companyNameFormatted}. ${emailFooterText}
       </p>
     </div>
