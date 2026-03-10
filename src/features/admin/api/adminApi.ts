@@ -339,7 +339,6 @@ export interface Product {
 export const getProducts = async (): Promise<{ products: Product[] }> => {
   return apiRequest('/products/admin/all', {
     requiresAuth: true,
-    encryptResponse: true,
   });
 };
 
@@ -351,7 +350,6 @@ export const updateProduct = async (
     method: 'PUT',
     body: data,
     requiresAuth: true,
-    encryptResponse: true,
   });
 };
 
@@ -359,7 +357,6 @@ export const toggleProductStatus = async (productId: string): Promise<{ product:
   return apiRequest(`/products/admin/${productId}/status`, {
     method: 'PATCH',
     requiresAuth: true,
-    encryptResponse: true,
   });
 };
 
@@ -367,7 +364,6 @@ export const toggleProductVisibility = async (productId: string): Promise<{ prod
   return apiRequest(`/products/admin/${productId}/visibility`, {
     method: 'PATCH',
     requiresAuth: true,
-    encryptResponse: true,
   });
 };
 
@@ -412,7 +408,6 @@ export interface PromotionPlan {
 export const getPromotionPlans = async (): Promise<{ plans: PromotionPlan[] }> => {
   return apiRequest('/promotion-plans/admin', {
     requiresAuth: true,
-    encryptResponse: true,
   });
 };
 
@@ -430,7 +425,6 @@ export const createPromotionPlan = async (
     method: 'POST',
     body: data,
     requiresAuth: true,
-    encryptResponse: true,
   });
 };
 
@@ -442,7 +436,6 @@ export const updatePromotionPlan = async (
     method: 'PUT',
     body: data,
     requiresAuth: true,
-    encryptResponse: true,
   });
 };
 
@@ -450,7 +443,6 @@ export const deletePromotionPlan = async (planId: string): Promise<{ message: st
   return apiRequest(`/promotion-plans/${planId}`, {
     method: 'DELETE',
     requiresAuth: true,
-    encryptResponse: true,
   });
 };
 
@@ -458,7 +450,6 @@ export const togglePromotionPlanStatus = async (planId: string): Promise<{ plan:
   return apiRequest(`/promotion-plans/${planId}/toggle-status`, {
     method: 'POST',
     requiresAuth: true,
-    encryptResponse: true,
   });
 };
 
@@ -467,7 +458,6 @@ export const seedPromotionPlans = async (options?: { force?: boolean }): Promise
   return apiRequest(`/promotion-plans/seed${queryParams}`, {
     method: 'POST',
     requiresAuth: true,
-    encryptResponse: true,
   });
 };
 

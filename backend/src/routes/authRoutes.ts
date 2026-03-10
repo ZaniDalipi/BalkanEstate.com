@@ -18,6 +18,7 @@ import {
   logoutAllDevices,
   getActiveSessions,
   getLoginHistory,
+  verifyPassword,
   changePassword,
   setPassword,
   deleteAccount,
@@ -214,6 +215,7 @@ router.post('/resend-verification', passwordResetRateLimiterIP, resendVerificati
 // Password reset routes with rate limiting
 router.post('/forgot-password', passwordResetRateLimiterIP, decryptPayload, requestPasswordReset);
 router.post('/reset-password', passwordResetRateLimiterIP, decryptPayload, resetPassword);
+router.post('/verify-password', protect, decryptPayload, verifyPassword);
 router.post('/change-password', protect, decryptPayload, changePassword);
 router.post('/change-email', protect, decryptPayload, changeEmail);
 router.post('/set-password', protect, decryptPayload, setPassword);

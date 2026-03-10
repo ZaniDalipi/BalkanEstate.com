@@ -97,6 +97,11 @@ import {
   deleteEmailConfig,
   duplicateEmailConfig,
 } from '../controllers/emailConfigController';
+import {
+  getSystemSettings,
+  updateSystemSettings,
+  resetSystemSettings,
+} from '../controllers/systemSettingsController';
 import multer from 'multer';
 
 const router = express.Router();
@@ -365,6 +370,11 @@ const logoUpload = multer({
 });
 router.post('/site-settings/upload-logo', logAdminAction('UPLOAD_SITE_LOGO'), logoUpload.single('logo'), uploadSiteLogo);
 router.post('/site-settings/upload-email-logo', logAdminAction('UPLOAD_EMAIL_LOGO'), logoUpload.single('logo'), uploadEmailLogo);
+
+// ===== System Settings Management =====
+router.get('/system-settings', logAdminAction('VIEW_SYSTEM_SETTINGS'), getSystemSettings);
+router.patch('/system-settings', logAdminAction('UPDATE_SYSTEM_SETTINGS'), updateSystemSettings);
+router.post('/system-settings/reset', logAdminAction('RESET_SYSTEM_SETTINGS'), resetSystemSettings);
 
 // ===== Email Configuration Management =====
 router.get('/email-configs', logAdminAction('VIEW_EMAIL_CONFIGS'), getAllEmailConfigs);
