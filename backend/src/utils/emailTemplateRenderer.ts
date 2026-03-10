@@ -127,9 +127,9 @@ export function renderEmailConfig(
   const headerImageUrl = (config as any).headerImageUrl || emailLogoUrl;
 
   // Brand colors from SiteSettings — used in the wrapper template
+  // (brandAccent is available as {{brandAccent}} in templates but not used in the wrapper)
   const brandPrimary = variables.brandPrimary || '#0252CD';
   const brandPrimaryDark = variables.brandPrimaryDark || '#0142a8';
-  const brandAccent = variables.brandAccent || '#10b981';
   const brandText = variables.brandText || '#1f2937';
   const brandTextMuted = variables.brandTextMuted || '#6b7280';
   const brandBackground = variables.brandBackground || '#ffffff';
