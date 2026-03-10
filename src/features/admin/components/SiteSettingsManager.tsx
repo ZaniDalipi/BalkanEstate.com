@@ -888,7 +888,7 @@ const SiteSettingsManager: React.FC = () => {
           {t('admin:siteSettings.emailVars.description')}
         </p>
         <div className="flex flex-wrap gap-2">
-          {['companyName', 'companyNameFormatted', 'supportEmail', 'contactPhone', 'frontendUrl', 'backendUrl', 'emailLogoUrl', 'emailFooterText'].map(v => (
+          {['companyName', 'companyNameFormatted', 'supportEmail', 'contactPhone', 'frontendUrl', 'backendUrl', 'emailLogoUrl', 'emailFooterText', 'brandPrimary', 'brandAccent', 'brandText', 'brandBackground'].map(v => (
             <code key={v} className="px-2.5 py-1 bg-white border border-gray-200 rounded-md text-xs text-blue-700 font-mono shadow-sm">
               {`{{${v}}}`}
             </code>

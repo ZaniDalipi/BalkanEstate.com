@@ -311,7 +311,7 @@ export const getBaseTemplate = (options: {
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="color-scheme" content="light dark">
   <meta name="supported-color-schemes" content="light dark">
-  <title>BalkanEstate</title>
+  <title>BalkanEstateAI</title>
   <!--[if mso]>
   <noscript>
     <xml>
@@ -697,7 +697,7 @@ export const getPromoTemplate = (options: {
     ${getMinimalFooter({
       unsubscribeUrl: options.unsubscribeUrl,
       preferencesUrl: options.preferencesUrl,
-      reason: "You're receiving this because you signed up for BalkanEstate.",
+      reason: "You're receiving this because you signed up for BalkanEstateAI.",
     })}
   `;
 
@@ -788,7 +788,7 @@ export const getReportTemplate = (options: {
     ` : ''}
 
     ${getCtaButton({ text: options.ctaText, url: options.ctaUrl })}
-    ${getMinimalFooter({ unsubscribeUrl: options.unsubscribeUrl, reason: "You're receiving this because you're a member of BalkanEstate." })}
+    ${getMinimalFooter({ unsubscribeUrl: options.unsubscribeUrl, reason: "You're receiving this because you're a member of BalkanEstateAI." })}
   `;
 
   return getBaseTemplate({

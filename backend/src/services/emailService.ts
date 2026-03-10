@@ -3,7 +3,7 @@ import { Resend } from 'resend';
 import User from '../models/User';
 import { getPromoTemplate, BRAND_COLORS } from '../templates/emailTemplates';
 import { emailLogger } from '../utils/logger';
-import { getActiveEmailConfig, renderEmailWithSiteSettings, buildCouponCodesHtml } from '../utils/emailTemplateRenderer';
+import { getActiveEmailConfig, renderEmailWithSiteSettings, buildCouponCodesHtml, getSiteSettingsForEmail } from '../utils/emailTemplateRenderer';
 
 // =============================================================================
 // Security Utilities
@@ -194,6 +194,31 @@ class EmailService {
   }
 
   /**
+   * Get company branding from SiteSettings (cached).
+   * All email methods should use this instead of hardcoding company names.
+   */
+  async getBranding(): Promise<{
+    name: string;
+    nameFormatted: string;
+    namePlain: string;
+    frontendUrl: string;
+    supportEmail: string;
+  }> {
+    const s = await getSiteSettingsForEmail();
+    const name = s?.companyName || 'BalkanEstateAI';
+    const nameFormatted = s?.companyNameFormatted || 'BalkanEstate<sup>AI</sup>';
+    // Plain text version with Unicode superscript for email subjects/text
+    const namePlain = name.includes('AI') ? name.replace('AI', '\u1d2c\u1d35') : `${name}\u1d2c\u1d35`;
+    return {
+      name,
+      nameFormatted,
+      namePlain,
+      frontendUrl: s?.frontendUrl || process.env.FRONTEND_URL || 'https://balkanestateai.com',
+      supportEmail: s?.supportEmail || 'support@balkanestateai.com',
+    };
+  }
+
+  /**
    * Get the appropriate "from" address for an email category
    */
   getFromAddress(category: EmailCategory = 'noreply'): string {
@@ -359,9 +384,15 @@ class EmailService {
    * @param emailType - Type of email for specific unsubscribe (weeklyStats, propertyAlerts, priceDrops, messages, marketing)
    * @param reason - Reason shown to user why they're receiving this email
    */
-  generateEmailFooter(unsubscribeToken: string | undefined, emailType: string = 'all', reason: string = ''): string {
-    const frontendUrl = process.env.FRONTEND_URL || 'https://balkanestate.com';
-    const backendUrl = process.env.BACKEND_URL || 'https://api.balkanestate.com';
+  generateEmailFooter(
+    unsubscribeToken: string | undefined,
+    emailType: string = 'all',
+    reason: string = '',
+    branding?: { nameFormatted: string; frontendUrl: string },
+  ): string {
+    const frontendUrl = branding?.frontendUrl || process.env.FRONTEND_URL || 'https://balkanestateai.com';
+    const backendUrl = process.env.BACKEND_URL || 'https://api.balkanestateai.com';
+    const companyNameFormatted = branding?.nameFormatted || 'BalkanEstate<sup>AI</sup>';
     const year = new Date().getFullYear();
 
     const unsubscribeUrl = unsubscribeToken
@@ -382,7 +413,7 @@ class EmailService {
         · <a href="${frontendUrl}/settings/notifications" style="color: #9ca3af; text-decoration: underline;">Manage preferences</a>
       </p>
       <p style="color: #9ca3af; font-size: 11px; margin: 8px 0 0 0;">
-        © ${year} BalkanEstate<sup>AI</sup>. All rights reserved.
+        © ${year} ${companyNameFormatted}. All rights reserved.
       </p>
     </div>`;
   }
@@ -398,7 +429,7 @@ class EmailService {
       return;
     }
 
-    const frontendUrl = process.env.FRONTEND_URL || 'https://balkanestate.com';
+    const frontendUrl = process.env.FRONTEND_URL || 'https://balkanestateai.com';
 
     // Try admin-editable template first
     const config = await getActiveEmailConfig('weekly-stats');
@@ -572,7 +603,7 @@ class EmailService {
 
       <!-- CTA -->
       <div style="margin-top: 32px; text-align: center;">
-        <a href="${process.env.FRONTEND_URL || 'https://balkanestate.com'}/dashboard"
+        <a href="${process.env.FRONTEND_URL || 'https://balkanestateai.com'}/dashboard"
            style="display: inline-block; background: linear-gradient(135deg, #0252CD 0%, #0369a1 100%); color: #ffffff; text-decoration: none; padding: 14px 32px; border-radius: 8px; font-weight: 600; font-size: 14px;">
           View Full Analytics →
         </a>
@@ -589,7 +620,7 @@ class EmailService {
       </div>
     </div>
 
-    ${this.generateEmailFooter(unsubscribeToken, 'weeklyStats', "You're receiving this email because you're a Pro member of BalkanEstate.")}
+    ${this.generateEmailFooter(unsubscribeToken, 'weeklyStats', "You're receiving this email because you're a Pro member of BalkanEstateAI.")}
   </div>
 </body>
 </html>`;
@@ -614,7 +645,7 @@ class EmailService {
       return;
     }
 
-    const frontendUrl = process.env.FRONTEND_URL || 'https://balkanestate.com';
+    const frontendUrl = process.env.FRONTEND_URL || 'https://balkanestateai.com';
 
     // Try admin-editable template first
     const agencyConfig = await getActiveEmailConfig('agency-weekly-stats');
@@ -794,14 +825,14 @@ class EmailService {
 
       <!-- CTA -->
       <div style="margin-top: 32px; text-align: center;">
-        <a href="${process.env.FRONTEND_URL || 'https://balkanestate.com'}/agency/dashboard"
+        <a href="${process.env.FRONTEND_URL || 'https://balkanestateai.com'}/agency/dashboard"
            style="display: inline-block; background: linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%); color: #ffffff; text-decoration: none; padding: 14px 32px; border-radius: 8px; font-weight: 600; font-size: 14px;">
           View Agency Dashboard →
         </a>
       </div>
     </div>
 
-    ${this.generateEmailFooter(unsubscribeToken, 'weeklyStats', "You're receiving this email as an agency owner on BalkanEstate.")}
+    ${this.generateEmailFooter(unsubscribeToken, 'weeklyStats', "You're receiving this email as an agency owner on BalkanEstateAI.")}
   </div>
 </body>
 </html>`;
@@ -826,7 +857,7 @@ class EmailService {
       return;
     }
 
-    const frontendUrl = process.env.FRONTEND_URL || 'https://balkanestate.com';
+    const frontendUrl = process.env.FRONTEND_URL || 'https://balkanestateai.com';
 
     // Try admin-editable template first
     const msgConfig = await getActiveEmailConfig('new-message');
@@ -907,7 +938,7 @@ class EmailService {
       </a>
     </div>
 
-    ${this.generateEmailFooter(unsubscribeToken, 'messages', "You received this message through BalkanEstate.")}
+    ${this.generateEmailFooter(unsubscribeToken, 'messages', "You received this message through BalkanEstateAI.")}
   </div>
 </body>
 </html>`;
@@ -923,7 +954,7 @@ class EmailService {
 
   async sendWelcomeCoupon(email: string, agencyName: string, couponCode: string, expiryDate: Date): Promise<void> {
     const expiryDateStr = expiryDate.toLocaleDateString();
-    const frontendUrl = process.env.FRONTEND_URL || 'https://balkanestate.com';
+    const frontendUrl = process.env.FRONTEND_URL || 'https://balkanestateai.com';
     const daysUntilExpiry = Math.max(1, Math.ceil((expiryDate.getTime() - Date.now()) / (1000 * 60 * 60 * 24)));
 
     // Try admin-editable template first
@@ -949,10 +980,10 @@ class EmailService {
 
     const html = getPromoTemplate({
       title: '1 Week FREE Featured Listing',
-      subtitle: 'Welcome to BalkanEstate! Start showcasing your properties today.',
+      subtitle: 'Welcome to BalkanEstateAI! Start showcasing your properties today.',
       greeting: `Hi ${safeAgencyName},`,
       bodyParagraphs: [
-        'Thank you for joining BalkanEstate! To help you get started, we\'re giving you a special welcome gift.',
+        'Thank you for joining BalkanEstateAI! To help you get started, we\'re giving you a special welcome gift.',
         `Use code <strong style="font-family: monospace; background: #f3f4f6; padding: 4px 8px; border-radius: 4px; color: ${BRAND_COLORS.primary};">${safeCouponCode}</strong> to get 1 week of featured listing absolutely free.`,
         `This offer is valid until ${expiryDateStr}. Don\'t miss out!`,
       ],
@@ -972,7 +1003,7 @@ class EmailService {
 
   async sendExpiryReminder(email: string, agencyName: string, expiryDate: Date, couponCode: string, discount: number): Promise<void> {
     const expiryDateStr = expiryDate.toLocaleDateString();
-    const frontendUrl = process.env.FRONTEND_URL || 'https://balkanestate.com';
+    const frontendUrl = process.env.FRONTEND_URL || 'https://balkanestateai.com';
 
     // Try admin-editable template first
     const config = await getActiveEmailConfig('expiry-reminder');
@@ -1019,7 +1050,7 @@ class EmailService {
 
   async sendSubscriptionConfirmation(email: string, agencyName: string, details: { interval: string; price: number; endDate: Date }): Promise<void> {
     const renewsDate = details.endDate.toLocaleDateString();
-    const frontendUrl = process.env.FRONTEND_URL || 'https://balkanestate.com';
+    const frontendUrl = process.env.FRONTEND_URL || 'https://balkanestateai.com';
 
     // Try admin-editable template first
     const config = await getActiveEmailConfig('subscription-confirmation');
@@ -1094,7 +1125,7 @@ class EmailService {
       return;
     }
 
-    const frontendUrl = process.env.FRONTEND_URL || 'https://balkanestate.com';
+    const frontendUrl = process.env.FRONTEND_URL || 'https://balkanestateai.com';
 
     // Try admin-editable template first
     const alertConfig = await getActiveEmailConfig('property-alert');
@@ -1277,7 +1308,7 @@ class EmailService {
       return;
     }
 
-    const frontendUrl = process.env.FRONTEND_URL || 'https://balkanestate.com';
+    const frontendUrl = process.env.FRONTEND_URL || 'https://balkanestateai.com';
     const frequencyLabel = params.frequency === 'daily' ? 'Daily' : params.frequency === 'weekly' ? 'Weekly' : '';
 
     // Sanitize user inputs
@@ -1399,7 +1430,7 @@ class EmailService {
       return;
     }
 
-    const frontendUrl = process.env.FRONTEND_URL || 'https://balkanestate.com';
+    const frontendUrl = process.env.FRONTEND_URL || 'https://balkanestateai.com';
     const isIncrease = !!params.property.isPriceIncrease;
     const priceDiff = Math.abs(params.property.previousPrice - params.property.newPrice);
 
@@ -1627,8 +1658,8 @@ class EmailService {
       subject,
       html,
       text: isIncrease
-        ? `Heads up, ${params.recipientName}!\n\nA property you saved just went up in price.\n\n${params.property.title}\n${params.property.address}, ${params.property.city}\n\nWas: €${params.property.previousPrice.toLocaleString()}\nNow: €${params.property.newPrice.toLocaleString()}\nIncrease: €${priceDiff.toLocaleString()} (${params.property.percentageDrop}% up)\n\n${params.property.beds} beds · ${params.property.baths} baths · ${params.property.sqft.toLocaleString()} sqft\n\nAct now before the price rises further.\n\nView property: ${frontendUrl}/property/${params.property.id}\n\n© ${new Date().getFullYear()} BalkanEstate`
-        : `Great news, ${params.recipientName}!\n\nA property you saved just dropped in price!\n\n${params.property.title}\n${params.property.address}, ${params.property.city}\n\nWas: €${params.property.previousPrice.toLocaleString()}\nNow: €${params.property.newPrice.toLocaleString()}\nYou save: €${priceDiff.toLocaleString()} (${params.property.percentageDrop}% off)\n\n${params.property.beds} beds · ${params.property.baths} baths · ${params.property.sqft.toLocaleString()} sqft\n\nPrice drops attract buyers fast. Don't miss this opportunity!\n\nView property: ${frontendUrl}/property/${params.property.id}\n\n© ${new Date().getFullYear()} BalkanEstate`,
+        ? `Heads up, ${params.recipientName}!\n\nA property you saved just went up in price.\n\n${params.property.title}\n${params.property.address}, ${params.property.city}\n\nWas: €${params.property.previousPrice.toLocaleString()}\nNow: €${params.property.newPrice.toLocaleString()}\nIncrease: €${priceDiff.toLocaleString()} (${params.property.percentageDrop}% up)\n\n${params.property.beds} beds · ${params.property.baths} baths · ${params.property.sqft.toLocaleString()} sqft\n\nAct now before the price rises further.\n\nView property: ${frontendUrl}/property/${params.property.id}\n\n© ${new Date().getFullYear()} BalkanEstateᴬᴵ`
+        : `Great news, ${params.recipientName}!\n\nA property you saved just dropped in price!\n\n${params.property.title}\n${params.property.address}, ${params.property.city}\n\nWas: €${params.property.previousPrice.toLocaleString()}\nNow: €${params.property.newPrice.toLocaleString()}\nYou save: €${priceDiff.toLocaleString()} (${params.property.percentageDrop}% off)\n\n${params.property.beds} beds · ${params.property.baths} baths · ${params.property.sqft.toLocaleString()} sqft\n\nPrice drops attract buyers fast. Don't miss this opportunity!\n\nView property: ${frontendUrl}/property/${params.property.id}\n\n© ${new Date().getFullYear()} BalkanEstateᴬᴵ`,
       category: 'alerts',
     });
   }
@@ -1663,7 +1694,7 @@ class EmailService {
       return;
     }
 
-    const frontendUrl = process.env.FRONTEND_URL || 'https://balkanestate.com';
+    const frontendUrl = process.env.FRONTEND_URL || 'https://balkanestateai.com';
     const isIncrease = !!params.property.isPriceIncrease;
     const priceDiff = Math.abs(params.property.previousPrice - params.property.newPrice);
 
@@ -1924,7 +1955,7 @@ class EmailService {
    * Send subscription renewal reminder (for non-auto-renewing subscriptions)
    */
   async sendSubscriptionRenewalReminder(email: string, userName: string, expiryDate: Date, planName: string): Promise<void> {
-    const frontendUrl = process.env.FRONTEND_URL || 'https://balkanestate.com';
+    const frontendUrl = process.env.FRONTEND_URL || 'https://balkanestateai.com';
 
     // Try admin-editable template first
     const config = await getActiveEmailConfig('subscription-renewal-reminder');
@@ -1979,7 +2010,7 @@ class EmailService {
    * Send auto-renewal reminder (7 days before renewal for auto-renewing subscriptions)
    */
   async sendAutoRenewalReminder(email: string, userName: string, renewalDate: Date, planName: string): Promise<void> {
-    const frontendUrl = process.env.FRONTEND_URL || 'https://balkanestate.com';
+    const frontendUrl = process.env.FRONTEND_URL || 'https://balkanestateai.com';
     const formattedDate = renewalDate.toLocaleDateString();
 
     // Try admin-editable template first
@@ -2067,7 +2098,7 @@ class EmailService {
     expiresAt: Date;
     transactionId?: string;
   }): Promise<void> {
-    const frontendUrl = process.env.FRONTEND_URL || 'https://balkanestate.com';
+    const frontendUrl = process.env.FRONTEND_URL || 'https://balkanestateai.com';
 
     // Try admin-editable template first
     const config = await getActiveEmailConfig('payment-confirmation');
@@ -2123,7 +2154,7 @@ class EmailService {
     planName: string;
     expiresAt: Date;
   }): Promise<void> {
-    const frontendUrl = process.env.FRONTEND_URL || 'https://balkanestate.com';
+    const frontendUrl = process.env.FRONTEND_URL || 'https://balkanestateai.com';
 
     // Try admin-editable template first
     const config = await getActiveEmailConfig('subscription-cancelled');
@@ -2182,7 +2213,7 @@ class EmailService {
     nextBillingDate: Date;
     autoRenewing: boolean;
   }): Promise<void> {
-    const frontendUrl = process.env.FRONTEND_URL || 'https://balkanestate.com';
+    const frontendUrl = process.env.FRONTEND_URL || 'https://balkanestateai.com';
     const currencySymbol = details.currency === 'EUR' ? '€' : details.currency;
     const billingText = details.billingPeriod === 'yearly' ? 'year' : 'month';
     const renewalDate = new Date(details.nextBillingDate);
@@ -2214,7 +2245,7 @@ class EmailService {
             <!-- Header -->
             <div style="text-align: center; margin-bottom: 30px;">
               <h1 style="color: #16a34a; margin-bottom: 10px;">Invoice & Receipt</h1>
-              <p style="color: #6b7280; font-size: 14px;">Thank you for subscribing to BalkanEstate</p>
+              <p style="color: #6b7280; font-size: 14px;">Thank you for subscribing to BalkanEstateAI</p>
             </div>
 
             <!-- Invoice Details Box -->
@@ -2292,7 +2323,7 @@ class EmailService {
                 Questions? Contact us at <a href="mailto:support@balkanestate.com" style="color: #2563eb;">support@balkanestate.com</a>
               </p>
               <p style="color: #9ca3af; font-size: 11px; margin-top: 12px;">
-                BalkanEstate • Secure Payment Processing
+                BalkanEstateAI • Secure Payment Processing
               </p>
             </div>
           </div>
@@ -2317,7 +2348,7 @@ class EmailService {
     reason?: string;
     transactionId?: string;
   }): Promise<void> {
-    const frontendUrl = process.env.FRONTEND_URL || 'https://balkanestate.com';
+    const frontendUrl = process.env.FRONTEND_URL || 'https://balkanestateai.com';
 
     // Try admin-editable template first
     const config = await getActiveEmailConfig('refund-notification');
@@ -4080,7 +4111,7 @@ Questions? Contact us at support@balkanestateai.com
     sellerName: string;
     propertyId: string;
   }): Promise<void> {
-    const frontendUrl = process.env.FRONTEND_URL || 'https://balkanestate.com';
+    const frontendUrl = process.env.FRONTEND_URL || 'https://balkanestateai.com';
 
     // Try admin-editable template first
     const config = await getActiveEmailConfig('viewing-confirmation');
@@ -4209,7 +4240,7 @@ Questions? Contact us at support@balkanestateai.com
     timeSlot: string;
     propertyId: string;
   }): Promise<void> {
-    const frontendUrl = process.env.FRONTEND_URL || 'https://balkanestate.com';
+    const frontendUrl = process.env.FRONTEND_URL || 'https://balkanestateai.com';
 
     // Try admin-editable template first
     const config = await getActiveEmailConfig('viewing-notification');
@@ -4369,7 +4400,7 @@ Questions? Contact us at support@balkanestateai.com
     sellerPhone?: string;
     propertyId: string;
   }): Promise<void> {
-    const frontendUrl = process.env.FRONTEND_URL || 'https://balkanestate.com';
+    const frontendUrl = process.env.FRONTEND_URL || 'https://balkanestateai.com';
 
     // Try admin-editable template first
     const config = await getActiveEmailConfig('viewing-approved');
@@ -4502,7 +4533,7 @@ Questions? Contact us at support@balkanestateai.com
     cancelReason?: string;
     propertyId: string;
   }): Promise<void> {
-    const frontendUrl = process.env.FRONTEND_URL || 'https://balkanestate.com';
+    const frontendUrl = process.env.FRONTEND_URL || 'https://balkanestateai.com';
 
     // Try admin-editable template first
     const config = await getActiveEmailConfig('viewing-rejected');

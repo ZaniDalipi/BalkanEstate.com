@@ -277,28 +277,108 @@ export const PreviewEmailModal: React.FC<PreviewEmailModalProps> = ({
   onClose,
 }) => {
   const { t } = useTranslation(['admin', 'common']);
+  const [previewMode, setPreviewMode] = React.useState<'light' | 'dark'>('light');
+  const [deviceView, setDeviceView] = React.useState<'desktop' | 'mobile'>('desktop');
+
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-2xl shadow-xl max-w-3xl w-full max-h-[90vh] overflow-hidden flex flex-col">
+      <div className="bg-white rounded-2xl shadow-xl max-w-4xl w-full max-h-[90vh] overflow-hidden flex flex-col">
         <div className="border-b border-gray-200 px-6 py-4 flex items-center justify-between">
           <div>
             <h2 className="text-xl font-bold text-gray-900">{t('admin:emailManager.emailPreview')}</h2>
             <p className="text-sm text-gray-500">Subject: {previewSubject}</p>
           </div>
-          <button
-            onClick={onClose}
-            className="p-2 hover:bg-gray-100 rounded-lg"
-          >
-            <XMarkIcon className="w-5 h-5" />
-          </button>
+          <div className="flex items-center gap-3">
+            {/* Device toggle */}
+            <div className="flex items-center bg-gray-200 rounded-lg p-0.5">
+              <button
+                type="button"
+                onClick={() => setDeviceView('desktop')}
+                className={`flex items-center gap-1 px-2.5 py-1.5 text-xs font-medium rounded-md transition-colors ${
+                  deviceView === 'desktop'
+                    ? 'bg-white text-gray-900 shadow-sm'
+                    : 'text-gray-500 hover:text-gray-700'
+                }`}
+              >
+                <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                </svg>
+                Desktop
+              </button>
+              <button
+                type="button"
+                onClick={() => setDeviceView('mobile')}
+                className={`flex items-center gap-1 px-2.5 py-1.5 text-xs font-medium rounded-md transition-colors ${
+                  deviceView === 'mobile'
+                    ? 'bg-white text-gray-900 shadow-sm'
+                    : 'text-gray-500 hover:text-gray-700'
+                }`}
+              >
+                <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                </svg>
+                Mobile
+              </button>
+            </div>
+
+            {/* Light/Dark toggle */}
+            <div className="flex items-center bg-gray-200 rounded-lg p-0.5">
+              <button
+                type="button"
+                onClick={() => setPreviewMode('light')}
+                className={`flex items-center gap-1 px-2.5 py-1.5 text-xs font-medium rounded-md transition-colors ${
+                  previewMode === 'light'
+                    ? 'bg-white text-gray-900 shadow-sm'
+                    : 'text-gray-500 hover:text-gray-700'
+                }`}
+              >
+                <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+                </svg>
+                Light
+              </button>
+              <button
+                type="button"
+                onClick={() => setPreviewMode('dark')}
+                className={`flex items-center gap-1 px-2.5 py-1.5 text-xs font-medium rounded-md transition-colors ${
+                  previewMode === 'dark'
+                    ? 'bg-gray-800 text-white shadow-sm'
+                    : 'text-gray-500 hover:text-gray-700'
+                }`}
+              >
+                <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+                </svg>
+                Dark
+              </button>
+            </div>
+
+            <button
+              onClick={onClose}
+              className="p-2 hover:bg-gray-100 rounded-lg"
+            >
+              <XMarkIcon className="w-5 h-5" />
+            </button>
+          </div>
         </div>
 
-        <div className="flex-1 overflow-y-auto p-4 bg-gray-100">
+        <div className={`flex-1 overflow-y-auto p-4 transition-colors ${
+          previewMode === 'dark' ? 'bg-gray-900' : 'bg-gray-100'
+        }`}>
           <div
-            className="bg-white mx-auto shadow-lg"
-            style={{ maxWidth: '600px' }}
+            className={`mx-auto shadow-lg transition-all ${
+              previewMode === 'dark' ? 'bg-gray-800' : 'bg-white'
+            }`}
+            style={{ maxWidth: deviceView === 'mobile' ? '375px' : '600px' }}
             dangerouslySetInnerHTML={{ __html: sanitizeHtml(previewHtml) }}
           />
+          <p className={`text-center text-xs mt-3 ${
+            previewMode === 'dark' ? 'text-gray-500' : 'text-gray-400'
+          }`}>
+            {previewMode === 'dark'
+              ? 'Dark mode preview simulates how the email appears in dark email clients'
+              : 'Light mode shows the standard email appearance'}
+          </p>
         </div>
       </div>
     </div>
