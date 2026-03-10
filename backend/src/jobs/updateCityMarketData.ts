@@ -1,5 +1,6 @@
 import cron, { ScheduledTask } from 'node-cron';
 import { updateAllCityMarketData } from '../services/cityMarketDataService';
+import { refreshAllCityImages } from '../services/cityImageService';
 import { cronLogger } from '../utils/logger';
 
 /**
@@ -15,6 +16,7 @@ import { cronLogger } from '../utils/logger';
  */
 
 let updateJob: ScheduledTask | null = null;
+let imageJob: ScheduledTask | null = null;
 
 export function startCityMarketDataUpdateJob(): void {
   // Prevent multiple instances
@@ -38,6 +40,20 @@ export function startCityMarketDataUpdateJob(): void {
   });
 
   cronLogger.info('✅ City market data update job scheduled (biweekly: 1st & 15th at 3 AM)');
+
+  // Monthly city image refresh: 1st of each month at 4 AM
+  if (!imageJob) {
+    imageJob = cron.schedule('0 4 1 * *', async () => {
+      cronLogger.info('⏰ Monthly city image refresh triggered');
+      try {
+        await refreshAllCityImages();
+        cronLogger.info('✅ Monthly city image refresh completed');
+      } catch (error) {
+        cronLogger.error('❌ Monthly city image refresh failed:', error);
+      }
+    }, { timezone: 'Europe/Belgrade' });
+    cronLogger.info('✅ City image refresh job scheduled (monthly: 1st at 4 AM)');
+  }
 }
 
 export function stopCityMarketDataUpdateJob(): void {
@@ -45,6 +61,11 @@ export function stopCityMarketDataUpdateJob(): void {
     updateJob.stop();
     updateJob = null;
     cronLogger.info('⏹️ City market data update job stopped');
+  }
+  if (imageJob) {
+    imageJob.stop();
+    imageJob = null;
+    cronLogger.info('⏹️ City image refresh job stopped');
   }
 }
 
