@@ -1,6 +1,7 @@
 import { Request, Response } from 'express';
 import { getFeaturedCities, getCitiesByCountry, getCityMarketData } from '../services/cityMarketDataService';
 import { triggerMarketDataUpdate } from '../jobs/updateCityMarketData';
+import { refreshAllCityImages } from '../services/cityImageService';
 import { apiLogger } from '../utils/logger';
 import { getParam } from '../utils/validateParams';
 
@@ -115,5 +116,34 @@ export const triggerMarketDataUpdateController = async (req: Request, res: Respo
       success: false,
       message: 'Error triggering update',
     });
+  }
+};
+
+/**
+ * @desc    Refresh city images from Wikipedia → Cloudinary (admin only)
+ * @route   POST /api/cities/refresh-images
+ * @access  Private/Admin
+ */
+export const refreshCityImagesController = async (req: Request, res: Response): Promise<void> => {
+  try {
+    if (!req.user || (req.user as any).role !== 'admin') {
+      res.status(403).json({ success: false, message: 'Admin access required' });
+      return;
+    }
+
+    const force = req.query.force === 'true';
+
+    // Run in background
+    refreshAllCityImages(force).catch(error => {
+      apiLogger.error('Background city image refresh failed:', error);
+    });
+
+    res.json({
+      success: true,
+      message: 'City image refresh triggered successfully',
+    });
+  } catch (error: any) {
+    apiLogger.error('Error triggering city image refresh:', error);
+    res.status(500).json({ success: false, message: 'Error triggering image refresh' });
   }
 };

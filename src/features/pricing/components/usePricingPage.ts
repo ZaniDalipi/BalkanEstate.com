@@ -164,8 +164,8 @@ export function usePricingPage() {
     const tier = user.subscription?.tier || '';
 
     if (plan.includes('enterprise') || tier === 'agency_owner') return 3;
-    if (plan.includes('pro_yearly') || plan.includes('yearly')) return 2;
-    if (plan.includes('pro_monthly') || plan.includes('monthly')) return 1;
+    if ((plan.includes('pro_yearly') || plan.includes('yearly')) && !plan.includes('buyer')) return 2;
+    if ((plan.includes('pro_monthly') || plan.includes('monthly')) && !plan.includes('buyer')) return 1;
 
     return 0;
   };
@@ -499,14 +499,16 @@ export function usePricingPage() {
 
     // Enterprise
     if (id.includes('enterprise') && (plan.includes('enterprise') || tier === 'agency_owner')) return true;
-    // Pro Yearly
+    // Seller Pro Yearly
     if ((id.includes('pro_yearly') || (id.includes('yearly') && !id.includes('enterprise'))) &&
+        !id.includes('buyer') &&
         (plan.includes('pro_yearly') || plan.includes('yearly')) &&
-        !plan.includes('enterprise')) return true;
-    // Pro Monthly
+        !plan.includes('enterprise') && !plan.includes('buyer')) return true;
+    // Seller Pro Monthly
     if ((id.includes('pro_monthly') || (id.includes('monthly') && !id.includes('buyer'))) &&
+        !id.includes('buyer') &&
         (plan.includes('pro_monthly') || plan.includes('monthly')) &&
-        !plan.includes('yearly') && !plan.includes('enterprise')) return true;
+        !plan.includes('yearly') && !plan.includes('enterprise') && !plan.includes('buyer')) return true;
     // Buyer
     if (id.includes('buyer') && plan.includes('buyer')) return true;
 

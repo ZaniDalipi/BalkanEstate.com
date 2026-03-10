@@ -818,14 +818,19 @@ export const applyFreeSubscription = async (req: Request, res: Response): Promis
 
     // User found
 
-    // SECURITY: Check if user already has an active subscription (prevent stacking)
+    // Check if user already has an active subscription
     const existingActiveSub = await Subscription.findOne({
       userId,
       status: { $in: ['active', 'grace'] },
     });
     if (existingActiveSub) {
-      res.status(400).json({ message: 'You already have an active subscription' });
-      return;
+      // If the user is trying to subscribe to the exact same product, block it (prevent stacking)
+      if (existingActiveSub.productId === productId) {
+        res.status(400).json({ message: 'You already have an active subscription for this plan' });
+        return;
+      }
+      // Otherwise, allow the upgrade/switch — the old subscription will be
+      // canceled automatically inside processSubscriptionPayment
     }
 
     // Verify discount code is valid and provides 100% off

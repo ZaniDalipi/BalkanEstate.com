@@ -126,6 +126,7 @@ export interface CityMarketData {
   highlights: string[];
   lastUpdated: string;
   dataSource: 'gemini' | 'manual' | 'calculated';
+  imageUrl?: string;
   featured: boolean;
   displayOrder: number;
 }
