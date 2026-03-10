@@ -221,10 +221,10 @@ export const PropertyEditModal: React.FC<PropertyEditModalProps> = ({
                 <input
                   type="number"
                   value={editForm.price}
-                  onChange={(e) => setEditForm({ ...editForm, price: Number(e.target.value) })}
-                  className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  required
+                  disabled
+                  className="w-full px-4 py-2.5 border border-gray-200 rounded-lg bg-gray-100 text-gray-500 cursor-not-allowed"
                 />
+                <p className="text-xs text-gray-400 mt-1">{t('admin:properties.priceReadOnly')}</p>
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">{t('admin:table.status')}</label>

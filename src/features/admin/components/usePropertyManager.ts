@@ -198,9 +198,11 @@ export function usePropertyManager() {
     if (!editingProperty) return;
 
     try {
+      // Strip price fields - only property owner can change price
+      const { price, ...updateData } = editForm;
       await apiRequest(`/admin/properties/${editingProperty._id}`, {
         method: 'PATCH',
-        body: editForm,
+        body: updateData,
         requiresAuth: true,
         encryptResponse: true,
       });
