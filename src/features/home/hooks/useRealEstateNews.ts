@@ -71,15 +71,23 @@ const COUNTRY_IMAGE_TOPICS: Record<string, string> = {
   'Romania': 'Bucharest',
 };
 
-/** Fetch a representative image for a country via Wikipedia REST API */
-async function fetchCountryImage(country: string): Promise<string | null> {
+// In-memory cache so we only fetch once per session
+const thumbnailCache: Record<string, string | null> = {};
+
+/** Fetch a small thumbnail URL for a country via Wikipedia REST API (JSON only, ~1KB) */
+async function fetchCountryThumbnail(country: string): Promise<string | null> {
+  if (country in thumbnailCache) return thumbnailCache[country];
   const topic = COUNTRY_IMAGE_TOPICS[country] || country;
   try {
     const res = await fetch(`https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(topic)}`);
-    if (!res.ok) return null;
+    if (!res.ok) { thumbnailCache[country] = null; return null; }
     const data = await res.json();
-    return data.originalimage?.source || data.thumbnail?.source || null;
+    // Prefer thumbnail (~320px) over original (can be 5000px+)
+    const url = data.thumbnail?.source || null;
+    thumbnailCache[country] = url;
+    return url;
   } catch {
+    thumbnailCache[country] = null;
     return null;
   }
 }
@@ -132,16 +140,16 @@ const FALLBACK_NEWS: NewsItem[] = [
   { id: 'f11c', title: 'Romania\'s Black Sea Coast Attracts Retirees from Western Europe', excerpt: 'Affordable beachfront properties and a low cost of living are drawing increasing numbers of Western European retirees to Romania\'s Black Sea resorts.', country: 'Romania', countryCode: 'RO', source: 'Romania Insider', sourceUrl: 'https://www.romania-insider.com', date: '2026-02-04', category: 'tourism', imageGradient: 'from-emerald-500 to-teal-400' },
 ];
 
-/** Enrich news items that lack a cover image with Wikipedia photos */
-async function enrichWithCoverImages(items: NewsItem[]): Promise<NewsItem[]> {
-  // Fetch one image per unique country (deduplicate requests)
+/** Enrich news items with small Wikipedia thumbnails (cached, ~1KB JSON per country) */
+async function enrichWithThumbnails(items: NewsItem[]): Promise<NewsItem[]> {
   const countriesNeeded = [...new Set(
     items.filter(i => !i.coverImageUrl).map(i => i.country)
   )];
+  // All fetches run in parallel + are cached — typically completes in <200ms
   const imageMap: Record<string, string | null> = {};
   await Promise.all(
     countriesNeeded.map(async (country) => {
-      imageMap[country] = await fetchCountryImage(country);
+      imageMap[country] = await fetchCountryThumbnail(country);
     })
   );
   return items.map(item => ({
@@ -164,8 +172,8 @@ async function fetchNews(): Promise<NewsItem[]> {
   } catch {
     items = FALLBACK_NEWS;
   }
-  // Fill in missing cover images from Wikipedia
-  return enrichWithCoverImages(items);
+  // Fill in missing cover images with small Wikipedia thumbnails (~320px, cached)
+  return enrichWithThumbnails(items);
 }
 
 export function useRealEstateNews() {
