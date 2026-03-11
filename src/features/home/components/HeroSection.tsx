@@ -281,6 +281,7 @@ const HeroSection: React.FC<HeroSectionProps> = ({
         <motion.div className="mt-8 sm:mt-10 max-w-2xl mx-auto relative z-20" variants={fadeUp} ref={wrapperRef}>
           <div style={{
             position: 'relative',
+            zIndex: 10,
             borderRadius: '20px',
             background: isFocused
               ? 'rgba(255,255,255,0.9)'
