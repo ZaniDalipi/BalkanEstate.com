@@ -21,6 +21,10 @@ import {
     LANGUAGES, CheckCircleIcon, UploadIcon, TagListInput,
     inputBaseClasses, labelClasses, selectClasses,
 } from './ListingFormHelpers';
+import FloorPlanRoomEditor from './FloorPlanRoomEditor';
+import type { FloorPlanRoom } from '@/types';
+
+const LazyFloorPlan3DViewer = React.lazy(() => import('@/src/features/property-details/components/FloorPlan3DViewer'));
 
 // --- Main Component ---
 const GeminiDescriptionGenerator: React.FC<{ propertyToEdit: Property | null }> = ({ propertyToEdit }) => {
@@ -605,6 +609,23 @@ const GeminiDescriptionGenerator: React.FC<{ propertyToEdit: Property | null }> 
                         handleImageTagChange={handleImageTagChange}
                         setFloorplanImage={setFloorplanImage}
                     />
+
+                    {/* 3D Floor Plan Builder */}
+                    {listingData.propertyType !== 'land' && (
+                        <fieldset className="space-y-4 glass-fieldset border-blue-200">
+                            <FloorPlanRoomEditor
+                                rooms={listingData.floorPlanRooms}
+                                onChange={(rooms: FloorPlanRoom[]) => setListingData(prev => ({ ...prev, floorPlanRooms: rooms }))}
+                            />
+                            {listingData.floorPlanRooms.length > 0 && (
+                                <div className="mt-4">
+                                    <React.Suspense fallback={<div className="h-64 animate-pulse bg-gray-100 rounded-xl" />}>
+                                        <LazyFloorPlan3DViewer rooms={listingData.floorPlanRooms} />
+                                    </React.Suspense>
+                                </div>
+                            )}
+                        </fieldset>
+                    )}
 
                     {/* 360 Virtual Tour URL */}
                     <fieldset className="space-y-4 glass-fieldset border-purple-200">

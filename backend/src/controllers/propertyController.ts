@@ -665,6 +665,8 @@ export const createProperty = async (
       'hasAirConditioning', 'hasPool', 'petsAllowed',
       'distanceToCenter', 'distanceToSea', 'distanceToSchool', 'distanceToHospital',
       'furnishing', 'heatingType', 'condition', 'viewType', 'energyRating', 'orientation',
+      // 3D Floor plan rooms
+      'floorPlanRooms', 'hasFloorPlan3D',
       // Rental-specific fields
       'rentPeriod', 'securityDeposit', 'minimumLeaseDuration', 'maximumLeaseDuration',
       'availableFrom', 'utilitiesIncluded', 'internetIncluded',
@@ -849,6 +851,8 @@ export const updateProperty = async (
       'hasBalcony', 'hasGarden', 'hasElevator', 'hasSecurity',
       'hasAirConditioning', 'hasPool', 'petsAllowed',
       'distanceToCenter', 'distanceToSea', 'distanceToSchool', 'distanceToHospital',
+      // 3D Floor plan rooms
+      'floorPlanRooms', 'hasFloorPlan3D',
       // Rental-specific fields
       'rentPeriod', 'securityDeposit', 'minimumLeaseDuration', 'maximumLeaseDuration',
       'availableFrom', 'utilitiesIncluded', 'internetIncluded',

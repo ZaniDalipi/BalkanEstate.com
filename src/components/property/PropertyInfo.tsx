@@ -1,9 +1,11 @@
 // PropertyInfo Component
 // Displays property details, description, and amenities
 
-import React, { useCallback } from 'react';
+import React, { useCallback, Suspense } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Property } from '../../../types';
+
+const LazyFloorPlan3DViewer = React.lazy(() => import('@/src/features/property-details/components/FloorPlan3DViewer'));
 import { formatPrice } from '../../../utils/currency';
 import { getPriceReductionInfo } from '../../../utils/priceUtils';
 import {
@@ -340,6 +342,15 @@ export const PropertyInfo: React.FC<PropertyInfoProps> = ({ property, onOpenFloo
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
                 </svg>
               </button>
+            </div>
+          )}
+
+          {/* 3D Floor Plan Viewer */}
+          {property.floorPlanRooms && property.floorPlanRooms.length > 0 && (
+            <div className="col-span-2 sm:col-span-3 lg:col-span-4 mt-2">
+              <Suspense fallback={<div className="h-[450px] animate-pulse bg-gray-100 rounded-2xl" />}>
+                <LazyFloorPlan3DViewer rooms={property.floorPlanRooms} totalArea={property.sqft} />
+              </Suspense>
             </div>
           )}
         </div>

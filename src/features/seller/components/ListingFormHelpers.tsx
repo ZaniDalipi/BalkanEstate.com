@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import type { PropertyImageTag, FurnishingStatus, HeatingType, PropertyCondition, ViewType, EnergyRating, Orientation, ListingType, RentPeriod, VisitAvailability } from '@/types';
+import type { PropertyImageTag, FurnishingStatus, HeatingType, PropertyCondition, ViewType, EnergyRating, Orientation, ListingType, RentPeriod, VisitAvailability, FloorPlanRoom } from '@/types';
 import { Button } from '@/components/ui/liquid-glass-button';
 
 // --- Types ---
@@ -56,6 +56,8 @@ export interface ListingData {
     internetIncluded: boolean;
     tenantRequirements: string[];
     maxOccupants: number;
+    // 3D Floor plan rooms
+    floorPlanRooms: FloorPlanRoom[];
     // Visit availability
     visitAvailability: VisitAvailability;
 }
@@ -112,6 +114,8 @@ export const initialListingData: ListingData = {
     internetIncluded: false,
     tenantRequirements: [],
     maxOccupants: 1,
+    // 3D Floor plan rooms
+    floorPlanRooms: [],
     // Visit availability
     visitAvailability: {
         enabled: false,

@@ -135,6 +135,9 @@ export interface Property {
   maxOccupants?: number;
   rentedUntil?: number;
   rentalHistory?: RentalHistoryEntry[];
+  // 3D Floor plan rooms
+  floorPlanRooms?: FloorPlanRoom[];
+  hasFloorPlan3D?: boolean;
   // Visit/viewing availability
   visitAvailability?: VisitAvailability;
   // Currency
@@ -147,6 +150,20 @@ export interface Property {
   size?: number;
   // Agent reference
   agentId?: string;
+}
+
+export type FloorPlanRoomType = 'bedroom' | 'bathroom' | 'kitchen' | 'living' | 'dining' | 'hallway' | 'balcony' | 'office' | 'storage' | 'garage' | 'other';
+
+export interface FloorPlanRoom {
+  id: string;
+  name: string;
+  roomType: FloorPlanRoomType;
+  width: number; // meters
+  height: number; // meters (depth)
+  x: number; // position x offset in meters
+  y: number; // position y offset in meters
+  wallHeight?: number; // wall height in meters (default 2.8)
+  color?: string; // hex color override
 }
 
 export interface VisitAvailability {

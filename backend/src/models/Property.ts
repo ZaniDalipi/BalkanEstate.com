@@ -23,6 +23,19 @@ export interface IRentalHistoryEntry {
   notes?: string;
 }
 
+// Floor plan room for 3D preview
+export interface IFloorPlanRoom {
+  id: string;
+  name: string;
+  roomType: 'bedroom' | 'bathroom' | 'kitchen' | 'living' | 'dining' | 'hallway' | 'balcony' | 'office' | 'storage' | 'garage' | 'other';
+  width: number; // meters
+  height: number; // meters (depth)
+  x: number; // position x offset in meters
+  y: number; // position y offset in meters
+  wallHeight?: number; // wall height in meters (default 2.8)
+  color?: string; // hex color override
+}
+
 // Visit availability - seller-defined time windows for property viewings
 export interface IVisitAvailability {
   enabled: boolean;
@@ -127,6 +140,9 @@ export interface IProperty extends Document {
   rentedAt?: Date; // When the property was rented
   rentedUntil?: Date; // When the rental period ends
   rentalHistory?: IRentalHistoryEntry[]; // Past rental periods for income tracking
+  // 3D Floor plan rooms
+  floorPlanRooms?: IFloorPlanRoom[];
+  hasFloorPlan3D: boolean;
   // Visit/viewing availability
   visitAvailability?: IVisitAvailability;
   createdAt: Date;
@@ -520,6 +536,29 @@ const PropertySchema: Schema = new Schema(
         notes: { type: String },
       },
     ],
+    // 3D Floor plan rooms
+    floorPlanRooms: [
+      {
+        id: { type: String, required: true },
+        name: { type: String, required: true },
+        roomType: {
+          type: String,
+          enum: ['bedroom', 'bathroom', 'kitchen', 'living', 'dining', 'hallway', 'balcony', 'office', 'storage', 'garage', 'other'],
+          required: true,
+        },
+        width: { type: Number, required: true, min: 0.5, max: 50 },
+        height: { type: Number, required: true, min: 0.5, max: 50 },
+        x: { type: Number, required: true },
+        y: { type: Number, required: true },
+        wallHeight: { type: Number, min: 2, max: 6, default: 2.8 },
+        color: { type: String },
+      },
+    ],
+    hasFloorPlan3D: {
+      type: Boolean,
+      default: false,
+      index: true,
+    },
     // Visit/viewing availability
     visitAvailability: {
       enabled: { type: Boolean, default: false },

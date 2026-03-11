@@ -291,6 +291,20 @@ export type ViewType = 'any' | 'sea' | 'mountain' | 'city' | 'park' | 'garden' |
 export type EnergyRating = 'any' | 'A+' | 'A' | 'B' | 'C' | 'D' | 'E' | 'F' | 'G';
 export type Orientation = 'any' | 'north' | 'south' | 'east' | 'west' | 'northEast' | 'northWest' | 'southEast' | 'southWest';
 
+export type FloorPlanRoomType = 'bedroom' | 'bathroom' | 'kitchen' | 'living' | 'dining' | 'hallway' | 'balcony' | 'office' | 'storage' | 'garage' | 'other';
+
+export interface FloorPlanRoom {
+    id: string;
+    name: string;
+    roomType: FloorPlanRoomType;
+    width: number;
+    height: number;
+    x: number;
+    y: number;
+    wallHeight?: number;
+    color?: string;
+}
+
 export interface VisitAvailability {
     enabled: boolean;
     days: number[];
@@ -384,6 +398,9 @@ export interface Property {
     internetIncluded?: boolean;
     tenantRequirements?: string[];
     maxOccupants?: number;
+    // 3D Floor plan rooms
+    floorPlanRooms?: FloorPlanRoom[];
+    hasFloorPlan3D?: boolean;
     // Visit scheduling
     visitAvailability?: VisitAvailability;
     // Rental history

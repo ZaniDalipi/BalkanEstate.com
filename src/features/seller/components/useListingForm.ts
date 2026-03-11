@@ -98,6 +98,10 @@ export function buildPreviewProperty(
             tenantRequirements: listingData.tenantRequirements || [],
             maxOccupants: Number(listingData.maxOccupants) || 1,
         } : {}),
+        ...(listingData.floorPlanRooms.length > 0 ? {
+            floorPlanRooms: listingData.floorPlanRooms,
+            hasFloorPlan3D: true,
+        } : {}),
         ...(listingData.visitAvailability.enabled ? {
             visitAvailability: listingData.visitAvailability,
         } : {}),
@@ -229,6 +233,8 @@ export const useListingForm = (propertyToEdit: Property | null) => {
                 internetIncluded: propertyToEdit.internetIncluded || false,
                 tenantRequirements: propertyToEdit.tenantRequirements || [],
                 maxOccupants: propertyToEdit.maxOccupants || 1,
+                // 3D Floor plan rooms
+                floorPlanRooms: propertyToEdit.floorPlanRooms || [],
                 // Visit availability
                 visitAvailability: propertyToEdit.visitAvailability || {
                     enabled: false,
@@ -925,6 +931,11 @@ export const useListingForm = (propertyToEdit: Property | null) => {
                     internetIncluded: listingData.internetIncluded ?? false,
                     tenantRequirements: listingData.tenantRequirements || [],
                     maxOccupants: Number(listingData.maxOccupants) || 1,
+                } : {}),
+                // 3D Floor plan rooms
+                ...(listingData.floorPlanRooms.length > 0 ? {
+                    floorPlanRooms: listingData.floorPlanRooms,
+                    hasFloorPlan3D: true,
                 } : {}),
                 // Visit availability (for all listing types)
                 ...(listingData.visitAvailability.enabled ? {
