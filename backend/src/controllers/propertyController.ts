@@ -134,11 +134,13 @@ export const getProperties = async (
     }
 
     if (city) {
-      filter.city = new RegExp(escapeRegex(city as string), 'i');
+      // Case-insensitive exact match using collation (index-friendly, unlike $regex)
+      filter.city = city as string;
     }
 
     if (country) {
-      filter.country = new RegExp(escapeRegex(country as string), 'i');
+      // Case-insensitive exact match using collation (index-friendly, unlike $regex)
+      filter.country = country as string;
     }
 
     // Filter by listing type (sale vs rent)
@@ -286,37 +288,56 @@ export const getProperties = async (
 
     const skip = useCursor ? 0 : (pageNum - 1) * limitNum;
 
-    // Execute query with seller population
+    // List-view projection: exclude heavy fields not needed in listings
+    const LIST_PROJECTION = {
+      description: 0,
+      rentalHistory: 0,
+      priceIntervals: 0,
+      tenantRequirements: 0,
+      visitAvailability: 0,
+      specialFeatures: 0,
+      materials: 0,
+      'images.publicId': 0,
+    };
+
+    // Execute query with .lean() for 5-10x faster reads (plain JS objects, no Mongoose overhead)
     // Fetch more than needed to allow for promoted property sorting
-    const fetchLimit = limitNum * 2; // Fetch 2x to ensure we have enough promoted properties
-    let properties = await Property.find(filter)
-      .populate('sellerId', 'name email phone avatarUrl role agencyName agencyId')
-      .sort(sort)
-      .skip(skip)
-      .limit(fetchLimit);
+    const fetchLimit = Math.min(limitNum + 20, limitNum * 2); // Fetch slightly extra for promotion sort, capped
+    const [rawProperties, total] = await Promise.all([
+      Property.find(filter)
+        .select(LIST_PROJECTION)
+        .populate('sellerId', 'name email phone avatarUrl role agencyName agencyId')
+        .collation({ locale: 'en', strength: 2 }) // Case-insensitive matching for city/country
+        .sort(sort)
+        .skip(skip)
+        .limit(fetchLimit)
+        .lean(),
+      // Run count in parallel — skip for cursor mode (expensive on large datasets)
+      // For offset pagination on first page, use faster estimatedDocumentCount when no filters applied
+      useCursor
+        ? Promise.resolve(undefined)
+        : (Object.keys(filter).length <= 1 && filter.$or && !filter.$and && !filter.$text && pageNum === 1)
+          ? Property.estimatedDocumentCount()
+          : Property.countDocuments(filter),
+    ]);
+
+    let properties = rawProperties as any[];
 
     // Use centralized highlighting utility for sorting
-    // This handles:
-    // - Priority order: Premium > Highlight > Featured > Standard
-    // - Hourly rotation within same tier for fair exposure
-    // - Urgent badge bonus points
     const currentHour = new Date().getHours();
     properties = sortPropertiesWithHighlighting(properties, currentHour);
 
     // Log highlighting stats for monitoring
     const stats = getHighlightingStats(properties);
     if (stats.activePromotions > 0) {
-      propertyLogger.info(`📊 Highlighting stats: ${stats.premium} premium, ${stats.highlight} highlight, ${stats.featured} featured (rotation hour: ${currentHour})`);
+      propertyLogger.info(`Highlighting stats: ${stats.premium} premium, ${stats.highlight} highlight, ${stats.featured} featured (rotation hour: ${currentHour})`);
     }
 
     // Trim to requested limit after sorting
     properties = properties.slice(0, limitNum);
 
-    // Convert all properties to plain objects first (required for sanitizer)
-    const plainProperties = properties.map(p => p.toObject ? p.toObject() : p);
-
-    // Enrich properties with agency logos for agent sellers
-    const agencyIds = plainProperties
+    // Enrich properties with agency logos for agent sellers (already plain objects from .lean())
+    const agencyIds = properties
       .map(p => (p.sellerId as any)?.agencyId)
       .filter(Boolean);
 
@@ -330,8 +351,7 @@ export const getProperties = async (
         agencies.map(a => [String(a._id), a.logo])
       );
 
-      // Add agencyLogo to each property's seller
-      for (const prop of plainProperties) {
+      for (const prop of properties) {
         const seller = prop.sellerId as any;
         if (seller?.agencyId) {
           seller.agencyLogo = agencyLogoMap.get(String(seller.agencyId));
@@ -339,10 +359,7 @@ export const getProperties = async (
       }
     }
 
-    const enrichedProperties = plainProperties;
-
-    // Get total count for pagination (skip for cursor mode — expensive on large datasets)
-    const total = useCursor ? undefined : await Property.countDocuments(filter);
+    const enrichedProperties = properties;
 
     // Track user activity for pro buyer email recommendations
     // Only track if user is authenticated (req.user from auth middleware)
@@ -370,8 +387,8 @@ export const getProperties = async (
       pagination: {
         page: useCursor ? undefined : pageNum,
         limit: limitNum,
-        total,
-        pages: total ? Math.ceil(total / limitNum) : undefined,
+        total: total as number | undefined,
+        pages: total ? Math.ceil((total as number) / limitNum) : undefined,
         nextCursor,
         hasMore: sanitizedProperties.length === limitNum,
       },

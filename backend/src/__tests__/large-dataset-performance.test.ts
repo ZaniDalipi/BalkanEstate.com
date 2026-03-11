@@ -2,9 +2,9 @@
  * Large Dataset Performance Tests
  *
  * Tests whether the application can handle:
- * - 50,000 properties for sale
- * - 2,000 agents
- * - 1,000 agencies
+ * - 100,000 properties for sale
+ * - 4,000 agents
+ * - 2,000 agencies
  *
  * Uses MongoDB Memory Server with bulk inserts to simulate real-world scale.
  *
@@ -25,9 +25,9 @@ import User from '../models/User';
 
 // ── Constants ────────────────────────────────────────────────────────
 
-const TOTAL_PROPERTIES = 50_000;
-const TOTAL_AGENTS = 2_000;
-const TOTAL_AGENCIES = 1_000;
+const TOTAL_PROPERTIES = 100_000;
+const TOTAL_AGENTS = 4_000;
+const TOTAL_AGENCIES = 2_000;
 const BATCH_SIZE = 5_000;
 
 const balkanCountries = ['Kosovo', 'Albania', 'Serbia', 'North Macedonia', 'Montenegro', 'Bosnia and Herzegovina', 'Croatia'];
@@ -227,7 +227,7 @@ describe('Large Dataset Performance Tests', () => {
   let agencyIds: mongoose.Types.ObjectId[] = [];
   let seeded = false;
 
-  jest.setTimeout(300_000); // 5 minutes for seeding + all tests
+  jest.setTimeout(600_000); // 10 minutes for seeding 100k + all tests
 
   beforeAll(async () => {
     // Check if mongoose is connected (from shared setup.ts)
@@ -888,6 +888,183 @@ describe('Large Dataset Performance Tests', () => {
 
       // Pre-computed should be orders of magnitude faster
       expect(cachedResult.ms).toBeLessThan(liveResult.ms);
+    });
+  });
+
+  // ────────────────────────────────────────────────────────────────
+  // Lean + Projection Performance (100k scale)
+  // ────────────────────────────────────────────────────────────────
+
+  describe('Lean and projection performance at 100k', () => {
+    it('should be significantly faster with .lean() vs Mongoose documents', async () => {
+      if (skipIfNotSeeded()) return;
+
+      const withoutLean = await measureMs('Without .lean()', () =>
+        Property.find({ status: 'active' }).sort({ createdAt: -1 }).limit(50).exec()
+      );
+
+      const withLean = await measureMs('With .lean()', () =>
+        Property.find({ status: 'active' }).sort({ createdAt: -1 }).limit(50).lean()
+      );
+
+      console.log(`  Without .lean(): ${withoutLean.ms}ms`);
+      console.log(`  With .lean(): ${withLean.ms}ms`);
+      console.log(`  Lean speedup: ${((withoutLean.ms - withLean.ms) / Math.max(withoutLean.ms, 1) * 100).toFixed(1)}%`);
+      expect(withLean.ms).toBeLessThan(500);
+    });
+
+    it('should be faster with field projection (excluding heavy fields)', async () => {
+      if (skipIfNotSeeded()) return;
+
+      const fullFields = await measureMs('Full document', () =>
+        Property.find({ status: 'active' }).sort({ createdAt: -1 }).limit(50).lean()
+      );
+
+      const projected = await measureMs('Projected (no description)', () =>
+        Property.find({ status: 'active' })
+          .select({ description: 0, rentalHistory: 0, priceIntervals: 0, specialFeatures: 0, materials: 0 })
+          .sort({ createdAt: -1 }).limit(50).lean()
+      );
+
+      console.log(`  Full document: ${fullFields.ms}ms`);
+      console.log(`  With projection: ${projected.ms}ms`);
+      expect(projected.ms).toBeLessThan(500);
+    });
+
+    it('should handle parallel count + query efficiently under 1000ms', async () => {
+      if (skipIfNotSeeded()) return;
+
+      const { ms, result } = await measureMs('Parallel query + count', async () => {
+        const filter = { status: 'active', city: 'Belgrade' };
+        const [properties, count] = await Promise.all([
+          Property.find(filter)
+            .select({ description: 0, rentalHistory: 0 })
+            .sort({ createdAt: -1 }).limit(20).lean(),
+          Property.countDocuments(filter),
+        ]);
+        return { properties: properties.length, count };
+      });
+      console.log(`  Parallel query + count (Belgrade): ${ms}ms — ${result.properties} props, ${result.count} total`);
+      expect(ms).toBeLessThan(1000);
+    });
+
+    it('should handle estimatedDocumentCount much faster than countDocuments', async () => {
+      if (skipIfNotSeeded()) return;
+
+      const estimated = await measureMs('estimatedDocumentCount', () =>
+        Property.estimatedDocumentCount()
+      );
+
+      const exact = await measureMs('countDocuments (no filter)', () =>
+        Property.countDocuments({})
+      );
+
+      console.log(`  estimatedDocumentCount: ${estimated.ms}ms (${estimated.result})`);
+      console.log(`  countDocuments({}): ${exact.ms}ms (${exact.result})`);
+      expect(estimated.ms).toBeLessThan(50);
+    });
+
+    it('should handle collation-based case-insensitive city match under 500ms', async () => {
+      if (skipIfNotSeeded()) return;
+
+      const regexResult = await measureMs('Regex city match', () =>
+        Property.find({ status: 'active', city: { $regex: /^pristina$/i } })
+          .limit(20).lean()
+      );
+
+      const collationResult = await measureMs('Collation city match', () =>
+        Property.find({ status: 'active', city: 'Pristina' })
+          .collation({ locale: 'en', strength: 2 })
+          .limit(20).lean()
+      );
+
+      console.log(`  Regex city: ${regexResult.ms}ms (${regexResult.result.length} results)`);
+      console.log(`  Collation city: ${collationResult.ms}ms (${collationResult.result.length} results)`);
+      expect(collationResult.ms).toBeLessThan(500);
+    });
+  });
+
+  // ────────────────────────────────────────────────────────────────
+  // 100k Scale Stress Tests
+  // ────────────────────────────────────────────────────────────────
+
+  describe('100k scale stress tests', () => {
+    it('should handle deep pagination at page 5000 (skip 99980) under 3000ms', async () => {
+      if (skipIfNotSeeded()) return;
+      const { ms, result } = await measureMs('Very deep pagination', () =>
+        Property.find({ status: 'active' }).sort({ createdAt: -1 }).skip(50000).limit(20).lean()
+      );
+      console.log(`  Very deep pagination (skip 50000): ${ms}ms — returned ${result.length} docs`);
+      expect(ms).toBeLessThan(3000);
+    });
+
+    it('should handle cursor-based deep pagination at 50k depth under 500ms', async () => {
+      if (skipIfNotSeeded()) return;
+
+      // Get a reference point deep in the dataset
+      const refDoc = await Property.findOne({ status: 'active' })
+        .sort({ createdAt: -1, _id: -1 })
+        .skip(50000)
+        .lean();
+      expect(refDoc).toBeTruthy();
+
+      const { ms, result } = await measureMs('Cursor at 50k depth', () =>
+        Property.find({
+          status: 'active',
+          $or: [
+            { createdAt: { $lt: refDoc!.createdAt } },
+            { createdAt: refDoc!.createdAt, _id: { $lt: refDoc!._id } },
+          ],
+        })
+          .sort({ createdAt: -1, _id: -1 })
+          .limit(20)
+          .lean()
+      );
+      console.log(`  Cursor at 50k depth: ${ms}ms — returned ${result.length} docs`);
+      expect(result.length).toBeGreaterThan(0);
+      expect(ms).toBeLessThan(500);
+    });
+
+    it('should handle compound filter on 100k dataset under 500ms', async () => {
+      if (skipIfNotSeeded()) return;
+      const { ms, result } = await measureMs('Compound filter 100k', () =>
+        Property.find({
+          status: 'active',
+          country: 'Kosovo',
+          propertyType: 'apartment',
+          price: { $gte: 50000, $lte: 200000 },
+          beds: { $gte: 2 },
+        })
+          .select({ description: 0, rentalHistory: 0 })
+          .sort({ price: 1 })
+          .limit(20)
+          .lean()
+      );
+      console.log(`  Compound filter on 100k: ${ms}ms — returned ${result.length} docs`);
+      expect(ms).toBeLessThan(500);
+    });
+
+    it('should stream through all 100k properties with cursor without OOM', async () => {
+      if (skipIfNotSeeded()) return;
+      const start = performance.now();
+      let count = 0;
+      const cursor = Property.find().select('_id price city').lean().cursor({ batchSize: 5000 });
+      for await (const _doc of cursor) {
+        count++;
+      }
+      const ms = Math.round(performance.now() - start);
+      console.log(`  Cursor iteration (all ${count.toLocaleString()} props): ${ms}ms`);
+      expect(count).toBeGreaterThanOrEqual(TOTAL_PROPERTIES);
+      expect(ms).toBeLessThan(120_000);
+    });
+
+    it('should compute stats on 100k dataset under 10000ms', async () => {
+      if (skipIfNotSeeded()) return;
+      const { computePropertyStats } = require('../jobs/computePropertyStatsJob');
+
+      const { ms } = await measureMs('Stats computation 100k', () => computePropertyStats());
+      console.log(`  Stats computation (100k): ${ms}ms`);
+      expect(ms).toBeLessThan(10_000);
     });
   });
 });

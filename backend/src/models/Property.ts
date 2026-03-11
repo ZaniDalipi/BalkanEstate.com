@@ -564,4 +564,16 @@ PropertySchema.index(
 // Compound index for cursor-based pagination (createdAt + _id for tie-breaking)
 PropertySchema.index({ status: 1, createdAt: -1, _id: -1 });
 
+// Compound indexes for 100k-scale query patterns
+// Price range queries filtered by city (common search pattern)
+PropertySchema.index({ city: 1, price: 1, status: 1 });
+// Price range queries filtered by country
+PropertySchema.index({ country: 1, price: 1, status: 1 });
+// Listing type + price sort (sale/rent filtered by price)
+PropertySchema.index({ listingType: 1, price: 1, status: 1 });
+// Seller's own listings sorted by creation date
+PropertySchema.index({ sellerId: 1, status: 1, createdAt: -1 });
+// Default sort order (lastRenewed) with status filter — covers the most common query
+PropertySchema.index({ status: 1, lastRenewed: -1 });
+
 export default mongoose.model<IProperty>('Property', PropertySchema);
