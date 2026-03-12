@@ -137,7 +137,7 @@ const Map3DBuildings: React.FC<Map3DBuildingsProps> = (props) => {
       {/* Property info card - top left */}
       {(title || resolvedAddress) && !show360Tour && (
         <div className="absolute top-3 sm:top-4 left-2 sm:left-4 z-10">
-          <div className="bg-slate-900/90 backdrop-blur-sm px-2.5 sm:px-4 py-2 sm:py-3 rounded-lg shadow-lg max-w-[200px] sm:max-w-[300px] border border-slate-700/50">
+          <div className="bg-white/15 backdrop-blur-xl backdrop-saturate-150 px-2.5 sm:px-4 py-2 sm:py-3 rounded-xl shadow-[0_4px_20px_rgba(0,0,0,0.15)] max-w-[200px] sm:max-w-[300px] border border-white/25">
             {title && <p className="font-semibold text-white text-xs sm:text-sm truncate">{title}</p>}
             {resolvedAddress && <p className="text-[10px] sm:text-sm text-slate-300 truncate" title={resolvedAddress}>{resolvedAddress}</p>}
           </div>
