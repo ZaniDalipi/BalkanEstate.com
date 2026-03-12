@@ -111,9 +111,10 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
   const externalVideoUrl = property.tourUrl || property.videoUrl || '';
   const videoPlatform = useMemo(() => getVideoPlatform(externalVideoUrl), [externalVideoUrl, getVideoPlatform]);
 
-  // YouTube, Vimeo, Facebook, and TikTok can be embedded via iframe
+  // YouTube, Vimeo, Facebook, TikTok, and Instagram can be embedded via iframe
   // TikTok uses their official player embed: tiktok.com/player/v1/{videoId}
-  const isEmbeddableVideo = ['youtube', 'vimeo', 'facebook', 'tiktok'].includes(videoPlatform);
+  // Instagram uses their /embed/ endpoint for reels and posts
+  const isEmbeddableVideo = ['youtube', 'vimeo', 'facebook', 'tiktok', 'instagram'].includes(videoPlatform);
   const hasExternalVideo = !!externalVideoUrl && isEmbeddableVideo;
 
   // Check if property has an auto-generated video (from video generator)
@@ -172,10 +173,19 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
     }
 
     // TikTok URL patterns - extract video ID - use player format for cleaner embed
-    const tiktokMatch = url.match(/(?:tiktok\.com\/@[\w.-]+\/video\/|vm\.tiktok\.com\/)(\d+)/);
-    if (tiktokMatch) {
+    // Full URL: tiktok.com/@username/video/7234567890 (numeric ID)
+    const tiktokFullMatch = url.match(/tiktok\.com\/@[\w.-]+\/video\/(\d+)/);
+    if (tiktokFullMatch) {
       return {
-        embedUrl: `https://www.tiktok.com/player/v1/${tiktokMatch[1]}?music_info=0&description=0&autoplay=1&loop=1`,
+        embedUrl: `https://www.tiktok.com/player/v1/${tiktokFullMatch[1]}?music_info=0&description=0&autoplay=1&loop=1`,
+        platform: 'tiktok'
+      };
+    }
+    // Short URL: vm.tiktok.com/ZMrxxxxxxx/ (alphanumeric code)
+    const tiktokShortMatch = url.match(/vm\.tiktok\.com\/([\w]+)/);
+    if (tiktokShortMatch) {
+      return {
+        embedUrl: `https://www.tiktok.com/player/v1/${tiktokShortMatch[1]}?music_info=0&description=0&autoplay=1&loop=1`,
         platform: 'tiktok'
       };
     }
