@@ -498,46 +498,31 @@ export function use3DMap(props: Map3DBuildingsProps) {
         }
       }
     } else {
-      // 2. Try a larger bounding box query
+      // 2. Try a small bounding box query (~30px, roughly one building width)
       const bbox: [maplibregl.PointLike, maplibregl.PointLike] = [
-        [point.x - 150, point.y - 150],
-        [point.x + 150, point.y + 150]
+        [point.x - 30, point.y - 30],
+        [point.x + 30, point.y + 30]
       ];
       const nearbyFeatures = mapInstance.queryRenderedFeatures(bbox, {
         layers: ['3d-buildings']
       });
 
       // Find the building CLOSEST to our coordinates that is tall enough
-      // Filter out small auxiliary structures (garages, sheds, etc.)
+      // Only accept buildings very close to the property (max ~30m)
       if (nearbyFeatures.length > 0) {
         let minDistance = Infinity;
         let closestFeature: maplibregl.MapGeoJSONFeature | null = null;
 
-        // Minimum height requirement: building must have at least as many floors as target floor
-        // or be at least 10 meters tall (roughly 3 floors)
-        const minRequiredHeight = Math.max(10, floorNum * floorHeightM);
+        // Maximum distance threshold: ~30m in degrees (~0.0003)
+        const maxDistanceThreshold = 0.0003;
 
         for (const feature of nearbyFeatures) {
-          const props = feature.properties;
-
-          // Get building height
-          let buildingHeight = 10; // Default
-          if (props?.render_height) {
-            buildingHeight = props.render_height;
-          } else if (props?.['building:levels']) {
-            buildingHeight = props['building:levels'] * 3.5;
-          }
-
-          // Skip buildings that are too small (likely auxiliary structures)
-          if (buildingHeight < minRequiredHeight) {
-            continue;
-          }
-
           const centroid = getBuildingCentroid(feature);
           if (centroid) {
             const distance = getDistance(latitude, longitude, centroid.lat, centroid.lng);
 
-            if (distance < minDistance) {
+            // Only consider buildings within the distance threshold
+            if (distance < maxDistanceThreshold && distance < minDistance) {
               minDistance = distance;
               closestFeature = feature;
             }
@@ -546,10 +531,6 @@ export function use3DMap(props: Map3DBuildingsProps) {
 
         if (closestFeature) {
           buildingFeature = closestFeature;
-          const height = closestFeature.properties?.render_height ||
-                        (closestFeature.properties?.['building:levels'] || 1) * 3.5;
-        } else {
-          // Warning removed
         }
       }
     }
@@ -564,21 +545,10 @@ export function use3DMap(props: Map3DBuildingsProps) {
       }
     }
 
-    // If we still don't have building coords, create a fallback based on the building's floor count
+    // If no building was found at the property coordinates, skip the custom building overlay
+    // Don't create a fake building box that would mark the wrong location
     if (!buildingCoords) {
-      // Warning removed
-      const metersToDegrees = 1 / 111320;
-      // For a tall building, use a larger footprint (proportional to floors)
-      const buildingSize = Math.max(25, totalFlrs * 1.5); // At least 25m, scales with floors
-      const halfSize = buildingSize * metersToDegrees;
-      const lonAdjust = halfSize / Math.cos(latitude * Math.PI / 180);
-      buildingCoords = [[
-        [longitude - lonAdjust, latitude - halfSize],
-        [longitude + lonAdjust, latitude - halfSize],
-        [longitude + lonAdjust, latitude + halfSize],
-        [longitude - lonAdjust, latitude + halfSize],
-        [longitude - lonAdjust, latitude - halfSize],
-      ]];
+      return;
     }
 
     // Get actual building height from map data if available
@@ -1130,7 +1100,7 @@ export function use3DMap(props: Map3DBuildingsProps) {
 
       // Add 360 tour door marker for properties without floor visualization
       // (properties with floor data get the door marker via addCustomBuilding3D instead)
-      const willHaveFloorViz = floorNumber != null && totalFloors != null && totalFloors > 0;
+      const willHaveFloorViz = propertyType === 'apartment' && floorNumber != null && totalFloors != null && totalFloors > 0;
       if (!willHaveFloorViz && virtualTour360Url) {
         const doorEl = document.createElement('div');
         doorEl.className = 'apartment-door-marker';
@@ -1177,9 +1147,9 @@ export function use3DMap(props: Map3DBuildingsProps) {
         doorMarkerRef.current = doorMarker;
       }
 
-      // Add custom 3D building with floor slices for properties with floor data
+      // Add custom 3D building with floor slices only for apartments with floor data
       // Wait for tiles to fully load before querying building geometry
-      if (floorNumber != null && totalFloors != null && totalFloors > 0) {
+      if (propertyType === 'apartment' && floorNumber != null && totalFloors != null && totalFloors > 0) {
         // Retry mechanism to ensure building tiles are loaded
         let retryCount = 0;
         const maxRetries = 5;

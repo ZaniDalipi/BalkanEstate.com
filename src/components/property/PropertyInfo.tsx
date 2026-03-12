@@ -192,6 +192,88 @@ export const PropertyInfo: React.FC<PropertyInfoProps> = ({ property, onOpenFloo
             </span>
           </div>
 
+          {/* Property Type & Listing Badge */}
+          {property.propertyType && (
+            <div className="mt-4 flex flex-wrap items-stretch gap-3">
+              {/* Property Type Card */}
+              <div className="group relative flex items-center gap-3 px-4 py-3 rounded-2xl bg-gradient-to-br from-primary/[0.07] via-primary/[0.04] to-transparent border border-primary/15 hover:border-primary/30 hover:shadow-lg hover:shadow-primary/5 transition-all duration-300 cursor-default overflow-hidden">
+                {/* Subtle animated shimmer */}
+                <div className="absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-1000 bg-gradient-to-r from-transparent via-white/20 to-transparent pointer-events-none" />
+                <div className="relative flex items-center justify-center w-10 h-10 rounded-xl bg-gradient-to-br from-primary/20 to-primary/10 group-hover:from-primary/30 group-hover:to-primary/15 transition-colors">
+                  {property.propertyType === 'apartment' && (
+                    <svg className="w-5 h-5 text-primary" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 21h16.5M4.5 3h15M5.25 3v18m13.5-18v18M9 6.75h1.5m-1.5 3h1.5m-1.5 3h1.5m3-6H15m-1.5 3H15m-1.5 3H15M9 21v-3.375c0-.621.504-1.125 1.125-1.125h3.75c.621 0 1.125.504 1.125 1.125V21" />
+                    </svg>
+                  )}
+                  {property.propertyType === 'house' && (
+                    <svg className="w-5 h-5 text-primary" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 12l8.954-8.955c.44-.439 1.152-.439 1.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25" />
+                    </svg>
+                  )}
+                  {property.propertyType === 'villa' && (
+                    <svg className="w-5 h-5 text-primary" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M12 3L2 12h3v8h6v-5h2v5h6v-8h3L12 3z" />
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M8 12h8" />
+                    </svg>
+                  )}
+                  {property.propertyType === 'land' && (
+                    <svg className="w-5 h-5 text-primary" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M9 6.75V15m6-6v8.25m.503 3.498l4.875-2.437c.381-.19.622-.58.622-1.006V4.82c0-.836-.88-1.38-1.628-1.006l-3.869 1.934c-.317.159-.69.159-1.006 0L9.503 3.252a1.125 1.125 0 00-1.006 0L3.622 5.689C3.24 5.88 3 6.27 3 6.695V19.18c0 .836.88 1.38 1.628 1.006l3.869-1.934c.317-.159.69-.159 1.006 0l4.994 2.497c.317.158.69.158 1.006 0z" />
+                    </svg>
+                  )}
+                  {(property.propertyType === 'other' || !['apartment', 'house', 'villa', 'land'].includes(property.propertyType)) && (
+                    <CubeTransparentIcon className="w-5 h-5 text-primary" />
+                  )}
+                </div>
+                <div className="relative">
+                  <span className="block text-[10px] sm:text-xs font-medium text-primary/60 uppercase tracking-wider leading-none">
+                    {t('details.propertyType', 'Property Type')}
+                  </span>
+                  <span className="block text-sm sm:text-base font-bold text-neutral-900 capitalize mt-0.5">
+                    {t(`details.propertyTypes.${property.propertyType}`, property.propertyType)}
+                  </span>
+                </div>
+              </div>
+
+              {/* Listing Type Card */}
+              {property.listingType && (
+                <div className={`relative flex items-center gap-3 px-4 py-3 rounded-2xl border transition-all duration-300 cursor-default overflow-hidden ${
+                  property.listingType === 'rent'
+                    ? 'bg-gradient-to-br from-blue-50/80 via-blue-50/40 to-transparent border-blue-200/50 hover:border-blue-300/70 hover:shadow-lg hover:shadow-blue-500/5'
+                    : 'bg-gradient-to-br from-emerald-50/80 via-emerald-50/40 to-transparent border-emerald-200/50 hover:border-emerald-300/70 hover:shadow-lg hover:shadow-emerald-500/5'
+                }`}>
+                  <div className={`flex items-center justify-center w-10 h-10 rounded-xl ${
+                    property.listingType === 'rent'
+                      ? 'bg-blue-100/80'
+                      : 'bg-emerald-100/80'
+                  }`}>
+                    {property.listingType === 'rent' ? (
+                      <svg className="w-5 h-5 text-blue-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 5.25a3 3 0 013 3m3 0a6 6 0 01-7.029 5.912c-.563-.097-1.159.026-1.563.43L10.5 17.25H8.25v2.25H6v2.25H2.25v-2.818c0-.597.237-1.17.659-1.591l6.499-6.499c.404-.404.527-1 .43-1.563A6 6 0 1121.75 8.25z" />
+                      </svg>
+                    ) : (
+                      <svg className="w-5 h-5 text-emerald-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 18.75a60.07 60.07 0 0115.797 2.101c.727.198 1.453-.342 1.453-1.096V18.75M3.75 4.5v.75A.75.75 0 013 6h-.75m0 0v-.375c0-.621.504-1.125 1.125-1.125H20.25M2.25 6v9m18-10.5v.75c0 .414.336.75.75.75h.75m-1.5-1.5h.375c.621 0 1.125.504 1.125 1.125v9.75c0 .621-.504 1.125-1.125 1.125h-.375m1.5-1.5H21a.75.75 0 00-.75.75v.75m0 0H3.75m0 0h-.375a1.125 1.125 0 01-1.125-1.125V15m1.5 1.5v-.75A.75.75 0 003 15h-.75M15 10.5a3 3 0 11-6 0 3 3 0 016 0zm3 0h.008v.008H18V10.5zm-12 0h.008v.008H6V10.5z" />
+                      </svg>
+                    )}
+                  </div>
+                  <div>
+                    <span className={`block text-[10px] sm:text-xs font-medium uppercase tracking-wider leading-none ${
+                      property.listingType === 'rent' ? 'text-blue-500/70' : 'text-emerald-500/70'
+                    }`}>
+                      {t('details.listingType', 'Listing')}
+                    </span>
+                    <span className={`block text-sm sm:text-base font-bold mt-0.5 ${
+                      property.listingType === 'rent' ? 'text-blue-700' : 'text-emerald-700'
+                    }`}>
+                      {property.listingType === 'rent' ? t('details.forRent', 'For Rent') : t('details.forSale', 'For Sale')}
+                    </span>
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+
           <div className="mt-6 flex flex-wrap justify-around text-base sm:text-lg text-neutral-800 border-t border-neutral-200 pt-4 gap-4">
             <div className="flex items-center gap-3 p-2 rounded-lg hover:bg-primary-light/50 transition-all duration-200 cursor-default group">
               <BedIcon className="w-6 h-6 text-primary group-hover:scale-110 transition-transform" />

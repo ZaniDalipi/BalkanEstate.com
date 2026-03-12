@@ -328,7 +328,7 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
 
   return (
     <div className="bg-white rounded-xl shadow-lg border border-neutral-200 overflow-hidden">
-      <div className="relative w-full h-[200px] xs:h-[250px] sm:h-[350px] md:h-[400px] lg:h-[450px] landscape:h-[50vh] landscape:min-h-[200px] bg-black">
+      <div className="relative w-full h-[280px] xs:h-[340px] sm:h-[420px] md:h-[500px] lg:h-[560px] landscape:h-[60vh] landscape:min-h-[280px] bg-black">
         {viewMode === 'photos' ? (
           <button
             onClick={onOpenViewer}
@@ -634,6 +634,46 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
                   {t('property:gallery.floor', 'floor')}
                 </div>
               </div>
+            </div>
+          </div>
+        )}
+
+        {/* Property Type & Listing Chip - Bottom right overlay */}
+        {viewMode === 'photos' && property.propertyType && (
+          <div className="absolute bottom-2 sm:bottom-3 right-2 sm:right-3 z-10 flex items-center gap-1.5 animate-fade-in">
+            <div className="flex items-center gap-1.5 bg-white/15 backdrop-blur-xl backdrop-saturate-150 px-2.5 py-1.5 sm:px-3 sm:py-2 rounded-full border border-white/25 shadow-[0_4px_20px_rgba(0,0,0,0.15)]">
+              {property.propertyType === 'apartment' && (
+                <svg className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-white/90" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 21h16.5M4.5 3h15M5.25 3v18m13.5-18v18M9 6.75h1.5m-1.5 3h1.5m-1.5 3h1.5m3-6H15m-1.5 3H15m-1.5 3H15M9 21v-3.375c0-.621.504-1.125 1.125-1.125h3.75c.621 0 1.125.504 1.125 1.125V21" />
+                </svg>
+              )}
+              {property.propertyType === 'house' && (
+                <svg className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-white/90" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 12l8.954-8.955c.44-.439 1.152-.439 1.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25" />
+                </svg>
+              )}
+              {property.propertyType === 'villa' && (
+                <svg className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-white/90" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 3L2 12h3v8h6v-5h2v5h6v-8h3L12 3z" />
+                </svg>
+              )}
+              {property.propertyType === 'land' && (
+                <svg className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-white/90" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M9 6.75V15m6-6v8.25m.503 3.498l4.875-2.437c.381-.19.622-.58.622-1.006V4.82c0-.836-.88-1.38-1.628-1.006l-3.869 1.934c-.317.159-.69.159-1.006 0L9.503 3.252a1.125 1.125 0 00-1.006 0L3.622 5.689C3.24 5.88 3 6.27 3 6.695V19.18c0 .836.88 1.38 1.628 1.006l3.869-1.934c.317-.159.69-.159 1.006 0l4.994 2.497c.317.158.69.158 1.006 0z" />
+                </svg>
+              )}
+              {!['apartment', 'house', 'villa', 'land'].includes(property.propertyType) && (
+                <BuildingOfficeIcon className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-white/90" />
+              )}
+              <span className="text-white text-[11px] sm:text-xs font-semibold capitalize">
+                {t(`property:propertyTypes.${property.propertyType}`, property.propertyType)}
+              </span>
+              <span className="w-px h-3 bg-white/30" />
+              <span className={`text-[11px] sm:text-xs font-bold ${
+                property.listingType === 'rent' ? 'text-blue-300' : 'text-emerald-300'
+              }`}>
+                {property.listingType === 'rent' ? t('property:gallery.forRent', 'Rent') : t('property:gallery.forSale', 'Sale')}
+              </span>
             </div>
           </div>
         )}
