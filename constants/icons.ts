@@ -116,28 +116,11 @@ export const ArrowTopRightOnSquareIcon: React.FC<{ className?: string }> = ({ cl
 );
 
 export const LogoIcon: React.FC<{ className?: string }> = ({ className }) => (
-    React.createElement('svg', { className: className, viewBox: "85 50 345 360", xmlns: "http://www.w3.org/2000/svg" },
-        React.createElement('g', { fillRule: "evenodd" },
-            // Left Building (shorter)
-            // Front face - lighter blue
-            React.createElement('path', { fill: "#6BA3F5", d: "M115 380L115 200L195 160L195 380Z" }),
-            // Right side face - medium blue
-            React.createElement('path', { fill: "#4A8FE7", d: "M195 160L245 190L245 380L195 380Z" }),
-            // Top face - lightest blue
-            React.createElement('path', { fill: "#89B4F8", d: "M115 200L195 160L245 190L165 230Z" }),
-            // Right Building (taller) - separated by a small gap
-            // Front face - lighter blue
-            React.createElement('path', { fill: "#6BA3F5", d: "M260 380L260 120L340 80L340 380Z" }),
-            // Right side face - darkest blue
-            React.createElement('path', { fill: "#0252CD", d: "M340 80L400 115L400 380L340 380Z" }),
-            // Top face - medium blue
-            React.createElement('path', { fill: "#4A8FE7", d: "M260 120L340 80L400 115L320 155Z" }),
-            // Step/notch at top-left of right building (visible inner face in the gap)
-            React.createElement('path', { fill: "#4A8FE7", d: "M260 120L260 155L290 140L290 105Z" }),
-            // Inner face visible in gap between buildings - darker shade
-            React.createElement('path', { fill: "#2563A8", d: "M245 190L260 198L260 380L245 380Z" })
-        )
-    )
+    React.createElement('img', {
+        className: className,
+        src: '/icons/BalkanEstateAILogo.svg',
+        alt: 'BalkanEstate',
+    })
 );
 
 // FIX: Add missing MapIcon component.

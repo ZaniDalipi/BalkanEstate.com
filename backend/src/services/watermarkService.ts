@@ -22,7 +22,7 @@ let balkanEstateLogoCache: Buffer | null = null;
 const getBalkanEstateLogo = async (): Promise<Buffer> => {
   if (balkanEstateLogoCache) return balkanEstateLogoCache;
 
-  const svgPath = path.resolve(__dirname, '../../../public/icons/icon.svg');
+  const svgPath = path.resolve(__dirname, '../../../public/icons/BalkanEstateAILogo.svg');
 
   if (!fs.existsSync(svgPath)) {
     mediaLogger.warn('⚠️  BalkanEstate logo SVG not found at', svgPath);
