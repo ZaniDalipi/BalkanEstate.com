@@ -192,6 +192,25 @@ export const PropertyInfo: React.FC<PropertyInfoProps> = ({ property, onOpenFloo
             </span>
           </div>
 
+          {/* Property Type Badge */}
+          {property.propertyType && (
+            <div className="mt-3 inline-flex items-center gap-2">
+              <span className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-primary/10 text-primary font-semibold rounded-full text-xs sm:text-sm border border-primary/20">
+                <CubeTransparentIcon className="w-4 h-4" />
+                <span className="capitalize">{t(`details.propertyTypes.${property.propertyType}`, property.propertyType)}</span>
+              </span>
+              {property.listingType && (
+                <span className={`inline-flex items-center px-3 py-1.5 font-semibold rounded-full text-xs sm:text-sm border ${
+                  property.listingType === 'rent'
+                    ? 'bg-blue-50 text-blue-700 border-blue-200'
+                    : 'bg-green-50 text-green-700 border-green-200'
+                }`}>
+                  {property.listingType === 'rent' ? t('details.forRent', 'For Rent') : t('details.forSale', 'For Sale')}
+                </span>
+              )}
+            </div>
+          )}
+
           <div className="mt-6 flex flex-wrap justify-around text-base sm:text-lg text-neutral-800 border-t border-neutral-200 pt-4 gap-4">
             <div className="flex items-center gap-3 p-2 rounded-lg hover:bg-primary-light/50 transition-all duration-200 cursor-default group">
               <BedIcon className="w-6 h-6 text-primary group-hover:scale-110 transition-transform" />
@@ -258,6 +277,11 @@ export const PropertyInfo: React.FC<PropertyInfoProps> = ({ property, onOpenFloo
         </div>
 
         <div className="relative grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2.5">
+          {property.propertyType && (
+            <DetailItem icon={<CubeTransparentIcon />} label={t('details.propertyType', 'Property Type')}>
+              <span className="capitalize">{t(`details.propertyTypes.${property.propertyType}`, property.propertyType)}</span>
+            </DetailItem>
+          )}
           <DetailItem icon={<CalendarIcon />} label={t('features.yearBuilt')}>
             {property.yearBuilt}
           </DetailItem>

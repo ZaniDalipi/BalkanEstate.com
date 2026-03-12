@@ -328,7 +328,7 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
 
   return (
     <div className="bg-white rounded-xl shadow-lg border border-neutral-200 overflow-hidden">
-      <div className="relative w-full h-[200px] xs:h-[250px] sm:h-[350px] md:h-[400px] lg:h-[450px] landscape:h-[50vh] landscape:min-h-[200px] bg-black">
+      <div className="relative w-full h-[280px] xs:h-[340px] sm:h-[420px] md:h-[500px] lg:h-[560px] landscape:h-[60vh] landscape:min-h-[280px] bg-black">
         {viewMode === 'photos' ? (
           <button
             onClick={onOpenViewer}

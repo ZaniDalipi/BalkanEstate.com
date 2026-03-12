@@ -8,7 +8,7 @@
 //   - Map3DControls.tsx   — control panel UI
 //   - Map3DTourViewer.tsx — 360 virtual tour overlay
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import 'maplibre-gl/dist/maplibre-gl.css';
 import { useTranslation } from 'react-i18next';
 import type { Map3DBuildingsProps } from './Map3DConstants';
@@ -16,12 +16,15 @@ import { TIME_LIGHTING } from './Map3DConstants';
 import { use3DMap } from './use3DMap';
 import Map3DControls from './Map3DControls';
 import Map3DTourViewer from './Map3DTourViewer';
+import { reverseGeocode } from '@/services/osmService';
 
 /**
  * Map3DBuildings Component - OneGeo-style 3D map
  */
 const Map3DBuildings: React.FC<Map3DBuildingsProps> = (props) => {
   const {
+    lat,
+    lng,
     address,
     title,
     height = '500px',
@@ -33,6 +36,31 @@ const Map3DBuildings: React.FC<Map3DBuildingsProps> = (props) => {
   } = props;
 
   const { t } = useTranslation(['property']);
+
+  // Reverse geocode to get accurate address from coordinates
+  const [resolvedAddress, setResolvedAddress] = useState(address);
+  useEffect(() => {
+    if (!lat || !lng || isNaN(lat) || isNaN(lng)) return;
+    let cancelled = false;
+    reverseGeocode(lat, lng).then((result) => {
+      if (cancelled || !result) return;
+      // Build a concise address from the structured parts
+      const addr = result.address;
+      if (addr) {
+        const parts: string[] = [];
+        const street = addr.road || addr.street;
+        if (street) parts.push(street);
+        if (addr.city || addr.town || addr.village) parts.push((addr.city || addr.town || addr.village)!);
+        if (addr.country) parts.push(addr.country);
+        if (parts.length > 0) {
+          setResolvedAddress(parts.join(', '));
+        }
+      } else if (result.display_name) {
+        setResolvedAddress(result.display_name);
+      }
+    });
+    return () => { cancelled = true; };
+  }, [lat, lng]);
 
   const {
     // Refs
@@ -107,11 +135,11 @@ const Map3DBuildings: React.FC<Map3DBuildingsProps> = (props) => {
       )}
 
       {/* Property info card - top left */}
-      {(title || address) && !show360Tour && (
+      {(title || resolvedAddress) && !show360Tour && (
         <div className="absolute top-3 sm:top-4 left-2 sm:left-4 z-10">
-          <div className="bg-slate-900/90 backdrop-blur-sm px-2.5 sm:px-4 py-2 sm:py-3 rounded-lg shadow-lg max-w-[160px] sm:max-w-[240px] border border-slate-700/50">
+          <div className="bg-slate-900/90 backdrop-blur-sm px-2.5 sm:px-4 py-2 sm:py-3 rounded-lg shadow-lg max-w-[200px] sm:max-w-[300px] border border-slate-700/50">
             {title && <p className="font-semibold text-white text-xs sm:text-sm truncate">{title}</p>}
-            {address && <p className="text-[10px] sm:text-sm text-slate-300 truncate">{address}</p>}
+            {resolvedAddress && <p className="text-[10px] sm:text-sm text-slate-300 truncate" title={resolvedAddress}>{resolvedAddress}</p>}
           </div>
         </div>
       )}
