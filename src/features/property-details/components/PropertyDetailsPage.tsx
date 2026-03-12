@@ -821,12 +821,17 @@ const PropertyDetailsPage: React.FC<{ property: Property }> = ({ property: cache
             {/* 360 Virtual Tour is now shown as a badge in the gallery and can be opened from there */}
             {/* Video Tour (YouTube/Vimeo) is now integrated in the PropertyGallery as the first view */}
 
-            {/* Social Video Embed - TikTok, Instagram (these need special embed) */}
-            {property.tourUrl && (property.tourUrl.includes('tiktok.com') || property.tourUrl.includes('instagram.com')) && (
-              <div className="animate-slide-up" style={{ animationDelay: '125ms' }}>
-                <SocialVideoEmbed videoUrl={property.tourUrl} />
-              </div>
-            )}
+            {/* Social Video Embed - TikTok, Instagram (fallback embed below gallery) */}
+            {(() => {
+              const socialVideoUrl = [property.tourUrl, property.videoUrl].find(
+                url => url && (url.includes('tiktok.com') || url.includes('instagram.com'))
+              );
+              return socialVideoUrl ? (
+                <div className="animate-slide-up" style={{ animationDelay: '125ms' }}>
+                  <SocialVideoEmbed videoUrl={socialVideoUrl} />
+                </div>
+              ) : null;
+            })()}
 
             {/* Property Info (Desktop only - mobile version shown above) */}
             <div className="hidden lg:block animate-slide-up" style={{ animationDelay: '100ms' }}>

@@ -107,11 +107,14 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
     return 'unknown';
   }, []);
 
-  const videoPlatform = useMemo(() => getVideoPlatform(property.tourUrl || ''), [property.tourUrl, getVideoPlatform]);
+  // Use tourUrl first, fall back to videoUrl for external video detection
+  const externalVideoUrl = property.tourUrl || property.videoUrl || '';
+  const videoPlatform = useMemo(() => getVideoPlatform(externalVideoUrl), [externalVideoUrl, getVideoPlatform]);
 
-  // Only YouTube, Vimeo, and Facebook can be embedded via iframe (TikTok/Instagram block iframes)
-  const isEmbeddableVideo = ['youtube', 'vimeo', 'facebook'].includes(videoPlatform);
-  const hasExternalVideo = !!property.tourUrl && isEmbeddableVideo;
+  // YouTube, Vimeo, Facebook, and TikTok can be embedded via iframe
+  // TikTok uses their official player embed: tiktok.com/player/v1/{videoId}
+  const isEmbeddableVideo = ['youtube', 'vimeo', 'facebook', 'tiktok'].includes(videoPlatform);
+  const hasExternalVideo = !!externalVideoUrl && isEmbeddableVideo;
 
   // Check if property has an auto-generated video (from video generator)
   const hasGeneratedVideo = !!(property.hasGeneratedVideo && property.generatedVideoUrl);
@@ -207,7 +210,7 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
     return { embedUrl: url, platform: 'other' };
   }, []);
 
-  const videoInfo = useMemo(() => getVideoEmbedUrl(property.tourUrl || ''), [property.tourUrl, getVideoEmbedUrl]);
+  const videoInfo = useMemo(() => getVideoEmbedUrl(externalVideoUrl), [externalVideoUrl, getVideoEmbedUrl]);
 
   // Combine all images
   const allImages = useMemo(() => {
