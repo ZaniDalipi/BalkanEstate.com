@@ -44,6 +44,7 @@ export interface UserSubscription {
   tier: SubscriptionTier;
   status: SubscriptionStatus;
   plan?: SubscriptionPlan;
+  productId?: string;
 
   // Listing management
   listingsLimit: number;
