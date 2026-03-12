@@ -204,13 +204,10 @@ const RegisterPage: React.FC = () => {
     const [showPassword, setShowPassword] = useState(false);
     const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
-    const [isInAppBrowser, setIsInAppBrowser] = useState(false);
-
     useEffect(() => {
         const fetchProviders = async () => {
             try {
-                const { getAvailableOAuthProviders, isEmbeddedWebView } = await import('@/services/apiService');
-                setIsInAppBrowser(isEmbeddedWebView());
+                const { getAvailableOAuthProviders } = await import('@/services/apiService');
                 const providers = await getAvailableOAuthProviders();
                 setAvailableProviders(providers);
             } catch {
@@ -366,31 +363,12 @@ const RegisterPage: React.FC = () => {
                         {/* Social Login */}
                         {(availableProviders.google || availableProviders.apple) && (
                             <div className="space-y-3 mb-6">
-                                {isInAppBrowser && (
-                                    <div className="p-3 rounded-xl bg-amber-50/80 border border-amber-200/50 text-sm text-amber-700">
-                                        <p className="font-semibold mb-1">{t('auth:login.inAppBrowserTitle', 'In-app browser detected')}</p>
-                                        <p>{t('auth:login.inAppBrowserMessage', 'Google sign-in is not supported in this browser. Please open this page in Safari or Chrome.')}</p>
-                                        <button
-                                            type="button"
-                                            onClick={() => {
-                                                const url = window.location.href;
-                                                if (navigator.clipboard) {
-                                                    navigator.clipboard.writeText(url);
-                                                }
-                                                window.open(url, '_system');
-                                            }}
-                                            className="mt-2 inline-flex items-center gap-1 text-sm font-semibold text-amber-800 underline"
-                                        >
-                                            {t('auth:login.copyLink', 'Copy link & open in browser')}
-                                        </button>
-                                    </div>
-                                )}
                                 {availableProviders.google && (
                                     <SocialButton
                                         icon={<GoogleIcon className="w-6 h-6" />}
                                         label={t('auth:signup.continueWithGoogle', 'Continue with Google')}
                                         onClick={() => handleSocialLogin('google')}
-                                        disabled={isLoading || isInAppBrowser}
+                                        disabled={isLoading}
                                     />
                                 )}
                                 {availableProviders.apple && (
@@ -398,7 +376,7 @@ const RegisterPage: React.FC = () => {
                                         icon={<AppleIcon className="w-6 h-6" />}
                                         label={t('auth:signup.continueWithApple', 'Continue with Apple')}
                                         onClick={() => handleSocialLogin('apple')}
-                                        disabled={isLoading || isInAppBrowser}
+                                        disabled={isLoading}
                                     />
                                 )}
                                 <div className="relative my-4">
