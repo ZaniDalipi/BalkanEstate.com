@@ -1218,8 +1218,8 @@ const SubscriptionManagement: React.FC<SubscriptionManagementProps> = ({ userId 
               <p className="font-semibold text-neutral-800">{t('management.listingLimit', 'Listing Limit')}</p>
               <p className="text-sm text-neutral-500">
                 {t('management.listingUsage', { used: user.subscription?.activeListingsCount || user.listingsCount || 0, limit: currentProduct?.listingsLimit ?? subscriptionDetails.currentPlan.listingLimit, defaultValue: '{{used}} of {{limit}} used' })}
-                {(user.subscription?.tier === 'agency_agent' || user.subscription?.tier === 'agency_owner') && (
-                  <span className="ml-1 text-neutral-400">· {t('management.perMonth', 'per month')}</span>
+                {subscriptionDetails && subscriptionDetails.currentPlan.period && subscriptionDetails.currentPlan.period !== 'forever' && (
+                  <span className="ml-1 text-neutral-400">· {subscriptionDetails.currentPlan.period === 'month' ? t('management.perMonth', 'per month') : t('management.perYear', 'per year')}</span>
                 )}
               </p>
             </div>

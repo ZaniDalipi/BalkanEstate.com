@@ -774,6 +774,7 @@ export const getMe = async (req: Request, res: Response): Promise<void> => {
     let savedSearchesLimit = FREE_TIER_LIMITS.SAVED_SEARCHES;
     let subscriptionExpiresAt: Date | undefined;
     let subscriptionStatus: string = 'active';
+    let subscriptionProductId: string | undefined;
 
     // **CRITICAL: Check Subscriptions collection - this is the source of truth**
     // Handle both ObjectId and string userId formats for compatibility
@@ -812,6 +813,7 @@ export const getMe = async (req: Request, res: Response): Promise<void> => {
 
     if (dbSubscription) {
       const productId = dbSubscription.productId;
+      subscriptionProductId = productId;
       subscriptionStatus = dbSubscription.status;
 
       // Look up product limits from DB - single source of truth
@@ -906,7 +908,7 @@ export const getMe = async (req: Request, res: Response): Promise<void> => {
         user.subscription.expiresAt = subscriptionExpiresAt;
       } else if (tier === 'agency_owner' && user.subscription.tier !== 'agency_owner') {
         user.subscription.tier = 'agency_owner';
-        user.subscription.listingsLimit = ENTERPRISE_TIER_LIMITS.LISTINGS; // Enterprise
+        user.subscription.listingsLimit = listingsLimit; // Use DB Product value (falls back to ENTERPRISE_TIER_LIMITS.LISTINGS)
         user.subscription.expiresAt = subscriptionExpiresAt;
       }
 
@@ -927,8 +929,8 @@ export const getMe = async (req: Request, res: Response): Promise<void> => {
         }
       }
 
-      // Sync listingsLimit for Pro users based on their actual plan
-      if (user.subscription.tier === 'pro' && listingsLimit > 0 && user.subscription.listingsLimit !== listingsLimit) {
+      // Sync listingsLimit for all paid tiers based on their actual DB Product value
+      if (listingsLimit > 0 && user.subscription.listingsLimit !== listingsLimit && user.subscription.tier !== 'free' && user.subscription.tier !== 'buyer') {
         user.subscription.listingsLimit = listingsLimit;
       }
 
@@ -968,6 +970,7 @@ export const getMe = async (req: Request, res: Response): Promise<void> => {
         subscription: user.subscription ? {
           tier: user.subscription.tier,
           status: user.subscription.status,
+          productId: subscriptionProductId,
           listingsLimit: user.subscription.listingsLimit,
           activeListingsCount: user.subscription.activeListingsCount,
           privateSellerCount: user.subscription.privateSellerCount,

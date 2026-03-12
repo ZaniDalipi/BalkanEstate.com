@@ -255,11 +255,14 @@ const AuthPage: React.FC = () => {
     const [showPassword, setShowPassword] = useState(false);
     const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
+    const [isInAppBrowser, setIsInAppBrowser] = useState(false);
+
     useEffect(() => {
         // Fetch available OAuth providers
         const fetchProviders = async () => {
             try {
-                const { getAvailableOAuthProviders } = await import('@/services/apiService');
+                const { getAvailableOAuthProviders, isEmbeddedWebView } = await import('@/services/apiService');
+                setIsInAppBrowser(isEmbeddedWebView());
                 const providers = await getAvailableOAuthProviders();
                 setAvailableProviders(providers);
             } catch (error) {
@@ -717,12 +720,31 @@ const AuthPage: React.FC = () => {
                                     <div className="flex-grow h-px bg-gradient-to-r from-transparent via-neutral-300/60 to-transparent"></div>
                                 </div>
                                 <div className="space-y-3">
+                                    {isInAppBrowser && (
+                                        <div className="p-3 rounded-xl bg-amber-50/80 border border-amber-200/50 text-sm text-amber-700">
+                                            <p className="font-semibold mb-1">{t('auth:login.inAppBrowserTitle', 'In-app browser detected')}</p>
+                                            <p>{t('auth:login.inAppBrowserMessage', 'Google sign-in is not supported in this browser. Please open this page in Safari or Chrome.')}</p>
+                                            <button
+                                                type="button"
+                                                onClick={() => {
+                                                    const url = window.location.href;
+                                                    if (navigator.clipboard) {
+                                                        navigator.clipboard.writeText(url);
+                                                    }
+                                                    window.open(url, '_system');
+                                                }}
+                                                className="mt-2 inline-flex items-center gap-1 text-sm font-semibold text-amber-800 underline"
+                                            >
+                                                {t('auth:login.copyLink', 'Copy link & open in browser')}
+                                            </button>
+                                        </div>
+                                    )}
                                     {availableProviders.google && (
                                         <SocialButton
                                             icon={<GoogleIcon/>}
                                             label={t('auth:login.google')}
                                             onClick={() => handleSocialLoginClick('google')}
-                                            disabled={isLoading}
+                                            disabled={isLoading || isInAppBrowser}
                                         />
                                     )}
                                     {availableProviders.apple && (
@@ -730,7 +752,7 @@ const AuthPage: React.FC = () => {
                                             icon={<AppleIcon className="text-black"/>}
                                             label={t('auth:login.apple')}
                                             onClick={() => handleSocialLoginClick('apple')}
-                                            disabled={isLoading}
+                                            disabled={isLoading || isInAppBrowser}
                                         />
                                     )}
                                 </div>
