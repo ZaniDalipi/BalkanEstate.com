@@ -498,10 +498,10 @@ export function use3DMap(props: Map3DBuildingsProps) {
         }
       }
     } else {
-      // 2. Try a larger bounding box query
+      // 2. Try a bounding box query around the property point
       const bbox: [maplibregl.PointLike, maplibregl.PointLike] = [
-        [point.x - 150, point.y - 150],
-        [point.x + 150, point.y + 150]
+        [point.x - 75, point.y - 75],
+        [point.x + 75, point.y + 75]
       ];
       const nearbyFeatures = mapInstance.queryRenderedFeatures(bbox, {
         layers: ['3d-buildings']
@@ -544,7 +544,10 @@ export function use3DMap(props: Map3DBuildingsProps) {
           }
         }
 
-        if (closestFeature) {
+        // Only accept the building if it's close enough to the property coordinates
+        // ~0.0005 degrees ≈ 55 meters - beyond this the building is likely not the right one
+        const maxAcceptableDistance = 0.0005;
+        if (closestFeature && minDistance < maxAcceptableDistance) {
           buildingFeature = closestFeature;
           const height = closestFeature.properties?.render_height ||
                         (closestFeature.properties?.['building:levels'] || 1) * 3.5;
