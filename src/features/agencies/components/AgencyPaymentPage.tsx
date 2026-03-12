@@ -39,7 +39,7 @@ const DEFAULT_ENTERPRISE_PLAN: EnterprisePlan = {
     'Unlimited Saved Searches',
     'Full Analytics Dashboard',
     'Priority Support',
-    '10 Monthly Promotion Coupons',
+    '5 Monthly Promotion Coupons',
     'Team Management Tools',
   ],
 };

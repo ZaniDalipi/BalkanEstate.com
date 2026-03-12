@@ -78,12 +78,12 @@ export const LISTING_LIMITS: Record<string, number> = {
   free: 3,
   seller_pro_monthly: 20,
   seller_pro_yearly: 250,
-  seller_enterprise_yearly: 500,
+  seller_enterprise_yearly: 1000,
   free_tier: 3,
   pro_monthly: 20,
   pro_yearly: 250,
-  enterprise_yearly: 500,
-  agency_yearly: 100,
+  enterprise_yearly: 1000,
+  agency_yearly: 1000,
   agency_agent_yearly: 25, // Fallback — overridden by DB Product.listingsLimit when available
 };
 

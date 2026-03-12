@@ -1842,7 +1842,7 @@ const SubscriptionManagement: React.FC<SubscriptionManagementProps> = ({ userId 
                 t('management.enterpriseFeatures.unlimitedSearches', 'Unlimited Saved Searches'),
                 t('management.enterpriseFeatures.fullAnalytics', 'Full Analytics Dashboard'),
                 t('management.enterpriseFeatures.prioritySupport', 'Priority Support'),
-                t('management.enterpriseFeatures.promoCouponsCount', '{{count}} Monthly Promotion Coupons', { count: matchedProduct?.promotionCoupons ?? agencyOwnerProductFromDB?.promotionCoupons ?? 10 }),
+                t('management.enterpriseFeatures.promoCouponsCount', '{{count}} Monthly Promotion Coupons', { count: matchedProduct?.promotionCoupons ?? agencyOwnerProductFromDB?.promotionCoupons ?? 5 }),
                 t('management.enterpriseFeatures.teamTools', 'Team Management Tools'),
               ] : matchedProduct
                 ? plan.features.map(f => replacePlaceholders(f, matchedProduct))

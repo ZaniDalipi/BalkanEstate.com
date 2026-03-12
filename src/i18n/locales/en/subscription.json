@@ -180,13 +180,13 @@
     "cancelPlan": "Cancel Plan",
     "upgradePlan": "Upgrade Your Plan",
     "enterpriseFeatures": {
-      "listings750": "1000 Active Listings",
+      "listingsCount": "{{count}} Active Listings",
       "createAgency": "Create Your Own Agency",
-      "agentCoupons5": "5 Agent Invitation Coupons",
+      "agentCouponsCount": "{{count}} Agent Invitation Coupons",
       "unlimitedSearches": "Unlimited Saved Searches",
       "fullAnalytics": "Full Analytics Dashboard",
       "prioritySupport": "Priority Support",
-      "promoCoupons10": "10 Monthly Promotion Coupons",
+      "promoCouponsCount": "{{count}} Monthly Promotion Coupons",
       "teamTools": "Team Management Tools"
     },
     "bestForAgencies": "Best for Agencies",
