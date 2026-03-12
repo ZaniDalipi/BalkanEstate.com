@@ -251,7 +251,7 @@ const PRODUCTS = [
   {
     productId: 'seller_enterprise_yearly',
     name: 'Enterprise',
-    description: 'Complete agency solution - 750 listings, 5 team members, and shared promotion pool.',
+    description: 'Complete agency solution - 1000 listings, 5 team members, and shared promotion pool.',
     type: 'subscription' as const,
     tier: 'agency' as const,
     price: 1000,
@@ -259,7 +259,7 @@ const PRODUCTS = [
     billingPeriod: 'yearly' as const,
     durationDays: 365,
     features: [
-      '750 listings (expandable)',
+      '1000 listings (expandable)',
       '5 team members included',
       'Agency branding page',
       '5 promotion coupons/month (2 premier + 2 highlighted + 1 featured)',
@@ -303,7 +303,7 @@ const PRODUCTS = [
   {
     productId: 'agency_yearly',
     name: 'Enterprise',
-    description: 'Complete agency solution - 750 listings, 5 team members, and shared promotion pool.',
+    description: 'Complete agency solution - 1000 listings, 5 team members, and shared promotion pool.',
     type: 'subscription' as const,
     tier: 'agency' as const,
     price: 1000,
@@ -311,7 +311,7 @@ const PRODUCTS = [
     billingPeriod: 'yearly' as const,
     durationDays: 365,
     features: [
-      '750 listings (expandable)',
+      '1000 listings (expandable)',
       '5 team members included',
       'Agency branding page',
       '5 promotion coupons/month (2 premier + 2 highlighted + 1 featured)',
@@ -996,7 +996,7 @@ async function seedProducts() {
     log.info('   Free: €0 (3 listings, 3 saved searches, 3 AI messages, 3 insights)');
     log.info('   Pro Monthly: €25 (20 listings/mo, 3 promo coupons/mo, 20 insights/mo, unlimited AI & searches)');
     log.info('   Pro Yearly: €200 (250 listings/year, 3 promo coupons/mo, 20 insights/mo, unlimited AI & searches)');
-    log.info('   Enterprise: €1000/year (750 listings, 5 team members, 5 promo coupons, unlimited everything)');
+    log.info('   Enterprise: €1000/year (1000 listings, 5 team members, 5 promo coupons, unlimited everything)');
     log.info('   Agency Agent: €0 (granted via agent registration code, 25 listings/year, unlimited AI & searches)');
     log.info('   Buyer Pro: €3/month (unlimited searches, instant alerts, early access, market insights)');
 

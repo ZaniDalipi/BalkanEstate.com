@@ -112,7 +112,7 @@
     "perMonthPerAgent": "Per month, per agent",
     "perMonthLabel": "Per month",
     "totalAvailable": "Total available",
-    "agencyPoolDesc": "750 listing pool / year across the agency",
+    "agencyPoolDesc": "1000 listing pool / year across the agency",
     "unlimitedSavedSearches": "Unlimited Saved Searches",
     "savedSearchesCount": "{{count}} Saved Searches",
     "sharedPool": "Shared Agency Pool",
@@ -180,7 +180,7 @@
     "cancelPlan": "Cancel Plan",
     "upgradePlan": "Upgrade Your Plan",
     "enterpriseFeatures": {
-      "listings750": "750 Active Listings",
+      "listings750": "1000 Active Listings",
       "createAgency": "Create Your Own Agency",
       "agentCoupons5": "5 Agent Invitation Coupons",
       "unlimitedSearches": "Unlimited Saved Searches",

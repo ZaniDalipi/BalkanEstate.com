@@ -104,7 +104,7 @@ export const ENTERPRISE_TIER_LIMITS: {
   AI_MESSAGES: number;
   IMAGE_DESCRIPTIONS: number;
 } = {
-  LISTINGS: 750,
+  LISTINGS: 1000,
   TEAM_MEMBERS: 5,
   PROMOTION_COUPONS: 5,
   PREMIUM_COUPONS: 1,
@@ -128,7 +128,7 @@ export const TRIAL_LIMITS: {
 // Agency tier limits
 export const AGENCY_TIER_LIMITS = {
   YEARLY: {
-    LISTINGS: 750,
+    LISTINGS: 1000,
     AGENT_COUPONS: 5, // Monthly agent coupons
     PROMOTION_COUPONS: 5,
     PREMIUM_COUPONS: 1,

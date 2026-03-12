@@ -3577,7 +3577,7 @@ Questions? Contact us at support@balkanestateai.com
     const frontendUrl = process.env.FRONTEND_URL || 'https://balkanestateai.com';
 
     // Default values if not provided
-    const listingsLimit = params.listingsLimit || 750;
+    const listingsLimit = params.listingsLimit || 1000;
     const teamMembersLimit = params.teamMembersLimit || 5;
     const agentCoupons = params.agentCoupons || 5;
     const promotionCoupons = params.promotionCoupons || {

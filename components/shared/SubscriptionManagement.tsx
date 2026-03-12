@@ -146,12 +146,12 @@ const LISTING_LIMITS: Record<string, number> = {
   free: 3,
   seller_pro_monthly: 20,  // 20 listings per month
   seller_pro_yearly: 250,  // 250 listings per year
-  seller_enterprise_yearly: 750, // 750 listings for enterprise
+  seller_enterprise_yearly: 1000, // 1000 listings for enterprise
   // New tiers (from new monetization system)
   free_tier: 3,
   pro_monthly: 20,  // 20 listings per month
   pro_yearly: 250,  // 250 listings per year
-  agency_yearly: 750,  // 750 listings for enterprise
+  agency_yearly: 1000,  // 1000 listings for enterprise
   buyer_monthly: 0,  // Buyers don't create listings
   // Agency agent tier (joined via coupon)
   agency_agent_yearly: 25,  // 25 listings per year for agency agents (fallback; real value comes from DB)
@@ -1262,7 +1262,7 @@ const SubscriptionManagement: React.FC<SubscriptionManagementProps> = ({ userId 
                   : subscriptionDetails.currentPlan.period === 'month' ? t('management.perMonthLabel', 'Per month') : t('management.totalAvailable', 'Total available')}
               </p>
               {(subscriptionDetails.currentPlan.tier === 2 || user.subscription?.tier === 'agency_agent' || user.subscription?.tier === 'agency_owner') && (
-                <p className="text-xs text-neutral-400 mt-0.5">{t('management.agencyPoolDesc', '{{count}} listing pool / year across the agency', { count: agencyOwnerProductFromDB?.listingsLimit ?? 750 })}</p>
+                <p className="text-xs text-neutral-400 mt-0.5">{t('management.agencyPoolDesc', '{{count}} listing pool / year across the agency', { count: agencyOwnerProductFromDB?.listingsLimit ?? 1000 })}</p>
               )}
             </div>
           </div>
@@ -1836,7 +1836,7 @@ const SubscriptionManagement: React.FC<SubscriptionManagementProps> = ({ userId 
               const isEnterprise = key.includes('enterprise') || key.includes('agency_yearly');
               const matchedProduct = products.find(p => p.productId === key);
               const displayFeatures = isEnterprise ? [
-                t('management.enterpriseFeatures.listingsCount', '{{count}} Active Listings', { count: matchedProduct?.listingsLimit ?? agencyOwnerProductFromDB?.listingsLimit ?? 750 }),
+                t('management.enterpriseFeatures.listingsCount', '{{count}} Active Listings', { count: matchedProduct?.listingsLimit ?? agencyOwnerProductFromDB?.listingsLimit ?? 1000 }),
                 t('management.enterpriseFeatures.createAgency', 'Create Your Own Agency'),
                 t('management.enterpriseFeatures.agentCouponsCount', '{{count}} Agent Invitation Coupons', { count: matchedProduct?.agentCoupons ?? agencyOwnerProductFromDB?.agentCoupons ?? 5 }),
                 t('management.enterpriseFeatures.unlimitedSearches', 'Unlimited Saved Searches'),

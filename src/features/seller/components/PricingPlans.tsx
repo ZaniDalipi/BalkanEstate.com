@@ -491,7 +491,7 @@ const PricingPlans: React.FC<PricingPlansProps> = ({ isOpen, onClose, onSubscrib
                         ) : (
                             <>
                                 <div className="bg-neutral-700/50 p-4 rounded-lg">
-                                    <p className="font-bold text-base sm:text-lg">750 listings (expandable)</p>
+                                    <p className="font-bold text-base sm:text-lg">1000 listings (expandable)</p>
                                     <p className="text-neutral-300 text-sm">For your entire agency team</p>
                                 </div>
                                 <div className="bg-neutral-700/50 p-4 rounded-lg">
