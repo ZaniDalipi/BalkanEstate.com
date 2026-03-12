@@ -78,7 +78,7 @@ const PromotionSelector: React.FC<PromotionSelectorProps> = (props) => {
   const tiers = tiersData.tiers;
 
   return (
-    <div className={inModal ? "w-full px-4 sm:px-6 pt-4 sm:pt-6 lg:pt-8 pb-4" : "max-w-7xl mx-auto px-4 sm:px-6 py-8"}>
+    <div className={inModal ? "w-full px-4 sm:px-6 pt-4 sm:pt-6 lg:pt-8 pb-4" : "max-w-7xl mx-auto px-4 sm:px-6 py-8 pb-24"}>
       {/* Header Section - Enhanced for Extension Mode and Urgent Badge Mode */}
       {focusUrgent ? (
         <div className={`text-center ${inModal ? 'mb-6' : 'mb-10'}`}>
