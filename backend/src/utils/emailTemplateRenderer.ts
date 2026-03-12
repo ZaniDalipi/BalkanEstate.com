@@ -182,13 +182,18 @@ export function renderEmailConfig(
   <style>
     @media (prefers-color-scheme: dark) {
       .ec-body { background-color: ${darkBackground} !important; }
-      .ec-card { background-color: ${darkBackgroundAlt} !important; }
+      .ec-card { background-color: ${darkBackgroundAlt} !important; color: ${darkText} !important; }
+      .ec-card p, .ec-card li, .ec-card td, .ec-card h1, .ec-card h2, .ec-card h3,
+      .ec-card span, .ec-card div, .ec-card ul, .ec-card ol, .ec-card strong { color: ${darkText} !important; }
+      .ec-header, .ec-header h1, .ec-header p, .ec-header span { color: #ffffff !important; }
       .ec-header { background: ${darkGradient} !important; }
       .ec-text { color: ${darkText} !important; }
       .ec-text-muted { color: ${darkTextMuted} !important; }
-      .ec-footer { background: ${darkBackground} !important; border-color: ${darkBackgroundAlt} !important; }
+      .ec-footer { background: ${darkBackground} !important; border-color: ${darkBackgroundAlt} !important; color: ${darkTextMuted} !important; }
+      .ec-footer p, .ec-footer a, .ec-footer span, .ec-footer div { color: ${darkTextMuted} !important; }
       .ec-link { color: ${darkPrimary} !important; }
-      .ec-cta { background: ${darkGradient} !important; }
+      .ec-card a { color: ${darkPrimary} !important; }
+      .ec-cta, .ec-cta center { background: ${darkGradient} !important; color: #ffffff !important; }
       .ec-border { border-color: ${darkBackgroundAlt} !important; }
     }
   </style>
