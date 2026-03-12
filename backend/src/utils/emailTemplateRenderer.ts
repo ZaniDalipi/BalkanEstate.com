@@ -154,8 +154,8 @@ export function renderEmailConfig(
   // Brand colors from SiteSettings — dark theme (CSS media query)
   const darkPrimary = variables.darkBrandPrimary || '#3b82f6';
   const darkPrimaryDark = variables.darkBrandPrimaryDark || '#2563eb';
-  const darkText = variables.darkBrandText || '#f9fafb';
-  const darkTextMuted = variables.darkBrandTextMuted || '#9ca3af';
+  const darkText = variables.darkBrandText || '#ffffff';
+  const darkTextMuted = variables.darkBrandTextMuted || '#ffffff';
   const darkBackground = variables.darkBrandBackground || '#111827';
   const darkBackgroundAlt = variables.darkBrandBackgroundAlt || '#1f2937';
 

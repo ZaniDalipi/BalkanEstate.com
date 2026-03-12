@@ -32,9 +32,9 @@ export const BRAND_COLORS_DARK = {
   primary: '#3b82f6',
   primaryDark: '#2563eb',
   accent: '#34d399',
-  text: '#f9fafb',
-  textMuted: '#9ca3af',
-  textLight: '#6b7280',
+  text: '#ffffff',
+  textMuted: '#ffffff',
+  textLight: '#ffffff',
   background: '#111827',
   backgroundAlt: '#1f2937',
   border: '#374151',
@@ -360,7 +360,9 @@ export const getBaseTemplate = (options: {
     /* Dark mode — colors driven by SiteSettings.emailBrandColorsDark */
     @media (prefers-color-scheme: dark) {
       .email-bg { background-color: ${darkColors.background} !important; }
-      .email-card { background-color: ${darkColors.backgroundAlt} !important; }
+      .email-card { background-color: ${darkColors.backgroundAlt} !important; color: #ffffff !important; }
+      .email-card p, .email-card li, .email-card td, .email-card h1, .email-card h2, .email-card h3,
+      .email-card span, .email-card div, .email-card ul, .email-card ol, .email-card strong { color: #ffffff !important; }
       .text-primary { color: ${darkColors.text} !important; }
       .text-muted { color: ${darkColors.textMuted} !important; }
       .text-light { color: ${darkColors.textLight} !important; }

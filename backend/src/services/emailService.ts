@@ -347,24 +347,24 @@ class EmailService {
   <style>
     @media (prefers-color-scheme: dark) {
       .ec-body { background-color: #111827 !important; }
-      .ec-card { background-color: #1f2937 !important; color: #e5e7eb !important; }
+      .ec-card { background-color: #1f2937 !important; color: #ffffff !important; }
       .ec-card p, .ec-card li, .ec-card td, .ec-card h1, .ec-card h2, .ec-card h3,
-      .ec-card span, .ec-card div, .ec-card ul, .ec-card ol, .ec-card strong { color: #e5e7eb !important; }
+      .ec-card span, .ec-card div, .ec-card ul, .ec-card ol, .ec-card strong { color: #ffffff !important; }
       .ec-header, .ec-header h1, .ec-header p, .ec-header span { color: #ffffff !important; }
       .ec-header { background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%) !important; }
-      .ec-text { color: #f9fafb !important; }
-      .ec-text-muted { color: #9ca3af !important; }
-      .ec-footer { background-color: #111827 !important; border-color: #374151 !important; color: #9ca3af !important; }
-      .ec-footer p, .ec-footer a, .ec-footer span, .ec-footer div { color: #9ca3af !important; }
+      .ec-text { color: #ffffff !important; }
+      .ec-text-muted { color: #ffffff !important; }
+      .ec-footer { background-color: #111827 !important; border-color: #374151 !important; color: #ffffff !important; }
+      .ec-footer p, .ec-footer a, .ec-footer span, .ec-footer div { color: #ffffff !important; }
       .ec-link { color: #60a5fa !important; }
       .ec-card a { color: #60a5fa !important; }
       .ec-cta, .ec-cta center { background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%) !important; color: #ffffff !important; }
       .ec-border { border-color: #374151 !important; }
       .ec-stat-card { background-color: #374151 !important; }
-      .ec-stat-card div, .ec-stat-card span { color: #e5e7eb !important; }
+      .ec-stat-card div, .ec-stat-card span { color: #ffffff !important; }
       .ec-highlight { background-color: #374151 !important; border-color: #4b5563 !important; }
       .ec-highlight p, .ec-highlight li, .ec-highlight h3, .ec-highlight span, .ec-highlight ul,
-      .ec-highlight div, .ec-highlight td, .ec-highlight strong { color: #e5e7eb !important; }
+      .ec-highlight div, .ec-highlight td, .ec-highlight strong { color: #ffffff !important; }
     }
   </style>
 </head>
@@ -576,24 +576,24 @@ class EmailService {
   <style>
     @media (prefers-color-scheme: dark) {
       .ec-body { background-color: #111827 !important; }
-      .ec-card { background-color: #1f2937 !important; color: #e5e7eb !important; }
+      .ec-card { background-color: #1f2937 !important; color: #ffffff !important; }
       .ec-card p, .ec-card li, .ec-card td, .ec-card h1, .ec-card h2, .ec-card h3,
-      .ec-card span, .ec-card div, .ec-card ul, .ec-card ol, .ec-card strong { color: #e5e7eb !important; }
+      .ec-card span, .ec-card div, .ec-card ul, .ec-card ol, .ec-card strong { color: #ffffff !important; }
       .ec-header, .ec-header h1, .ec-header p, .ec-header span { color: #ffffff !important; }
       .ec-header { background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%) !important; }
-      .ec-text { color: #f9fafb !important; }
-      .ec-text-muted { color: #9ca3af !important; }
-      .ec-footer { background-color: #111827 !important; border-color: #374151 !important; color: #9ca3af !important; }
-      .ec-footer p, .ec-footer a, .ec-footer span, .ec-footer div { color: #9ca3af !important; }
+      .ec-text { color: #ffffff !important; }
+      .ec-text-muted { color: #ffffff !important; }
+      .ec-footer { background-color: #111827 !important; border-color: #374151 !important; color: #ffffff !important; }
+      .ec-footer p, .ec-footer a, .ec-footer span, .ec-footer div { color: #ffffff !important; }
       .ec-link { color: #60a5fa !important; }
       .ec-card a { color: #60a5fa !important; }
       .ec-cta, .ec-cta center { background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%) !important; color: #ffffff !important; }
       .ec-border { border-color: #374151 !important; }
       .ec-stat-card { background-color: #374151 !important; }
-      .ec-stat-card div, .ec-stat-card span { color: #e5e7eb !important; }
+      .ec-stat-card div, .ec-stat-card span { color: #ffffff !important; }
       .ec-highlight { background-color: #374151 !important; border-color: #4b5563 !important; }
       .ec-highlight p, .ec-highlight li, .ec-highlight h3, .ec-highlight span, .ec-highlight ul,
-      .ec-highlight div, .ec-highlight td, .ec-highlight strong { color: #e5e7eb !important; }
+      .ec-highlight div, .ec-highlight td, .ec-highlight strong { color: #ffffff !important; }
     }
   </style>
 </head>
@@ -826,24 +826,24 @@ class EmailService {
   <style>
     @media (prefers-color-scheme: dark) {
       .ec-body { background-color: #111827 !important; }
-      .ec-card { background-color: #1f2937 !important; color: #e5e7eb !important; }
+      .ec-card { background-color: #1f2937 !important; color: #ffffff !important; }
       .ec-card p, .ec-card li, .ec-card td, .ec-card h1, .ec-card h2, .ec-card h3,
-      .ec-card span, .ec-card div, .ec-card ul, .ec-card ol, .ec-card strong { color: #e5e7eb !important; }
+      .ec-card span, .ec-card div, .ec-card ul, .ec-card ol, .ec-card strong { color: #ffffff !important; }
       .ec-header, .ec-header h1, .ec-header p, .ec-header span { color: #ffffff !important; }
       .ec-header { background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%) !important; }
-      .ec-text { color: #f9fafb !important; }
-      .ec-text-muted { color: #9ca3af !important; }
-      .ec-footer { background-color: #111827 !important; border-color: #374151 !important; color: #9ca3af !important; }
-      .ec-footer p, .ec-footer a, .ec-footer span, .ec-footer div { color: #9ca3af !important; }
+      .ec-text { color: #ffffff !important; }
+      .ec-text-muted { color: #ffffff !important; }
+      .ec-footer { background-color: #111827 !important; border-color: #374151 !important; color: #ffffff !important; }
+      .ec-footer p, .ec-footer a, .ec-footer span, .ec-footer div { color: #ffffff !important; }
       .ec-link { color: #60a5fa !important; }
       .ec-card a { color: #60a5fa !important; }
       .ec-cta, .ec-cta center { background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%) !important; color: #ffffff !important; }
       .ec-border { border-color: #374151 !important; }
       .ec-stat-card { background-color: #374151 !important; }
-      .ec-stat-card div, .ec-stat-card span { color: #e5e7eb !important; }
+      .ec-stat-card div, .ec-stat-card span { color: #ffffff !important; }
       .ec-highlight { background-color: #374151 !important; border-color: #4b5563 !important; }
       .ec-highlight p, .ec-highlight li, .ec-highlight h3, .ec-highlight span, .ec-highlight ul,
-      .ec-highlight div, .ec-highlight td, .ec-highlight strong { color: #e5e7eb !important; }
+      .ec-highlight div, .ec-highlight td, .ec-highlight strong { color: #ffffff !important; }
     }
   </style>
 </head>
@@ -1007,24 +1007,24 @@ class EmailService {
   <style>
     @media (prefers-color-scheme: dark) {
       .ec-body { background-color: #111827 !important; }
-      .ec-card { background-color: #1f2937 !important; color: #e5e7eb !important; }
+      .ec-card { background-color: #1f2937 !important; color: #ffffff !important; }
       .ec-card p, .ec-card li, .ec-card td, .ec-card h1, .ec-card h2, .ec-card h3,
-      .ec-card span, .ec-card div, .ec-card ul, .ec-card ol, .ec-card strong { color: #e5e7eb !important; }
+      .ec-card span, .ec-card div, .ec-card ul, .ec-card ol, .ec-card strong { color: #ffffff !important; }
       .ec-header, .ec-header h1, .ec-header p, .ec-header span { color: #ffffff !important; }
       .ec-header { background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%) !important; }
-      .ec-text { color: #f9fafb !important; }
-      .ec-text-muted { color: #9ca3af !important; }
-      .ec-footer { background-color: #111827 !important; border-color: #374151 !important; color: #9ca3af !important; }
-      .ec-footer p, .ec-footer a, .ec-footer span, .ec-footer div { color: #9ca3af !important; }
+      .ec-text { color: #ffffff !important; }
+      .ec-text-muted { color: #ffffff !important; }
+      .ec-footer { background-color: #111827 !important; border-color: #374151 !important; color: #ffffff !important; }
+      .ec-footer p, .ec-footer a, .ec-footer span, .ec-footer div { color: #ffffff !important; }
       .ec-link { color: #60a5fa !important; }
       .ec-card a { color: #60a5fa !important; }
       .ec-cta, .ec-cta center { background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%) !important; color: #ffffff !important; }
       .ec-border { border-color: #374151 !important; }
       .ec-stat-card { background-color: #374151 !important; }
-      .ec-stat-card div, .ec-stat-card span { color: #e5e7eb !important; }
+      .ec-stat-card div, .ec-stat-card span { color: #ffffff !important; }
       .ec-highlight { background-color: #374151 !important; border-color: #4b5563 !important; }
       .ec-highlight p, .ec-highlight li, .ec-highlight h3, .ec-highlight span, .ec-highlight ul,
-      .ec-highlight div, .ec-highlight td, .ec-highlight strong { color: #e5e7eb !important; }
+      .ec-highlight div, .ec-highlight td, .ec-highlight strong { color: #ffffff !important; }
     }
   </style>
 </head>
@@ -1338,24 +1338,24 @@ class EmailService {
   <style>
     @media (prefers-color-scheme: dark) {
       .ec-body { background-color: #111827 !important; }
-      .ec-card { background-color: #1f2937 !important; color: #e5e7eb !important; }
+      .ec-card { background-color: #1f2937 !important; color: #ffffff !important; }
       .ec-card p, .ec-card li, .ec-card td, .ec-card h1, .ec-card h2, .ec-card h3,
-      .ec-card span, .ec-card div, .ec-card ul, .ec-card ol, .ec-card strong { color: #e5e7eb !important; }
+      .ec-card span, .ec-card div, .ec-card ul, .ec-card ol, .ec-card strong { color: #ffffff !important; }
       .ec-header, .ec-header h1, .ec-header p, .ec-header span { color: #ffffff !important; }
       .ec-header { background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%) !important; }
-      .ec-text { color: #f9fafb !important; }
-      .ec-text-muted { color: #9ca3af !important; }
-      .ec-footer { background-color: #111827 !important; border-color: #374151 !important; color: #9ca3af !important; }
-      .ec-footer p, .ec-footer a, .ec-footer span, .ec-footer div { color: #9ca3af !important; }
+      .ec-text { color: #ffffff !important; }
+      .ec-text-muted { color: #ffffff !important; }
+      .ec-footer { background-color: #111827 !important; border-color: #374151 !important; color: #ffffff !important; }
+      .ec-footer p, .ec-footer a, .ec-footer span, .ec-footer div { color: #ffffff !important; }
       .ec-link { color: #60a5fa !important; }
       .ec-card a { color: #60a5fa !important; }
       .ec-cta, .ec-cta center { background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%) !important; color: #ffffff !important; }
       .ec-border { border-color: #374151 !important; }
       .ec-stat-card { background-color: #374151 !important; }
-      .ec-stat-card div, .ec-stat-card span { color: #e5e7eb !important; }
+      .ec-stat-card div, .ec-stat-card span { color: #ffffff !important; }
       .ec-highlight { background-color: #374151 !important; border-color: #4b5563 !important; }
       .ec-highlight p, .ec-highlight li, .ec-highlight h3, .ec-highlight span, .ec-highlight ul,
-      .ec-highlight div, .ec-highlight td, .ec-highlight strong { color: #e5e7eb !important; }
+      .ec-highlight div, .ec-highlight td, .ec-highlight strong { color: #ffffff !important; }
     }
   </style>
 </head>
@@ -1525,24 +1525,24 @@ class EmailService {
   <style>
     @media (prefers-color-scheme: dark) {
       .ec-body { background-color: #111827 !important; }
-      .ec-card { background-color: #1f2937 !important; color: #e5e7eb !important; }
+      .ec-card { background-color: #1f2937 !important; color: #ffffff !important; }
       .ec-card p, .ec-card li, .ec-card td, .ec-card h1, .ec-card h2, .ec-card h3,
-      .ec-card span, .ec-card div, .ec-card ul, .ec-card ol, .ec-card strong { color: #e5e7eb !important; }
+      .ec-card span, .ec-card div, .ec-card ul, .ec-card ol, .ec-card strong { color: #ffffff !important; }
       .ec-header, .ec-header h1, .ec-header p, .ec-header span { color: #ffffff !important; }
       .ec-header { background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%) !important; }
-      .ec-text { color: #f9fafb !important; }
-      .ec-text-muted { color: #9ca3af !important; }
-      .ec-footer { background-color: #111827 !important; border-color: #374151 !important; color: #9ca3af !important; }
-      .ec-footer p, .ec-footer a, .ec-footer span, .ec-footer div { color: #9ca3af !important; }
+      .ec-text { color: #ffffff !important; }
+      .ec-text-muted { color: #ffffff !important; }
+      .ec-footer { background-color: #111827 !important; border-color: #374151 !important; color: #ffffff !important; }
+      .ec-footer p, .ec-footer a, .ec-footer span, .ec-footer div { color: #ffffff !important; }
       .ec-link { color: #60a5fa !important; }
       .ec-card a { color: #60a5fa !important; }
       .ec-cta, .ec-cta center { background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%) !important; color: #ffffff !important; }
       .ec-border { border-color: #374151 !important; }
       .ec-stat-card { background-color: #374151 !important; }
-      .ec-stat-card div, .ec-stat-card span { color: #e5e7eb !important; }
+      .ec-stat-card div, .ec-stat-card span { color: #ffffff !important; }
       .ec-highlight { background-color: #374151 !important; border-color: #4b5563 !important; }
       .ec-highlight p, .ec-highlight li, .ec-highlight h3, .ec-highlight span, .ec-highlight ul,
-      .ec-highlight div, .ec-highlight td, .ec-highlight strong { color: #e5e7eb !important; }
+      .ec-highlight div, .ec-highlight td, .ec-highlight strong { color: #ffffff !important; }
     }
   </style>
 </head>
@@ -1747,24 +1747,24 @@ class EmailService {
   <style>
     @media (prefers-color-scheme: dark) {
       .ec-body { background-color: #111827 !important; }
-      .ec-card { background-color: #1f2937 !important; color: #e5e7eb !important; }
+      .ec-card { background-color: #1f2937 !important; color: #ffffff !important; }
       .ec-card p, .ec-card li, .ec-card td, .ec-card h1, .ec-card h2, .ec-card h3,
-      .ec-card span, .ec-card div, .ec-card ul, .ec-card ol, .ec-card strong { color: #e5e7eb !important; }
+      .ec-card span, .ec-card div, .ec-card ul, .ec-card ol, .ec-card strong { color: #ffffff !important; }
       .ec-header, .ec-header h1, .ec-header p, .ec-header span { color: #ffffff !important; }
       .ec-header { background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%) !important; }
-      .ec-text { color: #f9fafb !important; }
-      .ec-text-muted { color: #9ca3af !important; }
-      .ec-footer { background-color: #111827 !important; border-color: #374151 !important; color: #9ca3af !important; }
-      .ec-footer p, .ec-footer a, .ec-footer span, .ec-footer div { color: #9ca3af !important; }
+      .ec-text { color: #ffffff !important; }
+      .ec-text-muted { color: #ffffff !important; }
+      .ec-footer { background-color: #111827 !important; border-color: #374151 !important; color: #ffffff !important; }
+      .ec-footer p, .ec-footer a, .ec-footer span, .ec-footer div { color: #ffffff !important; }
       .ec-link { color: #60a5fa !important; }
       .ec-card a { color: #60a5fa !important; }
       .ec-cta, .ec-cta center { background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%) !important; color: #ffffff !important; }
       .ec-border { border-color: #374151 !important; }
       .ec-stat-card { background-color: #374151 !important; }
-      .ec-stat-card div, .ec-stat-card span { color: #e5e7eb !important; }
+      .ec-stat-card div, .ec-stat-card span { color: #ffffff !important; }
       .ec-highlight { background-color: #374151 !important; border-color: #4b5563 !important; }
       .ec-highlight p, .ec-highlight li, .ec-highlight h3, .ec-highlight span, .ec-highlight ul,
-      .ec-highlight div, .ec-highlight td, .ec-highlight strong { color: #e5e7eb !important; }
+      .ec-highlight div, .ec-highlight td, .ec-highlight strong { color: #ffffff !important; }
     }
   </style>
 </head>
@@ -2051,24 +2051,24 @@ class EmailService {
   <style>
     @media (prefers-color-scheme: dark) {
       .ec-body { background-color: #111827 !important; }
-      .ec-card { background-color: #1f2937 !important; color: #e5e7eb !important; }
+      .ec-card { background-color: #1f2937 !important; color: #ffffff !important; }
       .ec-card p, .ec-card li, .ec-card td, .ec-card h1, .ec-card h2, .ec-card h3,
-      .ec-card span, .ec-card div, .ec-card ul, .ec-card ol, .ec-card strong { color: #e5e7eb !important; }
+      .ec-card span, .ec-card div, .ec-card ul, .ec-card ol, .ec-card strong { color: #ffffff !important; }
       .ec-header, .ec-header h1, .ec-header p, .ec-header span { color: #ffffff !important; }
       .ec-header { background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%) !important; }
-      .ec-text { color: #f9fafb !important; }
-      .ec-text-muted { color: #9ca3af !important; }
-      .ec-footer { background-color: #111827 !important; border-color: #374151 !important; color: #9ca3af !important; }
-      .ec-footer p, .ec-footer a, .ec-footer span, .ec-footer div { color: #9ca3af !important; }
+      .ec-text { color: #ffffff !important; }
+      .ec-text-muted { color: #ffffff !important; }
+      .ec-footer { background-color: #111827 !important; border-color: #374151 !important; color: #ffffff !important; }
+      .ec-footer p, .ec-footer a, .ec-footer span, .ec-footer div { color: #ffffff !important; }
       .ec-link { color: #60a5fa !important; }
       .ec-card a { color: #60a5fa !important; }
       .ec-cta, .ec-cta center { background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%) !important; color: #ffffff !important; }
       .ec-border { border-color: #374151 !important; }
       .ec-stat-card { background-color: #374151 !important; }
-      .ec-stat-card div, .ec-stat-card span { color: #e5e7eb !important; }
+      .ec-stat-card div, .ec-stat-card span { color: #ffffff !important; }
       .ec-highlight { background-color: #374151 !important; border-color: #4b5563 !important; }
       .ec-highlight p, .ec-highlight li, .ec-highlight h3, .ec-highlight span, .ec-highlight ul,
-      .ec-highlight div, .ec-highlight td, .ec-highlight strong { color: #e5e7eb !important; }
+      .ec-highlight div, .ec-highlight td, .ec-highlight strong { color: #ffffff !important; }
     }
   </style>
 </head>
@@ -2675,24 +2675,24 @@ class EmailService {
   <style>
     @media (prefers-color-scheme: dark) {
       .ec-body { background-color: #111827 !important; }
-      .ec-card { background-color: #1f2937 !important; color: #e5e7eb !important; }
+      .ec-card { background-color: #1f2937 !important; color: #ffffff !important; }
       .ec-card p, .ec-card li, .ec-card td, .ec-card h1, .ec-card h2, .ec-card h3,
-      .ec-card span, .ec-card div, .ec-card ul, .ec-card ol, .ec-card strong { color: #e5e7eb !important; }
+      .ec-card span, .ec-card div, .ec-card ul, .ec-card ol, .ec-card strong { color: #ffffff !important; }
       .ec-header, .ec-header h1, .ec-header p, .ec-header span { color: #ffffff !important; }
       .ec-header { background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%) !important; }
-      .ec-text { color: #f9fafb !important; }
-      .ec-text-muted { color: #9ca3af !important; }
-      .ec-footer { background-color: #111827 !important; border-color: #374151 !important; color: #9ca3af !important; }
-      .ec-footer p, .ec-footer a, .ec-footer span, .ec-footer div { color: #9ca3af !important; }
+      .ec-text { color: #ffffff !important; }
+      .ec-text-muted { color: #ffffff !important; }
+      .ec-footer { background-color: #111827 !important; border-color: #374151 !important; color: #ffffff !important; }
+      .ec-footer p, .ec-footer a, .ec-footer span, .ec-footer div { color: #ffffff !important; }
       .ec-link { color: #60a5fa !important; }
       .ec-card a { color: #60a5fa !important; }
       .ec-cta, .ec-cta center { background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%) !important; color: #ffffff !important; }
       .ec-border { border-color: #374151 !important; }
       .ec-stat-card { background-color: #374151 !important; }
-      .ec-stat-card div, .ec-stat-card span { color: #e5e7eb !important; }
+      .ec-stat-card div, .ec-stat-card span { color: #ffffff !important; }
       .ec-highlight { background-color: #374151 !important; border-color: #4b5563 !important; }
       .ec-highlight p, .ec-highlight li, .ec-highlight h3, .ec-highlight span, .ec-highlight ul,
-      .ec-highlight div, .ec-highlight td, .ec-highlight strong { color: #e5e7eb !important; }
+      .ec-highlight div, .ec-highlight td, .ec-highlight strong { color: #ffffff !important; }
     }
   </style>
 </head>
@@ -2810,24 +2810,24 @@ class EmailService {
   <style>
     @media (prefers-color-scheme: dark) {
       .ec-body { background-color: #111827 !important; }
-      .ec-card { background-color: #1f2937 !important; color: #e5e7eb !important; }
+      .ec-card { background-color: #1f2937 !important; color: #ffffff !important; }
       .ec-card p, .ec-card li, .ec-card td, .ec-card h1, .ec-card h2, .ec-card h3,
-      .ec-card span, .ec-card div, .ec-card ul, .ec-card ol, .ec-card strong { color: #e5e7eb !important; }
+      .ec-card span, .ec-card div, .ec-card ul, .ec-card ol, .ec-card strong { color: #ffffff !important; }
       .ec-header, .ec-header h1, .ec-header p, .ec-header span { color: #ffffff !important; }
       .ec-header { background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%) !important; }
-      .ec-text { color: #f9fafb !important; }
-      .ec-text-muted { color: #9ca3af !important; }
-      .ec-footer { background-color: #111827 !important; border-color: #374151 !important; color: #9ca3af !important; }
-      .ec-footer p, .ec-footer a, .ec-footer span, .ec-footer div { color: #9ca3af !important; }
+      .ec-text { color: #ffffff !important; }
+      .ec-text-muted { color: #ffffff !important; }
+      .ec-footer { background-color: #111827 !important; border-color: #374151 !important; color: #ffffff !important; }
+      .ec-footer p, .ec-footer a, .ec-footer span, .ec-footer div { color: #ffffff !important; }
       .ec-link { color: #60a5fa !important; }
       .ec-card a { color: #60a5fa !important; }
       .ec-cta, .ec-cta center { background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%) !important; color: #ffffff !important; }
       .ec-border { border-color: #374151 !important; }
       .ec-stat-card { background-color: #374151 !important; }
-      .ec-stat-card div, .ec-stat-card span { color: #e5e7eb !important; }
+      .ec-stat-card div, .ec-stat-card span { color: #ffffff !important; }
       .ec-highlight { background-color: #374151 !important; border-color: #4b5563 !important; }
       .ec-highlight p, .ec-highlight li, .ec-highlight h3, .ec-highlight span, .ec-highlight ul,
-      .ec-highlight div, .ec-highlight td, .ec-highlight strong { color: #e5e7eb !important; }
+      .ec-highlight div, .ec-highlight td, .ec-highlight strong { color: #ffffff !important; }
     }
   </style>
 </head>
@@ -3519,24 +3519,24 @@ Questions? Contact us at support@balkanestateai.com
   <style>
     @media (prefers-color-scheme: dark) {
       .ec-body { background-color: #111827 !important; }
-      .ec-card { background-color: #1f2937 !important; color: #e5e7eb !important; }
+      .ec-card { background-color: #1f2937 !important; color: #ffffff !important; }
       .ec-card p, .ec-card li, .ec-card td, .ec-card h1, .ec-card h2, .ec-card h3,
-      .ec-card span, .ec-card div, .ec-card ul, .ec-card ol, .ec-card strong { color: #e5e7eb !important; }
+      .ec-card span, .ec-card div, .ec-card ul, .ec-card ol, .ec-card strong { color: #ffffff !important; }
       .ec-header, .ec-header h1, .ec-header p, .ec-header span { color: #ffffff !important; }
       .ec-header { background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%) !important; }
-      .ec-text { color: #f9fafb !important; }
-      .ec-text-muted { color: #9ca3af !important; }
-      .ec-footer { background-color: #111827 !important; border-color: #374151 !important; color: #9ca3af !important; }
-      .ec-footer p, .ec-footer a, .ec-footer span, .ec-footer div { color: #9ca3af !important; }
+      .ec-text { color: #ffffff !important; }
+      .ec-text-muted { color: #ffffff !important; }
+      .ec-footer { background-color: #111827 !important; border-color: #374151 !important; color: #ffffff !important; }
+      .ec-footer p, .ec-footer a, .ec-footer span, .ec-footer div { color: #ffffff !important; }
       .ec-link { color: #60a5fa !important; }
       .ec-card a { color: #60a5fa !important; }
       .ec-cta, .ec-cta center { background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%) !important; color: #ffffff !important; }
       .ec-border { border-color: #374151 !important; }
       .ec-stat-card { background-color: #374151 !important; }
-      .ec-stat-card div, .ec-stat-card span { color: #e5e7eb !important; }
+      .ec-stat-card div, .ec-stat-card span { color: #ffffff !important; }
       .ec-highlight { background-color: #374151 !important; border-color: #4b5563 !important; }
       .ec-highlight p, .ec-highlight li, .ec-highlight h3, .ec-highlight span, .ec-highlight ul,
-      .ec-highlight div, .ec-highlight td, .ec-highlight strong { color: #e5e7eb !important; }
+      .ec-highlight div, .ec-highlight td, .ec-highlight strong { color: #ffffff !important; }
     }
   </style>
 </head>
@@ -3757,24 +3757,24 @@ Questions? Contact us at support@balkanestateai.com
   <style>
     @media (prefers-color-scheme: dark) {
       .ec-body { background-color: #111827 !important; }
-      .ec-card { background-color: #1f2937 !important; color: #e5e7eb !important; }
+      .ec-card { background-color: #1f2937 !important; color: #ffffff !important; }
       .ec-card p, .ec-card li, .ec-card td, .ec-card h1, .ec-card h2, .ec-card h3,
-      .ec-card span, .ec-card div, .ec-card ul, .ec-card ol, .ec-card strong { color: #e5e7eb !important; }
+      .ec-card span, .ec-card div, .ec-card ul, .ec-card ol, .ec-card strong { color: #ffffff !important; }
       .ec-header, .ec-header h1, .ec-header p, .ec-header span { color: #ffffff !important; }
       .ec-header { background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%) !important; }
-      .ec-text { color: #f9fafb !important; }
-      .ec-text-muted { color: #9ca3af !important; }
-      .ec-footer { background-color: #111827 !important; border-color: #374151 !important; color: #9ca3af !important; }
-      .ec-footer p, .ec-footer a, .ec-footer span, .ec-footer div { color: #9ca3af !important; }
+      .ec-text { color: #ffffff !important; }
+      .ec-text-muted { color: #ffffff !important; }
+      .ec-footer { background-color: #111827 !important; border-color: #374151 !important; color: #ffffff !important; }
+      .ec-footer p, .ec-footer a, .ec-footer span, .ec-footer div { color: #ffffff !important; }
       .ec-link { color: #60a5fa !important; }
       .ec-card a { color: #60a5fa !important; }
       .ec-cta, .ec-cta center { background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%) !important; color: #ffffff !important; }
       .ec-border { border-color: #374151 !important; }
       .ec-stat-card { background-color: #374151 !important; }
-      .ec-stat-card div, .ec-stat-card span { color: #e5e7eb !important; }
+      .ec-stat-card div, .ec-stat-card span { color: #ffffff !important; }
       .ec-highlight { background-color: #374151 !important; border-color: #4b5563 !important; }
       .ec-highlight p, .ec-highlight li, .ec-highlight h3, .ec-highlight span, .ec-highlight ul,
-      .ec-highlight div, .ec-highlight td, .ec-highlight strong { color: #e5e7eb !important; }
+      .ec-highlight div, .ec-highlight td, .ec-highlight strong { color: #ffffff !important; }
     }
   </style>
 </head>
@@ -3959,24 +3959,24 @@ Questions? Contact us at support@balkanestateai.com
   <style>
     @media (prefers-color-scheme: dark) {
       .ec-body { background-color: #111827 !important; }
-      .ec-card { background-color: #1f2937 !important; color: #e5e7eb !important; }
+      .ec-card { background-color: #1f2937 !important; color: #ffffff !important; }
       .ec-card p, .ec-card li, .ec-card td, .ec-card h1, .ec-card h2, .ec-card h3,
-      .ec-card span, .ec-card div, .ec-card ul, .ec-card ol, .ec-card strong { color: #e5e7eb !important; }
+      .ec-card span, .ec-card div, .ec-card ul, .ec-card ol, .ec-card strong { color: #ffffff !important; }
       .ec-header, .ec-header h1, .ec-header p, .ec-header span { color: #ffffff !important; }
       .ec-header { background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%) !important; }
-      .ec-text { color: #f9fafb !important; }
-      .ec-text-muted { color: #9ca3af !important; }
-      .ec-footer { background-color: #111827 !important; border-color: #374151 !important; color: #9ca3af !important; }
-      .ec-footer p, .ec-footer a, .ec-footer span, .ec-footer div { color: #9ca3af !important; }
+      .ec-text { color: #ffffff !important; }
+      .ec-text-muted { color: #ffffff !important; }
+      .ec-footer { background-color: #111827 !important; border-color: #374151 !important; color: #ffffff !important; }
+      .ec-footer p, .ec-footer a, .ec-footer span, .ec-footer div { color: #ffffff !important; }
       .ec-link { color: #60a5fa !important; }
       .ec-card a { color: #60a5fa !important; }
       .ec-cta, .ec-cta center { background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%) !important; color: #ffffff !important; }
       .ec-border { border-color: #374151 !important; }
       .ec-stat-card { background-color: #374151 !important; }
-      .ec-stat-card div, .ec-stat-card span { color: #e5e7eb !important; }
+      .ec-stat-card div, .ec-stat-card span { color: #ffffff !important; }
       .ec-highlight { background-color: #374151 !important; border-color: #4b5563 !important; }
       .ec-highlight p, .ec-highlight li, .ec-highlight h3, .ec-highlight span, .ec-highlight ul,
-      .ec-highlight div, .ec-highlight td, .ec-highlight strong { color: #e5e7eb !important; }
+      .ec-highlight div, .ec-highlight td, .ec-highlight strong { color: #ffffff !important; }
     }
   </style>
 </head>
@@ -4175,24 +4175,24 @@ Questions? Contact us at support@balkanestateai.com
   <style>
     @media (prefers-color-scheme: dark) {
       .ec-body { background-color: #111827 !important; }
-      .ec-card { background-color: #1f2937 !important; color: #e5e7eb !important; }
+      .ec-card { background-color: #1f2937 !important; color: #ffffff !important; }
       .ec-card p, .ec-card li, .ec-card td, .ec-card h1, .ec-card h2, .ec-card h3,
-      .ec-card span, .ec-card div, .ec-card ul, .ec-card ol, .ec-card strong { color: #e5e7eb !important; }
+      .ec-card span, .ec-card div, .ec-card ul, .ec-card ol, .ec-card strong { color: #ffffff !important; }
       .ec-header, .ec-header h1, .ec-header p, .ec-header span { color: #ffffff !important; }
       .ec-header { background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%) !important; }
-      .ec-text { color: #f9fafb !important; }
-      .ec-text-muted { color: #9ca3af !important; }
-      .ec-footer { background-color: #111827 !important; border-color: #374151 !important; color: #9ca3af !important; }
-      .ec-footer p, .ec-footer a, .ec-footer span, .ec-footer div { color: #9ca3af !important; }
+      .ec-text { color: #ffffff !important; }
+      .ec-text-muted { color: #ffffff !important; }
+      .ec-footer { background-color: #111827 !important; border-color: #374151 !important; color: #ffffff !important; }
+      .ec-footer p, .ec-footer a, .ec-footer span, .ec-footer div { color: #ffffff !important; }
       .ec-link { color: #60a5fa !important; }
       .ec-card a { color: #60a5fa !important; }
       .ec-cta, .ec-cta center { background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%) !important; color: #ffffff !important; }
       .ec-border { border-color: #374151 !important; }
       .ec-stat-card { background-color: #374151 !important; }
-      .ec-stat-card div, .ec-stat-card span { color: #e5e7eb !important; }
+      .ec-stat-card div, .ec-stat-card span { color: #ffffff !important; }
       .ec-highlight { background-color: #374151 !important; border-color: #4b5563 !important; }
       .ec-highlight p, .ec-highlight li, .ec-highlight h3, .ec-highlight span, .ec-highlight ul,
-      .ec-highlight div, .ec-highlight td, .ec-highlight strong { color: #e5e7eb !important; }
+      .ec-highlight div, .ec-highlight td, .ec-highlight strong { color: #ffffff !important; }
     }
   </style>
 </head>
@@ -4369,24 +4369,24 @@ Questions? Contact us at support@balkanestateai.com
   <style>
     @media (prefers-color-scheme: dark) {
       .ec-body { background-color: #111827 !important; }
-      .ec-card { background-color: #1f2937 !important; color: #e5e7eb !important; }
+      .ec-card { background-color: #1f2937 !important; color: #ffffff !important; }
       .ec-card p, .ec-card li, .ec-card td, .ec-card h1, .ec-card h2, .ec-card h3,
-      .ec-card span, .ec-card div, .ec-card ul, .ec-card ol, .ec-card strong { color: #e5e7eb !important; }
+      .ec-card span, .ec-card div, .ec-card ul, .ec-card ol, .ec-card strong { color: #ffffff !important; }
       .ec-header, .ec-header h1, .ec-header p, .ec-header span { color: #ffffff !important; }
       .ec-header { background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%) !important; }
-      .ec-text { color: #f9fafb !important; }
-      .ec-text-muted { color: #9ca3af !important; }
-      .ec-footer { background-color: #111827 !important; border-color: #374151 !important; color: #9ca3af !important; }
-      .ec-footer p, .ec-footer a, .ec-footer span, .ec-footer div { color: #9ca3af !important; }
+      .ec-text { color: #ffffff !important; }
+      .ec-text-muted { color: #ffffff !important; }
+      .ec-footer { background-color: #111827 !important; border-color: #374151 !important; color: #ffffff !important; }
+      .ec-footer p, .ec-footer a, .ec-footer span, .ec-footer div { color: #ffffff !important; }
       .ec-link { color: #60a5fa !important; }
       .ec-card a { color: #60a5fa !important; }
       .ec-cta, .ec-cta center { background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%) !important; color: #ffffff !important; }
       .ec-border { border-color: #374151 !important; }
       .ec-stat-card { background-color: #374151 !important; }
-      .ec-stat-card div, .ec-stat-card span { color: #e5e7eb !important; }
+      .ec-stat-card div, .ec-stat-card span { color: #ffffff !important; }
       .ec-highlight { background-color: #374151 !important; border-color: #4b5563 !important; }
       .ec-highlight p, .ec-highlight li, .ec-highlight h3, .ec-highlight span, .ec-highlight ul,
-      .ec-highlight div, .ec-highlight td, .ec-highlight strong { color: #e5e7eb !important; }
+      .ec-highlight div, .ec-highlight td, .ec-highlight strong { color: #ffffff !important; }
     }
   </style>
 </head>
@@ -4551,24 +4551,24 @@ Questions? Contact us at support@balkanestateai.com
   <style>
     @media (prefers-color-scheme: dark) {
       .ec-body { background-color: #111827 !important; }
-      .ec-card { background-color: #1f2937 !important; color: #e5e7eb !important; }
+      .ec-card { background-color: #1f2937 !important; color: #ffffff !important; }
       .ec-card p, .ec-card li, .ec-card td, .ec-card h1, .ec-card h2, .ec-card h3,
-      .ec-card span, .ec-card div, .ec-card ul, .ec-card ol, .ec-card strong { color: #e5e7eb !important; }
+      .ec-card span, .ec-card div, .ec-card ul, .ec-card ol, .ec-card strong { color: #ffffff !important; }
       .ec-header, .ec-header h1, .ec-header p, .ec-header span { color: #ffffff !important; }
       .ec-header { background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%) !important; }
-      .ec-text { color: #f9fafb !important; }
-      .ec-text-muted { color: #9ca3af !important; }
-      .ec-footer { background-color: #111827 !important; border-color: #374151 !important; color: #9ca3af !important; }
-      .ec-footer p, .ec-footer a, .ec-footer span, .ec-footer div { color: #9ca3af !important; }
+      .ec-text { color: #ffffff !important; }
+      .ec-text-muted { color: #ffffff !important; }
+      .ec-footer { background-color: #111827 !important; border-color: #374151 !important; color: #ffffff !important; }
+      .ec-footer p, .ec-footer a, .ec-footer span, .ec-footer div { color: #ffffff !important; }
       .ec-link { color: #60a5fa !important; }
       .ec-card a { color: #60a5fa !important; }
       .ec-cta, .ec-cta center { background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%) !important; color: #ffffff !important; }
       .ec-border { border-color: #374151 !important; }
       .ec-stat-card { background-color: #374151 !important; }
-      .ec-stat-card div, .ec-stat-card span { color: #e5e7eb !important; }
+      .ec-stat-card div, .ec-stat-card span { color: #ffffff !important; }
       .ec-highlight { background-color: #374151 !important; border-color: #4b5563 !important; }
       .ec-highlight p, .ec-highlight li, .ec-highlight h3, .ec-highlight span, .ec-highlight ul,
-      .ec-highlight div, .ec-highlight td, .ec-highlight strong { color: #e5e7eb !important; }
+      .ec-highlight div, .ec-highlight td, .ec-highlight strong { color: #ffffff !important; }
     }
   </style>
 </head>
@@ -4719,24 +4719,24 @@ Questions? Contact us at support@balkanestateai.com
   <style>
     @media (prefers-color-scheme: dark) {
       .ec-body { background-color: #111827 !important; }
-      .ec-card { background-color: #1f2937 !important; color: #e5e7eb !important; }
+      .ec-card { background-color: #1f2937 !important; color: #ffffff !important; }
       .ec-card p, .ec-card li, .ec-card td, .ec-card h1, .ec-card h2, .ec-card h3,
-      .ec-card span, .ec-card div, .ec-card ul, .ec-card ol, .ec-card strong { color: #e5e7eb !important; }
+      .ec-card span, .ec-card div, .ec-card ul, .ec-card ol, .ec-card strong { color: #ffffff !important; }
       .ec-header, .ec-header h1, .ec-header p, .ec-header span { color: #ffffff !important; }
       .ec-header { background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%) !important; }
-      .ec-text { color: #f9fafb !important; }
-      .ec-text-muted { color: #9ca3af !important; }
-      .ec-footer { background-color: #111827 !important; border-color: #374151 !important; color: #9ca3af !important; }
-      .ec-footer p, .ec-footer a, .ec-footer span, .ec-footer div { color: #9ca3af !important; }
+      .ec-text { color: #ffffff !important; }
+      .ec-text-muted { color: #ffffff !important; }
+      .ec-footer { background-color: #111827 !important; border-color: #374151 !important; color: #ffffff !important; }
+      .ec-footer p, .ec-footer a, .ec-footer span, .ec-footer div { color: #ffffff !important; }
       .ec-link { color: #60a5fa !important; }
       .ec-card a { color: #60a5fa !important; }
       .ec-cta, .ec-cta center { background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%) !important; color: #ffffff !important; }
       .ec-border { border-color: #374151 !important; }
       .ec-stat-card { background-color: #374151 !important; }
-      .ec-stat-card div, .ec-stat-card span { color: #e5e7eb !important; }
+      .ec-stat-card div, .ec-stat-card span { color: #ffffff !important; }
       .ec-highlight { background-color: #374151 !important; border-color: #4b5563 !important; }
       .ec-highlight p, .ec-highlight li, .ec-highlight h3, .ec-highlight span, .ec-highlight ul,
-      .ec-highlight div, .ec-highlight td, .ec-highlight strong { color: #e5e7eb !important; }
+      .ec-highlight div, .ec-highlight td, .ec-highlight strong { color: #ffffff !important; }
     }
   </style>
 </head>
@@ -4896,24 +4896,24 @@ Questions? Contact us at support@balkanestateai.com
   <style>
     @media (prefers-color-scheme: dark) {
       .ec-body { background-color: #111827 !important; }
-      .ec-card { background-color: #1f2937 !important; color: #e5e7eb !important; }
+      .ec-card { background-color: #1f2937 !important; color: #ffffff !important; }
       .ec-card p, .ec-card li, .ec-card td, .ec-card h1, .ec-card h2, .ec-card h3,
-      .ec-card span, .ec-card div, .ec-card ul, .ec-card ol, .ec-card strong { color: #e5e7eb !important; }
+      .ec-card span, .ec-card div, .ec-card ul, .ec-card ol, .ec-card strong { color: #ffffff !important; }
       .ec-header, .ec-header h1, .ec-header p, .ec-header span { color: #ffffff !important; }
       .ec-header { background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%) !important; }
-      .ec-text { color: #f9fafb !important; }
-      .ec-text-muted { color: #9ca3af !important; }
-      .ec-footer { background-color: #111827 !important; border-color: #374151 !important; color: #9ca3af !important; }
-      .ec-footer p, .ec-footer a, .ec-footer span, .ec-footer div { color: #9ca3af !important; }
+      .ec-text { color: #ffffff !important; }
+      .ec-text-muted { color: #ffffff !important; }
+      .ec-footer { background-color: #111827 !important; border-color: #374151 !important; color: #ffffff !important; }
+      .ec-footer p, .ec-footer a, .ec-footer span, .ec-footer div { color: #ffffff !important; }
       .ec-link { color: #60a5fa !important; }
       .ec-card a { color: #60a5fa !important; }
       .ec-cta, .ec-cta center { background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%) !important; color: #ffffff !important; }
       .ec-border { border-color: #374151 !important; }
       .ec-stat-card { background-color: #374151 !important; }
-      .ec-stat-card div, .ec-stat-card span { color: #e5e7eb !important; }
+      .ec-stat-card div, .ec-stat-card span { color: #ffffff !important; }
       .ec-highlight { background-color: #374151 !important; border-color: #4b5563 !important; }
       .ec-highlight p, .ec-highlight li, .ec-highlight h3, .ec-highlight span, .ec-highlight ul,
-      .ec-highlight div, .ec-highlight td, .ec-highlight strong { color: #e5e7eb !important; }
+      .ec-highlight div, .ec-highlight td, .ec-highlight strong { color: #ffffff !important; }
     }
   </style>
 </head>
@@ -5050,24 +5050,24 @@ Questions? Contact us at support@balkanestateai.com
   <style>
     @media (prefers-color-scheme: dark) {
       .ec-body { background-color: #111827 !important; }
-      .ec-card { background-color: #1f2937 !important; color: #e5e7eb !important; }
+      .ec-card { background-color: #1f2937 !important; color: #ffffff !important; }
       .ec-card p, .ec-card li, .ec-card td, .ec-card h1, .ec-card h2, .ec-card h3,
-      .ec-card span, .ec-card div, .ec-card ul, .ec-card ol, .ec-card strong { color: #e5e7eb !important; }
+      .ec-card span, .ec-card div, .ec-card ul, .ec-card ol, .ec-card strong { color: #ffffff !important; }
       .ec-header, .ec-header h1, .ec-header p, .ec-header span { color: #ffffff !important; }
       .ec-header { background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%) !important; }
-      .ec-text { color: #f9fafb !important; }
-      .ec-text-muted { color: #9ca3af !important; }
-      .ec-footer { background-color: #111827 !important; border-color: #374151 !important; color: #9ca3af !important; }
-      .ec-footer p, .ec-footer a, .ec-footer span, .ec-footer div { color: #9ca3af !important; }
+      .ec-text { color: #ffffff !important; }
+      .ec-text-muted { color: #ffffff !important; }
+      .ec-footer { background-color: #111827 !important; border-color: #374151 !important; color: #ffffff !important; }
+      .ec-footer p, .ec-footer a, .ec-footer span, .ec-footer div { color: #ffffff !important; }
       .ec-link { color: #60a5fa !important; }
       .ec-card a { color: #60a5fa !important; }
       .ec-cta, .ec-cta center { background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%) !important; color: #ffffff !important; }
       .ec-border { border-color: #374151 !important; }
       .ec-stat-card { background-color: #374151 !important; }
-      .ec-stat-card div, .ec-stat-card span { color: #e5e7eb !important; }
+      .ec-stat-card div, .ec-stat-card span { color: #ffffff !important; }
       .ec-highlight { background-color: #374151 !important; border-color: #4b5563 !important; }
       .ec-highlight p, .ec-highlight li, .ec-highlight h3, .ec-highlight span, .ec-highlight ul,
-      .ec-highlight div, .ec-highlight td, .ec-highlight strong { color: #e5e7eb !important; }
+      .ec-highlight div, .ec-highlight td, .ec-highlight strong { color: #ffffff !important; }
     }
   </style>
 </head>
@@ -5212,24 +5212,24 @@ Questions? Contact us at support@balkanestateai.com
   <style>
     @media (prefers-color-scheme: dark) {
       .ec-body { background-color: #111827 !important; }
-      .ec-card { background-color: #1f2937 !important; color: #e5e7eb !important; }
+      .ec-card { background-color: #1f2937 !important; color: #ffffff !important; }
       .ec-card p, .ec-card li, .ec-card td, .ec-card h1, .ec-card h2, .ec-card h3,
-      .ec-card span, .ec-card div, .ec-card ul, .ec-card ol, .ec-card strong { color: #e5e7eb !important; }
+      .ec-card span, .ec-card div, .ec-card ul, .ec-card ol, .ec-card strong { color: #ffffff !important; }
       .ec-header, .ec-header h1, .ec-header p, .ec-header span { color: #ffffff !important; }
       .ec-header { background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%) !important; }
-      .ec-text { color: #f9fafb !important; }
-      .ec-text-muted { color: #9ca3af !important; }
-      .ec-footer { background-color: #111827 !important; border-color: #374151 !important; color: #9ca3af !important; }
-      .ec-footer p, .ec-footer a, .ec-footer span, .ec-footer div { color: #9ca3af !important; }
+      .ec-text { color: #ffffff !important; }
+      .ec-text-muted { color: #ffffff !important; }
+      .ec-footer { background-color: #111827 !important; border-color: #374151 !important; color: #ffffff !important; }
+      .ec-footer p, .ec-footer a, .ec-footer span, .ec-footer div { color: #ffffff !important; }
       .ec-link { color: #60a5fa !important; }
       .ec-card a { color: #60a5fa !important; }
       .ec-cta, .ec-cta center { background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%) !important; color: #ffffff !important; }
       .ec-border { border-color: #374151 !important; }
       .ec-stat-card { background-color: #374151 !important; }
-      .ec-stat-card div, .ec-stat-card span { color: #e5e7eb !important; }
+      .ec-stat-card div, .ec-stat-card span { color: #ffffff !important; }
       .ec-highlight { background-color: #374151 !important; border-color: #4b5563 !important; }
       .ec-highlight p, .ec-highlight li, .ec-highlight h3, .ec-highlight span, .ec-highlight ul,
-      .ec-highlight div, .ec-highlight td, .ec-highlight strong { color: #e5e7eb !important; }
+      .ec-highlight div, .ec-highlight td, .ec-highlight strong { color: #ffffff !important; }
     }
   </style>
 </head>
@@ -5392,24 +5392,24 @@ Questions? Contact us at support@balkanestateai.com
   <style>
     @media (prefers-color-scheme: dark) {
       .ec-body { background-color: #111827 !important; }
-      .ec-card { background-color: #1f2937 !important; color: #e5e7eb !important; }
+      .ec-card { background-color: #1f2937 !important; color: #ffffff !important; }
       .ec-card p, .ec-card li, .ec-card td, .ec-card h1, .ec-card h2, .ec-card h3,
-      .ec-card span, .ec-card div, .ec-card ul, .ec-card ol, .ec-card strong { color: #e5e7eb !important; }
+      .ec-card span, .ec-card div, .ec-card ul, .ec-card ol, .ec-card strong { color: #ffffff !important; }
       .ec-header, .ec-header h1, .ec-header p, .ec-header span { color: #ffffff !important; }
       .ec-header { background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%) !important; }
-      .ec-text { color: #f9fafb !important; }
-      .ec-text-muted { color: #9ca3af !important; }
-      .ec-footer { background-color: #111827 !important; border-color: #374151 !important; color: #9ca3af !important; }
-      .ec-footer p, .ec-footer a, .ec-footer span, .ec-footer div { color: #9ca3af !important; }
+      .ec-text { color: #ffffff !important; }
+      .ec-text-muted { color: #ffffff !important; }
+      .ec-footer { background-color: #111827 !important; border-color: #374151 !important; color: #ffffff !important; }
+      .ec-footer p, .ec-footer a, .ec-footer span, .ec-footer div { color: #ffffff !important; }
       .ec-link { color: #60a5fa !important; }
       .ec-card a { color: #60a5fa !important; }
       .ec-cta, .ec-cta center { background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%) !important; color: #ffffff !important; }
       .ec-border { border-color: #374151 !important; }
       .ec-stat-card { background-color: #374151 !important; }
-      .ec-stat-card div, .ec-stat-card span { color: #e5e7eb !important; }
+      .ec-stat-card div, .ec-stat-card span { color: #ffffff !important; }
       .ec-highlight { background-color: #374151 !important; border-color: #4b5563 !important; }
       .ec-highlight p, .ec-highlight li, .ec-highlight h3, .ec-highlight span, .ec-highlight ul,
-      .ec-highlight div, .ec-highlight td, .ec-highlight strong { color: #e5e7eb !important; }
+      .ec-highlight div, .ec-highlight td, .ec-highlight strong { color: #ffffff !important; }
     }
   </style>
 </head>
@@ -5590,24 +5590,24 @@ Questions? Contact us at support@balkanestateai.com
   <style>
     @media (prefers-color-scheme: dark) {
       .ec-body { background-color: #111827 !important; }
-      .ec-card { background-color: #1f2937 !important; color: #e5e7eb !important; }
+      .ec-card { background-color: #1f2937 !important; color: #ffffff !important; }
       .ec-card p, .ec-card li, .ec-card td, .ec-card h1, .ec-card h2, .ec-card h3,
-      .ec-card span, .ec-card div, .ec-card ul, .ec-card ol, .ec-card strong { color: #e5e7eb !important; }
+      .ec-card span, .ec-card div, .ec-card ul, .ec-card ol, .ec-card strong { color: #ffffff !important; }
       .ec-header, .ec-header h1, .ec-header p, .ec-header span { color: #ffffff !important; }
       .ec-header { background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%) !important; }
-      .ec-text { color: #f9fafb !important; }
-      .ec-text-muted { color: #9ca3af !important; }
-      .ec-footer { background-color: #111827 !important; border-color: #374151 !important; color: #9ca3af !important; }
-      .ec-footer p, .ec-footer a, .ec-footer span, .ec-footer div { color: #9ca3af !important; }
+      .ec-text { color: #ffffff !important; }
+      .ec-text-muted { color: #ffffff !important; }
+      .ec-footer { background-color: #111827 !important; border-color: #374151 !important; color: #ffffff !important; }
+      .ec-footer p, .ec-footer a, .ec-footer span, .ec-footer div { color: #ffffff !important; }
       .ec-link { color: #60a5fa !important; }
       .ec-card a { color: #60a5fa !important; }
       .ec-cta, .ec-cta center { background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%) !important; color: #ffffff !important; }
       .ec-border { border-color: #374151 !important; }
       .ec-stat-card { background-color: #374151 !important; }
-      .ec-stat-card div, .ec-stat-card span { color: #e5e7eb !important; }
+      .ec-stat-card div, .ec-stat-card span { color: #ffffff !important; }
       .ec-highlight { background-color: #374151 !important; border-color: #4b5563 !important; }
       .ec-highlight p, .ec-highlight li, .ec-highlight h3, .ec-highlight span, .ec-highlight ul,
-      .ec-highlight div, .ec-highlight td, .ec-highlight strong { color: #e5e7eb !important; }
+      .ec-highlight div, .ec-highlight td, .ec-highlight strong { color: #ffffff !important; }
     }
   </style>
 </head>
