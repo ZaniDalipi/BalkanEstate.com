@@ -16,14 +16,18 @@ export const defaultEmailConfigs = [
     headerEmoji: '📧',
     headerGradient: 'linear-gradient(135deg, #0252CD 0%, #0369a1 100%)',
     bodyTemplate: `
-      <p style="color: #374151; font-size: 16px; margin: 0 0 16px 0;">
+      <p style="color: #374151; font-size: 16px; margin: 0 0 16px 0;" class="ec-text">
         Hi <strong>{{userName}}</strong>,
       </p>
-      <p style="color: #6b7280; font-size: 14px; margin: 0 0 24px 0;">
+      <p style="color: #4b5563; font-size: 14px; margin: 0 0 24px 0;" class="ec-text-muted">
         Thanks for signing up! Please verify your email address by clicking the button below.
       </p>
-      <p style="color: #6b7280; font-size: 14px; margin: 0 0 24px 0;">
+      <p style="color: #4b5563; font-size: 14px; margin: 0 0 16px 0;" class="ec-text-muted">
         This link will expire in <strong>24 hours</strong>.
+      </p>
+      <p style="color: #6b7280; font-size: 12px; margin: 16px 0 0 0; word-break: break-all;" class="ec-text-muted">
+        If the button above doesn&rsquo;t work, copy and paste this link into your browser:<br/>
+        <a href="{{verificationUrl}}" style="color: #0252CD; text-decoration: underline;" class="ec-link">{{verificationUrl}}</a>
       </p>
     `,
     ctaEnabled: true,

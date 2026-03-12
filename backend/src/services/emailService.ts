@@ -206,7 +206,7 @@ class EmailService {
   }> {
     const s = await getSiteSettingsForEmail();
     const name = s?.companyName || 'BalkanEstateAI';
-    const nameFormatted = s?.companyNameFormatted || 'BalkanEstate<sup>AI</sup>';
+    const nameFormatted = s?.companyNameFormatted || 'BalkanEstate<span style="font-size:0.7em;vertical-align:super;line-height:0;">AI</span>';
     // Plain text version with Unicode superscript for email subjects/text
     const namePlain = name.includes('AI') ? name.replace('AI', '\u1d2c\u1d35') : `${name}\u1d2c\u1d35`;
     return {
@@ -392,7 +392,7 @@ class EmailService {
   ): string {
     const frontendUrl = branding?.frontendUrl || process.env.FRONTEND_URL || 'https://balkanestateai.com';
     const backendUrl = process.env.BACKEND_URL || 'https://api.balkanestateai.com';
-    const companyNameFormatted = branding?.nameFormatted || 'BalkanEstate<sup>AI</sup>';
+    const companyNameFormatted = branding?.nameFormatted || 'BalkanEstate<span style="font-size:0.7em;vertical-align:super;line-height:0;">AI</span>';
     const year = new Date().getFullYear();
 
     const unsubscribeUrl = unsubscribeToken
@@ -2510,10 +2510,10 @@ class EmailService {
     <!-- Footer -->
     <div style="background: #f9fafb; padding: 16px; text-align: center; border-top: 1px solid #e5e7eb;">
       <p style="color: #6b7280; font-size: 11px; margin: 0 0 4px 0;">
-        This inquiry was sent through BalkanEstate<sup>AI</sup>
+        This inquiry was sent through BalkanEstate<span style="font-size:0.7em;vertical-align:super;line-height:0;">AI</span>
       </p>
       <p style="color: #9ca3af; font-size: 11px; margin: 0;">
-        © ${new Date().getFullYear()} BalkanEstate<sup>AI</sup>
+        © ${new Date().getFullYear()} BalkanEstate<span style="font-size:0.7em;vertical-align:super;line-height:0;">AI</span>
       </p>
     </div>
   </div>
@@ -2636,7 +2636,7 @@ class EmailService {
         Need help? Contact us at <a href="mailto:support@balkanestateai.com" style="color: #0252CD; text-decoration: none;">support@balkanestateai.com</a>
       </p>
       <p style="color: #9ca3af; font-size: 11px; margin: 0;">
-        © ${new Date().getFullYear()} BalkanEstate<sup>AI</sup> · Your security is our priority
+        © ${new Date().getFullYear()} BalkanEstate<span style="font-size:0.7em;vertical-align:super;line-height:0;">AI</span> · Your security is our priority
       </p>
     </div>
   </div>
@@ -2647,7 +2647,7 @@ class EmailService {
       to: params.email,
       subject: 'Reset your BalkanEstateᴬᴵ password',
       html,
-      text: `Hey ${params.userName},\n\nWe received a request to reset your password. No worries—it happens to the best of us!\n\nReset your password here:\n${params.resetUrl}\n\nThis link expires in 1 hour.\n\nPassword tips:\n- Use at least 8 characters\n- Mix uppercase, lowercase, and numbers\n- Avoid using common words or personal info\n\nIf you didn't request this reset, you can safely ignore this email.\n\nNeed help? Contact us at support@balkanestateai.com\n\n© ${new Date().getFullYear()} BalkanEstate<sup>AI</sup>`,
+      text: `Hey ${params.userName},\n\nWe received a request to reset your password. No worries—it happens to the best of us!\n\nReset your password here:\n${params.resetUrl}\n\nThis link expires in 1 hour.\n\nPassword tips:\n- Use at least 8 characters\n- Mix uppercase, lowercase, and numbers\n- Avoid using common words or personal info\n\nIf you didn't request this reset, you can safely ignore this email.\n\nNeed help? Contact us at support@balkanestateai.com\n\n© ${new Date().getFullYear()} BalkanEstate<span style="font-size:0.7em;vertical-align:super;line-height:0;">AI</span>`,
       category: 'noreply',
     });
   }
@@ -2705,7 +2705,7 @@ class EmailService {
       <div style="margin-bottom: 16px;">
         <span style="display: inline-block; width: 60px; height: 60px; background: rgba(255,255,255,0.15); border-radius: 16px; line-height: 60px; font-size: 32px;">🏠</span>
       </div>
-      <h1 style="color: #ffffff; margin: 0; font-size: 26px; font-weight: 700; letter-spacing: -0.5px;">Welcome to BalkanEstate<sup>AI</sup>!</h1>
+      <h1 style="color: #ffffff; margin: 0; font-size: 26px; font-weight: 700; letter-spacing: -0.5px;">Welcome to BalkanEstate<span style="font-size:0.7em;vertical-align:super;line-height:0;">AI</span>!</h1>
       <p style="color: #ffffff; margin: 8px 0 0 0; font-size: 15px; opacity: 0.9;">Your journey to the perfect property starts here</p>
     </div>
 
@@ -2715,16 +2715,24 @@ class EmailService {
         Hey ${safeUserName}! 👋
       </p>
       <p style="color: #4b5563; font-size: 15px; line-height: 1.6; margin: 0 0 24px 0;">
-        Thanks for joining BalkanEstate<sup>AI</sup>! We're excited to help you discover amazing properties across the Balkans. Just one quick step to get started:
+        Thanks for joining BalkanEstate<span style="font-size:0.7em;vertical-align:super;line-height:0;">AI</span>! We're excited to help you discover amazing properties across the Balkans. Just one quick step to get started:
       </p>
 
       <!-- CTA Button -->
       <div style="text-align: center; margin: 32px 0;">
+        <!--[if mso]>
+        <v:roundrect xmlns:v="urn:schemas-microsoft-com:vml" href="${safeVerificationUrl}" style="height:48px;v-text-anchor:middle;width:240px;" arcsize="21%" fillcolor="#0252CD">
+          <w:anchorlock/>
+          <center style="color:#ffffff;font-family:'Segoe UI',Tahoma,sans-serif;font-size:16px;font-weight:bold;">✓ Verify My Email</center>
+        </v:roundrect>
+        <![endif]-->
+        <!--[if !mso]><!-->
         <a href="${safeVerificationUrl}"
            class="button"
-           style="display: inline-block; background: linear-gradient(135deg, #0252CD 0%, #0369a1 100%); color: #ffffff; text-decoration: none; padding: 16px 40px; border-radius: 10px; font-weight: 600; font-size: 16px; box-shadow: 0 4px 14px rgba(2, 82, 205, 0.4); transition: transform 0.2s;">
+           style="display: inline-block; background-color: #0252CD; background: linear-gradient(135deg, #0252CD 0%, #0369a1 100%); color: #ffffff; text-decoration: none; padding: 16px 40px; border-radius: 10px; font-weight: 600; font-size: 16px; box-shadow: 0 4px 14px rgba(2, 82, 205, 0.4);">
           ✓ Verify My Email
         </a>
+        <!--<![endif]-->
       </div>
 
       <!-- What's next section -->
@@ -2775,7 +2783,7 @@ class EmailService {
       </div>
 
       <p style="color: #6b7280; font-size: 12px; margin: 0; text-align: center;">
-        Didn't sign up for BalkanEstate<sup>AI</sup>? No worries—just ignore this email.
+        Didn't sign up for BalkanEstate<span style="font-size:0.7em;vertical-align:super;line-height:0;">AI</span>? No worries—just ignore this email.
       </p>
     </div>
 
@@ -2785,7 +2793,7 @@ class EmailService {
         Questions? We're here to help at <a href="mailto:support@balkanestateai.com" style="color: #0252CD; text-decoration: none;">support@balkanestateai.com</a>
       </p>
       <p style="color: #6b7280; font-size: 11px; margin: 0;">
-        © ${new Date().getFullYear()} BalkanEstate<sup>AI</sup> · Find your place in the Balkans
+        © ${new Date().getFullYear()} BalkanEstate<span style="font-size:0.7em;vertical-align:super;line-height:0;">AI</span> · Find your place in the Balkans
       </p>
     </div>
   </div>
@@ -2848,7 +2856,7 @@ class EmailService {
       <div style="margin-bottom: 20px;">
         <div style="display: inline-block; background: rgba(255,255,255,0.15); border-radius: 16px; padding: 12px 20px;">
           <span style="font-size: 32px; vertical-align: middle;">🏠</span>
-          <span style="color: #ffffff; font-size: 24px; font-weight: 700; vertical-align: middle; margin-left: 8px;">BalkanEstate<sup>AI</sup></span>
+          <span style="color: #ffffff; font-size: 24px; font-weight: 700; vertical-align: middle; margin-left: 8px;">BalkanEstate<span style="font-size:0.7em;vertical-align:super;line-height:0;">AI</span></span>
         </div>
       </div>
       <h1 style="color: #ffffff; margin: 0; font-size: 32px; font-weight: 700; letter-spacing: -0.5px;">Welcome, ${params.userName}!</h1>
@@ -2860,7 +2868,7 @@ class EmailService {
 
       <!-- Introduction -->
       <p style="color: #374151; font-size: 16px; line-height: 1.7; margin: 0 0 24px 0;">
-        Thank you for joining <strong>BalkanEstate<sup>AI</sup></strong> — the premier real estate platform connecting buyers, sellers, and agents across the Balkans. Whether you're searching for your dream home or looking to list a property, we've got you covered.
+        Thank you for joining <strong>BalkanEstate<span style="font-size:0.7em;vertical-align:super;line-height:0;">AI</span></strong> — the premier real estate platform connecting buyers, sellers, and agents across the Balkans. Whether you're searching for your dream home or looking to list a property, we've got you covered.
       </p>
 
       <!-- Countries Coverage -->
@@ -3079,7 +3087,7 @@ class EmailService {
     <!-- Footer -->
     <div style="background: #1f2937; padding: 32px; text-align: center;">
       <div style="margin-bottom: 20px;">
-        <span style="color: #ffffff; font-size: 18px; font-weight: 600;">🏠 BalkanEstate<sup>AI</sup></span>
+        <span style="color: #ffffff; font-size: 18px; font-weight: 600;">🏠 BalkanEstate<span style="font-size:0.7em;vertical-align:super;line-height:0;">AI</span></span>
       </div>
       <p style="color: #9ca3af; font-size: 13px; margin: 0 0 16px 0;">
         The premier real estate platform for the Balkans
@@ -3093,7 +3101,7 @@ class EmailService {
       </div>
       <div style="border-top: 1px solid #374151; padding-top: 20px; margin-top: 20px;">
         <p style="color: #6b7280; font-size: 11px; margin: 0;">
-          © ${new Date().getFullYear()} BalkanEstate<sup>AI</sup>. All rights reserved.<br>
+          © ${new Date().getFullYear()} BalkanEstate<span style="font-size:0.7em;vertical-align:super;line-height:0;">AI</span>. All rights reserved.<br>
           You're receiving this email because you created an account at balkanestateai.com
         </p>
       </div>
@@ -3353,7 +3361,7 @@ Questions? Contact us at support@balkanestateai.com
         ${params.isAgency ? `${safeAgencyName} · Enterprise Plan` : `${safePlanName} Subscription`}
       </p>
       <p style="color: #9ca3af; font-size: 11px; margin: 0;">
-        © ${currentYear} BalkanEstate<sup>AI</sup> · Find your place in the Balkans
+        © ${currentYear} BalkanEstate<span style="font-size:0.7em;vertical-align:super;line-height:0;">AI</span> · Find your place in the Balkans
       </p>
     </div>
   </div>
@@ -3465,7 +3473,7 @@ Questions? Contact us at support@balkanestateai.com
         <span style="display: inline-block; width: 60px; height: 60px; background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); border-radius: 50%; line-height: 60px; font-size: 28px;">🏢</span>
       </div>
       <h1 style="color: #ffffff; margin: 0; font-size: 24px; font-weight: 700;">Enterprise Plan Activated!</h1>
-      <p style="color: #94a3b8; margin: 8px 0 0 0; font-size: 14px;">Welcome to BalkanEstate<sup>AI</sup> Enterprise</p>
+      <p style="color: #94a3b8; margin: 8px 0 0 0; font-size: 14px;">Welcome to BalkanEstate<span style="font-size:0.7em;vertical-align:super;line-height:0;">AI</span> Enterprise</p>
     </div>
 
     <div style="padding: 28px 24px;">
@@ -3502,7 +3510,7 @@ Questions? Contact us at support@balkanestateai.com
         <h3 style="color: #ffffff; font-size: 14px; font-weight: 600; margin: 0 0 8px 0;">📋 How to Use These Codes</h3>
         <ol style="color: #e2e8f0; font-size: 13px; margin: 0; padding-left: 20px; line-height: 1.6;">
           <li>Share a code with each team member you want to invite</li>
-          <li>They register on BalkanEstate<sup>AI</sup> (or log in if already registered)</li>
+          <li>They register on BalkanEstate<span style="font-size:0.7em;vertical-align:super;line-height:0;">AI</span> (or log in if already registered)</li>
           <li>Go to <strong style="color: #60a5fa;">Agency → Redeem Code</strong> and enter the code</li>
           <li>They'll automatically get a yearly Pro subscription and join your agency!</li>
         </ol>
@@ -3538,7 +3546,7 @@ Questions? Contact us at support@balkanestateai.com
         ${safeAgencyName} · Enterprise Plan
       </p>
       <p style="color: #64748b; font-size: 11px; margin: 0;">
-        © ${currentYear} BalkanEstate<sup>AI</sup> · Find your place in the Balkans
+        © ${currentYear} BalkanEstate<span style="font-size:0.7em;vertical-align:super;line-height:0;">AI</span> · Find your place in the Balkans
       </p>
     </div>
   </div>
@@ -3651,7 +3659,7 @@ Questions? Contact us at support@balkanestateai.com
       </p>
 
       <p style="color: #4b5563; font-size: 15px; line-height: 1.7; margin: 0 0 20px 0;">
-        We're thrilled to have <strong>${safeAgencyName}</strong> join the BalkanEstate<sup>AI</sup> Enterprise program!
+        We're thrilled to have <strong>${safeAgencyName}</strong> join the BalkanEstate<span style="font-size:0.7em;vertical-align:super;line-height:0;">AI</span> Enterprise program!
         Your trust in our platform means the world to us, and we're committed to helping your agency succeed.
       </p>
 
@@ -3722,11 +3730,11 @@ Questions? Contact us at support@balkanestateai.com
       <!-- Personal Note -->
       <div style="background: linear-gradient(135deg, #1e3a5f 0%, #0f172a 100%); border-radius: 8px; padding: 20px; margin-bottom: 28px; border-left: 4px solid #f59e0b;">
         <p style="color: #f1f5f9; font-size: 14px; margin: 0; line-height: 1.6; font-style: italic;">
-          "We built BalkanEstate<sup>AI</sup> to empower real estate professionals across the Balkans.
+          "We built BalkanEstate<span style="font-size:0.7em;vertical-align:super;line-height:0;">AI</span> to empower real estate professionals across the Balkans.
           Your success is our success. If you ever need anything, don't hesitate to reach out!"
         </p>
         <p style="color: #ffffff; font-size: 13px; margin: 12px 0 0 0; font-weight: 600;">
-          — The BalkanEstate<sup>AI</sup> Team
+          — The BalkanEstate<span style="font-size:0.7em;vertical-align:super;line-height:0;">AI</span> Team
         </p>
       </div>
 
@@ -3753,7 +3761,7 @@ Questions? Contact us at support@balkanestateai.com
         Enterprise Subscriber · €999/year
       </p>
       <p style="color: #94a3b8; font-size: 11px; margin: 12px 0 0 0;">
-        © ${currentYear} BalkanEstate<sup>AI</sup> · Find your place in the Balkans
+        © ${currentYear} BalkanEstate<span style="font-size:0.7em;vertical-align:super;line-height:0;">AI</span> · Find your place in the Balkans
       </p>
     </div>
   </div>
@@ -3916,7 +3924,7 @@ Questions? Contact us at support@balkanestateai.com
         ${safeAgencyName} · Pro Agent
       </p>
       <p style="color: #64748b; font-size: 11px; margin: 0;">
-        © ${currentYear} BalkanEstate<sup>AI</sup> · Find your place in the Balkans
+        © ${currentYear} BalkanEstate<span style="font-size:0.7em;vertical-align:super;line-height:0;">AI</span> · Find your place in the Balkans
       </p>
     </div>
   </div>
@@ -4082,7 +4090,7 @@ Questions? Contact us at support@balkanestateai.com
         ${safeAgencyName} · Enterprise Plan
       </p>
       <p style="color: #64748b; font-size: 11px; margin: 0;">
-        © ${currentYear} BalkanEstate<sup>AI</sup> · Find your place in the Balkans
+        © ${currentYear} BalkanEstate<span style="font-size:0.7em;vertical-align:super;line-height:0;">AI</span> · Find your place in the Balkans
       </p>
     </div>
   </div>
@@ -4208,7 +4216,7 @@ Questions? Contact us at support@balkanestateai.com
         Need help? Contact us at <a href="mailto:support@balkanestateai.com" style="color: #0252CD; text-decoration: none;">support@balkanestateai.com</a>
       </p>
       <p style="color: #9ca3af; font-size: 11px; margin: 0;">
-        &copy; ${currentYear} BalkanEstate<sup>AI</sup>
+        &copy; ${currentYear} BalkanEstate<span style="font-size:0.7em;vertical-align:super;line-height:0;">AI</span>
       </p>
     </div>
   </div>
@@ -4371,7 +4379,7 @@ Questions? Contact us at support@balkanestateai.com
     </div>
     <div style="background: #f9fafb; padding: 24px; text-align: center; border-top: 1px solid #e5e7eb;">
       <p style="color: #9ca3af; font-size: 11px; margin: 0;">
-        &copy; ${currentYear} BalkanEstate<sup>AI</sup>
+        &copy; ${currentYear} BalkanEstate<span style="font-size:0.7em;vertical-align:super;line-height:0;">AI</span>
       </p>
     </div>
   </div>
@@ -4503,7 +4511,7 @@ Questions? Contact us at support@balkanestateai.com
         Need help? Contact us at <a href="mailto:support@balkanestateai.com" style="color: #0252CD; text-decoration: none;">support@balkanestateai.com</a>
       </p>
       <p style="color: #9ca3af; font-size: 11px; margin: 0;">
-        &copy; ${currentYear} BalkanEstate<sup>AI</sup>
+        &copy; ${currentYear} BalkanEstate<span style="font-size:0.7em;vertical-align:super;line-height:0;">AI</span>
       </p>
     </div>
   </div>
@@ -4628,7 +4636,7 @@ Questions? Contact us at support@balkanestateai.com
         Need help? Contact us at <a href="mailto:support@balkanestateai.com" style="color: #0252CD; text-decoration: none;">support@balkanestateai.com</a>
       </p>
       <p style="color: #9ca3af; font-size: 11px; margin: 0;">
-        &copy; ${currentYear} BalkanEstate<sup>AI</sup>
+        &copy; ${currentYear} BalkanEstate<span style="font-size:0.7em;vertical-align:super;line-height:0;">AI</span>
       </p>
     </div>
   </div>
@@ -4777,7 +4785,7 @@ Questions? Contact us at support@balkanestateai.com
     <!-- Footer -->
     <div style="background: #0f172a; padding: 20px; text-align: center; border-top: 1px solid #334155;">
       <p style="color: #64748b; font-size: 12px; margin: 0;">
-        &copy; ${currentYear} BalkanEstate<sup>AI</sup> • Promotion coupons refresh monthly
+        &copy; ${currentYear} BalkanEstate<span style="font-size:0.7em;vertical-align:super;line-height:0;">AI</span> • Promotion coupons refresh monthly
       </p>
     </div>
   </div>
@@ -4981,7 +4989,7 @@ Questions? Contact us at support@balkanestateai.com
     <!-- Footer -->
     <div style="background: #0f172a; padding: 20px; text-align: center; border-top: 1px solid #334155;">
       <p style="color: #64748b; font-size: 12px; margin: 0 0 8px 0;">
-        &copy; ${currentYear} BalkanEstate<sup>AI</sup> • All rights reserved
+        &copy; ${currentYear} BalkanEstate<span style="font-size:0.7em;vertical-align:super;line-height:0;">AI</span> • All rights reserved
       </p>
       <p style="color: #475569; font-size: 11px; margin: 0;">
         If you have any questions, contact us at <a href="mailto:support@balkanestateai.com" style="color: #f59e0b;">support@balkanestateai.com</a>
@@ -5089,7 +5097,7 @@ Questions? Contact us at support@balkanestateai.com
         Need help? Contact us at <a href="mailto:support@balkanestateai.com" style="color: #0252CD; text-decoration: none;">support@balkanestateai.com</a>
       </p>
       <p style="color: #9ca3af; font-size: 11px; margin: 0;">
-        &copy; ${currentYear} BalkanEstate<sup>AI</sup>
+        &copy; ${currentYear} BalkanEstate<span style="font-size:0.7em;vertical-align:super;line-height:0;">AI</span>
       </p>
     </div>
   </div>

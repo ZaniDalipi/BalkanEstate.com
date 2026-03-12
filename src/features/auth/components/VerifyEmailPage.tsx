@@ -17,6 +17,7 @@ const VerifyEmailPage: React.FC<VerifyEmailPageProps> = ({ onVerificationComplet
   const [resendEmail, setResendEmail] = useState('');
   const [resendSuccess, setResendSuccess] = useState(false);
   const [resendLoading, setResendLoading] = useState(false);
+  const [isAutoLoggedIn, setIsAutoLoggedIn] = useState(false);
 
   useEffect(() => {
     // Get token from URL query params
@@ -41,13 +42,16 @@ const VerifyEmailPage: React.FC<VerifyEmailPageProps> = ({ onVerificationComplet
       const result = await verifyEmailApi(verifyToken);
 
       if (result.success) {
+        const hasToken = !!result.accessToken;
+        setIsAutoLoggedIn(hasToken);
         setSuccess(true);
-        // Redirect to home after 3 seconds
+        // If tokens were returned, user is auto-logged in — redirect to home
+        // Otherwise redirect to login page
         setTimeout(() => {
           if (onVerificationComplete) {
             onVerificationComplete();
           } else {
-            window.location.href = '/';
+            window.location.href = hasToken ? '/' : '/login';
           }
         }, 3000);
       } else {
@@ -125,7 +129,9 @@ const VerifyEmailPage: React.FC<VerifyEmailPageProps> = ({ onVerificationComplet
               {t('auth:verifyEmail.successMessage', 'Your email has been successfully verified. You now have full access to all features.')}
             </p>
             <p className="text-sm text-gray-500">
-              {t('auth:verifyEmail.redirecting', 'Redirecting you to the app...')}
+              {isAutoLoggedIn
+                ? t('auth:verifyEmail.redirecting', 'Redirecting you to the app...')
+                : t('auth:verifyEmail.redirectingToLogin', 'Redirecting you to sign in...')}
             </p>
           </div>
         </div>

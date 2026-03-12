@@ -221,11 +221,19 @@ export function renderEmailConfig(
 
       ${config.ctaEnabled && ctaText && ctaUrl ? `
       <div style="margin-top:28px;text-align:center;">
+        <!--[if mso]>
+        <v:roundrect xmlns:v="urn:schemas-microsoft-com:vml" href="${ctaUrl}" style="height:48px;v-text-anchor:middle;width:220px;" arcsize="21%" fillcolor="${brandPrimary}">
+          <w:anchorlock/>
+          <center style="color:#ffffff;font-family:'Segoe UI',Tahoma,sans-serif;font-size:15px;font-weight:bold;">${ctaText}</center>
+        </v:roundrect>
+        <![endif]-->
+        <!--[if !mso]><!-->
         <a href="${ctaUrl}"
-           style="display:inline-block;background:${replaceVariables(config.headerGradient || defaultGradient, variables)};color:#ffffff;text-decoration:none;padding:16px 32px;border-radius:10px;font-weight:600;font-size:15px;box-shadow:0 4px 14px rgba(0,0,0,0.15);"
+           style="display:inline-block;background-color:${brandPrimary};background:${replaceVariables(config.headerGradient || defaultGradient, variables)};color:#ffffff;text-decoration:none;padding:16px 32px;border-radius:10px;font-weight:600;font-size:15px;box-shadow:0 4px 14px rgba(0,0,0,0.15);"
            class="ec-cta">
           ${ctaText}
         </a>
+        <!--<![endif]-->
       </div>` : ''}
     </div>
 
@@ -240,7 +248,7 @@ export function renderEmailConfig(
         Need help? <a href="mailto:${supportEmail}" style="color:${brandPrimary};text-decoration:none;" class="ec-link">${supportEmail}</a>
       </p>
       <p style="color:${brandTextMuted};font-size:11px;margin:4px 0 0 0;" class="ec-text-muted">
-        &copy; ${year} ${companyNameFormatted}. ${emailFooterText}
+        &copy; ${year} ${companyNameFormatted.replace(/<sup>/gi, '<span style="font-size:0.7em;vertical-align:super;line-height:0;">').replace(/<\/sup>/gi, '</span>')}. ${emailFooterText}
       </p>
     </div>
   </div>

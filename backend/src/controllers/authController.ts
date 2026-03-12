@@ -1881,14 +1881,28 @@ export const verifyEmail = async (req: Request, res: Response): Promise<void> =>
       }
     }
 
+    // Generate tokens so user is automatically logged in after verification
+    let accessToken: string | undefined;
+    if (result.user) {
+      try {
+        const deviceInfo = {
+          userAgent: req.headers['user-agent'],
+          ipAddress: req.ip || req.socket.remoteAddress,
+        };
+        const tokens = await generateTokenPair(result.user, deviceInfo);
+        accessToken = tokens.accessToken;
+        setRefreshTokenCookie(res, tokens.refreshToken);
+      } catch {
+        // Don't block verification if token generation fails
+      }
+    }
+
     res.json({
       success: true,
       message: result.message,
+      accessToken,
       user: result.user ? {
-        id: String(result.user._id),
-        email: result.user.email,
-        name: result.user.name,
-        isEmailVerified: result.user.isEmailVerified,
+        ...buildSafeUserResponse(result.user),
       } : undefined,
     });
   } catch (error: any) {

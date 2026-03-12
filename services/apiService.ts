@@ -508,7 +508,7 @@ export const loginWithSocial = (provider: 'google' | 'apple'): void => {
 };
 
 // Email Verification Functions
-export const verifyEmail = async (token: string): Promise<{ success: boolean; message: string; user?: User }> => {
+export const verifyEmail = async (token: string): Promise<{ success: boolean; message: string; user?: User; accessToken?: string }> => {
   const response = await apiRequest<{ success: boolean; message: string; user?: User; accessToken?: string; refreshToken?: string }>('/auth/verify-email', {
     method: 'POST',
     body: { token },
