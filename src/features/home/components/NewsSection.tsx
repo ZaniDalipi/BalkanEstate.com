@@ -53,6 +53,9 @@ const NewsCard: React.FC<{ item: NewsItem; index: number; t: (key: string, fallb
             alt={item.title}
             className="w-full h-full object-cover"
             loading="lazy"
+            decoding="async"
+            width={400}
+            height={144}
           />
         ) : (
           <>

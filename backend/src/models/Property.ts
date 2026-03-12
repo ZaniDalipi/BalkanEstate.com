@@ -593,4 +593,26 @@ PropertySchema.index({ listingType: 1, status: 1 });
 // Compound index for rental searches
 PropertySchema.index({ listingType: 1, propertyType: 1, city: 1, status: 1 });
 
+// Text index for full-text search on title, description, address, and city
+// Weights prioritize title and city matches over description
+PropertySchema.index(
+  { title: 'text', city: 'text', address: 'text', description: 'text' },
+  { weights: { title: 10, city: 5, address: 3, description: 1 }, name: 'text_search_index' }
+);
+
+// Compound index for cursor-based pagination (createdAt + _id for tie-breaking)
+PropertySchema.index({ status: 1, createdAt: -1, _id: -1 });
+
+// Compound indexes for 100k-scale query patterns
+// Price range queries filtered by city (common search pattern)
+PropertySchema.index({ city: 1, price: 1, status: 1 });
+// Price range queries filtered by country
+PropertySchema.index({ country: 1, price: 1, status: 1 });
+// Listing type + price sort (sale/rent filtered by price)
+PropertySchema.index({ listingType: 1, price: 1, status: 1 });
+// Seller's own listings sorted by creation date
+PropertySchema.index({ sellerId: 1, status: 1, createdAt: -1 });
+// Default sort order (lastRenewed) with status filter — covers the most common query
+PropertySchema.index({ status: 1, lastRenewed: -1 });
+
 export default mongoose.model<IProperty>('Property', PropertySchema);

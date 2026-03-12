@@ -1,4 +1,5 @@
 import { Request, Response } from 'express';
+import mongoose from 'mongoose';
 import { escapeRegex } from '../utils/escapeRegex';
 import Property from '../models/Property';
 import User, { IUser } from '../models/User';
@@ -84,6 +85,8 @@ export const getProperties = async (
       status,
       page = 1,
       limit = 20,
+      cursor, // Cursor-based pagination: pass last item's _id from previous page
+      cursorCreatedAt, // Companion to cursor: the createdAt of the last item
     } = req.query;
 
     // Build filter object
@@ -131,11 +134,13 @@ export const getProperties = async (
     }
 
     if (city) {
-      filter.city = new RegExp(escapeRegex(city as string), 'i');
+      // Case-insensitive exact match using collation (index-friendly, unlike $regex)
+      filter.city = city as string;
     }
 
     if (country) {
-      filter.country = new RegExp(escapeRegex(country as string), 'i');
+      // Case-insensitive exact match using collation (index-friendly, unlike $regex)
+      filter.country = country as string;
     }
 
     // Filter by listing type (sale vs rent)
@@ -198,24 +203,36 @@ export const getProperties = async (
       filter.sellerId = req.query.sellerId;
     }
 
-    // Handle query search - search only in address and city, NOT description
-    // Use $and to preserve other filters like status
+    // Handle query search using MongoDB text index for performance
+    // Falls back to regex for very short queries (single char)
     if (query) {
-      const queryRegex = new RegExp(escapeRegex(query as string), 'i');
-      const queryConditions = [
-        { address: queryRegex },
-        { city: queryRegex },
-      ];
-
-      // If we already have $or (for status), use $and to combine them
-      if (filter.$or) {
-        filter.$and = [
-          { $or: filter.$or },
-          { $or: queryConditions }
-        ];
-        delete filter.$or;
+      const queryStr = query as string;
+      // Use $text search for multi-word or full-word queries (much faster with text index)
+      if (queryStr.trim().length >= 2) {
+        filter.$text = { $search: queryStr };
+        // Combine with existing $or for status conditions
+        if (filter.$or) {
+          filter.$and = filter.$and || [];
+          filter.$and.push({ $or: filter.$or });
+          delete filter.$or;
+        }
       } else {
-        filter.$or = queryConditions;
+        // Short single-char queries: fall back to regex
+        const queryRegex = new RegExp(escapeRegex(queryStr), 'i');
+        const queryConditions = [
+          { address: queryRegex },
+          { city: queryRegex },
+        ];
+
+        if (filter.$or) {
+          filter.$and = [
+            { $or: filter.$or },
+            { $or: queryConditions }
+          ];
+          delete filter.$or;
+        } else {
+          filter.$or = queryConditions;
+        }
       }
     }
 
@@ -245,39 +262,82 @@ export const getProperties = async (
     // Pagination
     const pageNum = Number(page);
     const limitNum = Number(limit);
-    const skip = (pageNum - 1) * limitNum;
+    const useCursor = cursor && cursorCreatedAt;
 
-    // Execute query with seller population
+    // Cursor-based pagination: more efficient for deep pages
+    // Instead of skip(N), we filter by "createdAt < cursorCreatedAt OR (createdAt == cursorCreatedAt AND _id < cursor)"
+    if (useCursor) {
+      const cursorDate = new Date(cursorCreatedAt as string);
+      const cursorId = new (mongoose.Types.ObjectId as any)(cursor as string);
+      const cursorCondition = {
+        $or: [
+          { createdAt: { $lt: cursorDate } },
+          { createdAt: cursorDate, _id: { $lt: cursorId } },
+        ],
+      };
+      // Merge cursor condition with existing filters
+      if (filter.$and) {
+        filter.$and.push(cursorCondition);
+      } else if (filter.$or) {
+        filter.$and = [{ $or: filter.$or }, cursorCondition];
+        delete filter.$or;
+      } else {
+        filter.$and = [cursorCondition];
+      }
+    }
+
+    const skip = useCursor ? 0 : (pageNum - 1) * limitNum;
+
+    // List-view projection: exclude heavy fields not needed in listings
+    const LIST_PROJECTION = {
+      description: 0,
+      rentalHistory: 0,
+      priceIntervals: 0,
+      tenantRequirements: 0,
+      visitAvailability: 0,
+      specialFeatures: 0,
+      materials: 0,
+      'images.publicId': 0,
+    };
+
+    // Execute query with .lean() for 5-10x faster reads (plain JS objects, no Mongoose overhead)
     // Fetch more than needed to allow for promoted property sorting
-    const fetchLimit = limitNum * 2; // Fetch 2x to ensure we have enough promoted properties
-    let properties = await Property.find(filter)
-      .populate('sellerId', 'name email phone avatarUrl role agencyName agencyId')
-      .sort(sort)
-      .skip(skip)
-      .limit(fetchLimit);
+    const fetchLimit = Math.min(limitNum + 20, limitNum * 2); // Fetch slightly extra for promotion sort, capped
+    const [rawProperties, total] = await Promise.all([
+      Property.find(filter)
+        .select(LIST_PROJECTION)
+        .populate('sellerId', 'name email phone avatarUrl role agencyName agencyId')
+        .collation({ locale: 'en', strength: 2 }) // Case-insensitive matching for city/country
+        .sort(sort)
+        .skip(skip)
+        .limit(fetchLimit)
+        .lean(),
+      // Run count in parallel — skip for cursor mode (expensive on large datasets)
+      // For offset pagination on first page, use faster estimatedDocumentCount when no filters applied
+      useCursor
+        ? Promise.resolve(undefined)
+        : (Object.keys(filter).length <= 1 && filter.$or && !filter.$and && !filter.$text && pageNum === 1)
+          ? Property.estimatedDocumentCount()
+          : Property.countDocuments(filter),
+    ]);
+
+    let properties = rawProperties as any[];
 
     // Use centralized highlighting utility for sorting
-    // This handles:
-    // - Priority order: Premium > Highlight > Featured > Standard
-    // - Hourly rotation within same tier for fair exposure
-    // - Urgent badge bonus points
     const currentHour = new Date().getHours();
     properties = sortPropertiesWithHighlighting(properties, currentHour);
 
     // Log highlighting stats for monitoring
     const stats = getHighlightingStats(properties);
     if (stats.activePromotions > 0) {
-      propertyLogger.info(`📊 Highlighting stats: ${stats.premium} premium, ${stats.highlight} highlight, ${stats.featured} featured (rotation hour: ${currentHour})`);
+      propertyLogger.info(`Highlighting stats: ${stats.premium} premium, ${stats.highlight} highlight, ${stats.featured} featured (rotation hour: ${currentHour})`);
     }
 
     // Trim to requested limit after sorting
     properties = properties.slice(0, limitNum);
 
-    // Convert all properties to plain objects first (required for sanitizer)
-    const plainProperties = properties.map(p => p.toObject ? p.toObject() : p);
-
-    // Enrich properties with agency logos for agent sellers
-    const agencyIds = plainProperties
+    // Enrich properties with agency logos for agent sellers (already plain objects from .lean())
+    const agencyIds = properties
       .map(p => (p.sellerId as any)?.agencyId)
       .filter(Boolean);
 
@@ -291,8 +351,7 @@ export const getProperties = async (
         agencies.map(a => [String(a._id), a.logo])
       );
 
-      // Add agencyLogo to each property's seller
-      for (const prop of plainProperties) {
+      for (const prop of properties) {
         const seller = prop.sellerId as any;
         if (seller?.agencyId) {
           seller.agencyLogo = agencyLogoMap.get(String(seller.agencyId));
@@ -300,10 +359,7 @@ export const getProperties = async (
       }
     }
 
-    const enrichedProperties = plainProperties;
-
-    // Get total count for pagination
-    const total = await Property.countDocuments(filter);
+    const enrichedProperties = properties;
 
     // Track user activity for pro buyer email recommendations
     // Only track if user is authenticated (req.user from auth middleware)
@@ -322,13 +378,19 @@ export const getProperties = async (
     // Sanitize: strip PII (email, phone, license) from list responses
     const sanitizedProperties = enrichedProperties.map((p: any) => sanitizeProperty(p, 'list'));
 
+    // Build cursor for next page (last item in current results)
+    const lastItem = sanitizedProperties[sanitizedProperties.length - 1];
+    const nextCursor = lastItem ? { id: String(lastItem._id), createdAt: lastItem.createdAt } : null;
+
     res.json({
       properties: sanitizedProperties,
       pagination: {
-        page: pageNum,
+        page: useCursor ? undefined : pageNum,
         limit: limitNum,
-        total,
-        pages: Math.ceil(total / limitNum),
+        total: total as number | undefined,
+        pages: total ? Math.ceil((total as number) / limitNum) : undefined,
+        nextCursor,
+        hasMore: sanitizedProperties.length === limitNum,
       },
     });
   } catch (error: any) {

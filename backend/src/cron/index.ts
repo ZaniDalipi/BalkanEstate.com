@@ -14,6 +14,7 @@ import { processNewListingAlerts, processPriceDropAlerts } from '../jobs/propert
 import { sendHotHourRecommendations, cleanupOldPatterns } from '../services/proBuyerEmailService';
 import { processMonthlyCouponRefresh } from '../services/monthlyCouponService';
 import { fetchAndStoreNews, cleanupOldNews } from '../services/newsService';
+import { startPropertyStatsJob, stopPropertyStatsJob } from '../jobs/computePropertyStatsJob';
 
 // Helper to check if MongoDB is connected before running a job
 const isMongoConnected = (): boolean => {
@@ -409,7 +410,10 @@ export const startCronJobs = () => {
     });
   });
 
-  cronLogger.info('🕐 All cron jobs started (subscription checks, weekly stats, property alerts, pro buyer emails, monthly coupons, news fetch)');
+  // Pre-computed property stats (hourly)
+  startPropertyStatsJob();
+
+  cronLogger.info('🕐 All cron jobs started (subscription checks, weekly stats, property alerts, pro buyer emails, monthly coupons, news fetch, property stats)');
 };
 
 export const stopCronJobs = () => {
@@ -428,5 +432,6 @@ export const stopCronJobs = () => {
   if (monthlyCouponTask) monthlyCouponTask.stop();
   if (newsFetchTask) newsFetchTask.stop();
   if (newsCleanupTask) newsCleanupTask.stop();
+  stopPropertyStatsJob();
   cronLogger.info('🛑 All cron jobs stopped');
 };
