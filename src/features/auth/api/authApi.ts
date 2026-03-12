@@ -215,6 +215,40 @@ export const getOAuthUrl = (provider: 'google' | 'facebook' | 'apple'): string =
   return `${baseUrl}/api/auth/${provider}`;
 };
 
+/**
+ * Detects if the current browser is an embedded webview (in-app browser).
+ * Google blocks OAuth requests from embedded webviews (Error 403: disallowed_useragent).
+ * Common culprits: Instagram, Facebook, TikTok, Snapchat, Twitter/X in-app browsers.
+ */
+export const isEmbeddedWebView = (): boolean => {
+  const ua = navigator.userAgent || '';
+  // Instagram, Facebook (FBAN/FBAV), TikTok, Snapchat, Twitter/X, Line, WeChat, etc.
+  const embeddedIndicators = [
+    'FBAN', 'FBAV',         // Facebook
+    'Instagram',             // Instagram
+    'BytedanceWebview',      // TikTok
+    'musical_ly',            // TikTok (older)
+    'Snapchat',              // Snapchat
+    'Twitter',               // Twitter/X
+    'Line/',                 // Line
+    'MicroMessenger',        // WeChat
+    'LinkedIn',              // LinkedIn
+  ];
+  if (embeddedIndicators.some(indicator => ua.includes(indicator))) {
+    return true;
+  }
+  // Generic WebView detection for Android and iOS
+  // Android WebView sets "wv" in the UA string
+  if (/; wv\)/.test(ua)) {
+    return true;
+  }
+  // iOS: WKWebView doesn't set Safari in UA but does set AppleWebKit
+  if (/iPhone|iPad|iPod/.test(ua) && /AppleWebKit/.test(ua) && !/Safari/.test(ua)) {
+    return true;
+  }
+  return false;
+};
+
 export const loginWithSocial = (provider: 'google' | 'facebook' | 'apple'): void => {
   window.location.href = getOAuthUrl(provider);
 };
