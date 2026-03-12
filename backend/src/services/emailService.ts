@@ -3785,12 +3785,12 @@ Questions? Contact us at support@balkanestateai.com
 
   <div style="max-width: 650px; margin: 0 auto; background-color: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);">
     <!-- Header -->
-    <div style="background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%); padding: 32px 24px; text-align: center;" class="ec-header">
+    <div style="background: linear-gradient(135deg, #0252CD 0%, #0369a1 100%); padding: 32px 24px; text-align: center;" class="ec-header">
       <div style="margin-bottom: 12px;">
-        <span style="display: inline-block; width: 60px; height: 60px; background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); border-radius: 50%; line-height: 60px; font-size: 28px;">🏢</span>
+        <span style="display: inline-block; width: 60px; height: 60px; background: rgba(255,255,255,0.2); border-radius: 50%; line-height: 60px; font-size: 28px;">🏢</span>
       </div>
       <h1 style="color: #ffffff; margin: 0; font-size: 24px; font-weight: 700;">Enterprise Plan Activated!</h1>
-      <p style="color: #94a3b8; margin: 8px 0 0 0; font-size: 14px;">Welcome to BalkanEstate<span style="font-size:0.7em;vertical-align:super;line-height:0;">AI</span> Enterprise</p>
+      <p style="color: rgba(255,255,255,0.85); margin: 8px 0 0 0; font-size: 14px;">Welcome to BalkanEstate<span style="font-size:0.7em;vertical-align:super;line-height:0;">AI</span> Enterprise</p>
     </div>
 
     <div style="padding: 28px 24px;">
@@ -3847,7 +3847,8 @@ Questions? Contact us at support@balkanestateai.com
       <!-- CTA Button -->
       <div style="text-align: center; margin: 28px 0;">
         <a href="${frontendUrl}/agency/dashboard"
-           style="display: inline-block; background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%); color: #ffffff; text-decoration: none; padding: 16px 32px; border-radius: 10px; font-weight: 600; font-size: 16px; box-shadow: 0 4px 14px rgba(15, 23, 42, 0.3);">
+           style="display: inline-block; background-color: #0252CD; background: linear-gradient(135deg, #0252CD 0%, #0369a1 100%); color: #ffffff; text-decoration: none; padding: 16px 32px; border-radius: 10px; font-weight: 600; font-size: 16px; box-shadow: 0 4px 14px rgba(2, 82, 205, 0.3);"
+           class="ec-cta">
           Go to Agency Dashboard →
         </a>
       </div>

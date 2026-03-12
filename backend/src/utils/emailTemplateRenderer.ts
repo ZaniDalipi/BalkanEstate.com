@@ -234,7 +234,7 @@ export function renderEmailConfig(
         <![endif]-->
         <!--[if !mso]><!-->
         <a href="${ctaUrl}"
-           style="display:inline-block;background-color:${brandPrimary};background:${replaceVariables(config.headerGradient || defaultGradient, variables)};color:#ffffff;text-decoration:none;padding:16px 32px;border-radius:10px;font-weight:600;font-size:15px;box-shadow:0 4px 14px rgba(0,0,0,0.15);"
+           style="display:inline-block;background-color:${brandPrimary};background:linear-gradient(135deg, ${brandPrimary} 0%, ${brandPrimaryDark} 100%);color:#ffffff;text-decoration:none;padding:16px 32px;border-radius:10px;font-weight:600;font-size:15px;box-shadow:0 4px 14px rgba(0,0,0,0.15);"
            class="ec-cta">
           ${ctaText}
         </a>

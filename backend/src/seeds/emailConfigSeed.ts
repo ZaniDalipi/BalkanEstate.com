@@ -1321,7 +1321,7 @@ export const defaultEmailConfigs = [
     headerTitle: 'Welcome to Enterprise!',
     headerSubtitle: 'Your agency is now powered by BalkanEstate Enterprise',
     headerEmoji: '🏢',
-    headerGradient: 'linear-gradient(135deg, #0f172a 0%, #1e293b 100%)',
+    headerGradient: 'linear-gradient(135deg, #0252CD 0%, #0369a1 100%)',
     bodyTemplate: `
       <p style="color: #1f2937; font-size: 16px; margin: 0 0 16px 0;">
         Hi <strong>{{ownerName}}</strong>,
