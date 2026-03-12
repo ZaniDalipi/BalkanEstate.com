@@ -92,9 +92,7 @@ const Footer: React.FC<FooterProps> = ({ className = '' }) => {
           {/* Brand Section */}
           <div className="lg:col-span-2 space-y-3">
             <div className="flex items-center gap-2.5">
-              <div className="p-1.5 bg-gradient-to-br from-gray-900 to-gray-700 rounded-xl shadow-sm">
-                <LogoIcon className="w-5 h-5 text-white" />
-              </div>
+              <LogoIcon className="w-8 h-8" />
               <span className="text-xl font-semibold text-gray-900">
                 {t('common:appName')}
               </span>
