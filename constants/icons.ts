@@ -115,6 +115,7 @@ export const ArrowTopRightOnSquareIcon: React.FC<{ className?: string }> = ({ cl
     )
 );
 
+
 export const LogoIcon: React.FC<{ className?: string }> = ({ className }) => (
     React.createElement('svg', { className: className, viewBox: "85 50 345 360", xmlns: "http://www.w3.org/2000/svg" },
         React.createElement('g', { fillRule: "evenodd" },
