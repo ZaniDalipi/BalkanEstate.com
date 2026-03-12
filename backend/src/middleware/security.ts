@@ -538,7 +538,8 @@ export const xssSanitizer = (req: Request, _res: Response, next: NextFunction): 
     'password', 'currentPassword', 'newPassword',
     'url', 'imageUrl', 'previewUrl', 'floorplanUrl', 'tourUrl',
     'virtualTour360Url', 'avatarUrl', 'publicId', 'images',
-    'text', 'message', 'description', 'title', 'name', 'content' // User-facing text fields - React handles XSS escaping
+    'text', 'message', 'description', 'title', 'name', 'content', // User-facing text fields - React handles XSS escaping
+    'bodyTemplate', 'footerHtml', 'headerHtml', 'subject', 'preheaderText', 'headerGradient' // Email template fields - contain intentional HTML edited by admins
   ]);
 
   // Recursive function to sanitize strings
