@@ -11,35 +11,45 @@ interface SocialVideoEmbedProps {
 // Detect platform from URL
 const detectPlatform = (url: string): 'tiktok' | 'instagram' | null => {
   if (!url) return null;
-  if (url.includes('tiktok.com') || url.includes('vm.tiktok.com')) return 'tiktok';
+  if (url.includes('tiktok.com') || url.includes('vm.tiktok.com') || url.includes('m.tiktok.com')) return 'tiktok';
   if (url.includes('instagram.com')) return 'instagram';
   return null;
 };
 
-// Extract TikTok video ID and username
+// Extract TikTok video ID and username from all URL formats
 const extractTikTokInfo = (url: string): { id: string; username: string } => {
   // Format: tiktok.com/@username/video/1234567890
   const fullMatch = url.match(/tiktok\.com\/@([\w.-]+)\/video\/(\d+)/);
   if (fullMatch) {
     return { username: fullMatch[1], id: fullMatch[2] };
   }
-  // Format: vm.tiktok.com/1234567890
-  const shortMatch = url.match(/vm\.tiktok\.com\/(\w+)/);
-  if (shortMatch) {
-    return { username: '', id: shortMatch[1] };
+  // Format: m.tiktok.com/v/1234567890 (mobile)
+  const mobileMatch = url.match(/m\.tiktok\.com\/v\/(\d+)/);
+  if (mobileMatch) {
+    return { username: '', id: mobileMatch[1] };
+  }
+  // Format: vm.tiktok.com/ZMrxxxxxxx/ (short URL - alphanumeric)
+  const vmMatch = url.match(/vm\.tiktok\.com\/(\w+)/);
+  if (vmMatch) {
+    return { username: '', id: vmMatch[1] };
+  }
+  // Format: tiktok.com/t/ZTRxxxxx/ (another short URL format)
+  const tMatch = url.match(/tiktok\.com\/t\/(\w+)/);
+  if (tMatch) {
+    return { username: '', id: tMatch[1] };
   }
   return { username: '', id: '' };
 };
 
-// Extract Instagram post/reel ID
+// Extract Instagram post/reel/tv ID
 const extractInstagramId = (url: string): string => {
-  const match = url.match(/(?:instagram\.com\/(?:reel|p)\/)([A-Za-z0-9_-]+)/);
+  const match = url.match(/instagram\.com\/(?:reel|p|tv)\/([A-Za-z0-9_-]+)/);
   return match?.[1] || '';
 };
 
-// Check if Instagram URL is a reel
+// Check if Instagram URL is a reel or IGTV (video content, not a static post)
 const isInstagramReel = (url: string): boolean => {
-  return url.includes('/reel/');
+  return url.includes('/reel/') || url.includes('/tv/');
 };
 
 export const SocialVideoEmbed: React.FC<SocialVideoEmbedProps> = ({ videoUrl }) => {

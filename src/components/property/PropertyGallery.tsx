@@ -96,10 +96,10 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
   const [isMuted, setIsMuted] = useState(true);
   const videoRef = React.useRef<HTMLVideoElement>(null);
 
-  // Determine video platform
+  // Determine video platform from URL
   const getVideoPlatform = useCallback((url: string): string => {
     if (!url) return 'unknown';
-    if (url.includes('tiktok.com') || url.includes('vm.tiktok.com')) return 'tiktok';
+    if (url.includes('tiktok.com') || url.includes('vm.tiktok.com') || url.includes('m.tiktok.com')) return 'tiktok';
     if (url.includes('instagram.com')) return 'instagram';
     if (url.includes('facebook.com') || url.includes('fb.watch')) return 'facebook';
     if (url.includes('youtube.com') || url.includes('youtu.be')) return 'youtube';
@@ -107,11 +107,15 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
     return 'unknown';
   }, []);
 
-  const videoPlatform = useMemo(() => getVideoPlatform(property.tourUrl || ''), [property.tourUrl, getVideoPlatform]);
+  // Use tourUrl first, fall back to videoUrl for external video detection
+  const externalVideoUrl = property.tourUrl || property.videoUrl || '';
+  const videoPlatform = useMemo(() => getVideoPlatform(externalVideoUrl), [externalVideoUrl, getVideoPlatform]);
 
-  // Only YouTube, Vimeo, and Facebook can be embedded via iframe (TikTok/Instagram block iframes)
-  const isEmbeddableVideo = ['youtube', 'vimeo', 'facebook'].includes(videoPlatform);
-  const hasExternalVideo = !!property.tourUrl && isEmbeddableVideo;
+  // YouTube, Vimeo, Facebook, TikTok, and Instagram can be embedded via iframe
+  // TikTok uses their official player embed: tiktok.com/player/v1/{videoId}
+  // Instagram uses their /embed/ endpoint for reels and posts
+  const isEmbeddableVideo = ['youtube', 'vimeo', 'facebook', 'tiktok', 'instagram'].includes(videoPlatform);
+  const hasExternalVideo = !!externalVideoUrl && isEmbeddableVideo;
 
   // Check if property has an auto-generated video (from video generator)
   const hasGeneratedVideo = !!(property.hasGeneratedVideo && property.generatedVideoUrl);
@@ -146,68 +150,101 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
     setViewMode(val as 'photos' | 'streetview' | 'video');
   }, []);
 
-  // Helper to convert video URLs to embed format (YouTube, Vimeo, TikTok, Instagram)
+  // Helper to convert video URLs to embed format
+  // Supports: YouTube, Vimeo, TikTok, Instagram, Facebook (all known URL variations)
   const getVideoEmbedUrl = useCallback((url: string): { embedUrl: string; platform: string } => {
     if (!url) return { embedUrl: '', platform: 'unknown' };
 
-    // YouTube URL patterns
-    const youtubeMatch = url.match(/(?:youtube\.com\/(?:watch\?v=|embed\/|shorts\/)|youtu\.be\/)([a-zA-Z0-9_-]{11})/);
-    if (youtubeMatch) {
-      return {
-        embedUrl: `https://www.youtube.com/embed/${youtubeMatch[1]}?autoplay=1&rel=0&playsinline=1&enablejsapi=1`,
-        platform: 'youtube'
-      };
+    // --- YouTube ---
+    // watch?v=ID, watch?feature=share&v=ID (v= as first or later param)
+    const ytParamMatch = url.match(/youtube\.com\/watch\?(?:.*&)?v=([a-zA-Z0-9_-]{11})/);
+    if (ytParamMatch) {
+      return { embedUrl: `https://www.youtube.com/embed/${ytParamMatch[1]}?autoplay=1&rel=0&playsinline=1&enablejsapi=1`, platform: 'youtube' };
+    }
+    // embed/ID, shorts/ID, v/ID (legacy), live/ID
+    const ytPathMatch = url.match(/youtube\.com\/(?:embed|shorts|v|live)\/([a-zA-Z0-9_-]{11})/);
+    if (ytPathMatch) {
+      return { embedUrl: `https://www.youtube.com/embed/${ytPathMatch[1]}?autoplay=1&rel=0&playsinline=1&enablejsapi=1`, platform: 'youtube' };
+    }
+    // youtu.be/ID short links
+    const ytShortMatch = url.match(/youtu\.be\/([a-zA-Z0-9_-]{11})/);
+    if (ytShortMatch) {
+      return { embedUrl: `https://www.youtube.com/embed/${ytShortMatch[1]}?autoplay=1&rel=0&playsinline=1&enablejsapi=1`, platform: 'youtube' };
     }
 
-    // Vimeo URL patterns
-    const vimeoMatch = url.match(/(?:vimeo\.com\/)(\d+)/);
-    if (vimeoMatch) {
-      return {
-        embedUrl: `https://player.vimeo.com/video/${vimeoMatch[1]}?autoplay=1&playsinline=1`,
-        platform: 'vimeo'
-      };
+    // --- Vimeo ---
+    // player.vimeo.com/video/ID (already an embed URL)
+    const vimeoPlayerMatch = url.match(/player\.vimeo\.com\/video\/(\d+)/);
+    if (vimeoPlayerMatch) {
+      return { embedUrl: `https://player.vimeo.com/video/${vimeoPlayerMatch[1]}?autoplay=1&playsinline=1`, platform: 'vimeo' };
+    }
+    // vimeo.com/channels/xxx/ID, vimeo.com/groups/xxx/videos/ID, vimeo.com/manage/videos/ID
+    const vimeoPathMatch = url.match(/vimeo\.com\/(?:channels\/[\w]+\/|groups\/[\w]+\/videos\/|manage\/videos\/)(\d+)/);
+    if (vimeoPathMatch) {
+      return { embedUrl: `https://player.vimeo.com/video/${vimeoPathMatch[1]}?autoplay=1&playsinline=1`, platform: 'vimeo' };
+    }
+    // vimeo.com/ID (standard - must be after path-based matches to avoid false positives)
+    const vimeoStdMatch = url.match(/vimeo\.com\/(\d+)/);
+    if (vimeoStdMatch) {
+      return { embedUrl: `https://player.vimeo.com/video/${vimeoStdMatch[1]}?autoplay=1&playsinline=1`, platform: 'vimeo' };
     }
 
-    // TikTok URL patterns - extract video ID - use player format for cleaner embed
-    const tiktokMatch = url.match(/(?:tiktok\.com\/@[\w.-]+\/video\/|vm\.tiktok\.com\/)(\d+)/);
-    if (tiktokMatch) {
-      return {
-        embedUrl: `https://www.tiktok.com/player/v1/${tiktokMatch[1]}?music_info=0&description=0&autoplay=1&loop=1`,
-        platform: 'tiktok'
-      };
+    // --- TikTok ---
+    // tiktok.com/@username/video/ID (full URL)
+    const tiktokFullMatch = url.match(/tiktok\.com\/@[\w.-]+\/video\/(\d+)/);
+    if (tiktokFullMatch) {
+      return { embedUrl: `https://www.tiktok.com/player/v1/${tiktokFullMatch[1]}?music_info=0&description=0&autoplay=1&loop=1`, platform: 'tiktok' };
+    }
+    // m.tiktok.com/v/ID (mobile URL)
+    const tiktokMobileMatch = url.match(/m\.tiktok\.com\/v\/(\d+)/);
+    if (tiktokMobileMatch) {
+      return { embedUrl: `https://www.tiktok.com/player/v1/${tiktokMobileMatch[1]}?music_info=0&description=0&autoplay=1&loop=1`, platform: 'tiktok' };
+    }
+    // vm.tiktok.com/CODE/ (short URL - alphanumeric)
+    const tiktokVmMatch = url.match(/vm\.tiktok\.com\/([\w]+)/);
+    if (tiktokVmMatch) {
+      return { embedUrl: `https://www.tiktok.com/player/v1/${tiktokVmMatch[1]}?music_info=0&description=0&autoplay=1&loop=1`, platform: 'tiktok' };
+    }
+    // tiktok.com/t/CODE/ (another short URL format)
+    const tiktokTMatch = url.match(/tiktok\.com\/t\/([\w]+)/);
+    if (tiktokTMatch) {
+      return { embedUrl: `https://www.tiktok.com/player/v1/${tiktokTMatch[1]}?music_info=0&description=0&autoplay=1&loop=1`, platform: 'tiktok' };
     }
 
-    // Instagram URL patterns - Reels or Posts - use reel embed for cleaner display
-    const instagramReelMatch = url.match(/(?:instagram\.com\/(?:reel|p)\/)([A-Za-z0-9_-]+)/);
-    if (instagramReelMatch) {
-      return {
-        embedUrl: `https://www.instagram.com/reel/${instagramReelMatch[1]}/embed/captioned/?autoplay=1`,
-        platform: 'instagram'
-      };
+    // --- Instagram ---
+    // instagram.com/reel/CODE, /p/CODE, /tv/CODE (IGTV)
+    const instagramMatch = url.match(/instagram\.com\/(?:reel|p|tv)\/([A-Za-z0-9_-]+)/);
+    if (instagramMatch) {
+      return { embedUrl: `https://www.instagram.com/reel/${instagramMatch[1]}/embed/captioned/?autoplay=1`, platform: 'instagram' };
     }
 
-    // Facebook URL patterns - videos and watch
-    const facebookVideoMatch = url.match(/(?:facebook\.com|fb\.watch)\/(?:watch\/?\?v=|.*\/videos\/|reel\/)(\d+)/);
-    if (facebookVideoMatch) {
-      return {
-        embedUrl: `https://www.facebook.com/plugins/video.php?href=${encodeURIComponent(url)}&show_text=false&autoplay=true`,
-        platform: 'facebook'
-      };
+    // --- Facebook ---
+    // facebook.com/video.php?v=ID (legacy)
+    const fbVideoPhpMatch = url.match(/facebook\.com\/video\.php\?v=(\d+)/);
+    if (fbVideoPhpMatch) {
+      return { embedUrl: `https://www.facebook.com/plugins/video.php?href=${encodeURIComponent(url)}&show_text=false&autoplay=true`, platform: 'facebook' };
     }
-    // Facebook watch format (fb.watch short links)
+    // facebook.com/share/v/CODE/ (share links)
+    const fbShareMatch = url.match(/facebook\.com\/share\/v\/([A-Za-z0-9_-]+)/);
+    if (fbShareMatch) {
+      return { embedUrl: `https://www.facebook.com/plugins/video.php?href=${encodeURIComponent(url)}&show_text=false&autoplay=true`, platform: 'facebook' };
+    }
+    // facebook.com/watch/?v=ID, /videos/ID, /reel/ID
+    const fbVideoMatch = url.match(/facebook\.com\/(?:watch\/?\?v=|[\w.]+\/videos\/|reel\/)(\d+)/);
+    if (fbVideoMatch) {
+      return { embedUrl: `https://www.facebook.com/plugins/video.php?href=${encodeURIComponent(url)}&show_text=false&autoplay=true`, platform: 'facebook' };
+    }
+    // fb.watch/CODE/ (short links)
     const fbWatchMatch = url.match(/fb\.watch\/([A-Za-z0-9_-]+)/);
     if (fbWatchMatch) {
-      return {
-        embedUrl: `https://www.facebook.com/plugins/video.php?href=${encodeURIComponent(url)}&show_text=false&autoplay=true`,
-        platform: 'facebook'
-      };
+      return { embedUrl: `https://www.facebook.com/plugins/video.php?href=${encodeURIComponent(url)}&show_text=false&autoplay=true`, platform: 'facebook' };
     }
 
     // Default - return original URL
     return { embedUrl: url, platform: 'other' };
   }, []);
 
-  const videoInfo = useMemo(() => getVideoEmbedUrl(property.tourUrl || ''), [property.tourUrl, getVideoEmbedUrl]);
+  const videoInfo = useMemo(() => getVideoEmbedUrl(externalVideoUrl), [externalVideoUrl, getVideoEmbedUrl]);
 
   // Combine all images
   const allImages = useMemo(() => {
