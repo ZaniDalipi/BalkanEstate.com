@@ -23,9 +23,19 @@ import { buildFrontendRedirectUrl } from '../utils/redirectValidation';
 const STRIPE_SECRET_KEY = process.env.STRIPE_SECRET_KEY || '';
 const STRIPE_WEBHOOK_SECRET = process.env.STRIPE_WEBHOOK_SECRET || '';
 
-const stripe = new Stripe(STRIPE_SECRET_KEY, {
-  apiVersion: '2026-02-25.clover',
-});
+let stripeInstance: Stripe | null = null;
+
+function getStripe(): Stripe {
+  if (!stripeInstance) {
+    if (!STRIPE_SECRET_KEY) {
+      throw new Error('Stripe is not configured. Please set STRIPE_SECRET_KEY environment variable.');
+    }
+    stripeInstance = new Stripe(STRIPE_SECRET_KEY, {
+      apiVersion: '2026-02-25.clover',
+    });
+  }
+  return stripeInstance;
+}
 
 export interface StripePaymentRequest {
   userId: string;
@@ -67,7 +77,7 @@ class StripeService {
    * Get Stripe instance for webhook verification
    */
   public getStripeInstance(): Stripe {
-    return stripe;
+    return getStripe();
   }
 
   /**
@@ -92,7 +102,7 @@ class StripeService {
         provider: 'stripe',
       });
 
-      const session = await stripe.checkout.sessions.create({
+      const session = await getStripe().checkout.sessions.create({
         payment_method_types: ['card'],
         line_items: [
           {
@@ -150,7 +160,7 @@ class StripeService {
     if (!STRIPE_WEBHOOK_SECRET) {
       throw new Error('Stripe webhook secret not configured');
     }
-    return stripe.webhooks.constructEvent(payload, signature, STRIPE_WEBHOOK_SECRET);
+    return getStripe().webhooks.constructEvent(payload, signature, STRIPE_WEBHOOK_SECRET);
   }
 
   /**
@@ -158,21 +168,21 @@ class StripeService {
    * Used for the verification endpoint after redirect.
    */
   public async retrieveSession(sessionId: string): Promise<Stripe.Checkout.Session> {
-    return stripe.checkout.sessions.retrieve(sessionId);
+    return getStripe().checkout.sessions.retrieve(sessionId);
   }
 
   /**
    * Retrieve a subscription from Stripe
    */
   public async retrieveSubscription(subscriptionId: string): Promise<Stripe.Subscription> {
-    return stripe.subscriptions.retrieve(subscriptionId);
+    return getStripe().subscriptions.retrieve(subscriptionId);
   }
 
   /**
    * Cancel a Stripe subscription
    */
   public async cancelSubscription(subscriptionId: string): Promise<Stripe.Subscription> {
-    return stripe.subscriptions.cancel(subscriptionId);
+    return getStripe().subscriptions.cancel(subscriptionId);
   }
 
   /**
