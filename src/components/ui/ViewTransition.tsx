@@ -1,4 +1,4 @@
-import React, { memo, useEffect, useRef, useState, createContext, useContext, useCallback } from 'react';
+import React, { memo, useRef, useState, createContext, useContext, useCallback, useMemo } from 'react';
 
 // ============================================================================
 // Navigation Direction Tracking
@@ -40,27 +40,28 @@ const MORPH_VIEWS = new Set([
 ]);
 
 /**
- * Determine the best transition animation for a given navigation
+ * Determine the best transition animation for a given navigation.
+ * Priority: explicit direction > view-type auto-detection > default forward
  */
 function resolveTransitionClass(
   direction: NavigationDirection,
   viewKey: string,
 ): string {
-  // Check if entering a detail page
+  // Explicit back direction always wins (e.g., back button pressed)
+  if (direction === 'back') return 'animate-page-enter-back';
+
+  // Explicit direction from caller
+  if (direction === 'up') return 'animate-page-enter-up';
+  if (direction === 'morph') return 'animate-page-morph';
+
+  // Auto-detect based on view type when direction is 'forward' (default)
   const isDetail = DETAIL_VIEWS.has(viewKey) ||
     viewKey.startsWith('property-') ||
     viewKey.startsWith('agency-') ||
     viewKey.startsWith('agent-');
 
   if (isDetail) return 'animate-page-enter-up';
-
-  // Check if entering a morph-style page
   if (MORPH_VIEWS.has(viewKey)) return 'animate-page-morph';
-
-  // Direction-based
-  if (direction === 'back') return 'animate-page-enter-back';
-  if (direction === 'up') return 'animate-page-enter-up';
-  if (direction === 'morph') return 'animate-page-morph';
 
   return 'animate-page-enter';
 }
@@ -74,31 +75,76 @@ export const NavigationProvider = memo(function NavigationProvider({
 }: {
   children: React.ReactNode;
 }) {
-  const [direction, setDirection] = useState<NavigationDirection>('forward');
-  const historyLength = useRef(window.history.length);
+  // Use a ref so popstate reads the latest direction synchronously
+  const directionRef = useRef<NavigationDirection>('forward');
+  const [direction, setDirectionState] = useState<NavigationDirection>('forward');
 
-  useEffect(() => {
-    const handlePopState = () => {
-      // Browser back/forward — determine direction by comparing history lengths
-      const newLength = window.history.length;
-      if (newLength <= historyLength.current) {
-        setDirection('back');
-      } else {
-        setDirection('forward');
-      }
-      historyLength.current = newLength;
+  const setDirection = useCallback((dir: NavigationDirection) => {
+    directionRef.current = dir;
+    setDirectionState(dir);
+  }, []);
+
+  // Track our own position in the history stack to detect back vs forward.
+  // We intercept pushState/replaceState to maintain a counter, and compare
+  // on popstate to reliably determine direction.
+  const historyIndexRef = useRef(0);
+
+  // One-time setup: monkey-patch pushState/replaceState and listen to popstate
+  const setupDone = useRef(false);
+  if (!setupDone.current) {
+    setupDone.current = true;
+
+    // Store our position index in history.state so popstate can read it
+    const currentState = window.history.state;
+    const initialIndex = (currentState && typeof currentState.__navIdx === 'number')
+      ? currentState.__navIdx
+      : 0;
+    historyIndexRef.current = initialIndex;
+
+    // If current state doesn't have our index, inject it
+    if (!currentState || typeof currentState.__navIdx !== 'number') {
+      window.history.replaceState({ ...currentState, __navIdx: initialIndex }, '');
+    }
+
+    // Intercept pushState to track forward navigation index
+    const origPush = window.history.pushState.bind(window.history);
+    window.history.pushState = function(state: any, title: string, url?: string | URL | null) {
+      historyIndexRef.current += 1;
+      const augmented = { ...state, __navIdx: historyIndexRef.current };
+      return origPush(augmented, title, url);
     };
 
-    window.addEventListener('popstate', handlePopState);
-    return () => window.removeEventListener('popstate', handlePopState);
-  }, []);
+    // Intercept replaceState to keep index in sync
+    const origReplace = window.history.replaceState.bind(window.history);
+    window.history.replaceState = function(state: any, title: string, url?: string | URL | null) {
+      const augmented = { ...state, __navIdx: historyIndexRef.current };
+      return origReplace(augmented, title, url);
+    };
 
-  const handleSetDirection = useCallback((dir: NavigationDirection) => {
-    setDirection(dir);
-  }, []);
+    // Listen for popstate (browser back/forward buttons)
+    window.addEventListener('popstate', (e) => {
+      const prevIdx = historyIndexRef.current;
+      const newIdx = (e.state && typeof e.state.__navIdx === 'number')
+        ? e.state.__navIdx
+        : prevIdx - 1; // Assume back if no index found
+
+      historyIndexRef.current = newIdx;
+
+      // Only auto-set direction if no explicit direction was set programmatically
+      // (i.e., this was triggered by browser back/forward button)
+      if (directionRef.current === 'forward') {
+        if (newIdx < prevIdx) {
+          setDirection('back');
+        }
+        // If newIdx > prevIdx, keep 'forward' (which is already default)
+      }
+    });
+  }
+
+  const contextValue = useMemo(() => ({ direction, setDirection }), [direction, setDirection]);
 
   return (
-    <NavigationContext.Provider value={{ direction, setDirection: handleSetDirection }}>
+    <NavigationContext.Provider value={contextValue}>
       {children}
     </NavigationContext.Provider>
   );
@@ -121,19 +167,20 @@ export const ViewTransition = memo(function ViewTransition({
 }: ViewTransitionProps) {
   const { direction, setDirection } = useNavigationDirection();
   const prevKeyRef = useRef(viewKey);
-  const [transitionClass, setTransitionClass] = useState('animate-page-enter');
 
-  useEffect(() => {
-    if (prevKeyRef.current !== viewKey) {
-      // A navigation happened — resolve the right animation
-      const animClass = resolveTransitionClass(direction, viewKey);
-      setTransitionClass(animClass);
-      prevKeyRef.current = viewKey;
-
-      // Reset direction to forward after applying (so next programmatic nav defaults to forward)
-      setDirection('forward');
-    }
-  }, [viewKey, direction, setDirection]);
+  // Resolve animation class synchronously during render (not in useEffect)
+  // so the first paint already has the correct animation applied.
+  let transitionClass: string;
+  if (prevKeyRef.current !== viewKey) {
+    transitionClass = resolveTransitionClass(direction, viewKey);
+    prevKeyRef.current = viewKey;
+    // Schedule direction reset after this render cycle completes
+    // so subsequent navigations default back to 'forward'
+    queueMicrotask(() => setDirection('forward'));
+  } else {
+    // Same view — use current direction (initial render or no navigation)
+    transitionClass = resolveTransitionClass(direction, viewKey);
+  }
 
   return (
     <div
