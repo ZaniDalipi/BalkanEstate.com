@@ -279,7 +279,7 @@ const TopAgenciesSection: React.FC = () => {
   const handleAgencyClick = useCallback((agency: Agency) => {
     const agencyIdentifier = agency.slug || agency._id;
     dispatch({ type: 'SET_SELECTED_AGENCY', payload: agencyIdentifier });
-    navigate(`/agencies/${agencyIdentifier}`);
+    navigate(`/agencies/${agencyIdentifier}`, { direction: 'up' });
   }, [dispatch, navigate]);
 
   const { data: agencies = [], isLoading } = useQuery<Agency[]>({

@@ -654,6 +654,106 @@ html[data-zoom] #root {
 }
 
 /* ============================================================================
+   Micro-interaction Animations — Subtle polish for interactive elements
+   ============================================================================ */
+
+/* Staggered fade-in for lists and grids */
+@keyframes staggerFadeIn {
+  0% {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-stagger-in {
+  animation: staggerFadeIn 0.4s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.animate-stagger-in:nth-child(1) { animation-delay: 0ms; }
+.animate-stagger-in:nth-child(2) { animation-delay: 50ms; }
+.animate-stagger-in:nth-child(3) { animation-delay: 100ms; }
+.animate-stagger-in:nth-child(4) { animation-delay: 150ms; }
+.animate-stagger-in:nth-child(5) { animation-delay: 200ms; }
+.animate-stagger-in:nth-child(6) { animation-delay: 250ms; }
+.animate-stagger-in:nth-child(7) { animation-delay: 300ms; }
+.animate-stagger-in:nth-child(8) { animation-delay: 350ms; }
+
+/* Subtle spring press effect for cards and buttons */
+@keyframes pressSpring {
+  0% { transform: scale(1); }
+  50% { transform: scale(0.97); }
+  100% { transform: scale(1); }
+}
+
+.press-spring:active {
+  animation: pressSpring 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* Gentle scale-in for elements entering the viewport */
+@keyframes scaleIn {
+  0% {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.animate-scale-in {
+  animation: scaleIn 0.35s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+/* Smooth tab indicator slide */
+@keyframes tabSlide {
+  0% {
+    transform: scaleX(0);
+    opacity: 0;
+  }
+  100% {
+    transform: scaleX(1);
+    opacity: 1;
+  }
+}
+
+.animate-tab-slide {
+  animation: tabSlide 0.3s cubic-bezier(0.22, 1, 0.36, 1) both;
+  transform-origin: left center;
+}
+
+/* Subtle glow pulse for active/selected elements */
+@keyframes glowPulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0); }
+  50% { box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.15); }
+}
+
+.animate-glow-pulse {
+  animation: glowPulse 2s ease-in-out infinite;
+}
+
+/* Reduced motion: disable all micro-animations */
+@media (prefers-reduced-motion: reduce) {
+  .animate-stagger-in,
+  .animate-scale-in,
+  .animate-tab-slide {
+    animation: none !important;
+    opacity: 1 !important;
+    transform: none !important;
+  }
+  .press-spring:active {
+    animation: none !important;
+  }
+  .animate-glow-pulse {
+    animation: none !important;
+  }
+}
+
+/* ============================================================================
    Animation Utility Classes
    ============================================================================ */
 

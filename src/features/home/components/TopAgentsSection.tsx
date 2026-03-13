@@ -243,7 +243,7 @@ const TopAgentsSection: React.FC = () => {
   const handleAgentClick = useCallback((agent: Agent) => {
     const agentIdentifier = agent.agentId || agent.id;
     dispatch({ type: 'SET_SELECTED_AGENT', payload: agentIdentifier });
-    navigate(`/agents/${agentIdentifier}`);
+    navigate(`/agents/${agentIdentifier}`, { direction: 'up' });
   }, [dispatch, navigate]);
 
   const { data: agents = [], isLoading } = useQuery<Agent[]>({

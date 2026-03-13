@@ -92,7 +92,7 @@ const PropertyDetailsPage: React.FC<{ property: Property }> = ({ property: cache
       // If the property being viewed was deleted, go back to the appropriate listing page
       if (data.propertyId === property.id) {
         const isRental = property.listingType === 'rent';
-        navigate(isRental ? '/rentals' : '/search');
+        navigate(isRental ? '/rentals' : '/search', { direction: 'back' });
       }
     },
   });
@@ -239,12 +239,13 @@ const PropertyDetailsPage: React.FC<{ property: Property }> = ({ property: cache
     // Use browser history for proper PWA back navigation
     // This preserves the user's navigation context (e.g., coming from saved properties, agents, etc.)
     if (window.history.length > 1) {
+      // popstate handler in NavigationProvider will auto-detect back direction
       window.history.back();
     } else {
       // Fallback for direct navigation (e.g., shared link with no history)
       dispatch({ type: 'SET_SELECTED_PROPERTY', payload: null });
       const isRental = property.listingType === 'rent';
-      navigate(isRental ? '/rentals' : '/search');
+      navigate(isRental ? '/rentals' : '/search', { direction: 'back' });
     }
   };
 

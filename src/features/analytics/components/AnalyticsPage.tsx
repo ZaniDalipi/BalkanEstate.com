@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useAppContext } from '@/context/AppContext';
+import { useNavigationDirection } from '@/src/components/ui/ViewTransition';
 import {
   useDashboardOverview,
   useMyPropertiesViewStats,
@@ -99,6 +100,7 @@ const FloatingParticle: React.FC<{ delay: number; size: 'sm' | 'md' | 'lg' }> = 
 const AnalyticsPage: React.FC = () => {
   const { t } = useTranslation(['analytics', 'common']);
   const { state, dispatch } = useAppContext();
+  const { setDirection } = useNavigationDirection();
   const { currentUser } = state;
   const [period, setPeriod] = useState<Period>('30d');
   const [myProperties, setMyProperties] = useState<any[]>([]);
@@ -269,7 +271,7 @@ const AnalyticsPage: React.FC = () => {
               {/* Left side - Title and stats */}
               <div className="flex items-start gap-4">
                 <button
-                  onClick={() => window.history.back()}
+                  onClick={() => { setDirection('back'); window.history.back(); }}
                   className="p-2.5 rounded-xl bg-white/10 backdrop-blur-sm border border-white/20 hover:bg-white/20 transition-all group"
                 >
                   <ArrowLeftIcon className="h-5 w-5 text-white group-hover:-translate-x-0.5 transition-transform" />
@@ -550,11 +552,12 @@ const Header: React.FC<HeaderProps> = ({
   isDownloading,
 }) => {
   const { t } = useTranslation(['analytics']);
+  const { setDirection: setDir } = useNavigationDirection();
   return (
     <div className="flex items-center justify-between mb-6">
       <div className="flex items-center gap-3">
         <button
-          onClick={() => window.history.back()}
+          onClick={() => { setDir('back'); window.history.back(); }}
           className="p-2 rounded-lg bg-white border border-neutral-200 hover:bg-neutral-50 transition-colors"
         >
           <ArrowLeftIcon className="h-4 w-4 text-neutral-600" />

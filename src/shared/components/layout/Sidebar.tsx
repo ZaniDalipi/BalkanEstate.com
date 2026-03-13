@@ -1,6 +1,7 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { useAppContext } from '@/context/AppContext';
+import { useNavigationDirection } from '@/src/components/ui/ViewTransition';
 import { AppView, UserRole, Conversation } from '@/types';
 import { LogoIcon, AgentsIcon, SearchIcon, MagnifyingGlassPlusIcon, HeartIcon, EnvelopeIcon, UserCircleIcon, UsersIcon, ArrowLeftOnRectangleIcon, XMarkIcon, PencilIcon, StarIconSolid, BuildingOfficeIcon, ShieldCheckIcon, GlobeAltIcon, ChartBarIcon } from '@/constants';
 import LanguageSwitcher from '@/src/components/LanguageSwitcher';
@@ -45,6 +46,7 @@ interface SidebarProps {
 const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
     const { t } = useTranslation(['nav', 'common', 'auth']);
     const { state, dispatch, logout } = useAppContext();
+    const { setDirection } = useNavigationDirection();
     const { activeView, isAuthenticated, currentUser, conversations } = state;
 
     // Calculate total unread messages
@@ -58,6 +60,9 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
         if (needsAuth && !isAuthenticated) {
             dispatch({ type: 'TOGGLE_AUTH_MODAL', payload: { isOpen: true } });
         } else {
+            // Set transition direction: morph for tab-like switches, forward for drill-in views
+            const morphViews = new Set(['search', 'saved-properties', 'saved-searches', 'inbox', 'account', 'agency-dashboard', 'admin']);
+            setDirection(morphViews.has(view) ? 'morph' : 'forward');
             // Clear selected agency/property when navigating to different views
             dispatch({ type: 'SET_SELECTED_AGENCY', payload: null });
             dispatch({ type: 'SET_ACTIVE_VIEW', payload: view });
@@ -71,6 +76,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
 
     const handleNewListingClick = () => {
         if (isAuthenticated) {
+            setDirection('morph');
             // Clear selected agency when creating new listing
             dispatch({ type: 'SET_SELECTED_AGENCY', payload: null });
             dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'create-listing' });
@@ -82,6 +88,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
     };
 
     const handleSubscriptionClick = () => {
+        setDirection('forward');
         dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'pricing' });
         const currentLang = window.location.pathname.split('/')[1] || 'en';
         const validLangs = ['en', 'sq', 'sr', 'de', 'mk'];
