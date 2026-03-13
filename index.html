@@ -108,30 +108,20 @@
     <link rel="alternate" hreflang="el" href="https://balkanestateai.com/el" />
     <link rel="alternate" hreflang="x-default" href="https://balkanestateai.com" />
 
-    <!-- DNS prefetch for third-party domains (lower priority than preconnect) -->
-    <link rel="dns-prefetch" href="https://res.cloudinary.com">
-    <link rel="dns-prefetch" href="https://unpkg.com">
-
     <!-- Preconnect to critical domains (high priority) -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link rel="preconnect" href="https://images.unsplash.com">
+    <link rel="preconnect" href="https://res.cloudinary.com" crossorigin>
 
-    <!-- Google Maps preconnect for faster map loading -->
-    <link rel="preconnect" href="https://maps.googleapis.com">
-    <link rel="preconnect" href="https://maps.gstatic.com" crossorigin>
-    <link rel="preconnect" href="https://khms0.google.com" crossorigin>
-    <link rel="preconnect" href="https://khms1.google.com" crossorigin>
+    <!-- DNS prefetch for third-party domains (lower priority than preconnect) -->
+    <link rel="dns-prefetch" href="https://images.unsplash.com">
     <link rel="dns-prefetch" href="https://maps.googleapis.com">
     <link rel="dns-prefetch" href="https://maps.gstatic.com">
+    <link rel="dns-prefetch" href="https://unpkg.com">
 
     <!-- Google Fonts with display=swap (non-blocking) -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
     <noscript><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet"></noscript>
-
-    <!-- Leaflet CSS - deferred loading (only needed for map pages) -->
-    <link rel="preload" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" as="style" onload="this.onload=null;this.rel='stylesheet'" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="anonymous">
-    <noscript><link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="anonymous"></noscript>
 
 </head>
   <body class="bg-neutral-50 font-sans">
@@ -363,6 +353,20 @@
         0%, 100% { transform: translateY(0px); }
         50% { transform: translateY(-3px); }
       }
+
+      /* Hero section CSS animations (replaces framer-motion for FCP) */
+      @keyframes heroFadeUp {
+        from { opacity: 0; transform: translateY(20px); }
+        to { opacity: 1; transform: translateY(0); }
+      }
+      .hero-fade-up {
+        animation: heroFadeUp 0.5s ease-out both;
+      }
+      .hero-stagger > .hero-fade-up:nth-child(1) { animation-delay: 0s; }
+      .hero-stagger > .hero-fade-up:nth-child(2) { animation-delay: 0.08s; }
+      .hero-stagger > .hero-fade-up:nth-child(3) { animation-delay: 0.16s; }
+      .hero-stagger > .hero-fade-up:nth-child(4) { animation-delay: 0.24s; }
+      .hero-stagger > .hero-fade-up:nth-child(5) { animation-delay: 0.32s; }
     </style>
   </body>
 </html>
