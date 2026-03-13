@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { Property } from '@/types';
 import { MapPinIcon, BedIcon, BathIcon, SqftIcon, UserCircleIcon, ScaleIcon, LivingRoomIcon, BuildingOfficeIcon, StarIconSolid, FireIcon } from '@/constants';
 import { useAppContext } from '@/context/AppContext';
+import { useNavigationDirection } from '@/src/components/ui/ViewTransition';
 import { generatePropertySlug } from '@/utils/slug';
 import { formatPrice } from '@/utils/currency';
 import { getPriceReductionInfo } from '@/utils/priceUtils';
@@ -520,6 +521,7 @@ PropertyCardInner.displayName = 'PropertyCardInner';
  */
 const PropertyCard: React.FC<PropertyCardProps> = ({ property, showToast, showCompareButton }) => {
   const { state, dispatch, toggleSavedHome, updateSearchPageState } = useAppContext();
+  const { setDirection } = useNavigationDirection();
 
   // Defensive check for required fields
   const hasRequiredFields = property && property.id && property.price !== undefined;
@@ -581,6 +583,7 @@ const PropertyCard: React.FC<PropertyCardProps> = ({ property, showToast, showCo
       key => BALKAN_COUNTRIES[key].name.toLowerCase() === property.country.toLowerCase()
     ) || '';
 
+    setDirection('back');
     if (type === 'city') {
       const newFilters = {
         ...stateRef.current.searchPageState.filters,

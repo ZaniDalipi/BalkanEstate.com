@@ -1,6 +1,7 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useAppContext } from '@/context/AppContext';
+import { useNavigationDirection } from '@/src/components/ui/ViewTransition';
 import { useRealtimeProperties } from '@/src/features/properties/hooks';
 import { Property, Agent } from '@/types';
 import PropertyCard from '@/src/features/property-details/components/PropertyCard';
@@ -21,6 +22,7 @@ import SavedItemsHeroBanner from '@/components/shared/SavedItemsHeroBanner';
 const SavedPropertiesPage: React.FC = () => {
   const { t } = useTranslation(['property', 'nav', 'agents']);
   const { state, dispatch } = useAppContext();
+  const { setDirection } = useNavigationDirection();
   const { savedHomes, comparisonList, properties, isAuthenticated, isLoadingUserData } = state;
   const [isComparisonModalOpen, setComparisonModalOpen] = useState(false);
   const [toast, setToast] = useState<{ show: boolean, message: string, type: 'success' | 'error' }>({ show: false, message: '', type: 'success' });
@@ -101,12 +103,14 @@ const SavedPropertiesPage: React.FC = () => {
 
   const handleAgentClick = (agent: Agent) => {
     const agentIdentifier = agent.agentId || agent.id;
+    setDirection('up');
     dispatch({ type: 'SET_SELECTED_AGENT', payload: agentIdentifier });
     dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'agentProfile' });
     window.history.pushState({}, '', `/agents/${agentIdentifier}`);
   };
 
   const handleBrowseAgents = () => {
+    setDirection('forward');
     dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'agents' });
     window.history.pushState({}, '', '/agents');
   };
@@ -116,6 +120,7 @@ const SavedPropertiesPage: React.FC = () => {
       const response = await fetch(`${import.meta.env.VITE_API_URL || ''}/api/agencies/${agency.id || agency._id}`);
       if (response.ok) {
         const data = await response.json();
+        setDirection('up');
         dispatch({ type: 'SET_SELECTED_AGENCY', payload: data.agency });
         dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'agencyDetail' });
       }
@@ -125,6 +130,7 @@ const SavedPropertiesPage: React.FC = () => {
   };
 
   const handleBrowseAgencies = () => {
+    setDirection('forward');
     dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'agencies' });
     window.history.pushState({}, '', '/agencies');
   };

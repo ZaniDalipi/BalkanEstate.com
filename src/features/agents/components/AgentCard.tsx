@@ -17,6 +17,7 @@ import {
   BoltIcon
 } from '@/constants';
 import { useAppContext } from '@/context/AppContext';
+import { useNavigationDirection } from '@/src/components/ui/ViewTransition';
 import { formatPrice } from '@/utils/currency';
 import { slugify } from '@/utils/slug';
 import { API_URL } from '@/src/shared/api/config';
@@ -77,6 +78,7 @@ const AgentAvatar: React.FC<{ agent: Agent }> = ({ agent }) => {
 const AgentCard: React.FC<AgentCardProps> = ({ agent, index = 0 }) => {
   const { t } = useTranslation(['agents', 'common']);
   const { dispatch } = useAppContext();
+  const { setDirection } = useNavigationDirection();
   const cardRef = useRef<HTMLDivElement>(null);
   const [isVisible, setIsVisible] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
@@ -131,6 +133,7 @@ const AgentCard: React.FC<AgentCardProps> = ({ agent, index = 0 }) => {
 
   const handleSelectAgent = () => {
     const agentIdentifier = agent.agentId || agent.id;
+    setDirection('up');
     dispatch({ type: 'SET_SELECTED_AGENT', payload: agentIdentifier });
     window.history.pushState({}, '', `/agents/${agentIdentifier}`);
   };
@@ -149,6 +152,7 @@ const AgentCard: React.FC<AgentCardProps> = ({ agent, index = 0 }) => {
 
       if (response.ok) {
         const data = await response.json();
+        setDirection('up');
         dispatch({ type: 'SET_SELECTED_AGENCY', payload: data.agency });
         dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'agencyDetail' });
         let urlSlug = data.agency.slug || data.agency._id;

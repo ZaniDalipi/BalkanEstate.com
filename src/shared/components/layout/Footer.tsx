@@ -1,6 +1,7 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { useAppContext } from '@/context/AppContext';
+import { useNavigationDirection } from '@/src/components/ui/ViewTransition';
 import {
   Home,
   Search,
@@ -41,6 +42,7 @@ const Footer: React.FC<FooterProps> = ({ className = '' }) => {
   const { t } = useTranslation(['footer', 'common']);
   const currentYear = new Date().getFullYear();
   const { dispatch } = useAppContext();
+  const { setDirection } = useNavigationDirection();
   const lang = getCurrentLang();
 
   const handleNavigation = (
@@ -54,9 +56,9 @@ const Footer: React.FC<FooterProps> = ({ className = '' }) => {
       | 'agents'
       | 'agencies'
   ) => {
+    setDirection('forward');
     dispatch({ type: 'SET_ACTIVE_VIEW', payload: view });
     window.history.pushState({}, '', `/${view === 'search' ? '' : view}`);
-    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   const buyerLinks = [
@@ -241,9 +243,9 @@ const Footer: React.FC<FooterProps> = ({ className = '' }) => {
                 href={`/${lang}/privacy`}
                 onClick={(e) => {
                   e.preventDefault();
+                  setDirection('forward');
                   dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'privacy' });
                   window.history.pushState({}, '', `/${lang}/privacy`);
-                  window.scrollTo({ top: 0, behavior: 'smooth' });
                 }}
                 className="text-gray-600 hover:text-blue-600 transition-colors font-medium"
               >
@@ -253,9 +255,9 @@ const Footer: React.FC<FooterProps> = ({ className = '' }) => {
                 href={`/${lang}/terms`}
                 onClick={(e) => {
                   e.preventDefault();
+                  setDirection('forward');
                   dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'terms' });
                   window.history.pushState({}, '', `/${lang}/terms`);
-                  window.scrollTo({ top: 0, behavior: 'smooth' });
                 }}
                 className="text-gray-600 hover:text-blue-600 transition-colors font-medium"
               >
@@ -265,9 +267,9 @@ const Footer: React.FC<FooterProps> = ({ className = '' }) => {
                 href={`/${lang}/cookies`}
                 onClick={(e) => {
                   e.preventDefault();
+                  setDirection('forward');
                   dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'cookies' });
                   window.history.pushState({}, '', `/${lang}/cookies`);
-                  window.scrollTo({ top: 0, behavior: 'smooth' });
                 }}
                 className="text-gray-600 hover:text-blue-600 transition-colors font-medium"
               >
